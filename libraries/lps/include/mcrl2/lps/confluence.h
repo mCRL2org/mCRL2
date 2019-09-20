@@ -202,8 +202,8 @@ bool has_ctau_action(const Specification& lpsspec)
 }
 
 /// \brief Function object that computes the condition for square confluence
-/// \param summand_i A tau summand
-/// \param summand_j An arbitrary action summand
+/// \param summand_i An arbitrary action summand
+/// \param summand_j A tau summand
 struct square_confluence_condition
 {
   const data::variable_list& process_parameters;
@@ -215,17 +215,17 @@ struct square_confluence_condition
 
   data::data_expression operator()(const confluence_summand& summand_i, const confluence_summand& summand_j) const
   {
-    assert(summand_i.is_tau());
+    assert(summand_j.is_tau());
 
     data::data_expression result;
 
     const auto& d = process_parameters;
 
-    const auto& ci = summand_i.condition;
-    const auto& gi = summand_i.next_state;
+    const auto& ci = summand_j.condition;
+    const auto& gi = summand_j.next_state;
 
-    const auto& cj = summand_j.condition;
-    const auto& gj = summand_j.next_state;
+    const auto& cj = summand_i.condition;
+    const auto& gj = summand_i.next_state;
 
     data::add_assignments(sigma, d, gi);
     data::data_expression cj_gi = data::replace_variables_capture_avoiding(cj, sigma);
@@ -235,14 +235,14 @@ struct square_confluence_condition
     data::data_expression ci_gj = data::replace_variables_capture_avoiding(ci, sigma);
     data::data_expression_list gi_gj = data::replace_variables_capture_avoiding(gi, sigma);
 
-    if (summand_j.is_tau())
+    if (summand_i.is_tau())
     {
       data::remove_assignments(sigma, d);
       result = imp(data::and_(ci, cj), or_(detail::equal_to(gi, gj), detail::make_and(ci_gj, cj_gi, detail::equal_to(gj_gi, gi_gj))));
     }
     else
     {
-      const auto& fj = summand_j.multi_action.arguments();
+      const auto& fj = summand_i.multi_action.arguments();
       data::data_expression_list fj_gi = data::replace_variables_capture_avoiding(fj, sigma);
       data::remove_assignments(sigma, d);
       result = imp(data::and_(ci, cj), detail::make_and(ci_gj, cj_gi, detail::equal_to(fj, fj_gi), detail::equal_to(gj_gi, gi_gj)));
@@ -253,8 +253,8 @@ struct square_confluence_condition
 };
 
 /// \brief Function object that computes the condition for triangular confluence
-/// \param summand_i A tau summand
-/// \param summand_j An arbitrary action summand
+/// \param summand_i An arbitrary action summand
+/// \param summand_j A tau summand
 struct triangular_confluence_condition
 {
   const data::variable_list& process_parameters;
@@ -267,7 +267,7 @@ struct triangular_confluence_condition
   inline
   data::data_expression operator()(const confluence_summand& summand_i, const confluence_summand& summand_j) const
   {
-    assert(summand_i.is_tau());
+    assert(summand_j.is_tau());
 
     data::data_expression result;
     
@@ -279,21 +279,21 @@ struct triangular_confluence_condition
     const auto& cj = summand_j.condition;
     const auto& gj = summand_j.next_state;
 
-    data::add_assignments(sigma, d, gi);
-    data::data_expression cj_gi = data::replace_variables_capture_avoiding(cj, sigma);
-    data::data_expression_list gj_gi = data::replace_variables_capture_avoiding(gj, sigma);
+    data::add_assignments(sigma, d, gj);
+    data::data_expression ci_gj = data::replace_variables_capture_avoiding(ci, sigma);
+    data::data_expression_list gi_gj = data::replace_variables_capture_avoiding(gi, sigma);
 
-    if (summand_j.is_tau())
+    if (summand_i.is_tau())
     {
       data::remove_assignments(sigma, d);
-      result = imp(and_(ci, cj), and_(cj_gi, detail::equal_to(gj_gi, gj)));
+      result = imp(and_(cj, ci), and_(ci_gj, detail::equal_to(gi_gj, gi)));
     }
     else
     {
-      const auto& fj = summand_j.multi_action.arguments();
+      const auto& fj = summand_i.multi_action.arguments();
       data::data_expression_list fj_gi = data::replace_variables_capture_avoiding(fj, sigma);
       data::remove_assignments(sigma, d);
-      result = imp(and_(ci, cj), detail::make_and(cj_gi, detail::equal_to(fj, fj_gi), detail::equal_to(gj_gi, gj)));
+      result = imp(and_(cj, ci), detail::make_and(ci_gj, detail::equal_to(fj, fj_gi), detail::equal_to(gi_gj, gi)));
     }
     
     return detail::make_forall(result);
@@ -301,8 +301,8 @@ struct triangular_confluence_condition
 };
 
 /// \brief Function object that computes the condition for triangular confluence
-/// \param summand_i A tau summand
-/// \param summand_j An arbitrary action summand
+/// \param summand_i An arbitrary action summand
+/// \param summand_j A tau summand
 struct trivial_confluence_condition
 {
   data::mutable_indexed_substitution<>& sigma;
@@ -314,11 +314,11 @@ struct trivial_confluence_condition
   inline
   data::data_expression operator()(const confluence_summand& summand_i, const confluence_summand& summand_j) const
   {
-    assert(summand_i.is_tau());
+    assert(summand_j.is_tau());
 
     data::data_expression result;
 
-    data::data_expression aj_is_tau = summand_j.is_tau() ? data::true_() : data::false_();
+    data::data_expression aj_is_tau = summand_i.is_tau() ? data::true_() : data::false_();
 
     const auto& ci = summand_i.condition;
     const auto& gi = summand_i.next_state;
@@ -326,7 +326,7 @@ struct trivial_confluence_condition
     const auto& cj = summand_j.condition;
     const auto& gj = summand_j.next_state;
 
-    result = imp(and_(ci, cj), and_(aj_is_tau, detail::equal_to(gi, gj)));
+    result = imp(and_(cj, ci), and_(aj_is_tau, detail::equal_to(gj, gi)));
 
     return detail::make_forall(result);
   }
@@ -429,14 +429,14 @@ class confluence_checker
           }
         }
 
-        if (check_disjointness && disjoint(summand_j, summand_i))
+        if (check_disjointness && disjoint(summand_i, summand_j))
         {
           cache_store(i, j, true);
           mCRL2log(log::info) << ':';
           continue;
         }
 
-        data::data_expression condition = confluence_condition(summand_j, summand_i);
+        data::data_expression condition = confluence_condition(summand_i, summand_j);
         bool confluent = is_true(condition);
         cache_store(i, j, confluent);
         if (confluent)
