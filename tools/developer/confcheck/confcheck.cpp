@@ -44,6 +44,7 @@ class confcheck_tool: public rewriter_tool<input_output_tool>
       super::add_options(desc);
       desc.add_option("conditions", utilities::make_optional_argument("CONDITIONS", "C"),
                  "use the confluence conditions specified by individual characters ("
+                 "Q: commutative confluence; "
                  "C: square confluence; "
                  "T: triangular confluence; "
                  "Z: trivial confluence)", 'x');

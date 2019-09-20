@@ -201,6 +201,78 @@ bool has_ctau_action(const Specification& lpsspec)
   return contains(lpsspec.action_labels(), make_ctau_act_id());
 }
 
+/// \brief Function object that computes the condition for commutative confluence
+/// \param summand_i An arbitrary action summand
+/// \param summand_j A tau summand
+struct commutative_confluence_condition
+{
+  const data::variable_list& process_parameters;
+  data::mutable_indexed_substitution<>& sigma;
+  data::set_identifier_generator& generator; // used to generate unique variable names
+
+  commutative_confluence_condition(const data::variable_list& process_parameters_, data::mutable_indexed_substitution<>& sigma_, data::set_identifier_generator& generator_)
+    : process_parameters(process_parameters_), sigma(sigma_), generator(generator_)
+  {}
+
+  data::variable_list make_fresh_variables(const data::variable_list& e) const
+  {
+    return data::variable_list(e.begin(), e.end(), [&](const data::variable& v) { return data::variable(generator(v.name()), v.sort()); });
+  }
+
+  data::data_expression operator()(const confluence_summand& summand_i, const confluence_summand& summand_j) const
+  {
+    assert(summand_j.is_tau());
+
+    data::data_expression result;
+
+    const auto& d = process_parameters;
+
+    const auto& ci = summand_j.condition;
+    const auto& gi = summand_j.next_state;
+    const auto& ei = summand_i.variables;
+    data::variable_list ei1 = make_fresh_variables(ei);
+
+    const auto& cj = summand_i.condition;
+    const auto& gj = summand_i.next_state;
+    const auto& ej = summand_i.variables;
+    data::variable_list ej1 = make_fresh_variables(ej);
+
+    data::add_assignments(sigma, d, gi);   // sigma = [d := gi]
+    data::add_assignments(sigma, ej, ej1); // sigma = [d := gi, ej := ej']
+    data::data_expression cj_gi_ej1 = data::replace_variables_capture_avoiding(cj, sigma);
+    data::data_expression_list gj_gi_ej1 = data::replace_variables_capture_avoiding(gj, sigma);
+
+    data::remove_assignments(sigma, ej);   // sigma = [d := gi]
+    data::add_assignments(sigma, d, gj);   // sigma = [d := gj]
+    data::add_assignments(sigma, ei, ei1); // sigma = [d := gj, ei := ei']
+    data::data_expression ci_gj_ei1 = data::replace_variables_capture_avoiding(ci, sigma);
+    data::data_expression_list gi_gj_ei1 = data::replace_variables_capture_avoiding(gi, sigma);
+
+    if (summand_i.is_tau())
+    {
+      result = imp(data::and_(ci, cj),
+        data::make_exists(ei1 + ej1,
+          or_(detail::equal_to(gi, gj), detail::make_and(ci_gj_ei1, cj_gi_ej1, detail::equal_to(gj_gi_ej1, gi_gj_ei1)))
+        )
+      );
+    }
+    else
+    {
+      const auto& fi = summand_i.multi_action.arguments();
+      data::data_expression_list fi_gj_ei1 = data::replace_variables_capture_avoiding(fi, sigma);
+      result = imp(data::and_(ci, cj),
+        data::make_exists(ei1 + ej1,
+          detail::make_and(ci_gj_ei1, cj_gi_ej1, detail::equal_to(fi, fi_gj_ei1), detail::equal_to(gj_gi_ej1, gi_gj_ei1))
+        )
+      );
+    }
+
+    data::remove_assignments(sigma, ei); // sigma = [d := gj]
+    data::remove_assignments(sigma, d);  // sigma = []
+    return detail::make_forall(result);
+  }
+};
+
 /// \brief Function object that computes the condition for square confluence
 /// \param summand_i An arbitrary action summand
 /// \param summand_j A tau summand
@@ -242,10 +314,10 @@ struct square_confluence_condition
     }
     else
     {
-      const auto& fj = summand_i.multi_action.arguments();
-      data::data_expression_list fj_gi = data::replace_variables_capture_avoiding(fj, sigma);
+      const auto& fi = summand_i.multi_action.arguments();
+      data::data_expression_list fi_gj = data::replace_variables_capture_avoiding(fi, sigma);
       data::remove_assignments(sigma, d);
-      result = imp(data::and_(ci, cj), detail::make_and(ci_gj, cj_gi, detail::equal_to(fj, fj_gi), detail::equal_to(gj_gi, gi_gj)));
+      result = imp(data::and_(ci, cj), detail::make_and(ci_gj, cj_gi, detail::equal_to(fi, fi_gj), detail::equal_to(gj_gi, gi_gj)));
     }
 
     return detail::make_forall(result);
@@ -286,14 +358,14 @@ struct triangular_confluence_condition
     if (summand_i.is_tau())
     {
       data::remove_assignments(sigma, d);
-      result = imp(and_(cj, ci), and_(ci_gj, detail::equal_to(gi_gj, gi)));
+      result = imp(and_(ci, cj), and_(ci_gj, detail::equal_to(gi_gj, gi)));
     }
     else
     {
-      const auto& fj = summand_i.multi_action.arguments();
-      data::data_expression_list fj_gi = data::replace_variables_capture_avoiding(fj, sigma);
+      const auto& fi = summand_i.multi_action.arguments();
+      data::data_expression_list fi_gj = data::replace_variables_capture_avoiding(fi, sigma);
       data::remove_assignments(sigma, d);
-      result = imp(and_(cj, ci), detail::make_and(ci_gj, detail::equal_to(fj, fj_gi), detail::equal_to(gi_gj, gi)));
+      result = imp(and_(ci, cj), detail::make_and(ci_gj, detail::equal_to(fi, fi_gj), detail::equal_to(gi_gj, gi)));
     }
     
     return detail::make_forall(result);
@@ -452,6 +524,12 @@ class confluence_checker
     }
 
   public:
+    std::pair<bool, std::size_t> is_commutative_confluent(std::size_t j, data::set_identifier_generator& generator) const
+    {
+      bool check_disjointness = true;
+      return is_confluent(j, commutative_confluence_condition(m_process_parameters, m_sigma, generator), check_disjointness);
+    }
+
     std::pair<bool, std::size_t> is_square_confluent(std::size_t j) const
     {
       bool check_disjointness = true;
@@ -500,6 +578,12 @@ class confluence_checker
         std::size_t violating_index;
         switch (confluence_type)
         {
+          case 'Q':
+          {
+            data::set_identifier_generator generator;
+            generator.add_identifiers(lps::find_identifiers(lpsspec));
+            std::tie(confluent, violating_index) = is_commutative_confluent(j, generator); break;
+          }
           case 'C': std::tie(confluent, violating_index) = is_square_confluent(j); break;
           case 'T': std::tie(confluent, violating_index) = is_triangular_confluent(j); break;
           case 'Z': std::tie(confluent, violating_index) = is_trivial_confluent(j); break;
