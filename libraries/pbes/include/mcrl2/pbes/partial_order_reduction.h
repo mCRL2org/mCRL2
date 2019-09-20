@@ -276,6 +276,7 @@ class partial_order_reduction_algorithm
     std::vector<summand_set> m_dependency_nes;
 
     smt::smt_solver* m_solver;
+    std::chrono::milliseconds m_smt_timeout;
 
     std::size_t summand_index(const srf_summand& summand) const
     {
@@ -602,7 +603,7 @@ class partial_order_reduction_algorithm
           expr = make_abstraction(data::exists_binder(), f.variables(), data::sort_bool::not_(f.body()));
         }
         // data::data_expression result = data::one_point_rule_rewrite(m_rewr(expr));
-        switch(m_solver->solve(data::variable_list(), expr))
+        switch(m_solver->solve(data::variable_list(), expr, m_smt_timeout))
         {
           case smt::answer::SAT: return negate ^ true;
           case smt::answer::UNSAT: return negate ^ false;
@@ -1328,7 +1329,7 @@ class partial_order_reduction_algorithm
     }
 
   public:
-    explicit partial_order_reduction_algorithm(const pbes& p, data::rewrite_strategy strategy, bool use_smt_solver)
+    explicit partial_order_reduction_algorithm(const pbes& p, data::rewrite_strategy strategy, bool use_smt_solver, std::size_t smt_timeout)
      : m_rewr(p.data(),
               //TODO temporarily disabled used_data_equation_selector so the rewriter can rewrite accordance conditions
               // data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()),
@@ -1338,7 +1339,8 @@ class partial_order_reduction_algorithm
        m_pbes(pbes2srf(p)),
        m_equation_index(m_pbes),
        m_dependency_nes(m_pbes.equations().size()),
-       m_solver(use_smt_solver ? new smt::smt_solver(p.data()) : nullptr)
+       m_solver(use_smt_solver ? new smt::smt_solver(p.data()) : nullptr),
+       m_smt_timeout(smt_timeout)
     {
       unify_parameters(m_pbes);
 

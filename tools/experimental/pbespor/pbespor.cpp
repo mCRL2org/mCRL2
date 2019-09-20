@@ -38,12 +38,17 @@ class pbespor_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<r
 
     bool m_use_condition_L = true;
     bool m_use_smt_solver = false;
+    std::size_t m_smt_timeout = 0;
 
     void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
       m_use_condition_L = !parser.has_option("no-l");
-      m_use_smt_solver = parser.has_option("use-smt-solver");
+      if(parser.has_option("use-smt-solver"))
+      {
+        m_use_smt_solver = true;
+        m_smt_timeout = parser.option_argument_as<std::size_t>("use-smt-solver");
+      }
     }
 
     void add_options(interface_description& desc) override
@@ -51,7 +56,10 @@ class pbespor_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<r
       super::add_options(desc);
       desc.add_option("no-l",
                   "do not apply the condition L");
-       desc.add_option("use-smt-solver", "Use the SMT solver Z3 (must be in the path)", 's');
+      desc.add_option("use-smt-solver", utilities::make_optional_argument("TIMEOUT", "0"),
+                  "Use the SMT solver Z3 (must be in the path). "
+                  "The timeout should be given in milliseconds (0 = no timeout). "
+                  "Very small values may lead to errors.", 's');
     }
 
   public:
@@ -77,7 +85,8 @@ class pbespor_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<r
               pbes_output_format(),
               rewrite_strategy(),
               m_use_condition_L,
-              m_use_smt_solver
+              m_use_smt_solver,
+              m_smt_timeout
              );
 
       return true;
