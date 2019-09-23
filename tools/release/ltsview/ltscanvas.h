@@ -10,7 +10,7 @@
 #define LTSCANVAS_H
 
 #include <QCursor>
-#include <QGLWidget>
+#include <QOpenGLWidget>
 #include <QImage>
 #include <QMouseEvent>
 #include <QPoint>
@@ -19,7 +19,7 @@
 
 #include "visualizer.h"
 
-class LtsCanvas : public QGLWidget
+class LtsCanvas : public QOpenGLWidget
 {
   Q_OBJECT
 
