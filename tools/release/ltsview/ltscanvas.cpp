@@ -18,7 +18,7 @@
 #include "icons/rotate_cursor.xpm"
 
 LtsCanvas::LtsCanvas(QWidget* parent, Settings* settings, LtsManager* ltsManager, MarkManager* markManager):
-  QGLWidget(parent),
+  QOpenGLWidget(parent),
   m_settings(settings),
   m_ltsManager(ltsManager),
   m_visualizer(new Visualizer(this, settings, ltsManager, markManager)),
