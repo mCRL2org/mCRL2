@@ -422,6 +422,7 @@ LtsCanvas::Selection LtsCanvas::selectObject(QPoint position)
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
   glLoadIdentity();
+  glViewport(0, 0, m_width, m_height);
 
   GLint viewport[4];
   glGetIntegerv(GL_VIEWPORT, viewport);
