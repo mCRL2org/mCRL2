@@ -37,6 +37,7 @@ class pbespor_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<r
     typedef pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool>>>> super;
 
     bool m_use_condition_L = true;
+    bool m_weak_conditions = false;
     bool m_use_smt_solver = false;
     std::size_t m_smt_timeout = 0;
 
@@ -44,6 +45,7 @@ class pbespor_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<r
     {
       super::parse_options(parser);
       m_use_condition_L = !parser.has_option("no-l");
+      m_weak_conditions = parser.has_option("weak-conditions");
       if(parser.has_option("use-smt-solver"))
       {
         m_use_smt_solver = true;
@@ -56,6 +58,8 @@ class pbespor_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<r
       super::add_options(desc);
       desc.add_option("no-l",
                   "do not apply the condition L");
+      desc.add_option("weak-conditions",
+                  "use weak accordance conditions (cheaper, but less exact, static analysis)", 'w');
       desc.add_option("use-smt-solver", utilities::make_optional_argument("TIMEOUT", "0"),
                   "Use the SMT solver Z3 (must be in the path). "
                   "The timeout should be given in milliseconds (0 = no timeout). "
@@ -86,7 +90,8 @@ class pbespor_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<r
               rewrite_strategy(),
               m_use_condition_L,
               m_use_smt_solver,
-              m_smt_timeout
+              m_smt_timeout,
+              m_weak_conditions
              );
 
       return true;

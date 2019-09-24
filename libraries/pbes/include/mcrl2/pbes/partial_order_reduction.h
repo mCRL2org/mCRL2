@@ -280,10 +280,14 @@ class partial_order_reduction_algorithm
     smt::smt_solver* m_solver;
     std::chrono::milliseconds m_smt_timeout;
 
+    // if true use alternative A3 for maybe clauses in accordance conditions
+    bool m_use_weak_conditions;
+
     class summand_relations_data
     {
     private:
       partial_order_reduction_algorithm& parent;
+      bool use_weak_conditions;
       data::set_identifier_generator id_gen;
 
       data::variable_list qvars1_k;
@@ -307,6 +311,13 @@ class partial_order_reduction_algorithm
 
       data::variable_list combined_quantified_vars;
 
+      // Depending on whether the weak (A3) or strong condition (A4) is used, wrap the consequent in
+      // an existential quantifier
+      data::data_expression make_exists_if_strong(const data::variable_list& vars, const data::data_expression& body)
+      {
+        return use_weak_conditions ? body : make_exists(vars, body);
+      }
+
       data::data_expression left_accords_antecedent()
       {
         return data::sort_bool::and_(condition1_k1, data::replace_variables_capture_avoiding(condition1_k, sigma_k1, id_gen));
@@ -316,14 +327,12 @@ class partial_order_reduction_algorithm
       {
         data::data_expression parameters_equal = detail::equal_to(data::replace_variables_capture_avoiding(updates2_k, sigma_k1, id_gen),
                                                                   data::replace_variables_capture_avoiding(updates2_k1, sigma_k, id_gen));
-        return make_exists(
-          qvars2_k + qvars2_k1,
-          detail::make_and(
-            condition2_k,
-            data::replace_variables_capture_avoiding(condition2_k1, sigma_k, id_gen),
-            parameters_equal
-          )
+        data::data_expression body = detail::make_and(
+          condition2_k,
+          data::replace_variables_capture_avoiding(condition2_k1, sigma_k, id_gen),
+          parameters_equal
         );
+        return make_exists_if_strong(qvars2_k + qvars2_k1, body);
       }
 
       data::data_expression coenabled_antecedent()
@@ -335,26 +344,31 @@ class partial_order_reduction_algorithm
       {
         data::data_expression parameters_equal = detail::equal_to(data::replace_variables_capture_avoiding(updates2_k, sigma_k1, id_gen),
                                                                   data::replace_variables_capture_avoiding(updates2_k1, sigma_k, id_gen));
-        return make_exists(
-          qvars2_k + qvars2_k1,
-          detail::make_and(
-            data::replace_variables_capture_avoiding(condition2_k, sigma_k1, id_gen),
-            data::replace_variables_capture_avoiding(condition2_k1, sigma_k, id_gen),
-            parameters_equal
-          )
+        data::data_expression body = detail::make_and(
+          data::replace_variables_capture_avoiding(condition2_k, sigma_k1, id_gen),
+          data::replace_variables_capture_avoiding(condition2_k1, sigma_k, id_gen),
+          parameters_equal
+        );
+        return make_exists_if_strong(qvars2_k + qvars2_k1, body);
+      }
+
+      data::data_expression triangle_accords_consequent_weak()
+      {
+        data::data_expression parameters_equal = detail::equal_to(updates1_k1, data::replace_variables_capture_avoiding(updates1_k1, sigma_k, id_gen));
+        return data::sort_bool::and_(
+          data::replace_variables_capture_avoiding(condition1_k1, sigma_k, id_gen),
+          parameters_equal
         );
       }
 
       data::data_expression triangle_accords_consequent()
       {
         data::data_expression parameters_equal = detail::equal_to(updates2_k1, data::replace_variables_capture_avoiding(updates2_k1, sigma_k, id_gen));
-        return make_exists(
-          qvars2_k1,
-          data::sort_bool::and_(
-            data::replace_variables_capture_avoiding(condition2_k1, sigma_k, id_gen),
-            parameters_equal
-          )
+        data::data_expression body = data::sort_bool::and_(
+          data::replace_variables_capture_avoiding(condition2_k1, sigma_k, id_gen),
+          parameters_equal
         );
+        return make_exists_if_strong(qvars2_k1, body);
       }
 
       tribool accords_data(bool affect_set, bool needs_yes,
@@ -388,6 +402,7 @@ class partial_order_reduction_algorithm
     public:
       summand_relations_data(partial_order_reduction_algorithm& p, const std::size_t k, const std::size_t k1)
       : parent(p)
+      , use_weak_conditions(p.m_use_weak_conditions)
       {
         const summand_class& summand_k = parent.m_summand_classes[k];
         const summand_class& summand_k1 = parent.m_summand_classes[k1];
@@ -398,7 +413,7 @@ class partial_order_reduction_algorithm
           id_gen.add_identifier(v.name());
         }
 
-        // For both summands, create two copies with fresh variables
+        // For both summands, create a copy with fresh variables
         // These will be used when constructing accordance and NES conditions
         summand_equivalence_key new1_k = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k));
         summand_equivalence_key new1_k1 = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k1));
@@ -407,10 +422,20 @@ class partial_order_reduction_algorithm
         data::add_assignments(sigma_k, parameters, updates1_k);
         data::add_assignments(sigma_k1, parameters, updates1_k1);
 
-        summand_equivalence_key new2_k = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k));
-        summand_equivalence_key new2_k1 = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k1));
-        qvars2_k  = new2_k.e;  condition2_k  = new2_k.f;  updates2_k  = new2_k.g;
-        qvars2_k1 = new2_k1.e; condition2_k1 = new2_k1.f; updates2_k1 = new2_k1.g;
+        if (!use_weak_conditions)
+        {
+          // When using the stronger condition A4, create another fresh copy
+          summand_equivalence_key new2_k = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k));
+          summand_equivalence_key new2_k1 = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k1));
+          qvars2_k  = new2_k.e;  condition2_k  = new2_k.f;  updates2_k  = new2_k.g;
+          qvars2_k1 = new2_k1.e; condition2_k1 = new2_k1.f; updates2_k1 = new2_k1.g;
+        }
+        else
+        {
+          // In the weak case (A3), the two copies are identical
+          qvars2_k  = qvars1_k;  condition2_k  = condition1_k;  updates2_k  = updates1_k;
+          qvars2_k1 = qvars1_k1; condition2_k1 = condition1_k1; updates2_k1 = updates1_k1;
+        }
 
         combined_quantified_vars = parameters + qvars1_k + qvars1_k1;
       }
@@ -797,7 +822,7 @@ class partial_order_reduction_algorithm
       }
       else
       {
-        data::data_expression result = m_rewr(data::one_point_rule_rewrite(data::quantifiers_inside_rewrite(m_rewr(expr))));
+        data::data_expression result = m_rewr(data::one_point_rule_rewrite((m_rewr(expr))));
         if (result != data::sort_bool::true_() && result != data::sort_bool::false_())
         {
           mCRL2log(log::verbose) << "Cannot rewrite " << result << " any further" << std::endl;
@@ -1308,7 +1333,7 @@ class partial_order_reduction_algorithm
     }
 
   public:
-    explicit partial_order_reduction_algorithm(const pbes& p, data::rewrite_strategy strategy, bool use_smt_solver, std::size_t smt_timeout)
+    explicit partial_order_reduction_algorithm(const pbes& p, data::rewrite_strategy strategy, bool use_smt_solver, std::size_t smt_timeout, bool weak_conditions)
      : m_rewr(p.data(),
               //TODO temporarily disabled used_data_equation_selector so the rewriter can rewrite accordance conditions
               // data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()),
@@ -1319,7 +1344,8 @@ class partial_order_reduction_algorithm
        m_equation_index(m_pbes),
        m_dependency_nes(m_pbes.equations().size()),
        m_solver(use_smt_solver ? new smt::smt_solver(p.data()) : nullptr),
-       m_smt_timeout(smt_timeout)
+       m_smt_timeout(smt_timeout),
+       m_use_weak_conditions(weak_conditions)
     {
       unify_parameters(m_pbes);
 
