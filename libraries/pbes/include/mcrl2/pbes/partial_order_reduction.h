@@ -209,14 +209,16 @@ static inline bool operator&&(tribool a, tribool b)
   return a == yes || b == yes || (a == maybe && b == maybe);
 }
 // Short-circuit version of the operator && for tribools
-static inline bool operator&&(std::function<tribool()> a, std::function<tribool()> b)
+// The second function will be told whether a 'yes' answer is required to satisfy
+// the expression
+static inline bool operator&&(std::function<tribool()> a, std::function<tribool(bool)> b)
 {
   tribool a_ = a();
   if(a_ == yes)
   {
     return true;
   }
-  return a_ && b();
+  return a_ && b(a_ == no);
 }
 
 class partial_order_reduction_algorithm
@@ -351,13 +353,24 @@ class partial_order_reduction_algorithm
         return !parent.is_true(data::sort_bool::not_(can_enable));
       }
 
-      tribool left_accords_data()
+      tribool left_accords_data(bool affect_set, bool needs_yes)
       {
+        // Check whether the maybe clause is satisfied by affect sets and it is sufficient to return maybe
+        if (affect_set && !needs_yes)
+        {
+          return maybe;
+        }
+
         data::data_expression antecedent = data::sort_bool::and_(condition1_k1, data::replace_variables_capture_avoiding(condition1_k, sigma_k1, id_gen));
         data::data_expression yes_condition = make_forall(combined_quantified_vars, data::sort_bool::not_(antecedent));
         if (parent.is_true(yes_condition))
         {
           return yes;
+        }
+        if (needs_yes)
+        {
+          // we were not able to return yes, now it doesn't matter what we return
+          return no;
         }
 
         data::data_expression parameters_equal = detail::equal_to(data::replace_variables_capture_avoiding(updates2_k, sigma_k1, id_gen),
@@ -377,13 +390,24 @@ class partial_order_reduction_algorithm
         return parent.is_true(condition) ? maybe : no;
       }
 
-      tribool square_accords_data()
+      tribool square_accords_data(bool affect_set, bool needs_yes)
       {
+        // Check whether the maybe clause is satisfied by affect sets and it is sufficient to return maybe
+        if (affect_set && !needs_yes)
+        {
+          return maybe;
+        }
+
         data::data_expression antecedent = data::sort_bool::and_(condition1_k, condition1_k1);
         data::data_expression yes_condition = make_forall(combined_quantified_vars, data::sort_bool::not_(antecedent));
         if (parent.is_true(yes_condition))
         {
           return yes;
+        }
+        if (needs_yes)
+        {
+          // we were not able to return yes, now it doesn't matter what we return
+          return no;
         }
 
         data::data_expression parameters_equal = detail::equal_to(data::replace_variables_capture_avoiding(updates2_k, sigma_k1, id_gen),
@@ -403,14 +427,26 @@ class partial_order_reduction_algorithm
         return parent.is_true(condition) ? maybe : no;
       }
 
-      tribool triangle_accords_data()
+      tribool triangle_accords_data(bool affect_set, bool needs_yes)
       {
+        // Check whether the maybe clause is satisfied by affect sets and it is sufficient to return maybe
+        if (affect_set && !needs_yes)
+        {
+          return maybe;
+        }
+
         data::data_expression antecedent = data::sort_bool::and_(condition1_k, condition1_k1);
         data::data_expression yes_condition = make_forall(combined_quantified_vars, data::sort_bool::not_(antecedent));
         if (parent.is_true(yes_condition))
         {
           return yes;
         }
+        if (needs_yes)
+        {
+          // we were not able to return yes, now it doesn't matter what we return
+          return no;
+        }
+
         data::data_expression parameters_equal = detail::equal_to(updates1_k1, data::replace_variables_capture_avoiding(updates1_k1, sigma_k, id_gen));
         data::data_expression consequent = data::sort_bool::and_(data::replace_variables_capture_avoiding(condition1_k1, sigma_k, id_gen), parameters_equal);
         data::data_expression condition = make_forall(combined_quantified_vars, data::sort_bool::implies(antecedent, consequent));
@@ -1006,16 +1042,20 @@ class partial_order_reduction_algorithm
             continue;
           }
           bool DNL_DNS_affect_sets = has_empty_intersection(set_intersection(Vs(k), Vs(k1)), set_union(Ws(k), Ws(k1)));
-          bool DNT_affect_sets = has_empty_intersection(Ws(k), Rs(k1)) && has_empty_intersection(Ws(k), Ts(k1)) && set_includes(Ws(k), Ws(k1));
+          bool DNT_affect_sets = has_empty_intersection(Ws(k), Rs(k1)) && has_empty_intersection(Ws(k), Ts(k1)) && set_includes(Ws(k1), Ws(k));
 
           accordance_nes summand_data(*this, k, k1);
           // Use lambda lifting for short-circuiting the && operator on tribools
-          bool left_accords     = [&]{ return left_accords_equations(k, k1); }     && [&]{ return summand_data.left_accords_data(); };
+          bool left_accords     = [&]{ return left_accords_equations(k, k1); } &&
+                                  [&](bool needs_yes) { return summand_data.left_accords_data(DNL_DNS_affect_sets, needs_yes); };
           // The DNS relation is symmetric
           bool square_accords   = (k1 < k && !DNS(k1).test(k)) ||
-                                  (k1 > k && ([&]{ return square_accords_equations(k, k1); } && [&]{ return summand_data.square_accords_data(); }));
+                                  (k1 > k &&
+                                      ([&]{ return square_accords_equations(k, k1); } &&
+                                       [&](bool needs_yes) { return summand_data.square_accords_data(DNL_DNS_affect_sets, needs_yes); }));
           bool accords          = square_accords ||
-                                  ([&]{ return triangle_accords_equations(k, k1); } && [&]{ return summand_data.triangle_accords_data(); });
+                                  ([&]{ return triangle_accords_equations(k, k1); } &&
+                                   [&](bool needs_yes) { return summand_data.triangle_accords_data(DNT_affect_sets, needs_yes); });
           bool can_enable       = !dependency_permanently_disables(k1, k) && !has_empty_intersection(Ts(k), Ws(k1)) && summand_data.can_enable();
 
           if (!left_accords)
