@@ -442,18 +442,20 @@ class partial_order_reduction_algorithm
 
       bool can_enable()
       {
-        data::data_expression can_enable = make_exists(
+        data::data_expression cannot_enable = make_forall(
           combined_quantified_vars,
-          data::sort_bool::and_(
-            data::sort_bool::and_(
+          data::sort_bool::not_(
+            detail::make_and(
               data::sort_bool::not_(condition1_k),
-              condition1_k1
-            ),
-            data::replace_variables_capture_avoiding(condition1_k, sigma_k1, id_gen)
+              condition1_k1,
+              data::replace_variables_capture_avoiding(condition1_k, sigma_k1, id_gen)
+            )
           )
         );
 
-        return !parent.is_true(data::sort_bool::not_(can_enable));
+        // The condition is constructed in a negated way, so the approximation of the decision
+        // procedure works the right way. Note that the result of this function is negated as well.
+        return !parent.is_true(cannot_enable);
       }
 
       tribool left_accords_data(bool affect_set, bool needs_yes)
