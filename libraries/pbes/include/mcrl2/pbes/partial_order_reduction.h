@@ -464,6 +464,16 @@ class partial_order_reduction_algorithm
       return m_summand_classes[k].DNL;
     }
 
+    const summand_set& NES(std::size_t k) const
+    {
+      return m_summand_classes[k].NES;
+    }
+
+    summand_set& NES(std::size_t k)
+    {
+      return m_summand_classes[k].NES;
+    }
+
     summand_set en(const propositional_variable_instantiation& X_e)
     {
       std::size_t N = m_summand_classes.size();
@@ -766,7 +776,7 @@ class partial_order_reduction_algorithm
 
     /// \brief Return true iff k1 can never happen after k happens, as deduced from
     /// predicate dependencies.
-    bool permanently_disables(const std::size_t k, const std::size_t k1) const
+    bool dependency_permanently_disables(const std::size_t k, const std::size_t k1) const
     {
       std::size_t N = m_summand_classes.size();
       const summand_class& summand_k = m_summand_classes[k];
@@ -801,42 +811,14 @@ class partial_order_reduction_algorithm
         [&](const std::size_t i) { return depends(i, k1); });
     }
 
-    void compute_NES(const std::vector<parameter_info>& info)
+    void compute_dependency_NES()
     {
       using utilities::detail::set_union;
       using utilities::detail::has_empty_intersection;
 
-      std::unordered_map<std::pair<std::size_t, std::size_t>, bool> TsWs_empty_intersection_cache;
-
-      // returns true if Ts(k1) and Ws(k2) have an empty intersection
-      auto TsWs_has_empty_intersection = [&](std::size_t k1, std::size_t k2)
-      {
-        auto key = std::make_pair(k1, k2);
-        auto i = TsWs_empty_intersection_cache.find(key);
-        if (i == TsWs_empty_intersection_cache.end())
-        {
-          bool value = has_empty_intersection(info[k1].Ts, info[k2].Ws);
-          i = TsWs_empty_intersection_cache.insert(std::make_pair(key, value)).first;
-        }
-        return i->second;
-      };
-
       std::size_t n = m_pbes.equations().size();
       std::size_t N = m_summand_classes.size();
 
-      // compute NES
-      for (std::size_t k = 0; k < N; k++)
-      {
-        summand_class& summand_k = m_summand_classes[k];
-        summand_set& NES = summand_k.NES;
-        for (std::size_t k1 = 0; k1 < N; k1++)
-        {
-          if (!permanently_disables(k1, k) && !TsWs_has_empty_intersection(k, k1) && accordance_nes(*this, k, k1).can_enable())
-          {
-            NES.set(k1);
-          }
-        }
-      }
       for (std::size_t i = 0; i < n; i++)
       {
         m_dependency_nes[i].resize(N);
@@ -1001,7 +983,7 @@ class partial_order_reduction_algorithm
       return result;
     }
 
-    void compute_DNA_DNL(const std::vector<parameter_info>& info)
+    void compute_DNA_DNL_NES(const std::vector<parameter_info>& info)
     {
       using utilities::detail::has_empty_intersection;
       using utilities::detail::set_includes;
@@ -1034,6 +1016,7 @@ class partial_order_reduction_algorithm
                                   (k1 > k && ([&]{ return square_accords_equations(k, k1); } && [&]{ return summand_data.square_accords_data(); }));
           bool accords          = square_accords ||
                                   ([&]{ return triangle_accords_equations(k, k1); } && [&]{ return summand_data.triangle_accords_data(); });
+          bool can_enable       = !dependency_permanently_disables(k1, k) && !has_empty_intersection(Ts(k), Ws(k1)) && summand_data.can_enable();
 
           if (!left_accords)
           {
@@ -1046,6 +1029,10 @@ class partial_order_reduction_algorithm
           if (!accords)
           {
             DNA(k).set(k1);
+          }
+          if (can_enable)
+          {
+            NES(k).set(k1);
           }
         }
       }
@@ -1098,8 +1085,8 @@ class partial_order_reduction_algorithm
         compute_parameter_info(m_summand_classes[k], info[k]);
       }
 
-      compute_NES(info);
-      compute_DNA_DNL(info);
+      compute_dependency_NES();
+      compute_DNA_DNL_NES(info);
     }
 
     bool compute_deterministic_equations(std::size_t k)
