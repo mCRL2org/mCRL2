@@ -347,8 +347,14 @@ class partial_order_reduction_algorithm
 
       data::data_expression triangle_accords_consequent()
       {
-        data::data_expression parameters_equal = detail::equal_to(updates1_k1, data::replace_variables_capture_avoiding(updates1_k1, sigma_k, id_gen));
-        return data::sort_bool::and_(data::replace_variables_capture_avoiding(condition1_k1, sigma_k, id_gen), parameters_equal);
+        data::data_expression parameters_equal = detail::equal_to(updates2_k1, data::replace_variables_capture_avoiding(updates2_k1, sigma_k, id_gen));
+        return make_exists(
+          qvars2_k1,
+          data::sort_bool::and_(
+            data::replace_variables_capture_avoiding(condition2_k1, sigma_k, id_gen),
+            parameters_equal
+          )
+        );
       }
 
       tribool accords_data(bool affect_set, bool needs_yes,
