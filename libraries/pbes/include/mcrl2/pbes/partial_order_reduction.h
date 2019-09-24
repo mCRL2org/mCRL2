@@ -280,7 +280,7 @@ class partial_order_reduction_algorithm
     smt::smt_solver* m_solver;
     std::chrono::milliseconds m_smt_timeout;
 
-    class accordance_nes
+    class summand_relations_data
     {
     private:
       partial_order_reduction_algorithm& parent;
@@ -307,8 +307,80 @@ class partial_order_reduction_algorithm
 
       data::variable_list combined_quantified_vars;
 
+      data::data_expression left_accords_antecedent()
+      {
+        return data::sort_bool::and_(condition1_k1, data::replace_variables_capture_avoiding(condition1_k, sigma_k1, id_gen));
+      }
+
+      data::data_expression left_accords_consequent()
+      {
+        data::data_expression parameters_equal = detail::equal_to(data::replace_variables_capture_avoiding(updates2_k, sigma_k1, id_gen),
+                                                                  data::replace_variables_capture_avoiding(updates2_k1, sigma_k, id_gen));
+        return make_exists(
+          qvars2_k + qvars2_k1,
+          detail::make_and(
+            condition2_k,
+            data::replace_variables_capture_avoiding(condition2_k1, sigma_k, id_gen),
+            parameters_equal
+          )
+        );
+      }
+
+      data::data_expression coenabled_antecedent()
+      {
+        return data::sort_bool::and_(condition1_k, condition1_k1);
+      }
+
+      data::data_expression square_accords_consequent()
+      {
+        data::data_expression parameters_equal = detail::equal_to(data::replace_variables_capture_avoiding(updates2_k, sigma_k1, id_gen),
+                                                                  data::replace_variables_capture_avoiding(updates2_k1, sigma_k, id_gen));
+        return make_exists(
+          qvars2_k + qvars2_k1,
+          detail::make_and(
+            data::replace_variables_capture_avoiding(condition2_k, sigma_k1, id_gen),
+            data::replace_variables_capture_avoiding(condition2_k1, sigma_k, id_gen),
+            parameters_equal
+          )
+        );
+      }
+
+      data::data_expression triangle_accords_consequent()
+      {
+        data::data_expression parameters_equal = detail::equal_to(updates1_k1, data::replace_variables_capture_avoiding(updates1_k1, sigma_k, id_gen));
+        return data::sort_bool::and_(data::replace_variables_capture_avoiding(condition1_k1, sigma_k, id_gen), parameters_equal);
+      }
+
+      tribool accords_data(bool affect_set, bool needs_yes,
+                           std::function<data::data_expression()> make_antecedent,
+                           std::function<data::data_expression()> make_consequent)
+      {
+        // Check whether the maybe clause is satisfied by affect sets and it is sufficient to return maybe
+        if (affect_set && !needs_yes)
+        {
+          return maybe;
+        }
+
+        data::data_expression antecedent = make_antecedent();
+        data::data_expression yes_condition = make_forall(combined_quantified_vars, data::sort_bool::not_(antecedent));
+        if (parent.is_true(yes_condition))
+        {
+          return yes;
+        }
+        if (needs_yes)
+        {
+          // we were not able to return yes, now it doesn't matter what we return
+          return no;
+        }
+
+        data::data_expression consequent = make_consequent();
+        data::data_expression condition = make_forall(combined_quantified_vars, data::sort_bool::implies(antecedent, consequent));
+
+        return parent.is_true(condition) ? maybe : no;
+      }
+
     public:
-      accordance_nes(partial_order_reduction_algorithm& p, const std::size_t k, const std::size_t k1)
+      summand_relations_data(partial_order_reduction_algorithm& p, const std::size_t k, const std::size_t k1)
       : parent(p)
       {
         const summand_class& summand_k = parent.m_summand_classes[k];
@@ -355,105 +427,23 @@ class partial_order_reduction_algorithm
 
       tribool left_accords_data(bool affect_set, bool needs_yes)
       {
-        // Check whether the maybe clause is satisfied by affect sets and it is sufficient to return maybe
-        if (affect_set && !needs_yes)
-        {
-          return maybe;
-        }
-
-        data::data_expression antecedent = data::sort_bool::and_(condition1_k1, data::replace_variables_capture_avoiding(condition1_k, sigma_k1, id_gen));
-        data::data_expression yes_condition = make_forall(combined_quantified_vars, data::sort_bool::not_(antecedent));
-        if (parent.is_true(yes_condition))
-        {
-          return yes;
-        }
-        if (needs_yes)
-        {
-          // we were not able to return yes, now it doesn't matter what we return
-          return no;
-        }
-
-        data::data_expression parameters_equal = detail::equal_to(data::replace_variables_capture_avoiding(updates2_k, sigma_k1, id_gen),
-                                                                  data::replace_variables_capture_avoiding(updates2_k1, sigma_k, id_gen));
-        data::data_expression consequent = make_exists(
-          qvars2_k + qvars2_k1,
-          detail::make_and(
-            condition2_k,
-            data::replace_variables_capture_avoiding(condition2_k1, sigma_k, id_gen),
-            parameters_equal
-          )
-        );
-        data::data_expression condition = make_forall(combined_quantified_vars, data::sort_bool::implies(antecedent, consequent));
-
-        // mCRL2log(log::verbose) << "Left condition for " << k << " and " << k1 << ": " << m_rewr(condition) << " original " << condition << std::endl;
-
-        return parent.is_true(condition) ? maybe : no;
+        return accords_data(affect_set, needs_yes,
+                            std::bind(&summand_relations_data::left_accords_antecedent, *this),
+                            std::bind(&summand_relations_data::left_accords_consequent, *this));
       }
 
       tribool square_accords_data(bool affect_set, bool needs_yes)
       {
-        // Check whether the maybe clause is satisfied by affect sets and it is sufficient to return maybe
-        if (affect_set && !needs_yes)
-        {
-          return maybe;
-        }
-
-        data::data_expression antecedent = data::sort_bool::and_(condition1_k, condition1_k1);
-        data::data_expression yes_condition = make_forall(combined_quantified_vars, data::sort_bool::not_(antecedent));
-        if (parent.is_true(yes_condition))
-        {
-          return yes;
-        }
-        if (needs_yes)
-        {
-          // we were not able to return yes, now it doesn't matter what we return
-          return no;
-        }
-
-        data::data_expression parameters_equal = detail::equal_to(data::replace_variables_capture_avoiding(updates2_k, sigma_k1, id_gen),
-                                                                  data::replace_variables_capture_avoiding(updates2_k1, sigma_k, id_gen));
-        data::data_expression consequent = make_exists(
-          qvars2_k + qvars2_k1,
-          detail::make_and(
-            data::replace_variables_capture_avoiding(condition2_k, sigma_k1, id_gen),
-            data::replace_variables_capture_avoiding(condition2_k1, sigma_k, id_gen),
-            parameters_equal
-          )
-        );
-        data::data_expression condition = make_forall(combined_quantified_vars, data::sort_bool::implies(antecedent, consequent));
-
-        // mCRL2log(log::verbose) << "Square condition for " << k << " and " << k1 << ": " << m_rewr(condition) << " original " << condition << std::endl;
-
-        return parent.is_true(condition) ? maybe : no;
+        return accords_data(affect_set, needs_yes,
+                            std::bind(&summand_relations_data::coenabled_antecedent, *this),
+                            std::bind(&summand_relations_data::square_accords_consequent, *this));
       }
 
       tribool triangle_accords_data(bool affect_set, bool needs_yes)
       {
-        // Check whether the maybe clause is satisfied by affect sets and it is sufficient to return maybe
-        if (affect_set && !needs_yes)
-        {
-          return maybe;
-        }
-
-        data::data_expression antecedent = data::sort_bool::and_(condition1_k, condition1_k1);
-        data::data_expression yes_condition = make_forall(combined_quantified_vars, data::sort_bool::not_(antecedent));
-        if (parent.is_true(yes_condition))
-        {
-          return yes;
-        }
-        if (needs_yes)
-        {
-          // we were not able to return yes, now it doesn't matter what we return
-          return no;
-        }
-
-        data::data_expression parameters_equal = detail::equal_to(updates1_k1, data::replace_variables_capture_avoiding(updates1_k1, sigma_k, id_gen));
-        data::data_expression consequent = data::sort_bool::and_(data::replace_variables_capture_avoiding(condition1_k1, sigma_k, id_gen), parameters_equal);
-        data::data_expression condition = make_forall(combined_quantified_vars, data::sort_bool::implies(antecedent, consequent));
-
-        // mCRL2log(log::verbose) << "Triangle condition for " << k << " and " << k1 << ": " << m_rewr(condition) << " original " << condition << std::endl;
-
-        return parent.is_true(condition) ? maybe : no;
+        return accords_data(affect_set, needs_yes,
+                            std::bind(&summand_relations_data::coenabled_antecedent, *this),
+                            std::bind(&summand_relations_data::triangle_accords_consequent, *this));
       }
     };
 
@@ -1044,7 +1034,7 @@ class partial_order_reduction_algorithm
           bool DNL_DNS_affect_sets = has_empty_intersection(set_intersection(Vs(k), Vs(k1)), set_union(Ws(k), Ws(k1)));
           bool DNT_affect_sets = has_empty_intersection(Ws(k), Rs(k1)) && has_empty_intersection(Ws(k), Ts(k1)) && set_includes(Ws(k1), Ws(k));
 
-          accordance_nes summand_data(*this, k, k1);
+          summand_relations_data summand_data(*this, k, k1);
           // Use lambda lifting for short-circuiting the && operator on tribools
           bool left_accords     = [&]{ return left_accords_equations(k, k1); } &&
                                   [&](bool needs_yes) { return summand_data.left_accords_data(DNL_DNS_affect_sets, needs_yes); };
