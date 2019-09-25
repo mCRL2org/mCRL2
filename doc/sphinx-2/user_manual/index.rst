@@ -1,4 +1,4 @@
-.. include:: toplevel.inc
+.. include:: ../_includes/toplevel.inc
 
 .. title:: Home
 
@@ -49,6 +49,7 @@
           :align: right
           :width: 90px
           :alt: TACAS artefact evaluation badge
+
   A tool paper explaining the latest developments in mCRL2 was published in TACAS2019.
   The new features include counterexamples, probabilistic processes and efficient algorithms for several types of behavioural relations.
   As part of the review process, mCRL2 was tested and accepted by the TACAS artefact evaluation committee.
@@ -69,12 +70,12 @@
    be downloaded from `MIT Press <http://mitpress.mit.edu/books/modeling-and-analysis-communicating-systems>`_.
 
 .. note::
-
    .. image:: ../_static/Verum-2-Logo-Vert-Colour.*
           :align: right
           :width: 75px
           :alt: Verum is the industry leader in reliable software design.
           :target: https://www.verum.com
+
    mCRL2 is used by the company `Verum <https://www.verum.com>`_ as their verification engine.
    Verum provides model based software development environments for the languages ASD and Dezyne that
    allow to program proven correct embedded software with much less effort than "classical" programming.
@@ -95,4 +96,4 @@
    :hidden:
 
    user
-   boost
+   build_instructions/boost

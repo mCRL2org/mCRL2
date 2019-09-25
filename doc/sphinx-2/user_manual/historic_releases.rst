@@ -1,4 +1,4 @@
-.. include:: toplevel.inc
+.. include:: ../_includes/toplevel.inc
 
 .. _historic_releases:
 

@@ -65,6 +65,10 @@ try:
 except:
     from sphinx.util import ensuredir, ENOENT, EPIPE
 
+from sphinx.util import logging
+logger = logging.getLogger(__name__)
+
+
 class TikzExtError(SphinxError):
     category = 'Tikz extension error'
 
@@ -144,7 +148,7 @@ def render_tikz(self,tikz,libs='',stringsubst=False):
     if stringsubst:
         tikz = tikz % {'wd': curdir}
     latex += DOC_BODY % tikz
-    if isinstance(latex, unicode):
+    if isinstance(latex, bytes):
         latex = latex.encode('utf-8')
 
     if not hasattr(self.builder, '_tikz_tempdir'):
@@ -165,7 +169,7 @@ def render_tikz(self,tikz,libs='',stringsubst=False):
         except OSError as err:
             if err.errno != ENOENT:   # No such file or directory
                 raise
-            self.builder.warn('LaTeX command cannot be run')
+            logger.warning('LaTeX command cannot be run')
             self.builder._tikz_warned = True
             return None
     finally:
