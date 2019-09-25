@@ -22,13 +22,14 @@ sys.path.insert(0, (Path(__file__).parent / '_extensions').as_posix())
 
 project = 'mCRL2'
 author = 'Technische Universiteit Eindhoven'
-version = '2019'
-with open(Path(__file__).parent / '../../build/cmake/MCRL2Version.cmake') as mCRL2_version_file:
+release = '2019'
+with open(Path(__file__).parent / '../../build/cmake/MCRL2Version.cmake') \
+        as mCRL2_version_file:
     for line in mCRL2_version_file:
         matches = re.findall(r'MCRL2_MAJOR_VERSION[^"]+"([^"]+)"', line)
         if matches:
-            version = matches[0]
-release = version # looks like detailed release info is not used in docs
+            release = matches[0]
+version = release + '.fd641414f8' # TODO: execute above CMake to find minor version
 copyright = f'2011-{version[0:4]}, Technische Universiteit Eindhoven'
 
 
@@ -38,6 +39,7 @@ copyright = f'2011-{version[0:4]}, Technische Universiteit Eindhoven'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'dparser_grammar',
     'mcrl2_pygment',
     'sphinx.ext.graphviz',
     'sphinx.ext.ifconfig',
@@ -66,7 +68,7 @@ templates_path = ['_templates']
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', '_temp/rst/libraries', '.svn', '.git',
-                    'Thumbs.db', '.DS_Store']
+                    'Thumbs.db', '.DS_Store', 'sphinx-venv']
 
 
 # -- Options for HTML output -------------------------------------------------

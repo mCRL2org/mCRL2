@@ -1,10 +1,10 @@
-.. include:: toplevel.inc
+.. include:: ../_includes/toplevel.inc
 
 .. The links to the release are hard coded in downloads-release.inc.
 .. The nightly builds are linked in downloads-nightly.inc.
 
-.. include:: downloads-release.inc
-.. include:: downloads-nightly.inc
+.. include:: ../_includes/downloads-release.inc
+.. include:: ../_includes/downloads-nightly.inc
 
 .. _download:
 
@@ -19,17 +19,17 @@ latest release of the toolset.
    +------------------------+------------------------+
    |Operating system        |Release (|release|)     |
    +========================+========================+
-   |Windows                 | |bin_w64|_             |
+   |Windows                 | |bin_w64|              |
    |                        +------------------------+
-   |                        | |zip_w64|_             |
+   |                        | |zip_w64|              |
    +------------------------+------------------------+
-   |macOS                   | |bin_osx|_             |
+   |macOS                   | |bin_osx|              |
    +------------------------+------------------------+
    |Ubuntu                  | |bin_ppa|_             |
    +------------------------+------------------------+
-   |Fedora                  | |bin_fedora64|_        |
+   |Fedora                  | |bin_fedora64|         |
    +------------------------+------------------------+
-   |Source                  | |src_tgz|_             |
+   |Source                  | |src_tgz|              |
    +------------------------+------------------------+
 
 
@@ -42,19 +42,19 @@ They are available here.
    +------------------------+-------------------------+
    |Operating system        |Nightly build (|version|)|
    +========================+=========================+
-   |Windows                 | |bin_w64n|_             |
+   |Windows                 | |bin_w64n|              |
    |                        +-------------------------+
-   |                        | |zip_w64n|_             |
+   |                        | |zip_w64n|              |
    +------------------------+-------------------------+
-   |macOS                   | |bin_osx64n|_           |
+   |macOS                   | |bin_osx64n|            |
    +------------------------+-------------------------+
-   |Ubuntu                  | |bin_deb32n|_           |
+   |Ubuntu                  | |bin_deb32n|            |
    |                        +-------------------------+
-   |                        | |bin_deb64n|_           |
+   |                        | |bin_deb64n|            |
    +------------------------+-------------------------+
-   |Fedora                  | |bin_fedora64n|_        |
+   |Fedora                  | |bin_fedora64n|         |
    +------------------------+-------------------------+
-   |Source                  | |src_tgzn|_             |
+   |Source                  | |src_tgzn|              |
    +------------------------+-------------------------+
 
 If you are using a Linux distribution that is not listed, you may wish to try

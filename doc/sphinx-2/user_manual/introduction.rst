@@ -59,7 +59,7 @@ Language, Groote and Ponse).
 
 Unfortunately, the use of abstract data types made these languages unpleasant
 when it came to the specification of complex behaviour. Therefore, we designed
-the language mCRL2 (the successor of µCRL) to contain exactly those data types 
+the language mCRL2 (the successor of µCRL) to contain exactly those data types
 that one would expect when writing specifications, namely Bool, Pos, Nat, Int,
 Real, lists, sets, bags, functions and functional data types. These data types
 are machine independent. For instance there is no upperbound on natural numbers,
@@ -89,12 +89,12 @@ of a typical analysis using mCRL2 below.
 All tools can be accessed via a command-line interface. Another possibility is
 to use the :ref:`tool-mcrl2-gui` tool which provides access to the tools via a GUI.
 
-.. figure:: ToolsetOverview.png
+.. figure:: ../_static/ToolsetOverview.png
    :align: center
 
 The rest of this section describes the different categories of tools that are
 part of mCRL2.
-  
+
 mCRL2 specification and linearisation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Every analysis starts off by specifying the behaviour of the system being

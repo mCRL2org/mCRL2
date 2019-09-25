@@ -1,4 +1,4 @@
-.. include:: toplevel.inc
+.. include:: ../_includes/toplevel.inc
 
 mCRL2 user documentation
 ========================
@@ -16,24 +16,24 @@ mCRL2 user documentation
 
 Welcome to the mCRL2 user documentation. If you are looking for information on
 the use of the mCRL2 libraries or for source code documentation, please consult
-the `developers' documentation <../developer_manual/index.html>`_. 
+the `developers' documentation <../developer_manual/index.html>`_.
 
 .. list-table::
    :class: libdoc
 
    * - **Manuals**
-   
+
        .. toctree::
           :maxdepth: 1
-   
+
           introduction
           tutorial/tutorial
 
      - **Tools**
-   
+
        .. toctree::
           :maxdepth: 1
-   
+
           tools
 
    * - **Build instructions**
@@ -52,11 +52,11 @@ the `developers' documentation <../developer_manual/index.html>`_.
           language_reference/index
 
    * - **Background**
-   
+
        .. toctree::
           :maxdepth: 1
           :glob:
-   
+
           articles/*
 
      - **Publications**
