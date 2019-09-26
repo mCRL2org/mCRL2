@@ -9,6 +9,8 @@ from pathlib import Path
 import re
 # used to add paths for extensions
 import sys
+# used for generation of rst files from man pages
+import tempfile
 
 
 # -- Path setup --------------------------------------------------------------
@@ -87,3 +89,10 @@ html_static_path = ['_static']
 
 # Tweaking how the "last updated" is displayed
 today_fmt = '%d-%m-%Y'
+
+
+# Generate rst files from man pages
+import man
+
+with tempfile.TemporaryDirectory() as temppath:
+    man.generate_rst(temppath, (Path(__file__).parent / '../../../build/stage/bin/').as_posix())
