@@ -118,9 +118,17 @@ struct pbespor_pbes_composer
     return result;
   }
 
-  pbes run(const pbes& p, data::rewrite_strategy rewrite_strategy, bool use_condition_L, bool use_smt_solver, std::size_t smt_timeout, bool use_weak_conditions)
+  pbes run(const pbes& p,
+           data::rewrite_strategy rewrite_strategy,
+           bool use_condition_L,
+           bool use_smt_solver,
+           std::size_t smt_timeout,
+           bool use_weak_conditions,
+           bool no_determinisim,
+           bool no_triangle
+         )
   {
-    partial_order_reduction_algorithm algorithm(p, rewrite_strategy, use_smt_solver, smt_timeout, use_weak_conditions);
+    partial_order_reduction_algorithm algorithm(p, rewrite_strategy, use_smt_solver, smt_timeout, use_weak_conditions, no_determinisim, no_triangle);
     algorithm.print();
 
     algorithm.explore(
@@ -155,14 +163,16 @@ void pbespor(const std::string& input_filename,
              bool use_condition_L,
              bool use_smt_solver,
              std::size_t smt_timeout,
-             bool weak_conditions
+             bool weak_conditions,
+             bool no_determinisim,
+             bool no_triangle
             )
 {
   pbes p;
   load_pbes(p, input_filename, input_format);
   algorithms::normalize(p);
   pbespor_pbes_composer composer;
-  pbes result = composer.run(p, rewrite_strategy, use_condition_L, use_smt_solver, smt_timeout, weak_conditions);
+  pbes result = composer.run(p, rewrite_strategy, use_condition_L, use_smt_solver, smt_timeout, weak_conditions, no_determinisim, no_triangle);
   save_pbes(result, output_filename, output_format);
 }
 

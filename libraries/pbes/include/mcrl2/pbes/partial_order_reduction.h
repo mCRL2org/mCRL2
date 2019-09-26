@@ -282,6 +282,8 @@ class partial_order_reduction_algorithm
 
     // if true use alternative A3 for maybe clauses in accordance conditions
     bool m_use_weak_conditions;
+    bool m_no_determinisim;
+    bool m_no_triangle;
 
     class summand_relations_data
     {
@@ -1076,9 +1078,9 @@ class partial_order_reduction_algorithm
                                   (k1 > k &&
                                       ([&]{ return square_accords_equations(k, k1); } &&
                                        [&](bool needs_yes) { return summand_data.square_accords_data(DNL_DNS_affect_sets, needs_yes); }));
-          bool accords          = square_accords ||
-                                  ([&]{ return triangle_accords_equations(k, k1); } &&
-                                   [&](bool needs_yes) { return summand_data.triangle_accords_data(DNT_affect_sets, needs_yes); });
+          bool triangle_accords = !m_no_triangle && ([&]{ return triangle_accords_equations(k, k1); } &&
+                                                     [&](bool needs_yes) { return summand_data.triangle_accords_data(DNT_affect_sets, needs_yes); });
+          bool accords          = square_accords || triangle_accords;
           bool can_enable       = !dependency_permanently_disables(k1, k) && !has_empty_intersection(Ts(k), Ws(k1)) && summand_data.can_enable();
 
           if (!left_accords)
@@ -1201,6 +1203,10 @@ class partial_order_reduction_algorithm
 
     void compute_deterministic()
     {
+      if (m_no_determinisim)
+      {
+        return;
+      }
       std::size_t N = m_summand_classes.size();
       for (std::size_t k = 0; k < N; k++)
       {
@@ -1335,7 +1341,14 @@ class partial_order_reduction_algorithm
     }
 
   public:
-    explicit partial_order_reduction_algorithm(const pbes& p, data::rewrite_strategy strategy, bool use_smt_solver, std::size_t smt_timeout, bool weak_conditions)
+    explicit partial_order_reduction_algorithm(const pbes& p,
+          data::rewrite_strategy strategy,
+          bool use_smt_solver,
+          std::size_t smt_timeout,
+          bool weak_conditions,
+          bool no_determinisim,
+          bool no_triangle
+        )
      : m_rewr(p.data(),
               //TODO temporarily disabled used_data_equation_selector so the rewriter can rewrite accordance conditions
               // data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()),
@@ -1347,7 +1360,9 @@ class partial_order_reduction_algorithm
        m_dependency_nes(m_pbes.equations().size()),
        m_solver(use_smt_solver ? new smt::smt_solver(p.data()) : nullptr),
        m_smt_timeout(smt_timeout),
-       m_use_weak_conditions(weak_conditions)
+       m_use_weak_conditions(weak_conditions),
+       m_no_determinisim(no_determinisim),
+       m_no_triangle(no_triangle)
     {
       unify_parameters(m_pbes);
 
