@@ -78,6 +78,7 @@ exclude_patterns = ['_build', '_temp/rst/libraries', '.svn', '.git',
 #
 html_theme = 'mcrl2'
 html_theme_path = ['_templates']
+html_logo = '_templates/mcrl2/static/mcrl2.png'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
