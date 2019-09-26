@@ -1,0 +1,68 @@
+% Specification for the rope bridge problem
+% Written by Bas Ploeger, June 2008.
+
+% Adventurers are identified by their "speeds", i.e. the number of
+% minutes they need for crossing the bridge. For this we use the basic
+% integer data type of mCRL2 called 'Int'.
+
+% Data type for the position of adventurers and the flashlight.
+% Initially, they are all on the 'start' side of the bridge. In the end,
+% they should all have reached the 'finish' side.
+sort Position = struct start | finish;
+
+
+act
+    % Action declarations:
+    % - 'forward'  means:  from start to finish
+    % - 'back'     means:  from finish to start
+
+    % The flashlight moves forward together with two adventurers,
+    % identified by the action's parameters.
+    forward_flashlight: Int # Int;
+
+    % The flashlight moves back together with one adventurer, identified
+    % by the action's parameter.
+    back_flashlight: Int;
+
+
+%%% TODO (Exercise 1): 
+%%% Add action declarations for Adventurer process here
+
+%%% TODO (Exercise 2):
+%%% Add action declarations for synchronised events.
+
+%%% TODO (Exercise 5):
+%%% Add action declarations for Referee process.
+
+
+% The Flashlight process models the flashlight:
+% 1. If it is at the 'start' side, it can move forward together with any
+%    pair of adventurers.
+% 2. If it is at the 'finish' side, it can move back together with any
+%    adventurer.
+proc Flashlight(pos:Position) =
+       (pos == start) ->
+         % Case 1.
+         sum s,s':Int . forward_flashlight(s,s') . Flashlight(finish)
+       <> 
+         % Case 2.
+         sum s:Int . back_flashlight(s) . Flashlight(start);
+
+
+%%% TODO (Exercise 1):
+%%% Add Adventurer process definition here
+
+%%% TODO (Exercise 5):
+%%% Add Referee process definition here
+
+
+
+% Initial process definition: the system currently only consists of a
+% flashlight at the 'start' side.
+init  Flashlight(start) ;
+
+%%% TODO (Exercise 2):
+%%% Add the four Adventurer processes to this definition
+
+%%% TODO (Exercise 5):
+%%% Add the Referee process to this definition

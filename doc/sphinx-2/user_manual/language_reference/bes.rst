@@ -33,7 +33,7 @@ Mathematically, we also write :math:`(\mu X = f)` or :math:`(\nu X = f)`
 BES specification
 -----------------
 
-A Boolean equation system is a sequence of Boolean equations, 
+A Boolean equation system is a sequence of Boolean equations,
 
 .. dparser:: BesInit BesSpec
 
@@ -52,9 +52,9 @@ References
 .. [DPW08] A. van Dam, B. Ploeger and Tim A.C. Willemse. Instantiation for
            Parameterised Boolean Equation Systems, Eindhoven University of
            Technology, Department of Computer Science, CSR 08-11, 2008, 24 pp.
-           `(PDF) <http://www.win.tue.nl/~timw/new/articles/CSR08-11.pdf>`_
-           
+           `(PDF) <http://www.win.tue.nl/~timw/new/articles/CSR08-11.pdf>`__
+
 .. [Mad97] Mader, A.H. (1997) Verification of Modal Properties Using Boolean
            Equation Systems. Edition versal 8, Bertz Verlag, Berlin.
            ISBN 3-929470-58-6.
-           `(PDF) <http://eprints.eemcs.utwente.nl/1078/02/diss.pdf>`_
+           `(PDF) <http://eprints.eemcs.utwente.nl/1078/02/diss.pdf>`__

@@ -1,0 +1,5 @@
+% an apple after 10 cents
+
+[ true* . !(coin10 || coin20) . readyA ] false
+
+

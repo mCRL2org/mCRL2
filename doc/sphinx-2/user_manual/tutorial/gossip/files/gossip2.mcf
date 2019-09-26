@@ -1,0 +1,5 @@
+% There is a path of length (N - 1) + (N - 2) states
+% leading to the situation where all girls know all gossips (true)
+
+mu X(n:Nat=0) . (val(n <  (N - 1) + (N - 2)) && <!all_done> X(n+1))
+             || (val(n == (N - 1) + (N - 2)) && <all_done> true)

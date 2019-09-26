@@ -1,0 +1,34 @@
+% Towers of Hanoi
+map  N: Pos;
+eqn  N = 3;
+
+sort Stack = List(Pos);
+map  empty: Stack -> Bool;       
+     push:  Pos # Stack -> Stack;
+     pop:   Stack -> Stack;      
+     top:   Stack -> Pos;
+var  s: Stack;
+     x: Pos;
+eqn  empty(s)  = s == [];
+     push(x,s) = x |> s;
+     pop(s)    = tail(s);
+     (!empty(s)) -> top(s) = head(s);
+
+map  build_stack: Pos # Pos -> Stack;
+var  x,y: Pos;
+eqn  (x >  y) -> build_stack(x,y) = [];
+     (x <= y) -> build_stack(x,y) = push(x,build_stack(x+1,y));
+
+act  send, receive, move: Pos # Pos # Pos;
+
+proc Peg(id:Pos, stack:Stack) = 
+     sum d,p:Pos . (empty(stack) || top(stack) > d) ->
+       receive(d,p,id) . Peg(id,push(d,stack))
+     +
+     sum p:Pos . (!empty(stack) && !(#stack==N && id==3)) ->
+       send(top(stack),id,p) . Peg(id,pop(stack));
+
+init allow({move},
+     comm({send|receive -> move},
+       Peg(1,build_stack(1,N)) || Peg(2,[]) || Peg(3,[])
+     ));
