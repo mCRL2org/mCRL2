@@ -396,7 +396,7 @@ p.admonition-title:after {
     content: ":";
 }
 
-p:first-child {
+p:first-child:not(.logo) {
     margin-top: 0 !important;
 }
 
