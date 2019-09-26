@@ -1,0 +1,6 @@
+forall n: Name, p,r: PhoneNumber .
+  [true* . addPhone(n,p) .
+     !delPhone(n)* .
+     findPhone(n) .
+     !delPhone(n)* .
+     reportPhone(n, r)] val(p == r)

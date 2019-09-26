@@ -1,0 +1,4 @@
+% no three 10ct coins in a row
+
+[ true* . coin10 . coin10 . coin10 ] false
+

@@ -1,0 +1,26 @@
+sort Coin = struct ten | twenty;
+     Product = struct Apple | Chocolate;
+
+act
+  ins, acc, coin, ret, chg, out: Coin;
+  opt, put, ready: Product;
+  prod;
+
+proc
+  User = 
+    ins(ten).( opt(Apple) + ins(ten).( opt(Chocolate) + chg(twenty) ) + chg(ten) ).User +
+    ins(twenty).( opt(Apple).chg(ten) + opt(Chocolate) + chg(twenty) ).User ;
+
+  Mach = 
+    acc(ten).( put(Apple).prod + acc(ten).( put(Chocolate).prod + ret(twenty) ) + ret(ten) ).Mach +
+    acc(twenty).( put(Apple).prod.ret(ten) + put(Chocolate).prod + ret(twenty) ).Mach ;
+
+init
+  allow(
+    { coin, ready, out, prod },
+    comm(
+      { ins|acc -> coin,
+        chg|ret -> out,
+        opt|put -> ready },
+      User || Mach
+  ) ) ;

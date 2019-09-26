@@ -1,0 +1,4 @@
+% a ready is always possible (false)
+
+[ true* ] < ready > true
+

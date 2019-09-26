@@ -1,0 +1,5 @@
+% There is no path of length < (N-1)+(N-2) leading to the situation
+% where all girls know all gossips (true)
+
+nu X(n:Nat = 0) . val(n < (N-1)+(N-2)) =>
+                    ([true] X(n+1) && [all_done] false)

@@ -1,0 +1,14 @@
+%% file vm01.mcf
+
+%% always, eventually a ready is possible (true)
+   [ true* ] < true* . ready > true
+
+%% a ready is always possible (false)
+%% [ true* ] < ready > true
+
+%% after every ready only a coin follows (true)
+%% [ true* . ready . !coin ] false
+
+%% any ready is followed by a coin and another ready (true)
+%% [ true* . ready . !coin ] false  &&  [ true* . ready . true . !ready ] false
+

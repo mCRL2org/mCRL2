@@ -5,17 +5,17 @@ Process syntax
 
 *Process expressions*
 
-.. dparser:: Action ActIdSet MultActId MultActIdList MultActIdSet RenExpr 
-             RenExprList RenExprSet CommExpr CommExprList CommExprSet 
+.. dparser:: Action ActIdSet MultActId MultActIdList MultActIdSet RenExpr
+             RenExprList RenExprSet CommExpr CommExprList CommExprSet
              DataExprUnit ProcExpr
 
-The non-terminal :token:`ProcExprNoif` is equal to :token:`ProcExpr`, except 
-that no *if-then* or *if-then-else* productions are allowed. It recurses back 
-into :token:`ProcExpr` where this non-terminal is enclosed by brackets; 
+The non-terminal :token:`ProcExprNoif` is equal to :token:`ProcExpr`, except
+that no *if-then* or *if-then-else* productions are allowed. It recurses back
+into :token:`ProcExpr` where this non-terminal is enclosed by brackets;
 otherwise, it stays in :token:`ProcExprNoIf`.
 
 *Process equation*
- 
+
 .. dparser:: ProcDecl ProcSpec
 
 Process specifications
@@ -63,12 +63,12 @@ followed by a sequence of ``c``, ``d`` and ``e``.
 ::
 
   act a, b, c, d, e;
- 
+
   proc P = a . b . c;
        Q = d + e;
        R = (a + b) . c . d . e;
 
-Whether a process ``P + Q`` behaves as ``P`` or as ``Q`` is determined by the 
+Whether a process ``P + Q`` behaves as ``P`` or as ``Q`` is determined by the
 first action that either ``P`` or ``Q`` carries out.
 
 By using process variables at the right-hand side, recursive behaviour can be
@@ -87,8 +87,8 @@ bars. E.g. ``a|b|...|z``. If we reconsider the example above, but we want to
 express that reading and writing must happen at the same time, this can be
 specified by::
 
-  act read, write; 
-  proc P = (read | write) . P; 
+  act read, write;
+  proc P = (read | write) . P;
   init P;
 
 Multi-actions are an effective weapon against the state space explosion problem.
@@ -140,14 +140,14 @@ Conditions
 """"""""""
 
 We can let data influence the course of events by adding conditions to the
-process. We write ``c -> p`` for "if ``c`` then do process ``p``" and 
-``c -> p <> q`` for "if ``c`` then do proces ``p`` else do process ``q``". For 
-instance, the clock above can be forced to count modulo 100, and it may only be 
+process. We write ``c -> p`` for "if ``c`` then do process ``p``" and
+``c -> p <> q`` for "if ``c`` then do proces ``p`` else do process ``q``". For
+instance, the clock above can be forced to count modulo 100, and it may only be
 reset if ``n`` is smaller than 50.
 ::
 
   act tick, reset;
-  proc Clock(n: Nat) = (n < 99) -> tick . Clock(n + 1) 
+  proc Clock(n: Nat) = (n < 99) -> tick . Clock(n + 1)
                                 <> tick . Clock(0)
                      + (n < 50) -> reset . Clock(0);
   init Clock(0);
@@ -161,21 +161,21 @@ semi-formal texts, the sum operator is often written using the choice operator.
 
 The process ``sum n: Nat . p(n)`` can be seen as a shorthand for ``p(0) + p(1) +
 p(2) + ....`` The use of the sum operator is often to indicate that some value
-must be read, *i.e.*, the process wants to read either a 0 or a 1 or a 2, etc. 
+must be read, *i.e.*, the process wants to read either a 0 or a 1 or a 2, etc.
 So, a buffer that reads some natural number and subsequently delivers it again
 can be compactly specified by::
 
-  act read, write: Nat; 
-  proc Buffer = sum n: Nat . read(n) . write(n) . Buffer; 
+  act read, write: Nat;
+  proc Buffer = sum n: Nat . read(n) . write(n) . Buffer;
   init Buffer;
 
 Looking at the example of the clock, the clock can be set to a particular time
 using a ``sum`` operator and a ``set`` action::
 
   act tick;
-      set: Nat; 
+      set: Nat;
   proc Clock(n: Nat) = tick . Clock(n + 1)
-                     + sum m: Nat . set(m) . Clock(m); 
+                     + sum m: Nat . set(m) . Clock(m);
   init Clock(0);
 
 If sum operators are used over infinite domains, such as ``Nat``, then it is not
@@ -191,7 +191,7 @@ simulation or state space generation. For instance when there are conditions
 that restrict the domain. A typical example is the following::
 
   act show: Nat;
-  proc P = sum n: Nat. (n < 10) -> show(n) . P; 
+  proc P = sum n: Nat. (n < 10) -> show(n) . P;
   init P;
 
 Here the variable in the sum operator is restricted by a condition. Using the
@@ -206,12 +206,12 @@ finiteness constraint at all on the sum operators.
 Parallel composition
 --------------------
 
-Processes can be put in parallel using the parallel operator. E.g. if ``p`` and 
-``q`` are processes, the expression ``p || q`` represents the processes ``p`` 
+Processes can be put in parallel using the parallel operator. E.g. if ``p`` and
+``q`` are processes, the expression ``p || q`` represents the processes ``p``
 and ``q`` executing in parallel. More precisely, the actions of ``p`` and ``q``
 are executed in an interleaved fashion.
 
-For example consider the process ``a || b`` (for actions ``a`` and ``b``). This 
+For example consider the process ``a || b`` (for actions ``a`` and ``b``). This
 process is equal to the following, where the ``a`` and ``b`` are not only
 interleaved, as there is also a multi-action where ``a`` and ``b`` happen
 simultaneously::
@@ -219,7 +219,7 @@ simultaneously::
   a . b + b . a + a | b
 
 Note that parallel behaviour can easily become quite complex. For instance the
-simple looking parallel process ``a . b || c . d`` is equal to the sequential 
+simple looking parallel process ``a . b || c . d`` is equal to the sequential
 process::
 
     a . (b . c . d + b|c . d + c . (b . d + d . b + b|d))
@@ -230,14 +230,14 @@ One of the major reasons why the analysis of behaviour is complex, lies in
 exactly this explosion of possibilities of parallel processes. It is virtually
 impossible to imagine all possible interleavings of actions.
 
-The current implementation of the linearization procedure in 
-:ref:`tool-mcrl22lps` does not support recursive paralellism, e.g. processes 
+The current implementation of the linearization procedure in
+:ref:`tool-mcrl22lps` does not support recursive paralellism, e.g. processes
 like
 ::
 
   proc X = a . (X || X)
 
-cannot be handled. The same holds for the ``allow``, ``block``, ``hide`` and 
+cannot be handled. The same holds for the ``allow``, ``block``, ``hide`` and
 ``comm`` operators that can not be used within recursive processes.
 
 Communication and allow
@@ -249,20 +249,20 @@ one process can do a send action and another reads, via a read action::
 
   send || read  =  send . read + read . send + send|read
 
-The intention is that send and read must happen at the same time (i.e. must 
+The intention is that send and read must happen at the same time (i.e. must
 communicate) and can not happen as single isolated actions. In order to achieve
 this there are two operators: ``comm`` and ``allow``.
 
 The ``comm({a|b -> c}, p)`` operator says which multi-actions are renamed to a
 single action. It says that actions ``a`` and ``b`` must communicate to ``c`` in
-process ``p``. Concretely, in any multi-action of ``p`` all occurrences of 
-``a|b`` are replaced by ``c``, provided that the data that ``a`` and ``b`` 
+process ``p``. Concretely, in any multi-action of ``p`` all occurrences of
+``a|b`` are replaced by ``c``, provided that the data that ``a`` and ``b``
 carry, match.
 
-The ``allow({c}, p)`` operator says that besides the empty multi-action ``tau``, 
-only multi-actions consisting of a single ``c`` are allowed in ``p``. All other 
-actions are blocked. The allow operator can also permit multi-actions to happen, 
-as in ``allow({a|b, c|d}, p)``. In such a case the arguments of the allowed 
+The ``allow({c}, p)`` operator says that besides the empty multi-action ``tau``,
+only multi-actions consisting of a single ``c`` are allowed in ``p``. All other
+actions are blocked. The allow operator can also permit multi-actions to happen,
+as in ``allow({a|b, c|d}, p)``. In such a case the arguments of the allowed
 multi-actions can differ.
 
 The following expression enforces the desired communication in the example with
@@ -271,34 +271,34 @@ read and write::
   allow({c}, comm({send|read -> c}, send || read))
 
 Transfering data can be done easily in this scheme. So, assume one process sends
-a natural number ``n``, which is read and processed by another process. This 
+a natural number ``n``, which is read and processed by another process. This
 could be specified by::
 
-  allow({c}, 
-    comm({send|read -> c}, 
-      send(n) . p || sum m: Nat . read(m) . q(m) 
+  allow({c},
+    comm({send|read -> c},
+      send(n) . p || sum m: Nat . read(m) . q(m)
   ))
 
-Here, ``q(m)`` is the process that uses the value ``m``. The process above 
+Here, ``q(m)`` is the process that uses the value ``m``. The process above
 actually behaves as
 ::
 
-  c(n) . 
-  allow({c}, 
-    comm({send|read -> c}, 
-      p || q(n) 
+  c(n) .
+  allow({c},
+    comm({send|read -> c},
+      p || q(n)
   ))
 
-or in other words, the communication took place and the value ``n`` is neatly 
+or in other words, the communication took place and the value ``n`` is neatly
 handed over to ``q``.
 
 More components can be put in parallel. As a larger example we show how the four
 components of the alternating bit protocol are assembled together. The process
 ``S(true)`` is the sending protocol entity with initial bit ``true``. The process
-``R(true)`` is the receiving entity, also with initial bit ``true``. The 
-processes ``K`` and ``L`` model unreliable channels. The actions ``r1`` and 
-``s4`` are external actions. Actions starting with a ``c`` are communications. 
-The action ``i`` represents an internal action in the channels that determine 
+``R(true)`` is the receiving entity, also with initial bit ``true``. The
+processes ``K`` and ``L`` model unreliable channels. The actions ``r1`` and
+``s4`` are external actions. Actions starting with a ``c`` are communications.
+The action ``i`` represents an internal action in the channels that determine
 whether data is lost or not.
 ::
 
@@ -320,16 +320,16 @@ Rename and hide
 ---------------
 
 A convenient operator that is not used very often is the renaming operator,
-which allows to rename action labels. E.g. ``rename({a -> b, c -> d}, p)`` 
-renames action ``a`` in ``p`` to ``b``, and action ``c`` in ``p`` to ``d``. The 
-operator is useful if certain processes must be used several times in a system, 
+which allows to rename action labels. E.g. ``rename({a -> b, c -> d}, p)``
+renames action ``a`` in ``p`` to ``b``, and action ``c`` in ``p`` to ``d``. The
+operator is useful if certain processes must be used several times in a system,
 and have different communication patterns each time.
 
 It is possible to hide actions, which means that they are not visible anymore in
-multi-actions. E.g. ``hide({a}, a|b)`` equals ``b``, as ``a`` is hidden. Using 
-hiding it is possible to indicate that certain actions can no longer be observed 
-by the outside world. For instance with the alternating bit protocol, it might 
-be useful to indicate that the communications ``c2, c3, c5, c6`` and the 
+multi-actions. E.g. ``hide({a}, a|b)`` equals ``b``, as ``a`` is hidden. Using
+hiding it is possible to indicate that certain actions can no longer be observed
+by the outside world. For instance with the alternating bit protocol, it might
+be useful to indicate that the communications ``c2, c3, c5, c6`` and the
 internal choice ``i`` are not visible. This is done as follows::
 
   init hide({c2,c3,c5,c6,i},
@@ -344,48 +344,48 @@ causes the number of summands in the linear process to grow. This makes analysis
 and simulation of the process behaviour much harder.
 
 If hiding is applied, the process behaviour can be reduced modulo branching
-bisimulation. Under the assumption that empty multi-actions (i.e. ``tau`` 
-actions) cannot be observed, the behaviour of a transition system becomes much 
+bisimulation. Under the assumption that empty multi-actions (i.e. ``tau``
+actions) cannot be observed, the behaviour of a transition system becomes much
 smaller. For example for the alternating bit protocol the picture below on the
 left depicts the behaviour before branching bisimulation reduction is applied,
 and the picture on the right depicts the equivalent reduced behaviour.
 
-.. _tutorial-img2: ../_static/img/tutorial/ltsgraph-abp.jpg
-.. _tutorial-img3: ../_static/img/tutorial/ltsgraph-abpbb.jpg
+.. _tutorial-img2: ../../_static/tutorial/ltsgraph-abp.jpg
+.. _tutorial-img3: ../../_static/tutorial/ltsgraph-abpbb.jpg
 
 .. table:: The alternating bit protocol shown in :ref:`tool-ltsgraph`. Left the
            entire state space, right the state space reduced modulo branching
            bisimulation
 
-  +------------------------------------+--------------------------------------+
-  | .. figure:: img/ltsgraph-abp.jpg   | .. figure:: img/ltsgraph-abpbb.jpg   |
-  |    :target: `tutorial-img2`_       |    :target: `tutorial-img3`_         |
-  |    :align: center                  |    :align: center                    |
-  |                                    |                                      |
-  |    ..                              |    ..                                |
-  +------------------------------------+--------------------------------------+
+  +-----------------------------------------------------------+-------------------------------------------------------------+
+  | .. figure:: ../../_static/tutorial/ltsgraph-abp-thumb.jpg | .. figure:: ../../_static/tutorial/ltsgraph-abpbb-thumb.jpg |
+  |    :target: `tutorial-img2`_                              |    :target: `tutorial-img3`_                                |
+  |    :align: center                                         |    :align: center                                           |
+  |                                                           |                                                             |
+  |    ..                                                     |    ..                                                       |
+  +-----------------------------------------------------------+-------------------------------------------------------------+
 
 
 Time
 ----
 
 Using the ``@`` operator it can be expressed at which time an action can take
-place. In the process ``a@1 . b@3 . c@8`` we see three actions taking place at 
-time instances 1, 3 and 8. The time labels are positive ``Real`` numbers, 
-meaning that we use absolute, dense time. If actions do not carry an explicit 
+place. In the process ``a@1 . b@3 . c@8`` we see three actions taking place at
+time instances 1, 3 and 8. The time labels are positive ``Real`` numbers,
+meaning that we use absolute, dense time. If actions do not carry an explicit
 time, they can take place at any time instance.
 
 Actually, the time operator applies to processes in general. The process ``p@t``
-represents the process where the first action of ``p`` must take place at time 
-``t``. If timing constraints conflict, e.g. in ``a@3@5``, the process time 
-deadlocks meaning that the time cannot proceed from a certain moment onwards. 
-Although this cannot happen in reality, time deadlocks are a strong tool to 
-investigate that all time constraints in a behavioural specification are 
-consistent. A time deadlock is written as ``delta@t``. More concretely, the 
+represents the process where the first action of ``p`` must take place at time
+``t``. If timing constraints conflict, e.g. in ``a@3@5``, the process time
+deadlocks meaning that the time cannot proceed from a certain moment onwards.
+Although this cannot happen in reality, time deadlocks are a strong tool to
+investigate that all time constraints in a behavioural specification are
+consistent. A time deadlock is written as ``delta@t``. More concretely, the
 process above is equal to ``delta@3``.
 
-Although labelling an action with time is rather straightforward, it is a very 
-versatile tool in the context of conditions and sum operators. For instance, a 
+Although labelling an action with time is rather straightforward, it is a very
+versatile tool in the context of conditions and sum operators. For instance, a
 clock that ticks every second is specified by
 ::
 
@@ -393,15 +393,15 @@ clock that ticks every second is specified by
 
 We can make a drifting clock as follows (where ``e`` is some small constant)::
 
-  Clock(t: Real) = 
+  Clock(t: Real) =
     sum u: Real . (1 - e <= u && u <= 1 + e) -> tick@(t + u) . Clock(t + u);
 
-A timeout can be specified in much the same way. If the action ``water`` must 
-follow within five time units after the action ``fire``, then this can be 
+A timeout can be specified in much the same way. If the action ``water`` must
+follow within five time units after the action ``fire``, then this can be
 specified by the following expression::
 
-  ... 
-  sum t: Real . fire@t . sum u: Real. (u <= 5) -> water@(t + u) 
+  ...
+  sum t: Real . fire@t . sum u: Real. (u <= 5) -> water@(t + u)
   ...
 
 Processes with time can be linearised and using the lpsuntime tool time
