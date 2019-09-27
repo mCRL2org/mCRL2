@@ -1,0 +1,82 @@
+%TCIDATA{Version=5.50.0.2890}
+%TCIDATA{LaTeXparent=1,1,pbes-implementation-notes.tex}
+                      
+
+\section{ReachableVariables}
+
+Let $\mathcal{E=(\sigma }_{1}X_{1}(d_{X_{1}}:D_{X_{1}})=\varphi
+_{X_{1}})\cdots \mathcal{(\sigma }_{n}X_{n}(d_{X_{n}}:D_{X_{n}})=\varphi
+_{X_{n}})$ be a PBES, and let $X_{init}(e_{init})$ be the initial state. The
+algorithm \textsc{ReachableVariables} computes the reachable predicate
+variables.
+
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{ReachableVariables(}}\mathcal{E},X_{init}\text{\textsc{)}} \\ 
+\text{visited }:=\{X_{init}\};\text{ explored }:=\emptyset \\ 
+\text{\textbf{while} visited}\neq \emptyset \\ 
+\qquad \text{\textbf{choose} }X_{i}\in \text{visited} \\ 
+\qquad \text{visited}:=\text{visited}\setminus \{X_{i}\} \\ 
+\qquad \text{explored }:=\text{ explored}\cup \{X_{i}\} \\ 
+\qquad \text{\textbf{for each} }X_{j}(e)\text{ }\in \mathsf{iocc(}\varphi
+_{X_{i}}{)} \\ 
+\qquad \qquad \text{\textbf{if} }X_{j}\notin \text{ explored} \\ 
+\qquad \qquad \qquad \text{visited }:=\text{ visited}\cup \{X_{j}\} \\ 
+\text{\textbf{return} explored}%
+\end{array}%
+\end{equation*}%
+\pagebreak
+
+\section{ \protect\appendix}
+
+\paragraph{ATerm format}
+
+\begin{equation*}
+\begin{array}{ll}
+\mathtt{<DataExpr>} & c \\ 
+\mathtt{StateTrue} & true \\ 
+\mathtt{StateFalse} & false \\ 
+\mathtt{StateNot(<StateFrm>)} & \lnot \varphi \\ 
+\mathtt{StateAnd(<StateFrm>,<StateFrm>)} & \varphi \wedge \varphi \\ 
+\mathtt{StateOr(<StateFrm>,<StateFrm>)} & \varphi \vee \varphi \\ 
+\mathtt{StateImp(<StateFrm>,<StateFrm>)} & \varphi \Rightarrow \varphi \\ 
+\mathtt{StateForall(<DataVarId>+,<StateFrm>)} & \forall x{:}D.\varphi \\ 
+\mathtt{StateExists(<DataVarId>+,<StateFrm>)} & \exists x{:}D.\varphi \\ 
+\mathtt{StateMust(<RegFrm>,<StateFrm>)} & \langle \alpha \rangle \varphi \\ 
+\mathtt{StateMay(<RegFrm>,<StateFrm>)} & [\alpha ]\varphi \\ 
+\mathtt{StateYaled} & \nabla \\ 
+\mathtt{StateYaledTimed(<DataExpr>)} & \nabla (t) \\ 
+\mathtt{StateDelay} & \Delta \\ 
+\mathtt{StateDelayTimed(<DataExpr>)} & \Delta (t) \\ 
+\mathtt{StateVar(<String>,<DataExpr>\ast )} & X(d) \\ 
+\mathtt{StateNu(<String>,<DataVarIdInit>\ast ,<StateFrm>)} & \nu X(x{:}%
+D:=d).~\varphi \\ 
+\mathtt{StateMu(<String>,<DataVarIdInit>\ast ,<StateFrm>)} & \mu X(x{:}%
+D:=d).~\varphi%
+\end{array}%
+\end{equation*}
+
+\paragraph{Naming conventions}
+
+\begin{equation*}
+\begin{array}{lcl}
+\mathsf{left}(\varphi \otimes \psi ) & = & \varphi  \\ 
+\mathsf{right}(\varphi \otimes \psi ) & = & \psi  \\ 
+\arg (\lnot \varphi ) & = & \varphi  \\ 
+\arg (\forall d:D.\varphi )=\arg (\exists d:D.\varphi ) & = & \varphi  \\ 
+\mathsf{var}(\forall d:D.\varphi )=\mathsf{var}(\exists d:D.\varphi ) & = & 
+d:D \\ 
+\arg (\left\langle \alpha \right\rangle \varphi )=\arg ([\alpha ]\varphi ) & 
+= & \varphi  \\ 
+\mathsf{act}(\left\langle \alpha \right\rangle \varphi )=\mathsf{act}%
+([\alpha ]\varphi ) & = & \alpha  \\ 
+\mathsf{time}(\nabla (t))=\mathsf{time}(\Delta (t)) & = & t \\ 
+\mathsf{var}(X(d:D)) & = & d:D \\ 
+\mathsf{\arg }(\sigma X(d:D:=e).\varphi ) & = & \varphi  \\ 
+\mathsf{name}(\sigma X(d:D:=e).\varphi ) & = & X \\ 
+\mathsf{var}(\sigma X(d:D:=e).\varphi ) & = & d:D \\ 
+\mathsf{val}(\sigma X(d:D:=e).\varphi ) & = & e%
+\end{array}%
+\end{equation*}%
+where $\sigma $ is either $\mu $ or $\nu $, and $\otimes $ is either $\wedge 
+$, $\vee $, or $\Rightarrow $.

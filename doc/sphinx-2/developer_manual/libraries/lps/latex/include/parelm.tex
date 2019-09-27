@@ -1,0 +1,61 @@
+%TCIDATA{Version=5.50.0.2890}
+%TCIDATA{LaTeXparent=1,1,pbes-implementation-notes.tex}
+                      
+
+Let $P$ be the stochastic linear process%
+\[
+\begin{array}{l}
+P(d:D)=\sum\limits_{i\in I}\sum\limits_{e:E_{i}}c_{i}(d,e_{i})\rightarrow
+a_{i}(f_{i}(d,e_{i}))\at t_{i}(d,e_{i}).\frac{p_{i}(d,e_{i},h_{i})}{%
+h_{i}:F_{i}}P(g_{i}(d,e_{i},h_{i})),%
+\end{array}%
+\]%
+with initial state%
+\[
+\begin{array}{l}
+P_{init}=\frac{p(h)}{h:F}P(g(h)),%
+\end{array}%
+\]
+
+with $d=[d_{1},\ldots ,d_{n}]$ the process parameters of $P$. The algorithm 
+\textsc{Parelm} is used to find insignificant process parameters that can be
+eliminated from $P$ without altering the corresponding state space. It is
+not guaranteed that all insignificant process parameters are detected.
+
+\paragraph{Parelm implementations}
+
+We define the following implementations of parelm:
+
+\[
+\begin{tabular}{|l|}
+\hline
+\textsc{Parelm1(}$P,P_{init}$\textsc{)} \\ 
+$G:=\{k\in \lbrack 1,\ldots ,n]\ |\ \exists _{i\in I}:d_{k}\in \mathcal{FV}%
+(c_{i}(d,e_{i}))\cup \mathcal{FV}(f_{i}(d,e_{i}))\cup \mathcal{FV}%
+(t_{i}(d,e_{i}))\cup \mathcal{FV}(p_{i}(d,e_{i},h_{i}))\}$ \\ 
+$\text{\textbf{do}}$ \\ 
+$\qquad \Delta G:=\{k\in \lbrack 1,\ldots ,n]\ |\ \exists _{l\in G}\ \exists
+_{i\in I}:d_{k}\in \mathcal{FV}(g_{i}(d,e_{i},h_{i})_{l}\}$ \\ 
+$\qquad G:=G\cup \Delta G$ \\ 
+$\text{\textbf{while }}(\Delta G\neq \emptyset )$ \\ 
+$\text{\textbf{return} }\{d_{j_{1}},\cdots ,d_{j_{m}}\},$ \\ \hline
+\end{tabular}%
+\]%
+where $\{j_{1},\cdots ,j_{m}\}=G$. Note that $g_{i}(d,e)_{l}$ is the $l$-th
+component of the vector of terms $g_{i}(d,e)$.%
+\[
+\begin{tabular}{|l|}
+\hline
+\textsc{Parelm2(}$P,P_{init}$\textsc{)} \\ 
+$W:=\{d_{k}\ |\ \exists _{i\in I}:d_{k}\in \mathcal{FV}(c_{i}(d,e_{i}))\cup 
+\mathcal{FV}(f_{i}(d,e_{i}))\cup \mathcal{FV}(t_{i}(d,e_{i}))\cup \mathcal{FV%
+}(p_{i}(d,e_{i},h_{i}))\}$ \\ 
+$V:=\{d_{1},\ldots ,d_{n}\}$ \\ 
+$E:=\{(d_{j},d_{k})\ |\ \exists _{i\in I}:d_{j}\in \mathcal{FV}%
+(g_{i}(d,e_{i},h_{i})_{k}\}$ \\ 
+$R:=\{d_{k}\ |\ $graph $G=(V,E)$ contains a directed path $w,\cdots ,d_{k}$
+for some $w\in W\}$ \\ 
+$\text{\textbf{return} }R$ \\ \hline
+\end{tabular}%
+\]%
+\newpage

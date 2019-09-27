@@ -376,6 +376,10 @@ a.headerlink:hover {
     color: white;
 }
 
+#developer-page-of-the-mcrl2-toolset a.reference.internal {
+  font-style: italic;
+}
+
 div.body p, div.body dd, div.body li {
     text-align: justify;
     line-height: 130%;

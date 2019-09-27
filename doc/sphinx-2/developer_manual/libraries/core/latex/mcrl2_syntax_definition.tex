@@ -1,0 +1,731 @@
+\documentclass[a4paper,fleqn,10pt]{article}
+
+\title{mCRL2 syntax definition}
+\author{Aad Mathijssen}
+
+% packages
+% --------
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{graphicx,theorem,ifthen,float}
+\usepackage[T1]{fontenc}
+\usepackage[latin1]{inputenc}
+\usepackage[english]{babel}
+%\usepackage{algorithm}
+%\usepackage{algorithmic}
+\usepackage{multicol}
+\usepackage{array}
+\usepackage{stmaryrd}
+
+
+% increase pagewidth
+\addtolength{\textwidth}{20mm}
+\addtolength{\oddsidemargin}{-10mm}
+\addtolength{\evensidemargin}{10mm}
+
+
+% column types that change column types l,c,r from math mode to LR
+% and the other way round
+\newcolumntype{L}{>{$}l<{$}}%stopzone%stopzone%stopzone
+\newcolumntype{C}{>{$}c<{$}}%stopzone%stopzone%stopzone
+\newcolumntype{R}{>{$}r<{$}}%stopzone%stopzone%stopzone
+
+
+% commands
+% --------
+
+
+% List operator
+\newcommand{\conc}{{\fontsize{8pt}{0pt} + \!\!\!\! +}}
+
+% mathematical constant
+\newcommand{\f}[1]{\ensuremath{\mathit{#1}}}
+
+% definition font
+\newcommand{\deffont}[1]{{\bf #1}}
+
+% interpretation of a sort in a data algebra
+\newcommand{\meansrt}[2]{
+  {#1}^{#2}
+}
+
+% interpretation of an operation in a data algebra
+\newcommand{\meanop}[2]{
+  {#1}^{#2}
+}
+
+% interpretation of a data term in a data environment and a data algebra
+\newcommand{\meandta}[3]{
+  \llbracket  #1 \rrbracket_{#2}^{#3}
+}
+
+% interpretation of a data term in a data environment
+\newcommand{\meandt}[2]{
+  \llbracket  #1 \rrbracket_{#2}
+}
+
+\newcommand{\lbanana}{{\langle\hspace{-.465ex}\mid}}
+\newcommand{\rbanana}{{\mid\hspace{-.465ex}\rangle}}
+
+\newcommand{\banana}[3]{{\lbanana #1 \rbanana_{#2}^{#3}}}
+
+
+% interpretation of an action in a data environment and a data algebra
+\newcommand{\meanacta}[3]{
+  \llbracket  #1 \rrbracket_{#2}^{#3}
+}
+
+% interpretation of an action in a data environment
+\newcommand{\meanact}[2]{
+  \llbracket  #1 \rrbracket_{#2}
+}
+
+% interpretation of an action formula in a data environment and a data algebra
+\newcommand{\meanafa}[3]{
+  \llbracket  #1 \rrbracket_{#2}^{#3}
+}
+
+% interpretation of an action formula in a data environment
+\newcommand{\meanaf}[2]{
+  \llbracket  #1 \rrbracket_{#2}
+}
+
+% interpretation of a state formula in a data environment and a propositional
+% environment
+\newcommand{\meansf}[3]{
+  \llbracket  #1 \rrbracket_{{#2}{#3}}
+}
+% solution of a PBES in the context of a data environment and a propositional
+% environment
+\newcommand{\pbessol}[3]{
+  [  #1 ]_{{#2}{#3}}
+}
+
+% boolean sort: B
+\newcommand{\sbool}{\ensuremath{\mathsf{B}}}
+\newcommand{\strue}{\ensuremath{\mathsf{true}}}
+\newcommand{\sfalse}{\ensuremath{\mathsf{false}}}
+
+% booleans
+\newcommand{\bool}{\ensuremath{\mathbb{B}}}
+
+% natural sort: N
+\newcommand{\snat}{\ensuremath{\mathsf{N}}}
+
+% positive sort: N^+
+\newcommand{\spos}{\ensuremath{\snat^{+}}}
+
+% integral sort: Z
+\newcommand{\sint}{\ensuremath{\mathsf{Z}}}
+
+% real sort: R
+\newcommand{\sreal}{\ensuremath{\mathsf{R}}}
+
+% non-negative real sort: R^{>=0}
+\newcommand{\snnreal}{\ensuremath{\mathsf{R}_{\scriptscriptstyle 0}}}
+
+% non-negative reals
+\newcommand{\nnreal}{\ensuremath{\mathbb{R}_{\scriptscriptstyle 0}}}
+
+%tuple
+\newcommand{\tuple}[1]{\ensuremath{\langle {#1} \rangle}}
+
+%set of all transitions
+\newcommand{\strans}{\ensuremath{\f{Tr}}}
+
+%transition
+\newcommand{\trans}[1]{\,{}^{\underrightarrow{\ #1 \ }}\,}
+
+%subset or equal on functions
+\newcommand{\subseteqfun}{\,{\dot\subseteq}\,}
+
+% environments
+% ------------
+
+% proof: proof of a theorem
+\newenvironment{proof}
+  {\textbf{Proof}}%
+  %{\frm{\Box}%
+  % \vspace{1ex}%
+  %}
+
+% tightarray: array with no outcolumn spacing and tighter intercolumn spacing
+\newenvironment{tightarray}[1]
+  {\setlength{\arraycolsep}{2pt}%
+   \begin{array}{@{}#1@{}}%
+  }
+  {\end{array}%
+  }
+
+% theorems
+% --------
+
+\newtheorem{thdefinition}{Definition}[section]
+\newenvironment{definition}
+  {\begin{thdefinition}\em}
+  {\end{thdefinition}}
+
+\newtheorem{ththeorem}[thdefinition]{Theorem}
+\newenvironment{theorem}
+  {\begin{ththeorem}\em}
+  {\end{ththeorem}}
+
+\newtheorem{thcorollary}[thdefinition]{Corollary}
+\newenvironment{corollary}
+  {\begin{thcorollary}\em}
+  {\end{thcorollary}}
+
+\newtheorem{thlemma}[thdefinition]{Lemma}
+\newenvironment{lemma}
+  {\begin{thlemma}\em}
+  {\end{thlemma}}
+
+\newtheorem{thproperty}[thdefinition]{Property}
+\newenvironment{property}
+  {\begin{thproperty}\em}
+  {\end{thproperty}}
+
+\newtheorem{thexample}[thdefinition]{Example}
+\newenvironment{example}
+  {\begin{thexample}\em}
+  {\end{thexample}}
+
+\newtheorem{thremark}[thdefinition]{Remark}
+\newenvironment{remark}
+  {\begin{thremark}\em}
+  {\end{thremark}}
+
+\newtheorem{thconvention}[thdefinition]{Convention}
+\newenvironment{convention}
+  {\begin{thconvention}\em}
+  {\end{thconvention}}
+
+\newtheorem{thconjecture}[thdefinition]{Conjecture}
+\newenvironment{conjecture}
+  {\begin{thconjecture}\em}
+  {\end{thconjecture}}
+
+\newtheorem{thspecification}[thdefinition]{Specification}
+\newenvironment{specification}
+  {\begin{thspecification}\em}
+  {\end{thspecification}}
+
+\newtheorem{thdeclaration}[thdefinition]{Declaration}
+\newenvironment{declaration}
+  {\begin{thdeclaration}\em}
+  {\end{thdeclaration}}
+
+% sets
+% ----
+
+% set of elements: {e}
+\newcommand{\set}[1]{\ensuremath{\{\,#1\,\}}}
+
+% bag of elements: {e}
+\newcommand{\bag}[1]{\ensuremath{\set{#1}}}
+
+% set difference: s \ t
+\newcommand{\sdiff}[2]{\ensuremath{#1\ \backslash\ #2}}
+
+% set comprehension: { e | c }, where e is an expression or a binding and c is
+% a condition
+\newcommand{\scompr}[2]{\ensuremath{\set{#1\ |\ #2}}}
+
+% lists
+% -----
+
+% list of a certain type: L(t)
+\newcommand{\List}[1]{\ensuremath{\mathcal{L}{\I{#1}}}}
+
+% list of elements: [e]
+\newcommand{\lst}[1]{\ensuremath{[\,#1\,]}}
+
+% empty list
+\newcommand{\el}{\ensuremath{[\,]}}
+
+% cons: |>
+\newcommand{\cons}{\ensuremath{\hspace{0.12em}\triangleright\hspace{0.08em}}}
+
+% snoc: <|
+\newcommand{\snoc}{\ensuremath{\hspace{0.08em}\triangleleft\hspace{0.12em}}}
+
+% concatenation: ++
+\newcommand{\concat}{\ensuremath{\hspace{0.12em}\raisebox{0.2ex}
+{\text{\footnotesize+}\!\text{\footnotesize+}}\hspace{0.12em}}}
+
+% process algebra
+% ---------------
+
+% sequential composition .
+\newcommand{\seq}{\mathbin{\cdot}}
+
+% alternative composition +
+\newcommand{\alt}{\mathbin{+}}
+
+% parallel merge ||
+\newcommand{\pmerge}{\mathbin{\parallel}}
+
+% left merge ||_
+\newcommand{\lmerge}{\mathbin{\llfloor}}
+
+% synchronisation |
+\newcommand{\sync}{\mathbin{\!\mid\!}}
+
+% block
+\newcommand{\block}[1]{\partial_{#1}}
+
+% hide
+\newcommand{\hide}[1]{\tau_{#1}}
+
+% rename
+\newcommand{\ren}[1]{\rho_{#1}}
+
+% allow
+\newcommand{\allow}[1]{\nabla_{#1}}
+
+% communication
+\newcommand{\comm}[1]{\Gamma_{#1}}
+
+% at
+\font \aap cmmi10
+\newcommand{\at}[1]{\mbox{\aap ,} #1}
+
+% initialisation
+\newcommand{\pinit}{\gg}
+
+% before
+\newcommand{\pbefore}{\ll}
+
+% ???
+\newcommand{\ap}{{:}}
+
+% Logic
+% -----
+
+% true
+\newcommand{\true}{\ensuremath{\f{true}}}
+
+% false
+\newcommand{\false}{\ensuremath{\f{false}}}
+
+% implies: =>
+\newcommand{\limp}{\ensuremath{\Rightarrow}}
+
+% logical iff
+\newcommand{\liff}{\ensuremath{\Leftrightarrow}}
+
+% Misc definitions
+% ----------------
+
+% simple bold math
+\newcommand{\mb}[1]{\text{\boldmath$#1$}}
+
+% mCRL2 keywords
+\newcommand{\kwsort}{{\bf sort}}
+\newcommand{\kwcons}{{\bf cons}}
+\newcommand{\kwmap}{{\bf map}}
+\newcommand{\kwvar}{{\bf var}}
+\newcommand{\kweqn}{{\bf eqn}}
+\newcommand{\kwact}{{\bf act}}
+\newcommand{\kwstruct}{{\bf struct}}
+\newcommand{\kwwhr}{{\bf whr}}
+\newcommand{\kwend}{{\bf end}}
+\newcommand{\kwdiv}{{\bf div}}
+\newcommand{\kwmod}{{\bf mod}}
+\newcommand{\kwglob}{{\bf glob}}
+\newcommand{\kwproc}{{\bf proc}}
+\newcommand{\kwinit}{{\bf init}}
+\newcommand{\kwpbes}{{\bf pbes}}
+
+
+% Abbreviations
+
+\newcommand{\isdef}{\ensuremath{=_{\textit{def}}}}
+
+% document
+% --------
+
+
+\begin{document}
+
+\maketitle
+
+This document describes the syntax of mCRL2 expressions and specifications.
+We present the syntax in a rich text format.
+In Section~\ref{sec:symbols} a translation of rich text to plain text is given, which is needed for using the toolset.
+
+Throughout this document, suggestive dots ($\mb{\ldots}$, $\mb{\cdots}$) are used to indicate repeating patterns with one or more
+occurrence. Furthermore, $\mb{|}$ distinguishes alternatives (not to be mistaken with the pipe $|$),
+$\mb{(}\f{pattern}\mb{)^{+}}$ indicates one or more occurrences of $\f{pattern}$,
+and $\mb{(}\f{pattern}\mb{)^{*}}$ indicates zero or more occurrences of $\f{pattern}$.
+As opposed to real EBNF, we do not use quotes to separate the terminals from the non-terminals.
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Lexical syntax}
+
+We defined the notions of identifiers, numbers, whitespace and comments:
+\begin{itemize}
+\item
+An \emph{identifier} is a string matching the pattern ``$[A{-}Za{-}z\_][A{-}Za{-}z\_0{-}9]*$'', excluding the following reserved words:
+\[\begin{tightarray}{L}
+sort
+cons
+map
+var
+eqn
+act
+glob
+proc
+pbes
+init
+\\
+struct
+Bool
+Pos
+Nat
+Int
+Real
+List
+Set
+Bag
+\\
+true
+false
+if
+div
+mod
+in
+lambda
+forall
+exists
+whr
+end
+\\
+delta
+tau
+sum
+block
+allow
+hide
+rename
+comm
+\\
+val
+mu
+nu
+delay
+yaled
+nil
+\end{tightarray}\]
+Identifiers are used for representing sort names $b$, function names $f$, data variable names $x$, action names $a$, process reference names $P$, and propositional variable names $X$.
+
+\item
+A \emph{number} is a string that matches the pattern ``$0$'' or ``$[1-9][0-9]*$''.
+
+\item
+Spaces, tabs and newlines are treated as \emph{whitespace}.
+
+\item
+A $\%$-sign indicates the beginning of a \emph{comment} that extends to the end of the line.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Data specifications}
+
+Sort expressions $s$:
+\[\begin{tightarray}{lrl}
+s      & \mb{::=} & b\ \mb{|}\ s \to s\ \mb{|}\
+               \sbool\ \mb{|}\ \spos\ \mb{|}\ \snat\ \mb{|}\ \sint\ \mb{|}\ \sreal\\
+       & \mb{|}   &
+               \kwstruct\ \f{scs}\,|\,\mb{\cdots}\,|\,\f{scs}\ \mb{|}\
+               \mathsf{List}(s)\ \mb{|}\ \mathsf{Set}(s)\ \mb{|}\ \mathsf{Bag}(s)\ \mb{|}\
+               ( s )\\
+\f{scs} & \mb{::=} & f\ \mb{|}\ f(\f{spj},\mb{\ldots},\f{spj})\ \mb{|}\
+                f ? f\ \mb{|}\ f(\f{spj},\mb{\ldots},\f{spj})?f \\
+\f{spj} & \mb{::=} & s\ \mb{|}\ s \times \mb{\cdots} \times s \to s\ \mb{|}\
+                f: s\ \mb{|}\ f: s \times \mb{\cdots} \times s \to s
+\end{tightarray}\]
+Here $\f{scs}$ and $\f{spj}$ stand for the constructor and projection functions of a structured sort.
+The binary operator $\to$ associates to the right.
+
+Data expressions $d$:
+\[\begin{tightarray}{lrl}
+d      & \mb{::=} & x\ \mb{|}\ f\ \mb{|}\ d(d, \mb{\ldots}, d)\ \mb{|}\ N\ \mb{|}\ \mathsf{true}\ \mb{|}\ \mathsf{false}\ \mb{|}\ \mathsf{if}\ \mb{|}\
+               \lnot d\ \mb{|}\ -d\ \mb{|}\ \overline{d}\ \mb{|}\ \#d\ \mb{|}\ d\ \oplus\ d\\
+       & \mb{|} & \el\ \mb{|}\ [d,\mb{\ldots},d]\ \mb{|}\ \set{}\ \mb{|}\ \set{d,\mb{\ldots},d}\ \mb{|}\
+               \set{d: d,\mb{\ldots},d: d}\ \mb{|}\ \scompr{x: s}{d}\\
+       & \mb{|} & \lambda_{\f{mvd},\mb{\ldots},\f{mvd}} d\ \mb{|}\
+               \forall_{\f{mvd},\mb{\ldots},\f{mvd}} d\ \mb{|}\ \exists_{\f{mvd},\mb{\ldots},\f{mvd}} d\ \mb{|}\
+               d\ \kwwhr\ x=d,\mb{\ldots},x=d\ \kwend\\
+        & \mb{|} & ( d )\\
+\f{mvd}& \mb{::=} & x,\mb{\ldots},x: s\\
+\oplus & \mb{::=} & *\ \mb{|}\ .\ \mb{|}\ \cap\ \mb{|}\
+               /\ \mb{|}\  \kwdiv\ \mb{|}\ \kwmod\ \mb{|}\
+               +\ \mb{|}\ -\ \mb{|}\ \cup\ \mb{|}\
+               \concat\ \mb{|}\
+               \snoc\ \mb{|}\
+               \cons\\
+       & \mb{|} &
+               <\ \mb{|}\ \leq\ \mb{|}\ \geq\ \mb{|}\ >\ \mb{|}\ \subset\ \mb{|}\ \subseteq\ \mb{|}\ \in\ \mb{|}\
+               \approx\ \mb{|}\ \not\approx\ \mb{|}\
+               \land\ \mb{|}\ \lor\ \mb{|}\
+               \limp
+\end{tightarray}\]
+Here $\f{mvd}$ stands for a multiple data variable declaration, $\oplus$ for a binary operator, and $N$ for a number.
+The unary operators have the highest priority, followed by the infix operators,
+followed by $\lambda$, $\forall$ and $\exists$, followed by $\kwwhr\ \kwend$.
+The descending order of precedence of the infix operators is:
+$\set{*, ., \cap}, \set{/, \kwdiv, \kwmod}, \set{+, -, \cup}, \concat, \snoc,
+\cons, \set{<, \leq, \geq, >, \subset, \subseteq, \in}, \set{\approx,\not\approx},
+\set{\land, \lor}, \limp$.
+Of these operators $*$, $.$, $\cap$, $/$, $\kwdiv$, $\kwmod$, $+$, $-$, $\cup$ and
+$\concat$ associate to the left and $\approx$, $\not\approx$, $\land$, $\lor$
+and $\limp$ associate to the right.
+
+Data specifications $\f{data\_spec}$:
+\[\begin{tightarray}{lrl}
+\f{data\_spec}
+& \mb{::=} & \kwsort\ \mb{(}\f{sd};\mb{)^{+}}\\
+& \mb{|}   & \kwcons\ \mb{(}\f{mfd};\mb{)^{+}}\\
+& \mb{|}   & \kwmap\  \mb{(}\f{mfd};\mb{)^{+}}\\
+& \mb{|}   & \kwvar\  \mb{(}\f{mvd};\mb{)^{+}}\ \kweqn\ \mb{(}ed;\mb{)^{+}}\\
+& \mb{|}   & \kweqn\  \mb{(}ed;\mb{)^{+}}\\
+\f{sd}  & \mb{::=} & b\ \mb{|}\ b = s\\
+\f{mfd} & \mb{::=} & f, \mb{\ldots}, f: s\\
+\f{ed}  & \mb{::=} & d = d\ \mb{|}\ c \to d = d\\
+\end{tightarray}\]
+Here, $\f{sd}$ stands for sort declaration,
+$\f{mfd}$ for multiple function declaration,
+$\f{ed}$ for equation declaration,
+and $\f{ad}$ for action declaration.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Process specifications}
+
+Process expressions $p$:
+\[\begin{tightarray}{lrl}
+p   & \mb{::=} & a\ \mb{|}\ \delta\ \mb{|}\ \tau\ \mb{|}\ p \alt p\ \mb{|}\ p \seq p\ \mb{|}\ P\ \mb{|}\
+                 p \sync p\ \mb{|}\ p \pmerge p\ \mb{|}\ p \lmerge p\\
+    & \mb{|}   & \allow{\set{\f{as},\mb{\ldots},\f{as}}}(p)\ \mb{|}\
+                 \block{\set{a,\mb{\ldots},a}}(p)\ \mb{|}\
+                 \hide{\set{a,\mb{\ldots},a}}(p)\ \mb{|}\
+                 \ren{\set{\f{ar},\mb{\ldots},\f{ar}}}(p)\ \mb{|}\
+                 \comm{\set{\f{ac},\mb{\ldots},\f{ac}}}(p)\\
+    & \mb{|}   & a(d, \mb{\ldots}, d)\ \mb{|}\
+                 P(d, \mb{\ldots}, d)\ \mb{|}\
+                 P()\ \mb{|}\
+                 P(x = d, \mb{\ldots}, x = d)\\
+    & \mb{|}   & c \to p \diamond p\ \mb{|}\
+                 c \to p\ \mb{|}\
+                 \sum_{\f{mvd},\mb{\ldots},\f{mvd}}p\\
+     & \mb{|}  & p\,\at\,t\ \mb{|}\ t \pinit p\ \mb{|}\ p \pbefore q\\
+     & \mb{|}  & ( p )\\
+as  & \mb{::=} & a |\,\mb{\cdots} | a\\
+ar  & \mb{::=} & a \to a\\
+ac  & \mb{::=} & a\sync\f{as} \to a\ \mb{|}\ a\sync\f{as} \to \tau\ \mb{|}\ a\sync\f{as}\\
+\end{tightarray}\]
+Here, $c$ and $t$ stand for data expressions of sort $\sbool$ and $\sreal$,
+respectively.
+For technical reasons, $c$ and $t$ may not have an infix operator, a
+where clause or a quantifier at the top-level (parentheses should be
+used instead).
+$\f{as}$ represents an action sequence, $\f{ar}$ an action
+renaming, and $\f{ac}$ an action communication. The descending order of
+precedence of the operators is: $\mid, \at, \seq, \set{\pinit, \pbefore}, \to,
+\set{\pmerge,\lmerge},\sum,\alt$. Of these operators $\alt$, $\pmerge$,
+$\lmerge$, $\seq$ and $\mid$ associate to the right.
+
+Process specifications $\f{proc\_spec}$:
+\[\begin{tightarray}{lrl}
+\f{proc\_spec}      & \mb{::=} & \mb{(}\f{proc\_spec\_elt}\mb{)^{*}}\\
+\f{proc\_spec\_elt} & \mb{::=} & \f{data\_spec}\\
+                    & \mb{|}   & \kwact\ \mb{(}\f{ad};\mb{)^{+}}\\
+                    & \mb{|}   & \kwglob\ \mb{(}\f{mvd};\mb{)^{+}}\\
+                    & \mb{|}   & \kwproc\ \mb{(}\f{pd};\mb{)^{+}}\\
+                    & \mb{|}   & \kwinit\ p;\\
+\f{pd}              & \mb{::=} & P = p\ \mb{|}\ P(\f{mvd},\mb{\ldots},\f{mvd}) = p\\
+\f{ad}              & \mb{::=} & a\ \mb{|}\ a: s \times \mb{\cdots} \times s
+\end{tightarray}\]
+Here $\f{proc\_spec\_elt}$ represents a process specification element, $\f{pd}$ a process definition, and $\f{ad}$ an action declaration. Furthermore, we impose the restriction that $\f{proc\_spec}$ should contain precisely one occurrence of the keyword $\kwinit$.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Mu-calculus formulae}
+
+Multiactions $\f{ma}$:
+\[\begin{tightarray}{lrl}
+\f{ma} & \mb{::=} & \tau\ \mb{|}\ \f{pa}\,|\,\mb{\cdots} |\,\f{pa}\\
+\f{pa} & \mb{::=} & a\ \mb{|}\ a(d,\mb{\ldots},d)
+\end{tightarray}\]
+Here, $\f{pa}$ represents a parameterised action.
+
+Action formulae $\alpha$:
+\[\begin{tightarray}{lrl}
+\alpha & \mb{::=} & \f{ma}\ \mb{|}\
+                    \alpha\at t\ \mb{|}\
+                    \mathsf{val}(c)\ \mb{|}\
+                    ( \alpha )\\
+       & \mb{|}   & \mathsf{true}\ \mb{|}\
+                    \mathsf{false}\ \mb{|}\
+                    \neg \alpha\ \mb{|}\
+                    \alpha \land \alpha\ \mb{|}\
+                    \alpha \lor  \alpha\ \mb{|}\
+                    \alpha \limp \alpha\ \mb{|}\
+                    \forall_{\f{mvd},\mb{\ldots},\f{mvd}} \alpha\ \mb{|}\
+                    \exists_{\f{mvd},\mb{\ldots},\f{mvd}} \alpha\\
+\end{tightarray}\]
+Here, $c$ and $t$ stand for data expressions of sort $\sbool$ and $\sreal$,
+respectively.
+For technical reasons, $t$ may not have an infix operator, a where
+clause or a quantifier at the top-level (parentheses should be used
+instead).
+The descending order of precedence of the operators is: $\neg,
+\at, \set{\land,\lor}, \limp, \set{\forall, \exists}$.  Of the infix operators
+$\at$ associates to the left and $\land$, $\lor$ and $\limp$ associate to the
+right.
+
+Regular formulae $\varphi_r$:
+\[\begin{tightarray}{lrl}
+\varphi_r & \mb{::=} & \alpha\ \mb{|}\
+                       \epsilon\ \mb{|}\
+                       \varphi_r \cdot \varphi_r\ \mb{|}\
+                       \varphi_r + \varphi_r\ \mb{|}\
+                       \varphi_r^{*} \ \mb{|}\
+                       \varphi_r^{+} \ \mb{|}\
+                       ( \varphi_r )
+\end{tightarray}\]
+The postfix operators ${}^{*}$ and ${}^{+}$ have the highest priority, followed
+by $\cdot$, followed by infix $+$. The infix operators associate to the right.
+
+State formulae $\varphi_s$:
+\[\begin{tightarray}{lrl}
+\varphi_s & \mb{::=} & [\varphi_r]\varphi_s\ \mb{|}\
+                       \langle\varphi_r\rangle\varphi_s\ \mb{|}\
+                       \nabla(t)\ \mb{|}\
+                       \Delta(t)\ \mb{|}\
+                       \nabla\ \mb{|}\
+                       \Delta\ \mb{|}\
+                       \mathsf{val}(c)\ \mb{|}\
+                       ( \varphi_s )\\
+          & \mb{|}   & \nu X. \varphi_s\ \mb{|}\
+                       \mu X.\varphi_s\ \mb{|}\
+                       \nu X(\f{vdi},\mb{\ldots},\f{vdi}). \varphi_s\ \mb{|}\
+                       \mu X(\f{vdi},\mb{\ldots},\f{vdi}).\varphi_s\ \mb{|}\
+                       X\ \mb{|}\
+                       X(d,\mb{\ldots},d)\\
+          & \mb{|}   & \mathsf{true}\ \mb{|}\
+                       \mathsf{false}\ \mb{|}\
+                       \neg \varphi_s\ \mb{|}\
+                       \varphi_s \land \varphi_s\ \mb{|}\
+                       \varphi_s \lor  \varphi_s\ \mb{|}\
+                       \varphi_s \limp \varphi_s\ \mb{|}\
+                       \forall_{\f{mvd},\mb{\ldots},\f{mvd}} \varphi_s\ \mb{|}\
+                       \exists_{\f{mvd},\mb{\ldots},\f{mvd}} \varphi_s\\
+\f{vdi}  & \mb{::=} & x: s = d\\
+\end{tightarray}\]
+Here $\f{vdi}$ stands for a data variable declaration and initialisation,
+and $c$ and $t$ stand for data expressions of sort $\sbool$ and
+$\sreal$, respectively.
+For technical reasons, $t$ may not have an infix operator, a where
+clause or a quantifier at the top-level (parentheses should be used
+instead).
+The descending order of precedence of the operators is: $\set{\neg,
+\_[\_], \_\langle\_\rangle}, \set{\land,\lor}, \limp, \set{\forall,
+\exists, \mu, \nu}$.  The infix operators $\land$, $\lor$ and $\limp$
+associate to the right.
+
+%%%%%%%%%%%%%%%%
+\section{PBES's}
+
+Parameterised boolean expressions $\varphi_e$:
+\[\begin{tightarray}{lrl}
+\varphi_e & \mb{::=} & \f{pvo}\ \mb{|}\
+                       \mathsf{val}(c)\ \mb{|}\
+                       ( \varphi_e )\\
+          & \mb{|}   & \mathsf{true}\ \mb{|}\
+                       \mathsf{false}\ \mb{|}\
+                       \neg \varphi_e\ \mb{|}\
+                       \varphi_e \land \varphi_e\ \mb{|}\
+                       \varphi_e \lor \varphi_e\ \mb{|}\
+                       \varphi_e \limp \varphi_e\ \mb{|}\
+                       \forall_{\f{mvd},\mb{\ldots},\f{mvd}} \varphi_e\ \mb{|}\
+                       \exists_{\f{mvd},\mb{\ldots},\f{mvd}} \varphi_e\\
+\f{pvo}  & \mb{::=} & X\ \mb{|}\ X(d,\mb{\ldots},d)\\
+\end{tightarray}\]
+Here $\f{pvo}$ stands for a propositional variable occurrence,
+The descending order of operator precedence is: $\neg, \set{\land, \lor}, \limp, \set{\forall, \exists}$.
+The infix operators $\land$, $\lor$ and $\limp$ associate to the right.
+
+Parameterised boolean equations $\f{pb\_eqn}$:
+\[\begin{tightarray}{lrl}
+\f{pb\_eqn} & \mb{::=} & \sigma\,\f{pvd} = \varphi_e\\
+\sigma      & \mb{::=} & \nu\ \mb{|}\ \mu\\
+\f{pvd}     & \mb{::=} & X\ \mb{|}\ X(\f{mvd},\mb{\ldots},\f{mvd})\\
+\end{tightarray}\]
+Here $\sigma$ stands for a fixpoint symbol, and $\f{pvd}$ for a propositional variable declaration.
+
+PBES specifications $\f{pbes\_spec}$:
+\[\begin{tightarray}{lrl}
+\f{pbes\_spec}      & \mb{::=} & \mb{(}\f{pbes\_spec\_elt}\mb{)^{*}}\\
+\f{pbes\_spec\_elt} & \mb{::=} & \f{data\_spec}\\
+                    & \mb{|} & \kwglob\ \mb{(}\f{mvd};\mb{)^{+}}\\
+                    & \mb{|} & \kwpbes\ \mb{(}\f{pb\_eqn};\mb{)^{+}}\\
+                    & \mb{|} & \kwinit\ \f{pvo};
+\end{tightarray}\]
+Here $\f{pbes\_spec\_elt}$ represents a PBES specification element. We impose the restriction that $\f{pbes\_spec}$ should contain precisely one occurrence of each of the keywords $\kwpbes$ and $\kwinit$.
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Table of symbols}
+\label{sec:symbols}
+
+In the toolset, a plain text format is used as opposed to the rich text format of the previous section.
+A mapping from rich text to plain text symbols is provided in Table~\ref{table:symbols}.
+
+\begin{table}[H]
+\centering
+%\footnotesize
+\begin{tabular}{|l@{\qquad}L@{\qquad}l|}
+\hline
+Symbol                 & \textit{Rich}            & \verb+Plain+\\\hline
+arrow                  & \to                      & \verb+->+\\
+cross                  & \times                   & \verb+#+\\
+diamond                & \diamond                 & \verb+<>+\\
+\hline
+standard sorts         & \sbool,\spos,\snat,\sint,\sreal
+&\verb+Bool+, \verb+Pos+, \verb+Nat+, \verb+Int+, \verb+Real+\\
+equality and inequality& \approx,\not\approx      & \verb+==+, \verb+!=+\\
+logical operators      & \lnot,\land,\lor,\limp   & \verb+!+, \verb+&&+, \verb+||+, \verb+=>+\\
+relational numeric operators & \leq,\geq          & \verb+<=+, \verb+>=+\\
+relational set operators & \in, \subseteq, \subset& \verb+in+, \verb+<=+, \verb+<+\\
+set operators          & ^{\_},\cup,\cap          & \verb+!+, \verb-+-, \verb+*+\\
+list operators         & \cons,\snoc,\concat      & \verb+|>+, \verb+<|+, \verb-++-\\
+lambda abstraction     & \lambda_{x:s}d           & \verb+lambda x:s.d+\\
+universal quantification&\forall_{x:s}\varphi     & \verb+forall x:s.phi+\\
+existential quantification&\exists_{x:s}\varphi   & \verb+exists x:s.phi+\\
+\hline
+deadlock               & \delta                   & \verb+delta+\\
+internal action        & \tau                     & \verb+tau+\\
+left merge             & \lmerge                  & \verb+||_+\\
+sum                    & \sum_{x:s}p              & \verb+sum x:s.p+\\
+allow                  & \allow{\set{a \mid b}}(p)& \verb+allow({a|b},p)+\\
+block                  & \block{\set{a}}(p)       & \verb+block({a},p)+\\
+hide                   & \hide{\set{a}}(p)        & \verb+hide({a},p)+\\
+rename                 & \ren{\set{a \to b}}(p)   & \verb+rename({a -> b},p)+\\
+communication          & \comm{\set{a \mid b\to c}}(p) & \verb+comm({a|b -> c},p)+\\
+time                   & \at,\pinit,\pbefore      & \verb+@+, \verb+>>+, \verb+<<+\\
+\hline
+negation of ultimate delay & \nabla               & \verb+yaled+\\
+ultimate delay         & \Delta                   & \verb+delay+\\
+nil                    & \epsilon                 & \verb+nil+\\
+fixpoint symbol        & \nu,\mu                  & \verb+nu+, \verb+mu+\\
+maximal fixpoint       & \nu X(x:s = d).\varphi   & \verb+nu X(x:s = d).phi+\\
+minimal fixpoint       & \mu X(x:s = d).\varphi   & \verb+mu X(x:s = d).phi+\\
+\hline
+\end{tabular}
+\caption{Mapping from rich to plain text}
+\label{table:symbols}
+\end{table}
+
+\end{document}

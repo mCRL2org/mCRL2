@@ -1,0 +1,115 @@
+\documentclass{article}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{fullpage}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
+\newcommand{\concat}{\ensuremath{+\!\!+}}
+\begin{document}
+
+\title{Enumerator}
+\author{Wieger Wesselink}
+\maketitle
+
+This document specifies an algorithm for enumeration. Given an expression $\varphi$ of type $T$ and a list of data variables $v$, the algorithm will iteratively report expressions
+$[\varphi_0, \varphi_1, \ldots]$ that can be obtained from $\varphi$ by assigning
+constant values to the variables in $v$.
+
+Let $R$ be a rewriter on expressions of type $T$, let $r$ be a rewriter on
+data expressions, and let $\sigma $ a substitution on data variables that is
+applied during rewriting with $R$. Furthermore let $P$ be a queue of pairs
+$\left\langle v,\varphi \right\rangle$, with $v$ a non-empty list of variables and
+$\varphi$ an expression. The function $report\_solution$ is a user supplied callback function. Whenever the callback function returns true, the while loop is interrupted.
+The predicate function $reject$ is used to discard
+an expression, so that it does not end up in the queue $P$. The predicate function $accept$ is used to accept an expression as a solution, even though it
+may still have a non-empty list of variables. By default the $reject$ and $accept$ functions
+always return false. The $reject$ function is not just a cosmetic detail. The termination of the enumeration may depend on it.
+Enumeration is often used to find solutions of boolean predicates. Then we typically reject the expression $false$ and accept the expression $true$ or vice versa.
+
+The $\mathrm{is\_finite}$ case in the algorithm applies to finite function sorts and finite sets. We assume that all elements of such sorts can be obtained using the function $\mathrm{values}$. We assume that for each sort $s$ a non-empty set of
+constructor functions $\mathrm{constructors}(s)$ is defined.
+
+\[
+\begin{tabular}{l}
+\textsc{Enumerate}($P,R,r,\sigma, report\_solution, reject, accept)$ \\
+\textbf{while} $P\neq \emptyset $ \textbf{do} \\
+\qquad \textbf{let} $\left\langle v,\varphi \right\rangle =\mathrm{head}(P) 
+\textbf{ with } v = [v_1, \ldots, v_n]$\\
+\qquad \textbf{if } $v = []$ \textbf{ then} \\
+\qquad \qquad $\varphi^{\prime}:=R(\varphi,\sigma)$ \\
+\qquad \qquad \textbf{if } $reject(\varphi')$ \textbf{ then skip} \\
+\qquad \qquad \textbf{else if }$report\_solution(\varphi')$ \textbf{ then break} \\
+\qquad \textbf{else if } $reject(\varphi)$ \textbf{ then} \\
+\qquad \qquad \textbf{skip} \\
+%--- finite sorts ---%
+\qquad \textbf{else if } $\mathrm{is\_finite}(\mathrm{sort}(v_{1}))$ \textbf{ then} \\
+\qquad \qquad \textbf{for} $e\in \mathrm{values}(\mathrm{sort}(v_{1}))$ \textbf{do} \\
+\qquad \qquad \qquad $\varphi^{\prime}:=R(\varphi,\sigma[v_{1}:=e])$ \\
+\qquad \qquad \qquad \textbf{if } $reject(\varphi')$ \textbf{ then} \\
+\qquad \qquad \qquad \qquad \textbf{skip} \\
+\qquad \qquad \qquad \textbf{else if } $\mathrm{tail}(v) = [] \vee accept(\varphi')$ \textbf{ then} \\
+\qquad \qquad \qquad \qquad \textbf{if } $report\_solution(\varphi)$ \textbf{ then break} \\
+\qquad \qquad \qquad \textbf{else } \\ 
+\qquad \qquad \qquad \qquad $P:=P\concat\lbrack \left\langle \mathrm{tail}(v), \varphi' \right\rangle ]$ \\
+%--- function sort ---%
+\qquad \textbf{else } \\
+\qquad \qquad \textbf{for} $c\in $ $\mathrm{constructors}(\mathrm{sort}(v_{1}))$ \textbf{do} \\
+\qquad \qquad \qquad \textbf{let} $c:D_{1}\times \ldots \times
+D_{m}\rightarrow \mathrm{sort}(v_{1})$ \\
+\qquad \qquad \qquad \textbf{choose }$y_1,\ldots ,y_m$
+\textbf{such} that $y_i \notin \{ v_1, \ldots ,v_n \} \cup FV(\varphi)$, for $i=1, \cdots, m$ \\
+\qquad \qquad \qquad $\varphi ^{\prime }:=R(\varphi ,\sigma \lbrack v_{1}:=r(c(y_{1},\ldots ,y_{m}))])$ \\
+\qquad \qquad \qquad \textbf{if } $reject(\varphi')$ \textbf{ then} \\
+\qquad \qquad \qquad \qquad \textbf{skip } \\
+\qquad \qquad \qquad \textbf{else if } $accept(\varphi')
+\vee (\mathrm{tail}(v) = [] \wedge (\varphi = \varphi' \vee [y_1,\ldots ,y_m] = [])) 
+$ \textbf{ then} \\
+\qquad \qquad \qquad \qquad \textbf{if } $report\_solution(\varphi)$ \textbf{ then break} \\
+\qquad \qquad \qquad \textbf{else} \\
+\qquad \qquad \qquad \qquad \textbf{if } $\varphi = \varphi'$ \textbf{ then }
+$P:=P\concat\lbrack \left\langle \mathrm{tail}(v),\varphi'\right\rangle ]$ \\
+\qquad \qquad \qquad \qquad \textbf{else}
+$P:=P\concat\lbrack \left\langle \mathrm{tail}(v) \concat [y_{1},\ldots ,y_{m}],\varphi'\right\rangle ]$ \\
+\qquad $P:=\mathrm{tail}(P)$
+\end{tabular}
+\]
+
+\begin{remark}
+The algorithm works both for data expressions and PBES expressions.
+\end{remark}
+
+\begin{remark}
+In the case of data expressions, $R$ and $r$ may coincide.
+\end{remark}
+
+\begin{remark}
+The algorithm can be extended such that it also returns the assignments
+corresponding to a solution.
+\end{remark}
+
+\begin{remark}
+In some applications of the enumerator solutions with a non-empty list of variables are unwanted. In that case the $\varphi = \varphi'$ cases in the algorithm need to be removed. A boolean setting accept\_solutions\_with\_variables is introduced to control this.
+\end{remark}
+
+\end{document}

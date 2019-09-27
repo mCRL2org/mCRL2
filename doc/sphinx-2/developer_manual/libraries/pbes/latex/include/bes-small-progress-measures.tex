@@ -1,0 +1,116 @@
+%TCIDATA{Version=5.50.0.2890}
+%TCIDATA{LaTeXparent=1,1,pbes-implementation-notes.tex}
+                      
+
+\section{Small progress measures}
+
+Let $\mathcal{E}=(\sigma _{1}X_{1}=\varphi _{1})\ \cdots \ (\sigma
+_{n}X_{n}=\varphi _{n})$ be a BES in standard recursive form. Let $d$ be the
+number of $\mu $-blocks appearing in $\mathcal{E}$. For each variable $X_{i}$
+we define a corresponding attribute $\alpha _{i}\in \mathbb{N}^{d}$, which
+is called the 'progress measure' of $X_{i}$. We define the algorithm \textsc{%
+SmallProgressMeasures} as follows:
+
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{SmallProgressMeasures(}}\mathcal{E}\text{\textsc{)}} \\ 
+V:=\{X_{i}\ |\ 1\leq i\leq n\} \\ 
+V_{Even}:=\{X_{i}\in V\ |\ \mathsf{\varphi }_{i}~\text{is a disjunction}\}
+\\ 
+V_{Odd}:=\{X_{i}\in V\ |\ \mathsf{\varphi }_{i}~\text{is not a disjunction}\}
+\\ 
+\text{\textbf{for }}i:=1\cdots n\text{ \textbf{do }}\mathcal{\alpha }%
+_{i}:=[0,\cdots ,0] \\ 
+\text{\textbf{while }}\mathsf{liftable\_variables}(V)\neq \emptyset \text{ 
+\textbf{do}} \\ 
+\qquad \text{\textbf{choose }}X_{i}\in \mathsf{liftable\_variables}(V) \\ 
+\qquad \mathcal{\alpha }_{i}:=\left\{ 
+\begin{array}{ll}
+\mathsf{min}\{\gamma \ |\ X_{j}\in \mathsf{\mathsf{occ}}(\varphi _{i})\wedge
+\gamma =f(X_{j},\mathsf{rank}(X_{i}))\mathsf{\}} & \text{\textsf{if}}\
+X_{i}\in V_{Even} \\ 
+\mathsf{max}\{\gamma \ |\ X_{j}\in \mathsf{\mathsf{occ}}(\varphi _{i})\wedge
+\gamma =f(X_{j},\mathsf{rank}(X_{i}))\mathsf{\}} & \text{\textsf{if}}\
+X_{i}\in V_{Odd}%
+\end{array}%
+\right.  \\ 
+\text{\textbf{return} }(W_{Even},W_{Odd})%
+\end{array}%
+\end{equation*}%
+where $\mathsf{min/max}$ is the minimum/maximum with respect to the
+lexicographical order on $\mathbb{N}^{d}$, and $\beta \in \mathbb{N}^{d}$ is
+defined as%
+\begin{equation*}
+\beta _{i}=\left\{ 
+\begin{array}{ll}
+0 & \mathsf{if}\ i\text{ \textsf{is even}} \\ 
+|\{X_{j}\in V\ |\ \mathsf{rank}(X_{j})=i\}| & \mathsf{if}\ i\text{ \textsf{%
+is odd}}%
+\end{array}%
+\right. 
+\end{equation*}%
+and the function $\mathsf{inc:}$ $\mathbb{N}^{d}\times \mathbb{Z}\rightarrow 
+\mathbb{N}^{d}$ is defined inductively as%
+\begin{equation*}
+\left\{ 
+\begin{array}{lll}
+\mathsf{inc}(\alpha ,-1) & = & \top  \\ 
+&  &  \\ 
+\mathsf{inc}(\alpha ,i) & = & \left\{ 
+\begin{array}{ll}
+\mathsf{inc}([\alpha _{0},\cdots ,\alpha _{i-1},0,\alpha _{i+1},\cdots
+,\alpha _{d}],i-1) & \text{\textsf{if}}\ \alpha _{i}=\beta _{i} \\ 
+\lbrack \alpha _{0},\cdots ,\alpha _{i-1},\alpha _{i}+1,\alpha _{i+1},\cdots
+,\alpha _{d}] & \text{\textsf{otherwise}}%
+\end{array}%
+\right. 
+\end{array}%
+\right. 
+\end{equation*}%
+and the function $f:\mathbb{N}^{d}\times \mathbb{N}\rightarrow \mathbb{N}^{d}
+$ is defined as:%
+\begin{equation*}
+f(X_{j},m)=\left\{ 
+\begin{array}{ll}
+\lbrack (\mathcal{\alpha }_{j})_{1},\cdots ,(\mathcal{\alpha }%
+_{j})_{m},0,\cdots ,0] & \text{\textsf{if}}\ m\text{ is even} \\ 
+\mathsf{inc}([(\mathcal{\alpha }_{j})_{1},\cdots ,(\mathcal{\alpha }%
+_{j})_{m},0,\cdots ,0],m) & \text{\textsf{if}}\ m\text{ is odd}%
+\end{array}%
+\right. 
+\end{equation*}%
+and%
+\begin{equation*}
+\mathsf{liftable\_variables}(V)=\{X_{i}\in V\ |\ \mathsf{min}\{\alpha \ |\
+w\in \mathsf{\mathsf{occ}}(\varphi _{i})\wedge \alpha =f(w)\}\mathsf{<}%
+\mathcal{\alpha }_{i}\}.
+\end{equation*}%
+and $W_{Even}$ and $W_{Odd}$ are defined as%
+\begin{equation*}
+\left\{ 
+\begin{array}{lll}
+W_{Even} & = & \{X_{i}\in V\ |\ \mathcal{\alpha }_{i}<\top \} \\ 
+W_{Odd} & = & \{X_{i}\in V\ |\ \mathcal{\alpha }_{i}=\top \}%
+\end{array}%
+\right. 
+\end{equation*}%
+and the function $\mathsf{rank}$ is defined inductively as follows:%
+\begin{equation*}
+\left\{ 
+\begin{array}{lll}
+\mathsf{rank}(X_{1}) & = & \left\{ 
+\begin{array}{ll}
+0 & \mathsf{if}\ \sigma _{1}=\nu  \\ 
+1 & \mathsf{if}\ \sigma _{1}=\mu 
+\end{array}%
+\right.  \\ 
+\mathsf{rank}(X_{i+1}) & = & \left\{ 
+\begin{array}{ll}
+\mathsf{rank}(X_{i}) & \mathsf{if}\ \sigma _{i+1}=\sigma _{i} \\ 
+\mathsf{rank}(X_{i})+1 & \mathsf{if}\ \sigma _{i+1}\neq \sigma _{i}%
+\end{array}%
+\right. 
+\end{array}%
+\right. 
+\end{equation*}%
+\newpage 

@@ -1,0 +1,665 @@
+%TCIDATA{Version=5.50.0.2890}
+%TCIDATA{LaTeXparent=1,1,pbes-implementation-notes.tex}
+                      
+
+\section{Stategraph}
+
+This section describes the implementation of the tool pbesstategraph.
+
+\subsection{Definitions}
+
+We denote the number of predicate variable instances occurring in a
+predicate formula $\varphi $ by $\mathrm{npred}(\varphi )$. We assume that
+predicate variable instances in $\varphi $ are assigned a unique natural
+number between $1$ and $\mathrm{npred}(\varphi )$.
+
+\begin{definition}
+Let $\varphi $ be a predicate formula and let $i$ be between $1$ and $%
+\mathrm{npred}(\varphi )$. The functions $\mathrm{pred}(\varphi ,i)$, $%
+\mathrm{data}(\varphi ,i)$ and $\mathrm{PVI}(\varphi ,i)$ are such that the
+predicate variable instance $\mathrm{PVI}(\varphi ,i)$ is the $i^{th}$
+predicate variable instance in $\varphi $, syntactically present as $\mathrm{%
+pred}(\varphi ,i)(\mathrm{data}(\varphi ,i))$. Let $\psi $ be a predicate
+formula. We write $\varphi \lbrack i\rightarrow \psi ]$ to indicate that the
+predicate variable instance at position $i$ is replaced syntactically by $%
+\psi $ in $\varphi $.
+\end{definition}
+
+\begin{definition}
+Let $\varphi $ be a predicate formula. We define the guard of predicate
+variable instantiation $\mathrm{PVI}(\varphi ,i)$ for $i\leq \mathrm{npred}%
+(\varphi )$ inductively as follows:
+\end{definition}
+
+\begin{equation*}
+\begin{array}{lll}
+guard^{i}(c) & = & false \\ 
+guard^{i}(Y) & = & true \\ 
+guard^{i}(\forall d:D.\varphi ) & = & guard^{i}(\varphi ) \\ 
+guard^{i}(\exists d:D.\varphi ) & = & guard^{i}(\varphi ) \\ 
+guard^{i}(\varphi \wedge \psi ) & = & \left\{ 
+\begin{array}{lll}
+s(\varphi )\wedge guard^{i-\mathrm{npred}(\varphi )}(\psi ) &  & \text{if }i>%
+\mathrm{npred}(\varphi ) \\ 
+s(\psi )\wedge guard^{i}(\varphi ) &  & \text{if }i\leq \mathrm{npred}%
+(\varphi )%
+\end{array}%
+\right. \\ 
+guard^{i}(\varphi \vee \psi ) & = & \left\{ 
+\begin{array}{lll}
+n(\varphi )\wedge guard^{i}(\psi ) &  & \text{if }i>\mathrm{npred}(\varphi )
+\\ 
+ns(\psi )\wedge guard^{i}(\varphi ) &  & \text{if }i\leq \mathrm{npred}%
+(\varphi )%
+\end{array}%
+\right.%
+\end{array}%
+\end{equation*}%
+where%
+\begin{equation*}
+\begin{array}{lll}
+s(\varphi ) & = & \left\{ 
+\begin{array}{lll}
+\varphi &  & \text{if }\mathrm{npred}(\varphi )=0 \\ 
+true &  & \text{otherwise}%
+\end{array}%
+\right. \\ 
+ns(\varphi ) & = & \left\{ 
+\begin{array}{lll}
+\lnot \varphi &  & \text{if }\mathrm{npred}(\varphi )=0 \\ 
+true &  & \text{otherwise}%
+\end{array}%
+\right.%
+\end{array}%
+\end{equation*}%
+We define the function $sig$ for computing significant variables recursively
+as follows:%
+\begin{equation*}
+\begin{array}{lll}
+sig(b) & = & FV(b) \\ 
+sig(\varphi \wedge \psi ) & = & sig(\varphi )\cup sig(\psi ) \\ 
+sig(\varphi \vee \psi ) & = & sig(\varphi )\cup sig(\psi ) \\ 
+sig(X(e)) & = & \emptyset \\ 
+sig(\exists d:D.\varphi ) & = & sig(\varphi )\setminus \{d\} \\ 
+sig(\forall d:D.\varphi ) & = & sig(\varphi )\setminus \{d\} \\ 
+sig(\varphi \Rightarrow \psi ) & = & sig(\varphi )\cup sig(\psi ) \\ 
+sig(\lnot \varphi ) & = & sig(\varphi )%
+\end{array}%
+\end{equation*}
+
+\subsubsection{The functions source, target and copy}
+
+Let $X(d:D)=\varphi $ be a PBES equation. Let $\mathrm{source}$ be a
+function with the property that 
+\begin{equation*}
+\mathrm{source}(X,i,j)=\left\{ 
+\begin{array}{lll}
+e &  & \text{if }guard^{i}(\mathrm{PVI}(\varphi _{X},i))\Rightarrow
+d[j]\approx e \\ 
+\bot &  & \text{otherwise}%
+\end{array}%
+\right.
+\end{equation*}%
+A possible heuristic for obtaining a source function is to look for positive
+occurrences of constraints of the form $d[j]\approx e$ in the guards; these
+can be used to define the source function. Let $\mathrm{sigma}(X,i)$ be the
+substitution defined as%
+\begin{equation*}
+\mathrm{sigma}(X,i)(v)=%
+\begin{array}{lll}
+e &  & \text{if }\mathrm{source}(X,i,j)=e\text{ for some }j \\ 
+v &  & \text{otherwise}%
+\end{array}%
+\end{equation*}
+
+We define the function $\mathrm{target}$ as follows:%
+\begin{equation*}
+\mathrm{target}(X,i,j)=\left\{ 
+\begin{array}{lll}
+c &  & \text{if }rewrite(\mathrm{sigma}(X,i)(\mathrm{PVI}(\varphi ,i))[j]=c
+\\ 
+\bot &  & \text{otherwise}%
+\end{array}%
+\right.
+\end{equation*}%
+with $c$ a constant. We define the function $\mathrm{copy}$ as follows:%
+\begin{equation*}
+\mathrm{copy}(X,i,j)=\left\{ 
+\begin{array}{lll}
+k &  & \text{if }\mathrm{PVI}(\varphi ,i)[k]=d[j] \\ 
+\bot &  & \text{otherwise}%
+\end{array}%
+\right.
+\end{equation*}%
+We define the function $\mathrm{used}$ as follows:%
+\begin{equation*}
+\mathrm{used}(X,i,j)=d_{X}[j]\in FV(guard^{i}(\mathrm{PVI}(\varphi _{X},i)))
+\end{equation*}%
+We define the function $\mathrm{changed}$ as follows:%
+\begin{equation*}
+\mathrm{changed}(X,i,j)=\mathrm{pred}(\varphi _{X},i)=X\wedge d_{X}[j]\neq 
+\mathrm{data}(\varphi _{X},i)[j]
+\end{equation*}
+
+Let $par(X)$ be the set of parameters of the equation corresponding to $X$.
+Let $pos(X,i)$ denote the $i$-th parameter of the equation corresponding to $%
+X$.\newpage
+
+\subsection{Control flow parameters}
+
+Control flow parameters are computed in phases. First the function $LCFP$ is
+computed, then the function $GCFP$, and finally they are related using $\sim 
+$.
+
+\subsubsection{LCFP computation}
+
+There are two versions of the computation of LCFP.
+
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ComputeLocalControlflowParametersDefault(}$\mathcal{E}$\textsc{)} \\ 
+$\text{\textbf{for }}X\in bnd(\mathcal{E})\text{ \textbf{do}}$ \\ 
+$\qquad \text{\textbf{for }}n=1,\cdots ,\left\vert par(X)\right\vert \text{ 
+\textbf{do}}$ \\ 
+$\qquad \qquad LCFP(X,n):=true$ \\ 
+$\text{\textbf{for }}X\in bnd(\mathcal{E})\text{ \textbf{do}}$ \\ 
+$\qquad \text{\textbf{for }}i=1,\cdots ,npred(\varphi _{X})\text{ \textbf{do}%
+}$ \\ 
+$\qquad \qquad \text{\textbf{if }}pred(\varphi _{X},i)=X\text{ \textbf{then}}
+$ \\ 
+$\qquad \qquad \qquad \text{\textbf{for }}n=1,\cdots ,\left\vert
+par(X)\right\vert \text{ \textbf{do}}$ \\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{if }}source(X,i,n)=\bot \text{ }%
+\wedge \mathrm{target}(X,i,n)=\bot \wedge \mathrm{copy}(X,i,n)\neq n\text{ 
+\textbf{then}}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad LCFP(X,n):=false$ \\ 
+$\text{\textbf{return} }LCFP$%
+\end{tabular}%
+\end{equation*}
+
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ComputeLocalControlflowParametersAlternative(}$\mathcal{E}$\textsc{)}
+\\ 
+$\text{\textbf{for }}X\in bnd(\mathcal{E})\text{ \textbf{do}}$ \\ 
+$\qquad \text{\textbf{for }}n=1,\cdots ,\left\vert par(X)\right\vert \text{ 
+\textbf{do}}$ \\ 
+$\qquad \qquad LCFP(X,n):=true$ \\ 
+$\text{\textbf{for }}X\in bnd(\mathcal{E})\text{ \textbf{do}}$ \\ 
+$\qquad \text{\textbf{for }}i=1,\cdots ,npred(\varphi _{X})\text{ \textbf{do}%
+}$ \\ 
+$\qquad \qquad \text{\textbf{if }}pred(\varphi _{X},i)=X\text{ \textbf{then}}
+$ \\ 
+$\qquad \qquad \qquad \text{\textbf{for }}n=1,\cdots ,\left\vert
+par(X)\right\vert \text{ \textbf{do}}$ \\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{if }}(\mathrm{source}(X,i,n)=\bot 
+\text{ }\wedge \mathrm{target}(X,i,n)=\bot \wedge \mathrm{copy}(X,i,n)\neq
+\bot )$ \\ 
+$\qquad \qquad \qquad \qquad $\textbf{or} $(\mathrm{source}(X,i,n)\neq \bot 
+\text{ }\wedge \mathrm{target}(X,i,n)\neq \bot \wedge \mathrm{copy}%
+(X,i,n)=\bot )$ \\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{then}}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad LCFP(X,n):=false$ \\ 
+$\text{\textbf{return} }LCFP$%
+\end{tabular}%
+\end{equation*}
+
+\subsubsection{GCFP computation}
+
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ComputeGlobalControlflowParameters(}$\mathcal{E},LCFP$\textsc{)} \\ 
+$\text{\textbf{for }}X\in bnd(\mathcal{E})\text{ \textbf{do}}$ \\ 
+$\qquad \text{\textbf{for }}n=1,\cdots ,\left\vert par(X)\right\vert \text{ 
+\textbf{do}}$ \\ 
+$\qquad \qquad GCFP(X,n):=LCFP(X,n)$ \\ 
+$\text{\textbf{for }}X\in bnd(\mathcal{E})\text{ \textbf{do}}$ \\ 
+$\qquad \text{\textbf{for }}i=1,\cdots ,npred(\varphi _{X})\text{ \textbf{do}%
+}$ \\ 
+$\qquad \qquad \text{\textbf{let }}Y=pred(\varphi _{X},i)$ \\ 
+$\qquad \qquad \text{\textbf{if }}Y\neq X\text{ \textbf{then}}$ \\ 
+$\qquad \qquad \qquad \text{\textbf{for }}n=1,\cdots ,\left\vert
+par(X)\right\vert \text{ \textbf{do}}$ \\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{if }}\mathrm{target}(X,i,n)=\bot
+\wedge \forall m:\mathrm{copy}(X,i,m)\neq n\text{ \textbf{then}}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad GCFP(X,n):=false$ \\ 
+$\text{\textbf{return} }GCFP$%
+\end{tabular}%
+\end{equation*}%
+\newline
+
+\subsubsection{Related control flow parameters}
+
+GCFP parameters can be related using the relation $\sim $. There are two
+versions of the computation of $\sim $.%
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ComputeRelatedGlobalControlflowParametersDefault(}$\mathcal{E},GCFP$%
+\textsc{)} \\ 
+$\text{\textbf{for }}X\in bnd(\mathcal{E})\text{ \textbf{do}}$ \\ 
+$\qquad \text{\textbf{for }}i=1,\cdots ,npred(\varphi _{X})\text{ \textbf{do}%
+}$ \\ 
+$\qquad \qquad \text{\textbf{let }}Y=pred(\varphi _{X},i)$ \\ 
+$\qquad \qquad \text{\textbf{for }}n=1,\cdots ,\left\vert par(X)\right\vert 
+\text{ \textbf{do}}$ \\ 
+$\qquad \qquad \qquad \text{\textbf{if }}\mathrm{copy}(X,i,n)=m\neq \bot 
+\text{ \textbf{then}}$ \\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{if }}GCFP(X,n)\wedge GCFP(Y,m)%
+\text{ \textbf{then }}(X,n)\sim (Y,m)$%
+\end{tabular}%
+\end{equation*}%
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ComputeRelatedGlobalControlflowParametersAlternative(}$\mathcal{E}%
+,GCFP$\textsc{)} \\ 
+$\text{\textbf{for }}X\in bnd(\mathcal{E})\text{ \textbf{do}}$ \\ 
+$\qquad \text{\textbf{for }}i=1,\cdots ,npred(\varphi _{X})\text{ \textbf{do}%
+}$ \\ 
+$\qquad \qquad \text{\textbf{let }}Y=pred(\varphi _{X},i)$ \\ 
+$\qquad \qquad \text{\textbf{for }}n=1,\cdots ,\left\vert par(X)\right\vert 
+\text{ \textbf{do}}$ \\ 
+$\qquad \qquad \qquad \text{\textbf{if }}\mathrm{copy}(X,i,n)=m\neq \bot 
+\text{ \textbf{then}}$ \\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{if }}GCFP(X,n)\wedge GCFP(Y,m)%
+\text{ }\wedge \mathrm{target}(X,i,m)=\bot \text{ \textbf{then }}(X,n)\sim
+(Y,m)$%
+\end{tabular}%
+\end{equation*}
+
+\subsubsection{Control flow graphs}
+
+The symmetric closure $\symbol{126}_{S}$ of the relation $\sim $ defines an
+undirected graph $(V,\symbol{126}_{S})$ on the set of vertices $%
+V=\{(X,i)\mid X\in bnd(\mathcal{E})\wedge 1\leq i\leq \left\vert
+d_{X}\right\vert \}$. This graph is called the global control flow graph.
+The connected components in this graph are the local control flow graphs. A
+local control flow graph is called \emph{invalid} if it contains two
+vertices $(X,i)$ and $(X,j)$ with $i\neq j$. \newpage
+
+\subsection{Global algorithm}
+
+\subsubsection{Global control flow graph}
+
+The following algorithm is computes the global control flow graph.%
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ComputeGlobalControlflowGraph(}$\mathcal{E}$, $X_{init}(e_{init})$%
+\textsc{)} \\ 
+$V:=\emptyset $ \\ 
+$E:=\emptyset $ \\ 
+$todo:=\{(X_{init},e)\mid \forall k\leq \left\vert c_{X}\right\vert
+:e[k]=e_{init}[\downarrow _{X}k]\}$ \\ 
+\textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
+$\qquad $\textbf{choose} $u\in todo$ \\ 
+$\qquad todo:=todo\setminus \{u\}$ \\ 
+$\qquad V:=V\cup \{u\}$ \\ 
+$\qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi )\text{ \textbf{%
+do}}$ \\ 
+$\qquad \qquad \text{\textbf{if }\textsc{EnabledEdge}}(u,i)$ \\ 
+$\qquad \qquad \qquad v:=\text{\textsc{ComputeVertex}}(u,i,\mathrm{PVI}%
+(\varphi _{X},i))$ \\ 
+$\qquad \qquad \qquad \text{\textbf{if }}v\notin V$ \\ 
+$\qquad \qquad \qquad \qquad V:=V\cup \{v\}$ \\ 
+$\qquad \qquad \qquad \qquad todo:=todo\cup \{v\}$ \\ 
+$\qquad \qquad \qquad E:=E\cup \{(u,i,v)\}$ \\ 
+$\text{\textbf{return} }(V,E)$%
+\end{tabular}%
+\end{equation*}
+
+\begin{equation*}
+\begin{tabular}{l}
+$\text{\textsc{EnabledEdge}}$\textsc{(}$u,i$\textsc{)} \\ 
+\textbf{let }$u=(X,e)$ \\ 
+\textbf{for }$k=1\cdots \left\vert c_{X}\right\vert $ \textbf{do} \\ 
+$\qquad \text{\textbf{if }}\mathrm{source}(X,i,\downarrow _{X}k)\neq \bot
+\wedge \mathrm{source}(X,i,\downarrow _{X}k)\neq e_{k}$ \textbf{then} \\ 
+$\qquad \qquad \text{\textbf{return} }false$ \\ 
+$\text{\textbf{return} }true$%
+\end{tabular}%
+\end{equation*}%
+\begin{equation*}
+\begin{tabular}{l}
+$\text{\textsc{ComputeVertex}}$\textsc{(}$u,i,Y(f)$\textsc{)} \\ 
+\textbf{let }$u=(X,e)$ \\ 
+\textbf{for }$l=1\cdots \left\vert c_{Y}\right\vert $ \textbf{do} \\ 
+$\qquad q:=$ $\mathrm{target}(X,i,\downarrow _{Y}l)$ \\ 
+$\qquad \text{\textbf{if }}q=\bot $ \textbf{then} \\ 
+$\qquad \qquad \text{\textbf{choose }}k$ \textbf{such that }$\mathrm{copy}%
+(X,i,\downarrow _{X}k)=\downarrow _{Y}l$ \\ 
+$\qquad \qquad v_{l}:=e_{k}$ \\ 
+$\qquad \text{\textbf{else}}$ \\ 
+$\qquad \qquad v_{l}:=q$ \\ 
+$\text{\textbf{return} }(Y,v)$%
+\end{tabular}%
+\end{equation*}%
+Note that $\mathrm{copy}(X,i,\downarrow _{Y}l)=\downarrow _{X}k$ implies
+that parameters $(X,\downarrow _{X}k)$ and $(Y,\downarrow _{Y}l)$ are
+related.
+
+\begin{remark}
+In the code $\downarrow _{X}k$ is represented by $\mathtt{cfp\_X[k]}$
+\end{remark}
+
+\begin{remark}
+In the code $\mathrm{copy}(X,i,\downarrow _{X}k)$ is represented by $\mathtt{%
+Yf.copy(k)}$, where $Yf=\mathrm{PVI}(\varphi _{X},i)$
+\end{remark}
+
+\newpage
+
+\subsubsection{Global control flow marking}
+
+The following algorithm computes the function $marking$ that denotes which
+parameters are marked in a vertex of the control flow graph $(V,E)$.
+
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ComputeMarkingGlobal(}$\mathcal{E}$, $X_{init}(e_{init})$, $V$, $E$%
+\textsc{)} \\ 
+\textbf{for} $u=X(e)\in V$ \textbf{do }$marking(u):=sig(u)\cap par(X)$ \\ 
+$todo:=V$ \\ 
+\textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
+$\qquad $\textbf{choose} $v=X(e)\in todo$ \\ 
+$\qquad todo:=todo\setminus \{v\}$ \\ 
+$\qquad \text{\textbf{for }}(u,v)\in E\text{ \textbf{do}}$ \\ 
+$\qquad \qquad $\textbf{let} $X(f)=label(u,v)$ \\ 
+$\qquad \qquad \text{\textbf{for }}d_{X}[j]\in marking(v)$ \\ 
+$\qquad \qquad \qquad M:=(FV(f[j])\setminus marking(u))\cap par(X)$ \\ 
+$\qquad \qquad \qquad \text{\textbf{if }}M\neq \emptyset $ \\ 
+$\qquad \qquad \qquad \qquad marking(u):=marking(u)\cup M$ \\ 
+$\qquad \qquad \qquad \qquad todo:=todo\cup \{u\}$%
+\end{tabular}%
+\end{equation*}
+
+\subsubsection{Global reset variables}
+
+Let $\mathrm{PVI}(\varphi _{X},i)=Y(e)$ and let $V$ be the global control
+flow graph. Then we define
+
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ResetVariableGlobal(}$Y(e)$, $i,$ $V$\textsc{)} \\ 
+$\varphi :=true$ \\ 
+\textbf{for} $u=Y(f)\in V$ \textbf{do} \\ 
+$\qquad c:=true$ \\ 
+$\qquad k:=1$ \\ 
+$\qquad $\textbf{for} $j=1\cdots \left\vert par(Y)\right\vert $ \textbf{do}
+\\ 
+$\qquad \qquad r:=[]$ \\ 
+$\qquad \qquad $\textbf{if} $CFP(Y,j)$ \textbf{then} \\ 
+$\qquad \qquad \qquad $\textbf{if} $\mathrm{target}(X,i,j)=\bot $ \\ 
+$\qquad \qquad \qquad \qquad c:=c\wedge (e[j]=f[k])$ \\ 
+$\qquad \qquad \qquad r:=r\vartriangleleft f[k]$ \\ 
+$\qquad \qquad $\textbf{else if} $e[j]\in marking(u)$ \textbf{then} \\ 
+$\qquad \qquad \qquad r:=r\vartriangleleft e[j]$ \\ 
+$\qquad \qquad $\textbf{else} \\ 
+$\qquad \qquad \qquad r:=r\vartriangleleft default\_value(e[j])$ \\ 
+$\qquad \qquad k:=k+1$ \\ 
+$\qquad \varphi :=\varphi \wedge (c\Rightarrow Y(r))$ \\ 
+\textbf{return} $\varphi $%
+\end{tabular}%
+\end{equation*}
+
+\newpage
+
+\subsection{Compute values}
+
+Let $C$ be a component containing related CFPs.
+
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ComputeValues(}$\mathcal{E}$, $X_{init}(e_{init}),C$\textsc{)} \\ 
+$result:=$ $\emptyset $ \\ 
+$\text{\textbf{for }}(X,j)\in C$ \textbf{do} \\ 
+$\qquad $\textbf{if} $(X=X_{init})$\textbf{\ then} $result:=result\cup
+\{e_{init}[j]\}$ \\ 
+\textbf{for} $(X,k)\in C$ \textbf{do} \\ 
+$\qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi _{X})\text{ 
+\textbf{do}}$ \\ 
+$\qquad \qquad \text{\textbf{if }}\mathrm{source}(X,i,k)=v$\textbf{\ then} $%
+result:=result\cup \{v\}$ \\ 
+\textbf{for} $(Y,k)\in C$ \textbf{do} \\ 
+$\qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi _{Y})\text{ 
+\textbf{do}}$ \\ 
+$\qquad \qquad \text{\textbf{if }}\mathrm{pred}(\varphi _{Y},i)=Y\wedge 
+\mathrm{target}(Y,i,k)=v$\textbf{\ then} $result:=result\cup \{v\}$ \\ 
+\textbf{return} $result$%
+\end{tabular}%
+\end{equation*}
+
+\newpage
+
+\subsection{Local algorithm}
+
+\subsubsection{Local control flow graph}
+
+Given a GCFG $(W,\symbol{126})$ and a component $C\subseteq W$, then we
+define $U$ as $\{(X,i,d=e)\mid (X,i,d)\in C\wedge e\in $ \textsc{%
+ComputeValues}$(C)\}\cup \{(X_{init},?,?=?)\mid \forall i:(X_{init},i)\notin
+C\}$. Note that this algorithm potentially extends the graph with
+'undefined' nodes in a lazy fashion.
+
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ComputeLocalControlFlowGraph(}$U,C$\textsc{)} \\ 
+$V,E:=U,\emptyset $ \\ 
+$todo:=U$ \\ 
+\textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
+$\qquad \text{\textbf{choose }}u=(X,k,d=e)\in todo$ \\ 
+$\qquad todo:=todo\setminus \{u\}$ \\ 
+$\qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi _{X})\text{ 
+\textbf{do}}$ \\ 
+$\qquad \qquad \text{\textbf{let }}Y=$ $\mathrm{pred}(\varphi _{X},i)$ \\ 
+$\qquad \qquad \text{\textbf{if }}d=?$ $\text{\textbf{then}}$ \\ 
+$\qquad \qquad \qquad \text{\textbf{if }}(Y,k^{\prime })\in C$ for some $%
+k^{\prime }$ \textbf{then} \\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{if }}\mathrm{target}%
+(X,i,k^{\prime })=e^{\prime }$ \textbf{then} \\ 
+$\qquad \qquad \qquad \qquad \qquad v:=(Y,k^{\prime },d_{Y}[k^{\prime
+}]=e^{\prime })$ \\ 
+$\qquad \qquad \qquad \qquad \qquad insert(V,E,todo,u,i,v)$ \\ 
+$\qquad \qquad \qquad \text{\textbf{else}}$ \\ 
+$\qquad \qquad \qquad \qquad $\textbf{if} $X\neq Y$ \textbf{then} \\ 
+$\qquad \qquad \qquad \qquad \qquad v:=(Y,?,?=?)$ \\ 
+$\qquad \qquad \qquad \qquad \qquad insert(V,E,todo,u,i,v)$ \\ 
+$\qquad \qquad \text{\textbf{else}}$ \\ 
+$\qquad \qquad \qquad \text{\textbf{if }}(Y,k^{\prime })\in C$ for some $%
+k^{\prime }$ \textbf{then} \\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{if }}\left( \mathrm{source}%
+(X,i,k)=e\mathbf{\ }\wedge \mathrm{target}(X,i,k^{\prime })=e^{\prime
+}\right) $ \textbf{then }$insert(V,E,todo,u,i,(Y,k^{\prime },d_{Y}[k^{\prime
+}]=e^{\prime }))$ \\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{else if} }\left( Y\neq X\wedge 
+\mathrm{source}(X,i,k)=\bot \mathbf{\ }\wedge \mathrm{target}(X,i,k^{\prime
+})=e^{\prime }\right) $ \textbf{then }$insert(V,E,todo,u,i,(Y,k^{\prime
+},d_{Y}[k^{\prime }]=e^{\prime }))$ \\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{else if} }\left( Y\neq X\wedge 
+\mathrm{source}(X,i,k)=\bot \mathbf{\ }\wedge \mathrm{copy}(X,i,k)=k^{\prime
+}\right) $ \textbf{then }$insert(V,E,todo,u,i,(Y,k^{\prime },d_{Y}[k^{\prime
+}]=e))$ \\ 
+$\qquad \qquad \qquad \text{\textbf{else}}$ \\ 
+$\qquad \qquad \qquad \qquad v:=(Y,?,?=?)$ \\ 
+$\qquad \qquad \qquad \qquad insert(V,E,todo,u,i,v)\qquad $ \\ 
+\textbf{return} $(V,E),$%
+\end{tabular}%
+\end{equation*}%
+where $insert(V,E,todo,u,i,v)$ is shorthand for the statements%
+\begin{equation*}
+\begin{array}{l}
+\text{\textbf{if} }v\notin todo\wedge v\notin V\text{ \textbf{then} }%
+todo:=todo\cup \{v\} \\ 
+V:=V\cup \{v\} \\ 
+E:=E\cup \{(u,i,v)\}%
+\end{array}%
+\end{equation*}%
+\newpage
+
+\subsubsection{Local belongs relation}
+
+Let $(V$, $\mathrm{\longrightarrow })$ be a local control flow graph, and $%
+\mathrm{rules}$ be a predicate defined as%
+\begin{equation*}
+\mathrm{rules}(V,X,i)=\exists _{(X,j,e)\in V}:(X,j,e)\overset{i}{\mathrm{%
+\longrightarrow }}.
+\end{equation*}%
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ComputeBelongs(} $V$, $\mathrm{\longrightarrow }$, $\mathrm{rules}$%
+\textsc{)} \\ 
+$B_{k}:=\emptyset $ \\ 
+\textbf{for} $(X,j,v)\in V$ \textbf{do} \\ 
+$\qquad belongs:=\{m\mid d_{X}[m]$ is a data parameter of $X\}$ \\ 
+$\qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi )\text{ \textbf{%
+do}}$ \\ 
+$\qquad \qquad \text{\textbf{for }}m\in belongs\text{ \textbf{do}}$ \\ 
+$\qquad \qquad \qquad $\textbf{if }$\left( \mathrm{used}(X,i,m)\vee \mathrm{%
+changed}(X,i,m)\right) \wedge \lnot \mathrm{rules}(V,X,i)$ \textbf{then} \\ 
+$\qquad \qquad \qquad \qquad belongs:=belongs\setminus \{m\}$ \\ 
+$\qquad B_{k}:=B_{k}\cup \{(X,d_{X}[m])\mid m\in belongs\}$ \\ 
+\textbf{return} $B_{k}$%
+\end{tabular}%
+\end{equation*}
+
+\subsubsection{Local control flow marking}
+
+Let $\left( V,E\right) $ be a local control flow graph, and $B$ the
+corresponding belongs relation.%
+\begin{eqnarray*}
+&&%
+\begin{tabular}{l}
+\textsc{UpdateMarkingRule1(}$B$, $u$, $i$, $v$\textsc{)} \\ 
+\textbf{let} $u=\left( X,n,d_{X}[n]=z\right) $ \\ 
+\textbf{let} $v=\left( Y,m,d_{Y}[m]=w\right) $ \\ 
+\textbf{let} $Y(e)=\mathrm{PVI}(\varphi _{X},i)$ \\ 
+$M:=\emptyset $ \\ 
+$\text{\textbf{for }}d_{Y}[l]\in marking(v)\text{ \textbf{do}}$ \\ 
+$\qquad M:=M\cup \left( \mathrm{FV}\left( \mathrm{rewr}(e[l],\left[
+d_{X}[n]:=z\right] )\right) \cap \{d\mid (X,d)\in B\}\right) $ \\ 
+\textbf{return }$marking(u)\cup M$%
+\end{tabular}
+\\
+&& \\
+&&%
+\begin{tabular}{l}
+\textsc{UpdateMarkingRule2(}$B$, $u$, $i$, $v$\textsc{)} \\ 
+\textbf{let} $u=\left( X,n,d_{X}[n]=z\right) $ \\ 
+\textbf{let} $v=\left( Y,m,d_{Y}[m]=w\right) $ \\ 
+\textbf{let} $Y(e)=\mathrm{PVI}(\varphi _{X},i)$ \\ 
+$M:=\emptyset $ \\ 
+$\text{\textbf{for }}d_{Y}[l]\in marking(v)\text{ \textbf{do}}$ \\ 
+$\qquad $\textbf{if} $\left( Y,d_{Y}[l]\right) \notin B$ \textbf{then} \\ 
+$\qquad \qquad M:=M\cup \left( \mathrm{FV}\left( \mathrm{rewr}(e[l],\left[
+d_{X}[n]:=z\right] )\right) \cap \{d\mid (X,d)\in B\}\right) $ \\ 
+\textbf{return }$marking(u)\cup M$%
+\end{tabular}%
+\end{eqnarray*}
+
+\begin{equation*}
+\begin{array}{l}
+\begin{tabular}{l}
+\textsc{ComputeMarkingLocal(}$\mathcal{E}$, $(V_{1},E_{1},B_{1}),\cdots
+,(V_{J},E_{J},B_{J})$\textsc{)} \\ 
+\textbf{for} $j=1\cdots J$ \textbf{do} \\ 
+$\qquad $\textbf{for} $u=(X,n,d_{X}[n]=z)\in V_{j}$ \textbf{do} \\ 
+$\qquad \qquad marking(u):=significant(u)\cap \{d\mid (X,d)\in B_{j}\}$ \\ 
+$stable:=false$ \\ 
+\textbf{while} $\lnot stable$ \textbf{do} \\ 
+$\qquad stableint:=false$ \\ 
+$\qquad $\textbf{while} $\lnot stableint$ \textbf{do} \\ 
+$\qquad \qquad stableint:=true$ \\ 
+$\qquad \qquad $\textbf{for} $j=1\cdots J$ \textbf{do} \\ 
+$\qquad \qquad \qquad todo:=V_{j}$ \\ 
+$\qquad \qquad \qquad $\textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
+$\qquad \qquad \qquad \qquad $\textbf{choose} $u=(X,n,d_{X}[n]=z)\in todo$
+\\ 
+$\qquad \qquad \qquad \qquad todo:=todo\setminus \{u\}$ \\ 
+$\qquad \qquad \qquad \qquad $\textbf{if} $marking(u)=\{d\mid (X,d)\in
+B_{j}\}$ \textbf{then continue} \\ 
+$\qquad \qquad \qquad \qquad $\textbf{for} $(u,i,v)\in E_{j}$ \textbf{do} \\ 
+$\qquad \qquad \qquad \qquad \qquad m:=marking(u)$ \\ 
+$\qquad \qquad \qquad \qquad \qquad marking(u):=$ \textsc{UpdateMarkingRule1(%
+}$B_{j}$, $u$, $i$, $v$\textsc{)} \\ 
+$\qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}m\neq marking(u)$ 
+\textbf{then} \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad todo:=todo\cup \{v^{\prime }\mid
+\exists i^{\prime }:(v^{\prime },i^{\prime },u)\in E_{j}\}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad stableint:=false$ \\ 
+$\qquad stableext:=false$%
+\end{tabular}
+\\ 
+\begin{tabular}{l}
+$\qquad $\textbf{while} $\lnot stableext$ \textbf{do} \\ 
+$\qquad \qquad stableext:=true$ \\ 
+$\qquad \qquad $\textbf{for} $j=1\cdots J$ \textbf{do} \\ 
+$\qquad \qquad \qquad $\textbf{for} $u=(X,n,d_{X}[n]=z)\in V_{j}$ \textbf{do}
+\\ 
+$\qquad \qquad \qquad \qquad $\textbf{if} $marking(u)=\{d\mid (X,d)\in
+B_{j}\}$ \textbf{then continue} \\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{for }}(u,i,w)\in E_{j}$ \textbf{do%
+} \\ 
+$\qquad \qquad \qquad \qquad \qquad $\textbf{let} $Y(e)=\mathrm{PVI}(\varphi
+_{X},i)$ \\ 
+$\qquad \qquad \qquad \qquad \qquad $\textbf{for} $k=1\cdots J$ \textbf{do}
+\\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}k\neq j$ 
+\textbf{then} \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad $\textbf{for} $%
+v=(Y,m,d_{Y}[m]=w)\in V_{k}$ \textbf{do} \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad $\textbf{if} $%
+\exists v^{\prime }=(X,m^{\prime },D_{X}[m^{\prime }])\in V_{k}$ \textbf{%
+such that} $(v^{\prime },i,v)\in E_{k}$ \textbf{then} \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad
+m:=marking(u) $ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad marking(u):=$
+\textsc{UpdateMarkingRule2(}$B_{j}$, $u$, $i$, $v$\textsc{)} \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \text{%
+\textbf{if }}m\neq marking(u)$ \textbf{then} \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad
+stableint:=false$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad
+stableext:=false$ \\ 
+$\qquad stable:=stableint\wedge stableext$%
+\end{tabular}%
+\end{array}%
+\end{equation*}
+
+\newpage
+
+\subsubsection{Local reset variables}
+
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ResetVariableLocal(}$i,$ $\sigma X(d_{X})=\varphi _{X},V_{1},\cdots
+,V_{J},B_{1},\cdots ,B_{J},\mathrm{rules}$\textsc{)} \\ 
+\textbf{let }$Y(e)=\mathrm{PVI}(\varphi _{X},i)$ \\ 
+$e^{\prime }:=e$ \\ 
+\textbf{for} $k=1\cdots \left\vert e\right\vert $ \textbf{do} \\ 
+$\qquad $\textbf{if} $\mathrm{CFP}(Y,k)$ \textbf{then continue} \\ 
+$\qquad relevant:=true$ \\ 
+$\qquad condition:=\{\}$ \\ 
+$\qquad $\textbf{for} $j=1\cdots J$ \textbf{do} \\ 
+$\qquad \qquad $\textbf{if} $\mathrm{rules}(V_{j},X,i)$ \textbf{then} \\ 
+$\qquad \qquad \qquad $\textbf{let }$p,q$ be such that $(Y,p,q)\in V_{j}$ \\ 
+$\qquad \qquad \qquad $\textbf{if} $\mathrm{target}(X,i,p)\neq \bot $ 
+\textbf{then} \\ 
+$\qquad \qquad \qquad \qquad $\textbf{let} $q^{\prime }=\mathrm{target}%
+(X,i,p)$ \\ 
+$\qquad \qquad \qquad \qquad relevant:=relevant\wedge \left( \left(
+Y,d_{Y}[k]\right) \in B_{j}\Rightarrow d_{Y}[k]\in marking(Y,p,q^{\prime
+})\right) $ \\ 
+$\qquad \qquad \qquad $\textbf{else} \\ 
+$\qquad \qquad \qquad \qquad relevant:=relevant\wedge (\left(
+Y,d_{Y}[k]\right) \in B_{j}\Rightarrow \exists r:d_{Y}[k]\in marking(Y,p,r))$
+\\ 
+$\qquad \qquad \qquad \qquad condition+=$ $\{e[p]=r\mid \left(
+Y,d_{Y}[k]\right) \in B_{j}\wedge (Y,p,r)\in V_{j}\wedge d_{Y}[k]\notin
+marking(Y,p,r)\}$ \\ 
+$\qquad $\textbf{if} $\lnot relevant$ \textbf{then} \\ 
+$\qquad \qquad e^{\prime }[k]:=default\_value(d_{Y}[k])$ \\ 
+$\qquad $\textbf{else if} $condition\neq \{\}$ \textbf{then} \\ 
+$\qquad \qquad e^{\prime
+}[k]:=if(join\_or(condition),default\_value(d_{Y}[k]),e[k]))$ \\ 
+\textbf{return }$Y(e^{\prime })$%
+\end{tabular}%
+\end{equation*}%
+\newpage
