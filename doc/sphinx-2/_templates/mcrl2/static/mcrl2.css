@@ -137,6 +137,7 @@ table.libdoc strong {
 
 table.libdoc td {
     border: none;
+    vertical-align: top;
 }
 
 table.libdoc td p {
@@ -215,7 +216,8 @@ div.header {
     top: 0%;
 }
 
-div.related a {
+div.related a,
+div.related span {
     font-family: sans-serif;
     color: #ffffff;
 }

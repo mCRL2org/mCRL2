@@ -37,6 +37,9 @@ copyright = f'2011-{version[0:4]}, Technische Universiteit Eindhoven'
 
 # -- General configuration ---------------------------------------------------
 
+# The master document is in the user_manual directory.
+master_doc = 'user_manual/index'
+
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
@@ -81,6 +84,9 @@ exclude_patterns = ['_build', '_temp/rst/libraries', '.svn', '.git',
 html_theme = 'mcrl2'
 html_theme_path = ['_templates']
 html_logo = '_templates/mcrl2/static/mcrl2.png'
+html_sidebars = {
+   '**': ['localtoc.html', 'relations.html', 'sourcelink.html', 'searchbox.html'],
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
