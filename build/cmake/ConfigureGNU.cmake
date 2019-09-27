@@ -63,12 +63,12 @@ endif()
 
 try_add_cxx_flag(-std=c++17)
 
-if(APPLE)
-  try_add_cxx_flag(-stdlib=libc++)
+if(NOT CXX_ACCEPTS_STD_CPP17)
+  message(FATAL_ERROR "Your compiler does not support the -std=c++17 flag. You should upgrade to a newer compiler version to build mCRL2")
 endif()
 
-if(NOT CXX_ACCEPTS_STD_CPP11)
-  message(FATAL_ERROR "Your compiler does not support the -std=c++17 flag. You should upgrade to a newer compiler version to build mCRL2")
+if(APPLE)
+  try_add_cxx_flag(-stdlib=libc++)
 endif()
 
 try_add_cxx_flag(-Wall)
