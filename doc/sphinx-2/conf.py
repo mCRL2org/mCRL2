@@ -4,13 +4,12 @@
 
 # -- Imports -----------------------------------------------------------------
 
+import os
 # used to parse mCRL2 version information from CMake file
 from pathlib import Path
 import re
 # used to add paths for extensions
 import sys
-# used for generation of rst files from man pages
-import tempfile
 
 
 # -- Path setup --------------------------------------------------------------
@@ -101,7 +100,15 @@ suppress_warnings = ['ref.citation']
 
 
 # Generate rst files from man pages
+import libraries
 import man
 
-with tempfile.TemporaryDirectory() as temppath:
+temppath = (Path(__file__).parent / '_build/cache').as_posix()
+os.makedirs(temppath, mode = 0o755, exist_ok = True)
+olddir = os.getcwd()
+try:
+    os.chdir(temppath)
+    libraries.generate_rst(temppath)
     man.generate_rst(temppath, (Path(__file__).parent / '../../../build/stage/bin/').as_posix())
+finally:
+    os.chdir(olddir)

@@ -1,0 +1,54 @@
+%TCIDATA{Version=5.50.0.2890}
+%TCIDATA{LaTeXparent=1,1,pbes-implementation-notes.tex}
+                      
+
+\subsection{Global algorithm}
+
+\subsubsection{Global control flow graph computation (old version)}
+
+In the following algorithm we use a projection that removes all parameters
+of a predicate variable that do not correspond to a control flow parameter.
+This projection applied to the predicate variable $X_{k}(e_{1},\cdots
+,e_{m}) $ is denoted as $\overline{X_{k}(e_{1},\cdots ,e_{m})}$. The mapping 
+$R$ is a rewriter that takes a substitution to data variables as second
+argument.
+
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ComputeGlobalControlflowGraph(}$\mathcal{E}$, $X_{init}(e_{init})$%
+\textsc{)} \\ 
+$u_{0}:=X_{init}(\widehat{e_{init}})$ \\ 
+$V:=\{u_{0}\}$ \\ 
+$E:=\emptyset $ \\ 
+$todo:=\{u_{0}\}$ \\ 
+$sig(u_{0}):=\emptyset $ \\ 
+\textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
+$\qquad $\textbf{choose} $u=X(d=e)\in todo$ \\ 
+$\qquad todo:=todo\setminus \{u\}$ \\ 
+$\qquad sig(u):=sig(R(\varphi _{X},[d:=e])$ \\ 
+$\qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi )\text{ \textbf{%
+do}}$ \\ 
+$\qquad \qquad g:=R(guard^{i}(\varphi _{X}),[d_{X}:=e])$ \\ 
+$\qquad \qquad \text{\textbf{if }}g\neq false$ \\ 
+$\qquad \qquad \qquad Y(f):=\text{\textsc{PutDest}}(\mathrm{PVI}(\varphi
+_{X},i),X,i)$ \\ 
+$\qquad \qquad \qquad Y(f):=Y(f)[d:=e]$ \\ 
+$\qquad \qquad \qquad v:=Y(\widehat{f})$ \\ 
+$\qquad \qquad \qquad \text{\textbf{if }}v\notin V$ \\ 
+$\qquad \qquad \qquad \qquad V:=V\cup \{v\}$ \\ 
+$\qquad \qquad \qquad \qquad todo:=todo\cup \{v\}$ \\ 
+$\qquad \qquad \qquad E:=E\cup \{(u,i,v)\}$ \\ 
+$\text{\textbf{return} }(V,E)$%
+\end{tabular}%
+\end{equation*}%
+\begin{equation*}
+\begin{tabular}{l}
+$\text{\textsc{PutDest}}$\textsc{(}$Y(e),X,i$\textsc{)} \\ 
+$e^{\prime }:=e$ \\ 
+\textbf{for }$j=1\cdots \left\vert e\right\vert $ \textbf{do} \\ 
+$\qquad \text{\textbf{if }}\mathrm{target}(X,i,p)\neq \bot $ \textbf{then}
+\\ 
+$\qquad \qquad e^{\prime }[j]:=\mathrm{target}(X,i,p)$ \\ 
+$\text{\textbf{return} }Y(e^{\prime })$%
+\end{tabular}%
+\end{equation*}

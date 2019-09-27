@@ -1,0 +1,108 @@
+\documentclass{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{makeidx}
+\usepackage{eurosym}
+\usepackage{fullpage}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+\setcounter{MaxMatrixCols}{10}
+%TCIDATA{OutputFilter=LATEX.DLL}
+%TCIDATA{Version=5.50.0.2890}
+%TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
+%TCIDATA{BibliographyScheme=Manual}
+%TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
+%TCIDATA{LastRevised=Tuesday, July 09, 2013 12:13:16}
+%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+%TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
+%TCIDATA{CSTFile=40 LaTeX article.cst}
+
+\font \aap cmmi10
+\newcommand{\at}[1]{\mbox{\aap ,} #1}
+\newcommand{\ap}{{:}}
+\newcommand{\tuple}[1]{\ensuremath{\langle {#1} \rangle}}
+\newcommand{\vars}{\mathit{vars}}
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
+\input{include/tcilatex}
+\providecommand{\concat}{\ensuremath{\hspace{0.12em}\raisebox{0.2ex}{\text{\scriptsize+}\!\text{\scriptsize+}}\hspace{0.12em}}}
+
+\begin{document}
+
+\title{PBES Implementation Notes}
+\author{Wieger Wesselink}
+\maketitle
+
+This document contains details about data structures and algorithms of the
+PBES Library of the mCRL2 toolset.
+
+%TCIMACRO{%
+%\QSubDoc{Include pbes-definitions}{\input{include/pbes-definitions.tex}}}%
+%BeginExpansion
+\input{include/pbes-definitions.tex}%
+%EndExpansion
+
+%TCIMACRO{%
+%\QSubDoc{Include pbes-monotonicity}{\input{include/pbes-monotonicity.tex}}}%
+%BeginExpansion
+\input{include/pbes-monotonicity.tex}%
+%EndExpansion
+
+%TCIMACRO{%
+%\QSubDoc{Include pbes-parity-games}{\input{include/pbes-parity-games.tex}}}%
+%BeginExpansion
+\input{include/pbes-parity-games.tex}%
+%EndExpansion
+
+%TCIMACRO{%
+%\QSubDoc{Include pbes-constelm}{\input{include/pbes-constelm.tex}}}%
+%BeginExpansion
+\input{include/pbes-constelm.tex}%
+%EndExpansion
+
+%TCIMACRO{%
+%\QSubDoc{Include pbes-gauss-elimination}{\input{include/pbes-gauss-elimination.tex}}}%
+%BeginExpansion
+\input{include/pbes-gauss-elimination.tex}%
+%EndExpansion
+
+%TCIMACRO{%
+%\QSubDoc{Include bes-small-progress-measures}{\input{include/bes-small-progress-measures.tex}}}%
+%BeginExpansion
+\input{include/bes-small-progress-measures.tex}%
+%EndExpansion
+
+%TCIMACRO{%
+%\QSubDoc{Include pbes-stategraph}{\input{include/pbes-stategraph.tex}}}%
+%BeginExpansion
+\input{include/pbes-stategraph.tex}%
+%EndExpansion
+
+%TCIMACRO{%
+%\QSubDoc{Include pbes-miscellaneous}{\input{include/pbes-miscellaneous.tex}}}%
+%BeginExpansion
+\input{include/pbes-miscellaneous.tex}%
+%EndExpansion
+
+\end{document}

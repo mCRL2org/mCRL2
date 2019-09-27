@@ -1,0 +1,1089 @@
+\documentclass[a4paper,fleqn]{article}
+
+% title and author
+\title{Data types for mCRL2}
+\author{Aad Mathijssen}
+
+% packages
+\usepackage[english]{babel}
+\usepackage[final]{graphics}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{array}
+\usepackage{calc}
+\usepackage{xspace}
+
+% General layout
+% --------------
+
+%add headings
+\pagestyle{headings}
+
+% increase pagewidth
+\addtolength{\textwidth}{20mm}
+\addtolength{\oddsidemargin}{-10mm}
+\addtolength{\evensidemargin}{10mm}
+
+% set the indentation of the math environment to 10mm
+\setlength{\mathindent}{10mm}
+
+% equations are unique up to their section
+\renewcommand{\theequation}{\arabic{equation}}
+
+% do not put subsubsections in the table of contents
+\addtocounter{tocdepth}{-1}
+
+% column types that change column types l,c,r from math mode to LR
+% and the other way round
+\newcolumntype{L}{>{$}l<{$}}%stopzone%stopzone%stopzone
+\newcolumntype{C}{>{$}c<{$}}%stopzone%stopzone%stopzone
+\newcolumntype{R}{>{$}r<{$}}%stopzone%stopzone%stopzone
+
+% Environments
+% ------------
+
+% equations: eqnarray environment with no outer column spacing and tighter
+% intercolumn spacing
+\newenvironment{equations}
+  {\setlength{\arraycolsep}{2pt}%
+   \begin{array}{@{}lll@{}}%
+  }
+  {\end{array}%
+  }
+
+% tightarray: array with no outcolumn spacing and tighter intercolumn spacing
+\newenvironment{tightarray}[1]
+  {\setlength{\arraycolsep}{2pt}%
+   \begin{array}{@{}#1@{}}%
+  }
+  {\end{array}%
+  }
+
+% definitions: list of definitions where:
+% - the optional argument denotes the space between successive items
+%   (default 0.15em)
+% - items are horizontally aligned at the math indent
+\newenvironment{definitions}[1][0.15em]
+  {\begin{list}%
+    {}%
+    {\setlength{\parsep}{0pt}%
+     \setlength{\itemsep}{#1}%
+     \setlength{\leftmargin}{\mathindent}%
+     \setlength{\labelwidth}{\mathindent - \labelsep}%
+    }
+  }
+  {\end{list}}
+
+% tdefinitions: list of tagged definitions where:
+% - the optional argument denotes the space between successive items
+%   (default 0.15em)
+% - items are horizontally aligned at the math indent
+% - each item is tagged with the mandatory argument
+\newenvironment{tdefinitions}[2][0.15em]
+  {\begin{list}%
+    {#2}%
+    {\setlength{\parsep}{0pt}%
+     \setlength{\itemsep}{#1}%
+     \setlength{\leftmargin}{\mathindent}%
+     \setlength{\labelwidth}{\mathindent - \labelsep}%
+    }
+  }
+  {\end{list}}
+
+% edefinitions: list of enumerated definitions where:
+% - the optional argument denotes the space between successive items
+%   (default 0.15em);
+% - items are horizontally aligned at the math indent;
+% - each item is numbered with a parenthesized roman numeral.
+\newcounter{edefinitioncount}
+\newenvironment{edefinitions}[1][0.15em]
+  {\begin{list}%
+    {(\roman{edefinitioncount})}%
+    {\renewcommand{\theenumi}{\roman{enumi}}%
+     \renewcommand{\labelenumi}{(\theenumi)}%
+     \usecounter{edefinitioncount}%
+     \setlength{\parsep}{0pt}%
+     \setlength{\itemsep}{#1}%
+     \setlength{\leftmargin}{\mathindent}%
+     \setlength{\labelwidth}{\mathindent - \labelsep}%
+    }
+  }
+  {\end{list}}
+
+% entry: list of entries where:
+% - the optional argument denotes the space between successive items
+%   (default 0.15em);
+% - items are horizontally aligned at the math indent;
+% - each item is labelled.
+\newenvironment{entry}[2][0.15em]%
+  {\begin{list}{}%
+    {\renewcommand{\makelabel}[1]{\textsf{##1:}\hfil}%
+     \settowidth{\labelwidth}{\textsf{#2:}}%
+     \setlength{\leftmargin}{\labelwidth+\labelsep}%
+     \setlength{\parsep}{0pt}%
+     \setlength{\itemsep}{#1}%
+    }%
+  }%
+  {\end{list}}
+
+% derivation: calculational derivation where expressions (\expr) are related by
+% means of transformations (\tran). A transformation is denoted by a symbol and
+% a hint. Expressions and transformations can be broken into several lines
+% using \breakexpr and \breaktran.
+\newenvironment{derivation}
+{\par\addtolength{\baselineskip}{1mm}\begin{tabbing}\hspace{5mm}\=\hspace{5mm}\=\hspace{5mm}\=\kill}
+{\end{tabbing}\par}
+\newcommand{\expr}[1]{\>\>$#1$}
+\newcommand{\tran}[2]{\\*\>$#1$\>\>\{ #2 \}\\}
+\newcommand{\breakexpr}{$\\*\>\>$}
+\newcommand{\breaktran}{\\*\>\>\>\hspace{8pt}}
+
+% Theorem-like environments that are numbered as s.n, where:
+% - s is the section number
+% - n is the number of occurrences of all theorem-like environments in s
+% We have the following environments:
+% - definition
+% - theorem
+% - lemma
+% - corollary
+% - property
+% - example
+% - remark
+% - convention
+% - specification
+% - declaration
+
+\newtheorem{thdefinition}{Definition}[section]
+\newenvironment{definition}
+  {\begin{thdefinition}\em}
+  {\end{thdefinition}}
+
+\newtheorem{ththeorem}[thdefinition]{Theorem}
+\newenvironment{theorem}
+  {\begin{ththeorem}\em}
+  {\end{ththeorem}}
+
+\newtheorem{thcorollary}[thdefinition]{Corollary}
+\newenvironment{corollary}
+  {\begin{thcorollary}\em}
+  {\end{thcorollary}}
+
+\newtheorem{thlemma}[thdefinition]{Lemma}
+\newenvironment{lemma}
+  {\begin{thlemma}\em}
+  {\end{thlemma}}
+
+\newtheorem{thproperty}[thdefinition]{Property}
+\newenvironment{property}
+  {\begin{thproperty}\em}
+  {\end{thproperty}}
+
+\newtheorem{thexample}[thdefinition]{Example}
+\newenvironment{example}
+  {\begin{thexample}\em}
+  {\end{thexample}}
+
+\newtheorem{thremark}[thdefinition]{Remark}
+\newenvironment{remark}
+  {\begin{thremark}\em}
+  {\end{thremark}}
+
+\newtheorem{thconvention}[thdefinition]{Convention}
+\newenvironment{convention}
+  {\begin{thconvention}\em}
+  {\end{thconvention}}
+
+\newtheorem{thspecification}[thdefinition]{Specification}
+\newenvironment{specification}
+  {\begin{thspecification}\em}
+  {\end{thspecification}}
+
+\newtheorem{thdeclaration}[thdefinition]{Declaration}
+\newenvironment{declaration}
+  {\begin{thdeclaration}\em}
+  {\end{thdeclaration}}
+
+% proof: proof of a theorem
+\newenvironment{proof}
+  {\textbf{Proof}}
+  {\frm{\Box}
+   \vspace{1ex}%
+  }
+
+
+% Commands
+% --------
+% --------
+
+
+% math mode
+% ---------
+
+% improvement to $ ... $ such that mathematical formulas cannot be cramped
+\newcommand{\frm}[1]{\mbox{\ensuremath{#1}}}
+
+% frm with extra spacing
+\newcommand{\for}[1]{\frm{\,#1\,}}
+
+
+% functions and constants
+% -----------------------
+
+% constant
+\newcommand{\f}[1]{\ensuremath{\mathit{#1}}}
+
+% function application with 1 argument: f(arg0)
+\newcommand{\fa}[2]{\ensuremath{\f{#1}(#2)}}
+
+% function application with 2 arguments: f(arg0, arg1)
+\newcommand{\faa}[3]{\ensuremath{\f{#1}(#2, #3)}}
+
+% function application with 3 arguments: f(arg0, arg1, arg2)
+\newcommand{\faaa}[4]{\ensuremath{\f{#1}(#2, #3, #4)}}
+
+% function application with 4 arguments: f(arg0, arg1, arg2, arg3)
+\newcommand{\faaaa}[5]{\ensuremath{\f{#1}(#2, #3, #4, #5)}}
+
+
+% functions and types
+% -------------------
+
+% to: ->
+\newcommand{\To}{\ensuremath{\rightarrow}}
+
+% function application symbol: .
+\newcommand{\fap}{\ensuremath{\!\cdot\!}}
+
+% composition: 0
+\newcommand{\comp}{\ensuremath{\circ}}
+
+% function composition: o
+\newcommand{\fcomp}{\ensuremath{%
+  \hspace{0.08em}\mbox{\small\ensuremath{\circ}}\hspace{0.08em}}}
+
+% function mapping
+\newcommand{\fmap}{
+  \hspace{0.08em}\raisebox{0.2ex}{%
+  \tiny\ensuremath{\bullet}}\hspace{0.08em}}
+
+
+% lambda calculus
+% ---------------
+
+% abstraction in the typed lambda calculus
+\newcommand{\labst}[3]{\ensuremath{\lambda #1\!:\!#2.#3}}
+
+% application in the typed lambda calculus
+\newcommand{\lappl}[2]{\ensuremath{#1\ #2}}
+
+% abstraction in the pure (untyped) lambda calculus
+\newcommand{\pabst}[2]{\ensuremath{\lambda #1.#2}}
+
+% application in the pure (untyped) lambda calculus
+\newcommand{\pappl}[2]{\ensuremath{#1\ #2}}
+
+% sets
+% ----
+
+% set of elements: {e}
+\newcommand{\set}[1]{\ensuremath{\{\,#1\,\}}}
+
+% bag of elements: {e}
+\newcommand{\bag}[1]{\ensuremath{\set{#1}}}
+
+% set difference: s \ t
+\newcommand{\sdiff}[2]{\ensuremath{#1\ \backslash\ #2}}
+
+% set comprehension: { e | c }, where e is an expression or a binding and c is
+% a condition
+\newcommand{\scompr}[2]{\ensuremath{\set{#1\ |\ #2}}}
+
+% powerset: P(s)
+\newcommand{\pow}[1]{\ensuremath{\fa{\mathcal{P}}{#1}}}
+
+
+% tuples
+% ------
+
+% tuple of elements: <e>
+\newcommand{\tpl}[1]{\ensuremath{\langle\,#1\,\rangle}}
+
+% pair of elements: <e0,e1>
+\newcommand{\pair}[2]{\ensuremath{\tpl{#1\hspace{0.08em},#2}}}
+
+
+% lists
+% -----
+
+% list of a certain type: L(t)
+\newcommand{\List}[1]{\ensuremath{\mathcal{L}{\I{#1}}}}
+
+% list of elements: [e]
+\newcommand{\lst}[1]{\ensuremath{[\,#1\,]}}
+
+% empty list
+\newcommand{\el}{\ensuremath{[\,]}}
+
+% cons: |>
+\newcommand{\cons}{\ensuremath{\hspace{0.12em}\triangleright\hspace{0.08em}}}
+
+% snoc: <|
+\newcommand{\snoc}{\ensuremath{\hspace{0.08em}\triangleleft\hspace{0.12em}}}
+
+% concatenation: ++
+\newcommand{\concat}{\ensuremath{\hspace{0.12em}\raisebox{0.2ex}
+{\text{\scriptsize+}\!\text{\scriptsize+}}\hspace{0.12em}}}
+
+% take
+\newcommand{\take}{\ensuremath{\lceil}}
+
+% drop
+\newcommand{\drop}{\ensuremath{\lfloor}}
+
+
+% logic
+% -----
+
+% boolean type: B
+\newcommand{\bool}{\ensuremath{\mathbb{B}}}
+
+% true
+\newcommand{\true}{\ensuremath{\f{true}}}
+
+% false
+\newcommand{\false}{\ensuremath{\f{false}}}
+
+% implies: =>
+\newcommand{\limp}{\ensuremath{\Rightarrow}}
+
+% follows: =>
+\newcommand{\lfol}{\ensuremath{\Leftarrow}}
+
+% bi-implies: <=>
+\newcommand{\lbimp}{\ensuremath{\Leftrightarrow}}
+
+% not with extra spacing
+\newcommand{\Lnot}{\ensuremath{\ \lnot\ }}
+
+% and with extra spacing
+\newcommand{\Land}{\ensuremath{\ \land\ }}
+
+% or with extra spacing
+\newcommand{\Lor}{\ensuremath{\ \lor\ }}
+
+% implies with extra spacing
+\newcommand{\Limp}{\ensuremath{\ \limp\ }}
+
+% bi-implies with extra spacing
+\newcommand{\Lbimp}{\ensuremath{\ \lbimp\ }}
+
+% quantification in Dijkstra notation: <Q x : y : z>
+\newcommand{\quantD}[4]{\ensuremath{\langle\,{#1} {#2} : #3 : {#4}\,\rangle}}
+
+% universal quantification in Dijkstra notation: <forall x : y : z>
+\newcommand{\forallD}[3]{\ensuremath{\quantD{\forall}{#1}{#2}{#3}}}
+
+% existential quantification in Dijkstra notation: <exists x : y : z>
+\newcommand{\existsD}[3]{\ensuremath{\quantD{\exists}{#1}{#2}{#3}}}
+
+% derivable in #1: |-_#1
+\newcommand{\derivable}[1]{\ensuremath{\vdash_{_{#1}}}}
+
+% valid in #1: |=_#1
+\newcommand{\valid}[1]{\ensuremath{\models_{_{#1}}}}
+
+%inference rule with 0 premises and 1 conclusion
+\newcommand{\infC}[1]{\ensuremath{
+  \begin{array}{c}
+    \\\hline
+    #1
+  \end{array}
+}}
+
+%inference rule with 1 premise and 1 conclusion
+\newcommand{\infPC}[2]{\ensuremath{
+  \begin{array}{c}
+    #1 \\\hline
+    #2
+  \end{array}
+}}
+
+% inference rule with 2 premises and 1 conclusion
+\newcommand{\infPPC}[3]{\ensuremath{
+  \begin{array}{c@{\hspace{2em}}c}
+    #1 & #2 \\\hline
+    \multicolumn{2}{c}{#3}
+  \end{array}
+}}
+
+%inference rule with 3 premises and 1 conclusion
+\newcommand{\infPPPC}[4]{\ensuremath{
+  \begin{array}{c@{\hspace{2em}}c@{\hspace{2em}}c}
+    #1 & #2 & #3\\\hline
+    \multicolumn{3}{c}{#4}
+  \end{array}
+}}
+
+% arithmetic
+% ----------
+
+% natural type: N
+\newcommand{\nat}{\ensuremath{\mathbb{N}}}
+
+% positive type: N+
+\newcommand{\pos}{\ensuremath{\mathbb{N}^{+}}}
+
+% integral type: Z
+\newcommand{\tint}{\ensuremath{\mathbb{Z}}}
+
+% integer division: "div"
+\renewcommand{\div}{\ensuremath{\ \mathbf{div}\ }}
+
+% integer remainder: "mod"
+\renewcommand{\mod}{\ensuremath{\ \mathbf{mod}\ }}
+
+
+% miscellaneous
+% -------------
+
+% language of a signature Sigma: L(Sigma)
+\newcommand{\lang}[1]{\ensuremath{\fa{\mathcal{L}}{\f{#1}}}}
+
+% meaning of a syntactic element
+\newcommand{\mean}[1]{%
+  [\hspace{-.15em}[\hspace{.15em}#1\hspace{.15em}]\hspace{-.15em}]%
+}
+
+% alternative choice
+\newcommand{\alt}{\ensuremath{[\hspace{-0.04em}]}}
+
+% bullet
+\newcommand{\bul}{\mbox{\small\ensuremath{\bullet}}}
+
+% complexity according to expression: O(e)
+\newcommand{\bigo}[1]{\ensuremath{\mathcal{O}(#1)}}
+
+% print #2 inside #3, where #2 is raised by #1
+\newlength{\insidewd}%                        Define length command
+\newcommand{\inside}[3][0pt]{%		      Definition of inside:
+   \settowidth{\insidewd}{#3}%                - Save width of #3
+   \raisebox{#1}[0pt]{%                       - Raise #2 by #1
+     \makebox[0pt]{\hspace{\insidewd}#2}}%    - Print #2 centered
+   #3}%				              - Print #3
+
+% stack #2 on #3, where #2 is raised by #1
+\newlength{\stackht}%                         Define length commands
+\newcommand{\stack}[3][0pt]{%		      Definition of stack:
+   \settoheight{\stackht}{#3}%                - Save height of #3
+   \addtolength{\stackht}{#1}%                - Add to #1 to heigth
+   \inside[\stackht]{#2}{#3}}%                - Print #2 in #3 at height #3 + #1
+
+% abbreviations
+% -------------
+
+% mCRL
+\newcommand{\mCRL}{\frm{\mu}CRL\xspace}
+
+% Miscellaneous local definitions
+% -------------------------------
+
+% temporary lengths
+\newlength{\tlength}
+
+% mCRL2 keywords
+\newcommand{\kwsort}{{\bf sort}}
+\newcommand{\kwcons}{{\bf cons}}
+\newcommand{\kwmap}{{\bf map}}
+\newcommand{\kwvar}{{\bf var}}
+\newcommand{\kweqn}{{\bf eqn}}
+\newcommand{\kwact}{{\bf act}}
+\newcommand{\kwstruct}{{\bf struct}}
+\newcommand{\kwwhr}{{\bf whr}}
+\newcommand{\kwend}{{\bf end}}
+
+
+% mCRL Sorts
+\newcommand{\srtbool}{\f{Bool}}
+\newcommand{\srtpos}{\f{Pos}}
+\newcommand{\srtnat}{\f{Nat}}
+\newcommand{\srtint}{\f{Int}}
+\newcommand{\srtreal}{\f{Real}}
+
+% mCRL Operations
+\newcommand{\opzeronat}{{0n}}
+\newcommand{\oponenat}{{1}}
+\newcommand{\optwonat}{{2}}
+\newcommand{\opzeroint}{{0i}}
+\newcommand{\opposint}{\ensuremath{\f{pos}}}
+\newcommand{\opnegint}{\ensuremath{\f{neg}}}
+\newcommand{\opnot}{\ensuremath{\f{not}}}
+\newcommand{\opand}{\ensuremath{\f{and}}}
+\newcommand{\opor}{\ensuremath{\f{or}}}
+\newcommand{\opforall}{\ensuremath{\f{forall}}}
+\newcommand{\opexists}{\ensuremath{\f{exists}}}
+\newcommand{\opsucc}{\ensuremath{\f{succ}}}
+\newcommand{\oppred}{\ensuremath{\f{pred}}}
+\newcommand{\opadd}{\ensuremath{\f{add}}}
+\newcommand{\opminus}{\ensuremath{\f{minus}}}
+\newcommand{\opmonus}{\ensuremath{\f{monus}}}
+\newcommand{\optimes}{\ensuremath{\f{times}}}
+\newcommand{\opdiv}{\ensuremath{\f{div}}}
+\newcommand{\opmod}{\ensuremath{\f{mod}}}
+\newcommand{\oppower}{\ensuremath{\f{power}}}
+\newcommand{\opdouble}{\ensuremath{\f{double}}}
+\newcommand{\opif}{\ensuremath{\f{if}}}
+\newcommand{\opeq}{\ensuremath{\f{eq}}}
+\newcommand{\opneq}{\ensuremath{\f{neq}}}
+\newcommand{\opgrt}{\ensuremath{\f{grt}}}
+\newcommand{\opsmt}{\ensuremath{\f{smt}}}
+\newcommand{\opgreq}{\ensuremath{\f{greq}}}
+\newcommand{\opsmeq}{\ensuremath{\f{smeq}}}
+\newcommand{\opint}{\ensuremath{\f{int}}}
+\newcommand{\opnat}{\ensuremath{\f{nat}}}
+\newcommand{\oplambda}[1]{\ensuremath{\f{lambda\_#1}}}
+\newcommand{\opappl}[1]{\ensuremath{\f{appl\_#1}}}
+\newcommand{\opsubst}[2]{\ensuremath{\f{subst\_#1\_#2}}}
+\newcommand{\opindex}[1]{\ensuremath{\f{index\_#1}}}
+\newcommand{\opproj}[2]{\ensuremath{\f{proj_{#1}^{#2}}}}
+\newcommand{\opheadsymbol}{\ensuremath{\f{opheadsymbol}}}
+
+\newcommand{\Time}{{\bf Time}}
+\newcommand{\Bool}{{\bf Bool}}
+\newcommand{\sft}{{\sf t}}
+\newcommand{\sff}{{\sf f}}
+\newcommand{\nul}{{\bf 0}}
+\font \aap cmmi10
+\newcommand{\at}[1]{\mbox{\aap ,} #1}
+\newcommand{\before}{\mbox{\footnotesize{\frm{\ll}}}}
+\newcommand{\ap}{{:}}
+\newcommand{\qed}{\hfill\ensuremath{\quad\Box}}
+\newcommand{\leftmerge}{\underline {\parallel}}
+
+\newenvironment{mCRL2}%
+{\par\bigskip\noindent%
+ \begin{tabular}{@{}>{\bf}p{2.3em}L@{\ }L@{\ }L@{\ }L@{\ }L@{\ }L@{\ }L@{\ }L}%
+}%
+{\end{tabular}\bigskip\par%
+}
+
+\begin{document}
+
+\maketitle
+
+\noindent
+We provide a syntax for the standard data types of the mCRL2 language. This
+syntax is intended to be a practical mix between standard mathematical notation
+and the syntax of specification languages and programming languages in general.
+
+\section{Basic formalism}
+
+The underlying theory of the mCRL2 data types is abstract data types.
+Abstract data types consist of:
+\begin{tdefinitions}{-}
+\item sorts and operations on these sorts;
+\item equations on terms made up from operations and variables, where the terms
+      are of the same sort.
+\end{tdefinitions}
+
+\noindent
+Sorts are declared using the keyword \frm{\kwsort}, operations using the
+keyword \frm{\kwmap} and equations using the keyword \frm{\kweqn}. Variables
+that are used in the equations need to be declared using the keyword
+\frm{\kwvar}. To distinguish constructor operations from normal operations the
+former may be declared using the keyword \frm{\kwcons}. However, the use of
+these constructors is strongly discouraged, because in practise they are
+implicitly defined via the concrete data types. With the keyword \frm{\kwsort},
+also abbreviations for sort expressions may be introduced.
+
+\subsection{Expressions}
+
+There are three kind of expressions in mCRL2, namely expressions over sorts,
+over data and over processes. Sort expressions are made up from existing sort
+names and from representations of predefined data types and type constructors.
+Data expressions are terms constructed from operations and variables. These
+data expressions are in the standard functional notation, but in the next
+sections also mixfix notation is introduced. To increase readability of the
+operation declarations in the following sections, the sorts are left implicit
+and underscores indicate the placement of the parameters.
+
+\emph{Where clauses} may be used as an abbreviation mechanism in data
+expressions. A where clause is of the form \frm{e\ \kwwhr\ a_{0} = e_{0},
+\ldots a_{n} = a_{n}\ \kwend}, with \frm{n \in \nat}. Here, \frm{e} is a data
+expression and, for all \frm{i}, \frm{0 \leq i \leq n}, \frm{a_{i}} is an
+identifier and \frm{e_{i}} is a data expression. Expression \frm{e} is called
+the body and each equation \frm{a_{i} = e_{i}} is called a \emph{definition}.
+Each identifier \frm{a_{i}} is used as an abbreviation for \frm{e_{i}} in
+\frm{e}, even if \frm{a_{i}} is already defined in the context. Also, an
+identifier \frm{a_{i}} may not occur in any of the expressions \frm{e_{j}},
+\frm{0 \leq j \leq n}. As a consequence, the order in which expressions occur
+is irrelevant.
+
+\section{Predefined data types}
+\label{sec:StandardTypes}
+
+A number of predefined data types are provided. For each data type a sort is
+provided together with a number of predefined operations.
+
+\subsection{Booleans}
+
+The boolean type is represented by the sort \frm{\srtbool}. For this sort, we
+have the following operations.
+
+\bigskip
+\begin{tabular}{|l@{\qquad}L@{\qquad}l|}
+\hline
+Operator                   & \textit{Rich}          & \verb+Plain+\\\hline
+true                       & \true                  & \verb+true+\\
+false                      & \false                 & \verb+false+\\
+negation                   & \lnot \_               & \verb+!_+\\
+conjunction                & \_ \land \_            & \verb+_ && _+\\
+disjunction                & \_ \lor \_             & \verb+_ || _+\\
+implication                & \_ \limp \_            & \verb+_ => _+\\
+universal quantification   & \forall \_ {:} \_ . \_ & \verb+forall _:_._+\\
+existential quantification & \exists \_ {:} \_ . \_ & \verb+exists _:_._+\\
+\hline
+\end{tabular}\bigskip
+
+\noindent
+In the quantifiers the first two parameters form a variable declaration,
+consisting of a name and a sort; the third parameter is the body.
+
+We also have operations that express the equality and inequality of two terms
+of the same sort, and an operation that expresses the conditional. These
+operations are available for any predefined sort, and are automatically
+generated for user defined sorts.
+
+\bigskip
+\begin{tabular}{|l@{\qquad}L@{\qquad}l|}
+\hline
+Operator                   & \textit{Rich}          & \verb+Plain+\\\hline
+equality                   & \_ \approx \_          & \verb+_ == _+\\
+inequality                 & \_ \not\approx \_      & \verb+_ != _+\\
+conditional                & \faaa{if}{\_}{\_}{\_}  & \verb+if(_,_,_)+\\
+less than                  & \_ < \_                & \verb+_ < _+\\
+less than or equal         & \_ \leq \_             & \verb+_ <= _+\\
+greater than or equal      & \_ \geq \_             & \verb+_ >= _+\\
+greater than               & \_ > \_                & \verb+_ > _+\\
+\hline
+\end{tabular}\bigskip
+
+\newpage
+
+\subsection{Numbers}
+
+Positive numbers, natural numbers, integers and real numbers (rational
+number approximations) are represented by the sorts \frm{\srtpos},
+\frm{\srtnat}, \frm{\srtint} and \frm{\srtreal}. For these sorts, we
+have the following operations, where \frm{A,B \in \set{\srtpos, \srtnat,
+\srtint, \srtreal}}:
+
+\bigskip
+\begin{tabular}{|l@{\qquad}L@{\qquad}l|}
+\hline
+Operator                   & \textit{Rich}              & \verb+Plain+\\\hline
+positive numbers           & 1,2,3,\ldots               & \verb+1,2,3,...+\\
+natural numbers            & 0,1,2,\ldots               & \verb+0,1,2,...+\\
+integers                   & \ldots, -2,-1,0,1,2,\ldots & \verb+...,-2,-1,0,1,2,...+\\
+rational numbers           & \ldots                     & \verb+...+\\
+                           & -1/1,-1/2,-1/3,\ldots      & \verb+-1/1,-1/2,-1/3,...+\\
+                           & 0/1,0/2,0/3,\ldots         & \verb+0/1,0/2,0/3,...+\\
+                           & 1/1,1/2,1/3,\ldots         & \verb+1/1,1/2,1/3,...+\\
+                           & \ldots                     & \verb+...+\\
+conversion                 & \fa{A2B}{\_}               & \verb+A2B(_)+\\
+maximum                    & \faa{max}{\_\,}{\_}        & \verb+max(_,_)+\\
+minimum                    & \faa{min}{\_\,}{\_}        & \verb+min(_,_)+\\
+absolute value             & \fa{abs}{\_}               & \verb+abs(_)+\\
+negation                   & - \_                       & \verb+-_+\\
+successor                  & \fa{succ}{\_}              & \verb+succ(_)+\\
+predecessor                & \fa{pred}{\_}              & \verb+pred(_)+\\
+addition                   & \_ + \_                    & \verb-_ + _-\\
+subtraction                & \_ - \_                    & \verb+_ - _+\\
+multiplication             & \_ * \_                    & \verb+_ * _+\\
+division                   & \_ / \_                    & \verb+_ / _+\\
+integer div                & \_ \div \_                 & \verb+_ div _+\\
+integer mod                & \_ \mod \_                 & \verb+_ mod _+\\
+exponentiation             & \faa{exp}{\_\,}{\_}        & \verb+exp(_,_)+\\
+floor                      & \fa{floor}{\_}             & \verb+floor(_)+\\
+ceiling                    & \fa{ceil}{\_}              & \verb+ceil(_)+\\
+round                      & \fa{round}{\_}             & \verb+round(_)+\\
+\hline
+\end{tabular}\bigskip
+
+\noindent
+Explicit type conversions can be done using the conversion operation
+\frm{\f{A2B}}. The other operations perform implicit type conversions, when
+needed.
+
+\newpage
+\section{Type constructors}
+\label{sec:TypeConstructors}
+
+Type constructors are predefined operations on sorts with which we can
+construct sorts. For each sort that is constructed this way a number of
+operations are provided.
+
+\subsection{Lists}
+
+Lists, where all elements are of sort \frm{A}, are declared by the sort
+expression \frm{\fa{List}{A}}. The following operations are provided for this
+sort.
+
+\bigskip
+\begin{tabular}{|l@{\qquad}L@{\qquad}l|}
+\hline
+Operator                       & \textit{Rich}          & \verb+Plain+\\\hline
+construction                   & \lst{\_\,,\ldots,\_}   & \verb+[_,...,_]+\\
+element test                   & \_ \in \_              & \verb+_ in _+\\
+length                         & \# \_                  & \verb+#_+\\
+cons                           & \_ \cons \_            & \verb+_ |> _+\\
+snoc                           & \_ \snoc \_            & \verb+_ <| _+\\
+concatenation                  & \_ \concat \_          & \verb-_ ++ _-\\
+element at position            & \_\ .\ \_              & \verb+_ . _+\\
+the first element of a list    & \fa{head}{\_}          & \verb+head(_)+\\
+list without its first element & \fa{tail}{\_}          & \verb+tail(_)+\\
+the last element of a list     & \fa{rhead}{\_}         & \verb+rhead(_)+\\
+list without its last element  & \fa{rtail}{\_}         & \verb+rtail(_)+\\
+\hline
+\end{tabular}\bigskip
+
+\noindent
+The empty list is represented by an empty list construction, i.e.\ \frm{\el}.
+Also note that the lists \frm{\lst{a,b}}, \frm{a \cons \lst{b}} and
+\frm{\lst{a} \snoc b} are all equivalent.
+
+\subsection{Sets and bags}
+
+Possibly infinite sets and bags where all elements are of sort \frm{A} are
+declared by the sort expressions \frm{\fa{Set}{A}} and \frm{\fa{Bag}{A}},
+respectively. The following operations are provided for these sorts.
+
+\bigskip
+\begin{tabular}{|l@{\qquad}L@{\qquad}l|}
+\hline
+Operator                       & \textit{Rich}           & \verb+Plain+\\\hline
+set enumeration                & \set{\_\,,\ldots,\_}    & \verb+{ _,...,_ }+\\
+bag enumeration                & \bag{{\_:\_}\,,\ldots,{\_:\_}}
+                                                      & \verb+{ _:_,...,_:_}+\\
+comprehension                  & \scompr{\_:\_}{\_}      & \verb+{ _:_ | _ }+\\
+element test                   & \_ \in \_               & \verb+_ in _+\\
+bag multiplicity               & \faa{count}{\_}{\_}     & \verb+count(_,_)+\\
+subset/subbag                  & \_ \subseteq \_         & \verb+_ <= _+\\
+proper subset/subbag           & \_ \subset \_           & \verb+_ < _+\\
+union                          & \_ \cup \_              & \verb-_ + _-\\
+difference                     & \_ - \_                 & \verb+_ - _+\\
+intersection                   & \_ \cap \_              & \verb+_ * _+\\
+set complement                 & \stack[1.3ex]{\_}{\_}   & \verb+!_+\\
+convert set to bag             & \fa{Set2Bag}{\_}        & \verb+Set2Bag(_)+\\
+convert bag to set             & \fa{Bag2Set}{\_}        & \verb+Bag2Set(_)+\\
+\hline
+\end{tabular}\bigskip
+
+\noindent
+The empty set of bag is represented by an empty enumeration, i.e.\
+\frm{\set{}}. Note that a set enumeration declares a set, not a bag. So e.g.\
+\frm{\set{a,b,c}} declares the same set as \frm{\set{a,b,c,c,a,c}}. In a bag
+enumeration the number of times an element occurs has to be declared explicitly.
+So e.g.\ \frm{\bag{a:2,b:1}} declares a bag consisting of two \frm{a}'s and one
+\frm{b}. Also \frm{\bag{a:1,b:1,a:1}} declares the same bag. A set
+comprehension \frm{\scompr{x:A}{\fa{P}{x}}} declares the set consisting of all
+elements \frm{x} of sort \frm{A} for which predicate \frm{\fa{P}{x}} holds,
+i.e.\ \frm{\fa{P}{x}} is an expression of sort \frm{\srtbool}. A bag
+comprehension \frm{\scompr{x:A}{\fa{f}{x}}} declares the bag in which each
+element \frm{x} occurs \frm{\fa{f}{x}} times, i.e.\ \frm{\fa{f}{x}} is an
+expression of sort \frm{\srtnat}. Note that functions \frm{P} and \frm{f} have
+to be total.
+
+\subsection{Function types}
+
+A function type of total functions from \frm{X_{0} \times \ldots \times X_{n}}
+to \frm{Y} is declared by the sort expression \frm{X_{0} \times \ldots \times
+X_{n} \To Y}. The following operations are provided for these sorts.
+
+\bigskip
+\begin{tabular}{|l@{\qquad}L@{\qquad}l|}
+\hline
+Operator                   & \textit{Rich}          & \verb+Plain+\\\hline
+function application       & \_(\_,\ldots,\_)       & \verb+_(_,...,_)+\\
+lambda abstraction         & \lambda \_{:}X_{0}, \ldots, \_{:}X_{n}.\_
+                                          & \verb+lambda _:X0,...,_:Xn._+\\
+\hline
+\end{tabular}\bigskip
+
+\noindent
+Function types may be nested. To make this unambiguous, function arrow
+\frm{\To} is right associative, which may be overridden by using parentheses.
+Also it is not allowed to have sort expressions with \frm{\To} as its head at
+the left hand side of a function type. If this is needed, parentheses need to
+be used.
+
+
+\subsection{Structured types}
+
+Structured types consist of \emph{sum} types and \emph{product} types. A
+structured type is declared by the following sort expression, where \frm{n \in
+\pos} and \frm{k_{i} \in \nat} with \frm{1 \leq i \leq n}:
+\begin{mCRL2}
+& \kwstruct
+    &c_{1}(\f{pr}_{1,1}: A_{1,1}, & \ldots & , \f{pr}_{1,k_{1}}: A_{1,k_{1}})
+      ?\f{is\_c_{1}}\\
+&\hfill |
+    &c_{2}(\f{pr}_{2,1}: A_{2,1}, & \ldots & , \f{pr}_{2,k_{2}}: A_{2,k_{2}})
+      ?\f{is\_c_{2}}\\
+&                                 & \multicolumn{1}{c}{\vdots}\\
+&\hfill |
+    &c_{n}(\f{pr}_{n,1}: A_{n,1}, & \ldots & , \f{pr}_{n,k_{n}}: A_{n,k_{n}})
+      ?\f{is\_c_{n}}
+\end{mCRL2}
+
+\noindent
+From this declaration it can be seen that at least \frm{1} summation has to be
+specified and a summation may consist of \frm{0} products. Each summation
+\frm{i} is labelled by a \emph{constructor} \frm{c_{i}} and optionally by a
+\emph{recogniser} \frm{\f{is\_c_{i}}}. Recogniser \frm{\f{is\_c_{i}}} is used
+to determine if a term of the above sort is constructed with \frm{c_{i}}. If a
+recogniser label is left out, the corresponding \frm{?} is also left out.  Each
+product \frm{(i,j)} is optionally labelled by a \emph{projection}
+\frm{\f{pr}_{i,j}}. With this projection, the \frm{j}'th element of summation
+\frm{i} can be obtained. If a projection label is left out, the corresponding
+\frm{:} is left out. If a summation \frm{i} does not have any products, it is
+written as \frm{c_{i}?\f{is\_c_{i}}} instead of \frm{c_{i}()?\f{is\_c_{i}}}.
+
+All labels have to be chosen such that no ambiguity can arise. Each sort
+\frm{A_{i,j}} has to be a valid sort expression, in which forward references to
+sort labels may occur. This means that it is allowed to specify systems of
+equations of structured types.
+
+The following operations are generated for the above sort. Projection and
+recogniser operations are only generated if the user specified them.
+
+\bigskip
+\begin{tabular}{|l@{\qquad}L@{\qquad}l|}
+\hline
+Operator                            & \textit{Rich}      & \verb+Plain+\\\hline
+constructor of summation \frm{i}    & \fa{c_{i}}{\_,\ldots,\_}
+                                                         & \verb+ci(_,...,_)+\\
+recogniser for constructor \frm{i}  & \fa{is\_c_{i}}{\_}    & \verb+is_ci(_)+\\
+projection \frm{(i,j)}, if declared & \fa{\f{pr}_{i,j}}{\_}  & \verb+prij(_)+\\
+\hline
+\end{tabular}\bigskip
+
+We give a few examples of sort declarations involving structured sorts. For
+finite \frm{n \in \nat}, an enumerated type can be declared by
+\begin{mCRL2}
+sort & Enum & = & \kwstruct\ \f{enum}_{0}?\f{is\_enum}_{0}\ |\ \ldots\ |\
+\f{enum}_{n}?\f{is\_enum}_{n}
+\end{mCRL2}
+
+\noindent
+This generates constructor operations \frm{\f{enum}_{i} : \f{Enum}}, together
+with recogniser operations \frm{\f{is\_enum}_{i}: \f{Enum} \To \srtbool}, with
+\frm{0 \leq i \leq n}.
+
+Pairs of elements of sort \frm{A} and \frm{B} can be declared as follows:
+\begin{mCRL2}
+sort & \f{ABPair} & = & \kwstruct\ \faa{pair}{\f{fst}: A}{\f{snd}: B}
+\end{mCRL2}
+
+\noindent
+For this declaration, constructor operation \frm{\f{pair}: A \times B \To
+\f{ABPair}} and projection operations \frm{\f{fst}: \f{ABPair} \To A} and
+\frm{\f{snd}: \f{ABPair} \To B} are generated.
+
+Binary trees where all leaves and nodes are labelled with elements of sort
+\frm{A} can be declared as follows:
+Example:
+\begin{mCRL2}
+sort & \f{BATree} & =
+  & \kwstruct\ \fa{leaf}{A} \  | \  \faaa{node}{BATree}{A}{BATree}
+\end{mCRL2}
+\noindent
+Or, with projection and recogniser labels:
+\begin{mCRL2}
+sort & \f{BATree} & =
+  & \kwstruct & \fa{leaf}{\f{lval}: A}?\f{is\_leaf}\\
+&&& \hfill |  & \faaa{node}{
+    \f{left}: \f{BATree}}{\f{nval}: A}{\f{right}:\f{BATree}}?\f{is\_node}
+\end{mCRL2}
+\noindent
+The quantification of an associative operation \frm{f: A \times A \To A} over
+all labels in a \frm{\f{BATree}}, can be defined in the same way for both
+declarations of the tree:
+\begin{mCRL2}
+map  & \f{qf}: \f{BATree} \To A\\
+var  & t,u: \f{BATree}\\
+     & a: A\\
+eqn  & \fa{qf}{\fa{leaf}{a}}         & = & a\\
+     & \fa{qf}{\faaa{node}{t}{a}{u}} & =
+       & \faa{f}{\fa{qf}{t}}{\faa{f}{a}{\fa{qf}{u}}}\\
+\end{mCRL2}
+\noindent
+The last definition of sort \frm{\f{BATree}} also allows the definition of
+operation \frm{\f{qf}} without pattern matching:
+\begin{mCRL2}
+var  & \multicolumn{3}{L}{t: \f{BATree}}\\
+eqn  & \fa{qf}{t} & = & \faaa{if}{\fa{is\_leaf}{t}}{\fa{lval}{t}}{
+         \faa{f}{\fa{qf}{\fa{left}{t}}}{
+           \faa{f}{\fa{nval}{t}}{\fa{qf}{\fa{right}{t}}}}}\\
+\end{mCRL2}
+
+\subsubsection{Pattern matching versus projections and recognisers}
+
+When defining \emph{data equations}, it is often the case that pattern matching
+on the constructors of a structured type is more elegant than using projection
+and recogniser operations. The last example is a typical instance of this.
+
+When defining \emph{process equations}, pattern matching can not be applied
+directly on the left hand side of the equation. However, we can apply it
+indirectly through the use of the summation and conditional operators in the
+right hand side. As an example, take the following process declaration without
+pattern matching:
+\begin{mCRL2}
+proc & \fa{P}{t: \f{BATree}} & = &
+    \fa{is\_leaf}{t} & \To
+    & \multicolumn{3}{@{}L}{\fa{get}{\fa{lval}{t}}.\delta\ +}\\
+&&& \fa{is\_node}{t} & \To
+    & \fa{get}{\fa{nval}{t}}.(\fa{P}{\fa{left}{t}} + \fa{P}{\fa{right}{t}})\\
+\end{mCRL2}
+
+\noindent
+This declaration is equivalent to the following declaration, which uses pattern
+matching:
+\begin{mCRL2}
+proc & \fa{P}{t: \f{BATree}} & = &
+    \sum_{a:A}
+    & (t & \approx & \fa{leaf}{a}) \To \fa{get}{a}.\delta\ +\\
+&&& \sum_{a:A, u,v: \f{BATree}}
+    & (t & \approx & \faaa{node}{u}{a}{v}) \To \fa{get}{a}.(\fa{P}{u} + \fa{P}{v})\\
+\end{mCRL2}
+
+\noindent
+As can be seen from the above example, it is arguable which way is the most
+elegant to specify process equations.
+
+\section{Parsing issues}
+
+The following issues are important not only for parsing by computer, but also
+for parsing by humans.
+
+\subsection{Relation with processes}
+
+\noindent
+Data terms occur in relation to processes in the following ways:
+\begin{tdefinitions}{-}
+\item action parameters
+\item arguments of a process reference
+\item left argument of conditional process terms (\frm{b \To p \diamond q})
+\item right argument of a timed process term (\frm{p @ t})
+\end{tdefinitions}
+
+\noindent
+These last two are ambiguous or hard to read for where clauses, quantifications
+and infix operations. For this reason, these operations need to be
+parenthesized.
+
+\subsection{Type inference}
+
+Data expressions involving numbers, sets, bags or lists may be ambiguous. E.g.\
+namely \frm{1} can be parsed as a term of sort \frm{\srtpos}, \frm{\srtnat},
+\frm{\srtint} or \frm{\srtreal}, and \frm{\set{}} can be parsed as a term of an arbitrary set or
+bag sort. For overloaded operations, we have similar problems.
+
+These problems are solved by a type inference system: if the type of an
+expression can be determined unambiguously, the system is able to infer the
+type of this expression.
+
+\subsection{Priorities and associativity}
+
+The prefix operators have the highest priority, followed by the infix
+operators, followed by the lambda operator together with universal and
+existential quantification, followed by the where clause.
+Table~\ref{tab:precedence} lists the infix operators by decreasing priority.
+The symbols are shown in plain text format and may represent multiple rich text
+symbols. Operators on the same line have the same priority and associativity.
+Note that the list operations \frm{\cons}, \frm{\snoc} and \frm{\concat} are
+split into three priority levels such that expressions with one of these
+operations as their head symbol are allowed if and only if they match the
+following pattern, where \frm{b, \ldots, c}, \frm{d, \ldots, e} and \frm{s,
+\ldots, t} are expressions with a priority level greater than \frm{\concat}:
+\[
+b \cons \dots \cons c \cons s \concat \dots \concat t \snoc d \snoc \dots
+\snoc e
+\]
+
+\begin{table}[!hbt]
+\centering
+\begin{tabular}{|ll|}
+\hline
+operators                                           & associativity\\\hline
+\verb+*+, \verb+.+                                  & left\\
+\verb+/+, \verb+div+, \verb+mod+                    & left\\
+\verb-+-, \verb+-+                                  & left\\
+\verb+|>+                                           & right\\
+\verb+<|+                                           & left\\
+\verb-++-                                           & left\\
+\verb+<+, \verb+>+, \verb+<=+, \verb+>=+, \verb+in+ & none\\
+\verb+==+, \verb+!=+                                & right\\
+\verb+&&+, \verb+||+                                & right\\
+\verb+=>+                                           & right\\\hline
+\end{tabular}
+\caption{Precedence of infix operators}
+\label{tab:precedence}
+\end{table}
+
+\subsection{Design decisions}
+
+In the development of the language, a number of design decisions were taken.
+The most important ones are listed here:
+\begin{tdefinitions}{-}
+\item Layout may not have any effect on the semantics of the language.
+\item Declarations have to be terminated by a semicolon. If this was not
+required the language would be ambiguous. E.g.\ consider the following
+operation declarations:
+\begin{mCRL2}
+& X   & = & \fa{f}{g}\\
+& (k) & = & Y\\
+\end{mCRL2}
+From the layout it is clear that \frm{X} is equal to \frm{\fa{f}{g}} and
+\frm{Y} to \frm{(k)}. However, since layout may not have any effect on the
+semantics of the language, it is also possible that \frm{X} is equal to
+\frm{f} and \frm{Y} to \frm{\fa{(g)}{k}}.
+\end{tdefinitions}
+
+\section {Comparison of data languages}
+
+The data part of both the \mCRL and the mCRL2 languages have a lot in common
+with functional programming languages. For the features that involve functional
+programming languages the following comparison is made.
+
+\begin{table}[h!bt]
+\centering
+\begin{tabular}{|l|llll|}
+\hline
+Aspect \verb+\+ Language&\mCRL        &mCRL2       &Haskell/Clean&MetaOCaml\\
+\hline
+Purely functional       &yes          &yes         &yes          &no\\
+Expressiveness          &first-order  &higher-order&higher-order &higher-order\\
+Strict                  &no           &no          &no           &yes\\
+Evaluation              &somewhat lazy&somewhat lazy&lazy        &eager\\
+Control of eval.\ order & no       &yes         &yes          &yes\\
+Partial evaluation      &yes          &yes         &no           &yes\\
+Polymorphism            &no           &no          &yes          &yes\\
+Modules                 &no           &no          &yes          &yes\\
+Object orientation      &no           &no          &no           &yes\\
+Concrete data types     &no           &yes         &yes          &yes\\
+\hline
+\end{tabular}
+\caption{Comparison of data languages}
+\label{tab:comparison}
+\end{table}
+
+\noindent
+Note that originally the evaluation in \mCRL and mCRL2 was eager, but the
+addition of just-in-time strategies has moved towards laziness. Since both
+languages have a non-strict semantics and evaluation is not fully lazy, the
+evaluation only \emph{approximates} the semantics. However, this problem rarely
+pops up in practise and if it pops up, it can usually be circumvented by
+controlling the evaluation order. This can be achieved by the use of
+\emph{conditional rewrite rules}.
+
+\end{document}

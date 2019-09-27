@@ -1,0 +1,34 @@
+%%
+%% This is file `undertilde.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% undertilde.dtx  (with options: `package')
+%% 
+%% IMPORTANT NOTICE:
+%% 
+%% For the copyright see the source file.
+%% 
+%% Any modified versions of this file must be renamed
+%% with new filenames distinct from undertilde.sty.
+%% 
+%% For distribution of the original source see the terms
+%% for copying and modification in the file undertilde.dtx.
+%% 
+%% This generated file may be distributed as long as the
+%% original source files, as listed above, are part of the
+%% same distribution. (The sources need not necessarily be
+%% in the same archive or directory.)
+\ProvidesPackage{undertilde}[2000/08/08 v1.0 Tilde under a math object]
+\newlength\knuthian@fdfive
+\def\mathpal@save#1{\let\was@math@style=#1\relax}
+\def\utilde#1{\mathpalette\mathpal@save
+              {\setbox124=\hbox{$\was@math@style#1$}%
+\setbox125=\hbox{$\fam=3\global\knuthian@fdfive=\fontdimen5\font$}
+\setbox125=\hbox{$\widetilde{\vrule height 0pt depth 0pt width \wd124}$}%
+               \baselineskip=1pt\relax
+               \vtop{\copy124\copy125\vskip -\knuthian@fdfive}}}
+\endinput
+%%
+%% End of file `undertilde.sty'.
