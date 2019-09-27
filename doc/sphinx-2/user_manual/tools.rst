@@ -6,7 +6,7 @@ Tool documentation
 Below the main tools provided in the toolset are given. The common tools
 are suitable for all main tasks to be carried out with the toolset. The experimental
 tools are tools that are under development and provide additional but still experimental
-functionality. 
+functionality.
 
 List of the common tools
 ------------------------
@@ -20,9 +20,12 @@ List of the common tools
 
       tools/release/*
 
-.. The ugly dot below is the only way I manage to let the next header start on a new line. 
 
-.
+.. The non-breaking space below is the only way I manage to let the next header start on a new line.
+.. raw:: html
+
+   &nbsp;
+
 
 List of the experimental tools
 ------------------------------
@@ -36,9 +39,13 @@ List of the experimental tools
 
       tools/experimental/*
 
-.
 
-In the source distribution there are more tools such as the deprecated and developer tools. 
+.. raw:: html
+
+   &nbsp;
+
+
+In the source distribution there are more tools such as the deprecated and developer tools.
 
 
 
