@@ -96,6 +96,9 @@ html_static_path = ['_static']
 # Tweaking how the "last updated" is displayed
 today_fmt = '%d-%m-%Y'
 
+# Suppress warnings about unreferenced citations (there are many on the publications page).
+suppress_warnings = ['ref.citation']
+
 
 # Generate rst files from man pages
 import man
