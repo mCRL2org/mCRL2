@@ -61,17 +61,14 @@ endif()
 ## Set C++ compile flags
 ##---------------------------------------------------
 
-try_add_cxx_flag(-std=c++11)
-if(NOT CXX_ACCEPTS_STD_CPP11)
-  try_add_cxx_flag(-std=c++0x)
-endif()
+try_add_cxx_flag(-std=c++17)
 
 if(APPLE)
   try_add_cxx_flag(-stdlib=libc++)
 endif()
 
-if(NOT (CXX_ACCEPTS_STD_CPP11 OR CXX_ACCEPTS_STD_CPP0X))
-  message(FATAL_ERROR "Your compiler does not support -std=c++11 or -std=c++0x. You should upgrade to a newer compiler version to build mCRL2")
+if(NOT CXX_ACCEPTS_STD_CPP11)
+  message(FATAL_ERROR "Your compiler does not support the -std=c++17 flag. You should upgrade to a newer compiler version to build mCRL2")
 endif()
 
 try_add_cxx_flag(-Wall)

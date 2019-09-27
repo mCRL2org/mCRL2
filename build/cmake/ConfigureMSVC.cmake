@@ -10,13 +10,13 @@ try_add_cxx_flag(/EHs)                # From MSDN:  Although Windows and Visual 
                                       #     that you use ISO-standard C++ exception handling (/EHs or /EHsc) because 
                                       #     it makes code more portable and flexible.
 try_add_cxx_flag(/bigobj)             # Increases object addressable sections capacity to 4,294,967,296 (2^32), possibly required for template heavy code.
-try_add_cxx_flag(/std:c++14)          # Sets the minimal C++ standard available for conformance checking in Visual Studio 2017.
+try_add_cxx_flag(/std:c++17)          # Enable for conformance checking in Visual Studio 2017 for the C++17 standard.
 try_add_cxx_flag(/W3      DEBUG)      # Increase the warning level.
 try_add_cxx_flag(/MP)                 # Enable multicore compilation.
 
 try_add_c_flag(/EHs)
 try_add_c_flag(/bigobj)
-try_add_c_flag(/std:c++14)
+try_add_c_flag(/std:c++17)
 try_add_c_flag(/W3         DEBUG)
 try_add_c_flag(/MP)
 

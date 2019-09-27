@@ -46,6 +46,3 @@ endif()
 if(NOT ${MCRL2_ENABLE_DEBUG_SOUNDNESS_CHECKS})
   add_definitions(-DMCRL2_NO_SOUNDNESS_CHECKS)
 endif()
-
-# Check supported C++11 features
-include(CheckCXX11Features)
