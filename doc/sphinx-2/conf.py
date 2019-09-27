@@ -24,13 +24,27 @@ sys.path.insert(0, (Path(__file__).parent / '_extensions').as_posix())
 project = 'mCRL2'
 author = 'Technische Universiteit Eindhoven'
 release = '2019'
-with open(Path(__file__).parent / '../../build/cmake/MCRL2Version.cmake') \
-        as mCRL2_version_file:
-    for line in mCRL2_version_file:
-        matches = re.findall(r'MCRL2_MAJOR_VERSION[^"]+"([^"]+)"', line)
+version = '2019'
+
+# run CMake on the version file to obtain the current version of mCRL2
+from man import call
+src_path = Path(__file__).parent / '../..'
+olddir = os.getcwd()
+try:
+    os.chdir(src_path)
+    out = call('CMake', ['cmake', '-P', 'build/cmake/MCRL2Version.cmake']).decode('utf-8')
+    for line in iter(out.splitlines()):
+        matches = re.findall(r'MCRL2_MAJOR_VERSION ([\S]+)', line)
         if matches:
             release = matches[0]
-version = release + '.fd641414f8' # TODO: execute above CMake to find minor version
+        matches = re.findall(r'MCRL2_MINOR_VERSION ([\S]+)', line)
+        if matches:
+            version = matches[0]
+finally:
+    os.chdir(olddir)
+version = f'{release}.{version}'
+
+# update copyright from current version
 copyright = f'2011-{version[0:4]}, Technische Universiteit Eindhoven'
 
 
