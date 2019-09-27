@@ -117,7 +117,7 @@ public:
   }
 };
 
-struct translate_user_notation_function: public std::unary_function<data_expression, data_expression>
+struct translate_user_notation_function
 {
   data_expression operator()(const data_expression& x) const
   {

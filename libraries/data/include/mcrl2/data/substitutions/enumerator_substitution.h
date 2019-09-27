@@ -80,7 +80,7 @@ data_expression enumerator_replace(const T& x, const variable_list& variables, c
 /// \brief Substitution that stores the assignments as a sequence of variables and a sequence of expressions.
 /// It supports function composition efficiently. This is done by simply concatenating the variables and
 /// expressions of the two substitutions. As a result, evaluating the substitution becomes more expensive.
-struct enumerator_substitution: public std::unary_function<data::variable, data::data_expression>
+struct enumerator_substitution
 {
   /// \brief type used to represent variables
   typedef data::variable variable_type;

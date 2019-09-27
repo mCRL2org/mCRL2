@@ -35,7 +35,7 @@ namespace data {
 /// sigma[v] = v; // remove the assignment to v
 ///\endverbatim
 template <typename AssociativeContainer = std::map<variable,data_expression> >
-class mutable_map_substitution : public std::unary_function<typename AssociativeContainer::key_type, typename AssociativeContainer::mapped_type>
+class mutable_map_substitution
 {
 protected:
   AssociativeContainer m_map;

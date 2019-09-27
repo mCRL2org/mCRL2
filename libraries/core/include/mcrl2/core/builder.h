@@ -152,15 +152,13 @@ struct update_apply_builder: public Builder<update_apply_builder<Builder, Functi
   using super::leave;
   using super::apply;
   using super::update;
-
-  typedef typename Function::result_type result_type;
-  typedef typename Function::argument_type argument_type;
-
+  
   const Function& f_;
 
-  result_type apply(const argument_type& x)
+  template<typename ...Args>
+  auto apply(const Args&&... args) -> decltype(Function(std::forward<Args>(args)...))
   {
-    return f_(x);
+    return f_(std::forward<Args>(args)...);
   }
 
   update_apply_builder(const Function& f)
@@ -185,15 +183,13 @@ class update_apply_builder_arg1: public Builder<update_apply_builder_arg1<Builde
   using super::leave;
 	using super::apply;
   using super::update;
-
-  typedef typename Function::result_type result_type;
-  typedef typename Function::argument_type argument_type;
-
+  
   const Function& f_;
-
-  result_type apply(const argument_type& x)
+  
+  template<typename ...Args>
+  auto apply(const Args&&... args) -> decltype(Function(std::forward<Args>(args)...))
   {
-    return f_(x);
+    return f_(std::forward<Args>(args)...);
   }
 
   update_apply_builder_arg1(const Function& f, const Arg1& arg1):

@@ -25,7 +25,7 @@ namespace mcrl2 {
 namespace data {
 
 /// \brief Substitution that maps a sort expression to a sort expression.
-struct sort_expression_assignment: public std::unary_function<sort_expression, sort_expression>
+struct sort_expression_assignment
 {
   typedef sort_expression variable_type;
   typedef sort_expression expression_type;
