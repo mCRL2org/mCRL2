@@ -151,13 +151,23 @@ table.libdoc td p em {
 
 /* -- page layout ----------------------------------------------------------- */
 
+html {
+  height: 100%; /* needed for pushing footer to bottom of page */
+}
+
 body {
-    font-family: serif;
-    font-size: 100%;
-    background-color: white;
-    color: #000;
-    margin: 0;
-    padding: 0;
+  /* needed for pushing footer to bottom of page */
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  /* other styles */
+  font-family: serif;
+  font-size: 100%;
+  background-color: white;
+  color: #000;
+  margin: 0;
+  padding: 0;
 }
 
 div.document {
@@ -178,6 +188,10 @@ div.body {
     background-color: #ffffff;
     color: #000000;
     padding: 0 40px 40px 40px;
+}
+
+div.footer-spacer {
+  flex: 1 0 auto;
 }
 
 div.footer {
