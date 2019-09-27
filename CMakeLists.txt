@@ -1,22 +1,12 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.0)
 project(mCRL2)
 
-if(NOT ${CMAKE_VERSION} VERSION_LESS 3.0)
-  # Ignore variable COMPILE_DEFINITIONS_<CONFIG>
-  cmake_policy(SET CMP0043 NEW)
-endif()
-
-if (NOT ${CMAKE_VERSION} VERSION_LESS 3.1)
-  # Do not implicitly dereference variables or keywords when quoted in an if() command.
-  cmake_policy(SET CMP0054 NEW)
-endif()
-
-if(NOT ${CMAKE_VERSION} VERSION_LESS 3.10)
-  # From CMake 3.10 onwards the AUTOMOC and AUTOUIC properties apply to GENERATED files.
+if(POLICY CMP0071)
+  # The AUTOMOC and AUTOUIC properties should not apply to GENERATED files.
   cmake_policy(SET CMP0071 OLD)
 endif()
 
-if(NOT ${CMAKE_VERSION} VERSION_LESS 3.11)
+if(POLICY CMP0072)
   # Choose the GLVND (GL Vendor Neutral Dispatch library) over OpenGL legacy if both are available.
   cmake_policy(SET CMP0072 NEW)
 endif()
