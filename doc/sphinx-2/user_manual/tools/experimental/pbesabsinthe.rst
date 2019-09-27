@@ -36,7 +36,7 @@ Besides a PBES, the user must supply an input file, containing the following:
        ==: Bit # Bit -> Bool        := abseq : AbsBit # AbsBit -> Set(Bool);
        inv: Bit -> Bit              := absinv : AbsBit -> Set(AbsBit);
 
-This file is passed to the tool using the option :option:`-a`.
+This file is passed to the tool using the option `-a`.
 The tool attempts to automatically generate abstractions of functions that were
 not specified by the user. The data specification and the right hand sides of the
 function mapping are merged with the data specification of the input PBES.

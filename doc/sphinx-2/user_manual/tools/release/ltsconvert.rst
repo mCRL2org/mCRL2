@@ -18,7 +18,7 @@ groups the state labels of all states that are equivalent into one set of state
 labels for a number of reductions. The reduced state in the new state space is labelled with this set. The state labels can be
 inspected using the tool :ref:`tool-ltsinfo` with the flag ``-l``, or ``--state-label``.
 As these sets of state labels can be large, the flag ``-n``, or ``--no-state``
-of :ref:`ltsconvert` can be used to remove these state labels in the resulting
+of :ref:`tool-ltsconvert` can be used to remove these state labels in the resulting
 state space.
 
 .. note::

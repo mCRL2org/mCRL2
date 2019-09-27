@@ -26,7 +26,7 @@ following condition holds:
    \end{array}
 
 where :math:`inv` is the invariant specified using the option
-:option:`--invariant`. In case :math:`a_i` is also a :math:`tau`-action, this
+`--invariant`. In case :math:`a_i` is also a :math:`tau`-action, this
 formula can be weakened to the following:
 
 .. math::
@@ -44,13 +44,13 @@ The tool will generate these confluence conditions for all :math:`tau`-summands 
 tries to prove that they are tautologies using a BDD based prover for
 propositional formulas. In some cases :ref:`tool-lpsconfcheck` indicates that
 a :math:`tau`-summand is not confluent even though it is. The option
-:option:`--verbose` gives insight into what the prover is doing and can be used
+`--verbose` gives insight into what the prover is doing and can be used
 to see if rewrite rules have to be added to the specification in order to enable
 the prover to determine that certain condition are indeed tautologies.
 
 In some cases it may be useful to use an SMT solver to assist the prover. The
 SMT solver can further reduce BDDs by removing inconsistent paths. A specific
-SMT solver can be chosen using the option :option:`--smt-solver=SOLVER``. Either
+SMT solver can be chosen using the option `--smt-solver=SOLVER``. Either
 the SMT solver `Ario <http://www.eecs.umich.edu/~ario>`_ or `CVC3
 <http://www.cs.nyu.edu/acsys/cvc3>`_ can be used. To use one of these solvers,
 the directory containing the corresponding executable must be in the path.
@@ -80,7 +80,7 @@ of determining confluence are as follows:
   generating the confluence condition and then checking if this condition is a
   tautology using the prover. If two summands are proven confluent using the
   prover, :ref:`tool-lpsconfcheck` indicates this by printing a plus sign
-  ('+'). If the option :option:`--generate-invariants` is used, the
+  ('+'). If the option `--generate-invariants` is used, the
   tool will try to prove that the reduced confluence
   condition is an invariant of the LPS, in case the confluence condition is not
   a tautology. If the reduced confluence condition is indeed an invariant, the

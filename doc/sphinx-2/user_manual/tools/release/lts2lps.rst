@@ -17,7 +17,7 @@ the process.
    If the labelled transition system does not provide information on the data types
    and has no action declarations, these must be provided separately. Only the .lts
    format contains such information. There are several ways to provide this extra
-   required info, see the :option:`-D`, :option:`-l` and :option:`-m` options.
+   required info, see the `-D`, `-l` and `-m` options.
 
 
 .. include:: man/lts2lps.txt
