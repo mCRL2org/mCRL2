@@ -73,7 +73,7 @@ def generate_tool_documentation(temppath, binpath, tool_directory_path, tool_sub
             usr_rst_handle.write(f'\n\n.. include:: man/{tool}.txt\n')
       elif os.path.exists(man_rst):
         _LOG.warning('No help available for {0}. Only man page will be available.'.format(tool))
-        open(usr_rst, 'w+').write('.. index:: {0}\n\n.. _tool-{0}:\n\n{0}\n{1}\n\n.. include:: man/{0}.txt'.format(tool, '='*len(tool)))
+        open(usr_rst, 'w+').write('.. index:: {0}\n\n.. _tool-{0}:\n\n{0}\n{1}\n\n.. include:: man/{0}.txt\n'.format(tool, '='*len(tool)))
       else:
         _LOG.warning('No documentation generated for {0}'.format(tool))
 
