@@ -18,19 +18,6 @@ else()
   message(FATAL_ERROR "Unsupported compiler setup (C: ${CMAKE_C_COMPILER_ID} / C++: ${CMAKE_CXX_COMPILER_ID}).")
 endif()
 
-# Make the user aware that the Maintainer build type has been removed. This code can be removed after some time.
-if(CMAKE_BUILD_TYPE)
-  if (${CMAKE_BUILD_TYPE} STREQUAL "Maintainer")
-    message(FATAL_ERROR "The Maintainer build type has been replaced by Debug, choose a valid build type.")
-  endif()
-endif()
-if (CMAKE_CONFIGURATION_TYPES)
-  list(FIND CMAKE_CONFIGURATION_TYPES "Maintainer" index)
-  if (${index} GREATER -1)
-    message(FATAL_ERROR "The Maintainer configuration type has been replaced by Debug, clear CMAKE_CONFIGURATION_TYPES and configure again.")
-  endif()
-endif()
-
 # Sets the default build type if none was provided.
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to 'Release' as none was specified.")
