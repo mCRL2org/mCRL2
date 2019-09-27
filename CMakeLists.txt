@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.0)
 project(mCRL2)
 
+if(POLICY CMP0054)
+  cmake_policy(SET CMP0054 NEW)
+endif()
+
 if(POLICY CMP0071)
   # The AUTOMOC and AUTOUIC properties should not apply to GENERATED files.
   cmake_policy(SET CMP0071 OLD)
