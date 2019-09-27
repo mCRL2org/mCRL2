@@ -5980,7 +5980,7 @@ class specification_basic_type
         const data_expression newcondition=equal_to(var,unique);
         return extend(newcondition,conditionlist);
       }
-      catch (mcrl2::runtime_error &e)
+      catch (mcrl2::runtime_error&)
       {
         // The representative generator failed to find a term of var.sort(). 
         // No condition is generated, meaning that var will be unrestrained. This
@@ -6001,7 +6001,7 @@ class specification_basic_type
           data_expression unique=representative_generator_internal(v.sort(),false);
           result=lazy::and_(result, equal_to(v,unique));
         }
-        catch (mcrl2::runtime_error& e)
+        catch (mcrl2::runtime_error&)
         {
           // No representant for sort v.sort() could be found. No condition is added. 
         }
