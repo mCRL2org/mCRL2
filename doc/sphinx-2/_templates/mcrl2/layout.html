@@ -35,16 +35,9 @@
 {% endblock %}
 {% block relbar2 %}{% endblock %}
 
-{% block sidebarsourcelink %}
-{%- if show_source and has_source and sourcename %}
-<div class="sourcelink">
-  <h4>This page</h4>
-  <ul class="this-page-menu">
-    <li><a href="{{ pathto('_sources/' + sourcename, true)|e }}"
-           rel="nofollow">{{ _('Show Source') }}</a></li>
-  </ul>
-</div>
-{%- endif %}
+{# Show the current document in the navigation bar. #}
+{% block relbaritems %}
+<li class="nav-item">{{ title|striptags|e }}</li>
 {% endblock %}
 
 {% block footer %}

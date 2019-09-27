@@ -1,0 +1,12 @@
+{#
+    based on basic/sourcelink.html
+#}
+{%- if show_source and has_source and sourcename %}
+  <div role="note" aria-label="source link">
+    <h4>{{ _('This page') }}</h4>
+    <ul class="this-page-menu">
+      <li><a href="{{ pathto('_sources/' + sourcename, true)|e }}"
+            rel="nofollow">{{ _('Show Source') }}</a></li>
+    </ul>
+   </div>
+{%- endif %}
