@@ -37,7 +37,7 @@ The resulting PBES will be:
    \mathbf{init}\ X(1,1,1,1)
    \end{array}
 
-To perform the dead variable analysis, the algorithm computes a set of control flow variables. By default, local control flow graphs are constructed in order to avoid a combinatorial explosion of the control flow graph. The option :option:`-g/--use-global-variant` uses a global control flow graph instead. The latter option may be able to detect more dead variables, but may use (much) more memory.
+To perform the dead variable analysis, the algorithm computes a set of control flow variables. By default, local control flow graphs are constructed in order to avoid a combinatorial explosion of the control flow graph. The option `-g/--use-global-variant` uses a global control flow graph instead. The latter option may be able to detect more dead variables, but may use (much) more memory.
 
 The algorithm underlying the tool, including the detection of control flow variables and the construction of local and global control flow graphs, is described in detail in [KWW14]_.
 

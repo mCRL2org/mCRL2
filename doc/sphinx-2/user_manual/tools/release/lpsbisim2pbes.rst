@@ -6,7 +6,7 @@ lpsbisim2pbes
 =============
 
 Construct a PBES that expresses whether the two LPSs given as input are equal
-modulo some behavioural equivalence relation specified with option :option:`-b/--bisimulation`.
+modulo some behavioural equivalence relation specified with option `-b/--bisimulation`.
 The two LPSs used to construct the PBES are equivalent if and only if the
 solution to the PBES is true.
 

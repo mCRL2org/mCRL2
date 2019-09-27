@@ -23,21 +23,21 @@ some cases it will not terminate, for instance with non terminating rewrite
 rules. The following options can be used to speed up the linearisation, at the
 expense of a less readable result.
 
-The option :option:`--lin-method=stack` avoids non termination if the process
-structure is not regular. The option :option:`--no-rewrite` causes rewriting to
+The option `--lin-method=stack` avoids non termination if the process
+structure is not regular. The option `--no-rewrite` causes rewriting to
 be switched off, avoiding non termination due to non terminating rewrite rules.
-The option :option:`--no-sumelm` avoids the use of sum elimination, which under
+The option `--no-sumelm` avoids the use of sum elimination, which under
 certain circumstances may take a lot of time. Finally, the option
-:option:`--no-deltaelm` avoids removal of spurious delta summands, which uses a
+`--no-deltaelm` avoids removal of spurious delta summands, which uses a
 quadratic algorithm in the number of summands, and therefore, may be very time
 consuming.
 
-The option :option:`--timed` assumes that the timing of the input is strict. By
+The option `--timed` assumes that the timing of the input is strict. By
 default it is assumed that time can always progress in the sense that each
 process ``p`` is interpreted as ``p+delta``, which is incorrect as it does not
 preserve time. For instance the process ``a@1`` is interpreted as ``a@1+delta``,
 meaning that the ``a`` does not have to happen at time ``1``. If time is
-important, the option :option:`--timed` is required. However, this may lead to
+important, the option `--timed` is required. However, this may lead to
 substantially increased linearisation times and an increased size of the linear
 process.
 
@@ -45,7 +45,7 @@ Linearisation methods
 ---------------------
 
 The tool supports three different linearisation methods, configurable using
-the option :option:`-l/--lin-method`:
+the option `-l/--lin-method`:
 
 ``regular``
 
@@ -82,7 +82,7 @@ the option :option:`-l/--lin-method`:
   See the explanation of regular. Note that with this option the number of
   parameters can be very large, and consequently, the number of global variables
   can be huge too. In this case, linearising using the option
-  :option:`-f/--no-globvars` is advisable.
+  `-f/--no-globvars` is advisable.
 
 ``stack``
 

@@ -14,7 +14,7 @@ If the PBES was constructed via ``lps2pbes``, then the evidence is an LPS that i
 LPS that was passed to ``lps2pbes``. If the PBES was constructed via ``lts2pbes``, then the evidence
 is an LTS that is a submodel of the LTS that was passed to ``lts2pbes``. The evidence is written to a
 file named ``<<pbesfile>>.evidence.lps`` or ``<<pbesfile>>.evidence.lts``. A different name can be
-specified using the command line option :option:`--evidence-file`.
+specified using the command line option `--evidence-file`.
 
 A counter example for the "infinitely often enabled then infinitely often taken" property of the ABP protocol
 can be generated as follows::
@@ -25,9 +25,9 @@ can be generated as follows::
    lps2lts abp.pbes.evidence.lps abp.pbes.evidence.lts
    ltsgraph abp.pbes.evidence.lts
 
-Note that ``lps2pbes`` is called with the option :option:`-c` to include counter example
+Note that ``lps2pbes`` is called with the option `-c` to include counter example
 information in the generated PBES. Also note that the specification ``abp.lps`` that was used
-to create the PBES is passed as an argument to pbessolve with the option :option:`--file`. It
+to create the PBES is passed as an argument to pbessolve with the option `--file`. It
 is needed to construct the counter example.
 
 Similarly it can be done starting from an LTS instead of an LPS::
@@ -47,7 +47,7 @@ Similarly it can be done starting from an LTS instead of an LPS::
 .. note::
 
    The interface of pbessolve is not stable yet. In particular the strategies that
-   are available through the option :option:`-s` are subject to change.
+   are available through the option `-s` are subject to change.
 
 
 .. include:: man/pbessolve.txt

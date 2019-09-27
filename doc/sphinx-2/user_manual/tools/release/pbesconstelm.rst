@@ -32,7 +32,7 @@ resulting PBES will be:
    \mathbf{init}\ X(4)
    \end{array}
 
-The option :option:`-c/--compute-conditions` can be used to analyse conditions
+The option `-c/--compute-conditions` can be used to analyse conditions
 with the contants that have been found. This can help the algorithm to find more
 constants. However, this option typically leads to a large increase in the
 runtime of the tool.

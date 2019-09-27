@@ -52,7 +52,7 @@ states are randomly ignored. High way search does not guarantee that all states 
 to explore a state space, far more effective than random simulation.
 
 When the linear process has confluent tau actions (which can be proven using the tool :ref:`tool-lpsconfcheck`)
-then the flag --confluent generates a state space giving priority to confluent tau's [GM14]_. In certain cases
+then the flag --confluent generates a state space giving priority to confluent tau's [GM14a]_. In certain cases
 this can give an exponential reduction. The confluent tau is by default called ctau.
 
 When generating the transition system is taking too much time, the generation can be aborted. lps2lts will attempt
@@ -78,7 +78,7 @@ limited a priori.
 [EGWW09] T.A.N. Engels, J.F. Groote, M.J. van Weerdenburg and T.A.C. Willemse. Search algorithms for automated validation.
 Journal of Logic and Algebraic Programming 78(4), 274-287, 2009.
 
-[GM14] J.F. Groote and M.R. Mousavi. Modeling and analysis of communicating systems. The MIT Press 2014.
+[GM14a] J.F. Groote and M.R. Mousavi. Modeling and analysis of communicating systems. The MIT Press 2014.
 
 
 .. include:: man/lps2lts.txt
