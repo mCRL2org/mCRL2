@@ -81,8 +81,10 @@ class structured_sort_constructor: public atermpp::aterm_appl
 
   private:
 
-    struct get_argument_sort
+    struct get_argument_sort : public
+        std::unary_function< structured_sort_constructor_argument const&, sort_expression >
     {
+
       sort_expression operator()(structured_sort_constructor_argument const& s) const
       {
         return s.sort();

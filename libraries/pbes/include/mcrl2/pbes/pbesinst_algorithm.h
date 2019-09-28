@@ -91,7 +91,7 @@ struct pbesinst_rename_long
 /// propositional variable instantiation must be closed.
 /// Originally implemented by Alexander van Dam.
 /// \return A name that uniquely corresponds to the propositional variable.
-struct pbesinst_rename
+struct pbesinst_rename: public std::unary_function<propositional_variable_instantiation, propositional_variable_instantiation>
 {
   propositional_variable_instantiation operator()(const propositional_variable_instantiation& Ye) const
   {

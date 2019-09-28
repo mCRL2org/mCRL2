@@ -45,7 +45,7 @@ namespace detail
 /// \brief Represents a quantifier Qv:V. If the bool is true it is a forall, otherwise an exists.
 typedef std::pair<bool, data::variable_list> pfnf_traverser_quantifier;
 
-struct variable_variable_substitution
+struct variable_variable_substitution: public std::unary_function<data::variable, data::variable>
 {
   std::map<data::variable, data::variable> sigma;
 
@@ -86,7 +86,7 @@ struct variable_variable_substitution
   }
 };
 
-struct variable_data_expression_substitution
+struct variable_data_expression_substitution: public std::unary_function<data::variable, data::data_expression>
 {
   typedef data::variable variable_type;
   typedef data::data_expression expression_type;

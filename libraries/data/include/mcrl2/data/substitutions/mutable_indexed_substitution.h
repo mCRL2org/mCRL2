@@ -45,7 +45,7 @@ namespace data {
 ///          the substitution automatically maintains these variables. This requires
 ///          time O(n log n) per rhs, where n is the size of the rhs. 
 template <typename VariableType = data::variable, typename ExpressionType = data_expression >
-class mutable_indexed_substitution
+class mutable_indexed_substitution : public std::unary_function<VariableType, ExpressionType>
 {
 protected:
   typedef std::pair <VariableType, ExpressionType> substitution_type;

@@ -33,7 +33,7 @@ namespace detail
 {
 
 template <typename Term>
-struct compare_term
+struct compare_term: public std::unary_function<atermpp::aterm_appl, bool>
 {
   const Term& term;
 
@@ -52,7 +52,7 @@ struct compare_term
 };
 
 /// Tests if a term is a sort, and if it is equal to s
-struct compare_sort
+struct compare_sort : public std::unary_function< bool, atermpp::aterm_appl >
 {
   sort_expression s;
 
@@ -75,7 +75,7 @@ struct compare_variable: public compare_term<variable>
 };
 
 /// \brief Function object that returns the name of a data variable
-struct variable_name
+struct variable_name: public std::unary_function<variable, core::identifier_string>
 {
   /// \brief Function call operator
   /// \param v A data variable
@@ -88,7 +88,7 @@ struct variable_name
 
 /// \brief Function object that returns the sort of a data expression
 template < typename Expression >
-struct sort_of_expression
+struct sort_of_expression: public std::unary_function< Expression, sort_expression >
 {
   /// \brief Function call operator
   /// \param v A data variable
@@ -100,7 +100,7 @@ struct sort_of_expression
 };
 
 /// \brief Function object that returns the sort of a data variable
-typedef sort_of_expression<variable> sort_of_variable;
+typedef sort_of_expression< variable > sort_of_variable;
 
 struct sort_has_name
 {

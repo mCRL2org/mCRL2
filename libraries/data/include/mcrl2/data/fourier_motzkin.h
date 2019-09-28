@@ -317,7 +317,7 @@ inline void fourier_motzkin(const data_expression& e_in,
 /// Apply this function innermost first if the expresion contains
 /// nested quantifiers.
 /// \author Thomas Neele
-struct fourier_motzkin_sigma
+struct fourier_motzkin_sigma: public std::unary_function<data_expression, data_expression>
 {
 
   protected:

@@ -72,7 +72,7 @@ namespace detail
     return pv_renaming;
   }
 
-  class rename_pbesinst_consecutively
+  class rename_pbesinst_consecutively: public std::unary_function<propositional_variable_instantiation, propositional_variable_instantiation>
   {
     protected:
       const std::unordered_map<propositional_variable_instantiation,propositional_variable_instantiation>& m_pv_renaming;

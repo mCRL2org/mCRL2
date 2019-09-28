@@ -27,7 +27,7 @@ namespace data {
 /// \brief Generic substitution function. The substitution is stored as a sequence
 /// of variables and a sequence of expressions.
 template <typename VariableContainer, typename ExpressionContainer>
-struct sequence_sequence_substitution
+struct sequence_sequence_substitution: public std::unary_function<typename VariableContainer::value_type, typename ExpressionContainer::value_type>
 {
   /// \brief type used to represent variables
   typedef typename VariableContainer::value_type variable_type;

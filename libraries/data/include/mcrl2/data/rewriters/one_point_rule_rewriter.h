@@ -254,7 +254,7 @@ class one_point_rule_rewrite_builder: public data_expression_builder<Derived>
 
 } // namespace detail
 
-struct one_point_rule_rewriter
+struct one_point_rule_rewriter: public std::unary_function<data_expression, data_expression>
 {
   data_expression operator()(const data_expression& x) const
   {

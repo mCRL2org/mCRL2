@@ -25,7 +25,7 @@ namespace data
 namespace detail
 {
 
-struct normalize_sorts_function
+struct normalize_sorts_function: public std::unary_function<data::sort_expression, data::sort_expression>
 {
   /* const sort_specification& m_sort_spec; */
   const std::map< sort_expression, sort_expression >& m_normalised_aliases;

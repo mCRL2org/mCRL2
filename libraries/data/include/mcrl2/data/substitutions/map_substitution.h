@@ -27,7 +27,7 @@ namespace data {
 /// \brief Generic substitution function. The substitution is stored as a mapping
 /// of variables to expressions.
 template <typename AssociativeContainer>
-struct map_substitution
+struct map_substitution : public std::unary_function<typename AssociativeContainer::key_type, typename AssociativeContainer::mapped_type>
 {
   typedef typename AssociativeContainer::key_type variable_type;
   typedef typename AssociativeContainer::mapped_type expression_type;
