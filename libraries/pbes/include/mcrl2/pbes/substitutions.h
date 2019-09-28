@@ -26,7 +26,7 @@ namespace pbes_system {
  * Model of Substitution.
  *
  **/
-class propositional_variable_substitution: public std::unary_function<propositional_variable_instantiation, pbes_expression>
+class propositional_variable_substitution
 {
   public:
     // maps X to (phi, d), where X(d) is the propositional variable corresponding to X

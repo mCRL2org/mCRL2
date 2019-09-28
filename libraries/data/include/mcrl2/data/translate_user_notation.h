@@ -117,8 +117,10 @@ public:
   }
 };
 
-struct translate_user_notation_function: public std::unary_function<data_expression, data_expression>
+struct translate_user_notation_function
 {
+  using argument_type = data_expression;
+
   data_expression operator()(const data_expression& x) const
   {
     return core::make_apply_builder<translate_user_notation_builder>().apply(x);

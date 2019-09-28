@@ -118,8 +118,10 @@ class simplify_rewrite_builder: public data_expression_builder<Derived>
 
 } // namespace detail
 
-struct simplify_rewriter: public std::unary_function<data_expression, data_expression>
+struct simplify_rewriter
 {
+  using argument_type = data_expression;
+
   data_expression operator()(const data_expression& x) const
   {
     return core::make_apply_builder<detail::simplify_rewrite_builder>().apply(x);

@@ -35,7 +35,7 @@ namespace data {
 /// sigma[v] = v; // remove the assignment to v
 ///\endverbatim
 template <typename AssociativeContainer = std::map<variable,data_expression> >
-class mutable_map_substitution : public std::unary_function<typename AssociativeContainer::key_type, typename AssociativeContainer::mapped_type>
+class mutable_map_substitution
 {
 protected:
   AssociativeContainer m_map;
@@ -45,6 +45,7 @@ public:
   typedef typename AssociativeContainer::mapped_type expression_type;
   typedef typename AssociativeContainer::const_iterator const_iterator;
   typedef typename AssociativeContainer::iterator iterator;
+  using argument_type = variable_type;
 
   /// \brief Wrapper class for internal storage and substitution updates using operator()
   struct assignment

@@ -20,10 +20,12 @@ namespace mcrl2 {
 
 namespace bes {
 
-struct boolean_variable_substitution: public std::unary_function<boolean_variable, boolean_expression>
+struct boolean_variable_substitution
 {
   const boolean_variable& v;
   const boolean_expression& phi;
+
+  using argument_type = boolean_variable;
 
   boolean_variable_substitution(const boolean_variable& v_, const boolean_expression& phi_)
     : v(v_), phi(phi_)

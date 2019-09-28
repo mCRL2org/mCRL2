@@ -27,10 +27,11 @@ namespace data {
 
 /// \brief Substitution that maps data variables to data expressions. The substitution is stored as an
 /// assignment_list.
-struct assignment_sequence_substitution: public std::unary_function<variable, data_expression>
+struct assignment_sequence_substitution
 {
-  typedef variable variable_type;
-  typedef data_expression expression_type;
+  using variable_type = variable;
+  using expression_type = data_expression;
+  using argument_type = variable;
 
   const assignment_list& assignments;
 

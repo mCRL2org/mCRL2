@@ -279,8 +279,10 @@ data_expression quantifiers_inside_exists(const std::set<variable>& variables, c
 
 } // namespace detail
 
-struct quantifiers_inside_rewriter: public std::unary_function<data_expression, data_expression>
+struct quantifiers_inside_rewriter
 {
+  using argument_type = data_expression;
+
   data_expression operator()(const data_expression& x) const
   {
     return detail::quantifiers_inside(x);

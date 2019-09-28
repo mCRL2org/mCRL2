@@ -25,7 +25,7 @@ namespace mcrl2 {
 namespace data {
 
 /// \brief Substitution that maps a single variable to a data expression
-struct variable_substitution: public std::unary_function<variable, data_expression>
+struct variable_substitution
 {
   typedef variable variable_type;
   typedef data_expression expression_type;
