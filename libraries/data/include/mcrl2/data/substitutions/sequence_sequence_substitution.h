@@ -35,6 +35,8 @@ struct sequence_sequence_substitution
   /// \brief type used to represent expressions
   typedef typename ExpressionContainer::value_type  expression_type;
 
+  using argument_type = variable_type;
+
   const VariableContainer& variables;
   const ExpressionContainer& expressions;
 

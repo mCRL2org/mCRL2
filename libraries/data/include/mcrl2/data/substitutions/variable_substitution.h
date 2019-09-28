@@ -27,8 +27,9 @@ namespace data {
 /// \brief Substitution that maps a single variable to a data expression
 struct variable_substitution
 {
-  typedef variable variable_type;
-  typedef data_expression expression_type;
+  using variable_type = variable;
+  using expression_type = data_expression;
+  using argument_type = variable;
 
   const variable& lhs;
   const data_expression& rhs;
