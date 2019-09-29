@@ -150,13 +150,13 @@ class specification_base
     /// \param source The source from which the stream originates. Used for error messages.
     void load(std::istream& stream, bool binary = true, const std::string& source = "")
     {
-      atermpp::aterm t = core::load_aterm(stream, binary, "LPS", source);
-      std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
-      t = data::detail::add_index(t, cache);
+      atermpp::aterm t = core::load_aterm(stream, binary, "LPS", source, data::detail::add_index_impl);
+
       if (!t.type_is_appl() || !is_specification(atermpp::down_cast<const atermpp::aterm_appl>(t)))
       {
         throw mcrl2::runtime_error("Input stream does not contain an LPS");
       }
+
       construct_from_aterm(atermpp::down_cast<atermpp::aterm_appl>(t));
       // The well typedness check is only done in debug mode, since for large LPSs it takes too much
       // time
@@ -173,14 +173,14 @@ class specification_base
       // The well typedness check is only done in debug mode, since for large
       // LPSs it takes too much time
       atermpp::aterm t = specification_to_aterm(*this);
-      t = data::detail::remove_index(t);
+
       if (binary)
       {
-        atermpp::write_term_to_binary_stream(t, stream);
+        atermpp::binary_aterm_output(stream, data::detail::remove_index_impl).write_term(t);
       }
       else
       {
-        atermpp::write_term_to_text_stream(t, stream);
+        atermpp::text_aterm_output(stream, data::detail::remove_index_impl).write_term(t);
       }
     }
 

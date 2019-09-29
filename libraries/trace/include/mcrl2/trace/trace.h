@@ -600,12 +600,12 @@ class Trace
 
     atermpp::aterm readATerm(std::istream& is)
     {
-      atermpp::aterm t = atermpp::read_term_from_binary_stream(is);
+      atermpp::aterm t = atermpp::binary_aterm_input(is, mcrl2::data::detail::add_index_impl).read_term();
+
       if (!t.defined())
       {
         throw runtime_error("Failed to read aterm from stream.");
       }
-      t = mcrl2::data::detail::add_index(t);
 
       return t;
     }
@@ -734,8 +734,7 @@ class Trace
       }
 
       // write trace
-      atermpp::aterm t = mcrl2::data::detail::remove_index(trace);
-      atermpp::write_term_to_binary_stream(t, os);
+      atermpp::binary_aterm_output(os, data::detail::remove_index_impl).write_term(trace);
       if (os.bad())
       {
         throw runtime_error("Could not write to stream.");

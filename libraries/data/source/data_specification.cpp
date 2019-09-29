@@ -817,27 +817,27 @@ void data_specification::build_from_aterm(const atermpp::aterm_appl& term)
 
 void data_specification::load(std::istream& stream, bool binary, const std::string& source)
 {
-  atermpp::aterm t = core::load_aterm(stream, binary, "data specification", source);
-  std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
-  t = data::detail::add_index(t, cache);
+  atermpp::aterm t = core::load_aterm(stream, binary, "data specification", source, detail::add_index_impl);
+
   if (!t.type_is_appl() || !is_data_specification(atermpp::down_cast<const atermpp::aterm_appl>(t)))
   {
     throw mcrl2::runtime_error("Input stream does not contain a data specification");
   }
+
   build_from_aterm(atermpp::down_cast<atermpp::aterm_appl>(t));
 }
 
 void data_specification::save(std::ostream& stream, bool binary) const
 {
   atermpp::aterm t = detail::data_specification_to_aterm(*this);
-  t = data::detail::remove_index(t);
+
   if (binary)
   {
-    atermpp::write_term_to_binary_stream(t, stream);
+    atermpp::binary_aterm_output(stream, detail::remove_index_impl).write_term(t);
   }
   else
   {
-    atermpp::write_term_to_text_stream(t, stream);
+    atermpp::text_aterm_output(stream, detail::remove_index_impl).write_term(t);
   }
 }
 

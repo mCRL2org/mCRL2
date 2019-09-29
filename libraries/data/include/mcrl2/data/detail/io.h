@@ -27,7 +27,7 @@ namespace detail {
 
 // transforms DataVarId to DataVarIdNoIndex
 // transforms OpId to OpIdNoIndex
-static atermpp::aterm_appl remove_index_impl(const atermpp::aterm_appl& x)
+inline atermpp::aterm_appl remove_index_impl(const atermpp::aterm_appl& x)
 {
   if (x.function() == core::detail::function_symbol_DataVarId())
   {
@@ -42,7 +42,7 @@ static atermpp::aterm_appl remove_index_impl(const atermpp::aterm_appl& x)
 
 // transforms DataVarIdNoIndex to DataVarId
 // transforms OpIdNoIndex to OpId
-static atermpp::aterm_appl add_index_impl(const atermpp::aterm_appl& x)
+inline atermpp::aterm_appl add_index_impl(const atermpp::aterm_appl& x)
 {
   if (x.function() == core::detail::function_symbol_DataVarIdNoIndex())
   {
@@ -57,30 +57,6 @@ static atermpp::aterm_appl add_index_impl(const atermpp::aterm_appl& x)
     return atermpp::aterm_appl(core::detail::function_symbol_OpId(), x[0], x[1], atermpp::aterm_int(index));
   }
   return x;
-}
-
-inline
-atermpp::aterm add_index(const atermpp::aterm& x)
-{
-  return atermpp::bottom_up_replace(x, detail::add_index_impl);
-}
-
-inline
-atermpp::aterm remove_index(const atermpp::aterm& x)
-{
-  return atermpp::bottom_up_replace(x, detail::remove_index_impl);
-}
-
-inline
-atermpp::aterm add_index(const atermpp::aterm& x, std::unordered_map<atermpp::aterm_appl, atermpp::aterm>& cache)
-{
-  return atermpp::bottom_up_replace(x, detail::add_index_impl, cache);
-}
-
-inline
-atermpp::aterm remove_index(const atermpp::aterm& x, std::unordered_map<atermpp::aterm_appl, atermpp::aterm>& cache)
-{
-  return atermpp::bottom_up_replace(x, detail::remove_index_impl, cache);
 }
 
 } // namespace detail
