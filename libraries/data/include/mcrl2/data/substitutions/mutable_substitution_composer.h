@@ -29,20 +29,22 @@ namespace data {
 
 /// \brief An adapter that makes an arbitrary substitution function mutable.
 template <typename Substitution>
-class mutable_substitution_composer: public std::unary_function<typename Substitution::variable_type, typename Substitution::expression_type>
+class mutable_substitution_composer
 {
   public:
     /// \brief type used to represent variables.
-    typedef typename Substitution::variable_type variable_type;
+    using variable_type = typename Substitution::variable_type ;
 
     /// \brief type used to represent expressions.
-    typedef typename Substitution::expression_type expression_type;
+    using expression_type = typename Substitution::expression_type;
 
     /// \brief Wrapper class for internal storage and substitution updates using operator().
-    typedef typename mutable_map_substitution<std::map<variable_type, expression_type> >::assignment assignment;
+    using assignment = typename mutable_map_substitution<std::map<variable_type, expression_type> >::assignment ;
 
     /// \brief The type of the wrapped substitution.
-    typedef Substitution substitution_type;
+    using substitution_type = Substitution;
+
+    using argument_type = Expression;
 
   protected:
     /// \brief The wrapped substitution.
@@ -87,20 +89,22 @@ class mutable_substitution_composer: public std::unary_function<typename Substit
 
 /// \brief Specialization for mutable_map_substitution.
 template <typename AssociativeContainer>
-class mutable_substitution_composer<mutable_map_substitution<AssociativeContainer> >: public std::unary_function<typename AssociativeContainer::key_type, typename AssociativeContainer::mapped_type>
+class mutable_substitution_composer<mutable_map_substitution<AssociativeContainer>>
 {
   public:
     /// \brief The type of the wrapped substitution.
-    typedef mutable_map_substitution<AssociativeContainer> substitution_type;
+    using substitution_type = mutable_map_substitution<AssociativeContainer>;
 
     /// \brief type used to represent variables.
-    typedef typename substitution_type::variable_type variable_type;
+    using variable_type = typename substitution_type::variable_type;
 
     /// \brief type used to represent expressions.
-    typedef typename substitution_type::expression_type expression_type;
+    using expression_type = typename substitution_type::expression_type;
 
     /// \brief Wrapper class for internal storage and substitution updates using operator().
-    typedef typename substitution_type::assignment assignment;
+    using assignment = typename substitution_type::assignment;
+    
+    using argument_type = Expression;
 
   protected:
     /// \brief object on which substitution manipulations are performed.
@@ -144,20 +148,22 @@ class mutable_substitution_composer<mutable_map_substitution<AssociativeContaine
 
 /// \brief Specialization for mutable_indexed_substitution.
 template <typename VariableType, typename ExpressionSequence>
-class mutable_substitution_composer<mutable_indexed_substitution<VariableType, ExpressionSequence> >: public std::unary_function<VariableType, typename ExpressionSequence::value_type>
+class mutable_substitution_composer<mutable_indexed_substitution<VariableType, ExpressionSequence>>
 {
   public:
     /// \brief The type of the wrapped substitution.
-    typedef mutable_indexed_substitution<VariableType, ExpressionSequence> substitution_type;
+    using substitution_type = mutable_indexed_substitution<VariableType, ExpressionSequence>;
 
     /// \brief type used to represent variables.
-    typedef typename substitution_type::variable_type variable_type;
+    using variable_type = typename substitution_type::variable_type;
 
     /// \brief type used to represent expressions.
-    typedef typename substitution_type::expression_type expression_type;
+    using expression_type = typename substitution_type::expression_type;
 
     /// \brief Wrapper class for internal storage and substitution updates using operator().
-    typedef typename substitution_type::assignment assignment;
+    using assignment = typename substitution_type::assignment;
+
+    using argument_type = Expression;
 
   protected:
     /// \brief object on which substitution manipulations are performed.

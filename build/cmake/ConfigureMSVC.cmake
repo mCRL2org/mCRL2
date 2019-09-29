@@ -13,21 +13,15 @@ try_add_cxx_flag(/bigobj)             # Increases object addressable sections ca
 try_add_cxx_flag(/std:c++17)          # Enable for conformance checking in Visual Studio 2017 for the C++17 standard.
 try_add_cxx_flag(/W3      DEBUG)      # Increase the warning level.
 try_add_cxx_flag(/MP)                 # Enable multicore compilation.
+try_add_cxx_flag(/permissive-)		  # This option disables permissive behaviors, and sets the /Zc compiler options for strict conformance.
 
 try_add_c_flag(/EHs)
 try_add_c_flag(/bigobj)
 try_add_c_flag(/std:c++17)
 try_add_c_flag(/W3         DEBUG)
 try_add_c_flag(/MP)
-
-if (${Boost_MAJOR_VERSION} LESS 2 AND ${Boost_MINOR_VERSION} LESS 65)
-  # Enabling /permissive- with older boost versions breaks compilation. 
-  message(STATUS "The /permissive- flag will only be added for boost 1.65.0 and higher.")
-else()
-  try_add_cxx_flag(/permissive-) # This option disables permissive behaviors, and sets the /Zc compiler options for strict conformance.
-  try_add_c_flag(/permissive-)
-endif()
-
+try_add_c_flag(/permissive-)
+  
 add_definitions(-DNOMINMAX)                 # Don't let <windows.h> (re)define min and max
 add_definitions(-D_USE_MATH_DEFINES)        # Make <cmath> define M_PI, M_PI_2 etc.
 add_definitions(-D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES) # Enables template overloads of standard CRT functions that call the more secure variants automatically.

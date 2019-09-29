@@ -26,8 +26,9 @@ namespace data
 using namespace mcrl2::log;
 
 
-struct simplify_real_inequalities: public std::unary_function<data_expression, data_expression>
+struct simplify_real_inequalities
 {
+  using argument_type = data_expression;
 
   rewriter rewr;
 

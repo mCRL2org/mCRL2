@@ -266,8 +266,10 @@ struct absinthe_algorithm
   };
 
   // Applies sigmaS to a sort expression
-  struct sort_function: public std::unary_function<data::sort_expression, data::sort_expression>
+  struct sort_function
   {
+    using argument_type = data::sort_expression;
+
     absinthe_sort_expression_builder f;
 
     sort_function(const abstraction_map& sigmaH,

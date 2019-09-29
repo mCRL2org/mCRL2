@@ -25,10 +25,11 @@ namespace mcrl2 {
 namespace data {
 
 /// \brief Substitution that maps a data expression to a data expression
-struct data_expression_assignment: public std::unary_function<data_expression, data_expression>
+struct data_expression_assignment
 {
-  typedef data_expression variable_type;
-  typedef data_expression expression_type;
+  using variable_type = data_expression;
+  using expression_type = data_expression;
+  using argument_type = data_expression;
 
   const data_expression& lhs;
   const data_expression& rhs;

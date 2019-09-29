@@ -28,7 +28,12 @@ else()
   set(MCRL2_MIN_QT_VERSION 5.9.0)
 endif()
 
-set(MCRL2_MIN_BOOST_VERSION 1.56.0)
+if(MSVC)
+  set(MCRL2_MIN_BOOST_VERSION 1.66.0)
+else()
+  set(MCRL2_MIN_BOOST_VERSION 1.56.0)  
+endif()
+
 
 option(MCRL2_ENABLE_GUI_TOOLS       "Enable compilation of tools with a graphical user interface." ON)
 option(MCRL2_ENABLE_EXPERIMENTAL    "Enable compilation of experimental tools." OFF)
@@ -58,8 +63,7 @@ if(MCRL2_ENABLE_GUI_TOOLS)
   find_package(TR         QUIET REQUIRED)
   find_package(CVC3       QUIET)
   find_package(Qt5 ${MCRL2_MIN_QT_VERSION} COMPONENTS Core OpenGL Widgets Xml Gui QUIET REQUIRED)
-
-
+	
   # The directories for components are derived from Qt5_DIR, as such they can be marked as advanced.
   mark_as_advanced(Qt5_DIR Qt5Core_DIR Qt5OpenGL_DIR Qt5Widgets_DIR Qt5Xml_DIR Qt5Gui_DIR)
 endif()

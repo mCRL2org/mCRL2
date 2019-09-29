@@ -130,10 +130,11 @@ std::cerr << "RES " << data::replace_free_variables(c + x * y, s) << "\n";
   BOOST_CHECK(data::replace_free_variables(lambda(y,y)(x) + y, sb) == lambda(y,y)(x) + c);
 }
 
-struct my_assignment_sequence_substitution: public std::unary_function<variable, data_expression>
+struct my_assignment_sequence_substitution
 {
-  typedef variable variable_type;
-  typedef data_expression expression_type;
+  using variable_type = variable;
+  using expression_type = data_expression;
+  using argument_type = variable;
 
   assignment_list assignments;
 
@@ -270,8 +271,10 @@ void test_mutable_substitution_composer()
   BOOST_CHECK(g(x) == y);
 }
 
-struct my_sort_substitution: public std::unary_function<data::basic_sort, data::sort_expression>
+struct my_sort_substitution
 {
+  using argument_type = data::basic_sort;
+
   data::sort_expression operator()(const data::basic_sort& s)
   {
     if (s == sort_nat::nat()) {

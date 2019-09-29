@@ -82,8 +82,10 @@ struct replace_free_variables_builder: public Binder<Builder, replace_free_varia
   }
 };
 
-struct subst: public std::unary_function<data::variable, data::data_expression>
+struct subst
 {
+  using argument_type = variable;
+
   data_expression operator()(const variable& v)
   {
     if (v == bool_("b"))
