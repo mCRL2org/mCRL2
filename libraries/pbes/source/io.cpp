@@ -168,19 +168,21 @@ void load_pbes(pbes& pbes,
 /// \param source The source from which the stream originates. Used for error messages.
 void pbes::load(std::istream& stream, bool binary, const std::string& source)
 {
-  atermpp::aterm t = core::load_aterm(stream, binary, "PBES", source);
-  std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
-  t = pbes_system::detail::add_index(t, cache);
+  atermpp::aterm t = core::load_aterm(stream, binary, "PBES", source, pbes_system::detail::add_index_impl);
+
   if (!t.type_is_appl() || !core::detail::check_rule_PBES(atermpp::down_cast<atermpp::aterm_appl>(t)))
   {
     throw mcrl2::runtime_error("The loaded ATerm is not a PBES.");
   }
+
   init_term(atermpp::down_cast<atermpp::aterm_appl>(t));
   m_data.declare_data_specification_to_be_type_checked();
-  complete_data_specification(*this); // Add all the sorts that are used in the specification
+
+  // Add all the sorts that are used in the specification
   // to the data specification. This is important for those
   // sorts that are built in, because these are not explicitly
   // declared.
+  complete_data_specification(*this);
 
   // The well typedness check is only done in debug mode, since for large
   // PBESs it takes too much time
@@ -194,20 +196,13 @@ void pbes::load(std::istream& stream, bool binary, const std::string& source)
 /// much more compact than the ascii representation.
 void pbes::save(std::ostream& stream, bool binary) const
 {
-  atermpp::aterm term;
-  {
-    std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
-    term = pbes_system::detail::remove_index(pbes_to_aterm(*this), cache);
-    // cache goes out of scope here to save memory. cache and
-    // write_term_to_binary_stream can both consume a lot of memory.
-  }
   if (binary)
   {
-    write_term_to_binary_stream(term, stream);
+    atermpp::binary_aterm_output(stream, pbes_system::detail::remove_index_impl).write_term(pbes_to_aterm(*this));
   }
   else
   {
-    write_term_to_text_stream(term, stream);
+    atermpp::text_aterm_output(stream, pbes_system::detail::remove_index_impl).write_term(pbes_to_aterm(*this));
   }
 }
 
