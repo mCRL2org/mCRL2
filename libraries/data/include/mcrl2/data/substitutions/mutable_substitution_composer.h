@@ -44,7 +44,7 @@ class mutable_substitution_composer
     /// \brief The type of the wrapped substitution.
     using substitution_type = Substitution;
 
-    using argument_type = Expression;
+    using argument_type = variable_type;
 
   protected:
     /// \brief The wrapped substitution.
@@ -65,13 +65,6 @@ class mutable_substitution_composer
     expression_type operator()(variable_type const& v) const
     {
       return data::replace_free_variables(f_(v), g_);
-    }
-
-    template <typename Expression>
-    expression_type operator()(const Expression&) const
-    {
-      throw mcrl2::runtime_error("data::mutable_substitution_composer::operator(const Expression&) is a deprecated interface!");
-      return data::undefined_data_expression();
     }
 
     assignment operator[](variable_type const& v)
@@ -104,7 +97,7 @@ class mutable_substitution_composer<mutable_map_substitution<AssociativeContaine
     /// \brief Wrapper class for internal storage and substitution updates using operator().
     using assignment = typename substitution_type::assignment;
     
-    using argument_type = Expression;
+    using argument_type = variable_type;
 
   protected:
     /// \brief object on which substitution manipulations are performed.
@@ -124,13 +117,6 @@ class mutable_substitution_composer<mutable_map_substitution<AssociativeContaine
     const expression_type operator()(variable_type const& v) const
     {
       return g_(v);
-    }
-
-    template <typename Expression>
-    expression_type operator()(const Expression&) const
-    {
-      throw mcrl2::runtime_error("data::mutable_substitution_composer<mutable_map_substitution<AssociativeContainer> >::operator(const Expression&) is a deprecated interface!");
-      return data::undefined_data_expression();
     }
 
     assignment operator[](variable_type const& v)
@@ -163,7 +149,7 @@ class mutable_substitution_composer<mutable_indexed_substitution<VariableType, E
     /// \brief Wrapper class for internal storage and substitution updates using operator().
     using assignment = typename substitution_type::assignment;
 
-    using argument_type = Expression;
+    using argument_type = variable_type;
 
   protected:
     /// \brief object on which substitution manipulations are performed.
@@ -183,13 +169,6 @@ class mutable_substitution_composer<mutable_indexed_substitution<VariableType, E
     const expression_type operator()(variable_type const& v) const
     {
       return g_(v);
-    }
-
-    template <typename Expression>
-    expression_type operator()(const Expression&) const
-    {
-      throw mcrl2::runtime_error("data::mutable_substitution_composer<mutable_map_substitution<AssociativeContainer> >::operator(const Expression&) is a deprecated interface!");
-      return data::undefined_data_expression();
     }
 
     assignment operator[](variable_type const& v)
