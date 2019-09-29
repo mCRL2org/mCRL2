@@ -5,6 +5,11 @@ if(POLICY CMP0054)
   cmake_policy(SET CMP0054 NEW)
 endif()
 
+if(POLICY CMP0065)
+  # Do not export symbols from executables unless ENABLE_EXPORTS is explicitly set.
+  cmake_policy(SET CMP0065 NEW)
+endif()
+
 if(POLICY CMP0071)
   # The AUTOMOC and AUTOUIC properties should not apply to GENERATED files.
   cmake_policy(SET CMP0071 OLD)
