@@ -14,6 +14,7 @@
 
 #include <string>
 #include <queue>
+#include <random>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -253,7 +254,7 @@ protected:
     }
     if(m_randomize)
     {
-      std::random_shuffle(unreachable.begin(), unreachable.end());
+      std::shuffle(unreachable.begin(), unreachable.end(), std::random_device());
     }
     std::queue<block_t> open_set;
 
