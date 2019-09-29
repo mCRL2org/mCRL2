@@ -101,10 +101,6 @@ if(MCRL2_CLANGPP AND NOT APPLE)
   set(CMAKE_REQUIRED_LIBRARIES "-fsanitize=address")
   try_add_cxx_flag(-fsanitize=address       DEBUG)
   try_add_cxx_flag(-fno-omit-frame-pointer  DEBUG)
-
-  # Add a blacklist for the address and leak sanitizer to suppress reports for desired behaviour.
-  get_filename_component(LEAKSANITIZER_SUPPRESS ${CMAKE_SOURCE_DIR}/build/leaksanitizer.suppress ABSOLUTE)
-  try_add_cxx_flag("-fsanitize-blacklist=${LEAKSANITIZER_SUPPRESS}" DEBUG)
   unset(CMAKE_REQUIRED_LIBRARIES)
 endif()
 
