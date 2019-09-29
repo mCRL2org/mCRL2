@@ -7,10 +7,11 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 include(AddFlag)
 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
   set(MCRL2_CLANGPP ON)
 endif()
-if("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+
+if(CMAKE_C_COMPILER_ID MATCHES ".*Clang")
   set(MCRL2_CLANG ON)
 endif()
 
