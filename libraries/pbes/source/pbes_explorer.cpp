@@ -1379,7 +1379,7 @@ ltsmin_state explorer::false_state()
 data::data_expression explorer::string_to_data(const std::string& s)
 {
   atermpp::aterm t = atermpp::read_term_from_string(s);
-  return atermpp::down_cast<data::data_expression>(data::detail::add_index_impl(static_cast<const atermpp::aterm_appl&>(t)));
+  return atermpp::down_cast<data::data_expression>(data::detail::add_index(static_cast<const atermpp::aterm_appl&>(t)));
 }
 
 
@@ -1542,7 +1542,7 @@ std::string explorer::get_value(int type_no, int index)
         //write_term_to_text_stream(value, os);
         //std::string s = atermpp::pp(value);
         //return os.str();
-        atermpp::aterm t = data::detail::remove_index_impl(value);
+        atermpp::aterm t = data::detail::remove_index(value);
         return pp(t);
     }
 }
