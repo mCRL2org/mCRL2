@@ -97,3 +97,4 @@
 
    user
    build_instructions/boost
+   ../developer_manual/index
