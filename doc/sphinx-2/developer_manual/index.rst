@@ -48,4 +48,6 @@ Old pages
    testing
    guidelines
    code_generation
+   performance
    packaging
+   cronjobs
