@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_PARTIAL_ORDER_REDUCTION_H
 #define MCRL2_PBES_PARTIAL_ORDER_REDUCTION_H
 
+#include <chrono>
 #include <iomanip>
 #include <boost/dynamic_bitset.hpp>
 #include "mcrl2/data/enumerator.h"
@@ -276,6 +277,9 @@ class partial_order_reduction_algorithm
     // One NES for every predicate variable X_i that can be used for summand
     // class k when !depends(i,k).
     std::vector<summand_set> m_dependency_nes;
+
+    std::chrono::high_resolution_clock::duration m_static_analysis_duration;
+    std::chrono::high_resolution_clock::duration m_exploration_duration;
 
     smt::smt_solver* m_solver;
     std::chrono::milliseconds m_smt_timeout;
@@ -1374,8 +1378,11 @@ class partial_order_reduction_algorithm
         m_parameter_positions[m_parameters[m]] = m;
       }
 
+      const std::chrono::time_point<std::chrono::high_resolution_clock> t_start =
+        std::chrono::high_resolution_clock::now();
       compute_summand_classes();
       compute_vis_invis();
+      m_static_analysis_duration = std::chrono::high_resolution_clock::now() - t_start;
 
       // initialize m_largest_equation_size;
       for (std::size_t i = 0; i < m_pbes.equations().size(); i++)
@@ -1433,6 +1440,9 @@ class partial_order_reduction_algorithm
       using utilities::detail::set_includes;
       using utilities::detail::set_intersection;
       using utilities::detail::set_union;
+
+      const std::chrono::time_point<std::chrono::high_resolution_clock> t_start =
+        std::chrono::high_resolution_clock::now();
 
       enum todo_state
       {
@@ -1559,6 +1569,11 @@ class partial_order_reduction_algorithm
         }
       }
       mCRL2log(log::verbose) << "Finished exploration, found " << seen.size() << " nodes." << std::endl;
+
+      m_exploration_duration = std::chrono::high_resolution_clock::now() - t_start;
+      mCRL2log(log::info) << "timing pbespor (wall clock time in seconds):"
+        "\n  static analysis: " << std::chrono::duration<double>(m_static_analysis_duration).count() <<
+        "\n  exploration:     " << std::chrono::duration<double>(m_exploration_duration).count() << std::endl;
     }
 };
 
