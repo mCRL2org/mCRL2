@@ -84,7 +84,7 @@ struct write_todo
   {}
 };
 
-void binary_aterm_output::write_term(const aterm& term)
+const aterm_output& binary_aterm_output::operator<<(const aterm& term)
 {
   assert(!term.type_is_int());
 
@@ -158,6 +158,8 @@ void binary_aterm_output::write_term(const aterm& term)
     }
   }
   while (!stack.empty());
+
+  return *this;
 }
 
 unsigned int binary_aterm_output::term_index_width()
@@ -216,7 +218,7 @@ std::size_t binary_aterm_output::write_function_symbol(const function_symbol& sy
   }
 }
 
-aterm binary_aterm_input::read_term()
+aterm binary_aterm_input::get()
 {
   while(true)
   {
@@ -289,14 +291,12 @@ unsigned int binary_aterm_input::function_symbol_index_width()
 
 void write_term_to_binary_stream(const aterm& t, std::ostream& os)
 {
-  binary_aterm_output output(os);
-  output.write_term(t);
+  binary_aterm_output(os) << t;
 }
 
 aterm read_term_from_binary_stream(std::istream& is)
 {
-  binary_aterm_input input(is);
-  return input.read_term();
+  return binary_aterm_input(is).get();
 }
 
 } // namespace atermpp

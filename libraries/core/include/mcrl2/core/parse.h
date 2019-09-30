@@ -14,6 +14,7 @@
 #define MCRL2_CORE_PARSE_H
 
 #include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/core/detail/dparser_functions.h"
 #include "mcrl2/core/dparser.h"

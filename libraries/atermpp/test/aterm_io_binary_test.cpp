@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "mcrl2/atermpp/aterm_io.h"
+#include "mcrl2/atermpp/aterm_io_binary.h"
 
 #include <vector>
 
@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(simple_term_test)
 
     for (const auto& term : sequence)
     {
-      input.write_term(term);
+      input << term;
     }
 
     // The buffer is flushed here.
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(simple_term_test)
 
   for (std::size_t index = 0; index < sequence.size(); ++index)
   {
-    BOOST_CHECK_EQUAL(output.read_term(), sequence[index]);
+    BOOST_CHECK_EQUAL(output.get(), sequence[index]);
   }
 }
 
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(transitions_test)
 
     for (const auto& term : sequence)
     {
-      input.write_term(term);
+      input << term;
     }
 
     // The buffer is flushed here.
@@ -85,6 +85,6 @@ BOOST_AUTO_TEST_CASE(transitions_test)
 
   for (std::size_t index = 0; index < sequence.size(); ++index)
   {
-    BOOST_CHECK_EQUAL(output.read_term(), sequence[index]);
+    BOOST_CHECK_EQUAL(output.get(), sequence[index]);
   }
 }

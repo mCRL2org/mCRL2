@@ -12,8 +12,11 @@
 #ifndef MCRL2_CORE_LOAD_ATERM_H
 #define MCRL2_CORE_LOAD_ATERM_H
 
-#include "mcrl2/atermpp/aterm_io.h"
+#include "mcrl2/atermpp/aterm_io_binary.h"
+#include "mcrl2/atermpp/aterm_io_text.h"
+
 #include "mcrl2/utilities/exception.h"
+
 #include <istream>
 #include <string>
 
@@ -51,7 +54,14 @@ atermpp::aterm load_aterm(std::istream& stream,
   atermpp::aterm result;
   try
   {
-    result = binary ? atermpp::binary_aterm_input(stream, transformer).read_term() : atermpp::text_aterm_input(stream, transformer).read_term();
+    if (binary)
+    {
+      atermpp::binary_aterm_input(stream, transformer) >> result;
+    }
+    else
+    {
+      atermpp::text_aterm_input(stream, transformer) >> result;
+    }
   }
   catch (std::exception &e)
   {

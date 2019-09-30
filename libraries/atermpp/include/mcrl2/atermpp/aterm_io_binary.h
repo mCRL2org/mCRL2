@@ -30,7 +30,7 @@ namespace atermpp
 ///          The start of the stream is a zero followed by a header and a version and a term with function symbol index zero
 ///          indicates the end of the stream.
 ///
-class binary_aterm_output : public aterm_output
+class binary_aterm_output final : public aterm_output
 {
 public:
   /// \brief Provide the output stream to which the terms are written.
@@ -40,7 +40,7 @@ public:
 
   /// \brief Writes an aterm in a compact binary format that keeps subterms shared. The term that is
   ///        written itself is not shared whenever it occurs as the argument of another term.
-  void write_term(const aterm& term) override;
+  const aterm_output& operator<<(const aterm& term) override;
 
 private:
   /// \brief Write a function symbol to the output stream.
@@ -63,15 +63,14 @@ private:
 };
 
 /// \brief Reads terms from a stream in the steamable binary aterm format.
-class binary_aterm_input : public aterm_input
+class binary_aterm_input final : public aterm_input
 {
 public:
   /// \brief Provide the input stream from which terms are read.
   /// \param transformer A function transforming the function symbols after reading, see the type for details.
   binary_aterm_input(std::istream& is, std::function<aterm_transformer> transformer = identity);
 
-  aterm read_term() override;
-
+  aterm get() override;
 private:
   /// \returns The number of bits needed to index terms.
   unsigned int term_index_width();

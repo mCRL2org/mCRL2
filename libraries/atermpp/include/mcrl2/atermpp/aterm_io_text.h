@@ -16,14 +16,14 @@ namespace atermpp
 {
 
 /// \brief Writes terms in textual format to an output stream.
-class text_aterm_output : public aterm_output
+class text_aterm_output final : public aterm_output
 {
 public:
   /// \param newline When true each term is written on a new line.
   /// \param transformer A function transforming the function symbols before writing, see the type for details.
   text_aterm_output(std::ostream& os, std::function<aterm_transformer> transformer = identity, bool newline = false);
 
-  void write_term(const aterm& term) override;
+  const aterm_output& operator<<(const aterm& term) override;
 
 private:
   /// \brief Writes a term in textual format on the same line.
@@ -36,12 +36,12 @@ private:
 };
 
 /// \brief Reads terms in textual format from an input stream.
-class text_aterm_input : public aterm_input
+class text_aterm_input final : public aterm_input
 {
 public:
   text_aterm_input(std::istream& os, std::function<aterm_transformer> transformer = identity);
 
-  aterm read_term() override;
+  aterm get() override;
 
 private:
   /// \brief Parse a term from the input stream and return it.

@@ -224,8 +224,7 @@ static void read_from_lts(LTS_TRANSITION_SYSTEM& lts, const std::string& filenam
 
     while (true)
     {
-      aterm term = stream.read_term();
-
+      aterm term = stream.get();
       if (!term.defined())
       {
         // The default constructed term indicates the end of the stream.
@@ -318,7 +317,7 @@ static void write_to_lts(const LTS_TRANSITION_SYSTEM& lts, const std::string& fi
       for (std::size_t i = 0; i < lts.num_state_labels(); ++i)
       {
         // Write state labels as such, we assume that all list terms without headers are state labels.
-        stream.write_term(lts.state_label(i));
+        stream << lts.state_label(i);
       }
     }
 
@@ -326,13 +325,13 @@ static void write_to_lts(const LTS_TRANSITION_SYSTEM& lts, const std::string& fi
     {
       for (std::size_t i = 1; i < lts.num_action_labels(); ++i)
       {
-        stream.write_term(atermpp::aterm_appl(multi_action_header(), lts.action_label(i).actions(), lts.action_label(i).time()));
+        stream << atermpp::aterm_appl(multi_action_header(), lts.action_label(i).actions(), lts.action_label(i).time());
       }
     }
 
     for (auto& trans : lts.get_transitions())
     {
-      stream.write_term(encode_transition(lts, trans));
+      stream << encode_transition(lts, trans);
     }
 
     // Write the header of the labelled transition system at the end, because the initial state must be set of adding the transitions.
@@ -344,7 +343,7 @@ static void write_to_lts(const LTS_TRANSITION_SYSTEM& lts, const std::string& fi
                 aterm_int(lts.num_states()));
 
     // Write the header with the indices of dedicated terms removed.
-    stream.write_term(header);
+    stream << header;
   }
   catch (std::ofstream::failure&)
   {

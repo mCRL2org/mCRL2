@@ -87,7 +87,7 @@ text_aterm_output::text_aterm_output(std::ostream& os, std::function<aterm_trans
     m_newline(newline)
 {}
 
-void text_aterm_output::write_term(const aterm& term)
+const aterm_output& text_aterm_output::operator<<(const aterm& term)
 {
   write_term_line(term);
 
@@ -95,6 +95,8 @@ void text_aterm_output::write_term(const aterm& term)
   {
     m_stream << "\n";
   }
+
+  return *this;
 }
 
 text_aterm_input::text_aterm_input(std::istream& is, std::function<aterm_transformer> transformer)
@@ -104,15 +106,13 @@ text_aterm_input::text_aterm_input(std::istream& is, std::function<aterm_transfo
   character = next_char();
 }
 
-aterm text_aterm_input::read_term()
+aterm text_aterm_input::get()
 {
-  aterm term;
-
   try
   {
     if (character != EOF)
     {
-      term = parse_aterm(character);
+      return parse_aterm(character);
     }
   }
   catch (atermpp::runtime_error& e)
@@ -124,7 +124,7 @@ aterm text_aterm_input::read_term()
   m_column = 0;
   m_history.clear();
 
-  return term;
+  return aterm();
 }
 
 // Private functions
@@ -388,8 +388,7 @@ std::string text_aterm_input::parse_unquoted_string(int& character)
 
 void write_term_to_text_stream(const aterm& term, std::ostream& os)
 {
-  text_aterm_output stream(os);
-  stream.write_term(term);
+  text_aterm_output(os) << term;
 }
 
 aterm read_term_from_string(const std::string& s)
@@ -400,15 +399,13 @@ aterm read_term_from_string(const std::string& s)
 
 aterm read_term_from_text_stream(istream& is)
 {
-  text_aterm_input stream(is);
-  return stream.read_term();
+  return text_aterm_input(is).get();
 }
 
 
 std::ostream& operator<<(std::ostream& os, const aterm& term)
 {
-  text_aterm_output stream(os);
-  stream.write_term(term);
+  text_aterm_output(os) << term;
   return os;
 }
 

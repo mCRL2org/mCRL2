@@ -9,6 +9,7 @@
 #ifndef MCRL2_SMT_TRANSLATE_SPECIFICATION_H
 #define MCRL2_SMT_TRANSLATE_SPECIFICATION_H
 
+#include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/data_equation.h"
@@ -98,7 +99,7 @@ std::set<data::sort_expression> find_dependencies(const data::data_specification
 }
 
 // Find all sorts that need to be translated and the dependencies in their definitions
-static inline
+inline
 std::map<data::sort_expression, std::set<data::sort_expression>> find_sorts_and_dependencies(const data::data_specification& dataspec)
 {
   std::map<data::sort_expression, std::set<data::sort_expression>> result;
