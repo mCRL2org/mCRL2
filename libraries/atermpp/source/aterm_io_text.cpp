@@ -10,11 +10,8 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_int.h"
-#include "mcrl2/atermpp/aterm_io.h"
+#include "mcrl2/atermpp/aterm_io_text.h"
 
-#include <cstdio>
-#include <cstdlib>
-#include <cctype>
 #include <string>
 #include <cassert>
 #include <stdexcept>

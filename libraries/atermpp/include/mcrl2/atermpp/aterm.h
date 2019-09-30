@@ -13,10 +13,6 @@
 #include "mcrl2/atermpp/type_traits.h"
 #include "mcrl2/atermpp/detail/aterm.h"
 
-#include <string>
-#include <sstream>
-#include <iostream>
-
 /// \brief The main namespace for the aterm++ library.
 namespace atermpp
 {
@@ -339,18 +335,6 @@ const Derived& deprecated_cast(const Base& t,
   static_assert(sizeof(Derived) == sizeof(aterm),
                 "aterm cast cannot be applied types derived from aterms where extra fields are added");
   return reinterpret_cast<const Derived&>(t);
-}
-
-/// \brief Send the term in textual form to the ostream.
-std::ostream& operator<<(std::ostream& out, const aterm& t);
-
-/// \param t The input aterm.
-/// \return A string representation of the given term derived from an aterm.
-inline std::string pp(const aterm& t)
-{
-  std::ostringstream oss;
-  oss << t;
-  return oss.str();
 }
 
 namespace detail

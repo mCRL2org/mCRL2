@@ -12,11 +12,17 @@
 
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_int.h"
-#include "mcrl2/utilities/bitstream.h"
-#include "mcrl2/utilities/indexed_set.h"
 
 namespace atermpp
 {
+
+/// \brief A function that is applied to all terms. The resulting term should only use
+///        a subset of the original arguments (i.e. not introduce new terms).
+/// \details Typical usage is removing the index traits from function symbols that represent operators.
+using aterm_transformer = aterm_appl(const aterm_appl&);
+
+/// \brief The default transformer that maps each term to itself.
+inline aterm_appl identity(const aterm_appl& x) { return x; }
 
 /// \brief The interface for a class that writes aterm to a stream.
 class aterm_output
@@ -40,152 +46,37 @@ public:
   virtual aterm read_term() = 0;
 };
 
-/// \brief A function that is applied to all terms. The resulting term should only use
-///        a subset of the original arguments (i.e. not introduce new terms).
-/// \details Typical usage is removing the index traits from function symbols that represent operators.
-using aterm_transformer = aterm_appl(const aterm_appl&);
+// These are utility functions.
 
-/// \brief The default transformer that maps each term to itself.
-static inline aterm_appl identity(const aterm_appl& x) { return x; }
+/// \brief Send the term in textual form to the ostream.
+std::ostream& operator<<(std::ostream& out, const aterm& t);
 
-/// \brief Writes terms in a streamable binary aterm format to an output stream.
-/// \details The streamable aterm format:
-///
-///          Aterms (and function symbols) are written as packets (with an identifier in the header) and their
-///          indices are derived from the number of aterms, resp. symbols, that occur before them in this stream. For each term
-///          we first ensure that its arguments and symbol are written to the stream (avoiding duplicates). Then its
-///          symbol index followed by a number of indices (depending on the arity) for its argments are written as integers.
-///          Packet headers also contain a special value to indicate that the read term should be visible as output as opposed to
-///          being only a subterm.
-///          The start of the stream is a zero followed by a header and a version and a term with function symbol index zero
-///          indicates the end of the stream.
-///
-class binary_aterm_output : public aterm_output
+/// \param t The input aterm.
+/// \return A string representation of the given term derived from an aterm.
+inline std::string pp(const aterm& t)
 {
-public:
-  /// \brief Provide the output stream to which the terms are written.
-  /// \param transformer A function transforming the function symbols before writing, see the type for details.
-  binary_aterm_output(std::ostream& os, std::function<aterm_transformer> transformer = identity);
-  ~binary_aterm_output() override;
+  std::ostringstream oss;
+  oss << t;
+  return oss.str();
+}
 
-  /// \brief Writes an aterm in a compact binary format that keeps subterms shared. The term that is
-  ///        written itself is not shared whenever it occurs as the argument of another term.
-  void write_term(const aterm& term) override;
-
-private:
-  /// \brief Write a function symbol to the output stream.
-  std::size_t write_function_symbol(const function_symbol& symbol);
-
-  /// \returns The number of bits needed to index terms.
-  unsigned int term_index_width();
-
-  /// \returns The number of bits needed to index function symbols.
-  unsigned int function_symbol_index_width();
-
-  mcrl2::utilities::obitstream m_stream;
-  std::function<aterm_transformer> m_transformer;
-
-  unsigned int m_term_index_width; ///< caches the result of term_index_width().
-  unsigned int m_function_symbol_index_width; ///< caches the result of function_symbol_index_width().
-
-  mcrl2::utilities::indexed_set<aterm> m_terms; ///< An index of already written terms.
-  mcrl2::utilities::indexed_set<function_symbol> m_function_symbols; ///< An index of already written function symbols.
-};
-
-/// \brief Reads terms from a stream in the steamable binary aterm format.
-class binary_aterm_input : public aterm_input
+/// \brief Sends the name of a function symbol to an ostream.
+/// \param out The out stream.
+/// \param f The function symbol to be output.
+/// \return The stream.
+inline
+std::ostream& operator<<(std::ostream& out, const function_symbol& f)
 {
-public:
-  /// \brief Provide the input stream from which terms are read.
-  /// \param transformer A function transforming the function symbols after reading, see the type for details.
-  binary_aterm_input(std::istream& is, std::function<aterm_transformer> transformer = identity);
+  return out << f.name();
+}
 
-  aterm read_term() override;
-
-private:
-  /// \returns The number of bits needed to index terms.
-  unsigned int term_index_width();
-
-  /// \returns The number of bits needed to index function symbols.
-  unsigned int function_symbol_index_width();
-
-  mcrl2::utilities::ibitstream m_stream;
-  std::function<aterm_transformer> m_transformer;
-
-  unsigned int m_term_index_width; ///< caches the result of term_index_width().
-  unsigned int m_function_symbol_index_width; ///< caches the result of function_symbol_index_width().
-
-  std::deque<aterm> m_terms; ///< An index of read terms.
-  std::deque<function_symbol> m_function_symbols; ///< An index of read function symbols.
-};
-
-/// \brief Writes terms in textual format to an output stream.
-class text_aterm_output : public aterm_output
+/// \brief Prints the name of a function symbol as a string.
+/// \param f The function symbol.
+/// \return The string representation of r.
+inline const std::string& pp(const function_symbol& f)
 {
-public:
-  /// \param newline When true each term is written on a new line.
-  /// \param transformer A function transforming the function symbols before writing, see the type for details.
-  text_aterm_output(std::ostream& os, std::function<aterm_transformer> transformer = identity, bool newline = false);
-
-  void write_term(const aterm& term) override;
-
-private:
-  /// \brief Writes a term in textual format on the same line.
-  void write_term_line(const aterm& term);
-
-  std::ostream& m_stream;
-  std::function<aterm_transformer> m_transformer;
-
-  bool m_newline = false; ///< Indicates that terms are separated by a newline.
-};
-
-/// \brief Reads terms in textual format from an input stream.
-class text_aterm_input : public aterm_input
-{
-public:
-  text_aterm_input(std::istream& os, std::function<aterm_transformer> transformer = identity);
-
-  aterm read_term() override;
-
-private:
-  /// \brief Parse a term from the input stream and return it.
-  aterm parse_aterm(int& character);
-
-  /// \brief Parses an "f"(t0, ..., tn) application as an aterm_appl.
-  aterm_appl parse_aterm_appl(const std::string& function_name, int& character);
-
-  /// \brief Parses an std::size_t as an aterm_int.
-  aterm_int parse_aterm_int(int& character);
-
-  /// \brief Parses a list of arguments [...] as terms.
-  aterm_list parse_aterm_list(int& character, char begin, char end);
-
-  /// \brief Reads a quoted string from the stream.
-  /// \returns The parsed string and the first character after this string that is not whitespace.
-  std::string parse_quoted_string(int& character);
-
-  /// \brief Reads an unquoted string from the stream.
-  std::string parse_unquoted_string(int& character);
-
-  /// \returns A string indicating the parse error position.
-  std::string print_parse_error_position();
-
-  /// \returns The first character that is not whitespace or end-of-file (EOF).
-  /// \param skip_whitespace, returns the next non space character.
-  /// \param required Throw error when the next character is EOL.
-  int next_char(bool skip_whitespace = true, bool required = false);
-
-  std::istream& m_stream;
-  std::function<aterm_transformer> m_transformer;
-
-  std::size_t m_line = 0; ///< The line number of the current character.
-  std::size_t m_column = 0; ///< The column of the current character.
-
-  int character; ///< The last character that was read.
-
-  std::deque<char> m_history; ///< Stores the characters that have been read so-far.
-  std::size_t m_history_limit = 64; ///< Determines the maximum number of characters that are stored.
-};
+  return f.name();
+}
 
 /// \brief Writes term t to a stream in binary aterm format.
 void write_term_to_binary_stream(const aterm& t, std::ostream& os);

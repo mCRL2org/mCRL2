@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "mcrl2/atermpp/aterm_io.h"
+#include "mcrl2/atermpp/aterm_io_binary.h"
 
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_int.h"
