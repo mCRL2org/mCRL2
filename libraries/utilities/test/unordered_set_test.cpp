@@ -127,3 +127,10 @@ BOOST_AUTO_TEST_CASE(test_erase_begin)
   unordered_set<int> set = construct({5,3,2,5});
   set.erase(set.begin());
 }
+
+BOOST_AUTO_TEST_CASE(test_const_iterator)
+{
+  unordered_set<int> set = construct({5,3,2,5});
+  auto it = set.begin();
+  unordered_set<int>::const_iterator const_it = it;
+}

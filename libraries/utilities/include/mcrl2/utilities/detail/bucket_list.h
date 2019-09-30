@@ -101,6 +101,12 @@ public:
       : m_bucket_node(nullptr)
     {}
 
+    /// \brief Implicit conversion to the const_iterator variant.
+    operator key_iterator<true>() const
+    {
+      return key_iterator<true>(m_bucket_node);
+    }
+
     key_iterator& operator++()
     {
       m_bucket_node = reinterpret_cast<class node*>(m_bucket_node->next());

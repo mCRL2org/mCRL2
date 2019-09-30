@@ -31,7 +31,7 @@ private:
     typename Bucket::iterator>::type;
 
 public:
-  using tag = std::input_iterator_tag;
+  using tag = std::forward_iterator_tag;
 
   /// \brief Construct an iterator over all keys passed in this bucket and all remaining buckets.
   unordered_set_iterator(bucket_it it, bucket_it end, key_it_type before_it, key_it_type key) :
@@ -49,6 +49,12 @@ public:
   explicit unordered_set_iterator(bucket_it it) :
     m_bucket_it(it)
   {}
+
+  /// \brief Implicit conversion to the const_iterator should be provided.
+  operator unordered_set_iterator<Key, Bucket, Allocator, true>() const
+  {
+    return unordered_set_iterator<Key, Bucket, Allocator, true>(m_bucket_it, m_bucket_end, m_key_before_it, m_key_it);
+  }
 
   unordered_set_iterator& operator++()
   {
