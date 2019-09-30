@@ -51,12 +51,14 @@ option(MCRL2_EXTRA_TOOL_TESTS       "Enable testing of tools on more mCRL2 speci
 option(MCRL2_TEST_JITTYC            "Also test the compiling rewriters in the library tests. This can be time consuming." OFF)
 set(MCRL2_QT_APPS "" CACHE INTERNAL "Internally keep track of Qt apps for the packaging procedure")
 
-option(MCRL2_ENABLE_DEBUG_SOUNDNESS_CHECKS "Enable extensive soundness check in the Debug build type." ON)
+option(MCRL2_ENABLE_ADDRESSSANITIZER "Enable additional memory run-time checks implemented by the AddressSanitizer." OFF)
 option(MCRL2_ENABLE_CODE_COVERAGE   "Enable generation of code coverage statistics." OFF)
+option(MCRL2_ENABLE_DEBUG_SOUNDNESS_CHECKS "Enable extensive soundness check in the Debug build type." ON)
 option(MCRL2_ENABLE_STABLE          "Enable compilation of stable tools." ON)
 option(MCRL2_SKIP_LONG_TESTS        "Do not compile test code that takes too long when profiling is on." OFF)
 
 mark_as_advanced(
+  MCRL2_ENABLE_ADDRESSSANITIZER
   MCRL2_ENABLE_CODE_COVERAGE
   MCRL2_ENABLE_DEBUG_SOUNDNESS_CHECKS 
   MCRL2_ENABLE_STABLE

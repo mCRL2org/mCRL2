@@ -45,8 +45,7 @@ if(NOT MCRL2_CLANG)
   try_add_c_flag(-ftest-coverage           DEBUG)
 endif()
 
-# The following is only implemented in clang, but not on Apple.
-if(MCRL2_CLANG AND NOT APPLE)
+if(MCRL2_ENABLE_ADDRESSSANITIZER)
   # We need to add the proper flag to the linker before we try:
   set(CMAKE_REQUIRED_LIBRARIES "-fsanitize=address")
   try_add_c_flag(-fsanitize=address       DEBUG)
@@ -95,8 +94,7 @@ if(NOT MCRL2_CLANGPP)
   try_add_cxx_flag(-ftest-coverage           DEBUG)
 endif()
 
-# The following is only implemented in clang
-if(MCRL2_CLANGPP AND NOT APPLE)
+if(MCRL2_ENABLE_ADDRESSSANITIZER)
   # We need to add the proper flag to the linker before we try:
   set(CMAKE_REQUIRED_LIBRARIES "-fsanitize=address")
   try_add_cxx_flag(-fsanitize=address       DEBUG)
@@ -142,7 +140,7 @@ if(CXX_ACCEPTS_FTEST_COVERAGE)
   set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} -ftest-coverage")
 endif()
 
-if(CXX_ACCEPTS_FSANITIZE_ADDRESS)
+if(MCRL2_ENABLE_ADDRESSSANITIZER)
   set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fsanitize=address")
   set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} -fsanitize=address")
 endif()
