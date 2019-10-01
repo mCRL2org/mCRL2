@@ -44,13 +44,13 @@ public:
     m_freelist.destructive_mark();
 
     /// For all actual elements stored in the pool trigger the destructor.
+    bool first_block = true;
     for (auto& block : m_blocks)
     {
-      --m_number_of_blocks;
-      if (m_number_of_blocks == 0)
+      if (first_block)
       {
-        // This is the last block, for that one only m_current_index elements were inserted.
-        for (std::size_t index = 0; index < m_number_of_blocks; ++index)
+        // This is the first block, for that one only m_current_index elements were inserted.
+        for (std::size_t index = 0; index < m_current_index; ++index)
         {
           auto& slot = block[index];
           if (!slot.is_marked())
@@ -58,6 +58,7 @@ public:
             reinterpret_cast<T*>(&slot)->~T();
           }
         }
+        first_block = false;
       }
       else
       {
@@ -70,6 +71,8 @@ public:
         }
       }
     }
+
+    assert(m_freelist.empty());
   }
 
   /// \brief Reuses memory from block and allocates a new block when
