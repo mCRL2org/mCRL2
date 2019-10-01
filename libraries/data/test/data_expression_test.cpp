@@ -11,8 +11,8 @@
 
 #define BOOST_TEST_MODULE data_expression_test
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iostream>
 
+#include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/abstraction.h"
 #include "mcrl2/data/application.h"
@@ -34,7 +34,7 @@
 using namespace mcrl2;
 using namespace mcrl2::data;
 
-void variable_test()
+BOOST_AUTO_TEST_CASE(variable_test)
 {
   basic_sort s("S");
   variable x("x", s);
@@ -61,7 +61,7 @@ void variable_test()
   BOOST_CHECK(y_e_.sort() == y.sort());
 }
 
-void function_symbol_test()
+BOOST_AUTO_TEST_CASE(function_symbol_test)
 {
   basic_sort s0("S0");
   basic_sort s1("S1");
@@ -97,7 +97,7 @@ void function_symbol_test()
   BOOST_CHECK(f_e_.sort() == f.sort());
 }
 
-void application_test()
+BOOST_AUTO_TEST_CASE(application_test)
 {
   basic_sort s0("S0");
   basic_sort s1("S1");
@@ -126,7 +126,7 @@ void application_test()
   BOOST_CHECK(fxy == f(x,y));
 }
 
-void abstraction_test()
+BOOST_AUTO_TEST_CASE(abstraction_test)
 {
   basic_sort s("S");
 
@@ -145,7 +145,7 @@ void abstraction_test()
   BOOST_CHECK(I_e_.body() == I.body());
 }
 
-void lambda_test()
+BOOST_AUTO_TEST_CASE(lambda_test)
 {
   basic_sort s("S");
 
@@ -175,7 +175,7 @@ void lambda_test()
   BOOST_CHECK(I_.body() == I.body()) ;
 }
 
-void forall_test()
+BOOST_AUTO_TEST_CASE(forall_test)
 {
   basic_sort s("S");
 
@@ -204,7 +204,7 @@ void forall_test()
   BOOST_CHECK(I_.body() == I.body()) ;
 }
 
-void exists_test()
+BOOST_AUTO_TEST_CASE(exists_test)
 {
   basic_sort s("S");
 
@@ -233,7 +233,7 @@ void exists_test()
   BOOST_CHECK(I_.body() == I.body()) ;
 }
 
-void set_comprehension_test()
+BOOST_AUTO_TEST_CASE(set_comprehension_test)
 {
   basic_sort s("S");
   variable x("x", make_function_sort(s,sort_bool::bool_()));
@@ -242,7 +242,7 @@ void set_comprehension_test()
   BOOST_CHECK(e.sort() == sort_set::set_(s));
 }
 
-void bag_comprehension_test()
+BOOST_AUTO_TEST_CASE(bag_comprehension_test)
 {
   basic_sort s("S");
   data::function_symbol f("f", make_function_sort(s, sort_nat::nat()));
@@ -250,7 +250,7 @@ void bag_comprehension_test()
   BOOST_CHECK(e.sort() == sort_bag::bag(s));
 }
 
-void where_declaration_test()
+BOOST_AUTO_TEST_CASE(where_declaration_test)
 {
   basic_sort s("S");
   variable x("x", s);
@@ -270,7 +270,7 @@ void where_declaration_test()
   BOOST_CHECK(wxy.sort() == x.sort());
 }
 
-void assignment_test()
+BOOST_AUTO_TEST_CASE(assignment_test)
 {
   basic_sort s("S");
   variable x("x", s);
@@ -281,34 +281,7 @@ void assignment_test()
   BOOST_CHECK(xy.rhs() == y);
 }
 
-void system_defined_check()
+BOOST_AUTO_TEST_CASE(system_defined_check)
 {
   BOOST_CHECK(sort_list::empty(sort_pos::pos()) != sort_list::empty(sort_nat::nat()));
 }
-
-BOOST_AUTO_TEST_CASE(test_main)
-{
-  variable_test();
-
-  function_symbol_test();
-
-  application_test();
-
-  abstraction_test();
-
-  lambda_test();
-
-  forall_test();
-
-  exists_test();
-
-  set_comprehension_test();
-
-  bag_comprehension_test();
-
-  where_declaration_test();
-
-  assignment_test();
-}
-
-

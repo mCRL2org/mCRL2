@@ -6,31 +6,21 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file identifier_string_test.cpp
-/// \brief Add your file description here.
 
 #define BOOST_TEST_MODULE identifier_string_test
-
-#include <iostream>
 #include <boost/test/included/unit_test_framework.hpp>
+
+#include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/core/identifier_string.h"
 
 using namespace mcrl2;
 
-// Example that didn't compile, submitted by Jan Friso.
-void test_identifier_string()
+BOOST_AUTO_TEST_CASE(test_identifier_string)
 {
   core::identifier_string a("abc");
-  const core::identifier_string& b = a;
-
   const core::identifier_string_list l;
   for (const auto& s: l)
   {
     std::cout << s;
   }
-}
-
-BOOST_AUTO_TEST_CASE(test_main)
-{
-  test_identifier_string();
 }

@@ -6,15 +6,13 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file constructors.cpp
-/// \brief Add your file description here.
 
 #define BOOST_TEST_MODULE constructors
-#include <iostream>
 #include <boost/test/included/unit_test_framework.hpp>
+
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_string.h"
+#include "mcrl2/atermpp/aterm_io.h"
 
 using namespace std;
 using namespace atermpp;

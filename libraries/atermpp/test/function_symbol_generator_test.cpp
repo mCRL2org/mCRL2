@@ -10,15 +10,16 @@
 /// \brief Add your file description here.
 
 #define BOOST_TEST_MODULE function_symbol_generator_test
-#include <iostream>
-#include <string>
 #include <boost/test/included/unit_test_framework.hpp>
 
+#include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/function_symbol_generator.h"
+
+#include <string>
 
 using namespace atermpp;
 
-void test_generator()
+BOOST_AUTO_TEST_CASE(test_generator)
 {
   std::string prefix("@");
   function_symbol_generator generator(prefix);
@@ -51,9 +52,4 @@ void test_generator()
   BOOST_CHECK(q1 == q2);
   std::cout << "q1 == " << q1 << " name = " << q1.name() << " arity = " << q1.arity() << std::endl;
   std::cout << "q2 == " << q2 << " name = " << q2.name() << " arity = " << q2.arity() << std::endl;
-}
-
-BOOST_AUTO_TEST_CASE(test_main)
-{
-  test_generator();
 }

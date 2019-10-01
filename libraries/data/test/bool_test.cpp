@@ -11,23 +11,17 @@
 
 #define BOOST_TEST_MODULE bool_test
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iostream>
 
+#include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/data/bool.h"
-
 
 using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::data::sort_bool;
 
-void bool_sort_test()
+BOOST_AUTO_TEST_CASE(test_bool_sort)
 {
   const basic_sort& b(bool_());
   BOOST_CHECK(b == bool_());
   BOOST_CHECK(pp(b.name()) == "Bool");
-}
-
-BOOST_AUTO_TEST_CASE(test_main)
-{
-  bool_sort_test();
 }
