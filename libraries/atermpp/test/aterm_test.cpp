@@ -23,7 +23,7 @@
 using namespace std;
 using namespace atermpp;
 
-void test_aterm()
+BOOST_AUTO_TEST_CASE(test_aterm)
 {
   atermpp::aterm a = read_term_from_string("f(x)");
   atermpp::aterm label = read_term_from_string("label");
@@ -35,7 +35,7 @@ void test_aterm()
   BOOST_CHECK(e==atermpp::aterm());
 }
 
-void test_aterm_string()
+BOOST_AUTO_TEST_CASE(test_aterm_string)
 {
   const aterm_string& empty = empty_string();
   std::ostringstream out;
@@ -73,7 +73,7 @@ void test_aterm_io(const std::string& input_string)
   BOOST_CHECK(input == binary_output);
 }
 
-void test_aterm_io()
+BOOST_AUTO_TEST_CASE(test_several_aterm_io)
 {
   test_aterm_io("a_somewhat_longer_constant_name_with_some_blah_blah_at_the_end_to_make_it_longer");
   test_aterm_io("f(g,h)");
@@ -81,11 +81,4 @@ void test_aterm_io()
   test_aterm_io("[a]");
   test_aterm_io("[a,b,[]]");
   test_aterm_io("f([a,f(x),[]],2,[g,g(34566)])"); 
-}
-
-BOOST_AUTO_TEST_CASE(test_main)
-{
-  test_aterm();
-  test_aterm_string(); 
-  test_aterm_io();
 }

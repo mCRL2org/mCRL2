@@ -66,7 +66,7 @@ aterm_appl g()
   return aterm_appl(function_symbol("f", 1), w);
 }
 
-void test_hooks()
+BOOST_AUTO_TEST_CASE(test_hooks)
 {
   add_creation_hook(function_symbol_DataVarId(), on_create_variable);
   add_deletion_hook(function_symbol_DataVarId(), on_delete_variable);
@@ -81,9 +81,4 @@ void test_hooks()
   BOOST_CHECK(variable_count == 2);
   detail::g_term_pool().collect();
   BOOST_CHECK(variable_count == 2);
-}
-
-BOOST_AUTO_TEST_CASE(test_main)
-{
-  test_hooks();
 }

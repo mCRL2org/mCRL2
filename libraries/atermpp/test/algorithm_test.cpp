@@ -35,7 +35,7 @@ struct is_f
   }
 };
 
-void test_algorithm()
+BOOST_AUTO_TEST_CASE(test_algorithm)
 {
   aterm_appl a (read_appl_from_string("h(g(x),f(y),p(a(x,y),q(f(z))))"));
   aterm_appl b (read_appl_from_string("h(g(x),p(a(x,y),q(g(z))))"));
@@ -78,7 +78,7 @@ struct for_each_proc
   }
 };
 
-void test_for_each()
+BOOST_AUTO_TEST_CASE(test_for_each)
 {
   aterm_appl t (read_appl_from_string("h(g(x),f(y))"));
   std::set<std::string> names;
@@ -94,7 +94,7 @@ void test_for_each()
   BOOST_CHECK(names.find("y") != names.end());
 }
 
-void test_operators()
+BOOST_AUTO_TEST_CASE(test_operators)
 {
   {
     aterm_appl a1 (read_appl_from_string("a1"));
@@ -123,11 +123,4 @@ void test_operators()
     bool b = (a1 < a2);
     std::clog << "b = " << (b?"true":"false") << std::endl;
   }
-}
-
-BOOST_AUTO_TEST_CASE(test_main)
-{
-  test_algorithm();
-  test_operators();
-  test_for_each();
 }

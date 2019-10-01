@@ -37,15 +37,12 @@ BOOST_AUTO_TEST_CASE(test_main)
   aterm_list L  = l;
 
   // assignment
-  t = t;
   t = T;
   T = t;
 
-  a = a;
   a = A;
   A = a;
 
-  l = l;
   l = L;
   L = l;
 
@@ -54,41 +51,37 @@ BOOST_AUTO_TEST_CASE(test_main)
   // l = a;  this will give a runtime assertion failure
 
   // equality
-  t == t;
-  // t == T; Disabled this test as ATerms should not be compared to aterms.
-  // T == t;
+  bool b;
+  b = t == t;
 
-  a == a;
-  a == A;
-  A == a;
+  b = a == a;
+  b = a == A;
+  b = A == a;
 
-  l == l;
-  l == L;
-  L == l;
+  b = l == l;
+  b = l == L;
+  b = L == l;
 
-  t == a;
-  t == l;
-  // l == a;  Temporarily disabled. Should be reanabled in due time.
+  b = t == a;
+  b = t == l;
+  b = l == a;
 
   // inequality
-  t != t;
-  // t != T; Disabled this test as ATerms should not be compared to aterms.
-  // T != t;
+  b = t != t;
 
-  a != a;
-  a != A;
-  A != a;
+  b = a != a;
+  b = a != A;
+  b = A != a;
 
-  l != l;
-  l != L;
-  L != l;
+  b = l != l;
+  b = l != L;
+  b = L != l;
 
-  t != a;
-  t != l;
-  // l != a;  Temporarily disabled. Should be reanabled in due time.
+  b = t != a;
+  b = t != l;
+  b = l != a;
 
   // operator<
-  bool b;
   b = t < t;
   b = t < T;
   b = T < t;

@@ -50,7 +50,7 @@ struct func
   }
 };
 
-void test_aterm_list()
+BOOST_AUTO_TEST_CASE(test_aterm_list)
 {
   aterm_list q = read_list_from_string("[1,2,3,4]");
   aterm_list r = reverse(q); // r == [4,3,2,1]
@@ -91,7 +91,7 @@ void test_aterm_list()
   }  
 }
 
-void test_set_operations()
+BOOST_AUTO_TEST_CASE(test_set_operations)
 {
   atermpp::aterm x = read_term_from_string("x");
   atermpp::aterm y = read_term_from_string("y");
@@ -112,14 +112,14 @@ void test_set_operations()
   BOOST_CHECK(lm_difference.size() == 1);
 }
 
-void test_initializer_list()
+BOOST_AUTO_TEST_CASE(test_initializer_list)
 {
   atermpp::aterm x = read_term_from_string("x");
   atermpp::aterm y = read_term_from_string("y");
   aterm_list l = { x, y };
 }
 
-void test_list_with_apply_filter()
+BOOST_AUTO_TEST_CASE(test_list_with_apply_filter)
 {
   std::vector<aterm_list> v;
   aterm_list l1= read_list_from_string("[1,2,3,4]");
@@ -149,18 +149,9 @@ void test_list_with_apply_filter()
   BOOST_CHECK(result2.size()==2);
 }
 
-void test_concatenation()
+BOOST_AUTO_TEST_CASE(test_concatenation)
 {
   term_list<aterm_int> l1;
   term_list<aterm> l2;
   BOOST_CHECK(l2+l1 == l1+l2);
-}
-
-BOOST_AUTO_TEST_CASE(test_main)
-{
-  test_aterm_list();
-  test_set_operations();
-  test_initializer_list();
-  test_list_with_apply_filter();
-  test_concatenation();
 }

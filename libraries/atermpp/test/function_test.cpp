@@ -20,7 +20,7 @@
 using namespace std;
 using namespace atermpp;
 
-void test_aterm_function()
+BOOST_AUTO_TEST_CASE(test_aterm_function)
 {
   // create an unquoted function symbol
   function_symbol sym("f", 1);
@@ -42,9 +42,4 @@ void test_aterm_function()
   aterm_appl f ( read_appl_from_string("f(g(a,b),c)"));
   aterm_appl g ( read_appl_from_string("g(a,b)"));
   BOOST_CHECK(f[0] == g);
-}
-
-BOOST_AUTO_TEST_CASE(test_main)
-{
-  test_aterm_function();
 }
