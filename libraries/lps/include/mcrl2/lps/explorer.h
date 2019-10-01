@@ -15,6 +15,7 @@
 #include <deque>
 #include <iomanip>
 #include <limits>
+#include <memory>
 #include <random>
 #include <tuple>
 #include <type_traits>
@@ -39,9 +40,7 @@
 #include "mcrl2/utilities/skip.h"
 #include "mcrl2/utilities/unused.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps {
 
 enum class caching { none, local, global };
 
@@ -337,10 +336,27 @@ struct abortable
   virtual void abort() = 0;
 };
 
+template <bool Stochastic, bool Timed, typename Specification>
 class explorer: public abortable
 {
+  public:
+    using state_type = typename std::conditional<Stochastic, stochastic_state, state>::type;
+    using state_index_type = typename std::conditional<Stochastic, std::list<std::size_t>, std::size_t>::type;
+    static constexpr bool is_stochastic = Stochastic;
+    static constexpr bool is_timed = Timed;
+
   protected:
-    typedef data::enumerator_list_element_with_substitution<> enumerator_element;
+    using enumerator_element = data::enumerator_list_element_with_substitution<>;
+
+    struct transition
+    {
+      process::timed_multi_action action;
+      state_type state;
+
+      transition(process::timed_multi_action  action_, const state_type& state_)
+       : action(std::move(action_)), state(state_)
+      {}
+    };
 
     const explorer_options& m_options;
     data::rewriter m_rewr;
@@ -348,11 +364,10 @@ class explorer: public abortable
     data::enumerator_identifier_generator m_id_generator;
     data::enumerator_algorithm<> m_enumerator;
     std::vector<data::variable> m_process_parameters;
-    std::size_t m_n; // m_n = process_parameters.size()
+    std::size_t m_n; // m_n = m_process_parameters.size()
     data::data_expression_list m_initial_state;
     lps::stochastic_distribution m_initial_distribution;
     bool m_recursive = false;
-
     std::vector<explorer_summand> m_regular_summands;
     std::vector<explorer_summand> m_confluent_summands;
 
@@ -363,9 +378,8 @@ class explorer: public abortable
     std::unordered_map<state, std::size_t> m_discovered;
 
     // used by make_timed_state, to avoid needless creation of vectors
-    std::vector<data::data_expression> timed_state;
+    mutable std::vector<data::data_expression> timed_state;
 
-    template <typename Specification>
     Specification preprocess(const Specification& lpsspec)
     {
       Specification result = lpsspec;
@@ -384,6 +398,12 @@ class explorer: public abortable
         replace_constants_by_variables(result, m_rewr, m_sigma);
       }
       return result;
+    }
+
+    // Evaluates whether t0 <= t1
+    bool less_equal(const data::data_expression& t0, const data::data_expression& t1) const
+    {
+      return m_rewr(data::less_equal(t0, t1)) == data::sort_bool::true_();
     }
 
     // Find a unique representative in the confluent tau-graph reachable from u0.
@@ -467,7 +487,7 @@ class explorer: public abortable
       }
     }
 
-    // Generates outgoing transitions for a summand, and reports them via the callback function examine_transition.
+    // Generates outgoing transitions for a summand, and reports them via the callback function report_transition.
     // It is assumed that the substitution sigma contains the assignments corresponding to the current state.
     template <typename SummandSequence, typename ReportTransition = utilities::skip>
     void generate_transitions(
@@ -491,16 +511,24 @@ class explorer: public abortable
                         check_enumerator_solution(p, summand);
                         p.add_assignments(summand.variables, m_sigma, m_rewr);
                         process::timed_multi_action a = rewrite_action(summand.multi_action);
-                        state d1 = compute_state(summand.next_state);
-                        if (!confluent_summands.empty())
+                        state_type s1;
+                        if constexpr (Stochastic)
                         {
-                          d1 = find_representative(d1, confluent_summands);
+                          s1 = compute_stochastic_state(summand.distribution, summand.next_state);
+                        }
+                        else
+                        {
+                          s1 = compute_state(summand.next_state);
+                          if (!confluent_summands.empty())
+                          {
+                            s1 = find_representative(s1, confluent_summands);
+                          }
                         }
                         if (m_recursive)
                         {
                           data::remove_assignments(m_sigma, summand.variables);
                         }
-                        report_transition(a, d1);
+                        report_transition(a, s1);
                         return false;
                       },
                       data::is_false
@@ -534,16 +562,24 @@ class explorer: public abortable
         {
           data::add_assignments(m_sigma, summand.variables, e);
           process::timed_multi_action a = rewrite_action(summand.multi_action);
-          state d1 = compute_state(summand.next_state);
-          if (!confluent_summands.empty())
+          state_type s1;
+          if constexpr (Stochastic)
           {
-            d1 = find_representative(d1, confluent_summands);
+            s1 = compute_stochastic_state(summand.distribution, summand.next_state);
+          }
+          else
+          {
+            s1 = compute_state(summand.next_state);
+            if (!confluent_summands.empty())
+            {
+              s1 = find_representative(s1, confluent_summands);
+            }
           }
           if (m_recursive)
           {
             data::remove_assignments(m_sigma, summand.variables);
           }
-          report_transition(a, d1);
+          report_transition(a, s1);
         }
       }
       if (!m_recursive)
@@ -552,81 +588,37 @@ class explorer: public abortable
       }
     }
 
-    // Generates outgoing transitions for a summand, and reports them via the callback function examine_transition.
-    // It is assumed that the substitution sigma contains the assignments corresponding to the current state.
-    template <typename ExamineTransition = utilities::skip>
-    void generate_untimed_stochastic_transitions(
-      const explorer_summand& summand,
-      ExamineTransition examine_transition = ExamineTransition()
-    )
+    template <typename SummandSequence>
+    std::list<transition> out_edges(const state& s, const SummandSequence& regular_summands, const SummandSequence& confluent_summands)
     {
-      if (!m_recursive)
+      std::list<transition> transitions;
+      data::add_assignments(m_sigma, m_process_parameters, s);
+      for (const explorer_summand& summand: regular_summands)
       {
-        m_id_generator.clear();
-      }
-      if (summand.cache_strategy == caching::none)
-      {
-        data::data_expression condition = m_rewr(summand.condition, m_sigma);
-        if (!data::is_false(condition))
-        {
-          m_enumerator.enumerate(enumerator_element(summand.variables, condition),
-                      m_sigma,
-                      [&](const enumerator_element& p) {
-                        check_enumerator_solution(p, summand);
-                        p.add_assignments(summand.variables, m_sigma, m_rewr);
-                        process::timed_multi_action a = rewrite_action(summand.multi_action);
-                        stochastic_state d1 = compute_stochastic_state(summand.distribution, summand.next_state);
-                        if (m_recursive)
-                        {
-                          data::remove_assignments(m_sigma, summand.variables);
-                        }
-                        examine_transition(a, d1);
-                        return false;
-                      },
-                      data::is_false
-          );
-        }
-      }
-      else
-      {
-        auto key = summand.compute_key(m_sigma);
-        auto& cache = summand.cache_strategy == caching::global ? global_cache : summand.local_cache;
-        auto q = cache.find(key);
-        if (q == cache.end())
-        {
-          data::data_expression condition = m_rewr(summand.condition, m_sigma);
-          std::list<data::data_expression_list> solutions;
-          if (!data::is_false(condition))
+        generate_transitions(
+          summand,
+          confluent_summands,
+          [&](const process::timed_multi_action& a, const state_type& s1)
           {
-            m_enumerator.enumerate(enumerator_element(summand.variables, condition),
-                        m_sigma,
-                        [&](const enumerator_element& p) {
-                          check_enumerator_solution(p, summand);
-                          solutions.push_back(p.assign_expressions(summand.variables, m_rewr));
-                          return false;
-                        },
-                        data::is_false
-            );
+            if constexpr (Timed)
+            {
+              const data::data_expression& t = s[m_n];
+              if (a.has_time() && less_equal(a.time(), t))
+              {
+                return;
+              }
+              data::data_expression t1 = a.has_time() ? a.time() : t;
+              state s1_at_t1 = make_timed_state(s1, t1);
+              transitions.emplace_back(a, s1_at_t1);
+            }
+            else
+            {
+              transitions.emplace_back(a, s1);
+            }
           }
-          q = cache.insert({key, solutions}).first;
-        }
-        for (const data::data_expression_list& e: q->second)
-        {
-          data::add_assignments(m_sigma, summand.variables, e);
-          process::timed_multi_action a = rewrite_action(summand.multi_action);
-          stochastic_state d1 = compute_stochastic_state(summand.distribution, summand.next_state);
-          examine_transition(a, d1);
-          if (m_recursive)
-          {
-            data::remove_assignments(m_sigma, summand.variables);
-          }
-          examine_transition(a, d1);
-        }
+        );
       }
-      if (!m_recursive)
-      {
-        data::remove_assignments(m_sigma, summand.variables);
-      }
+      return transitions;
     }
 
     // pre: d0 is in normal form
@@ -663,18 +655,13 @@ class explorer: public abortable
       return result;
     }
 
-    bool less_equal(const data::data_expression& t0, const data::data_expression& t1)
-    {
-      return m_rewr(data::less_equal(t0, t1)) == data::sort_bool::true_();
-    }
-
     std::unique_ptr<todo_set> make_todo_set(const state& init)
     {
       switch (m_options.search_strategy)
       {
-        case lps::es_breadth: return std::unique_ptr<todo_set>(new breadth_first_todo_set(init));
-        case lps::es_depth: return std::unique_ptr<todo_set>(new depth_first_todo_set(init));
-        case lps::es_highway: return std::unique_ptr<todo_set>(new highway_todo_set(init, m_options.todo_max));
+        case lps::es_breadth: return std::make_unique<breadth_first_todo_set>(init);
+        case lps::es_depth: return std::make_unique<depth_first_todo_set>(init);
+        case lps::es_highway: return std::make_unique<highway_todo_set>(init, m_options.todo_max);
         default: throw mcrl2::runtime_error("unsupported search strategy");
       }
     }
@@ -684,15 +671,14 @@ class explorer: public abortable
     {
       switch (m_options.search_strategy)
       {
-        case lps::es_breadth: return std::unique_ptr<todo_set>(new breadth_first_todo_set(first, last));
-        case lps::es_depth: return std::unique_ptr<todo_set>(new depth_first_todo_set(first, last));
-        case lps::es_highway: return std::unique_ptr<todo_set>(new highway_todo_set(first, last, m_options.todo_max));
+        case lps::es_breadth: return std::make_unique<breadth_first_todo_set>(first, last);
+        case lps::es_depth: return std::make_unique<depth_first_todo_set>(first, last);
+        case lps::es_highway: return std::make_unique<highway_todo_set>(first, last, m_options.todo_max);
         default: throw mcrl2::runtime_error("unsupported search strategy");
       }
     }
 
   public:
-    template <typename Specification>
     explorer(const Specification& lpsspec, const explorer_options& options_)
       : m_options(options_),
         m_rewr(lpsspec.data(),
@@ -726,84 +712,46 @@ class explorer: public abortable
 
     ~explorer() = default;
 
-    // pre: d0 is in normal form
-    template <typename SummandSequence,
-      typename DiscoverState = utilities::skip,
-      typename ExamineTransition = utilities::skip,
-      typename StartState = utilities::skip,
-      typename FinishState = utilities::skip
-    >
-    void generate_untimed_state_space(
-      bool recursive,
-      const state& d0,
-      const SummandSequence& regular_summands,
-      const SummandSequence& confluent_summands,
-      std::unordered_map<state, std::size_t>& discovered,
-      DiscoverState discover_state = DiscoverState(),
-      ExamineTransition examine_transition = ExamineTransition(),
-      StartState start_state = StartState(),
-      FinishState finish_state = FinishState()
-    )
-    {
-      m_recursive = recursive;
-      std::unique_ptr<todo_set> todo = make_todo_set(d0);
-      discovered.clear();
-      std::size_t d0_index = 0;
-      discovered.insert(std::make_pair(d0, d0_index));
-      discover_state(d0, d0_index);
-
-      while (!todo->empty() && !m_must_abort)
-      {
-        state s = todo->choose_element();
-        std::size_t s_index = discovered.find(s)->second;
-        start_state(s, s_index);
-        data::add_assignments(m_sigma, m_process_parameters, s);
-        for (const explorer_summand& summand: regular_summands)
-        {
-          generate_transitions(
-            summand,
-            confluent_summands,
-            [&](const process::timed_multi_action& a, const state& s1)
-            {
-              auto j = discovered.find(s1);
-              if (j == discovered.end())
-              {
-                std::size_t k = discovered.size();
-                j = discovered.insert(std::make_pair(s1, k)).first;
-                discover_state(s1, k);
-                todo->insert(s1);
-              }
-              std::size_t s1_index = j->second;
-              examine_transition(s, s_index, a, s1, s1_index, summand.index);
-            }
-          );
-        }
-        finish_state(s, s_index, todo->size());
-        todo->finish_state();
-      }
-      m_must_abort = false;
-    }
-
     // Returns the concatenation of s and [t]
-    state make_timed_state(const state& s, const data::data_expression& t)
+    state make_timed_state(const state& s, const data::data_expression& t) const
     {
       std::copy(s.begin(), s.end(), timed_state.begin());
       timed_state.back() = t;
       return state(timed_state.begin(), m_n + 1);
     }
 
-    // pre: d0 is in normal form
-    template <typename SummandSequence,
+    state_type make_state(const state& s) const
+    {
+      if constexpr (Stochastic)
+      {
+        return stochastic_state(s);
+      }
+      else
+      {
+        return s;
+      }
+    }
+
+    const state_type& make_state(const stochastic_state& s) const
+    {
+      return s;
+    }
+
+    // pre: s0 is in normal form
+    template <
+      typename StateType,
+      typename SummandSequence,
       typename DiscoverState = utilities::skip,
       typename ExamineTransition = utilities::skip,
       typename StartState = utilities::skip,
       typename FinishState = utilities::skip,
       typename DiscoverInitialState = utilities::skip
     >
-    void generate_untimed_stochastic_state_space(
+    void generate_state_space(
       bool recursive,
-      const stochastic_state& s0_,
+      const StateType& s0,
       const SummandSequence& regular_summands,
+      const SummandSequence& confluent_summands,
       std::unordered_map<state, std::size_t>& discovered,
       DiscoverState discover_state = DiscoverState(),
       ExamineTransition examine_transition = ExamineTransition(),
@@ -812,19 +760,40 @@ class explorer: public abortable
       DiscoverInitialState discover_initial_state = DiscoverInitialState()
     )
     {
+      utilities::mcrl2_unused(discover_initial_state); // silence unused parameter warning
+
       m_recursive = recursive;
-      const auto& S = s0_.states;
-      std::unique_ptr<todo_set> todo = make_todo_set(S.begin(), S.end());
+      std::unique_ptr<todo_set> todo;
       discovered.clear();
-      std::list<std::size_t> s0_index;
-      for (const state& s: S)
+
+      if constexpr (Stochastic)
       {
-        std::size_t s_index = discovered.size();
-        discovered.insert(std::make_pair(s, s_index));
-        discover_state(s, s_index);
-        s0_index.push_back(s_index);
+        state_type s0_ = make_state(s0);
+        const auto& S = s0_.states;
+        todo = make_todo_set(S.begin(), S.end());
+        discovered.clear();
+        std::list<std::size_t> s0_index;
+        for (const state& s: S)
+        {
+          // TODO: join duplicate targets
+          auto j = discovered.find(s);
+          if (j == discovered.end())
+          {
+            std::size_t s_index = discovered.size();
+            j = discovered.insert(std::make_pair(s, s_index)).first;
+            discover_state(s, s_index);
+          }
+          s0_index.push_back(j->second);
+        }
+        discover_initial_state(s0_, s0_index);
       }
-      discover_initial_state(s0_, s0_index);
+      else
+      {
+        todo = make_todo_set(s0);
+        std::size_t s0_index = 0;
+        discovered.insert(std::make_pair(s0, s0_index));
+        discover_state(s0, s0_index);
+      }
 
       while (!todo->empty() && !m_must_abort)
       {
@@ -834,25 +803,63 @@ class explorer: public abortable
         data::add_assignments(m_sigma, m_process_parameters, s);
         for (const explorer_summand& summand: regular_summands)
         {
-          std::list<std::size_t> s1_index;
-          generate_untimed_stochastic_transitions(
+          generate_transitions(
             summand,
-            [&](const process::timed_multi_action& a, const stochastic_state& s1_)
+            confluent_summands,
+            [&](const process::timed_multi_action& a, const state_type& s1)
             {
-              const auto& S1 = s1_.states;
-              for (const state& s1: S1)
+              if constexpr (Timed)
+              {
+                const data::data_expression& t = s[m_n];
+                if (a.has_time() && less_equal(a.time(), t))
+                {
+                  return;
+                }
+              }
+              if constexpr (Stochastic)
+              {
+                std::list<std::size_t> s1_index;
+                const auto& S1 = s1.states;
+                // TODO: join duplicate targets
+                for (const state& s1_: S1)
+                {
+                  auto j = discovered.find(s1_);
+                  if (j == discovered.end())
+                  {
+                    todo->insert(s1_);
+                    std::size_t k = discovered.size();
+                    j = discovered.insert(std::make_pair(s1_, k)).first;
+                    discover_state(s1_, k);
+                  }
+                  s1_index.push_back(j->second);
+                }
+                examine_transition(s, s_index, a, s1, s1_index, summand.index);
+              }
+              else
               {
                 auto j = discovered.find(s1);
                 if (j == discovered.end())
                 {
-                  todo->insert(s1);
                   std::size_t k = discovered.size();
-                  j = discovered.insert(std::make_pair(s1, k)).first;
-                  discover_state(s1, k);
+                  if constexpr (Timed)
+                  {
+                    const data::data_expression& t = s[m_n];
+                    data::data_expression t1 = a.has_time() ? a.time() : t;
+                    state s1_at_t1 = make_timed_state(s1, t1);
+                    j = discovered.insert(std::make_pair(s1_at_t1, k)).first;
+                    discover_state(s1_at_t1, k);
+                    todo->insert(s1_at_t1);
+                  }
+                  else
+                  {
+                    j = discovered.insert(std::make_pair(s1, k)).first;
+                    discover_state(s1, k);
+                    todo->insert(s1);
+                  }
                 }
-                s1_index.push_back(j->second);
+                std::size_t s1_index = j->second;
+                examine_transition(s, s_index, a, s1, s1_index, summand.index);
               }
-              examine_transition(s, s_index, a, s1_, s1_index, summand.index);
             }
           );
         }
@@ -860,133 +867,6 @@ class explorer: public abortable
         todo->finish_state();
       }
       m_must_abort = false;
-    }
-
-    // pre: d0 is a timed state in normal form
-    template <typename SummandSequence,
-      typename DiscoverState = utilities::skip,
-      typename ExamineTransition = utilities::skip,
-      typename StartState = utilities::skip,
-      typename FinishState = utilities::skip
-    >
-    void generate_timed_state_space(
-      bool recursive,
-      const state& d0,
-      const SummandSequence& regular_summands,
-      const SummandSequence& confluent_summands,
-      std::unordered_map<state, std::size_t>& discovered,
-      DiscoverState discover_state = DiscoverState(),
-      ExamineTransition examine_transition = ExamineTransition(),
-      StartState start_state = StartState(),
-      FinishState finish_state = FinishState()
-    )
-    {
-      m_recursive = recursive;
-      std::unique_ptr<todo_set> todo = make_todo_set(d0);
-      discovered.clear();
-      std::size_t d0_index = 0;
-      discovered.insert(std::make_pair(d0, d0_index));
-      discover_state(d0, d0_index);
-
-      while (!todo->empty() && !m_must_abort)
-      {
-        state s_at_t = todo->choose_element();
-        const data::data_expression& t = s_at_t[m_n];
-        std::size_t s_index = discovered.find(s_at_t)->second;
-        start_state(s_at_t, s_index);
-        data::add_assignments(m_sigma, m_process_parameters, s_at_t);
-        for (const explorer_summand& summand: regular_summands)
-        {
-          generate_transitions(
-            summand,
-            confluent_summands,
-            [&](const process::timed_multi_action& a, const state& s1)
-            {
-              if (a.has_time() && less_equal(a.time(), t))
-              {
-                return;
-              }
-              data::data_expression t1 = a.has_time() ? a.time() : t;
-              auto j = discovered.find(s1);
-              if (j == discovered.end())
-              {
-                state s1_at_t1 = make_timed_state(s1, t1);
-                std::size_t k = discovered.size();
-                j = discovered.insert(std::make_pair(s1_at_t1, k)).first;
-                discover_state(s1_at_t1, k);
-                todo->insert(s1_at_t1);
-              }
-              std::size_t s1_index = j->second;
-              examine_transition(s_at_t, s_index, a, j->first, s1_index, summand.index);
-            }
-          );
-        }
-        finish_state(s_at_t, s_index, todo->size());
-      }
-      m_must_abort = false;
-    }
-
-    // pre: d0 is in normal form
-    template <typename SummandSequence,
-      typename DiscoverState = utilities::skip,
-      typename ExamineTransition = utilities::skip,
-      typename StartState = utilities::skip,
-      typename FinishState = utilities::skip
-    >
-    void generate_state_space(
-      bool timed,
-      bool recursive,
-      const state& d0,
-      const SummandSequence& regular_summands,
-      const SummandSequence& confluent_summands,
-      std::unordered_map<state, std::size_t>& discovered,
-      DiscoverState discover_state = DiscoverState(),
-      ExamineTransition examine_transition = ExamineTransition(),
-      StartState start_state = StartState(),
-      FinishState finish_state = FinishState()
-    )
-    {
-      if (timed)
-      {
-        generate_timed_state_space(recursive, d0, regular_summands, confluent_summands, discovered, discover_state, examine_transition, start_state, finish_state);
-      }
-      else
-      {
-        generate_untimed_state_space(recursive, d0, regular_summands, confluent_summands, discovered, discover_state, examine_transition, start_state, finish_state);
-      }
-    }
-
-    /// \brief Generates the state space, and reports all discovered states and transitions by means of callback
-    /// functions.
-    /// \param discover_state Is invoked when a state is encountered for the first time.
-    /// \param examine_transition Is invoked on every transition.
-    /// \param start_state Is invoked on a state right before its outgoing transitions are being explored.
-    /// \param finish_state Is invoked on a state after all of its outgoing transitions have been explored.
-    template <
-      typename DiscoverState = utilities::skip,
-      typename ExamineTransition = utilities::skip,
-      typename StartState = utilities::skip,
-      typename FinishState = utilities::skip
-    >
-    void generate_state_space(
-      bool timed,
-      bool recursive,
-      DiscoverState discover_state = DiscoverState(),
-      ExamineTransition examine_transition = ExamineTransition(),
-      StartState start_state = StartState(),
-      FinishState finish_state = FinishState()
-    )
-    {
-      state d0 = compute_state(m_initial_state);
-      if (!m_confluent_summands.empty())
-      {
-        d0 = find_representative(d0, m_confluent_summands);
-      }
-      if (timed)
-      {
-        d0 = make_timed_state(d0, real_zero());
-      }
-      generate_state_space(timed, recursive, d0, m_regular_summands, m_confluent_summands, m_discovered, discover_state, examine_transition, start_state, finish_state);
     }
 
     /// \brief Generates the state space, and reports all discovered states and transitions by means of callback
@@ -1002,7 +882,7 @@ class explorer: public abortable
       typename FinishState = utilities::skip,
       typename DiscoverInitialState = utilities::skip
     >
-    void generate_stochastic_state_space(
+    void generate_state_space(
       bool recursive,
       DiscoverState discover_state = DiscoverState(),
       ExamineTransition examine_transition = ExamineTransition(),
@@ -1011,27 +891,42 @@ class explorer: public abortable
       DiscoverInitialState discover_initial_state = DiscoverInitialState()
     )
     {
-      lps::stochastic_state d0 = compute_stochastic_state(m_initial_distribution, m_initial_state);
-      generate_untimed_stochastic_state_space(recursive, d0, m_regular_summands, m_discovered, discover_state, examine_transition, start_state, finish_state, discover_initial_state);
+      state_type s0;
+      if constexpr (Stochastic)
+      {
+        s0 = compute_stochastic_state(m_initial_distribution, m_initial_state);
+      }
+      else
+      {
+        s0 = compute_state(m_initial_state);
+        if (!m_confluent_summands.empty())
+        {
+          s0 = find_representative(s0, m_confluent_summands);
+        }
+        if constexpr (Timed)
+        {
+          s0 = make_timed_state(s0, real_zero());
+        }
+      }
+      generate_state_space(recursive, s0, m_regular_summands, m_confluent_summands, m_discovered, discover_state, examine_transition, start_state, finish_state, discover_initial_state);
     }
 
     /// \brief Generates outgoing transitions for a given state.
-    std::vector<std::pair<lps::multi_action, state>> generate_transitions(const state& d0)
+    std::vector<std::pair<lps::multi_action, state_type>> generate_transitions(const state& d0)
     {
       data::data_expression_list process_parameter_undo = process_parameter_values();
-      std::vector<std::pair<lps::multi_action, state>> result;
+      std::vector<std::pair<lps::multi_action, state_type>> result;
       data::add_assignments(m_sigma, m_process_parameters, d0);
       for (const explorer_summand& summand: m_regular_summands)
       {
         generate_transitions(
           summand,
           m_confluent_summands,
-          [&](const process::timed_multi_action& a, const state& d1)
+          [&](const process::timed_multi_action& a, const state_type& d1)
           {
             result.emplace_back(lps::multi_action(a.actions(), a.time()), d1);
           }
         );
-        // remove_assignments(m_sigma, summand.variables);
       }
       set_process_parameter_values(process_parameter_undo);
       return result;
@@ -1045,16 +940,16 @@ class explorer: public abortable
     }
 
     /// \brief Generates outgoing transitions for a given state, reachable via the summand with index i.
-    std::vector<std::pair<lps::multi_action, state>> generate_transitions(const data::data_expression_list& init, std::size_t i)
+    std::vector<std::pair<lps::multi_action, state_type>> generate_transitions(const data::data_expression_list& init, std::size_t i)
     {
       data::data_expression_list process_parameter_undo = process_parameter_values();
       state d0 = compute_state(init);
-      std::vector<std::pair<lps::multi_action, state>> result;
+      std::vector<std::pair<lps::multi_action, state_type>> result;
       data::add_assignments(m_sigma, m_process_parameters, d0);
       generate_transitions(
         m_regular_summands[i],
         m_confluent_summands,
-        [&](const process::timed_multi_action& a, const state& d1)
+        [&](const process::timed_multi_action& a, const state_type& d1)
         {
           result.emplace_back(lps::multi_action(a), d1);
         }
@@ -1064,7 +959,239 @@ class explorer: public abortable
       return result;
     }
 
-    /// \brief Abort the function generate_state_space.
+    // pre: s0 is in normal form
+    // N.B. Does not support stochastic specifications!
+    template <
+      typename SummandSequence,
+      typename DiscoverState = utilities::skip,
+      typename ExamineTransition = utilities::skip,
+      typename TreeEdge = utilities::skip,
+      typename BackEdge = utilities::skip,
+      typename ForwardOrCrossEdge = utilities::skip,
+      typename FinishState = utilities::skip
+    >
+    void generate_state_space_dfs_recursive(
+      const state& s0,
+      std::unordered_set<state> gray,
+      std::unordered_set<state>& discovered,
+      const SummandSequence& regular_summands,
+      const SummandSequence& confluent_summands,
+      DiscoverState discover_state = DiscoverState(),
+      ExamineTransition examine_transition = ExamineTransition(),
+      TreeEdge tree_edge = TreeEdge(),
+      BackEdge back_edge = BackEdge(),
+      ForwardOrCrossEdge forward_or_cross_edge = ForwardOrCrossEdge(),
+      FinishState finish_state = FinishState()
+    )
+    {
+      using utilities::detail::contains;
+
+      // invariants:
+      // - s not in discovered => color(s) = white
+      // - s in discovered && s in gray => color(s) = gray
+      // - s in discovered && s not in gray => color(s) = black
+
+      gray.insert(s0);
+      discovered.insert(s0);
+      discover_state(s0);
+
+      for (const transition& tr: out_edges(s0, regular_summands, confluent_summands))
+      {
+        if (m_must_abort)
+        {
+          break;
+        }
+
+        const auto&[a, s1] = tr;
+        examine_transition(s0, a, s1);
+
+        auto j = discovered.find(s1);
+        if (j == discovered.end())
+        {
+          tree_edge(s0, a, s1);
+          if constexpr (Timed)
+          {
+            const data::data_expression& t = s0[m_n];
+            data::data_expression t1 = a.has_time() ? a.time() : t;
+            state s1_at_t1 = make_timed_state(s1, t1);
+            discovered.insert(s1_at_t1);
+          }
+          else
+          {
+            discovered.insert(s1);
+          }
+          generate_state_space_dfs_recursive(s1, gray, discovered, regular_summands, confluent_summands, discover_state, examine_transition, tree_edge, back_edge, forward_or_cross_edge, finish_state);
+        }
+        else if (contains(gray, s1))
+        {
+          back_edge(s0, a, s1);
+        }
+        else
+        {
+          forward_or_cross_edge(s0, a, s1);
+        }
+      }
+      gray.erase(s0);
+      finish_state(s0);
+    }
+
+    template <
+      typename DiscoverState = utilities::skip,
+      typename ExamineTransition = utilities::skip,
+      typename TreeEdge = utilities::skip,
+      typename BackEdge = utilities::skip,
+      typename ForwardOrCrossEdge = utilities::skip,
+      typename FinishState = utilities::skip
+    >
+    void generate_state_space_dfs_recursive(
+      bool recursive,
+      DiscoverState discover_state = DiscoverState(),
+      ExamineTransition examine_transition = ExamineTransition(),
+      TreeEdge tree_edge = TreeEdge(),
+      BackEdge back_edge = BackEdge(),
+      ForwardOrCrossEdge forward_or_cross_edge = ForwardOrCrossEdge(),
+      FinishState finish_state = FinishState()
+    )
+    {
+      m_recursive = recursive;
+      std::unordered_set<state> gray;
+      std::unordered_set<state> discovered;
+
+      state s0 = compute_state(m_initial_state);
+      if (!m_confluent_summands.empty())
+      {
+        s0 = find_representative(s0, m_confluent_summands);
+      }
+      if constexpr (Timed)
+      {
+        s0 = make_timed_state(s0, real_zero());
+      }
+      generate_state_space_dfs_recursive(s0, gray, discovered, m_regular_summands, m_confluent_summands, discover_state, examine_transition, tree_edge, back_edge, forward_or_cross_edge, finish_state);
+      m_recursive = false;
+    }
+
+    // pre: s0 is in normal form
+    // N.B. Does not support stochastic specifications!
+    template <
+      typename SummandSequence,
+      typename DiscoverState = utilities::skip,
+      typename ExamineTransition = utilities::skip,
+      typename TreeEdge = utilities::skip,
+      typename BackEdge = utilities::skip,
+      typename ForwardOrCrossEdge = utilities::skip,
+      typename FinishState = utilities::skip
+    >
+    void generate_state_space_dfs_iterative(
+      const state& s0,
+      std::unordered_set<state>& discovered,
+      const SummandSequence& regular_summands,
+      const SummandSequence& confluent_summands,
+      DiscoverState discover_state = DiscoverState(),
+      ExamineTransition examine_transition = ExamineTransition(),
+      TreeEdge tree_edge = TreeEdge(),
+      BackEdge back_edge = BackEdge(),
+      ForwardOrCrossEdge forward_or_cross_edge = ForwardOrCrossEdge(),
+      FinishState finish_state = FinishState()
+    )
+    {
+      using utilities::detail::contains;
+
+      // invariants:
+      // - s not in discovered => color(s) = white
+      // - s in discovered && s in todo => color(s) = gray
+      // - s in discovered && s not in todo => color(s) = black
+
+      std::vector<std::pair<state, std::list<transition>>> todo;
+
+      todo.emplace_back(s0, out_edges(s0, regular_summands, confluent_summands));
+      discovered.insert(s0);
+      discover_state(s0);
+
+      while (!todo.empty())
+      {
+        const state* s = &todo.back().first;
+        std::list<transition>* E = &todo.back().second;
+        while (!E->empty())
+        {
+          transition e = E->front();
+          const auto& a = e.action;
+          const auto& s1 = e.state;
+          E->pop_front();
+          examine_transition(*s, a, s1);
+
+          auto j = discovered.find(s1);
+          if (j == discovered.end())
+          {
+            tree_edge(*s, a, s1);
+            if constexpr (Timed)
+            {
+              const data::data_expression& t = (*s)[m_n];
+              data::data_expression t1 = a.has_time() ? a.time() : t;
+              state s1_at_t1 = make_timed_state(s1, t1);
+              discovered.insert(s1_at_t1);
+              discover_state(s1_at_t1);
+            }
+            else
+            {
+              discovered.insert(s1);
+              discover_state(s1);
+            }
+            todo.emplace_back(s1, out_edges(s1, regular_summands, confluent_summands));
+            s = &todo.back().first;
+            E = &todo.back().second;
+          }
+          else
+          {
+            if (std::find_if(todo.begin(), todo.end(), [&](const std::pair<state, std::list<transition>>& p) { return s1 == p.first; }) != todo.end())
+            {
+              back_edge(*s, a, s1);
+            }
+            else
+            {
+              forward_or_cross_edge(*s, a, s1);
+            }
+          }
+        }
+        todo.pop_back();
+        finish_state(*s);
+      }
+    }
+
+    template <
+      typename DiscoverState = utilities::skip,
+      typename ExamineTransition = utilities::skip,
+      typename TreeEdge = utilities::skip,
+      typename BackEdge = utilities::skip,
+      typename ForwardOrCrossEdge = utilities::skip,
+      typename FinishState = utilities::skip
+    >
+    void generate_state_space_dfs_iterative(
+      bool recursive,
+      DiscoverState discover_state = DiscoverState(),
+      ExamineTransition examine_transition = ExamineTransition(),
+      TreeEdge tree_edge = TreeEdge(),
+      BackEdge back_edge = BackEdge(),
+      ForwardOrCrossEdge forward_or_cross_edge = ForwardOrCrossEdge(),
+      FinishState finish_state = FinishState()
+    )
+    {
+      m_recursive = recursive;
+      std::unordered_set<state> discovered;
+
+      state s0 = compute_state(m_initial_state);
+      if (!m_confluent_summands.empty())
+      {
+        s0 = find_representative(s0, m_confluent_summands);
+      }
+      if constexpr (Timed)
+      {
+        s0 = make_timed_state(s0, real_zero());
+      }
+      generate_state_space_dfs_iterative(s0, discovered, m_regular_summands, m_confluent_summands, discover_state, examine_transition, tree_edge, back_edge, forward_or_cross_edge, finish_state);
+      m_recursive = false;
+    }
+
+    /// \brief Abort the state space generation
     void abort() override
     {
       m_must_abort = true;
@@ -1102,8 +1229,6 @@ class explorer: public abortable
     }
 };
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_EXPLORER_H

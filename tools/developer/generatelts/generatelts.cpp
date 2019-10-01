@@ -13,7 +13,6 @@
 #include <limits>
 #include <memory>
 #include <string>
-#include <sstream>
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/explorer.h"
@@ -23,13 +22,10 @@
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/stochastic_lts_builder.h"
 #include "mcrl2/lts/state_space_generator.h"
-#include "mcrl2/utilities/detail/io.h"
-#include "mcrl2/utilities/detail/transform_tool.h"
 #include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
 using data::tools::rewriter_tool;
-using utilities::detail::transform_tool;
 using utilities::tools::input_output_tool;
 
 class generatelts_tool: public rewriter_tool<input_output_tool>
@@ -38,7 +34,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
 
   lps::explorer_options options;
   lts::lts_type output_format = lts::lts_none;
-  lps::explorer* current_explorer = nullptr;
+  lps::abortable* current_explorer = nullptr;
 
   public:
     generatelts_tool()
@@ -58,6 +54,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       desc.add_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
       desc.add_option("no-replace-constants-by-variables", "do not move constant expressions to a substitution");
       desc.add_option("no-resolve-summand-variable-name-clashes", "do not resolve summand variable name clashes");
+      desc.add_option("dfs-recursive", "use recursive depth first search for divergence detection");
 
       // copied from lps2lts
       desc.add_option("cached", "use enumeration caching techniques to speed up state space generation. ");
@@ -166,6 +163,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       options.detect_divergence                     = parser.has_option("divergence");
       options.save_error_trace                      = parser.has_option("error-trace");
       options.suppress_progress_messages            = parser.has_option("suppress");
+      options.dfs_recursive                         = parser.has_option("dfs-recursive");
       options.search_strategy = parser.option_argument_as<lps::exploration_strategy>("strategy");
 
       if (parser.has_option("max"))
@@ -269,13 +267,23 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       }
     }
 
-    std::unique_ptr<lts::stochastic_lts_builder> create_stochastic_lts_builder(const lps::stochastic_specification& /* lpsspec */)
+    std::unique_ptr<lts::stochastic_lts_builder> create_stochastic_lts_builder(const lps::stochastic_specification& lpsspec)
     {
       switch (output_format)
       {
         case lts::lts_aut: return std::unique_ptr<lts::stochastic_lts_builder>(new lts::stochastic_lts_aut_builder());
+        case lts::lts_lts: return std::unique_ptr<lts::stochastic_lts_builder>(new lts::stochastic_lts_lts_builder(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters()));
         default: return std::unique_ptr<lts::stochastic_lts_builder>(new lts::stochastic_lts_none_builder());
       }
+    }
+
+    template <bool Stochastic, bool Timed, typename Specification, typename LTSBuilder>
+    void generate_state_space(const Specification& lpsspec, LTSBuilder& builder)
+    {
+      lts::state_space_generator<Stochastic, Timed, Specification> generator(lpsspec, options);
+      current_explorer = &generator.explorer;
+      generator.explore(builder);
+      builder.save(output_filename());
     }
 
     bool run() override
@@ -284,23 +292,32 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       options.trace_prefix = input_filename();
       lps::stochastic_specification stochastic_lpsspec;
       lps::load_lps(stochastic_lpsspec, input_filename());
+      bool is_timed = stochastic_lpsspec.process().has_time();
 
       if (lps::is_stochastic(stochastic_lpsspec))
       {
-        std::unique_ptr<lts::stochastic_lts_builder> builder = create_stochastic_lts_builder(stochastic_lpsspec);
-        lts::stochastic_state_space_generator generator(stochastic_lpsspec, options);
-        current_explorer = &generator.explorer;
-        generator.explore(*builder);
-        builder->save(output_filename());
+        auto builder = create_stochastic_lts_builder(stochastic_lpsspec);
+        if (is_timed)
+        {
+          generate_state_space<true, true>(stochastic_lpsspec, *builder);
+        }
+        else
+        {
+          generate_state_space<true, false>(stochastic_lpsspec, *builder);
+        }
       }
       else
       {
         lps::specification lpsspec = lps::remove_stochastic_operators(stochastic_lpsspec);
-        std::unique_ptr<lts::lts_builder> builder = create_lts_builder(lpsspec);
-        lts::state_space_generator generator(lpsspec, options);
-        current_explorer = &generator.explorer;
-        generator.explore(*builder);
-        builder->save(output_filename());
+        auto builder = create_lts_builder(lpsspec);
+        if (is_timed)
+        {
+          generate_state_space<false, true>(lpsspec, *builder);
+        }
+        else
+        {
+          generate_state_space<false, false>(lpsspec, *builder);
+        }
       }
       return true;
     }
@@ -313,7 +330,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
 
 std::unique_ptr<generatelts_tool> tool_instance;
 
-void premature_termination_handler(int)
+static void premature_termination_handler(int)
 {
   // Reset signal handlers.
   signal(SIGABRT, nullptr);
@@ -323,7 +340,7 @@ void premature_termination_handler(int)
 
 int main(int argc, char** argv)
 {
-  tool_instance = std::unique_ptr<generatelts_tool>(new generatelts_tool());
+  tool_instance = std::make_unique<generatelts_tool>();
   signal(SIGABRT, premature_termination_handler);
   signal(SIGINT, premature_termination_handler); // At ^C invoke the termination handler.
   return tool_instance->execute(argc, argv);
