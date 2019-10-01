@@ -67,10 +67,6 @@ if(NOT CXX_ACCEPTS_STD_CPP17)
   message(FATAL_ERROR "Your compiler does not support the -std=c++17 flag. You should upgrade to a newer compiler version to build mCRL2")
 endif()
 
-if(APPLE)
-  try_add_cxx_flag(-stdlib=libc++)
-endif()
-
 try_add_cxx_flag(-Wall)
 try_add_cxx_flag(-Wno-inline)
 try_add_cxx_flag(-fno-strict-overflow)
