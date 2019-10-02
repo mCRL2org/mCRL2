@@ -220,7 +220,8 @@ static void read_from_lts(LTS_TRANSITION_SYSTEM& lts, const std::string& filenam
 
   try
   {
-    atermpp::binary_aterm_input stream(filename.empty() ? std::cin : fstream, data::detail::add_index_impl);
+    atermpp::binary_aterm_input stream(filename.empty() ? std::cin : fstream);
+    stream >> data::detail::add_index_impl;
 
     while (true)
     {
@@ -310,7 +311,8 @@ static void write_to_lts(const LTS_TRANSITION_SYSTEM& lts, const std::string& fi
 
   try
   {
-    atermpp::binary_aterm_output stream(filename.empty() ? std::cout : fstream, data::detail::remove_index_impl);
+    atermpp::binary_aterm_output stream(filename.empty() ? std::cout : fstream);
+    stream << data::detail::remove_index_impl;
 
     if (lts.has_state_info())
     {

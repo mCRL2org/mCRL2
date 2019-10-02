@@ -833,11 +833,11 @@ void data_specification::save(std::ostream& stream, bool binary) const
 
   if (binary)
   {
-    atermpp::binary_aterm_output(stream, detail::remove_index_impl) << t;
+    atermpp::binary_aterm_output(stream) << detail::remove_index_impl << t;
   }
   else
   {
-    atermpp::text_aterm_output(stream, detail::remove_index_impl) << t;
+    atermpp::text_aterm_output(stream) << detail::remove_index_impl << t;
   }
 }
 

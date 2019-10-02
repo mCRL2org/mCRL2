@@ -32,7 +32,17 @@ public:
 
   /// \brief Write the given term to the stream, this aterm is also returned from
   ///        the corresponding aterm_input::read_term() call.
-  virtual const aterm_output& operator<<(const aterm& term) = 0;
+  virtual aterm_output& operator<<(const aterm& term) = 0;
+
+  /// \brief Sets the given transformer to be applied to following writes.
+  aterm_output& operator<<(std::function<aterm_transformer> transformer)
+  {
+    m_transformer = transformer;
+    return *this;
+  }
+
+protected:
+  std::function<aterm_transformer> m_transformer = identity;
 };
 
 /// \brief The interface for a class that reads aterm from a stream.
@@ -47,7 +57,17 @@ public:
 
   /// \brief Reads a single term from this stream.
   /// \details The default constructed term aterm() indicates the end of the stream.
-  const aterm_input& operator>>(aterm& output) { output = get(); return *this; }
+  aterm_input& operator>>(aterm& output) { output = get(); return *this; }
+
+  /// \brief Sets the given transformer to be applied to following reads.
+  aterm_input& operator>>(std::function<aterm_transformer> transformer)
+  {
+    m_transformer = transformer;
+    return *this;
+  }
+
+protected:
+  std::function<aterm_transformer> m_transformer = identity;
 };
 
 // These are utility functions.

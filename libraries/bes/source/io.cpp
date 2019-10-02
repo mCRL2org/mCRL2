@@ -315,11 +315,11 @@ void boolean_equation_system::save(std::ostream& stream, bool binary) const
   assert(is_well_typed());
   if (binary)
   {
-    atermpp::binary_aterm_output(stream, bes::detail::remove_index_impl) << boolean_equation_system_to_aterm(*this);
+    atermpp::binary_aterm_output(stream) << bes::detail::remove_index_impl << boolean_equation_system_to_aterm(*this);
   }
   else
   {
-    atermpp::text_aterm_output(stream, bes::detail::remove_index_impl) << boolean_equation_system_to_aterm(*this);
+    atermpp::text_aterm_output(stream) << bes::detail::remove_index_impl << boolean_equation_system_to_aterm(*this);
   }
 }
 

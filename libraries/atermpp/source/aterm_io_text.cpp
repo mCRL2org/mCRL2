@@ -81,13 +81,12 @@ static void write_string_with_escape_symbols(const std::string& s, std::ostream&
 
 // Public functions
 
-text_aterm_output::text_aterm_output(std::ostream& os, std::function<aterm_transformer> transformer, bool newline)
+text_aterm_output::text_aterm_output(std::ostream& os, bool newline)
   : m_stream(os),
-    m_transformer(transformer),
     m_newline(newline)
 {}
 
-const aterm_output& text_aterm_output::operator<<(const aterm& term)
+aterm_output& text_aterm_output::operator<<(const aterm& term)
 {
   write_term_line(term);
 
@@ -99,9 +98,8 @@ const aterm_output& text_aterm_output::operator<<(const aterm& term)
   return *this;
 }
 
-text_aterm_input::text_aterm_input(std::istream& is, std::function<aterm_transformer> transformer)
-  : m_stream(is),
-    m_transformer(transformer)
+text_aterm_input::text_aterm_input(std::istream& is)
+  : m_stream(is)
 {
   character = next_char();
 }

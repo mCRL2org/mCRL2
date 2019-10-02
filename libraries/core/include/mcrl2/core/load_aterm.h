@@ -56,11 +56,11 @@ atermpp::aterm load_aterm(std::istream& stream,
   {
     if (binary)
     {
-      atermpp::binary_aterm_input(stream, transformer) >> result;
+      atermpp::binary_aterm_input(stream) >> transformer >> result;
     }
     else
     {
-      atermpp::text_aterm_input(stream, transformer) >> result;
+      atermpp::text_aterm_input(stream) >> transformer >> result;
     }
   }
   catch (std::exception &e)

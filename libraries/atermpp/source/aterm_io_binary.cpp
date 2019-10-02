@@ -52,9 +52,8 @@ enum class packet_type
 /// \brief The number of bits needed to store an element of packet_type.
 static constexpr unsigned int packet_bits = 2;
 
-binary_aterm_output::binary_aterm_output(std::ostream& stream, std::function<aterm_transformer> transformer)
-  : m_stream(stream),
-    m_transformer(transformer)
+binary_aterm_output::binary_aterm_output(std::ostream& stream)
+  : m_stream(stream)
 {
   // The term with function symbol index 0 indicates the end of the stream, its actual value does not matter.
   m_function_symbols.insert(detail::g_as_int);
@@ -84,7 +83,7 @@ struct write_todo
   {}
 };
 
-const aterm_output& binary_aterm_output::operator<<(const aterm& term)
+aterm_output& binary_aterm_output::operator<<(const aterm& term)
 {
   assert(!term.type_is_int());
 
@@ -174,9 +173,8 @@ unsigned int binary_aterm_output::function_symbol_index_width()
   return m_function_symbol_index_width;
 }
 
-binary_aterm_input::binary_aterm_input(std::istream& is, std::function<aterm_transformer> transformer)
-  : m_stream(is),
-    m_transformer(transformer)
+binary_aterm_input::binary_aterm_input(std::istream& is)
+  : m_stream(is)
 {
   // The term with function symbol index 0 indicates the end of the stream.
   m_function_symbols.emplace_back();

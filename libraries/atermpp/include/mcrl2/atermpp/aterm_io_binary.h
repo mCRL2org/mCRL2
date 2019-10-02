@@ -35,12 +35,20 @@ class binary_aterm_output final : public aterm_output
 public:
   /// \brief Provide the output stream to which the terms are written.
   /// \param transformer A function transforming the function symbols before writing, see the type for details.
-  binary_aterm_output(std::ostream& os, std::function<aterm_transformer> transformer = identity);
+  binary_aterm_output(std::ostream& os);
   ~binary_aterm_output() override;
 
   /// \brief Writes an aterm in a compact binary format that keeps subterms shared. The term that is
   ///        written itself is not shared whenever it occurs as the argument of another term.
-  const aterm_output& operator<<(const aterm& term) override;
+  aterm_output& operator<<(const aterm& term) override;
+
+  /// \brief Sets the given transformer to be applied to following writes.
+  /// \todo This operator should not be necessary, but otherwise the aterm_output one cannot be used.
+  aterm_output& operator<<(std::function<aterm_transformer> transformer)
+  {
+    m_transformer = transformer;
+    return *this;
+  }
 
 private:
   /// \brief Write a function symbol to the output stream.
@@ -53,7 +61,6 @@ private:
   unsigned int function_symbol_index_width();
 
   mcrl2::utilities::obitstream m_stream;
-  std::function<aterm_transformer> m_transformer;
 
   unsigned int m_term_index_width; ///< caches the result of term_index_width().
   unsigned int m_function_symbol_index_width; ///< caches the result of function_symbol_index_width().
@@ -68,7 +75,7 @@ class binary_aterm_input final : public aterm_input
 public:
   /// \brief Provide the input stream from which terms are read.
   /// \param transformer A function transforming the function symbols after reading, see the type for details.
-  binary_aterm_input(std::istream& is, std::function<aterm_transformer> transformer = identity);
+  binary_aterm_input(std::istream& is);
 
   aterm get() override;
 private:
@@ -79,7 +86,6 @@ private:
   unsigned int function_symbol_index_width();
 
   mcrl2::utilities::ibitstream m_stream;
-  std::function<aterm_transformer> m_transformer;
 
   unsigned int m_term_index_width; ///< caches the result of term_index_width().
   unsigned int m_function_symbol_index_width; ///< caches the result of function_symbol_index_width().

@@ -198,11 +198,11 @@ void pbes::save(std::ostream& stream, bool binary) const
 {
   if (binary)
   {
-    atermpp::binary_aterm_output(stream, pbes_system::detail::remove_index_impl) << pbes_to_aterm(*this);
+    atermpp::binary_aterm_output(stream) << pbes_system::detail::remove_index_impl << pbes_to_aterm(*this);
   }
   else
   {
-    atermpp::text_aterm_output(stream, pbes_system::detail::remove_index_impl) << pbes_to_aterm(*this);
+    atermpp::text_aterm_output(stream) << pbes_system::detail::remove_index_impl << pbes_to_aterm(*this);
   }
 }
 

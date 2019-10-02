@@ -21,16 +21,23 @@ class text_aterm_output final : public aterm_output
 public:
   /// \param newline When true each term is written on a new line.
   /// \param transformer A function transforming the function symbols before writing, see the type for details.
-  text_aterm_output(std::ostream& os, std::function<aterm_transformer> transformer = identity, bool newline = false);
+  text_aterm_output(std::ostream& os, bool newline = false);
 
-  const aterm_output& operator<<(const aterm& term) override;
+  aterm_output& operator<<(const aterm& term) override;
+
+  /// \brief Sets the given transformer to be applied to following writes.
+  /// \todo This operator should not be necessary, but otherwise the aterm_output one cannot be used.
+  aterm_output& operator<<(std::function<aterm_transformer> transformer)
+  {
+    m_transformer = transformer;
+    return *this;
+  }
 
 private:
   /// \brief Writes a term in textual format on the same line.
   void write_term_line(const aterm& term);
 
   std::ostream& m_stream;
-  std::function<aterm_transformer> m_transformer;
 
   bool m_newline = false; ///< Indicates that terms are separated by a newline.
 };
@@ -39,7 +46,7 @@ private:
 class text_aterm_input final : public aterm_input
 {
 public:
-  text_aterm_input(std::istream& os, std::function<aterm_transformer> transformer = identity);
+  text_aterm_input(std::istream& os);
 
   aterm get() override;
 
@@ -72,7 +79,6 @@ private:
   int next_char(bool skip_whitespace = true, bool required = false);
 
   std::istream& m_stream;
-  std::function<aterm_transformer> m_transformer;
 
   std::size_t m_line = 0; ///< The line number of the current character.
   std::size_t m_column = 0; ///< The column of the current character.
