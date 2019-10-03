@@ -653,7 +653,7 @@ class partial_order_reduction_algorithm
       return h(DNS(k)) <= h(DNL(k)) ? DNS(k) : DNL(k);
     }
 
-    summand_set stubborn_set(const propositional_variable_instantiation& X_e)
+    summand_set stubborn_set(const propositional_variable_instantiation& X_e, const summand_set& en_X_e)
     {
       using utilities::detail::contains;
       using utilities::detail::has_empty_intersection;
@@ -663,8 +663,6 @@ class partial_order_reduction_algorithm
       using utilities::detail::set_union;
 
       std::size_t N = m_summand_classes.size();
-
-      summand_set en_X_e = en(X_e);
 
       summand_set empty_set;
       auto size = [&](const invis_pair& p)
@@ -1490,7 +1488,7 @@ class partial_order_reduction_algorithm
 
         if (s == NEW)
         {
-          summand_set stubborn_set_X_e = stubborn_set(X_e);
+          summand_set stubborn_set_X_e = stubborn_set(X_e, en_X_e);
           mCRL2log(log::debug) << "stubborn_set(X_e) = " << print_summand_set(stubborn_set_X_e) << std::endl;
           next = succ(X_e, stubborn_set_X_e & en_X_e);
 
