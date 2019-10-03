@@ -33,12 +33,7 @@ else()
   set(MCRL2_MIN_QT_VERSION 5.9.0)
 endif()
 
-if(MSVC)
-  set(MCRL2_MIN_BOOST_VERSION 1.66.0)
-else()
-  set(MCRL2_MIN_BOOST_VERSION 1.56.0)  
-endif()
-
+set(MCRL2_MIN_BOOST_VERSION 1.66.0)
 
 option(MCRL2_ENABLE_GUI_TOOLS       "Enable compilation of tools with a graphical user interface." ON)
 option(MCRL2_ENABLE_EXPERIMENTAL    "Enable compilation of experimental tools." OFF)
