@@ -1,3 +1,0 @@
-% The done action can be reached
-
-exists N: Name . <true*.done(N)> true
