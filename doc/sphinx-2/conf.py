@@ -23,8 +23,8 @@ sys.path.insert(0, (Path(__file__).parent / '_extensions').as_posix())
 
 project = 'mCRL2'
 author = 'Technische Universiteit Eindhoven'
-release = '2019'
-version = '2019'
+release = '' # populated below
+version = ''
 
 # run CMake on the version file to obtain the current version of mCRL2
 from man import call
@@ -68,7 +68,6 @@ extensions = [
 ]
 
 # Extension configuration
-mathjax_path = '../../mathjax/MathJax.js?config=default'
 tikz_latex_preamble = r'''
   \tikzstyle{every state}=[
     draw,
