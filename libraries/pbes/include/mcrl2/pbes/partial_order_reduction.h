@@ -681,9 +681,9 @@ class partial_order_reduction_algorithm
 
         std::size_t size(const invis_pair& p) const
         {
-          temp_set = m_en_X_e;
-          temp_set &= p.Twork;
-          temp_set &= p.Ts;
+          temp_set = p.Twork;
+          temp_set |= p.Ts;
+          temp_set &= m_en_X_e;
           return temp_set.count();
         }
 
