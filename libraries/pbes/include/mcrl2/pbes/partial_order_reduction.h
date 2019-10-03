@@ -669,26 +669,30 @@ class partial_order_reduction_algorithm
 
       std::size_t N = m_summand_classes.size();
 
-      summand_set empty_set;
-      auto size = [&](const invis_pair& p)
+      struct compare_invis_pair
       {
-        empty_set = en_X_e;
-        empty_set &= p.Twork;
-        empty_set &= p.Ts;
-        return empty_set.count();
-      };
+        // Prevent allocations and destructions by using temp_set
+        mutable summand_set temp_set;
+        const summand_set m_en_X_e;
 
-      auto choose_minimum_element = [&](std::set<invis_pair>& C)
-      {
-        auto i = std::min_element(C.begin(), C.end(),
-                                  [&](const invis_pair& x, const invis_pair& y)
-                                  {
-                                    return size(x) < size(y);
-                                  }
-        );
-        invis_pair result = *i;
-        C.erase(i);
-        return result;
+        compare_invis_pair(const summand_set& en)
+        : m_en_X_e(en)
+        {}
+
+        std::size_t size(const invis_pair& p) const
+        {
+          temp_set = m_en_X_e;
+          temp_set &= p.Twork;
+          temp_set &= p.Ts;
+          return temp_set.count();
+        }
+
+        bool operator()(const invis_pair& x, const invis_pair& y) const
+        {
+          std::size_t sizex = size(x);
+          std::size_t sizey = size(y);
+          return sizex < sizey || (sizex == sizey && x < y);
+        };
       };
 
       if ((en_X_e & m_invis).none())
@@ -696,11 +700,12 @@ class partial_order_reduction_algorithm
         return en_X_e;
       }
 
-      std::set<invis_pair> C;
+      // C will always be sorted according to the size of each element.
+      std::set<invis_pair, compare_invis_pair> C{compare_invis_pair(en_X_e)};
       auto invis_en_X_e = invis(en_X_e);
       for (std::size_t k = invis_en_X_e.find_first(); k != summand_set::npos; k = invis_en_X_e.find_next(k))
       {
-        invis_pair pair_k((summand_set(N)), summand_set(N));
+        invis_pair pair_k{summand_set(N), summand_set(N)};
         pair_k.Twork.set(k);
         C.insert(pair_k);
       }
@@ -708,7 +713,9 @@ class partial_order_reduction_algorithm
 
       while (true)
       {
-        auto p = choose_minimum_element(C);
+        // The smallest element is the first element in the set
+        auto p = *C.begin();
+        C.erase(C.begin());
         auto& Twork = p.Twork;
         auto& Ts = p.Ts;
         if (Twork.none())
@@ -744,7 +751,7 @@ class partial_order_reduction_algorithm
             Twork = Twork | (NES - Ts);
           }
         }
-        C.insert(invis_pair(Twork, Ts));
+        C.emplace(Twork, Ts);
       }
     }
 
