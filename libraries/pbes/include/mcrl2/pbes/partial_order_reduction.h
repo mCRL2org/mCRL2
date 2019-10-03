@@ -565,9 +565,10 @@ class partial_order_reduction_algorithm
                                m_sigma,
                                [&](const enumerator_element&) {
                                  result.set(k);
-                                 return false;
+                                 return true;
                                },
-                               pbes_system::is_false
+                               pbes_system::is_false,
+                               pbes_system::is_true
         );
         remove_assignments(m_sigma, e_k);
       }
@@ -1367,7 +1368,7 @@ class partial_order_reduction_algorithm
               // data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()),
               strategy),
        m_pbes_rewr(m_rewr, p.data()),
-       m_enumerator(m_pbes_rewr, p.data(), m_rewr, m_id_generator, false),
+       m_enumerator(m_pbes_rewr, p.data(), m_rewr, m_id_generator, true),
        m_pbes(pbes2srf(p)),
        m_equation_index(m_pbes),
        m_dependency_nes(m_pbes.equations().size()),
