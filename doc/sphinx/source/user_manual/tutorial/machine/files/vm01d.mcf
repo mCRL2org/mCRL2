@@ -1,4 +1,0 @@
-% any ready is followed by a coin and another ready (true)
-
-[ true* . ready . !coin ] false  &&  [ true* . ready . true . !ready ] false
-

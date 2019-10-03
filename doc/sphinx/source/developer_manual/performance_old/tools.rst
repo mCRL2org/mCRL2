@@ -1,8 +1,0 @@
-Tools
------
-
-.. toctree::
-   :glob:
-
-   tools/*
-   
