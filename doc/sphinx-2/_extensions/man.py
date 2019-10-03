@@ -99,5 +99,5 @@ def generate_rst(temppath, binpath):
     open(_RSTTAG, 'w+').close()
     generate_tool_documentation(temppath, binpath, 'tools', 'release')
     generate_tool_documentation(temppath, binpath, 'tools', 'experimental')
-    log_nonl('generated user documentation')
+    log_nonl('generated user documentation for all tools')
     _LOG.info('')
