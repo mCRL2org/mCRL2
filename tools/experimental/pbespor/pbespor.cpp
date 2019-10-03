@@ -41,6 +41,7 @@ class pbespor_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<r
     bool m_no_determinisim = false;
     bool m_no_triangle = false;
     bool m_use_smt_solver = false;
+    bool m_no_reduction = false;
     std::size_t m_smt_timeout = 0;
 
     void parse_options(const command_line_parser& parser) override
@@ -50,6 +51,7 @@ class pbespor_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<r
       m_weak_conditions = parser.has_option("weak-conditions");
       m_no_determinisim = parser.has_option("no-determinism");
       m_no_triangle = parser.has_option("no-triangle");
+      m_no_reduction = parser.has_option("full");
       if(parser.has_option("use-smt-solver"))
       {
         m_use_smt_solver = true;
@@ -68,6 +70,8 @@ class pbespor_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<r
                   "do not check whether transitions are deterministic (cheaper, but less powerful, static analysis)");
       desc.add_option("no-triangle",
                   "do not compute the triangle accordance relation (cheaper, but less powerful, static analysis)");
+      desc.add_option("full",
+                  "explore the full state space. No static analysis is performed.");
       desc.add_option("use-smt-solver", utilities::make_optional_argument("TIMEOUT", "0"),
                   "Use the SMT solver Z3 (must be in the path). "
                   "The timeout should be given in milliseconds (0 = no timeout). "
@@ -101,7 +105,8 @@ class pbespor_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<r
               m_smt_timeout,
               m_weak_conditions,
               m_no_determinisim,
-              m_no_triangle
+              m_no_triangle,
+              m_no_reduction
              );
 
       return true;

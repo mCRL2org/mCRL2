@@ -288,6 +288,7 @@ class partial_order_reduction_algorithm
     bool m_use_weak_conditions;
     bool m_no_determinisim;
     bool m_no_triangle;
+    bool m_no_reduction;
 
     class summand_relations_data
     {
@@ -547,7 +548,6 @@ class partial_order_reduction_algorithm
       std::size_t i = m_equation_index.index(X_e.name());
       const data::variable_list& d = m_pbes.equations()[i].variable().parameters();
       const data::data_expression_list& e = X_e.parameters();
-      add_assignments(m_sigma, d, e);
       for (std::size_t k = 0; k < N; k++)
       {
         if (!depends(i, k))
@@ -557,6 +557,10 @@ class partial_order_reduction_algorithm
         const summand_class& summand_k = m_summand_classes[k];
         const data::variable_list& e_k = summand_k.e;
         const pbes_expression& f_k = summand_k.f;
+
+        // Add assignments to d in every iteration, becuase they might have been
+        // overwritten if a variable in e_k coincides with a parameter in d.
+        add_assignments(m_sigma, d, e);
         m_enumerator.enumerate(enumerator_element(e_k, f_k),
                                m_sigma,
                                [&](const enumerator_element&) {
@@ -1107,6 +1111,11 @@ class partial_order_reduction_algorithm
 
     void compute_NES_DNA_DNL()
     {
+      if (m_no_reduction)
+      {
+        return;
+      }
+
       using utilities::detail::set_union;
 
       std::size_t N = m_summand_classes.size();
@@ -1205,7 +1214,7 @@ class partial_order_reduction_algorithm
 
     void compute_deterministic()
     {
-      if (m_no_determinisim)
+      if (m_no_determinisim || m_no_reduction)
       {
         return;
       }
@@ -1239,6 +1248,7 @@ class partial_order_reduction_algorithm
         s.set_num_summands(m_summand_classes.size());
       }
       compute_nxt();
+      // optional steps
       compute_NES_DNA_DNL();
       compute_deterministic();
     }
@@ -1349,7 +1359,8 @@ class partial_order_reduction_algorithm
           std::size_t smt_timeout,
           bool weak_conditions,
           bool no_determinisim,
-          bool no_triangle
+          bool no_triangle,
+          bool no_reduction
         )
      : m_rewr(p.data(),
               //TODO temporarily disabled used_data_equation_selector so the rewriter can rewrite accordance conditions
@@ -1364,7 +1375,8 @@ class partial_order_reduction_algorithm
        m_smt_timeout(smt_timeout),
        m_use_weak_conditions(weak_conditions),
        m_no_determinisim(no_determinisim),
-       m_no_triangle(no_triangle)
+       m_no_triangle(no_triangle),
+       m_no_reduction(no_reduction)
     {
       unify_parameters(m_pbes);
 
@@ -1571,6 +1583,84 @@ class partial_order_reduction_algorithm
       m_exploration_duration = std::chrono::high_resolution_clock::now() - t_start;
       mCRL2log(log::info) << "timing pbespor (wall clock time in seconds):"
         "\n  static analysis: " << std::chrono::duration<double>(m_static_analysis_duration).count() <<
+        "\n  exploration:     " << std::chrono::duration<double>(m_exploration_duration).count() << std::endl;
+    }
+
+    template <
+      typename EmitNode = utilities::skip,
+      typename EmitEdge = utilities::skip
+    >
+    void explore_full(
+      const propositional_variable_instantiation& X_init,
+      EmitNode emit_node = EmitNode(),
+      EmitEdge emit_edge = EmitEdge()
+    )
+    {
+      const std::chrono::time_point<std::chrono::high_resolution_clock> t_start =
+        std::chrono::high_resolution_clock::now();
+
+      std::unordered_set<propositional_variable_instantiation> seen;
+      std::deque<propositional_variable_instantiation> todo{ X_init };
+
+      {
+        std::size_t rank = m_equation_index.rank(X_init.name());
+        std::size_t i = m_equation_index.index(X_init.name());
+        bool is_conjunctive = m_pbes.equations()[i].is_conjunctive();
+        emit_node(X_init, is_conjunctive, rank);
+        seen.insert(X_init);
+      }
+
+      std::size_t N = m_summand_classes.size();
+      summand_set summands_X(N);
+
+      std::size_t iteration = 0;
+      while (!todo.empty())
+      {
+        const propositional_variable_instantiation X_e = todo.back();
+        todo.pop_back();
+        mCRL2log(log::debug) << "choose X_e = " << X_e << std::endl;
+
+        std::size_t X_index = m_equation_index.index(X_e.name());
+        for(std::size_t i = 0; i < N; i++)
+        {
+          if (depends(X_index, i))
+          {
+            summands_X.set(i);
+          }
+        }
+        mCRL2log(log::debug) << "enabled according to dependencies = " << print_summand_set(summands_X) << std::endl;
+        std::set<propositional_variable_instantiation> next = succ(X_e, summands_X);
+        mCRL2log(log::debug) << "next = " << core::detail::print_set(next) << std::endl;
+        summands_X.reset();
+
+        for (const propositional_variable_instantiation& Y_f: next)
+        {
+          if (seen.find(Y_f) == seen.end())
+          {
+            std::size_t rank = m_equation_index.rank(Y_f.name());
+            std::size_t i = m_equation_index.index(Y_f.name());
+            bool is_conjunctive = m_pbes.equations()[i].is_conjunctive();
+            emit_node(Y_f, is_conjunctive, rank);
+            seen.insert(Y_f);
+            todo.emplace_back(Y_f);
+          }
+        }
+        for (const propositional_variable_instantiation& Y_f: next)
+        {
+          emit_edge(X_e, Y_f);
+        }
+
+        iteration++;
+        if(iteration == 100)
+        {
+          mCRL2log(log::status) << "Found " << seen.size() << " nodes. Todo set contains " << todo.size() << " nodes.\n";
+          iteration = 0;
+        }
+      }
+      mCRL2log(log::verbose) << "Finished exploration, found " << seen.size() << " nodes." << std::endl;
+
+      m_exploration_duration = std::chrono::high_resolution_clock::now() - t_start;
+      mCRL2log(log::info) << "timing pbespor (wall clock time in seconds):"
         "\n  exploration:     " << std::chrono::duration<double>(m_exploration_duration).count() << std::endl;
     }
 };

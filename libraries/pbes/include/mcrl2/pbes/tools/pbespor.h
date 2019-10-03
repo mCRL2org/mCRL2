@@ -125,31 +125,33 @@ struct pbespor_pbes_composer
            std::size_t smt_timeout,
            bool use_weak_conditions,
            bool no_determinisim,
-           bool no_triangle
+           bool no_triangle,
+           bool no_reduction
          )
   {
-    partial_order_reduction_algorithm algorithm(p, rewrite_strategy, use_smt_solver, smt_timeout, use_weak_conditions, no_determinisim, no_triangle);
-    algorithm.print();
+    partial_order_reduction_algorithm algorithm(p, rewrite_strategy, use_smt_solver, smt_timeout, use_weak_conditions, no_determinisim, no_triangle, no_reduction);
 
-    algorithm.explore(
-      algorithm.initial_state(),
+    auto emit_node = [&](const propositional_variable_instantiation& X, bool is_conjunctive, std::size_t rank)
+    {
+      mCRL2log(log::debug) << "emit node " << X << std::endl;
+      add_equation(X, is_conjunctive, rank, algorithm.symbol(X.name()));
+    };
 
-      // emit_node
-      [&](const propositional_variable_instantiation& X, bool is_conjunctive, std::size_t rank)
-      {
-        mCRL2log(log::debug) << "emit node " << X << std::endl;
-        add_equation(X, is_conjunctive, rank, algorithm.symbol(X.name()));
-      },
+    auto emit_edge = [&](const propositional_variable_instantiation& X, const propositional_variable_instantiation& Y)
+    {
+      mCRL2log(log::debug) << "emit edge " << X << " -> " << Y << std::endl;
+      add_expression(X, Y);
+    };
 
-      // emit_edge
-      [&](const propositional_variable_instantiation& X, const propositional_variable_instantiation& Y)
-      {
-        mCRL2log(log::debug) << "emit edge " << X << " -> " << Y << std::endl;
-        add_expression(X, Y);
-      },
-
-      use_condition_L
-    );
+    if(no_reduction)
+    {
+      algorithm.explore_full(algorithm.initial_state(), emit_node, emit_edge);
+    }
+    else
+    {
+      algorithm.print();
+      algorithm.explore(algorithm.initial_state(), emit_node, emit_edge, use_condition_L);
+    }
 
     return compose_result(p.data(), algorithm.initial_state());
   }
@@ -165,14 +167,15 @@ void pbespor(const std::string& input_filename,
              std::size_t smt_timeout,
              bool weak_conditions,
              bool no_determinisim,
-             bool no_triangle
+             bool no_triangle,
+             bool no_reduction
             )
 {
   pbes p;
   load_pbes(p, input_filename, input_format);
   algorithms::normalize(p);
   pbespor_pbes_composer composer;
-  pbes result = composer.run(p, rewrite_strategy, use_condition_L, use_smt_solver, smt_timeout, weak_conditions, no_determinisim, no_triangle);
+  pbes result = composer.run(p, rewrite_strategy, use_condition_L, use_smt_solver, smt_timeout, weak_conditions, no_determinisim, no_triangle, no_reduction);
   save_pbes(result, output_filename, output_format);
 }
 
