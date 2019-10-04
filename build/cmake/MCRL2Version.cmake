@@ -91,6 +91,10 @@ else()
   set(MCRL2_VERSION "${MCRL2_MAJOR_VERSION}.${MCRL2_MINOR_VERSION}")
 endif()
 
+# This script can be included from other CMake files to set variables and add definitions,
+# but it can also be run standalone in script mode. In that case, it will output the mCRL2
+# version. This is used by the documentation and ensures that the version number of mCRL2
+# needs to be changed in only one place: this file.
 if(CMAKE_SCRIPT_MODE_FILE AND CMAKE_SCRIPT_MODE_FILE STREQUAL CMAKE_PARENT_LIST_FILE)
   message(STATUS "MCRL2_MAJOR_VERSION ${MCRL2_MAJOR_VERSION}")
   message(STATUS "MCRL2_MINOR_VERSION ${MCRL2_MINOR_VERSION}")
