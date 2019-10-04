@@ -16,6 +16,7 @@
 #include "mcrl2/core/load_aterm.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/data_io.h"
 #include "mcrl2/data/detail/io.h"
 #include "mcrl2/process/action_label.h"
 #include "mcrl2/process/process_equation.h"

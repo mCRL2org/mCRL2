@@ -6,8 +6,6 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/data_specification.h
-/// \brief The class data_specification.
 
 #include "mcrl2/core/load_aterm.h"
 #include "mcrl2/data/data_specification.h"
@@ -30,39 +28,8 @@
 
 namespace mcrl2
 {
-
 namespace data
 {
-/// \cond INTERNAL_DOCS
-
-namespace detail
-{
-
-/**
- * \param[in/\<aterm\>/aterm/g
- * :%s/\<aterm_int\>/aterm_int/g
- * :%s/\<aterm_appl\>/aterm_appl/g
- * :%s/\<aterm_list\>/aterm_list/g
- * :%s/\<function_symbol\>/function_symbol/g
- * :%s/\<atermpp\>/atermpp/g
- *  compatible whether the produced aterm is compatible with the `format after type checking'
- *
- * The compatible transformation should eventually disappear, it is only
- * here for compatibility with the old parser, type checker and pretty
- * print implementations.
- **/
-atermpp::aterm_appl data_specification_to_aterm(const data_specification& s)
-{
-  return atermpp::aterm_appl(core::detail::function_symbol_DataSpec(),
-           atermpp::aterm_appl(core::detail::function_symbol_SortSpec(), atermpp::aterm_list(s.user_defined_sorts().begin(),s.user_defined_sorts().end()) +
-                              atermpp::aterm_list(s.user_defined_aliases().begin(),s.user_defined_aliases().end())),
-           atermpp::aterm_appl(core::detail::function_symbol_ConsSpec(), atermpp::aterm_list(s.m_user_defined_constructors.begin(),s.m_user_defined_constructors.end())),
-           atermpp::aterm_appl(core::detail::function_symbol_MapSpec(), atermpp::aterm_list(s.m_user_defined_mappings.begin(),s.m_user_defined_mappings.end())),
-           atermpp::aterm_appl(core::detail::function_symbol_DataEqnSpec(), atermpp::aterm_list(s.m_user_defined_equations.begin(),s.m_user_defined_equations.end())));
-}
-} // namespace detail
-/// \endcond
-
 
 class finiteness_helper
 {
@@ -473,7 +440,7 @@ void sort_specification::reconstruct_m_normalised_aliases() const
     const sort_expression rhs=it->second;
     sort_aliases_to_be_investigated.erase(it);
 
-    for(const std::pair< sort_expression, sort_expression >& p: resulting_normalized_sort_aliases)
+    for(const std::pair<const sort_expression, sort_expression >& p: resulting_normalized_sort_aliases)
     {
       const sort_expression s1=data::replace_sort_expressions(lhs,sort_expression_assignment(p.first,p.second), true);
 
@@ -544,7 +511,7 @@ void sort_specification::reconstruct_m_normalised_aliases() const
   // If there are rules with equal left hand side, only one is arbitrarily chosen. Rewrite the
   // right hand side to normal form.
 
-  for(const std::pair< sort_expression,sort_expression>& p: resulting_normalized_sort_aliases)
+  for(const std::pair<const sort_expression,sort_expression>& p: resulting_normalized_sort_aliases)
   {
     const sort_expression normalised_rhs = find_normal_form(p.second,resulting_normalized_sort_aliases);
     m_normalised_aliases[p.first]=normalised_rhs;
@@ -812,32 +779,6 @@ void data_specification::build_from_aterm(const atermpp::aterm_appl& term)
   for(const data_equation& e: term_equations)
   {
     add_equation(e);
-  }
-}
-
-void data_specification::load(std::istream& stream, bool binary, const std::string& source)
-{
-  atermpp::aterm t = core::load_aterm(stream, binary, "data specification", source, detail::add_index_impl);
-
-  if (!t.type_is_appl() || !is_data_specification(atermpp::down_cast<const atermpp::aterm_appl>(t)))
-  {
-    throw mcrl2::runtime_error("Input stream does not contain a data specification");
-  }
-
-  build_from_aterm(atermpp::down_cast<atermpp::aterm_appl>(t));
-}
-
-void data_specification::save(std::ostream& stream, bool binary) const
-{
-  atermpp::aterm t = detail::data_specification_to_aterm(*this);
-
-  if (binary)
-  {
-    atermpp::binary_aterm_output(stream) << detail::remove_index_impl << t;
-  }
-  else
-  {
-    atermpp::text_aterm_output(stream) << detail::remove_index_impl << t;
   }
 }
 

@@ -6,8 +6,6 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/data_specification.h
-/// \brief The class data_specification.
 
 #ifndef MCRL2_DATA_DATA_SPECIFICATION_H
 #define MCRL2_DATA_DATA_SPECIFICATION_H
@@ -38,14 +36,6 @@ void normalize_sorts(data_equation_vector& x, const data::sort_specification& so
 class data_specification;
 
 std::string pp(const data::data_specification& x);
-
-/// \cond INTERNAL_DOCS
-namespace detail
-{
-atermpp::aterm_appl data_specification_to_aterm(const data_specification&);
-
-} // namespace detail
-/// \endcond
 
 /// \brief Test for a data specification expression
 /// \param x A term
@@ -112,12 +102,9 @@ class data_specification: public sort_specification
       }
     };
 
-    friend atermpp::aterm_appl detail::data_specification_to_aterm(const data_specification&);
-
     ///\brief Builds a specification from aterm
     void build_from_aterm(const atermpp::aterm_appl& term);
     /// \endcond
-
 
   protected:
 
@@ -646,21 +633,6 @@ class data_specification: public sort_specification
       m_normalised_equations=other.m_normalised_equations;
       return *this;
     }
-
-    /// \brief Reads a data specification from a stream.
-    /// \param stream An input stream.
-    /// \param binary An boolean that if true means the stream contains a term in binary encoding.
-    //                Otherwise the encoding is textual.
-    /// \param source The source from which the stream originates. Used for error messages.
-    void load(std::istream& stream, bool binary = true, const std::string& source = "");
-
-    /// \brief Writes the data specification to a stream.
-    /// \param stream The output stream.
-    /// \param binary
-    /// If binary is true the data specification is saved in compressed binary format.
-    /// Otherwise an ascii representation is saved. In general the binary format is
-    /// much more compact than the ascii representation.
-    void save(std::ostream& stream, bool binary=true) const;
 
 }; // class data_specification
 
