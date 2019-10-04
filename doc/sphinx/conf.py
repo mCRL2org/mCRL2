@@ -85,7 +85,7 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', '.svn', '.git',
+exclude_patterns = ['.svn', '.git',
                     'Thumbs.db', '.DS_Store',
                     'sphinx-venv']
 
@@ -114,16 +114,19 @@ today_fmt = '%d-%m-%Y'
 suppress_warnings = ['ref.citation']
 
 
-# Generate rst files from man pages
-import libraries
-import man
+# -- App setup - executed before the build process starts --------------------
 
-temppath = (Path(__file__).parent / '_build/cache').as_posix()
-os.makedirs(temppath, mode = 0o755, exist_ok = True)
-olddir = os.getcwd()
-try:
-    os.chdir(temppath)
-    libraries.generate_rst(temppath)
-    man.generate_rst(temppath, (Path(__file__).parent / '../../../build/stage/bin/').as_posix())
-finally:
-    os.chdir(olddir)
+def setup(app):
+    # Generate rst files from man pages
+    import libraries
+    import man
+
+    temppath = f'{app.outdir}/cache'
+    os.makedirs(temppath, mode = 0o755, exist_ok = True)
+    olddir = os.getcwd()
+    try:
+        os.chdir(temppath)
+        libraries.generate_rst(temppath)
+        man.generate_rst(temppath, (Path(__file__).parent / '../../../build/stage/bin/').as_posix())
+    finally:
+        os.chdir(olddir)
