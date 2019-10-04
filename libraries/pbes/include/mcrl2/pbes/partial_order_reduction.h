@@ -714,10 +714,9 @@ class partial_order_reduction_algorithm
       while (true)
       {
         // The smallest element is the first element in the set
-        auto p = *C.begin();
-        C.erase(C.begin());
-        auto& Twork = p.Twork;
-        auto& Ts = p.Ts;
+        auto p = C.extract(C.begin());
+        auto& Twork = p.value().Twork;
+        auto& Ts = p.value().Ts;
         if (Twork.none())
         {
           summand_set T = Ts & en_X_e;
@@ -751,7 +750,7 @@ class partial_order_reduction_algorithm
             Twork = Twork | (NES - Ts);
           }
         }
-        C.emplace(Twork, Ts);
+        C.insert(std::move(p));
       }
     }
 
