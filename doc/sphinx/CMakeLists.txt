@@ -2,6 +2,9 @@ set(SPHINX_BUILD_CMD "sphinx-build")
 set(SPHINX_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 set(SPHINX_BUILD_DIR "${CMAKE_BINARY_DIR}/sphinx")
 
+# ensure the build directory exists, because Sphinx does not create it automatically
+file(MAKE_DIRECTORY ${SPHINX_BUILD_DIR})
+
 set(SPHINX_PARALLEL "-jauto")
 if(CMAKE_BUILD_PARALLEL_LEVEL)
   set(SPHINX_PARALLEL "-j${CMAKE_BUILD_PARALLEL_LEVEL}")
@@ -23,8 +26,6 @@ function(add_build_doc_target NAME DESC INCLUDE_CLEAN)
     COMMENT ${DESC}
     ${CLEAN_DEPENCY}
     WORKING_DIRECTORY ${SPHINX_SOURCE_DIR}
-    # ensure the build directory exists, because Sphinx does not create it automatically
-    COMMAND mkdir -p ${SPHINX_BUILD_DIR}
     # run the Sphinx build command
     COMMAND ${SPHINX_BUILD_CMD} -b html -d "${SPHINX_BUILD_DIR}/doctrees" ${SPHINX_PARALLEL} ${SPHINX_SOURCE_DIR} ${SPHINX_BUILD_DIR} 2> ${SPHINX_BUILD_DIR}/sphinx-build-warnings.log
     VERBATIM
