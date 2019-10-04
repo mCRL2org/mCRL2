@@ -4,6 +4,7 @@
 
 # -- Imports -----------------------------------------------------------------
 
+import datetime
 import os
 # used to parse mCRL2 version information from CMake file
 from pathlib import Path
@@ -45,7 +46,7 @@ finally:
 version = f'{release}.{version}'
 
 # update copyright from current version
-copyright = f'2011-{version[0:4]}, Technische Universiteit Eindhoven'
+copyright = f'2011-{datetime.datetime.now().year}, {author}'
 
 
 # -- General configuration ---------------------------------------------------
