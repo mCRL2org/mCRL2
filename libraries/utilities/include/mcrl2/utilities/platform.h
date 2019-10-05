@@ -19,6 +19,10 @@
 #define MCRL2_PLATFORM_LINUX 1
 #endif
 
+#ifdef __FreeBSD__
+#define MCRL2_PLATFORM_FREEBSD 1
+#endif
+
 #ifdef __APPLE__
 #define MCRL2_PLATFORM_MAC 1
 #endif

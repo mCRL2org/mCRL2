@@ -16,25 +16,28 @@
 /// for variable n, but for the MSVC compilers, the
 /// special function _alloca must be used.
 
-
-// Reserve a local array of type TYPE and SIZE elements (where SIZE
-// is not necessarily a constant value). These will be allocated on the stack, 
-// but the memory will not be initialised, nor will a destructor be called
-// on these memory positions when the reserved data is freed. 
-
-
 #ifndef MCRL2_UTILITIES_DETAIL_MEMORY_UTILITY_H
 #define MCRL2_UTILITIES_DETAIL_MEMORY_UTILITY_H
 
 #include "mcrl2/utilities/platform.h"
 
+// Reserve a local array of type TYPE and SIZE elements (where SIZE
+// is not necessarily a constant value). These will be allocated on the stack,
+// but the memory will not be initialised, nor will a destructor be called
+// on these memory positions when the reserved data is freed.
+
 #ifdef MCRL2_PLATFORM_WINDOWS
-#include <malloc.h>
-#define MCRL2_SPECIFIC_STACK_ALLOCATOR(TYPE, SIZE) reinterpret_cast<TYPE*>(_alloca((SIZE)*sizeof(TYPE)))
+  #include <malloc.h>
+  #define MCRL2_SPECIFIC_STACK_ALLOCATOR(TYPE, SIZE) reinterpret_cast<TYPE*>(_alloca((SIZE)*sizeof(TYPE)))
+#elif (MCRL2_PLATFORM_LINUX || MCRL2_PLATFORM_MAC)
+  #include <alloca.h>
+  #define MCRL2_SPECIFIC_STACK_ALLOCATOR(TYPE, SIZE) reinterpret_cast<TYPE*>(alloca((SIZE)*sizeof(TYPE)))
+#elif MCRL2_PLATFORM_FREEBSD
+  #include <stdlib.h>
+ #define MCRL2_SPECIFIC_STACK_ALLOCATOR(TYPE, SIZE) reinterpret_cast<TYPE*>(alloca((SIZE)*sizeof(TYPE)))
 #else
-#include <alloca.h>
-#define MCRL2_SPECIFIC_STACK_ALLOCATOR(TYPE, SIZE) reinterpret_cast<TYPE*>(alloca((SIZE)*sizeof(TYPE)))
-#endif 
+  static_assert(false, "MCRL2_SPECIFICATION_STACK_ALLOCATOR has not yet been defined for your platform.");
+#endif
 
 #endif // MCRL2_UTILITIES_DETAIL_MEMORY_UTILITY_H
 
