@@ -105,13 +105,6 @@ struct enumerator_substitution
     return detail::enumerator_replace(v, variables, expressions);
   }
 
-  template <typename Expression>
-  data::data_expression operator()(const Expression&) const
-  {
-    throw mcrl2::runtime_error("data::enumerator_substitution::operator(const Expression&) is a deprecated interface!");
-    return data::undefined_data_expression();
-  }
-
   // Adds the assignment [v := e] to this substitution, by putting it in front of the lists with variables and expressions.
   // Note that this operation has not the same effect as function composition with [v := e]. Therefore we use a different
   // syntax than sigma[v] = e.

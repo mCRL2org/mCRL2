@@ -518,6 +518,7 @@ class lts: public LTS_BASE
     /** \brief Sorts the transitions using a sort style.
      * \param[in] ts The sort style to use.
      * \note Deprecated */
+    [[deprecated]]
     inline void sort_transitions(transition_sort_style ts = src_lbl_tgt)
     {
       switch (ts)

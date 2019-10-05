@@ -326,6 +326,7 @@ const DerivedCont& vertical_cast(const Cont<Base>& t,
 /// \brief Cast from an aterm derived term to another aterm.
 /// \deprecated.
 template <class Derived, class Base>
+[[deprecated]]
 const Derived& deprecated_cast(const Base& t,
                                typename std::enable_if<
                                   std::is_base_of<aterm, Base>::value &&

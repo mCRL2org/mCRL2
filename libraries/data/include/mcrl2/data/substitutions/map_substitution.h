@@ -53,13 +53,6 @@ struct map_substitution
     // return i == m_map.end() ? v : i->second;
   }
 
-  template <typename Expression>
-  expression_type operator()(const Expression&) const
-  {
-    throw mcrl2::runtime_error("data::map_substitution::operator(const Expression&) is a deprecated interface!");
-    return data::undefined_data_expression();
-  }
-
   std::string to_string() const
   {
     std::ostringstream out;

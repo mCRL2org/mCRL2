@@ -138,15 +138,6 @@ class assignment: public assignment_expression
     {
       return x == lhs() ? rhs() : x;
     }
-
-    /// \brief Applies the assignment to a term
-    /// \return The value <tt>x[lhs() := rhs()]</tt>.
-    template < typename Expression >
-    data_expression operator()(const Expression& /*x*/) const
-    {
-      throw std::runtime_error("data::assignment::operator(const Expression&) is a deprecated interface!");
-      return data::undefined_data_expression();
-    }
 //--- end user section assignment ---//
 };
 
