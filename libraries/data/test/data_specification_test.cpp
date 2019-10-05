@@ -11,11 +11,11 @@
 
 #define BOOST_TEST_MODULE data_specification_test
 #include <boost/test/included/unit_test_framework.hpp>
-#include <functional>
-#include <iostream>
+
 #include "mcrl2/data/bag.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/data_io.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/list.h"
@@ -25,6 +25,9 @@
 #include "mcrl2/data/set.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/structured_sort.h"
+
+#include <functional>
+#include <iostream>
 
 using namespace mcrl2;
 using namespace mcrl2::data;

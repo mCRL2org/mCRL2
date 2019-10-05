@@ -17,6 +17,7 @@
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/parse.h"
+#include "mcrl2/data/data_io.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/typecheck.h"
