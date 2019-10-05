@@ -81,12 +81,12 @@ static void write_string_with_escape_symbols(const std::string& s, std::ostream&
 
 // Public functions
 
-text_aterm_output::text_aterm_output(std::ostream& os, bool newline)
+text_aterm_ostream::text_aterm_ostream(std::ostream& os, bool newline)
   : m_stream(os),
     m_newline(newline)
 {}
 
-aterm_output& text_aterm_output::operator<<(const aterm& term)
+aterm_ostream& text_aterm_ostream::operator<<(const aterm& term)
 {
   write_term_line(term);
 
@@ -98,13 +98,13 @@ aterm_output& text_aterm_output::operator<<(const aterm& term)
   return *this;
 }
 
-text_aterm_input::text_aterm_input(std::istream& is)
+text_aterm_istream::text_aterm_istream(std::istream& is)
   : m_stream(is)
 {
   character = next_char();
 }
 
-aterm text_aterm_input::get()
+aterm text_aterm_istream::get()
 {
   try
   {
@@ -127,7 +127,7 @@ aterm text_aterm_input::get()
 
 // Private functions
 
-void text_aterm_output::write_term_line(const aterm& t)
+void text_aterm_ostream::write_term_line(const aterm& t)
 {
   if (t.type_is_int())
   {
@@ -173,7 +173,7 @@ void text_aterm_output::write_term_line(const aterm& t)
   }
 }
 
-aterm text_aterm_input::parse_aterm(int& character)
+aterm text_aterm_istream::parse_aterm(int& character)
 {
   // Parse the term.
   switch (character)
@@ -200,7 +200,7 @@ aterm text_aterm_input::parse_aterm(int& character)
   }
 }
 
-aterm_appl text_aterm_input::parse_aterm_appl(const std::string& function_name, int& character)
+aterm_appl text_aterm_istream::parse_aterm_appl(const std::string& function_name, int& character)
 {
   // Parse the arguments.
   aterm_list arguments = parse_aterm_list(character, '(', ')');
@@ -210,7 +210,7 @@ aterm_appl text_aterm_input::parse_aterm_appl(const std::string& function_name, 
   return m_transformer(aterm_appl(symbol, arguments.begin(), arguments.end()));
 }
 
-aterm_int text_aterm_input::parse_aterm_int(int& character)
+aterm_int text_aterm_istream::parse_aterm_int(int& character)
 {
   std::array<char, 32> number;
   auto it = number.begin();
@@ -233,7 +233,7 @@ aterm_int text_aterm_input::parse_aterm_int(int& character)
   return aterm_int(static_cast<std::size_t>(atol(number.data())));
 }
 
-aterm_list text_aterm_input::parse_aterm_list(int& character, char begin, char end)
+aterm_list text_aterm_istream::parse_aterm_list(int& character, char begin, char end)
 {
   aterm_list list;
 
@@ -264,7 +264,7 @@ aterm_list text_aterm_input::parse_aterm_list(int& character, char begin, char e
 }
 
 
-std::string text_aterm_input::print_parse_error_position()
+std::string text_aterm_istream::print_parse_error_position()
 {
   std::stringstream s;
   s << "Error occurred at line " << m_line << ", col " << m_column << " near: ";
@@ -275,7 +275,7 @@ std::string text_aterm_input::print_parse_error_position()
   return s.str();
 }
 
-int text_aterm_input::next_char(bool skip_whitespace, bool required)
+int text_aterm_istream::next_char(bool skip_whitespace, bool required)
 {
   character = EOF;
 
@@ -322,7 +322,7 @@ int text_aterm_input::next_char(bool skip_whitespace, bool required)
   return character == '\n' ? EOF : character;
 }
 
-std::string text_aterm_input::parse_quoted_string(int& character)
+std::string text_aterm_istream::parse_quoted_string(int& character)
 {
   // We need a buffer for printing and parsing.
   std::string string;
@@ -365,7 +365,7 @@ std::string text_aterm_input::parse_quoted_string(int& character)
   return string;
 }
 
-std::string text_aterm_input::parse_unquoted_string(int& character)
+std::string text_aterm_istream::parse_unquoted_string(int& character)
 {
   std::string string;
 
@@ -386,7 +386,7 @@ std::string text_aterm_input::parse_unquoted_string(int& character)
 
 void write_term_to_text_stream(const aterm& term, std::ostream& os)
 {
-  text_aterm_output(os) << term;
+  text_aterm_ostream(os) << term;
 }
 
 aterm read_term_from_string(const std::string& s)
@@ -397,13 +397,13 @@ aterm read_term_from_string(const std::string& s)
 
 aterm read_term_from_text_stream(istream& is)
 {
-  return text_aterm_input(is).get();
+  return text_aterm_istream(is).get();
 }
 
 
 std::ostream& operator<<(std::ostream& os, const aterm& term)
 {
-  text_aterm_output(os) << term;
+  text_aterm_ostream(os) << term;
   return os;
 }
 

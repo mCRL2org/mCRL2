@@ -31,10 +31,10 @@ atermpp::aterm add_index(const atermpp::aterm& x);
 atermpp::aterm remove_index(const atermpp::aterm& x);
 
 /// \brief Reads a data specification from a stream.
-atermpp::aterm_input& operator>>(atermpp::aterm_input& stream, data_specification& spec);
+atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, data_specification& spec);
 
 /// \brief Writes the data specification to a stream.
-atermpp::aterm_output& operator<<(atermpp::aterm_output& stream, const data_specification& spec);
+atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const data_specification& spec);
 
 } // namespace mcrl2::data
 

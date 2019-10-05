@@ -52,7 +52,7 @@ enum class packet_type
 /// \brief The number of bits needed to store an element of packet_type.
 static constexpr unsigned int packet_bits = 2;
 
-binary_aterm_output::binary_aterm_output(std::ostream& stream)
+binary_aterm_ostream::binary_aterm_ostream(std::ostream& stream)
   : m_stream(stream)
 {
   // The term with function symbol index 0 indicates the end of the stream, its actual value does not matter.
@@ -65,7 +65,7 @@ binary_aterm_output::binary_aterm_output(std::ostream& stream)
   m_stream.write_bits(BAF_VERSION, 16);
 }
 
-binary_aterm_output::~binary_aterm_output()
+binary_aterm_ostream::~binary_aterm_ostream()
 {
   // Write the end of the stream.
   m_stream.write_bits(static_cast<std::size_t>(packet_type::aterm), packet_bits);
@@ -83,7 +83,7 @@ struct write_todo
   {}
 };
 
-aterm_output& binary_aterm_output::operator<<(const aterm& term)
+aterm_ostream& binary_aterm_ostream::operator<<(const aterm& term)
 {
   assert(!term.type_is_int());
 
@@ -161,19 +161,19 @@ aterm_output& binary_aterm_output::operator<<(const aterm& term)
   return *this;
 }
 
-unsigned int binary_aterm_output::term_index_width()
+unsigned int binary_aterm_ostream::term_index_width()
 {
   assert(m_term_index_width == static_cast<unsigned int>(std::log2(m_terms.size()) + 1));
   return m_term_index_width;
 }
 
-unsigned int binary_aterm_output::function_symbol_index_width()
+unsigned int binary_aterm_ostream::function_symbol_index_width()
 {
   assert(m_function_symbol_index_width == static_cast<unsigned int>(std::log2(m_function_symbols.size()) + 1));
   return m_function_symbol_index_width;
 }
 
-binary_aterm_input::binary_aterm_input(std::istream& is)
+binary_aterm_istream::binary_aterm_istream(std::istream& is)
   : m_stream(is)
 {
   // The term with function symbol index 0 indicates the end of the stream.
@@ -194,7 +194,7 @@ binary_aterm_input::binary_aterm_input(std::istream& is)
   }
 }
 
-std::size_t binary_aterm_output::write_function_symbol(const function_symbol& symbol)
+std::size_t binary_aterm_ostream::write_function_symbol(const function_symbol& symbol)
 {
   std::size_t result = m_function_symbols.index(symbol);
 
@@ -216,7 +216,7 @@ std::size_t binary_aterm_output::write_function_symbol(const function_symbol& sy
   }
 }
 
-aterm binary_aterm_input::get()
+aterm binary_aterm_istream::get()
 {
   while(true)
   {
@@ -275,13 +275,13 @@ aterm binary_aterm_input::get()
   }
 }
 
-unsigned int binary_aterm_input::term_index_width()
+unsigned int binary_aterm_istream::term_index_width()
 {
   assert(m_term_index_width == static_cast<unsigned int>(std::log2(m_terms.size()) + 1));
   return m_term_index_width;
 }
 
-unsigned int binary_aterm_input::function_symbol_index_width()
+unsigned int binary_aterm_istream::function_symbol_index_width()
 {
   assert(m_function_symbol_index_width == static_cast<unsigned int>(std::log2(m_function_symbols.size()) + 1));
   return m_function_symbol_index_width;
@@ -289,12 +289,12 @@ unsigned int binary_aterm_input::function_symbol_index_width()
 
 void write_term_to_binary_stream(const aterm& t, std::ostream& os)
 {
-  binary_aterm_output(os) << t;
+  binary_aterm_ostream(os) << t;
 }
 
 aterm read_term_from_binary_stream(std::istream& is)
 {
-  return binary_aterm_input(is).get();
+  return binary_aterm_istream(is).get();
 }
 
 } // namespace atermpp

@@ -229,11 +229,11 @@ class process_specification
 
       if (binary)
       {
-        atermpp::binary_aterm_output(stream) << data::detail::remove_index_impl << t;
+        atermpp::binary_aterm_ostream(stream) << data::detail::remove_index_impl << t;
       }
       else
       {
-        atermpp::text_aterm_output(stream) << data::detail::remove_index_impl << t;
+        atermpp::text_aterm_ostream(stream) << data::detail::remove_index_impl << t;
       }
     }
 };

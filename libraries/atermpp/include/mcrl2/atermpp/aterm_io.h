@@ -25,17 +25,17 @@ using aterm_transformer = aterm_appl(const aterm_appl&);
 inline aterm_appl identity(const aterm_appl& x) { return x; }
 
 /// \brief The interface for a class that writes aterm to a stream.
-class aterm_output
+class aterm_ostream
 {
 public:
-  virtual ~aterm_output();
+  virtual ~aterm_ostream();
 
   /// \brief Write the given term to the stream, this aterm is also returned from
   ///        the corresponding aterm_input::read_term() call.
-  virtual aterm_output& operator<<(const aterm& term) = 0;
+  virtual aterm_ostream& operator<<(const aterm& term) = 0;
 
   /// \brief Sets the given transformer to be applied to following writes.
-  aterm_output& operator<<(std::function<aterm_transformer> transformer)
+  aterm_ostream& operator<<(std::function<aterm_transformer> transformer)
   {
     m_transformer = transformer;
     return *this;
@@ -46,10 +46,10 @@ protected:
 };
 
 /// \brief The interface for a class that reads aterm from a stream.
-class aterm_input
+class aterm_istream
 {
 public:
-  virtual ~aterm_input();
+  virtual ~aterm_istream();
 
   /// \brief Reads a single term from this stream.
   /// \details The default constructed term aterm() indicates the end of the stream.
@@ -57,10 +57,10 @@ public:
 
   /// \brief Reads a single term from this stream.
   /// \details The default constructed term aterm() indicates the end of the stream.
-  aterm_input& operator>>(aterm& output) { output = get(); return *this; }
+  aterm_istream& operator>>(aterm& output) { output = get(); return *this; }
 
   /// \brief Sets the given transformer to be applied to following reads.
-  aterm_input& operator>>(std::function<aterm_transformer> transformer)
+  aterm_istream& operator>>(std::function<aterm_transformer> transformer)
   {
     m_transformer = transformer;
     return *this;

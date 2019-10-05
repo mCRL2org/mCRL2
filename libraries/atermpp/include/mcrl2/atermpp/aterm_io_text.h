@@ -16,18 +16,18 @@ namespace atermpp
 {
 
 /// \brief Writes terms in textual format to an output stream.
-class text_aterm_output final : public aterm_output
+class text_aterm_ostream final : public aterm_ostream
 {
 public:
   /// \param newline When true each term is written on a new line.
   /// \param transformer A function transforming the function symbols before writing, see the type for details.
-  text_aterm_output(std::ostream& os, bool newline = false);
+  text_aterm_ostream(std::ostream& os, bool newline = false);
 
-  aterm_output& operator<<(const aterm& term) override;
+  aterm_ostream& operator<<(const aterm& term) override;
 
   /// \brief Sets the given transformer to be applied to following writes.
   /// \todo This operator should not be necessary, but otherwise the aterm_output one cannot be used.
-  aterm_output& operator<<(std::function<aterm_transformer> transformer)
+  aterm_ostream& operator<<(std::function<aterm_transformer> transformer)
   {
     m_transformer = transformer;
     return *this;
@@ -43,10 +43,10 @@ private:
 };
 
 /// \brief Reads terms in textual format from an input stream.
-class text_aterm_input final : public aterm_input
+class text_aterm_istream final : public aterm_istream
 {
 public:
-  text_aterm_input(std::istream& os);
+  text_aterm_istream(std::istream& os);
 
   aterm get() override;
 
@@ -83,10 +83,10 @@ private:
   std::size_t m_line = 0; ///< The line number of the current character.
   std::size_t m_column = 0; ///< The column of the current character.
 
-  int character; ///< The last character that was read.
-
-  std::deque<char> m_history; ///< Stores the characters that have been read so-far.
   std::size_t m_history_limit = 64; ///< Determines the maximum number of characters that are stored.
+  std::deque<char> m_history; ///< Stores the characters that have been read so-far.
+
+  int character; ///< The last character that was read.
 };
 
 } // namespace atermpp

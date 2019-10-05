@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(simple_term_test)
 
   std::stringstream stream;
   {
-    binary_aterm_output input(stream);
+    binary_aterm_ostream input(stream);
 
     for (const auto& term : sequence)
     {
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(simple_term_test)
     // The buffer is flushed here.
   }
 
-  binary_aterm_input output(stream);
+  binary_aterm_istream output(stream);
 
   for (std::size_t index = 0; index < sequence.size(); ++index)
   {
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(transitions_test)
 
   std::stringstream stream;
   {
-    binary_aterm_output input(stream);
+    binary_aterm_ostream input(stream);
 
     for (const auto& term : sequence)
     {
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(transitions_test)
     // The buffer is flushed here.
   }
 
-  binary_aterm_input output(stream);
+  binary_aterm_istream output(stream);
 
   for (std::size_t index = 0; index < sequence.size(); ++index)
   {

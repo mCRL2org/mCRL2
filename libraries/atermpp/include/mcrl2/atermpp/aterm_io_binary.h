@@ -30,21 +30,21 @@ namespace atermpp
 ///          The start of the stream is a zero followed by a header and a version and a term with function symbol index zero
 ///          indicates the end of the stream.
 ///
-class binary_aterm_output final : public aterm_output
+class binary_aterm_ostream final : public aterm_ostream
 {
 public:
   /// \brief Provide the output stream to which the terms are written.
   /// \param transformer A function transforming the function symbols before writing, see the type for details.
-  binary_aterm_output(std::ostream& os);
-  ~binary_aterm_output() override;
+  binary_aterm_ostream(std::ostream& os);
+  ~binary_aterm_ostream() override;
 
   /// \brief Writes an aterm in a compact binary format that keeps subterms shared. The term that is
   ///        written itself is not shared whenever it occurs as the argument of another term.
-  aterm_output& operator<<(const aterm& term) override;
+  aterm_ostream& operator<<(const aterm& term) override;
 
   /// \brief Sets the given transformer to be applied to following writes.
   /// \todo This operator should not be necessary, but otherwise the aterm_output one cannot be used.
-  aterm_output& operator<<(std::function<aterm_transformer> transformer)
+  aterm_ostream& operator<<(std::function<aterm_transformer> transformer)
   {
     m_transformer = transformer;
     return *this;
@@ -70,12 +70,12 @@ private:
 };
 
 /// \brief Reads terms from a stream in the steamable binary aterm format.
-class binary_aterm_input final : public aterm_input
+class binary_aterm_istream final : public aterm_istream
 {
 public:
   /// \brief Provide the input stream from which terms are read.
   /// \param transformer A function transforming the function symbols after reading, see the type for details.
-  binary_aterm_input(std::istream& is);
+  binary_aterm_istream(std::istream& is);
 
   aterm get() override;
 private:

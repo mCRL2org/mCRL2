@@ -68,7 +68,7 @@ atermpp::aterm remove_index(const atermpp::aterm& x)
   return atermpp::bottom_up_replace(x, remove_index_impl);
 }
 
-atermpp::aterm_input& data::operator>>(atermpp::aterm_input& stream, data_specification& spec)
+atermpp::aterm_istream& data::operator>>(atermpp::aterm_istream& stream, data_specification& spec)
 {
   atermpp::aterm t = stream.get();
 
@@ -81,7 +81,7 @@ atermpp::aterm_input& data::operator>>(atermpp::aterm_input& stream, data_specif
   return stream;
 }
 
-atermpp::aterm_output& data::operator<<(atermpp::aterm_output& stream, const data_specification& spec)
+atermpp::aterm_ostream& data::operator<<(atermpp::aterm_ostream& stream, const data_specification& spec)
 {
   stream << remove_index_impl << detail::data_specification_to_aterm(spec);
   return stream;

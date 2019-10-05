@@ -32,8 +32,8 @@ void atermpp::add_deletion_hook(const function_symbol& function, term_callback c
   g_term_pool().add_deletion_hook(function, callback);
 }
 
-aterm_input::~aterm_input() {}
+aterm_istream::~aterm_istream() {}
 
-aterm_output::~aterm_output() {}
+aterm_ostream::~aterm_ostream() {}
 
 typename std::aligned_storage<sizeof(aterm_pool), alignof(aterm_pool)>::type atermpp::detail::g_aterm_pool_storage = {};

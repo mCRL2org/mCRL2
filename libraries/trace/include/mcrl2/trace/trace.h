@@ -601,7 +601,7 @@ class Trace
     atermpp::aterm readATerm(std::istream& is)
     {
       atermpp::aterm t;
-      atermpp::binary_aterm_input(is) >> mcrl2::data::detail::add_index_impl >> t;
+      atermpp::binary_aterm_istream(is) >> mcrl2::data::detail::add_index_impl >> t;
 
       if (!t.defined())
       {
@@ -735,7 +735,7 @@ class Trace
       }
 
       // write trace
-      atermpp::binary_aterm_output(os) << data::detail::remove_index_impl << trace;
+      atermpp::binary_aterm_ostream(os) << data::detail::remove_index_impl << trace;
       if (os.bad())
       {
         throw runtime_error("Could not write to stream.");
