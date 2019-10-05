@@ -34,7 +34,7 @@ template<std::size_t N,
          typename InputIterator,
          typename TermConverter,
          typename std::enable_if<is_iterator<InputIterator>::value, void>::type* = nullptr>
-static inline std::array<unprotected_aterm, N> construct_arguments(InputIterator it, TermConverter converter)
+inline std::array<unprotected_aterm, N> construct_arguments(InputIterator it, TermConverter converter)
 {
   // Copy the arguments into this array. Doesn't change any reference count, because they are unprotected terms.
   std::array<unprotected_aterm, N> arguments;
@@ -216,11 +216,11 @@ void ATERM_POOL_STORAGE::sweep()
 ATERM_POOL_STORAGE_TEMPLATES
 void ATERM_POOL_STORAGE::call_creation_hook(unprotected_aterm term)
 {
-  for (auto& pair : m_creation_hooks)
+  for (const auto& [symbol, callback] : m_creation_hooks)
   {
-    if (pair.first == term.function())
+    if (symbol == term.function())
     {
-      pair.second(static_cast<const aterm&>(term));
+      callback(static_cast<const aterm&>(term));
     }
   }
 }
@@ -228,11 +228,11 @@ void ATERM_POOL_STORAGE::call_creation_hook(unprotected_aterm term)
 ATERM_POOL_STORAGE_TEMPLATES
 void ATERM_POOL_STORAGE::call_deletion_hook(unprotected_aterm term)
 {
-  for (auto& pair : m_deletion_hooks)
+  for (const auto& [symbol, callback] : m_deletion_hooks)
   {
-    if (pair.first == term.function())
+    if (symbol == term.function())
     {
-      pair.second(static_cast<const aterm&>(term));
+      callback(static_cast<const aterm&>(term));
     }
   }
 }
@@ -288,10 +288,10 @@ ATERM_POOL_STORAGE_TEMPLATES
 template<typename ...Args>
 aterm ATERM_POOL_STORAGE::emplace(Args&&... args)
 {
+  auto [it, added] = m_term_set.emplace(std::forward<Args>(args)...);
 
-  auto result = m_term_set.emplace(std::forward<Args>(args)...);
-  aterm term(&(*result.first));
-  if (result.second)
+  aterm term(&(*it));
+  if (added)
   {
     // A new term was created
     if (EnableTermCreationMetrics) { m_term_metric.miss(); }
