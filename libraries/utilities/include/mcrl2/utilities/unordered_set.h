@@ -12,7 +12,6 @@
 #include "mcrl2/utilities/unordered_set_iterator.h"
 
 #include "mcrl2/utilities/block_allocator.h"
-#include "mcrl2/utilities/const.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/detail/bucket_list.h"
 

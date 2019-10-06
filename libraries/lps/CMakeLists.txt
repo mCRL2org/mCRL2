@@ -1,9 +1,5 @@
 add_mcrl2_library(lps
   INSTALL_HEADERS TRUE
-  NOHEADERTEST
-    # These headers require C++17. Reenable when compiling with C++17.
-    mcrl2/lps/explorer-cpp17.h
-
   SOURCES
     lps.cpp
     tools.cpp
