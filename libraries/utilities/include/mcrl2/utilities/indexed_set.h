@@ -61,13 +61,15 @@ public:
   
   /// \brief Value returned when an element does not exist in the set.
   /// \return Value indicating non existing element, equal to std::numeric_limits<std::size_t>::max(). 
-  static const size_type npos = std::numeric_limits<std::size_t>::max();
+  static constexpr size_type npos = std::numeric_limits<std::size_t>::max();
 
   /// \brief Constructor of an empty indexed set. Starts with a hashtable of size 128.
   indexed_set();
 
   /// \brief Constructor of an empty index set. Starts with a hashtable of the indicated size. 
   /// \param initial_hashtable_size The initial size of the hashtable.
+  /// \param hash The hash function.
+  /// \param equals The comparison function for its elements.
   indexed_set(std::size_t initial_hashtable_size,
     const hasher& hash = hasher(),
     const key_equal& equals = key_equal());

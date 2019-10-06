@@ -35,8 +35,8 @@ public:
   ~obitstream() { flush(); }
 
   /// \brief Write the num_of_bits least significant bits in descending order from value.
-  /// @param val      Variable that contains the bits.
-  /// @param nr_bits  Number of bits to write to the output stream.
+  /// @param value Variable that contains the bits.
+  /// @param num_of_bits Number of bits to write to the output stream.
   void write_bits(std::size_t value, unsigned int num_of_bits);
 
   /// \brief Write the given string to the output stream.

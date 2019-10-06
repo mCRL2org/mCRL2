@@ -43,6 +43,7 @@ std::string file_source(const std::string& filename)
 /// \param[in] binary A boolean indicating whether the stream is in binary of textual format.
 /// \param[in] format The format that is being read (for example "LPS" or "PBES").
 /// \param[in] source The source from which the stream originates (the empty string is used for an unknown source).
+/// \param[in] transformer A funtion that is applied to every subterm of the read term.
 /// \exception Throws a mcrl2 runtime error when an error occurs when reading the term.
 inline
 atermpp::aterm load_aterm(std::istream& stream,

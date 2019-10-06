@@ -65,8 +65,10 @@ class maintain_variables_in_rhs: public Substitution
   
       public:
         /// \brief Constructor.
-        /// \param[in] v a reference to the variable.
-        /// \param[in] vars Variables in the rhs of the assignments. 
+        /// \param[in] v A reference to the variable.
+        /// \param[in] sigma A reference to the substitution.
+        /// \param[in] variables_in_rhs Variables in the rhs of the assignments.
+        /// \param[in] scratch_set A set used for locally for computations.
         assignment(const variable_type& v,
                    Substitution& sigma,
                    std::multiset<variable_type>& variables_in_rhs,

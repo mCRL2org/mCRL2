@@ -67,15 +67,14 @@ class sort_specification
     mutable std::set<sort_expression> m_normalised_sorts;
 
     /// \brief The sorts that occur are needed in this sort specification but are
-    /// not explicitly defined as user defined sorts. An example is the sort Nat
-    /// when declaring the use of a sort List(Nat).
-    /// The normalised sorts, constructors, mappings and equations are complete
-    /// with respect to these sorts.
+    ///        not explicitly defined as user defined sorts. An example is the sort Nat
+    ///        when declaring the use of a sort List(Nat).
+    ///        The normalised sorts, constructors, mappings and equations are complete
+    ///        with respect to these sorts.
     std::set< sort_expression > m_sorts_in_context;
 
     /// \brief The basic sorts and structured sorts in the specification.
     alias_vector m_user_defined_aliases;
-
 
     /// \brief Table containing how sorts should be mapped to normalised sorts.
     mutable std::map< sort_expression, sort_expression > m_normalised_aliases;
@@ -307,10 +306,10 @@ class sort_specification
     /// \brief Adds the system defined sorts in a sequence.
     ///       The second argument is used to check which sorts are added, to prevent
     ///       useless repetitions of additions of sorts.
-    /// \detail The function normalise_sorts imports for the given sort_expression sort all sorts, constructors,
-    /// mappings and equations that belong to this sort to the `normalised' sets in this
-    /// data type. E.g. for the sort Nat of natural numbers, it is required that Pos
-    /// (positive numbers) are defined.
+    /// \details The function normalise_sorts imports for the given sort_expression sort all sorts, constructors,
+    ///       mappings and equations that belong to this sort to the `normalised' sets in this
+    ///       data type. E.g. for the sort Nat of natural numbers, it is required that Pos
+    ///       (positive numbers) are defined.
     void import_system_defined_sort(const sort_expression& sort);
 
     // The function below recalculates m_normalised_aliases, such that

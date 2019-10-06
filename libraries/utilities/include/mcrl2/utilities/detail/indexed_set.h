@@ -31,13 +31,13 @@ namespace detail
 static const std::size_t STEP = 1; ///< The position on which the next hash entry is searched.
 
 /// in the hashtable we use the following constant to indicate free positions.
-static const std::size_t EMPTY(std::numeric_limits<std::size_t>::max());
+static constexpr std::size_t EMPTY(std::numeric_limits<std::size_t>::max());
 
-static const float max_load_factor = 0.75f; ///< The load factor before the hash table is resized.
+static constexpr float max_load_factor = 0.75f; ///< The load factor before the hash table is resized.
 
-static const size_t minimal_hashtable_size = 8;  ///< With a max_load of 0.75 the minimal size of the hashtable must be 8.
+static constexpr size_t minimal_hashtable_size = 8;  ///< With a max_load of 0.75 the minimal size of the hashtable must be 8.
 
-static const std::size_t PRIME_NUMBER = 999953;
+static constexpr std::size_t PRIME_NUMBER = 999953;
 
 } // namespace detail
 

@@ -34,7 +34,6 @@ class binary_aterm_ostream final : public aterm_ostream
 {
 public:
   /// \brief Provide the output stream to which the terms are written.
-  /// \param transformer A function transforming the function symbols before writing, see the type for details.
   binary_aterm_ostream(std::ostream& os);
   ~binary_aterm_ostream() override;
 
@@ -66,7 +65,6 @@ class binary_aterm_istream final : public aterm_istream
 {
 public:
   /// \brief Provide the input stream from which terms are read.
-  /// \param transformer A function transforming the function symbols after reading, see the type for details.
   binary_aterm_istream(std::istream& is);
 
   aterm get() override;

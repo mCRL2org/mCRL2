@@ -19,8 +19,8 @@ namespace atermpp
 class text_aterm_ostream final : public aterm_ostream
 {
 public:
+  /// \param os The output stream.
   /// \param newline When true each term is written on a new line.
-  /// \param transformer A function transforming the function symbols before writing, see the type for details.
   text_aterm_ostream(std::ostream& os, bool newline = false);
 
   void put(const aterm &term) override;

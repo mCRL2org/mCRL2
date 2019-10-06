@@ -18,7 +18,7 @@ namespace mcrl2 {
 
 namespace data {
 
-/// \Brief Adds assignments [v := e] to the substitution sigma for each variable in v.
+/// \brief Adds assignments [v := e] to the substitution sigma for each variable in v.
 template <typename VariableSequence, typename DataExpressionSequence>
 inline
 void add_assignments(data::mutable_indexed_substitution<>& sigma, const VariableSequence& v, const DataExpressionSequence& e)
@@ -32,7 +32,7 @@ void add_assignments(data::mutable_indexed_substitution<>& sigma, const Variable
   }
 }
 
-/// \Brief Removes assignments to variables in v from the substitution sigma
+/// \brief Removes assignments to variables in v from the substitution sigma
 template <typename VariableSequence>
 inline
 void remove_assignments(data::mutable_indexed_substitution<>& sigma, const VariableSequence& v)
