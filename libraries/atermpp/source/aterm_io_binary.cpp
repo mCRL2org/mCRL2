@@ -83,7 +83,7 @@ struct write_todo
   {}
 };
 
-aterm_ostream& binary_aterm_ostream::operator<<(const aterm& term)
+void binary_aterm_ostream::put(const aterm& term)
 {
   assert(!term.type_is_int());
 
@@ -157,8 +157,6 @@ aterm_ostream& binary_aterm_ostream::operator<<(const aterm& term)
     }
   }
   while (!stack.empty());
-
-  return *this;
 }
 
 unsigned int binary_aterm_ostream::term_index_width()

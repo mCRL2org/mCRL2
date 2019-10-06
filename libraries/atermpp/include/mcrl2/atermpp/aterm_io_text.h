@@ -23,15 +23,7 @@ public:
   /// \param transformer A function transforming the function symbols before writing, see the type for details.
   text_aterm_ostream(std::ostream& os, bool newline = false);
 
-  aterm_ostream& operator<<(const aterm& term) override;
-
-  /// \brief Sets the given transformer to be applied to following writes.
-  /// \todo This operator should not be necessary, but otherwise the aterm_output one cannot be used.
-  aterm_ostream& operator<<(std::function<aterm_transformer> transformer)
-  {
-    m_transformer = transformer;
-    return *this;
-  }
+  void put(const aterm &term) override;
 
 private:
   /// \brief Writes a term in textual format on the same line.

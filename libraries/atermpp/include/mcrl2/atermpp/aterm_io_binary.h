@@ -38,17 +38,9 @@ public:
   binary_aterm_ostream(std::ostream& os);
   ~binary_aterm_ostream() override;
 
-  /// \brief Writes an aterm in a compact binary format that keeps subterms shared. The term that is
+  /// \brief Writes an aterm in a compact binary format where subterms are shared. The term that is
   ///        written itself is not shared whenever it occurs as the argument of another term.
-  aterm_ostream& operator<<(const aterm& term) override;
-
-  /// \brief Sets the given transformer to be applied to following writes.
-  /// \todo This operator should not be necessary, but otherwise the aterm_output one cannot be used.
-  aterm_ostream& operator<<(std::function<aterm_transformer> transformer)
-  {
-    m_transformer = transformer;
-    return *this;
-  }
+  void put(const aterm &term) override;
 
 private:
   /// \brief Write a function symbol to the output stream.
@@ -78,6 +70,7 @@ public:
   binary_aterm_istream(std::istream& is);
 
   aterm get() override;
+
 private:
   /// \returns The number of bits needed to index terms.
   unsigned int term_index_width();

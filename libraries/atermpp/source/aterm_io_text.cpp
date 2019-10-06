@@ -86,7 +86,7 @@ text_aterm_ostream::text_aterm_ostream(std::ostream& os, bool newline)
     m_newline(newline)
 {}
 
-aterm_ostream& text_aterm_ostream::operator<<(const aterm& term)
+void text_aterm_ostream::put(const aterm& term)
 {
   write_term_line(term);
 
@@ -94,8 +94,6 @@ aterm_ostream& text_aterm_ostream::operator<<(const aterm& term)
   {
     m_stream << "\n";
   }
-
-  return *this;
 }
 
 text_aterm_istream::text_aterm_istream(std::istream& is)
@@ -106,11 +104,13 @@ text_aterm_istream::text_aterm_istream(std::istream& is)
 
 aterm text_aterm_istream::get()
 {
+  aterm term;
+
   try
   {
     if (character != EOF)
     {
-      return parse_aterm(character);
+      term = parse_aterm(character);
     }
   }
   catch (atermpp::runtime_error& e)
@@ -122,7 +122,7 @@ aterm text_aterm_istream::get()
   m_column = 0;
   m_history.clear();
 
-  return aterm();
+  return term;
 }
 
 // Private functions

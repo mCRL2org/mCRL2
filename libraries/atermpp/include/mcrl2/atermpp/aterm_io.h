@@ -25,50 +25,65 @@ using aterm_transformer = aterm_appl(const aterm_appl&);
 inline aterm_appl identity(const aterm_appl& x) { return x; }
 
 /// \brief The interface for a class that writes aterm to a stream.
+///        Every written term is retrieved by the corresponding aterm_istream::operator>>() call.
 class aterm_ostream
 {
 public:
   virtual ~aterm_ostream();
 
-  /// \brief Write the given term to the stream, this aterm is also returned from
-  ///        the corresponding aterm_input::read_term() call.
-  virtual aterm_ostream& operator<<(const aterm& term) = 0;
-
   /// \brief Sets the given transformer to be applied to following writes.
-  aterm_ostream& operator<<(std::function<aterm_transformer> transformer)
-  {
-    m_transformer = transformer;
-    return *this;
-  }
+  void set_transformer(aterm_transformer transformer) { m_transformer = transformer; }
+
+  /// \brief Write the given term to the stream.
+  virtual void put(const aterm& term) = 0;
 
 protected:
   std::function<aterm_transformer> m_transformer = identity;
 };
 
 /// \brief The interface for a class that reads aterm from a stream.
+///        The default constructed term aterm() indicates the end of the stream.
 class aterm_istream
 {
 public:
   virtual ~aterm_istream();
 
-  /// \brief Reads a single term from this stream.
-  /// \details The default constructed term aterm() indicates the end of the stream.
-  virtual aterm get() = 0;
-
-  /// \brief Reads a single term from this stream.
-  /// \details The default constructed term aterm() indicates the end of the stream.
-  aterm_istream& operator>>(aterm& output) { output = get(); return *this; }
-
   /// \brief Sets the given transformer to be applied to following reads.
-  aterm_istream& operator>>(std::function<aterm_transformer> transformer)
-  {
-    m_transformer = transformer;
-    return *this;
-  }
+  void set_transformer(aterm_transformer transformer) { m_transformer = transformer; }
+
+  /// \brief Reads an object of type T from this stream, using the object specific >> operator.
+  template<typename T>
+  T get();
+
+  /// \brief Reads a single term from this stream.
+  virtual aterm get() = 0;
 
 protected:
   std::function<aterm_transformer> m_transformer = identity;
 };
+
+// These free functions provide input/output operators for these streams.
+
+/// \brief Sets the given transformer to be applied to following reads.
+inline aterm_ostream& operator<<(aterm_ostream& stream, aterm_transformer transformer) { stream.set_transformer(transformer); return stream; }
+
+/// \brief Write the given term to the stream.
+inline aterm_ostream& operator<<(aterm_ostream& stream, const aterm& term) { stream.put(term); return stream; }
+
+/// \brief Sets the given transformer to be applied to following reads.
+inline aterm_istream& operator>>(aterm_istream& stream, aterm_transformer transformer) { stream.set_transformer(transformer); return stream; }
+
+/// \brief Reads a single term from this stream.
+inline aterm_istream& operator>>(aterm_istream& stream, aterm& term) { term = stream.get(); return stream; }
+
+template<typename T>
+inline aterm_ostream& operator<<(aterm_ostream&& stream, const T& t) { stream << t; return stream; }
+
+template<typename T>
+inline aterm_istream& operator>>(aterm_istream&& stream, T& t) { stream >> t; return stream; }
+
+template<typename T>
+inline T aterm_istream::get() { T t; *this >> t; return t; }
 
 // These are utility functions.
 
