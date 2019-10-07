@@ -278,13 +278,17 @@ native_translations initialise_native_translation(const data::data_specification
   nt.set_native_definition(sort_real::int2real(), "to_real");
   nt.set_native_definition(sort_real::real2int(), "to_int");
 
+  function_symbol id_bool("@id", function_sort({sort_bool::bool_()}, sort_bool::bool_()));
   function_symbol id_int("@id", function_sort({sort_int::int_()}, sort_int::int_()));
   function_symbol id_real("@id", function_sort({sort_real::real_()}, sort_real::real_()));
+  variable vb("b", sort_bool::bool_());
   variable vi("i", sort_int::int_());
   variable vr("r", sort_real::real_());
+  nt.mappings[id_bool] = data_equation(variable_list({vb}), id_bool(vb), vb);
   nt.mappings[id_int] = data_equation(variable_list({vi}), id_int(vi), vi);
   nt.mappings[id_real] = data_equation(variable_list({vr}), id_real(vr), vr);
-  // necessary for translating the two equations above
+  // necessary for translating the equations above
+  nt.set_native_definition(equal_to(sort_bool::bool_()), "=");
   nt.set_native_definition(equal_to(sort_int::int_()), "=");
   nt.set_native_definition(equal_to(sort_real::real_()), "=");
 
