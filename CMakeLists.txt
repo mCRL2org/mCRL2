@@ -33,7 +33,12 @@ else()
   set(MCRL2_MIN_QT_VERSION 5.9.0)
 endif()
 
-set(MCRL2_MIN_BOOST_VERSION 1.66.0)
+if (UNIX)
+  # On Ubuntu bionic the available libboost version is the following:
+  set(MCRL2_MIN_BOOST_VERSION 1.65.1)
+else()
+  set(MCRL2_MIN_BOOST_VERSION 1.66.0)
+endif()
 
 option(MCRL2_ENABLE_GUI_TOOLS       "Enable compilation of tools with a graphical user interface." ON)
 option(MCRL2_ENABLE_EXPERIMENTAL    "Enable compilation of experimental tools." OFF)
