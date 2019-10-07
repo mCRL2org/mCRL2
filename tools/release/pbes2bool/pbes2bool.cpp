@@ -122,7 +122,7 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
       m_construct_counter_example(false),
       m_erase_unused_bes_variables(mcrl2::bes::none),
       m_data_elm(true),
-      m_maximal_todo_size(atermpp::npos),
+      m_maximal_todo_size(std::numeric_limits<std::size_t>::max()),
       m_approximate_true(true)
     {}
 
@@ -145,7 +145,7 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
       }
       m_approximate_true          = 0 == parser.options.count("approximate-false");
 
-      if (m_maximal_todo_size==atermpp::npos && !m_approximate_true)
+      if (m_maximal_todo_size == std::numeric_limits<std::size_t>::max() && !m_approximate_true)
       {
         parser.error("Setting approximate-false only makes sense when setting todo-max. ");
       }
@@ -230,7 +230,7 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
       mCRL2log(verbose) << "  search strategy:       " << m_search_strategy << std::endl;
       mCRL2log(verbose) << "  solution strategy      " << m_solution_strategy << "" << std::endl;
       mCRL2log(verbose) << "  erase level:           " << m_erase_unused_bes_variables << std::endl;
-      if (m_maximal_todo_size!=atermpp::npos)
+      if (m_maximal_todo_size != std::numeric_limits<std::size_t>::max())
       {
         mCRL2log(verbose) << "  limit the todo buffer to " << m_maximal_todo_size << " bes variables and replace removed variables by " <<
                (m_approximate_true?"false":"true") << std::endl;

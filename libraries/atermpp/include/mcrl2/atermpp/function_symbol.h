@@ -10,7 +10,6 @@
 #ifndef MCRL2_ATERMPP_FUNCTION_SYMBOL_H
 #define MCRL2_ATERMPP_FUNCTION_SYMBOL_H
 
-#include "mcrl2/atermpp/detail/atypes.h"
 #include "mcrl2/atermpp/detail/function_symbol.h"
 #include "mcrl2/utilities/shared_reference.h"
 

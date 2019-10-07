@@ -11,7 +11,6 @@
 #define MCRL2_ATERMPP_DETAIL_ATERM_H
 
 #include "mcrl2/atermpp/detail/aterm_configuration.h"
-#include "mcrl2/atermpp/detail/atypes.h"
 #include "mcrl2/atermpp/function_symbol.h"
 #include "mcrl2/utilities/noncopyable.h"
 #include "mcrl2/utilities/shared_reference.h"

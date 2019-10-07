@@ -265,7 +265,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
           label << "self:block(" << info.first << "),op(" << info.second << ")";
           process::action t(process::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
           std::size_t label_index = labs.index(t);
-          if (label_index == atermpp::npos)
+          if (label_index == labs.npos)
           {
             std::pair<std::size_t, bool> put_result = labs.insert(t);
             label_index = put_result.first;
@@ -323,7 +323,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
           std::size_t to = indices[*j];
           process::action t(process::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
           std::size_t label_index = labs.index(t);
-          if (label_index == atermpp::npos)
+          if (label_index == labs.npos)
           {
             assert(label.str()!="tau");
             std::pair<std::size_t, bool> put_result = labs.insert(t);

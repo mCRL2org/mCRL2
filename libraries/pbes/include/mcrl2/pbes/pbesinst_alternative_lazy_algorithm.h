@@ -224,7 +224,7 @@ class pbesinst_alternative_lazy_algorithm
         mCRL2log(mcrl2::log::status) << "Processed " << nr_of_processed_variables <<
                        " and generated " << nr_of_generated_variables <<
                        " boolean variables";
-        if (m_maximum_todo_size!=atermpp::npos)
+        if (m_maximum_todo_size != std::numeric_limits<std::size_t>::max())
         {
           mCRL2log(mcrl2::log::status) << " with a todo buffer of size " << todo_size << ".    \n";
         }
@@ -254,7 +254,7 @@ class pbesinst_alternative_lazy_algorithm
         search_strategy search_strategy = breadth_first,
         transformation_strategy transformation_strategy = lazy,
         const mcrl2::bes::remove_level erase_unused_bes_variables = mcrl2::bes::none,
-        const std::size_t maximum_todo_size = atermpp::npos,
+        const std::size_t maximum_todo_size = std::numeric_limits<std::size_t>::max(),
         const bool approximate_true = true
         )
       :

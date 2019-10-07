@@ -93,7 +93,7 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
       else
       {
         std::size_t n = enumerated_elements.size();
-        std::size_t m = static_cast<ssize_t>(1) << (new_parameters.size() - 1);  //m == 2^(new_parameters.size() - 1)
+        std::size_t m = static_cast<std::size_t>(1) << (new_parameters.size() - 1);  //m == 2^(new_parameters.size() - 1)
 
         if (m > n)
         {
@@ -231,7 +231,7 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
             while (k != elements.end())
             {
               // Elements that get boolean value false
-              ssize_t count(static_cast<ssize_t>(1) << j);
+              std::ptrdiff_t count(static_cast<std::ptrdiff_t>(1) << j);
               if (std::distance(k, elements.end()) < count)
               {
                 k = elements.end();
@@ -242,7 +242,7 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
               }
 
               // Elements that get value true
-              for (ssize_t l = 0; l < count && k != elements.end(); ++l)
+              for (std::ptrdiff_t l = 0; l < count && k != elements.end(); ++l)
               {
                 disjuncts.push_back(data::equal_to(a.rhs(), *k++));
               }
