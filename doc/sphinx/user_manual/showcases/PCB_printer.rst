@@ -3,7 +3,7 @@
 PCB Printer
 ===========
 
-.. image:: ../../_static/showcases/Oce_Arizona_250-web.jpg
+.. image:: /_static/showcases/Oce_Arizona_250-web.jpg
    :align: right
    :width: 250px
 

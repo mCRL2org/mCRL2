@@ -3,7 +3,7 @@
 Dogfooding the structural operational semantics of mCRL2
 ========================================================
 
-.. image:: ../../_static/showcases/Dogfooding.png
+.. image:: /_static/showcases/Dogfooding.png
    :align: right
    :width: 250px
 

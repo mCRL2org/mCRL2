@@ -4,7 +4,7 @@
 DAF Trucks Vehicle Function Architecture
 ========================================
 
-.. image:: ../../_static/showcases/DAF.jpg
+.. image:: /_static/showcases/DAF.jpg
    :align: right
    :width: 250px
 

@@ -3,7 +3,7 @@
 Automatic Document Feeder
 =========================
 
-.. image:: ../../_static/showcases/ADFCopier.jpg
+.. image:: /_static/showcases/ADFCopier.jpg
    :align: right
    :width: 250px
 

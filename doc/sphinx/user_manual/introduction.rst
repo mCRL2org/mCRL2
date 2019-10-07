@@ -89,7 +89,7 @@ of a typical analysis using mCRL2 below.
 All tools can be accessed via a command-line interface. Another possibility is
 to use the :ref:`tool-mcrl2-gui` tool which provides access to the tools via a GUI.
 
-.. figure:: ../_static/ToolsetOverview.png
+.. figure:: /_static/ToolsetOverview.png
    :align: center
 
 The rest of this section describes the different categories of tools that are

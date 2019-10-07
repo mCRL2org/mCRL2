@@ -3,7 +3,7 @@
 IEEE 1394 link layer
 ====================
 
-.. image:: ../../_static/showcases/FireWire_cables.jpg
+.. image:: /_static/showcases/FireWire_cables.jpg
    :align: right
    :width: 250px
 

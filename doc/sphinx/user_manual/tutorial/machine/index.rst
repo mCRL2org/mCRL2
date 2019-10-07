@@ -32,7 +32,7 @@ Figure :ref:`fig-mach1`.
 
 .. _fig-mach1:
 
-.. figure:: ../../../_static/tutorial/machine/mach1.*
+.. figure:: /_static/tutorial/machine/mach1.*
    :align: center
 
    Vending machine 1
@@ -90,7 +90,7 @@ Figure :ref:`fig-lts-vm01`.
 
 .. _fig-lts-vm01:
 
-.. figure:: ../../../_static/tutorial/machine/vm01.*
+.. figure:: /_static/tutorial/machine/vm01.*
    :align: center
 
    LTS of vending machine 1
@@ -202,7 +202,7 @@ Figure :ref:`fig-mach2`.
 
 .. _fig-mach2:
 
-.. figure:: ../../../_static/tutorial/machine/mach2.*
+.. figure:: /_static/tutorial/machine/mach2.*
    :align: center
 
    Vending machine 2

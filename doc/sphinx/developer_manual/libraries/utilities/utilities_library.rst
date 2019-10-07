@@ -11,7 +11,7 @@ Structure
 =========
 The header files of the utilities library are roughly organised as depicted below.
 
-.. figure:: ../../../_static/utilities/layout.png
+.. figure:: /_static/utilities/layout.png
    :align: center
 
 The top directory is mcrl2, containing a header file with toolset specific build information and the utilities directory.

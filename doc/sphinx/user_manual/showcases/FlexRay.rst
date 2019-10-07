@@ -3,7 +3,7 @@
 FlexRay communication protocol
 ==============================
 
-.. image:: ../../_static/showcases/flexray1.jpg
+.. image:: /_static/showcases/flexray1.jpg
    :align: right
    :width: 100px
 
@@ -15,7 +15,7 @@ sequence always leads to a successfully communicating network, even if one node
 misbehaves. This is not the case. Resulting error traces were visualised as shown
 below.
 
-.. image:: ../../_static/showcases/flexray2.jpg
+.. image:: /_static/showcases/flexray2.jpg
    :align: center
 
 Technical details

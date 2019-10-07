@@ -3,7 +3,7 @@
 Distributed system for lifting trucks
 =====================================
 
-.. image:: ../../_static/showcases/Lift.jpeg
+.. image:: /_static/showcases/Lift.jpeg
    :align: right
    :width: 250px
 

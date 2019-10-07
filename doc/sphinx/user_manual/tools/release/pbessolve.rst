@@ -38,7 +38,7 @@ Similarly it can be done starting from an LTS instead of an LPS::
    pbessolve -v --file=abp.lts abp.pbes
    ltsgraph abp.pbes.evidence.lts
 
-.. figure:: ../../../_static/tools/infinitely_often_enabled_then_infinitely_often_taken.png
+.. figure:: /_static/tools/infinitely_often_enabled_then_infinitely_often_taken.png
    :align: center
    :width: 50%
 

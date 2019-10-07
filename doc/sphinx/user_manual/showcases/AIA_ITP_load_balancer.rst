@@ -3,7 +3,7 @@
 AIA ITP load-balancer
 =====================
 
-.. image:: ../../_static/showcases/ITP_Aia_r.png
+.. image:: /_static/showcases/ITP_Aia_r.png
    :align: right
    :width: 250px
 

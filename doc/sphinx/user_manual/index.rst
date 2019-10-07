@@ -2,7 +2,7 @@
 
 .. title:: Home
 
-.. image:: ../_templates/mcrl2/static/mcrl2.png
+.. image:: /_templates/mcrl2/static/mcrl2.png
    :align: center
    :class: frontpage-logo
 
@@ -17,7 +17,7 @@
    :class: frontpage-table
    :widths: 40,60
 
-   * - .. image:: ../_static/book.*
+   * - .. image:: /_static/book.*
           :align: left
           :alt: Modeling and analysis of communicating systems (book)
           :target: http://mitpress.mit.edu/books/modeling-and-analysis-communicating-systems
@@ -45,7 +45,7 @@
   whether two processes are equal under a given behavioural equivalence.
 
 .. note::
-  .. image:: ../_static/tacas-ae.*
+  .. image:: /_static/tacas-ae.*
           :align: right
           :width: 90px
           :alt: TACAS artefact evaluation badge
@@ -70,7 +70,7 @@
    be downloaded from `MIT Press <http://mitpress.mit.edu/books/modeling-and-analysis-communicating-systems>`_.
 
 .. note::
-   .. image:: ../_static/Verum-2-Logo-Vert-Colour.*
+   .. image:: /_static/Verum-2-Logo-Vert-Colour.*
           :align: right
           :width: 75px
           :alt: Verum is the industry leader in reliable software design.
@@ -85,7 +85,7 @@
    :class: teamcity-blurb
    :widths: 13,87
 
-   * - .. image:: ../_static/teamcity.*
+   * - .. image:: /_static/teamcity.*
           :width: 75
           :alt: TeamCity
           :target: https://www.jetbrains.com/teamcity/
