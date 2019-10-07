@@ -3,7 +3,7 @@
 Pacemaker
 =========
 
-.. image:: ../../_static/showcases/Ci_pacemaker_tseries_small.jpg
+.. image:: /_static/showcases/Ci_pacemaker_tseries_small.jpg
    :align: right
    :width: 250px
 
@@ -39,7 +39,7 @@ requirements have been verified on the resulting models, including absence of
 deadlocks and the requirement that the pacing rate never exceeds a certain upper
 bound.
 
-.. image:: ../../_static/showcases/Pacemaker.png
+.. image:: /_static/showcases/Pacemaker.png
    :align: right
    :width: 300px
 

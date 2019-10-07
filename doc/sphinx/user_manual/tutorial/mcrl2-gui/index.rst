@@ -27,15 +27,15 @@ installation.
 .. _tutorial-img3: ../../../_static/tutorial/ltsgraph-abpbb.jpg
 .. _tutorial-img4: ../../../_static/tutorial/ltsview-abp.jpg
 
-+-----------------------------------------------------------+--------------------------------------------------------------+----------------------------------------------------------------+-------------------------------------------------------------+
-| .. figure:: ../../../_static/tutorial/mcrl2-gui-thumb.png | .. figure:: ../../../_static/tutorial/ltsgraph-abp-thumb.jpg | .. figure:: ../../../_static/tutorial/ltsgraph-abpbb-thumb.jpg | .. figure:: ../../../_static/tutorial/ltsview-abp-thumb.jpg |
-|    :target: `tutorial-img1`_                              |    :target: `tutorial-img2`_                                 |    :target: `tutorial-img3`_                                   |    :target: `tutorial-img4`_                                |
-|    :align: center                                         |    :align: center                                            |    :align: center                                              |    :align: center                                           |
-|                                                           |                                                              |                                                                |                                                             |
-|    The :ref:`tool-mcrl2-gui`                              |    The :ref:`tool-ltsgraph`                                  |    The ABP statespace after                                    |    The :ref:`tool-ltsview`                                  |
-|    interface.                                             |    tool, showing the statespace of                           |    branching bisimulation reduction.                           |    tool showing the ABP                                     |
-|                                                           |    the alternating bit protocol.                             |                                                                |    statespace in 3D.                                        |
-+-----------------------------------------------------------+--------------------------------------------------------------+----------------------------------------------------------------+-------------------------------------------------------------+
++---------------------------------------------------+------------------------------------------------------+--------------------------------------------------------+-----------------------------------------------------+
+| .. figure:: /_static/tutorial/mcrl2-gui-thumb.png | .. figure:: /_static/tutorial/ltsgraph-abp-thumb.jpg | .. figure:: /_static/tutorial/ltsgraph-abpbb-thumb.jpg | .. figure:: /_static/tutorial/ltsview-abp-thumb.jpg |
+|    :target: `tutorial-img1`_                      |    :target: `tutorial-img2`_                         |    :target: `tutorial-img3`_                           |    :target: `tutorial-img4`_                        |
+|    :align: center                                 |    :align: center                                    |    :align: center                                      |    :align: center                                   |
+|                                                   |                                                      |                                                        |                                                     |
+|    The :ref:`tool-mcrl2-gui`                      |    The :ref:`tool-ltsgraph`                          |    The ABP statespace after                            |    The :ref:`tool-ltsview`                          |
+|    interface.                                     |    tool, showing the statespace of                   |    branching bisimulation reduction.                   |    tool showing the ABP                             |
+|                                                   |    the alternating bit protocol.                     |                                                        |    statespace in 3D.                                |
++---------------------------------------------------+------------------------------------------------------+--------------------------------------------------------+-----------------------------------------------------+
 
 Obtaining a linear process specification
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -50,7 +50,7 @@ specification into a linear specification, we need to use the tool
 :menuselection:`Transformation --> mcrl22lps`. After selecting *mcrl22lps*, the
 *mcrl2-gui* displays the configuration panel, as shown below.
 
-.. image:: ../../../_static/tutorial/mcrl2-gui/mcrl2gui-abp-mcrl22lps.png
+.. image:: /_static/tutorial/mcrl2-gui/mcrl2gui-abp-mcrl22lps.png
    :width: 70%
    :align: center
 
@@ -124,14 +124,14 @@ tool down dramatically.
 .. _tutorial-img7: ../../../_static/tutorial/lpsxsim.jpg
 .. _tutorial-img8: ../../../_static/tutorial/preferences.jpg
 
-+---------------------------------------------------------------+---------------------------------------------------------------+---------------------------------------------------------+-------------------------------------------------------------+
-| .. figure:: ../../../_static/tutorial/diagraphica-1-thumb.jpg | .. figure:: ../../../_static/tutorial/diagraphica-2-thumb.jpg | .. figure:: ../../../_static/tutorial/lpsxsim-thumb.jpg | .. figure:: ../../../_static/tutorial/preferences-thumb.jpg |
-|    :target: `tutorial-img5`_                                  |    :target: `tutorial-img6`_                                  |    :target: `tutorial-img7`_                            |    :target: `tutorial-img8`_                                |
-|    :align: center                                             |    :align: center                                             |    :align: center                                       |    :align: center                                           |
-|                                                               |                                                               |                                                         |                                                             |
-|    Diagraphica visualises process                             |    Diagraphica as a graphical                                 |    The *lpsxsim* tool simulating                        |    The edit window allows to use                            |
-|    parameters.                                                |    simulator.                                                 |    the alternating bit protocol.                        |    external editors.                                        |
-+---------------------------------------------------------------+---------------------------------------------------------------+---------------------------------------------------------+-------------------------------------------------------------+
++-------------------------------------------------------+-------------------------------------------------------+-------------------------------------------------+-----------------------------------------------------+
+| .. figure:: /_static/tutorial/diagraphica-1-thumb.jpg | .. figure:: /_static/tutorial/diagraphica-2-thumb.jpg | .. figure:: /_static/tutorial/lpsxsim-thumb.jpg | .. figure:: /_static/tutorial/preferences-thumb.jpg |
+|    :target: `tutorial-img5`_                          |    :target: `tutorial-img6`_                          |    :target: `tutorial-img7`_                    |    :target: `tutorial-img8`_                        |
+|    :align: center                                     |    :align: center                                     |    :align: center                               |    :align: center                                   |
+|                                                       |                                                       |                                                 |                                                     |
+|    Diagraphica visualises process                     |    Diagraphica as a graphical                         |    The *lpsxsim* tool simulating                |    The edit window allows to use                    |
+|    parameters.                                        |    simulator.                                         |    the alternating bit protocol.                |    external editors.                                |
++-------------------------------------------------------+-------------------------------------------------------+-------------------------------------------------+-----------------------------------------------------+
 
 The tool *diagraphica* allows to visualize the process parameters that make up
 each state. If *diagraphica* is started, the process parameters are listed in

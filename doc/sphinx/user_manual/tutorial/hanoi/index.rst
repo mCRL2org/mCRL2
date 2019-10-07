@@ -23,7 +23,7 @@ as the following rules are obeyed:
 #. Only the topmost disc on a peg can be moved.
 #. A disc cannot be placed on top of a smaller disc.
 
-.. image:: ../../../_static/tutorial/hanoi/hanoi.*
+.. image:: /_static/tutorial/hanoi/hanoi.svg
    :align: center
 
 Over the next exercises we gradually construct an mCRL2 specification of the
@@ -213,7 +213,7 @@ The state space for ``N=3`` is depicted in Figure :ref:`fig-hanoi3`.
 
 .. _fig-hanoi3:
 
-.. figure:: img/hanoi3.*
+.. figure:: /_static/tutorial/hanoi/hanoi3.*
    :align: center
    :width: 100%
 

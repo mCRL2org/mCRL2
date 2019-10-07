@@ -8,7 +8,7 @@ ltsgraph
 This tool draws a labelled transition system (LTS). It can read graphs in .aut, .lts
 and .fsm format. Graphs can be drawn in 2D and 3D format.
 
-.. figure:: ../../../_static/tools/ltsgraph.png
+.. figure:: /_static/tools/ltsgraph.png
    :width: 400px
    :align: center
    :height: 200px

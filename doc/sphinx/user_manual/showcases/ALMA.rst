@@ -3,7 +3,7 @@
 Atacama Large Millimeter Array
 ==============================
 
-.. image:: ../../_static/showcases/ALMA.jpg
+.. image:: /_static/showcases/ALMA.jpg
    :align: right
    :width: 250px
 

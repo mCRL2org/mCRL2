@@ -3,7 +3,7 @@
 Automated parking garage
 ========================
 
-.. image:: ../../_static/showcases/ParkingGarageEnter.png
+.. image:: /_static/showcases/ParkingGarageEnter.png
    :align: right
    :width: 250px
 
@@ -18,7 +18,7 @@ one to split implementation, safety and algorithmic aspects of the
 software. We also developed a custom visualization tool to assist us
 with our analysis. This enabled us to find a number of serious errors.
 
-.. image:: ../../_static/showcases/ParkingGarageErrors.jpg
+.. image:: /_static/showcases/ParkingGarageErrors.jpg
    :width: 500px
 
 The visualization plug-in for the parking garage visualizes the garage as

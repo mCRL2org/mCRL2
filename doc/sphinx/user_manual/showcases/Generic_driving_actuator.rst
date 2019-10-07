@@ -3,7 +3,7 @@
 Generic Driving Actuator
 ========================
 
-.. image:: ../../_static/showcases/GenericDrivingActuator.jpg
+.. image:: /_static/showcases/GenericDrivingActuator.jpg
    :align: right
    :width: 250px
 

@@ -1,7 +1,7 @@
 LedSync communication protocol
 ==============================
 
-.. image:: ../../_static/showcases/Demokit_gr2.jpg
+.. image:: /_static/showcases/Demokit_gr2.jpg
    :align: right
    :width: 250px
 

@@ -138,7 +138,7 @@ states specified in the states section.
 Example
 ^^^^^^^
 
-.. image:: ../../_static/language_reference/FSM_file_example.*
+.. image:: /_static/language_reference/FSM_file_example.*
    :align: center
 
 The following FSM file specifies the LTS depicted in the figure above. The state
@@ -211,7 +211,7 @@ The following example shows a simple labelled transition system of the dining
 philosophers problem for two philosophers, visualised using
 :ref:`tool-ltsgraph`:
 
-.. image:: ../../_static/language_reference/Dining2_ns_seq.*
+.. image:: /_static/language_reference/Dining2_ns_seq.*
    :width: 600px
    :align: center
 

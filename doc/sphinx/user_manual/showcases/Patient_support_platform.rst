@@ -1,7 +1,7 @@
 Patient support platform
 ========================
 
-.. image:: ../../_static/showcases/Patsup.jpg
+.. image:: /_static/showcases/Patsup.jpg
    :align: right
    :width: 250px
 
@@ -57,7 +57,7 @@ The movements of the carrier can be controlled by:
   * a wireless remote control, connected to an external computer (i.e. Convertor)
   * software on a host system which controls the entire scan process
 
-.. image:: ../../_static/showcases/Patsuparch.png
+.. image:: /_static/showcases/Patsuparch.png
    :align: center
    :width: 250px
 

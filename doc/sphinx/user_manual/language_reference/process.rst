@@ -357,13 +357,13 @@ and the picture on the right depicts the equivalent reduced behaviour.
            entire state space, right the state space reduced modulo branching
            bisimulation
 
-  +-----------------------------------------------------------+-------------------------------------------------------------+
-  | .. figure:: ../../_static/tutorial/ltsgraph-abp-thumb.jpg | .. figure:: ../../_static/tutorial/ltsgraph-abpbb-thumb.jpg |
-  |    :target: `tutorial-img2`_                              |    :target: `tutorial-img3`_                                |
-  |    :align: center                                         |    :align: center                                           |
-  |                                                           |                                                             |
-  |    ..                                                     |    ..                                                       |
-  +-----------------------------------------------------------+-------------------------------------------------------------+
+  +------------------------------------------------------+--------------------------------------------------------+
+  | .. figure:: /_static/tutorial/ltsgraph-abp-thumb.jpg | .. figure:: /_static/tutorial/ltsgraph-abpbb-thumb.jpg |
+  |    :target: `tutorial-img2`_                         |    :target: `tutorial-img3`_                           |
+  |    :align: center                                    |    :align: center                                      |
+  |                                                      |                                                        |
+  |    ..                                                |    ..                                                  |
+  +------------------------------------------------------+--------------------------------------------------------+
 
 
 Time

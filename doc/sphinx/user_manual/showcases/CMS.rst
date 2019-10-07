@@ -3,7 +3,7 @@
 Control Software of the CMS Experiment at CERN's Large Hadron Collider
 ======================================================================
 
-.. image:: ../../_static/showcases/CMS_all_sketch.jpg
+.. image:: /_static/showcases/CMS_all_sketch.jpg
    :align: right
    :width: 250px
 
