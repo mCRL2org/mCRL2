@@ -9,14 +9,14 @@ Publications
   use the following references:
 
     * [BGK+19]_ for the *mCRL2 toolset*, and
-    * [GM14a]_ for the *mCRL2 language*.
+    * [GM14]_ for the *mCRL2 language*.
 
 
 General
 -------
 
 .. [BGK+19] O\. Bunte, J.F. Groote, J.J.A. Keiren, M\. Laveaux, T\. Neele, E.P. de Vink, J.W. Wesselink, A.J. Wijs, T.A.C. Willemse. The mCRL2 Toolset for Analysing Concurrent Systems: Improvements in Expressivity and Usability. TACAS 2019, LNCS vol. 11428, pp. 21-39. `(DOI) <https://doi.org/10.1007/978-3-030-17465-1_2>`__
-.. [GM14a] J.F. Groote, M.R. Mousavi. `Modeling and analysis of communicating systems <https://mitpress.mit.edu/books/modeling-and-analysis-communicating-systems>`__. The MIT press. 2014.
+.. [GM14] J.F. Groote, M.R. Mousavi. `Modeling and analysis of communicating systems <https://mitpress.mit.edu/books/modeling-and-analysis-communicating-systems>`__. The MIT press. 2014.
 .. [CGK+13] S\. Cranen, J.F. Groote, J.J.A. Keiren, F.P.M. Stappers, E.P. de Vink, J. W. Wesselink, T.A.C. Willemse. An Overview of the mCRL2 Toolset and Its Recent Advances. TACAS 2013, pages 199-213. `(DOI) <http://dx.doi.org/10.1007/978-3-642-36742-7_15>`__
 .. [GKS+11] J.F. Groote, J.J.A. Keiren, F.P.M. Stappers, J.W. Wesselink and T.A.C. Willemse. Experiences in developing the mCRL2 toolset. In Software: Practice and Experience, 41(2): 143-153, 2011. `(DOI) <http://dx.doi.org/10.1002/spe.1021>`__
 .. [GMR+08] J.F. Groote, A. Mathijssen, M.A. Reniers, Y.S. Usenko, M.J. van Weerdenburg. Analysis of distributed systems with mCRL2. In M. Alexander, W. Gardner (Eds.), Process Algebra for Parallel and Distributed Processing, pages 99-128. Chapman and Hall, 2008
@@ -86,8 +86,12 @@ Applications
 Course material
 ---------------
 
-.. [GM14b] J.F. Groote, M.R. Mousavi. `Modeling and analysis of communicating systems <https://mitpress.mit.edu/books/modeling-and-analysis-communicating-systems>`__. The MIT press. 2014.
-.. [GMPR06] J.F. Groote, A. Mathijssen, B. Ploeger, M.A. Reniers, M.J. van Weerdenburg, J. van der Wulp. Process Algebra and mCRL2 , IPA Basic Course on Formal Methods 2006.
+.. rst-class:: citation
+
+[GM14]
+  J.F. Groote, M.R. Mousavi. `Modeling and analysis of communicating systems <https://mitpress.mit.edu/books/modeling-and-analysis-communicating-systems>`__. The MIT press. 2014.
+[GMPR06]
+  J.F. Groote, A. Mathijssen, B. Ploeger, M.A. Reniers, M.J. van Weerdenburg, J. van der Wulp. Process Algebra and mCRL2 , IPA Basic Course on Formal Methods 2006.
 
 Presentations
 -------------
