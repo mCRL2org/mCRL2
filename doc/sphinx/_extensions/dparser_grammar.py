@@ -100,6 +100,7 @@ def setup(app):
     logger.warning('While loading {}'.format(os.path.join(os.path.dirname(__file__),
                    '..', '..', '..', 'libraries', 'core', 'source', 'mcrl2_syntax.g')))
     logger.warning('Exception: {}'.format(e))
+  return {'parallel_read_safe': False, 'parallel_write_safe': True}
 
 if __name__ == '__main__':
   g = getGrammar(os.path.join(os.path.dirname(__file__),
