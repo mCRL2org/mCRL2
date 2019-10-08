@@ -828,14 +828,14 @@ class partial_order_reduction_algorithm
         {
           negate = true;
           const data::forall& f = atermpp::down_cast<data::forall>(expr);
-          expr = make_exists(f.variables(), data::sort_bool::not_(f.body()));
+          expr = data::make_exists(f.variables(), data::sort_bool::not_(f.body()));
         }
         // data::data_expression result = data::one_point_rule_rewrite(m_rewr(expr));
         switch(m_solver->solve(data::variable_list(), expr, m_smt_timeout))
         {
           case smt::answer::SAT: return negate ^ true;
           case smt::answer::UNSAT: return negate ^ false;
-          case smt::answer::UNKNOWN: return negate ^ false;
+          case smt::answer::UNKNOWN: return false;
         }
       }
       else
