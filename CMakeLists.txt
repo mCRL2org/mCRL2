@@ -12,7 +12,7 @@ endif()
 
 if(POLICY CMP0071)
   # The AUTOMOC and AUTOUIC properties should not apply to GENERATED files.
-  cmake_policy(SET CMP0071 OLD)
+  cmake_policy(SET CMP0071 NEW)
 endif()
 
 if(POLICY CMP0072)

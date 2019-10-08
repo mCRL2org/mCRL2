@@ -194,12 +194,6 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
       set(SRC_ABS ${PARSER_CODE})
       set(DEPENDS ${DEPENDS} dparser)
       set(ARG_INCLUDE ${ARG_INCLUDE} ${CMAKE_SOURCE_DIR}/3rd-party/dparser)
-    # TODO: In CMake 3.0.0 these could be replaced by enabling the AUTOUIC and AUTORCC
-    # properties for the target.
-    elseif("${SRC_EXT}" STREQUAL ".ui")
-      qt5_wrap_ui(SRC_ABS ${SRC_ABS})
-    elseif("${SRC_EXT}" STREQUAL ".qrc")
-      qt5_add_resources(SRC_ABS ${SRC_ABS})
     endif()
     set(SOURCES ${SRC_ABS} ${SOURCES})
   endforeach()
@@ -274,6 +268,8 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
 
     # Enable the CMake build system to automatically run MOC on source files that need it.
     set_target_properties(${TARGET_NAME} PROPERTIES AUTOMOC TRUE)
+    set_target_properties(${TARGET_NAME} PROPERTIES AUTOUIC TRUE)
+    set_target_properties(${TARGET_NAME} PROPERTIES AUTORCC TRUE)
   endif()
 endfunction()
 
