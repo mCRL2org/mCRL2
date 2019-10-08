@@ -31,10 +31,8 @@ function(add_build_doc_target NAME DESC INCLUDE_CLEAN)
   )
   add_custom_command(
     TARGET ${NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND}
-      -DIncludePath=${CMAKE_MODULE_PATH}
-      -DLogPath=${SPHINX_BUILD_DIR}/sphinx-build-warnings.log
-      -P ${CMAKE_SOURCE_DIR}/build/cmake/sphinx/WarnIfNeeded.cmake
+    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold
+      "-- Please check ${SPHINX_BUILD_DIR}/sphinx-build-warnings.log for warnings and errors"
   )
 endfunction(add_build_doc_target)
 
