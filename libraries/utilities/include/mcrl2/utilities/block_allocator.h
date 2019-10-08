@@ -14,7 +14,6 @@
 
 #include <memory>
 #include <stddef.h>
-#include <utility>
 
 namespace mcrl2
 {

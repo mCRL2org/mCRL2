@@ -25,7 +25,7 @@ using aterm_transformer = aterm_appl(const aterm_appl&);
 inline aterm_appl identity(const aterm_appl& x) { return x; }
 
 /// \brief The interface for a class that writes aterm to a stream.
-///        Every written term is retrieved by the corresponding aterm_istream::operator>>() call.
+///        Every written term is retrieved by the corresponding aterm_istream::get() call.
 class aterm_ostream
 {
 public:
@@ -34,11 +34,14 @@ public:
   /// \brief Sets the given transformer to be applied to following writes.
   void set_transformer(aterm_transformer transformer) { m_transformer = transformer; }
 
+  /// \returns The currently assigned transformer function.
+  aterm_transformer* get_transformer() const { return m_transformer; }
+
   /// \brief Write the given term to the stream.
   virtual void put(const aterm& term) = 0;
 
 protected:
-  std::function<aterm_transformer> m_transformer = identity;
+  aterm_transformer* m_transformer = identity;
 };
 
 /// \brief The interface for a class that reads aterm from a stream.
@@ -51,6 +54,9 @@ public:
   /// \brief Sets the given transformer to be applied to following reads.
   void set_transformer(aterm_transformer transformer) { m_transformer = transformer; }
 
+  /// \returns The currently assigned transformer function.
+  aterm_transformer* get_transformer() const { return m_transformer; }
+
   /// \brief Reads an object of type T from this stream, using the object specific >> operator.
   template<typename T>
   T get();
@@ -59,7 +65,7 @@ public:
   virtual aterm get() = 0;
 
 protected:
-  std::function<aterm_transformer> m_transformer = identity;
+  aterm_transformer* m_transformer = identity;
 };
 
 // These free functions provide input/output operators for these streams.

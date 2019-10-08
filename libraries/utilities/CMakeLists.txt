@@ -7,6 +7,7 @@ add_mcrl2_library(utilities
   INSTALL_HEADERS TRUE
   SOURCES
     bitstream.cpp
+    cache_metric.cpp
     command_line_interface.cpp
     logger.cpp
     text_utility.cpp

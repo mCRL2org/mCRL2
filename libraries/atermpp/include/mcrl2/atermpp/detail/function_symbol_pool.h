@@ -19,7 +19,6 @@
 #include "mcrl2/utilities/unordered_set.h"
 
 #include <map>
-#include <memory>
 #include <string>
 
 namespace atermpp

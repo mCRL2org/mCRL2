@@ -26,7 +26,6 @@ extern void add_deletion_hook(const function_symbol&, term_callback);
 ///        shared term when it is copied or moved.
 class unprotected_aterm
 {
-
   friend detail::_aterm* detail::address(const unprotected_aterm& t);
 
 protected:

@@ -12,7 +12,7 @@
 
 #include <assert.h>
 #include <atomic>
-#include <utility>
+#include <type_traits>
 
 namespace mcrl2
 {

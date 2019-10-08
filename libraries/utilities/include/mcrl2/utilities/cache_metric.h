@@ -12,7 +12,6 @@
 
 #include <cstddef>
 #include <string>
-#include <sstream>
 
 namespace mcrl2
 {
@@ -37,13 +36,7 @@ public:
   }
 
   /// \returns A message stating x hits, y misses (z %), where x,y,z indicate the number of hits, misses and percentage respectively.
-  std::string message() const
-  {
-    std::stringstream str;
-    std::size_t total_count = m_hit_count + m_miss_count;
-    str << m_hit_count << " times found out of " << total_count << " calls (" << static_cast<double>(m_hit_count) / static_cast<double>(m_miss_count) * 100 << " %)";
-    return str.str();
-  }
+  std::string message() const;
 
 private:
   std::size_t m_hit_count = 0;

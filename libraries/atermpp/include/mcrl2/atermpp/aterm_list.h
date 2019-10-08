@@ -12,7 +12,6 @@
 
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/detail/aterm_list.h"
-
 #include "mcrl2/atermpp/detail/aterm_list_iterator.h"
 #include "mcrl2/atermpp/detail/global_aterm_pool.h"
 

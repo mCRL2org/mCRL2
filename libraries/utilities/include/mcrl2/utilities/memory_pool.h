@@ -20,7 +20,6 @@
 #include <cstdint>
 #include <forward_list>
 #include <type_traits>
-#include <utility>
 
 namespace mcrl2
 {
