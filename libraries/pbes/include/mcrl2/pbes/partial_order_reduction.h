@@ -106,12 +106,14 @@ struct summand_class
   }
 
   // returns X_i -k->
+  [[nodiscard]]
   bool depends(std::size_t i) const
   {
     return !nxt[i].empty();
   }
 
   // returns X_i -k-> j
+  [[nodiscard]]
   bool depends(std::size_t i, std::size_t j) const
   {
     using utilities::detail::contains;
@@ -129,8 +131,7 @@ struct summand_class
     }
   }
 
-  // N is the number of summand classes
-  void print(std::ostream& out, const std::size_t N) const
+  void print(std::ostream& out) const
   {
     out << "deterministic = " << std::boolalpha << is_deterministic << std::endl;
     out << "NES = " << print_summand_set(NES) << std::endl;
@@ -212,14 +213,14 @@ static inline bool operator&&(tribool a, tribool b)
 // Short-circuit version of the operator && for tribools
 // The second function will be told whether a 'yes' answer is required to satisfy
 // the expression
-static inline bool operator&&(std::function<tribool()> a, std::function<tribool(bool)> b)
+static inline bool operator&&(const std::function<tribool()>& a, const std::function<tribool(bool)>& b)
 {
-  tribool a_ = a();
-  if(a_ == yes)
+  tribool a_result = a();
+  if(a_result == yes)
   {
     return true;
   }
-  return a_ && b(a_ == no);
+  return a_result && b(a_result == no);
 }
 
 class partial_order_reduction_algorithm
@@ -379,8 +380,8 @@ class partial_order_reduction_algorithm
       }
 
       tribool accords_data(bool affect_set, bool needs_yes,
-                           std::function<data::data_expression()> make_antecedent,
-                           std::function<data::data_expression()> make_consequent)
+                           const std::function<data::data_expression()>& make_antecedent,
+                           const std::function<data::data_expression()>& make_consequent)
       {
         // Check whether the maybe clause is satisfied by affect sets and it is sufficient to return maybe
         if (affect_set && !needs_yes)
@@ -675,8 +676,8 @@ class partial_order_reduction_algorithm
         mutable summand_set temp_set;
         const summand_set m_en_X_e;
 
-        compare_invis_pair(const summand_set& en)
-        : m_en_X_e(en)
+        explicit compare_invis_pair(summand_set en)
+        : m_en_X_e(std::move(en))
         {}
 
         std::size_t size(const invis_pair& p) const
@@ -1350,7 +1351,7 @@ class partial_order_reduction_algorithm
           const summand_class& summand = m_summand_classes[k];
           mCRL2log(log::verbose) << "\n--- summand class " << k << " ---" << std::endl;
           mCRL2log(log::verbose) << "visible = " << std::boolalpha << m_vis.test(k) << "\n";
-          summand.print(log::mcrl2_logger().get(log::verbose), N);
+          summand.print(log::mcrl2_logger().get(log::verbose));
         }
         for (std::size_t i = 0; i < m_pbes.equations().size(); i++)
         {
@@ -1402,9 +1403,9 @@ class partial_order_reduction_algorithm
       m_static_analysis_duration = std::chrono::high_resolution_clock::now() - t_start;
 
       // initialize m_largest_equation_size;
-      for (std::size_t i = 0; i < m_pbes.equations().size(); i++)
+      for (const srf_equation& eq: m_pbes.equations())
       {
-        m_largest_equation_size = std::max(m_largest_equation_size, m_pbes.equations()[i].summands().size());
+        m_largest_equation_size = std::max(m_largest_equation_size, eq.summands().size());
       }
 
       mCRL2log(log::verbose) << p << std::endl;
@@ -1413,10 +1414,7 @@ class partial_order_reduction_algorithm
 
     ~partial_order_reduction_algorithm()
     {
-      if(m_solver != nullptr)
-      {
-        delete m_solver;
-      }
+      delete m_solver;
     }
 
     const propositional_variable_instantiation& initial_state() const
@@ -1514,42 +1512,45 @@ class partial_order_reduction_algorithm
           bool vis_expanded = stubborn_set_X_e.is_subset_of(m_vis);
           s = vis_expanded ? DONE : DONE_PARTIALLY;
 
-          // Check if a cycle is closed
-          // At the same time, check whether some node on the stack is fully expanded
-          // If both are true, some node will be fully expanded
-          bool cycle_found = false;
-          std::size_t min_index = std::numeric_limits<std::size_t>::max();
-          propositional_variable_instantiation min_node;
-          for (const propositional_variable_instantiation& Y_f: next)
+          if (use_condition_L)
           {
-            auto node = seen.find(Y_f);
-            if (node == seen.end())
+            // Check if a cycle is closed
+            // At the same time, check whether some node on the stack is fully expanded
+            // If both are true, some node will be fully expanded
+            bool cycle_found = false;
+            std::size_t min_index = std::numeric_limits<std::size_t>::max();
+            propositional_variable_instantiation min_node;
+            for (const propositional_variable_instantiation& Y_f: next)
             {
-              continue;
+              auto node = seen.find(Y_f);
+              if (node == seen.end())
+              {
+                continue;
+              }
+              std::size_t node_index = node->second.first;
+              std::size_t node_instack = node->second.second;
+              if (node_instack && node_index < min_index)
+              {
+                cycle_found = true;
+                min_index = std::min(min_index, node_index);
+                min_node = Y_f;
+              }
             }
-            std::size_t node_index = node->second.first;
-            std::size_t node_instack = node->second.second;
-            if (node_instack && node_index < min_index)
+            bool fully_expanded_node_found = false;
+            auto it = todo.rbegin();
+            for (; cycle_found && !fully_expanded_node_found; ++it)
             {
-              cycle_found = true;
-              min_index = std::min(min_index, node_index);
-              min_node = Y_f;
+              assert(it != todo.rend());
+              fully_expanded_node_found |= (it->second == STARTS_CYCLE || it->second == DONE);
+              if(it->first == min_node)
+              {
+                break;
+              }
             }
-          }
-          bool fully_expanded_node_found = false;
-          auto it = todo.rbegin();
-          for (; cycle_found && !fully_expanded_node_found; ++it)
-          {
-            assert(it != todo.rend());
-            fully_expanded_node_found |= (it->second == STARTS_CYCLE || it->second == DONE);
-            if(it->first == min_node)
+            if (cycle_found && !fully_expanded_node_found)
             {
-              break;
+              it->second = STARTS_CYCLE;
             }
-          }
-          if (cycle_found && !fully_expanded_node_found)
-          {
-            it->second = STARTS_CYCLE;
           }
         }
         else
