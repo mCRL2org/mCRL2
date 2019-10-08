@@ -1326,7 +1326,6 @@ class partial_order_reduction_algorithm
 
     void print_pbes() const
     {
-      mCRL2log(log::verbose) << m_pbes.to_pbes() << std::endl;
       mCRL2log(log::verbose) << "srf_pbes" << std::endl;
       for (const srf_equation& eqn: m_pbes.equations())
       {
@@ -1408,7 +1407,6 @@ class partial_order_reduction_algorithm
         m_largest_equation_size = std::max(m_largest_equation_size, eq.summands().size());
       }
 
-      mCRL2log(log::verbose) << p << std::endl;
       print_pbes();
     }
 
