@@ -144,7 +144,7 @@ class parser
     }
 };
 
-struct equal_to: public std::binary_function<pbes_expression, pbes_expression, bool>
+struct equal_to
 {
   bool operator()(const pbes_expression& x, const pbes_expression& y) const
   {
