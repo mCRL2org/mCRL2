@@ -44,11 +44,10 @@ bool test_operation(
   const std::string& opname2
 )
 {
-  typedef typename Compare::first_argument_type T;
-  T x1 = parse(expr1);
-  T x2 = parse(expr2);
-  T f1 = op1(x1);
-  T f2 = op2(x2);
+  auto x1 = parse(expr1);
+  auto x2 = parse(expr2);
+  auto f1 = op1(x1);
+  auto f2 = op2(x2);
   bool success = comp(f1, f2);
   if (success)
   {
@@ -83,8 +82,7 @@ bool test_operation(
   const std::string& opname
 )
 {
-  typedef typename Compare::first_argument_type T;
-  return test_operation(expr1, expr2, parse, comp, op, opname, identity<T>, "");
+  return test_operation(expr1, expr2, parse, comp, op, opname, [](const auto& T) { return T; }, "");
 }
 
 } // namespace detail
