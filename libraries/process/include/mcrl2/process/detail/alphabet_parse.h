@@ -186,9 +186,7 @@ communication_expression_list parse_comm_set(const std::string& text)
   std::vector<communication_expression> result;
   for (const std::string& word: set_elements(text))
   {
-    std::string lhs;
-    std::string rhs;
-    std::tie(lhs, rhs) = split_arrow(word);
+    auto [lhs, rhs] = split_arrow(word);
     result.push_back(communication_expression(make_identifier_string_list(split_bar(lhs)), core::identifier_string(rhs)));
   }
   return communication_expression_list(result.begin(), result.end());
@@ -200,9 +198,7 @@ rename_expression_list parse_rename_set(const std::string& text)
   std::vector<rename_expression> result;
   for (const std::string& word: set_elements(text))
   {
-    std::string lhs;
-    std::string rhs;
-    std::tie(lhs, rhs) = split_arrow(word);
+    auto [lhs, rhs] = split_arrow(word);
     result.push_back(rename_expression(core::identifier_string(lhs), core::identifier_string(rhs)));
   }
   return rename_expression_list(result.begin(), result.end());

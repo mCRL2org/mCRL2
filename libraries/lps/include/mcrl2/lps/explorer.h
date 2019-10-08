@@ -37,7 +37,9 @@
 #include "mcrl2/process/timed_multi_action.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/utilities/detail/io.h"
+#include "mcrl2/utilities/indexed_set.h"
 #include "mcrl2/utilities/skip.h"
+#include "mcrl2/utilities/unordered_map.h"
 #include "mcrl2/utilities/unused.h"
 
 namespace mcrl2::lps {
@@ -254,7 +256,7 @@ struct explorer_summand
   caching cache_strategy;
   std::vector<data::variable> gamma;
   atermpp::function_symbol f_gamma;
-  mutable std::unordered_map<atermpp::term_appl<data::data_expression>, std::list<data::data_expression_list>> local_cache;
+  mutable utilities::unordered_map<atermpp::term_appl<data::data_expression>, std::list<data::data_expression_list>> local_cache;
 
   template <typename ActionSummand>
   explorer_summand(const ActionSummand& summand, std::size_t summand_index, const data::variable_list& process_parameters, caching cache_strategy_)
@@ -374,8 +376,8 @@ class explorer: public abortable
     volatile bool m_must_abort = false;
 
     // N.B. The keys are stored in term_appl instead of data_expression_list for performance reasons.
-    std::unordered_map<atermpp::term_appl<data::data_expression>, std::list<data::data_expression_list>> global_cache;
-    std::unordered_map<state, std::size_t> m_discovered;
+    utilities::unordered_map<atermpp::term_appl<data::data_expression>, std::list<data::data_expression_list>> global_cache;
+    utilities::indexed_set<state> m_discovered;
 
     // used by make_timed_state, to avoid needless creation of vectors
     mutable std::vector<data::data_expression> timed_state;
@@ -752,7 +754,7 @@ class explorer: public abortable
       const StateType& s0,
       const SummandSequence& regular_summands,
       const SummandSequence& confluent_summands,
-      std::unordered_map<state, std::size_t>& discovered,
+      utilities::indexed_set<state>& discovered,
       DiscoverState discover_state = DiscoverState(),
       ExamineTransition examine_transition = ExamineTransition(),
       StartState start_state = StartState(),
@@ -776,29 +778,27 @@ class explorer: public abortable
         for (const state& s: S)
         {
           // TODO: join duplicate targets
-          auto j = discovered.find(s);
-          if (j == discovered.end())
+          std::size_t s_index = discovered.index(s);
+          if (s_index >= discovered.size())
           {
-            std::size_t s_index = discovered.size();
-            j = discovered.insert(std::make_pair(s, s_index)).first;
+            s_index = discovered.insert(s).first;
             discover_state(s, s_index);
           }
-          s0_index.push_back(j->second);
+          s0_index.push_back(s_index);
         }
         discover_initial_state(s0_, s0_index);
       }
       else
       {
         todo = make_todo_set(s0);
-        std::size_t s0_index = 0;
-        discovered.insert(std::make_pair(s0, s0_index));
+        std::size_t s0_index = discovered.insert(s0).first;
         discover_state(s0, s0_index);
       }
 
       while (!todo->empty() && !m_must_abort)
       {
         state s = todo->choose_element();
-        std::size_t s_index = discovered.find(s)->second;
+        std::size_t s_index = discovered.index(s);
         start_state(s, s_index);
         data::add_assignments(m_sigma, m_process_parameters, s);
         for (const explorer_summand& summand: regular_summands)
@@ -823,41 +823,38 @@ class explorer: public abortable
                 // TODO: join duplicate targets
                 for (const state& s1_: S1)
                 {
-                  auto j = discovered.find(s1_);
-                  if (j == discovered.end())
+                  std::size_t k = discovered.index(s1_);
+                  if (k >= discovered.size())
                   {
                     todo->insert(s1_);
-                    std::size_t k = discovered.size();
-                    j = discovered.insert(std::make_pair(s1_, k)).first;
+                    k = discovered.insert(s1_).first;
                     discover_state(s1_, k);
                   }
-                  s1_index.push_back(j->second);
+                  s1_index.push_back(k);
                 }
                 examine_transition(s, s_index, a, s1, s1_index, summand.index);
               }
               else
               {
-                auto j = discovered.find(s1);
-                if (j == discovered.end())
+                std::size_t s1_index = discovered.index(s1);
+                if (s1_index >= discovered.size())
                 {
-                  std::size_t k = discovered.size();
                   if constexpr (Timed)
                   {
                     const data::data_expression& t = s[m_n];
                     data::data_expression t1 = a.has_time() ? a.time() : t;
                     state s1_at_t1 = make_timed_state(s1, t1);
-                    j = discovered.insert(std::make_pair(s1_at_t1, k)).first;
-                    discover_state(s1_at_t1, k);
+                    s1_index = discovered.insert(s1_at_t1).first;
+                    discover_state(s1_at_t1, s1_index);
                     todo->insert(s1_at_t1);
                   }
                   else
                   {
-                    j = discovered.insert(std::make_pair(s1, k)).first;
-                    discover_state(s1, k);
+                    s1_index = discovered.insert(s1).first;
+                    discover_state(s1, s1_index);
                     todo->insert(s1);
                   }
                 }
-                std::size_t s1_index = j->second;
                 examine_transition(s, s_index, a, s1, s1_index, summand.index);
               }
             }
@@ -1005,8 +1002,7 @@ class explorer: public abortable
         const auto&[a, s1] = tr;
         examine_transition(s0, a, s1);
 
-        auto j = discovered.find(s1);
-        if (j == discovered.end())
+        if (discovered.find(s1) == discovered.end())
         {
           tree_edge(s0, a, s1);
           if constexpr (Timed)
@@ -1119,8 +1115,7 @@ class explorer: public abortable
           E->pop_front();
           examine_transition(*s, a, s1);
 
-          auto j = discovered.find(s1);
-          if (j == discovered.end())
+          if (discovered.find(s1) == discovered.end())
           {
             tree_edge(*s, a, s1);
             if constexpr (Timed)
@@ -1198,7 +1193,7 @@ class explorer: public abortable
     }
 
     /// \brief Returns a mapping containing all discovered states.
-    const std::unordered_map<state, std::size_t>& state_map() const
+    const utilities::indexed_set<state>& state_map() const
     {
       return m_discovered;
     }

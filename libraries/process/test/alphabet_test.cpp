@@ -85,9 +85,7 @@ std::string print(const allow_set& x)
 
 BOOST_AUTO_TEST_CASE(test_print)
 {
-  multi_action_name_set A;
-  bool dummy;
-  std::tie(A, dummy) = detail::parse_simple_multi_action_name_set("{a}");
+  auto [A, dummy] = detail::parse_simple_multi_action_name_set("{a}");
   multi_action_name tau;
   A.insert(tau);
   std::cout << print(A) << std::endl;
@@ -182,9 +180,7 @@ void test_push_allow(const std::string& expression, const std::string& Atext, co
 {
   std::string text = "act a, b, c, d;\n" + equations + "\ninit " + expression + ";\n";
   process_specification procspec = parse_process_specification(text);
-  multi_action_name_set A;
-  bool A_includes_subsets;
-  std::tie(A, A_includes_subsets) = detail::parse_simple_multi_action_name_set(Atext);
+  auto [A, A_includes_subsets] = detail::parse_simple_multi_action_name_set(Atext);
   data::set_identifier_generator id_generator;
 
   std::map<process_identifier, multi_action_name_set> pcrl_equation_cache = detail::compute_pcrl_equation_cache(procspec.equations());
@@ -203,9 +199,7 @@ template <typename Operation>
 void test_comm_operation(const std::string& comm_text, const std::string& Atext, const std::string& expected_result, Operation op, const std::string& title)
 {
   communication_expression_list C = detail::parse_comm_set(comm_text);
-  multi_action_name_set A;
-  bool A_includes_subsets;
-  std::tie(A, A_includes_subsets) = detail::parse_simple_multi_action_name_set(Atext);
+  auto [A, A_includes_subsets] = detail::parse_simple_multi_action_name_set(Atext);
   multi_action_name_set A1 = op(C, A, A_includes_subsets);
   std::string result = print(A1, A_includes_subsets);
   check_result(comm_text + ", " + Atext, result, expected_result, title);
@@ -232,9 +226,7 @@ template <typename Operation>
 void test_rename_operation(const std::string& rename_text, const std::string& Atext, const std::string& expected_result, Operation op, const std::string& title)
 {
   rename_expression_list R = detail::parse_rename_set(rename_text);
-  multi_action_name_set A;
-  bool A_includes_subsets;
-  std::tie(A, A_includes_subsets) = detail::parse_simple_multi_action_name_set(Atext);
+  auto [A, A_includes_subsets] = detail::parse_simple_multi_action_name_set(Atext);
   multi_action_name_set A1 = op(R, A, A_includes_subsets);
   std::string result = print(A1, A_includes_subsets);
   check_result(rename_text + ", " + Atext, result, expected_result, title);
@@ -265,9 +257,7 @@ template <typename Operation>
 void test_hide_operation(const std::string& hide_text, const std::string& Atext, const std::string& expected_result, Operation op, const std::string& title)
 {
   core::identifier_string_list I = detail::parse_block_set(hide_text);
-  multi_action_name_set A;
-  bool A_includes_subsets;
-  std::tie(A, A_includes_subsets) = detail::parse_simple_multi_action_name_set(Atext);
+  auto [A, A_includes_subsets] = detail::parse_simple_multi_action_name_set(Atext);
   multi_action_name_set A1 = op(I, A, A_includes_subsets);
   std::string result = print(A1, A_includes_subsets);
   check_result(hide_text + ", " + Atext, result, expected_result, title);
@@ -282,9 +272,7 @@ BOOST_AUTO_TEST_CASE(test_hide_operations)
 void test_allow(const std::string& allow_text, const std::string& Atext, const std::string& expected_result, const std::string& title)
 {
   action_name_multiset_list V = detail::parse_allow_set(allow_text);
-  multi_action_name_set A;
-  bool A_includes_subsets;
-  std::tie(A, A_includes_subsets) = detail::parse_simple_multi_action_name_set(Atext);
+  auto [A, A_includes_subsets] = detail::parse_simple_multi_action_name_set(Atext);
   multi_action_name_set A1 = alphabet_operations::allow(V, A, A_includes_subsets);
   std::string result = print(A1);
   check_result(allow_text + ", " + Atext, result, expected_result, title);
@@ -304,9 +292,7 @@ BOOST_AUTO_TEST_CASE(test_allow1)
 void test_block(const std::string& block_text, const std::string& Atext, const std::string& expected_result, const std::string& title)
 {
   core::identifier_string_list B = detail::parse_block_set(block_text);
-  multi_action_name_set A;
-  bool A_includes_subsets;
-  std::tie(A, A_includes_subsets) = detail::parse_simple_multi_action_name_set(Atext);
+  auto [A, A_includes_subsets] = detail::parse_simple_multi_action_name_set(Atext);
   multi_action_name_set A1 = alphabet_operations::block(B, A, A_includes_subsets);
   std::string result = print(A1, A_includes_subsets);
   check_result(block_text + ", " + Atext, result, expected_result, title);

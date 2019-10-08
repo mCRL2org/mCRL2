@@ -26,8 +26,7 @@ struct multi_action_name: public std::multiset<core::identifier_string>
 {
   typedef std::multiset<core::identifier_string> super;
 
-  multi_action_name()
-  {}
+  multi_action_name() = default;
 
   template <typename InputIterator>
   multi_action_name(InputIterator first, InputIterator last)

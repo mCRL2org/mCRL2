@@ -50,7 +50,9 @@ private:
   // Hashes only the keys of each pair.
   struct PairHash
   {
-    PairHash(const hasher& hash)
+    PairHash() = default;
+
+    explicit PairHash(const hasher& hash)
       : hash(hash)
     {}
 
@@ -75,7 +77,9 @@ private:
   // Compares only the keys of each pair.
   struct PairEquals
   {
-    PairEquals(const key_equals& equals)
+    PairEquals() = default;
+
+    explicit PairEquals(const key_equals& equals)
       : equals(equals)
     {}
 

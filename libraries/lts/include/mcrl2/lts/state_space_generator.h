@@ -355,7 +355,7 @@ class divergence_detector
     Explorer& explorer;
     const std::string& filename_prefix;
     trace_constructor<Explorer> m_local_trace_constructor;
-    std::unordered_map<lps::state, std::size_t> m_divergent_states;
+    utilities::unordered_map<lps::state, std::size_t> m_divergent_states;
     std::vector<lps::explorer_summand> m_regular_summands;
     std::vector<lps::explorer_summand> m_confluent_summands;
     std::size_t m_trace_count = 0;

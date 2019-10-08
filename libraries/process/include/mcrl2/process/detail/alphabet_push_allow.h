@@ -636,9 +636,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     push_allow_node p1 = push_allow(x.left(), A_sub, equations, W);
     allow_set A_arrow = alphabet_operations::left_arrow(A, p1.alphabet);
     push_allow_node q1 = push_allow(x.right(), A_arrow, equations, W);
-    bool allow_required;
-    multi_action_name_set Apq;
-    std::tie(Apq, allow_required) = alphabet_operations::bounded_merge(p1.alphabet, q1.alphabet, A);
+    auto [Apq, allow_required] = alphabet_operations::bounded_merge(p1.alphabet, q1.alphabet, A);
     push(push_allow_node(Apq, make_merge(p1.expression, q1.expression)));
     top().apply_allow(A, allow_required);
     mCRL2log(log::debug) << log(x, log_merge(x, A, A_sub, A_arrow));
@@ -657,9 +655,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     push_allow_node p1 = push_allow(x.left(), A_sub, equations, W);
     allow_set A_arrow = alphabet_operations::left_arrow(A, p1.alphabet);
     push_allow_node q1 = push_allow(x.right(), A_arrow, equations, W);
-    bool allow_required;
-    multi_action_name_set Apq;
-    std::tie(Apq, allow_required) = alphabet_operations::bounded_left_merge(p1.alphabet, q1.alphabet, A);
+    auto [Apq, allow_required] = alphabet_operations::bounded_left_merge(p1.alphabet, q1.alphabet, A);
     push(push_allow_node(Apq, make_left_merge(p1.expression, q1.expression)));
     top().apply_allow(A, allow_required);
     mCRL2log(log::debug) << log(x, log_left_merge(x, A, A_sub, A_arrow));
@@ -695,9 +691,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     push_allow_node p1 = push_allow(x.left(), A_sub, equations, W);
     allow_set A_arrow = alphabet_operations::left_arrow(A, p1.alphabet);
     push_allow_node q1 = push_allow(x.right(), A_arrow, equations, W);
-    bool allow_required;
-    multi_action_name_set Apq;
-    std::tie(Apq, allow_required) = alphabet_operations::bounded_merge(p1.alphabet, q1.alphabet, A);
+    auto [Apq, allow_required] = alphabet_operations::bounded_merge(p1.alphabet, q1.alphabet, A);
     push(push_allow_node(Apq, make_sync(p1.expression, q1.expression)));
     top().apply_allow(A, allow_required);
     mCRL2log(log::debug) << log(x, log_sync(x, A, A_sub, A_arrow));

@@ -13,6 +13,7 @@
 #define MCRL2_LTS_STOCHASTIC_LTS_BUILDER_H
 
 #include "mcrl2/lts/lts_builder.h"
+#include "mcrl2/utilities/unordered_map.h"
 
 namespace mcrl2 {
 
@@ -22,7 +23,7 @@ struct stochastic_lts_builder
 {
   // All LTS classes use integers to represent actions in transitions. A mapping from actions to integers
   // is needed to avoid duplicates.
-  std::unordered_map<process::timed_multi_action, std::size_t> m_actions;
+  utilities::unordered_map_large<process::timed_multi_action, std::size_t> m_actions;
 
   stochastic_lts_builder()
   {
@@ -47,7 +48,7 @@ struct stochastic_lts_builder
   virtual void add_transition(std::size_t from, const process::timed_multi_action& a, const std::list<std::size_t>& targets, const std::vector<data::data_expression>& probabilities) = 0;
 
   // Add actions and states to the LTS
-  virtual void finalize(const std::unordered_map<lps::state, std::size_t>& state_map) = 0;
+  virtual void finalize(const utilities::indexed_set<lps::state>& state_map) = 0;
 
   // Save the LTS to a file
   virtual void save(const std::string& filename) = 0;
@@ -64,7 +65,7 @@ class stochastic_lts_none_builder: public stochastic_lts_builder
     void add_transition(std::size_t /* from */, const process::timed_multi_action& /* a */, const std::list<std::size_t>& /* targets */, const std::vector<data::data_expression>& /* probabilities */) override
     {}
 
-    void finalize(const std::unordered_map<lps::state, std::size_t>& /* state_map */) override
+    void finalize(const utilities::indexed_set<lps::state>& /* state_map */) override
     {}
 
     void save(const std::string& /* filename */) override
@@ -138,7 +139,7 @@ class stochastic_lts_aut_builder: public stochastic_lts_builder
     }
 
     // Add actions and states to the LTS
-    void finalize(const std::unordered_map<lps::state, std::size_t>& state_map) override
+    void finalize(const utilities::indexed_set<lps::state>& state_map) override
     {
       m_number_of_states = state_map.size();
     }
@@ -224,7 +225,7 @@ class stochastic_lts_lts_builder: public stochastic_lts_builder
     }
 
     // Add actions and states to the LTS
-    void finalize(const std::unordered_map<lps::state, std::size_t>& state_map) override
+    void finalize(const utilities::indexed_set<lps::state>& state_map) override
     {
       // add actions
       m_lts.set_num_action_labels(m_actions.size());
@@ -234,10 +235,11 @@ class stochastic_lts_lts_builder: public stochastic_lts_builder
       }
 
       // add states
-      std::vector<state_label_lts> state_labels(state_map.size());
-      for (const auto& p: state_map)
+      std::size_t n = state_map.size();
+      std::vector<state_label_lts> state_labels(n);
+      for (std::size_t i = 0; i < n; i++)
       {
-        state_labels[p.second] = state_label_lts(p.first);
+        state_labels[i] = state_label_lts(state_map[i]);
       }
       m_lts.state_labels() = std::move(state_labels);
       m_lts.set_num_states(state_map.size(), true);
