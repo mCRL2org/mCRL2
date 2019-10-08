@@ -61,6 +61,9 @@ endif()
 ## Set C++ compile flags
 ##---------------------------------------------------
 
+# This first flag is only necessary for our compiling rewriter script (that ignores 'other' build flags).
+try_add_cxx_flag(-std=c++17)
+
 try_add_cxx_flag(-Wall)
 try_add_cxx_flag(-Wno-inline)
 try_add_cxx_flag(-fno-strict-overflow)
