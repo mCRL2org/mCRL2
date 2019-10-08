@@ -208,6 +208,8 @@ Classes
   <xsl:choose>
     <xsl:when test="@kind='typedef'">
       <xsl:text>.. cpp:type:: </xsl:text>
+      <xsl:value-of select="//compoundname/text()"/>
+      <xsl:text>::</xsl:text>
       <xsl:value-of select="name"/>
       <xsl:text>
 
@@ -217,6 +219,8 @@ Classes
     </xsl:when>
     <xsl:when test="@kind='enum'">
       <xsl:text>.. cpp:type:: </xsl:text>
+      <xsl:value-of select="//compoundname/text()"/>
+      <xsl:text>::</xsl:text>
       <xsl:value-of select="name"/>
       <xsl:text>
 
@@ -236,18 +240,24 @@ Classes
       <xsl:text>.. cpp:member:: </xsl:text>
       <xsl:value-of select="type"/>
       <xsl:text> </xsl:text>
+        <xsl:value-of select="//compoundname/text()"/>
+        <xsl:text>::</xsl:text>
       <xsl:value-of select="name"/>
     </xsl:when>
     
     <xsl:when test="@kind='friend'">
       <xsl:value-of select="type"/>
       <xsl:text> :cpp:type:`</xsl:text>
+      <xsl:value-of select="//compoundname/text()"/>
+      <xsl:text>::</xsl:text>
       <xsl:value-of select="name"/>
       <xsl:text>`</xsl:text>
     </xsl:when>
     
     <xsl:otherwise>
       <xsl:value-of select="kind"/>
+      <xsl:value-of select="//compoundname/text()"/>
+      <xsl:text>::</xsl:text>
       <xsl:value-of select="name"/>
     </xsl:otherwise>
   </xsl:choose>
