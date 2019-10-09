@@ -40,6 +40,3 @@ not hold. If formulas are valid, this flag can also be used to determine witness
 are valid. The tool :ref:`tool-pbes2bool` can generate counter examples without the use of this flag. These
 counter-examples are solely based on the provided PBES and they must be manually be related to the original
 transition system.
-
-
-.. include:: man/lts2pbes.txt

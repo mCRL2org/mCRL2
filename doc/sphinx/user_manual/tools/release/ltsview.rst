@@ -47,6 +47,3 @@ References
            Visualization 2001, IEEE CS Press, pp. 59-66, 2001.
            `(DOI) <http://dx.doi.org/10.1109/INFVIS.2001.963281>`_
            `(PDF) <http://www.research.ibm.com/visual/papers/FSM2002.pdf>`_
-
-
-.. include:: man/ltsview.txt

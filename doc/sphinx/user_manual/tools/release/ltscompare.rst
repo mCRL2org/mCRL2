@@ -22,6 +22,3 @@ nondeterministic.
 The second useful option is to hide some actions while doing the comparisons
 (option ``--tau=`` followed by a comma separated list of actions). Counter examples
 are provided without applying hiding.
-
-
-.. include:: man/ltscompare.txt

@@ -38,6 +38,3 @@ constants. However, this option typically leads to a large increase in the
 runtime of the tool.
 
 The algorithm underlying the tool is described in detail in [OWW09]_.
-
-
-.. include:: man/pbesconstelm.txt

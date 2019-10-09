@@ -155,6 +155,3 @@ the shape ``^expression$`` to ensure the whole action name is matched.
 It is also possible to rename actions to delta or to tau. For example, when
 renaming ``a_out`` to ``delta`` using ``^a_out$/delta``, the multi action
 ``a_out|c_out`` will become ``delta``.
-
-
-.. include:: man/lpsactionrename.txt

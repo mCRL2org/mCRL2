@@ -14,6 +14,3 @@ Rewrite the following data expressions of and LPS:
 Rewriting LPS summands and the initial state is done to simplify these parts of
 the LPS. Rewriting data equations is done to speed up state space generation. In
 most cases, this results in a performance gain of at most 5%.
-
-
-.. include:: man/lpsrewr.txt

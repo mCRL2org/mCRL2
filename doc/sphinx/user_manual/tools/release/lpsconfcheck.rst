@@ -89,6 +89,3 @@ of determining confluence are as follows:
 
 If there already is an action named ''ctau'' present in the LPS as found in
 ''INFILE'', an error will be reported.
-
-
-.. include:: man/lpsconfcheck.txt

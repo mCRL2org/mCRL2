@@ -26,6 +26,3 @@ References
           user-defined diagrams". A.J. Pretorius and J.J. van Wijk IEEE Computer
           Graphics and Applications, vol. 27, no. 5, pp. 58-66, 2007
           `(DOI) <http://dx.doi.org/10.1109/MCG.2007.121>`_
-
-
-.. include:: man/diagraphica.txt

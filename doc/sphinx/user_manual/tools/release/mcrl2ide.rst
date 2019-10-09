@@ -115,6 +115,3 @@ Known issues in the 201808.0 release version:
   One can also reopen the project to reload the properties in the IDE from the file system.
 
 These issues have been fixed in the latest 201908.0 release version
-
-
-.. include:: man/mcrl2ide.txt

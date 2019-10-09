@@ -62,6 +62,3 @@ following commands can be entered:
 ``q, quit, Ctrl-D``
 
   Quit :ref:`tool-lpssim`.
-
-
-.. include:: man/lpssim.txt

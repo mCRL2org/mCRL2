@@ -60,6 +60,3 @@ The tool transforms this to the following strongly bisimilar LPS
             P(larger, larger);
 
    init P(equal, smaller);
-
-
-.. include:: man/lpsrealelm.txt
