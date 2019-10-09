@@ -52,6 +52,3 @@ and removing redundant parameters can speed up the generation of the state space
 is the elimination of data from communication protocols. By unfolding the message frames in the protocol into
 their individual components, by preventing data to be delivered, :ref:`tool-lpsparelm` can remove all the data
 from the protocol, allowing to investigate its full behaviour, independently of the nature of the data.
-
-
-.. include:: man/lpsparelm.txt

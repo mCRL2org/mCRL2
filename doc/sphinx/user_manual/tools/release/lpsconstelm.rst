@@ -55,6 +55,3 @@ When processes send messages to other processes indexed by numbers (e.g., ``send
 then summands with communication that are not possible due to mismatching id's are removed from the lps
 by ``lpsconstelm``. For a typical example such as Milner's scheduler, this reduces the number of summands
 from quadratic to linear in the number of participating processes.
-
-
-.. include:: man/lpsconstelm.txt

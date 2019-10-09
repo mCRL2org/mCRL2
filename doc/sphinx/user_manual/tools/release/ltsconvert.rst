@@ -26,6 +26,3 @@ state space.
    Tools that use the fsm format may depend on state information and parameter
    names. This requires that this information is available in the input LTS file
    or that the --lps option is used (see the options sections below).
-
-
-.. include:: man/ltsconvert.txt

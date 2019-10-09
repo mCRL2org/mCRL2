@@ -42,6 +42,3 @@ The result is given by::
         + delta;
 
    init P(0, d1 == d2, d1 == d1, true);
-
-
-.. include:: man/lpsbinary.txt

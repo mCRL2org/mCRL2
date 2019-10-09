@@ -126,6 +126,3 @@ detected that the initial instantiated variable is either true or false and the
 approximation algorithm is not necessary. Counter examples in this case are
 compact (although we have no proof that the counter examples are always optimal)
 and also very helpful.
-
-
-.. include:: man/pbes2bool.txt

@@ -27,6 +27,3 @@ additional functionalities:
   :ref:`tool-lpsxsim` interface. Such plugins can give the user a better
   overview / understanding of what is going on in the system being simulated.
 * Various options can be set.
-
-
-.. include:: man/lpsxsim.txt

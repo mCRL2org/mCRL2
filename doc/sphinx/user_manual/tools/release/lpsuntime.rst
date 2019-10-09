@@ -28,6 +28,3 @@ The tool transforms this to the following equivalent untimed version:
    \quad \sum_{e_1:E_1} c_1(d,e_1) \land t_1(d,e_1) > t \to a_1(f_1(d,e_1)) \cdot P(g_1(d,e_1),t_1(d,e_1)) + {}\\
    \quad \ldots
    \end{array}
-
-
-.. include:: man/lpsuntime.txt

@@ -194,6 +194,3 @@ able to prove that the invariant is actually an invariant. This for instance
 happens when inequalities are used. In such a case, the flag `-n` can be
 used to skip the check that the invariant indeed satisfies the invariant
 properties.
-
-
-.. include:: man/lpsinvelm.txt

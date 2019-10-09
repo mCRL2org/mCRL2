@@ -40,6 +40,3 @@ no successor has been expanded.
    For visualising larger state spaces it is also recommended to use
    :ref:`tool-ltsview` to visualise the structure of large graphs. The tool :ref:`tool-diagraphica`
    is especially designed to inspect the structure of the data occurring in large graphs.
-
-
-.. include:: man/ltsgraph.txt

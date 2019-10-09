@@ -19,6 +19,3 @@ Furthermore, it is reported whether
 all states are reachable and wheter the lts is deterministic.
 
 For a .lts the sets of state labels can be printed using the option '''-l'''
-
-
-.. include:: man/ltsinfo.txt

@@ -32,6 +32,3 @@ window.
 
    If the startup screen is blank the file browser may have been closed. Use **Revert to default layout**
    under **View** in the main menu to bring the file browser back.
-
-
-.. include:: man/mcrl2-gui.txt

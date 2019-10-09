@@ -42,6 +42,3 @@ transition system.
 Note that there is also an option ``--structured`` which can be used to generate boolean equation systems that
 do not contain both the conjunction and the disjunction operators among PBES variables in the right hand side.
 This flag can lead to a substantially larger number of equation (but linear in the original formula).
-
-
-.. include:: man/lps2pbes.txt

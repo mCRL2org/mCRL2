@@ -94,6 +94,3 @@ the option `-l/--lin-method`:
   for state space generation. Symbolic operations on the stacks are generally
   not very effective, because the stack data type is too complex. For symbolic
   analysis, linearisation methods ``regular`` or ``regular2`` can be used.
-
-
-.. include:: man/mcrl22lps.txt

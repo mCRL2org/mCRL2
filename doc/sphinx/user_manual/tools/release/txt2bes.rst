@@ -15,6 +15,3 @@ A typical example of textual input is the following::
 
 It is possible to declare data types in the input, but this is generally of
 no use as the data cannot be used in the BES.
-
-
-.. include:: man/txt2bes.txt
