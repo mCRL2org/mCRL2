@@ -12,7 +12,7 @@ from sphinx.util.console import colorize, term_width_line
 #
 _LOG = logging.getLogger(__name__)
 _PWD = os.path.abspath(os.path.dirname(__file__))
-_TRUNK = os.path.abspath(os.path.join(_PWD, '..', '..', '..'))
+_TRUNK = os.environ['MCRL2_SRC_DIR']
 _XML = None
 _RST = None
 _DOXYTAG = None
