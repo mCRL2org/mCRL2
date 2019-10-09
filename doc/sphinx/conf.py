@@ -29,11 +29,12 @@ version = ''
 
 # run CMake on the version file to obtain the current version of mCRL2
 from man import call
-src_path = Path(__file__).parent / '../..'
+src_path = os.environ['MCRL2_SRC_DIR']
 olddir = os.getcwd()
 try:
     os.chdir(src_path)
-    out = call('CMake', ['cmake', '-P', 'build/cmake/MCRL2Version.cmake']).decode('utf-8')
+    out = call('CMake', ['cmake', '-P',
+        f'{src_path}/build/cmake/MCRL2Version.cmake']).decode('utf-8')
     for line in iter(out.splitlines()):
         matches = re.findall(r'MCRL2_MAJOR_VERSION ([\S]+)', line)
         if matches:

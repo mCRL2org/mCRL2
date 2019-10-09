@@ -92,18 +92,12 @@ class DParserGrammarDirective(ProductionList):
 def setup(app):
   app.add_directive('dparser', DParserGrammarDirective)
   try:
-    getGrammar(os.path.join(os.path.dirname(__file__),
-               '..', '..', '..', 'libraries', 'core', 'source', 'mcrl2_syntax.g'))
+    getGrammar(os.path.join(os.environ['MCRL2_SRC_DIR'],
+               'libraries', 'core', 'source', 'mcrl2_syntax.g'))
   except Exception as e:
     logger.warning('DParser Python module not found. The dparser RST directive will '
              'not be processed correctly.')
-    logger.warning('While loading {}'.format(os.path.join(os.path.dirname(__file__),
-                   '..', '..', '..', 'libraries', 'core', 'source', 'mcrl2_syntax.g')))
+    logger.warning('While loading {}'.format(os.path.join(os.environ['MCRL2_SRC_DIR'],
+                   'libraries', 'core', 'source', 'mcrl2_syntax.g')))
     logger.warning('Exception: {}'.format(e))
   return {'parallel_read_safe': False, 'parallel_write_safe': True}
-
-if __name__ == '__main__':
-  g = getGrammar(os.path.join(os.path.dirname(__file__),
-                 '..', '..', '..', 'libraries', 'core', 'source', 'mcrl2_syntax.g'))
-  print('!!!')
-  print(_PROD['SortExpr'])

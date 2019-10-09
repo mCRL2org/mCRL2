@@ -40,5 +40,5 @@ Later, you may want to build the documentation without clearing the cache.
 
 The build process will write its output to `sphinx`, and any warnings
 generated during the build process are written to
-`sphinx/sphinx-build-warnings.log` - *not* to stderr! This file will contain
+`sphinx/build-warnings.log` - *not* to stderr! This file will contain
 ANSI escape sequences, so use for example `less -R ...` to open it.
