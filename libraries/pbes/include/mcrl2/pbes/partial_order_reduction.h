@@ -1092,9 +1092,9 @@ class partial_order_reduction_algorithm
                                   (k1 > k &&
                                       ([&]{ return square_accords_equations(k, k1); } &&
                                        [&](bool needs_yes) { return summand_data.square_accords_data(DNL_DNS_affect_sets, needs_yes); }));
-          bool triangle_accords = !m_no_triangle && ([&]{ return triangle_accords_equations(k, k1); } &&
-                                                     [&](bool needs_yes) { return summand_data.triangle_accords_data(DNT_affect_sets, needs_yes); });
-          bool accords          = square_accords || triangle_accords;
+          bool accords          = square_accords ||
+                                 (!m_no_triangle && ([&]{ return triangle_accords_equations(k, k1); } &&
+                                                     [&](bool needs_yes) { return summand_data.triangle_accords_data(DNT_affect_sets, needs_yes); }));
           bool can_enable       = !dependency_permanently_disables(k1, k) && !has_empty_intersection(Ts(k), Ws(k1)) && summand_data.can_enable();
 
           if (!left_accords)
