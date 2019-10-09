@@ -1518,8 +1518,7 @@ class partial_order_reduction_algorithm
             // Check if a cycle is closed
             // At the same time, check whether some node on the stack is fully expanded
             // If both are true, some node will be fully expanded
-            bool cycle_found = false;
-            std::size_t min_index = std::numeric_limits<std::size_t>::max();
+            std::size_t num_cycles = 0;
             propositional_variable_instantiation min_node;
             for (const propositional_variable_instantiation& Y_f: next)
             {
@@ -1530,27 +1529,25 @@ class partial_order_reduction_algorithm
               }
               std::size_t node_index = node->second.first;
               std::size_t node_instack = node->second.second;
-              if (node_instack && node_index < min_index)
+              if (node_instack)
               {
-                cycle_found = true;
-                min_index = std::min(min_index, node_index);
+                num_cycles++;
                 min_node = Y_f;
+                if (num_cycles > 1)
+                {
+                  break;
+                }
               }
             }
-            bool fully_expanded_node_found = false;
-            auto it = todo.rbegin();
-            for (; cycle_found && !fully_expanded_node_found; ++it)
+            if (num_cycles == 1)
             {
+              auto it = std::find_if(todo.rbegin(), todo.rend(), [&](const auto& pair){ return pair.first == min_node; });
               assert(it != todo.rend());
-              fully_expanded_node_found |= (it->second == STARTS_CYCLE || it->second == DONE);
-              if(it->first == min_node)
-              {
-                break;
-              }
-            }
-            if (cycle_found && !fully_expanded_node_found)
-            {
               it->second = STARTS_CYCLE;
+            }
+            else if (num_cycles > 1 && s == DONE_PARTIALLY)
+            {
+              s = STARTS_CYCLE;
             }
           }
         }
