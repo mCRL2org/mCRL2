@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
+#include <iomanip>
 #include <string>
 
 
@@ -770,7 +771,6 @@ void Confluence_Checker<Specification>::check_confluence_and_mark_summand(
   std::vector<action_summand_type>& v_summands = f_lps.process().action_summands();
   std::size_t v_summand_number = 1;
   bool v_is_confluent = true;
-  bool v_current_summands_are_confluent;
 
   // Add here that the sum variables of a_summand must be empty otherwise
   // the confluence of the summand must be checked with respect to itself,
@@ -793,10 +793,10 @@ void Confluence_Checker<Specification>::check_confluence_and_mark_summand(
 
     if (v_summand_number < a_summand_number)
     {
+      // Check the cache
       if (f_intermediate[v_summand_number] > a_summand_number)
       {
         mCRL2log(log::info) << ".";
-        v_summand_number++;
       }
       else
       {
@@ -814,29 +814,18 @@ void Confluence_Checker<Specification>::check_confluence_and_mark_summand(
         }
         else
         {
-          v_current_summands_are_confluent = check_summands(a_invariant, a_summand, a_summand_number, v_summand, v_summand_number, a_condition_type);
-          if (v_current_summands_are_confluent)
-          {
-            v_summand_number++;
-          }
-          else
-          {
-            v_is_confluent = false;
-          }
+          v_is_confluent &= check_summands(a_invariant, a_summand, a_summand_number, v_summand, v_summand_number, a_condition_type);
         }
       }
     }
     else
     {
-      v_current_summands_are_confluent = check_summands(a_invariant, a_summand, a_summand_number, v_summand, v_summand_number, a_condition_type);
-      if (v_current_summands_are_confluent)
-      {
-        v_summand_number++;
-      }
-      else
-      {
-        v_is_confluent = false;
-      }
+      v_is_confluent &= check_summands(a_invariant, a_summand, a_summand_number, v_summand, v_summand_number, a_condition_type);
+    }
+    if (v_is_confluent || f_check_all)
+    {
+      // Only increase number if we will continue
+      v_summand_number++;
     }
   }
 
@@ -952,7 +941,7 @@ void Confluence_Checker<Specification>::check_confluence_and_mark(const data::da
       {
         bool summand_is_marked = false;
 
-        mCRL2log(log::info) << "summand " << v_summand_number << " of " << v_summands.size() << " (condition = " << v_condition_type << "): ";
+        mCRL2log(log::info) << "summand " << std::setw(3) << v_summand_number << " of " << v_summands.size() << " (condition = " << v_condition_type << "): ";
         check_confluence_and_mark_summand(s, v_summand_number, a_invariant, v_condition_type, summand_is_marked);
         mCRL2log(log::info) << std::endl;
 
