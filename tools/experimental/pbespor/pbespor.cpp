@@ -36,26 +36,20 @@ class pbespor_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<r
   protected:
     typedef pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool>>>> super;
 
-    bool m_use_condition_L = true;
-    bool m_weak_conditions = false;
-    bool m_no_determinisim = false;
-    bool m_no_triangle = false;
-    bool m_use_smt_solver = false;
-    bool m_no_reduction = false;
-    std::size_t m_smt_timeout = 0;
+    pbespor_options m_options;
 
     void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
-      m_use_condition_L = !parser.has_option("no-l");
-      m_weak_conditions = parser.has_option("weak-conditions");
-      m_no_determinisim = parser.has_option("no-determinism");
-      m_no_triangle = parser.has_option("no-triangle");
-      m_no_reduction = parser.has_option("full");
+      m_options.use_condition_L = !parser.has_option("no-l");
+      m_options.use_weak_conditions = parser.has_option("weak-conditions");
+      m_options.no_determinisim = parser.has_option("no-determinism");
+      m_options.no_triangle = parser.has_option("no-triangle");
+      m_options.no_reduction = parser.has_option("full");
       if(parser.has_option("use-smt-solver"))
       {
-        m_use_smt_solver = true;
-        m_smt_timeout = parser.option_argument_as<std::size_t>("use-smt-solver");
+        m_options.use_smt_solver = true;
+        m_options.smt_timeout = std::chrono::milliseconds{parser.option_argument_as<std::size_t>("use-smt-solver")};
       }
     }
 
@@ -99,14 +93,7 @@ class pbespor_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<r
               output_filename(),
               pbes_input_format(),
               pbes_output_format(),
-              rewrite_strategy(),
-              m_use_condition_L,
-              m_use_smt_solver,
-              m_smt_timeout,
-              m_weak_conditions,
-              m_no_determinisim,
-              m_no_triangle,
-              m_no_reduction
+              m_options
              );
 
       return true;

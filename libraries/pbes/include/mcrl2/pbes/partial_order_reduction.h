@@ -223,6 +223,25 @@ static inline bool operator&&(const std::function<tribool()>& a, const std::func
   return a_result && b(a_result == no);
 }
 
+struct pbespor_options
+{
+  // if true use alternative A3 for maybe clauses in accordance conditions
+  bool use_weak_conditions = false;
+  // if true, do not compute which summands are deterministic
+  bool no_determinisim = false;
+  // if true, do not compute triangle accordance
+  bool no_triangle = false;
+  // if true, do not do any static analysis
+  bool no_reduction = false;
+  // if true, do not apply condition L
+  bool use_condition_L = true;
+
+  data::rewrite_strategy rewrite_strategy = data::rewrite_strategy::jitty;
+
+  bool use_smt_solver = false;
+  std::chrono::milliseconds smt_timeout = std::chrono::milliseconds::zero();
+};
+
 class partial_order_reduction_algorithm
 {
   protected:
@@ -283,13 +302,8 @@ class partial_order_reduction_algorithm
     std::chrono::high_resolution_clock::duration m_exploration_duration;
 
     smt::smt_solver* m_solver;
-    std::chrono::milliseconds m_smt_timeout;
 
-    // if true use alternative A3 for maybe clauses in accordance conditions
-    bool m_use_weak_conditions;
-    bool m_no_determinisim;
-    bool m_no_triangle;
-    bool m_no_reduction;
+    pbespor_options m_options;
 
     class summand_relations_data
     {
@@ -410,7 +424,7 @@ class partial_order_reduction_algorithm
     public:
       summand_relations_data(partial_order_reduction_algorithm& p, const std::size_t k, const std::size_t k1)
       : parent(p)
-      , use_weak_conditions(p.m_use_weak_conditions)
+      , use_weak_conditions(p.m_options.use_weak_conditions)
       {
         const summand_class& summand_k = parent.m_summand_classes[k];
         const summand_class& summand_k1 = parent.m_summand_classes[k1];
@@ -831,7 +845,7 @@ class partial_order_reduction_algorithm
           expr = data::make_exists(f.variables(), data::sort_bool::not_(f.body()));
         }
         // data::data_expression result = data::one_point_rule_rewrite(m_rewr(expr));
-        switch(m_solver->solve(data::variable_list(), expr, m_smt_timeout))
+        switch(m_solver->solve(data::variable_list(), expr, m_options.smt_timeout))
         {
           case smt::answer::SAT: return negate ^ true;
           case smt::answer::UNSAT: return negate ^ false;
@@ -1093,7 +1107,7 @@ class partial_order_reduction_algorithm
                                       ([&]{ return square_accords_equations(k, k1); } &&
                                        [&](bool needs_yes) { return summand_data.square_accords_data(DNL_DNS_affect_sets, needs_yes); }));
           bool accords          = square_accords ||
-                                 (!m_no_triangle && ([&]{ return triangle_accords_equations(k, k1); } &&
+                                 (!m_options.no_triangle && ([&]{ return triangle_accords_equations(k, k1); } &&
                                                      [&](bool needs_yes) { return summand_data.triangle_accords_data(DNT_affect_sets, needs_yes); }));
           bool can_enable       = !dependency_permanently_disables(k1, k) && !has_empty_intersection(Ts(k), Ws(k1)) && summand_data.can_enable();
 
@@ -1119,7 +1133,7 @@ class partial_order_reduction_algorithm
 
     void compute_NES_DNA_DNL()
     {
-      if (m_no_reduction)
+      if (m_options.no_reduction)
       {
         return;
       }
@@ -1222,7 +1236,7 @@ class partial_order_reduction_algorithm
 
     void compute_deterministic()
     {
-      if (m_no_determinisim || m_no_reduction)
+      if (m_options.no_determinisim || m_options.no_reduction)
       {
         return;
       }
@@ -1361,29 +1375,19 @@ class partial_order_reduction_algorithm
 
   public:
     explicit partial_order_reduction_algorithm(const pbes& p,
-          data::rewrite_strategy strategy,
-          bool use_smt_solver,
-          std::size_t smt_timeout,
-          bool weak_conditions,
-          bool no_determinisim,
-          bool no_triangle,
-          bool no_reduction
+          pbespor_options options
         )
      : m_rewr(p.data(),
               //TODO temporarily disabled used_data_equation_selector so the rewriter can rewrite accordance conditions
               // data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()),
-              strategy),
+              options.rewrite_strategy),
        m_pbes_rewr(m_rewr, p.data()),
        m_enumerator(m_pbes_rewr, p.data(), m_rewr, m_id_generator, true),
        m_pbes(pbes2srf(p)),
        m_equation_index(m_pbes),
        m_dependency_nes(m_pbes.equations().size()),
-       m_solver(use_smt_solver ? new smt::smt_solver(p.data()) : nullptr),
-       m_smt_timeout(smt_timeout),
-       m_use_weak_conditions(weak_conditions),
-       m_no_determinisim(no_determinisim),
-       m_no_triangle(no_triangle),
-       m_no_reduction(no_reduction)
+       m_solver(options.use_smt_solver ? new smt::smt_solver(p.data()) : nullptr),
+       m_options(options)
     {
       unify_parameters(m_pbes);
 
@@ -1443,8 +1447,7 @@ class partial_order_reduction_algorithm
     void explore(
       const propositional_variable_instantiation& X_init,
       EmitNode emit_node = EmitNode(),
-      EmitEdge emit_edge = EmitEdge(),
-      bool use_condition_L = true
+      EmitEdge emit_edge = EmitEdge()
     )
     {
       using utilities::detail::contains;
@@ -1510,7 +1513,7 @@ class partial_order_reduction_algorithm
           bool vis_expanded = stubborn_set_X_e.is_subset_of(m_vis);
           s = vis_expanded ? DONE : DONE_PARTIALLY;
 
-          if (use_condition_L)
+          if (m_options.use_condition_L)
           {
             // Check if a cycle is closed
             // At the same time, check whether some node on the stack is fully expanded
