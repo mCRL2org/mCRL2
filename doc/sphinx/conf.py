@@ -126,6 +126,6 @@ def setup(app):
     try:
         os.chdir(temppath)
         libraries.generate_rst(temppath)
-        man.generate_rst(temppath, f'{app.outdir}/../stage/bin/')
+        man.generate_rst(temppath, f'{app.outdir}/../../stage/bin/')
     finally:
         os.chdir(olddir)
