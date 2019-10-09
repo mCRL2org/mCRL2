@@ -1,6 +1,15 @@
-# Building the documentation
+# mCRL2 documentation/website
 
-Set up a Python virtual environment (needs to be done only once).
+We will assume that you build the documentation out of source, in the same
+directory where you built/configured mCRL2.
+
+    $ cd path/to/your/build/directory/
+
+
+## Python virtual environment (optional)
+
+If you don't want to install Python libraries system wide, you can set up a
+Python virtual environment (needs to be done only once).
 
     $ python3 -m venv sphinx-venv
 
@@ -8,37 +17,28 @@ Activate it.
 
     $ source sphinx-venv/bin/activate
 
-Install Sphinx (currently version 2.2.0).
+Install Sphinx (currently version 2.2.0) and other dependencies.
 
-    $ pip install Sphinx
+    $ pip install Sphinx wheel dparser
 
-Patch `sphinx-venv/lib/python3.7/site-packages/sphinx/domains/cpp.py` (or the
-equivalent path for your Python version), line 4261, which contains
-`assert len(withDecl) <= 1`: comment that out. It will error out unnecessarily.
-This is a [known issue](https://github.com/sphinx-doc/sphinx/issues/5496) in
-Sphinx.
+Ensure that CMake uses the right Python binary.
 
-Generate the documentation using the Makefile.
+    $ cmake [other options] \
+          -DPYTHON_EXECUTABLE=absolute/path/to/sphinx-venv/bin/python \
+          path/to/mCRL2/src
 
-    $ make html
 
-Later, you may want to clear the cached Doxygen and PDF files by first cleaning
-the build environment.
+## Building the documentation
 
-    $ make clean html
+Generate the documentation (can also use Ninja etc.).
 
-The build process will write its output to `_build/html`, and any warnings
+    $ make doc
+
+Later, you may want to build the documentation without clearing the cache.
+
+    $ make fastdoc
+
+The build process will write its output to `sphinx`, and any warnings
 generated during the build process are written to
-`_build/sphinx-build-warnings.log` - *not* to stderr! This file will contain
+`sphinx/sphinx-build-warnings.log` - *not* to stderr! This file will contain
 ANSI escape sequences, so use for example `less -R ...` to open it.
-
-## Integration with mCRL2 CMake
-
-You may need to pass an additional flag to CMake to let it use the right version
-of Python. This can be done as follows:
-
-    cmake [other options] -DPYTHON_EXECUTABLE=[absolute path to sphinx-venv]/bin/python ../src
-
-The above should not be necessary if Sphinx is installed system wide.
-
-Once done with the CMake process, you can `make doc` to generate the documentation.
