@@ -1088,10 +1088,12 @@ class partial_order_reduction_algorithm
 
       for (std::size_t k = 0; k < N; k++)
       {
+        mCRL2log(log::verbose) << std::setw(3) << k << " = ";
         for (std::size_t k1 = 0; k1 < N; k1++)
         {
           if (k == k1)
           {
+            mCRL2log(log::verbose) << ". ";
             continue;
           }
           bool DNL_DNS_affect_sets = has_empty_intersection(set_intersection(Vs(k), Vs(k1)), set_union(Ws(k), Ws(k1)));
@@ -1122,12 +1124,19 @@ class partial_order_reduction_algorithm
           if (!accords)
           {
             DNA(k).set(k1);
+            mCRL2log(log::verbose) << "- ";
           }
+          else
+          {
+            mCRL2log(log::verbose) << (DNL_DNS_affect_sets ? ": " : "+ ");
+          }
+          mCRL2log(log::verbose) << std::flush;
           if (can_enable)
           {
             NES(k).set(k1);
           }
         }
+        mCRL2log(log::verbose) << "\n";
       }
     }
 
