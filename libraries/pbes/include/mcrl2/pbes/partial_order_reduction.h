@@ -663,6 +663,10 @@ class partial_order_reduction_algorithm
       {
         return DNL(k);
       }
+      if (!m_options.compute_left_accordance)
+      {
+        return DNA(k);
+      }
 
       summand_set Twork_Ts = Twork | Ts;
 
@@ -714,21 +718,24 @@ class partial_order_reduction_algorithm
         };
       };
 
-      if ((en_X_e & m_invis).none())
-      {
-        return en_X_e;
-      }
-
       // C will always be sorted according to the size of each element.
       std::set<invis_pair, compare_invis_pair> C{compare_invis_pair(en_X_e)};
       auto invis_en_X_e = invis(en_X_e);
       for (std::size_t k = invis_en_X_e.find_first(); k != summand_set::npos; k = invis_en_X_e.find_next(k))
       {
-        invis_pair pair_k{summand_set(N), summand_set(N)};
-        pair_k.Twork.set(k);
-        C.insert(pair_k);
+        // If DNL is not computed, only attempt to construct stubborn set for deterministic
+        // summands.
+        if(m_summand_classes[k].is_deterministic || m_options.compute_left_accordance)
+        {
+          invis_pair pair_k{summand_set(N), summand_set(N)};
+          pair_k.Twork.set(k);
+          C.insert(pair_k);
+        }
       }
-      assert(!C.empty());
+      if (C.empty())
+      {
+        return en_X_e;
+      }
 
       while (true)
       {
