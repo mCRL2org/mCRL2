@@ -23,10 +23,10 @@ mCRL2 has the following minimum dependencies:
  - A C++17 compliant compiler, which can be one of the following:
    - GCC: 7.0
    - Clang: 5.0
-   - AppleClang: 10.0
-   - MSVC: 2017 (v19.10)
- - Qt (5.9.0, for the GUI tools only)
- - Boost (GCC/Clang: 1.57.0, MSVC: 1.66.0)
+   - AppleClang: 11.0
+   - MSVC: 2019 v16.0
+ - Qt (Linux/Windows: 5.9.0, MacOS: 5.10.0; for the GUI tools only)
+ - Boost (Linux: 1.65.1, MacOS/Windows: 1.66.0)
 
 Furthermore, sphinx and xsltproc are required to build the documentation.
 Makefiles can be generated using cmake. To build the toolset in Release mode
