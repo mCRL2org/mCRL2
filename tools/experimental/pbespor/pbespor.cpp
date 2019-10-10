@@ -44,9 +44,9 @@ class pbespor_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<r
       m_options.use_condition_L = !parser.has_option("no-l");
       m_options.compute_weak_conditions = parser.has_option("weak-conditions");
       m_options.compute_determinism = !parser.has_option("no-determinism");
-      m_options.compute_triangle_accordance = !parser.has_option("no-triangle");
-      m_options.compute_left_accordance = !parser.has_option("no-left");
-      m_options.compute_NES = !parser.has_option("no-nes");
+      m_options.compute_triangle_accordance = parser.has_option("triangle");
+      m_options.compute_left_accordance = parser.has_option("left");
+      m_options.compute_NES = parser.has_option("nes");
       m_options.reduction = !parser.has_option("full");
       if(parser.has_option("use-smt-solver"))
       {
@@ -59,17 +59,17 @@ class pbespor_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<r
     {
       super::add_options(desc);
       desc.add_option("no-l",
-                  "do not apply the condition L");
+                  "do not apply the condition L (might affect correctness)");
       desc.add_option("weak-conditions",
                   "use weak accordance conditions (cheaper, but less exact, static analysis)", 'w');
       desc.add_option("no-determinism",
                   "do not check whether transitions are deterministic (cheaper, but less powerful, static analysis)");
-      desc.add_option("no-triangle",
-                  "do not compute the triangle accordance relation (cheaper, but less powerful, static analysis)");
-      desc.add_option("no-left",
-                  "do not compute the left accordance relation (cheaper, but less powerful, static analysis)");
-      desc.add_option("no-nes",
-                  "do not compute the necessary enabling relation (cheaper, but less powerful, static analysis)");
+      desc.add_option("triangle",
+                  "compute the triangle accordance relation (more expensive, more powerful, static analysis)");
+      desc.add_option("left",
+                  "compute the left accordance relation (more expensive, more powerful, static analysis)");
+      desc.add_option("nes",
+                  "compute the necessary enabling relation (more expensive, more powerful, static analysis)");
       desc.add_option("full",
                   "explore the full state space. No static analysis is performed.");
       desc.add_option("use-smt-solver", utilities::make_optional_argument("TIMEOUT", "0"),
