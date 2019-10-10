@@ -15,9 +15,7 @@
 #include <utility>
 #include <functional>
 
-namespace mcrl2
-{
-namespace utilities
+namespace mcrl2::utilities
 {
 
 /// \brief A class for a map of keys to values in T based using the simple hash table set implementation.
@@ -170,9 +168,8 @@ template<typename Key,
          bool ThreadSafe = false>
 using unordered_map_large = unordered_map<Key, T, Hash, Equals, Allocator, ThreadSafe>;
 
-} // namespace utilities
-} // namespace mcrl2
+} // namespace mcrl2::utilities
 
-#include "unordered_map_implementation.h"
+#include "detail/unordered_map_implementation.h"
 
 #endif // MCRL2_UTILITIES_UNORDERED_MAP_H

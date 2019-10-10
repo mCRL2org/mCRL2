@@ -19,24 +19,20 @@
 
 #include <memory>
 
-namespace mcrl2
-{
-namespace utilities
+namespace mcrl2::utilities
 {
 
-namespace /// local functions
-{
 static constexpr std::size_t minimum_size = 4UL;
 
 /// \brief A compile time check for allocate_args in the given allocator, calls allocate(1) otherwise.
 template<typename T, typename Allocator, typename ...Args>
-static auto allocate(Allocator& allocator, const Args&... args) -> decltype(allocator.allocate_args(args...))
+inline auto allocate(Allocator& allocator, const Args&... args) -> decltype(allocator.allocate_args(args...))
 {
   return allocator.allocate_args(args...);
 }
 
 template<typename T, typename Allocator, typename ...Args>
-static auto allocate(Allocator& allocator, const Args&...) -> decltype(allocator.allocate(1))
+inline auto allocate(Allocator& allocator, const Args&...) -> decltype(allocator.allocate(1))
 {
   return allocator.allocate(1);
 }
@@ -44,8 +40,6 @@ static auto allocate(Allocator& allocator, const Args&...) -> decltype(allocator
 inline float bytes_to_megabytes(std::size_t bytes)
 {
   return static_cast<float>(bytes) / (1024.0f * 1024.0f);
-}
-
 }
 
 MCRL2_UNORDERED_SET_TEMPLATES
@@ -331,7 +325,6 @@ void MCRL2_UNORDERED_SET_CLASS::rehash_if_needed()
 #undef MCRL2_UNORDERED_SET_CLASS
 #undef MCRL2_UNORDERED_SET_TEMPLATES
 
-} // namespace utilities
-} // namespace mcrl2
+} // namespace mcrl2::utilities
 
 #endif // MCRL2_UTILITIES_UNORDERED_SET_IMPLEMENTATION_H

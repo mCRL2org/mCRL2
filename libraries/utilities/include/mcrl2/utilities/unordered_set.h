@@ -20,9 +20,7 @@
 #include <cstddef>
 #include <vector>
 
-namespace mcrl2
-{
-namespace utilities
+namespace mcrl2::utilities
 {
 
 /// \brief Prints various information for unordered_set like data structures.
@@ -232,9 +230,8 @@ template<typename Key,
          bool ThreadSafe = false>
 using unordered_set_large = unordered_set<Key, Hash, Equals, Allocator, ThreadSafe>;
 
-} // namespace utilities
-} // namespace mcrl2;
+} // namespace mcrl2::utilities
 
-#include "unordered_set_implementation.h"
+#include "detail/unordered_set_implementation.h"
 
 #endif // MCRL2_UTILITIES_UNORDERED_SET_H

@@ -16,9 +16,7 @@
 #define MCRL2_UNORDERED_MAP_TEMPLATES template<typename Key, typename T, typename Hash, typename Equals, typename Allocator, bool ThreadSafe>
 #define MCRL2_UNORDERED_MAP_CLASS unordered_map<Key, T, Hash, Equals, Allocator, ThreadSafe>
 
-namespace mcrl2
-{
-namespace utilities
+namespace mcrl2::utilities
 {
 
 MCRL2_UNORDERED_MAP_TEMPLATES
@@ -40,7 +38,6 @@ const T& MCRL2_UNORDERED_MAP_CLASS::at(const key_type& key) const
 #undef MCRL2_UNORDERED_MAP_TEMPLATES
 #undef MCRL2_UNORDERED_MAP_CLASS
 
-} // namespace utilities
-} // namespace mcrl2
+} // namespace mcrl2::utilities
 
 #endif // MCRL2_UTILITIES_UNORDERED_MAP_IMPLEMENTATION_H
