@@ -42,10 +42,12 @@ class pbespor_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<r
     {
       super::parse_options(parser);
       m_options.use_condition_L = !parser.has_option("no-l");
-      m_options.use_weak_conditions = parser.has_option("weak-conditions");
-      m_options.no_determinisim = parser.has_option("no-determinism");
-      m_options.no_triangle = parser.has_option("no-triangle");
-      m_options.no_reduction = parser.has_option("full");
+      m_options.compute_weak_conditions = parser.has_option("weak-conditions");
+      m_options.compute_determinism = !parser.has_option("no-determinism");
+      m_options.compute_triangle_accordance = !parser.has_option("no-triangle");
+      m_options.compute_left_accordance = !parser.has_option("no-left");
+      m_options.compute_NES = !parser.has_option("no-nes");
+      m_options.reduction = !parser.has_option("full");
       if(parser.has_option("use-smt-solver"))
       {
         m_options.use_smt_solver = true;
@@ -64,6 +66,10 @@ class pbespor_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<r
                   "do not check whether transitions are deterministic (cheaper, but less powerful, static analysis)");
       desc.add_option("no-triangle",
                   "do not compute the triangle accordance relation (cheaper, but less powerful, static analysis)");
+      desc.add_option("no-left",
+                  "do not compute the left accordance relation (cheaper, but less powerful, static analysis)");
+      desc.add_option("no-nes",
+                  "do not compute the necessary enabling relation (cheaper, but less powerful, static analysis)");
       desc.add_option("full",
                   "explore the full state space. No static analysis is performed.");
       desc.add_option("use-smt-solver", utilities::make_optional_argument("TIMEOUT", "0"),

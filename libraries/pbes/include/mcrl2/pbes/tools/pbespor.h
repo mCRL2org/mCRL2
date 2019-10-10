@@ -136,14 +136,14 @@ struct pbespor_pbes_composer
       add_expression(X, Y);
     };
 
-    if(options.no_reduction)
-    {
-      algorithm.explore_full(algorithm.initial_state(), emit_node, emit_edge);
-    }
-    else
+    if(options.reduction)
     {
       algorithm.print();
       algorithm.explore(algorithm.initial_state(), emit_node, emit_edge);
+    }
+    else
+    {
+      algorithm.explore_full(algorithm.initial_state(), emit_node, emit_edge);
     }
 
     return compose_result(p.data(), algorithm.initial_state());

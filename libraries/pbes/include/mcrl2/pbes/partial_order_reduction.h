@@ -226,14 +226,18 @@ static inline bool operator&&(const std::function<tribool()>& a, const std::func
 struct pbespor_options
 {
   // if true use alternative A3 for maybe clauses in accordance conditions
-  bool use_weak_conditions = false;
-  // if true, do not compute which summands are deterministic
-  bool no_determinisim = false;
-  // if true, do not compute triangle accordance
-  bool no_triangle = false;
-  // if true, do not do any static analysis
-  bool no_reduction = false;
-  // if true, do not apply condition L
+  bool compute_weak_conditions = false;
+  // if true, compute which summands are deterministic
+  bool compute_determinism = true;
+  // if true, compute triangle accordance
+  bool compute_triangle_accordance = true;
+  // if true, compute left accordance
+  bool compute_left_accordance = true;
+  // if true, compute NES relation
+  bool compute_NES = true;
+  // if true, perform static analysis and reduce state space
+  bool reduction = true;
+  // if true, apply condition L
   bool use_condition_L = true;
 
   data::rewrite_strategy rewrite_strategy = data::rewrite_strategy::jitty;
@@ -309,7 +313,7 @@ class partial_order_reduction_algorithm
     {
     private:
       partial_order_reduction_algorithm& parent;
-      bool use_weak_conditions;
+      bool compute_weak_conditions;
       data::set_identifier_generator id_gen;
 
       data::variable_list qvars1_k;
@@ -337,7 +341,7 @@ class partial_order_reduction_algorithm
       // an existential quantifier
       data::data_expression make_exists_if_strong(const data::variable_list& vars, const data::data_expression& body)
       {
-        return use_weak_conditions ? body : make_exists(vars, body);
+        return compute_weak_conditions ? body : make_exists(vars, body);
       }
 
       data::data_expression left_accords_antecedent()
@@ -424,7 +428,7 @@ class partial_order_reduction_algorithm
     public:
       summand_relations_data(partial_order_reduction_algorithm& p, const std::size_t k, const std::size_t k1)
       : parent(p)
-      , use_weak_conditions(p.m_options.use_weak_conditions)
+      , compute_weak_conditions(p.m_options.compute_weak_conditions)
       {
         const summand_class& summand_k = parent.m_summand_classes[k];
         const summand_class& summand_k1 = parent.m_summand_classes[k1];
@@ -444,7 +448,7 @@ class partial_order_reduction_algorithm
         data::add_assignments(sigma_k, parameters, updates1_k);
         data::add_assignments(sigma_k1, parameters, updates1_k1);
 
-        if (!use_weak_conditions)
+        if (!compute_weak_conditions)
         {
           // When using the stronger condition A4, create another fresh copy
           summand_equivalence_key new2_k = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k));
@@ -1101,17 +1105,19 @@ class partial_order_reduction_algorithm
 
           summand_relations_data summand_data(*this, k, k1);
           // Use lambda lifting for short-circuiting the && operator on tribools
-          bool left_accords     = [&]{ return left_accords_equations(k, k1); } &&
-                                  [&](bool needs_yes) { return summand_data.left_accords_data(DNL_DNS_affect_sets, needs_yes); };
+          bool left_accords     = m_options.compute_left_accordance &&
+                                  ([&]{ return left_accords_equations(k, k1); } &&
+                                   [&](bool needs_yes) { return summand_data.left_accords_data(DNL_DNS_affect_sets, needs_yes); });
           // The DNS relation is symmetric
           bool square_accords   = (k1 < k && !DNS(k1).test(k)) ||
                                   (k1 > k &&
                                       ([&]{ return square_accords_equations(k, k1); } &&
                                        [&](bool needs_yes) { return summand_data.square_accords_data(DNL_DNS_affect_sets, needs_yes); }));
           bool accords          = square_accords ||
-                                 (!m_options.no_triangle && ([&]{ return triangle_accords_equations(k, k1); } &&
-                                                     [&](bool needs_yes) { return summand_data.triangle_accords_data(DNT_affect_sets, needs_yes); }));
-          bool can_enable       = !dependency_permanently_disables(k1, k) && !has_empty_intersection(Ts(k), Ws(k1)) && summand_data.can_enable();
+                                  (m_options.compute_triangle_accordance && ([&]{ return triangle_accords_equations(k, k1); } &&
+                                                          [&](bool needs_yes) { return summand_data.triangle_accords_data(DNT_affect_sets, needs_yes); }));
+          bool can_enable       = !m_options.compute_NES ||
+                                  (!dependency_permanently_disables(k1, k) && !has_empty_intersection(Ts(k), Ws(k1)) && summand_data.can_enable());
 
           if (!left_accords)
           {
@@ -1142,7 +1148,7 @@ class partial_order_reduction_algorithm
 
     void compute_NES_DNA_DNL()
     {
-      if (m_options.no_reduction)
+      if (!m_options.reduction)
       {
         return;
       }
@@ -1245,7 +1251,7 @@ class partial_order_reduction_algorithm
 
     void compute_deterministic()
     {
-      if (m_options.no_determinisim || m_options.no_reduction)
+      if (!m_options.compute_determinism || !m_options.reduction)
       {
         return;
       }
