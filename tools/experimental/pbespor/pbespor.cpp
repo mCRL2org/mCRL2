@@ -95,6 +95,7 @@ class pbespor_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<r
       mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
       mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
 
+      m_options.rewrite_strategy = rewrite_strategy();
       pbespor(input_filename(),
               output_filename(),
               pbes_input_format(),
