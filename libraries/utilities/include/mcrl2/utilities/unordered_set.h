@@ -132,7 +132,7 @@ public:
 
   /// \brief Erases the element pointed to by the iterator.
   /// \returns An iterator to the next key.
-  iterator erase(iterator it);
+  iterator erase(const_iterator it);
 
   /// \brief Counts the number of occurrences of the given key (1 when it exists and 0 otherwise).
   template<typename ...Args>

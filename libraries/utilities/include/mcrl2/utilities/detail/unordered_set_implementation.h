@@ -110,8 +110,10 @@ std::pair<typename MCRL2_UNORDERED_SET_CLASS::iterator, bool> MCRL2_UNORDERED_SE
 }
 
 MCRL2_UNORDERED_SET_TEMPLATES
-typename MCRL2_UNORDERED_SET_CLASS::iterator MCRL2_UNORDERED_SET_CLASS::erase(typename MCRL2_UNORDERED_SET_CLASS::iterator it)
+typename MCRL2_UNORDERED_SET_CLASS::iterator MCRL2_UNORDERED_SET_CLASS::erase(typename MCRL2_UNORDERED_SET_CLASS::const_iterator const_it)
 {
+  iterator& it = reinterpret_cast<iterator&>(const_it);
+
   // Find the bucket that is pointed to and remove the key after the before iterator.
   bucket_type& bucket = it.bucket();
 

@@ -146,7 +146,7 @@ public:
   std::pair<iterator, bool> emplace(Args&&... args) { return m_set.emplace(std::forward<Args>(args)...); }
 
   void erase(const key_type& key) { m_set.erase(key); }
-  iterator erase(iterator it) { return m_set.erase(it); }
+  iterator erase(const_iterator it) { return m_set.erase(it); }
 
   template<typename ...Args>
   iterator find(const Args&... args) { return m_set.find(args...); }

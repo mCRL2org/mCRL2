@@ -33,6 +33,8 @@ private:
 public:
   using tag = std::forward_iterator_tag;
 
+  unordered_set_iterator() = default;
+
   /// \brief Construct an iterator over all keys passed in this bucket and all remaining buckets.
   unordered_set_iterator(bucket_it it, bucket_it end, key_it_type before_it, key_it_type key) :
     m_bucket_it(it), m_bucket_end(end), m_key_before_it(before_it), m_key_it(key)
