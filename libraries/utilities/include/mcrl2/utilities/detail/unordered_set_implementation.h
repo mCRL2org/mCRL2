@@ -129,7 +129,7 @@ typename MCRL2_UNORDERED_SET_CLASS::iterator MCRL2_UNORDERED_SET_CLASS::erase(ty
 }
 
 MCRL2_UNORDERED_SET_TEMPLATES
-void MCRL2_UNORDERED_SET_CLASS::erase(Key& key)
+void MCRL2_UNORDERED_SET_CLASS::erase(const Key& key)
 {
   bucket_type& bucket = m_buckets[find_bucket_index(key)];
 

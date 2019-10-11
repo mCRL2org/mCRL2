@@ -128,7 +128,7 @@ public:
 
   /// \brief Erases the given key from the unordered set.
   /// \details Needs to find the key first.
-  void erase(key_type& key);
+  void erase(const key_type& key);
 
   /// \brief Erases the element pointed to by the iterator.
   /// \returns An iterator to the next key.
