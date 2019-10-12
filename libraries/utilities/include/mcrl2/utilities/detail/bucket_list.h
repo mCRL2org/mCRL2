@@ -125,9 +125,19 @@ public:
       return m_bucket_node->key();
     }
 
+    bool operator == (const key_iterator& it) const noexcept
+    {
+      !(*this != it);
+    }
+
     bool operator != (const key_iterator& it) const noexcept
     {
       return m_bucket_node != it.m_bucket_node;
+    }
+
+    bool operator == (Sentinel) const noexcept
+    {
+      !(*this != Sentinel());
     }
 
     bool operator != (Sentinel) const noexcept
@@ -172,6 +182,7 @@ public:
   /// \brief Puts the given node before the head of the list.
   void push_front(node* node)
   {
+    assert(!contains(node));
     node->next(m_head.next());
     m_head.next(node);
   }
@@ -186,12 +197,11 @@ public:
     node* erased_node = reinterpret_cast<node*>(current_node->next());
     node* next_node = reinterpret_cast<node*>(erased_node->next());
 
+    // Update the next pointer of the current node.
+    current_node->next(next_node);
     // Clean up the old node.
     std::allocator_traits<NodeAllocator>::destroy(allocator, erased_node);
     std::allocator_traits<NodeAllocator>::deallocate(allocator, erased_node, 1);
-
-    // Update the next pointer of the current node.
-    current_node->next(next_node);
     return iterator(next_node);
   }
 
@@ -200,7 +210,28 @@ public:
   /// \brief Empties the bucket list.
   void clear() { m_head.next(nullptr); }
 
+  /// \returns True iff this bucket has no elements.
+  bool empty() const { return m_head.has_next(); }
+
 private:
+
+  /// \returns True iff this bucket already contains the given node.
+  bool contains(node* node)
+  {
+    node_base* element = &m_head;
+    while(element->has_next())
+    {
+      if (node == element->next())
+      {
+        return true;
+      }
+
+      element = element->next();
+    }
+
+    return false;
+  }
+
   /// \brief The first node in the bucket list.
   node_base m_head;
 };
