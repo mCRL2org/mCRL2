@@ -600,18 +600,9 @@ class partial_order_reduction_algorithm
       return m_invis & K;
     }
 
-    // Choose a NES according to the heuristic function h.
-    const summand_set& choose_minimal_NES(std::size_t k,
-                                   const propositional_variable_instantiation& X_e,
-                                   const summand_set& /* Twork */,
-                                   const summand_set& /* Ts */,
-                                   const summand_set& /* en_X_e */
-                                  ) const
+    // Choose a NES according to whether k is present in X
+    const summand_set& choose_minimal_NES(std::size_t k, const propositional_variable_instantiation& X_e) const
     {
-      using utilities::detail::set_difference;
-      using utilities::detail::set_intersection;
-      using utilities::detail::set_union;
-
       if(!depends(m_equation_index.index(X_e.name()), k))
       {
         return m_dependency_nes[m_equation_index.index(X_e.name())];
@@ -620,32 +611,6 @@ class partial_order_reduction_algorithm
       {
         return m_summand_classes[k].NES;
       }
-
-      //TODO implement one NES per guard, choose the smallest one
-      // summand_set Twork_Ts = set_union(Twork, Ts);
-      // const summand_class& summand_k = m_summand_classes[k];
-      //
-      // summand_set T1 = set_union(Twork_Ts, en_X_e);
-      // summand_set T2 = set_intersection(Twork_Ts, en_X_e);
-      //
-      // auto h = [&](std::size_t i)
-      // {
-      //   const summand_set NES_k = summand_k.NES[i];
-      //   return set_difference(NES_k, T1).size() + m_largest_equation_size * set_difference(NES_k, T2).size();
-      // };
-      //
-      // std::size_t i_min = 0;
-      // std::size_t h_min = h(0);
-      // for (std::size_t i = 1; i < n; i++)
-      // {
-      //   std::size_t h_i = h(i);
-      //   if (h_i < h_min)
-      //   {
-      //     i_min = i;
-      //     h_min = h_i;
-      //   }
-      // }
-      // return i_min;
     }
 
     const summand_set& DNX(std::size_t k,
@@ -696,10 +661,10 @@ class partial_order_reduction_algorithm
       {
         // Prevent allocations and destructions by using temp_set
         mutable summand_set temp_set;
-        const summand_set m_en_X_e;
+        const summand_set& m_en_X_e;
 
-        explicit compare_invis_pair(summand_set en)
-        : m_en_X_e(std::move(en))
+        explicit compare_invis_pair(const summand_set& en)
+        : m_en_X_e(en)
         {}
 
         std::size_t size(const invis_pair& p) const
@@ -714,7 +679,7 @@ class partial_order_reduction_algorithm
         {
           std::size_t sizex = size(x);
           std::size_t sizey = size(y);
-          return sizex < sizey || (sizex == sizey && x < y);
+          return std::tie(sizex, x) < std::tie(sizey, y);
         };
       };
 
@@ -743,6 +708,7 @@ class partial_order_reduction_algorithm
         auto p = C.extract(C.begin());
         auto& Twork = p.value().Twork;
         auto& Ts = p.value().Ts;
+        
         if (Twork.none())
         {
           summand_set T = Ts & en_X_e;
@@ -754,7 +720,7 @@ class partial_order_reduction_algorithm
             }
           }
           std::size_t k = T.find_first(); // TODO: choose k according to D2t
-          Twork = Twork | (DNA(k) - Ts);
+          Twork |= (DNA(k) - Ts);
         }
         else
         {
@@ -764,18 +730,19 @@ class partial_order_reduction_algorithm
           if (en_X_e.test(k))
           {
             auto& DNS_or_DNL = DNX(k, Twork, Ts, en_X_e);
-            Twork = Twork | (DNS_or_DNL - Ts);
+            Twork |= (DNS_or_DNL - Ts);
             if (m_vis.test(k))
             {
-              Twork = Twork | (m_vis - Ts);
+              Twork |= (m_vis - Ts);
             }
           }
           else
           {
-            auto& NES = choose_minimal_NES(k, X_e, Twork, Ts, en_X_e);
-            Twork = Twork | (NES - Ts);
+            auto& NES = choose_minimal_NES(k, X_e);
+            Twork |= (NES - Ts);
           }
         }
+
         C.insert(std::move(p));
       }
     }
@@ -1549,7 +1516,6 @@ class partial_order_reduction_algorithm
               {
                 continue;
               }
-              std::size_t node_index = node->second.first;
               std::size_t node_instack = node->second.second;
               if (node_instack)
               {
