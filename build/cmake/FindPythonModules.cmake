@@ -1,4 +1,4 @@
-find_package(PythonInterp 3.6.8)
+find_package(PythonInterp 3.6.0)
 
 if(PYTHONINTERP_FOUND)
   if(PythonModules_FIND_COMPONENTS)
