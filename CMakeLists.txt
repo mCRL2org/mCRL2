@@ -46,6 +46,7 @@ option(MCRL2_ENABLE_DEPRECATED      "Enable compilation of deprecated tools." OF
 option(MCRL2_ENABLE_DEVELOPER       "Enable compilation of developer tools." OFF)
 option(MCRL2_ENABLE_HEADER_TESTS    "Enable generation of headertest targets." OFF)
 option(MCRL2_ENABLE_TESTS           "Enable generation of library, tool and random test targets." OFF)
+option(MCRL2_ENABLE_DOCUMENTATION   "Enable generation of documentation." OFF)
 option(MCRL2_ENABLE_BENCHMARKS      "Enable benchmarks. Build the 'benchmarks' target to generate the necessary files and tools. Run the benchmarks using ctest." OFF)
 option(MCRL2_EXTRA_TOOL_TESTS       "Enable testing of tools on more mCRL2 specifications." OFF)
 option(MCRL2_TEST_JITTYC            "Also test the compiling rewriters in the library tests. This can be time consuming." OFF)
@@ -94,7 +95,10 @@ add_subdirectory(3rd-party/dparser)
 
 add_subdirectory(libraries)
 add_subdirectory(tools)
-add_subdirectory(doc)
+
+if (MCRL2_ENABLE_DOCUMENTATION)
+  add_subdirectory(doc)
+endif()
 
 if (MCRL2_ENABLE_TESTS)
   add_subdirectory(tests)
