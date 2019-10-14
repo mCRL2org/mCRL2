@@ -48,6 +48,8 @@ private:
   // Hashes only the keys of each pair.
   struct PairHash
   {
+    using is_transparent = void;
+
     PairHash() = default;
 
     explicit PairHash(const hasher& hash)
@@ -75,6 +77,8 @@ private:
   // Compares only the keys of each pair.
   struct PairEquals
   {
+    using is_transparent = void;
+
     PairEquals() = default;
 
     explicit PairEquals(const key_equals& equals)

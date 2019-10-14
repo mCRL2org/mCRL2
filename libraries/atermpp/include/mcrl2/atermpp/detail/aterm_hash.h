@@ -86,6 +86,8 @@ constexpr std::size_t DynamicNumberOfArguments = std::numeric_limits<std::size_t
 template<std::size_t N = DynamicNumberOfArguments>
 struct aterm_hasher
 {
+  using is_transparent = void;
+
   std::size_t operator()(const _aterm& term) const noexcept;
   std::size_t operator()(const function_symbol& symbol) const noexcept;
   std::size_t operator()(const function_symbol& symbol, unprotected_aterm arguments[]) const noexcept;
@@ -100,6 +102,8 @@ struct aterm_hasher
 template<std::size_t N = 0>
 struct aterm_hasher_finite : public aterm_hasher<N>
 {
+  using is_transparent = void;
+
   using aterm_hasher<N>::operator();
   std::size_t operator()(const function_symbol& symbol, std::array<unprotected_aterm, N> key) const noexcept;
 
@@ -110,6 +114,8 @@ struct aterm_hasher_finite : public aterm_hasher<N>
 /// \brief Computes the hash of the integral term arguments.
 struct aterm_int_hasher
 {
+  using is_transparent = void;
+
   inline std::size_t operator()(const _aterm_int& term) const noexcept;
   inline std::size_t operator()(std::size_t value) const noexcept;
 };

@@ -51,6 +51,22 @@ private:
   using bucket_iterator = typename std::vector<bucket_type>::iterator;
   using const_bucket_iterator = typename std::vector<bucket_type>::const_iterator;
 
+  // Check for the existence of the is_transparent type.
+  template <typename... >
+  using void_t = void;
+
+  template <typename X, typename = void>
+  struct is_transparent : std::false_type { };
+
+  template <typename X>
+  struct is_transparent<X, void_t<typename X::is_transparent>>
+  : std::true_type { };
+
+  // Transparency means that it can be called with the arguments passed through emplace (which are the arguments of a constructor) and find.
+  // Specifically the function hash(x_0,...,x_n) and equals(key, x_0,...,x_n) must be defined for all arguments of calls to emplace(x_0,...,x_n) and find(x_0,...,x_n).
+  static_assert (is_transparent<Hash>(), "The hash function must have is_transparent to indicate that it supports heterogeneous lookup.");
+  static_assert (is_transparent<Equals>(), "The equals function must have is_transparent to indicate that it supports heterogeneous lookup.");
+
 public:
   using key_type = Key;
   using value_type = Key;

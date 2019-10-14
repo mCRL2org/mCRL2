@@ -61,6 +61,8 @@ namespace detail
 ///        function_symbol_key.
 struct function_symbol_hasher
 {
+  using is_transparent = void;
+
   inline std::size_t operator() (const _function_symbol& symbol) const noexcept;
   inline std::size_t operator() (const std::string& name, std::size_t arity) const noexcept;
 };
