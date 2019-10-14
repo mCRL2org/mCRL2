@@ -1,5 +1,5 @@
 include(GenerateToolTests)
-find_package(PythonModules 3.7 COMPONENTS yaml psutil REQUIRED)
+find_package(PythonModules COMPONENTS yaml psutil REQUIRED)
 
 generate_tool_tests(${CMAKE_SOURCE_DIR}/examples/academic/abp/abp.mcrl2 "")
 

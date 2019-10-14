@@ -1,4 +1,4 @@
-find_package(PythonInterp ${PythonModules_FIND_VERSION})
+find_package(PythonInterp 3.6.8)
 
 if(PYTHONINTERP_FOUND)
   if(PythonModules_FIND_COMPONENTS)
@@ -15,7 +15,6 @@ if(PYTHONINTERP_FOUND)
       endif()
     endforeach()
   endif()
-elseif(PythonModules_FIND_REQUIRED)
+else()
   message(FATAL_ERROR "Python interpreter could not be found.")
 endif()
-
