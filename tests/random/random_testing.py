@@ -9,6 +9,7 @@ import os.path
 import random
 import re
 import sys
+import traceback
 sys.path += [os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'python'))]
 
 import random_state_formula_generator
@@ -461,7 +462,8 @@ def main(tests):
                 test = tests[name]('{}_{}'.format(name, i), settings)
                 test.execute_in_sandbox()
         except Exception as e:
-            print(e)
+            print('An exception occurred:', e.__class__, e)
+            traceback.print_exc()
 
 if __name__ == '__main__':
     main(available_tests)
