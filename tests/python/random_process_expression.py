@@ -151,7 +151,7 @@ def select_generators(generators, actions, process_identifiers, variables, is_pc
 # example: 'b: Bool'
 def parse_variable(text):
     text = text.strip()
-    m = re.match('([^,:]+)\s*\:(.+)', text)
+    m = re.match('([^,:]+)\s*:(.+)', text)
     result = Variable(m.group(1).strip(), m.group(2).strip())
     return result
 
@@ -159,7 +159,7 @@ def parse_variable(text):
 def parse_variables(text):
     import string
     variables = filter(None, list(map(str.strip, text.split(','))))
-    return map(parse_variable, variables)
+    return list(map(parse_variable, variables))
 
 #---------------------------------------------------------------------------#
 #           generators for process expressions
@@ -425,7 +425,7 @@ def make_process_specification(parallel_operator_generators = default_parallel_o
         equations.append(ProcessEquation(P, x))
     n = random.randint(0, 5)
     if not init:
-        process_instances = [ProcessInstance(x, map(default_value, x.variables)) for x in process_identifiers]
+        process_instances = [ProcessInstance(x, list(map(default_value, x.variables))) for x in process_identifiers]
         init = make_parallel_process_expression(actions, process_instances, n, parallel_operator_generators)
     return ProcessSpecification(list(set(actions)), equations, init)
 
