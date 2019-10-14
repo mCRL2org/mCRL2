@@ -1,9 +1,5 @@
-if (NOT ${MCRL2_ENABLE_TESTS})
-  return()
-endif()
-
 include(GenerateToolTests)
-find_package(PythonModules 2.4 COMPONENTS argparse)
+find_package(PythonModules 3.7 COMPONENTS yaml psutil REQUIRED)
 
 generate_tool_tests(${CMAKE_SOURCE_DIR}/examples/academic/abp/abp.mcrl2 "")
 
@@ -47,8 +43,6 @@ endif()
 # runs the test numbered NUM (if it exists) and returns exit code 0 if the
 # test succeeds, or 1 if it fails.
 #
-include(./dependencies.cmake)
-
 set(python_dirs "random" "regression")
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/workspace)
 foreach(dir ${python_dirs})

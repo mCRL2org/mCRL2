@@ -95,7 +95,10 @@ add_subdirectory(3rd-party/dparser)
 add_subdirectory(libraries)
 add_subdirectory(tools)
 add_subdirectory(doc)
-add_subdirectory(tests)
+
+if (MCRL2_ENABLE_TESTS)
+  add_subdirectory(tests)
+endif()
 
 install(DIRECTORY examples DESTINATION ${MCRL2_RESOURCE_PATH} COMPONENT Examples)
 
