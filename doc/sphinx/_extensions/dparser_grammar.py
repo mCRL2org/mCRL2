@@ -63,7 +63,7 @@ def getGrammar(filename):
   from dparser import Parser
   gramgram = open(os.path.join(os.path.dirname(__file__), 'grammargrammar.txt')).read()
   d_parse_grammar.__doc__ = gramgram
-  parser = Parser()
+  parser = Parser(parser_folder=os.path.dirname(__file__))
   return parser.parse(open(filename).read()).getStructure()
 
 class DParserGrammarDirective(ProductionList):
