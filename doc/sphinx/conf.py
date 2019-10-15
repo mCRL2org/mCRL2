@@ -106,6 +106,9 @@ html_sidebars = {
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+# Additional files that are copied as such to the output directory, for example the index.html.
+html_extra_path = ['_html']
+
 # Tweaking how the "last updated" is displayed
 today_fmt = '%d-%m-%Y'
 
