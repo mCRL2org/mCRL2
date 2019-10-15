@@ -211,7 +211,7 @@ public:
   void clear() { m_head.next(nullptr); }
 
   /// \returns True iff this bucket has no elements.
-  bool empty() const { return m_head.has_next(); }
+  bool empty() const { return !m_head.has_next(); }
 
 private:
 
