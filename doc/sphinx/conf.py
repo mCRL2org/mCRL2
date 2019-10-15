@@ -120,7 +120,7 @@ def setup(app):
     import libraries
     import man
 
-    temppath = f'{app.outdir}/cache'
+    temppath = f'{app.outdir}/../temp'
     os.makedirs(temppath, mode = 0o755, exist_ok = True)
     olddir = os.getcwd()
     try:

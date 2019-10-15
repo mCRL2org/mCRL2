@@ -1,8 +1,9 @@
 set(SPHINX_BUILD_CMD "sphinx-build")
 set(SPHINX_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 set(SPHINX_BUILD_ROOT_DIR "${CMAKE_BINARY_DIR}/sphinx")
-set(SPHINX_BUILD_SRC_DIR "${CMAKE_BINARY_DIR}/sphinx/source")
-set(SPHINX_BUILD_OUT_DIR "${CMAKE_BINARY_DIR}/sphinx/build")
+set(SPHINX_BUILD_SRC_DIR "${SPHINX_BUILD_ROOT_DIR}/source")
+set(SPHINX_BUILD_OUT_DIR "${SPHINX_BUILD_ROOT_DIR}/build")
+set(SPHINX_BUILD_TEMP_DIR "${SPHINX_BUILD_ROOT_DIR}/temp")
 
 set(SPHINX_PARALLEL "-jauto")
 if(CMAKE_BUILD_PARALLEL_LEVEL)
@@ -14,8 +15,8 @@ add_custom_target(cleandoc
   COMMENT "Delete all cached documentation"
   COMMAND ${CMAKE_COMMAND} -E remove_directory ${SPHINX_BUILD_SRC_DIR}
   COMMAND ${CMAKE_COMMAND} -E remove_directory ${SPHINX_BUILD_OUT_DIR}
-  COMMAND ${CMAKE_COMMAND} -E remove
-    "${SPHINX_BUILD_ROOT_DIR}/build-warnings.log"
+  COMMAND ${CMAKE_COMMAND} -E remove_directory ${SPHINX_BUILD_TEMP_DIR}
+  COMMAND ${CMAKE_COMMAND} -E remove "${SPHINX_BUILD_ROOT_DIR}/build-warnings.log"
   VERBATIM
 )
 
@@ -40,7 +41,7 @@ function(add_build_doc_target NAME DESC INCLUDE_CLEAN)
     # run the Sphinx build command
     COMMAND ${CMAKE_COMMAND} -E env MCRL2_SRC_DIR=${CMAKE_SOURCE_DIR}
       ${SPHINX_BUILD_CMD}
-      -b html -d "${SPHINX_BUILD_OUT_DIR}/doctrees" ${SPHINX_PARALLEL}
+      -b html -d "${SPHINX_BUILD_TEMP_DIR}/doctrees" ${SPHINX_PARALLEL}
       ${SPHINX_BUILD_SRC_DIR} ${SPHINX_BUILD_OUT_DIR}
       2> ${SPHINX_BUILD_ROOT_DIR}/build-warnings.log
     VERBATIM
