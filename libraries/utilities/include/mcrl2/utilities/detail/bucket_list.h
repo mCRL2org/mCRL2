@@ -199,6 +199,7 @@ public:
 
     // Update the next pointer of the current node.
     current_node->next(next_node);
+
     // Clean up the old node.
     std::allocator_traits<NodeAllocator>::destroy(allocator, erased_node);
     std::allocator_traits<NodeAllocator>::deallocate(allocator, erased_node, 1);
@@ -208,7 +209,13 @@ public:
   const node_base* front() const noexcept { return &m_head; }
 
   /// \brief Empties the bucket list.
-  void clear() { m_head.next(nullptr); }
+  void clear(NodeAllocator& allocator)
+  {
+    while(!empty())
+    {
+      erase_after(before_begin(), allocator);
+    }
+  }
 
   /// \returns True iff this bucket has no elements.
   bool empty() const { return !m_head.has_next(); }
