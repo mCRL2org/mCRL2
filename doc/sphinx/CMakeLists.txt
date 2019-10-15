@@ -21,13 +21,8 @@ add_custom_target(cleandoc
 )
 
 function(add_build_doc_target NAME DESC INCLUDE_CLEAN)
-  set(CLEAN_DEPENCY "")
-  if(INCLUDE_CLEAN)
-    list(APPEND CLEAN_DEPENCY DEPENDS cleandoc)
-  endif()
   add_custom_target(${NAME}
     COMMENT ${DESC}
-    ${CLEAN_DEPENCY}
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     # ensure the build directory exists, because Sphinx does not create it
     # automatically
@@ -46,12 +41,17 @@ function(add_build_doc_target NAME DESC INCLUDE_CLEAN)
       2> ${SPHINX_BUILD_ROOT_DIR}/build-warnings.log
     VERBATIM
   )
+
   add_custom_command(
     TARGET ${NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold
       "-- Please check ${SPHINX_BUILD_ROOT_DIR}/build-warnings.log for warnings and errors"
   )
-endfunction(add_build_doc_target)
+
+  if (INCLUDE_CLEAN)
+    add_dependencies(${NAME} cleandoc)
+  endif()
+endfunction()
 
 add_build_doc_target(fastdoc "Generating mCRL2 documentation (does not \
 regenerate cached PDF, manual pages and Doxygen documentation)" FALSE)
