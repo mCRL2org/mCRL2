@@ -94,7 +94,7 @@ struct aterm_hasher
 
   template<typename ForwardIterator,
            typename std::enable_if<is_iterator<ForwardIterator>::value, void>::type* = nullptr>
-  std::size_t operator()(const function_symbol& symbol, ForwardIterator begin) const noexcept;
+  std::size_t operator()(const function_symbol& symbol, ForwardIterator begin, ForwardIterator end) const noexcept;
 };
 
 /// \brief Computes the hash of the given term.
@@ -134,7 +134,7 @@ struct aterm_equals
 
   template<typename ForwardIterator,
            typename std::enable_if<is_iterator<ForwardIterator>::value>::type* = nullptr>
-  bool operator()(const _aterm& term, const function_symbol& symbol, ForwardIterator begin) const noexcept;
+  bool operator()(const _aterm& term, const function_symbol& symbol, ForwardIterator begin, ForwardIterator end) const noexcept;
 };
 
 template<std::size_t N>
@@ -210,8 +210,11 @@ std::size_t aterm_hasher<N>::operator()(const function_symbol& symbol, unprotect
 template<std::size_t N>
 template<typename ForwardIterator,
          typename std::enable_if<is_iterator<ForwardIterator>::value, void>::type*>
-inline std::size_t aterm_hasher<N>::operator()(const function_symbol& symbol, ForwardIterator begin) const noexcept
+inline std::size_t aterm_hasher<N>::operator()(const function_symbol& symbol, ForwardIterator it, ForwardIterator end) const noexcept
 {
+  // The end is only used for debugging to ensure that the arity and std::distance(it, end) match.
+  mcrl2::utilities::mcrl2_unused(end);
+
   // The arity is defined by the function symbol iff N is unchanged and the arity is N otherwise.
   const std::size_t arity = (N == DynamicNumberOfArguments) ? symbol.arity() : N;
 
@@ -219,10 +222,12 @@ inline std::size_t aterm_hasher<N>::operator()(const function_symbol& symbol, Fo
   std::size_t hnr = operator()(symbol);
   for (std::size_t i = 0; i < arity; ++i)
   {
-    hnr = combine(hnr, *begin);
-    ++begin;
+    assert(it != end);
+    hnr = combine(hnr, *it);
+    ++it;
   }
 
+  assert(it == end);
   return hnr;
 }
 
@@ -333,8 +338,11 @@ bool aterm_equals<N>::operator()(const _aterm& term, const function_symbol& symb
 template<std::size_t N>
 template<typename ForwardIterator,
          typename std::enable_if<is_iterator<ForwardIterator>::value>::type*>
-inline bool aterm_equals<N>::operator()(const _aterm& term, const function_symbol& symbol, ForwardIterator begin) const noexcept
+inline bool aterm_equals<N>::operator()(const _aterm& term, const function_symbol& symbol, ForwardIterator it, ForwardIterator end) const noexcept
 {
+  // The end is only used for debugging to ensure that the arity and std::distance(it, end) match.
+  mcrl2::utilities::mcrl2_unused(end);
+
   if (term.function() == symbol)
   {
     const std::size_t arity = (N == DynamicNumberOfArguments) ? symbol.arity() : N;
@@ -342,13 +350,15 @@ inline bool aterm_equals<N>::operator()(const _aterm& term, const function_symbo
     // Each argument should be equal.
     for (std::size_t i = 0; i < arity; ++i)
     {
-      if (static_cast<const _term_appl&>(term).arg(i) != (*begin))
+      assert(it != end);
+      if (static_cast<const _term_appl&>(term).arg(i) != (*it))
       {
         return false;
       }
-      ++begin;
+      ++it;
     }
 
+    assert(it == end);
     return true;
   }
 

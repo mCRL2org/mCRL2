@@ -34,15 +34,20 @@ template<std::size_t N,
          typename InputIterator,
          typename TermConverter,
          typename std::enable_if<is_iterator<InputIterator>::value, void>::type* = nullptr>
-inline std::array<unprotected_aterm, N> construct_arguments(InputIterator it, TermConverter converter)
+inline std::array<unprotected_aterm, N> construct_arguments(InputIterator it, InputIterator end, TermConverter converter)
 {
+  // The end is only used for debugging to ensure that the arity and std::distance(it, end) match.
+  mcrl2::utilities::mcrl2_unused(end);
+
   // Copy the arguments into this array. Doesn't change any reference count, because they are unprotected terms.
   std::array<unprotected_aterm, N> arguments;
   for (size_t i = 0; i < N; ++i)
   {
+    assert(it != end);
     arguments[i] = converter(*it);
     ++it;
   }
+  assert(it == end);
 
   return arguments;
 }
@@ -91,23 +96,25 @@ aterm ATERM_POOL_STORAGE::create_int(std::size_t value)
 ATERM_POOL_STORAGE_TEMPLATES
 aterm ATERM_POOL_STORAGE::create_term(const function_symbol& symbol)
 {
+  assert(symbol.arity() == 0);
   return emplace(symbol);
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
 template<class ...Terms>
-aterm ATERM_POOL_STORAGE::create_appl(const function_symbol& sym, const Terms&... arguments)
+aterm ATERM_POOL_STORAGE::create_appl(const function_symbol& symbol, const Terms&... arguments)
 {
-  return emplace(sym, arguments...);
+  assert(symbol.arity() == sizeof...(arguments));
+  return emplace(symbol, arguments...);
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
 template<typename ForwardIterator>
 aterm ATERM_POOL_STORAGE::create_appl_iterator(const function_symbol& symbol,
                                         ForwardIterator begin,
-                                        ForwardIterator)
+                                        ForwardIterator end)
 {
-  return emplace(symbol, begin);
+  return emplace(symbol, begin, end);
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
@@ -115,9 +122,9 @@ template<typename InputIterator, typename TermConverter>
 aterm ATERM_POOL_STORAGE::create_appl_iterator(const function_symbol& symbol,
                                         TermConverter converter,
                                         InputIterator begin,
-                                        InputIterator)
+                                        InputIterator end)
 {
-  std::array<unprotected_aterm, N> arguments = construct_arguments<N>(begin, converter);
+  std::array<unprotected_aterm, N> arguments = construct_arguments<N>(begin, end, converter);
   return emplace(symbol, arguments);
 }
 
@@ -125,9 +132,9 @@ ATERM_POOL_STORAGE_TEMPLATES
 template<typename ForwardIterator>
 aterm ATERM_POOL_STORAGE::create_appl_dynamic(const function_symbol& symbol,
                                         ForwardIterator begin,
-                                        ForwardIterator)
+                                        ForwardIterator end)
 {
-  return emplace(symbol, begin);
+  return emplace(symbol, begin, end);
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
@@ -136,17 +143,19 @@ template<typename InputIterator,
 aterm ATERM_POOL_STORAGE::create_appl_dynamic(const function_symbol& symbol,
                                         TermConverter converter,
                                         InputIterator it,
-                                        InputIterator)
+                                        InputIterator end)
 {
   MCRL2_DECLARE_STACK_ARRAY(arguments, unprotected_aterm, symbol.arity());
   for (std::size_t i = 0; i < symbol.arity(); ++i)
   {
+    assert(it != end);
     arguments[i] = converter(*it);
     ++it;
   }
+  assert(it == end);
 
   // Find or create a new term and return it.
-  return emplace(symbol, arguments.begin());
+  return emplace(symbol, arguments.begin(), arguments.end());
 }
 
 ATERM_POOL_STORAGE_TEMPLATES

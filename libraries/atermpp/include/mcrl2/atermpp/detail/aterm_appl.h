@@ -11,6 +11,7 @@
 #define MCRL2_ATERMPP_DETAIL_ATERM_APPL_H
 
 #include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/utilities/unused.h"
 
 #include <array>
 #include <tuple>
@@ -47,34 +48,48 @@ public:
   ///        of elements is equal to the template parameter N.
   template<typename Iterator,
            typename std::enable_if<is_iterator<Iterator>::value>::type* = nullptr>
-  _aterm_appl(const function_symbol& sym, Iterator it)
+  _aterm_appl(const function_symbol& sym, Iterator it, Iterator end)
     : _aterm(sym)
   {
+    // The end is only used for debugging to ensure that the arity and std::distance(it, end) match.
+    mcrl2::utilities::mcrl2_unused(end);
+
     for (std::size_t i = 0; i < N; ++i)
     {
+      assert(it != end);
       m_arguments[i] = *it;
       ++it;
     }
+
+    assert(it == end);
   }
 
   /// \brief Constructs a term application with the given symbol and arguments.
   _aterm_appl(const function_symbol& sym, std::array<unprotected_aterm, N> arguments)
     : _aterm(sym),
       m_arguments(arguments)
-  {}
+  {
+    assert(sym.arity() == N);
+  }
 
   /// \brief constructs a term application with the given symbol and its arguments from the iterator.
   template<typename Iterator,
            typename std::enable_if<is_iterator<Iterator>::value>::type* = nullptr>
-  _aterm_appl(const function_symbol& symbol, Iterator it, bool)
+  _aterm_appl(const function_symbol& symbol, Iterator it, Iterator end, bool)
     : _aterm(symbol)
   {
+    // The end is only used for debugging to ensure that the arity and std::distance(it, end) match.
+    mcrl2::utilities::mcrl2_unused(end);
+
     for (std::size_t i = 0; i < symbol.arity(); ++i)
     {
       // Prevent bound checking, the allocator must make sure that symbol.arity() arguments fit.
+      assert(it != end);
       m_arguments.data()[i] = *it;
       ++it;
     }
+
+    assert(it == end);
   }
 
   /// \returns A reference to the arguments at the ith position.
@@ -128,7 +143,7 @@ public:
 
   /// \brief Allocates space for an _aterm_appl where the arity is given by the function symbol.
   template<typename ForwardIterator>
-  T* allocate_args(const function_symbol& symbol, ForwardIterator)
+  T* allocate_args(const function_symbol& symbol, ForwardIterator, ForwardIterator)
   {
     // We assume that object T contains the _aterm_appl<aterm, 1> at the end and reserve extra space for parameters.
     char* newTerm = m_packed_allocator.allocate(term_appl_size(symbol.arity()));
@@ -146,9 +161,9 @@ public:
 
   /// \brief Constructs an _aterm_appl with arguments taken from begin, the arity is given by the function symbol.
   template<typename ForwardIterator>
-  void construct(T* element, const function_symbol& symbol, ForwardIterator begin)
+  void construct(T* element, const function_symbol& symbol, ForwardIterator begin, ForwardIterator end)
   {
-    new (element) T(symbol, begin, true);
+    new (element) T(symbol, begin, end, true);
   }
 
   /// \brief Specialize destroy for _aterm_appl to only destroy the function symbol. The reference count for the aterm does not have to be decreased.
