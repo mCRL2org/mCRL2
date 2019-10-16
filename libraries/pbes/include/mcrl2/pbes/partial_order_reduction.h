@@ -1459,7 +1459,8 @@ class partial_order_reduction_algorithm
       typedef std::pair<propositional_variable_instantiation, todo_state> todo_pair;
 
       // The set seen also stores for each node an index and a boolean that expresses whether
-      // the node is currently in the DFS stack and not fully explored.
+      // the node is currently in the DFS stack and not fully explored, ie, its state in the
+      // stack is DONE_PARTIALLY.
       std::unordered_map<propositional_variable_instantiation, std::pair<std::size_t, bool>> seen;
       std::deque<todo_pair> todo{todo_pair(X_init, NEW)};
       // Each state is given unique index, based on the order of discovery.
@@ -1501,6 +1502,10 @@ class partial_order_reduction_algorithm
 
           bool vis_expanded = stubborn_set_X_e.is_subset_of(m_vis);
           s = vis_expanded ? DONE : DONE_PARTIALLY;
+          if (!vis_expanded)
+          {
+            seen[X_e].second = true;
+          }
 
           if (m_options.use_condition_L)
           {
@@ -1566,7 +1571,7 @@ class partial_order_reduction_algorithm
             std::size_t i = m_equation_index.index(Y_f.name());
             bool is_conjunctive = m_pbes.equations()[i].is_conjunctive();
             emit_node(Y_f, is_conjunctive, rank);
-            seen.insert(std::make_pair(Y_f, std::make_pair(index, true)));
+            seen.insert(std::make_pair(Y_f, std::make_pair(index, false)));
             index++;
             todo.emplace_back(Y_f, NEW);
           }
