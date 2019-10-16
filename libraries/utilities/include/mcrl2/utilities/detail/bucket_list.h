@@ -91,7 +91,7 @@ public:
     using reference = typename std::conditional<Constant, const Key&, Key&>::type;
     using pointer = typename std::conditional<Constant, const Key*, Key*>::type;
     using difference_type = std::ptrdiff_t;
-    using iterator_category = std::input_iterator_tag;
+    using iterator_category = std::forward_iterator_tag;
 
     explicit key_iterator(node_base_pointer node)
       : m_bucket_node(reinterpret_cast<node_pointer>(node))
@@ -127,7 +127,7 @@ public:
 
     bool operator == (const key_iterator& it) const noexcept
     {
-      !(*this != it);
+      return !(*this != it);
     }
 
     bool operator != (const key_iterator& it) const noexcept
@@ -137,7 +137,7 @@ public:
 
     bool operator == (Sentinel) const noexcept
     {
-      !(*this != Sentinel());
+      return !(*this != Sentinel());
     }
 
     bool operator != (Sentinel) const noexcept
@@ -188,7 +188,7 @@ public:
   }
 
   /// \brief Removes the element after the given iterator from the list. The returned iterator
-  iterator erase_after(iterator it, NodeAllocator& allocator)
+  iterator erase_after(const_iterator it, NodeAllocator& allocator)
   {
     node* current_node = it.get_node();
     assert(current_node->next() != nullptr); // Cannot erase after the last node.
