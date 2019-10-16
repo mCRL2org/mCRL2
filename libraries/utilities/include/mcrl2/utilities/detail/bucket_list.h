@@ -188,7 +188,7 @@ public:
   }
 
   /// \brief Removes the element after the given iterator from the list. The returned iterator
-  iterator erase_after(const_iterator it, NodeAllocator& allocator)
+  iterator erase_after(iterator it, NodeAllocator& allocator)
   {
     node* current_node = it.get_node();
     assert(current_node->next() != nullptr); // Cannot erase after the last node.
