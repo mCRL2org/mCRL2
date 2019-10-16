@@ -445,13 +445,13 @@ void ToolInstance::onRun()
 
   if (m_process->waitForStarted(1000))
   {
-    mCRL2log(mcrl2::log::info) << "Started " << executable().toStdString() << std::endl;
+    mCRL2log(mcrl2::log::info) << "Started " << executable().toStdString() << arguments().join(" ").toStdString() << std::endl;
     m_ui.tabWidget->setCurrentIndex(1);
   }
   else
   {
     mCRL2log(mcrl2::log::error) << m_process->errorString().toStdString()
-      << " (" << executable().toStdString() << ")" << std::endl;
+      << " (" << executable().toStdString() << arguments().join(" ").toStdString() << ")" << std::endl;
     onStateChange(QProcess::NotRunning);
   }
 }
