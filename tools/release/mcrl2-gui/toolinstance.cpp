@@ -264,6 +264,7 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
             {
               ToolValue val = option.argument.values.at(j);
               QRadioButton *rbVal = new QRadioButton(val.nameLong, this);
+              rbVal->setProperty("valueName", val.nameLong);
               rbVal->setChecked(val.standard);
               grpValues->addButton(rbVal);
 

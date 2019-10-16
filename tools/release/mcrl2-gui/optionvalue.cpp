@@ -100,7 +100,7 @@ QString OptionValue::value()
           argValue = dynamic_cast<QLineEdit*>(m_value)->text();
           break;
         case EnumArgument:
-          argValue = dynamic_cast<QButtonGroup*>(m_value)->checkedButton()->text();
+          argValue = dynamic_cast<QButtonGroup*>(m_value)->checkedButton()->property("valueName").toString();
           break;
         case FileArgument:
           argValue = dynamic_cast<FilePicker*>(m_value)->text();
