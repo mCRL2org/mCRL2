@@ -158,11 +158,11 @@ private:
   constexpr bool is_dynamic_storage() const;
 
   /// \brief Marks a term and recursively all arguments that are not reachable.
-  void mark_term(_aterm& root);
+  void mark_term(const _aterm& root);
 
   /// \brief Verify that the given term was constructed properly.
   template<std::size_t Arity = N>
-  bool verify_term(_aterm& term);
+  bool verify_term(const _aterm& term);
 
   /// The pool that this storage belongs to.
   aterm_pool& m_pool;

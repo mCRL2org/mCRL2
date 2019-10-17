@@ -29,7 +29,7 @@ class unprotected_aterm
   friend detail::_aterm* detail::address(const unprotected_aterm& t);
 
 protected:
-  detail::_aterm* m_term;
+  const detail::_aterm* m_term;
 
 public:
 
@@ -40,7 +40,7 @@ public:
 
   /// \brief Constructor.
   /// \param term The term from which the new term is constructed.
-  unprotected_aterm(detail::_aterm* term) noexcept
+  unprotected_aterm(const detail::_aterm* term) noexcept
    : m_term(term)
   {}
 
@@ -179,7 +179,7 @@ public:
   /// \param t A pointer to an internal aterm data structure.
   /// \todo Should be protected, but this cannot yet be done due to a problem
   ///       in the compiling rewriter.
-  explicit aterm(detail::_aterm *t) noexcept
+  explicit aterm(const detail::_aterm *t) noexcept
   {
     t->increment_reference_count();
     m_term = t;
@@ -342,7 +342,7 @@ namespace detail
   /// \returns A pointer to the underlying aterm.
   inline _aterm* address(const unprotected_aterm& t)
   {
-    return t.m_term;
+    return const_cast<_aterm*>(t.m_term);
   }
 }
 

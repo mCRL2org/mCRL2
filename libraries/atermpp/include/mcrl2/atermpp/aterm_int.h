@@ -45,7 +45,7 @@ public:
   /// \returns The value of the integer term.
   std::size_t value() const noexcept
   {
-    return reinterpret_cast<detail::_aterm_int*>(m_term)->value();
+    return reinterpret_cast<const detail::_aterm_int*>(m_term)->value();
   }
 
   /// \brief Swaps two integer terms without changing the protection.

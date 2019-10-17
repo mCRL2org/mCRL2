@@ -218,7 +218,7 @@ public:
   const term_list<Term>& tail() const
   {
     assert(!empty());
-    return (static_cast<detail::_aterm_list<Term>&>(*m_term)).tail();
+    return (static_cast<const detail::_aterm_list<Term>&>(*m_term)).tail();
   }
 
   /// \brief Removes the first element of the list.
@@ -231,7 +231,7 @@ public:
   /// \return The term at the head of the list.
   const Term& front() const
   {
-    return static_cast<detail::_aterm_list<Term>&>(*m_term).head();
+    return static_cast<const detail::_aterm_list<Term>&>(*m_term).head();
   }
 
   /// \brief Inserts a new element at the beginning of the current list.
@@ -301,10 +301,10 @@ class _aterm_list : public _aterm_appl<2>
 {
 public:
   /// \returns A reference to the head of the list.
-  Term& head() { return static_cast<Term&>(arg(0)); }
+  const Term& head() const { return static_cast<const Term&>(arg(0)); }
 
   /// \returns A reference to the tail of the list.
-  term_list<Term>& tail() { return static_cast<term_list<Term>&>(arg(1)); }
+  const term_list<Term>& tail() const { return static_cast<const term_list<Term>&>(arg(1)); }
 };
 
 } // namespace detail

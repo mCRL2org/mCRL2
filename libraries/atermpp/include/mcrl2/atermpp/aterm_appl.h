@@ -199,14 +199,14 @@ public:
   /// \return An iterator pointing to the first argument.
   const_iterator begin() const
   {
-    return const_iterator(reinterpret_cast<Term*>(&(reinterpret_cast<detail::_term_appl*>(m_term)->arg(0))));
+    return const_iterator(reinterpret_cast<const Term*>(&(reinterpret_cast<const detail::_term_appl*>(m_term)->arg(0))));
   }
 
   /// \brief Returns a const_iterator pointing past the last argument.
   /// \return A const_iterator pointing past the last argument.
   const_iterator end() const
   {
-    return const_iterator(reinterpret_cast<Term*>(&reinterpret_cast<detail::_term_appl*>(m_term)->arg(size())));
+    return const_iterator(reinterpret_cast<const Term*>(&reinterpret_cast<const detail::_term_appl*>(m_term)->arg(size())));
   }
 
   /// \brief Returns the largest possible number of arguments.
@@ -222,7 +222,7 @@ public:
   const Term& operator[](const size_type i) const
   {
     assert(i < size()); // Check the bounds.
-    return reinterpret_cast<detail::_term_appl*>(m_term)->arg(i);
+    return reinterpret_cast<const detail::_term_appl*>(m_term)->arg(i);
   }
 };
 

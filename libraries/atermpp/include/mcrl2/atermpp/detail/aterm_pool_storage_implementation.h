@@ -182,7 +182,7 @@ void ATERM_POOL_STORAGE::print_performance_stats(const char* identifier) const
 ATERM_POOL_STORAGE_TEMPLATES
 void ATERM_POOL_STORAGE::mark()
 {
-  for (Element& term : m_term_set)
+  for (const Element& term : m_term_set)
   {
     // If a term is marked its arguments have been marked as well.
     if (term.is_reachable() && !term.is_marked())
@@ -199,7 +199,7 @@ void ATERM_POOL_STORAGE::sweep()
   // Iterate over all terms and removes the ones that are marked.
   for (auto it = m_term_set.begin(); it != m_term_set.end(); )
   {
-    Element& term = *it;
+    const Element& term = *it;
 
     if (!term.is_reachable())
     {
@@ -251,11 +251,11 @@ ATERM_POOL_STORAGE_TEMPLATES
 bool ATERM_POOL_STORAGE::verify_mark()
 {
   // Check for consistency that if a term is reachable its arguments are as well.
-  for (Element& term : m_term_set)
+  for (const Element& term : m_term_set)
   {
     if (term.is_reachable() && term.function().arity() > 0)
     {
-       const _term_appl& ta = static_cast<const _term_appl&>(term);
+       const _term_appl& ta = static_cast<_term_appl&>(const_cast<Element&>(term));
        for (std::size_t i = 0; i < ta.function().arity(); ++i)
        {
          assert(detail::address(ta.arg(i))->is_reachable());
@@ -269,7 +269,7 @@ ATERM_POOL_STORAGE_TEMPLATES
 bool ATERM_POOL_STORAGE::verify_sweep()
 {
   // Check that no argument was removed from a reachable term.
-  for (Element& term : m_term_set)
+  for (const Element& term : m_term_set)
   {
     (void)term;
     assert(verify_term(term));
@@ -283,7 +283,7 @@ ATERM_POOL_STORAGE_TEMPLATES
 typename ATERM_POOL_STORAGE::iterator ATERM_POOL_STORAGE::destroy(iterator it)
 {
   // Store the term temporarily to be able to deallocate it after removing it from the set.
-  Element& term = *it;
+  const Element& term = *it;
   assert(!term.is_reachable());
 
   // Trigger the deletion hook before the term is actually destroyed.
@@ -323,10 +323,10 @@ constexpr bool ATERM_POOL_STORAGE::is_dynamic_storage() const
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
-void ATERM_POOL_STORAGE::mark_term(_aterm& root)
+void ATERM_POOL_STORAGE::mark_term(const _aterm& root)
 {
   // Do not use the stack, because this might run out of stack memory for large lists.
-  todo.push(root);
+  todo.push(const_cast<_aterm&>(root));
 
   // Mark the term depth-first to reduce the maximum todo size required.
   while (!todo.empty())
@@ -361,7 +361,7 @@ void ATERM_POOL_STORAGE::mark_term(_aterm& root)
 
 ATERM_POOL_STORAGE_TEMPLATES
 template<std::size_t Arity>
-bool ATERM_POOL_STORAGE::verify_term(_aterm& term)
+bool ATERM_POOL_STORAGE::verify_term(const _aterm& term)
 {
   // Check that a valid function symbol was used and that its arity belongs to this storage.
   assert(term.function().defined());
@@ -370,7 +370,7 @@ bool ATERM_POOL_STORAGE::verify_term(_aterm& term)
   // Check that all of its arguments are defined.
   if (term.function().arity() > 0)
   {
-    _term_appl& ta = static_cast<_term_appl&>(term);
+    const _term_appl& ta = static_cast<const _term_appl&>(term);
     for (std::size_t i = 0; i < ta.function().arity(); ++i)
     {
       assert(ta.arg(i).defined());

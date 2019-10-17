@@ -82,13 +82,12 @@ function_symbol function_symbol_pool::create(const std::string& name, const std:
   }
 }
 
-void function_symbol_pool::destroy(_function_symbol* f)
+void function_symbol_pool::destroy(const _function_symbol& f)
 {
-  assert(f != nullptr);
-  assert(f->reference_count() == 0);
+  assert(f.reference_count() == 0);
 
   // Remove it from the function symbol pool.
-  m_symbol_set.erase(*f);
+  m_symbol_set.erase(f);
 }
 
 void function_symbol_pool::deregister(const std::string& prefix)

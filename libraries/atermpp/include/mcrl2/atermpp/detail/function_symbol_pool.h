@@ -47,7 +47,7 @@ public:
   function_symbol create(const std::string& name, const std::size_t arity, const bool check_for_registered_functions = false);
 
   /// \brief Frees the memory used by the passed element and remove it from the set.
-  void destroy(_function_symbol* f);
+  void destroy(const _function_symbol& f);
 
   /// \brief Restore the index back to index before registering this prefix.
   void deregister(const std::string& prefix);

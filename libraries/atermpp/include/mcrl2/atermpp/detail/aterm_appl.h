@@ -92,12 +92,6 @@ public:
     assert(it == end);
   }
 
-  /// \returns A reference to the arguments at the ith position.
-  aterm& arg(std::size_t index)
-  {
-    return static_cast<aterm&>(m_arguments.data()[index]);
-  }
-
   /// \returns A const reference to the arguments at the ith position.
   const aterm& arg(std::size_t index) const
   {

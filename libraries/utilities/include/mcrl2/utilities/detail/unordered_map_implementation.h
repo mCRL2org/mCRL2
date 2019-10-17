@@ -24,7 +24,9 @@ T& MCRL2_UNORDERED_MAP_CLASS::operator[](const key_type& key)
 {
   // Insert a new object and return a reference to it;
   auto pair = m_set.emplace(std::make_pair(key, mapped_type()));
-  return (*pair.first).second;
+
+  // The second element of the pair is mutable.
+  return const_cast<mapped_type&>((*pair.first).second);
 }
 
 MCRL2_UNORDERED_MAP_TEMPLATES

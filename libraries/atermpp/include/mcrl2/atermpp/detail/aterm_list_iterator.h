@@ -35,12 +35,12 @@ class term_list_iterator
     friend class term_list;
 
   protected:
-    detail::_aterm_list<Term>* m_list;
+    const detail::_aterm_list<Term>* m_list;
 
     /// \brief Constructor from an aterm which must be a list.
     /// \param l A sequence of terms
-    term_list_iterator(detail::_aterm* l)
-      : m_list(static_cast<detail::_aterm_list<Term>*>(l))
+    term_list_iterator(const detail::_aterm* l)
+      : m_list(static_cast<const detail::_aterm_list<Term>*>(l))
     { 
       assert(l->function()==detail::g_term_pool().as_list()
              || l->function()==detail::g_term_pool().as_empty_list());

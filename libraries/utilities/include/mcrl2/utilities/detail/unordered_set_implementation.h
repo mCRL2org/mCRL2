@@ -180,7 +180,7 @@ void MCRL2_UNORDERED_SET_CLASS::rehash(std::size_t number_of_buckets)
     old_keys.splice_after(old_keys.before_begin(), bucket);
   }
 
-  assert(std::distance(old_keys.begin(), old_keys.end()) == m_number_of_elements);
+  assert(std::distance(old_keys.begin(), old_keys.end()) == static_cast<long>(m_number_of_elements));
 
   // Recreate the hash table, but don't move or copy the old elements.
   {
@@ -195,7 +195,7 @@ void MCRL2_UNORDERED_SET_CLASS::rehash(std::size_t number_of_buckets)
   {
     // Move the current element to this bucket.
     bucket_type& bucket = m_buckets[find_bucket_index(old_keys.front())];
-    bucket.splice_front(bucket.begin(), old_keys);
+    bucket.splice_front(bucket.before_begin(), old_keys);
   }
 
   // The number of elements remain the same, so don't change this counter.

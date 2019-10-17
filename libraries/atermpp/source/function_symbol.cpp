@@ -28,6 +28,7 @@ global_function_symbol::global_function_symbol(const std::string& name, const st
 
 void function_symbol::destroy()
 {
-  g_term_pool().get_symbol_pool().destroy(m_function_symbol.get());
+  assert(m_function_symbol.get() != nullptr);
+  g_term_pool().get_symbol_pool().destroy(*m_function_symbol.get());
 }
 

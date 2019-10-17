@@ -39,17 +39,12 @@ using are_terms = and_<std::is_convertible<Terms, unprotected_aterm>...>;
 class _aterm : public mcrl2::utilities::shared_reference_counted<_aterm, GlobalThreadSafe>, mcrl2::utilities::noncopyable
 {
 public:
-  using ref = mcrl2::utilities::shared_reference<_aterm>;
+  using ref = mcrl2::utilities::shared_reference<const _aterm>;
 
   /// \brief Create a term from a function symbol.
   _aterm(const function_symbol& symbol) :
     m_function_symbol(symbol)
   {}
-
-  function_symbol& function() noexcept
-  {
-    return m_function_symbol;
-  }
 
   const function_symbol& function() const noexcept
   {
@@ -58,7 +53,7 @@ public:
 
   /// \brief Mark this term to be garbage collected.
   /// \details Changes the reference count, so only apply whenever !is_reachable().
-  void mark()
+  void mark() const
   {
     assert(!is_reachable());
     m_reference_count = MarkedReferenceCount;
@@ -67,7 +62,7 @@ public:
 
   /// \brief Remove the mark from a term.
   /// \details Changes the reference count, so only apply whenever it was marked.
-  void reset()
+  void reset() const
   {
     assert(is_marked());
     m_reference_count = 0;
