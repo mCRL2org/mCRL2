@@ -23,9 +23,6 @@ namespace std
 template<>
 struct hash<atermpp::function_symbol>
 {
-  /// Clang 3.8: Default initialization of an object of const type requires a user-provided default constructor
-  hash() {}
-
   std::size_t operator()(const atermpp::function_symbol& f) const
   {
     // Function symbols take 48 bytes in memory, so when they are packed there
@@ -39,9 +36,6 @@ struct hash<atermpp::function_symbol>
 template<>
 struct hash<atermpp::detail::_function_symbol>
 {
-  /// Clang 3.8: Default initialization of an object of const type requires a user-provided default constructor
-  hash() {}
-
   std::size_t operator()(const atermpp::detail::_function_symbol& f) const
   {
     std::hash<std::string> string_hasher;

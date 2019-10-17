@@ -30,9 +30,6 @@ namespace std
 template<>
 struct hash<atermpp::detail::_aterm*>
 {
-  /// Clang 3.8: Default initialization of an object of const type requires a user-provided default constructor
-  hash() {}
-
   std::size_t operator()(const atermpp::detail::_aterm* term) const
   {
     // All terms are 8 bytes aligned which means that the three lowest significant
@@ -46,9 +43,6 @@ struct hash<atermpp::detail::_aterm*>
 template<>
 struct hash<atermpp::unprotected_aterm>
 {
-  /// Clang 3.8: Default initialization of an object of const type requires a user-provided default constructor
-  hash() {}
-
   std::size_t operator()(const atermpp::unprotected_aterm& term) const
   {
     const std::hash<atermpp::detail::_aterm*> hasher;
@@ -60,9 +54,6 @@ struct hash<atermpp::unprotected_aterm>
 template<>
 struct hash<atermpp::aterm>
 {
-  /// Clang 3.8: Default initialization of an object of const type requires a user-provided default constructor
-  hash() {}
-
   std::size_t operator()(const atermpp::aterm& t) const
   {
     const std::hash<atermpp::detail::_aterm*> aterm_hasher;
