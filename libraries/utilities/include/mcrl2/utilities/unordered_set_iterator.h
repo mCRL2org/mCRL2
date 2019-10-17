@@ -46,7 +46,7 @@ public:
   unordered_set_iterator operator++(int)
   {
     unordered_set_iterator copy(*this);
-    ++copy;
+    ++(*this);
     return *copy;
   }
 

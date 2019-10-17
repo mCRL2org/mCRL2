@@ -28,13 +28,13 @@ struct Sentinel{};
 static constexpr Sentinel EndIterator = {};
 
 /// \brief A compile time check for allocate_args in the given allocator, calls allocate(1) otherwise.
-template<typename T, typename Allocator, typename ...Args>
+template<typename Allocator, typename ...Args>
 inline auto allocate(Allocator& allocator, const Args&... args) -> decltype(allocator.allocate_args(args...))
 {
   return allocator.allocate_args(args...);
 }
 
-template<typename T, typename Allocator, typename ...Args>
+template<typename Allocator, typename ...Args>
 inline auto allocate(Allocator& allocator, const Args&...) -> decltype(allocator.allocate(1))
 {
   return allocator.allocate(1);
@@ -120,7 +120,7 @@ public:
     key_iterator operator++(int)
     {
       key_iterator copy(*this);
-      ++copy;
+      ++(*this);
       return copy;
     }
 
@@ -232,7 +232,7 @@ public:
   void emplace_front(NodeAllocator& allocator, Args&& ...args)
   {
     // Allocate a new node.
-    node* new_node = allocate<node>(allocator, std::forward<Args>(args)...);
+    node* new_node = allocate(allocator, std::forward<Args>(args)...);
     std::allocator_traits<NodeAllocator>::construct(allocator, new_node, std::forward<Args>(args)...);
 
     // Ensure that the previous front is set behind this node.
@@ -250,7 +250,7 @@ public:
 
     // Keep track of the node that we should remove.
     node* erased_node = reinterpret_cast<node*>(current_node->next());
-    node* next_node = reinterpret_cast<node*>(erased_node->next());
+    node_base* next_node = erased_node->next();
 
     // Update the next pointer of the current node.
     current_node->set_next(next_node);
@@ -267,6 +267,7 @@ public:
   {
     if (!other.empty())
     {
+      assert(begin() != other.begin());
       node* current_node = const_cast<node*>(pos.get_node());
 
       // Increment the position now as we are going to change the current_node.
@@ -295,18 +296,26 @@ public:
     }
   }
 
-  /// \brief Moves the elements from other into this bucket after the given position.
+  /// \brief Moves the first node from the given bucket into this bucket after the given position.
   /// \details This is a non-standard addition to ensure efficient splicing (instead of splice_after(pos, other, other.begin(), ++other.begin()).
   void splice_front(const_iterator pos, bucket_list& other)
   {
-    if (other.empty())
+    if (!other.empty())
     {
       // Sets the current position to be followed by the other bucket list.
       node* current_node = const_cast<node*>(pos.get_node());
-      current_node->set_next(other.m_head.next());
+      node_base* next_node = current_node->next();
+
+      // Make the other head node the start of our bucket after pos.
+      node_base* head_node = other.begin().get_node();
+      current_node->set_next(head_node);
+
+      // Make the next position the position after the head, but keep track of the current next node.
+      node_base* next_head_node = head_node->next();
+      head_node->set_next(next_node);
 
       // Make the other head point to the next element.
-      other.m_head.set_next(current_node->next()->next());
+      other.m_head.set_next(next_head_node);
     }
   }
 

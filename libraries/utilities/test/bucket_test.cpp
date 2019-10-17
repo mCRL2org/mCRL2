@@ -36,18 +36,16 @@ BOOST_AUTO_TEST_CASE(test_list)
   /// Allocate and construct various nodes for in the list.
   for (int i = 0; i < 100; ++i)
   {
-    Bucket::node* node = allocator.allocate(1);
-    allocator.construct(node, i);
-    list.push_front(node);
+    list.emplace_front(allocator, i);
   }
 
   BOOST_CHECK_EQUAL(length(list), 100);
 
   /// Erase the first 10 elements.
   std::size_t count = 10;
-  for (Bucket::iterator it = list.before_begin(); it != list.end();)
+  for (Bucket::const_iterator it = list.before_begin(); it != list.end();)
   {
-    it = list.erase_after(list.before_begin(), allocator);
+    it = list.erase_after(allocator, list.before_begin());
     --count;
     if (count == 0)
     {
@@ -58,9 +56,9 @@ BOOST_AUTO_TEST_CASE(test_list)
   BOOST_CHECK_EQUAL(length(list), 90);
 
   /// Clean up the remaining nodes.
-  for (Bucket::iterator it = list.before_begin(); it != list.end();)
+  for (Bucket::const_iterator it = list.before_begin(); it != list.end();)
   {
-    it = list.erase_after(list.before_begin(), allocator);
+    it = list.erase_after(allocator, list.before_begin());
   }
 
   BOOST_CHECK_EQUAL(length(list), 0);

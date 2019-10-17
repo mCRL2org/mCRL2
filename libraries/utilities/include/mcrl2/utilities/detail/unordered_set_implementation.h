@@ -84,6 +84,9 @@ MCRL2_UNORDERED_SET_TEMPLATES
 template<typename ...Args>
 std::pair<typename MCRL2_UNORDERED_SET_CLASS::iterator, bool> MCRL2_UNORDERED_SET_CLASS::emplace(Args&&... args)
 {
+  // First rehash, such that this bucket can not be invalidated afterwards.
+  rehash_if_needed();
+
   auto bucket_it = find_bucket_index(args...);
   auto it = find_impl(bucket_it, args...);
 
@@ -229,13 +232,11 @@ MCRL2_UNORDERED_SET_TEMPLATES
 template<typename ...Args>
 std::pair<typename MCRL2_UNORDERED_SET_CLASS::iterator, bool> MCRL2_UNORDERED_SET_CLASS::emplace_impl(size_type bucket_index, Args&&... args)
 {
-  auto& bucket = m_buckets[bucket_index];
-
   // Construct a new node and put it at the front of the bucket list.
+  auto& bucket = m_buckets[bucket_index];
   bucket.emplace_front(m_allocator, args...);
 
   ++m_number_of_elements;
-  rehash_if_needed();
   return std::make_pair(iterator(m_buckets.begin() + bucket_index, m_buckets.end(), bucket.before_begin(), bucket.begin()), true);
 }
 
