@@ -88,7 +88,7 @@ void MCRL2_UNORDERED_SET_CLASS::clear()
     it = erase(it);
   }
 
-  assert(std::find_if_not(m_buckets.begin(), m_buckets.end(), [](const bucket_type& bucket) { return bucket.empty(); }) == m_buckets.end());
+  assert(std::all_of(m_buckets.begin(), m_buckets.end(), [](const bucket_type& bucket) { return bucket.empty(); }));
   assert(m_number_of_elements == 0);
   assert(m_buckets.size() != 0);
 }
