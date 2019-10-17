@@ -59,14 +59,9 @@ foreach(dir ${python_dirs})
   string(REPLACE "\n" ";" tests "${tests}")
   string(REPLACE "\r" "" tests "${tests}")
   foreach(testname ${tests})
-    if(MCRL2_PYTHON_TESTS)
-      add_test(NAME ${testname}
-               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/workspace
-               COMMAND ${PYTHON_EXECUTABLE} ${testrunner} --run ${num} --toolpath ${MCRL2_STAGE_PATH}/${MCRL2_RUNTIME_PATH} --verbose)
-    else()
-      add_test(NAME ${testname}
-               COMMAND ${CMAKE_COMMAND} -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH} -Dmode=FATAL_ERROR -P ${CMAKE_CURRENT_SOURCE_DIR}/dependencies.cmake)
-    endif()
+    add_test(NAME ${testname}
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/workspace
+             COMMAND ${PYTHON_EXECUTABLE} ${testrunner} --run ${num} --toolpath ${MCRL2_STAGE_PATH}/${MCRL2_RUNTIME_PATH} --verbose)
     set_tests_properties(${testname} PROPERTIES LABELS ${dir})
     math(EXPR num "${num} + 1")
   endforeach()
