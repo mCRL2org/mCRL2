@@ -27,6 +27,19 @@ struct Sentinel{};
 /// \brief A end of the iterator sentinel.
 static constexpr Sentinel EndIterator = {};
 
+/// \brief A compile time check for allocate_args in the given allocator, calls allocate(1) otherwise.
+template<typename T, typename Allocator, typename ...Args>
+inline auto allocate(Allocator& allocator, const Args&... args) -> decltype(allocator.allocate_args(args...))
+{
+  return allocator.allocate_args(args...);
+}
+
+template<typename T, typename Allocator, typename ...Args>
+inline auto allocate(Allocator& allocator, const Args&...) -> decltype(allocator.allocate(1))
+{
+  return allocator.allocate(1);
+}
+
 /// \brief This essentially implements the std::forward_list, with the difference that
 ///        it does not own the nodes in the list. It just keeps track of the list
 ///        next pointers.
@@ -47,7 +60,7 @@ public:
     bool has_next() const noexcept { return m_next != nullptr; }
 
     /// \brief Set the next pointer to the given next pointer.
-    void next(node_base* next) noexcept { m_next = next; }
+    void set_next(node_base* next) noexcept { m_next = next; }
   protected:
 
     /// \brief Pointer to the next node.
@@ -55,7 +68,7 @@ public:
   };
 
   /// \brief The nodes of the bucket list.
-  class node : public node_base
+  class node final : public node_base
   {
   public:
 
@@ -81,10 +94,6 @@ public:
   class key_iterator
   {
     friend class bucket_list<Key, Allocator>;
-    using bucket_type = typename std::conditional<Constant, const bucket_list<Key, Allocator>, bucket_list<Key, Allocator>>::type;
-
-    using node_pointer = typename std::conditional<Constant, const node*, node*>::type;
-    using node_base_pointer = typename std::conditional<Constant, const node_base*, node_base*>::type;
 
   public:
     using value_type = typename std::conditional<Constant, const Key, Key>::type;
@@ -93,65 +102,69 @@ public:
     using difference_type = std::ptrdiff_t;
     using iterator_category = std::forward_iterator_tag;
 
-    explicit key_iterator(node_base_pointer node)
-      : m_bucket_node(reinterpret_cast<node_pointer>(node))
-    {}
+    /// Default constructor.
+    key_iterator() {}
 
-    key_iterator()
-      : m_bucket_node(nullptr)
-    {}
-
-    /// \brief Implicit conversion to the const_iterator variant.
+    /// \brief Implicit conversion to const_iterator.
     operator key_iterator<true>() const
     {
-      return key_iterator<true>(m_bucket_node);
+      return key_iterator<true>(m_current_node);
     }
 
     key_iterator& operator++()
     {
-      m_bucket_node = reinterpret_cast<class node*>(m_bucket_node->next());
+      m_current_node = reinterpret_cast<node*>(m_current_node->next());
       return *this;
     }
 
     template<bool Constant_ = Constant>
     typename std::enable_if<!Constant_, reference>::type operator*()
     {
-      return m_bucket_node->key();
+      return m_current_node->key();
     }
 
     template<bool Constant_ = Constant>
     typename std::enable_if<Constant_, reference>::type operator*() const
     {
-      return m_bucket_node->key();
+      return m_current_node->key();
     }
 
-    bool operator == (const key_iterator& it) const noexcept
+    bool operator== (const key_iterator& it) const noexcept
     {
       return !(*this != it);
     }
 
-    bool operator != (const key_iterator& it) const noexcept
+    bool operator!= (const key_iterator& it) const noexcept
     {
-      return m_bucket_node != it.m_bucket_node;
+      return m_current_node != it.m_current_node;
     }
 
-    bool operator == (Sentinel) const noexcept
+    bool operator== (Sentinel) const noexcept
     {
       return !(*this != Sentinel());
     }
 
-    bool operator != (Sentinel) const noexcept
+    bool operator!= (Sentinel) const noexcept
     {
-      return m_bucket_node != nullptr;
-    }
-
-    node* get_node() const noexcept
-    {
-      return m_bucket_node;
+      return m_current_node != nullptr;
     }
 
   private:
-    node_pointer m_bucket_node;
+    explicit key_iterator(node_base* current)
+      : m_current_node(reinterpret_cast<node*>(current))
+    {}
+
+    node* get_node() noexcept
+    {
+      return m_current_node;
+    }
+
+    const node* get_node() const noexcept
+    {
+      return m_current_node;
+    }
+
+    node* m_current_node = nullptr;
   };
 
 public:
@@ -161,6 +174,10 @@ public:
 
   /// Rebind the passed to allocator to a bucket list node allocator.
   using NodeAllocator = typename Allocator::template rebind<typename Bucket::node>::other;
+
+  /// \returns The first element.
+  Key& front() { return reinterpret_cast<node&>(m_head).key(); }
+  const Key& front() const { return reinterpret_cast<const node&>(m_head).key(); }
 
   /// \returns An iterator over the keys of this bucket and successor buckets.
   iterator begin() { return iterator(m_head.next()); }
@@ -177,36 +194,10 @@ public:
   const_iterator cend() const { return const_iterator(); }
 
   /// \return A const iterator pointing to the before the head of the list.
-  const_iterator before_begin() const { return const_iterator(&m_head); }
+  const_iterator before_begin() const { return const_iterator(const_cast<node_base*>(&m_head)); }
 
-  /// \brief Puts the given node before the head of the list.
-  void push_front(node* node)
-  {
-    assert(!contains(node));
-    node->next(m_head.next());
-    m_head.next(node);
-  }
-
-  /// \brief Removes the element after the given iterator from the list. The returned iterator
-  iterator erase_after(iterator it, NodeAllocator& allocator)
-  {
-    node* current_node = it.get_node();
-    assert(current_node->next() != nullptr); // Cannot erase after the last node.
-
-    // Keep track of the node that we should remove.
-    node* erased_node = reinterpret_cast<node*>(current_node->next());
-    node* next_node = reinterpret_cast<node*>(erased_node->next());
-
-    // Update the next pointer of the current node.
-    current_node->next(next_node);
-
-    // Clean up the old node.
-    std::allocator_traits<NodeAllocator>::destroy(allocator, erased_node);
-    std::allocator_traits<NodeAllocator>::deallocate(allocator, erased_node, 1);
-    return iterator(next_node);
-  }
-
-  const node_base* front() const noexcept { return &m_head; }
+  /// \returns True iff this bucket has no elements.
+  bool empty() const { return !m_head.has_next(); }
 
   /// \brief Empties the bucket list.
   void clear(NodeAllocator& allocator)
@@ -217,8 +208,68 @@ public:
     }
   }
 
-  /// \returns True iff this bucket has no elements.
-  bool empty() const { return !m_head.has_next(); }
+  /// \brief Constructs an element using the allocator with the given arguments and insert it in the front.
+  template<typename ...Args>
+  void emplace_front(NodeAllocator& allocator, Args&& ...args)
+  {
+    node* new_node = allocate<node>(allocator, std::forward<Args>(args)...);
+    std::allocator_traits<NodeAllocator>::construct(allocator, new_node, std::forward<Args>(args)...);
+  }
+
+  /// \brief Removes the element after the given iterator from the list. The returned iterator
+  iterator erase_after(NodeAllocator& allocator, const_iterator it)
+  {
+    node* current_node = const_cast<node*>(it.get_node());
+    assert(current_node->next() != nullptr); // Cannot erase after the last node.
+
+    // Keep track of the node that we should remove.
+    node* erased_node = reinterpret_cast<node*>(current_node->next());
+    node* next_node = reinterpret_cast<node*>(erased_node->next());
+
+    // Update the next pointer of the current node.
+    current_node->set_next(next_node);
+
+    // Clean up the old node.
+    std::allocator_traits<NodeAllocator>::destroy(allocator, erased_node);
+    std::allocator_traits<NodeAllocator>::deallocate(allocator, erased_node, 1);
+
+    return iterator(next_node);
+  }
+
+  /// \brief Moves the elements from other into this bucket after the given position.
+  void splice_after(const_iterator pos, bucket_list& other)
+  {
+    // Sets the current position to be followed by the other bucket list.
+    node* current_node = const_cast<node*>(pos.get_node());
+    current_node->set_next(other.m_head.next());
+
+    // Find the last node of the other list.
+    iterator before_end;
+    for (iterator it = other.begin(); it != other.end(); ++it)
+    {
+      before_end = it;
+    }
+
+    // Set the last element of other to the position after pos.
+    node* last = before_end.get_node();
+    ++pos;
+    last->set_next(pos.get_node());
+
+    // Make the other bucket empty, all elements belong to this bucket now.
+    other.m_head.set_next(nullptr);
+  }
+
+  /// \brief Moves the elements from other into this bucket after the given position.
+  /// \details This is a non-standard addition to ensure efficient splicing (instead of splice_after(pos, other, other.begin(), ++other.begin()).
+  void splice_front(const_iterator pos, bucket_list& other)
+  {
+    // Sets the current position to be followed by the other bucket list.
+    node* current_node = const_cast<node*>(pos.get_node());
+    current_node->set_next(other.m_head.next());
+
+    // Make the other head point to the next element.
+    other.m_head.set_next(current_node->next()->next());
+  }
 
 private:
 

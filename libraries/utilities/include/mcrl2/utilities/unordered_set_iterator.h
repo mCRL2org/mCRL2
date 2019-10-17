@@ -108,8 +108,6 @@ public:
 
   bucket_it& get_bucket_it() { return m_bucket_it; }
 
-  Bucket& bucket() { return *m_bucket_it; }
-
   /// \brief Iterate to the next non-empty bucket.
   void goto_next_bucket()
   {

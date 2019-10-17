@@ -24,19 +24,6 @@ namespace mcrl2::utilities
 
 static constexpr std::size_t minimum_size = 4UL;
 
-/// \brief A compile time check for allocate_args in the given allocator, calls allocate(1) otherwise.
-template<typename T, typename Allocator, typename ...Args>
-inline auto allocate(Allocator& allocator, const Args&... args) -> decltype(allocator.allocate_args(args...))
-{
-  return allocator.allocate_args(args...);
-}
-
-template<typename T, typename Allocator, typename ...Args>
-inline auto allocate(Allocator& allocator, const Args&...) -> decltype(allocator.allocate(1))
-{
-  return allocator.allocate(1);
-}
-
 inline float bytes_to_megabytes(std::size_t bytes)
 {
   return static_cast<float>(bytes) / (1024.0f * 1024.0f);
@@ -116,13 +103,13 @@ typename MCRL2_UNORDERED_SET_CLASS::iterator MCRL2_UNORDERED_SET_CLASS::erase(ty
   iterator& it = reinterpret_cast<iterator&>(const_it);
 
   // Find the bucket that is pointed to and remove the key after the before iterator.
-  bucket_type& bucket = it.bucket();
+  bucket_type& bucket = *it.get_bucket_it();
 
   // An element was removed from the hash table.
   --m_number_of_elements;
 
   // Remove the key that is after the before iterator.
-  iterator result_it(it.get_bucket_it(), m_buckets.end(), it.key_before_it(), bucket.erase_after(it.key_before_it(), m_allocator));
+  iterator result_it(it.get_bucket_it(), m_buckets.end(), it.key_before_it(), bucket.erase_after(m_allocator, it.key_before_it()));
 
   // We must guarantee that the iterator points the a valid key (and this might not be the case after removal).
   result_it.goto_next_bucket();
@@ -135,14 +122,14 @@ void MCRL2_UNORDERED_SET_CLASS::erase(const Key& key)
   bucket_type& bucket = m_buckets[find_bucket_index(key)];
 
   // Loop over the elements in the bucket until the key was found.
-  typename bucket_type::iterator before_it = bucket.before_begin();
+  typename bucket_type::const_iterator before_it = bucket.before_begin();
   for (typename bucket_type::iterator it = bucket.begin(); it != bucket.end();)
   {
     if (m_equals(*it, key))
     {
       // Erase the current element and stop iterating.
       --m_number_of_elements;
-      it = bucket.erase_after(before_it, m_allocator);
+      it = bucket.erase_after(m_allocator, before_it);
       break;
     }
     else
@@ -192,13 +179,7 @@ void MCRL2_UNORDERED_SET_CLASS::rehash(std::size_t number_of_buckets)
   bucket_type old_keys;
   for (auto&& bucket : m_buckets)
   {
-    for (auto it = bucket.begin(); it != bucket.end();)
-    {
-      // The insertion will change the current node, which influences the iterator.
-      typename bucket_type::node* node = it.get_node();
-      ++it;
-      old_keys.push_front(node);
-    }
+    old_keys.splice_after(old_keys.before_begin(), bucket);
   }
 
   // Recreate the hash table, but don't move or copy the old elements.
@@ -209,13 +190,12 @@ void MCRL2_UNORDERED_SET_CLASS::rehash(std::size_t number_of_buckets)
   m_buckets.resize(number_of_buckets);
   m_buckets_mask = m_buckets.size() - 1;
 
-  // Fill the set with all elements of the previous unordered set.
-  for (auto it = old_keys.begin(); it != old_keys.end(); )
+  // Fill the set with all elements that are stored in old_keys.
+  while (!old_keys.empty())
   {
-    // The insertion will change the current node, which influences the iterator.
-    typename bucket_type::node* node = it.get_node();
-    ++it;
-    insert(node);
+    // Move the current element to this bucket.
+    bucket_type& bucket = m_buckets[find_bucket_index(old_keys.front())];
+    bucket.splice_front(bucket.begin(), old_keys);
   }
 
   // The number of elements remain the same, so don't change this counter.
@@ -252,13 +232,11 @@ std::pair<typename MCRL2_UNORDERED_SET_CLASS::iterator, bool> MCRL2_UNORDERED_SE
   auto& bucket = m_buckets[bucket_index];
 
   // Construct a new node and put it at the front of the bucket list.
-  typename bucket_type::node* new_node = allocate<typename bucket_type::node>(m_allocator, args...);
-  std::allocator_traits<allocator_type>::construct(m_allocator, new_node, std::forward<Args>(args)...);
+  bucket.emplace_front(m_allocator, args...);
 
-  bucket.push_front(new_node);
   ++m_number_of_elements;
   rehash_if_needed();
-  return std::make_pair(iterator(m_buckets.begin() + bucket_index, m_buckets.end(), bucket.before_begin(), typename bucket_type::iterator(new_node)), true);
+  return std::make_pair(iterator(m_buckets.begin() + bucket_index, m_buckets.end(), bucket.before_begin(), bucket.begin()), true);
 }
 
 MCRL2_UNORDERED_SET_TEMPLATES

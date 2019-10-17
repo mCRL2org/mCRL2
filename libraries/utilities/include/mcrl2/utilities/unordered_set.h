@@ -212,14 +212,6 @@ private:
   template<typename ...Args>
   iterator find_impl(size_type bucket_index, const Args&... args);
 
-  /// \brief Inserts a bucket node into the hash table.
-  /// \details Does not increment the m_number_of_elements.
-  void insert(typename bucket_type::node* node)
-  {
-    bucket_type& bucket = m_buckets[find_bucket_index(node->key())];
-    bucket.push_front(node);
-  }
-
   /// \brief Resizes the hash table if required.
   void rehash_if_needed();
 
