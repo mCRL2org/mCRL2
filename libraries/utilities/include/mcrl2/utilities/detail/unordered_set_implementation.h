@@ -98,12 +98,10 @@ std::pair<typename MCRL2_UNORDERED_SET_CLASS::iterator, bool> MCRL2_UNORDERED_SE
 }
 
 MCRL2_UNORDERED_SET_TEMPLATES
-typename MCRL2_UNORDERED_SET_CLASS::iterator MCRL2_UNORDERED_SET_CLASS::erase(typename MCRL2_UNORDERED_SET_CLASS::const_iterator const_it)
+typename MCRL2_UNORDERED_SET_CLASS::iterator MCRL2_UNORDERED_SET_CLASS::erase(typename MCRL2_UNORDERED_SET_CLASS::const_iterator it)
 {
-  iterator& it = reinterpret_cast<iterator&>(const_it);
-
   // Find the bucket that is pointed to and remove the key after the before iterator.
-  bucket_type& bucket = *it.get_bucket_it();
+  bucket_type& bucket = const_cast<bucket_type&>(*it.get_bucket_it());
 
   // An element was removed from the hash table.
   --m_number_of_elements;
@@ -181,6 +179,8 @@ void MCRL2_UNORDERED_SET_CLASS::rehash(std::size_t number_of_buckets)
   {
     old_keys.splice_after(old_keys.before_begin(), bucket);
   }
+
+  assert(std::distance(old_keys.begin(), old_keys.end()) == m_number_of_elements);
 
   // Recreate the hash table, but don't move or copy the old elements.
   {

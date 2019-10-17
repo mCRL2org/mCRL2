@@ -117,6 +117,13 @@ public:
       return *this;
     }
 
+    key_iterator operator++(int)
+    {
+      key_iterator copy(*this);
+      ++copy;
+      return copy;
+    }
+
     template<bool Constant_ = Constant>
     typename std::enable_if<!Constant_, reference>::type operator*()
     {
@@ -127,6 +134,18 @@ public:
     typename std::enable_if<Constant_, reference>::type operator*() const
     {
       return m_current_node->key();
+    }
+
+    template<bool Constant_ = Constant>
+    typename std::enable_if<!Constant_, pointer>::type operator->()
+    {
+      return &m_current_node->key();
+    }
+
+    template<bool Constant_ = Constant>
+    typename std::enable_if<Constant_, pointer>::type operator->() const
+    {
+      return &m_current_node->key();
     }
 
     bool operator== (const key_iterator& it) const noexcept
@@ -214,6 +233,7 @@ public:
   {
     node* new_node = allocate<node>(allocator, std::forward<Args>(args)...);
     std::allocator_traits<NodeAllocator>::construct(allocator, new_node, std::forward<Args>(args)...);
+    m_head.set_next(new_node);
   }
 
   /// \brief Removes the element after the given iterator from the list. The returned iterator
@@ -239,36 +259,49 @@ public:
   /// \brief Moves the elements from other into this bucket after the given position.
   void splice_after(const_iterator pos, bucket_list& other)
   {
-    // Sets the current position to be followed by the other bucket list.
-    node* current_node = const_cast<node*>(pos.get_node());
-    current_node->set_next(other.m_head.next());
-
-    // Find the last node of the other list.
-    iterator before_end;
-    for (iterator it = other.begin(); it != other.end(); ++it)
+    if (!other.empty())
     {
-      before_end = it;
+      node* current_node = const_cast<node*>(pos.get_node());
+
+      // Increment the position now as we are going to change the current_node.
+      ++pos;
+
+      // Sets the current position to be followed by the other bucket list.
+      current_node->set_next(other.m_head.next());
+
+      node* after_pos_node = const_cast<node*>(pos.get_node());
+      if (after_pos_node != nullptr)
+      {
+        // Find the last node of the other list.
+        iterator before_end;
+        for (iterator it = other.begin(); it != other.end(); ++it)
+        {
+          before_end = it;
+        }
+
+        // Set the last element of other to the position after pos.
+        node* last = before_end.get_node();
+        last->set_next(after_pos_node);
+      }
+
+      // Make the other bucket empty, all elements belong to this bucket now.
+      other.m_head.set_next(nullptr);
     }
-
-    // Set the last element of other to the position after pos.
-    node* last = before_end.get_node();
-    ++pos;
-    last->set_next(pos.get_node());
-
-    // Make the other bucket empty, all elements belong to this bucket now.
-    other.m_head.set_next(nullptr);
   }
 
   /// \brief Moves the elements from other into this bucket after the given position.
   /// \details This is a non-standard addition to ensure efficient splicing (instead of splice_after(pos, other, other.begin(), ++other.begin()).
   void splice_front(const_iterator pos, bucket_list& other)
   {
-    // Sets the current position to be followed by the other bucket list.
-    node* current_node = const_cast<node*>(pos.get_node());
-    current_node->set_next(other.m_head.next());
+    if (other.empty())
+    {
+      // Sets the current position to be followed by the other bucket list.
+      node* current_node = const_cast<node*>(pos.get_node());
+      current_node->set_next(other.m_head.next());
 
-    // Make the other head point to the next element.
-    other.m_head.set_next(current_node->next()->next());
+      // Make the other head point to the next element.
+      other.m_head.set_next(current_node->next()->next());
+    }
   }
 
 private:

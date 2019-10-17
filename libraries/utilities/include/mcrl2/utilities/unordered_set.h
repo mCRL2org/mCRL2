@@ -79,10 +79,10 @@ public:
   using pointer = typename std::allocator_traits<Allocator>::pointer;
   using const_pointer = typename std::allocator_traits<Allocator>::const_pointer;
 
-  using iterator = unordered_set_iterator<key_type, bucket_type, Allocator, false>;
   using local_iterator = typename bucket_type::iterator;
-  using const_iterator = unordered_set_iterator<key_type, bucket_type, Allocator, true>;
+  using const_iterator = unordered_set_iterator<key_type, bucket_type, Allocator>;
   using const_local_iterator = typename bucket_type::const_iterator;
+  using iterator = const_iterator;
 
   using size_type = std::size_t;
   using difference_type = std::ptrdiff_t;

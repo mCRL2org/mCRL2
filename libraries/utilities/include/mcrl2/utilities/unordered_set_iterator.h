@@ -19,21 +19,58 @@ namespace utilities
 {
 
 /// \brief An iterator over all elements in the unordered set.
-template<typename Key, typename Bucket, typename Allocator, bool Constant = false>
+template<typename Key, typename Bucket, typename Allocator>
 class unordered_set_iterator : std::iterator_traits<Key>
 {
 private:
-  using bucket_it = typename std::conditional<Constant,
-    typename std::vector<Bucket>::const_iterator,
-    typename std::vector<Bucket>::iterator>::type;
-  using key_it_type = typename std::conditional<Constant,
-    typename Bucket::const_iterator,
-    typename Bucket::iterator>::type;
+  using bucket_it = typename std::vector<Bucket>::const_iterator;
+  using key_it_type = typename Bucket::const_iterator;
 
 public:
-  using tag = std::forward_iterator_tag;
+  using value_type = Key;
+  using reference = const Key&;
+  using pointer = const Key*;
+  using difference_type = std::ptrdiff_t;
+  using iterator_category = std::forward_iterator_tag;
 
   unordered_set_iterator() = default;
+
+  unordered_set_iterator& operator++()
+  {
+    ++m_key_before_it;
+    ++m_key_it;
+    goto_next_bucket();
+    return *this;
+  }
+
+  unordered_set_iterator operator++(int)
+  {
+    unordered_set_iterator copy(*this);
+    ++copy;
+    return *copy;
+  }
+
+  reference operator*() const
+  {
+    return *m_key_it;
+  }
+
+  pointer operator->() const
+  {
+    return &(*m_key_it);
+  }
+
+  bool operator!=(const unordered_set_iterator& other) const
+  {
+    return m_key_it != other.m_key_it || m_bucket_it != other.m_bucket_it;
+  }
+
+  bool operator==(const unordered_set_iterator& other) const
+  {
+    return !(*this != other);
+  }
+
+  // This is the private interface.
 
   /// \brief Construct an iterator over all keys passed in this bucket and all remaining buckets.
   unordered_set_iterator(bucket_it it, bucket_it end, key_it_type before_it, key_it_type key) :
@@ -52,60 +89,13 @@ public:
     m_bucket_it(it)
   {}
 
-  /// \brief Implicit conversion to the const_iterator should be provided.
-  operator unordered_set_iterator<Key, Bucket, Allocator, true>() const
-  {
-    return unordered_set_iterator<Key, Bucket, Allocator, true>(m_bucket_it, m_bucket_end, m_key_before_it, m_key_it);
-  }
-
-  unordered_set_iterator& operator++()
-  {
-    ++m_key_before_it;
-    ++m_key_it;
-    goto_next_bucket();
-    return *this;
-  }
-
-  template<bool _Constant = Constant>
-  typename std::enable_if<!_Constant, Key&>::type operator*()
-  {
-    return *m_key_it;
-  }
-
-  template<bool _Constant = Constant>
-  typename std::enable_if<_Constant, const Key&>::type operator*() const
-  {
-    return *m_key_it;
-  }
-
-  template<bool _Constant = Constant>
-  typename std::enable_if<!_Constant, Key*>::type operator->()
-  {
-    return &(*m_key_it);
-  }
-
-  template<bool _Constant = Constant>
-  typename std::enable_if<_Constant, const Key*>::type operator->() const
-  {
-    return &(*m_key_it);
-  }
-
-  bool operator!=(const unordered_set_iterator& other) const
-  {
-    return m_key_it != other.m_key_it || m_bucket_it != other.m_bucket_it;
-  }
-
-  bool operator==(const unordered_set_iterator& other) const
-  {
-    return !(operator!=(other));
-  }
-
   /// \returns A reference to the before key iterator.
   key_it_type& key_before_it() { return m_key_before_it; }
 
   /// \returns A reference to the key iterator.
   key_it_type& key_it() { return m_key_it; }
 
+  /// \returns A reference to the bucket iterator.
   bucket_it& get_bucket_it() { return m_bucket_it; }
 
   /// \brief Iterate to the next non-empty bucket.
