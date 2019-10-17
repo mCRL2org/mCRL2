@@ -195,8 +195,8 @@ public:
   using NodeAllocator = typename Allocator::template rebind<typename Bucket::node>::other;
 
   /// \returns The first element.
-  Key& front() { return reinterpret_cast<node&>(m_head).key(); }
-  const Key& front() const { return reinterpret_cast<const node&>(m_head).key(); }
+  Key& front() { return reinterpret_cast<node&>(*m_head.next()).key(); }
+  const Key& front() const { return reinterpret_cast<const node&>(*m_head.next()).key(); }
 
   /// \returns An iterator over the keys of this bucket and successor buckets.
   iterator begin() { return iterator(m_head.next()); }
@@ -231,8 +231,14 @@ public:
   template<typename ...Args>
   void emplace_front(NodeAllocator& allocator, Args&& ...args)
   {
+    // Allocate a new node.
     node* new_node = allocate<node>(allocator, std::forward<Args>(args)...);
     std::allocator_traits<NodeAllocator>::construct(allocator, new_node, std::forward<Args>(args)...);
+
+    // Ensure that the previous front is set behind this node.
+    new_node->set_next(m_head.next());
+
+    // Change the head to the newly allocated node.
     m_head.set_next(new_node);
   }
 

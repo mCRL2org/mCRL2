@@ -29,7 +29,7 @@ class _function_symbol : public mcrl2::utilities::shared_reference_counted<_func
 {
 public:
   /// \brief A shared reference for this object.
-  using ref = mcrl2::utilities::shared_reference<_function_symbol>;
+  using ref = mcrl2::utilities::shared_reference<const _function_symbol>;
 
   _function_symbol(const std::string& name, std::size_t arity) :
      m_arity(arity),

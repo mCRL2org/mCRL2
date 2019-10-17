@@ -38,7 +38,6 @@ function_symbol_pool::~function_symbol_pool()
 
 function_symbol function_symbol_pool::create(const std::string& name, const std::size_t arity, const bool check_for_registered_functions)
 {
-
   auto it = m_symbol_set.find(name, arity);
   if (it != m_symbol_set.end())
   {
@@ -51,7 +50,7 @@ function_symbol function_symbol_pool::create(const std::string& name, const std:
   {
     if (EnableFunctionSymbolMetrics) { m_function_symbol_metrics.miss(); }
 
-    _function_symbol& symbol = *m_symbol_set.emplace(name, arity).first;
+    const _function_symbol& symbol = *m_symbol_set.emplace(name, arity).first;
     if (check_for_registered_functions)
     {
       // Check whether there is a registered prefix p such that name equal pn where n is a number.
