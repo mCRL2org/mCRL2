@@ -9,8 +9,6 @@
 #ifndef MCRL2_UTILITIES_UNORDERED_SET_H
 #define MCRL2_UTILITIES_UNORDERED_SET_H
 
-#include "mcrl2/utilities/unordered_set_iterator.h"
-
 #include "mcrl2/utilities/block_allocator.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/detail/bucket_list.h"
@@ -26,6 +24,15 @@ namespace mcrl2::utilities
 /// \brief Prints various information for unordered_set like data structures.
 template<typename T>
 void print_performance_statistics(const T& unordered_set);
+
+// Forward declaration of an unordered_map.
+template<typename Key,
+         typename T,
+         typename Hash = std::hash<Key>,
+         typename KeyEqual = std::equal_to<Key>,
+         typename Allocator = std::allocator<Key>,
+         bool ThreadSafe = false>
+class unordered_map;
 
 /// \brief A unordered_set with a subset of the interface of std::unordered_set that only stores a single pointer for each element.
 /// \details Only supports input iterators (not bidirectional) compared to std::unordered_set. Furthermore, iterating over all elements
@@ -43,13 +50,14 @@ template<typename Key,
          bool ThreadSafe = false>
 class unordered_set
 {
-
 private:
   /// \brief Combine the bucket list and a lock that locks modifications to the bucket list.
   using bucket_type = detail::bucket_list<Key, Allocator>;
-
   using bucket_iterator = typename std::vector<bucket_type>::iterator;
   using const_bucket_iterator = typename std::vector<bucket_type>::const_iterator;
+
+  template<typename Key_, typename T, typename Hash_, typename KeyEqual, typename Allocator_, bool ThreadSafe_>
+  friend class unordered_map;
 
   // Check for the existence of the is_transparent type.
   template <typename... >
@@ -68,6 +76,145 @@ private:
   static_assert (is_transparent<Equals>(), "The equals function must have is_transparent to indicate that it supports heterogeneous lookup.");
 
 public:
+  /// \brief An iterator over all elements in the unordered set.
+  template<typename Bucket, bool Constant>
+  class unordered_set_iterator : std::iterator_traits<Key>
+  {
+  private:
+    friend class unordered_set;
+
+    template<typename Key_, typename T, typename Hash_, typename KeyEqual, typename Allocator_, bool ThreadSafe_>
+    friend class unordered_map;
+
+    using bucket_it = typename std::vector<Bucket>::const_iterator;
+    using key_it_type = typename Bucket::const_iterator;
+
+  public:
+    using value_type = Key;
+    using reference = typename std::conditional<Constant, const Key&, Key&>::type;
+    using pointer = typename std::conditional<Constant, const Key*, Key*>::type;
+    using difference_type = std::ptrdiff_t;
+    using iterator_category = std::forward_iterator_tag;
+
+    unordered_set_iterator() = default;
+
+    operator unordered_set_iterator<Bucket, true>() const
+    {
+      return unordered_set_iterator<Bucket, true>(m_bucket_it, m_bucket_end, m_key_before_it, m_key_it);
+    }
+
+    unordered_set_iterator& operator++()
+    {
+      ++m_key_before_it;
+      ++m_key_it;
+      goto_next_bucket();
+      return *this;
+    }
+
+    unordered_set_iterator operator++(int)
+    {
+      unordered_set_iterator copy(*this);
+      ++(*this);
+      return *copy;
+    }
+
+    template<bool Constant_ = Constant>
+    std::enable_if_t<Constant_, reference> operator*() const
+    {
+      return *m_key_it;
+    }
+
+    template<bool Constant_ = Constant>
+    std::enable_if_t<!Constant_, reference> operator*()
+    {
+      return const_cast<reference>(*m_key_it);
+    }
+
+    template<bool Constant_ = Constant>
+    std::enable_if_t<Constant_, pointer> operator->() const
+    {
+      return &(*m_key_it);
+    }
+
+    template<bool Constant_ = Constant>
+    std::enable_if_t<!Constant_, pointer> operator->()
+    {
+      return const_cast<pointer>(&(*m_key_it));
+    }
+
+    bool operator!=(const unordered_set_iterator& other) const
+    {
+      return m_key_it != other.m_key_it || m_bucket_it != other.m_bucket_it;
+    }
+
+    bool operator==(const unordered_set_iterator& other) const
+    {
+      return !(*this != other);
+    }
+
+  private:
+    /// \brief Construct an iterator over all keys passed in this bucket and all remaining buckets.
+    unordered_set_iterator(bucket_it it, bucket_it end, key_it_type before_it, key_it_type key) :
+      m_bucket_it(it), m_bucket_end(end), m_key_before_it(before_it), m_key_it(key)
+    {}
+
+    /// \brief Construct the begin iterator (over all elements).
+    unordered_set_iterator(bucket_it it, bucket_it end) :
+      m_bucket_it(it), m_bucket_end(end), m_key_before_it((*it).before_begin()), m_key_it((*it).begin())
+    {
+      goto_next_bucket();
+    }
+
+    /// \brief Construct the end iterator
+    explicit unordered_set_iterator(bucket_it it) :
+      m_bucket_it(it)
+    {}
+
+    operator unordered_set_iterator<Bucket, false>() const
+    {
+      return unordered_set_iterator<Bucket, false>(m_bucket_it, m_bucket_end, m_key_before_it, m_key_it);
+    }
+
+    /// \returns A reference to the before key iterator.
+    key_it_type& key_before_it() { return m_key_before_it; }
+
+    /// \returns A reference to the key iterator.
+    key_it_type& key_it() { return m_key_it; }
+
+    /// \returns A reference to the bucket iterator.
+    bucket_it& get_bucket_it() { return m_bucket_it; }
+
+    /// \brief Iterate to the next non-empty bucket.
+    void goto_next_bucket()
+    {
+      // Find the first bucket that is not empty.
+      while(!(m_key_it != detail::EndIterator))
+      {
+        // Take the next bucket and reset the key iterator.
+        ++m_bucket_it;
+
+        if (m_bucket_it != m_bucket_end)
+        {
+          m_key_it = (*m_bucket_it).begin();
+          m_key_before_it = (*m_bucket_it).before_begin();
+        }
+        else
+        {
+          // Reached the end of the buckets.
+          break;
+        }
+      }
+
+      // The current bucket contains elements or we are at the end.
+      assert(m_bucket_it == m_bucket_end || m_key_it != detail::EndIterator);
+    }
+
+    bucket_it m_bucket_it;
+    bucket_it m_bucket_end;
+    key_it_type m_key_before_it;
+    key_it_type m_key_it; // Invariant: m_key_it != EndIterator.
+  };
+
   using key_type = Key;
   using value_type = Key;
   using hasher = Hash;
@@ -79,9 +226,9 @@ public:
   using pointer = typename std::allocator_traits<Allocator>::pointer;
   using const_pointer = typename std::allocator_traits<Allocator>::const_pointer;
 
-  using local_iterator = typename bucket_type::iterator;
-  using const_iterator = unordered_set_iterator<key_type, bucket_type, Allocator>;
   using const_local_iterator = typename bucket_type::const_iterator;
+  using local_iterator = typename bucket_type::const_iterator;
+  using const_iterator = unordered_set_iterator<bucket_type, true>;
   using iterator = const_iterator;
 
   using size_type = std::size_t;

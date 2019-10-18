@@ -93,7 +93,7 @@ public:
   template<bool Constant = true>
   class key_iterator
   {
-    friend class bucket_list<Key, Allocator>;
+    friend class bucket_list;
 
   public:
     using value_type = typename std::conditional<Constant, const Key, Key>::type;
@@ -125,25 +125,25 @@ public:
     }
 
     template<bool Constant_ = Constant>
-    typename std::enable_if<!Constant_, reference>::type operator*()
+    typename std::enable_if_t<!Constant_, reference> operator*()
     {
       return m_current_node->key();
     }
 
     template<bool Constant_ = Constant>
-    typename std::enable_if<Constant_, reference>::type operator*() const
+    typename std::enable_if_t<Constant_, reference> operator*() const
     {
       return m_current_node->key();
     }
 
     template<bool Constant_ = Constant>
-    typename std::enable_if<!Constant_, pointer>::type operator->()
+    typename std::enable_if_t<!Constant_, pointer> operator->()
     {
       return &m_current_node->key();
     }
 
     template<bool Constant_ = Constant>
-    typename std::enable_if<Constant_, pointer>::type operator->() const
+    typename std::enable_if_t<Constant_, pointer> operator->() const
     {
       return &m_current_node->key();
     }

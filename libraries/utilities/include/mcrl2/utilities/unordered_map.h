@@ -21,10 +21,10 @@ namespace mcrl2::utilities
 /// \brief A class for a map of keys to values in T based using the simple hash table set implementation.
 template<typename Key,
          typename T,
-         typename Hash = std::hash<Key>,
-         typename KeyEqual = std::equal_to<Key>,
-         typename Allocator = std::allocator<Key>,
-         bool ThreadSafe = false>
+         typename Hash,
+         typename KeyEqual,
+         typename Allocator,
+         bool ThreadSafe>
 class unordered_map
 {
 public:
@@ -104,13 +104,14 @@ private:
   };
 
   using Set = unordered_set<value_type, PairHash, PairEquals, allocator_type, ThreadSafe>;
+  using bucket_type = typename Set::bucket_type;
 
   Set m_set; ///< The underlying set storing <key, value> pairs.
 
 public:
-  using iterator = typename Set::iterator;
+  using iterator = typename Set::template unordered_set_iterator<bucket_type, false>;
   using const_iterator = typename Set::const_iterator;
-  using local_iterator = typename Set::local_iterator;
+  using local_iterator = typename bucket_type::iterator;
   using const_local_iterator = typename Set::const_local_iterator;
 
   unordered_map()
@@ -147,7 +148,7 @@ public:
   size_type count(const key_type& key) const { return m_set.count(key); }
 
   template<typename ...Args>
-  std::pair<iterator, bool> emplace(Args&&... args) { return m_set.emplace(std::forward<Args>(args)...); }
+  std::pair<iterator, bool> emplace(Args&&... args) { auto[x, y] = m_set.emplace(std::forward<Args>(args)...); return std::make_pair(iterator(x), y); }
 
   void erase(const key_type& key) { const_iterator it = m_set.find(key); m_set.erase(it); }
   iterator erase(const_iterator it) { return m_set.erase(it); }
@@ -158,7 +159,7 @@ public:
   template<typename ...Args>
   const_iterator find(const Args&... args) const { return m_set.find(args...); }
 
-  std::pair<iterator, bool> insert(const value_type& pair) { return m_set.emplace(pair); }
+  std::pair<iterator, bool> insert(const value_type& pair) { auto[x, y] = m_set.emplace(pair); return std::make_pair(iterator(x), y); }
 
   size_type size() const { return m_set.size(); }
 };
