@@ -140,7 +140,6 @@ def test2():
     run_tests(slow_regression_tests, settings)
 
 def print_names(tests):
-    print('--- available tests ---')
     for name in sorted(tests):
         print(name)
 

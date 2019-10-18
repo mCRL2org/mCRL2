@@ -421,7 +421,6 @@ available_tests = {
 }
 
 def print_names(tests):
-    print('--- available tests ---')
     for name in sorted(tests):
         print(name)
 
