@@ -131,27 +131,13 @@ void ProcessSystem::testExecutableExistence()
 
     if (started)
     {
-      /* if found, get the tool version from the output
-       * the version is the fourth plus the fifth word in the output */
+      /* if found, check if the tool gives expected output */
       process.waitForFinished();
       QString output = process.readAllStandardOutput();
       QStringList splittedOutput = output.split(QRegExp("[ \r\n]"));
-      /* check if the output has the correct output */
-      if (splittedOutput.length() >= 4 && splittedOutput[1] == "mCRL2" &&
-          splittedOutput[2] == "toolset" && splittedOutput[3].startsWith("2"))
-      {
-        QString version = splittedOutput[3] + " " + splittedOutput[4];
-        if (version != mcrl2ideVersion)
-        {
-          consoleDock->broadcast(
-              "WARNING: Tool " + tool +
-              " does not have the same version as mCRL2 IDE: "
-              "mCRL2 IDE has version " +
-              mcrl2ideVersion + " whereas " + tool + " has version " + version +
-              ".\n");
-        }
-      }
-      else
+
+      if (!(splittedOutput.length() > 2 && splittedOutput[1] == "mCRL2" &&
+            splittedOutput[2] == "toolset"))
       {
         consoleDock->broadcast(
             "WARNING: The executable of tool " + tool +
