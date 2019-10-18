@@ -322,21 +322,6 @@ const DerivedCont& vertical_cast(const Cont<Base>& t,
   return reinterpret_cast<const DerivedCont&>(t);
 }
 
-/// \brief Cast from an aterm derived term to another aterm.
-/// \deprecated.
-template <class Derived, class Base>
-[[deprecated]]
-const Derived& deprecated_cast(const Base& t,
-                               typename std::enable_if<
-                                  std::is_base_of<aterm, Base>::value &&
-                                  std::is_base_of<aterm, Derived>::value
-                               >::type* = nullptr)
-{
-  static_assert(sizeof(Derived) == sizeof(aterm),
-                "aterm cast cannot be applied types derived from aterms where extra fields are added");
-  return reinterpret_cast<const Derived&>(t);
-}
-
 namespace detail
 {
   /// \returns A pointer to the underlying aterm.
