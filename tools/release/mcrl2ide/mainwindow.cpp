@@ -666,25 +666,25 @@ bool MainWindow::event(QEvent* event)
   switch (event->type())
   {
   case QEvent::WindowActivate:
-    /* if the specification has been modified outside of the IDE, ask to
-     *   update the editor */
+    /* if the project has been modified outside of the IDE, ask to reload the
+     *   project */
     if (!reloadIsBeingHandled &&
-        (fileSystem->projectOpened() ||
-         fileSystem->inSpecificationOnlyMode()) &&
-        fileSystem->isSpecificationNewlyModifiedFromOutside())
+        (fileSystem->projectOpened() || fileSystem->inSpecificationOnlyMode()))
     {
       reloadIsBeingHandled = true;
-      bool doReload = executeBinaryQuestionBox(
-          this, "mCRL2 IDE",
-          "The specification has been modified from outside "
-          "of the IDE, do you want to reload it?");
-      if (doReload)
+      if (fileSystem->isProjectNewlyModifiedFromOutside())
       {
-        fileSystem->loadSpecification();
-      }
-      else
-      {
-        specificationEditor->document()->setModified();
+        if (executeBinaryQuestionBox(
+                this, "mCRL2 IDE",
+                "The project has been modified from outside of the IDE, do you "
+                "want to reload it?"))
+        {
+          fileSystem->reloadProject();
+        }
+        else
+        {
+          fileSystem->setProjectModified();
+        }
       }
 
       reloadIsBeingHandled = false;

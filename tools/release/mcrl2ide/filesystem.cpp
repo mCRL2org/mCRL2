@@ -50,7 +50,7 @@ bool Property::operator!=(const Property& property) const
 FileSystem::FileSystem(mcrl2::gui::qt::CodeEditor* specificationEditor,
                        QSettings* settings, QWidget* parent)
     : parent(parent), specificationEditor(specificationEditor),
-      settings(settings), projectOpen(false), specificationModified(false),
+      settings(settings), projectOpen(false), properties({}),
       specificationOnlyMode(false)
 {
   for (std::pair<IntermediateFileType, QString> item :
@@ -63,9 +63,6 @@ FileSystem::FileSystem(mcrl2::gui::qt::CodeEditor* specificationEditor,
   {
     qDebug("Warning: could not create temporary folder");
   }
-
-  connect(specificationEditor, SIGNAL(modificationChanged(bool)), this,
-          SLOT(setSpecificationModified(bool)));
 }
 
 void FileSystem::makeSurePropertiesFolderExists()
@@ -228,18 +225,7 @@ bool FileSystem::inSpecificationOnlyMode()
 
 bool FileSystem::isSpecificationModified()
 {
-  return specificationModified;
-}
-
-void FileSystem::setSpecificationModified(bool modified)
-{
-  specificationModified = modified;
-}
-
-void FileSystem::updateSpecificationModificationTime()
-{
-  lastKnownSpecificationModificationTime =
-      QFileInfo(specificationFilePath()).lastModified();
+  return specificationEditor->document()->isModified();
 }
 
 bool FileSystem::isSpecificationNewlyModifiedFromOutside()
@@ -250,6 +236,68 @@ bool FileSystem::isSpecificationNewlyModifiedFromOutside()
       lastKnownSpecificationModificationTime != newestModificationTime;
   lastKnownSpecificationModificationTime = newestModificationTime;
   return newlyModified;
+}
+
+bool FileSystem::isPropertyModified(const Property& property)
+{
+  return propertyModified.at(property.name);
+}
+
+bool FileSystem::isPropertyNewlyModifiedFromOutside(const Property& property)
+{
+  QFileInfo propertyFileInfo(propertyFilePath(property));
+  if (propertyFileInfo.exists())
+  {
+    QDateTime newestModificationTime =
+        QFileInfo(propertyFilePath(property)).lastModified();
+    bool newlyModified = lastKnownPropertyModificationTime.at(property.name) !=
+                         newestModificationTime;
+    lastKnownPropertyModificationTime[property.name] = newestModificationTime;
+    return newlyModified;
+  }
+  else
+  {
+    return true;
+  }
+}
+
+void FileSystem::setProjectModified()
+{
+  specificationEditor->document()->setModified(true);
+  for (Property& property : properties)
+  {
+    propertyModified[property.name] = true;
+  }
+}
+
+bool FileSystem::isProjectFileNewlyModifiedFromOutside()
+{
+  QDateTime newestModificationTime =
+      QFileInfo(projectFilePath()).lastModified();
+  bool newlyModified =
+      lastKnownProjectFileModificationTime != newestModificationTime;
+  lastKnownProjectFileModificationTime = newestModificationTime;
+  return newlyModified;
+}
+
+bool FileSystem::isProjectNewlyModifiedFromOutside()
+{
+  if (isSpecificationNewlyModifiedFromOutside() ||
+      isProjectFileNewlyModifiedFromOutside())
+  {
+    return true;
+  }
+  else
+  {
+    for (Property& property : properties)
+    {
+      if (isPropertyNewlyModifiedFromOutside(property))
+      {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 bool FileSystem::propertyNameExists(const QString& propertyName)
@@ -365,6 +413,7 @@ void FileSystem::updateProjectFile()
   QTextStream saveStream(&projectFile);
   saveStream << projectOptions.toString();
   projectFile.close();
+  lastKnownProjectFileModificationTime = QFileInfo(projectFile).lastModified();
 }
 
 QDomDocument
@@ -474,14 +523,7 @@ bool FileSystem::newProject(bool forNewProject)
 
       projectOpen = true;
       emit newProjectOpened();
-      success = true;
-
-      /* if we are not saving as, create an empty specification file by saving
-       *   the project */
-      if (forNewProject)
-      {
-        save(true);
-      }
+      success = save(true);
     }
     else
     {
@@ -533,7 +575,8 @@ bool FileSystem::loadSpecification(QString specPath)
     }
 
     specificationEditor->document()->setModified(false);
-    updateSpecificationModificationTime();
+    lastKnownSpecificationModificationTime =
+        QFileInfo(specificationFilePath()).lastModified();
     return true;
   }
   else
@@ -677,6 +720,7 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
   projectFolderPath = QFileInfo(newProjectFilePath).path();
   projectName = QFileInfo(newProjectFilePath).baseName();
   projectOptions = newProjectOptions;
+  lastKnownProjectFileModificationTime = QFileInfo(projectFile).lastModified();
 
   /* read all properties */
   properties.clear();
@@ -706,6 +750,9 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
     if (!readProperty.name.isEmpty())
     {
       properties.push_back(readProperty);
+      propertyModified[readProperty.name] = false;
+      lastKnownPropertyModificationTime[readProperty.name] =
+          QFileInfo(propFilePath).lastModified();
     }
   }
 
@@ -723,6 +770,11 @@ void FileSystem::openProject()
     openProjectFromFolder(newProjectFolderPath);
   }
   openProjectDialog->deleteLater();
+}
+
+void FileSystem::reloadProject()
+{
+  openProjectFromFolder(projectFolderPath);
 }
 
 QString FileSystem::findPropertyFilePath(const QString& propertyName)
@@ -922,14 +974,14 @@ bool FileSystem::save(bool forceSave)
       QTextStream saveStream(&specificationFile);
       saveStream << specificationEditor->toPlainText();
       specificationFile.close();
-      updateSpecificationModificationTime();
+      lastKnownSpecificationModificationTime =
+          QFileInfo(specificationFile).lastModified();
     }
 
-    /* save all properties if necessary */
-    if (forceSave && !specificationOnlyMode)
+    /* save all properties */
+    for (Property& property : properties)
     {
-      makeSurePropertiesFolderExists();
-      for (Property property : properties)
+      if (propertyModified.at(property.name) || forceSave)
       {
         saveProperty(property);
       }
@@ -976,14 +1028,7 @@ bool FileSystem::saveAs()
    *   current as and save if successful */
   else
   {
-    if (newProject(!projectOpen))
-    {
-      return save(true);
-    }
-    else
-    {
-      return false;
-    }
+    return newProject(!projectOpen);
   }
 }
 
@@ -1007,6 +1052,9 @@ void FileSystem::saveProperty(const Property& property, bool forParsing)
   }
 
   propertyFile.close();
+  propertyModified[property.name] = false;
+  lastKnownPropertyModificationTime.at(property.name) =
+      QFileInfo(propertyFile).lastModified();
 }
 
 void FileSystem::createReinitialisedSpecification(const Property& property,

@@ -283,6 +283,45 @@ class FileSystem : public QObject
   bool isSpecificationNewlyModifiedFromOutside();
 
   /**
+   * @brief isPropertyModified Checks whether the given property has been
+   *   modified since it has been saved
+   * @param property The property to check the modification for
+   * @return Whether the given property has been modified since it has been
+   *   saved
+   */
+  bool isPropertyModified(const Property& property);
+
+  /**
+   * @brief isPropertyNewlyModifiedFromOutside Checks whether the property file
+   *   of the given property file has been modified from outside the IDE since
+   *   it was saved using the IDE or since it was last modified from outside
+   * @param property The property to check the modification for
+   * @return Whether the project file has been modified from outside
+   */
+  bool isPropertyNewlyModifiedFromOutside(const Property& property);
+
+  /**
+   * @brief setProjectModified Sets the project to modified
+   */
+  void setProjectModified();
+
+  /**
+   * @brief isProjectFileNewlyModifiedFromOutside Checks whether the project
+   *   file has been modified from outside the IDE since it was saved using the
+   *   IDE or since it was last modified from outside
+   * @return Whether the project file has been modified from outside
+   */
+  bool isProjectFileNewlyModifiedFromOutside();
+
+  /**
+   * @brief isProjectNewlyModifiedFromOutside Checks whether the project has
+   *   been modified from outside the IDE since it was saved using the IDE or
+   *   since it was last modified from outside
+   * @return Whether the project has been modified from outside
+   */
+  bool isProjectNewlyModifiedFromOutside();
+
+  /**
    * @brief propertyNameExists Checks whether the given property name already
    *   exists
    * @param propertyName The property name to check for
@@ -343,6 +382,11 @@ class FileSystem : public QObject
    * @brief openProject Opens a project chosen by the user
    */
   void openProject();
+
+  /**
+   * @brief reloadProject Reloads the current project
+   */
+  void reloadProject();
 
   /**
    * @brief newProperty Adds a new property
@@ -422,13 +466,6 @@ class FileSystem : public QObject
 
   public slots:
   /**
-   * @brief setSpecificationModified Sets the specification to modified or
-   *   unmodified
-   * @param modified Whether the specification was modified
-   */
-  void setSpecificationModified(bool modified);
-
-  /**
    * @brief setSaveIntermediateFilesOptions Sets the options on whether
    *   intermediate files need to be saved
    * @param checked Whether an options was checked or unchecked
@@ -466,9 +503,11 @@ class FileSystem : public QObject
   bool projectOpen;
   QDomDocument projectOptions;
   std::list<Property> properties;
-  bool specificationModified;
+  std::map<QString, bool> propertyModified;
   bool specificationOnlyMode;
   QDateTime lastKnownSpecificationModificationTime;
+  QDateTime lastKnownProjectFileModificationTime;
+  std::map<QString, QDateTime> lastKnownPropertyModificationTime;
 
   /**
    * @brief makeSureProjectFolderExists Checks whether the properties folder
@@ -481,12 +520,6 @@ class FileSystem : public QObject
    *   exists, if not creates it
    */
   void makeSureArtefactsFolderExists();
-
-  /**
-   * @brief updateSpecificationModificationTime Updates the specification
-   *   modification time to what it is according to the OS
-   */
-  void updateSpecificationModificationTime();
 
   /**
    * @brief createFileDialog Creates a file dialog that can be used to ask the
