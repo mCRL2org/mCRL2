@@ -87,8 +87,19 @@ std::pair<typename MCRL2_UNORDERED_SET_CLASS::iterator, bool> MCRL2_UNORDERED_SE
   // First rehash, such that this bucket can not be invalidated afterwards.
   rehash_if_needed();
 
-  auto bucket_it = find_bucket_index(args...);
-  auto it = find_impl(bucket_it, args...);
+  size_type bucket_index;
+  iterator it;
+  if constexpr (allow_transparent)
+  {
+    bucket_index = find_bucket_index(args...);
+    it = find_impl(bucket_index, args...);
+  }
+  else
+  {
+    Key object(std::forward<Args>(args)...);
+    bucket_index = find_bucket_index(object);
+    it = find_impl(bucket_index, object);
+  }
 
   if (it != end())
   {
@@ -96,7 +107,7 @@ std::pair<typename MCRL2_UNORDERED_SET_CLASS::iterator, bool> MCRL2_UNORDERED_SE
   }
   else
   {
-    return emplace_impl(bucket_it, std::forward<Args>(args)...);
+    return emplace_impl(bucket_index, std::forward<Args>(args)...);
   }
 }
 
@@ -118,49 +129,61 @@ typename MCRL2_UNORDERED_SET_CLASS::iterator MCRL2_UNORDERED_SET_CLASS::erase(ty
 }
 
 MCRL2_UNORDERED_SET_TEMPLATES
-void MCRL2_UNORDERED_SET_CLASS::erase(const Key& key)
+template<typename ...Args>
+std::size_t MCRL2_UNORDERED_SET_CLASS::count(const Args&... args) const
 {
-  bucket_type& bucket = m_buckets[find_bucket_index(key)];
-
-  // Loop over the elements in the bucket until the key was found.
-  typename bucket_type::const_iterator before_it = bucket.before_begin();
-  for (typename bucket_type::iterator it = bucket.begin(); it != bucket.end();)
+  if constexpr (allow_transparent)
   {
-    if (m_equals(*it, key))
-    {
-      // Erase the current element and stop iterating.
-      --m_number_of_elements;
-      it = bucket.erase_after(m_allocator, before_it);
-      break;
-    }
-    else
-    {
-      // Both iterators move one place forward.
-      ++before_it;
-      ++it;
-    }
+    return find(args...) != end();
+  }
+  else
+  {
+    return find(Key(args...)) != end();
   }
 }
 
 MCRL2_UNORDERED_SET_TEMPLATES
 template<typename ...Args>
-std::size_t MCRL2_UNORDERED_SET_CLASS::count(const Args&... args) const
+void MCRL2_UNORDERED_SET_CLASS::erase(const Args&... args)
 {
-  return find(args...) != end();
+  if constexpr (allow_transparent)
+  {
+    erase_impl(args...);
+  }
+  else
+  {
+    erase_impl(Key(args...));
+  }
 }
 
 MCRL2_UNORDERED_SET_TEMPLATES
 template<typename ...Args>
 typename MCRL2_UNORDERED_SET_CLASS::const_iterator MCRL2_UNORDERED_SET_CLASS::find(const Args&... args) const
 {
-  return find_impl(find_bucket_index(args...), args...);
+  if constexpr (allow_transparent)
+  {
+    return find_impl(find_bucket_index(args...), args...);
+  }
+  else
+  {
+    Key element(args...);
+    return find_impl(find_bucket_index(element), element);
+  }
 }
 
 MCRL2_UNORDERED_SET_TEMPLATES
 template<typename ...Args>
 typename MCRL2_UNORDERED_SET_CLASS::iterator MCRL2_UNORDERED_SET_CLASS::find(const Args&... args)
 {
-  return find_impl(find_bucket_index(args...), args...);
+  if constexpr (allow_transparent)
+  {
+    return find_impl(find_bucket_index(args...), args...);
+  }
+  else
+  {
+    Key element(args...);
+    return find_impl(find_bucket_index(element), element);
+  }
 }
 
 MCRL2_UNORDERED_SET_TEMPLATES
@@ -242,6 +265,33 @@ std::pair<typename MCRL2_UNORDERED_SET_CLASS::iterator, bool> MCRL2_UNORDERED_SE
 
 MCRL2_UNORDERED_SET_TEMPLATES
 template<typename ...Args>
+void MCRL2_UNORDERED_SET_CLASS::erase_impl(const Args&... args)
+{
+  bucket_type& bucket = m_buckets[find_bucket_index(args...)];
+
+  // Loop over the elements in the bucket until the key was found.
+  typename bucket_type::const_iterator before_it = bucket.before_begin();
+  for (typename bucket_type::iterator it = bucket.begin(); it != bucket.end();)
+  {
+    if (m_equals(*it, args...))
+    {
+      // Erase the current element and stop iterating.
+      --m_number_of_elements;
+      it = bucket.erase_after(m_allocator, before_it);
+      break;
+    }
+    else
+    {
+      // Both iterators move one place forward.
+      ++before_it;
+      ++it;
+    }
+  }
+}
+
+
+MCRL2_UNORDERED_SET_TEMPLATES
+template<typename ...Args>
 std::size_t MCRL2_UNORDERED_SET_CLASS::find_bucket_index(const Args&... args) const
 {
   std::size_t hash = m_hash(args...);
@@ -266,27 +316,6 @@ typename MCRL2_UNORDERED_SET_CLASS::const_iterator MCRL2_UNORDERED_SET_CLASS::fi
     if (m_equals(key, args...))
     {
       return const_iterator(m_buckets.begin() + bucket_index, m_buckets.end(), before_it, it);
-    }
-
-    before_it = it;
-  }
-
-  return end();
-}
-
-MCRL2_UNORDERED_SET_TEMPLATES
-template<typename ...Args>
-typename MCRL2_UNORDERED_SET_CLASS::iterator MCRL2_UNORDERED_SET_CLASS::find_impl(size_type bucket_index, const Args&... args)
-{
-  auto& bucket = m_buckets[bucket_index];
-
-  auto before_it = bucket.before_begin();
-  for(auto it = bucket.begin(); it != bucket.end(); ++it)
-  {
-    auto& key = *it;
-    if (m_equals(key, args...))
-    {
-      return iterator(m_buckets.begin() + bucket_index, m_buckets.end(), before_it, it);
     }
 
     before_it = it;

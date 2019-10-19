@@ -56,24 +56,6 @@ private:
   using bucket_iterator = typename std::vector<bucket_type>::iterator;
   using const_bucket_iterator = typename std::vector<bucket_type>::const_iterator;
 
-  template<typename Key_, typename T, typename Hash_, typename KeyEqual, typename Allocator_, bool ThreadSafe_>
-  friend class unordered_map;
-
-  // Check for the existence of the is_transparent type.
-  template <typename... >
-  using void_t = void;
-
-  template <typename X, typename = void>
-  struct is_transparent : std::false_type { };
-
-  template <typename X>
-  struct is_transparent<X, void_t<typename X::is_transparent>>
-  : std::true_type { };
-
-  // Transparency means that it can be called with the arguments passed through emplace (which are the arguments of a constructor) and find.
-  // Specifically the function hash(x_0,...,x_n) and equals(key, x_0,...,x_n) must be defined for all arguments of calls to emplace(x_0,...,x_n) and find(x_0,...,x_n).
-  static_assert (is_transparent<Hash>(), "The hash function must have is_transparent to indicate that it supports heterogeneous lookup.");
-  static_assert (is_transparent<Equals>(), "The equals function must have is_transparent to indicate that it supports heterogeneous lookup.");
 
 public:
   /// \brief An iterator over all elements in the unordered set.
@@ -289,9 +271,9 @@ public:
   template<typename ...Args>
   std::pair<iterator, bool> emplace(Args&&... args);
 
-  /// \brief Erases the given key from the unordered set.
-  /// \details Needs to find the key first.
-  void erase(const key_type& key);
+  /// \brief Erases the given key_type(args...) from the unordered set.
+  template<typename...Args>
+  void erase(const Args&... args);
 
   /// \brief Erases the element pointed to by the iterator.
   /// \returns An iterator to the next key.
@@ -343,10 +325,27 @@ public:
   key_equal key_eq() const { return m_equals; }
 
 private:
+  template<typename Key_, typename T, typename Hash_, typename KeyEqual, typename Allocator_, bool ThreadSafe_>
+  friend class unordered_map;
+
+  // Check for the existence of the is_transparent type.
+  template <typename... >
+  using void_t = void;
+
+  template <typename X, typename = void>
+  struct is_transparent : std::false_type { };
+
+  template <typename X>
+  struct is_transparent<X, void_t<typename X::is_transparent>>
+  : std::true_type { };
 
   /// \brief Inserts T(args...) into the given bucket, assumes that it did not exists before.
   template<typename ...Args>
   std::pair<iterator, bool> emplace_impl(size_type bucket_index, Args&&... args);
+
+  /// \brief Removes T(args...) from the set.
+  template<typename ...Args>
+  void erase_impl(const Args&... args);
 
   /// \returns The index of the bucket that might contain the element constructed by the given arguments.
   template<typename ...Args>
@@ -356,11 +355,11 @@ private:
   template<typename ...Args>
   const_iterator find_impl(size_type bucket_index, const Args&... args) const;
 
-  template<typename ...Args>
-  iterator find_impl(size_type bucket_index, const Args&... args);
-
   /// \brief Resizes the hash table if required.
   void rehash_if_needed();
+
+  /// \brief True iff the hash and equals functions allow transparent lookup,
+  static constexpr bool allow_transparent = is_transparent<Hash>() && is_transparent<Equals>();
 
   /// \brief The number of elements stored in this set.
   size_type m_number_of_elements = 0;
