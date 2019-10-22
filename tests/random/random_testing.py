@@ -16,7 +16,7 @@ import random_state_formula_generator
 from random_bes_generator import make_bes
 from random_pbes_generator import make_pbes
 import random_process_expression
-from testcommand import YmlTest
+from testing import YmlTest
 from text_utility import write_text
 
 MCRL2_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -123,7 +123,7 @@ class LpsParelmTest(ProcessTest):
 class LpsOnePointRuleRewriteTest(ProcessTest):
     def __init__(self, name, settings):
         super(LpsOnePointRuleRewriteTest, self).__init__(name, ymlfile('lpstransform'), settings)
-        self.set_command_line_options('t2', ['-alps-one-point-rule-rewriter'])
+        self.add_command_line_options('t2', ['-alps-one-point-rule-rewriter'])
 
 class LpsConfcheckTest(ProcessTauTest):
     def __init__(self, name, confluence_type, settings):
@@ -135,14 +135,14 @@ class LpsConfcheckTest(ProcessTauTest):
                           }
         assert confluence_type in self.option_map
         super(LpsConfcheckTest, self).__init__(name, ymlfile('lpsconfcheck'), settings)
-        self.set_command_line_options('t2', ['-x' + self.option_map[confluence_type]])
+        self.add_command_line_options('t2', ['-x' + self.option_map[confluence_type]])
 
 class LtscompareTest(ProcessTauTest):
     def __init__(self, name, equivalence_type, settings):
         assert equivalence_type in ['bisim', 'bisim-gv', 'bisim-gjkw', 'branching-bisim', 'branching-bisim-gv', 'branching-bisim-gjkw', 'dpbranching-bisim', 'dpbranching-bisim-gv', 'dpbranching-bisim-gjkw', 'weak-bisim', 'dpweak-bisim', 'sim', 'ready-sim' , 'trace', 'weak-trace']
         super(LtscompareTest, self).__init__(name, ymlfile('ltscompare'), settings)
-        self.set_command_line_options('t3', ['-e' + equivalence_type])
-        self.set_command_line_options('t4', ['-e' + equivalence_type])
+        self.add_command_line_options('t3', ['-e' + equivalence_type])
+        self.add_command_line_options('t4', ['-e' + equivalence_type])
 
 class StochasticLtscompareTest(StochasticProcessTest):
     def __init__(self, name, settings):
@@ -152,14 +152,14 @@ class BisimulationTest(ProcessTauTest):
     def __init__(self, name, equivalence_type, settings):
         assert equivalence_type in ['bisim', 'bisim-gv', 'bisim-gjkw', 'branching-bisim', 'branching-bisim-gv', 'branching-bisim-gjkw', 'weak-bisim']
         super(BisimulationTest, self).__init__(name, ymlfile('bisimulation'), settings)
-        self.set_command_line_options('t3', ['-e' + equivalence_type])
-        self.set_command_line_options('t4', ['-e' + equivalence_type])
+        self.add_command_line_options('t3', ['-e' + equivalence_type])
+        self.add_command_line_options('t4', ['-e' + equivalence_type])
         if equivalence_type in ['branching-bisim-gv', 'branching-bisim-gjkw']:
-            self.set_command_line_options('t7', ['-bbranching-bisim'])
+            self.add_command_line_options('t7', ['-bbranching-bisim'])
         elif equivalence_type in ['bisim', 'bisim-gv', 'bisim-gjkw']:
-            self.set_command_line_options('t7', ['-bstrong-bisim'])
+            self.add_command_line_options('t7', ['-bstrong-bisim'])
         else:
-            self.set_command_line_options('t7', ['-b' + equivalence_type])
+            self.add_command_line_options('t7', ['-b' + equivalence_type])
 
 class Lps2ltsAlgorithmsTest(ProcessTauTest):
     def __init__(self, name, settings):
@@ -172,8 +172,8 @@ class Lps2ltsAlgorithmsTest(ProcessTauTest):
             tau_actions = random.choice(['', '', 'b', 'b,c'])
             if tau_actions:
                 options.append('--tau={}'.format(tau_actions))
-        self.set_command_line_options('t2', options)
-        self.set_command_line_options('t3', options)
+        self.add_command_line_options('t2', options)
+        self.add_command_line_options('t3', options)
 
 class LpsConstelmTest(ProcessTest):
     def __init__(self, name, settings):
@@ -260,17 +260,17 @@ class Pbespor2Test(ProcessTest):
 class PbesrewrTest(PbesTest):
     def __init__(self, name, rewriter, settings):
         super(PbesrewrTest, self).__init__(name, ymlfile('pbesrewr'), settings)
-        self.set_command_line_options('t2', ['-p' + rewriter])
+        self.add_command_line_options('t2', ['-p' + rewriter])
 
 class PbestransformTest(PbesTest):
     def __init__(self, name, rewriter, settings):
         super(PbestransformTest, self).__init__(name, ymlfile('pbestransform'), settings)
-        self.set_command_line_options('t2', ['-a' + rewriter])
+        self.add_command_line_options('t2', ['-a' + rewriter])
 
 class PbesinstTest(PbesTest):
     def __init__(self, name, options, settings):
         super(PbesinstTest, self).__init__(name, ymlfile('pbesinst'), settings)
-        self.set_command_line_options('t2', options)
+        self.add_command_line_options('t2', options)
 
 class PbespgsolveTest(PbesTest):
     def __init__(self, name, settings):
@@ -291,21 +291,21 @@ class PbessolveTest(PbesTest):
 class PbessolveDepthFirstTest(PbesTest):
     def __init__(self, name, settings):
         super(PbessolveDepthFirstTest, self).__init__(name, ymlfile('pbessolve'), settings)
-        self.set_command_line_options('t2', ['-zdepth-first'])
-        self.set_command_line_options('t3', ['-zdepth-first'])
-        self.set_command_line_options('t4', ['-zdepth-first'])
-        self.set_command_line_options('t5', ['-zdepth-first'])
-        self.set_command_line_options('t6', ['-zdepth-first'])
-        self.set_command_line_options('t7', ['-zdepth-first'])
-        self.set_command_line_options('t8', ['-zdepth-first'])
+        self.add_command_line_options('t2', ['-zdepth-first'])
+        self.add_command_line_options('t3', ['-zdepth-first'])
+        self.add_command_line_options('t4', ['-zdepth-first'])
+        self.add_command_line_options('t5', ['-zdepth-first'])
+        self.add_command_line_options('t6', ['-zdepth-first'])
+        self.add_command_line_options('t7', ['-zdepth-first'])
+        self.add_command_line_options('t8', ['-zdepth-first'])
 
 class Pbessolve_counter_exampleTest(ProcessTest):
     def __init__(self, name, optimization, settings):
         super(Pbessolve_counter_exampleTest, self).__init__(name, ymlfile('pbessolve-counter-example'), settings)
         if optimization in [4, 5]:
-            self.set_command_line_options('t3', ['-l{}'.format(optimization), '--aggressive', '--prune-todo-list'])
+            self.add_command_line_options('t3', ['-l{}'.format(optimization), '--aggressive', '--prune-todo-list'])
         else:
-            self.set_command_line_options('t3', ['-l{}'.format(optimization), '--prune-todo-list'])
+            self.add_command_line_options('t3', ['-l{}'.format(optimization), '--prune-todo-list'])
 
     def create_inputfiles(self, runpath = '.'):
         super(Pbessolve_counter_exampleTest, self).create_inputfiles(runpath)

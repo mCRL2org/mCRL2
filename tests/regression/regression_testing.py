@@ -8,7 +8,7 @@ import os
 import re
 import sys
 sys.path += [os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'python'))]
-from testcommand import YmlTest
+from testing import YmlTest
 
 MCRL2_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 MCRL2_INSTALL_DIR = os.path.join(MCRL2_ROOT, 'install', 'bin')
@@ -27,32 +27,32 @@ class LpsconfcheckTest(YmlTest):
     def __init__(self, name, inputfiles, confluence_type, expected_result, settings):
         assert confluence_type in 'cdCTZ'
         super(LpsconfcheckTest, self).__init__(name, ymlfile('lpsconfcheck'), inputfiles, settings)
-        self.set_command_line_options('t2', ['-x' + confluence_type])
+        self.add_command_line_options('t2', ['-x' + confluence_type])
         self.settings.update({'result': "result = t5.value['result'] and t2.value['confluent-tau-summand-count'] == {}  and t2.value['tau-summand-count'] == {}".format(expected_result[0], expected_result[1])})
 
 class LpsconfcheckCtauTest(YmlTest):
     def __init__(self, name, inputfiles, confluence_type, expected_result, settings):
         assert confluence_type in 'cdCTZ'
         super(LpsconfcheckCtauTest, self).__init__(name, ymlfile('lpsconfcheck_ctau'), inputfiles, settings)
-        self.set_command_line_options('t3', ['-x' + confluence_type])
+        self.add_command_line_options('t3', ['-x' + confluence_type])
         self.settings.update({'result': "result = t6.value['result'] and t3.value['confluent-tau-summand-count'] == {}  and t3.value['tau-summand-count'] == {}".format(expected_result[0], expected_result[1])})
 
 class PbesrewrTest(YmlTest):
     def __init__(self, name, inputfiles, rewriter, settings):
         super(PbesrewrTest, self).__init__(name, ymlfile('pbesrewr'), inputfiles, settings)
-        self.set_command_line_options('t2', ['-p' + rewriter])
+        self.add_command_line_options('t2', ['-p' + rewriter])
 
 class CountStatesTest(YmlTest):
     # expected_result is the expected number of states
     def __init__(self, name, inputfiles, expected_result, lps2lts_options, settings):
         super(CountStatesTest, self).__init__(name, ymlfile('countstates'), inputfiles, settings)
         if lps2lts_options:
-            self.set_command_line_options('t2', lps2lts_options)
+            self.add_command_line_options('t2', lps2lts_options)
 
 class PbesstategraphTest(YmlTest):
     def __init__(self, name, inputfiles, command_line_options, settings):
         super(PbesstategraphTest, self).__init__(name, ymlfile('pbesstategraph'), inputfiles, settings)
-        self.set_command_line_options('t2', command_line_options)
+        self.add_command_line_options('t2', command_line_options)
 
 regression_tests = {
     'ticket-283'    : lambda name, settings: YmlTest(name, ymlfile('mcrl22lps'),         [abspath('tickets/283/1.mcrl2')], settings),
