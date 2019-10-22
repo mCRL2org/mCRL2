@@ -9,8 +9,6 @@ import os
 import os.path
 import shutil
 import sys
-sys.path += [os.path.join(os.path.dirname(__file__), '..', '..', 'build', 'python')]
-import testrunner
 from text_utility import read_text, write_text
 from tools import Node, ToolFactory
 
@@ -297,53 +295,3 @@ def run_yml_test(name, testfile, inputfiles, settings):
     if result == False:
         raise RuntimeError('The result expression evaluated to False. The output of the tools likely does not match.')
     return result
-
-class TestRunner(testrunner.TestRunner):
-    def __init__(self):
-        super(TestRunner, self).__init__()
-        self.settings = {'toolpath': self._tool_path,
-                         'verbose': self._args.verbose,
-                         'cleanup_files': not self._args.keep_files}
-        self.tests = []
-
-    def main(self):
-        if self._args.print_names:
-            self.print_names()
-        if self._args.command is not None:
-            try:
-                test = self.tests[self._args.command]
-                test.print_commands(os.path.join(os.getcwd(), test.name))
-            except Exception as e:
-                sys.exit(str(e))
-        super(TestRunner, self).main()
-
-    def ymlfile(self, name):
-        return '{}/tests/specifications/{}.yml'.format(self._source_path, name)
-
-    def mcrl2file(self, file):
-        return self._source_path + file
-
-    def _get_commandline_parser(self):
-        parser = super(TestRunner, self)._get_commandline_parser()
-        parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='Display additional progress messages.')
-        parser.add_argument('-k', '--keep-files', dest='keep_files', action='store_true', help='Keep the files produced by the test')
-        parser.add_argument('-p', '--print-names', dest='print_names', action='store_true', help='Print the names and the numbers of the tests')
-        parser.add_argument('-c', '--print-commands', dest='command', metavar='N', type=int, action='store', help='Print the commands of test N, or exit with return value 1 if N is too large.')
-        return parser
-
-    def names(self):
-        for test in self.tests:
-            yield test.name
-
-    # displays names and numbers of the tests
-    def print_names(self):
-        for i, test in enumerate(self.tests):
-            print('{} {}'.format(i, test.name))
-
-    def run(self, testnum):
-        if testnum < len(self.tests):
-            test = self.tests[testnum]
-            test.settings.update(self.settings)
-            test.execute_in_sandbox()
-        else:
-            raise RuntimeError('Invalid test number')
