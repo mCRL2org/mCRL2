@@ -440,6 +440,7 @@ def main(tests):
     cmdline_parser.add_argument('-k', '--keep-files', dest='keep_files', action='store_true', help='Keep the files produced by the test')
     cmdline_parser.add_argument('-n', '--names', dest='names', action='store_true', help='Print the names of the available tests')
     cmdline_parser.add_argument('-p', '--pattern', dest='pattern', metavar='P', default='.', action='store', help='Run the tests that match with pattern P')
+    cmdline_parser.add_argument('-o', '--output', dest='output', metavar='o', action='store', help='Run the tests in the given directory')
     args = cmdline_parser.parse_args()
     if args.names:
         print_names(tests)
@@ -450,10 +451,10 @@ def main(tests):
     settings = {'toolpath': toolpath, 'verbose': args.verbose, 'cleanup_files': not args.keep_files, 'allow-non-zero-return-values': True}
     I = range(int(args.repetitions))
 
-    testdir = 'output'
-    if not os.path.exists(testdir):
-        os.mkdir(testdir)
-    os.chdir(testdir)
+    if args.output:
+        if not os.path.exists(args.output):
+            os.mkdir(args.output)
+        os.chdir(args.output)
 
     for name in matching_tests(tests, args.pattern):
         try:
