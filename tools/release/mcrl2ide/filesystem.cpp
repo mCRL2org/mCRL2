@@ -1052,9 +1052,12 @@ void FileSystem::saveProperty(const Property& property, bool forParsing)
   }
 
   propertyFile.close();
-  propertyModified[property.name] = false;
-  lastKnownPropertyModificationTime[property.name] =
-      QFileInfo(propertyFile).lastModified();
+  if (!forParsing)
+  {
+    propertyModified[property.name] = false;
+    lastKnownPropertyModificationTime[property.name] =
+        QFileInfo(propertyFile).lastModified();
+  }
 }
 
 void FileSystem::createReinitialisedSpecification(const Property& property,
