@@ -153,6 +153,7 @@ void AddEditPropertyDialog::abortPropertyParsing()
     int parsingid = propertyParsingProcessid;
     propertyParsingProcessid = -1;
     processSystem->abortProcess(parsingid);
+    ui->parseButton->setText("Parse");
   }
 }
 
@@ -162,7 +163,6 @@ void AddEditPropertyDialog::parseProperty()
   if (propertyParsingProcessid >= 0)
   {
     abortPropertyParsing();
-    ui->parseButton->setText("Parse");
   }
   /* else parse the current property */
   else
