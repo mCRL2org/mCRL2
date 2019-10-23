@@ -174,17 +174,8 @@ void MainWindow::setupMenuBar()
       editMenu->addAction("Select All", specificationEditor, SLOT(selectAll()),
                           QKeySequence::SelectAll);
 
-  /* Create the View Menu (more actions are added in setupDocks())*/
-  viewMenu = menuBar()->addMenu("View");
-
-  zoomInAction =
-      viewMenu->addAction("Zoom in", specificationEditor, SLOT(zoomIn()),
-                          QKeySequence(Qt::CTRL + Qt::Key_Equal));
-
-  zoomOutAction = viewMenu->addAction("Zoom out", specificationEditor,
-                                      SLOT(zoomOut()), QKeySequence::ZoomOut);
-
-  viewMenu->addSeparator();
+  /* Create the View Menu (actions are added in setupDocks())*/
+  viewMenu = menuBar()->addMenu("View"); 
 
   /* Create the Tools menu */
   QMenu* toolsMenu = menuBar()->addMenu("Tools");
