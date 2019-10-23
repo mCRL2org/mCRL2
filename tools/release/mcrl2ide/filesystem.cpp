@@ -1053,7 +1053,7 @@ void FileSystem::saveProperty(const Property& property, bool forParsing)
 
   propertyFile.close();
   propertyModified[property.name] = false;
-  lastKnownPropertyModificationTime.at(property.name) =
+  lastKnownPropertyModificationTime[property.name] =
       QFileInfo(propertyFile).lastModified();
 }
 
