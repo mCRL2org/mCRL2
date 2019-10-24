@@ -436,3 +436,15 @@ BOOST_AUTO_TEST_CASE(test_function_as_equation_condition)
   );
 }
 
+// Test case supplied by Johri van Eerd, 22-10-2019
+BOOST_AUTO_TEST_CASE(test_incomplete_assignments)
+{
+  test_typechecker_case(
+    "act F,T;\n"
+    "proc P(b: Bool) = (b) -> T . Q() <> F . Q();\n"
+    "     Q(res: Bool) = P(b = !res);\n"
+    "init P(true);",
+    false
+  );
+}
+

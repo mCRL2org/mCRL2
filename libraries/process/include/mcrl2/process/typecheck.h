@@ -141,17 +141,19 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   data::detail::variable_context m_variable_context;
   const detail::process_context& m_process_context;
   const detail::action_context& m_action_context;
-  const process_equation* m_current_equation;
+  const process_identifier* m_current_equation;
 
   typecheck_builder(data::data_type_checker& data_typechecker,
                     const data::detail::variable_context& variable_context,
                     const detail::process_context& process_context,
-                    const detail::action_context& action_context
+                    const detail::action_context& action_context,
+                    const process_identifier* current_equation = nullptr
                    )
     : m_data_type_checker(data_typechecker),
       m_variable_context(variable_context),
       m_process_context(process_context),
-      m_action_context(action_context)
+      m_action_context(action_context),
+      m_current_equation(current_equation)
   {}
 
   data::sorts_list action_sorts(const core::identifier_string& name)
@@ -198,7 +200,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     }
   }
 
-  bool has_empty_intersection(const data::sorts_list& s1, const data::sorts_list& s2)
+  static bool has_empty_intersection(const data::sorts_list& s1, const data::sorts_list& s2)
   {
     std::set<data::sort_expression_list> v1(s1.begin(), s1.end());
     std::set<data::sort_expression_list> v2(s2.begin(), s2.end());
@@ -213,13 +215,13 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     }
   }
 
-  std::map<core::identifier_string, data::data_expression> make_assignment_map(const data::untyped_identifier_assignment_list& assignments)
+  static std::map<core::identifier_string, data::data_expression> make_assignment_map(const data::untyped_identifier_assignment_list& assignments)
   {
     std::map<core::identifier_string, data::data_expression> result;
     for (const data::untyped_identifier_assignment& a: assignments)
     {
       auto i = result.find(a.lhs());
-      if (i != result.end()) // An data::assignment of the shape x:=t already exists, this is not OK.
+      if (i != result.end()) // An data::assignment of the shape x := t already exists, this is not OK.
       {
         throw mcrl2::runtime_error("Double data::assignment to data::variable " + core::pp(a.lhs()) + " (detected assigned values are " + data::pp(i->second) + " and " + core::pp(a.rhs()) + ")");
       }
@@ -251,12 +253,46 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     return m_process_context.make_process_instance(name, p.second, p.first);
   }
 
+  std::string print_untyped_process_assignment(const untyped_process_assignment& x) const
+  {
+    if (x.assignments().empty())
+    {
+      return core::pp(x.name()) + "()";
+    }
+    else
+    {
+      return core::pp(x.name()) + core::detail::print_arguments(x.assignments());
+    }
+  }
+
+  // Checks if in the equation P(..) = Q(assignments) all formal parameters of Q have been assigned a value,
+  // either directly via an assignment in assignments, or indirectly via a formal parameter of P.
+  void check_assignments(const process_identifier& P, const process_identifier& Q, const std::vector<data::assignment>& assignments, const untyped_process_assignment& x) const
+  {
+    std::set<data::variable> Q_variables;
+    for (const data::assignment& a: assignments)
+    {
+      Q_variables.insert(a.lhs());
+    }
+    for (const data::variable& v: P.variables())
+    {
+      Q_variables.insert(v);
+    }
+    for (const data::variable& v: Q.variables())
+    {
+      if (Q_variables.find(v) == Q_variables.end())
+      {
+        throw mcrl2::runtime_error("Process parameter " + core::pp(v.name()) + " has not been assigned a value in the process call with short-hand assignments " + print_untyped_process_assignment(x) + ".");
+      }
+    }
+  }
+
   process_expression apply(const untyped_process_assignment& x)
   {
     mCRL2log(log::debug) << "typechecking a process call with short-hand assignments " << x << "" << std::endl;
     if (!is_process_name(x.name()))
     {
-      throw mcrl2::runtime_error("Could not find a matching declaration for action or process expression " + core::pp(x.name()) + core::detail::print_arguments(x.assignments()) + ".");
+      throw mcrl2::runtime_error("Could not find a matching declaration for action or process expression " + print_untyped_process_assignment(x) + ".");
     }
 
     process_identifier P = m_process_context.match_untyped_process_instance_assignment(x);
@@ -286,6 +322,13 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
         throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error occurred while typechecking the process call with short-hand assignments " + process::pp(x));
       }
     }
+
+    // Check if all formal parameters have been assigned a value
+    if (m_current_equation)
+    {
+      check_assignments(*m_current_equation, P, assignments, x);
+    }
+
     return process_instance_assignment(P, data::assignment_list(assignments.begin(), assignments.end()));
   }
 
@@ -476,10 +519,11 @@ typecheck_builder make_typecheck_builder(
                     data::data_type_checker& data_typechecker,
                     const data::detail::variable_context& variables,
                     const detail::process_context& process_identifiers,
-                    const detail::action_context& action_context
+                    const detail::action_context& action_context,
+                    const process_identifier* current_equation = nullptr
                    )
 {
-  return typecheck_builder(data_typechecker, variables, process_identifiers, action_context);
+  return typecheck_builder(data_typechecker, variables, process_identifiers, action_context, current_equation);
 }
 
 } // namespace detail
@@ -492,7 +536,7 @@ class process_type_checker
     detail::process_context m_process_context;
     data::detail::variable_context m_variable_context;
 
-    std::vector<process_identifier> equation_identifiers(const std::vector<process_equation>& equations)
+    static std::vector<process_identifier> equation_identifiers(const std::vector<process_equation>& equations)
     {
       std::vector<process_identifier> result;
       for (const process_equation& eqn: equations)
@@ -526,9 +570,9 @@ class process_type_checker
      *  \param[in] x A process expression that has not been type checked.
      *  \return    a process expression where all untyped identifiers have been replace by typed ones.
      **/    /// \brief Typecheck the pbes pbesspec
-    process_expression operator()(const process_expression& x)
+    process_expression operator()(const process_expression& x, const process_identifier* current_equation = nullptr)
     {
-      return typecheck_process_expression(m_variable_context, process::normalize_sorts(x, m_data_type_checker.typechecked_data_specification()));
+      return typecheck_process_expression(m_variable_context, process::normalize_sorts(x, m_data_type_checker.typechecked_data_specification()), current_equation);
     }
 
     /// \brief Typecheck the process specification procspec
@@ -553,7 +597,7 @@ class process_type_checker
       {
         data::detail::variable_context variable_context = m_variable_context;
         variable_context.add_context_variables(eqn.identifier().variables(), m_data_type_checker);
-        eqn = process_equation(eqn.identifier(), eqn.formal_parameters(), typecheck_process_expression(variable_context, eqn.expression()));
+        eqn = process_equation(eqn.identifier(), eqn.formal_parameters(), typecheck_process_expression(variable_context, eqn.expression(), &eqn.identifier()));
       }
 
       // typecheck the initial state
@@ -566,9 +610,9 @@ class process_type_checker
     }
 
   protected:
-    process_expression typecheck_process_expression(const data::detail::variable_context& variables, const process_expression& x)
+    process_expression typecheck_process_expression(const data::detail::variable_context& variables, const process_expression& x, const process_identifier* current_equation = nullptr)
     {
-      return detail::make_typecheck_builder(m_data_type_checker, variables, m_process_context, m_action_context).apply(x);
+      return detail::make_typecheck_builder(m_data_type_checker, variables, m_process_context, m_action_context, current_equation).apply(x);
     }
 };
 
@@ -585,16 +629,25 @@ void typecheck_process_specification(process_specification& proc_spec)
   type_checker(proc_spec);
 }
 
+/// \brief Typecheck a process expression
+/// \param x An untyped process expression
+/// \param variables A sequence of data variables
+/// \param dataspec A data specification
+/// \param action_labels A sequence of action labels
+/// \param process_identifiers A sequence of process identifiers
+/// \param current_equation A pointer to the current equation. If this pointer is set, a check will be done it
+/// process instance assignments assign values to all their parameters.
 template <typename VariableContainer, typename ActionLabelContainer, typename ProcessIdentifierContainer>
 process_expression typecheck_process_expression(const process_expression& x,
                                                 const VariableContainer& variables = VariableContainer(),
                                                 const data::data_specification& dataspec = data::data_specification(),
                                                 const ActionLabelContainer& action_labels = ActionLabelContainer(),
-                                                const ProcessIdentifierContainer& process_identifiers = ProcessIdentifierContainer()
+                                                const ProcessIdentifierContainer& process_identifiers = ProcessIdentifierContainer(),
+                                                const process_identifier* current_equation = nullptr
                                                )
 {
   process_type_checker type_checker(dataspec, variables, action_labels, process_identifiers);
-  return type_checker(x);
+  return type_checker(x, current_equation);
 }
 
 } // namespace process

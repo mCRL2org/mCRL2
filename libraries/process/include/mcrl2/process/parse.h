@@ -134,11 +134,12 @@ process_expression parse_process_expression(const std::string& text,
                                             const VariableContainer& variables = VariableContainer(),
                                             const data::data_specification& dataspec = data::data_specification(),
                                             const ActionLabelContainer& action_labels = std::vector<action_label>(),
-                                            const ProcessIdentifierContainer& process_identifiers = ProcessIdentifierContainer()
+                                            const ProcessIdentifierContainer& process_identifiers = ProcessIdentifierContainer(),
+                                            const process_identifier* current_equation = nullptr
                                            )
 {
   process_expression x = detail::parse_process_expression_new(text);
-  x = typecheck_process_expression(x, variables, dataspec, action_labels, process_identifiers);
+  x = typecheck_process_expression(x, variables, dataspec, action_labels, process_identifiers, current_equation);
   x = translate_user_notation(x);
   return x;
 }
