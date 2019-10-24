@@ -3,7 +3,7 @@
 Prerequisites
 =============
 
-.. include:: ../../_includes/toggle-platform.inc
+.. include:: /_includes/toggle-platform.inc
 
 .. toctree::
    :hidden:
@@ -14,13 +14,13 @@ To build the source code, the first requirement is to have a compiler, and,
 optionally, the necessary tools to build the documentation.
 To build the documentation, the following is needed:
 
-.. |python| replace:: *Python 2.5.1*
+.. |python| replace:: *Python 3.6.0*
 .. _python: http://www.python.org
 
-.. |cmake| replace:: *CMake 2.8.6*
+.. |cmake| replace:: *CMake 3.8.0*
 .. _cmake: http://www.cmake.org/cmake/resources/software.html
 
-.. |cmakeosx| replace:: *CMake 2.8.12*
+.. |cmakeosx| replace:: *CMake 3.8.0*
 .. _cmakeosx: http://www.cmake.org/cmake/resources/software.html
 
 .. |doxygen| replace:: *Doxygen 1.7.4*
@@ -39,7 +39,7 @@ setup:
 .. admonition:: Windows
    :class: platform-specific win
 
-   Visual Studio 2017 with C++ development
+   Visual Studio 2019 with C++ development
 
 .. admonition:: Mac OS X
    :class: platform-specific mac
@@ -51,7 +51,7 @@ setup:
 .. admonition:: Linux
    :class: platform-specific linux
 
-   - *g++* version 4.9.0 or higher.
+   - *g++* version 7.0.0 or higher.
    - *make* version 3.80 or higher.
    - |cmake|_ or higher.
 
@@ -62,7 +62,7 @@ setup:
 Boost
 -----
 
-.. |boost| replace:: *Boost 1.48.0*
+.. |boost| replace:: *Boost 1.65.1*
 .. _boost: http://www.boost.org
 
 The mCRL2 sources use libraries from the |boost|_ collection (or a more recent
