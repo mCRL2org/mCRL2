@@ -6,7 +6,6 @@
 .. default-role:: math
 .. highlight:: mcrl2
 .. math::
-   :nowrap: 
  
     \newcommand{\seq}{\cdot}
     \newcommand{\alt}{+}
@@ -231,7 +230,6 @@ An action formula `A` over `\act` is associated with a set `\sem{A} \subseteq
 The following common abbreviations are allowed:
 
 .. math::
-   :nowrap:
 
    \begin{align*}
    \false &= \neg \true & \varphi \lor \chi &= \neg(\neg \varphi \land \neg \chi) \\
@@ -244,7 +242,6 @@ An HML formula `\varphi` is interpreted over an LTS `T = \langle S, \act,
 defined as follows.
 
 .. math::
-   :nowrap:
 
     \begin{align*}
     \sem{\true}_T &= S \\
@@ -547,14 +544,13 @@ formal semantics, and then elaborate more informally on its use.
 
    .. math::
       
-      \varphi,\chi &::= \true ~|~ X ~|~ \mu X\,.\, \varphi ~|~ \mccan{A}\varphi 
+      \varphi,\chi ::= \true ~|~ X ~|~ \mu X\,.\, \varphi ~|~ \mccan{A}\varphi 
       ~|~ \varphi \land \chi ~|~ \neg \varphi
 
 We allow the same abbreviations as for HML, and we add the *greatest fixpoint
 operator*, which is the dual of the least fixpoint operator:
 
 .. math::
-   :nowrap:
 
     \begin{align*}
     \nu X \,.\, \varphi &= \neg \mu X\,.\, \neg\varphi[\neg X / X]
@@ -601,7 +597,6 @@ is instructive to see that regular HML can be encoded into the modal µ-calculus
 using the following equalities.
 
 .. math::
-   :nowrap:
 
     \begin{align*}
     \mccan{\alpha^*}\varphi &= \mu X\,.\, \varphi \lor \mccan{\alpha}X &
@@ -911,12 +906,11 @@ most naturally done using quantifiers.
    data variable, `b` is a Boolean expression, `e` is a data expression and `D`
    is a data sort.
 
-   .. math:: A,B &::= b ~|~ a(e) ~|~ \overline{A} ~|~ A \cup B ~|~ \exists d{:}D. A
+   .. math:: A,B ::= b ~|~ a(e) ~|~ \overline{A} ~|~ A \cup B ~|~ \exists d{:}D. A
 
 The following abbreviations may also be used:
 
 .. math::
-   :nowrap:
     
    \begin{align*}
    A \cap B &= \overline{\overline{A} \cup \overline{B}} &
@@ -931,7 +925,6 @@ An action formula `A` over `\act` is associated with a set
 in the following manner. 
 
 .. math::
-   :nowrap:
 
     \begin{align*}
     \sem{b}{\varepsilon} &= 
@@ -989,7 +982,6 @@ grammar for Hennessy-Milner logic.
 The following common abbreviations are allowed:
 
 .. math::
-   :nowrap:
 
     \begin{align*}
     \exists d{:}D. \varphi&= \neg \forall d{:}D. \neg \varphi & \varphi \lor \chi &= \neg(\neg \varphi \land \neg \chi) \\
@@ -1003,7 +995,6 @@ states `\sem{\varphi}_T^\varepsilon \subseteq S` of the LTS in which
 the formula holds. It is defined as follows.
 
 .. math::
-   :nowrap:
 
     \begin{align*}
     \sem{b}_T^\varepsilon &= \{s \in S ~|~ \varepsilon(b) \}\\

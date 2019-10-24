@@ -5,7 +5,7 @@ An LTS consists of a set of *states* and a set of *transitions* between those
 states. These transitions are labelled by *actions* and one state is designated
 as the *initial state*.
 
-Formally, an LTS is a tuple :math:`(S, A, \to,s_0>)` where:
+Formally, an LTS is a tuple :math:`(S, A, \to, s_0)` where:
 
 - :math:`S` is a (finite) set of states;
 - :math:`A` is a set of actions;
