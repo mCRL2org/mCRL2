@@ -124,26 +124,12 @@ public:
       return copy;
     }
 
-    template<bool Constant_ = Constant>
-    typename std::enable_if_t<!Constant_, reference> operator*()
+    reference operator*() const
     {
       return m_current_node->key();
     }
 
-    template<bool Constant_ = Constant>
-    typename std::enable_if_t<Constant_, reference> operator*() const
-    {
-      return m_current_node->key();
-    }
-
-    template<bool Constant_ = Constant>
-    typename std::enable_if_t<!Constant_, pointer> operator->()
-    {
-      return &m_current_node->key();
-    }
-
-    template<bool Constant_ = Constant>
-    typename std::enable_if_t<Constant_, pointer> operator->() const
+    pointer operator->() const
     {
       return &m_current_node->key();
     }

@@ -56,7 +56,6 @@ private:
   using bucket_iterator = typename std::vector<bucket_type>::iterator;
   using const_bucket_iterator = typename std::vector<bucket_type>::const_iterator;
 
-
 public:
   /// \brief An iterator over all elements in the unordered set.
   template<typename Bucket, bool Constant>
@@ -100,26 +99,12 @@ public:
       return *copy;
     }
 
-    template<bool Constant_ = Constant>
-    std::enable_if_t<Constant_, reference> operator*() const
-    {
-      return *m_key_it;
-    }
-
-    template<bool Constant_ = Constant>
-    std::enable_if_t<!Constant_, reference> operator*()
+    reference operator*() const
     {
       return const_cast<reference>(*m_key_it);
     }
 
-    template<bool Constant_ = Constant>
-    std::enable_if_t<Constant_, pointer> operator->() const
-    {
-      return &(*m_key_it);
-    }
-
-    template<bool Constant_ = Constant>
-    std::enable_if_t<!Constant_, pointer> operator->()
+    pointer operator->() const
     {
       return const_cast<pointer>(&(*m_key_it));
     }
