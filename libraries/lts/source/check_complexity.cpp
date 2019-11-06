@@ -87,7 +87,7 @@ namespace bisim_gjkw
 unsigned char check_complexity::log_n = '\0';
 
 /// \brief the number of useful steps in the last refinement
-signed_state_type check_complexity::sensible_work = 0;
+signed_trans_type check_complexity::sensible_work = 0;
 
 /// \brief names for complexity counters
 /// \details Every complexity counter (defined in check_complexity.h)
@@ -162,7 +162,7 @@ const char *check_complexity::work_names[TRANS_dnj_MAX - BLOCK_MIN + 1] =
                                                               "(a posteriori)",
     "4.15: for all old bottom states s in RedB",
 
-    /*---------------- counters for the bisim_dnj algorithm ----------------*/
+    /*---------------- counters for the bisim_jgkw algorithm ----------------*/
 
     // block counters
     "split_off_block()",
@@ -170,9 +170,9 @@ const char *check_complexity::work_names[TRANS_dnj_MAX - BLOCK_MIN + 1] =
     "create_initial_partition()",
 
     // state counters
-    "refine(), find predecessors of a red or blue state",
-    "refine(), while blue coroutine runs, find predecessors of a blue state",
-    "refine(), while red coroutine runs, find predecessors of a red state",
+    "split(), find predecessors of a state in the smaller subblock",
+    "split(), while U-coroutine runs, find predecessors of a U-state",
+    "split(), while R-coroutine runs, find predecessors of a R-state",
     "prepare_for_postprocessing()",
 
     // bunch counters (only for small bunches, i. e. bunches that have been
@@ -183,29 +183,26 @@ const char *check_complexity::work_names[TRANS_dnj_MAX - BLOCK_MIN + 1] =
     // part of a small bunch)
     "refine_partition_until_it_becomes_stable(), stabilize",
     "refine_partition_until_it_becomes_stable(), stabilize for large splitter",
-    "second_move_transition_to_new_bunch()",
     "prepare_for_postprocessing(), make block_bunch-slice without bottom "
                                          "states unstable (temporary counter)",
 
     // transition counters
     "move_out_slice_to_new_block()",
-    "refine(), handle a transition from a red or blue state",
-    "refine(), handle a transition to a red or blue state",
-    "refine(), handle a transition in the small splitter",
-    "refine(), while blue coroutine runs, handle a transition in the small "
-                                                                    "splitter",
-    "refine(), while blue coroutine runs, handle a transition to a blue state",
-    "refine(), while blue coroutine runs, slow test",
-    "refine(), while red coroutine runs, handle a transition from a red state",
-    "refine(), while red coroutine runs, handle a transition to a red state",
-    "refine(), the slow test found a red state",
+    "split(), handle a transition from a state in the smaller subblock",
+    "split(), handle a transition to a state in the smaller subblock",
+    "split(), while U-coroutine runs, handle a transition to a U-state",
+    "split(), while U-coroutine runs, test noninert outgoing transitions",
+    "split(), while R-coroutine runs, handle a transition from a R-state",
+    "split(), while R-coroutine runs, handle a transition to a R-state",
+    "split(), the test for noninert transitions found a new bottom state",
     "prepare_for_postprocessing(), make block_bunch-slice with bottom states "
                                                                     "unstable",
     "prepare_for_postprocessing(), make block_bunch-slice without bottom "
                                              "states unstable (final counter)",
-    "postprocess_new_noninert(), sort",
-    "postprocess_new_noninert(), stabilize block with bottom states",
-    "postprocess_new_noninert(), stabilize block without bottom states"
+    "refine_partition_until_it_becomes_stable(), stabilize block with bottom "
+                                        "states for new non-inert transitions",
+    "refine_partition_until_it_becomes_stable(), stabilize block without "
+                                  "bottom states for new non-inert transitions"
 };
 
 
@@ -310,7 +307,7 @@ void check_complexity::test_work_names()
     test_work_name(i, for_all_old_bottom_states_s_in_RedB_4_15);
     assert(check_complexity::TRANS_MAX + 1 == i);
 
-    /*---------------- counters for the bisim_dnj algorithm ----------------*/
+    /*---------------- counters for the bisim_jgkw algorithm ----------------*/
 
     // block counters
     assert(check_complexity::BLOCK_dnj_MIN == i);
@@ -321,10 +318,10 @@ void check_complexity::test_work_names()
 
     // state counters
     assert(check_complexity::STATE_dnj_MIN == i);
-    test_work_name(i, refine__find_predecessors_of_red_or_blue_state);
+    test_work_name(i, split__find_predecessors_of_R_or_U_state);
     assert(check_complexity::STATE_dnj_MIN_TEMP == i);
-    test_work_name(i, refine_blue__find_predecessors_of_blue_state);
-    test_work_name(i, refine_red__find_predecessors_of_red_state);
+    test_work_name(i, split_U__find_predecessors_of_U_state);
+    test_work_name(i, split_R__find_predecessors_of_R_state);
     assert(check_complexity::STATE_dnj_MAX_TEMP + 1 == i);
     test_work_name(i, prepare_for_postprocessing);
     assert(check_complexity::STATE_dnj_MAX + 1 == i);
@@ -332,16 +329,15 @@ void check_complexity::test_work_names()
     // bunch counters (only for small bunches, i. e. bunches that have been
     // split off from a large bunch)
     assert(check_complexity::BUNCH_dnj_MIN == i);
-    test_work_name(i, refine_partition_until_it_becomes_stable__find_pred);
+    test_work_name(i, refine_partition_until_stable__find_pred);
     assert(check_complexity::BUNCH_dnj_MAX + 1 == i);
 
     // block_bunch-slice counters (only for block_bunch-slices that are
     // part of a small bunch)
     assert(check_complexity::BLOCK_BUNCH_dnj_MIN == i);
-    test_work_name(i, refine_partition_until_it_becomes_stable__stabilize);
+    test_work_name(i, refine_partition_until_stable__stabilize);
     test_work_name(i,
-       refine_partition_until_it_becomes_stable__stabilize_for_large_splitter);
-    test_work_name(i, second_move_transition_to_new_bunch);
+                  refine_partition_until_stable__stabilize_for_large_splitter);
     assert(check_complexity::BLOCK_BUNCH_dnj_MIN_TEMP == i);
     test_work_name(i, prepare_for_postprocessing__make_unstable_temp);
     assert(check_complexity::BLOCK_BUNCH_dnj_MAX_TEMP + 1 == i);
@@ -350,22 +346,21 @@ void check_complexity::test_work_names()
     // transition counters
     assert(check_complexity::TRANS_dnj_MIN == i);
     test_work_name(i, move_out_slice_to_new_block);
-    test_work_name(i, refine__handle_transition_from_red_or_blue_state);
-    test_work_name(i, refine__handle_transition_to_red_or_blue_state);
-    test_work_name(i, refine__handle_transition_in_FromRed);
+    test_work_name(i, split__handle_transition_from_R_or_U_state);
+    test_work_name(i, split__handle_transition_to_R_or_U_state);
     assert(check_complexity::TRANS_dnj_MIN_TEMP == i);
-    test_work_name(i, refine_blue__handle_transition_in_FromRed);
-    test_work_name(i, refine_blue__handle_transition_to_blue_state);
-    test_work_name(i, refine_blue__slow_test);
-    test_work_name(i, refine_red__handle_transition_from_red_state);
-    test_work_name(i, refine_red__handle_transition_to_red_state);
+    test_work_name(i, split_U__handle_transition_to_U_state);
+    test_work_name(i, split_U__test_noninert_transitions);
+    test_work_name(i, split_R__handle_transition_from_R_state);
+    test_work_name(i, split_R__handle_transition_to_R_state);
     assert(check_complexity::TRANS_dnj_MAX_TEMP + 1 == i);
-    test_work_name(i, refine__slow_test_found_red_state);
+    test_work_name(i, split__test_noninert_transitions_found_new_bottom_state);
     test_work_name(i, prepare_for_postprocessing__make_unstable_a_priori);
     test_work_name(i, prepare_for_postprocessing__make_unstable_a_posteriori);
-    test_work_name(i, postprocess_new_noninert__sort);
-    test_work_name(i, postprocess_new_noninert__stabilize_a_priori);
-    test_work_name(i, postprocess_new_noninert__stabilize_a_posteriori);
+    test_work_name(i,
+               refine_partition_until_stable__stabilize_new_noninert_a_priori);
+    test_work_name(i,
+           refine_partition_until_stable__stabilize_new_noninert_a_posteriori);
     assert(check_complexity::TRANS_dnj_MAX + 1 == i);
 
     exit(EXIT_SUCCESS);

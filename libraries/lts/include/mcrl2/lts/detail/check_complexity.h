@@ -92,9 +92,6 @@ typedef std::size_t state_type;
 #define STATE_TYPE_MIN ((state_type) 0)
 #define STATE_TYPE_MAX SIZE_MAX
 
-/// \brief type used to store differences between state counters
-typedef std::ptrdiff_t signed_state_type;
-
 /// \brief type used to store transition (numbers and) counts
 /// \details defined here because this is the most basic #include header that
 /// uses it.
@@ -103,6 +100,9 @@ typedef std::size_t trans_type;
 #define TRANS_TYPE_MAX SIZE_MAX
 
 #ifndef NDEBUG
+
+/// \brief type used to store differences between transition counters
+typedef std::ptrdiff_t signed_trans_type;
 
 namespace bisim_gjkw
 {
@@ -280,32 +280,30 @@ class check_complexity
         // state counters
             // If every state of a block is handled by some loop, we
             // abbreviate the counter to a block counter.
-        refine__find_predecessors_of_red_or_blue_state,
-                  STATE_dnj_MIN=refine__find_predecessors_of_red_or_blue_state,
+        split__find_predecessors_of_R_or_U_state,
+                    STATE_dnj_MIN = split__find_predecessors_of_R_or_U_state,
 
-        // temporary state counters (blue):
-        refine_blue__find_predecessors_of_blue_state,
-               STATE_dnj_MIN_TEMP=refine_blue__find_predecessors_of_blue_state,
+        // temporary state counters (U-coroutine):
+        split_U__find_predecessors_of_U_state,
+                    STATE_dnj_MIN_TEMP = split_U__find_predecessors_of_U_state,
 
-        // temporary state counters (red):
-        refine_red__find_predecessors_of_red_state,
-                 STATE_dnj_MAX_TEMP=refine_red__find_predecessors_of_red_state,
+        // temporary state counters (R-coroutine):
+        split_R__find_predecessors_of_R_state,
+                    STATE_dnj_MAX_TEMP = split_R__find_predecessors_of_R_state,
         prepare_for_postprocessing,
-                 STATE_dnj_MAX = prepare_for_postprocessing,
+                    STATE_dnj_MAX = prepare_for_postprocessing,
 
         // bunch counters (only for small bunches, i. e. bunches that have been
         // split off from a large bunch)
-        refine_partition_until_it_becomes_stable__find_pred,
-           BUNCH_dnj_MIN = refine_partition_until_it_becomes_stable__find_pred,
-           BUNCH_dnj_MAX = refine_partition_until_it_becomes_stable__find_pred,
+        refine_partition_until_stable__find_pred,
+                    BUNCH_dnj_MIN = refine_partition_until_stable__find_pred,
+                    BUNCH_dnj_MAX = refine_partition_until_stable__find_pred,
 
         // block_bunch-slice counters (only for block_bunch-slices that are
         // part of a small bunch)
-        refine_partition_until_it_becomes_stable__stabilize,
-                    BLOCK_BUNCH_dnj_MIN =
-                           refine_partition_until_it_becomes_stable__stabilize,
-        refine_partition_until_it_becomes_stable__stabilize_for_large_splitter,
-        second_move_transition_to_new_bunch,
+        refine_partition_until_stable__stabilize,
+                  BLOCK_BUNCH_dnj_MIN=refine_partition_until_stable__stabilize,
+        refine_partition_until_stable__stabilize_for_large_splitter,
         prepare_for_postprocessing__make_unstable_temp,
                     BLOCK_BUNCH_dnj_MIN_TEMP =
                                 prepare_for_postprocessing__make_unstable_temp,
@@ -320,29 +318,28 @@ class check_complexity
             // transitivity, to a block counter).
         move_out_slice_to_new_block, // source block size
                     TRANS_dnj_MIN = move_out_slice_to_new_block,
-        refine__handle_transition_from_red_or_blue_state, // source block size
-        refine__handle_transition_to_red_or_blue_state, // target block size
-        refine__handle_transition_in_FromRed, // bunch size
+        split__handle_transition_from_R_or_U_state, // source block size
+        split__handle_transition_to_R_or_U_state, // target block size
 
-        // temporary transition counters (blue):
-        refine_blue__handle_transition_in_FromRed, // bunch size
-                  TRANS_dnj_MIN_TEMP=refine_blue__handle_transition_in_FromRed,
-        refine_blue__handle_transition_to_blue_state, // target block size
-        refine_blue__slow_test, // red: new bottom; blue (inert): block size
+        // temporary transition counters (U-coroutine):
+        split_U__handle_transition_to_U_state, // target block size
+                    TRANS_dnj_MIN_TEMP = split_U__handle_transition_to_U_state,
+        split_U__test_noninert_transitions, // R: new bottom;
+                                            // U: source block size
 
-        // temporary transition counters (red):
-        refine_red__handle_transition_from_red_state, // bunch size
-        refine_red__handle_transition_to_red_state, // target block size
-            TRANS_dnj_MAX_TEMP = refine_red__handle_transition_to_red_state,
+        // temporary transition counters (R-coroutine):
+        split_R__handle_transition_from_R_state, // source block size
+        split_R__handle_transition_to_R_state, // target block size
+                    TRANS_dnj_MAX_TEMP = split_R__handle_transition_to_R_state,
 
         // transition counters for new bottom states:
-        refine__slow_test_found_red_state,
+        split__test_noninert_transitions_found_new_bottom_state,
         prepare_for_postprocessing__make_unstable_a_priori,
         prepare_for_postprocessing__make_unstable_a_posteriori,
-        postprocess_new_noninert__sort,
-        postprocess_new_noninert__stabilize_a_priori,
-        postprocess_new_noninert__stabilize_a_posteriori,
-            TRANS_dnj_MAX = postprocess_new_noninert__stabilize_a_posteriori
+        refine_partition_until_stable__stabilize_new_noninert_a_priori,
+        refine_partition_until_stable__stabilize_new_noninert_a_posteriori,
+            TRANS_dnj_MAX =
+             refine_partition_until_stable__stabilize_new_noninert_a_posteriori
     };
 
     /// \brief special value for temporary work without changing the balance
@@ -370,15 +367,20 @@ class check_complexity
                 return sizeof(unsigned long long) * CHAR_BIT - 1 -
                                                          __builtin_clzll(size);
             }
+        #else
+            #if 2 == FLT_RADIX
+                return std::ilogb(size);
+            #else
+                return (int) std::log2(size);
+            #endif
         #endif
-        return (int) std::log2(size);
     }
 
   private:
     /// \brief counter to register the work balance for coroutines
     /// \details Sensible work will be counted positively, and cancelled work
     /// negatively.
-    static signed_state_type sensible_work;
+    static signed_trans_type sensible_work;
 
   public:
     /// \brief printable names of the counter types (for error messages)
@@ -401,6 +403,10 @@ class check_complexity
                   enum counter_type FirstPostprocessCounter = FirstTempCounter>
     class counter_t
     {
+        static_assert(FirstCounter < FirstTempCounter);
+        static_assert(FirstTempCounter <= FirstPostprocessCounter);
+        static_assert(FirstPostprocessCounter <=
+                                        (enum counter_type) (LastCounter + 1));
       public:
         /// \brief actual space to store the counters
         unsigned char counters[LastCounter - FirstCounter + 1];
@@ -466,10 +472,6 @@ class check_complexity
         /// \brief constructor, initializes all counters to 0
         counter_t()
         {
-            assert(FirstCounter < FirstTempCounter);
-            assert(FirstTempCounter <= FirstPostprocessCounter);
-            assert(FirstPostprocessCounter <=
-                                        (enum counter_type) (LastCounter + 1));
             std::memset(counters, '\0', sizeof(counters));
         }
 
@@ -655,7 +657,7 @@ class check_complexity
                     return false;
                 }
             }
-            assert(B_TO_C_MAX_TEMP == B_TO_C_MAX);
+            static_assert(B_TO_C_MAX_TEMP == B_TO_C_MAX);
             return true;
         }
 
@@ -1077,18 +1079,18 @@ class check_complexity
                 }
                 assert(counters[ctr - BLOCK_BUNCH_dnj_MIN] <= 0);
             }
-            assert(BLOCK_BUNCH_dnj_MAX_TEMP == BLOCK_BUNCH_dnj_MAX);
+            static_assert(BLOCK_BUNCH_dnj_MAX_TEMP == BLOCK_BUNCH_dnj_MAX);
             return true;
         }
 
         bool has_temporary_work()
         {
-            assert(BLOCK_BUNCH_dnj_MIN_TEMP == BLOCK_BUNCH_dnj_MAX_TEMP);
+            static_assert(BLOCK_BUNCH_dnj_MIN_TEMP==BLOCK_BUNCH_dnj_MAX_TEMP);
             return counters[BLOCK_BUNCH_dnj_MIN_TEMP-BLOCK_BUNCH_dnj_MIN] > 0;
         }
         void reset_temporary_work()
         {
-            assert(BLOCK_BUNCH_dnj_MIN_TEMP == BLOCK_BUNCH_dnj_MAX_TEMP);
+            static_assert(BLOCK_BUNCH_dnj_MIN_TEMP==BLOCK_BUNCH_dnj_MAX_TEMP);
             counters[BLOCK_BUNCH_dnj_MIN_TEMP - BLOCK_BUNCH_dnj_MIN] = 0;
         }
     };
@@ -1108,7 +1110,6 @@ class check_complexity
         /// size of the block is used for other counters.)
         /// \param max_source_block  ilog2(n) - ilog2(size of source block)
         /// \param max_target_block  ilog2(n) - ilog2(size of target block)
-        /// \param max_bunch  ilog2(n^2) - ilog2(size of bunch)
         /// \param bottom true iff the transition source is a bottom state
         /// \returns false  iff some temporary counter was nonzero.  In that
         ///                 case, also the beginning of an error message is
@@ -1116,13 +1117,12 @@ class check_complexity
         ///                 macro `mCRL2complexity()`, because that macro will
         ///                 print the remainder of the error message as needed.
         bool no_temporary_work(unsigned const max_source_block,
-                unsigned const max_target_block, unsigned const max_bunch,
-                                                             bool const bottom)
+                            unsigned const max_target_block, bool const bottom)
         {
             assert((log_n + 1U) / 2U <= max_source_block);
             assert(max_source_block <= log_n);
             for (enum counter_type ctr = TRANS_dnj_MIN;
-                        ctr < refine__handle_transition_to_red_or_blue_state;
+                        ctr < split__handle_transition_to_R_or_U_state;
                                            ctr = (enum counter_type) (ctr + 1))
             {
                 assert(counters[ctr - TRANS_dnj_MIN] <= max_source_block);
@@ -1130,27 +1130,12 @@ class check_complexity
             }
             assert((log_n + 1U) / 2U <= max_target_block);
             assert(max_target_block <= log_n);
-            for (enum counter_type ctr =
-                                refine__handle_transition_to_red_or_blue_state;
-                        ctr < refine__handle_transition_in_FromRed;
+            for(enum counter_type ctr=split__handle_transition_to_R_or_U_state;
+                        ctr < TRANS_dnj_MIN_TEMP;
                                            ctr = (enum counter_type) (ctr + 1))
             {
                 assert(counters[ctr - TRANS_dnj_MIN] <= max_target_block);
                 counters[ctr - TRANS_dnj_MIN] = max_target_block;
-            }
-            assert(max_bunch <= log_n);
-            for (enum counter_type ctr = refine__handle_transition_in_FromRed;
-                 ctr < TRANS_dnj_MIN_TEMP; ctr = (enum counter_type) (ctr + 1))
-            {
-
-                if (counters[ctr - TRANS_dnj_MIN] > max_bunch)
-                {
-                    mCRL2log(log::error) << "Error 10: counter \""
-                        << work_names[ctr - BLOCK_MIN] << "\" exceeded "
-                                    "maximum value (" << max_bunch << ") for ";
-                    return false;
-                }
-                counters[ctr - TRANS_dnj_MIN] = max_bunch;
             }
             for (enum counter_type ctr = TRANS_dnj_MIN_TEMP;
                 ctr <= TRANS_dnj_MAX_TEMP; ctr = (enum counter_type) (ctr + 1))
