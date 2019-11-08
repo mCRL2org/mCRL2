@@ -277,22 +277,22 @@ struct find_quantified_propositional_variables_traverser: public Traverser<find_
     }
   }
 
-  void enter(const not_& v)
+  void enter(const not_& /*v*/  )
   {
     quantified_context.clear();
   }
 
-  void enter(const and_& v)
+  void enter(const and_& /*v*/  )
   {
     quantified_context.clear();
   }
 
-  void enter(const or_& v)
+  void enter(const or_& /*v*/ )
   {
     quantified_context.clear();
   }
 
-  void enter(const imp& v)
+  void enter(const imp& /*v*/ )
   {
     quantified_context.clear();
   }
@@ -420,28 +420,29 @@ struct constelm_quantifiers_inside_builder: public pbes_expression_builder<const
     }
   }
 
-  void enter(const and_& x)
+  void enter(const and_& /*x*/)
   {
     quantified_context.clear();
   }
 
-  void enter(const or_& x)
+  void enter(const or_& /*x*/)
   {
     quantified_context.clear();
   }
 
-  void enter(const imp& x)
+  void enter(const imp& /*x*/)
   {
     quantified_context.clear();
   }
 
-  void enter(const not_& x)
+  void enter(const not_& /*x*/)
   {
     quantified_context.clear();
   }
 
-  pbes_expression apply(const propositional_variable_instantiation& x)
+  pbes_expression apply(const propositional_variable_instantiation& X_e)
   {
+    // Create list of quantified variables around X_e
     std::list<quantified_variable> qvars;
     for(const pbes_expression& pe: quantified_context)
     {
@@ -452,17 +453,18 @@ struct constelm_quantifiers_inside_builder: public pbes_expression_builder<const
         qvars.emplace_back(is_forall(pe), v);
       }
     }
-    auto find_result = constraints_map.find(x.name());
+    // Check whether some parameters of X_e are constant
+    auto find_result = constraints_map.find(X_e.name());
     if(find_result == constraints_map.end())
     {
-      return x;
+      return X_e;
     }
 
     const constraints_t& constraints = find_result->second;
     const std::map<data::variable, data::data_expression>& exprs = constraints.second;
     const std::list<quantified_variable>& cqvars = constraints.first;
-    const std::vector<data::variable> parameters(var_map.at(x.name()).variable().parameters().begin(), var_map.at(x.name()).variable().parameters().end());
-    const std::vector<data::data_expression> updates(x.parameters().begin(), x.parameters().end());
+    const std::vector<data::variable> parameters(var_map.at(X_e.name()).variable().parameters().begin(), var_map.at(X_e.name()).variable().parameters().end());
+    const std::vector<data::data_expression> updates(X_e.parameters().begin(), X_e.parameters().end());
 
     std::list<std::size_t> independent_pars;
     std::set<data::variable> quantified_variables;
@@ -470,6 +472,8 @@ struct constelm_quantifiers_inside_builder: public pbes_expression_builder<const
     {
       quantified_variables.insert(qv.variable());
     }
+
+    // Start building a list of parameters that are constant and can be pushed through X_e
     std::set<data::variable> seen;
     std::size_t i = 0;
     for(const data::variable& par: parameters)
@@ -487,6 +491,8 @@ struct constelm_quantifiers_inside_builder: public pbes_expression_builder<const
     }
     std::queue<data::variable> todo(std::deque<data::variable>(seen.begin(), seen.end()));
 
+    // Add all transitive dependencies, either becuase they occur together in one
+    // of the updates, or because of their quantifier scopes
     while(!todo.empty())
     {
       data::variable elem = todo.front();
@@ -533,18 +539,19 @@ struct constelm_quantifiers_inside_builder: public pbes_expression_builder<const
 
     if(independent_pars.empty())
     {
-      if(std::find(eqn_stack.begin(), eqn_stack.end(), x.name()) == eqn_stack.end())
+      if(std::find(eqn_stack.begin(), eqn_stack.end(), X_e.name()) == eqn_stack.end())
       {
-        eqn_stack.push_back(x.name());
+        eqn_stack.push_back(X_e.name());
         constelm_quantifiers_inside_builder r(*this);
-        r.update(var_map.at(x.name()).formula());
+        r.update(var_map.at(X_e.name()).formula());
         new_equations = r.new_equations;
         new_equations_rec = r.new_equations_rec;
         eqn_stack.pop_back();
       }
-      return x;
+      return X_e;
     }
 
+    // Build a new equation based on the independent parameters found
     data::variable_list new_parameter_list;
     data::data_expression_list new_update_list;
     i = 0;
@@ -567,18 +574,19 @@ struct constelm_quantifiers_inside_builder: public pbes_expression_builder<const
     new_parameter_list = reverse(new_parameter_list);
     new_update_list = reverse(new_update_list);
 
+    // Generate a new name if necessary
     core::identifier_string new_name;
-    auto eqn_find_result = new_equations.find(x.name());
+    auto eqn_find_result = new_equations.find(X_e.name());
     if(eqn_find_result != new_equations.end())
     {
       new_name = eqn_find_result->second.variable().name();
     }
     else
     {
-      new_name = id_gen(x.name());
+      new_name = id_gen(X_e.name());
     }
 
-    pbes_expression new_rhs = pbes_system::replace_free_variables(var_map.at(x.name()).formula(), sigma);
+    pbes_expression new_rhs = pbes_system::replace_free_variables(var_map.at(X_e.name()).formula(), sigma);
     propositional_variable_instantiation new_inst(new_name, new_update_list);
     pbes_expression result = new_inst;
     for(auto qv = qvars.rbegin(); qv != qvars.rend(); ++qv)
@@ -592,7 +600,7 @@ struct constelm_quantifiers_inside_builder: public pbes_expression_builder<const
         new_rhs = qv->make_expr(new_rhs);
       }
     }
-    pbes_equation new_eqn(var_map.at(x.name()).symbol(), propositional_variable(new_name, new_parameter_list), new_rhs);
+    pbes_equation new_eqn(var_map.at(X_e.name()).symbol(), propositional_variable(new_name, new_parameter_list), new_rhs);
 
     if(eqn_find_result != new_equations.end())
     {
@@ -603,24 +611,25 @@ struct constelm_quantifiers_inside_builder: public pbes_expression_builder<const
       }
       else
       {
-        mCRL2log(log::verbose) << "------------\nFound different equation" << std::endl;
-        return x;
+        mCRL2log(log::verbose) << "------------\nFound different equation, my independent parameters are\n"
+          << core::detail::print_list(independent_pars) << " in " << X_e << std::endl;
+        return X_e;
       }
     }
-    new_equations.insert(std::make_pair(x.name(), new_eqn));
+    new_equations.insert(std::make_pair(X_e.name(), new_eqn));
 
     new_eqn.formula() = quantifiers_inside(new_eqn.formula());
     constelm_quantifiers_inside_builder r(*this);
     r.update(new_eqn.formula());
     new_equations = r.new_equations;
     new_equations_rec = r.new_equations_rec;
-    new_equations_rec.insert(std::make_pair(x.name(), new_eqn));
+    new_equations_rec.insert(std::make_pair(X_e.name(), new_eqn));
     mCRL2log(log::verbose) << "------------\nIndependent parameters for ";
     for(const quantified_variable& qv: qvars)
     {
       mCRL2log(log::verbose) << qv.to_string();
     }
-    mCRL2log(log::verbose) << x << "\n";
+    mCRL2log(log::verbose) << X_e << "\n";
     for(const std::size_t j: independent_pars)
     {
       mCRL2log(log::verbose) << parameters[j] << "\n";
