@@ -104,7 +104,7 @@ struct quantifiers_inside_forall_builder: public pbes_expression_builder<quantif
       }
     }
     return make_forall(data::variable_list(W.begin(), W.end()),
-                       or_(quantifiers_inside_forall(set_difference(V, W), join_or(X1.begin(), X1.end())),
+                       data::optimized_or(quantifiers_inside_forall(set_difference(V, W), join_or(X1.begin(), X1.end())),
                            join_or(X2.begin(), X2.end()))
                       );
   }
@@ -117,7 +117,7 @@ struct quantifiers_inside_forall_builder: public pbes_expression_builder<quantif
     auto const& psi = x.right();
     auto W = set_intersection(set_intersection(V, find_free_variables(phi)), find_free_variables(psi));
     return make_forall(data::variable_list(W.begin(), W.end()),
-                       imp(quantifiers_inside_exists(set_difference(V, W), phi),
+                       data::optimized_imp(quantifiers_inside_exists(set_difference(V, W), phi),
                            quantifiers_inside_forall(set_difference(V, W), psi)
                           )
                       );
@@ -207,7 +207,7 @@ struct quantifiers_inside_exists_builder: public pbes_expression_builder<quantif
       }
     }
     return make_exists(data::variable_list(W.begin(), W.end()),
-                       and_(quantifiers_inside_exists(set_difference(V, W), join_and(X1.begin(), X1.end())),
+                       data::optimized_and(quantifiers_inside_exists(set_difference(V, W), join_and(X1.begin(), X1.end())),
                             join_and(X2.begin(), X2.end()))
     );
   }
@@ -216,7 +216,7 @@ struct quantifiers_inside_exists_builder: public pbes_expression_builder<quantif
   {
     auto const& phi = x.left();
     auto const& psi = x.right();
-    return imp(quantifiers_inside_forall(V, phi), quantifiers_inside_exists(V, psi));
+    return data::optimized_imp(quantifiers_inside_forall(V, phi), quantifiers_inside_exists(V, psi));
   }
 
   pbes_expression apply(const exists& x)
@@ -274,7 +274,7 @@ pbes_expression quantifiers_inside_exists(const std::set<data::variable>& variab
 
 } // namespace detail
 
-/// \brief A rewriter that applies one point rule quantifier elimination to a PBES.
+/// \brief A rewriter that pushes quantifiers inside in a PBES expression.
 class quantifiers_inside_rewriter
 {
   public:
