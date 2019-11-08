@@ -520,19 +520,29 @@ struct constelm_quantifiers_inside_builder: public pbes_expression_builder<const
         }
       }
 
-      // Check if we need to add quantified variables that have a larger scope than elem
+      // Check if we need to add quantified variables that have a larger scope and
+      // and are at least one quantifier alternation away from elem
       bool add_rest = false;
+      bool is_forall = false;
+      bool quantifier_changed = false;
       for(auto qv = qvars.rbegin(); qv != qvars.rend(); ++qv)
       {
         const data::variable& var = qv->variable();
         if(var == elem)
         {
           add_rest = true;
+          is_forall = qv->is_forall();
         }
-        else if(add_rest && seen.count(var) == 0)
+        else if(add_rest)
         {
-          seen.insert(var);
-          todo.push(var);
+          // if the quantifier changes, we need to add all variables from now on
+          quantifier_changed |= qv->is_forall() != is_forall;
+          if(quantifier_changed && seen.count(var) == 0)
+          {
+            mCRL2log(log::verbose) << "adding variable " << var << ": " << var.sort() << std::endl;
+            seen.insert(var);
+            todo.push(var);
+          }
         }
       }
     }
