@@ -257,7 +257,7 @@ std::pair<typename MCRL2_UNORDERED_SET_CLASS::iterator, bool> MCRL2_UNORDERED_SE
 {
   // Construct a new node and put it at the front of the bucket list.
   auto& bucket = m_buckets[bucket_index];
-  bucket.emplace_front(m_allocator, args...);
+  bucket.emplace_front(m_allocator, std::forward<Args>(args)...);
 
   ++m_number_of_elements;
   return std::make_pair(iterator(m_buckets.begin() + bucket_index, m_buckets.end(), bucket.before_begin(), bucket.begin()), true);
