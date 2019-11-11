@@ -145,6 +145,9 @@ aterm ATERM_POOL_STORAGE::create_appl_dynamic(const function_symbol& symbol,
                                         InputIterator it,
                                         InputIterator end)
 {
+  // The end is only used for debugging to ensure that the arity and std::distance(it, end) match.
+  mcrl2::utilities::mcrl2_unused(end);
+
   MCRL2_DECLARE_STACK_ARRAY(arguments, unprotected_aterm, symbol.arity());
   for (std::size_t i = 0; i < symbol.arity(); ++i)
   {
