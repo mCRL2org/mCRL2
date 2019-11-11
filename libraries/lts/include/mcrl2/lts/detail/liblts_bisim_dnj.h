@@ -373,8 +373,9 @@ class action_block_entry;
     /// \details This class simplifies lists:  It assumes that list entries are
     /// trivially destructible, and it does not store the size of a list.
     /// Therefore, the destructor, erase() and splice() can be simplified.
-    /// Also, the list class itself is trivially destructible if the pool
-    /// allocator is used; therefore, deleting a block becomes trivial as well.
+    /// Also, the simple_list object itself is trivially destructible if the
+    /// pool allocator is used; therefore, destroying a block_t object becomes
+    /// trivial as well.
     template <class T>
     class simple_list
     {
@@ -419,6 +420,7 @@ class action_block_entry;
             {  }
         };
 
+        /// \brief constant iterator class for simple_list
         class const_iterator :
                        public std::iterator<std::bidirectional_iterator_tag, T>
         {
@@ -453,6 +455,7 @@ class action_block_entry;
             }
         };
 
+        /// \brief iterator class for simple_list
         class iterator : public const_iterator
         {
           protected:
@@ -535,22 +538,38 @@ class action_block_entry;
                 }
             }
         #endif
+
+        /// \brief return an iterator to the first element of the list
         iterator begin()  {  return iterator(sentinel.next);  }
+
+        /// \brief return an iterator past the last element of the list
         iterator end()    {  return iterator(&sentinel);      }
+
+        /// \brief return a constant iterator to the first element of the list
         const_iterator cbegin() const { return const_iterator(sentinel.next); }
+
+        /// \brief return a constant iterator past the last element of the list
         const_iterator cend()   const { return const_iterator(&sentinel);     }
+
+        /// \brief return a constant iterator to the first element of the list
         const_iterator begin() const  {  return cbegin();  }
+
+        /// \brief return a constant iterator past the last element of the list
         const_iterator end()   const  {  return cend();    }
 
+        /// \brief return a reference to the first element of the list
         T& front()
         {                                                                       assert(!empty());
             return static_cast<entry*>(sentinel.next)->data;
         }
+
+        /// \brief return a reference to the last element of the list
         T& back()
         {                                                                       assert(!empty());
             return static_cast<entry*>(sentinel.prev)->data;
         }
 
+        /// \brief return true iff the list is empty
         bool empty() const  {  return sentinel.next == &sentinel;  }
 
         /// \brief construct a new list entry before pos
@@ -1287,8 +1306,6 @@ class part_state_t
     permutation_t permutation;
 
     /// \brief array with all other information about states
-    /// \details We allocate 1 additional dummy ``state'' at the end of the
-    /// array, to get an illegal state that can actually be dereferenced.
     bisim_gjkw::fixed_vector<state_info_entry> state_info;
 
     /// \brief total number of blocks with unique sequence number allocated
@@ -1350,12 +1367,14 @@ class part_state_t
         return state_info[s].bl.ock;
     }
                                                                                 #ifndef NDEBUG
+                                                                                  private:
                                                                                     /// \brief print a slice of the partition (typically a block)
                                                                                     /// \details If the slice indicated by the parameters is not empty, the
                                                                                     /// message and the states in this slice will be printed.
                                                                                     /// \param message      text printed as a title if the slice is not empty
                                                                                     /// \param begin_print  iterator to the beginning of the slice
                                                                                     /// \param end_print    iterator past the end of the slice
+                                                                                    /// \param partitioner  LTS partitioner (used to print more details)
                                                                                     template<class LTS_TYPE>
                                                                                     void print_block(const block_t* B,
                                                                                                      const char* const message,
@@ -1386,10 +1405,11 @@ class part_state_t
                                                                                         }
                                                                                         while (++begin_print < end_print);
                                                                                     }
-
+                                                                                  public:
                                                                                     /// \brief print the partition per block
                                                                                     /// \details The function prints all blocks in order.  For each block, it
                                                                                     /// lists its states, separated into nonbottom and bottom states.
+                                                                                    /// \param partitioner  LTS partitioner (used to print more details)
                                                                                     template<class LTS_TYPE>
                                                                                     void print_part(const bisim_partitioner_dnj<LTS_TYPE>& partitioner) const
                                                                                     {
@@ -1413,8 +1433,9 @@ class part_state_t
 
                                                                                     /// \brief asserts that the partition of states is consistent
                                                                                     /// \details It also requires that no states are marked.
+                                                                                    /// \param partitioner  LTS partitioner (used to print more details)
                                                                                     template<class LTS_TYPE>
-                                                                                    void assert_consistency(bool branching,
+                                                                                    void assert_consistency(
                                                                                                       const bisim_partitioner_dnj<LTS_TYPE>& partitioner) const
                                                                                     {
                                                                                         const permutation_entry* perm_iter(&permutation.front());
@@ -1428,7 +1449,7 @@ class part_state_t
                                                                                             assert(block->marked_bottom_begin == block->nonbottom_begin);
                                                                                             assert(block->nonbottom_begin <= block->marked_nonbottom_begin);
                                                                                             assert(block->marked_nonbottom_begin == block->end);
-                                                                                            assert(branching || block->nonbottom_begin == block->end);
+                                                                                            assert(partitioner.branching||block->nonbottom_begin==block->end);
                                                                                             assert(0 <= block->seqnr);
                                                                                             assert(block->seqnr < nr_of_blocks);
                                                                                             unsigned const max_block(bisim_gjkw::check_complexity::log_n -
@@ -1555,6 +1576,15 @@ class succ_entry
                                                                                 #ifndef NDEBUG
                                                                                     /// \brief assign work to the transitions in an out-slice (i.e. the
                                                                                     /// transitions from one state in a specific bunch)
+                                                                                    /// \details This debugging function is called to account for work that
+                                                                                    /// could be assigned to any transition in the out-slice.  Just to make
+                                                                                    /// sure, we therefore set the corresponding counter `ctr` for every
+                                                                                    /// transition in the out-slice to `max_value`.
+                                                                                    /// \param partitioner      LTS partitioner
+                                                                                    /// \param out_slice_begin  pointer to the first transition in the
+                                                                                    ///                         out-slice
+                                                                                    /// \param ctr              type of the counter that work is assigned to
+                                                                                    /// \param max_value        new value that the counter should get
                                                                                     template <class LTS_TYPE>
                                                                                     static inline void add_work_to_out_slice(
                                                                                         const bisim_partitioner_dnj<LTS_TYPE>& partitioner,
@@ -1943,7 +1973,13 @@ class block_bunch_slice_t
                                                                                                                    " in " + bunch->debug_id_short(partitioner);
                                                                                     }
 
-                                                                                    // \brief add work to transitions starting in bottom states
+                                                                                    /// \brief add work to transitions starting in bottom states
+                                                                                    /// \details Sometimes an action is done whose time could be accounted for
+                                                                                    /// by any transition starting in a bottom state of the block.
+                                                                                    /// \param ctr          counter type to which work is assigned
+                                                                                    /// \param max_value    new value of the counter
+                                                                                    /// \param partitioner  LTS partitioner (to print error messages if
+                                                                                    ///                     necessary)
                                                                                     template <class LTS_TYPE>
                                                                                     bool add_work_to_bottom_transns(
                                                                                        enum bisim_gjkw::check_complexity::counter_type ctr, unsigned max_value,
@@ -2088,6 +2124,7 @@ class part_trans_t
         my_pool<simple_list<block_bunch_slice_t>::entry> storage;
     #endif
 
+    /// \brief number of new bottom states found until now.
     state_type number_of_new_bottom_states;
 
     /// \brief constructor
@@ -2343,7 +2380,6 @@ class part_trans_t
     }
 
 
-    /// \brief correct transition data structure after splitting a bunch
     /// \brief transition is moved to a new bunch, phase 2
     /// \details This (and the previous function) have to be called after a
     /// transition has changed its bunch.  The member function will adapt the
@@ -2463,7 +2499,12 @@ class part_trans_t
     ///
     /// This function handles all transitions in the out-slice just before
     /// `out_slice_end`, as they all belong to the same block_bunch-slice and
-    /// can be moved together.
+    /// can be moved together.  However, transitions in `splitter_T` are
+    /// excepted:  all transitions in `splitter_T` from all states are
+    /// transitions of the R-subblock, so if the latter is the new block, then
+    /// `splitter_T` can be moved as a whole instead of per-state.  In this
+    /// case, the caller should move `splitter_T` to the list of stable
+    /// block_bunch-slices of the R-subblock.
     ///
     /// The function returns the beginning of this out-slice (which can become
     /// the next out_slice_end).  It is meant to be called from the last
@@ -2474,16 +2515,16 @@ class part_trans_t
     ///                       adapted
     /// \param old_block      The block in which the source state of the
     ///                       out-slice was before it was split
-    /// \param last_splitter  The splitter that made this block split
+    /// \param splitter_T     The splitter that made this block split
     /// \returns  the beginning of this out-slice (which can become the next
     ///           out_slice_end)
                                                                                 ONLY_IF_DEBUG( template <class LTS_TYPE> )
     succ_entry* move_out_slice_to_new_block(
-                            succ_entry* out_slice_end,                          ONLY_IF_DEBUG( const bisim_partitioner_dnj<LTS_TYPE>& partitioner, )
-                            #ifndef USE_SIMPLE_LIST
-                                block_t* const old_block,
-                            #endif
-                            block_bunch_slice_const_iter_t const last_splitter)
+                               succ_entry* out_slice_end,                       ONLY_IF_DEBUG( const bisim_partitioner_dnj<LTS_TYPE>& partitioner, )
+                               #ifndef USE_SIMPLE_LIST
+                                   block_t* const old_block,
+                               #endif
+                               block_bunch_slice_const_iter_t const splitter_T)
     {                                                                           assert(&succ.cbegin()[1] < out_slice_end);
         succ_entry* const out_slice_begin(
                                         out_slice_end[-1].begin_or_before_end); assert(nullptr != out_slice_begin);
@@ -2495,7 +2536,7 @@ class part_trans_t
         block_bunch_slice_iter_t const old_block_bunch_slice(
                                                    old_block_bunch_pos->slice); assert(old_block_bunch_pos->pred->action_block->succ->block_bunch ==
                                                                                                                                           old_block_bunch_pos);
-        if(&*last_splitter == &*old_block_bunch_slice)  return out_slice_begin;
+        if (&*splitter_T == &*old_block_bunch_slice)  return out_slice_begin;
 
         block_bunch_entry* old_block_bunch_slice_end(
                                                    old_block_bunch_slice->end);
@@ -2628,14 +2669,14 @@ class part_trans_t
                 {
                     // If the new block is R, then the old (U) block loses
                     // exactly one stable block_bunch-slice, namely the one we
-                    // just stabilised for (last_splitter).  We could perhaps
+                    // just stabilised for (`splitter_T`).  We could perhaps
                     // optimize this by moving that slice as a whole to the new
                     // block -- perhaps later.
                     //
                     // If the new block is U, then the old (R) block loses
                     // no stable block_bunch-slices if it contains any bottom
                     // state.  If it doesn't contain any bottom state, it will
-                    // definitely keep last_splitter, but nothing else can be
+                    // definitely keep `splitter_T`, but nothing else can be
                     // guaranteed.
                     //
                     // So old_block_bunch_slice may be deleted, in particular
@@ -2795,11 +2836,6 @@ class part_trans_t
     /// The state is only marked if is becomes a new bottom state.  Otherwise,
     /// the marking/unmarking of the state is unchanged.
     /// \param         old_pred_pos the transition that needs to be adapted.
-    ///                             Note that this parameter is passed by value
-    ///                             -- otherwise, as this parameter is not only
-    ///                             read at the beginning, it may happen that
-    ///                             it is read after the transition has partly
-    ///                             already been changed.
     /// \param[in,out] new_noninert_block_bunch_ptr the bunch where new
     ///                             non-inert transitions have to be stored.
     ///                             If no such bunch has yet been created, it
@@ -3023,7 +3059,7 @@ class part_trans_t
     ///                        new non-inert transitions are added to this
     ///                        block_bunch-slice (which must be in the correct
     ///                        position to allow this).
-    /// \param last_splitter   the splitter that caused new_block and old_block
+    /// \param splitter_T      the splitter that caused new_block and old_block
     ///                        to separate from each other
     /// \param new_block_mode  indicates whether the new block is U or R
                                                                                 ONLY_IF_DEBUG( template<class LTS_TYPE> )
@@ -3031,9 +3067,9 @@ class part_trans_t
                   block_t* const new_block,
                   block_t* const old_block,                                     ONLY_IF_DEBUG( const bisim_partitioner_dnj<LTS_TYPE>& partitioner, )
                   bool use_splitter_for_new_noninert_block_bunch,
-                  const block_bunch_slice_iter_t last_splitter,
+                  const block_bunch_slice_iter_t splitter_T,
                   enum new_block_mode_t const new_block_mode)
-    {                                                                           assert(last_splitter->is_stable());
+    {                                                                           assert(splitter_T->is_stable());
         // We begin with a bottom state so the new block gets a sorted list of
         // stable block_bunch-slices.
         permutation_entry* s_iter(new_block->begin);                            assert(s_iter < new_block->end);
@@ -3050,7 +3086,7 @@ class part_trans_t
                                                     #ifndef USE_SIMPLE_LIST
                                                         old_block,
                                                     #endif
-                                                                last_splitter); assert(succ_iter->block_bunch->pred->action_block->succ == succ_iter);
+                                                                   splitter_T); assert(succ_iter->block_bunch->pred->action_block->succ == succ_iter);
                                                                                 assert(s == succ_iter->block_bunch->pred->source);
                                                                                 // add_work_to_out_slice(succ_iter, ...) -- subsumed in the call below
             }
@@ -3068,13 +3104,13 @@ class part_trans_t
         while (++s_iter < new_block->end);
 
         if (new_block_is_R == new_block_mode)
-        {                                                                       assert(last_splitter->source_block() == new_block);
-            // The last_splitter slice moves completely from the old to the new
+        {                                                                       assert(splitter_T->source_block() == new_block);
+            // The `splitter_T` slice moves completely from the old to the new
             // block.  We move it as a whole to the new block_bunch list.
             new_block->stable_block_bunch.splice(
                     new_block->stable_block_bunch.begin(),
-                                 old_block->stable_block_bunch, last_splitter);
-        }                                                                       else assert(last_splitter->source_block() == old_block);
+                                    old_block->stable_block_bunch, splitter_T);
+        }                                                                       else assert(splitter_T->source_block() == old_block);
 
         // We cannot join the loop above with the one below because transitions
         // in the action_block-slices need to be handled in two phases.
@@ -3100,7 +3136,7 @@ class part_trans_t
             block_bunch_slice_iter_or_null_t new_noninert_block_bunch;
             if (use_splitter_for_new_noninert_block_bunch)
             {
-                new_noninert_block_bunch = last_splitter;
+                new_noninert_block_bunch = splitter_T;
             }
             else
             {
@@ -3389,6 +3425,7 @@ class part_trans_t
 
 
 
+/// \brief modes that determine details of how split() should work
 enum refine_mode_t { extend_from_marked_states,
                      extend_from_marked_states_for_init_and_postprocess,
                      extend_from_splitter };
@@ -3423,10 +3460,10 @@ class bisim_partitioner_dnj
     /// found.
     bisim_gjkw::fixed_vector<bisim_dnj::iterator_or_counter<
                                 bisim_dnj::action_block_entry*> > action_label;
-
+                                                                                ONLY_IF_DEBUG( public: )
     /// \brief true iff branching (not strong) bisimulation has been requested
     bool const branching;
-
+  private:
     /// \brief true iff divergence-preserving branching bisimulation has been
     /// requested
     /// \details Note that this field must be false if strong bisimulation has
@@ -3889,6 +3926,8 @@ class bisim_partitioner_dnj
             //                               from s }
             //           B_invis := S \ B_vis
             // Line 1.3: Pi_s := { B_vis, B_invis } \ { emptyset }
+                // At this point, all states with a visible transition are
+                // marked.
             if (0 < B->marked_size())
             {                                                                   ONLY_IF_DEBUG( part_st.print_part(*this);
                                                                                                part_tr.print_trans(*this); )
@@ -3916,7 +3955,7 @@ class bisim_partitioner_dnj
                                                                                     /// can reach a subset of them.
                                                                                     void assert_stability() const
                                                                                     {
-                                                                                        part_st.assert_consistency(branching, *this);
+                                                                                        part_st.assert_consistency(*this);
 
                                                                                         assert(part_tr.succ.size() == part_tr.block_bunch.size() + 1);
                                                                                         assert(part_tr.pred.size() == part_tr.block_bunch.size() + 1);
