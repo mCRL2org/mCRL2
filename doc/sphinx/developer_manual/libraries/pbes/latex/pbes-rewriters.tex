@@ -356,7 +356,7 @@ R_{\exists}(V,\neg \phi)&=&\neg R_{\forall}(V,\phi)\\
 R_{\exists}(V, \bigwedge_i \phi_i)&=&
   \exists W.
     \left(
-         R_\exists(V \setminus W, \bigvee_{i \in I_1}\phi_i) \lor \bigvee_{i \in I_2}R(\phi_i)
+         R_\exists(V \setminus W, \bigwedge_{i \in I_1}\phi_i) \lor \bigwedge_{i \in I_2}R(\phi_i)
     \right) \\
   && \text{where } W = \vars(\phi_j) \cap V \text{ for some $j$ such that $|W|$ is minimal,} \\
   && \text{and where } I_1 = \{ i \mid \vars(\phi_i) \cap V \nsubseteq W \}, I_2 = \{ i \mid \vars(\phi_i) \cap V \subseteq W \} \\
