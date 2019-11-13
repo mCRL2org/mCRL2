@@ -56,6 +56,9 @@ private:
   using bucket_iterator = typename std::vector<bucket_type>::iterator;
   using const_bucket_iterator = typename std::vector<bucket_type>::const_iterator;
 
+  template<typename Key_, typename T, typename Hash_, typename KeyEqual, typename Allocator_, bool ThreadSafe_>
+  friend class unordered_map;
+
 public:
   /// \brief An iterator over all elements in the unordered set.
   template<typename Bucket, bool Constant>
@@ -303,11 +306,12 @@ public:
   /// \brief Resizes the set to the given number of elements.
   void reserve(size_type count) { rehash(std::ceil(static_cast<float>(count) / max_load_factor())); }
 
-  /// \returns The number of elements that can be present in the set before resizing.
-  size_type capacity() const noexcept { return m_buckets.size(); }
-
   hasher hash_function() const { return m_hash; }
   key_equal key_eq() const { return m_equals; }
+
+  /// \returns The number of elements that can be present in the set before resizing.
+  /// \details Not standard.
+  size_type capacity() const noexcept { return m_buckets.size(); }
 
 private:
   template<typename Key_, typename T, typename Hash_, typename KeyEqual, typename Allocator_, bool ThreadSafe_>

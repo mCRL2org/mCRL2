@@ -8,6 +8,7 @@
 //
 
 #include "mcrl2/utilities/unordered_set.h"
+#include "mcrl2/utilities/unordered_map.h"
 
 #define BOOST_AUTO_TEST_MAIN
 #include <boost/test/included/unit_test_framework.hpp>
@@ -16,17 +17,6 @@
 #include <unordered_set>
 
 using namespace mcrl2::utilities;
-
-BOOST_AUTO_TEST_CASE(test_trivial)
-{
-  // Sanity check, default construction and destruction.
-  unordered_set<int> set;
-
-  for (auto& element : set)
-  {
-    BOOST_FAIL("There should be no elements in this set");
-  }
-}
 
 template<typename T>
 unordered_set<T> construct(std::initializer_list<T> list)
@@ -49,6 +39,13 @@ BOOST_AUTO_TEST_CASE(test_small)
   BOOST_CHECK(set.find(5) != set.end());
   BOOST_CHECK(set.find(2) != set.end());
   BOOST_CHECK(set.find(3) != set.end());
+
+  BOOST_CHECK(set.count(5) != 0);
+  BOOST_CHECK(set.count(2) != 0);
+  BOOST_CHECK(set.count(3) != 0);
+
+  BOOST_CHECK(set.size() == 3);
+  BOOST_CHECK(!set.empty());
 }
 
 BOOST_AUTO_TEST_CASE(test_large)
@@ -56,7 +53,7 @@ BOOST_AUTO_TEST_CASE(test_large)
   // Test inserting a large number of elements (tests resize behaviour).
   std::random_device dev;
   std::mt19937 rng(dev());
-  std::uniform_int_distribution<std::mt19937::result_type> dist(1,1000); // distribution in range [1, 6]
+  std::uniform_int_distribution<std::mt19937::result_type> dist(1,10000);
 
   unordered_set<int> test;
 
@@ -74,6 +71,8 @@ BOOST_AUTO_TEST_CASE(test_large)
   {
     BOOST_CHECK(test.find(value) != test.end());
   }
+
+  BOOST_CHECK(test.size() == correct.size());
 
   for (auto& value : test)
   {
@@ -103,9 +102,12 @@ BOOST_AUTO_TEST_CASE(test_move)
 
 BOOST_AUTO_TEST_CASE(test_empty)
 {
-  // Test the move constructor.
   unordered_set<int> set(0);
-  for (int element : set)
+
+  BOOST_CHECK(set.empty());
+  BOOST_CHECK(set.size() == 0);
+
+  for (auto it = set.begin(); it != set.end(); ++it)
   {
     BOOST_CHECK(false);
   }
@@ -136,4 +138,54 @@ BOOST_AUTO_TEST_CASE(test_const_iterator)
 
   const unordered_set<int>::iterator it2 = set.begin();
   int value = *it2;
+}
+
+class Object
+{
+public:
+  Object(std::vector<int>&& reference)
+    : m_vector(std::forward<std::vector<int>>(reference))
+  {}
+
+  bool operator==(const Object& other) const
+  {
+    return m_vector == other.m_vector;
+  }
+
+private:
+  std::vector<int> m_vector;
+};
+
+namespace std
+{
+
+template<>
+struct hash<Object>
+{
+  std::size_t operator()(const Object& object) const
+  {
+    return 0;
+  }
+};
+
+}
+
+BOOST_AUTO_TEST_CASE(test_perfect_forwarding)
+{
+  unordered_set<Object> objects;
+
+  // Move it into the unordered_set.
+  std::vector<int> test;
+  objects.emplace(std::move(test));
+}
+
+BOOST_AUTO_TEST_CASE(test_try_emplace)
+{
+  unordered_map<int, std::vector<int>> mapping;
+
+  // Move it into the unordered_set.
+  std::vector<int> test;
+  mapping.try_emplace(5, 1000);
+
+  BOOST_CHECK(mapping.try_emplace(5, 1000).second == false);
 }

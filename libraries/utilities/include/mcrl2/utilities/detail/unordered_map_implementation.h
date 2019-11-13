@@ -20,6 +20,25 @@ namespace mcrl2::utilities
 {
 
 MCRL2_UNORDERED_MAP_TEMPLATES
+template<typename ...Args>
+auto MCRL2_UNORDERED_MAP_CLASS::try_emplace(const key_type& key, Args&&... args) -> std::pair<iterator, bool>
+{
+  std::size_t bucket = m_set.find_bucket_index(key);
+
+  // If the key can be found, then return it and otherwise add it in the same bucket.
+  iterator it = m_set.find_impl(bucket, key);
+  if (it != end())
+  {
+    return std::make_pair(it, false);
+  }
+  else
+  {
+    auto [x, y] = m_set.emplace_impl(bucket, key, std::forward<Args>(args)...);
+    return std::make_pair(iterator(x), y);
+  }
+}
+
+MCRL2_UNORDERED_MAP_TEMPLATES
 T& MCRL2_UNORDERED_MAP_CLASS::operator[](const key_type& key)
 {
   // Insert a new object and return a reference to it;

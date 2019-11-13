@@ -82,7 +82,7 @@ void MCRL2_UNORDERED_SET_CLASS::clear()
 
 MCRL2_UNORDERED_SET_TEMPLATES
 template<typename ...Args>
-std::pair<typename MCRL2_UNORDERED_SET_CLASS::iterator, bool> MCRL2_UNORDERED_SET_CLASS::emplace(Args&&... args)
+auto MCRL2_UNORDERED_SET_CLASS::emplace(Args&&... args) -> std::pair<iterator, bool>
 {
   // First rehash, such that this bucket can not be invalidated afterwards.
   rehash_if_needed();
@@ -112,7 +112,7 @@ std::pair<typename MCRL2_UNORDERED_SET_CLASS::iterator, bool> MCRL2_UNORDERED_SE
 }
 
 MCRL2_UNORDERED_SET_TEMPLATES
-typename MCRL2_UNORDERED_SET_CLASS::iterator MCRL2_UNORDERED_SET_CLASS::erase(typename MCRL2_UNORDERED_SET_CLASS::const_iterator it)
+auto MCRL2_UNORDERED_SET_CLASS::erase(typename MCRL2_UNORDERED_SET_CLASS::const_iterator it) -> iterator
 {
   // Find the bucket that is pointed to and remove the key after the before iterator.
   bucket_type& bucket = const_cast<bucket_type&>(*it.get_bucket_it());
@@ -158,7 +158,7 @@ void MCRL2_UNORDERED_SET_CLASS::erase(const Args&... args)
 
 MCRL2_UNORDERED_SET_TEMPLATES
 template<typename ...Args>
-typename MCRL2_UNORDERED_SET_CLASS::const_iterator MCRL2_UNORDERED_SET_CLASS::find(const Args&... args) const
+auto MCRL2_UNORDERED_SET_CLASS::find(const Args&... args) const -> const_iterator
 {
   if constexpr (allow_transparent)
   {
@@ -173,7 +173,7 @@ typename MCRL2_UNORDERED_SET_CLASS::const_iterator MCRL2_UNORDERED_SET_CLASS::fi
 
 MCRL2_UNORDERED_SET_TEMPLATES
 template<typename ...Args>
-typename MCRL2_UNORDERED_SET_CLASS::iterator MCRL2_UNORDERED_SET_CLASS::find(const Args&... args)
+auto MCRL2_UNORDERED_SET_CLASS::find(const Args&... args) -> iterator
 {
   if constexpr (allow_transparent)
   {
@@ -253,7 +253,7 @@ void print_performance_statistics(const T& unordered_set)
 
 MCRL2_UNORDERED_SET_TEMPLATES
 template<typename ...Args>
-std::pair<typename MCRL2_UNORDERED_SET_CLASS::iterator, bool> MCRL2_UNORDERED_SET_CLASS::emplace_impl(size_type bucket_index, Args&&... args)
+auto MCRL2_UNORDERED_SET_CLASS::emplace_impl(size_type bucket_index, Args&&... args) -> std::pair<iterator, bool>
 {
   // Construct a new node and put it at the front of the bucket list.
   auto& bucket = m_buckets[bucket_index];
@@ -304,7 +304,7 @@ std::size_t MCRL2_UNORDERED_SET_CLASS::find_bucket_index(const Args&... args) co
 
 MCRL2_UNORDERED_SET_TEMPLATES
 template<typename ...Args>
-typename MCRL2_UNORDERED_SET_CLASS::const_iterator MCRL2_UNORDERED_SET_CLASS::find_impl(size_type bucket_index, const Args&... args) const
+auto MCRL2_UNORDERED_SET_CLASS::find_impl(size_type bucket_index, const Args&... args) const -> const_iterator
 {
   const auto& bucket = m_buckets[bucket_index];
 
