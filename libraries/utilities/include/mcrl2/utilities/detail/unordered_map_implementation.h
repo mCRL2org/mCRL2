@@ -23,8 +23,9 @@ MCRL2_UNORDERED_MAP_TEMPLATES
 template<typename ...Args>
 auto MCRL2_UNORDERED_MAP_CLASS::try_emplace(const key_type& key, Args&&... args) -> std::pair<iterator, bool>
 {
-  std::size_t bucket = m_set.find_bucket_index(key);
+  m_set.rehash_if_needed();
 
+  std::size_t bucket = m_set.find_bucket_index(key);
   // If the key can be found, then return it and otherwise add it in the same bucket.
   iterator it = m_set.find_impl(bucket, key);
   if (it != end())
