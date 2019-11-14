@@ -50,9 +50,9 @@ BOOST_AUTO_TEST_CASE(test_abp)
   run_test_case("[true*]<true*>true", lpstext);
   run_test_case("mu X. !!X", lpstext);
   run_test_case("nu X. [true]X && <true>true", lpstext);
-  run_test_case("nu X. [true]X && (forall d: D. [r1(d)]mu Y. <true>Y || <s4(d)>true)", lpstext);
+  run_test_case("nu X. [true]X && (forall d: D. [r1(d)](mu Y. <true>Y || <s4(d)>true))", lpstext);
   run_test_case("forall d: D. nu X. [!r1(d)]X && [s4(d)]false", lpstext);
-  run_test_case("nu X. [true]X && (forall d: D. [r1(d)]nu Y. [!r1(d) && !s4(d)]Y && [r1(d)]false)", lpstext);
+  run_test_case("nu X. [true]X && (forall d: D. [r1(d)](nu Y. [!r1(d) && !s4(d)]Y && [r1(d)]false))", lpstext);
   run_test_case("mu X. !X", lpstext);
   run_test_case("mu X. nu Y. X => Y", lpstext);
   run_test_case("mu X. X || (mu X. X)", lpstext);

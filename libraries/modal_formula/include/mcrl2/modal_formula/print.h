@@ -364,6 +364,7 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
   using super::print_expression;
   using super::print_unary_left_operation;
   using super::print_binary_operation;
+  using super::print_unary_operand;
 
   // Determines whether or not data expressions should be wrapped inside 'val'.
   std::vector<bool> val;
@@ -461,7 +462,7 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
     derived().apply(x.formula());
     enable_val();
     derived().print("]");
-    derived().apply(x.operand());
+    print_unary_operand(x, x.operand());
     derived().leave(x);
   }
 
@@ -473,7 +474,7 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
     derived().apply(x.formula());
     enable_val();
     derived().print(">");
-    derived().apply(x.operand());
+    print_unary_operand(x, x.operand());
     derived().leave(x);
   }
 
