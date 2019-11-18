@@ -1079,7 +1079,9 @@ void FileSystem::createReinitialisedSpecification(const Property& property,
     QString procExp =
         (specType == SpecType::First ? property.text : property.text2);
 
-    int initIndex = spec.indexOf(QRegExp("(^|[; \\t\\n\\r])init[ \\t\\n\\r]"));
+    /* find the init keyword */
+    int initIndex =
+        spec.indexOf(QRegularExpression("(^|[; \\t\\n\\r])init[ \\t\\n\\r%]"));
     /* if there is no init block in the main spec, add an init block, else
      *   replace the contents of the init block */
     if (initIndex == -1)
@@ -1088,10 +1090,15 @@ void FileSystem::createReinitialisedSpecification(const Property& property,
     }
     else
     {
-      int initSize = spec.indexOf(";", initIndex + 5) - initIndex +
-                     (spec.at(initIndex) == 'i' ? 1 : 0) - 6;
-      alternateSpec.replace(initIndex + (spec.at(initIndex) == 'i' ? 0 : 1) + 5,
-                            initSize, procExp);
+      /* find the size of the contents of the init block */
+      QRegularExpressionMatch match;
+      spec.indexOf(QRegularExpression("([^;%]|%[^\\n]*\\n)*;"), initIndex,
+                   &match);
+      int offset = (spec.at(initIndex) == 'i' ? 0 : 1);
+      int initSize = match.capturedEnd() - initIndex - offset - 5;
+      /* replace the contents of the init block with the given process
+       *   expression */
+      alternateSpec.replace(initIndex + offset + 4, initSize, " " + procExp);
     }
 
     QFile alternateSpecFile(specificationFilePath(specType, property.name));

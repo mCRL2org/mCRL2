@@ -15,7 +15,7 @@
 
 #include <QDialog>
 #include <QComboBox>
-#include <QRegExpValidator>
+#include <QRegularExpressionValidator>
 
 namespace Ui
 {
@@ -104,7 +104,7 @@ class AddEditPropertyDialog : public QDialog
   Property oldProperty;
   int propertyParsingProcessid;
   bool lastParsingPropertyIsMucalculus;
-  QRegExpValidator* propertyNameValidator;
+  QRegularExpressionValidator* propertyNameValidator;
 
   /**
    * @brief checkInput Checks whether the fields are non-empty and whether the

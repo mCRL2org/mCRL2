@@ -24,7 +24,8 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add,
 {
   ui->setupUi(this);
 
-  propertyNameValidator = new QRegExpValidator(QRegExp("[A-Za-z0-9_\\s]*"));
+  propertyNameValidator =
+      new QRegularExpressionValidator(QRegularExpression("[A-Za-z0-9_\\s]*"));
   ui->propertyNameField->setValidator(propertyNameValidator);
 
   /* change the ui depending on whether this should be an add or edit property
@@ -194,7 +195,8 @@ void AddEditPropertyDialog::parseResults(int processid)
     if (result == "valid")
     {
       message = "The entered " + inputType +
-                (lastParsingPropertyIsMucalculus ? " is" : " are") + " well-formed.";
+                (lastParsingPropertyIsMucalculus ? " is" : " are") +
+                " well-formed.";
     }
     else if (result.startsWith("invalid"))
     {
@@ -204,8 +206,9 @@ void AddEditPropertyDialog::parseResults(int processid)
                          ? "first process expression"
                          : "second process expression");
       }
-      message = "The entered " + inputType +
-                " is not well-formed. See the parsing console for more information";
+      message =
+          "The entered " + inputType +
+          " is not well-formed. See the parsing console for more information";
     }
     else
     {
