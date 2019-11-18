@@ -218,6 +218,7 @@ public:
   pbes_expression apply(const propositional_variable_instantiation& X_e)
   {
     using utilities::detail::contains;
+    using utilities::detail::set_difference;
     using utilities::detail::set_includes;
 
     std::list<quantifier> qvars = make_quantifier_list(quantified_context);
@@ -250,7 +251,7 @@ public:
     }
     std::queue<data::variable> todo(std::deque<data::variable>(seen.begin(), seen.end()));
 
-    // Add all transitive dependencies, either becuase they occur together in one
+    // Add all transitive dependencies, either because they occur together in one
     // of the updates, or because of their quantifier scopes
     while(!todo.empty())
     {
@@ -264,13 +265,10 @@ public:
         std::set<data::variable> fv = find_free_variables(updates[*ip]);
         if(contains(fv, elem))
         {
-          for(const data::variable& var: fv)
+          for(const data::variable& var: set_difference(fv, seen))
           {
-            if(!contains(seen, elem))
-            {
-              todo.push(var);
-              seen.insert(var);
-            }
+            todo.push(var);
+            seen.insert(var);
           }
           ip = independent_pars.erase(ip);
         }
@@ -288,13 +286,10 @@ public:
         const std::set<data::variable>& vars = qv->variables();
         if(add_rest)
         {
-          for(const data::variable& var: vars)
+          for(const data::variable& var: set_difference(vars, seen))
           {
-            if(!contains(seen, var))
-            {
-              seen.insert(var);
-              todo.push(var);
-            }
+            seen.insert(var);
+            todo.push(var);
           }
         }
         else if(contains(vars, elem))
@@ -351,14 +346,14 @@ public:
 };
 
 inline
-pbes_expression quantifier_propagate(
+void quantifier_propagate(
         std::list<std::pair<core::identifier_string, pbes_equation>>& new_equations,
         data::set_identifier_generator& id_gen,
         const quantifier_propagate_builder::equation_map_t eqn_map,
-        const pbes_expression& x)
+        pbes_expression& x)
 {
   quantifier_propagate_builder f(new_equations, id_gen, eqn_map);
-  return f.apply(x);
+  f.update(x);
 }
 
 } // namespace detail
@@ -375,7 +370,7 @@ void quantifier_propagate(pbes& p)
     m_eqn_map[eq.variable().name()] = eq;
   }
 
-  for(const pbes_equation& eqn: p.equations())
+  for(pbes_equation& eqn: p.equations())
   {
     detail::quantifier_propagate(new_equations, id_gen, m_eqn_map, eqn.formula());
   }
