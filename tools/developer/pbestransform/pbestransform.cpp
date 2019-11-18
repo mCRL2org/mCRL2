@@ -33,6 +33,7 @@
 #include "mcrl2/pbes/rewriters/quantifiers_inside_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
+#include "mcrl2/pbes/quantifier_propagate.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/srf_pbes.h"
 #include "mcrl2/pbes/stategraph.h"
@@ -201,6 +202,20 @@ struct rewrite_pbes_quantifiers_inside_rewriter_command: public pbes_system::det
   }
 };
 
+struct rewrite_pbes_quantifier_propagate_command: public pbes_system::detail::pbes_command
+{
+  rewrite_pbes_quantifier_propagate_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : pbes_system::detail::pbes_command("pbes-quantifier-propagate", input_filename, output_filename, options)
+  {}
+
+  void execute() override
+  {
+    pbes_system::detail::pbes_command::execute();
+    quantifier_propagate(pbesspec);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
+  }
+};
+
 struct rewrite_pbes_data2pbes_rewriter_command: public pbes_system::detail::pbes_command
 {
   rewrite_pbes_data2pbes_rewriter_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
@@ -308,6 +323,7 @@ class pbestransform_tool: public transform_tool<rewriter_tool<input_output_tool>
       add_command(std::make_shared<rewrite_pbes_enumerate_quantifiers_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
       add_command(std::make_shared<rewrite_pbes_one_point_rule_rewriter_command>(input_filename(), output_filename(), options));
       add_command(std::make_shared<rewrite_pbes_quantifiers_inside_rewriter_command>(input_filename(), output_filename(), options));
+      add_command(std::make_shared<rewrite_pbes_quantifier_propagate_command>(input_filename(), output_filename(), options));
       add_command(std::make_shared<rewrite_pbes_simplify_data_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
       add_command(std::make_shared<rewrite_pbes_simplify_quantifiers_data_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
       add_command(std::make_shared<rewrite_pbes_simplify_quantifiers_rewriter_command>(input_filename(), output_filename(), options));
