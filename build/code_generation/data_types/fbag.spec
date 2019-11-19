@@ -9,7 +9,7 @@
 % Specification of the FBag data sort, denoting finite bags.
 % Note that the specification relies on the underlying data type S to have a total ordering.
 %
-% The definition of an FBag originally had the shape 
+% The definition of an FBag originally had the shape
 %
 % sort FBag(S) <"fbag"> = struct {:} <"empty"> | @fbag_cons <"cons_"> : S <"arg1"> # Pos <"arg2"> # FBag(S) <"arg3">;
 %
@@ -19,9 +19,9 @@
 %
 % Also changed @fbag_insert to become the constructor and @fbag_cons to become a map. All bags should have
 % their elements in a list with @fbag_cons as head symbol be ordered. This is not the case in lists with @fbag_insert.
-% If the @fbag_cons would be a constructor illegal lists would be constructed when evaluationg quantifications and 
-% sum operators. Now it is the case that too many bags will be generated when evaluating for instance a sum operator, 
-% but they are at least not incorrect. 
+% If the @fbag_cons would be a constructor illegal lists would be constructed when evaluationg quantifications and
+% sum operators. Now it is the case that too many bags will be generated when evaluating for instance a sum operator,
+% but they are at least not incorrect.
 
 #using S
 #include bool.spec
@@ -106,7 +106,7 @@ eqn ==(@fbag_cons(d, p, b), {:})  =  false;
     <(p,q) -> -(@fbag_cons(d,p,b),@fbag_cons(d,q,c)) = -(b,c);
     <(q,p) -> -(@fbag_cons(d,p,b),@fbag_cons(d,q,c)) = @fbag_cons(d,Nat2Pos(@gtesubtb(false,p,q)),-(b,c));
     <(d,e) -> -(@fbag_cons(d,p,b),@fbag_cons(e,q,c)) = @fbag_cons(d,p,-(b,@fbag_cons(e,q,c)));
-    <(e,d) -> -(@fbag_cons(d,p,b),@fbag_cons(e,q,c)) = @fbag_cons(e,q,-(@fbag_cons(d,p,b),c));
+    <(e,d) -> -(@fbag_cons(d,p,b),@fbag_cons(e,q,c)) = @fbag_cons(d,p,-(b,c));
     +(b,{:}) = b;
     +({:},c) = c;
     +(@fbag_cons(d,p,b),@fbag_cons(d,q,c)) = @fbag_cons(d,@addc(false,p,q),+(b,c));
