@@ -106,7 +106,7 @@ eqn ==(@fbag_cons(d, p, b), {:})  =  false;
     <(p,q) -> -(@fbag_cons(d,p,b),@fbag_cons(d,q,c)) = -(b,c);
     <(q,p) -> -(@fbag_cons(d,p,b),@fbag_cons(d,q,c)) = @fbag_cons(d,Nat2Pos(@gtesubtb(false,p,q)),-(b,c));
     <(d,e) -> -(@fbag_cons(d,p,b),@fbag_cons(e,q,c)) = @fbag_cons(d,p,-(b,@fbag_cons(e,q,c)));
-    <(e,d) -> -(@fbag_cons(d,p,b),@fbag_cons(e,q,c)) = @fbag_cons(d,p,-(b,c));
+    <(e,d) -> -(@fbag_cons(d,p,b),@fbag_cons(e,q,c)) = -(@fbag_cons(d,p,b),c);
     +(b,{:}) = b;
     +({:},c) = c;
     +(@fbag_cons(d,p,b),@fbag_cons(d,q,c)) = @fbag_cons(d,@addc(false,p,q),+(b,c));
