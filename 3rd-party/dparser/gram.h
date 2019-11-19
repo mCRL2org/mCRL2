@@ -243,13 +243,13 @@ typedef struct Grammar {
 Grammar *new_D_Grammar(char *pathname);
 void free_D_Grammar(Grammar *g);
 int build_grammar(Grammar *g);
-int parse_grammar(Grammar *g, char *pathname, char *str);
+int parse_grammar(Grammar *g, const char *pathname, char *str);
 void print_grammar(Grammar *g);
-void print_rdebug_grammar(Grammar *g, char *pathname);
+void print_rdebug_grammar(Grammar *g, const char *pathname);
 void print_states(Grammar *g);
 void print_rule(Rule *r);
 void print_term(Term *t);
-Production *lookup_production(Grammar *g, char *name, size_t len);
+Production *lookup_production(Grammar *g, const char *name, size_t len);
 
 /* for creating grammars */
 #define last_elem(_r) ((_r)->elems.v[(_r)->elems.n-1])

@@ -7,7 +7,7 @@
 
 extern D_ParserTables parser_tables_dparser_gram;
 
-static char *action_types[] = { "ACCEPT", "SHIFT", "REDUCE" };
+static const char *action_types[] = { "ACCEPT", "SHIFT", "REDUCE" };
 
 static void print_state(State *s);
 
@@ -380,7 +380,7 @@ add_pass_code(Grammar *g, Rule *r, char *pass_start, char *pass_end,
     
 Production *
 new_internal_production(Grammar *g, Production *p) {
-  char *n = p ? p->name : " _synthetic";
+  const char *n = p ? p->name : " _synthetic";
   char *name = MALLOC(strlen(n) + 21);
   Production *pp = NULL, *tp = NULL, *ttp;
   uint i, found = 0;
@@ -515,7 +515,7 @@ finish_productions(Grammar *g) {
 }
 
 Production *
-lookup_production(Grammar *g, char *name, size_t l) {
+lookup_production(Grammar *g, const char *name, size_t l) {
   uint i;
   
   for (i = 0; i < g->productions.n; i++) {
@@ -705,7 +705,7 @@ print_elem(Elem *ee) {
 
 struct EnumStr {
   uint	e;
-  char	*s;
+  const char	*s;
 } assoc_strings[] = {
   { ASSOC_NONE, "$none" },
   { ASSOC_NARY_LEFT, "$left" },
@@ -717,7 +717,7 @@ struct EnumStr {
   { ASSOC_NO, "$noassoc" }
 };
 
-static char *
+static const char *
 assoc_str(uint e) {
   uint i;
 
@@ -805,7 +805,7 @@ print_item(Item *i) {
 }
 
 static void
-print_conflict(char *kind, int *conflict) {
+print_conflict(const char *kind, int *conflict) {
   if (!*conflict) {
     printf("  CONFLICT (before precedence and associativity)\n");
     *conflict = 1;
@@ -1306,7 +1306,7 @@ free_D_Grammar(Grammar *g) {
 }
 
 int
-parse_grammar(Grammar *g, char *pathname, char *sarg) {
+parse_grammar(Grammar *g, const char *pathname, char *sarg) {
   D_Parser *p;
   int res = 0;
   char *s = sarg;
@@ -1549,7 +1549,7 @@ print_term_escaped(Term *t, int double_escaped) {
 	printf("%sterm %d ", double_escaped?"#":"$", t->term_priority);
     }
   } else if (t->kind == TERM_REGEX) {
-    char *quote = double_escaped ? "\\\"" : "\"";
+    const char *quote = double_escaped ? "\\\"" : "\"";
     s = t->string ? escape_string(t->string) : NULL;
     //char *s = t->string; // ? escape_string(t->string) : NULL;
     printf("%s%s%s ", quote, double_escaped?escape_string(s):s, quote);
@@ -1599,12 +1599,12 @@ static void
 print_production(Production *p) {
   uint j, k;
   Rule *r;
-  char *opening[] = { ""        , "\n\t  [ printf(\""    , "\n\t  { printf(\"" };
-  char *closing[] = { "\n"      , "\\n\"); ]\n"          , "\\n\"); }\n" };
-  char *middle[]  = { "\n\t:   ", "  <-  "               , "  <=  " };
-  char *assoc[]   = { "$"       , "#"                    , "#" };
-  char *speculative_final_closing = "\\n\"); ]";  /* closing[1] without final newline */
-  char *next_or_rule = "\t|   ";
+  const char *opening[] = { ""        , "\n\t  [ printf(\""    , "\n\t  { printf(\"" };
+  const char *closing[] = { "\n"      , "\\n\"); ]\n"          , "\\n\"); }\n" };
+  const char *middle[]  = { "\n\t:   ", "  <-  "               , "  <=  " };
+  const char *assoc[]   = { "$"       , "#"                    , "#" };
+  const char *speculative_final_closing = "\\n\"); ]";  /* closing[1] without final newline */
+  const char *next_or_rule = "\t|   ";
   //  char *regex_production = "  ::=  ";
 
   uint variant = 0;
@@ -1658,7 +1658,7 @@ print_production(Production *p) {
 }
 
 static void
-print_productions(Grammar *g, char *pathname) {
+print_productions(Grammar *g, const char *pathname) {
   uint i;
   if (!g->productions.n) {
     printf("/*\n  There were no productions in the grammar %s\n*/\n", pathname);  
@@ -1668,7 +1668,7 @@ print_productions(Grammar *g, char *pathname) {
     print_production(g->productions.v[i]);
 }
 
-static void print_declare(char *s, char *n) {
+static void print_declare(const char *s, const char *n) {
   while (*n && (isspace_(*n) || isdigit_(*n))) n++;
   printf(s, n);
 }
@@ -1730,7 +1730,7 @@ print_declarations(Grammar *g) {
 }
 
 void
-print_rdebug_grammar(Grammar *g, char *pathname) {
+print_rdebug_grammar(Grammar *g, const char *pathname) {
   char ver[30];
   d_version(ver);
   

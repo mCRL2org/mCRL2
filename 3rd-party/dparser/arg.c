@@ -3,18 +3,18 @@
 */
 #include "d.h"
 
-static char *SPACES = "                                                                               ";
-static char *arg_types_keys = (char *)"ISDfF+TL";
-static char *arg_types_desc[] = {
-  (char *)"int     ",
-  (char *)"string  ",
-  (char *)"double  ",
-  (char *)"set off ",
-  (char *)"set on  ",
-  (char *)"incr    ",
-  (char *)"toggle  ",
-  (char *)"int64   ",
-  (char *)"        "
+static const char *SPACES = "                                                                               ";
+static const char *arg_types_keys = "ISDfF+TL";
+static const char *arg_types_desc[] = {
+  "int     ",
+  "string  ",
+  "double  ",
+  "set off ",
+  "set on  ",
+  "incr    ",
+  "toggle  ",
+  "int64   ",
+  "        "
 };
 
 void 

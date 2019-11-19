@@ -7,7 +7,7 @@
 #include "mkdparse.h"
 
 static void 
-mkdparse_internal(Grammar *g, char *grammar_pathname, char *str) {
+mkdparse_internal(Grammar *g, const char *grammar_pathname, char *str) {
   if (!grammar_pathname)
     grammar_pathname = "-";
   if (parse_grammar(g, grammar_pathname, str) < 0)
