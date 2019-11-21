@@ -29,6 +29,7 @@ struct explorer_options
   bool one_point_rule_rewrite = false;
   bool replace_constants_by_variables = false;
   bool resolve_summand_variable_name_clashes = false;
+  bool remove_unused_rewrite_rules = false;
   bool cached = false;
   bool global_cache = false;
   bool confluence = false;
@@ -63,6 +64,7 @@ std::ostream& operator<<(std::ostream& out, const explorer_options& options)
   out << "one-point-rule-rewrite = " << std::boolalpha << options.one_point_rule_rewrite << std::endl;
   out << "resolve-summand-variable-name-clashes = " << std::boolalpha << options.resolve_summand_variable_name_clashes << std::endl;
   out << "replace-constants-by-variables = " << std::boolalpha << options.replace_constants_by_variables << std::endl;
+  out << "remove-unused-rewrite-rules = " << std::boolalpha << options.remove_unused_rewrite_rules << std::endl;
   out << "detect-deadlock = " << std::boolalpha << options.detect_deadlock << std::endl;
   out << "detect-nondeterminism = " << std::boolalpha << options.detect_nondeterminism << std::endl;
   out << "detect-divergence = " << std::boolalpha << options.detect_divergence << std::endl;

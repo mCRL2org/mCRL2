@@ -680,12 +680,24 @@ class explorer: public abortable
       }
     }
 
+    data::rewriter construct_rewriter(const Specification& lpsspec, bool remove_unused_rewrite_rules)
+    {
+      if (remove_unused_rewrite_rules)
+      {
+        return data::rewriter(lpsspec.data(),
+          data::used_data_equation_selector(lpsspec.data(), add_real_operators(lps::find_function_symbols(lpsspec)), lpsspec.global_variables()),
+          m_options.rewrite_strategy);
+      }
+      else
+      {
+        return data::rewriter(lpsspec.data(), m_options.rewrite_strategy);
+      }
+    }
+
   public:
     explorer(const Specification& lpsspec, const explorer_options& options_)
       : m_options(options_),
-        m_rewr(lpsspec.data(),
-          data::used_data_equation_selector(lpsspec.data(), add_real_operators(lps::find_function_symbols(lpsspec)), lpsspec.global_variables()),
-          m_options.rewrite_strategy),
+        m_rewr(construct_rewriter(lpsspec, m_options.remove_unused_rewrite_rules)),
         m_enumerator(m_rewr, lpsspec.data(), m_rewr, m_id_generator, false)
     {
       Specification lpsspec_ = preprocess(lpsspec);
