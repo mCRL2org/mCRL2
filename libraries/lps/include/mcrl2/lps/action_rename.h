@@ -305,8 +305,6 @@ namespace lps
 /// \cond INTERNAL_DOCS
 namespace detail
 {
-// using namespace data;
-
 // Put the equalities t==u in the replacement map as u:=t.
 inline void fill_replacement_map(const data::data_expression& equalities_in_conjunction, 
                                  std::map<data::data_expression, data::data_expression>& replacement_map)
@@ -455,7 +453,6 @@ lps::stochastic_specification action_rename(
   using namespace mcrl2::core;
   using namespace mcrl2::data;
   using namespace mcrl2::lps;
-  using namespace std;
 
   const std::vector <action_rename_rule>& rename_rules = action_rename_spec.rules();
   stochastic_action_summand_vector lps_old_action_summands = lps_old_spec.process().action_summands();
@@ -771,8 +768,8 @@ lps::stochastic_specification action_rename(
   process::action_label_list all=action_rename_spec.action_labels();
   for (const process::action_label& a: lps_old_spec.action_labels())
   {
-    if (find(action_rename_spec.action_labels().begin(),
-             action_rename_spec.action_labels().end(),a)==action_rename_spec.action_labels().end())
+    if (std::find(action_rename_spec.action_labels().begin(),
+                  action_rename_spec.action_labels().end(),a)==action_rename_spec.action_labels().end())
     {
       // Not found;
       all.push_front(a);

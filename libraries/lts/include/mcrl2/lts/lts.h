@@ -462,8 +462,6 @@ class lts: public LTS_BASE
      *       transformed to tau's */
     void hide_actions(const std::vector<std::string>& tau_actions)
     {
-      using namespace std;
-
       if (tau_actions.size()==0)
       {
         return;

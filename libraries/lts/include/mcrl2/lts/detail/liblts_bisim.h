@@ -272,8 +272,6 @@ class bisim_partitioner
                                   const bool preserve_divergences)
 
     {
-      using namespace std;
-
       to_be_processed.clear();
 
       block initial_partition;
@@ -382,7 +380,7 @@ class bisim_partitioner
       initial_partition.state_index=0;
       max_state_index=1;
       initial_partition.parent_block_index=0;
-      initial_partition.splitter=pair< label_type, block_index_type > (0,0);
+      initial_partition.splitter=std::pair< label_type, block_index_type > (0,0);
       blocks.push_back(block());
       blocks.back().swap(initial_partition);
       block_index_of_a_state=std::vector < block_index_type >(aut.num_states(),0);
@@ -488,7 +486,6 @@ class bisim_partitioner
       const label_type splitter_label,
       const block_index_type splitter_block)
     {
-      using namespace std;
       for (std::vector < block_index_type > :: const_iterator i1=BL.begin();
            i1!=BL.end(); ++i1)
       {
@@ -531,7 +528,7 @@ class bisim_partitioner
             }
           }
           // Record how block *i1 is split, to use this to generate counter examples.
-          blocks[*i1].splitter=pair< label_type, block_index_type > (splitter_label,splitter_block);
+          blocks[*i1].splitter=std::pair< label_type, block_index_type > (splitter_label,splitter_block);
 
           // Create a first new block.
           blocks.push_back(block());
@@ -922,7 +919,6 @@ class bisim_partitioner
       std::set < state_type > &visited,
       const bool branching_bisimulation) const
     {
-      using namespace std;
       // This function yields a set of states that are reachable via a sequence of tau steps
       // in block block_index_for_bottom_state, followed by an l step.
       // The technique used is to search through tau transitions from s, until a bottom state
@@ -934,8 +930,8 @@ class bisim_partitioner
 
       visited.insert(s);
       // Put all l reachable states in the result set.
-      for (outgoing_transitions_per_state_action_t::const_iterator i1=outgoing_transitions.lower_bound(pair<state_type,label_type>(s,l));
-           i1!=outgoing_transitions.upper_bound(pair<state_type, label_type>(s,l)); ++i1)
+      for (outgoing_transitions_per_state_action_t::const_iterator i1=outgoing_transitions.lower_bound(std::pair<state_type,label_type>(s,l));
+           i1!=outgoing_transitions.upper_bound(std::pair<state_type, label_type>(s,l)); ++i1)
       {
         result_set.insert(to(i1));
       }
@@ -947,8 +943,8 @@ class bisim_partitioner
         {
           if (aut.is_tau(aut.apply_hidden_label_map(lab)))
           {
-            for (outgoing_transitions_per_state_action_t::const_iterator i=outgoing_transitions.lower_bound(pair<state_type,label_type>(s,lab));
-                 i!=outgoing_transitions.upper_bound(pair<state_type, label_type>(s,lab)); ++i)
+            for (outgoing_transitions_per_state_action_t::const_iterator i=outgoing_transitions.lower_bound(std::pair<state_type,label_type>(s,lab));
+                 i!=outgoing_transitions.upper_bound(std::pair<state_type, label_type>(s,lab)); ++i)
             {
               // Now find out whether the block index of to(i) is part of the block with index block_index_for_bottom_state.
               block_index_type b=block_index_of_a_state[to(i)];
