@@ -287,7 +287,7 @@ bool %(check_name)s(const Term& t)
         }
         ptext = ptext + 'template <typename Term> bool %s(const Term& t);\n' % f.check_name()
 
-    text = string.strip(ptext + '\n' + text)
+    text = ptext + '\n' + text.strip()
     text = text + '\n'
     return insert_text_in_file(filename, text, 'generated code')
 
@@ -308,7 +308,7 @@ def parse_ebnf(filename):
             continue
 
         #--- handle other paragraphs
-        lines  = string.split(paragraph, '\n')
+        lines  = paragraph.split('\n')
         clines = [] # comment lines
         glines = [] # grammar lines
         for line in lines:
@@ -316,22 +316,22 @@ def parse_ebnf(filename):
                 clines.append(line)
             else:
                 glines.append(line)
-        comment = string.join(clines, '\n')
+        comment = '\n'.join(clines)
 
         parser = EBNFParser(Mcrl2Actions())
         try:
-            newrules = parser(string.join(glines, '\n'))
+            newrules = parser('\n'.join(glines))
             for rule in newrules:
                 rule.comment = comment
             rules = rules + newrules
-        except tpg.SyntacticError, e:
-            print "------------------------------------------------------"
-            print 'grammar: ', string.join(glines, '\n')
-            print e
-        except tpg.LexicalError, e:
-            print "------------------------------------------------------"
-            print 'grammar: ', string.join(glines, '\n')
-            print e
+        except tpg.SyntacticError as e:
+            print("------------------------------------------------------")
+            print('grammar: ', string.join(glines, '\n'))
+            print(e)
+        except tpg.LexicalError as e:
+            print("------------------------------------------------------")
+            print('grammar: ', string.join(glines, '\n'))
+            print(e)
     return rules
 
 #---------------------------------------------------------------#

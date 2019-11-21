@@ -18,7 +18,7 @@ trees while parsing.
 """
 
 # Toy Parser Generator: A Python parser generator
-# Copyright (C) 2002 Christophe Delord
+# Copyright (C) 2001-2013 Christophe Delord
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -35,52 +35,56 @@ trees while parsing.
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # For further information about TPG you can visit
-# http://christophe.delord.free.fr/en/tpg
+# http://cdsoft.fr/tpg
 
 # TODO:
 #   - indent and dedent preprocessor
 #
 
-from __future__ import generators
-
 __tpgname__ = 'TPG'
-__version__ = '3.0.6'
-__date__ = '2005-07-08'
+__version__ = '3.2.2'
+__date__ = '2013-12-29'
 __description__ = "A Python parser generator"
 __long_description__ = __doc__
 __license__ = 'LGPL'
 __author__ = 'Christophe Delord'
-__email__ = 'christophe.delord@free.fr'
-__url__ = 'http://christophe.delord.free.fr/en/tpg/'
+__email__ = 'cdsoft.fr'
+__url__ = 'http://cdsoft.fr/tpg/'
 
 import parser
 import re
 import sre_parse
 import sys
 
-try:
-    enumerate
-except NameError:
-    enumerate = lambda seq: zip(xrange(sys.maxint), seq)
+# Python 2/3 compatibility
+__python__ = sys.version_info[0]
+
+if __python__ == 3:
+    import collections
+    callable = lambda value: isinstance(value, collections.Callable)
+    exc = lambda: sys.exc_info()[1]
+
+if __python__ == 2:
+    exc = lambda: sys.exc_value
 
 _id = lambda x: x
 tab = " "*4
 
 class Error(Exception):
-    """ Error((line, row), msg)
+    """ Error((line, column), msg)
 
     Error is the base class for TPG exceptions.
 
     Attributes:
-        line : line number from where the error has been raised
-        row  : row number from where the error has been raised
-        msg  : message associated to the error
+        line   : line number from where the error has been raised
+        column : column number from where the error has been raised
+        msg    : message associated to the error
     """
-    def __init__(self, (line, row), msg):
-        self.line, self.row = line, row
+    def __init__(self, line_column, msg):
+        self.line, self.column = line_column
         self.msg = msg
     def __str__(self):
-        return "%s at line %s, row %s: %s"%(self.__class__.__name__, self.line, self.row, self.msg)
+        return "%s at line %s, column %s: %s"%(self.__class__.__name__, self.line, self.column, self.msg)
 
 class WrongToken(Error):
     """ WrongToken()
@@ -91,26 +95,26 @@ class WrongToken(Error):
         Exception.__init__(self)
 
 class LexicalError(Error):
-    """ LexicalError((line, row), msg)
+    """ LexicalError((line, column), msg)
 
     LexicalError is raised by lexers when a lexical error is encountered.
 
     Attributes:
-        line : line number from where the error has been raised
-        row  : row number from where the error has been raised
-        msg  : message associated to the error
+        line   : line number from where the error has been raised
+        column : column number from where the error has been raised
+        msg    : message associated to the error
     """
     pass
 
 class SyntacticError(Error):
-    """ SyntacticError((line, row), msg)
+    """ SyntacticError((line, column), msg)
 
     SyntacticError is raised by parsers when they fail.
 
     Attributes:
-        line : line number from where the error has been raised
-        row  : row number from where the error has been raised
-        msg  : message associated to the error
+        line   : line number from where the error has been raised
+        column : column number from where the error has been raised
+        msg    : message associated to the error
     """
     pass
 
@@ -181,7 +185,7 @@ class NamedGroupLexer(LexerOptions):
         last_token : last token reached in the input string
         pos        : position in the input string of the current token
         line       : line of the current token
-        row        : row of the current token
+        column     : column of the current token
         cur_token  : current token
     """
 
@@ -246,7 +250,7 @@ class NamedGroupLexer(LexerOptions):
         self.last_token = None
         self.build()
         self.back(None)
-        self.next()
+        self.next_token()
 
     def eof(self):
         """ True if the current position of the lexer is the end of the input string
@@ -258,14 +262,14 @@ class NamedGroupLexer(LexerOptions):
         """
         if token is None:
             self.pos = 0
-            self.line, self.row = 1, 1
+            self.line, self.column = 1, 1
             self.cur_token = None
         else:
             self.pos = token.stop
-            self.line, self.row = token.end_line, token.end_row
+            self.line, self.column = token.end_line, token.end_column
             self.cur_token = token
 
-    def next(self):
+    def next_token(self):
         """ return the next token
 
         Tokens are Token instances. Separators are ignored.
@@ -276,7 +280,7 @@ class NamedGroupLexer(LexerOptions):
             prev_stop = self.cur_token.stop
         while True:
             if self.pos >= len(self.input):
-                self.cur_token = EOFToken(self.line, self.row, self.pos, prev_stop)
+                self.cur_token = EOFToken(self.line, self.column, self.pos, prev_stop)
                 return self.cur_token
             tok = self.token_re.match(self.input, self.pos)
             if tok:
@@ -286,17 +290,17 @@ class NamedGroupLexer(LexerOptions):
                 try:
                     value = value(text)
                 except WrongToken:
-                    raise LexicalError((self.line, self.row), "Lexical error in %s"%text)
+                    raise LexicalError((self.line, self.column), "Lexical error in %s"%text)
                 start, stop = tok.span()
                 self.pos = stop
-                tok_line, tok_row = self.line, self.row
+                tok_line, tok_column = self.line, self.column
                 if '\n' in text:
                     self.line += text.count('\n')
-                    self.row = len(text) - text.rfind('\n')
+                    self.column = len(text) - text.rfind('\n')
                 else:
-                    self.row += len(text)
+                    self.column += len(text)
                 if real_token:
-                    self.cur_token = Token(name, text, value, tok_line, tok_row, self.line, self.row, start, stop, prev_stop)
+                    self.cur_token = Token(name, text, value, tok_line, tok_column, self.line, self.column, start, stop, prev_stop)
                     if self.pos > self.max_pos:
                         self.max_pos = self.pos
                         self.last_token = self.cur_token
@@ -308,22 +312,21 @@ class NamedGroupLexer(LexerOptions):
                     err = self.input[self.pos:nl]
                 else:
                     err = self.input[self.pos:self.pos+w]
-                raise LexicalError((self.line, self.row), "Lexical error near %s"%err)
+                raise LexicalError((self.line, self.column), "Lexical error near %s"%err)
 
     def token(self):
         """ return the current token
         """
         return self.cur_token
 
-    def __getitem__(self, item):
+    def extract(self, start, stop):
         """ extract text from the input string
 
         Parameters:
-            item : slice delimiting the text to extract
-                   item.start is the token from which the extraction starts
-                   item.stop is the token where the extraction stops
+           start : token from which the extraction starts
+           stop  : token where the extraction stops
         """
-        return self.input[item.start.start:item.stop.prev_stop]
+        return self.input[start.start:stop.prev_stop]
 
 class Lexer(NamedGroupLexer):
     r""" Lexer(word_bounded, compile_options)
@@ -345,7 +348,7 @@ class Lexer(NamedGroupLexer):
         last_token : last token reached in the input string
         pos        : position in the input string of the current token
         line       : line of the current token
-        row        : row of the current token
+        column     : column of the current token
         cur_token  : current token
     """
 
@@ -400,9 +403,9 @@ class Lexer(NamedGroupLexer):
         self.max_pos = 0
         self.last_token = None
         self.back(None)
-        self.next()
+        self.next_token()
 
-    def next(self):
+    def next_token(self):
         """ return the next token
 
         Tokens are Token instances. Separators are ignored.
@@ -413,7 +416,7 @@ class Lexer(NamedGroupLexer):
             prev_stop = self.cur_token.stop
         while True:
             if self.pos >= len(self.input):
-                self.cur_token = EOFToken(self.line, self.row, self.pos, prev_stop)
+                self.cur_token = EOFToken(self.line, self.column, self.pos, prev_stop)
                 return self.cur_token
             tok = None
             text = ""
@@ -431,17 +434,17 @@ class Lexer(NamedGroupLexer):
                 try:
                     value = value(text)
                 except WrongToken:
-                    raise LexicalError((self.line, self.row), "Lexical error in %s"%text)
+                    raise LexicalError((self.line, self.column), "Lexical error in %s"%text)
                 start, stop = tok.span()
                 self.pos = stop
-                tok_line, tok_row = self.line, self.row
+                tok_line, tok_column = self.line, self.column
                 if '\n' in text:
                     self.line += text.count('\n')
-                    self.row = len(text) - text.rfind('\n')
+                    self.column = len(text) - text.rfind('\n')
                 else:
-                    self.row += len(text)
+                    self.column += len(text)
                 if real_token:
-                    self.cur_token = Token(name, text, value, tok_line, tok_row, self.line, self.row, start, stop, prev_stop)
+                    self.cur_token = Token(name, text, value, tok_line, tok_column, self.line, self.column, start, stop, prev_stop)
                     if self.pos > self.max_pos:
                         self.max_pos = self.pos
                         self.last_token = self.cur_token
@@ -453,7 +456,7 @@ class Lexer(NamedGroupLexer):
                     err = self.input[self.pos:nl]
                 else:
                     err = self.input[self.pos:self.pos+w]
-                raise LexicalError((self.line, self.row), "Lexical error near %s"%err)
+                raise LexicalError((self.line, self.column), "Lexical error near %s"%err)
 
 class CacheNamedGroupLexer(NamedGroupLexer):
     r""" CacheNamedGroupLexer(word_bounded, compile_options)
@@ -476,7 +479,7 @@ class CacheNamedGroupLexer(NamedGroupLexer):
         last_token : last token reached in the input string
         pos        : position in the input string of the current token
         line       : line of the current token
-        row        : row of the current token
+        column     : column of the current token
         cur_token  : current token
     """
 
@@ -496,7 +499,7 @@ class CacheNamedGroupLexer(NamedGroupLexer):
         self.build()
         self.back(None)
         while True:
-            token = NamedGroupLexer.next(self)
+            token = NamedGroupLexer.next_token(self)
             token.index = len(self.cache)
             self.cache.append(token)
             if isinstance(token, EOFToken):
@@ -504,9 +507,9 @@ class CacheNamedGroupLexer(NamedGroupLexer):
         self.max_pos = 0
         self.last_token = None
         self.back(None)
-        self.next()
+        self.next_token()
 
-    def next(self):
+    def next_token(self):
         """ return the next token
 
         Tokens are Token instances. Separators are ignored.
@@ -517,7 +520,7 @@ class CacheNamedGroupLexer(NamedGroupLexer):
             index = self.cur_token.index+1
         token = self.cache[index]
         self.pos = token.stop
-        self.line, self.row = token.line, token.row
+        self.line, self.column = token.line, token.column
         self.cur_token = token
         if self.pos > self.max_pos:
             self.max_pos = self.pos
@@ -547,7 +550,7 @@ class CacheLexer(Lexer):
         last_token : last token reached in the input string
         pos        : position in the input string of the current token
         line       : line of the current token
-        row        : row of the current token
+        column     : column of the current token
         cur_token  : current token
     """
 
@@ -566,7 +569,7 @@ class CacheLexer(Lexer):
         self.last_token = None
         self.back(None)
         while True:
-            token = Lexer.next(self)
+            token = Lexer.next_token(self)
             token.index = len(self.cache)
             self.cache.append(token)
             if isinstance(token, EOFToken):
@@ -574,9 +577,9 @@ class CacheLexer(Lexer):
         self.max_pos = 0
         self.last_token = None
         self.back(None)
-        self.next()
+        self.next_token()
 
-    def next(self):
+    def next_token(self):
         """ return the next token
 
         Tokens are Token instances. Separators are ignored.
@@ -587,7 +590,7 @@ class CacheLexer(Lexer):
             index = self.cur_token.index+1
         token = self.cache[index]
         self.pos = token.stop
-        self.line, self.row = token.line, token.row
+        self.line, self.column = token.line, token.column
         self.cur_token = token
         if self.pos > self.max_pos:
             self.max_pos = self.pos
@@ -616,7 +619,7 @@ class ContextSensitiveLexer(LexerOptions):
         last_token : last token reached in the input string
         pos        : position in the input string of the current token
         line       : line of the current token
-        row        : row of the current token
+        column     : column of the current token
         cur_token  : current token
     """
 
@@ -683,11 +686,11 @@ class ContextSensitiveLexer(LexerOptions):
         """
         if token is None:
             self.pos = 0
-            self.line, self.row = 1, 1
+            self.line, self.column = 1, 1
             self.cur_token = SOFToken()
         else:
             self.pos = token.stop
-            self.line, self.row = token.end_line, token.end_row
+            self.line, self.column = token.end_line, token.end_column
             self.cur_token = token
         self.eat_separators()
         self.cur_token.next_start = self.pos
@@ -707,9 +710,9 @@ class ContextSensitiveLexer(LexerOptions):
                     self.pos = stop
                     if '\n' in text:
                         self.line += text.count('\n')
-                        self.row = len(text) - text.rfind('\n')
+                        self.column = len(text) - text.rfind('\n')
                     else:
-                        self.row += len(text)
+                        self.column += len(text)
                     done = False
 
     def eat(self, name):
@@ -728,13 +731,13 @@ class ContextSensitiveLexer(LexerOptions):
             text = self.input[start:stop]
             value = value(text)
             self.pos = stop
-            tok_line, tok_row = self.line, self.row
+            tok_line, tok_column = self.line, self.column
             if '\n' in text:
                 self.line += text.count('\n')
-                self.row = len(text) - text.rfind('\n')
+                self.column = len(text) - text.rfind('\n')
             else:
-                self.row += len(text)
-            self.cur_token = Token(name, text, value, tok_line, tok_row, self.line, self.row, start, stop, prev_stop)
+                self.column += len(text)
+            self.cur_token = Token(name, text, value, tok_line, tok_column, self.line, self.column, start, stop, prev_stop)
             if self.pos > self.max_pos:
                 self.max_pos = self.pos
                 self.last_token = self.cur_token
@@ -747,42 +750,41 @@ class ContextSensitiveLexer(LexerOptions):
         """
         return self.cur_token
 
-    def __getitem__(self, item):
+    def extract(self, start, stop):
         """ extract text from the input string
 
         Parameters:
-            item : slice delimiting the text to extract
-                   item.start is the token from which the extraction starts
-                   item.stop is the token where the extraction stops
+           start : the token from which the extraction starts
+           stop  : the token where the extraction stops
         """
-        start = item.start and item.start.next_start or 0
-        stop = item.stop and item.stop.stop or -1
+        start = start and start.next_start or 0
+        stop = stop and stop.stop or -1
         return self.input[start:stop]
 
 class Token:
-    """ Token(name, text, value, line, row, end_line, end_row, start, stop, prev_stop)
+    """ Token(name, text, value, line, column, end_line, end_column, start, stop, prev_stop)
 
     Token object used by lexers
 
     Attributes:
-        name      : name of the token
-        text      : text matched by the regular expression
-        value     : value computed from the text
-        line      : line of the token in the input string
-        row       : row of the token in the input string
-        end_line  : line of the end of the token
-        end_row   : row of the end of the token
-        start     : position of the start in the input string of the token
-        stop      : position of the end in the input string of the token
-        prev_stop : position of the end of the previous token
+        name       : name of the token
+        text       : text matched by the regular expression
+        value      : value computed from the text
+        line       : line of the token in the input string
+        column     : column of the token in the input string
+        end_line   : line of the end of the token
+        end_column : column of the end of the token
+        start      : position of the start in the input string of the token
+        stop       : position of the end in the input string of the token
+        prev_stop  : position of the end of the previous token
     """
 
-    def __init__(self, name, text, value, line, row, end_line, end_row, start, stop, prev_stop):
+    def __init__(self, name, text, value, line, column, end_line, end_column, start, stop, prev_stop):
         self.name = name
         self.text = text
         self.value = value
-        self.line, self.row = line, row
-        self.end_line, self.end_row = end_line, end_row
+        self.line, self.column = line, column
+        self.end_line, self.end_column = end_line, end_column
         self.start, self.stop = start, stop
         self.prev_stop = prev_stop
 
@@ -795,29 +797,29 @@ class Token:
         return name == self.name
 
     def __str__(self):
-        return "line %s, row %s: %s %s %s"%(self.line, self.row, self.name, self.text, self.value)
+        return "line %s, column %s: %s %s %s"%(self.line, self.column, self.name, self.text, self.value)
 
 class EOFToken(Token):
-    """ EOFToken(line, row, pos, prev_stop)
+    """ EOFToken(line, column, pos, prev_stop)
 
     Token for the end of file (end of the input string).
     EOFToken is a Token object.
 
     Attributes:
-        name      : name of the token
-        text      : text matched by the regular expression
-        value     : value computed from the text
-        line      : line of the token in the input string
-        row       : row of the token in the input string
-        end_line  : line of the end of the token
-        end_row   : row of the end of the token
-        start     : position of the start in the input string of the token
-        stop      : position of the end in the input string of the token
-        prev_stop : position of the end of the previous token
+        name       : name of the token
+        text       : text matched by the regular expression
+        value      : value computed from the text
+        line       : line of the token in the input string
+        column     : column of the token in the input string
+        end_line   : line of the end of the token
+        end_column : column of the end of the token
+        start      : position of the start in the input string of the token
+        stop       : position of the end in the input string of the token
+        prev_stop  : position of the end of the previous token
     """
 
-    def __init__(self, line, row, pos, prev_stop):
-        Token.__init__(self, "EOF", "EOF", None, line, row, line, row, pos, pos, prev_stop)
+    def __init__(self, line, column, pos, prev_stop):
+        Token.__init__(self, "EOF", "EOF", None, line, column, line, column, pos, pos, prev_stop)
 
 class SOFToken(Token):
     """ SOFToken()
@@ -826,16 +828,16 @@ class SOFToken(Token):
     SOFToken is a Token object.
 
     Attributes:
-        name      : name of the token
-        text      : text matched by the regular expression
-        value     : value computed from the text
-        line      : line of the token in the input string
-        row       : row of the token in the input string
-        end_line  : line of the end of the token
-        end_row   : row of the end of the token
-        start     : position of the start in the input string of the token
-        stop      : position of the end in the input string of the token
-        prev_stop : position of the end of the previous token
+        name       : name of the token
+        text       : text matched by the regular expression
+        value      : value computed from the text
+        line       : line of the token in the input string
+        column     : column of the token in the input string
+        end_line   : line of the end of the token
+        end_column : column of the end of the token
+        start      : position of the start in the input string of the token
+        stop       : position of the end in the input string of the token
+        prev_stop  : position of the end of the previous token
     """
 
     def __init__(self):
@@ -853,7 +855,7 @@ class Py:
 class ParserMetaClass(type):
     """ ParserMetaClass is the metaclass of Parser objects.
 
-    When a ParserMetaClass class in defined, its doc string should contain
+    When a ParserMetaClass class is defined, its doc string should contain
     a grammar. This grammar is parsed by TPGParser and the generated code
     is added to the class.
     If the class doesn't have a doc string, nothing is generated
@@ -870,7 +872,12 @@ class ParserMetaClass(type):
             for attribute, source, code in parser(grammar):
                 setattr(cls, attribute, code)
 
-class Parser:
+if __python__ == 3:
+    exec("class _Parser(metaclass=ParserMetaClass): pass")
+else:
+    class _Parser: __metaclass__ = ParserMetaClass
+
+class Parser(_Parser):
     # Parser is the base class for parsers.
     #
     # This class can not have a doc string otherwise it would be considered as a grammar.
@@ -882,8 +889,6 @@ class Parser:
     # Methods added to the generated parsers:
     #   init_lexer(self) : return a lexer object to scan the tokens defined by the grammar
     #   <rule>           : each rule is translated into a method with the same name
-
-    __metaclass__ = ParserMetaClass
 
     def __init__(self):
         """ Parser is the base class for parsers.
@@ -908,7 +913,7 @@ class Parser:
         """
         token = self.lexer.token()
         if token.match(name):
-            self.lexer.next()
+            self.lexer.next_token()
             return token.value
         else:
             raise WrongToken
@@ -947,17 +952,21 @@ class Parser:
         """
         try:
             self.lexer.start(input)
+            if __python__ == 2 and isinstance(input, unicode):
+                self.string_prefix = 'ur'
+            else:
+                self.string_prefix = 'r'
             value = getattr(self, axiom)(*args, **kws)
             if not self.lexer.eof():
                 raise WrongToken
         except WrongToken:
             if self.lexer.last_token is None:
                 last_token = ""
-                line, row = 1, 1
+                line, column = 1, 1
             else:
                 last_token = self.lexer.last_token.text
-                line, row = self.lexer.last_token.line, self.lexer.last_token.row
-            raise SyntacticError((line, row), "Syntax error near %s"%last_token)
+                line, column = self.lexer.last_token.line, self.lexer.last_token.column
+            raise SyntacticError((line, column), "Syntax error near %s"%last_token)
         return value
 
     def line(self, token=None):
@@ -972,22 +981,22 @@ class Parser:
                 return 1
         return token.line
 
-    def row(self, token=None):
-        """ return the row number of a token
+    def column(self, token=None):
+        """ return the column number of a token
 
         Parameters:
-            token : token object. If None, the current token row is returned.
+            token : token object. If None, the current token column is returned.
         """
         if token is None:
             token =self.lexer.token()
             if token is None:
-                return 2
-        return token.row
+                return 1
+        return token.column
 
     def mark(self):
         """ return the current token
 
-        This can be used to get the line or row number of a token
+        This can be used to get the line or column number of a token
         or to extract text between two tokens.
         """
         return self.lexer.token()
@@ -999,7 +1008,7 @@ class Parser:
             start : token object as returned by mark
             stop  : token object as returned by mark
         """
-        return self.lexer[start:stop]
+        return self.lexer.extract(start, stop)
 
     def check(self, cond):
         """ check a condition and backtrack when it is False
@@ -1071,11 +1080,13 @@ class VerboseParser(Parser):
         try:
             value = Parser.eat(self, name)
             if self.verbose >= 1:
-                print self.token_info(token, "==", name)
+                #print(self.token_info(token, "==", name))
+                sys.stderr.write(self.token_info(token, "==", name)+"\n")
             return value
         except WrongToken:
             if self.verbose >= 2:
-                print self.token_info(token, "!=", name)
+                #print(self.token_info(token, "!=", name))
+                sys.stderr.write(self.token_info(token, "!=", name)+"\n")
             raise
 
     def eatCSL(self, name):
@@ -1091,12 +1102,14 @@ class VerboseParser(Parser):
             value = Parser.eatCSL(self, name)
             if self.verbose >= 1:
                 token = self.lexer.token()
-                print self.token_info(token, "==", name)
+                #print(self.token_info(token, "==", name))
+                sys.stderr.write(self.token_info(token, "==", name)+"\n")
             return value
         except WrongToken:
             if self.verbose >= 2:
-                token = Token("???", self.lexer.input[self.lexer.pos:self.lexer.pos+10].replace('\n', ' '), "???", self.lexer.line, self.lexer.row, self.lexer.line, self.lexer.row, self.lexer.pos, self.lexer.pos, self.lexer.pos)
-                print self.token_info(token, "!=", name)
+                token = Token("???", self.lexer.input[self.lexer.pos:self.lexer.pos+10].replace('\n', ' '), "???", self.lexer.line, self.lexer.column, self.lexer.line, self.lexer.column, self.lexer.pos, self.lexer.pos, self.lexer.pos)
+                #print(self.token_info(token, "!=", name))
+                sys.stderr.write(self.token_info(token, "!=", name)+"\n")
             raise
 
     def parse(self, axiom, input, *args, **kws):
@@ -1129,7 +1142,7 @@ class VerboseParser(Parser):
             if len(callernames) < 10:
                 callernames.insert(0, name)
         callernames = '.'.join(callernames)
-        found = "(%d,%d) %s %s"%(token.line, token.row, token.name, token.text)
+        found = "(%d,%d) %s %s"%(token.line, token.column, token.name, token.text)
         return "[%3d][%2d]%s: %s %s %s"%(eatcnt, stackdepth, callernames, found, op, expected)
 
 blank_line_re = re.compile("^\s*$")
@@ -1151,16 +1164,42 @@ class TPGParser(tpg.Parser):
     __grammar__ = r"""
 
     # This class parses TPG grammar
-    # and generate the Python source and compiled code for the parser
+    # and generates the Python source and compiled code for the parser
 
     set lexer = NamedGroupLexer
+    set lexer_verbose
 
     separator   spaces      '\s+'                                                       ;
-    separator   comment     '#.*'                                                       ;
+    separator   comment     '\#.*'                                                      ;
 
-    token       string      "\"(\\.|[^\"\\]+)*\"|'(\\.|[^'\\]+)*'"                      ;
-    token       code        "\{\{(\}?[^\}]+)*\}\}|\$[^\$\n]*\$|\$.*\n([ \t]*\$.*\n)*"   $ self.Code
-    token       ident       "\w+"                                                       ;
+    token       string      '''
+                                "{3}   [^"\\]*
+                                        (?: (?: \\. | "(?!"") )
+                                            [^"\\]*
+                                        )*
+                                "{3}
+                            |   "       [^"\\\n]*
+                                        (?: \\. [^"\\\n]* )*
+                                "
+                            |   '{3}   [^'\\]*
+                                        (?: (?: \\. | '(?!'') )
+                                            [^'\\]*
+                                        )*
+                                '{3}
+                            |   '       [^'\\\n]*
+                                        (?: \\. [^'\\\n]* )*
+                                '
+                            '''                                                         ;
+
+    token       code        '''
+                                \{\{
+                                    ( \}? [^\}]+ )*
+                                \}\}
+                            |   \$  [^\$\n]* \$
+                            |               \$ .*\n
+                                ( [ \t]*    \$ .*\n )*
+                            '''                                                         $ self.Code
+    token       ident       '\w+'                                                       ;
     token       lcbra       '\{'                                                        ;
     token       rcbra       '\}'                                                        ;
     token       star2       '\*\*'                                                      ;
@@ -1187,7 +1226,7 @@ class TPGParser(tpg.Parser):
         )*
         ;
 
-    TOKEN/$token_type(name, expr, code)$ ->
+    TOKEN/$token_type(name, self.string_prefix, expr, code)$ ->
         (   'separator'     $ token_type = self.DefSeparator
         |   'token'         $ token_type = self.DefToken
         )
@@ -1206,7 +1245,7 @@ class TPGParser(tpg.Parser):
 
     RULE/$self.Rule(head, body)$ -> HEAD/head '->' OR_EXPR/body ';' ;
 
-    HEAD/$self.Symbol(name, args, ret)$ -> ident/name OPT_ARGS/args RET/ret ;
+    HEAD/$self.Symbol(name, args, ret)$ -> ident/name OPT_ARGS/args RET<$self.PY_Ident(name)$>/ret ;
 
     OR_EXPR/$self.balance(or_expr)$ ->
         AND_EXPR/a                  $ or_expr = [a]
@@ -1244,7 +1283,7 @@ class TPGParser(tpg.Parser):
         )?
         ;
 
-    SYMBOL/$self.Symbol(name, args, ret)$ -> ident/name OPT_ARGS/args RET/ret ;
+    SYMBOL/$self.Symbol(name, args, ret)$ -> ident/name OPT_ARGS/args RET<$self.PY_Ident(name)$>/ret ;
 
     INLINE_TOKEN/$self.InlineToken(expr, ret)$ ->
         @t string/expr  $ self.re_check(expr, t)
@@ -1270,7 +1309,7 @@ class TPGParser(tpg.Parser):
         |   '\*\*' ident/name           $ a = self.PY_KeywordArgumentList(name)
         ;
 
-    RET/ret -> '/' PY_EXPR/ret | $ ret = None $ ;
+    RET<ret=None>/ret -> ( '/' PY_EXPR/ret )? ;
 
     PY_EXPR/expr ->
             ident/name      $ expr = self.PY_Ident(name)
@@ -1281,7 +1320,7 @@ class TPGParser(tpg.Parser):
     """
 
     def init_lexer(self):
-        lexer = tpg.NamedGroupLexer(True, 0)
+        lexer = tpg.NamedGroupLexer(True, tpg.re.VERBOSE)
         lexer.def_token('_tok_1', r'set')
         lexer.def_token('_tok_2', r'=')
         lexer.def_token('_tok_3', r'separator')
@@ -1302,10 +1341,34 @@ class TPGParser(tpg.Parser):
         lexer.def_token('_tok_18', r'>')
         lexer.def_token('_tok_19', r'/')
         lexer.def_separator('spaces', r'\s+')
-        lexer.def_separator('comment', r'#.*')
-        lexer.def_token('string', r"\"(\\.|[^\"\\]+)*\"|'(\\.|[^'\\]+)*'")
-        lexer.def_token('code', r"\{\{(\}?[^\}]+)*\}\}|\$[^\$\n]*\$|\$.*\n([ \t]*\$.*\n)*", self.Code)
-        lexer.def_token('ident', r"\w+")
+        lexer.def_separator('comment', r'\#.*')
+        lexer.def_token('string', r'''
+                                    "{3}   [^"\\]*
+                                            (?: (?: \\. | "(?!"") )
+                                                [^"\\]*
+                                            )*
+                                    "{3}
+                                |   "       [^"\\\n]*
+                                            (?: \\. [^"\\\n]* )*
+                                    "
+                                |   '{3}   [^'\\]*
+                                            (?: (?: \\. | '(?!'') )
+                                                [^'\\]*
+                                            )*
+                                    '{3}
+                                |   '       [^'\\\n]*
+                                            (?: \\. [^'\\\n]* )*
+                                    '
+                                ''')
+        lexer.def_token('code', r'''
+                                    \{\{
+                                        ( \}? [^\}]+ )*
+                                    \}\}
+                                |   \$  [^\$\n]* \$
+                                |               \$ .*\n
+                                    ( [ \t]*    \$ .*\n )*
+                                ''', self.Code)
+        lexer.def_token('ident', r'\w+')
         lexer.def_token('lcbra', r'\{')
         lexer.def_token('rcbra', r'\}')
         lexer.def_token('star2', r'\*\*')
@@ -1313,14 +1376,14 @@ class TPGParser(tpg.Parser):
         return lexer
 
     def START(self, ):
-        r""" START -> OPTIONS TOKENS RULES """
+        r""" ``START -> OPTIONS TOKENS RULES ;`` """
         options = self.OPTIONS()
         tokens = self.TOKENS()
         rules = self.RULES()
         return self.gen(options, tokens, rules)
 
     def OPTIONS(self, ):
-        r""" OPTIONS -> ('set' ident ('=' ident | ))* """
+        r""" ``OPTIONS -> ('set' ident ('=' ident | ))* ;`` """
         options = self.Options(self)
         while True:
             _p1 = self.lexer.token()
@@ -1341,7 +1404,7 @@ class TPGParser(tpg.Parser):
         return options
 
     def TOKENS(self, ):
-        r""" TOKENS -> (TOKEN)* """
+        r""" ``TOKENS -> (TOKEN)* ;`` """
         ts = []
         while True:
             _p1 = self.lexer.token()
@@ -1354,7 +1417,7 @@ class TPGParser(tpg.Parser):
         return ts
 
     def TOKEN(self, ):
-        r""" TOKEN -> ('separator' | 'token') ident ':'? string (PY_EXPR ';'? | ';') """
+        r""" ``TOKEN -> ('separator' | 'token') ident ':'? string (PY_EXPR ';'? | ';') ;`` """
         _p1 = self.lexer.token()
         try:
             self.eat('_tok_3') # 'separator'
@@ -1384,10 +1447,10 @@ class TPGParser(tpg.Parser):
             self.lexer.back(_p3)
             self.eat('_tok_6') # ';'
             code = None
-        return token_type(name, expr, code)
+        return token_type(name, self.string_prefix, expr, code)
 
     def RULES(self, ):
-        r""" RULES -> (RULE)* """
+        r""" ``RULES -> (RULE)* ;`` """
         rs = self.Rules()
         while True:
             _p1 = self.lexer.token()
@@ -1400,7 +1463,7 @@ class TPGParser(tpg.Parser):
         return rs
 
     def RULE(self, ):
-        r""" RULE -> HEAD '->' OR_EXPR ';' """
+        r""" ``RULE -> HEAD '->' OR_EXPR ';' ;`` """
         head = self.HEAD()
         self.eat('_tok_7') # '->'
         body = self.OR_EXPR()
@@ -1408,14 +1471,14 @@ class TPGParser(tpg.Parser):
         return self.Rule(head, body)
 
     def HEAD(self, ):
-        r""" HEAD -> ident OPT_ARGS RET """
+        r""" ``HEAD -> ident OPT_ARGS RET ;`` """
         name = self.eat('ident')
         args = self.OPT_ARGS()
-        ret = self.RET()
+        ret = self.RET(self.PY_Ident(name))
         return self.Symbol(name, args, ret)
 
     def OR_EXPR(self, ):
-        r""" OR_EXPR -> AND_EXPR ('\|' AND_EXPR)* """
+        r""" ``OR_EXPR -> AND_EXPR ('\|' AND_EXPR)* ;`` """
         a = self.AND_EXPR()
         or_expr = [a]
         while True:
@@ -1431,7 +1494,7 @@ class TPGParser(tpg.Parser):
         return self.balance(or_expr)
 
     def AND_EXPR(self, ):
-        r""" AND_EXPR -> (ATOM_EXPR REP)* """
+        r""" ``AND_EXPR -> (ATOM_EXPR REP)* ;`` """
         and_expr = self.And()
         while True:
             _p1 = self.lexer.token()
@@ -1445,7 +1508,7 @@ class TPGParser(tpg.Parser):
         return and_expr
 
     def ATOM_EXPR(self, ):
-        r""" ATOM_EXPR -> SYMBOL | INLINE_TOKEN | code | '\(' OR_EXPR '\)' | 'check' PY_EXPR | 'error' PY_EXPR | '@' PY_EXPR """
+        r""" ``ATOM_EXPR -> SYMBOL | INLINE_TOKEN | code | '\(' OR_EXPR '\)' | 'check' PY_EXPR | 'error' PY_EXPR | '@' PY_EXPR ;`` """
         _p1 = self.lexer.token()
         try:
             try:
@@ -1485,7 +1548,7 @@ class TPGParser(tpg.Parser):
         return a
 
     def REP(self, a):
-        r""" REP -> ('\*' | '\+' | '\?' | '\{' (PY_EXPR | ) (',' (PY_EXPR | ) | ) '\}')? """
+        r""" ``REP -> ('\*' | '\+' | '\?' | '\{' (PY_EXPR | ) (',' (PY_EXPR | ) | ) '\}')? ;`` """
         _p1 = self.lexer.token()
         try:
             try:
@@ -1509,7 +1572,7 @@ class TPGParser(tpg.Parser):
                         min = self.PY_EXPR()
                     except tpg.WrongToken:
                         self.lexer.back(_p2)
-                        min = self.PY_Ident("0")
+                        min = self.PY_Ident("0") 
                     _p3 = self.lexer.token()
                     try:
                         self.eat('_tok_16') # ','
@@ -1518,10 +1581,10 @@ class TPGParser(tpg.Parser):
                             max = self.PY_EXPR()
                         except tpg.WrongToken:
                             self.lexer.back(_p4)
-                            max = self.PY_Ident("None")
+                            max = self.PY_Ident("None") 
                     except tpg.WrongToken:
                         self.lexer.back(_p3)
-                        max = min
+                        max = min 
                     self.eat('rcbra') # '\}'
                     a = self.Rep(a, min, max)
         except tpg.WrongToken:
@@ -1529,14 +1592,14 @@ class TPGParser(tpg.Parser):
         return a
 
     def SYMBOL(self, ):
-        r""" SYMBOL -> ident OPT_ARGS RET """
+        r""" ``SYMBOL -> ident OPT_ARGS RET ;`` """
         name = self.eat('ident')
         args = self.OPT_ARGS()
-        ret = self.RET()
+        ret = self.RET(self.PY_Ident(name))
         return self.Symbol(name, args, ret)
 
     def INLINE_TOKEN(self, ):
-        r""" INLINE_TOKEN -> string RET """
+        r""" ``INLINE_TOKEN -> string RET ;`` """
         t = self.mark()
         expr = self.eat('string')
         self.re_check(expr, t)
@@ -1544,17 +1607,17 @@ class TPGParser(tpg.Parser):
         return self.InlineToken(expr, ret)
 
     def OPT_ARGS(self, ):
-        r""" OPT_ARGS -> ARGS |  """
+        r""" ``OPT_ARGS -> ARGS |  ;`` """
         _p1 = self.lexer.token()
         try:
             args = self.ARGS()
         except tpg.WrongToken:
             self.lexer.back(_p1)
-            args = self.Args()
+            args = self.Args() 
         return args
 
     def ARGS(self, ):
-        r""" ARGS -> '<' (ARG (',' ARG)* ','?)? '>' """
+        r""" ``ARGS -> '<' (ARG (',' ARG)* ','?)? '>' ;`` """
         self.eat('_tok_17') # '<'
         args = self.Args()
         _p1 = self.lexer.token()
@@ -1581,7 +1644,7 @@ class TPGParser(tpg.Parser):
         return args
 
     def ARG(self, ):
-        r""" ARG -> ident '=' PY_EXPR | PY_EXPR | '\*' ident | '\*\*' ident """
+        r""" ``ARG -> ident '=' PY_EXPR | PY_EXPR | '\*' ident | '\*\*' ident ;`` """
         _p1 = self.lexer.token()
         try:
             try:
@@ -1606,19 +1669,18 @@ class TPGParser(tpg.Parser):
                 a = self.PY_KeywordArgumentList(name)
         return a
 
-    def RET(self, ):
-        r""" RET -> '/' PY_EXPR |  """
+    def RET(self, ret=None):
+        r""" ``RET -> ('/' PY_EXPR)? ;`` """
         _p1 = self.lexer.token()
         try:
             self.eat('_tok_19') # '/'
             ret = self.PY_EXPR()
         except tpg.WrongToken:
             self.lexer.back(_p1)
-            ret = None
         return ret
 
     def PY_EXPR(self, ):
-        r""" PY_EXPR -> ident | string | code | ARGS """
+        r""" ``PY_EXPR -> ident | string | code | ARGS ;`` """
         _p1 = self.lexer.token()
         try:
             try:
@@ -1645,18 +1707,36 @@ class TPGParser(tpg.Parser):
         else:
             self.env = {}
 
+    def __call__(self, input, *args, **kws):
+        """ parse a string starting from the default axiom
+
+        The default axiom is START.
+
+        Parameters:
+            input : input string to parse
+            *args : argument list to pass to START
+            **kws : argument dictionnary to pass to START
+
+        If a line ends with '::', it is considered as the end
+        of the ReST part. The lines after are the grammar.
+        """
+        docs = re.split(r"::[ \t]*$", input, maxsplit=1, flags=re.M)
+        if len(docs) == 2:
+            input = re.sub(".", " ", docs[0])+docs[1]
+        return self.parse('START', input, *args, **kws)
+
     def re_check(self, expr, tok):
         try:
-            sre_parse.parse(eval('r'+expr))
-        except Exception, e:
-            raise LexicalError((tok.line, tok.row), "Invalid regular expression: %s (%s)"%(expr, e))
+            sre_parse.parse(eval(self.string_prefix+expr))
+        except Exception:
+            raise LexicalError((tok.line, tok.column), "Invalid regular expression: %s (%s)"%(expr, exc()))
 
     def code_check(self, code, tok):
         try:
             parser.suite(code.code)
-        except Exception, e:
+        except Exception:
             erroneous_code = "\n".join([ "%2d: %s"%(i+1, l) for (i, l) in enumerate(code.code.splitlines()) ])
-            raise LexicalError((tok.line, tok.row), "Invalid Python code (%s): \n%s"%(e, erroneous_code))
+            raise LexicalError((tok.line, tok.column), "Invalid Python code (%s): \n%s"%(exc, erroneous_code))
 
     class Options:
         option_dict = {
@@ -1685,14 +1765,12 @@ class TPGParser(tpg.Parser):
                 options, default = TPGParser.Options.option_dict[name]
             except KeyError:
                 opts = TPGParser.Options.option_dict.keys()
-                opts.sort()
-                self.parser.error("Unknown option (%s). Valid options are %s"%(name, ', '.join(opts)))
+                self.parser.error("Unknown option (%s). Valid options are %s"%(name, ', '.join(sorted(opts))))
             try:
                 value = options[value]
             except KeyError:
                 values = options.keys()
-                values.sort()
-                self.parser.error("Unknown value (%s). Valid values for %s are %s"%(value, name, ', '.join(values)))
+                self.parser.error("Unknown value (%s). Valid values for %s are %s"%(value, name, ', '.join(sorted(values))))
             setattr(self, name, value)
         def lexer_compile_options(self):
             options = [ self.lexer_ignorecase,
@@ -1748,8 +1826,9 @@ class TPGParser(tpg.Parser):
 
     class DefToken:
         def_method = "def_token"
-        def __init__(self, name, expr, code=None):
+        def __init__(self, name, string_prefix, expr, code=None):
             self.name = name
+            self.string_prefix = string_prefix
             self.expr = expr
             if code is not None and code.gen_code().count('\n') > 1:
                 raise WrongToken
@@ -1757,10 +1836,10 @@ class TPGParser(tpg.Parser):
         def gen_def(self):
             expr = self.expr
             if self.code is None:
-                return "lexer.%s('%s', r%s)"%(self.def_method, self.name, expr)
+                return "lexer.%s('%s', %s%s)"%(self.def_method, self.name, self.string_prefix, expr)
             else:
                 code = self.code.gen_code().strip()
-                return "lexer.%s('%s', r%s, %s)"%(self.def_method, self.name, expr, code)
+                return "lexer.%s('%s', %s%s, %s)"%(self.def_method, self.name, self.string_prefix, expr, code)
 
     class DefSeparator(DefToken):
         def_method = "def_separator"
@@ -1798,7 +1877,8 @@ class TPGParser(tpg.Parser):
             counters = self.Counters()
             return self.head.name, [
                 self.head.gen_def(),
-                tab + 'r""" %s -> %s """'%(self.head.gen_doc(self), self.body.gen_doc(self)),
+                tab + 'r""" ``%s -> %s ;`` """'%(self.head.gen_doc(self), self.body.gen_doc(self)),
+                self.head.gen_init_ret(tab),
                 self.body.gen_code(tab, counters, None),
                 self.head.gen_ret(tab),
             ]
@@ -1817,6 +1897,8 @@ class TPGParser(tpg.Parser):
                 raise SemanticError("Token %s can not have arguments"%self.name)
         def gen_def(self):
             return "def %s(self, %s):"%(self.name, self.args.gen_code())
+        def gen_init_ret(self, indent):
+            return self.ret.gen_code() == self.name and indent + "%s = None"%(self.name) or ()
         def gen_ret(self, indent):
             return self.ret and indent + "return %s"%self.ret.gen_code() or ()
         def gen_code(self, indent, counters, pos):
@@ -2085,7 +2167,7 @@ class TPGParser(tpg.Parser):
     def make_code(self, attribute, *source):
         source = "".join(self.flatten_nl(*source))
         local_namespace = {}
-        exec source in self.env, local_namespace
+        exec(source, self.env, local_namespace)
         code = local_namespace[attribute]
         return attribute, source, code
 
@@ -2106,7 +2188,7 @@ class TPGParser(tpg.Parser):
             except KeyError:
                 # Otherwise create an explicit definition for the new inline token
                 token_number += 1
-                token.set_explicit_token(self.DefToken("_tok_%s"%token_number, token.expr))
+                token.set_explicit_token(self.DefToken("_tok_%s"%token_number, self.string_prefix, token.expr))
                 explicit_tokens[token.expr[1:-1]] = token.explicit_token
                 inline_tokens.append(token)
         yield self.make_code("init_lexer",

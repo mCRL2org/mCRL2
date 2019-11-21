@@ -17,8 +17,8 @@ from types import *
 def read_text(filename):
     try:
         f = open(filename, 'r')
-    except IOError, e:
-        print 'Unable to open file ' + filename + ' ', e
+    except IOError as e:
+        print('Unable to open file ' + filename + ' ', e)
         sys.exit(0)
 
     text = f.read()
@@ -45,7 +45,7 @@ class Rule:
     def __init__(self, lhs, rhs):
         self.lhs = lhs
         self.rhs = rhs
-        assert isinstance(rhs, ListType)
+        assert isinstance(rhs, list)
 
     def name(self):
         return self.lhs[1:-1]
@@ -124,7 +124,7 @@ class Function:
         t = []
         for i in range(len(params)):
             t.append('%s' % (params[i]))
-        return string.join(t, ', ')
+        return ', '.join(t)
 
     def default_declaration(self):
         params = self.parameters()
@@ -132,7 +132,7 @@ class Function:
         t = []
         for i in range(len(params)):
             t.append('const %s& %s' % (types[i], params[i]))
-        return string.join(t, ', ')
+        return ', '.join(t)
 
 #---------------------------------------------------------------#
 #                          Argument
@@ -163,7 +163,7 @@ class Argument:
         args = []
         for e in self.expressions:
             args.append(e.name())
-        return self.repetitions + ' ' + string.join(args, ' ')
+        return self.repetitions + ' ' + ' '.join(args)
 
 #---------------------------------------------------------------#
 #                          Mcrl2Actions
