@@ -100,7 +100,6 @@ inline
 bool is_state_formula(const atermpp::aterm_appl& x)
 {
   return data::is_data_expression(x) ||
-         data::is_untyped_data_parameter(x) ||
          state_formulas::is_true(x) ||
          state_formulas::is_false(x) ||
          state_formulas::is_not(x) ||
@@ -117,7 +116,8 @@ bool is_state_formula(const atermpp::aterm_appl& x)
          state_formulas::is_delay_timed(x) ||
          state_formulas::is_variable(x) ||
          state_formulas::is_nu(x) ||
-         state_formulas::is_mu(x);
+         state_formulas::is_mu(x) ||
+         data::is_untyped_data_parameter(x);
 }
 
 // prototype declaration

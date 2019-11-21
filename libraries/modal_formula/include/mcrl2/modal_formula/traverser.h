@@ -172,13 +172,13 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::multi_action>(x));
     }
-    else if (process::is_untyped_multi_action(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_multi_action>(x));
-    }
     else if (data::is_untyped_data_parameter(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
+    else if (process::is_untyped_multi_action(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_multi_action>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -322,13 +322,13 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::multi_action>(x));
     }
-    else if (process::is_untyped_multi_action(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_multi_action>(x));
-    }
     else if (data::is_untyped_data_parameter(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
+    else if (process::is_untyped_multi_action(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_multi_action>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -471,13 +471,13 @@ struct add_traverser_action_formula_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::multi_action>(x));
     }
-    else if (process::is_untyped_multi_action(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_multi_action>(x));
-    }
     else if (data::is_untyped_data_parameter(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
+    else if (process::is_untyped_multi_action(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_multi_action>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -623,13 +623,13 @@ struct add_traverser_variables: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::multi_action>(x));
     }
-    else if (process::is_untyped_multi_action(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_multi_action>(x));
-    }
     else if (data::is_untyped_data_parameter(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
+    else if (process::is_untyped_multi_action(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_multi_action>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -775,13 +775,13 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::multi_action>(x));
     }
-    else if (process::is_untyped_multi_action(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_multi_action>(x));
-    }
     else if (data::is_untyped_data_parameter(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
+    else if (process::is_untyped_multi_action(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_multi_action>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -924,13 +924,13 @@ struct add_traverser_action_labels: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::multi_action>(x));
     }
-    else if (process::is_untyped_multi_action(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_multi_action>(x));
-    }
     else if (data::is_untyped_data_parameter(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
+    else if (process::is_untyped_multi_action(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_multi_action>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -1688,10 +1688,6 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     else if (state_formulas::is_true(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::true_>(x));
@@ -1759,6 +1755,10 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     else if (state_formulas::is_mu(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::mu>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -1921,10 +1921,6 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     else if (state_formulas::is_true(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::true_>(x));
@@ -1992,6 +1988,10 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     else if (state_formulas::is_mu(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::mu>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -2150,10 +2150,6 @@ struct add_traverser_state_formula_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     else if (state_formulas::is_true(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::true_>(x));
@@ -2221,6 +2217,10 @@ struct add_traverser_state_formula_expressions: public Traverser<Derived>
     else if (state_formulas::is_mu(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::mu>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -2385,10 +2385,6 @@ struct add_traverser_variables: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     else if (state_formulas::is_true(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::true_>(x));
@@ -2456,6 +2452,10 @@ struct add_traverser_variables: public Traverser<Derived>
     else if (state_formulas::is_mu(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::mu>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -2614,10 +2614,6 @@ struct add_traverser_state_variables: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     else if (state_formulas::is_true(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::true_>(x));
@@ -2685,6 +2681,10 @@ struct add_traverser_state_variables: public Traverser<Derived>
     else if (state_formulas::is_mu(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::mu>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -2853,10 +2853,6 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     else if (state_formulas::is_true(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::true_>(x));
@@ -2924,6 +2920,10 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     else if (state_formulas::is_mu(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::mu>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -3084,10 +3084,6 @@ struct add_traverser_regular_formula_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     else if (state_formulas::is_true(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::true_>(x));
@@ -3155,6 +3151,10 @@ struct add_traverser_regular_formula_expressions: public Traverser<Derived>
     else if (state_formulas::is_mu(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::mu>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -3316,10 +3316,6 @@ struct add_traverser_action_labels: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     else if (state_formulas::is_true(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::true_>(x));
@@ -3387,6 +3383,10 @@ struct add_traverser_action_labels: public Traverser<Derived>
     else if (state_formulas::is_mu(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::mu>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }

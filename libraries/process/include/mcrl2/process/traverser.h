@@ -261,7 +261,11 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   void apply(const process::process_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    if (process::is_action(x))
+    if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
+    else if (process::is_action(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<process::action>(x));
     }
@@ -348,10 +352,6 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     else if (process::is_untyped_process_assignment(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_process_assignment>(x));
-    }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -575,7 +575,11 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   void apply(const process::process_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    if (process::is_action(x))
+    if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
+    else if (process::is_action(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<process::action>(x));
     }
@@ -662,10 +666,6 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     else if (process::is_untyped_process_assignment(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_process_assignment>(x));
-    }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -867,7 +867,11 @@ struct add_traverser_process_expressions: public Traverser<Derived>
   void apply(const process::process_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    if (process::is_action(x))
+    if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
+    else if (process::is_action(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<process::action>(x));
     }
@@ -954,10 +958,6 @@ struct add_traverser_process_expressions: public Traverser<Derived>
     else if (process::is_untyped_process_assignment(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_process_assignment>(x));
-    }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -1195,7 +1195,11 @@ struct add_traverser_variables: public Traverser<Derived>
   void apply(const process::process_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    if (process::is_action(x))
+    if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
+    else if (process::is_action(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<process::action>(x));
     }
@@ -1282,10 +1286,6 @@ struct add_traverser_variables: public Traverser<Derived>
     else if (process::is_untyped_process_assignment(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_process_assignment>(x));
-    }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -1563,7 +1563,11 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   void apply(const process::process_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    if (process::is_action(x))
+    if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
+    else if (process::is_action(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<process::action>(x));
     }
@@ -1650,10 +1654,6 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     else if (process::is_untyped_process_assignment(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_process_assignment>(x));
-    }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -1870,7 +1870,11 @@ struct add_traverser_action_labels: public Traverser<Derived>
   void apply(const process::process_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    if (process::is_action(x))
+    if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
+    else if (process::is_action(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<process::action>(x));
     }
@@ -1957,10 +1961,6 @@ struct add_traverser_action_labels: public Traverser<Derived>
     else if (process::is_untyped_process_assignment(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_process_assignment>(x));
-    }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }

@@ -133,6 +133,14 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
+    else if (data::is_variable(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
     else if (pbes_system::is_propositional_variable_instantiation(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::propositional_variable_instantiation>(x));
@@ -160,14 +168,6 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     else if (pbes_system::is_exists(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::exists>(x));
-    }
-    else if (data::is_variable(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
-    }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -264,6 +264,14 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
+    else if (data::is_variable(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
     else if (pbes_system::is_propositional_variable_instantiation(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::propositional_variable_instantiation>(x));
@@ -291,14 +299,6 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     else if (pbes_system::is_exists(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::exists>(x));
-    }
-    else if (data::is_variable(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
-    }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -394,6 +394,14 @@ struct add_traverser_pbes_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
+    else if (data::is_variable(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
     else if (pbes_system::is_propositional_variable_instantiation(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::propositional_variable_instantiation>(x));
@@ -421,14 +429,6 @@ struct add_traverser_pbes_expressions: public Traverser<Derived>
     else if (pbes_system::is_exists(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::exists>(x));
-    }
-    else if (data::is_variable(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
-    }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -536,6 +536,14 @@ struct add_traverser_variables: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
+    else if (data::is_variable(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
     else if (pbes_system::is_propositional_variable_instantiation(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::propositional_variable_instantiation>(x));
@@ -563,14 +571,6 @@ struct add_traverser_variables: public Traverser<Derived>
     else if (pbes_system::is_exists(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::exists>(x));
-    }
-    else if (data::is_variable(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
-    }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -680,6 +680,14 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
+    else if (data::is_variable(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
     else if (pbes_system::is_propositional_variable_instantiation(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::propositional_variable_instantiation>(x));
@@ -707,14 +715,6 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     else if (pbes_system::is_exists(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::exists>(x));
-    }
-    else if (data::is_variable(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
-    }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
