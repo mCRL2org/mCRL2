@@ -77,15 +77,14 @@ struct add_sort_expressions: public Builder<Derived>
     return result;
   }
 
-  void update(process::timed_multi_action& x)
+  process::timed_multi_action apply(const process::timed_multi_action& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    x.actions() = static_cast<Derived&>(*this).apply(x.actions());
-    if (x.has_time())
-    {
-      x.time() = static_cast<Derived&>(*this).apply(x.time());
-    }
+    process::timed_multi_action result = x.has_time() ?
+      process::timed_multi_action(static_cast<Derived&>(*this).apply(x.actions()), static_cast<Derived&>(*this).apply(x.time())) :
+      process::timed_multi_action(static_cast<Derived&>(*this).apply(x.actions()), x.time());
     static_cast<Derived&>(*this).leave(x);
+    return result;
   }
 
   process::action apply(const process::action& x)
@@ -408,15 +407,14 @@ struct add_data_expressions: public Builder<Derived>
     return result;
   }
 
-  void update(process::timed_multi_action& x)
+  process::timed_multi_action apply(const process::timed_multi_action& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    x.actions() = static_cast<Derived&>(*this).apply(x.actions());
-    if (x.has_time())
-    {
-      x.time() = static_cast<Derived&>(*this).apply(x.time());
-    }
+    process::timed_multi_action result = x.has_time() ?
+      process::timed_multi_action(static_cast<Derived&>(*this).apply(x.actions()), static_cast<Derived&>(*this).apply(x.time())) :
+      process::timed_multi_action(static_cast<Derived&>(*this).apply(x.actions()), x.time());
     static_cast<Derived&>(*this).leave(x);
+    return result;
   }
 
   process::action apply(const process::action& x)
@@ -747,15 +745,14 @@ struct add_variables: public Builder<Derived>
     return result;
   }
 
-  void update(process::timed_multi_action& x)
+  process::timed_multi_action apply(const process::timed_multi_action& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    x.actions() = static_cast<Derived&>(*this).apply(x.actions());
-    if (x.has_time())
-    {
-      x.time() = static_cast<Derived&>(*this).apply(x.time());
-    }
+    process::timed_multi_action result = x.has_time() ?
+      process::timed_multi_action(static_cast<Derived&>(*this).apply(x.actions()), static_cast<Derived&>(*this).apply(x.time())) :
+      process::timed_multi_action(static_cast<Derived&>(*this).apply(x.actions()), x.time());
     static_cast<Derived&>(*this).leave(x);
+    return result;
   }
 
   process::action apply(const process::action& x)

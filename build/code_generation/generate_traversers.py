@@ -112,6 +112,10 @@ struct <BUILDER>: public <ADD_BUILDER><<PARENT_BUILDER>, Derived>
     {
       x.time() = static_cast<Derived&>(*this).apply(x.time());
     }''')
+    text = text.replace('process::timed_multi_action result = process::timed_multi_action(static_cast<Derived&>(*this).apply(x.actions()), static_cast<Derived&>(*this).apply(x.time()));',
+'''process::timed_multi_action result = x.has_time() ?
+      process::timed_multi_action(static_cast<Derived&>(*this).apply(x.actions()), static_cast<Derived&>(*this).apply(x.time())) :
+      process::timed_multi_action(static_cast<Derived&>(*this).apply(x.actions()), x.time());''')
     #----------------------------------------------------------------------------------------#
 
     label = add_builder
