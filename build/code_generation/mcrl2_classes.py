@@ -258,9 +258,9 @@ def extract_type(text):
 #indents the text with the given prefix
 def indent_text(text, indent):
     lines = []
-    for line in string.split(text, '\n'):
+    for line in text.split('\n'):
         lines.append(indent + line)
-    return string.join(lines, '\n')
+    return '\n'.join(lines)
 
 # Represents a function parameter like the following;
 #
@@ -342,7 +342,7 @@ class FunctionDeclaration:
 
         # compute parameters
         parameters = []
-        words = map(string.strip, text.split(','))
+        words = [word.strip() for word in text.split(',')]
         for word in words:
             if word == '':
                 continue
@@ -1018,8 +1018,8 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
 
     def derived_classes(self, all_classes):
         classes = [all_classes[name] for name in self.expression_classes()]
-        classes.sort(cmp = lambda x, y: cmp(x.index, y.index))
-        classes.sort(cmp = lambda x, y: cmp('X' in y.modifiers(), 'X' in x.modifiers()))
+        classes.sort(key = lambda x: x.index)
+        classes.sort(key = lambda x: 'X' in x.modifiers(), reverse=True)
         return classes
 
     def traverser_function(self, all_classes, dependencies):
@@ -1259,7 +1259,7 @@ def parse_classes(text, namespace = None):
     for line in lines:
         if line.startswith('%'):
             continue
-        words = map(string.strip, line.split('|'))
+        words = [word.strip() for word in line.split('|')]
         if len(words) < 4:
             continue
         constructor, modifiers, aterm, description = words
@@ -1273,9 +1273,9 @@ def parse_classes(text, namespace = None):
     return result
 
 def print_dependencies(dependencies, message):
-    print message
+    print(message)
     for type in sorted(dependencies):
-        print type, dependencies[type]
+        print(type, dependencies[type])
 
 def is_dependent_type(dependencies, type):
     if type in dependencies:
@@ -1332,7 +1332,7 @@ def find_dependencies(all_classes, type):
 
     #for expr in all_classes[type].expression_classes():
     #    update_dependency(expr, all_classes, dependencies, value = True)
-    #    print expr, dependencies[expr]
+    #    print(expr, dependencies[expr])
 
     while update_dependencies(all_classes, dependencies):
         pass
@@ -1382,7 +1382,7 @@ def parse_class_map(class_map):
             for name in ADDITIONAL_EXPRESSION_CLASS_DEPENDENCIES[classname]:
                 result[classname].expression_classes().append(name)
         if 'X' in c.modifiers():
-            c.expression_classes().sort(cmp = lambda x, y: cmp(result[x].index, result[y].index))
+            c.expression_classes().sort(key = lambda x: result[x].index)
     return result
 
 def parse_classnames(text, namespace):
@@ -1392,7 +1392,7 @@ def parse_classnames(text, namespace):
     for line in lines:
         if line.startswith('%'):
             continue
-        words = map(string.strip, line.split('|'))
+        words = [word.strip() for word in line.split('|')]
         if len(words) < 4:
             continue
         constructor, modifiers, aterm, description = words

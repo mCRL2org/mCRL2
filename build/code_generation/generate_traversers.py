@@ -7,15 +7,17 @@
 import os
 import re
 import sys
+from functools import cmp_to_key
 from mcrl2_classes import *
 from mcrl2_utility import *
 
 MCRL2_ROOT = '../../'
 
 def compare_classes(x, y):
+    mycmp = (lambda a, b : (a > b) - (a < b))
     if 'X' in x.modifiers() and 'X' in y.modifiers():
-        return cmp(x.index, y.index)
-    return cmp('X' in x.modifiers(), 'X' in y.modifiers())
+        return mycmp(x.index, y.index)
+    return mycmp('X' in x.modifiers(), 'X' in y.modifiers())
 
 def make_traverser(filename, traverser, add_traverser, parent_traverser, class_map, all_classes, namespace, expression, dependencies):
     TRAVERSER = '''template <template <class> class Traverser, class Derived>
@@ -41,7 +43,7 @@ struct <TRAVERSER>: public <ADD_TRAVERSER><<PARENT_TRAVERSER>, Derived>
     classes = [all_classes[name] for name in classnames]
 
     # preserve the same order as old generation
-    classes.sort(compare_classes)
+    classes = sorted(classes, key=cmp_to_key(compare_classes))
 
     for c in classes:
         if is_dependent_type(dependencies, c.classname(True)) or ('E' in c.modifiers() and is_dependent_type(dependencies, c.superclass(True))):
@@ -93,7 +95,7 @@ struct <BUILDER>: public <ADD_BUILDER><<PARENT_BUILDER>, Derived>
     classes = [all_classes[name] for name in classnames]
 
     # preserve the same order as old generation
-    classes.sort(compare_classes)
+    classes = sorted(classes, key=cmp_to_key(compare_classes))
 
     for c in classes:
         if is_dependent_type(dependencies, c.classname(True)) or ('E' in c.modifiers() and is_dependent_type(dependencies, c.superclass(True))):
