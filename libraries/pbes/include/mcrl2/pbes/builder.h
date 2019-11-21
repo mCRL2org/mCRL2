@@ -138,14 +138,6 @@ struct add_sort_expressions: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
-    else if (data::is_variable(x))
-    {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
-    }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     else if (pbes_system::is_propositional_variable_instantiation(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::propositional_variable_instantiation>(x));
@@ -173,6 +165,14 @@ struct add_sort_expressions: public Builder<Derived>
     else if (pbes_system::is_exists(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::exists>(x));
+    }
+    else if (data::is_variable(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -277,14 +277,6 @@ struct add_data_expressions: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
-    else if (data::is_variable(x))
-    {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
-    }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     else if (pbes_system::is_propositional_variable_instantiation(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::propositional_variable_instantiation>(x));
@@ -312,6 +304,14 @@ struct add_data_expressions: public Builder<Derived>
     else if (pbes_system::is_exists(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::exists>(x));
+    }
+    else if (data::is_variable(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -425,14 +425,6 @@ struct add_variables: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
-    else if (data::is_variable(x))
-    {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
-    }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     else if (pbes_system::is_propositional_variable_instantiation(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::propositional_variable_instantiation>(x));
@@ -460,6 +452,14 @@ struct add_variables: public Builder<Derived>
     else if (pbes_system::is_exists(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::exists>(x));
+    }
+    else if (data::is_variable(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -563,14 +563,6 @@ struct add_pbes_expressions: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
-    else if (data::is_variable(x))
-    {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
-    }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     else if (pbes_system::is_propositional_variable_instantiation(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::propositional_variable_instantiation>(x));
@@ -598,6 +590,14 @@ struct add_pbes_expressions: public Builder<Derived>
     else if (pbes_system::is_exists(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::exists>(x));
+    }
+    else if (data::is_variable(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;

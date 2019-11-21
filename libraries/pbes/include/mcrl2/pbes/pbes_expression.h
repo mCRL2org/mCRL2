@@ -93,15 +93,15 @@ inline
 bool is_pbes_expression(const atermpp::aterm_appl& x)
 {
   return data::is_data_expression(x) ||
-         data::is_variable(x) ||
-         data::is_untyped_data_parameter(x) ||
          pbes_system::is_propositional_variable_instantiation(x) ||
          pbes_system::is_not(x) ||
          pbes_system::is_and(x) ||
          pbes_system::is_or(x) ||
          pbes_system::is_imp(x) ||
          pbes_system::is_forall(x) ||
-         pbes_system::is_exists(x);
+         pbes_system::is_exists(x) ||
+         data::is_variable(x) ||
+         data::is_untyped_data_parameter(x);
 }
 
 // prototype declaration

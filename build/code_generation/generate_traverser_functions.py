@@ -12,8 +12,8 @@ from mcrl2_utility import *
 MCRL2_ROOT = '../../'
 
 REWRITE_TEXT = '''/// \\\\brief Rewrites all embedded expressions in an object x
-/// \param x an object containing expressions
-/// \param R a rewriter
+/// \\\\param x an object containing expressions
+/// \\\\param R a rewriter
 template <typename T, typename Rewriter>
 void rewrite(T& x,
              Rewriter R,
@@ -24,8 +24,8 @@ void rewrite(T& x,
 }
 
 /// \\\\brief Rewrites all embedded expressions in an object x
-/// \param x an object containing expressions
-/// \param R a rewriter
+/// \\\\param x an object containing expressions
+/// \\\\param R a rewriter
 /// \\\\return the rewrite result
 template <typename T, typename Rewriter>
 T rewrite(const T& x,
@@ -37,9 +37,9 @@ T rewrite(const T& x,
 }
 
 /// \\\\brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
-/// \param x an object containing expressions
-/// \param R a rewriter
-/// \param sigma a substitution
+/// \\\\param x an object containing expressions
+/// \\\\param R a rewriter
+/// \\\\param sigma a substitution
 template <typename T, typename Rewriter, typename Substitution>
 void rewrite(T& x,
              Rewriter R,
@@ -51,9 +51,9 @@ void rewrite(T& x,
 }
 
 /// \\\\brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
-/// \param x an object containing expressions
-/// \param R a rewriter
-/// \param sigma a substitution
+/// \\\\param x an object containing expressions
+/// \\\\param R a rewriter
+/// \\\\param sigma a substitution
 /// \\\\return the rewrite result
 template <typename T, typename Rewriter, typename Substitution>
 T rewrite(const T& x,
@@ -300,8 +300,8 @@ T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
 '''
 
 FIND_VARIABLES_FUNCTION_TEXT = '''/// \\\\brief Returns all variables that occur in an object
-/// \param[in] x an object containing variables
-/// \param[in,out] o an output iterator to which all variables occurring in x are written.
+/// \\\\param[in] x an object containing variables
+/// \\\\param[in,out] o an output iterator to which all variables occurring in x are written.
 /// \\\\return All variables that occur in the term x
 template <typename T, typename OutputIterator>
 void find_all_variables(const T& x, OutputIterator o)
@@ -310,7 +310,7 @@ void find_all_variables(const T& x, OutputIterator o)
 }
 
 /// \\\\brief Returns all variables that occur in an object
-/// \param[in] x an object containing variables
+/// \\\\param[in] x an object containing variables
 /// \\\\return All variables that occur in the object x
 template <typename T>
 std::set<data::variable> find_all_variables(const T& x)
@@ -321,8 +321,8 @@ std::set<data::variable> find_all_variables(const T& x)
 }
 
 /// \\\\brief Returns all variables that occur in an object
-/// \param[in] x an object containing variables
-/// \param[in,out] o an output iterator to which all variables occurring in x are added.
+/// \\\\param[in] x an object containing variables
+/// \\\\param[in,out] o an output iterator to which all variables occurring in x are added.
 /// \\\\return All free variables that occur in the object x
 template <typename T, typename OutputIterator>
 void find_free_variables(const T& x, OutputIterator o)
@@ -331,9 +331,9 @@ void find_free_variables(const T& x, OutputIterator o)
 }
 
 /// \\\\brief Returns all variables that occur in an object
-/// \param[in] x an object containing variables
-/// \param[in,out] o an output iterator to which all variables occurring in x are written.
-/// \param[in] bound a container of variables
+/// \\\\param[in] x an object containing variables
+/// \\\\param[in,out] o an output iterator to which all variables occurring in x are written.
+/// \\\\param[in] bound a container of variables
 /// \\\\return All free variables that occur in the object x
 template <typename T, typename OutputIterator, typename VariableContainer>
 void find_free_variables_with_bound(const T& x, OutputIterator o, const VariableContainer& bound)
@@ -342,7 +342,7 @@ void find_free_variables_with_bound(const T& x, OutputIterator o, const Variable
 }
 
 /// \\\\brief Returns all variables that occur in an object
-/// \param[in] x an object containing variables
+/// \\\\param[in] x an object containing variables
 /// \\\\return All free variables that occur in the object x
 template <typename T>
 std::set<data::variable> find_free_variables(const T& x)
@@ -353,8 +353,8 @@ std::set<data::variable> find_free_variables(const T& x)
 }
 
 /// \\\\brief Returns all variables that occur in an object
-/// \param[in] x an object containing variables
-/// \param[in] bound a bound a container of variables
+/// \\\\param[in] x an object containing variables
+/// \\\\param[in] bound a bound a container of variables
 /// \\\\return All free variables that occur in the object x
 template <typename T, typename VariableContainer>
 std::set<data::variable> find_free_variables_with_bound(const T& x, VariableContainer const& bound)
@@ -365,8 +365,8 @@ std::set<data::variable> find_free_variables_with_bound(const T& x, VariableCont
 }
 
 /// \\\\brief Returns all identifiers that occur in an object
-/// \param[in] x an object containing identifiers
-/// \param[in,out] o an output iterator to which all identifiers occurring in x are written.
+/// \\\\param[in] x an object containing identifiers
+/// \\\\param[in,out] o an output iterator to which all identifiers occurring in x are written.
 /// \\\\return All identifiers that occur in the term x
 template <typename T, typename OutputIterator>
 void find_identifiers(const T& x, OutputIterator o)
@@ -375,7 +375,7 @@ void find_identifiers(const T& x, OutputIterator o)
 }
 
 /// \\\\brief Returns all identifiers that occur in an object
-/// \param[in] x an object containing identifiers
+/// \\\\param[in] x an object containing identifiers
 /// \\\\return All identifiers that occur in the object x
 template <typename T>
 std::set<core::identifier_string> find_identifiers(const T& x)
@@ -386,8 +386,8 @@ std::set<core::identifier_string> find_identifiers(const T& x)
 }
 
 /// \\\\brief Returns all sort expressions that occur in an object
-/// \param[in] x an object containing sort expressions
-/// \param[in,out] o an output iterator to which all sort expressions occurring in x are written.
+/// \\\\param[in] x an object containing sort expressions
+/// \\\\param[in,out] o an output iterator to which all sort expressions occurring in x are written.
 /// \\\\return All sort expressions that occur in the term x
 template <typename T, typename OutputIterator>
 void find_sort_expressions(const T& x, OutputIterator o)
@@ -396,7 +396,7 @@ void find_sort_expressions(const T& x, OutputIterator o)
 }
 
 /// \\\\brief Returns all sort expressions that occur in an object
-/// \param[in] x an object containing sort expressions
+/// \\\\param[in] x an object containing sort expressions
 /// \\\\return All sort expressions that occur in the object x
 template <typename T>
 std::set<data::sort_expression> find_sort_expressions(const T& x)
@@ -407,8 +407,8 @@ std::set<data::sort_expression> find_sort_expressions(const T& x)
 }
 
 /// \\\\brief Returns all function symbols that occur in an object
-/// \param[in] x an object containing function symbols
-/// \param[in,out] o an output iterator to which all function symbols occurring in x are written.
+/// \\\\param[in] x an object containing function symbols
+/// \\\\param[in,out] o an output iterator to which all function symbols occurring in x are written.
 /// \\\\return All function symbols that occur in the term x
 template <typename T, typename OutputIterator>
 void find_function_symbols(const T& x, OutputIterator o)
@@ -417,7 +417,7 @@ void find_function_symbols(const T& x, OutputIterator o)
 }
 
 /// \\\\brief Returns all function symbols that occur in an object
-/// \param[in] x an object containing function symbols
+/// \\\\param[in] x an object containing function symbols
 /// \\\\return All function symbols that occur in the object x
 template <typename T>
 std::set<data::function_symbol> find_function_symbols(const T& x)
@@ -430,7 +430,7 @@ std::set<data::function_symbol> find_function_symbols(const T& x)
 
 def generate_code(filename, namespace, label, text):
     text = re.sub('NAMESPACE', namespace, text)
-    return insert_text_in_file(filename, text, 'generated %s %s code' % (namespace, label))
+    return insert_text_in_file(filename, text, 'generated {} {} code'.format(namespace, label))
 
 def generate_rewrite_functions():
     result = True

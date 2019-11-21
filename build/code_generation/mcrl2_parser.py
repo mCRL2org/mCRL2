@@ -60,7 +60,7 @@ class Rule:
     def __repr__(self):
         text = self.name() + '\n'
         for f in self.rhs:
-            text = text + '  %s\n' % f.name()
+            text = text + '  {}\n'.format(f.name())
         return text
 
     def terminals(self, non_terminal_list):
@@ -113,17 +113,17 @@ class Function:
         result = []
         for i in range(len(self.arguments)):
             arg = self.arguments[i]
-            result.append('%s_%d' % (arg.name(), i))
+            result.append('{}_{}'.format(arg.name(), i))
         return result
 
     def types(self):
-        return map(Argument.type, self.arguments)
+        return [Argument.type(arg) for arg in self.arguments]
 
     def default_call(self):
         params = self.parameters()
         t = []
         for i in range(len(params)):
-            t.append('%s' % (params[i]))
+            t.append(str(params[i]))
         return ', '.join(t)
 
     def default_declaration(self):
@@ -131,7 +131,7 @@ class Function:
         types  = self.types()
         t = []
         for i in range(len(params)):
-            t.append('const %s& %s' % (types[i], params[i]))
+            t.append('const {}& {}'.format(types[i], params[i]))
         return ', '.join(t)
 
 #---------------------------------------------------------------#

@@ -47,23 +47,14 @@ const atermpp::function_symbol& function_symbol_%(name)s()
         vtext = vtext + '  static const atermpp::function_symbol %s;\n' % name
 
     name_keys = names.keys()
-    name_keys.sort()
+    name_keys = sorted(name_keys)
     for name in name_keys:
         if name in skip_list:
             continue
         arity = names[name]
         ctext = ctext + CODE % {
             'name'  : name,
-            'name'  : name,
-            'name'  : name,
             'arity' : arity,
-            'name'  : name,
-            'name'  : name,
-            'name'  : name,
-            'name'  : name,
-            'name'  : name,
-            'name'  : name,
-            'name'  : name
         }
         comma = ''
         if calls[name] != "":
@@ -125,12 +116,8 @@ const atermpp::aterm_appl& default_value_%(name)s()
             arguments = ''
         ctext = ctext + TERM_FUNCTION % {
             'name'       : name,
-            'name'       : name,
             'arity'      : arity,
-            'name'       : name,
             'arguments'  : arguments,
-            'name'       : name,
-            'name'       : name
         }
         dtext = dtext + '  const atermpp::aterm_appl core::detail::default_values::%s = core::detail::default_value_%s();\n' % (name, name)
         vtext = vtext + '  static const atermpp::aterm_appl %s;\n' % name
@@ -147,7 +134,6 @@ const atermpp::aterm_appl& default_value_%(name)s()
                     break
             ptext = ptext + 'const atermpp::aterm_appl& default_value_%s();\n' % name
             ctext = ctext + RULE_FUNCTION % {
-                'name'       : name,
                 'name'       : name,
                 'fname'      : fname
             }
@@ -326,11 +312,11 @@ def parse_ebnf(filename):
             rules = rules + newrules
         except tpg.SyntacticError as e:
             print("------------------------------------------------------")
-            print('grammar: ', string.join(glines, '\n'))
+            print('grammar: ', '\n'.join(glines))
             print(e)
         except tpg.LexicalError as e:
             print("------------------------------------------------------")
-            print('grammar: ', string.join(glines, '\n'))
+            print('grammar: ', '\n'.join(glines))
             print(e)
     return rules
 

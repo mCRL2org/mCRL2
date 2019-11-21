@@ -27,9 +27,9 @@ def make_classes(all_classes, filename, class_text, namespace, add_constructor_o
     result = True
     if os.path.isdir(filename):
         for c in classes:
-            fname = os.path.join(os.path.normcase(filename), ('%s.h' % c.name()))
+            fname = os.path.join(os.path.normcase(filename), ('{}.h'.format(c.name())))
             text = c.class_inline_definition(all_classes)
-            result = insert_text_in_file(fname, text, 'generated class %s' % c.name(), handle_user_sections = True) and result
+            result = insert_text_in_file(fname, text, 'generated class {}'.format(c.name()), handle_user_sections = True) and result
     else:
         class_definitions = [c.class_inline_definition(all_classes) for c in classes]
         ctext = '\n'.join(class_definitions)

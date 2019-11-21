@@ -206,146 +206,146 @@ template <typename Term> bool check_rule_BooleanEquation(const Term& t);
 template <typename Term> bool check_rule_BooleanVariable(const Term& t);
 template <typename Term> bool check_rule_BooleanExpression(const Term& t);
 template <typename Term> bool check_rule_BddExpression(const Term& t);
-template <typename Term> bool check_term_Hide(const Term& t);
-template <typename Term> bool check_term_StateOr(const Term& t);
-template <typename Term> bool check_term_Forall(const Term& t);
-template <typename Term> bool check_term_BooleanTrue(const Term& t);
-template <typename Term> bool check_term_StateForall(const Term& t);
-template <typename Term> bool check_term_UntypedDataParameter(const Term& t);
-template <typename Term> bool check_term_Delta(const Term& t);
-template <typename Term> bool check_term_ActionRenameRule(const Term& t);
-template <typename Term> bool check_term_Comm(const Term& t);
-template <typename Term> bool check_term_LinProcSpec(const Term& t);
 template <typename Term> bool check_term_BooleanOr(const Term& t);
-template <typename Term> bool check_term_PBInit(const Term& t);
-template <typename Term> bool check_term_IfThen(const Term& t);
-template <typename Term> bool check_term_UntypedIdentifier(const Term& t);
-template <typename Term> bool check_term_SortRef(const Term& t);
-template <typename Term> bool check_term_ActTrue(const Term& t);
-template <typename Term> bool check_term_RegNil(const Term& t);
-template <typename Term> bool check_term_DataSpec(const Term& t);
-template <typename Term> bool check_term_StateTrue(const Term& t);
-template <typename Term> bool check_term_BooleanNot(const Term& t);
-template <typename Term> bool check_term_DataEqn(const Term& t);
-template <typename Term> bool check_term_Exists(const Term& t);
-template <typename Term> bool check_term_Rename(const Term& t);
-template <typename Term> bool check_term_Allow(const Term& t);
-template <typename Term> bool check_term_StateYaledTimed(const Term& t);
-template <typename Term> bool check_term_ActImp(const Term& t);
-template <typename Term> bool check_term_StructProj(const Term& t);
-template <typename Term> bool check_term_MapSpec(const Term& t);
-template <typename Term> bool check_term_PBESOr(const Term& t);
-template <typename Term> bool check_term_IfThenElse(const Term& t);
-template <typename Term> bool check_term_ProcEqnSpec(const Term& t);
-template <typename Term> bool check_term_UntypedSetBagComp(const Term& t);
-template <typename Term> bool check_term_BInit(const Term& t);
-template <typename Term> bool check_term_StateNot(const Term& t);
-template <typename Term> bool check_term_DataEqnSpec(const Term& t);
-template <typename Term> bool check_term_RenameExpr(const Term& t);
-template <typename Term> bool check_term_StateMay(const Term& t);
-template <typename Term> bool check_term_UntypedMultiAction(const Term& t);
-template <typename Term> bool check_term_BooleanEquation(const Term& t);
+template <typename Term> bool check_term_ProcEqn(const Term& t);
+template <typename Term> bool check_term_Hide(const Term& t);
 template <typename Term> bool check_term_SortArrow(const Term& t);
-template <typename Term> bool check_term_StateMust(const Term& t);
-template <typename Term> bool check_term_RegTrans(const Term& t);
-template <typename Term> bool check_term_SortStruct(const Term& t);
-template <typename Term> bool check_term_UntypedSortsPossible(const Term& t);
-template <typename Term> bool check_term_ActMultAct(const Term& t);
-template <typename Term> bool check_term_ProcessInit(const Term& t);
-template <typename Term> bool check_term_PBESTrue(const Term& t);
-template <typename Term> bool check_term_RegAlt(const Term& t);
-template <typename Term> bool check_term_SortId(const Term& t);
-template <typename Term> bool check_term_ActForall(const Term& t);
-template <typename Term> bool check_term_Choice(const Term& t);
-template <typename Term> bool check_term_DataVarIdInit(const Term& t);
-template <typename Term> bool check_term_StateImp(const Term& t);
-template <typename Term> bool check_term_UntypedSortVariable(const Term& t);
-template <typename Term> bool check_term_LinearProcessInit(const Term& t);
-template <typename Term> bool check_term_BooleanFalse(const Term& t);
-template <typename Term> bool check_term_StateDelayTimed(const Term& t);
-template <typename Term> bool check_term_PropVarInst(const Term& t);
-template <typename Term> bool check_term_PBESNot(const Term& t);
-template <typename Term> bool check_term_AtTime(const Term& t);
-template <typename Term> bool check_term_ActSpec(const Term& t);
-template <typename Term> bool check_term_Process(const Term& t);
-template <typename Term> bool check_term_Distribution(const Term& t);
-template <typename Term> bool check_term_StructCons(const Term& t);
-template <typename Term> bool check_term_StateMu(const Term& t);
-template <typename Term> bool check_term_PBES(const Term& t);
-template <typename Term> bool check_term_PBEqn(const Term& t);
-template <typename Term> bool check_term_UntypedProcessAssignment(const Term& t);
-template <typename Term> bool check_term_UntypedIdentifierAssignment(const Term& t);
-template <typename Term> bool check_term_LinearProcess(const Term& t);
-template <typename Term> bool check_term_ActId(const Term& t);
-template <typename Term> bool check_term_SortSpec(const Term& t);
-template <typename Term> bool check_term_SortBag(const Term& t);
-template <typename Term> bool check_term_LMerge(const Term& t);
-template <typename Term> bool check_term_StateExists(const Term& t);
+template <typename Term> bool check_term_ProcessAssignment(const Term& t);
+template <typename Term> bool check_term_Forall(const Term& t);
+template <typename Term> bool check_term_CommExpr(const Term& t);
+template <typename Term> bool check_term_StateNot(const Term& t);
+template <typename Term> bool check_term_UntypedSetBagComp(const Term& t);
 template <typename Term> bool check_term_SortFSet(const Term& t);
-template <typename Term> bool check_term_BddFalse(const Term& t);
-template <typename Term> bool check_term_ActionRenameRules(const Term& t);
-template <typename Term> bool check_term_BddIf(const Term& t);
-template <typename Term> bool check_term_StateFalse(const Term& t);
-template <typename Term> bool check_term_ActAnd(const Term& t);
-template <typename Term> bool check_term_MultAct(const Term& t);
-template <typename Term> bool check_term_Seq(const Term& t);
-template <typename Term> bool check_term_UntypedSortUnknown(const Term& t);
-template <typename Term> bool check_term_ActExists(const Term& t);
-template <typename Term> bool check_term_SortList(const Term& t);
-template <typename Term> bool check_term_ConsSpec(const Term& t);
-template <typename Term> bool check_term_PBEqnSpec(const Term& t);
-template <typename Term> bool check_term_ProcSpec(const Term& t);
-template <typename Term> bool check_term_StateVar(const Term& t);
-template <typename Term> bool check_term_Sum(const Term& t);
-template <typename Term> bool check_term_BooleanAnd(const Term& t);
-template <typename Term> bool check_term_PBESFalse(const Term& t);
-template <typename Term> bool check_term_SortFBag(const Term& t);
+template <typename Term> bool check_term_StateImp(const Term& t);
+template <typename Term> bool check_term_PBESExists(const Term& t);
 template <typename Term> bool check_term_PBESImp(const Term& t);
 template <typename Term> bool check_term_Binder(const Term& t);
-template <typename Term> bool check_term_StateDelay(const Term& t);
-template <typename Term> bool check_term_CommExpr(const Term& t);
-template <typename Term> bool check_term_ActFalse(const Term& t);
-template <typename Term> bool check_term_StateAnd(const Term& t);
-template <typename Term> bool check_term_ActNot(const Term& t);
-template <typename Term> bool check_term_DataVarId(const Term& t);
-template <typename Term> bool check_term_PBESExists(const Term& t);
+template <typename Term> bool check_term_StochasticOperator(const Term& t);
+template <typename Term> bool check_term_SortRef(const Term& t);
+template <typename Term> bool check_term_ProcEqnSpec(const Term& t);
+template <typename Term> bool check_term_StateForall(const Term& t);
+template <typename Term> bool check_term_BooleanImp(const Term& t);
+template <typename Term> bool check_term_SortId(const Term& t);
 template <typename Term> bool check_term_StateNu(const Term& t);
-template <typename Term> bool check_term_Merge(const Term& t);
-template <typename Term> bool check_term_StateYaled(const Term& t);
-template <typename Term> bool check_term_PropVarDecl(const Term& t);
-template <typename Term> bool check_term_UntypedRegFrm(const Term& t);
-template <typename Term> bool check_term_TimedMultAct(const Term& t);
+template <typename Term> bool check_term_RegNil(const Term& t);
+template <typename Term> bool check_term_DataSpec(const Term& t);
+template <typename Term> bool check_term_Tau(const Term& t);
+template <typename Term> bool check_term_StateYaledTimed(const Term& t);
 template <typename Term> bool check_term_SortCons(const Term& t);
-template <typename Term> bool check_term_SortSet(const Term& t);
-template <typename Term> bool check_term_OpId(const Term& t);
-template <typename Term> bool check_term_ActionRenameSpec(const Term& t);
+template <typename Term> bool check_term_DataEqnSpec(const Term& t);
+template <typename Term> bool check_term_LinearProcessSummand(const Term& t);
+template <typename Term> bool check_term_SortSpec(const Term& t);
+template <typename Term> bool check_term_ActionRenameRules(const Term& t);
+template <typename Term> bool check_term_ActAnd(const Term& t);
+template <typename Term> bool check_term_BooleanEquation(const Term& t);
+template <typename Term> bool check_term_ConsSpec(const Term& t);
+template <typename Term> bool check_term_SortList(const Term& t);
+template <typename Term> bool check_term_Sum(const Term& t);
+template <typename Term> bool check_term_DataVarId(const Term& t);
+template <typename Term> bool check_term_ProcVarId(const Term& t);
+template <typename Term> bool check_term_ProcessInit(const Term& t);
+template <typename Term> bool check_term_UntypedIdentifier(const Term& t);
+template <typename Term> bool check_term_BooleanFalse(const Term& t);
 template <typename Term> bool check_term_BES(const Term& t);
-template <typename Term> bool check_term_BooleanVariable(const Term& t);
-template <typename Term> bool check_term_RegSeq(const Term& t);
-template <typename Term> bool check_term_GlobVarSpec(const Term& t);
+template <typename Term> bool check_term_MapSpec(const Term& t);
+template <typename Term> bool check_term_IfThen(const Term& t);
+template <typename Term> bool check_term_BooleanAnd(const Term& t);
+template <typename Term> bool check_term_LinProcSpec(const Term& t);
+template <typename Term> bool check_term_Choice(const Term& t);
+template <typename Term> bool check_term_LinearProcessInit(const Term& t);
+template <typename Term> bool check_term_MultAct(const Term& t);
+template <typename Term> bool check_term_PropVarInst(const Term& t);
+template <typename Term> bool check_term_BagComp(const Term& t);
+template <typename Term> bool check_term_StateDelay(const Term& t);
+template <typename Term> bool check_term_RegAlt(const Term& t);
+template <typename Term> bool check_term_BddFalse(const Term& t);
+template <typename Term> bool check_term_StructCons(const Term& t);
 template <typename Term> bool check_term_Mu(const Term& t);
-template <typename Term> bool check_term_Whr(const Term& t);
+template <typename Term> bool check_term_PBEqnSpec(const Term& t);
+template <typename Term> bool check_term_UntypedRegFrm(const Term& t);
+template <typename Term> bool check_term_Distribution(const Term& t);
+template <typename Term> bool check_term_BooleanTrue(const Term& t);
+template <typename Term> bool check_term_Block(const Term& t);
+template <typename Term> bool check_term_Rename(const Term& t);
+template <typename Term> bool check_term_Exists(const Term& t);
+template <typename Term> bool check_term_Sync(const Term& t);
+template <typename Term> bool check_term_ActExists(const Term& t);
+template <typename Term> bool check_term_ProcSpec(const Term& t);
+template <typename Term> bool check_term_UntypedSortsPossible(const Term& t);
+template <typename Term> bool check_term_StateMu(const Term& t);
+template <typename Term> bool check_term_BddIf(const Term& t);
+template <typename Term> bool check_term_StateFalse(const Term& t);
+template <typename Term> bool check_term_PBESFalse(const Term& t);
+template <typename Term> bool check_term_PBESForall(const Term& t);
+template <typename Term> bool check_term_StateTrue(const Term& t);
+template <typename Term> bool check_term_BInit(const Term& t);
+template <typename Term> bool check_term_UntypedSortUnknown(const Term& t);
+template <typename Term> bool check_term_RegTrans(const Term& t);
+template <typename Term> bool check_term_StateDelayTimed(const Term& t);
+template <typename Term> bool check_term_Nu(const Term& t);
+template <typename Term> bool check_term_SortStruct(const Term& t);
+template <typename Term> bool check_term_AtTime(const Term& t);
+template <typename Term> bool check_term_ActOr(const Term& t);
+template <typename Term> bool check_term_Comm(const Term& t);
+template <typename Term> bool check_term_BooleanNot(const Term& t);
+template <typename Term> bool check_term_Delta(const Term& t);
+template <typename Term> bool check_term_ActMultAct(const Term& t);
+template <typename Term> bool check_term_StateAnd(const Term& t);
+template <typename Term> bool check_term_LMerge(const Term& t);
+template <typename Term> bool check_term_SetComp(const Term& t);
+template <typename Term> bool check_term_ActForall(const Term& t);
+template <typename Term> bool check_term_RenameExpr(const Term& t);
+template <typename Term> bool check_term_Merge(const Term& t);
+template <typename Term> bool check_term_ActSpec(const Term& t);
+template <typename Term> bool check_term_BooleanVariable(const Term& t);
+template <typename Term> bool check_term_Action(const Term& t);
 template <typename Term> bool check_term_PBESAnd(const Term& t);
 template <typename Term> bool check_term_Lambda(const Term& t);
-template <typename Term> bool check_term_Sync(const Term& t);
-template <typename Term> bool check_term_RegTransOrNil(const Term& t);
-template <typename Term> bool check_term_ProcEqn(const Term& t);
-template <typename Term> bool check_term_Tau(const Term& t);
+template <typename Term> bool check_term_StateMust(const Term& t);
+template <typename Term> bool check_term_Seq(const Term& t);
+template <typename Term> bool check_term_DataVarIdInit(const Term& t);
+template <typename Term> bool check_term_Process(const Term& t);
+template <typename Term> bool check_term_TimedMultAct(const Term& t);
+template <typename Term> bool check_term_ActionRenameSpec(const Term& t);
+template <typename Term> bool check_term_PBES(const Term& t);
+template <typename Term> bool check_term_StateVar(const Term& t);
+template <typename Term> bool check_term_ActionRenameRule(const Term& t);
+template <typename Term> bool check_term_RegSeq(const Term& t);
+template <typename Term> bool check_term_ActNot(const Term& t);
+template <typename Term> bool check_term_LinearProcess(const Term& t);
 template <typename Term> bool check_term_ActAt(const Term& t);
-template <typename Term> bool check_term_LinearProcessSummand(const Term& t);
-template <typename Term> bool check_term_BddTrue(const Term& t);
-template <typename Term> bool check_term_Action(const Term& t);
-template <typename Term> bool check_term_Block(const Term& t);
+template <typename Term> bool check_term_DataEqn(const Term& t);
+template <typename Term> bool check_term_PBESNot(const Term& t);
+template <typename Term> bool check_term_StateExists(const Term& t);
+template <typename Term> bool check_term_StateMay(const Term& t);
+template <typename Term> bool check_term_PBESTrue(const Term& t);
 template <typename Term> bool check_term_MultActName(const Term& t);
-template <typename Term> bool check_term_ActOr(const Term& t);
-template <typename Term> bool check_term_StochasticOperator(const Term& t);
-template <typename Term> bool check_term_ProcessAssignment(const Term& t);
-template <typename Term> bool check_term_BooleanImp(const Term& t);
-template <typename Term> bool check_term_Nu(const Term& t);
-template <typename Term> bool check_term_PBESForall(const Term& t);
-template <typename Term> bool check_term_ProcVarId(const Term& t);
-template <typename Term> bool check_term_BagComp(const Term& t);
-template <typename Term> bool check_term_SetComp(const Term& t);
+template <typename Term> bool check_term_IfThenElse(const Term& t);
+template <typename Term> bool check_term_UntypedSortVariable(const Term& t);
+template <typename Term> bool check_term_StateOr(const Term& t);
+template <typename Term> bool check_term_StructProj(const Term& t);
+template <typename Term> bool check_term_PBEqn(const Term& t);
+template <typename Term> bool check_term_Whr(const Term& t);
+template <typename Term> bool check_term_OpId(const Term& t);
+template <typename Term> bool check_term_SortSet(const Term& t);
+template <typename Term> bool check_term_ActFalse(const Term& t);
+template <typename Term> bool check_term_ActId(const Term& t);
+template <typename Term> bool check_term_StateYaled(const Term& t);
+template <typename Term> bool check_term_PBESOr(const Term& t);
+template <typename Term> bool check_term_BddTrue(const Term& t);
+template <typename Term> bool check_term_UntypedProcessAssignment(const Term& t);
+template <typename Term> bool check_term_SortFBag(const Term& t);
+template <typename Term> bool check_term_Allow(const Term& t);
+template <typename Term> bool check_term_PropVarDecl(const Term& t);
+template <typename Term> bool check_term_ActImp(const Term& t);
+template <typename Term> bool check_term_SortBag(const Term& t);
+template <typename Term> bool check_term_PBInit(const Term& t);
+template <typename Term> bool check_term_ActTrue(const Term& t);
+template <typename Term> bool check_term_RegTransOrNil(const Term& t);
+template <typename Term> bool check_term_UntypedMultiAction(const Term& t);
+template <typename Term> bool check_term_GlobVarSpec(const Term& t);
+template <typename Term> bool check_term_UntypedIdentifierAssignment(const Term& t);
+template <typename Term> bool check_term_UntypedDataParameter(const Term& t);
 
 template <typename Term>
 bool check_rule_SortExpr(const Term& t)
@@ -1144,395 +1144,6 @@ bool check_rule_BddExpression(const Term& t)
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
 }
 
-// Hide(String*, ProcExpr)
-template <typename Term>
-bool check_term_Hide(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::Hide)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_String<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_ProcExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// StateOr(StateFrm, StateFrm)
-template <typename Term>
-bool check_term_StateOr(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::StateOr)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_StateFrm<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_StateFrm" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_StateFrm<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_StateFrm" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// Forall()
-template <typename Term>
-bool check_term_Forall(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::Forall)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 0)
-  {
-    return false;
-  }
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// BooleanTrue()
-template <typename Term>
-bool check_term_BooleanTrue(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::BooleanTrue)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 0)
-  {
-    return false;
-  }
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// StateForall(DataVarId+, StateFrm)
-template <typename Term>
-bool check_term_StateForall(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::StateForall)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 1))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_StateFrm<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_StateFrm" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// UntypedDataParameter(String, DataExpr*)
-template <typename Term>
-bool check_term_UntypedDataParameter(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::UntypedDataParameter)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
-    return false;
-  }
-  if (!check_list_argument(a[1], check_rule_DataExpr<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// Delta()
-template <typename Term>
-bool check_term_Delta(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::Delta)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 0)
-  {
-    return false;
-  }
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// ActionRenameRule(DataVarId*, DataExpr, ParamIdOrAction, ActionRenameRuleRHS)
-template <typename Term>
-bool check_term_ActionRenameRule(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::ActionRenameRule)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 4)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_DataExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[2], check_rule_ParamIdOrAction<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ParamIdOrAction" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[3], check_rule_ActionRenameRuleRHS<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActionRenameRuleRHS" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// Comm(CommExpr*, ProcExpr)
-template <typename Term>
-bool check_term_Comm(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::Comm)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_CommExpr<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_CommExpr" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_ProcExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// LinProcSpec(DataSpec, ActSpec, GlobVarSpec, LinearProcess, LinearProcessInit)
-template <typename Term>
-bool check_term_LinProcSpec(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::LinProcSpec)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 5)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_DataSpec<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataSpec" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_ActSpec<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActSpec" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[2], check_rule_GlobVarSpec<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_GlobVarSpec" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[3], check_rule_LinearProcess<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_LinearProcess" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[4], check_rule_LinearProcessInit<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_LinearProcessInit" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
 // BooleanOr(BooleanExpression, BooleanExpression)
 template <typename Term>
 bool check_term_BooleanOr(const Term& t)
@@ -1573,9 +1184,9 @@ bool check_term_BooleanOr(const Term& t)
   return true;
 }
 
-// PBInit(PropVarInst)
+// ProcEqn(ProcVarId, DataVarId*, ProcExpr)
 template <typename Term>
-bool check_term_PBInit(const Term& t)
+bool check_term_ProcEqn(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -1586,674 +1197,7 @@ bool check_term_PBInit(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::PBInit)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 1)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_PropVarInst<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_PropVarInst" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// IfThen(DataExpr, ProcExpr)
-template <typename Term>
-bool check_term_IfThen(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::IfThen)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_DataExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_ProcExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// UntypedIdentifier(String)
-template <typename Term>
-bool check_term_UntypedIdentifier(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::UntypedIdentifier)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 1)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// SortRef(SortId, SortExpr)
-template <typename Term>
-bool check_term_SortRef(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::SortRef)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_SortId<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_SortId" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_SortExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_SortExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// ActTrue()
-template <typename Term>
-bool check_term_ActTrue(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::ActTrue)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 0)
-  {
-    return false;
-  }
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// RegNil()
-template <typename Term>
-bool check_term_RegNil(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::RegNil)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 0)
-  {
-    return false;
-  }
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// DataSpec(SortSpec, ConsSpec, MapSpec, DataEqnSpec)
-template <typename Term>
-bool check_term_DataSpec(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::DataSpec)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 4)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_SortSpec<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_SortSpec" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_ConsSpec<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ConsSpec" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[2], check_rule_MapSpec<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_MapSpec" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[3], check_rule_DataEqnSpec<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataEqnSpec" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// StateTrue()
-template <typename Term>
-bool check_term_StateTrue(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::StateTrue)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 0)
-  {
-    return false;
-  }
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// BooleanNot(BooleanExpression)
-template <typename Term>
-bool check_term_BooleanNot(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::BooleanNot)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 1)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_BooleanExpression<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_BooleanExpression" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// DataEqn(DataVarId*, DataExpr, DataExpr, DataExpr)
-template <typename Term>
-bool check_term_DataEqn(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::DataEqn)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 4)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_DataExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[2], check_rule_DataExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[3], check_rule_DataExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// Exists()
-template <typename Term>
-bool check_term_Exists(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::Exists)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 0)
-  {
-    return false;
-  }
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// Rename(RenameExpr*, ProcExpr)
-template <typename Term>
-bool check_term_Rename(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::Rename)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_RenameExpr<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RenameExpr" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_ProcExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// Allow(MultActName*, ProcExpr)
-template <typename Term>
-bool check_term_Allow(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::Allow)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_MultActName<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_MultActName" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_ProcExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// StateYaledTimed(DataExpr)
-template <typename Term>
-bool check_term_StateYaledTimed(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::StateYaledTimed)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 1)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_DataExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// ActImp(ActFrm, ActFrm)
-template <typename Term>
-bool check_term_ActImp(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::ActImp)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_ActFrm<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActFrm" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_ActFrm<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActFrm" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// StructProj(StringOrEmpty, SortExpr)
-template <typename Term>
-bool check_term_StructProj(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::StructProj)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_StringOrEmpty<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_StringOrEmpty" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_SortExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_SortExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// MapSpec(OpId*)
-template <typename Term>
-bool check_term_MapSpec(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::MapSpec)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 1)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_OpId<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_OpId" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// PBESOr(PBExpr, PBExpr)
-template <typename Term>
-bool check_term_PBESOr(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::PBESOr)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_PBExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_PBExpr" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_PBExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_PBExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// IfThenElse(DataExpr, ProcExpr, ProcExpr)
-template <typename Term>
-bool check_term_IfThenElse(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::IfThenElse)
+  if (a.function() != core::detail::function_symbols::ProcEqn)
   {
     return false;
   }
@@ -2264,14 +1208,14 @@ bool check_term_IfThenElse(const Term& t)
     return false;
   }
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_DataExpr<atermpp::aterm>))
+  if (!check_term_argument(a[0], check_rule_ProcVarId<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcVarId" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[1], check_rule_ProcExpr<atermpp::aterm>))
+  if (!check_list_argument(a[1], check_rule_DataVarId<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
     return false;
   }
   if (!check_term_argument(a[2], check_rule_ProcExpr<atermpp::aterm>))
@@ -2285,9 +1229,9 @@ bool check_term_IfThenElse(const Term& t)
   return true;
 }
 
-// ProcEqnSpec(ProcEqn*)
+// Hide(String*, ProcExpr)
 template <typename Term>
-bool check_term_ProcEqnSpec(const Term& t)
+bool check_term_Hide(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -2298,70 +1242,7 @@ bool check_term_ProcEqnSpec(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::ProcEqnSpec)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 1)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_ProcEqn<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcEqn" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// UntypedSetBagComp()
-template <typename Term>
-bool check_term_UntypedSetBagComp(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::UntypedSetBagComp)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 0)
-  {
-    return false;
-  }
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// BInit(ProcExpr, ProcExpr)
-template <typename Term>
-bool check_term_BInit(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::BInit)
+  if (a.function() != core::detail::function_symbols::Hide)
   {
     return false;
   }
@@ -2372,244 +1253,14 @@ bool check_term_BInit(const Term& t)
     return false;
   }
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_ProcExpr<atermpp::aterm>))
+  if (!check_list_argument(a[0], check_rule_String<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
     return false;
   }
   if (!check_term_argument(a[1], check_rule_ProcExpr<atermpp::aterm>))
   {
     mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// StateNot(StateFrm)
-template <typename Term>
-bool check_term_StateNot(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::StateNot)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 1)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_StateFrm<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_StateFrm" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// DataEqnSpec(DataEqn*)
-template <typename Term>
-bool check_term_DataEqnSpec(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::DataEqnSpec)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 1)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_DataEqn<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataEqn" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// RenameExpr(String, String)
-template <typename Term>
-bool check_term_RenameExpr(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::RenameExpr)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_String<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// StateMay(RegFrm, StateFrm)
-template <typename Term>
-bool check_term_StateMay(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::StateMay)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_RegFrm<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RegFrm" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_StateFrm<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_StateFrm" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// UntypedMultiAction(UntypedDataParameter*)
-template <typename Term>
-bool check_term_UntypedMultiAction(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::UntypedMultiAction)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 1)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_UntypedDataParameter<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_UntypedDataParameter" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// BooleanEquation(FixPoint, BooleanVariable, BooleanExpression)
-template <typename Term>
-bool check_term_BooleanEquation(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::BooleanEquation)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 3)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_FixPoint<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_FixPoint" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_BooleanVariable<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_BooleanVariable" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[2], check_rule_BooleanExpression<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_BooleanExpression" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2658,9 +1309,9 @@ bool check_term_SortArrow(const Term& t)
   return true;
 }
 
-// StateMust(RegFrm, StateFrm)
+// ProcessAssignment(ProcVarId, DataVarIdInit*)
 template <typename Term>
-bool check_term_StateMust(const Term& t)
+bool check_term_ProcessAssignment(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -2671,7 +1322,7 @@ bool check_term_StateMust(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::StateMust)
+  if (a.function() != core::detail::function_symbols::ProcessAssignment)
   {
     return false;
   }
@@ -2682,14 +1333,14 @@ bool check_term_StateMust(const Term& t)
     return false;
   }
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_RegFrm<atermpp::aterm>))
+  if (!check_term_argument(a[0], check_rule_ProcVarId<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RegFrm" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcVarId" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[1], check_rule_StateFrm<atermpp::aterm>))
+  if (!check_list_argument(a[1], check_rule_DataVarIdInit<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_StateFrm" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarIdInit" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2698,9 +1349,9 @@ bool check_term_StateMust(const Term& t)
   return true;
 }
 
-// RegTrans(RegFrm)
+// Forall()
 template <typename Term>
-bool check_term_RegTrans(const Term& t)
+bool check_term_Forall(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -2711,182 +1362,7 @@ bool check_term_RegTrans(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::RegTrans)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 1)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_RegFrm<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RegFrm" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// SortStruct(StructCons+)
-template <typename Term>
-bool check_term_SortStruct(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::SortStruct)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 1)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_StructCons<atermpp::aterm>, 1))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_StructCons" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// UntypedSortsPossible(SortExpr+)
-template <typename Term>
-bool check_term_UntypedSortsPossible(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::UntypedSortsPossible)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 1)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_SortExpr<atermpp::aterm>, 1))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_SortExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// ActMultAct(Action*)
-template <typename Term>
-bool check_term_ActMultAct(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::ActMultAct)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 1)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_Action<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_Action" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// ProcessInit(ProcExpr)
-template <typename Term>
-bool check_term_ProcessInit(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::ProcessInit)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 1)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_ProcExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// PBESTrue()
-template <typename Term>
-bool check_term_PBESTrue(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::PBESTrue)
+  if (a.function() != core::detail::function_symbols::Forall)
   {
     return false;
   }
@@ -2901,9 +1377,9 @@ bool check_term_PBESTrue(const Term& t)
   return true;
 }
 
-// RegAlt(RegFrm, RegFrm)
+// CommExpr(MultActName, String)
 template <typename Term>
-bool check_term_RegAlt(const Term& t)
+bool check_term_CommExpr(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -2914,7 +1390,7 @@ bool check_term_RegAlt(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::RegAlt)
+  if (a.function() != core::detail::function_symbols::CommExpr)
   {
     return false;
   }
@@ -2925,47 +1401,12 @@ bool check_term_RegAlt(const Term& t)
     return false;
   }
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_RegFrm<atermpp::aterm>))
+  if (!check_term_argument(a[0], check_rule_MultActName<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RegFrm" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_MultActName" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[1], check_rule_RegFrm<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RegFrm" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// SortId(String)
-template <typename Term>
-bool check_term_SortId(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::SortId)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 1)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
+  if (!check_term_argument(a[1], check_rule_String<atermpp::aterm>))
   {
     mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
     return false;
@@ -2976,9 +1417,9 @@ bool check_term_SortId(const Term& t)
   return true;
 }
 
-// ActForall(DataVarId+, ActFrm)
+// StateNot(StateFrm)
 template <typename Term>
-bool check_term_ActForall(const Term& t)
+bool check_term_StateNot(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -2989,25 +1430,20 @@ bool check_term_ActForall(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::ActForall)
+  if (a.function() != core::detail::function_symbols::StateNot)
   {
     return false;
   }
 
   // check the children
-  if (a.size() != 2)
+  if (a.size() != 1)
   {
     return false;
   }
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 1))
+  if (!check_term_argument(a[0], check_rule_StateFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_ActFrm<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActFrm" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_StateFrm" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3016,9 +1452,9 @@ bool check_term_ActForall(const Term& t)
   return true;
 }
 
-// Choice(ProcExpr, ProcExpr)
+// UntypedSetBagComp()
 template <typename Term>
-bool check_term_Choice(const Term& t)
+bool check_term_UntypedSetBagComp(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -3029,36 +1465,24 @@ bool check_term_Choice(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::Choice)
+  if (a.function() != core::detail::function_symbols::UntypedSetBagComp)
   {
     return false;
   }
 
   // check the children
-  if (a.size() != 2)
+  if (a.size() != 0)
   {
     return false;
   }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_ProcExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_ProcExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
 
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
   return true;
 }
 
-// DataVarIdInit(DataVarId, DataExpr)
+// SortFSet()
 template <typename Term>
-bool check_term_DataVarIdInit(const Term& t)
+bool check_term_SortFSet(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -3069,28 +1493,16 @@ bool check_term_DataVarIdInit(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::DataVarIdInit)
+  if (a.function() != core::detail::function_symbols::SortFSet)
   {
     return false;
   }
 
   // check the children
-  if (a.size() != 2)
+  if (a.size() != 0)
   {
     return false;
   }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_DataVarId<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_DataExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
 
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
   return true;
@@ -3136,9 +1548,9 @@ bool check_term_StateImp(const Term& t)
   return true;
 }
 
-// UntypedSortVariable(Number)
+// PBESExists(DataVarId+, PBExpr)
 template <typename Term>
-bool check_term_UntypedSortVariable(const Term& t)
+bool check_term_PBESExists(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -3149,42 +1561,7 @@ bool check_term_UntypedSortVariable(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::UntypedSortVariable)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 1)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_Number<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_Number" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// LinearProcessInit(DataVarIdInit*, Distribution)
-template <typename Term>
-bool check_term_LinearProcessInit(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::LinearProcessInit)
+  if (a.function() != core::detail::function_symbols::PBESExists)
   {
     return false;
   }
@@ -3195,1479 +1572,17 @@ bool check_term_LinearProcessInit(const Term& t)
     return false;
   }
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_DataVarIdInit<atermpp::aterm>, 0))
+  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 1))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarIdInit" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[1], check_rule_Distribution<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_Distribution" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// BooleanFalse()
-template <typename Term>
-bool check_term_BooleanFalse(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::BooleanFalse)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 0)
-  {
-    return false;
-  }
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// StateDelayTimed(DataExpr)
-template <typename Term>
-bool check_term_StateDelayTimed(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::StateDelayTimed)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 1)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_DataExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// PropVarInst(String, DataExpr*, Number)
-template <typename Term>
-bool check_term_PropVarInst(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::PropVarInst)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 3)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
-    return false;
-  }
-  if (!check_list_argument(a[1], check_rule_DataExpr<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[2], check_rule_Number<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_Number" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// PBESNot(PBExpr)
-template <typename Term>
-bool check_term_PBESNot(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::PBESNot)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 1)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_PBExpr<atermpp::aterm>))
+  if (!check_term_argument(a[1], check_rule_PBExpr<atermpp::aterm>))
   {
     mCRL2log(log::debug, "soundness_checks") << "check_rule_PBExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// AtTime(ProcExpr, DataExpr)
-template <typename Term>
-bool check_term_AtTime(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::AtTime)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_ProcExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_DataExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// ActSpec(ActId*)
-template <typename Term>
-bool check_term_ActSpec(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::ActSpec)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 1)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_ActId<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActId" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// Process(ProcVarId, DataExpr*)
-template <typename Term>
-bool check_term_Process(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::Process)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_ProcVarId<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcVarId" << std::endl;
-    return false;
-  }
-  if (!check_list_argument(a[1], check_rule_DataExpr<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// Distribution(DataVarId*, DataExpr)
-template <typename Term>
-bool check_term_Distribution(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::Distribution)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_DataExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// StructCons(String, StructProj*, StringOrEmpty)
-template <typename Term>
-bool check_term_StructCons(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::StructCons)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 3)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
-    return false;
-  }
-  if (!check_list_argument(a[1], check_rule_StructProj<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_StructProj" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[2], check_rule_StringOrEmpty<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_StringOrEmpty" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// StateMu(String, DataVarIdInit*, StateFrm)
-template <typename Term>
-bool check_term_StateMu(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::StateMu)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 3)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
-    return false;
-  }
-  if (!check_list_argument(a[1], check_rule_DataVarIdInit<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarIdInit" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[2], check_rule_StateFrm<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_StateFrm" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// PBES(DataSpec, GlobVarSpec, PBEqnSpec, PBInit)
-template <typename Term>
-bool check_term_PBES(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::PBES)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 4)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_DataSpec<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataSpec" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_GlobVarSpec<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_GlobVarSpec" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[2], check_rule_PBEqnSpec<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_PBEqnSpec" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[3], check_rule_PBInit<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_PBInit" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// PBEqn(FixPoint, PropVarDecl, PBExpr)
-template <typename Term>
-bool check_term_PBEqn(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::PBEqn)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 3)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_FixPoint<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_FixPoint" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_PropVarDecl<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_PropVarDecl" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[2], check_rule_PBExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_PBExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// UntypedProcessAssignment(String, UntypedIdentifierAssignment*)
-template <typename Term>
-bool check_term_UntypedProcessAssignment(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::UntypedProcessAssignment)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
-    return false;
-  }
-  if (!check_list_argument(a[1], check_rule_UntypedIdentifierAssignment<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_UntypedIdentifierAssignment" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// UntypedIdentifierAssignment(String, DataExpr)
-template <typename Term>
-bool check_term_UntypedIdentifierAssignment(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::UntypedIdentifierAssignment)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_DataExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// LinearProcess(DataVarId*, LinearProcessSummand*)
-template <typename Term>
-bool check_term_LinearProcess(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::LinearProcess)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
-    return false;
-  }
-  if (!check_list_argument(a[1], check_rule_LinearProcessSummand<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_LinearProcessSummand" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// ActId(String, SortExpr*)
-template <typename Term>
-bool check_term_ActId(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::ActId)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
-    return false;
-  }
-  if (!check_list_argument(a[1], check_rule_SortExpr<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_SortExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// SortSpec(SortDecl*)
-template <typename Term>
-bool check_term_SortSpec(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::SortSpec)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 1)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_SortDecl<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_SortDecl" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// SortBag()
-template <typename Term>
-bool check_term_SortBag(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::SortBag)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 0)
-  {
-    return false;
-  }
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// LMerge(ProcExpr, ProcExpr)
-template <typename Term>
-bool check_term_LMerge(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::LMerge)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_ProcExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_ProcExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// StateExists(DataVarId+, StateFrm)
-template <typename Term>
-bool check_term_StateExists(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::StateExists)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 1))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_StateFrm<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_StateFrm" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// SortFSet()
-template <typename Term>
-bool check_term_SortFSet(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::SortFSet)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 0)
-  {
-    return false;
-  }
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// BddFalse()
-template <typename Term>
-bool check_term_BddFalse(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::BddFalse)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 0)
-  {
-    return false;
-  }
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// ActionRenameRules(ActionRenameRule*)
-template <typename Term>
-bool check_term_ActionRenameRules(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::ActionRenameRules)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 1)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_ActionRenameRule<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActionRenameRule" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// BddIf(String, BddExpression, BddExpression)
-template <typename Term>
-bool check_term_BddIf(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::BddIf)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 3)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_BddExpression<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_BddExpression" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[2], check_rule_BddExpression<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_BddExpression" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// StateFalse()
-template <typename Term>
-bool check_term_StateFalse(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::StateFalse)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 0)
-  {
-    return false;
-  }
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// ActAnd(ActFrm, ActFrm)
-template <typename Term>
-bool check_term_ActAnd(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::ActAnd)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_ActFrm<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActFrm" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_ActFrm<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActFrm" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// MultAct(Action*)
-template <typename Term>
-bool check_term_MultAct(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::MultAct)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 1)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_Action<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_Action" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// Seq(ProcExpr, ProcExpr)
-template <typename Term>
-bool check_term_Seq(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::Seq)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_ProcExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_ProcExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// UntypedSortUnknown()
-template <typename Term>
-bool check_term_UntypedSortUnknown(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::UntypedSortUnknown)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 0)
-  {
-    return false;
-  }
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// ActExists(DataVarId+, ActFrm)
-template <typename Term>
-bool check_term_ActExists(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::ActExists)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 1))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_ActFrm<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActFrm" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// SortList()
-template <typename Term>
-bool check_term_SortList(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::SortList)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 0)
-  {
-    return false;
-  }
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// ConsSpec(OpId*)
-template <typename Term>
-bool check_term_ConsSpec(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::ConsSpec)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 1)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_OpId<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_OpId" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// PBEqnSpec(PBEqn*)
-template <typename Term>
-bool check_term_PBEqnSpec(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::PBEqnSpec)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 1)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_PBEqn<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_PBEqn" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// ProcSpec(DataSpec, ActSpec, GlobVarSpec, ProcEqnSpec, ProcInit)
-template <typename Term>
-bool check_term_ProcSpec(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::ProcSpec)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 5)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_DataSpec<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataSpec" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_ActSpec<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActSpec" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[2], check_rule_GlobVarSpec<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_GlobVarSpec" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[3], check_rule_ProcEqnSpec<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcEqnSpec" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[4], check_rule_ProcInit<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcInit" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// StateVar(String, DataExpr*)
-template <typename Term>
-bool check_term_StateVar(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::StateVar)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
-    return false;
-  }
-  if (!check_list_argument(a[1], check_rule_DataExpr<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// Sum(DataVarId+, ProcExpr)
-template <typename Term>
-bool check_term_Sum(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::Sum)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 1))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_ProcExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// BooleanAnd(BooleanExpression, BooleanExpression)
-template <typename Term>
-bool check_term_BooleanAnd(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::BooleanAnd)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_BooleanExpression<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_BooleanExpression" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_BooleanExpression<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_BooleanExpression" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// PBESFalse()
-template <typename Term>
-bool check_term_PBESFalse(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::PBESFalse)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 0)
-  {
-    return false;
-  }
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// SortFBag()
-template <typename Term>
-bool check_term_SortFBag(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::SortFBag)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 0)
-  {
-    return false;
-  }
 
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
   return true;
@@ -4758,9 +1673,9 @@ bool check_term_Binder(const Term& t)
   return true;
 }
 
-// StateDelay()
+// StochasticOperator(DataVarId+, DataExpr, ProcExpr)
 template <typename Term>
-bool check_term_StateDelay(const Term& t)
+bool check_term_StochasticOperator(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -4771,178 +1686,7 @@ bool check_term_StateDelay(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::StateDelay)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 0)
-  {
-    return false;
-  }
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// CommExpr(MultActName, String)
-template <typename Term>
-bool check_term_CommExpr(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::CommExpr)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_MultActName<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_MultActName" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_String<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// ActFalse()
-template <typename Term>
-bool check_term_ActFalse(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::ActFalse)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 0)
-  {
-    return false;
-  }
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// StateAnd(StateFrm, StateFrm)
-template <typename Term>
-bool check_term_StateAnd(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::StateAnd)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_StateFrm<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_StateFrm" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_StateFrm<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_StateFrm" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// ActNot(ActFrm)
-template <typename Term>
-bool check_term_ActNot(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::ActNot)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 1)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_ActFrm<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActFrm" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// DataVarId(String, SortExpr, Number)
-template <typename Term>
-bool check_term_DataVarId(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::DataVarId)
+  if (a.function() != core::detail::function_symbols::StochasticOperator)
   {
     return false;
   }
@@ -4953,19 +1697,19 @@ bool check_term_DataVarId(const Term& t)
     return false;
   }
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
+  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 1))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[1], check_rule_SortExpr<atermpp::aterm>))
+  if (!check_term_argument(a[1], check_rule_DataExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_SortExpr" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[2], check_rule_Number<atermpp::aterm>))
+  if (!check_term_argument(a[2], check_rule_ProcExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_Number" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4974,9 +1718,9 @@ bool check_term_DataVarId(const Term& t)
   return true;
 }
 
-// PBESExists(DataVarId+, PBExpr)
+// SortRef(SortId, SortExpr)
 template <typename Term>
-bool check_term_PBESExists(const Term& t)
+bool check_term_SortRef(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -4987,7 +1731,82 @@ bool check_term_PBESExists(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::PBESExists)
+  if (a.function() != core::detail::function_symbols::SortRef)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_SortId<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_SortId" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_SortExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_SortExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// ProcEqnSpec(ProcEqn*)
+template <typename Term>
+bool check_term_ProcEqnSpec(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ProcEqnSpec)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_ProcEqn<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcEqn" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// StateForall(DataVarId+, StateFrm)
+template <typename Term>
+bool check_term_StateForall(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateForall)
   {
     return false;
   }
@@ -5003,9 +1822,84 @@ bool check_term_PBESExists(const Term& t)
     mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[1], check_rule_PBExpr<atermpp::aterm>))
+  if (!check_term_argument(a[1], check_rule_StateFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_PBExpr" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_StateFrm" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// BooleanImp(BooleanExpression, BooleanExpression)
+template <typename Term>
+bool check_term_BooleanImp(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::BooleanImp)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_BooleanExpression<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_BooleanExpression" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_BooleanExpression<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_BooleanExpression" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// SortId(String)
+template <typename Term>
+bool check_term_SortId(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::SortId)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5059,9 +1953,9 @@ bool check_term_StateNu(const Term& t)
   return true;
 }
 
-// Merge(ProcExpr, ProcExpr)
+// RegNil()
 template <typename Term>
-bool check_term_Merge(const Term& t)
+bool check_term_RegNil(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -5072,7 +1966,939 @@ bool check_term_Merge(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::Merge)
+  if (a.function() != core::detail::function_symbols::RegNil)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 0)
+  {
+    return false;
+  }
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// DataSpec(SortSpec, ConsSpec, MapSpec, DataEqnSpec)
+template <typename Term>
+bool check_term_DataSpec(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::DataSpec)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 4)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_SortSpec<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_SortSpec" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_ConsSpec<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ConsSpec" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[2], check_rule_MapSpec<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_MapSpec" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[3], check_rule_DataEqnSpec<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataEqnSpec" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// Tau()
+template <typename Term>
+bool check_term_Tau(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Tau)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 0)
+  {
+    return false;
+  }
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// StateYaledTimed(DataExpr)
+template <typename Term>
+bool check_term_StateYaledTimed(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateYaledTimed)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_DataExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// SortCons(SortConsType, SortExpr)
+template <typename Term>
+bool check_term_SortCons(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::SortCons)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_SortConsType<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_SortConsType" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_SortExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_SortExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// DataEqnSpec(DataEqn*)
+template <typename Term>
+bool check_term_DataEqnSpec(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::DataEqnSpec)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_DataEqn<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataEqn" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// LinearProcessSummand(DataVarId*, DataExpr, MultActOrDelta, DataExpr, DataVarIdInit*, Distribution)
+template <typename Term>
+bool check_term_LinearProcessSummand(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::LinearProcessSummand)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 6)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_DataExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[2], check_rule_MultActOrDelta<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_MultActOrDelta" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[3], check_rule_DataExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
+    return false;
+  }
+  if (!check_list_argument(a[4], check_rule_DataVarIdInit<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarIdInit" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[5], check_rule_Distribution<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_Distribution" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// SortSpec(SortDecl*)
+template <typename Term>
+bool check_term_SortSpec(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::SortSpec)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_SortDecl<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_SortDecl" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// ActionRenameRules(ActionRenameRule*)
+template <typename Term>
+bool check_term_ActionRenameRules(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ActionRenameRules)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_ActionRenameRule<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActionRenameRule" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// ActAnd(ActFrm, ActFrm)
+template <typename Term>
+bool check_term_ActAnd(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ActAnd)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_ActFrm<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActFrm" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_ActFrm<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActFrm" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// BooleanEquation(FixPoint, BooleanVariable, BooleanExpression)
+template <typename Term>
+bool check_term_BooleanEquation(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::BooleanEquation)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 3)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_FixPoint<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_FixPoint" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_BooleanVariable<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_BooleanVariable" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[2], check_rule_BooleanExpression<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_BooleanExpression" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// ConsSpec(OpId*)
+template <typename Term>
+bool check_term_ConsSpec(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ConsSpec)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_OpId<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_OpId" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// SortList()
+template <typename Term>
+bool check_term_SortList(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::SortList)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 0)
+  {
+    return false;
+  }
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// Sum(DataVarId+, ProcExpr)
+template <typename Term>
+bool check_term_Sum(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Sum)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 1))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_ProcExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// DataVarId(String, SortExpr, Number)
+template <typename Term>
+bool check_term_DataVarId(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::DataVarId)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 3)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_SortExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_SortExpr" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[2], check_rule_Number<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_Number" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// ProcVarId(String, DataVarId*, Number)
+template <typename Term>
+bool check_term_ProcVarId(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ProcVarId)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 3)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
+    return false;
+  }
+  if (!check_list_argument(a[1], check_rule_DataVarId<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[2], check_rule_Number<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_Number" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// ProcessInit(ProcExpr)
+template <typename Term>
+bool check_term_ProcessInit(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ProcessInit)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_ProcExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// UntypedIdentifier(String)
+template <typename Term>
+bool check_term_UntypedIdentifier(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::UntypedIdentifier)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// BooleanFalse()
+template <typename Term>
+bool check_term_BooleanFalse(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::BooleanFalse)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 0)
+  {
+    return false;
+  }
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// BES(BooleanEquation*, BooleanExpression)
+template <typename Term>
+bool check_term_BES(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::BES)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_BooleanEquation<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_BooleanEquation" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_BooleanExpression<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_BooleanExpression" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// MapSpec(OpId*)
+template <typename Term>
+bool check_term_MapSpec(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::MapSpec)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_OpId<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_OpId" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// IfThen(DataExpr, ProcExpr)
+template <typename Term>
+bool check_term_IfThen(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::IfThen)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_DataExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_ProcExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// BooleanAnd(BooleanExpression, BooleanExpression)
+template <typename Term>
+bool check_term_BooleanAnd(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::BooleanAnd)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_BooleanExpression<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_BooleanExpression" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_BooleanExpression<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_BooleanExpression" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// LinProcSpec(DataSpec, ActSpec, GlobVarSpec, LinearProcess, LinearProcessInit)
+template <typename Term>
+bool check_term_LinProcSpec(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::LinProcSpec)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 5)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_DataSpec<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataSpec" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_ActSpec<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActSpec" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[2], check_rule_GlobVarSpec<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_GlobVarSpec" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[3], check_rule_LinearProcess<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_LinearProcess" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[4], check_rule_LinearProcessInit<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_LinearProcessInit" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// Choice(ProcExpr, ProcExpr)
+template <typename Term>
+bool check_term_Choice(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Choice)
   {
     return false;
   }
@@ -5099,9 +2925,9 @@ bool check_term_Merge(const Term& t)
   return true;
 }
 
-// StateYaled()
+// LinearProcessInit(DataVarIdInit*, Distribution)
 template <typename Term>
-bool check_term_StateYaled(const Term& t)
+bool check_term_LinearProcessInit(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -5112,7 +2938,127 @@ bool check_term_StateYaled(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::StateYaled)
+  if (a.function() != core::detail::function_symbols::LinearProcessInit)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_DataVarIdInit<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarIdInit" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_Distribution<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_Distribution" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// MultAct(Action*)
+template <typename Term>
+bool check_term_MultAct(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::MultAct)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_Action<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_Action" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// PropVarInst(String, DataExpr*, Number)
+template <typename Term>
+bool check_term_PropVarInst(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PropVarInst)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 3)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
+    return false;
+  }
+  if (!check_list_argument(a[1], check_rule_DataExpr<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[2], check_rule_Number<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_Number" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// BagComp()
+template <typename Term>
+bool check_term_BagComp(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::BagComp)
   {
     return false;
   }
@@ -5127,9 +3073,9 @@ bool check_term_StateYaled(const Term& t)
   return true;
 }
 
-// PropVarDecl(String, DataVarId*)
+// StateDelay()
 template <typename Term>
-bool check_term_PropVarDecl(const Term& t)
+bool check_term_StateDelay(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -5140,7 +3086,35 @@ bool check_term_PropVarDecl(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::PropVarDecl)
+  if (a.function() != core::detail::function_symbols::StateDelay)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 0)
+  {
+    return false;
+  }
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// RegAlt(RegFrm, RegFrm)
+template <typename Term>
+bool check_term_RegAlt(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::RegAlt)
   {
     return false;
   }
@@ -5151,14 +3125,150 @@ bool check_term_PropVarDecl(const Term& t)
     return false;
   }
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_RegFrm<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RegFrm" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_RegFrm<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RegFrm" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// BddFalse()
+template <typename Term>
+bool check_term_BddFalse(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::BddFalse)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 0)
+  {
+    return false;
+  }
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// StructCons(String, StructProj*, StringOrEmpty)
+template <typename Term>
+bool check_term_StructCons(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StructCons)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 3)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
   {
     mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
     return false;
   }
-  if (!check_list_argument(a[1], check_rule_DataVarId<atermpp::aterm>, 0))
+  if (!check_list_argument(a[1], check_rule_StructProj<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_StructProj" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[2], check_rule_StringOrEmpty<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_StringOrEmpty" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// Mu()
+template <typename Term>
+bool check_term_Mu(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Mu)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 0)
+  {
+    return false;
+  }
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// PBEqnSpec(PBEqn*)
+template <typename Term>
+bool check_term_PBEqnSpec(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PBEqnSpec)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_PBEqn<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PBEqn" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5212,9 +3322,9 @@ bool check_term_UntypedRegFrm(const Term& t)
   return true;
 }
 
-// TimedMultAct(Action*, DataExpr)
+// Distribution(DataVarId*, DataExpr)
 template <typename Term>
-bool check_term_TimedMultAct(const Term& t)
+bool check_term_Distribution(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -5225,7 +3335,7 @@ bool check_term_TimedMultAct(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::TimedMultAct)
+  if (a.function() != core::detail::function_symbols::Distribution)
   {
     return false;
   }
@@ -5236,9 +3346,9 @@ bool check_term_TimedMultAct(const Term& t)
     return false;
   }
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_Action<atermpp::aterm>, 0))
+  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_Action" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
     return false;
   }
   if (!check_term_argument(a[1], check_rule_DataExpr<atermpp::aterm>))
@@ -5252,9 +3362,9 @@ bool check_term_TimedMultAct(const Term& t)
   return true;
 }
 
-// SortCons(SortConsType, SortExpr)
+// BooleanTrue()
 template <typename Term>
-bool check_term_SortCons(const Term& t)
+bool check_term_BooleanTrue(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -5265,47 +3375,7 @@ bool check_term_SortCons(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::SortCons)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_SortConsType<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_SortConsType" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_SortExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_SortExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// SortSet()
-template <typename Term>
-bool check_term_SortSet(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::SortSet)
+  if (a.function() != core::detail::function_symbols::BooleanTrue)
   {
     return false;
   }
@@ -5320,9 +3390,9 @@ bool check_term_SortSet(const Term& t)
   return true;
 }
 
-// OpId(String, SortExpr, Number)
+// Block(String*, ProcExpr)
 template <typename Term>
-bool check_term_OpId(const Term& t)
+bool check_term_Block(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -5333,7 +3403,285 @@ bool check_term_OpId(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::OpId)
+  if (a.function() != core::detail::function_symbols::Block)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_String<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_ProcExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// Rename(RenameExpr*, ProcExpr)
+template <typename Term>
+bool check_term_Rename(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Rename)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_RenameExpr<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RenameExpr" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_ProcExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// Exists()
+template <typename Term>
+bool check_term_Exists(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Exists)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 0)
+  {
+    return false;
+  }
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// Sync(ProcExpr, ProcExpr)
+template <typename Term>
+bool check_term_Sync(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Sync)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_ProcExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_ProcExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// ActExists(DataVarId+, ActFrm)
+template <typename Term>
+bool check_term_ActExists(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ActExists)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 1))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_ActFrm<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActFrm" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// ProcSpec(DataSpec, ActSpec, GlobVarSpec, ProcEqnSpec, ProcInit)
+template <typename Term>
+bool check_term_ProcSpec(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ProcSpec)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 5)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_DataSpec<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataSpec" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_ActSpec<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActSpec" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[2], check_rule_GlobVarSpec<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_GlobVarSpec" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[3], check_rule_ProcEqnSpec<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcEqnSpec" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[4], check_rule_ProcInit<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcInit" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// UntypedSortsPossible(SortExpr+)
+template <typename Term>
+bool check_term_UntypedSortsPossible(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::UntypedSortsPossible)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_SortExpr<atermpp::aterm>, 1))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_SortExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// StateMu(String, DataVarIdInit*, StateFrm)
+template <typename Term>
+bool check_term_StateMu(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateMu)
   {
     return false;
   }
@@ -5349,14 +3697,14 @@ bool check_term_OpId(const Term& t)
     mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[1], check_rule_SortExpr<atermpp::aterm>))
+  if (!check_list_argument(a[1], check_rule_DataVarIdInit<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_SortExpr" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarIdInit" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[2], check_rule_Number<atermpp::aterm>))
+  if (!check_term_argument(a[2], check_rule_StateFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_Number" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_StateFrm" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5365,9 +3713,9 @@ bool check_term_OpId(const Term& t)
   return true;
 }
 
-// ActionRenameSpec(DataSpec, ActSpec, ActionRenameRules)
+// BddIf(String, BddExpression, BddExpression)
 template <typename Term>
-bool check_term_ActionRenameSpec(const Term& t)
+bool check_term_BddIf(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -5378,7 +3726,7 @@ bool check_term_ActionRenameSpec(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::ActionRenameSpec)
+  if (a.function() != core::detail::function_symbols::BddIf)
   {
     return false;
   }
@@ -5389,19 +3737,19 @@ bool check_term_ActionRenameSpec(const Term& t)
     return false;
   }
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_DataSpec<atermpp::aterm>))
+  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataSpec" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[1], check_rule_ActSpec<atermpp::aterm>))
+  if (!check_term_argument(a[1], check_rule_BddExpression<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActSpec" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_BddExpression" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[2], check_rule_ActionRenameRules<atermpp::aterm>))
+  if (!check_term_argument(a[2], check_rule_BddExpression<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActionRenameRules" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_BddExpression" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5410,9 +3758,9 @@ bool check_term_ActionRenameSpec(const Term& t)
   return true;
 }
 
-// BES(BooleanEquation*, BooleanExpression)
+// StateFalse()
 template <typename Term>
-bool check_term_BES(const Term& t)
+bool check_term_StateFalse(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -5423,7 +3771,63 @@ bool check_term_BES(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::BES)
+  if (a.function() != core::detail::function_symbols::StateFalse)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 0)
+  {
+    return false;
+  }
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// PBESFalse()
+template <typename Term>
+bool check_term_PBESFalse(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PBESFalse)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 0)
+  {
+    return false;
+  }
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// PBESForall(DataVarId+, PBExpr)
+template <typename Term>
+bool check_term_PBESForall(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PBESForall)
   {
     return false;
   }
@@ -5434,14 +3838,724 @@ bool check_term_BES(const Term& t)
     return false;
   }
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_BooleanEquation<atermpp::aterm>, 0))
+  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 1))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_BooleanEquation" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[1], check_rule_BooleanExpression<atermpp::aterm>))
+  if (!check_term_argument(a[1], check_rule_PBExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PBExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// StateTrue()
+template <typename Term>
+bool check_term_StateTrue(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateTrue)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 0)
+  {
+    return false;
+  }
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// BInit(ProcExpr, ProcExpr)
+template <typename Term>
+bool check_term_BInit(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::BInit)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_ProcExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_ProcExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// UntypedSortUnknown()
+template <typename Term>
+bool check_term_UntypedSortUnknown(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::UntypedSortUnknown)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 0)
+  {
+    return false;
+  }
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// RegTrans(RegFrm)
+template <typename Term>
+bool check_term_RegTrans(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::RegTrans)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_RegFrm<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RegFrm" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// StateDelayTimed(DataExpr)
+template <typename Term>
+bool check_term_StateDelayTimed(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateDelayTimed)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_DataExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// Nu()
+template <typename Term>
+bool check_term_Nu(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Nu)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 0)
+  {
+    return false;
+  }
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// SortStruct(StructCons+)
+template <typename Term>
+bool check_term_SortStruct(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::SortStruct)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_StructCons<atermpp::aterm>, 1))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_StructCons" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// AtTime(ProcExpr, DataExpr)
+template <typename Term>
+bool check_term_AtTime(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::AtTime)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_ProcExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_DataExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// ActOr(ActFrm, ActFrm)
+template <typename Term>
+bool check_term_ActOr(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ActOr)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_ActFrm<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActFrm" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_ActFrm<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActFrm" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// Comm(CommExpr*, ProcExpr)
+template <typename Term>
+bool check_term_Comm(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Comm)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_CommExpr<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_CommExpr" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_ProcExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// BooleanNot(BooleanExpression)
+template <typename Term>
+bool check_term_BooleanNot(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::BooleanNot)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_BooleanExpression<atermpp::aterm>))
   {
     mCRL2log(log::debug, "soundness_checks") << "check_rule_BooleanExpression" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// Delta()
+template <typename Term>
+bool check_term_Delta(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Delta)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 0)
+  {
+    return false;
+  }
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// ActMultAct(Action*)
+template <typename Term>
+bool check_term_ActMultAct(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ActMultAct)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_Action<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_Action" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// StateAnd(StateFrm, StateFrm)
+template <typename Term>
+bool check_term_StateAnd(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateAnd)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_StateFrm<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_StateFrm" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_StateFrm<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_StateFrm" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// LMerge(ProcExpr, ProcExpr)
+template <typename Term>
+bool check_term_LMerge(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::LMerge)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_ProcExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_ProcExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// SetComp()
+template <typename Term>
+bool check_term_SetComp(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::SetComp)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 0)
+  {
+    return false;
+  }
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// ActForall(DataVarId+, ActFrm)
+template <typename Term>
+bool check_term_ActForall(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ActForall)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 1))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_ActFrm<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActFrm" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// RenameExpr(String, String)
+template <typename Term>
+bool check_term_RenameExpr(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::RenameExpr)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_String<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// Merge(ProcExpr, ProcExpr)
+template <typename Term>
+bool check_term_Merge(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Merge)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_ProcExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_ProcExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// ActSpec(ActId*)
+template <typename Term>
+bool check_term_ActSpec(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ActSpec)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_ActId<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActId" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5490,9 +4604,9 @@ bool check_term_BooleanVariable(const Term& t)
   return true;
 }
 
-// RegSeq(RegFrm, RegFrm)
+// Action(ActId, DataExpr*)
 template <typename Term>
-bool check_term_RegSeq(const Term& t)
+bool check_term_Action(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -5503,7 +4617,7 @@ bool check_term_RegSeq(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::RegSeq)
+  if (a.function() != core::detail::function_symbols::Action)
   {
     return false;
   }
@@ -5514,117 +4628,14 @@ bool check_term_RegSeq(const Term& t)
     return false;
   }
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_RegFrm<atermpp::aterm>))
+  if (!check_term_argument(a[0], check_rule_ActId<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RegFrm" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActId" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[1], check_rule_RegFrm<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RegFrm" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// GlobVarSpec(DataVarId*)
-template <typename Term>
-bool check_term_GlobVarSpec(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::GlobVarSpec)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 1)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// Mu()
-template <typename Term>
-bool check_term_Mu(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::Mu)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 0)
-  {
-    return false;
-  }
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// Whr(DataExpr, WhrDecl+)
-template <typename Term>
-bool check_term_Whr(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::Whr)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_DataExpr<atermpp::aterm>))
+  if (!check_list_argument(a[1], check_rule_DataExpr<atermpp::aterm>, 0))
   {
     mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
-    return false;
-  }
-  if (!check_list_argument(a[1], check_rule_WhrDecl<atermpp::aterm>, 1))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_WhrDecl" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5701,9 +4712,9 @@ bool check_term_Lambda(const Term& t)
   return true;
 }
 
-// Sync(ProcExpr, ProcExpr)
+// StateMust(RegFrm, StateFrm)
 template <typename Term>
-bool check_term_Sync(const Term& t)
+bool check_term_StateMust(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -5714,7 +4725,47 @@ bool check_term_Sync(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::Sync)
+  if (a.function() != core::detail::function_symbols::StateMust)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_RegFrm<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RegFrm" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_StateFrm<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_StateFrm" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// Seq(ProcExpr, ProcExpr)
+template <typename Term>
+bool check_term_Seq(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Seq)
   {
     return false;
   }
@@ -5741,9 +4792,9 @@ bool check_term_Sync(const Term& t)
   return true;
 }
 
-// RegTransOrNil(RegFrm)
+// DataVarIdInit(DataVarId, DataExpr)
 template <typename Term>
-bool check_term_RegTransOrNil(const Term& t)
+bool check_term_DataVarIdInit(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -5754,20 +4805,25 @@ bool check_term_RegTransOrNil(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::RegTransOrNil)
+  if (a.function() != core::detail::function_symbols::DataVarIdInit)
   {
     return false;
   }
 
   // check the children
-  if (a.size() != 1)
+  if (a.size() != 2)
   {
     return false;
   }
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_RegFrm<atermpp::aterm>))
+  if (!check_term_argument(a[0], check_rule_DataVarId<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RegFrm" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_DataExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5776,9 +4832,9 @@ bool check_term_RegTransOrNil(const Term& t)
   return true;
 }
 
-// ProcEqn(ProcVarId, DataVarId*, ProcExpr)
+// Process(ProcVarId, DataExpr*)
 template <typename Term>
-bool check_term_ProcEqn(const Term& t)
+bool check_term_Process(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -5789,7 +4845,87 @@ bool check_term_ProcEqn(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::ProcEqn)
+  if (a.function() != core::detail::function_symbols::Process)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_ProcVarId<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcVarId" << std::endl;
+    return false;
+  }
+  if (!check_list_argument(a[1], check_rule_DataExpr<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// TimedMultAct(Action*, DataExpr)
+template <typename Term>
+bool check_term_TimedMultAct(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::TimedMultAct)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_Action<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_Action" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_DataExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// ActionRenameSpec(DataSpec, ActSpec, ActionRenameRules)
+template <typename Term>
+bool check_term_ActionRenameSpec(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ActionRenameSpec)
   {
     return false;
   }
@@ -5800,19 +4936,19 @@ bool check_term_ProcEqn(const Term& t)
     return false;
   }
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_ProcVarId<atermpp::aterm>))
+  if (!check_term_argument(a[0], check_rule_DataSpec<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcVarId" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataSpec" << std::endl;
     return false;
   }
-  if (!check_list_argument(a[1], check_rule_DataVarId<atermpp::aterm>, 0))
+  if (!check_term_argument(a[1], check_rule_ActSpec<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActSpec" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[2], check_rule_ProcExpr<atermpp::aterm>))
+  if (!check_term_argument(a[2], check_rule_ActionRenameRules<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActionRenameRules" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5821,9 +4957,9 @@ bool check_term_ProcEqn(const Term& t)
   return true;
 }
 
-// Tau()
+// PBES(DataSpec, GlobVarSpec, PBEqnSpec, PBInit)
 template <typename Term>
-bool check_term_Tau(const Term& t)
+bool check_term_PBES(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -5834,16 +4970,243 @@ bool check_term_Tau(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::Tau)
+  if (a.function() != core::detail::function_symbols::PBES)
   {
     return false;
   }
 
   // check the children
-  if (a.size() != 0)
+  if (a.size() != 4)
   {
     return false;
   }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_DataSpec<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataSpec" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_GlobVarSpec<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_GlobVarSpec" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[2], check_rule_PBEqnSpec<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PBEqnSpec" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[3], check_rule_PBInit<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PBInit" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// StateVar(String, DataExpr*)
+template <typename Term>
+bool check_term_StateVar(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateVar)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
+    return false;
+  }
+  if (!check_list_argument(a[1], check_rule_DataExpr<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// ActionRenameRule(DataVarId*, DataExpr, ParamIdOrAction, ActionRenameRuleRHS)
+template <typename Term>
+bool check_term_ActionRenameRule(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ActionRenameRule)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 4)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_DataExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[2], check_rule_ParamIdOrAction<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ParamIdOrAction" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[3], check_rule_ActionRenameRuleRHS<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActionRenameRuleRHS" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// RegSeq(RegFrm, RegFrm)
+template <typename Term>
+bool check_term_RegSeq(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::RegSeq)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_RegFrm<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RegFrm" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_RegFrm<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RegFrm" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// ActNot(ActFrm)
+template <typename Term>
+bool check_term_ActNot(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ActNot)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_ActFrm<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActFrm" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// LinearProcess(DataVarId*, LinearProcessSummand*)
+template <typename Term>
+bool check_term_LinearProcess(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::LinearProcess)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
+    return false;
+  }
+  if (!check_list_argument(a[1], check_rule_LinearProcessSummand<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_LinearProcessSummand" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
 
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
   return true;
@@ -5889,9 +5252,9 @@ bool check_term_ActAt(const Term& t)
   return true;
 }
 
-// LinearProcessSummand(DataVarId*, DataExpr, MultActOrDelta, DataExpr, DataVarIdInit*, Distribution)
+// DataEqn(DataVarId*, DataExpr, DataExpr, DataExpr)
 template <typename Term>
-bool check_term_LinearProcessSummand(const Term& t)
+bool check_term_DataEqn(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -5902,13 +5265,13 @@ bool check_term_LinearProcessSummand(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::LinearProcessSummand)
+  if (a.function() != core::detail::function_symbols::DataEqn)
   {
     return false;
   }
 
   // check the children
-  if (a.size() != 6)
+  if (a.size() != 4)
   {
     return false;
   }
@@ -5923,24 +5286,14 @@ bool check_term_LinearProcessSummand(const Term& t)
     mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[2], check_rule_MultActOrDelta<atermpp::aterm>))
+  if (!check_term_argument(a[2], check_rule_DataExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_MultActOrDelta" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(a[3], check_rule_DataExpr<atermpp::aterm>))
   {
     mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
-    return false;
-  }
-  if (!check_list_argument(a[4], check_rule_DataVarIdInit<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarIdInit" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[5], check_rule_Distribution<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_Distribution" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5949,9 +5302,9 @@ bool check_term_LinearProcessSummand(const Term& t)
   return true;
 }
 
-// BddTrue()
+// PBESNot(PBExpr)
 template <typename Term>
-bool check_term_BddTrue(const Term& t)
+bool check_term_PBESNot(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -5962,7 +5315,122 @@ bool check_term_BddTrue(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::BddTrue)
+  if (a.function() != core::detail::function_symbols::PBESNot)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_PBExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PBExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// StateExists(DataVarId+, StateFrm)
+template <typename Term>
+bool check_term_StateExists(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateExists)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 1))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_StateFrm<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_StateFrm" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// StateMay(RegFrm, StateFrm)
+template <typename Term>
+bool check_term_StateMay(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateMay)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_RegFrm<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RegFrm" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_StateFrm<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_StateFrm" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// PBESTrue()
+template <typename Term>
+bool check_term_PBESTrue(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PBESTrue)
   {
     return false;
   }
@@ -5972,86 +5440,6 @@ bool check_term_BddTrue(const Term& t)
   {
     return false;
   }
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// Action(ActId, DataExpr*)
-template <typename Term>
-bool check_term_Action(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::Action)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_ActId<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ActId" << std::endl;
-    return false;
-  }
-  if (!check_list_argument(a[1], check_rule_DataExpr<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// Block(String*, ProcExpr)
-template <typename Term>
-bool check_term_Block(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::Block)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_String<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_ProcExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
 
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
   return true;
@@ -6092,9 +5480,9 @@ bool check_term_MultActName(const Term& t)
   return true;
 }
 
-// ActOr(ActFrm, ActFrm)
+// IfThenElse(DataExpr, ProcExpr, ProcExpr)
 template <typename Term>
-bool check_term_ActOr(const Term& t)
+bool check_term_IfThenElse(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -6105,7 +5493,637 @@ bool check_term_ActOr(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::ActOr)
+  if (a.function() != core::detail::function_symbols::IfThenElse)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 3)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_DataExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_ProcExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[2], check_rule_ProcExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// UntypedSortVariable(Number)
+template <typename Term>
+bool check_term_UntypedSortVariable(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::UntypedSortVariable)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_Number<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_Number" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// StateOr(StateFrm, StateFrm)
+template <typename Term>
+bool check_term_StateOr(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateOr)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_StateFrm<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_StateFrm" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_StateFrm<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_StateFrm" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// StructProj(StringOrEmpty, SortExpr)
+template <typename Term>
+bool check_term_StructProj(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StructProj)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_StringOrEmpty<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_StringOrEmpty" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_SortExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_SortExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// PBEqn(FixPoint, PropVarDecl, PBExpr)
+template <typename Term>
+bool check_term_PBEqn(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PBEqn)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 3)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_FixPoint<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_FixPoint" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_PropVarDecl<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PropVarDecl" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[2], check_rule_PBExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PBExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// Whr(DataExpr, WhrDecl+)
+template <typename Term>
+bool check_term_Whr(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Whr)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_DataExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
+    return false;
+  }
+  if (!check_list_argument(a[1], check_rule_WhrDecl<atermpp::aterm>, 1))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_WhrDecl" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// OpId(String, SortExpr, Number)
+template <typename Term>
+bool check_term_OpId(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::OpId)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 3)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_SortExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_SortExpr" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[2], check_rule_Number<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_Number" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// SortSet()
+template <typename Term>
+bool check_term_SortSet(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::SortSet)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 0)
+  {
+    return false;
+  }
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// ActFalse()
+template <typename Term>
+bool check_term_ActFalse(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ActFalse)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 0)
+  {
+    return false;
+  }
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// ActId(String, SortExpr*)
+template <typename Term>
+bool check_term_ActId(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ActId)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
+    return false;
+  }
+  if (!check_list_argument(a[1], check_rule_SortExpr<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_SortExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// StateYaled()
+template <typename Term>
+bool check_term_StateYaled(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateYaled)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 0)
+  {
+    return false;
+  }
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// PBESOr(PBExpr, PBExpr)
+template <typename Term>
+bool check_term_PBESOr(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PBESOr)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_PBExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PBExpr" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_PBExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PBExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// BddTrue()
+template <typename Term>
+bool check_term_BddTrue(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::BddTrue)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 0)
+  {
+    return false;
+  }
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// UntypedProcessAssignment(String, UntypedIdentifierAssignment*)
+template <typename Term>
+bool check_term_UntypedProcessAssignment(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::UntypedProcessAssignment)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
+    return false;
+  }
+  if (!check_list_argument(a[1], check_rule_UntypedIdentifierAssignment<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_UntypedIdentifierAssignment" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// SortFBag()
+template <typename Term>
+bool check_term_SortFBag(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::SortFBag)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 0)
+  {
+    return false;
+  }
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// Allow(MultActName*, ProcExpr)
+template <typename Term>
+bool check_term_Allow(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Allow)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_MultActName<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_MultActName" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_ProcExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// PropVarDecl(String, DataVarId*)
+template <typename Term>
+bool check_term_PropVarDecl(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PropVarDecl)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
+    return false;
+  }
+  if (!check_list_argument(a[1], check_rule_DataVarId<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// ActImp(ActFrm, ActFrm)
+template <typename Term>
+bool check_term_ActImp(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ActImp)
   {
     return false;
   }
@@ -6132,9 +6150,9 @@ bool check_term_ActOr(const Term& t)
   return true;
 }
 
-// StochasticOperator(DataVarId+, DataExpr, ProcExpr)
+// SortBag()
 template <typename Term>
-bool check_term_StochasticOperator(const Term& t)
+bool check_term_SortBag(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -6145,132 +6163,7 @@ bool check_term_StochasticOperator(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::StochasticOperator)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 3)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 1))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_DataExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[2], check_rule_ProcExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcExpr" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// ProcessAssignment(ProcVarId, DataVarIdInit*)
-template <typename Term>
-bool check_term_ProcessAssignment(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::ProcessAssignment)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_ProcVarId<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_ProcVarId" << std::endl;
-    return false;
-  }
-  if (!check_list_argument(a[1], check_rule_DataVarIdInit<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarIdInit" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// BooleanImp(BooleanExpression, BooleanExpression)
-template <typename Term>
-bool check_term_BooleanImp(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::BooleanImp)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_BooleanExpression<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_BooleanExpression" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_BooleanExpression<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_BooleanExpression" << std::endl;
-    return false;
-  }
-#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// Nu()
-template <typename Term>
-bool check_term_Nu(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::Nu)
+  if (a.function() != core::detail::function_symbols::SortBag)
   {
     return false;
   }
@@ -6285,9 +6178,9 @@ bool check_term_Nu(const Term& t)
   return true;
 }
 
-// PBESForall(DataVarId+, PBExpr)
+// PBInit(PropVarInst)
 template <typename Term>
-bool check_term_PBESForall(const Term& t)
+bool check_term_PBInit(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -6298,25 +6191,20 @@ bool check_term_PBESForall(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::PBESForall)
+  if (a.function() != core::detail::function_symbols::PBInit)
   {
     return false;
   }
 
   // check the children
-  if (a.size() != 2)
+  if (a.size() != 1)
   {
     return false;
   }
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 1))
+  if (!check_term_argument(a[0], check_rule_PropVarInst<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_PBExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_PBExpr" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PropVarInst" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -6325,9 +6213,9 @@ bool check_term_PBESForall(const Term& t)
   return true;
 }
 
-// ProcVarId(String, DataVarId*, Number)
+// ActTrue()
 template <typename Term>
-bool check_term_ProcVarId(const Term& t)
+bool check_term_ActTrue(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -6338,13 +6226,146 @@ bool check_term_ProcVarId(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::ProcVarId)
+  if (a.function() != core::detail::function_symbols::ActTrue)
   {
     return false;
   }
 
   // check the children
-  if (a.size() != 3)
+  if (a.size() != 0)
+  {
+    return false;
+  }
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// RegTransOrNil(RegFrm)
+template <typename Term>
+bool check_term_RegTransOrNil(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::RegTransOrNil)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_RegFrm<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RegFrm" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// UntypedMultiAction(UntypedDataParameter*)
+template <typename Term>
+bool check_term_UntypedMultiAction(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::UntypedMultiAction)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_UntypedDataParameter<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_UntypedDataParameter" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// GlobVarSpec(DataVarId*)
+template <typename Term>
+bool check_term_GlobVarSpec(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::GlobVarSpec)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// UntypedIdentifierAssignment(String, DataExpr)
+template <typename Term>
+bool check_term_UntypedIdentifierAssignment(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::UntypedIdentifierAssignment)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
   {
     return false;
   }
@@ -6354,14 +6375,9 @@ bool check_term_ProcVarId(const Term& t)
     mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
     return false;
   }
-  if (!check_list_argument(a[1], check_rule_DataVarId<atermpp::aterm>, 0))
+  if (!check_term_argument(a[1], check_rule_DataExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[2], check_rule_Number<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_Number" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -6370,9 +6386,9 @@ bool check_term_ProcVarId(const Term& t)
   return true;
 }
 
-// BagComp()
+// UntypedDataParameter(String, DataExpr*)
 template <typename Term>
-bool check_term_BagComp(const Term& t)
+bool check_term_UntypedDataParameter(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -6383,44 +6399,28 @@ bool check_term_BagComp(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::BagComp)
+  if (a.function() != core::detail::function_symbols::UntypedDataParameter)
   {
     return false;
   }
 
   // check the children
-  if (a.size() != 0)
+  if (a.size() != 2)
   {
     return false;
   }
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// SetComp()
-template <typename Term>
-bool check_term_SetComp(const Term& t)
-{
-  utilities::mcrl2_unused(t);
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  const atermpp::aterm& term(t);
-  if (!term.type_is_appl())
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
   {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::SetComp)
+  if (!check_list_argument(a[1], check_rule_DataExpr<atermpp::aterm>, 0))
   {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
     return false;
   }
-
-  // check the children
-  if (a.size() != 0)
-  {
-    return false;
-  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
 
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
   return true;

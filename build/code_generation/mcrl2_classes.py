@@ -617,7 +617,7 @@ class AdditionalConstructor(Constructor):
 
     def definition(self, inline = False):
         text = r'''    /// \\\\brief Constructor.
-    /// \\param term A term
+    /// \\\\param term A term
     <INLINE><CLASSNAME>::<CLASSNAME>(const <ADDITIONAL_CLASSNAME>& x)
       : <SUPERCLASS>(x)
     {}'''
@@ -641,7 +641,7 @@ class ATermConstructor(Constructor):
 
     def inline_definition(self):
         text = r'''    /// \\\\brief Constructor.
-    /// \\param term A term
+    /// \\\\param term A term
     explicit <CLASSNAME>(const atermpp::aterm& term)
       : <SUPERCLASS>(term)
     {
@@ -651,13 +651,13 @@ class ATermConstructor(Constructor):
 
     def declaration(self):
         text = r'''    /// \\\\brief Constructor.
-    /// \\param term A term
+    /// \\\\param term A term
     explicit <CLASSNAME>(const atermpp::aterm& term);'''
         return self.expand_text(text)
 
     def definition(self, inline = False):
         text = r'''    /// \\\\brief Constructor.
-    /// \\param term A term
+    /// \\\\param term A term
     explicit <INLINE><CLASSNAME>::<CLASSNAME>(const atermpp::aterm& term)
       : <SUPERCLASS>(term)
     {
