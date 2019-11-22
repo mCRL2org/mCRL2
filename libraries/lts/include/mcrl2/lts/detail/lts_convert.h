@@ -229,7 +229,7 @@ inline void convert_core_lts(CONVERTOR& c,
     }
   } * /
 
-  const std::vector<transition> &trans=lts_in.get_transitions();
+  const std::vector<transition>& trans=lts_in.get_transitions();
   for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
   {
     lts_out.add_transition(*r);
@@ -855,7 +855,7 @@ inline void lts_convert_aux(const lts<STATE_LABEL1, ACTION_LABEL1, LTS_BASE1>& l
     lts_out.add_action(lts_convert_translate_label(lts_in.action_label(i),c));
   }
 
-  const std::vector<transition> &trans=lts_in.get_transitions();
+  const std::vector<transition>& trans=lts_in.get_transitions();
   for (const transition& t: trans)
   {
     lts_out.add_transition(t);
