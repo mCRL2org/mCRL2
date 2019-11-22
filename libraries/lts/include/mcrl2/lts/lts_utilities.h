@@ -196,8 +196,11 @@ inline std::size_t to(const outgoing_pair_t& p)
 }
 
 /// \brief Type for exploring transitions per state and action.
+// It can be considered to replace this function with an unordered_multimap.
+// This may increase memory requirements, but would allow for constant versus logarithmic access times
+// of elements. 
 typedef std::multimap<std::pair<transition::size_type, transition::size_type>, transition::size_type>
-outgoing_transitions_per_state_action_t;
+                     outgoing_transitions_per_state_action_t;
 
 /// \brief From state of an iterator exploring transitions per outgoing state and action.
 inline std::size_t from(const outgoing_transitions_per_state_action_t::const_iterator& i)
