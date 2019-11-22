@@ -132,7 +132,7 @@ std::string t11 =
   "                                                              \n"
   "init X(1,2);                                                  \n"
   ;
-std::string x11 = "binding_variables = X(n1,n2: Nat)";
+std::string x11 = "binding_variables = X";
 
 std::string t12 =
   "% example 4.2.1 from \"Tools for PBES\" report                                     \n"
@@ -198,6 +198,18 @@ std::string t17 =
 
 std::string x17 = "binding_variables = X1, X(s3_X: Pos)";
 
+std::string t18 =
+  "% conditions: quantifications which cannot be solved, n1 and n2 are *not* \n"
+  "% constants even if conditions are enabled.                               \n"
+  "                                                                          \n"
+  "pbes mu X(n1,n2:Nat) =                                                    \n"
+  "    forall m1:Nat. exists m2:Nat. (val(m2 > n2 + m1) && X(n1+1,n2+1));    \n"
+  "                                                                          \n"
+  "init X(1,2);                                                              \n"
+  ;
+
+std::string x18 = "binding_variables = X(n1,n2: Nat)";
+
 void test_pbes(const std::string& pbes_spec, const std::string& expected_result, bool compute_conditions, bool remove_equations = true)
 {
   typedef simplify_data_rewriter<data::rewriter> my_pbes_rewriter;
@@ -260,4 +272,5 @@ BOOST_AUTO_TEST_CASE(test_constelm)
   test_pbes(t15, x15, false);
   test_pbes(t16, x16, true);
   test_pbes(t17, x17, false);
+  test_pbes(t18, x18, true);
 }
