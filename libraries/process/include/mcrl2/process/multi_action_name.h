@@ -12,6 +12,7 @@
 #ifndef MCRL2_PROCESS_MULTI_ACTION_NAME_H
 #define MCRL2_PROCESS_MULTI_ACTION_NAME_H
 
+#include "mcrl2/atermpp/aterm_io_text.h"
 #include "mcrl2/core/identifier_string.h"
 #include <algorithm>
 #include <set>

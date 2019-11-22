@@ -12,6 +12,7 @@
 #ifndef MCRL2_PROCESS_DETAIL_ALPHABET_PARSE_H
 #define MCRL2_PROCESS_DETAIL_ALPHABET_PARSE_H
 
+#include "mcrl2/process/multi_action_name.h"
 #include "mcrl2/process/parse.h"
 
 namespace mcrl2 {
@@ -77,7 +78,7 @@ inline
 std::vector<std::string> split_bar(const std::string& text)
 {
   std::string s = utilities::trim_copy(text);
-  return utilities::regex_split(s, "\\s*\\|\\s*");
+  return utilities::regex_split(s, R"(\s*\|\s*)");
 }
 
 // Splits a word into characters.
@@ -88,7 +89,7 @@ std::vector<std::string> split_characters(const std::string& text)
   std::vector<std::string> result;
   for (char & i : s)
   {
-    result.push_back(std::string(1, i));
+    result.emplace_back(1, i);
   }
   return result;
 }
@@ -100,7 +101,7 @@ core::identifier_string_list make_identifier_string_list(const std::vector<std::
   std::vector<core::identifier_string> ids;
   for (const std::string& word: words)
   {
-    ids.push_back(core::identifier_string(word));
+    ids.emplace_back(word);
   }
   return core::identifier_string_list(ids.begin(), ids.end());
 }
@@ -169,7 +170,7 @@ action_name_multiset_list parse_allow_set(const std::string& text)
   std::vector<action_name_multiset> result;
   for (const std::string& word: set_elements(text))
   {
-    result.push_back(action_name_multiset(make_identifier_string_list(split_bar(word))));
+    result.emplace_back(make_identifier_string_list(split_bar(word)));
   }
   return action_name_multiset_list(result.begin(), result.end());
 }
@@ -187,7 +188,7 @@ communication_expression_list parse_comm_set(const std::string& text)
   for (const std::string& word: set_elements(text))
   {
     auto [lhs, rhs] = split_arrow(word);
-    result.push_back(communication_expression(make_identifier_string_list(split_bar(lhs)), core::identifier_string(rhs)));
+    result.emplace_back(make_identifier_string_list(split_bar(lhs)), core::identifier_string(rhs));
   }
   return communication_expression_list(result.begin(), result.end());
 }
@@ -199,7 +200,7 @@ rename_expression_list parse_rename_set(const std::string& text)
   for (const std::string& word: set_elements(text))
   {
     auto [lhs, rhs] = split_arrow(word);
-    result.push_back(rename_expression(core::identifier_string(lhs), core::identifier_string(rhs)));
+    result.emplace_back(core::identifier_string(lhs), core::identifier_string(rhs));
   }
   return rename_expression_list(result.begin(), result.end());
 }
