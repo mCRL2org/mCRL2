@@ -25,6 +25,7 @@ struct pbessolve_options
 {
   data::rewrite_strategy rewrite_strategy = data::jitty;
   bool replace_constants_by_variables = false;
+  bool remove_unused_rewrite_rules = false;
   bool prune_todo_list = false;
   search_strategy exploration_strategy = breadth_first;
   int optimization = 0;
@@ -43,6 +44,7 @@ std::ostream& operator<<(std::ostream& out, const pbessolve_options& options)
 {
   out << "rewrite-strategy = " << options.rewrite_strategy << std::endl;
   out << "replace-constants-by-variables = " << std::boolalpha << options.replace_constants_by_variables << std::endl;
+  out << "remove-unused-rewrite-rules = " << std::boolalpha << options.remove_unused_rewrite_rules << std::endl;
   out << "reset-todo = " << std::boolalpha << options.prune_todo_list << std::endl;
   out << "search-strategy = " << options.exploration_strategy << std::endl;
   out << "optimization = " << options.optimization << std::endl;

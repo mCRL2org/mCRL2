@@ -1,312 +1,271 @@
-// Author(s): Jan Friso Groote // Copyright: see the accompanying file COPYING or copy at
+// Author(s): Wieger Wesselink
+// Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file pbes2bool.cpp
-/// \brief Add your file description here.
+/// \file pbessolve.cpp
 
-// ======================================================================
-//
-// file          : pbes2bool
-// date          : 15-04-2007
-// version       : 0.1.3
-//
-// author(s)     : Jan Friso Groote <J.F.Groote@tue.nl>
-//
-// ======================================================================
-
-
-#define NAME "pbes2bool"
-#define AUTHOR "Jan Friso Groote"
-
-//C++
 #include <iostream>
-#include <string>
-#include <utility>
 
-#include <sstream>
-
-//Tool framework
-#include "mcrl2/bes/pbes_rewriter_tool.h"
-#include "mcrl2/data/rewriter_tool.h"
-#include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/bes/pbes_input_tool.h"
-#include "mcrl2/utilities/execution_timer.h"
-
-//Data Framework
-#include "mcrl2/data/selection.h"
-#include "mcrl2/data/data_equation.h"
-
-// Parameterised boolean equation systems
-#include "mcrl2/pbes/rewrite.h"
-#include "mcrl2/pbes/find.h"
-#include "mcrl2/pbes/detail/instantiate_global_variables.h"
-#include "mcrl2/pbes/pbesinst_alternative_lazy_algorithm.h"
-#include "mcrl2/pbes/algorithms.h"
-#include "mcrl2/pbes/transformation_strategy.h"
-#include "mcrl2/pbes/search_strategy.h"
-
-//Boolean equation systems
-#include "mcrl2/bes/boolean_equation_system.h"
-#include "mcrl2/bes/bes2pbes.h"
-#include "mcrl2/bes/remove_level.h"
-#include "mcrl2/bes/solution_strategy.h"
-#include "mcrl2/bes/small_progress_measures.h"
-#include "mcrl2/bes/local_fixpoints.h"
-#include "mcrl2/bes/pbesinst_conversion.h"
-#include "mcrl2/bes/justification.h"
-
-using namespace std;
-using namespace mcrl2::utilities;
-using namespace mcrl2::core;
-
-//Function declarations used by main program
-//------------------------------------------
+#include "mcrl2/data/rewriter_tool.h"
+#include "mcrl2/lps/detail/instantiate_global_variables.h"
+#include "mcrl2/lps/detail/lps_io.h"
+#include "mcrl2/lts/lts_lts.h"
+#include "mcrl2/pbes/detail/pbes_io.h"
+#include "mcrl2/pbes/pbessolve_options.h"
+#include "mcrl2/pbes/pbesinst_structure_graph.h"
+#include "mcrl2/pbes/pbesinst_structure_graph2.h"
+#include "mcrl2/pbes/solve_structure_graph.h"
+#include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
-using namespace mcrl2::log;
-using namespace mcrl2::bes;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::utilities::tools;
 using mcrl2::bes::tools::pbes_input_tool;
-using mcrl2::bes::tools::pbes_rewriter_tool;
 using mcrl2::data::tools::rewriter_tool;
 using mcrl2::utilities::tools::input_tool;
 
-class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
+// TODO: put this code in the utilities library?
+inline
+std::string file_extension(const std::string& filename)
+{
+  auto pos = filename.find_last_of('.');
+  if (pos == std::string::npos)
+  {
+    return "";
+  }
+  return filename.substr(pos + 1);
+}
+
+class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
 {
   protected:
-    // Tool options.
-    transformation_strategy m_transformation_strategy; // The strategy to substitute the value of variables with
-                                                       // a trivial rhs (aka true or false) in other equations when generating a BES.
-    search_strategy m_search_strategy;                 // The search strategy (depth first/breadth first)
-    solution_strategy_t m_solution_strategy;           // Indicates the solver used to solve the generated BES.
-    bool m_construct_counter_example;                  // The counter example option
-    mcrl2::bes::remove_level m_erase_unused_bes_variables;       // Remove unused bes variables according to its value of none, some or all.
-    bool m_data_elm;                                   // The data elimination option
-    std::size_t m_maximal_todo_size;                        // The maximal size of the todo queue when generating a bes
-    bool m_approximate_true;                           // If approximate_true holds, rhs's of variables that cannot
-                                                       // be put in the todo queue are set to false, assuring that
-                                                       // a true answer is correct, but false might be incorrect.
-                                                       // If approximate_true is false, true is used, meaning that
-                                                       // the answer false is correct, and true might be incorrect.
+    typedef rewriter_tool<pbes_input_tool<input_tool>> super;
 
+    pbessolve_options options;
 
-    typedef rewriter_tool<pbes_input_tool<input_tool> > super;
+    std::string lpsfile;
+    std::string ltsfile;
+    std::string evidence_file;
 
-    pbes_system::pbes_rewriter_type default_rewriter() const
+    void add_options(utilities::interface_description& desc) override
     {
-      return pbes_system::quantifier_all;
+      super::add_options(desc);
+      desc.add_hidden_option("check-strategy", "do a sanity check on the computed strategy", 'c');
+      desc.add_option("search",
+                 utilities::make_enum_argument<search_strategy>("SEARCH")
+                   .add_value_desc(breadth_first, "Leads to smaller counter examples", true)
+                   .add_value_desc(depth_first, ""),
+                 "Use search strategy SEARCH:",
+                 'z');
+      desc.add_option("file",
+                 utilities::make_file_argument("NAME"),
+                 "The file containing the LPS or LTS that was used to generate the PBES using lps2pbes -c. If this "
+                 "option is set, a counter example or witness for the encoded property will be generated. The "
+                 "extension of the file should be .lps in case of an LPS file, in all other cases it is assumed to "
+                 "be an LTS.",
+                 'f');
+      desc.add_option("prune-todo-list", "Prune the todo list periodically.");
+      desc.add_hidden_option("no-remove-unused-rewrite-rules", "do not remove unused rewrite rules. ", 'u');
+      desc.add_option("evidence-file",
+                      utilities::make_file_argument("NAME"),
+                      "The file to which the evidence is written. If not set, a default name will be chosen.");
+      desc.add_option("strategy",
+                      utilities::make_enum_argument<int>("STRATEGY")
+                        .add_value_desc(0, "No on-the-fly solving is applied", true)
+                        .add_value_desc(1, "Propagate solved equations using an attractor.")
+                        .add_value_desc(2, "Detect winning loops.")
+                        .add_value_desc(3, "Solve subgames using a fatal attractor.")
+                        .add_value_desc(4, "Solve subgames using the solver.")
+        ,"Use solving strategy STRATEGY. Strategies 1-4 periodically apply on-the-fly solving, which may lead to early termination.",
+                      's');
+      desc.add_hidden_option("long-strategy",
+                  utilities::make_enum_argument<int>("STRATEGY")
+                    .add_value_desc(0, "Do not apply any optimizations.")
+                    .add_value_desc(1, "Remove self loops.")
+                    .add_value_desc(2, "Propagate solved equations using substitution.")
+                    .add_value_desc(3, "Propagate solved equations using an attractor.")
+                    .add_value_desc(4, "Detect winning loops using a fatal attractor.")
+                    .add_value_desc(5, "Solve subgames using a fatal attractor (local version).")
+                    .add_value_desc(6, "Solve subgames using a fatal attractor (original version).")
+                    .add_value_desc(7, "Solve subgames using the solver.")
+                    .add_value_desc(8, "Detect winning loops (original version)."
+                      " N.B. This optimization does not work correctly in combination with counter examples."
+                      " It may also cause stack overflow."
+                     )
+                    ,"use strategy STRATEGY (N.B. This is a developer option that overrides --strategy)",
+                 'l');
+      desc.add_hidden_option("no-replace-constants-by-variables", "Do not move constant expressions to a substitution.");
+      desc.add_hidden_option("aggressive", "Apply optimizations 4 and 5 at every iteration.");
+      desc.add_hidden_option("prune-todo-alternative", "Use a variation of todo list pruning.");
     }
 
-    // Overload synopsis to cope with optional OUTFILE
-    std::string synopsis() const
-    {
-      return "[OPTION]...[INFILE]\n";
-    }
 
-  public:
-    pbes2bool_tool()
-      : super(
-        NAME,
-        AUTHOR,
-        "Generate a BES from a PBES and solve it. ",
-        "Solves (P)BES from INFILE. "
-        "If INFILE is not present, stdin is used. "),
-      m_transformation_strategy(lazy),
-      m_search_strategy(breadth_first),
-      m_solution_strategy(local_fixed_point),
-      m_construct_counter_example(false),
-      m_erase_unused_bes_variables(mcrl2::bes::none),
-      m_data_elm(true),
-      m_maximal_todo_size(std::numeric_limits<std::size_t>::max()),
-      m_approximate_true(true)
-    {}
-
-  protected:
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
 
-      input_tool::parse_options(parser);
+      options.check_strategy = parser.has_option("check-strategy");
+      options.replace_constants_by_variables = !parser.has_option("no-replace-constants-by-variables");
+      options.remove_unused_rewrite_rules = !parser.has_option("no-remove-unused-rewrite-rules");
+      options.aggressive = parser.has_option("aggressive");
+      options.prune_todo_list = parser.has_option("prune-todo-list");
+      options.prune_todo_alternative = parser.has_option("prune-todo-alternative");
+      options.exploration_strategy = parser.option_argument_as<mcrl2::pbes_system::search_strategy>("search");
+      options.rewrite_strategy = rewrite_strategy();
 
-      m_construct_counter_example = 0 < parser.options.count("counter");
-      m_erase_unused_bes_variables= parser.option_argument_as<mcrl2::bes::remove_level>("erase");
-      m_data_elm                  = parser.options.count("unused-data") == 0;
-      m_transformation_strategy   = parser.option_argument_as<mcrl2::pbes_system::transformation_strategy>("strategy");
-      m_solution_strategy         = parser.option_argument_as<mcrl2::bes::solution_strategy_t>("solver");
-      m_search_strategy           = parser.option_argument_as<mcrl2::pbes_system::search_strategy>("search");
-      if (parser.options.count("todo-max"))
+      if (parser.has_option("file"))
       {
-        m_maximal_todo_size         = parser.option_argument_as< unsigned long >("todo-max");
+        std::string filename = parser.option_argument("file");
+        if (file_extension(filename) == "lps")
+        {
+          lpsfile = filename;
+        }
+        else
+        {
+          ltsfile = filename;
+        }
       }
-      m_approximate_true          = 0 == parser.options.count("approximate-false");
-
-      if (m_maximal_todo_size == std::numeric_limits<std::size_t>::max() && !m_approximate_true)
+      if (parser.has_option("evidence-file"))
       {
-        parser.error("Setting approximate-false only makes sense when setting todo-max. ");
-      }
-
-      if (m_construct_counter_example && m_erase_unused_bes_variables!=mcrl2::bes::none)
-      {
-        parser.error("Generating a counter example cannot be combined with erasing bes variables. ");
-      }
-
-      if (m_construct_counter_example && m_solution_strategy!=local_fixed_point)
-      {
-        parser.error("Generating a counter example only works with the local fixed point algorithm to solve the boolean equation system. ");
-      }
-    }
-
-    void add_options(interface_description& desc)
-    {
-      using namespace mcrl2::bes;
-      super::add_options(desc);
-      desc.
-      add_option("strategy", make_enum_argument<transformation_strategy>("STRAT")
-                 .add_value(lazy, true)
-                 .add_value(optimize)
-                 .add_value(on_the_fly)
-                 .add_value(on_the_fly_with_fixed_points),
-                 "use substitution strategy STRAT:",
-                 's').
-     add_option("search",
-                 make_enum_argument<search_strategy>("SEARCH")
-                   .add_value(breadth_first, true)
-                   .add_value(depth_first)
-                   .add_value(breadth_first_short)
-                   .add_value(depth_first_short),
-                 "use search strategy SEARCH:",
-                 'z').
-      add_option("counter",
-                 "print evidence why the formula is valid or invalid. If invalid "
-                 "this information can be used to construct a counterexample using the tool "
-                 "lpsxsim. The evidence consists of a tree labelled with instantiations "
-                 "of the left hand side of PBES equations. These instantiations largely match the states "
-                 "of the lps. An indentation corresponds in general with one (sometimes zero, sometimes more) "
-                 "transition. ",
-                 'c').
-      add_option("erase",
-                 make_enum_argument<remove_level>("LEVEL")
-                   .add_value(none, true)
-                   .add_value(some)
-                   .add_value(all),
-                 "use remove level LEVEL to remove bes variables",
-                 'e').
-      add_option("todo-max", make_mandatory_argument("NUM"),
-                 "limit the number of boolean variables that can reside in the todo buffer. If the todo "
-                 "stack is full, a random element in the buffer is removed and the rhs of this variable is "
-                 "set to false (or true if --approximate-false is used). In this case the result true is reliable, "
-                 "and a result false could mean that the formula is valid (or vice versa, if --approximate-false is used). "
-                 "By replacing the variables in the queue at random, the breadth/depth-first structure is mixed up. ").
-      add_option("approximate-false",
-                 "If set, variables that are removed from the todo buffer are set to true. This means that the result "
-                 "false is reliable, and the result true can still mean that the formula is false. Without this flag "
-                 "true is approximated, meaning that true is the reliable answer, and false is not. ").
-      add_option("unused_data",
-                 "do not remove unused parts of the data specification. ",
-                 'u').
-      add_option("solver",
-                 make_enum_argument<solution_strategy_t>("STRATEGY")
-                    .add_value(local_fixed_point, true)
-                    .add_value(small_progr_measures),
-                 "This flag selects the solver using which the generated bes is solved.",
-                 'g');
-    }
-
-  public:
-    bool run()
-    {
-      using namespace pbes_system;
-      using namespace utilities;
-
-      mCRL2log(verbose) << "pbes2bool parameters:" << std::endl;
-      mCRL2log(verbose) << "  input file:            " << (input_filename().empty()?"standard input":input_filename()) << std::endl;
-      mCRL2log(verbose) << "  data rewriter:         " << m_rewrite_strategy << std::endl;
-      mCRL2log(verbose) << "  substitution strategy: " << m_transformation_strategy << std::endl;
-      mCRL2log(verbose) << "  search strategy:       " << m_search_strategy << std::endl;
-      mCRL2log(verbose) << "  solution strategy      " << m_solution_strategy << "" << std::endl;
-      mCRL2log(verbose) << "  erase level:           " << m_erase_unused_bes_variables << std::endl;
-      if (m_maximal_todo_size != std::numeric_limits<std::size_t>::max())
-      {
-        mCRL2log(verbose) << "  limit the todo buffer to " << m_maximal_todo_size << " bes variables and replace removed variables by " <<
-               (m_approximate_true?"false":"true") << std::endl;
+        evidence_file = parser.option_argument("evidence-file");
       }
 
-      // load the pbes
-      mcrl2::pbes_system::pbes p;
-      mcrl2::bes::load_pbes(p, input_filename(), pbes_input_format());
-
-      pbes_system::algorithms::normalize(p);
-      pbes_system::detail::instantiate_global_variables(p);
-
-      // data rewriter
-      data::rewriter datar;
-      if (m_data_elm)
+      if (parser.has_option("long-strategy"))
       {
-        // Create a rewriter with only the necessary data equations.
-        using namespace mcrl2::data;
-        std::set < data::function_symbol > eqn_symbol_set=pbes_system::find_function_symbols(p.equations());
-        std::set < data::function_symbol > init_symbol_set=pbes_system::find_function_symbols(p.initial_state());
-        std::set < data::function_symbol > function_symbol_set;
-        set_union(eqn_symbol_set.begin(),eqn_symbol_set.end(),
-                  init_symbol_set.begin(),init_symbol_set.end(),
-                  inserter(function_symbol_set,function_symbol_set.begin()));
-        datar=data::rewriter(p.data(),
-                             mcrl2::data::used_data_equation_selector( p.data(), function_symbol_set, p.global_variables()),
-                             m_rewrite_strategy);
+        options.optimization = parser.option_argument_as<int>("long-strategy");
       }
       else
       {
-        // Create a rewriter with all data equations. This is safer, but increases the time and memory to
-        // compile the rewrite system.
-        datar=data::rewriter(p.data(), m_rewrite_strategy);
+        options.optimization = parser.option_argument_as<int>("strategy");
+        if (options.optimization == 0)
+        {
+          options.optimization = 2;
+        }
+        else if (options.optimization == 1)
+        {
+          options.optimization = 3;
+        }
+        else if (options.optimization == 2)
+        {
+          options.optimization = 4;
+        }
+        else if (options.optimization == 3)
+        {
+          options.optimization = 6;
+        }
+        else if (options.optimization == 4)
+        {
+          options.optimization = 7;
+        }
       }
 
-      timer().start("instantiation");
-
-      pbesinst_alternative_lazy_algorithm algorithm(p.data(), datar, m_search_strategy, m_transformation_strategy,
-                                                    m_erase_unused_bes_variables, m_maximal_todo_size, m_approximate_true);
-      algorithm.run(p);
-      p=algorithm.get_result(!m_construct_counter_example);
-      boolean_equation_system bes = pbesinst_conversion(p);
-
-      timer().finish("instantiation");
-
-      bool result = false;
-      std::vector<bool> full_solution;
-
-      timer().start("solving");
-      switch (m_solution_strategy)
+      if (options.optimization < 0 || options.optimization > 8)
       {
-        case gauss:
-          throw mcrl2::runtime_error("Plain gauss elimination is not supported. Use the local fixpoints algorithm instead.");
-        case small_progr_measures:
-          result = small_progress_measures(bes);
-          break;
-        case local_fixed_point:
-          result = local_fixpoints(bes, &full_solution);
-          break;
+        throw mcrl2::runtime_error("Invalid strategy " + std::to_string(options.optimization));
       }
-      timer().finish("solving");
-
-      mCRL2log(verbose) << "The solution for the initial variable of the pbes is " << (result ? "true" : "false") << std::endl;
-      std::cout << (result ? "true" : "false") << std::endl;
-
-      if (m_construct_counter_example)
+      if (options.prune_todo_list && options.optimization < 2)
       {
-        print_justification_tree(bes, full_solution, result);
+        mCRL2log(log::warning) << "Option --prune-todo-list has no effect for strategies less than 2." << std::endl;
       }
-
-      return true;
     }
 
+    std::set<utilities::file_format> available_input_formats() const override
+    {
+      return { pbes_system::pbes_format_internal() };
+    }
+
+  public:
+    pbessolve_tool()
+      : super("pbessolve",
+              "Wieger Wesselink",
+              "Generate a BES from a PBES and solve it. ",
+              "Solves (P)BES from INFILE. "
+              "If INFILE is not present, stdin is used. "
+              "The PBES is first instantiated into a parity game, "
+              "which is then solved using Zielonka's algorithm. "
+              "It supports the generation of a witness or counter "
+              "example for the property encoded by the PBES."
+             )
+    {}
+
+    template <typename PbesInstAlgorithm>
+    void run_algorithm(PbesInstAlgorithm& algorithm, const pbes_system::pbes& pbesspec, structure_graph& G)
+    {
+      mCRL2log(log::verbose) << "Generating parity game..." << std::endl;
+      timer().start("instantiation");
+      algorithm.run();
+      timer().finish("instantiation");
+
+      mCRL2log(log::verbose) << "Number of vertices in the structure graph: " << G.all_vertices().size() << std::endl;
+
+      if (!lpsfile.empty())
+      {
+        lps::specification lpsspec = lps::detail::load_lps(lpsfile);
+        lps::detail::instantiate_global_variables(lpsspec); // N.B. This is necessary, because the global variables might not be valid for the evidence.
+        bool result;
+        lps::specification evidence;
+        timer().start("solving");
+        std::tie(result, evidence) = solve_structure_graph_with_counter_example(G, lpsspec, pbesspec, algorithm.equation_index());
+        timer().finish("solving");
+        std::cout << (result ? "true" : "false") << std::endl;
+        if (evidence_file.empty())
+        {
+          evidence_file = input_filename() + ".evidence.lps";
+        }
+        lps::detail::save_lps(evidence, evidence_file);
+        mCRL2log(log::verbose) << "Saved " << (result ? "witness" : "counter example") << " in " << evidence_file << std::endl;
+      }
+      else if (!ltsfile.empty())
+      {
+        lts::lts_lts_t ltsspec;
+        ltsspec.load(ltsfile);
+        lts::lts_lts_t evidence;
+        timer().start("solving");
+        bool result = solve_structure_graph_with_counter_example(G, ltsspec);
+        timer().finish("solving");
+        std::cout << (result ? "true" : "false") << std::endl;
+        if (evidence_file.empty())
+        {
+          evidence_file = input_filename() + ".evidence.lts";
+        }
+        ltsspec.save(evidence_file);
+        mCRL2log(log::verbose) << "Saved " << (result ? "witness" : "counter example") << " in " << evidence_file << std::endl;
+      }
+      else
+      {
+        timer().start("solving");
+        bool result = solve_structure_graph(G, options.check_strategy);
+        timer().finish("solving");
+        std::cout << (result ? "true" : "false") << std::endl;
+      }
+    }
+
+    bool run() override
+    {
+      pbes_system::pbes pbesspec = pbes_system::detail::load_pbes(input_filename());
+      pbes_system::algorithms::normalize(pbesspec);
+
+      structure_graph G;
+      if (options.optimization <= 1)
+      {
+        pbesinst_structure_graph_algorithm algorithm(options, pbesspec, G);
+        run_algorithm<pbesinst_structure_graph_algorithm>(algorithm, pbesspec, G);
+      }
+      else
+      {
+        pbesinst_structure_graph_algorithm2 algorithm(options, pbesspec, G);
+        run_algorithm<pbesinst_structure_graph_algorithm2>(algorithm, pbesspec, G);
+      }
+      return true;
+    }
 };
 
 int main(int argc, char* argv[])
 {
-  return pbes2bool_tool().execute(argc, argv);
+  return pbessolve_tool().execute(argc, argv);
 }

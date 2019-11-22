@@ -3,6 +3,7 @@ set(MCRL2_TOOLS
   lps2torx
   lpsrealzone
   pbesabstract
+  pbes2booldeprecated
 )
 
 if(MCRL2_ENABLE_DEPRECATED)

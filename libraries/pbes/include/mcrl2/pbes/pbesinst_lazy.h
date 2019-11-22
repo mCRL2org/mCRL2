@@ -211,7 +211,7 @@ class pbesinst_lazy_algorithm
     std::size_t m_iteration_count = 0;
 
     /// \brief Prints a log message for every 1000-th equation
-    std::string print_equation_count(std::size_t size) const
+    static std::string print_equation_count(std::size_t size)
     {
       if (size > 0 && size % 1000 == 0)
       {
@@ -237,10 +237,10 @@ class pbesinst_lazy_algorithm
       return p;
     }
 
-    pbes_expression rewrite_true_false(const fixpoint_symbol& symbol,
+    static pbes_expression rewrite_true_false(const fixpoint_symbol& symbol,
                                        const propositional_variable_instantiation& X,
                                        const pbes_expression& psi
-                                      ) const
+                                      )
     {
       bool changed = false;
       pbes_expression value;
@@ -272,6 +272,20 @@ class pbesinst_lazy_algorithm
       }
     }
 
+    data::rewriter construct_rewriter(const pbes& pbesspec)
+    {
+      if (m_options.remove_unused_rewrite_rules)
+      {
+        return data::rewriter(pbesspec.data(),
+                              data::used_data_equation_selector(pbesspec.data(), pbes_system::find_function_symbols(pbesspec), pbesspec.global_variables()),
+                              m_options.rewrite_strategy);
+      }
+      else
+      {
+        return data::rewriter(pbesspec.data(), m_options.rewrite_strategy);
+      }
+    }
+
   public:
 
     /// \brief Constructor.
@@ -284,7 +298,7 @@ class pbesinst_lazy_algorithm
       const pbes& p
     )
      : m_options(options),
-       datar(p.data(), data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()), options.rewrite_strategy),
+       datar(construct_rewriter(p)),
        m_pbes(preprocess(p)),
        m_equation_index(p),
        R(datar, p.data())
