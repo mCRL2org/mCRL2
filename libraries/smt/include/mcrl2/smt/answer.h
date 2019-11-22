@@ -11,6 +11,8 @@
 #ifndef MCRL2_SMT_ANSWER_H
 #define MCRL2_SMT_ANSWER_H
 
+#include <iostream>
+
 namespace mcrl2
 {
 namespace smt
