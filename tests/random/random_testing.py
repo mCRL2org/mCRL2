@@ -284,13 +284,13 @@ class PbessymbolicbisimTest(PbesTest):
     def __init__(self, name, settings):
         super(PbessymbolicbisimTest, self).__init__(name, ymlfile('pbessymbolicbisim'), settings)
 
-class PbessolveTest(PbesTest):
+class Pbes2boolTest(PbesTest):
     def __init__(self, name, settings):
-        super(PbessolveTest, self).__init__(name, ymlfile('pbessolve'), settings)
+        super(Pbes2boolTest, self).__init__(name, ymlfile('pbessolve'), settings)
 
-class PbessolveDepthFirstTest(PbesTest):
+class Pbes2boolDepthFirstTest(PbesTest):
     def __init__(self, name, settings):
-        super(PbessolveDepthFirstTest, self).__init__(name, ymlfile('pbessolve'), settings)
+        super(Pbes2boolDepthFirstTest, self).__init__(name, ymlfile('pbessolve'), settings)
         self.add_command_line_options('t2', ['-zdepth-first'])
         self.add_command_line_options('t3', ['-zdepth-first'])
         self.add_command_line_options('t4', ['-zdepth-first'])
@@ -299,16 +299,16 @@ class PbessolveDepthFirstTest(PbesTest):
         self.add_command_line_options('t7', ['-zdepth-first'])
         self.add_command_line_options('t8', ['-zdepth-first'])
 
-class Pbessolve_counter_exampleTest(ProcessTest):
+class Pbes2bool_counter_exampleTest(ProcessTest):
     def __init__(self, name, optimization, settings):
-        super(Pbessolve_counter_exampleTest, self).__init__(name, ymlfile('pbessolve-counter-example'), settings)
+        super(Pbes2bool_counter_exampleTest, self).__init__(name, ymlfile('pbessolve-counter-example'), settings)
         if optimization in [4, 5]:
             self.add_command_line_options('t3', ['-l{}'.format(optimization), '--aggressive', '--prune-todo-list'])
         else:
             self.add_command_line_options('t3', ['-l{}'.format(optimization), '--prune-todo-list'])
 
     def create_inputfiles(self, runpath = '.'):
-        super(Pbessolve_counter_exampleTest, self).create_inputfiles(runpath)
+        super(Pbes2bool_counter_exampleTest, self).create_inputfiles(runpath)
         filename = '{0}.mcf'.format(self.name, self.settings)
         formula = random_state_formula_generator.make_modal_formula()
         write_text(filename, str(formula))
@@ -362,13 +362,13 @@ available_tests = {
     'lts2pbes'                                    : lambda name, settings: Lts2pbesTest(name, settings)                                                ,
     'ltscompare-bisim'                            : lambda name, settings: LtscompareTest(name, 'bisim', settings)                                     ,
     'ltscompare-bisim-gv'                         : lambda name, settings: LtscompareTest(name, 'bisim-gv', settings)                                  ,
-    'ltscompare-bisim-gjkw'                        : lambda name, settings: LtscompareTest(name, 'bisim-gjkw', settings)                               ,
+    'ltscompare-bisim-gjkw'                       : lambda name, settings: LtscompareTest(name, 'bisim-gjkw', settings)                                ,
     'ltscompare-branching-bisim'                  : lambda name, settings: LtscompareTest(name, 'branching-bisim', settings)                           ,
     'ltscompare-branching-bisim-gv'               : lambda name, settings: LtscompareTest(name, 'branching-bisim-gv', settings)                        ,
-    'ltscompare-branching-bisim-gjkw'              : lambda name, settings: LtscompareTest(name, 'branching-bisim-gjkw', settings)                     ,
+    'ltscompare-branching-bisim-gjkw'             : lambda name, settings: LtscompareTest(name, 'branching-bisim-gjkw', settings)                      ,
     'ltscompare-dpbranching-bisim'                : lambda name, settings: LtscompareTest(name, 'dpbranching-bisim', settings)                         ,
     'ltscompare-dpbranching-bisim-gv'             : lambda name, settings: LtscompareTest(name, 'dpbranching-bisim-gv', settings)                      ,
-    'ltscompare-dpbranching-bisim-gjkw'            : lambda name, settings: LtscompareTest(name, 'dpbranching-bisim-gjkw', settings)                   ,
+    'ltscompare-dpbranching-bisim-gjkw'           : lambda name, settings: LtscompareTest(name, 'dpbranching-bisim-gjkw', settings)                    ,
     'ltscompare-weak-bisim'                       : lambda name, settings: LtscompareTest(name, 'weak-bisim', settings)                                ,
     'ltscompare-dpweak-bisim'                     : lambda name, settings: LtscompareTest(name, 'dpweak-bisim', settings)                              ,
     'ltscompare-sim'                              : lambda name, settings: LtscompareTest(name, 'sim', settings)                                       ,
@@ -377,15 +377,14 @@ available_tests = {
     'ltscompare-weak-trace'                       : lambda name, settings: LtscompareTest(name, 'weak-trace', settings)                                ,
     'bisimulation-bisim'                          : lambda name, settings: BisimulationTest(name, 'bisim', settings)                                   ,
     'bisimulation-bisim-gv'                       : lambda name, settings: BisimulationTest(name, 'bisim-gv', settings)                                ,
-    'bisimulation-bisim-gjkw'                      : lambda name, settings: BisimulationTest(name, 'bisim-gjkw', settings)                             ,
+    'bisimulation-bisim-gjkw'                     : lambda name, settings: BisimulationTest(name, 'bisim-gjkw', settings)                              ,
     'bisimulation-branching-bisim'                : lambda name, settings: BisimulationTest(name, 'branching-bisim', settings)                         ,
     'bisimulation-branching-bisim-gv'             : lambda name, settings: BisimulationTest(name, 'branching-bisim-gv', settings)                      ,
-    'bisimulation-branching-bisim-gjkw'            : lambda name, settings: BisimulationTest(name, 'branching-bisim-gjkw', settings)                   ,
+    'bisimulation-branching-bisim-gjkw'           : lambda name, settings: BisimulationTest(name, 'branching-bisim-gjkw', settings)                    ,
     'bisimulation-weak-bisim'                     : lambda name, settings: BisimulationTest(name, 'weak-bisim', settings)                              ,
     'pbesconstelm'                                : lambda name, settings: PbesconstelmTest(name, settings)                                            ,
     'pbesparelm'                                  : lambda name, settings: PbesparelmTest(name, settings)                                              ,
     'pbespareqelm'                                : lambda name, settings: PbespareqelmTest(name, settings)                                            ,
-    #'pbespor1'                                    : lambda name, settings: Pbespor1Test(name, settings)                                               ,
     'pbespor2'                                    : lambda name, settings: Pbespor2Test(name, settings)                                                ,
     'pbesrewr-simplify'                           : lambda name, settings: PbesrewrTest(name, 'simplify', settings)                                    ,
     'pbesrewr-pfnf'                               : lambda name, settings: PbesrewrTest(name, 'pfnf', settings)                                        ,
@@ -402,22 +401,22 @@ available_tests = {
     'pbesinst-alternative_lazy'                   : lambda name, settings: PbesinstTest(name, ['-salternative-lazy'], settings)                        ,
     'pbesinst-finite'                             : lambda name, settings: PbesinstTest(name, ['-sfinite', '-f*(*:Bool)'], settings)                   ,
     'pbespgsolve'                                 : lambda name, settings: PbespgsolveTest(name, settings)                                             ,
-    'pbessolve'                                   : lambda name, settings: PbessolveTest(name, settings)                                               ,
-    'pbessolve-depth-first'                       : lambda name, settings: PbessolveDepthFirstTest(name, settings)                                     ,
-    'pbessolve-counter-example-optimization-0'    : lambda name, settings: Pbessolve_counter_exampleTest(name, 0, settings)                            ,
-    'pbessolve-counter-example-optimization-1'    : lambda name, settings: Pbessolve_counter_exampleTest(name, 1, settings)                            ,
-    'pbessolve-counter-example-optimization-2'    : lambda name, settings: Pbessolve_counter_exampleTest(name, 2, settings)                            ,
-    'pbessolve-counter-example-optimization-3'    : lambda name, settings: Pbessolve_counter_exampleTest(name, 3, settings)                            ,
-    'pbessolve-counter-example-optimization-4'    : lambda name, settings: Pbessolve_counter_exampleTest(name, 4, settings)                            ,
-    'pbessolve-counter-example-optimization-5'    : lambda name, settings: Pbessolve_counter_exampleTest(name, 5, settings)                            ,
-    'pbessolve-counter-example-optimization-6'    : lambda name, settings: Pbessolve_counter_exampleTest(name, 6, settings)                            ,
-    'pbessolve-counter-example-optimization-7'    : lambda name, settings: Pbessolve_counter_exampleTest(name, 7, settings)                            ,
+    'pbessolve'                                   : lambda name, settings: Pbes2boolTest(name, settings)                                               ,
+    'pbessolve-depth-first'                       : lambda name, settings: Pbes2boolDepthFirstTest(name, settings)                                     ,
+    'pbessolve-counter-example-optimization-0'    : lambda name, settings: Pbes2bool_counter_exampleTest(name, 0, settings)                            ,
+    'pbessolve-counter-example-optimization-1'    : lambda name, settings: Pbes2bool_counter_exampleTest(name, 1, settings)                            ,
+    'pbessolve-counter-example-optimization-2'    : lambda name, settings: Pbes2bool_counter_exampleTest(name, 2, settings)                            ,
+    'pbessolve-counter-example-optimization-3'    : lambda name, settings: Pbes2bool_counter_exampleTest(name, 3, settings)                            ,
+    'pbessolve-counter-example-optimization-4'    : lambda name, settings: Pbes2bool_counter_exampleTest(name, 4, settings)                            ,
+    'pbessolve-counter-example-optimization-5'    : lambda name, settings: Pbes2bool_counter_exampleTest(name, 5, settings)                            ,
+    'pbessolve-counter-example-optimization-6'    : lambda name, settings: Pbes2bool_counter_exampleTest(name, 6, settings)                            ,
+    'pbessolve-counter-example-optimization-7'    : lambda name, settings: Pbes2bool_counter_exampleTest(name, 7, settings)                            ,
     'pbesstategraph'                              : lambda name, settings: PbesstategraphTest(name, settings)                                          ,
     'pbes-unify-parameters'                       : lambda name, settings: Pbes_unify_parametersTest(name, settings)                                   ,
     'pbes-srf'                                    : lambda name, settings: Pbes_srfTest(name, settings)                                                ,
     # 'pbessymbolicbisim'                           : lambda name, settings: PbessymbolicbisimTest(name, settings)                                       , # excluded from the tests because of Z3 dependency
     'bessolve'                                    : lambda name, settings: BessolveTest(name, settings)                                                ,
-    #'stochastic-ltscompare'                       : lambda name, settings: StochasticLtscompareTest(name, settings)                                     ,
+    #'stochastic-ltscompare'                      : lambda name, settings: StochasticLtscompareTest(name, settings)                                     ,
 }
 
 def print_names(tests):

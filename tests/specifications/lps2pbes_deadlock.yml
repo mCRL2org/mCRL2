@@ -21,7 +21,7 @@ tools:
     input: [l3]
     output: []
     args: []
-    name: pbessolve
+    name: pbes2bool
 result: |
   result = True
 

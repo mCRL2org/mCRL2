@@ -14,47 +14,47 @@ tools:
     input: [l2]
     output: []
     args: [--check-strategy]
-    name: pbessolve
+    name: pbes2bool
   t3:
     input: [l2]
     output: []
     args: [-l1]
-    name: pbessolve
+    name: pbes2bool
   t4:
     input: [l2]
     output: []
     args: [-l2]
-    name: pbessolve
+    name: pbes2bool
   t5:
     input: [l2]
     output: []
     args: [-l3]
-    name: pbessolve
+    name: pbes2bool
   t6:
     input: [l2]
     output: []
     args: [-l4, --aggressive, --prune-todo-list]
-    name: pbessolve
+    name: pbes2bool
   t7:
     input: [l2]
     output: []
     args: [-l5, --aggressive, --prune-todo-list]
-    name: pbessolve
+    name: pbes2bool
   t8:
     input: [l2]
     output: []
     args: [-l6, --aggressive, --prune-todo-list]
-    name: pbessolve
+    name: pbes2bool
   t9:
     input: [l2]
     output: []
     args: [-l7, --aggressive, --prune-todo-list]
-    name: pbessolve
+    name: pbes2bool
   t10:
     input: [l2]
     output: []
     args: [-l2, --aggressive, --prune-todo-list]
-    name: pbessolve
+    name: pbes2bool
   t11:
     input: [l2]
     output: []

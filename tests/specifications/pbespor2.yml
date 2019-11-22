@@ -25,7 +25,7 @@ tools:
     input: [l4]
     output: []
     args: []
-    name: pbessolve
+    name: pbes2bool
   t4:
     input: [l4]
     output: [l5]
@@ -35,7 +35,7 @@ tools:
     input: [l5]
     output: []
     args: []
-    name: pbessolve
+    name: pbes2bool
 
 result: |
   result = t3.value['solution'] == t5.value['solution']

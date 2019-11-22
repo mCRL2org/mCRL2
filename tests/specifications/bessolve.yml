@@ -3,6 +3,8 @@ nodes:
     type: BesSpec
   l2:
     type: bes
+  l3:
+    type: pbes
 
 tools:
   t1:
@@ -21,9 +23,14 @@ tools:
     args: [-sspm]
     name: bessolve
   t4:
-    input: [l2]
+    input: [l3]
     output: []
     args: []
     name: pbes2bool
+  t5:
+    input: [l2]
+    output: [l3]
+    args: [-opbes]
+    name: besconvert
 result: |
   result = t2.value['solution'] == t3.value['solution'] == t4.value['solution']

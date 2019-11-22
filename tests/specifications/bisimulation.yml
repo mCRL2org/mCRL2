@@ -54,7 +54,7 @@ tools:
     input: [l8]
     output: []
     args: []
-    name: pbessolve
+    name: pbes2bool
 
 result: |
   result = t4.value['result'] == t8.value['solution'] == True
