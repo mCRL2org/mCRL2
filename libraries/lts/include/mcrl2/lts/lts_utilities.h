@@ -31,6 +31,46 @@ namespace mcrl2
 namespace lts
 {
 
+/** \brief Sorts the transitions using a sort style.
+ * \param[in/out] transitions A vector of transitions to be sorted. 
+ * \param[in] hidden_label_map A map that tells which actions are mapped on a hidden label. 
+ *            Sorting takes place after applying the hidden label map.
+ * \param[in] ts The sort style to use.
+ */
+
+inline void sort_transitions(std::vector<transition>& transitions, 
+                      const std::map<transition::size_type,transition::size_type>& hidden_label_map,
+                      transition_sort_style ts = src_lbl_tgt)
+{
+  switch (ts)
+  {
+    case lbl_tgt_src:
+    {
+      const detail::compare_transitions_lts compare(hidden_label_map);
+      sort(transitions.begin(),transitions.end(),compare);
+      break;
+    }
+    case src_lbl_tgt:
+    default:
+    {
+      const detail::compare_transitions_slt compare(hidden_label_map);
+      sort(transitions.begin(),transitions.end(),compare);
+      break;
+    }
+  }
+}
+
+/** \brief Sorts the transitions using a sort style.
+ * \param[in/out] transitions A vector of transitions to be sorted. 
+ * \param[in] ts The sort style to use.
+ */
+
+inline void sort_transitions(std::vector<transition>& transitions, transition_sort_style ts = src_lbl_tgt)
+{
+  sort_transitions(transitions, std::map<transition::size_type,transition::size_type>(), ts);
+}
+
+
 namespace detail
 {
 

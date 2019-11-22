@@ -900,21 +900,26 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
 template <class LTS_TYPE>
 bool is_deterministic(const LTS_TYPE& l)
 {
-  outgoing_transitions_per_state_action_t trans_lut=
-                  transitions_per_outgoing_state_action_pair(l.get_transitions(),l.hidden_label_map());
-
-  for(outgoing_transitions_per_state_action_t::const_iterator i=trans_lut.begin(); i!=trans_lut.end(); ++i)
+  std::vector<transition> temporary_copy_of_transitions = l.get_transitions();
+  sort_transitions(temporary_copy_of_transitions, l.hidden_label_map(), src_lbl_tgt);
+  
+  // Traverse the ordered transitions, and search for two consecutive pairs <s,l,t> and <s,l,t'> with t!=t'. 
+  // Such a pair exists iff l is not deterministic.
+  transition& previous_t=temporary_copy_of_transitions[0];
+  bool previous_t_is_valid=false;
+  for(const transition& t: temporary_copy_of_transitions) 
   {
-    outgoing_transitions_per_state_action_t::const_iterator i_next=i;
-    i_next++;
-    if (i_next!=trans_lut.end() &&
-                  from(i)==from(i_next) &&
-                  label(i)==label(i_next) &&
-                  to(i)!=to(i_next))
+    if (previous_t_is_valid)
     {
-      // found a pair <s,l,t> and <s,l,t'> with t!=t', so l is not deterministic.
-      return false;
+      if (previous_t.from()==t.from() && 
+          previous_t.label()==t.label() &&
+          previous_t.to()!=t.to())
+      {
+        return false;
+      }
     }
+    previous_t=t;
+    previous_t_is_valid=true;
   }
   return true;
 }
