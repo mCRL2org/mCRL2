@@ -512,31 +512,6 @@ class lts: public LTS_BASE
     {
       return m_action_labels.size() > 1;
     }
-
-    /** \brief Sorts the transitions using a sort style.
-     * \param[in] ts The sort style to use.
-     * \note Deprecated */
-    [[deprecated]]
-    inline void sort_transitions(transition_sort_style ts = src_lbl_tgt)
-    {
-      switch (ts)
-      {
-        case lbl_tgt_src:
-        { 
-          const detail::compare_transitions_lts compare(hidden_label_map());
-          sort(m_transitions.begin(),m_transitions.end(),compare);
-          break;
-        }
-        case src_lbl_tgt:
-        default:
-        {
-          const detail::compare_transitions_slt compare(hidden_label_map());
-          sort(m_transitions.begin(),m_transitions.end(),compare);
-          break;
-        }
-      }
-    }
-
 };
 
 }
