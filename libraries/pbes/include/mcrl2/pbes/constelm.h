@@ -51,20 +51,6 @@ void make_constelm_substitution(const std::map<data::variable, data::data_expres
   }
 }
 
-struct true_false_pair
-{
-  pbes_expression TC;
-  pbes_expression FC;
-
-  true_false_pair()
-    : TC(true_()), FC(true_())
-  {}
-
-  true_false_pair(pbes_expression t, pbes_expression f)
-    : TC(t), FC(f)
-  {}
-};
-
 /// \cond INTERNAL_DOCS
 /// \brief Compares two terms
 /// \param v A term
@@ -76,72 +62,17 @@ bool less_term(const atermpp::aterm_appl& v, const atermpp::aterm_appl& w)
   return v < w;
 }
 
-struct apply_exists
-{
-  data::variable_list variables_;
-
-  apply_exists(data::variable_list variables)
-    : variables_(variables)
-  {}
-
-  /// \brief Function call operator
-  /// \param p A true-false pair
-  void operator()(true_false_pair& p) const
-  {
-    p.TC = exists(variables_, p.TC);
-    p.FC = forall(variables_, p.FC);
-  }
-};
-
-struct apply_forall
-{
-  data::variable_list variables_;
-
-  apply_forall(data::variable_list variables)
-    : variables_(variables)
-  {}
-
-  /// \brief Function call operator
-  /// \param p A true-false pair
-  void operator()(true_false_pair& p) const
-  {
-    p.TC = forall(variables_, p.TC);
-    p.FC = exists(variables_, p.FC);
-  }
-};
-
 struct constelm_edge_condition
 {
-  typedef std::multimap<propositional_variable_instantiation, std::vector<true_false_pair > > condition_map;
+  typedef std::multimap<propositional_variable_instantiation, std::set<data::data_expression> > condition_map;
 
-  pbes_expression TC;
-  pbes_expression FC;
+  data::data_expression TC;
+  data::data_expression FC;
   condition_map condition;  // condT + condF
 
-  constelm_edge_condition(const pbes_expression& tc, const pbes_expression& fc)
+  constelm_edge_condition(const data::data_expression& tc, const data::data_expression& fc)
     : TC(tc), FC(fc)
   {}
-
-  /// \brief Returns the true-false pair corresponding to the edge condition
-  /// \return The true-false pair corresponding to the edge condition
-  true_false_pair TCFC() const
-  {
-    return true_false_pair(TC, FC);
-  }
-
-  /// \brief Returns the condition
-  /// \param c A sequence of true-false pairs
-  /// \return The condition
-  pbes_expression compute_condition(const std::vector<true_false_pair >& c) const
-  {
-    pbes_expression result = true_();
-    for (const auto & i : c)
-    {
-      result = data::optimized_and(result, data::optimized_not(i.TC));
-      result = data::optimized_and(result, data::optimized_not(i.FC));
-    }
-    return result;
-  }
 };
 
 struct edge_condition_traverser: public pbes_expression_traverser<edge_condition_traverser>
@@ -179,19 +110,19 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
   }
 
   // N.B. As a side effect ec1 and ec2 are changed!!!
-  void merge_conditions(edge_condition& ec1,
-                        edge_condition& ec2,
+  void merge_conditions(edge_condition& ec1, bool negate1,
+                        edge_condition& ec2, bool negate2,
                         edge_condition& ec
                        )
   {
     for (auto& i: ec1.condition)
     {
-      i.second.push_back(ec.TCFC());
+      i.second.insert(negate2 ? ec2.FC : ec2.TC);
       ec.condition.insert(i);
     }
     for (auto& i: ec2.condition)
     {
-      i.second.push_back(ec.TCFC());
+      i.second.insert(negate1 ? ec1.FC : ec1.TC);
       ec.condition.insert(i);
     }
   }
@@ -203,9 +134,7 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
 
   void leave(const not_&)
   {
-    edge_condition ec = pop();
-    std::swap(ec.TC, ec.FC);
-    push(ec);
+    std::swap(top().TC, top().FC);
   }
 
   void leave(const and_&)
@@ -213,7 +142,7 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
     edge_condition ec_right = pop();
     edge_condition ec_left = pop();
     edge_condition ec(data::optimized_and(ec_left.TC, ec_right.TC), data::optimized_or(ec_left.FC, ec_right.FC));
-    merge_conditions(ec_left, ec_right, ec);
+    merge_conditions(ec_left, false, ec_right, false, ec);
     push(ec);
   }
 
@@ -222,7 +151,7 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
     edge_condition ec_right = pop();
     edge_condition ec_left = pop();
     edge_condition ec(data::optimized_or(ec_left.TC, ec_right.TC), data::optimized_and(ec_left.FC, ec_right.FC));
-    merge_conditions(ec_left, ec_right, ec);
+    merge_conditions(ec_left, true, ec_right, true, ec);
     push(ec);
   }
 
@@ -231,17 +160,22 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
     edge_condition ec_right = pop();
     edge_condition ec_left = pop();
     edge_condition ec(data::optimized_or(ec_left.FC, ec_right.TC), data::optimized_and(ec_left.TC, ec_right.FC));
-    merge_conditions(ec_left, ec_right, ec);
+    merge_conditions(ec_left, false, ec_right, true, ec);
     push(ec);
   }
 
   void leave(const forall& x)
   {
     edge_condition ec = pop();
-    for (auto i = ec.condition.begin(); i != ec.condition.end(); ++i)
+    for (auto& [X_e, cond_set]: ec.condition)
     {
-      i->second.push_back(ec.TCFC());
-      std::for_each(i->second.begin(), i->second.end(), apply_forall(x.variables()));
+      std::set<data::data_expression> new_conditions;
+      for(const data::data_expression& e: cond_set)
+      {
+        new_conditions.insert(data::optimized_exists(x.variables(), e, true));
+      }
+      cond_set = std::move(new_conditions);
+      cond_set.insert(data::optimized_forall(x.variables(), ec.TC, true));
     }
     push(ec);
   }
@@ -249,27 +183,30 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
   void leave(const exists& x)
   {
     edge_condition ec = pop();
-    for (auto i = ec.condition.begin(); i != ec.condition.end(); ++i)
+    for (auto& [X_e, cond_set]: ec.condition)
     {
-      i->second.push_back(ec.TCFC());
-      std::for_each(i->second.begin(), i->second.end(), apply_exists(x.variables()));
+      std::set<data::data_expression> new_conditions;
+      for(const data::data_expression& e: cond_set)
+      {
+        new_conditions.insert(data::optimized_exists(x.variables(), e, true));
+      }
+      cond_set = std::move(new_conditions);
+      cond_set.insert(data::optimized_forall(x.variables(), ec.FC, true));
     }
     push(ec);
   }
 
   void leave(const propositional_variable_instantiation& x)
   {
-    edge_condition ec(false_(), false_());
-    std::vector<true_false_pair > c;
-    c.emplace_back(false_(), false_());
-    ec.condition.insert(std::make_pair(x, c));
+    edge_condition ec(data::sort_bool::true_(), data::sort_bool::true_());
+    ec.condition.insert(std::make_pair(x, std::set<data::data_expression>{data::sort_bool::true_()}));
     push(ec);
   }
 
-  const edge_condition& result() const
+  const condition_map& result() const
   {
     assert(condition_stack.size() == 1);
-    return top();
+    return top().condition;
   }
 };
 
@@ -281,13 +218,6 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
 template <typename DataRewriter, typename PbesRewriter>
 class pbes_constelm_algorithm
 {
-  public:
-    /// \brief The edge condition type
-    typedef detail::edge_condition_traverser::edge_condition edge_condition;
-
-    /// \brief The edge condition map type
-    typedef detail::edge_condition_traverser::condition_map condition_map;
-
   protected:
     /// \brief A map with constraints on the vertices of the graph
     typedef std::map<data::variable, data::data_expression> constraint_map;
@@ -307,7 +237,7 @@ class pbes_constelm_algorithm
     // This is achieved by deriving from pbes_expression. This is very ugly, but AFAIK
     // this is the least destructive solution to garbage collection problems.
     // Note that source and target are protected elsewhere.
-    class edge: public pbes_expression
+    class edge: public data::data_expression
     {
       protected:
         /// \brief The propositional variable at the source of the edge
@@ -324,8 +254,8 @@ class pbes_constelm_algorithm
         /// \param src A propositional variable declaration
         /// \param tgt A propositional variable
         /// \param c A term
-        edge(const propositional_variable& src, const propositional_variable_instantiation& tgt, pbes_expression c = true_())
-          : pbes_expression(c), m_source(src), m_target(tgt)
+        edge(const propositional_variable& src, const propositional_variable_instantiation& tgt, data::data_expression c = data::sort_bool::true_())
+          : data::data_expression(c), m_source(src), m_target(tgt)
         {}
 
         /// \brief Returns a string representation of the edge.
@@ -350,7 +280,7 @@ class pbes_constelm_algorithm
         }
 
         /// \brief The condition of the edge
-        const pbes_expression& condition() const
+        const data::data_expression& condition() const
         {
           return *this;
         }
@@ -628,16 +558,12 @@ class pbes_constelm_algorithm
           // use an edge_condition_traverser to compute the edges
           detail::edge_condition_traverser f;
           f.apply(eqn.formula());
-          edge_condition ec = f.result();
-          if (!ec.condition.empty())
+
+          std::vector<edge>& edges = m_edges[name];
+          for (auto& [X_e, conditions]: f.result())
           {
-            std::vector<edge>& edges = m_edges[name];
-            for (auto j = ec.condition.begin(); j != ec.condition.end(); ++j)
-            {
-              propositional_variable_instantiation X = j->first;
-              pbes_expression condition = ec.compute_condition(j->second);
-              edges.emplace_back(eqn.variable(), X, condition);
-            }
+            data::data_expression condition = data::lazy::join_and(conditions.begin(), conditions.end());
+            edges.emplace_back(eqn.variable(), X_e, condition);
           }
         }
         else
