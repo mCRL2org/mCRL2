@@ -56,61 +56,83 @@ d_{X}[i] & \text{otherwise}%
 
 and where $needs\_update$ is a boolean function that determines whether an
 update should be performed. A safe choice for this function is the constant
-function $true$. In [Simon Janssen, 2008] the following alternative is
-proposed.
+function $true$. [Simon Janssen, 2008] originally proposed an alternative based
+on a syntactical analysis of predicate formulae. The following is an improved
+version of his definitions.
 
-Let $c_{T}$ and $c_{F}$ be defined as
+Let $c$ be defined as
 
 \begin{equation*}
-\begin{array}{lll}
-c_{T}(c) & = & c \\
-c_{F}(c) & = & \lnot c \\
-c_{T}(\lnot \varphi ) & = & c_{F}(\varphi ) \\
-c_{F}(\lnot \varphi ) & = & c_{T}(\varphi ) \\
-c_{\Gamma }(X(e)) & = & false \\
-c_{\Gamma }(\mathsf{Q}d:{D}.\varphi ) & = & \mathsf{Q}d:{D}.c_{\Gamma
-}(\varphi ) \\
-c_{T}(\varphi \wedge \psi ) & = & c_{T}(\varphi )\wedge c_{T}(\psi ) \\
-c_{T}(\varphi \vee \psi ) & = & c_{T}(\varphi )\vee c_{T}(\psi ) \\
-c_{T}(\varphi \Rightarrow \psi ) & = & c_{F}(\varphi )\vee c_{T}(\psi ) \\
-c_{F}(\varphi \wedge \psi ) & = & c_{F}(\varphi )\vee c_{F}(\psi ) \\
-c_{F}(\varphi \vee \psi ) & = & c_{F}(\varphi )\wedge c_{F}(\psi ) \\
-c_{F}(\varphi \Rightarrow \psi ) & = & c_{T}(\varphi )\wedge c_{F}(\psi )%
+\begin{array}{llllll}
+c_{T}(c) & = & c &
+	c_{F}(c) & = & \lnot c \\
+c_{T}(\lnot \varphi) & = & c_{F}(\varphi) &
+	c_{F}(\lnot \varphi) & = & c_{T}(\varphi) \\
+c_{T}(X(e)) & = & true &
+	c_{F}(X(e)) & = & true \\
+c_{T}(\mathsf{Q}d:{D}.\varphi) & = & \mathsf{Q}d:{D}.c_{T}(\varphi) &
+	c_{F}(\mathsf{Q}d:{D}.\varphi) & = & \mathsf{Q}d:{D}.c_{F}(\varphi) \\
+c_{T}(\varphi \land \psi) & = & c_{T}(\varphi) \land c_{T}(\psi) &
+	c_{F}(\varphi \land \psi) & = & c_{F}(\varphi) \lor c_{F}(\psi) \\
+c_{T}(\varphi \lor \psi) & = & c_{T}(\varphi) \lor c_{T}(\psi) &
+	c_{F}(\varphi \lor \psi) & = & c_{F}(\varphi) \land c_{F}(\psi) \\
+c_{T}(\varphi \Rightarrow \psi) & = & c_{F}(\varphi) \lor c_{T}(\psi) &
+	c_{F}(\varphi \Rightarrow \psi) & = & c_{T}(\varphi) \land c_{F}(\psi)%
 \end{array}%
 \end{equation*}%
-and let the multi sets $cond_{T}$ and $cond_{F}$ be defined as%
+and let the set $cond$ be defined as%
 \begin{equation*}
 \begin{array}{lll}
-cond_{\Gamma }(X(e),c) & = & \emptyset \\
-cond_{\Gamma }(X(e),Y(f)) & = & \emptyset \\
-cond_{\Gamma }(X(e),\lnot \varphi ) & = & cond_{\Gamma }(X(e),\varphi ) \\
-cond_{\Gamma }(X(e),\varphi \oplus \psi ) & = & \left\{
-\begin{array}{cc}
-\{c_{\Gamma }(\varphi \oplus \psi )\}\cup cond_{\Gamma }(X(e),\varphi ) &
-\text{if }X(e)\in \mathsf{iocc}(\varphi ) \\
-\{c_{\Gamma }(\varphi \oplus \psi )\}\cup cond_{\Gamma }(X(e),\psi ) & \text{%
-if }X(e)\in \mathsf{iocc}(\psi ) \\
+cond(X(e),c) & = & \emptyset \\
+cond(X(e),Y(f)) & = & \emptyset \\
+cond(X(e),\lnot \varphi) & = & cond(X(e),\varphi) \\
+cond(X(e),\varphi \land \psi) & = & \left\{
+\begin{array}{ll}
+\{c_{T}(\psi)\}\cup cond(X(e),\varphi) &
+\text{if }X(e)\in \mathsf{iocc}(\varphi) \\
+\{c_{T}(\varphi)\}\cup cond(X(e),\psi) & \text{%
+if }X(e)\in \mathsf{iocc}(\psi) \\
 \emptyset & \text{otherwise}%
 \end{array}%
 \right. \\
-cond_{\Gamma}(X(e),\mathsf{Q}d:{D}.\varphi ) & = & \left\{
-\begin{array}{cc}
-\{c_{\Gamma}(\mathsf{Q}d:{D}.\varphi )\}\cup \{\mathsf{Q}d:{D}.\theta \ |\
-\theta \in cond_{\Gamma }(X(e),\varphi )\} & \text{if }X(e)\in \mathsf{iocc}%
-(\varphi ) \\
+cond(X(e),\varphi \lor \psi) & = & \left\{
+\begin{array}{ll}
+\{c_{F}(\psi)\}\cup cond(X(e),\varphi) &
+\text{if }X(e)\in \mathsf{iocc}(\varphi) \\
+\{c_{F}(\varphi)\}\cup cond(X(e),\psi) & \text{%
+if }X(e)\in \mathsf{iocc}(\psi) \\
+\emptyset & \text{otherwise}%
+\end{array}%
+\right. \\
+cond(X(e),\varphi \Rightarrow \psi) & = & \left\{
+\begin{array}{ll}
+\{c_{F}(\psi)\}\cup cond(X(e),\varphi) &
+\text{if }X(e)\in \mathsf{iocc}(\varphi) \\
+\{c_{T}(\varphi)\}\cup cond(X(e),\psi) & \text{%
+if }X(e)\in \mathsf{iocc}(\psi) \\
+\emptyset & \text{otherwise}%
+\end{array}%
+\right. \\
+cond(X(e),\mathsf{Q}d:{D}.\varphi) & = & \left\{
+\begin{array}{ll}
+\{c_{\Gamma}(\forall d:{D}.\varphi)\}\cup \{\exists d:{D}.\theta \mid
+\theta \in cond(X(e),\varphi)\} & \text{if }X(e)\in \mathsf{iocc}%
+(\varphi) \\
 \emptyset & \text{otherwise}%
 \end{array}%
 \right.
 \end{array}%
 \end{equation*}%
-with $\Gamma \in \{T,F\}$ and $\mathsf{Q} \in \{\forall, \exists\}$. Then we
-define%
+with $\mathsf{Q} \in \{\forall, \exists\}$. Then we define%
 \begin{equation*}
-needs\_update(X(e),\varphi )=\dbigwedge\limits_{c\in cond_{T}(X(e),\varphi
-)\cup cond_{F}(X(e),\varphi )}\lnot c
+\mathit{needs\_update}(X(e),\varphi )=\bigwedge_{c\in cond(X(e),\varphi
+)} c
 \end{equation*}
 
-\begin{remark}
-Note that a direct implementation of this function is extremely inefficient.
-It is expected that a more suitable representation can be found.\newpage
-\end{remark}
+The implementation of these three functions is integrated into one recursive
+traverser. The resulting condition is quadratic in the number of quantifier
+alternations in which scope X(e) occurs and linear in the other operators. Most
+PBESs stemming from model checking do not yield conditions larger than those
+contained in the LPS. Furthermore, this traverser is only executed once, a
+priori. This means that computing the conditions is relatively cheap.
+\newpage
