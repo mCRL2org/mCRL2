@@ -36,12 +36,14 @@ class pbes_constelm_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_
 
     bool m_compute_conditions = false;
     bool m_remove_redundant_equations = false;
+    bool m_check_quantifiers = false;
 
     void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
       m_compute_conditions = parser.options.count("compute-conditions") > 0;
       m_remove_redundant_equations = parser.options.count("remove-equations") > 0;
+      m_check_quantifiers = parser.options.count("check-quantifiers") > 0;
     }
 
     void add_options(interface_description& desc) override
@@ -49,6 +51,7 @@ class pbes_constelm_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_
       super::add_options(desc);
       desc.add_option("compute-conditions", "compute propagation conditions", 'c');
       desc.add_option("remove-equations", "remove redundant equations", 'e');
+      desc.add_option("check-quantifiers", "also analyse which quantified parameters are constant", 'a');
     }
 
   public:
@@ -77,7 +80,8 @@ class pbes_constelm_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_
                    rewrite_strategy(),
                    rewriter_type(),
                    m_compute_conditions,
-                   m_remove_redundant_equations
+                   m_remove_redundant_equations,
+                   m_check_quantifiers
                   );
       return true;
     }
