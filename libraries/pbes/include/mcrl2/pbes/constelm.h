@@ -225,7 +225,7 @@ public:
     return m_is_forall < other.m_is_forall || (m_is_forall == other.m_is_forall && m_var < other.m_var);
   }
 
-  pbes_expression make_expr(const pbes_expression& expr)
+  pbes_expression make_expr(const pbes_expression& expr) const
   {
     return m_is_forall ? pbes_expression(forall(data::variable_list({m_var}), expr)) : pbes_expression(exists(data::variable_list({m_var}), expr));
   }
@@ -342,350 +342,9 @@ std::set<std::pair<std::list<quantified_variable>, propositional_variable_instan
   return result;
 }
 
-struct constelm_quantifiers_inside_builder: public pbes_expression_builder<constelm_quantifiers_inside_builder>
-{
-  typedef pbes_expression_builder<constelm_quantifiers_inside_builder> super;
-  typedef std::pair<std::list<quantified_variable>, std::map<data::variable, data::data_expression>> constraints_t;
-  typedef std::map<core::identifier_string, constraints_t> constraints_map_t;
-  typedef std::map<core::identifier_string, pbes_equation&> variable_map_t;
-  using super::apply;
-  using super::enter;
-
-
-  std::list<pbes_expression> quantified_context;
-  const constraints_map_t& constraints_map;
-  variable_map_t& var_map;
-
-  data::set_identifier_generator& id_gen;
-  std::map<core::identifier_string, pbes_equation> new_equations;
-  std::map<core::identifier_string, pbes_equation> new_equations_rec;
-  std::list<core::identifier_string> eqn_stack;
-
-  constelm_quantifiers_inside_builder(const constraints_map_t& cm, variable_map_t& vm, data::set_identifier_generator& ig)
-  : constraints_map(cm)
-  , var_map(vm)
-  , id_gen(ig)
-  {}
-
-  constelm_quantifiers_inside_builder(constelm_quantifiers_inside_builder& other)
-  : constraints_map(other.constraints_map)
-  , var_map(other.var_map)
-  , id_gen(other.id_gen)
-  , new_equations(other.new_equations)
-  , new_equations_rec(other.new_equations_rec)
-  , eqn_stack(other.eqn_stack)
-  {}
-
-  pbes_expression apply(const forall& x)
-  {
-    quantified_context.push_back(x);
-    pbes_expression result = apply(x.body());
-    if(quantified_context.empty())
-    {
-      return forall(x.variables(), result);
-    }
-    else
-    {
-      quantified_context.pop_back();
-      if(result == x.body())
-      {
-        return x;
-      }
-      else
-      {
-        return result;
-      }
-    }
-  }
-
-  pbes_expression apply(const exists& x)
-  {
-    quantified_context.push_back(x);
-    pbes_expression result = apply(x.body());
-    if(quantified_context.empty())
-    {
-      return exists(x.variables(), result);
-    }
-    else
-    {
-      quantified_context.pop_back();
-      if(result == x.body())
-      {
-        return x;
-      }
-      else
-      {
-        return result;
-      }
-    }
-  }
-
-  void enter(const and_& /*x*/)
-  {
-    quantified_context.clear();
-  }
-
-  void enter(const or_& /*x*/)
-  {
-    quantified_context.clear();
-  }
-
-  void enter(const imp& /*x*/)
-  {
-    quantified_context.clear();
-  }
-
-  void enter(const not_& /*x*/)
-  {
-    quantified_context.clear();
-  }
-
-  pbes_expression apply(const propositional_variable_instantiation& X_e)
-  {
-    // Create list of quantified variables around X_e
-    std::list<quantified_variable> qvars;
-    for(const pbes_expression& pe: quantified_context)
-    {
-      assert(is_forall(pe) || is_exists(pe));
-      data::variable_list vars(is_forall(pe) ? atermpp::down_cast<forall>(pe).variables() : atermpp::down_cast<exists>(pe).variables());
-      for(const data::variable& v: vars)
-      {
-        qvars.emplace_back(is_forall(pe), v);
-      }
-    }
-    // Check whether some parameters of X_e are constant
-    auto find_result = constraints_map.find(X_e.name());
-    if(find_result == constraints_map.end())
-    {
-      return X_e;
-    }
-
-    const constraints_t& constraints = find_result->second;
-    const std::map<data::variable, data::data_expression>& exprs = constraints.second;
-    const std::list<quantified_variable>& cqvars = constraints.first;
-    const std::vector<data::variable> parameters(var_map.at(X_e.name()).variable().parameters().begin(), var_map.at(X_e.name()).variable().parameters().end());
-    const std::vector<data::data_expression> updates(X_e.parameters().begin(), X_e.parameters().end());
-
-    std::list<std::size_t> independent_pars;
-    std::set<data::variable> quantified_variables;
-    for(const quantified_variable& qv: qvars)
-    {
-      quantified_variables.insert(qv.variable());
-    }
-
-    // Start building a list of parameters that are constant and can be pushed through X_e
-    std::set<data::variable> seen;
-    std::size_t i = 0;
-    for(const data::variable& par: parameters)
-    {
-      if(exprs.count(par) != 0)
-      {
-        independent_pars.push_back(i);
-      }
-      else
-      {
-        std::set<data::variable> fv = find_free_variables(updates[i]);
-        seen.insert(fv.begin(), fv.end());
-      }
-      i++;
-    }
-    std::queue<data::variable> todo(std::deque<data::variable>(seen.begin(), seen.end()));
-
-    // Add all transitive dependencies, either becuase they occur together in one
-    // of the updates, or because of their quantifier scopes
-    while(!todo.empty())
-    {
-      data::variable elem = todo.front();
-      todo.pop();
-
-      // Check for each update if it contains elem. If so, elem also influences the
-      // other free variables in that update expression.
-      for(std::list<std::size_t>::const_iterator ip = independent_pars.begin(); ip != independent_pars.end(); )
-      {
-        if(find_free_variables(updates[*ip]).count(elem) != 0)
-        {
-          for(const data::variable& var: find_free_variables(updates[*ip]))
-          {
-            if(seen.count(var) == 0)
-            {
-              todo.push(var);
-              seen.insert(var);
-            }
-          }
-          ip = independent_pars.erase(ip);
-        }
-        else
-        {
-          ++ip;
-        }
-      }
-
-      // Check if we need to add quantified variables that have a larger scope and
-      // and are at least one quantifier alternation away from elem
-      bool add_rest = false;
-      bool is_forall = false;
-      bool quantifier_changed = false;
-      for(auto qv = qvars.rbegin(); qv != qvars.rend(); ++qv)
-      {
-        const data::variable& var = qv->variable();
-        if(var == elem)
-        {
-          add_rest = true;
-          is_forall = qv->is_forall();
-        }
-        else if(add_rest)
-        {
-          // if the quantifier changes, we need to add all variables from now on
-          quantifier_changed |= qv->is_forall() != is_forall;
-          if(quantifier_changed && seen.count(var) == 0)
-          {
-            mCRL2log(log::verbose) << "adding variable " << var << ": " << var.sort() << std::endl;
-            seen.insert(var);
-            todo.push(var);
-          }
-        }
-      }
-    }
-
-    if(independent_pars.empty())
-    {
-      if(std::find(eqn_stack.begin(), eqn_stack.end(), X_e.name()) == eqn_stack.end())
-      {
-        eqn_stack.push_back(X_e.name());
-        constelm_quantifiers_inside_builder r(*this);
-        r.update(var_map.at(X_e.name()).formula());
-        new_equations = r.new_equations;
-        new_equations_rec = r.new_equations_rec;
-        eqn_stack.pop_back();
-      }
-      return X_e;
-    }
-
-    // Build a new equation based on the independent parameters found
-    data::variable_list new_parameter_list;
-    data::data_expression_list new_update_list;
-    i = 0;
-    auto ip = independent_pars.begin();
-    data::rewriter::substitution_type sigma;
-    for(const data::variable& par: parameters)
-    {
-      if(ip != independent_pars.end() && *ip == i)
-      {
-        sigma[par] = updates[i];
-        ++ip;
-      }
-      else
-      {
-        new_parameter_list.push_front(par);
-        new_update_list.push_front(updates[i]);
-      }
-      i++;
-    }
-    new_parameter_list = reverse(new_parameter_list);
-    new_update_list = reverse(new_update_list);
-
-    // Generate a new name if necessary
-    core::identifier_string new_name;
-    auto eqn_find_result = new_equations.find(X_e.name());
-    if(eqn_find_result != new_equations.end())
-    {
-      new_name = eqn_find_result->second.variable().name();
-    }
-    else
-    {
-      new_name = id_gen(X_e.name());
-    }
-
-    pbes_expression new_rhs = pbes_system::replace_free_variables(var_map.at(X_e.name()).formula(), sigma);
-    propositional_variable_instantiation new_inst(new_name, new_update_list);
-    pbes_expression result = new_inst;
-    for(auto qv = qvars.rbegin(); qv != qvars.rend(); ++qv)
-    {
-      if(seen.count(qv->variable()) != 0)
-      {
-        result = qv->make_expr(result);
-      }
-      else
-      {
-        new_rhs = qv->make_expr(new_rhs);
-      }
-    }
-    pbes_equation new_eqn(var_map.at(X_e.name()).symbol(), propositional_variable(new_name, new_parameter_list), new_rhs);
-
-    if(eqn_find_result != new_equations.end())
-    {
-      if(eqn_find_result->second == new_eqn)
-      {
-        mCRL2log(log::verbose) << "------------\nFound matching equation, returning " << result << std::endl;
-        return result;
-      }
-      else
-      {
-        mCRL2log(log::verbose) << "------------\nFound different equation, my independent parameters are\n"
-          << core::detail::print_list(independent_pars) << " in " << X_e << std::endl;
-        return X_e;
-      }
-    }
-    new_equations.insert(std::make_pair(X_e.name(), new_eqn));
-
-    new_eqn.formula() = quantifiers_inside(new_eqn.formula());
-    constelm_quantifiers_inside_builder r(*this);
-    r.update(new_eqn.formula());
-    new_equations = r.new_equations;
-    new_equations_rec = r.new_equations_rec;
-    new_equations_rec.insert(std::make_pair(X_e.name(), new_eqn));
-    mCRL2log(log::verbose) << "------------\nIndependent parameters for ";
-    for(const quantified_variable& qv: qvars)
-    {
-      mCRL2log(log::verbose) << qv.to_string();
-    }
-    mCRL2log(log::verbose) << X_e << "\n";
-    for(const std::size_t j: independent_pars)
-    {
-      mCRL2log(log::verbose) << parameters[j] << "\n";
-    }
-    mCRL2log(log::verbose) << std::endl;
-    mCRL2log(log::verbose) << "New rhs " << new_rhs << std::endl;
-    mCRL2log(log::verbose) << "New equation " << new_eqn << std::endl;
-    mCRL2log(log::verbose) << "New instantiation " << result << std::endl;
-
-
-    return result;
-  }
-};
-
 } // namespace detail
 /// \endcond
 
-void rewrite_constelm_quantifiers_inside(pbes& p,
-  const typename detail::constelm_quantifiers_inside_builder::constraints_map_t& cm)
-{
-  typename detail::constelm_quantifiers_inside_builder::variable_map_t vm;
-  for(pbes_equation& e: p.equations())
-  {
-    vm.insert(std::pair<core::identifier_string, pbes_equation&>(e.variable().name(),e));
-  }
-  data::set_identifier_generator id_gen;
-  for(const pbes_equation& eq: p.equations())
-  {
-    id_gen.add_identifier(eq.variable().name());
-  }
-  detail::constelm_quantifiers_inside_builder r(cm, vm, id_gen);
-  pbes_expression initial_state(p.initial_state());
-  r.update(initial_state);
-  p.initial_state() = atermpp::down_cast<propositional_variable_instantiation>(initial_state);
-  std::vector<pbes_equation> new_eqns;
-  for(const pbes_equation& eq: p.equations())
-  {
-    new_eqns.push_back(eq);
-    auto eq_find_result = r.new_equations_rec.find(eq.variable().name());
-    if(eq_find_result != r.new_equations_rec.end())
-    {
-      new_eqns.push_back(eq_find_result->second);
-    }
-  }
-  p.equations() = new_eqns;
-}
 
 /// \brief Algorithm class for the constelm algorithm
 template <typename DataRewriter, typename PbesRewriter>
@@ -754,7 +413,7 @@ class pbes_constelm_algorithm
           return m_source;
         }
 
-        const std::list<detail::quantified_variable>& quantified_variables() const
+        const qvar_list& quantified_variables() const
         {
           return m_qvars;
         }
@@ -850,7 +509,7 @@ class pbes_constelm_algorithm
           return m_variable;
         }
 
-        const qvar_list quantified_variables() const
+        const qvar_list& quantified_variables() const
         {
           return m_qvars;
         }
@@ -1177,47 +836,44 @@ class pbes_constelm_algorithm
         }
       }
 
-      typename detail::constelm_quantifiers_inside_builder::constraints_map_t cm;
-      for(const auto& vp: m_vertices)
-      {
-        const vertex& v = vp.second;
-        cm[v.variable().name()] = std::make_pair(v.quantified_variables(), v.constraints());
-      }
-      rewrite_constelm_quantifiers_inside(p, cm);
-
       // Apply the constraints to the equations.
-      // for (pbes_equation& eqn: p.equations())
-      // {
-      //   core::identifier_string name = eqn.variable().name();
-      //   const vertex& v = m_vertices[name];
-      //
-      //   if (!v.constraints().empty())
-      //   {
-      //     data::rewriter::substitution_type sigma;
-      //     detail::make_constelm_substitution(v.constraints(), sigma);
-      //     eqn = pbes_equation(
-      //              eqn.symbol(),
-      //              eqn.variable(),
-      //              pbes_system::replace_free_variables(eqn.formula(), sigma)
-      //            );
-      //   }
-      // }
-      //
-      // // remove the redundant parameters
-      // pbes_system::algorithms::remove_parameters(p, m_redundant_parameters);
-      //
-      // // print the parameters and equation that are removed
-      // if (mCRL2logEnabled(log::verbose))
-      // {
-      //   mCRL2log(log::verbose) << "\nremoved the following constant parameters:" << std::endl;
-      //   for (const std::pair<const propositional_variable, std::vector<data::variable>>& i: redundant_parameters())
-      //   {
-      //     for (const data::variable& var: i.second)
-      //     {
-      //       mCRL2log(log::verbose) << "  (" << mcrl2::core::pp(i.first.name()) << ", " << data::pp(var) << ")" << std::endl;
-      //     }
-      //   }
-      // }
+      for (pbes_equation& eqn: p.equations())
+      {
+        core::identifier_string name = eqn.variable().name();
+        const vertex& v = m_vertices[name];
+
+        if (!v.constraints().empty())
+        {
+          data::rewriter::substitution_type sigma;
+          detail::make_constelm_substitution(v.constraints(), sigma);
+          pbes_expression body = pbes_system::replace_free_variables(eqn.formula(), sigma);
+          for (auto i = v.quantified_variables().crbegin(); i != v.quantified_variables().crend(); ++i)
+          {
+            body = i->make_expr(body);
+          }
+          eqn = pbes_equation(
+                   eqn.symbol(),
+                   eqn.variable(),
+                   body
+                 );
+        }
+      }
+
+      // remove the redundant parameters
+      pbes_system::algorithms::remove_parameters(p, m_redundant_parameters);
+
+      // print the parameters and equation that are removed
+      if (mCRL2logEnabled(log::verbose))
+      {
+        mCRL2log(log::verbose) << "\nremoved the following constant parameters:" << std::endl;
+        for (const std::pair<const propositional_variable, std::vector<data::variable>>& i: redundant_parameters())
+        {
+          for (const data::variable& var: i.second)
+          {
+            mCRL2log(log::verbose) << "  (" << mcrl2::core::pp(i.first.name()) << ", " << data::pp(var) << ")" << std::endl;
+          }
+        }
+      }
     }
 };
 
