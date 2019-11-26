@@ -38,7 +38,8 @@ void pbesconstelm(const std::string& input_filename,
                   data::rewrite_strategy rewrite_strategy,
                   pbes_rewriter_type rewriter_type,
                   bool compute_conditions,
-                  bool remove_redundant_equations
+                  bool remove_redundant_equations,
+                  bool check_quantifiers
                  );
 
 void pbesinfo(const std::string& input_filename,
