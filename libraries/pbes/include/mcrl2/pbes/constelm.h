@@ -679,7 +679,7 @@ class pbes_constelm_algorithm
     /// \param p A pbes
     /// \param compute_conditions If true, propagation conditions are computed. Note
     /// that the currently implementation has exponential behavior.
-    void run(pbes& p, bool compute_conditions = false)
+    void run(pbes& p, bool compute_conditions = false, bool check_quantifiers = true)
     {
       m_vertices.clear();
       m_edges.clear();
@@ -699,15 +699,14 @@ class pbes_constelm_algorithm
         for (auto& [Q_X_e, conditions]: f.result())
         {
           auto& [Q, X_e] = Q_X_e;
-          if(compute_conditions)
-          {
-            data::data_expression condition = data::lazy::join_and(conditions.begin(), conditions.end());
-            edges.emplace_back(eqn.variable(), Q, X_e, condition);
-          }
-          else
-          {
-            edges.emplace_back(eqn.variable(), Q, X_e);
-          }
+
+          // check options for quantifiers and conditions.
+          qvar_list quantifier_list = check_quantifiers ? Q : qvar_list();
+          data::data_expression condition = compute_conditions
+            ? data::lazy::join_and(conditions.begin(), conditions.end())
+            : data::data_expression(data::sort_bool::true_());
+
+          edges.emplace_back(eqn.variable(), quantifier_list, X_e, condition);
         }
       }
 
@@ -829,7 +828,8 @@ void constelm(pbes& p,
               data::rewrite_strategy rewrite_strategy,
               pbes_rewriter_type rewriter_type,
               bool compute_conditions = false,
-              bool remove_redundant_equations = true
+              bool remove_redundant_equations = true,
+              bool check_quantifiers = true
              )
 {
   // data rewriter
@@ -843,7 +843,7 @@ void constelm(pbes& p,
       typedef simplify_data_rewriter<data::rewriter> pbes_rewriter;
       pbes_rewriter pbesr(datar);
       pbes_constelm_algorithm<data::rewriter, pbes_rewriter> algorithm(datar, pbesr);
-      algorithm.run(p, compute_conditions);
+      algorithm.run(p, compute_conditions, check_quantifiers);
       if (remove_redundant_equations)
       {
         std::vector<propositional_variable> V = algorithms::remove_unreachable_variables(p);
@@ -857,7 +857,7 @@ void constelm(pbes& p,
       bool enumerate_infinite_sorts = (rewriter_type == quantifier_all);
       enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_infinite_sorts);
       pbes_constelm_algorithm<data::rewriter, enumerate_quantifiers_rewriter> algorithm(datar, pbesr);
-      algorithm.run(p, compute_conditions);
+      algorithm.run(p, compute_conditions, check_quantifiers);
       if (remove_redundant_equations)
       {
         std::vector<propositional_variable> V = algorithms::remove_unreachable_variables(p);
