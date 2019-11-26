@@ -34,165 +34,6 @@ void make_constelm_substitution(const std::map<data::variable, data::data_expres
   }
 }
 
-/// \cond INTERNAL_DOCS
-/// \brief Compares two terms
-/// \param v A term
-/// \param w A term
-/// \return True if v is less than w
-inline
-bool less_term(const atermpp::aterm_appl& v, const atermpp::aterm_appl& w)
-{
-  return v < w;
-}
-
-struct constelm_edge_condition
-{
-  typedef std::multimap<propositional_variable_instantiation, std::set<data::data_expression> > condition_map;
-
-  data::data_expression TC;
-  data::data_expression FC;
-  condition_map condition;  // condT + condF
-
-  constelm_edge_condition(const data::data_expression& tc, const data::data_expression& fc)
-    : TC(tc), FC(fc)
-  {}
-};
-
-struct edge_condition_traverser: public pbes_expression_traverser<edge_condition_traverser>
-{
-  typedef pbes_expression_traverser<edge_condition_traverser> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
-
-  typedef constelm_edge_condition edge_condition;
-  typedef edge_condition::condition_map condition_map;
-
-  std::vector<edge_condition> condition_stack;
-
-  void push(const edge_condition& x)
-  {
-    condition_stack.push_back(x);
-  }
-
-  edge_condition& top()
-  {
-    return condition_stack.back();
-  }
-
-  const edge_condition& top() const
-  {
-    return condition_stack.back();
-  }
-
-  edge_condition pop()
-  {
-    edge_condition result = top();
-    condition_stack.pop_back();
-    return result;
-  }
-
-  // N.B. As a side effect ec1 and ec2 are changed!!!
-  void merge_conditions(edge_condition& ec1, bool negate1,
-                        edge_condition& ec2, bool negate2,
-                        edge_condition& ec
-                       )
-  {
-    for (auto& i: ec1.condition)
-    {
-      i.second.insert(negate2 ? ec2.FC : ec2.TC);
-      ec.condition.insert(i);
-    }
-    for (auto& i: ec2.condition)
-    {
-      i.second.insert(negate1 ? ec1.FC : ec1.TC);
-      ec.condition.insert(i);
-    }
-  }
-
-  void leave(const data::data_expression& x)
-  {
-    push(edge_condition(x, data::optimized_not(x)));
-  }
-
-  void leave(const not_&)
-  {
-    std::swap(top().TC, top().FC);
-  }
-
-  void leave(const and_&)
-  {
-    edge_condition ec_right = pop();
-    edge_condition ec_left = pop();
-    edge_condition ec(data::optimized_and(ec_left.TC, ec_right.TC), data::optimized_or(ec_left.FC, ec_right.FC));
-    merge_conditions(ec_left, false, ec_right, false, ec);
-    push(ec);
-  }
-
-  void leave(const or_&)
-  {
-    edge_condition ec_right = pop();
-    edge_condition ec_left = pop();
-    edge_condition ec(data::optimized_or(ec_left.TC, ec_right.TC), data::optimized_and(ec_left.FC, ec_right.FC));
-    merge_conditions(ec_left, true, ec_right, true, ec);
-    push(ec);
-  }
-
-  void leave(const imp&)
-  {
-    edge_condition ec_right = pop();
-    edge_condition ec_left = pop();
-    edge_condition ec(data::optimized_or(ec_left.FC, ec_right.TC), data::optimized_and(ec_left.TC, ec_right.FC));
-    merge_conditions(ec_left, false, ec_right, true, ec);
-    push(ec);
-  }
-
-  void leave(const forall& x)
-  {
-    edge_condition ec = pop();
-    for (auto& [X_e, cond_set]: ec.condition)
-    {
-      std::set<data::data_expression> new_conditions;
-      for(const data::data_expression& e: cond_set)
-      {
-        new_conditions.insert(data::optimized_exists(x.variables(), e, true));
-      }
-      cond_set = std::move(new_conditions);
-      cond_set.insert(data::optimized_forall(x.variables(), ec.TC, true));
-    }
-    push(ec);
-  }
-
-  void leave(const exists& x)
-  {
-    edge_condition ec = pop();
-    for (auto& [X_e, cond_set]: ec.condition)
-    {
-      std::set<data::data_expression> new_conditions;
-      for(const data::data_expression& e: cond_set)
-      {
-        new_conditions.insert(data::optimized_exists(x.variables(), e, true));
-      }
-      cond_set = std::move(new_conditions);
-      cond_set.insert(data::optimized_forall(x.variables(), ec.FC, true));
-    }
-    push(ec);
-  }
-
-  void leave(const propositional_variable_instantiation& x)
-  {
-    edge_condition ec(data::sort_bool::true_(), data::sort_bool::true_());
-    ec.condition.insert(std::make_pair(x, std::set<data::data_expression>{data::sort_bool::true_()}));
-    push(ec);
-  }
-
-  const condition_map& result() const
-  {
-    assert(condition_stack.size() == 1);
-    return top().condition;
-  }
-};
-
 class quantified_variable
 {
 protected:
@@ -238,109 +79,215 @@ public:
   }
 };
 
-template <template <class> class Traverser, class OutputIterator>
-struct find_quantified_propositional_variables_traverser: public Traverser<find_quantified_propositional_variables_traverser<Traverser, OutputIterator> >
+struct constelm_edge_condition
 {
-  typedef Traverser<find_quantified_propositional_variables_traverser<Traverser, OutputIterator> > super;
+  typedef std::multimap<std::pair<std::list<quantified_variable>, propositional_variable_instantiation>, std::set<data::data_expression> > condition_map;
+
+  data::data_expression TC;
+  data::data_expression FC;
+  condition_map condition;  // condT + condF
+
+  constelm_edge_condition(const data::data_expression& tc, const data::data_expression& fc)
+    : TC(tc), FC(fc)
+  {}
+};
+
+struct edge_condition_traverser: public pbes_expression_traverser<edge_condition_traverser>
+{
+  typedef pbes_expression_traverser<edge_condition_traverser> super;
   using super::enter;
   using super::leave;
   using super::apply;
 
-  OutputIterator out;
+  typedef constelm_edge_condition edge_condition;
+  typedef edge_condition::condition_map condition_map;
+  typedef std::list<detail::quantified_variable> qvar_list;
+
+  std::vector<edge_condition> condition_stack;
   std::list<pbes_expression> quantified_context;
 
-  find_quantified_propositional_variables_traverser(OutputIterator out_)
-    : out(out_)
-  {}
-
-  // instead of deriving from a traverser in the data library
-  void apply(const data::data_expression&)
-  {}
-
-  void apply(const forall& v)
+  void push(const edge_condition& x)
   {
-    quantified_context.push_back(v);
-    apply(v.body());
-    if(quantified_context.back() == v)
+    condition_stack.push_back(x);
+  }
+
+  edge_condition& top()
+  {
+    return condition_stack.back();
+  }
+
+  const edge_condition& top() const
+  {
+    return condition_stack.back();
+  }
+
+  edge_condition pop()
+  {
+    edge_condition result = top();
+    condition_stack.pop_back();
+    return result;
+  }
+
+  // N.B. As a side effect ec1 and ec2 are changed!!!
+  void merge_conditions(edge_condition& ec1, bool negate1,
+                        edge_condition& ec2, bool negate2,
+                        edge_condition& ec
+                       )
+  {
+    for (auto& i: ec1.condition)
+    {
+      i.second.insert(negate2 ? ec2.FC : ec2.TC);
+      ec.condition.insert(i);
+    }
+    for (auto& i: ec2.condition)
+    {
+      i.second.insert(negate1 ? ec1.FC : ec1.TC);
+      ec.condition.insert(i);
+    }
+  }
+
+  // enter functions related to maintaining the quantfier scope
+  void enter(const not_&)
+  {
+    quantified_context.clear();
+  }
+
+  void enter(const and_&)
+  {
+    quantified_context.clear();
+  }
+
+  void enter(const or_&)
+  {
+    quantified_context.clear();
+  }
+
+  void enter(const imp&)
+  {
+    quantified_context.clear();
+  }
+
+  void enter(const forall& x)
+  {
+    quantified_context.push_back(x);
+  }
+
+  void enter(const exists& x)
+  {
+    quantified_context.push_back(x);
+  }
+
+  // leave functions, mostly used to build conditions
+  void leave(const data::data_expression& x)
+  {
+    push(edge_condition(x, data::optimized_not(x)));
+  }
+
+  void leave(const not_&)
+  {
+    std::swap(top().TC, top().FC);
+  }
+
+  void leave(const and_&)
+  {
+    edge_condition ec_right = pop();
+    edge_condition ec_left = pop();
+    edge_condition ec(data::optimized_and(ec_left.TC, ec_right.TC), data::optimized_or(ec_left.FC, ec_right.FC));
+    merge_conditions(ec_left, false, ec_right, false, ec);
+    push(ec);
+  }
+
+  void leave(const or_&)
+  {
+    edge_condition ec_right = pop();
+    edge_condition ec_left = pop();
+    edge_condition ec(data::optimized_or(ec_left.TC, ec_right.TC), data::optimized_and(ec_left.FC, ec_right.FC));
+    merge_conditions(ec_left, true, ec_right, true, ec);
+    push(ec);
+  }
+
+  void leave(const imp&)
+  {
+    edge_condition ec_right = pop();
+    edge_condition ec_left = pop();
+    edge_condition ec(data::optimized_or(ec_left.FC, ec_right.TC), data::optimized_and(ec_left.TC, ec_right.FC));
+    merge_conditions(ec_left, false, ec_right, true, ec);
+    push(ec);
+  }
+
+  void leave(const forall& x)
+  {
+    // build conditions
+    edge_condition ec = pop();
+    for (auto& [X_e, cond_set]: ec.condition)
+    {
+      std::set<data::data_expression> new_conditions;
+      for(const data::data_expression& e: cond_set)
+      {
+        new_conditions.insert(data::optimized_exists(x.variables(), e, true));
+      }
+      cond_set = std::move(new_conditions);
+      cond_set.insert(data::optimized_forall(x.variables(), ec.TC, true));
+    }
+    push(ec);
+
+    // maintain quantifier scope
+    if(quantified_context.back() == x)
     {
       quantified_context.pop_back();
     }
   }
 
-  void apply(const exists& v)
+  void leave(const exists& x)
   {
-    quantified_context.push_back(v);
-    apply(v.body());
-    if(quantified_context.back() == v)
+    // build conditions
+    edge_condition ec = pop();
+    for (auto& [X_e, cond_set]: ec.condition)
+    {
+      std::set<data::data_expression> new_conditions;
+      for(const data::data_expression& e: cond_set)
+      {
+        new_conditions.insert(data::optimized_exists(x.variables(), e, true));
+      }
+      cond_set = std::move(new_conditions);
+      cond_set.insert(data::optimized_forall(x.variables(), ec.FC, true));
+    }
+    push(ec);
+
+    // maintain quantifier scope
+    if(quantified_context.back() == x)
     {
       quantified_context.pop_back();
     }
   }
 
-  void enter(const not_& /*v*/  )
+  void leave(const propositional_variable_instantiation& x)
   {
-    quantified_context.clear();
-  }
-
-  void enter(const and_& /*v*/  )
-  {
-    quantified_context.clear();
-  }
-
-  void enter(const or_& /*v*/ )
-  {
-    quantified_context.clear();
-  }
-
-  void enter(const imp& /*v*/ )
-  {
-    quantified_context.clear();
-  }
-
-  void apply(const propositional_variable_instantiation& v)
-  {
-    std::list<quantified_variable> qvars;
-    for(const pbes_expression& pe: quantified_context)
+    // Build list of qvars from quantifier scope
+    qvar_list qvars;
+    for(const pbes_expression& expr: quantified_context)
     {
-      assert(is_forall(pe) || is_exists(pe));
-      data::variable_list vars(is_forall(pe) ? atermpp::down_cast<forall>(pe).variables() : atermpp::down_cast<exists>(pe).variables());
+      assert(is_forall(expr) || is_exists(expr));
+      data::variable_list vars(is_forall(expr) ? atermpp::down_cast<forall>(expr).variables() : atermpp::down_cast<exists>(expr).variables());
       for(const data::variable& v: vars)
       {
-        qvars.emplace_back(is_forall(pe), v);
+        qvars.emplace_back(is_forall(expr), v);
       }
     }
-    *out = std::make_pair(qvars, v);
+    std::pair<qvar_list, propositional_variable_instantiation> QPVI(qvars, x);
+
+    // Store the QPVI and the condition true
+    edge_condition ec(data::sort_bool::true_(), data::sort_bool::true_());
+    ec.condition.insert(std::make_pair(QPVI, std::set<data::data_expression>{data::sort_bool::true_()}));
+    push(ec);
+  }
+
+  const condition_map& result() const
+  {
+    assert(condition_stack.size() == 1);
+    return top().condition;
   }
 };
-
-template <template <class> class Traverser, class OutputIterator>
-find_quantified_propositional_variables_traverser<Traverser, OutputIterator>
-make_find_quantified_propositional_variables_traverser(OutputIterator out)
-{
-  return find_quantified_propositional_variables_traverser<Traverser, OutputIterator>(out);
-}
-
-/// \brief Returns all data variables that occur in a range of expressions
-/// \param[in] container a container with expressions
-/// \param[in,out] o an output iterator to which all data variables occurring in t
-///             are added.
-/// \return All data variables that occur in the term t
-template <typename Container, typename OutputIterator>
-void find_quantified_propositional_variable_instantiations(const Container& container, OutputIterator o)
-{
-  make_find_quantified_propositional_variables_traverser<pbes_system::pbes_expression_traverser>(o).apply(container);
-}
-
-/// \brief Returns all data variables that occur in a range of expressions
-/// \param[in] container a container with expressions
-/// \return All data variables that occur in the term t
-template <typename Container>
-std::set<std::pair<std::list<quantified_variable>, propositional_variable_instantiation>> find_quantified_propositional_variable_instantiations(const Container& container)
-{
-  std::set<std::pair<std::list<quantified_variable>, propositional_variable_instantiation>> result;
-  find_quantified_propositional_variable_instantiations(container, std::inserter(result, result.end()));
-  return result;
-}
 
 } // namespace detail
 /// \endcond
@@ -743,29 +690,23 @@ class pbes_constelm_algorithm
       {
         core::identifier_string name = eqn.variable().name();
         m_vertices[name] = vertex(eqn.variable());
-        eqn.formula() = detail::quantifiers_inside(eqn.formula());
 
-        if (compute_conditions)
+        // use an edge_condition_traverser to compute the edges
+        detail::edge_condition_traverser f;
+        f.apply(eqn.formula());
+
+        std::vector<edge>& edges = m_edges[name];
+        for (auto& [Q_X_e, conditions]: f.result())
         {
-          // use an edge_condition_traverser to compute the edges
-          // detail::edge_condition_traverser f;
-          // f.apply(eqn.formula());
-          //
-          // std::vector<edge>& edges = m_edges[name];
-          // for (auto& [X_e, conditions]: f.result())
-          // {
-          //   data::data_expression condition = data::lazy::join_and(conditions.begin(), conditions.end());
-          //   edges.emplace_back(eqn.variable(), X_e, condition);
-          // }
-        }
-        else
-        {
-          // use find function to compute the edges
-          std::set<std::pair<qvar_list,propositional_variable_instantiation>> inst = detail::find_quantified_propositional_variable_instantiations(eqn.formula());
-          std::vector<edge>& edges = m_edges[name];
-          for (const auto& k : inst)
+          auto& [Q, X_e] = Q_X_e;
+          if(compute_conditions)
           {
-            edges.emplace_back(eqn.variable(), k.first, k.second);
+            data::data_expression condition = data::lazy::join_and(conditions.begin(), conditions.end());
+            edges.emplace_back(eqn.variable(), Q, X_e, condition);
+          }
+          else
+          {
+            edges.emplace_back(eqn.variable(), Q, X_e);
           }
         }
       }
