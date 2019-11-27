@@ -549,6 +549,15 @@ class pbes_constelm_algorithm
                 changed = true;
               }
             }
+            if (changed)
+            {
+              std::set<data::variable> used_vars;
+              for(const auto& [var, expr]: m_constraints)
+              {
+                data::find_free_variables(m_constraints[*j], std::inserter(used_vars, used_vars.end()));
+              }
+              m_qvars = project(qvars, used_vars);
+            }
           }
           return changed;
         }
@@ -615,9 +624,9 @@ class pbes_constelm_algorithm
     std::string print_edge_update(const edge& e, const vertex& u, const vertex& v)
     {
       std::ostringstream out;
-      out << "\n<updating edge>" << e.to_string() << std::endl;
-      out << "  <source vertex       >" << u.to_string() << std::endl;
-      out << "  <target vertex before>" << v.to_string() << std::endl;
+      out << "\n<updating edge> " << e.to_string() << std::endl;
+      out << "  <source vertex       > " << u.to_string() << std::endl;
+      out << "  <target vertex before> " << v.to_string() << std::endl;
       return out.str();
     }
 
@@ -626,7 +635,7 @@ class pbes_constelm_algorithm
       std::ostringstream out;
       data::rewriter::substitution_type sigma;
       detail::make_constelm_substitution(u.constraints(), sigma);
-      out << "\nEvaluated condition " << e.condition() << sigma << " to " << value << std::endl;
+      out << "  <condition           > " << e.condition() << sigma << " to " << value << std::endl;
       return out.str();
     }
 
