@@ -423,9 +423,7 @@ class pbes_constelm_algorithm
           {
             out << qv.to_string();
           }
-          out << m_target << "  condition = " << condition()
-              << " conj context = " << core::detail::print_set(m_conj_context)
-              << " disj context = " << core::detail::print_set(m_disj_context);
+          out << m_target << "  condition = " << condition();
           return out.str();
         }
 
@@ -450,6 +448,28 @@ class pbes_constelm_algorithm
         const data::data_expression& condition() const
         {
           return *this;
+        }
+
+        /// \brief Try to guess which quantifiers of Q can end up directly
+        /// before target, when the quantifier inside rewriter is applied.
+        qvar_list quantifier_inside_approximation(const qvar_list& Q) const
+        {
+          qvar_list result;
+          for (auto it = Q.crbegin(); it != Q.crend(); ++it)
+          {
+            // Variable of a universal quantifier cannot occur in the disjunctive context
+            // Variable of an existential quantifier cannot occur in the conjunctive context
+            if (( it->is_forall() && m_disj_context.find(it->variable()) == m_disj_context.end()) ||
+                (!it->is_forall() && m_conj_context.find(it->variable()) == m_conj_context.end()))
+            {
+              result.push_front(*it);
+            }
+            else
+            {
+              break;
+            }
+          }
+          return result;
         }
     };
 
@@ -834,13 +854,17 @@ class pbes_constelm_algorithm
           }
           if (!is_false(needs_update))
           {
-            bool changed = v.update(concat(u.quantified_variables(), e.quantified_variables()), e.target().parameters(), u.constraints(), m_data_rewriter);
+            bool changed = v.update(
+                              concat(e.quantifier_inside_approximation(u.quantified_variables()), e.quantified_variables()),
+                              e.target().parameters(),
+                              u.constraints(),
+                              m_data_rewriter);
             if (changed)
             {
               todo.push_back(v.variable());
             }
           }
-          mCRL2log(log::debug) << "  <target vertex after >" << v.to_string() << "\n";
+          mCRL2log(log::debug) << "  <target vertex after > " << v.to_string() << "\n";
         }
       }
 
