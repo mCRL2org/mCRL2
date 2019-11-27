@@ -83,3 +83,20 @@ BOOST_AUTO_TEST_CASE(test_parameter_dependency)
 
   BOOST_CHECK_EQUAL(quantifier_propagate(txt2pbes(PBES_TEXT)), txt2pbes(RESULT_TEXT));
 }
+
+BOOST_AUTO_TEST_CASE(test_no_quantifier)
+{
+  std::string PBES_TEXT =
+    "pbes             \n"
+    " nu X(s: Nat) =  \n"
+    "   Y(2);         \n"
+    " mu Y(s: Nat) =  \n"
+    "   val(s == 2);  \n"
+    "init X(0);       \n"
+  ;
+
+  // No changes expected, since there is no quantifier to propagate
+  std::string RESULT_TEXT = PBES_TEXT;
+
+  BOOST_CHECK_EQUAL(quantifier_propagate(txt2pbes(PBES_TEXT)), txt2pbes(RESULT_TEXT));
+}

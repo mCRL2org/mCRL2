@@ -222,8 +222,13 @@ public:
     using utilities::detail::contains;
     using utilities::detail::set_difference;
     using utilities::detail::set_includes;
+    using utilities::detail::set_intersection;
 
     std::list<quantifier> qvars = make_quantifier_list(quantified_context);
+    if(qvars.empty())
+    {
+      return X_e;
+    }
 
     const std::vector<data::variable> parameters(find_equation(X_e).variable().parameters().begin(), find_equation(X_e).variable().parameters().end());
     const std::vector<data::data_expression> updates(X_e.parameters().begin(), X_e.parameters().end());
@@ -301,7 +306,10 @@ public:
       }
     }
 
-    if(independent_pars.empty())
+    // Check whether there is at least one independent parameter and we are
+    // propagating at least one quantified variable.
+    if(independent_pars.empty() ||
+      set_difference(qvars.back().variables(), seen).empty())
     {
       return X_e;
     }
