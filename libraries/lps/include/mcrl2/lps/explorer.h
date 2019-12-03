@@ -1115,7 +1115,7 @@ class explorer: public abortable
       discovered.insert(s0);
       discover_state(s0);
 
-      while (!todo.empty())
+      while (!todo.empty() && !m_must_abort)
       {
         const state* s = &todo.back().first;
         std::list<transition>* E = &todo.back().second;
@@ -1162,6 +1162,7 @@ class explorer: public abortable
         todo.pop_back();
         finish_state(*s);
       }
+      m_must_abort = false;
     }
 
     template <
