@@ -203,7 +203,7 @@ class lts_dot_builder: public lts_lts_builder
     {
       lts_dot_t dot;
       detail::lts_convert(m_lts, dot);
-      m_lts.save(filename);
+      dot.save(filename);
     }
 };
 
@@ -219,7 +219,7 @@ class lts_fsm_builder: public lts_lts_builder
     {
       lts_fsm_t fsm;
       detail::lts_convert(m_lts, fsm);
-      m_lts.save(filename);
+      fsm.save(filename);
     }
 };
 
