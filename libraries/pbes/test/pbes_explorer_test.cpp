@@ -10,6 +10,7 @@
 /// \brief Test for the PBES_Explorer interface.
 
 #include <boost/test/included/unit_test_framework.hpp>
+#include "mcrl2/utilities/logger.h"
 
 #ifndef MCRL2_SKIP_LONG_TESTS
 
@@ -341,6 +342,7 @@ BOOST_AUTO_TEST_CASE(skip_test)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
+  (void) argc;  (void) argv;  //< avoid warning about unused parameters
   mcrl2::log::mcrl2_logger::set_reporting_level(mcrl2::log::debug);
   return nullptr;
 }
