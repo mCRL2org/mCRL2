@@ -679,6 +679,19 @@ class explorer: public abortable
       }
     }
 
+    bool is_confluent_tau(const multi_action& a)
+    {
+      if (a.actions().size() == 0)
+      {
+        return m_options.confluence_action == "tau";
+      }
+      else if (a.actions().size() == 1)
+      {
+        return std::string(a.actions().front().label().name()) == m_options.confluence_action;
+      }
+      return false;
+    }
+
   public:
     explorer(const Specification& lpsspec, const explorer_options& options_)
       : m_options(options_),
@@ -692,13 +705,14 @@ class explorer: public abortable
       timed_state.resize(m_n + 1);
       m_initial_state = lpsspec_.initial_process().state(lpsspec_.process().process_parameters());
       m_initial_distribution = initial_distribution(lpsspec_);
-      core::identifier_string ctau{"ctau"};
+
+      // Split the summands in regular and confluent summands
       const auto& lpsspec_summands = lpsspec_.process().action_summands();
       for (std::size_t i = 0; i < lpsspec_summands.size(); i++)
       {
         const auto& summand = lpsspec_summands[i];
         auto cache_strategy = m_options.cached ? (m_options.global_cache ? lps::caching::global : lps::caching::local) : lps::caching::none;
-        if (summand.multi_action().actions().size() == 1 && summand.multi_action().actions().front().label().name() == ctau)
+        if (is_confluent_tau(summand.multi_action()))
         {
           m_confluent_summands.emplace_back(summand, i, lpsspec_.process().process_parameters(), cache_strategy);
         }

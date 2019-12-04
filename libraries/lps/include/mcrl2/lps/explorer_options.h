@@ -45,12 +45,12 @@ struct explorer_options
   std::size_t max_states = std::numeric_limits<std::size_t>::max();
   std::size_t max_traces = 0;
   std::size_t todo_max = std::numeric_limits<std::size_t>::max();
-  std::string priority_action;
   std::string trace_prefix;
   std::set<core::identifier_string> trace_actions;
   std::set<std::string> trace_multiaction_strings;
   std::set<lps::multi_action> trace_multiactions;
   std::set<core::identifier_string> actions_internal_for_divergencies;
+  std::string confluence_action = "ctau";
 };
 
 inline
@@ -61,6 +61,7 @@ std::ostream& operator<<(std::ostream& out, const explorer_options& options)
   out << "cached = " << std::boolalpha << options.cached << std::endl;
   out << "global-cache = " << std::boolalpha << options.global_cache << std::endl;
   out << "confluence = " << std::boolalpha << options.confluence << std::endl;
+  out << "confluence-action = " << options.confluence << std::endl;
   out << "one-point-rule-rewrite = " << std::boolalpha << options.one_point_rule_rewrite << std::endl;
   out << "resolve-summand-variable-name-clashes = " << std::boolalpha << options.resolve_summand_variable_name_clashes << std::endl;
   out << "replace-constants-by-variables = " << std::boolalpha << options.replace_constants_by_variables << std::endl;
@@ -77,7 +78,6 @@ std::ostream& operator<<(std::ostream& out, const explorer_options& options)
   out << "max-states = " << options.max_states << std::endl;
   out << "max-traces = " << options.max_traces << std::endl;
   out << "todo-max = " << options.todo_max << std::endl;
-  out << "priority-action = " << options.priority_action << std::endl;
   out << "trace-prefix = " << options.trace_prefix << std::endl;
   out << "trace-actions = " << core::detail::print_set(options.trace_actions) << std::endl;
   out << "trace-multiaction-strings = " << core::detail::print_set(options.trace_multiaction_strings) << std::endl;

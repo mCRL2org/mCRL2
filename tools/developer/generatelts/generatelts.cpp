@@ -90,9 +90,9 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
                  , 't');
       desc.add_option("confluence", utilities::make_optional_argument("NAME", "ctau"),
                  "apply prioritization of transitions with the action label NAME. "
-                 "(when no NAME is supplied (i.e., '-c') priority is given to the action 'ctau'. To give priority to "
-                 "to tau use the flag -ctau. Note that if the linear process is not tau-confluent, the generated "
-                 "state space is necessarily branching bisimilar to the state space of the lps. The generation "
+                 "(when no NAME is supplied (i.e., '-c') priority is given to the action 'ctau'. To give priority "
+                 "to tau use the flag -ctau. Only if the linear process is tau-confluent, the generated "
+                 "state space is branching bisimilar to the state space of the lps. The generation "
                  "algorithm that is used does not require the linear process to be tau convergent. ", 'c');
       desc.add_option("out", utilities::make_mandatory_argument("FORMAT"), "save the output in the specified FORMAT. ", 'o');
       desc.add_option("tau", utilities::make_mandatory_argument("ACTNAMES"),
@@ -227,7 +227,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
 
       if (parser.has_option("confluence"))
       {
-        options.priority_action = parser.option_argument("confluence");
+        options.confluence_action = parser.option_argument("confluence");
       }
 
       if (2 < parser.arguments.size())
