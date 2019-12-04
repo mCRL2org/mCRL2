@@ -11,7 +11,7 @@
 
 #define BOOST_TEST_MODULE stategraph_test
 #include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/pbes/detail/guard_traverser.h"
+
 #include "mcrl2/pbes/detail/stategraph_global_reset_variables.h"
 #include "mcrl2/pbes/detail/stategraph_local_reset_variables.h"
 #include "mcrl2/pbes/significant_variables.h"

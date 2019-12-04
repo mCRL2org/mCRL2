@@ -12,9 +12,6 @@
 #ifndef MCRL2_PG_PARITYGAME_IMPL_H
 #define MCRL2_PG_PARITYGAME_IMPL_H
 
-#include <cassert>
-#include <iterator>
-
 #include "mcrl2/pg/ParityGame.h"
 
 template<class ForwardIterator>

@@ -12,9 +12,7 @@
 #ifndef MCRL2_DATA_ALIAS_H
 #define MCRL2_DATA_ALIAS_H
 
-#include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/data/basic_sort.h"
-#include "mcrl2/data/sort_expression.h"
 
 namespace mcrl2
 {

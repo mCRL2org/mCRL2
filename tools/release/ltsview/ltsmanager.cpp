@@ -7,8 +7,6 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "mcrl2/utilities/logger.h"
-#include "ltsmanager.h"
-#include "simulation.h"
 #include "state.h"
 #include "transition.h"
 #include <QEventLoop>

@@ -15,10 +15,6 @@
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/partial_order_reduction.h"
 #include "mcrl2/pbes/io.h"
-#include "mcrl2/pbes/join.h"
-#include "mcrl2/utilities/logger.h"
-
-#include <utility>
 
 namespace mcrl2 {
 

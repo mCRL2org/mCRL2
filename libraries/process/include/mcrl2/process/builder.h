@@ -12,7 +12,6 @@
 #ifndef MCRL2_PROCESS_BUILDER_H
 #define MCRL2_PROCESS_BUILDER_H
 
-#include "mcrl2/core/builder.h"
 #include "mcrl2/data/builder.h"
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/untyped_multi_action.h"

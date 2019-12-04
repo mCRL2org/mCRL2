@@ -13,10 +13,6 @@
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/pg/Graph.h"
 
-#include <iostream>
-#include <vector>
-
-
 // Forward declaration of mcrl2::pbes_system::pbes, which may or may not be
 // defined later depending on whether mCRL2 support is compiled in.
 namespace mcrl2 { namespace pbes_system { class pbes; } }

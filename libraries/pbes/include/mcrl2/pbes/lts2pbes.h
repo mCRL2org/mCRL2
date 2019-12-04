@@ -12,18 +12,9 @@
 #ifndef MCRL2_PBES_LTS2PBES_H
 #define MCRL2_PBES_LTS2PBES_H
 
-#include <map>
-#include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/lts/lts_lts.h"
-#include "mcrl2/modal_formula/algorithms.h"
 #include "mcrl2/modal_formula/count_fixpoints.h"
-#include "mcrl2/modal_formula/preprocess_state_formula.h"
-#include "mcrl2/modal_formula/traverser.h"
 #include "mcrl2/pbes/lps2pbes.h"
-#include "mcrl2/pbes/detail/lts2pbes_lts.h"
 #include "mcrl2/pbes/detail/lts2pbes_e.h"
-#include "mcrl2/utilities/progress_meter.h"
-#include "mcrl2/pbes/detail/term_traits_optimized.h"
 
 namespace mcrl2 {
 

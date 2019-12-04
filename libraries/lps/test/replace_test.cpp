@@ -11,14 +11,10 @@
 
 #define BOOST_TEST_MODULE replace_test
 #include "mcrl2/data/consistency.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/parse.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/replace.h"
+
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iostream>
-#include <set>
-#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::data;

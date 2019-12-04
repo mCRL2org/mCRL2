@@ -13,7 +13,6 @@
 #define MCRL2_LPS_DETAIL_LPS_COMMAND_H
 
 #include "mcrl2/lps/detail/lps_io.h"
-#include "mcrl2/lps/specification.h"
 #include "mcrl2/utilities/detail/command.h"
 
 namespace mcrl2 {

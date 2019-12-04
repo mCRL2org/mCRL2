@@ -10,7 +10,7 @@
 
 #define BOOST_TEST_MODULE read_plain
 #include <boost/test/included/unit_test_framework.hpp>
-#include <sstream>
+
 #include "mcrl2/trace/trace.h"
 
 using namespace std;

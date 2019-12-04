@@ -14,10 +14,7 @@
 
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
-#include <ctime>
 #include <fstream>
-#include <sstream>
-#include <vector>
 
 namespace mcrl2
 {

@@ -8,17 +8,10 @@
 //
 
 #include "mcrl2/lps/io.h"
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_output_output_tool.h"
 
 #include "dependency_cleave.h"
 #include "lpscleave_utility.h"
-
-#include <fstream>
-#include <iostream>
-#include <list>
-#include <string>
-#include <vector>
 
 namespace mcrl2
 {

@@ -11,22 +11,9 @@
 #ifndef TIMESERIES_H
 #define TIMESERIES_H
 
-#include <QtCore>
-#include <QtGui>
-
-#include <cstddef>
-#include <cstdlib>
-#include <cmath>
-#include <map>
-#include <set>
-#include <string>
-#include <vector>
 #include <QTimer>
-#include "attribute.h"
 #include "diagram.h"
-#include "graph.h"
 #include "settings.h"
-#include "visualizer.h"
 
 class TimeSeries : public Visualizer
 {

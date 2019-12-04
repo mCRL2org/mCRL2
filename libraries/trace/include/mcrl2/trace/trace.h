@@ -21,15 +21,8 @@
 
 // #include <iostream>
 #include <fstream>
-#include <string>
-#include "mcrl2/core/print.h"
-#include "mcrl2/core/detail/function_symbols.h"
-#include "mcrl2/data/detail/io.h"
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/process/parse.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/state.h"
-#include "mcrl2/data/data_specification.h"
 
 namespace mcrl2
 {

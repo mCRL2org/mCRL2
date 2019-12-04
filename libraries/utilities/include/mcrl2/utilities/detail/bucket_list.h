@@ -9,7 +9,7 @@
 #ifndef MCRL2_UTILITIES_DETAIL_BUCKETLIST_H_
 #define MCRL2_UTILITIES_DETAIL_BUCKETLIST_H_
 
-#include <assert.h>
+#include <cassert>
 #include <atomic>
 #include <cstddef>
 #include <iterator>

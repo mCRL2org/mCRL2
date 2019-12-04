@@ -12,8 +12,6 @@
 #ifndef MCRL2_PBES_REWRITERS_SIMPLIFY_QUANTIFIERS_REWRITER_H
 #define MCRL2_PBES_REWRITERS_SIMPLIFY_QUANTIFIERS_REWRITER_H
 
-#include "mcrl2/data/detail/data_sequence_algorithm.h"
-#include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 
 namespace mcrl2 {

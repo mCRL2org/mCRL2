@@ -12,12 +12,8 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_LOCAL_RESET_VARIABLES_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_LOCAL_RESET_VARIABLES_H
 
-#include "mcrl2/data/standard.h"
-#include "mcrl2/data/standard_utility.h"
 #include "mcrl2/pbes/detail/stategraph_local_algorithm.h"
 #include "mcrl2/pbes/detail/stategraph_reset_variables.h"
-#include "mcrl2/utilities/detail/container_utility.h"
-#include "mcrl2/utilities/sequence.h"
 
 namespace mcrl2 {
 

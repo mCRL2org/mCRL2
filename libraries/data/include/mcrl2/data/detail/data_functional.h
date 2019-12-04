@@ -12,16 +12,8 @@
 #ifndef MCRL2_DATA_DETAIL_DATA_FUNCTIONAL_H
 #define MCRL2_DATA_DETAIL_DATA_FUNCTIONAL_H
 
-#include <algorithm>
-#include <functional>
-#include <iterator>
-#include <string>
-#include <utility>
-
-#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_symbol.h"
-#include "mcrl2/data/variable.h"
 
 namespace mcrl2
 {

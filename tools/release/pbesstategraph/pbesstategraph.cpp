@@ -9,7 +9,6 @@
 /// \file pbesstategraph.cpp
 
 #include "mcrl2/pbes/tools.h"
-#include "mcrl2/pbes/tools/pbesstategraph_options.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/bes/pbes_input_tool.h"

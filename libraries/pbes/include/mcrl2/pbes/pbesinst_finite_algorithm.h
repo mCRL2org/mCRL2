@@ -15,21 +15,10 @@
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/replace.h"
-#include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
-#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/pbes_parameter_map.h"
 #include "mcrl2/pbes/join.h"
-#include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/rewriters/data_rewriter.h"
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/utilities/logger.h"
-#include <algorithm>
-#include <set>
-#include <sstream>
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
 
 namespace mcrl2
 {

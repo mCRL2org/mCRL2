@@ -12,8 +12,8 @@
 #define BOOST_TEST_MODULE parse_test
 
 #include "mcrl2/process/parse.h"
+
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iostream>
 
 using namespace mcrl2;
 using namespace mcrl2::process;

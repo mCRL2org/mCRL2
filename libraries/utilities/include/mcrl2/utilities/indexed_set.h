@@ -12,7 +12,6 @@
 #include <deque>
 
 #include "mcrl2/utilities/unordered_map.h"
-#include "mcrl2/utilities/block_allocator.h"
 
 namespace mcrl2
 {

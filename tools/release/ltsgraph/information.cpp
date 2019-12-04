@@ -8,7 +8,6 @@
 //
 
 #include "information.h"
-#include "ui_information.h"
 
 namespace Graph
 {

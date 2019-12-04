@@ -9,13 +9,6 @@
 
 #include "mcrl2/atermpp/aterm_io_binary.h"
 
-#include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/atermpp/aterm_int.h"
-#include "mcrl2/atermpp/aterm_list.h"
-
-#include <cassert>
-#include <cmath>
-
 namespace atermpp
 {
 using namespace mcrl2::utilities;

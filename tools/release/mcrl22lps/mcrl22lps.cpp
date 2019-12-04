@@ -13,15 +13,10 @@
 #define TOOLNAME "mcrl22lps"
 #define AUTHOR "Jan Friso Groote"
 
-#include <fstream>
-#include <iostream>
-#include <string>
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
-#include "mcrl2/process/parse.h"
 
 // #include "gc.h"  Required for ad hoc garbage collection. This is possible with ATcollect,
 // useful to find garbage collection problems.

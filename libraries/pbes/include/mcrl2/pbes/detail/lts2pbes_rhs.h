@@ -12,13 +12,9 @@
 #ifndef MCRL2_PBES_DETAIL_LTS2PBES_RHS_H
 #define MCRL2_PBES_DETAIL_LTS2PBES_RHS_H
 
-#include "mcrl2/lts/lts_lts.h"
-#include "mcrl2/modal_formula/traverser.h"
-#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/detail/lps2pbes_par.h"
 #include "mcrl2/pbes/detail/lps2pbes_sat.h"
-#include "mcrl2/pbes/detail/lps2pbes_utility.h"
 #include "mcrl2/pbes/detail/lts2pbes_lts.h"
 #include "mcrl2/utilities/progress_meter.h"
 

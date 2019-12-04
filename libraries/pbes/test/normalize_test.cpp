@@ -11,8 +11,7 @@
 
 #define BOOST_TEST_MODULE normalize_test
 #include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/data/consistency.h"
-#include "mcrl2/lps/linearise.h"
+
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/pbes/detail/normalize_and_or.h"
 #include "mcrl2/pbes/lps2pbes.h"

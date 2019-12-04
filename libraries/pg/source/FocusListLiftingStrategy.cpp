@@ -8,9 +8,6 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "mcrl2/pg/FocusListLiftingStrategy.h"
-#include "mcrl2/utilities/logger.h"
-
-#include <cassert>
 
 /*! Credit for a vertex when it is put on the focus list. */
 static const unsigned initial_credit  = 2;

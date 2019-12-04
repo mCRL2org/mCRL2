@@ -9,15 +9,8 @@
 #ifndef VISUALIZER_H
 #define VISUALIZER_H
 
-#include <QList>
-#include <QObject>
-
-#include <string>
-#include <vector>
-#include "ltsmanager.h"
 #include "markmanager.h"
 #include "primitivefactory.h"
-#include "settings.h"
 #include "visobjectfactory.h"
 
 class PrimitiveFactory;

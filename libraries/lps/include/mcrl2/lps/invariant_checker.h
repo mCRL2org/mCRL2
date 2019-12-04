@@ -14,17 +14,8 @@
 #ifndef MCRL2_LPS_INVARIANT_CHECKER_H
 #define MCRL2_LPS_INVARIANT_CHECKER_H
 
-#include <cstring>
-#include <string>
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/core/print.h"
 #include "mcrl2/data/detail/prover/bdd_prover.h"
 #include "mcrl2/data/detail/prover/bdd2dot.h"
-#include "mcrl2/data/detail/prover/solver_type.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
-#include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/stochastic_specification.h"
 
 /// The class Invariant_Checker is initialized with an LPS using the constructor Invariant_Checker::Invariant_Checker.

@@ -12,7 +12,6 @@
 #ifndef MCRL2_PBES_TRAVERSER_H
 #define MCRL2_PBES_TRAVERSER_H
 
-#include "mcrl2/data/traverser.h"
 #include "mcrl2/pbes/pbes.h"
 
 namespace mcrl2

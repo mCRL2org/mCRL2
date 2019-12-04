@@ -22,7 +22,6 @@
 #include <QUrl>
 #include <QtGlobal>
 
-#include <string>
 #include <memory>
 
 namespace mcrl2

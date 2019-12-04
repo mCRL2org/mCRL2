@@ -18,7 +18,7 @@
 #define MCRL2_PROCESS_TRAVERSER_H
 
 #include "mcrl2/data/traverser.h"
-#include "mcrl2/process/process_specification.h"
+
 #include "mcrl2/process/untyped_multi_action.h"
 #include "mcrl2/process/timed_multi_action.h"
 

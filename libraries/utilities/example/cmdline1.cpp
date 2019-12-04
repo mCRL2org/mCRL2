@@ -9,9 +9,6 @@
 /// \file cmdline1.cpp
 /// \brief CLI example
 
-#include <iostream>
-#include <stdexcept>
-#include <string>
 #include <utility>
 
 #include "mcrl2/utilities/input_output_tool.h"

@@ -12,11 +12,7 @@
 #ifndef MCRL2_MODAL_FORMULA_RESOLVE_NAME_CLASHES_H
 #define MCRL2_MODAL_FORMULA_RESOLVE_NAME_CLASHES_H
 
-#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/modal_formula/builder.h"
-#include "mcrl2/modal_formula/state_formula.h"
-#include "mcrl2/utilities/number_postfix_generator.h"
-#include <set>
 
 namespace mcrl2
 {

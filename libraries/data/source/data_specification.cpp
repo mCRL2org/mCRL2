@@ -15,16 +15,8 @@
 #include "mcrl2/data/substitutions/sort_expression_assignment.h"
 
 // Predefined datatypes
-#include "mcrl2/data/bag.h"
-#include "mcrl2/data/bool.h"
 #include "mcrl2/data/function_update.h"
 #include "mcrl2/data/list.h"
-#include "mcrl2/data/int.h"
-#include "mcrl2/data/nat.h"
-#include "mcrl2/data/pos.h"
-#include "mcrl2/data/real.h"
-#include "mcrl2/data/set.h"
-#include "mcrl2/data/standard.h"
 
 namespace mcrl2
 {

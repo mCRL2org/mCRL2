@@ -9,13 +9,6 @@
 /// \file realelm.cpp
 /// \brief
 
-#include <algorithm>
-#include <cstdlib>
-
-#include "mcrl2/data/find.h"
-#include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/replace.h"
 #include "mcrl2/data/enumerator_with_iterator.h"
 #include "mcrl2/data/fourier_motzkin.h"
 

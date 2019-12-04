@@ -12,10 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_INSTANTIATE_GLOBAL_VARIABLES_H
 #define MCRL2_PBES_DETAIL_INSTANTIATE_GLOBAL_VARIABLES_H
 
-#include "mcrl2/data/replace.h"
 #include "mcrl2/data/representative_generator.h"
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
-#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/replace.h"
 
 namespace mcrl2

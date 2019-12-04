@@ -12,13 +12,8 @@
 #ifndef MCRL2_DATA_DATA_EQUATION_H
 #define MCRL2_DATA_DATA_EQUATION_H
 
-#include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/data/basic_sort.h"
-#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/function_symbol.h"
-#include "mcrl2/data/variable.h"
 
 namespace mcrl2
 {

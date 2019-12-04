@@ -19,21 +19,10 @@
 #ifndef MCRL2_LTS_LTS_MCRL2_H
 #define MCRL2_LTS_LTS_MCRL2_H
 
-#include <string>
-#include <vector>
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/core/detail/function_symbols.h"
-#include "mcrl2/core/parse.h"
-#include "mcrl2/data/variable.h"
-#include "mcrl2/process/parse.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/print.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/multi_action.h"
-#include "mcrl2/lps/typecheck.h"
 #include "mcrl2/lps/state.h"
 #include "mcrl2/lps/probabilistic_data_expression.h"
-#include "mcrl2/lts/probabilistic_state.h"
 #include "mcrl2/lts/probabilistic_lts.h"
 
 namespace mcrl2

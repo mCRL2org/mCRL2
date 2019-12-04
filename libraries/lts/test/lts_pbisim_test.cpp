@@ -13,7 +13,6 @@
 #define BOOST_TEST_MODULE lts_pbisim_test
 #include <boost/test/included/unit_test_framework.hpp>
 
-#include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/detail/liblts_pbisim_bem.h"
 #include "mcrl2/lts/detail/liblts_pbisim_grv.h"
 

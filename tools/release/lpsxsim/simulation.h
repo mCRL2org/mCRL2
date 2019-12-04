@@ -18,7 +18,6 @@
 #include <QThread>
 
 #ifndef Q_MOC_RUN // Workaround for QTBUG-22829
-#include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/simulation.h"
 #endif // Q_MOC_RUN
 

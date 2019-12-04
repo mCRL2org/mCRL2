@@ -14,7 +14,6 @@
 
 #include "mcrl2/data/builder.h"
 #include "mcrl2/data/sort_specification.h"
-#include <functional>
 
 namespace mcrl2
 {

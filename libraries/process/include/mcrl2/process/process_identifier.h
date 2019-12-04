@@ -12,12 +12,6 @@
 #ifndef MCRL2_PROCESS_PROCESS_IDENTIFIER_H
 #define MCRL2_PROCESS_PROCESS_IDENTIFIER_H
 
-#include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/detail/default_values.h"
-#include "mcrl2/core/detail/function_symbols.h"
-#include "mcrl2/core/identifier_string.h"
-#include "mcrl2/core/index_traits.h"
-#include "mcrl2/data/data_specification.h"
 #include "mcrl2/process/action_name_multiset.h"
 
 namespace mcrl2

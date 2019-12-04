@@ -10,16 +10,10 @@
 #include "mainwindow.h"
 
 #include "mcrl2/lts/lts_lts.h"
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/utilities/platform.h"
 
 #include <QSettings>
-#include <utility>
 
 #include "dimensionsdialog.h"
-#include "glwidget.h"
-#include "information.h"
-#include "springlayout.h"
 
 /// \brief The number of vertices before the user is prompted to enable exploration mode.
 constexpr std::size_t MAX_NODE_COUNT  = 400;

@@ -12,12 +12,9 @@
 #define BOOST_TEST_MODULE action_test
 
 #include "mcrl2/core/print.h"
-#include "mcrl2/data/function_symbol.h"
 #include "mcrl2/process/process_expression.h"
+
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iostream>
-#include <set>
-#include <string>
 
 using namespace mcrl2;
 

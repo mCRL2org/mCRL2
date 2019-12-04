@@ -13,10 +13,6 @@
 #include "mcrl2/pg/SmallProgressMeasures.h"
 #include "mcrl2/pg/DenseSet.h"
 #include "mcrl2/pg/SCC.h"
-#include "mcrl2/utilities/logger.h"
-
-#include <string>
-#include <vector>
 
 /*! A solver that breaks down the game graph into strongly connected components.
 

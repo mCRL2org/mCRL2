@@ -14,11 +14,9 @@
 #define BOOST_TEST_MODULE multi_action_test
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/detail/test_rewriters.h"
-#include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/print.h"
+
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iostream>
-#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::data;

@@ -18,18 +18,8 @@
 
 #ifndef MCRL2_SKIP_LONG_TESTS
 
-#include <ctime>
-#include <iostream>
-#include <sstream>
-#include <cstdio>
 #include "mcrl2/data/detail/rewrite_strategies.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/parse.h"
 #include "mcrl2/lts/detail/exploration.h"
-#include "mcrl2/lts/lts_aut.h"
-#include "mcrl2/lts/lts_fsm.h"
-#include "mcrl2/lts/lts_lts.h"
-#include "mcrl2/lts/lts_dot.h"
 #include "mcrl2/utilities/test_utilities.h"
 
 using namespace mcrl2;

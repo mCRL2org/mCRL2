@@ -11,18 +11,7 @@
 #ifndef COLORCHOOSER_H
 #define COLORCHOOSER_H
 
-#include <QtCore>
-#include <QtGui>
-
-#include <cstddef>
-#include <cstdlib>
-#include <cmath>
-#include <vector>
-#include "dof.h"
-#include "graph.h"
 #include "shape.h"
-#include "utils.h"
-#include "visualizer.h"
 
 class ColorChooser : public Visualizer
 {

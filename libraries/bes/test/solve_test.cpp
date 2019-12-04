@@ -12,11 +12,9 @@
 #define BOOST_TEST_MODULE solve_test
 #include "mcrl2/bes/gauss_elimination.h"
 #include "mcrl2/bes/parse.h"
-#include "mcrl2/bes/print.h"
 #include "mcrl2/bes/small_progress_measures.h"
+
 #include <boost/test/included/unit_test_framework.hpp>
-#include <sstream>
-#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::bes;

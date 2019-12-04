@@ -13,7 +13,6 @@
 #define MCRL2_DATA_REWRITER_TOOL_H
 
 #include "mcrl2/data/detail/enumerator_iteration_limit.h"
-#include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/utilities/command_line_interface.h"
 

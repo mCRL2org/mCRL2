@@ -15,8 +15,6 @@
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/join.h"
 #include "mcrl2/pbes/pbesinst_lazy.h"
-#include "mcrl2/pbes/pbessolve_vertex_set.h"
-#include "mcrl2/pbes/structure_graph.h"
 #include "mcrl2/pbes/structure_graph_builder.h"
 
 namespace mcrl2 {

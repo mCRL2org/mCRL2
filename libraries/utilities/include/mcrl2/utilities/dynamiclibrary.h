@@ -15,10 +15,6 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/platform.h"
 
-#include <string>
-#include <sstream>
-#include <stdexcept>
-
 #ifdef MCRL2_PLATFORM_WINDOWS
   #include <windows.h>
   typedef HMODULE library_handle;

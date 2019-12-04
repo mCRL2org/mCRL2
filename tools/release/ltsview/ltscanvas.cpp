@@ -10,8 +10,6 @@
 #include "ltscanvas.h"
 #include <tr/tr.h>
 
-#include <cmath>
-
 #include "mcrl2/gui/arcball.h"
 #include "mcrl2/gui/glu.h"
 

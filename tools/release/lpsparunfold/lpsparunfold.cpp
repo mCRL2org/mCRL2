@@ -12,20 +12,12 @@
 #define AUTHOR "Frank Stappers"
 
 // C++
-#include <iostream>
-#include <string>
-#include <algorithm>
 #include <climits>
-
-//mCRL2
-#include "mcrl2/lps/linear_process.h"
-#include "mcrl2/lps/stochastic_specification.h"
 
 //LPS framework
 #include "mcrl2/lps/io.h"
 
 //DATA
-#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/parse.h"
 
 //LPSPARUNFOLDLIB

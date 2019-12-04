@@ -12,13 +12,9 @@
 #ifndef MCRL2_DATA_STANDARD_CONTAINER_UTILITY_H
 #define MCRL2_DATA_STANDARD_CONTAINER_UTILITY_H
 
-#include <iterator>
-#include <type_traits>
-
 #include "mcrl2/utilities/detail/join.h"
 #include "mcrl2/data/bag.h"
 #include "mcrl2/data/list.h"
-#include "mcrl2/data/set.h"
 
 namespace mcrl2
 {

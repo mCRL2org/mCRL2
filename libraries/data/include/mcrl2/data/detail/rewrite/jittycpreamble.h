@@ -11,7 +11,6 @@
 #ifndef __REWR_JITTYC_PREAMBLE_H
 #define __REWR_JITTYC_PREAMBLE_H
 
-#include <cassert>
 #include "mcrl2/utilities/toolset_version_const.h"
 #include "mcrl2/data/detail/rewrite/jitty_jittyc.h"
 #include "mcrl2/data/detail/rewrite/jittyc.h"

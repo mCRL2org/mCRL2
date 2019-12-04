@@ -13,9 +13,7 @@
 #define MCRL2_LPS_IO_H
 
 #include <fstream>
-#include <string>
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {

@@ -12,7 +12,6 @@
 #ifndef MCRL2_PROCESS_EXPAND_PROCESS_INSTANCE_ASSIGNMENTS_H
 #define MCRL2_PROCESS_EXPAND_PROCESS_INSTANCE_ASSIGNMENTS_H
 
-#include "mcrl2/process/builder.h"
 #include "mcrl2/process/utility.h"
 
 namespace mcrl2 {

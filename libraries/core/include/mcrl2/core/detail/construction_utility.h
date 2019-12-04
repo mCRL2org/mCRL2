@@ -12,7 +12,6 @@
 #ifndef MCRL2_CORE_DETAIL_CONSTRUCTION_UTILITY_H
 #define MCRL2_CORE_DETAIL_CONSTRUCTION_UTILITY_H
 
-#include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/identifier_string.h"
 
 namespace mcrl2

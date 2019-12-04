@@ -10,7 +10,6 @@
 /// \brief Some tests for BES.
 
 #define BOOST_TEST_MODULE bes_test
-#include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/find.h"
 #include "mcrl2/bes/join.h"
 #include "mcrl2/bes/print.h"

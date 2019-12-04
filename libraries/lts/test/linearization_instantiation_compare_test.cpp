@@ -10,8 +10,6 @@
 /// \brief Add your file description here.
 
 #define BOOST_TEST_MODULE linearization_instantiation_compare_test
-#include <iostream>
-#include <string>
 
 #include <boost/test/included/unit_test_framework.hpp>
 
@@ -19,10 +17,8 @@
 
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lts/detail/exploration.h"
-#include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/lts_algorithm.h"
 
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/test_utilities.h"
 
 using namespace mcrl2;

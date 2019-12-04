@@ -13,18 +13,9 @@
 #define MCRL2_PBES_DETAIL_STATEGRAPH_PBES_H
 
 #include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/data/consistency.h"
-#include "mcrl2/data/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/detail/guard_traverser.h"
 #include "mcrl2/pbes/detail/stategraph_simplify_rewriter.h"
-#include "mcrl2/pbes/detail/stategraph_split.h"
 #include "mcrl2/pbes/detail/stategraph_utility.h"
-#include "mcrl2/pbes/rewrite.h"
-#include "mcrl2/utilities/logger.h"
-#include <cassert>
-#include <iostream>
-#include <sstream>
-#include <utility>
 
 namespace mcrl2 {
 

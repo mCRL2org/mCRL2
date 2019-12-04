@@ -12,16 +12,9 @@
 #ifndef MCRL2_DATA_DATA_EXPRESSION_H
 #define MCRL2_DATA_DATA_EXPRESSION_H
 
-#include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/core/detail/default_values.h"
-#include "mcrl2/core/detail/function_symbols.h"
-#include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/container_sort.h"
 #include "mcrl2/data/function_sort.h"
-#include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/untyped_sort.h"
-#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {

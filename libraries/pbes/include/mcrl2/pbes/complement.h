@@ -28,7 +28,6 @@
 
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/pbes/builder.h"
-#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {

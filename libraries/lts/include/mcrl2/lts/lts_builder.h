@@ -12,16 +12,8 @@
 #ifndef MCRL2_LTS_BUILDER_H
 #define MCRL2_LTS_BUILDER_H
 
-#include <unordered_map>
-#include "mcrl2/data/undefined.h"
 #include "mcrl2/lps/explorer.h"
-#include "mcrl2/process/timed_multi_action.h"
 #include "mcrl2/lts/detail/lts_convert.h"
-#include "mcrl2/lts/lts_aut.h"
-#include "mcrl2/lts/lts_dot.h"
-#include "mcrl2/lts/lts_fsm.h"
-#include "mcrl2/lts/lts_lts.h"
-#include "mcrl2/utilities/unordered_map.h"
 
 namespace mcrl2 {
 

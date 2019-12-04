@@ -10,11 +10,9 @@
 /// \brief Add your file description here.
 
 #define BOOST_TEST_MODULE lts_test
-#include <iostream>
-#include <sstream>
 #include <boost/test/included/unit_test_framework.hpp>
+
 #include "mcrl2/lts/lts_algorithm.h"
-#include "mcrl2/lts/lts_aut.h"
 
 using namespace mcrl2;
 

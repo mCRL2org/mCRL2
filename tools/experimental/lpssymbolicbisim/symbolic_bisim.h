@@ -12,25 +12,13 @@
 #ifndef MCRL2_LPSSYMBOLICBISIM_SYMBOLIC_BISIM_H
 #define MCRL2_LPSSYMBOLICBISIM_SYMBOLIC_BISIM_H
 
-#include <string>
 #include <queue>
-#include <ctime>
-#include <chrono>
-#include <unordered_map>
-#include <unordered_set>
 
-#include "mcrl2/data/bool.h"
-#include "mcrl2/data/detail/linear_inequalities_utilities.h"
 #include "mcrl2/data/detail/prover/bdd_path_eliminator.h"
 #include "mcrl2/data/detail/prover/bdd2dot.h"
 #include "mcrl2/data/enumerator_with_iterator.h"
-#include "mcrl2/data/find.h"
 #include "mcrl2/data/fourier_motzkin.h"
-#include "mcrl2/data/lambda.h"
 #include "mcrl2/data/merge_data_specifications.h"
-#include "mcrl2/data/parse.h"
-#include "mcrl2/data/replace.h"
-#include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/data/rewriters/quantifiers_inside_rewriter.h"
 #include "mcrl2/data/substitutions/data_expression_assignment.h"
@@ -38,10 +26,7 @@
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/smt/solver.h"
 #include "mcrl2/smt/translation_error.h"
-#include "mcrl2/utilities/indexed_set.h"
-#include "mcrl2/utilities/logger.h"
 
-#include "../pbessymbolicbisim/simplifier_mode.h"
 #include "../pbessymbolicbisim/simplifier.h"
 #define THIN       "0"
 #define BOLD       "1"

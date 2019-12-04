@@ -17,11 +17,7 @@
 #ifndef MCRL2_DATA_MOVE_CONSTANT_TO_SUBSTITUTION_H
 #define MCRL2_DATA_MOVE_CONSTANT_TO_SUBSTITUTION_H
 
-
-#include <unordered_map>
-
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/set_identifier_generator.h"
 
 namespace mcrl2
 {

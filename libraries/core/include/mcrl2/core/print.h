@@ -12,20 +12,9 @@
 #ifndef MCRL2_CORE_PRINT_H
 #define MCRL2_CORE_PRINT_H
 
-#include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/print_format.h"
 #include "mcrl2/core/traverser.h"
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/utilities/logger.h"
-#include <cassert>
 #include <cctype>
-#include <cstdio>
-#include <cstdlib>
-#include <list>
-#include <ostream>
-#include <sstream>
-#include <string>
-#include <vector>
 
 namespace mcrl2
 {

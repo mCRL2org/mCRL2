@@ -9,7 +9,6 @@
 /// \file lps.cpp
 /// \brief
 
-#include "mcrl2/lps/find.h"
 #include "mcrl2/lps/is_well_typed.h"
 #include "mcrl2/lps/normalize_sorts.h"
 #include "mcrl2/lps/parse_impl.h"

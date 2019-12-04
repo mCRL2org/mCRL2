@@ -14,10 +14,9 @@
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
+
 #include <boost/algorithm/string.hpp>
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iostream>
-#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::lps;

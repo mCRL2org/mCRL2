@@ -12,9 +12,6 @@
 #include "export.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/gui/arcball.h"
-#include "ui_glwidget.h"
-
-#include <map>
 
 /// \brief Minimum distance for a drag to be registered (pixels)
 constexpr float DRAG_MIN_DIST = 20.0f;

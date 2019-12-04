@@ -12,11 +12,9 @@
 #define BOOST_TEST_MODULE set_test
 #include <boost/test/included/unit_test_framework.hpp>
 
-#include "mcrl2/data/fset.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/set.h"
-#include "mcrl2/data/standard.h"
 
 
 using namespace mcrl2;

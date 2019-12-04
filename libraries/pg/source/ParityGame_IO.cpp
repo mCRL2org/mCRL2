@@ -7,13 +7,9 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/parity_game_generator.h"
 #include "mcrl2/pg/ParityGame.h"
-
-#include <cassert>
 
 /* N.B. The PGSolver I/O functions reverse the priorities when reading/writing
    the game description. This is done to preserve solutions, since PGSolver

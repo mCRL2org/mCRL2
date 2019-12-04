@@ -9,22 +9,12 @@
 /// \file symbolic_reachability_test.cpp
 /// \brief Add your file description here.
 
-#include <algorithm>
-#include <iostream>
-#include <iterator>
-#include <memory>
-#include <set>
-#include <stack>
-#include <string>
-#include <vector>
-
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/next_state_generator.h"
-#include "mcrl2/lps/state.h"
 
 using namespace mcrl2;
 

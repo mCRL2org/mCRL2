@@ -12,13 +12,8 @@
 #ifndef MCRL2_DATA_DETAIL_BDD_PROVER_H
 #define MCRL2_DATA_DETAIL_BDD_PROVER_H
 
-#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/prover/bdd_path_eliminator.h"
-#include "mcrl2/data/detail/prover/bdd_simplifier.h"
 #include "mcrl2/data/detail/prover/induction.h"
-#include "mcrl2/data/detail/prover/manipulator.h"
-#include "mcrl2/data/detail/prover/solver_type.h"
-#include "mcrl2/data/rewriter.h"
 
 namespace mcrl2
 {

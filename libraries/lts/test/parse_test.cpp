@@ -11,9 +11,6 @@
 
 #define BOOST_TEST_MODULE parse_test
 #include <fstream>
-#include <iostream>
-#include <sstream>
-#include <cstdio>
 
 #include <boost/test/included/unit_test_framework.hpp>
 

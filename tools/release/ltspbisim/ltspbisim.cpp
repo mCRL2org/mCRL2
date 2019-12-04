@@ -10,15 +10,10 @@
 #define NAME "ltspbisim"
 #define AUTHOR "Hector Joao Rivera Verduzco"
 
-#include <string>
-#include <iostream>
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/lps/io.h"
 #include "mcrl2/lts/lts_probabilistic_equivalence.h"
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/lts_algorithm.h"
-#include "mcrl2/lts/detail/lts_convert.h"
 #include "mcrl2/lts/detail/liblts_pbisim_bem.h"
 #include "mcrl2/lts/detail/liblts_pbisim_grv.h"
 

@@ -13,8 +13,6 @@
 #define MCRL2_PROCESS_IS_GUARDED_H
 
 #include "mcrl2/process/find.h"
-#include "mcrl2/process/traverser.h"
-#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2 {
 

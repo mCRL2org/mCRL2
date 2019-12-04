@@ -19,8 +19,6 @@
 #ifndef MCRL2_LTS_LTS_FSM_H
 #define MCRL2_LTS_LTS_FSM_H
 
-#include <string>
-#include <vector>
 #include "mcrl2/lts/probabilistic_arbitrary_precision_fraction.h"
 #include "mcrl2/lts/probabilistic_lts.h"
 #include "mcrl2/lts/action_label_string.h"

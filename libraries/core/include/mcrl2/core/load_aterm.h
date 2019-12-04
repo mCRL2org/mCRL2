@@ -15,11 +15,6 @@
 #include "mcrl2/atermpp/aterm_io_binary.h"
 #include "mcrl2/atermpp/aterm_io_text.h"
 
-#include "mcrl2/utilities/exception.h"
-
-#include <istream>
-#include <string>
-
 namespace mcrl2 {
 
 namespace core {

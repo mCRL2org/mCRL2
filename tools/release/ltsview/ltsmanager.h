@@ -9,7 +9,6 @@
 #ifndef LTSMANAGER_H
 #define LTSMANAGER_H
 
-#include <QObject>
 #include <QThread>
 #include <QString>
 #include <memory>

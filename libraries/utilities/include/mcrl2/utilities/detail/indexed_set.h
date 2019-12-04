@@ -14,11 +14,6 @@
 #define MCRL2_UTILITIES_DETAIL_INDEXED_SET_H
 #pragma once
 
-#include <cstddef>
-#include <limits>
-#include <cassert>
-#include <deque>
-
 #include "mcrl2/utilities/indexed_set.h"    // necessary for header test. 
 
 namespace mcrl2

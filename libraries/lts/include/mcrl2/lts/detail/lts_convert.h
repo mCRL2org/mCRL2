@@ -19,11 +19,6 @@
 #ifndef MCRL2_LTS_DETAIL_LTS_CONVERT_H
 #define MCRL2_LTS_DETAIL_LTS_CONVERT_H
 
-#include <sstream>
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/core/detail/function_symbols.h"
-#include "mcrl2/data/parse.h"
-#include "mcrl2/lps/specification.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/lts_fsm.h"

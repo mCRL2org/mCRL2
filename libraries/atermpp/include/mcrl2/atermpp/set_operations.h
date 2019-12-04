@@ -12,7 +12,6 @@
 #ifndef MCRL2_ATERMPP_SET_OPERATIONS_H
 #define MCRL2_ATERMPP_SET_OPERATIONS_H
 
-#include <set>
 #include "mcrl2/atermpp/aterm_list.h"
 
 namespace atermpp

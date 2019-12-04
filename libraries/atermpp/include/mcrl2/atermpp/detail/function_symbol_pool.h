@@ -10,16 +10,9 @@
 #ifndef DETAIL_FUNCTION_SYMBOL_POOL_H
 #define DETAIL_FUNCTION_SYMBOL_POOL_H
 
-#include "mcrl2/atermpp/function_symbol.h"
 #include "mcrl2/atermpp/detail/function_symbol_hash.h"
-#include "mcrl2/utilities/block_allocator.h"
 #include "mcrl2/utilities/cache_metric.h"
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/noncopyable.h"
 #include "mcrl2/utilities/unordered_set.h"
-
-#include <map>
-#include <string>
 
 namespace atermpp
 {

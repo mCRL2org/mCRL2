@@ -11,12 +11,8 @@
 #define PROPERTIESDOCK_H
 
 #include "propertywidget.h"
-#include "processsystem.h"
-#include "filesystem.h"
 
-#include <QDockWidget>
 #include <QVBoxLayout>
-#include <QScrollArea>
 #include <QScrollBar>
 
 /**

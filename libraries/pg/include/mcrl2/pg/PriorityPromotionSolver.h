@@ -8,10 +8,8 @@
 #ifndef MCRL2_PG_PRIORITYPROMOTION_SOLVER_H
 #define MCRL2_PG_PRIORITYPROMOTION_SOLVER_H
 
-#include "mcrl2/pg/ParityGameSolver.h"
 #include "mcrl2/pg/RecursiveSolver.h"
 
-#include <vector>
 #include <deque>
 
 /*! \defgroup PriorityPromotion

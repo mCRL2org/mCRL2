@@ -12,7 +12,6 @@
 #ifndef MCRL2_PBES_DETAIL_LTS2PBES_LTS_H
 #define MCRL2_PBES_DETAIL_LTS2PBES_LTS_H
 
-#include <iostream>
 #include "mcrl2/lts/lts_lts.h"
 
 namespace mcrl2 {

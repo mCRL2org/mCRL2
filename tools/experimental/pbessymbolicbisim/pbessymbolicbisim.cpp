@@ -13,19 +13,12 @@
 
 //C++
 #include <exception>
-#include <cstdio>
 
 //Tool framework
-#include "mcrl2/data/bool.h"
-#include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/lambda.h"
-#include "mcrl2/data/parse.h"
 #include "mcrl2/data/prover_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
-#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/utilities/input_tool.h"
 
-#include "simplifier_mode.h"
 #include "symbolic_bisim.h"
 
 using namespace mcrl2::utilities;

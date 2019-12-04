@@ -14,7 +14,6 @@
 
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/join.h"
-#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2 {
 

@@ -11,12 +11,6 @@
 #ifndef DIAGRAM_H
 #define DIAGRAM_H
 
-#include <QtCore>
-#include <QtGui>
-
-#include <cstddef>
-#include <vector>
-#include "visutils.h"
 #include "shape.h"
 
 class Diagram : public QObject

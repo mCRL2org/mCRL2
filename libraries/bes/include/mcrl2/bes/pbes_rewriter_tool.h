@@ -14,10 +14,7 @@
 
 #include "mcrl2/pbes/pbes_rewriter_type.h"
 #include "mcrl2/utilities/command_line_interface.h"
-#include <iostream>
 #include <set>
-#include <stdexcept>
-#include <string>
 
 namespace mcrl2
 {

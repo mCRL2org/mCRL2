@@ -17,7 +17,6 @@
 #include <cmath>
 #include <fstream>
 #include <map>
-#include <sstream>
 #include <string>
 
 namespace mcrl2

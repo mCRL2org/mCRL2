@@ -10,25 +10,15 @@
 /// Implements strong bisimulation and oblivious bisimulation reduction on
 /// boolean equation systems.
 
-#include <algorithm>
-#include <functional>
-
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/indexed_set.h"
 
 #include "mcrl2/bes/pbes_input_output_tool.h"
-#include "mcrl2/utilities/execution_timer.h"
 
 #include "mcrl2/bes/detail/bes_algorithm.h"
-#include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/parse.h"
 #include "mcrl2/bes/bes2pbes.h"
 #include "mcrl2/bes/normal_forms.h"
-#include "mcrl2/bes/find.h"
-#include "mcrl2/bes/io.h"
 #include "mcrl2/bes/join.h"
-#include "mcrl2/process/process_expression.h"
-#include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/detail/liblts_bisim.h"
 
 using namespace mcrl2::bes;

@@ -6,7 +6,6 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "mcrl2/pg/PriorityPromotionSolver.h"
-#include "mcrl2/utilities/logger.h"
 
 const priority_t COMPUTED_REGION = -1;
 

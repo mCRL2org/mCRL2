@@ -10,7 +10,6 @@
 
 #ifndef _LIBLTS_SCC_H
 #define _LIBLTS_SCC_H
-#include <vector>
 #include <unordered_set>
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/utilities/logger.h"

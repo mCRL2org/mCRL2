@@ -14,12 +14,8 @@
 
 #ifndef MCRL2_SKIP_LONG_TESTS
 
-#include <iostream>
-#include <string>
-
 #include "mcrl2/data/detail/rewrite_strategies.h"
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/utilities/logger.h"
 
 using namespace mcrl2;
 using namespace mcrl2::lps;

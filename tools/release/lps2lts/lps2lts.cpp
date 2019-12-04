@@ -11,19 +11,11 @@
 // NAME is defined in lps2lts.h
 #define AUTHOR "Muck van Weerdenburg"
 
-#include <string>
-#include <cassert>
 #include <csignal>
-
-#include "mcrl2/utilities/logger.h"
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 
-#include "mcrl2/lps/io.h"
-#include "mcrl2/process/parse.h"
-
-#include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/detail/exploration.h"
 
 #ifdef MCRL2_DISPLAY_REWRITE_STATISTICS

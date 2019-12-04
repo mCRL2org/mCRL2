@@ -11,8 +11,6 @@
 #endif
 #include <assert.h>
 #include <stdarg.h>
-#include <stdlib.h>
-#include <stdio.h>
 #if !defined(__FreeBSD__) || (__FreeBSD_version >= 500000)
 #include <inttypes.h>
 #endif
@@ -29,7 +27,6 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <ctype.h>
-#include <string.h>
 
 #ifdef LEAK_DETECT
 #define GC_DEBUG
@@ -46,7 +43,7 @@
 #define REALLOC GC_REALLOC
 #define FREE(_x)
 #define malloc dont_use_malloc_use_MALLOC_instead
-#define relloc dont_use_realloc_use_REALLOC_instead
+#define realloc dont_use_realloc_use_REALLOC_instead
 #define free dont_use_free_use_FREE_instead
 #else
 #define MALLOC malloc

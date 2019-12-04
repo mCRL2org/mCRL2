@@ -11,9 +11,7 @@
 #ifndef MCRL2_DATA_MATCH_TREE_H
 #define MCRL2_DATA_MATCH_TREE_H
 
-#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/function_symbol.h"
-#include "mcrl2/data/variable.h"
 #include "mcrl2/atermpp/aterm_io.h"
 
 namespace mcrl2

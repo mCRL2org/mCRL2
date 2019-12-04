@@ -11,10 +11,8 @@
 #ifdef DBM_PACKAGE_AVAILABLE
   #include "simplifier_dbm.h"
 #endif
-#include "simplifier_mdd.h"
 #include "simplifier_fourier_motzkin.h"
 #include "simplifier_identity.h"
-#include "simplifier_mode.h"
 
 namespace mcrl2
 {

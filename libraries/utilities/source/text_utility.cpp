@@ -11,15 +11,10 @@
 
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/text_utility.h"
-#include <algorithm>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/xpressive/xpressive.hpp>
 #include <fstream>
-#include <iostream>
-#include <iterator>
-#include <string>
-#include <vector>
 
 namespace mcrl2
 {

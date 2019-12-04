@@ -11,13 +11,8 @@
 
 #define BOOST_TEST_MODULE data_equation_test
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iostream>
 
-#include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/data_equation.h"
-#include "mcrl2/data/data_equation.h"
-#include "mcrl2/data/function_symbol.h"
-#include "mcrl2/data/variable.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;

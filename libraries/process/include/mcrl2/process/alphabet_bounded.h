@@ -12,7 +12,6 @@
 #ifndef MCRL2_PROCESS_ALPHABET_BOUNDED_H
 #define MCRL2_PROCESS_ALPHABET_BOUNDED_H
 
-#include "mcrl2/process/alphabet_efficient.h"
 #include "mcrl2/process/allow_set.h"
 #include "mcrl2/process/detail/pcrl_equation_cache.h"
 

@@ -14,7 +14,6 @@
 
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/utilities/exception.h"
 
 namespace atermpp {
 

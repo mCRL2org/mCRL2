@@ -10,7 +10,6 @@
 
 #include "diagrameditor.h"
 #include <iostream>
-#include <sstream>
 #include <QColorDialog>
 
 using namespace std;

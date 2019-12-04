@@ -12,15 +12,11 @@
 #ifndef MCRL2_BES_PG_PARSE_H
 #define MCRL2_BES_PG_PARSE_H
 
-#include <cctype>
-#include <cstdio>
 #include <fstream>
-#include <map>
 
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/join.h"
 #include "mcrl2/core/parser_utility.h"
-#include "mcrl2/utilities/text_utility.h"
 
 extern "C"
 {

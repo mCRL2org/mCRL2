@@ -10,10 +10,7 @@
 #ifndef MCRL2_PG_FOCUS_LIST_LIFTING_STRATEGY_H
 #define MCRL2_PG_FOCUS_LIST_LIFTING_STRATEGY_H
 
-#include "mcrl2/pg/SmallProgressMeasures.h"
 #include "mcrl2/pg/LinearLiftingStrategy.h"
-#include <utility>
-#include <vector>
 
 /*! \ingroup LiftingStrategies
 

@@ -11,8 +11,7 @@
 
 #define BOOST_TEST_MODULE find_test
 #include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/data/consistency.h"
+
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/detail/parse.h"
 #include "mcrl2/pbes/print.h"

@@ -11,14 +11,13 @@
 
 #define BOOST_TEST_MODULE stochastic_specification_test
 #include <boost/test/included/unit_test_framework.hpp>
+
 #include "mcrl2/lps/detail/test_input.h"
-#include "mcrl2/lps/find.h"
 #include "mcrl2/lps/is_stochastic.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parelm.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/print.h"
-#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/is_well_typed.h"
 
 using namespace mcrl2;

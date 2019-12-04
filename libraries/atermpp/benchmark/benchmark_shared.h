@@ -9,9 +9,6 @@
 
 #include "mcrl2/atermpp/aterm_appl.h"
 
-#include "mcrl2/atermpp/detail/aterm_list.h"
-
-#include <vector>
 #include <thread>
 
 using namespace atermpp;

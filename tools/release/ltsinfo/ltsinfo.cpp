@@ -11,20 +11,9 @@
 #define NAME "ltsinfo"
 #define AUTHOR "Muck van Weerdenburg"
 
-#include <algorithm>
-#include <string>
-
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/lts_algorithm.h"
-
-#include "mcrl2/lts/lts_lts.h"
-#include "mcrl2/lts/lts_aut.h"
-#include "mcrl2/lts/lts_fsm.h"
-#include "mcrl2/lts/lts_dot.h"
-
 
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;

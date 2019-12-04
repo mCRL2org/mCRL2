@@ -11,14 +11,8 @@
 #define NAME "ltsconvert"
 #define AUTHOR "Muck van Weerdenburg, Jan Friso Groote"
 
-#include <string>
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/lps/io.h"
-#include "mcrl2/lts/lts_equivalence.h"
 #include "mcrl2/lts/lts_io.h"
-#include "mcrl2/lts/detail/lts_convert.h"
 #include "mcrl2/lts/lts_algorithm.h"
 
 using namespace mcrl2::lts;

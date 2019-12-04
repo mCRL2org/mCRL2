@@ -12,7 +12,6 @@
 #ifndef MCRL2_DATA_BINDER_TYPE_H
 #define MCRL2_DATA_BINDER_TYPE_H
 
-#include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 

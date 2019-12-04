@@ -12,14 +12,8 @@
 #define TOOLNAME "lpsactionrename"
 #define AUTHOR "Jan Friso Groote and Tom Haenen"
 
-#include <fstream>
-#include <iostream>
-#include <algorithm>
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/lps/stochastic_specification.h"
-#include "mcrl2/lps/rewrite.h"
 #include "mcrl2/lps/sumelm.h"
-#include "mcrl2/lps/action_rename.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"

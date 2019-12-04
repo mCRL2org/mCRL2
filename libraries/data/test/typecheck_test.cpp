@@ -13,17 +13,10 @@
 #define MCRL2_DISABLE_TYPECHECK_ASSERTIONS
 
 #include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/data/data_io.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/experimental/type_check_tree.h"
-#include "mcrl2/data/parse.h"
-#include "mcrl2/data/print.h"
-#include "mcrl2/data/typecheck.h"
-#include "mcrl2/data/untyped_sort.h"
-#include "mcrl2/utilities/text_utility.h"
 
-#include <iostream>
-#include <sstream>
+#include "mcrl2/data/data_io.h"
+#include "mcrl2/data/experimental/type_check_tree.h"
+#include "mcrl2/data/print.h"
 
 using namespace mcrl2;
 

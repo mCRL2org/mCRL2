@@ -13,7 +13,6 @@
 #define MCRL2_PROCESS_DETAIL_PROCESS_COMMAND_H
 
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/process/parse.h"
 #include "mcrl2/process/detail/process_io.h"
 #include "mcrl2/utilities/detail/command.h"
 

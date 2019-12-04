@@ -12,11 +12,7 @@
 #ifndef MCRL2_DATA_REPRESENTATIVE_GENERATOR_H
 #define MCRL2_DATA_REPRESENTATIVE_GENERATOR_H
 
-#include <algorithm>
-#include <functional>
-
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {

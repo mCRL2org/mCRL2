@@ -12,8 +12,8 @@
 #define BOOST_TEST_MODULE linear_inequalities_test
 #include "mcrl2/data/fourier_motzkin.h"
 #include "mcrl2/data/join.h"
-#include "mcrl2/data/linear_inequalities.h"
 #include "mcrl2/data/parse.h"
+
 #include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;

@@ -14,30 +14,14 @@
 
 #define NAME "rewr_jittyc"
 
-#include <utility>
-#include <string>
-#include <sstream>
-#include <stdexcept>
-#include <cstdio>
-#include <cstdlib>
 #include <unistd.h>
-#include <cerrno>
-#include <cstring>
-#include <cassert>
-#include <sstream>
-#include <fstream>
 #include <sys/stat.h>
-#include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/utilities/basename.h"
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/stopwatch.h"
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/core/print.h"
-#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/data/detail/rewrite/jittyc.h"
 #include "mcrl2/data/detail/rewrite/jitty_jittyc.h"
 #include "mcrl2/data/replace.h"
-#include "mcrl2/data/traverser.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 
 #ifdef MCRL2_DISPLAY_REWRITE_STATISTICS

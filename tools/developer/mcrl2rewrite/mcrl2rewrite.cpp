@@ -8,15 +8,8 @@
 //
 
 #include "mcrl2/data/parse.h"
-#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/utilities/input_input_tool.h"
-#include "mcrl2/utilities/logger.h"
-
-#include <chrono>
-#include <fstream>
-#include <iostream>
-#include <set>
 
 using namespace mcrl2;
 using namespace mcrl2::data::tools;

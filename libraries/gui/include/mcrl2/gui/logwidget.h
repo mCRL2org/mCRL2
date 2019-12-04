@@ -9,7 +9,6 @@
 #ifndef MCRL2_UTILITIES_LOGWIDGET_H
 #define MCRL2_UTILITIES_LOGWIDGET_H
 
-#include <QWidget>
 #include <QDateTime>
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/gui/utilities.h"

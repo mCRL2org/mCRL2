@@ -11,7 +11,7 @@
 
 #define BOOST_TEST_MODULE print_test
 #include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/pbes/pbes.h"
+
 #include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/txt2pbes.h"
 

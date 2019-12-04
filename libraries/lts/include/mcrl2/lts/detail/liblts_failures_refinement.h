@@ -20,7 +20,6 @@
 #ifndef LIBLTS_FAILURES_REFINEMENT_H
 #define LIBLTS_FAILURES_REFINEMENT_H
 
-#include "unordered_set"
 #include "mcrl2/lts/detail/counter_example.h"
 #include "mcrl2/lps/exploration_strategy.h"
 #include "mcrl2/lts/detail/liblts_bisim_dnj.h"

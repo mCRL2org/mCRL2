@@ -11,9 +11,7 @@
 #ifndef _LIBLTS_TAUSTARREDUCE_H
 #define _LIBLTS_TAUSTARREDUCE_H
 
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/lts_utilities.h"
-#include "mcrl2/lts/probabilistic_lts.h"
 
 namespace mcrl2
 {

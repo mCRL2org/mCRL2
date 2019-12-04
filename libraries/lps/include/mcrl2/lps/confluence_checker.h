@@ -15,24 +15,9 @@
 #ifndef MCRL2_LPS_CONFLUENCE_CHECKER_H
 #define MCRL2_LPS_CONFLUENCE_CHECKER_H
 
-#include "mcrl2/core/detail/function_symbols.h"
-#include "mcrl2/data/detail/prover/bdd_prover.h"
-#include "mcrl2/data/detail/prover/bdd2dot.h"
-#include "mcrl2/data/detail/prover/solver_type.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/disjointness_checker.h"
 #include "mcrl2/lps/invariant_checker.h"
-#include "mcrl2/lps/linear_process.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/utilities/logger.h"
-#include <algorithm>
-#include <cstdlib>
-#include <cstring>
 #include <iomanip>
-#include <string>
 
 
 /** \brief A class that takes a linear process specification and checks all tau-summands of that LPS for confluence.

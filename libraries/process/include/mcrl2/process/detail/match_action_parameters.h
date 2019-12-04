@@ -15,8 +15,6 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/data/typecheck.h"
-#include <sstream>
-#include <tuple>
 
 namespace mcrl2 {
 

@@ -8,15 +8,9 @@
 //
 /// \file lpsconfcheck.cpp
 
-#include <string>
-#include <fstream>
-
 #include "mcrl2/data/parse.h"
-#include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/io.h"
-#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/confluence_checker.h"
-#include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/data/prover_tool.h"

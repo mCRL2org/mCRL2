@@ -11,9 +11,6 @@
 
 #include <queue>
 
-#include "mcrl2/core/identifier_string.h"
-#include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/function_symbol.h"
 #include "mcrl2/smt/native_translation.h"
 #include "mcrl2/smt/translation_error.h"
 

@@ -16,7 +16,6 @@
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/stategraph_algorithm.h"
 #include "mcrl2/pbes/detail/stategraph_global_graph.h"
-#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2 {
 

@@ -10,8 +10,6 @@
 
 #ifndef _LIBLTS_ADD_ACTION_LOOP_H
 #define _LIBLTS_ADD_ACTION_LOOP_H
-#include <vector>
-#include <map>
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/utilities/logger.h"
 

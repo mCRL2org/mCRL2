@@ -13,7 +13,6 @@
 
 //C++
 #include <exception>
-#include <cstdio>
 
 //LPS
 #include "mcrl2/lps/io.h"

@@ -11,12 +11,6 @@
 #ifndef DOF_H
 #define DOF_H
 
-#include <QtCore>
-#include <QtGui>
-
-#include <cstddef>
-#include <string>
-#include <vector>
 #include "attribute.h"
 
 class DOF

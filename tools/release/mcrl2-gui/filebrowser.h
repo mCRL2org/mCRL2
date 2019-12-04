@@ -16,7 +16,6 @@
 
 #include "toolcatalog.h"
 #include "toolaction.h"
-#include "toolinformation.h"
 
 #include "copydialog.h"
 #include "copythread.h"

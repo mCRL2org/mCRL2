@@ -10,12 +10,9 @@
 #ifndef MPI_RECURSIVE_SOLVER_H_INCLUDED
 #define MPI_RECURSIVE_SOLVER_H_INCLUDED
 
-#include "GamePart.h"
 #include "Logger.h"
 #include "MpiAttractorAlgorithm.h"
-#include "MpiUtils.h"
 #include "RecursiveSolver.h"
-#include "VertexPartition.h"
 
 /*! Parallel version of RecursiveSolver implemented using MPI.
  

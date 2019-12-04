@@ -11,18 +11,11 @@
 #define NAME "reduce_pbes"
 #define AUTHOR "Wieger Wesselink"
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <type_traits>
-
 #include "mcrl2/bes/pbes_input_tool.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/pbes/detail/pbes_io.h"
 #include "mcrl2/pbes/replace_subterm.h"
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/utilities/text_utility.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

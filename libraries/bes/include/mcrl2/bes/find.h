@@ -12,10 +12,7 @@
 #ifndef MCRL2_BES_FIND_H
 #define MCRL2_BES_FIND_H
 
-#include "mcrl2/bes/boolean_expression.h"
 #include "mcrl2/bes/traverser.h"
-#include "mcrl2/utilities/detail/container_utility.h"
-#include <iterator>
 
 namespace mcrl2
 {

@@ -15,9 +15,7 @@
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/aterm_io.h"
 
-#include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/index_traits.h"
-#include "mcrl2/data/variable.h"
 
 namespace mcrl2 {
 

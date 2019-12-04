@@ -15,7 +15,7 @@
 #ifdef MCRL2_PLATFORM_WINDOWS
   #include <windows.h>
   #include <tchar.h>
-  #include <stdio.h>
+  #include <cstdio>
   #include <strsafe.h>
 #else
   #include <unistd.h>
@@ -25,7 +25,7 @@
 
 #include <cstring>
 #include <csignal>
-#include <errno.h>
+#include <cerrno>
 
 
 namespace mcrl2

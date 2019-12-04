@@ -12,10 +12,7 @@
 
 #include "graph.h"
 
-#include "mcrl2/gui/glu.h"
-
 #include <QtOpenGL>
-#include <QString>
 #include <QFile>
 
 namespace

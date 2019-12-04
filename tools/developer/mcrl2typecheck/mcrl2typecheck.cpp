@@ -8,14 +8,9 @@
 //
 /// \file mcrl2typecheck.cpp
 
-#include <iostream>
-#include <string>
-
 #include "mcrl2/data/parse.h"
-#include "mcrl2/data/traverser.h"
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
 #include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/utilities/text_utility.h"
 
 using namespace mcrl2;
 

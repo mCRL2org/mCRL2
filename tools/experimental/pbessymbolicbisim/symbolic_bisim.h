@@ -12,16 +12,9 @@
 #ifndef MCRL2_PBESSYMBOLICBISIM_SYMBOLIC_BISIM_H
 #define MCRL2_PBESSYMBOLICBISIM_SYMBOLIC_BISIM_H
 
-#include <string>
-#include <ctime>
-#include <chrono>
-
 #include "mcrl2/data/merge_data_specifications.h"
-#include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/solve_structure_graph.h"
-#include "mcrl2/utilities/logger.h"
 
-#include "ppg_parser.h"
 #include "partition.h"
 
 namespace mcrl2

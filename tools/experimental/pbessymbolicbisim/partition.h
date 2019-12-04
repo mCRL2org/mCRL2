@@ -12,26 +12,13 @@
 #ifndef MCRL2_PBESSYMBOLICBISIM_PARTITION_H
 #define MCRL2_PBESSYMBOLICBISIM_PARTITION_H
 
-#include <string>
 #include <queue>
 #include <random>
-#include <unordered_map>
-#include <unordered_set>
 
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/join.h"
-#include "mcrl2/data/bool.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/data/fourier_motzkin.h"
-#include "mcrl2/data/lambda.h"
-#include "mcrl2/data/replace.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/data/rewriters/quantifiers_inside_rewriter.h"
-#include "mcrl2/pbes/detail/ppg_rewriter.h"
-#include "mcrl2/pbes/structure_graph.h"
 #include "mcrl2/pbes/structure_graph_builder.h"
-#include "mcrl2/utilities/logger.h"
 
 #include "simplifier.h"
 #define THIN       "0"

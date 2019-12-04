@@ -14,7 +14,6 @@
 #include "Logger.h"
 #include "MpiUtils.h"
 #include "SmallProgressMeasures.h"
-#include "VertexPartition.h"
 
 /*! A distributed parity game solver using MPI.
 

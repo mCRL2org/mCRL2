@@ -25,43 +25,17 @@
    the use of this software.
 */
 
-// Standard C libraries
-#include <cassert>
-#include <iostream>
-#include <iterator>
-#include <algorithm>
-#include <sstream>
-#include <memory>
-#include <algorithm>
-
 // linear process libraries.
 #include "mcrl2/lps/detail/ultimate_delay.h"
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/lps/sumelm.h"
 #include "mcrl2/lps/constelm.h"
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/lps/find.h"
 #include "mcrl2/lps/replace_capture_avoiding_with_an_identifier_generator.h"
 
 //mCRL2 data
-#include "mcrl2/data/structured_sort.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/representative_generator.h"
-#include "mcrl2/data/function_sort.h"
-#include "mcrl2/data/replace.h"
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/data/substitutions/maintain_variables_in_rhs.h"
 #include "mcrl2/data/fourier_motzkin.h"
 #include "mcrl2/data/enumerator.h" 
-
-//mCRL2 processes
-#include "mcrl2/process/find.h"
-#include "mcrl2/process/process_expression.h"
-#include "mcrl2/process/process_equation.h"
-#include "mcrl2/process/process_specification.h"
-#include "mcrl2/process/replace.h"
 
 
 // For Aterm library extension functions

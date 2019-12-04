@@ -17,8 +17,6 @@
 #ifndef MCRL2_LPS_MOVE_CONSTANTS_TO_SUBSTITUTION_H
 #define MCRL2_LPS_MOVE_CONSTANTS_TO_SUBSTITUTION_H
 
-#include <unordered_map>
-
 #include "mcrl2/data/detail/move_constants_to_substitution.h"
 #include "mcrl2/lps/stochastic_specification.h"
 

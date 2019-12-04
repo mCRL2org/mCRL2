@@ -10,12 +10,8 @@
 #ifndef TOOLCATALOG_H
 #define TOOLCATALOG_H
 
-#include <QDomDocument>
-#include <QString>
-#include <QCoreApplication>
 #include <QFile>
 #include <QMap>
-#include <QList>
 #include <QStringList>
 
 #include "toolinformation.h"

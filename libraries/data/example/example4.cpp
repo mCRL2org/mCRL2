@@ -1,7 +1,5 @@
-#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
-#include <cassert>
 
 using namespace mcrl2::data;
 

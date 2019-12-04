@@ -11,10 +11,6 @@
 #ifndef MCRL2_PBESSYMBOLICBISIM_SUBBLOCK_H
 #define MCRL2_PBESSYMBOLICBISIM_SUBBLOCK_H
 
-#include <list>
-
-#include "mcrl2/utilities/hash_utility.h"
-
 #include "eliminate_real_if.h"
 #include "utilities.h"
 

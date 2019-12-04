@@ -17,10 +17,6 @@
 #include <QWheelEvent>
 #include <QQuaternion>
 
-#include "ltsmanager.h"
-#include "markmanager.h"
-#include "settings.h"
-#include "vectors.h"
 #include "visualizer.h"
 
 class LtsCanvas : public QGLWidget

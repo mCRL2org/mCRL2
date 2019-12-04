@@ -11,10 +11,9 @@
 
 #define BOOST_TEST_MODULE pfnf_rewriter_test
 #include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/pbes/detail/is_pfnf.h"
+
 #include "mcrl2/pbes/detail/pbessolve.h"
 #include "mcrl2/pbes/detail/pfnf_print.h"
-#include "mcrl2/pbes/detail/pfnf_traverser.h"
 #include "mcrl2/pbes/detail/parse.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/pfnf_rewriter.h"

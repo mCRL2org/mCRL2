@@ -12,13 +12,10 @@
 #ifndef MCRL2_LPS_CONFLUENCE_H
 #define MCRL2_LPS_CONFLUENCE_H
 
-#include <memory>
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/consistency.h"
-#include "mcrl2/data/join.h"
 #include "mcrl2/data/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/data/rewriters/quantifiers_inside_rewriter.h"
-#include "mcrl2/data/standard.h" // equal_to
 #include "mcrl2/data/substitution_utility.h"
 #include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/smt/solver.h"

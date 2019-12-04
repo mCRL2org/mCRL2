@@ -17,8 +17,6 @@
 
 #include "mcrl2/utilities/power_of_two.h"
 
-#include <memory>
-
 namespace mcrl2::utilities
 {
 

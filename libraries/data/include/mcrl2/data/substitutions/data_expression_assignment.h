@@ -12,13 +12,8 @@
 #ifndef MCRL2_DATA_SUBSTITUTIONS_DATA_EXPRESSION_ASSIGNMENT_H
 #define MCRL2_DATA_SUBSTITUTIONS_DATA_EXPRESSION_ASSIGNMENT_H
 
-#include <functional>
-#include <iostream>
-#include <sstream>
-#include <string>
 #include "mcrl2/data/is_simple_substitution.h"
 #include "mcrl2/data/undefined.h"
-#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2 {
 

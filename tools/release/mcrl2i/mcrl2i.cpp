@@ -12,15 +12,7 @@
 #define TOOLNAME "mcrl2i"
 #define AUTHORS "Muck van Weerdenburg; Jan Friso Groote"
 
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <cassert>
-
-#include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/enumerator_with_iterator.h"
-#include "mcrl2/data/parse.h"
-#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/data/rewriter_tool.h"

@@ -12,7 +12,6 @@
 #ifndef MCRL2_PROCESS_ALPHABET_NEW_H
 #define MCRL2_PROCESS_ALPHABET_NEW_H
 
-#include "mcrl2/process/alphabet_efficient.h"
 #include "mcrl2/process/detail/pcrl_equation_cache.h"
 
 namespace mcrl2 {

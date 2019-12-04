@@ -12,10 +12,8 @@
 #ifndef MCRL2_PROCESS_DETAIL_PROCESS_IO_H
 #define MCRL2_PROCESS_DETAIL_PROCESS_IO_H
 
-#include <iostream>
 #include <fstream>
 #include "mcrl2/process/parse.h"
-#include "mcrl2/process/process_specification.h"
 
 namespace mcrl2 {
 

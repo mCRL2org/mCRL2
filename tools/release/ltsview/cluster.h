@@ -12,10 +12,6 @@
 #ifndef CLUSTER_H
 #define CLUSTER_H
 
-#include <vector>
-#include <map>
-#include <set>
-
 #include "markmanager.h"
 
 class State;

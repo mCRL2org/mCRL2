@@ -11,7 +11,6 @@
 #include "mcrl2/lps/tools.h"
 
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/data/rewriter_tool.h"
 
 using namespace mcrl2::utilities;

@@ -7,17 +7,9 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_io_text.h"
 
-#include <string>
-#include <cassert>
-#include <stdexcept>
-#include <iostream>
 #include <fstream>
-#include <sstream>
 
 namespace atermpp
 {

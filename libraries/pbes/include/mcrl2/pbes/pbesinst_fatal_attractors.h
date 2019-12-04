@@ -12,9 +12,7 @@
 #ifndef MCRL2_PBES_PBESINST_FATAL_ATTRACTORS_H
 #define MCRL2_PBES_PBESINST_FATAL_ATTRACTORS_H
 
-#include <array>
 #include "mcrl2/pbes/pbessolve_attractors.h"
-#include "mcrl2/pbes/pbessolve_vertex_set.h"
 #include "mcrl2/pbes/simple_structure_graph.h"
 
 namespace mcrl2 {

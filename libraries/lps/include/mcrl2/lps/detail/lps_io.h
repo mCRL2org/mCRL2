@@ -13,11 +13,7 @@
 #define MCRL2_LPS_DETAIL_LPS_IO_H
 
 #include <fstream>
-#include <iostream>
-#include <string>
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2 {
 

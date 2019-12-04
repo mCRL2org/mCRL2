@@ -13,12 +13,10 @@
 #include <boost/test/included/unit_test_framework.hpp>
 
 #include "mcrl2/data/detail/rewrite_strategies.h"
-#include "mcrl2/data/fset.h"
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/set.h"
-#include "mcrl2/data/standard.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;

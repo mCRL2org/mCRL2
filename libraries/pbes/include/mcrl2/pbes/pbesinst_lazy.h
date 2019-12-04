@@ -9,33 +9,18 @@
 /// \file mcrl2/pbes/pbesinst_lazy_algorithm.h
 /// \brief A lazy algorithm for instantiating a PBES, ported from bes_deprecated.h.
 
-#include <cassert>
-#include <set>
-#include <deque>
-#include <stack>
-#include <iostream>
-#include <sstream>
-#include <unordered_set>
-#include <unordered_map>
-#include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/substitution_utility.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/pbes/pbes_equation_index.h"
 #include "mcrl2/pbes/pbessolve_options.h"
 #include "mcrl2/pbes/remove_equations.h"
-#include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/replace_constants_by_variables.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
-#include "mcrl2/pbes/rewriters/simplify_rewriter.h"
-#include "mcrl2/pbes/search_strategy.h"
 #include "mcrl2/pbes/transformation_strategy.h"
 #include "mcrl2/pbes/transformations.h"
-#include "mcrl2/utilities/detail/container_utility.h"
-#include "mcrl2/utilities/text_utility.h"
 
 #ifndef MCRL2_PBES_PBESINST_LAZY_H
 #define MCRL2_PBES_PBESINST_LAZY_H

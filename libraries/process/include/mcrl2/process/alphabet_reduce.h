@@ -12,7 +12,6 @@
 #ifndef MCRL2_PROCESS_ALPHABET_REDUCE_H
 #define MCRL2_PROCESS_ALPHABET_REDUCE_H
 
-#include <limits>
 #include "mcrl2/process/process_specification.h"
 
 namespace mcrl2 {

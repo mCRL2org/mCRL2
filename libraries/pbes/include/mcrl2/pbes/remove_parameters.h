@@ -11,13 +11,7 @@
 #ifndef MCRL2_PBES_REMOVE_PARAMETERS_H
 #define MCRL2_PBES_REMOVE_PARAMETERS_H
 
-#include <cassert>
-#include <algorithm>
-#include <functional>
-#include <map>
-#include <vector>
 #include "mcrl2/pbes/builder.h"
-#include "mcrl2/pbes/pbes.h"
 
 namespace mcrl2
 {

@@ -12,8 +12,6 @@
 
 #include "mcrl2/utilities/input_tool.h"
 
-#include <sstream>
-
 namespace mcrl2
 {
 

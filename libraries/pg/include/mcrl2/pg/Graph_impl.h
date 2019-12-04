@@ -16,7 +16,6 @@
 #include "mcrl2/pg/DenseMap.h"
 
 #include <unordered_map>
-#include <algorithm>
 #include <iterator>
 #include <cassert>
 

@@ -13,7 +13,6 @@
 #define MCRL2_LTS_STOCHASTIC_LTS_BUILDER_H
 
 #include "mcrl2/lts/lts_builder.h"
-#include "mcrl2/utilities/unordered_map.h"
 
 namespace mcrl2 {
 

@@ -14,7 +14,6 @@
 
 #include "mcrl2/pbes/detail/stategraph_global_reset_variables.h"
 #include "mcrl2/pbes/detail/stategraph_local_reset_variables.h"
-#include "mcrl2/pbes/tools/pbesstategraph_options.h"
 
 namespace mcrl2 {
 

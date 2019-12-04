@@ -10,14 +10,10 @@
 /// \brief Test for normalizing sorts.
 
 #define BOOST_TEST_MODULE normalize_sorts_test
-#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/normalize_sorts.h"
 #include "mcrl2/data/parse.h"
-#include <algorithm>
+
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iterator>
-#include <set>
-#include <vector>
 
 using namespace mcrl2;
 using namespace mcrl2::data;

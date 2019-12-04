@@ -11,11 +11,8 @@
 #define MCRL2_ATERMPP_ATERM_BALANCED_TREE_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/function_symbol.h"
 
 #include <boost/iterator/iterator_facade.hpp>
-
-#include <cassert>
 
 namespace atermpp
 {

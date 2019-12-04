@@ -12,14 +12,9 @@
 #ifndef MCRL2_PBES_DETAIL_SYMBOLIC_EXPLORATION_H
 #define MCRL2_PBES_DETAIL_SYMBOLIC_EXPLORATION_H
 
-#include <cassert>
-#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/pbes/io.h"
-#include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/pbes_functions.h"
 #include "mcrl2/pbes/pbesinst_symbolic.h"
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
 

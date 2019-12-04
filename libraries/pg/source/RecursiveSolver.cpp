@@ -7,10 +7,6 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include <set>
-#include <cassert>
-
-#include "mcrl2/pg/attractor.h"
 #include "mcrl2/pg/attractor_impl.h"
 #include "mcrl2/pg/DenseSet.h"
 #include "mcrl2/pg/RecursiveSolver.h"

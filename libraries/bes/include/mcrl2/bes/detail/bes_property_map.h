@@ -12,16 +12,9 @@
 #ifndef MCRL2_BES_DETAIL_BES_PROPERTY_MAP_H
 #define MCRL2_BES_DETAIL_BES_PROPERTY_MAP_H
 
-#include <algorithm>
-#include <iterator>
-#include <map>
-#include <set>
-#include <sstream>
-#include <utility>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include "mcrl2/data/detail/data_property_map.h"
-#include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/find.h"
 #include "mcrl2/bes/print.h"
 

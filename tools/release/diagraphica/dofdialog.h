@@ -14,9 +14,6 @@
 
 #include <QDialog>
 #include <QComboBox>
-#include "graph.h"
-#include "shape.h"
-#include "dof.h"
 #include "colorchooser.h"
 
 class DofDialog : public QDialog

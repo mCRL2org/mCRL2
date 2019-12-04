@@ -13,10 +13,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/detail/bucket_list.h"
 
-#include <algorithm>
 #include <cmath>
-#include <cstddef>
-#include <vector>
 
 namespace mcrl2::utilities
 {
@@ -375,6 +372,6 @@ using unordered_set_large = unordered_set<Key, Hash, Equals, Allocator, ThreadSa
 
 } // namespace mcrl2::utilities
 
-#include "detail/unordered_set_implementation.h"
+#include "mcrl2/utilities/detail/unordered_set_implementation.h"
 
 #endif // MCRL2_UTILITIES_UNORDERED_SET_H

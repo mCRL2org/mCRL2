@@ -10,28 +10,11 @@
 #ifndef MCRL2_PBES_CONSTELM_H
 #define MCRL2_PBES_CONSTELM_H
 
-#include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/data/optimized_boolean_operators.h"
-#include "mcrl2/data/replace.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/undefined.h"
 #include "mcrl2/pbes/algorithms.h"
-#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_rewriter_type.h"
 #include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
-#include "mcrl2/pbes/rewriters/simplify_rewriter.h"
-#include "mcrl2/pbes/traverser.h"
-#include "mcrl2/utilities/logger.h"
-#include <algorithm>
-#include <deque>
-#include <iostream>
-#include <map>
-#include <set>
-#include <sstream>
-#include <utility>
-#include <vector>
 
 namespace mcrl2
 {

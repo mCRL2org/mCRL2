@@ -6,17 +6,12 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include <algorithm>
-#include <limits>
 #include <queue>
-#include <vector>
 #include "cluster.h"
 #include "fsm_state_positioner.h"
-#include "lts.h"
 #include "mathutils.h"
 #include "state.h"
 #include "transition.h"
-#include "vectors.h"
 
 using namespace std;
 using namespace MathUtils;

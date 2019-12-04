@@ -9,8 +9,6 @@
 
 #include "mcrl2/pg/ParityGameSolver.h"
 
-#include <cassert>
-
 void merge_strategies( std::vector<verti> &strategy,
                        const std::vector<verti> &substrat,
                        const std::vector<verti> &vertex_map )

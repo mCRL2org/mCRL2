@@ -15,10 +15,7 @@
 #include "mcrl2/utilities/text_utility.h"
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <sstream>
-#include <string>
 #include <utility>
-#include <vector>
 
 namespace mcrl2 {
 

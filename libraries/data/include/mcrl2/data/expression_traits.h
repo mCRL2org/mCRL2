@@ -13,14 +13,9 @@
 #define MCRL2_DATA_EXPRESSION_TRAITS_H
 
 #include "mcrl2/core/term_traits.h"
-#include "mcrl2/data/application.h"
 #include "mcrl2/data/bool.h"
-#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/forall.h"
-#include "mcrl2/data/variable.h"
-#include "mcrl2/utilities/exception.h"
-#include <functional>
 
 namespace mcrl2
 {

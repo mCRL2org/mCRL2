@@ -8,20 +8,6 @@
 //
 /// \file liblts.cpp
 
-#include <string>
-#include <set>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <cassert>
-#include <cstdlib>
-#include <algorithm>
-#include "mcrl2/core/detail/function_symbols.h"
-#include "mcrl2/core/parse.h"
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/lts/lts_utilities.h"
 #include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/lts/lts_io.h"
 

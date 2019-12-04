@@ -12,7 +12,6 @@
 #define BOOST_TEST_MODULE print_test
 
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iostream>
 
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/print.h"

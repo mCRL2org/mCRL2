@@ -16,8 +16,6 @@
 #include <algorithm>
 #include <cctype>
 #include <fstream>
-#include <sstream>
-#include <string>
 #include <vector>
 
 namespace mcrl2

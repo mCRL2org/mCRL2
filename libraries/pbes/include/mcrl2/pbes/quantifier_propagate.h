@@ -11,11 +11,8 @@
 #ifndef MCRL2_PBES_QUANTIFIER_PROPAGATE_H
 #define MCRL2_PBES_QUANTIFIER_PROPAGATE_H
 
-#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/replace.h"
-#include "mcrl2/utilities/detail/container_utility.h"
 
 #include <queue>
 

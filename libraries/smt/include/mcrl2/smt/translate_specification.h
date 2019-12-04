@@ -11,16 +11,8 @@
 
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/core/identifier_string.h"
-#include "mcrl2/data/data_equation.h"
-#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/find.h"
-#include "mcrl2/data/forall.h"
-#include "mcrl2/data/function_symbol.h"
-#include "mcrl2/smt/native_translation.h"
 #include "mcrl2/smt/translate_expression.h"
-#include "mcrl2/smt/translate_sort.h"
-#include "mcrl2/smt/utilities.h"
 
 namespace mcrl2
 {

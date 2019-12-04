@@ -9,11 +9,7 @@
 
 #include "benchmark_shared.h"
 
-#include "mcrl2/atermpp/function_symbol.h"
 #include "mcrl2/utilities/stopwatch.h"
-
-#include <vector>
-#include <string>
 
 using namespace atermpp;
 

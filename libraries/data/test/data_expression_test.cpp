@@ -13,22 +13,10 @@
 #include <boost/test/included/unit_test_framework.hpp>
 
 #include "mcrl2/atermpp/aterm_io.h"
-#include "mcrl2/core/identifier_string.h"
-#include "mcrl2/data/abstraction.h"
-#include "mcrl2/data/application.h"
-#include "mcrl2/data/assignment.h"
 #include "mcrl2/data/bag.h"
-#include "mcrl2/data/basic_sort.h"
-#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/exists.h"
-#include "mcrl2/data/forall.h"
-#include "mcrl2/data/function_sort.h"
-#include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/list.h"
-#include "mcrl2/data/nat.h"
-#include "mcrl2/data/set.h"
-#include "mcrl2/data/variable.h"
 #include "mcrl2/data/where_clause.h"
 
 using namespace mcrl2;

@@ -12,17 +12,10 @@
 
 #define BOOST_TEST_MODULE compatibility_test
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iostream>
-#include <sstream>
 
-#include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/data/data_io.h"
-#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/parse.h"
-#include "mcrl2/data/typecheck.h"
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/utilities/text_utility.h"
 
 using namespace mcrl2;
 

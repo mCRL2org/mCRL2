@@ -10,11 +10,8 @@
 /// \brief Add your file description here.
 
 #define BOOST_TEST_MODULE hooks_test
-#include <iostream>
-#include <string>
 #include <boost/test/included/unit_test_framework.hpp>
 
-#include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_string.h"
 

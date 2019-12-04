@@ -9,13 +9,11 @@
 
 #include "mainwindow.h"
 
-#include <QDockWidget>
 #include <QMenu>
 #include <QMenuBar>
 #include <QToolBar>
 #include <QInputDialog>
 #include <QDesktopWidget>
-#include <QComboBox>
 #include <QDialogButtonBox>
 #include <QStandardItemModel>
 

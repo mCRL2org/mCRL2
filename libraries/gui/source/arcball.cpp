@@ -9,9 +9,6 @@
 #include "mcrl2/gui/arcball.h"
 
 #include "mcrl2/gui/glu.h"
-#include "mcrl2/utilities/platform.h"
-
-#include <cmath>
 
 #ifdef MCRL2_PLATFORM_MAC
   #include <GLKit/GLKMatrix4.h>

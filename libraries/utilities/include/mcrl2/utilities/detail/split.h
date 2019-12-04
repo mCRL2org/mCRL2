@@ -13,14 +13,7 @@
 #define MCRL2_UTILITIES_DETAIL_SPLIT_H
 
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
-#include "mcrl2/utilities/text_utility.h"
-#include <boost/algorithm/string/join.hpp>
-#include <boost/algorithm/string/trim.hpp>
 #include <map>
-#include <sstream>
-#include <string>
-#include <utility>
-#include <vector>
 
 namespace mcrl2 {
 

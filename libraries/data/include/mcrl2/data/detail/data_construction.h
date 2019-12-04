@@ -12,10 +12,8 @@
 #ifndef MCRL2_DATA_DETAIL_DATA_CONSTRUCTION_H
 #define MCRL2_DATA_DETAIL_DATA_CONSTRUCTION_H
 
-#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/set.h"
-#include "mcrl2/data/standard.h"
 
 namespace mcrl2 {
 

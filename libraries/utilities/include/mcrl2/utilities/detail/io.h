@@ -13,8 +13,6 @@
 #define MCRL2_UTILITIES_DETAIL_IO_H
 
 #include <fstream>
-#include <iostream>
-#include <string>
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/text_utility.h"
 

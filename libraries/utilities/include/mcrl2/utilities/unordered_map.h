@@ -10,7 +10,6 @@
 #define MCRL2_UTILITIES_UNORDERED_MAP_H
 
 #include "mcrl2/utilities/unordered_set.h"
-#include "mcrl2/utilities/block_allocator.h"
 
 #include <utility>
 #include <functional>
@@ -224,6 +223,6 @@ using unordered_map_large = unordered_map<Key, T, Hash, Equals, Allocator, Threa
 
 } // namespace mcrl2::utilities
 
-#include "detail/unordered_map_implementation.h"
+#include "mcrl2/utilities/detail/unordered_map_implementation.h"
 
 #endif // MCRL2_UTILITIES_UNORDERED_MAP_H

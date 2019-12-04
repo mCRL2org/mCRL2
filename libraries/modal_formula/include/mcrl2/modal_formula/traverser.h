@@ -13,8 +13,6 @@
 #define MCRL2_MODAL_FORMULA_TRAVERSER_H
 
 #include "mcrl2/lps/traverser.h"
-#include "mcrl2/modal_formula/action_formula.h"
-#include "mcrl2/modal_formula/regular_formula.h"
 #include "mcrl2/modal_formula/state_formula_specification.h"
 
 namespace mcrl2

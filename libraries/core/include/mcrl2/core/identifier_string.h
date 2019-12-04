@@ -12,11 +12,8 @@
 #ifndef MCRL2_CORE_IDENTIFIER_STRING_H
 #define MCRL2_CORE_IDENTIFIER_STRING_H
 
-#include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_string.h"
 #include "mcrl2/core/detail/function_symbols.h"
-#include <iostream>
-#include <vector>
 
 namespace mcrl2
 {

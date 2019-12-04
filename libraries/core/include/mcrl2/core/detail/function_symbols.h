@@ -14,9 +14,6 @@
 
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/function_symbol.h"
-
-#include <memory>
 
 namespace mcrl2 {
 

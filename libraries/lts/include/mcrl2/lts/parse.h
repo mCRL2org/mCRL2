@@ -12,14 +12,9 @@
 #ifndef MCRL2_LTS_PARSE_H
 #define MCRL2_LTS_PARSE_H
 
-#include <cctype>
-#include <sstream>
-
 #include <boost/xpressive/xpressive.hpp>
 
 #include "mcrl2/lts/detail/fsm_builder.h"
-#include "mcrl2/lts/lts_fsm.h"
-#include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2 {
 

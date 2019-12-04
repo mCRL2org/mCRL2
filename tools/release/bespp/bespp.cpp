@@ -11,15 +11,8 @@
 #define NAME "bespp"
 #define AUTHOR "Jeroen Keiren"
 
-#include <string>
-#include <iostream>
-#include <fstream>
-
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/bes/pbes_input_tool.h"
-#include "mcrl2/bes/io.h"
-#include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/print.h"
 
 using namespace mcrl2::log;

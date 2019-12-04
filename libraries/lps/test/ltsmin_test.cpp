@@ -10,8 +10,6 @@
 /// \brief Test for the pins class that connects mCRL2 with LTSMin (http://fmt.cs.utwente.nl/tools/ltsmin/).
 
 #define BOOST_TEST_MODULE ltsmin_test
-#include <cstdio>
-#include <iostream>
 
 #include <boost/test/included/unit_test_framework.hpp>
 

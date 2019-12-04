@@ -13,11 +13,9 @@
 #define MCRL2_UTILITIES_NUMBER_POSTFIX_GENERATOR_H
 
 #include "mcrl2/utilities/text_utility.h"
-#include <algorithm>
 #include <cassert>
 #include <cctype>
 #include <map>
-#include <string>
 
 namespace mcrl2 {
 

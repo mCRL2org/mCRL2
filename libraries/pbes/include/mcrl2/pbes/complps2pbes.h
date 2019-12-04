@@ -16,9 +16,6 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/process/is_communicating_lpe.h"
 #include "mcrl2/process/is_linear.h"
-#include "mcrl2/process/process_specification.h"
-#include "mcrl2/utilities/exception.h"
-#include <string>
 
 namespace mcrl2 {
 

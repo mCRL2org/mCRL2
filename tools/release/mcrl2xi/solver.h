@@ -20,7 +20,6 @@
 #define MCRL2XI_SOLVER_H
 
 #include <QObject>
-#include <QPoint>
 
 #ifndef Q_MOC_RUN // Workaround for QTBUG-22829
 #include "mcrl2/data/data_specification.h"

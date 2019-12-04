@@ -11,10 +11,6 @@
 #define NAME "lpspp"
 #define AUTHOR "Aad Mathijssen and Jeroen Keiren"
 
-#include <string>
-#include <iostream>
-
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/lps/tools.h"
 

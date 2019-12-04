@@ -12,16 +12,10 @@
 #ifndef MCRL2_PBES_DETAIL_GUARD_TRAVERSER_H
 #define MCRL2_PBES_DETAIL_GUARD_TRAVERSER_H
 
-#include <utility>
-
-#include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes_functions.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
-#include "mcrl2/pbes/traverser.h"
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/unused.h"
 
 #ifdef MCRL2_PBES_STATEGRAPH_CHECK_GUARDS
 #include "mcrl2/pbes/find.h"

@@ -13,7 +13,6 @@
 #define MCRL2_LTS_DETAIL_LTS_LOAD_H
 
 #include "mcrl2/lts/lts_io.h"
-#include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/utilities/tool.h"
 
 namespace mcrl2 {

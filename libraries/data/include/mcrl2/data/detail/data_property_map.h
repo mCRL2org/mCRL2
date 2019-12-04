@@ -12,20 +12,9 @@
 #ifndef MCRL2_DATA_DETAIL_DATA_PROPERTY_MAP_H
 #define MCRL2_DATA_DETAIL_DATA_PROPERTY_MAP_H
 
-#include <algorithm>
-#include <iterator>
-#include <map>
-#include <set>
-#include <sstream>
-#include <type_traits>
-#include <utility>
-
 #include <boost/lexical_cast.hpp>
-#include <functional>
 
-#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/variable.h"
-#include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2
 {

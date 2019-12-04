@@ -13,7 +13,6 @@
 #define MCRL2_LPS_STOCHASTIC_PROCESS_INITIALIZER_H
 
 #include "mcrl2/lps/process_initializer.h"
-#include "mcrl2/lps/stochastic_distribution.h"
 
 namespace mcrl2 {
 

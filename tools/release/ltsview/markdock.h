@@ -12,7 +12,6 @@
 #include "ui_markdock.h"
 
 #include <QMap>
-#include <QString>
 
 #include "markmanager.h"
 

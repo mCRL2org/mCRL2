@@ -12,15 +12,8 @@
 #ifndef MCRL2_MODAL_FORMULA_ACTION_FORMULA_H
 #define MCRL2_MODAL_FORMULA_ACTION_FORMULA_H
 
-#include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/multi_action.h"
-#include "mcrl2/process/process_expression.h"
 #include "mcrl2/process/untyped_multi_action.h"
-#include <cassert>
-#include <iostream> // for debugging
-#include <stdexcept>
-#include <string>
 
 namespace mcrl2
 {

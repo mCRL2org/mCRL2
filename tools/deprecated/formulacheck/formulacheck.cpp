@@ -12,13 +12,7 @@
 #define NAME "formulacheck"
 #define AUTHOR "Luc Engelen"
 
-#include <string>
-#include <fstream>
-
-#include "mcrl2/data/parse.h"
-#include "mcrl2/data/detail/prover/bdd_path_eliminator.h"
 #include "mcrl2/data/detail/prover/formula_checker.h"
-#include "mcrl2/data/find.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/utilities/input_output_tool.h"

@@ -11,17 +11,11 @@
 
 // To avoid circular inclusion problems
 
-#ifndef MCRL2_LPS_SPECIFICATION_H
-#include "mcrl2/lps/specification.h"
-#endif
-
 #ifndef MCRL2_LPS_TRAVERSER_H
 #define MCRL2_LPS_TRAVERSER_H
 
-#include "mcrl2/data/traverser.h"
 #include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/process/traverser.h"
-#include "mcrl2/process/untyped_multi_action.h"
 
 namespace mcrl2
 {

@@ -13,7 +13,6 @@
 #define MCRL2_ATERMPP_DETAIL_ATERM_APPL_ITERATOR_H
 
 #include "mcrl2/atermpp/detail/aterm_appl.h"
-#include "mcrl2/atermpp/aterm.h"
 
 namespace atermpp
 {

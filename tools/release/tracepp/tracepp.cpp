@@ -11,14 +11,8 @@
 #define NAME "tracepp"
 #define AUTHOR "Muck van Weerdenburg"
 
-#include <iostream>
-#include <fstream>
-#include <cassert>
 #include "mcrl2/trace/trace.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/lps/multi_action.h"
-#include "mcrl2/data/data_expression.h"
 
 using namespace std;
 using namespace mcrl2;

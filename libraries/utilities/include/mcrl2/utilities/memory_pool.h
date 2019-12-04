@@ -15,8 +15,6 @@
 #include "mcrl2/utilities/spinlock.h"
 
 #include <array>
-#include <assert.h>
-#include <atomic>
 #include <cstdint>
 #include <forward_list>
 #include <type_traits>

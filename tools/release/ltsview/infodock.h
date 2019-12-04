@@ -10,7 +10,6 @@
 #define INFODOCK_H
 
 #include "ui_infodock.h"
-#include "ltsmanager.h"
 #include "markmanager.h"
 
 class InfoDock : public QWidget

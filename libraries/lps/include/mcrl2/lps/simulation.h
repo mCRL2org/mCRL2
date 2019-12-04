@@ -9,14 +9,7 @@
 #ifndef MCRL2_LPS_SIMULATION_H
 #define MCRL2_LPS_SIMULATION_H
 
-#include <deque>
-#include <string>
-
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/next_state_generator.h"
-#include "mcrl2/lps/state.h"
-#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/trace/trace.h"
 
 namespace mcrl2

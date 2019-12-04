@@ -13,10 +13,8 @@
 #define MCRL2_LTS_DETAIL_LTS_GENERATION_OPTIONS_H
 
 #include <climits>
-#include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lps/exploration_strategy.h"
-#include "mcrl2/process/parse.h"
 
 namespace mcrl2
 {

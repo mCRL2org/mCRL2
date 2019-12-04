@@ -12,14 +12,6 @@
 #ifndef MCRL2_LPS_PROCESS_INITIALIZER_H
 #define MCRL2_LPS_PROCESS_INITIALIZER_H
 
-#include <algorithm>
-#include <cassert>
-#include <iterator>
-#include <string>
-#include <utility>
-#include "mcrl2/core/detail/soundness_checks.h"
-#include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/substitutions/assignment_sequence_substitution.h"

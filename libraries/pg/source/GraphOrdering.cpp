@@ -9,7 +9,6 @@
 
 #include "mcrl2/pg/GraphOrdering.h"
 
-#include <cassert>
 #include <queue>
 #include <stack>
 

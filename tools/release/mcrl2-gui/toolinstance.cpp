@@ -8,24 +8,13 @@
 
 
 #include "toolinstance.h"
-#include "ui_toolinstance.h"
-
-#include "filepicker.h"
 
 #include <cassert>
-#include <limits>
-#include <QCheckBox>
-#include <QRadioButton>
-#include <QButtonGroup>
 #include <QLabel>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
-#include <QLineEdit>
-#include <QSpinBox>
-#include <QDoubleSpinBox>
 #include <QPushButton>
 #include <QSpacerItem>
-#include <QFileDialog>
 #include <QScrollBar>
 #include "mcrl2/utilities/logger.h"
 

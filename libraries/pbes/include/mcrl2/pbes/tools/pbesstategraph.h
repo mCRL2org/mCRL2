@@ -12,11 +12,8 @@
 #ifndef MCRL2_PBES_TOOLS_PBESSTATEGRAPH_H
 #define MCRL2_PBES_TOOLS_PBESSTATEGRAPH_H
 
-#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/stategraph.h"
 #include "mcrl2/pbes/io.h"
-#include "mcrl2/pbes/tools/pbesstategraph_options.h"
-#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
 

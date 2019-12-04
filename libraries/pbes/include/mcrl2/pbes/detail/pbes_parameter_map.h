@@ -13,15 +13,8 @@
 #define MCRL2_PBES_DETAIL_PBES_PARAMETER_MAP_H
 
 #include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/data/parse.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/utilities/text_utility.h"
-#include <iostream>
 #include <regex>
-#include <set>
-#include <string>
-#include <vector>
 
 namespace mcrl2
 {

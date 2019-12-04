@@ -16,7 +16,6 @@
 #ifndef MCRL2_PBES_DETAIL_BQNF_VISITOR_H
 #define MCRL2_PBES_DETAIL_BQNF_VISITOR_H
 
-#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_functions.h"
 
 namespace mcrl2 {

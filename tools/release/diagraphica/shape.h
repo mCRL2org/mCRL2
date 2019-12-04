@@ -11,15 +11,7 @@
 #ifndef SHAPE_H
 #define SHAPE_H
 
-#include <QtCore>
-#include <QtGui>
-
-#include <cstddef>
-#include <string>
-#include <map>
-#include <vector>
 #include "dof.h"
-#include "visutils.h"
 #include "visualizer.h"
 
 class Diagram;

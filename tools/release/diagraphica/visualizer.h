@@ -13,13 +13,8 @@
 
 #include "graph.h"
 #include "visutils.h"
-#include "mcrl2/gui/glu.h"
 
-#include <QtCore>
-#include <QtGui>
 #include <QGLWidget>
-
-#include <cstddef>
 
 class Visualizer : public QGLWidget
 {

@@ -11,11 +11,7 @@
 #include "mcrl2/pg/attractor.h"
 #include "mcrl2/pg/SCC.h"
 
-#include <algorithm>
-#include <memory>
-#include <cassert>
 #include <cstring>
-#include <cstdio>  /* printf() */
 
 LiftingStatistics::LiftingStatistics( const ParityGame &game,
                                       long long max_lifts )

@@ -11,12 +11,9 @@
 #include <cstdlib>
 #include <fstream>
 #include "cluster.h"
-#include "lts.h"
 #include "mathutils.h"
-#include "settings.h"
 #include "state.h"
 #include "transition.h"
-#include "vectors.h"
 
 #include <QtOpenGL>
 

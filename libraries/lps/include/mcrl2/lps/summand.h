@@ -12,12 +12,7 @@
 #ifndef MCRL2_LPS_SUMMAND_H
 #define MCRL2_LPS_SUMMAND_H
 
-#include "mcrl2/data/bool.h"
-#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/real.h"
-#include <algorithm>
-#include <iterator>
-#include <string>
 
 namespace mcrl2
 {

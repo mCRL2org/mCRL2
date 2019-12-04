@@ -12,11 +12,8 @@
 #ifndef MCRL2_PROCESS_ELIMINATE_UNUSED_EQUATIONS_H
 #define MCRL2_PROCESS_ELIMINATE_UNUSED_EQUATIONS_H
 
-#include <algorithm>
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/process/traverser.h"
-#include "mcrl2/utilities/detail/container_utility.h"
-#include "mcrl2/utilities/detail/join.h"
 
 namespace mcrl2 {
 

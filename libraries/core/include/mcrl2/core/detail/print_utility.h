@@ -12,10 +12,6 @@
 #ifndef MCRL2_CORE_DETAIL_PRINT_UTILITY_H
 #define MCRL2_CORE_DETAIL_PRINT_UTILITY_H
 
-#include <iostream>
-#include <sstream>
-#include <string>
-
 #include "mcrl2/core/print.h"
 
 namespace mcrl2

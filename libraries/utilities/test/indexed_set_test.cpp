@@ -12,10 +12,6 @@
 #define BOOST_AUTO_TEST_MAIN
 #include <boost/test/included/unit_test_framework.hpp>
 
-#include <map>
-#include <iostream>
-#include <string>
-
 using namespace std;
 using namespace mcrl2::utilities;
 

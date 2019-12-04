@@ -9,7 +9,7 @@
 #ifndef MCRL2_UTILITIES_DETAIL_FREELIST_H_
 #define MCRL2_UTILITIES_DETAIL_FREELIST_H_
 
-#include <assert.h>
+#include <cassert>
 #include <atomic>
 #include <cstddef>
 #include <limits>

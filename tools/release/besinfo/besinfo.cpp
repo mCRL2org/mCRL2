@@ -10,15 +10,9 @@
 /// \brief Tool that displays information about a PBES.
 
 //C++
-#include <cstdio>
 #include <exception>
-#include <iostream>
-#include <string>
 
 //MCRL2-specific
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/bes/io.h"
-#include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/detail/bes_property_map.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/bes/pbes_input_tool.h"

@@ -14,8 +14,6 @@
 
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/utilities/file_utility.h"
-#include <iostream>
-#include <string>
 
 namespace mcrl2
 {

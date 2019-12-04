@@ -8,18 +8,12 @@
 //
 /// \file pbessolve.cpp
 
-#include <iostream>
-
 #include "mcrl2/bes/pbes_input_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/lps/detail/lps_io.h"
-#include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/pbes/detail/pbes_io.h"
-#include "mcrl2/pbes/pbessolve_options.h"
-#include "mcrl2/pbes/pbesinst_structure_graph.h"
 #include "mcrl2/pbes/pbesinst_structure_graph2.h"
-#include "mcrl2/pbes/solve_structure_graph.h"
 #include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;

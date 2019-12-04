@@ -23,7 +23,6 @@
 #include "ui_springlayout.h"
 #include <QtOpenGL>
 
-#include "graph.h"
 #include "glwidget.h"
 
 namespace Graph

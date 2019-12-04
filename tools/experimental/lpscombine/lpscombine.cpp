@@ -9,7 +9,6 @@
 
 #include "mcrl2/lps/io.h"
 #include "mcrl2/lps/stochastic_specification.h"
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_input_output_tool.h"
 #include "mcrl2/process/print.h"
 

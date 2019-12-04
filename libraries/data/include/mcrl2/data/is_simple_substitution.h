@@ -13,7 +13,6 @@
 #define MCRL2_DATA_IS_SIMPLE_SUBSTITUTION_H
 
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/variable.h"
 
 namespace mcrl2 {
 

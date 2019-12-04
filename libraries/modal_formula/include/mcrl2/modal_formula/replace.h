@@ -13,8 +13,6 @@
 #define MCRL2_MODAL_FORMULA_REPLACE_H
 
 #include "mcrl2/lps/replace.h"
-#include "mcrl2/modal_formula/add_binding.h"
-#include "mcrl2/modal_formula/builder.h"
 #include "mcrl2/modal_formula/replace_capture_avoiding.h"
 
 namespace mcrl2

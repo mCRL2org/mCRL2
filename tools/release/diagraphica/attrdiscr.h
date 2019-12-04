@@ -11,16 +11,7 @@
 #ifndef ATTRDISCR_H
 #define ATTRDISCR_H
 
-#include <QtCore>
-#include <QtGui>
-
-#include <algorithm>
-#include <cstddef>
-#include <string>
-#include <map>
-#include <vector>
 #include "attribute.h"
-#include "value.h"
 
 class AttrDiscr : public Attribute
 {

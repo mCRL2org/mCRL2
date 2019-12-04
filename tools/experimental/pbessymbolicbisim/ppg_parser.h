@@ -14,13 +14,9 @@
 #ifndef MCRL2_PBESSYMBOLICBISIM_PPG_PARSER_H
 #define MCRL2_PBESSYMBOLICBISIM_PPG_PARSER_H
 
-#include "mcrl2/data/bool.h"
 #include "mcrl2/data/fourier_motzkin.h"
-#include "mcrl2/data/replace.h"
-#include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/detail/ppg_rewriter.h"
 #include "mcrl2/pbes/detail/ppg_traverser.h"
-#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/pbes2data_rewriter.h"
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"

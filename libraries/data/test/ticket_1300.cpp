@@ -10,11 +10,10 @@
 /// \brief Test for find functions.
 
 #define BOOST_TEST_MODULE ticket_1300
-#include "mcrl2/atermpp/aterm_io.h"
-#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/io.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/print.h"
+
 #include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;

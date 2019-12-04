@@ -11,15 +11,11 @@
 
 #define BOOST_TEST_MODULE pbes_test
 #include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/atermpp/aterm_io.h"
-#include "mcrl2/data/consistency.h"
-#include "mcrl2/data/detail/print_utility.h"
+
 #include "mcrl2/lps/detail/test_input.h"
-#include "mcrl2/lps/linearise.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/pbes/complement.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
-#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/txt2pbes.h"

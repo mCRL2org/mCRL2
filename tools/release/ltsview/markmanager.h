@@ -12,15 +12,9 @@
 #ifndef MARKMANAGER_H
 #define MARKMANAGER_H
 
-#include <QColor>
 #include <QLinkedList>
-#include <QObject>
 #include <QSet>
 #include <QVector>
-
-#include <vector>
-#include <set>
-#include <string>
 
 #include "ltsmanager.h"
 

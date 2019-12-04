@@ -11,8 +11,8 @@
 
 #define BOOST_TEST_MODULE parelm_test
 #include <boost/test/included/unit_test_framework.hpp>
+
 #include "mcrl2/lps/detail/test_input.h"
-#include "mcrl2/lps/linearise.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/pbes/complement.h"
 #include "mcrl2/pbes/lps2pbes.h"

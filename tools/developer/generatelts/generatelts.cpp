@@ -9,16 +9,8 @@
 /// \file transform.cpp
 
 #include <csignal>
-#include <iostream>
-#include <limits>
-#include <memory>
-#include <string>
-#include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/rewriter_tool.h"
-#include "mcrl2/lps/explorer.h"
-#include "mcrl2/lps/io.h"
 #include "mcrl2/lps/is_stochastic.h"
-#include "mcrl2/lts/lts_builder.h"
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/stochastic_lts_builder.h"
 #include "mcrl2/lts/state_space_generator.h"

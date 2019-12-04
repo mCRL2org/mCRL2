@@ -14,26 +14,16 @@
 //#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
 //#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
 
-#include <stdexcept>
-#include <iostream>
-#include <string>
-#include <utility>
-
 #include <boost/algorithm/string.hpp>
 
-#include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/bes/pbes_input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 
-#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/normalize.h"
-#include "mcrl2/pbes/pbesinst_algorithm.h"
 #include "mcrl2/pbes/pbesinst_alternative_lazy_algorithm.h"
 #include "mcrl2/pbes/pbesinst_finite_algorithm.h"
 #include "mcrl2/pbes/pbesinst_strategy.h"
-#include "mcrl2/bes/io.h"
-#include "mcrl2/utilities/logger.h"
 
 using namespace mcrl2;
 using namespace mcrl2::core;

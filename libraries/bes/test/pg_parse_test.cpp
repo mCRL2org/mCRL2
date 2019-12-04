@@ -11,9 +11,8 @@
 
 #define BOOST_TEST_MODULE pg_parse_test
 #include "mcrl2/bes/pg_parse.h"
+
 #include <boost/test/included/unit_test_framework.hpp>
-#include <sstream>
-#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::bes;

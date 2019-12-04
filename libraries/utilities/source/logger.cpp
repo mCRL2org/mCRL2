@@ -10,10 +10,6 @@
 
 #include "mcrl2/utilities/logger.h"
 #include <cassert>
-#include <cstdio>
-#include <ctime>
-#include <iostream>
-#include <string>
 
 namespace mcrl2 {
   namespace log {

@@ -8,9 +8,6 @@
 //
 /// \file next_state_generator.cpp
 
-#include <set>
-#include <algorithm>
-
 #include "mcrl2/lps/next_state_generator.h"
 
 using namespace mcrl2;

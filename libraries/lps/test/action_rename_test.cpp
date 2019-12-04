@@ -10,9 +10,6 @@
 /// \brief Action rename test.
 
 #define BOOST_TEST_MODULE action_rename_test
-#include "mcrl2/lps/action_rename.h"
-#include "mcrl2/lps/action_summand.h"
-#include "mcrl2/lps/deadlock_summand.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/remove.h"

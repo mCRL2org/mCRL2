@@ -9,22 +9,12 @@
 /// \file ltscompare.cpp
 /// \brief A tool to calculate whether probabilistic transition systems are equival
 
-#include <string>
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/exception.h"
-
 #include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/utilities/tool.h"
 
 #include "mcrl2/lts/lts_probabilistic_equivalence.h"
 #include "mcrl2/lts/detail/liblts_pbisim_grv.h"
 #include "mcrl2/lts/detail/liblts_pbisim_bem.h"
 #include "mcrl2/lts/lts_io.h"
-
-#include "mcrl2/lts/lts_lts.h"
-#include "mcrl2/lts/lts_aut.h"
-#include "mcrl2/lts/lts_fsm.h"
-#include "mcrl2/lts/lts_dot.h"
 
 // #include "mcrl2/lps/exploration_strategy.h"
 

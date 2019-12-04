@@ -11,14 +11,9 @@
 #ifndef ATTRIBUTE_H
 #define ATTRIBUTE_H
 
-#include <QtCore>
-#include <QtGui>
-
 #include <algorithm>
-#include <cstddef>
 #include <limits>
 #include <map>
-#include <string>
 #include <vector>
 
 #include "value.h"

@@ -14,10 +14,7 @@
 #define MCRL2_DATA_SORT_SPECIFICATION_H
 
 #include "mcrl2/data/alias.h"
-#include "mcrl2/data/container_sort.h"
-#include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/structured_sort.h"
-#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {

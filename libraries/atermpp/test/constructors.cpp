@@ -10,7 +10,6 @@
 #define BOOST_TEST_MODULE constructors
 #include <boost/test/included/unit_test_framework.hpp>
 
-#include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_string.h"
 #include "mcrl2/atermpp/aterm_io.h"
 

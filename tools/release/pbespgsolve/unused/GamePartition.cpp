@@ -10,7 +10,6 @@
 #include "GamePartition.h"
 #include <algorithm>
 #include <sstream>  // for debug_str()
-#include <cassert>
 
 GamePartition::GamePartition( const ParityGame &old_game,
                               const VertexPartition &vpart, int proc )

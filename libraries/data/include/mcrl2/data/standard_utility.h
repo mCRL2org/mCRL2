@@ -13,11 +13,6 @@
 #define MCRL2_DATA_STANDARD_UTILITY_H
 
 #include "mcrl2/utilities/detail/join.h"
-#include "mcrl2/data/bool.h"
-#include "mcrl2/data/container_sort.h"
-#include "mcrl2/data/int.h"
-#include "mcrl2/data/nat.h"
-#include "mcrl2/data/pos.h"
 #include "mcrl2/data/real.h"
 
 namespace mcrl2

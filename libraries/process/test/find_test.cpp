@@ -13,11 +13,8 @@
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/process/find.h"
 #include "mcrl2/process/parse.h"
-#include <algorithm>
+
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iterator>
-#include <set>
-#include <vector>
 
 using namespace mcrl2;
 using namespace mcrl2::process;

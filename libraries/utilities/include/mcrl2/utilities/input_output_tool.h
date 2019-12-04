@@ -13,7 +13,6 @@
 #define MCRL2_UTILITIES_INPUT_OUTPUT_TOOL_H
 
 #include "mcrl2/utilities/input_tool.h"
-#include <sstream>
 
 namespace mcrl2
 {

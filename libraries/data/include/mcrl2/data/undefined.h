@@ -13,7 +13,6 @@
 #define MCRL2_DATA_UNDEFINED_H
 
 #include "mcrl2/data/real.h"
-#include "mcrl2/data/variable.h"
 
 namespace mcrl2 {
 

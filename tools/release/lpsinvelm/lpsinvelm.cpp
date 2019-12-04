@@ -9,9 +9,6 @@
 /// \file lpsinvelm.cpp
 /// \brief Add your file description here.
 
-#include <string>
-#include <fstream>
-
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/data/prover_tool.h"

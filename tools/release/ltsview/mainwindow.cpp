@@ -6,12 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include <QActionGroup>
 #include <QApplication>
 #include <QImageWriter>
-#include <QMessageBox>
-#include <QPixmap>
-#include <QString>
 #include <QSettings>
 
 #include "mcrl2/lts/lts_io.h"

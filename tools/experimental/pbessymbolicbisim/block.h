@@ -11,9 +11,6 @@
 #ifndef MCRL2_PBESSYMBOLICBISIM_BLOCK_H
 #define MCRL2_PBESSYMBOLICBISIM_BLOCK_H
 
-#include <list>
-
-#include "mcrl2/utilities/hash_utility.h"
 #include "mcrl2/pbes/structure_graph.h"
 
 #include "subblock.h"

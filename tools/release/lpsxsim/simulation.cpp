@@ -8,7 +8,6 @@
 
 #include "simulation.h"
 #include <QMetaObject>
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 

@@ -13,13 +13,8 @@
 #ifndef MCRL2_CORE_INDEX_TRAITS_H
 #define MCRL2_CORE_INDEX_TRAITS_H
 
-#include <iostream>
-#include <sstream>
-#include <stack>
 #include <unordered_map>
-#include <stdexcept>
-#include "mcrl2/utilities/hash_utility.h"
-#include "mcrl2/atermpp/aterm_int.h"
+
 #include "mcrl2/core/identifier_string.h"
 
 namespace mcrl2 {

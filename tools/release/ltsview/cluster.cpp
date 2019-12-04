@@ -9,7 +9,6 @@
 /// \file cluster.cpp
 /// \brief Implementation of the Cluster class
 
-#include <algorithm>
 #include <cmath>
 #include "cluster.h"
 #include "mathutils.h"

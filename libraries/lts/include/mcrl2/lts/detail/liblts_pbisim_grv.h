@@ -10,15 +10,9 @@
 
 #ifndef _LIBLTS_PBISIM_GRV_H
 #define _LIBLTS_PBISIM_GRV_H
-#include <cassert>
-#include <vector>
-#include <deque>
-#include <stack>
 #include "mcrl2/utilities/execution_timer.h"
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/detail/embedded_list.h"
 #include "mcrl2/lts/detail/liblts_plts_merge.h"
-#include "mcrl2/lts/lts_aut.h"
 
 namespace mcrl2
 {

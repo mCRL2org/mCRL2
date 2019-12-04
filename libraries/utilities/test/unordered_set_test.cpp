@@ -7,7 +7,6 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "mcrl2/utilities/unordered_set.h"
 #include "mcrl2/utilities/unordered_map.h"
 
 #define BOOST_AUTO_TEST_MAIN

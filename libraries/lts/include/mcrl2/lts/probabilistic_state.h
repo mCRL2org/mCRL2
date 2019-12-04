@@ -18,7 +18,6 @@
 #ifndef MCRL2_LTS_PROBABILISTIC_STATE_H
 #define MCRL2_LTS_PROBABILISTIC_STATE_H
 
-#include <vector>
 #include <sstream>
 #include "mcrl2/lps/state_probability_pair.h"
 

@@ -13,7 +13,7 @@
 
 #define BOOST_TEST_MODULE data_specification_test
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/lps/stochastic_specification.h"
+
 #include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;

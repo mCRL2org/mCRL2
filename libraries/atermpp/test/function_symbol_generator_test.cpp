@@ -15,8 +15,6 @@
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/function_symbol_generator.h"
 
-#include <string>
-
 using namespace atermpp;
 
 BOOST_AUTO_TEST_CASE(test_generator)

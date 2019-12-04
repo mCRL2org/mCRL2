@@ -12,9 +12,7 @@
 #ifndef MCRL2_DATA_INDEX_TRAITS_H
 #define MCRL2_DATA_INDEX_TRAITS_H
 
-#include "mcrl2/core/index_traits.h"
 #include "mcrl2/data/function_symbol.h"
-#include "mcrl2/data/variable.h"
 
 namespace mcrl2 {
 

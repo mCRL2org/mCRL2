@@ -20,7 +20,6 @@
 #define MCRL2XI_REWRITER_H
 
 #include <QObject>
-#include <QPoint>
 #include <QThread>
 
 #ifndef Q_MOC_RUN // Workaround for QTBUG-22829

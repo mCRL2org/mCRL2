@@ -8,9 +8,6 @@
 //
 /// \file pbes2bdd.cpp
 
-#include <iostream>
-#include <string>
-
 #include "mcrl2/pbes/detail/pbes_io.h"
 #include "mcrl2/pbes/bdd.h"
 #include "mcrl2/utilities/detail/io.h"

@@ -11,7 +11,6 @@
 #ifndef MCRL2_DATA_DETAIL_REWRITE_H
 #define MCRL2_DATA_DETAIL_REWRITE_H
 
-#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/enumerator_identifier_generator.h"
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/selection.h"

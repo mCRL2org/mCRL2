@@ -11,13 +11,6 @@
 #ifndef BUNDLE_H
 #define BUNDLE_H
 
-#include <QtCore>
-#include <QtGui>
-
-#include <cstddef>
-#include <map>
-#include <vector>
-#include <string>
 #include "edge.h"
 #include "cluster.h"
 

@@ -13,15 +13,11 @@
 #define MCRL2_MODAL_FORMULA_PREPROCESS_STATE_FORMULA_H
 
 #include "mcrl2/data/detail/find.h"
-#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/xyz_identifier_generator.h"
-#include "mcrl2/modal_formula/builder.h"
 #include "mcrl2/modal_formula/has_name_clashes.h"
 #include "mcrl2/modal_formula/is_monotonous.h"
 #include "mcrl2/modal_formula/normalize.h"
-#include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/state_formula_rename.h"
-#include "mcrl2/modal_formula/traverser.h"
 
 namespace mcrl2
 {

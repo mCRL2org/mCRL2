@@ -11,10 +11,7 @@
 
 #define BOOST_TEST_MODULE builder_test
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iostream>
-#include <set>
 
-#include "mcrl2/data/add_binding.h"
 #include "mcrl2/data/builder.h"
 #include "mcrl2/data/parse.h"
 

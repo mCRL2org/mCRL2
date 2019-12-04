@@ -12,15 +12,8 @@
 #define NAME "txt2pbes"
 #define AUTHOR "Aad Mathijssen, Wieger Wesselink"
 
-//C++
-#include <cstdio>
-#include <fstream>
-#include <string>
-
 //mCRL2 specific
 #include "mcrl2/pbes/tools.h"
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/bes/pbes_output_tool.h"
 

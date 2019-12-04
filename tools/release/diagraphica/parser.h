@@ -11,20 +11,11 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include <QtCore>
-#include <QtGui>
 #include <QDomDocument>
 
-#include <cstddef>
 #include <fstream>
 #include <iostream>
-#include <map>
-#include <string>
-#include <vector>
 #include "diagram.h"
-#include "dof.h"
-#include "graph.h"
-#include "utils.h"
 
 class Parser : public QObject
 {

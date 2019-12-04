@@ -7,12 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "mcrl2/trace/trace.h"
-#include "mcrl2/utilities/logger.h"
-#include "lts.h"
-#include "simulation.h"
 #include "transition.h"
 #include "state.h"
-#include <algorithm>
 
 using namespace std;
 

@@ -12,7 +12,6 @@
 #ifndef MCRL2_PBES_PBESSOLVE_VERTEX_SET_H
 #define MCRL2_PBES_PBESSOLVE_VERTEX_SET_H
 
-#include <algorithm>
 #include <deque>
 #include "mcrl2/pbes/structure_graph.h"
 

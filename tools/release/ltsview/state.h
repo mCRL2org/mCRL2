@@ -9,8 +9,6 @@
 #ifndef STATE_H
 #define STATE_H
 
-#include <vector>
-#include <set>
 #include "markmanager.h"
 #include "vectors.h"
 

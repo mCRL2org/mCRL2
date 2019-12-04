@@ -10,13 +10,7 @@
 /// \brief add your file description here.
 
 #include "mcrl2/pbes/parity_game_generator.h"
-#include "mcrl2/pbes/pbes.h"
 #include <boost/algorithm/string/join.hpp>
-#include <functional>
-#include <set>
-#include <string>
-#include <utility>
-#include <vector>
 
 #ifndef MCRL2_PBES_DETAIL_PARITY_GAME_OUTPUT_H
 #define MCRL2_PBES_DETAIL_PARITY_GAME_OUTPUT_H

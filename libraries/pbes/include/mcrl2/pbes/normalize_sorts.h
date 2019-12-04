@@ -14,7 +14,6 @@
 
 #include "mcrl2/data/normalize_sorts.h"
 #include "mcrl2/pbes/builder.h"
-#include "mcrl2/pbes/pbes.h"
 
 namespace mcrl2
 {

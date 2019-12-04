@@ -10,8 +10,6 @@
 #include "mcrl2/pg/ParityGame.h"
 #include "mcrl2/pg/SCC.h"
 
-#include <cassert>
-
 /*! \file ParityGame_verify.cc
 
     Implementation of parity game solution verification algorithm.

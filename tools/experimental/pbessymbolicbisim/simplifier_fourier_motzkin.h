@@ -14,7 +14,6 @@
 
 #include "mcrl2/data/detail/linear_inequalities_utilities.h"
 
-#include "simplifier.h"
 #include "simplifier_mdd.h"
 
 namespace mcrl2

@@ -14,7 +14,6 @@
 
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/process/action_label.h"
-#include <map>
 
 namespace mcrl2 {
 

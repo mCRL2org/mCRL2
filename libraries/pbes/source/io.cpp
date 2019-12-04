@@ -13,11 +13,6 @@
 #include "mcrl2/pbes/detail/io.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/parse.h"
-#include "mcrl2/utilities/file_utility.h"
-#include "mcrl2/utilities/logger.h"
-
-#include <string>
-#include <utility>
 
 namespace mcrl2
 {

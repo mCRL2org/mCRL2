@@ -11,11 +11,9 @@
 
 #define BOOST_TEST_MODULE untime_test
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iostream>
-#include "mcrl2/lps/find.h"
+
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/untime.h"
-#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::data;

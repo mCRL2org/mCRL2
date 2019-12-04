@@ -18,11 +18,6 @@
 
 #include "mcrl2/data/is_simple_substitution.h"
 #include "mcrl2/data/undefined.h"
-#include "mcrl2/utilities/exception.h"
-#include <functional>
-#include <iostream>
-#include <sstream>
-#include <string>
 
 namespace mcrl2 {
 

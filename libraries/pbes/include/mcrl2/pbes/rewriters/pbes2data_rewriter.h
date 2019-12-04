@@ -14,7 +14,6 @@
 
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/pbes/builder.h"
-#include "mcrl2/pbes/pbes_expression.h"
 
 namespace mcrl2 {
 

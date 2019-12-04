@@ -11,16 +11,10 @@
 #define MCRL2_ATERMPP_ATERM_POOL_STORAGE_IMPLEMENTION_H
 #pragma once
 
-#include "mcrl2/atermpp/detail/aterm_pool_storage.h"
 #include "mcrl2/atermpp/detail/aterm_pool.h"
 
-#include "mcrl2/atermpp/detail/aterm_appl.h"
-#include "mcrl2/utilities/unused.h"
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/stack_array.h"
 
-#include <algorithm>
-#include <assert.h>
 #include <cstring>
 
 namespace atermpp

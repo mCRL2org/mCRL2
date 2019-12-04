@@ -8,7 +8,6 @@
 //
 /// \file ./arcdiagram.cpp
 
-#include <limits>
 #include "arcdiagram.h"
 #include <iostream>
 

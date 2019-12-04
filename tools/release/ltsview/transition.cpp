@@ -9,8 +9,6 @@
 /// \file transition.cpp
 /// \brief Source file for Transition class
 
-#include <cstddef>
-
 #include "transition.h"
 #include "state.h"
 

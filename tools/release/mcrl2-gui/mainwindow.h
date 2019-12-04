@@ -25,7 +25,6 @@
 #include "mcrl2/gui/persistentfiledialog.h"
 
 #include "toolcatalog.h"
-#include "toolinformation.h"
 
 class MainWindow : public QMainWindow
 {

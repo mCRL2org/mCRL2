@@ -12,9 +12,6 @@
 
 #include "mcrl2/pg/SmallProgressMeasures.h"
 
-#include <deque>
-#include <vector>
-
 /*! \ingroup LiftingStrategies
  
     A simple lifting strategy that puts all nodes in a queue, then takes them

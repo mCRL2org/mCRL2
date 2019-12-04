@@ -12,9 +12,8 @@
 #define BOOST_TEST_MODULE typecheck_test
 
 #include "mcrl2/process/parse.h"
-#include "mcrl2/process/typecheck.h"
+
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iostream>
 
 using namespace mcrl2;
 

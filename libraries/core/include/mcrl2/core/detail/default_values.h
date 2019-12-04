@@ -12,8 +12,6 @@
 #ifndef MCRL2_CORE_DETAIL_DEFAULT_VALUES_H
 #define MCRL2_CORE_DETAIL_DEFAULT_VALUES_H
 
-#include "mcrl2/atermpp/aterm_int.h"
-#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/identifier_string.h"
 
 namespace mcrl2 {

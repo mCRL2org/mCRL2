@@ -7,15 +7,12 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include <cmath>
-#include <vector>
 #include "cluster.h"
-#include "lts.h"
 #include "sp_state_positioner.h"
 #include "mathutils.h"
 #include "rtree.h"
 #include "state.h"
 #include "transition.h"
-#include "vectors.h"
 
 
 class ClusterStatePositioner

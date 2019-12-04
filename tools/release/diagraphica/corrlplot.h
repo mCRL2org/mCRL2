@@ -11,17 +11,7 @@
 #ifndef CORRLPLOT_H
 #define CORRLPLOT_H
 
-#include <QtCore>
-#include <QtGui>
-
-#include <cstddef>
-#include <cstdlib>
-#include <cmath>
-#include <vector>
 #include "diagram.h"
-#include "graph.h"
-#include "utils.h"
-#include "visualizer.h"
 
 class CorrlPlot : public Visualizer
 {

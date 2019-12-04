@@ -15,7 +15,6 @@
 #define MCRL2_PBES_DETAIL_BQNF_QUANTIFIER_REWRITER_H
 
 #include "mcrl2/pbes/detail/bqnf_visitor.h"
-#include "mcrl2/utilities/detail/memory_utility.h"
 
 namespace mcrl2 {
 

@@ -12,11 +12,7 @@
 #ifndef MCRL2_MODAL_FORMULA_STATE_FORMULA_SPECIFICATION_H
 #define MCRL2_MODAL_FORMULA_STATE_FORMULA_SPECIFICATION_H
 
-#include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/print.h"
-#include "mcrl2/data/data_specification.h"
 #include "mcrl2/modal_formula/state_formula.h"
-#include "mcrl2/process/action_label.h"
 
 namespace mcrl2 {
 

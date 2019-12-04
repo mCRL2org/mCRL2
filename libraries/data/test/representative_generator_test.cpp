@@ -10,21 +10,13 @@
 /// \brief Add your file description here.
 
 #define BOOST_TEST_MODULE representative_generator_test
-#include <algorithm>
-#include <iostream>
-#include <iterator>
-#include <set>
-#include <string>
 
 #include <boost/test/included/unit_test_framework.hpp>
 
-#include "mcrl2/data/bool.h"
 #include "mcrl2/data/list.h"
-#include "mcrl2/data/nat.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/set.h"
-#include "mcrl2/data/structured_sort.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;

@@ -11,13 +11,10 @@
 
 #define BOOST_TEST_MODULE boolean_expression_test
 #include "mcrl2/bes/bes2pbes.h"
-#include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/io.h"
 #include "mcrl2/bes/print.h"
+
 #include <boost/test/included/unit_test_framework.hpp>
-#include <cstdio>
-#include <iostream>
-#include <string>
 
 using namespace mcrl2;
 

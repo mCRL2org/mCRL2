@@ -12,11 +12,7 @@
 #ifndef MCRL2_BES_PBES_OUTPUT_TOOL_H
 #define MCRL2_BES_PBES_OUTPUT_TOOL_H
 
-#include <iostream>
-#include <set>
 #include "mcrl2/utilities/command_line_interface.h"
-#include "mcrl2/utilities/file_utility.h"
-#include <string>
 #include "mcrl2/bes/io.h"
 #include "mcrl2/pbes/io.h"
 

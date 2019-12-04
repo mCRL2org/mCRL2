@@ -12,7 +12,6 @@
 #ifndef PRIMITIVEFACTORY_H
 #define PRIMITIVEFACTORY_H
 
-#include <QObject>
 #include <vector>
 #include "settings.h"
 

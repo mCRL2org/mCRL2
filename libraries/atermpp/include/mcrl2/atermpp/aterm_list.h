@@ -10,15 +10,8 @@
 #ifndef MCRL2_ATERMPP_ATERM_LIST_H
 #define MCRL2_ATERMPP_ATERM_LIST_H
 
-#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/detail/aterm_list.h"
 #include "mcrl2/atermpp/detail/aterm_list_iterator.h"
-#include "mcrl2/atermpp/detail/global_aterm_pool.h"
-
-#include <cassert>
-#include <initializer_list>
-#include <limits>
-#include <type_traits>
 
 namespace atermpp
 {

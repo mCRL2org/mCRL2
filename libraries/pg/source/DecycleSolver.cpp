@@ -9,8 +9,6 @@
 
 #include "mcrl2/pg/DecycleSolver.h"
 #include "mcrl2/pg/attractor.h"
-#include <memory>
-#include <cassert>
 
 /*! This helper class searches for cycles of a fixed priority in subgames
     controlled entirely by the corresponding player. */

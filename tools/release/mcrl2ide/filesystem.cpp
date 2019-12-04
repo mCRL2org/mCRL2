@@ -11,7 +11,6 @@
 
 #include <QFile>
 #include <QFileInfo>
-#include <QDateTime>
 #include <QTextStream>
 #include <QDirIterator>
 #include <QInputDialog>

@@ -6,14 +6,10 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "mcrl2/trace/trace.h"
 #include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/lts/lts_io.h"
-#include "mcrl2/lts/detail/lts_convert.h"
-#include "mcrl2/utilities/logger.h"
 #include "cluster.h"
 #include "fsm_state_positioner.h"
-#include "lts.h"
 #include "mathutils.h"
 #include "sp_state_positioner.h"
 #include "state.h"

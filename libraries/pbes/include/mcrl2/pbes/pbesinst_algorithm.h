@@ -12,18 +12,11 @@
 #ifndef MCRL2_PBES_PBESINST_ALGORITHM_H
 #define MCRL2_PBES_PBESINST_ALGORITHM_H
 
-#include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
-#include "mcrl2/pbes/find.h"
-#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
-#include <cassert>
-#include <iostream>
-#include <set>
-#include <sstream>
 
 namespace mcrl2
 {

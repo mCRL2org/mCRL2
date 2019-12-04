@@ -19,9 +19,6 @@
 #ifndef MCRL2_LTS_LTS_DOT_H
 #define MCRL2_LTS_LTS_DOT_H
 
-#include <string>
-#include <vector>
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/lts/probabilistic_arbitrary_precision_fraction.h"
 #include "mcrl2/lts/probabilistic_lts.h"

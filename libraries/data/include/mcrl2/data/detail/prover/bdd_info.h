@@ -13,8 +13,6 @@
 #define MCRL2_DATA_DETAIL_PROVER_BDD_INFO_H
 
 #include "mcrl2/data/bool.h"
-#include "mcrl2/data/standard.h"
-#include <iterator>
 
 namespace mcrl2
 {

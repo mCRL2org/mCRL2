@@ -10,12 +10,8 @@
 #ifndef MCRL2_LTSGRAPH_GLWIDGET_H
 #define MCRL2_LTSGRAPH_GLWIDGET_H
 
-#include "graph.h"
 #include "glscene.h"
 
-#include "mcrl2/lts/lts.h"
-
-#include <QOpenGLWidget>
 #include <QColorDialog>
 #include <QVector2D>
 #include <QOpenGLDebugLogger>

@@ -12,16 +12,9 @@
 #ifndef MCRL2_DATA_DETAIL_PROVER_SMT_LIB_SOLVER_H
 #define MCRL2_DATA_DETAIL_PROVER_SMT_LIB_SOLVER_H
 
-#include <sstream>
-#include <string>
-
 #include "mcrl2/core/print.h"
-#include "mcrl2/data/bool.h"
 #include "mcrl2/data/data_specification.h" // Added to make this header compile standalone
 #include "mcrl2/data/detail/prover/smt_solver.h"
-#include "mcrl2/data/standard_utility.h"
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/utilities/logger.h"
 
 #ifdef HAVE_CVC
 #include "mcrl2/data/detail/prover/smt_solver_cvc_fast.ipp"

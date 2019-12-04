@@ -14,8 +14,6 @@
 
 #include "mcrl2/pbes/constelm.h"
 #include "mcrl2/pbes/io.h"
-#include "mcrl2/pbes/pbes_rewriter_type.h"
-#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
 

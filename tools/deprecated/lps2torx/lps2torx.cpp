@@ -11,23 +11,8 @@
 #define NAME "lps2torx"
 #define AUTHOR "Muck van Weerdenburg, Frank Stappers"
 
-#include <iostream>
-#include <string>
-#include <cctype>
-
-#include <cstdio>
-#include <cerrno>
-#include <cstdlib>
-#include <cstring>
-#include <cassert>
-#include <deque>
-
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/io.h"
-#include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/next_state_generator.h"
-#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 

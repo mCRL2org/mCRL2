@@ -7,14 +7,10 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include <QTextEdit>
 #include <QMessageBox>
-#include <QPalette>
 #include <QSettings>
 
 #include "mainwindow.h"
-
-#include "mcrl2/utilities/logger.h"
 
 MainWindow::MainWindow(QThread *atermThread, mcrl2::data::rewrite_strategy strategy) :
   m_parser(atermThread),

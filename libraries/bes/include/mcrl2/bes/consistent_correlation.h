@@ -12,11 +12,8 @@
 #ifndef MCRL2_BES_CONSISTENT_CORRELATION_H
 #define MCRL2_BES_CONSISTENT_CORRELATION_H
 
-#include <map>
-#include <set>
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/pbes/equation_index.h"
-#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2 {
 

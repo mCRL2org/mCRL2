@@ -12,7 +12,6 @@
 #ifndef MCRL2_PBES_PBES_EQUATION_INDEX_H
 #define MCRL2_PBES_PBES_EQUATION_INDEX_H
 
-#include <map>
 #include "mcrl2/pbes/pbes.h"
 
 namespace mcrl2 {

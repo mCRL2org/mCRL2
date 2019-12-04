@@ -12,12 +12,9 @@
 #ifndef MCRL2_PROCESS_ELIMINATE_TRIVIAL_EQUATIONS_H
 #define MCRL2_PROCESS_ELIMINATE_TRIVIAL_EQUATIONS_H
 
-#include <algorithm>
-#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/process/builder.h"
-#include "mcrl2/process/process_specification.h"
 
 namespace mcrl2 {
 

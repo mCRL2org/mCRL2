@@ -10,13 +10,10 @@
 #define LPSXSIM_MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QSemaphore>
 #include <QTimer>
-#include <QThread>
 #include "ui_mainwindow.h"
 
 #ifndef Q_MOC_RUN // Workaround for QTBUG-22829
-#include "mcrl2/data/rewriter.h"
 #include "mcrl2/gui/persistentfiledialog.h"
 #endif // Q_MOC_RUN
 

@@ -10,13 +10,9 @@
 /// \brief Add your file description here.
 
 #define BOOST_TEST_MODULE linear_process_conversion_test
-#include "mcrl2/lps/detail/linear_process_conversion_traverser.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/process/is_linear.h"
-#include "mcrl2/process/parse.h"
-#include "mcrl2/process/process_specification.h"
+
 #include <boost/test/included/unit_test_framework.hpp>
-#include <set>
 
 using namespace mcrl2;
 using namespace mcrl2::process;

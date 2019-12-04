@@ -13,11 +13,7 @@
 #define MCRL2_PBES_DETAIL_PBES_IO_H
 
 #include <fstream>
-#include <iostream>
-#include <string>
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2 {
 

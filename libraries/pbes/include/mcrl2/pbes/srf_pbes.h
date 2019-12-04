@@ -13,10 +13,8 @@
 #define MCRL2_PBES_SRF_PBES_H
 
 #include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/join.h"
-#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_functions.h"
 #include "mcrl2/pbes/rewriters/pbes2data_rewriter.h"
 

@@ -14,9 +14,6 @@
 
 #include "mcrl2/atermpp/aterm_io_text.h"
 #include "mcrl2/core/identifier_string.h"
-#include <algorithm>
-#include <set>
-#include <sstream>
 
 namespace mcrl2 {
 

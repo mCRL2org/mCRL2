@@ -12,22 +12,16 @@
 #ifndef MCRL2_PBES_PARTIAL_ORDER_REDUCTION_H
 #define MCRL2_PBES_PARTIAL_ORDER_REDUCTION_H
 
-#include <chrono>
 #include <iomanip>
 #include <boost/dynamic_bitset.hpp>
-#include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/data/rewriters/quantifiers_inside_rewriter.h"
 #include "mcrl2/data/substitution_utility.h"
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/data/substitutions/maintain_variables_in_rhs.h"
-#include "mcrl2/pbes/pbes_equation_index.h"
 #include "mcrl2/pbes/replace_capture_avoiding_with_an_identifier_generator.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
-#include "mcrl2/pbes/srf_pbes.h"
 #include "mcrl2/pbes/unify_parameters.h"
 #include "mcrl2/smt/solver.h"
-#include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/utilities/skip.h"
 
 namespace mcrl2 {

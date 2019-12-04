@@ -13,7 +13,6 @@
 #define MCRL2_DATA_UNTYPED_SET_OR_BAG_COMPREHENSION_H
 
 #include "mcrl2/data/abstraction.h"
-#include "mcrl2/data/variable.h"
 
 namespace mcrl2 {
 

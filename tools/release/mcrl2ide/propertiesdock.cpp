@@ -10,7 +10,6 @@
 #include "propertiesdock.h"
 
 #include <QMainWindow>
-#include <QLabel>
 
 PropertiesDock::PropertiesDock(ProcessSystem* processSystem,
                                FileSystem* fileSystem, QWidget* parent)

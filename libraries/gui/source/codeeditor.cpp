@@ -13,7 +13,6 @@
 
 #include <QPainter>
 #include <QTextBlock>
-#include <QWidget>
 #include <QMenu>
 
 using namespace mcrl2::gui::qt;

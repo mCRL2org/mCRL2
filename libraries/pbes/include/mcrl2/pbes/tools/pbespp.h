@@ -14,9 +14,6 @@
 
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/detail/pfnf_print.h"
-#include "mcrl2/pbes/detail/pfnf_print.h"
-#include "mcrl2/utilities/logger.h"
-#include <fstream>
 
 namespace mcrl2 {
 

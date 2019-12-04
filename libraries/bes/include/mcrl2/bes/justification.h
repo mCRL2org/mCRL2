@@ -13,12 +13,6 @@
 #define MCRL2_BES_JUSTIFICATION_H
 
 #include "mcrl2/bes/boolean_equation_system.h"
-#include "mcrl2/utilities/logger.h"
-#include <iostream>
-#include <map>
-#include <set>
-#include <string>
-#include <vector>
 
 using std::cout;
 using std::endl;

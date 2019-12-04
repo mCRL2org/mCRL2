@@ -12,7 +12,6 @@
 #ifndef MCRL2_PROCESS_PROCESS_INFO_H
 #define MCRL2_PROCESS_PROCESS_INFO_H
 
-#include <iostream>
 #include "mcrl2/process/process_specification.h"
 
 namespace mcrl2 {

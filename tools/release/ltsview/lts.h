@@ -12,9 +12,6 @@
 #ifndef LTS_H
 #define LTS_H
 
-#include <string>
-#include <vector>
-#include <map>
 #include <set>
 
 #include "mcrl2/lts/lts_fsm.h"

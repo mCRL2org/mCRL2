@@ -12,7 +12,7 @@
 
 #include <forward_list>
 
-#include <assert.h>
+#include <cassert>
 
 namespace mcrl2
 {

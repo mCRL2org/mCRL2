@@ -8,23 +8,13 @@
 //
 /// \file mcrl2transform.cpp
 
-#include <chrono>
-#include <iostream>
-#include <fstream>
-#include <memory>
-#include <string>
-
-#include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/process/alphabet_reduce.h"
 #include "mcrl2/process/anonymize.h"
 #include "mcrl2/process/detail/process_command.h"
 #include "mcrl2/process/eliminate_trivial_equations.h"
 #include "mcrl2/process/eliminate_unused_equations.h"
-#include "mcrl2/process/parse.h"
 #include "mcrl2/utilities/detail/io.h"
-#include "mcrl2/utilities/detail/separate_keyword_section.h"
 #include "mcrl2/utilities/detail/transform_tool.h"
 #include "mcrl2/utilities/input_output_tool.h"
 

@@ -12,7 +12,6 @@
 #ifndef MCRL2_CORE_PARSER_UTILITY_H
 #define MCRL2_CORE_PARSER_UTILITY_H
 
-#include "mcrl2/core/dparser.h"
 #include "mcrl2/core/parse.h"
 
 namespace mcrl2 {

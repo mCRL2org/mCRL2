@@ -12,16 +12,10 @@
 #ifndef MCRL2_PROCESS_PARSE_IMPL_H
 #define MCRL2_PROCESS_PARSE_IMPL_H
 
-#include "mcrl2/core/parser_utility.h"
 #include "mcrl2/data/parse_impl.h"
 #include "mcrl2/process/alphabet_reduce.h"
-#include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/typecheck.h"
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
-#include "mcrl2/utilities/text_utility.h"
-#include <iostream>
-#include <sstream>
-#include <string>
 
 namespace mcrl2 {
 

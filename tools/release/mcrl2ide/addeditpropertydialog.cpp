@@ -9,7 +9,6 @@
 
 #include "addeditpropertydialog.h"
 #include "ui_addeditpropertydialog.h"
-#include "utilities.h"
 
 #include <QStandardItemModel>
 

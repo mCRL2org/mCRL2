@@ -12,10 +12,8 @@
 #define BOOST_TEST_MODULE resolve_name_clash_test
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/resolve_name_clashes.h"
+
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iostream>
-#include <set>
-#include <string>
 
 using namespace mcrl2;
 

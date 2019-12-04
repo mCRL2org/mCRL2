@@ -16,7 +16,6 @@
 
 #include <cstdio>
 #include <string>
-#include <iostream>
 #include "mcrl2/utilities/exception.h"
 
 #ifdef MCRL2_PLATFORM_LINUX

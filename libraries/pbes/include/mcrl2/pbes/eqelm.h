@@ -10,25 +10,11 @@
 #ifndef MCRL2_PBES_EQELM_H
 #define MCRL2_PBES_EQELM_H
 
-#include "mcrl2/data/sort_expression.h"
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/algorithms.h"
-#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_rewriter_type.h"
 #include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/replace.h"
-#include "mcrl2/pbes/rewriters/data_rewriter.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
-#include "mcrl2/pbes/rewriters/simplify_rewriter.h"
-#include "mcrl2/utilities/logger.h"
-#include <algorithm>
-#include <deque>
-#include <map>
-#include <set>
-#include <sstream>
-#include <sstream>
-#include <utility>
-#include <vector>
 
 namespace mcrl2
 {

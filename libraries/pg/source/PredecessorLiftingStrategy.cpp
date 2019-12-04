@@ -9,8 +9,6 @@
 
 #include "mcrl2/pg/PredecessorLiftingStrategy.h"
 
-#include <cassert>
-
 PredecessorLiftingStrategy::PredecessorLiftingStrategy(
     const ParityGame &game, const SmallProgressMeasures &spm,
     bool stack, int version )

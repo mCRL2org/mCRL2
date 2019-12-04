@@ -13,7 +13,6 @@
 #define MCRL2_DATA_DETAIL_PROVER_BDD_SIMPLIFIER_H
 
 #include "mcrl2/data/data_expression.h"
-#include <ctime>
 
 namespace mcrl2
 {

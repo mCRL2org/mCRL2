@@ -12,17 +12,8 @@
 
 #define NAME std::string("rewr_jitty")
 
-#include <algorithm>
-#include <cstdlib>
-#include <cstring>
-#include <cassert>
-#include <stdexcept>
-#include <iostream>
 #include <boost/config.hpp>
 
-#include "mcrl2/utilities/detail/memory_utility.h"
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/data/replace.h"
 

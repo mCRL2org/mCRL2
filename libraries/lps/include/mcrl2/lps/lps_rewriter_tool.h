@@ -12,10 +12,7 @@
 #ifndef MCRL2_LPS_LPS_REWRITER_TOOL_H
 #define MCRL2_LPS_LPS_REWRITER_TOOL_H
 
-#include <iostream>
 #include <set>
-#include <stdexcept>
-#include <string>
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/lps/lps_rewriter_type.h"
 

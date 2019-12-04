@@ -10,14 +10,9 @@
 /// \brief Add your file description here.
 
 #define BOOST_TEST_MODULE aterm_test
-#include <iostream>
-#include <string>
-#include <sstream>
 #include <boost/test/included/unit_test_framework.hpp>
 
 #include "mcrl2/atermpp/aterm_io.h"
-#include "mcrl2/atermpp/aterm_int.h"
-#include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_string.h"
 
 using namespace std;

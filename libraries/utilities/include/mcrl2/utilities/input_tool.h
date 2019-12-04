@@ -12,7 +12,6 @@
 #ifndef MCRL2_UTILITIES_INPUT_TOOL_H
 #define MCRL2_UTILITIES_INPUT_TOOL_H
 
-#include <sstream>
 // #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/tool.h"
 

@@ -10,18 +10,12 @@
 #ifndef ATERMPP_DETAIL_ATERM_POOL_STORAGE_H
 #define ATERMPP_DETAIL_ATERM_POOL_STORAGE_H
 
-#include "mcrl2/atermpp/detail/aterm_appl.h"
-#include "mcrl2/atermpp/detail/aterm.h"
 #include "mcrl2/atermpp/detail/aterm_hash.h"
-#include "mcrl2/atermpp/detail/aterm_int.h"
-#include "mcrl2/utilities/block_allocator.h"
 #include "mcrl2/utilities/cache_metric.h"
 #include "mcrl2/utilities/unordered_set.h"
 
-#include <limits>
 #include <stack>
 #include <utility>
-#include <vector>
 
 namespace atermpp
 {

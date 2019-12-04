@@ -12,10 +12,6 @@
 #ifndef MCRL2_DATA_CONTAINER_SORT_H
 #define MCRL2_DATA_CONTAINER_SORT_H
 
-#include <iostream>
-
-#include "mcrl2/core/detail/function_symbols.h"
-#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/container_type.h"
 #include "mcrl2/data/sort_expression.h"
 

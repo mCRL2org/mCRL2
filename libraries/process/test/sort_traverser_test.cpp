@@ -13,11 +13,8 @@
 
 #include "mcrl2/process/find.h"
 #include "mcrl2/process/parse.h"
-#include "mcrl2/process/process_specification.h"
+
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iostream>
-#include <set>
-#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::process;

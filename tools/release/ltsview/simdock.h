@@ -11,8 +11,6 @@
 
 #include "ui_simdock.h"
 
-#include "ltsmanager.h"
-#include "simulation.h"
 #include "state.h"
 #include "transition.h"
 

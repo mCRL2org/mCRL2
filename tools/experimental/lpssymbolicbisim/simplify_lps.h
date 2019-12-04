@@ -13,10 +13,8 @@
 #define MCRL2_LPSSYMBOLICBISIM_SIMPLIFY_LPS_H
 
 #include "mcrl2/data/join.h"
-#include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/linear_inequalities.h"
 #include "mcrl2/lps/stochastic_specification.h"
-#include "mcrl2/lps/summand.h"
 
 namespace mcrl2
 {

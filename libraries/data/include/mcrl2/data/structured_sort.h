@@ -12,23 +12,9 @@
 #ifndef MCRL2_DATA_STRUCTURED_SORT_H
 #define MCRL2_DATA_STRUCTURED_SORT_H
 
-#include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/core/detail/function_symbols.h"
-#include "mcrl2/core/identifier_string.h"
-#include "mcrl2/data/bool.h"
-#include "mcrl2/data/data_equation.h"
-#include "mcrl2/data/function_sort.h"
-#include "mcrl2/data/function_symbol.h"
-#include "mcrl2/data/pos.h"
 #include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/data/sort_expression.h"
-#include "mcrl2/data/standard.h"
 #include "mcrl2/data/standard_numbers_utility.h"
 #include "mcrl2/data/structured_sort_constructor.h"
-#include "mcrl2/data/variable.h"
-#include <iterator>
-#include <string>
 
 namespace mcrl2
 {

@@ -11,8 +11,6 @@
 // #define MCRL2_PBES_CONSTELM_DEBUG
 // #define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 
-#include <iostream>
-#include <string>
 #include "mcrl2/bes/pbes_rewriter_tool.h"
 #include "mcrl2/bes/pbes_input_tool.h"
 #include "mcrl2/bes/pbes_output_tool.h"

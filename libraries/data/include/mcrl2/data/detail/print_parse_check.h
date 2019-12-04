@@ -12,10 +12,8 @@
 #ifndef MCRL2_DATA_DETAIL_PRINT_PARSE_CHECK_H
 #define MCRL2_DATA_DETAIL_PRINT_PARSE_CHECK_H
 
-#include "mcrl2/data/find.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/print.h"
-#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2 {
 

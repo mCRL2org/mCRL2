@@ -11,19 +11,11 @@
 #define NAME "bessolve"
 #define AUTHOR "Jeroen Keiren"
 
-#include <string>
-#include <iostream>
-#include <vector>
-
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/bes/pbes_input_tool.h"
-#include "mcrl2/bes/io.h"
-#include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/gauss_elimination.h"
 #include "mcrl2/bes/small_progress_measures.h"
 #include "mcrl2/bes/local_fixpoints.h"
-#include "mcrl2/bes/justification.h"
 #include "mcrl2/bes/solution_strategy.h"
 
 using namespace mcrl2::log;

@@ -11,13 +11,10 @@
 
 #define BOOST_TEST_MODULE binary_test
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iostream>
-#include <string>
 
 #include "mcrl2/lps/binary.h"
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/lps/specification.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;

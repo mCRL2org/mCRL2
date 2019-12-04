@@ -10,10 +10,6 @@
 #include "mcrl2/data/detail/rewrite/strategy_rule.h"
 #include "mcrl2/data/detail/rewrite/jitty_jittyc.h"
 
-#include "mcrl2/data/data_equation.h"
-
-#include <vector>
-
 using namespace mcrl2::data;
 
 namespace

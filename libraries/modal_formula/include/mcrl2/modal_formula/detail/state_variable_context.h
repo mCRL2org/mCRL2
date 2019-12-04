@@ -15,7 +15,6 @@
 #include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/data/sort_type_checker.h"
 #include "mcrl2/modal_formula/state_formula.h"
-#include <map>
 
 namespace mcrl2 {
 

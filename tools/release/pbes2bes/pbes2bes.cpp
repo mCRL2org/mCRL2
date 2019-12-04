@@ -24,40 +24,20 @@
 #define NAME "pbes2bes"
 #define AUTHOR "Jan Friso Groote"
 
-//C++
-#include <iostream>
-#include <string>
-#include <utility>
-
-#include <sstream>
-
 //Tool framework
 #include "mcrl2/bes/pbes_output_tool.h"
 #include "mcrl2/bes/pbes_input_tool.h"
 #include "mcrl2/bes/pbes_rewriter_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/execution_timer.h"
-
-//Data Framework
-#include "mcrl2/data/selection.h"
-#include "mcrl2/data/data_equation.h"
 
 //Parameterised boolean equation systems
 #include "mcrl2/pbes/normalize.h"
-#include "mcrl2/pbes/io.h"
-#include "mcrl2/pbes/find.h"
-#include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/pbes/pbesinst_alternative_lazy_algorithm.h"
-#include "mcrl2/pbes/transformation_strategy.h"
-#include "mcrl2/pbes/search_strategy.h"
 
 //Boolean equation systems
-#include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes2pbes.h"
-#include "mcrl2/bes/io.h"
 #include "mcrl2/bes/pbesinst_conversion.h"
-#include "mcrl2/bes/remove_level.h"
 
 using namespace std;
 using namespace mcrl2::log;

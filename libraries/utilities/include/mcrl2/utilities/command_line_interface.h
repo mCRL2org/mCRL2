@@ -11,16 +11,11 @@
 
 #ifndef MCRL2_UTILITIES_COMMAND_LINE_INTERFACE_H
 #define MCRL2_UTILITIES_COMMAND_LINE_INTERFACE_H
-#include <algorithm>
-#include <cassert>
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
-#include <iostream>
 #include <map>
 #include <memory>
-#include <sstream>
-#include <vector>
 
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/text_utility.h"

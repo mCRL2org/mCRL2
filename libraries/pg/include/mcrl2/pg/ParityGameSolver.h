@@ -14,8 +14,6 @@
 #include "mcrl2/pg/Abortable.h"
 #include "mcrl2/pg/RefCounted.h"
 
-#include <vector>
-
 /*! Merge a substrategy into a main strategy. Overwrites the existing strategy
     for all vertices with indices in vertex_map. */
 void merge_strategies( std::vector<verti> &strategy,

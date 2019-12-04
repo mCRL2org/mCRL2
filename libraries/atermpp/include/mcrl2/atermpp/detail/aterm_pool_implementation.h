@@ -12,7 +12,6 @@
 #pragma once
 
 #include "aterm_pool.h"
-#include "mcrl2/utilities/logger.h"
 
 #include <chrono>
 

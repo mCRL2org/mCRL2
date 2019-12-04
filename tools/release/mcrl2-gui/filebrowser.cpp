@@ -12,7 +12,6 @@
 #include "mcrl2/utilities/platform.h"
 
 #include <QMenu>
-#include <QAction>
 #include <QMessageBox>
 
 FileBrowser::FileBrowser(QWidget *parent) :

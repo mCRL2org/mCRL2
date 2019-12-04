@@ -13,7 +13,6 @@
 #ifndef MCRL2_LTS_DETAIL_SWAP_TO_FROM_PROBABILISTIC_LTS_H
 #define MCRL2_LTS_DETAIL_SWAP_TO_FROM_PROBABILISTIC_LTS_H
 
-#include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/probabilistic_lts.h"
 #include "mcrl2/utilities/exception.h"
 

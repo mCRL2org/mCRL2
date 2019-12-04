@@ -13,9 +13,7 @@
 #define MCRL2_PBES_ALGORITHMS_H
 
 #include "mcrl2/data/rewrite_strategy.h"
-#include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/pbes.h"
-#include <set>
 
 namespace mcrl2 {
 

@@ -14,8 +14,6 @@
 #define MCRL2_PBES_DETAIL_PPG_TRAVERSER_H
 
 #include "mcrl2/pbes/pbes_functions.h"
-#include "mcrl2/pbes/traverser.h"
-#include <stack>
 
 namespace mcrl2 {
 

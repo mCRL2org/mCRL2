@@ -8,14 +8,9 @@
 //
 /// \file lpsbisim2pbes.cpp
 
-#include <iostream>
-#include <string>
 #include "mcrl2/pbes/tools.h"
-#include "mcrl2/pbes/bisimulation_type.h"
-#include "mcrl2/utilities/tool.h"
 #include "mcrl2/utilities/input_input_output_tool.h"
 #include "mcrl2/bes/pbes_output_tool.h"
-#include "mcrl2/utilities/exception.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

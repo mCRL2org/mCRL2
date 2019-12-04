@@ -16,12 +16,8 @@
 #include "mcrl2/bes/pbesinst_conversion.h"
 #include "mcrl2/bes/pg_parse.h"
 // #include "mcrl2/core/detail/default_values.h"
-#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/load_aterm.h"
-#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/io.h"
-
-#include <fstream>
 
 namespace mcrl2
 {

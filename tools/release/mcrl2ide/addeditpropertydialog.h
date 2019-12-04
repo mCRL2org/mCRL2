@@ -11,10 +11,8 @@
 #define ADDEDITPROPERTYDIALOG_H
 
 #include "processsystem.h"
-#include "filesystem.h"
 
 #include <QDialog>
-#include <QComboBox>
 #include <QRegularExpressionValidator>
 
 namespace Ui

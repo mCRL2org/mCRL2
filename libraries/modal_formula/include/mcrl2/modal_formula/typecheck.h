@@ -12,25 +12,10 @@
 #ifndef MCRL2_MODAL_FORMULA_TYPECHECK_H
 #define MCRL2_MODAL_FORMULA_TYPECHECK_H
 
-#include "mcrl2/data/bag.h"
-#include "mcrl2/data/fbag.h"
-#include "mcrl2/data/fset.h"
-#include "mcrl2/data/int.h"
-#include "mcrl2/data/list.h"
-#include "mcrl2/data/nat.h"
-#include "mcrl2/data/pos.h"
-#include "mcrl2/data/real.h"
-#include "mcrl2/data/set.h"
-#include "mcrl2/data/typecheck.h"
 #include "mcrl2/lps/typecheck.h"
-#include "mcrl2/modal_formula/builder.h"
 #include "mcrl2/modal_formula/detail/state_variable_context.h"
 #include "mcrl2/modal_formula/is_monotonous.h"
 #include "mcrl2/modal_formula/normalize_sorts.h"
-#include "mcrl2/modal_formula/state_formula.h"
-#include "mcrl2/modal_formula/state_formula_specification.h"
-#include "mcrl2/process/typecheck.h"
-#include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2
 {

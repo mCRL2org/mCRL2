@@ -14,7 +14,6 @@
 
 #include "mcrl2/data/translate_user_notation.h"
 #include "mcrl2/lps/builder.h"
-#include "mcrl2/lps/specification.h"
 
 namespace mcrl2
 {

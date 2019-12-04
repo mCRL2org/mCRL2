@@ -18,10 +18,6 @@
 #include "mcrl2/utilities/execution_timer.h"
 #include "mcrl2/utilities/platform.h"
 
-#include <cstdlib>
-#include <stdexcept>
-#include <string>
-
 #ifdef MCRL2_PLATFORM_WINDOWS
   #include <io.h>
   #include <fcntl.h>

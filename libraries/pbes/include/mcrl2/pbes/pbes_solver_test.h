@@ -13,20 +13,8 @@
 #ifndef MCRL2_PBES_PBES_SOLVER_TEST_H
 #define MCRL2_PBES_PBES_SOLVER_TEST_H
 
-//General includes
-#include "mcrl2/core/detail/print_utility.h"
-
-//Rewriters
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/pbes/algorithms.h"
-
-//Data framework
-#include "mcrl2/data/selection.h"
-
 //Boolean equation systems
 #include "mcrl2/pbes/pbesinst_alternative_lazy_algorithm.h"
-#include "mcrl2/pbes/search_strategy.h"
-#include "mcrl2/pbes/transformation_strategy.h"
 #include "mcrl2/bes/pbesinst_conversion.h"
 #include "mcrl2/bes/local_fixpoints.h"
 #include "mcrl2/bes/gauss_elimination.h"

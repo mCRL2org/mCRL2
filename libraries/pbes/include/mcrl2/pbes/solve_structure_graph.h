@@ -12,22 +12,10 @@
 #ifndef MCRL2_PBES_SOLVE_STRUCTURE_GRAPH_H
 #define MCRL2_PBES_SOLVE_STRUCTURE_GRAPH_H
 
-#include <limits>
-#include <regex>
-#include <sstream>
-#include <unordered_set>
-#include <tuple>
-#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/join.h"
-#include "mcrl2/data/standard.h"
-#include "mcrl2/lps/print.h"
-#include "mcrl2/lps/specification.h"
 #include "mcrl2/lts/lts_algorithm.h"
-#include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/pbes/pbes_equation_index.h"
 #include "mcrl2/pbes/pbessolve_attractors.h"
-#include "mcrl2/pbes/pbessolve_vertex_set.h"
-#include "mcrl2/pbes/structure_graph.h"
 
 namespace mcrl2 {
 

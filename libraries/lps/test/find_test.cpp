@@ -11,14 +11,10 @@
 
 #define BOOST_TEST_MODULE find_test
 #include "mcrl2/data/consistency.h"
-#include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/parse.h"
-#include <algorithm>
+
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iterator>
-#include <set>
-#include <vector>
 
 using namespace mcrl2;
 using namespace mcrl2::lps;

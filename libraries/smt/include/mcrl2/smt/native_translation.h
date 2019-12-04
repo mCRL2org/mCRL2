@@ -9,12 +9,7 @@
 #ifndef MCRL2_SMT_NATIVE_TRANSLATION_H
 #define MCRL2_SMT_NATIVE_TRANSLATION_H
 
-#include <functional>
-
-#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/function_symbol.h"
-#include "mcrl2/data/sort_expression.h"
 
 namespace mcrl2
 {

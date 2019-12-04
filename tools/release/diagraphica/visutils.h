@@ -14,11 +14,6 @@
 #include "mcrl2/gui/glu.h"
 #include "utils.h"
 
-#include <QtCore>
-#include <QtGui>
-
-#include <string>
-
 static inline QColor alpha(QColor color, double alpha) { color.setAlphaF(alpha); return color; }
 
 // -- structs for positions -----------------------------------------

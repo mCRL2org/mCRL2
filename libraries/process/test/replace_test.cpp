@@ -12,16 +12,10 @@
 #define BOOST_TEST_MODULE replace_test
 
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iostream>
 
-#include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/data/parse.h"
-#include "mcrl2/data/replace.h"
-#include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/replace.h"
-#include "mcrl2/utilities/text_utility.h"
 
 using namespace mcrl2;
 using namespace mcrl2::process;

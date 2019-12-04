@@ -15,10 +15,6 @@
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/detail/pbes_parameter_map.h"
-#include "mcrl2/pbes/pbes.h"
-#include <algorithm>
-#include <iostream>
-#include <utility>
 
 namespace mcrl2
 {

@@ -34,16 +34,10 @@
  *
  */
 
-#include <cassert>
 #include <cerrno>
-#include <cstdio>
 #include <list>
-#include <string>
-#include <sstream>
-#include <stdexcept>
 #include "mcrl2/utilities/dynamiclibrary.h"
 #include "mcrl2/utilities/file_utility.h"
-#include "mcrl2/utilities/logger.h"
 
 class uncompiled_library : public dynamic_library
 {

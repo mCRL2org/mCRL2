@@ -12,12 +12,9 @@
 #ifndef MCRL2_LPS_FIND_REPRESENTATIVE_H
 #define MCRL2_LPS_FIND_REPRESENTATIVE_H
 
-#include <algorithm>
 #include <cstddef>
-#include <map>
 #include <vector>
 #include "mcrl2/utilities/detail/container_utility.h"
-#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2 {
 

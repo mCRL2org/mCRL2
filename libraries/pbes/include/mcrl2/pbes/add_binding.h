@@ -12,7 +12,6 @@
 #ifndef MCRL2_PBES_ADD_BINDING_H
 #define MCRL2_PBES_ADD_BINDING_H
 
-#include "mcrl2/data/add_binding.h"
 #include "mcrl2/pbes/pbes.h"
 
 namespace mcrl2

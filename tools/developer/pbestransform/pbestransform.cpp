@@ -8,34 +8,16 @@
 //
 /// \file pbestransform.cpp
 
-#include <chrono>
-#include <iostream>
-#include <fstream>
-#include <memory>
-#include <string>
-#include <sstream>
-
 #include "mcrl2/bes/io.h"
-#include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/pbes/anonymize.h"
-#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/pbes_command.h"
 #include "mcrl2/pbes/normalize.h"
-#include "mcrl2/pbes/pbesinst_lazy.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
-#include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/data2pbes_rewriter.h"
-#include "mcrl2/pbes/rewriters/data_rewriter.h"
-#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
-#include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/rewriters/quantifiers_inside_rewriter.h"
-#include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
-#include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/quantifier_propagate.h"
 #include "mcrl2/pbes/io.h"
-#include "mcrl2/pbes/srf_pbes.h"
 #include "mcrl2/pbes/stategraph.h"
 #include "mcrl2/pbes/unify_parameters.h"
 #include "mcrl2/utilities/detail/io.h"

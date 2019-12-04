@@ -12,7 +12,6 @@
 
 #include "mcrl2/gui/codeeditor.h"
 #include "utilities.h"
-#include "mcrl2/lts/lts_equivalence.h"
 
 #include <QObject>
 #include <QDir>

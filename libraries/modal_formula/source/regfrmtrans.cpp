@@ -8,7 +8,6 @@
 //
 /// \file regfrmtrans.cpp
 
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/xyz_identifier_generator.h"
 #include "mcrl2/modal_formula/translate_regular_formulas.h"
 

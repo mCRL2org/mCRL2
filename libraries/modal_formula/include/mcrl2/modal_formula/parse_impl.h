@@ -12,13 +12,9 @@
 #ifndef MCRL2_MODAL_FORMULA_PARSE_IMPL_H
 #define MCRL2_MODAL_FORMULA_PARSE_IMPL_H
 
-#include "mcrl2/core/parser_utility.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/parse_impl.h"
-#include "mcrl2/modal_formula/state_formula.h"
-#include "mcrl2/modal_formula/state_formula_specification.h"
 #include "mcrl2/modal_formula/typecheck.h"
-#include <iostream>
 
 namespace mcrl2
 {

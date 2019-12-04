@@ -12,7 +12,6 @@
 #ifndef MCRL2_ATERMPP_ATERM_LIST_ITERATOR_H
 #define MCRL2_ATERMPP_ATERM_LIST_ITERATOR_H
 
-#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/detail/global_aterm_pool.h"
 
 namespace atermpp

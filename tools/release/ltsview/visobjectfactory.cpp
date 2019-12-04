@@ -13,7 +13,6 @@
 #include <algorithm>
 #include <cstdlib>
 #include "primitivefactory.h"
-#include "vectors.h"
 
 #include <QtOpenGL>
 

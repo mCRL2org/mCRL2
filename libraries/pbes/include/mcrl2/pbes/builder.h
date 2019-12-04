@@ -12,7 +12,6 @@
 #ifndef MCRL2_PBES_BUILDER_H
 #define MCRL2_PBES_BUILDER_H
 
-#include "mcrl2/core/builder.h"
 #include "mcrl2/data/builder.h"
 #include "mcrl2/pbes/pbes.h"
 

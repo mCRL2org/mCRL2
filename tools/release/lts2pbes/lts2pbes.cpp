@@ -12,11 +12,8 @@
 #define TOOLNAME "lts2pbes"
 #define AUTHOR "Wieger Wesselink"
 
-#include <fstream>
-#include <iostream>
 #include "mcrl2/bes/pbes_output_tool.h"
 #include "mcrl2/lts/detail/lts_load.h"
-#include "mcrl2/modal_formula/algorithms.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/pbes/lts2pbes.h"
 #include "mcrl2/utilities/input_output_tool.h"

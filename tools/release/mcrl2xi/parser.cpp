@@ -10,8 +10,6 @@
 #include "parser.h"
 #include "parsing.h"
 
-#include "mcrl2/process/parse.h"
-
 Parser::Parser(QThread *atermThread)
 {
   moveToThread(atermThread);

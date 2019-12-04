@@ -14,9 +14,7 @@
 
 #include "mcrl2/core/detail/construction_utility.h"
 #include "mcrl2/data/abstraction.h"
-#include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
-#include "mcrl2/data/function_symbol.h"
 
 
 namespace mcrl2

@@ -10,16 +10,11 @@
 #ifndef PROPERTYWIDGET_H
 #define PROPERTYWIDGET_H
 
-#include "processsystem.h"
-#include "filesystem.h"
 #include "addeditpropertydialog.h"
-#include "utilities.h"
 
 #include <QLabel>
 #include <QHBoxLayout>
-#include <QWidget>
 #include <QPushButton>
-#include <QProcess>
 #include <QStackedWidget>
 #include <QScrollArea>
 

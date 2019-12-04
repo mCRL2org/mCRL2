@@ -12,7 +12,6 @@
 #ifndef MCRL2_PG_SMALLPROGRESSMEASURES_IMPL_H
 #define MCRL2_PG_SMALLPROGRESSMEASURES_IMPL_H
 
-#include <vector>
 #include <deque>
 
 #include "mcrl2/pg/SmallProgressMeasures.h"

@@ -7,7 +7,6 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "mcrl2/lps/simulation.h"
-#include "mcrl2/trace/trace.h"
 
 using namespace mcrl2;
 using namespace mcrl2::lps;

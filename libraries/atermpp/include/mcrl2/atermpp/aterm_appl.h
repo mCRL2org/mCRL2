@@ -12,17 +12,9 @@
 #ifndef MCRL2_ATERMPP_ATERM_APPL_H
 #define MCRL2_ATERMPP_ATERM_APPL_H
 
-#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/detail/aterm_appl_iterator.h"
 #include "mcrl2/atermpp/detail/aterm_list.h"
 #include "mcrl2/atermpp/detail/global_aterm_pool.h"
-
-#include <limits>
-#include <type_traits>
-
-#include "mcrl2/atermpp/detail/aterm_appl_iterator.h"
-#include "mcrl2/atermpp/aterm.h"
-
 
 namespace atermpp
 {

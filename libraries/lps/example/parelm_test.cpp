@@ -1,6 +1,5 @@
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parelm.h"
-#include <string>
 
 using namespace mcrl2;
 

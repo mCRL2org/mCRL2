@@ -13,7 +13,6 @@
 #define MCRL2_DATA_DETAIL_ONE_POINT_RULE_PREPROCESSOR_H
 
 #include "mcrl2/data/join.h"
-#include "mcrl2/data/standard.h"
 
 namespace mcrl2 {
 

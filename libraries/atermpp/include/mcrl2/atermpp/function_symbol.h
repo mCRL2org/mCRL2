@@ -12,8 +12,6 @@
 
 #include "mcrl2/atermpp/detail/function_symbol.h"
 
-#include <string>
-
 namespace atermpp
 {
 class aterm;

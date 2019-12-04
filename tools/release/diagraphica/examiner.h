@@ -11,21 +11,8 @@
 #ifndef EXAMINER_H
 #define EXAMINER_H
 
-#include <QtCore>
-#include <QtGui>
-
-#include <cstddef>
-#include <cstdlib>
-#include <cmath>
-#include <vector>
-#include "bundle.h"
 #include "diagram.h"
-#include "edge.h"
-#include "graph.h"
 #include "settings.h"
-#include "utils.h"
-#include "visualizer.h"
-#include "visutils.h"
 
 class Examiner : public Visualizer
 {

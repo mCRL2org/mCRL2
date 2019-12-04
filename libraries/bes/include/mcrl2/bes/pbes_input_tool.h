@@ -15,10 +15,6 @@
 #include "mcrl2/bes/io.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/utilities/command_line_interface.h"
-#include <iostream>
-#include <set>
-#include <stdexcept>
-#include <string>
 
 namespace mcrl2
 {

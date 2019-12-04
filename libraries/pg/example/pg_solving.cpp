@@ -7,14 +7,9 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "mcrl2/pg/ParityGame.h"
-#include "mcrl2/pg/SmallProgressMeasures.h"
 #include "mcrl2/pg/PredecessorLiftingStrategy.h"
 #include "mcrl2/pg/RecursiveSolver.h"
 #include "mcrl2/pg/ComponentSolver.h"
-
-#include <memory>
-#include <cstdio>
 
 int main(int argc, char *argv[])
 {

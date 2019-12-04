@@ -16,9 +16,6 @@
 #include "mcrl2/pbes/detail/pbes_greybox_interface.h"
 #include "mcrl2/pbes/detail/ppg_rewriter.h"
 #include "mcrl2/pbes/detail/ppg_traverser.h"
-#include "mcrl2/pbes/parity_game_generator.h"
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/utilities/detail/memory_utility.h"
 
 using mcrl2::data::data_expression;
 using mcrl2::data::variable;

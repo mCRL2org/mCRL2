@@ -10,7 +10,6 @@
 #ifndef MCRL2_PBESSYMBOLICBISIM_SIMPLIFIER_MODE_H
 #define MCRL2_PBESSYMBOLICBISIM_SIMPLIFIER_MODE_H
 
-#include <iostream>
 #include <string>
 #include "mcrl2/utilities/exception.h"
 

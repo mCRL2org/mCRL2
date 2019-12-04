@@ -14,15 +14,9 @@
 
 #ifndef _LIBLTS_WEAK_BISIM_H
 #define _LIBLTS_WEAK_BISIM_H
-#include <cmath>
-#include <vector>
-#include <map>
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
 #include "mcrl2/lts/detail/liblts_tau_star_reduce.h"
 #include "mcrl2/lts/detail/liblts_merge.h"
-#include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_dot.h"

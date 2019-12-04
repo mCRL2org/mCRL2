@@ -10,8 +10,6 @@
 #ifndef MCRL2_ATERMPP_ATERM_STRING_H
 #define MCRL2_ATERMPP_ATERM_STRING_H
 
-#include <string>
-#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 
 namespace atermpp

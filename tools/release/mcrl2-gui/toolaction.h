@@ -10,7 +10,6 @@
 #ifndef TOOLACTION_H
 #define TOOLACTION_H
 
-#include <QAction>
 #include "toolinformation.h"
 
 class ToolAction : public QAction

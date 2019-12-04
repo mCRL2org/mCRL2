@@ -13,13 +13,8 @@
 #define MCRL2_ATERMPP_FUNCTION_SYMBOL_GENERATOR_H
 
 #include "mcrl2/atermpp/detail/global_aterm_pool.h"
-#include "mcrl2/utilities/text_utility.h"
-#include "mcrl2/utilities/noncopyable.h"
 
-#include <algorithm>
-#include <cassert>
 #include <cctype>
-#include <memory>
 
 namespace atermpp {
 

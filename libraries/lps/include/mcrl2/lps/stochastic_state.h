@@ -13,7 +13,6 @@
 #define MCRL2_LPS_STOCHASTIC_STATE_H
 
 #include "mcrl2/data/print.h"
-#include "mcrl2/data/real.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/state.h"
 

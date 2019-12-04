@@ -12,15 +12,9 @@
 #ifndef MCRL2_PBES_DETAIL_PBES2BOOL_H
 #define MCRL2_PBES_DETAIL_PBES2BOOL_H
 
-#include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/local_fixpoints.h"
 #include "mcrl2/bes/pbesinst_conversion.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/selection.h"
-#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbesinst_alternative_lazy_algorithm.h"
-#include "mcrl2/pbes/search_strategy.h"
-#include "mcrl2/pbes/transformation_strategy.h"
 
 namespace mcrl2 {
 

@@ -12,16 +12,9 @@
 #ifndef MCRL2_PBES_PBES_EXPRESSION_H
 #define MCRL2_PBES_PBES_EXPRESSION_H
 
-#include "mcrl2/core/detail/default_values.h"
-#include "mcrl2/core/detail/function_symbols.h"
-#include "mcrl2/core/detail/soundness_checks.h"
-#include "mcrl2/core/index_traits.h"
-#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/pbes/propositional_variable.h"
-#include <iterator>
-#include <stdexcept>
 
 namespace mcrl2
 {

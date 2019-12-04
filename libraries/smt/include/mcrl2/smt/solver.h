@@ -11,13 +11,9 @@
 #ifndef MCRL2_SMT_SOLVER_H
 #define MCRL2_SMT_SOLVER_H
 
-#include "mcrl2/utilities/platform.h"
 #include "mcrl2/smt/child_process.h"
 #include "mcrl2/smt/native_translation.h"
 #include "mcrl2/smt/answer.h"
-
-#include <chrono>
-#include <unordered_map>
 
 namespace mcrl2
 {

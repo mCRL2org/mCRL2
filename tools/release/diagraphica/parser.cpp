@@ -12,10 +12,7 @@
 
 #include "parser.h"
 
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/exception.h"
 #include "mcrl2/lts/lts_io.h"
-#include "mcrl2/lts/lts_fsm.h"
 
 
 using namespace std;

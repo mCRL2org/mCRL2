@@ -10,14 +10,8 @@
 #ifndef MCRL2_DATA_DATA_SPECIFICATION_H
 #define MCRL2_DATA_DATA_SPECIFICATION_H
 
-#include <algorithm>
-#include <functional>
-#include <vector>
-
-#include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/sort_specification.h"
-#include "mcrl2/data/data_equation.h"
 
 namespace mcrl2
 {

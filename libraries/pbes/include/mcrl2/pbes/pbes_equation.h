@@ -12,14 +12,9 @@
 #ifndef MCRL2_PBES_PBES_EQUATION_H
 #define MCRL2_PBES_PBES_EQUATION_H
 
-#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/pbes/fixpoint_symbol.h"
 #include "mcrl2/pbes/pbes_expression.h"
-#include "mcrl2/pbes/propositional_variable.h"
-#include <sstream>
-#include <string>
-#include <utility>
 
 namespace mcrl2
 {

@@ -9,11 +9,6 @@
 /// \file mcrl2/data/application.h
 /// \brief The class application.
 
-// This is to avoid incomplete type errors when including this header standalone
-#ifndef MCRL2_DATA_DATA_EXPRESSION_H
-#include "mcrl2/data/data_expression.h"
-#endif
-
 #ifndef MCRL2_DATA_VARIABLE_H
 #include "mcrl2/data/variable.h"
 #endif

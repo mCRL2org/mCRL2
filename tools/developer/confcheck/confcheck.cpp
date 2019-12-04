@@ -8,7 +8,6 @@
 //
 /// \file confcheck.cpp
 
-#include <string>
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/confluence.h"
 #include "mcrl2/lps/io.h"

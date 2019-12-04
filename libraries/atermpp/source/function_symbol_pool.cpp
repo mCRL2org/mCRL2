@@ -9,10 +9,7 @@
 
 #include "mcrl2/atermpp/detail/function_symbol_pool.h"
 
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/unused.h"
-
-#include <algorithm>
 
 using namespace atermpp;
 using namespace atermpp::detail;

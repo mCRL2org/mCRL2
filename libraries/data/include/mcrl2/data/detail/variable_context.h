@@ -13,7 +13,6 @@
 #define MCRL2_DATA_DETAIL_VARIABLE_CONTEXT_H
 
 #include "mcrl2/data/variable.h"
-#include <map>
 
 namespace mcrl2 {
 

@@ -16,9 +16,7 @@
 #include <map>
 #include <memory>
 #include <set>
-#include <sstream>
 #include <stdexcept>
-#include <string>
 
 #include "mcrl2/utilities/text_utility.h"
 

@@ -10,7 +10,7 @@
 #ifndef MCRL2_UTILITIES_SHARED_REFERENCE_H_
 #define MCRL2_UTILITIES_SHARED_REFERENCE_H_
 
-#include <assert.h>
+#include <cassert>
 #include <atomic>
 #include <type_traits>
 

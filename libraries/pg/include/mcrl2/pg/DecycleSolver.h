@@ -13,11 +13,6 @@
 #include "mcrl2/pg/SmallProgressMeasures.h"
 #include "mcrl2/pg/DenseSet.h"
 #include "mcrl2/pg/SCC.h"
-#include "mcrl2/utilities/logger.h"
-
-#include <deque>
-#include <string>
-#include <vector>
 
 /*! A partial solver that efficiently solves cycles controlled by a single
     player.

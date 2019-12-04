@@ -15,10 +15,6 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/process/typecheck.h"
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
-#include "mcrl2/utilities/text_utility.h"
-#include <iostream>
-#include <sstream>
-#include <string>
 
 namespace mcrl2 {
 

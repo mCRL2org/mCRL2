@@ -10,15 +10,10 @@
 #include "glscene.h"
 
 #include "utility.h"
-#include "mcrl2/utilities/logger.h"
 
 #include <QFont>
 #include <QFontMetrics>
 #include <QImage>
-#include <QPainter>
-
-#include <cassert>
-#include <cmath>
 
 /// \brief Number of orthogonal slices from which a circle representing a node is constructed.
 constexpr int RES_NODE_SLICE = 32;

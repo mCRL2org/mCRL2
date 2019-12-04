@@ -8,14 +8,6 @@
 //
 /// \file liblts_fsm.cpp
 
-#include <string>
-#include <fstream>
-#include "mcrl2/core/print.h"
-#include "mcrl2/data/typecheck.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/typecheck.h"
-#include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/parse.h"
 #include "mcrl2/lts/detail/liblts_swap_to_from_probabilistic_lts.h"

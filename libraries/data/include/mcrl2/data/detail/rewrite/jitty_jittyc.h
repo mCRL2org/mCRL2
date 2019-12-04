@@ -11,7 +11,6 @@
 #define MCRL2_DATA_DETAIL_REWRITE_JITTY_JITTYC_H
 
 #include "mcrl2/data/detail/rewrite.h"
-#include "mcrl2/data/data_specification.h"
 
 namespace mcrl2
 {

@@ -16,7 +16,6 @@
 #define MCRL2_LPS_DISJOINTNESS_CHECKER_H
 
 #include "mcrl2/lps/linear_process.h"
-#include "mcrl2/utilities/detail/container_utility.h"
 
 /// \brief Class that can determine if two summands are syntactically disjoint.
 /// Two summands are syntactically disjoint if the following conditions hold:

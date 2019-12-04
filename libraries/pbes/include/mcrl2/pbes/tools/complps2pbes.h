@@ -14,13 +14,8 @@
 
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/modal_formula/algorithms.h"
-#include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/pbes/complps2pbes.h"
 #include "mcrl2/pbes/io.h"
-#include "mcrl2/process/parse.h"
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/text_utility.h"
-#include <fstream>
 
 namespace mcrl2 {
 

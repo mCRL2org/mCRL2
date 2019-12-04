@@ -19,8 +19,6 @@
 #ifndef MCRL2_LTS_LTS_AUT_H
 #define MCRL2_LTS_LTS_AUT_H
 
-#include <istream>
-#include "mcrl2/lps/state_probability_pair.h"
 #include "mcrl2/lts/probabilistic_arbitrary_precision_fraction.h"
 #include "mcrl2/lts/state_label_empty.h"
 #include "mcrl2/lts/action_label_string.h"

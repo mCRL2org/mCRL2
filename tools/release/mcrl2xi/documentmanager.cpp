@@ -12,8 +12,6 @@
 #include <QFileInfo>
 #include <QTextStream>
 
-#include "documentwidget.h"
-
 DocumentManager::DocumentManager(QWidget *parent) :
   ExtendedTabWidget(parent)
 {

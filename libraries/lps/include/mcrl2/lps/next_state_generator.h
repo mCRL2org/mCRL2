@@ -11,12 +11,6 @@
 #ifndef MCRL2_LPS_NEXT_STATE_GENERATOR_H
 #define MCRL2_LPS_NEXT_STATE_GENERATOR_H
 
-#include <boost/iterator/iterator_facade.hpp>
-#include <forward_list>
-#include <iterator>
-#include <string>
-#include <vector>
-
 #include "mcrl2/atermpp/detail/shared_subset.h"
 #include "mcrl2/data/enumerator_with_iterator.h"
 #include "mcrl2/lps/probabilistic_data_expression.h"

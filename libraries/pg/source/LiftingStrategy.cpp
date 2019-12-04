@@ -7,8 +7,6 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "mcrl2/pg/LiftingStrategy.h"
-#include "mcrl2/pg/LinearLiftingStrategy.h"
 #include "mcrl2/pg/PredecessorLiftingStrategy.h"
 #include "mcrl2/pg/FocusListLiftingStrategy.h"
 #include "mcrl2/pg/MaxMeasureLiftingStrategy.h"

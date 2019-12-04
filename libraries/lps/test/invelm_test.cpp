@@ -12,17 +12,12 @@
 //#define MCRL2_LPS_PARELM_DEBUG
 
 #define BOOST_TEST_MODULE invelm_test
-#include "mcrl2/lps/find.h"
-#include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/lps/invelm_algorithm.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/print.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/utilities/text_utility.h"
 #include "test_specifications.h"
+
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iostream>
-#include <string>
 
 using namespace mcrl2;
 

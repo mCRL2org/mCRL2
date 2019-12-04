@@ -16,7 +16,6 @@
 #include "mcrl2/data/detail/prover/solver_type.h"
 #include "mcrl2/lps/lps_rewriter_type.h"
 #include "mcrl2/data/rewriter.h"
-#include <string>
 
 namespace mcrl2 {
 

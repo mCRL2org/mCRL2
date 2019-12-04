@@ -12,10 +12,7 @@
 #ifndef MCRL2_LPS_DEADLOCK_H
 #define MCRL2_LPS_DEADLOCK_H
 
-#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/print.h"
-#include "mcrl2/data/real.h"
-#include "mcrl2/data/undefined.h"
 
 namespace mcrl2
 {

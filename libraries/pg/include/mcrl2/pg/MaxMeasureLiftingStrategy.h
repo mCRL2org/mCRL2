@@ -12,10 +12,6 @@
 
 #include "mcrl2/pg/SmallProgressMeasures.h"
 
-#include <vector>
-#include <set>
-#include <utility>
-
 /*! \ingroup LiftingStrategies
 
     A lifting strategy that propagate maximum measures first.

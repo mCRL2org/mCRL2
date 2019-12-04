@@ -7,27 +7,15 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #define BOOST_TEST_MODULE enumerator_test
-#include <set>
-#include <sstream>
-#include <stack>
-
 #include <boost/test/included/unit_test_framework.hpp>
 
-#include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/core/print.h"
 #include "mcrl2/data/consistency.h"
-#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/detail/concepts.h"
-#include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/data/enumerator_with_iterator.h"
-#include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/replace.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 
 using namespace mcrl2;

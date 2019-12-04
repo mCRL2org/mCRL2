@@ -13,7 +13,6 @@
 #define MCRL2_PBES_DETAIL_STATEGRAPH_SPLIT_H
 
 #include "mcrl2/pbes/pbes_expression.h"
-#include "mcrl2/utilities/detail/join.h"
 
 namespace mcrl2 {
 

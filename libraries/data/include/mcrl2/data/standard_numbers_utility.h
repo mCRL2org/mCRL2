@@ -12,12 +12,6 @@
 #ifndef MCRL2_DATA_STANDARD_NUMBERS_UTILITY_H
 #define MCRL2_DATA_STANDARD_NUMBERS_UTILITY_H
 
-#include <type_traits>
-#include "mcrl2/data/bool.h"
-#include "mcrl2/data/int.h"
-#include "mcrl2/data/nat.h"
-#include "mcrl2/data/pos.h"
-#include "mcrl2/data/real.h"
 #include "mcrl2/data/standard_utility.h"
 
 namespace mcrl2

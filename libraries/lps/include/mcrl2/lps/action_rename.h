@@ -13,19 +13,10 @@
 #define MCRL2_LPS_ACTION_RENAME_H
 
 #include <regex>
-#include <algorithm>
 
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/utilities/logger.h"
-
-#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/parse.h"
 
-#include "mcrl2/data/replace.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 
 #include "mcrl2/lps/stochastic_specification.h"

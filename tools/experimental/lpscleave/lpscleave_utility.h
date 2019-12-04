@@ -10,11 +10,7 @@
 #ifndef MCRL2_LPSCLEAVE_UTILITY_H
 #define MCRL2_LPSCLEAVE_UTILITY_H
 
-#include "mcrl2/data/assignment.h"
 #include "mcrl2/lps/stochastic_specification.h"
-
-#include <list>
-#include <string>
 
 namespace mcrl2
 {

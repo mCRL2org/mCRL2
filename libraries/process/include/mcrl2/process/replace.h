@@ -13,9 +13,6 @@
 #define MCRL2_PROCESS_REPLACE_H
 
 #include "mcrl2/data/replace.h"
-#include "mcrl2/process/add_binding.h"
-#include "mcrl2/process/builder.h"
-#include "mcrl2/process/find.h"
 #include "mcrl2/process/replace_capture_avoiding.h"
 
 namespace mcrl2

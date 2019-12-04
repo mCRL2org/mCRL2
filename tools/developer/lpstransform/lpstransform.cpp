@@ -8,16 +8,8 @@
 //
 /// \file transform.cpp
 
-#include <iostream>
-#include <fstream>
-#include <memory>
-#include <string>
-
-#include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/detail/lps_command.h"
-#include "mcrl2/lps/detail/lps_io.h"
 #include "mcrl2/lps/is_well_typed.h"
 #include "mcrl2/lps/one_point_rule_rewrite.h"
 #include "mcrl2/utilities/detail/io.h"

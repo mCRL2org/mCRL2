@@ -10,17 +10,10 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "filesystem.h"
-#include "processsystem.h"
 #include "propertiesdock.h"
-#include "consoledock.h"
-#include "addeditpropertydialog.h"
 #include "findandreplacedialog.h"
-#include "mcrl2/gui/codeeditor.h"
-#include "utilities.h"
 
 #include <QMainWindow>
-#include <QSettings>
 
 class FileSystem;
 

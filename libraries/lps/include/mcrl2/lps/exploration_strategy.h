@@ -10,7 +10,6 @@
 #ifndef MCRL2_LPS_EXPLORATION_STRATEGY_H
 #define MCRL2_LPS_EXPLORATION_STRATEGY_H
 
-#include <iostream>
 #include <string>
 #include "mcrl2/utilities/exception.h"
 

@@ -12,9 +12,7 @@
 #ifndef MCRL2_MODAL_FORMULA_NEGATE_VARIABLES_H
 #define MCRL2_MODAL_FORMULA_NEGATE_VARIABLES_H
 
-#include "mcrl2/core/builder.h"
 #include "mcrl2/modal_formula/builder.h"
-#include "mcrl2/modal_formula/state_formula.h"
 
 namespace mcrl2
 {

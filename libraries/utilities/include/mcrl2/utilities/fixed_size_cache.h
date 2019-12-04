@@ -13,9 +13,6 @@
 #include "mcrl2/utilities/cache_policy.h"
 #include "mcrl2/utilities/unordered_map.h"
 
-#include <limits>
-#include <type_traits>
-
 namespace mcrl2
 {
 namespace utilities

@@ -13,8 +13,6 @@
 #include "filesystem.h"
 #include "consoledock.h"
 
-#include <QObject>
-#include <QProcess>
 #include <QQueue>
 #include <QThread>
 

@@ -14,11 +14,6 @@
 #define MCRL2_PBES_DETAIL_PBES_GREYBOX_INTERFACE_H
 
 #include "mcrl2/pbes/parity_game_generator.h"
-#include "mcrl2/pbes/pbes.h"
-#include <set>
-#include <string>
-#include <utility>
-#include <vector>
 
 namespace mcrl2 {
 

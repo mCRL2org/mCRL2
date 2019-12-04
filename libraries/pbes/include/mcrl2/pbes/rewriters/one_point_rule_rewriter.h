@@ -14,13 +14,8 @@
 
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/rewriters/one_point_rule_rewriter.h"
-#include "mcrl2/data/standard.h"
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
-#include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/find_equalities.h"
 #include "mcrl2/pbes/replace.h"
-#include "mcrl2/utilities/logger.h"
-#include <cassert>
 
 namespace mcrl2 {
 

@@ -14,8 +14,6 @@
 #include "mcrl2/utilities/unused.h"
 #include "mcrl2/utilities/power_of_two.h"
 
-#include <limits>
-
 #ifdef MCRL2_PLATFORM_WINDOWS
 #include <io.h>
 #include <fcntl.h>

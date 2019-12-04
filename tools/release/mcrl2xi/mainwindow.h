@@ -20,7 +20,6 @@
 #define MCRL2XI_MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QThread>
 #include "ui_mainwindow.h"
 
 #ifndef Q_MOC_RUN // Workaround for QTBUG-22829
@@ -28,7 +27,6 @@
 #endif // Q_MOC_RUN
 #include "mcrl2/gui/persistentfiledialog.h"
 
-#include "documentwidget.h"
 #include "documentmanager.h"
 #include "parser.h"
 #include "findreplacedialog.h"

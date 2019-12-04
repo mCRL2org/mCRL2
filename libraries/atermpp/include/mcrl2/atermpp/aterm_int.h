@@ -12,8 +12,6 @@
 #ifndef MCRL2_ATERMPP_ATERM_INT_H
 #define MCRL2_ATERMPP_ATERM_INT_H
 
-#include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/atermpp/detail/aterm_int.h"
 #include "mcrl2/atermpp/detail/global_aterm_pool.h"
 
 namespace atermpp

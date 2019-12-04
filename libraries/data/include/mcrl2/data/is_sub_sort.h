@@ -12,24 +12,10 @@
 #ifndef MCRL2_DATA_IS_SUB_SORT_H
 #define MCRL2_DATA_IS_SUB_SORT_H
 
-#include <algorithm>
-
-#include "mcrl2/data/basic_sort.h"
-#include "mcrl2/data/bool.h"
-#include "mcrl2/data/pos.h"
-#include "mcrl2/data/nat.h"
-#include "mcrl2/data/int.h"
-#include "mcrl2/data/real.h"
-#include "mcrl2/data/list.h"
-#include "mcrl2/data/set.h"
-#include "mcrl2/data/bag.h"
-#include "mcrl2/data/standard.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/standard_container_utility.h"
-#include "mcrl2/data/untyped_sort.h"
 #include "mcrl2/data/untyped_possible_sorts.h"
 #include "mcrl2/data/function_update.h"
-#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2 {
 

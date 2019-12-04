@@ -17,11 +17,8 @@
 #include "mcrl2/pg/ComponentSolver.h"
 #include "mcrl2/pg/DecycleSolver.h"
 #include "mcrl2/pg/DeloopSolver.h"
-#include "mcrl2/pg/ParityGame.h"
 #include "mcrl2/pg/PredecessorLiftingStrategy.h"
 #include "mcrl2/pg/PriorityPromotionSolver.h"
-#include "mcrl2/pg/RecursiveSolver.h"
-#include "mcrl2/pg/SmallProgressMeasures.h"
 #include "mcrl2/utilities/execution_timer.h"
 
 namespace mcrl2 {

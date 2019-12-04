@@ -11,11 +11,6 @@
 #define NAME "pbespp"
 #define AUTHOR "Aad Mathijssen and Jeroen Keiren"
 
-#include <string>
-#include <iostream>
-#include <fstream>
-
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/bes/pbes_input_tool.h"
 #include "mcrl2/pbes/tools.h"

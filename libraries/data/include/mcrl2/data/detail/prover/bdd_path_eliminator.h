@@ -12,18 +12,11 @@
 #ifndef MCRL2_DATA_DETAIL_PROVER_BDD_PATH_ELIMINATOR_H
 #define MCRL2_DATA_DETAIL_PROVER_BDD_PATH_ELIMINATOR_H
 
-#include <algorithm>
-#include <cstring>
-#include <iostream> // For streaming operators
-#include <iterator>
-
-#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/data/detail/prover/bdd_info.h"
 #include "mcrl2/data/detail/prover/bdd_simplifier.h"
 #include "mcrl2/data/detail/prover/manipulator.h"
 #include "mcrl2/data/detail/prover/smt_lib_solver.h"
 #include "mcrl2/data/detail/prover/solver_type.h"
-#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {

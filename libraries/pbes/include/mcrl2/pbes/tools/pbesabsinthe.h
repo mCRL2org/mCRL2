@@ -15,7 +15,6 @@
 #include "mcrl2/pbes/absinthe.h"
 #include "mcrl2/pbes/absinthe_strategy.h"
 #include "mcrl2/pbes/io.h"
-#include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2 {
 

@@ -11,8 +11,8 @@
 
 #define BOOST_TEST_MODULE monotonicity_test
 #include <boost/test/included/unit_test_framework.hpp>
+
 #include "mcrl2/pbes/is_monotonous.h"
-#include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/txt2pbes.h"
 
 using namespace mcrl2;

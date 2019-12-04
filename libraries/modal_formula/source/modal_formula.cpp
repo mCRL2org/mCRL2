@@ -10,16 +10,12 @@
 /// \brief
 
 #include "mcrl2/modal_formula/algorithms.h"
-#include "mcrl2/modal_formula/find.h"
-#include "mcrl2/modal_formula/is_monotonous.h"
 #include "mcrl2/modal_formula/is_timed.h"
 #include "mcrl2/modal_formula/normalize.h"
-#include "mcrl2/modal_formula/normalize_sorts.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/modal_formula/parse_impl.h"
 #include "mcrl2/modal_formula/print.h"
 #include "mcrl2/modal_formula/replace.h"
-#include "mcrl2/modal_formula/translate_user_notation.h"
 
 namespace mcrl2
 {

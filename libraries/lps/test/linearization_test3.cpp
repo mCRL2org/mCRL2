@@ -12,13 +12,8 @@
 #define BOOST_TEST_MODULE linearization_test3
 #include <boost/test/included/unit_test_framework.hpp>
 
-
-#include <iostream>
-#include <string>
-
 #include "mcrl2/data/detail/rewrite_strategies.h"
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/utilities/logger.h"
 
 using namespace mcrl2;
 using namespace mcrl2::lps;

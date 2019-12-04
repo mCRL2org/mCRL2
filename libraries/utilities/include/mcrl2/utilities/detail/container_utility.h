@@ -17,7 +17,6 @@
 #include <iterator>
 #include <map>
 #include <set>
-#include <sstream>
 #include <unordered_set>
 
 namespace mcrl2 {

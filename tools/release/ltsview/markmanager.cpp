@@ -9,9 +9,6 @@
 /// \file markmanager.cpp
 /// \brief Mark manager source file
 
-#include "markmanager.h"
-#include <algorithm>
-#include "lts.h"
 #include "state.h"
 #include "cluster.h"
 #include "transition.h"

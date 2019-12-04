@@ -14,8 +14,6 @@
 
 #include "mcrl2/bes/traverser.h"
 #include "mcrl2/pbes/pbes_expression.h"
-#include <cassert>
-#include <vector>
 
 namespace mcrl2
 {

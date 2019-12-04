@@ -10,7 +10,7 @@
 
 #define BOOST_TEST_MODULE remove_parameters_test
 #include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/data/data_expression.h"
+
 #include "mcrl2/pbes/detail/test_utility.h"
 #include "mcrl2/pbes/remove_parameters.h"
 

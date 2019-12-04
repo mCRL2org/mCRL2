@@ -13,11 +13,6 @@
 #define TOOLNAME "lts2lps"
 #define AUTHOR "Frank Stappers"
 
-#include <fstream>
-#include <iostream>
-#include <string>
-#include "mcrl2/utilities/logger.h"
-
 #include "mcrl2/utilities/input_output_tool.h"
 
 #include "mcrl2/lts/lts_io.h"

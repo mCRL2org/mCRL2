@@ -9,29 +9,11 @@
 /// \file process.cpp
 /// \brief
 
-#include <algorithm>
-#include <iostream>
-#include <limits>
-#include <sstream>
-#include "mcrl2/core/parser_utility.h"
-#include "mcrl2/data/parse_impl.h"
-#include "mcrl2/process/alphabet_reduce.h"
 #include "mcrl2/process/detail/alphabet_push_block.h"
-#include "mcrl2/process/detail/pcrl_equation_cache.h"
-#include "mcrl2/process/find.h"
 #include "mcrl2/process/index_traits.h"
-#include "mcrl2/process/normalize_sorts.h"
-#include "mcrl2/process/parse.h"
 #include "mcrl2/process/parse_impl.h"
-#include "mcrl2/process/print.h"
 #include "mcrl2/process/translate_user_notation.h"
 #include "mcrl2/process/remove_equations.h"
-#include "mcrl2/process/traverser.h"
-#include "mcrl2/process/typecheck.h"
-#include "mcrl2/process/utility.h"
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/detail/separate_keyword_section.h"
-#include "mcrl2/utilities/text_utility.h"
 
 
 namespace mcrl2

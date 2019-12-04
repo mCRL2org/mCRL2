@@ -12,21 +12,11 @@
 #ifndef MCRL2_PBES_BDD_H
 #define MCRL2_PBES_BDD_H
 
-#include <iostream>
-#include <memory>
-#include <string>
-#include <sstream>
-#include <utility>
-
 #include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/data/application.h"
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/join.h"
-#include "mcrl2/data/parse.h"
-#include "mcrl2/data/standard.h"
 #include "mcrl2/pbes/join.h"
 #include "mcrl2/pbes/pbes_equation_index.h"
-#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2 {
 

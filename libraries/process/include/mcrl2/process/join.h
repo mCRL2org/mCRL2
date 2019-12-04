@@ -12,9 +12,7 @@
 #ifndef MCRL2_PROCESS_JOIN_H
 #define MCRL2_PROCESS_JOIN_H
 
-#include <vector>
 #include "mcrl2/process/process_expression.h"
-#include "mcrl2/utilities/detail/join.h"
 
 namespace mcrl2 {
 

@@ -12,11 +12,8 @@
 #ifndef MCRL2_DATA_TRAVERSER_H
 #define MCRL2_DATA_TRAVERSER_H
 
-#include <type_traits>
-
 #include "mcrl2/core/traverser.h"
 #include "mcrl2/data/alias.h"
-#include "mcrl2/data/assignment.h"
 #include "mcrl2/data/bag_comprehension.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/forall.h"
@@ -26,7 +23,6 @@
 #include "mcrl2/data/untyped_data_parameter.h"
 #include "mcrl2/data/untyped_possible_sorts.h"
 #include "mcrl2/data/untyped_set_or_bag_comprehension.h"
-#include "mcrl2/data/untyped_sort.h"
 #include "mcrl2/data/untyped_sort_variable.h"
 #include "mcrl2/data/where_clause.h"
 

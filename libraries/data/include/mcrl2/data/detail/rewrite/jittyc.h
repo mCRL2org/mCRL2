@@ -11,8 +11,6 @@
 #ifndef __REWR_JITTYC_H
 #define __REWR_JITTYC_H
 
-#include "mcrl2/data/detail/rewrite.h"
-#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/rewrite/jitty.h"
 #include "mcrl2/data/detail/rewrite/match_tree.h"
 #include "mcrl2/utilities/uncompiledlibrary.h"

@@ -13,7 +13,6 @@
 #define MCRL2_CORE_TRAVERSER_H
 
 #include "mcrl2/core/identifier_string.h"
-#include <set>
 
 namespace mcrl2
 {

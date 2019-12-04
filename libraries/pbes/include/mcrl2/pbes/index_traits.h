@@ -12,7 +12,6 @@
 #ifndef MCRL2_PBES_INDEX_TRAITS_H
 #define MCRL2_PBES_INDEX_TRAITS_H
 
-#include "mcrl2/core/index_traits.h"
 #include "mcrl2/pbes/pbes_expression.h"
 
 namespace mcrl2 {

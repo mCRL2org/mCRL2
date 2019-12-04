@@ -10,20 +10,10 @@
 /// \brief add your file description here.
 
 #include <d.h>
-#include <dparse.h>
 #include "mcrl2/core/detail/dparser_functions.h"
-#include "mcrl2/core/dparser.h"
-#include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
-#include <parse.h>
 #include <iomanip>
-#include <iostream>
 #include <locale>
-#include <set>
-#include <sstream>
-#include <stdexcept>
-#include <string>
-#include <vector>
 
 extern "C"
 {

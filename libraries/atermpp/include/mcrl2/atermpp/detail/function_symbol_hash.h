@@ -12,10 +12,6 @@
 
 #include "mcrl2/atermpp/function_symbol.h"
 
-#include <assert.h>
-#include <string>
-#include <stddef.h>
-
 namespace std
 {
  

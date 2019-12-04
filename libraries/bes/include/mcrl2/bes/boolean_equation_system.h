@@ -12,12 +12,7 @@
 #ifndef MCRL2_BES_BOOLEAN_EQUATION_SYSTEM_H
 #define MCRL2_BES_BOOLEAN_EQUATION_SYSTEM_H
 
-#include <algorithm>
-#include <iostream>
 #include "mcrl2/bes/boolean_equation.h"
-#include "mcrl2/core/detail/soundness_checks.h"
-#include "mcrl2/core/term_traits.h"
-#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {

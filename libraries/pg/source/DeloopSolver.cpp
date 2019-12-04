@@ -9,8 +9,6 @@
 
 #include "mcrl2/pg/DeloopSolver.h"
 #include "mcrl2/pg/attractor.h"
-#include <memory>
-#include <cassert>
 
 DeloopSolver::DeloopSolver(
     const ParityGame &game, ParityGameSolverFactory &pgsf,

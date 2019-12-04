@@ -12,7 +12,6 @@
 #ifndef MCRL2_DATA_PARSE_H
 #define MCRL2_DATA_PARSE_H
 
-#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/typecheck.h"
 
 namespace mcrl2

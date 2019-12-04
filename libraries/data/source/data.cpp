@@ -9,7 +9,6 @@
 /// \file data.cpp
 /// \brief
 
-#include "mcrl2/data/find.h"
 #include "mcrl2/data/index_traits.h"
 #include "mcrl2/data/normalize_sorts.h"
 #include "mcrl2/data/parse_impl.h"

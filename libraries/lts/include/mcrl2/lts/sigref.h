@@ -14,12 +14,7 @@
 #ifndef MCRL2_LTS_SIGREF_H
 #define MCRL2_LTS_SIGREF_H
 
-#include <set>
-#include <map>
-#include <iostream>
-#include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/lts_utilities.h"
-#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {

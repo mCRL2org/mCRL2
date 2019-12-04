@@ -14,14 +14,8 @@
 
 #include "mcrl2/data/detail/data_property_map.h"
 #include "mcrl2/pbes/pbes.h"
-#include <algorithm>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <iterator>
-#include <map>
-#include <set>
-#include <sstream>
-#include <utility>
 
 namespace mcrl2
 {

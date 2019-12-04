@@ -8,11 +8,6 @@
 //
 /// \file liblts_dot.cpp
 
-#include <ostream>
-#include <fstream>
-#include <string>
-#include <vector>
-#include "mcrl2/lts/lts_dot.h"
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/parse.h"
 #include "mcrl2/lts/detail/liblts_swap_to_from_probabilistic_lts.h"

@@ -12,7 +12,6 @@
 #ifndef MCRL2_PBES_DETAIL_OCCURRING_VARIABLE_VISITOR_H
 #define MCRL2_PBES_DETAIL_OCCURRING_VARIABLE_VISITOR_H
 
-#include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/traverser.h"
 
 namespace mcrl2

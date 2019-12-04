@@ -20,7 +20,6 @@
 #define MCRL2XI_DOCUMENTMANAGER_H
 
 #include "mcrl2/gui/extendedtabwidget.h"
-#include <QTextEdit>
 
 #include "documentwidget.h"
 

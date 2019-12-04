@@ -12,13 +12,9 @@
 #ifndef MCRL2_DATA_SELECTION_H
 #define MCRL2_DATA_SELECTION_H
 
-#include <algorithm>
-
-#include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/fset.h"
-#include "mcrl2/data/standard_utility.h"
 
 namespace mcrl2
 {

@@ -20,12 +20,6 @@
 #ifndef MCRL2_LTS_PROBABILISTIC_ARBITRARY_PRECISION_FRACTION_H
 #define MCRL2_LTS_PROBABILISTIC_ARBITRARY_PRECISION_FRACTION_H
 
-#include <cstddef>
-#include <string>
-#include <cassert>
-#include <sstream>
-#include <limits>
-#include "mcrl2/utilities/hash_utility.h"
 #include "mcrl2/utilities/big_numbers.h"
 
 

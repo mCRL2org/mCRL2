@@ -12,9 +12,9 @@
 #define BOOST_TEST_MODULE sequence_test
 
 #include "mcrl2/utilities/sequence.h"
+
 #include <boost/test/included/unit_test_framework.hpp>
 #include <numeric>
-#include <vector>
 
 using namespace mcrl2;
 

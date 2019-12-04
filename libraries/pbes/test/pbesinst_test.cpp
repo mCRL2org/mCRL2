@@ -11,15 +11,12 @@
 
 #define BOOST_TEST_MODULE pbesinst_test
 #include <boost/test/included/unit_test_framework.hpp>
+
 #include "mcrl2/lps/detail/test_input.h"
-#include "mcrl2/lps/linearise.h"
 #include "mcrl2/modal_formula/detail/test_input.h"
 #include "mcrl2/modal_formula/parse.h"
-#include "mcrl2/pbes/detail/instantiate_global_variables.h"
-#include "mcrl2/pbes/detail/pbes_parameter_map.h"
 #include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/lps2pbes.h"
-#include "mcrl2/pbes/pbesinst_algorithm.h"
 #include "mcrl2/pbes/pbesinst_finite_algorithm.h"
 #include "mcrl2/pbes/pbesinst_symbolic.h"
 #include "mcrl2/pbes/rewriter.h"

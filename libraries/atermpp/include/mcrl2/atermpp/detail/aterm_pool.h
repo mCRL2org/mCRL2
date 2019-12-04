@@ -10,12 +10,8 @@
 #ifndef ATERMPP_DETAIL_ATERM_POOL_H
 #define ATERMPP_DETAIL_ATERM_POOL_H
 
-#include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/atermpp/detail/aterm_configuration.h"
 #include "mcrl2/atermpp/detail/aterm_pool_storage.h"
 #include "mcrl2/atermpp/detail/function_symbol_pool.h"
-
-#include <tuple>
 
 namespace atermpp
 {

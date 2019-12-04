@@ -8,8 +8,6 @@
 //
 /// \file pbesrewr.cpp
 
-#include <iostream>
-#include <string>
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"

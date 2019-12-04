@@ -13,7 +13,6 @@
 #define MCRL2_DATA_EXISTS_H
 
 #include "mcrl2/data/abstraction.h"
-#include "mcrl2/data/variable.h"
 
 namespace mcrl2
 {

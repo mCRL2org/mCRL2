@@ -12,7 +12,6 @@
 #ifndef MCRL2_PBES_PBES_GAUSS_ELIMINATION_H
 #define MCRL2_PBES_PBES_GAUSS_ELIMINATION_H
 
-#include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/gauss_elimination.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 

@@ -13,20 +13,7 @@
 *        complex data types by simpler ones.
 */
 
-#include <algorithm>
-#include <iostream>
-#include <cstdio>
-#include <cstring>
-#include <iostream>
-#include <string>
-#include "mcrl2/utilities/logger.h"
-
-#include "mcrl2/data/function_symbol.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
-
 #include "mcrl2/lps/lpsparunfoldlib.h"
-#include "mcrl2/lps/find.h"
 #include "mcrl2/lps/replace.h"
 
 using namespace std;

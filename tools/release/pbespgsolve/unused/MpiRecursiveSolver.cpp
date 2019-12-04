@@ -7,18 +7,10 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include <cassert>
-#include <algorithm>
-#include <set>
 #include <utility>
-#include <vector>
-#include <deque>
-#include "mcrl2/utilities/logger.h"
 #include "AsyncMpiAttractorAlgorithm.h"
 #include "SyncMpiAttractorAlgorithm.h"
 #include "MpiRecursiveSolver.h"
-#include "GamePart.h"
-#include "DenseSet.h"
 
 //! Returns a list of indices at which `incl` is zero.
 static std::vector<verti> collect_complement(const DenseSet<verti> &incl)

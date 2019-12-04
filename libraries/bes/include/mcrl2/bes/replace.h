@@ -12,9 +12,7 @@
 #ifndef MCRL2_BES_REPLACE_H
 #define MCRL2_BES_REPLACE_H
 
-#include "mcrl2/bes/boolean_expression.h"
 #include "mcrl2/bes/builder.h"
-#include <functional>
 
 namespace mcrl2 {
 

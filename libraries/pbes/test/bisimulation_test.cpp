@@ -13,7 +13,6 @@
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/lps/parse.h"
 #include "mcrl2/pbes/bisimulation.h"
 #include "mcrl2/pbes/detail/pbessolve.h"
 

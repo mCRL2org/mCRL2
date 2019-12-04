@@ -10,7 +10,6 @@
 #ifndef MCRL2_ATERMPP_ATERM_H
 #define MCRL2_ATERMPP_ATERM_H
 
-#include "mcrl2/atermpp/type_traits.h"
 #include "mcrl2/atermpp/detail/aterm.h"
 
 /// \brief The main namespace for the aterm++ library.

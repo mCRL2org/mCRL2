@@ -14,9 +14,6 @@
 
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/utilities/number_postfix_generator.h"
-#include <set>
-#include <sstream>
-#include <string>
 
 namespace mcrl2
 {

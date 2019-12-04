@@ -12,10 +12,7 @@
 #ifndef MCRL2_DATA_DETAIL_PROVER_BDD2DOT_H
 #define MCRL2_DATA_DETAIL_PROVER_BDD2DOT_H
 
-#include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/data/detail/prover/bdd_info.h"
-#include "mcrl2/utilities/logger.h"
 #include <fstream>
 
 namespace mcrl2

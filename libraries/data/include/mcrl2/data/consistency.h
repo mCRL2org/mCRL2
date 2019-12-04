@@ -16,7 +16,6 @@
 #define MCRL2_DATA_CONSISTENCY_H
 
 #include "mcrl2/data/bool.h"
-#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/forall.h"
 

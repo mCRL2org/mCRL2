@@ -11,18 +11,7 @@
 #ifndef DISTRPLOT_H
 #define DISTRPLOT_H
 
-#include <QtCore>
-#include <QtGui>
-
-#include <cstddef>
-#include <cstdlib>
-#include <cmath>
-#include <vector>
-#include <string>
 #include "diagram.h"
-#include "graph.h"
-#include "utils.h"
-#include "visualizer.h"
 
 class DistrPlot : public Visualizer
 {

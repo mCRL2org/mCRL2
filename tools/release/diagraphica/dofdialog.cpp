@@ -8,7 +8,6 @@
 //
 
 #include "dofdialog.h"
-#include "ui_dofdialog.h"
 
 DofDialog::DofDialog(Graph* graph, Shape* shape, QWidget *parent) :
   QDialog(parent),

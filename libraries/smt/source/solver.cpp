@@ -8,24 +8,10 @@
 //
 /// \file solver.cpp
 
-#include "mcrl2/data/bool.h"
-#include "mcrl2/data/data_equation.h"
-#include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/function_symbol.h"
-#include "mcrl2/data/int.h"
 #include "mcrl2/data/list.h"
-#include "mcrl2/data/nat.h"
-#include "mcrl2/data/pos.h"
-#include "mcrl2/data/real.h"
-#include "mcrl2/data/sort_expression.h"
-#include "mcrl2/data/standard.h"
-#include "mcrl2/data/structured_sort.h"
-#include "mcrl2/smt/translate_expression.h"
 #include "mcrl2/smt/translate_specification.h"
 #include "mcrl2/smt/solver.h"
 #include "mcrl2/smt/unfold_pattern_matching.h"
-#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {

@@ -13,8 +13,6 @@
 #include "DenseSet.h"
 #include "GamePart.h"
 #include "MpiUtils.h"
-#include "ParityGame.h"
-#include "VertexPartition.h"
 #include <deque>
 #include <vector>
 

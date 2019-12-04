@@ -12,7 +12,6 @@
 #ifndef MCRL2_PROCESS_UNTYPED_MULTI_ACTION_H
 #define MCRL2_PROCESS_UNTYPED_MULTI_ACTION_H
 
-#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/untyped_data_parameter.h"
 
 namespace mcrl2 {

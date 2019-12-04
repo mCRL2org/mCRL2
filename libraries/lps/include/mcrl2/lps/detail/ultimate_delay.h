@@ -18,8 +18,6 @@
 #ifndef MCRL2_LPS_DETAIL_ULTIMATE_DELAY_H
 #define MCRL2_LPS_DETAIL_ULTIMATE_DELAY_H
 
-#include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/bool.h"
 #include "mcrl2/data/real.h"
 
 namespace mcrl2

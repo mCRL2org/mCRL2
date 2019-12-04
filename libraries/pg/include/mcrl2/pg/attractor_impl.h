@@ -11,7 +11,6 @@
 #define MCRL2_PG_ATTRACTOR_IMPL_H
 
 #include "mcrl2/pg/attractor.h"
-#include "mcrl2/pg/Graph.h"
 #include "mcrl2/pg/ParityGame_impl.h"
 
 #include <queue>

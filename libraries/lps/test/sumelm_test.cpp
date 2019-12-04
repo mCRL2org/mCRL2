@@ -12,11 +12,9 @@
 #define BOOST_TEST_MODULE sumelm_test
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/sumelm.h"
+
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iostream>
-#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::data;

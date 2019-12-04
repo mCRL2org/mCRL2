@@ -10,12 +10,6 @@
 /// \brief Add your file description here.
 
 #include <boost/test/included/unit_test_framework.hpp>
-#include <type_traits>
-
-#include <algorithm>
-#include <list>
-#include <set>
-#include <vector>
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/detail/aterm_list_iterator.h"

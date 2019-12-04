@@ -13,10 +13,8 @@
 #define MCRL2_DATA_REPLACE_CAPTURE_AVOIDING_H
 
 #include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/data/add_binding.h"
 #include "mcrl2/data/builder.h"
 #include "mcrl2/data/find.h"
-#include "mcrl2/data/set_identifier_generator.h"
 
 namespace mcrl2 {
 

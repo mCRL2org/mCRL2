@@ -1,6 +1,5 @@
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/parse.h"
-#include <iostream>
 
 using namespace mcrl2::data;
 

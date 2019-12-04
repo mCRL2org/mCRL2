@@ -11,19 +11,8 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
-#include <QtCore>
-#include <QtGui>
-
-#include <cstddef>
-#include <map>
-#include <vector>
-#include <string>
-#include "attribute.h"
 #include "attrdiscr.h"
 #include "bundle.h"
-#include "cluster.h"
-#include "edge.h"
-#include "node.h"
 
 class Graph : public QObject
 {

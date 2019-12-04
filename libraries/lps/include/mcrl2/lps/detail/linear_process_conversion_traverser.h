@@ -14,12 +14,6 @@
 
 #include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/process/is_linear.h"
-#include "mcrl2/process/process_specification.h"
-#include "mcrl2/process/traverser.h"
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/utilities/logger.h"
-#include <stdexcept>
-#include <vector>
 
 namespace mcrl2
 {

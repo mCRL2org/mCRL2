@@ -9,8 +9,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QtCore>
-#include <QtGui>
 #include <QMainWindow>
 #include "ui_mainwindow.h"
 
@@ -20,7 +18,6 @@
 #include "diagrameditor.h"
 #include "examiner.h"
 #include "parser.h"
-#include "settings.h"
 #include "settingsdialog.h"
 #include "simulator.h"
 #include "timeseries.h"

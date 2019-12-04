@@ -11,7 +11,7 @@
 
 #define BOOST_TEST_MODULE pbes_expression_test
 #include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/data/data_expression.h"
+
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/join.h"
 #include "mcrl2/pbes/detail/parse.h"

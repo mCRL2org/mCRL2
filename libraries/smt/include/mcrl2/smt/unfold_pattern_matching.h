@@ -9,9 +9,6 @@
 #ifndef MCRL2_SMT_UNFOLD_PATTERN_MATCHING_H
 #define MCRL2_SMT_UNFOLD_PATTERN_MATCHING_H
 
-#include <functional>
-
-#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/join.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/representative_generator.h"

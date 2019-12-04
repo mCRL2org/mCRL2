@@ -10,12 +10,10 @@
 
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/tools.h"
-#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/stategraph.h"
 #include "mcrl2/pbes/detail/lpsstategraph_algorithm.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/file_utility.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;

@@ -13,9 +13,7 @@
 #define MCRL2_BES_DETAIL_IO_H
 
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/bes/boolean_expression.h"
-#include "mcrl2/core/index_traits.h"
 
 namespace mcrl2 {
 

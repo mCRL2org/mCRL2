@@ -12,14 +12,10 @@
 #ifndef MCRL2_PBES_STRUCTURE_GRAPH_H
 #define MCRL2_PBES_STRUCTURE_GRAPH_H
 
-#include <algorithm>
 #include <iomanip>
-#include <limits>
-#include <utility>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/range/adaptor/filtered.hpp>
 #include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/data/undefined.h"
 #include "mcrl2/pbes/pbes.h"
 
 namespace mcrl2 {

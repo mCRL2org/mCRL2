@@ -12,9 +12,6 @@
 
 #include "mcrl2/pg/SmallProgressMeasures.h"
 
-#include <algorithm>
-#include <vector>
-
 /*! \ingroup LiftingStrategies
 
     A lifting strategy that combines the linear and predecessor lifting

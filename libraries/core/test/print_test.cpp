@@ -11,7 +11,6 @@
 
 #define BOOST_TEST_MODULE print_test
 
-#include <sstream>
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/core/print.h"
 

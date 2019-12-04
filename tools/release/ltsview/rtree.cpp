@@ -11,7 +11,6 @@
 #include <limits>
 #include <queue>
 #include <list>
-#include <vector>
 #include "rtree.h"
 
 class Rectangle

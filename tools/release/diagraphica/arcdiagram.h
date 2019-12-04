@@ -15,21 +15,9 @@
 #ifndef ARCDIAGRAM_H
 #define ARCDIAGRAM_H
 
-#include <QtCore>
-#include <QtGui>
-
-#include <cstddef>
-#include <cstdlib>
-#include <cmath>
-#include <map>
-#include <vector>
 #include <QTimer>
 #include "diagram.h"
-#include "graph.h"
 #include "settings.h"
-#include "utils.h"
-#include "visualizer.h"
-#include "visutils.h"
 
 
 enum RenderMode

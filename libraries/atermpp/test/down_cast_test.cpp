@@ -12,9 +12,6 @@
 #define BOOST_TEST_MODULE down_cast_test
 #include <boost/test/included/unit_test_framework.hpp>
 
-#include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/function_symbol.h"
 #include "mcrl2/atermpp/aterm_list.h"
 
 using namespace std;

@@ -16,7 +16,6 @@
 #ifndef MCRL2_LTS_LTS_PROBABILISTIC_EQUIVALENCE_H
 #define MCRL2_LTS_LTS_PROBABILISTIC_EQUIVALENCE_H
 
-#include <iostream>
 #include <string>
 #include "mcrl2/utilities/exception.h"
 

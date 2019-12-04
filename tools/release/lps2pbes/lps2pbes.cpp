@@ -10,7 +10,6 @@
 /// \brief Add your file description here.
 
 #include "mcrl2/pbes/tools.h"
-#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/bes/pbes_output_tool.h"
 

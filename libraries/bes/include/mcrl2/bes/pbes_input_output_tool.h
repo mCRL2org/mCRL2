@@ -12,10 +12,6 @@
 #ifndef MCRL2_UTILITIES_PBES_INPUT_OUTPUT_TOOL_H
 #define MCRL2_UTILITIES_PBES_INPUT_OUTPUT_TOOL_H
 
-#include <set>
-#include <string>
-#include <iostream>
-#include <stdexcept>
 #include "mcrl2/bes/pbes_input_tool.h"
 #include "mcrl2/bes/pbes_output_tool.h"
 

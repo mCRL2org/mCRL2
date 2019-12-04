@@ -14,7 +14,6 @@
 
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/modal_formula/state_formula_specification.h"
-#include <iostream>
 
 namespace mcrl2 {
 

@@ -17,8 +17,6 @@
 #ifndef MCRL2_BES_TRAVERSER_H
 #define MCRL2_BES_TRAVERSER_H
 
-#include "mcrl2/core/traverser.h"
-
 namespace mcrl2
 {
 

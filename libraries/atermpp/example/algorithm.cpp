@@ -9,13 +9,6 @@
 /// \file algorithm.cpp
 /// \brief Add your file description here.
 
-#include <iostream>
-#include <iterator>
-#include <cassert>
-#include <vector>
-
-#include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/aterm_io.h"
 

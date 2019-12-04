@@ -12,8 +12,6 @@
 #include "mcrl2/gui/arcball.h"
 #include "mcrl2/gui/glu.h"
 
-#include <cmath>
-
 void ArcballCameraView::update()
 {
   m_viewMatrix.setToIdentity();

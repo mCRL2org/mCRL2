@@ -11,17 +11,11 @@
 #define NAME "reduce_process"
 #define AUTHOR "Wieger Wesselink"
 
-#include <iostream>
-#include <fstream>
-
-#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/process/is_well_typed.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/replace_subterm.h"
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/detail/io.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/text_utility.h"
 
 using namespace mcrl2;
 

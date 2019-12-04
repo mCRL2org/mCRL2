@@ -7,16 +7,9 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "mcrl2/pg/Graph.h"
 #include "mcrl2/pg/SCC.h"
 #include "mcrl2/pg/shuffle.h"
 #include "mcrl2/utilities/logger.h"
-
-#include <cassert>
-#include <cstdlib>
-#include <algorithm>
-#include <utility>
-#include <vector>
 
 
 StaticGraph::StaticGraph()

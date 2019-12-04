@@ -12,18 +12,14 @@
 //#define MCRL2_LPSCONSTELM_DEBUG
 
 #define BOOST_TEST_MODULE constelm_test
-#include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/constelm.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/lps/stochastic_specification.h"
-#include "mcrl2/utilities/text_utility.h"
+
 #include <boost/algorithm/string.hpp>
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iostream>
-#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::data;

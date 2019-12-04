@@ -13,7 +13,6 @@
 #include <boost/test/included/unit_test_framework.hpp>
 
 #include "mcrl2/data/bag.h"
-#include "mcrl2/data/fbag.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
 

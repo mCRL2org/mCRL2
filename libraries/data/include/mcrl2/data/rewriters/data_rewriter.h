@@ -14,7 +14,6 @@
 
 #include "mcrl2/data/builder.h"
 #include "mcrl2/data/substitutions/no_substitution.h"
-#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
 

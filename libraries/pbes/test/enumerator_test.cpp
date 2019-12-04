@@ -11,7 +11,7 @@
 
 #define BOOST_TEST_MODULE enumerator_test
 #include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/core/detail/print_utility.h"
+
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/data/enumerator_with_iterator.h"
 #include "mcrl2/pbes/enumerator.h"

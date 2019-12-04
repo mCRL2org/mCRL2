@@ -10,8 +10,6 @@
 #ifndef MCRL2_PG_SCC_H
 #define MCRL2_PG_SCC_H
 
-#include <vector>
-
 #include "mcrl2/pg/SCC_impl.h"
 
 /*! \ingroup ParityGameData

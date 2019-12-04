@@ -2,14 +2,7 @@
 #define PARSING_H
 
 #include "mcrl2/process/parse.h"
-#include "mcrl2/data/parse.h"
 
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <cctype>
-
-#include <QPoint>
 #include <QString>
 #include <QStringList>
 #include <QRegExp>

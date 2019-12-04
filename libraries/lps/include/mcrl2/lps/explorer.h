@@ -12,15 +12,7 @@
 #ifndef MCRL2_LPS_EXPLORER_H
 #define MCRL2_LPS_EXPLORER_H
 
-#include <deque>
-#include <iomanip>
-#include <limits>
-#include <memory>
 #include <random>
-#include <tuple>
-#include <type_traits>
-#include <unordered_map>
-#include <utility>
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/substitution_utility.h"
@@ -31,16 +23,9 @@
 #include "mcrl2/lps/order_summand_variables.h"
 #include "mcrl2/lps/replace_constants_by_variables.h"
 #include "mcrl2/lps/resolve_name_clashes.h"
-#include "mcrl2/lps/state.h"
-#include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/stochastic_state.h"
-#include "mcrl2/process/timed_multi_action.h"
-#include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/utilities/detail/io.h"
-#include "mcrl2/utilities/indexed_set.h"
 #include "mcrl2/utilities/skip.h"
-#include "mcrl2/utilities/unordered_map.h"
-#include "mcrl2/utilities/unused.h"
 
 namespace mcrl2::lps {
 

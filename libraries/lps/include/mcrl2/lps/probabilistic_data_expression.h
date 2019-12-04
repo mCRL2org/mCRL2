@@ -17,7 +17,6 @@
 #ifndef MCRL2_LPS_PROBABILISTIC_DATA_EXPRESSION_H
 #define MCRL2_LPS_PROBABILISTIC_DATA_EXPRESSION_H
 
-#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/rewriter.h"
 
 

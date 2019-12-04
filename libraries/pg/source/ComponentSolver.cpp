@@ -10,9 +10,6 @@
 #include "mcrl2/pg/ComponentSolver.h"
 #include "mcrl2/pg/attractor.h"
 
-#include <cassert>
-#include <memory>
-
 ComponentSolver::ComponentSolver(
     const ParityGame &game, ParityGameSolverFactory &pgsf,
     int max_depth, const verti *vmap, verti vmap_size )

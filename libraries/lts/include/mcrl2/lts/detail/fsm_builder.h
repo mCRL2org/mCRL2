@@ -12,10 +12,6 @@
 #ifndef MCRL2_LTS_DETAIL_FSM_BUILDER_H
 #define MCRL2_LTS_DETAIL_FSM_BUILDER_H
 
-#include <map>
-#include <string>
-#include <vector>
-
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/utilities/parse_numbers.h"
 

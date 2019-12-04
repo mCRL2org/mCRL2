@@ -12,17 +12,10 @@
 #ifndef MCRL2_PBES_PBESINST_STRUCTURE_GRAPH2_H
 #define MCRL2_PBES_PBESINST_STRUCTURE_GRAPH2_H
 
-#include <array>
-#include <utility>
-#include "mcrl2/data/undefined.h"
 #include "mcrl2/pbes/pbesinst_fatal_attractors.h"
 #include "mcrl2/pbes/pbesinst_find_loops.h"
 #include "mcrl2/pbes/pbesinst_partial_solve.h"
-#include "mcrl2/pbes/pbessolve_attractors.h"
-#include "mcrl2/pbes/replace.h"
-#include "mcrl2/pbes/simple_structure_graph.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
-#include "mcrl2/pbes/traverser.h"
 
 namespace mcrl2 {
 

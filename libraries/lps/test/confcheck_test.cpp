@@ -10,13 +10,10 @@
 /// \brief Add your file description here.
 
 #define BOOST_TEST_MODULE confcheck_test
-#include "mcrl2/data/bool.h"
 #include "mcrl2/lps/confluence_checker.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/lps/specification.h"
+
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iostream>
-#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::data;

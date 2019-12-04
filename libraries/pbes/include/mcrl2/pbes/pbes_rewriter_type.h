@@ -13,7 +13,6 @@
 #define MCRL2_PBES_PBES_REWRITER_TYPE_H
 
 #include "mcrl2/utilities/exception.h"
-#include <iostream>
 #include <string>
 
 namespace mcrl2 {

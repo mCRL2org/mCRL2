@@ -12,18 +12,11 @@
 #define NAME "txt2bes"
 #define AUTHOR "Wieger Wesselink"
 
-//C++
-#include <cstdio>
-#include <fstream>
-#include <string>
-
 //mCRL2 specific
-#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/bes/pbes_output_tool.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/bes/pbesinst_conversion.h"
-#include "mcrl2/bes/io.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;

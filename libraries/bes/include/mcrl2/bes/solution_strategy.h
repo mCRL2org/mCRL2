@@ -12,7 +12,6 @@
 #ifndef MCRL2_BES_SOLUTION_STRATEGY_H
 #define MCRL2_BES_SOLUTION_STRATEGY_H
 
-#include <iostream>
 #include <fstream>
 #include "mcrl2/utilities/exception.h"
 

@@ -12,19 +12,14 @@
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QProgressDialog>
-#include <QThread>
 #include "ui_mainwindow.h"
 
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/gui/logwidget.h"
 #include "mcrl2/gui/persistentfiledialog.h"
 
 #include "infodock.h"
 #include "ltscanvas.h"
-#include "ltsmanager.h"
 #include "markdock.h"
-#include "markmanager.h"
-#include "settings.h"
 #include "settingsdialog.h"
 #include "settingsdock.h"
 #include "simdock.h"

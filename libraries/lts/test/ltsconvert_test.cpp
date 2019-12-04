@@ -12,13 +12,10 @@
 
 #define BOOST_TEST_MODULE ltsconvert_test
 // #include <iostream>
-#include <string>
-#include <sstream>
 
 #include <boost/test/included/unit_test_framework.hpp>
 
 #include "mcrl2/lts/lts_algorithm.h"
-#include "mcrl2/lts/lts_aut.h"
 
 using namespace mcrl2::lts;
 

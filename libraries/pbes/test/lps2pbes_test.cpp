@@ -17,14 +17,11 @@
 #ifndef MCRL2_SKIP_LONG_TESTS
 
 #include "mcrl2/lps/detail/test_input.h"
-#include "mcrl2/lps/linearise.h"
-#include "mcrl2/lps/parse.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/pbes/detail/pbessolve.h"
 #include "mcrl2/pbes/detail/test_utility.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/rewrite.h"
-#include "mcrl2/utilities/text_utility.h"
 #include "test_specifications.h"
 
 using namespace mcrl2;

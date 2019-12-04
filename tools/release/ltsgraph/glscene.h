@@ -20,9 +20,6 @@
 #include <QOpenGLWidget>
 #include <QPainter>
 
-#include <array>
-#include <vector>
-
 /// \brief The scene contains the graph that is shown and the camera from which the graph is viewed. It performs
 ///        all the necessary OpenGL calls to render this graph as if shown from the camera. It assumes
 ///        to be the only place where OpenGL calls are performed as it does not keep track or reset the internal OpenGL

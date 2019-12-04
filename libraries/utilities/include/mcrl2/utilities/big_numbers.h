@@ -23,7 +23,6 @@
 #include <algorithm>
 #include <limits>
 #include <string>
-#include <vector>
 
 // Prototype.
 namespace mcrl2

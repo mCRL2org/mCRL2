@@ -18,12 +18,7 @@
 #ifndef MCRL2_LTS_LTS_UTILITIES_H
 #define MCRL2_LTS_LTS_UTILITIES_H
 
-#include <map>
-#include <set>
-#include "mcrl2/core/identifier_string.h"
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/lts_lts.h"
-#include "mcrl2/lts/lts.h"
 
 namespace mcrl2
 {

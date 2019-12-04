@@ -8,14 +8,6 @@
 
 #define NAME "rewr_prover"
 
-#include <cstdio>
-#include <cstdlib>
-#include <cassert>
-#include <memory>
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/detail/prover/bdd_prover.h"
-#include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/rewrite/with_prover.h"
 
 using namespace mcrl2::data::detail;

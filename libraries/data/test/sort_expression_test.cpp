@@ -14,10 +14,6 @@
 
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/data/alias.h"
-#include "mcrl2/data/basic_sort.h"
-#include "mcrl2/data/container_sort.h"
-#include "mcrl2/data/function_sort.h"
-#include "mcrl2/data/nat.h"
 #include "mcrl2/data/structured_sort.h"
 
 using namespace mcrl2;

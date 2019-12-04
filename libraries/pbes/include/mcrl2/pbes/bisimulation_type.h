@@ -13,7 +13,6 @@
 #define MCRL2_PBES_BISIMULATION_TYPE_H
 
 #include "mcrl2/utilities/exception.h"
-#include <iostream>
 #include <string>
 
 namespace mcrl2 {

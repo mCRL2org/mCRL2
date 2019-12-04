@@ -18,10 +18,6 @@
 #ifndef MCRL2_LTS_PROBABILISTIC_LTS_H
 #define MCRL2_LTS_PROBABILISTIC_LTS_H
 
-#include <string>
-#include <vector>
-#include <map>
-#include <cstdio>
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/probabilistic_state.h"
 

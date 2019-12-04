@@ -7,18 +7,13 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include <iomanip>
-#include <ctime>
 
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/data/real.h"
 #include "mcrl2/lps/resolve_name_clashes.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
-#include "mcrl2/lps/probabilistic_data_expression.h"
 #include "mcrl2/lps/one_point_rule_rewrite.h"
 #include "mcrl2/lps/detail/move_constants_to_substitution.h"
 #include "mcrl2/lts/detail/exploration.h"
 #include "mcrl2/lts/detail/counter_example.h"
-#include "mcrl2/lts/lts_io.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;

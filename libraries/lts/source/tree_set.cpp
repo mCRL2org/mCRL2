@@ -8,8 +8,6 @@
 //
 /// \file tree_set.cpp
 
-#include <cstdlib>
-#include <vector>
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/detail/tree_set.h"

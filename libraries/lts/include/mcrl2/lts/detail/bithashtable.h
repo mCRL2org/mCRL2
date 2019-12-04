@@ -11,7 +11,6 @@
 #ifndef MCRL2_LTS_DETAIL_BITHASHTABLE_H
 #define MCRL2_LTS_DETAIL_BITHASHTABLE_H
 
-#include <vector>
 #include "mcrl2/lps/next_state_generator.h"
 
 namespace mcrl2

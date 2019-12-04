@@ -11,7 +11,6 @@
 
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/function_symbol.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;

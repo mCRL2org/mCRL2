@@ -13,12 +13,6 @@
 #define MCRL2_PROCESS_PROCESS_VARIABLE_STRONGLY_CONNECTED_COMPONENTS_H
 
 #include "mcrl2/process/find.h"
-#include "mcrl2/process/traverser.h"
-#include <algorithm>
-#include <cstdlib>
-#include <set>
-#include <utility>
-#include <vector>
 
 namespace mcrl2 {
 

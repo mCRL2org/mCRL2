@@ -12,15 +12,11 @@
 #ifndef MCRL2_PBES_DETAIL_LPSSTATEGRAPH_ALGORITHM_H
 #define MCRL2_PBES_DETAIL_LPSSTATEGRAPH_ALGORITHM_H
 
-#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/lps/is_well_typed.h"
-#include "mcrl2/lps/specification.h"
 #include "mcrl2/pbes/detail/stategraph_global_reset_variables.h"
 #include "mcrl2/pbes/detail/stategraph_local_reset_variables.h"
-#include "mcrl2/pbes/join.h"
-#include "mcrl2/pbes/tools/pbesstategraph_options.h"
 
 namespace mcrl2 {
 

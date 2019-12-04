@@ -2,7 +2,6 @@
 #define MCRL2_DATA_REWRITE_STRATEGY_H
 
 #include "mcrl2/utilities/exception.h"
-#include <iostream>
 #include <string>
 
 namespace mcrl2

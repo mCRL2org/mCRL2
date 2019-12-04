@@ -10,19 +10,10 @@
 #ifndef MCRL2_LTS_DETAIL_EXPLORATION_NEW_H
 #define MCRL2_LTS_DETAIL_EXPLORATION_NEW_H
 
-#include <string>
-#include <limits>
-#include <memory>
-
-#include "mcrl2/utilities/indexed_set.h"
-
 #include "mcrl2/trace/trace.h"
-#include "mcrl2/lps/next_state_generator.h"
-#include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/detail/bithashtable.h"
 #include "mcrl2/lts/detail/queue.h"
 #include "mcrl2/lts/detail/lts_generation_options.h"
-#include "mcrl2/lps/exploration_strategy.h"
 
 
 namespace mcrl2

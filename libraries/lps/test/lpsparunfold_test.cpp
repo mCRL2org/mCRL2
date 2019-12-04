@@ -10,15 +10,11 @@
 /// \brief Add your file description here.
 
 #define BOOST_TEST_MODULE lpsparunfold_test
-#include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/lpsparunfoldlib.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/lps/stochastic_specification.h"
-#include "mcrl2/utilities/text_utility.h"
+
 #include <boost/algorithm/string.hpp>
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iostream>
-#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::data;

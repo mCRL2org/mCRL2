@@ -12,12 +12,8 @@
 #ifndef MCRL2_ATERMPP_ALGORITHM_H
 #define MCRL2_ATERMPP_ALGORITHM_H
 
-#include <type_traits>
 #include <unordered_map>
 
-#include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/builder.h"
 #include "mcrl2/atermpp/detail/algorithm_impl.h"
 

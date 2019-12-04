@@ -15,8 +15,6 @@
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/detail/pbes_expression2boolean_expression_traverser.h"
 #include "mcrl2/pbes/algorithms.h"
-#include "mcrl2/pbes/pbes.h"
-#include <cassert>
 
 namespace mcrl2
 {

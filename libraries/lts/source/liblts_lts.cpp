@@ -8,16 +8,9 @@
 //
 /// \file liblts_lts.cpp
 
-#include "mcrl2/atermpp/aterm_int.h"
-#include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/detail/io.h"
-#include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lts/lts_lts.h"
 
 #include <fstream>
-#include <string>
-#include <cstring>
-#include <sstream>
 
 namespace mcrl2
 {

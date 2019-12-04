@@ -1,13 +1,8 @@
 #if !(defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
 #include <cerrno>       // for errno
-#include <cstddef>      // for std::size_t
-#include <cstdlib>
-#include <cstring>      // for strerror
 #include <sys/types.h>  // for pid_t
 #include <sys/wait.h>   // for waitpid()
 #include <sys/ioctl.h>  // for ioctl() and FIONREAD
-#include <unistd.h>
-#include <iostream>
 #include "mcrl2/data/detail/prover/smt_lib_solver.h"
 
 using namespace mcrl2::log;

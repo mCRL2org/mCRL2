@@ -9,11 +9,6 @@
 
 #include "mcrl2/pg/MaxMeasureLiftingStrategy.h"
 
-#include <algorithm>
-#include <cassert>
-
-#include <cstdio>  /* debug */
-
 /* TODO: write short description of how this works! */
 
 MaxMeasureLiftingStrategy2::MaxMeasureLiftingStrategy2(

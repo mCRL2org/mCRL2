@@ -12,12 +12,8 @@
 #ifndef MCRL2_LPS_BUILDER_H
 #define MCRL2_LPS_BUILDER_H
 
-#include "mcrl2/core/builder.h"
-#include "mcrl2/data/builder.h"
-#include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/process/builder.h"
-#include "mcrl2/process/untyped_multi_action.h"
 
 namespace mcrl2
 {

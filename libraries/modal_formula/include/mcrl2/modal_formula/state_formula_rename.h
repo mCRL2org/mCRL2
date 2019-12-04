@@ -12,12 +12,7 @@
 #ifndef MCRL2_MODAL_FORMULA_STATE_FORMULA_RENAME_H
 #define MCRL2_MODAL_FORMULA_STATE_FORMULA_RENAME_H
 
-#include "mcrl2/data/replace.h"
-#include "mcrl2/modal_formula/builder.h"
 #include "mcrl2/modal_formula/replace.h"
-#include "mcrl2/modal_formula/state_formula.h"
-#include "mcrl2/utilities/number_postfix_generator.h"
-#include <deque>
 
 namespace mcrl2
 {

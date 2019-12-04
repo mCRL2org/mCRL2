@@ -12,13 +12,10 @@
 #ifndef MCRL2_LPS_IS_WELL_TYPED_H
 #define MCRL2_LPS_IS_WELL_TYPED_H
 
-#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/lps/detail/action_utility.h"
-#include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/stochastic_specification.h"
 #include <boost/iterator/transform_iterator.hpp>
-#include <sstream>
 
 namespace mcrl2 {
 

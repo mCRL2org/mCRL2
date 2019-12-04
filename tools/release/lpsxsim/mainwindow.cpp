@@ -8,9 +8,6 @@
 
 #include "mainwindow.h"
 
-#include "mcrl2/utilities/platform.h"
-
-#include <QApplication>
 #include <QEventLoop>
 #include <QInputDialog>
 #include <QMetaObject>

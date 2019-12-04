@@ -12,7 +12,6 @@
 #ifndef MCRL2_PBES_PBES_FUNCTIONS_H
 #define MCRL2_PBES_PBES_FUNCTIONS_H
 
-#include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/traverser.h"
 
 namespace mcrl2 {

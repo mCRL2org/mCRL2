@@ -2,7 +2,6 @@
   Copyright 2002-2006 John Plevyak, All Rights Reserved
 */
 #include "d.h"
-#include "dparse_tables.h"
 
 #ifdef __GNUC__
 #include "strings.h"

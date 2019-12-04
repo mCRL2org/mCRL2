@@ -7,7 +7,6 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "savepicturedialog.h"
-#include <QImage>
 #include <QImageWriter>
 
 SavePictureDialog::SavePictureDialog(QWidget *parent, LtsCanvas *canvas, QString filename):

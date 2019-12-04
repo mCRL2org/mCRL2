@@ -9,13 +9,9 @@
 
 #include "springlayout.h"
 #include "utility.h"
-#include "ui_springlayout.h"
 
 #include <QThread>
-#include <algorithm>
-#include <cmath>
 #include <cstdlib>
-#include <ctime>
 
 namespace Graph
 {

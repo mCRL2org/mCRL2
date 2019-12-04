@@ -11,11 +11,7 @@
 
 #define BOOST_TEST_MODULE identifier_generator_test
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iostream>
-#include <string>
-#include <vector>
 
-#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/xyz_identifier_generator.h"
 
 using namespace mcrl2;

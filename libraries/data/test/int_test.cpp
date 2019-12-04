@@ -11,7 +11,6 @@
 
 #define BOOST_TEST_MODULE int_test
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iostream>
 
 #include "mcrl2/data/standard_numbers_utility.h"
 

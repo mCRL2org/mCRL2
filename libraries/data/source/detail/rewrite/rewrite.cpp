@@ -6,19 +6,6 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include <cstdlib>
-#include <cassert>
-#include <stdexcept>
-#include <string>
-#include <cstring>
-#include <limits>
-#include <algorithm>
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/core/detail/function_symbols.h"
-#include "mcrl2/core/print.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/rewrite/jitty.h"
 #include "mcrl2/data/detail/rewrite/jitty_jittyc.h"
 #ifdef MCRL2_JITTYC_AVAILABLE
@@ -29,7 +16,6 @@
 
 #include "mcrl2/data/detail/rewriter_wrapper.h"
 #include "mcrl2/data/enumerator_with_iterator.h"
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;

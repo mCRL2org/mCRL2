@@ -12,11 +12,8 @@
 #define BOOST_TEST_MODULE find_test
 #include "mcrl2/bes/find.h"
 #include "mcrl2/bes/parse.h"
-#include <algorithm>
+
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iterator>
-#include <set>
-#include <vector>
 
 using namespace mcrl2;
 using namespace mcrl2::bes;

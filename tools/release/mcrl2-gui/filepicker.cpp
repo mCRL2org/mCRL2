@@ -9,7 +9,6 @@
 
 #include "filepicker.h"
 
-#include <QFileDialog>
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QMimeData>

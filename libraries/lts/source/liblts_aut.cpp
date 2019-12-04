@@ -8,8 +8,6 @@
 //
 /// \file liblts_aut.cpp
 
-#include <string>
-#include <sstream>
 #include <fstream>
 #include <unordered_map>
 #include "mcrl2/lts/lts_aut.h"

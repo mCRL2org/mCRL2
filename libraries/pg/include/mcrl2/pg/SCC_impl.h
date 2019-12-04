@@ -13,11 +13,6 @@
 #ifndef MCRL2_PG_SCC_IMPL_H
 #define MCRL2_PG_SCC_IMPL_H
 
-#include <algorithm>
-#include <vector>
-#include <utility>
-#include <cassert>
-
 #include "mcrl2/pg/Graph.h"
 
 
