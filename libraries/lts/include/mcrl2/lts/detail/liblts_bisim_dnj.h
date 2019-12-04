@@ -85,9 +85,6 @@
 #include "mcrl2/lts/detail/check_complexity.h"
 #include "mcrl2/lts/detail/fixed_vector.h"
 
-#ifndef NDEBUG
-    #include <algorithm> // for std::lower_bound()
-#endif
 #include <cstddef>   // for std::size_t
 
 // My provisional recommendation is to always use simple lists and pool
@@ -267,7 +264,7 @@ class action_block_entry;
         /// free list
         template <class U, class... Args>
         U* construct_samesize(Args&&... args)
-        {                                                                       assert(sizeof(T) == sizeof(U));
+        {                                                                       static_assert(sizeof(T) == sizeof(U));
             void* new_el;
             if (first_block->data + sizeof(U) <= begin_used_in_first_block)
             {
@@ -297,7 +294,7 @@ class action_block_entry;
         /// fit the free list
         template <class U, class... Args>
         U* construct_othersize(Args&&... args)
-        {                                                                       assert(sizeof(U) != sizeof(T));
+        {                                                                       static_assert(sizeof(U) != sizeof(T));
             void* new_el;
             if (first_block->data + sizeof(U) <= begin_used_in_first_block)
             {
@@ -307,7 +304,7 @@ class action_block_entry;
             }
             else
             {
-                if (sizeof(T) < sizeof(U))
+                if constexpr (sizeof(T) < sizeof(U))
                 {
                     while(first_block->data + sizeof(T) <=
                                                      begin_used_in_first_block)
@@ -330,11 +327,14 @@ class action_block_entry;
         template <class U, class... Args>
         U* construct(Args&&... args)
         {                                                                       static_assert(std::is_trivially_destructible<U>::value);
-            if (sizeof(U) == sizeof(T))
+            if constexpr (sizeof(U) == sizeof(T))
             {
                 return construct_samesize<U>(std::forward<Args>(args)...);
-            }                                                                   static_assert(sizeof(U) <= sizeof(first_block->data));
-            return construct_othersize<U>(std::forward<Args>(args)...);
+            }
+            else
+            {                                                                   static_assert(sizeof(U) <= sizeof(first_block->data));
+                return construct_othersize<U>(std::forward<Args>(args)...);
+            }
         }
 
 
@@ -421,9 +421,14 @@ class action_block_entry;
         };
 
         /// \brief constant iterator class for simple_list
-        class const_iterator :
-                       public std::iterator<std::bidirectional_iterator_tag, T>
+        class const_iterator
         {
+          public:
+            typedef std::bidirectional_iterator_tag iterator_category;
+            typedef T value_type;
+            typedef std::ptrdiff_t difference_type;
+            typedef T* pointer;
+            typedef T& reference;
           protected:
             empty_entry* ptr;
 
@@ -458,6 +463,13 @@ class action_block_entry;
         /// \brief iterator class for simple_list
         class iterator : public const_iterator
         {
+          public:
+            typedef typename const_iterator::iterator_category
+                                                             iterator_category;
+            typedef typename const_iterator::value_type value_type;
+            typedef typename const_iterator::difference_type difference_type;
+            typedef typename const_iterator::pointer pointer;
+            typedef typename const_iterator::reference reference;
           protected:
             iterator(empty_entry* new_ptr) : const_iterator(new_ptr)  {  }
 
@@ -478,9 +490,17 @@ class action_block_entry;
         };
 
         /// \brief class that stores either an iterator or a null value
+        /// \details We cannot use C++14's ``null forward iterators'', as they
+        /// are not guaranteed to compare unequal to valid iterators.  We also
+        /// need to compare null iterators with non-null ones.
         class iterator_or_null : public iterator
         {
           public:
+            typedef typename iterator::iterator_category iterator_category;
+            typedef typename iterator::value_type value_type;
+            typedef typename iterator::difference_type difference_type;
+            typedef typename iterator::pointer pointer;
+            typedef typename iterator::reference reference;
             iterator_or_null() : iterator()  {  }
             iterator_or_null(std::nullptr_t) : iterator()
             {
@@ -800,7 +820,7 @@ typedef simple_list<block_bunch_slice_t>::const_iterator
         /// different types can be compared.
         bool operator==(const block_bunch_slice_iter_or_null_t& other) const
         {
-            if (sizeof(null) == sizeof(iter))
+            if constexpr (sizeof(null) == sizeof(iter))
             {
                 return &*iter == &*other.iter;
             }
@@ -853,37 +873,6 @@ typedef simple_list<block_bunch_slice_t>::const_iterator
 
         /// \brief Check whether the object contains a valid iterator
         bool is_null() const  {  return nullptr == null;  }
-
-/*
-        /// \brief Clear the valid iterator stored in the object
-        void clear()
-        {                                                                           assert(!is_null());
-            iter.~Iterator();
-            null = nullptr;
-        }
-
-
-        /// \brief Set an object, which does not contain an iterator, to a valid
-        /// iterator
-        void set(const Iterator new_iter)
-        {                                                                           assert(is_null());
-            new (&iter) Iterator(new_iter);                                         assert(!is_null());
-        }
-
-
-        /// \brief Change the valid iterator stored in the object to a new value
-        void change(const Iterator new_iter)
-        {                                                                           assert(!is_null());
-            iter = new_iter;                                                        assert(!is_null());
-        }
-
-
-        /// \brief Read the valid value of the iterator
-        const Iterator& operator()() const
-        {                                                                           assert(!is_null());
-            return iter;
-        }
-*/
     };
 #endif
 
@@ -982,7 +971,7 @@ class permutation_entry {
     /// \brief move constructor
     /// \details The move constructor is called when a temporary object is
     /// created; in that case, it is not necessary to set the pos pointer.
-    permutation_entry(const permutation_entry&& other)
+    permutation_entry(const permutation_entry&& other) noexcept
     {
         st = other.st;
         // st->pos += this - &*st->pos; // st->pos = iterator(this);
@@ -994,7 +983,7 @@ class permutation_entry {
     /// to its final place. Therefore, we have to adapt the pos pointer.  Note
     /// that std::swap also uses move assignment, so we automatically get the
     /// correct behaviour there.
-    void operator=(const permutation_entry&& other)
+    void operator=(const permutation_entry&& other) noexcept
     {
         st = other.st;
         st->pos += this - &*st->pos; // st->pos = iterator(this);
@@ -1171,105 +1160,10 @@ class block_t
     ///          uninitialized block, where the new block will be stored.
     /// \returns pointer to the new block
                                                                                 ONLY_IF_DEBUG( template<class LTS_TYPE> )
-    #ifdef USE_POOL_ALLOCATOR
-        void split_off_block(enum new_block_mode_t const new_block_mode,        ONLY_IF_DEBUG( const bisim_partitioner_dnj<LTS_TYPE>& partitioner, )
-                                                      block_t* const new_block)
-    #else
-        block_t* split_off_block(enum new_block_mode_t const new_block_mode,    ONLY_IF_DEBUG( const bisim_partitioner_dnj<LTS_TYPE>& partitioner, )
-                                                          state_type new_seqnr)
-    #endif
-    {                                                                           assert(0 < marked_size());  assert(0 < unmarked_bottom_size());
-        // create a new block
-        #ifndef USE_POOL_ALLOCATOR
-            block_t* new_block;
-        #endif
-        state_type swapcount(std::min(marked_bottom_size(),
-                                                   unmarked_nonbottom_size()));
-        permutation_entry* const splitpoint(marked_bottom_begin +
-                                                    unmarked_nonbottom_size()); assert(begin < splitpoint);  assert(splitpoint < end);
-                                                                                assert(splitpoint->st->pos == splitpoint);
-        if (new_block_is_U == new_block_mode)
-        {                                                                       assert((state_type) (splitpoint - begin) <= size()/2);
-            #ifdef USE_POOL_ALLOCATOR
-                new_block->end = splitpoint;                                    assert(new_block->begin == begin);
-            #else
-                new_block = new block_t(begin, splitpoint, new_seqnr);
-            #endif
-            new_block->nonbottom_begin = marked_bottom_begin;
-
-            // adapt the old block: it only keeps the R-states
-            begin = splitpoint;
-            nonbottom_begin = marked_nonbottom_begin;
-        }
-        else
-        {                                                                       assert(new_block_is_R == new_block_mode);
-            #ifdef USE_POOL_ALLOCATOR
-                new_block->begin = splitpoint;                                  assert(new_block->end == end);
-            #else
-                new_block = new block_t(splitpoint, end, new_seqnr);
-            #endif
-            new_block->nonbottom_begin = marked_nonbottom_begin;                assert((state_type) (end - splitpoint) <= size()/2);
-
-            // adapt the old block: it only keeps the U-states
-            end = splitpoint;
-            nonbottom_begin = marked_bottom_begin;
-        }                                                                       ONLY_IF_DEBUG( new_block->work_counter = work_counter; )
-
-        // swap contents
-
-        // The structure of a block is
-        // |  unmarked  |   marked   |  unmarked  |   marked   |
-        // |   bottom   |   bottom   | non-bottom | non-bottom |
-        // We have to swap the marked bottom with the unmarked non-bottom
-        // states.
-        //
-        // It is not necessary to reset the untested_to_U counters; these
-        // counters are anyway only valid for the states in the respective
-        // slice.
-
-        if (0 < swapcount)
-        {
-            // vector swap the states:
-            permutation_entry* pos1(marked_bottom_begin);
-            permutation_entry* pos2(marked_nonbottom_begin);                    assert(pos1 < pos2);
-            permutation_entry const temp(std::move(*pos1));
-            for (;;)
-            {
-                --pos2;                                                         assert(pos1 < pos2);
-                *pos1 = std::move(*pos2);
-                ++pos1;
-                if (0 >= --swapcount)  break;                                   assert(pos1 < pos2);
-                *pos2 = std::move(*pos1);                                       // mCRL2complexity(new_block_is_U == new_block_mode ? pos1[-1] : *pos2, ...)
-            }                                                                   // -- overapproximated by the call at the end
-            *pos2 = std::move(temp);                                            // mCRL2complexity(new_block_is_U == new_block_mode ? pos1[-1] : *pos2, ...)
-        }                                                                       // -- overapproximated by the call at the end
-                                                                                #ifndef NDEBUG
-                                                                                    { const permutation_entry* s_iter(begin);  assert(s_iter < end);
-                                                                                    do  assert(s_iter->st->pos == s_iter);
-                                                                                    while (++s_iter < end); }
-                                                                                #endif
-        // unmark all states in both blocks
-        marked_nonbottom_begin = end;
-        marked_bottom_begin = nonbottom_begin;
-        #ifdef USE_POOL_ALLOCATOR
-            new_block->marked_nonbottom_begin = new_block->end;
-        #endif
-        new_block->marked_bottom_begin = new_block->nonbottom_begin;            assert(new_block->size() <= size());
-
-        /* set the block pointer of states in the new block                  */ assert(new_block->marked_nonbottom_begin == new_block->end);
-        permutation_entry* s_iter(new_block->begin);                            assert(s_iter < new_block->end);
-        do
-        {                                                                       assert(s_iter->st->pos == s_iter);
-            s_iter->st->bl.ock = new_block;                                     // mCRL2complexity (*s_iter, ...) -- subsumed in the call below
-        }
-        while (++s_iter < new_block->end);                                      mCRL2complexity(new_block, add_work(bisim_gjkw::check_complexity::
-                                                                                                    split_off_block, bisim_gjkw::check_complexity::log_n -
-                                                                                                    bisim_gjkw::check_complexity::ilog2(new_block->size())),
-                                                                                                                                                  partitioner);
-        #ifndef USE_POOL_ALLOCATOR
-            return new_block;
-        #endif
-    }
+    block_t* split_off_block(enum new_block_mode_t const new_block_mode,        ONLY_IF_DEBUG( const bisim_partitioner_dnj<LTS_TYPE>& partitioner, )
+            ONLY_IF_POOL_ALLOCATOR(
+                 my_pool<simple_list<block_bunch_slice_t>::entry>& storage, )
+                                                         state_type new_seqnr);
                                                                                 #ifndef NDEBUG
                                                                                     /// \brief print a block identification for debugging
                                                                                     template<class LTS_TYPE>
@@ -1772,12 +1666,7 @@ class bunch_t
     /// is smaller.  It creates a new bunch for the split-off slice and
     /// returns a pointer to the new bunch.  The caller has to adapt the
     /// block_bunch-slices.
-    #ifdef USE_POOL_ALLOCATOR
-        void split_off_small_action_block_slice(part_trans_t& part_tr,
-                                              bunch_t* const bunch_T_a_Bprime);
-    #else
-        bunch_t* split_off_small_action_block_slice(part_trans_t& part_tr);
-    #endif
+    bunch_t* split_off_small_action_block_slice(part_trans_t& part_tr);
                                                                                 #ifndef NDEBUG
                                                                                     /// \brief print a short bunch identification for debugging
                                                                                     template <class LTS_TYPE>
@@ -1958,8 +1847,11 @@ class block_bunch_slice_t
                                                                                         }
                                                                                         const block_bunch_entry* begin(
                                                                                                                  &partitioner.part_tr.block_bunch.cbegin()[1]);
-                                                                                        trans_type bunch_size(bunch->end - bunch->begin);
-                                                                                        if ((trans_type) (end - begin) > bunch_size)  begin = end - bunch_size;
+                                                                                        if (trans_type bunch_size(bunch->end - bunch->begin);
+                                                                                                                       (trans_type) (end - begin) > bunch_size)
+                                                                                        {
+                                                                                            begin = end - bunch_size;
+                                                                                        }
                                                                                         begin = std::lower_bound(begin, (const block_bunch_entry*)
                                                                                                      (is_stable() || marked_begin==end ? end-1 : marked_begin),
                                                                                                                                   this, block_bunch_not_equal);
@@ -2794,17 +2686,17 @@ class part_trans_t
                                                                                 assert(nullptr != old_begin_or_before_end->succ);
                                                                                 assert(old_begin_or_before_end->succ->block_bunch->pred->action_block ==
                                                                                                                                       old_begin_or_before_end);
-        action_block_entry* const new_begin_or_before_end(
-                                 old_begin_or_before_end->begin_or_before_end); assert(nullptr != new_begin_or_before_end);
-                                                                                assert(nullptr != new_begin_or_before_end->succ);
+        if (action_block_entry* const new_begin_or_before_end(
+                                 old_begin_or_before_end->begin_or_before_end); assert(nullptr != new_begin_or_before_end),
+                                                                                assert(nullptr != new_begin_or_before_end->succ),
                                                                                 assert(new_begin_or_before_end->succ->block_bunch->pred->action_block ==
-                                                                                                                                  new_begin_or_before_end);
-        if (new_begin_or_before_end < new_action_block_pos)
+                                                                                                                                      new_begin_or_before_end),
+                                new_begin_or_before_end < new_action_block_pos)
         {                                                                       assert(old_begin_or_before_end==new_begin_or_before_end->begin_or_before_end);
             new_action_block_pos->begin_or_before_end =
                                                        new_begin_or_before_end; assert(new_action_block_pos <= old_begin_or_before_end);
             return;
-        }                                                                       assert(new_begin_or_before_end == new_action_block_pos);
+        }                                                                       else  assert(new_begin_or_before_end == new_action_block_pos);
         if (old_begin_or_before_end < new_action_block_pos)  return;
 
         // this is the first transition in the new action_block-slice.
@@ -2910,17 +2802,17 @@ class part_trans_t
         }                                                                       else  assert(new_pred_pos == old_pred_pos);
         new_pred_pos->action_block = new_action_block_pos;
 
-        // make the state a bottom state if necessary
-        block_t* const source_block(source->bl.ock);                            assert(source_block->nonbottom_begin <= source->pos);
+        /* make the state a bottom state if necessary                        */ assert(source->bl.ock->nonbottom_begin <= source->pos);
         bool became_bottom(false);                                              assert(succ.back().block_bunch->pred->source != source);
         if (source != source->succ_inert.begin->block_bunch->pred->source)
         {
+            block_t* const source_block(source->bl.ock);
             // make the state a marked bottom state
             if (source->pos >= source_block->marked_nonbottom_begin)
             {
                 std::swap(*source->pos,
                                       *source_block->marked_nonbottom_begin++);
-            }                                                                   assert(source->pos < source->bl.ock->marked_nonbottom_begin);
+            }                                                                   assert(source->pos < source_block->marked_nonbottom_begin);
             std::swap(*source->pos, *source_block->nonbottom_begin++);
             ++number_of_new_bottom_states;
             became_bottom = true;
@@ -3335,6 +3227,114 @@ class part_trans_t
 };
 
 
+/// \brief refine a block
+/// \details This function is called after a refinement function has found
+/// where to split the block into unmarked (U) and marked (R) states.
+/// It creates a new block for the smaller subblock.
+/// \param  new_block_mode  indicates whether the U- or the R-block should be
+///                         the new one.  (This parameter is necessary in case
+///                         the two halves have exactly the same size.)
+/// \param  storage         (only if one uses the pool allocator) reference to
+///                         the pool allocator where the new block is placed
+/// \param  new_seqnr       is the sequence number of the new block
+/// \returns pointer to the new block
+                                                                                ONLY_IF_DEBUG( template<class LTS_TYPE> )
+inline block_t* block_t::split_off_block(
+        enum new_block_mode_t const new_block_mode,                             ONLY_IF_DEBUG( const bisim_partitioner_dnj<LTS_TYPE>& partitioner, )
+        ONLY_IF_POOL_ALLOCATOR(
+                  my_pool<simple_list<block_bunch_slice_t>::entry>& storage, )
+                                                          state_type new_seqnr)
+{                                                                               assert(0 < marked_size());  assert(0 < unmarked_bottom_size());
+    // create a new block
+    block_t* new_block;
+    state_type swapcount(std::min(marked_bottom_size(),
+                                                   unmarked_nonbottom_size()));
+    if (permutation_entry* const splitpoint(marked_bottom_begin +
+                                                    unmarked_nonbottom_size()); assert(begin < splitpoint),  assert(splitpoint < end),
+                                                                                assert(splitpoint->st->pos == splitpoint),
+                                              new_block_is_U == new_block_mode)
+    {                                                                           assert((state_type) (splitpoint - begin) <= size()/2);
+        new_block =
+                    #ifdef USE_POOL_ALLOCATOR
+                        storage.template construct<block_t>
+                    #else
+                        new block_t
+                    #endif
+                                                (begin, splitpoint, new_seqnr);
+        new_block->nonbottom_begin = marked_bottom_begin;
+
+        // adapt the old block: it only keeps the R-states
+        begin = splitpoint;
+        nonbottom_begin = marked_nonbottom_begin;
+    }
+    else
+    {                                                                           assert(new_block_is_R == new_block_mode);
+        new_block =
+                    #ifdef USE_POOL_ALLOCATOR
+                        storage.template construct<block_t>
+                    #else
+                        new block_t
+                    #endif
+                                                  (splitpoint, end, new_seqnr);
+        new_block->nonbottom_begin = marked_nonbottom_begin;                    assert((state_type) (end - splitpoint) <= size()/2);
+
+        // adapt the old block: it only keeps the U-states
+        end = splitpoint;
+        nonbottom_begin = marked_bottom_begin;
+    }                                                                           ONLY_IF_DEBUG( new_block->work_counter = work_counter; )
+
+    // swap contents
+
+    // The structure of a block is
+    // |  unmarked  |   marked   |  unmarked  |   marked   |
+    // |   bottom   |   bottom   | non-bottom | non-bottom |
+    // We have to swap the marked bottom with the unmarked non-bottom
+    // states.
+    //
+    // It is not necessary to reset the untested_to_U counters; these
+    // counters are anyway only valid for the states in the respective
+    // slice.
+
+    if (0 < swapcount)
+    {
+        // vector swap the states:
+        permutation_entry* pos1(marked_bottom_begin);
+        permutation_entry* pos2(marked_nonbottom_begin);                        assert(pos1 < pos2);
+        permutation_entry const temp(std::move(*pos1));
+        for (;;)
+        {
+            --pos2;                                                             assert(pos1 < pos2);
+            *pos1 = std::move(*pos2);
+            ++pos1;
+            if (0 >= --swapcount)  break;                                       assert(pos1 < pos2);
+            *pos2 = std::move(*pos1);                                           // mCRL2complexity(new_block_is_U == new_block_mode ? pos1[-1] : *pos2, ...)
+        }                                                                       // -- overapproximated by the call at the end
+        *pos2 = std::move(temp);                                                // mCRL2complexity(new_block_is_U == new_block_mode ? pos1[-1] : *pos2, ...)
+    }                                                                           // -- overapproximated by the call at the end
+                                                                                #ifndef NDEBUG
+                                                                                    { const permutation_entry* s_iter(begin);  assert(s_iter < end);
+                                                                                    do  assert(s_iter->st->pos == s_iter);
+                                                                                    while (++s_iter < end); }
+                                                                                #endif
+    // unmark all states in both blocks
+    marked_nonbottom_begin = end;
+    marked_bottom_begin = nonbottom_begin;
+    new_block->marked_bottom_begin = new_block->nonbottom_begin;                assert(new_block->size() <= size());
+
+    /* set the block pointer of states in the new block                      */ assert(new_block->marked_nonbottom_begin == new_block->end);
+    permutation_entry* s_iter(new_block->begin);                                assert(s_iter < new_block->end);
+    do
+    {                                                                           assert(s_iter->st->pos == s_iter);
+        s_iter->st->bl.ock = new_block;                                         // mCRL2complexity (*s_iter, ...) -- subsumed in the call below
+    }
+    while (++s_iter < new_block->end);                                          mCRL2complexity(new_block, add_work(bisim_gjkw::check_complexity::
+                                                                                                    split_off_block, bisim_gjkw::check_complexity::log_n -
+                                                                                                    bisim_gjkw::check_complexity::ilog2(new_block->size())),
+                                                                                                                                                  partitioner);
+    return new_block;
+}
+
+
 /// \brief split off a single action_block-slice from the bunch
 /// \details The function splits the current bunch after its first
 /// action_block-slice or before its last action_block-slice, whichever is
@@ -3345,30 +3345,25 @@ class part_trans_t
 ///                 non-trivial bunches)
 /// \returns pointer to a new bunch containing one small action_block-slice
 ///          that was originally in this bunch
-#ifdef USE_POOL_ALLOCATOR
-    inline void bunch_t::split_off_small_action_block_slice(
-                        part_trans_t& part_tr, bunch_t* const bunch_T_a_Bprime)
-#else
-    inline bunch_t* bunch_t::split_off_small_action_block_slice(
+inline bunch_t* bunch_t::split_off_small_action_block_slice(
                                                          part_trans_t& part_tr)
-#endif
 {                                                                               assert(begin < end);  assert(nullptr != begin->succ);
                                                                                 assert(nullptr != begin->begin_or_before_end);
     action_block_entry* first_slice_end(begin->begin_or_before_end + 1);        assert(nullptr != end[-1].succ);  assert(nullptr!=end[-1].begin_or_before_end);
     action_block_entry* last_slice_begin(end[-1].begin_or_before_end);          assert(begin < first_slice_end);  assert(first_slice_end <= last_slice_begin);
-    #ifndef USE_POOL_ALLOCATOR
-        bunch_t* bunch_T_a_Bprime;
-    #endif
+    bunch_t* bunch_T_a_Bprime;
         /* Line 1.6: Select some a in Act and B' in Pi_s such that           */ assert(last_slice_begin < end);  assert(nullptr != first_slice_end[-1].succ);
         /*            |T--a-->B'| < 1/2 |T|                                  */ assert(nullptr != last_slice_begin->succ);
     if (first_slice_end - begin > end - last_slice_begin)
     {
         // Line 1.7: Pi_t := Pi_t \ {T} union { T--a-->B', T \ T--a-->B' }
-        #ifdef USE_POOL_ALLOCATOR
-            bunch_T_a_Bprime->begin = last_slice_begin;                         assert(bunch_T_a_Bprime->end == end);
-        #else
-            bunch_T_a_Bprime = new bunch_t(last_slice_begin, end);
-        #endif
+        bunch_T_a_Bprime =
+                            #ifdef USE_POOL_ALLOCATOR
+                                 part_tr.storage.template construct<bunch_t>
+                            #else
+                                new bunch_t
+                            #endif
+                                                       (last_slice_begin, end); assert(nullptr != bunch_T_a_Bprime);
         end = last_slice_begin;
         while (nullptr == end[-1].succ)
         {
@@ -3379,11 +3374,13 @@ class part_trans_t
     else
     {
         // Line 1.7: Pi_t := Pi_t \ {T} union { T--a-->B', T \ T--a-->B' }
-        #ifdef USE_POOL_ALLOCATOR
-            bunch_T_a_Bprime->end = first_slice_end;                            assert(bunch_T_a_Bprime->begin == begin);
-        #else
-            bunch_T_a_Bprime = new bunch_t(begin, first_slice_end);
-        #endif
+        bunch_T_a_Bprime =
+                            #ifdef USE_POOL_ALLOCATOR
+                                 part_tr.storage.template construct<bunch_t>
+                            #else
+                                new bunch_t
+                            #endif
+                                                      (begin, first_slice_end); assert(nullptr != bunch_T_a_Bprime);
         begin = first_slice_end;
         while (nullptr == begin->succ)
         {                                                                       assert(nullptr == begin->begin_or_before_end);
@@ -3391,11 +3388,11 @@ class part_trans_t
         }                                                                       assert(nullptr != begin->begin_or_before_end);
         if (begin == last_slice_begin)  part_tr.make_trivial(this);
     }                                                                           ONLY_IF_DEBUG( bunch_T_a_Bprime->work_counter = work_counter; )
-    #ifndef USE_POOL_ALLOCATOR
-        return bunch_T_a_Bprime;
-    #endif
+    return bunch_T_a_Bprime;
 }
 ///@} (end of group part_trans)
+
+} // end namespace bisim_dnj
 
 
 
@@ -3425,13 +3422,6 @@ class part_trans_t
 
 
 
-/// \brief modes that determine details of how split() should work
-enum refine_mode_t { extend_from_marked_states,
-                     extend_from_marked_states_for_init_and_postprocess,
-                     extend_from_splitter };
-
-} // end namespace bisim_dnj
-
 /// \class bisim_partitioner_dnj
 /// \brief implements the main algorithm for the branching bisimulation
 /// quotient
@@ -3439,6 +3429,11 @@ template <class LTS_TYPE>
 class bisim_partitioner_dnj
 {
   private:
+    /// \brief modes that determine details of how split() should work
+    enum refine_mode_t { extend_from_marked_states,
+                         extend_from_marked_states_for_init_and_postprocess,
+                         extend_from_splitter };
+
     /// \brief automaton that is being reduced
     LTS_TYPE& aut;
                                                                                 ONLY_IF_DEBUG( public: )
@@ -3719,16 +3714,16 @@ class bisim_partitioner_dnj
             state_iter->pred_inert.convert_to_iterator(next_pred_begin);
 
             // create slice descriptors in part_tr.succ for each state with
-            // outgoing transitions.
+            /* outgoing transitions.                                         */ assert(nullptr != next_succ_begin);
             state_iter->untested_to_U_eqv.convert_to_iterator(
                         next_succ_begin + state_iter->untested_to_U_eqv.count);
             if (next_succ_begin < state_iter->untested_to_U_eqv.begin)
             {                                                                   assert(nullptr != state_iter->untested_to_U_eqv.begin);
                 next_succ_begin->begin_or_before_end =
                                        state_iter->untested_to_U_eqv.begin - 1;
-                bisim_dnj::succ_entry* out_slice_begin(next_succ_begin);        assert(nullptr != out_slice_begin);
-                while (++next_succ_begin <
-                                           state_iter->untested_to_U_eqv.begin)
+                for (bisim_dnj::succ_entry* const
+                                              out_slice_begin(next_succ_begin);
+                     ++next_succ_begin < state_iter->untested_to_U_eqv.begin; )
                 {
                     next_succ_begin->begin_or_before_end = out_slice_begin;     // mCRL2complexity(next_succ_begin->block_bunch->pred, ...) -- subsumed in the
                 }                                                               // call below
@@ -3932,7 +3927,7 @@ class bisim_partitioner_dnj
             {                                                                   ONLY_IF_DEBUG( part_st.print_part(*this);
                                                                                                part_tr.print_trans(*this); )
                 B = split(B, /* splitter block_bunch */
-                           part_tr.splitter_list.begin(), bisim_dnj::
+                           part_tr.splitter_list.begin(),
                            extend_from_marked_states_for_init_and_postprocess); assert(!B->stable_block_bunch.empty());
                                                                                 assert(part_tr.splitter_list.empty());
                 /* We can ignore possible new non-inert transitions, as      */ assert(B->stable_block_bunch.front().end <= part_tr.block_bunch_inert_begin);
@@ -4253,16 +4248,8 @@ class bisim_partitioner_dnj
             if (nullptr == bunch_T)  break;
             /* Line 1.7: Pi_t := Pi_t \ { bunch_T } union                    */ ONLY_IF_DEBUG( mCRL2log(log::debug, "bisim_jgkw") << "Refining "
             /*              { bunch_T_a_Bprime, bunch_T \ bunch_T_a_Bprime } */                                          << bunch_T->debug_id(*this) << '\n'; )
-            #ifdef USE_POOL_ALLOCATOR
-                bisim_dnj::bunch_t* const bunch_T_a_Bprime(part_tr.storage.
-                        template construct<bisim_dnj::bunch_t>(
-                                                bunch_T->begin, bunch_T->end)); assert(nullptr != bunch_T_a_Bprime);
-                bunch_T->split_off_small_action_block_slice(part_tr,
-                                                             bunch_T_a_Bprime);
-            #else
-                bisim_dnj::bunch_t* const bunch_T_a_Bprime(
+            bisim_dnj::bunch_t* const bunch_T_a_Bprime(
                          bunch_T->split_off_small_action_block_slice(part_tr));
-            #endif
                                                                                 #ifndef NDEBUG
             /*------------ find predecessors of bunch_T_a_Bprime ------------*/     mCRL2log(log::debug, "bisim_jgkw") << "Splitting off "
                                                                                                                   << bunch_T_a_Bprime->debug_id(*this) << '\n';
@@ -4349,8 +4336,8 @@ class bisim_partitioner_dnj
                     // Line 1.15: Remove T'_B--> from the splitter list
                     // Line 1.16: Pi_s := Pi_s \ { B } union { R, U } \ { {} }
                     bisim_dnj::block_t*block_R=split(block_B,splitter_Tprime_B,
-                       is_primary_splitter?bisim_dnj::extend_from_marked_states
-                                          :bisim_dnj::extend_from_splitter);
+                                is_primary_splitter ? extend_from_marked_states
+                                                    : extend_from_splitter);
                     if (block_B_begin < block_R->begin)
                     {
                         // The refinement was non-trivial.
@@ -4546,33 +4533,29 @@ class bisim_partitioner_dnj
     /// U-subblock is ok.)
     bisim_dnj::block_t* split(bisim_dnj::block_t* const block_B,
               const bisim_dnj::block_bunch_slice_iter_t splitter_T,
-                                            enum bisim_dnj::refine_mode_t mode)
+                                                       enum refine_mode_t mode)
     {                                                                           assert(block_B == splitter_T->source_block());
                                                                                 #ifndef NDEBUG
                                                                                     mCRL2log(log::debug, "bisim_jgkw") << "split("
                                                                                         << block_B->debug_id(*this)
                                                                                         << ',' << splitter_T->debug_id(*this)
-                                                                                        << (bisim_dnj::extend_from_marked_states_for_init_and_postprocess==mode
+                                                                                        << (extend_from_marked_states_for_init_and_postprocess == mode
                                                                                            ? ",extend_from_marked_states_for_init_and_postprocess,"
-                                                                                           : (bisim_dnj::extend_from_marked_states == mode
+                                                                                           : (extend_from_marked_states == mode
                                                                                              ? ",extend_from_marked_states,"
-                                                                                             : (bisim_dnj::extend_from_splitter == mode
+                                                                                             : (extend_from_splitter == mode
                                                                                                ? ",extend_from_splitter)\n"
                                                                                                : ",UNKNOWN MODE)\n")));
                                                                                 #endif
-                                                                                assert(!splitter_T->is_stable());  assert(1 < block_B->size());
-                                                                                assert(bisim_dnj::extend_from_splitter != mode || 0 == block_B->marked_size());
-        bisim_dnj::block_t* block_R;                                            assert(bisim_dnj::extend_from_splitter == mode || 0 < block_B->marked_size());
-                                                                                assert(bisim_dnj::extend_from_splitter == mode ||
-                                                                                                                  splitter_T->marked_begin == splitter_T->end);
+        bisim_dnj::block_t* block_R;                                            assert(!splitter_T->is_stable());  assert(1 < block_B->size());
         union R_s_iter_t
         {
             bisim_dnj::block_bunch_entry* splitter_iter;
             bisim_dnj::permutation_entry* block;
         } R_s_iter;
 
-        if (bisim_dnj::extend_from_splitter == mode)
-        {
+        if (extend_from_splitter == mode)
+        {                                                                       assert(0 == block_B->marked_size());
             // Line 2.2: R := B--Marked(T)--> ; U := Bottom(B) \ R
             R_s_iter.splitter_iter = splitter_T->end;                           assert(splitter_T->marked_begin <= R_s_iter.splitter_iter);
             while (splitter_T->marked_begin < R_s_iter.splitter_iter)
@@ -4584,8 +4567,8 @@ class bisim_partitioner_dnj
                 // We cannot stop, even if the R-subblock becomes too large,
                 // because we need to mark all bottom states that are not in U.
             }
-        }
-
+        }                                                                       else  {  assert(0 < block_B->marked_size());
+                                                                                         assert(splitter_T->marked_begin == splitter_T->end);  }
         block_B->stable_block_bunch.splice(block_B->stable_block_bunch.end(),
                                             part_tr.splitter_list, splitter_T);
         splitter_T->make_stable();
@@ -4674,7 +4657,7 @@ class bisim_partitioner_dnj
                                 goto continuation;
                             }
                             // Line 2.13l: if not (B--T--> subset R) then
-                            if (bisim_dnj::extend_from_splitter == mode)
+                            if (extend_from_splitter == mode)
                             {                                                   assert(U_t != part_tr.succ.front().block_bunch->pred->source);
                                 // Line 2.14l: for all non-inert
                                 //             t --alpha--> u do
@@ -4738,24 +4721,16 @@ class bisim_partitioner_dnj
                     // All non-U states are in R.
                 block_B->marked_nonbottom_begin = U_nonbottom_end;
                 block_R = block_B;
-                #ifdef USE_POOL_ALLOCATOR
-                    bisim_dnj::block_t* const block_U(part_tr.storage.
-                            template construct<bisim_dnj::block_t>(
-                                                block_R->begin, block_R->end,
-                                                      part_st.nr_of_blocks++));
+                bisim_dnj::block_t* const block_U(
                     block_R->split_off_block(bisim_dnj::new_block_is_U,         ONLY_IF_DEBUG( *this, )
-                                                                      block_U);
-                #else
-                    bisim_dnj::block_t* const block_U(
-                            block_R->split_off_block(new_block_is_U,            ONLY_IF_DEBUG( *this, )
+                                  ONLY_IF_POOL_ALLOCATOR( part_tr.storage, )
                                                       part_st.nr_of_blocks++));
-                #endif
                 // Line 1.15: Remove Tprime_B--> = Tprime_R--> from the
                 //            splitter list
                 /* and the remainder of Line 1.16                            */ assert(0 == block_U->marked_size());  assert(0 == block_R->marked_size());
                 part_tr.adapt_transitions_for_new_block(block_U, block_R,       ONLY_IF_DEBUG( *this, )
-                  bisim_dnj::extend_from_marked_states_for_init_and_postprocess
-                               == mode, splitter_T, bisim_dnj::new_block_is_U); ONLY_IF_DEBUG( finalise_U_is_smaller(block_U, block_R, *this); )
+                    extend_from_marked_states_for_init_and_postprocess == mode,
+                                        splitter_T, bisim_dnj::new_block_is_U); ONLY_IF_DEBUG( finalise_U_is_smaller(block_U, block_R, *this); )
             END_COROUTINE
 
             /*------------------------ find R-states ------------------------*/
@@ -4771,7 +4746,7 @@ class bisim_partitioner_dnj
 
                 /* -  -  -  -  -  collect states from B--T-->  -  -  -  -  - */
 
-                if (bisim_dnj::extend_from_splitter == mode)
+                if (extend_from_splitter == mode)
                 {
                     // Line 2.4r: R := R union B--(T \ Marked(T))-->
                     if (U_nonbottom_end < block_B->marked_nonbottom_begin)
@@ -4789,7 +4764,7 @@ class bisim_partitioner_dnj
                                     // The non-bottom state has a transition
                                     // to a visited U-state, so untested is
                                     // initialised; however, now it is
-                                    // discovered to be red anyway.
+                                    // discovered to be in R anyway.
                                     std::swap(*s->pos,
                                                  *--untested_to_U_defined_end);
                                 }
@@ -4811,7 +4786,7 @@ class bisim_partitioner_dnj
                         // B--T--> are now in R.
                             // The shared variable `mode` is used
                             // instead of a separate shared variable.
-                        mode = bisim_dnj::extend_from_marked_states;
+                        mode = extend_from_marked_states;
                     }
                                                                                 #ifndef NDEBUG
                                                                                     else
@@ -4823,7 +4798,7 @@ class bisim_partitioner_dnj
                                                                                         {
                                                                                             assert(&part_tr.block_bunch.cbegin()[1] < R_s_iter.splitter_iter);
                                                                                             --R_s_iter.splitter_iter;
-                                                                                            bisim_dnj::state_info_entry*
+                                                                                            bisim_dnj::state_info_entry* const
                                                                                                                        s(R_s_iter.splitter_iter->pred->source);
                                                                                             assert(s->bl.ock == block_B);  assert(s->pos->st == s);
                                                                                             assert(s->pos < block_B->nonbottom_begin ||
@@ -4895,22 +4870,15 @@ class bisim_partitioner_dnj
                 ABORT_OTHER_COROUTINE();
                 // Line 1.16: Pi_s := Pi_s \ { B } union ({ R, U } \ { {} })
                     // All non-R states are in U.
-                #ifdef USE_POOL_ALLOCATOR
-                    block_R = part_tr.storage.template construct
-                                  <bisim_dnj::block_t>(block_B->begin,
-                                         block_B->end, part_st.nr_of_blocks++);
-                    block_B->split_off_block(bisim_dnj::new_block_is_R,         ONLY_IF_DEBUG( *this, )
-                                                                      block_R);
-                #else
-                    block_R = block_B->split_off_block(new_block_is_R,          ONLY_IF_DEBUG( *this, )
+                block_R = block_B->split_off_block(bisim_dnj::new_block_is_R,   ONLY_IF_DEBUG( *this, )
+                                   ONLY_IF_POOL_ALLOCATOR( part_tr.storage, )
                                                        part_st.nr_of_blocks++);
-                #endif
                 // Line 1.15: Remove Tprime_B--> = Tprime_R--> from the
                 //            splitter list
                 /* and the remainder of Line 1.16                            */ assert(0 == block_B->marked_size());  assert(0 == block_R->marked_size());
                 part_tr.adapt_transitions_for_new_block(block_R, block_B,       ONLY_IF_DEBUG( *this, )
-                  bisim_dnj::extend_from_marked_states_for_init_and_postprocess
-                               == mode, splitter_T, bisim_dnj::new_block_is_R); ONLY_IF_DEBUG( finalise_R_is_smaller(block_B, block_R, *this); )
+                    extend_from_marked_states_for_init_and_postprocess == mode,
+                                        splitter_T, bisim_dnj::new_block_is_R); ONLY_IF_DEBUG( finalise_R_is_smaller(block_B, block_R, *this); )
             END_COROUTINE
         END_COROUTINES_SECTION
         return block_R;
@@ -4959,7 +4927,7 @@ class bisim_partitioner_dnj
                                                                                                        part_tr.splitter_list.front().source_block() == block_R;
                                                                                 #endif
             block_N = split(block_R, bbslice_R_tau_U,
-                bisim_dnj::extend_from_marked_states_for_init_and_postprocess); assert(&part_st.permutation.front() < block_N->begin);
+                           extend_from_marked_states_for_init_and_postprocess); assert(&part_st.permutation.front() < block_N->begin);
             block_Rprime = block_N->begin[-1].st->bl.ock;
                                                                                 #ifndef NDEBUG
                                                                                     // If the first element of the splitter list was a block_bunch-slice of

@@ -24,9 +24,9 @@
 ///     {
 ///         ...
 ///         COROUTINES_SECTION
-///             variable declarations of local variables of all coroutines;
+///             variable declarations of local variables of both coroutines;
 ///
-///             COROUTINE_LABELS(labels of all coroutines)
+///             COROUTINE_LABELS(labels of both coroutines)
 ///
 ///             COROUTINE
 ///                 code of the first coroutine, with special macros for loops.
@@ -154,30 +154,31 @@
 /// unused locations from the parameter list of the macro.
 ///
 /// Immediately after `COROUTINE_LABELS()`, the user should place the first
-/// coroutine, indicated by `COROUTINE(1)`.
+/// coroutine, indicated by `COROUTINE`.
 /// \param locations   locations where the coroutine can be interrupted, as a
 ///                    boost sequence: `(location1) (location2) (location3)`
 ///                    etc.
 #define COROUTINE_LABELS(locations)                                           \
             enum class _coroutine_labels {                                    \
-                _coroutine_1_BEGIN_enum,                                      \
+                _coroutine_1_BEGIN_enum_,                                     \
                 _coroutine_ENUMDEF(locations)                                 \
-                ONLY_IF_DEBUG( _coroutine_ILLEGAL_enum, )                     \
-                _coroutine_2_BEGIN_enum                                       \
+                ONLY_IF_DEBUG( _coroutine_ILLEGAL_enum_, )                    \
+                _coroutine_2_BEGIN_enum_                                      \
             } _coroutine_location[2] =                                        \
-                               { _coroutine_labels::_coroutine_2_BEGIN_enum,  \
-                                 _coroutine_labels::_coroutine_1_BEGIN_enum };\
+                              { _coroutine_labels::_coroutine_2_BEGIN_enum_,  \
+                                _coroutine_labels::_coroutine_1_BEGIN_enum_ };\
             std::size_t _coroutine_allowance = 1;                             \
     _coroutine_label_switch:                                                  \
             _coroutine_labels _coroutine_temp_location=_coroutine_location[1];\
             _coroutine_location[1] = _coroutine_location[0];                  \
             ONLY_IF_DEBUG( _coroutine_location[0] =                           \
-                                 _coroutine_labels::_coroutine_ILLEGAL_enum; )\
+                                _coroutine_labels::_coroutine_ILLEGAL_enum_; )\
             switch (_coroutine_temp_location)                                 \
             {                                                                 \
-        case _coroutine_labels::_coroutine_1_BEGIN_enum:                      \
+        case _coroutine_labels::_coroutine_1_BEGIN_enum_:                     \
                 do { do {                                                     \
-                    switch (0) { // to skip ``default:'' of the first coroutine
+                    switch (_coroutine_labels::_coroutine_2_BEGIN_enum_) {
+                        //< to neutralize the case label of the first coroutine
 
 
 /// \brief Define the code for a coroutine
@@ -185,8 +186,11 @@
 /// is placed.  It is required to have exactly two coroutines.
 ///
 /// A coroutine is closed with `END_COROUTINE`.
+///
+/// (If this is the first coroutine, the case label is ignored because an
+/// additional switch statement is included in COROUTINE_LABELS.)
 #define COROUTINE                                                             \
-        default: ;                                                            \
+        case _coroutine_labels::_coroutine_2_BEGIN_enum_: ;                   \
                 }} while (0); } while (0);                                    \
                 do { do {{                                                    \
                     {{ if (1) {
@@ -202,7 +206,7 @@
 
 /// \brief Close a section containing coroutines
 #define END_COROUTINES_SECTION                                                \
-            ONLY_IF_DEBUG( case _coroutine_labels::_coroutine_ILLEGAL_enum:; )\
+        ONLY_IF_DEBUG( default: ; )                                           \
                 }} while (0); } while (0);                                    \
             }                                                                 \
             assert(0 && "corrupted coroutine state");                         \
@@ -230,7 +234,7 @@ unmatched COROUTINE_WHILE or END_COROUTINE_WHILE. */
                 goto _coroutine_ ## location ## _label;                       \
                 for ( ;; )                                                    \
                 {                                                             \
-                    assert(_coroutine_labels::_coroutine_ILLEGAL_enum ==      \
+                    assert(_coroutine_labels::_coroutine_ILLEGAL_enum_ ==     \
                                                       _coroutine_location[0]);\
                     if (0 == --_coroutine_allowance)                          \
                     {                                                         \
@@ -275,7 +279,7 @@ unmatched COROUTINE_WHILE or END_COROUTINE_WHILE. */
                 for( ;; )                                                     \
                 {                                                             \
                     (update);                                                 \
-                    assert(_coroutine_labels::_coroutine_ILLEGAL_enum ==      \
+                    assert(_coroutine_labels::_coroutine_ILLEGAL_enum_ ==     \
                                                       _coroutine_location[0]);\
                     if (0 == --_coroutine_allowance)                          \
                     {                                                         \
@@ -314,7 +318,7 @@ unmatched COROUTINE_WHILE or END_COROUTINE_WHILE. */
             goto _coroutine_ ## location ## _do_while_begin;                  \
             do                                                                \
             {                                                                 \
-                assert(_coroutine_labels::_coroutine_ILLEGAL_enum ==          \
+                assert(_coroutine_labels::_coroutine_ILLEGAL_enum_ ==         \
                                                       _coroutine_location[0]);\
                 if (0 == --_coroutine_allowance)                              \
                 {                                                             \
@@ -344,7 +348,7 @@ unmatched COROUTINE_WHILE or END_COROUTINE_WHILE. */
 #define TERMINATE_COROUTINE_SUCCESSFULLY()                                    \
                         do                                                    \
                         {                                                     \
-                            assert(_coroutine_labels::_coroutine_ILLEGAL_enum \
+                            assert(_coroutine_labels::_coroutine_ILLEGAL_enum_\
                                                    == _coroutine_location[0]);\
                             goto _coroutine_label_terminate;                  \
                             (void) _coroutine_allowance;                      \
@@ -359,7 +363,7 @@ unmatched COROUTINE_WHILE or END_COROUTINE_WHILE. */
 #define ABORT_THIS_COROUTINE()                                                \
                         do                                                    \
                         {                                                     \
-                            assert(_coroutine_labels::_coroutine_ILLEGAL_enum \
+                            assert(_coroutine_labels::_coroutine_ILLEGAL_enum_\
                                                    == _coroutine_location[0]);\
                             _coroutine_allowance = 0;                         \
                             goto _coroutine_label_switch;                     \
@@ -374,10 +378,10 @@ unmatched COROUTINE_WHILE or END_COROUTINE_WHILE. */
 #define ABORT_OTHER_COROUTINE()                                               \
                         do                                                    \
                         {                                                     \
-                            assert(_coroutine_labels::_coroutine_ILLEGAL_enum \
+                            assert(_coroutine_labels::_coroutine_ILLEGAL_enum_\
                                                    == _coroutine_location[0]);\
                             ONLY_IF_DEBUG( _coroutine_location[1] =           \
-                                 _coroutine_labels::_coroutine_ILLEGAL_enum; )\
+                                _coroutine_labels::_coroutine_ILLEGAL_enum_; )\
                             _coroutine_allowance = 0;                         \
                         }                                                     \
                         while (0)

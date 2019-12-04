@@ -37,19 +37,17 @@ namespace lts
 {
 namespace detail
 {
-
-#ifndef NDEBUG
-    /// \brief include something in Debug mode
-    /// \details In a few places, we have to include an additional parameter to
-    /// a function in Debug mode.  While it is in principle possible to use
-    /// #ifndef NDEBUG ... #endif, that would lead to distributing the code
-    /// over many code lines.  This macro expands to its arguments in Debug
-    /// mode and to nothing otherwise.
-    #define ONLY_IF_DEBUG(...) __VA_ARGS__
-#else
-    #define ONLY_IF_DEBUG(...)
-#endif
-
+                                                                                #ifndef NDEBUG
+                                                                                    /// \brief include something in Debug mode
+                                                                                    /// \details In a few places, we have to include an additional parameter to
+                                                                                    /// a function in Debug mode.  While it is in principle possible to use
+                                                                                    /// #ifndef NDEBUG ... #endif, that would lead to distributing the code
+                                                                                    /// over many code lines.  This macro expands to its arguments in Debug
+                                                                                    /// mode and to nothing otherwise.
+                                                                                    #define ONLY_IF_DEBUG(...) __VA_ARGS__
+                                                                                #else
+                                                                                    #define ONLY_IF_DEBUG(...)
+                                                                                #endif
 // state_type and trans_type are defined in check_complexity.h.
 
 /// \brief type used to store label numbers and counts
@@ -204,24 +202,23 @@ class state_info_entry
     succ_iter_t current_constln()  {  return int_current_constln;  }
     void set_current_constln(succ_iter_t const new_current_constln)
     {
-        int_current_constln = new_current_constln;
-        // current_constln points to a successor transition of this state:
-        assert(succ_begin() <= int_current_constln);
-        assert(int_current_constln <= succ_end());
-        // it points to a place where a constellation slice starts or ends:
-        // (This assertion cannot be tested because the types are not yet
-        // complete.)
-        // assert(succ_begin() == int_current_constln ||
-        //     succ_end() == int_current_constln ||
-        //     int_current_constln[-1].constln_slice !=
-        //                                 int_current_constln->constln_slice);
-        // it points to the relevant constellation:
-        // The following assertions cannot be executed immediately after each
-        // call.
-        // assert(succ_begin() == current_constln() ||
-        //                   *current_constln()[-1].target->constln() <= *SpC);
-        // assert(succ_end() == current_constln() ||
-        //                      *SpC <= *current_constln()->target->constln());
+        int_current_constln = new_current_constln;                              // current_constln points to a successor transition of this state:
+                                                                                assert(succ_begin() <= int_current_constln);
+                                                                                assert(int_current_constln <= succ_end());
+                                                                                // it points to a place where a constellation slice starts or ends:
+                                                                                // (This assertion cannot be tested because the types are not yet
+                                                                                // complete.)
+                                                                                // assert(succ_begin() == int_current_constln ||
+                                                                                //     succ_end() == int_current_constln ||
+                                                                                //     int_current_constln[-1].constln_slice !=
+                                                                                //                                 int_current_constln->constln_slice);
+                                                                                // it points to the relevant constellation:
+                                                                                // The following assertions cannot be executed immediately after each
+                                                                                // call.
+                                                                                // assert(succ_begin() == current_constln() ||
+                                                                                //                   *current_constln()[-1].target->constln() <= *SpC);
+                                                                                // assert(succ_end() == current_constln() ||
+                                                                                //                      *SpC <= *current_constln()->target->constln());
     }
 
     /// iterator to first incoming transition
@@ -234,21 +231,15 @@ class state_info_entry
 
     /// iterator past the last incoming transition
     pred_const_iter_t pred_end() const
-    {
-        assert(s_i_begin <= this);
-        assert(this < s_i_end);
+    {                                                                           assert(s_i_begin <= this);  assert(this < s_i_end);
         return this[1].state_in_begin;
     }
     pred_iter_t pred_end()
-    {
-        assert(s_i_begin <= this);
-        assert(this < s_i_end);
+    {                                                                           assert(s_i_begin <= this);  assert(this < s_i_end);
         return this[1].state_in_begin;
     }
     void set_pred_end(pred_iter_t new_in_end)
-    {
-        assert(s_i_begin <= this);
-        assert(this < s_i_end);
+    {                                                                           assert(s_i_begin <= this);  assert(this < s_i_end);
         this[1].set_pred_begin(new_in_end);
     }
 
@@ -265,9 +256,8 @@ class state_info_entry
     pred_iter_t inert_pred_begin()  {  return state_inert_in_begin;  }
     void set_inert_pred_begin(pred_iter_t new_inert_in_begin)
     {
-        state_inert_in_begin = new_inert_in_begin;
-        assert(pred_begin() <= inert_pred_begin());
-        assert(inert_pred_begin() <= pred_end());
+        state_inert_in_begin = new_inert_in_begin;                              assert(pred_begin() <= inert_pred_begin());
+                                                                                assert(inert_pred_begin() <= pred_end());
     }
 
     /// iterator one past the last inert incoming transition
@@ -284,44 +274,35 @@ class state_info_entry
 
     /// iterator past the last outgoing transition
     succ_const_iter_t succ_end() const
-    {
-        assert(s_i_begin <= this);
-        assert(this < s_i_end);
+    {                                                                           assert(s_i_begin <= this);  assert(this < s_i_end);
         return this[1].state_out_begin;
     }
     succ_iter_t succ_end()
-    {
-        assert(s_i_begin <= this);
-        assert(this < s_i_end);
+    {                                                                           assert(s_i_begin <= this);  assert(this < s_i_end);
         return this[1].state_out_begin;
     }
     void set_succ_end(succ_iter_t new_out_end)
-    {
-        assert(s_i_begin <= this);
-        assert(this < s_i_end);
-        this[1].set_succ_begin(new_out_end);
-        assert(succ_begin() <= succ_end());
+    {                                                                           assert(s_i_begin <= this);  assert(this < s_i_end);
+        this[1].set_succ_begin(new_out_end);                                    assert(succ_begin() <= succ_end());
     }
 
     /// iterator to first inert outgoing transition
     succ_const_iter_t inert_succ_begin() const  {return state_inert_out_begin;}
     succ_iter_t inert_succ_begin()  {  return state_inert_out_begin;  }
     void set_inert_succ_begin(succ_iter_t const new_inert_out_begin)
-    {
-        // The following assertions cannot be tested because the respective
-        // types are not yet complete.
-        // if (new_inert_out_begin > inert_succ_begin())
-        // {
-        //     assert(*new_inert_out_begin[-1].target->constln()<=*constln());
-        //     assert(new_inert_out_begin[-1].target->block != block);
-        // }
-        // else if (new_inert_out_begin < inert_succ_begin())
-        // {
-        //     assert(new_inert_out_begin->target->block == block);
-        // }
-        state_inert_out_begin = new_inert_out_begin;
-        assert(succ_begin() <= inert_succ_begin());
-        assert(inert_succ_begin() <= inert_succ_end());
+    {                                                                           // The following assertions cannot be tested because the respective
+                                                                                // types are not yet complete.
+                                                                                // if (new_inert_out_begin > inert_succ_begin())
+                                                                                // {
+                                                                                //     assert(*new_inert_out_begin[-1].target->constln()<=*constln());
+                                                                                //     assert(new_inert_out_begin[-1].target->block != block);
+                                                                                // }
+                                                                                // else if (new_inert_out_begin < inert_succ_begin())
+                                                                                // {
+                                                                                //     assert(new_inert_out_begin->target->block == block);
+                                                                                // }
+        state_inert_out_begin = new_inert_out_begin;                            assert(succ_begin() <= inert_succ_begin());
+                                                                                assert(inert_succ_begin() <= inert_succ_end());
     }
 
     /// iterator past the last inert outgoing transition
@@ -332,58 +313,55 @@ class state_info_entry
                                                  succ_iter_t new_inert_out_end)
     {
         state_inert_out_begin = new_inert_out_begin;
-        state_inert_out_end = new_inert_out_end;
-        assert(succ_begin() <= inert_succ_begin());
-        assert(inert_succ_begin() <= inert_succ_end());
-        assert(inert_succ_end() <= succ_end());
-        // The following assertions cannot be tested always, as the function
-        // may be called earlier than the assertions are reestablished.
-        // assert(succ_begin() == inert_succ_begin() ||
-        //            *inert_succ_begin()[-1].target->constln() <= *constln());
-        // assert(succ_begin() == inert_succ_begin() ||
-        //                      inert_succ_begin()[-1].target->block != block);
-        // assert(inert_succ_begin() == inert_succ_end() ||
-        //                      (inert_succ_begin()->target->block == block &&
-        //                       inert_succ_end()[-1].target->block == block));
-        // assert(succ_end() == inert_succ_end() ||
-        //                  *constln() < *inert_succ_end()->target->constln());
+        state_inert_out_end = new_inert_out_end;                                assert(succ_begin() <= inert_succ_begin());
+                                                                                assert(inert_succ_begin() <= inert_succ_end());
+                                                                                assert(inert_succ_end() <= succ_end());
+                                                                                // The following assertions cannot be tested always, as the function
+                                                                                // may be called earlier than the assertions are reestablished.
+                                                                                // assert(succ_begin() == inert_succ_begin() ||
+                                                                                //            *inert_succ_begin()[-1].target->constln() <= *constln());
+                                                                                // assert(succ_begin() == inert_succ_begin() ||
+                                                                                //                      inert_succ_begin()[-1].target->block != block);
+                                                                                // assert(inert_succ_begin() == inert_succ_end() ||
+                                                                                //                      (inert_succ_begin()->target->block == block &&
+                                                                                //                       inert_succ_end()[-1].target->block == block));
+                                                                                // assert(succ_end() == inert_succ_end() ||
+                                                                                //                  *constln() < *inert_succ_end()->target->constln());
     }
 
     bool surely_has_transition_to(const constln_t* SpC) const;
     bool surely_has_no_transition_to(const constln_t* SpC) const;
+                                                                                #ifndef NDEBUG
+                                                                                    /// \brief print a short state identification for debugging
+                                                                                    /// \details This function is only available if compiled in Debug mode.
+                                                                                    std::string debug_id_short() const
+                                                                                    {
+                                                                                        assert(s_i_begin <= this);
+                                                                                        assert(this < s_i_end);
+                                                                                        return std::to_string(this - s_i_begin);
+                                                                                    }
 
-#ifndef NDEBUG
-    /// \brief print a short state identification for debugging
-    /// \details This function is only available if compiled in Debug mode.
-    std::string debug_id_short() const
-    {
-        assert(s_i_begin <= this);
-        assert(this < s_i_end);
-        return std::to_string(this - s_i_begin);
-    }
+                                                                                    /// \brief print a state identification for debugging
+                                                                                    /// \details This function is only available if compiled in Debug mode.
+                                                                                    std::string debug_id() const
+                                                                                    {
+                                                                                        return "state " + debug_id_short();
+                                                                                    }
+                                                                                  private:
+                                                                                    /// \brief pointer at the first entry in the `state_info` array
+                                                                                    static state_info_const_ptr s_i_begin;
 
-    /// \brief print a state identification for debugging
-    /// \details This function is only available if compiled in Debug mode.
-    std::string debug_id() const
-    {
-        return "state " + debug_id_short();
-    }
+                                                                                    /// \brief pointer past the last actual entry in the `state_info` array
+                                                                                    /// \details `state_info` actually contains an additional entry that is
+                                                                                    /// only used partially, namely to store pointers to the end of the
+                                                                                    /// transition slices of the last state.  In other words, `s_i_end` points
+                                                                                    /// at this additional, partially used entry.
+                                                                                    static state_info_const_ptr s_i_end;
 
-  private:
-    /// \brief pointer at the first entry in the `state_info` array
-    static state_info_const_ptr s_i_begin;
-
-    /// \brief pointer past the last actual entry in the `state_info` array
-    /// \details `state_info` actually contains an additional entry that is
-    /// only used partially, namely to store pointers to the end of the
-    /// transition slices of the last state.  In other words, `s_i_end` points
-    /// at this additional, partially used entry.
-    static state_info_const_ptr s_i_end;
-
-    friend class part_state_t;
-  public:
-    mutable check_complexity::state_counter_t work_counter;
-#endif
+                                                                                    friend class part_state_t;
+                                                                                  public:
+                                                                                    mutable check_complexity::state_counter_t work_counter;
+                                                                                #endif
 };
 
 
@@ -504,25 +482,23 @@ class block_t
         int_constln(constln_),
         refinable_next(nullptr),
         int_seqnr(BLOCK_NO_SEQNR)
-    {
-        // The following assertions hold trivially.
-        // assert(int_begin <= int_marked_nonbottom_begin);
-        // assert(int_marked_nonbottom_begin <= int_bottom_begin);
-        // assert(int_bottom_begin <= int_marked_bottom_begin);
-        // assert(int_marked_bottom_begin <= int_end);
-        assert(int_bottom_begin < int_end);
-        // The following assertions cannot be tested because constln_t is not
-        // yet complete.
-        // assert(int_constln->begin() <= int_begin);
-        // assert(int_end <= int_constln->end());
+    {                                                                           // The following assertions hold trivially.
+                                                                                // assert(int_begin <= int_marked_nonbottom_begin);
+                                                                                // assert(int_marked_nonbottom_begin <= int_bottom_begin);
+                                                                                // assert(int_bottom_begin <= int_marked_bottom_begin);
+                                                                                // assert(int_marked_bottom_begin <= int_end);
+                                                                                assert(int_bottom_begin < int_end);
+                                                                                // The following assertions cannot be tested because constln_t is not
+                                                                                // yet complete.
+                                                                                // assert(int_constln->begin() <= int_begin);
+                                                                                // assert(int_end <= int_constln->end());
     }
 
     ~block_t()  {  }
 
     /// assigns a unique sequence number
     void assign_seqnr()
-    {
-        assert(BLOCK_NO_SEQNR == int_seqnr);
+    {                                                                           assert(BLOCK_NO_SEQNR == int_seqnr);
         int_seqnr = nr_of_blocks++;
     }
 
@@ -554,8 +530,7 @@ class block_t
     /// \details This member function only works if the block is the first one
     /// in the list (which will normally be the case).
     void make_nonrefinable()
-    {
-        assert(refinable_first == this);
+    {                                                                           assert(refinable_first == this);
         refinable_first = refinable_next == this ? nullptr : refinable_next;
         refinable_next = nullptr;
     }
@@ -600,13 +575,11 @@ class block_t
     const constln_t* constln() const  {  return int_constln;  }
     constln_t* constln()  {  return int_constln;  }
     void set_constln(constln_t* new_constln)
-    {
-        int_constln = new_constln;
-        // The following assertion cannot be tested because the type constln_t
-        // is not yet complete.
-        // assert(nullptr == int_constln ||
-        //                             (int_constln->begin() <= int_begin &&
-        //                                     int_end <= int_constln->end()));
+    {                                                                           // The following assertion cannot be tested because the type constln_t
+        int_constln = new_constln;                                              // is not yet complete.
+                                                                                // assert(nullptr == int_constln ||
+                                                                                //                             (int_constln->begin() <= int_begin &&
+                                                                                //                                     int_end <= int_constln->end()));
     }
 
     /// read FromRed
@@ -620,8 +593,7 @@ class block_t
     permutation_iter_t begin()  {  return int_begin;  }
     void set_begin(permutation_iter_t new_begin)
     {
-        int_begin = new_begin;
-        assert(int_begin <= int_marked_nonbottom_begin);
+        int_begin = new_begin;                                                  assert(int_begin <= int_marked_nonbottom_begin);
     }
 
     /// iterator past the last state in the block
@@ -629,9 +601,7 @@ class block_t
     permutation_iter_t end()  {  return int_end;  }
     void set_end(permutation_iter_t new_end)
     {
-        int_end = new_end;
-        assert(int_marked_bottom_begin <= int_end);
-        assert(int_bottom_begin < int_end);
+        int_end = new_end;                                                      assert(int_marked_bottom_begin <= int_end); assert(int_bottom_begin < int_end);
     }
 
     /// iterator to the first non-bottom state in the block
@@ -643,10 +613,9 @@ class block_t
     permutation_iter_t nonbottom_end()  {  return int_bottom_begin;  }
     void set_nonbottom_end(permutation_iter_t new_nonbottom_end)
     {
-        int_bottom_begin = new_nonbottom_end;
-        assert(int_marked_nonbottom_begin <= int_bottom_begin);
-        assert(int_bottom_begin <= int_marked_bottom_begin);
-        assert(int_bottom_begin < int_end);
+        int_bottom_begin = new_nonbottom_end;                                   assert(int_marked_nonbottom_begin <= int_bottom_begin);
+                                                                                assert(int_bottom_begin <= int_marked_bottom_begin);
+                                                                                assert(int_bottom_begin < int_end);
     }
 
     /// iterator to the first bottom state in the block
@@ -654,10 +623,9 @@ class block_t
     permutation_iter_t bottom_begin()  {  return int_bottom_begin;  }
     void set_bottom_begin(permutation_iter_t new_bottom_begin)
     {
-        int_bottom_begin = new_bottom_begin;
-        assert(int_marked_nonbottom_begin <= int_bottom_begin);
-        assert(int_bottom_begin <= int_marked_bottom_begin);
-        // assert(int_bottom_begin < int_end);
+        int_bottom_begin = new_bottom_begin;                                    assert(int_marked_nonbottom_begin <= int_bottom_begin);
+                                                                                assert(int_bottom_begin <= int_marked_bottom_begin);
+                                                                                // assert(int_bottom_begin < int_end);
     }
 
     /// iterator past the last bottom state in the block
@@ -680,9 +648,8 @@ class block_t
     void set_unmarked_nonbottom_end(permutation_iter_t
                                                     new_unmarked_nonbottom_end)
     {
-        int_marked_nonbottom_begin = new_unmarked_nonbottom_end;
-        assert(int_begin <= int_marked_nonbottom_begin);
-        assert(int_marked_nonbottom_begin <= int_bottom_begin);
+        int_marked_nonbottom_begin = new_unmarked_nonbottom_end;                assert(int_begin <= int_marked_nonbottom_begin);
+                                                                                assert(int_marked_nonbottom_begin <= int_bottom_begin);
     }
 
     /// iterator to the first marked non-bottom state in the block
@@ -697,9 +664,8 @@ class block_t
     void set_marked_nonbottom_begin(permutation_iter_t
                                                     new_marked_nonbottom_begin)
     {
-        int_marked_nonbottom_begin = new_marked_nonbottom_begin;
-        assert(int_begin <= int_marked_nonbottom_begin);
-        assert(int_marked_nonbottom_begin <= int_bottom_begin);
+        int_marked_nonbottom_begin = new_marked_nonbottom_begin;                assert(int_begin <= int_marked_nonbottom_begin);
+                                                                                assert(int_marked_nonbottom_begin <= int_bottom_begin);
     }
 
     /// iterator one past the last marked non-bottom state in the block
@@ -724,9 +690,8 @@ class block_t
     permutation_iter_t unmarked_bottom_end()  {return int_marked_bottom_begin;}
     void set_unmarked_bottom_end(permutation_iter_t new_unmarked_bottom_end)
     {
-        int_marked_bottom_begin = new_unmarked_bottom_end;
-        assert(int_bottom_begin <= int_marked_bottom_begin);
-        assert(int_marked_bottom_begin <= int_end);
+        int_marked_bottom_begin = new_unmarked_bottom_end;                      assert(int_bottom_begin <= int_marked_bottom_begin);
+                                                                                assert(int_marked_bottom_begin <= int_end);
     }
 
     /// iterator to the first marked bottom state in the block
@@ -737,9 +702,8 @@ class block_t
     permutation_iter_t marked_bottom_begin()  {return int_marked_bottom_begin;}
     void set_marked_bottom_begin(permutation_iter_t new_marked_bottom_begin)
     {
-        int_marked_bottom_begin = new_marked_bottom_begin;
-        assert(int_bottom_begin <= int_marked_bottom_begin);
-        assert(int_marked_bottom_begin <= int_end);
+        int_marked_bottom_begin = new_marked_bottom_begin;                      assert(int_bottom_begin <= int_marked_bottom_begin);
+                                                                                assert(int_marked_bottom_begin <= int_end);
     }
 
     /// \brief iterator past the last marked bottom state in the block
@@ -752,8 +716,7 @@ class block_t
     B_to_C_iter_t inert_begin()  {  return int_inert_begin;  }
     void set_inert_begin(B_to_C_iter_t new_inert_begin)
     {
-        int_inert_begin = new_inert_begin;
-        assert(int_inert_begin <= int_inert_end);
+        int_inert_begin = new_inert_begin;                                      assert(int_inert_begin <= int_inert_end);
     }
 
     /// iterator past the last inert transition of the block
@@ -761,15 +724,13 @@ class block_t
     B_to_C_iter_t inert_end()  {  return int_inert_end;  }
     void set_inert_end(B_to_C_iter_t new_inert_end)
     {
-        int_inert_end = new_inert_end;
-        assert(int_inert_begin <= int_inert_end);
+        int_inert_end = new_inert_end;                                          assert(int_inert_begin <= int_inert_end);
     }
     void set_inert_begin_and_end(B_to_C_iter_t new_inert_begin,
                                                    B_to_C_iter_t new_inert_end)
     {
         int_inert_begin = new_inert_begin;
-        int_inert_end = new_inert_end;
-        assert(int_inert_begin <= int_inert_end);
+        int_inert_end = new_inert_end;                                          assert(int_inert_begin <= int_inert_end);
     }
 
     /// \brief mark a non-bottom state
@@ -778,10 +739,7 @@ class block_t
     /// \param s the non-bottom state that has to be marked
     /// \returns true if the state was not marked before
     bool mark_nonbottom(state_info_ptr s)
-    {
-        assert(s->pos < nonbottom_end());
-        assert(nonbottom_begin() <= s->pos);
-
+    {                                                                           assert(s->pos < nonbottom_end());  assert(nonbottom_begin() <= s->pos);
         if (marked_nonbottom_begin() <= s->pos)  return false;
         set_marked_nonbottom_begin(marked_nonbottom_begin() - 1);
         swap_permutation(s->pos, marked_nonbottom_begin());
@@ -795,9 +753,7 @@ class block_t
     /// \param s the state that has to be marked
     /// \returns true if the state was not marked before
     bool mark(state_info_ptr s)
-    {
-        assert(s->pos < end());
-
+    {                                                                           assert(s->pos < end());
         if (bottom_begin() <= s->pos)
         {
             if (marked_bottom_begin() <= s->pos)  return false;
@@ -823,28 +779,27 @@ class block_t
     /// \param red_nonbottom_begin iterator to the first red non-bottom state
     /// \returns pointer to the new (red) block
     block_t* split_off_red(permutation_iter_t red_nonbottom_begin);
+                                                                                #ifndef NDEBUG
+                                                                                    /// \brief print a block identification for debugging
+                                                                                    /// \details This function is only available if compiled in Debug mode.
+                                                                                    std::string debug_id() const
+                                                                                    {
+                                                                                        return "block [" + std::to_string(begin() - perm_begin) + "," +
+                                                                                            std::to_string(end() - perm_begin) + ")" +
+                                                                                            (BLOCK_NO_SEQNR != seqnr() ?" (#"+std::to_string(seqnr())+")" :"");
+                                                                                    }
 
-#ifndef NDEBUG
-    /// \brief print a block identification for debugging
-    /// \details This function is only available if compiled in Debug mode.
-    std::string debug_id() const
-    {
-        return "block [" + std::to_string(begin() - perm_begin) + "," +
-            std::to_string(end() - perm_begin) + ")" +
-            (BLOCK_NO_SEQNR != seqnr() ?" (#"+std::to_string(seqnr())+")" :"");
-    }
+                                                                                    /// \brief provide an iterator to the beginning of the permutation array
+                                                                                    /// \details This iterator is required to be able to print identifications
+                                                                                    /// for debugging.  It is only available if compiled in Debug mode.
+                                                                                    static permutation_const_iter_t permutation_begin()  { return perm_begin; }
 
-    /// \brief provide an iterator to the beginning of the permutation array
-    /// \details This iterator is required to be able to print identifications
-    /// for debugging.  It is only available if compiled in Debug mode.
-    static permutation_const_iter_t permutation_begin()  { return perm_begin; }
+                                                                                    mutable check_complexity::block_counter_t work_counter;
+                                                                                  private:
+                                                                                    static permutation_const_iter_t perm_begin;
 
-    mutable check_complexity::block_counter_t work_counter;
-  private:
-    static permutation_const_iter_t perm_begin;
-
-    friend class part_state_t;
-#endif
+                                                                                    friend class part_state_t;
+                                                                                #endif
 };
 
 
@@ -908,9 +863,7 @@ class constln_t
         postprocess_begin(postprocess_none),
         postprocess_end(postprocess_none),
         sort_key(sort_key_)
-    {
-        assert(int_begin < int_end);
-        assert((state_type) (int_end - int_begin) <= sort_key);
+    {                                                                           assert(int_begin<int_end);  assert((state_type)(int_end-int_begin)<=sort_key);
     }
 
     /// \brief destructor
@@ -934,8 +887,7 @@ class constln_t
     /// \details This member function only works if the constellation is the
     /// first one in the list (which will normally be the case).
     void make_trivial()
-    {
-        assert(nontrivial_first == this);
+    {                                                                           assert(nontrivial_first == this);
         nontrivial_first = nontrivial_next == this ? nullptr : nontrivial_next;
         nontrivial_next = nullptr;
     }
@@ -968,8 +920,7 @@ class constln_t
     /// \brief set the iterator to the first state in the constellation
     void set_begin(permutation_iter_t new_begin)
     {
-        int_begin = new_begin;
-        assert(int_begin < int_end);
+        int_begin = new_begin;                                                  assert(int_begin < int_end);
     }
 
     /// \brief constant iterator past the last state in the constellation
@@ -979,8 +930,7 @@ class constln_t
     /// \brief set the iterator past the last state in the constellation
     void set_end(permutation_iter_t new_end)
     {
-        int_end = new_end;
-        assert(int_begin < int_end);
+        int_end = new_end;                                                      assert(int_begin < int_end);
     }
 
     /// \brief returns number of states in the constellation
@@ -1006,19 +956,11 @@ class constln_t
     /// constellation for the split-off block and returns a pointer to the
     /// block.
     block_t* split_off_small_block()
-    {
-        assert(begin() < end());
+    {                                                                           assert(begin() < end());
         block_t* const FirstB = (*begin())->block;
-        block_t* const LastB = end()[-1]->block;
-        assert(FirstB != LastB);
-        if (FirstB->end() == LastB->begin())  make_trivial();
-
-        assert(FirstB->constln() == this);
-        assert(LastB->constln() == this);
-        assert(postprocess_begin == postprocess_end);
-
-        constln_t* NewC;
-
+        block_t* const LastB = end()[-1]->block;                                assert(FirstB != LastB);
+        if (FirstB->end() == LastB->begin())  make_trivial();                   assert(FirstB->constln() == this);  assert(LastB->constln() == this);
+                                                                                assert(postprocess_begin == postprocess_end);
         // 2.5: Choose a small splitter block SpB subset of SpC from P,
         //      i.e. |SpB| <= 1/2*|SpC|
         /// It doesn't matter very much how ties are resolved here:
@@ -1029,7 +971,8 @@ class constln_t
         {
             // 2.6: Create a new constellation NewC
             // 2.6: ... and move SpB from SpC to NewC
-            NewC = new constln_t(sort_key - (LastB->begin() - begin()),
+            constln_t* NewC =
+                    new constln_t(sort_key - (LastB->begin() - begin()),
                                        LastB->begin(), end(), postprocess_end);
             set_end(LastB->begin());
             LastB->set_constln(NewC);
@@ -1039,24 +982,24 @@ class constln_t
         {
             // 2.6: Create a new constellation NewC
             // 2.6: ... and move SpB from SpC to NewC
-            NewC = new constln_t(sort_key - (end() - FirstB->end()), begin(),
+            constln_t* NewC =
+                    new constln_t(sort_key - (end() - FirstB->end()), begin(),
                                                FirstB->end(), postprocess_end);
             set_begin(FirstB->end());
             FirstB->set_constln(NewC);
             return FirstB;
         }
     }
-
-#ifndef NDEBUG
-    /// \brief print a constellation identification for debugging
-    std::string debug_id() const
-    {
-        return "constellation [" +
-                   std::to_string(begin() - block_t::permutation_begin()) +
-                   "," + std::to_string(end() - block_t::permutation_begin()) +
-                   ") (#" + std::to_string(sort_key) + ")";
-    }
-#endif
+                                                                                #ifndef NDEBUG
+                                                                                    /// \brief print a constellation identification for debugging
+                                                                                    std::string debug_id() const
+                                                                                    {
+                                                                                        return "constellation [" +
+                                                                                                   std::to_string(begin() - block_t::permutation_begin()) +
+                                                                                                   "," + std::to_string(end() - block_t::permutation_begin()) +
+                                                                                                   ") (#" + std::to_string(sort_key) + ")";
+                                                                                    }
+                                                                                #endif
 };
 
 
@@ -1099,22 +1042,19 @@ class part_state_t
       : permutation(n),
         state_info(n+1) //< an additional ``state'' is needed to store pointers
             // to the end of the slices of transitions of the last state
-    {
-        assert(0 == block_t::nr_of_blocks);
-        #ifndef NDEBUG
-            block_t::perm_begin = permutation.begin();
-            state_info_entry::s_i_begin = state_info.data();
-            state_info_entry::s_i_end = state_info_entry::s_i_begin + n;
-        #endif
+    {                                                                           assert(0 == block_t::nr_of_blocks);
+                                                                                #ifndef NDEBUG
+                                                                                    block_t::perm_begin = permutation.begin();
+                                                                                    state_info_entry::s_i_begin = state_info.data();
+                                                                                    state_info_entry::s_i_end = state_info_entry::s_i_begin + n;
+                                                                                #endif
     }
 
     /// \brief destructor
     /// \details The destructor assumes that the caller has already executed
     /// `clear()` to deallocate the memory for the partition.
     ~part_state_t()
-    {
-        assert(state_info.empty());
-        assert(permutation.empty());
+    {                                                                           assert(state_info.empty());  assert(permutation.empty());
     }
 
     /// \brief deallocates constellations and blocks
@@ -1126,40 +1066,29 @@ class part_state_t
     {
         // We have to deallocate constellations first because deallocating
         // blocks makes the constellations inaccessible.
-        permutation_iter_t permutation_iter = permutation.end();
-        while (permutation.begin() != permutation_iter)
+        for (permutation_iter_t permutation_iter = permutation.end();
+                                     permutation.begin() != permutation_iter; )
         {
-            constln_t* const C = permutation_iter[-1]->constln();
-            // permutation_iter[-1]->block->set_constln(nullptr);
-            assert(C->end() == permutation_iter);
-            // assert that constellation is trivial:
-            assert(permutation_iter[-1]->block->begin() == C->begin());
+            constln_t* const C = permutation_iter[-1]->constln();               assert(C->end() == permutation_iter);
+            // permutation_iter[-1]->block->set_constln(nullptr);               // assert that constellation is trivial:
+                                                                                assert(permutation_iter[-1]->block->begin() == C->begin());
             permutation_iter = C->begin();
             delete C;
         }
-
-        #ifndef NDEBUG
-            state_type deleted_blocks = 0;
-        #endif
-        permutation_iter = permutation.end();
-        while (permutation.begin() != permutation_iter)
+                                                                                #ifndef NDEBUG
+                                                                                    state_type deleted_blocks = 0;
+                                                                                #endif
+        for (permutation_iter_t permutation_iter = permutation.end();
+                                     permutation.begin() != permutation_iter; )
         {
-            block_t* const B = permutation_iter[-1]->block;
-            assert(B->end() == permutation_iter);
+            block_t* const B = permutation_iter[-1]->block;                     assert(B->end() == permutation_iter);
             permutation_iter = B->begin();
-            #ifndef NDEBUG
-                if (BLOCK_NO_SEQNR != B->seqnr())
-                {
-                    ++deleted_blocks;
-                }
-                else
-                {
-                    assert(0 == deleted_blocks);
-                }
-            #endif
+                                                                                #ifndef NDEBUG
+                                                                                    if (BLOCK_NO_SEQNR != B->seqnr())  ++deleted_blocks;
+                                                                                    else                               assert(0 == deleted_blocks);
+                                                                                #endif
             delete B;
-        }
-        assert(deleted_blocks == block_t::nr_of_blocks);
+        }                                                                       assert(deleted_blocks == block_t::nr_of_blocks);
         block_t::nr_of_blocks = 0;
         state_info.clear();
         permutation.clear();
@@ -1176,32 +1105,32 @@ class part_state_t
     {
         return state_info[s].block;
     }
-#ifndef NDEBUG
-  private:
-    /// \brief print a slice of the partition (typically a block)
-    /// \details If the slice indicated by the parameters is not empty, the
-    /// states in this slice will be printed.
-    /// \param message text printed as a title if the slice is not empty
-    /// \param B       block that is being printed (it is checked whether
-    ///                states belong to this block)
-    /// \param begin   iterator to the beginning of the slice
-    /// \param end     iterator past the end of the slice
-    void print_block(const char* message, const block_t* B,
-        permutation_const_iter_t begin, permutation_const_iter_t end) const;
-  public:
-    /// \brief print the partition as a tree (per constellation and block)
-    /// \details The function prints all constellations (in order); for each
-    /// constellation it prints the blocks it consists of; and for each block,
-    /// it lists its states, separated into nonbottom and bottom states.
-    /// \param part_tr partition for the transitions
-    void print_part(const part_trans_t& part_tr) const;
+                                                                                #ifndef NDEBUG
+                                                                                  private:
+                                                                                    /// \brief print a slice of the partition (typically a block)
+                                                                                    /// \details If the slice indicated by the parameters is not empty, the
+                                                                                    /// states in this slice will be printed.
+                                                                                    /// \param message text printed as a title if the slice is not empty
+                                                                                    /// \param B       block that is being printed (it is checked whether
+                                                                                    ///                states belong to this block)
+                                                                                    /// \param begin   iterator to the beginning of the slice
+                                                                                    /// \param end     iterator past the end of the slice
+                                                                                    void print_block(const char* message, const block_t* B,
+                                                                                        permutation_const_iter_t begin, permutation_const_iter_t end) const;
+                                                                                  public:
+                                                                                    /// \brief print the partition as a tree (per constellation and block)
+                                                                                    /// \details The function prints all constellations (in order); for each
+                                                                                    /// constellation it prints the blocks it consists of; and for each block,
+                                                                                    /// it lists its states, separated into nonbottom and bottom states.
+                                                                                    /// \param part_tr partition for the transitions
+                                                                                    void print_part(const part_trans_t& part_tr) const;
 
-    /// \brief print all transitions
-    /// \details For each state (in order), its outgoing transitions are
-    /// listed, sorted by goal constellation.  The function also indicates
-    /// where the current constellation pointer of the state points at.
-    void print_trans() const;
-#endif
+                                                                                    /// \brief print all transitions
+                                                                                    /// \details For each state (in order), its outgoing transitions are
+                                                                                    /// listed, sorted by goal constellation.  The function also indicates
+                                                                                    /// where the current constellation pointer of the state points at.
+                                                                                    void print_trans() const;
+                                                                                #endif
 };
 
 ///@} (end of group part_state)
@@ -1296,41 +1225,31 @@ class succ_entry
     succ_iter_t slice_begin()
     {
         if (this < &*int_slice_begin_or_before_end)
-        {
-            assert(&*int_slice_begin_or_before_end->
-                                        int_slice_begin_or_before_end <= this);
+        {                                                                       assert(&*int_slice_begin_or_before_end->int_slice_begin_or_before_end <= this);
             return int_slice_begin_or_before_end->
                                                  int_slice_begin_or_before_end;
-        }
-        assert(&*int_slice_begin_or_before_end->int_slice_begin_or_before_end==
-                                                                         this);
+        }                                                                       assert(&*int_slice_begin_or_before_end->int_slice_begin_or_before_end == this);
         return int_slice_begin_or_before_end;
     }
 
     succ_const_iter_t slice_begin() const
     {
         if (this < &*int_slice_begin_or_before_end)
-        {
-            assert(&*int_slice_begin_or_before_end->
-                                        int_slice_begin_or_before_end <= this);
+        {                                                                       assert(&*int_slice_begin_or_before_end->int_slice_begin_or_before_end <= this);
             return int_slice_begin_or_before_end->
                                                  int_slice_begin_or_before_end;
-        }
-        assert(&*int_slice_begin_or_before_end->int_slice_begin_or_before_end==
-                                                                         this);
+        }                                                                       assert(&*int_slice_begin_or_before_end->int_slice_begin_or_before_end == this);
         return int_slice_begin_or_before_end;
     }
 
     static succ_iter_t slice_end(succ_iter_t this_)
     {
         if (this_ < this_->int_slice_begin_or_before_end)
-        {
-            assert(this_->int_slice_begin_or_before_end->
-                                       int_slice_begin_or_before_end <= this_);
+        {                                                                       assert(this_->int_slice_begin_or_before_end->
+                                                                                                                       int_slice_begin_or_before_end <= this_);
             return this_->int_slice_begin_or_before_end + 1;
-        }
-        assert(this_->int_slice_begin_or_before_end->
-                                       int_slice_begin_or_before_end == this_);
+        }                                                                       assert(this_->int_slice_begin_or_before_end->
+                                                                                                                       int_slice_begin_or_before_end == this_);
         // The following line requires an iterator but a normal method would
         // only have a pointer, not an iterator.  That's why we need to jump
         // through the `static` hoop.
@@ -1340,25 +1259,22 @@ class succ_entry
     static succ_const_iter_t slice_end(succ_const_iter_t this_)
     {
         if (this_ < this_->int_slice_begin_or_before_end)
-        {
-            assert(this_->int_slice_begin_or_before_end->
-                                       int_slice_begin_or_before_end <= this_);
+        {                                                                       assert(this_->int_slice_begin_or_before_end->
+                                                                                                                       int_slice_begin_or_before_end <= this_);
             return this_->int_slice_begin_or_before_end + 1;
-        }
-        assert(this_->int_slice_begin_or_before_end->
-                                       int_slice_begin_or_before_end == this_);
+        }                                                                       assert(this_->int_slice_begin_or_before_end->
+                                                                                                                       int_slice_begin_or_before_end == this_);
         // The following line requires an iterator but a normal method would
         // only have a pointer, not an iterator.  That's why we need to jump
         // through the `static` hoop.
         return this_ + 1;
     }
-
-#ifndef NDEBUG
-    /// adds work (for time complexity measurement) to every transition in the
-    /// slice to which `this_` belongs.
-    static void slice_add_work_to_transns(succ_const_iter_t this_,
-                  enum check_complexity::counter_type ctr, unsigned max_value);
-#endif
+                                                                                #ifndef NDEBUG
+                                                                                    /// adds work (for time complexity measurement) to every transition in the
+                                                                                    /// slice to which `this_` belongs.
+                                                                                    static void slice_add_work_to_transns(succ_const_iter_t this_,
+                                                                                                  enum check_complexity::counter_type ctr, unsigned max_value);
+                                                                                #endif
 };
 
 
@@ -1367,25 +1283,24 @@ class pred_entry
   public:
     succ_iter_t succ;
     state_info_ptr source;
+                                                                                #ifndef NDEBUG
+                                                                                    /// \brief print a short transition identification for debugging
+                                                                                    /// \details This function is only available if compiled in Debug mode.
+                                                                                    std::string debug_id_short() const
+                                                                                    {
+                                                                                        return "from " + source->debug_id_short() + " to " +
+                                                                                                                                succ->target->debug_id_short();
+                                                                                    }
 
-#ifndef NDEBUG
-    /// \brief print a short transition identification for debugging
-    /// \details This function is only available if compiled in Debug mode.
-    std::string debug_id_short() const
-    {
-        return "from " + source->debug_id_short() + " to " +
-                                                succ->target->debug_id_short();
-    }
+                                                                                    /// \brief print a transition identification for debugging
+                                                                                    /// \details This function is only available if compiled in Debug mode.
+                                                                                    std::string debug_id() const
+                                                                                    {
+                                                                                        return "transition " + debug_id_short();
+                                                                                    }
 
-    /// \brief print a transition identification for debugging
-    /// \details This function is only available if compiled in Debug mode.
-    std::string debug_id() const
-    {
-        return "transition " + debug_id_short();
-    }
-
-    mutable check_complexity::trans_counter_t work_counter;
-#endif
+                                                                                    mutable check_complexity::trans_counter_t work_counter;
+                                                                                #endif
 };
 
 
@@ -1395,28 +1310,24 @@ class B_to_C_entry
     pred_iter_t pred;
     B_to_C_desc_iter_t B_to_C_slice;
 };
-
-
-#ifndef NDEBUG
-    /// adds work (for time complexity measurement) to every transition in the
-    /// slice.
-    inline void succ_entry::slice_add_work_to_transns(succ_const_iter_t this_,
-                   enum check_complexity::counter_type ctr, unsigned max_value)
-    {
-        succ_const_iter_t iter = this_->slice_begin();
-        succ_const_iter_t end = slice_end(this_);
-        assert(iter < end);
-        mCRL2complexity(iter->B_to_C->pred, add_work(ctr, max_value), );
-        while (++iter != end)
-        {
-            // treat temporary counters specially
-            mCRL2complexity(iter->B_to_C->pred,
-                                       add_work_notemporary(ctr, max_value), );
-        }
-    }
-#endif
-
-
+                                                                                #ifndef NDEBUG
+                                                                                    /// adds work (for time complexity measurement) to every transition in the
+                                                                                    /// slice.
+                                                                                    inline void succ_entry::slice_add_work_to_transns(succ_const_iter_t this_,
+                                                                                                   enum check_complexity::counter_type ctr, unsigned max_value)
+                                                                                    {
+                                                                                        succ_const_iter_t iter = this_->slice_begin();
+                                                                                        succ_const_iter_t end = slice_end(this_);
+                                                                                        assert(iter < end);
+                                                                                        mCRL2complexity(iter->B_to_C->pred, add_work(ctr, max_value), );
+                                                                                        while (++iter != end)
+                                                                                        {
+                                                                                            // treat temporary counters specially
+                                                                                            mCRL2complexity(iter->B_to_C->pred,
+                                                                                                                       add_work_notemporary(ctr, max_value), );
+                                                                                        }
+                                                                                    }
+                                                                                #endif
 /* B_to_C_descriptor is a data type that indicates which slice of states
 belongs together. */
 class B_to_C_descriptor
@@ -1431,29 +1342,21 @@ class B_to_C_descriptor
 
     /// compute the source block of the transitions in this slice
     const block_t* from_block() const
-    {
-        assert(begin < end);
-        assert(begin->pred->succ->B_to_C == begin);
+    {                                                                           assert(begin < end);  assert(begin->pred->succ->B_to_C == begin);
         return begin->pred->source->block;
     }
     block_t* from_block()
-    {
-        assert(begin < end);
-        assert(begin->pred->succ->B_to_C == begin);
+    {                                                                           assert(begin < end);  assert(begin->pred->succ->B_to_C == begin);
         return begin->pred->source->block;
     }
 
     /// compute the goal constellation of the transitions in this slice
     const constln_t* to_constln() const
-    {
-        assert(begin < end);
-        assert(begin->pred->succ->B_to_C == begin);
+    {                                                                           assert(begin < end);  assert(begin->pred->succ->B_to_C == begin);
         return begin->pred->succ->target->constln();
     }
     constln_t* to_constln()
-    {
-        assert(begin < end);
-        assert(begin->pred->succ->B_to_C == begin);
+    {                                                                           assert(begin < end);  assert(begin->pred->succ->B_to_C == begin);
         return begin->pred->succ->target->constln();
     }
 
@@ -1461,76 +1364,72 @@ class B_to_C_descriptor
     /// \details The function uses the data registered with the goal
     /// constellation.
     bool needs_postprocessing() const
-    {
-        assert(to_constln()->postprocess_end <= begin ||
-                                         end <= to_constln()->postprocess_end);
-        assert(to_constln()->postprocess_begin <= begin ||
-                                       end <= to_constln()->postprocess_begin);
+    {                                                                           assert(to_constln()->postprocess_end <= begin ||
+                                                                                                                         end <= to_constln()->postprocess_end);
+                                                                                assert(to_constln()->postprocess_begin <= begin ||
+                                                                                                                       end <= to_constln()->postprocess_begin);
         return to_constln()->postprocess_begin <= begin &&
                                           end <= to_constln()->postprocess_end;
     }
+                                                                                #ifndef NDEBUG
+                                                                                    /// \brief print a B_to_C slice identification for debugging
+                                                                                    /// \details This function is only available if compiled in Debug mode.
+                                                                                    std::string debug_id() const
+                                                                                    {
+                                                                                        assert(begin < end);
+                                                                                        std::string result("slice containing transition");
+                                                                                        if (end - begin > 1)
+                                                                                            result += "s ";
+                                                                                        else
+                                                                                            result += " ";
+                                                                                        B_to_C_const_iter_t iter = begin;
+                                                                                        assert(iter->pred->succ->B_to_C == iter);
+                                                                                        result += iter->pred->debug_id_short();
+                                                                                        if (end - iter > 4)
+                                                                                        {
+                                                                                            assert(iter[1].pred->succ->B_to_C == iter+1);
+                                                                                            result += ", ";
+                                                                                            result += iter[1].pred->debug_id_short();
+                                                                                            result += ", ...";
+                                                                                            iter = end - 3;
+                                                                                        }
+                                                                                        while (++iter != end)
+                                                                                        {
+                                                                                            assert(iter->pred->succ->B_to_C == iter);
+                                                                                            result += ", ";
+                                                                                            result += iter->pred->debug_id_short();
+                                                                                        }
+                                                                                        return result;
+                                                                                    }
 
-#ifndef NDEBUG
-    /// \brief print a B_to_C slice identification for debugging
-    /// \details This function is only available if compiled in Debug mode.
-    std::string debug_id() const
-    {
-        assert(begin < end);
-        std::string result("slice containing transition");
-        if (end - begin > 1)
-            result += "s ";
-        else
-            result += " ";
-        B_to_C_const_iter_t iter = begin;
-        assert(iter->pred->succ->B_to_C == iter);
-        result += iter->pred->debug_id_short();
-        if (end - iter > 4)
-        {
-            assert(iter[1].pred->succ->B_to_C == iter+1);
-            result += ", ";
-            result += iter[1].pred->debug_id_short();
-            result += ", ...";
-            iter = end - 3;
-        }
-        while (++iter != end)
-        {
-            assert(iter->pred->succ->B_to_C == iter);
-            result += ", ";
-            result += iter->pred->debug_id_short();
-        }
-        return result;
-    }
+                                                                                    /// The function is meant to transfer work temporarily assigned to the
+                                                                                    /// B_to_C slice to the transitions in the slice.  It is used during
+                                                                                    /// handling of new bottom states, so the work is only assigned to
+                                                                                    /// transitions that start in a (new) bottom state.
+                                                                                    /// If at this moment no such (new) bottom state has been found, the work
+                                                                                    /// is kept with the slice and the function returns false.  The work should
+                                                                                    /// be transferred later (but if there is no later transfer, it should be
+                                                                                    /// tested that the function returns true).
+                                                                                    bool add_work_to_bottom_transns(enum check_complexity::counter_type ctr,
+                                                                                                                                            unsigned max_value)
+                                                                                    {
+                                                                                        bool added = false;
 
+                                                                                        for (B_to_C_const_iter_t iter = begin; iter != end; ++iter)
+                                                                                        {
+                                                                                            if (iter->pred->source->pos >=
+                                                                                                                     iter->pred->source->block->bottom_begin())
+                                                                                            {
+                                                                                                // source state of the transition is a bottom state
+                                                                                                mCRL2complexity(iter->pred, add_work(ctr, max_value), );
+                                                                                                added = true;
+                                                                                            }
+                                                                                        }
+                                                                                        return added;
+                                                                                    }
 
-    /// The function is meant to transfer work temporarily assigned to the
-    /// B_to_C slice to the transitions in the slice.  It is used during
-    /// handling of new bottom states, so the work is only assigned to
-    /// transitions that start in a (new) bottom state.
-    /// If at this moment no such (new) bottom state has been found, the work
-    /// is kept with the slice and the function returns false.  The work should
-    /// be transferred later (but if there is no later transfer, it should be
-    /// tested that the function returns true).
-    bool add_work_to_bottom_transns(enum check_complexity::counter_type ctr,
-                                                            unsigned max_value)
-    {
-        bool added = false;
-
-        for (B_to_C_const_iter_t iter = begin; iter != end; ++iter)
-        {
-            if (iter->pred->source->pos >=
-                                     iter->pred->source->block->bottom_begin())
-            {
-                // source state of the transition is a bottom state
-                mCRL2complexity(iter->pred, add_work(ctr, max_value), );
-                added = true;
-            }
-        }
-        return added;
-    }
-
-
-    mutable check_complexity::B_to_C_counter_t work_counter;
-#endif
+                                                                                    mutable check_complexity::B_to_C_counter_t work_counter;
+                                                                                #endif
 };
 
 
@@ -1546,12 +1445,8 @@ class part_trans_t
     friend class bisim_partitioner_gjkw_initialise_helper;
 
     void swap_in(B_to_C_iter_t const pos1, B_to_C_iter_t const pos2)
-    {
-        assert(B_to_C.end() > pos1);
-        assert(pos1->pred->succ->B_to_C == pos1);
-        assert(B_to_C.end() > pos2);
-        assert(pos2->pred->succ->B_to_C == pos2);
-
+    {                                                                           assert(B_to_C.end() > pos1);  assert(pos1->pred->succ->B_to_C == pos1);
+                                                                                assert(B_to_C.end() > pos2);  assert(pos2->pred->succ->B_to_C == pos2);
         // swap contents
         pred_entry const temp_entry(*pos1->pred);
         *pos1->pred = *pos2->pred;
@@ -1559,24 +1454,15 @@ class part_trans_t
         // swap pointers to contents
         pred_iter_t const temp_iter(pos1->pred);
         pos1->pred = pos2->pred;
-        pos2->pred = temp_iter;
-
-        assert(B_to_C.end() > pos1);
-        assert(pos1->pred->succ->B_to_C == pos1);
-        assert(B_to_C.end() > pos2);
-        assert(pos2->pred->succ->B_to_C == pos2);
+        pos2->pred = temp_iter;                                                 assert(B_to_C.end() > pos1);  assert(pos1->pred->succ->B_to_C == pos1);
+                                                                                assert(B_to_C.end() > pos2);  assert(pos2->pred->succ->B_to_C == pos2);
     }
 
     void swap_out(pred_iter_t const pos1, pred_iter_t const pos2)
-    {
-        assert(pred.end() > pos1);
-        assert(pos1->succ->B_to_C->pred == pos1);
-        assert(pred.end() > pos2);
-        assert(pos2->succ->B_to_C->pred == pos2);
-        assert(pos1->succ->slice_begin() == pos2->succ->slice_begin());
-        assert(succ_entry::slice_end(pos1->succ) ==
-                                            succ_entry::slice_end(pos2->succ));
-
+    {                                                                           assert(pred.end() > pos1);  assert(pos1->succ->B_to_C->pred == pos1);
+                                                                                assert(pred.end() > pos2);  assert(pos2->succ->B_to_C->pred == pos2);
+                                                                                assert(pos1->succ->slice_begin() == pos2->succ->slice_begin());
+                                                                                assert(succ_entry::slice_end(pos1->succ) == succ_entry::slice_end(pos2->succ));
         // swap contents, but do not swap slice_begin_or_before_end
         B_to_C_iter_t const temp_B_to_C(pos1->succ->B_to_C);
         state_info_ptr const temp_target(pos1->succ->target);
@@ -1587,24 +1473,15 @@ class part_trans_t
         // swap pointers to contents
         succ_iter_t const temp_iter(pos1->succ);
         pos1->succ = pos2->succ;
-        pos2->succ = temp_iter;
-
-        assert(pred.end() > pos1);
-        assert(pos1->succ->B_to_C->pred == pos1);
-        assert(pred.end() > pos2);
-        assert(pos2->succ->B_to_C->pred == pos2);
-        assert(pos1->succ->slice_begin() == pos2->succ->slice_begin());
-        assert(succ_entry::slice_end(pos1->succ) ==
-                                            succ_entry::slice_end(pos2->succ));
+        pos2->succ = temp_iter;                                                 assert(pred.end() > pos1);  assert(pos1->succ->B_to_C->pred == pos1);
+                                                                                assert(pred.end() > pos2);  assert(pos2->succ->B_to_C->pred == pos2);
+                                                                                assert(pos1->succ->slice_begin() == pos2->succ->slice_begin());
+                                                                                assert(succ_entry::slice_end(pos1->succ) == succ_entry::slice_end(pos2->succ));
     }
 
     void swap_B_to_C(succ_iter_t const pos1, succ_iter_t const pos2)
-    {
-        assert(succ.end() > pos1);
-        assert(pos1->B_to_C->pred->succ == pos1);
-        assert(succ.end() > pos2);
-        assert(pos2->B_to_C->pred->succ == pos2);
-
+    {                                                                           assert(succ.end() > pos1);  assert(pos1->B_to_C->pred->succ == pos1);
+                                                                                assert(succ.end() > pos2);  assert(pos2->B_to_C->pred->succ == pos2);
         // swap contents
         B_to_C_entry const temp_entry(*pos1->B_to_C);
         *pos1->B_to_C = *pos2->B_to_C;
@@ -1612,26 +1489,17 @@ class part_trans_t
         // swap pointers to contents
         B_to_C_iter_t const temp_iter(pos1->B_to_C);
         pos1->B_to_C = pos2->B_to_C;
-        pos2->B_to_C = temp_iter;
-
-        assert(succ.end() > pos1);
-        assert(pos1->B_to_C->pred->succ == pos1);
-        assert(succ.end() > pos2);
-        assert(pos2->B_to_C->pred->succ == pos2);
+        pos2->B_to_C = temp_iter;                                               assert(succ.end() > pos1);  assert(pos1->B_to_C->pred->succ == pos1);
+                                                                                assert(succ.end() > pos2);  assert(pos2->B_to_C->pred->succ == pos2);
     }
 
     // *pos1 -> *pos2 -> *pos3 -> *pos1
     void swap3_B_to_C(succ_iter_t const pos1, succ_iter_t const pos2,
                                                         succ_iter_t const pos3)
-    {
-        assert(succ.end() > pos1);
-        assert(pos1->B_to_C->pred->succ == pos1);
-        assert(succ.end() > pos2);
-        assert(pos2->B_to_C->pred->succ == pos2);
-        assert(succ.end() > pos3);
-        assert(pos3->B_to_C->pred->succ == pos3);
-
-        assert(pos1 != pos2 || pos1 == pos3);
+    {                                                                           assert(succ.end() > pos1);  assert(pos1->B_to_C->pred->succ == pos1);
+                                                                                assert(succ.end() > pos2);  assert(pos2->B_to_C->pred->succ == pos2);
+                                                                                assert(succ.end() > pos3);  assert(pos3->B_to_C->pred->succ == pos3);
+                                                                                assert(pos1 != pos2 || pos1 == pos3);
         // swap contents
         B_to_C_entry const temp_entry(*pos1->B_to_C);
         *pos1->B_to_C = *pos3->B_to_C;
@@ -1641,14 +1509,9 @@ class part_trans_t
         B_to_C_iter_t const temp_iter(pos2->B_to_C);
         pos2->B_to_C = pos3->B_to_C;
         pos3->B_to_C = pos1->B_to_C;
-        pos1->B_to_C = temp_iter;
-
-        assert(succ.end() > pos1);
-        assert(pos1->B_to_C->pred->succ == pos1);
-        assert(succ.end() > pos2);
-        assert(pos2->B_to_C->pred->succ == pos2);
-        assert(succ.end() > pos3);
-        assert(pos3->B_to_C->pred->succ == pos3);
+        pos1->B_to_C = temp_iter;                                               assert(succ.end() > pos1);  assert(pos1->B_to_C->pred->succ == pos1);
+                                                                                assert(succ.end() > pos2);  assert(pos2->B_to_C->pred->succ == pos2);
+                                                                                assert(succ.end() > pos3);  assert(pos3->B_to_C->pred->succ == pos3);
     }
   public:
     part_trans_t(trans_type m)
@@ -1657,10 +1520,7 @@ class part_trans_t
         B_to_C(m)
     {  }
     ~part_trans_t()
-    {
-        assert(B_to_C.empty());
-        assert(succ.empty());
-        assert(pred.empty());
+    {                                                                           assert(B_to_C.empty());  assert(succ.empty());  assert(pred.empty());
     }
 
     /// clear allocated memory
@@ -1692,8 +1552,7 @@ class part_trans_t
     new constellation does not (yet) have inert incoming transitions.  It
     returns the boundary between transitions to OldC and transitions to NewC in
     the state's outgoing transition array. */
-    succ_iter_t change_to_C(pred_iter_t pred_iter,
-               ONLY_IF_DEBUG( constln_t* SpC, constln_t* NewC, )
+    succ_iter_t change_to_C(pred_iter_t pred_iter,                              ONLY_IF_DEBUG( constln_t* SpC, constln_t* NewC, )
                bool first_transition_of_state, bool first_transition_of_block);
 
     /* split_s_inert_out splits the outgoing transitions from s to its own
@@ -1702,7 +1561,8 @@ class part_trans_t
     transitions to OldC.  It returns the boundary between transitions to
     OldC and transitions to NewC in the outgoing transition array of s.
     Its time complexity is O(1 + min { |out_\nottau(s)|, |out_\tau(s)| }). */
-    bool split_s_inert_out(state_info_ptr s ONLY_IF_DEBUG(, constln_t* OldC) );
+    bool split_s_inert_out(state_info_ptr s                                     ONLY_IF_DEBUG(, constln_t* OldC)
+                                           );
 
     /* part_trans_t::make_noninert makes the transition identified by succ_iter
     noninert. */
@@ -1710,26 +1570,23 @@ class part_trans_t
     {
         // change B_to_C
         B_to_C_iter_t const other_B_to_C =
-                    succ_iter->B_to_C->pred->source->block->inert_begin();
-        assert(succ_iter->B_to_C->B_to_C_slice->begin <= other_B_to_C);
-        assert(other_B_to_C <= succ_iter->B_to_C);
-        assert(succ_iter->B_to_C < succ_iter->B_to_C->B_to_C_slice->end);
+                    succ_iter->B_to_C->pred->source->block->inert_begin();      assert(succ_iter->B_to_C->B_to_C_slice->begin <= other_B_to_C);
+                                                                                assert(other_B_to_C <= succ_iter->B_to_C);
+                                                                                assert(succ_iter->B_to_C < succ_iter->B_to_C->B_to_C_slice->end);
         swap_B_to_C(succ_iter, other_B_to_C->pred->succ);
         succ_iter->B_to_C->pred->source->block->set_inert_begin(other_B_to_C +
                                                                             1);
         // change pred
-        pred_iter_t const other_pred = succ_iter->target->inert_pred_begin();
-        assert(succ_iter->target->pred_begin() <= other_pred);
-        assert(other_pred <= succ_iter->B_to_C->pred);
-        assert(succ_iter->B_to_C->pred < succ_iter->target->pred_end());
+        pred_iter_t const other_pred = succ_iter->target->inert_pred_begin();   assert(succ_iter->target->pred_begin() <= other_pred);
+                                                                                assert(other_pred <= succ_iter->B_to_C->pred);
+                                                                                assert(succ_iter->B_to_C->pred < succ_iter->target->pred_end());
         swap_in(succ_iter->B_to_C, other_pred->succ->B_to_C);
         succ_iter->target->set_inert_pred_begin(other_pred + 1);
         // change succ
         succ_iter_t const other_succ =
-                        succ_iter->B_to_C->pred->source->inert_succ_begin();
-        assert(succ_iter->B_to_C->pred->source->succ_begin() <= other_succ);
-        assert(other_succ <= succ_iter);
-        assert(succ_iter < succ_iter->B_to_C->pred->source->succ_end());
+                           succ_iter->B_to_C->pred->source->inert_succ_begin(); assert(succ_iter->B_to_C->pred->source->succ_begin() <= other_succ);
+                                                                                assert(other_succ <= succ_iter);
+                                                                                assert(succ_iter < succ_iter->B_to_C->pred->source->succ_end());
         swap_out(succ_iter->B_to_C->pred, other_succ->B_to_C->pred);
         succ_iter->B_to_C->pred->source->set_inert_succ_begin(other_succ + 1);
     }
@@ -1750,11 +1607,10 @@ class part_trans_t
     B_to_C_iter_t       B_to_C_end  ()        {  return B_to_C.end  ();  }
     pred_const_iter_t pred_end() const  {  return pred.end();  }
     succ_const_iter_t succ_end() const  {  return succ.end();  }
-
-#ifndef NDEBUG
-    /// \brief assert that the data structure is consistent and stable
-    void assert_stability(const part_state_t& part_st) const;
-#endif
+                                                                                #ifndef NDEBUG
+                                                                                    /// \brief assert that the data structure is consistent and stable
+                                                                                    void assert_stability(const part_state_t& part_st) const;
+                                                                                #endif
 };
 
 ///@} (end of group part_trans)
@@ -1857,8 +1713,7 @@ class bisim_partitioner_gjkw_initialise_helper
     // those of its bisimulation quotient.  However, it does not change
     // anything else; in particular, it does not change the number of states of
     // the LTS.
-    void replace_transition_system(const part_state_t& part_st, 
-                                   ONLY_IF_DEBUG( bool branching, )
+    void replace_transition_system(const part_state_t& part_st,                 ONLY_IF_DEBUG( bool branching, )
                                    bool preserve_divergence);
 
     /// provides the number of states in the Kripke structure
@@ -1898,15 +1753,14 @@ class bisim_partitioner_gjkw
       : init_helper(l, branching, preserve_divergence),
         part_st(init_helper.get_nr_of_states()),
         part_tr(init_helper.get_nr_of_transitions())
-    {
-      assert(branching || !preserve_divergence);
-      create_initial_partition_gjkw(branching, preserve_divergence);
-      refine_partition_until_it_becomes_stable_gjkw();
+    {                                                                           assert(branching || !preserve_divergence);
+        create_initial_partition_gjkw(branching, preserve_divergence);
+        refine_partition_until_it_becomes_stable_gjkw();
     }
     ~bisim_partitioner_gjkw()
     {
-      part_tr.clear();
-      part_st.clear();
+        part_tr.clear();
+        part_st.clear();
     }
 
     // replace_transition_system() replaces the transitions of the LTS stored here by
@@ -1915,9 +1769,9 @@ class bisim_partitioner_gjkw
     // the LTS.
     void replace_transition_system(bool branching, bool preserve_divergence)
     {
-      (void) branching; // avoid warning about unused parameter.
-      init_helper.replace_transition_system(part_st,
-                              ONLY_IF_DEBUG( branching, ) preserve_divergence);
+        (void) branching; // avoid warning about unused parameter.
+        init_helper.replace_transition_system(part_st,                          ONLY_IF_DEBUG( branching, )
+                                                       preserve_divergence);
     }
 
     static state_type num_eq_classes()
@@ -1948,8 +1802,8 @@ class bisim_partitioner_gjkw
     bisim_gjkw::block_t* refine(bisim_gjkw::block_t* RfnB,
               const bisim_gjkw::constln_t* SpC,
               const bisim_gjkw::B_to_C_descriptor* FromRed,
-              bool postprocessing
-              ONLY_IF_DEBUG( , const bisim_gjkw::constln_t* NewC = nullptr ) );
+              bool postprocessing                                               ONLY_IF_DEBUG( , const bisim_gjkw::constln_t* NewC = nullptr )
+                                 );
 
     /*--------- PostprocessNewBottom -- Algorithm 4 of [GJKW 2017] ----------*/
 
@@ -2128,14 +1982,14 @@ inline B_to_C_descriptor* block_t::FromRed(const constln_t* const SpC)
     }
     else
     {
-        #ifndef NDEBUG
-            for (B_to_C_desc_const_iter_t iter = to_constln.begin();
-                                              to_constln.end() != iter; ++iter)
-            {
-                assert(iter->from_block() == this);
-                assert(iter->to_constln() != SpC);
-            }
-        #endif
+                                                                                #ifndef NDEBUG
+                                                                                    for (B_to_C_desc_const_iter_t iter = to_constln.begin();
+                                                                                                                              to_constln.end() != iter; ++iter)
+                                                                                    {
+                                                                                        assert(iter->from_block() == this);
+                                                                                        assert(iter->to_constln() != SpC);
+                                                                                    }
+                                                                                #endif
         return nullptr;
     }
 }
@@ -2143,13 +1997,11 @@ inline B_to_C_descriptor* block_t::FromRed(const constln_t* const SpC)
 
 /// set FromRed to an existing element in to_constln
 inline void block_t::SetFromRed(B_to_C_desc_iter_t const new_fromred)
-{
-    assert(!to_constln.empty());
+{                                                                               assert(!to_constln.empty());
     if (to_constln.begin() != new_fromred)
     {
         to_constln.splice(to_constln.begin(), to_constln, new_fromred);
-    }
-    assert(new_fromred->from_block() == this);
+    }                                                                           assert(new_fromred->from_block() == this);
 }
 
 
@@ -2164,13 +2016,11 @@ inline void block_t::SetFromRed(B_to_C_desc_iter_t const new_fromred)
 /// \memberof state_info_entry
 inline bool state_info_entry::surely_has_transition_to(const constln_t* const
                                                                      SpC) const
-{
-    assert(succ_begin() <= current_constln());
-    assert(current_constln() <= succ_end());
-    assert(succ_begin()==current_constln() || succ_end()==current_constln() ||
-                            *current_constln()[-1].target->constln() <
-                                        *current_constln()->target->constln());
-    assert(constln() != SpC);
+{                                                                               assert(succ_begin()<=current_constln()); assert(current_constln()<=succ_end());
+                                                                                assert(succ_begin() == current_constln() || succ_end() == current_constln() ||
+                                                                                        *current_constln()[-1].target->constln() <
+                                                                                                                        *current_constln()->target->constln());
+                                                                                assert(constln() != SpC);
     // either current_constln()->target or current_constln()[-1].target is in
     // SpC
     if (current_constln() != succ_end() &&
@@ -2194,13 +2044,11 @@ inline bool state_info_entry::surely_has_transition_to(const constln_t* const
 /// \memberof state_info_entry
 inline bool state_info_entry::surely_has_no_transition_to(
                                               const constln_t* const SpC) const
-{
-    assert(succ_begin() <= current_constln());
-    assert(current_constln() <= succ_end());
-    assert(succ_begin()==current_constln() || succ_end()==current_constln() ||
-                            *current_constln()[-1].target->constln() <
-                                        *current_constln()->target->constln());
-    assert(constln() != SpC);
+{                                                                               assert(succ_begin()<=current_constln()); assert(current_constln()<=succ_end());
+                                                                                assert(succ_begin() == current_constln() || succ_end() == current_constln() ||
+                                                                                        *current_constln()[-1].target->constln() <
+                                                                                                                        *current_constln()->target->constln());
+                                                                                assert(constln() != SpC);
     // condition:
     // current_constln()->target is in a constellation > SpC and
     // current_constln()[-1].target is in a constellation < SpC.

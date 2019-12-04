@@ -351,29 +351,39 @@ class check_complexity
     static unsigned char log_n;
 
     /// \brief calculate the base-2 logarithm, rounded down
-    static int ilog2(state_type size)
+    constexpr static int ilog2(state_type size)
     {
         #ifdef __GNUC__
-            if (sizeof(unsigned) == sizeof(state_type))
+            if constexpr (sizeof(unsigned) == sizeof(state_type))
             {
                 return sizeof(unsigned) * CHAR_BIT - 1 - __builtin_clz(size);
             }
-            if (sizeof(unsigned long) == sizeof(state_type))
+            else if constexpr (sizeof(unsigned long) == sizeof(state_type))
             {
                 return sizeof(unsigned long)*CHAR_BIT-1 - __builtin_clzl(size);
             }
-            if (sizeof(unsigned long long) == sizeof(state_type))
+            else if constexpr(sizeof(unsigned long long) == sizeof(state_type))
             {
                 return sizeof(unsigned long long) * CHAR_BIT - 1 -
                                                          __builtin_clzll(size);
             }
-        #else
-            #if 2 == FLT_RADIX
-                return std::ilogb(size);
-            #else
-                return (int) std::log2(size);
-            #endif
+            else
+        //#elif defined(_MSC_VER)
+        //    if constexpr (sizeof(long) == sizeof(state_type))
+        //    {
+        //        long result;
+        //        _BitScanReverse(result, size);
+        //        return result - 1;
+        //    }
+        //    else if constexpr(sizeof(__int64) == sizeof(state_type))
+        //    {
+        //        long result;
+        //        _BitScanReverse64(result, size);
+        //        return result - 1;
+        //    }
+        //    else
         #endif
+        return (int) std::log2(size);
     }
 
   private:
