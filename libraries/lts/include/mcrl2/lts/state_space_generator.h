@@ -81,15 +81,15 @@ template <typename Explorer>
 class trace_constructor
 {
   protected:
-    Explorer& explorer;
-    std::map<lps::state, lps::state> backpointers;
+    Explorer& m_explorer;
+    std::map<lps::state, lps::state> m_backpointers;
 
     // Finds a transition s0 --a--> s1, and returns a.
     lps::multi_action find_action(const lps::state& s0, const lps::state& s1)
     {
       if constexpr (Explorer::is_stochastic)
       {
-        for (const std::pair<lps::multi_action, lps::stochastic_state>& t: explorer.generate_transitions(s0))
+        for (const std::pair<lps::multi_action, lps::stochastic_state>& t: m_explorer.generate_transitions(s0))
         {
           for (const lps::state& s: t.second.states)
           {
@@ -102,7 +102,7 @@ class trace_constructor
       }
       else
       {
-        for (const std::pair<lps::multi_action, lps::state>& t: explorer.generate_transitions(s0))
+        for (const std::pair<lps::multi_action, lps::state>& t: m_explorer.generate_transitions(s0))
         {
           if (t.second == s1)
           {
@@ -115,7 +115,7 @@ class trace_constructor
 
   public:
     explicit trace_constructor(Explorer& explorer_)
-      : explorer(explorer_)
+      : m_explorer(explorer_)
     {}
 
     // Constructs a trace ending in s, using the backpointers map.
@@ -126,8 +126,8 @@ class trace_constructor
       while (true)
       {
         const lps::state& s1 = states.front();
-        auto i = backpointers.find(s1);
-        if (i == backpointers.end())
+        auto i = m_backpointers.find(s1);
+        if (i == m_backpointers.end())
         {
           break;
         }
@@ -149,12 +149,18 @@ class trace_constructor
     // Adds a back pointer for the given edge
     void add_edge(const lps::state& s0, const lps::state& s1)
     {
-      backpointers[s1] = s0;
+      m_backpointers[s1] = s0;
     }
 
     void clear()
     {
-      backpointers.clear();
+      m_backpointers.clear();
+    }
+
+    // Providing access to the explorer should perhaps be avoided.
+    Explorer& explorer()
+    {
+      return m_explorer;
     }
 };
 
@@ -251,6 +257,10 @@ class action_detector
         save_trace(tr, filename);
         result = true;
       }
+      else
+      {
+        m_trace_constructor.explorer().abort();
+      }
       mCRL2log(log::info) << ".\n";
       return result;
     }
@@ -284,6 +294,10 @@ class deadlock_detector
         trace::Trace tr = m_trace_constructor.construct_trace(s);
         std::string filename = filename_prefix + "_dlk_" + std::to_string(m_trace_count++) + ".trc";
         save_trace(tr, filename);
+      }
+      else
+      {
+        m_trace_constructor.explorer().abort();
       }
       mCRL2log(log::info) << ".\n";
     }
@@ -334,6 +348,10 @@ class nondeterminism_detector
           std::string filename = filename_prefix + "_nondeterministic_" + std::to_string(m_trace_count++) + ".trc";
           save_trace(tr, filename);
           result = true;
+        }
+        else
+        {
+          m_trace_constructor.explorer().abort();
         }
         mCRL2log(log::info) << ".\n";
       }
@@ -460,8 +478,6 @@ class divergence_detector
             explorer.abort();
           }
         );
-        explorer.set_process_parameter_values(process_parameter_undo);
-        return result;
       }
       else
       {
@@ -496,9 +512,13 @@ class divergence_detector
             explorer.abort();
           }
         );
-        explorer.set_process_parameter_values(process_parameter_undo);
-        return result;
       }
+      explorer.set_process_parameter_values(process_parameter_undo);
+      if (m_trace_count >= m_max_trace_count)
+      {
+        explorer.abort();
+      }
+      return result;
     }
 };
 
