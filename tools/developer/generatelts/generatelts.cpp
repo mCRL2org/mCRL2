@@ -84,7 +84,10 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
                  "traces is unbounded. "
                  "For each trace that is to be written a unique file with extension .trc (trace) "
                  "will be created containing a shortest trace from the initial state to the deadlock "
-                 "state. The traces can be pretty printed and converted to other formats using tracepp. ", 't');
+                 "state. The traces can be pretty printed and converted to other formats using tracepp. "
+                 "If the maximum amount of traces has been reached, state space generation is aborted. "
+                 "There is no guarantee that the traces are contained in the partial state space."
+                 , 't');
       desc.add_option("confluence", utilities::make_optional_argument("NAME", "ctau"),
                  "apply prioritization of transitions with the action label NAME. "
                  "(when no NAME is supplied (i.e., '-c') priority is given to the action 'ctau'. To give priority to "
