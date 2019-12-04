@@ -197,6 +197,12 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
 
       mCRL2log(log::verbose) << "Number of vertices in the structure graph: " << G.all_vertices().size() << std::endl;
 
+      if ((!lpsfile.empty() || !ltsfile.empty()) && !has_counter_example_information(pbesspec))
+      {
+        mCRL2log(log::warning) << "Warning: the PBES has no counter example information. Did you use the"
+                                  " --counter-example option when generating the PBES?" << std::endl;
+      }
+
       if (!lpsfile.empty())
       {
         lps::specification lpsspec = lps::detail::load_lps(lpsfile);

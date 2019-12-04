@@ -117,7 +117,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
        : S(S_), graph_builder(graph_builder_)
       {}
 
-      void unexpected(const pbes_expression& x) const
+      static void unexpected(const pbes_expression& x)
       {
         throw mcrl2::runtime_error("Unexpected term " + pbes_system::pp(x) + " encountered in Rplus");
       }
@@ -147,7 +147,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       }
 
       // TODO: use a heuristic for the smallest term
-      bool less(const pbes_expression& /* x1 */, const pbes_expression& /* x2 */) const
+      static bool less(const pbes_expression& /* x1 */, const pbes_expression& /* x2 */)
       {
         return true;
       }

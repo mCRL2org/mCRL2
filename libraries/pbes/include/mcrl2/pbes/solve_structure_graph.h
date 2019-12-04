@@ -53,6 +53,23 @@ std::tuple<std::size_t, std::size_t, vertex_set> get_minmax_rank(const structure
   return std::make_tuple(min_rank, max_rank, vertex_set(N, M.begin(), M.end()));
 }
 
+/// \brief Guesses if a pbes has counter example information
+inline
+bool has_counter_example_information(const pbes& pbesspec)
+{
+  std::regex re("Z(neg|pos)_(\\d+)_.*");
+  std::smatch match;
+  for (const pbes_equation& eqn: pbesspec.equations())
+  {
+    std::string X = eqn.variable().name();
+    if (std::regex_match(X, match, re))
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
 class solve_structure_graph_algorithm
 {
   protected:
@@ -133,7 +150,6 @@ class solve_structure_graph_algorithm
           {
             global_strategy<structure_graph>(G).set_strategy(ui, v);
 //            mCRL2log(log::debug) << "set initial strategy for node " << ui << " to " << v << std::endl;
-//            u.strategy = v;
           }
         }
       }
@@ -250,7 +266,7 @@ class solve_structure_graph_algorithm
       }
     }
 
-    void insert_edge(std::vector<structure_graph::vertex>& V, structure_graph::index_type ui, structure_graph::index_type vi) const
+    static void insert_edge(std::vector<structure_graph::vertex>& V, structure_graph::index_type ui, structure_graph::index_type vi)
     {
       using utilities::detail::contains;
       auto& u = V[ui];
