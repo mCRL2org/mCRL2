@@ -73,7 +73,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
                  "detect and report multiactions in the transitions system "
                  "from NAMES, a comma-separated list. Works like -a, except that multi-actions "
                  "are matched exactly, including data parameters. ", 'm');
-      desc.add_option("error-trace",
+      desc.add_hidden_option("error-trace",
                  "if an error occurs during exploration, save a trace to the state that could "
                  "not be explored. ");
       desc.add_option("trace", utilities::make_optional_argument("NUM", std::to_string(std::numeric_limits<std::size_t>::max())),
@@ -104,12 +104,10 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
                    .add_value_short(lps::es_highway, "h")
         , "explore the state space using strategy NAME:"
         , 's');
-      desc.add_option("suppress","in verbose mode, do not print progress messages indicating the number of visited states and transitions. "
-                            "For large state spaces the number of progress messages can be quite "
-                            "horrendous. This feature helps to suppress those. Other verbose messages, "
-                            "such as the total number of states explored, just remain visible. ");
+      desc.add_option("suppress","in verbose mode, do not print progress messages indicating the number of visited states and transitions.");
       desc.add_option("no-store", "save the resulting LTS to disk while generating. Currently this only works "
                               "for .aut files.");
+      desc.add_option("no-info", "do not add state information to OUTFILE when saving in .lts format.");
     }
 
     static std::list<std::string> split_actions(const std::string& s)
@@ -161,6 +159,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       options.save_error_trace                      = parser.has_option("error-trace");
       options.suppress_progress_messages            = parser.has_option("suppress");
       options.dfs_recursive                         = parser.has_option("dfs-recursive");
+      options.discard_lts_state_labels              = parser.has_option("no-info");
       options.search_strategy = parser.option_argument_as<lps::exploration_strategy>("strategy");
 
       if (parser.has_option("max"))
@@ -181,6 +180,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
           parser.error("Format '" + parser.option_argument("out") + "' is not recognised.");
         }
       }
+
       if (output_format == lts::lts_none && !output_filename().empty())
       {
         output_format = lts::detail::guess_format(output_filename());
@@ -246,6 +246,11 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
         parser.error("Search strategy 'highway' requires that the option todo-max is set");
       }
       options.rewrite_strategy = rewrite_strategy();
+
+      if (options.discard_lts_state_labels && options.discard_lts_state_labels != lts::lts_lts)
+      {
+        parser.error("Option '--no-info' requires that the output is in .lts format.");
+      }
     }
 
     std::unique_ptr<lts::lts_builder> create_lts_builder(const lps::specification& lpsspec)
@@ -259,7 +264,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
           }
         case lts::lts_dot: return std::unique_ptr<lts::lts_builder>(new lts::lts_dot_builder(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters()));
         case lts::lts_fsm: return std::unique_ptr<lts::lts_builder>(new lts::lts_fsm_builder(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters()));
-        case lts::lts_lts: return std::unique_ptr<lts::lts_builder>(new lts::lts_lts_builder(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters()));
+        case lts::lts_lts: return std::unique_ptr<lts::lts_builder>(new lts::lts_lts_builder(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters(), options.discard_lts_state_labels));
         default: return std::unique_ptr<lts::lts_builder>(new lts::lts_none_builder());
       }
     }
@@ -269,7 +274,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       switch (output_format)
       {
         case lts::lts_aut: return std::unique_ptr<lts::stochastic_lts_builder>(new lts::stochastic_lts_aut_builder());
-        case lts::lts_lts: return std::unique_ptr<lts::stochastic_lts_builder>(new lts::stochastic_lts_lts_builder(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters()));
+        case lts::lts_lts: return std::unique_ptr<lts::stochastic_lts_builder>(new lts::stochastic_lts_lts_builder(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters(), options.discard_lts_state_labels));
         default: return std::unique_ptr<lts::stochastic_lts_builder>(new lts::stochastic_lts_none_builder());
       }
     }

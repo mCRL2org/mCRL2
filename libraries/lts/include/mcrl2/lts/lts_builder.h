@@ -140,9 +140,16 @@ class lts_lts_builder: public lts_builder
 {
   protected:
     lts_lts_t m_lts;
+    bool m_discard_state_labels = false;
 
   public:
-    lts_lts_builder(const data::data_specification& dataspec, const process::action_label_list& action_labels, const data::variable_list& process_parameters)
+    lts_lts_builder(
+      const data::data_specification& dataspec,
+      const process::action_label_list& action_labels,
+      const data::variable_list& process_parameters,
+      bool discard_state_labels = false
+    )
+     : m_discard_state_labels(discard_state_labels)
     {
       m_lts.set_data(dataspec);
       m_lts.set_process_parameters(process_parameters);
@@ -165,14 +172,18 @@ class lts_lts_builder: public lts_builder
         m_lts.set_action_label(p.second, action_label_lts(lps::multi_action(p.first.actions(), p.first.time())));
       }
 
-      // add states
-      std::size_t n = state_map.size();
-      std::vector<state_label_lts> state_labels(n);
-      for (std::size_t i = 0; i < n; i++)
+      // add state labels
+      if (!m_discard_state_labels)
       {
-        state_labels[i] = state_label_lts(state_map[i]);
+        std::size_t n = state_map.size();
+        std::vector<state_label_lts> state_labels(n);
+        for (std::size_t i = 0; i < n; i++)
+        {
+          state_labels[i] = state_label_lts(state_map[i]);
+        }
+        m_lts.state_labels() = std::move(state_labels);
       }
-      m_lts.state_labels() = std::move(state_labels);
+
       m_lts.set_num_states(state_map.size(), true);
       m_lts.set_initial_state(0);
     }

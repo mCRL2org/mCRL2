@@ -42,6 +42,7 @@ struct explorer_options
   bool suppress_progress_messages = false;
   bool no_store = false;
   bool dfs_recursive = false;
+  bool discard_lts_state_labels = false;
   std::size_t max_states = std::numeric_limits<std::size_t>::max();
   std::size_t max_traces = 0;
   std::size_t todo_max = std::numeric_limits<std::size_t>::max();
@@ -70,6 +71,7 @@ std::ostream& operator<<(std::ostream& out, const explorer_options& options)
   out << "detect-nondeterminism = " << std::boolalpha << options.detect_nondeterminism << std::endl;
   out << "detect-divergence = " << std::boolalpha << options.detect_divergence << std::endl;
   out << "detect-action = " << std::boolalpha << options.detect_action << std::endl;
+  out << "discard-lts-state-labels = " << std::boolalpha << options.discard_lts_state_labels << std::endl;
   out << "save-error-trace = " << std::boolalpha << options.save_error_trace << std::endl;
   out << "generate-traces = " << std::boolalpha << options.generate_traces << std::endl;
   out << "suppress-progress-messages = " << std::boolalpha << options.suppress_progress_messages << std::endl;
