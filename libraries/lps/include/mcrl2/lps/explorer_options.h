@@ -40,10 +40,9 @@ struct explorer_options
   bool save_error_trace = true;
   bool generate_traces = false;
   bool suppress_progress_messages = false;
-  bool no_store = false;
+  bool save_aut_at_end = false;
   bool dfs_recursive = false;
   bool discard_lts_state_labels = false;
-  std::size_t max_states = std::numeric_limits<std::size_t>::max();
   std::size_t max_traces = 0;
   std::size_t todo_max = std::numeric_limits<std::size_t>::max();
   std::string trace_prefix;
@@ -75,9 +74,8 @@ std::ostream& operator<<(std::ostream& out, const explorer_options& options)
   out << "save-error-trace = " << std::boolalpha << options.save_error_trace << std::endl;
   out << "generate-traces = " << std::boolalpha << options.generate_traces << std::endl;
   out << "suppress-progress-messages = " << std::boolalpha << options.suppress_progress_messages << std::endl;
-  out << "no-store = " << std::boolalpha << options.no_store << std::endl;
+  out << "save-aut-at-end = " << std::boolalpha << options.save_aut_at_end << std::endl;
   out << "dfs-recursive = " << std::boolalpha << options.dfs_recursive << std::endl;
-  out << "max-states = " << options.max_states << std::endl;
   out << "max-traces = " << options.max_traces << std::endl;
   out << "todo-max = " << options.todo_max << std::endl;
   out << "trace-prefix = " << options.trace_prefix << std::endl;

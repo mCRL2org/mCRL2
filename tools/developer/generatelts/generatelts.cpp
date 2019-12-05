@@ -42,62 +42,59 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
     void add_options(utilities::interface_description& desc) override
     {
       super::add_options(desc);
-      desc.add_option("global-cache", "use a global cache");
+      desc.add_hidden_option("global-cache", "use a global cache");
       desc.add_hidden_option("no-remove-unused-rewrite-rules", "do not remove unused rewrite rules. ", 'u');
       desc.add_hidden_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
       desc.add_hidden_option("no-replace-constants-by-variables", "do not move constant expressions to a substitution");
       desc.add_hidden_option("no-resolve-summand-variable-name-clashes", "do not resolve summand variable name clashes");
       desc.add_hidden_option("dfs-recursive", "use recursive depth first search for divergence detection");
-
-      // copied from lps2lts
       desc.add_option("cached", "use enumeration caching techniques to speed up state space generation. ");
-      desc.add_option("max", utilities::make_mandatory_argument("NUM"), "explore at most NUM states", 'l');
       desc.add_option("todo-max", utilities::make_mandatory_argument("NUM"),
                  "keep at most NUM states in todo lists; this option is only relevant for "
                  "highway search, where NUM is the maximum number of states per "
                  "level. ");
-      desc.add_option("nondeterminism", "detect nondeterministic states, i.e. states with outgoing transitions with the same label to different states. ", 'n');
-      desc.add_option("deadlock", "detect deadlocks (i.e. for every deadlock a message is printed). ", 'D');
+      desc.add_option("nondeterminism", "report nondeterministic states, i.e. states with outgoing transitions"
+                 " with the same label to different states. The flag --trace can be used to generate traces to these nondeterministic states.", 'n');
+      desc.add_option("deadlock", "report deadlocks (i.e. states with no outgoing transitions). "
+                 "The flag --trace can be used to generate traces to these deadlocks.", 'D');
       desc.add_option("divergence",
-                   "detect divergences (i.e. for every state with a divergence (=tau loop) a message is printed). "
+                   "report divergences (i.e. states with a tau loop). "
                    "The algorithm to detect the divergences is linear for every state, "
                    "so state space exploration becomes quadratic with this option on, causing a state "
                    "space exploration to become slow when this option is enabled. ", 'F');
       desc.add_option("action", utilities::make_mandatory_argument("NAMES"),
-                   "report whether an action from NAMES occurs in the transitions system, "
-                   "where NAMES is a comma-separated list. A message "
-                   "is printed for every occurrence of one of these action names. "
-                   "With the -t flag traces towards these actions are generated. "
-                   "When using -tN only N traces are generated after which the generation of the state space stops. ", 'a');
+                   "report actions in the transition system with a name that occurs in the "
+                   "comma-separated list NAMES. The flag --trace can be used to generate traces to these actions.",
+                   'a');
       desc.add_option("multiaction", utilities::make_mandatory_argument("NAMES"),
-                 "detect and report multiactions in the transitions system "
-                 "from NAMES, a comma-separated list. Works like -a, except that multi-actions "
-                 "are matched exactly, including data parameters. ", 'm');
+                 "report occurrences of multi-actions in the transition system that occur in "
+                 "the comma-separated list NAMES. Works like --action, except that multi-actions "
+                 "are matched exactly, including data parameters. The flag --trace can be used to generate traces "
+                 "to these multi-actions.", 'm');
       desc.add_hidden_option("error-trace",
                  "if an error occurs during exploration, save a trace to the state that could "
-                 "not be explored. ");
+                 "not be explored.");
       desc.add_option("trace", utilities::make_optional_argument("NUM", std::to_string(std::numeric_limits<std::size_t>::max())),
-                 "Write a shortest trace to each state that is reached with an action from NAMES "
-                 "with the option --action, is a deadlock with the option --deadlock, is nondeterministic with the option --nondeterminism, or is a "
-                 "divergence with the option --divergence to a file. "
-                 "No more than NUM traces will be written. If NUM is not supplied the number of "
-                 "traces is unbounded. "
-                 "For each trace that is to be written a unique file with extension .trc (trace) "
-                 "will be created containing a shortest trace from the initial state to the deadlock "
-                 "state. The traces can be pretty printed and converted to other formats using tracepp. "
+                 "Write a trace to states that are reported using one of the flags "
+                 "--action, --deadlock, --divergence, --multiaction or --nondeterminism. "
+                 "No more than NUM traces will be written for each type of event. If NUM is not supplied"
+                 " the number of traces is unbounded. "
+                 "For each trace a unique file with extension .trc (trace) "
+                 "will be created containing a shortest trace starting from the initial state. "
+                 "The traces can be pretty printed and converted to other formats using tracepp. "
                  "If the maximum amount of traces has been reached, state space generation is aborted. "
-                 "There is no guarantee that the traces are contained in the partial state space."
+                 "There is no guarantee that the traces are fully contained in the partial state space."
                  , 't');
       desc.add_option("confluence", utilities::make_optional_argument("NAME", "ctau"),
-                 "apply prioritization of transitions with the action label NAME. "
-                 "(when no NAME is supplied (i.e., '-c') priority is given to the action 'ctau'. To give priority "
+                 "apply prioritization of transitions with the action label NAME (default 'ctau'). "
+                 "To give priority "
                  "to tau use the flag -ctau. Only if the linear process is tau-confluent, the generated "
                  "state space is branching bisimilar to the state space of the lps. The generation "
                  "algorithm that is used does not require the linear process to be tau convergent. ", 'c');
       desc.add_option("out", utilities::make_mandatory_argument("FORMAT"), "save the output in the specified FORMAT. ", 'o');
-      desc.add_option("tau", utilities::make_mandatory_argument("ACTNAMES"),
-                 "consider actions with a name in the comma separated list ACTNAMES to be internal. "
-                 "This list is only used and allowed when searching for divergencies. ");
+      desc.add_option("tau", utilities::make_mandatory_argument("NAMES"),
+                 "consider actions with a name in the comma separated list NAMES to be internal. "
+                 "This list is only used and allowed when searching for divergencies.");
       desc.add_option("strategy", utilities::make_enum_argument<lps::exploration_strategy>("NAME")
                    .add_value_short(lps::es_breadth, "b", true)
                    .add_value_short(lps::es_depth, "d")
@@ -105,9 +102,9 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
         , "explore the state space using strategy NAME:"
         , 's');
       desc.add_option("suppress","in verbose mode, do not print progress messages indicating the number of visited states and transitions.");
-      desc.add_option("no-store", "save the resulting LTS to disk while generating. Currently this only works "
-                              "for .aut files.");
-      desc.add_option("no-info", "do not add state information to OUTFILE when saving in .lts format.");
+      desc.add_option("save-at-end", "delay saving of the generated LTS until the end. "
+                 "This option only applies to .aut files, which are by default saved on the fly.");
+      desc.add_option("no-info", "do not add state label information to OUTFILE. This option only applies to .lts files.");
     }
 
     static std::list<std::string> split_actions(const std::string& s)
@@ -145,7 +142,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
     void parse_options(const utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
-      options.no_store                              = parser.has_option("no-store");
+      options.save_aut_at_end                       = parser.has_option("save-at-end");
       options.cached                                = parser.has_option("cached");
       options.global_cache                          = parser.has_option("global-cache");
       options.confluence                            = parser.has_option("confluence");
@@ -161,11 +158,6 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       options.dfs_recursive                         = parser.has_option("dfs-recursive");
       options.discard_lts_state_labels              = parser.has_option("no-info");
       options.search_strategy = parser.option_argument_as<lps::exploration_strategy>("strategy");
-
-      if (parser.has_option("max"))
-      {
-        options.max_states = parser.option_argument_as<std::size_t> ("max");
-      }
 
       if (parser.has_option("todo-max"))
       {
@@ -235,19 +227,18 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
         parser.error("Too many file arguments.");
       }
 
-      if (options.no_store && (output_filename().empty() || output_format != lts::lts_aut))
-      {
-        options.no_store = false;
-        mCRL2log(log::warning) << "Ignoring the no-store option.";
-      }
-
       if (options.search_strategy == lps::es_highway && !parser.has_option("todo-max"))
       {
         parser.error("Search strategy 'highway' requires that the option todo-max is set");
       }
       options.rewrite_strategy = rewrite_strategy();
 
-      if (options.discard_lts_state_labels && options.discard_lts_state_labels != lts::lts_lts)
+      if (options.save_aut_at_end && (output_filename().empty() || output_format != lts::lts_aut))
+      {
+        parser.error("Option '--save-at-end' requires that the output is in .aut format.");
+      }
+
+      if (options.discard_lts_state_labels && (output_filename().empty() || output_format != lts::lts_lts))
       {
         parser.error("Option '--no-info' requires that the output is in .lts format.");
       }
@@ -259,8 +250,8 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       {
         case lts::lts_aut:
           {
-            return options.no_store ? std::unique_ptr<lts::lts_builder>(new lts::lts_aut_disk_builder(output_filename()))
-                                    : std::unique_ptr<lts::lts_builder>(new lts::lts_aut_builder());
+            return options.save_aut_at_end ? std::unique_ptr<lts::lts_builder>(new lts::lts_aut_disk_builder(output_filename()))
+                                           : std::unique_ptr<lts::lts_builder>(new lts::lts_aut_builder());
           }
         case lts::lts_dot: return std::unique_ptr<lts::lts_builder>(new lts::lts_dot_builder(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters()));
         case lts::lts_fsm: return std::unique_ptr<lts::lts_builder>(new lts::lts_fsm_builder(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters()));
