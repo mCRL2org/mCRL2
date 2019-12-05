@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file transform.cpp
+/// \file generatelts.cpp
 
 #include <csignal>
 #include "mcrl2/data/rewriter_tool.h"
@@ -27,6 +27,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
   lps::explorer_options options;
   lts::lts_type output_format = lts::lts_none;
   lps::abortable* current_explorer = nullptr;
+  std::set<std::string> trace_multiaction_strings;
 
   public:
     generatelts_tool()
@@ -77,7 +78,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       desc.add_option("trace", utilities::make_optional_argument("NUM", std::to_string(std::numeric_limits<std::size_t>::max())),
                  "Write a trace to states that are reported using one of the flags "
                  "--action, --deadlock, --divergence, --multiaction or --nondeterminism. "
-                 "No more than NUM traces will be written for each type of event. If NUM is not supplied"
+                 "No more than NUM traces will be written for each flag. If NUM is not supplied"
                  " the number of traces is unbounded. "
                  "For each trace a unique file with extension .trc (trace) "
                  "will be created containing a shortest trace starting from the initial state. "
@@ -139,6 +140,58 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       return result;
     }
 
+    void parse_trace_multiactions(const data::data_specification& dataspec, const process::action_label_list& action_labels)
+    {
+      for (const std::string& s: trace_multiaction_strings)
+      {
+        try
+        {
+          options.trace_multiactions.insert(mcrl2::lps::parse_multi_action(s, action_labels, dataspec));
+        }
+        catch (mcrl2::runtime_error& e)
+        {
+          throw mcrl2::runtime_error(std::string("Multi-action ") + s + " does not exist: " + e.what());
+        }
+        mCRL2log(log::verbose) << "Checking for action \"" << s << "\"\n";
+      }
+      if (options.detect_action)
+      {
+        for (const mcrl2::core::identifier_string& ta: options.trace_actions)
+        {
+          bool found = (std::string(ta) == "tau");
+          for(const process::action_label& al: action_labels)
+          {
+            if (al.name() == ta)
+            {
+              found = true;
+              break;
+            }
+          }
+          if (!found)
+          {
+            throw mcrl2::runtime_error(std::string("Action label ") + core::pp(ta) + " is not declared.");
+          }
+          else
+          {
+            mCRL2log(log::verbose) << "Checking for action " << ta << "\n";
+          }
+        }
+      }
+      for (const mcrl2::core::identifier_string& ta: options.actions_internal_for_divergencies)
+      {
+        mcrl2::process::action_label_list::iterator it = action_labels.begin();
+        bool found = (std::string(ta) == "tau");
+        while (!found && it != action_labels.end())
+        {
+          found = (it++->name() == ta);
+        }
+        if (!found)
+        {
+          throw mcrl2::runtime_error(std::string("Action label ") + core::pp(ta) + " is not declared.");
+        }
+      }
+    }
+
     void parse_options(const utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
@@ -195,7 +248,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       if (parser.has_option("multiaction"))
       {
         std::list<std::string> actions = split_actions(parser.option_argument("multiaction"));
-        options.trace_multiaction_strings.insert(actions.begin(), actions.end());
+        trace_multiaction_strings.insert(actions.begin(), actions.end());
       }
 
       if (parser.has_option("trace"))
@@ -285,6 +338,10 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       options.trace_prefix = input_filename();
       lps::stochastic_specification stochastic_lpsspec;
       lps::load_lps(stochastic_lpsspec, input_filename());
+      if (!trace_multiaction_strings.empty())
+      {
+        parse_trace_multiactions(stochastic_lpsspec.data(), stochastic_lpsspec.action_labels());
+      }
       bool is_timed = stochastic_lpsspec.process().has_time();
 
       if (lps::is_stochastic(stochastic_lpsspec))

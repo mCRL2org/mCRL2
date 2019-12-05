@@ -47,7 +47,6 @@ struct explorer_options
   std::size_t todo_max = std::numeric_limits<std::size_t>::max();
   std::string trace_prefix;
   std::set<core::identifier_string> trace_actions;
-  std::set<std::string> trace_multiaction_strings;
   std::set<lps::multi_action> trace_multiactions;
   std::set<core::identifier_string> actions_internal_for_divergencies;
   std::string confluence_action = "ctau";
@@ -80,7 +79,6 @@ std::ostream& operator<<(std::ostream& out, const explorer_options& options)
   out << "todo-max = " << options.todo_max << std::endl;
   out << "trace-prefix = " << options.trace_prefix << std::endl;
   out << "trace-actions = " << core::detail::print_set(options.trace_actions) << std::endl;
-  out << "trace-multiaction-strings = " << core::detail::print_set(options.trace_multiaction_strings) << std::endl;
   out << "trace-multiactions = " << core::detail::print_set(options.trace_multiactions) << std::endl;
   out << "actions-internal-for-divergencies = " << core::detail::print_set(options.actions_internal_for_divergencies) << std::endl;
   return out;
