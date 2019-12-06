@@ -16,8 +16,6 @@
 #define BOOST_TEST_MODULE lps2lts_test
 #include <boost/test/included/unit_test_framework.hpp>
 
-#ifndef MCRL2_SKIP_LONG_TESTS
-
 #include "mcrl2/data/detail/rewrite_strategies.h"
 #include "mcrl2/lts/detail/exploration.h"
 #include "mcrl2/utilities/test_utilities.h"
@@ -676,15 +674,3 @@ BOOST_AUTO_TEST_CASE(coins_simulate_dice)   // Example from the probabilistic ex
   const bool contains_probabilities=true;
   check_lps2lts_specification(spec, 26, 26, 9, contains_probabilities);
 } 
-
-
-
-
-#else // ndef MCRL2_SKIP_LONG_TESTS
-
-BOOST_AUTO_TEST_CASE(skip_test)
-{
-}
-
-#endif // ndef MCRL2_SKIP_LONG_TESTS
-
