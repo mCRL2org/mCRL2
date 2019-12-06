@@ -48,36 +48,35 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       desc.add_hidden_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
       desc.add_hidden_option("no-replace-constants-by-variables", "do not move constant expressions to a substitution");
       desc.add_hidden_option("no-resolve-summand-variable-name-clashes", "do not resolve summand variable name clashes");
-      desc.add_option("no-probability-checking", "do not check if probabilities have sensible values");
+      desc.add_option("no-probability-checking", "do not check if probabilities in stochastic specifications have sensible values");
       desc.add_hidden_option("dfs-recursive", "use recursive depth first search for divergence detection");
       desc.add_option("cached", "use enumeration caching techniques to speed up state space generation. ");
       desc.add_option("todo-max", utilities::make_mandatory_argument("NUM"),
-                 "keep at most NUM states in todo lists; this option is only relevant for "
-                 "highway search, where NUM is the maximum number of states per "
-                 "level. ");
+                 "keep at most NUM states in the todo list; this option is only relevant for "
+                 "highway search, where NUM is the maximum number of states per level. ");
       desc.add_option("nondeterminism", "report nondeterministic states, i.e. states with outgoing transitions"
                  " with the same label to different states. The flag --trace can be used to generate traces to these nondeterministic states.", 'n');
       desc.add_option("deadlock", "report deadlocks (i.e. states with no outgoing transitions). "
                  "The flag --trace can be used to generate traces to these deadlocks.", 'D');
       desc.add_option("divergence",
                    "report divergences (i.e. states with a tau loop). "
-                   "The algorithm to detect the divergences is linear for every state, "
-                   "so state space exploration becomes quadratic with this option on, causing a state "
-                   "space exploration to become slow when this option is enabled. ", 'F');
+                   "The algorithm to detect divergences is linear for every state, "
+                   "so state space exploration becomes quadratic with this option enabled."
+                   "The flag --trace can be used to generate traces to these divergences.", 'F');
       desc.add_option("action", utilities::make_mandatory_argument("NAMES"),
-                   "report actions in the transition system with a name that occurs in the "
-                   "comma-separated list NAMES. The flag --trace can be used to generate traces to these actions.",
+                   "report actions in the transition system that occur in the "
+                   "comma-separated list of action names NAMES. The flag --trace can be used to generate traces to these actions.",
                    'a');
       desc.add_option("multiaction", utilities::make_mandatory_argument("NAMES"),
                  "report occurrences of multi-actions in the transition system that occur in "
-                 "the comma-separated list NAMES. Works like --action, except that multi-actions "
+                 "the comma-separated list of actions NAMES. Works like --action, except that multi-actions "
                  "are matched exactly, including data parameters. The flag --trace can be used to generate traces "
                  "to these multi-actions.", 'm');
       desc.add_hidden_option("error-trace",
                  "if an error occurs during exploration, save a trace to the state that could "
                  "not be explored.");
       desc.add_option("trace", utilities::make_optional_argument("NUM", std::to_string(std::numeric_limits<std::size_t>::max())),
-                 "Write a trace to states that are reported using one of the flags "
+                 "write a trace to states that are reported using one of the flags "
                  "--action, --deadlock, --divergence, --multiaction or --nondeterminism. "
                  "No more than NUM traces will be written for each flag. If NUM is not supplied"
                  " the number of traces is unbounded. "
@@ -95,8 +94,8 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
                  "algorithm that is used does not require the linear process to be tau convergent. ", 'c');
       desc.add_option("out", utilities::make_mandatory_argument("FORMAT"), "save the output in the specified FORMAT. ", 'o');
       desc.add_option("tau", utilities::make_mandatory_argument("NAMES"),
-                 "consider actions with a name in the comma separated list NAMES to be internal. "
-                 "This list is only used and allowed when searching for divergencies.");
+                 "consider actions that occur in the comma-separated list of action names "
+                 "NAMES to be internal. This setting only affects the option --divergence.");
       desc.add_option("strategy", utilities::make_enum_argument<lps::exploration_strategy>("NAME")
                    .add_value_short(lps::es_breadth, "b", true)
                    .add_value_short(lps::es_depth, "d")
