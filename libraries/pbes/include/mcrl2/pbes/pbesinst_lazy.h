@@ -195,13 +195,13 @@ class pbesinst_lazy_algorithm
     // \brief The number of iterations
     std::size_t m_iteration_count = 0;
 
-    /// \brief Prints a log message for every 1000-th equation
-    static std::string print_equation_count(std::size_t size)
+    // \brief Returns a status message about the progress
+    virtual std::string status_message(std::size_t equation_count)
     {
-      if (size > 0 && size % 1000 == 0)
+      if (equation_count > 0 && equation_count % 1000 == 0)
       {
         std::ostringstream out;
-        out << "Generated " << size << " BES equations" << std::endl;
+        out << "Generated " << equation_count << " BES equations" << std::endl;
         return out.str();
       }
       return "";
@@ -357,7 +357,7 @@ class pbesinst_lazy_algorithm
       while (!todo.elements().empty())
       {
         ++m_iteration_count;
-        mCRL2log(log::status) << print_equation_count(m_iteration_count);
+        mCRL2log(log::status) << status_message(m_iteration_count);
         detail::check_bes_equation_limit(m_iteration_count);
 
         propositional_variable_instantiation X_e = next_todo();

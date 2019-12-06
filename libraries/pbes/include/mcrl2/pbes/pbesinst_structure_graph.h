@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_PBESINST_STRUCTURE_GRAPH_H
 #define MCRL2_PBES_PBESINST_STRUCTURE_GRAPH_H
 
+#include <iomanip>
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/join.h"
 #include "mcrl2/pbes/pbesinst_lazy.h"
@@ -94,6 +95,18 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
         }
       }
       return vertex_psi;
+    }
+
+    std::string status_message(std::size_t equation_count) override
+    {
+      if (equation_count > 0 && equation_count % 1000 == 0)
+      {
+        std::ostringstream out;
+        out << "Generated " << equation_count << " BES equations (" << std::fixed << std::setprecision(2) <<
+          ((100.0 * equation_count) / m_graph_builder.extent()) << "% explored)" << std::endl;
+        return out.str();
+      }
+      return "";
     }
 
   public:
