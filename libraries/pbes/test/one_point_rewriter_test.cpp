@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE(ticket_1388)
     "init X;\n"
     ;
   p = txt2pbes(text, normalize);
-  pbes_rewrite(p, R);
+  replace_pbes_expressions(p, R, false);
   BOOST_CHECK(p.is_closed() && p.is_well_typed());
 
   text =
@@ -123,6 +123,6 @@ BOOST_AUTO_TEST_CASE(ticket_1388)
     "init X;"
     ;
   p = txt2pbes(text, normalize);
-  pbes_rewrite(p, R);
+  replace_pbes_expressions(p, R, false);
   BOOST_CHECK(p.is_closed() && p.is_well_typed());
 }

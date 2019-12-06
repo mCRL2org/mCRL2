@@ -76,7 +76,8 @@ void pbesrewr(const std::string& input_filename,
     {
       // apply the one point rule rewriter
       one_point_rule_rewriter pbesr;
-      pbes_rewrite(p, pbesr);
+      bool innermost = false;
+      replace_pbes_expressions(p, pbesr, innermost); // use replace, since the one point rule rewriter does the recursion itself
 
       // post processing: apply the simplifying rewriter
       simplify_data_rewriter<data::rewriter> simp(datar);

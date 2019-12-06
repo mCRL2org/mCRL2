@@ -164,7 +164,7 @@ struct rewrite_pbes_one_point_rule_rewriter_command: public pbes_system::detail:
   {
     pbes_system::detail::pbes_command::execute();
     pbes_system::one_point_rule_rewriter R;
-    pbes_rewrite(pbesspec, R);
+    replace_pbes_expressions(pbesspec, R, false);
     pbes_system::detail::save_pbes(pbesspec, output_filename);
   }
 };

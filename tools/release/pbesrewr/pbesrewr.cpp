@@ -49,7 +49,7 @@ class pbes_rewriter : public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool
       )
     {}
 
-    bool run()
+    bool run() override
     {
       using namespace pbes_system;
       using namespace utilities;

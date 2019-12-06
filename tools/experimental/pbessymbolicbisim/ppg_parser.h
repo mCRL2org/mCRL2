@@ -328,7 +328,7 @@ public:
     // Apply the one point rewriter since the ppg rewriter may
     // leave nested quantification, which this parse doesn't
     // deal with.
-    pbes_rewrite(q, one_point_rule_rewriter());
+    replace_pbes_expressions(q, one_point_rule_rewriter(), false);
 
     // Group equations by fixpoint symbol. Each mu group gets its
     // own instances of X_false. Each nu group gets its own instances

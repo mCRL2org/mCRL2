@@ -103,7 +103,8 @@ void one_point_rule_rewrite(pbes& p)
 
   // apply the one point rule rewriter
   pbes_system::one_point_rule_rewriter pbesr;
-  pbes_rewrite(p, pbesr);
+  bool innermost = false;
+  replace_pbes_expressions(p, pbesr, innermost);
 
   // post processing: apply the simplifying rewriter
   simplify_data_rewriter<data::rewriter> simp(datar);
