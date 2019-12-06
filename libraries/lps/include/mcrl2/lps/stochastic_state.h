@@ -65,7 +65,7 @@ std::string print_probability(const data::data_expression& x)
 }
 
 inline
-void check_probability(const data::data_expression& x)
+void check_probability(const data::data_expression& x, const data::rewriter& rewr)
 {
   const auto& x_ = atermpp::down_cast<data::application>(x);
   if (x_.head().size() != 3)
@@ -76,16 +76,23 @@ void check_probability(const data::data_expression& x)
   {
     throw mcrl2::runtime_error("Probability is not a closed expression with a proper enumerator and denominator: " + data::pp(x) + ".");
   }
+  if (rewr(data::greater_equal(x, real_zero())) != data::sort_bool::true_())
+  {
+    throw mcrl2::runtime_error("Probability is smaller than zero: " + data::pp(x) + ".");
+  }
+  if (rewr(data::greater_equal(real_one(), x)) != data::sort_bool::true_())
+  {
+    throw mcrl2::runtime_error("Probability is greater than one: " + data::pp(x) + ".");
+  }
 }
 
 inline
 void check_stochastic_state(const stochastic_state& s, const data::rewriter& rewr)
 {
-  // TODO: check if the probabilities are positive?
   data::data_expression probability = real_zero();
   for (const data::data_expression& prob: s.probabilities)
   {
-    check_probability(prob);
+    check_probability(prob, rewr);
     probability = data::sort_real::plus(probability, prob);
   }
   probability = rewr(probability);
@@ -96,7 +103,7 @@ void check_stochastic_state(const stochastic_state& s, const data::rewriter& rew
     {
       v.push_back(print_probability(prob));
     }
-    throw mcrl2::runtime_error("The probabilities " + core::detail::print_list(v) + " add up to " + data::pp(probability) + ".");
+    throw mcrl2::runtime_error("The probabilities " + core::detail::print_list(v) + " do not add up to one.");
   }
 }
 
