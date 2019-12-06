@@ -426,7 +426,10 @@ class explorer: public abortable
                     [](const data::data_expression& x) { return x == real_zero(); }
         );
         data::remove_assignments(m_sigma, distribution.variables());
-        check_stochastic_state(result, m_rewr);
+        if (m_options.check_probabilities)
+        {
+          check_stochastic_state(result, m_rewr);
+        }
       }
       else
       {

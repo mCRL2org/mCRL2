@@ -37,6 +37,7 @@ struct explorer_options
   bool detect_nondeterminism = false;
   bool detect_divergence = false;
   bool detect_action = false;
+  bool check_probabilities = false;
   bool save_error_trace = true;
   bool generate_traces = false;
   bool suppress_progress_messages = false;
@@ -65,6 +66,7 @@ std::ostream& operator<<(std::ostream& out, const explorer_options& options)
   out << "resolve-summand-variable-name-clashes = " << std::boolalpha << options.resolve_summand_variable_name_clashes << std::endl;
   out << "replace-constants-by-variables = " << std::boolalpha << options.replace_constants_by_variables << std::endl;
   out << "remove-unused-rewrite-rules = " << std::boolalpha << options.remove_unused_rewrite_rules << std::endl;
+  out << "check-probabilities = " << std::boolalpha << options.check_probabilities << std::endl;
   out << "detect-deadlock = " << std::boolalpha << options.detect_deadlock << std::endl;
   out << "detect-nondeterminism = " << std::boolalpha << options.detect_nondeterminism << std::endl;
   out << "detect-divergence = " << std::boolalpha << options.detect_divergence << std::endl;
