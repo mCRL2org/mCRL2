@@ -1,0 +1,38 @@
+% Knuth's dancing links.
+
+% MAX is the maximal element allowed in the list.
+% So, there can be MAX+1 elements in the list.
+% The maps remove and insert represent predecessors and successors
+% of the data structure.
+% In the defining equations, function updates are used to model
+% the remove and insert pointer operations.
+% For experiments, the initial left and right pointers of the doubly linked lists are
+% represented using d_full.
+
+sort D = struct pair(L: Nat -> Nat, R: Nat -> Nat);
+
+map MAX: Nat;
+eqn MAX = 4;
+
+map remove,insert: Nat # D -> D;
+var x: Nat; p: D;
+eqn remove(x, p) = pair(L(p)[R(p)(x) -> L(p)(x)], R(p)[L(p)(x) -> R(p)(x)]);
+    insert(x, p) = pair(L(p)[R(p)(x) -> x], R(p)[L(p)(x) -> x]);
+
+act do_remove, do_insert: Nat;
+    left, right: Nat # Nat;
+
+% CHECK ALLOWING THE FIRST ELEMENT TO BE REMOVED.
+proc UseListWith0(d: D, stack: List(Nat))=
+  sum x: Nat. (x <= MAX && !(x in stack)) ->
+    do_remove(x).UseListWith0(remove(x, d), x |> stack) +
+  (stack != []) -> do_insert(head(stack)).
+    UseListWith0(insert(head(stack), d), tail(stack)) +
+  sum x: Nat. (x <= MAX && !(x in stack)) ->
+    (left(x, L(d)(x)) + right(x, R(d)(x))).UseListWith0(d, stack);
+
+map d_full: D;
+eqn d_full = pair(lambda n:Nat.if(n == 0, MAX, max(0, n - 1)),
+                  lambda n:Nat.if(n == MAX, 0, n + 1));
+
+init UseListWith0(d_full,[]);

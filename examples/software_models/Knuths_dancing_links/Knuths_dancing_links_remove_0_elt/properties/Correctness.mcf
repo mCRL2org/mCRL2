@@ -1,0 +1,19 @@
+nu X(s: Set(Nat) = {n: Nat | n <= MAX}).
+  (forall x: Nat. [do_insert(x)](val(!(x in s)) && X(s + {x})) &&
+                  [do_remove(x)](val(x in s) && X(s - {x}))) &&
+  (forall x,x': Nat. val(x in s) =>
+    [right(x,x')]( X(s) && val(x' in s) &&
+      forall x'': Nat.(
+         val(x < x'' && x'' < x')
+      || val(x' <= x && x < x'' && x'' <= MAX)
+      || val(x' <= x && 0 <= x'' && x'' < x')
+      ) => val(!(x'' in s)) )
+  ) &&
+  (forall x,x': Nat. val(x in s) =>
+    [left(x,x')]( X(s) && val(x' in s) &&
+      forall x'': Nat.(
+         val(x' < x'' && x'' < x)
+      || val(x <= x' && x' < x'' && x'' <= MAX)
+      || val(x <= x' && 0 < x'' && x'' < x)
+      ) => val(!(x'' in s)) )
+  )

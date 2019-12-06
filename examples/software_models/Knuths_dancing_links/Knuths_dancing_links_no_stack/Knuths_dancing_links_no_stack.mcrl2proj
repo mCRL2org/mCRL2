@@ -1,0 +1,6 @@
+<root>
+ <spec>Knuths_dancing_links_no_stack_spec.mcrl2</spec>
+ <properties>
+  <property>Correctness</property>
+ </properties>
+</root>
