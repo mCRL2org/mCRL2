@@ -351,37 +351,36 @@ class check_complexity
     static unsigned char log_n;
 
     /// \brief calculate the base-2 logarithm, rounded down
-    constexpr static int ilog2(state_type size)
+    /// \details The function cannot be constexpr because std::log2() may have
+    /// the side effect of setting `errno`.
+    static int ilog2(state_type size)
     {
         #ifdef __GNUC__
-            if constexpr (sizeof(unsigned) == sizeof(state_type))
+            if constexpr (sizeof(unsigned) == sizeof(size))
             {
-                return sizeof(unsigned) * CHAR_BIT - 1 - __builtin_clz(size);
+                return sizeof(size) * CHAR_BIT - 1 - __builtin_clz(size);
             }
-            else if constexpr (sizeof(unsigned long) == sizeof(state_type))
+            else if constexpr (sizeof(unsigned long) == sizeof(size))
             {
-                return sizeof(unsigned long)*CHAR_BIT-1 - __builtin_clzl(size);
+                return sizeof(size) * CHAR_BIT - 1 - __builtin_clzl(size);
             }
-            else if constexpr(sizeof(unsigned long long) == sizeof(state_type))
+            else if constexpr(sizeof(unsigned long long) == sizeof(size))
             {
-                return sizeof(unsigned long long) * CHAR_BIT - 1 -
-                                                         __builtin_clzll(size);
+                return sizeof(size) * CHAR_BIT - 1 - __builtin_clzll(size);
             }
-            else
         //#elif defined(_MSC_VER)
-        //    if constexpr (sizeof(long) == sizeof(state_type))
+        //    if constexpr (sizeof(long) == sizeof(size))
         //    {
         //        long result;
         //        _BitScanReverse(result, size);
         //        return result - 1;
         //    }
-        //    else if constexpr(sizeof(__int64) == sizeof(state_type))
+        //    else if constexpr(sizeof(__int64) == sizeof(size))
         //    {
         //        long result;
         //        _BitScanReverse64(result, size);
         //        return result - 1;
         //    }
-        //    else
         #endif
         return (int) std::log2(size);
     }
