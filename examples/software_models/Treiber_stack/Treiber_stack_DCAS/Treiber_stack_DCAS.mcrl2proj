@@ -1,0 +1,7 @@
+<root>
+ <spec>Treiber_stack_DCAS_spec.mcrl2</spec>
+ <properties>
+  <property>Correct release implies correct retrieve</property>
+  <property>Inevitably retrieve when two resources on the stack</property>
+ </properties>
+</root>

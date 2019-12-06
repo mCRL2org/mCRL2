@@ -1,0 +1,9 @@
+nu X(free: Set(Nat) = { n:Nat | 0 < n && n <= N }).
+  (forall id: ID, n: Nat.
+    [release(id, n)]X(free + {n}) &&
+    [retrieve(id, n)]X(free - {n})) &&
+  [!exists id: ID, n: Nat. (release(id, n) || retrieve(id, n))]X(free) &&
+  (val(exists n: Nat. (n in free && free - {n} != {})) =>
+    mu Y.([(!exists id: ID, n: Nat. retrieve(id, n)) &&
+           (!exists id: ID, n: Nat. release(id, n))]Y &&
+      <!exists id: ID, n: Nat. release(id, n)>true))

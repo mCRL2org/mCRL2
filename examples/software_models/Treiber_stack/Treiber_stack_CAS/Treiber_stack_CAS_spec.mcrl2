@@ -1,0 +1,58 @@
+% Model of Treiber's stack that uses compare-and-swap (CAS) to access
+% shared variables.
+%
+% This is the model described in the paper
+% "Modelling and Analysing Software in mCRL2".
+%
+% This model contains a hard to spot error that can occur when retrieving
+% an element from the stack.
+%
+% Note that for N = 4, the model has about 300M states.
+
+sort ID = struct p1 | p2;
+map N: Nat;
+eqn N = 2;
+
+act set_next_r, set_next_s, set_next,
+    get_next_r, get_next_s, get_next: ID # Nat # Nat;
+    cmpswp_hd_r, cmpswp_hd_s, cmpswp_hd: ID # Nat # Nat # Bool;
+    get_head_r, get_head_s, get_head: ID # Nat;
+    nothing: ID;
+    retrieve, release: ID # Nat;
+
+proc
+  treibers_stack(hd: Nat, next: Nat -> Nat) =
+    sum id: ID, a,v: Nat. set_next_r(id, a, v).treibers_stack(hd, next[a -> v]) +
+    sum id: ID, a: Nat. get_next_s(id, a, next(a)).treibers_stack(hd, next) +
+    sum id: ID. get_head_s(id, hd).treibers_stack(hd, next) +
+    sum id: ID, v1,v2: Nat. cmpswp_hd_r(id, v1, v2, hd==v1).
+      treibers_stack(if(hd==v1, v2, hd), next);
+
+proc
+  release_elmnt(id: ID, v: Nat, owns: Set(Nat)) =
+    sum hd: Nat. get_head_r(id, hd).
+    set_next_s(id, v, hd).
+    sum b: Bool. cmpswp_hd_s(id, hd, v, b).
+    (b -> P(id, owns-{v})
+       <> release_elmnt(id, v, owns));
+
+  retrieve_elmnt(id: ID, owns: Set(Nat)) =
+    sum v: Nat. get_head_r(id, v).
+    ((v==0) -> nothing(id).P(id, owns)
+            <> (sum v_next: Nat. get_next_r(id, v, v_next).
+                sum b: Bool. cmpswp_hd_s(id, v, v_next, b).
+                (b -> retrieve(id,v).P(id, owns+{v})
+                   <> retrieve_elmnt(id, owns))));
+
+  P(id: ID, owns: Set(Nat)) =
+    retrieve_elmnt(id, owns) +
+    sum v: Nat. (v in owns) -> release(id, v).release_elmnt(id, v, owns);
+
+init allow({ set_next, get_next, cmpswp_hd, get_head,
+             nothing, retrieve, release },
+       comm({ set_next_r|set_next_s -> set_next,
+              get_next_r|get_next_s -> get_next,
+              cmpswp_hd_r|cmpswp_hd_s -> cmpswp_hd,
+              get_head_r|get_head_s -> get_head },
+         treibers_stack(N, lambda l: Nat. max(0, l-1)) ||
+         P(p1, {}) || P(p2, {})));

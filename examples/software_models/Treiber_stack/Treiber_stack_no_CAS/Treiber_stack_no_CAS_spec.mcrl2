@@ -1,0 +1,57 @@
+% Straightforward model of Treiber's stack.
+% In this model, standard read/write operations of shared variables are used
+% that are appropriate for sequentially obtaining elements from the stack, and
+% returning elements to the stack. However, these operations do not work in parallel.
+%
+% Treiber described an algorithm which uses compare-and-swap (CAS) instead, and
+% showed that even that can be problematic.
+% The CAS model is in Treiber_stack_CAS.
+
+sort ID = struct p1 | p2;
+map N: Nat;
+eqn N = 2;
+
+act set_next_r, set_next_s, set_next,
+    get_next_r, get_next_s, get_next: ID # Nat # Nat;
+    set_head_r, set_head_s, set_head,
+    get_head_r, get_head_s, get_head: ID # Nat;
+    nothing: ID;
+    retrieve, release: ID # Nat;
+
+proc
+  treibers_stack(hd: Nat, next: Nat -> Nat) =
+    sum id: ID, a,v: Nat. set_next_r(id, a, v).treibers_stack(hd, next[a -> v]) +
+    sum id: ID, a: Nat. get_next_s(id, a, next(a)).treibers_stack(hd, next) +
+    sum id: ID, v: Nat. set_head_r(id, v).treibers_stack(v, next) +
+    sum id: ID. get_head_s(id, hd).treibers_stack(hd, next) +
+
+proc
+  release_elmnt(id: ID, v: Nat, owns: Set(Nat)) =
+    sum hd: Nat. get_head_r(id, hd).
+    set_next_s(id, v, hd).
+    set_head_s(id, v).
+    P(id, owns-{v});
+
+  retrieve_elmnt(id: ID, owns: Set(Nat)) =
+    sum v: Nat. get_head_r(id, v).
+    ((v==0) -> nothing(id).P(id, owns)
+            <> (sum v_next: Nat. get_next_r(id, v, v_next).
+                set_head_s(id, v_next).
+                retrieve(id,v).P(id, owns+{v})));
+
+  P(id: ID, owns: Set(Nat)) =
+    retrieve_elmnt(id, owns) +
+    sum v: Nat. (v in owns) -> release(id, v).release_elmnt(id, v, owns);
+
+proc P(id:ID, nodes:FSet(Nat)) =
+         retrieve_node(id,nodes) +
+         sum v:Nat.(v in nodes)->release(id,v).release_node(id,v,nodes);
+
+init allow({ set_next, get_next, cmpswp_hd, get_head,
+             nothing, retrieve, release },
+       comm({ set_next_r|set_next_s -> set_next,
+              get_next_r|get_next_s -> get_next,
+              set_next_r|set_next_s -> set_next,
+              get_head_r|get_head_s -> get_head },
+         treibers_stack(N, lambda l: Nat. max(0, l-1)) ||
+         P(p1, {}) || P(p2, {})));
