@@ -212,9 +212,18 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       options.discard_lts_state_labels              = parser.has_option("no-info");
       options.search_strategy = parser.option_argument_as<lps::exploration_strategy>("strategy");
 
+      // highway search
       if (parser.has_option("todo-max"))
       {
         options.todo_max = parser.option_argument_as<std::size_t>("todo-max");
+      }
+      if (options.search_strategy == lps::es_highway && !parser.has_option("todo-max"))
+      {
+        parser.error("Search strategy 'highway' requires that the option todo-max is set");
+      }
+      if (options.search_strategy != lps::es_highway && parser.has_option("todo-max"))
+      {
+        parser.error("Option 'todo-max' can only be used in combination with highway search");
       }
 
       if (parser.has_option("out"))
@@ -280,10 +289,6 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
         parser.error("Too many file arguments.");
       }
 
-      if (options.search_strategy == lps::es_highway && !parser.has_option("todo-max"))
-      {
-        parser.error("Search strategy 'highway' requires that the option todo-max is set");
-      }
       options.rewrite_strategy = rewrite_strategy();
 
       if (options.save_aut_at_end && (output_filename().empty() || output_format != lts::lts_aut))
