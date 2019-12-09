@@ -47,7 +47,7 @@ struct stochastic_lts_builder
   virtual void add_transition(std::size_t from, const process::timed_multi_action& a, const std::list<std::size_t>& targets, const std::vector<data::data_expression>& probabilities) = 0;
 
   // Add actions and states to the LTS
-  virtual void finalize(const utilities::indexed_set<lps::state>& state_map) = 0;
+  virtual void finalize(const utilities::indexed_set<lps::state>& state_map, bool timed) = 0;
 
   // Save the LTS to a file
   virtual void save(const std::string& filename) = 0;
@@ -64,7 +64,7 @@ class stochastic_lts_none_builder: public stochastic_lts_builder
     void add_transition(std::size_t /* from */, const process::timed_multi_action& /* a */, const std::list<std::size_t>& /* targets */, const std::vector<data::data_expression>& /* probabilities */) override
     {}
 
-    void finalize(const utilities::indexed_set<lps::state>& /* state_map */) override
+    void finalize(const utilities::indexed_set<lps::state>& /* state_map */, bool /* timed */) override
     {}
 
     void save(const std::string& /* filename */) override
@@ -138,7 +138,7 @@ class stochastic_lts_aut_builder: public stochastic_lts_builder
     }
 
     // Add actions and states to the LTS
-    void finalize(const utilities::indexed_set<lps::state>& state_map) override
+    void finalize(const utilities::indexed_set<lps::state>& state_map, bool /* timed */) override
     {
       m_number_of_states = state_map.size();
     }
@@ -231,7 +231,7 @@ class stochastic_lts_lts_builder: public stochastic_lts_builder
     }
 
     // Add actions and states to the LTS
-    void finalize(const utilities::indexed_set<lps::state>& state_map) override
+    void finalize(const utilities::indexed_set<lps::state>& state_map, bool timed) override
     {
       // add actions
       m_lts.set_num_action_labels(m_actions.size());
@@ -247,7 +247,14 @@ class stochastic_lts_lts_builder: public stochastic_lts_builder
         std::vector<state_label_lts> state_labels(n);
         for (std::size_t i = 0; i < n; i++)
         {
-          state_labels[i] = state_label_lts(state_map[i]);
+          if (timed)
+          {
+            state_labels[i] = state_label_lts(remove_time_stamp(state_map[i]));
+          }
+          else
+          {
+            state_labels[i] = state_label_lts(state_map[i]);
+          }
         }
         m_lts.state_labels() = std::move(state_labels);
       }

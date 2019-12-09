@@ -19,6 +19,13 @@ namespace mcrl2 {
 
 namespace lts {
 
+/// \brief Removes the last element from state s
+inline
+lps::state remove_time_stamp(const lps::state& s)
+{
+  return lps::state(s.begin(), s.size() - 1);
+}
+
 struct lts_builder
 {
   // All LTS classes use integers to represent actions in transitions. A mapping from actions to integers
@@ -45,7 +52,7 @@ struct lts_builder
   virtual void add_transition(std::size_t from, const process::timed_multi_action& a, std::size_t to) = 0;
 
   // Add actions and states to the LTS
-  virtual void finalize(const utilities::indexed_set<lps::state>& state_map) = 0;
+  virtual void finalize(const utilities::indexed_set<lps::state>& state_map, bool timed) = 0;
 
   // Save the LTS to a file
   virtual void save(const std::string& filename) = 0;
@@ -59,7 +66,7 @@ class lts_none_builder: public lts_builder
     void add_transition(std::size_t /* from */, const process::timed_multi_action& /* a */, std::size_t /* to */) override
     {}
 
-    void finalize(const utilities::indexed_set<lps::state>& /* state_map */) override
+    void finalize(const utilities::indexed_set<lps::state>& /* state_map */, bool /* timed */) override
     {}
 
     void save(const std::string& /* filename */) override
@@ -81,7 +88,7 @@ class lts_aut_builder: public lts_builder
     }
 
     // Add actions and states to the LTS
-    void finalize(const utilities::indexed_set<lps::state>& state_map) override
+    void finalize(const utilities::indexed_set<lps::state>& state_map, bool /* timed */) override
     {
       // add actions
       m_lts.set_num_action_labels(m_actions.size());
@@ -124,7 +131,7 @@ class lts_aut_disk_builder: public lts_builder
     }
 
     // Add actions and states to the LTS
-    void finalize(const utilities::indexed_set<lps::state>& state_map) override
+    void finalize(const utilities::indexed_set<lps::state>& state_map, bool /* timed */) override
     {
       out.flush();
       out.seekp(0);
@@ -163,7 +170,7 @@ class lts_lts_builder: public lts_builder
     }
 
     // Add actions and states to the LTS
-    void finalize(const utilities::indexed_set<lps::state>& state_map) override
+    void finalize(const utilities::indexed_set<lps::state>& state_map, bool timed) override
     {
       // add actions
       m_lts.set_num_action_labels(m_actions.size());
@@ -179,7 +186,14 @@ class lts_lts_builder: public lts_builder
         std::vector<state_label_lts> state_labels(n);
         for (std::size_t i = 0; i < n; i++)
         {
-          state_labels[i] = state_label_lts(state_map[i]);
+          if (timed)
+          {
+            state_labels[i] = state_label_lts(remove_time_stamp(state_map[i]));
+          }
+          else
+          {
+            state_labels[i] = state_label_lts(state_map[i]);
+          }
         }
         m_lts.state_labels() = std::move(state_labels);
       }

@@ -724,7 +724,7 @@ struct state_space_generator
         }
       );
       m_progress_monitor.finish_exploration(explorer.state_map().size());
-      builder.finalize(explorer.state_map());
+      builder.finalize(explorer.state_map(), Timed);
     }
     catch (const data::enumerator_error& e)
     {
