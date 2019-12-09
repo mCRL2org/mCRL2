@@ -173,7 +173,7 @@ const char *check_complexity::work_names[TRANS_dnj_MAX - BLOCK_MIN + 1] =
     "split(), find predecessors of a state in the smaller subblock",
     "split(), while U-coroutine runs, find predecessors of a U-state",
     "split(), while R-coroutine runs, find predecessors of a R-state",
-    "prepare_for_postprocessing()",
+    "handle_new_noninert_transns()",
 
     // bunch counters (only for small bunches, i. e. bunches that have been
     // split off from a large bunch)
@@ -183,7 +183,7 @@ const char *check_complexity::work_names[TRANS_dnj_MAX - BLOCK_MIN + 1] =
     // part of a small bunch)
     "refine_partition_until_it_becomes_stable(), stabilize",
     "refine_partition_until_it_becomes_stable(), stabilize for large splitter",
-    "prepare_for_postprocessing(), make block_bunch-slice without bottom "
+    "handle_new_noninert_transns(), make block_bunch-slice without bottom "
                                          "states unstable (temporary counter)",
 
     // transition counters
@@ -195,9 +195,9 @@ const char *check_complexity::work_names[TRANS_dnj_MAX - BLOCK_MIN + 1] =
     "split(), while R-coroutine runs, handle a transition from a R-state",
     "split(), while R-coroutine runs, handle a transition to a R-state",
     "split(), the test for noninert transitions found a new bottom state",
-    "prepare_for_postprocessing(), make block_bunch-slice with bottom states "
+    "handle_new_noninert_transns(), make block_bunch-slice with bottom states "
                                                                     "unstable",
-    "prepare_for_postprocessing(), make block_bunch-slice without bottom "
+    "handle_new_noninert_transns(), make block_bunch-slice without bottom "
                                              "states unstable (final counter)",
     "refine_partition_until_it_becomes_stable(), stabilize block with bottom "
                                         "states for new non-inert transitions",
@@ -323,7 +323,7 @@ void check_complexity::test_work_names()
     test_work_name(i, split_U__find_predecessors_of_U_state);
     test_work_name(i, split_R__find_predecessors_of_R_state);
     assert(check_complexity::STATE_dnj_MAX_TEMP + 1 == i);
-    test_work_name(i, prepare_for_postprocessing);
+    test_work_name(i, handle_new_noninert_transns);
     assert(check_complexity::STATE_dnj_MAX + 1 == i);
 
     // bunch counters (only for small bunches, i. e. bunches that have been
@@ -339,7 +339,7 @@ void check_complexity::test_work_names()
     test_work_name(i,
                   refine_partition_until_stable__stabilize_for_large_splitter);
     assert(check_complexity::BLOCK_BUNCH_dnj_MIN_TEMP == i);
-    test_work_name(i, prepare_for_postprocessing__make_unstable_temp);
+    test_work_name(i, handle_new_noninert_transns__make_unstable_temp);
     assert(check_complexity::BLOCK_BUNCH_dnj_MAX_TEMP + 1 == i);
     assert(check_complexity::BLOCK_BUNCH_dnj_MAX + 1 == i);
 
@@ -355,8 +355,8 @@ void check_complexity::test_work_names()
     test_work_name(i, split_R__handle_transition_to_R_state);
     assert(check_complexity::TRANS_dnj_MAX_TEMP + 1 == i);
     test_work_name(i, split__test_noninert_transitions_found_new_bottom_state);
-    test_work_name(i, prepare_for_postprocessing__make_unstable_a_priori);
-    test_work_name(i, prepare_for_postprocessing__make_unstable_a_posteriori);
+    test_work_name(i, handle_new_noninert_transns__make_unstable_a_priori);
+    test_work_name(i, handle_new_noninert_transns__make_unstable_a_posteriori);
     test_work_name(i,
                refine_partition_until_stable__stabilize_new_noninert_a_priori);
     test_work_name(i,

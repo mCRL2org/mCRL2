@@ -265,7 +265,7 @@ class check_complexity
         for_all_old_bottom_states_s_in_RedB_4_15,
                 TRANS_MAX = for_all_old_bottom_states_s_in_RedB_4_15,
 
-        /*-------------- counters for the bisim_dnj algorithm --------------*/
+        /*-------------- counters for the bisim_jgkw algorithm --------------*/
 
         // block counters
             // Block counters are used to assign some work to each state in the
@@ -290,8 +290,8 @@ class check_complexity
         // temporary state counters (R-coroutine):
         split_R__find_predecessors_of_R_state,
                     STATE_dnj_MAX_TEMP = split_R__find_predecessors_of_R_state,
-        prepare_for_postprocessing,
-                    STATE_dnj_MAX = prepare_for_postprocessing,
+        handle_new_noninert_transns,
+                    STATE_dnj_MAX = handle_new_noninert_transns,
 
         // bunch counters (only for small bunches, i. e. bunches that have been
         // split off from a large bunch)
@@ -304,13 +304,13 @@ class check_complexity
         refine_partition_until_stable__stabilize,
                   BLOCK_BUNCH_dnj_MIN=refine_partition_until_stable__stabilize,
         refine_partition_until_stable__stabilize_for_large_splitter,
-        prepare_for_postprocessing__make_unstable_temp,
+        handle_new_noninert_transns__make_unstable_temp,
                     BLOCK_BUNCH_dnj_MIN_TEMP =
-                                prepare_for_postprocessing__make_unstable_temp,
+                               handle_new_noninert_transns__make_unstable_temp,
                     BLOCK_BUNCH_dnj_MAX_TEMP =
-                                prepare_for_postprocessing__make_unstable_temp,
+                               handle_new_noninert_transns__make_unstable_temp,
                     BLOCK_BUNCH_dnj_MAX =
-                                prepare_for_postprocessing__make_unstable_temp,
+                               handle_new_noninert_transns__make_unstable_temp,
 
         // transition counters
             // If every transition of a state is handled by some loop, we
@@ -334,8 +334,8 @@ class check_complexity
 
         // transition counters for new bottom states:
         split__test_noninert_transitions_found_new_bottom_state,
-        prepare_for_postprocessing__make_unstable_a_priori,
-        prepare_for_postprocessing__make_unstable_a_posteriori,
+        handle_new_noninert_transns__make_unstable_a_priori,
+        handle_new_noninert_transns__make_unstable_a_posteriori,
         refine_partition_until_stable__stabilize_new_noninert_a_priori,
         refine_partition_until_stable__stabilize_new_noninert_a_posteriori,
             TRANS_dnj_MAX =
