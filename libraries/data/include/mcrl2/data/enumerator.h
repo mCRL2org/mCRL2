@@ -674,7 +674,7 @@ class enumerator_algorithm
           const variable fset_variable(id_generator(), sort_fset::fset(element_sort));
           data_expression e = sort_set::constructor(element_sort, lambda_term, fset_variable);
           sigma[v1] = e;
-          if (add_element(v_tail, phi, v1, e))
+          if (add_element_with_variables(v_tail, { fset_variable }, phi, v1, e))
           {
             sigma[v1] = v1;
             return true;
