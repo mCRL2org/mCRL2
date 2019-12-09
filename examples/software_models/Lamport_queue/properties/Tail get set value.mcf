@@ -1,0 +1,2 @@
+[true*] forall i: Nat. [set_tail(i).!(exists j: Nat.set_tail(j))*]
+    forall i': Nat.[get_tail(i')] val(i==i')

@@ -1,0 +1,1 @@
+[true*] forall i :Nat. [set_head(i)] val(i<N)

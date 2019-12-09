@@ -1,0 +1,17 @@
+<root>
+ <spec>Lamport_queue_spec.mcrl2</spec>
+ <properties>
+  <property>Queue behaviour</property>
+  <property>Push always terminates</property>
+  <property>Push can terminate</property>
+  <property>Head get set value</property>
+  <property>Head not set out of bounds</property>
+  <property>No out of bounds write</property>
+  <property>Pop always terminates</property>
+  <property>Pop can terminate</property>
+  <property>Tail get set value</property>
+  <property>Tail not set out of bounds</property>
+  <property>Tail not read out of bounds</property>
+  <property>No out of bounds read</property>
+ </properties>
+</root>

@@ -1,0 +1,1 @@
+[true*.call_pop.!exists v: Value. ret_pop(v)*]<!exists v: Value. ret_pop(v)* . exists v: Value. ret_pop(v)>true

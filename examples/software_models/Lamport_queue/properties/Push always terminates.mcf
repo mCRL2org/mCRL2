@@ -1,0 +1,3 @@
+% Property does not assume fairness, and therefore
+% does not hold.
+[true*.exists v: Value. call_push(v)]( mu X.[!ret_push]X && <true>true )

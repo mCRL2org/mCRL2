@@ -1,0 +1,6 @@
+nu X(q: List(Value) = []).
+  [ret_push](val(#q <= N)) &&
+  forall v: Value.
+    [call_push(v)](val(v != garbage) && X(v |> q)) &&
+    [ret_pop(v)](val(q != [] && v == rhead(q)) && X(rtail(q))) &&
+  [!(exists v': Value. call_push(v') || ret_pop(v'))] X(q)

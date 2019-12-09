@@ -1,0 +1,1 @@
+[true*.exists v: Value. call_push(v).!ret_push*]<!ret_push* . ret_push>true

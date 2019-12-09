@@ -1,0 +1,2 @@
+[true*] forall i: Nat. [set_head(i).!(exists j: Nat.set_head(j))*]
+    forall i': Nat.[get_head(i')] val(i==i')
