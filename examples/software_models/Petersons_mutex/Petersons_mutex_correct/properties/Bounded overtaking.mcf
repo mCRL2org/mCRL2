@@ -1,0 +1,2 @@
+[true*] forall id: Nat. [wish(id)]
+  ( nu Y(n: Nat = 0). val(n<=2) && [!enter(id)]Y(n) && [enter(other(id))]Y(n+1) )

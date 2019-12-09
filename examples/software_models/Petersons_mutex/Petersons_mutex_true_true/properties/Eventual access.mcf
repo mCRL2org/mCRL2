@@ -1,0 +1,1 @@
+[true*] forall id: Nat. [wish(id)]( mu Y. [!enter(id)]Y && <true>true )

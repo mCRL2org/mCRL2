@@ -1,0 +1,2 @@
+[true*.(exists id1: Nat. enter(id1)).(!exists id2 :Nat. leave(id2))*.
+  (exists id3: Nat. enter(id3))]false
