@@ -188,6 +188,7 @@ class stochastic_lts_lts_builder: public stochastic_lts_builder
   protected:
     probabilistic_lts_lts_t m_lts;
     bool m_discard_state_labels = false;
+    probabilistic_state<std::size_t, lps::probabilistic_data_expression> m_initial_state;
 
   public:
     stochastic_lts_lts_builder(
@@ -218,7 +219,7 @@ class stochastic_lts_lts_builder: public stochastic_lts_builder
     // Set the initial (stochastic) state of the LTS
     void set_initial_state(const std::list<std::size_t>& targets, const std::vector<data::data_expression>& probabilities) override
     {
-      m_lts.set_initial_probabilistic_state(make_probabilistic_state(targets, probabilities));
+      m_initial_state = make_probabilistic_state(targets, probabilities);
     }
 
     // Add a transition to the LTS
@@ -260,12 +261,29 @@ class stochastic_lts_lts_builder: public stochastic_lts_builder
       }
 
       m_lts.set_num_states(state_map.size(), true);
+      m_lts.set_initial_probabilistic_state(m_initial_state); // This can't be done at the start :-(
     }
 
     // Save the LTS to a file
     void save(const std::string& filename) override
     {
       m_lts.save(filename);
+    }
+};
+
+class stochastic_lts_fsm_builder: public stochastic_lts_lts_builder
+{
+  public:
+    typedef stochastic_lts_lts_builder super;
+    stochastic_lts_fsm_builder(const data::data_specification& dataspec, const process::action_label_list& action_labels, const data::variable_list& process_parameters)
+      : super(dataspec, action_labels, process_parameters)
+    { }
+
+    void save(const std::string& filename) override
+    {
+      probabilistic_lts_fsm_t fsm;
+      detail::lts_convert(m_lts, fsm);
+      fsm.save(filename);
     }
 };
 
