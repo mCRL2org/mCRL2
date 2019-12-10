@@ -372,10 +372,7 @@ class explorer: public abortable
       Specification result = lpsspec;
       detail::instantiate_global_variables(result);
       lps::order_summand_variables(result);
-      if (m_options.resolve_summand_variable_name_clashes)
-      {
-        resolve_summand_variable_name_clashes(result);
-      }
+      resolve_summand_variable_name_clashes(result); // N.B. This is a required preprocessing step.
       if (m_options.one_point_rule_rewrite)
       {
         one_point_rule_rewrite(result);

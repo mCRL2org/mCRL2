@@ -48,7 +48,6 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       desc.add_hidden_option("no-remove-unused-rewrite-rules", "do not remove unused rewrite rules. ", 'u');
       desc.add_hidden_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
       desc.add_hidden_option("no-replace-constants-by-variables", "do not move constant expressions to a substitution");
-      desc.add_hidden_option("no-resolve-summand-variable-name-clashes", "do not resolve summand variable name clashes");
       desc.add_option("no-probability-checking", "do not check if probabilities in stochastic specifications have sensible values");
       desc.add_hidden_option("dfs-recursive", "use recursive depth first search for divergence detection");
       desc.add_option("cached", "use enumeration caching techniques to speed up state space generation. ");
@@ -203,7 +202,6 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       options.one_point_rule_rewrite                = !parser.has_option("no-one-point-rule-rewrite");
       options.remove_unused_rewrite_rules           = !parser.has_option("no-remove-unused-rewrite-rules");
       options.replace_constants_by_variables        = !parser.has_option("no-replace-constants-by-variables");
-      options.resolve_summand_variable_name_clashes = !parser.has_option("no-resolve-summand-variable-name-clashes");
       options.check_probabilities                   = !parser.has_option("no-probability-checking");
       options.detect_deadlock                       = parser.has_option("deadlock");
       options.detect_nondeterminism                 = parser.has_option("nondeterminism");
