@@ -34,17 +34,17 @@ class pbes_constelm_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_
   protected:
     typedef pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool> > > > super;
 
-    bool m_compute_conditions;
-    bool m_remove_redundant_equations;
+    bool m_compute_conditions = false;
+    bool m_remove_redundant_equations = false;
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
       m_compute_conditions = parser.options.count("compute-conditions") > 0;
       m_remove_redundant_equations = parser.options.count("remove-equations") > 0;
     }
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("compute-conditions", "compute propagation conditions", 'c');
@@ -62,7 +62,7 @@ class pbes_constelm_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_
       )
     {}
 
-    bool run()
+    bool run() override
     {
       mCRL2log(verbose) << "pbesconstelm parameters:" << std::endl;
       mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;

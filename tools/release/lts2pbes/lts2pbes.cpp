@@ -44,11 +44,11 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
   protected:
 
     std::string formfilename;
-    bool preprocess_modal_operators;
-    bool generate_counter_example;
+    bool preprocess_modal_operators = false;
+    bool generate_counter_example = false;
     lts::lts_lts_t l;
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
 
@@ -63,7 +63,7 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
       lts::detail::add_options(desc);
     }
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
 
@@ -90,7 +90,7 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
     {}
 
   public:
-    bool run()
+    bool run() override
     {
       lps::specification lpsspec = lts::detail::extract_specification(l);
       std::ifstream from(formfilename.c_str());

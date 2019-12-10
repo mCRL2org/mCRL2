@@ -35,7 +35,7 @@ class lpspp_tool: public input_output_tool
       m_format(print_default)
     {}
 
-    bool run()
+    bool run() override
     {
       lps::lpspp(input_filename(),
                  output_filename(),
@@ -47,9 +47,9 @@ class lpspp_tool: public input_output_tool
 
   protected:
     print_format_type m_format;
-    bool m_print_summand_numbers;
+    bool m_print_summand_numbers = false;
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("format", make_enum_argument<print_format_type>("FORMAT")
@@ -59,7 +59,7 @@ class lpspp_tool: public input_output_tool
       desc.add_option("print-summand_numbers", "print numbers in front of summands", 'n');
     }
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       input_output_tool::parse_options(parser);
       m_format = parser.option_argument_as<print_format_type>("format");

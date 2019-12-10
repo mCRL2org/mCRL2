@@ -30,7 +30,7 @@ class pbes_stategraph_tool: public pbes_input_tool<pbes_output_tool<rewriter_too
   protected:
     pbesstategraph_options options;
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
       options.rewrite_strategy = rewrite_strategy();
@@ -49,7 +49,7 @@ class pbes_stategraph_tool: public pbes_input_tool<pbes_output_tool<rewriter_too
       options.timer = &timer();
     }
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_hidden_option("no-simplify", "do not simplify the PBES during reduction (works only in combination with -g)", 's');
@@ -73,7 +73,7 @@ class pbes_stategraph_tool: public pbes_input_tool<pbes_output_tool<rewriter_too
       )
     {}
 
-    bool run()
+    bool run() override
     {
       mCRL2log(verbose) << "pbesstategraph parameters:" << std::endl;
       mCRL2log(verbose) << "  input file:                       " << m_input_filename << std::endl;

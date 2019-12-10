@@ -36,7 +36,7 @@ class lpsinfo_tool: public input_tool
 
   public:
 
-    bool run()
+    bool run() override
     {
       lpsinfo(input_filename(),
               input_file_message()

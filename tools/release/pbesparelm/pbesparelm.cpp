@@ -40,7 +40,7 @@ class pbes_parelm_tool: public pbes_input_tool<pbes_output_tool<input_output_too
       )
     {}
 
-    bool run() /*< The virtual function `run` executes the tool.
+    bool run() override /*< The virtual function `run` executes the tool.
                    The user has to override this function to add behavior. >*/
     {
       mCRL2log(verbose) << "pbesparelm parameters:" << std::endl;

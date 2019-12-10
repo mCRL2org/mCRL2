@@ -24,17 +24,6 @@ class lps_rewriter : public lps_rewriter_tool<rewriter_tool< input_output_tool >
   protected:
     typedef lps_rewriter_tool<rewriter_tool< input_output_tool > > super;
 
-    void add_options(utilities::interface_description& desc)
-    {
-      super::add_options(desc);
-    }
-
-    /// Parse the non-default options.
-    void parse_options(const utilities::command_line_parser& parser)
-    {
-      super::parse_options(parser);
-    }
-
   public:
     lps_rewriter()
       : super(
@@ -47,7 +36,7 @@ class lps_rewriter : public lps_rewriter_tool<rewriter_tool< input_output_tool >
       )
     {}
 
-    bool run()
+    bool run() override
     {
       using namespace utilities;
 

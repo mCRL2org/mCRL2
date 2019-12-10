@@ -38,7 +38,7 @@ class pbespp_tool: public pbes_input_tool<input_output_tool>
       format(core::print_default)
     {}
 
-    bool run()
+    bool run() override
     {
       pbes_system::pbespp(input_filename(),
                           output_filename(),
@@ -53,7 +53,7 @@ class pbespp_tool: public pbes_input_tool<input_output_tool>
     core::print_format_type  format;
     bool use_pfnf_printer = false;
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       input_output_tool::add_options(desc);
       desc.add_option("format", make_enum_argument<core::print_format_type>("FORMAT")
@@ -65,7 +65,7 @@ class pbespp_tool: public pbes_input_tool<input_output_tool>
                       'p');
     }
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
       format = parser.option_argument_as<core::print_format_type>("format");

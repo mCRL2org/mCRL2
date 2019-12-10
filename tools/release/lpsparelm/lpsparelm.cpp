@@ -31,7 +31,7 @@ class lps_parelm_tool : public input_output_tool
     {
     }
 
-    bool run()
+    bool run() override
     {
       lps::lpsparelm(input_filename(),
                      output_filename()
