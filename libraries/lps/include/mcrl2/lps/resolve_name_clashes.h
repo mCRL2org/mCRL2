@@ -47,9 +47,8 @@ std::set<core::identifier_string> variable_name_clashes(const VariableContainer&
   return result;
 }
 
-// resolves name clashes in an action_summand or deadlock_summand
-template <typename Summand>
-void resolve_summand_variable_name_clashes(Summand& summand, const std::set<core::identifier_string>& process_parameter_names, data::set_identifier_generator& generator)
+inline
+void resolve_summand_variable_name_clashes(action_summand& summand, const std::set<core::identifier_string>& process_parameter_names, data::set_identifier_generator& generator)
 {
   const data::variable_list& summation_variables = summand.summation_variables();
   std::set<core::identifier_string> names = variable_name_clashes(summation_variables, process_parameter_names);
@@ -67,6 +66,59 @@ void resolve_summand_variable_name_clashes(Summand& summand, const std::set<core
   }
 }
 
+inline
+void resolve_summand_variable_name_clashes(deadlock_summand& summand, const std::set<core::identifier_string>& process_parameter_names, data::set_identifier_generator& generator)
+{
+  const data::variable_list& summation_variables = summand.summation_variables();
+  std::set<core::identifier_string> names = variable_name_clashes(summation_variables, process_parameter_names);
+  if (!names.empty())
+  {
+    data::mutable_map_substitution<> sigma;
+    for (const data::variable& v: summation_variables)
+    {
+      if (process_parameter_names.find(v.name()) != process_parameter_names.end())
+      {
+        sigma[v] = data::variable(generator(v.name()), v.sort());
+      }
+    }
+    lps::replace_all_variables(summand, sigma);
+  }
+}
+
+inline
+void resolve_summand_variable_name_clashes(stochastic_action_summand& summand, const std::set<core::identifier_string>& process_parameter_names, data::set_identifier_generator& generator)
+{
+  data::mutable_map_substitution<> sigma;
+
+  // handle the summation variables
+  for (const data::variable& v: summand.summation_variables())
+  {
+    if (process_parameter_names.find(v.name()) != process_parameter_names.end())
+    {
+      sigma[v] = data::variable(generator(v.name()), v.sort());
+    }
+  }
+  if (!sigma.empty())
+  {
+    lps::replace_all_variables(summand, sigma);
+  }
+
+  // handle the distribution variables
+  sigma.clear();
+  for (const data::variable& v: summand.distribution().variables())
+  {
+    if (process_parameter_names.find(v.name()) != process_parameter_names.end())
+    {
+      sigma[v] = data::variable(generator(v.name()), v.sort());
+    }
+  }
+  if (!sigma.empty())
+  {
+    summand.distribution() = lps::replace_all_variables(summand.distribution(), sigma);
+    summand.assignments() = lps::replace_all_variables(summand.assignments(), sigma);
+  }
+}
+
 } // namespace detail
 
 /// \brief Renames summand variables such that there are no name clashes between summand variables and process parameters
@@ -80,12 +132,12 @@ void resolve_summand_variable_name_clashes(Specification& spec)
   generator.add_identifiers(lps::find_identifiers(spec));
   generator.add_identifiers(data::function_and_mapping_identifiers(spec.data()));
 
-  for (action_summand& s: proc.action_summands())
+  for (auto& s: proc.action_summands())
   {
     detail::resolve_summand_variable_name_clashes(s, process_parameter_names, generator);
   }
 
-  for (deadlock_summand& s: proc.deadlock_summands())
+  for (auto& s: proc.deadlock_summands())
   {
     detail::resolve_summand_variable_name_clashes(s, process_parameter_names, generator);
   }
