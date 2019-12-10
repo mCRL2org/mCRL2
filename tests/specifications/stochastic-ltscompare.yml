@@ -23,7 +23,7 @@ tools:
     input: [l2]
     output: [l4]
     args: []
-    name: generatelts17
+    name: generatelts
   t4:
     input: [l3, l4]
     output: []
