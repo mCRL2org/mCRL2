@@ -64,22 +64,6 @@ void generate_state_space(const Specification& lpsspec, LTSBuilder& builder, con
   builder.save(output_filename);
 }
 
-static inline
-exploration_strategy_vector initialise_exploration_strategies()
-{
-  exploration_strategy_vector result;
-  result.push_back(lps::es_breadth);
-  result.push_back(lps::es_depth);
-  return result;
-}
-
-static inline
-exploration_strategy_vector exploration_strategies()
-{
-  static exploration_strategy_vector exploration_strategies = initialise_exploration_strategies();
-  return exploration_strategies;
-}
-
 std::string file_extension(lts::lts_type output_format)
 {
   switch (output_format)
@@ -170,11 +154,6 @@ void check_lts(
 )
 {
   std::clog << "Translating LPS to LTS with exploration strategy " << estrategy << ", rewrite strategy " << rstrategy << "." << std::endl;
-
-  std::string outputfile3 = static_cast<std::string>(boost::unit_test::framework::current_test_case().p_name) + ".lps";
-  std::ofstream to(outputfile3);
-  stochastic_lpsspec.save(to);
-
   LTSType result1;
   LTSType result2;
   lts::lts_type output_format = result1.type();
@@ -193,8 +172,8 @@ void check_lts(
   BOOST_CHECK_EQUAL(result2.num_transitions(), expected_transitions);
   BOOST_CHECK_EQUAL(result2.num_action_labels(), expected_labels);
 
-//  std::remove(outputfile1.c_str());
-//  std::remove(outputfile2.c_str());
+  std::remove(outputfile1.c_str());
+  std::remove(outputfile2.c_str());
 }
 
 static void check_lps2lts_specification(const std::string& specification,
@@ -210,7 +189,7 @@ static void check_lps2lts_specification(const std::string& specification,
 
   for (data::rewrite_strategy rstrategy: data::detail::get_test_rewrite_strategies(false))
   {
-    for (lps::exploration_strategy estrategy: exploration_strategies())
+    for (lps::exploration_strategy estrategy: { lps::es_breadth, lps::es_depth })
     {
       if (contains_probabilities)
       {
