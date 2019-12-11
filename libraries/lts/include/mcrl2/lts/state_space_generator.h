@@ -475,7 +475,9 @@ class divergence_detector
               result = true;
             }
             mCRL2log(log::info) << ".\n";
-            explorer.abort();
+            //--- Workaround for Visual Studio 2019 ---//
+            // explorer.abort();
+            static_cast<lps::abortable&>(explorer).abort();
           }
         );
       }
@@ -509,7 +511,9 @@ class divergence_detector
               result = true;
             }
             mCRL2log(log::info) << ".\n";
-            explorer.abort();
+            //--- Workaround for Visual Studio 2019 ---//
+            // explorer.abort();
+            static_cast<lps::abortable&>(explorer).abort();
           }
         );
       }
