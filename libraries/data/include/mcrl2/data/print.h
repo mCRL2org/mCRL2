@@ -364,7 +364,7 @@ bool is_right_associative(const data_expression& x)
     return false;
   }
   const auto& x_ = atermpp::down_cast<application>(x);
-  return !detail::is_minus(x_);
+  return !detail::is_minus(x_) && !is_equal_to_application(x);
 }
 
 namespace detail
@@ -1668,7 +1668,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     else if (sort_real::is_creal_application(x))
     {
       data_expression numerator = sort_real::left(x);
-      data_expression denominator = sort_real::right(x);
+      const data_expression& denominator = sort_real::right(x);
       if (is_one(denominator))
       {
         derived().apply(numerator);
