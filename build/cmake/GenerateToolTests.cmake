@@ -126,7 +126,7 @@ function(gen_lps2lts_release_tests LPSFILE LTSFILES ACTIONS)
   #set(ARGUMENTS "-b10" "-ctau" "-D" "--error-trace" "--init-tsize=10" "-l10" "--no-info"
   #              "-rjitty" "-rjittyp" ${_JITTYC} "-sd" "-sb" "-sp" "-sq\;-l100" "-sr\;-l100"
   #              "--verbose\;--suppress" "--todo-max=10" "-u" "-yno")
-  set(ARGUMENTS "-ctau" "-D" "--error-trace" "--no-info"
+  set(ARGUMENTS "-ctau" "-D" "--error-trace"
                 "-rjitty" "-rjittyp" ${_JITTYC} "-sd" "-sb" "-sh\;--todo-max=100"
                 "--verbose\;--suppress" "-u")
   if(ACTIONS)
