@@ -41,7 +41,7 @@ std::unique_ptr<lts::lts_builder> create_lts_builder(const lps::specification& l
     case lts::lts_dot: return std::make_unique<lts::lts_dot_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters());
     case lts::lts_fsm: return std::make_unique<lts::lts_fsm_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters());
     case lts::lts_lts: return std::make_unique<lts::lts_lts_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters(), false);
-    default: return std::unique_ptr<lts::lts_builder>(new lts::lts_none_builder());
+    default: return std::make_unique<lts::lts_none_builder>();
   }
 }
 
@@ -52,7 +52,7 @@ std::unique_ptr<lts::stochastic_lts_builder> create_stochastic_lts_builder(const
     case lts::lts_aut: return std::make_unique<lts::stochastic_lts_aut_builder>();
     case lts::lts_lts: return std::make_unique<lts::stochastic_lts_lts_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters(), false);
     case lts::lts_fsm: return std::make_unique<lts::stochastic_lts_fsm_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters());
-    default: return std::unique_ptr<lts::stochastic_lts_builder>(new lts::stochastic_lts_none_builder());
+    default: return std::make_unique<lts::stochastic_lts_none_builder>();
   }
 }
 
