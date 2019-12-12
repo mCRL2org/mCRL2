@@ -275,6 +275,17 @@ class Lts2LpsTool(Tool):
         args.insert(1, '-l')
         return args
 
+class Lps2LtsDeprecatedTool(Tool):
+    def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
+        super(Lps2LtsDeprecatedTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
+
+    def assign_outputs(self):
+        self.value['has-deadlock'] = None
+        self.value['has-nondeterminism'] = None
+        self.value['has-divergence'] = None
+        self.value['actions'] = set([])
+        super(Lps2LtsDeprecatedTool, self).assign_outputs()
+
 class Lps2LtsTool(Tool):
     def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
         super(Lps2LtsTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
@@ -285,17 +296,6 @@ class Lps2LtsTool(Tool):
         self.value['has-divergence'] = None
         self.value['actions'] = set([])
         super(Lps2LtsTool, self).assign_outputs()
-
-class GenerateLtsTool(Tool):
-    def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
-        super(GenerateLtsTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
-
-    def assign_outputs(self):
-        self.value['has-deadlock'] = None
-        self.value['has-nondeterminism'] = None
-        self.value['has-divergence'] = None
-        self.value['actions'] = set([])
-        super(GenerateLtsTool, self).assign_outputs()
 
 class PbesSolveTool(Tool):
     def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
@@ -332,10 +332,10 @@ class ToolFactory(object):
             return Lps2PbesTool(label, name, toolpath, input_nodes, output_nodes, args)
         elif name == 'lts2pbes':
             return Lts2PbesTool(label, name, toolpath, input_nodes, output_nodes, args)
-        elif name == 'lps2lts':
+        elif name in ['generatelts', 'lps2lts']:
             return Lps2LtsTool(label, name, toolpath, input_nodes, output_nodes, args)
-        elif 'generatelts' in name:
-            return GenerateLtsTool(label, name, toolpath, input_nodes, output_nodes, args)
+        elif name == 'lps2ltsdeprecated':
+            return Lps2LtsDeprecatedTool(label, name, toolpath, input_nodes, output_nodes, args)
         elif name == 'lts2lps':
             return Lts2LpsTool(label, name, toolpath, input_nodes, output_nodes, args)
         elif name in ['pbespgsolve', 'bessolve']:

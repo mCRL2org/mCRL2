@@ -1,4 +1,4 @@
-// Author(s): Muck van Weerdenburg
+// Author(s): Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -6,377 +6,398 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file lps2lts_lts.cpp
-
-// NAME is defined in lps2lts.h
-#define AUTHOR "Muck van Weerdenburg"
+/// \file generatelts.cpp
 
 #include <csignal>
-
-#include "mcrl2/utilities/input_output_tool.h"
+#include <memory>
 #include "mcrl2/data/rewriter_tool.h"
+#include "mcrl2/lps/is_stochastic.h"
+#include "mcrl2/lts/lts_io.h"
+#include "mcrl2/lts/stochastic_lts_builder.h"
+#include "mcrl2/lts/state_space_generator.h"
+#include "mcrl2/utilities/input_output_tool.h"
 
-#include "mcrl2/lts/detail/exploration.h"
+using namespace mcrl2;
+using data::tools::rewriter_tool;
+using utilities::tools::input_output_tool;
 
-#ifdef MCRL2_DISPLAY_REWRITE_STATISTICS
-#include "mcrl2/data/detail/rewrite_statistics.h"
-#endif
-
-using namespace std;
-using namespace mcrl2::utilities::tools;
-using namespace mcrl2::utilities;
-using namespace mcrl2::core;
-using namespace mcrl2::lts;
-using namespace mcrl2::lps;
-using namespace mcrl2::log;
-
-using mcrl2::data::tools::rewriter_tool;
-
-static
-std::list<std::string> split_actions(const std::string& s)
+class generatelts_tool: public rewriter_tool<input_output_tool>
 {
-  std::size_t pcount = 0;
-  std::string a;
-  std::list<std::string> result;
-  for (std::string::const_iterator i = s.begin(); i != s.end(); ++i)
-  {
-    if (*i == ',' && pcount == 0)
-    {
-      result.push_back(a);
-      a.clear();
-    }
-    else
-    {
-      if (*i == '(') ++pcount;
-      else if (*i == ')') --pcount;
-      a.push_back(*i);
-    }
-  }
-  if (!a.empty())
-    result.push_back(a);
-  return result;
-}
+  typedef rewriter_tool<input_output_tool> super;
 
-typedef  rewriter_tool< input_output_tool > lps2lts_base;
-class lps2lts_tool : public lps2lts_base
-{
-  protected:
-    mcrl2::lts::lps2lts_algorithm m_lps2lts;
-    lts_generation_options m_options;
-    std::string m_filename;
+  lps::explorer_options options;
+  lts::lts_type output_format = lts::lts_none;
+  lps::abortable* current_explorer = nullptr;
+  std::set<std::string> trace_multiaction_strings;
 
   public:
+    generatelts_tool()
+      : super("lps2lts",
+              "Wieger Wesselink",
+              "generates an LTS from an LPS",
+              "Transforms the LPS in INFILE and writes a corresponding LTS in .aut format "
+              " to OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not "
+              " present, stdin is used."
+             )
+    {}
 
-    lps2lts_tool() :
-      lps2lts_base("lps2lts",AUTHOR,
-                   "generate an LTS from an LPS",
-                   "Generate an LTS from the LPS in INFILE and save the result to OUTFILE. "
-                   "If INFILE is not supplied, stdin is used. "
-                   "If OUTFILE is not supplied, the LTS is not stored.\n"
-                   "\n"
-                   "The format of OUTFILE is determined by its extension (unless it is specified "
-                   "by an option). The supported formats are:\n"
-                   "\n"
-                   +mcrl2::lts::detail::supported_lts_formats_text()+"\n"
-                   "If the jittyc rewriter is used, then the MCRL2_COMPILEREWRITER environment "
-                   "variable (default value: mcrl2compilerewriter) determines the script that "
-                   "compiles the rewriter, and MCRL2_COMPILEDIR (default value: '.') "
-                   "determines where temporary files are stored."
-                   "\n"
-                   "Note that lps2lts can deliver multiple transitions with the same "
-                   "label between any pair of states. If this is not desired, such "
-                   "transitions can be removed by applying a strong bisimulation reduction "
-                   "using for instance the tool ltsconvert."
-                  )
+    void add_options(utilities::interface_description& desc) override
     {
-    }
-
-    void abort()
-    {
-      m_lps2lts.abort();
-    }
-
-    bool run()
-    {
-      load_lps(m_options.specification, m_filename);
-      m_options.trace_prefix = m_filename.substr(0, m_options.trace_prefix.find_last_of('.'));
-
-      m_options.validate_actions(); // Throws an exception if actions are not properly declared.
-
-      try
-      {
-        m_lps2lts.generate_lts(m_options);
-      }
-      catch (const mcrl2::runtime_error& e)
-      {
-        mCRL2log(error) << e.what() << std::endl;
-        return false;
-      }
-
-      return true;
-    }
-
-  protected:
-    void add_options(interface_description& desc)
-    {
-      lps2lts_base::add_options(desc);
-
-      desc.
-      add_option("cached",
-                 "use enumeration caching techniques to speed up state space generation. ").
-      add_option("prune",
-                 "use summand pruning to speed up state space generation. ").
-      add_option("dummy", make_mandatory_argument("BOOL"),
-                 "replace free variables in the LPS with dummy values based on the value of BOOL: 'yes' (default) or 'no'. ", 'y').
-      add_option("unused-data",
-                 "do not remove unused parts of the data specification. ", 'u').
-      add_option("bit-hash", make_optional_argument("NUM", "200000000"),
-                 "use bit hashing to store states and store at most NUM states. "
-                 "This means that instead of keeping a full record of all states "
-                 "that have been visited, a bit array is used that indicate whether "
-                 "or not a hash of a state has been seen before. Although this means "
-                 "that this option may cause states to be mistaken for others (because "
-                 "they are mapped to the same hash), it can be useful to explore very "
-                 "large LTSs that are otherwise not explorable. The default value for NUM is "
-                 "2*10^8 (this corresponds to 25MB of memory). ",'b').
-      add_option("max", make_mandatory_argument("NUM"),
-                 "explore at most NUM states", 'l').
-      add_option("todo-max", make_mandatory_argument("NUM"),
-                 "keep at most NUM states in todo lists; this option is only relevant for "
-                 "breadth-first search, where NUM is the maximum number of states per "
-                 "level, and for depth first search, where NUM is the maximum depth. ").
-      add_option("nondeterminism",
-                 "detect nondeterministic states, i.e. states with outgoing transitions with the same label to different states. ", 'n').
-      add_option("deadlock",
-                 "detect deadlocks (i.e. for every deadlock a message is printed). ", 'D').
-      add_option("divergence",
-                 "detect divergences (i.e. for every state with a divergence (=tau loop) a message is printed). "
-                 "The algorithm to detect the divergences is linear for every state, "
-                 "so state space exploration becomes quadratic with this option on, causing a state "
-                 "space exploration to become slow when this option is enabled. ", 'F').
-      add_option("action", make_mandatory_argument("NAMES"),
-                 "report whether an action from NAMES occurs in the transitions system, "
-                 "where NAMES is a comma-separated list. A message "
-                 "is printed for every occurrence of one of these action names. "
-                 "With the -t flag traces towards these actions are generated. "
-                 "When using -tN only N traces are generated after which the generation of the state space stops. ", 'a').
-      add_option("multiaction", make_mandatory_argument("NAMES"),
-                 "detect and report multiactions in the transitions system "
-                 "from NAMES, a comma-separated list. Works like -a, except that multi-actions "
-                 "are matched exactly, including data parameters. ", 'm').
-      add_option("trace", make_optional_argument("NUM", std::to_string(lts_generation_options::default_max_traces)),
-                 "Write a shortest trace to each state that is reached with an action from NAMES "
-                 "with the option --action, is a deadlock with the option --deadlock, is nondeterministic with the option --nondeterminism, or is a "
-                 "divergence with the option --divergence to a file. "
-                 "No more than NUM traces will be written. If NUM is not supplied the number of "
-                 "traces is unbounded. "
-                 "For each trace that is to be written a unique file with extension .trc (trace) "
-                 "will be created containing a shortest trace from the initial state to the deadlock "
-                 "state. The traces can be pretty printed and converted to other formats using tracepp. ", 't').
-      add_option("error-trace",
+      super::add_options(desc);
+      desc.add_hidden_option("global-cache", "use a global cache");
+      desc.add_hidden_option("no-remove-unused-rewrite-rules", "do not remove unused rewrite rules. ", 'u');
+      desc.add_hidden_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
+      desc.add_hidden_option("no-replace-constants-by-variables", "do not move constant expressions to a substitution");
+      desc.add_option("no-probability-checking", "do not check if probabilities in stochastic specifications have sensible values");
+      desc.add_hidden_option("dfs-recursive", "use recursive depth first search for divergence detection");
+      desc.add_option("cached", "use enumeration caching techniques to speed up state space generation. ");
+      desc.add_option("todo-max", utilities::make_mandatory_argument("NUM"),
+                 "keep at most NUM states in the todo list; this option is only relevant for "
+                 "highway search, where NUM is the maximum number of states per level. ");
+      desc.add_option("nondeterminism", "report nondeterministic states, i.e. states with outgoing transitions"
+                 " with the same label to different states. The flag --trace can be used to generate traces to these nondeterministic states.", 'n');
+      desc.add_option("deadlock", "report deadlocks (i.e. states with no outgoing transitions). "
+                 "The flag --trace can be used to generate traces to these deadlocks.", 'D');
+      desc.add_option("divergence",
+                   "report divergences (i.e. states with a tau loop). "
+                   "The algorithm to detect divergences is linear for every state, "
+                   "so state space exploration becomes quadratic with this option enabled."
+                   "The flag --trace can be used to generate traces to these divergences.", 'F');
+      desc.add_option("action", utilities::make_mandatory_argument("NAMES"),
+                   "report actions in the transition system that occur in the "
+                   "comma-separated list of action names NAMES. The flag --trace can be used to generate traces to these actions.",
+                   'a');
+      desc.add_option("multiaction", utilities::make_mandatory_argument("NAMES"),
+                 "report occurrences of multi-actions in the transition system that occur in "
+                 "the comma-separated list of actions NAMES. Works like --action, except that multi-actions "
+                 "are matched exactly, including data parameters. The flag --trace can be used to generate traces "
+                 "to these multi-actions.", 'm');
+      desc.add_hidden_option("error-trace",
                  "if an error occurs during exploration, save a trace to the state that could "
-                 "not be explored. ").
-      add_option("confluence", make_optional_argument("NAME", "ctau"),
-                 "apply prioritization of transitions with the action label NAME. "
-                 "(when no NAME is supplied (i.e., '-c') priority is given to the action 'ctau'. To give priority to "
-                 "to tau use the flag -ctau. Note that if the linear process is not tau-confluent, the generated "
-                 "state space is necessarily branching bisimilar to the state space of the lps. The generation "
-                 "algorithm that is used does not require the linear process to be tau convergent. ", 'c').
-      add_option("strategy", make_enum_argument<mcrl2::lps::exploration_strategy>("NAME")
-                 .add_value_short(es_breadth, "b", true)
-                 .add_value_short(es_depth, "d")
-                 .add_value_short(es_value_prioritized, "p")
-                 .add_value_short(es_value_random_prioritized, "q")
-                 .add_value_short(es_random, "r")
-                 , "explore the state space using strategy NAME:"
-                 , 's').
-      add_option("out", make_mandatory_argument("FORMAT"),
-                 "save the output in the specified FORMAT. ", 'o').
-      add_option("no-info", "do not add state information to OUTFILE. "
-                 "Without this option lps2lts adds state vector to the LTS. This "
-                 "option causes this information to be discarded and states are only "
-                 "indicated by a sequence number. Explicit state information is useful "
-                 "for visualisation purposes, for instance, but can cause the OUTFILE "
-                 "to grow considerably. Note that this option is implicit when writing "
-                 "in the AUT format. ").
-      add_option("suppress","in verbose mode, do not print progress messages indicating the number of visited states and transitions. "
-                 "For large state spaces the number of progress messages can be quite "
-                 "horrendous. This feature helps to suppress those. Other verbose messages, "
-                 "such as the total number of states explored, just remain visible. ").
-      add_option("init-tsize", make_mandatory_argument("NUM"),
-                 "set the initial size of the internally used hash tables (default is 10000). ").
-      add_option("tau",make_mandatory_argument("ACTNAMES"),
-                 "consider actions with a name in the comma separated list ACTNAMES to be internal. "
-                 "This list is only used and allowed when searching for divergencies. ");
+                 "not be explored.");
+      desc.add_option("trace", utilities::make_optional_argument("NUM", std::to_string(std::numeric_limits<std::size_t>::max())),
+                 "write a trace to states that are reported using one of the flags "
+                 "--action, --deadlock, --divergence, --multiaction or --nondeterminism. "
+                 "No more than NUM traces will be written for each flag. If NUM is not supplied"
+                 " the number of traces is unbounded. "
+                 "For each trace a unique file with extension .trc (trace) "
+                 "will be created containing a shortest trace starting from the initial state. "
+                 "The traces can be pretty printed and converted to other formats using tracepp. "
+                 "If the maximum amount of traces has been reached, state space generation is aborted. "
+                 "There is no guarantee that the traces are fully contained in the partial state space."
+                 , 't');
+      desc.add_option("confluence", utilities::make_optional_argument("NAME", "ctau"),
+                 "apply prioritization of transitions with the action label NAME (default 'ctau'). "
+                 "To give priority "
+                 "to tau use the flag -ctau. Only if the linear process is tau-confluent, the generated "
+                 "state space is branching bisimilar to the state space of the lps. The generation "
+                 "algorithm that is used does not require the linear process to be tau convergent. ", 'c');
+      desc.add_option("out", utilities::make_mandatory_argument("FORMAT"), "save the output in the specified FORMAT. ", 'o');
+      desc.add_option("tau", utilities::make_mandatory_argument("NAMES"),
+                 "consider actions that occur in the comma-separated list of action names "
+                 "NAMES to be internal. This setting only affects the option --divergence.");
+      desc.add_option("strategy", utilities::make_enum_argument<lps::exploration_strategy>("NAME")
+                   .add_value_short(lps::es_breadth, "b", true)
+                   .add_value_short(lps::es_depth, "d")
+                   .add_value_short(lps::es_highway, "h")
+        , "explore the state space using strategy NAME:"
+        , 's');
+      desc.add_option("suppress","in verbose mode, do not print progress messages indicating the number of visited states and transitions.");
+      desc.add_option("save-at-end", "delay saving of the generated LTS until the end. "
+                 "This option only applies to .aut files, which are by default saved on the fly.");
+      desc.add_option("no-info", "do not add state label information to OUTFILE. This option only applies to .lts files.");
     }
 
-    void parse_options(const command_line_parser& parser)
+    static std::list<std::string> split_actions(const std::string& s)
     {
-      lps2lts_base::parse_options(parser);
-      m_options.removeunused    = parser.options.count("unused-data") == 0;
-      m_options.detect_deadlock = parser.options.count("deadlock") != 0;
-      m_options.detect_nondeterminism = parser.options.count("nondeterminism") != 0;
-      m_options.detect_divergence = parser.options.count("divergence") != 0;
-      m_options.outinfo         = parser.options.count("no-info") == 0;
-      m_options.suppress_progress_messages = parser.options.count("suppress") !=0;
-      m_options.strat           = parser.option_argument_as< mcrl2::data::rewriter::strategy >("rewriter");
-
-      m_options.use_enumeration_caching = parser.options.count("cached") > 0;
-      m_options.use_summand_pruning = parser.options.count("prune") > 0;
-
-      if (parser.options.count("dummy"))
+      std::size_t count = 0;
+      std::string a;
+      std::list<std::string> result;
+      for (char ch: s)
       {
-        if (parser.options.count("dummy") > 1)
+        if (ch == ',' && count == 0)
         {
-          parser.error("Multiple use of option -y/--dummy; only one occurrence is allowed.");
-        }
-        std::string dummy_str(parser.option_argument("dummy"));
-        if (dummy_str == "yes")
-        {
-          m_options.usedummies = true;
-        }
-        else if (dummy_str == "no")
-        {
-          m_options.usedummies = false;
+          result.push_back(a);
+          a.clear();
         }
         else
         {
-          parser.error("Option -y/--dummy has illegal argument '" + dummy_str + "'.");
+          if (ch == '(')
+          {
+            ++count;
+          }
+          else if (ch == ')')
+          {
+            --count;
+          }
+          a.push_back(ch);
+        }
+      }
+      if (!a.empty())
+      {
+        result.push_back(a);
+      }
+      return result;
+    }
+
+    void parse_trace_multiactions(const data::data_specification& dataspec, const process::action_label_list& action_labels)
+    {
+      for (const std::string& s: trace_multiaction_strings)
+      {
+        try
+        {
+          options.trace_multiactions.insert(mcrl2::lps::parse_multi_action(s, action_labels, dataspec));
+        }
+        catch (mcrl2::runtime_error& e)
+        {
+          throw mcrl2::runtime_error(std::string("Multi-action ") + s + " does not exist: " + e.what());
+        }
+        mCRL2log(log::verbose) << "Checking for action \"" << s << "\"\n";
+      }
+      if (options.detect_action)
+      {
+        for (const mcrl2::core::identifier_string& ta: options.trace_actions)
+        {
+          bool found = (std::string(ta) == "tau");
+          for(const process::action_label& al: action_labels)
+          {
+            if (al.name() == ta)
+            {
+              found = true;
+              break;
+            }
+          }
+          if (!found)
+          {
+            throw mcrl2::runtime_error(std::string("Action label ") + core::pp(ta) + " is not declared.");
+          }
+          else
+          {
+            mCRL2log(log::verbose) << "Checking for action " << ta << "\n";
+          }
+        }
+      }
+      for (const mcrl2::core::identifier_string& ta: options.actions_internal_for_divergencies)
+      {
+        mcrl2::process::action_label_list::iterator it = action_labels.begin();
+        bool found = (std::string(ta) == "tau");
+        while (!found && it != action_labels.end())
+        {
+          found = (it++->name() == ta);
+        }
+        if (!found)
+        {
+          throw mcrl2::runtime_error(std::string("Action label ") + core::pp(ta) + " is not declared.");
+        }
+      }
+    }
+
+    void parse_options(const utilities::command_line_parser& parser) override
+    {
+      super::parse_options(parser);
+      options.save_aut_at_end                       = parser.has_option("save-at-end");
+      options.cached                                = parser.has_option("cached");
+      options.global_cache                          = parser.has_option("global-cache");
+      options.confluence                            = parser.has_option("confluence");
+      options.one_point_rule_rewrite                = !parser.has_option("no-one-point-rule-rewrite");
+      options.remove_unused_rewrite_rules           = !parser.has_option("no-remove-unused-rewrite-rules");
+      options.replace_constants_by_variables        = !parser.has_option("no-replace-constants-by-variables");
+      options.check_probabilities                   = !parser.has_option("no-probability-checking");
+      options.detect_deadlock                       = parser.has_option("deadlock");
+      options.detect_nondeterminism                 = parser.has_option("nondeterminism");
+      options.detect_divergence                     = parser.has_option("divergence");
+      options.save_error_trace                      = parser.has_option("error-trace");
+      options.suppress_progress_messages            = parser.has_option("suppress");
+      options.dfs_recursive                         = parser.has_option("dfs-recursive");
+      options.discard_lts_state_labels              = parser.has_option("no-info");
+      options.search_strategy = parser.option_argument_as<lps::exploration_strategy>("strategy");
+
+      // highway search
+      if (parser.has_option("todo-max"))
+      {
+        options.todo_max = parser.option_argument_as<std::size_t>("todo-max");
+      }
+      if (options.search_strategy == lps::es_highway && !parser.has_option("todo-max"))
+      {
+        parser.error("Search strategy 'highway' requires that the option todo-max is set");
+      }
+      if (options.search_strategy != lps::es_highway && parser.has_option("todo-max"))
+      {
+        parser.error("Option 'todo-max' can only be used in combination with highway search");
+      }
+
+      if (parser.has_option("out"))
+      {
+        output_format = lts::detail::parse_format(parser.option_argument("out"));
+        if (output_format == lts::lts_none)
+        {
+          parser.error("Format '" + parser.option_argument("out") + "' is not recognised.");
         }
       }
 
-      if (parser.options.count("bit-hash"))
+      if (output_format == lts::lts_none && !output_filename().empty())
       {
-        m_options.bithashing  = true;
-        m_options.bithashsize = parser.option_argument_as< unsigned long > ("bit-hash");
-      }
-      if (parser.options.count("max"))
-      {
-        m_options.max_states = parser.option_argument_as< unsigned long > ("max");
-      }
-      if (parser.options.count("action"))
-      {
-        m_options.detect_action = true;
-        std::list<std::string> actions = split_actions(parser.option_argument("action"));
-        for (const std::string& s: actions)
+        output_format = lts::detail::guess_format(output_filename());
+        if (output_format == lts::lts_none)
         {
-          m_options.trace_actions.insert(mcrl2::core::identifier_string(s));
+          mCRL2log(log::warning) << "no output format set or detected; using default (lts)" << std::endl;
+          output_format = lts::lts_lts;
         }
       }
-      if (parser.options.count("multiaction"))
+
+      if (parser.has_option("action"))
+      {
+        options.detect_action = true;
+        for (const std::string& s: split_actions(parser.option_argument("action")))
+        {
+          options.trace_actions.insert(core::identifier_string(s));
+        }
+      }
+
+      if (parser.has_option("multiaction"))
       {
         std::list<std::string> actions = split_actions(parser.option_argument("multiaction"));
-        m_options.trace_multiaction_strings.insert(actions.begin(), actions.end());
+        trace_multiaction_strings.insert(actions.begin(), actions.end());
       }
-      if (parser.options.count("tau")>0)
+
+      if (parser.has_option("trace"))
       {
-        if (parser.options.count("divergence")==0)
+        options.generate_traces = true;
+        options.max_traces = parser.option_argument_as<std::size_t>("trace");
+      }
+
+      if (parser.has_option("tau"))
+      {
+        if (!parser.has_option("divergence"))
         {
           parser.error("Option --tau requires the option --divergence.");
         }
         std::list<std::string> actions = split_actions(parser.option_argument("tau"));
         for (const std::string& s: actions)
         {
-          m_options.actions_internal_for_divergencies.insert(mcrl2::core::identifier_string(s));
+          options.actions_internal_for_divergencies.insert(core::identifier_string(s));
         }
       }
-      if (parser.options.count("trace"))
-      {
-        m_options.trace      = true;
-        m_options.max_traces = parser.option_argument_as< unsigned long > ("trace");
-      }
-      if (parser.options.count("confluence"))
-      {
-        m_options.priority_action = parser.option_argument("confluence");
-      }
 
-      m_options.expl_strat = parser.option_argument_as<mcrl2::lps::exploration_strategy>("strategy");
-
-      if (parser.options.count("out"))
+      if (parser.has_option("confluence"))
       {
-        m_options.outformat = mcrl2::lts::detail::parse_format(parser.option_argument("out"));
-
-        if (m_options.outformat == lts_none)
-        {
-          parser.error("Format '" + parser.option_argument("out") + "' is not recognised.");
-        }
-      }
-      if (parser.options.count("init-tsize"))
-      {
-        m_options.initial_table_size = parser.option_argument_as< unsigned long >("init-tsize");
-      }
-      if (parser.options.count("todo-max"))
-      {
-        m_options.todo_max = parser.option_argument_as< unsigned long >("todo-max");
-      }
-      if (parser.options.count("error-trace"))
-      {
-        m_options.save_error_trace = true;
-      }
-
-      if (parser.options.count("suppress") && !mCRL2logEnabled(verbose))
-      {
-        parser.error("Option --suppress requires --verbose (of -v).");
+        options.confluence_action = parser.option_argument("confluence");
       }
 
       if (2 < parser.arguments.size())
       {
         parser.error("Too many file arguments.");
       }
-      if (0 < parser.arguments.size())
+
+      options.rewrite_strategy = rewrite_strategy();
+
+      if (options.save_aut_at_end && (output_filename().empty() || output_format != lts::lts_aut))
       {
-        m_filename = parser.arguments[0];
-      }
-      if (1 < parser.arguments.size())
-      {
-        m_options.lts = parser.arguments[1];
+        parser.error("Option '--save-at-end' requires that the output is in .aut format.");
       }
 
-      if (!m_options.lts.empty() && m_options.outformat == lts_none)
+      if (options.discard_lts_state_labels && (output_filename().empty() || output_format != lts::lts_lts))
       {
-        m_options.outformat = mcrl2::lts::detail::guess_format(m_options.lts);
-
-        if (m_options.outformat == lts_none)
-        {
-          mCRL2log(warning) << "no output format set or detected; using default (mcrl2)" << std::endl;
-          m_options.outformat = lts_lts;
-        }
+        parser.error("Option '--no-info' requires that the output is in .lts format.");
       }
     }
 
+    std::unique_ptr<lts::lts_builder> create_lts_builder(const lps::specification& lpsspec)
+    {
+      switch (output_format)
+      {
+        case lts::lts_aut:
+          {
+            return options.save_aut_at_end ? std::unique_ptr<lts::lts_builder>(new lts::lts_aut_disk_builder(output_filename()))
+                                           : std::unique_ptr<lts::lts_builder>(new lts::lts_aut_builder());
+          }
+        case lts::lts_dot: return std::make_unique<lts::lts_dot_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters());
+        case lts::lts_fsm: return std::make_unique<lts::lts_fsm_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters());
+        case lts::lts_lts: return std::make_unique<lts::lts_lts_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters(), options.discard_lts_state_labels);
+        default: return std::make_unique<lts::lts_none_builder>();
+      }
+    }
+
+    std::unique_ptr<lts::stochastic_lts_builder> create_stochastic_lts_builder(const lps::stochastic_specification& lpsspec)
+    {
+      switch (output_format)
+      {
+        case lts::lts_aut: return std::make_unique<lts::stochastic_lts_aut_builder>();
+        case lts::lts_lts: return std::make_unique<lts::stochastic_lts_lts_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters(), options.discard_lts_state_labels);
+        case lts::lts_fsm: return std::make_unique<lts::stochastic_lts_fsm_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters());
+        default: return std::make_unique<lts::stochastic_lts_none_builder>();
+      }
+    }
+
+    template <bool Stochastic, bool Timed, typename Specification, typename LTSBuilder>
+    void generate_state_space(const Specification& lpsspec, LTSBuilder& builder)
+    {
+      lts::state_space_generator<Stochastic, Timed, Specification> generator(lpsspec, options);
+      current_explorer = &generator.explorer;
+      generator.explore(builder);
+      builder.save(output_filename());
+    }
+
+    bool run() override
+    {
+      mCRL2log(log::verbose) << options << std::endl;
+      options.trace_prefix = input_filename();
+      lps::stochastic_specification stochastic_lpsspec;
+      lps::load_lps(stochastic_lpsspec, input_filename());
+      if (!trace_multiaction_strings.empty())
+      {
+        parse_trace_multiactions(stochastic_lpsspec.data(), stochastic_lpsspec.action_labels());
+      }
+      bool is_timed = stochastic_lpsspec.process().has_time();
+
+      if (lps::is_stochastic(stochastic_lpsspec))
+      {
+        auto builder = create_stochastic_lts_builder(stochastic_lpsspec);
+        if (is_timed)
+        {
+          generate_state_space<true, true>(stochastic_lpsspec, *builder);
+        }
+        else
+        {
+          generate_state_space<true, false>(stochastic_lpsspec, *builder);
+        }
+      }
+      else
+      {
+        lps::specification lpsspec = lps::remove_stochastic_operators(stochastic_lpsspec);
+        auto builder = create_lts_builder(lpsspec);
+        if (is_timed)
+        {
+          generate_state_space<false, true>(lpsspec, *builder);
+        }
+        else
+        {
+          generate_state_space<false, false>(lpsspec, *builder);
+        }
+      }
+      return true;
+    }
+
+    void abort()
+    {
+      current_explorer->abort();
+    }
 };
 
-lps2lts_tool *tool_instance;
+std::unique_ptr<generatelts_tool> tool_instance;
 
-static
-void premature_termination_handler(int)
+static void premature_termination_handler(int)
 {
   // Reset signal handlers.
-  signal(SIGABRT,NULL);
-  signal(SIGINT,NULL);
+  signal(SIGABRT, nullptr);
+  signal(SIGINT, nullptr);
   tool_instance->abort();
 }
 
 int main(int argc, char** argv)
 {
-  int result;
-  tool_instance = new lps2lts_tool();
-
-  signal(SIGABRT,premature_termination_handler);
-  signal(SIGINT,premature_termination_handler); // At ^C invoke the termination handler.
-
-  try
-  {
-    result = tool_instance->execute(argc, argv);
-#ifdef MCRL2_DISPLAY_REWRITE_STATISTICS
-    mcrl2::data::detail::display_rewrite_statistics();
-#endif
-  }
-  catch (...)
-  {
-    delete tool_instance;
-    throw;
-  }
-  delete tool_instance;
-  return result;
+  tool_instance = std::make_unique<generatelts_tool>();
+  signal(SIGABRT, premature_termination_handler);
+  signal(SIGINT, premature_termination_handler); // At ^C invoke the termination handler.
+  return tool_instance->execute(argc, argv);
 }

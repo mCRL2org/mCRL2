@@ -29,12 +29,12 @@ tools:
     input: [l2]
     output: [l4]
     args: []
-    name: lps2lts
+    name: lps2ltsdeprecated
   t4:
     input: [l3]
     output: [l5]
     args: [-c]
-    name: lps2lts
+    name: lps2ltsdeprecated
   t5:
     input: [l4, l5]
     output: []
@@ -44,12 +44,12 @@ tools:
     input: [l2]
     output: [l6]
     args: []
-    name: generatelts
+    name: lps2lts
   t7:
     input: [l3]
     output: [l7]
     args: [-c]
-    name: generatelts
+    name: lps2lts
   t8:
     input: [l6, l7]
     output: []

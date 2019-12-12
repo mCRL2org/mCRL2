@@ -18,12 +18,12 @@ tools:
     input: [l2]
     output: [l3]
     args: []
-    name: lps2lts
+    name: lps2ltsdeprecated
   t3:
     input: [l2]
     output: [l4]
     args: []
-    name: generatelts
+    name: lps2lts
 
 result: |
     result = True

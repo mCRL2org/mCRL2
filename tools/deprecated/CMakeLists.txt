@@ -1,5 +1,6 @@
 set(MCRL2_TOOLS
   formulacheck
+  lps2ltsdeprecated
   lps2torx
   lpsrealzone
   pbesabstract
