@@ -130,7 +130,6 @@ function(gen_lps2lts_release_tests LPSFILE LTSFILES ACTIONS)
                 "-rjitty" "-rjittyp" ${_JITTYC} "-sd" "-sb" "-sh\;--todo-max=100"
                 "--verbose\;--suppress" "-u")
   if(ACTIONS)
-  if(ACTIONS)
     list(GET ACTIONS 0 ACTION)
     list(APPEND ARGUMENTS "-a${ACTIONS}" "-c${ACTION}")
   endif()
