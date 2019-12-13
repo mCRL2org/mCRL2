@@ -1,5 +1,4 @@
-% The following PBES shows how overloading of propositional variables
-% can be used in PBESs.
+% Overloading of propositional variables is no longer allowed.
 
 pbes mu X            = X(true);
      nu X(b: Bool)   = X(b,false);
