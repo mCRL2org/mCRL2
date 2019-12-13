@@ -86,6 +86,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
                  "If the maximum amount of traces has been reached, state space generation is aborted. "
                  "There is no guarantee that the traces are fully contained in the partial state space."
                  , 't');
+      desc.add_option("max", utilities::make_mandatory_argument("NUM"), "explore at most NUM states", 'l');
       desc.add_option("confluence", utilities::make_optional_argument("NAME", "ctau"),
                  "apply prioritization of transitions with the action label NAME (default 'ctau'). "
                  "To give priority "
@@ -215,7 +216,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       // highway search
       if (parser.has_option("todo-max"))
       {
-        options.todo_max = parser.option_argument_as<std::size_t>("todo-max");
+        options.highway_todo_max = parser.option_argument_as<std::size_t>("todo-max");
       }
       if (options.search_strategy == lps::es_highway && !parser.has_option("todo-max"))
       {
@@ -264,6 +265,11 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       {
         options.generate_traces = true;
         options.max_traces = parser.option_argument_as<std::size_t>("trace");
+      }
+
+      if (parser.options.count("max"))
+      {
+        options.max_states = parser.option_argument_as<std::size_t>("max");
       }
 
       if (parser.has_option("tau"))

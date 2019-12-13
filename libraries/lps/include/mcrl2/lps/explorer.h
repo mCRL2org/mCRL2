@@ -648,7 +648,7 @@ class explorer: public abortable
       {
         case lps::es_breadth: return std::make_unique<breadth_first_todo_set>(init);
         case lps::es_depth: return std::make_unique<depth_first_todo_set>(init);
-        case lps::es_highway: return std::make_unique<highway_todo_set>(init, m_options.todo_max);
+        case lps::es_highway: return std::make_unique<highway_todo_set>(init, m_options.highway_todo_max);
         default: throw mcrl2::runtime_error("unsupported search strategy");
       }
     }
@@ -660,7 +660,7 @@ class explorer: public abortable
       {
         case lps::es_breadth: return std::make_unique<breadth_first_todo_set>(first, last);
         case lps::es_depth: return std::make_unique<depth_first_todo_set>(first, last);
-        case lps::es_highway: return std::make_unique<highway_todo_set>(first, last, m_options.todo_max);
+        case lps::es_highway: return std::make_unique<highway_todo_set>(first, last, m_options.highway_todo_max);
         default: throw mcrl2::runtime_error("unsupported search strategy");
       }
     }

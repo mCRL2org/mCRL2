@@ -215,7 +215,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       // highway search
       if (parser.has_option("todo-max"))
       {
-        options.todo_max = parser.option_argument_as<std::size_t>("todo-max");
+        options.highway_todo_max = parser.option_argument_as<std::size_t>("todo-max");
       }
       if (options.search_strategy == lps::es_highway && !parser.has_option("todo-max"))
       {
