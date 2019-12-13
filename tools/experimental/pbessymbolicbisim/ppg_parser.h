@@ -17,9 +17,10 @@
 #include "mcrl2/data/fourier_motzkin.h"
 #include "mcrl2/pbes/detail/ppg_rewriter.h"
 #include "mcrl2/pbes/detail/ppg_traverser.h"
+#include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/pbes2data_rewriter.h"
-#include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
+#include "mcrl2/pbes/rewriters/quantifiers_inside_rewriter.h"
 
 namespace mcrl2
 {
@@ -325,10 +326,10 @@ public:
       q = to_ppg(p);
       assert(is_ppg(q));
     }
-    // Apply the one point rewriter since the ppg rewriter may
+    // Apply the quantifier inside rewriter since the ppg rewriter may
     // leave nested quantification, which this parser doesn't
     // deal with.
-    replace_pbes_expressions(q, one_point_rule_rewriter(), false);
+    replace_pbes_expressions(q, quantifiers_inside_rewriter(), false);
 
     data::set_identifier_generator id_gen;
     for(auto& eq: p.equations())

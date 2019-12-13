@@ -13,6 +13,7 @@
 
 #include "mcrl2/smt/solver.h"
 #include "mcrl2/smt/translation_error.h"
+#include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 
 namespace mcrl2
 {
