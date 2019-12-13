@@ -26,36 +26,6 @@
 using namespace mcrl2;
 using namespace mcrl2::lps;
 
-// Configure rewrite strategies to be used.
-typedef mcrl2::data::rewrite_strategy rewrite_strategy;
-typedef std::vector<rewrite_strategy > rewrite_strategy_vector;
-
-// Configure exploration strategies to be tested;
-typedef std::vector<lps::exploration_strategy> exploration_strategy_vector;
-
-std::unique_ptr<lts::lts_builder> create_lts_builder(const lps::specification& lpsspec, lts::lts_type output_format)
-{
-  switch (output_format)
-  {
-    case lts::lts_aut: return std::make_unique<lts::lts_aut_builder>();
-    case lts::lts_dot: return std::make_unique<lts::lts_dot_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters());
-    case lts::lts_fsm: return std::make_unique<lts::lts_fsm_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters());
-    case lts::lts_lts: return std::make_unique<lts::lts_lts_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters(), false);
-    default: return std::make_unique<lts::lts_none_builder>();
-  }
-}
-
-std::unique_ptr<lts::stochastic_lts_builder> create_stochastic_lts_builder(const lps::stochastic_specification& lpsspec, lts::lts_type output_format)
-{
-  switch (output_format)
-  {
-    case lts::lts_aut: return std::make_unique<lts::stochastic_lts_aut_builder>();
-    case lts::lts_lts: return std::make_unique<lts::stochastic_lts_lts_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters(), false);
-    case lts::lts_fsm: return std::make_unique<lts::stochastic_lts_fsm_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters());
-    default: return std::make_unique<lts::stochastic_lts_none_builder>();
-  }
-}
-
 template <bool Stochastic, bool Timed, typename Specification, typename LTSBuilder>
 void generate_state_space(const Specification& lpsspec, LTSBuilder& builder, const std::string& output_filename, const lps::explorer_options& options)
 {
@@ -116,7 +86,7 @@ void run_generatelts(
 
   if (lps::is_stochastic(stochastic_lpsspec))
   {
-    auto builder = create_stochastic_lts_builder(stochastic_lpsspec, output_format);
+    auto builder = create_stochastic_lts_builder(stochastic_lpsspec, options, output_format);
     if (is_timed)
     {
       generate_state_space<true, true>(stochastic_lpsspec, *builder, outputfile, options);
@@ -129,7 +99,7 @@ void run_generatelts(
   else
   {
     lps::specification lpsspec = lps::remove_stochastic_operators(stochastic_lpsspec);
-    auto builder = create_lts_builder(lpsspec, output_format);
+    auto builder = create_lts_builder(lpsspec, options, output_format);
     if (is_timed)
     {
       generate_state_space<false, true>(lpsspec, *builder, outputfile, options);

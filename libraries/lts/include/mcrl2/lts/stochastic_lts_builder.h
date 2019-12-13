@@ -287,6 +287,18 @@ class stochastic_lts_fsm_builder: public stochastic_lts_lts_builder
     }
 };
 
+inline
+std::unique_ptr<stochastic_lts_builder> create_stochastic_lts_builder(const lps::stochastic_specification& lpsspec, const lps::explorer_options& options, lts_type output_format)
+{
+  switch (output_format)
+  {
+    case lts_aut: return std::make_unique<stochastic_lts_aut_builder>();
+    case lts_lts: return std::make_unique<stochastic_lts_lts_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters(), options.discard_lts_state_labels);
+    case lts_fsm: return std::make_unique<stochastic_lts_fsm_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters());
+    default: return std::make_unique<stochastic_lts_none_builder>();
+  }
+}
+
 } // namespace lts
 
 } // namespace mcrl2

@@ -240,6 +240,29 @@ class lts_fsm_builder: public lts_lts_builder
     }
 };
 
+inline
+std::unique_ptr<lts_builder> create_lts_builder(const lps::specification& lpsspec, const lps::explorer_options& options, lts_type output_format, const std::string& output_filename = "")
+{
+  switch (output_format)
+  {
+    case lts_aut:
+    {
+      if (options.save_aut_at_end)
+      {
+        std::make_unique<lts_aut_disk_builder>(output_filename);
+      }
+      else
+      {
+        return std::make_unique<lts_aut_builder>();
+      }
+    }
+    case lts_dot: return std::make_unique<lts_dot_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters());
+    case lts_fsm: return std::make_unique<lts_fsm_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters());
+    case lts_lts: return std::make_unique<lts_lts_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters(), options.discard_lts_state_labels);
+    default: return std::make_unique<lts_none_builder>();
+  }
+}
+
 } // namespace lts
 
 } // namespace mcrl2

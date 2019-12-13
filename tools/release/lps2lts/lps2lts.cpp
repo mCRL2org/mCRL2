@@ -302,33 +302,6 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       }
     }
 
-    std::unique_ptr<lts::lts_builder> create_lts_builder(const lps::specification& lpsspec)
-    {
-      switch (output_format)
-      {
-        case lts::lts_aut:
-          {
-            return options.save_aut_at_end ? std::unique_ptr<lts::lts_builder>(new lts::lts_aut_disk_builder(output_filename()))
-                                           : std::unique_ptr<lts::lts_builder>(new lts::lts_aut_builder());
-          }
-        case lts::lts_dot: return std::make_unique<lts::lts_dot_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters());
-        case lts::lts_fsm: return std::make_unique<lts::lts_fsm_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters());
-        case lts::lts_lts: return std::make_unique<lts::lts_lts_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters(), options.discard_lts_state_labels);
-        default: return std::make_unique<lts::lts_none_builder>();
-      }
-    }
-
-    std::unique_ptr<lts::stochastic_lts_builder> create_stochastic_lts_builder(const lps::stochastic_specification& lpsspec)
-    {
-      switch (output_format)
-      {
-        case lts::lts_aut: return std::make_unique<lts::stochastic_lts_aut_builder>();
-        case lts::lts_lts: return std::make_unique<lts::stochastic_lts_lts_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters(), options.discard_lts_state_labels);
-        case lts::lts_fsm: return std::make_unique<lts::stochastic_lts_fsm_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters());
-        default: return std::make_unique<lts::stochastic_lts_none_builder>();
-      }
-    }
-
     template <bool Stochastic, bool Timed, typename Specification, typename LTSBuilder>
     void generate_state_space(const Specification& lpsspec, LTSBuilder& builder)
     {
@@ -352,7 +325,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
 
       if (lps::is_stochastic(stochastic_lpsspec))
       {
-        auto builder = create_stochastic_lts_builder(stochastic_lpsspec);
+        auto builder = create_stochastic_lts_builder(stochastic_lpsspec, options, output_format);
         if (is_timed)
         {
           generate_state_space<true, true>(stochastic_lpsspec, *builder);
@@ -365,7 +338,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       else
       {
         lps::specification lpsspec = lps::remove_stochastic_operators(stochastic_lpsspec);
-        auto builder = create_lts_builder(lpsspec);
+        auto builder = create_lts_builder(lpsspec, options, output_format, output_filename());
         if (is_timed)
         {
           generate_state_space<false, true>(lpsspec, *builder);
