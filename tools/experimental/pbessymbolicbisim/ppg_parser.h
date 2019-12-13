@@ -326,15 +326,25 @@ public:
       assert(is_ppg(q));
     }
     // Apply the one point rewriter since the ppg rewriter may
-    // leave nested quantification, which this parse doesn't
+    // leave nested quantification, which this parser doesn't
     // deal with.
     replace_pbes_expressions(q, one_point_rule_rewriter(), false);
+
+    data::set_identifier_generator id_gen;
+    for(auto& eq: p.equations())
+    {
+      id_gen.add_identifier(eq.variable().name());
+    }
 
     // Group equations by fixpoint symbol. Each mu group gets its
     // own instances of X_false. Each nu group gets its own instances
     // of X_true.
     fixpoint_symbol previous_symbol(q.equations()[0].symbol());
     int rank = previous_symbol == fixpoint_symbol::nu() ? 0 : 1;
+
+    const std::string x_true_name = id_gen("X_true");
+    const std::string x_false_name = id_gen("X_false");
+
     std::string x_false_conj_name;
     std::string x_true_conj_name;
     std::string x_false_disj_name;
@@ -342,18 +352,18 @@ public:
     if(previous_symbol == fixpoint_symbol::mu())
     {
       // For a mu block we can only use local X_false
-      x_false_conj_name = "X_false_conj" + std::to_string(rank);
-      x_true_conj_name = "X_true";
-      x_false_disj_name = "X_false_disj" + std::to_string(rank);
-      x_true_disj_name = "X_true";
+      x_false_conj_name = id_gen("X_false_conj");
+      x_true_conj_name = x_true_name;
+      x_false_disj_name = id_gen("X_false_disj");
+      x_true_disj_name = x_true_name;
     }
     else
     {
       // For a nu block we can only use local X_true
-      x_false_conj_name = "X_false";
-      x_true_conj_name = "X_true_conj" + std::to_string(rank);
-      x_false_disj_name = "X_false";
-      x_true_disj_name = "X_true_disj" + std::to_string(rank);
+      x_false_conj_name = x_false_name;
+      x_true_conj_name = id_gen("X_true_conj");
+      x_false_disj_name = x_false_name;
+      x_true_disj_name = id_gen("X_true_disj");
     }
     for(const pbes_equation& eq: q.equations())
     {
@@ -371,18 +381,18 @@ public:
         if(previous_symbol == fixpoint_symbol::mu())
         {
           // For a mu block we can only use local X_false
-          x_false_conj_name = "X_false_conj" + std::to_string(rank);
-          x_true_conj_name = "X_true";
-          x_false_disj_name = "X_false_disj" + std::to_string(rank);
-          x_true_disj_name = "X_true";
+          x_false_conj_name = id_gen("X_false_conj");
+          x_true_conj_name = x_true_name;
+          x_false_disj_name = id_gen("X_false_disj");
+          x_true_disj_name = x_true_name;
         }
         else
         {
           // For a nu block we can only use local X_true
-          x_false_conj_name = "X_false";
-          x_true_conj_name = "X_true_conj" + std::to_string(rank);
-          x_false_disj_name = "X_false";
-          x_true_disj_name = "X_true_disj" + std::to_string(rank);
+          x_false_conj_name = x_false_name;
+          x_true_conj_name = id_gen("X_true_conj");
+          x_false_disj_name = x_false_name;
+          x_true_disj_name = id_gen("X_true_disj");
         }
       }
       m_equations.emplace_back(eq, x_false_conj_name, x_true_conj_name, x_false_disj_name, x_true_disj_name);
@@ -393,8 +403,8 @@ public:
 
     // Add global equations for X_true and X_false that are used throughout the
     // PBES
-    m_equations.emplace_back("X_false", fixpoint_symbol::mu(), true);
-    m_equations.emplace_back("X_true", fixpoint_symbol::nu(), true);
+    m_equations.emplace_back(x_false_name, fixpoint_symbol::mu(), true);
+    m_equations.emplace_back(x_true_name, fixpoint_symbol::nu(), true);
   }
 
   const std::vector<ppg_equation>& equations() const
