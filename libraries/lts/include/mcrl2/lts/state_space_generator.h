@@ -669,7 +669,9 @@ struct state_space_generator
           if (explorer.state_map().size() >= options.max_states)
           {
             mCRL2log(log::verbose) << "Explored the maximum number (" << options.max_states << ") of states, terminating." << std::endl;
-            explorer.abort();
+            //--- Workaround for Visual Studio 2019 ---//
+            // explorer.abort();
+            static_cast<lps::abortable&>(explorer).abort();
           }
         },
 
