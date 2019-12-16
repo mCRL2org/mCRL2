@@ -1,5 +1,5 @@
 <root>
- <spec>Petersons_mutex_true_true_spec.mcrl2</spec>
+ <spec>Petersons_F_F_spec.mcrl2</spec>
  <properties>
   <property>Mutual exclusion</property>
   <property>Eventual access</property>

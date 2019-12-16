@@ -1,0 +1,7 @@
+<root>
+ <spec>Treiber_CAS_spec.mcrl2</spec>
+ <properties>
+  <property>Correct release implies correct retrieve</property>
+  <property>Inevitably retrieve when stacksize is 2</property>
+ </properties>
+</root>
