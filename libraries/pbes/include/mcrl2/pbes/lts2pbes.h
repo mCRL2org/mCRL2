@@ -41,7 +41,7 @@ class lts2pbes_algorithm
 
   public:
     /// \brief Constructor.
-    lts2pbes_algorithm(const lts::lts_lts_t& l)
+    explicit lts2pbes_algorithm(const lts::lts_lts_t& l)
       : lts0(l), lts1(l)
     {}
 

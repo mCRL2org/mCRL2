@@ -55,15 +55,17 @@ void lps2pbes(const std::string& input_filename,
   }
   std::string text = utilities::read_text(from);
   state_formulas::state_formula_specification formspec = state_formulas::algorithms::parse_state_formula_specification(text, lpsspec);
+  mCRL2log(log::verbose) << "converting state formula and LPS to a PBES..." << std::endl;
+  pbes_system::pbes result = pbes_system::lps2pbes(lpsspec, formspec, timed, structured, unoptimized, preprocess_modal_operators, generate_counter_example, check_only);
+
   if (check_only)
   {
     mCRL2log(mcrl2::log::info)
-        << "the file '" << formula_filename
-        << "' contains a well-formed state formula" << std::endl;
+      << "the file '" << formula_filename
+      << "' contains a well-formed state formula" << std::endl;
     return;
   }
-  mCRL2log(log::verbose) << "converting state formula and LPS to a PBES..." << std::endl;
-  pbes_system::pbes result = pbes_system::lps2pbes(lpsspec, formspec, timed, structured, unoptimized, preprocess_modal_operators, generate_counter_example);
+
   if (output_filename.empty())
   {
     mCRL2log(log::verbose) << "writing PBES to stdout..." << std::endl;
