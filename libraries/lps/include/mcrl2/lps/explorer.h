@@ -681,7 +681,7 @@ class explorer: public abortable
 
     bool is_confluent_tau(const multi_action& a)
     {
-      if (a.actions().size() == 0)
+      if (a.actions().empty())
       {
         return m_options.confluence_action == "tau";
       }

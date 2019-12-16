@@ -639,6 +639,11 @@ struct state_space_generator
     }
   }
 
+  bool max_states_exceeded() const
+  {
+    return explorer.state_map().size() >= options.max_states;
+  }
+
   // Explore the specification passed via the constructor, and put the results in builder.
   template <typename LTSBuilder>
   void explore(LTSBuilder& builder)
@@ -666,7 +671,9 @@ struct state_space_generator
               m_divergence_detector->detect_divergence(s, s_index, m_trace_constructor, options.dfs_recursive);
             }
           }
-          if (explorer.state_map().size() >= options.max_states)
+          // if (explorer.state_map().size() >= options.max_states)
+          //--- Workaround for Visual Studio 2019 ---//
+          if (max_states_exceeded())
           {
             mCRL2log(log::verbose) << "Explored the maximum number (" << options.max_states << ") of states, terminating." << std::endl;
             //--- Workaround for Visual Studio 2019 ---//
