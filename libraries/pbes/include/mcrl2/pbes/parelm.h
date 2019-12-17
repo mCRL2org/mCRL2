@@ -15,8 +15,30 @@
 #include "mcrl2/utilities/detail/iota.h"
 #include "mcrl2/utilities/reachable_nodes.h"
 
-namespace mcrl2::pbes_system
+namespace mcrl2::pbes_system {
+
+namespace detail {
+
+/// \brief Finds the index of a variable in a sequence
+/// \param variables A sequence of data variables
+/// \param d A data variable
+/// \return The index of \p d in \p v, or -1 if the variable wasn't found
+inline
+int variable_index(const data::variable_list& variables, const data::variable& d)
 {
+  int index = 0;
+  for (const data::variable& v: variables)
+  {
+    if (v == d)
+    {
+      return index;
+    }
+    index++;
+  }
+  return -1;
+}
+
+} // namespace detail
 
 /// \brief Algorithm class for the parelm algorithm
 class pbes_parelm_algorithm
@@ -31,6 +53,90 @@ class pbes_parelm_algorithm
     /// \brief The edge type of the dependency graph
     typedef boost::graph_traits<graph>::edge_descriptor edge_descriptor;
 
+    struct parelm_dependency_traverser: public pbes_expression_traverser<parelm_dependency_traverser>
+    {
+      typedef pbes_expression_traverser<parelm_dependency_traverser> super;
+      using super::enter;
+      using super::leave;
+      using super::apply;
+
+      graph& G;
+      const std::map<core::identifier_string, std::size_t>& propvar_offsets;
+
+      core::identifier_string X;
+      data::variable_list Xparams;
+      std::multiset<data::variable> bound_variables;
+
+      parelm_dependency_traverser(graph& G_, const std::map<core::identifier_string, std::size_t>& propvar_offsets_)
+        : G(G_), propvar_offsets(propvar_offsets_)
+      {}
+
+      void enter(const forall& x)
+      {
+        for (const data::variable& v: x.variables())
+        {
+          bound_variables.insert(v);
+        }
+      }
+
+      void leave(const forall& x)
+      {
+        for (const data::variable& v: x.variables())
+        {
+          bound_variables.erase(v);
+        }
+      }
+
+      void enter(const exists& x)
+      {
+        for (const data::variable& v: x.variables())
+        {
+          bound_variables.insert(v);
+        }
+      }
+
+      void leave(const exists& x)
+      {
+        for (const data::variable& v: x.variables())
+        {
+          bound_variables.erase(v);
+        }
+      }
+
+      void apply(const propositional_variable_instantiation& x)
+      {
+        using utilities::detail::contains;
+
+        const core::identifier_string& Y = x.name();
+        int Yindex = 0;
+        for (const data::data_expression& e: x.parameters())
+        {
+          for (const data::variable& var: data::find_free_variables(e))
+          {
+            if (contains(bound_variables, var))
+            {
+              continue;
+            }
+            int Xindex = detail::variable_index(Xparams, var);
+            if (Xindex < 0)
+            {
+              continue;
+            }
+            // parameter (Y, Yindex) is influenced by (X, Xindex)
+            boost::add_edge(propvar_offsets.at(Y) + Yindex, propvar_offsets.at(X) + Xindex, G);
+          }
+          Yindex++;
+        }
+      }
+
+      void apply(const pbes_equation& eqn)
+      {
+        X = eqn.variable().name();
+        Xparams = eqn.variable().parameters();
+        super::apply(eqn);
+      }
+    };
+
     /// \brief Finds unbound variables in a pbes expression
     /// \param t A PBES expression
     /// \param bound_variables A sequence of data variables
@@ -39,24 +145,6 @@ class pbes_parelm_algorithm
     {
       bool search_propositional_variables = false;
       return detail::find_free_variables(t, bound_variables, search_propositional_variables);
-    }
-
-    /// \brief Finds the index of a variable in a sequence
-    /// \param variables A sequence of data variables
-    /// \param d A data variable
-    /// \return The index of \p d in \p v, or -1 if the variable wasn't found
-    static int variable_index(const data::variable_list& variables, const data::variable& d)
-    {
-      int index = 0;
-      for (const data::variable& v: variables)
-      {
-        if (v == d)
-        {
-          return index;
-        }
-        index++;
-      }
-      return -1;
     }
 
     /// \brief Finds the predicate variable to which the data parameter with the given index belongs.
@@ -78,6 +166,15 @@ class pbes_parelm_algorithm
         offset += eqn.variable().parameters().size();
       }
       return core::identifier_string("<not found>");
+    }
+
+    static void compute_dependency_graph(const pbes& p, const std::map<core::identifier_string, std::size_t>& propvar_offsets, graph& G)
+    {
+      parelm_dependency_traverser f(G, propvar_offsets);
+      for (const pbes_equation& eqn: p.equations())
+      {
+        f.apply(eqn);
+      }
     }
 
   public:
@@ -106,7 +203,7 @@ class pbes_parelm_algorithm
       {
         for (const data::variable& w: unbound_variables(eqn.formula(), global_variables))
         {
-          int k = variable_index(eqn.variable().parameters(), w);
+          int k = detail::variable_index(eqn.variable().parameters(), w);
           if (k < 0)
           {
             throw mcrl2::runtime_error("<variable error>" + data::pp(w));
@@ -116,37 +213,8 @@ class pbes_parelm_algorithm
         offset += eqn.variable().parameters().size();
       }
 
-      // compute the dependency graph G
       graph G(N);
-      for (pbes_equation& eqn: p.equations())
-      {
-        // left hand side (X)
-        core::identifier_string X = eqn.variable().name();
-        data::variable_list Xparams = eqn.variable().parameters();
-
-        // right hand side (Y)
-        pbes_expression phi = eqn.formula();
-        for (const propositional_variable_instantiation& propvar: find_propositional_variable_instantiations(phi))
-        {
-          const core::identifier_string& Y = propvar.name();
-          data::data_expression_list Yparams = propvar.parameters();
-          int Yindex = 0;
-          for (const data::data_expression& e: Yparams)
-          {
-            for (const data::variable& var: data::find_all_variables(e))
-            {
-              int Xindex = variable_index(Xparams, var);
-              if (Xindex < 0)
-              {
-                continue;
-              }
-              // parameter (Y, Yindex) is influenced by (X, Xindex)
-              boost::add_edge(propvar_offsets[Y] + Yindex, propvar_offsets[X] + Xindex, G);
-            }
-            Yindex++;
-          }
-        }
-      }
+      compute_dependency_graph(p, propvar_offsets, G);
 
       // compute the indices s of the parameters that need to be removed
       std::vector<std::size_t> r = utilities::reachable_nodes(G, significant_variables.begin(), significant_variables.end());
