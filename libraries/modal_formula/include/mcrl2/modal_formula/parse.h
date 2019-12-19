@@ -138,10 +138,10 @@ state_formula post_process_state_formula(
   {
     throw mcrl2::runtime_error("state formula is not monotonic: " + state_formulas::pp(x));
   }
-  if (options.resolve_name_clashes && has_name_clashes(x))
+  if (options.resolve_name_clashes && has_state_variable_name_clashes(x))
   {
     mCRL2log(log::debug) << "formula before resolving name clashes: " << x << std::endl;
-    x = state_formulas::resolve_name_clashes(x);
+    x = state_formulas::resolve_state_variable_name_clashes(x);
     mCRL2log(log::debug) << "formula after resolving name clashes: " << x << std::endl;
   }
   return x;

@@ -26,10 +26,10 @@ void run_monotonicity_test_case(const std::string& formula, const std::string& l
   options.check_monotonicity = false;
   options.resolve_name_clashes = false;
   state_formula f = parse_state_formula(formula, lpsspec, options);
-  if (state_formulas::has_name_clashes(f))
+  if (state_formulas::has_state_variable_name_clashes(f))
   {
     std::cerr << "Error: " << state_formulas::pp(f) << " has name clashes" << std::endl;
-    f = state_formulas::resolve_name_clashes(f);
+    f = state_formulas::resolve_state_variable_name_clashes(f);
     std::cerr << "resolved to " << state_formulas::pp(f) << std::endl;
   }
   BOOST_CHECK(is_monotonous(f) == expect_success);

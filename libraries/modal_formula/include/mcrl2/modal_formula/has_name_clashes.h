@@ -14,20 +14,16 @@
 
 #include "mcrl2/modal_formula/traverser.h"
 
-namespace mcrl2
-{
-
-namespace state_formulas
-{
+namespace mcrl2::state_formulas {
 
 namespace detail
 {
 
 /// \brief Traverser that checks for name clashes in nested mu's/nu's.
-class state_formula_name_clash_checker: public state_formulas::state_formula_traverser<state_formula_name_clash_checker>
+class state_variable_name_clash_checker: public state_formulas::state_formula_traverser<state_variable_name_clash_checker>
 {
   public:
-    typedef state_formulas::state_formula_traverser<state_formula_name_clash_checker> super;
+    typedef state_formulas::state_formula_traverser<state_variable_name_clash_checker> super;
 
     using super::apply;
     using super::enter;
@@ -45,7 +41,8 @@ class state_formula_name_clash_checker: public state_formulas::state_formula_tra
     /// \brief Pushes name on the stack.
     void push(const core::identifier_string& name)
     {
-      if (std::find(m_name_stack.begin(), m_name_stack.end(), name) != m_name_stack.end())
+      using utilities::detail::contains;
+      if (contains(m_name_stack, name))
       {
         throw mcrl2::runtime_error("nested propositional variable " + std::string(name) + " clashes");
       }
@@ -74,10 +71,10 @@ class state_formula_name_clash_checker: public state_formulas::state_formula_tra
 };
 
 /// \brief Traverser that checks for name clashes in parameters of nested mu's/nu's and forall/exists.
-class state_formula_parameter_name_clash_checker: public state_formulas::state_formula_traverser<state_formula_parameter_name_clash_checker>
+class state_formula_data_variable_name_clash_checker: public state_formulas::state_formula_traverser<state_formula_data_variable_name_clash_checker>
 {
   public:
-    typedef state_formulas::state_formula_traverser<state_formula_parameter_name_clash_checker> super;
+    typedef state_formulas::state_formula_traverser<state_formula_data_variable_name_clash_checker> super;
 
     using super::apply;
     using super::enter;
@@ -169,19 +166,19 @@ class state_formula_parameter_name_clash_checker: public state_formulas::state_f
 
 /// \brief Throws an exception if the formula contains name clashes
 inline
-void check_name_clashes(const state_formula& x)
+void check_state_variable_name_clashes(const state_formula& x)
 {
-  detail::state_formula_name_clash_checker checker;
+  detail::state_variable_name_clash_checker checker;
   checker.apply(x);
 }
 
 /// \brief Returns true if the formula contains name clashes
 inline
-bool has_name_clashes(const state_formula& x)
+bool has_state_variable_name_clashes(const state_formula& x)
 {
   try
   {
-    check_name_clashes(x);
+    check_state_variable_name_clashes(x);
   }
   catch (const mcrl2::runtime_error&)
   {
@@ -192,19 +189,19 @@ bool has_name_clashes(const state_formula& x)
 
 /// \brief Throws an exception if the formula contains name clashes in the parameters of mu/nu/exists/forall
 inline
-void check_parameter_name_clashes(const state_formula& x)
+void check_data_variable_name_clashes(const state_formula& x)
 {
-  detail::state_formula_parameter_name_clash_checker checker;
+  detail::state_formula_data_variable_name_clash_checker checker;
   checker.apply(x);
 }
 
 /// \brief Returns true if the formula contains parameter name clashes
 inline
-bool has_parameter_name_clashes(const state_formula& x)
+bool has_data_variable_name_clashes(const state_formula& x)
 {
   try
   {
-    check_parameter_name_clashes(x);
+    check_data_variable_name_clashes(x);
   }
   catch (const mcrl2::runtime_error&)
   {
@@ -213,8 +210,6 @@ bool has_parameter_name_clashes(const state_formula& x)
   return false;
 }
 
-} // namespace state_formulas
-
-} // namespace mcrl2
+} // namespace mcrl2::state_formulas
 
 #endif // MCRL2_MODAL_FORMULA_HAS_NAME_CLASHES_H

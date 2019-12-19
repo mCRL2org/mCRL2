@@ -394,8 +394,8 @@ BOOST_AUTO_TEST_CASE(check_parameter_name_clashes_test)
     ;
   lps::specification lpsspec = lps::parse_linear_process_specification(text);
 
-  BOOST_CHECK(has_parameter_name_clashes(parse_state_formula("nu X(n: Nat = 0). mu Y(n: Nat = 1). val(n == 0)", lpsspec)));
-  BOOST_CHECK(!has_parameter_name_clashes(parse_state_formula("nu X(n: Nat = 0). mu Y(m: Nat = 1). val(n == 0)", lpsspec)));
+  BOOST_CHECK(has_data_variable_name_clashes(parse_state_formula("nu X(n: Nat = 0). mu Y(n: Nat = 1). val(n == 0)", lpsspec)));
+  BOOST_CHECK(!has_data_variable_name_clashes(parse_state_formula("nu X(n: Nat = 0). mu Y(m: Nat = 1). val(n == 0)", lpsspec)));
 }
 
 BOOST_AUTO_TEST_CASE(parse_state_formula_specification_test)

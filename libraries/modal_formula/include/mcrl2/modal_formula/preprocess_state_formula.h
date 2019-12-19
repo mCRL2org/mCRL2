@@ -17,6 +17,7 @@
 #include "mcrl2/modal_formula/has_name_clashes.h"
 #include "mcrl2/modal_formula/is_monotonous.h"
 #include "mcrl2/modal_formula/normalize.h"
+#include "mcrl2/modal_formula/resolve_name_clashes.h"
 #include "mcrl2/modal_formula/state_formula_rename.h"
 
 namespace mcrl2
@@ -398,10 +399,14 @@ state_formulas::state_formula preprocess_state_formula(const state_formulas::sta
     mCRL2log(log::debug) << "formula after wrapping the formula inside a 'nu':  " << f << std::endl;
   }
 
-  mCRL2log(log::debug) << "formula after preprocessing:  " << f << std::endl;
+  // resolve name clashes like mu X(n: Nat). forall n: Nat
+  if (state_formulas::has_data_variable_name_clashes(f))
+  {
+    f = resolve_state_formula_data_variable_name_clashes(f, context_ids);
+    mCRL2log(log::debug) << "formula after removing data variable name clashes:  " << f << std::endl;
+  }
 
-  // check for parameter name clashes like these mu X(n: Nat). forall n: Nat
-  state_formulas::check_parameter_name_clashes(f);
+  mCRL2log(log::debug) << "formula after preprocessing:  " << f << std::endl;
 
   return f;
 }

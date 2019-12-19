@@ -13,18 +13,15 @@
 #define MCRL2_MODAL_FORMULA_RESOLVE_NAME_CLASHES_H
 
 #include "mcrl2/modal_formula/builder.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
-namespace mcrl2
-{
-
-namespace state_formulas
-{
+namespace mcrl2::state_formulas {
 
 namespace detail
 {
 
 template <typename Derived>
-class state_formula_name_clash_resolver: public state_formulas::state_formula_builder<Derived>
+class state_variable_name_clash_resolver: public state_formulas::state_formula_builder<Derived>
 {
   public:
     typedef state_formulas::state_formula_builder<Derived> super;
@@ -114,17 +111,176 @@ class state_formula_name_clash_resolver: public state_formulas::state_formula_bu
     }
 };
 
+class state_formula_data_variable_name_clash_resolver: public state_formulas::data_expression_builder<state_formula_data_variable_name_clash_resolver>
+{
+  public:
+    typedef state_formulas::data_expression_builder<state_formula_data_variable_name_clash_resolver> super;
+
+    using super::enter;
+    using super::leave;
+    using super::apply;
+
+    data::set_identifier_generator& generator;
+    std::multiset<data::variable> bound_variables;
+    std::map<data::variable, std::vector<data::variable>> substitutions;
+
+    explicit state_formula_data_variable_name_clash_resolver(data::set_identifier_generator& generator_)
+     : generator(generator_)
+    {}
+
+    void insert(const data::variable& v)
+    {
+      if (utilities::detail::contains(bound_variables, v))
+      {
+        substitutions[v].push_back(data::variable(generator(v.name()), v.sort()));
+      }
+      bound_variables.insert(v);
+    }
+
+    void erase(const data::variable& v)
+    {
+      bound_variables.erase(v);
+      auto i = substitutions.find(v);
+      if (i != substitutions.end())
+      {
+        i->second.pop_back();
+        if (i->second.empty())
+        {
+          substitutions.erase(i);
+        }
+      }
+    }
+
+    data::assignment_list apply_assignments(const data::assignment_list& x)
+    {
+      auto sigma = [&](const data::variable& v) -> data::data_expression
+      {
+        auto i = substitutions.find(v);
+        if (i == substitutions.end())
+        {
+          return v;
+        }
+        return i->second.back();
+      };
+
+      return data::assignment_list(x.begin(), x.end(), [&](const data::assignment& a)
+        {
+          return data::assignment(atermpp::down_cast<data::variable>(sigma(a.lhs())), data::replace_free_variables(a.rhs(), sigma));
+        }
+      );
+    }
+
+    data::variable_list apply_variables(const data::variable_list& x)
+    {
+      auto sigma = [&](const data::variable& v) -> data::data_expression
+      {
+        auto i = substitutions.find(v);
+        if (i == substitutions.end())
+        {
+          return v;
+        }
+        return i->second.back();
+      };
+
+      return data::variable_list(x.begin(), x.end(), [&](const data::variable& v)
+                                   {
+                                     return atermpp::down_cast<data::variable>(sigma(v));
+                                   }
+      );
+    }
+
+    state_formula apply(const mu& x)
+    {
+      for (const data::assignment& a: x.assignments())
+      {
+        insert(a.lhs());
+      }
+      state_formula result = mu(x.name(), apply_assignments(x.assignments()), apply(x.operand()));
+      for (const data::assignment& a: x.assignments())
+      {
+        erase(a.lhs());
+      }
+      return result;
+    }
+
+    state_formula apply(const nu& x)
+    {
+      for (const data::assignment& a: x.assignments())
+      {
+        insert(a.lhs());
+      }
+      state_formula result = nu(x.name(), apply_assignments(x.assignments()), apply(x.operand()));
+      for (const data::assignment& a: x.assignments())
+      {
+        erase(a.lhs());
+      }
+      return result;
+    }
+
+    state_formula apply(const forall& x)
+    {
+      for (const data::variable& v: x.variables())
+      {
+        insert(v);
+      }
+      state_formula result = forall(apply_variables(x.variables()), apply(x.body()));
+      for (const data::variable& v: x.variables())
+      {
+        erase(v);
+      }
+      return result;
+    }
+
+    state_formula apply(const exists& x)
+    {
+      for (const data::variable& v: x.variables())
+      {
+        insert(v);
+      }
+      state_formula result = exists(apply_variables(x.variables()), apply(x.body()));
+      for (const data::variable& v: x.variables())
+      {
+        erase(v);
+      }
+      return result;
+    }
+
+    data::data_expression apply(const data::data_expression& x)
+    {
+      auto sigma = [&](const data::variable& v) -> data::data_expression
+      {
+        auto i = substitutions.find(v);
+        if (i == substitutions.end())
+        {
+          return v;
+        }
+        return i->second.back();
+      };
+
+      return data::replace_free_variables(x, sigma);
+    }
+};
+
 } // namespace detail
 
-/// \brief Resolves name clashes in state formula f
+/// \brief Resolves name clashes in state variables of formula x
 inline
-state_formula resolve_name_clashes(const state_formula& x)
+state_formula resolve_state_variable_name_clashes(const state_formula& x)
 {
-  return core::make_apply_builder<detail::state_formula_name_clash_resolver>().apply(x);
+  return core::make_apply_builder<detail::state_variable_name_clash_resolver>().apply(x);
 }
 
-} // namespace state_formulas
+/// \brief Resolves name clashes in data variables of formula x
+inline
+state_formula resolve_state_formula_data_variable_name_clashes(const state_formula& x, const std::set<core::identifier_string>& context_ids = std::set<core::identifier_string>())
+{
+  data::set_identifier_generator generator;
+  generator.add_identifiers(state_formulas::find_identifiers(x));
+  generator.add_identifiers(context_ids);
+  detail::state_formula_data_variable_name_clash_resolver f(generator);
+  return f.apply(x);
+}
 
-} // namespace mcrl2
+} // namespace mcrl2::state_formulas
 
 #endif // MCRL2_MODAL_FORMULA_RESOLVE_NAME_CLASHES_H
