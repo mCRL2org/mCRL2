@@ -426,7 +426,7 @@ class enumerator_queue
 
     /// \brief Initializes the enumerator queue with the given value
     explicit enumerator_queue(const EnumeratorListElement& value)
-            : P(1, value)
+            : P({value})
     { }
 
     void push_back(const EnumeratorListElement& x)
@@ -440,6 +440,9 @@ class enumerator_queue
     template <class... Args>
     void emplace_back(Args&&... args)
     {
+#ifdef MCRL2_LOG_ENUMERATOR
+      std::cout << "emplace_back " << EnumeratorListElement(args...) << std::endl;
+#endif
       P.emplace_back(std::forward<Args>(args)...);
     }
 
