@@ -16,9 +16,7 @@
 
 #include "mcrl2/lts/detail/fsm_builder.h"
 
-namespace mcrl2 {
-
-namespace lts {
+namespace mcrl2::lts {
 
 namespace detail {
 
@@ -29,17 +27,22 @@ class simple_fsm_parser
   protected:
     enum states { PARAMETERS, STATES, TRANSITIONS, INITIAL_DISTRIBUTION };
 
-    // Maintains the parsing phase
-    states state;
-
     // Used for constructing an FSM
     detail::fsm_builder builder;
 
-    // Used for parsing lines
-    boost::xpressive::sregex regex_parameter;
-    boost::xpressive::sregex regex_transition;
-    boost::xpressive::sregex regex_quoted_string;
-    boost::xpressive::sregex regex_probabilistic_initial_distribution;
+    boost::xpressive::sregex regex_parameter = boost::xpressive::sregex::compile(R"(\s*([a-zA-Z_][a-zA-Z0-9_'@]*)\((\d+)\)\s*([a-zA-Z_][a-zA-Z0-9_'@#\-> \t=,\\(\\):]*)?\s*((\"[^\"]*\"\s*)*))");
+
+    // Probabilistic transitions can have one of the following two forms.
+    //        in out "label"
+    //        in [out1 prob1 ... out_n prob_n] "label"
+    // where out is a state number of a state that can be reached with probability 1 in the first format, whereas
+    // it is precisely indicated what the probabilities of the reachable states are in the second form.
+    boost::xpressive::sregex regex_transition = boost::xpressive::sregex::compile("(0|([1-9][0-9]*))+\\s+(0|([1-9][0-9]*|\\[[^\\]]*\\]))+\\s+\"([^\"]*)\"");
+
+    boost::xpressive::sregex regex_quoted_string = boost::xpressive::sregex::compile(R"(\"([^\"]*)\")");
+
+    // The initial state, is either a number or it has the shape [num1 prob1 ... num_n prob_n].
+    boost::xpressive::sregex regex_probabilistic_initial_distribution = boost::xpressive::sregex::compile(R"(0|([1-9][0-9]*)|\[[^\]]*\])");
 
     states next_state(states state)
     {
@@ -65,7 +68,7 @@ class simple_fsm_parser
       for (; cur != end; ++cur)
       {
         std::string value = *cur;
-        if (value.size() > 0)
+        if (!value.empty())
         {
           result.push_back(value.substr(1, value.size() - 2));
         }
@@ -128,29 +131,9 @@ class simple_fsm_parser
     }
 
   public:
-    simple_fsm_parser(probabilistic_lts_fsm_t& fsm)
+    explicit simple_fsm_parser(probabilistic_lts_fsm_t& fsm)
       : builder(fsm)
-    {
-      // \s*([a-zA-Z_][a-zA-Z0-9_'@]*)\((\d+)\)\s*([a-zA-Z_][a-zA-Z0-9_'@#\-> \t=,\\(\\):]*)?\s*((\"[^\"]*\"\s*)*)
-      regex_parameter = boost::xpressive::sregex::compile("\\s*([a-zA-Z_][a-zA-Z0-9_'@]*)\\((\\d+)\\)\\s*([a-zA-Z_][a-zA-Z0-9_'@#\\-> \\t=,\\\\(\\\\):]*)?\\s*((\\\"[^\\\"]*\\\"\\s*)*)");
-
-      // (0|([1-9][0-9]*))+\s+(0|([1-9][0-9]*))+\s+"([^"]*)"
-      // regex_transition = boost::xpressive::sregex::compile("(0|([1-9][0-9]*))+\\s+(0|([1-9][0-9]*))+\\s+\"([^\"]*)\"");
-
-      // The line above have been replaced to deal with probabilistic transitions. They have one of the following two forms.
-      //        in out "label"
-      //        in [out1 prob1 ... out_n prob_n] "label"
-      // where out is a state number of a state that can be reached with probability 1 in the first format, whereas
-      // it is precisely indicated what the probabilities of the reachable states are in the second form.
-      // (0|([1-9][0-9]*))+\s+(0|([1-9][0-9]*)|\\[[^\\]]*\\])+\s+"([^"]*)"
-      regex_transition = boost::xpressive::sregex::compile("(0|([1-9][0-9]*))+\\s+(0|([1-9][0-9]*|\\[[^\\]]*\\]))+\\s+\"([^\"]*)\"");
-
-      regex_quoted_string = boost::xpressive::sregex::compile("\\\"([^\\\"]*)\\\"");
-
-      // The initial state, is either a number or it has the shape [num1 prob1 ... num_n prob_n].
-      // 0|([1-9][0-9]*)|\\[.*\\]
-      regex_probabilistic_initial_distribution = boost::xpressive::sregex::compile("0|([1-9][0-9]*)|\\[[^\\]]*\\]");
-    }
+    {}
 
     void run(std::istream& from)
     {
@@ -160,9 +143,8 @@ class simple_fsm_parser
       std::string line;
       while (std::getline(from, line))
       {
-
         utilities::trim(line);
-        if (line != "")  // This deals with the case when there are empty lines in or at the end of the file.
+        if (!line.empty())  // This deals with the case when there are empty lines in or at the end of the file.
         { 
           if (line == "---")
           {
@@ -200,8 +182,6 @@ void parse_fsm_specification(const std::string& text, probabilistic_lts_fsm_t& r
   parse_fsm_specification(is, result);
 }
 
-} // namespace lts
-
-} // namespace mcrl2
+} // namespace mcrl2::lts
 
 #endif // MCRL2_LTS_PARSE_H

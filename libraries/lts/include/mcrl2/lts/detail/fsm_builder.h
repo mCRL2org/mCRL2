@@ -15,23 +15,19 @@
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/utilities/parse_numbers.h"
 
-namespace mcrl2 {
-
-namespace lts {
-
-namespace detail {
+namespace mcrl2::lts::detail {
 
 // Read a numeric value before a symbol c1 or c2, and remove it from s, including the symbol.
 inline std::string split_string_until(std::string& s, const std::string& c1, const std::string& c2="")
 {
   std::size_t n=s.find(c1);
-  if (c2!="")
+  if (!c2.empty())
   {
     n=std::min(n,s.find(c2));
   }
   if (n==std::string::npos)
   {
-    if (c2=="")
+    if (c2.empty())
     { 
       throw mcrl2::runtime_error("Expect '" + c1 + "' in distribution " + s + ".");
     }
@@ -59,24 +55,24 @@ inline lts_fsm_base::probabilistic_state parse_distribution(const std::string& d
   
   // Otherwise the distribution has the shape [state1 enumerator1/denominator1 ... staten enumeratorn/denominatorn]
   std::vector<lts_fsm_base::state_probability_pair> result;
-  std::string s=utilities::trim_copy(distribution);
-  if (s.substr(0,1)!="[")
+  std::string s = utilities::trim_copy(distribution);
+  if (s.substr(0,1) != "[")
   {
     throw mcrl2::runtime_error("Distribution does not start with ']': " + distribution + ".");
   }
-  s=s.substr(1);  // Remove initial "[";
-  for(; s.size()>1; s=utilities::trim_copy(s))
+  s = s.substr(1);  // Remove initial "[";
+  for(; s.size() > 1; s = utilities::trim_copy(s))
   {
-    std::size_t state_number=utilities::parse_natural_number(split_string_until(s," "));
-    if (state_number==0)
+    std::size_t state_number = utilities::parse_natural_number(split_string_until(s," "));
+    if (state_number == 0)
     {
       throw mcrl2::runtime_error("Transition has a zero as target state number.");
     }
-    std::string enumerator=split_string_until(s,"/");
-    std::string denominator=split_string_until(s," ","]");
-    result.push_back(lts_fsm_base::state_probability_pair(state_number-1,probabilistic_arbitrary_precision_fraction(enumerator,denominator)));
+    std::string enumerator = split_string_until(s,"/");
+    std::string denominator = split_string_until(s," ","]");
+    result.emplace_back(state_number - 1, probabilistic_arbitrary_precision_fraction(enumerator,denominator));
   }
-  return lts_fsm_base::probabilistic_state(result.begin(),result.end());
+  return lts_fsm_base::probabilistic_state(result.begin(), result.end());
 }
 
 class fsm_parameter
@@ -204,7 +200,7 @@ class fsm_transition
 
 struct fsm_builder
 {
-  fsm_builder(probabilistic_lts_fsm_t& fsm_)
+  explicit fsm_builder(probabilistic_lts_fsm_t& fsm_)
     : fsm(fsm_),
       m_initial_state_is_set(false)
   {}
@@ -226,7 +222,7 @@ struct fsm_builder
   {
     parameters.clear();
     labels.clear();
-    labels[action_label_string::tau_action()]=0; // The label 0 is the tau action by default.
+    labels[action_label_string::tau_action()] = 0; // The label 0 is the tau action by default.
     fsm.clear();
   }
 
@@ -234,15 +230,16 @@ struct fsm_builder
   {
     fsm_transition t(source, target, label);
     std::size_t max = t.source();
-    for(const detail::lts_fsm_base::state_probability_pair& p: t.target())
+    for (const detail::lts_fsm_base::state_probability_pair& p: t.target())
     {
-      max=std::max(max,p.state());
+      max = std::max(max, p.state());
     }
+    max += 1; // Apply a correction for the mismatch between numbering in lts_fsm and the fsm file format
     if (fsm.num_states() <= max)
     {
       fsm.set_num_states(max, fsm.has_state_info());
     }
-    std::map<std::string, std::size_t>::const_iterator i = labels.find(t.label());
+    auto i = labels.find(t.label());
     lts_fsm_t::labels_size_type label_index = 0;
     if (i == labels.end())
     {
@@ -255,8 +252,7 @@ struct fsm_builder
       label_index = i->second;
     }
 
-
-    const std::size_t probabilistic_state_index=fsm.add_probabilistic_state(detail::lts_fsm_base::probabilistic_state(t.target()));
+    const std::size_t probabilistic_state_index = fsm.add_probabilistic_state(detail::lts_fsm_base::probabilistic_state(t.target()));
     fsm.add_transition(transition(t.source(), label_index, probabilistic_state_index));
   }
 
@@ -267,13 +263,13 @@ struct fsm_builder
 
   void add_parameter(const std::string& name, const std::string& cardinality, const std::string& sort, const std::vector<std::string>& domain_values)
   {
-    parameters.push_back(fsm_parameter(name, cardinality, sort, domain_values));
+    parameters.emplace_back(name, cardinality, sort, domain_values);
   }
 
   void add_initial_distribution(const std::string& distribution)
   {
     fsm.set_initial_probabilistic_state(parse_distribution(distribution));
-    m_initial_state_is_set=true;
+    m_initial_state_is_set = true;
   }
 
   void write_parameters()
@@ -295,6 +291,8 @@ struct fsm_builder
 
   void finish()
   {
+std::cout << "finish " << fsm.num_states() << std::endl;
+
     // guarantee that the LTS has at least one state
     if (fsm.num_states() == 0)
     {
@@ -307,10 +305,6 @@ struct fsm_builder
   }
 };
 
-} // namespace detail
-
-} // namespace lts
-
-} // namespace mcrl2
+} // namespace mcrl2::lts::detail
 
 #endif // MCRL2_LTS_DETAIL_FSM_BUILDER_H
