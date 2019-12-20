@@ -243,7 +243,7 @@ struct pbespor_options
 class partial_order_reduction_algorithm
 {
   protected:
-    using enumerator_element = data::enumerator_list_element_with_substitution<pbes_expression>;
+    using enumerator_element = data::enumerator_list_element_with_substitution<data::data_expression>;
 
     struct invis_pair
     {
@@ -268,9 +268,8 @@ class partial_order_reduction_algorithm
     };
 
     data::rewriter m_rewr;
-    enumerate_quantifiers_rewriter m_pbes_rewr;
     data::enumerator_identifier_generator m_id_generator;
-    data::enumerator_algorithm<enumerate_quantifiers_rewriter, data::rewriter> m_enumerator;
+    data::enumerator_algorithm<> m_enumerator;
     srf_pbes m_pbes;
     pbes_equation_index m_equation_index;
     data::mutable_indexed_substitution<> m_sigma;
@@ -569,7 +568,7 @@ class partial_order_reduction_algorithm
         }
         const summand_class& summand_k = m_summand_classes[k];
         const data::variable_list& e_k = summand_k.e;
-        const pbes_expression& f_k = summand_k.f;
+        const data::data_expression& f_k = summand_k.f;
 
         // Add assignments to d in every iteration, becuase they might have been
         // overwritten if a variable in e_k coincides with a parameter in d.
@@ -752,7 +751,7 @@ class partial_order_reduction_algorithm
       {
         const summand_class& summand_k = m_summand_classes[k];
         const data::variable_list& e_k = summand_k.e;
-        const pbes_expression& f_k = summand_k.f;
+        const data::data_expression& f_k = summand_k.f;
         const data::data_expression_list& g_k = summand_k.g;
         const auto& J = summand_k.nxt[i];
 
@@ -760,6 +759,7 @@ class partial_order_reduction_algorithm
         // because they might have been removed on the previous one if
         // a parameter coincides with a quantified variable.
         data::add_assignments(m_sigma, d, e);
+        data::remove_assignments(m_sigma, e_k);
         m_enumerator.enumerate(enumerator_element(e_k, f_k),
                                m_sigma,
                                [&](const enumerator_element& p) {
@@ -1364,8 +1364,7 @@ class partial_order_reduction_algorithm
               //TODO temporarily disabled used_data_equation_selector so the rewriter can rewrite accordance conditions
               // data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()),
               options.rewrite_strategy),
-       m_pbes_rewr(m_rewr, p.data()),
-       m_enumerator(m_pbes_rewr, p.data(), m_rewr, m_id_generator, true),
+       m_enumerator(m_rewr, p.data(), m_rewr, m_id_generator, true),
        m_pbes(pbes2srf(p)),
        m_equation_index(m_pbes),
        m_dependency_nes(m_pbes.equations().size()),
