@@ -65,11 +65,8 @@ foreach(benchmark ${STATESPACE_BENCHMARKS})
   add_tool_benchmark("${NAME}" lps2lts "${LPS_FILENAME}" "")
   add_tool_benchmark("${NAME}_jittyc" lps2lts "${LPS_FILENAME}" "" "-rjittyc")
 
-  add_tool_benchmark("${NAME}" generatelts ${LPS_FILENAME} "")
-  add_tool_benchmark("${NAME}_jittyc" generatelts "${LPS_FILENAME}" "" "-rjittyc")
-
   # Benchmark statespace reduction techniques, the first target generates the statespaces.
-  add_tool_benchmark("${NAME}_exploration" generatelts "${LPS_FILENAME}" "${LTS_FILENAME}" "-rjittyc")
+  add_tool_benchmark("${NAME}_exploration" lps2lts "${LPS_FILENAME}" "${LTS_FILENAME}" "-rjittyc")
 
   add_tool_benchmark("${NAME}_bisim" ltsconvert ${LTS_FILENAME} "" "-ebisim")
   add_tool_benchmark("${NAME}_bisim-gjkw" ltsconvert ${LTS_FILENAME} "" "-ebisim-gjkw")
@@ -84,12 +81,9 @@ foreach(benchmark ${STATESPACE_BENCHMARKS})
     "benchmark_ltsconvert_${NAME}_bisim-gjkw" 
     "benchmark_ltsconvert_${NAME}_branching-bisim" 
     "benchmark_ltsconvert_${NAME}_branching-bisim-gjkw" 
-    PROPERTIES DEPENDS "benchmark_generatelts_${NAME}_exploration")
+    PROPERTIES DEPENDS "benchmark_lps2lts_${NAME}_exploration")
 
   # Benchmark solving PBES
   add_tool_benchmark("${NAME}" pbes2bool ${NODEADLOCK_PBES_FILENAME} "")
   add_tool_benchmark("${NAME}_jittyc" pbes2bool ${NODEADLOCK_PBES_FILENAME} "" "-rjittyc")
-
-  add_tool_benchmark("${NAME}" pbessolve ${NODEADLOCK_PBES_FILENAME} "")
-  add_tool_benchmark("${NAME}_jittyc" pbessolve ${NODEADLOCK_PBES_FILENAME} "" "-rjittyc")
 endforeach()
