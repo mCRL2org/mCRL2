@@ -124,7 +124,7 @@ bool compute_finite_function_sorts(const function_sort& sort,
   {
     domain_expressions.push_back(enumerate_expressions(s, dataspec, datar, id_generator));
     total_domain_size = total_domain_size * domain_expressions.back().size();
-    function_parameters.push_back(variable(id_generator(), s));
+    function_parameters.emplace_back(id_generator(), s);
   }
 
   if (total_domain_size * utilities::ceil_log2(codomain_expressions.size()) >= 32)  // If there are at least 2^32 functions, then enumerating them makes little sense.
@@ -416,6 +416,12 @@ class enumerator_queue
       P.push_back(x);
     }
 
+    template <class... Args>
+    void emplace_back(Args&&... args)
+    {
+      P.emplace_back(std::forward<Args>(args)...);
+    }
+
     bool empty() const
     {
       return P.empty();
@@ -582,7 +588,7 @@ class enumerator_algorithm
           EnumeratorListElement q(variables, phi1, p, v, e);
           return report_solution(q);
         }
-        P.push_back(EnumeratorListElement(variables, phi1, p, v, e));
+        P.emplace_back(variables, phi1, p, v, e);
         return false;
       };
 
@@ -606,11 +612,11 @@ class enumerator_algorithm
         }
         if (added_variables_empty)
         {
-          P.push_back(EnumeratorListElement(variables, phi1, p, v, e));
+          P.emplace_back(variables, phi1, p, v, e);
         }
         else
         {
-          P.push_back(EnumeratorListElement(variables + added_variables, phi1, p, v, e));
+          P.emplace_back(variables + added_variables, phi1, p, v, e);
         }
         return false;
       };
