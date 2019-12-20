@@ -291,8 +291,6 @@ struct fsm_builder
 
   void finish()
   {
-std::cout << "finish " << fsm.num_states() << std::endl;
-
     // guarantee that the LTS has at least one state
     if (fsm.num_states() == 0)
     {
