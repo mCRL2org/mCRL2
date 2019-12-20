@@ -20,8 +20,6 @@ namespace mcrl2::lts {
 
 namespace detail {
 
-typedef std::vector<std::size_t> fsm_state;
-
 class simple_fsm_parser
 {
   protected:
@@ -37,7 +35,7 @@ class simple_fsm_parser
     //        in [out1 prob1 ... out_n prob_n] "label"
     // where out is a state number of a state that can be reached with probability 1 in the first format, whereas
     // it is precisely indicated what the probabilities of the reachable states are in the second form.
-    boost::xpressive::sregex regex_transition = boost::xpressive::sregex::compile("(0|([1-9][0-9]*))+\\s+(0|([1-9][0-9]*|\\[[^\\]]*\\]))+\\s+\"([^\"]*)\"");
+    boost::xpressive::sregex regex_transition = boost::xpressive::sregex::compile(R"((0|([1-9][0-9]*))+\s+(0|([1-9][0-9]*|\[[^\]]*\]))+\s+"([^"]*)\")");
 
     boost::xpressive::sregex regex_quoted_string = boost::xpressive::sregex::compile(R"(\"([^\"]*)\")");
 
