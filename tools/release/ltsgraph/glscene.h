@@ -69,6 +69,9 @@ public:
   /// \brief Updates the state of the scene.
   void update();
 
+  /// \brief Builds static data based on the current graph.
+  void rebuild();
+
   /// \brief Render the scene.
   void render(QPainter& painter);
 
@@ -115,6 +118,9 @@ private:
 
   /// \brief Renders text at a given world position, facing the camera and center aligned.
   void drawCenteredText3D(QPainter& painter, const QString& text, const QVector3D& position, const QVector3D& color);
+
+  /// \brief Renders static text at a given world position, facing the camera and center aligned.
+  void drawCenteredStaticText3D(QPainter& painter, const QStaticText& text, const QVector3D& position, const QVector3D& color);
 
   /// \returns Whether the given point (no radius) is visible based on the camera viewdistance and fog amount (if enabled).
   /// \param fog The amount of fog that a given point receives.
@@ -182,6 +188,10 @@ private:
 
   /// \brief The background color of the scene.
   QVector3D m_clearColor = QVector3D(1.0f, 1.0f, 1.0f);
+
+  /// \brief For each label store a QStaticText object, which is more efficient for text that rarely changes its layout.
+  std::vector<QStaticText> m_state_labels;
+  std::vector<QStaticText> m_transition_labels;
 };
 
 #endif // MCRL2_LTSGRAPH_GLSCENE_H

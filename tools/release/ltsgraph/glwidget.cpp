@@ -483,6 +483,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
 
 void GLWidget::rebuild()
 {
+  m_scene.rebuild();
   makeCurrent();
   update();
 }

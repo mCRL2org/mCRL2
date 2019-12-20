@@ -15,6 +15,7 @@
 #include <QOpenGLFunctions_3_3_Core>
 #include <QPainter>
 #include <QVector3D>
+#include <QStaticText>
 
 #include <cmath>
 
@@ -63,14 +64,14 @@ inline void glCheckError()
 constexpr float PI = 3.14159265358979323846f;
 constexpr float PI_2 = PI * 0.5f;
 
-inline static
+inline
 float frand(float min, float max)
 {
   return (static_cast<float>(qrand()) / RAND_MAX) * (max - min) + min;
 }
 
 /// \brief Renders text, centered around the window coordinates at x and y (in pixels)
-inline static
+inline
 void drawCenteredText(QPainter& painter, float x, float y, const QString& text, const QColor& color = Qt::black)
 {
   QFontMetrics metrics(painter.font());
@@ -81,8 +82,19 @@ void drawCenteredText(QPainter& painter, float x, float y, const QString& text, 
   painter.drawText(x - w / 2, y - h / 2, text);
 }
 
+/// \brief Renders static text, centered around the window coordinates at x and y (in pixels)
+inline
+void drawCenteredStaticText(QPainter& painter, float x, float y, const QStaticText& text, const QColor& color = Qt::black)
+{
+  QFontMetrics metrics(painter.font());
+  qreal w = text.size().width();
+  qreal h = text.size().height();
+  painter.setPen(color);
+  painter.drawStaticText(x - w / 2, y - h / 2, text);
+}
+
 /// \brief Converts a QVector3D of floats [0,1] to a QColor object with integers [0,255] for colors.
-inline static
+inline
 QColor vectorToColor(const QVector3D& vector)
 {
   return QColor(vector.x() * 255, vector.y() * 255, vector.z() * 255);
@@ -96,7 +108,7 @@ T clamp(T value, T min, T max)
   return std::min(std::max(value, min), max);
 }
 
-inline static
+inline
 void clipVector(QVector3D& vec, const QVector3D& min, const QVector3D& max)
 {
   for (int i = 0; i < 3; i++)
@@ -106,21 +118,21 @@ void clipVector(QVector3D& vec, const QVector3D& min, const QVector3D& max)
 }
 
 /// \returns A linear interpolation between a and b using the given value. Often called lerp, but called mix in GLSL.
-inline static
+inline
 QVector3D mix(float value, QVector3D a, QVector3D b)
 {
   return (1 - value) * a + (value * b);
 }
 
 /// \returns The angle in degrees [0, 180] from a given angle in radians [0, PI].
-inline static
+inline
 float radiansToDegrees(float radians)
 {
   return 180.0f / PI * radians;
 }
 
 /// \returns The angle in radians [0, pi] from a given angle in degrees [0, 180].
-inline static
+inline
 float degreesToRadians(float degrees)
 {
   return degrees / 180.0f * PI;
@@ -128,7 +140,7 @@ float degreesToRadians(float degrees)
 
 /// \returns True whenever the given window coordinates (and device coordinate depth), given by pos, is within a circle of radius threshold
 ///          centered at (x, y) in window coordinates. Returns the smallest Z coordinate that is close.
-inline static
+inline
 bool isCloseCircle(int x, int y, const QVector3D& pos, float threshold, float& bestZ)
 {
   float distance = std::sqrt(std::pow(pos.x() - x, 2.0f) + std::pow(pos.y() - y, 2.0f));
@@ -143,7 +155,7 @@ bool isCloseCircle(int x, int y, const QVector3D& pos, float threshold, float& b
 
 /// \returns True whenever the given window coordinate, given by pos, is within a square
 /// centered at (x,y) with a width and height of 2*threshold. The smallest Z coordinate that is close is stored in bestZ.
-inline static
+inline
 bool isCloseSquare(int x, int y, const QVector3D& pos, float threshold, float& bestZ)
 {
   if(std::abs(x - pos.x()) < threshold && std::abs(y - pos.y()) < threshold && -1.0f <= pos.z() && pos.z() < bestZ)
@@ -156,7 +168,7 @@ bool isCloseSquare(int x, int y, const QVector3D& pos, float threshold, float& b
 
 
 /// \returns True whenever the given (x, y) position (in pixels) is on the text positioned at the window coordinates.
-inline static
+inline
 bool isOnText(int x,
   int y,
   const QString& text,
@@ -172,6 +184,18 @@ bool isOnText(int x,
   int w = bounds.width() / 2;
   int h = bounds.height() / 2;
   bounds.adjust(window.x() - w, window.y() - h, window.x() - w, window.y() - h);
+  return bounds.contains(x, y);
+}
+
+inline
+bool isOnText(int x,
+  int y,
+  const QStaticText& text,
+  const QVector3D& window)
+{
+  qreal w = text.size().width();
+  qreal h = text.size().height();
+  QRect bounds(window.x() - w / 2, window.y() - h / 2, w, h);
   return bounds.contains(x, y);
 }
 

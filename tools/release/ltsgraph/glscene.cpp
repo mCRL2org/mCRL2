@@ -14,6 +14,7 @@
 #include <QFont>
 #include <QFontMetrics>
 #include <QImage>
+#include <QStaticText>
 
 /// \brief Number of orthogonal slices from which a circle representing a node is constructed.
 constexpr int RES_NODE_SLICE = 32;
@@ -51,6 +52,7 @@ GLScene::GLScene(QOpenGLWidget& glwidget, Graph::Graph& g)
      m_graph(g)
 {
   setFontSize(m_fontsize);
+  rebuild();
 }
 
 void GLScene::initialize()
@@ -203,6 +205,27 @@ void GLScene::update()
   m_camera.update();
 }
 
+void GLScene::rebuild()
+{
+  // Update the state labels.
+  m_state_labels = std::vector<QStaticText>(m_graph.stateLabelCount());
+
+  for (std::size_t i = 0; i < m_graph.stateLabelCount(); ++i)
+  {
+    m_state_labels[i] = QStaticText(m_graph.stateLabelstring(i));
+    m_state_labels[i].setPerformanceHint(QStaticText::AggressiveCaching);
+  }
+
+  // Update the transition labels.
+  m_transition_labels = std::vector<QStaticText>(m_graph.transitionLabelCount());
+
+  for (std::size_t i = 0; i < m_graph.transitionLabelCount(); ++i)
+  {
+    m_transition_labels[i] = QStaticText(m_graph.transitionLabelstring(i));
+    m_transition_labels[i].setPerformanceHint(QStaticText::AggressiveCaching);
+  }
+}
+
 void GLScene::render(QPainter& painter)
 {
   // Qt: Direct OpenGL commands can still be issued. However, you must make sure these are enclosed by a call to the painter's beginNativePainting() and endNativePainting().
@@ -340,6 +363,23 @@ void GLScene::drawCenteredText3D(QPainter& painter, const QString& text, const Q
        window.y(),
        text,
        qcolor);
+  }
+}
+
+void GLScene::drawCenteredStaticText3D(QPainter& painter, const QStaticText& text, const QVector3D& position, const QVector3D& color)
+{
+  QVector3D window = m_camera.worldToWindow(position);
+  float fog = 0.0f;
+  if (window.z() <= 1.0f && isVisible(position, fog)) // There is text, that is not behind the camera and it is visible.
+  {
+     QColor qcolor = vectorToColor(color);
+     qcolor.setAlpha(static_cast<int>(255 * (1.0f - fog)));
+
+     drawCenteredStaticText(painter,
+      window.x(),
+      window.y(),
+      text,
+      qcolor);
   }
 }
 
@@ -575,14 +615,14 @@ void GLScene::renderTransitionLabel(QPainter& painter, std::size_t i)
 
   Graph::LabelNode& label = m_graph.transitionLabel(i);
   QVector3D fill(std::max(label.color().x(), label.selected()), std::min(label.color().y(), 1.0f - label.selected()), std::min(label.color().z(), 1.0f - label.selected()));
-  drawCenteredText3D(painter, m_graph.transitionLabelstring(label.labelindex()), label.pos(), fill);
+  drawCenteredStaticText3D(painter, m_transition_labels[label.labelindex()], label.pos(), fill);
 }
 
 void GLScene::renderStateLabel(QPainter& painter, std::size_t i)
 {
   Graph::LabelNode& label = m_graph.stateLabel(i);
   QVector3D color(std::max(label.color().x(), label.selected()), std::min(label.color().y(), 1.0f - label.selected()), std::min(label.color().z(), 1.0f - label.selected()));
-  drawCenteredText3D(painter, m_graph.stateLabelstring(label.labelindex()), label.pos(), color);
+  drawCenteredStaticText3D(painter, m_state_labels[label.labelindex()], label.pos(), color);
 }
 
 void GLScene::renderStateNumber(QPainter& painter, std::size_t i)
@@ -642,8 +682,7 @@ bool GLScene::selectObject(GLScene::Selection& s,
       std::size_t index = exploration_active ? m_graph.explorationEdge(i) : i;
       const Graph::LabelNode& label = m_graph.transitionLabel(index);
       QVector3D window = m_camera.worldToWindow(label.pos());
-      const QString& labelstring = m_graph.transitionLabelstring(label.labelindex());
-      if (isOnText(x, y, labelstring, window, metrics))
+      if (isOnText(x, y, m_transition_labels[label.labelindex()], window))
       {
         s.selectionType = type;
         s.index = index;
@@ -659,8 +698,7 @@ bool GLScene::selectObject(GLScene::Selection& s,
       std::size_t index = exploration_active ? m_graph.explorationNode(i) : i;
       const Graph::LabelNode& label = m_graph.stateLabel(index);
       QVector3D window = m_camera.worldToWindow(label.pos());
-      const QString& labelstring = m_graph.stateLabelstring(label.labelindex());
-      if (isOnText(x, y, labelstring, window, metrics))
+      if (isOnText(x, y, m_state_labels[label.labelindex()], window))
       {
         s.selectionType = type;
         s.index = index;
