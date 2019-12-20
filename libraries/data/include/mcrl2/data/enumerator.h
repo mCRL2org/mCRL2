@@ -371,6 +371,11 @@ class enumerator_list_element_with_substitution: public enumerator_list_element<
       sigma.revert();
       return data_expression_list(v.begin(), v.end(), [&](const data::variable& v_i) { return rewriter(sigma(v_i)); });
     }
+
+    data::enumerator_substitution sigma() const
+    {
+      return data::enumerator_substitution(m_variables, m_expressions);
+    }
 };
 
 template <typename Expression>
@@ -387,6 +392,22 @@ std::ostream& operator<<(std::ostream& out, const enumerator_list_element<Expres
     out << *i << ": " << i->sort();
   }
   return out << "], " << p.expression() << " }";
+}
+
+template <typename Expression>
+std::ostream& operator<<(std::ostream& out, const enumerator_list_element_with_substitution<Expression>& p)
+{
+  out << "{ [";
+  const auto& variables = p.variables();
+  for (auto i = variables.begin(); i != variables.end(); ++i)
+  {
+    if (i != variables.begin())
+    {
+      out << ", ";
+    }
+    out << *i << ": " << i->sort();
+  }
+  return out << "], " << p.expression() << ", " << p.sigma() << " }";
 }
 
 /// \brief Contains the enumerator queue.
