@@ -56,14 +56,13 @@ option(MCRL2_ENABLE_ADDRESSSANITIZER "Enable additional memory run-time checks i
 option(MCRL2_ENABLE_CODE_COVERAGE   "Enable generation of code coverage statistics." OFF)
 option(MCRL2_ENABLE_DEBUG_SOUNDNESS_CHECKS "Enable extensive soundness check in the Debug build type." ON)
 option(MCRL2_ENABLE_STABLE          "Enable compilation of stable tools." ON)
-option(MCRL2_SKIP_LONG_TESTS        "Do not compile test code that takes too long when profiling is on." OFF)
+option(MCRL2_SKIP_LONG_TESTS        "Do not execute tests that take a long time to run." OFF)
 
 mark_as_advanced(
   MCRL2_ENABLE_ADDRESSSANITIZER
   MCRL2_ENABLE_CODE_COVERAGE
   MCRL2_ENABLE_DEBUG_SOUNDNESS_CHECKS 
   MCRL2_ENABLE_STABLE
-  MCRL2_SKIP_LONG_TESTS
 )
 
 if(MCRL2_ENABLE_GUI_TOOLS)
