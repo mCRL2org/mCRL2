@@ -4443,7 +4443,7 @@ void mcrl2::data::data_type_checker::TransformVarConsTypeData(data_specification
     sort_expression leftType;
     try
     {
-      leftType=TraverseVarConsTypeD(DeclaredVars,left,data::untyped_sort(),false,true);
+      leftType=TraverseVarConsTypeD(DeclaredVars,left,data::untyped_sort(),true,true);
     }
     catch (mcrl2::runtime_error& e)
     {
