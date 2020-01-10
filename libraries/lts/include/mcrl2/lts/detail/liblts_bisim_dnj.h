@@ -2101,17 +2101,7 @@ class part_trans_t
 
     /// \brief destructor
     ~part_trans_t()
-    {                                                                           assert(nr_of_bunches == nr_of_action_block_slices);
-        mCRL2log(log::verbose, "bisim_jgkw") << "The final partition contains "
-            << nr_of_new_bottom_states
-                  << (1 == nr_of_new_bottom_states ? " new bottom state, "
-                                                   : " new bottom states, ")
-            << nr_of_bunches
-                  << (1 == nr_of_bunches ? " bunch, and "
-                                         : " bunches, and ")
-            << nr_of_block_bunch_slices
-                  << (1 == nr_of_block_bunch_slices ? "block-bunch-slice.\n"
-                                                    : "block-bunch-slices.\n"); assert(0 == nr_of_nontrivial_bunches);
+    {
         #ifndef USE_POOL_ALLOCATOR
             // The destructor also deallocates the bunches, as they are not
             // directly referenced from anywhere.  This is only necessary if we
@@ -4320,9 +4310,17 @@ class bisim_partitioner_dnj
         // Line 1.5: while a bunch_T in Pi_t exists with more than one
         //                                               action--block-slice do
         clock_t next_print_time = clock();
+        const clock_t rounded_start_time = next_print_time - CLOCKS_PER_SEC/2;
         for (;;)
         {                                                                       // mCRL2complexity(...) -- this loop will be ascribed to (the transitions in)
-            if (const clock_t now = clock(); next_print_time <= now)            // the new bunch below.
+                                                                                // the new bunch below.
+            /*------------------ find a non-trivial bunch -------------------*/ ONLY_IF_DEBUG( part_st.print_part(*this);  part_tr.print_trans(*this);
+                                                                                                                                          assert_stability(); )
+            // Line 1.6: Select some a in Act and B' in Pi_s such that
+            //                              |bunch_T_a_Bprime| <= 1/2 |bunch_T|
+            bisim_dnj::bunch_t* const bunch_T(part_tr.get_some_nontrivial());
+            if (const clock_t now = clock(); next_print_time <= now ||
+                                                            nullptr == bunch_T)
             {
                 // The formula below should ensure that `next_print_time`
                 // increases by a whole number of minutes, so that the current
@@ -4331,42 +4329,43 @@ class bisim_partitioner_dnj
                 // minutes).
                 next_print_time += ((now-next_print_time) / (60*CLOCKS_PER_SEC)
                                                     + 1) * (60*CLOCKS_PER_SEC);
+                #define PRINT_SG_PL(counter, sg_string, pl_string)            \
+                            (counter)                                         \
+                            << (1 == (counter) ? (sg_string) : (pl_string))
+                #define PRINT_INT_PERCENTAGE(num,denom)                       \
+                            (num) << '/' << (denom) << " = "                  \
+                            << (((num) * 200 + (denom)) / (denom) / 2)
                 mCRL2log(log::verbose, "bisim_jgkw")
-                    << "The current partition contains "
-                    << part_st.nr_of_blocks
-                          << (1 == part_st.nr_of_blocks ? " block, "
-                                                        : " blocks, ")
-                    << part_tr.nr_of_new_bottom_states
-                          << (1 == part_tr.nr_of_new_bottom_states
-                                                      ? " new bottom state, "
-                                                      : " new bottom states, ")
-                    << part_tr.nr_of_bunches
-                          << (1 == part_tr.nr_of_bunches
-                                                       ? " bunch (of which "
-                                                       : " bunches (of which ")
-                    << part_tr.nr_of_nontrivial_bunches
-                    << ", i.e. "
-                    << (part_tr.nr_of_nontrivial_bunches * 200 + 1)
-                                                    / part_tr.nr_of_bunches / 2
-                          << (1 == part_tr.nr_of_nontrivial_bunches
-                                                       ? "% is nontrivial), "
-                                                       : "% are nontrivial), ")
-                    << part_tr.nr_of_action_block_slices
-                          << (1 == part_tr.nr_of_action_block_slices
-                                                 ? "action-block-slice, and "
-                                                 : "action-block-slices, and ")
-                    << part_tr.nr_of_block_bunch_slices
-                          << (1 == part_tr.nr_of_block_bunch_slices
-                                                    ? "block-bunch-slice.\n"
-                                                    : "block-bunch-slices.\n");
+                    << "After " << (now - rounded_start_time) / CLOCKS_PER_SEC
+                    << " sec, the current partition contains "
+                    << PRINT_SG_PL(part_st.nr_of_blocks, " block, ",
+                                                         " blocks, ")
+                    << PRINT_SG_PL(part_tr.nr_of_new_bottom_states,
+                                                        " new bottom state, ",
+                                                        " new bottom states, ")
+                    << PRINT_SG_PL(part_tr.nr_of_bunches," bunch (of which ",
+                                                         " bunches (of which ")
+                    << PRINT_SG_PL(part_tr.nr_of_nontrivial_bunches,
+                                                           " is nontrivial: ",
+                                                           " are nontrivial: ")
+                    << PRINT_INT_PERCENTAGE(part_tr.nr_of_nontrivial_bunches,
+                                               part_tr.nr_of_bunches) << "%), "
+                    << PRINT_SG_PL(part_tr.nr_of_action_block_slices,
+                                   " action-block-slice (requiring at least ",
+                                   " action-block-slices (requiring at least ")
+                    << PRINT_SG_PL(part_tr.nr_of_action_block_slices -
+                                            part_tr.nr_of_bunches, " split: ",
+                                                                   " splits: ")
+                    << PRINT_INT_PERCENTAGE(part_tr.nr_of_action_block_slices -
+                                                        part_tr.nr_of_bunches,
+                               part_tr.nr_of_action_block_slices) << "%), and "
+                    << PRINT_SG_PL(part_tr.nr_of_block_bunch_slices,
+                                                     " block-bunch-slice.\n",
+                                                     " block-bunch-slices.\n");
+                #undef PRINT_INT_PERCENTAGE
+                #undef PRINT_SG_PL
+                if (nullptr == bunch_T)  break;
             }
-
-            /*------------------ find a non-trivial bunch -------------------*/ ONLY_IF_DEBUG( part_st.print_part(*this);  part_tr.print_trans(*this);
-                                                                                                                                          assert_stability(); )
-            // Line 1.6: Select some a in Act and B' in Pi_s such that
-            //                              |bunch_T_a_Bprime| <= 1/2 |bunch_T|
-            bisim_dnj::bunch_t* const bunch_T(part_tr.get_some_nontrivial());
-            if (nullptr == bunch_T)  break;
             /* Line 1.7: Pi_t := Pi_t \ { bunch_T } union                    */ ONLY_IF_DEBUG( mCRL2log(log::debug, "bisim_jgkw") << "Refining "
             /*              { bunch_T_a_Bprime, bunch_T \ bunch_T_a_Bprime } */                                          << bunch_T->debug_id(*this) << '\n'; )
             bisim_dnj::bunch_t* const bunch_T_a_Bprime(
@@ -4588,7 +4587,8 @@ class bisim_partitioner_dnj
                                                                                 #endif
             }
         // Line 1.23: end while
-        }
+        }                                                                       assert(part_tr.nr_of_bunches == part_tr.nr_of_action_block_slices);
+                                                                                assert(0 == part_tr.nr_of_nontrivial_bunches);
 
         // store the labels with the action_block-slices
         // As every action_block-slice is a (trivial) bunch at the same time,
