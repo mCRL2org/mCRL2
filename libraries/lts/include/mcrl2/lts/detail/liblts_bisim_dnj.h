@@ -269,7 +269,7 @@ class action_block_entry;
         template <class U, class... Args>
         U* construct_samesize(Args&&... args)
         {                                                                       static_assert(sizeof(T) == sizeof(U));
-            void* new_el;
+            void* new_el;                                                       assert(nullptr != first_block);
             if (first_block->data + sizeof(U) <= begin_used_in_first_block)
             {
                 begin_used_in_first_block =
@@ -299,7 +299,7 @@ class action_block_entry;
         template <class U, class... Args>
         U* construct_othersize(Args&&... args)
         {                                                                       static_assert(sizeof(U) != sizeof(T));
-            void* new_el;
+            void* new_el;                                                       assert(nullptr != first_block);
             if (first_block->data + sizeof(U) <= begin_used_in_first_block)
             {
                 begin_used_in_first_block =
@@ -308,9 +308,22 @@ class action_block_entry;
             }
             else
             {
-                if constexpr (sizeof(T) < sizeof(U))
+                if constexpr (sizeof(T) * 2 < sizeof(U))
                 {
-                    while(first_block->data + sizeof(T) <=
+                    // There may be space for several T-elements
+                    while (first_block->data + sizeof(T) <=
+                                                     begin_used_in_first_block)
+                    {
+                        begin_used_in_first_block = static_cast<char*>
+                                       (begin_used_in_first_block) - sizeof(T);
+                        deref_void(begin_used_in_first_block) = first_free_T;
+                        first_free_T = begin_used_in_first_block;
+                    }
+                }
+                else if constexpr (sizeof(T) < sizeof(U))
+                {
+                    // There may be space for one T-element (but not more)
+                    if (first_block->data + sizeof(T) <=
                                                      begin_used_in_first_block)
                     {
                         begin_used_in_first_block = static_cast<char*>
@@ -1343,6 +1356,7 @@ class part_state_t
                                                                                                       const bisim_partitioner_dnj<LTS_TYPE>& partitioner) const
                                                                                     {
                                                                                         const permutation_entry* perm_iter(&permutation.front());
+                                                                                        state_type true_nr_of_blocks(0);
                                                                                         assert(perm_iter <= &permutation.back());
                                                                                         do
                                                                                         {
@@ -1394,8 +1408,10 @@ class part_state_t
                                                                                             }
                                                                                             while (++perm_iter < block->end);
                                                                                             assert(perm_iter == block->end);
+                                                                                            ++true_nr_of_blocks;
                                                                                         }
                                                                                         while (perm_iter <= &permutation.back());
+                                                                                        assert(nr_of_blocks == true_nr_of_blocks);
                                                                                     }
                                                                                 #endif
 };
@@ -2038,7 +2054,13 @@ class part_trans_t
     #endif
 
     /// \brief number of new bottom states found until now.
-    state_type number_of_new_bottom_states;
+    state_type nr_of_new_bottom_states;
+
+    /// \brief counters to measure progress
+    trans_type nr_of_bunches;
+    trans_type nr_of_nontrivial_bunches;
+    trans_type nr_of_action_block_slices;
+    trans_type nr_of_block_bunch_slices;
 
     /// \brief constructor
     /// \details The constructor sets up the dummy transitions at the beginning
@@ -2060,7 +2082,11 @@ class part_trans_t
         action_block_inert_begin(action_block_end),
         splitter_list(),
         first_nontrivial(nullptr),
-        number_of_new_bottom_states(0)
+        nr_of_new_bottom_states(0),
+        nr_of_bunches(0),
+        nr_of_nontrivial_bunches(0),
+        nr_of_action_block_slices(0),
+        nr_of_block_bunch_slices(0)
     {
         succ.front().block_bunch = &block_bunch.front();
         succ.back() .block_bunch = &block_bunch.front();
@@ -2075,9 +2101,17 @@ class part_trans_t
 
     /// \brief destructor
     ~part_trans_t()
-    {
-        mCRL2log(log::verbose, "bisim_jgkw") << "The algorithm found "
-                     << number_of_new_bottom_states << " new bottom states.\n";
+    {                                                                           assert(nr_of_bunches == nr_of_action_block_slices);
+        mCRL2log(log::verbose, "bisim_jgkw") << "The final partition contains "
+            << nr_of_new_bottom_states
+                  << (1 == nr_of_new_bottom_states ? " new bottom state, "
+                                                   : " new bottom states, ")
+            << nr_of_bunches
+                  << (1 == nr_of_bunches ? " bunch, and "
+                                         : " bunches, and ")
+            << nr_of_block_bunch_slices
+                  << (1 == nr_of_block_bunch_slices ? "block-bunch-slice.\n"
+                                                    : "block-bunch-slices.\n"); assert(0 == nr_of_nontrivial_bunches);
         #ifndef USE_POOL_ALLOCATOR
             // The destructor also deallocates the bunches, as they are not
             // directly referenced from anywhere.  This is only necessary if we
@@ -2089,7 +2123,7 @@ class part_trans_t
                 do
                 {
                     if (action_block_inert_begin <= action_block_iter)
-                    {
+                    {                                                           assert(0 == nr_of_bunches);
                         delete [] action_block_begin;
                         return;
                     }
@@ -2098,7 +2132,7 @@ class part_trans_t
                                                    ++action_block_iter, true)); assert(nullptr != action_block_iter->begin_or_before_end);
                 bunch_t* const bunch(action_block_iter->succ->bunch());         assert(bunch->begin == action_block_iter);
                 action_block_iter = bunch->end;
-                delete bunch;
+                delete bunch;                                                   ONLY_IF_DEBUG( --nr_of_bunches; )
             }
             /* unreachable                                                   */ assert(0);
         #else
@@ -2127,7 +2161,8 @@ class part_trans_t
                                                                                 //assert(bunch->begin->begin_or_before_end <
                                                                                 //                                         bunch->end[-1].begin_or_before_end);
                                                                                 //assert(nullptr != end[-1].begin_or_before_end);
-        first_nontrivial = bunch;                                               //assert(end[-1].begin_or_before_end <= end);
+        first_nontrivial = bunch;                                               assert(nr_of_nontrivial_bunches < nr_of_bunches);
+        ++nr_of_nontrivial_bunches;                                             //assert(end[-1].begin_or_before_end <= end);
     }
 
 
@@ -2138,7 +2173,8 @@ class part_trans_t
         first_nontrivial =
                 bunch == bunch->next_nontrivial_and_label.next_nontrivial
                   ? nullptr : bunch->next_nontrivial_and_label.next_nontrivial; assert(bunch->end - 1 == bunch->begin->begin_or_before_end);
-        bunch->next_nontrivial_and_label.next_nontrivial = nullptr;             assert(bunch->begin == bunch->end[-1].begin_or_before_end);
+        bunch->next_nontrivial_and_label.next_nontrivial = nullptr;             assert(0 < nr_of_nontrivial_bunches);
+        --nr_of_nontrivial_bunches;                                             assert(bunch->begin == bunch->end[-1].begin_or_before_end);
     }
 
 
@@ -2250,7 +2286,7 @@ class part_trans_t
                                                       bunch_T_a_Bprime, false);
                 new_block_bunch_slice = std::prev(splitter_list.end());
             #endif
-                                                                                ONLY_IF_DEBUG( new_block_bunch_slice->work_counter =
+            ++nr_of_block_bunch_slices;                                         ONLY_IF_DEBUG( new_block_bunch_slice->work_counter =
                                                                                                                          old_block_bunch_slice->work_counter; )
             splitter_list.splice(splitter_list.end(),
                       source_block->stable_block_bunch, old_block_bunch_slice);
@@ -2275,6 +2311,7 @@ class part_trans_t
         {                                                                       assert(!old_block_bunch_slice->is_stable());
             splitter_list.erase(  ONLY_IF_POOL_ALLOCATOR( storage, )
                                                         old_block_bunch_slice); assert(!new_block_bunch_slice->is_stable());
+            --nr_of_block_bunch_slices;
 
             // Because now every bottom state has a transition in the new
             // bunch, and no state has a transition in the old bunch, there
@@ -2500,7 +2537,8 @@ class part_trans_t
                                           old_block_bunch_slice->end,
                                           old_block_bunch_slice->bunch, false);
                 #endif
-            }                                                                   ONLY_IF_DEBUG( new_block_bunch_slice->work_counter =
+            }
+            ++nr_of_block_bunch_slices;                                         ONLY_IF_DEBUG( new_block_bunch_slice->work_counter =
                                                                                                                          old_block_bunch_slice->work_counter; )
         }
                                                                                 ONLY_IF_DEBUG( unsigned max_counter = bisim_gjkw::check_complexity::log_n -
@@ -2604,6 +2642,7 @@ class part_trans_t
                     splitter_list.erase(old_block_bunch_slice);
                 }
             #endif
+            --nr_of_block_bunch_slices;
         }
         return out_slice_begin;
     }
@@ -2656,6 +2695,7 @@ class part_trans_t
                 action_block_slice_begin->begin_or_before_end =
                                                       new_action_block_pos - 1;
             }
+            else  --nr_of_action_block_slices;
         }                                                                       assert(nullptr != new_action_block_pos->succ);
                                                                                 assert(pred_iter == new_action_block_pos->succ->block_bunch->pred);
         // adapt the new action_block-slice, as far as is possible now
@@ -2673,6 +2713,7 @@ class part_trans_t
             // This is the first transition that moves to this new
             // action_block-slice.
             new_action_block_pos->begin_or_before_end = new_action_block_pos;
+            ++nr_of_action_block_slices;
         }
         else
         {
@@ -2839,7 +2880,7 @@ class part_trans_t
                                       *source_block->marked_nonbottom_begin++);
             }                                                                   assert(source->pos < source_block->marked_nonbottom_begin);
             std::swap(*source->pos, *source_block->nonbottom_begin++);
-            ++number_of_new_bottom_states;
+            ++nr_of_new_bottom_states;
             became_bottom = true;
         }
 
@@ -2905,6 +2946,7 @@ class part_trans_t
                                                                                         }
                                                                                     }
                                                                                 #endif
+                ++nr_of_action_block_slices;
             }
 
             /* adapt the out-slice                                           */ assert(source != succ.front().block_bunch->pred->source);
@@ -2931,6 +2973,7 @@ class part_trans_t
                     new bunch_t
                 #endif
                               (new_action_block_pos, action_block_inert_begin);
+            ++nr_of_bunches;
 
             // create a new block_bunch-slice
             #ifdef USE_SIMPLE_LIST
@@ -2944,11 +2987,13 @@ class part_trans_t
                 block_bunch_slice_iter_t new_noninert_block_bunch(
                                                std::prev(splitter_list.end()));
             #endif
+            ++nr_of_block_bunch_slices;
             new_block_bunch_pos->slice = new_noninert_block_bunch;
             *new_noninert_block_bunch_ptr = new_noninert_block_bunch;
 
             // create a new action_block-slice
             new_action_block_pos->begin_or_before_end = new_action_block_pos;
+            ++nr_of_action_block_slices;
         }                                                                       assert(&succ.cbegin()[1] == new_succ_pos ||
                                                                                                 new_succ_pos[-1].block_bunch->pred->source < source ||
         /* create a new out-slice                                            */                                new_succ_pos[-1].bunch() != new_noninert_bunch);
@@ -3413,6 +3458,7 @@ inline bunch_t* bunch_t::split_off_small_action_block_slice(
         }                                                                       assert(nullptr != begin->begin_or_before_end);
         if (begin == last_slice_begin)  part_tr.make_trivial(this);
     }                                                                           ONLY_IF_DEBUG( bunch_T_a_Bprime->work_counter = work_counter; )
+    ++part_tr.nr_of_bunches;
     return bunch_T_a_Bprime;
 }
 ///@} (end of group part_trans)
@@ -3785,11 +3831,13 @@ class bisim_partitioner_dnj
                 #endif
                                             (part_tr.action_block_begin,
                                              part_tr.action_block_inert_begin); assert(nullptr != bunch);  assert(part_tr.splitter_list.empty());
+            ++part_tr.nr_of_bunches;                                            assert(1 == part_tr.nr_of_bunches);
 
             // create a single block_bunch entry for all non-inert transitions
             part_tr.splitter_list.emplace_front(
                     ONLY_IF_POOL_ALLOCATOR( part_tr.storage, )
                                 part_tr.block_bunch_inert_begin, bunch, false); assert(!part_tr.splitter_list.empty());
+            ++part_tr.nr_of_block_bunch_slices;                                 assert(1 == part_tr.nr_of_block_bunch_slices);
         }
 
         // create slice descriptors in part_tr.action_block for each label
@@ -3804,7 +3852,6 @@ class bisim_partitioner_dnj
         /* multiple dummy entries will be placed side-by-side.               */                               aut.num_transitions() + action_label.size() - 1);
         bisim_dnj::action_block_entry*
                            next_action_label_begin(part_tr.action_block_begin);
-        label_type num_labels_with_transitions(0);
         trans_type const n_square(part_st.state_size() * part_st.state_size()); ONLY_IF_DEBUG( trans_type max_transitions = n_square; )
         label_type label(action_label.size());                                  assert(0 < label);
         do
@@ -3812,7 +3859,7 @@ class bisim_partitioner_dnj
             --label;
             if (0 < action_label[label].count)
             {                                                                   assert(nullptr != bunch);
-                if (++num_labels_with_transitions == 2)
+                if (++part_tr.nr_of_action_block_slices == 2)
                 {
                     // This is the second action_block-slice, so the bunch is
                     // not yet marked as nontrivial but it should be.
@@ -3989,6 +4036,7 @@ class bisim_partitioner_dnj
                                                                                             assert(!block_bunch.is_stable());
                                                                                         } */
 
+                                                                                        trans_type true_nr_of_block_bunch_slices(0);
                                                                                         // for all blocks
                                                                                         const bisim_dnj::permutation_entry*
                                                                                                                        perm_iter(&part_st.permutation.front());
@@ -4015,6 +4063,7 @@ class bisim_partitioner_dnj
                                                                                                 block_bunch_check_set.insert(&block_bunch);
                                                                                                 mCRL2complexity(&block_bunch, no_temporary_work(
                                                                                                            block_bunch.bunch->max_work_counter(*this)), *this);
+                                                                                                ++true_nr_of_block_bunch_slices;
                                                                                             }
 
                                                                                             // for all states in the block
@@ -4087,6 +4136,8 @@ class bisim_partitioner_dnj
                                                                                             while (++perm_iter < block->end);
                                                                                         }
                                                                                         while (perm_iter <= &part_st.permutation.back());
+                                                                                        assert(part_tr.nr_of_block_bunch_slices ==
+                                                                                                                                true_nr_of_block_bunch_slices);
                                                                                         assert(part_tr.action_block_begin <= part_tr.action_block_inert_begin);
                                                                                         assert(&part_tr.block_bunch.front() < part_tr.block_bunch_inert_begin);
                                                                                         if (branching)
@@ -4136,6 +4187,9 @@ class bisim_partitioner_dnj
                                                                                         }
                                                                                         const bisim_dnj::action_block_entry*
                                                                                                             action_slice_end(part_tr.action_block_inert_begin);
+                                                                                        trans_type true_nr_of_bunches(0);
+                                                                                        trans_type true_nr_of_nontrivial_bunches(0);
+                                                                                        trans_type true_nr_of_action_block_slices(0);
                                                                                         // for all action labels and bunches
                                                                                         label_type label(0);
                                                                                         assert(label < action_label.size());
@@ -4174,9 +4228,14 @@ class bisim_partitioner_dnj
                                                                                                         // be made trivial.
                                                                                                         assert(bunch->is_trivial());
                                                                                                     }
-                                                                                                    else  assert(!bunch->is_trivial());
+                                                                                                    else
+                                                                                                    {
+                                                                                                        assert(!bunch->is_trivial());
+                                                                                                        ++true_nr_of_nontrivial_bunches;
+                                                                                                    }
                                                                                                     mCRL2complexity(bunch, no_temporary_work(
                                                                                                                        bunch->max_work_counter(*this)), *this);
+                                                                                                    ++true_nr_of_bunches;
                                                                                                 }
                                                                                                 if(bunch->begin == action_block_slice_begin)
                                                                                                 {
@@ -4220,6 +4279,7 @@ class bisim_partitioner_dnj
                                                                                                     assert(action_block->begin_or_before_end ==
                                                                                                                              action_block_slice_begin), true));
                                                                                                 action_block_slice_end = action_block_slice_begin;
+                                                                                                ++true_nr_of_action_block_slices;
                                                                                             }
                                                                                             if (action_slice_end < part_tr.action_block_inert_begin)
                                                                                             {
@@ -4231,6 +4291,11 @@ class bisim_partitioner_dnj
                                                                                         while (++label < action_label.size() &&
                                                                                                  (action_slice_end = action_label[label - 1].begin - 1, true));
                                                                                         assert(nullptr == previous_bunch);
+                                                                                        assert(part_tr.nr_of_bunches == true_nr_of_bunches);
+                                                                                        assert(part_tr.nr_of_nontrivial_bunches ==
+                                                                                                                                true_nr_of_nontrivial_bunches);
+                                                                                        assert(part_tr.nr_of_action_block_slices ==
+                                                                                                                               true_nr_of_action_block_slices);
                                                                                     }
                                                                                 #endif
     /// \brief Run (branching) bisimulation minimisation in time O(m log n)
@@ -4254,9 +4319,48 @@ class bisim_partitioner_dnj
     {
         // Line 1.5: while a bunch_T in Pi_t exists with more than one
         //                                               action--block-slice do
+        clock_t next_print_time = clock();
         for (;;)
         {                                                                       // mCRL2complexity(...) -- this loop will be ascribed to (the transitions in)
-                                                                                // the new bunch below.
+            if (const clock_t now = clock(); next_print_time <= now)            // the new bunch below.
+            {
+                // The formula below should ensure that `next_print_time`
+                // increases by a whole number of minutes, so that the current
+                // situation is printed every minute (or, if one iteration
+                // takes more than one minute, after a whole number of
+                // minutes).
+                next_print_time += ((now-next_print_time) / (60*CLOCKS_PER_SEC)
+                                                    + 1) * (60*CLOCKS_PER_SEC);
+                mCRL2log(log::verbose, "bisim_jgkw")
+                    << "The current partition contains "
+                    << part_st.nr_of_blocks
+                          << (1 == part_st.nr_of_blocks ? " block, "
+                                                        : " blocks, ")
+                    << part_tr.nr_of_new_bottom_states
+                          << (1 == part_tr.nr_of_new_bottom_states
+                                                      ? " new bottom state, "
+                                                      : " new bottom states, ")
+                    << part_tr.nr_of_bunches
+                          << (1 == part_tr.nr_of_bunches
+                                                       ? " bunch (of which "
+                                                       : " bunches (of which ")
+                    << part_tr.nr_of_nontrivial_bunches
+                    << ", i.e. "
+                    << (part_tr.nr_of_nontrivial_bunches * 200 + 1)
+                                                    / part_tr.nr_of_bunches / 2
+                          << (1 == part_tr.nr_of_nontrivial_bunches
+                                                       ? "% is nontrivial), "
+                                                       : "% are nontrivial), ")
+                    << part_tr.nr_of_action_block_slices
+                          << (1 == part_tr.nr_of_action_block_slices
+                                                 ? "action-block-slice, and "
+                                                 : "action-block-slices, and ")
+                    << part_tr.nr_of_block_bunch_slices
+                          << (1 == part_tr.nr_of_block_bunch_slices
+                                                    ? "block-bunch-slice.\n"
+                                                    : "block-bunch-slices.\n");
+            }
+
             /*------------------ find a non-trivial bunch -------------------*/ ONLY_IF_DEBUG( part_st.print_part(*this);  part_tr.print_trans(*this);
                                                                                                                                           assert_stability(); )
             // Line 1.6: Select some a in Act and B' in Pi_s such that
