@@ -39,6 +39,7 @@ void instantiate_global_variables(Specification& spec)
     }
     sigma[v] = d;
   }
+  mCRL2log(log::debug) << "instantiating global LPS variables " << sigma << std::endl;
   lps::replace_free_variables(spec.process(), sigma);
   spec.initial_process() = lps::replace_free_variables(spec.initial_process(), sigma);
   spec.global_variables().clear();

@@ -47,6 +47,7 @@ void instantiate_global_variables(pbes& p)
     sigma[v] = d;
     to_be_removed.insert(v);
   }
+  mCRL2log(log::debug) << "instantiating global PBES variables " << sigma << std::endl;
   pbes_system::replace_free_variables(p.equations(), sigma);
   p.initial_state() = pbes_system::replace_free_variables(p.initial_state(), sigma);
   p.global_variables().clear();
