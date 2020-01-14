@@ -81,6 +81,7 @@ void run_generatelts(
   options.confluence_action = priority_action;
   options.rewrite_strategy = rstrategy;
   options.search_strategy = estrategy;
+  options.save_aut_at_end = true;
 
   bool is_timed = stochastic_lpsspec.process().has_time();
 
