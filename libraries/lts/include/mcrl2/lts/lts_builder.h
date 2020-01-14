@@ -253,7 +253,7 @@ std::unique_ptr<lts_builder> create_lts_builder(const lps::specification& lpsspe
       }
       else
       {
-        std::make_unique<lts_aut_disk_builder>(output_filename);
+        return std::make_unique<lts_aut_disk_builder>(output_filename);
       }
     }
     case lts_dot: return std::make_unique<lts_dot_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters());
