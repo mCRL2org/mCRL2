@@ -24,17 +24,28 @@ namespace pbes_system
 namespace detail
 {
 
-/// \brief Attempts to eliminate the free variables of a PBES, by substituting
+/// \brief Applies a global variable substitution to a PBES.
+inline
+void replace_global_variables(pbes& p, const data::mutable_map_substitution<>& sigma)
+{
+  pbes_system::replace_free_variables(p.equations(), sigma);
+  p.initial_state() = pbes_system::replace_free_variables(p.initial_state(), sigma);
+  p.global_variables().clear();
+}
+
+/// \brief Eliminates the global variables of a PBES, by substituting
 /// a constant value for them. If no constant value is found for one of the variables,
 /// an exception is thrown.
 inline
-void instantiate_global_variables(pbes& p)
+data::mutable_map_substitution<> instantiate_global_variables(pbes& p)
 {
+  data::mutable_map_substitution<> sigma;
+
   if (p.global_variables().empty())
   {
-    return;
+    return sigma;
   }
-  data::mutable_map_substitution<> sigma;
+
   data::representative_generator default_expression_generator(p.data());
   std::set<data::variable> to_be_removed;
   for (const data::variable& v: p.global_variables())
@@ -47,10 +58,11 @@ void instantiate_global_variables(pbes& p)
     sigma[v] = d;
     to_be_removed.insert(v);
   }
+
   mCRL2log(log::debug) << "instantiating global PBES variables " << sigma << std::endl;
-  pbes_system::replace_free_variables(p.equations(), sigma);
-  p.initial_state() = pbes_system::replace_free_variables(p.initial_state(), sigma);
-  p.global_variables().clear();
+  replace_global_variables(p, sigma);
+
+  return sigma;
 }
 
 } // namespace detail

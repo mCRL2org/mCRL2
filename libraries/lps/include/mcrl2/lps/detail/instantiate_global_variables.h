@@ -24,13 +24,26 @@ namespace lps
 namespace detail
 {
 
+/// \brief Applies a global variable substitution to an LPS.
 template <typename Specification>
-void instantiate_global_variables(Specification& spec)
+void replace_global_variables(Specification& lpsspec, const data::mutable_map_substitution<>& sigma)
 {
-  mCRL2log(log::verbose) << "Replacing free variables with dummy values." << std::endl;
+  lps::replace_free_variables(lpsspec.process(), sigma);
+  lpsspec.initial_process() = lps::replace_free_variables(lpsspec.initial_process(), sigma);
+  lpsspec.global_variables().clear();
+}
+
+/// \brief Eliminates the global variables of an LPS, by substituting
+/// a constant value for them. If no constant value is found for one of the variables,
+/// an exception is thrown.
+template <typename Specification>
+data::mutable_map_substitution<> instantiate_global_variables(Specification& lpsspec)
+{
   data::mutable_map_substitution<> sigma;
-  data::representative_generator default_expression_generator(spec.data());
-  for (const data::variable& v : spec.global_variables())
+
+  mCRL2log(log::verbose) << "Replacing global variables with dummy values." << std::endl;
+  data::representative_generator default_expression_generator(lpsspec.data());
+  for (const data::variable& v : lpsspec.global_variables())
   {
     data::data_expression d = default_expression_generator(v.sort());
     if (!d.defined())
@@ -39,10 +52,11 @@ void instantiate_global_variables(Specification& spec)
     }
     sigma[v] = d;
   }
+
   mCRL2log(log::debug) << "instantiating global LPS variables " << sigma << std::endl;
-  lps::replace_free_variables(spec.process(), sigma);
-  spec.initial_process() = lps::replace_free_variables(spec.initial_process(), sigma);
-  spec.global_variables().clear();
+  replace_global_variables(lpsspec, sigma);
+
+  return sigma;
 }
 
 } // namespace detail
