@@ -111,6 +111,7 @@ class lts_aut_disk_builder: public lts_builder
 {
   protected:
     std::ofstream out;
+    std::size_t m_transition_count = 0;
 
   public:
     explicit lts_aut_disk_builder(const std::string& filename)
@@ -127,6 +128,7 @@ class lts_aut_disk_builder: public lts_builder
 
     void add_transition(std::size_t from, const process::timed_multi_action& a, std::size_t to) override
     {
+      m_transition_count++;
       out << "(" << from << ",\"" << process::pp(a) << "\"," << to << ")\n";
     }
 
@@ -135,7 +137,7 @@ class lts_aut_disk_builder: public lts_builder
     {
       out.flush();
       out.seekp(0);
-      out << "des (0," << m_actions.size() << "," << state_map.size() << ")";
+      out << "des (0," << m_transition_count << "," << state_map.size() << ")";
       out.close();
     }
 
