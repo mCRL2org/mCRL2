@@ -188,7 +188,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
     {}
 
     template <typename PbesInstAlgorithm>
-    void run_algorithm(PbesInstAlgorithm& algorithm, const pbes_system::pbes& pbesspec, structure_graph& G)
+    void run_algorithm(PbesInstAlgorithm& algorithm, pbes_system::pbes& pbesspec, structure_graph& G, const data::mutable_map_substitution<>& sigma)
     {
       mCRL2log(log::verbose) << "Generating parity game..." << std::endl;
       timer().start("instantiation");
@@ -206,7 +206,8 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       if (!lpsfile.empty())
       {
         lps::specification lpsspec = lps::detail::load_lps(lpsfile);
-        lps::detail::instantiate_global_variables(lpsspec); // N.B. This is necessary, because the global variables might not be valid for the evidence.
+        lps::detail::replace_global_variables(lpsspec, sigma);
+
         bool result;
         lps::specification evidence;
         timer().start("solving");
@@ -249,17 +250,25 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
     {
       pbes_system::pbes pbesspec = pbes_system::detail::load_pbes(input_filename());
       pbes_system::algorithms::normalize(pbesspec);
+      data::mutable_map_substitution<> sigma;
+
+      if (!lpsfile.empty())
+      {
+        // Make sure that the global variables of the LPS and the PBES get the same values
+        sigma = pbes_system::detail::instantiate_global_variables(pbesspec);
+        pbes_system::detail::replace_global_variables(pbesspec, sigma);
+      }
 
       structure_graph G;
       if (options.optimization <= 1)
       {
         pbesinst_structure_graph_algorithm algorithm(options, pbesspec, G);
-        run_algorithm<pbesinst_structure_graph_algorithm>(algorithm, pbesspec, G);
+        run_algorithm<pbesinst_structure_graph_algorithm>(algorithm, pbesspec, G, sigma);
       }
       else
       {
         pbesinst_structure_graph_algorithm2 algorithm(options, pbesspec, G);
-        run_algorithm<pbesinst_structure_graph_algorithm2>(algorithm, pbesspec, G);
+        run_algorithm<pbesinst_structure_graph_algorithm2>(algorithm, pbesspec, G, sigma);
       }
       return true;
     }

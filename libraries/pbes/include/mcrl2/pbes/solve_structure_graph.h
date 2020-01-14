@@ -463,6 +463,15 @@ class lps_solve_structure_graph_algorithm: public solve_structure_graph_algorith
     /// \return A boolean indicating the solution and a linear process that represents the counter example.
     std::pair<bool, lps::specification> solve_with_counter_example(structure_graph& G, const lps::specification& lpsspec, const pbes& p, const pbes_equation_index& p_index)
     {
+      if (!lpsspec.global_variables().empty())
+      {
+        throw mcrl2::runtime_error("solve_with_counter_example requires an LPS without global variables.");
+      }
+      if (!p.global_variables().empty())
+      {
+        throw mcrl2::runtime_error("solve_with_counter_example requires a PBES without global variables.");
+      }
+
       mCRL2log(log::verbose) << "Solving parity game..." << std::endl;
       vertex_set Wconj;
       vertex_set Wdisj;
