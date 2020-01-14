@@ -31,7 +31,7 @@ class pbes_rewriter : public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool
     typedef pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool> > > > super;
 
     /// \brief Returns the types of rewriters that are available for this tool.
-    std::set<pbes_system::pbes_rewriter_type> available_rewriters() const
+    std::set<pbes_system::pbes_rewriter_type> available_rewriters() const override
     {
       std::set<pbes_system::pbes_rewriter_type> result = super::available_rewriters();
       result.insert(pbes_system::quantifier_one_point);
