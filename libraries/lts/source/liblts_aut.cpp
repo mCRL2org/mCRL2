@@ -240,7 +240,8 @@ static bool read_initial_part_of_an_aut_transition(
   }
   if (ch != '(')
   {
-    throw mcrl2::runtime_error("Expect opening bracket at line " + std::to_string(line_no) + ".");
+    is.unget();
+    return false;
   }
 
   is >> std::skipws >> from;
@@ -528,7 +529,7 @@ namespace lts
 
 void probabilistic_lts_aut_t::load(const std::string& filename)
 {
-  if (filename=="")
+  if (filename=="" || filename=="-")
   {
     read_from_aut(*this, std::cin);
   }
@@ -553,7 +554,7 @@ void probabilistic_lts_aut_t::load(std::istream& is)
 
 void probabilistic_lts_aut_t::save(std::string const& filename) const
 {
-  if (filename=="")
+  if (filename=="" || filename=="-")
   {
     write_to_aut(*this, std::cout);
   }
@@ -573,7 +574,7 @@ void probabilistic_lts_aut_t::save(std::string const& filename) const
 
 void lts_aut_t::load(const std::string& filename)
 {
-  if (filename=="")
+  if (filename=="" || filename=="-")
   {
     read_from_aut(*this, std::cin);
   }
@@ -598,7 +599,7 @@ void lts_aut_t::load(std::istream& is)
 
 void lts_aut_t::save(std::string const& filename) const
 {
-  if (filename=="")
+  if (filename=="" || filename=="-")
   {
     write_to_aut(*this, std::cout);
   }
