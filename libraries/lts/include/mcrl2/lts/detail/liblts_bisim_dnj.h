@@ -4311,63 +4311,95 @@ class bisim_partitioner_dnj
         //                                               action--block-slice do
         clock_t next_print_time = clock();
         const clock_t rounded_start_time = next_print_time - CLOCKS_PER_SEC/2;
+        // const double log_initial_nr_of_action_block_slices =
+        //                   100 / std::log(part_tr.nr_of_action_block_slices);
         for (;;)
         {                                                                       // mCRL2complexity(...) -- this loop will be ascribed to (the transitions in)
                                                                                 // the new bunch below.
             /*------------------ find a non-trivial bunch -------------------*/ ONLY_IF_DEBUG( part_st.print_part(*this);  part_tr.print_trans(*this);
                                                                                                                                           assert_stability(); )
-            // Line 1.6: Select some a in Act and B' in Pi_s such that
-            //                              |bunch_T_a_Bprime| <= 1/2 |bunch_T|
+            /* Line 1.6: Select some a in Act and B' in Pi_s such that       */ assert(part_tr.nr_of_bunches + part_tr.nr_of_nontrivial_bunches <=
+            /*                           |bunch_T_a_Bprime| <= 1/2 |bunch_T| */                                             part_tr.nr_of_action_block_slices);
             bisim_dnj::bunch_t* const bunch_T(part_tr.get_some_nontrivial());
-            if (const clock_t now = clock(); next_print_time <= now ||
-                                                            nullptr == bunch_T)
+            if (mCRL2logEnabled(log::verbose))
             {
-                // The formula below should ensure that `next_print_time`
-                // increases by a whole number of minutes, so that the current
-                // situation is printed every minute (or, if one iteration
-                // takes more than one minute, after a whole number of
-                // minutes).
-                next_print_time += ((now-next_print_time) / (60*CLOCKS_PER_SEC)
+                if (clock_t now = clock(); next_print_time <= now ||
+                                                            nullptr == bunch_T)
+                {
+
+                    /* -  -  -  -  -print progress information-  -  -  -  - */
+
+                    // The formula below should ensure that `next_print_time`
+                    // increases by a whole number of minutes, so that the
+                    // progress information is printed every minute (or, if
+                    // one iteration takes more than one minute, after a whole
+                    // number of minutes).
+                    next_print_time+=((now-next_print_time)/(60*CLOCKS_PER_SEC)
                                                     + 1) * (60*CLOCKS_PER_SEC);
-                #define PRINT_SG_PL(counter, sg_string, pl_string)            \
+                    now = (now - rounded_start_time) / CLOCKS_PER_SEC;
+                    if (0 != now)
+                    {
+                        if (60 <= now)
+                        {
+                            if (3600 <= now)
+                            {
+                                mCRL2log(log::verbose, "bisim_jgkw")
+                                    << now / 3600 << " h ";
+                                now %= 3600;
+                            }
+                            mCRL2log(log::verbose, "bisim_jgkw")
+                                << now / 60 << " min ";
+                            now %= 60;
+                        }
+                        mCRL2log(log::verbose, "bisim_jgkw") << now
+                              << " sec passed since starting the main loop.\n";
+                    }
+                    #define PRINT_SG_PL(counter, sg_string, pl_string)        \
                             (counter)                                         \
                             << (1 == (counter) ? (sg_string) : (pl_string))
-                #define PRINT_INT_PERCENTAGE(num,denom)                       \
-                            (num) << '/' << (denom) << " = "                  \
-                            << (((num) * 200 + (denom)) / (denom) / 2)
-                mCRL2log(log::verbose, "bisim_jgkw")
-                    << "After " << (now - rounded_start_time) / CLOCKS_PER_SEC
-                    << " sec, the current partition contains "
-                    << PRINT_SG_PL(part_st.nr_of_blocks, " block, ",
-                                                         " blocks, ")
-                    << PRINT_SG_PL(part_tr.nr_of_new_bottom_states,
-                                                        " new bottom state, ",
-                                                        " new bottom states, ")
-                    << PRINT_SG_PL(part_tr.nr_of_bunches," bunch (of which ",
-                                                         " bunches (of which ")
-                    << PRINT_SG_PL(part_tr.nr_of_nontrivial_bunches,
-                                                           " is nontrivial: ",
-                                                           " are nontrivial: ")
-                    << PRINT_INT_PERCENTAGE(part_tr.nr_of_nontrivial_bunches,
-                                               part_tr.nr_of_bunches) << "%), "
-                    << PRINT_SG_PL(part_tr.nr_of_action_block_slices,
-                                   " action-block-slice (requiring at least ",
-                                   " action-block-slices (requiring at least ")
-                    << PRINT_SG_PL(part_tr.nr_of_action_block_slices -
-                                            part_tr.nr_of_bunches, " split: ",
-                                                                   " splits: ")
-                    << PRINT_INT_PERCENTAGE(part_tr.nr_of_action_block_slices -
-                                                        part_tr.nr_of_bunches,
-                               part_tr.nr_of_action_block_slices) << "%), and "
-                    << PRINT_SG_PL(part_tr.nr_of_block_bunch_slices,
-                                                     " block-bunch-slice.\n",
-                                                     " block-bunch-slices.\n");
-                #undef PRINT_INT_PERCENTAGE
-                #undef PRINT_SG_PL
-                if (nullptr == bunch_T)  break;
+                    mCRL2log(log::verbose, "bisim_jgkw")
+                        << (nullptr == bunch_T ? "The reduced LTS contains "
+                                        : "The reduced LTS contains at least ")
+                        << PRINT_SG_PL(part_st.nr_of_blocks,
+                                                 " state and ", " states and ")
+                        << PRINT_SG_PL(part_tr.nr_of_block_bunch_slices,
+                                              " transition.", " transitions.");
+                    if (1 < part_tr.nr_of_action_block_slices)
+                    {
+                        #define PRINT_INT_PERCENTAGE(num,denom)               \
+                                (((num) * 200 + (denom)) / (denom) / 2)
+                        mCRL2log(log::verbose, "bisim_jgkw") << " Estimated "
+                            << PRINT_INT_PERCENTAGE(part_tr.nr_of_bunches - 1,
+                                         part_tr.nr_of_action_block_slices - 1)
+                            << "% done.";
+                        #undef PRINT_INT_PERCENTAGE
+                    }
+                    mCRL2log(log::verbose, "bisim_jgkw")
+                    //  << " Logarithmic estimate: "
+                    //  << (int)(100.5+std::log((double) part_tr.nr_of_bunches/
+                    //                      part_tr.nr_of_action_block_slices)
+                    //                  *log_initial_nr_of_action_block_slices)
+                    //  << "% done."
+                        << "\nThe current partition contains ";
+                    if (branching)
+                    {
+                        mCRL2log(log::verbose, "bisim_jgkw")
+                            << PRINT_SG_PL(part_tr.nr_of_new_bottom_states,
+                                " new bottom state, ", " new bottom states, ");
+                    }                                                           else  assert(0 == part_tr.nr_of_new_bottom_states);
+                    mCRL2log(log::verbose, "bisim_jgkw")
+                        << PRINT_SG_PL(part_tr.nr_of_bunches,
+                                    " bunch (of which ", " bunches (of which ")
+                        << PRINT_SG_PL(part_tr.nr_of_nontrivial_bunches,
+                             " is nontrivial), and ", " are nontrivial), and ")
+                        << PRINT_SG_PL(part_tr.nr_of_action_block_slices,
+                          " action-block-slice.\n", " action-block-slices.\n");
+                    #undef PRINT_SG_PL
+                }
             }
-            /* Line 1.7: Pi_t := Pi_t \ { bunch_T } union                    */ ONLY_IF_DEBUG( mCRL2log(log::debug, "bisim_jgkw") << "Refining "
-            /*              { bunch_T_a_Bprime, bunch_T \ bunch_T_a_Bprime } */                                          << bunch_T->debug_id(*this) << '\n'; )
+            if (nullptr == bunch_T)  break;                                     ONLY_IF_DEBUG( mCRL2log(log::debug, "bisim_jgkw") << "Refining "
+            /* Line 1.7: Pi_t := Pi_t \ { bunch_T } union                    */                                          << bunch_T->debug_id(*this) << '\n'; )
+            /*              { bunch_T_a_Bprime, bunch_T \ bunch_T_a_Bprime } */ assert(part_tr.nr_of_bunches < part_tr.nr_of_action_block_slices);
             bisim_dnj::bunch_t* const bunch_T_a_Bprime(
                          bunch_T->split_off_small_action_block_slice(part_tr));
                                                                                 #ifndef NDEBUG
@@ -4489,7 +4521,7 @@ class bisim_partitioner_dnj
                                                                                                                           iter(part_tr.splitter_list.cbegin());
                                                                                                                   part_tr.splitter_list.cend() != iter; ++iter)
                                                                                     {   assert(!iter->is_stable());
-                                                                                        assert(iter->source_block() != block_U || iter->bunch != bunch_T);
+                                                                                        assert(iter->source_block() != block_U);
                         /* Line 1.19: end if                                 */     }
                                                                                 #endif
                         }
