@@ -20,6 +20,8 @@ namespace mcrl2
 namespace data
 {
 /// \brief Components for generating an arbitrary element of a sort
+/// \details This component is not deterministic. So, it is not guaranteed
+///          to deliver the same element each time it is run.
 ///
 /// A representative is an arbitrary element of a given sort. This
 /// component takes a specification and generates representatives for sorts
