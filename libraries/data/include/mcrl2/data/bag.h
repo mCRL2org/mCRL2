@@ -1027,6 +1027,224 @@ namespace mcrl2 {
       {
         return is_application(e) && is_bool2nat_function_function_symbol(atermpp::down_cast<application>(e).head());
       }
+
+      /// \brief Generate identifier \@fbag_join
+      /// \return Identifier \@fbag_join
+      inline
+      core::identifier_string const& fbag_join_name()
+      {
+        static core::identifier_string fbag_join_name = core::identifier_string("@fbag_join");
+        return fbag_join_name;
+      }
+
+      /// \brief Constructor for function symbol \@fbag_join
+      /// \param s A sort expression
+      /// \return Function symbol fbag_join
+      inline
+      function_symbol fbag_join(const sort_expression& s)
+      {
+        function_symbol fbag_join(fbag_join_name(), make_function_sort(make_function_sort(s, sort_nat::nat()), make_function_sort(s, sort_nat::nat()), sort_fbag::fbag(s), sort_fbag::fbag(s), sort_fbag::fbag(s)));
+        return fbag_join;
+      }
+
+      /// \brief Recogniser for function \@fbag_join
+      /// \param e A data expression
+      /// \return true iff e is the function symbol matching \@fbag_join
+      inline
+      bool is_fbag_join_function_symbol(const atermpp::aterm_appl& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e).name() == fbag_join_name();
+        }
+        return false;
+      }
+
+      /// \brief Application of function symbol \@fbag_join
+      /// \param s A sort expression
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \param arg2 A data expression
+      /// \param arg3 A data expression
+      /// \return Application of \@fbag_join to a number of arguments
+      inline
+      application fbag_join(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
+      {
+        return sort_bag::fbag_join(s)(arg0, arg1, arg2, arg3);
+      }
+
+      /// \brief Recogniser for application of \@fbag_join
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol fbag_join to a
+      ///     number of arguments
+      inline
+      bool is_fbag_join_application(const atermpp::aterm_appl& e)
+      {
+        return is_application(e) && is_fbag_join_function_symbol(atermpp::down_cast<application>(e).head());
+      }
+
+      /// \brief Generate identifier \@fbag_inter
+      /// \return Identifier \@fbag_inter
+      inline
+      core::identifier_string const& fbag_intersect_name()
+      {
+        static core::identifier_string fbag_intersect_name = core::identifier_string("@fbag_inter");
+        return fbag_intersect_name;
+      }
+
+      /// \brief Constructor for function symbol \@fbag_inter
+      /// \param s A sort expression
+      /// \return Function symbol fbag_intersect
+      inline
+      function_symbol fbag_intersect(const sort_expression& s)
+      {
+        function_symbol fbag_intersect(fbag_intersect_name(), make_function_sort(make_function_sort(s, sort_nat::nat()), make_function_sort(s, sort_nat::nat()), sort_fbag::fbag(s), sort_fbag::fbag(s), sort_fbag::fbag(s)));
+        return fbag_intersect;
+      }
+
+      /// \brief Recogniser for function \@fbag_inter
+      /// \param e A data expression
+      /// \return true iff e is the function symbol matching \@fbag_inter
+      inline
+      bool is_fbag_intersect_function_symbol(const atermpp::aterm_appl& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e).name() == fbag_intersect_name();
+        }
+        return false;
+      }
+
+      /// \brief Application of function symbol \@fbag_inter
+      /// \param s A sort expression
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \param arg2 A data expression
+      /// \param arg3 A data expression
+      /// \return Application of \@fbag_inter to a number of arguments
+      inline
+      application fbag_intersect(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
+      {
+        return sort_bag::fbag_intersect(s)(arg0, arg1, arg2, arg3);
+      }
+
+      /// \brief Recogniser for application of \@fbag_inter
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol fbag_intersect to a
+      ///     number of arguments
+      inline
+      bool is_fbag_intersect_application(const atermpp::aterm_appl& e)
+      {
+        return is_application(e) && is_fbag_intersect_function_symbol(atermpp::down_cast<application>(e).head());
+      }
+
+      /// \brief Generate identifier \@fbag_diff
+      /// \return Identifier \@fbag_diff
+      inline
+      core::identifier_string const& fbag_difference_name()
+      {
+        static core::identifier_string fbag_difference_name = core::identifier_string("@fbag_diff");
+        return fbag_difference_name;
+      }
+
+      /// \brief Constructor for function symbol \@fbag_diff
+      /// \param s A sort expression
+      /// \return Function symbol fbag_difference
+      inline
+      function_symbol fbag_difference(const sort_expression& s)
+      {
+        function_symbol fbag_difference(fbag_difference_name(), make_function_sort(make_function_sort(s, sort_nat::nat()), make_function_sort(s, sort_nat::nat()), sort_fbag::fbag(s), sort_fbag::fbag(s), sort_fbag::fbag(s)));
+        return fbag_difference;
+      }
+
+      /// \brief Recogniser for function \@fbag_diff
+      /// \param e A data expression
+      /// \return true iff e is the function symbol matching \@fbag_diff
+      inline
+      bool is_fbag_difference_function_symbol(const atermpp::aterm_appl& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e).name() == fbag_difference_name();
+        }
+        return false;
+      }
+
+      /// \brief Application of function symbol \@fbag_diff
+      /// \param s A sort expression
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \param arg2 A data expression
+      /// \param arg3 A data expression
+      /// \return Application of \@fbag_diff to a number of arguments
+      inline
+      application fbag_difference(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
+      {
+        return sort_bag::fbag_difference(s)(arg0, arg1, arg2, arg3);
+      }
+
+      /// \brief Recogniser for application of \@fbag_diff
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol fbag_difference to a
+      ///     number of arguments
+      inline
+      bool is_fbag_difference_application(const atermpp::aterm_appl& e)
+      {
+        return is_application(e) && is_fbag_difference_function_symbol(atermpp::down_cast<application>(e).head());
+      }
+
+      /// \brief Generate identifier \@fbag2fset
+      /// \return Identifier \@fbag2fset
+      inline
+      core::identifier_string const& fbag2fset_name()
+      {
+        static core::identifier_string fbag2fset_name = core::identifier_string("@fbag2fset");
+        return fbag2fset_name;
+      }
+
+      /// \brief Constructor for function symbol \@fbag2fset
+      /// \param s A sort expression
+      /// \return Function symbol fbag2fset
+      inline
+      function_symbol fbag2fset(const sort_expression& s)
+      {
+        function_symbol fbag2fset(fbag2fset_name(), make_function_sort(make_function_sort(s, sort_nat::nat()), sort_fbag::fbag(s), sort_fset::fset(s)));
+        return fbag2fset;
+      }
+
+      /// \brief Recogniser for function \@fbag2fset
+      /// \param e A data expression
+      /// \return true iff e is the function symbol matching \@fbag2fset
+      inline
+      bool is_fbag2fset_function_symbol(const atermpp::aterm_appl& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e).name() == fbag2fset_name();
+        }
+        return false;
+      }
+
+      /// \brief Application of function symbol \@fbag2fset
+      /// \param s A sort expression
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \return Application of \@fbag2fset to a number of arguments
+      inline
+      application fbag2fset(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        return sort_bag::fbag2fset(s)(arg0, arg1);
+      }
+
+      /// \brief Recogniser for application of \@fbag2fset
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol fbag2fset to a
+      ///     number of arguments
+      inline
+      bool is_fbag2fset_application(const atermpp::aterm_appl& e)
+      {
+        return is_application(e) && is_fbag2fset_function_symbol(atermpp::down_cast<application>(e).head());
+      }
       /// \brief Give all system defined mappings for bag
       /// \param s A sort expression
       /// \return All system defined mappings for bag
@@ -1050,6 +1268,10 @@ namespace mcrl2 {
         result.push_back(sort_bag::monus_function(s));
         result.push_back(sort_bag::nat2bool_function(s));
         result.push_back(sort_bag::bool2nat_function(s));
+        result.push_back(sort_bag::fbag_join(s));
+        result.push_back(sort_bag::fbag_intersect(s));
+        result.push_back(sort_bag::fbag_difference(s));
+        result.push_back(sort_bag::fbag2fset(s));
         return result;
       }
       ///\brief Function for projecting out argument
@@ -1060,8 +1282,56 @@ namespace mcrl2 {
       inline
       const data_expression& right(const data_expression& e)
       {
-        assert(is_constructor_application(e) || is_count_application(e) || is_in_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e) || is_add_function_application(e) || is_min_function_application(e) || is_monus_function_application(e));
+        assert(is_constructor_application(e) || is_count_application(e) || is_in_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e) || is_add_function_application(e) || is_min_function_application(e) || is_monus_function_application(e) || is_fbag2fset_application(e));
         return atermpp::down_cast<const application >(e)[1];
+      }
+
+      ///\brief Function for projecting out argument
+      ///        arg1 from an application
+      /// \param e A data expression
+      /// \pre arg1 is defined for e
+      /// \return The argument of e that corresponds to arg1
+      inline
+      const data_expression& arg1(const data_expression& e)
+      {
+        assert(is_fbag_join_application(e) || is_fbag_intersect_application(e) || is_fbag_difference_application(e));
+        return atermpp::down_cast<const application >(e)[0];
+      }
+
+      ///\brief Function for projecting out argument
+      ///        arg2 from an application
+      /// \param e A data expression
+      /// \pre arg2 is defined for e
+      /// \return The argument of e that corresponds to arg2
+      inline
+      const data_expression& arg2(const data_expression& e)
+      {
+        assert(is_fbag_join_application(e) || is_fbag_intersect_application(e) || is_fbag_difference_application(e));
+        return atermpp::down_cast<const application >(e)[1];
+      }
+
+      ///\brief Function for projecting out argument
+      ///        arg3 from an application
+      /// \param e A data expression
+      /// \pre arg3 is defined for e
+      /// \return The argument of e that corresponds to arg3
+      inline
+      const data_expression& arg3(const data_expression& e)
+      {
+        assert(is_fbag_join_application(e) || is_fbag_intersect_application(e) || is_fbag_difference_application(e));
+        return atermpp::down_cast<const application >(e)[2];
+      }
+
+      ///\brief Function for projecting out argument
+      ///        arg4 from an application
+      /// \param e A data expression
+      /// \pre arg4 is defined for e
+      /// \return The argument of e that corresponds to arg4
+      inline
+      const data_expression& arg4(const data_expression& e)
+      {
+        assert(is_fbag_join_application(e) || is_fbag_intersect_application(e) || is_fbag_difference_application(e));
+        return atermpp::down_cast<const application >(e)[3];
       }
 
       ///\brief Function for projecting out argument
@@ -1084,7 +1354,7 @@ namespace mcrl2 {
       inline
       const data_expression& left(const data_expression& e)
       {
-        assert(is_constructor_application(e) || is_count_application(e) || is_in_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e) || is_add_function_application(e) || is_min_function_application(e) || is_monus_function_application(e));
+        assert(is_constructor_application(e) || is_count_application(e) || is_in_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e) || is_add_function_application(e) || is_min_function_application(e) || is_monus_function_application(e) || is_fbag2fset_application(e));
         return atermpp::down_cast<const application >(e)[0];
       }
 
@@ -1096,14 +1366,16 @@ namespace mcrl2 {
       {
         variable vb("b",sort_fbag::fbag(s));
         variable vc("c",sort_fbag::fbag(s));
+        variable vd("d",s);
         variable ve("e",s);
         variable vf("f",make_function_sort(s, sort_nat::nat()));
         variable vg("g",make_function_sort(s, sort_nat::nat()));
         variable vh("h",make_function_sort(s, sort_bool::bool_()));
+        variable vp("p",sort_pos::pos());
+        variable vq("q",sort_pos::pos());
         variable vs("s",sort_fset::fset(s));
         variable vx("x",bag(s));
         variable vy("y",bag(s));
-        variable vd("d",s);
 
         data_equation_vector result;
         result.push_back(data_equation(variable_list({vb}), bag_fbag(s, vb), constructor(s, zero_function(s), vb)));
@@ -1113,15 +1385,15 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vb, vc, vf, vg}), equal_to(constructor(s, vf, vb), constructor(s, vg, vc)), if_(equal_to(vf, vg), equal_to(vb, vc), forall(variable_list({vd}), equal_to(count(s, vd, constructor(s, vf, vb)), count(s, vd, constructor(s, vg, vc)))))));
         result.push_back(data_equation(variable_list({vx, vy}), less(vx, vy), sort_bool::and_(less_equal(vx, vy), not_equal_to(vx, vy))));
         result.push_back(data_equation(variable_list({vx, vy}), less_equal(vx, vy), equal_to(intersection(s, vx, vy), vx)));
-        result.push_back(data_equation(variable_list({vb, vc, vf, vg}), union_(s, constructor(s, vf, vb), constructor(s, vg, vc)), constructor(s, add_function(s, vf, vg), sort_fbag::join(s, vf, vg, vb, vc))));
+        result.push_back(data_equation(variable_list({vb, vc, vf, vg}), union_(s, constructor(s, vf, vb), constructor(s, vg, vc)), constructor(s, add_function(s, vf, vg), fbag_join(s, vf, vg, vb, vc))));
         result.push_back(data_equation(variable_list({vx}), intersection(s, vx, vx), vx));
         result.push_back(data_equation(variable_list({vx, vy}), intersection(s, vx, intersection(s, vx, vy)), intersection(s, vx, vy)));
         result.push_back(data_equation(variable_list({vx, vy}), intersection(s, vx, intersection(s, vy, vx)), intersection(s, vy, vx)));
         result.push_back(data_equation(variable_list({vx, vy}), intersection(s, intersection(s, vx, vy), vx), intersection(s, vx, vy)));
         result.push_back(data_equation(variable_list({vx, vy}), intersection(s, intersection(s, vy, vx), vx), intersection(s, vy, vx)));
-        result.push_back(data_equation(variable_list({vb, vc, vf, vg}), intersection(s, constructor(s, vf, vb), constructor(s, vg, vc)), constructor(s, min_function(s, vf, vg), sort_fbag::fbag_intersect(s, vf, vg, vb, vc))));
-        result.push_back(data_equation(variable_list({vb, vc, vf, vg}), difference(s, constructor(s, vf, vb), constructor(s, vg, vc)), constructor(s, monus_function(s, vf, vg), sort_fbag::fbag_difference(s, vf, vg, vb, vc))));
-        result.push_back(data_equation(variable_list({vb, vf}), bag2set(s, constructor(s, vf, vb)), sort_set::constructor(s, nat2bool_function(s, vf), sort_fbag::fbag2fset(s, vf, vb))));
+        result.push_back(data_equation(variable_list({vb, vc, vf, vg}), intersection(s, constructor(s, vf, vb), constructor(s, vg, vc)), constructor(s, min_function(s, vf, vg), fbag_intersect(s, vf, vg, vb, vc))));
+        result.push_back(data_equation(variable_list({vb, vc, vf, vg}), difference(s, constructor(s, vf, vb), constructor(s, vg, vc)), constructor(s, monus_function(s, vf, vg), fbag_difference(s, vf, vg, vb, vc))));
+        result.push_back(data_equation(variable_list({vb, vf}), bag2set(s, constructor(s, vf, vb)), sort_set::constructor(s, nat2bool_function(s, vf), fbag2fset(s, vf, vb))));
         result.push_back(data_equation(variable_list({vh, vs}), set2bag(s, sort_set::constructor(s, vh, vs)), constructor(s, bool2nat_function(s, vh), sort_fbag::fset2fbag(s, vs))));
         result.push_back(data_equation(variable_list({ve}), zero_function(s, ve), sort_nat::c0()));
         result.push_back(data_equation(variable_list({ve}), one_function(s, ve), sort_nat::cnat(sort_pos::c1())));
@@ -1144,6 +1416,26 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({ve, vh}), bool2nat_function(s, vh)(ve), if_(vh(ve), sort_nat::cnat(sort_pos::c1()), sort_nat::c0())));
         result.push_back(data_equation(variable_list(), bool2nat_function(s, sort_set::false_function(s)), zero_function(s)));
         result.push_back(data_equation(variable_list(), bool2nat_function(s, sort_set::true_function(s)), one_function(s)));
+        result.push_back(data_equation(variable_list({vf, vg}), fbag_join(s, vf, vg, sort_fbag::empty(s), sort_fbag::empty(s)), sort_fbag::empty(s)));
+        result.push_back(data_equation(variable_list({vb, vd, vf, vg, vp}), fbag_join(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::empty(s)), sort_fbag::cinsert(s, vd, sort_nat::swap_zero_add(vf(vd), vg(vd), sort_nat::cnat(vp), sort_nat::c0()), fbag_join(s, vf, vg, vb, sort_fbag::empty(s)))));
+        result.push_back(data_equation(variable_list({vc, ve, vf, vg, vq}), fbag_join(s, vf, vg, sort_fbag::empty(s), sort_fbag::cons_(s, ve, vq, vc)), sort_fbag::cinsert(s, ve, sort_nat::swap_zero_add(vf(ve), vg(ve), sort_nat::c0(), sort_nat::cnat(vq)), fbag_join(s, vf, vg, sort_fbag::empty(s), vc))));
+        result.push_back(data_equation(variable_list({vb, vc, vd, vf, vg, vp, vq}), fbag_join(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::cons_(s, vd, vq, vc)), sort_fbag::cinsert(s, vd, sort_nat::swap_zero_add(vf(vd), vg(vd), sort_nat::cnat(vp), sort_nat::cnat(vq)), fbag_join(s, vf, vg, vb, vc))));
+        result.push_back(data_equation(variable_list({vb, vc, vd, ve, vf, vg, vp, vq}), less(vd, ve), fbag_join(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::cons_(s, ve, vq, vc)), sort_fbag::cinsert(s, vd, sort_nat::swap_zero_add(vf(vd), vg(vd), sort_nat::cnat(vp), sort_nat::c0()), fbag_join(s, vf, vg, vb, sort_fbag::cons_(s, ve, vq, vc)))));
+        result.push_back(data_equation(variable_list({vb, vc, vd, ve, vf, vg, vp, vq}), less(ve, vd), fbag_join(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::cons_(s, ve, vq, vc)), sort_fbag::cinsert(s, ve, sort_nat::swap_zero_add(vf(ve), vg(ve), sort_nat::c0(), sort_nat::cnat(vq)), fbag_join(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), vc))));
+        result.push_back(data_equation(variable_list({vf, vg}), fbag_intersect(s, vf, vg, sort_fbag::empty(s), sort_fbag::empty(s)), sort_fbag::empty(s)));
+        result.push_back(data_equation(variable_list({vb, vd, vf, vg, vp}), fbag_intersect(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::empty(s)), sort_fbag::cinsert(s, vd, sort_nat::swap_zero_min(vf(vd), vg(vd), sort_nat::cnat(vp), sort_nat::c0()), fbag_intersect(s, vf, vg, vb, sort_fbag::empty(s)))));
+        result.push_back(data_equation(variable_list({vc, ve, vf, vg, vq}), fbag_intersect(s, vf, vg, sort_fbag::empty(s), sort_fbag::cons_(s, ve, vq, vc)), sort_fbag::cinsert(s, ve, sort_nat::swap_zero_min(vf(ve), vg(ve), sort_nat::c0(), sort_nat::cnat(vq)), fbag_intersect(s, vf, vg, sort_fbag::empty(s), vc))));
+        result.push_back(data_equation(variable_list({vb, vc, vd, vf, vg, vp, vq}), fbag_intersect(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::cons_(s, vd, vq, vc)), sort_fbag::cinsert(s, vd, sort_nat::swap_zero_min(vf(vd), vg(vd), sort_nat::cnat(vp), sort_nat::cnat(vq)), fbag_intersect(s, vf, vg, vb, vc))));
+        result.push_back(data_equation(variable_list({vb, vc, vd, ve, vf, vg, vp, vq}), less(vd, ve), fbag_intersect(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::cons_(s, ve, vq, vc)), sort_fbag::cinsert(s, vd, sort_nat::swap_zero_min(vf(vd), vg(vd), sort_nat::cnat(vp), sort_nat::c0()), fbag_intersect(s, vf, vg, vb, sort_fbag::cons_(s, ve, vq, vc)))));
+        result.push_back(data_equation(variable_list({vb, vc, vd, ve, vf, vg, vp, vq}), less(ve, vd), fbag_intersect(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::cons_(s, ve, vq, vc)), sort_fbag::cinsert(s, ve, sort_nat::swap_zero_min(vf(ve), vg(ve), sort_nat::c0(), sort_nat::cnat(vq)), fbag_intersect(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), vc))));
+        result.push_back(data_equation(variable_list({vf, vg}), fbag_difference(s, vf, vg, sort_fbag::empty(s), sort_fbag::empty(s)), sort_fbag::empty(s)));
+        result.push_back(data_equation(variable_list({vb, vd, vf, vg, vp}), fbag_difference(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::empty(s)), sort_fbag::cinsert(s, vd, sort_nat::swap_zero_monus(vf(vd), vg(vd), sort_nat::cnat(vp), sort_nat::c0()), fbag_difference(s, vf, vg, vb, sort_fbag::empty(s)))));
+        result.push_back(data_equation(variable_list({vc, ve, vf, vg, vq}), fbag_difference(s, vf, vg, sort_fbag::empty(s), sort_fbag::cons_(s, ve, vq, vc)), sort_fbag::cinsert(s, ve, sort_nat::swap_zero_monus(vf(ve), vg(ve), sort_nat::c0(), sort_nat::cnat(vq)), fbag_difference(s, vf, vg, sort_fbag::empty(s), vc))));
+        result.push_back(data_equation(variable_list({vb, vc, vd, vf, vg, vp, vq}), fbag_difference(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::cons_(s, vd, vq, vc)), sort_fbag::cinsert(s, vd, sort_nat::swap_zero_monus(vf(vd), vg(vd), sort_nat::cnat(vp), sort_nat::cnat(vq)), fbag_difference(s, vf, vg, vb, vc))));
+        result.push_back(data_equation(variable_list({vb, vc, vd, ve, vf, vg, vp, vq}), less(vd, ve), fbag_difference(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::cons_(s, ve, vq, vc)), sort_fbag::cinsert(s, vd, sort_nat::swap_zero_monus(vf(vd), vg(vd), sort_nat::cnat(vp), sort_nat::c0()), fbag_difference(s, vf, vg, vb, sort_fbag::cons_(s, ve, vq, vc)))));
+        result.push_back(data_equation(variable_list({vb, vc, vd, ve, vf, vg, vp, vq}), less(ve, vd), fbag_difference(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::cons_(s, ve, vq, vc)), sort_fbag::cinsert(s, ve, sort_nat::swap_zero_monus(vf(ve), vg(ve), sort_nat::c0(), sort_nat::cnat(vq)), fbag_difference(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), vc))));
+        result.push_back(data_equation(variable_list({vf}), fbag2fset(s, vf, sort_fbag::empty(s)), sort_fset::empty(s)));
+        result.push_back(data_equation(variable_list({vb, vd, vf, vp}), fbag2fset(s, vf, sort_fbag::cons_(s, vd, vp, vb)), sort_fset::cinsert(s, vd, equal_to(equal_to(vf(vd), sort_nat::cnat(vp)), greater(vf(vd), sort_nat::c0())), fbag2fset(s, vf, vb))));
         return result;
       }
 
