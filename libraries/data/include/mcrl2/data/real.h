@@ -15,6 +15,16 @@
 #ifndef MCRL2_DATA_REAL_H
 #define MCRL2_DATA_REAL_H
 
+#include "mcrl2/utilities/exception.h"
+#include "mcrl2/data/basic_sort.h"
+#include "mcrl2/data/function_sort.h"
+#include "mcrl2/data/function_symbol.h"
+#include "mcrl2/data/application.h"
+#include "mcrl2/data/data_equation.h"
+#include "mcrl2/data/standard.h"
+#include "mcrl2/data/bool.h"
+#include "mcrl2/data/pos.h"
+#include "mcrl2/data/nat.h"
 #include "mcrl2/data/int.h"
 
 namespace mcrl2 {

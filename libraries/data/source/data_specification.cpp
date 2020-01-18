@@ -338,13 +338,13 @@ void sort_specification::import_system_defined_sort(const sort_expression& sort)
     else if (sort_set::is_set(sort))
     {
       import_system_defined_sort(sort_fset::fset(element_sort));
-    }
-    else if (sort_fset::is_fset(sort))
-    {
       // Import the functions from element_sort->Bool.
       sort_expression_list element_sorts;
       element_sorts.push_front(element_sort);
       import_system_defined_sort(function_sort(element_sorts,sort_bool::bool_()));
+    }
+    else if (sort_fset::is_fset(sort))
+    {
     }
     else if (sort_bag::is_bag(sort))
     {

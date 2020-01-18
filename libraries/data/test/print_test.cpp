@@ -495,8 +495,8 @@ BOOST_AUTO_TEST_CASE(test_fset_print)
   data_expression false_ = sort_set::false_function(s);
   data_expression true_ = sort_set::true_function(s);
 
-  data_expression xy_union = sort_fset::fset_union(s, false_, false_, x, y);
-  data_expression xy_intersection = sort_fset::fset_intersection(s, false_, false_, x, y);
+  data_expression xy_union = sort_set::fset_union(s, false_, false_, x, y);
+  data_expression xy_intersection = sort_set::fset_intersection(s, false_, false_, x, y);
   data_expression xy_difference = sort_fset::difference(s, x, y);
   data_expression xy_in = sort_fset::in(s, one, x);
 
@@ -505,13 +505,13 @@ BOOST_AUTO_TEST_CASE(test_fset_print)
   BOOST_CHECK_EQUAL(data::pp(xy_difference)  , "{1, 2} - {3}");
   BOOST_CHECK_EQUAL(data::pp(xy_in)          , "1 in {1, 2}");
 
-  xy_union = sort_fset::fset_union(s, f, false_, x, y);
-  xy_intersection = sort_fset::fset_intersection(s, f, false_, x, y);
+  xy_union = sort_set::fset_union(s, f, false_, x, y);
+  xy_intersection = sort_set::fset_intersection(s, f, false_, x, y);
   BOOST_CHECK_EQUAL(data::pp(xy_union)       , "{1, 2} + { x: Pos | !f(x) && x in {3} }");
   BOOST_CHECK_EQUAL(data::pp(xy_intersection), "{1, 2} * { x: Pos | !f(x) && x in {3} }");
 
-  xy_union = sort_fset::fset_union(s, f, g, x, y);
-  xy_intersection = sort_fset::fset_intersection(s, f, g, x, y);
+  xy_union = sort_set::fset_union(s, f, g, x, y);
+  xy_intersection = sort_set::fset_intersection(s, f, g, x, y);
   BOOST_CHECK_EQUAL(data::pp(xy_union)       , "{ x: Pos | !g(x) && x in {1, 2} } + { x: Pos | !f(x) && x in {3} }");
   BOOST_CHECK_EQUAL(data::pp(xy_intersection), "{ x: Pos | !g(x) && x in {1, 2} } * { x: Pos | !f(x) && x in {3} }");
 }

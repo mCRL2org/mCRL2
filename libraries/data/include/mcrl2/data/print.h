@@ -1013,25 +1013,25 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
   void print_fset_set_operation(const data_expression& x, const std::string& op)
   {
-    data_expression f = sort_fset::arg1(x);
-    data_expression g = sort_fset::arg2(x);
+    data_expression f = sort_set::arg1(x);
+    data_expression g = sort_set::arg2(x);
 
     // print lhs
     if (sort_set::is_false_function_function_symbol(g))
     {
-      derived().apply(sort_fset::arg3(x));
+      derived().apply(sort_set::arg3(x));
     }
     else if (sort_set::is_true_function_function_symbol(g))
     {
       derived().print("!");
-      derived().apply(sort_fset::arg3(x));
+      derived().apply(sort_set::arg3(x));
     }
     else
     {
-      sort_expression s = function_sort(sort_fset::arg1(x).sort()).domain().front();
+      sort_expression s = function_sort(sort_set::arg1(x).sort()).domain().front();
       core::identifier_string name = generate_identifier("x", x);
       variable var(name, s);
-      data_expression body = sort_bool::and_(sort_bool::not_(g(var)), sort_set::in(s, var, sort_fset::arg3(x)));
+      data_expression body = sort_bool::and_(sort_bool::not_(g(var)), sort_set::in(s, var, sort_set::arg3(x)));
       derived().print("{ ");
       print_variable(var, true);
       derived().print(" | ");
@@ -1045,19 +1045,19 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     // print rhs
     if (sort_set::is_false_function_function_symbol(f))
     {
-      derived().apply(sort_fset::arg4(x));
+      derived().apply(sort_set::arg4(x));
     }
     else if (sort_set::is_true_function_function_symbol(f))
     {
       derived().print("!");
-      derived().apply(sort_fset::arg4(x));
+      derived().apply(sort_set::arg4(x));
     }
     else
     {
-      sort_expression s = function_sort(sort_fset::arg1(x).sort()).domain().front();
+      sort_expression s = function_sort(sort_set::arg1(x).sort()).domain().front();
       core::identifier_string name = generate_identifier("x", x);
       variable var(name, s);
-      data_expression body = sort_bool::and_(sort_bool::not_(f(var)), sort_set::in(s, var, sort_fset::arg4(x)));
+      data_expression body = sort_bool::and_(sort_bool::not_(f(var)), sort_set::in(s, var, sort_set::arg4(x)));
       derived().print("{ ");
       print_variable(var, true);
       derived().print(" | ");
@@ -1841,6 +1841,14 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       print_binary_data_operation(x, " - ");
     }
+    else if (sort_set::is_fset_union_application(x))
+    {
+      print_fset_set_operation(x, " + ");
+    }
+    else if (sort_set::is_fset_intersection_application(x))
+    {
+      print_fset_set_operation(x, " * ");
+    }
 
     //-------------------------------------------------------------------//
     //                            fset
@@ -1853,14 +1861,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     else if (sort_fset::is_in_application(x))
     {
       print_binary_data_operation(x, " in ");
-    }
-    else if (sort_fset::is_fset_union_application(x))
-    {
-      print_fset_set_operation(x, " + ");
-    }
-    else if (sort_fset::is_fset_intersection_application(x))
-    {
-      print_fset_set_operation(x, " * ");
     }
     else if (sort_fset::is_difference_application(x))
     {

@@ -15,6 +15,15 @@
 #ifndef MCRL2_DATA_FSET_H
 #define MCRL2_DATA_FSET_H
 
+#include "mcrl2/utilities/exception.h"
+#include "mcrl2/data/basic_sort.h"
+#include "mcrl2/data/function_sort.h"
+#include "mcrl2/data/function_symbol.h"
+#include "mcrl2/data/application.h"
+#include "mcrl2/data/data_equation.h"
+#include "mcrl2/data/standard.h"
+#include "mcrl2/data/container_sort.h"
+#include "mcrl2/data/bool.h"
 #include "mcrl2/data/nat.h"
 
 namespace mcrl2 {
@@ -306,116 +315,6 @@ namespace mcrl2 {
         return is_application(e) && is_in_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
-      /// \brief Generate identifier \@fset_union
-      /// \return Identifier \@fset_union
-      inline
-      core::identifier_string const& fset_union_name()
-      {
-        static core::identifier_string fset_union_name = core::identifier_string("@fset_union");
-        return fset_union_name;
-      }
-
-      /// \brief Constructor for function symbol \@fset_union
-      /// \param s A sort expression
-      /// \return Function symbol fset_union
-      inline
-      function_symbol fset_union(const sort_expression& s)
-      {
-        function_symbol fset_union(fset_union_name(), make_function_sort(make_function_sort(s, sort_bool::bool_()), make_function_sort(s, sort_bool::bool_()), fset(s), fset(s), fset(s)));
-        return fset_union;
-      }
-
-      /// \brief Recogniser for function \@fset_union
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@fset_union
-      inline
-      bool is_fset_union_function_symbol(const atermpp::aterm_appl& e)
-      {
-        if (is_function_symbol(e))
-        {
-          return atermpp::down_cast<function_symbol>(e).name() == fset_union_name();
-        }
-        return false;
-      }
-
-      /// \brief Application of function symbol \@fset_union
-      /// \param s A sort expression
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \param arg2 A data expression
-      /// \param arg3 A data expression
-      /// \return Application of \@fset_union to a number of arguments
-      inline
-      application fset_union(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
-      {
-        return sort_fset::fset_union(s)(arg0, arg1, arg2, arg3);
-      }
-
-      /// \brief Recogniser for application of \@fset_union
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol fset_union to a
-      ///     number of arguments
-      inline
-      bool is_fset_union_application(const atermpp::aterm_appl& e)
-      {
-        return is_application(e) && is_fset_union_function_symbol(atermpp::down_cast<application>(e).head());
-      }
-
-      /// \brief Generate identifier \@fset_inter
-      /// \return Identifier \@fset_inter
-      inline
-      core::identifier_string const& fset_intersection_name()
-      {
-        static core::identifier_string fset_intersection_name = core::identifier_string("@fset_inter");
-        return fset_intersection_name;
-      }
-
-      /// \brief Constructor for function symbol \@fset_inter
-      /// \param s A sort expression
-      /// \return Function symbol fset_intersection
-      inline
-      function_symbol fset_intersection(const sort_expression& s)
-      {
-        function_symbol fset_intersection(fset_intersection_name(), make_function_sort(make_function_sort(s, sort_bool::bool_()), make_function_sort(s, sort_bool::bool_()), fset(s), fset(s), fset(s)));
-        return fset_intersection;
-      }
-
-      /// \brief Recogniser for function \@fset_inter
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@fset_inter
-      inline
-      bool is_fset_intersection_function_symbol(const atermpp::aterm_appl& e)
-      {
-        if (is_function_symbol(e))
-        {
-          return atermpp::down_cast<function_symbol>(e).name() == fset_intersection_name();
-        }
-        return false;
-      }
-
-      /// \brief Application of function symbol \@fset_inter
-      /// \param s A sort expression
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \param arg2 A data expression
-      /// \param arg3 A data expression
-      /// \return Application of \@fset_inter to a number of arguments
-      inline
-      application fset_intersection(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
-      {
-        return sort_fset::fset_intersection(s)(arg0, arg1, arg2, arg3);
-      }
-
-      /// \brief Recogniser for application of \@fset_inter
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol fset_intersection to a
-      ///     number of arguments
-      inline
-      bool is_fset_intersection_application(const atermpp::aterm_appl& e)
-      {
-        return is_application(e) && is_fset_intersection_function_symbol(atermpp::down_cast<application>(e).head());
-      }
-
       /// \brief Generate identifier -
       /// \return Identifier -
       inline
@@ -636,8 +535,6 @@ namespace mcrl2 {
         result.push_back(sort_fset::cons_(s));
         result.push_back(sort_fset::cinsert(s));
         result.push_back(sort_fset::in(s));
-        result.push_back(sort_fset::fset_union(s));
-        result.push_back(sort_fset::fset_intersection(s));
         result.push_back(sort_fset::difference(s));
         result.push_back(sort_fset::union_(s));
         result.push_back(sort_fset::intersection(s));
@@ -664,7 +561,7 @@ namespace mcrl2 {
       inline
       const data_expression& arg1(const data_expression& e)
       {
-        assert(is_cinsert_application(e) || is_fset_union_application(e) || is_fset_intersection_application(e));
+        assert(is_cinsert_application(e));
         return atermpp::down_cast<const application >(e)[0];
       }
 
@@ -676,7 +573,7 @@ namespace mcrl2 {
       inline
       const data_expression& arg2(const data_expression& e)
       {
-        assert(is_cinsert_application(e) || is_fset_union_application(e) || is_fset_intersection_application(e));
+        assert(is_cinsert_application(e));
         return atermpp::down_cast<const application >(e)[1];
       }
 
@@ -688,20 +585,8 @@ namespace mcrl2 {
       inline
       const data_expression& arg3(const data_expression& e)
       {
-        assert(is_cinsert_application(e) || is_fset_union_application(e) || is_fset_intersection_application(e));
+        assert(is_cinsert_application(e));
         return atermpp::down_cast<const application >(e)[2];
-      }
-
-      ///\brief Function for projecting out argument
-      ///        arg4 from an application
-      /// \param e A data expression
-      /// \pre arg4 is defined for e
-      /// \return The argument of e that corresponds to arg4
-      inline
-      const data_expression& arg4(const data_expression& e)
-      {
-        assert(is_fset_union_application(e) || is_fset_intersection_application(e));
-        return atermpp::down_cast<const application >(e)[3];
       }
 
       ///\brief Function for projecting out argument
@@ -736,8 +621,6 @@ namespace mcrl2 {
       {
         variable vd("d",s);
         variable ve("e",s);
-        variable vf("f",make_function_sort(s, sort_bool::bool_()));
-        variable vg("g",make_function_sort(s, sort_bool::bool_()));
         variable vs("s",fset(s));
         variable vt("t",fset(s));
 
@@ -760,18 +643,6 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vd}), in(s, vd, empty(s)), sort_bool::false_()));
         result.push_back(data_equation(variable_list({vd, ve, vs}), in(s, vd, cons_(s, ve, vs)), sort_bool::or_(equal_to(vd, ve), in(s, vd, vs))));
         result.push_back(data_equation(variable_list({vd, ve, vs}), in(s, vd, insert(s, ve, vs)), sort_bool::or_(equal_to(vd, ve), in(s, vd, vs))));
-        result.push_back(data_equation(variable_list({vf, vg}), fset_union(s, vf, vg, empty(s), empty(s)), empty(s)));
-        result.push_back(data_equation(variable_list({vd, vf, vg, vs}), fset_union(s, vf, vg, cons_(s, vd, vs), empty(s)), cinsert(s, vd, sort_bool::not_(vg(vd)), fset_union(s, vf, vg, vs, empty(s)))));
-        result.push_back(data_equation(variable_list({ve, vf, vg, vt}), fset_union(s, vf, vg, empty(s), cons_(s, ve, vt)), cinsert(s, ve, sort_bool::not_(vf(ve)), fset_union(s, vf, vg, empty(s), vt))));
-        result.push_back(data_equation(variable_list({vd, vf, vg, vs, vt}), fset_union(s, vf, vg, cons_(s, vd, vs), cons_(s, vd, vt)), cinsert(s, vd, equal_to(vf(vd), vg(vd)), fset_union(s, vf, vg, vs, vt))));
-        result.push_back(data_equation(variable_list({vd, ve, vf, vg, vs, vt}), less(vd, ve), fset_union(s, vf, vg, cons_(s, vd, vs), cons_(s, ve, vt)), cinsert(s, vd, sort_bool::not_(vg(vd)), fset_union(s, vf, vg, vs, cons_(s, ve, vt)))));
-        result.push_back(data_equation(variable_list({vd, ve, vf, vg, vs, vt}), less(ve, vd), fset_union(s, vf, vg, cons_(s, vd, vs), cons_(s, ve, vt)), cinsert(s, ve, sort_bool::not_(vf(ve)), fset_union(s, vf, vg, cons_(s, vd, vs), vt))));
-        result.push_back(data_equation(variable_list({vf, vg}), fset_intersection(s, vf, vg, empty(s), empty(s)), empty(s)));
-        result.push_back(data_equation(variable_list({vd, vf, vg, vs}), fset_intersection(s, vf, vg, cons_(s, vd, vs), empty(s)), cinsert(s, vd, vg(vd), fset_intersection(s, vf, vg, vs, empty(s)))));
-        result.push_back(data_equation(variable_list({ve, vf, vg, vt}), fset_intersection(s, vf, vg, empty(s), cons_(s, ve, vt)), cinsert(s, ve, vf(ve), fset_intersection(s, vf, vg, empty(s), vt))));
-        result.push_back(data_equation(variable_list({vd, vf, vg, vs, vt}), fset_intersection(s, vf, vg, cons_(s, vd, vs), cons_(s, vd, vt)), cinsert(s, vd, equal_to(vf(vd), vg(vd)), fset_intersection(s, vf, vg, vs, vt))));
-        result.push_back(data_equation(variable_list({vd, ve, vf, vg, vs, vt}), less(vd, ve), fset_intersection(s, vf, vg, cons_(s, vd, vs), cons_(s, ve, vt)), cinsert(s, vd, vg(vd), fset_intersection(s, vf, vg, vs, cons_(s, ve, vt)))));
-        result.push_back(data_equation(variable_list({vd, ve, vf, vg, vs, vt}), less(ve, vd), fset_intersection(s, vf, vg, cons_(s, vd, vs), cons_(s, ve, vt)), cinsert(s, ve, vf(ve), fset_intersection(s, vf, vg, cons_(s, vd, vs), vt))));
         result.push_back(data_equation(variable_list({vs}), difference(s, vs, empty(s)), vs));
         result.push_back(data_equation(variable_list({vt}), difference(s, empty(s), vt), empty(s)));
         result.push_back(data_equation(variable_list({vd, vs, vt}), difference(s, cons_(s, vd, vs), cons_(s, vd, vt)), difference(s, vs, vt)));
