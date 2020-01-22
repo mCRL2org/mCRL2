@@ -14,6 +14,7 @@
 
 #include "mcrl2/lps/explorer.h"
 #include "mcrl2/lts/detail/lts_convert.h"
+#include "mcrl2/lts/lts_io.h"
 
 namespace mcrl2 {
 
@@ -208,6 +209,61 @@ class lts_lts_builder: public lts_builder
     {
       m_lts.save(filename);
     }
+};
+
+class lts_lts_disk_builder: public lts_builder
+{
+  protected:
+    std::fstream file;
+    std::unique_ptr<atermpp::binary_aterm_ostream> stream;
+    bool m_discard_state_labels = false;
+
+  public:
+    lts_lts_disk_builder(
+      const std::string& filename,
+      const data::data_specification& dataspec,
+      const process::action_label_list& action_labels,
+      const data::variable_list& process_parameters,
+      bool discard_state_labels = false
+    )
+     : m_discard_state_labels(discard_state_labels)
+    {
+      file.open(filename);
+      stream = std::make_unique<atermpp::binary_aterm_ostream>(file);
+
+      mcrl2::lts::write_lts_header(*stream, dataspec, process_parameters, action_labels);
+    }
+
+    void add_transition(std::size_t from, const process::timed_multi_action& a, std::size_t to) override
+    {
+      write_transition(*stream, from, a, to);
+    }
+
+    // Add actions and states to the LTS
+    void finalize(const utilities::indexed_set<lps::state>& state_map, bool timed) override
+    {
+      if (!m_discard_state_labels)
+      {
+        // Write the state labels in the order of their indices.
+        for (std::size_t i = 0; i < state_map.size(); i++)
+        {
+          if (timed)
+          {
+            write_state_label(*stream, state_label_lts(remove_time_stamp(state_map[i])));
+          }
+          else
+          {
+            write_state_label(*stream, state_label_lts(state_map[i]));
+          }
+        }
+      }
+
+      // Write the initial state.
+      write_initial_state(*stream, 0);
+    }
+
+    void save(const std::string& filename) override
+    {}
 };
 
 class lts_dot_builder: public lts_lts_builder

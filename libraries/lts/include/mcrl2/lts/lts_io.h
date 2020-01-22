@@ -22,6 +22,7 @@
 #include "mcrl2/lps/io.h"
 #include "mcrl2/lts/detail/lts_convert.h"
 
+#include "mcrl2/atermpp/aterm_io.h"
 
 namespace mcrl2::lts
 {
@@ -276,6 +277,39 @@ inline void load_lts_as_fsm_file(const std::string& path, lts_fsm_t& l)
     }
   }
 }
+
+// Proper interface.
+
+/// \brief Read a (probabilistic) LTS from the given stream.
+atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, lts_lts_t& lts);
+atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, probabilistic_lts_lts_t& lts);
+
+/// \brief Write a (probabilistic) LTS to the given stream at once.
+atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const lts_lts_t& lts);
+atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const probabilistic_lts_lts_t& lts);
+
+// Streaming an LTS to disk:
+//  write_lts_header(data_spec, parameters, action_labels)
+//
+// In any order:
+//  Write transitions (to, label, from), where 'to' and 'from' are indices and 'label' the timed_multi_action, as necessary.
+//  Write state labels (state_label_lts) in their order such that writing the i-th state label belongs to state with index i.
+//  Write the initial state.
+
+/// \brief Writes the start of an LTS stream.
+void write_lts_header(atermpp::aterm_ostream& stream,
+  const data::data_specification& data,
+  const data::variable_list& parameters,
+  const process::action_label_list& action_labels);
+
+/// \brief Write a transition to the LTS stream.
+void write_transition(atermpp::aterm_ostream& stream, std::size_t from, const process::timed_multi_action& label, std::size_t to);
+
+/// \brief Write a state label to the LTS stream.
+void write_state_label(atermpp::aterm_ostream& stream, const state_label_lts& label);
+
+/// \brief Write the initial state to the LTS stream.
+void write_initial_state(atermpp::aterm_ostream& stream, std::size_t state);
 
 } // namespace mcrl2::lts
 
