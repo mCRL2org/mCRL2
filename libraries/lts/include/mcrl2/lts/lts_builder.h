@@ -249,7 +249,7 @@ std::unique_ptr<lts_builder> create_lts_builder(const lps::specification& lpsspe
   {
     case lts_aut:
     {
-      if (options.save_aut_at_end)
+      if (options.save_at_end)
       {
         return std::make_unique<lts_aut_builder>();
       }
@@ -260,7 +260,17 @@ std::unique_ptr<lts_builder> create_lts_builder(const lps::specification& lpsspe
     }
     case lts_dot: return std::make_unique<lts_dot_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters());
     case lts_fsm: return std::make_unique<lts_fsm_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters());
-    case lts_lts: return std::make_unique<lts_lts_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters(), options.discard_lts_state_labels);
+    case lts_lts:
+    {
+      if (options.save_at_end)
+      {
+        return std::make_unique<lts_lts_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters(), options.discard_lts_state_labels);
+      }
+      else
+      {
+        return std::make_unique<lts_lts_disk_builder>(output_filename, lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters(), options.discard_lts_state_labels);
+      }
+    }
     default: return std::make_unique<lts_none_builder>();
   }
 }

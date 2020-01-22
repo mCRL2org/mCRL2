@@ -105,7 +105,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
         , 's');
       desc.add_option("suppress","in verbose mode, do not print progress messages indicating the number of visited states and transitions.");
       desc.add_option("save-at-end", "delay saving of the generated LTS until the end. "
-                 "This option only applies to .aut files, which are by default saved on the fly.");
+                 "This option only applies to .aut and .lts files, which are by default saved on the fly.");
       desc.add_option("no-info", "do not add state label information to OUTFILE. This option only applies to .lts files.");
     }
 
@@ -196,7 +196,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
     void parse_options(const utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
-      options.save_aut_at_end                       = parser.has_option("save-at-end");
+      options.save_at_end                           = parser.has_option("save-at-end");
       options.cached                                = parser.has_option("cached");
       options.global_cache                          = parser.has_option("global-cache");
       options.confluence                            = parser.has_option("confluence");
@@ -297,9 +297,9 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
 
       options.rewrite_strategy = rewrite_strategy();
 
-      if (options.save_aut_at_end && (output_filename().empty() || output_format != lts::lts_aut))
+      if (options.save_at_end && (output_filename().empty() || (output_format != lts::lts_aut && output_format != lts::lts_lts)))
       {
-        parser.error("Option '--save-at-end' requires that the output is in .aut format.");
+        parser.error("Option '--save-at-end' requires that the output is in .aut or .lts format.");
       }
 
       if (options.discard_lts_state_labels && (output_filename().empty() || output_format != lts::lts_lts))
