@@ -28,6 +28,7 @@ General
 Research
 --------
 
+.. [NWG20] T\. Neele, T.A.C. Willemse and J.F. Groote. Finding compact proofs for infinite-data parameterised Boolean equation systems. Science of Computer Programming (FACS 2018 special issue), vol. 188, pp. 102389. `(DOI) <https://doi.org/10.1016/j.scico.2019.102389>`__
 .. [NWG18] T\. Neele, T.A.C. Willemse and J.F. Groote. Solving Parameterised Boolean Equation Systems with Infinite Data Through Quotienting. In FACS 2018. LNCS, vol. 11222, pp. 216--236. `(DOI) <https://dx.doi.org/10.1007/978-3-030-02146-7_11>`__
 .. [WW18] J.W. Wesselink and T.A.C. Willemse. Evidence Extraction from Parameterised Boolean Equation Systems. In ARQNL 2018, CEUR workshop proceedings, vol. 2095, pp. 86--100. `(link) <http://ceur-ws.org/Vol-2095/paper6.pdf>`__
 .. [CKW18] S\. Cranen, J.J.A. Keiren, and T.A.C. Willemse. Parity game reductions. Acta Informatica 55(5): 401-444, 2018. `(DOI) <https://doi.org/10.1007/s00236-017-0301-x>`__
@@ -59,6 +60,7 @@ Research
 Applications
 ------------
 
+.. [NRG19] T\. Neele, M. H. Rol, J. F. Groote. Verifying System-Wide Properties of Industrial Component-Based Software. In FSEN 2019, LNCS vol. 11761, pp. 158-175. `(DOI) <https://doi.org/10.1007/978-3-030-31517-7_11>`__
 .. [BGH+17] R\. van Beusekom, J. F. Groote, P. Hoogendijk, R. Howe, J. W. Wesselink, R. Wieringa, and T. A. C. Willemse. Formalising the Dezyne Modelling Language in mCRL2. In FMICS-AVoCS 2017, LNCS vol. 10471, pp. 217-233. `(DOI) <https://doi.org/10.1007/978-3-319-67113-0_14>`__
 .. [RTW+13] Daniela Remenska, Jeff Templon, Tim A.C. Willemse, Philip Homburg, Kees Verstoep , Adria Casajus and Henri Bal. From UML to Process Algebra and Back: An Automated Approach to Model-Checking Software Design Artifacts of Concurrent Systems. In Guillaume Brat, Neha Rungta, Arnaud Venet (eds.), NFM 2013, Lecture Notes in Computer Science 7871, Springer, pp. 244-260, 2013. `(DOI) <http://dx.doi.org/10.1007/978-3-642-38088-4_17>`__
 .. [HKV+13] Y.L. Hwong, J.J.A. Keiren, V.J.J. Kusters, S. Leemans, T.A.C. Willemse. Formalising and Analysing the Control Software of the Compact Muon Solenoid Experiment at the Large Hadron Collider. Accepted for publication in Science of Computer Programming. 2013. An extended abstract appeared at `FSEN 2011 <http://dx.doi.org/10.1007/978-3-642-29320-7_12>`_ and as `CoRR abs/1101.5324 <http://arxiv.org/abs/1101.5324>`_. See also :ref:`showcase-cms` and `(DOI) <http://dx.doi.org/10.1016/j.scico.2012.11.009>`__
