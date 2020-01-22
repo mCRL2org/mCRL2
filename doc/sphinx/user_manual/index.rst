@@ -37,14 +37,6 @@
        the `University of Twente <http://fmt.cs.utwente.nl>`_.
 
 .. note::
-
-  The |release| release of mCRL2 is now available. Packages for various platforms can be
-  found on the :ref:`download<download>` page. In this release, the ATerm library, which is
-  the main internal data storage engine of mCRL2, has been re-implemented completely.
-  Furthermore, the mCRL2ide has seen many improvements, including the ability to check
-  whether two processes are equal under a given behavioural equivalence.
-
-.. note::
   .. image:: /_static/tacas-ae.*
           :align: right
           :width: 90px
