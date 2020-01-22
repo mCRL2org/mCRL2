@@ -23,9 +23,7 @@
 #include "mcrl2/lts/detail/lts_convert.h"
 
 
-namespace mcrl2
-{
-namespace lts
+namespace mcrl2::lts
 {
 
 /// \brief Type for data files that contain extra information for an lts in .aut or .fsm
@@ -216,6 +214,7 @@ inline void load_lts(lts_lts_t& result,
     }
     case lts_none:
       mCRL2log(log::warning) << "Cannot determine type of input. Assuming .aut.\n";
+      [[fallthrough]]; // For the default (lts_none) load as aut file.
     case lts_aut:
     {
       lts_aut_t l;
@@ -258,6 +257,7 @@ inline void load_lts_as_fsm_file(const std::string& path, lts_fsm_t& l)
     }
     case lts_none:
       mCRL2log(log::warning) << "Cannot determine type of input. Assuming .aut.\n";
+      [[fallthrough]]; // For the default (lts_none) load as aut file.
     case lts_aut:
     {
       lts_aut_t l1;
@@ -277,7 +277,6 @@ inline void load_lts_as_fsm_file(const std::string& path, lts_fsm_t& l)
   }
 }
 
-}
-}
+} // namespace mcrl2::lts
 
 #endif // MCRL2_LTS_LTS_IO_H
