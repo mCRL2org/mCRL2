@@ -195,7 +195,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
     void parse_options(const utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
-      options.save_aut_at_end                       = parser.has_option("save-at-end");
+      options.save_at_end                       = parser.has_option("save-at-end");
       options.cached                                = parser.has_option("cached");
       options.global_cache                          = parser.has_option("global-cache");
       options.confluence                            = parser.has_option("confluence");
@@ -291,7 +291,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
 
       options.rewrite_strategy = rewrite_strategy();
 
-      if (options.save_aut_at_end && (output_filename().empty() || output_format != lts::lts_aut))
+      if (options.save_at_end && (output_filename().empty() || output_format != lts::lts_aut))
       {
         parser.error("Option '--save-at-end' requires that the output is in .aut format.");
       }
@@ -308,7 +308,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       {
         case lts::lts_aut:
           {
-            return options.save_aut_at_end ? std::unique_ptr<lts::lts_builder>(new lts::lts_aut_disk_builder(output_filename()))
+            return options.save_at_end ? std::unique_ptr<lts::lts_builder>(new lts::lts_aut_disk_builder(output_filename()))
                                            : std::unique_ptr<lts::lts_builder>(new lts::lts_aut_builder());
           }
         case lts::lts_dot: return std::make_unique<lts::lts_dot_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters());
