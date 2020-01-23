@@ -257,11 +257,11 @@ class action_detector
         save_trace(tr, filename);
         result = true;
       }
-      else
+      mCRL2log(log::info) << ".\n";
+      if (m_trace_count >= m_max_trace_count)
       {
         m_trace_constructor.explorer().abort();
       }
-      mCRL2log(log::info) << ".\n";
       return result;
     }
 };
@@ -295,7 +295,7 @@ class deadlock_detector
         std::string filename = filename_prefix + "_dlk_" + std::to_string(m_trace_count++) + ".trc";
         save_trace(tr, filename);
       }
-      else
+      if (m_trace_count >= m_max_trace_count)
       {
         m_trace_constructor.explorer().abort();
       }
@@ -349,11 +349,11 @@ class nondeterminism_detector
           save_trace(tr, filename);
           result = true;
         }
-        else
+        mCRL2log(log::info) << ".\n";
+        if (m_trace_count >= m_max_trace_count)
         {
           m_trace_constructor.explorer().abort();
         }
-        mCRL2log(log::info) << ".\n";
       }
       return result;
     }
