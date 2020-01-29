@@ -92,27 +92,29 @@ std::set<data::sort_expression> find_dependencies(const data::data_specification
 
 // Find all sorts that need to be translated and the dependencies in their definitions
 inline
-std::map<data::sort_expression, std::set<data::sort_expression>> find_sorts_and_dependencies(const data::data_specification& dataspec)
+std::map<data::sort_expression, std::set<data::sort_expression>> find_sorts_and_dependencies(const data::data_specification& dataspec,
+                                                                                             std::map<data::structured_sort, std::string>& struct_name_map)
 {
   std::map<data::sort_expression, std::set<data::sort_expression>> result;
-  for(const data::sort_expression& s: dataspec.context_sorts())
+  for(const data::sort_expression& s: dataspec.sorts())
   {
     if(data::is_function_sort(s))
     {
       // SMT-LIB2 does not support function sorts
+      // Hope & pray that nothing breaks later...
       continue;
     }
     auto find_alias = dataspec.sort_alias_map().find(s);
     if(find_alias != dataspec.sort_alias_map().end() && find_alias->second != s)
     {
+      if(data::is_structured_sort(s))
+      {
+        struct_name_map[atermpp::down_cast<data::structured_sort>(s)] = pp(find_alias->second);
+      }
       // translate only the unique representation of a sort
       continue;
     }
 
-    result[s] = find_dependencies(dataspec, s);
-  }
-  for(const data::basic_sort& s: dataspec.user_defined_sorts())
-  {
     result[s] = find_dependencies(dataspec, s);
   }
   return result;
@@ -126,7 +128,7 @@ void translate_sort_definitions(const data::data_specification& dataspec,
                                data::set_identifier_generator& id_gen,
                                std::map<data::structured_sort, std::string>& struct_name_map)
 {
-  auto sort_dependencies = find_sorts_and_dependencies(dataspec);
+  auto sort_dependencies = find_sorts_and_dependencies(dataspec, struct_name_map);
   // for(const auto& p: sort_dependencies)
   // {
   //   std::cout << p.first << " := " << core::detail::print_set(p.second) << std::endl;
@@ -137,6 +139,8 @@ void translate_sort_definitions(const data::data_specification& dataspec,
     std::string name(pp(s));
     if(data::is_structured_sort(s))
     {
+      // The structured sort is anonymous. Can happen in a specification such as
+      // sort StateList = List(struct s1 | s2);
       name = pp(id_gen("@struct"));
       struct_name_map[atermpp::down_cast<data::structured_sort>(s)] = name;
     }
@@ -310,14 +314,12 @@ void translate_data_specification(const data::data_specification& dataspec,
 
   // Translate sorts
   detail::translate_sort_definitions(dataspec, o, nt, id_gen, struct_name_map);
-  for(const data::alias& s: dataspec.user_defined_aliases())
+  for(const auto& s: dataspec.sort_alias_map())
   {
-    if(dataspec.sort_alias_map().find(s.reference())->second == s.name())
+    if(data::is_basic_sort(s.first))
     {
-      // Left-hand side is already the normalized form
-      continue;
+      detail::translate_alias(data::alias(atermpp::down_cast<data::basic_sort>(s.first), s.second), o, nt, struct_name_map);
     }
-    detail::translate_alias(s, o, nt, struct_name_map);
   }
 
   // Translate mappings
