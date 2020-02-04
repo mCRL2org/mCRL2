@@ -50,6 +50,7 @@ enum TraceFormat
 {
   tfMcrl2,  /**< Format is stored as an aterm */
   tfPlain,  /**< Format is stored in plain text. In this format there are only actions */
+  tfLine,   /**< Format is stored in a line of text. In this format there are only actions */
   tfUnknown /**< This value indicates that the format is unknown */
 };
 
@@ -498,6 +499,9 @@ class Trace
           case tfPlain:
             savePlain(os);
             break;
+          case tfLine:
+            saveLine(os);
+            break;
           default:
             break;
         }
@@ -735,18 +739,32 @@ class Trace
       }
     }
 
-    void savePlain(std::ostream& os)
+    void save_text(std::ostream& os, std::string separator)
     {
+      std::string sep;
       for (std::size_t i=0; i<m_actions.size(); i++)
       {
-        os << pp(m_actions[i]);
-        os << std::endl;
+        os << sep << pp(m_actions[i]);
+        sep = separator;
         if (os.bad())
         {
           throw runtime_error("Could not write to stream.");
         }
       }
     }
+
+    void saveLine(std::ostream& os)
+    {
+      save_text(os, " ");
+      os << std::endl;
+    }
+
+    void savePlain(std::ostream& os)
+    {
+      save_text(os, "\n");
+      os << std::endl;
+    }
+
 };
 
 }

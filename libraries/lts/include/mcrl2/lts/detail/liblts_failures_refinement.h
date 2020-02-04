@@ -183,7 +183,8 @@ namespace detail
               const lts_cache<LTS_TYPE>& weak_property_cache,
               label_type& culprit,
               const LTS_TYPE& l,
-              const bool provide_a_counter_example);
+              const bool provide_a_counter_example,
+              const bool structured_output);
 
 } // namespace detail
 
@@ -359,7 +360,8 @@ bool destructive_refinement_checker(
                                            weak_property_cache,
                                            offending_action,
                                            l1,
-                                           !generate_counter_example.is_dummy()))
+                                           !generate_counter_example.is_dummy(),
+                                           generate_counter_example.is_structured()))
         {
           generate_counter_example.save_counter_example(impl_spec.counter_example_index(), l1);
           report_statistics(stats);
@@ -608,7 +610,8 @@ namespace detail
               const lts_cache<LTS_TYPE>& weak_property_cache,
               label_type& culprit,
               const LTS_TYPE& l,
-              const bool provide_a_counter_example)
+              const bool provide_a_counter_example,
+              const bool structured_output)
   {
     if (!weak_property_cache.stable(impl)) return true; // Checking in case of instability is not necessary, but rather time consuming.
 
@@ -654,39 +657,74 @@ namespace detail
         // Print the acceptance set of the implementation
         if (impl_action_labels.empty())
         {
-          mCRL2log(log::verbose) << "The acceptance of the left process is empty.\n";
+          if (structured_output)
+            std::cout << "left-acceptance:\n";
+          else
+            mCRL2log(log::verbose) << "The acceptance of the left process is empty.\n";
         }
         else
         {
-          mCRL2log(log::verbose) << "A stable acceptance set of the left process is:\n";
+          if (structured_output)
+            std::cout << "left-acceptance:";
+          else
+            mCRL2log(log::verbose) << "A stable acceptance set of the left process is:\n";
+          std::string sep = "";
           for(const label_type a : impl_action_labels)
-          {
-            mCRL2log(log::verbose) << l.action_label(a) << "\n";
-          }
+            {
+              if (structured_output)
+              {
+                std::cout << sep << l.action_label(a);
+                sep = " ";
+              }
+              else
+                mCRL2log(log::verbose) << l.action_label(a) << "\n";
+            }
+          if (structured_output)
+            std::cout << "\n";
         }
 
         // Print the acceptance sets of the specification.
         if (spec.empty())
         {
-          mCRL2log(log::verbose) << "The process at the right has no acceptance sets.\n";
+          if (structured_output)
+            std::cout << "right-acceptance-sets:0\n";
+          else
+            mCRL2log(log::verbose) << "The process at the right has no acceptance sets.\n";
         }
         else
         {
-          mCRL2log(log::verbose) << "Below all corresponding stable acceptance sets of the right process are provided:\n";
-          for(const state_type s : spec)
-          {
-            // Only the stable specification states contributed to this counter example.
-            if (!weak_property_cache.stable(s)) { continue; }
+          set_of_states stable;
+          // Only the stable specification states contributed to this counter example.
+          std::copy_if(spec.begin(), spec.end(), std::inserter(stable,stable.end()), [=](const state_type s){return weak_property_cache.stable(s);});
 
+          if (structured_output)
+            std::cout << "right-acceptance-sets:" << stable.size () << "\n";
+          else
+            mCRL2log(log::verbose) << "Below all corresponding stable acceptance sets of the right process are provided:\n";
+          for(const state_type s : stable)
+          {
             const action_label_set& spec_action_labels = weak_property_cache.action_labels(s);
-            mCRL2log(log::verbose) << "An acceptance set of the right process is:\n";
+            if (structured_output)
+              std::cout << "right-acceptance:";
+            else
+              mCRL2log(log::verbose) << "An acceptance set of the right process is:\n";
+            std::string sep = "";
             for(const label_type a : spec_action_labels)
             {
-              mCRL2log(log::verbose) << l.action_label(a) << "\n";
+              if (structured_output)
+              {
+                std::cout << sep << l.action_label(a);
+                sep = " ";
+              }
+              else
+                mCRL2log(log::verbose) << l.action_label(a) << "\n";
             }
+            if (structured_output)
+              std::cout << "\n";
           }
         }
-        mCRL2log(log::verbose) << "Finished printing acceptance sets.\n";
+        if (!structured_output)
+          mCRL2log(log::verbose) << "Finished printing acceptance sets.\n";
         // Ready printing acceptance sets.
       }
       return false;

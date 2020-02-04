@@ -1208,12 +1208,13 @@ bool bisimulation_compare(
   const LTS_TYPE& l2,
   const bool branching /* =false*/,
   const bool preserve_divergences /*=false*/,
-  const bool generate_counter_examples /*= false*/)
+  const bool generate_counter_examples /*= false*/,
+  const bool structured_output /* = false */)
 {
   LTS_TYPE l1_copy(l1);
   LTS_TYPE l2_copy(l2);
   return destructive_bisimulation_compare(l1_copy,l2_copy,branching,preserve_divergences,
-                                          generate_counter_examples);
+                                          generate_counter_examples, structured_output);
 }
 
 template < class LTS_TYPE>
@@ -1222,7 +1223,8 @@ bool destructive_bisimulation_compare(
   LTS_TYPE& l2,
   const bool branching /* =false*/,
   const bool preserve_divergences /*=false*/,
-  const bool generate_counter_examples /* = false */)
+  const bool generate_counter_examples /* = false */,
+  const bool structured_output /* = false */)
 {
   std::size_t init_l2 = l2.initial_state() + l1.num_states();
   mcrl2::lts::detail::merge(l1,l2);

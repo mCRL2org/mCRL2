@@ -60,7 +60,8 @@ template <class LTS_TYPE>
 bool destructive_compare(LTS_TYPE& l1,
                          LTS_TYPE& l2,
                          const lts_equivalence eq,
-                         const bool generate_counter_examples = false)
+                         const bool generate_counter_examples = false,
+                         const bool structured_output = false)
 {
   // Merge this LTS and l and store the result in this LTS.
   // In the resulting LTS, the initial state i of l will have the
@@ -76,51 +77,51 @@ bool destructive_compare(LTS_TYPE& l1,
       if (generate_counter_examples)
       {
         mCRL2log(mcrl2::log::warning) << "The default bisimulation comparison algorithm cannot generate counter examples. Therefore the slower gv algorithm is used instead.\n";
-        return detail::destructive_bisimulation_compare(l1,l2, false,false,generate_counter_examples);
+        return detail::destructive_bisimulation_compare(l1,l2, false,false,generate_counter_examples,structured_output);
       }
-      return detail::destructive_bisimulation_compare_dnj(l1,l2, false,false,generate_counter_examples);
+      return detail::destructive_bisimulation_compare_dnj(l1,l2, false,false,generate_counter_examples,structured_output);
     }
     case lts_eq_bisim_gv:
     {
-      return detail::destructive_bisimulation_compare(l1,l2, false,false,generate_counter_examples);
+      return detail::destructive_bisimulation_compare(l1,l2, false,false,generate_counter_examples,structured_output);
     }
     case lts_eq_bisim_gjkw:
     {
-      return detail::destructive_bisimulation_compare_gjkw(l1,l2, false,false,generate_counter_examples);
+      return detail::destructive_bisimulation_compare_gjkw(l1,l2, false,false,generate_counter_examples,structured_output);
     }
     case lts_eq_branching_bisim:
     {
       if (generate_counter_examples)
       {
         mCRL2log(mcrl2::log::warning) << "The default branching bisimulation comparison algorithm cannot generate counter examples. Therefore the slower gv algorithm is used instead.\n";
-        return detail::destructive_bisimulation_compare(l1,l2, true,false,generate_counter_examples);
+        return detail::destructive_bisimulation_compare(l1,l2, true,false,generate_counter_examples,structured_output);
       }
-      return detail::destructive_bisimulation_compare_dnj(l1,l2, true,false,generate_counter_examples);
+      return detail::destructive_bisimulation_compare_dnj(l1,l2, true,false,generate_counter_examples,structured_output);
     }
     case lts_eq_branching_bisim_gv:
     {
-      return detail::destructive_bisimulation_compare(l1,l2, true,false,generate_counter_examples);
+      return detail::destructive_bisimulation_compare(l1,l2, true,false,generate_counter_examples,structured_output);
     }
     case lts_eq_branching_bisim_gjkw:
     {
-      return detail::destructive_bisimulation_compare_gjkw(l1,l2, true,false,generate_counter_examples);
+      return detail::destructive_bisimulation_compare_gjkw(l1,l2, true,false,generate_counter_examples,structured_output);
     }
     case lts_eq_divergence_preserving_branching_bisim:
     {
       if (generate_counter_examples)
       {
         mCRL2log(mcrl2::log::warning) << "The default divergence-preserving branching bisimulation comparison algorithm cannot generate counter examples. Therefore the slower gv algorithm is used instead.\n";
-        return detail::destructive_bisimulation_compare(l1,l2, true,true,generate_counter_examples);
+        return detail::destructive_bisimulation_compare(l1,l2, true,true,generate_counter_examples,structured_output);
       }
-      return detail::destructive_bisimulation_compare_dnj(l1,l2, true,true,generate_counter_examples);
+      return detail::destructive_bisimulation_compare_dnj(l1,l2, true,true,generate_counter_examples,structured_output);
     }
     case lts_eq_divergence_preserving_branching_bisim_gv:
     {
-      return detail::destructive_bisimulation_compare(l1,l2, true,true,generate_counter_examples);
+      return detail::destructive_bisimulation_compare(l1,l2, true,true,generate_counter_examples,structured_output);
     }
     case lts_eq_divergence_preserving_branching_bisim_gjkw:
     {
-      return detail::destructive_bisimulation_compare_gjkw(l1,l2, true,true,generate_counter_examples);
+      return detail::destructive_bisimulation_compare_gjkw(l1,l2, true,true,generate_counter_examples,structured_output);
     }
     case lts_eq_weak_bisim:
     {
@@ -179,7 +180,7 @@ bool destructive_compare(LTS_TYPE& l1,
       determinise(l2);
 
       // Trace equivalence now corresponds to bisimilarity
-      return detail::destructive_bisimulation_compare(l1,l2,false,false,generate_counter_examples);
+      return detail::destructive_bisimulation_compare(l1,l2,false,false,generate_counter_examples,structured_output);
     }
     case lts_eq_weak_trace:
     {
@@ -196,7 +197,7 @@ bool destructive_compare(LTS_TYPE& l1,
       determinise(l2);
 
       // Weak trace equivalence now corresponds to bisimilarity
-      return detail::destructive_bisimulation_compare(l1,l2,false,false,generate_counter_examples);
+      return detail::destructive_bisimulation_compare(l1,l2,false,false,generate_counter_examples,structured_output);
     }
     default:
     throw mcrl2::runtime_error("Comparison for this equivalence is not available");
@@ -220,7 +221,8 @@ template <class LTS_TYPE>
 bool compare(const LTS_TYPE& l1,
              const LTS_TYPE& l2,
              const lts_equivalence eq,
-             const bool generate_counter_examples = false);
+             const bool generate_counter_examples = false,
+             const bool structured_output = false);
 
 /** \brief Checks whether this LTS is smaller than another LTS according
  * to a preorder.
@@ -248,6 +250,7 @@ bool destructive_compare(LTS_TYPE& l1,
                          LTS_TYPE& l2,
                          const lts_preorder pre,
                          const bool generate_counter_example,
+                         const bool structured_output = false,
                          const lps::exploration_strategy strategy = lps::es_breadth,
                          const bool preprocess = true);
 
@@ -270,6 +273,7 @@ bool compare(const LTS_TYPE&  l1,
              const  LTS_TYPE& l2,
              const lts_preorder pre,
              const bool generate_counter_example,
+             const bool structured_output = false,
              const lps::exploration_strategy strategy = lps::es_breadth,
              const bool preprocess = true);
 
@@ -731,7 +735,7 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
 }
 
 template <class LTS_TYPE>
-bool compare(const LTS_TYPE& l1, const LTS_TYPE& l2, const lts_equivalence eq, const bool generate_counter_examples)
+bool compare(const LTS_TYPE& l1, const LTS_TYPE& l2, const lts_equivalence eq, const bool generate_counter_examples, const bool structured_output)
 {
   switch (eq)
   {
@@ -740,21 +744,21 @@ bool compare(const LTS_TYPE& l1, const LTS_TYPE& l2, const lts_equivalence eq, c
     default:
       LTS_TYPE l1_copy(l1);
       LTS_TYPE l2_copy(l2);
-      return destructive_compare(l1_copy,l2_copy,eq,generate_counter_examples);
+      return destructive_compare(l1_copy,l2_copy,eq,generate_counter_examples,structured_output);
   }
   return false;
 }
 
 template <class LTS_TYPE>
-bool compare(const LTS_TYPE& l1, const LTS_TYPE& l2, const lts_preorder pre, const bool generate_counter_example, const lps::exploration_strategy strategy, const bool preprocess)
+bool compare(const LTS_TYPE& l1, const LTS_TYPE& l2, const lts_preorder pre, const bool generate_counter_example, const bool structured_output, const lps::exploration_strategy strategy, const bool preprocess)
 {
   LTS_TYPE l1_copy(l1);
   LTS_TYPE l2_copy(l2);
-  return destructive_compare(l1_copy, l2_copy, pre, generate_counter_example, strategy, preprocess);
+  return destructive_compare(l1_copy, l2_copy, pre, generate_counter_example, structured_output, strategy, preprocess);
 }
 
 template <class LTS_TYPE>
-bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, const bool generate_counter_example, const lps::exploration_strategy strategy, const bool preprocess)
+bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, const bool generate_counter_example, const bool structured_output, const lps::exploration_strategy strategy, const bool preprocess)
 {
   switch (pre)
   {
@@ -813,7 +817,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
       detail::bisimulation_reduce(l2,false);
 
       // Trace preorder now corresponds to simulation preorder
-      return destructive_compare(l1, l2, lts_pre_sim, generate_counter_example, strategy);
+      return destructive_compare(l1, l2, lts_pre_sim, generate_counter_example, structured_output, strategy);
     }
     case lts_pre_weak_trace:
     {
@@ -826,13 +830,13 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
       detail::tau_star_reduce(l2);
 
       // Weak trace preorder now corresponds to strong trace preorder
-      return destructive_compare(l1, l2, lts_pre_trace, generate_counter_example, strategy);
+      return destructive_compare(l1, l2, lts_pre_trace, generate_counter_example, structured_output, strategy);
     }
     case lts_pre_trace_anti_chain:
     {
       if (generate_counter_example)
       {
-        detail::counter_example_constructor cec("counter_example_trace_preorder.trc");
+        detail::counter_example_constructor cec("counter_example_trace_preorder", structured_output);
         return destructive_refinement_checker(l1, l2, trace, false, strategy, preprocess, cec);
       }
       return destructive_refinement_checker(l1, l2, trace, false, strategy, preprocess);
@@ -841,7 +845,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
     {
       if (generate_counter_example)
       {
-        detail::counter_example_constructor cec("counter_example_weak_trace_preorder.trc");
+        detail::counter_example_constructor cec("counter_example_weak_trace_preorder", structured_output);
         return destructive_refinement_checker(l1, l2, trace, true, strategy, preprocess, cec);
       }
       return destructive_refinement_checker(l1, l2, trace, true, strategy, preprocess);
@@ -850,7 +854,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
     {
       if (generate_counter_example)
       {
-        detail::counter_example_constructor cec("counter_example_failures_refinement.trc");
+        detail::counter_example_constructor cec("counter_example_failures_refinement", structured_output);
         return destructive_refinement_checker(l1, l2, failures, false, strategy, preprocess, cec);
       }
       return destructive_refinement_checker(l1, l2, failures, false, strategy, preprocess);
@@ -859,7 +863,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
     {
       if (generate_counter_example)
       {
-        detail::counter_example_constructor cec("counter_example_weak_failures_refinement.trc");
+        detail::counter_example_constructor cec("counter_example_weak_failures_refinement", structured_output);
         return destructive_refinement_checker(l1, l2, failures, true, strategy, preprocess, cec);
       }
       return destructive_refinement_checker(l1, l2, failures, true, strategy, preprocess);
@@ -868,7 +872,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
     {
       if (generate_counter_example)
       {
-        detail::counter_example_constructor cec("counter_example_failures_divergence_refinement.trc");
+        detail::counter_example_constructor cec("counter_example_failures_divergence_refinement", structured_output);
         return destructive_refinement_checker(l1, l2, failures_divergence, true, strategy, preprocess, cec);
       }
       return destructive_refinement_checker(l1, l2, failures_divergence, true, strategy, preprocess);

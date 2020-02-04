@@ -1915,7 +1915,8 @@ inline bool bisimulation_compare_gjkw(const LTS_TYPE& l1, const LTS_TYPE& l2,
 template <class LTS_TYPE>
 bool destructive_bisimulation_compare_gjkw(LTS_TYPE& l1, LTS_TYPE& l2,
           bool branching /* = false */, bool preserve_divergence /* = false */,
-                                  bool generate_counter_examples /* = false */)
+                                           bool generate_counter_examples /* = false */,
+                                           bool structured_output /* = false */)
 {
   if (generate_counter_examples)
   {
