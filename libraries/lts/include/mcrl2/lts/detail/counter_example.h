@@ -69,11 +69,13 @@ class counter_example_constructor
 
     static const index_type m_root_index=-1;
     std::deque< action_index_pair > m_backward_tree;
-    const std::string m_filename;
+    const std::string m_name;
+    const bool m_structured_output;
   
   public:
-    counter_example_constructor(const std::string& filename)
-     : m_filename(filename)
+    counter_example_constructor(const std::string& name, bool structured_output)
+     : m_name(name)
+     , m_structured_output(structured_output)
     {}
 
     /// \brief Return the index of the root.
@@ -126,14 +128,27 @@ class counter_example_constructor
                                        mcrl2::data::sort_expression_list()),
                                 mcrl2::data::data_expression_list())));
       }
-      mCRL2log(log::verbose) << "Saved trace to file " + m_filename + "\n";
-      result.save(m_filename);
+      if (m_structured_output)
+        {
+          std::cout << m_name << ":";
+          result.save(std::cout, mcrl2::trace::tfLine);
+        }
+      else
+      {
+        std::string filename = m_name + ".trc";
+        mCRL2log(log::verbose) << "Saved trace to file " + filename + "\n";
+        result.save(filename);
+      }
     }
 
     /// \brief This function indicates that this is not a dummy counterexample class and that a serious counterexample is required.
     bool is_dummy() const
     {
       return false;
+    }
+    bool is_structured() const
+    {
+      return m_structured_output;
     }
 };
 
@@ -166,6 +181,10 @@ class dummy_counter_example_constructor
     bool is_dummy() const
     {
       return true;
+    }
+    bool is_structured() const
+    {
+      return false;
     }
 };
 

@@ -34,6 +34,7 @@ struct t_tool_options
   mcrl2::lps::exploration_strategy strategy = mcrl2::lps::es_breadth;
   std::vector<std::string> tau_actions;   // Actions with these labels must be considered equal to tau.
   bool generate_counter_examples = false;
+  bool structured_output = false;
   bool enable_preprocessing      = true;
 };
 
@@ -97,7 +98,7 @@ class ltscompare_tool : public ltscompare_base
         mCRL2log(verbose) << "comparing LTSs using " <<
                      tool_options.equivalence << "..." << std::endl;
 
-        result = destructive_compare(l1, l2, tool_options.equivalence, tool_options.generate_counter_examples);
+        result = destructive_compare(l1, l2, tool_options.equivalence, tool_options.generate_counter_examples, tool_options.structured_output);
 
         mCRL2log(info) << "LTSs are " << ((result) ? "" : "not ")
                        << "equal ("
@@ -110,19 +111,26 @@ class ltscompare_tool : public ltscompare_base
                      description(tool_options.preorder) << "..."
                      " using the " << print_exploration_strategy(tool_options.strategy) << " strategy.\n";
 
-        result = destructive_compare(l1, l2, tool_options.preorder, tool_options.generate_counter_examples, tool_options.strategy, tool_options.enable_preprocessing);
+        result = destructive_compare(l1, l2, tool_options.preorder, tool_options.generate_counter_examples, tool_options.structured_output, tool_options.strategy, tool_options.enable_preprocessing);
 
-        mCRL2log(info) << "The LTS in " << tool_options.name_for_first
-                       << " is " << ((result) ? "" : "not ")
-                       << "included in"
-                       << " the LTS in " << tool_options.name_for_second
-                       << " (using " << description(tool_options.preorder)
-                       << ")." << std::endl;
+        if (!tool_options.structured_output)
+          mCRL2log(info) << "The LTS in " << tool_options.name_for_first
+                         << " is " << ((result) ? "" : "not ")
+                         << "included in"
+                         << " the LTS in " << tool_options.name_for_second
+                         << " (using " << description(tool_options.preorder)
+                         << ")." << std::endl;
       }
 
-      std::cout << (result ? "true" : "false") << std::endl;
-
-      return true; // The tool terminates in a correct way.
+      if (tool_options.structured_output)
+        // behave as expected for UNIX tools, such as diff
+        exit(!result);
+      else
+        {
+          // retain backward compatibility
+          std::cout << (result ? "true" : "false") << std::endl;
+          return true; // The tool terminates in a correct way.
+        }
     }
 
   public:
@@ -245,8 +253,15 @@ class ltscompare_tool : public ltscompare_base
                  "the input").
       add_option("counter-example",
                  "generate counter example traces if the input lts's are not equivalent",'c').
+      add_option("structured-output",
+                 // TODO: also write human readable stderr chatter like
+                 // "LTS in A is [not] included in B" in a structured way to stdout,
+                 // something like
+                 // 2_contains_1: no
+                 // 1_contains_2: yes
+                 "generate counter examples on stdout",'x').
       add_hidden_option("no-preprocessing",
-                 "disable preprocessing applied to the input LTSs for refinement checking",'\0');
+                        "disable preprocessing applied to the input LTSs for refinement checking",'\0');
     }
 
     void parse_options(const command_line_parser& parser) override
@@ -287,6 +302,7 @@ class ltscompare_tool : public ltscompare_base
       }
 
       tool_options.generate_counter_examples = parser.has_option("counter-example");
+      tool_options.structured_output = parser.has_option("structured-output");
 
       if (parser.arguments.size() == 1)
       {
