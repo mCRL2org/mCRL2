@@ -82,6 +82,54 @@ inline aterm_istream& operator>>(aterm_istream& stream, aterm_transformer transf
 /// \brief Reads a single term from this stream.
 inline aterm_istream& operator>>(aterm_istream& stream, aterm& term) { term = stream.get(); return stream; }
 
+// Utility functions
+
+namespace detail
+{
+  inline aterm end_of_container()
+  {
+    static aterm_appl t(function_symbol("end_of_container", 0));
+    return t;
+  }
+}
+
+/// \brief Write any container (that is not an aterm) to the stream.
+/// \brief Write any container (that is not an aterm itself) to the stream.
+template<typename T,
+  typename std::enable_if_t<is_container<T, aterm>::value, int> = 0,
+  typename std::enable_if_t<!std::is_base_of<aterm, T>::value, int> = 0>
+inline aterm_ostream& operator<<(aterm_ostream& stream, const T& container)
+{
+  // Write the number of elements, followed by each element in the container.
+  for (const auto& element : container)
+  {
+    stream << element;
+  }
+
+  stream << detail::end_of_container();
+
+  return stream;
+}
+
+/// \brief Read any container (that is not an aterm itself) from the stream.
+template<typename T,
+  typename std::enable_if_t<is_container<T, aterm>::value, int> = 0,
+  typename std::enable_if_t<!std::is_base_of<aterm, T>::value, int> = 0>
+inline aterm_istream& operator>>(aterm_istream& stream, T& container)
+{
+  // Insert each term into the container until the end_of_container mark is found.
+  aterm t;
+  auto it = std::inserter(container, container.end());
+  do
+  {
+    t = stream.get();
+    it = static_cast<const typename T::value_type&>(t);
+  }
+  while (t != detail::end_of_container());
+
+  return stream;
+}
+
 template<typename T>
 inline aterm_ostream& operator<<(aterm_ostream&& stream, const T& t) { stream << t; return stream; }
 
@@ -90,8 +138,6 @@ inline aterm_istream& operator>>(aterm_istream&& stream, T& t) { stream >> t; re
 
 template<typename T>
 inline T aterm_istream::get() { T t; *this >> t; return t; }
-
-// These are utility functions.
 
 /// \brief Send the term in textual form to the ostream.
 std::ostream& operator<<(std::ostream& out, const aterm& t);
