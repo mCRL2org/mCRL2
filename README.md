@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://mcrl2.org/web/user_manual/_static/mcrl2.png" >
+  <img src="https://mcrl2.org/web/_images/mcrl2.png" >
 </p>
 
 mCRL2 is a formal specification language with an associated toolset. The toolset
@@ -26,7 +26,7 @@ mCRL2 has the following minimum dependencies:
    - AppleClang: 11.0
    - MSVC: 2019 v16.0
  - Qt (Linux/Windows: 5.9.0, MacOS: 5.10.0; for the GUI tools only)
- - Boost (Linux: 1.65.1, MacOS/Windows: 1.66.0)
+ - Boost (Linux: 1.65.1, MacOS/Windows: 1.67.0)
 
 Furthermore, sphinx and xsltproc are required to build the documentation.
 Makefiles can be generated using cmake. To build the toolset in Release mode
