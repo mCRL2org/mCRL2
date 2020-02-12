@@ -304,12 +304,13 @@ void write_lts_header(atermpp::aterm_ostream& stream,
 
 /// \brief Write a transition to the LTS stream.
 void write_transition(atermpp::aterm_ostream& stream, std::size_t from, const process::timed_multi_action& label, std::size_t to);
+void write_transition(atermpp::aterm_ostream& stream, std::size_t from, const process::timed_multi_action& label, const probabilistic_lts_lts_t::probabilistic_state_t& to);
 
 /// \brief Write a state label to the LTS stream.
 void write_state_label(atermpp::aterm_ostream& stream, const state_label_lts& label);
 
 /// \brief Write the initial state to the LTS stream.
-void write_initial_state(atermpp::aterm_ostream& stream, std::size_t state);
+void write_initial_state(atermpp::aterm_ostream& stream, std::size_t index);
 
 } // namespace mcrl2::lts
 
