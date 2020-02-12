@@ -30,16 +30,17 @@ static constexpr std::uint16_t BAF_MAGIC = 0x8baf;
 /// 23 November 2013  : version changed to 0x0302 (introduction of index for variable types)
 /// 24 September 2014 : version changed to 0x0303 (introduction of stochastic distribution)
 ///  2 April 2017     : version changed to 0x0304 (removed a few superfluous fields in the format)
-/// 19 Juli 2019      : version changed to 0x8305 (introduction of the streamable aterm format)
+/// 19 July 2019      : version changed to 0x8305 (introduction of the streamable aterm format)
 static constexpr std::uint16_t BAF_VERSION = 0x8305;
 
-/// \brief Each packet has a header consisting of a type and an invisible bit (indicating no output).
+/// \brief Each packet has a header consisting of a type.
+/// \details Either indicates a function symbol, a term (either shared or output) or an arbitrary integer.
 enum class packet_type
 {
   function_symbol = 0,
   aterm,
   aterm_output,
-  aterm_int,
+  aterm_int_output
 };
 
 /// \brief The number of bits needed to store an element of packet_type.
@@ -78,8 +79,6 @@ struct write_todo
 
 void binary_aterm_ostream::put(const aterm& term)
 {
-  assert(!term.type_is_int());
-
   // Traverse the term bottom up and store the subterms (and function symbol) before the actual term.
   std::stack<write_todo> stack;
   stack.emplace(static_cast<const aterm_appl&>(term));
@@ -97,9 +96,21 @@ void binary_aterm_ostream::put(const aterm& term)
       {
         if (transformed.type_is_int())
         {
-          // Write the packet identifier of an aterm_int followed by its value.
-          m_stream.write_bits(static_cast<std::size_t>(packet_type::aterm_int), packet_bits);
-          m_stream.write_integer(reinterpret_cast<const aterm_int&>(current.term).value());
+          if (is_output)
+          {
+            // If the integer is output, write the header and just an integer
+            m_stream.write_bits(static_cast<std::size_t>(packet_type::aterm_int_output), packet_bits);
+            m_stream.write_integer(reinterpret_cast<const aterm_int&>(current.term).value());
+          }
+          else
+          {
+            std::size_t symbol_index = write_function_symbol(transformed.function());
+
+            // Write the packet identifier of an aterm_int followed by its value.
+            m_stream.write_bits(static_cast<std::size_t>(packet_type::aterm), packet_bits);
+            m_stream.write_bits(symbol_index, function_symbol_index_width());
+            m_stream.write_integer(reinterpret_cast<const aterm_int&>(current.term).value());
+          }
         }
         else
         {
@@ -119,7 +130,7 @@ void binary_aterm_ostream::put(const aterm& term)
 
         if (!is_output)
         {
-          // Output terms are not shared and thus can be forgotten.
+          // Only regular terms (not output) are shared and as such need a unique index.
           bool assigned = m_terms.insert(current.term).second;
           assert(assigned); mcrl2_unused(assigned); // This term should have a new index assigned.
           m_term_index_width = static_cast<std::uint8_t>(std::log2(m_terms.size()) + 1);
@@ -223,6 +234,12 @@ aterm binary_aterm_istream::get()
       m_function_symbols.emplace_back(name, arity);
       m_function_symbol_index_width = static_cast<unsigned int>(std::log2(m_function_symbols.size()) + 1);
     }
+    else if (packet == packet_type::aterm_int_output)
+    {
+      // Read the integer from the stream and construct an aterm_int.
+      std::size_t value = m_stream.read_integer();
+      return aterm_int(value);
+    }
     else if (packet == packet_type::aterm || packet == packet_type::aterm_output)
     {
       // First read the function symbol of the following term.
@@ -233,35 +250,37 @@ aterm binary_aterm_istream::get()
         // The term with function symbol zero marks the end of the stream.
         return aterm();
       }
-
-      // Read arity number of arguments from the stream and search them in the already defined set of terms.
-      std::vector<aterm> arguments(symbol.arity());
-      for (std::size_t argument = 0; argument < symbol.arity(); ++argument)
+      else if (symbol == detail::g_as_int)
       {
-        arguments[argument] = m_terms[m_stream.read_bits(term_index_width())];
-      }
-
-      // Transform the resulting term.
-      aterm transformed = m_transformer(aterm_appl(symbol, arguments.begin(), arguments.end()));
-
-      if (packet == packet_type::aterm_output)
-      {
-        // This aterm was marked as output in the file so return it.
-        return transformed;
+        // Read the integer from the stream and construct a shared aterm_int in the index.
+        std::size_t value = m_stream.read_integer();
+        m_terms.emplace_back(aterm_int(value));
+        m_term_index_width = static_cast<unsigned int>(std::log2(m_terms.size()) + 1);
       }
       else
       {
-        // Construct the term appl from the function symbol and the already read arguments and insert it.
-        m_terms.emplace_back(transformed);
-        m_term_index_width = static_cast<unsigned int>(std::log2(m_terms.size()) + 1);
+        // Read arity number of arguments from the stream and search them in the already defined set of terms.
+        std::vector<aterm> arguments(symbol.arity());
+        for (std::size_t argument = 0; argument < symbol.arity(); ++argument)
+        {
+          arguments[argument] = m_terms[m_stream.read_bits(term_index_width())];
+        }
+
+        // Transform the resulting term.
+        aterm transformed = m_transformer(aterm_appl(symbol, arguments.begin(), arguments.end()));
+
+        if (packet == packet_type::aterm_output)
+        {
+          // This aterm was marked as output in the file so return it.
+          return transformed;
+        }
+        else
+        {
+          // Construct the term appl from the function symbol and the already read arguments and insert it.
+          m_terms.emplace_back(transformed);
+          m_term_index_width = static_cast<unsigned int>(std::log2(m_terms.size()) + 1);
+        }
       }
-    }
-    else if (packet == packet_type::aterm_int)
-    {
-      // Read the integer from the stream and construct an aterm_int.
-      std::size_t value = m_stream.read_integer();
-      m_terms.emplace_back(aterm_int(value));
-      m_term_index_width = static_cast<unsigned int>(std::log2(m_terms.size()) + 1);
     }
   }
 }
