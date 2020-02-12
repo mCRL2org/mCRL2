@@ -214,7 +214,7 @@ class lts_lts_builder: public lts_builder
 class lts_lts_disk_builder: public lts_builder
 {
   protected:
-    std::fstream file;
+    std::fstream fstream;
     std::unique_ptr<atermpp::binary_aterm_ostream> stream;
     bool m_discard_state_labels = false;
 
@@ -228,8 +228,19 @@ class lts_lts_disk_builder: public lts_builder
     )
      : m_discard_state_labels(discard_state_labels)
     {
-      file.open(filename);
-      stream = std::make_unique<atermpp::binary_aterm_ostream>(file);
+      fstream.exceptions ( std::ofstream::failbit | std::ofstream::badbit );
+
+      try
+      {
+        fstream.open(filename, std::ofstream::out | std::ofstream::binary);
+      }
+      catch (std::ofstream::failure&)
+      {
+        throw mcrl2::runtime_error("Fail to open file " + filename + " for writing.");
+      }
+
+      mCRL2log(log::verbose) << "writing state space in LTS format to '" << filename << "'." << std::endl;
+      stream = std::make_unique<atermpp::binary_aterm_ostream>(fstream);
 
       mcrl2::lts::write_lts_header(*stream, dataspec, process_parameters, action_labels);
     }
