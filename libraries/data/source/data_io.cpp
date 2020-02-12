@@ -69,19 +69,73 @@ atermpp::aterm remove_index(const atermpp::aterm& x)
 
 atermpp::aterm_istream& data::operator>>(atermpp::aterm_istream& stream, data_specification& spec)
 {
-  atermpp::aterm t = stream.get();
+  atermpp::aterm_stream_state state(stream);
+  stream >> add_index_impl;
 
-  if (!t.type_is_appl() || !is_data_specification(atermpp::down_cast<const atermpp::aterm_appl>(t)))
+  try
+  {
+    basic_sort_vector sorts;
+    alias_vector aliases;
+    function_symbol_vector constructors;
+    function_symbol_vector user_defined_mappings;
+    data_equation_vector user_defined_equations;
+
+    stream >> sorts;
+    stream >> aliases;
+    stream >> constructors;
+    stream >> user_defined_mappings;
+    stream >> user_defined_equations;
+
+    // Store the given information in a new data specification (to ignore existing elements of spec).
+    data_specification new_spec;
+
+    // Store the sorts and aliases.
+    for(const atermpp::aterm_appl& t : sorts)
+    {
+      new_spec.add_sort(atermpp::down_cast<basic_sort>(t));
+    }
+    for (const atermpp::aterm_appl& t : aliases)
+    {
+      new_spec.add_alias(atermpp::down_cast<alias>(t));
+    }
+
+    // Store the constructors.
+    for(const function_symbol& f : constructors)
+    {
+      new_spec.add_constructor(f);
+    }
+
+    // Store the mappings.
+    for(const function_symbol& f : user_defined_mappings)
+    {
+      new_spec.add_mapping(f);
+    }
+
+    // Store the equations.
+    for(const data_equation& e: user_defined_equations)
+    {
+      new_spec.add_equation(e);
+    }
+
+    spec = new_spec;
+  }
+  catch (std::exception&)
   {
     throw mcrl2::runtime_error("Input stream does not contain a data specification");
   }
 
-  spec = data_specification(atermpp::down_cast<atermpp::aterm_appl>(t));
   return stream;
 }
 
 atermpp::aterm_ostream& data::operator<<(atermpp::aterm_ostream& stream, const data_specification& spec)
 {
-  stream << remove_index_impl << detail::data_specification_to_aterm(spec);
+  atermpp::aterm_stream_state state(stream);
+  stream << remove_index_impl;
+
+  stream << spec.user_defined_sorts();
+  stream << spec.user_defined_aliases();
+  stream << spec.user_defined_constructors();
+  stream << spec.user_defined_mappings();
+  stream << spec.user_defined_equations();
   return stream;
 }
