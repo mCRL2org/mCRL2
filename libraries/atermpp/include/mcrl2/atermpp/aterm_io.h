@@ -24,12 +24,12 @@ using aterm_transformer = aterm_appl(const aterm_appl&);
 /// \brief The default transformer that maps each term to itself.
 inline aterm_appl identity(const aterm_appl& x) { return x; }
 
-/// \brief The interface for a class that writes aterm to a stream.
-///        Every written term is retrieved by the corresponding aterm_istream::get() call.
-class aterm_ostream
+/// \brief The general aterm stream interface, which enables the use of a transformer to
+///        change the written/read terms.
+class aterm_stream
 {
 public:
-  virtual ~aterm_ostream();
+  virtual ~aterm_stream();
 
   /// \brief Sets the given transformer to be applied to following writes.
   void set_transformer(aterm_transformer transformer) { m_transformer = transformer; }
@@ -37,25 +37,27 @@ public:
   /// \returns The currently assigned transformer function.
   aterm_transformer* get_transformer() const { return m_transformer; }
 
-  /// \brief Write the given term to the stream.
-  virtual void put(const aterm& term) = 0;
-
 protected:
   aterm_transformer* m_transformer = identity;
 };
 
+/// \brief The interface for a class that writes aterm to a stream.
+///        Every written term is retrieved by the corresponding aterm_istream::get() call.
+class aterm_ostream : public aterm_stream
+{
+public:
+  virtual ~aterm_ostream();
+
+  /// \brief Write the given term to the stream.
+  virtual void put(const aterm& term) = 0;
+};
+
 /// \brief The interface for a class that reads aterm from a stream.
 ///        The default constructed term aterm() indicates the end of the stream.
-class aterm_istream
+class aterm_istream : public aterm_stream
 {
 public:
   virtual ~aterm_istream();
-
-  /// \brief Sets the given transformer to be applied to following reads.
-  void set_transformer(aterm_transformer transformer) { m_transformer = transformer; }
-
-  /// \returns The currently assigned transformer function.
-  aterm_transformer* get_transformer() const { return m_transformer; }
 
   /// \brief Reads an object of type T from this stream, using the object specific >> operator.
   template<typename T>
@@ -63,9 +65,6 @@ public:
 
   /// \brief Reads a single term from this stream.
   virtual aterm get() = 0;
-
-protected:
-  aterm_transformer* m_transformer = identity;
 };
 
 // These free functions provide input/output operators for these streams.
@@ -86,14 +85,35 @@ inline aterm_istream& operator>>(aterm_istream& stream, aterm& term) { term = st
 
 namespace detail
 {
-  inline aterm end_of_container()
+  /// \brief A special term indicating the end of a container.
+  inline atermpp::aterm end_of_container()
   {
-    static aterm_appl t(function_symbol("end_of_container", 0));
-    return t;
+    static atermpp::aterm_appl mark(atermpp::function_symbol("end_of_container", 0));
+    return mark;
   }
 }
 
-/// \brief Write any container (that is not an aterm) to the stream.
+/// \brief A helper class to restore the state of the aterm_{i,o}stream objects upon destruction. Currently, onlt
+///        preserves the transformer object.
+class aterm_stream_state
+{
+public:
+  aterm_stream_state(aterm_stream& stream)
+    : m_stream(stream)
+  {
+    m_transformer = stream.get_transformer();
+  }
+
+  ~aterm_stream_state()
+  {
+    m_stream.set_transformer(m_transformer);
+  }
+
+private:
+  aterm_stream& m_stream;
+  aterm_transformer* m_transformer;
+};
+
 /// \brief Write any container (that is not an aterm itself) to the stream.
 template<typename T,
   typename std::enable_if_t<is_container<T, aterm>::value, int> = 0,
