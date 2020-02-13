@@ -273,8 +273,7 @@ class lts_lts_disk_builder: public lts_builder
       write_initial_state(*stream, 0);
     }
 
-    void save(const std::string& filename) override
-    {}
+    void save(const std::string&) override {}
 };
 
 class lts_dot_builder: public lts_lts_builder

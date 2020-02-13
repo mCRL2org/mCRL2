@@ -14,6 +14,18 @@
 
 using namespace atermpp;
 
+BOOST_AUTO_TEST_CASE(simple_int_test)
+{
+  std::stringstream stream;
+  {
+    binary_aterm_ostream output(stream);
+    output << aterm_int(50);
+  }
+
+  binary_aterm_istream input(stream);
+  BOOST_CHECK_EQUAL(input.get(), aterm_int(50));
+}
+
 BOOST_AUTO_TEST_CASE(simple_term_test)
 {
 
@@ -31,21 +43,21 @@ BOOST_AUTO_TEST_CASE(simple_term_test)
 
   std::stringstream stream;
   {
-    binary_aterm_ostream input(stream);
+    binary_aterm_ostream output(stream);
 
     for (const auto& term : sequence)
     {
-      input << term;
+      output << term;
     }
 
     // The buffer is flushed here.
   }
 
-  binary_aterm_istream output(stream);
+  binary_aterm_istream input(stream);
 
   for (std::size_t index = 0; index < sequence.size(); ++index)
   {
-    BOOST_CHECK_EQUAL(output.get(), sequence[index]);
+    BOOST_CHECK_EQUAL(input.get(), sequence[index]);
   }
 }
 
@@ -69,20 +81,20 @@ BOOST_AUTO_TEST_CASE(transitions_test)
 
   std::stringstream stream;
   {
-    binary_aterm_ostream input(stream);
+    binary_aterm_ostream output(stream);
 
     for (const auto& term : sequence)
     {
-      input << term;
+      output << term;
     }
 
     // The buffer is flushed here.
   }
 
-  binary_aterm_istream output(stream);
+  binary_aterm_istream input(stream);
 
   for (std::size_t index = 0; index < sequence.size(); ++index)
   {
-    BOOST_CHECK_EQUAL(output.get(), sequence[index]);
+    BOOST_CHECK_EQUAL(input.get(), sequence[index]);
   }
 }

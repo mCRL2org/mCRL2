@@ -137,7 +137,15 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
       aterm_int to                      = stream.get<aterm_int>();
 
       auto [index, inserted] = multi_actions.insert(label);
-      lts.add_transition(transition(from.value(), index, to.value()));
+
+      std::size_t target_index = to.value();
+      if constexpr (std::is_same<LTS, probabilistic_lts_lts_t>::value)
+      {
+        // For probabilistic lts it is necessary to add the state first (and use the returned index).
+        target_index = lts.add_probabilistic_state(probabilistic_lts_lts_t::probabilistic_state_t(to.value()));
+      }
+
+      lts.add_transition(transition(from.value(), index, target_index));
 
       if (inserted)
       {
@@ -161,6 +169,10 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
           lts.add_action(action_label_lts(lps::multi_action(label.actions(), label.time())));
         }
       }
+      else
+      {
+        throw mcrl2::runtime_error("Attempting to read a probabilistic lts as a regular lts.");
+      }
     }
     else if (term.function() == atermpp::detail::g_term_pool().as_list())
     {
@@ -169,7 +181,7 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
     }
     else if (term == initial_state_mark())
     {
-      // Read the state itself.
+      // Read the initial state.
       stream >> initial_state;
     }
   }
