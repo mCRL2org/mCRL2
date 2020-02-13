@@ -83,16 +83,6 @@ inline aterm_istream& operator>>(aterm_istream& stream, aterm& term) { term = st
 
 // Utility functions
 
-namespace detail
-{
-  /// \brief A special term indicating the end of a container.
-  inline atermpp::aterm end_of_container()
-  {
-    static atermpp::aterm_appl mark(atermpp::function_symbol("end_of_container", 0));
-    return mark;
-  }
-}
-
 /// \brief A helper class to restore the state of the aterm_{i,o}stream objects upon destruction. Currently, onlt
 ///        preserves the transformer object.
 class aterm_stream_state
@@ -121,12 +111,12 @@ template<typename T,
 inline aterm_ostream& operator<<(aterm_ostream& stream, const T& container)
 {
   // Write the number of elements, followed by each element in the container.
+  stream << aterm_int(std::distance(container.begin(), container.end()));
+
   for (const auto& element : container)
   {
     stream << element;
   }
-
-  stream << detail::end_of_container();
 
   return stream;
 }
@@ -137,15 +127,14 @@ template<typename T,
   typename std::enable_if_t<!std::is_base_of<aterm, T>::value, int> = 0>
 inline aterm_istream& operator>>(aterm_istream& stream, T& container)
 {
-  // Insert each term into the container until the end_of_container mark is found.
-  aterm t;
+  // Insert the next nof_elements into the container.
+  std::size_t nof_elements = stream.get<aterm_int>().value();
+
   auto it = std::inserter(container, container.end());
-  do
+  for (std::size_t i = 0; i < nof_elements; ++i)
   {
-    t = stream.get();
-    it = static_cast<const typename T::value_type&>(t);
+    it = stream.get<typename T::value_type>();
   }
-  while (t != detail::end_of_container());
 
   return stream;
 }

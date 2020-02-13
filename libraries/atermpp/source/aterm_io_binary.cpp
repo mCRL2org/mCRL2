@@ -50,7 +50,7 @@ binary_aterm_ostream::binary_aterm_ostream(std::ostream& stream)
   : m_stream(stream)
 {
   // The term with function symbol index 0 indicates the end of the stream, its actual value does not matter.
-  m_function_symbols.insert(detail::g_as_int);
+  m_function_symbols.insert(function_symbol("end_of_stream", 0));
   m_function_symbol_index_width = 1;
 
   // Write the header of the binary aterm format.

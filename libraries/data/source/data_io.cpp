@@ -90,13 +90,13 @@ atermpp::aterm_istream& data::operator>>(atermpp::aterm_istream& stream, data_sp
     data_specification new_spec;
 
     // Store the sorts and aliases.
-    for(const atermpp::aterm_appl& t : sorts)
+    for(const basic_sort& t : sorts)
     {
-      new_spec.add_sort(atermpp::down_cast<basic_sort>(t));
+      new_spec.add_sort(t);
     }
-    for (const atermpp::aterm_appl& t : aliases)
+    for (const alias& t : aliases)
     {
-      new_spec.add_alias(atermpp::down_cast<alias>(t));
+      new_spec.add_alias(t);
     }
 
     // Store the constructors.
