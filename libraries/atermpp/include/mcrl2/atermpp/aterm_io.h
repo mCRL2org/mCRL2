@@ -59,26 +59,20 @@ class aterm_istream : public aterm_stream
 public:
   virtual ~aterm_istream();
 
-  /// \brief Reads an object of type T from this stream, using the object specific >> operator.
-  template<typename T>
-  T get();
-
-  /// \brief Reads a single term from this stream.
+  /// \brief Reads an aterm from this stream.
   virtual aterm get() = 0;
 };
 
 // These free functions provide input/output operators for these streams.
 
 /// \brief Sets the given transformer to be applied to following reads.
+inline aterm_istream& operator>>(aterm_istream& stream, aterm_transformer transformer) { stream.set_transformer(transformer); return stream; }
 inline aterm_ostream& operator<<(aterm_ostream& stream, aterm_transformer transformer) { stream.set_transformer(transformer); return stream; }
 
 /// \brief Write the given term to the stream.
 inline aterm_ostream& operator<<(aterm_ostream& stream, const aterm& term) { stream.put(term); return stream; }
 
-/// \brief Sets the given transformer to be applied to following reads.
-inline aterm_istream& operator>>(aterm_istream& stream, aterm_transformer transformer) { stream.set_transformer(transformer); return stream; }
-
-/// \brief Reads a single term from this stream.
+/// \brief Read the given term from the stream.
 inline aterm_istream& operator>>(aterm_istream& stream, aterm& term) { term = stream.get(); return stream; }
 
 // Utility functions
@@ -128,12 +122,15 @@ template<typename T,
 inline aterm_istream& operator>>(aterm_istream& stream, T& container)
 {
   // Insert the next nof_elements into the container.
-  std::size_t nof_elements = stream.get<aterm_int>().value();
+  aterm_int nof_elements;
+  stream >> nof_elements;
 
   auto it = std::inserter(container, container.end());
-  for (std::size_t i = 0; i < nof_elements; ++i)
+  for (std::size_t i = 0; i < nof_elements.value(); ++i)
   {
-    it = stream.get<typename T::value_type>();
+    typename T::value_type element;
+    stream >> element;
+    it = element;
   }
 
   return stream;
@@ -144,9 +141,6 @@ inline aterm_ostream& operator<<(aterm_ostream&& stream, const T& t) { stream <<
 
 template<typename T>
 inline aterm_istream& operator>>(aterm_istream&& stream, T& t) { stream >> t; return stream; }
-
-template<typename T>
-inline T aterm_istream::get() { T t; *this >> t; return t; }
 
 /// \brief Send the term in textual form to the ostream.
 std::ostream& operator<<(std::ostream& out, const aterm& t);

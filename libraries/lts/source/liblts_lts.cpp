@@ -132,9 +132,13 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
 
     if (term == transition_mark())
     {
-      aterm_int from                    = stream.get<aterm_int>();
-      process::timed_multi_action label = stream.get<process::timed_multi_action>();
-      aterm_int to                      = stream.get<aterm_int>();
+      aterm_int from;
+      process::timed_multi_action label;
+      aterm_int to;
+
+      stream >> from;
+      stream >> label;
+      stream >> to;
 
       auto [index, inserted] = multi_actions.insert(label);
 
@@ -156,9 +160,13 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
     {
       if constexpr (std::is_same<LTS, probabilistic_lts_lts_t>::value)
       {
-        aterm_int from                    = stream.get<aterm_int>();
-        process::timed_multi_action label = stream.get<process::timed_multi_action>();
-        probabilistic_lts_lts_t::probabilistic_state_t to = stream.get<probabilistic_lts_lts_t::probabilistic_state_t>();
+        aterm_int from;
+        process::timed_multi_action label;
+        probabilistic_lts_lts_t::probabilistic_state_t to;
+
+        stream >> from;
+        stream >> label;
+        stream >> to;
 
         auto [index, inserted] = multi_actions.insert(label);
         std::size_t to_index = lts.add_probabilistic_state(to);
@@ -251,8 +259,6 @@ void write_initial_state(atermpp::aterm_ostream& stream, const lts_lts_t& lts)
 template <class LTS>
 static void write_lts(atermpp::aterm_ostream& stream, LTS& lts)
 {
-  stream << data::detail::remove_index_impl;
-
   // Write the process related information.
   write_lts_header(stream,
    lts.data(),
@@ -345,6 +351,7 @@ void write_lts_header(atermpp::aterm_ostream& stream,
   const process::action_label_list& action_labels)
 {
   // Write the header of the lts.
+  stream << data::detail::remove_index_impl;
   stream << data_spec;
   stream << parameters;
   stream << action_labels;
