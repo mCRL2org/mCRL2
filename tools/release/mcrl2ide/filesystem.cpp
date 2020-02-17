@@ -661,10 +661,11 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
         parent, context, "Provided folder contains more than one project file");
     return;
   }
+  QString projectFileName = projectFiles.first();
 
   /* read the project file to get the specification path */
   QString newProjectFilePath =
-      newProjectFolderPath + QDir::separator() + projectFiles.first();
+      newProjectFolderPath + QDir::separator() + projectFileName;
   QFile projectFile(newProjectFilePath);
   projectFile.open(QIODevice::ReadOnly);
   QTextStream projectOpenStream(&projectFile);
@@ -733,7 +734,8 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
 
   /* opening is successful, so set project variables */
   projectFolderPath = QFileInfo(newProjectFilePath).path();
-  projectName = QFileInfo(newProjectFilePath).baseName();
+  projectName = projectFileName.left(projectFileName.length() -
+                                     projectFileExtension.length());
   projectOptions = newProjectOptions;
   lastKnownProjectFileModificationTime = QFileInfo(projectFile).lastModified();
 
