@@ -19,6 +19,7 @@
 #include <QDomNode>
 #include <QDomElement>
 #include <QDomNodeList>
+#include <QCryptographicHash>
 
 Property::Property()
     : name(""), text(""), mucalculus(true),
@@ -109,9 +110,25 @@ QString FileSystem::intermediateFilesFolderPath(IntermediateFileType fileType)
   }
 }
 
+QString FileSystem::projectHash()
+{
+  return QString("%1").arg(
+      QString(QCryptographicHash::hash(projectFolderPath.toUtf8(),
+                                       QCryptographicHash::Md4)
+                  .toHex()));
+}
+
 QString FileSystem::defaultSpecificationFilePath()
 {
   return projectFolderPath + QDir::separator() + projectName + "_spec.mcrl2";
+}
+
+QString FileSystem::intermediateFilePrefix(const QString& propertyName,
+                                           SpecType specType, bool evidence)
+{
+  return projectHash() + "_" + projectName +
+         (propertyName.isEmpty() ? "" : "_" + propertyName) +
+         SPECTYPEEXTENSION.at(specType) + (evidence ? "_evidence" : "");
 }
 
 QString FileSystem::specificationFilePath(SpecType specType,
@@ -130,8 +147,9 @@ QString FileSystem::specificationFilePath(SpecType specType,
   }
   else
   {
-    return temporaryFolder.path() + QDir::separator() + projectName + "_" +
-           propertyName + SPECTYPEEXTENSION.at(specType) + "_spec.mcrl2";
+    return temporaryFolder.path() + QDir::separator() +
+           intermediateFilePrefix(propertyName, specType, false) +
+           "_spec.mcrl2";
   }
 }
 
@@ -139,10 +157,8 @@ QString FileSystem::lpsFilePath(SpecType specType, const QString& propertyName,
                                 bool evidence)
 {
   return intermediateFilesFolderPath(IntermediateFileType::Lps) +
-         QDir::separator() + projectName +
-         (propertyName.isEmpty() ? "" : "_" + propertyName) +
-         SPECTYPEEXTENSION.at(specType) + (evidence ? "_evidence" : "") +
-         "_lps.lps";
+         QDir::separator() +
+         intermediateFilePrefix(propertyName, specType, evidence) + "_lps.lps";
 }
 
 QString FileSystem::ltsFilePath(mcrl2::lts::lts_equivalence equivalence,
@@ -150,24 +166,24 @@ QString FileSystem::ltsFilePath(mcrl2::lts::lts_equivalence equivalence,
                                 bool evidence)
 {
   return intermediateFilesFolderPath(IntermediateFileType::Lts) +
-         QDir::separator() + projectName +
-         (propertyName.isEmpty() ? "" : "_" + propertyName) +
-         SPECTYPEEXTENSION.at(specType) + (evidence ? "_evidence" : "") +
-         "_lts_" + getEquivalenceName(equivalence, true) + ".lts";
+         QDir::separator() +
+         intermediateFilePrefix(propertyName, specType, evidence) + "_lts_" +
+         getEquivalenceName(equivalence, true) + ".lts";
 }
 
 QString FileSystem::propertyFilePath(const Property& property, bool forParsing)
 {
   return (forParsing ? temporaryFolder.path() : propertiesFolderPath()) +
-         QDir::separator() + property.name +
-         (property.mucalculus ? ".mcf" : ".equ");
+         QDir::separator() + (forParsing ? projectHash() + "_" : "") +
+         property.name + (property.mucalculus ? ".mcf" : ".equ");
 }
 
 QString FileSystem::pbesFilePath(const QString& propertyName, bool evidence)
 {
   return intermediateFilesFolderPath(IntermediateFileType::Pbes) +
-         QDir::separator() + projectName + "_" + propertyName +
-         (evidence ? "_evidence" : "") + "_pbes.pbes";
+         QDir::separator() +
+         intermediateFilePrefix(propertyName, SpecType::Main, evidence) +
+         "_pbes.pbes";
 }
 
 QString FileSystem::toolPath(const QString& tool)

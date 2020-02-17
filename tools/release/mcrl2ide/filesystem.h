@@ -521,6 +521,25 @@ class FileSystem : public QObject
   void makeSureArtefactsFolderExists();
 
   /**
+   * @brief projectHash Returns a hash that depends on the path of the project
+   *   folder
+   * @return A hash that depends on the path of the project folder
+   */
+  QString projectHash();
+
+  /**
+   * @brief intermediateFilePrefix Defines a prefix used for names of
+   *   intermediate files
+   * @param propertyName The name of a property if applicable
+   * @param specType The type of the specification this file is generated
+   *   from/for
+   * @param evidence Whether this file is used for evidence
+   * @return A prefix used for names of intermediate files
+   */
+  QString intermediateFilePrefix(const QString& propertyName, SpecType specType,
+                                 bool evidence);
+
+  /**
    * @brief createFileDialog Creates a file dialog that can be used to ask the
    *   user for a file (location)
    * @param type What type of file window is needed: 0 = new project, 1 = save
