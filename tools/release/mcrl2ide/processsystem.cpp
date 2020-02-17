@@ -344,8 +344,8 @@ QProcess* ProcessSystem::createSubprocess(
     inputFile = fileSystem->pbesFilePath(property.name, evidence);
     arguments << inputFile << "--in=pbes"
               << "--rewriter=jitty"
-              << "--search=breadth-first"
-              << "--strategy=0"
+              << "--search-strategy=breadth-first"
+              << "--solve-strategy=0"
               << "--verbose";
     if (evidence)
     {
