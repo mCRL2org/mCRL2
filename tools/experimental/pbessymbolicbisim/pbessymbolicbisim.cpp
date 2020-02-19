@@ -17,6 +17,7 @@
 //Tool framework
 #include "mcrl2/data/prover_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
+#include "mcrl2/pbes/detail/pbes_io.h"
 #include "mcrl2/utilities/input_tool.h"
 
 #include "symbolic_bisim.h"
@@ -104,11 +105,7 @@ public:
     mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
     mCRL2log(verbose) << "  data rewriter       " << m_rewrite_strategy << std::endl;
 
-    mcrl2::pbes_system::pbes spec;
-    std::ifstream in;
-    in.open(m_input_filename);
-    spec.load(in);
-    in.close();
+    mcrl2::pbes_system::pbes spec = mcrl2::pbes_system::detail::load_pbes(m_input_filename);
 
     mcrl2::data::symbolic_bisim_algorithm(spec, m_num_refine_steps, m_rewrite_strategy, m_mode, m_fine_initial_partition, m_early_termination, m_randomize).run();
 
