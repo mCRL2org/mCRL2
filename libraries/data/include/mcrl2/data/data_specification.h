@@ -281,14 +281,6 @@ class data_specification: public sort_specification
       build_from_aterm(t);
     }
 
-    /// \brief Indicates that the data specification is type checked.
-    /// \details This builds up internal data structures and allows
-    ///  access to the data specification using all the utility functions.
-    void declare_data_specification_to_be_type_checked()
-    {
-      // This is now an empty deprecated method.
-    }
-
     /// \brief Gets all constructors including those that are system defined.
     /// \details The time complexity is the same as for sorts().
     /// \return All constructors in this specification, including those for

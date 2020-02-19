@@ -88,19 +88,10 @@ class process_specification
 
     /// \brief Constructor.
     /// \param t A term containing an aterm representation of a process specification.
-    /// \param data_specification_is_type_checked A boolean that indicates whether the
-    ///         data specification has been type checked. If so, the internal data specification
-    ///         data structures will be set up. Otherwise, the function
-    ///         declare_data_specification_to_be_type_checked must be invoked after type checking,
-    ///         before the data specification can be used.
-    process_specification(atermpp::aterm_appl t, const bool data_specification_is_type_checked=true)
+    process_specification(atermpp::aterm_appl t)
     {
       assert(core::detail::check_term_ProcSpec(t));
       construct_from_aterm(t);
-      if (data_specification_is_type_checked)
-      {
-        m_data.declare_data_specification_to_be_type_checked();
-      }
       complete_data_specification(*this);
     }
 

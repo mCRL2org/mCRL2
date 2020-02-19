@@ -4287,7 +4287,6 @@ mcrl2::data::data_type_checker::data_type_checker(const data_specification& data
   }
 
   type_checked_data_spec=data_spec;
-  type_checked_data_spec.declare_data_specification_to_be_type_checked();
 
   // Type check equations and add them to the specification.
   try

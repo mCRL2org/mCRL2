@@ -84,7 +84,6 @@ class specification_base
       m_global_variables = std::set<data::variable>(global_variables.begin(),global_variables.end());
       m_process          = LinearProcess(get(t, 3), stochastic_distributions_allowed);
       m_initial_process  = InitialProcessExpression(get(t, 4));
-      m_data.declare_data_specification_to_be_type_checked();
     }
 
   public:
