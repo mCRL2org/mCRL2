@@ -54,29 +54,6 @@ class pbes_equation
     pbes_equation() = default;
 
     /// \brief Constructor.
-    /// \param t A term
-    pbes_equation(const atermpp::aterm_appl& t)
-    {
-      assert(core::detail::check_rule_PBEqn(t));
-      atermpp::aterm_appl::iterator i = t.begin();
-      m_symbol   = fixpoint_symbol(*i++);
-      m_variable = propositional_variable(*i++);
-      m_formula  = pbes_expression(*i);
-    }
-
-    /// \brief Constructor.
-    /// \param t1 A term
-    explicit pbes_equation(const atermpp::aterm& t1)
-    {
-      atermpp::aterm_appl t=atermpp::down_cast<atermpp::aterm_appl>(t1);
-      assert(core::detail::check_rule_PBEqn(t));
-      atermpp::aterm_appl::iterator i = t.begin();
-      m_symbol   = fixpoint_symbol(*i++);
-      m_variable = propositional_variable(*i++);
-      m_formula  = pbes_expression(*i);
-    }
-
-    /// \brief Constructor.
     /// \param symbol A fixpoint symbol
     /// \param variable A propositional variable declaration
     /// \param expr A PBES expression
