@@ -15,6 +15,7 @@
 #include "mcrl2/atermpp/detail/aterm_appl_iterator.h"
 #include "mcrl2/atermpp/detail/aterm_list.h"
 #include "mcrl2/atermpp/detail/global_aterm_pool.h"
+#include "mcrl2/utilities/type_traits.h"
 
 namespace atermpp
 {
@@ -86,7 +87,7 @@ public:
   /// \param begin The start of a range of elements.
   /// \param end The end of a range of elements.
   template <class ForwardIterator,
-            typename std::enable_if<is_iterator<ForwardIterator>::value>::type* = nullptr,
+            typename std::enable_if<mcrl2::utilities::is_iterator<ForwardIterator>::value>::type* = nullptr,
             typename std::enable_if<!std::is_same<typename ForwardIterator::iterator_category, std::input_iterator_tag>::value>::type* = nullptr,
             typename std::enable_if<!std::is_same<typename ForwardIterator::iterator_category, std::output_iterator_tag>::value>::type* = nullptr>
   term_appl(const function_symbol& sym,
@@ -109,7 +110,7 @@ public:
   /// \param begin The start of a range of elements.
   /// \param end The end of a range of elements.
   template <class InputIterator,
-            typename std::enable_if<is_iterator<InputIterator>::value>::type* = nullptr,
+            typename std::enable_if<mcrl2::utilities::is_iterator<InputIterator>::value>::type* = nullptr,
             typename std::enable_if<std::is_same<typename InputIterator::iterator_category, std::input_iterator_tag>::value>::type* = nullptr>
   term_appl(const function_symbol& sym,
             InputIterator begin,
@@ -132,7 +133,7 @@ public:
   ///        applied to each each element in the iterator range before it becomes an argument of this term.
   template <class InputIterator,
             class TermConverter,
-            typename std::enable_if<is_iterator<InputIterator>::value>::type* = nullptr>
+            typename std::enable_if<mcrl2::utilities::is_iterator<InputIterator>::value>::type* = nullptr>
   term_appl(const function_symbol& sym,
             InputIterator begin,
             InputIterator end,

@@ -47,7 +47,7 @@ public:
   /// \brief constructs a term application with the given symbol and an iterator where the number
   ///        of elements is equal to the template parameter N.
   template<typename Iterator,
-           typename std::enable_if<is_iterator<Iterator>::value>::type* = nullptr>
+           typename std::enable_if<mcrl2::utilities::is_iterator<Iterator>::value>::type* = nullptr>
   _aterm_appl(const function_symbol& sym, Iterator it, Iterator end)
     : _aterm(sym)
   {
@@ -74,7 +74,7 @@ public:
 
   /// \brief constructs a term application with the given symbol and its arguments from the iterator.
   template<typename Iterator,
-           typename std::enable_if<is_iterator<Iterator>::value>::type* = nullptr>
+           typename std::enable_if<mcrl2::utilities::is_iterator<Iterator>::value>::type* = nullptr>
   _aterm_appl(const function_symbol& symbol, Iterator it, Iterator end, bool)
     : _aterm(symbol)
   {

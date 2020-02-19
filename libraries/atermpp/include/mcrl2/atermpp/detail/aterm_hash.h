@@ -79,7 +79,7 @@ struct aterm_hasher
   std::size_t operator()(const function_symbol& symbol, unprotected_aterm arguments[]) const noexcept;
 
   template<typename ForwardIterator,
-           typename std::enable_if<is_iterator<ForwardIterator>::value, void>::type* = nullptr>
+           typename std::enable_if<mcrl2::utilities::is_iterator<ForwardIterator>::value, void>::type* = nullptr>
   std::size_t operator()(const function_symbol& symbol, ForwardIterator begin, ForwardIterator end) const noexcept;
 };
 
@@ -119,7 +119,7 @@ struct aterm_equals
   bool operator()(const _aterm& term, const function_symbol& symbol, unprotected_aterm arguments[]) const noexcept;
 
   template<typename ForwardIterator,
-           typename std::enable_if<is_iterator<ForwardIterator>::value>::type* = nullptr>
+           typename std::enable_if<mcrl2::utilities::is_iterator<ForwardIterator>::value>::type* = nullptr>
   bool operator()(const _aterm& term, const function_symbol& symbol, ForwardIterator begin, ForwardIterator end) const noexcept;
 };
 
@@ -195,7 +195,7 @@ std::size_t aterm_hasher<N>::operator()(const function_symbol& symbol, unprotect
 
 template<std::size_t N>
 template<typename ForwardIterator,
-         typename std::enable_if<is_iterator<ForwardIterator>::value, void>::type*>
+         typename std::enable_if<mcrl2::utilities::is_iterator<ForwardIterator>::value, void>::type*>
 inline std::size_t aterm_hasher<N>::operator()(const function_symbol& symbol, ForwardIterator it, ForwardIterator end) const noexcept
 {
   // The end is only used for debugging to ensure that the arity and std::distance(it, end) match.
@@ -323,7 +323,7 @@ bool aterm_equals<N>::operator()(const _aterm& term, const function_symbol& symb
 
 template<std::size_t N>
 template<typename ForwardIterator,
-         typename std::enable_if<is_iterator<ForwardIterator>::value>::type*>
+         typename std::enable_if<mcrl2::utilities::is_iterator<ForwardIterator>::value>::type*>
 inline bool aterm_equals<N>::operator()(const _aterm& term, const function_symbol& symbol, ForwardIterator it, ForwardIterator end) const noexcept
 {
   // The end is only used for debugging to ensure that the arity and std::distance(it, end) match.

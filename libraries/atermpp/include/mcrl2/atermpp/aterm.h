@@ -282,12 +282,12 @@ const Derived& down_cast(const Base& t,
 
 template < typename DerivedCont, typename Base, template <typename Elem> class Cont >
 const DerivedCont& container_cast(const Cont<Base>& t,
-                              typename std::enable_if<
-                                is_container<DerivedCont>::value &&
-                                std::is_same<Cont<typename DerivedCont::value_type>, DerivedCont>::value &&
-                                !std::is_base_of<DerivedCont, Cont<Base> >::value &&
+                              typename std::enable_if_t<
+                                mcrl2::utilities::is_container_v<DerivedCont> &&
+                                std::is_same_v<Cont<typename DerivedCont::value_type>, DerivedCont> &&
+                                !std::is_base_of_v<DerivedCont, Cont<Base> > &&
                                 is_convertible<Base, typename DerivedCont::value_type>::value
-                              >::type* = nullptr)
+                              >* = nullptr)
 {
   static_assert(sizeof(typename DerivedCont::value_type) == sizeof(aterm),
                 "aterm cast cannot be applied types derived from aterms where extra fields are added");
@@ -310,11 +310,11 @@ const Derived& vertical_cast(const Base& t,
 
 template < typename DerivedCont, typename Base, template <typename Elem> class Cont >
 const DerivedCont& vertical_cast(const Cont<Base>& t,
-                              typename std::enable_if<
-                                is_container<DerivedCont>::value &&
-                                std::is_same<Cont<typename DerivedCont::value_type>, DerivedCont>::value &&
+                              typename std::enable_if_t<
+                                mcrl2::utilities::is_container_v<DerivedCont> &&
+                                std::is_same_v<Cont<typename DerivedCont::value_type>, DerivedCont> &&
                                 is_convertible<Base, typename DerivedCont::value_type>::value
-                              >::type* = NULL)
+                              >* = nullptr)
 {
   static_assert(sizeof(typename DerivedCont::value_type) == sizeof(aterm),
                 "aterm cast cannot be applied types derived from aterms where extra fields are added");

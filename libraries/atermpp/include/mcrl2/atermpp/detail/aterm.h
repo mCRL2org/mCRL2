@@ -11,7 +11,7 @@
 #define MCRL2_ATERMPP_DETAIL_ATERM_H
 
 #include "mcrl2/atermpp/function_symbol.h"
-#include "mcrl2/atermpp/type_traits.h"
+#include "mcrl2/utilities/type_traits.h"
 
 #include <limits>
 
@@ -28,7 +28,7 @@ namespace detail
 
 /// \brief Can be used to check whether all elements in the parameter pack are derived from aterms.
 template<typename ...Terms>
-using are_terms = and_<std::is_convertible<Terms, unprotected_aterm>...>;
+using are_terms = mcrl2::utilities::forall<std::is_convertible<Terms, unprotected_aterm>...>;
 
 /// \brief This is the class to which an aterm points. Each _aterm consists
 ///        of a function symbol and a reference count used for garbage
