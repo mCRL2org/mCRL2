@@ -7,10 +7,11 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#include "mcrl2/atermpp/aterm_io_binary.h"
 #include "mcrl2/core/load_aterm.h"
 #include "mcrl2/data/data_io.h"
 #include "mcrl2/pbes/algorithms.h"
-#include "mcrl2/pbes/detail/io.h"
+#include "mcrl2/pbes/detail/pbes_io.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/parse.h"
 
@@ -50,7 +51,7 @@ void save_pbes(const pbes& pbes,
   mCRL2log(log::verbose) << "Saving result in " << format.shortname() << " format..." << std::endl;
   if (format == pbes_format_internal())
   {
-    pbes.save(stream, true);
+    atermpp::binary_aterm_ostream(stream) << pbes;
   }
   else
   if (format == pbes_format_text())
@@ -78,7 +79,7 @@ void load_pbes(pbes& pbes, std::istream& stream, utilities::file_format format, 
   mCRL2log(log::verbose) << "Loading PBES in " << format.shortname() << " format..." << std::endl;
   if (format == pbes_format_internal())
   {
-    pbes.load(stream, true, source);
+    atermpp::binary_aterm_istream(stream) >> pbes;
   }
   else
   if (format == pbes_format_text())
@@ -158,49 +159,149 @@ void load_pbes(pbes& pbes,
   }
 }
 
-/// \brief Reads the parameterized boolean equation system from a stream.
-/// \param stream The stream to read from.
-/// \param binary An indicator whether the stream is binary or textual.
-/// \param source The source from which the stream originates. Used for error messages.
-void pbes::load(std::istream& stream, bool binary, const std::string& source)
+// transforms DataVarId to DataVarIdNoIndex
+// transforms OpId to OpIdNoIndex
+// transforms PropVarInst to PropVarInstNoIndex
+static atermpp::aterm_appl remove_index_impl(const atermpp::aterm_appl& x)
 {
-  atermpp::aterm t = core::load_aterm(stream, binary, "PBES", source, pbes_system::detail::add_index_impl);
-
-  if (!t.type_is_appl() || !core::detail::check_rule_PBES(atermpp::down_cast<atermpp::aterm_appl>(t)))
+  if (x.function() == core::detail::function_symbol_DataVarId())
   {
-    throw mcrl2::runtime_error("The loaded ATerm is not a PBES.");
+    return atermpp::aterm_appl(core::detail::function_symbol_DataVarIdNoIndex(), x.begin(), --x.end());
   }
-
-  init_term(atermpp::down_cast<atermpp::aterm_appl>(t));
-  m_data.declare_data_specification_to_be_type_checked();
-
-  // Add all the sorts that are used in the specification
-  // to the data specification. This is important for those
-  // sorts that are built in, because these are not explicitly
-  // declared.
-  complete_data_specification(*this);
-
-  // The well typedness check is only done in debug mode, since for large
-  // PBESs it takes too much time
-  assert(is_well_typed());
+  else if (x.function() == core::detail::function_symbol_OpId())
+  {
+    return atermpp::aterm_appl(core::detail::function_symbol_OpIdNoIndex(), x.begin(), --x.end());
+  }
+  else if (x.function() == core::detail::function_symbol_PropVarInst())
+  {
+    return atermpp::aterm_appl(core::detail::function_symbol_PropVarInstNoIndex(), x.begin(), --x.end());
+  }
+  return x;
 }
 
-/// \brief Writes the pbes to a stream.
-/// \param stream The stream to which the pbes is written.
-/// \param binary If binary is true the pbes is saved in compressed binary format.
-/// Otherwise an ascii representation is saved. In general the binary format is
-/// much more compact than the ascii representation.
-void pbes::save(std::ostream& stream, bool binary) const
+// transforms DataVarIdNoIndex to DataVarId
+// transforms OpIdNoIndex to OpId
+// transforms PropVarInstNoIndex to PropVarInst
+static atermpp::aterm_appl add_index_impl(const atermpp::aterm_appl& x)
 {
-  if (binary)
+  if (x.function() == core::detail::function_symbol_DataVarIdNoIndex())
   {
-    atermpp::binary_aterm_ostream(stream) << pbes_system::detail::remove_index_impl << pbes_to_aterm(*this);
+    const data::variable& y = atermpp::down_cast<const data::variable>(x);
+    std::size_t index = core::index_traits<data::variable, data::variable_key_type, 2>::insert(std::make_pair(y.name(), y.sort()));
+    return atermpp::aterm_appl(core::detail::function_symbol_DataVarId(), x[0], x[1], atermpp::aterm_int(index));
+  }
+  else if (x.function() == core::detail::function_symbol_OpIdNoIndex())
+  {
+    const data::function_symbol& y = atermpp::down_cast<const data::function_symbol>(x);
+    std::size_t index = core::index_traits<data::function_symbol, data::function_symbol_key_type, 2>::insert(std::make_pair(y.name(), y.sort()));
+    return atermpp::aterm_appl(core::detail::function_symbol_OpId(), x[0], x[1], atermpp::aterm_int(index));
+  }
+  else if (x.function() == core::detail::function_symbol_PropVarInstNoIndex())
+  {
+    const pbes_system::propositional_variable_instantiation& y = atermpp::down_cast<const pbes_system::propositional_variable_instantiation>(x);
+    std::size_t index = core::index_traits<propositional_variable_instantiation, propositional_variable_key_type, 2>::insert(std::make_pair(y.name(), y.parameters()));
+    return atermpp::aterm_appl(core::detail::function_symbol_PropVarInst(), x[0], x[1], atermpp::aterm_int(index));
+  }
+  return x;
+}
+
+atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const pbes& pbes)
+{
+  atermpp::aterm_stream_state state(stream);
+  stream << remove_index_impl;
+
+  stream << pbes.data();
+  stream << pbes.global_variables();
+  stream << pbes.equations();
+  stream << pbes.initial_state();
+  return stream;
+}
+
+atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const pbes_equation& equation)
+{
+  atermpp::aterm_stream_state state(stream);
+  stream << remove_index_impl;
+
+  stream << equation.symbol();
+  stream << equation.variable();
+  stream << equation.formula();
+  return stream;
+}
+
+atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, pbes_equation& equation)
+{
+  atermpp::aterm_stream_state state(stream);
+  stream >> add_index_impl;
+
+  fixpoint_symbol symbol;
+  propositional_variable var;
+  pbes_expression expression;
+
+  stream >> symbol;
+  stream >> var;
+  stream >> expression;
+
+  equation = pbes_equation(symbol, var, expression);
+
+  return stream;
+}
+
+atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, pbes& pbes)
+{
+  atermpp::aterm_stream_state state(stream);
+  stream >> add_index_impl;
+
+  data::data_specification data;
+  std::set<data::variable> global_variables;
+  std::vector<pbes_equation> equations;
+  propositional_variable_instantiation initial_state;
+
+  stream >> data;
+  stream >> global_variables;
+  stream >> equations;
+  stream >> initial_state;
+
+  pbes = pbes_system::pbes(data, equations, global_variables, initial_state);
+
+  return stream;
+}
+
+namespace detail
+{
+
+pbes load_pbes(const std::string& filename)
+{
+  pbes result;
+  if (filename.empty())
+  {
+    atermpp::binary_aterm_istream(std::cin) >> result;
   }
   else
   {
-    atermpp::text_aterm_ostream(stream) << pbes_system::detail::remove_index_impl << pbes_to_aterm(*this);
+    std::ifstream from(filename, std::ifstream::in | std::ifstream::binary);
+    atermpp::binary_aterm_istream(from) >> result;
+  }
+  return result;
+}
+
+void save_pbes(const pbes& pbesspec, const std::string& filename)
+{
+  if (filename.empty())
+  {
+    atermpp::binary_aterm_ostream(std::cout) << pbesspec;
+  }
+  else
+  {
+    std::ofstream to(filename, std::ofstream::out | std::ofstream::binary);
+    if (!to.good())
+    {
+      throw mcrl2::runtime_error("Could not write to filename " + filename);
+    }
+    atermpp::binary_aterm_ostream(to) << pbesspec;
   }
 }
+
+} // namespace detail
 
 /// \brief Conversion to atermappl.
 /// \return The PBES converted to aterm format.

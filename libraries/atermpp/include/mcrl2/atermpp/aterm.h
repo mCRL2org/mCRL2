@@ -11,6 +11,7 @@
 #define MCRL2_ATERMPP_ATERM_H
 
 #include "mcrl2/atermpp/detail/aterm.h"
+#include "mcrl2/atermpp/type_traits.h"
 
 /// \brief The main namespace for the aterm++ library.
 namespace atermpp
@@ -283,7 +284,7 @@ const Derived& down_cast(const Base& t,
 template < typename DerivedCont, typename Base, template <typename Elem> class Cont >
 const DerivedCont& container_cast(const Cont<Base>& t,
                               typename std::enable_if_t<
-                                mcrl2::utilities::is_container_v<DerivedCont> &&
+                                is_container<DerivedCont, aterm>::value &&
                                 std::is_same_v<Cont<typename DerivedCont::value_type>, DerivedCont> &&
                                 !std::is_base_of_v<DerivedCont, Cont<Base> > &&
                                 is_convertible<Base, typename DerivedCont::value_type>::value
@@ -311,7 +312,7 @@ const Derived& vertical_cast(const Base& t,
 template < typename DerivedCont, typename Base, template <typename Elem> class Cont >
 const DerivedCont& vertical_cast(const Cont<Base>& t,
                               typename std::enable_if_t<
-                                mcrl2::utilities::is_container_v<DerivedCont> &&
+                                is_container<DerivedCont, aterm>::value &&
                                 std::is_same_v<Cont<typename DerivedCont::value_type>, DerivedCont> &&
                                 is_convertible<Base, typename DerivedCont::value_type>::value
                               >* = nullptr)

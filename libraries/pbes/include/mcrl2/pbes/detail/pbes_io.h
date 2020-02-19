@@ -6,56 +6,37 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/detail/pbes_io.h
-/// \brief add your file description here.
 
 #ifndef MCRL2_PBES_DETAIL_PBES_IO_H
 #define MCRL2_PBES_DETAIL_PBES_IO_H
 
-#include <fstream>
 #include "mcrl2/pbes/pbes.h"
 
-namespace mcrl2 {
+#include <fstream>
 
-namespace pbes_system {
+namespace mcrl2::pbes_system
+{
 
-namespace detail {
+/// \brief Writes the pbes to a stream.
+atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const pbes& pbes);
+
+/// \brief Write a pbes equation to the stream.
+atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const pbes_equation& equation);
+
+/// \brief Reads a pbes from a stream.
+atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, pbes& pbes);
+
+/// \brief Read a pbes equation from the stream.
+atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, pbes_equation& equation);
+
+namespace detail
+{
 
 /// \brief Loads a PBES from filename, or from stdin if filename equals "".
-inline
-pbes load_pbes(const std::string& filename)
-{
-  pbes result;
-  if (filename.empty())
-  {
-    result.load(std::cin);
-  }
-  else
-  {
-    std::ifstream from(filename, std::ifstream::in | std::ifstream::binary);
-    result.load(from);
-  }
-  return result;
-}
+pbes load_pbes(const std::string& filename);
 
 /// \brief Saves an PBES to filename, or to stdout if filename equals "".
-inline
-void save_pbes(const pbes& pbesspec, const std::string& filename)
-{
-  if (filename.empty())
-  {
-    pbesspec.save(std::cout);
-  }
-  else
-  {
-    std::ofstream to(filename, std::ofstream::out | std::ofstream::binary);
-    if (!to.good())
-    {
-      throw mcrl2::runtime_error("Could not write to filename " + filename);
-    }
-    pbesspec.save(to);
-  }
-}
+void save_pbes(const pbes& pbesspec, const std::string& filename);
 
 // inline
 // std::string file_extension(const std::string& filename)
@@ -92,8 +73,6 @@ void save_pbes(const pbes& pbesspec, const std::string& filename)
 
 } // namespace detail
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_DETAIL_PBES_IO_H
