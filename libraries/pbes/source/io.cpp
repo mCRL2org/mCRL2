@@ -263,6 +263,8 @@ atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, pbes& pbes)
 
   pbes = pbes_system::pbes(data, equations, global_variables, initial_state);
 
+  complete_data_specification(pbes);
+
   return stream;
 }
 
