@@ -12,6 +12,7 @@
 
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_int.h"
+#include "mcrl2/utilities/type_traits.h"
 
 namespace atermpp
 {
@@ -100,7 +101,7 @@ private:
 
 /// \brief Write any container (that is not an aterm itself) to the stream.
 template<typename T,
-  typename std::enable_if_t<is_container<T, aterm>::value, int> = 0,
+  typename std::enable_if_t<mcrl2::utilities::is_iterable_v<T>, int> = 0,
   typename std::enable_if_t<!std::is_base_of<aterm, T>::value, int> = 0>
 inline aterm_ostream& operator<<(aterm_ostream& stream, const T& container)
 {
@@ -117,7 +118,7 @@ inline aterm_ostream& operator<<(aterm_ostream& stream, const T& container)
 
 /// \brief Read any container (that is not an aterm itself) from the stream.
 template<typename T,
-  typename std::enable_if_t<is_container<T, aterm>::value, int> = 0,
+  typename std::enable_if_t<mcrl2::utilities::is_iterable_v<T>, int> = 0,
   typename std::enable_if_t<!std::is_base_of<aterm, T>::value, int> = 0>
 inline aterm_istream& operator>>(aterm_istream& stream, T& container)
 {

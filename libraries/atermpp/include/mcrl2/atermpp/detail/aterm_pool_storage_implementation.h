@@ -27,7 +27,7 @@ namespace detail
 template<std::size_t N,
          typename InputIterator,
          typename TermConverter,
-         typename std::enable_if<is_iterator<InputIterator>::value, void>::type* = nullptr>
+         typename std::enable_if<mcrl2::utilities::is_iterator<InputIterator>::value, void>::type* = nullptr>
 inline std::array<unprotected_aterm, N> construct_arguments(InputIterator it, InputIterator end, TermConverter converter)
 {
   // The end is only used for debugging to ensure that the arity and std::distance(it, end) match.

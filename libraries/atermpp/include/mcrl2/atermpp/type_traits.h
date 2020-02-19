@@ -62,16 +62,6 @@ struct unary_template_swap
   typedef C< E > type;
 };
 
-/// \brief Can be used to check whether a given class has the iterator traits.
-template<typename T, typename = void>
-struct is_iterator : std::false_type
-{};
-
-template<typename T>
-struct is_iterator<T, typename std::enable_if<!std::is_same<typename std::iterator_traits<T>::value_type, void>::value>::type>
-    : std::true_type
-{};
-
 } // namespace atermpp
 
 #endif // ATERMPP_TYPE_TRAITS_H
