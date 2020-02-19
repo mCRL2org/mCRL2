@@ -149,7 +149,6 @@ void complete_action_rename_specification(action_rename_specification& x, const 
 {
   using namespace mcrl2::data;
   x = lps::typecheck_action_rename_specification(x, spec);
-  x.data().declare_data_specification_to_be_type_checked();
   x = action_rename_specification(x.data() + spec.data(), x.action_labels(), x.rules());
   detail::translate_user_notation(x);
 }

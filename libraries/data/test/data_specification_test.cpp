@@ -461,7 +461,6 @@ void test_system_defined()
   // A data specification that is constructed using data_specification_to_aterm is assumed not
   // not be type checked. This must be indicated explicitly.
   data_specification specification1=data_specification(data::detail::data_specification_to_aterm(copy));
-  specification1.declare_data_specification_to_be_type_checked();
   BOOST_CHECK(compare_for_equality(specification1,specification));
 
   specification = parse_data_specification(
