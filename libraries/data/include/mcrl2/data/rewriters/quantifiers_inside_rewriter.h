@@ -12,8 +12,10 @@
 #ifndef MCRL2_DATA_REWRITERS_QUANTIFIERS_INSIDE_REWRITER_H
 #define MCRL2_DATA_REWRITERS_QUANTIFIERS_INSIDE_REWRITER_H
 
+#include <tuple>
 #include "mcrl2/data/builder.h"
 #include "mcrl2/data/join.h"
+#include "mcrl2/data/optimized_boolean_operators.h"
 
 namespace mcrl2 {
 
@@ -29,6 +31,49 @@ inline
 std::set<variable> make_variable_set(const variable_list& x)
 {
   return std::set<variable>(x.begin(), x.end());
+}
+
+inline
+variable_list make_variable_list(const std::set<variable>& x)
+{
+  return variable_list(x.begin(), x.end());
+}
+
+inline
+std::tuple<data_expression, data_expression> compute_Phi_Psi(const std::vector<data_expression>& X, const std::set<variable>& V)
+{
+  using utilities::detail::set_difference;
+  using utilities::detail::set_intersection;
+
+  std::vector<std::set<data::variable>> vars; // free variables
+  for (const data_expression& x_j: X)
+  {
+    vars.push_back(set_intersection(find_free_variables(x_j), V));
+  }
+  auto j = std::min_element(vars.begin(), vars.end(),
+                            [&](const std::set<data::variable>& x, const std::set<data::variable>& y)
+                            {
+                              return x.size() < y.size();
+                            }
+  );
+  const std::set<data::variable>& Z = *j;
+
+  std::vector<data_expression> phi;
+  std::vector<data_expression> psi;
+  for (std::size_t i = 0; i < X.size(); i++)
+  {
+    if (std::includes(Z.begin(), Z.end(), vars[i].begin(), vars[i].end()))
+    {
+      psi.push_back(X[i]);
+    }
+    else
+    {
+      phi.push_back(X[i]);
+    }
+  }
+  data_expression Phi = join_or(phi.begin(), phi.end());
+  data_expression Psi = join_or(psi.begin(), psi.end());
+  return { Phi, Psi };
 }
 
 struct quantifiers_inside_builder: public data_expression_builder<quantifiers_inside_builder>
@@ -58,11 +103,11 @@ struct quantifiers_inside_forall_builder: public data_expression_builder<quantif
 
   const std::set<variable>& V;
 
-  quantifiers_inside_forall_builder(const std::set<variable>& V_)
+  explicit quantifiers_inside_forall_builder(const std::set<variable>& V_)
     : V(V_)
   {}
 
-  data_expression make_forall(const variable_list& vars, const data_expression& body)
+  static data_expression make_forall(const variable_list& vars, const data_expression& body)
   {
     return vars.empty() ? body : forall(vars,body);
   }
@@ -85,18 +130,18 @@ struct quantifiers_inside_forall_builder: public data_expression_builder<quantif
 
   data_expression apply(const data_expression& x)
   {
-    if(sort_bool::is_not_application(x))
+    if (sort_bool::is_not_application(x))
     {
       data_expression const& phi = sort_bool::arg(x);
       return sort_bool::not_(quantifiers_inside_exists(V, phi));
     }
-    else if(sort_bool::is_and_application(x))
+    else if (sort_bool::is_and_application(x))
     {
-      data_expression const& phi = sort_bool::left(x);
-      data_expression const& psi = sort_bool::right(x);
+      const data_expression& phi = sort_bool::left(x);
+      const data_expression& psi = sort_bool::right(x);
       return sort_bool::and_(quantifiers_inside_forall(V, phi), quantifiers_inside_forall(V, psi));
     }
-    else if(sort_bool::is_or_application(x))
+    else if (sort_bool::is_or_application(x))
     {
       using utilities::detail::set_difference;
       using utilities::detail::set_intersection;
@@ -104,49 +149,25 @@ struct quantifiers_inside_forall_builder: public data_expression_builder<quantif
 
       std::vector<data_expression> X;
       utilities::detail::split(x, std::back_inserter(X), tr::is_or, tr::left, tr::right);
-      std::vector<std::set<data::variable>> FV;
-      for (const data_expression& x_i: X)
+      const auto [Phi, Psi] = compute_Phi_Psi(X, V);
+      if (sort_bool::is_false_function_symbol(Phi) || sort_bool::is_false_function_symbol(Psi))
       {
-        FV.push_back(set_intersection(find_free_variables(x_i), V));
+        return forall(make_variable_list(V), x);
       }
-      auto i = std::min_element(FV.begin(), FV.end(),
-                                [&](const std::set<data::variable>& x, const std::set<data::variable>& y)
-                                {
-                                  return x.size() < y.size();
-                                }
-      );
-
-      const std::set<data::variable>& W = *i;
-      std::vector<data_expression> X1;
-      std::vector<data_expression> X2;
-      for (std::size_t j = 0; j < X.size(); j++)
-      {
-        if (std::includes(W.begin(), W.end(), FV[j].begin(), FV[j].end()))
-        {
-          X2.push_back(X[j]);
-        }
-        else
-        {
-          X1.push_back(X[j]);
-        }
-      }
-      return make_forall(data::variable_list(W.begin(), W.end()),
-                         lazy::or_(quantifiers_inside_forall(set_difference(V, W), join_or(X1.begin(), X1.end())),
-                             join_or(X2.begin(), X2.end()))
+      std::set<variable> vars_Phi = find_free_variables(Phi);
+      std::set<variable> vars_Psi = find_free_variables(Psi);
+      return make_forall(make_variable_list(set_intersection(V, set_intersection(vars_Phi, vars_Psi))),
+                         lazy::or_(
+                           quantifiers_inside_forall(set_difference(set_intersection(V, vars_Phi), vars_Psi), Phi),
+                           quantifiers_inside_forall(set_difference(set_intersection(V, vars_Psi), vars_Phi), Psi)
+                              )
       );
     }
-    else if(sort_bool::is_implies_application(x))
+    else if (sort_bool::is_implies_application(x))
     {
-      using utilities::detail::set_difference;
-      using utilities::detail::set_intersection;
-      data_expression const& phi = sort_bool::left(x);
-      data_expression const& psi = sort_bool::right(x);
-      auto W = set_intersection(set_intersection(V, find_free_variables(phi)), find_free_variables(psi));
-      return make_forall(data::variable_list(W.begin(), W.end()),
-                         sort_bool::implies(quantifiers_inside_exists(set_difference(V, W), phi),
-                             quantifiers_inside_forall(set_difference(V, W), psi)
-                         )
-      );
+      const data_expression& left = sort_bool::left(x);
+      const data_expression& right = sort_bool::right(x);
+      return quantifiers_inside_forall(V, sort_bool::or_(sort_bool::not_(left), right));
     }
     else
     {
@@ -194,12 +215,12 @@ struct quantifiers_inside_exists_builder: public data_expression_builder<quantif
 
   data_expression apply(const data_expression& x)
   {
-    if(sort_bool::is_not_application(x))
+    if (sort_bool::is_not_application(x))
     {
       data_expression const& phi = sort_bool::arg(x);
       return sort_bool::not_(quantifiers_inside_forall(V, phi));
     }
-    else if(sort_bool::is_and_application(x))
+    else if (sort_bool::is_and_application(x))
     {
       using utilities::detail::set_difference;
       using utilities::detail::set_intersection;
@@ -207,49 +228,32 @@ struct quantifiers_inside_exists_builder: public data_expression_builder<quantif
 
       std::vector<data_expression> X;
       utilities::detail::split(x, std::back_inserter(X), tr::is_and, tr::left, tr::right);
-      std::vector<std::set<data::variable>> FV;
-      for (const data_expression& x_i: X)
+      const auto [Phi, Psi] = compute_Phi_Psi(X, V);
+      if (sort_bool::is_true_function_symbol(Phi) || sort_bool::is_true_function_symbol(Psi))
       {
-        FV.push_back(set_intersection(find_free_variables(x_i), V));
+        return exists(make_variable_list(V), x);
       }
-      auto i = std::min_element(FV.begin(), FV.end(),
-                                [&](const std::set<data::variable>& x, const std::set<data::variable>& y)
-                                {
-                                  return x.size() < y.size();
-                                }
-      );
-
-      const std::set<data::variable>& W = *i;
-      std::vector<data_expression> X1;
-      std::vector<data_expression> X2;
-      for (std::size_t j = 0; j < X.size(); j++)
-      {
-        if (std::includes(W.begin(), W.end(), FV[j].begin(), FV[j].end()))
-        {
-          X2.push_back(X[j]);
-        }
-        else
-        {
-          X1.push_back(X[j]);
-        }
-      }
-      return make_exists(data::variable_list(W.begin(), W.end()),
-                         lazy::and_(quantifiers_inside_exists(set_difference(V, W), join_and(X1.begin(), X1.end())),
-                                        join_and(X2.begin(), X2.end()))
+      std::set<variable> vars_Phi = find_free_variables(Phi);
+      std::set<variable> vars_Psi = find_free_variables(Psi);
+      return make_exists(make_variable_list(set_intersection(V, set_intersection(vars_Phi, vars_Psi))),
+                         lazy::and_(
+                           quantifiers_inside_exists(set_difference(set_intersection(V, vars_Phi), vars_Psi), Phi),
+                           quantifiers_inside_exists(set_difference(set_intersection(V, vars_Psi), vars_Phi), Psi)
+                         )
       );
     }
-    else if(sort_bool::is_or_application(x))
+    else if (sort_bool::is_or_application(x))
     {
       data_expression const& phi = sort_bool::left(x);
       data_expression const& psi = sort_bool::right(x);
       return sort_bool::or_(quantifiers_inside_exists(V, phi), quantifiers_inside_exists(V, psi)
       );
     }
-    else if(sort_bool::is_implies_application(x))
+    else if (sort_bool::is_implies_application(x))
     {
-      data_expression const& phi = sort_bool::left(x);
-      data_expression const& psi = sort_bool::right(x);
-      return sort_bool::implies(quantifiers_inside_forall(V, phi), quantifiers_inside_exists(V, psi));
+      const data_expression& left = sort_bool::left(x);
+      const data_expression& right = sort_bool::right(x);
+      return quantifiers_inside_exists(V, sort_bool::or_(sort_bool::not_(left), right));
     }
     return apply_default(x);
   }

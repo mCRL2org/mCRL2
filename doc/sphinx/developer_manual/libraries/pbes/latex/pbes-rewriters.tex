@@ -39,7 +39,7 @@
 \begin{document}
 
 \title{PBES rewriters}
-\author{Wieger Wesselink, Tim Willemse}
+\author{Wieger Wesselink, Tim Willemse, Thomas Neele}
 \maketitle
 
 This document describes several rewriters on PBES expressions. We assume that a data
@@ -320,8 +320,7 @@ R(\phi)&=&\phi\textrm{  otherwise}.
 \end{equation*}
 Here $W$ is a set of typed variables.
 
-The rewrite function $R_{\forall}$ is defined by
-
+The function $R_{\forall}$ is defined as
 \begin{equation*}
 \begin{array}{lll}
 R_{\forall}(V,\neg \phi) &=& \neg R_{\exists}(V,\phi)\\
@@ -329,52 +328,67 @@ R_{\forall}(V,\neg \phi) &=& \neg R_{\exists}(V,\phi)\\
 R_{\forall}(V,\phi\wedge \psi)&=&R_{\forall}(V,\phi)\wedge R_{\forall}(V,\psi)\\
 
 R_{\forall}(V, \bigvee_i \phi_i)&=&
-  \forall V \cap \vars(\phi) \cap \vars(\psi).
-    \left(
-         R_\forall(V \cap \vars(\phi) \setminus \vars(\psi), \phi) \lor R_\forall(V \cap \vars(\psi) \setminus \vars(\phi), \psi)
-    \right) \\
-  && \text{where}\\
-  && W = \vars(\phi_j) \cap V \text{ for some $j$ such that $|W|$ is minimal,} \\
-  && \phi = \bigvee_{\{ i \mid \vars(\phi_i) \cap V \subseteq W \}} \phi_i \\
-  && \psi = \bigvee_{\{ i \mid \vars(\phi_i) \cap V \nsubseteq W \}} \phi_i \\
+   \left\{
+     \begin{array}{l}
+       \forall V. \bigvee_i \phi_i \hspace{3cm} \text{ if } \neg \Phi \lor \neg \Psi \\
 
-R_{\forall}(V,\phi\Rightarrow\psi)&=&
-\forall W.(R_{\exists}(V\setminus W,\phi)\Rightarrow{}
-R_{\forall}(V \setminus W,\psi)),
-\text{ where } W = V \cap \vars(\phi) \cap \vars(\psi) \\
+      \forall V \cap \vars(\Phi) \cap \vars(\Psi).
+      \left(
+           R_\forall(V \cap \vars(\Phi) \setminus \vars(\Psi), \Phi) \lor R_\forall(V \cap \vars(\Psi) \setminus \vars(\Phi), \Psi)
+        \right) \text{ otherwise}
+    \end{array}
+     \right.
+  \\
+
+
+R_{\forall}(V,\phi\Rightarrow\psi)&=& R_{\forall}(V,\neg \phi \lor \psi) \\
 
 R_{\forall}(V,\forall W.\phi)&=&R_{\forall}(V \cup W,\phi) \\
 
 R_{\forall}(V,\phi)&=&\forall V\cap \vars(\phi).\phi\textrm{ otherwise}.
-
 \end{array}
 \end{equation*}
+where
+\[
+     \left\{
+       \begin{array}{l}
+          \Phi = \bigvee {\{ \phi_i \mid (\vars(\phi_i) \cap V) \subseteq Z \}} \\
+          \Psi = \bigvee {\{ \phi_i \mid (\vars(\phi_i) \cap V) \nsubseteq Z \}} \\
+          Z = \vars(\phi_j) \cap V \text{ for some $j$ such that $|Z|$ is minimal} \\
+       \end{array}
+     \right. \\
+\]
 
-The rewrite function $R_{\exists}$ is defined by
+The function $R_{\exists}$ is defined as
 \begin{equation*}
 \begin{array}{lll}
 R_{\exists}(V,\neg \phi)&=&\neg R_{\forall}(V,\phi)\\
 
 R_{\exists}(V, \bigwedge_i \phi_i)&=&
-  \exists V \cap \vars(\phi) \cap \vars(\psi).
+  \forall V \cap \vars(\Phi) \cap \vars(\Psi).
     \left(
-         R_\exists(V \cap \vars(\phi) \setminus \vars(\psi), \phi) \land R_\exists(V \cap \vars(\psi) \setminus \vars(\phi), \psi)
+         R_\exists(V \cap \vars(\Phi) \setminus \vars(\Psi), \Phi) \lor R_\forall(V \cap \vars(\Psi) \setminus \vars(\Phi), \Psi)
     \right) \\
-  && \text{where}\\
-  && W = \vars(\phi_j) \cap V \text{ for some $j$ such that $|W|$ is minimal,} \\
-  && \phi = \bigwedge_{\{ i \mid \vars(\phi_i) \cap V \subseteq W \}} \phi_i \\
-  && \psi = \bigwedge_{\{ i \mid \vars(\phi_i) \cap V \nsubseteq W \}} \phi_i \\
 
 R_{\exists}(V,\phi\vee \psi)&=&R_{\exists}(V,\phi)\vee R_{\exists}(V,\psi)\\
 
-R_{\exists}(V,\phi\Rightarrow\psi)&=&
-R_{\forall}(V,\phi)\Rightarrow R_{\exists}(V,\psi)\\
+R_{\exists}(V,\phi\Rightarrow\psi)&=& R_{\exists}(V,\neg \phi \lor \psi) \\
 
 R_{\exists}(V,\exists W.\phi)&=&R_{\exists}(V \cup W,\phi)\\
 
 R_{\exists}(V,\phi)&=&\exists V\cap\vars(\phi).\phi\textrm{ otherwise}.
 \end{array}
 \end{equation*}
+where
+\[
+     \left\{
+       \begin{array}{l}
+          \Phi = \bigwedge {\{ \phi_i \mid (\vars(\phi_i) \cap V) \subseteq Z \}} \\
+          \Psi = \bigwedge {\{ \phi_i \mid (\vars(\phi_i) \cap V) \nsubseteq Z \}} \\
+          Z = \vars(\phi_j) \cap V \text{ for some $j$ such that $|Z|$ is minimal,} \\
+       \end{array}
+     \right. \\
+\]
 
 \newpage
 \section{Quantifier Expansion Rewriter}
