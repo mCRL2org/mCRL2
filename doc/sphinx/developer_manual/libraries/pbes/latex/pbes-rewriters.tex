@@ -365,10 +365,17 @@ The function $R_{\exists}$ is defined as
 R_{\exists}(V,\neg \phi)&=&\neg R_{\forall}(V,\phi)\\
 
 R_{\exists}(V, \bigwedge_i \phi_i)&=&
-  \forall V \cap \vars(\Phi) \cap \vars(\Psi).
-    \left(
-         R_\exists(V \cap \vars(\Phi) \setminus \vars(\Psi), \Phi) \lor R_\forall(V \cap \vars(\Psi) \setminus \vars(\Phi), \Psi)
-    \right) \\
+   \left\{
+     \begin{array}{l}
+       \exists V. \bigwedge_i \phi_i \hspace{3cm} \text{ if } \Phi \lor \Psi \\
+
+      \exists V \cap \vars(\Phi) \cap \vars(\Psi).
+      \left(
+           R_\exists(V \cap \vars(\Phi) \setminus \vars(\Psi), \Phi) \lor R_\exists(V \cap \vars(\Psi) \setminus \vars(\Phi), \Psi)
+        \right) \text{ otherwise}
+    \end{array}
+     \right.
+  \\
 
 R_{\exists}(V,\phi\vee \psi)&=&R_{\exists}(V,\phi)\vee R_{\exists}(V,\psi)\\
 
