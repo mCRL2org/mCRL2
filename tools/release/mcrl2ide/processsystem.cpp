@@ -262,6 +262,7 @@ QProcess* ProcessSystem::createSubprocess(
     connect(subprocess, SIGNAL(finished(int)), this,
             SLOT(mcrl2ParsingResult(int)));
 
+  [[fallthrough]];
   case SubprocessType::Mcrl22lps:
     program = "mcrl22lps";
     inputFile = fileSystem->specificationFilePath(specType, property.name);
@@ -324,6 +325,7 @@ QProcess* ProcessSystem::createSubprocess(
     connect(subprocess, SIGNAL(finished(int)), this,
             SLOT(mcfParsingResult(int)));
 
+  [[fallthrough]];
   case SubprocessType::Lps2pbes:
     program = "lps2pbes";
     inputFile = fileSystem->lpsFilePath();
@@ -760,7 +762,7 @@ void ProcessSystem::executeNextSubprocess(int previousExitCode, int processid)
      *   it */
     if (noNeedToRun)
     {
-      emit subprocess->finished(0);
+      emit subprocess->finished(0, QProcess::ExitStatus::NormalExit);
     }
     else
     {
