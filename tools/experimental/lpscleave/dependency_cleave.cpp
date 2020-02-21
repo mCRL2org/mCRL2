@@ -19,6 +19,7 @@ struct summand_dependencies
   bool in_L_X; ///< Indicates that this summand belongs to the set L_X.
 };
 
+/// \brief Computes the dependencies of the given summand w.r.t. the parameters (determining X).
 inline
 summand_dependencies compute_dependencies(
   const lps::stochastic_specification& spec,
@@ -29,10 +30,10 @@ summand_dependencies compute_dependencies(
   // Compute the set S^i_X, first add the dependencies of the conditions (Condition 3).
   std::set<data::variable> S_i_X = data::find_free_variables(summand.condition());
 
-  // Compute the first set, i.e. the positions in N \ X (the other parameters) that our update functions and action expression
-  // depends on. We first compute the total set of dependencies and then remove X.
+  // (Condition 1) Compute the first set, i.e. the positions in N \ X (the other parameters) that our update functions and action expression
+  // depends on. We first compute the total set of dependencies and then remove elements from X.
   std::set<data::variable> set_1;
-  for (auto& action : summand.multi_action().actions())
+  for (const process::action& action : summand.multi_action().actions())
   {
     auto dependencies = data::find_free_variables(action.arguments());
     set_1.insert(dependencies.begin(), dependencies.end());
@@ -40,8 +41,10 @@ summand_dependencies compute_dependencies(
 
   // Find the dependencies of the assignments both processes.
   std::set<data::variable> assignment_dependencies;
+
+  // (Condition 2) parameters that the other process needs for its update expressions (elements of X).
   std::set<data::variable> set_2;
-  for (auto& assignment : summand.assignments())
+  for (const data::assignment& assignment : summand.assignments())
   {
     auto dependencies = data::find_free_variables(assignment.rhs());
     if (std::find(parameters.begin(), parameters.end(), assignment.lhs()) != parameters.end())
@@ -51,6 +54,7 @@ summand_dependencies compute_dependencies(
     }
     else
     {
+      // This is an assignment for the other component's parameters
       set_2.insert(dependencies.begin(), dependencies.end());
     }
   }
@@ -58,32 +62,43 @@ summand_dependencies compute_dependencies(
   set_1.insert(assignment_dependencies.begin(), assignment_dependencies.end());
 
   // Remove the indices in X.
-  for (auto& param : parameters)
+  for (const data::variable& param : parameters)
   {
     set_1.erase(param);
   }
 
-  // Remove the other parameters from the second set of positions (from X).
-  for (auto& param : other_parameters)
+  // Remove the other parameters from the second set of positions (from (N \ X)).
+  for (const data::variable& param : other_parameters)
   {
     set_2.erase(param);
+  }
+
+  // (Ad hoc) summand variables are a special case (these are the only variables that are duplicated).
+  for (const data::variable& var : summand.summation_variables())
+  {
+    if (std::find(set_1.begin(), set_1.end(), var) == set_1.end() || std::find(set_2.begin(), set_2.end(), var) == set_2.end())
+    {
+      // The other component does not depend on this variable.
+      set_1.erase(var);
+    }
   }
 
   // Gather all the necessary dependencies S^i_X, the condition dependencies were already added.
   S_i_X.insert(set_1.begin(), set_1.end());
   S_i_X.insert(set_2.begin(), set_2.end());
 
+
   // Remove the global variables.
 
   // This version crashes, but would be nicer/more efficient:
   // dependencies.erase(spec.global_variables().begin(), spec.global_variables().end());
-  for (auto& variable : spec.global_variables())
+  for (const data::variable& variable : spec.global_variables())
   {
     S_i_X.erase(variable);
   }
 
   // Indicates that each assignment is the identity (lhs == lhs).
-  auto other_assignments = project(summand.assignments(), other_parameters);
+  data::assignment_list other_assignments = project(summand.assignments(), other_parameters);
   bool is_trivial = std::find_if(other_assignments.begin(),
     other_assignments.end(),
     [](const data::assignment& assignment)
@@ -99,10 +114,10 @@ summand_dependencies compute_dependencies(
 
 /// \brief Creates a single summand for the dependency cleave process. We are always constructing the
 ///        left process, i.e. P_V, in the definition.
-/// \returns A pair of the summand and a boolean indicating whether it should be added (an optional).
+/// \returns A summand that should be added and else nothing.
 template<bool owning = false>
 inline
-std::pair<lps::stochastic_action_summand, bool> cleave_summand(
+std::optional<lps::stochastic_action_summand> cleave_summand(
   const lps::stochastic_specification& spec,
   std::size_t summand_index,
   const data::variable_list& parameters,
@@ -122,9 +137,9 @@ std::pair<lps::stochastic_action_summand, bool> cleave_summand(
 
   print_names(std::string("Dependencies of summand ") += std::to_string(summand_index) += std::string(" (S^i_X) := "), dependencies.S_i_X);
 
-  // Add a summation for every parameter of the other process that we depend on.
+  // Add a summation for every parameter of the other process, and for every summation variable, that we depend on.
   data::variable_list variables = summand.summation_variables();
-  for (auto& variable : other_parameters)
+  for (const data::variable& variable : other_parameters)
   {
     if (dependencies.S_i_X.count(variable) > 0)
     {
@@ -136,7 +151,7 @@ std::pair<lps::stochastic_action_summand, bool> cleave_summand(
   data::data_expression_list values;
   data::sort_expression_list sorts;
 
-  for (auto& dependency : dependencies.S_i_X)
+  for (const data::variable& dependency : dependencies.S_i_X)
   {
     values.push_front(data::data_expression(dependency));
     sorts.push_front(dependency.sort());
@@ -144,7 +159,7 @@ std::pair<lps::stochastic_action_summand, bool> cleave_summand(
 
   sync_labels.emplace_back(syncname += std::string("_") += std::to_string(summand_index), sorts);
 
-  auto assignments = project(summand.assignments(), parameters);
+  data::assignment_list assignments = project(summand.assignments(), parameters);
 
   lps::multi_action action;
   if (owning)
@@ -178,7 +193,7 @@ std::pair<lps::stochastic_action_summand, bool> cleave_summand(
     if (other_dependencies.in_L_X)
     {
       mCRL2log(log::info) << "Summand is independent in the other component, so " << summand_index << " in L_W.\n";
-      return std::make_pair(summand, false);
+      return {};
     }
     else
     {
@@ -189,7 +204,7 @@ std::pair<lps::stochastic_action_summand, bool> cleave_summand(
     }
   }
 
-  return std::make_pair(lps::stochastic_action_summand(variables, summand.condition(), action, assignments, summand.distribution()), true);
+  return lps::stochastic_action_summand(variables, summand.condition(), action, assignments, summand.distribution());
 }
 
 std::list<std::size_t> mcrl2::compute_indices(
@@ -202,7 +217,7 @@ std::list<std::size_t> mcrl2::compute_indices(
   // For each summand compute whether it is included in the set L_X.
   for (std::size_t index = 0; index < spec.process().action_summands().size(); ++index)
   {
-    const auto& summand = spec.process().action_summands()[index];
+    const lps::stochastic_action_summand& summand = spec.process().action_summands()[index];
 
     summand_dependencies dependencies = compute_dependencies(spec, summand, parameters, other_parameters);
     if (dependencies.in_L_X)
@@ -221,7 +236,7 @@ lps::stochastic_specification mcrl2::dependency_cleave(const lps::stochastic_spe
   bool right_process)
 {
   // Check sanity conditions, no timed or stochastic processes.
-  auto& process = spec.process();
+  const lps::stochastic_linear_process& process = spec.process();
 
   if (process.has_time())
   {
@@ -260,14 +275,14 @@ lps::stochastic_specification mcrl2::dependency_cleave(const lps::stochastic_spe
   lps::stochastic_action_summand_vector cleave_summands;
 
   // Add the summands that generate the action label.
-  for (auto& index : indices)
+  for (std::size_t index : indices)
   {
     if (index < process.action_summands().size())
     {
-      auto pair = cleave_summand<true>(spec, index, parameters, other_parameters, labels, synclabel, tag, intern);
-      if (pair.second)
+      auto summand = cleave_summand<true>(spec, index, parameters, other_parameters, labels, synclabel, tag, intern);
+      if (summand)
       {
-        cleave_summands.emplace_back(pair.first);
+        cleave_summands.emplace_back(summand.value());
       }
     }
     else
@@ -276,18 +291,18 @@ lps::stochastic_specification mcrl2::dependency_cleave(const lps::stochastic_spe
     }
   }
 
-  for (auto& index : get_other_indices(process, indices))
+  for (std::size_t index : get_other_indices(process, indices))
   {
-    auto pair = cleave_summand<false>(spec, index, parameters, other_parameters, labels, synclabel, tag, intern);
-    if (pair.second)
+    auto summand = cleave_summand<false>(spec, index, parameters, other_parameters, labels, synclabel, tag, intern);
+    if (summand)
     {
-      cleave_summands.emplace_back(pair.first);
+      cleave_summands.emplace_back(summand.value());
     }
   }
 
   // Add the labels to the LPS action specification.
   auto cleave_action_labels = spec.action_labels();
-  for (const auto& label : labels)
+  for (const process::action_label& label : labels)
   {
     cleave_action_labels.push_front(label);
   }
