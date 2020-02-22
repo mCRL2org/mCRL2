@@ -11,6 +11,8 @@
 
 #include "lpscleave_utility.h"
 
+#include <optional>
+
 using namespace mcrl2;
 
 struct summand_dependencies
