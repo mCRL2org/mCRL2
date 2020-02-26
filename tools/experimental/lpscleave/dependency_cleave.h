@@ -16,7 +16,7 @@ namespace mcrl2
 {
 
 /// \brief Determine the least subset of indices that should belong to the left process.
-std::list<std::size_t> compute_indices(
+std::list<std::size_t> compute_independent_indices(
   const lps::stochastic_specification& spec,
   const data::variable_list& parameters);
 

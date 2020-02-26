@@ -30,7 +30,7 @@ summand_dependencies compute_dependencies(
   const data::variable_list& other_parameters)
 {
   // Compute the set S^i_X, first add the dependencies of the conditions (Condition 3).
-  std::set<data::variable> S_i_X = data::find_free_variables(summand.condition());
+  std::set<data::variable> S_i_X;
 
   // (Condition 1) Compute the first set, i.e. the positions in N \ X (the other parameters) that our update functions and action expression
   // depends on. We first compute the total set of dependencies and then remove elements from X.
@@ -75,6 +75,8 @@ summand_dependencies compute_dependencies(
     set_2.erase(param);
   }
 
+  std::set<data::variable> set_3 = data::find_free_variables(summand.condition());
+
   // (Ad hoc) summand variables are a special case (these are the only variables that are duplicated).
   for (const data::variable& var : summand.summation_variables())
   {
@@ -88,7 +90,7 @@ summand_dependencies compute_dependencies(
   // Gather all the necessary dependencies S^i_X, the condition dependencies were already added.
   S_i_X.insert(set_1.begin(), set_1.end());
   S_i_X.insert(set_2.begin(), set_2.end());
-
+  S_i_X.insert(set_3.begin(), set_3.end());
 
   // Remove the global variables.
 
@@ -110,7 +112,7 @@ summand_dependencies compute_dependencies(
 
   summand_dependencies result;
   result.S_i_X = S_i_X;
-  result.in_L_X = is_trivial && set_1.empty();
+  result.in_L_X = is_trivial && set_1.empty() && std::includes(parameters.begin(), parameters.end(), set_3.begin(), set_3.end());
   return result;
 }
 
@@ -209,7 +211,7 @@ std::optional<lps::stochastic_action_summand> cleave_summand(
   return lps::stochastic_action_summand(variables, summand.condition(), action, assignments, summand.distribution());
 }
 
-std::list<std::size_t> mcrl2::compute_indices(
+std::list<std::size_t> mcrl2::compute_independent_indices(
   const lps::stochastic_specification& spec,
   const data::variable_list& parameters)
 {
@@ -247,10 +249,6 @@ lps::stochastic_specification mcrl2::dependency_cleave(const lps::stochastic_spe
 
   // The parameters of the "other" component process.
   data::variable_list other_parameters = get_other_parameters(process, parameters);
-
-  print_names("Parameters", parameters);
-  print_names("Other parameters", other_parameters);
-  print_elements("Indices", indices);
 
   // Extend the action specification with an actsync (that is unique) for every summand with the correct sorts, a tag and an intern action.
   std::vector<process::action_label> labels;
