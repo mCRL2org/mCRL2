@@ -77,16 +77,6 @@ summand_dependencies compute_dependencies(
 
   std::set<data::variable> set_3 = data::find_free_variables(summand.condition());
 
-  // (Ad hoc) summand variables are a special case (these are the only variables that are duplicated).
-  for (const data::variable& var : summand.summation_variables())
-  {
-    if (std::find(set_1.begin(), set_1.end(), var) == set_1.end() || std::find(set_2.begin(), set_2.end(), var) == set_2.end())
-    {
-      // The other component does not depend on this variable.
-      set_1.erase(var);
-    }
-  }
-
   // Gather all the necessary dependencies S^i_X, the condition dependencies were already added.
   S_i_X.insert(set_1.begin(), set_1.end());
   S_i_X.insert(set_2.begin(), set_2.end());

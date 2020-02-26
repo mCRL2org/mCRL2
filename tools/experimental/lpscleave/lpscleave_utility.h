@@ -120,13 +120,7 @@ void print_elements(const std::string& identifier, const Container<El>& elements
   print_values(identifier, elements, [](const El& element) { return element; });
 }
 
-inline
-bool is_independent(const data::variable_list& parameters, const std::set<data::variable>& dependencies, const data::assignment_list& other_assignments)
-{
-  // We are independent whenever all dependencies are included in our own parameters and the other process does no assignments.
-  return std::includes(parameters.begin(), parameters.end(), dependencies.begin(), dependencies.end()) && other_assignments.empty();
-}
-
+/// \returns A list of parameters of the given process that are not elements of the given parameters, i.e., the complement.
 template<typename LinearProcess>
 inline
 data::variable_list get_other_parameters(const LinearProcess& process, const data::variable_list& parameters)
@@ -145,7 +139,7 @@ data::variable_list get_other_parameters(const LinearProcess& process, const dat
   return other_parameters;
 }
 
-/// \returns A sorted (and unique) list of indices that indicate the summands of process without the element of indices.
+/// \returns A sorted (and unique) list of indices that indicate the summands of process which are an elements of the given indices.
 template<typename LinearProcess>
 inline
 std::list<std::size_t> get_other_indices(const LinearProcess& process, const std::list<std::size_t>& indices)
