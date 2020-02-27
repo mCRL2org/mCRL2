@@ -186,43 +186,6 @@ class process_specification
     {
       return m_initial_process;
     }
-
-    /// \brief Reads a process specification from a stream.
-    /// \param stream An input stream.
-    /// \param binary An boolean that if true means the stream contains a term in binary encoding.
-    //                Otherwise the encoding is textual.
-    /// \param source The source from which the stream originates. Used for error messages.
-    void load(std::istream& stream, bool binary = true, const std::string& source = "")
-    {
-      atermpp::aterm t = core::load_aterm(stream, binary, "process specification", source, data::detail::add_index_impl);
-
-      if (!t.type_is_appl() || !is_process_specification(atermpp::down_cast<const atermpp::aterm_appl>(t)))
-      {
-        throw mcrl2::runtime_error("Input stream does not contain a process specification");
-      }
-
-      construct_from_aterm(atermpp::down_cast<atermpp::aterm_appl>(t));
-    }
-
-    /// \brief Writes the process specification to a stream.
-    /// \param stream The output stream.
-    /// \param binary
-    /// If binary is true the process specification is saved in compressed binary format.
-    /// Otherwise an ascii representation is saved. In general the binary format is
-    /// much more compact than the ascii representation.
-    void save(std::ostream& stream, bool binary=true) const
-    {
-      atermpp::aterm t = process_specification_to_aterm(*this);
-
-      if (binary)
-      {
-        atermpp::binary_aterm_ostream(stream) << data::detail::remove_index_impl << t;
-      }
-      else
-      {
-        atermpp::text_aterm_ostream(stream) << data::detail::remove_index_impl << t;
-      }
-    }
 };
 
 //--- start generated class process_specification ---//
