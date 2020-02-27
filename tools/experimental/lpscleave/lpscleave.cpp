@@ -100,7 +100,16 @@ public:
 
         // Take the complement of the parameters for the projection W.
         parameters = get_other_parameters(spec.process(), parameters);
-        auto right_parameters = parameters + duplicated;
+        auto right_parameters = parameters;
+
+        // Ensure that parameters are unique.
+        for (const data::variable& param : duplicated)
+        {
+          if (std::find(right_parameters.begin(), right_parameters.end(), param) == right_parameters.end())
+          {
+            right_parameters.push_front(param);
+          }
+        }
 
         print_names("Left parameters", left_parameters);
         print_names("Right parameters", right_parameters);

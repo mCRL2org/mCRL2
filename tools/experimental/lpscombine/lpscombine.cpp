@@ -88,7 +88,7 @@ void combine_specification(const lps::stochastic_specification& left_spec,
 
   action_label_list action_labels(actions.begin(), actions.end());
 
-  // Find syncleft_i synchronization actions and define sync_i for each in i in I..
+  // Find syncleft_i synchronization actions and define sync_i for each in i in I.
 
   // H = {actsync_i | i in I}. However, we only need to consider existing indices.
   core::identifier_string_list H;
@@ -96,7 +96,7 @@ void combine_specification(const lps::stochastic_specification& left_spec,
   for (const auto& action : left_spec.action_labels())
   {
     std::string name = action.name();
-    if (name.find("sync") != std::string::npos)
+    if (name.find("syncleft") != std::string::npos)
     {
       H.emplace_front(convert_sync(name));
 
@@ -155,11 +155,14 @@ void combine_specification(const lps::stochastic_specification& left_spec,
     C.emplace_front(action_name_multiset(list), name);
   }
 
-  // Construct the union of formal parameters.
+  // Construct the union of formal parameters, but ensure that they are unique.
   data::variable_list formal_parameters = left_spec.process().process_parameters();
   for (const auto& parameter : right_spec.process().process_parameters())
   {
-    formal_parameters.push_front(parameter);
+    if (std::find(formal_parameters.begin(), formal_parameters.end(), parameter) == formal_parameters.end())
+    {
+      formal_parameters.push_front(parameter);
+    }
   }
 
   process_identifier PQ(core::identifier_string("PQ"), data::variable_list());
@@ -185,8 +188,18 @@ void combine_specification(const lps::stochastic_specification& left_spec,
   // Print the process PQ.
   stream << "proc " << composition << "\n\n";
 
-  // Define the initial process expression, which depends on the assigns of the original processes.
-  stream << "init " << process_instance_assignment(PQ, left_spec.initial_process().assignments() + right_spec.initial_process().assignments()) << ";\n";
+  // Construct the union of formal parameters, but ensure that they are unique.
+  data::assignment_list assignments = left_spec.initial_process().assignments();
+  for (const auto& assignment : right_spec.initial_process().assignments())
+  {
+    if (std::find(assignments.begin(), assignments.end(), assignment) == assignments.end())
+    {
+      assignments.push_front(assignment);
+    }
+  }
+
+  // Define the initial process expression, which depends on the assignments of the original processes.
+  stream << "init " << process_instance_assignment(PQ, assignments) << ";\n";
 }
 
 class lpscleave_tool : public input_input_output_tool
