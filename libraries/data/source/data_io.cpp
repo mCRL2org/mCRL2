@@ -87,37 +87,7 @@ atermpp::aterm_istream& data::operator>>(atermpp::aterm_istream& stream, data_sp
     stream >> user_defined_equations;
 
     // Store the given information in a new data specification (to ignore existing elements of spec).
-    data_specification new_spec;
-
-    // Store the sorts and aliases.
-    for(const basic_sort& t : sorts)
-    {
-      new_spec.add_sort(t);
-    }
-    for (const alias& t : aliases)
-    {
-      new_spec.add_alias(t);
-    }
-
-    // Store the constructors.
-    for(const function_symbol& f : constructors)
-    {
-      new_spec.add_constructor(f);
-    }
-
-    // Store the mappings.
-    for(const function_symbol& f : user_defined_mappings)
-    {
-      new_spec.add_mapping(f);
-    }
-
-    // Store the equations.
-    for(const data_equation& e: user_defined_equations)
-    {
-      new_spec.add_equation(e);
-    }
-
-    spec = new_spec;
+    spec = data_specification(sorts, aliases, constructors, user_defined_mappings, user_defined_equations);
   }
   catch (std::exception&)
   {

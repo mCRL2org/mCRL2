@@ -774,5 +774,16 @@ void data_specification::build_from_aterm(const atermpp::aterm_appl& term)
   }
 }
 
+data_specification::data_specification(const basic_sort_vector& sorts,
+  const alias_vector& aliases,
+  const function_symbol_vector& constructors,
+  const function_symbol_vector& user_defined_mappings,
+  const data_equation_vector& user_defined_equations)
+  : sort_specification(sorts, aliases),
+    m_user_defined_constructors(constructors),
+    m_user_defined_mappings(user_defined_mappings),
+    m_user_defined_equations(user_defined_equations)
+{}
+
 } // namespace data
 } // namespace mcrl2
