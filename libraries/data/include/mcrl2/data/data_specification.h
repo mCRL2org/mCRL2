@@ -281,6 +281,13 @@ class data_specification: public sort_specification
       build_from_aterm(t);
     }
 
+    ///\brief Constructor from its members.
+    data_specification(const basic_sort_vector& sorts,
+      const alias_vector& aliases,
+      const function_symbol_vector& constructors,
+      const function_symbol_vector& user_defined_mappings,
+      const data_equation_vector& user_defined_equations);
+
     /// \brief Gets all constructors including those that are system defined.
     /// \details The time complexity is the same as for sorts().
     /// \return All constructors in this specification, including those for
