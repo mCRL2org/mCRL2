@@ -86,19 +86,6 @@ class stochastic_specification: public specification_base<stochastic_linear_proc
         other.process(), 
         stochastic_process_initializer(other.initial_process().assignments(),stochastic_distribution()))
     { } 
-
-    void save(std::ostream& stream, bool binary=true) const
-    {
-      assert(check_well_typedness(*this));
-      super::save(stream, binary);
-    }
-
-    void load(std::istream& stream, bool binary=true, const std::string& source = "")
-    {
-      super::load(stream, binary, source);
-      complete_data_specification(*this);
-      assert(check_well_typedness(*this));
-    }
 };
 
 //--- start generated class stochastic_specification ---//

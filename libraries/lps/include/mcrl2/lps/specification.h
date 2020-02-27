@@ -12,7 +12,6 @@
 #ifndef MCRL2_LPS_SPECIFICATION_H
 #define MCRL2_LPS_SPECIFICATION_H
 
-#include "mcrl2/core/load_aterm.h"
 #include "mcrl2/data/data_io.h"
 #include "mcrl2/data/detail/io.h"
 #include "mcrl2/lps/linear_process.h"
@@ -132,47 +131,6 @@ class specification_base
     {
     }
 
-    /// \brief Reads the specification from a stream.
-    /// \param stream An input stream.
-    /// \param binary An boolean that if true means the stream contains a term in binary encoding.
-    //                Otherwise the encoding is textual.
-    /// \param source The source from which the stream originates. Used for error messages.
-    void load(std::istream& stream, bool binary = true, const std::string& source = "")
-    {
-      atermpp::aterm t = core::load_aterm(stream, binary, "LPS", source, data::detail::add_index_impl);
-
-      if (!t.type_is_appl() || !is_specification(atermpp::down_cast<const atermpp::aterm_appl>(t)))
-      {
-        throw mcrl2::runtime_error("Input stream does not contain an LPS");
-      }
-
-      construct_from_aterm(atermpp::down_cast<atermpp::aterm_appl>(t));
-      // The well typedness check is only done in debug mode, since for large LPSs it takes too much
-      // time
-    }
-
-    /// \brief Writes the specification to a stream.
-    /// \param stream The output stream.
-    /// \param binary
-    /// If binary is true the linear process is saved in compressed binary format.
-    /// Otherwise an ascii representation is saved. In general the binary format is
-    /// much more compact than the ascii representation.
-    void save(std::ostream& stream, bool binary=true) const
-    {
-      // The well typedness check is only done in debug mode, since for large
-      // LPSs it takes too much time
-      atermpp::aterm t = specification_to_aterm(*this);
-
-      if (binary)
-      {
-        atermpp::binary_aterm_ostream(stream) << data::detail::remove_index_impl << t;
-      }
-      else
-      {
-        atermpp::text_aterm_ostream(stream) << data::detail::remove_index_impl << t;
-      }
-    }
-
     /// \brief Returns the linear process of the specification.
     /// \return The linear process of the specification.
     const LinearProcess& process() const
@@ -280,19 +238,6 @@ class specification: public specification_base<linear_process, process_initializ
       : super(data, action_labels, global_variables, lps, initial_process)
     {
       complete_data_specification(*this);
-    }
-
-    void save(std::ostream& stream, bool binary = true) const
-    {
-      assert(check_well_typedness(*this));
-      super::save(stream, binary);
-    }
-
-    void load(std::istream& stream, bool binary = true, const std::string& source = "")
-    {
-      super::load(stream, binary, source);
-      complete_data_specification(*this);
-      assert(check_well_typedness(*this));
     }
 };
 
