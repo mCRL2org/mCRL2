@@ -9,6 +9,8 @@
 /// \file io.cpp
 /// \brief
 
+#include "mcrl2/atermpp/aterm_io.h"
+#include "mcrl2/atermpp/aterm_io_binary.h"
 #include "mcrl2/bes/bes2pbes.h"
 #include "mcrl2/bes/detail/io.h"
 #include "mcrl2/bes/io.h"
@@ -55,7 +57,7 @@ void save_bes(const boolean_equation_system& bes,
   mCRL2log(log::verbose) << "Saving result in " << format.shortname() << " format..." << std::endl;
   if (format == bes_format_internal())
   {
-    bes.save(stream, true);
+    atermpp::binary_aterm_ostream(stream) << bes;
   }
   else
   if (format == bes_format_pgsolver())
@@ -92,7 +94,7 @@ void load_bes(boolean_equation_system& bes, std::istream& stream, utilities::fil
   mCRL2log(log::verbose) << "Loading BES in " << format.shortname() << " format..." << std::endl;
   if (format == bes_format_internal())
   {
-    bes.load(stream, true);
+    atermpp::binary_aterm_istream(stream) >> bes;
   }
   else
   if (format == bes_format_pgsolver())
@@ -278,45 +280,82 @@ atermpp::aterm_appl boolean_equation_system_to_aterm(const boolean_equation_syst
   return atermpp::aterm_appl(core::detail::function_symbol_BES(), eqn_list, p.initial_state());
 }
 
-
-/// \brief Reads the boolean equation system from a stream.
-/// \param stream The stream to read from.
-/// \param binary An indicaton whether the stream is in binary format.
-/// \param source The source from which the stream originates. Used for error messages.
-void boolean_equation_system::load(std::istream& stream, bool binary, const std::string& source)
+// transforms BooleanVariable to BooleanVariableNoIndex
+static atermpp::aterm_appl remove_index_impl(const atermpp::aterm_appl& x)
 {
-  atermpp::aterm t = core::load_aterm(stream, binary, "BES", source, bes::detail::add_index_impl);
-
-  if (!t.type_is_appl() || !core::detail::check_rule_BES(atermpp::down_cast<atermpp::aterm_appl>(t)))
+  if (x.function() == core::detail::function_symbol_BooleanVariable())
   {
-    throw mcrl2::runtime_error("The loaded ATerm is not a BES.");
+    return atermpp::aterm_appl(core::detail::function_symbol_BooleanVariableNoIndex(), x.begin(), --x.end());
   }
-
-  init_term(atermpp::down_cast<atermpp::aterm_appl>(t));
-
-  if (!is_well_typed())
-  {
-    throw mcrl2::runtime_error("boolean equation system is not well typed (boolean_equation_system::load())");
-  }
+  return x;
 }
 
-/// \brief Writes the boolean equation system to a stream.
-/// \param binary If binary is true the boolean equation system is saved in compressed binary format.
-/// Otherwise an ascii representation is saved. In general the binary format is
-/// much more compact than the ascii representation.
-/// \param stream An output stream
-/// \param binary If true, the file is saved in binary format
-void boolean_equation_system::save(std::ostream& stream, bool binary) const
+// transforms BooleanVariableNoIndex to BooleanVariable
+static atermpp::aterm_appl add_index_impl(const atermpp::aterm_appl& x)
 {
-  assert(is_well_typed());
-  if (binary)
+  if (x.function() == core::detail::function_symbol_BooleanVariableNoIndex())
   {
-    atermpp::binary_aterm_ostream(stream) << bes::detail::remove_index_impl << boolean_equation_system_to_aterm(*this);
+    const bes::boolean_variable& y = atermpp::down_cast<const bes::boolean_variable>(x);
+    std::size_t index = core::index_traits<bes::boolean_variable, bes::boolean_variable_key_type, 1>::insert(y.name());
+    return atermpp::aterm_appl(core::detail::function_symbol_BooleanVariable(), x[0], atermpp::aterm_int(index));
   }
-  else
-  {
-    atermpp::text_aterm_ostream(stream) << bes::detail::remove_index_impl << boolean_equation_system_to_aterm(*this);
-  }
+  return x;
+}
+
+atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const boolean_equation_system& bes)
+{
+  atermpp::aterm_stream_state state(stream);
+  stream << remove_index_impl;
+
+  stream << bes.initial_state();
+  stream << bes.equations();
+
+  return stream;
+}
+
+atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const boolean_equation& equation)
+{
+  atermpp::aterm_stream_state state(stream);
+  stream << remove_index_impl;
+
+  stream << equation.symbol();
+  stream << equation.variable();
+  stream << equation.formula();
+
+  return stream;
+}
+
+atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, boolean_equation_system& bes)
+{
+  atermpp::aterm_stream_state state(stream);
+  stream >> add_index_impl;
+
+  boolean_expression initial_state;
+  std::vector<boolean_equation> equations;
+
+  stream >> initial_state;
+  stream >> equations;
+
+  bes = boolean_equation_system(equations, initial_state);
+  return stream;
+}
+
+atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, boolean_equation& equation)
+{
+  atermpp::aterm_stream_state state(stream);
+  stream >> add_index_impl;
+
+  fixpoint_symbol symbol;
+  boolean_variable variable;
+  boolean_expression formula;
+
+  stream >> symbol;
+  stream >> variable;
+  stream >> formula;
+
+  equation = boolean_equation(symbol, variable, formula);
+
+  return stream;
 }
 
 } // namespace bes
