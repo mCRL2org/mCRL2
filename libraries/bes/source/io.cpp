@@ -262,24 +262,6 @@ void save_pbes(const pbes_system::pbes& pbes,
   }
 }
 
-
-/// \brief Conversion to aterm_appl.
-/// \return The boolean equation system converted to aterm format.
-inline
-atermpp::aterm_appl boolean_equation_system_to_aterm(const boolean_equation_system& p)
-{
-  atermpp::aterm_list eqn_list;
-  const std::vector<boolean_equation>& eqn = p.equations();
-
-  for (auto i = eqn.rbegin(); i != eqn.rend(); ++i)
-  {
-    atermpp::aterm a = boolean_equation_to_aterm(*i);
-    eqn_list.push_front(a);
-  }
-
-  return atermpp::aterm_appl(core::detail::function_symbol_BES(), eqn_list, p.initial_state());
-}
-
 // transforms BooleanVariable to BooleanVariableNoIndex
 static atermpp::aterm_appl remove_index_impl(const atermpp::aterm_appl& x)
 {
