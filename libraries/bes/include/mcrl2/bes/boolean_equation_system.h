@@ -106,20 +106,6 @@ class boolean_equation_system
       return true;
     }
 
-    /// \brief Reads the boolean equation system from a stream.
-    /// \param stream The stream to read from.
-    /// \param binary An indicaton whether the stream is in binary format.
-    /// \param source The source from which the stream originates. Used for error messages.
-    void load(std::istream& stream, bool binary = true, const std::string& source = "");
-
-    /// \brief Writes the boolean equation system to a stream.
-    /// \param binary If binary is true the boolean equation system is saved in compressed binary format.
-    /// Otherwise an ascii representation is saved. In general the binary format is
-    /// much more compact than the ascii representation.
-    /// \param stream An output stream
-    /// \param binary If true, the file is saved in binary format
-    void save(std::ostream& stream, bool binary = true) const;
-
     /// \brief Returns the set of binding variables of the boolean_equation_system, i.e. the
     /// variables that occur on the left hand side of an equation.
     /// \return The binding variables of the equation system
