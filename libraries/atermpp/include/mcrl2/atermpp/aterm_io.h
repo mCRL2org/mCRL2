@@ -76,6 +76,30 @@ inline aterm_ostream& operator<<(aterm_ostream& stream, const aterm& term) { str
 /// \brief Read the given term from the stream.
 inline aterm_istream& operator>>(aterm_istream& stream, aterm& term) { term = stream.get(); return stream; }
 
+/// \brief Read an integer term from the stream.
+inline aterm_istream& operator>>(aterm_istream& stream, aterm_int& term)
+{
+  aterm t = stream.get();
+  if (!t.defined() || !t.type_is_int())
+  {
+    throw mcrl2::runtime_error("Could not read aterm_int");
+  }
+  term = static_cast<aterm_int&>(t);
+  return stream;
+}
+
+/// \brief Read a list term from the stream.
+inline aterm_istream& operator>>(aterm_istream& stream, aterm_list& term)
+{
+  aterm t = stream.get();
+  if (!t.defined() || !t.type_is_list())
+  {
+    throw mcrl2::runtime_error("Could not read aterm_list");
+  }
+  term = static_cast<aterm_list&>(t);
+  return stream;
+}
+
 // Utility functions
 
 /// \brief A helper class to restore the state of the aterm_{i,o}stream objects upon destruction. Currently, onlt
