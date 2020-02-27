@@ -53,19 +53,6 @@ class boolean_equation
     {}
 
     /// \brief Constructor.
-    /// \param t1 A term
-    explicit boolean_equation(const atermpp::aterm &t1)
-    {
-      atermpp::aterm_appl t = atermpp::down_cast<atermpp::aterm_appl>(t1);
-      assert(core::detail::check_rule_BooleanEquation(t));
-      atermpp::aterm_appl::iterator i = t.begin();
-      m_symbol   = fixpoint_symbol(*i++);
-      atermpp::aterm_appl var = atermpp::down_cast<atermpp::aterm_appl>(*i++);
-      m_variable = boolean_variable(var);
-      m_formula  = boolean_expression(*i);
-    }
-
-    /// \brief Constructor.
     /// \brief Constructor.
     /// \param t A term
     boolean_equation(const atermpp::aterm_appl &t)
@@ -183,14 +170,6 @@ inline bool
 operator<(const boolean_equation& x, const boolean_equation& y)
 {
   return x.variable() < y.variable();
-}
-
-/// \brief Conversion to atermAppl.
-/// \return The boolean equation converted to aterm format.
-inline
-atermpp::aterm_appl boolean_equation_to_aterm(const boolean_equation& eqn)
-{
-  return atermpp::aterm_appl(core::detail::function_symbol_BooleanEquation(), eqn.symbol(), eqn.variable(), eqn.formula());
 }
 
 } // namespace bes

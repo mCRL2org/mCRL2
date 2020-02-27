@@ -39,20 +39,6 @@ class boolean_equation_system
     /// \brief The initial state
     boolean_expression m_initial_state;
 
-    /// \brief Initialize the boolean_equation_system with an atermpp::aterm_appl.
-    /// \param t A term
-    void init_term(const atermpp::aterm_appl& t)
-    {
-      auto i = t.begin();
-      atermpp::aterm_list equations = atermpp::down_cast<atermpp::aterm_list>(*i++);
-      m_initial_state = boolean_expression(*i);
-      m_equations.reserve(equations.size());
-      for (const atermpp::aterm& eqn: equations)
-      {
-        m_equations.emplace_back(eqn);
-      }
-    }
-
   public:
     /// \brief Constructor.
     boolean_equation_system()
