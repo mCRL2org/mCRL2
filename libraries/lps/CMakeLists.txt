@@ -2,6 +2,7 @@ add_mcrl2_library(lps
   INSTALL_HEADERS TRUE
   SOURCES
     lps.cpp
+    lps_io.cpp
     tools.cpp
     linearise.cpp
     lpsparunfoldlib.cpp
