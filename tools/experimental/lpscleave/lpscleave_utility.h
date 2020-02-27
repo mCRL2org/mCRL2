@@ -63,6 +63,24 @@ data::assignment_list project(const data::assignment_list& assignments, const da
   return result;
 }
 
+/// \brief Take a list of parameters and assignments and make an assignment_list in order of the given parameters.
+inline
+data::assignment_list make_assignments(const data::variable_list& process_parameters, const data::assignment_list& assignments)
+{
+  // Maps variables to their corresponding expression (in the assignments).
+  data::assignment_sequence_substitution sigma(assignments);
+
+  // For each parameter (in this order) add the assignment.
+  data::assignment_list result;
+  for (const data::variable& var : process_parameters)
+  {
+    data::assignment assignment(var, sigma(var));
+    result.push_front(assignment);
+  }
+
+  return atermpp::reverse(result);
+}
+
 /// \brief Projects a list of parameters based on a list of names.
 /// \returns A list that only contains those parameters of the given parameters that are contained in the list of names.
 inline

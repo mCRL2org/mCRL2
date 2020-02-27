@@ -69,7 +69,8 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::r
     std::set<data::variable> synchronized;
 
     // The variables on which the condition depends (which is just duplicated for now which always satisfies condition 1).
-    std::set<data::variable> condition_dependencies = data::find_free_variables(summand.condition());
+    std::set<data::variable> left_condition_dependencies = data::find_free_variables(summand.condition());
+    std::set<data::variable> right_condition_dependencies = data::find_free_variables(summand.condition());
 
     // The dependencies for the multi-action.
     std::set<data::variable> action_dependencies;
@@ -118,24 +119,27 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::r
       }
     }
 
+    // Remove dependencies on our own parameters (as these are not needed).
     for (const data::variable& var : left_parameters)
     {
       left_update_dependencies.erase(var);
+      left_condition_dependencies.erase(var);
     }
 
     for (const data::variable& var : right_parameters)
     {
       right_update_dependencies.erase(var);
+      right_condition_dependencies.erase(var);
     }
 
     data::assignment_list assignments;
     if (generate_left)
     {
-      assignments = project(summand.assignments(), right_parameters);
+      assignments = project(summand.assignments(), left_parameters);
     }
     else
     {
-      assignments = project(summand.assignments(), left_parameters);
+      assignments = project(summand.assignments(), right_parameters);
     }
 
     // Indicates that each assignment is the identity (lhs == lhs) so only trivial updates.
@@ -152,7 +156,8 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::r
         : std::includes(right_parameters.begin(), right_parameters.end(), synchronized.begin(), synchronized.end()));
 
     // Compute the synchronization vector (the values of h without functions)
-    synchronized.insert(condition_dependencies.begin(), condition_dependencies.end());
+    synchronized.insert(left_condition_dependencies.begin(), left_condition_dependencies.end());
+    synchronized.insert(right_condition_dependencies.begin(), right_condition_dependencies.end());
     synchronized.insert(action_dependencies.begin(), action_dependencies.end());
     synchronized.insert(left_update_dependencies.begin(), left_update_dependencies.end());
     synchronized.insert(right_update_dependencies.begin(), right_update_dependencies.end());
@@ -205,16 +210,12 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::r
         left_action.actions().push_front(process::action(left_sync_label, values));
       }
 
-      data::data_expression condition = summand.condition();
-      if (!generate_left && is_independent)
+      if (generate_left || !is_independent)
       {
-        // Just make the condition false, but keep the summand for clarity.
-        condition = data::sort_bool::false_();
+        // Only update our parameters.
+        data::assignment_list left_assignments = project(summand.assignments(), left_parameters);
+        left_summands.emplace_back(left_variables, summand.condition(), left_action, left_assignments, summand.distribution());
       }
-
-      // Only update our parameters.
-      data::assignment_list left_assignments = project(summand.assignments(), left_parameters);
-      left_summands.emplace_back(left_variables, condition, left_action, left_assignments, summand.distribution());
     }
 
     // The right specification.
@@ -228,10 +229,7 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::r
         }
       }
 
-      data::assignment_list right_assignments = project(summand.assignments(), right_parameters);
-
       process::action_label right_sync_label(std::string("syncright_") += std::to_string(index), sorts);
-      labels.push_back(right_sync_label);
 
       lps::multi_action right_action;
       if (!generate_left)
@@ -253,14 +251,11 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::r
         right_action.actions().push_front(process::action(left_sync_label, values));
       }
 
-      data::data_expression condition = summand.condition();
-      if (generate_left && is_independent)
+      if (!generate_left || !is_independent)
       {
-        // Just make the condition false, but keep the summand for clarity.
-        condition = data::sort_bool::false_();
+        data::assignment_list right_assignments = project(summand.assignments(), right_parameters);
+        right_summands.emplace_back(right_variables, summand.condition(), right_action, right_assignments, summand.distribution());
       }
-
-      right_summands.emplace_back(right_variables, condition, right_action, right_assignments, summand.distribution());
     }
   }
 
@@ -275,8 +270,8 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::r
   lps::stochastic_linear_process left_process(left_parameters, no_deadlock_summands, left_summands);
   lps::stochastic_linear_process right_process(right_parameters, no_deadlock_summands, right_summands);
 
-  lps::stochastic_process_initializer left_initial(project(spec.initial_process().assignments(), left_parameters), spec.initial_process().distribution());
-  lps::stochastic_process_initializer right_initial(project(spec.initial_process().assignments(), right_parameters), spec.initial_process().distribution());
+  lps::stochastic_process_initializer left_initial(make_assignments(left_parameters, spec.initial_process().assignments()), spec.initial_process().distribution());
+  lps::stochastic_process_initializer right_initial(make_assignments(right_parameters, spec.initial_process().assignments()), spec.initial_process().distribution());
 
   // Create the new LPS and return it.
   return std::make_pair(

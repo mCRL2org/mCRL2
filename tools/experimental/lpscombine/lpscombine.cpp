@@ -199,7 +199,8 @@ void combine_specification(const lps::stochastic_specification& left_spec,
   }
 
   // Define the initial process expression, which depends on the assignments of the original processes.
-  stream << "init " << process_instance_assignment(PQ, assignments) << ";\n";
+  data::data_expression_list values = data::replace_variables(atermpp::container_cast<data::data_expression_list>(formal_parameters), data::assignment_sequence_substitution(assignments));
+  stream << "init " << process_instance(PQ, values) << ";\n";
 }
 
 class lpscleave_tool : public input_input_output_tool
