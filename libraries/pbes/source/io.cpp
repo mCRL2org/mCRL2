@@ -205,11 +205,17 @@ static atermpp::aterm_appl add_index_impl(const atermpp::aterm_appl& x)
   return x;
 }
 
+atermpp::aterm pbes_marker()
+{
+  return atermpp::aterm_appl(atermpp::function_symbol("parameterised_boolean_equation_system", 0));
+}
+
 atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const pbes& pbes)
 {
   atermpp::aterm_stream_state state(stream);
   stream << remove_index_impl;
 
+  stream << pbes_marker();
   stream << pbes.data();
   stream << pbes.global_variables();
   stream << pbes.equations();
@@ -251,19 +257,35 @@ atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, pbes& pbes)
   atermpp::aterm_stream_state state(stream);
   stream >> add_index_impl;
 
-  data::data_specification data;
-  std::set<data::variable> global_variables;
-  std::vector<pbes_equation> equations;
-  propositional_variable_instantiation initial_state;
+  try
+  {
+    atermpp::aterm marker;
+    stream >> marker;
 
-  stream >> data;
-  stream >> global_variables;
-  stream >> equations;
-  stream >> initial_state;
+    if (marker != pbes_marker())
+    {
+      throw mcrl2::runtime_error("Stream does not contain a parameterised boolean equation system (PBES).");
+    }
 
-  pbes = pbes_system::pbes(data, equations, global_variables, initial_state);
+    data::data_specification data;
+    std::set<data::variable> global_variables;
+    std::vector<pbes_equation> equations;
+    propositional_variable_instantiation initial_state;
 
-  complete_data_specification(pbes);
+    stream >> data;
+    stream >> global_variables;
+    stream >> equations;
+    stream >> initial_state;
+
+    pbes = pbes_system::pbes(data, equations, global_variables, initial_state);
+
+    complete_data_specification(pbes);
+  }
+  catch (std::exception& ex)
+  {
+    mCRL2log(log::error) << ex.what() << "\n";
+    throw mcrl2::runtime_error(std::string("Error reading parameterised boolean equation system (PBES)."));
+  }
 
   return stream;
 }
