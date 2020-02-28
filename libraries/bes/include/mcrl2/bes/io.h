@@ -114,14 +114,8 @@ void save_pbes(const pbes_system::pbes& pbes,
 /// \brief Writes the bes to a stream.
 atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const boolean_equation_system& bes);
 
-/// \brief Writes the boolean equation to a stream.
-atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const boolean_equation& equation);
-
 /// \brief Reads the bes from a stream.
 atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, boolean_equation_system& bes);
-
-/// \brief Reads the boolean equation from a stream.
-atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, boolean_equation& equation);
 
 } // namespace bes
 

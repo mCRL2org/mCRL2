@@ -13,7 +13,7 @@
 #define MCRL2_LPS_DETAIL_LPS_IO_H
 
 #include "mcrl2/atermpp/aterm_io_binary.h"
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/io.h"
 
 #include <fstream>
 

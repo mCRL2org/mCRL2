@@ -73,32 +73,8 @@ inline aterm_ostream& operator<<(aterm_ostream& stream, aterm_transformer transf
 /// \brief Write the given term to the stream.
 inline aterm_ostream& operator<<(aterm_ostream& stream, const aterm& term) { stream.put(term); return stream; }
 
-/// \brief Read the given term from the stream.
+/// \brief Read the given term from the stream, but for aterm_list we want to use a specific one that performs validation (defined below).
 inline aterm_istream& operator>>(aterm_istream& stream, aterm& term) { term = stream.get(); return stream; }
-
-/// \brief Read an integer term from the stream.
-inline aterm_istream& operator>>(aterm_istream& stream, aterm_int& term)
-{
-  aterm t = stream.get();
-  if (!t.defined() || !t.type_is_int())
-  {
-    throw mcrl2::runtime_error("Could not read aterm_int");
-  }
-  term = static_cast<aterm_int&>(t);
-  return stream;
-}
-
-/// \brief Read a list term from the stream.
-inline aterm_istream& operator>>(aterm_istream& stream, aterm_list& term)
-{
-  aterm t = stream.get();
-  if (!t.defined() || !t.type_is_list())
-  {
-    throw mcrl2::runtime_error("Could not read aterm_list");
-  }
-  term = static_cast<aterm_list&>(t);
-  return stream;
-}
 
 // Utility functions
 

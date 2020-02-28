@@ -117,17 +117,9 @@ public:
         std::tie(left_spec, right_spec) = refined_cleave(spec, left_parameters, right_parameters, m_indices);
       }
 
-      // Save the resulting left component.
-      {
-        std::ofstream file(output_filename1(), std::ios::binary);
-        left_spec.save(file, true);
-      }
-
-      // Save the resulting right component.
-      {
-        std::ofstream file(output_filename2(), std::ios::binary);
-        right_spec.save(file, true);
-      }
+      // Save the resulting components.
+      lps::save_lps(left_spec, output_filename1());
+      lps::save_lps(right_spec, output_filename2());
     }
 
     return true;
