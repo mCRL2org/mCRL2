@@ -19,39 +19,36 @@ namespace mcrl2::lts
 /// \brief Converts a probabilistic state into an aterm that encodes it.
 atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const probabilistic_lts_lts_t::probabilistic_state_t& state)
 {
-  atermpp::aterm_list list;
+  stream << atermpp::aterm_int(state.size());
+
   for(const auto& state : state)
   {
     // Push a (index, probability) pair into the list.
-    list.push_front(state.probability());
-    list.push_front(atermpp::aterm_int(state.state()));
+    stream << state.probability();
+    stream << atermpp::aterm_int(state.state());
   }
-
-  stream << list;
 
   return stream;
 }
 
 atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, probabilistic_lts_lts_t::probabilistic_state_t& state)
 {
-  atermpp::aterm_list list;
-  stream >> list;
+  atermpp::aterm_int size;
+  stream >> size;
 
-  // Convert the list into a vector of pairs.
-  std::vector<lps::state_probability_pair<std::size_t, mcrl2::lps::probabilistic_data_expression>> result;
-
-  for(auto it = list.begin(); it != list.end(); ++it)
+  state = {};
+  for (std::size_t i = 0; i < size.value(); ++i)
   {
-    // Read the (index, probability) pair from the list.
-    const std::size_t state_number = atermpp::down_cast<atermpp::aterm_int>(*it).value();
-    ++it;
+    lps::probabilistic_data_expression probability;
+    atermpp::aterm_int index;
 
-    // The indices are already added to the header before.
-    const lps::probabilistic_data_expression& probability = atermpp::down_cast<lps::probabilistic_data_expression>(*it);
-    result.emplace_back(state_number, probability);
+    stream >> probability;
+    stream >> index;
+
+    state.add(index.value(), probability);
   }
 
-  state = probabilistic_lts_lts_t::probabilistic_state_t(result.begin(), result.end());
+  state.shrink_to_fit();
   return stream;
 }
 
@@ -80,6 +77,11 @@ static atermpp::aterm initial_state_mark()
   return mark;
 }
 
+static atermpp::aterm labelled_transition_system_mark()
+{
+  return atermpp::aterm_appl(atermpp::function_symbol("labelled_transition_system", 0));
+}
+
 // Utility functions
 
 static void set_initial_state(lts_lts_t& lts, const probabilistic_lts_lts_t::probabilistic_state_t& initial_state)
@@ -100,102 +102,123 @@ static void set_initial_state(probabilistic_lts_lts_t& lts, const probabilistic_
 template <class LTS>
 static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
 {
+  atermpp::aterm_stream_state state(stream);
   stream >> data::detail::add_index_impl;
 
-  // Read the header of the lts.
-  data::data_specification spec;
-  stream >> spec;
-  lts.set_data(spec);
-
-  data::variable_list parameters;
-  stream >> parameters;
-  lts.set_process_parameters(parameters);
-
-  process::action_label_list action_labels;
-  stream >> action_labels;
-  lts.set_action_label_declarations(action_labels);
-
-  // An indexed set to keep indices for multi actions.
-  mcrl2::utilities::indexed_set<process::timed_multi_action> multi_actions;
-
-  // The initial state is stored and set as last.
-  probabilistic_lts_lts_t::probabilistic_state_t initial_state;
-
-  while (true)
+  try
   {
-    aterm term = stream.get();
-    if (!term.defined())
+    atermpp::aterm marker;
+    stream >> marker;
+
+    if (marker != labelled_transition_system_mark())
     {
-      // The default constructed term indicates the end of the stream.
-      break;
+      throw mcrl2::runtime_error("Stream does not contain a labelled transition system (LTS).");
     }
 
-    if (term == transition_mark())
+    // Read the header of the lts.
+    data::data_specification spec;
+    data::variable_list parameters;
+    process::action_label_list action_labels;
+
+    stream >> spec;
+    stream >> parameters;
+    stream >> action_labels;
+
+    lts.set_data(spec);
+    lts.set_process_parameters(parameters);
+    lts.set_action_label_declarations(action_labels);
+
+    // An indexed set to keep indices for multi actions.
+    mcrl2::utilities::indexed_set<process::timed_multi_action> multi_actions;
+
+    // The initial state is stored and set as last.
+    probabilistic_lts_lts_t::probabilistic_state_t initial_state;
+
+    while (true)
     {
-      aterm_int from;
-      process::timed_multi_action label;
-      aterm_int to;
-
-      stream >> from;
-      stream >> label;
-      stream >> to;
-
-      auto [index, inserted] = multi_actions.insert(label);
-
-      std::size_t target_index = to.value();
-      if constexpr (std::is_same<LTS, probabilistic_lts_lts_t>::value)
+      aterm term = stream.get();
+      if (!term.defined())
       {
-        // For probabilistic lts it is necessary to add the state first (and use the returned index).
-        target_index = lts.add_probabilistic_state(probabilistic_lts_lts_t::probabilistic_state_t(to.value()));
+        // The default constructed term indicates the end of the stream.
+        break;
       }
 
-      lts.add_transition(transition(from.value(), index, target_index));
-
-      if (inserted)
-      {
-        lts.add_action(action_label_lts(lps::multi_action(label.actions(), label.time())));
-      }
-    }
-    else if(term == probabilistic_transition_mark())
-    {
-      if constexpr (std::is_same<LTS, probabilistic_lts_lts_t>::value)
+      if (term == transition_mark())
       {
         aterm_int from;
         process::timed_multi_action label;
-        probabilistic_lts_lts_t::probabilistic_state_t to;
+        aterm_int to;
 
         stream >> from;
         stream >> label;
         stream >> to;
 
         auto [index, inserted] = multi_actions.insert(label);
-        std::size_t to_index = lts.add_probabilistic_state(to);
-        lts.add_transition(transition(from.value(), index, to_index));
+
+        std::size_t target_index = to.value();
+        if constexpr (std::is_same<LTS, probabilistic_lts_lts_t>::value)
+        {
+          // For probabilistic lts it is necessary to add the state first (and use the returned index).
+          target_index = lts.add_probabilistic_state(probabilistic_lts_lts_t::probabilistic_state_t(to.value()));
+        }
+
+        lts.add_transition(transition(from.value(), index, target_index));
 
         if (inserted)
         {
           lts.add_action(action_label_lts(lps::multi_action(label.actions(), label.time())));
         }
       }
+      else if(term == probabilistic_transition_mark())
+      {
+        if constexpr (std::is_same<LTS, probabilistic_lts_lts_t>::value)
+        {
+          aterm_int from;
+          process::timed_multi_action label;
+          probabilistic_lts_lts_t::probabilistic_state_t to;
+
+          stream >> from;
+          stream >> label;
+          stream >> to;
+
+          auto [index, inserted] = multi_actions.insert(label);
+          std::size_t to_index = lts.add_probabilistic_state(to);
+          lts.add_transition(transition(from.value(), index, to_index));
+
+          if (inserted)
+          {
+            lts.add_action(action_label_lts(lps::multi_action(label.actions(), label.time())));
+          }
+        }
+        else
+        {
+          throw mcrl2::runtime_error("Attempting to read a probabilistic LTS as a regular LTS.");
+        }
+      }
+      else if (term.function() == atermpp::detail::g_term_pool().as_list())
+      {
+        // Lists always represent state labels, only need to add the indices.
+        lts.add_state(reinterpret_cast<const state_label_lts&>(term));
+      }
+      else if (term == initial_state_mark())
+      {
+        // Read the initial state.
+        stream >> initial_state;
+      }
       else
       {
-        throw mcrl2::runtime_error("Attempting to read a probabilistic lts as a regular lts.");
+        throw mcrl2::runtime_error("Malformed labelled transition system stream.");
       }
     }
-    else if (term.function() == atermpp::detail::g_term_pool().as_list())
-    {
-      // Lists always represent state labels, only need to add the indices.
-      lts.add_state(reinterpret_cast<const state_label_lts&>(term));
-    }
-    else if (term == initial_state_mark())
-    {
-      // Read the initial state.
-      stream >> initial_state;
-    }
-  }
 
-  // The initial state can only be set after the states are known.
-  set_initial_state(lts, initial_state);
+    // The initial state can only be set after the states are known.
+    set_initial_state(lts, initial_state);
+  }
+  catch (std::exception& ex)
+  {
+    mCRL2log(log::error) << ex.what() << "\n";
+    throw mcrl2::runtime_error(std::string("Error reading labelled transition system (LTS)."));
+  }
 }
 
 template <class LTS_TRANSITION_SYSTEM>     
@@ -351,7 +374,10 @@ void write_lts_header(atermpp::aterm_ostream& stream,
   const process::action_label_list& action_labels)
 {
   // Write the header of the lts.
+  atermpp::aterm_stream_state state(stream);
   stream << data::detail::remove_index_impl;
+
+  stream << detail::labelled_transition_system_mark();
   stream << data_spec;
   stream << parameters;
   stream << action_labels;

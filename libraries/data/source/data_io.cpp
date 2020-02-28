@@ -72,27 +72,20 @@ atermpp::aterm_istream& data::operator>>(atermpp::aterm_istream& stream, data_sp
   atermpp::aterm_stream_state state(stream);
   stream >> add_index_impl;
 
-  try
-  {
-    basic_sort_vector sorts;
-    alias_vector aliases;
-    function_symbol_vector constructors;
-    function_symbol_vector user_defined_mappings;
-    data_equation_vector user_defined_equations;
+  basic_sort_vector sorts;
+  alias_vector aliases;
+  function_symbol_vector constructors;
+  function_symbol_vector user_defined_mappings;
+  data_equation_vector user_defined_equations;
 
-    stream >> sorts;
-    stream >> aliases;
-    stream >> constructors;
-    stream >> user_defined_mappings;
-    stream >> user_defined_equations;
+  stream >> sorts;
+  stream >> aliases;
+  stream >> constructors;
+  stream >> user_defined_mappings;
+  stream >> user_defined_equations;
 
-    // Store the given information in a new data specification (to ignore existing elements of spec).
-    spec = data_specification(sorts, aliases, constructors, user_defined_mappings, user_defined_equations);
-  }
-  catch (std::exception&)
-  {
-    throw mcrl2::runtime_error("Input stream does not contain a data specification");
-  }
+  // Store the given information in a new data specification (to ignore existing elements of spec).
+  spec = data_specification(sorts, aliases, constructors, user_defined_mappings, user_defined_equations);
 
   return stream;
 }

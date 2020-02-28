@@ -284,11 +284,17 @@ static atermpp::aterm_appl add_index_impl(const atermpp::aterm_appl& x)
   return x;
 }
 
+atermpp::aterm boolean_equation_system_marker()
+{
+  return atermpp::aterm_appl(atermpp::function_symbol("boolean_equation_system", 0));
+}
+
 atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const boolean_equation_system& bes)
 {
   atermpp::aterm_stream_state state(stream);
   stream << remove_index_impl;
 
+  stream << boolean_equation_system_marker();
   stream << bes.initial_state();
   stream << bes.equations();
 
@@ -312,13 +318,29 @@ atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, boolean_equat
   atermpp::aterm_stream_state state(stream);
   stream >> add_index_impl;
 
-  boolean_expression initial_state;
-  std::vector<boolean_equation> equations;
+  try
+  {
+    atermpp::aterm marker;
 
-  stream >> initial_state;
-  stream >> equations;
+    stream >> marker;
+    if (marker != boolean_equation_system_marker())
+    {
+      throw mcrl2::runtime_error("Stream does not contain a boolean equation system (BES).");
+    }
 
-  bes = boolean_equation_system(equations, initial_state);
+    boolean_expression initial_state;
+    std::vector<boolean_equation> equations;
+
+    stream >> initial_state;
+    stream >> equations;
+
+    bes = boolean_equation_system(equations, initial_state);
+  }
+  catch (std::exception& ex)
+  {
+    mCRL2log(log::error) << ex.what() << "\n";
+    throw mcrl2::runtime_error(std::string("Error reading boolean equation system (BES)."));
+  }
   return stream;
 }
 
