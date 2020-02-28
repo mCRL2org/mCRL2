@@ -37,7 +37,7 @@ set(STATESPACE_BENCHMARKS
 
 # This target is used to generate all intermediate files required for benchmarks. 
 add_custom_target(benchmarks)
-add_dependencies(benchmarks lps2lts pbes2bool pbessolve generatelts ltsconvert)
+add_dependencies(benchmarks lps2lts pbes2bool ltsconvert)
 
 foreach(benchmark ${STATESPACE_BENCHMARKS})
   # Obtain just <name>.mcrl2, split off <name> for the benchmark name and output lps <name>.lps
