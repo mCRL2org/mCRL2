@@ -106,7 +106,7 @@ class probabilistic_state
     void swap(probabilistic_state& s)
     {
       m_probabilistic_state.swap(s.m_probabilistic_state);
-    };
+    }
 
     /** \brief Set this probabilistic state to a single state with probability one.
      * \details It is assumed that the given state probability pair does not have
@@ -117,7 +117,7 @@ class probabilistic_state
       assert(size()==0);
       m_probabilistic_state.emplace_back(s, PROBABILITY::one());
       shrink_to_fit();
-    };
+    }
 
     /** \brief Add a state with a probability to the probabilistic state
      * \param[in] s The state to be added.
