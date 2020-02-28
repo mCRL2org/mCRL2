@@ -31,7 +31,8 @@ static constexpr std::uint16_t BAF_MAGIC = 0x8baf;
 /// 24 September 2014 : version changed to 0x0303 (introduction of stochastic distribution)
 ///  2 April 2017     : version changed to 0x0304 (removed a few superfluous fields in the format)
 /// 19 July 2019      : version changed to 0x8305 (introduction of the streamable aterm format)
-static constexpr std::uint16_t BAF_VERSION = 0x8305;
+/// 28 February 2020  : version changed to 0x8306 (added ability to stream aterm_int, implemented structured streaming for all objects)
+static constexpr std::uint16_t BAF_VERSION = 0x8306;
 
 /// \brief Each packet has a header consisting of a type.
 /// \details Either indicates a function symbol, a term (either shared or output) or an arbitrary integer.
@@ -185,7 +186,7 @@ binary_aterm_istream::binary_aterm_istream(std::istream& is)
   // Read the binary aterm format header.
   if (m_stream.read_bits(8) != 0 || m_stream.read_bits(16) != BAF_MAGIC)
   {
-    throw mcrl2::runtime_error("Error while reading file: The file is not correct as it does not have the BAF_MAGIC control sequence at the right place.");
+    throw mcrl2::runtime_error("Error while reading: missing the BAF_MAGIC control sequence.");
   }
 
   std::size_t version = m_stream.read_bits(16);
