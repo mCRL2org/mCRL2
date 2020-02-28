@@ -373,10 +373,10 @@ void write_lts_header(atermpp::aterm_ostream& stream,
   const data::variable_list& parameters,
   const process::action_label_list& action_labels)
 {
-  // Write the header of the lts.
-  atermpp::aterm_stream_state state(stream);
+  // We set the transformer for all other elements (transitions, state labels and the initial state).
   stream << data::detail::remove_index_impl;
 
+  // Write the header of the lts.
   stream << detail::labelled_transition_system_mark();
   stream << data_spec;
   stream << parameters;

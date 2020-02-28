@@ -14,6 +14,7 @@
 
 #include "mcrl2/atermpp/aterm_io_binary.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/stochastic_specification.h"
 
 #include <fstream>
 
@@ -24,12 +25,12 @@ namespace lps
 {
 
 /// \brief Writes LPS to the stream.
-template <typename LinearProcess, typename InitialProcessExpression>
-atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const specification_base<LinearProcess, InitialProcessExpression>& spec);
+atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const specification& spec);
+atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const stochastic_specification& spec);
 
 /// \brief Reads LPS from the stream.
-template <typename LinearProcess, typename InitialProcessExpression>
-atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, specification_base<LinearProcess, InitialProcessExpression>& spec);
+atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, specification& spec);
+atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, stochastic_specification& spec);
 
 /// \brief Save an LPS in the format specified.
 /// \param spec The LPS to be stored

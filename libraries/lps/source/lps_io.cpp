@@ -58,12 +58,12 @@ atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, deadlock_summ
   stream >> time;
 
   summand = deadlock_summand(summation_variables, condition, lps::deadlock(time));
-
   return stream;
 }
 
-atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const action_summand& summand)
+atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const stochastic_action_summand& summand)
 {
+  stream << summand.distribution();
   stream << summand.summation_variables();
   stream << summand.condition();
   stream << summand.multi_action();
@@ -71,41 +71,24 @@ atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const action_
   return stream;
 }
 
-atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, action_summand& summand)
+atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, stochastic_action_summand& summand)
 {
+  stochastic_distribution distribution;
   data::variable_list summation_variables;
   data::data_expression condition;
   lps::multi_action multi_action;
   data::assignment_list assignments;
 
+  stream >> distribution;
   stream >> summation_variables;
   stream >> condition;
   stream >> multi_action;
   stream >> assignments;
 
-  summand = action_summand(summation_variables, condition, multi_action, assignments);
-  return stream;
-}
-
-atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const stochastic_action_summand& summand)
-{
-  stream << summand.distribution();
-  stream << static_cast<action_summand>(summand);
-  return stream;
-}
-
-atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, stochastic_action_summand& summand)
-{
-  stochastic_distribution distribution;
-  action_summand action_summand;
-
-  stream >> distribution;
-  stream >> action_summand;
-
-  summand = stochastic_action_summand(action_summand.summation_variables(),
-    action_summand.condition(),
-    action_summand.multi_action(),
-    action_summand.assignments(),
+  summand = stochastic_action_summand(summation_variables,
+    condition,
+    multi_action,
+    assignments,
     distribution);
   return stream;
 }
@@ -128,15 +111,15 @@ atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, linear_proces
   std::vector<ActionSummand> action_summands;
 
   stream >> process_parameters;
-  stream >> deadlock_summands;
   stream >> action_summands;
+  stream >> deadlock_summands;
 
   lps = linear_process_base<ActionSummand>(process_parameters, deadlock_summands, action_summands);
   return stream;
 }
 
 template <typename LinearProcess, typename InitialProcessExpression>
-atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const specification_base<LinearProcess, InitialProcessExpression>& spec)
+void write_spec(atermpp::aterm_ostream& stream, const specification_base<LinearProcess, InitialProcessExpression>& spec)
 {
   atermpp::aterm_stream_state state(stream);
   stream << data::detail::remove_index_impl;
@@ -147,11 +130,10 @@ atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const specifi
   stream << spec.global_variables();
   stream << spec.process();
   stream << spec.initial_process();
-  return stream;
 }
 
 template <typename LinearProcess, typename InitialProcessExpression>
-atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, specification_base<LinearProcess, InitialProcessExpression>& spec)
+void read_spec(atermpp::aterm_istream& stream, specification_base<LinearProcess, InitialProcessExpression>& spec)
 {
   atermpp::aterm_stream_state state(stream);
   stream >> data::detail::add_index_impl;
@@ -184,20 +166,32 @@ atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, specification
     mCRL2log(log::error) << ex.what() << "\n";
     throw mcrl2::runtime_error(std::string("Error reading linear process specification (LPS)."));
   }
+}
 
+atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const lps::specification& spec)
+{
+  write_spec(stream, lps::stochastic_specification(spec));
   return stream;
 }
 
-template atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream,
-  const specification_base<mcrl2::lps::linear_process, mcrl2::lps::process_initializer>& spec);
+atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const lps::stochastic_specification& spec)
+{
+  write_spec(stream, spec);
+  return stream;
+}
 
-template atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream,
-  const specification_base<mcrl2::lps::stochastic_linear_process, mcrl2::lps::stochastic_process_initializer>& spec);
+atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, lps::specification& spec)
+{
+  lps::stochastic_specification stochastic_spec;
+  read_spec(stream, stochastic_spec);
+  spec = lps::remove_stochastic_operators(stochastic_spec);
+  return stream;
+}
 
-template atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream,
-  specification_base<mcrl2::lps::stochastic_linear_process, mcrl2::lps::stochastic_process_initializer>& spec);
-
-template atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream,
-  specification_base<mcrl2::lps::linear_process, mcrl2::lps::process_initializer>& spec);
+atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, lps::stochastic_specification& spec)
+{
+  read_spec(stream, spec);
+  return stream;
+}
 
 } // namespace mcrl2::lps

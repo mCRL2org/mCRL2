@@ -289,18 +289,6 @@ atermpp::aterm boolean_equation_system_marker()
   return atermpp::aterm_appl(atermpp::function_symbol("boolean_equation_system", 0));
 }
 
-atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const boolean_equation_system& bes)
-{
-  atermpp::aterm_stream_state state(stream);
-  stream << remove_index_impl;
-
-  stream << boolean_equation_system_marker();
-  stream << bes.initial_state();
-  stream << bes.equations();
-
-  return stream;
-}
-
 atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const boolean_equation& equation)
 {
   atermpp::aterm_stream_state state(stream);
@@ -309,6 +297,36 @@ atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const boolean
   stream << equation.symbol();
   stream << equation.variable();
   stream << equation.formula();
+
+  return stream;
+}
+
+atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, boolean_equation& equation)
+{
+  atermpp::aterm_stream_state state(stream);
+  stream >> add_index_impl;
+
+  fixpoint_symbol symbol;
+  boolean_variable variable;
+  boolean_expression formula;
+
+  stream >> symbol;
+  stream >> variable;
+  stream >> formula;
+
+  equation = boolean_equation(symbol, variable, formula);
+
+  return stream;
+}
+
+atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const boolean_equation_system& bes)
+{
+  atermpp::aterm_stream_state state(stream);
+  stream << remove_index_impl;
+
+  stream << boolean_equation_system_marker();
+  stream << bes.initial_state();
+  stream << bes.equations();
 
   return stream;
 }
@@ -341,24 +359,6 @@ atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, boolean_equat
     mCRL2log(log::error) << ex.what() << "\n";
     throw mcrl2::runtime_error(std::string("Error reading boolean equation system (BES)."));
   }
-  return stream;
-}
-
-atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, boolean_equation& equation)
-{
-  atermpp::aterm_stream_state state(stream);
-  stream >> add_index_impl;
-
-  fixpoint_symbol symbol;
-  boolean_variable variable;
-  boolean_expression formula;
-
-  stream >> symbol;
-  stream >> variable;
-  stream >> formula;
-
-  equation = boolean_equation(symbol, variable, formula);
-
   return stream;
 }
 
