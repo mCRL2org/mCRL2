@@ -64,27 +64,6 @@ class specification_base
     /// \brief The initial state of the specification
     InitialProcessExpression m_initial_process;
 
-    /// \brief Returns the i-th element of t, converted to aterm_appl
-    const atermpp::aterm_appl& get(const atermpp::aterm_appl& t, std::size_t i)
-    {
-      return atermpp::down_cast<atermpp::aterm_appl>(t[i]);
-    }
-
-    /// \brief Initializes the specification with an aterm.
-    /// \param t An aterm.
-    /// \param stochastic_distributions_allowed A boolean indicating that the specification can contain stochastic operators.
-    void construct_from_aterm(const atermpp::aterm_appl& t, bool stochastic_distributions_allowed = true)
-    {
-      using atermpp::down_cast;
-      assert(core::detail::check_term_LinProcSpec(t));
-      m_data             = data::data_specification(get(t, 0));
-      m_action_labels    = down_cast<process::action_label_list>(get(t, 1)[0]);
-      const data::variable_list& global_variables = down_cast<data::variable_list>(get(t, 2)[0]);
-      m_global_variables = std::set<data::variable>(global_variables.begin(),global_variables.end());
-      m_process          = LinearProcess(get(t, 3), stochastic_distributions_allowed);
-      m_initial_process  = InitialProcessExpression(get(t, 4));
-    }
-
   public:
     /// \brief The process type
     typedef LinearProcess process_type;
@@ -100,15 +79,6 @@ class specification_base
       m_global_variables = other.m_global_variables;
       m_process = other.m_process;
       m_initial_process = other.m_initial_process;
-    }
-
-    /// \brief Constructor.
-    /// \param t A term
-    /// \param stochastic_distributions_allowed A boolean indicating that the specification can contain stochastic operators.
-    explicit specification_base(const atermpp::aterm_appl& t, bool stochastic_distributions_allowed = true)
-    {
-      assert(core::detail::check_rule_LinProcSpec(t));
-      construct_from_aterm(t, stochastic_distributions_allowed);
     }
 
     /// \brief Constructor.
@@ -215,14 +185,6 @@ class specification: public specification_base<linear_process, process_initializ
     specification() = default;
 
     specification(const specification& other) = default;
-
-    /// \brief Constructor.
-    /// \param t A term
-    explicit specification(const atermpp::aterm_appl& t)
-      : super(t, false)
-    {
-      complete_data_specification(*this);
-    }
 
     /// \brief Constructor.
     /// \param data A data specification

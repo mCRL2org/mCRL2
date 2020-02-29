@@ -205,6 +205,29 @@ static atermpp::aterm_appl add_index_impl(const atermpp::aterm_appl& x)
   return x;
 }
 
+inline atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const pbes_equation& equation)
+{
+  stream << equation.symbol();
+  stream << equation.variable();
+  stream << equation.formula();
+  return stream;
+}
+
+inline atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, pbes_equation& equation)
+{
+  fixpoint_symbol symbol;
+  propositional_variable var;
+  pbes_expression expression;
+
+  stream >> symbol;
+  stream >> var;
+  stream >> expression;
+
+  equation = pbes_equation(symbol, var, expression);
+
+  return stream;
+}
+
 atermpp::aterm pbes_marker()
 {
   return atermpp::aterm_appl(atermpp::function_symbol("parameterised_boolean_equation_system", 0));
@@ -220,35 +243,6 @@ atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const pbes& p
   stream << pbes.global_variables();
   stream << pbes.equations();
   stream << pbes.initial_state();
-  return stream;
-}
-
-atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const pbes_equation& equation)
-{
-  atermpp::aterm_stream_state state(stream);
-  stream << remove_index_impl;
-
-  stream << equation.symbol();
-  stream << equation.variable();
-  stream << equation.formula();
-  return stream;
-}
-
-atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, pbes_equation& equation)
-{
-  atermpp::aterm_stream_state state(stream);
-  stream >> add_index_impl;
-
-  fixpoint_symbol symbol;
-  propositional_variable var;
-  pbes_expression expression;
-
-  stream >> symbol;
-  stream >> var;
-  stream >> expression;
-
-  equation = pbes_equation(symbol, var, expression);
-
   return stream;
 }
 
@@ -279,6 +273,10 @@ atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, pbes& pbes)
 
     pbes = pbes_system::pbes(data, equations, global_variables, initial_state);
 
+    // Add all the sorts that are used in the specification
+    // to the data specification. This is important for those
+    // sorts that are built in, because these are not explicitly
+    // declared.
     complete_data_specification(pbes);
   }
   catch (std::exception& ex)

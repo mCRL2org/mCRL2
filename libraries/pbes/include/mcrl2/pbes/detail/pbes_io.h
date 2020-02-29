@@ -20,14 +20,8 @@ namespace mcrl2::pbes_system
 /// \brief Writes the pbes to a stream.
 atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const pbes& pbes);
 
-/// \brief Write a pbes equation to the stream.
-atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const pbes_equation& equation);
-
 /// \brief Reads a pbes from a stream.
 atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, pbes& pbes);
-
-/// \brief Read a pbes equation from the stream.
-atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, pbes_equation& equation);
 
 namespace detail
 {
