@@ -55,14 +55,6 @@ class stochastic_specification: public specification_base<stochastic_linear_proc
     { }
 
     /// \brief Constructor.
-    /// \param t A term
-    stochastic_specification(const atermpp::aterm_appl& t)
-      : super(t)
-    {
-      complete_data_specification(*this);
-    }
-
-    /// \brief Constructor.
     /// \param data A data specification
     /// \param action_labels A sequence of action labels
     /// \param global_variables A set of global variables

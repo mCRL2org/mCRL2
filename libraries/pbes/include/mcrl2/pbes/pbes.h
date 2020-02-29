@@ -123,6 +123,7 @@ class pbes
     {
       m_global_variables = pbes_system::find_free_variables(*this);
       assert(core::detail::check_rule_PBES(pbes_to_aterm(*this)));
+      assert(is_well_typed());
     }
 
     /// \brief Constructor.
@@ -141,6 +142,7 @@ class pbes
       m_initial_state(initial_state)
     {
       assert(core::detail::check_rule_PBES(pbes_to_aterm(*this)));
+      assert(is_well_typed());
     }
 
     /// \brief Returns the data specification.
