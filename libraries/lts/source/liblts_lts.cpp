@@ -12,6 +12,7 @@
 #include "mcrl2/lts/lts_io.h"
 
 #include <fstream>
+#include <optional>
 
 namespace mcrl2::lts
 {
@@ -132,7 +133,7 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
     mcrl2::utilities::indexed_set<process::timed_multi_action> multi_actions;
 
     // The initial state is stored and set as last.
-    probabilistic_lts_lts_t::probabilistic_state_t initial_state;
+    std::optional<probabilistic_lts_lts_t::probabilistic_state_t> initial_state;
 
     while (true)
     {
@@ -203,16 +204,25 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
       else if (term == initial_state_mark())
       {
         // Read the initial state.
-        stream >> initial_state;
+        probabilistic_lts_lts_t::probabilistic_state_t state;
+        stream >> state;
+        initial_state = state;
       }
       else
       {
-        throw mcrl2::runtime_error("Malformed labelled transition system stream.");
+        throw mcrl2::runtime_error("Unknown mark in labelled transition system (LTS) stream.");
       }
     }
 
     // The initial state can only be set after the states are known.
-    set_initial_state(lts, initial_state);
+    if (initial_state)
+    {
+      set_initial_state(lts, initial_state.value());
+    }
+    else
+    {
+      throw mcrl2::runtime_error("Missing initial state in labelled transition system (LTS) stream.");
+    }
   }
   catch (std::exception& ex)
   {
