@@ -118,8 +118,7 @@ atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, linear_proces
   return stream;
 }
 
-template <typename LinearProcess, typename InitialProcessExpression>
-void write_spec(atermpp::aterm_ostream& stream, const specification_base<LinearProcess, InitialProcessExpression>& spec)
+void write_spec(atermpp::aterm_ostream& stream, const stochastic_specification& spec)
 {
   atermpp::aterm_stream_state state(stream);
   stream << data::detail::remove_index_impl;
@@ -132,8 +131,7 @@ void write_spec(atermpp::aterm_ostream& stream, const specification_base<LinearP
   stream << spec.initial_process();
 }
 
-template <typename LinearProcess, typename InitialProcessExpression>
-void read_spec(atermpp::aterm_istream& stream, specification_base<LinearProcess, InitialProcessExpression>& spec)
+void read_spec(atermpp::aterm_istream& stream, stochastic_specification& spec)
 {
   atermpp::aterm_stream_state state(stream);
   stream >> data::detail::add_index_impl;
@@ -151,15 +149,15 @@ void read_spec(atermpp::aterm_istream& stream, specification_base<LinearProcess,
     data::data_specification data;
     process::action_label_list action_labels;
     std::set<data::variable> global_variables;
-    LinearProcess process;
-    InitialProcessExpression initial_process;
+    stochastic_linear_process process;
+    stochastic_process_initializer initial_process;
 
     stream >> data;
     stream >> action_labels;
     stream >> global_variables;
     stream >> process;
     stream >> initial_process;
-    spec = specification_base<LinearProcess, InitialProcessExpression>(data, action_labels, global_variables, process, initial_process);
+    spec = stochastic_specification(data, action_labels, global_variables, process, initial_process);
   }
   catch (std::exception& ex)
   {
@@ -168,13 +166,13 @@ void read_spec(atermpp::aterm_istream& stream, specification_base<LinearProcess,
   }
 }
 
-atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const lps::specification& spec)
+atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const specification& spec)
 {
-  write_spec(stream, lps::stochastic_specification(spec));
+  write_spec(stream, stochastic_specification(spec));
   return stream;
 }
 
-atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const lps::stochastic_specification& spec)
+atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const stochastic_specification& spec)
 {
   write_spec(stream, spec);
   return stream;
@@ -182,9 +180,9 @@ atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const lps::st
 
 atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, lps::specification& spec)
 {
-  lps::stochastic_specification stochastic_spec;
+  stochastic_specification stochastic_spec;
   read_spec(stream, stochastic_spec);
-  spec = lps::remove_stochastic_operators(stochastic_spec);
+  spec = remove_stochastic_operators(stochastic_spec);
   return stream;
 }
 
