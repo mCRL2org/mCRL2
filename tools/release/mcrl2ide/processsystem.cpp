@@ -233,11 +233,12 @@ QProcess* ProcessSystem::createSubprocess(
 
   /* connect the subprocess to the subprocess handler to execute the next one
    *   when finished */
-  connect(subprocess, SIGNAL(finished(int)), this,
+  connect(subprocess, SIGNAL(finished(int, QProcess::ExitStatus)), this,
           SLOT(executeNextSubprocess(int)));
 
   /* the subprocess should delete itself when finished */
-  connect(subprocess, SIGNAL(finished(int)), subprocess, SLOT(deleteLater()));
+  connect(subprocess, SIGNAL(finished(int, QProcess::ExitStatus)), subprocess,
+          SLOT(deleteLater()));
 
   /* add properties we might need */
   subprocess->setProperty("processid", processid);
@@ -259,7 +260,7 @@ QProcess* ProcessSystem::createSubprocess(
   {
   case SubprocessType::ParseMcrl2:
     arguments << "--check-only";
-    connect(subprocess, SIGNAL(finished(int)), this,
+    connect(subprocess, SIGNAL(finished(int, QProcess::ExitStatus)), this,
             SLOT(mcrl2ParsingResult(int)));
 
   [[fallthrough]];
@@ -309,7 +310,7 @@ QProcess* ProcessSystem::createSubprocess(
                          mcrl2::lts::print_equivalence(equivalence))
               << inputFile << inputFile2;
 
-    connect(subprocess, SIGNAL(finished(int)), this,
+    connect(subprocess, SIGNAL(finished(int, QProcess::ExitStatus)), this,
             SLOT(verificationResult(int)));
     break;
 
@@ -322,7 +323,7 @@ QProcess* ProcessSystem::createSubprocess(
 
   case SubprocessType::ParseMcf:
     arguments << "--check-only";
-    connect(subprocess, SIGNAL(finished(int)), this,
+    connect(subprocess, SIGNAL(finished(int, QProcess::ExitStatus)), this,
             SLOT(mcfParsingResult(int)));
 
   [[fallthrough]];
@@ -357,7 +358,7 @@ QProcess* ProcessSystem::createSubprocess(
     }
     else
     {
-      connect(subprocess, SIGNAL(finished(int)), this,
+      connect(subprocess, SIGNAL(finished(int, QProcess::ExitStatus)), this,
               SLOT(verificationResult(int)));
     }
     break;
