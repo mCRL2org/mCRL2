@@ -134,7 +134,10 @@ leading to unreadable (white on white) text in some tools.
    :class: platform-specific mac
 
    For MacOS the minimum Qt version supported is 5.10.
-   QT can be installed using MacPorts by doing the following:
+   However, due to MacOS updates changing the APIs used by applications,
+   a newer version of MacOS may require a newer version of Qt for some
+   features to work properly.
+   Qt can be installed using MacPorts by doing the following:
 
    - First go to http://www.macports.org/.
    - In the left menu bar select "Available Downloads" and download the
@@ -146,7 +149,7 @@ leading to unreadable (white on white) text in some tools.
        sudo port selfupdate
 
      Note that ``port`` is usually installed in ``/opt/local/bin``.
-   - To install *QT*, execute::
+   - To install Qt, execute::
 
        sudo port install qt5-mac
 
