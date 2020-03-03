@@ -72,15 +72,6 @@ class specification_base
     specification_base()
     { }
 
-    specification_base(const specification_base<LinearProcess, InitialProcessExpression>& other)
-    {
-      m_data = other.m_data;
-      m_action_labels = other.m_action_labels;
-      m_global_variables = other.m_global_variables;
-      m_process = other.m_process;
-      m_initial_process = other.m_initial_process;
-    }
-
     /// \brief Constructor.
     /// \param data A data specification
     /// \param action_labels A sequence of action labels
@@ -183,8 +174,6 @@ class specification: public specification_base<linear_process, process_initializ
   public:
     /// \brief Constructor.
     specification() = default;
-
-    specification(const specification& other) = default;
 
     /// \brief Constructor.
     /// \param data A data specification

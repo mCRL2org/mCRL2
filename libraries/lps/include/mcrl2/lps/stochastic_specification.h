@@ -6,8 +6,6 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/stochastic_specification.h
-/// \brief add your file description here.
 
 #ifndef MCRL2_LPS_STOCHASTIC_SPECIFICATION_H
 #define MCRL2_LPS_STOCHASTIC_SPECIFICATION_H
@@ -18,12 +16,6 @@
 namespace mcrl2 {
 
 namespace lps {
-
-namespace detail {
-
-
-
-} // namespace detail
 
 class stochastic_specification;
 void complete_data_specification(stochastic_specification& spec);
@@ -50,11 +42,6 @@ class stochastic_specification: public specification_base<stochastic_linear_proc
     { }
 
     /// \brief Constructor.
-    stochastic_specification(const stochastic_specification& other)
-      : super(other)
-    { }
-
-    /// \brief Constructor.
     /// \param data A data specification
     /// \param action_labels A sequence of action labels
     /// \param global_variables A set of global variables
@@ -75,7 +62,7 @@ class stochastic_specification: public specification_base<stochastic_linear_proc
       : super(other.data(), 
         other.action_labels(), 
         other.global_variables(), 
-        other.process(), 
+        stochastic_linear_process(other.process()),
         stochastic_process_initializer(other.initial_process().assignments(),stochastic_distribution()))
     { } 
 };

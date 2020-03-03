@@ -120,12 +120,6 @@ public:
     return false;
   }
 
-  mutable_map_substitution& operator=(const mutable_map_substitution& other)
-  {
-    m_map = other.m_map;
-    return *this;
-  }
-
   /// \brief Returns an iterator pointing to the beginning of the sequence of assignments
   /// TODO: should become protected
   const_iterator begin() const

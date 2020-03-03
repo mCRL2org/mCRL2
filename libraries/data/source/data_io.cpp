@@ -15,6 +15,7 @@
 using namespace mcrl2;
 using namespace mcrl2::data;
 
+static
 atermpp::aterm_appl remove_index_impl(const atermpp::aterm_appl& x)
 {
   if (x.function() == core::detail::function_symbol_DataVarId())
@@ -28,6 +29,7 @@ atermpp::aterm_appl remove_index_impl(const atermpp::aterm_appl& x)
   return x;
 }
 
+static
 atermpp::aterm_appl add_index_impl(const atermpp::aterm_appl& x)
 {
   if (x.function() == core::detail::function_symbol_DataVarIdNoIndex())

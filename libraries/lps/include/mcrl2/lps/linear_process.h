@@ -79,13 +79,6 @@ class linear_process_base
     /// \brief Constructor.
     linear_process_base() = default;
 
-    /// \brief Copy constructor.
-    linear_process_base(const linear_process_base<ActionSummand> &other) :
-      m_process_parameters(other.m_process_parameters),
-      m_deadlock_summands(other.m_deadlock_summands),
-      m_action_summands(other.m_action_summands)
-    { }
-
     /// \brief Constructor.
     linear_process_base(const data::variable_list& process_parameters,
                         const deadlock_summand_vector& deadlock_summands,
@@ -212,9 +205,6 @@ class linear_process: public linear_process_base<action_summand>
   public:
     /// \brief Constructor.
     linear_process() = default;
-
-    /// \brief Copy constructor.
-    linear_process(const linear_process& other) = default;
 
     /// \brief Constructor.
     linear_process(const data::variable_list& process_parameters,

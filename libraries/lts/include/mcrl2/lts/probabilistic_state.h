@@ -73,12 +73,19 @@ class probabilistic_state
       shrink_to_fit();
     }
 
-    /** \brief Copy constructor
-     **/
+    /** \brief Copy constructor **/
     probabilistic_state(const probabilistic_state& s)
       : m_probabilistic_state(s.m_probabilistic_state)
     {
       shrink_to_fit();
+    }
+
+    /** \brief Copy assignment constructor **/
+    probabilistic_state& operator=(const probabilistic_state& s)
+    {
+      m_probabilistic_state = s.m_probabilistic_state;
+      shrink_to_fit();
+      return *this;
     }
 
     /** \brief Creates a probabilistic state on the basis of state_probability_pairs.
