@@ -271,13 +271,6 @@ class lts_lts_base
     lts_lts_base()
     {}
 
-    /// \brief Copy constructor
-    lts_lts_base(const lts_lts_base& l)
-    : m_data_spec(l.m_data_spec),
-      m_parameters(l.m_parameters),
-      m_action_decls(l.m_action_decls)
-    {}
-
     void swap(lts_lts_base& l)
     {
       const data::data_specification auxd=m_data_spec;

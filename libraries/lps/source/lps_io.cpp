@@ -118,6 +118,7 @@ atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, linear_proces
   return stream;
 }
 
+static
 void write_spec(atermpp::aterm_ostream& stream, const stochastic_specification& spec)
 {
   atermpp::aterm_stream_state state(stream);
@@ -131,6 +132,7 @@ void write_spec(atermpp::aterm_ostream& stream, const stochastic_specification& 
   stream << spec.initial_process();
 }
 
+static
 void read_spec(atermpp::aterm_istream& stream, stochastic_specification& spec)
 {
   atermpp::aterm_stream_state state(stream);

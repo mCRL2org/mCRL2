@@ -57,11 +57,6 @@ class stochastic_linear_process: public linear_process_base<stochastic_action_su
     stochastic_linear_process()
     { }
 
-    /// \brief Copy constructor.
-    stochastic_linear_process(const stochastic_linear_process& other)
-      : super(other)
-    { }
-
     /// \brief Constructor.
     stochastic_linear_process(const atermpp::aterm_appl& t, bool stochastic_distributions_allowed = true)
       : super(t, stochastic_distributions_allowed)
@@ -76,7 +71,7 @@ class stochastic_linear_process: public linear_process_base<stochastic_action_su
     { }
 
     /// \brief Constructor.
-    stochastic_linear_process(const linear_process& other)
+    explicit stochastic_linear_process(const linear_process& other)
       : super(other.process_parameters(), other.deadlock_summands(), detail::convert_action_summands(other.action_summands()))
     { }
 };

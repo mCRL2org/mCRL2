@@ -613,20 +613,6 @@ class data_specification: public sort_specification
         m_normalised_equations == other.m_normalised_equations;
     }
 
-    data_specification& operator=(const data_specification& other)
-    {
-      sort_specification::operator=(other);
-      m_user_defined_constructors=other.m_user_defined_constructors;
-      m_user_defined_mappings=other.m_user_defined_mappings;
-      m_user_defined_equations=other.m_user_defined_equations;
-      m_normalised_mappings=other.m_normalised_mappings;
-      m_normalised_constructors=other.m_normalised_constructors;
-      m_grouped_normalised_mappings=other.m_grouped_normalised_mappings;
-      m_grouped_normalised_constructors=other.m_grouped_normalised_constructors;
-      m_normalised_equations=other.m_normalised_equations;
-      return *this;
-    }
-
 }; // class data_specification
 
 //--- start generated class data_specification ---//
