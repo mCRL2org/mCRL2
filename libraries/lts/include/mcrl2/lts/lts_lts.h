@@ -357,24 +357,8 @@ class lts_lts_base
 class lts_lts_t : public lts< state_label_lts, action_label_lts, detail::lts_lts_base >
 {
   public:
-    typedef lts< state_label_lts, action_label_lts, detail::lts_lts_base > super;
-
     /** \brief Creates an object containing no information. */
-    lts_lts_t()
-    {}
-
-    /** \brief Creates an object containing a muCRL specification.
-     * \param[in] t The muCRL specification that will be stored in the object. */
-    lts_lts_t(const atermpp::aterm& t);
-
-    /** \brief Creates an object containing an mCRL2 specification.
-     * \param[in] spec The mCRL2 specification that will be stored in the object. */
-    lts_lts_t(lps::specification const& spec);
-
-    /** \brief Copy constructor */
-    lts_lts_t(const lts_lts_t& l):
-      super(l)
-    {}
+    lts_lts_t() {}
 
     /** \brief Load the labelled transition system from file.
      *  \details If the filename is empty, the result is read from stdout.
@@ -401,27 +385,8 @@ class probabilistic_lts_lts_t :
                                    detail::lts_lts_base >
 {
   public:
-    typedef probabilistic_lts< state_label_lts,
-                               action_label_lts,
-                               probabilistic_state_t,
-                               detail::lts_lts_base > super;
-
     /** \brief Creates an object containing no information. */
-    probabilistic_lts_lts_t()
-    {}
-
-    /** \brief Creates an object containing a muCRL specification.
-     * \param[in] t The muCRL specification that will be stored in the object. */
-    probabilistic_lts_lts_t(const atermpp::aterm& t);
-
-    /** \brief Creates an object containing an mCRL2 specification.
-     * \param[in] spec The mCRL2 specification that will be stored in the object. */
-    probabilistic_lts_lts_t(lps::specification const& spec);
-
-    /** \brief Copy constructor */
-    probabilistic_lts_lts_t(const probabilistic_lts_lts_t& l):
-      super(l)
-    {}
+    probabilistic_lts_lts_t() {}
 
     /** \brief Load the labelled transition system from file.
      *  \details If the filename is empty, the result is read from stdout.
