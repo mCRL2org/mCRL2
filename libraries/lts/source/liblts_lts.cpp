@@ -103,6 +103,10 @@ static void set_initial_state(probabilistic_lts_lts_t& lts, const probabilistic_
 template <class LTS>
 static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
 {
+  static_assert(std::is_same<LTS,probabilistic_lts_lts_t>::value ||
+                std::is_same<LTS,lts_lts_t>::value,
+                "Function read_lts can only be applied to a (probabilistic) lts. ");
+
   atermpp::aterm_stream_state state(stream);
   stream >> data::detail::add_index_impl;
 
@@ -290,8 +294,12 @@ void write_initial_state(atermpp::aterm_ostream& stream, const lts_lts_t& lts)
 }
 
 template <class LTS>
-static void write_lts(atermpp::aterm_ostream& stream, LTS& lts)
+static void write_lts(atermpp::aterm_ostream& stream, const LTS& lts)
 {
+  static_assert(std::is_same<LTS,probabilistic_lts_lts_t>::value ||
+                std::is_same<LTS,lts_lts_t>::value,
+                "Function write_lts can only be applied to a (probabilistic) lts. ");
+
   // Write the process related information.
   write_lts_header(stream,
    lts.data(),
@@ -301,7 +309,15 @@ static void write_lts(atermpp::aterm_ostream& stream, LTS& lts)
   for (auto& trans : lts.get_transitions())
   {
     lts_lts_t::action_label_t label = lts.action_label(lts.apply_hidden_label_map(trans.label()));
-    write_transition(stream, trans.from(), process::timed_multi_action(label.actions(), label.time()), trans.to());
+
+    if constexpr (std::is_same<LTS, probabilistic_lts_lts_t>::value)
+    {
+      write_transition(stream, trans.from(), process::timed_multi_action(label.actions(), label.time()), lts.probabilistic_state(trans.to()));
+    }
+    else
+    {
+      write_transition(stream, trans.from(), process::timed_multi_action(label.actions(), label.time()), trans.to());
+    }
   }
 
   if (lts.has_state_info())
@@ -322,7 +338,7 @@ static void write_to_lts(const LTS_TRANSITION_SYSTEM& lts, const std::string& fi
 {
   static_assert(std::is_same<LTS_TRANSITION_SYSTEM,probabilistic_lts_lts_t>::value ||
                 std::is_same<LTS_TRANSITION_SYSTEM,lts_lts_t>::value,
-                "Function read_from_lts can only be applied to a (probabilistic) lts. ");
+                "Function write_to_lts can only be applied to a (probabilistic) lts. ");
 
   std::ofstream fstream;
   if (!filename.empty())
@@ -406,7 +422,7 @@ void write_transition(atermpp::aterm_ostream& stream, std::size_t from, const pr
   if (to.size() == 1)
   {
     // Actually a non probabilistic transition.
-    write_transition(stream, from, label, to);
+    write_transition(stream, from, label, to.begin()->state());
   }
   else
   {
