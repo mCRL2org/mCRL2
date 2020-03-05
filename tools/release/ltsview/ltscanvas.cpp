@@ -411,6 +411,7 @@ LtsCanvas::Selection LtsCanvas::selectObject(QPoint position)
   // * The identifier of the type of object clicked
   // * Up to two numbers indicating the object selected
 
+  makeCurrent();
   int maxItems = m_ltsManager->lts()->getNumClusters() + m_ltsManager->lts()->getNumStates();
   int bufferSize = maxItems * 6;
   GLuint* selectionBuffer = new GLuint[bufferSize];
@@ -522,6 +523,7 @@ LtsCanvas::Selection LtsCanvas::parseSelection(GLuint* selectionBuffer, GLint it
 
 QImage LtsCanvas::renderImage(int width, int height)
 {
+  makeCurrent();
   glReadBuffer(GL_BACK);
   glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
