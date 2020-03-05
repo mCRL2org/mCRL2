@@ -61,6 +61,11 @@ public:
     return m_is_forall == other.m_is_forall && m_var == other.m_var;
   }
 
+  bool operator!=(const quantified_variable& other) const
+  {
+    return !(*this == other);
+  }
+
   bool operator<(const quantified_variable& other) const
   {
     return m_is_forall < other.m_is_forall || (m_is_forall == other.m_is_forall && m_var < other.m_var);
@@ -604,6 +609,8 @@ class pbes_constelm_algorithm
           bool changed = false;
 
           data::variable_list params = m_variable.parameters();
+          data::rewriter::substitution_type sigma;
+          detail::make_constelm_substitution(e_constraints, sigma);
 
           if (!m_visited)
           {
@@ -612,8 +619,6 @@ class pbes_constelm_algorithm
             auto j = params.begin();
             for (auto i = e.begin(); i != e.end(); ++i, ++j)
             {
-              data::rewriter::substitution_type sigma;
-              detail::make_constelm_substitution(e_constraints, sigma);
               data::data_expression e1 = datar(*i, sigma);
               if (bound_in_quantifiers(qvars, e1))
               {
@@ -626,32 +631,70 @@ class pbes_constelm_algorithm
           }
           else
           {
-            auto j = params.begin();
-            for (auto i = e.begin(); i != e.end(); ++i, ++j)
+            std::vector<data::data_expression> deleted_constraints;
+
+            // Find longest common suffix of qvars
+            qvar_list common_qvars;
+            auto mvar = m_qvars.rbegin();
+            auto nvar = qvars.rbegin();
+            for (; mvar != m_qvars.rend() && nvar != qvars.rend(); ++mvar, ++nvar)
             {
-              auto k = m_constraints.find(*j);
+              if (*mvar != *nvar)
+              {
+                changed = true;
+                break;
+              }
+              common_qvars.push_front(*mvar);
+            }
+
+            // Find common constraints fi for which vars(fi) is contained in common_qvars
+            auto i = e.begin();
+            for (auto par = params.begin(); i != e.end(); ++i, ++par)
+            {
+              auto k = m_constraints.find(*par);
               if(k == m_constraints.end())
               {
                 continue;
               }
-              data::data_expression& ci = k->second;
-              data::rewriter::substitution_type sigma;
-              detail::make_constelm_substitution(e_constraints, sigma);
+              data::data_expression& fi = k->second;
               data::data_expression ei = datar(*i, sigma);
-              if (ci != ei || project(m_qvars, vars(ci)) != project(qvars, vars(ei)))
+              if (fi != ei)
               {
-                m_constraints.erase(k);
                 changed = true;
+                deleted_constraints.push_back(fi);
+                m_constraints.erase(k);
               }
             }
-            if (changed)
+            while (!deleted_constraints.empty())
             {
-              std::set<data::variable> used_vars;
-              for(const auto& [var, expr]: m_constraints)
+              std::set<data::variable> vars_deleted;
+              for (const data::data_expression& fi: deleted_constraints)
               {
-                data::find_free_variables(expr, std::inserter(used_vars, used_vars.end()));
+                data::find_free_variables(fi, std::inserter(vars_deleted, vars_deleted.end()));
               }
-              m_qvars = project(qvars, used_vars);
+              deleted_constraints.clear();
+
+              auto deli = std::find_if(common_qvars.rbegin(), common_qvars.rend(), [&](const detail::quantified_variable& qv)
+              {
+                return vars_deleted.find(qv.variable()) != vars_deleted.end();
+              });
+              common_qvars.erase(common_qvars.begin(), std::next(deli).base());
+
+              std::set<data::variable> bound_vars;
+              std::for_each(common_qvars.begin(), common_qvars.end(), [&](const detail::quantified_variable& qv) { bound_vars.insert(qv.variable()); });
+              for (const data::variable& par: params)
+              {
+                auto k = m_constraints.find(par);
+                if(k == m_constraints.end())
+                {
+                  continue;
+                }
+                if(!utilities::detail::set_includes(bound_vars, data::find_free_variables(k->second)))
+                {
+                  deleted_constraints.push_back(k->second);
+                  m_constraints.erase(k);
+                }
+              }
             }
           }
           return changed;
