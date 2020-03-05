@@ -3,6 +3,7 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
+\usepackage{mathtools}
 \usepackage[dvipsnames]{xcolor}
 
 \setcounter{MaxMatrixCols}{10}
@@ -329,13 +330,12 @@ R_{\forall}(V,\phi\wedge \psi)&=&R_{\forall}(V,\phi)\wedge R_{\forall}(V,\psi)\\
 
 R_{\forall}(V, \bigvee_i \phi_i)&=&
    \left\{
-     \begin{array}{l}
-       \forall V. \bigvee_i \phi_i \hspace{3cm} \text{ if } \neg \Phi \lor \neg \Psi \\
+     \begin{array}{ll}
+       \forall V \cap \vars(\bigvee_i \phi_i). \bigvee_i \phi_i & \text{ if } \Psi = \mathit{false} \\
 
-      \forall V \cap \vars(\Phi) \cap \vars(\Psi).
-      \left(
-           R_\forall(V \cap \vars(\Phi) \setminus \vars(\Psi), \Phi) \lor R_\forall(V \cap \vars(\Psi) \setminus \vars(\Phi), \Psi)
-        \right) \text{ otherwise}
+      \forall V \cap \vars(\Phi) \cap \vars(\Psi). & \text{otherwise}\\
+      \qquad \big(
+           R_\forall(V \cap \vars(\Phi) \setminus \vars(\Psi), \Phi) \mathrlap{\lor R_\forall(V \cap \vars(\Psi) \setminus \vars(\Phi), \Psi) \big)}
     \end{array}
      \right.
   \\
@@ -352,9 +352,9 @@ where
 \[
      \left\{
        \begin{array}{l}
-          \Phi = \bigvee {\{ \phi_i \mid (\vars(\phi_i) \cap V) \subseteq Z \}} \\
-          \Psi = \bigvee {\{ \phi_i \mid (\vars(\phi_i) \cap V) \nsubseteq Z \}} \\
           Z = \vars(\phi_j) \cap V \text{ for some $j$ such that $|Z|$ is minimal} \\
+          \Phi = \bigvee {\{ \phi_i \mid (\vars(\phi_i) \cap V) \subseteq Z \}} \\
+          \Psi = \bigvee {\{ \phi_i \mid (\vars(\phi_i) \cap V) \nsubseteq Z \}}
        \end{array}
      \right. \\
 \]
@@ -366,13 +366,12 @@ R_{\exists}(V,\neg \phi)&=&\neg R_{\forall}(V,\phi)\\
 
 R_{\exists}(V, \bigwedge_i \phi_i)&=&
    \left\{
-     \begin{array}{l}
-       \exists V. \bigwedge_i \phi_i \hspace{3cm} \text{ if } \Phi \lor \Psi \\
+     \begin{array}{ll}
+       \exists V \cap \vars(\bigwedge_i \phi_i). \bigwedge_i \phi_i & \text{ if } \Psi = \mathit{true} \\
 
-      \exists V \cap \vars(\Phi) \cap \vars(\Psi).
-      \left(
-           R_\exists(V \cap \vars(\Phi) \setminus \vars(\Psi), \Phi) \land R_\exists(V \cap \vars(\Psi) \setminus \vars(\Phi), \Psi)
-        \right) \text{ otherwise}
+      \exists V \cap \vars(\Phi) \cap \vars(\Psi). & \text{otherwise}\\
+      \qquad \big(
+           R_\exists(V \cap \vars(\Phi) \setminus \vars(\Psi), \Phi) \mathrlap{\land R_\exists(V \cap \vars(\Psi) \setminus \vars(\Phi), \Psi) \big)}
     \end{array}
      \right.
   \\
@@ -390,9 +389,9 @@ where
 \[
      \left\{
        \begin{array}{l}
-          \Phi = \bigwedge {\{ \phi_i \mid (\vars(\phi_i) \cap V) \subseteq Z \}} \\
-          \Psi = \bigwedge {\{ \phi_i \mid (\vars(\phi_i) \cap V) \nsubseteq Z \}} \\
           Z = \vars(\phi_j) \cap V \text{ for some $j$ such that $|Z|$ is minimal,} \\
+          \Phi = \bigwedge {\{ \phi_i \mid (\vars(\phi_i) \cap V) \subseteq Z \}} \\
+          \Psi = \bigwedge {\{ \phi_i \mid (\vars(\phi_i) \cap V) \nsubseteq Z \}}
        \end{array}
      \right. \\
 \]
