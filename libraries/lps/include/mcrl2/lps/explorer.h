@@ -638,6 +638,7 @@ class explorer: public abortable
     {
       std::set<data::function_symbol> result = std::move(s);
       result.insert(data::less_equal(data::sort_real::real_()));
+      result.insert(data::greater_equal(data::sort_real::real_()));
       result.insert(data::sort_real::plus(data::sort_real::real_(), data::sort_real::real_()));
       return result;
     }
