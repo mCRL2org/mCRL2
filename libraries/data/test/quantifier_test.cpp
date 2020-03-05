@@ -16,6 +16,7 @@
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/rewriters/quantifiers_inside_rewriter.h"
 #include "mcrl2/data/set.h"
 
 using namespace mcrl2;
@@ -180,6 +181,34 @@ void test_mixed_enumeration()
   quantifier_expression_test("exists x:Real, p:Pos . p == 1 && x > 4", "exists x:Real . x > 4", data_specification(), data::rewriter(data_specification()));
   quantifier_expression_test("exists x:Real, p:Pos . p == 1", "true", data_specification(), data::rewriter(data_specification()));
   quantifier_expression_test("exists x:Real, p:Pos . x > 4", "exists x:Real . x > 4", data_specification(), data::rewriter(data_specification()));
+}
+
+void quantifier_inside_test(const std::string& expr1_text, const std::string& expr2_text, const std::vector<variable>& vars, const data_specification& dataspec)
+{
+  data_expression expr1 = parse_data_expression(expr1_text, vars, dataspec);
+  data_expression expr2 = parse_data_expression(expr2_text, vars, dataspec);
+
+  BOOST_CHECK_EQUAL(quantifiers_inside_rewrite(expr1), expr2);
+}
+
+BOOST_AUTO_TEST_CASE(test_quantifier_inside)
+{
+  data_specification dataspec;
+  std::vector<variable> vars{variable("m", sort_nat::nat())};
+
+  quantifier_inside_test("forall n:Nat. (m == 2 || m == 3)", "m == 2 || m == 3", vars, dataspec);
+  quantifier_inside_test("forall n:Nat. (n == 2 || n == 3)", "forall n:Nat. (n == 2 || n == 3)", vars, dataspec);
+  quantifier_inside_test("forall n:Nat. (n == m || m == 3)", "m == 3 || (forall n: Nat. n == m)", vars, dataspec);
+  quantifier_inside_test("forall n:Nat. (n == m || n == 3)", "forall n: Nat. n == m || n == 3", vars, dataspec);
+  quantifier_inside_test("forall n:Nat. false", "false", vars, dataspec);
+  quantifier_inside_test("forall n:Nat. true", "true", vars, dataspec);
+
+  quantifier_inside_test("exists n:Nat. (m == 2 && m == 3)", "m == 2 && m == 3", vars, dataspec);
+  quantifier_inside_test("exists n:Nat. (n == 2 && n == 3)", "exists n:Nat. (n == 2 && n == 3)", vars, dataspec);
+  quantifier_inside_test("exists n:Nat. (n == m && m == 3)", "m == 3 && (exists n: Nat. n == m)", vars, dataspec);
+  quantifier_inside_test("exists n:Nat. (n == m && n == 3)", "exists n: Nat. n == m && n == 3", vars, dataspec);
+  quantifier_inside_test("exists n:Nat. false", "false", vars, dataspec);
+  quantifier_inside_test("exists n:Nat. true", "true", vars, dataspec);
 }
 
 BOOST_AUTO_TEST_CASE(test_main)
