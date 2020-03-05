@@ -39,8 +39,8 @@ variable_list make_variable_list(const std::set<variable>& x)
   return variable_list(x.begin(), x.end());
 }
 
-inline
-std::tuple<data_expression, data_expression> compute_Phi_Psi(const std::vector<data_expression>& X, const std::set<variable>& V)
+template <typename BinaryOperation>
+std::tuple<data_expression, data_expression> compute_Phi_Psi(const std::vector<data_expression>& X, const std::set<variable>& V, BinaryOperation op, data_expression empty_sequence_result)
 {
   using utilities::detail::set_difference;
   using utilities::detail::set_intersection;
@@ -64,15 +64,15 @@ std::tuple<data_expression, data_expression> compute_Phi_Psi(const std::vector<d
   {
     if (std::includes(Z.begin(), Z.end(), vars[i].begin(), vars[i].end()))
     {
-      psi.push_back(X[i]);
+      phi.push_back(X[i]);
     }
     else
     {
-      phi.push_back(X[i]);
+      psi.push_back(X[i]);
     }
   }
-  data_expression Phi = join_or(phi.begin(), phi.end());
-  data_expression Psi = join_or(psi.begin(), psi.end());
+  data_expression Phi = utilities::detail::join(phi.begin(), phi.end(), op, empty_sequence_result);
+  data_expression Psi = utilities::detail::join(psi.begin(), psi.end(), op, empty_sequence_result);
   return { Phi, Psi };
 }
 
@@ -149,10 +149,10 @@ struct quantifiers_inside_forall_builder: public data_expression_builder<quantif
 
       std::vector<data_expression> X;
       utilities::detail::split(x, std::back_inserter(X), tr::is_or, tr::left, tr::right);
-      const auto [Phi, Psi] = compute_Phi_Psi(X, V);
-      if (sort_bool::is_false_function_symbol(Phi) || sort_bool::is_false_function_symbol(Psi))
+      const auto [Phi, Psi] = compute_Phi_Psi(X, V, tr::or_, tr::false_());
+      if (sort_bool::is_false_function_symbol(Psi))
       {
-        return forall(make_variable_list(V), x);
+        return make_forall(make_variable_list(set_intersection(V,find_free_variables(x))), x);
       }
       std::set<variable> vars_Phi = find_free_variables(Phi);
       std::set<variable> vars_Psi = find_free_variables(Psi);
@@ -228,10 +228,10 @@ struct quantifiers_inside_exists_builder: public data_expression_builder<quantif
 
       std::vector<data_expression> X;
       utilities::detail::split(x, std::back_inserter(X), tr::is_and, tr::left, tr::right);
-      const auto [Phi, Psi] = compute_Phi_Psi(X, V);
-      if (sort_bool::is_true_function_symbol(Phi) || sort_bool::is_true_function_symbol(Psi))
+      const auto [Phi, Psi] = compute_Phi_Psi(X, V, tr::and_, tr::true_());
+      if (sort_bool::is_true_function_symbol(Psi))
       {
-        return exists(make_variable_list(V), x);
+        return make_exists(make_variable_list(set_intersection(V, find_free_variables(x))), x);
       }
       std::set<variable> vars_Phi = find_free_variables(Phi);
       std::set<variable> vars_Psi = find_free_variables(Psi);

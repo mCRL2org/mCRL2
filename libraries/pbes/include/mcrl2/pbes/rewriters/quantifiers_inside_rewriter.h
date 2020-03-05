@@ -26,8 +26,8 @@ pbes_expression quantifiers_inside(const pbes_expression& x);
 pbes_expression quantifiers_inside_forall(const std::set<data::variable>& variables, const pbes_expression& x);
 pbes_expression quantifiers_inside_exists(const std::set<data::variable>& variables, const pbes_expression& x);
 
-inline
-std::tuple<pbes_expression, pbes_expression> compute_Phi_Psi(const std::vector<pbes_expression>& X, const std::set<data::variable>& V)
+template <typename BinaryOperation>
+std::tuple<pbes_expression, pbes_expression> compute_Phi_Psi(const std::vector<pbes_expression>& X, const std::set<data::variable>& V, BinaryOperation op, pbes_expression empty_sequence_result)
 {
   using utilities::detail::set_difference;
   using utilities::detail::set_intersection;
@@ -51,15 +51,15 @@ std::tuple<pbes_expression, pbes_expression> compute_Phi_Psi(const std::vector<p
   {
     if (std::includes(Z.begin(), Z.end(), vars[i].begin(), vars[i].end()))
     {
-      psi.push_back(X[i]);
+      phi.push_back(X[i]);
     }
     else
     {
-      phi.push_back(X[i]);
+      psi.push_back(X[i]);
     }
   }
-  pbes_expression Phi = join_or(phi.begin(), phi.end());
-  pbes_expression Psi = join_or(psi.begin(), psi.end());
+  pbes_expression Phi = utilities::detail::join(phi.begin(), phi.end(), op, empty_sequence_result);
+  pbes_expression Psi = utilities::detail::join(psi.begin(), psi.end(), op, empty_sequence_result);
   return { Phi, Psi };
 }
 
@@ -136,10 +136,10 @@ struct quantifiers_inside_forall_builder: public data_expression_builder<quantif
 
     std::vector<pbes_expression> X;
     utilities::detail::split(x, std::back_inserter(X), tr::is_or, tr::left, tr::right);
-    const auto [Phi, Psi] = compute_Phi_Psi(X, V);
-    if (is_false(Phi) || is_false(Psi))
+    const auto [Phi, Psi] = compute_Phi_Psi(X, V, tr::or_, tr::false_());
+    if (is_false(Psi))
     {
-      return forall(data::detail::make_variable_list(V), x);
+      return make_forall(data::detail::make_variable_list(set_intersection(V, find_free_variables(x))), x);
     }
     std::set<data::variable> vars_Phi = find_free_variables(Phi);
     std::set<data::variable> vars_Psi = find_free_variables(Psi);
@@ -225,10 +225,10 @@ struct quantifiers_inside_exists_builder: public pbes_expression_builder<quantif
 
     std::vector<pbes_expression> X;
     utilities::detail::split(x, std::back_inserter(X), tr::is_and, tr::left, tr::right);
-    const auto [Phi, Psi] = compute_Phi_Psi(X, V);
-    if (is_true(Phi) || is_true(Psi))
+    const auto [Phi, Psi] = compute_Phi_Psi(X, V, tr::and_, tr::true_());
+    if (is_true(Psi))
     {
-      return exists(data::detail::make_variable_list(V), x);
+      return make_exists(data::detail::make_variable_list(set_intersection(V, find_free_variables(x))), x);
     }
     std::set<data::variable> vars_Phi = find_free_variables(Phi);
     std::set<data::variable> vars_Psi = find_free_variables(Psi);
