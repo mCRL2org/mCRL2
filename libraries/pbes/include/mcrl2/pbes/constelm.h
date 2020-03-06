@@ -489,55 +489,66 @@ class pbes_constelm_algorithm
         qvar_list m_qvars;
 
         /// \brief Maps data variables to data expressions. If a parameter is not
-        // prsent in this map, it means that it represents NaC ("not a constant").
+        // present in this map, it means that it represents NaC ("not a constant").
         constraint_map m_constraints;
 
         /// \brief Indicates whether this vertex has been visited at least once.
         bool m_visited = false;
 
-        /// \brief Returns true if the data variable v has been assigned a constant expression.
-        /// \param v A variable
-        /// \return True if the data variable v has been assigned a constant expression.
+        /// \brief Returns true if the parameter v has been assigned a constant expression.
+        /// \param v A parameter of this->variable()
+        /// \return True if the data parameter v has been assigned a constant expression.
         bool is_constant(const data::variable& v) const
         {
           auto i = m_constraints.find(v);
           return i != m_constraints.end();
         }
 
-        /// \brief Returns true if the expression x has the value undefined_data_expression or if x is a constant data expression.
-        /// \param x A
-        /// \return True if the data variable v has been assigned a constant expression.
-        bool is_constant_expression(const data::data_expression& x) const
-        {
-          return x == data::undefined_data_expression() || data::is_constant(x);
-        }
-
-        template <typename S>
-        std::set<data::variable> vars(const S& x)
-        {
-          return pbes_system::find_free_variables(x);
-        }
-
+        /// \brief Returns true iff all free variables in e are bound in qvars
         bool bound_in_quantifiers(const qvar_list& qvars, const data::data_expression& e)
         {
-          std::set<data::variable> free_vars(data::find_free_variables(e));
+          std::set<data::variable> free_vars = data::find_free_variables(e);
           return std::all_of(free_vars.begin(), free_vars.end(), [&](const data::variable& v)
             {
               return std::find_if(qvars.begin(), qvars.end(), [&](const detail::quantified_variable& qvar){ return qvar.variable() == v; }) != qvars.end();
             });
         }
 
-        qvar_list project(const qvar_list& qvars, std::set<data::variable> used_variables)
+        /// \brief Weaken the constraints so they satisfy
+        /// - vars(m_constraints[d]) subset vars(m_qvars); and
+        /// - vars(deleted_constraints) intersection vars(m_qvars) = {}
+        void fix_constraints(std::vector<data::data_expression> deleted_constraints)
         {
-          qvar_list result;
-          for(const detail::quantified_variable& v: qvars)
+          while (!deleted_constraints.empty())
           {
-            if(used_variables.find(v.variable()) != used_variables.end())
+            std::set<data::variable> vars_deleted;
+            for (const data::data_expression& fi: deleted_constraints)
             {
-              result.push_back(v);
+              data::find_free_variables(fi, std::inserter(vars_deleted, vars_deleted.end()));
+            }
+            deleted_constraints.clear();
+
+            auto del_i = std::find_if(m_qvars.rbegin(), m_qvars.rend(), [&](const detail::quantified_variable& qv)
+            {
+              return vars_deleted.find(qv.variable()) != vars_deleted.end();
+            });
+            // Remove quantified variables up to and including del_i
+            m_qvars.erase(m_qvars.begin(), del_i.base());
+
+            for (const data::variable& par: m_variable.parameters())
+            {
+              auto k = m_constraints.find(par);
+              if(k == m_constraints.end())
+              {
+                continue;
+              }
+              if(!bound_in_quantifiers(m_qvars, k->second))
+              {
+                deleted_constraints.push_back(k->second);
+                m_constraints.erase(k);
+              }
             }
           }
-          return result;
         }
 
       public:
@@ -615,39 +626,38 @@ class pbes_constelm_algorithm
           if (!m_visited)
           {
             m_visited = true;
-            std::set<data::variable> used_vars;
-            auto j = params.begin();
-            for (auto i = e.begin(); i != e.end(); ++i, ++j)
+            changed = true;
+
+            m_qvars = qvars;
+            // Partition expressions in e based on whether their free variables
+            // are bound in m_qvars.
+            std::vector<data::data_expression> deleted_constraints;
+            auto par = params.begin();
+            for (auto i = e.begin(); i != e.end(); ++i, ++par)
             {
               data::data_expression e1 = datar(*i, sigma);
-              if (bound_in_quantifiers(qvars, e1))
+              if (bound_in_quantifiers(m_qvars, e1))
               {
-                m_constraints[*j] = e1;
-                data::find_free_variables(m_constraints[*j], std::inserter(used_vars, used_vars.end()));
+                m_constraints[*par] = e1;
+              }
+              else
+              {
+                deleted_constraints.push_back(e1);
               }
             }
-            m_qvars = project(qvars, used_vars);
-            changed = true;
+            fix_constraints(deleted_constraints);
           }
           else
           {
-            std::vector<data::data_expression> deleted_constraints;
-
             // Find longest common suffix of qvars
-            qvar_list common_qvars;
-            auto mvar = m_qvars.rbegin();
-            auto nvar = qvars.rbegin();
-            for (; mvar != m_qvars.rend() && nvar != qvars.rend(); ++mvar, ++nvar)
-            {
-              if (*mvar != *nvar)
-              {
-                changed = true;
-                break;
-              }
-              common_qvars.push_front(*mvar);
-            }
+            auto mismatch_it = std::mismatch(m_qvars.rbegin(), m_qvars.rend(), qvars.rbegin(), qvars.rend()).first;
+            changed |= mismatch_it != m_qvars.rend();
+            // Remove the outer quantifiers, up to and including mismatch_it
+            m_qvars.erase(m_qvars.begin(), mismatch_it.base());
 
-            // Find common constraints fi for which vars(fi) is contained in common_qvars
+            // Find constraints for which f[i] = e[i] and for which all free
+            // variables are bound in m_qvars (which may have changed).
+            std::vector<data::data_expression> deleted_constraints;
             auto i = e.begin();
             for (auto par = params.begin(); i != e.end(); ++i, ++par)
             {
@@ -656,46 +666,16 @@ class pbes_constelm_algorithm
               {
                 continue;
               }
-              data::data_expression& fi = k->second;
+              const data::data_expression& fi = k->second;
               data::data_expression ei = datar(*i, sigma);
-              if (fi != ei)
+              if (fi != ei || !bound_in_quantifiers(m_qvars, fi))
               {
                 changed = true;
                 deleted_constraints.push_back(fi);
                 m_constraints.erase(k);
               }
             }
-            while (!deleted_constraints.empty())
-            {
-              std::set<data::variable> vars_deleted;
-              for (const data::data_expression& fi: deleted_constraints)
-              {
-                data::find_free_variables(fi, std::inserter(vars_deleted, vars_deleted.end()));
-              }
-              deleted_constraints.clear();
-
-              auto deli = std::find_if(common_qvars.rbegin(), common_qvars.rend(), [&](const detail::quantified_variable& qv)
-              {
-                return vars_deleted.find(qv.variable()) != vars_deleted.end();
-              });
-              common_qvars.erase(common_qvars.begin(), std::next(deli).base());
-
-              std::set<data::variable> bound_vars;
-              std::for_each(common_qvars.begin(), common_qvars.end(), [&](const detail::quantified_variable& qv) { bound_vars.insert(qv.variable()); });
-              for (const data::variable& par: params)
-              {
-                auto k = m_constraints.find(par);
-                if(k == m_constraints.end())
-                {
-                  continue;
-                }
-                if(!utilities::detail::set_includes(bound_vars, data::find_free_variables(k->second)))
-                {
-                  deleted_constraints.push_back(k->second);
-                  m_constraints.erase(k);
-                }
-              }
-            }
+            fix_constraints(deleted_constraints);
           }
           return changed;
         }
