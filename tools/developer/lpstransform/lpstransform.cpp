@@ -27,7 +27,7 @@ struct rewrite_lps_one_point_rule_rewriter_command: public lps::detail::lps_comm
     : lps::detail::lps_command("lps-one-point-rule-rewriter", input_filename, output_filename, options)
   {}
 
-  void execute()
+  void execute() override
   {
     lps::detail::lps_command::execute();
     lps::one_point_rule_rewrite(lpsspec);
@@ -41,7 +41,7 @@ struct is_well_typed_command: public lps::detail::lps_command
     : lps::detail::lps_command("is-well-typed", input_filename, output_filename, options)
   {}
 
-  void execute()
+  void execute() override
   {
     lps::detail::lps_command::execute();
     std::string result = lps::detail::is_well_typed(lpsspec) ? "true\n" : "false\n";
