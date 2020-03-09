@@ -24,17 +24,6 @@ namespace pbes_system {
 
 namespace detail {
 
-inline
-data::data_expression_list right_hand_sides(const data::assignment_list& x)
-{
-  std::vector<data::data_expression> result;
-  for (const data::assignment& a: x)
-  {
-    result.push_back(a.rhs());
-  }
-  return data::data_expression_list(result.begin(), result.end());
-}
-
 class lpsstategraph_algorithm;
 void lps_reset_variables(lpsstategraph_algorithm& algorithm,
                          const pbes_expression& x,
@@ -109,7 +98,7 @@ class lpsstategraph_algorithm: public local_reset_variables_algorithm
       pbes_equation eqn(fixpoint_symbol::nu(), propositional_variable(X, lpsspec.process().process_parameters()), rhs);
 
       pbesspec.data() = dataspec;
-      pbesspec.initial_state() = propositional_variable_instantiation(X, right_hand_sides(lpsspec.initial_process().assignments()));
+      pbesspec.initial_state() = propositional_variable_instantiation(X, data::right_hand_sides(lpsspec.initial_process().assignments()));
       pbesspec.equations().push_back(eqn);
       return pbesspec;
     }

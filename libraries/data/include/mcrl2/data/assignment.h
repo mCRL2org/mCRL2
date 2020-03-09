@@ -293,12 +293,15 @@ assignment_list make_assignment_list(const VariableSequence& variables, const Ex
 inline
 variable_list left_hand_sides(const assignment_list& x)
 {
-  std::vector<variable> result;
-  for (const assignment& a : x)
-  {
-    result.push_back(a.lhs());
-  }
-  return variable_list(result.begin(), result.end());
+  return variable_list(x.begin(), x.end(), [](const assignment& a) { return a.lhs(); });
+}
+
+/// \brief Returns the right hand sides of an assignment list
+/// \param x An assignment list
+inline
+data_expression_list right_hand_sides(const assignment_list& x)
+{
+  return data_expression_list(x.begin(), x.end(), [](const assignment& a) { return a.rhs(); });
 }
 
 // template function overloads
