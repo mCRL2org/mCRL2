@@ -134,7 +134,8 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
     lts.set_action_label_declarations(action_labels);
 
     // An indexed set to keep indices for multi actions.
-    mcrl2::utilities::indexed_set<process::timed_multi_action> multi_actions;
+    mcrl2::utilities::indexed_set<process::action_list> multi_actions;
+    multi_actions.insert(process::action_list()); // This action list represents 'tau'.
 
     // The initial state is stored and set as last.
     std::optional<probabilistic_lts_lts_t::probabilistic_state_t> initial_state;
@@ -151,14 +152,14 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
       if (term == transition_mark())
       {
         aterm_int from;
-        process::timed_multi_action label;
+        process::timed_multi_action action;
         aterm_int to;
 
         stream >> from;
-        stream >> label;
+        stream >> action;
         stream >> to;
 
-        auto [index, inserted] = multi_actions.insert(label);
+        auto [index, inserted] = multi_actions.insert(action.actions());
 
         std::size_t target_index = to.value();
         if constexpr (std::is_same<LTS, probabilistic_lts_lts_t>::value)
@@ -171,7 +172,9 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
 
         if (inserted)
         {
-          lts.add_action(action_label_lts(lps::multi_action(label.actions(), label.time())));
+          std::size_t actual_index = lts.add_action(action_label_lts(lps::multi_action(action.actions())));
+          utilities::mcrl2_unused(actual_index);
+          assert(actual_index == index);
         }
       }
       else if(term == probabilistic_transition_mark())
@@ -179,20 +182,22 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
         if constexpr (std::is_same<LTS, probabilistic_lts_lts_t>::value)
         {
           aterm_int from;
-          process::timed_multi_action label;
+          process::timed_multi_action action;
           probabilistic_lts_lts_t::probabilistic_state_t to;
 
           stream >> from;
-          stream >> label;
+          stream >> action;
           stream >> to;
 
-          auto [index, inserted] = multi_actions.insert(label);
+          auto [index, inserted] = multi_actions.insert(action.actions());
           std::size_t to_index = lts.add_probabilistic_state(to);
           lts.add_transition(transition(from.value(), index, to_index));
 
           if (inserted)
           {
-            lts.add_action(action_label_lts(lps::multi_action(label.actions(), label.time())));
+            std::size_t actual_index = lts.add_action(action_label_lts(lps::multi_action(action.actions())));
+            utilities::mcrl2_unused(actual_index);
+            assert(actual_index == index);
           }
         }
         else
