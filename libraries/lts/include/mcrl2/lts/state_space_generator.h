@@ -258,7 +258,7 @@ class action_detector
         result = true;
       }
       mCRL2log(log::info) << ".\n";
-      if (m_trace_count >= m_max_trace_count)
+      if (m_max_trace_count > 0 && m_trace_count >= m_max_trace_count)
       {
         m_trace_constructor.explorer().abort();
       }
@@ -295,7 +295,7 @@ class deadlock_detector
         std::string filename = filename_prefix + "_dlk_" + std::to_string(m_trace_count++) + ".trc";
         save_trace(tr, filename);
       }
-      if (m_trace_count >= m_max_trace_count)
+      if (m_max_trace_count > 0 && m_trace_count >= m_max_trace_count)
       {
         m_trace_constructor.explorer().abort();
       }
@@ -350,7 +350,7 @@ class nondeterminism_detector
           result = true;
         }
         mCRL2log(log::info) << ".\n";
-        if (m_trace_count >= m_max_trace_count)
+        if (m_max_trace_count > 0 && m_trace_count >= m_max_trace_count)
         {
           m_trace_constructor.explorer().abort();
         }
@@ -518,7 +518,7 @@ class divergence_detector
         );
       }
       explorer.set_process_parameter_values(process_parameter_undo);
-      if (m_trace_count >= m_max_trace_count)
+      if (m_max_trace_count > 0 && m_trace_count >= m_max_trace_count)
       {
         explorer.abort();
       }
