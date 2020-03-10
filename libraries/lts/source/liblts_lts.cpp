@@ -141,7 +141,7 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
     std::optional<probabilistic_lts_lts_t::probabilistic_state_t> initial_state;
 
     // Keep track of the number of states (derived from the transitions).
-    std::size_t number_of_states = 0;
+    std::size_t number_of_states = 1;
 
     while (true)
     {
