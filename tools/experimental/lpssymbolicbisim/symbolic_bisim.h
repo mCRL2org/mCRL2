@@ -514,7 +514,7 @@ protected:
   {
     for(const data_expression& block: blocks)
     {
-      if(rewr(application(block, m_spec.initial_process().state(process_parameters))) == sort_bool::true_())
+      if(rewr(application(block, m_spec.initial_process().expressions())) == sort_bool::true_())
       {
         // mCRL2log(log::verbose) << "Found initial block " << block << std::endl;
         return block;
