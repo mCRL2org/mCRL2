@@ -7,6 +7,7 @@
 import os
 import re
 import sys
+import traceback
 sys.path += [os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'python'))]
 from testing import YmlTest
 
@@ -149,6 +150,7 @@ def main(tests):
             os.mkdir(args.output)
         os.chdir(args.output)
 
+    test_failed = False
     for name in matching_tests(tests, args.pattern):
         try:
             test = tests[name](name, settings)
@@ -156,7 +158,10 @@ def main(tests):
         except Exception as e:
             print('An exception occurred:', e.__class__, e)
             traceback.print_exc()
-            return -1
+            test_failed = True
+
+    if (test_failed):
+        sys.exit(-1)
 
 if __name__ == '__main__':
     tests = regression_tests

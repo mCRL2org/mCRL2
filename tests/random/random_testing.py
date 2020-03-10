@@ -455,6 +455,7 @@ def main(tests):
             os.mkdir(args.output)
         os.chdir(args.output)
 
+    test_failed = False
     for name in matching_tests(tests, args.pattern):
         try:
             for i in I:
@@ -463,6 +464,10 @@ def main(tests):
         except Exception as e:
             print('An exception occurred:', e.__class__, e)
             traceback.print_exc()
+            test_failed = True
+
+    if (test_failed):
+      sys.exit(-1)
 
 if __name__ == '__main__':
     main(available_tests)
