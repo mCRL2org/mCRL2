@@ -134,6 +134,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
       auto& process = super::m_spec.process();
       const std::set<data::variable>& global_variables = super::m_spec.global_variables();
       const data::variable_list& d = process.process_parameters();
+      data::data_expression_list e = super::m_spec.initial_process().expressions(); // TODO: make this a const reference
 
       // initialize m_index_of
       unsigned index = 0;
@@ -144,17 +145,19 @@ class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
 
       std::set<data::variable> G(d.begin(), d.end());
       std::set<data::variable> dG;
-      for (const data::assignment& a: super::m_spec.initial_process().assignments())
+      auto di = d.begin();
+      auto ei = e.begin();
+      for (; di != d.end(); ++di, ++ei)
       {
         // The rewriter requires that the right hand sides of a substitution are in normal form.
-        data::data_expression rhs = R(a.rhs());
+        data::data_expression rhs = R(*ei);
         if (is_constant(rhs, global_variables))
         {
-          sigma[a.lhs()] = rhs;
+          sigma[*di] = rhs;
         }
         else
         {
-          G.erase(a.lhs());
+          G.erase(*di);
         }
       }
 

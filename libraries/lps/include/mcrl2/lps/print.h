@@ -181,7 +181,7 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
   {
     derived().enter(x);
     derived().print("init P");
-    print_assignments(x.assignments(), false, "(", ")", ", ");
+    print_variables(x.expressions(), false);
     derived().print(";");
     derived().leave(x);
   }
@@ -196,7 +196,7 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
       derived().print(" . ");
     }
     derived().print("P");
-    print_assignments(x.assignments(), false, "(", ")", ", ");
+    print_variables(x.expressions(), false);
     derived().print(";");
     derived().leave(x);
   }

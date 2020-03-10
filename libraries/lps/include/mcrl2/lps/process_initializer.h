@@ -58,15 +58,20 @@ class process_initializer: public atermpp::aterm_appl
     process_initializer& operator=(const process_initializer&) noexcept = default;
     process_initializer& operator=(process_initializer&&) noexcept = default;
 
-    const data::assignment_list& assignments() const
+    [[deprecated]] const data::assignment_list& assignments() const
     {
       return atermpp::down_cast<data::assignment_list>((*this)[0]);
+    }
+
+    data::data_expression_list expressions() const
+    {
+      return data::right_hand_sides(assignments());
     }
 
     /// \brief Returns the initial state of the LPS.
     /// \param process_parameters The parameters of the correponding linear process
     /// \return The initial state of the LPS.
-    data::data_expression_list state(const data::variable_list& process_parameters) const
+    [[deprecated]] data::data_expression_list state(const data::variable_list& process_parameters) const
     {
       return data::replace_variables(atermpp::container_cast<data::data_expression_list>(process_parameters), data::assignment_sequence_substitution(assignments()));
     }

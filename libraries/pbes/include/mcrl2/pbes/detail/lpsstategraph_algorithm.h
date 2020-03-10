@@ -98,7 +98,7 @@ class lpsstategraph_algorithm: public local_reset_variables_algorithm
       pbes_equation eqn(fixpoint_symbol::nu(), propositional_variable(X, lpsspec.process().process_parameters()), rhs);
 
       pbesspec.data() = dataspec;
-      pbesspec.initial_state() = propositional_variable_instantiation(X, data::right_hand_sides(lpsspec.initial_process().assignments()));
+      pbesspec.initial_state() = propositional_variable_instantiation(X, lpsspec.initial_process().expressions());
       pbesspec.equations().push_back(eqn);
       return pbesspec;
     }

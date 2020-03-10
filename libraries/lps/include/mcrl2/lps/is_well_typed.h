@@ -216,16 +216,6 @@ struct lps_well_typed_checker
     return true;
   }
 
-  /// \brief Checks well typedness of a process_initializer
-  /// \param i A process_initializer
-  /// <ul>
-  /// <li>the left hand sides of the data assignments are unique</li>
-  /// </ul>
-  bool is_well_typed(const process_initializer& i) const
-  {
-    return !!check_assignments(i.assignments(), "process_initializer");
-  }
-
   /// \brief Checks well typedness of a linear process
   /// \param p A linear_process
   /// \return True if
@@ -355,11 +345,6 @@ struct lps_well_typed_checker
     {
       return false;
     }
-    if (!is_well_typed(spec.initial_process()))
-    {
-      return false;
-    }
-
     if (!free_variables.empty())
     {
       error << "is_well_typed(specification) failed: some of the free variables were not declared\n";

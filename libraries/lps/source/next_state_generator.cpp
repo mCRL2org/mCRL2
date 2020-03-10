@@ -114,7 +114,7 @@ next_state_generator::next_state_generator(
     m_summands.push_back(summand);
   }
 
-  data::data_expression_list initial_state_raw = m_specification.initial_process().state(m_specification.process().process_parameters());
+  data::data_expression_list initial_state_raw = m_specification.initial_process().expressions();
 
   mutable_indexed_substitution<> sigma;
   data::data_expression_vector initial_symbolic_state(initial_state_raw.begin(),initial_state_raw.end());

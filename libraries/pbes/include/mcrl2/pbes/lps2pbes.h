@@ -124,7 +124,7 @@ class lps2pbes_algorithm
       assert(state_formulas::is_mu(f) || state_formulas::is_nu(f));
       const core::identifier_string& Xf = detail::mu_name(f);
       data::data_expression_list fi = detail::mu_expressions(f);
-      data::data_expression_list pi = lpsspec.initial_process().state(lpsspec.process().process_parameters());
+      data::data_expression_list pi = lpsspec.initial_process().expressions();
       data::data_expression_list e = fi + pi + detail::Par(Xf, data::variable_list(), f);
       if (T != data::undefined_real_variable())
       {
