@@ -140,6 +140,9 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
     // The initial state is stored and set as last.
     std::optional<probabilistic_lts_lts_t::probabilistic_state_t> initial_state;
 
+    // Keep track of the number of states (derived from the transitions).
+    std::size_t number_of_states = 0;
+
     while (true)
     {
       aterm term = stream.get();
@@ -168,7 +171,9 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
           target_index = lts.add_probabilistic_state(probabilistic_lts_lts_t::probabilistic_state_t(to.value()));
         }
 
+        // Add the transition and update the number of states.
         lts.add_transition(transition(from.value(), index, target_index));
+        number_of_states = std::max(number_of_states, std::max(from.value() + 1, to.value() + 1));
 
         if (inserted)
         {
@@ -176,6 +181,7 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
           utilities::mcrl2_unused(actual_index);
           assert(actual_index == index);
         }
+
       }
       else if(term == probabilistic_transition_mark())
       {
@@ -190,8 +196,13 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
           stream >> to;
 
           auto [index, inserted] = multi_actions.insert(action.actions());
+
+          // Compute the index of the probabilistic state by adding it.
           std::size_t to_index = lts.add_probabilistic_state(to);
           lts.add_transition(transition(from.value(), index, to_index));
+
+          // Update the number of states
+          number_of_states = std::max(number_of_states, std::max(from.value() + 1, to_index + 1));
 
           if (inserted)
           {
@@ -226,6 +237,15 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
     // The initial state can only be set after the states are known.
     if (initial_state)
     {
+      if (!lts.has_state_info())
+      {
+        // If the lts has no state labels, we need to add empty states labels.
+        for (std::size_t i = 0; i < number_of_states; ++i)
+        {
+          lts.add_state(state_label_lts());
+        }
+      }
+
       set_initial_state(lts, initial_state.value());
     }
     else
