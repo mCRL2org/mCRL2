@@ -883,6 +883,11 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
 template <class LTS_TYPE>
 bool is_deterministic(const LTS_TYPE& l)
 {
+  if (l.num_transitions() == 0)
+  {
+    return true;
+  }
+
   std::vector<transition> temporary_copy_of_transitions = l.get_transitions();
   sort_transitions(temporary_copy_of_transitions, l.hidden_label_map(), src_lbl_tgt);
   
