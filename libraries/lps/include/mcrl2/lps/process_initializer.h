@@ -67,14 +67,6 @@ class process_initializer: public atermpp::aterm_appl
     {
       return data::right_hand_sides(assignments());
     }
-
-    /// \brief Returns the initial state of the LPS.
-    /// \param process_parameters The parameters of the correponding linear process
-    /// \return The initial state of the LPS.
-    [[deprecated]] data::data_expression_list state(const data::variable_list& process_parameters) const
-    {
-      return data::replace_variables(atermpp::container_cast<data::data_expression_list>(process_parameters), data::assignment_sequence_substitution(assignments()));
-    }
 };
 
 //--- start generated class process_initializer ---//

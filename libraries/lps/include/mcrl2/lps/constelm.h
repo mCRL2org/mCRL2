@@ -123,7 +123,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
 
       m_instantiate_global_variables = instantiate_global_variables;
       m_ignore_conditions = ignore_conditions;
-      data::data_expression_list initial_state = super::m_spec.initial_process().state(super::m_spec.process().process_parameters());
+      data::data_expression_list initial_state = super::m_spec.initial_process().expressions();
       data::data_expression_vector r(initial_state.begin(), initial_state.end());
 
       // essential: rewrite the initial state vector r to normal form. Essential

@@ -83,8 +83,8 @@ class untime_algorithm: public detail::lps_algorithm<Specification>
       std::vector <bool>::iterator j=time_variable_candidates.begin() ;
       mCRL2log(log::verbose) << "For untiming to function optimally, it is assumed that the input lps is rewritten to normal form" << std::endl;
 
-      for (data::data_expression_list::const_iterator k = m_spec.initial_process().state(m_spec.process().process_parameters()).begin();
-           k != m_spec.initial_process().state(m_spec.process().process_parameters()).end(); ++j, ++k)
+      data::data_expression_list process_parameters = m_spec.initial_process().expressions(); // TODO: make this a const reference
+      for (data::data_expression_list::const_iterator k = process_parameters.begin(); k != process_parameters.end(); ++j, ++k)
       {
         if (*k != real_zero)
         {
