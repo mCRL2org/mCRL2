@@ -116,6 +116,13 @@ inline void swap(process_initializer& t1, process_initializer& t2)
 // template function overloads
 std::set<data::variable> find_free_variables(const lps::process_initializer& x);
 std::set<process::action_label> find_action_labels(const lps::process_initializer& x);
+
+// TODO: remove this function after the internal format of process_initializer has been fixed
+inline
+process_initializer make_process_initializer(const data::variable_list& variables, const data::data_expression_list& expressions)
+{
+  return process_initializer(data::make_assignment_list(variables, expressions));
+}
  
 } // namespace lps
 

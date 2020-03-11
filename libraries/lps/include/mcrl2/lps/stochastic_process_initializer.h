@@ -92,6 +92,13 @@ inline void swap(stochastic_process_initializer& t1, stochastic_process_initiali
 // template function overloads
 std::set<data::variable> find_free_variables(const lps::stochastic_process_initializer& x);
 
+// TODO: remove this function after the internal format of stochastic_process_initializer has been fixed
+inline
+stochastic_process_initializer make_stochastic_process_initializer(const data::variable_list& variables, const data::data_expression_list& expressions, const stochastic_distribution& dist)
+{
+  return stochastic_process_initializer(data::make_assignment_list(variables, expressions), dist);
+}
+
 } // namespace lps
 
 } // namespace mcrl2
