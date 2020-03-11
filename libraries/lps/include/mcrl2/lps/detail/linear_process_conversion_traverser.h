@@ -397,7 +397,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
       {
         throw mcrl2::runtime_error("Error in linear_process_conversion_traverser::convert: the initial process does not match the process equation");
       }
-      proc_init = lps::process_initializer(data::make_assignment_list(m_equation.formal_parameters(), init.actual_parameters()));
+      proc_init = lps::make_process_initializer(m_equation.formal_parameters(), init.actual_parameters());
     }
     else if (is_process_instance_assignment(p.init()))
     {
@@ -406,7 +406,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
       {
         throw mcrl2::runtime_error("Error in linear_process_conversion_traverser::convert: the initial process does not match the process equation");
       }
-      proc_init = lps::process_initializer(init.assignments());
+      proc_init = lps::make_process_initializer(data::left_hand_sides(init.assignments()), data::right_hand_sides(init.assignments()));
     }
     else
     {
@@ -814,7 +814,7 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
       {
         throw mcrl2::runtime_error("Error in stochastic_linear_process_conversion_traverser::convert: the initial process does not match the process equation");
       }
-      proc_init = lps::stochastic_process_initializer(data::make_assignment_list(m_equation.formal_parameters(), init.actual_parameters()), dist);
+      proc_init = lps::make_stochastic_process_initializer(m_equation.formal_parameters(), init.actual_parameters(), dist);
     }
     else if (is_process_instance_assignment(p.init()))
     {
@@ -823,7 +823,7 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
       {
         throw mcrl2::runtime_error("Error in stochastic_linear_process_conversion_traverser::convert: the initial process does not match the process equation");
       }
-      proc_init = lps::stochastic_process_initializer(init.assignments(), dist);
+      proc_init = lps::make_stochastic_process_initializer(data::left_hand_sides(init.assignments()), data::right_hand_sides(init.assignments()), dist);
     }
     else
     {

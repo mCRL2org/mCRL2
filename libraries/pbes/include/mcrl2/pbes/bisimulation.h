@@ -333,7 +333,7 @@ class bisimulation_algorithm
       const lps::linear_process& m = M.process();
       const lps::linear_process& s = S.process();
 
-      propositional_variable_instantiation init(X(m, s), M.initial_process().state(M.process().process_parameters()) + S.initial_process().state(S.process().process_parameters()));
+      propositional_variable_instantiation init(X(m, s), M.initial_process().expressions() + S.initial_process().expressions());
 
       pbes result(M.data(), equations, init);
       assert(result.is_closed());

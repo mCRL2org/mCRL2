@@ -704,7 +704,7 @@ class explorer: public abortable
       m_process_parameters = std::vector<data::variable>(params.begin(), params.end());
       m_n = m_process_parameters.size();
       timed_state.resize(m_n + 1);
-      m_initial_state = lpsspec_.initial_process().state(lpsspec_.process().process_parameters());
+      m_initial_state = lpsspec_.initial_process().expressions();
       m_initial_distribution = initial_distribution(lpsspec_);
 
       // Split the summands in regular and confluent summands
