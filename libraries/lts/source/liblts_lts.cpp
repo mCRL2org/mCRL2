@@ -237,14 +237,8 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
     // The initial state can only be set after the states are known.
     if (initial_state)
     {
-      if (!lts.has_state_info())
-      {
-        // If the lts has no state labels, we need to add empty states labels.
-        for (std::size_t i = 0; i < number_of_states; ++i)
-        {
-          lts.add_state(state_label_lts());
-        }
-      }
+      // If the lts has no state labels, we need to add empty states labels.
+      lts.set_num_states(number_of_states, lts.has_state_info());
 
       set_initial_state(lts, initial_state.value());
     }
