@@ -76,6 +76,7 @@ class Invariant_Checker
   typedef std::vector<action_summand_type> action_summand_vector_type;
 
   private:
+    const Specification& f_spec;
     data::detail::BDD_Prover f_bdd_prover;
     data::detail::BDD2Dot f_bdd2dot;
     process_initializer f_init;
@@ -150,9 +151,13 @@ template <typename Specification>
 bool Invariant_Checker<Specification>::check_init(const data::data_expression& a_invariant)
 {
   data::mutable_map_substitution<> v_substitutions;
-  for (const data::assignment& a: f_init.assignments())
+  const data::variable_list& d = f_spec.process().process_parameters();
+  data::data_expression_list e = f_init.expressions(); // TODO: make this a const reference
+  auto di = d.begin();
+  auto ei = e.begin();
+  for (; di != d.end(); ++di, ++ei)
   {
-    v_substitutions[a.lhs()] = a.rhs();
+    v_substitutions[*di] = *ei;
   }
 
   data::data_expression b_invariant = data::replace_variables_capture_avoiding(a_invariant, v_substitutions);
@@ -235,6 +240,7 @@ Invariant_Checker<Specification>::Invariant_Checker(
   data::rewriter::strategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, data::detail::smt_solver_type a_solver_type,
   bool a_apply_induction, bool a_counter_example, bool a_all_violations, std::string const& a_dot_file_name
 ):
+  f_spec(a_lps),
   f_bdd_prover(a_lps.data(), data::used_data_equation_selector(a_lps.data()), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
 {
   f_init = a_lps.initial_process();
