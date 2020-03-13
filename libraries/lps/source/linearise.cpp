@@ -9351,8 +9351,7 @@ class specification_basic_type
           }
         }
 
-std::cerr << "CONSTANT ELIMINATION IS TEMPORARILY SWITCHED OFF \n";
-        if (regular && !options.do_not_apply_constelm && false)
+        if (regular && !options.do_not_apply_constelm)
         {
           // We apply constant elimination on the obtained linear process.
           // In order to do so, we have to create a complete process specification first, as
