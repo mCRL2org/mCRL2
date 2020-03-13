@@ -66,6 +66,7 @@ struct remove_parameters_builder: public data_expression_builder<remove_paramete
   using super::update;
 
   const std::set<data::variable>& to_be_removed;
+  data::variable_list process_parameters;
 
   remove_parameters_builder(const std::set<data::variable>& to_be_removed_)
     : to_be_removed(to_be_removed_)
@@ -83,7 +84,7 @@ struct remove_parameters_builder: public data_expression_builder<remove_paramete
   /// \brief Removes parameters from a list of variables.
   data::variable_list apply(const data::variable_list& x)
   {
-  	using utilities::detail::contains;
+    using utilities::detail::contains;
 
     std::vector<data::variable> result;
     for (const data::variable& v: x)
@@ -122,10 +123,45 @@ struct remove_parameters_builder: public data_expression_builder<remove_paramete
     x.process_parameters() = apply(x.process_parameters());
   }
 
+  /// \brief Removes expressions from e at the corresponding positions of process_parameters
+  data::data_expression_list remove_expressions(const data::data_expression_list& e)
+  {
+    using utilities::detail::contains;
+
+    assert(e.size() == process_parameters.size());
+    std::vector<data::data_expression> result;
+    auto pi = process_parameters.begin();
+    auto ei = e.begin();
+    for (; pi != process_parameters.end(); ++pi, ++ei)
+    {
+      if (!contains(to_be_removed, *pi))
+      {
+        result.push_back(*ei);
+      }
+    }
+    return data::data_expression_list(result.begin(), result.end());
+  }
+
+  process_initializer apply(const process_initializer& x)
+  {
+    auto parameters = apply(process_parameters);
+    auto expressions = remove_expressions(x.expressions());
+    return lps::make_process_initializer(parameters, expressions);
+  }
+
+  stochastic_process_initializer apply(const stochastic_process_initializer& x)
+  {
+    auto parameters = apply(process_parameters);
+    auto expressions = remove_expressions(x.expressions());
+    auto distribution = super::apply(x.distribution());
+    return lps::make_stochastic_process_initializer(parameters, expressions, distribution);
+  }
+
   /// \brief Removes parameters from a linear process specification
   /// \param x A linear process specification
   void update(specification& x)
   {
+    process_parameters = x.process().process_parameters();
     super::update(x);
     update(x.global_variables());
   }
@@ -134,6 +170,7 @@ struct remove_parameters_builder: public data_expression_builder<remove_paramete
   /// \param x A linear process specification
   void update(stochastic_specification& x)
   {
+    process_parameters = x.process().process_parameters();
     super::update(x);
     update(x.global_variables());
   }
