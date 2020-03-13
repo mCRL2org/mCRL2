@@ -14,6 +14,7 @@
 
 #include "mcrl2/data/data_io.h"
 #include "mcrl2/data/detail/io.h"
+#include "mcrl2/lps/process_initializer.h"
 #include "mcrl2/lps/linear_process.h"
 
 #include <cerrno>
@@ -90,6 +91,7 @@ class specification_base
       m_process(lps),
       m_initial_process(initial_process)
     {
+      assert(lps.process_parameters().size()==initial_process.expressions().size());
     }
 
     /// \brief Returns the linear process of the specification.

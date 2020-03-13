@@ -13,7 +13,6 @@
 //Fileinfo
 #define MCRL2_LPS_LPSPARUNFOLDLIB_H
 
-// #include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/lps/stochastic_specification.h"
 

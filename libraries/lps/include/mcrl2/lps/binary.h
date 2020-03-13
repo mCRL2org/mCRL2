@@ -190,6 +190,69 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
       }
     }
 
+    /// \brief Replace expressions in v that are of a finite sort with a
+    ///        vector of assignments to Boolean variables.
+    data::data_expression_list replace_enumerated_parameters_in_initial_expressions( // XXXXXXXX
+                                 const data::variable_list& vl,
+                                 const data::data_expression_list& el)
+    {
+      // We use replace_variables, to make sure that the binding variables of assignments are ignored.
+      // Note that this operation is safe because the generated fresh variables can not clash with other
+      // binding variables.
+      const data::data_expression_list el_ = data::replace_variables(el, m_if_trees);
+
+      data::data_expression_vector result;
+      data::variable_list::const_iterator i=vl.begin();
+      for (const data::data_expression& a: el_)
+      {
+        const data::variable par= *i;
+        i++;
+/*        if (m_new_parameters.find(a.lhs()) == m_new_parameters.end())
+        {
+          result.push_back(a);
+        }
+        else
+        { */
+        data::variable_vector new_parameters = m_new_parameters[par];
+        data::data_expression_vector elements = m_enumerated_elements[par];
+
+        mCRL2log(log::debug) << "Found " << new_parameters.size() << " new parameter(s) for parameter " << data::pp(par) << std::endl;
+
+        for (std::size_t j = 0; j < new_parameters.size(); ++j)
+        {
+          data::data_expression_vector disjuncts;
+
+          data::data_expression_vector::iterator k = elements.begin();
+          while (k != elements.end())
+          {
+            // Elements that get boolean value false
+            std::ptrdiff_t count(static_cast<std::ptrdiff_t>(1) << j);
+            if (std::distance(k, elements.end()) < count)
+            {
+              k = elements.end();
+            }
+            else
+            {
+              std::advance(k, count);
+            }
+
+            // Elements that get value true
+            for (std::ptrdiff_t l = 0; l < count && k != elements.end(); ++l)
+            {
+              disjuncts.push_back(data::equal_to(a, *k++));
+            }
+          }
+          result.push_back(data::lazy::join_or(disjuncts.begin(), disjuncts.end()));
+        }
+
+      }
+//       }
+
+      mCRL2log(log::debug) << "Replaced expression(s) " << data::pp(el_) << " in the initial state with expression(s) " << data::pp(result) << std::endl;
+
+      return data::data_expression_list(result.begin(),result.end());
+    }
+
     /// \brief Replace assignments in v that are of a finite sort with a
     ///        vector of assignments to Boolean variables.
     data::assignment_list replace_enumerated_parameters_in_assignments(data::assignment_list v)
@@ -270,14 +333,14 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
       lps::replace_variables_capture_avoiding(s.deadlock(), m_if_trees, m_if_trees_generator);
     }
 
-    process_initializer update_initial_process(const process_initializer& init)
+    process_initializer update_initial_process(const data::variable_list& parameters, const process_initializer& init)
     {
-      return process_initializer(replace_enumerated_parameters_in_assignments(init.assignments()));
+      return process_initializer(replace_enumerated_parameters_in_initial_expressions(parameters, init.expressions()));   // XXXX
     }
 
-    stochastic_process_initializer update_initial_process(const stochastic_process_initializer& init)
+    stochastic_process_initializer update_initial_process(const data::variable_list& parameters, const stochastic_process_initializer& init)
     {
-      return stochastic_process_initializer(replace_enumerated_parameters_in_assignments(init.assignments()),
+      return stochastic_process_initializer(replace_enumerated_parameters_in_initial_expressions(parameters, init.expressions()),  // XXXX
                                             lps::replace_variables_capture_avoiding(init.distribution(), m_if_trees, m_if_trees_generator)
                                            );
     }
@@ -300,7 +363,7 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
 
       // Initial process
       mCRL2log(log::debug) << "Updating process initializer" << std::endl;
-      m_spec.initial_process() = update_initial_process(m_spec.initial_process());
+      m_spec.initial_process() = update_initial_process(m_spec.process().process_parameters(),m_spec.initial_process());
 
       // Summands
       mCRL2log(log::debug) << "Updating summands" << std::endl;

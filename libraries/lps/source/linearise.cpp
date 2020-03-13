@@ -5119,6 +5119,40 @@ class specification_basic_type
     }
 
 
+    data_expression_list pushdummy_regular_data_expressions(
+      const variable_list& pars,
+      const stacklisttype& stack,
+      const variable_list& stochastic_variables)
+    {
+      /* stack.parameters is the total list of parameters of the
+         aggregated pCRL process. The variable pars contains
+         the list of all variables occuring in the initial
+         process. */
+
+      data_expression_vector result;
+      for(const variable& par: stack.parameters)
+      {
+        /* // Check whether it is a stochastic variable.
+        if (std::find(stochastic_variables.begin(),stochastic_variables.end(),par)!=pars.end())
+        {
+          result.push_back(assignment(par,par)); 
+        } 
+        // Otherwise, check that is is an ordinary parameter.
+        else */ 
+        if (std::find(pars.begin(),pars.end(),par)!=pars.end())
+        {
+          result.push_back(par); 
+        }
+        /* otherwise the value of this argument is irrelevant, so
+           make it a don't care variable. */
+        else
+        {
+          result.push_back(representative_generator_internal(par.sort()));
+        }
+      }
+      return data_expression_list(result.begin(), result.end());
+    }
+
     assignment_list pushdummy_regular(
       const variable_list& pars,
       const stacklisttype& stack,
@@ -5197,7 +5231,7 @@ class specification_basic_type
       return pushdummyrec_stack(stack.parameters,parameters,stack,stochastic_variables);
     }
 
-    assignment_list make_initialstate(
+    data_expression_list make_initialstate(
       const process_identifier& initialProcId,
       const stacklisttype& stack,
       const std::set < process_identifier >& pcrlprcs,
@@ -5218,10 +5252,10 @@ class specification_basic_type
 
       if (regular)
       {
-        assignment_list result=
-          pushdummy_regular(objectIndex(initialProcId).parameters,
-                            stack,
-                            initial_stochastic_distribution.variables());
+        data_expression_list result=
+          pushdummy_regular_data_expressions(objectIndex(initialProcId).parameters,
+                                             stack,
+                                             initial_stochastic_distribution.variables());
         if (!singlecontrolstate)
         {
           return processencoding(i,result,stack);
@@ -5236,7 +5270,8 @@ class specification_basic_type
                                 initial_stochastic_distribution.variables());
         const data_expression_list l=processencoding(i,result,stack);
         assert(l.size()==function_sort(stack.opns->push.sort()).domain().size());
-        return assignment_list({ assignment(stack.stackvar,application(stack.opns->push,l)) });
+        // return assignment_list({ assignment(stack.stackvar,application(stack.opns->push,l)) });   ZZZZZ
+        return data_expression_list({ application(stack.opns->push,l) });
       }
     }
 
@@ -7193,7 +7228,7 @@ class specification_basic_type
                          const bool containstime,
                          const bool regular,
                          variable_list& parameters,
-                         assignment_list& init,
+                         data_expression_list& init,
                          stochastic_distribution& initial_stochastic_distribution)
     /* A pair of initial state and linear process must be extracted
        from the underlying GNF */
@@ -7263,6 +7298,7 @@ class specification_basic_type
         parameters = variable_list({ stack.stackvar });
       }
       init=make_initialstate(initial_proc_id,stack,stochastic_normalized_process_identifiers,regular,singlecontrolstate,initial_stochastic_distribution);
+      assert(init.size()==parameters.size());
       collectsumlist(action_summands,deadlock_summands,stochastic_normalized_process_identifiers,parameters,stack,regular,singlecontrolstate);
 
       if (!options.no_intermediate_cluster)
@@ -8632,7 +8668,7 @@ class specification_basic_type
       stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands,
       variable_list& pars,
-      assignment_list& init,
+      data_expression_list& init,
       lps::detail::ultimate_delay& ultimate_delay_condition,
       const std::string& hint="")
     {
@@ -8641,7 +8677,7 @@ class specification_basic_type
       data::maintain_variables_in_rhs<data::mutable_map_substitution<> > sigma=make_unique_variables(pars, hint);
       const variable_list unique_pars=data::replace_variables(pars, sigma);
 
-      init=substitute_assignmentlist(init,pars,true,false, sigma);  // Only substitute the variables in the lhs.
+      // init=substitute_assignmentlist(init,pars,true,false, sigma);  // Only substitute the variables in the lhs. ZZZZZ
 
       if (!options.ignore_time)
       {
@@ -9203,13 +9239,13 @@ class specification_basic_type
       const stochastic_action_summand_vector& action_summands1,
       const deadlock_summand_vector& deadlock_summands1,
       const variable_list& pars1,
-      const assignment_list& init1,
+      const data_expression_list& init1,
       const stochastic_distribution& initial_stochastic_distribution1,
       const lps::detail::ultimate_delay& ultimate_delay_condition1,
       const stochastic_action_summand_vector& action_summands2,
       const deadlock_summand_vector& deadlock_summands2,
       const variable_list& pars2,
-      const assignment_list& init2,
+      const data_expression_list& init2,
       const stochastic_distribution& initial_stochastic_distribution2,
       const lps::detail::ultimate_delay& ultimate_delay_condition2,
       const action_name_multiset_list& allowlist1,  // This is a list of list of identifierstring.
@@ -9218,7 +9254,7 @@ class specification_basic_type
       stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands,
       variable_list& pars_result,
-      assignment_list& init_result,
+      data_expression_list& init_result,
       stochastic_distribution& initial_stochastic_distribution,
       lps::detail::ultimate_delay& ultimate_delay_condition)
     {
@@ -9278,7 +9314,7 @@ class specification_basic_type
       const bool regular,
       const bool rename_variables,
       variable_list& pars,
-      assignment_list& init,
+      data_expression_list& init,
       stochastic_distribution& initial_stochastic_distribution,
       lps::detail::ultimate_delay& ultimate_delay_condition)
     {
@@ -9296,7 +9332,8 @@ class specification_basic_type
           const std::set<variable> varset=find_free_variables(i->rhs());
         }
 
-        init=substitute_assignmentlist(init,pars,false,true,sigma);
+        // init=substitute_assignmentlist(init,pars,false,true,sigma);   ZZZ
+        init=replace_variables_capture_avoiding_alt(init,sigma);
 
         // Make the bound variables and parameters in this process unique.
 
@@ -9314,7 +9351,8 @@ class specification_basic_type
           }
         }
 
-        if (regular && !options.do_not_apply_constelm)
+std::cerr << "CONSTANT ELIMINATION IS TEMPORARILY SWITCHED OFF \n";
+        if (regular && !options.do_not_apply_constelm && false)
         {
           // We apply constant elimination on the obtained linear process.
           // In order to do so, we have to create a complete process specification first, as
@@ -9340,9 +9378,9 @@ class specification_basic_type
           }
 
           // Reconstruct the variables from the temporary specification
-          init=temporary_spec.initial_process().assignments();
-
+          init=temporary_spec.initial_process().expressions();     // ZZZZZZZZZZZZ
           pars=temporary_spec.process().process_parameters();
+          assert(init.size()==pars.size());
 
           // Add all free variables in object.parameters that are not already in the parameter list
           // and are not global variables to pars. This can occur when a parameter of the process is replaced
@@ -9373,7 +9411,7 @@ class specification_basic_type
       if (is_merge(t))
       {
         variable_list pars1,pars2;
-        assignment_list init1,init2;
+        data_expression_list init1,init2;
         stochastic_distribution initial_stochastic_distribution1, initial_stochastic_distribution2;
         stochastic_action_summand_vector action_summands1, action_summands2;
         deadlock_summand_vector deadlock_summands1, deadlock_summands2;
@@ -9404,7 +9442,7 @@ class specification_basic_type
         {
           // Perform parallel composition with inline allow.
           variable_list pars1,pars2;
-          assignment_list init1,init2;
+          data_expression_list init1,init2;
           stochastic_distribution initial_stochastic_distribution1, initial_stochastic_distribution2;
           stochastic_action_summand_vector action_summands1, action_summands2;
           deadlock_summand_vector deadlock_summands1, deadlock_summands2;
@@ -9439,7 +9477,7 @@ class specification_basic_type
         {
           // Perform parallel composition with inline block.
           variable_list pars1,pars2;
-          assignment_list init1,init2;
+          data_expression_list init1,init2;
           stochastic_distribution initial_stochastic_distribution1, initial_stochastic_distribution2;
           stochastic_action_summand_vector action_summands1, action_summands2;
           deadlock_summand_vector deadlock_summands1, deadlock_summands2;
@@ -9506,7 +9544,8 @@ class specification_basic_type
         {
           sigma[v]=v;
         }
-        init=substitute_assignmentlist(init,pars,false,true,sigma);
+        // init=substitute_assignmentlist(init,pars,false,true,sigma);   ZZZZ
+        init=replace_variables_capture_avoiding_alt(init,sigma);
         return;
       }
 
@@ -9526,7 +9565,7 @@ class specification_basic_type
       const process_identifier& procIdDecl,
       const bool regular,
       variable_list& pars,
-      assignment_list& init,
+      data_expression_list& init,
       stochastic_distribution& initial_stochastic_distribution,
       lps::detail::ultimate_delay& ultimate_delay_condition)
     {
@@ -11205,14 +11244,18 @@ class specification_basic_type
   public:
     variable_list SieveProcDataVarsAssignments(
       const std::set <variable>& vars,
-      const assignment_list& assignments,
+      const data_expression_list& initial_state_expressions,
       const variable_list& parameters)
     {
       const std::set < variable > vars_set(vars.begin(),vars.end());
       std::set < variable > vars_result_set;
 
 
-      filter_vars_by_assignmentlist(assignments,parameters,vars_set,vars_result_set);
+      // filter_vars_by_assignmentlist(assignments,parameters,vars_set,vars_result_set);      ZZZZZZ
+      filter_vars_by_termlist(initial_state_expressions.begin(),
+                              initial_state_expressions.end(),
+                              vars_set,
+                              vars_result_set);
 
       variable_list result;
       for (std::set < variable >::reverse_iterator i=vars_result_set.rbegin();
@@ -11231,7 +11274,7 @@ class specification_basic_type
       stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands,
       variable_list& parameters,
-      assignment_list& initial_state,
+      data_expression_list& initial_state,
       stochastic_distribution& initial_stochastic_distribution)
     {
       /* Then select the BPA processes, and check that the others
@@ -11262,7 +11305,14 @@ class specification_basic_type
       procstorealGNF(init_,options.lin_method!=lmStack);
 
       lps::detail::ultimate_delay dummy_ultimate_delay_condition;
-      generateLPEmCRL(action_summands,deadlock_summands,init_, options.lin_method!=lmStack,parameters,initial_state,initial_stochastic_distribution,dummy_ultimate_delay_condition);
+      generateLPEmCRL(action_summands,
+                      deadlock_summands,
+                      init_, 
+                      options.lin_method!=lmStack,
+                      parameters,
+                      initial_state,
+                      initial_stochastic_distribution,
+                      dummy_ultimate_delay_condition);
       allowblockcomposition(action_name_multiset_list({action_name_multiset()}),false,action_summands,deadlock_summands); // This removes superfluous delta summands.
       if (options.final_cluster)
       {
@@ -11300,7 +11350,7 @@ mcrl2::lps::stochastic_specification mcrl2::lps::linearise(
 
   //linearise spec
   variable_list parameters;
-  assignment_list initial_state;
+  data_expression_list initial_state;
   stochastic_action_summand_vector action_summands;
   deadlock_summand_vector deadlock_summands;
   stochastic_distribution initial_distribution(

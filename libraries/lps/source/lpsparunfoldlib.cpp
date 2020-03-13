@@ -528,65 +528,38 @@ mcrl2::lps::stochastic_linear_process lpsparunfold::update_linear_process(const 
   return new_lps;
 }
 
-mcrl2::lps::stochastic_process_initializer lpsparunfold::update_linear_process_initialization(const data::function_symbol& determine_function, std::size_t parameter_at_index, const function_symbol_vector& projection_functions)
+mcrl2::lps::stochastic_process_initializer lpsparunfold::update_linear_process_initialization(
+                   const data::function_symbol& determine_function, 
+                   std::size_t parameter_at_index, 
+                   const function_symbol_vector& projection_functions)
 {
   //
   //update inital process
   //
   mCRL2log(verbose) << "Updating initialization...\n" << std::endl;
 
-  data::assignment_list ass = m_init_process.assignments();
-  //Create new left-hand assignment_list
-  mcrl2::data::variable_vector new_ass_left;
-  for (mcrl2::data::assignment_list::iterator k = ass.begin()
-       ; k != ass.end()
-       ; ++k)
-  {
-    if (proc_par_to_proc_par_inj.find(k-> lhs()) != proc_par_to_proc_par_inj.end())
-    {
-      for (mcrl2::data::variable_vector::iterator l =  proc_par_to_proc_par_inj[ k -> lhs() ].begin()
-           ; l != proc_par_to_proc_par_inj[ k -> lhs() ].end()
-           ; ++l)
-      {
-        new_ass_left.push_back(*l);
-      }
-    }
-    else
-    {
-      new_ass_left.push_back(k-> lhs());
-    }
-  }
-  //Create new right-hand assignment_list
+  const data::data_expression_list ass = m_init_process.expressions();
   //Unfold parameters
   mcrl2::data::data_expression_vector new_ass_right;
-  for (mcrl2::data::assignment_list::iterator k = ass.begin()
-       ; k != ass.end()
-       ; ++k)
+  size_t index=0;
+  for (const data::data_expression& k: ass)
   {
-    if (static_cast<std::size_t>(std::distance(ass.begin(), k)) == parameter_at_index)
+    if (index == parameter_at_index)
     {
-
-      mcrl2::data::data_expression_vector ins = unfold_constructor(k -> rhs(), determine_function, projection_functions);
+      mcrl2::data::data_expression_vector ins = unfold_constructor(k, determine_function, projection_functions);
       //Replace unfold parameters in affected assignments
       new_ass_right.insert(new_ass_right.end(), ins.begin(), ins.end());
     }
     else
     {
-      new_ass_right.push_back(k-> rhs());
+      new_ass_right.push_back(k);
     }
+    index++;
   }
 
-  assert(new_ass_left.size() == new_ass_right.size());
-  mcrl2::data::assignment_vector new_ass;
-  while (!new_ass_left.empty())
-  {
-    new_ass.push_back(mcrl2::data::assignment(new_ass_left.front(), new_ass_right.front()));
-    new_ass_left.erase(new_ass_left.begin());
-    new_ass_right.erase(new_ass_right.begin());
-  }
-
-  const mcrl2::lps::stochastic_process_initializer new_init(mcrl2::data::assignment_list(new_ass.begin(), new_ass.end()), m_init_process.distribution());
-  mCRL2log(debug) << lps::pp(new_init) << std::endl;
+  const mcrl2::lps::stochastic_process_initializer new_init(mcrl2::data::data_expression_list(new_ass_right.begin(), new_ass_right.end()), 
+                                                            m_init_process.distribution());
+  mCRL2log(debug) << "Expressions for the new initial state: " << lps::pp(new_init) << std::endl;
 
   return new_init;
 }

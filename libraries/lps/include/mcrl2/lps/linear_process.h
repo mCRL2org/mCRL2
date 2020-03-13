@@ -14,7 +14,7 @@
 
 #include "mcrl2/lps/action_summand.h"
 #include "mcrl2/lps/deadlock_summand.h"
-#include "mcrl2/lps/process_initializer.h"
+// #include "mcrl2/lps/process_initializer.h" Is not used in this file. 
 
 namespace mcrl2
 {

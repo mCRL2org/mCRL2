@@ -48,8 +48,25 @@ class process_initializer: public atermpp::aterm_appl
     }
 
     /// \brief Constructor.
-    explicit process_initializer(const data::assignment_list& assignments)
+    [[deprecated]] explicit process_initializer(const data::assignment_list& assignments)
       : atermpp::aterm_appl(core::detail::function_symbol_LinearProcessInit(), assignments, stochastic_distribution())
+    {}
+
+    /* THE FOLLOWING CODE IS TEMPORARY AND NEEDS TO BE REMOVED IF ASSIGNMENTS ARE REPLACED BY AN EXPRESSION_LIST */
+    static data::assignment_list transform_to_dummy_assignments_to_be_removed(const data::data_expression_list& initial_expressions)
+    {
+      std::vector<data::assignment> result;
+      const core::identifier_string dummy_string("dummy");
+      for(const data::data_expression& e: initial_expressions)
+      {
+        result.push_back(data::assignment(data::variable(dummy_string,e.sort()),e));
+      }
+      return data::assignment_list(result.begin(), result.end());
+    }
+
+    /// \brief Constructor.
+    explicit process_initializer(const data::data_expression_list& initial_expressions)
+      : atermpp::aterm_appl(core::detail::function_symbol_LinearProcessInit(), transform_to_dummy_assignments_to_be_removed(initial_expressions), stochastic_distribution())
     {}
 
     /// Move semantics
