@@ -192,7 +192,7 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
 
     /// \brief Replace expressions in v that are of a finite sort with a
     ///        vector of assignments to Boolean variables.
-    data::data_expression_list replace_enumerated_parameters_in_initial_expressions( // XXXXXXXX
+    data::data_expression_list replace_enumerated_parameters_in_initial_expressions(
                                  const data::variable_list& vl,
                                  const data::data_expression_list& el)
     {
@@ -207,46 +207,45 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
       {
         const data::variable par= *i;
         i++;
-/*        if (m_new_parameters.find(a.lhs()) == m_new_parameters.end())
+        if (m_new_parameters.find(par) == m_new_parameters.end())   // This parameter is not replaced by a boolean parameters. 
         {
           result.push_back(a);
         }
         else
-        { */
-        data::variable_vector new_parameters = m_new_parameters[par];
-        data::data_expression_vector elements = m_enumerated_elements[par];
+        { 
+          data::variable_vector new_parameters = m_new_parameters[par];
+          data::data_expression_vector elements = m_enumerated_elements[par];
 
-        mCRL2log(log::debug) << "Found " << new_parameters.size() << " new parameter(s) for parameter " << data::pp(par) << std::endl;
+          mCRL2log(log::debug) << "Found " << new_parameters.size() << " new parameter(s) for parameter " << data::pp(par) << std::endl;
 
-        for (std::size_t j = 0; j < new_parameters.size(); ++j)
-        {
-          data::data_expression_vector disjuncts;
-
-          data::data_expression_vector::iterator k = elements.begin();
-          while (k != elements.end())
+          for (std::size_t j = 0; j < new_parameters.size(); ++j)
           {
-            // Elements that get boolean value false
-            std::ptrdiff_t count(static_cast<std::ptrdiff_t>(1) << j);
-            if (std::distance(k, elements.end()) < count)
-            {
-              k = elements.end();
-            }
-            else
-            {
-              std::advance(k, count);
-            }
+            data::data_expression_vector disjuncts;
 
-            // Elements that get value true
-            for (std::ptrdiff_t l = 0; l < count && k != elements.end(); ++l)
+            data::data_expression_vector::iterator k = elements.begin();
+            while (k != elements.end())
             {
-              disjuncts.push_back(data::equal_to(a, *k++));
+              // Elements that get boolean value false
+              std::ptrdiff_t count(static_cast<std::ptrdiff_t>(1) << j);
+              if (std::distance(k, elements.end()) < count)
+              {
+                k = elements.end();
+              }
+              else
+              {
+                std::advance(k, count);
+              }
+
+              // Elements that get value true
+              for (std::ptrdiff_t l = 0; l < count && k != elements.end(); ++l)
+              {
+                disjuncts.push_back(data::equal_to(a, *k++));
+              }
             }
+            result.push_back(data::lazy::join_or(disjuncts.begin(), disjuncts.end()));
           }
-          result.push_back(data::lazy::join_or(disjuncts.begin(), disjuncts.end()));
         }
-
       }
-//       }
 
       mCRL2log(log::debug) << "Replaced expression(s) " << data::pp(el_) << " in the initial state with expression(s) " << data::pp(result) << std::endl;
 
@@ -335,12 +334,12 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
 
     process_initializer update_initial_process(const data::variable_list& parameters, const process_initializer& init)
     {
-      return process_initializer(replace_enumerated_parameters_in_initial_expressions(parameters, init.expressions()));   // XXXX
+      return process_initializer(replace_enumerated_parameters_in_initial_expressions(parameters, init.expressions())); 
     }
 
     stochastic_process_initializer update_initial_process(const data::variable_list& parameters, const stochastic_process_initializer& init)
     {
-      return stochastic_process_initializer(replace_enumerated_parameters_in_initial_expressions(parameters, init.expressions()),  // XXXX
+      return stochastic_process_initializer(replace_enumerated_parameters_in_initial_expressions(parameters, init.expressions()),
                                             lps::replace_variables_capture_avoiding(init.distribution(), m_if_trees, m_if_trees_generator)
                                            );
     }
