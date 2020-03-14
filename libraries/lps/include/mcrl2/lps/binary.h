@@ -358,11 +358,12 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
     ///        constructor
     void run()
     {
+      const data::variable_list old_parameters = m_spec.process().process_parameters();
       replace_enumerated_parameters();
 
       // Initial process
       mCRL2log(log::debug) << "Updating process initializer" << std::endl;
-      m_spec.initial_process() = update_initial_process(m_spec.process().process_parameters(),m_spec.initial_process());
+      m_spec.initial_process() = update_initial_process(old_parameters,m_spec.initial_process());
 
       // Summands
       mCRL2log(log::debug) << "Updating summands" << std::endl;
