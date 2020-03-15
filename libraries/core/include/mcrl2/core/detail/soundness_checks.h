@@ -2918,7 +2918,7 @@ bool check_term_Choice(const Term& t)
   return true;
 }
 
-// LinearProcessInit(DataVarIdInit*, Distribution)
+// LinearProcessInit(DataExpr*, Distribution)
 template <typename Term>
 bool check_term_LinearProcessInit(const Term& t)
 {
@@ -2942,9 +2942,9 @@ bool check_term_LinearProcessInit(const Term& t)
     return false;
   }
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_DataVarIdInit<atermpp::aterm>, 0))
+  if (!check_list_argument(a[0], check_rule_DataExpr<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarIdInit" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(a[1], check_rule_Distribution<atermpp::aterm>))

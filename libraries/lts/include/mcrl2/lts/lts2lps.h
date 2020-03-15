@@ -37,8 +37,7 @@ lps::specification transform_lts2lps(const lts_lts_t& l)
   const std::set< data::variable> global_variables;
   // Add a single delta.
   const deadlock_summand_vector deadlock_summands(1,deadlock_summand(variable_list(), sort_bool::true_(), deadlock()));
-  const process_initializer initial_process = lps::make_process_initializer(
-      data::variable_list{process_parameter}, data::data_expression_list{sort_pos::pos(l.initial_state()+1)}
+  const process_initializer initial_process(data::data_expression_list{sort_pos::pos(l.initial_state()+1)}
   );
 
   const std::vector<transition>& trans=l.get_transitions();

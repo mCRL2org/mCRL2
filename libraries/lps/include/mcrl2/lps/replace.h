@@ -213,12 +213,12 @@ struct replace_process_parameter_builder: public Binder<Builder, replace_process
     x.assignments() = super::apply(x.assignments());
   }
 
-  lps::process_initializer apply(const lps::process_initializer& x)
-  {
-    count = 0;
-    lps::process_initializer result = super::apply(x);
-    return lps::process_initializer(super::apply(result.assignments()));
-  }
+//  lps::process_initializer apply(const lps::process_initializer& x)
+//  {
+//    count = 0;
+//    lps::process_initializer result = super::apply(x);
+//    return lps::process_initializer(super::apply(result.assignments()));
+//  }
 
   void update(lps::linear_process& x)
   {

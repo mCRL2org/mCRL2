@@ -216,7 +216,7 @@
 
 //process initialisation
 <LinearProcessInit>
-                ::= LinearProcessInit(<DataVarIdInit>*, <Distribution>)
+                ::= LinearProcessInit(<DataExpr>*, <Distribution>)
 
 
 //Mu-calculus formulas

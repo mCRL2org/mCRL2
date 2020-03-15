@@ -48,25 +48,8 @@ class process_initializer: public atermpp::aterm_appl
     }
 
     /// \brief Constructor.
-    [[deprecated]] explicit process_initializer(const data::assignment_list& assignments)
-      : atermpp::aterm_appl(core::detail::function_symbol_LinearProcessInit(), assignments, stochastic_distribution())
-    {}
-
-    /* THE FOLLOWING CODE IS TEMPORARY AND NEEDS TO BE REMOVED IF ASSIGNMENTS ARE REPLACED BY AN EXPRESSION_LIST */
-    static data::assignment_list transform_to_dummy_assignments_to_be_removed(const data::data_expression_list& initial_expressions)
-    {
-      std::vector<data::assignment> result;
-      const core::identifier_string dummy_string("dummy");
-      for(const data::data_expression& e: initial_expressions)
-      {
-        result.push_back(data::assignment(data::variable(dummy_string,e.sort()),e));
-      }
-      return data::assignment_list(result.begin(), result.end());
-    }
-
-    /// \brief Constructor.
-    explicit process_initializer(const data::data_expression_list& initial_expressions)
-      : atermpp::aterm_appl(core::detail::function_symbol_LinearProcessInit(), transform_to_dummy_assignments_to_be_removed(initial_expressions), stochastic_distribution())
+    explicit process_initializer(const data::data_expression_list& expressions)
+      : atermpp::aterm_appl(core::detail::function_symbol_LinearProcessInit(), expressions, stochastic_distribution())
     {}
 
     /// Move semantics
@@ -75,14 +58,9 @@ class process_initializer: public atermpp::aterm_appl
     process_initializer& operator=(const process_initializer&) noexcept = default;
     process_initializer& operator=(process_initializer&&) noexcept = default;
 
-    [[deprecated]] const data::assignment_list& assignments() const
-    {
-      return atermpp::down_cast<data::assignment_list>((*this)[0]);
-    }
-
     data::data_expression_list expressions() const
     {
-      return data::right_hand_sides(assignments());
+      return atermpp::down_cast<data::data_expression_list>((*this)[0]);
     }
 };
 
@@ -126,13 +104,6 @@ inline void swap(process_initializer& t1, process_initializer& t2)
 std::set<data::variable> find_free_variables(const lps::process_initializer& x);
 std::set<process::action_label> find_action_labels(const lps::process_initializer& x);
 
-// TODO: remove this function after the internal format of process_initializer has been fixed
-inline
-process_initializer make_process_initializer(const data::variable_list& variables, const data::data_expression_list& expressions)
-{
-  return process_initializer(data::make_assignment_list(variables, expressions));
-}
- 
 } // namespace lps
 
 } // namespace mcrl2

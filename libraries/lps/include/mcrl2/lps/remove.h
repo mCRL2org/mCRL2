@@ -144,17 +144,15 @@ struct remove_parameters_builder: public data_expression_builder<remove_paramete
 
   process_initializer apply(const process_initializer& x)
   {
-    auto parameters = apply(process_parameters);
     auto expressions = remove_expressions(x.expressions());
-    return lps::make_process_initializer(parameters, expressions);
+    return process_initializer(expressions);
   }
 
   stochastic_process_initializer apply(const stochastic_process_initializer& x)
   {
-    auto parameters = apply(process_parameters);
     auto expressions = remove_expressions(x.expressions());
     auto distribution = super::apply(x.distribution());
-    return lps::make_stochastic_process_initializer(parameters, expressions, distribution);
+    return stochastic_process_initializer(expressions, distribution);
   }
 
   /// \brief Removes parameters from a linear process specification

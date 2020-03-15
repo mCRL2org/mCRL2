@@ -63,7 +63,7 @@ class stochastic_specification: public specification_base<stochastic_linear_proc
         other.action_labels(), 
         other.global_variables(), 
         stochastic_linear_process(other.process()),
-        stochastic_process_initializer(other.initial_process().assignments(),stochastic_distribution()))
+        stochastic_process_initializer(other.initial_process().expressions(),stochastic_distribution()))
     { } 
 };
 
@@ -136,7 +136,7 @@ specification remove_stochastic_operators(const stochastic_specification& spec)
   {
     throw mcrl2::runtime_error("initial state has non-empty stochastic distribution");
   }
-  result.initial_process() = process_initializer(spec.initial_process().assignments());
+  result.initial_process() = process_initializer(spec.initial_process().expressions());
   return result;
 }
 

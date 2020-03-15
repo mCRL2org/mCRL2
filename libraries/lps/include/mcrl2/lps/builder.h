@@ -75,7 +75,7 @@ struct add_sort_expressions: public Builder<Derived>
   lps::process_initializer apply(const lps::process_initializer& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    lps::process_initializer result = lps::process_initializer(static_cast<Derived&>(*this).apply(x.assignments()));
+    lps::process_initializer result = lps::process_initializer(static_cast<Derived&>(*this).apply(x.expressions()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -140,7 +140,7 @@ struct add_sort_expressions: public Builder<Derived>
   lps::stochastic_process_initializer apply(const lps::stochastic_process_initializer& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    lps::stochastic_process_initializer result = lps::stochastic_process_initializer(static_cast<Derived&>(*this).apply(x.assignments()), static_cast<Derived&>(*this).apply(x.distribution()));
+    lps::stochastic_process_initializer result = lps::stochastic_process_initializer(static_cast<Derived&>(*this).apply(x.expressions()), static_cast<Derived&>(*this).apply(x.distribution()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -206,7 +206,7 @@ struct add_data_expressions: public Builder<Derived>
   lps::process_initializer apply(const lps::process_initializer& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    lps::process_initializer result = lps::process_initializer(static_cast<Derived&>(*this).apply(x.assignments()));
+    lps::process_initializer result = lps::process_initializer(static_cast<Derived&>(*this).apply(x.expressions()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -264,7 +264,7 @@ struct add_data_expressions: public Builder<Derived>
   lps::stochastic_process_initializer apply(const lps::stochastic_process_initializer& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    lps::stochastic_process_initializer result = lps::stochastic_process_initializer(static_cast<Derived&>(*this).apply(x.assignments()), static_cast<Derived&>(*this).apply(x.distribution()));
+    lps::stochastic_process_initializer result = lps::stochastic_process_initializer(static_cast<Derived&>(*this).apply(x.expressions()), static_cast<Derived&>(*this).apply(x.distribution()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -331,7 +331,7 @@ struct add_variables: public Builder<Derived>
   lps::process_initializer apply(const lps::process_initializer& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    lps::process_initializer result = lps::process_initializer(static_cast<Derived&>(*this).apply(x.assignments()));
+    lps::process_initializer result = lps::process_initializer(static_cast<Derived&>(*this).apply(x.expressions()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -394,7 +394,7 @@ struct add_variables: public Builder<Derived>
   lps::stochastic_process_initializer apply(const lps::stochastic_process_initializer& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    lps::stochastic_process_initializer result = lps::stochastic_process_initializer(static_cast<Derived&>(*this).apply(x.assignments()), static_cast<Derived&>(*this).apply(x.distribution()));
+    lps::stochastic_process_initializer result = lps::stochastic_process_initializer(static_cast<Derived&>(*this).apply(x.expressions()), static_cast<Derived&>(*this).apply(x.distribution()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }

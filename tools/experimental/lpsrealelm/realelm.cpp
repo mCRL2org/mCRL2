@@ -985,8 +985,11 @@ stochastic_specification realelm(stochastic_specification s, const std::size_t m
   lps.process_parameters() = process_parameters;
   lps.action_summands() = action_summands;
   lps.deadlock_summands() = deadlock_summands;
-  assignment_list initialization(determine_process_initialization(s.initial_process().assignments(), context, r));
-  stochastic_process_initializer init(initialization,s.initial_process().distribution());
+
+  // TODO: get rid of the following workarounds
+  assignment_list assignments = make_assignment_list(process_parameters, s.initial_process().expressions());
+  assignment_list initialization(determine_process_initialization(assignments, context, r));
+  stochastic_process_initializer init(right_hand_sides(initialization),s.initial_process().distribution());
 
   return stochastic_specification(s.data(),
                                   s.action_labels()+new_act_declarations,

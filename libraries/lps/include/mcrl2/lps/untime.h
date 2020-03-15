@@ -30,13 +30,13 @@ INITIALIZER make_process_initializer(const data::variable_list& variables, const
 template <>
 process_initializer make_process_initializer(const data::variable_list& variables, const data::data_expression_list& expressions, const process_initializer& init)
 {
-  return lps::make_process_initializer(variables, expressions);
+  return lps::process_initializer(expressions);
 }
 
 template <>
 stochastic_process_initializer make_process_initializer(const data::variable_list& variables, const data::data_expression_list& expressions, const stochastic_process_initializer& init)
 {
-  return lps::make_stochastic_process_initializer(variables, expressions, init.distribution());
+  return stochastic_process_initializer(expressions, init.distribution());
 }
 
 } // namespace detail

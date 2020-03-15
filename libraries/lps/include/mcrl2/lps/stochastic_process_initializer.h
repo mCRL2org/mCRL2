@@ -38,19 +38,9 @@ class stochastic_process_initializer: public process_initializer
     }
 
     /// \brief Constructor.
-    [[deprecated]] stochastic_process_initializer(const data::assignment_list& assignments, const stochastic_distribution& distribution)
-      : super(atermpp::aterm_appl(core::detail::function_symbol_LinearProcessInit(), assignments, distribution), false)
+    stochastic_process_initializer(const data::data_expression_list& expressions, const stochastic_distribution& distribution)
+      : super(atermpp::aterm_appl(core::detail::function_symbol_LinearProcessInit(), expressions, distribution), false)
     {}
-
-    /// \brief Constructor.
-    stochastic_process_initializer(const data::data_expression_list& initial_expressions, const stochastic_distribution& distribution)
-      : super(atermpp::aterm_appl(core::detail::function_symbol_LinearProcessInit(), transform_to_dummy_assignments_to_be_removed(initial_expressions), distribution), false)
-    {}
-
-    /// \brief Constructor.  We don't want a silent conversion from process_initializer as this is a source of bugs.
-    /* stochastic_process_initializer(const process_initializer& other)
-      : super(other)
-    {} */
 
     const stochastic_distribution& distribution() const
     {
@@ -96,13 +86,6 @@ inline void swap(stochastic_process_initializer& t1, stochastic_process_initiali
 
 // template function overloads
 std::set<data::variable> find_free_variables(const lps::stochastic_process_initializer& x);
-
-// TODO: remove this function after the internal format of stochastic_process_initializer has been fixed
-inline
-stochastic_process_initializer make_stochastic_process_initializer(const data::variable_list& variables, const data::data_expression_list& expressions, const stochastic_distribution& dist)
-{
-  return stochastic_process_initializer(data::make_assignment_list(variables, expressions), dist);
-}
 
 } // namespace lps
 
