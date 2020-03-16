@@ -65,20 +65,24 @@ data::assignment_list project(const data::assignment_list& assignments, const da
 
 /// \brief Take a list of parameters and assignments and make an assignment_list in order of the given parameters.
 inline
-data::assignment_list make_assignments(const data::variable_list& process_parameters, const data::assignment_list& assignments)
+data::data_expression_list project_values(const data::assignment_list& assignments, const data::variable_list& parameters)
 {
-  // Maps variables to their corresponding expression (in the assignments).
-  data::assignment_sequence_substitution sigma(assignments);
+  data::data_expression_list values;
 
-  // For each parameter (in this order) add the assignment.
-  data::assignment_list result;
-  for (const data::variable& var : process_parameters)
+  // Search the original assignment for the parameter and add the right-hand side to the values.
+  for (const data::variable& parameter : parameters)
   {
-    data::assignment assignment(var, sigma(var));
-    result.push_front(assignment);
+    auto it = std::find_if(assignments.begin(), assignments.end(),
+      [&parameter](const data::assignment& assignment)
+      {
+        return (assignment.lhs() == parameter);
+      });
+
+    assert(it != assignments.end());
+    values.push_front(it->rhs());
   }
 
-  return atermpp::reverse(result);
+  return atermpp::reverse(values);
 }
 
 /// \brief Projects a list of parameters based on a list of names.
