@@ -270,8 +270,11 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::r
   lps::stochastic_linear_process left_process(left_parameters, no_deadlock_summands, left_summands);
   lps::stochastic_linear_process right_process(right_parameters, no_deadlock_summands, right_summands);
 
-  lps::stochastic_process_initializer left_initial(make_assignments(left_parameters, spec.initial_process().assignments()), spec.initial_process().distribution());
-  lps::stochastic_process_initializer right_initial(make_assignments(right_parameters, spec.initial_process().assignments()), spec.initial_process().distribution());
+  // TODO: this code needs to be checked
+  // lps::stochastic_process_initializer left_initial(make_assignments(left_parameters, spec.initial_process().assignments()), spec.initial_process().distribution());
+  // lps::stochastic_process_initializer right_initial(make_assignments(right_parameters, spec.initial_process().assignments()), spec.initial_process().distribution());
+  lps::stochastic_process_initializer left_initial = spec.initial_process();
+  lps::stochastic_process_initializer right_initial = spec.initial_process();
 
   // Create the new LPS and return it.
   return std::make_pair(

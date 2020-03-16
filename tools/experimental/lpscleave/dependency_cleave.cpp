@@ -300,7 +300,9 @@ lps::stochastic_specification mcrl2::dependency_cleave(const lps::stochastic_spe
   lps::deadlock_summand_vector no_deadlock_summands;
   lps::stochastic_linear_process cleave_process(parameters, no_deadlock_summands, cleave_summands);
 
-  lps::stochastic_process_initializer cleave_initial(make_assignments(parameters, spec.initial_process().assignments()), spec.initial_process().distribution());
+  // TODO: this code needs to be checked
+  lps::stochastic_process_initializer cleave_initial = spec.initial_process();
+  // lps::stochastic_process_initializer cleave_initial(make_assignments(parameters, spec.initial_process().assignments()), spec.initial_process().distribution());
 
   // Create the new LPS and return it.
   return lps::stochastic_specification(spec.data(), cleave_action_labels, spec.global_variables(), cleave_process, cleave_initial);
