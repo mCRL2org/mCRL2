@@ -494,9 +494,11 @@ protected:
     }
     m_spec.process().process_parameters().push_front(dbm_var);
 
+    // TODO: clean this code up
+    assignment_list initial_assignments = make_assignment_list(m_spec.process().process_parameters(), m_spec.initial_process().expressions());
     assignment_list al;
-    for(assignment_list::const_iterator i = m_spec.initial_process().assignments().begin();
-          i != m_spec.initial_process().assignments().end(); i++)
+    //for(assignment_list::const_iterator i = m_spec.initial_process().assignments().begin(); i != m_spec.initial_process().assignments().end(); i++)
+    for(assignment_list::const_iterator i = initial_assignments.begin(); i != initial_assignments.end(); i++)
     {
       if(i->lhs().sort() != sort_real::real_())
       {
@@ -504,7 +506,8 @@ protected:
       }
     }
     al.push_front(assignment(dbm_var, normalize_sorts(sort_dbm::dbm_zero(), m_spec.data())));
-    m_spec.initial_process() = stochastic_process_initializer(al, m_spec.initial_process().distribution());
+    //m_spec.initial_process() = stochastic_process_initializer(al, m_spec.initial_process().distribution());
+    m_spec.initial_process() = stochastic_process_initializer(right_hand_sides(al), m_spec.initial_process().distribution());
   }
 
   void add_constructors(data_specification& d, function_symbol_vector cons) {
