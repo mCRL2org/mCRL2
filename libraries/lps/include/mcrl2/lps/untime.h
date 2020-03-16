@@ -25,16 +25,16 @@ namespace detail
 {
 
 template <class INITIALIZER>
-INITIALIZER make_process_initializer(const data::variable_list& variables, const data::data_expression_list& expressions, const INITIALIZER& init);
+INITIALIZER make_process_initializer(const data::data_expression_list& expressions, const INITIALIZER& init);
 
 template <>
-process_initializer make_process_initializer(const data::variable_list& variables, const data::data_expression_list& expressions, const process_initializer& init)
+process_initializer make_process_initializer(const data::data_expression_list& expressions, const process_initializer& init)
 {
   return lps::process_initializer(expressions);
 }
 
 template <>
-stochastic_process_initializer make_process_initializer(const data::variable_list& variables, const data::data_expression_list& expressions, const stochastic_process_initializer& init)
+stochastic_process_initializer make_process_initializer(const data::data_expression_list& expressions, const stochastic_process_initializer& init)
 {
   return stochastic_process_initializer(expressions, init.distribution());
 }
@@ -244,7 +244,7 @@ class untime_algorithm: public detail::lps_algorithm<Specification>
         m_spec.process().process_parameters()=push_back(m_spec.process().process_parameters(),m_last_action_time);
         data::data_expression_list init = m_spec.initial_process().expressions();
         init = push_back(init, data::sort_real::real_(0));
-        m_spec.initial_process() = detail::make_process_initializer(m_spec.process().process_parameters(), init, m_spec.initial_process());
+        m_spec.initial_process() = detail::make_process_initializer(init, m_spec.initial_process());
 
         for(action_summand_type& s: m_spec.process().action_summands())
         {
