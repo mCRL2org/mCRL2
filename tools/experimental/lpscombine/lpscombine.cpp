@@ -189,8 +189,13 @@ void combine_specification(const lps::stochastic_specification& left_spec,
   stream << "proc " << composition << "\n\n";
 
   // Construct the union of formal parameters, but ensure that they are unique.
-  data::assignment_list assignments = left_spec.initial_process().assignments();
-  for (const auto& assignment : right_spec.initial_process().assignments())
+
+  // TODO: clean up this code
+  // data::assignment_list assignments = left_spec.initial_process().assignments();
+  data::assignment_list assignments = data::make_assignment_list(left_spec.process().process_parameters(), left_spec.initial_process().expressions());
+  data::assignment_list right_assignments = data::make_assignment_list(right_spec.process().process_parameters(), right_spec.initial_process().expressions());
+  //for (const auto& assignment : right_spec.initial_process().assignments())
+  for (const auto& assignment : right_assignments)
   {
     if (std::find(assignments.begin(), assignments.end(), assignment) == assignments.end())
     {
