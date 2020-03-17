@@ -134,7 +134,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
       auto& process = super::m_spec.process();
       const std::set<data::variable>& global_variables = super::m_spec.global_variables();
       const data::variable_list& d = process.process_parameters();
-      data::data_expression_list e = super::m_spec.initial_process().expressions(); // TODO: make this a const reference
+      const data::data_expression_list& e = super::m_spec.initial_process().expressions();
 
       // initialize m_index_of
       unsigned index = 0;

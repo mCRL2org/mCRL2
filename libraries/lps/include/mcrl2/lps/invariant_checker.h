@@ -152,7 +152,7 @@ bool Invariant_Checker<Specification>::check_init(const data::data_expression& a
 {
   data::mutable_map_substitution<> v_substitutions;
   const data::variable_list& d = f_spec.process().process_parameters();
-  data::data_expression_list e = f_init.expressions(); // TODO: make this a const reference
+  const data::data_expression_list& e = f_init.expressions();
   auto di = d.begin();
   auto ei = e.begin();
   for (; di != d.end(); ++di, ++ei)
