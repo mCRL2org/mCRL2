@@ -28,7 +28,7 @@ template <class INITIALIZER>
 INITIALIZER make_process_initializer(const data::data_expression_list& expressions, const INITIALIZER& init);
 
 template <>
-process_initializer make_process_initializer(const data::data_expression_list& expressions, const process_initializer& init)
+process_initializer make_process_initializer(const data::data_expression_list& expressions, const process_initializer& /* init */)
 {
   return lps::process_initializer(expressions);
 }
