@@ -5121,8 +5121,7 @@ class specification_basic_type
 
     data_expression_list pushdummy_regular_data_expressions(
       const variable_list& pars,
-      const stacklisttype& stack,
-      const variable_list& stochastic_variables)
+      const stacklisttype& stack)
     {
       /* stack.parameters is the total list of parameters of the
          aggregated pCRL process. The variable pars contains
@@ -5254,8 +5253,7 @@ class specification_basic_type
       {
         data_expression_list result=
           pushdummy_regular_data_expressions(objectIndex(initialProcId).parameters,
-                                             stack,
-                                             initial_stochastic_distribution.variables());
+                                             stack);
         if (!singlecontrolstate)
         {
           return processencoding(i,result,stack);
@@ -5270,7 +5268,6 @@ class specification_basic_type
                                 initial_stochastic_distribution.variables());
         const data_expression_list l=processencoding(i,result,stack);
         assert(l.size()==function_sort(stack.opns->push.sort()).domain().size());
-        // return assignment_list({ assignment(stack.stackvar,application(stack.opns->push,l)) });   ZZZZZ
         return data_expression_list({ application(stack.opns->push,l) });
       }
     }
@@ -8668,7 +8665,6 @@ class specification_basic_type
       stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands,
       variable_list& pars,
-      data_expression_list& init,
       lps::detail::ultimate_delay& ultimate_delay_condition,
       const std::string& hint="")
     {
@@ -8676,8 +8672,6 @@ class specification_basic_type
 
       data::maintain_variables_in_rhs<data::mutable_map_substitution<> > sigma=make_unique_variables(pars, hint);
       const variable_list unique_pars=data::replace_variables(pars, sigma);
-
-      // init=substitute_assignmentlist(init,pars,true,false, sigma);  // Only substitute the variables in the lhs. ZZZZZ
 
       if (!options.ignore_time)
       {
@@ -9341,13 +9335,13 @@ class specification_basic_type
             (object.processstatus==pCRL)||
             (object.processstatus==GNFalpha))
         {
-          make_parameters_and_sum_variables_unique(action_summands,deadlock_summands,pars,init,ultimate_delay_condition,std::string(object.objectname));
+          make_parameters_and_sum_variables_unique(action_summands,deadlock_summands,pars,ultimate_delay_condition,std::string(object.objectname));
         }
         else
         {
           if (rename_variables)
           {
-            make_parameters_and_sum_variables_unique(action_summands,deadlock_summands,pars,init,ultimate_delay_condition);
+            make_parameters_and_sum_variables_unique(action_summands,deadlock_summands,pars,ultimate_delay_condition);
           }
         }
 
@@ -9377,7 +9371,7 @@ class specification_basic_type
           }
 
           // Reconstruct the variables from the temporary specification
-          init=temporary_spec.initial_process().expressions();     // ZZZZZZZZZZZZ
+          init=temporary_spec.initial_process().expressions();     
           pars=temporary_spec.process().process_parameters();
           assert(init.size()==pars.size());
 
@@ -9543,7 +9537,6 @@ class specification_basic_type
         {
           sigma[v]=v;
         }
-        // init=substitute_assignmentlist(init,pars,false,true,sigma);   ZZZZ
         init=replace_variables_capture_avoiding_alt(init,sigma);
         return;
       }
@@ -11243,14 +11236,12 @@ class specification_basic_type
   public:
     variable_list SieveProcDataVarsAssignments(
       const std::set <variable>& vars,
-      const data_expression_list& initial_state_expressions,
-      const variable_list& parameters)
+      const data_expression_list& initial_state_expressions)
     {
       const std::set < variable > vars_set(vars.begin(),vars.end());
       std::set < variable > vars_result_set;
 
 
-      // filter_vars_by_assignmentlist(assignments,parameters,vars_set,vars_result_set);      ZZZZZZ
       filter_vars_by_termlist(initial_state_expressions.begin(),
                               initial_state_expressions.end(),
                               vars_set,
@@ -11359,7 +11350,7 @@ mcrl2::lps::stochastic_specification mcrl2::lps::linearise(
 
   // compute global variables
   data::variable_list globals1 = spec.SieveProcDataVarsSummands(spec.global_variables,action_summands,deadlock_summands,parameters);
-  data::variable_list globals2 = spec.SieveProcDataVarsAssignments(spec.global_variables,initial_state,parameters);
+  data::variable_list globals2 = spec.SieveProcDataVarsAssignments(spec.global_variables,initial_state);
   std::set<data::variable> global_variables;
   global_variables.insert(globals1.begin(), globals1.end());
   global_variables.insert(globals2.begin(), globals2.end());
