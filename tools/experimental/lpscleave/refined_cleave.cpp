@@ -99,6 +99,12 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::r
       }
     }
 
+    // Remove the summation variables from the action dependencies.
+    for (const data::variable& var : summand.summation_variables())
+    {
+      action_dependencies.erase(var);
+    }
+
     // The dependencies for the update expressions (on other parameters).
     std::set<data::variable> left_update_dependencies;
     std::set<data::variable> right_update_dependencies;
@@ -132,28 +138,23 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::r
       right_condition_dependencies.erase(var);
     }
 
-    data::assignment_list assignments;
+    data::assignment_list other_assignments;
     if (generate_left)
     {
-      assignments = project(summand.assignments(), left_parameters);
+      other_assignments = project(summand.assignments(), right_parameters);
     }
     else
     {
-      assignments = project(summand.assignments(), right_parameters);
+      other_assignments = project(summand.assignments(), left_parameters);
     }
 
     // Indicates that each assignment is the identity (lhs == lhs) so only trivial updates.
-    bool is_update_trivial = std::find_if(assignments.begin(),
-      assignments.end(),
+    bool is_update_trivial = std::find_if(other_assignments.begin(),
+      other_assignments.end(),
       [](const data::assignment& assignment)
       {
         return assignment.lhs() != assignment.rhs();
-      }) == assignments.end();
-
-    bool is_independent = is_update_trivial &&
-      (generate_left ?
-          std::includes(left_parameters.begin(), left_parameters.end(), synchronized.begin(), synchronized.end())
-        : std::includes(right_parameters.begin(), right_parameters.end(), synchronized.begin(), synchronized.end()));
+      }) == other_assignments.end();
 
     // Compute the synchronization vector (the values of h without functions)
     synchronized.insert(left_condition_dependencies.begin(), left_condition_dependencies.end());
@@ -162,11 +163,17 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::r
     synchronized.insert(left_update_dependencies.begin(), left_update_dependencies.end());
     synchronized.insert(right_update_dependencies.begin(), right_update_dependencies.end());
 
-    print_names(std::string("Dependencies of summand ") += std::to_string(index), synchronized);
-    if (is_independent)
-    {
-      mCRL2log(log::info) << "Summand is independent\n";
-    }
+    // If the other component is update trivial then it does not depend on summation parameters.
+    atermpp::term_list<data::variable> our_parameters = (generate_left ? left_parameters : right_parameters);
+    our_parameters = our_parameters + summand.summation_variables();
+
+    bool is_independent = is_update_trivial && std::includes(our_parameters.begin(), right_parameters.end(), synchronized.begin(), synchronized.end());
+
+    mCRL2log(log::verbose) << std::boolalpha << "Summand " << index
+                           << " (generate_left: " << generate_left
+                           << ", is_update_trivial: " << is_update_trivial
+                           << ", is_independent: " << is_independent << ").\n";
+    print_names("Dependencies", synchronized);
 
     // Create the actsync(p, e_i) action for our dependencies on p and e_i
     data::data_expression_list values;

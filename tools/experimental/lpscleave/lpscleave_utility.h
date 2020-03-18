@@ -112,20 +112,20 @@ template<typename Container, typename F>
 inline
 void print_values(const std::string& identifier, const Container& elements, F name)
 {
-  mCRL2log(log::info) << identifier << ": ";
+  mCRL2log(log::verbose) << identifier << ": ";
 
   bool first = true;
   for (const auto& element : elements)
   {
     if (!first)
     {
-      mCRL2log(log::info) << ", ";
+      mCRL2log(log::verbose) << ", ";
     }
-    mCRL2log(log::info) << name(element);
+    mCRL2log(log::verbose) << name(element);
     first = false;
   }
 
-  mCRL2log(log::info) << "\n";
+  mCRL2log(log::verbose) << "\n";
 }
 
 template<typename Container>

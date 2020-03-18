@@ -170,7 +170,7 @@ std::optional<lps::stochastic_action_summand> cleave_summand(
     if (dependencies.in_L_X)
     {
       // This summand belongs to L_V.
-      mCRL2log(log::info) << "Summand is independent, so " << summand_index << " in L_V.\n";
+      mCRL2log(log::verbose) << "Summand is independent, so " << summand_index << " in L_V.\n";
       actions.push_front(tag);
     }
     else
@@ -186,7 +186,7 @@ std::optional<lps::stochastic_action_summand> cleave_summand(
     summand_dependencies other_dependencies = compute_dependencies(spec, summand, other_parameters, parameters);
     if (other_dependencies.in_L_X)
     {
-      mCRL2log(log::info) << "Summand is independent in the other component, so " << summand_index << " in L_W.\n";
+      mCRL2log(log::verbose) << "Summand is independent in the other component, so " << summand_index << " in L_W.\n";
       return {};
     }
     else
