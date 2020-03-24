@@ -206,6 +206,14 @@ CodeEditor::CodeEditor(QWidget* parent) : QPlainTextEdit(parent)
   codeFont.setWeight(QFont::Light);
   lineNumberFont = this->font();
 
+  /* set the selection colour while inactive the same as when active */
+  QPalette palette = this->palette();
+  palette.setColor(QPalette::Inactive, QPalette::Highlight,
+                   palette.color(QPalette::Active, QPalette::Highlight));
+  palette.setColor(QPalette::Inactive, QPalette::HighlightedText,
+                   palette.color(QPalette::Active, QPalette::HighlightedText));
+  this->setPalette(palette);
+
   setFontSize(13);
 
   lineNumberArea = new LineNumberArea(this);
