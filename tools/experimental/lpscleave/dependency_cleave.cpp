@@ -118,8 +118,8 @@ std::optional<lps::stochastic_action_summand> cleave_summand(
   const data::variable_list& other_parameters,
   std::vector<process::action_label>& sync_labels,
   std::string syncname,
-  const process::action& tag,
-  const process::action& intern)
+  const process::action& independent_tag,
+  const process::action& internal_tag)
 {
   lps::stochastic_action_summand summand = spec.process().action_summands()[summand_index];
 
@@ -162,7 +162,7 @@ std::optional<lps::stochastic_action_summand> cleave_summand(
 
     // Convert tau actions to a visible action.
     process::action_list internal;
-    internal.push_front(intern);
+    internal.push_front(internal_tag);
 
     process::action_list actions = (summand.multi_action() == lps::multi_action()) ?
       internal : summand.multi_action().actions();
@@ -171,7 +171,7 @@ std::optional<lps::stochastic_action_summand> cleave_summand(
     {
       // This summand belongs to L_V.
       mCRL2log(log::verbose) << "Summand is independent, so " << summand_index << " in L_V.\n";
-      actions.push_front(tag);
+      actions.push_front(independent_tag);
     }
     else
     {
@@ -240,7 +240,7 @@ lps::stochastic_specification mcrl2::dependency_cleave(const lps::stochastic_spe
   // The parameters of the "other" component process.
   data::variable_list other_parameters = get_other_parameters(process, parameters);
 
-  // Extend the action specification with an actsync (that is unique) for every summand with the correct sorts, a tag and an intern action.
+  // Extend the action specification with an actsync (that is unique) for every summand with the correct sorts, a tag and an internal action.
   std::vector<process::action_label> labels;
 
   // Add the tags for the left and right processes
@@ -255,8 +255,8 @@ lps::stochastic_specification mcrl2::dependency_cleave(const lps::stochastic_spe
 
   process::action tag(labels.back(), {});
 
-  labels.emplace_back(process::action_label("intern", {}));
-  process::action intern(labels.back(), {});
+  labels.emplace_back(process::action_label("internal", {}));
+  process::action internal_tag(labels.back(), {});
 
   // Define the synchronization actions for the left and right components.
   std::string synclabel = right_process ? "syncright" : "syncleft";
@@ -269,7 +269,7 @@ lps::stochastic_specification mcrl2::dependency_cleave(const lps::stochastic_spe
   {
     if (index < process.action_summands().size())
     {
-      auto summand = cleave_summand<true>(spec, index, parameters, other_parameters, labels, synclabel, tag, intern);
+      auto summand = cleave_summand<true>(spec, index, parameters, other_parameters, labels, synclabel, tag, internal_tag);
       if (summand)
       {
         cleave_summands.emplace_back(summand.value());
@@ -283,7 +283,7 @@ lps::stochastic_specification mcrl2::dependency_cleave(const lps::stochastic_spe
 
   for (std::size_t index : get_other_indices(process, indices))
   {
-    auto summand = cleave_summand<false>(spec, index, parameters, other_parameters, labels, synclabel, tag, intern);
+    auto summand = cleave_summand<false>(spec, index, parameters, other_parameters, labels, synclabel, tag, internal_tag);
     if (summand)
     {
       cleave_summands.emplace_back(summand.value());
