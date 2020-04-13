@@ -28,7 +28,7 @@ QString tikzNode(Graph::Graph& graph, std::size_t i, float aspectRatio)
   ret = ret.arg(node.pos().x() / 10.0f * aspectRatio, 6, 'f').arg(node.pos().y() / 10.0f, 6, 'f');
   ret = ret.arg(graph.initialState() == i ? "init" : "");
   ret = ret.arg(i);
-  ret = ret.arg(node.active() ? "" : ", dashed");
+  ret = ret.arg(graph.hasExploration() && !node.active() ? ", dashed" : "");
 
   return ret;
 }
