@@ -44,6 +44,17 @@ std::list<std::string> split_actions(const std::string& s)
   return result;
 }
 
+/// \returns True if and only if the elements of the left containers are also elements of the right container.
+template<typename Container, typename Container2>
+bool is_subset(const Container& left, const Container2& right)
+{
+  return std::all_of(left.begin(), left.end(),
+    [&right](const auto& element)
+    {
+      return std::find(right.begin(), right.end(), element) != right.end();
+    });
+}
+
 /// \brief Given a list of assignments and parameters returns a list of assignments that only contain the assignments
 ///        for the given parameters and not for the potential other variables.
 /// \returns A list of assignments only over the given parameters.

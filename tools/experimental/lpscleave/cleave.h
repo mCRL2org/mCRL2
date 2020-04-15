@@ -7,8 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifndef MCRL2_REFINED_CLEAVE_H_
-#define MCRL2_REFINED_CLEAVE_H_
+#ifndef MCRL2_CLEAVE_H_
+#define MCRL2_CLEAVE_H_
 
 #include "mcrl2/lps/stochastic_specification.h"
 
@@ -16,7 +16,7 @@ namespace mcrl2
 {
 
 /// \brief Performs the a refined cleave based on the given parameters V and W.
-std::pair<lps::stochastic_specification, lps::stochastic_specification> refined_cleave(
+std::pair<lps::stochastic_specification, lps::stochastic_specification> cleave(
   const lps::stochastic_specification& spec,
   const data::variable_list& left_parameters,
   const data::variable_list& right_parameters,
@@ -25,4 +25,4 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> refined_
 
 } // namespace mcrl2
 
-#endif // MCRL2_REFINED_CLEAVE_H_
+#endif // MCRL2_CLEAVE_H_
