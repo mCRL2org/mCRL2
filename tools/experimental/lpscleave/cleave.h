@@ -19,7 +19,8 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> cleave(
   const lps::stochastic_specification& spec,
   const data::variable_list& left_parameters,
   const data::variable_list& right_parameters,
-  std::list<std::size_t>& indices
+  std::list<std::size_t>& indices,
+  bool enable_split_condition
 );
 
 } // namespace mcrl2
