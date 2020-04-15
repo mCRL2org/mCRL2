@@ -11,6 +11,7 @@
 
 #define BOOST_TEST_MODULE process_test
 
+#include "mcrl2/process/balance_nesting_depth.h"
 #include "mcrl2/process/is_guarded.h"
 #include "mcrl2/process/is_linear.h"
 #include "mcrl2/process/parse.h"
@@ -267,6 +268,31 @@ void test_guarded()
 
   x = parse_process_expression("R(0)", DATA_DECL, PROC_DECL);
   BOOST_CHECK(!is_guarded(x, procspec.equations()));
+}
+
+BOOST_AUTO_TEST_CASE(balance_summands_test)
+{
+  std::function<std::size_t(process_expression)> nesting_depth;
+  nesting_depth = [&nesting_depth](const process_expression& x) -> std::size_t
+  {
+    if (is_choice(x))
+    {
+      const auto& x_ = atermpp::down_cast<choice>(x);
+      return std::max(nesting_depth(x_.left()), nesting_depth(x_.right())) + 1;
+    }
+    return 0;
+  };
+
+  process_expression x = delta();
+  for (int i = 0; i < 100; i++)
+  {
+    x = choice(x, delta());
+  }
+  auto depth1 = nesting_depth(x);
+  x = balance_summands(x);
+  auto depth2 = nesting_depth(x);
+  BOOST_CHECK_EQUAL(depth1, 100);
+  BOOST_CHECK_EQUAL(depth2, 7);
 }
 
 BOOST_AUTO_TEST_CASE(test_main)

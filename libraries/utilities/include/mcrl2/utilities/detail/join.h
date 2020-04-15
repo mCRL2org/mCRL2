@@ -12,6 +12,8 @@
 #ifndef MCRL2_UTILITIES_DETAIL_JOIN_H
 #define MCRL2_UTILITIES_DETAIL_JOIN_H
 
+#include <iterator>
+
 namespace mcrl2
 {
 
@@ -62,6 +64,30 @@ T join(FwdIt first, FwdIt last, BinaryOperation op, T empty_sequence_result)
     result = op(result, *first++);
   }
   return result;
+}
+
+/// \brief Given a non-empty sequence [t1, t2, ..., tn] of elements of type T, returns
+/// op(op(t1, op(t2, ...), tn)))). The height of the resulting expression tree is minimal.
+/// \param first [first, last) is the range of elements.
+/// \param last
+/// \param op An operator
+/// \return The joined sequence
+template <typename T, typename RndIt, typename BinaryOperation>
+T join_balanced(RndIt first, RndIt last, BinaryOperation op)
+{
+  auto n = std::distance(first, last);
+  if (n == 1)
+  {
+    return *first;
+  }
+  if (n == 2)
+  {
+    return op(*first, *(first + 1));
+  }
+  auto d = n / 2;
+  auto left = join_balanced<T, RndIt, BinaryOperation>(first, first + d, op);
+  auto right = join_balanced<T, RndIt, BinaryOperation>(first + d, last, op);
+  return op(left, right);
 }
 
 } // namespace detail
