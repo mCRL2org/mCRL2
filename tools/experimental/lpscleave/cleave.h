@@ -14,7 +14,6 @@
 
 namespace mcrl2
 {
-
 /// \brief Performs the a refined cleave based on the given parameters V and W.
 std::pair<lps::stochastic_specification, lps::stochastic_specification> cleave(
   const lps::stochastic_specification& spec,
