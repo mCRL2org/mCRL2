@@ -75,7 +75,8 @@ inline mcrl2::lps::stochastic_specification linearise(
   const std::string& text,
   mcrl2::lps::t_lin_options lin_options = t_lin_options())
 {
-  mcrl2::process::process_specification spec = mcrl2::process::parse_process_specification(text,true);
+  mcrl2::process::process_specification spec =
+      mcrl2::process::parse_process_specification_deprecated(text, true);
   return linearise(spec, lin_options);
 }
 
@@ -86,7 +87,8 @@ inline mcrl2::lps::stochastic_specification linearise(
 /// \exception mcrl2::runtime_error Linearisation failed
 inline stochastic_specification linearise_no_alpha(const std::string& text)
 {
-  mcrl2::process::process_specification procspec = mcrl2::process::parse_process_specification(text, false);
+  mcrl2::process::process_specification procspec =
+      mcrl2::process::parse_process_specification_deprecated(text, false);
   return linearise(procspec);
 }
 

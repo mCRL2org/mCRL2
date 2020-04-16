@@ -160,11 +160,11 @@ process_specification parse_process_specification_new(const std::string& text)
 void complete_process_specification(process_specification& x, bool alpha_reduce)
 {
   typecheck_process_specification(x);
+  process::translate_user_notation(x);
   if (alpha_reduce)
   {
     alphabet_reduce(x, 1000ul);
   }
-  process::translate_user_notation(x);
 }
 
 } // namespace detail

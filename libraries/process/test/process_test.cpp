@@ -225,7 +225,7 @@ void test_linear(const std::string& text, bool result = true)
 // Test case supplied by Frank Stappers. A segmentation fault is reported on Suse 64 bit.
 void test_data_spec()
 {
-  process_specification spec = parse_process_specification("sort  X; init tau;", false);
+  process_specification spec = parse_process_specification("sort  X; init tau;");
   data::pp(spec.data());
 }
 
@@ -242,7 +242,8 @@ void test_guarded()
 
   std::string DATA_DECL = "act a;\n";
   std::string PROC_DECL = "proc P(n: Nat); proc Q(n: Nat); proc R(n: Nat); proc S(n: Nat);\n";
-  process_specification procspec = parse_process_specification(PROCSPEC);
+  process_specification procspec =
+      parse_process_specification(PROCSPEC);
   process_expression x;
 
   x = parse_process_expression("delta", DATA_DECL, PROC_DECL);

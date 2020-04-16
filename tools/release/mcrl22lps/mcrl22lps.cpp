@@ -175,7 +175,8 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
       {
         //parse specification from stdin
         mCRL2log(mcrl2::log::verbose) << "Reading input from stdin..." << std::endl;
-        spec = mcrl2::process::parse_process_specification(std::cin, !noalpha);
+        spec = mcrl2::process::parse_process_specification_deprecated(std::cin,
+                                                                      !noalpha);
       }
       else
       {
@@ -187,7 +188,8 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
         {
           throw mcrl2::runtime_error("Cannot open input file: " + input_filename() + ".");
         }
-        spec = mcrl2::process::parse_process_specification(instream, !noalpha);
+        spec = mcrl2::process::parse_process_specification_deprecated(instream,
+                                                                      !noalpha);
         instream.close();
       }
       //report on well-formedness (if needed)

@@ -46,8 +46,8 @@ void complps2pbes(const std::string& input_filename,
     text = utilities::read_text(from);
   }
   // TODO: check if alpha reduction should be applied
-  process::process_specification procspec = process::parse_process_specification(text, false);
-  lps::specification spec=remove_stochastic_operators(lps::linearise(procspec));
+  process::process_specification procspec = process::parse_process_specification(text);
+  lps::specification spec = remove_stochastic_operators(lps::linearise(procspec));
 
   // load state formula
   mCRL2log(log::verbose) << "reading formula from file '" <<  formula_filename << "'..." << std::endl;

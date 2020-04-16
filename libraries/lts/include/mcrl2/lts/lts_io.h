@@ -132,7 +132,8 @@ inline void read_data_context(const std::string& data_file,
   // "init delta;" must appear at the front, such that a second init clause will be
   // reported as wrong. 
   const std::string input="init delta; " + utilities::read_text(data_file);
-  process::process_specification procspec = process::parse_process_specification(input);
+  process::process_specification procspec =
+      process::parse_process_specification(input);
   data=procspec.data();
   action_labels=procspec.action_labels();
 }
@@ -141,7 +142,8 @@ inline void read_mcrl2_context(const std::string& data_file,
                                data::data_specification& data,
                                process::action_label_list& action_labels)
 {
-  process::process_specification procspec = process::parse_process_specification(utilities::read_text(data_file), false);
+  process::process_specification procspec =
+      process::parse_process_specification(utilities::read_text(data_file));
   data = procspec.data();
   action_labels = procspec.action_labels();
 }
