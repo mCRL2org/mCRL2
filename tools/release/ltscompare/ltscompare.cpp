@@ -226,7 +226,8 @@ class ltscompare_tool : public ltscompare_base
                  .add_value(lts_eq_sim)
                  .add_value(lts_eq_ready_sim)
                  .add_value(lts_eq_trace)
-                 .add_value(lts_eq_weak_trace),
+                 .add_value(lts_eq_weak_trace)
+                 .add_value(lts_eq_coupled_sim),
                  "use equivalence NAME (not allowed in combination with -p/--preorder):", 'e').
       add_option("preorder", make_enum_argument<lts_preorder>("NAME")
                  .add_value(lts_pre_none, true)

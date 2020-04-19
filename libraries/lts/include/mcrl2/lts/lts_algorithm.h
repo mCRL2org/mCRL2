@@ -25,6 +25,7 @@
 #include "mcrl2/lts/detail/liblts_add_an_action_loop.h"
 #include "mcrl2/lts/detail/liblts_ready_sim.h"
 #include "mcrl2/lts/detail/liblts_failures_refinement.h"
+#include "mcrl2/lts/detail/liblts_coupledsim.h"
 #include "mcrl2/lts/detail/tree_set.h"
 #include "mcrl2/lts/lts_equivalence.h"
 #include "mcrl2/lts/lts_preorder.h"
@@ -198,6 +199,10 @@ bool destructive_compare(LTS_TYPE& l1,
 
       // Weak trace equivalence now corresponds to bisimilarity
       return detail::destructive_bisimulation_compare(l1,l2,false,false,generate_counter_examples,structured_output);
+    }
+    case lts_eq_coupled_sim:
+    {
+      return detail::coupled_simulation_compare(l1,l2);
     }
     default:
     throw mcrl2::runtime_error("Comparison for this equivalence is not available");

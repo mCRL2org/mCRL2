@@ -49,6 +49,7 @@ enum lts_equivalence
   lts_eq_ready_sim,       /**< Strong ready-simulation equivalence */  
   lts_eq_trace,            /**< Strong trace equivalence*/
   lts_eq_weak_trace,       /**< Weak trace equivalence */
+  lts_eq_coupled_sim, /** Coupled Similarity TODO*/
   lts_red_tau_star,        /**< Tau star reduction */
   lts_red_determinisation /**< Used for a determinisation reduction */
 };
@@ -163,6 +164,10 @@ lts_equivalence parse_equivalence(std::string const& s)
   {
     return lts_eq_weak_trace;
   }
+  else if (s == "coupled-sim")
+  {
+    return lts_eq_coupled_sim;
+  }
   else if (s == "tau-star")
   {
     return lts_red_tau_star;
@@ -241,6 +246,8 @@ inline std::string print_equivalence(const lts_equivalence eq)
       return "trace";
     case lts_eq_weak_trace:
       return "weak-trace";
+    case lts_eq_coupled_sim:
+      return "coupled-sim";
     case lts_red_tau_star:
       return "tau-star";
     case lts_red_determinisation:
@@ -304,6 +311,8 @@ inline std::string description(const lts_equivalence eq)
       return "strong trace equivalence";
     case lts_eq_weak_trace:
       return "weak trace equivalence";
+    case lts_eq_coupled_sim:
+      return "coupled simulation equivalence";
     case lts_red_tau_star:
       return "tau star reduction";
     case lts_red_determinisation:
