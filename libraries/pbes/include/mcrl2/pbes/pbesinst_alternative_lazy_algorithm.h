@@ -599,6 +599,7 @@ class pbesinst_alternative_lazy_algorithm
         make_pbesinst_substitution(eqn.variable().parameters(), X_e.parameters(), sigma);
         const pbes_expression& phi = eqn.formula();
         pbes_expression psi_e = R(phi, sigma);
+        R.clear_identifier_generator();
         try
         {
           check_whether_argument_is_a_well_formed_bes(psi_e);

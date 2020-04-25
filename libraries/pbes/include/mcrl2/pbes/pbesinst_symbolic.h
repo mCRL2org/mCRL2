@@ -87,6 +87,7 @@ class pbesinst_symbolic_algorithm
         data::rewriter::substitution_type sigma;
         make_pbesinst_substitution(eqn.variable().parameters(), X.parameters(), sigma);
         pbes_expression psi = R(phi, sigma);
+        R.clear_identifier_generator();
         for (const propositional_variable_instantiation& v: find_propositional_variable_instantiations(psi))
         {
           if (done.find(v) == done.end())

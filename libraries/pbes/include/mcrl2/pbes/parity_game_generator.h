@@ -135,6 +135,7 @@ class parity_game_generator
         make_substitution(pbes_eqn.variable().parameters(), psi1.parameters(), sigma);
         mCRL2log(log::debug2, "parity_game_generator") << "Expanding right hand side " << pbes_eqn.formula() << " into " << std::flush;
         pbes_expression result = R(pbes_eqn.formula(), sigma);
+        R.clear_identifier_generator();
         mCRL2log(log::debug2, "parity_game_generator") << result << std::endl;
         return result;
       }

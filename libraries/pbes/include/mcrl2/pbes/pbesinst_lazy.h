@@ -366,6 +366,7 @@ class pbesinst_lazy_algorithm
         const auto& phi = eqn.formula();
         data::add_assignments(sigma, eqn.variable().parameters(), X_e.parameters());
         pbes_expression psi_e = R(phi, sigma);
+        R.clear_identifier_generator();
         data::remove_assignments(sigma, eqn.variable().parameters());
 
         // optional step

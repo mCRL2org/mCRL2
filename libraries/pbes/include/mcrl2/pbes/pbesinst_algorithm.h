@@ -206,6 +206,7 @@ class pbesinst_algorithm
         make_pbesinst_substitution(eqn.variable().parameters(), X_e.parameters(), sigma);
         auto const& phi = eqn.formula();
         pbes_expression psi_e = R(phi, sigma);
+        R.clear_identifier_generator();
         for (const propositional_variable_instantiation& v: find_propositional_variable_instantiations(psi_e))
         {
           if (!contains(done, v))
