@@ -93,19 +93,6 @@ namespace detail {
 state_formula parse_state_formula(const std::string& text);
 state_formula_specification parse_state_formula_specification(const std::string& text);
 
-/// \brief Prints a warning if formula contains an action that is not used in lpsspec.
-inline
-void check_actions(const state_formulas::state_formula& formula, const lps::specification& lpsspec)
-{
-  std::set<process::action_label> used_lps_actions = lps::find_action_labels(lpsspec.process());
-  std::set<process::action_label> used_state_formula_actions = state_formulas::find_action_labels(formula);
-  std::set<process::action_label> diff = utilities::detail::set_difference(used_state_formula_actions, used_lps_actions);
-  if (!diff.empty())
-  {
-    mCRL2log(log::warning) << "Warning: the modal formula contains an action " << *diff.begin() << " that does not appear in the LPS!" << std::endl;
-  }
-}
-
 } // namespace detail
 
 struct parse_state_formula_options
@@ -163,7 +150,6 @@ state_formula parse_state_formula(const std::string& text,
   {
     x = state_formulas::typecheck_state_formula(x, lpsspec);
   }
-  detail::check_actions(x, lpsspec);
   lpsspec.data().add_context_sorts(state_formulas::find_sort_expressions(x));
   return post_process_state_formula(x, options);
 }
@@ -237,7 +223,6 @@ state_formula_specification parse_state_formula_specification(const std::string&
     result.formula() = state_formulas::typecheck_state_formula(result.formula(), dataspec, actspec, lpsspec.global_variables());
     // TODO: dataspec and actspec must also be typechecked here.
   }
-  detail::check_actions(result.formula(), lpsspec);
   result.formula() = post_process_state_formula(result.formula(), options);
   return result;
 }

@@ -36,6 +36,40 @@ void check_lts(const lts::lts_lts_t& ltsspec)
   }
 }
 
+inline
+std::set<process::action_label> find_action_labels(const lts::lts_lts_t& ltsspec)
+{
+  std::set<std::size_t> used_labels;
+  for (const lts::transition& tr: ltsspec.get_transitions())
+  {
+    used_labels.insert(tr.label());
+  }
+  std::set<process::action_label> result;
+  const auto& action_labels = ltsspec.action_labels();
+  for (std::size_t index: used_labels)
+  {
+    for (const process::action& a: action_labels[index].actions())
+    {
+      result.insert(a.label());
+    }
+  }
+  return result;
+}
+
+/// \brief Prints a warning if formula contains an action that is not used in ltsspec.
+inline void check_lts2pbes_actions(const state_formulas::state_formula& formula, const lts::lts_lts_t& ltsspec)
+{
+  std::set<process::action_label> used_lts_actions = find_action_labels(ltsspec);
+  std::set<process::action_label> used_state_formula_actions = state_formulas::find_action_labels(formula);
+  std::set<process::action_label> diff = utilities::detail::set_difference(used_state_formula_actions, used_lts_actions);
+  if (!diff.empty())
+  {
+    mCRL2log(log::warning) << "Warning: the modal formula contains an action "
+                           << *diff.begin()
+                           << " that does not appear in the LTS!" << std::endl;
+  }
+}
+
 class lts2pbes_tool : public pbes_output_tool<input_output_tool>
 {
   private:
@@ -46,7 +80,7 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
     std::string formfilename;
     bool preprocess_modal_operators = false;
     bool generate_counter_example = false;
-    lts::lts_lts_t l;
+    lts::lts_lts_t ltsspec;
 
     void add_options(interface_description& desc) override
     {
@@ -74,8 +108,8 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
 
       preprocess_modal_operators = parser.options.count("preprocess-modal-operators") > 0;
       generate_counter_example = parser.options.count("counter-example") > 0;
-      lts::detail::load_lts(parser, input_filename(), l);
-      check_lts(l);
+      lts::detail::load_lts(parser, input_filename(), ltsspec);
+      check_lts(ltsspec);
     }
 
   public:
@@ -92,17 +126,18 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
   public:
     bool run() override
     {
-      lps::specification lpsspec = lts::detail::extract_specification(l);
+      lps::specification lpsspec = lts::detail::extract_specification(ltsspec);
       std::ifstream from(formfilename.c_str());
       if (!from)
       {
         throw mcrl2::runtime_error("Cannot open state formula file: " + formfilename + ".");
       }
       state_formulas::state_formula_specification formspec = state_formulas::parse_state_formula_specification(from, lpsspec);
+      check_lts2pbes_actions(formspec.formula(), ltsspec);
       from.close();
       lpsspec.data() = data::merge_data_specifications(lpsspec.data(), formspec.data());
       lpsspec.action_labels() = lpsspec.action_labels() + formspec.action_labels();
-      pbes_system::pbes result = pbes_system::lts2pbes(l, formspec, preprocess_modal_operators, generate_counter_example);
+      pbes_system::pbes result = pbes_system::lts2pbes(ltsspec, formspec, preprocess_modal_operators, generate_counter_example);
 
       //save the result
       if (output_filename().empty())
