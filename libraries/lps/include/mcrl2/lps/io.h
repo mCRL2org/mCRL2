@@ -63,7 +63,7 @@ void load_lps(Specification& spec, std::istream& stream, const std::string& sour
 template <typename Specification>
 void save_lps(const Specification& spec, const std::string& filename)
 {
-  if (filename.empty())
+  if (filename.empty() || filename == "-")
   {
     save_lps(spec, std::cout, "standard output");
     return;
@@ -84,7 +84,7 @@ void save_lps(const Specification& spec, const std::string& filename)
 template <typename Specification>
 void load_lps(Specification& spec, const std::string& filename)
 {
-  if (filename.empty())
+  if (filename.empty() || filename == "-")
   {
     load_lps(spec, std::cin, "standard input");
     return;
