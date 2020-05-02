@@ -129,10 +129,10 @@ class counter_example_constructor
                                 mcrl2::data::data_expression_list())));
       }
       if (m_structured_output)
-        {
-          std::cout << m_name << ":";
-          result.save(std::cout, mcrl2::trace::tfLine);
-        }
+      {
+        std::cout << m_name << ":";
+        result.save(std::cout, mcrl2::trace::tfLine);
+      }
       else
       {
         std::string filename = m_name + ".trc";
@@ -146,6 +146,9 @@ class counter_example_constructor
     {
       return false;
     }
+
+    /// \brief Returns whether this counter-example is printed in a machine-readable way to stdout
+    /// If false is returned, the counter-example is written to a file.
     bool is_structured() const
     {
       return m_structured_output;
@@ -182,6 +185,9 @@ class dummy_counter_example_constructor
     {
       return true;
     }
+
+    /// \brief Returns whether this counter-example is printed in a machine-readable way to stdout
+    /// If false is returned, the counter-example is written to a file.
     bool is_structured() const
     {
       return false;
