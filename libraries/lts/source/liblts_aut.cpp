@@ -383,7 +383,7 @@ static void read_from_aut(probabilistic_lts_aut_t& l, std::istream& is)
 
     if (!read_aut_transition(is,from,s,probabilistic_target_state,line_no))
     {
-      break; // eof encountered
+      break; // encountered EOF or something that is not a transition
     }
 
     check_state(from, nstate, line_no);

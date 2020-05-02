@@ -123,14 +123,18 @@ class ltscompare_tool : public ltscompare_base
       }
 
       if (tool_options.structured_output)
-        // behave as expected for UNIX tools, such as diff
-        exit(!result);
+      {
+        // Let the exit code depend on the result of the LTS comparison.
+        // This is expected behaviour for UNIX tools such as diff.
+        return result;
+      }
       else
-        {
-          // retain backward compatibility
-          std::cout << (result ? "true" : "false") << std::endl;
-          return true; // The tool terminates in a correct way.
-        }
+      {
+        // When printing human readable output, the exit code is EXIT_SUCCESS
+        // for backwards compatibility.
+        std::cout << (result ? "true" : "false") << std::endl;
+        return true; // The tool terminates in a correct way.
+      }
     }
 
   public:

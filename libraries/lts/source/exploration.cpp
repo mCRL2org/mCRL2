@@ -1066,7 +1066,7 @@ void lps2lts_algorithm::get_transitions(const lps::state& state,
                                         next_state_generator::enumerator_queue_t& enumeration_queue
                                        )
 {
-  bool structured_output = true;
+  bool structured_output = false;
   assert(transitions.empty());
   if (m_options.detect_divergence)
   {
@@ -1074,7 +1074,7 @@ void lps2lts_algorithm::get_transitions(const lps::state& state,
     { if (m_options.trace)
       {
         // Onderstaande string generatie kan duur uitpakken.
-        std::string filename_divergence_loop = m_options.trace_prefix + "_divergence_loop" + std::to_string(m_traces_saved) + ".trc";
+        std::string filename_divergence_loop = m_options.trace_prefix + "_divergence_loop" + std::to_string(m_traces_saved);
         check_divergence<detail::counter_example_constructor>(
                 detail::state_index_pair<detail::counter_example_constructor>(state,detail::counter_example_constructor::root_index()),
                 detail::counter_example_constructor(filename_divergence_loop, structured_output));
