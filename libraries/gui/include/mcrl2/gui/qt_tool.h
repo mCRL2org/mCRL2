@@ -140,6 +140,13 @@ class qt_tool: public Tool
       window.menuBar()->addAction(menu.menuAction());
       window.menuBar()->setNativeMenuBar(true);
       window.show();
+#ifdef __APPLE__
+    // Below is a nasty hack to guarantee that the menu bar of a mac
+    // application becomes clickable directly at startup. It requires the
+    // mac to allow events to be sent to this application. 
+    system("osascript -e 'tell application \"System Events\" "
+            "to keystroke tab using {command down, shift down}'");
+#endif
       return m_application->exec() == 0;
     }
 
