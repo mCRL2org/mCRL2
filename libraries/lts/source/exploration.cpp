@@ -622,6 +622,7 @@ void lps2lts_algorithm::construct_trace(const lps::state& state1, mcrl2::trace::
   next_state_generator::enumerator_queue_t enumeration_queue;
   for (std::deque<lps::state>::iterator i = states.begin(); i != states.end(); i++)
   {
+    bool found=false;
     for (next_state_generator::iterator j = m_generator->begin(state, &enumeration_queue); j != m_generator->end(); j++)
     {
       lps::state destination = j->target_state();
@@ -632,8 +633,14 @@ void lps2lts_algorithm::construct_trace(const lps::state& state1, mcrl2::trace::
       if (destination == *i)
       {
         trace.addAction(j->action());
+        found=true;
         break;
       }
+    }
+    if (not found)
+    {
+      throw mcrl2::runtime_error(std::string("Fail to save a trace. Most likely due to the use of binders (forall, exists, lambda, Set, Map) in a state vector.\n") +
+                                 "Problematic state (" + pp(*i) + ")");
     }
     enumeration_queue.clear();
     state = *i;
