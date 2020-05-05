@@ -7,13 +7,23 @@ lpsrewr
 
 Rewrite the following data expressions of and LPS:
 
-* conditions, action parameters, time expressions and next states of LPS summands
-* process parameters of the initial state
-* conditions and right-hand sides of data equations
+* Conditions, action parameters, time expressions and next states of LPS summands.
+* Process parameters of the initial state.
 
-Rewriting LPS summands and the initial state is done to simplify these parts of
-the LPS. Rewriting data equations is done to speed up state space generation. In
-most cases, this results in a performance gain of at most 5%.
-A specification of the one point rule rewriter can be found on
-`<https://mcrl2.org/web/developer_manual/developer.html>` in the `PBES rewriters`
-document.
+There are two rewriters. The default simplifying rewriter simplifies the above mentioned
+expressions by applying the rewrite rules in the specification together with the rewrite
+rules for the built-in data types.
+
+The quantifier-one-point rewriter eliminates variables that are bound in quantifiers
+if the values of these variables can be determined from the expression. Two examples:
+
+   exists x:Nat.(x==3 && f(x))      ==>        f(3)
+   forall x:Nat.(x!=3 || f(x))      ==>        f(3)
+
+The elimination of quantifiers is generally very helpful. In solving pbesses or generating state
+spaces it helps to avoid enumerating these quantifiers. Symbolic manipulation often becomes much 
+easier if quantifiers are removed. 
+
+A specification of the one point rule rewriter can be found in the
+`developers documentation<https://mcrl2.org/web/developer_manual/developer.html>`_ 
+in the `PBES rewriters<https://mcrl2.org/web/_downloads/fd0ada340742729e33a70a3666632073/pbes-rewriters.pdf>`_ document.
