@@ -30,7 +30,7 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
 
   private:
     mcrl2::lps::t_lin_options m_linearisation_options;
-    bool noalpha;   // indicates whether alpha reduction is needed.
+    // bool noalpha;   // indicates whether alpha reduction is needed.
     bool opt_check_only;
 
   protected:
@@ -124,6 +124,9 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
                       "process.");
       desc.add_option("check-only",
                       "check syntax and static semantics; do not linearise", 'e');
+      desc.add_option("balance-summands",
+                      "transform inputs expressions p1 + ... + pn into a balanced tree before "
+                      "linearising. Sometimes helpful in preventing stack overflow.");
     }
 
     void parse_options(const mcrl2::utilities::command_line_parser& parser)
@@ -131,7 +134,7 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
       super::parse_options(parser);
 
       opt_check_only                                  = 0 < parser.options.count("check-only");
-      noalpha                                         = 0 < parser.options.count("no-alpha");
+      m_linearisation_options.apply_alphabet_axioms   = 0 == parser.options.count("no-alpha");
       m_linearisation_options.final_cluster           = 0 < parser.options.count("cluster");
       m_linearisation_options.no_intermediate_cluster = 0 < parser.options.count("no-cluster");
       m_linearisation_options.newstate                = 0 < parser.options.count("newstate");
@@ -144,6 +147,7 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
       m_linearisation_options.ignore_time             = 0 == parser.options.count("timed");
       m_linearisation_options.do_not_apply_constelm   = 0 < parser.options.count("no-constelm") ||
                                                         0 < parser.options.count("no-rewrite");
+      m_linearisation_options.balance_summands        = 0 < parser.options.count("balance-summands");
 
       m_linearisation_options.lin_method = parser.option_argument_as< mcrl2::lps::t_lin_method >("lin-method");
 
@@ -164,7 +168,7 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
         "translate an mCRL2 specification to an LPS",
         "Linearises the mCRL2 specification in INFILE and writes the resulting LPS to "
         "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present, "
-        "stdin is used."), noalpha(false), opt_check_only(false)
+        "stdin is used."), opt_check_only(false)
     {}
 
     bool run()
@@ -175,8 +179,7 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
       {
         //parse specification from stdin
         mCRL2log(mcrl2::log::verbose) << "Reading input from stdin..." << std::endl;
-        spec = mcrl2::process::parse_process_specification_deprecated(std::cin,
-                                                                      !noalpha);
+        spec = mcrl2::process::parse_process_specification(std::cin);
       }
       else
       {
@@ -188,8 +191,7 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
         {
           throw mcrl2::runtime_error("Cannot open input file: " + input_filename() + ".");
         }
-        spec = mcrl2::process::parse_process_specification_deprecated(instream,
-                                                                      !noalpha);
+        spec = mcrl2::process::parse_process_specification(instream);
         instream.close();
       }
       //report on well-formedness (if needed)
@@ -207,6 +209,13 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
         }
         return true;
       }
+
+      /* if (!noalpha)  // Apply alphabet reduction. 
+      {
+        alphabet_reduce(spec, 1000ul);
+      } */
+
+
       //store the result
       mcrl2::lps::stochastic_specification linear_spec(mcrl2::lps::linearise(spec, m_linearisation_options));
       mCRL2log(mcrl2::log::verbose) << "Writing LPS to "

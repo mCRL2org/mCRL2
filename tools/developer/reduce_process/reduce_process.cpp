@@ -26,12 +26,12 @@ process::process_specification parse_process_specification(const std::string& in
   process::process_specification result;
   if (input_filename.empty())
   {
-    return process::parse_process_specification_deprecated(std::cin);
+    return process::parse_process_specification(std::cin);
   }
   else
   {
     std::ifstream from(input_filename, std::ifstream::in | std::ifstream::binary);
-    return process::parse_process_specification_deprecated(from);
+    return process::parse_process_specification(from);
   }
   return result;
 }

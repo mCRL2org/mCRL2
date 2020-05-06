@@ -13,7 +13,6 @@
 #define MCRL2_PROCESS_PARSE_H
 
 #include "mcrl2/data/parse.h"
-#include "mcrl2/process/alphabet_reduce.h"
 #include "mcrl2/process/typecheck.h"
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
 
@@ -35,36 +34,6 @@ void complete_process_specification(process_specification& x, bool alpha_reduce 
 /// \return A list of action labels
 /// \exception mcrl2::runtime_error when the input does not match the syntax of an action declaration.
 process::action_label_list parse_action_declaration(const std::string& text, const data::data_specification& data_spec = data::detail::default_specification());
-
-/// \brief Parses a process specification from an input stream
-/// \param in An input stream
-/// \param alpha_reduce Indicates whether alphabet reductions need to be performed
-/// \return The parse result
-inline
-process_specification
-parse_process_specification_deprecated(std::istream& in, bool alpha_reduce = false)
-{
-  std::string text = utilities::read_text(in);
-  process_specification result = detail::parse_process_specification_new(text);
-  detail::complete_process_specification(result);
-  if (alpha_reduce)
-  {
-    alphabet_reduce(result, 1000ul);
-  }
-  return result;
-}
-
-/// \brief Parses a process specification from a string
-/// \param spec_string A string
-/// \param alpha_reduce Indicates whether alphabet reductions needdto be performed
-/// \return The parse result
-inline
-process_specification
-parse_process_specification_deprecated(const std::string& spec_string, bool alpha_reduce = false)
-{
-  std::istringstream in(spec_string);
-  return parse_process_specification_deprecated(in, alpha_reduce);
-}
 
 /// \brief Parses a process specification from an input stream
 /// \param in An input stream
@@ -139,7 +108,7 @@ process_expression parse_process_expression(const std::string& text, const std::
   std::pair<std::string, std::string> result = utilities::detail::separate_keyword_section(procspec_text, "init", keywords);
   std::string init_text = "init\n     " + text + ";\n";
   std::string ptext = result.second + init_text;
-  process_specification spec = parse_process_specification_deprecated(ptext);
+  process_specification spec = parse_process_specification(ptext);
   return spec.init();
 }
 
@@ -153,7 +122,7 @@ process_expression parse_process_expression(const std::string& text, const Varia
   std::string ptext = process::pp(procspec1);
   ptext = utilities::regex_replace("\\binit.*;", "init " + text + ";", ptext);
   process_specification procspec2 =
-      parse_process_specification_deprecated(ptext);
+      parse_process_specification(ptext);
   return procspec2.init();
 }
 

@@ -13,7 +13,6 @@
 #define MCRL2_PROCESS_PARSE_IMPL_H
 
 #include "mcrl2/data/parse_impl.h"
-#include "mcrl2/process/alphabet_reduce.h"
 #include "mcrl2/process/typecheck.h"
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
 

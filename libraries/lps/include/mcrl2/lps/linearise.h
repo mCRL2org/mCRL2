@@ -38,6 +38,9 @@ struct t_lin_options
   bool nodeltaelimination;
   bool ignore_time;
   bool do_not_apply_constelm;
+  bool apply_alphabet_axioms;
+  bool balance_summands;      // Used to balance long expressions of the shape p1 + p2 + ... + pn. By default the parser delivers
+                              // such expressions in a skewed form, causing stack overflow. 
   mcrl2::data::rewriter::strategy rewrite_strategy;
 
   t_lin_options()
@@ -53,6 +56,8 @@ struct t_lin_options
       nodeltaelimination(false),
       ignore_time(false),
       do_not_apply_constelm(false),
+      apply_alphabet_axioms(false),
+      balance_summands(false),              
       rewrite_strategy(mcrl2::data::jitty)
   {}
 };
@@ -76,20 +81,8 @@ inline mcrl2::lps::stochastic_specification linearise(
   mcrl2::lps::t_lin_options lin_options = t_lin_options())
 {
   mcrl2::process::process_specification spec =
-      mcrl2::process::parse_process_specification_deprecated(text, true);
+      mcrl2::process::parse_process_specification(text);
   return linearise(spec, lin_options);
-}
-
-/// \brief Linearises a process specification from a textual specification
-/// \param[in] text A string containing a process specification
-/// \return An LPS equivalent to the specification representing text, which is linearised without applying
-/// alphabet reduction.
-/// \exception mcrl2::runtime_error Linearisation failed
-inline stochastic_specification linearise_no_alpha(const std::string& text)
-{
-  mcrl2::process::process_specification procspec =
-      mcrl2::process::parse_process_specification_deprecated(text, false);
-  return linearise(procspec);
 }
 
 } // namespace lps

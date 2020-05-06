@@ -25,6 +25,11 @@
    the use of this software.
 */
 
+//mCRL2 data
+#include "mcrl2/data/substitutions/maintain_variables_in_rhs.h"
+#include "mcrl2/data/fourier_motzkin.h"
+#include "mcrl2/data/enumerator.h" 
+
 // linear process libraries.
 #include "mcrl2/lps/detail/ultimate_delay.h"
 #include "mcrl2/lps/linearise.h"
@@ -32,10 +37,9 @@
 #include "mcrl2/lps/constelm.h"
 #include "mcrl2/lps/replace_capture_avoiding_with_an_identifier_generator.h"
 
-//mCRL2 data
-#include "mcrl2/data/substitutions/maintain_variables_in_rhs.h"
-#include "mcrl2/data/fourier_motzkin.h"
-#include "mcrl2/data/enumerator.h" 
+// Process libraries.
+#include "mcrl2/process/alphabet_reduce.h"
+#include "mcrl2/process/balance_nesting_depth.h"
 
 
 // For Aterm library extension functions
@@ -11321,22 +11325,36 @@ mcrl2::lps::stochastic_specification mcrl2::lps::linearise(
   mcrl2::lps::t_lin_options lin_options)
 {
   mCRL2log(mcrl2::log::verbose) << "linearising the process specification using the '" << lin_options.lin_method << " ' method.\n";
-  data_specification data_spec=type_checked_spec.data();
+  mcrl2::process::process_specification input_process=type_checked_spec;
+  data_specification data_spec=input_process.data();
+
+  if (lin_options.balance_summands) // Make a balanced tree of long expressions of the shape p1 + p2 + p3 + ... + p4. 
+                                    // By default the parser provides a skewed tree, and for very long sequences of summands this overflows the
+                                    // stack.
+  {
+    balance_summands(input_process);
+  }
+
+  if (lin_options.apply_alphabet_axioms) // Apply alphabet reduction if requested. 
+  {
+    alphabet_reduce(input_process, 1000ul);
+  }
+
   std::set<data::sort_expression> s;
-  process::find_sort_expressions(type_checked_spec.action_labels(), std::inserter(s, s.end()));
-  process::find_sort_expressions(type_checked_spec.equations(), std::inserter(s, s.end()));
-  process::find_sort_expressions(type_checked_spec.init(), std::inserter(s, s.end()));
+  process::find_sort_expressions(input_process.action_labels(), std::inserter(s, s.end()));
+  process::find_sort_expressions(input_process.equations(), std::inserter(s, s.end()));
+  process::find_sort_expressions(input_process.init(), std::inserter(s, s.end()));
   s.insert(sort_real::real_());
   data_spec.add_context_sorts(s);
 
-  specification_basic_type spec(type_checked_spec.action_labels(),
-                                type_checked_spec.equations(),
-                                data::variable_list(type_checked_spec.global_variables().begin(),type_checked_spec.global_variables().end()),
+  specification_basic_type spec(input_process.action_labels(),
+                                input_process.equations(),
+                                data::variable_list(input_process.global_variables().begin(),input_process.global_variables().end()),
                                 data_spec,
-                                type_checked_spec.global_variables(),
+                                input_process.global_variables(),
                                 lin_options,
-                                type_checked_spec);
-  process_identifier init=spec.storeinit(type_checked_spec.init());
+                                input_process);
+  process_identifier init=spec.storeinit(input_process.init());
 
   //linearise spec
   variable_list parameters;
