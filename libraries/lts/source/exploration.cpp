@@ -770,7 +770,7 @@ void lps2lts_algorithm::check_divergence(
   else
   {
     // No divergence has been found. Register all states as being non divergent.
-    for(const lps::state s: visited)
+    for(const lps::state& s: visited)
     {
       assert(non_divergent_states.count(s)==0);
       non_divergent_states.insert(s);

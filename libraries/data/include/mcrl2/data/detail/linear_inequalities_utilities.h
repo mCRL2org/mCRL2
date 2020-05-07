@@ -249,7 +249,7 @@ inline void split_condition(
     insert_result->second = lazy::or_(insert_result->second, lazy::join_and(j->begin(), j->end()));
   }
   // Convert the map to a pair of vectors
-  for(const std::pair< data_expression_list, data_expression >& expr_pair: non_real_expression_map)
+  for(const std::pair<const data_expression_list, data_expression >& expr_pair: non_real_expression_map)
   {
     real_conditions.push_back(expr_pair.first);
     non_real_conditions.push_back(expr_pair.second);

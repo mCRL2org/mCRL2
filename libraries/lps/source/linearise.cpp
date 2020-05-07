@@ -762,7 +762,7 @@ class specification_basic_type
       const bool containstime,
       process_identifier& p)
     {
-      for(const std::pair<aterm,objectdatatype>& d: objectdata)
+      for(const std::pair<const aterm,objectdatatype>& d: objectdata)
       {
         if (d.second.object==proc &&
             d.second.parameters==parameters &&
@@ -4047,7 +4047,7 @@ class specification_basic_type
     void complete_proc_identifier_map(std::map< process_identifier, process_identifier >& identifier_identifier_map)
     {
       std::map< process_identifier, process_identifier > new_identifier_identifier_map;
-      for(const std::pair< process_identifier, process_identifier >& p: identifier_identifier_map)
+      for(const std::pair<const process_identifier, process_identifier >& p: identifier_identifier_map)
       {
         new_identifier_identifier_map[p.first]=get_last(p.second,identifier_identifier_map);
       }
@@ -4090,7 +4090,7 @@ class specification_basic_type
       assert(reachable_process_identifiers.count(initial_process)>0);
       typedef std::pair< variable_list, process_expression > parameters_process_pair;
       typedef std::map< std::pair< variable_list, process_expression >, process_identifier > mapping_type;
-      typedef std::pair< std::pair< variable_list, process_expression >, process_identifier > mapping_type_pair;
+      typedef std::pair<const std::pair< variable_list, process_expression >, process_identifier > mapping_type_pair;
 
       /* First put the identifiers in reachable_process_identifiers in the process mapping */
       mapping_type process_mapping;

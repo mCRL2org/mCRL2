@@ -506,7 +506,7 @@ class pbes_constelm_algorithm
     std::map<propositional_variable, std::vector<data::variable> > redundant_parameters() const
     {
       std::map<propositional_variable, std::vector<data::variable> > result;
-      for (const std::pair<core::identifier_string, std::vector<std::size_t>>& red_pair: m_redundant_parameters)
+      for (const std::pair<const core::identifier_string, std::vector<std::size_t>>& red_pair: m_redundant_parameters)
       {
         const vertex& v = m_vertices.find(red_pair.first)->second;
         std::vector<data::variable>& variables = result[v.variable()];

@@ -4070,7 +4070,7 @@ void mcrl2::data::data_type_checker::read_sort(const sort_expression& sort_expr)
     // in this structured sort. This hardly ever serves a purpose and gives rise confusion. 
     std::map<core::identifier_string, sort_expression> duplicate_projections_warner;
     const structured_sort& struct_sort = atermpp::down_cast<structured_sort>(sort_expr);
-    for (const structured_sort_constructor constr: struct_sort.constructors())
+    for (const structured_sort_constructor& constr: struct_sort.constructors())
     {
       // recognizer -- if present -- a function from SortExpr to Bool
       core::identifier_string Name=constr.recogniser();

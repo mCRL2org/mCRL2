@@ -32,7 +32,7 @@ const utilities::file_format& bes_format_pgsolver() { return bes_file_formats()[
 inline
 utilities::file_format guess_format(const std::string& filename)
 {
-  for (const utilities::file_format fmt: bes_file_formats())
+  for (const utilities::file_format& fmt: bes_file_formats())
   {
     if (fmt.matches(filename))
     {
