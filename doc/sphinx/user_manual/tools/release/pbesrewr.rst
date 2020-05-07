@@ -13,13 +13,13 @@ rules for the data types, and by simplifying boolean expressions. It pushes
 quantifiers inside as much as possible, removes quantifiers over variables that
 are not used, and applies straightforward boolean simplifications. 
 
-The quantifier-all rewriter expands all quantifiers. The pbes 
+The quantifier-all rewriter expands all quantifiers. The pbes::
 
    map  f: Nat -> Bool;
    pbes nu Y = forall x: Nat. val(x < 3 => f(x));
    init Y;
 
-is rewriten to
+is rewriten to::
 
    map  f: Nat -> Bool;
    pbes nu Y = val(f(0)) && val(f(1)) && val(f(2));
@@ -33,14 +33,14 @@ infinite number of natural numbers.
 
 The quantifier one point rewriter tries to eliminate quantifiers if it can determine that they
 range over only one element. This works independently of the domain. Contrary to the quantifier-all
-and quantifier-finite rewriters, the bound variable can be equal to a symbolic value.
+and quantifier-finite rewriters, the bound variable can be equal to a symbolic value::
 
    map f:Nat->Bool;
        N:Nat;
    pbes nu Y = forall x:Nat.(val(x==N => f(x)));
    init Y;
 
-rewrites to 
+rewrites to::
 
    map  f: Nat -> Bool;
         N: Nat;
@@ -60,5 +60,5 @@ quantifiers are moved to the front of each pbes equation. The right hand side is
 into a big conjunction over disjunctions of pbes variables. 
 
 Specifications of the rewriters can be found in the
-`developers documenation<https://mcrl2.org/web/developer_manual/developer.html>`_ in the 
-document about `PBES rewriters<https://mcrl2.org/web/_downloads/fd0ada340742729e33a70a3666632073/pbes-rewriters.pdf>`_.
+`developers documenation <https://mcrl2.org/web/developer_manual/developer.html>`_ in the 
+document about `PBES rewriters <https://mcrl2.org/web/_downloads/fd0ada340742729e33a70a3666632073/pbes-rewriters.pdf>`_.
