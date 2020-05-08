@@ -35,8 +35,8 @@ The quantifier one point rewriter tries to eliminate quantifiers if it can deter
 range over only one element. This works independently of the domain. Contrary to the quantifier-all
 and quantifier-finite rewriters, the bound variable can be equal to a symbolic value::
 
-   map f:Nat->Bool;
-       N:Nat;
+   map  f:Nat->Bool;
+        N:Nat;
    pbes nu Y = forall x:Nat.(val(x==N => f(x)));
    init Y;
 
