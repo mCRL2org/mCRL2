@@ -58,6 +58,93 @@ struct if_rewrite_builder: public data_expression_builder<Derived>
     return x;
   }
 
+  data_expression apply_if(const data_expression& b, const data_expression& t1, const data_expression& t2)
+  {
+    if (is_true(b))
+    {
+      return t1;
+    }
+    else if (is_false(b))
+    {
+      return t2;
+    }
+    else if (is_and(b))
+    {
+      const data_expression& b1 = binary_left1(b);
+      const data_expression& b2 = binary_right1(b);
+      return if_(b1, if_(b2, t1, t2), t2);
+    }
+    else if (is_or(b))
+    {
+      const data_expression& b1 = binary_left1(b);
+      const data_expression& b2 = binary_right1(b);
+      return if_(b1, t1, if_(b2, t1, t2));
+    }
+    else if (is_imp(b))
+    {
+      const data_expression& b1 = binary_left1(b);
+      const data_expression& b2 = binary_right1(b);
+      return if_(b1, if_(b2, t1, t2), t1);
+    }
+    else if (is_not(b))
+    {
+      const data_expression& b1 = unary_operand1(b);
+      return if_(b1, t2, t1);
+    }
+    else
+    {
+      assert(is_simple(b));
+      if (t1 == t2)
+      {
+        return t1;
+      }
+      else if (is_if_application(t1))
+      {
+        const application& t1_ = atermpp::down_cast<application>(t1);
+        const data_expression& c = t1_[0];
+        const data_expression& u1 = t1_[1];
+        const data_expression& u2 = t1_[2];
+        if (b == c)
+        {
+          return apply_if(b, u1, t2);
+        }
+        else if (b > c) // use the aterm pointer comparison
+        {
+          assert(is_simple(c));
+          return if_(c, apply_if(b, u1, t2), apply_if(b, u2, t2));
+        }
+        else
+        {
+          return if_(b, t1, t2);
+        }
+      }
+      else if (is_if_application(t2))
+      {
+        const application& t2_ = atermpp::down_cast<application>(t2);
+        const data_expression& c = t2_[0];
+        const data_expression& u1 = t2_[1];
+        const data_expression& u2 = t2_[2];
+        if (b == c)
+        {
+          return if_(b, t1, u2);
+        }
+        else if (b > c) // use the aterm pointer comparison
+        {
+          assert(is_simple(c));
+          return if_(c, if_(b, t1, u1), if_(b, t1, u2));
+        }
+        else
+        {
+          return if_(b, t1, t2);
+        }
+      }
+      else
+      {
+        return if_(b, t1, t2);
+      }
+    }
+  }
+
   data_expression apply(const application& x)
   {
     if (is_if_application(x))
@@ -65,90 +152,7 @@ struct if_rewrite_builder: public data_expression_builder<Derived>
       data_expression b = super::apply(x[0]);
       data_expression t1 = super::apply(x[1]);
       data_expression t2 = super::apply(x[2]);
-
-      if (is_true(b))
-      {
-        return t1;
-      }
-      else if (is_false(b))
-      {
-        return t2;
-      }
-      else if (is_and(b))
-      {
-        const data_expression& b1 = binary_left1(b);
-        const data_expression& b2 = binary_right1(b);
-        return if_(b1, if_(b2, t1, t2), t2);
-      }
-      else if (is_or(b))
-      {
-        const data_expression& b1 = binary_left1(b);
-        const data_expression& b2 = binary_right1(b);
-        return if_(b1, t1, if_(b2, t1, t2));
-      }
-      else if (is_imp(b))
-      {
-        const data_expression& b1 = binary_left1(b);
-        const data_expression& b2 = binary_right1(b);
-        return if_(b1, if_(b2, t1, t2), t1);
-      }
-      else if (is_not(b))
-      {
-        const data_expression& b1 = unary_operand1(b);
-        return if_(b1, t2, t1);
-      }
-      else
-      {
-        assert(is_simple(b));
-        if (t1 == t2)
-        {
-          return t1;
-        }
-        else if (is_if_application(t1))
-        {
-          const application& t1_ = atermpp::down_cast<application>(t1);
-          const data_expression& c = t1_[0];
-          const data_expression& u1 = t1_[1];
-          const data_expression& u2 = t1_[2];
-          if (b == c)
-          {
-            return if_(b, u1, t2);
-          }
-          else if (b > c) // use the aterm pointer comparison
-          {
-            assert(is_simple(c));
-            return if_(c, if_(b, u1, t2), if_(b, u2, t2));
-          }
-          else
-          {
-            return if_(b, t1, t2);
-          }
-        }
-        else if (is_if_application(t2))
-        {
-          const application& t2_ = atermpp::down_cast<application>(t2);
-          const data_expression& c = t2_[0];
-          const data_expression& u1 = t2_[1];
-          const data_expression& u2 = t2_[2];
-          if (b == c)
-          {
-            return if_(b, t1, u2);
-          }
-          else if (b > c) // use the aterm pointer comparison
-          {
-            assert(is_simple(c));
-            return if_(c, if_(b, t1, u1), if_(b, t1, u2));
-          }
-          else
-          {
-            return if_(b, t1, t2);
-          }
-        }
-        else
-        {
-          return if_(b, t1, t2);
-        }
-      }
+      return apply_if(b, t1, t2);
     }
     else
     {
