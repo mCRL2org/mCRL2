@@ -10,6 +10,7 @@
 
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/detail/lps_command.h"
+#include "mcrl2/lps/if_rewrite.h"
 #include "mcrl2/lps/is_well_typed.h"
 #include "mcrl2/lps/one_point_rule_rewrite.h"
 #include "mcrl2/utilities/detail/io.h"
@@ -21,9 +22,9 @@ using data::tools::rewriter_tool;
 using utilities::detail::transform_tool;
 using utilities::tools::input_output_tool;
 
-struct rewrite_lps_one_point_rule_rewriter_command: public lps::detail::lps_command
+struct one_point_rule_rewriter_command : public lps::detail::lps_command
 {
-  rewrite_lps_one_point_rule_rewriter_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+  one_point_rule_rewriter_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
     : lps::detail::lps_command("lps-one-point-rule-rewriter", input_filename, output_filename, options)
   {}
 
@@ -31,6 +32,20 @@ struct rewrite_lps_one_point_rule_rewriter_command: public lps::detail::lps_comm
   {
     lps::detail::lps_command::execute();
     lps::one_point_rule_rewrite(lpsspec);
+    lps::detail::save_lps(lpsspec, output_filename);
+  }
+};
+
+struct if_rewriter_command: public lps::detail::lps_command
+{
+  if_rewriter_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+      : lps::detail::lps_command("if-rewriter", input_filename, output_filename, options)
+  {}
+
+  void execute() override
+  {
+    lps::detail::lps_command::execute();
+    lps::if_rewrite(lpsspec);
     lps::detail::save_lps(lpsspec, output_filename);
   }
 };
@@ -65,7 +80,8 @@ class lpstransform_tool: public transform_tool<rewriter_tool<input_output_tool>>
 
     void add_commands(const std::vector<std::string>& options) override
     {
-      add_command(std::make_shared<rewrite_lps_one_point_rule_rewriter_command>(input_filename(), output_filename(), options));
+      add_command(std::make_shared<one_point_rule_rewriter_command>(input_filename(), output_filename(), options));
+      add_command(std::make_shared<if_rewriter_command>(input_filename(), output_filename(), options));
       add_command(std::make_shared<is_well_typed_command>(input_filename(), output_filename(), options));
     }
 };

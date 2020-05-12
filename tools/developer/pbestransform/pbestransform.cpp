@@ -12,9 +12,9 @@
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/pbes/anonymize.h"
 #include "mcrl2/pbes/detail/pbes_command.h"
-#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
 #include "mcrl2/pbes/rewriters/data2pbes_rewriter.h"
+#include "mcrl2/pbes/rewriters/if_rewriter.h"
 #include "mcrl2/pbes/rewriters/quantifiers_inside_rewriter.h"
 #include "mcrl2/pbes/quantifier_propagate.h"
 #include "mcrl2/pbes/io.h"
@@ -213,6 +213,21 @@ struct rewrite_pbes_data2pbes_rewriter_command: public pbes_system::detail::pbes
   }
 };
 
+struct rewrite_pbes_if_rewriter_command: public pbes_system::detail::pbes_command
+{
+  rewrite_pbes_if_rewriter_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+      : pbes_system::detail::pbes_command("if-rewriter", input_filename, output_filename, options)
+  {}
+
+  void execute() override
+  {
+    pbes_system::detail::pbes_command::execute();
+    pbes_system::if_rewriter R;
+    pbes_rewrite(pbesspec, R);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
+  }
+};
+
 struct stategraph_local_command: public pbes_system::detail::pbes_command
 {
   stategraph_local_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
@@ -300,6 +315,7 @@ class pbestransform_tool: public transform_tool<rewriter_tool<input_output_tool>
       add_command(std::make_shared<anonymize_pbes_command>(input_filename(), output_filename(), options));
       add_command(std::make_shared<is_well_typed_command>(input_filename(), output_filename(), options));
       add_command(std::make_shared<standard_recursive_form_command>(input_filename(), output_filename(), options));
+      add_command(std::make_shared<rewrite_pbes_if_rewriter_command>(input_filename(), output_filename(), options));
       add_command(std::make_shared<rewrite_pbes_data2pbes_rewriter_command>(input_filename(), output_filename(), options));
       add_command(std::make_shared<rewrite_pbes_data_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
       add_command(std::make_shared<rewrite_pbes_enumerate_quantifiers_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
