@@ -110,7 +110,7 @@ struct if_rewrite_builder: public data_expression_builder<Derived>
         else if (b > c) // use the aterm pointer comparison
         {
           assert(is_simple(c));
-          return if_(c, apply_if(b, u1, t2), apply_if(b, u2, t2));
+          return apply_if(c, apply_if(b, u1, t2), apply_if(b, u2, t2));
         }
         else
         {
@@ -125,12 +125,12 @@ struct if_rewrite_builder: public data_expression_builder<Derived>
         const data_expression& u2 = t2_[2];
         if (b == c)
         {
-          return if_(b, t1, u2);
+          return apply_if(b, t1, u2);
         }
         else if (b > c) // use the aterm pointer comparison
         {
           assert(is_simple(c));
-          return if_(c, if_(b, t1, u1), if_(b, t1, u2));
+          return apply_if(c, apply_if(b, t1, u1), apply_if(b, t1, u2));
         }
         else
         {
