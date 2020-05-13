@@ -47,7 +47,6 @@ struct if_rewrite_builder: public data_expression_builder<Derived>
     {
       if (is_if_application(x[i]))
       {
-        const data_expression& head = x.head();
         const auto& x_i = atermpp::down_cast<application>(x[i]);
         const data_expression& b = x_i[0];
         const data_expression& t1 = x_i[1];
