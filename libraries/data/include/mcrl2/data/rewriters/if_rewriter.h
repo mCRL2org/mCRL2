@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_REWRITERS_IF_REWRITER_H
 #define MCRL2_DATA_REWRITERS_IF_REWRITER_H
 
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/builder.h"
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/standard.h"
