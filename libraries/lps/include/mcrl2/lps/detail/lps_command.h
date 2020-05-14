@@ -12,6 +12,7 @@
 #ifndef MCRL2_LPS_DETAIL_LPS_COMMAND_H
 #define MCRL2_LPS_DETAIL_LPS_COMMAND_H
 
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/detail/lps_io.h"
 #include "mcrl2/utilities/detail/command.h"
 
@@ -37,6 +38,21 @@ struct lps_command: public utilities::detail::command
   {
     lpsspec = lps::detail::load_lps(input_filename);
   }
+};
+
+/// \brief PBES command that uses a rewrite strategy
+struct lps_rewriter_command: public lps_command
+{
+  data::rewrite_strategy strategy;
+
+  lps_rewriter_command(const std::string& name,
+                       const std::string& input_filename,
+                       const std::string& output_filename,
+                       const std::vector<std::string>& options,
+                       data::rewrite_strategy strategy_)
+      : lps_command(name, input_filename, output_filename, options),
+        strategy(strategy_)
+  {}
 };
 
 } // namespace detail

@@ -22,6 +22,31 @@ namespace data {
 
 namespace detail {
 
+// Returns f(x0, ..., x_i-1, y, x_i+1, ..., xn)
+inline
+application replace_argument(const application& x, std::size_t i, const data_expression& y)
+{
+  std::size_t j = 0;
+  return application(x.head(), x.begin(), x.end(), [&](const data_expression& x_i) { return (j++ == i) ? y : x_i; });
+}
+
+inline
+data_expression push_if_outside(const application& x)
+{
+  for (std::size_t i = 0; i < x.size(); i++)
+  {
+    if (is_if_application(x[i]))
+    {
+      const auto& x_i = atermpp::down_cast<application>(x[i]);
+      const data_expression& b = x_i[0];
+      const data_expression& t1 = x_i[1];
+      const data_expression& t2 = x_i[2];
+      return if_(b, push_if_outside(replace_argument(x, i, t1)), push_if_outside(replace_argument(x, i, t2)));
+    }
+  }
+  return x;
+}
+
 template <typename Derived>
 struct if_rewrite_builder: public data_expression_builder<Derived>
 {
@@ -32,29 +57,6 @@ struct if_rewrite_builder: public data_expression_builder<Derived>
   bool is_simple(const data_expression& x) const
   {
     return !is_and(x) && !is_or(x) && !is_imp(x) && !is_not(x) && !is_true(x) && !is_false(x);
-  }
-
-  // Returns f(x0, ..., x_i-1, y, x_i+1, ..., xn)
-  application replace_argument(const application& x, std::size_t i, const data_expression& y) const
-  {
-    std::size_t j = 0;
-    return application(x.head(), x.begin(), x.end(), [&](const data_expression& x_i) { return (j++ == i) ? y : x_i; });
-  }
-
-  data_expression push_if_outside(const application& x) const
-  {
-    for (std::size_t i = 0; i < x.size(); i++)
-    {
-      if (is_if_application(x[i]))
-      {
-        const auto& x_i = atermpp::down_cast<application>(x[i]);
-        const data_expression& b = x_i[0];
-        const data_expression& t1 = x_i[1];
-        const data_expression& t2 = x_i[2];
-        return if_(b, push_if_outside(replace_argument(x, i, t1)), push_if_outside(replace_argument(x, i, t2)));
-      }
-    }
-    return x;
   }
 
   data_expression apply_if(const data_expression& b, const data_expression& t1, const data_expression& t2)
@@ -157,6 +159,35 @@ struct if_rewrite_builder: public data_expression_builder<Derived>
     {
       return push_if_outside(super::apply(x));
     }
+  }
+};
+
+struct if_rewrite_with_rewriter_builder: public if_rewrite_builder<if_rewrite_with_rewriter_builder>
+{
+  typedef if_rewrite_builder<if_rewrite_with_rewriter_builder> super;
+  using super::apply;
+  using super::apply_if;
+
+  data::rewriter& rewr;
+
+  explicit if_rewrite_with_rewriter_builder(data::rewriter& rewr_) : rewr(rewr_)
+  {}
+
+  data_expression apply(const application& x)
+  {
+    data_expression result;
+    if (is_if_application(x))
+    {
+      data_expression b = super::apply(x[0]);
+      data_expression t1 = super::apply(x[1]);
+      data_expression t2 = super::apply(x[2]);
+      result = apply_if(b, t1, t2);
+    }
+    else
+    {
+      result = push_if_outside(atermpp::down_cast<application>(super::apply(x)));
+    }
+    return rewr(result);
   }
 };
 
