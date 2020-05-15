@@ -28,9 +28,10 @@ class BDD_Info
     static const mcrl2::data::data_expression& argument(const mcrl2::data::data_expression& x, std::size_t n)
     {
       const mcrl2::data::application& a = atermpp::down_cast<mcrl2::data::application>(x);
-      mcrl2::data::application::const_iterator i = a.begin();
-      std::advance(i, n);
-      return *i;
+      return a[n]; 
+      // mcrl2::data::application::const_iterator i = a.begin();
+      // std::advance(i, n);
+      // return *i;
     }
 
   public:
@@ -38,7 +39,7 @@ class BDD_Info
     /// \brief Method that returns the guard of a BDD.
     /// \param[in] a_bdd A binary decision diagram.
     /// \return The guard at the root of the BDD.
-    static inline mcrl2::data::data_expression get_guard(const mcrl2::data::data_expression& a_bdd)
+    static inline const mcrl2::data::data_expression& get_guard(const mcrl2::data::data_expression& a_bdd)
     {
       return argument(a_bdd,0);
     }
@@ -46,7 +47,7 @@ class BDD_Info
     /// \brief Method that returns the true-branch of a BDD.
     /// \param[in] a_bdd A binary decision diagram.
     /// \return The true-branch of the BDD.
-    static inline mcrl2::data::data_expression get_true_branch(const mcrl2::data::data_expression&  a_bdd)
+    static inline const mcrl2::data::data_expression& get_true_branch(const mcrl2::data::data_expression&  a_bdd)
     {
       return argument(a_bdd,1);
     }
@@ -54,7 +55,7 @@ class BDD_Info
     /// \brief Method that returns the false-branch of a BDD.
     /// \param[in] a_bdd A binary decision diagram.
     /// \return The false-branch of the BDD.
-    static inline mcrl2::data::data_expression get_false_branch(const mcrl2::data::data_expression& a_bdd)
+    static inline const mcrl2::data::data_expression& get_false_branch(const mcrl2::data::data_expression& a_bdd)
     {
       return argument(a_bdd,2);
     }

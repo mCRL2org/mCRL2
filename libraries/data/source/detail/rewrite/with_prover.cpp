@@ -38,16 +38,17 @@ data_expression RewriterProver::rewrite(
             const data_expression& Term,
             substitution_type& sigma)
 {
-  if (mcrl2::data::data_expression(Term).sort() == mcrl2::data::sort_bool::bool_())
-  {
+  // The prover rewriter should also work on terms with other types than Bool. 
+  // if (mcrl2::data::data_expression(Term).sort() == mcrl2::data::sort_bool::bool_())
+  // {
     prover_obj->set_substitution(sigma);
     prover_obj->set_formula(Term);
     return prover_obj->get_bdd();
-  }
-  else
-  {
-    return rewr_obj->rewrite(Term,sigma);
-  }
+  // }
+  // else
+  //{
+  //  return rewr_obj->rewrite(Term,sigma);
+  //}
 }
 
 rewrite_strategy RewriterProver::getStrategy()

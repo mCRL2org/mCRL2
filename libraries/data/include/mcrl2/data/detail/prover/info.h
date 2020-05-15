@@ -52,34 +52,33 @@ class Info
     }
 
     Compare_Result compare_address(
-              const atermpp::aterm& a_term1,
-              const atermpp::aterm& a_term2) const
+              const atermpp::aterm& term1,
+              const atermpp::aterm& term2) const
     {
-      if (a_term1 < a_term2)
+      if (term1 < term2)
       {
         return compare_result_smaller;
       }
-      if (a_term2 < a_term1)
+      if (term2 < term1)
       {
         return compare_result_bigger;
       }
       return compare_result_equal;
     }
 
-        /// \brief Returns an integer corresponding to the structure of the guard passed as argument \c a_guard.
-    int get_guard_structure(const data_expression& a_guard) const
+        /// \brief Returns an integer corresponding to the structure of the guard passed as argument \c guard.
+    int get_guard_structure(const data_expression& guard) const
     {
-      if (is_variable(a_guard))
+      if (is_variable(guard))
       {
         return 0;
       }
-      if (is_equal_to_application(a_guard))
+      if (is_equal_to_application(guard))
       {
-        data_expression v_term1, v_term2;
-
-        v_term1 = get_argument(a_guard, 0);
-        v_term2 = get_argument(a_guard, 1);
-        if(find_free_variables(v_term1).empty() && is_variable(v_term2))
+        const application& guard_appl=atermpp::down_cast<application>(guard);
+        const data_expression& v_term1 = guard_appl[0]; 
+        const data_expression& v_term2 = guard_appl[1]; 
+        if (find_free_variables(v_term1).empty() && is_variable(v_term2))
         {
           return 1;
         }
@@ -93,13 +92,13 @@ class Info
     }
 
     /// \brief Compares the structure of two guards.
-    Compare_Result compare_guard_structure(const data_expression& a_guard1, const data_expression& a_guard2) const
+    Compare_Result compare_guard_structure(const data_expression& guard1, const data_expression& guard2) const
     {
-      if (get_guard_structure(a_guard1) < get_guard_structure(a_guard2))
+      if (get_guard_structure(guard1) < get_guard_structure(guard2))
       {
         return compare_result_smaller;
       }
-      if (get_guard_structure(a_guard1) > get_guard_structure(a_guard2))
+      if (get_guard_structure(guard1) > get_guard_structure(guard2))
       {
         return compare_result_bigger;
       }
@@ -107,16 +106,16 @@ class Info
     }
 
     /// \brief Compares two guards by their arguments.
-    Compare_Result compare_guard_equality(const data_expression& a_guard1, const data_expression& a_guard2) const
+    Compare_Result compare_guard_equality(const data_expression& guard1, const data_expression& guard2) const
     {
-      if (f_full && is_equal_to_application(a_guard1) && is_equal_to_application(a_guard2))
+      if (f_full && is_equal_to_application(guard1) && is_equal_to_application(guard2))
       {
-        data_expression v_g1a0, v_g1a1, v_g2a0, v_g2a1;
-
-        v_g1a0 = get_argument(a_guard1, 0);
-        v_g1a1 = get_argument(a_guard1, 1);
-        v_g2a0 = get_argument(a_guard2, 0);
-        v_g2a1 = get_argument(a_guard2, 1);
+        const application& guard1_appl=atermpp::down_cast<application>(guard1);
+        const application& guard2_appl=atermpp::down_cast<application>(guard2);
+        const data_expression& v_g1a0 = guard1_appl[0];
+        const data_expression& v_g1a1 = guard1_appl[1];
+        const data_expression& v_g2a0 = guard2_appl[0];
+        const data_expression& v_g2a1 = guard2_appl[1];
         if (f_reverse)
         {
           return lexico(compare_term(v_g1a1, v_g2a1), compare_term(v_g1a0, v_g2a0));
@@ -129,15 +128,15 @@ class Info
       return compare_result_equal;
     }
 
-    Compare_Result compare_term_free_variables(const data_expression& a_term1, const data_expression& a_term2) const
+    Compare_Result compare_term_free_variables(const data_expression& term1, const data_expression& term2) const
     {
-      bool term1_is_closed = find_free_variables(a_term1).empty();
-      bool term2_is_closed = find_free_variables(a_term2).empty();
-      if(term1_is_closed && !term2_is_closed)
+      bool term1_is_closed = find_free_variables(term1).empty();
+      bool term2_is_closed = find_free_variables(term2).empty();
+      if (term1_is_closed && !term2_is_closed)
       {
         return compare_result_smaller;
       }
-      if(!term1_is_closed && term2_is_closed)
+      if (!term1_is_closed && term2_is_closed)
       {
         return compare_result_bigger;
       }
@@ -145,13 +144,13 @@ class Info
     }
 
     /// \brief Compares terms by their type.
-    Compare_Result compare_term_type(const data_expression& a_term1, const data_expression& a_term2) const
+    Compare_Result compare_term_type(const data_expression& term1, const data_expression& term2) const
     {
-      if (is_variable(a_term1) && !is_variable(a_term2))
+      if (is_variable(term1) && !is_variable(term2))
       {
         return compare_result_bigger;
       }
-      if (!is_variable(a_term1) && is_variable(a_term2))
+      if (!is_variable(term1) && is_variable(term2))
       {
         return compare_result_smaller;
       }
@@ -159,13 +158,13 @@ class Info
     }
 
     /// \brief Compares terms by checking whether one is a part of the other.
-    Compare_Result compare_term_occurs(const data_expression& a_term1, const data_expression& a_term2) const
+    Compare_Result compare_term_occurs(const data_expression& term1, const data_expression& term2) const
     {
-      if (occurs(a_term1, a_term2))
+      if (occurs(term1, term2))
       {
         return compare_result_bigger;
       }
-      if (occurs(a_term2, a_term1))
+      if (occurs(term2, term1))
       {
         return compare_result_smaller;
       }
@@ -186,67 +185,45 @@ class Info
     }
 
     /// \brief Compares two guards.
-    Compare_Result compare_guard(const data_expression& a_guard1, const data_expression& a_guard2) const
+    Compare_Result compare_guard(const data_expression& guard1, const data_expression& guard2) const
     {
       return lexico(
                lexico(
-                 compare_guard_structure(a_guard1, a_guard2),
-                 compare_guard_equality(a_guard1, a_guard2)
+                 compare_guard_structure(guard1, guard2),
+                 compare_guard_equality(guard1, guard2)
                ),
-               compare_address(a_guard1, a_guard2)
+               compare_address(guard1, guard2)
              );
     }
 
     /// \brief Compares two terms.
-    Compare_Result compare_term(const data_expression& a_term1, const data_expression& a_term2) const
+    Compare_Result compare_term(const data_expression& term1, const data_expression& term2) const
     {
       return lexico(
                 lexico(
                   lexico(
-                    compare_term_free_variables(a_term1, a_term2),
-                    compare_term_occurs(a_term1, a_term2)
+                    compare_term_free_variables(term1, term2),
+                    compare_term_occurs(term1, term2)
                   ),
-                  compare_term_type(a_term1, a_term2)
+                  compare_term_type(term1, term2)
                 ),
-                compare_address(a_term1, a_term2)
+                compare_address(term1, term2)
              );
     }
 
-    /// \brief Returns the number of arguments of the main operator of a term.
-    /// \param a_term An expression in the internal format of the rewriter with the jitty strategy.
-    /// \return 0, if \c aterm is a constant or a variable.
-    ///         The number of arguments of the main operator, otherwise.
-    std::size_t get_number_of_arguments(const data_expression& a_term) const
+    /// \brief Returns the main operator of the term \c term;
+    data_expression get_operator(const data_expression& term) const
     {
-      if (!is_variable(a_term) && !is_function_symbol(a_term) && !is_abstraction(a_term))
+      if (is_function_symbol(term))
       {
-        return a_term.size() - 1;
+        return term;
       }
-      else
+      if (is_abstraction(term))
       {
-        return 0;
+        return get_operator(atermpp::down_cast<abstraction>(term).body());
       }
-    }
-
-    /// \brief Returns the main operator of the term \c a_term;
-    data_expression get_operator(const data_expression& a_term) const
-    {
-      if (is_function_symbol(a_term))
-      {
-        return a_term;
-      }
-      if (is_abstraction(a_term))
-      {
-        return get_operator(atermpp::down_cast<abstraction>(a_term).body());
-      }
-      const application& a = atermpp::down_cast<application>(a_term);
+      const application& a = atermpp::down_cast<application>(term);
       return get_operator(a.head());
-    }
-
-    /// \brief Returns the argument with number \c a_number of the main operator of term \c a_term.
-    data_expression get_argument(const data_expression& a_term, const std::size_t a_number) const
-    {
-      return data_expression(a_term[a_number + 1]);
     }
 };
 

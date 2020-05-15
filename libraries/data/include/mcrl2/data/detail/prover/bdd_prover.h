@@ -153,7 +153,7 @@ class BDD_Prover: protected rewriter
       data_expression v_previous_1;
       data_expression v_previous_2;
 
-      mCRL2log(log::debug1) << "Formula: " << f_formula << std::endl;
+      mCRL2log(log::debug) << "Formula: " << f_formula << std::endl;
 
       data_expression intermediate_bdd = f_formula;
 
@@ -172,7 +172,7 @@ class BDD_Prover: protected rewriter
       }
 
       f_bdd = intermediate_bdd;
-      mCRL2log(log::debug1) << "Resulting BDD: " << f_bdd << std::endl;
+      mCRL2log(log::debug) << "Resulting BDD: " << f_bdd << std::endl;
 
     }
 
@@ -182,41 +182,42 @@ class BDD_Prover: protected rewriter
       return std::string(n, ' ');
     }
 
-    /// \brief Creates the EQ-BDD corresponding to the formula a_formula.
-    data_expression bdd_down(const data_expression& a_formula, const size_t a_indent=0)
+    /// \brief Creates the EQ-BDD corresponding to the formula formula.
+    data_expression bdd_down(const data_expression& formula, const size_t a_indent=0)
     {
 
       if (f_time_limit != 0 && (f_deadline - time(nullptr)) <= 0)
       {
-        mCRL2log(log::debug1) << "The time limit has passed." << std::endl;
-        return a_formula;
+        mCRL2log(log::debug) << "The time limit has passed." << std::endl;
+        return formula;
       }
 
-      if (a_formula==sort_bool::true_())
+      if (formula==sort_bool::true_())
       {
-        return a_formula;
+        return formula;
       }
-      if (a_formula==sort_bool::false_())
+      if (formula==sort_bool::false_())
       {
-        return a_formula;
+        return formula;
       }
 
-      if (is_abstraction(a_formula))
+      if (is_abstraction(formula))
       {
-        const abstraction& a = atermpp::down_cast<abstraction>(a_formula);
+        const abstraction& a = atermpp::down_cast<abstraction>(formula);
         return abstraction(a.binding_operator(), a.variables(), bdd_down(a.body(), a_indent));
       }
 
-      const std::unordered_map < data_expression, data_expression >::const_iterator i = f_formula_to_bdd.find(a_formula);
+      const std::unordered_map < data_expression, data_expression >::const_iterator i = f_formula_to_bdd.find(formula);
       if (i!=f_formula_to_bdd.end()) // found
       {
         return i->second;
       }
 
-      data_expression v_guard = smallest(a_formula);
-      if (v_guard==data_expression())
+      data_expression v_guard;
+      bool success  = smallest(formula, v_guard);
+      if (!success)
       {
-        return a_formula;
+        return formula;
       }
       else
       {
@@ -225,14 +226,14 @@ class BDD_Prover: protected rewriter
 
       const size_t extra_indent = a_indent + 2;
 
-      data_expression v_term1 = f_manipulator.set_true(a_formula, v_guard);
+      data_expression v_term1 = f_manipulator.set_true(formula, v_guard);
       v_term1 = m_rewriter->rewrite(v_term1,bdd_sigma);
       v_term1 = f_manipulator.orient(v_term1);
       mCRL2log(log::debug1) << indent(extra_indent) << "True-branch after rewriting and orienting: " << v_term1 << std::endl;
       v_term1 = bdd_down(v_term1, extra_indent);
       mCRL2log(log::debug1) << indent(extra_indent) << "BDD of the true-branch: " << v_term1 << std::endl;
 
-      data_expression v_term2 = f_manipulator.set_false(a_formula, v_guard);
+      data_expression v_term2 = f_manipulator.set_false(formula, v_guard);
       v_term2 = m_rewriter->rewrite(v_term2,bdd_sigma);
       v_term2 = f_manipulator.orient(v_term2);
       mCRL2log(log::debug1) << indent(extra_indent) << "False-branch after rewriting and orienting: " << v_term2 << std::endl;
@@ -240,7 +241,7 @@ class BDD_Prover: protected rewriter
       mCRL2log(log::debug1) << indent(extra_indent) << "BDD of the false-branch: " << v_term2 << std::endl;
 
       data_expression v_bdd = Manipulator::make_reduced_if_then_else(v_guard, v_term1, v_term2);
-      f_formula_to_bdd[a_formula]=v_bdd;
+      f_formula_to_bdd[formula]=v_bdd;
 
       return v_bdd;
     }
@@ -253,10 +254,10 @@ class BDD_Prover: protected rewriter
       v_new_time_limit = f_deadline - time(nullptr);
       if (v_new_time_limit > 0 || f_time_limit == 0)
       {
-        mCRL2log(log::debug1) << "Simplifying the BDD:" << std::endl;
+        mCRL2log(log::debug) << "Simplifying the BDD:" << std::endl;
         f_bdd_simplifier->set_time_limit((std::max)(v_new_time_limit, time(nullptr)));
         f_bdd = f_bdd_simplifier->simplify(f_bdd);
-        mCRL2log(log::debug1) << "Resulting BDD: " << f_bdd << std::endl;
+        mCRL2log(log::debug) << "Resulting BDD: " << f_bdd << std::endl;
       }
     }
 
@@ -274,7 +275,7 @@ class BDD_Prover: protected rewriter
           f_induction.initialize(v_original_formula);
           while (f_induction.can_apply_induction() && !BDD_Info::is_true(f_bdd))
           {
-            mCRL2log(log::debug1) << "Applying induction." << std::endl;
+            mCRL2log(log::debug) << "Applying induction." << std::endl;
             f_formula = f_induction.apply_induction();
             build_bdd();
             eliminate_paths();
@@ -291,7 +292,7 @@ class BDD_Prover: protected rewriter
             f_induction.initialize(v_original_formula);
             while (f_induction.can_apply_induction() && !BDD_Info::is_true(f_bdd))
             {
-              mCRL2log(log::debug1) << "Applying induction on the negated formula." << std::endl;
+              mCRL2log(log::debug) << "Applying induction on the negated formula." << std::endl;
               f_formula = f_induction.apply_induction();
               build_bdd();
               eliminate_paths();
@@ -332,114 +333,121 @@ class BDD_Prover: protected rewriter
       }
     };
 
-    /// \brief Returns the smallest guard in the formula a_formula.
-    data_expression smallest(data_expression a_formula)
+    /// \brief Returns the smallest guard in the formula formula.
+    bool smallest(const data_expression& formula, data_expression& result)
     {
-      if (is_variable(a_formula))
+      if (is_variable(formula))
       {
-        if (a_formula.sort()==sort_bool::bool_())
+        if (formula.sort()==sort_bool::bool_())
         {
-          return a_formula;
+          result=formula;
+          return true;
         }
         else
         {
-          return data_expression();
+          return false;
         }
       }
-      if (a_formula==sort_bool::true_() || a_formula==sort_bool::false_())
-      {
-        return data_expression();
+      if (is_function_symbol(formula))
+      { 
+        if (formula.sort()==sort_bool::bool_() && !(formula==sort_bool::true_() || formula==sort_bool::false_()))
+        {
+          result=formula;
+          return true;
+        }
+        else
+        { 
+          return false;
+        }
       }
-      if (is_abstraction(a_formula))
+      if (is_abstraction(formula))
       {
         // Guards from within an abstraction may contain
         // variables that are not bound outside that abstraction.
         // Therefore, we never return a smallest guard from
         // within an abstraction.
-        return data_expression();
+        return false;
       }
 
-      const std::unordered_map < data_expression, data_expression >::const_iterator i = f_smallest.find(a_formula);
+      const std::unordered_map < data_expression, data_expression >::const_iterator i = f_smallest.find(formula);
       if (i!=f_smallest.end()) //found
       {
-        return i->second;
+        result=i->second;
+        return true;
       }
 
-      data_expression v_result;
-
-      std::size_t v_length = f_info.get_number_of_arguments(a_formula);
-
-      for (std::size_t s = 0; s < v_length; s++)
+      bool result_is_defined=false;
+      data_expression v_small;
+      for (const data_expression& arg: atermpp::down_cast<application>(formula))
       {
-        const data_expression v_small = smallest(f_info.get_argument(a_formula, s));
-        if (v_small!=data_expression())
+        bool success = smallest(arg,v_small);
+        if (success)
         {
-          if (v_result!=data_expression())
+          if (result_is_defined)
           {
-            if (f_info.compare_guard(v_small, v_result) == compare_result_smaller)
+            if (f_info.compare_guard(v_small, result) == compare_result_smaller)
             {
-              v_result = v_small;
+              result = v_small;
             }
           }
           else
           {
-            v_result = v_small;
+            result = v_small;
+            result_is_defined=true;
           }
         }
       }
-      if (v_result==data_expression() && a_formula.sort()==sort_bool::bool_())
+      if (!result_is_defined && formula.sort()==sort_bool::bool_())
       {
-        v_result = a_formula;
+        result = formula;
+        return true;
       }
-      if (v_result!=data_expression())
+      if (result_is_defined)
       {
-        f_smallest[a_formula]=v_result;
+        f_smallest[formula]=result;  // Save the result in the cache
+        return true;
       }
 
-      return v_result;
+      return false;
     }
 
     /// \brief Returns branch of the BDD a_bdd, depending on the polarity a_polarity.
-    data_expression get_branch(const data_expression& a_bdd, const bool a_polarity)
+    bool get_branch(const data_expression& a_bdd, const bool a_polarity, data_expression& result)
     {
-      data_expression v_result;
-
       if (BDD_Info::is_if_then_else(a_bdd))
       {
-        data_expression v_guard = BDD_Info::get_guard(a_bdd);
-        data_expression v_true_branch = BDD_Info::get_true_branch(a_bdd);
-        data_expression v_false_branch = BDD_Info::get_false_branch(a_bdd);
-        data_expression v_branch = get_branch(v_true_branch, a_polarity);
-        if (v_branch==data_expression())
+        const data_expression& v_guard = BDD_Info::get_guard(a_bdd);
+        const data_expression& v_true_branch = BDD_Info::get_true_branch(a_bdd);
+        const data_expression& v_false_branch = BDD_Info::get_false_branch(a_bdd);
+        bool success = get_branch(v_true_branch, a_polarity, result);
+        if (success)
         {
-          v_branch = get_branch(v_false_branch, a_polarity);
-          if (v_branch==data_expression())
-          {
-            v_result = data_expression();
-          }
-          else
-          {
-            data_expression v_term = sort_bool::not_(v_guard);
-            v_result = lazy::and_(v_branch, v_term);
-          }
+          result = lazy::and_(result, v_guard);
+          return true;
         }
         else
         {
-          v_result = lazy::and_(v_branch, v_guard);
+          success = get_branch(v_false_branch, a_polarity, result);
+          if (success)
+          {
+            result = lazy::and_(result, sort_bool::not_(v_guard));
+            return true;
+          }
+          else
+          {
+            return false;
+          }
         }
       }
       else
       {
         if ((BDD_Info::is_true(a_bdd) && a_polarity) || (BDD_Info::is_false(a_bdd) && !a_polarity))
         {
-          v_result = sort_bool::true_();
+          result = sort_bool::true_();
+          return true;
         }
-        else
-        {
-          v_result = data_expression();
-        }
+        return false;
       }
-      return v_result;
     }
 
   protected:
@@ -488,7 +496,7 @@ class BDD_Prover: protected rewriter
         }
       }
 
-      mCRL2log(log::debug1) << "Flags:" << std::endl
+      mCRL2log(log::debug) << "Flags:" << std::endl
                       << "  Reverse: " << std::boolalpha << f_reverse << "," << std::endl
                       << "  Full: " << f_full << "," << std::endl;
     }
@@ -546,24 +554,25 @@ class BDD_Prover: protected rewriter
       update_answers();
       if (is_contradiction() == answer_yes)
       {
-        mCRL2log(log::debug1) << "The formula is a contradiction." << std::endl;
+        mCRL2log(log::debug) << "The formula is a contradiction." << std::endl;
         return sort_bool::true_();
       }
       else if (is_tautology() == answer_yes)
       {
-        mCRL2log(log::debug1) << "The formula is a tautology." << std::endl;
+        mCRL2log(log::debug) << "The formula is a tautology." << std::endl;
         return sort_bool::false_();
       }
       else
       {
-        mCRL2log(log::debug1) << "The formula is satisfiable, but not a tautology." << std::endl;
-        data_expression t=get_branch(f_bdd, true);
-        if (t==data_expression())
+        mCRL2log(log::debug) << "The formula is satisfiable, but not a tautology." << std::endl;
+        data_expression result;
+        bool success = get_branch(f_bdd, true, result);
+        if (!success)
         { throw mcrl2::runtime_error(
             "Cannot provide witness. This is probably caused by an abrupt stop of the\n"
             "conversion from expression to EQ-BDD. This typically occurs when a time limit is set.");
         }
-        return t;
+        return result;
       }
     }
 
@@ -573,24 +582,25 @@ class BDD_Prover: protected rewriter
       update_answers();
       if (is_contradiction() == answer_yes)
       {
-        mCRL2log(log::debug1) << "The formula is a contradiction." << std::endl;
+        mCRL2log(log::debug) << "The formula is a contradiction." << std::endl;
         return sort_bool::false_();
       }
       else if (is_tautology() == answer_yes)
       {
-        mCRL2log(log::debug1) << "The formula is a tautology." << std::endl;
+        mCRL2log(log::debug) << "The formula is a tautology." << std::endl;
         return sort_bool::true_();
       }
       else
       {
-        mCRL2log(log::debug1) << "The formula is satisfiable, but not a tautology." << std::endl;
-        data_expression t=get_branch(f_bdd, false);
-        if (t==data_expression())
+        mCRL2log(log::debug) << "The formula is satisfiable, but not a tautology." << std::endl;
+        data_expression result;
+        bool success=get_branch(f_bdd, false,result);
+        if (!success)
         { throw mcrl2::runtime_error(
             "Cannot provide counter example. This is probably caused by an abrupt stop of the\n"
             "conversion from expression to EQ-BDD. This typically occurs when a time limit is set.");
         }
-        return t;
+        return result;
       }
     }
 
@@ -600,13 +610,13 @@ class BDD_Prover: protected rewriter
       return m_rewriter;
     }
 
-    /// \brief Sets Prover::f_formula to a_formula.
-    /// precondition: the argument passed as parameter a_formula is an expression of sort Bool
-    void set_formula(const data_expression& a_formula)
+    /// \brief Sets Prover::f_formula to formula.
+    /// precondition: the argument passed as parameter formula is an expression of sort Bool
+    void set_formula(const data_expression& formula)
     {
-      f_formula = a_formula;
+      f_formula = formula;
       f_processed = false;
-      mCRL2log(log::debug1) << "The formula has been set." << std::endl;
+      mCRL2log(log::debug) << "The formula has been set." << std::endl;
     }
 
 
