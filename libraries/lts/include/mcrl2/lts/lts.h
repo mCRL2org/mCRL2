@@ -116,6 +116,18 @@ class lts: public LTS_BASE
       assert(m_action_labels.size()>0 && m_action_labels[0]==ACTION_LABEL_T::tau_action());
     }
 
+    lts& operator=(const lts& l)
+    {
+      m_nstates = l.m_nstates;
+      m_init_state = l.m_init_state;
+      m_transitions = l.m_transitions;
+      m_state_labels = l.m_state_labels;
+      m_action_labels = l.m_action_labels;
+      m_hidden_label_map = l.m_hidden_label_map;
+      assert(m_action_labels.size()>0 && m_action_labels[0]==ACTION_LABEL_T::tau_action());
+      return *this;
+    }
+
     /** \brief Swap this lts with the supplied supplied LTS.
      * \param[in] l The LTS to swap. */
     void swap(lts& l)

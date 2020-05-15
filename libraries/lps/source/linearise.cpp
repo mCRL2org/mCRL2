@@ -4054,7 +4054,7 @@ class specification_basic_type
       identifier_identifier_map.swap(new_identifier_identifier_map);
 #ifndef NDEBUG
       /* In the result no right hand side occurs as the left hand side of identifier_identifier_map */
-      typedef std::pair< process_identifier, process_identifier > identifier_identifier_pair;
+      typedef std::pair< const process_identifier, process_identifier > identifier_identifier_pair;
       for(const identifier_identifier_pair& p: identifier_identifier_map)
       {
         assert(identifier_identifier_map.count(p.second)==0);

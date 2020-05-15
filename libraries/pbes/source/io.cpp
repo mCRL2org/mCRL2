@@ -70,7 +70,7 @@ void save_pbes(const pbes& pbes,
 /// \param format The format that should be assumed for the file in infilename. If unspecified, or
 ///        pbes_file_unknown is specified, then a default format is chosen.
 /// \param source The source from which the stream originates. Used for error messages.
-void load_pbes(pbes& pbes, std::istream& stream, utilities::file_format format, const std::string& source)
+void load_pbes(pbes& pbes, std::istream& stream, utilities::file_format format, const std::string& /*source*/)
 {
   if (format == utilities::file_format())
   {
@@ -144,7 +144,7 @@ void load_pbes(pbes& pbes,
   {
     format = guess_format(filename);
   }
- if (filename.empty())
+  if (filename.empty())
   {
     load_pbes(pbes, std::cin, format);
   }
