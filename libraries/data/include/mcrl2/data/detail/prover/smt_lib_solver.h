@@ -281,7 +281,7 @@ class SMT_LIB_Solver: public SMT_Solver
       }
     }
 
-    void translate_clause(const data_expression &a_clause, const bool a_expecting_predicate)
+    void translate_clause(const data_expression& a_clause, const bool a_expecting_predicate)
     {
       if (sort_bool::is_not_application(a_clause))
       {
@@ -420,7 +420,7 @@ class SMT_LIB_Solver: public SMT_Solver
       }
     }
 
-    void add_bool2pred_and_translate_clause(const data_expression &a_clause)
+    void add_bool2pred_and_translate_clause(const data_expression& a_clause)
     {
       f_bool2pred = true;
       f_formula = f_formula + "(bool2pred ";
@@ -428,7 +428,7 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_not(const data_expression &a_clause)
+    void translate_not(const data_expression& a_clause)
     {
       const data_expression v_clause=arg(a_clause);
       f_formula = f_formula + "(not ";
@@ -436,7 +436,7 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_equality(const data_expression &a_clause)
+    void translate_equality(const data_expression& a_clause)
     {
       const data_expression v_clause_1 = left(a_clause);
       const data_expression v_clause_2 = right(a_clause);
@@ -447,7 +447,7 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_inequality(const data_expression &a_clause)
+    void translate_inequality(const data_expression& a_clause)
     {
       const data_expression v_clause_1 = left(a_clause);
       const data_expression v_clause_2 = right(a_clause);
@@ -458,7 +458,7 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_greater_than(const data_expression &a_clause)
+    void translate_greater_than(const data_expression& a_clause)
     {
       const data_expression v_clause_1 = left(a_clause);
       const data_expression v_clause_2 = right(a_clause);
@@ -469,7 +469,7 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_greater_than_or_equal(const data_expression &a_clause)
+    void translate_greater_than_or_equal(const data_expression& a_clause)
     {
       const data_expression v_clause_1 = left(a_clause);
       const data_expression v_clause_2 = right(a_clause);
@@ -480,7 +480,7 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_less_than(const data_expression &a_clause)
+    void translate_less_than(const data_expression& a_clause)
     {
       const data_expression v_clause_1 = left(a_clause);
       const data_expression v_clause_2 = right(a_clause);
@@ -491,7 +491,7 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_less_than_or_equal(const data_expression &a_clause)
+    void translate_less_than_or_equal(const data_expression& a_clause)
     {
       const data_expression v_clause_1 = left(a_clause);
       const data_expression v_clause_2 = right(a_clause);
@@ -502,7 +502,7 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_plus(const data_expression &a_clause)
+    void translate_plus(const data_expression& a_clause)
     {
       const data_expression v_clause_1 = left(a_clause);
       const data_expression v_clause_2 = right(a_clause);
@@ -513,7 +513,7 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_unary_minus(const data_expression &a_clause)
+    void translate_unary_minus(const data_expression& a_clause)
     {
       const data_expression v_clause = arg(a_clause);
       f_formula = f_formula + "(~";
@@ -521,7 +521,7 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_binary_minus(const data_expression &a_clause)
+    void translate_binary_minus(const data_expression& a_clause)
     {
       const data_expression v_clause_1 = left(a_clause);
       const data_expression v_clause_2 = right(a_clause);
@@ -532,7 +532,7 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_multiplication(const data_expression &a_clause)
+    void translate_multiplication(const data_expression& a_clause)
     {
       const data_expression v_clause_1 = left(a_clause);
       const data_expression v_clause_2 = right(a_clause);
@@ -543,7 +543,7 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_max(const data_expression &a_clause)
+    void translate_max(const data_expression& a_clause)
     {
       const data_expression v_clause_1 = left(a_clause);
       const data_expression v_clause_2 = right(a_clause);
@@ -558,7 +558,7 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_min(const data_expression &a_clause)
+    void translate_min(const data_expression& a_clause)
     {
       const data_expression v_clause_1 = left(a_clause);
       const data_expression v_clause_2 = right(a_clause);
@@ -573,7 +573,7 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_abs(const data_expression &a_clause)
+    void translate_abs(const data_expression& a_clause)
     {
       const data_expression v_clause = arg(a_clause);
       f_formula = f_formula + "(ite (< 0 ";
@@ -585,7 +585,7 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_succ(const data_expression &a_clause)
+    void translate_succ(const data_expression& a_clause)
     {
       const data_expression v_clause = arg(a_clause);
       f_formula = f_formula + "(+ ";
@@ -593,7 +593,7 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + " 1)";
     }
 
-    void translate_pred(const data_expression &a_clause)
+    void translate_pred(const data_expression& a_clause)
     {
       const data_expression v_clause = arg(a_clause);
       f_formula = f_formula + "(- ";
@@ -601,7 +601,7 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + " 1)";
     }
 
-    void translate_add_c(const data_expression &a_clause)
+    void translate_add_c(const data_expression& a_clause)
     {
       const application& v_clause = atermpp::down_cast<application>(a_clause);
       application::const_iterator arg = v_clause.begin();
@@ -621,19 +621,19 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + "))";
     }
 
-    void translate_c_nat(const data_expression &a_clause)
+    void translate_c_nat(const data_expression& a_clause)
     {
       const data_expression v_clause = arg(a_clause);
       translate_clause(v_clause, false);
     }
 
-    void translate_c_int(const data_expression &a_clause)
+    void translate_c_int(const data_expression& a_clause)
     {
       const data_expression v_clause = arg(a_clause);
       translate_clause(v_clause, false);
     }
 
-    void translate_unknown_operator(const data_expression &a_clause)
+    void translate_unknown_operator(const data_expression& a_clause)
     {
       data_expression h = atermpp::down_cast<application>(a_clause).head();
       const function_symbol& v_operator = atermpp::down_cast<function_symbol>(h);
@@ -654,7 +654,7 @@ class SMT_LIB_Solver: public SMT_Solver
 
       if (data::is_application(a_clause))
       {
-        const data::application &a = atermpp::down_cast<data::application>(a_clause);
+        const data::application& a = atermpp::down_cast<data::application>(a_clause);
         for (application::const_iterator i = a.begin(); i != a.end(); ++i)
         {
           f_formula = f_formula + " ";
@@ -664,7 +664,7 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_variable(const variable &a_clause)
+    void translate_variable(const variable& a_clause)
     {
       std::string v_string = a_clause.name();
       f_formula = f_formula + v_string;
@@ -672,7 +672,7 @@ class SMT_LIB_Solver: public SMT_Solver
       f_variables.insert(a_clause);
     }
 
-    void translate_nat_variable(const variable &a_clause)
+    void translate_nat_variable(const variable& a_clause)
     {
       std::string v_string = a_clause.name();
       f_formula = f_formula + v_string;
@@ -681,7 +681,7 @@ class SMT_LIB_Solver: public SMT_Solver
       f_nat_variables.insert(a_clause);
     }
 
-    void translate_pos_variable(const variable &a_clause)
+    void translate_pos_variable(const variable& a_clause)
     {
       std::string v_string = a_clause.name();
       f_formula = f_formula + v_string;
@@ -690,7 +690,7 @@ class SMT_LIB_Solver: public SMT_Solver
       f_pos_variables.insert(a_clause);
     }
 
-    void translate_int_constant(const data_expression &a_clause)
+    void translate_int_constant(const data_expression& a_clause)
     {
       std::string v_value(data::sort_int::integer_constant_as_string(data::data_expression(a_clause)));
       if (v_value[0] == '-')
@@ -704,13 +704,13 @@ class SMT_LIB_Solver: public SMT_Solver
       }
     }
 
-    void translate_nat_constant(const data_expression &a_clause)
+    void translate_nat_constant(const data_expression& a_clause)
     {
       std::string v_value(data::sort_nat::natural_constant_as_string(data::data_expression(a_clause)));
       f_formula = f_formula + v_value;
     }
 
-    void translate_pos_constant(const data_expression &a_clause)
+    void translate_pos_constant(const data_expression& a_clause)
     {
       std::string v_value(data::sort_pos::positive_constant_as_string(data::data_expression(a_clause)));
       f_formula = f_formula + v_value;
@@ -726,7 +726,7 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + "false";
     }
 
-    void translate_function_symbol(const data_expression &a_clause)
+    void translate_function_symbol(const data_expression& a_clause)
     {
       const function_symbol& v_operator = atermpp::down_cast<function_symbol>(a_clause);
       std::map < function_symbol, std::size_t >::const_iterator i=f_operators.find(v_operator);
@@ -748,7 +748,7 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void add_nat_clauses()
     {
-      for(const auto & f_nat_variable : f_nat_variables)
+      for(const variable& f_nat_variable : f_nat_variables)
       {
         std::string v_variable_string = f_nat_variable.name();
         f_formula = f_formula + " (>= " + v_variable_string + " 0)";
@@ -757,7 +757,7 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void add_pos_clauses()
     {
-      for(const auto & f_pos_variable : f_pos_variables)
+      for(const variable& f_pos_variable : f_pos_variables)
       {
         std::string v_variable_string = f_pos_variable.name();
         f_formula = f_formula + " (>= " + v_variable_string + " 1)";
@@ -885,7 +885,7 @@ class cvc_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< cvc_smt_
     /// precondition: The argument passed as parameter a_formula is a list of expressions of sort Bool in internal mCRL2
     /// format. The argument represents a formula in conjunctive normal form, where the elements of the list represent the
     /// clauses
-    bool is_satisfiable(const data_expression_list &a_formula)
+    bool is_satisfiable(const data_expression_list& a_formula)
     {
       translate(a_formula);
 
@@ -923,7 +923,7 @@ class z3_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< z3_smt_so
     /// precondition: The argument passed as parameter a_formula is a list of expressions of sort Bool in internal mCRL2
     /// format. The argument represents a formula in conjunctive normal form, where the elements of the list represent the
     /// clauses
-    bool is_satisfiable(const data_expression_list &a_formula)
+    bool is_satisfiable(const data_expression_list& a_formula)
     {
       translate(a_formula);
 
@@ -960,7 +960,7 @@ class ario_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< ario_sm
     /// precondition: The argument passed as parameter a_formula is a list of expressions of sort Bool in internal mCRL2
     /// format. The argument represents a formula in conjunctive normal form, where the elements of the list represent the
     /// clauses
-    bool is_satisfiable(const data_expression_list &a_formula)
+    bool is_satisfiable(const data_expression_list& a_formula)
     {
       translate(a_formula);
 

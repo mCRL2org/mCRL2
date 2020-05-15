@@ -56,7 +56,7 @@ struct term_traits<data::data_expression>
   /// \param p A term
   /// \return Operator not applied to p
   static inline
-  term_type not_(const term_type &p)
+  term_type not_(const term_type& p)
   {
     return data::sort_bool::not_(p);
   }
@@ -96,7 +96,7 @@ struct term_traits<data::data_expression>
   /// \param p A term
   /// \return Operator forall applied to d and p
   static inline
-  term_type forall(const variable_sequence_type &d, const term_type& p)
+  term_type forall(const variable_sequence_type& d, const term_type& p)
   {
     return data::forall(d, p);
   }
@@ -106,7 +106,7 @@ struct term_traits<data::data_expression>
   /// \param p A term
   /// \return Operator exists applied to d and p
   static inline
-  term_type exists(const variable_sequence_type &d, const term_type& p)
+  term_type exists(const variable_sequence_type& d, const term_type& p)
   {
     return data::exists(d, p);
   }
@@ -219,7 +219,7 @@ struct term_traits<data::data_expression>
   const term_type& argument(const term_type& t, const std::size_t n)
   {
     assert(data::is_application(t));
-    const data::application &a=atermpp::down_cast<data::application>(t);
+    const data::application& a=atermpp::down_cast<data::application>(t);
     assert(a.size()>n);
     data::application::const_iterator i=a.begin();
     for(std::size_t j=0; j<n; ++j, ++i)
@@ -234,7 +234,7 @@ struct term_traits<data::data_expression>
   const term_type& left(const term_type& t)
   {
     assert(data::is_application(t));
-    const data::application &a=atermpp::down_cast<data::application>(t);
+    const data::application& a=atermpp::down_cast<data::application>(t);
     assert(a.size() == 2);
     return *(a.begin());
   }
@@ -243,7 +243,7 @@ struct term_traits<data::data_expression>
   const term_type& right(const term_type& t)
   {
     assert(data::is_application(t));
-    const data::application &a=atermpp::down_cast<data::application>(t);
+    const data::application& a=atermpp::down_cast<data::application>(t);
     assert(a.size() == 2);
     return *(++(a.begin()));
   }
@@ -253,7 +253,7 @@ struct term_traits<data::data_expression>
   {
     assert(is_not(t));
     assert(data::is_application(t));
-    const data::application &a=atermpp::down_cast<data::application>(t);
+    const data::application& a=atermpp::down_cast<data::application>(t);
     assert(a.size() == 1);
     return *(a.begin());
   }
@@ -304,7 +304,7 @@ struct expression_traits : public core::term_traits< Expression >
     return atermpp::down_cast<mcrl2::data::application>(e).head();
   }
 
-  static const data_expression_list &variables(const data_expression& a)
+  static const data_expression_list& variables(const data_expression& a)
   {
     return atermpp::container_cast<data_expression_list>(atermpp::down_cast<abstraction>(a).variables());
   }
@@ -316,7 +316,7 @@ struct expression_traits : public core::term_traits< Expression >
 
   static data_expression replace_body(const data_expression& variable_binder, const data_expression& new_body)
   {
-    const abstraction &a=atermpp::down_cast<const abstraction>(variable_binder);
+    const abstraction& a=atermpp::down_cast<const abstraction>(variable_binder);
     return abstraction(a.binding_operator(), a.variables(), new_body);
   }
 

@@ -42,7 +42,7 @@ class simulation
     simulation(const stochastic_specification& specification, data::rewrite_strategy strategy = data::rewrite_strategy());
 
     /// Returns the current annotated state vector.
-    const std::deque<state_t> &trace() const { return m_tau_prioritization ? m_prioritized_trace : m_full_trace; }
+    const std::deque<state_t>& trace() const { return m_tau_prioritization ? m_prioritized_trace : m_full_trace; }
 
     /// Remove states from the end of the simulation, making \a state_number the last state.
     void truncate(std::size_t state_number);
@@ -54,19 +54,19 @@ class simulation
     void enable_tau_prioritization(bool enable, const std::string& action = "ctau");
 
     /// Save the trace to a file.
-    void save(const std::string &filename);
+    void save(const std::string& filename);
 
     /// Load a trace from a file.
-    void load(const std::string &filename);
+    void load(const std::string& filename);
 
   protected:
     std::vector<transition_t> transitions(const lps::state& source_state);
-    std::vector<transition_t> prioritize(const std::vector<transition_t> &transitions);
+    std::vector<transition_t> prioritize(const std::vector<transition_t>& transitions);
     void push_back(const lps::state& lps_state);
-    bool is_prioritized(const multi_action &action);
+    bool is_prioritized(const multi_action& action);
     void prioritize_trace();
     bool match_trace(trace::Trace& trace);
-    bool match(const state &left, const state &right);
+    bool match(const state& left, const state& right);
 
     stochastic_specification m_specification;
     data::rewriter m_rewriter;
