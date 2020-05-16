@@ -53,26 +53,13 @@ namespace detail
     class multi_action_indexed_set 
     {
       protected:
-        utilities::indexed_set<atermpp::aterm> storage;
+        utilities::indexed_set<action_label_lts> storage;
       
       public:
         inline
         std::pair<std::size_t, bool> put(const lps::multi_action& ma) 
         {
-          if (ma.time()==data::undefined_real())
-          {
-            // If the time is undefined, which means the multi-action can take place
-            // at any time, we find a number based on the actions. 
-            return storage.insert(ma.actions());
-          }
-          else 
-          { 
-            // When the time is non trivial we put the time as the first element of the 
-            // list of actions. This is not very elegant but it works. 
-            atermpp::aterm_list l=atermpp::down_cast<atermpp::aterm_list>(static_cast<const atermpp::aterm&>(ma.actions()));
-            l.push_front(ma.time()); 
-            return storage.insert(l);
-          }
+          return storage.insert(action_label_lts(ma));
         }
     };
 

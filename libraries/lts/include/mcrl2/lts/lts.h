@@ -277,7 +277,7 @@ class lts: public LTS_BASE
         return 0;
       }
 // std::cerr << "ADD " << pp(label) << "\n";
-//      assert(std::find(m_action_labels.begin(),m_action_labels.end(),label)==m_action_labels.end()); // Action labels must be unique. 
+      assert(std::find(m_action_labels.begin(),m_action_labels.end(),label)==m_action_labels.end()); // Action labels must be unique. 
       const labels_size_type label_index=m_action_labels.size();
       m_action_labels.push_back(label);
       return label_index;
@@ -317,8 +317,8 @@ class lts: public LTS_BASE
     {
       assert(action<m_action_labels.size());
       assert((action==0) == (label==ACTION_LABEL_T::tau_action())); // a tau action is always stored at index 0.
- //     assert(m_action_labels[action] == label ||
- //            std::find(m_action_labels.begin(),m_action_labels.end(),label)==m_action_labels.end()); // Action labels must be unique. 
+      assert(m_action_labels[action] == label ||
+             std::find(m_action_labels.begin(),m_action_labels.end(),label)==m_action_labels.end()); // Action labels must be unique. 
       m_action_labels[action] = label;
     }
 
