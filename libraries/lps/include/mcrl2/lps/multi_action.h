@@ -439,4 +439,19 @@ inline data::data_expression not_equal_multi_actions(const multi_action& a, cons
 
 } // namespace mcrl2
 
+namespace std
+{
+/// \brief specialization of the standard std::hash function for an action_label_string.
+template<>
+struct std::hash< mcrl2::lps::multi_action >
+{
+  std::size_t operator()(const mcrl2::lps::multi_action& ma) const
+  {
+    std::hash<atermpp::aterm> hasher;
+    return hasher(ma.actions()) ^ (hasher(ma.time())<<1);
+  }
+};
+
+} // namespace std
+
 #endif // MCRL2_LPS_MULTI_ACTION_H

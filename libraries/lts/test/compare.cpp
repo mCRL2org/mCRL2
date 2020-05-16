@@ -407,3 +407,19 @@ BOOST_AUTO_TEST_CASE(failures_divergence_incomparable_test)
   BOOST_CHECK(preorder_compare(bP, aPtauP, lts_pre_failures_divergence_refinement)); // failures(bP) subset failures(aPtau) != empty because divergences.
 }
 
+
+// Test belonging to #1595. Check wheter action a|b and b|a are considered equal. 
+BOOST_AUTO_TEST_CASE(properly_order_multiactions)
+{
+
+  const std::string ab =
+    "des (0,1,1)\n"
+    "(0,\"a|b\",0)\n";
+  
+  // P = b.P
+  const std::string ba =
+    "des (0,1,1)\n"
+    "(0,\"b|a\",0)\n";
+
+  BOOST_CHECK(compare(ab, ba, lts_eq_bisim)); // These transition systems must be equal. 
+}

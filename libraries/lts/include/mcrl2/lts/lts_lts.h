@@ -149,7 +149,7 @@ class action_label_lts: public mcrl2::lps::multi_action
 
     /** \brief Constructor. */
     explicit action_label_lts(const mcrl2::lps::multi_action& a)
-     : mcrl2::lps::multi_action(a)
+     : mcrl2::lps::multi_action(sort_multiactions(a))
     {
     }
 
@@ -181,6 +181,17 @@ class action_label_lts: public mcrl2::lps::multi_action
       return tau_action;
     }
 
+  protected:
+    /// A function to sort a multi action to guarantee that multi-actions are compared properly. 
+    static mcrl2::lps::multi_action sort_multiactions(const mcrl2::lps::multi_action& a)
+    {
+      if (a.actions().size()<=1)
+      {
+        return a;
+      }
+      std::multiset<process::action> sorted_actions(a.actions().begin(), a.actions().end());
+      return  mcrl2::lps::multi_action(process::action_list(sorted_actions.begin(),sorted_actions.end()),a.time());
+    }
 };
 
 /** \brief Print the action label to string. */
@@ -402,5 +413,22 @@ class probabilistic_lts_lts_t :
 };
 } // namespace lts
 } // namespace mcrl2
+
+namespace std
+{
+
+/// \brief specialization of the standard std::hash function for an action_label_string.
+template<>
+struct hash< mcrl2::lts::action_label_lts >
+{
+  std::size_t operator()(const mcrl2::lts::action_label_lts& as) const
+  {
+    hash<mcrl2::lps::multi_action> hasher;
+    return hasher(as);
+  }
+};
+
+} // namespace std
+
 
 #endif

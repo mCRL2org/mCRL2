@@ -134,8 +134,8 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
     lts.set_action_label_declarations(action_labels);
 
     // An indexed set to keep indices for multi actions.
-    mcrl2::utilities::indexed_set<process::action_list> multi_actions;
-    multi_actions.insert(process::action_list()); // This action list represents 'tau'.
+    mcrl2::utilities::indexed_set<action_label_lts> multi_actions;
+    multi_actions.insert(action_label_lts::tau_action()); // This action list represents 'tau'.
 
     // The initial state is stored and set as last.
     std::optional<probabilistic_lts_lts_t::probabilistic_state_t> initial_state;
@@ -162,7 +162,8 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
         stream >> action;
         stream >> to;
 
-        auto [index, inserted] = multi_actions.insert(action.actions());
+        const action_label_lts lts_action(lps::multi_action(action.actions(),action.time()));
+        auto [index, inserted] = multi_actions.insert(lts_action);
 
         std::size_t target_index = to.value();
         if constexpr (std::is_same<LTS, probabilistic_lts_lts_t>::value)
@@ -177,7 +178,7 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
 
         if (inserted)
         {
-          std::size_t actual_index = lts.add_action(action_label_lts(lps::multi_action(action.actions())));
+          std::size_t actual_index = lts.add_action(lts_action);
           utilities::mcrl2_unused(actual_index);
           assert(actual_index == index);
         }
@@ -195,7 +196,8 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
           stream >> action;
           stream >> to;
 
-          auto [index, inserted] = multi_actions.insert(action.actions());
+          const action_label_lts lts_action(lps::multi_action(action.actions(),action.time()));
+          auto [index, inserted] = multi_actions.insert(lts_action);
 
           // Compute the index of the probabilistic state by adding it.
           std::size_t to_index = lts.add_probabilistic_state(to);

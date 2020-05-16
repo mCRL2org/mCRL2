@@ -63,6 +63,20 @@ class timed_multi_action: public atermpp::aterm_appl
     {
       return time() != data::undefined_real();
     }
+
+    /// \brief Returns the multiaction in which the list of actions is sorted. 
+    /// \return A multi-action with a sorted list.
+    timed_multi_action sort_actions() const
+    {
+      if (actions().size()<=1)  // Almost always there is only one action. 
+      {
+        return *this;
+      }
+      static std::multiset<action>sorted_actions(actions().begin(),actions().end());  // This set is static, as otherwise it must be constructed 
+                                                                                  // too often. 
+      return timed_multi_action(process::action_list(sorted_actions.begin(), sorted_actions.end()),time());
+    }
+
 //--- end user section timed_multi_action ---//
 };
 

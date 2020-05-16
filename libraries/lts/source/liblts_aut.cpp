@@ -9,16 +9,14 @@
 /// \file liblts_aut.cpp
 
 #include <fstream>
-#include <unordered_map>
+#include "mcrl2/utilities/unordered_map.h"
 #include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/detail/liblts_swap_to_from_probabilistic_lts.h"
 
 
 using namespace mcrl2::lts;
-using namespace std;
 
-
-static void read_newline(istream& is, const std::size_t line_no)
+static void read_newline(std::istream& is, const std::size_t line_no)
 {
   char ch;
   is.get(ch);
@@ -49,11 +47,11 @@ static void read_newline(istream& is, const std::size_t line_no)
 }
 
 // reads a number, puts it in s, and reads one extra character, which must be either a space or a closing bracket.
-static void read_natural_number_to_string(istream& is, string& s, const std::size_t line_no)
+static void read_natural_number_to_string(std::istream& is, std::string& s, const std::size_t line_no)
 {
   assert(s.empty());
   char ch;
-  is >> skipws >> ch;
+  is >> std::skipws >> ch;
   for( ; isdigit(ch) ; is.get(ch))
   {
     s.push_back(ch);
@@ -66,16 +64,17 @@ static void read_natural_number_to_string(istream& is, string& s, const std::siz
 }
 
 template <class AUT_LTS_TYPE>
-static std::size_t find_label_index(const string& s, unordered_map < string, std::size_t >& labs, AUT_LTS_TYPE& l)
+static std::size_t find_label_index(const std::string& s, mcrl2::utilities::unordered_map < action_label_string, std::size_t >& labs, AUT_LTS_TYPE& l)
 {
   std::size_t label;
 
   assert(labs.at(action_label_string::tau_action())==0);
-  const unordered_map < string, std::size_t >::const_iterator i=labs.find(s);
+  action_label_string as(s);
+  const mcrl2::utilities::unordered_map < action_label_string, std::size_t >::const_iterator i=labs.find(as);
   if (i==labs.end())
   {
-    label=l.add_action(action_label_string(s));
-    labs[s]=label;
+    label=l.add_action(as);
+    labs[as]=label;
   }
   else
   {
@@ -107,7 +106,7 @@ static void check_states(mcrl2::lts::probabilistic_lts_aut_t::probabilistic_stat
 // last state number is put in state. The remainder as pairs
 // in the vector. Typical expected input is 3 2/3 4 1/6 78 1/6 3.
 static void read_probabilistic_state(
-  istream& is,
+  std::istream& is,
   mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t& result,
   const std::size_t line_no)
 {
@@ -115,7 +114,7 @@ static void read_probabilistic_state(
 
   std::size_t state;
 
-  is >> skipws >> state;
+  is >> std::skipws >> state;
 
   if (!is.good())
   {
@@ -124,7 +123,7 @@ static void read_probabilistic_state(
 
   // Check whether the next character is a digit. If so a probability follows.
   char ch;
-  is >> skipws >> ch;
+  is >> std::skipws >> ch;
   is.putback(ch);
 
   if (!isdigit(ch))
@@ -139,22 +138,22 @@ static void read_probabilistic_state(
   while (is.good() && !ready)
   {
     // Now read a probabilities followed by the next state.
-    string enumerator;
+    std::string enumerator;
     read_natural_number_to_string(is,enumerator,line_no);
     char ch;
-    is >> skipws >> ch;
+    is >> std::skipws >> ch;
     if (ch != '/')
     {
       throw mcrl2::runtime_error("Expect a / in a probability at line " + std::to_string(line_no) + ".");
     }
 
-    string denominator;
+    std::string denominator;
     read_natural_number_to_string(is,denominator,line_no);
     mcrl2::lts::probabilistic_arbitrary_precision_fraction frac(enumerator,denominator);
     remainder=remainder-frac;
     result.add(state, frac);
     
-    is >> skipws >> state;
+    is >> std::skipws >> state;
 
     if (!is.good())
     {
@@ -163,7 +162,7 @@ static void read_probabilistic_state(
 
     // Check whether the next character is a digit.
     
-    is >> skipws >> ch;
+    is >> std::skipws >> ch;
     is.putback(ch);
 
     if (!isdigit(ch))
@@ -177,14 +176,14 @@ static void read_probabilistic_state(
 
 
 static void read_aut_header(
-  istream& is,
+  std::istream& is,
   mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t& initial_state,
   std::size_t& num_transitions,
   std::size_t& num_states)
 {
-  string s;
+  std::string s;
   is.width(3);
-  is >> skipws >> s;
+  is >> std::skipws >> s;
 
   if (s!="des")
   {
@@ -192,7 +191,7 @@ static void read_aut_header(
   }
 
   char ch;
-  is >> skipws >> ch;
+  is >> std::skipws >> ch;
 
   if (ch != '(')
   {
@@ -201,21 +200,21 @@ static void read_aut_header(
 
   read_probabilistic_state(is,initial_state,1);
 
-  is >> skipws >> ch;
+  is >> std::skipws >> ch;
   if (ch != ',')
   {
     throw mcrl2::runtime_error("Expect a comma after the first number in the first line of a .aut file.");
   }
 
-  is >> skipws >> num_transitions;
+  is >> std::skipws >> num_transitions;
 
-  is >> skipws >> ch;
+  is >> std::skipws >> ch;
   if (ch != ',')
   {
     throw mcrl2::runtime_error("Expect a comma after the second number in the first line of a .aut file.");
   }
 
-  is >> skipws >> num_states;
+  is >> std::skipws >> num_states;
 
   is >> ch;
 
@@ -228,13 +227,13 @@ static void read_aut_header(
 }
 
 static bool read_initial_part_of_an_aut_transition(
-  istream& is,
+  std::istream& is,
   std::size_t& from,
-  string& label,
+  std::string& label,
   const std::size_t line_no)
 {
   char ch;
-  is >> skipws >> ch;
+  is >> std::skipws >> ch;
   if (is.eof())
   {
     return false;
@@ -244,21 +243,21 @@ static bool read_initial_part_of_an_aut_transition(
     throw mcrl2::runtime_error("Expect opening bracket at line " + std::to_string(line_no) + ".");
   }
 
-  is >> skipws >> from;
+  is >> std::skipws >> from;
 
-  is >> skipws >> ch;
+  is >> std::skipws >> ch;
   if (ch != ',')
   {
     throw mcrl2::runtime_error("Expect that the first number is followed by a comma at line " + std::to_string(line_no) + ".");
   }
 
-  is >> skipws >> ch;
+  is >> std::skipws >> ch;
   if (ch == '"')
   {
     label="";
     // In case the label is using quotes whitespaces
     // in the label are preserved. 
-    is >> noskipws >> ch;
+    is >> std::noskipws >> ch;
     while ((ch != '"') && !is.eof())
     {
       label.push_back(ch);
@@ -268,7 +267,7 @@ static bool read_initial_part_of_an_aut_transition(
     {
       throw mcrl2::runtime_error("Expect that the second item is a quoted label (using \") at line " + std::to_string(line_no) + ".");
     }
-    is >> skipws >> ch;
+    is >> std::skipws >> ch;
   }
   else
   {
@@ -292,9 +291,9 @@ static bool read_initial_part_of_an_aut_transition(
 }
 
 static bool read_aut_transition(
-  istream& is,
+  std::istream& is,
   std::size_t& from,
-  string& label,
+  std::string& label,
   mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t& target_probabilistic_state,
   const std::size_t line_no)
 {
@@ -317,9 +316,9 @@ static bool read_aut_transition(
 }
 
 static bool read_aut_transition(
-  istream& is,
+  std::istream& is,
   std::size_t& from,
-  string& label,
+  std::string& label,
   std::size_t& to,
   const std::size_t line_no)
 {
@@ -328,7 +327,7 @@ static bool read_aut_transition(
     return false;
   }
 
-  is >> skipws >> to;
+  is >> std::skipws >> to;
 
   char ch;
   is >> ch;
@@ -342,7 +341,7 @@ static bool read_aut_transition(
 }
 
 
-static void read_from_aut(probabilistic_lts_aut_t& l, istream& is)
+static void read_from_aut(probabilistic_lts_aut_t& l, std::istream& is)
 {
   std::size_t line_no = 1;
   std::size_t ntrans=0, nstate=0;
@@ -354,8 +353,8 @@ static void read_from_aut(probabilistic_lts_aut_t& l, istream& is)
   // Because most states consist of one probabilistic state, the unordered maps are duplicated into
   // indices_of_single_probabilistic_states and indices_of_multiple_probabilistic_states.
   // The map indices_of_single_probabilistic_states requires far less memory.
-  unordered_map < std::size_t, std::size_t> indices_of_single_probabilistic_states;
-  unordered_map < mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t, std::size_t> indices_of_multiple_probabilistic_states;
+  mcrl2::utilities::unordered_map < std::size_t, std::size_t> indices_of_single_probabilistic_states;
+  mcrl2::utilities::unordered_map < mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t, std::size_t> indices_of_multiple_probabilistic_states;
   
   check_states(initial_probabilistic_state, nstate, line_no);
 
@@ -367,13 +366,13 @@ static void read_from_aut(probabilistic_lts_aut_t& l, istream& is)
   l.set_num_states(nstate,false);
   l.clear_transitions(ntrans); // Reserve enough space for the transitions.
   
-  unordered_map < string, std::size_t > action_labels;
+  mcrl2::utilities::unordered_map < action_label_string, std::size_t > action_labels;
   action_labels[action_label_string::tau_action()]=0; // A tau action is always stored at position 0.
   l.set_initial_probabilistic_state(initial_probabilistic_state); 
 
   mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t probabilistic_target_state;
   std::size_t from;
-  string s;
+  std::string s;
 
   while (!is.eof())
   {
@@ -422,7 +421,7 @@ static void read_from_aut(probabilistic_lts_aut_t& l, istream& is)
   }
 }
 
-static void read_from_aut(lts_aut_t& l, istream& is)
+static void read_from_aut(lts_aut_t& l, std::istream& is)
 {
   std::size_t line_no = 1;
   std::size_t ntrans=0, nstate=0;
@@ -445,12 +444,12 @@ static void read_from_aut(lts_aut_t& l, istream& is)
   l.set_num_states(nstate,false);
   l.clear_transitions(ntrans); // Reserve enough space for the transitions.
   
-  unordered_map < string, std::size_t > action_labels;
+  mcrl2::utilities::unordered_map < action_label_string, std::size_t > action_labels;
   action_labels[action_label_string::tau_action()]=0; // A tau action is always stored at position 0.
   l.set_initial_state(initial_probabilistic_state.begin()->state()); 
 
   std::size_t from, to;
-  string s;
+  std::string s;
   while (!is.eof())
   {
     line_no++;
@@ -473,7 +472,7 @@ static void read_from_aut(lts_aut_t& l, istream& is)
 }
 
 
-static void write_probabilistic_state(const mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t& prob_state, ostream& os)
+static void write_probabilistic_state(const mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t& prob_state, std::ostream& os)
 {
   mcrl2::lts::probabilistic_arbitrary_precision_fraction previous_probability;
   bool first_element=true;
@@ -493,7 +492,7 @@ static void write_probabilistic_state(const mcrl2::lts::probabilistic_lts_aut_t:
   }
 }
 
-static void write_to_aut(const probabilistic_lts_aut_t& l, ostream& os)
+static void write_to_aut(const probabilistic_lts_aut_t& l, std::ostream& os)
 {
   // Do not use "endl" below to avoid flushing. Use "\n" instead.
   os << "des (";
@@ -509,7 +508,7 @@ static void write_to_aut(const probabilistic_lts_aut_t& l, ostream& os)
   }
 }
 
-static void write_to_aut(const lts_aut_t& l, ostream& os)
+static void write_to_aut(const lts_aut_t& l, std::ostream& os)
 {
   // Do not use "endl" below to avoid flushing. Use "\n" instead.
   os << "des (" << l.initial_state() << "," << l.num_transitions() << "," << l.num_states() << ")" << "\n"; 
@@ -527,15 +526,15 @@ namespace mcrl2
 namespace lts
 {
 
-void probabilistic_lts_aut_t::load(const string& filename)
+void probabilistic_lts_aut_t::load(const std::string& filename)
 {
   if (filename=="")
   {
-    read_from_aut(*this,cin);
+    read_from_aut(*this, std::cin);
   }
   else
   {
-    ifstream is(filename.c_str());
+    std::ifstream is(filename.c_str());
 
     if (!is.is_open())
     {
@@ -547,20 +546,20 @@ void probabilistic_lts_aut_t::load(const string& filename)
   }
 }
 
-void probabilistic_lts_aut_t::load(istream& is)
+void probabilistic_lts_aut_t::load(std::istream& is)
 {
   read_from_aut(*this,is);
 }
 
-void probabilistic_lts_aut_t::save(string const& filename) const
+void probabilistic_lts_aut_t::save(std::string const& filename) const
 {
   if (filename=="")
   {
-    write_to_aut(*this,cout);
+    write_to_aut(*this, std::cout);
   }
   else
   {
-    ofstream os(filename.c_str());
+    std::ofstream os(filename.c_str());
 
     if (!os.is_open())
     {
@@ -572,15 +571,15 @@ void probabilistic_lts_aut_t::save(string const& filename) const
   }
 }
 
-void lts_aut_t::load(const string& filename)
+void lts_aut_t::load(const std::string& filename)
 {
   if (filename=="")
   {
-    read_from_aut(*this,cin);
+    read_from_aut(*this, std::cin);
   }
   else
   {
-    ifstream is(filename.c_str());
+    std::ifstream is(filename.c_str());
 
     if (!is.is_open())
     {
@@ -592,20 +591,20 @@ void lts_aut_t::load(const string& filename)
   }
 }
 
-void lts_aut_t::load(istream& is)
+void lts_aut_t::load(std::istream& is)
 {
   read_from_aut(*this,is);
 }
 
-void lts_aut_t::save(string const& filename) const
+void lts_aut_t::save(std::string const& filename) const
 {
   if (filename=="")
   {
-    write_to_aut(*this,cout);
+    write_to_aut(*this, std::cout);
   }
   else
   {
-    ofstream os(filename.c_str());
+    std::ofstream os(filename.c_str());
 
     if (!os.is_open())
     {

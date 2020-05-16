@@ -702,3 +702,16 @@ BOOST_AUTO_TEST_CASE(coins_simulate_dice)   // Example from the probabilistic ex
   );
   check_lps2lts_specification(spec, 26, 26, 9);
 } 
+
+BOOST_AUTO_TEST_CASE(test_whether_action_a_b_and_b_a_are_the_same)   // Related to #1595
+{
+  std::string spec(
+    "act a,b;\n"
+    "proc P = a|b.P+\n"
+    "         b|a.P;\n"
+    "init P;\n"
+  );
+  check_lps2lts_specification(spec, 1, 2, 2);
+}
+
+

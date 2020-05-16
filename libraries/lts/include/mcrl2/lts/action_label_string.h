@@ -19,6 +19,7 @@
 #ifndef MCRL2_LTS_ACTION_LABEL_STRING_H
 #define MCRL2_LTS_ACTION_LABEL_STRING_H
 
+#include <set>
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/text_utility.h"
 
@@ -29,7 +30,8 @@ namespace lts
 
 /** \brief This class contains strings to be used as values for action labels in lts's.
  *  \details These action labels are used in the aut, fsm, and dot format to represent
- *           values for the action labels in transitions.
+ *           values for the action labels in transitions. The string must have a pattern
+ *           resemblinb multiactions, and these multiactions are always sorted. 
  */
 class action_label_string: public std::string
 {
@@ -48,7 +50,7 @@ class action_label_string: public std::string
 
     /* \brief A constructor, where the string s is taken to become the action label.
      */
-    explicit action_label_string(const std::string& s):std::string(s)
+    explicit action_label_string(const std::string& s):std::string(sort_multiactions(s))
     {}
 
     /* \brief An auxiliary function to hide actions. Makes a best-effort attempt at
@@ -124,6 +126,67 @@ class action_label_string: public std::string
       static action_label_string tau_action("tau");
       return tau_action;
     }
+ 
+  protected:
+    ///\brief Sort multiactions in a string.
+    ///\details Take a string with a multi-action of the shape a1(...)|a2(...)|...|an(...).
+    ///         Split it into different actions, and reassemble them such that the actions
+    ///         are ordered. 
+    ///\returns This action in which the multi-actions are ordered. 
+    static std::string sort_multiactions(const std::string& s) 
+    {
+std::cerr << "SORT MULTIACTION " << s << "\n";
+      // Split this multiaction in actions a1(...)  , a2(...), a3(...)
+      static std::multiset<std::string> split_actions;  // Make a static variable to avoid this multiset being created often. 
+      assert(split_actions.empty());
+      size_t nested_bracket_counter=0;
+      size_t start_of_current_action=0;
+      for(size_t i=0; i<s.size(); ++i)
+      {
+        const char c=s[i];
+        if (c==')')
+        { if (nested_bracket_counter==0)
+          {
+            throw mcrl2::runtime_error("The transition label is not a proper multiaction (1): " + s);
+          }
+          else 
+          {
+            nested_bracket_counter--;
+          }
+        }
+        else if (c=='(')
+        {
+          nested_bracket_counter++;
+        }
+        else if (c=='|' && nested_bracket_counter==0)
+        {
+          split_actions.insert(s.substr(start_of_current_action,i-start_of_current_action));
+          start_of_current_action=i+1;
+        }
+      }
+      if (start_of_current_action==s.size()) // In this case the multiaction ends with a "|".
+      {
+        throw mcrl2::runtime_error("The transition label is not a proper multiaction (2): " + s);
+      }
+      if (split_actions.size()==0)   // No actions were split off. No 
+      {
+        // This is not a multiaction. 
+        return s;
+      }
+      split_actions.insert(s.substr(start_of_current_action,s.size()-start_of_current_action));
+      std::string result;
+      for(const std::string& s: split_actions)
+      {
+        if (result.size()>0)
+        {
+          result.append("|");
+        }
+        result.append(s);
+      }
+      split_actions.clear();
+      return result;
+    }
+
 };
 
 /* \brief A pretty print operator on action labels, returning it as a string.
@@ -135,6 +198,23 @@ inline std::string pp(const action_label_string& l)
 
 } // namespace lts
 } // namespace mcrl2
+
+namespace std
+{
+
+/// \brief specialization of the standard std::hash function for an action_label_string.
+template<>
+struct hash< mcrl2::lts::action_label_string >
+{
+  std::size_t operator()(const mcrl2::lts::action_label_string& as) const
+  {
+    hash<std::string> hasher;
+    return hasher(as);
+  }
+};
+
+} // namespace std
+
 
 #endif
 
