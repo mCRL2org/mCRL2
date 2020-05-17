@@ -13,7 +13,6 @@
 #include <QMessageBox>
 #include <QMenu>
 #include <iostream>
-using namespace std;
 
 
 static const int hgtHstPix = 80;
@@ -92,7 +91,7 @@ std::size_t Examiner::selectedClusterIndex()
 
 void Examiner::setFrame(
   Cluster* frme,
-  const vector< Attribute*> &attrs,
+  const std::vector< Attribute*> &attrs,
   QColor col)
 {
   delete frame;
@@ -128,14 +127,14 @@ void Examiner::clrFrame()
 
 void Examiner::addFrameHist(
   Cluster* frme,
-  const vector< Attribute* > &attrs)
+  const std::vector< Attribute* > &attrs)
 {
   // update flag
   dataChanged = true;
 
   framesHist.push_back(new Cluster(*frme));
 
-  vector< Attribute* > v;
+  std::vector< Attribute* > v;
   attrsHist.push_back(attrs);
 
   update();
@@ -410,7 +409,7 @@ void Examiner::clearFrames()
 // -- hit detection -------------------------------------------------
 
 
-void Examiner::handleHits(const vector< int > &ids)
+void Examiner::handleHits(const std::vector< int > &ids)
 {
   if (ids.size() > 0)
   {
@@ -612,7 +611,7 @@ void Examiner::processHits(
   GLuint buffer[])
 {
   GLuint* ptr;
-  vector< int > ids;
+  std::vector< int > ids;
 
   ptr = (GLuint*) buffer;
 
@@ -696,7 +695,7 @@ void Examiner::drawFrame(const bool& inSelectMode)
       -1.0 + 4*pix/scaleFrame,  1.0 + 4*pix/scaleFrame,
       1.0 - 4*pix/scaleFrame, -1.0 - 4*pix/scaleFrame);
 
-    vector< double > valsFrame;
+    std::vector< double > valsFrame;
     /*
     for ( int i = 0; i < attributes.size(); ++i )
         valsFrame.push_back(
@@ -766,7 +765,7 @@ void Examiner::drawFramesHist(const bool& inSelectMode)
   else
   {
     double pix = pixelSize();
-    vector< double > valsFrame;
+    std::vector< double > valsFrame;
 
     //for ( int i = 0; i < framesHist.size(); ++i )
     for (std::size_t i = vsblHistIdxLft; i <= vsblHistIdxRgt; ++i)

@@ -12,8 +12,6 @@
 
 // -- constructors and destructor -----------------------------------
 
-using namespace std;
-
 CombnPlot::CombnPlot(
   QWidget *parent,
   Graph* g,
@@ -252,13 +250,13 @@ void CombnPlot::drawLabelsBC(const bool& /*inSelectMode*/)
   if (combinations.size() > 0)
   {
     // max number
-    string max = Utils::intToStr((int) maxNumberPerComb);
+    std::string max = Utils::intToStr((int) maxNumberPerComb);
     double x   = -0.5*size.width()+13*pix;
     double y   =  0.5*size.height()-10*pix;
     VisUtils::drawLabelVertBelow(texCharId, x, y, scaling, max);
 
     // min number
-    string min = "0";
+    std::string min = "0";
     y   = yBot;
     VisUtils::drawLabelVertAbove(texCharId, x, y, scaling, min);
   }
@@ -709,7 +707,7 @@ void CombnPlot::calcPosCP()
   posRgtBot.clear();
   for (std::size_t i = 0; i < combinations.size(); ++i)
   {
-    vector< Position2D > temp;
+    std::vector< Position2D > temp;
     posLftTop.push_back(temp);
     posRgtBot.push_back(temp);
 

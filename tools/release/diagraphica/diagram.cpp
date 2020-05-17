@@ -10,8 +10,6 @@
 
 #include "diagram.h"
 
-using namespace std;
-
 // -- constructors and destructor -----------------------------------
 
 
@@ -142,8 +140,8 @@ void Diagram::visualize(
 void Diagram::visualize(
   const bool& inSelectMode,
   double pixelSize,
-  const vector< Attribute* > attrs,
-  const vector< double > attrValIdcs)
+  const std::vector< Attribute* > attrs,
+  const std::vector< double > attrValIdcs)
 // Used by visualizers.
 {
   visualize(inSelectMode, pixelSize, attrs, attrValIdcs, 1.0);
@@ -153,8 +151,8 @@ void Diagram::visualize(
 void Diagram::visualize(
   const bool& inSelectMode,
   double pixelSize,
-  const vector< Attribute* > attrs,
-  const vector< double > attrValIdcs,
+  const std::vector< Attribute* > attrs,
+  const std::vector< double > attrValIdcs,
   double opacity)
 // Used by visualizers.
 {

@@ -11,8 +11,6 @@
 #include "mcrl2/utilities/exception.h"
 #include "graph.h"
 
-using namespace std;
-
 
 Graph::Graph()
 {
@@ -40,10 +38,10 @@ void Graph::setFileName(QString filename)
 
 /*
 void Graph::addAttribute(
-    const string &name,
-    const string &type,
+    const std::string &name,
+    const std::string &type,
     const int &idx,
-    const vector< string > &vals )
+    const std::vector< std::string > &vals )
 {
     Attribute* attribute = new Attribute(
         name,
@@ -56,8 +54,8 @@ void Graph::addAttribute(
 
 
 void Graph::addAttribute(
-    const string &name,
-    const string &type,
+    const std::string &name,
+    const std::string &type,
     const int &idx,
     const double &lwrBnd,
     const double &uprBnd )
@@ -77,7 +75,7 @@ void Graph::addAttrDiscr(
   QString name,
   QString type,
   const std::size_t& idx,
-  const vector< string > &vals)
+  const std::vector< std::string > &vals)
 {
   AttrDiscr* attr = new AttrDiscr(
     name,
@@ -143,9 +141,9 @@ void Graph::moveAttribute(
 
 
 void Graph::configAttributes(
-  map< std::size_t, std::size_t > &idcsFrTo,
-  map< std::size_t, vector< string > > &attrCurDomains,
-  map< std::size_t, map< std::size_t , std::size_t  > > &attrOrigToCurDomains)
+  std::map< std::size_t, std::size_t > &idcsFrTo,
+  std::map< std::size_t, std::vector< std::string > > &attrCurDomains,
+  std::map< std::size_t, std::map< std::size_t , std::size_t  > > &attrOrigToCurDomains)
 {
   std::size_t sizeAttrs = attributes.size();
 
@@ -155,7 +153,7 @@ void Graph::configAttributes(
   {
     try
     {
-      vector< Attribute* > attrsNew;
+      std::vector< Attribute* > attrsNew;
 
       // init new list of attributes
       {
@@ -197,7 +195,7 @@ void Graph::configAttributes(
     }
     catch (const mcrl2::runtime_error& e)
     {
-      throw mcrl2::runtime_error(string("Error moving attributes.\n") + string(e.what()));
+      throw mcrl2::runtime_error(std::string("Error moving attributes.\n") + std::string(e.what()));
     }
 
   }
@@ -209,10 +207,10 @@ void Graph::configAttributes(
 }
 
 
-void Graph::duplAttributes(const vector< std::size_t > &idcs)
+void Graph::duplAttributes(const std::vector< std::size_t > &idcs)
 {
   std::size_t insIdx = 0;
-  vector< Attribute* > newAttrs;
+  std::vector< Attribute* > newAttrs;
 
   // get insertion index
   {
@@ -263,8 +261,8 @@ void Graph::duplAttributes(const vector< std::size_t > &idcs)
 void Graph::deleteAttribute(const std::size_t& idx)
 {
   Cluster* clst;
-  vector< std::size_t > idcsCurClust;
-  vector< std::size_t > idcsNewClust;
+  std::vector< std::size_t > idcsCurClust;
+  std::vector< std::size_t > idcsNewClust;
 
   // get indcs of attributes used in current clustering
   clst = root;
@@ -317,7 +315,7 @@ void Graph::deleteAttribute(const std::size_t& idx)
 }
 
 
-void Graph::addNode(const vector< double > &tpl)
+void Graph::addNode(const std::vector< double > &tpl)
 {
   Node* n = new Node(
     nodes.size(),
@@ -328,7 +326,7 @@ void Graph::addNode(const vector< double > &tpl)
 
 
 void Graph::addEdge(
-  const string& lbl,
+  const std::string& lbl,
   const std::size_t& inNodeIdx,
   const std::size_t& outNodeIdx)
 {
@@ -443,7 +441,7 @@ Cluster* Graph::getRoot()
 }
 
 
-Cluster* Graph::getCluster(const vector< std::size_t > coord)
+Cluster* Graph::getCluster(const std::vector< std::size_t > coord)
 {
   Cluster* result = 0;
 
@@ -515,7 +513,7 @@ std::size_t Graph::getSizeBundles()
 
 void Graph::calcAttrDistr(
   const std::size_t& attrIdx,
-  vector< std::size_t > &distr)
+  std::vector< std::size_t > &distr)
 {
   // vars
   Attribute* attribute = 0;
@@ -554,8 +552,8 @@ void Graph::calcAttrDistr(
 void Graph::calcAttrCorrl(
   const std::size_t& attrIdx1,
   const std::size_t& attrIdx2,
-  vector< vector< std::size_t > > &corrlMap,
-  vector< vector< int > > &number)
+  std::vector< std::vector< std::size_t > > &corrlMap,
+  std::vector< std::vector< int > > &number)
 {
   // vars
   Attribute* attr1 = 0;
@@ -566,7 +564,7 @@ void Graph::calcAttrCorrl(
   std::size_t sizeNodes    = 0;
   std::size_t domIdx1      = 0;
   std::size_t domIdx2      = 0;
-  vector< std::size_t > toErase;
+  std::vector< std::size_t > toErase;
 
   // init vars
   attr1       = getAttribute(attrIdx1);
@@ -582,14 +580,14 @@ void Graph::calcAttrCorrl(
   {
     for (std::size_t i = 0; i < sizeDomain1; ++i)
     {
-      vector< int > tempNumVec;
+      std::vector< int > tempNumVec;
       for (std::size_t j = 0; j < sizeDomain2; ++j)
       {
         tempNumVec.push_back(0);
       }
       number.push_back(tempNumVec);
 
-      vector< std::size_t > tempMapVec;
+      std::vector< std::size_t > tempMapVec;
       corrlMap.push_back(tempMapVec);
     }
   }
@@ -668,9 +666,9 @@ void Graph::calcAttrCorrl(
 
 
 void Graph::calcAttrCombn(
-  const vector< std::size_t > &attrIndcs,
-  vector< vector< std::size_t > > &combs,
-  vector< std::size_t > &number)
+  const std::vector< std::size_t > &attrIndcs,
+  std::vector< std::vector< std::size_t > > &combs,
+  std::vector< std::size_t > &number)
 {
   if (root != 0)
   {
@@ -681,18 +679,18 @@ void Graph::calcAttrCombn(
 
 void Graph::calcAttrCombn(
   Cluster* clust,
-  const vector< std::size_t > &attrIndcs,
-  vector< vector< std::size_t > > &combs,
-  vector< std::size_t > &number)
+  const std::vector< std::size_t > &attrIndcs,
+  std::vector< std::vector< std::size_t > > &combs,
+  std::vector< std::size_t > &number)
 {
   std::size_t summand     = 0;
   std::size_t key         = 0;
   std::size_t card        = 0;
   Node*      node = 0;
   Attribute* attr = 0;
-  vector< Node* >           nodesInClst;
-  map< std::size_t , vector< std::size_t > > keyToCombn;
-  map< std::size_t , std::size_t >           keyToNumber;
+  std::vector< Node* >           nodesInClst;
+  std::map< std::size_t , std::vector< std::size_t > > keyToCombn;
+  std::map< std::size_t , std::size_t >           keyToNumber;
 
   // do initialization
   getDescNodesInCluster(clust, nodesInClst);
@@ -737,7 +735,7 @@ void Graph::calcAttrCombn(
     // insert combn 1st time it occurs
     if (keyToCombn.find(key) == keyToCombn.end())
     {
-      vector< std::size_t > v;
+      std::vector< std::size_t > v;
       for (std::size_t j = 0; j < attrIndcs.size(); ++j)
       {
         attr = getAttribute(attrIndcs[j]);
@@ -752,8 +750,8 @@ void Graph::calcAttrCombn(
                         node->getTupleVal(attrIndcs[j]))->getIndex());
       }
 
-      keyToCombn.insert(pair< std::size_t, vector< std::size_t > >(key, v));
-      keyToNumber.insert(pair< std::size_t, std::size_t >(key, 1));
+      keyToCombn.insert(std::pair< std::size_t, std::vector< std::size_t > >(key, v));
+      keyToNumber.insert(std::pair< std::size_t, std::size_t >(key, 1));
     }
     // increment number if combn exists
     else
@@ -766,7 +764,7 @@ void Graph::calcAttrCombn(
   // update combs
   combs.clear();
 
-  map< std::size_t , vector< std::size_t > >::iterator it;
+  std::map< std::size_t , std::vector< std::size_t > >::iterator it;
   for (it = keyToCombn.begin(); it != keyToCombn.end(); ++it)
   {
     combs.push_back((*it).second);
@@ -781,8 +779,8 @@ void Graph::calcAttrCombn(
 
 
 void Graph::calcAttrCombn(
-  const vector< std::size_t > &attrIndcs,
-  vector< vector< std::size_t > > &combs)
+  const std::vector< std::size_t > &attrIndcs,
+  std::vector< std::vector< std::size_t > > &combs)
 {
   if (root != 0)
   {
@@ -794,16 +792,16 @@ void Graph::calcAttrCombn(
 
 void Graph::calcAttrCombn(
   Cluster* clust,
-  const vector< std::size_t > &attrIndcs,
-  vector< vector< std::size_t > > &combs)
+  const std::vector< std::size_t > &attrIndcs,
+  std::vector< std::vector< std::size_t > > &combs)
 {
   std::size_t summand     = 0;
   std::size_t key         = 0;
   std::size_t card        = 0;
   Node*      node = 0;
   Attribute* attr = 0;
-  vector< Node* >           nodesInClst;
-  map< std::size_t , vector< std::size_t > > keyToCombn;
+  std::vector< Node* >           nodesInClst;
+  std::map< std::size_t , std::vector< std::size_t > > keyToCombn;
 
   // do initialization
   getDescNodesInCluster(clust, nodesInClst);
@@ -848,7 +846,7 @@ void Graph::calcAttrCombn(
     // insert combn 1st time it occurs
     if (keyToCombn.find(key) == keyToCombn.end())
     {
-      vector< std::size_t > v;
+      std::vector< std::size_t > v;
       for (std::size_t j = 0; j < attrIndcs.size(); ++j)
       {
         attr = getAttribute(attrIndcs[j]);
@@ -863,7 +861,7 @@ void Graph::calcAttrCombn(
                         node->getTupleVal(attrIndcs[j]))->getIndex());
       }
 
-      keyToCombn.insert(pair< std::size_t, vector< std::size_t > >(
+      keyToCombn.insert(std::pair< std::size_t, std::vector< std::size_t > >(
                           key,
                           v));
     }
@@ -872,7 +870,7 @@ void Graph::calcAttrCombn(
   // update combs
   combs.clear();
 
-  map< std::size_t, vector< std::size_t > >::iterator it;
+  std::map< std::size_t, std::vector< std::size_t > >::iterator it;
   for (it = keyToCombn.begin(); it != keyToCombn.end(); ++it)
   {
     combs.push_back((*it).second);
@@ -887,16 +885,16 @@ void Graph::calcAttrCombn(
 
 void Graph::calcAttrCombn(
   Cluster* clust,
-  const vector< std::size_t > &attrIndcs,
-  vector< vector< Node* > > &combs)
+  const std::vector< std::size_t > &attrIndcs,
+  std::vector< std::vector< Node* > > &combs)
 {
   std::size_t summand     = 0;
   std::size_t key         = 0;
   std::size_t card        = 0;
   Node*      node = 0;
   Attribute* attr = 0;
-  vector< Node* >           nodesInClst;
-  map< std::size_t , vector< Node* > > keyToCombn;
+  std::vector< Node* >           nodesInClst;
+  std::map< std::size_t , std::vector< Node* > > keyToCombn;
 
   // do initialization
   getDescNodesInCluster(clust, nodesInClst);
@@ -938,14 +936,14 @@ void Graph::calcAttrCombn(
       key += summand;
     } // for j
 
-    map< std::size_t, vector< Node* > >::iterator pos;
+    std::map< std::size_t, std::vector< Node* > >::iterator pos;
     pos = keyToCombn.find(key);
     // insert combn 1st time it occurs
     if (pos == keyToCombn.end())
     {
-      vector< Node* > v;
+      std::vector< Node* > v;
       v.push_back(node);
-      keyToCombn.insert(pair< std::size_t , vector< Node* > >(key, v));
+      keyToCombn.insert(std::pair< std::size_t , std::vector< Node* > >(key, v));
     }
     // insert state if it occurs again
     else
@@ -956,7 +954,7 @@ void Graph::calcAttrCombn(
 
   // update combs
   combs.clear();
-  map< std::size_t, vector< Node* > >::iterator it;
+  std::map< std::size_t, std::vector< Node* > >::iterator it;
   for (it = keyToCombn.begin(); it != keyToCombn.end(); ++it)
   {
     combs.push_back((*it).second);
@@ -971,16 +969,16 @@ void Graph::calcAttrCombn(
 
 void Graph::calcAttrCombn(
   Cluster* clust,
-  const vector< Attribute* > &attrs,
-  vector< Cluster* > &combs)
+  const std::vector< Attribute* > &attrs,
+  std::vector< Cluster* > &combs)
 {
   std::size_t summand     = 0;
   std::size_t key         = 0;
   std::size_t card        = 0;
   Node*      node = 0;
   Attribute* attr = 0;
-  vector< Node* >      nodesInClst;
-  map< std::size_t, Cluster* > keyToCombn;
+  std::vector< Node* >      nodesInClst;
+  std::map< std::size_t, Cluster* > keyToCombn;
 
   // do initialization
   getDescNodesInCluster(clust, nodesInClst);
@@ -1022,14 +1020,14 @@ void Graph::calcAttrCombn(
       key += summand;
     } // for j
 
-    map< std::size_t, Cluster* >::iterator pos;
+    std::map< std::size_t, Cluster* >::iterator pos;
     pos = keyToCombn.find(key);
     // insert combn 1st time it occurs
     if (pos == keyToCombn.end())
     {
       Cluster* clst = new Cluster();
       clst->addNode(node);
-      keyToCombn.insert(pair< std::size_t, Cluster* >(key, clst));
+      keyToCombn.insert(std::pair< std::size_t, Cluster* >(key, clst));
       clst = 0;
     }
     // insert state if it occurs again
@@ -1041,7 +1039,7 @@ void Graph::calcAttrCombn(
 
   // update combs
   combs.clear();
-  map< std::size_t, Cluster* >::iterator it;
+  std::map< std::size_t, Cluster* >::iterator it;
   for (it = keyToCombn.begin(); it != keyToCombn.end(); ++it)
   {
     combs.push_back(it->second);
@@ -1056,7 +1054,7 @@ void Graph::calcAttrCombn(
 
 bool Graph::hasMultAttrCombns(
   Cluster* clust,
-  const vector< int > &attrIndcs)
+  const std::vector< int > &attrIndcs)
 // This function returns true as soon as more than 1 state is found
 // with different combinations of values for the attributes specified.
 {
@@ -1069,7 +1067,7 @@ bool Graph::hasMultAttrCombns(
   std::size_t  summand   = 0;
   Node*      node      = 0;
   Attribute* attribute = 0;
-  vector< Node* > clustNodes;
+  std::vector< Node* > clustNodes;
 
   getDescNodesInCluster(clust, clustNodes);
   numAttrs  = attrIndcs.size();
@@ -1136,10 +1134,10 @@ bool Graph::hasMultAttrCombns(
 // -- cluster functions ---------------------------------------------
 
 
-void Graph::clustNodesOnAttr(const vector< std::size_t > &attrIdcs)
+void Graph::clustNodesOnAttr(const std::vector< std::size_t > &attrIdcs)
 {
   std::size_t progress       = 0;
-  vector< std::size_t > idcs = attrIdcs;
+  std::vector< std::size_t > idcs = attrIdcs;
 
   disconnect(this, SLOT(recluster()));
   for (std::size_t i = 0; i < attrIdcs.size(); ++i)
@@ -1164,7 +1162,7 @@ void Graph::clustNodesOnAttr(const vector< std::size_t > &attrIdcs)
 }
 
 
-void Graph::clearSubClusters(const vector< std::size_t > &coord)
+void Graph::clearSubClusters(const std::vector< std::size_t > &coord)
 {
   Cluster* clst = 0;
 
@@ -1181,7 +1179,7 @@ void Graph::clearSubClusters(const vector< std::size_t > &coord)
 }
 
 
-std::size_t Graph::sumNodesInCluster(const vector< std::size_t > &coord)
+std::size_t Graph::sumNodesInCluster(const std::vector< std::size_t > &coord)
 {
   std::size_t      sum  = 0;
   Cluster* clst = 0;
@@ -1214,8 +1212,8 @@ void Graph::sumNodesInCluster(
 
 
 void Graph::getDescNodesInCluster(
-  const vector< std::size_t > &coord,
-  vector< Node* > &nodes)
+  const std::vector< std::size_t > &coord,
+  std::vector< Node* > &nodes)
 {
   Cluster* clst = 0;
 
@@ -1235,7 +1233,7 @@ void Graph::getDescNodesInCluster(
 
 void Graph::getDescNodesInCluster(
   Cluster* clust,
-  vector< Node* > &nodes)
+  std::vector< Node* > &nodes)
 {
   // call recursively on all child clusters
   {
@@ -1257,7 +1255,7 @@ void Graph::getDescNodesInCluster(
 }
 
 
-std::size_t Graph::calcMaxNumCombns(const vector< std::size_t > &attrIdcs)
+std::size_t Graph::calcMaxNumCombns(const std::vector< std::size_t > &attrIdcs)
 {
   std::size_t combinations     = 1;
   Attribute* attribute = 0;
@@ -1342,7 +1340,7 @@ void Graph::deleteEdges()
 
 void Graph::initRoot()
 {
-  vector< std::size_t > rootCoord;
+  std::vector< std::size_t > rootCoord;
   rootCoord.push_back(0);
 
   root = new Cluster(rootCoord);
@@ -1355,7 +1353,7 @@ void Graph::initRoot()
 
 void Graph::clustNodesOnAttr(
   Cluster* clust,
-  vector< std::size_t > attrIdcs,
+  std::vector< std::size_t > attrIdcs,
   std::size_t& progress)
 {
   if (attrIdcs.size() > 0)
@@ -1388,7 +1386,7 @@ void Graph::clustNodesOnAttr(
 
 
 void Graph::clustClusterOnAttr(
-  const vector< std::size_t > coord,
+  const std::vector< std::size_t > coord,
   const std::size_t& attrIdx)
 {
   Cluster* clst = 0;
@@ -1414,8 +1412,8 @@ void Graph::clustClusterOnAttr(
 {
   Attribute*         attr;
   Node*              node;
-  vector< Cluster* > clstTmp;
-  vector< std::size_t >      clstCoordNew;
+  std::vector< Cluster* > clstTmp;
+  std::vector< std::size_t >      clstCoordNew;
 
   // delete descendants & move up nodes
   clearSubClusters(clust);
@@ -1515,7 +1513,7 @@ void Graph::updateLeaves()
 
   // init new leaves
   /*
-  vector< Cluster* > v;
+  std::vector< Cluster* > v;
   v.push_back( root );
   updateLeaves( v );
   */
@@ -1547,7 +1545,7 @@ void Graph::updateLeaves(Cluster* clust)
 }
 
 /*
-void Graph::updateLeaves( vector< Cluster* > &clusts )
+void Graph::updateLeaves( std::vector< Cluster* > &clusts )
 {
     if ( clusts.size() > 0 )
     {
@@ -1570,7 +1568,7 @@ void Graph::updateLeaves( vector< Cluster* > &clusts )
             // update leaves
             leaves.push_back( c );
 
-            vector< int > coord;
+            std::vector< int > coord;
             c->getCoord( coord );
         }
 
@@ -1608,7 +1606,7 @@ void Graph::deleteClusters()
 
 void Graph::updateBundles(std::size_t& progress)
 {
-  vector< vector< Bundle* > > temp;
+  std::vector< std::vector< Bundle* > > temp;
 
   // clear bundles
   deleteBundles();
@@ -1617,7 +1615,7 @@ void Graph::updateBundles(std::size_t& progress)
   {
     for (std::size_t i = 0; i < leaves.size(); ++i)
     {
-      vector< Bundle* > v;
+      std::vector< Bundle* > v;
       temp.push_back(v);
 
       for (std::size_t j = 0; j < leaves.size(); ++j)
@@ -1676,7 +1674,7 @@ void Graph::updateBundles(std::size_t& progress)
   temp.clear();
 
   // iterate over bundles & update may or must
-  vector< string > labels;
+  std::vector< std::string > labels;
   Cluster* inClust;
   Cluster* outClust;
   Node*    node;
@@ -1732,7 +1730,7 @@ void Graph::updateBundles(std::size_t& progress)
 
 void Graph::updateBundles()
 {
-  vector< vector< Bundle* > > temp;
+  std::vector< std::vector< Bundle* > > temp;
 
   // clear bundles
   deleteBundles();
@@ -1741,7 +1739,7 @@ void Graph::updateBundles()
   {
     for (std::size_t i = 0; i < leaves.size(); ++i)
     {
-      vector< Bundle* > v;
+      std::vector< Bundle* > v;
       temp.push_back(v);
 
       for (std::size_t j = 0; j < leaves.size(); ++j)

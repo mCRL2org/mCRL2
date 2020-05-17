@@ -10,8 +10,6 @@
 
 #include "corrlplot.h"
 
-using namespace std;
-
 // -- constructors and destructor -----------------------------------
 
 
@@ -108,8 +106,8 @@ void CorrlPlot::visualize(const bool& inSelectMode)
 
 void CorrlPlot::drawAxes(
   const bool& inSelectMode,
-  const string& /*xLbl*/,
-  const string& /*yLbl*/)
+  const std::string& /*xLbl*/,
+  const std::string& /*yLbl*/)
 {
   QSizeF size = worldSize();
   double pix = pixelSize();
@@ -228,11 +226,11 @@ void CorrlPlot::drawDiagram(const bool& inSelectMode)
   double pix = pixelSize();
   double scaleTxt = ((12*pix)/(double)CHARHEIGHT)/scaleDgrm;
 
-  vector< Attribute* > attrs;
+  std::vector< Attribute* > attrs;
   attrs.push_back(attribute1);
   attrs.push_back(attribute2);
 
-  vector< double > vals;
+  std::vector< double > vals;
   vals.push_back(attrValIdx1Dgrm);
   vals.push_back(attrValIdx2Dgrm);
 
@@ -431,9 +429,9 @@ void CorrlPlot::calcPositions()
 
     for (std::size_t i = 0; i < mapXToY.size(); ++i)
     {
-      vector< Position2D > tempPos;
+      std::vector< Position2D > tempPos;
       positions.push_back(tempPos);
-      vector< double > tempRad;
+      std::vector< double > tempRad;
       radii.push_back(tempRad);
 
       for (std::size_t j = 0; j < mapXToY[i].size(); ++j)

@@ -13,13 +13,11 @@
 
 // -- constructors and destructor -----------------------------------
 
-using namespace std;
-
 AttrDiscr::AttrDiscr(
   QString name,
   QString type,
   const std::size_t& idx,
-  const vector< string > &vals)
+  const std::vector< std::string >& vals)
   : Attribute(name, type, idx)
 {
   initValues(vals);
@@ -68,15 +66,15 @@ AttrDiscr::~AttrDiscr()
 
 
 void AttrDiscr::clusterValues(
-  const vector< int > &indices,
-  const string& newValue)
+  const std::vector< int >& indices,
+  const std::string& newValue)
 {
   try
   {
     // variables
-    vector< int > sorted;
+    std::vector< int > sorted;
     Value*        value;
-    vector< vector< Value* >::iterator > toRemove;
+    std::vector< std::vector< Value* >::iterator > toRemove;
 
     // sort indices in ascending order
     sorted = indices;
@@ -195,8 +193,8 @@ void AttrDiscr::moveValue(
 
 
 void AttrDiscr::configValues(
-  const vector< string > &curDomain,
-  map< std::size_t , std::size_t  > &origToCurDomain)
+  const std::vector< std::string >& curDomain,
+  std::map< std::size_t , std::size_t  >& origToCurDomain)
 {
   try
   {
@@ -235,7 +233,7 @@ void AttrDiscr::configValues(
   }
   catch (const mcrl2::runtime_error& e)
   {
-    throw mcrl2::runtime_error(string("Error configuring attribute domain values.\n") + string(e.what()));
+    throw mcrl2::runtime_error(std::string("Error configuring attribute domain values.\n") + std::string(e.what()));
   }
 
   emit changed();
@@ -313,7 +311,7 @@ void AttrDiscr::clearClusters()
 // -- private utility functions -------------------------------------
 
 
-void AttrDiscr::initValues(const vector< string > &vals)
+void AttrDiscr::initValues(const std::vector< std::string >& vals)
 {
   Value*  value0  = 0;
   Value*  value1  = 0;

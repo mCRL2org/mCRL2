@@ -12,8 +12,6 @@
 
 #include <QMessageBox>
 
-using namespace std;
-
 static const int labelHeight = 40;
 static const int timerInterval = 10;
 static const double animationPixelsPerMS =  1.0;
@@ -112,7 +110,7 @@ void Simulator::setDiagram(Diagram* dgrm)
 
 void Simulator::initFrameCurr(
   Cluster* frame,
-  const vector< Attribute* > &attrs)
+  const std::vector< Attribute* > &attrs)
 {
   // clear previous data
   clearAttributes();
@@ -358,8 +356,8 @@ void Simulator::handleKeyEvent(QKeyEvent* e)
 void Simulator::initFramesPrevNext()
 {
   Node*        temp;
-  set< Node* > tempPrev;
-  set< Node* > tempNext;
+  std::set< Node* > tempPrev;
+  std::set< Node* > tempNext;
   Cluster*     nodesPrev;
   Cluster*     nodesNext;
 
@@ -388,7 +386,7 @@ void Simulator::initFramesPrevNext()
   // update clusters of incoming & outgoing nodes
   nodesPrev = new Cluster();
   nodesNext = new Cluster();
-  set< Node* >::iterator it;
+  std::set< Node* >::iterator it;
   {
     for (it = tempPrev.begin(); it != tempPrev.end(); ++it)
     {
@@ -428,10 +426,10 @@ void Simulator::initBundles()
   Node*    node;
   Cluster* clst;
   Edge*    edge;
-  set< Node* >           currNodes;
-  map< string, Bundle* > bdls;
+  std::set< Node* >           currNodes;
+  std::map< std::string, Bundle* > bdls;
   Bundle*                bdl;
-  map< string, Bundle* > lbls;
+  std::map< std::string, Bundle* > lbls;
   Bundle*                bdlLbls;
 
   // get nodes in current frame
@@ -459,14 +457,14 @@ void Simulator::initBundles()
 
           if (currNodes.find(edge->getOutNode()) != currNodes.end())
           {
-            map< string, Bundle* >::iterator pos;
+            std::map< std::string, Bundle* >::iterator pos;
 
             pos = lbls.find(edge->getLabel());
             if (pos == lbls.end())
             {
               bdlLbls = new Bundle();
 
-              lbls.insert(pair< string, Bundle* >(edge->getLabel(), bdlLbls));
+              lbls.insert(std::pair< std::string, Bundle* >(edge->getLabel(), bdlLbls));
             }
             else
             {
@@ -480,7 +478,7 @@ void Simulator::initBundles()
               bdl = new Bundle(m_bundles.size());
               m_bundles.push_back(bdl);
 
-              bdls.insert(pair< string, Bundle* >(edge->getLabel(), bdl));
+              bdls.insert(std::pair< std::string, Bundle* >(edge->getLabel(), bdl));
 
               clst->addOutBundle(bdl);
               m_currentFrame->addInBundle(bdl);
@@ -502,7 +500,7 @@ void Simulator::initBundles()
     }
   }
 
-  map< string, Bundle* >::iterator it;
+  std::map< std::string, Bundle* >::iterator it;
   for (it = lbls.begin(); it != lbls.end(); ++it)
   {
     bdlLbls = it->second;
@@ -526,14 +524,14 @@ void Simulator::initBundles()
 
           if (currNodes.find(edge->getInNode()) != currNodes.end())
           {
-            map< string, Bundle* >::iterator pos;
+            std::map< std::string, Bundle* >::iterator pos;
 
             pos = lbls.find(edge->getLabel());
             if (pos == lbls.end())
             {
               bdlLbls = new Bundle();
 
-              lbls.insert(pair< string, Bundle* >(edge->getLabel(), bdlLbls));
+              lbls.insert(std::pair< std::string, Bundle* >(edge->getLabel(), bdlLbls));
             }
             else
             {
@@ -546,7 +544,7 @@ void Simulator::initBundles()
               bdl = new Bundle();
               m_bundles.push_back(bdl);
 
-              bdls.insert(pair< string, Bundle* >(edge->getLabel(), bdl));
+              bdls.insert(std::pair< std::string, Bundle* >(edge->getLabel(), bdl));
 
               m_currentFrame->addOutBundle(bdl);
               clst->addInBundle(bdl);
@@ -581,13 +579,13 @@ void Simulator::initBundles()
     {
       bdl = m_bundlesPreviousByLabel[i];
 
-      map< string, Bundle* >::iterator pos;
+      std::map< std::string, Bundle* >::iterator pos;
       pos = lbls.find(bdl->getChild(0)->getEdge(0)->getLabel());
 
       if (pos == lbls.end())
       {
         bdlLbls = new Bundle();
-        lbls.insert(pair< string, Bundle* >(
+        lbls.insert(std::pair< std::string, Bundle* >(
                       bdl->getChild(0)->getEdge(0)->getLabel(),
                       bdlLbls));
       }
@@ -606,13 +604,13 @@ void Simulator::initBundles()
     {
       bdl = m_bundlesNextByLabel[i];
 
-      map< string, Bundle* >::iterator pos;
+      std::map< std::string, Bundle* >::iterator pos;
       pos = lbls.find(bdl->getChild(0)->getEdge(0)->getLabel());
 
       if (pos == lbls.end())
       {
         bdlLbls = new Bundle();
-        lbls.insert(pair< string, Bundle* >(
+        lbls.insert(std::pair< std::string, Bundle* >(
                       bdl->getChild(0)->getEdge(0)->getLabel(),
                       bdlLbls));
       }
@@ -647,7 +645,7 @@ void Simulator::initBundles()
 
 void Simulator::sortFramesPrevNext()
 {
-  multimap< int, Cluster* > sorted;
+  std::multimap< int, Cluster* > sorted;
 
   // sort previous frames
   {
@@ -659,12 +657,12 @@ void Simulator::sortFramesPrevNext()
         key += (int)pow(10.0, (int) m_previousFrames[i]->getOutBundle(j)->getParent()->getIndex());
       }
 
-      sorted.insert(pair< int, Cluster* >(key, m_previousFrames[i]));
+      sorted.insert(std::pair< int, Cluster* >(key, m_previousFrames[i]));
     }
   }
 
   m_previousFrames.clear();
-  multimap< int, Cluster* >::iterator it;
+  std::multimap< int, Cluster* >::iterator it;
   for (it = sorted.begin(); it != sorted.end(); ++it)
   {
     m_previousFrames.push_back(it->second);
@@ -680,7 +678,7 @@ void Simulator::sortFramesPrevNext()
       key += (int)pow(10.0, (int) m_nextFrames[i]->getInBundle(j)->getParent()->getIndex());
     }
 
-    sorted.insert(pair< int, Cluster* >(key, m_nextFrames[i]));
+    sorted.insert(std::pair< int, Cluster* >(key, m_nextFrames[i]));
   }
 
   m_nextFrames.clear();
@@ -808,7 +806,7 @@ void Simulator::calcPosBundles()
     {
       for (std::size_t i = 0; i < m_previousFrames.size(); ++i)
       {
-        vector< Position2D > v;
+        std::vector< Position2D > v;
 
         m_previousBundlePositionTL.push_back(v);
         m_previousBundlePositionBR.push_back(v);
@@ -880,7 +878,7 @@ void Simulator::calcPosBundles()
     {
       for (std::size_t i = 0; i < m_nextFrames.size(); ++i)
       {
-        vector< Position2D > v;
+        std::vector< Position2D > v;
 
         m_nextBundlePositionTL.push_back(v);
         m_nextBundlePositionBR.push_back(v);
@@ -1225,7 +1223,7 @@ void Simulator::clearBundles()
 // -- hit detection ---------------------------------------------
 
 
-void Simulator::handleHits(const vector< int > &ids)
+void Simulator::handleHits(const std::vector< int > &ids)
 {
   if (ids.size() == 1)
   {
@@ -1334,7 +1332,7 @@ void Simulator::processHits(
   GLuint buffer[])
 {
   GLuint* ptr;
-  vector< int > ids;
+  std::vector< int > ids;
 
   ptr = (GLuint*) buffer;
 
@@ -1429,7 +1427,7 @@ void Simulator::drawFrameCurr(const bool& inSelectMode)
   else
   {
     double pix = pixelSize();
-    vector< double > valsFrame;
+    std::vector< double > valsFrame;
 
     if (m_currentFrame != 0)
     {
@@ -1547,7 +1545,7 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
   else
   {
     double pix = pixelSize();
-    vector< double > valsFrame;
+    std::vector< double > valsFrame;
 
     for (int i = 0; i < (int) m_previousFramePositions.size(); ++i)
     {
@@ -1717,7 +1715,7 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
   else
   {
     double pix = pixelSize();
-    vector< double > valsFrame;
+    std::vector< double > valsFrame;
 
     for (std::size_t i = 0; i < m_nextFramePositions.size(); ++i)
     {
@@ -1851,7 +1849,7 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
   if (inSelectMode)
   {
     double pix = pixelSize();;
-    string lbl;
+    std::string lbl;
 
     glPushName(ID_BUNDLE_LBL);
     for (std::size_t i = 0; i < m_previousBundleLabelPositionTL.size(); ++i)
@@ -1909,7 +1907,7 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
       }
       else
       {
-        string lbl = m_bundlesPreviousByLabel[i]->getChild(0)->getEdge(0)->getLabel();
+        std::string lbl = m_bundlesPreviousByLabel[i]->getChild(0)->getEdge(0)->getLabel();
 
         double txt = m_settings->textSize.value();
 
@@ -1958,7 +1956,7 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
 
     if (idxHiLite != NON_EXISTING &&  static_cast <std::size_t>(idxHiLite) < m_previousBundleLabelPositionTL.size())
     {
-      string lbl = m_bundlesPreviousByLabel[idxHiLite]->getChild(0)->getEdge(0)->getLabel();
+      std::string lbl = m_bundlesPreviousByLabel[idxHiLite]->getChild(0)->getEdge(0)->getLabel();
 
       double txt = m_settings->textSize.value();
       txt += 1;
@@ -2041,7 +2039,7 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
     glPushName(ID_BUNDLE_LBL);
     for (std::size_t i = 0; i < m_nextBundleLabelPositionTL.size(); ++i)
     {
-      string lbl = m_bundlesNextByLabel[i]->getChild(0)->getEdge(0)->getLabel();
+      std::string lbl = m_bundlesNextByLabel[i]->getChild(0)->getEdge(0)->getLabel();
 
       glPushName((GLuint) m_bundlesNextByLabel[i]->getParent()->getIndex());
 
@@ -2094,7 +2092,7 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
       }
       else
       {
-        string lbl = m_bundlesNextByLabel[i]->getChild(0)->getEdge(0)->getLabel();
+        std::string lbl = m_bundlesNextByLabel[i]->getChild(0)->getEdge(0)->getLabel();
 
         double txt = m_settings->textSize.value();
 
@@ -2143,7 +2141,7 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
 
     if (idxHiLite != NON_EXISTING &&  static_cast <std::size_t>(idxHiLite) < m_nextBundleLabelPositionTL.size())
     {
-      string lbl = m_bundlesNextByLabel[idxHiLite]->getChild(0)->getEdge(0)->getLabel();
+      std::string lbl = m_bundlesNextByLabel[idxHiLite]->getChild(0)->getEdge(0)->getLabel();
 
       double txt = m_settings->textSize.value();
       txt += 1;
@@ -2535,7 +2533,7 @@ void Simulator::drawControls(const bool& inSelectMode)
 
 void Simulator::animate()
 {
-  vector< double > valsFrame;
+  std::vector< double > valsFrame;
 
   if (m_animationOldFrame != 0)
   {

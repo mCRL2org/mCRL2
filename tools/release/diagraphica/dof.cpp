@@ -10,8 +10,6 @@
 
 #include "dof.h"
 
-using namespace std;
-
 // -- constructors and destructor -----------------------------------
 
 

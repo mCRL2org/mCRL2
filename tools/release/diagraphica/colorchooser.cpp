@@ -10,8 +10,6 @@
 
 #include "colorchooser.h"
 
-using namespace std;
-
 static const double handleSize = 5.0;
 
 ColorChooser::ColorChooser(QWidget *parent, DOF *dof, QList<double> *yCoordinates, ColorChooser::ColorType type):
@@ -347,7 +345,7 @@ void ColorChooser::drawPoints(const bool& inSelectMode)
 }
 
 
-void ColorChooser::handleHits(const vector< int > &ids)
+void ColorChooser::handleHits(const std::vector< int > &ids)
 {
   if (m_lastMouseEvent.type() == QEvent::MouseButtonPress)
   {
@@ -394,7 +392,7 @@ void ColorChooser::processHits(
   GLuint buffer[])
 {
   GLuint* ptr;
-  vector< int > ids;
+  std::vector< int > ids;
 
   ptr = (GLuint*) buffer;
 

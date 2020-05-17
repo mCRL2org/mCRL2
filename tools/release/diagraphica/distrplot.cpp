@@ -12,8 +12,6 @@
 
 // -- constructors and destructor -----------------------------------
 
-using namespace std;
-
 DistrPlot::DistrPlot(
   QWidget *parent,
   Graph* g,
@@ -144,17 +142,17 @@ void DistrPlot::drawLabels(const bool& /*inSelectMode*/)
   if (number.size() > 0)
   {
     // x-axis label
-    string xLabel = attribute->name().toStdString();
+    std::string xLabel = attribute->name().toStdString();
     x =  0.0;
     y = -0.5*size.height()+9*pix;
     VisUtils::drawLabelCenter(texCharId, x, y, scaling, xLabel);
 
-    string max = Utils::size_tToStr(maxNumber);
+    std::string max = Utils::size_tToStr(maxNumber);
     x = -0.5*size.width()+13*pix;
     y =  0.5*size.height()-10*pix;
     VisUtils::drawLabelVertBelow(texCharId, x, y, scaling, max);
 
-    string min = "0";
+    std::string min = "0";
     y = -0.5*size.height()+20*pix;
     VisUtils::drawLabelVertAbove(texCharId, x, y, scaling, min);
   }
@@ -217,9 +215,9 @@ void DistrPlot::drawDiagram(const bool& inSelectMode)
     double pix      = pixelSize();
     double scaleTxt = ((12*pix)/(double)CHARHEIGHT)/scaleDgrm;
 
-    vector< Attribute* > attrs;
+    std::vector< Attribute* > attrs;
     attrs.push_back(attribute);
-    vector< double > vals;
+    std::vector< double > vals;
     vals.push_back(attrValIdxDgrm);
 
     glPushMatrix();
@@ -299,8 +297,8 @@ void DistrPlot::displTooltip(const std::size_t& posIdx)
 {
   if (posIdx < number.size())
   {
-    string xLabel   = attribute->name().toStdString();
-    string value    = "";
+    std::string xLabel   = attribute->name().toStdString();
+    std::string value    = "";
     if (posIdx < static_cast <std::size_t>(attribute->getSizeCurValues()))
     {
       value = attribute->getCurValue(posIdx)->getValue();

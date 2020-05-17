@@ -15,8 +15,6 @@
 #include "mcrl2/lts/lts_io.h"
 
 
-using namespace std;
-
 // -- constructors and destructor -----------------------------------
 
 
@@ -31,7 +29,7 @@ void Parser::parseFile(QString filename, Graph* graph)
 {
   using namespace mcrl2::lts;
 
-  string line = "";
+  std::string line = "";
   mcrl2::lts::lts_fsm_t l;
 
   load_lts_as_fsm_file(filename.toStdString(),l);
@@ -43,7 +41,7 @@ void Parser::parseFile(QString filename, Graph* graph)
   std::vector < std::pair < std::string, std::string > >::const_iterator parameter=process_parameters.begin();
   for (std::size_t i = 0; parameter != process_parameters.end(); ++i, ++parameter)
   {
-    std::vector< string > values = l.state_element_values(i);
+    std::vector< std::string > values = l.state_element_values(i);
     for (std::size_t j = 0; j < values.size(); ++j)
     {
       if (values[j].empty())
@@ -61,7 +59,7 @@ void Parser::parseFile(QString filename, Graph* graph)
 
   for (unsigned int si= 0; si<l.num_states(); ++si)
   {
-    vector< double > stateVector;
+    std::vector< double > stateVector;
     for (unsigned int i = 0; i < process_parameters.size(); ++i)
     {
       stateVector.push_back(l.state_label(si)[i]);
@@ -170,9 +168,9 @@ void Parser::writeFSMFile(
 void Parser::parseAttrConfig(
     QString filename,
     Graph* graph,
-    map< std::size_t, std::size_t >& attrIdxFrTo,
-    map< std::size_t, vector< string > >& attrCurDomains,
-    map< std::size_t, map< std::size_t, std::size_t  > >& attrOrigToCurDomains)
+    std::map< std::size_t, std::size_t >& attrIdxFrTo,
+    std::map< std::size_t, std::vector< std::string > >& attrCurDomains,
+    std::map< std::size_t, std::map< std::size_t, std::size_t  > >& attrOrigToCurDomains)
 {
 
   QDomDocument xml;
@@ -517,9 +515,9 @@ QDomElement Parser::appendDOF(QDomDocument document, QDomElement root, QString n
 
 void Parser::parseAttribute(
     Graph* graph,
-    map< std::size_t , std::size_t >& attrIdxFrTo,
-    map< std::size_t, vector< string > >& attrCurDomains,
-    map< std::size_t, map< std::size_t, std::size_t  > >& attrOrigToCurDomains,
+    std::map< std::size_t , std::size_t >& attrIdxFrTo,
+    std::map< std::size_t, std::vector< std::string > >& attrCurDomains,
+    std::map< std::size_t, std::map< std::size_t, std::size_t  > >& attrOrigToCurDomains,
     QDomNode AttributeNode)
 {
   try
@@ -553,9 +551,9 @@ void Parser::parseAttribute(
     }
 
     // update attribute mapping
-    attrIdxFrTo.insert(pair< std::size_t, std::size_t >(attribute->getIndex(), attrIdxFrTo.size()));
+    attrIdxFrTo.insert(std::pair< std::size_t, std::size_t >(attribute->getIndex(), attrIdxFrTo.size()));
 
-    vector< string > domain;
+    std::vector< std::string > domain;
     QDomElement valueElement = listPropertyElements["CurrentDomain"].firstChildElement("Value");
     for (int i = 0; !valueElement.isNull(); ++i, valueElement = valueElement.nextSiblingElement("Value"))
     {
@@ -568,9 +566,9 @@ void Parser::parseAttribute(
     }
 
     // update domain
-    attrCurDomains.insert(pair< std::size_t, vector< string > >(attribute->getIndex(), domain));
+    attrCurDomains.insert(std::pair< std::size_t, std::vector< std::string > >(attribute->getIndex(), domain));
 
-    map< std::size_t, std::size_t > origToCur;
+    std::map< std::size_t, std::size_t > origToCur;
     QDomElement positionElement = listPropertyElements["OriginalToCurrent"].firstChildElement("CurrentPosition");
     int i;
     for (i = 0; !positionElement.isNull(); ++i, positionElement = positionElement.nextSiblingElement("CurrentPosition"))
@@ -589,7 +587,7 @@ void Parser::parseAttribute(
       {
         throw mcrl2::runtime_error("Too many Current Positions found.");
       }
-      origToCur.insert(pair< int, int >(i, value));
+      origToCur.insert(std::pair< int, int >(i, value));
     }
     if (i < originalCardinality)
     {
@@ -597,7 +595,7 @@ void Parser::parseAttribute(
     }
 
     // update mapping
-    attrOrigToCurDomains.insert(pair< std::size_t , map< std::size_t, std::size_t > >(attribute->getIndex(), origToCur));
+    attrOrigToCurDomains.insert(std::pair< std::size_t , std::map< std::size_t, std::size_t > >(attribute->getIndex(), origToCur));
 
   }
   catch (const mcrl2::runtime_error& e)

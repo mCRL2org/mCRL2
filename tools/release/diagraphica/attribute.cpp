@@ -12,8 +12,6 @@
 
 // -- constructors and destructor -----------------------------------
 
-using namespace std;
-
 Attribute::Attribute(
   QString name,
   QString type,
@@ -62,8 +60,8 @@ void Attribute::setType(QString type)
 
 
 void Attribute::clusterValues(
-  const vector< int > & /*indices*/,
-  const string& /*newValue*/)
+  const std::vector< int > & /*indices*/,
+  const std::string& /*newValue*/)
 {}
 
 
@@ -74,8 +72,8 @@ void Attribute::moveValue(
 
 
 void Attribute::configValues(
-  const vector< string > &/*curDomain*/,
-  map< std::size_t, std::size_t  > &/*origToCurDomain*/)
+  const std::vector< std::string > &/*curDomain*/,
+  std::map< std::size_t, std::size_t  > &/*origToCurDomain*/)
 {}
 
 

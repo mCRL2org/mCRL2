@@ -13,8 +13,6 @@
 
 #include "timeseries.h"
 
-using namespace std;
-
 
 // -- static variables ----------------------------------------------
 
@@ -67,10 +65,10 @@ TimeSeries::~TimeSeries()
 // -- get functions -------------------------------------------------
 
 
-void TimeSeries::getIdcsClstMarked(set< std::size_t > &idcs)
+void TimeSeries::getIdcsClstMarked(std::set< std::size_t > &idcs)
 {
   idcs.clear();
-  set< std::size_t >::iterator it;
+  std::set< std::size_t >::iterator it;
   for (it = itemsMarked.begin(); it != itemsMarked.end(); ++it)
   {
     idcs.insert(m_graph->getNode(*it)->getCluster()->getIndex());
@@ -79,7 +77,7 @@ void TimeSeries::getIdcsClstMarked(set< std::size_t > &idcs)
 
 
 void TimeSeries::getIdcsClstMarked(
-  set< std::size_t > &idcs ,
+  std::set< std::size_t > &idcs ,
   QColor& col)
 {
   getIdcsClstMarked(idcs);
@@ -89,7 +87,7 @@ void TimeSeries::getIdcsClstMarked(
 
 void TimeSeries::getIdxMseOver(
   std::size_t& idxLeaf,
-  set< std::size_t > &idcsBndl,
+  std::set< std::size_t > &idcsBndl,
   QColor& colLeaf)
 {
   idxLeaf = NON_EXISTING;
@@ -110,7 +108,7 @@ void TimeSeries::getIdxMseOver(
 
 void TimeSeries::getCurrIdxDgrm(
   std::size_t& idxLeaf,
-  set< std::size_t > &idcsBndl,
+  std::set< std::size_t > &idcsBndl,
   QColor& colLeaf)
 {
   idxLeaf = NON_EXISTING;
@@ -131,7 +129,7 @@ void TimeSeries::getCurrIdxDgrm(
 
 void TimeSeries::getAnimIdxDgrm(
   std::size_t& idxLeaf,
-  set< std::size_t > &idcsBndl,
+  std::set< std::size_t > &idcsBndl,
   QColor& colLeaf)
 {
   if (animFrame != itemsMarked.end())
@@ -146,7 +144,7 @@ void TimeSeries::getAnimIdxDgrm(
     if (*animFrame != NON_EXISTING && *animFrame < m_graph->getSizeNodes())
     {
       nodeTo = m_graph->getNode(*animFrame);
-      set< std::size_t >::iterator it = itemsMarked.begin();
+      std::set< std::size_t >::iterator it = itemsMarked.begin();
       if (nodeTo->getIndex() == *it)
       {
         it = itemsMarked.end();
@@ -176,7 +174,7 @@ void TimeSeries::getAnimIdxDgrm(
 }
 
 
-void TimeSeries::getAttrIdcs(vector< std::size_t > &idcs)
+void TimeSeries::getAttrIdcs(std::vector< std::size_t > &idcs)
 {
   idcs.clear();
   for (std::size_t i = 0; i < attributes.size(); ++i)
@@ -199,7 +197,7 @@ void TimeSeries::setDiagram(Diagram* dgrm)
 }
 
 
-void TimeSeries::initAttributes(const vector< std::size_t > attrIdcs)
+void TimeSeries::initAttributes(const std::vector< std::size_t > attrIdcs)
 {
   // clear existing attributes
   clearAttributes();
@@ -674,7 +672,7 @@ void TimeSeries::calcPositions()
   for (std::size_t i = 0; i < attributes.size(); ++i)
   {
     attr = attributes[i];
-    vector< Position2D > v;
+    std::vector< Position2D > v;
 
     for (std::size_t j = 0; j< m_graph->getSizeNodes(); ++j)
     {
@@ -701,7 +699,7 @@ void TimeSeries::calcPositions()
   scaleDgrm = 120.0*(pix/2.0);
 
   // update positions of diagrams
-  map< std::size_t, Position2D >::iterator it;
+  std::map< std::size_t, Position2D >::iterator it;
   for (it = showDgrm.begin(); it != showDgrm.end(); ++it)
   {
     double prevCorrIdx = (it->second.x-prevScaleLft)/prevItvWdwPerNode;
@@ -751,14 +749,14 @@ void TimeSeries::handleRwndDiagram(const int& dgrmIdx)
 {
   animFrame = itemsMarked.begin();
 
-  map< std::size_t, Position2D >::iterator it;
+  std::map< std::size_t, Position2D >::iterator it;
   it = showDgrm.find(dgrmIdx);
 
   std::size_t idx = *animFrame;
   Position2D pos = it->second;
 
   showDgrm.erase(it);
-  showDgrm.insert(pair< std::size_t, Position2D >(idx, pos));
+  showDgrm.insert(std::pair< std::size_t, Position2D >(idx, pos));
 
   animIdxDgrm = idx;
   currIdxDgrm = idx;
@@ -788,7 +786,7 @@ void TimeSeries::handlePrevDiagram(const int& /*dgrmIdx*/)
 
   if (*animFrame != animIdxDgrm)
   {
-    map< std::size_t, Position2D >::iterator it;
+    std::map< std::size_t, Position2D >::iterator it;
     it = showDgrm.find(animIdxDgrm);
     if (it == showDgrm.end())
     {
@@ -799,7 +797,7 @@ void TimeSeries::handlePrevDiagram(const int& /*dgrmIdx*/)
     Position2D pos = it->second;
 
     showDgrm.erase(it);
-    showDgrm.insert(pair< std::size_t, Position2D >(idx, pos));
+    showDgrm.insert(std::pair< std::size_t, Position2D >(idx, pos));
 
     emit animationChanged();
 
@@ -819,14 +817,14 @@ void TimeSeries::handlePlayDiagram(const std::size_t& dgrmIdx)
 
       if (*animFrame != animIdxDgrm)
       {
-        map< std::size_t, Position2D >::iterator it;
+        std::map< std::size_t, Position2D >::iterator it;
         it = showDgrm.find(animIdxDgrm);
 
         std::size_t idx = *animFrame;
         Position2D pos = it->second;
 
         showDgrm.erase(it);
-        showDgrm.insert(pair< std::size_t, Position2D >(idx, pos));
+        showDgrm.insert(std::pair< std::size_t, Position2D >(idx, pos));
 
         animIdxDgrm = idx;
         currIdxDgrm = idx;
@@ -866,7 +864,7 @@ void TimeSeries::handleNextDiagram(const int& dgrmIdx)
 
   if (*animFrame != animIdxDgrm)
   {
-    map< std::size_t, Position2D >::iterator it;
+    std::map< std::size_t, Position2D >::iterator it;
     it = showDgrm.find(animIdxDgrm);
     if (it == showDgrm.end())
     {
@@ -877,7 +875,7 @@ void TimeSeries::handleNextDiagram(const int& dgrmIdx)
     Position2D pos = it->second;
 
     showDgrm.erase(it);
-    showDgrm.insert(pair< std::size_t, Position2D >(idx, pos));
+    showDgrm.insert(std::pair< std::size_t, Position2D >(idx, pos));
 
     emit animationChanged();
 
@@ -905,7 +903,7 @@ void TimeSeries::route()
 }
 
 
-void TimeSeries::handleHits(const vector< int > &ids)
+void TimeSeries::handleHits(const std::vector< int > &ids)
 {
   if (ids.size() > 1)
   {
@@ -983,7 +981,7 @@ void TimeSeries::handleHits(const vector< int > &ids)
         if (currIdxDgrm != NON_EXISTING && !m_animationTimer.isActive())
         {
           Cluster* frame = new Cluster();
-          vector< Attribute* > attrs;
+          std::vector< Attribute* > attrs;
 
           frame->addNode(m_graph->getNode(currIdxDgrm));
 
@@ -1090,7 +1088,7 @@ void TimeSeries::processHits(
     ++ptr; // z1
     ++ptr; // z2
 
-    vector< int > ids;
+    std::vector< int > ids;
     for (int i = 0; i < number; ++i)
     {
       ids.push_back(*ptr);
@@ -1166,7 +1164,7 @@ void TimeSeries::drawSlider(const bool& inSelectMode)
     VisUtils::setColor(colMrk);
     if (itvSliderPerNode < pix)
     {
-      set< std::size_t >::iterator it;
+      std::set< std::size_t >::iterator it;
       for (it = itemsMarked.begin(); it != itemsMarked.end(); ++it)
       {
         VisUtils::drawLine(
@@ -1178,7 +1176,7 @@ void TimeSeries::drawSlider(const bool& inSelectMode)
     }
     else
     {
-      set< std::size_t >::iterator it;
+      std::set< std::size_t >::iterator it;
       for (it = itemsMarked.begin(); it != itemsMarked.end(); ++it)
       {
         VisUtils::fillRect(
@@ -1191,7 +1189,7 @@ void TimeSeries::drawSlider(const bool& inSelectMode)
 
     // draw positions of diagrams
     VisUtils::setColor(VisUtils::coolBlue);
-    map< std::size_t, Position2D >::iterator it;
+    std::map< std::size_t, Position2D >::iterator it;
     for (it = showDgrm.begin(); it != showDgrm.end(); ++it)
     {
       VisUtils::drawLine(
@@ -1407,7 +1405,7 @@ void TimeSeries::drawMarkedItems(const bool& inSelectMode)
     // draw selected items
     VisUtils::setColor(colMrk);
 
-    set< std::size_t >::iterator it;
+    std::set< std::size_t >::iterator it;
     for (it = itemsMarked.begin(); it != itemsMarked.end(); ++it)
     {
       if (wdwStartIdx <= (*it) && (*it) <= (wdwStartIdx + nodesWdwScale))
@@ -1493,9 +1491,9 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
     if (m_animationTimer.isActive() && animIdxDgrm != NON_EXISTING)
     {
       Position2D posDgrm;
-      map< std::size_t, Position2D >::iterator it;
-      vector< double >     vals;
-      vector< Attribute* > attrs;
+      std::map< std::size_t, Position2D >::iterator it;
+      std::vector< double >     vals;
+      std::vector< Attribute* > attrs;
 
       it = showDgrm.find(animIdxDgrm);
       posDgrm = it->second;
@@ -1530,10 +1528,10 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
     else
     {
       Position2D posDgrm;
-      vector< double >     vals;
-      vector< Attribute* > attrs;
+      std::vector< double >     vals;
+      std::vector< Attribute* > attrs;
 
-      map< std::size_t, Position2D >::iterator it;
+      std::map< std::size_t, Position2D >::iterator it;
       for (it = showDgrm.begin(); it != showDgrm.end(); ++it)
       {
         posDgrm = it->second;
@@ -1586,9 +1584,9 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
     if (m_animationTimer.isActive() && animIdxDgrm != NON_EXISTING)
     {
       Position2D posPvot, posDgrm;
-      map< std::size_t, Position2D >::iterator it;
-      vector< double >     vals;
-      vector< Attribute* > attrs;
+      std::map< std::size_t, Position2D >::iterator it;
+      std::vector< double >     vals;
+      std::vector< Attribute* > attrs;
 
       it = showDgrm.find(animIdxDgrm);
       posDgrm = it->second;
@@ -1684,10 +1682,10 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
     else
     {
       Position2D posPvot, posDgrm;
-      vector< double >     vals;
-      vector< Attribute* > attrs;
+      std::vector< double >     vals;
+      std::vector< Attribute* > attrs;
 
-      map< std::size_t, Position2D >::iterator it;
+      std::map< std::size_t, Position2D >::iterator it;
       for (it = showDgrm.begin(); it != showDgrm.end(); ++it)
       {
         posPvot.x = posScaleTopLft.x + (it->first /*+ 0.5*/ - wdwStartIdx)*itvWdwPerNode;
@@ -1810,9 +1808,9 @@ void TimeSeries::drawMouseOver(const bool& inSelectMode)
     {
       double pix = pixelSize();
       Position2D pos1, pos2;
-      vector< string > lbls;
-      vector< Position2D > posTopLft;
-      vector< Position2D > posBotRgt;
+      std::vector< std::string > lbls;
+      std::vector< Position2D > posTopLft;
+      std::vector< Position2D > posBotRgt;
       std::size_t maxLbl = 0;
 
       pos1.x = posScaleTopLft.x + (mouseOverIdx - wdwStartIdx)*itvWdwPerNode;
@@ -1827,7 +1825,7 @@ void TimeSeries::drawMouseOver(const bool& inSelectMode)
 
       for (std::size_t i = 0; i < attributes.size(); ++i)
       {
-        string lbl;
+        std::string lbl;
         Attribute* attr = attributes[i];
         Node* node = m_graph->getNode(mouseOverIdx);
 
@@ -1899,7 +1897,7 @@ void TimeSeries::drawLabels(const bool& inSelectMode)
 
     for (std::size_t i = 0; i < posAxesTopLft.size(); ++i)
     {
-      string lblTop, lblBot;
+      std::string lblTop, lblBot;
       lblTop = Utils::dblToStr(0);
       lblBot = Utils::dblToStr(0);
 
@@ -2028,7 +2026,7 @@ void TimeSeries::handleHitItems(const int& idx)
   else if (m_lastKeyCode == Qt::Key_Control)
   {
     // update marked items
-    set< std::size_t >::iterator it;
+    std::set< std::size_t >::iterator it;
     it = itemsMarked.find(idx);
     if (it == itemsMarked.end())
     {
@@ -2123,7 +2121,7 @@ void TimeSeries::handleDragItems(const int& idx)
         dragDir = DRAG_DIR_LFT;
       }
 
-      set< std::size_t >::iterator it;
+      std::set< std::size_t >::iterator it;
       if (incr == true)
       {
         if (flag == true)
@@ -2214,7 +2212,7 @@ void TimeSeries::handleDragItems(const int& idx)
 
 void TimeSeries::handleShowDiagram(const int& dgrmIdx)
 {
-  map< std::size_t, Position2D >::iterator it;
+  std::map< std::size_t, Position2D >::iterator it;
 
   it = showDgrm.find(dgrmIdx);
   // diagram doesn't exist, add it
@@ -2223,7 +2221,7 @@ void TimeSeries::handleShowDiagram(const int& dgrmIdx)
     Position2D pos;
     pos.x = posScaleTopLft.x + (dgrmIdx+0.5)*itvWdwPerNode;
     pos.y = 0.0;
-    showDgrm.insert(pair< int, Position2D >(dgrmIdx, pos));
+    showDgrm.insert(std::pair< int, Position2D >(dgrmIdx, pos));
   }
   // diagram exists, remove it
   else
@@ -2237,7 +2235,7 @@ void TimeSeries::handleDragDiagram(const int& dgrmIdx)
 {
   dragStatus = DRAG_STATUS_DGRM;
 
-  map< std::size_t, Position2D >::iterator it;
+  std::map< std::size_t, Position2D >::iterator it;
   it = showDgrm.find(dgrmIdx);
   if (it != showDgrm.end())
   {

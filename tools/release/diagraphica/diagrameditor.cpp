@@ -12,9 +12,6 @@
 #include <iostream>
 #include <QColorDialog>
 
-using namespace std;
-
-
 // -- init static variables -----------------------------------------
 int DiagramEditor::szeTxt = 12;
 
@@ -723,7 +720,7 @@ void DiagramEditor::handleKeyEvent(QKeyEvent* e)
   updateGL();
 }
 
-void DiagramEditor::handleHits(const vector< int > &ids)
+void DiagramEditor::handleHits(const std::vector< int > &ids)
 {
   if (m_lastMouseEvent.type() == QEvent::MouseButtonPress)
   {
@@ -1101,7 +1098,7 @@ void DiagramEditor::processHits(
     GLuint buffer[])
 {
   GLuint* ptr;
-  vector< int > ids;
+  std::vector< int > ids;
 
   ptr = (GLuint*) buffer;
 

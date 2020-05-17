@@ -13,8 +13,6 @@
 
 // -- constructors and destructors ----------------------------------
 
-using namespace std;
-
 Bundle::Bundle()
 {
   index = NON_EXISTING;
@@ -62,11 +60,11 @@ void Bundle::addEdge(Edge* e)
 {
   edges.push_back(e);
 
-  labels.insert(pair< string, string >(e->getLabel(), "MAY"));
+  labels.insert(std::pair< std::string, std::string >(e->getLabel(), "MAY"));
 }
 
 
-void Bundle::setEdges(const vector< Edge* > &e)
+void Bundle::setEdges(const std::vector< Edge* > &e)
 {
   clearEdges();
   edges = e;
@@ -74,7 +72,7 @@ void Bundle::setEdges(const vector< Edge* > &e)
   labels.clear();
   for (std::size_t i = 0; i < edges.size(); ++i)
   {
-    labels.insert(pair< string, string >(edges[i]->getLabel(), "MAY"));
+    labels.insert(std::pair< std::string, std::string >(edges[i]->getLabel(), "MAY"));
   }
 }
 
@@ -98,11 +96,11 @@ Edge* Bundle::getEdge(const std::size_t& idx)
 }
 
 
-void Bundle::getLabels(vector< string > &lbls)
+void Bundle::getLabels(std::vector< std::string > &lbls)
 {
   lbls.clear();
 
-  map< string, string >::iterator it;
+  std::map< std::string, std::string >::iterator it;
   for (it = labels.begin(); it != labels.end(); ++it)
   {
     lbls.push_back(it->first);
@@ -112,13 +110,13 @@ void Bundle::getLabels(vector< string > &lbls)
 
 
 void Bundle::getLabels(
-  vector< string > &lbls,
-  vector< string > &status)
+  std::vector< std::string > &lbls,
+  std::vector< std::string > &status)
 {
   lbls.clear();
   status.clear();
 
-  map< string, string >::iterator it;
+  std::map< std::string, std::string >::iterator it;
   for (it = labels.begin(); it != labels.end(); ++it)
   {
     lbls.push_back(it->first);
@@ -128,15 +126,15 @@ void Bundle::getLabels(
 
 
 void Bundle::getLabels(
-  string& separator,
-  string& lbls)
+  std::string& separator,
+  std::string& lbls)
 {
   lbls = "";
 
   std::size_t size  = labels.size();
   std::size_t count = 0;
 
-  map< string, string >::iterator it;
+  std::map< std::string, std::string >::iterator it;
   for (it = labels.begin(); it != labels.end(); ++it)
   {
     count += 1;

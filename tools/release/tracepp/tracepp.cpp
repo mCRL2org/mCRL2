@@ -14,7 +14,6 @@
 #include "mcrl2/trace/trace.h"
 #include "mcrl2/utilities/input_output_tool.h"
 
-using namespace std;
 using namespace mcrl2;
 using namespace mcrl2::log;
 using namespace mcrl2::utilities;
@@ -89,7 +88,7 @@ std::ostream& operator<<(std::ostream& os, const output_type t)
   return os;
 }
 
-static void print_state(ostream& os, const mcrl2::lps::state &s)
+static void print_state(std::ostream& os, const mcrl2::lps::state &s)
 {
   std::size_t arity = s.size();
 
@@ -105,12 +104,12 @@ static void print_state(ostream& os, const mcrl2::lps::state &s)
   os << ")";
 }
 
-static void trace2dot(ostream& os, Trace& trace, const std::string& name)
+static void trace2dot(std::ostream& os, Trace& trace, const std::string& name)
 {
-  os << "digraph \"" << name << "\" {" << endl;
-  os << "center = TRUE;" << endl;
-  os << "mclimit = 10.0;" << endl;
-  os << "nodesep = 0.05;" << endl;
+  os << "digraph \"" << name << "\" {" << std::endl;
+  os << "center = TRUE;" << std::endl;
+  os << "mclimit = 10.0;" << std::endl;
+  os << "nodesep = 0.05;" << std::endl;
 
   trace.resetPosition();
 
@@ -119,7 +118,7 @@ static void trace2dot(ostream& os, Trace& trace, const std::string& name)
   {
     print_state(os,trace.currentState());
   }
-  os << "\",peripheries=2];" << endl;
+  os << "\",peripheries=2];" << std::endl;
 
   for(std::size_t i=0; i<trace.number_of_actions(); ++i, trace.increasePosition())
   {
@@ -130,15 +129,15 @@ static void trace2dot(ostream& os, Trace& trace, const std::string& name)
       print_state(os,trace.currentState());
     }
     trace.decreasePosition();
-    os << "\"];" << endl;
+    os << "\"];" << std::endl;
     os << i << " -> " << i+1 << " [label=\"";
     os << mcrl2::lps::pp(trace.currentAction());
-    os << "\"];" << endl;
+    os << "\"];" << std::endl;
   }
-  os << "}" << endl;
+  os << "}" << std::endl;
 }
 
-static void trace2statevector(ostream& os, Trace& trace)
+static void trace2statevector(std::ostream& os, Trace& trace)
 {
   trace.resetPosition();
 
@@ -159,16 +158,16 @@ static void trace2statevector(ostream& os, Trace& trace)
   os << std::endl;
 }
 
-static void trace2aut(ostream& os, Trace& trace)
+static void trace2aut(std::ostream& os, Trace& trace)
 {
-  os << "des (0," << trace.number_of_actions() << "," << trace.number_of_actions()+1 << ")" << endl;
+  os << "des (0," << trace.number_of_actions() << "," << trace.number_of_actions()+1 << ")" << std::endl;
   trace.resetPosition();
 
   for(std::size_t i=0; i<trace.number_of_actions(); ++i, trace.increasePosition())
   {
     os << "(" << i << ",\"";
     os << mcrl2::lps::pp(trace.currentAction());
-    os << "\"," << i+1 << ")" << endl;
+    os << "\"," << i+1 << ")" << std::endl;
   }
 }
 

@@ -11,16 +11,14 @@
 #include "utils.h"
 #include <iostream>
 
-using namespace std;
-
 
 // -- string conversion functions -----------------------------------
 
 
-string Utils::dblToStr(const double& d)
+std::string Utils::dblToStr(const double& d)
 {
-  ostringstream oss;
-  string result;
+  std::ostringstream oss;
+  std::string result;
 
   oss.precision(3); // set precision
   oss << d;
@@ -30,10 +28,10 @@ string Utils::dblToStr(const double& d)
 }
 
 
-string Utils::intToStr(const int& i)
+std::string Utils::intToStr(const int& i)
 {
-  ostringstream oss;
-  string result;
+  std::ostringstream oss;
+  std::string result;
 
   oss << i;
   result = oss.str();
@@ -41,10 +39,10 @@ string Utils::intToStr(const int& i)
   return result;
 }
 
-string Utils::size_tToStr(const std::size_t& i)
+std::string Utils::size_tToStr(const std::size_t& i)
 {
-  ostringstream oss;
-  string result;
+  std::ostringstream oss;
+  std::string result;
 
   oss << i;
   result = oss.str();
@@ -52,7 +50,7 @@ string Utils::size_tToStr(const std::size_t& i)
   return result;
 }
 
-double Utils::strToDbl(const string& s)
+double Utils::strToDbl(const std::string& s)
 {
   double result;
   result = atof(s.c_str());
@@ -61,7 +59,7 @@ double Utils::strToDbl(const string& s)
 }
 
 
-int Utils::strToInt(const string& s)
+int Utils::strToInt(const std::string& s)
 {
   int result;
 
@@ -285,7 +283,7 @@ double Utils::fishEye(
 // -- statistics functions --------------------------------------
 
 
-double Utils::mean(const vector< double > vals)
+double Utils::mean(const std::vector< double > vals)
 {
   double result = 0;
   if (vals.size() > 0)
@@ -300,7 +298,7 @@ double Utils::mean(const vector< double > vals)
 }
 
 
-double Utils::variance(const vector< double > vals)
+double Utils::variance(const std::vector< double > vals)
 {
   double result = 0;
   double mean = Utils::mean(vals);
@@ -318,7 +316,7 @@ double Utils::variance(const vector< double > vals)
 }
 
 
-double Utils::stdDev(const vector< double > vals)
+double Utils::stdDev(const std::vector< double > vals)
 {
   double result = 0;
   result = sqrt(Utils::variance(vals));

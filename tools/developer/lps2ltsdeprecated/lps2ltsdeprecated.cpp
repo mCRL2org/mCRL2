@@ -22,7 +22,6 @@
 #include "mcrl2/data/detail/rewrite_statistics.h"
 #endif
 
-using namespace std;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;

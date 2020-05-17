@@ -11,8 +11,6 @@
 #include "diagram.h"
 #include <iostream>
 
-using namespace std;
-
 
 // -- static variables ----------------------------------------------
 
@@ -268,8 +266,8 @@ void Shape::visualize(
 void Shape::visualize(
     double pixelSize,
     const double& opacity,
-    const vector< Attribute* > attrs,
-    const vector< double > attrValIdcs
+    const std::vector< Attribute* > attrs,
+    const std::vector< double > attrValIdcs
     )
 {
   m_variableValue = "";

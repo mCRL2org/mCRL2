@@ -13,8 +13,6 @@
 
 // -- constructors and destructors ----------------------------------
 
-using namespace std;
-
 Cluster::Cluster()
 {
   index      = NON_EXISTING;
@@ -24,7 +22,7 @@ Cluster::Cluster()
 }
 
 
-Cluster::Cluster(const vector< std::size_t > &crd)
+Cluster::Cluster(const std::vector< std::size_t > &crd)
 {
   coord      = crd;
   index      = NON_EXISTING;
