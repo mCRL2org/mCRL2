@@ -15,7 +15,6 @@
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/set_operations.h"
 
-using namespace std;
 using namespace atermpp;
 
 struct counter
@@ -63,7 +62,7 @@ BOOST_AUTO_TEST_CASE(test_aterm_list)
 
   q.push_front(read_term_from_string("[5,6]")); // q == [[5,6],1,2,3,4]
 
-  stringstream os;
+  std::stringstream os;
   for (aterm_list::iterator i = q.begin(); i != q.end(); ++i)
   {
     os << *i;

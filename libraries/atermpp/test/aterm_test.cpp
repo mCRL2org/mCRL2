@@ -15,7 +15,6 @@
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_string.h"
 
-using namespace std;
 using namespace atermpp;
 
 BOOST_AUTO_TEST_CASE(test_aterm)

@@ -13,14 +13,13 @@
 
 #include "mcrl2/trace/trace.h"
 
-using namespace std;
 using namespace mcrl2::trace;
 
 static const char* trace_str = "a\nb(1,true)\nc\n";
 
 static bool read_trace(Trace& t, const char* s)
 {
-  stringstream ss(s);
+  std::stringstream ss(s);
 
   try
   {

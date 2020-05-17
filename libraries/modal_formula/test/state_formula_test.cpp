@@ -20,7 +20,6 @@
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/modal_formula/preprocess_state_formula.h"
 
-using namespace std;
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::lps;

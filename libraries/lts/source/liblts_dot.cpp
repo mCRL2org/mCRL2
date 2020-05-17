@@ -14,8 +14,6 @@
 
 using namespace mcrl2::core;
 
-using namespace std;
-
 namespace mcrl2
 {
 namespace lts
@@ -24,12 +22,12 @@ namespace lts
 void probabilistic_lts_dot_t::save(std::ostream& os) const
 {
   // Language definition seems to suggest that the name is optional, but tools seem to think otherwise
-  os << "digraph G {" << endl;
-  // os << "size=\"7,10.5\";" << endl;
-  os << "center = TRUE;" << endl;
-  os << "mclimit = 10.0;" << endl;
-  os << "nodesep = 0.05;" << endl;
-  os << "node [ width=0.25, height=0.25, label=\"\" ];" << endl;
+  os << "digraph G {" << std::endl;
+  // os << "size=\"7,10.5\";" << std::endl;
+  os << "center = TRUE;" << std::endl;
+  os << "mclimit = 10.0;" << std::endl;
+  os << "nodesep = 0.05;" << std::endl;
+  os << "node [ width=0.25, height=0.25, label=\"\" ];" << std::endl;
   if (num_states() > 0)
   {
     if (initial_probabilistic_state().size()==1)
@@ -49,7 +47,7 @@ void probabilistic_lts_dot_t::save(std::ostream& os) const
       throw mcrl2::runtime_error("Cannnot save a probabilistic transition system in .dot format.");
     }
 
-    os << " [ peripheries=2 ];" << endl;
+    os << " [ peripheries=2 ];" << std::endl;
     for (std::size_t i=0; i<num_states(); i++)
     {
       if (has_state_info())
@@ -57,12 +55,12 @@ void probabilistic_lts_dot_t::save(std::ostream& os) const
         const std::string& label = state_label(i).label();
         if (!label.empty())
         {
-          os << state_label(i).name() << " [label=\"" << label << "\"];" << endl;
+          os << state_label(i).name() << " [label=\"" << label << "\"];" << std::endl;
         }
       }
       else
       {
-        os << "S" << i << endl;
+        os << "S" << i << std::endl;
       }
     }
   }
@@ -76,21 +74,21 @@ void probabilistic_lts_dot_t::save(std::ostream& os) const
         throw mcrl2::runtime_error("Cannot save probabilistic states in .dot format.");
       }
       os << state_label(t.from()).name() << "->" << state_label(probabilistic_state(t.to()).begin()->state()).name() << "[label=\"" <<
-         mcrl2::lts::pp(action_label(t.label())) << "\"];" << endl;
+         mcrl2::lts::pp(action_label(t.label())) << "\"];" << std::endl;
     }
     else
     {
       os << "S" << t.from() << " -> " << "S" << t.to() << "[label=\"" <<
-         mcrl2::lts::pp(action_label(apply_hidden_label_map(t.label()))) << "\"];" << endl;
+         mcrl2::lts::pp(action_label(apply_hidden_label_map(t.label()))) << "\"];" << std::endl;
     }
   }
 
-  os << "}" << endl;
+  os << "}" << std::endl;
 }
 
-void probabilistic_lts_dot_t::save(const string& filename) const
+void probabilistic_lts_dot_t::save(const std::string& filename) const
 {
-  ofstream os(filename.c_str());
+  std::ofstream os(filename.c_str());
   if (!os.is_open())
   {
     throw mcrl2::runtime_error("cannot open DOT file '" + filename + "' for writing.");
@@ -110,9 +108,9 @@ void lts_dot_t::save(std::ostream& os) const
   l.save(os);
 }
 
-void lts_dot_t::save(const string& filename) const
+void lts_dot_t::save(const std::string& filename) const
 {
-  ofstream os(filename.c_str());
+  std::ofstream os(filename.c_str());
   if (!os.is_open())
   {
     throw mcrl2::runtime_error("cannot open DOT file '" + filename + "' for writing.");

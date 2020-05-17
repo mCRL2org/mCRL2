@@ -14,7 +14,6 @@
 
 #include "mcrl2/atermpp/aterm_io.h"
 
-using namespace std;
 using namespace atermpp;
 
 class D: public aterm_appl
@@ -91,11 +90,11 @@ BOOST_AUTO_TEST_CASE(test_main)
   static_cast<void>(b); // Silence compiler/static analysis warnings
 
   // set
-  set<atermpp::aterm> st;
-  set<aterm_appl> sa;
-  set<aterm_list> sl;
-  set<aterm> sT;
-  set<aterm_appl> sA;
-  set<aterm_list> sL;
-  set<D> sD;
+  std::set<atermpp::aterm> st;
+  std::set<aterm_appl> sa;
+  std::set<aterm_list> sl;
+  std::set<aterm> sT;
+  std::set<aterm_appl> sA;
+  std::set<aterm_list> sL;
+  std::set<D> sD;
 }

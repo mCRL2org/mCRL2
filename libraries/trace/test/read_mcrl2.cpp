@@ -15,7 +15,6 @@
 
 #include "mcrl2/trace/trace.h"
 
-using namespace std;
 using namespace mcrl2;
 using namespace mcrl2::trace;
 
@@ -27,7 +26,7 @@ void test_next_action(Trace& t, const char* s)
   BOOST_CHECK((a != mcrl2::lps::multi_action()));
   if (a != mcrl2::lps::multi_action())
   {
-    string action(pp(a));
+    std::string action(pp(a));
     BOOST_CHECK(action == s);
     if (action != s)
     {
@@ -57,7 +56,7 @@ BOOST_AUTO_TEST_CASE(test_main)
   t.addAction(parse_multi_action("b(1,true)",act_decls,data_spec));
   t.addAction(parse_multi_action("c",act_decls,data_spec));
 
-  stringstream trace_data;
+  std::stringstream trace_data;
   t.save(trace_data);
 
   try

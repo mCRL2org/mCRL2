@@ -22,8 +22,6 @@
 // simple hash function; uses two large primes
 #define hash(l,r,m) (36425657*l + 77673689*r) & m
 
-using namespace std;
-
 namespace mcrl2
 {
 namespace lts
@@ -138,7 +136,7 @@ ptrdiff_t tree_set_store::find_set(ptrdiff_t child_l,ptrdiff_t child_r)
   return build_set(child_l,child_r);
 }
 
-ptrdiff_t tree_set_store::create_set(vector<ptrdiff_t> &elems)
+ptrdiff_t tree_set_store::create_set(std::vector<ptrdiff_t> &elems)
 {
   if (elems.size() == 0)
   {

@@ -15,7 +15,6 @@
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/aterm_io.h"
 
-using namespace std;
 using namespace atermpp;
 
 // function object to test if it is an aterm_appl with function symbol "f"

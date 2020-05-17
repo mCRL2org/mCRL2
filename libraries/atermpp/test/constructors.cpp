@@ -13,7 +13,6 @@
 #include "mcrl2/atermpp/aterm_string.h"
 #include "mcrl2/atermpp/aterm_io.h"
 
-using namespace std;
 using namespace atermpp;
 
 BOOST_AUTO_TEST_CASE(test_main)

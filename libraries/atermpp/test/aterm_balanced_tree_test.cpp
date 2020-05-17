@@ -16,7 +16,6 @@
 #include "mcrl2/atermpp/aterm_balanced_tree.h"
 #include "mcrl2/atermpp/set_operations.h"
 
-using namespace std;
 using namespace atermpp;
 
 struct counter

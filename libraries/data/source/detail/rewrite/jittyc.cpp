@@ -30,7 +30,6 @@
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
-using namespace std;
 using namespace atermpp;
 using namespace mcrl2::log;
 
@@ -1196,8 +1195,8 @@ class RewriterCompilingJitty::ImplementTree
     }
     else
     {
-      stringstream argument_type;
-      stringstream argument_string;
+      std::stringstream argument_type;
+      std::stringstream argument_string;
       calc_inner_term(argument_string, a.body(), startarg, nnfvars, false, argument_type);
       s << "delayed_abstraction<" << argument_type.str() << ">(" << binder_constructor << "(), "
            "this_rewriter->binding_variable_list_get(" << m_rewriter.binding_variable_list_index(a.variables()) << "), ";
@@ -1220,7 +1219,7 @@ class RewriterCompilingJitty::ImplementTree
       result_type << "term_not_in_normal_form";
     }
     // A rewritten result is expected.
-    stringstream temp_result_type;
+    std::stringstream temp_result_type;
     s << "where_clause(";
     calc_inner_term(s, w.body(), startarg, nnfvars, true, temp_result_type);
     s << ",";
@@ -1269,8 +1268,8 @@ class RewriterCompilingJitty::ImplementTree
     // This provides the information which arguments are certainly in normal
     // form, which can be used to optimise the result.
 
-    stringstream code_for_arguments;
-    stringstream types_for_arguments;
+    std::stringstream code_for_arguments;
+    std::stringstream types_for_arguments;
     calc_inner_terms(code_for_arguments, a, startarg, nnfvars, args_nfs, types_for_arguments);
 
     if (rewr)
@@ -1320,7 +1319,7 @@ class RewriterCompilingJitty::ImplementTree
       result_type << "data_expression";
 
       s << appl_function(arity) << "(";
-      stringstream types_for_arguments;
+      std::stringstream types_for_arguments;
       calc_inner_term(s, head, startarg, nnfvars, true, types_for_arguments);
       s << ", ";
       if (arity>0)
@@ -1339,7 +1338,7 @@ class RewriterCompilingJitty::ImplementTree
       args_nfs.fill();
 
       s << "term_not_in_normalform(" << appl_function(arity) << "(";
-      stringstream types_for_arguments;
+      std::stringstream types_for_arguments;
       calc_inner_term(s, head, startarg, nnfvars, true, types_for_arguments);
       s << ", ";
       if (arity>0)
@@ -1365,7 +1364,7 @@ class RewriterCompilingJitty::ImplementTree
     nfs_array rewr_args(arity);
     rewr_args.fill();
     s << appl_function(arity) << "(";
-    stringstream dummy_result_type;  // As we rewrite to normal forms, these are always data_expressions.
+    std::stringstream dummy_result_type;  // As we rewrite to normal forms, these are always data_expressions.
     if (is_variable(a.head()))
     {
       calc_inner_term(s, down_cast<variable>(a.head()), startarg, nnfvars, true, dummy_result_type);
@@ -1384,10 +1383,10 @@ class RewriterCompilingJitty::ImplementTree
     s << ")";
   }
 
-  string delayed_application(const std::size_t arity)
+  std::string delayed_application(const std::size_t arity)
   {
     m_delayed_application_functions.insert(arity);
-    stringstream s;
+    std::stringstream s;
     s << "delayed_application" << arity;
     return s.str();
   }
@@ -1404,8 +1403,8 @@ class RewriterCompilingJitty::ImplementTree
     const std::size_t arity = a.size();
     nfs_array rewr_args(arity);
     rewr_args.fill();
-    stringstream code_string;
-    stringstream result_types;
+    std::stringstream code_string;
+    std::stringstream result_types;
 
     if (is_variable(a.head()))
     {
@@ -1546,8 +1545,8 @@ class RewriterCompilingJitty::ImplementTree
         s << ", ";
         argument_types << ", ";
       }
-      stringstream argument_string;
-      stringstream argument_type;
+      std::stringstream argument_string;
+      std::stringstream argument_type;
       assert(i<rewr.size());
       calc_inner_term(argument_string,  get_argument_of_higher_order_term(appl,i), startarg + i, nnfvars, rewr.at(i),argument_type);
       s << argument_string.str();
@@ -1676,12 +1675,12 @@ class RewriterCompilingJitty::ImplementTree
     if (atermpp::find_if(treeS.subtree(),matches(treeS.target_variable()))!=aterm_appl()) // treeS.target_variable occurs in treeS.subtree
     {
       const std::string parameters = brackets.current_data_parameters.top(); 
-      brackets.current_data_parameters.push(parameters + (parameters.empty()?"":", ") + "const data_expression& " + (string(treeS.target_variable().name()).c_str() + 1));
+      brackets.current_data_parameters.push(parameters + (parameters.empty()?"":", ") + "const data_expression& " + (std::string(treeS.target_variable().name()).c_str() + 1));
       const std::string arguments = brackets.current_data_arguments.top();
-      brackets.current_data_arguments.push(arguments + (arguments.empty()?"":", ") + (string(treeS.target_variable().name()).c_str() + 1));
+      brackets.current_data_arguments.push(arguments + (arguments.empty()?"":", ") + (std::string(treeS.target_variable().name()).c_str() + 1));
       reset_current_data_parameters=true;
 
-      m_stream << m_padding << "const data_expression& " << string(treeS.target_variable().name()).c_str() + 1 << " = ";
+      m_stream << m_padding << "const data_expression& " << std::string(treeS.target_variable().name()).c_str() + 1 << " = ";
       if (level == 0)
       {
         if (m_used[cur_arg])
@@ -1721,7 +1720,7 @@ class RewriterCompilingJitty::ImplementTree
              bracket_level_data& brackets,
              std::stack<std::string>& auxiliary_code_fragments)
   {
-    m_stream << m_padding << "if (" << string(tree.match_variable().name()).c_str() + 1 << " == ";
+    m_stream << m_padding << "if (" << std::string(tree.match_variable().name()).c_str() + 1 << " == ";
     if (level == 0)
     {
       m_stream << "arg" << cur_arg;
@@ -1799,9 +1798,9 @@ class RewriterCompilingJitty::ImplementTree
                  << "  const data_expression& t" << cnt << " = down_cast<data_expression>(" << arg_or_t << parent << "[" << cur_arg << "]);\n";
       }
       const std::string parameters = brackets.current_data_parameters.top();
-      brackets.current_data_parameters.push(parameters + (parameters.empty()?"":", ") + "const data_expression& t" + to_string(cnt));
+      brackets.current_data_parameters.push(parameters + (parameters.empty()?"":", ") + "const data_expression& t" + std::to_string(cnt));
       const std::string arguments = brackets.current_data_arguments.top();
-      brackets.current_data_arguments.push(arguments + (arguments.empty()?"t":", t") + to_string(cnt));
+      brackets.current_data_arguments.push(arguments + (arguments.empty()?"t":", t") + std::to_string(cnt));
 
       reset_current_data_parameters=true;
     }
@@ -1913,7 +1912,7 @@ class RewriterCompilingJitty::ImplementTree
     }
     
     m_stream << m_padding << "return ";
-    stringstream result_type_string;
+    std::stringstream result_type_string;
     calc_inner_term(m_stream, tree.result(), cur_arg + 1, m_nnfvars, true, result_type_string);
     m_stream << "; // R1 " << tree.result() << "\n"; 
   }
@@ -1923,7 +1922,7 @@ class RewriterCompilingJitty::ImplementTree
              const match_tree_C& tree,
              bracket_level_data& brackets)
   {
-    stringstream result_type_string;
+    std::stringstream result_type_string;
     assert(tree.true_tree().isR());
     m_stream << m_padding
              << "if (";
@@ -1947,7 +1946,7 @@ class RewriterCompilingJitty::ImplementTree
              const match_tree_R& tree, 
              std::size_t arity)
   {
-    stringstream result_type_string;
+    std::stringstream result_type_string;
     if (arity == 0)
     {
       m_stream << m_padding
@@ -2061,9 +2060,9 @@ public:
             brackets.current_data_arguments.push(brackets.current_data_arguments.top()); 
           }
           const std::string& parameters=brackets.current_data_parameters.top();
-          brackets.current_data_parameters.top()=parameters + (parameters.empty()?"":", ") + "const data_expression& arg" + to_string(arg);
+          brackets.current_data_parameters.top()=parameters + (parameters.empty()?"":", ") + "const data_expression& arg" + std::to_string(arg);
           const std::string arguments = brackets.current_data_arguments.top();
-          brackets.current_data_arguments.top()=arguments + (arguments.empty()?"":", ") + "arg" + to_string(arg);
+          brackets.current_data_arguments.top()=arguments + (arguments.empty()?"":", ") + "arg" + std::to_string(arg);
         }
         m_stream << m_padding << "// Considering argument " << arg << "\n";
       }
@@ -2120,7 +2119,7 @@ public:
     m_stream << get_heads(s.codomain(), base_string, number_of_arguments - s.domain().size()) << "[" << index << "]";
   }
 
-  void generate_delayed_application_functions(ostream& ss)
+  void generate_delayed_application_functions(std::ostream& ss)
   {
     for(std::size_t arity: m_delayed_application_functions)
     {
@@ -2191,7 +2190,7 @@ public:
     }
 
     const std::size_t domain_size = s.domain().size();
-    stringstream ss;
+    std::stringstream ss;
     ss << appl_function(domain_size) << "(" << head;
 
     for (std::size_t i = 0; i < domain_size; ++i)
@@ -2229,7 +2228,7 @@ public:
     }
     else
     {
-      stringstream ss;
+      std::stringstream ss;
       ss << "atermpp::down_cast<data_expression>(atermpp::aterm(reinterpret_cast<atermpp::detail::_aterm*>(" << (void*)atermpp::detail::address(opid) << ")))";
       std::size_t used_arguments = 0;
       m_stream << rewr_function_finish_term(arity, ss.str(), down_cast<function_sort>(opid.sort()), used_arguments) << ";\n";

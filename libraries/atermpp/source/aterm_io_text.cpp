@@ -14,8 +14,6 @@
 namespace atermpp
 {
 
-using namespace std;
-
 // utility functions
 
 static void write_string_with_escape_symbols(const std::string& s, std::ostream& os)
@@ -105,9 +103,9 @@ aterm text_aterm_istream::get()
       term = parse_aterm(character);
     }
   }
-  catch (atermpp::runtime_error& e)
+  catch (std::runtime_error& e)
   {
-    throw atermpp::runtime_error(e.what() + string("\n") + print_parse_error_position());
+    throw std::runtime_error(e.what() + std::string("\n") + print_parse_error_position());
   }
 
   // Reset the parsing error buffers.
@@ -245,7 +243,7 @@ aterm_list text_aterm_istream::parse_aterm_list(int& character, char begin, char
 
       if (character != end)
       {
-        throw atermpp::runtime_error(std::string("Missing ") + end + " while parsing a list term");
+        throw std::runtime_error(std::string("Missing ") + end + " while parsing a list term");
       }
     }
 
@@ -305,7 +303,7 @@ int text_aterm_istream::next_char(bool skip_whitespace, bool required)
     }
     else if (required)
     {
-      throw atermpp::runtime_error("Premature end of file while parsing.");
+      throw std::runtime_error("Premature end of file while parsing.");
     }
   }
   while (isspace(character) && skip_whitespace);
@@ -383,11 +381,11 @@ void write_term_to_text_stream(const aterm& term, std::ostream& os)
 
 aterm read_term_from_string(const std::string& s)
 {
-  stringstream ss(s);
+  std::stringstream ss(s);
   return  read_term_from_text_stream(ss);
 }
 
-aterm read_term_from_text_stream(istream& is)
+aterm read_term_from_text_stream(std::istream& is)
 {
   return text_aterm_istream(is).get();
 }

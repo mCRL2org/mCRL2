@@ -18,7 +18,6 @@
 
 #include <boost/test/included/unit_test_framework.hpp>
 
-using namespace std;
 using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::data::detail;

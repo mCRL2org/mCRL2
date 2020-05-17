@@ -14,8 +14,6 @@
 
 #include "mcrl2/atermpp/aterm_list.h"
 
-using namespace std;
-
 class t1 : public atermpp::aterm
 {
 public:

@@ -14,7 +14,6 @@
 
 #include "mcrl2/atermpp/aterm_io.h"
 
-using namespace std;
 using namespace atermpp;
 
 BOOST_AUTO_TEST_CASE(test_aterm_function)
@@ -27,7 +26,7 @@ BOOST_AUTO_TEST_CASE(test_aterm_function)
   BOOST_CHECK(pp(a) == "f(x)");
   BOOST_CHECK(a.function() == sym);
 
-  string s = pp(a);
+  std::string s = pp(a);
   aterm_appl b ( read_appl_from_string(s));
   BOOST_CHECK(pp(a) == "f(x)");
   BOOST_CHECK(b.function() == sym); 
