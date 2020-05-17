@@ -13,7 +13,6 @@
 #include "state.h"
 #include "transition.h"
 
-using namespace std;
 using namespace MathUtils;
 
 FSMStatePositioner::FSMStatePositioner(LTS* l)
@@ -28,7 +27,7 @@ FSMStatePositioner::FSMStatePositioner(LTS* l)
 
 FSMStatePositioner::~FSMStatePositioner()
 {
-  for (map< Cluster*, ClusterSlotInfo* >::iterator slot_info_it =
+  for (std::map< Cluster*, ClusterSlotInfo* >::iterator slot_info_it =
          slot_info.begin(); slot_info_it != slot_info.end(); ++slot_info_it)
   {
     delete slot_info_it->second;
@@ -66,7 +65,7 @@ void FSMStatePositioner::bottomUpPass()
       }
       else if (cluster->getNumDescendants() == 1)
       {
-        vector< State* > successors;
+        std::vector< State* > successors;
         getSuccessors(state, successors);
         if (allStatesCentered(successors))
         {
@@ -81,7 +80,7 @@ void FSMStatePositioner::bottomUpPass()
       }
       else
       {
-        vector< State* > successors;
+        std::vector< State* > successors;
         getSuccessors(state, successors);
         QVector2D position = sumStateVectorsInMultipleClusters(
                               successors, cluster->getBaseRadius());
@@ -94,15 +93,15 @@ void FSMStatePositioner::bottomUpPass()
 void FSMStatePositioner::topDownPass()
 {
   // Assumption: unpositioned_states is sorted bottom-up
-  vector< State* > unpositioned_temp;
-  for (vector< State* >::reverse_iterator state_it =
+  std::vector< State* > unpositioned_temp;
+  for (std::vector< State* >::reverse_iterator state_it =
          unpositioned_states.rbegin(); state_it != unpositioned_states.rend();
        ++state_it)
   {
     State* state = *state_it;
     if (state->getCluster()->isCentered())
     {
-      vector< State* > predecessors;
+      std::vector< State* > predecessors;
       getPredecessors(state, predecessors);
       if (allStatesCentered(predecessors))
       {
@@ -124,7 +123,7 @@ void FSMStatePositioner::topDownPass()
 
 void FSMStatePositioner::resolveUnpositioned()
 {
-  for (vector< State* >::iterator state_it = unpositioned_states.begin();
+  for (std::vector< State* >::iterator state_it = unpositioned_states.begin();
        state_it != unpositioned_states.end(); ++state_it)
   {
     State* state = *state_it;
@@ -136,10 +135,10 @@ void FSMStatePositioner::resolveUnpositioned()
 }
 
 QVector2D FSMStatePositioner::sumStateVectorsInSingleCluster(
-  vector< State* > &states)
+  std::vector< State* > &states)
 {
   QVector2D sum_vector = QVector2D(0, 0);
-  for (vector< State* >::iterator state_it = states.begin(); state_it !=
+  for (std::vector< State* >::iterator state_it = states.begin(); state_it !=
        states.end(); ++state_it)
   {
     State* state = *state_it;
@@ -153,10 +152,10 @@ QVector2D FSMStatePositioner::sumStateVectorsInSingleCluster(
 }
 
 QVector2D FSMStatePositioner::sumStateVectorsInMultipleClusters(
-  vector< State* > &states, float rim_radius)
+  std::vector< State* > &states, float rim_radius)
 {
   QVector2D sum_vector = QVector2D(0, 0);
-  for (vector< State* >::iterator state_it = states.begin(); state_it !=
+  for (std::vector< State* >::iterator state_it = states.begin(); state_it !=
        states.end(); ++state_it)
   {
     State* state = *state_it;
@@ -182,9 +181,9 @@ QVector2D FSMStatePositioner::sumStateVectorsInMultipleClusters(
   return sum_vector;
 }
 
-bool FSMStatePositioner::allStatesCentered(vector< State* > &states)
+bool FSMStatePositioner::allStatesCentered(std::vector< State* > &states)
 {
-  for (vector< State* >::iterator state = states.begin(); state !=
+  for (std::vector< State* >::iterator state = states.begin(); state !=
        states.end(); ++state)
   {
     if (!(**state).isCentered())
@@ -195,7 +194,7 @@ bool FSMStatePositioner::allStatesCentered(vector< State* > &states)
   return true;
 }
 
-void FSMStatePositioner::getPredecessors(State* state, vector< State* >&
+void FSMStatePositioner::getPredecessors(State* state, std::vector< State* >&
     predecessors)
 {
   for (int t = 0; t < state->getNumInTransitions(); ++t)
@@ -208,7 +207,7 @@ void FSMStatePositioner::getPredecessors(State* state, vector< State* >&
   }
 }
 
-void FSMStatePositioner::getSuccessors(State* state, vector< State* >&
+void FSMStatePositioner::getSuccessors(State* state, std::vector< State* >&
                                        successors)
 {
   for (int t = 0; t < state->getNumOutTransitions(); ++t)
@@ -269,7 +268,7 @@ ClusterSlotInfo::ClusterSlotInfo(Cluster* cluster)
   {
     float circumference = 2 * static_cast<float>(PI) * ring * delta_ring;
     // max with 1 to ensure that ring 0 also has a slot
-    int size = max(1, static_cast<int>(circumference / MIN_DELTA_SLOT));
+    int size = std::max(1, static_cast<int>(circumference / MIN_DELTA_SLOT));
     num_slots.push_back(size);
   }
 }
@@ -308,7 +307,7 @@ void ClusterSlotInfo::findNearestSlot(QVector2D& position, int& ring, int
 {
   float angle, radius;
   Vectors::toPolar(angle, radius, position);
-  ring = min(round_to_int(radius / delta_ring), getNumRings() - 1);
+  ring = std::min(round_to_int(radius / delta_ring), getNumRings() - 1);
   slot = round_to_int(num_slots[ring] * deg_to_rad(angle) / (2 * static_cast<float>(PI))) %
          getNumSlots(ring);
 }
@@ -316,7 +315,7 @@ void ClusterSlotInfo::findNearestSlot(QVector2D& position, int& ring, int
 void ClusterSlotInfo::findNearestFreeSlot(int& ring, int& slot)
 {
   SlotSet visited_slots;
-  queue< Slot > to_visit_slots;
+  std::queue< Slot > to_visit_slots;
   to_visit_slots.push(Slot(ring, slot));
   while (! to_visit_slots.empty())
   {
@@ -375,13 +374,13 @@ void ClusterSlotInfo::findFarthestFreeSlot(int& ring, int& slot)
     for (int s = 0; s < getNumSlots(r); ++s)
     {
       QVector2D slot_vector = getVector(r, s);
-      float min_distance = numeric_limits< float >::max();
+      float min_distance = std::numeric_limits< float >::max();
       for (SlotSet::iterator occupied_slot = occupied_slots.begin();
            occupied_slot != occupied_slots.end(); ++occupied_slot)
       {
         QVector2D delta_vector = slot_vector - getVector(occupied_slot->ring,
                                 occupied_slot->slot);
-        min_distance = min(min_distance, delta_vector.length());
+        min_distance = std::min(min_distance, delta_vector.length());
       }
       if (min_distance > max_min_distance)
       {

@@ -86,7 +86,6 @@ class t_tool_options
 
 };
 
-using namespace std;
 
 class ltsconvert_tool : public input_output_tool
 {

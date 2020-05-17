@@ -17,7 +17,6 @@
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/bes/pbes_input_tool.h"
 
-using namespace std;
 using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;

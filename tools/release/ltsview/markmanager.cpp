@@ -13,7 +13,6 @@
 #include "cluster.h"
 #include "transition.h"
 
-using namespace std;
 
 MarkManager::MarkManager(QObject *parent, LtsManager *ltsManager):
   QObject(parent),

@@ -14,7 +14,6 @@
 #include "mathutils.h"
 #include "state.h"
 
-using namespace std;
 using namespace MathUtils;
 
 bool Comp_BCRadius::operator()(const Cluster* c1,const Cluster* c2) const
@@ -257,7 +256,7 @@ void Cluster::computeSizeAndPositions_FSM()
   {
     Cluster* desc = *descendants.begin();
     baseRadius = desc->getTopRadius();
-    bc_radius = max(topRadius,desc->getBCRadius());
+    bc_radius = std::max(topRadius,desc->getBCRadius());
     bc_height = desc->getBCHeight() + 1.0f;
     desc->center();
 
@@ -327,9 +326,9 @@ void Cluster::computeSizeAndPositions_FSM()
     {
       min_radius2 += bcr_rim + 0.01f;
     }
-    baseRadius = max(min_radius1,min_radius2);
-    bc_radius = max(min_radius1 + bcr_rim,min_radius2);
-    bc_radius = max(topRadius,bc_radius);
+    baseRadius = std::max(min_radius1,min_radius2);
+    bc_radius = std::max(min_radius1 + bcr_rim,min_radius2);
+    bc_radius = std::max(topRadius,bc_radius);
     bc_height = 0.0f;
     for (unsigned int i = 0; i < descendants.size(); ++i)
     {
@@ -381,7 +380,7 @@ void Cluster::computeSizeAndPositions()
   {
     Cluster* desc = *descendants.begin();
     baseRadius = desc->getTopRadius();
-    bc_radius = max(topRadius,desc->getBCRadius());
+    bc_radius = std::max(topRadius,desc->getBCRadius());
     bc_height = desc->getBCHeight() + 1.0f;
     desc->center();
   }
@@ -435,9 +434,9 @@ void Cluster::computeSizeAndPositions()
     {
       minRimRadius = (float)(bcr_rim / sin(PI / (y-x)));
     }
-    baseRadius = max(bcr_center + bcr_rim + 0.01f,minRimRadius);
-    bc_radius = max(bcr_center + bcr_rim + 0.01f,minRimRadius +bcr_rim);
-    bc_radius = max(topRadius,bc_radius);
+    baseRadius = std::max(bcr_center + bcr_rim + 0.01f,minRimRadius);
+    bc_radius = std::max(bcr_center + bcr_rim + 0.01f,minRimRadius +bcr_rim);
+    bc_radius = std::max(topRadius,bc_radius);
     bc_height = 0.0f;
     for (unsigned int i = 0; i < descendants.size(); ++i)
     {
@@ -513,7 +512,7 @@ void Cluster::removeMatchedRule(MarkRuleIndex index)
 
 int Cluster::setActionMark(int l,bool b)
 {
-  map<int,int>::iterator li = actionLabelCounts.find(l);
+  std::map<int,int>::iterator li = actionLabelCounts.find(l);
   if (li != actionLabelCounts.end())
   {
     if (b)

@@ -16,7 +16,6 @@
 #include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/lts/lts_io.h"
 
-using namespace std;
 using namespace mcrl2::lts;
 using namespace mcrl2::lts::detail;
 using namespace mcrl2::utilities::tools;

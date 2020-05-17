@@ -9,7 +9,6 @@
 #include "state.h"
 #include "transition.h"
 
-using namespace std;
 
 State::State(int aid):
   cluster(NULL),

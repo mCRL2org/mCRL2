@@ -16,7 +16,6 @@
 
 #include <QtOpenGL>
 
-using namespace std;
 
 class VisObject
 {
@@ -39,7 +38,7 @@ class VisObject
     GLuint texName;
     int numColours;
     int primitive;
-    vector<int> identifiers;
+    std::vector<int> identifiers;
 };
 
 VisObject::VisObject()
@@ -84,7 +83,7 @@ void VisObject::setColor(QColor c)
   color = c;
 }
 
-void VisObject::setTextureColours(vector<QColor>& colours)
+void VisObject::setTextureColours(std::vector<QColor>& colours)
 {
   if (colours.size() > 0)
   {
@@ -233,7 +232,7 @@ void VisObjectFactory::clear()
   objects_sorted.clear();
 }
 
-int VisObjectFactory::makeObject(int primitive, vector<int> &ids)
+int VisObjectFactory::makeObject(int primitive, std::vector<int> &ids)
 {
   VisObject* vo = new VisObject();
   glGetFloatv(GL_MODELVIEW_MATRIX,(GLfloat*)vo->getMatrixP());
@@ -259,7 +258,7 @@ void VisObjectFactory::updateObjectColor(int obj,QColor color)
   objects[obj]->setColor(color);
 }
 
-void VisObjectFactory::updateObjectTexture(int obj, vector<QColor> &colours)
+void VisObjectFactory::updateObjectTexture(int obj, std::vector<QColor> &colours)
 {
   objects[obj]->setTextureColours(colours);
 }

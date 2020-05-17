@@ -18,7 +18,6 @@
 
 // #include "mcrl2/lps/exploration_strategy.h"
 
-using namespace std;
 using namespace mcrl2::lts;
 using namespace mcrl2::lts::detail;
 using namespace mcrl2::utilities::tools;

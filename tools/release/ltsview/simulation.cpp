@@ -10,7 +10,6 @@
 #include "transition.h"
 #include "state.h"
 
-using namespace std;
 
 Simulation::Simulation(QObject *parent, LTS& lts):
   QObject(parent),

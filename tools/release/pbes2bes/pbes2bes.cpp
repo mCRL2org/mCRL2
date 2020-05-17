@@ -39,7 +39,6 @@
 #include "mcrl2/bes/bes2pbes.h"
 #include "mcrl2/bes/pbesinst_conversion.h"
 
-using namespace std;
 using namespace mcrl2::log;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;

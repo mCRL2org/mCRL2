@@ -19,7 +19,6 @@
 #include "mcrl2/lps/io.h"
 #include "mcrl2/pbes/io.h"
 
-using namespace std;
 using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
@@ -42,16 +41,16 @@ static bool check_whether_variable_string_is_in_use(
   return false;
 }
 
-static string trim_spaces(const string& str)
+static std::string trim_spaces(const std::string& str)
 {
   // function from http://www.codeproject.com/vcpp/stl/stdstringtrim.asp
-  string s(str);
-  string::size_type pos = s.find_last_not_of(' ');
-  if (pos != string::npos)
+  std::string s(str);
+  std::string::size_type pos = s.find_last_not_of(' ');
+  if (pos != std::string::npos)
   {
     s.erase(pos + 1);
     pos = s.find_first_not_of(' ');
-    if (pos != string::npos)
+    if (pos != std::string::npos)
     {
       s.erase(0, pos);
     }
@@ -64,7 +63,7 @@ static string trim_spaces(const string& str)
   return s;
 }
 
-static data_expression parse_term(const string& term_string,
+static data_expression parse_term(const std::string& term_string,
                                   const data_specification& spec,
                                   std::set < variable > context_variables,
                                   const std::set < variable >& local_variables = std::set < variable >())
@@ -74,7 +73,7 @@ static data_expression parse_term(const string& term_string,
 }
 
 static void declare_variables(
-                  const string& vars,
+                  const std::string& vars,
                   std::set <variable>& context_variables,
                   data_specification& spec)
 {
@@ -85,7 +84,7 @@ static void declare_variables(
 // Match beginning of string s with match. Return true
 // iff it does. If a match is found, remove match from the beginning
 // of s.
-static bool match_and_remove(string& s, const string& match)
+static bool match_and_remove(std::string& s, const std::string& match)
 {
   if (s.substr(0,match.size())==match)
   {
@@ -165,21 +164,21 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
 
     void handle_quit(bool& done)
     {
-      if (cin.eof())
+      if (std::cin.eof())
       {
-        cout << endl;
+        std::cout << std::endl;
       }
       done = true;
     }
 
     void handle_assign(std::string s)
     {
-      string::size_type assign_pos = s.find('=');
-      if (assign_pos==string::npos)
+      std::string::size_type assign_pos = s.find('=');
+      if (assign_pos==std::string::npos)
       {
         throw mcrl2::runtime_error("Missing symbol = in assignment.");
       }
-      string varname=trim_spaces(s.substr(0,assign_pos));
+      std::string varname=trim_spaces(s.substr(0,assign_pos));
 
       if (check_whether_variable_string_is_in_use(varname,context_variables))
       {
@@ -197,7 +196,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
         need_to_rebuild_rewriter=false;
       }
       term = rewr(term,assignments);
-      cout << data::pp(term) << "\n";
+      std::cout << data::pp(term) << "\n";
       assignments[var]=term;
       context_variables.insert(var);
     }
@@ -212,14 +211,14 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
         rewr=rewriter(spec,m_rewrite_strategy);
         need_to_rebuild_rewriter=false;
       }
-      cout << data::pp(rewr(term,assignments)) << "\n";
+      std::cout << data::pp(rewr(term,assignments)) << "\n";
     }
 
     void handle_solve(std::string s)
     {
       std::set <variable> vars;
-      string::size_type dotpos=s.find('.');
-      if (dotpos==string::npos)
+      std::string::size_type dotpos=s.find('.');
+      if (dotpos==std::string::npos)
       {
         throw mcrl2::runtime_error("Expect a `.' in the input.");
       }
@@ -251,21 +250,21 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
       {
         i->add_assignments(vars,sigma,rewr);
 
-        cout << "[";
+        std::cout << "[";
         for (std::set< variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v)
         {
           if (v!=vars.begin())
           {
-            cout << ", ";
+            std::cout << ", ";
           }
 
-          cout << data::pp(*v) << " := " << data::pp(sigma(*v));
+          std::cout << data::pp(*v) << " := " << data::pp(sigma(*v));
         }
-        cout << "] evaluates to "<< data::pp(rewr(term,sigma)) << "\n";
+        std::cout << "] evaluates to "<< data::pp(rewr(term,sigma)) << "\n";
       }
     }
 
-    void handle_rewrite(string s)
+    void handle_rewrite(std::string s)
     {
       rewriter::strategy new_strategy = parse_rewrite_strategy(trim_spaces(s));
       if (new_strategy!=m_rewrite_strategy)
@@ -275,20 +274,20 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
       }
     }
 
-    string read_input_command(bool& done)
+    std::string read_input_command(bool& done)
     {
-      string s;
-      (cout << "? ").flush();
-      getline(cin, s);
+      std::string s;
+      (std::cout << "? ").flush();
+      getline(std::cin, s);
       if ((s.length() > 0) && (s[s.length()-1] == '\r'))
       {
         // remove CR
         s.resize(s.length()-1);
       }
 
-      if (cin.eof())
+      if (std::cin.eof())
       {
-        cout << endl;
+        std::cout << std::endl;
         done = true;
       }
       return trim_spaces(s);
@@ -339,14 +338,14 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
       {
         try
         {
-          string s=read_input_command(done);
+          std::string s=read_input_command(done);
           if (match_and_remove(s,"q") || match_and_remove(s,"quit"))
           {
             handle_quit(done);
           }
           else if (match_and_remove(s,"h") || match_and_remove(s,"help"))
           {
-            cout << help_text;
+            std::cout << help_text;
           }
           else if (match_and_remove(s,"r ") || match_and_remove(s,"rewriter "))
           {
@@ -355,7 +354,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           else if (match_and_remove(s,"t ") || match_and_remove(s,"type "))
           {
             data_expression term = parse_term(s,spec,context_variables);
-            cout << data::pp(term.sort()) << endl;
+            std::cout << data::pp(term.sort()) << std::endl;
           }
           else if (match_and_remove(s,"v ") || match_and_remove(s,"var "))
           {
@@ -373,9 +372,9 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           {
             handle_assign(s);
           }
-          else if (cin.eof())
+          else if (std::cin.eof())
           {
-            cout << endl;
+            std::cout << std::endl;
             done = true;
           }
           else
@@ -385,7 +384,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
         }
         catch (mcrl2::runtime_error& e)  // Catch errors in the input.
         {
-          cout << e.what() << endl;
+          std::cout << e.what() << std::endl;
         }
       }
 
