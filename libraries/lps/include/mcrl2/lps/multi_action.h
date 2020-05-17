@@ -443,7 +443,7 @@ namespace std
 {
 /// \brief specialization of the standard std::hash function for an action_label_string.
 template<>
-struct std::hash< mcrl2::lps::multi_action >
+struct hash< mcrl2::lps::multi_action >
 {
   std::size_t operator()(const mcrl2::lps::multi_action& ma) const
   {
