@@ -107,8 +107,6 @@ template <typename Term>
 inline
 term_list<Term> sort_list(const term_list<Term>& l)
 {
-  typedef typename term_list<Term>::const_iterator const_iterator;
-
   const std::size_t len = l.size();
   if (len<=1)
   {
@@ -121,13 +119,14 @@ term_list<Term> sort_list(const term_list<Term>& l)
   if (len < LengthOfShortList)
   {
     // The list is short, use the stack for temporal storage.
-    const_iterator* buffer = MCRL2_SPECIFIC_STACK_ALLOCATOR(const_iterator, len);
+    Term* buffer = MCRL2_SPECIFIC_STACK_ALLOCATOR(Term, len);
 
     // Collect all elements of list in buffer.
     std::size_t j=0;
-    for (const_iterator i = l.begin(); i != l.end(); ++i, ++j)
+    for (const Term& t: l)
     {
-      buffer[j]=i;
+      new (buffer+j) Term(t); // A mcrl2 stack allocator does not handle construction by default. 
+      ++j;
     }
    
     std::sort(buffer, buffer+len);
@@ -136,7 +135,8 @@ term_list<Term> sort_list(const term_list<Term>& l)
     while (j>0)
     {
       j=j-1;
-      result.push_front(*buffer[j]);
+      result.push_front(buffer[j]);
+      buffer[j].~Term();    // Explicitly call the destructor, as an mCRL2 stack allocator does not do that itself. . 
     }
   }
   else

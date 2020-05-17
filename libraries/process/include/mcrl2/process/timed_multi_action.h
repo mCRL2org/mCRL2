@@ -68,7 +68,7 @@ class timed_multi_action: public atermpp::aterm_appl
     /// \return A multi-action with a sorted list.
     timed_multi_action sort_actions() const
     {
-      if (actions().size()<=1)  // Almost always there is only one action. 
+      if (actions().size()<=1)  // There is almost always only one action. 
       {
         return *this;
       }
