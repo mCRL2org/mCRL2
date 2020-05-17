@@ -135,7 +135,6 @@ class action_label_string: public std::string
     ///\returns This action in which the multi-actions are ordered. 
     static std::string sort_multiactions(const std::string& s) 
     {
-std::cerr << "SORT MULTIACTION " << s << "\n";
       // Split this multiaction in actions a1(...)  , a2(...), a3(...)
       static std::multiset<std::string> split_actions;  // Make a static variable to avoid this multiset being created often. 
       assert(split_actions.empty());

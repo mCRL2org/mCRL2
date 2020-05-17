@@ -317,6 +317,14 @@ template <typename Term>
 inline
 term_list<Term> reverse(const term_list<Term>& l);
 
+/// \brief Returns the list with the elements sorted according to the <-operator on the addresses of terms. 
+/// \param l A list.
+/// \details This operator has complexity nlog n where n is the size of the list.
+/// \return The sorted list.
+template <typename Term>
+inline
+term_list<Term> sort_list(const term_list<Term>& l);
+
 
 /// \brief Returns the concatenation of two lists with convertible element types.
 ///  \details The type of the result is either the type of l, if the elements of m

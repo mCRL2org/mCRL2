@@ -72,9 +72,7 @@ class timed_multi_action: public atermpp::aterm_appl
       {
         return *this;
       }
-      static std::multiset<action>sorted_actions(actions().begin(),actions().end());  // This set is static, as otherwise it must be constructed 
-                                                                                  // too often. 
-      return timed_multi_action(process::action_list(sorted_actions.begin(), sorted_actions.end()),time());
+      return timed_multi_action(atermpp::sort_list(actions()),time());
     }
 
 //--- end user section timed_multi_action ---//

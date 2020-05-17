@@ -103,6 +103,65 @@ term_list<Term> reverse(const term_list<Term>& l)
   return result;
 }
 
+template <typename Term>
+inline
+term_list<Term> sort_list(const term_list<Term>& l)
+{
+  typedef typename term_list<Term>::const_iterator const_iterator;
+
+  const std::size_t len = l.size();
+  if (len<=1)
+  {
+    return l;
+  }
+ 
+  // The resulting list
+  term_list<Term> result;
+
+  if (len < LengthOfShortList)
+  {
+    // The list is short, use the stack for temporal storage.
+    const_iterator* buffer = MCRL2_SPECIFIC_STACK_ALLOCATOR(const_iterator, len);
+
+    // Collect all elements of list in buffer.
+    std::size_t j=0;
+    for (const_iterator i = l.begin(); i != l.end(); ++i, ++j)
+    {
+      buffer[j]=i;
+    }
+   
+    std::sort(buffer, buffer+len);
+
+    // Insert elements at the front of the list.
+    while (j>0)
+    {
+      j=j-1;
+      result.push_front(*buffer[j]);
+    }
+  }
+  else
+  {
+    // The list is long. Use the heap to store intermediate data.
+    std::vector<Term> buffer;
+    buffer.reserve(len);
+
+    for (const Term& t: l)
+    {
+      buffer.push_back(t);
+    }
+
+    // Sort using a standard algorithm.
+    std::sort(buffer.begin(), buffer.end());
+
+    // Insert elements at the front of the list
+    for (typename std::vector<Term>::reverse_iterator i=buffer.rbegin(); i!=buffer.rend(); ++i)
+    {
+      result.push_front(*i);
+    }
+  }
+  return result;
+}
+
 
 template <typename Term>
 inline
