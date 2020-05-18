@@ -9,7 +9,7 @@
 
 #include "glwidget.h"
 
-#include "export.h"
+#include <QtOpenGL>
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/gui/arcball.h"
 
@@ -522,11 +522,6 @@ void GLWidget::startPaint()
 void GLWidget::endPaint()
 {
   m_painting = false;
-}
-
-void GLWidget::saveTikz(const QString& filename, float aspectRatio)
-{
-  export_graph_as_tikz_input(m_graph, filename, aspectRatio);
 }
 
 void GLWidget::saveBitmap(const QString& filename)

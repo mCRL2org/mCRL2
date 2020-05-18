@@ -235,6 +235,12 @@ void MainWindow::onOpenFile()
   openFile(fileName);
 }
 
+namespace Export
+{
+    /** LaTeX Tikz vector image format */
+    struct Tikz;
+}
+
 void MainWindow::onExportImage()
 {
   QString bitmap = tr("Bitmap images (*.png *.jpg *.jpeg *.gif *.bmp *.pbm *.pgm *.ppm *.xbm *.xpm)");
@@ -254,7 +260,7 @@ void MainWindow::onExportImage()
     }
     else
     {
-      m_glwidget->saveTikz(fileName, m_glwidget->width() / m_glwidget->height());
+      m_glwidget->saveVector<Export::Tikz>(fileName);
     }
   }
 
