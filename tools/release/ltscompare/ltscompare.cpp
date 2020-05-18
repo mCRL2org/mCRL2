@@ -70,7 +70,9 @@ class ltscompare_tool : public ltscompare_base
       ltscompare_base(NAME,AUTHOR,
                       "compare two LTSs",
                       "Determine whether or not the labelled transition systems (LTSs) in INFILE1 and INFILE2 are related by some equivalence or preorder. "
-                      "If INFILE1 is not supplied, stdin is used.\n"
+                      "If INFILE1 is not supplied, stdin is used. "
+                      "If INFILE1 and/or INFILE2 is '-', stdin is used. "
+                      "Reading two LTSs via stdin is only supported for the 'aut' format, these LTSs must be separated by an EOT character (\\x04).\n"
                       "\n"
                       "The input formats are determined by the contents of INFILE1 and INFILE2. "
                       "Options --in1 and --in2 can be used to force the input format of INFILE1 and INFILE2, respectively. "
