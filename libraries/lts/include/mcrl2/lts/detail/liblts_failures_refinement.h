@@ -650,39 +650,93 @@ namespace detail
       }
     }
 
-    if (!success)
+    if (!success && provide_a_counter_example)
     {
-      if (provide_a_counter_example)
+      // Print the acceptance set of the implementation
+      if (impl_action_labels.empty())
       {
-        // Print the acceptance set of the implementation
-        if (impl_action_labels.empty())
+        if (structured_output)
         {
-          if (structured_output)
-          {
-            std::cout << "left-acceptance:\n";
-          }
-          else
-          {
-            mCRL2log(log::verbose) << "The acceptance of the left process is empty.\n";
-          }
+          std::cout << "left-acceptance:\n";
         }
         else
         {
+          mCRL2log(log::verbose) << "The acceptance of the left process is empty.\n";
+        }
+      }
+      else
+      {
+        if (structured_output)
+        {
+          std::cout << "left-acceptance: ";
+        }
+        else
+        {
+          mCRL2log(log::verbose) << "A stable acceptance set of the left process is:\n";
+        }
+        std::string sep = "";
+        for (const label_type a: impl_action_labels)
+        {
           if (structured_output)
           {
-            std::cout << "left-acceptance:";
+            std::cout << sep << l.action_label(a);
+            sep = ";";
           }
           else
           {
-            mCRL2log(log::verbose) << "A stable acceptance set of the left process is:\n";
+            mCRL2log(log::verbose) << l.action_label(a) << "\n";
+          }
+        }
+        if (structured_output)
+        {
+          std::cout << "\n";
+        }
+      }
+
+      // Print the acceptance sets of the specification.
+      if (spec.empty())
+      {
+        if (structured_output)
+        {
+          std::cout << "right-acceptance-sets: 0\n";
+        }
+        else
+        {
+          mCRL2log(log::verbose) << "The process at the right has no acceptance sets.\n";
+        }
+      }
+      else
+      {
+        set_of_states stable;
+        // Only the stable specification states contributed to this counter example.
+        std::copy_if(spec.begin(), spec.end(), std::inserter(stable,stable.end()), [=](const state_type s){return weak_property_cache.stable(s);});
+
+        if (structured_output)
+        {
+          std::cout << "right-acceptance-sets: " << stable.size () << "\n";
+        }
+        else
+        {
+          mCRL2log(log::verbose) << "Below all corresponding stable acceptance sets of the right process are provided:\n";
+        }
+        for (const state_type s: stable)
+        {
+          const action_label_set& spec_action_labels = weak_property_cache.action_labels(s);
+          if (structured_output)
+          {
+            std::cout << "right-acceptance: ";
+          }
+          else
+          {
+            mCRL2log(log::verbose) << "An acceptance set of the right process is:\n";
           }
           std::string sep = "";
-          for(const label_type a : impl_action_labels)
+          for (const label_type a: spec_action_labels)
           {
             if (structured_output)
             {
               std::cout << sep << l.action_label(a);
-              sep = " ";
+              sep = ";";
             }
             else
             {
@@ -694,73 +748,15 @@ namespace detail
             std::cout << "\n";
           }
         }
-
-        // Print the acceptance sets of the specification.
-        if (spec.empty())
-        {
-          if (structured_output)
-          {
-            std::cout << "right-acceptance-sets:0\n";
-          }
-          else
-          {
-            mCRL2log(log::verbose) << "The process at the right has no acceptance sets.\n";
-          }
-        }
-        else
-        {
-          set_of_states stable;
-          // Only the stable specification states contributed to this counter example.
-          std::copy_if(spec.begin(), spec.end(), std::inserter(stable,stable.end()), [=](const state_type s){return weak_property_cache.stable(s);});
-
-          if (structured_output)
-          {
-            std::cout << "right-acceptance-sets:" << stable.size () << "\n";
-          }
-          else
-          {
-            mCRL2log(log::verbose) << "Below all corresponding stable acceptance sets of the right process are provided:\n";
-          }
-          for(const state_type s : stable)
-          {
-            const action_label_set& spec_action_labels = weak_property_cache.action_labels(s);
-            if (structured_output)
-            {
-              std::cout << "right-acceptance:";
-            }
-            else
-            {
-              mCRL2log(log::verbose) << "An acceptance set of the right process is:\n";
-            }
-            std::string sep = "";
-            for(const label_type a : spec_action_labels)
-            {
-              if (structured_output)
-              {
-                std::cout << sep << l.action_label(a);
-                sep = " ";
-              }
-              else
-              {
-                mCRL2log(log::verbose) << l.action_label(a) << "\n";
-              }
-            }
-            if (structured_output)
-            {
-              std::cout << "\n";
-            }
-          }
-        }
-        if (!structured_output)
-        {
-          mCRL2log(log::verbose) << "Finished printing acceptance sets.\n";
-        }
-        // Ready printing acceptance sets.
       }
-      return false;
+      if (!structured_output)
+      {
+        mCRL2log(log::verbose) << "Finished printing acceptance sets.\n";
+      }
+      // Done printing acceptance sets.
     }
 
-    return true;
+    return success;
   }
 
 

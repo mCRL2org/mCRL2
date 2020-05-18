@@ -130,7 +130,7 @@ class counter_example_constructor
       }
       if (m_structured_output)
       {
-        std::cout << m_name << ":";
+        std::cout << m_name << ": ";
         result.save(std::cout, mcrl2::trace::tfLine);
       }
       else
