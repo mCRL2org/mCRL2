@@ -389,6 +389,17 @@ class Graph
 #endif
 
     /**
+     * @brief Helper class that allows RAII-style locking for graph access
+     */
+    class Guard
+    {
+      public:
+        Graph& graph;
+        Guard(Graph& graph) : graph(graph) { graph.lock(GRAPH_LOCK_TRACE); }
+        ~Guard() { graph.unlock(GRAPH_LOCK_TRACE); }
+    };
+
+    /**
      * @brief Deletes all nodes, handles, edges and labels stored in this graph
      */
     void clear();

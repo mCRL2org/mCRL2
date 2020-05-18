@@ -125,10 +125,12 @@ public:
   void saveBitmap(const QString& filename);
 
   /**
-   * @brief Renders the current visualisation to a LaTeX Tikz image.
+   * @brief Renders the current visualisation to a vector file.
+   * @tparam Format The type of vector image format used.
    * @param filename The filename for the output.
+   * @note see export{Format}.cpp for the implementation
    */
-  void saveTikz(const QString& filename, float aspectRatio);
+  template <typename Format> void saveVector(const QString& filename);
 
   /**
    * @brief Sets the paint color.
