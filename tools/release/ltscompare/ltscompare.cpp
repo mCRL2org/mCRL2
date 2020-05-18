@@ -114,27 +114,18 @@ class ltscompare_tool : public ltscompare_base
         result = destructive_compare(l1, l2, tool_options.preorder, tool_options.generate_counter_examples, tool_options.structured_output, tool_options.strategy, tool_options.enable_preprocessing);
 
         if (!tool_options.structured_output)
+        {
           mCRL2log(info) << "The LTS in " << tool_options.name_for_first
                          << " is " << ((result) ? "" : "not ")
                          << "included in"
                          << " the LTS in " << tool_options.name_for_second
                          << " (using " << description(tool_options.preorder)
                          << ")." << std::endl;
+        }
       }
 
-      if (tool_options.structured_output)
-      {
-        // Let the exit code depend on the result of the LTS comparison.
-        // This is expected behaviour for UNIX tools such as diff.
-        return result;
-      }
-      else
-      {
-        // When printing human readable output, the exit code is EXIT_SUCCESS
-        // for backwards compatibility.
-        std::cout << (result ? "true" : "false") << std::endl;
-        return true; // The tool terminates in a correct way.
-      }
+      std::cout << (tool_options.structured_output ? "result: " : "") << std::boolalpha << result << std::endl;
+      return true; // The tool terminates in a correct way.
     }
 
   public:
@@ -258,11 +249,6 @@ class ltscompare_tool : public ltscompare_base
       add_option("counter-example",
                  "generate counter example traces if the input lts's are not equivalent",'c').
       add_option("structured-output",
-                 // TODO: also write human readable stderr chatter like
-                 // "LTS in A is [not] included in B" in a structured way to stdout,
-                 // something like
-                 // 2_contains_1: no
-                 // 1_contains_2: yes
                  "generate counter examples on stdout",'x').
       add_hidden_option("no-preprocessing",
                         "disable preprocessing applied to the input LTSs for refinement checking",'\0');

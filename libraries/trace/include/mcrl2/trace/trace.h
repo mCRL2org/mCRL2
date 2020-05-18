@@ -755,7 +755,7 @@ class Trace
 
     void saveLine(std::ostream& os)
     {
-      save_text(os, " ");
+      save_text(os, ";");
       os << std::endl;
     }
 
