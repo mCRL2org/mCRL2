@@ -238,9 +238,8 @@ static bool read_initial_part_of_an_aut_transition(
   {
     return false;
   }
-  if (ch != '(')
+  if (ch == 0x04) // found EOT character that separates two files
   {
-    is.unget();
     return false;
   }
 
