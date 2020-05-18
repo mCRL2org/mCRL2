@@ -28,13 +28,14 @@ namespace lps
 {
 
 void lpsbinary(const std::string& input_filename,
-               const std::string& output_filename)
+               const std::string& output_filename,
+               const std::string& parameter_selection)
 {
   lps::stochastic_specification spec;
   load_lps(spec, input_filename);
   data::rewriter r(spec.data());
 
-  lps::binary_algorithm<data::rewriter, stochastic_specification>(spec, r).run();
+  lps::binary_algorithm<data::rewriter, stochastic_specification>(spec, r, parameter_selection).run();
   save_lps(spec, output_filename);
 }
 

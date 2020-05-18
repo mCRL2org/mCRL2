@@ -14,6 +14,7 @@
 
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
+#include "mcrl2/lps/detail/parameter_selection.h"
 
 namespace mcrl2
 {
@@ -51,6 +52,8 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
   protected:
     /// Rewriter
     DataRewriter m_rewriter;
+
+    const std::string m_parameter_selection;
 
     /// Mapping of finite variables to boolean vectors
     std::map<data::variable, std::vector<data::variable> > m_new_parameters;
@@ -111,12 +114,49 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
       return result;
     }
 
-    // Take a specification and calculate a vector of boolean variables for each process
-    // parameter of a finite sort. A mapping variable -> vector of booleans is stored in new_parameters_table
-    // a mapping variable -> enumerated elements is stored in enumerated_elements_table
+    /// \brief Determine which variables should be replaced, based on parameter_selection
+    /// \return A subset of the process parameters, with a finite sort that is not Bool
+    std::set<data::variable> select_parameters(const std::string parameter_selection) const
+    {
+      const data::variable_list& process_parameters = m_spec.process().process_parameters();
+      bool use_selection = !parameter_selection.empty();
+
+      std::list<data::variable> selected_params;
+      if (use_selection)
+      {
+        auto sel = detail::parse_lps_parameter_selection(process_parameters, m_spec.data(), parameter_selection);
+        selected_params = std::list<data::variable>(sel.begin(), sel.end());
+      }
+      else
+      {
+        selected_params = std::list<data::variable>(process_parameters.begin(), process_parameters.end());
+      }
+      selected_params.remove_if([&](const data::variable& v)
+        {
+          bool cannot_replace = v.sort() == data::sort_bool::bool_() || !m_spec.data().is_certainly_finite(v.sort());
+          if (cannot_replace && use_selection)
+          {
+            mCRL2log(log::info) << "Not selecting " << v  << ":" << v.sort() << " since it is already Bool, or its type is not finite." << std::endl;
+          }
+          return cannot_replace;
+        }
+      );
+
+      if (use_selection && selected_params.empty())
+      {
+        mCRL2log(log::info) << "No parameters were selected to be replaced." << std::endl;
+      }
+
+      return std::set<data::variable>(selected_params.begin(), selected_params.end());
+    }
+
+    /// \brief Take a specification and calculate a vector of boolean variables for each process
+    /// parameter in selected_params. A mapping variable -> vector of booleans is stored in new_parameters_table
+    /// a mapping variable -> enumerated elements is stored in enumerated_elements_table
+    /// \pre all elements in selected_params should not be of type Bool and should have a finite type
     /// \return data variable list with the new process parameters (i.e. with all variables of a
     /// finite type != bool replaced by a vector of boolean variables.
-    void replace_enumerated_parameters()
+    void replace_enumerated_parameters(const std::set<data::variable>& selected_params)
     {
       data::variable_list process_parameters = m_spec.process().process_parameters();
       data::variable_vector new_parameters;
@@ -132,7 +172,7 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
       // Transpose all process parameters, and replace those that are finite, and not bool with boolean variables.
       for (const data::variable& par: process_parameters)
       {
-        if (!data::sort_bool::is_bool(par.sort()) && m_spec.data().is_certainly_finite(par.sort()))
+        if (selected_params.find(par) != selected_params.end())
         {
           //Get all constructors for par
           data::data_expression_vector enumerated_elements; // List to store enumerated elements of a parameter
@@ -207,12 +247,12 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
       {
         const data::variable par= *i;
         i++;
-        if (m_new_parameters.find(par) == m_new_parameters.end())   // This parameter is not replaced by a boolean parameters. 
+        if (m_new_parameters.find(par) == m_new_parameters.end())   // This parameter is not replaced by a boolean parameters.
         {
           result.push_back(a);
         }
         else
-        { 
+        {
           data::variable_vector new_parameters = m_new_parameters[par];
           data::data_expression_vector elements = m_enumerated_elements[par];
 
@@ -334,7 +374,7 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
 
     process_initializer update_initial_process(const data::variable_list& parameters, const process_initializer& init)
     {
-      return process_initializer(replace_enumerated_parameters_in_initial_expressions(parameters, init.expressions())); 
+      return process_initializer(replace_enumerated_parameters_in_initial_expressions(parameters, init.expressions()));
     }
 
     stochastic_process_initializer update_initial_process(const data::variable_list& parameters, const stochastic_process_initializer& init)
@@ -349,21 +389,24 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
     /// \param spec Specification to which the algorithm should be applied
     /// \param r a rewriter for data
     binary_algorithm(Specification& spec,
-                     DataRewriter& r)
+                     DataRewriter& r,
+                     const std::string parameter_selection = "")
       : detail::lps_algorithm<Specification>(spec),
-        m_rewriter(r)
+        m_rewriter(r),
+        m_parameter_selection(parameter_selection)
     {}
 
     /// \brief Apply the algorithm to the specification passed in the
     ///        constructor
     void run()
     {
-      const data::variable_list old_parameters = m_spec.process().process_parameters();
-      replace_enumerated_parameters();
+      data::variable_list old_parameters = m_spec.process().process_parameters();
+      const std::set<data::variable> to_replace = select_parameters(m_parameter_selection);
+      replace_enumerated_parameters(to_replace);
 
       // Initial process
       mCRL2log(log::debug) << "Updating process initializer" << std::endl;
-      m_spec.initial_process() = update_initial_process(old_parameters,m_spec.initial_process());
+      m_spec.initial_process() = update_initial_process(old_parameters, m_spec.initial_process());
 
       // Summands
       mCRL2log(log::debug) << "Updating summands" << std::endl;

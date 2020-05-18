@@ -22,7 +22,8 @@ namespace mcrl2 {
 namespace lps {
 
 void lpsbinary(const std::string& input_filename,
-               const std::string& output_filename);
+               const std::string& output_filename,
+               const std::string& parameter_selection);
 
 void lpsconstelm(const std::string& input_filename,
                  const std::string& output_filename,

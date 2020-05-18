@@ -15,6 +15,7 @@
 #include "mcrl2/lps/binary.h"
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/lps/linearise.h"
+#include "mcrl2/lps/parse.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -271,3 +272,28 @@ BOOST_AUTO_TEST_CASE(abp)
   BOOST_CHECK(check_well_typedness(spec));
 }
 
+BOOST_AUTO_TEST_CASE(parameter_selection)
+{
+  const std::string text =
+  "sort Enum6 = struct e6_1 | e6_2 | e6_3 | e6_4 | e6_5 | e6_6;\n"
+  "sort Enum5 = struct e5_1 | e5_2 | e5_3 | e5_4 | e5_5;\n"
+  "act z;\n"
+  "proc P(b:Pos, c:Enum6, d:Enum5) = z . P();\n"
+  "init P(5, e6_2, e5_5);";
+
+  specification s0 = parse_linear_process_specification(text);
+  rewriter r(s0.data());
+  specification s1 = s0;
+  binary_algorithm<rewriter, specification>(s1, r, "*:Enum6").run();
+
+  int bool_param_count = 0;
+  for (const variable& v: s1.process().process_parameters())
+  {
+    BOOST_CHECK(v.sort() == sort_pos::pos() || v.sort() == sort_bool::bool_() || v.sort() == parse_sort_expression("Enum5", s0.data()));
+    if (v.sort() == sort_bool::bool_())
+    {
+      ++bool_param_count;
+    }
+  }
+  BOOST_CHECK_EQUAL(bool_param_count, 3);
+}
