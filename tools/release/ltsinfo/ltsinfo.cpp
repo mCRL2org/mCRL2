@@ -323,6 +323,7 @@ class ltsinfo_tool : public ltsinfo_base
         }
         case lts_none:
           mCRL2log(warning) << "No input format is specified. Assuming .aut format.\n";
+          [[fallthrough]];
         case lts_aut:
         {
           return provide_information<probabilistic_lts_aut_t>();

@@ -142,6 +142,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
       case UNDETERMINED:
       case CONJUNCTIVE:
         mode = UNIVERSAL;
+        [[fallthrough]];
       case UNIVERSAL:
       {
         quantifier_variable_stack.push(quantifier_variable_stack.top() + x.variables());
@@ -184,6 +185,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
       case UNDETERMINED:
       case DISJUNCTIVE:
         mode = EXISTENTIAL;
+        [[fallthrough]];
       case EXISTENTIAL:
       {
         quantifier_variable_stack.push(quantifier_variable_stack.top() + x.variables());
@@ -225,6 +227,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
       {
       case UNDETERMINED:
         mode = CONJUNCTIVE;
+        [[fallthrough]];
       case CONJUNCTIVE:
       {
         mode_stack.push(mode);
@@ -314,6 +317,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
       {
       case UNDETERMINED:
         mode = DISJUNCTIVE;
+        [[fallthrough]];
       case DISJUNCTIVE:
       {
         mode_stack.push(mode);

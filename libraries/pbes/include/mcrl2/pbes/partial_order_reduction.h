@@ -833,6 +833,8 @@ class partial_order_reduction_algorithm
         }
         return result == data::sort_bool::true_();
       }
+      // This code is unreachable, but necessary to silence a compiler warning
+      return false;
     }
 
     /// \brief Return true iff k1 can never happen after k happens, as deduced from

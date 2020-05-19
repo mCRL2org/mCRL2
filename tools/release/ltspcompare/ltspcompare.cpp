@@ -170,6 +170,7 @@ class ltspcompare_tool : public ltscompare_base
         }
         case lts_none:
           mCRL2log(mcrl2::log::warning) << "No input format is specified. Assuming .aut format.\n";
+          [[fallthrough]];
         case lts_aut:
         {
           return lts_probabilistic_compare<probabilistic_lts_aut_t>();

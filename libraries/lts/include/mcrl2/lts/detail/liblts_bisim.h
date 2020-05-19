@@ -1224,7 +1224,7 @@ bool destructive_bisimulation_compare(
   const bool branching /* =false*/,
   const bool preserve_divergences /*=false*/,
   const bool generate_counter_examples /* = false */,
-  const bool structured_output /* = false */)
+  const bool /*structured_output = false */)
 {
   std::size_t init_l2 = l2.initial_state() + l1.num_states();
   mcrl2::lts::detail::merge(l1,l2);
