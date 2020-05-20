@@ -237,6 +237,8 @@ void MainWindow::onOpenFile()
 
 namespace Export
 {
+    /** Scalable Vector Graphics vector image format */
+    struct SVG;
     /** LaTeX Tikz vector image format */
     struct Tikz;
 }
@@ -244,9 +246,10 @@ namespace Export
 void MainWindow::onExportImage()
 {
   QString bitmap = tr("Bitmap images (*.png *.jpg *.jpeg *.gif *.bmp *.pbm *.pgm *.ppm *.xbm *.xpm)");
+  QString svg = tr("Scalable Vector Graphics [SVG] image (*.svg)");
   QString tikz = tr("LaTeX TikZ Image (*.tex)");
 
-  QString filter = bitmap + ";;" + tikz;
+  QString filter = bitmap + ";;" + svg + ";;" + tikz;
   QString selectedFilter = bitmap;
   QString fileName(m_fileDialog.getSaveFileName(tr("Save file"),
                    filter,
@@ -258,7 +261,11 @@ void MainWindow::onExportImage()
     {
       m_glwidget->saveBitmap(fileName);
     }
-    else
+    else if (selectedFilter == svg)
+    {
+      m_glwidget->saveVector<Export::SVG>(fileName);
+    }
+    else if (selectedFilter == tikz)
     {
       m_glwidget->saveVector<Export::Tikz>(fileName);
     }
