@@ -51,35 +51,35 @@ class Node : public Entity
     friend class Edge;
     friend class Exporter;
   public:
-    constexpr operator const Graph::NodeNode&() const
-    {
-      return m_graph.node(m_id);
-    }
-    constexpr operator const Graph::LabelNode&() const
-    {
-      return m_graph.stateLabel(m_id);
-    }
     /** @brief Returns true when this node represents the initial state */
-    constexpr bool initial() const
+    bool initial() const
     {
       return m_graph.initialState() == m_id;
     }
     /** @brief Returns false when the node is not being explored in exploration mode */
-    constexpr bool active() const
+    bool active() const
     {
       return !m_graph.hasExploration() || m_graph.node(m_id).active();
     }
-    constexpr const QString& label() const
+    const QString& label() const
     {
       return m_graph.stateLabelstring(m_graph.stateLabel(m_id).labelindex());
     }
-    constexpr const QVector3D& pos() const
+    const QVector3D& pos() const
     {
       return m_graph.node(m_id).pos();
     }
-    constexpr const QVector3D& color() const
+    const QVector3D& color() const
     {
       return m_graph.node(m_id).color();
+    }
+    const QVector3D& labelPos() const
+    {
+      return m_graph.stateLabel(m_id).pos();
+    }
+    const QVector3D& labelColor() const
+    {
+      return m_graph.stateLabel(m_id).color();
     }
 };
 
@@ -97,10 +97,6 @@ class Edge : public Entity
 
     friend class Exporter;
   public:
-    constexpr operator const Graph::LabelNode&() const
-    {
-      return m_graph.transitionLabel(m_id);
-    }
     constexpr const Node& from() const
     {
       return m_from;
@@ -109,18 +105,30 @@ class Edge : public Entity
     {
       return m_to;
     }
-    constexpr const Graph::Node& handle() const
-    {
-      return m_graph.handle(m_id);
-    }
     /** @brief Returns true when the edge has the same source and destination node */
     constexpr bool selfLoop() const
     {
       return m_from.m_id == m_to.m_id;
     }
-    constexpr const QString& label() const
+    const QString& label() const
     {
       return m_graph.transitionLabelstring(m_graph.transitionLabel(m_id).labelindex());
+    }
+    const QVector3D& handlePos() const
+    {
+      return m_graph.handle(m_id).pos();
+    }
+    const QVector3D& labelPos() const
+    {
+      return m_graph.transitionLabel(m_id).pos();
+    }
+    const QVector3D& labelColor() const
+    {
+      return m_graph.transitionLabel(m_id).color();
+    }
+    constexpr std::array<QVector3D, 4> quadraticCurve() const
+    {
+      return GLScene::calculateArc(from().pos(), handlePos(), to().pos(), selfLoop());
     }
 };
 

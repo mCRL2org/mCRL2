@@ -393,38 +393,12 @@ bool GLScene::isVisible(const QVector3D& position, float& fogamount)
 
 void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
 {
+  // Calculate control points from edge nodes and handle
   Graph::Edge edge = m_graph.edge(i);
-
-  // We define four control points of a spline.
-  std::array<QVector3D, 4> control;
-  QVector3D& from = control[0];
-  QVector3D& to = control[3];
-
-  // Calculate control points from handle
-  QVector3D via = m_graph.handle(i).pos();
-  from = m_graph.node(edge.from()).pos();
-  to = m_graph.node(edge.to()).pos();
-
-  // Move the control point a bit further from the middle point between the nodes.
-  // This is an affine combination of the points 'via' and '(from + to) / 2.0f'.
-  control[1] = via * 1.33333f - (from + to) / 6.0f;
-  // Standard case: use the same position for both points (effectively a quadratic curve).
-  control[2] = control[1];
-
-  if (edge.from() == edge.to())
-  {
-    // For self-loops, ctrl[1] and ctrl[2] need to lie apart, we'll spread
-    // them in x-y direction.
-    if (!m_drawselfloops)
-    {
-      return;
-    }
-    QVector3D diff = control[1] - control[0];
-    diff = QVector3D::crossProduct(diff, QVector3D(0, 0, 1));
-    diff = diff * ((via - from).length() / (diff.length() * 2.0f));
-    control[1] = control[1] + diff;
-    control[2] = control[2] - diff;
-  }
+  const QVector3D from = m_graph.node(edge.from()).pos();
+  const QVector3D via = m_graph.handle(i).pos();
+  const QVector3D to = m_graph.node(edge.to()).pos();
+  const std::array<QVector3D, 4> control = calculateArc(from, via, to, edge.from() == edge.to());
 
   // Use the arc shader to draw the arcs.
   m_arc_shader.bind();
