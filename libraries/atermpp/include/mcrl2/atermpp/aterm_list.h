@@ -319,11 +319,14 @@ term_list<Term> reverse(const term_list<Term>& l);
 
 /// \brief Returns the list with the elements sorted according to the <-operator on the addresses of terms. 
 /// \param l A list.
+/// \param ordering An total orderings relation on Term, by default the ordering relation on Terms. 
 /// \details This operator has complexity nlog n where n is the size of the list.
 /// \return The sorted list.
 template <typename Term>
 inline
-term_list<Term> sort_list(const term_list<Term>& l);
+term_list<Term> sort_list(const term_list<Term>& l, 
+                          const std::function<bool(const Term&, const Term&)>& ordering 
+                                      = [](const Term& t1, const Term& t2){ return t1<t2;});
 
 
 /// \brief Returns the concatenation of two lists with convertible element types.

@@ -7474,14 +7474,9 @@ class specification_basic_type
       deadlock_summands.swap(result);
     }
 
-    action_name_multiset_list sortMultiActionLabels(const action_name_multiset_list& l)
+    static action_name_multiset_list sort_multi_action_labels(const action_name_multiset_list& l)
     {
-      action_name_multiset_list result;
-      for (action_name_multiset_list::const_iterator i=l.begin(); i!=l.end(); ++i)
-      {
-        result.push_front(sortActionLabels(*i));
-      }
-      return result;
+      return action_name_multiset_list(l.begin(),l.end(),[](const action_name_multiset& al){ return sort_action_labels(al); });
     }
 
     /// \brief determine whether the multiaction has the same labels as the allow action,
@@ -7572,7 +7567,7 @@ class specification_basic_type
       deadlock_summand_vector resultsimpledeltasumlist;
       deadlock_summands.swap(resultdeltasumlist);
 
-      action_name_multiset_list allowlist((is_allow)?sortMultiActionLabels(allowlist1):allowlist1);
+      action_name_multiset_list allowlist((is_allow)?sort_multi_action_labels(allowlist1):allowlist1);
 
       std::size_t sourcesumlist_length=sourcesumlist.size();
       if (sourcesumlist_length>2 || is_allow) // This condition prevents this message to be printed
@@ -7799,40 +7794,12 @@ class specification_basic_type
 
     /**************** communication operator composition ****************/
 
-    identifier_string_list insertActionLabel(
-      const identifier_string& action,
-      const identifier_string_list& actionlabels)
+    static action_name_multiset sort_action_labels(const action_name_multiset& actionlabels)
     {
-      /* assume actionlabels is sorted, and put
-         action at the proper place to yield a sorted
-         list */
-      if (actionlabels.empty())
-      {
-        return identifier_string_list({ action });
-      }
-
-      const identifier_string& firstAction=actionlabels.front();
-
-      if (std::string(action)<std::string(firstAction))
-      {
-        identifier_string_list result=actionlabels;
-        result.push_front(action);
-        return result;
-      }
-      identifier_string_list result=insertActionLabel(action,actionlabels.tail());
-      result.push_front(firstAction);
-      return result;
-    }
-
-    action_name_multiset sortActionLabels(const action_name_multiset& actionlabels1)
-    {
-      identifier_string_list result;
-      const identifier_string_list& actionlabels(actionlabels1.names());
-      for (const identifier_string& id: actionlabels)
-      {
-        result=insertActionLabel(id,result);
-      }
-      return action_name_multiset(result);
+      return action_name_multiset(atermpp::sort_list<identifier_string>(
+                                               actionlabels.names(),
+                                               [](const identifier_string& a1, const identifier_string& a2)
+                                                                { return std::string(a1)<std::string(a2); }));
     }
 
     template <typename List>
@@ -8288,7 +8255,7 @@ class specification_basic_type
       {
         const action_name_multiset source=i->action_name();
         const identifier_string target=i->name();
-        resultingCommunications.push_front(communication_expression(sortActionLabels(source),target));
+        resultingCommunications.push_front(communication_expression(sort_action_labels(source),target));
       }
       communication_expression_list communications1=resultingCommunications;
 
@@ -8304,7 +8271,7 @@ class specification_basic_type
         assert(!options.nodeltaelimination && options.ignore_time);
         deadlock_summands.push_back(deadlock_summand(variable_list(),sort_bool::true_(),deadlock()));
       }
-      action_name_multiset_list allowlist((is_allow)?sortMultiActionLabels(allowlist1):allowlist1);
+      action_name_multiset_list allowlist((is_allow)?sort_multi_action_labels(allowlist1):allowlist1);
 
       for (stochastic_action_summand_vector::const_iterator sourcesumlist=action_summands.begin();
            sourcesumlist!=action_summands.end(); ++sourcesumlist)
@@ -9216,7 +9183,7 @@ class specification_basic_type
 
       /* first we enumerate the summands of t1 */
 
-      action_name_multiset_list allowlist((is_allow)?sortMultiActionLabels(allowlist1):allowlist1);
+      action_name_multiset_list allowlist((is_allow)?sort_multi_action_labels(allowlist1):allowlist1);
       calculate_left_merge(action_summands1, deadlock_summands1,
                            ultimate_delay_condition2, allowlist, is_allow, is_block,
                            action_summands, deadlock_summands);

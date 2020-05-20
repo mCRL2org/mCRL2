@@ -105,7 +105,9 @@ term_list<Term> reverse(const term_list<Term>& l)
 
 template <typename Term>
 inline
-term_list<Term> sort_list(const term_list<Term>& l)
+term_list<Term> sort_list(const term_list<Term>& l, 
+                             const std::function<bool(const Term&, const Term&)>& ordering 
+                                  /* = [](const Term& t1, const Term& t2){ return t1<t2;}*/ )
 {
   const std::size_t len = l.size();
   if (len<=1)
@@ -129,7 +131,7 @@ term_list<Term> sort_list(const term_list<Term>& l)
       ++j;
     }
    
-    std::sort(buffer, buffer+len);
+    std::sort(buffer, buffer+len, ordering);
 
     // Insert elements at the front of the list.
     while (j>0)
@@ -151,7 +153,7 @@ term_list<Term> sort_list(const term_list<Term>& l)
     }
 
     // Sort using a standard algorithm.
-    std::sort(buffer.begin(), buffer.end());
+    std::sort(buffer.begin(), buffer.end(), ordering);
 
     // Insert elements at the front of the list
     for (typename std::vector<Term>::reverse_iterator i=buffer.rbegin(); i!=buffer.rend(); ++i)
