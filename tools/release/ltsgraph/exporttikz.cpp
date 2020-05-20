@@ -47,37 +47,13 @@ inline QString tikzNode(const Export::Node& node, float aspectRatio)
 
 inline QString tikzEdge(const Export::Edge& edge, float aspectRatio)
 {
-  QVector3D ctrl[4];
-  QVector3D& from = ctrl[0];
-  QVector3D& to = ctrl[3];
-  QVector3D via = edge.handle().pos();
-  from = edge.from().pos();
-  to = edge.to().pos();
+  const std::array<QVector3D, 4> ctrl = edge.quadraticCurve();
 
-  // Calculate control points from handle
-  ctrl[1] = via * 1.33333f - (from + to) / 6.0f;
-  ctrl[2] = ctrl[1];
-
-  QString extraControls("");
-
-  // For self-loops, ctrl[1] and ctrl[2] need to lie apart, we'll spread
-  // them in x-y direction.
-  if (edge.selfLoop())
-  {
-    QVector3D diff = ctrl[1] - ctrl[0];
-    diff = QVector3D::crossProduct(diff, QVector3D(0, 0, 1));
-    diff = diff * ((via - from).length() / (diff.length() * 2.0));
-    ctrl[1] = ctrl[1] + diff;
-    ctrl[2] = ctrl[2] - diff;
-
-    extraControls = QString(" and (%1pt, %2pt)").arg(ctrl[2].x() / 10.0f * aspectRatio, 6, 'f').arg(ctrl[2].y() / 10.0f, 6, 'f');
-  }
-
-  QString ret = "\\draw [transition] (state%1) .. node[auto] {%3} controls (%4pt, %5pt)%6 .. (state%2);\n";
+  QString ret = "\\draw [transition] (state%1) .. node[auto] {%3} controls (%4pt, %5pt) and (%6pt, %7pt) .. (state%2);\n";
   ret = ret.arg(edge.from().id()).arg(edge.to().id());
   ret = ret.arg(escapeLatex(edge.label()));
   ret = ret.arg(ctrl[1].x() / 10.0f * aspectRatio, 6, 'f').arg(ctrl[1].y() / 10.0f, 6, 'f');
-  ret = ret.arg(extraControls);
+  ret = ret.arg(ctrl[2].x() / 10.0f * aspectRatio, 6, 'f').arg(ctrl[2].y() / 10.0f, 6, 'f');
 
   return ret;
 }
@@ -97,7 +73,7 @@ template <> void GLWidget::saveVector<Export::Tikz>(const QString& filename)
 
       "\\begin{document}\n"
       "\\begin{tikzpicture}\n"
-      "  [scale=2]\n\n"
+      "  [scale=5]\n\n"
       "   \\tikzstyle{state}=[circle, draw]\n"
       "   \\tikzstyle{initstate}=[state,fill=green]\n"
       "   \\tikzstyle{transition}=[->,>=stealth']\n";
