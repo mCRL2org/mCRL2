@@ -51,25 +51,25 @@ class Edge
     {}
 
     /// \brief Obtain the value of from.
-    std::size_t from() const
+    constexpr std::size_t from() const
     {
       return m_from;
     }
 
     /// \brief Obtain a reference to the value of from.
-    std::size_t& from()
+    constexpr std::size_t& from()
     {
       return m_from;
     }
 
     /// \brief Obtain the value of to.
-    std::size_t to() const
+    constexpr std::size_t to() const
     {
       return m_to;
     }
 
     /// \brief Obtain a reference to the value of to.
-    std::size_t& to()
+    constexpr std::size_t& to()
     {
       return m_to;
     }

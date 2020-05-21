@@ -208,8 +208,8 @@ private:
   std::vector<QStaticText> m_transition_labels;
 };
 
-constexpr std::array<QVector3D, 4> GLScene::calculateArc(const QVector3D & from, const QVector3D & via,
-  const QVector3D & to, bool selfLoop)
+constexpr std::array<QVector3D, 4> GLScene::calculateArc(const QVector3D& from, const QVector3D& via,
+  const QVector3D& to, bool selfLoop)
 {
   // Pick a point a bit further from the middle point between the nodes.
   // This is an affine combination of the points 'via' and '(from + to) / 2.0f'.
