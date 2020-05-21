@@ -96,11 +96,37 @@ inline QString svgEdge(const Export::Edge& edge, const GLScene& scene)
     + svgArrowhead(tip, top, headSize);
 }
 
+inline QString escapeXML(const QString& str)
+{
+  // Based on QString::toHtmlEscaped(), but added unicode escaping
+  QString rich;
+  const int len = str.length();
+  rich.reserve(int(len * 1.1));
+  for (int i = 0; i < len; ++i)
+  {
+    const QChar chr = str.at(i);
+    if (chr == QLatin1Char('<'))
+      rich += QLatin1String("&lt;");
+    else if (chr == QLatin1Char('>'))
+      rich += QLatin1String("&gt;");
+    else if (chr == QLatin1Char('&'))
+      rich += QLatin1String("&amp;");
+    else if (chr == QLatin1Char('"'))
+      rich += QLatin1String("&quot;");
+    else if (chr.unicode() > 255)
+      rich += QString("&#%1;").arg(static_cast<int>(chr.unicode()));
+    else
+      rich += chr;
+  }
+  rich.squeeze();
+  return rich;
+}
+
 inline QString svgText(QVector3D pos, const QString& text, QVector3D color)
 {
   return QString("\t<text class=\"label\" x=\"%1\" y=\"%2\"%4>%3</text>\n")
     .arg(pos.x(), 6, 'f').arg(pos.y(), 6, 'f')
-    .arg(text)
+    .arg(escapeXML(text))
     .arg(svgColor(color, QVector3D(0, 0, 0)));
 }
 
