@@ -10,6 +10,7 @@
 #include "glwidget.h"
 
 #include "export.h"
+#include "bezier.h"
 
 namespace Export
 {
@@ -74,26 +75,64 @@ inline QString svgArrowhead(const QVector3D& tip, const QVector3D& top, float si
 
 inline QString svgEdge(const Export::Edge& edge, const GLScene& scene)
 {
+  using namespace Math;
+
+  // Calculate bezier curve (screen coordinates)
   std::array<QVector3D, 4> control = edge.quadraticCurve();
-  
   for (QVector3D& point : control)
   {
     point = scene.camera().worldToWindow(point);
   }
+  const QVector3D from = control[0];
+  const QVector3D to = control[3];
 
-  // Calculate arrowhead position
-  float nodeSize = scene.sizeOnScreen(edge.to().pos(), scene.nodeSize()) / 2.0;
-  float headSize = scene.sizeOnScreen(edge.to().pos(), scene.arrowheadSize);
-  const QVector3D v = (control[2] - control[3]).normalized();
-  const QVector3D tip = control[3] + v * nodeSize;
-  const QVector3D top = control[3] + v * (nodeSize + headSize);
+  // Calculate node and arrowhead sizes
+  const float fromNodeRadius = scene.sizeOnScreen(edge.from().pos(), scene.nodeSize()) / 2.0;
+  const float toNodeRadius = scene.sizeOnScreen(edge.to().pos(), scene.nodeSize()) / 2.0;
+  const float headLength = scene.sizeOnScreen(edge.to().pos(), scene.arrowheadSize);
 
-  return QString("\t<path class=\"edge\" d=\"M%1 %2 C%3 %4, %5 %6, %7 %8\" />\n")
-    .arg(control[0].x(), 6, 'f').arg(control[0].y(), 6, 'f')
-    .arg(control[1].x(), 6, 'f').arg(control[1].y(), 6, 'f')
-    .arg(control[2].x(), 6, 'f').arg(control[2].y(), 6, 'f')
-    .arg(control[3].x(), 6, 'f').arg(control[3].y(), 6, 'f')
-    + svgArrowhead(tip, top, headSize);
+  try
+  {
+    // Subtract the nodes and arrowhead from the curve
+    using Ins = Intersection<Circle, CubicBezier>;
+    Ins ins1 = make_intersection(Circle{control[0], fromNodeRadius}, CubicBezier(control));
+    control = CubicBezier(control).trimFront(ins1.solve(ins1.guessNearFront()));
+    Ins ins2 = make_intersection(Circle{control[3], toNodeRadius + headLength}, CubicBezier(control));
+    control = CubicBezier(control).trimBack(ins2.solve(ins2.guessNearBack()));
+
+    // Calculate arrow position: find the closest point on the circle to the curve end
+    const QVector3D top = control[3];
+    const QVector3D tip = Circle{to, toNodeRadius}.project(top);
+
+    return QString("\t<path class=\"edge\" d=\"M%1 %2 C%3 %4, %5 %6, %7 %8\" />\n")
+      .arg(control[0].x(), 6, 'f').arg(control[0].y(), 6, 'f')
+      .arg(control[1].x(), 6, 'f').arg(control[1].y(), 6, 'f')
+      .arg(control[2].x(), 6, 'f').arg(control[2].y(), 6, 'f')
+      .arg(control[3].x(), 6, 'f').arg(control[3].y(), 6, 'f')
+      + svgArrowhead(tip, top, headLength);
+  }
+  catch (...)
+  {
+    // Soving failed, probably the nodes are too close to each other.
+    const QVector3D v = to - from;
+    if (length2(v) <= squared(fromNodeRadius + headLength + toNodeRadius))
+    {
+      // Too close to draw something meaningful: draw nothing.
+      return QString();
+    }
+    else
+    {
+      // Still some space left: draw a straight line.
+      const QVector3D src = Circle{from, fromNodeRadius}.project(to);
+      const QVector3D tip = Circle{to, toNodeRadius}.project(from);
+      const QVector3D top = Circle{to, toNodeRadius + headLength}.project(from);
+
+      return QString("\t<path class=\"edge\" d=\"M%1 %2 L%3 %4\" />\n")
+        .arg(src.x(), 6, 'f').arg(src.y(), 6, 'f')
+        .arg(top.x(), 6, 'f').arg(top.y(), 6, 'f')
+        + svgArrowhead(tip, top, headLength);
+    }
+  }
 }
 
 inline QString escapeXML(const QString& str)
