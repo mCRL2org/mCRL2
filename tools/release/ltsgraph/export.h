@@ -27,8 +27,8 @@ class Exporter;
 class Entity
 {
   protected:
-    const std::size_t m_id;
     const Graph::Graph& m_graph;
+    const std::size_t m_id;
 
     constexpr Entity(const Graph::Graph& graph, std::size_t id)
       : m_graph(graph), m_id(id) {}
@@ -43,7 +43,7 @@ class Entity
     }
 };
 
-/** @brief A descriptor class for graph nodes beging exported */
+/** @brief A descriptor class for graph nodes being exported */
 class Node : public Entity
 {
   private:
@@ -83,14 +83,14 @@ class Node : public Entity
     }
 };
 
-/** @brief A descriptor class for graph edges beging exported */
+/** @brief A descriptor class for graph edges being exported */
 class Edge : public Entity
 {
   private:
     const Node m_from;
     const Node m_to;
 
-    constexpr Edge(const Graph::Graph& graph, std::size_t id)
+    Edge(const Graph::Graph& graph, std::size_t id)
       : Entity(graph, id),
       m_from(graph, graph.edge(id).from()),
       m_to(graph, graph.edge(id).to()) {}
@@ -126,7 +126,7 @@ class Edge : public Entity
     {
       return m_graph.transitionLabel(m_id).color();
     }
-    constexpr std::array<QVector3D, 4> quadraticCurve() const
+    std::array<QVector3D, 4> quadraticCurve() const
     {
       return GLScene::calculateArc(from().pos(), handlePos(), to().pos(), selfLoop());
     }
@@ -207,7 +207,7 @@ class Exporter
      * @brief Returns a descriptor of the edge at the specified index
      * @pre 0 <= index < edgeCount()
      */
-    constexpr Edge edge(std::size_t index) const
+    Edge edge(std::size_t index) const
     {
       return Edge(m_guard.graph, edgeId(index));
     }
