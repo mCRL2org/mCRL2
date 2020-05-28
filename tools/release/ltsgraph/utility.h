@@ -14,6 +14,7 @@
 
 #include <QOpenGLFunctions_3_3_Core>
 #include <QPainter>
+#include <QRandomGenerator>
 #include <QVector3D>
 #include <QStaticText>
 
@@ -67,7 +68,7 @@ constexpr float PI_2 = PI * 0.5f;
 inline
 float frand(float min, float max)
 {
-  return (static_cast<float>(qrand()) / RAND_MAX) * (max - min) + min;
+  return static_cast<float>(QRandomGenerator::global()->generateDouble() * (max - min) + min);
 }
 
 /// \brief Renders text, centered around the window coordinates at x and y (in pixels)
