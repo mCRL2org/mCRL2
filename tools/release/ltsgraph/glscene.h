@@ -86,6 +86,7 @@ public:
   /// Getters
 
   bool drawStateLabels() const { return m_drawstatelabels; }
+  bool drawStateNumbers() const { return m_drawstatenumbers; }
   bool drawTransitionLabels() const { return m_drawtransitionlabels; }
   bool drawSelfLoops() const { return m_drawselfloops; }
   std::size_t nodeSize() const { return m_size_node; }
