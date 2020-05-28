@@ -68,12 +68,12 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
   if (m_info.hasOutput())
   {
     QDir dir = fileInfo.absoluteDir();
-    QString newfile = fileInfo.baseName().append(".%1").arg(m_info.output);
+    QString newfile = fileInfo.completeBaseName().append(".%1").arg(m_info.output);
     int filenr = 0;
     while(dir.exists(newfile))
     {
       filenr++;
-      newfile = fileInfo.baseName().append("_%1.%2").arg(filenr).arg(m_info.output);
+      newfile = fileInfo.completeBaseName().append("_%1.%2").arg(filenr).arg(m_info.output);
     }
     m_pckFileOut = new FilePicker(m_fileDialog, m_ui.pckFileOut);
     m_ui.pckFileOut->layout()->addWidget(m_pckFileOut);
