@@ -20,9 +20,9 @@ namespace Graph
 // Utility functions
 //
 
-inline float frand(float min, float max)
+// Todo: move to separate utility source file
+inline float fast_frand(float min, float max)
 {
-  //return ((float)qrand() / RAND_MAX) * (max - min) + min;
   // Fast pseudo rand, source: http://www.musicdsp.org/showone.php?id=273
   static int32_t seed = 1;
   seed *= 16807;
@@ -116,7 +116,7 @@ QVector3D repulsionForce(const QVector3D& a, const QVector3D& b, float repulsion
   QVector3D diff = a - b;
   float r = repulsion;
   r /= cube((std::max)(diff.length() / 2.0f, natlength / 10));
-  diff = diff * r + QVector3D(frand(-0.01f, 0.01f), frand(-0.01f, 0.01f), frand(-0.01f, 0.01f));
+  diff = diff * r + QVector3D(fast_frand(-0.01f, 0.01f), fast_frand(-0.01f, 0.01f), fast_frand(-0.01f, 0.01f));
   return diff;
 }
 
@@ -243,7 +243,7 @@ void SpringLayout::randomizeZ(float z)
   {
     if (!m_graph.node(n).anchored())
     {
-      m_graph.node(n).pos_mutable().setZ(m_graph.node(n).pos().z() + frand(-z, z));
+      m_graph.node(n).pos_mutable().setZ(m_graph.node(n).pos().z() + fast_frand(-z, z));
     }
   }
   m_graph.unlock(GRAPH_LOCK_TRACE);
@@ -257,7 +257,7 @@ class WorkerThread : public QThread
 {
   private:
     bool m_stopped;
-    QTime m_time;
+    QElapsedTimer m_time;
     SpringLayout& m_layout;
     int m_period;
   public:
