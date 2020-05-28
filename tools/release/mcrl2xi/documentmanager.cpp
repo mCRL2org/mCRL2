@@ -81,7 +81,7 @@ void DocumentManager::updateTitle()
   if(document->getFileName() != NULL)
   {
     QFileInfo info(document->getFileName());
-    setTabText(currentIndex(), (document->isModified() ? "*" : "") + info.baseName());
+    setTabText(currentIndex(), (document->isModified() ? "*" : "") + info.completeBaseName());
   }
 }
 
@@ -122,13 +122,13 @@ void DocumentManager::openFile(QString fileName)
     {
       document = getDocument(i);
       setCurrentWidget(document);
-      setTabText(indexOf(document), fileInfo.baseName());
+      setTabText(indexOf(document), fileInfo.completeBaseName());
       break;
     }
   }
 
   if (document == 0)
-    document = createDocument(fileInfo.baseName());
+    document = createDocument(fileInfo.completeBaseName());
 
   document->openFile(fileName);
 }
@@ -136,6 +136,6 @@ void DocumentManager::openFile(QString fileName)
 void DocumentManager::saveFile(int index, QString fileName)
 {
   QFileInfo fileInfo(fileName);
-  setTabText(index, fileInfo.baseName());
+  setTabText(index, fileInfo.completeBaseName());
   getDocument(index)->saveFile(fileName);
 }
