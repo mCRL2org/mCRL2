@@ -10,6 +10,7 @@
 #include "glscene.h"
 
 #include "utility.h"
+#include "bezier.h"
 
 #include <QFont>
 #include <QFontMetrics>
@@ -416,8 +417,19 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
   // Reset the shader.
   m_global_shader.bind();
 
-  // Rotate to match the orientation of the arc
-  QVector3D vec = to - control[2];
+  // Calculate the position of the tip of the arrow, and the orientation of the arc
+  QVector3D tip;
+  QVector3D vec;
+  {
+    const Math::Circle node{to, 0.5f * nodeSizeScaled()};
+    const Math::CubicBezier arc(control);
+    const Math::Scalar t = Math::make_intersection(node, arc).guessNearBack();
+    tip = node.project(arc.at(t));
+    const Math::Circle head{to, 0.5f * nodeSizeScaled() + arrowheadSizeScaled()};
+    const Math::Scalar s = Math::make_intersection(head, arc).guessNearBack();
+    const QVector3D top = arc.at(s);
+    vec = tip - top;
+  }
 
   // If to == ctrl[2], then something odd is going on. We'll just
   // make the executive decision not to draw the arrowhead then, as it
@@ -427,7 +439,7 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
     vec.normalize();
 
     float fog = 0.0f;
-    if (isVisible(to, fog))
+    if (isVisible(tip, fog))
     {
       // Apply the fog color.
       m_global_shader.setColor(applyFog(arcColor, fog));
@@ -435,14 +447,11 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
       QMatrix4x4 worldMatrix;
 
       // Go to arrowhead position
-      worldMatrix.translate(to.x(), to.y(), to.z());
+      worldMatrix.translate(tip.x(), tip.y(), tip.z());
 
       // Rotate the arrowhead to orient it to the end of the arc.
       QVector3D axis = QVector3D::crossProduct(QVector3D(1, 0, 0), vec);
       worldMatrix.rotate(radiansToDegrees(std::acos(vec.x())), axis);
-
-      // Move the arrowhead outside of the node.
-      worldMatrix.translate(-0.5f * nodeSizeScaled(), 0.0f, 0.0f);
 
       // Scale it according to its size.
       worldMatrix.scale(arrowheadSizeScaled());

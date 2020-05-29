@@ -226,13 +226,13 @@ constexpr std::array<QVector3D, 4> GLScene::calculateArc(const QVector3D& from, 
   else
   {
     // Standard case: use the same position for both points.
-    return std::array<QVector3D, 4>{from, base, base, to};
+    //return std::array<QVector3D, 4>{from, base, base, to};
     // Method 2: project the quadratic bezier curve going through the handle onto a cubic bezier curve.
-    /*const QVector3D control = via + (via - ((from + to) / 2.0f));
+    const QVector3D control = via + (via - ((from + to) / 2.0f));
     return std::array<QVector3D, 4>{from,
       0.33333f * from + 0.66666f * control,
       0.33333f * to + 0.66666f * control,
-      to};*/
+      to};
   }
 }
 

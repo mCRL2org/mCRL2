@@ -37,7 +37,7 @@ constexpr Vector lerp(const Vector& a, const Vector& b, Scalar t)
 
 constexpr Scalar dot(const Vector& v, const Vector& w)
 {
-  return v.x() * w.x() + v.y() * w.y();
+  return v.x() * w.x() + v.y() * w.y() + v.z() * w.z();
 }
 
 constexpr Scalar length2(const Vector& v)
@@ -157,17 +157,17 @@ template <int Order> struct Intersection<Circle, Bezier<Order>>
     /** \brief Returns a guess for the intersection point near the start-point of the curve. */
     inline Scalar guessNearFront() const
     {
-      const Scalar n = (bezier[1] - bezier[0]).length();
+      const Scalar n = length2(bezier[1] - bezier[0]);
       if (qFuzzyIsNull(n)) { return 0; }
-      return clamp(circle.radius / n, 0, 1) / static_cast<Scalar>(3);
+      return clamp(circle.radius / std::sqrt(n), 0, 1) / static_cast<Scalar>(3);
     }
 
     /** \brief Returns a guess for the intersection point near the end-point of the curve. */
     inline Scalar guessNearBack() const
     {
-      const Scalar n = (bezier[Order - 1] - bezier[Order]).length();
-      if (qFuzzyIsNull(n)) { return 1; }
-      return static_cast<Scalar>(1) - (clamp(circle.radius / n, 0, 1) / static_cast<Scalar>(3));
+      const Scalar n = length2(bezier[Order - 1] - bezier[Order]);
+      if (qFuzzyIsNull(static_cast<Scalar>(1) - n)) { return 1; }
+      return static_cast<Scalar>(1) - (clamp(circle.radius / std::sqrt(n), 0, 1) / static_cast<Scalar>(3));
     }
 
     /**
