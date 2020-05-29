@@ -79,7 +79,7 @@ float fast_frand(float min, float max)
 {
   // Fast pseudo rand, source: http://www.musicdsp.org/showone.php?id=273
   static thread_local std::random_device rd;
-  static int32_t seed = rd();
+  static thread_local int32_t seed = rd();
   seed *= 16807;
   return (((static_cast<float> (seed)) * 4.6566129e-010f) + 1.0) * (max - min) / 2.0 + min;
 }
