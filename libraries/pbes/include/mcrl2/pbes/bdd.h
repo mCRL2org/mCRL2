@@ -14,6 +14,7 @@
 
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/consistency.h"
+#include "mcrl2/data/standard.h"
 #include "mcrl2/data/join.h"
 #include "mcrl2/pbes/join.h"
 #include "mcrl2/pbes/pbes_equation_index.h"
@@ -304,6 +305,45 @@ bdd_node make_imp(bdd_node left, bdd_node right)
   return std::make_shared<imp>(left, right);
 }
 
+class ite: public term
+{
+  protected:
+    bdd_node m_condition;
+    bdd_node m_then;
+    bdd_node m_else;
+
+  public:
+    ite(bdd_node condtion, bdd_node then_, bdd_node else_)
+      : m_condition(condtion), m_then(then_), m_else(else_)
+    { }
+
+  const term& condition() const
+  {
+    return *m_condition;
+  }
+
+  const term& then_() const
+  {
+    return *m_then;
+  }
+
+  const term& else_() const
+  {
+    return *m_else;
+  }
+
+  std::string print(bool after) const override
+  {
+    return "ite(" + m_condition->print(after) + ", " + m_then->print(after) + ", " + m_else->print(after) + ")";
+  }
+};
+
+inline
+bdd_node make_ite(bdd_node condition, bdd_node then_, bdd_node else_)
+{
+  return std::make_shared<ite>(condition, then_, else_);
+}
+
 inline
 bdd_node all(const std::vector<bdd_node>& v)
 {
@@ -394,6 +434,14 @@ bdd_node to_bdd(const data::data_expression& x)
     const auto& left  = data::binary_left1(x);
     const auto& right = data::binary_right1(x);
     return make_imp(to_bdd(left), to_bdd(right));
+  }
+  else if (is_if_application(x))
+  {
+    const auto& x_ = atermpp::down_cast<data::application>(x);
+    const data::data_expression& condition = x_[0];
+    const data::data_expression& then_ = x_[1];
+    const data::data_expression& else_ = x_[2];
+    return make_ite(to_bdd(condition), to_bdd(then_), to_bdd(else_));
   }
   throw mcrl2::runtime_error("Unsupported data expression " + data::pp(x) + " encountered in to_bdd.");
 }
