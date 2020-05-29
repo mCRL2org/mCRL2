@@ -12,6 +12,7 @@
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/pbes/anonymize.h"
 #include "mcrl2/pbes/detail/pbes_command.h"
+#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
 #include "mcrl2/pbes/rewriters/data2pbes_rewriter.h"
 #include "mcrl2/pbes/rewriters/if_rewriter.h"
@@ -296,6 +297,20 @@ struct standard_recursive_form_command: public pbes_system::detail::pbes_command
   }
 };
 
+struct normalize_command: public pbes_system::detail::pbes_command
+{
+  normalize_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+      : pbes_system::detail::pbes_command("normalize", input_filename, output_filename, options)
+  {}
+
+  void execute() override
+  {
+    pbes_system::detail::pbes_command::execute();
+    normalize(pbesspec);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
+  }
+};
+
 class pbestransform_tool: public transform_tool<rewriter_tool<input_output_tool>>
 {
   typedef transform_tool<rewriter_tool<input_output_tool>> super;
@@ -314,6 +329,7 @@ class pbestransform_tool: public transform_tool<rewriter_tool<input_output_tool>
     {
       add_command(std::make_shared<anonymize_pbes_command>(input_filename(), output_filename(), options));
       add_command(std::make_shared<is_well_typed_command>(input_filename(), output_filename(), options));
+      add_command(std::make_shared<normalize_command>(input_filename(), output_filename(), options));
       add_command(std::make_shared<standard_recursive_form_command>(input_filename(), output_filename(), options));
       add_command(std::make_shared<rewrite_pbes_if_rewriter_command>(input_filename(), output_filename(), options));
       add_command(std::make_shared<rewrite_pbes_data2pbes_rewriter_command>(input_filename(), output_filename(), options));
