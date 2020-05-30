@@ -140,8 +140,17 @@ void MainWindow::on3DChanged(bool enabled)
 
   if(enabled)
   {
-    // Here, 10 is an arbitrary value chosen to move the nodes in the z-dimension when 3D is enabled.
-    m_layout->randomizeZ(10.0f);
+    bool all_z_zero = true;
+    for (std::size_t i = 0; all_z_zero && i < m_graph.nodeCount(); i++)
+    {
+      all_z_zero &= std::abs(m_graph.node(i).pos().z()) < 1.0f;
+    }
+    if (all_z_zero)
+    {
+      // If all nodes are in the same plane, slightly shift them to speed-up
+      // automatic layouting
+      m_layout->randomizeZ(10.0f);
+    }
   }
 }
 
@@ -286,6 +295,7 @@ void MainWindow::onImportXML()
     m_graph.loadXML(fileName);
     onExplore(hadExploration);
     m_glwidget->rebuild();
+    on3DChanged(false);
     m_information->update();
     m_graph.setStable(false);
   }
