@@ -73,6 +73,11 @@ class Edge
     {
       return m_to;
     }
+
+    constexpr bool is_selfloop() const
+    {
+      return m_from == m_to;
+    }
 };
 
 

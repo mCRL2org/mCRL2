@@ -158,7 +158,7 @@ void SpringLayout::apply()
       m_hforces[n] = QVector3D(0, 0, 0);
       m_lforces[n] = QVector3D(0, 0, 0);
 
-      if (e.from() == e.to())
+      if (e.is_selfloop())
       {
         m_hforces[n] += repulsionForce(m_graph.handle(n).pos(), m_graph.node(e.from()).pos(), m_repulsion, m_natLength);
       }

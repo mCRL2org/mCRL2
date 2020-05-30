@@ -394,12 +394,17 @@ bool GLScene::isVisible(const QVector3D& position, float& fogamount)
 
 void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
 {
-  // Calculate control points from edge nodes and handle
   Graph::Edge edge = m_graph.edge(i);
+  if (!m_drawselfloops && edge.is_selfloop())
+  {
+    return;
+  }
+
+  // Calculate control points from edge nodes and handle
   const QVector3D from = m_graph.node(edge.from()).pos();
   const QVector3D via = m_graph.handle(i).pos();
   const QVector3D to = m_graph.node(edge.to()).pos();
-  const std::array<QVector3D, 4> control = calculateArc(from, via, to, edge.from() == edge.to());
+  const std::array<QVector3D, 4> control = calculateArc(from, via, to, edge.is_selfloop());
 
   // Use the arc shader to draw the arcs.
   m_arc_shader.bind();
@@ -470,6 +475,11 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
 
 void GLScene::renderHandle(std::size_t i, const QMatrix4x4& viewProjMatrix)
 {
+  if (!m_drawselfloops && m_graph.edge(i).is_selfloop())
+  {
+    return;
+  }
+
   Graph::Node& handle = m_graph.handle(i);
   if (handle.selected() > 0.1f || handle.locked())
   {
@@ -590,8 +600,7 @@ void GLScene::renderNode(std::size_t i, const QMatrix4x4& viewProjMatrix, bool t
 
 void GLScene::renderTransitionLabel(QPainter& painter, std::size_t i)
 {
-  Graph::Edge edge = m_graph.edge(i);
-  if (edge.from() == edge.to() && !m_drawselfloops)
+  if (!m_drawselfloops && m_graph.edge(i).is_selfloop())
   {
     return;
   }
@@ -648,8 +657,13 @@ bool GLScene::selectObject(GLScene::Selection& s,
     for (std::size_t i = 0; i < edgeCount; i++)
     {
       std::size_t index = exploration_active ? m_graph.explorationEdge(i) : i;
-      QVector3D screenPos = m_camera.worldToWindow(m_graph.handle(index).pos());
-      float radius = sizeOnScreen(m_graph.handle(index).pos(), handleSizeScaled());
+      if (!m_drawselfloops && m_graph.edge(index).is_selfloop())
+      {
+        continue;
+      }
+      const Graph::Node& handle = m_graph.handle(index);
+      QVector3D screenPos = m_camera.worldToWindow(handle.pos());
+      float radius = sizeOnScreen(handle.pos(), handleSizeScaled());
       if (isCloseSquare(x, y, screenPos, radius, bestZ))
       {
         s.selectionType = type;
@@ -663,6 +677,10 @@ bool GLScene::selectObject(GLScene::Selection& s,
     for (std::size_t i = 0; i < edgeCount; i++)
     {
       std::size_t index = exploration_active ? m_graph.explorationEdge(i) : i;
+      if (!m_drawselfloops && m_graph.edge(index).is_selfloop())
+      {
+        continue;
+      }
       const Graph::LabelNode& label = m_graph.transitionLabel(index);
       QVector3D window = m_camera.worldToWindow(label.pos());
       if (isOnText(x, y, m_transition_labels[label.labelindex()], window))
