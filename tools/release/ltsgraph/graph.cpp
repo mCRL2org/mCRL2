@@ -598,12 +598,12 @@ const QVector3D& Graph::getClipMax() const
   return m_clip_max;
 }
 
-void Graph::lock()
+void Graph::lock() const
 {
   lockForRead(m_lock, GRAPH_LOCK_TRACE);
 }
 
-void Graph::unlock()
+void Graph::unlock() const
 {
   unlockForRead(m_lock, GRAPH_LOCK_TRACE);
 }

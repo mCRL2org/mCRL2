@@ -343,7 +343,7 @@ class Graph
     Exploration* m_exploration;     ///< The exploration of the current graph (or null).
     mcrl2::lts::lts_type m_type;    ///< The type of the current graph.
     QString m_empty;                ///< Empty string that is returned as label if none present.
-    QReadWriteLock m_lock;          ///< Lock protecting the structure from being changed while rendering and simulating
+    mutable QReadWriteLock m_lock;          ///< Lock protecting the structure from being changed while rendering and simulating
     bool m_stable;                  ///< When true, the graph is considered stable, spring forces should not be applied.
     QVector3D m_clip_min;
     QVector3D m_clip_max;
@@ -379,11 +379,11 @@ class Graph
     /**
      * @brief makes the graph structure read-only
      */
-    void lock();
+    void lock() const;
     /**
      * @brief makes the graph structure writable again after a lock
      */
-    void unlock();
+    void unlock() const;
 
 #ifndef DEBUG_GRAPH_LOCKS
 #define GRAPH_LOCK_TRACE

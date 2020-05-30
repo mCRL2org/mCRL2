@@ -62,7 +62,7 @@ public:
   /// \brief Constructor.
   /// \param glwidget The widget where this scene is drawn
   /// \param g The graph that is to be visualised by this object.
-  GLScene(QOpenGLWidget& glwidget, Graph::Graph& g);
+  GLScene(QOpenGLWidget& glwidget, const Graph::Graph& g);
 
   /// \brief Initializes all state and data required for rendering.
   void initialize();
@@ -110,7 +110,7 @@ public:
   * \param selfLoop True if the arc represents a self loop.
   * \returns Four points describing a cubic Bezier curve (start, control1, control2, end).
   */
-  static constexpr std::array<QVector3D, 4> calculateArc(const QVector3D& from, const QVector3D& via, 
+  static constexpr std::array<QVector3D, 4> calculateArc(const QVector3D& from, const QVector3D& via,
     const QVector3D& to, bool selfLoop);
 
   /// Setters
@@ -174,7 +174,7 @@ private:
   QQuaternion sphericalBillboard(const QVector3D& position) const;
 
   QOpenGLWidget& m_glwidget; /// The widget where this scene is drawn
-  Graph::Graph& m_graph;     /// The graph that is being visualised.
+  const Graph::Graph& m_graph;     /// The graph that is being visualised.
 
   ArcballCameraView m_camera;
   float m_device_pixel_ratio;

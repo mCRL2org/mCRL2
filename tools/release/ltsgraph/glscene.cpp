@@ -48,7 +48,7 @@ constexpr int OFFSET_ARROWHEAD  = OFFSET_HANDLE_OUTLINE + VERTICES_HANDLE_OUTLIN
 constexpr int OFFSET_ARROWHEAD_BASE = OFFSET_ARROWHEAD + VERTICES_ARROWHEAD;
 constexpr int OFFSET_ARC        = OFFSET_ARROWHEAD_BASE + VERTICES_ARROWHEAD_BASE;
 
-GLScene::GLScene(QOpenGLWidget& glwidget, Graph::Graph& g)
+GLScene::GLScene(QOpenGLWidget& glwidget, const Graph::Graph& g)
   :  m_glwidget(glwidget),
      m_graph(g)
 {
@@ -394,7 +394,7 @@ bool GLScene::isVisible(const QVector3D& position, float& fogamount)
 
 void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
 {
-  Graph::Edge edge = m_graph.edge(i);
+  const Graph::Edge& edge = m_graph.edge(i);
   if (!m_drawselfloops && edge.is_selfloop())
   {
     return;
@@ -480,7 +480,7 @@ void GLScene::renderHandle(std::size_t i, const QMatrix4x4& viewProjMatrix)
     return;
   }
 
-  Graph::Node& handle = m_graph.handle(i);
+  const Graph::Node& handle = m_graph.handle(i);
   if (handle.selected() > 0.1f || handle.locked())
   {
     QVector3D line(2 * handle.selected() - 1.0f, 0.0f, 0.0f);
@@ -605,21 +605,21 @@ void GLScene::renderTransitionLabel(QPainter& painter, std::size_t i)
     return;
   }
 
-  Graph::LabelNode& label = m_graph.transitionLabel(i);
+  const Graph::LabelNode& label = m_graph.transitionLabel(i);
   QVector3D fill(std::max(label.color().x(), label.selected()), std::min(label.color().y(), 1.0f - label.selected()), std::min(label.color().z(), 1.0f - label.selected()));
   drawCenteredStaticText3D(painter, m_transition_labels[label.labelindex()], label.pos(), fill);
 }
 
 void GLScene::renderStateLabel(QPainter& painter, std::size_t i)
 {
-  Graph::LabelNode& label = m_graph.stateLabel(i);
+  const Graph::LabelNode& label = m_graph.stateLabel(i);
   QVector3D color(std::max(label.color().x(), label.selected()), std::min(label.color().y(), 1.0f - label.selected()), std::min(label.color().z(), 1.0f - label.selected()));
   drawCenteredStaticText3D(painter, m_state_labels[label.labelindex()], label.pos(), color);
 }
 
 void GLScene::renderStateNumber(QPainter& painter, std::size_t i)
 {
-  Graph::NodeNode& node = m_graph.node(i);
+  const Graph::NodeNode& node = m_graph.node(i);
   QVector3D color(0.0f, 0.0f, 0.0f);
   drawCenteredText3D(painter, QString::number(i), node.pos(), color);
 }
