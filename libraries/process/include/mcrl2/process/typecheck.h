@@ -13,6 +13,7 @@
 #ifndef MCRL2_PROCESS_TYPECHECK_H
 #define MCRL2_PROCESS_TYPECHECK_H
 
+#include <algorithm>
 #include "mcrl2/process/detail/match_action_parameters.h"
 #include "mcrl2/process/detail/process_context.h"
 #include "mcrl2/process/normalize_sorts.h"
@@ -379,7 +380,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   {
     check_not_empty(x.comm_set(), "synchronizing empty set of (multi)actions", x);
 
-    std::set<core::identifier_string> left_hand_side_actions;
+    std::multiset<core::identifier_string> left_hand_side_actions;
     for (const communication_expression& c: x.comm_set())
     {
       const core::identifier_string_list& cnames = c.action_name().names();
@@ -413,19 +414,42 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       }
 
       //the multiactions in the lhss of comm should not intersect.
-      for (const core::identifier_string& a: std::set<core::identifier_string>(cnames.begin(), cnames.end()))
+      //but there can be multiple of the same actions in cnames. 
+      std::set < core::identifier_string > this_left_hand_sides;
+      for (const core::identifier_string& a: cnames)
       {
-        if (left_hand_side_actions.find(a) != left_hand_side_actions.end())
+        if (this_left_hand_sides.count(a)==0 && left_hand_side_actions.find(a) != left_hand_side_actions.end())
         {
           throw mcrl2::runtime_error("synchronizing action " + core::pp(a) + " in different ways (typechecking " + process::pp(x) + ")");
         }
         else
         {
           left_hand_side_actions.insert(a);
+          this_left_hand_sides.insert(a);
         }
       }
     }
 
+    //the multiactions in the rhs of comm should not intersect with an action in the a lhs of
+    //all other rules. So, {a|a->a} is allowed, but {a|b->c, c|a->d} is not. 
+    for (const communication_expression& c: x.comm_set())
+    {
+      // Count how many actions in the rhs occur at the left
+      std::size_t number_of_rhs_in_lhs=0;
+      for (const core::identifier_string& lhs_action: c.action_name().names())
+      { 
+        if (lhs_action==c.name())
+        {
+          number_of_rhs_in_lhs++;
+        }
+      }
+      assert(left_hand_side_actions.count(c.name())>=number_of_rhs_in_lhs);
+      if (left_hand_side_actions.count(c.name())-number_of_rhs_in_lhs>0) // There are more actions x.name() in the lhss than just in this lhs.
+      {
+        throw mcrl2::runtime_error("action " + core::pp(c.name()) + 
+                     " occurs at the left and the right in a communication (typechecking " + process::pp(x) + ")");
+      }
+    }
     return comm(x.comm_set(), (*this).apply(x.operand()));
   }
 
