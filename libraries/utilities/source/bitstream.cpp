@@ -128,6 +128,11 @@ void obitstream::write_bits(std::size_t value, unsigned int number_of_bits)
     {
       // Write the 8 * i most significant bits and mask out the other values.
       stream.put(static_cast<char>((write_value >> (8 * i)) & 255));
+
+      if (stream.fail())
+      {
+        throw mcrl2::runtime_error("Failed to write bytes to the output file/stream.");
+      }
     }
   }
 }
@@ -225,12 +230,11 @@ void obitstream::flush()
   write_bits(0, 64 - bits_in_buffer);
   assert(bits_in_buffer == 0);
 
+  stream.flush();
   if (stream.fail())
   {
     throw mcrl2::runtime_error("Failed to write the last byte to the output file/stream.");
   }
-
-  stream.flush();
 }
 
 void obitstream::write(const uint8_t* buffer, std::size_t size)
