@@ -64,7 +64,7 @@ binary_aterm_ostream::~binary_aterm_ostream()
 {
   // Write the end of the stream.
   m_stream.write_bits(static_cast<std::size_t>(packet_type::aterm), packet_bits);
-  m_stream.write_integer(0);
+  m_stream.write_bits(0, function_symbol_index_width());
 }
 
 /// \brief Keep track of whether the term can be written to the stream.
