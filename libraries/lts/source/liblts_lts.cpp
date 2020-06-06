@@ -110,53 +110,85 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
   atermpp::aterm_stream_state state(stream);
   stream >> data::detail::add_index_impl;
 
-  try
-  {
-    atermpp::aterm marker;
-    stream >> marker;
+  atermpp::aterm marker;
+  stream >> marker;
 
-    if (marker != labelled_transition_system_mark())
+  if (marker != labelled_transition_system_mark())
+  {
+    throw mcrl2::runtime_error("Stream does not contain a labelled transition system (LTS).");
+  }
+
+  // Read the header of the lts.
+  data::data_specification spec;
+  data::variable_list parameters;
+  process::action_label_list action_labels;
+
+  stream >> spec;
+  stream >> parameters;
+  stream >> action_labels;
+
+  lts.set_data(spec);
+  lts.set_process_parameters(parameters);
+  lts.set_action_label_declarations(action_labels);
+
+  // An indexed set to keep indices for multi actions.
+  mcrl2::utilities::indexed_set<action_label_lts> multi_actions;
+  multi_actions.insert(action_label_lts::tau_action()); // This action list represents 'tau'.
+
+  // The initial state is stored and set as last.
+  std::optional<probabilistic_lts_lts_t::probabilistic_state_t> initial_state;
+
+  // Keep track of the number of states (derived from the transitions).
+  std::size_t number_of_states = 1;
+
+  while (true)
+  {
+    aterm term = stream.get();
+    if (!term.defined())
     {
-      throw mcrl2::runtime_error("Stream does not contain a labelled transition system (LTS).");
+      // The default constructed term indicates the end of the stream.
+      break;
     }
 
-    // Read the header of the lts.
-    data::data_specification spec;
-    data::variable_list parameters;
-    process::action_label_list action_labels;
-
-    stream >> spec;
-    stream >> parameters;
-    stream >> action_labels;
-
-    lts.set_data(spec);
-    lts.set_process_parameters(parameters);
-    lts.set_action_label_declarations(action_labels);
-
-    // An indexed set to keep indices for multi actions.
-    mcrl2::utilities::indexed_set<action_label_lts> multi_actions;
-    multi_actions.insert(action_label_lts::tau_action()); // This action list represents 'tau'.
-
-    // The initial state is stored and set as last.
-    std::optional<probabilistic_lts_lts_t::probabilistic_state_t> initial_state;
-
-    // Keep track of the number of states (derived from the transitions).
-    std::size_t number_of_states = 1;
-
-    while (true)
+    if (term == transition_mark())
     {
-      aterm term = stream.get();
-      if (!term.defined())
+      aterm_int from;
+      process::timed_multi_action action;
+      aterm_int to;
+
+      stream >> from;
+      stream >> action;
+      stream >> to;
+
+      const action_label_lts lts_action(lps::multi_action(action.actions(),action.time()));
+      auto [index, inserted] = multi_actions.insert(lts_action);
+
+      std::size_t target_index = to.value();
+      if constexpr (std::is_same<LTS, probabilistic_lts_lts_t>::value)
       {
-        // The default constructed term indicates the end of the stream.
-        break;
+        // For probabilistic lts it is necessary to add the state first (and use the returned index).
+        target_index = lts.add_probabilistic_state(probabilistic_lts_lts_t::probabilistic_state_t(to.value()));
       }
 
-      if (term == transition_mark())
+      // Add the transition and update the number of states.
+      lts.add_transition(transition(from.value(), index, target_index));
+      number_of_states = std::max(number_of_states, std::max(from.value() + 1, to.value() + 1));
+
+      if (inserted)
+      {
+        std::size_t actual_index = lts.add_action(lts_action);
+        utilities::mcrl2_unused(actual_index);
+        assert(actual_index == index);
+      }
+
+    }
+    else if(term == probabilistic_transition_mark())
+    {
+      if constexpr (std::is_same<LTS, probabilistic_lts_lts_t>::value)
       {
         aterm_int from;
         process::timed_multi_action action;
-        aterm_int to;
+        probabilistic_lts_lts_t::probabilistic_state_t to;
 
         stream >> from;
         stream >> action;
@@ -165,94 +197,54 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
         const action_label_lts lts_action(lps::multi_action(action.actions(),action.time()));
         auto [index, inserted] = multi_actions.insert(lts_action);
 
-        std::size_t target_index = to.value();
-        if constexpr (std::is_same<LTS, probabilistic_lts_lts_t>::value)
-        {
-          // For probabilistic lts it is necessary to add the state first (and use the returned index).
-          target_index = lts.add_probabilistic_state(probabilistic_lts_lts_t::probabilistic_state_t(to.value()));
-        }
+        // Compute the index of the probabilistic state by adding it.
+        std::size_t to_index = lts.add_probabilistic_state(to);
+        lts.add_transition(transition(from.value(), index, to_index));
 
-        // Add the transition and update the number of states.
-        lts.add_transition(transition(from.value(), index, target_index));
-        number_of_states = std::max(number_of_states, std::max(from.value() + 1, to.value() + 1));
+        // Update the number of states
+        number_of_states = std::max(number_of_states, std::max(from.value() + 1, to_index + 1));
 
         if (inserted)
         {
-          std::size_t actual_index = lts.add_action(lts_action);
+          std::size_t actual_index = lts.add_action(action_label_lts(lps::multi_action(action.actions())));
           utilities::mcrl2_unused(actual_index);
           assert(actual_index == index);
         }
-
-      }
-      else if(term == probabilistic_transition_mark())
-      {
-        if constexpr (std::is_same<LTS, probabilistic_lts_lts_t>::value)
-        {
-          aterm_int from;
-          process::timed_multi_action action;
-          probabilistic_lts_lts_t::probabilistic_state_t to;
-
-          stream >> from;
-          stream >> action;
-          stream >> to;
-
-          const action_label_lts lts_action(lps::multi_action(action.actions(),action.time()));
-          auto [index, inserted] = multi_actions.insert(lts_action);
-
-          // Compute the index of the probabilistic state by adding it.
-          std::size_t to_index = lts.add_probabilistic_state(to);
-          lts.add_transition(transition(from.value(), index, to_index));
-
-          // Update the number of states
-          number_of_states = std::max(number_of_states, std::max(from.value() + 1, to_index + 1));
-
-          if (inserted)
-          {
-            std::size_t actual_index = lts.add_action(action_label_lts(lps::multi_action(action.actions())));
-            utilities::mcrl2_unused(actual_index);
-            assert(actual_index == index);
-          }
-        }
-        else
-        {
-          throw mcrl2::runtime_error("Attempting to read a probabilistic LTS as a regular LTS.");
-        }
-      }
-      else if (term.function() == atermpp::detail::g_term_pool().as_list())
-      {
-        // Lists always represent state labels, only need to add the indices.
-        lts.add_state(reinterpret_cast<const state_label_lts&>(term));
-      }
-      else if (term == initial_state_mark())
-      {
-        // Read the initial state.
-        probabilistic_lts_lts_t::probabilistic_state_t state;
-        stream >> state;
-        initial_state = state;
       }
       else
       {
-        throw mcrl2::runtime_error("Unknown mark in labelled transition system (LTS) stream.");
+        throw mcrl2::runtime_error("Attempting to read a probabilistic LTS as a regular LTS.");
       }
     }
-
-    // The initial state can only be set after the states are known.
-    if (initial_state)
+    else if (term.function() == atermpp::detail::g_term_pool().as_list())
     {
-      // If the lts has no state labels, we need to add empty states labels.
-      lts.set_num_states(number_of_states, lts.has_state_info());
-
-      set_initial_state(lts, initial_state.value());
+      // Lists always represent state labels, only need to add the indices.
+      lts.add_state(reinterpret_cast<const state_label_lts&>(term));
+    }
+    else if (term == initial_state_mark())
+    {
+      // Read the initial state.
+      probabilistic_lts_lts_t::probabilistic_state_t state;
+      stream >> state;
+      initial_state = state;
     }
     else
     {
-      throw mcrl2::runtime_error("Missing initial state in labelled transition system (LTS) stream.");
+      throw mcrl2::runtime_error("Unknown mark in labelled transition system (LTS) stream.");
     }
   }
-  catch (std::exception& ex)
+
+  // The initial state can only be set after the states are known.
+  if (initial_state)
   {
-    mCRL2log(log::error) << ex.what() << "\n";
-    throw mcrl2::runtime_error(std::string("Error reading labelled transition system (LTS)."));
+    // If the lts has no state labels, we need to add empty states labels.
+    lts.set_num_states(number_of_states, lts.has_state_info());
+
+    set_initial_state(lts, initial_state.value());
+  }
+  else
+  {
+    throw mcrl2::runtime_error("Missing initial state in labelled transition system (LTS) stream.");
   }
 }
 
@@ -266,12 +258,8 @@ static void read_from_lts(LTS_TRANSITION_SYSTEM& lts, const std::string& filenam
   std::ifstream fstream;
   if (!filename.empty())
   {
-    fstream.exceptions ( std::ifstream::failbit | std::ifstream::badbit );
-    try
-    {  
-      fstream.open(filename, std::ifstream::in | std::ifstream::binary);
-    }
-    catch (std::ifstream::failure&)
+    fstream.open(filename, std::ifstream::in | std::ifstream::binary);
+    if (fstream.fail())
     {
       if (filename.empty())
       {
@@ -289,8 +277,9 @@ static void read_from_lts(LTS_TRANSITION_SYSTEM& lts, const std::string& filenam
     atermpp::binary_aterm_istream stream(filename.empty() ? std::cin : fstream);
     stream >> lts;
   }
-  catch (std::ifstream::failure&)
+  catch (const std::exception& ex)
   {
+    mCRL2log(log::error) << ex.what() << "\n";
     if (filename.empty())
     {
       throw mcrl2::runtime_error("Fail to correctly read an lts from standard input.");
@@ -364,13 +353,8 @@ static void write_to_lts(const LTS_TRANSITION_SYSTEM& lts, const std::string& fi
   std::ofstream fstream;
   if (!filename.empty())
   {
-    fstream.exceptions ( std::ofstream::failbit | std::ofstream::badbit );
-
-    try
-    {
-      fstream.open(filename, std::ofstream::out | std::ofstream::binary);
-    }
-    catch (std::ofstream::failure&)
+    fstream.open(filename, std::ofstream::out | std::ofstream::binary);
+    if (fstream.fail())
     {
       throw mcrl2::runtime_error("Fail to open file " + filename + " for writing.");
     }
@@ -381,8 +365,9 @@ static void write_to_lts(const LTS_TRANSITION_SYSTEM& lts, const std::string& fi
     atermpp::binary_aterm_ostream stream(filename.empty() ? std::cout : fstream);
     stream << lts;
   }
-  catch (std::ofstream::failure&)
+  catch (const std::exception& ex)
   {
+    mCRL2log(log::error) << ex.what() << "\n";
     throw mcrl2::runtime_error("Fail to write lts correctly to the file " + filename + ".");
   }
 }
