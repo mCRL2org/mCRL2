@@ -188,7 +188,11 @@ std::size_t ibitstream::read_bits(unsigned int number_of_bits)
     // Read bytes until the buffer is sufficiently full.
     int byte = stream.get();
 
-    if(stream.fail())
+    if (stream.eof())
+    {
+      throw mcrl2::runtime_error("Unexpected end-of-file reached in the input file/stream.");
+    }
+    else if (stream.fail())
     {
       throw mcrl2::runtime_error("Failed to read bytes from the input file/stream.");
     }

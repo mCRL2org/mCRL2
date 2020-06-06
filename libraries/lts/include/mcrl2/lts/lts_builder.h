@@ -229,13 +229,8 @@ class lts_lts_disk_builder: public lts_builder
     )
      : m_discard_state_labels(discard_state_labels)
     {
-      fstream.exceptions ( std::ofstream::failbit | std::ofstream::badbit );
-
-      try
-      {
-        fstream.open(filename, std::ofstream::out | std::ofstream::binary);
-      }
-      catch (std::ofstream::failure&)
+      fstream.open(filename, std::ofstream::out | std::ofstream::binary);
+      if (fstream.fail())
       {
         throw mcrl2::runtime_error("Fail to open file " + filename + " for writing.");
       }
