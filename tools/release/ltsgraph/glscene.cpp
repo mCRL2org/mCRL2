@@ -613,6 +613,12 @@ void GLScene::renderTransitionLabel(QPainter& painter, std::size_t i)
 void GLScene::renderStateLabel(QPainter& painter, std::size_t i)
 {
   const Graph::LabelNode& label = m_graph.stateLabel(i);
+  if (label.labelindex() >= m_graph.stateLabelCount())
+  {
+    // the label does not actually exist, so we don't draw it
+    return;
+  }
+
   QVector3D color(std::max(label.color().x(), label.selected()), std::min(label.color().y(), 1.0f - label.selected()), std::min(label.color().z(), 1.0f - label.selected()));
   drawCenteredStaticText3D(painter, m_state_labels[label.labelindex()], label.pos(), color);
 }
@@ -698,6 +704,12 @@ bool GLScene::selectObject(GLScene::Selection& s,
     {
       std::size_t index = exploration_active ? m_graph.explorationNode(i) : i;
       const Graph::LabelNode& label = m_graph.stateLabel(index);
+      if (label.labelindex() >= m_graph.stateLabelCount())
+      {
+        // the label does not exist, so we skip it
+        continue;
+      }
+
       QVector3D window = m_camera.worldToWindow(label.pos());
       if (isOnText(x, y, m_state_labels[label.labelindex()], window))
       {
