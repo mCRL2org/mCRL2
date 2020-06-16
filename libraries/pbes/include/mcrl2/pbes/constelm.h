@@ -115,13 +115,13 @@ struct edge_traverser_stack_elem
 {
   typedef std::multimap<QPVI, edge_details> edge_map;
 
-  data::data_expression TC;
-  data::data_expression FC;
+  data::data_expression Cpos;
+  data::data_expression Cneg;
   std::set<data::variable> FV;
   edge_map edges;
 
-  edge_traverser_stack_elem(const data::data_expression& tc, const data::data_expression& fc, std::set<data::variable>&& free_vars)
-    : TC(tc), FC(fc)
+  edge_traverser_stack_elem(const data::data_expression& cond_pos, const data::data_expression& cond_neg, std::set<data::variable>&& free_vars)
+    : Cpos(cond_pos), Cneg(cond_neg)
   {
     std::swap(FV, free_vars);
   }
@@ -172,7 +172,7 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
     for (auto& i: ec1.edges)
     {
       auto& [Q_X_e, details] = i;
-      details.conditions.insert(negate2 ? ec2.FC : ec2.TC);
+      details.conditions.insert(negate2 ? ec2.Cneg : ec2.Cpos);
       (is_conjunctive ? details.conjunctive_context_FV : details.disjunctive_context_FV)
         .insert(ec2.FV.begin(), ec2.FV.end());
       ec.edges.insert(i);
@@ -180,7 +180,7 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
     for (auto& i: ec2.edges)
     {
       auto& [Q_X_e, details] = i;
-      details.conditions.insert(negate1 ? ec1.FC : ec1.TC);
+      details.conditions.insert(negate1 ? ec1.Cneg : ec1.Cpos);
       (is_conjunctive ? details.conjunctive_context_FV : details.disjunctive_context_FV)
         .insert(ec1.FV.begin(), ec1.FV.end());
       ec.edges.insert(i);
@@ -226,14 +226,14 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
 
   void leave(const not_&)
   {
-    std::swap(top().TC, top().FC);
+    std::swap(top().Cpos, top().Cneg);
   }
 
   void leave(const and_&)
   {
     stack_elem ec_right = pop();
     stack_elem ec_left = pop();
-    stack_elem ec(data::optimized_and(ec_left.TC, ec_right.TC), data::optimized_or(ec_left.FC, ec_right.FC),
+    stack_elem ec(data::optimized_and(ec_left.Cpos, ec_right.Cpos), data::optimized_or(ec_left.Cneg, ec_right.Cneg),
       utilities::detail::set_union(ec_left.FV, ec_right.FV));
     merge_conditions(ec_left, false, ec_right, false, ec, true);
     push(ec);
@@ -243,7 +243,7 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
   {
     stack_elem ec_right = pop();
     stack_elem ec_left = pop();
-    stack_elem ec(data::optimized_or(ec_left.TC, ec_right.TC), data::optimized_and(ec_left.FC, ec_right.FC),
+    stack_elem ec(data::optimized_or(ec_left.Cpos, ec_right.Cpos), data::optimized_and(ec_left.Cneg, ec_right.Cneg),
       utilities::detail::set_union(ec_left.FV, ec_right.FV));
     merge_conditions(ec_left, true, ec_right, true, ec, false);
     push(ec);
@@ -253,7 +253,7 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
   {
     stack_elem ec_right = pop();
     stack_elem ec_left = pop();
-    stack_elem ec(data::optimized_or(ec_left.FC, ec_right.TC), data::optimized_and(ec_left.TC, ec_right.FC),
+    stack_elem ec(data::optimized_or(ec_left.Cneg, ec_right.Cpos), data::optimized_and(ec_left.Cpos, ec_right.Cneg),
       utilities::detail::set_union(ec_left.FV, ec_right.FV));;
     merge_conditions(ec_left, false, ec_right, true, ec, false);
     push(ec);
@@ -274,7 +274,7 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
         new_conditions.insert(data::optimized_exists(x.variables(), e, true));
       }
       cond_set = std::move(new_conditions);
-      cond_set.insert(data::optimized_forall(x.variables(), ec.TC, true));
+      cond_set.insert(data::optimized_forall(x.variables(), ec.Cpos, true));
 
       // Update FV
       std::set<data::variable> bound_vars{x.variables().begin(), x.variables().end()};
@@ -305,7 +305,7 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
         new_conditions.insert(data::optimized_exists(x.variables(), e, true));
       }
       cond_set = std::move(new_conditions);
-      cond_set.insert(data::optimized_forall(x.variables(), ec.FC, true));
+      cond_set.insert(data::optimized_forall(x.variables(), ec.Cneg, true));
 
       // Update FV
       std::set<data::variable> bound_vars{x.variables().begin(), x.variables().end()};
