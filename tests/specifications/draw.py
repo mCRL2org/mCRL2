@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 #~ Copyright 2014-2016 Wieger Wesselink.
 #~ Distributed under the Boost Software License, Version 1.0.
@@ -12,7 +12,7 @@ import re
 import sys
 import traceback
 import yaml
-import StringIO
+import io
 
 def remove_extension(name):
     return re.sub(r'\.\w+$', '', name)
@@ -32,7 +32,7 @@ def result_nodes(nodes, result_text):
     return result
 
 def generate_dotfile(ymlfile):
-    out = StringIO.StringIO()
+    out = io.StringIO()
     out.write('digraph G {\n')
     f = open(ymlfile)
     data = yaml.safe_load(f)
@@ -60,7 +60,7 @@ def generate_dotfile(ymlfile):
     name = 'result'
     label_attribute = 'label="{0}"'.format(result_text)
     add_vertex(out, name, ['shape=box', 'style=filled', 'fillcolor=lightblue', label_attribute])
-    for label in result_nodes(nodes.keys() + tools.keys(), result_text):
+    for label in result_nodes(list(nodes.keys()) + list(tools.keys()), result_text):
         add_edge(out, label, name)
 
     out.write('}\n')
@@ -83,5 +83,5 @@ if __name__ == '__main__':
     try:
         main()
     except Exception as e:
-        print 'ERROR:', e
+        print('ERROR:', e)
         traceback.print_exc()
