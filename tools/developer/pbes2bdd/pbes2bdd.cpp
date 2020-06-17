@@ -28,14 +28,14 @@ class pbes2bdd_tool: public input_output_tool
     bool unary_encoding = false;
     bool use_new_implementation = false;
 
-    void parse_options(const utilities::command_line_parser& parser)
+    void parse_options(const utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
       unary_encoding = parser.has_option("unary-encoding");
       use_new_implementation = parser.has_option("use-new-implementation");
     }
 
-    void add_options(utilities::interface_description& desc)
+    void add_options(utilities::interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("unary-encoding", "use a unary encoding of the predicate variables", 'u');
@@ -52,7 +52,7 @@ class pbes2bdd_tool: public input_output_tool
              )
     {}
 
-    bool run()
+    bool run() override
     {
       pbes_system::pbes pbesspec = pbes_system::detail::load_pbes(input_filename());
       std::string result;
