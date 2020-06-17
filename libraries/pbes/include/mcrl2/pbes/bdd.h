@@ -458,6 +458,17 @@ std::vector<bdd_node> to_bdd(const data::data_expression_list& v)
   return result;
 }
 
+inline
+std::vector<bdd_node> to_bdd(const data::variable_list & v)
+{
+  std::vector<bdd_node> result;
+  for (const data::variable& x: v)
+  {
+    result.push_back(to_bdd(x));
+  }
+  return result;
+}
+
 //---------------------------------- equation identifiers ---------------------------------//
 
 // returns the smallest value m such that n <= 2**m
@@ -622,8 +633,12 @@ struct bdd_equation
       std::size_t i1 = eqn_index.index(e.second.name());
       std::string id1 = ids[i1]->print(true);
       std::string f = to_bdd(e.first)->print(false);
-      std::string updates = parameter_updates(e, parameters);
-      std::vector<std::string> v = { id0, id1, f, updates };
+      std::vector<std::string> v = { id0, id1, f };
+      if (!parameters.empty())
+      {
+        std::string updates = parameter_updates(e, parameters);
+        v.push_back(updates);
+      }
       result.push_back(string_join(add_parens(v), " & "));
     }
     return result;
@@ -840,6 +855,29 @@ std::map<std::size_t, std::vector<bdd_node>> priority_map(const std::vector<bdd_
   return result;
 }
 
+
+inline
+std::string initial_state(const srf_pbes& p, const pbes_equation_index& eqn_index, const std::vector<bdd_node>& ids)
+{
+  const propositional_variable_instantiation& init = p.initial_state();
+  const data::data_expression_list& e = init.parameters();
+  std::size_t index = eqn_index.index(init.name());
+  const propositional_variable& X_init = p.equations()[index].variable();
+  const data::variable_list& d = X_init.parameters();
+
+  std::string initvar = ids[index]->print(false);
+  std::vector<std::string> param0 = to_string(to_bdd(d));
+  std::vector<std::string> param1 = add_parens(to_string(to_bdd(e)));
+
+  std::vector<std::string> v;
+  v.push_back(initvar);
+  for (std::size_t i = 0; i < param0.size(); i++)
+  {
+    v.push_back(param0[i] + " <-> " + param1[i]);
+  }
+  return string_join(add_parens(v), " & ");
+}
+
 inline
 std::string pbes2bdd(const pbes_system::pbes& p, bool unary_encoding = false)
 {
@@ -905,6 +943,7 @@ std::string srfpbes2bdd(const srf_pbes& p, bool unary_encoding = false)
   out << "--- all nodes ---\n" << any(ids)->print(false) << "\n\n";
   out << "--- even nodes ---\n" << any(even_ids(equations))->print(false) << "\n\n";
   out << "--- odd nodes ---\n" << any(odd_ids(equations))->print(false) << "\n\n";
+  out << "--- initial state ---\n" << initial_state(p, eqn_index, ids) << "\n\n";
 
   out << "--- priorities ---\n";
   std::map<std::size_t, std::vector<bdd_node>> priority_ids = priority_map(equations);
