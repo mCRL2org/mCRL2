@@ -4,6 +4,7 @@
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
+import argparse
 import os
 import random
 from text_utility import write_text
@@ -239,21 +240,18 @@ def make_val(s):
     #else:
     #    return s
 
-def make_predvar(n, size = random.randint(0, 2)):
+def make_predvar(n, use_integers=True, size = random.randint(0, 2)):
     name = 'X%d' % n
     arguments = []
-    variables = PREDICATE_INTEGERS + PREDICATE_BOOLEANS
+    variables = PREDICATE_INTEGERS + PREDICATE_BOOLEANS if use_integers else PREDICATE_BOOLEANS
     for i in range(size):
         v, variables = pick_element(variables)
         arguments.append(v)
     return PredicateVariable(name, arguments)
 
 # Generates n random predicate variables with 0, 1 or 2 parameters
-def make_predvars(n):
-    result = []
-    for i in range(n):
-        result.append(make_predvar(i, random.randint(0, 2)))
-    return result
+def make_predvars(n, use_integers):
+    return [make_predvar(i, use_integers, random.randint(0, 2)) for i in range(n)]
 
 # Creates elementary random boolean terms, with free variables
 # from the set freevars.
@@ -266,7 +264,7 @@ def make_atoms(freevars, add_val = True):
         result.append('%s > 1' % m)
         result.append('%s < 2' % m)
         result.append('%s < 3' % m)
-        for n in naturals - set([m]):
+        for n in naturals - {m}:
             result.append('%s == %s' % (m, n))
     for b in booleans:
         result.append(b)
@@ -325,7 +323,7 @@ def join_terms(terms):
     terms.append(z)
     return terms
 
-def make_pbes(equation_count, atom_count = 5, propvar_count = 3, use_quantifiers = True):
+def make_pbes(equation_count, atom_count=5, propvar_count=3, use_quantifiers=True, use_integers=True):
     global operators
     if use_quantifiers:
       operators = [not_, and_, or_, implies, not_, and_, or_, implies, forall, exists]
@@ -333,7 +331,7 @@ def make_pbes(equation_count, atom_count = 5, propvar_count = 3, use_quantifiers
       operators = [not_, and_, or_, implies]
     while True:
         try:
-            predvars = make_predvars(equation_count)
+            predvars = make_predvars(equation_count, use_integers)
             equations = []
             for i in range(equation_count):
                 terms = make_terms(predvars, atom_count, propvar_count)
@@ -356,3 +354,21 @@ def make_pbes(equation_count, atom_count = 5, propvar_count = 3, use_quantifiers
             #print inst
             pass
 
+def main():
+    cmdline_parser = argparse.ArgumentParser()
+    cmdline_parser.add_argument('destination', metavar='DIR', type=str, help='the output directory')
+    cmdline_parser.add_argument('--equation-count', metavar='VALUE', type=int, action = 'store', help='the number of equations', default=4)
+    cmdline_parser.add_argument('--atom-count', metavar='VALUE', type=int, action = 'store', help='the number of atoms', default='5')
+    cmdline_parser.add_argument('--propvar-count', metavar='VALUE', type=int, action = 'store', help='the number of atoms', default='3')
+    cmdline_parser.add_argument("--no-use-quantifiers", help="disable the generation of quantifiers", action="store_true", default=False)
+    cmdline_parser.add_argument("--no-use-integers", help="disable the generation of integers", action="store_true", default=False)
+    cmdline_parser.add_argument('-r', '--repetitions', dest='repetitions', type=int, metavar='N', default=10, help='generate N instances')
+    args = cmdline_parser.parse_args()
+
+    for i in range(args.repetitions):
+        file = os.path.join(args.destination, '{}.txt'.format(i))
+        pbes = make_pbes(args.equation_count, args.atom_count, args.propvar_count, not args.no_use_quantifiers, not args.no_use_integers)
+        write_text(file, str(pbes))
+
+if __name__ == '__main__':
+    main()
