@@ -311,10 +311,9 @@ inline void lts_convert_base_class(const lts_lts_base& base_in, lts_fsm_base& ba
 {
   base_out.clear_process_parameters();
 
-  for (data::variable_list::const_iterator i=base_in.process_parameters().begin();
-       i!=base_in.process_parameters().end(); ++i)
+  for (const data::variable& v: base_in.process_parameters())
   {
-    base_out.add_process_parameter(data::pp(*i),data::pp(i->sort()));
+    base_out.add_process_parameter(data::pp(v),data::pp(v.sort()));
   }
 }
 

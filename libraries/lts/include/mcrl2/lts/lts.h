@@ -119,6 +119,7 @@ class lts: public LTS_BASE
 
     lts& operator=(const lts& l)
     {
+      static_cast<LTS_BASE&>(*this)=l;
       m_nstates = l.m_nstates;
       m_init_state = l.m_init_state;
       m_transitions = l.m_transitions;
@@ -276,7 +277,6 @@ class lts: public LTS_BASE
       {
         return 0;
       }
-// std::cerr << "ADD " << pp(label) << "\n";
       assert(std::find(m_action_labels.begin(),m_action_labels.end(),label)==m_action_labels.end()); // Action labels must be unique. 
       const labels_size_type label_index=m_action_labels.size();
       m_action_labels.push_back(label);
