@@ -78,8 +78,8 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       desc.add_option("trace", utilities::make_optional_argument("NUM", std::to_string(std::numeric_limits<std::size_t>::max())),
                  "write a trace to states that are reported using one of the flags "
                  "--action, --deadlock, --divergence, --multiaction or --nondeterminism. "
-                 "No more than NUM traces will be written for each flag. If NUM is not supplied"
-                 " the number of traces is unbounded. "
+                 "After NUM traces have been written state space generation stops. If NUM is not supplied"
+                 " the number of traces is not limited. "
                  "For each trace a unique file with extension .trc (trace) "
                  "will be created containing a shortest trace starting from the initial state. "
                  "The traces can be pretty printed and converted to other formats using tracepp. "
