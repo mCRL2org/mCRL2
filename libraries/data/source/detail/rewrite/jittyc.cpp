@@ -19,6 +19,7 @@
 #include "mcrl2/utilities/basename.h"
 #include "mcrl2/utilities/stopwatch.h"
 #include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/atermpp/detail/aterm_list_implementation.h"
 #include "mcrl2/data/detail/rewrite/jittyc.h"
 #include "mcrl2/data/detail/rewrite/jitty_jittyc.h"
 #include "mcrl2/data/replace.h"
@@ -62,6 +63,101 @@ class bracket_level_data
     {}
 };
 
+/// This function returns the variables that occur in a complex subexpression within f.
+/// For instance in f(n+1,m) it returns {n}. In m+f(n1+1,n2) it returns {n1}. 
+/// The effect is that such variables n, and n1, must be in normalform, before evaluation.
+/// This is required for the template structure of the compiling rewriter. 
+static void find_variables_in_the_scope_of_main_function_symbol_in_a_complex_subexpression_helper(
+                   const data_expression& f,
+                   const data_expression& e,
+                   std::set <variable>& result)
+{
+  if (is_function_symbol(e))
+  {
+    return;
+  }
+  else if (is_variable(e))
+  {
+    return;
+  }
+  else if (is_abstraction(e))
+  {
+    const abstraction& abstr = down_cast<abstraction>(e);
+    std::set<variable> intermediate_result;
+    find_variables_in_the_scope_of_main_function_symbol_in_a_complex_subexpression_helper(f, abstr.body(), intermediate_result);
+    // Remove the bound variables.
+    for(const variable& v: abstr.variables())
+    {
+      intermediate_result.erase(v);
+    }
+    result.insert(intermediate_result.begin(), intermediate_result.end());
+
+    return;
+  }
+  else if (is_where_clause(e))
+  {
+    const where_clause& where = down_cast<where_clause>(e);
+    std::set<variable> intermediate_result;
+    find_variables_in_the_scope_of_main_function_symbol_in_a_complex_subexpression_helper(f, where.body(), intermediate_result);
+    result.insert(intermediate_result.begin(), intermediate_result.end());
+    for(const assignment_expression& ass: where.declarations())
+    {
+      const assignment& ass1= atermpp::down_cast<assignment>(ass);
+      intermediate_result.erase(ass1.lhs());
+      find_variables_in_the_scope_of_main_function_symbol_in_a_complex_subexpression_helper(f, ass1.rhs(), intermediate_result);
+    }
+    result.insert(intermediate_result.begin(), intermediate_result.end());
+
+    return;
+  }
+  else
+  {
+    assert(is_application(e));
+    // e has the shape application(head,t1,...,tn)
+    const application& appl = down_cast<application>(e);
+    const std::size_t arity = recursive_number_of_args(appl);
+
+    if (get_nested_head(e)==f)
+    {
+      for(std::size_t i=0; i<arity; i++)   
+      {
+        const data_expression arg=get_argument_of_higher_order_term(appl, i);
+        if (is_variable(arg))
+        {
+          // if the argument is a single variable, it is ignored.
+        }
+        else 
+        {
+          std::set<variable> variables_in_arg=find_free_variables(arg);
+          result.insert(variables_in_arg.begin(), variables_in_arg.end());
+        }
+      }
+      
+    }
+    else
+    {
+      // Traverse all subexpressions for occurrences of variables. 
+      const data_expression& head = appl.head();
+      find_variables_in_the_scope_of_main_function_symbol_in_a_complex_subexpression_helper(f, head, result);
+      for(const data_expression& arg: appl)
+      {
+        find_variables_in_the_scope_of_main_function_symbol_in_a_complex_subexpression_helper(f, arg, result);
+      }
+    }
+  }
+
+  return;
+}
+
+
+static std::set<variable> find_variables_in_the_scope_of_main_function_symbol_in_a_complex_subexpression(
+                   const data_expression& f,
+                   const data_expression& e)
+{
+  std::set <variable> result;
+  find_variables_in_the_scope_of_main_function_symbol_in_a_complex_subexpression_helper(f, e, result); 
+  return result;
+}
 
 
 typedef atermpp::term_list<variable_list> variable_list_list;
@@ -74,6 +170,8 @@ static std::vector<bool> dep_vars(const data_equation& eqn)
 {
   std::vector<bool> result(recursive_number_of_args(eqn.lhs()), true);
   std::set<variable> condition_vars = find_free_variables(eqn.condition());
+  std::set<variable> variables_in_the_scope_of_main_function_symbol_in_a_complex_subexpression = 
+                   find_variables_in_the_scope_of_main_function_symbol_in_a_complex_subexpression(get_nested_head(eqn.lhs()),eqn.rhs());
   double_variable_traverser<data::variable_traverser> lhs_doubles;
   double_variable_traverser<data::variable_traverser> rhs_doubles;
   lhs_doubles.apply(eqn.lhs());
@@ -85,7 +183,10 @@ static std::vector<bool> dep_vars(const data_equation& eqn)
     if (is_variable(arg_i))
     {
       const variable& v = down_cast<variable>(arg_i);
-      if (condition_vars.count(v) == 0 && lhs_doubles.result().count(v) == 0 && rhs_doubles.result().count(v) == 0)
+      if (condition_vars.count(v) == 0 && 
+          lhs_doubles.result().count(v) == 0 && 
+          rhs_doubles.result().count(v) == 0 &&
+          variables_in_the_scope_of_main_function_symbol_in_a_complex_subexpression.count(v) == 0)
       {
         result[i] = false;
       }
@@ -239,8 +340,9 @@ static match_tree_list create_sequence(const data_equation& rule, std::size_t* v
 
 
 // Structure for build_tree parameters
-typedef struct
+class build_pars 
 {
+public:
   match_tree_list_list Flist;       // List of sequences of which the first action is an F
   match_tree_list_list Slist;       // List of sequences of which the first action is an S
   match_tree_list_list Mlist;       // List of sequences of which the first action is an M
@@ -248,16 +350,21 @@ typedef struct
                                     // do anything in the current term
   match_tree_list_list upstack;     // List of sequences that have done an F at the current
                                     // level
-} build_pars;
 
-static void initialise_build_pars(build_pars* p)
-{
-  p->Flist = match_tree_list_list();
-  p->Slist = match_tree_list_list();
-  p->Mlist = match_tree_list_list();
-  p->stack = { match_tree_list_list() };
-  p->upstack = match_tree_list_list();
-}
+  // Initialise. 
+  build_pars()
+   : Flist(), 
+     Slist(),
+     Mlist(),
+     stack({ match_tree_list_list() }),
+     upstack()
+
+  {
+  }
+};
+
+
+
 
 static match_tree_list_list_list add_to_stack(const match_tree_list_list_list& stack, const match_tree_list_list& seqs, match_tree_Re& r, match_tree_list& cr)
 {
@@ -269,23 +376,23 @@ static match_tree_list_list_list add_to_stack(const match_tree_list_list_list& s
   match_tree_list_list l;
   match_tree_list_list h = stack.front();
 
-  for (match_tree_list_list:: const_iterator e=seqs.begin(); e!=seqs.end(); ++e)
+  for (const match_tree_list& e: seqs)
   {
-    if (e->front().isD())
+    if (e.front().isD())
     {
-      l.push_front(e->tail());
+      l.push_front(e.tail());
     }
-    else if (e->front().isN())
+    else if (e.front().isN())
     {
-      h.push_front(e->tail());
+      h.push_front(e.tail());
     }
-    else if (e->front().isRe())
+    else if (e.front().isRe())
     {
-      r = match_tree_Re(e->front());
+      r = match_tree_Re(e.front());
     }
     else
     {
-      cr.push_front(e->front());
+      cr.push_front(e.front());
     }
   }
 
@@ -294,39 +401,39 @@ static match_tree_list_list_list add_to_stack(const match_tree_list_list_list& s
   return result;
 }
 
-static void add_to_build_pars(build_pars* pars,  const match_tree_list_list& seqs, match_tree_Re& r, match_tree_list& cr)
+static void add_to_build_pars(build_pars& pars, const match_tree_list_list& seqs, match_tree_Re& r, match_tree_list& cr)
 {
   match_tree_list_list l;
 
-  for (match_tree_list_list:: const_iterator e=seqs.begin(); e!=seqs.end(); ++e)
+  for (const match_tree_list& e: seqs)
   {
-    if (e->front().isD() || e->front().isN())
+    if (e.front().isD() || e.front().isN())
     {
-      l.push_front(*e);
+      l.push_front(e);
     }
-    else if (e->front().isS())
+    else if (e.front().isS())
     {
-      pars->Slist.push_front(*e);
+      pars.Slist.push_front(e);
     }
-    else if (e->front().isMe())     // M should not appear at the head of a seq
+    else if (e.front().isMe())     // M should not appear at the head of a seq
     {
-      pars->Mlist.push_front(*e);
+      pars.Mlist.push_front(e);
     }
-    else if (e->front().isF())
+    else if (e.front().isF())
     {
-      pars->Flist.push_front(*e);
+      pars.Flist.push_front(e);
     }
-    else if (e->front().isRe())
+    else if (e.front().isRe())
     {
-      r = e->front();
+      r = e.front();
     }
     else
     {
-      cr.push_front(e->front());
+      cr.push_front(e.front());
     }
   }
 
-  pars->stack = add_to_stack(pars->stack,l,r,cr);
+  pars.stack = add_to_stack(pars.stack,l,r,cr);
 }
 
 static char tree_var_str[20];
@@ -584,7 +691,7 @@ static match_tree build_tree(build_pars pars, std::size_t i)
     pars.stack.push_front(match_tree_list_list());
     l = pars.upstack;
     pars.upstack = match_tree_list_list();
-    add_to_build_pars(&pars,l,r,readies);
+    add_to_build_pars(pars,l,r,readies);
 
 
     if (!r.is_defined())
@@ -629,7 +736,7 @@ static match_tree build_tree(build_pars pars, std::size_t i)
 
       pars.stack = pars.stack.tail();
       pars.stack.push_front(match_tree_list_list());
-      add_to_build_pars(&pars,l,r,readies);
+      add_to_build_pars(pars,l,r,readies);
 
       match_tree tree;
       if (!r.is_defined())
@@ -664,19 +771,19 @@ static match_tree create_tree(const data_equation_list& rules)
   // store the total number of variables used in these sequences.
   // (The total number of variables in all sequences should be an upper
   // bound for the number of variable in the final tree.)
+
   match_tree_list_list rule_seqs;
   std::size_t total_rule_vars = 0;
-  for (data_equation_list::const_iterator it=rules.begin(); it!=rules.end(); ++it)
+  for (const data_equation& e: rules)
   {
-    rule_seqs.push_front(create_sequence(*it,&total_rule_vars));
+    rule_seqs.push_front(create_sequence(e,&total_rule_vars));
   }
   // Generate initial parameters for built_tree
   build_pars init_pars;
   match_tree_Re r;
   match_tree_list readies;
 
-  initialise_build_pars(&init_pars);
-  add_to_build_pars(&init_pars,rule_seqs,r,readies);
+  add_to_build_pars(init_pars,rule_seqs,r,readies);
   match_tree tree;
   if (!r.is_defined())
   {
@@ -692,7 +799,6 @@ static match_tree create_tree(const data_equation_list& rules)
   {
     tree = match_tree_R(r.result());
   }
-
   return tree;
 }
 
@@ -1127,10 +1233,10 @@ class RewriterCompilingJitty::ImplementTree
    *
    */
 
-  void calc_inner_term_function(std::ostream& s, const function_symbol& f, const bool rewr, std::size_t arity, std::ostream& result_type)
+  void calc_inner_term_function(std::ostream& s, const function_symbol& f, const bool require_normal_form, std::size_t arity, std::ostream& result_type)
   {
     const bool nf = opid_is_nf(f, arity);
-    if (rewr || nf)
+    if (require_normal_form || nf)
     {
       s << m_rewriter.m_nf_cache.insert(f);
       result_type << "data_expression";
@@ -1144,16 +1250,70 @@ class RewriterCompilingJitty::ImplementTree
     }
   }
 
-  void calc_inner_term_variable(std::ostream& s, const variable& v, std::ostream& result_type)
+  void calc_inner_term_variable(std::ostream& s, 
+                                const variable& v, 
+                                const variable_or_number_list& nnfvars,
+                                const bool require_normal_form,
+                                std::ostream& result_type,
+                                const std::map<variable,std::string>& type_of_code_variables) 
   {
     const std::string variable_name = v.name();
     // Remove the initial @ if it is present in the variable name, because then it is a variable introduced
     // by this rewriter.
     if (variable_name[0] == '@')
     {
-      s << variable_name.substr(1);
-      result_type << "data_expression";
+      assert(type_of_code_variables.count(v)>0);  // We know the type of the variable at hand. 
+      if (require_normal_form)
+      {
+        if (type_of_code_variables.at(v)=="data_expression")
+        {
+          s << variable_name.substr(1);
+        }
+        else 
+        {
+          s << "local_rewrite(" << variable_name.substr(1) << ", this_rewriter)";
+        }
+        result_type << "data_expression";
+      }
+      else // No normal form is required. 
+      {
+        s << variable_name.substr(1);
+        if (type_of_code_variables.at(v)=="data_expression")
+        {
+          result_type << "data_expression";
+        }
+        else 
+        {
+          assert(variable_name.substr(0,5)=="@var_");
+          result_type << type_of_code_variables.at(v);
+        }
+      }
       return;
+//      {
+//        if (std::find(nnfvars.begin(),nnfvars.end(),v)==nnfvars.end()) // This variable is a normal form. 
+//        {
+//          s << variable_name.substr(1);
+//        }
+//        else 
+//        {
+//          s << "local_rewrite(" << variable_name.substr(1) << ", this_rewriter)";
+//        }
+//        result_type << "data_expression";
+//      }
+//      else // No normal form is required. 
+//      {
+//        s << variable_name.substr(1);
+//        if (std::find(nnfvars.begin(),nnfvars.end(),v)==nnfvars.end()) // This variable is a normal form. 
+//        {
+//          result_type << "data_expression";
+//        }
+//        else 
+//        {
+//          assert(variable_name.substr(0,5)=="@var_");
+//          result_type << "DATA_EXPR" << variable_name.substr(5);
+//        }
+//      }
+//      return;
     }
     else
     {
@@ -1163,7 +1323,7 @@ class RewriterCompilingJitty::ImplementTree
     }
   }
 
-  void calc_inner_term_abstraction(std::ostream& s, const abstraction& a, const std::size_t startarg, const variable_or_number_list nnfvars, const bool rewr, std::ostream& result_type)
+  void calc_inner_term_abstraction(std::ostream& s, const abstraction& a, const std::size_t startarg, const variable_or_number_list nnfvars, const bool require_normal_form, std::ostream& result_type, const std::map<variable,std::string>& type_of_code_variables)
   {
     std::string binder_constructor;
     std::string rewriter_function;
@@ -1184,11 +1344,11 @@ class RewriterCompilingJitty::ImplementTree
       binder_constructor = "exists_binder";
       rewriter_function = "existential_quantifier_enumeration";
     }
-    if (rewr)
+    if (require_normal_form)
     {
       s << "static_cast<const data_expression&>(this_rewriter->" << rewriter_function << "("
            "this_rewriter->binding_variable_list_get(" << m_rewriter.binding_variable_list_index(a.variables()) << "), ";
-      calc_inner_term(s, a.body(), startarg, nnfvars, true, result_type);
+      calc_inner_term(s, a.body(), startarg, nnfvars, true, result_type, type_of_code_variables);
       s << ", true, sigma(this_rewriter)))";
       result_type << "data_expression";
       return;
@@ -1197,7 +1357,7 @@ class RewriterCompilingJitty::ImplementTree
     {
       std::stringstream argument_type;
       std::stringstream argument_string;
-      calc_inner_term(argument_string, a.body(), startarg, nnfvars, false, argument_type);
+      calc_inner_term(argument_string, a.body(), startarg, nnfvars, false, argument_type, type_of_code_variables);
       s << "delayed_abstraction<" << argument_type.str() << ">(" << binder_constructor << "(), "
            "this_rewriter->binding_variable_list_get(" << m_rewriter.binding_variable_list_index(a.variables()) << "), ";
       s << argument_string.str() << ", this_rewriter)";
@@ -1206,9 +1366,15 @@ class RewriterCompilingJitty::ImplementTree
     }
   }
 
-  void calc_inner_term_where_clause(std::ostream& s, const where_clause& w, const std::size_t startarg, const variable_or_number_list nnfvars, const bool rewr, std::ostream& result_type)
+  void calc_inner_term_where_clause(std::ostream& s, 
+                                    const where_clause& w, 
+                                    const std::size_t startarg, 
+                                    const variable_or_number_list nnfvars, 
+                                    const bool require_normal_form, 
+                                    std::ostream& result_type, 
+                                    const std::map<variable,std::string>& type_of_code_variables)
   {
-    if (rewr)  // TODO Take into account that some arguments are already in normal form.
+    if (require_normal_form)  // TODO Take into account that some arguments are already in normal form.
     {
       s << "this_rewriter->rewrite_where(";
       result_type << "data_expression";
@@ -1221,7 +1387,7 @@ class RewriterCompilingJitty::ImplementTree
     // A rewritten result is expected.
     std::stringstream temp_result_type;
     s << "where_clause(";
-    calc_inner_term(s, w.body(), startarg, nnfvars, true, temp_result_type);
+    calc_inner_term(s, w.body(), startarg, nnfvars, true, temp_result_type, type_of_code_variables);
     s << ",";
     for(std::size_t i = w.assignments().size(); i > 0; --i)
     {
@@ -1231,11 +1397,11 @@ class RewriterCompilingJitty::ImplementTree
     for(assignment_list::const_iterator i = w.assignments().begin(); i != w.assignments().end(); ++i)
     {
       s << ", assignment(this_rewriter->bound_variable_get(" << m_rewriter.bound_variable_index(i->lhs()) << "), ";
-      calc_inner_term(s, i->rhs(), startarg, nnfvars, true, temp_result_type);
+      calc_inner_term(s, i->rhs(), startarg, nnfvars, true, temp_result_type, type_of_code_variables);
       s << "))";
     }
     s << ")";
-    if (rewr)
+    if (require_normal_form)
     {
       s << ", sigma(this_rewriter))";
     }
@@ -1250,14 +1416,15 @@ class RewriterCompilingJitty::ImplementTree
                                      const function_symbol& head,
                                      const std::size_t startarg,
                                      const variable_or_number_list nnfvars,
-                                     const bool rewr,
-                                     std::ostream& result_type)
+                                     const bool require_normal_form,
+                                     std::ostream& result_type,
+                                     const std::map<variable,std::string>& type_of_code_variables)
   {
     const std::size_t arity = recursive_number_of_args(a);
 
     assert(arity > 0);
     nfs_array args_nfs(arity);
-    if (rewr)
+    if (require_normal_form)
     {
       // Take care that arguments that need to be rewritten,
       // are rewritten immediately.
@@ -1270,9 +1437,9 @@ class RewriterCompilingJitty::ImplementTree
 
     std::stringstream code_for_arguments;
     std::stringstream types_for_arguments;
-    calc_inner_terms(code_for_arguments, a, startarg, nnfvars, args_nfs, types_for_arguments);
+    calc_inner_terms(code_for_arguments, a, startarg, nnfvars, args_nfs, types_for_arguments, type_of_code_variables);
 
-    if (rewr)
+    if (require_normal_form)
     {
       result_type << "data_expression";
       s << rewr_function_name(head, arity) << "(";
@@ -1291,7 +1458,7 @@ class RewriterCompilingJitty::ImplementTree
     s << code_for_arguments.str();
     s <<  (code_for_arguments.str().empty()?"":", ") << " this_rewriter)";
 
-    return rewr;
+    return require_normal_form;
   }
 
   bool calc_inner_term_appl_lambda_abstraction(
@@ -1300,8 +1467,9 @@ class RewriterCompilingJitty::ImplementTree
                             const abstraction& head,
                             const std::size_t startarg,
                             const variable_or_number_list nnfvars,
-                            const bool rewr,
-                            std::ostream& result_type)
+                            const bool require_normal_form,
+                            std::ostream& result_type,
+                            const std::map<variable,std::string>& type_of_code_variables)
   {
     assert(a.size() > 0);    // TODO Take care that the application of this lambda is done without unnecessary rewriting.
                              // The problem is that the function rewrite_lambda_application rewrites all its arguments.
@@ -1310,7 +1478,7 @@ class RewriterCompilingJitty::ImplementTree
     assert(is_lambda_binder(head.binding_operator()));
     const std::size_t arity = a.size();
 
-    if (rewr)
+    if (require_normal_form)
     {
       nfs_array args_nfs(recursive_number_of_args(a));
       args_nfs.fill(true);
@@ -1320,35 +1488,35 @@ class RewriterCompilingJitty::ImplementTree
 
       s << appl_function(arity) << "(";
       std::stringstream types_for_arguments;
-      calc_inner_term(s, head, startarg, nnfvars, true, types_for_arguments);
+      calc_inner_term(s, head, startarg, nnfvars, true, types_for_arguments, type_of_code_variables);
       s << ", ";
       if (arity>0)
       {
         types_for_arguments << ", ";
       }
-      calc_inner_terms(s, a, startarg, nnfvars, args_nfs,types_for_arguments);
+      calc_inner_terms(s, a, startarg, nnfvars, args_nfs,types_for_arguments, type_of_code_variables);
       s << ")";
       s << ", sigma(this_rewriter))";
-      return rewr;
+      return require_normal_form;
     }
     else
     {
-      // !rewr
+      // !require_normal_form
       nfs_array args_nfs(arity);
       args_nfs.fill();
 
       s << "term_not_in_normalform(" << appl_function(arity) << "(";
       std::stringstream types_for_arguments;
-      calc_inner_term(s, head, startarg, nnfvars, true, types_for_arguments);
+      calc_inner_term(s, head, startarg, nnfvars, true, types_for_arguments, type_of_code_variables);
       s << ", ";
       if (arity>0)
       {
         types_for_arguments << ", ";
       }
-      calc_inner_terms(s, a, startarg, nnfvars, args_nfs,types_for_arguments);
+      calc_inner_terms(s, a, startarg, nnfvars, args_nfs,types_for_arguments, type_of_code_variables);
       s << "))";
       result_type << "term_not_in_normalform";
-      return rewr;
+      return require_normal_form;
     }
   }
 
@@ -1356,7 +1524,8 @@ class RewriterCompilingJitty::ImplementTree
                             std::ostream& s,
                             const application& a,
                             const std::size_t startarg,
-                            const variable_or_number_list nnfvars)
+                            const variable_or_number_list nnfvars,
+                            const std::map<variable,std::string>& type_of_code_variables)
   {
     // the application is either application(variable,t1,..,tn) or application(application(...),t1,..,tn).
 
@@ -1367,18 +1536,18 @@ class RewriterCompilingJitty::ImplementTree
     std::stringstream dummy_result_type;  // As we rewrite to normal forms, these are always data_expressions.
     if (is_variable(a.head()))
     {
-      calc_inner_term(s, down_cast<variable>(a.head()), startarg, nnfvars, true, dummy_result_type);
+      calc_inner_term(s, down_cast<variable>(a.head()), startarg, nnfvars, true, dummy_result_type, type_of_code_variables);
     }
     else
     {
       assert(is_application(a.head()));
-      write_application_to_stream_in_normal_form(s,down_cast<application>(a.head()),startarg,nnfvars);
+      write_application_to_stream_in_normal_form(s,down_cast<application>(a.head()),startarg,nnfvars, type_of_code_variables);
     }
     for(const data_expression& t: a)
     {
       s << ", ";
 
-      calc_inner_term(s, t, startarg, nnfvars, rewr_args, dummy_result_type);
+      calc_inner_term(s, t, startarg, nnfvars, rewr_args, dummy_result_type, type_of_code_variables);
     }
     s << ")";
   }
@@ -1396,7 +1565,8 @@ class RewriterCompilingJitty::ImplementTree
                             const application& a,
                             const std::size_t startarg,
                             const variable_or_number_list nnfvars,
-                            std::ostream& result_type)
+                            std::ostream& result_type,
+                            const std::map<variable,std::string>& type_of_code_variables)
   {
     // the application is either application(variable,t1,..,tn) or application(application(...),t1,..,tn).
 
@@ -1408,19 +1578,19 @@ class RewriterCompilingJitty::ImplementTree
 
     if (is_variable(a.head()))
     {
-      calc_inner_term(code_string, down_cast<variable>(a.head()), startarg, nnfvars, true, result_types);
+      calc_inner_term(code_string, down_cast<variable>(a.head()), startarg, nnfvars, true, result_types, type_of_code_variables);
     }
     else
     {
       assert(is_application(a.head()));
-      write_delayed_application_to_stream_in_normal_form(code_string,down_cast<application>(a.head()),startarg,nnfvars,result_types);
+      write_delayed_application_to_stream_in_normal_form(code_string,down_cast<application>(a.head()),startarg,nnfvars,result_types, type_of_code_variables);
     }
 
     for(const data_expression& t: a)
     {
       result_types << ",";
       code_string << ",";
-      calc_inner_term(code_string, t, startarg, nnfvars, rewr_args, result_types);
+      calc_inner_term(code_string, t, startarg, nnfvars, rewr_args, result_types, type_of_code_variables);
     }
 
     s << delayed_application(arity) << "<" << result_types.str() << ">(";
@@ -1436,20 +1606,21 @@ class RewriterCompilingJitty::ImplementTree
                             const variable& ,
                             const std::size_t startarg,
                             const variable_or_number_list nnfvars,
-                            const bool rewr,
-                            std::ostream& result_type)
+                            const bool require_normal_form,
+                            std::ostream& result_type,
+                            const std::map<variable,std::string>& type_of_code_variables)
   {
-    if (rewr)
+    if (require_normal_form)
     {
       result_type << "data_expression";
       s << "rewrite_with_arguments_in_normal_form(";
-      write_application_to_stream_in_normal_form(s,a,startarg,nnfvars);
+      write_application_to_stream_in_normal_form(s,a,startarg,nnfvars, type_of_code_variables);
       s << ", this_rewriter)";
       return true;
     }
 
     // Generate an application which is rewritten when it is needed.
-    write_delayed_application_to_stream_in_normal_form(s,a,startarg,nnfvars,result_type);
+    write_delayed_application_to_stream_in_normal_form(s,a,startarg,nnfvars,result_type, type_of_code_variables);
     return false;
 
   }
@@ -1458,23 +1629,24 @@ class RewriterCompilingJitty::ImplementTree
                                    const application& a,
                                    const std::size_t startarg,
                                    const variable_or_number_list nnfvars,
-                                   const bool rewr,
-                                   std::ostream& result_type)
+                                   const bool require_normal_form,
+                                   std::ostream& result_type,
+                                   const std::map<variable,std::string>& type_of_code_variables)
   {
     const data_expression head=get_nested_head(a);
 
     if (is_function_symbol(head))  // Determine whether the topmost symbol is a function symbol.
     {
-      return calc_inner_term_appl_function(s, a, down_cast<function_symbol>(head), startarg, nnfvars, rewr, result_type);
+      return calc_inner_term_appl_function(s, a, down_cast<function_symbol>(head), startarg, nnfvars, require_normal_form, result_type, type_of_code_variables);
     }
 
     if (is_abstraction(head)) // Here we must consider the case where head is an abstraction, and hence it must be a lambda abstraction.
     {
-      return calc_inner_term_appl_lambda_abstraction(s, a, down_cast<abstraction>(head), startarg, nnfvars, rewr, result_type);
+      return calc_inner_term_appl_lambda_abstraction(s, a, down_cast<abstraction>(head), startarg, nnfvars, require_normal_form, result_type, type_of_code_variables);
     }
 
     assert(is_variable(head)); // Here we must consider the case where head is variable.
-    return calc_inner_term_appl_variable(s, a, down_cast<variable>(a.head()), startarg, nnfvars, rewr, result_type);
+    return calc_inner_term_appl_variable(s, a, down_cast<variable>(a.head()), startarg, nnfvars, require_normal_form, result_type, type_of_code_variables);
   }
 
   ///
@@ -1483,15 +1655,16 @@ class RewriterCompilingJitty::ImplementTree
   /// \param t is the data expression to be reconstructed in the generated code.
   /// \param startarg gives the index of the position of t in the surrounding application (0 for head position, 1 for first argument, etc.)
   /// \param nnfvars contains variables and indices that are not in normal form.
-  /// \param rewr indicates whether the reconstructed data expression should be rewritten to normal form.
+  /// \param require_normal_form indicates whether the reconstructed data expression should be rewritten to normal form.
   /// \return True if the result is in normal form, false otherwise.
   ///
   void calc_inner_term(std::ostream& s,
                        const data_expression& t,
                        const std::size_t startarg,
-                       const variable_or_number_list nnfvars,
-                       const bool rewr,
-                       std::ostream& result_type)
+                       const variable_or_number_list& nnfvars,
+                       const bool require_normal_form,
+                       std::ostream& result_type,
+                       const std::map<variable,std::string>& type_of_code_variables)
   {
     if (find_free_variables(t).empty())
     {
@@ -1503,27 +1676,27 @@ class RewriterCompilingJitty::ImplementTree
     {
       // This will never be reached, as it is dealt with in the if clause above.
       assert(0);
-      calc_inner_term_function(s, down_cast<function_symbol>(t), rewr, 0, result_type);
+      calc_inner_term_function(s, down_cast<function_symbol>(t), require_normal_form, 0, result_type);
       return;
     }
     if (is_variable(t))
     {
-      calc_inner_term_variable(s, down_cast<variable>(t), result_type);
+      calc_inner_term_variable(s, down_cast<variable>(t), nnfvars, require_normal_form, result_type, type_of_code_variables);
       return;
     }
     if (is_abstraction(t))
     {
-      calc_inner_term_abstraction(s, down_cast<abstraction>(t), startarg, nnfvars, rewr, result_type);
+      calc_inner_term_abstraction(s, down_cast<abstraction>(t), startarg, nnfvars, require_normal_form, result_type, type_of_code_variables);
       return;
     }
     if (is_where_clause(t))
     {
-      calc_inner_term_where_clause(s, down_cast<where_clause>(t), startarg, nnfvars, rewr, result_type);
+      calc_inner_term_where_clause(s, down_cast<where_clause>(t), startarg, nnfvars, require_normal_form, result_type, type_of_code_variables);
       return;
     }
 
     assert(is_application(t));
-    calc_inner_term_application(s, down_cast<application>(t), startarg, nnfvars, rewr, result_type);
+    calc_inner_term_application(s, down_cast<application>(t), startarg, nnfvars, require_normal_form, result_type, type_of_code_variables);
   }
 
   ///
@@ -1536,7 +1709,8 @@ class RewriterCompilingJitty::ImplementTree
                         const std::size_t startarg,
                         const variable_or_number_list nnfvars,
                         const nfs_array& rewr,
-                        std::ostream& argument_types)
+                        std::ostream& argument_types,
+                        const std::map<variable,std::string>& type_of_code_variables)
   {
     for(std::size_t i=0; i<recursive_number_of_args(appl); ++i)
     {
@@ -1548,14 +1722,17 @@ class RewriterCompilingJitty::ImplementTree
       std::stringstream argument_string;
       std::stringstream argument_type;
       assert(i<rewr.size());
-      calc_inner_term(argument_string,  get_argument_of_higher_order_term(appl,i), startarg + i, nnfvars, rewr.at(i),argument_type);
+      calc_inner_term(argument_string,  get_argument_of_higher_order_term(appl,i), startarg + i, nnfvars, rewr.at(i),argument_type, type_of_code_variables);
       s << argument_string.str();
       argument_types << argument_type.str();
     }
   }
 
   /*
-   * implement_tree helper methods
+   * implement_tree helper methods.
+   * type_of_code_variables gives a mapping from the variables used in the generated code. 
+   * if it is "data_expression" then it is a normal form. Otherwise it is a template type, which
+   * may or may not be a normal form. 
    *
    */
 
@@ -1568,7 +1745,8 @@ class RewriterCompilingJitty::ImplementTree
                       const std::size_t arity,
                       const function_symbol& opid,
                       bracket_level_data& brackets, 
-                      std::stack<std::string>& auxiliary_code_fragments)
+                      std::stack<std::string>& auxiliary_code_fragments,
+                      std::map<variable,std::string>& type_of_code_variables)
   {
     /* Some c++ compilers cannot deal with more than 256 nestings of curly braces ({...}). 
        If too many curly braces are generated, a new method is generated, with as only  purpose
@@ -1596,7 +1774,7 @@ class RewriterCompilingJitty::ImplementTree
 
       std::size_t old_bracket_nesting_level=brackets.bracket_nesting_level;
       brackets.bracket_nesting_level=0;
-      implement_tree(s,tree,cur_arg,parent,level,cnt,arity, opid, brackets,auxiliary_code_fragments);
+      implement_tree(s,tree,cur_arg,parent,level,cnt,arity, opid, brackets,auxiliary_code_fragments, type_of_code_variables);
       brackets.bracket_nesting_level=old_bracket_nesting_level;
       s << "    return data_expression(); // This indicates that no result has been calculated;\n";
       // rewr_function_finish(s, arity, opid); 
@@ -1609,31 +1787,31 @@ class RewriterCompilingJitty::ImplementTree
 
     if (tree.isS())
     {
-      implement_treeS(m_stream,atermpp::down_cast<match_tree_S>(tree), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments);
+      implement_treeS(m_stream,atermpp::down_cast<match_tree_S>(tree), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments, type_of_code_variables);
     }
     else if (tree.isM())
     {
-      implement_treeM(m_stream,atermpp::down_cast<match_tree_M>(tree), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments);
+      implement_treeM(m_stream,atermpp::down_cast<match_tree_M>(tree), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments, type_of_code_variables);
     }
     else if (tree.isF())
     {
-      implement_treeF(m_stream, atermpp::down_cast<match_tree_F>(tree), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments);
+      implement_treeF(m_stream, atermpp::down_cast<match_tree_F>(tree), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments, type_of_code_variables);
     }
     else if (tree.isD())
     {
-      implement_treeD(m_stream, atermpp::down_cast<match_tree_D>(tree), level, cnt, arity, opid, brackets, auxiliary_code_fragments);
+      implement_treeD(m_stream, atermpp::down_cast<match_tree_D>(tree), level, cnt, arity, opid, brackets, auxiliary_code_fragments, type_of_code_variables);
     }
     else if (tree.isN())
     {
-      implement_treeN(m_stream, atermpp::down_cast<match_tree_N>(tree), cur_arg, parent, level, cnt, arity, opid, brackets,auxiliary_code_fragments);
+      implement_treeN(m_stream, atermpp::down_cast<match_tree_N>(tree), cur_arg, parent, level, cnt, arity, opid, brackets,auxiliary_code_fragments, type_of_code_variables);
     }
     else if (tree.isC())
     {
-      implement_treeC(m_stream, atermpp::down_cast<match_tree_C>(tree), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments);
+      implement_treeC(m_stream, atermpp::down_cast<match_tree_C>(tree), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments, type_of_code_variables);
     }
     else if (tree.isR())
     {
-      implement_treeR(m_stream, atermpp::down_cast<match_tree_R>(tree), cur_arg, level);
+      implement_treeR(m_stream, atermpp::down_cast<match_tree_R>(tree), cur_arg, level, type_of_code_variables);
     }
     else
     {
@@ -1668,7 +1846,8 @@ class RewriterCompilingJitty::ImplementTree
              const std::size_t arity,
              const function_symbol& opid,
              bracket_level_data& brackets,
-             std::stack<std::string>& auxiliary_code_fragments)
+             std::stack<std::string>& auxiliary_code_fragments,
+             std::map<variable,std::string>& type_of_code_variables)
   {
     const match_tree_S& treeS(tree);
     bool reset_current_data_parameters=false;
@@ -1680,27 +1859,34 @@ class RewriterCompilingJitty::ImplementTree
       brackets.current_data_arguments.push(arguments + (arguments.empty()?"":", ") + (std::string(treeS.target_variable().name()).c_str() + 1));
       reset_current_data_parameters=true;
 
-      m_stream << m_padding << "const data_expression& " << std::string(treeS.target_variable().name()).c_str() + 1 << " = ";
       if (level == 0)
       {
-        if (m_used[cur_arg])
+        if (m_used[cur_arg])   
         {
-          m_stream << "arg" << cur_arg << "; // S1\n";
+          m_stream << m_padding << "const data_expression& " << std::string(treeS.target_variable().name()).c_str() + 1 << " = ";
+          m_stream << "arg" << cur_arg << "; // S1a\n";
+          
+          type_of_code_variables[treeS.target_variable()]="data_expression";
         }
         else
         {
-          m_stream << "local_rewrite(arg_not_nf" << cur_arg << ", this_rewriter); // S1\n";
+          // m_stream << "local_rewrite(arg_not_nf" << cur_arg << ", this_rewriter); // S1b\n";
+          m_stream << m_padding << "const DATA_EXPR" << cur_arg <<"& " << std::string(treeS.target_variable().name()).c_str() + 1 << " = ";
+          m_stream << "arg_not_nf" << cur_arg << "; // S1b\n";
+          type_of_code_variables[treeS.target_variable()]="DATA_EXPR" + std::to_string(cur_arg);
           m_nnfvars.push_front(treeS.target_variable());
         }
       }
       else
       {
+        m_stream << m_padding << "const data_expression& " << std::string(treeS.target_variable().name()).c_str() + 1 << " = ";
         m_stream << "down_cast<data_expression>("
                  << (level == 1 ? "arg" : "t") << parent << "[" << cur_arg << "]"
                  << "); // S2\n";
+        type_of_code_variables[treeS.target_variable()]="data_expression";
       }
     }
-    implement_tree(m_stream, tree.subtree(), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments);
+    implement_tree(m_stream, tree.subtree(), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments, type_of_code_variables);
     if (reset_current_data_parameters)
     {
       brackets.current_data_parameters.pop();
@@ -1718,7 +1904,8 @@ class RewriterCompilingJitty::ImplementTree
              const std::size_t arity,
              const function_symbol& opid,
              bracket_level_data& brackets,
-             std::stack<std::string>& auxiliary_code_fragments)
+             std::stack<std::string>& auxiliary_code_fragments,
+             std::map<variable,std::string>& type_of_code_variables)
   {
     m_stream << m_padding << "if (" << std::string(tree.match_variable().name()).c_str() + 1 << " == ";
     if (level == 0)
@@ -1733,7 +1920,7 @@ class RewriterCompilingJitty::ImplementTree
              << "{\n";
     brackets.bracket_nesting_level++;
     m_padding.indent();
-    implement_tree(m_stream, tree.true_tree(), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments);
+    implement_tree(m_stream, tree.true_tree(), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments, type_of_code_variables);
     m_padding.unindent();
     brackets.bracket_nesting_level--;
     m_stream << m_padding
@@ -1742,7 +1929,7 @@ class RewriterCompilingJitty::ImplementTree
              << "{\n";
     brackets.bracket_nesting_level++;
     m_padding.indent();
-    implement_tree(m_stream, tree.false_tree(), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments);
+    implement_tree(m_stream, tree.false_tree(), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments, type_of_code_variables);
     m_padding.unindent();
     brackets.bracket_nesting_level--;
     m_stream << m_padding
@@ -1759,7 +1946,8 @@ class RewriterCompilingJitty::ImplementTree
              const std::size_t arity,
              const function_symbol& opid,
              bracket_level_data& brackets,
-             std::stack<std::string>& auxiliary_code_fragments)
+             std::stack<std::string>& auxiliary_code_fragments,
+             std::map<variable,std::string>& type_of_code_variables)
   {
     bool reset_current_data_parameters=false;
     const void* func = (void*)(atermpp::detail::address(tree.function()));
@@ -1807,7 +1995,7 @@ class RewriterCompilingJitty::ImplementTree
     m_stack.push_back(cur_arg);
     m_stack.push_back(parent);
     m_padding.indent();
-    implement_tree(m_stream, tree.true_tree(), 1, level == 0 ? cur_arg : cnt, level + 1, cnt + 1, arity, opid, brackets, auxiliary_code_fragments);
+    implement_tree(m_stream, tree.true_tree(), 1, level == 0 ? cur_arg : cnt, level + 1, cnt + 1, arity, opid, brackets, auxiliary_code_fragments, type_of_code_variables);
     if (reset_current_data_parameters)
     {
       brackets.current_data_parameters.pop();
@@ -1821,7 +2009,7 @@ class RewriterCompilingJitty::ImplementTree
              << "else\n" << m_padding
              << "{\n";
     m_padding.indent();
-    implement_tree(m_stream, tree.false_tree(), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments);
+    implement_tree(m_stream, tree.false_tree(), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments, type_of_code_variables);
     m_padding.unindent();
     m_stream << m_padding
              << "}\n";
@@ -1836,13 +2024,14 @@ class RewriterCompilingJitty::ImplementTree
              const std::size_t arity,
              const function_symbol& opid,
              bracket_level_data& brackets,
-             std::stack<std::string>& auxiliary_code_fragments)
+             std::stack<std::string>& auxiliary_code_fragments,
+             std::map<variable,std::string>& type_of_code_variables)
   {
     int i = m_stack.back();
     m_stack.pop_back();
     int j = m_stack.back();
     m_stack.pop_back();
-    implement_tree(m_stream, tree.subtree(), j, i, level - 1, cnt, arity, opid, brackets, auxiliary_code_fragments);
+    implement_tree(m_stream, tree.subtree(), j, i, level - 1, cnt, arity, opid, brackets, auxiliary_code_fragments, type_of_code_variables);
     m_stack.push_back(j);
     m_stack.push_back(i);
   }
@@ -1857,9 +2046,10 @@ class RewriterCompilingJitty::ImplementTree
              const std::size_t arity,
              const function_symbol& opid,
              bracket_level_data& brackets,
-             std::stack<std::string>& auxiliary_code_fragments)
+             std::stack<std::string>& auxiliary_code_fragments,
+             std::map<variable,std::string>& type_of_code_variables)
   {
-    implement_tree(m_stream, tree.subtree(), cur_arg + 1, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments);
+    implement_tree(m_stream, tree.subtree(), cur_arg + 1, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments, type_of_code_variables);
   }
 
   void implement_treeC(
@@ -1872,18 +2062,19 @@ class RewriterCompilingJitty::ImplementTree
              const std::size_t arity,
              const function_symbol& opid,
              bracket_level_data& brackets,
-             std::stack<std::string>& auxiliary_code_fragments)
+             std::stack<std::string>& auxiliary_code_fragments, 
+             std::map<variable,std::string>& type_of_code_variables)
   {
     std::stringstream result_type_string;
     m_stream << m_padding
              << "if (";
-    calc_inner_term(m_stream, tree.condition(), 0, m_nnfvars, true, result_type_string);
+    calc_inner_term(m_stream, tree.condition(), 0, m_nnfvars, true, result_type_string, type_of_code_variables);
     m_stream << " == sort_bool::true_()) // C\n" << m_padding
              << "{\n";
 
     brackets.bracket_nesting_level++;
     m_padding.indent();
-    implement_tree(m_stream, tree.true_tree(), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments);
+    implement_tree(m_stream, tree.true_tree(), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments, type_of_code_variables);
     m_padding.unindent();
 
     m_stream << m_padding
@@ -1892,7 +2083,7 @@ class RewriterCompilingJitty::ImplementTree
              << "{\n";
 
     m_padding.indent();
-    implement_tree(m_stream, tree.false_tree(), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments);
+    implement_tree(m_stream, tree.false_tree(), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments, type_of_code_variables);
     m_padding.unindent();
 
     m_stream << m_padding
@@ -1904,7 +2095,8 @@ class RewriterCompilingJitty::ImplementTree
              std::ostream& m_stream, 
              const match_tree_R& tree, 
              std::size_t cur_arg, 
-             std::size_t level)
+             std::size_t level,
+             const std::map<variable,std::string>& type_of_code_variables)
   {
     if (level > 0)
     {
@@ -1913,25 +2105,26 @@ class RewriterCompilingJitty::ImplementTree
     
     m_stream << m_padding << "return ";
     std::stringstream result_type_string;
-    calc_inner_term(m_stream, tree.result(), cur_arg + 1, m_nnfvars, true, result_type_string);
+    calc_inner_term(m_stream, tree.result(), cur_arg + 1, m_nnfvars, true, result_type_string, type_of_code_variables);
     m_stream << "; // R1 " << tree.result() << "\n"; 
   }
 
   const match_tree& implement_treeC(
              std::ostream& m_stream, 
              const match_tree_C& tree,
-             bracket_level_data& brackets)
+             bracket_level_data& brackets,
+             const std::map<variable,std::string>& type_of_code_variables)
   {
     std::stringstream result_type_string;
     assert(tree.true_tree().isR());
     m_stream << m_padding
              << "if (";
-    calc_inner_term(m_stream, tree.condition(), 0, variable_or_number_list(), true, result_type_string);
+    calc_inner_term(m_stream, tree.condition(), 0, variable_or_number_list(), true, result_type_string, type_of_code_variables);
     m_stream << " == sort_bool::true_()) // C\n" << m_padding
              << "{\n" << m_padding
              << "  return ";
     brackets.bracket_nesting_level++;
-    calc_inner_term(m_stream, match_tree_R(tree.true_tree()).result(), 0, m_nnfvars, true, result_type_string);
+    calc_inner_term(m_stream, match_tree_R(tree.true_tree()).result(), 0, m_nnfvars, true, result_type_string, type_of_code_variables);
     brackets.bracket_nesting_level--;
     m_stream << ";\n" << m_padding
              << "}\n" << m_padding
@@ -1944,14 +2137,15 @@ class RewriterCompilingJitty::ImplementTree
   void implement_treeR(
              std::ostream& m_stream, 
              const match_tree_R& tree, 
-             std::size_t arity)
+             std::size_t arity,
+             const std::map<variable,std::string>& type_of_code_variables)
   {
     std::stringstream result_type_string;
     if (arity == 0)
     {
       m_stream << m_padding
                << "static data_expression static_term(local_rewrite(";
-      calc_inner_term(m_stream, tree.result(), 0, m_nnfvars, true, result_type_string);
+      calc_inner_term(m_stream, tree.result(), 0, m_nnfvars, true, result_type_string, type_of_code_variables);
       m_stream << ", this_rewriter));\n" << m_padding
                << "return static_term; // R2a\n";
     }
@@ -1960,7 +2154,7 @@ class RewriterCompilingJitty::ImplementTree
       // arity>0
       m_stream << m_padding
                << "return ";
-      calc_inner_term(m_stream, tree.result(), 0, m_nnfvars, true, result_type_string);
+      calc_inner_term(m_stream, tree.result(), 0, m_nnfvars, true, result_type_string, type_of_code_variables);
       m_stream << "; // R2b\n";
     }
   }
@@ -1999,7 +2193,8 @@ public:
              const std::size_t arity,
              const function_symbol& opid,
              bracket_level_data& brackets,
-             std::stack<std::string>& auxiliary_code_fragments)
+             std::stack<std::string>& auxiliary_code_fragments,
+             std::map<variable,std::string>& type_of_code_variables)
   {
     for (std::size_t i = 0; i < arity; ++i)
     {
@@ -2012,17 +2207,17 @@ public:
     std::size_t l = 0;
     while (tree.isC())
     {
-      tree = implement_treeC(m_stream, down_cast<match_tree_C>(tree),brackets);
+      tree = implement_treeC(m_stream, down_cast<match_tree_C>(tree),brackets, type_of_code_variables);
       l++;
     }
 
     if (tree.isR())
     {
-      implement_treeR(m_stream, down_cast<match_tree_R>(tree), arity);
+      implement_treeR(m_stream, down_cast<match_tree_R>(tree), arity, type_of_code_variables);
     }
     else
     {
-      implement_tree(m_stream, tree, 0, 0, 0, 0, arity, opid, brackets, auxiliary_code_fragments);
+      implement_tree(m_stream, tree, 0, 0, 0, 0, arity, opid, brackets, auxiliary_code_fragments, type_of_code_variables);
     }
 
     // Close braces opened by implement_tree(std ostream&, onst match_tree_C&)
@@ -2043,6 +2238,8 @@ public:
   {
     bool added_new_parameters_in_brackets=false;
     m_used=nfs_array(arity); // This vector maintains which arguments are in normal form.
+    m_nnfvars=variable_or_number_list();
+    std::map<variable,std::string> type_of_code_variables;
     while (!strat.empty())
     {
       m_stream << m_padding << "// " << strat.front() <<  "\n";
@@ -2070,7 +2267,7 @@ public:
       {
         m_stream << m_padding << "{\n";
         m_padding.indent();
-        implement_tree(m_stream, strat.front(), arity, opid, brackets, auxiliary_code_fragments);
+        implement_tree(m_stream, strat.front(), arity, opid, brackets, auxiliary_code_fragments, type_of_code_variables);
         m_padding.unindent();
         m_stream << m_padding << "}\n";
       }
@@ -2290,7 +2487,7 @@ public:
     m_stream << m_padding << "}\n\n";
 
     m_stream << m_padding <<
-                  "static inline data_expression rewr_" << index << "_" << arity << "_term"
+                  "static inline data_expression rewr_" << index << "_" << arity << "_term" 
                   "(const application&" << (arity == 0 ? "" : " t") << ", RewriterCompilingJitty* this_rewriter) "
                   "{ return rewr_" << index << "_" << arity << "(";
     for(std::size_t i = 0; i < arity; ++i)
@@ -2304,7 +2501,7 @@ public:
     m_stream << (arity==0?"":", ") << "this_rewriter); }\n\n";
 
     m_stream << m_padding <<
-                  "static inline data_expression rewr_" << index << "_" << arity << "_term_arg_in_normal_form"
+                  "static inline data_expression rewr_" << index << "_" << arity << "_term_arg_in_normal_form" 
                   "(const application&" << (arity == 0 ? "" : " t") << ", RewriterCompilingJitty* this_rewriter) "
                   "{ return rewr_" << index << "_" << arity << "(";
     for(std::size_t i = 0; i < arity; ++i)

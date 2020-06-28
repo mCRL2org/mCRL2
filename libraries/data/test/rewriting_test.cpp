@@ -883,7 +883,7 @@ BOOST_AUTO_TEST_CASE(test_lambda_expression)
     "     remove(i,q) = lambda j:Nat.if(i==j,empty,q(j));\n"
     "     i mod 2*n==j mod 2*n -> release(i,j,q) = q;\n"
     "     i mod 2*n!=j mod 2*n ->\n"
-    "          release(i,j,q) = release((i+1) mod 2*n,j,remove(i,q));\n"
+    "         release(i,j,q) = release((i+1) mod 2*n,j,remove(i,q));\n"
     "     k<n -> nextempty_rec(i,q,k) =\n"
     "               if(q(i)==empty,i,nextempty_rec((i+1) mod n,q,k+1));\n"
     "     k==n -> nextempty_rec(i,q,k)=i;\n"
@@ -1498,3 +1498,27 @@ BOOST_AUTO_TEST_CASE(Check_normal_forms_in_function_update)   // In the jitty re
   }
 }
 
+BOOST_AUTO_TEST_CASE(Problem_with_recursive_templates_in_jittyc)   // This rewrite system cannot stand the compiling rewriter
+                                                                   // if it uses templates freely. The templates will be
+                                                                   // used recursively, causing infinite template nesting, which
+                                                                   // the compiler cannot handle. 
+{
+  std::string s(
+  "map f:Nat#Nat->Nat;\n"
+  "var n,m:Nat;\n"
+  "eqn n>0 -> f(n,m)=f(Int2Nat(n-1),m+1);\n"
+  );
+
+  data_specification specification(parse_data_specification(s));
+
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    std::cerr << "  Strategy32: " << *strat << std::endl;
+    data::rewriter R(specification, *strat);
+
+    data::data_expression e(parse_data_expression("f(3,3)", specification));
+    data::data_expression f(parse_data_expression("f(0,6)", specification));
+    data_rewrite_test(R, e, f);
+  }
+}
