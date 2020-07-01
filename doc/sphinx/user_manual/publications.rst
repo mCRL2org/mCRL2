@@ -15,6 +15,7 @@ Publications
 General
 -------
 
+.. [GKLVW19] J.F. Groote, J.J.A. Keiren, B. Luttik, E.P. de Vink, T.A.C. Willemse. Modelling and Analysing Software in mCRL2. FACS 2019, LNCS vol. 12018, pp. 25-48. `(DOI) <https://doi.org/10.1007/978-3-030-40914-2_2>`__
 .. [BGK+19] O\. Bunte, J.F. Groote, J.J.A. Keiren, M\. Laveaux, T\. Neele, E.P. de Vink, J.W. Wesselink, A.J. Wijs, T.A.C. Willemse. The mCRL2 Toolset for Analysing Concurrent Systems: Improvements in Expressivity and Usability. TACAS 2019, LNCS vol. 11428, pp. 21-39. `(DOI) <https://doi.org/10.1007/978-3-030-17465-1_2>`__
 .. [GM14] J.F. Groote, M.R. Mousavi. `Modeling and analysis of communicating systems <https://mitpress.mit.edu/books/modeling-and-analysis-communicating-systems>`__. The MIT press. 2014.
 .. [CGK+13] S\. Cranen, J.F. Groote, J.J.A. Keiren, F.P.M. Stappers, E.P. de Vink, J. W. Wesselink, T.A.C. Willemse. An Overview of the mCRL2 Toolset and Its Recent Advances. TACAS 2013, pages 199-213. `(DOI) <http://dx.doi.org/10.1007/978-3-642-36742-7_15>`__
@@ -28,7 +29,10 @@ General
 Research
 --------
 
+.. [JGKW20] D.N. Jansen, J.F. Groote, J.J.A. Keiren, A. Wijs. An O(m log n) algorithm for branching bisimilarity on labelled transition systems. TACAS 2020, LNCS vol. 12079, pp. 3-20. `(DOI) <https://doi.org/10.1007/978-3-030-45237-7_1>`__
+.. [NWW20] T\. Neele, W. Wesselink, T.A.C. Willemse. Partial-Order Reduction for Parity Games with an Application on Parameterised Boolean Equation Systems. TACAS 2020, LNCS vol. 12079, pp. 307-324. `(DOI) <https://doi.org/10.1007/978-3-030-45237-7_19>`__
 .. [NWG20] T\. Neele, T.A.C. Willemse and J.F. Groote. Finding compact proofs for infinite-data parameterised Boolean equation systems. Science of Computer Programming (FACS 2018 special issue), vol. 188, pp. 102389. `(DOI) <https://doi.org/10.1016/j.scico.2019.102389>`__
+.. [LGW19] M\. Laveaux, J.F. Groote, T.A.C. Willemse. Correct and Efficient Antichain Algorithms for Refinement Checking. FORTE 2019, LNCS vol. 11535, pp. 185-203. `(DOI) <https://doi.org/10.1007/978-3-030-21759-4_11>`__
 .. [NWG18] T\. Neele, T.A.C. Willemse and J.F. Groote. Solving Parameterised Boolean Equation Systems with Infinite Data Through Quotienting. In FACS 2018. LNCS, vol. 11222, pp. 216--236. `(DOI) <https://dx.doi.org/10.1007/978-3-030-02146-7_11>`__
 .. [WW18] J.W. Wesselink and T.A.C. Willemse. Evidence Extraction from Parameterised Boolean Equation Systems. In ARQNL 2018, CEUR workshop proceedings, vol. 2095, pp. 86--100. `(link) <http://ceur-ws.org/Vol-2095/paper6.pdf>`__
 .. [CKW18] S\. Cranen, J.J.A. Keiren, and T.A.C. Willemse. Parity game reductions. Acta Informatica 55(5): 401-444, 2018. `(DOI) <https://doi.org/10.1007/s00236-017-0301-x>`__
