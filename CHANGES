@@ -1,4 +1,42 @@
 ===============================================================================
+Changes between toolset releases 201908.0 and 202006.0:
+===============================================================================
+
+This release brings bug fixes and many changes under the hood. First, the format
+of the binary files (including lps, lts and pbes) has been revised, which makes
+reading and writing them far more memory efficient. It is important to note that
+binary files created with previous versions can no longer be used.
+
+The tools lps2lts and pbes2bool have both been replaced. The tool pbes2bool is
+now identical to the pbessolve tool, which was introduced in the 201808.0
+release. The lps2lts tool has been re-implemented with far better maintainable
+code. It now supports writing the state space in the lts format on-the-fly,
+which further reduces the amount of memory required. 
+
+Several parts of the code base now rely on a C++17 compliant compiler and
+consequently the minimum supported compiler versions have been increased. These
+are now GCC 7.0, Clang 5.0, and AppleClang 11.0. Finally, Visual Studio 2019 of
+at least version 16.0 is required. These changes also mean that using the
+compiling jitty rewriter (option --rewriter=jittyc) requires a C++17 compliant
+compiler, where compilers satisfying the minimum version requirements are
+confirmed to work properly.
+
+31 bug reports were resolved since the last release.
+List of other changes:
+- LTSgraph can now export the graph to a vector image in the SVG format again.
+  The resulting export is also more accurate to what is shown on screen.
+  Furthermore, the graph presentation and the LaTeX export functionality have
+  also received some polishing.
+- The tools lps2lts and ltsconvert now support piping using '-' as a special
+  symbol.
+- The tool lpsbinary has received a new option --select which can be used to
+  indicate the parameters or sorts that should be replaced by booleans.
+- Python 2 has been declared deprecated and various testing and build related
+  scripts have been adapted to work with Python 3.6 at minimum.
+- The documentation generation has also been refactored and now supports sphinx
+  version 2.2, which makes it easier to generate documentation locally.
+
+===============================================================================
 Changes between toolset releases 201808.0 and 201908.0:
 ===============================================================================
 
