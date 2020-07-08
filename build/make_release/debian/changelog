@@ -1,3 +1,9 @@
+mcrl2 (201908.0) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Wieger Wesselink <j.w.wesselink@tue.nl>  Tue, 03 Sep 2019 11:06:51 +0200
+
 mcrl2 (201808.0-1) unstable; urgency=medium
 
   * New upstream release.
