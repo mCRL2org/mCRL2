@@ -279,10 +279,8 @@ function build_ppa_package
 #build_mcrl2_release
 #build_source_package
 
-#test_ppa_package xenial
 #test_ppa_package bionic
 #test_ppa_package focal
 
-#build_ppa_package xenial
 #build_ppa_package bionic
 #build_ppa_package focal
