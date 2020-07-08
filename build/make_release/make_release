@@ -30,8 +30,8 @@
 # do_ppa_upload. If these steps fail, it makes no sense to do an upload. After
 # every failed upload attempt the version number needs to be updated.
 
-MCRL2_RELEASE_BRANCH="release-201808"
-MCRL2_VERSION="201808.0"
+MCRL2_RELEASE_BRANCH="release-202006"
+MCRL2_VERSION="202006.0"
 UBUNTU_VERSION="1ubuntu1ppa1"
 DEBEMAIL="j.w.wesselink@tue.nl"
 DEBFULLNAME="Wieger Wesselink"
@@ -245,24 +245,44 @@ function test_debian_package
   VERSION="$MCRL2_VERSION-$UBUNTU_VERSION~$1"
   dch -v $VERSION -D $1 "New upstream release."
   debuild -S -sa
+
   cd ..
+
+  # Copy the generated .dsc file. This is done because pbuilder-dist removes the signature from this file.
+  cp "mcrl2_$VERSION.dsc" "mcrl2_$VERSION.dsc.bak"
+
   pbuilder-dist $1 build mcrl2_$VERSION.dsc --buildresult .
   lintian -i mcrl2_${VERSION}_amd64.deb
+
+  # Restore the generated .dsc file
+  cp "mcrl2_$VERSION.dsc.bak" "mcrl2_$VERSION.dsc"
 }
 
+function test_ppa_package
+{
+  prepare_debian_packaging
+  test_debian_package $1
+  simulate_ppa_upload $1
+}
+
+# N.B. Either run build_debian_package or test_debian_package. Otherwise in a later step GPG errors may occur!
 function build_ppa_package
 {
-  # N.B. Either run build_debian_package or test_debian_package. Otherwise in a
-  # later step GPG errors may occur!
-  #
-  #prepare_debian_packaging
-  #build_debian_package $1 $2
-  #test_debian_package $1
-  #simulate_ppa_upload $1
+  prepare_debian_packaging
+  build_debian_package $1 $2
+  simulate_ppa_upload $1
   #do_ppa_upload $1
 }
 
-#--- Build ppa packages
-#build_ppa_package trusty
+#--- Preparation ---#
+#download_mcrl2_release
+#build_mcrl2_release
+#build_source_package
+
+#test_ppa_package xenial
+#test_ppa_package bionic
+#test_ppa_package focal
+
 #build_ppa_package xenial
 #build_ppa_package bionic
+#build_ppa_package focal
