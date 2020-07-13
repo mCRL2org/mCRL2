@@ -13,6 +13,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/unused.h"
 #include "mcrl2/utilities/power_of_two.h"
+#include "mcrl2/utilities/platform.h"
 
 #ifdef MCRL2_PLATFORM_WINDOWS
 #include <io.h>
