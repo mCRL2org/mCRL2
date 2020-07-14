@@ -1,3 +1,9 @@
+mcrl2 (202006.0-1ubuntu1ppa1~focal) focal; urgency=medium
+
+  * New upstream release.
+
+ -- Wieger Wesselink <j.w.wesselink@tue.nl>  Tue, 14 Jul 2020 08:21:14 +0200
+
 mcrl2 (201908.0) unstable; urgency=medium
 
   * New upstream release.
