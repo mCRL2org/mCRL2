@@ -102,7 +102,6 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
   // Add the tags for the left and right processes
   process::action_label tagright_label("tagright", {});
   process::action_label tagleft_label("tagleft", {});
-  process::action_label internal_label("internal", {});
 
   // Change the summands to include the parameters of the other process and added the sync action.
 
@@ -110,15 +109,10 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
   std::vector<process::action_label> labels;
   labels.push_back(tagright_label);
   labels.push_back(tagleft_label);
-  labels.push_back(internal_label);
 
   // Create actions to be used within the summands.
   process::action tagleft(tagleft_label, {});
   process::action tagright(tagright_label, {});
-  process::action taginternal(internal_label, {});
-
-  process::action_list internal_action;
-  internal_action.push_front(taginternal);
 
   // The summands of the two specifications.
   lps::stochastic_action_summand_vector left_summands;
@@ -140,14 +134,13 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
       bool generate_left = (std::find(indices.begin(), indices.end(), index) != indices.end());
 
       // The resulting multi-action is either alpha or internal.
-      process::action_list actions = (summand.multi_action() == lps::multi_action()) ? internal_action : summand.multi_action().actions();
       if (generate_left)
       {
-        left_action = actions;
+        left_action = summand.multi_action().actions();
       }
       else
       {
-        right_action = actions;
+        right_action = summand.multi_action().actions();
       }
     }
 
@@ -287,10 +280,10 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
 
     // Determine which component is independent.
     atermpp::term_list<data::variable> left_all_parameters = left_parameters + summand.summation_variables();
-    bool is_left_independent = is_right_update_trivial && is_subset(synchronized, left_all_parameters);
+    bool is_left_independent = is_right_update_trivial && is_subset(synchronized, left_all_parameters) && right_action == process::action_list();
 
     atermpp::term_list<data::variable> right_all_parameters = right_parameters + summand.summation_variables();
-    bool is_right_independent = is_left_update_trivial && is_subset(synchronized, right_all_parameters);
+    bool is_right_independent = is_left_update_trivial && is_subset(synchronized, right_all_parameters) && left_action == process::action_list();
 
     mCRL2log(log::verbose) << std::boolalpha << "Summand " << index
       << ", is_left_update_trivial: " << is_left_update_trivial

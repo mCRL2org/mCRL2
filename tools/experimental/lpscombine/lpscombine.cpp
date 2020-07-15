@@ -121,9 +121,8 @@ void combine_specification(const lps::stochastic_specification& left_spec,
   // Print the process Q.
   stream << replacement << "\n";
 
-  // H_prime = {internal, tag_left, tag_right}
+  // H_prime = {tag_left, tag_right}
   core::identifier_string_list H_prime;
-  H_prime.emplace_front("internal");
   H_prime.emplace_front("tagleft");
   H_prime.emplace_front("tagright");
 
