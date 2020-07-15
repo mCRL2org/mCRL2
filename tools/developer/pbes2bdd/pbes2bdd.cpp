@@ -26,13 +26,11 @@ class pbes2bdd_tool: public input_output_tool
     typedef input_output_tool super;
 
     bool unary_encoding = false;
-    bool use_new_implementation = false;
 
     void parse_options(const utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
       unary_encoding = parser.has_option("unary-encoding");
-      use_new_implementation = parser.has_option("use-new-implementation");
     }
 
     void add_options(utilities::interface_description& desc) override
@@ -56,17 +54,7 @@ class pbes2bdd_tool: public input_output_tool
     {
       pbes_system::pbes pbesspec = pbes_system::detail::load_pbes(input_filename());
       std::string result;
-      if (use_new_implementation)
-      {
-        normalize(pbesspec);
-        srf_pbes p = pbes2srf(pbesspec);
-        unify_parameters(p);
-        result = pbes_system::bdd::srfpbes2bdd(p, unary_encoding);
-      }
-      else
-      {
-        result = pbes_system::bdd::pbes2bdd(pbesspec, unary_encoding);
-      }
+      result = pbes_system::bdd::pbes2bdd(pbesspec, unary_encoding);
       utilities::detail::write_text(output_filename(), result);
       return true;
     }

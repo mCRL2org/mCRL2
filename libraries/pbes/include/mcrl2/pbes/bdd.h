@@ -18,7 +18,6 @@
 #include "mcrl2/data/join.h"
 #include "mcrl2/pbes/join.h"
 #include "mcrl2/pbes/pbes_equation_index.h"
-#include "mcrl2/pbes/srf_pbes.h"
 
 namespace mcrl2 {
 
@@ -784,39 +783,6 @@ std::vector<bdd_equation> split_pbes(const pbes& p, const pbes_equation_index& e
 }
 
 inline
-bdd_equation split_pbes_equation(const srf_equation& eqn, std::size_t rank, const bdd_node& id)
-{
-  bdd_equation result;
-  result.rank = rank;
-  result.id = id;
-  result.is_disjunctive = !eqn.is_conjunctive();
-  for (const srf_summand& summand: eqn.summands())
-  {
-    if (!summand.parameters().empty())
-    {
-      throw mcrl2::runtime_error("quantifiers are not yet supported");
-    }
-    result.add_element(summand.condition(), summand.variable());
-  }
-  return result;
-}
-
-inline
-std::vector<bdd_equation> split_pbes(const srf_pbes& p, const pbes_equation_index& eqn_index, const std::vector<bdd_node>& ids)
-{
-  std::vector<bdd_equation> result;
-  const std::vector<srf_equation>& equations = p.equations();
-  for (std::size_t i = 0; i < equations.size(); i++)
-  {
-    const srf_equation& eqn = equations[i];
-    std::size_t rank = eqn_index.rank(eqn.variable().name());
-    const bdd_node& id = ids[i];
-    result.push_back(split_pbes_equation(eqn, rank, id));
-  }
-  return result;
-}
-
-inline
 std::vector<bdd_node> even_ids(const std::vector<bdd_equation>& equations)
 {
   std::vector<bdd_node> result;
@@ -857,28 +823,6 @@ std::map<std::size_t, std::vector<bdd_node>> priority_map(const std::vector<bdd_
 
 
 inline
-std::string initial_state(const srf_pbes& p, const pbes_equation_index& eqn_index, const std::vector<bdd_node>& ids)
-{
-  const propositional_variable_instantiation& init = p.initial_state();
-  const data::data_expression_list& e = init.parameters();
-  std::size_t index = eqn_index.index(init.name());
-  const propositional_variable& X_init = p.equations()[index].variable();
-  const data::variable_list& d = X_init.parameters();
-
-  std::string initvar = ids[index]->print(false);
-  std::vector<std::string> param0 = to_string(to_bdd(d));
-  std::vector<std::string> param1 = add_parens(to_string(to_bdd(e)));
-
-  std::vector<std::string> v;
-  v.push_back(initvar);
-  for (std::size_t i = 0; i < param0.size(); i++)
-  {
-    v.push_back(param0[i] + " <-> " + param1[i]);
-  }
-  return string_join(add_parens(v), " & ");
-}
-
-inline
 std::string pbes2bdd(const pbes_system::pbes& p, bool unary_encoding = false)
 {
   std::ostringstream out;
@@ -898,52 +842,6 @@ std::string pbes2bdd(const pbes_system::pbes& p, bool unary_encoding = false)
   out << "--- all nodes ---\n" << any(ids)->print(false) << "\n\n";
   out << "--- even nodes ---\n" << any(even_ids(equations))->print(false) << "\n\n";
   out << "--- odd nodes ---\n" << any(odd_ids(equations))->print(false) << "\n\n";
-
-  out << "--- priorities ---\n";
-  std::map<std::size_t, std::vector<bdd_node>> priority_ids = priority_map(equations);
-  std::size_t min_rank = equations.front().rank;
-  std::size_t max_rank = equations.back().rank;
-  // We prefer a max priority game, so the ranks need to be reversed
-  // Start at 0 if max_rank is even
-  for (std::size_t rank = min_rank; rank <= max_rank; rank++)
-  {
-    std::size_t r = max_rank - rank + (max_rank % 2);
-    out << "prio[" << r << "] = " << any(priority_ids[rank])->print(false) << "\n";
-  }
-  out << "\n";
-
-  out << "--- edges ---\n";
-  std::vector<std::string> edges;
-  for (const bdd_equation& eqn: equations)
-  {
-    std::vector<std::string> E = eqn.edge_relation(eqn_index, ids, pvar);
-    edges.insert(edges.end(), E.begin(), E.end());
-  }
-  out << "'''  " << string_join(add_parens(edges), "\n| ") << "'''\n";
-  return out.str();
-}
-
-inline
-std::string srfpbes2bdd(const srf_pbes& p, bool unary_encoding = false)
-{
-  pbes_equation_index eqn_index(p);
-
-  std::ostringstream out;
-
-  // bdd variables
-  std::vector<bdd_node> ivar = id_variables(p.equations().size(), unary_encoding);
-  std::vector<bdd_node> pvar = param_variables(p.equations().front().variable());
-
-  // equation ids
-  std::vector<bdd_node> ids = equation_identifiers(p.equations().size(), ivar, unary_encoding);
-
-  std::vector<bdd_equation> equations = split_pbes(p, eqn_index, ids);
-
-  out << "--- bdd variables ---\n" << string_join(add_single_quotes(to_string(ivar + pvar)), ", ") << "\n\n";
-  out << "--- all nodes ---\n" << any(ids)->print(false) << "\n\n";
-  out << "--- even nodes ---\n" << any(even_ids(equations))->print(false) << "\n\n";
-  out << "--- odd nodes ---\n" << any(odd_ids(equations))->print(false) << "\n\n";
-  out << "--- initial state ---\n" << initial_state(p, eqn_index, ids) << "\n\n";
 
   out << "--- priorities ---\n";
   std::map<std::size_t, std::vector<bdd_node>> priority_ids = priority_map(equations);
