@@ -1,7 +1,7 @@
 This directory contains several third-party libraries that are used by the
 mCRL2 toolset. The libraries are:
 
-dparser    tr
+dparser    tr     sylvan
 
 Below these libraries have a compact additional explanation.
 
@@ -14,3 +14,8 @@ state-specific symbol table.
 tr
 --
 This is a tile rendering package that is used to render pictures in ltsview.
+
+
+sylvan
+------
+This is a BDD package.
