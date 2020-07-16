@@ -91,6 +91,7 @@ if (${MCRL2_ENABLE_BENCHMARKS})
 endif()
 
 add_subdirectory(3rd-party/dparser)
+#add_subdirectory(3rd-party/sylvan/src)
 
 add_subdirectory(libraries)
 add_subdirectory(tools)

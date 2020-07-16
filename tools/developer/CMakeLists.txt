@@ -6,6 +6,7 @@ set(MCRL2_TOOLS
   mcrl2transform
   mcrl2typecheck
   pbes2bdd
+  #pbesbddsolve
   pbestransform
   reduce_pbes
   reduce_process
