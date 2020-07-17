@@ -418,7 +418,6 @@ class bdd_parity_game
       else
       {
         auto p = maximum();
-        std::cout << "p = " << p << std::endl;
         bool parity = (p % 2 == 0) ? even : odd;
         bdd_type U = m_priorities[p];
         bdd_type A = attractor(parity, U);
