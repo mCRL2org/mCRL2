@@ -213,10 +213,11 @@ class PbesTest(RandomTest):
         self.atom_count = 4
         self.propvar_count = 3
         self.use_quantifiers = True
+        self.use_integers = True
 
     def create_inputfiles(self, runpath = '.'):
         filename = '{0}.txt'.format(self.name)
-        p = make_pbes(self.equation_count, self.atom_count, self.propvar_count, self.use_quantifiers)
+        p = make_pbes(self.equation_count, self.atom_count, self.propvar_count, self.use_quantifiers, use_integers=self.use_integers)
         write_text(filename, str(p))
         self.inputfiles += [filename]
 
@@ -229,6 +230,12 @@ class PbesabsintheTest(PbesTest):
 class PbesabstractTest(PbesTest):
     def __init__(self, name, settings):
         super(PbesabstractTest, self).__init__(name, ymlfile('pbesabstract'), settings)
+
+class PbesbddsolveTest(PbesTest):
+    def __init__(self, name, settings):
+        super(PbesbddsolveTest, self).__init__(name, ymlfile('pbesbddsolve'), settings)
+        self.use_integers = False
+        self.use_quantifiers = False
 
 class PbesconstelmTest(PbesTest):
     def __init__(self, name, settings):
@@ -418,6 +425,8 @@ available_tests = {
     'bessolve'                                    : lambda name, settings: BessolveTest(name, settings)                                                ,
     #'stochastic-ltscompare'                      : lambda name, settings: StochasticLtscompareTest(name, settings)                                     ,
 }
+if os.name != 'nt':
+    available_tests.update({ 'pbesbddsolve' : lambda name, settings: PbesbddsolveTest(name, settings) })
 
 def print_names(tests):
     for name in sorted(tests):

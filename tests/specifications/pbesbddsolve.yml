@@ -14,12 +14,12 @@ tools:
     input: [l2]
     output: []
     args: []
-    name: pbessolve.py
+    name: pbesbddsolve
   t3:
     input: [l2]
     output: []
     args: []
     name: pbes2bool
 result: |
-  result = t3.value['solution'] == ('true' in t2.stdout)
+  result = ('true' in t2.stdout) == t3.value['solution']
 
