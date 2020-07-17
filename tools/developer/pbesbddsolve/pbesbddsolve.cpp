@@ -68,8 +68,14 @@ class pbesbddsolve_tool : public input_output_tool
 int main(int argc, char* argv[])
 {
   // Standard Lace initialization with 1 worker
-  lace_init(1, 0);
-  lace_startup(0, NULL, NULL);
+  // lace_init(1, 0);
+  // lace_startup(0, NULL, NULL);
+
+  std::size_t lace_n_workers = 0; // autodetect
+  std::size_t lace_dqsize = 1024*1024*4; // set large default
+  std::size_t lace_stacksize = 0; // use default
+  lace_init(lace_n_workers, lace_dqsize);
+  lace_startup(lace_stacksize, NULL, NULL);
 
   // Initialize Sylvan
   // With starting size of the nodes table 1 << 21, and maximum size 1 << 27.
