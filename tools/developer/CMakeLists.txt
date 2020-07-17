@@ -6,11 +6,14 @@ set(MCRL2_TOOLS
   mcrl2transform
   mcrl2typecheck
   pbes2bdd
-  #pbesbddsolve
   pbestransform
   reduce_pbes
   reduce_process
 )
+
+if (UNIX)
+  list(APPEND MCRL2_TOOLS pbesbddsolve)
+endif (UNIX)
 
 # N.B. Some developer tools are needed for the random tests.
 if(${MCRL2_ENABLE_DEVELOPER} OR ${MCRL2_ENABLE_TESTS})
