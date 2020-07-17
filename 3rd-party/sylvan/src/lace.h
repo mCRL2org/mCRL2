@@ -23,6 +23,9 @@
 #ifndef __LACE_H__
 #define __LACE_H__
 
+/* This is a hack to allow compilation with C++17 */
+#define register
+
 #ifdef __has_include
 #  if __has_include("lace_config.h")
 #    include <lace_config.h>
