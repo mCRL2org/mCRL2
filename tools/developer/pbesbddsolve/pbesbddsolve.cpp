@@ -71,9 +71,23 @@ int main(int argc, char* argv[])
   lace_init(1, 0);
   lace_startup(0, NULL, NULL);
 
-  // Simple Sylvan initialization, also initialize BDD support
-  sylvan::sylvan_set_sizes(1LL<<16, 1LL<<16, 1LL<<16, 1LL<<16);
+  // Initialize Sylvan
+  // With starting size of the nodes table 1 << 21, and maximum size 1 << 27.
+  // With starting size of the cache table 1 << 20, and maximum size 1 << 20.
+  // Memory usage: 24 bytes per node, and 36 bytes per cache bucket
+  // - 1<<24 nodes: 384 MB
+  // - 1<<25 nodes: 768 MB
+  // - 1<<26 nodes: 1536 MB
+  // - 1<<27 nodes: 3072 MB
+  // - 1<<24 cache: 576 MB
+  // - 1<<25 cache: 1152 MB
+  // - 1<<26 cache: 2304 MB
+  // - 1<<27 cache: 4608 MB
+  sylvan::sylvan_set_sizes(1LL<<22, 1LL<<26, 1LL<<22, 1LL<<26);
   sylvan::sylvan_init_package();
+
+  // Initialize the BDD module with granularity 1 (cache every operation)
+  // A higher granularity (e.g. 6) often results in better performance in practice
   sylvan::sylvan_init_bdd();
 
   return pbesbddsolve_tool().execute(argc, argv);
