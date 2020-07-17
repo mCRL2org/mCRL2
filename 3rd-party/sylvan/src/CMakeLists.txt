@@ -29,4 +29,6 @@ add_library(sylvan STATIC
 
 target_include_directories(sylvan PUBLIC .)
 
+target_link_libraries(sylvan pthread)
+
 set(sylvan_include ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
