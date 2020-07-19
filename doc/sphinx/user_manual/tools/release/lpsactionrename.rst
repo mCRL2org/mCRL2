@@ -41,7 +41,7 @@ multi-action of the form ``a1|b`` will be replaced by ``b``. Instead of an
 action, ``a2`` may also be ``delta``. In this case, the action and the following
 process call are replaced by ``delta``.
 
-The renaming rules are applied from top to bottom to an linear process equation.
+The renaming rules are applied from top to bottom to a linear process equation.
 If no value for the variables in a rename rule can be found to match an action,
 the next rule is applied. If no rule applies the action is left untouched.
 Variables in different rename rules with the same variable names are independent
