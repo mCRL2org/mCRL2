@@ -44,7 +44,7 @@ To create packages for a specific distribution set the ``CPACK_SYSTEM_NAME``
 variable to specific distribution by specifying the name, version and
 architecture.
 
-When packages are created for OS-X and Unix, we strongly advise to use the
+When packages are created for Unix, we strongly advise to use the
 default value for ``CMAKE_INSTALL_PREFIX``, or use a directory value that is
 available in the target platform.
 
@@ -70,6 +70,11 @@ notes on packaging.
     cmake . -DCPACK_SYSTEM_NAME="`script.sh`"
 
 *MacOsX* 
-  To create a release version use the command:
+  To create a release version use the command::
 
     cpack -G DragNDrop
+
+  It is necessary to make the release using a clean checkout, and the
+  flag ``MCRL2_PACKAGE_RELEASE`` must be set in the cmake configuration. 
+  Also, explicitly enable the developer and release tools, and do not
+  make the experimental and deprecated tools available. 
