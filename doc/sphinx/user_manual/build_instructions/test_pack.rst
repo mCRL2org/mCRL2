@@ -68,3 +68,8 @@ notes on packaging.
   Then configure CMake with::
 
     cmake . -DCPACK_SYSTEM_NAME="`script.sh`"
+
+*MacOsX* 
+  To create a release version use the command:
+
+    cpack -G DragNDrop
