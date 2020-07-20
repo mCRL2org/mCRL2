@@ -37,6 +37,15 @@
        the `University of Twente <http://fmt.cs.utwente.nl>`_.
 
 .. note::
+
+   The latest release, mCRL2 202006.0, is now available from the download page.
+   This version sees many changes under the hood, including a completely new
+   implementation of the tool lps2lts and a new binary format for LPS, LTS, PBES
+   and BES files. Binary files generated with a previous release version have to
+   be regenerated. See the `changelog <https://github.com/mCRL2org/mCRL2/blob/master/CHANGES>`_
+   for a detailed list of changes.
+
+.. note::
   .. image:: /_static/tacas-ae.*
           :align: right
           :width: 90px
