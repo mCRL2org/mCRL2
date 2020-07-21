@@ -88,10 +88,11 @@ class AddEditPropertyDialog : public QDialog
   void addEditProperty();
 
   /**
-   * @brief onRejected On rejected (Cancel, escape, "X"), abort the last parsing
+   * @brief done When done (accepted or rejected), abort the last parsing
    *   process
+   * @param r Equals 0 if rejected or 1 of accepted
    */
-  void onRejected();
+  void done(int r) override;
 
   private:
   Ui::AddEditPropertyDialog* ui;
@@ -111,6 +112,12 @@ class AddEditPropertyDialog : public QDialog
    *   isn't already in use
    */
   bool checkInput();
+
+  /**
+   * @brief resetStateAfterParsing Resets the state of the dialog after parsing
+   *   is done or aborted
+   */
+  void resetStateAfterParsing();
 
   /**
    * @brief abortPropertyParsing Abort the current property parsing process

@@ -39,16 +39,19 @@ MainWindow::MainWindow(const QString& inputFilePath, QWidget* parent)
   findAndReplaceDialog = new FindAndReplaceDialog(specificationEditor, this);
   addPropertyDialog =
       new AddEditPropertyDialog(true, processSystem, fileSystem, this);
-  connect(addPropertyDialog, SIGNAL(accepted()), this,
-          SLOT(actionAddPropertyResult()));
 
-  /* change the UI whenever a new project has opened */
+  /* change the UI whenever a new project is opened */
   connect(fileSystem, SIGNAL(newProjectOpened()), this,
           SLOT(onNewProjectOpened()));
   /* change the UI whenever the IDE enters specification only mode */
   connect(fileSystem, SIGNAL(enterSpecificationOnlyMode()), this,
           SLOT(onEnterSpecificationOnlyMode()));
-
+  /* change the UI whenever a new property is added */
+  connect(addPropertyDialog, SIGNAL(accepted()), this,
+          SLOT(actionAddPropertyResult()));
+  /* reset the propertiesdock when the specification changes */
+  connect(specificationEditor->document(), SIGNAL(modificationChanged(bool)),
+          propertiesDock, SLOT(resetAllPropertyWidgets()));
   /* make saving a project only enabled whenever there are changes */
   saveAction->setEnabled(false);
   connect(specificationEditor, SIGNAL(modificationChanged(bool)), saveAction,
@@ -62,10 +65,6 @@ MainWindow::MainWindow(const QString& inputFilePath, QWidget* parent)
             SIGNAL(statusChanged(bool, ProcessType)), this,
             SLOT(changeToolButtons(bool, ProcessType)));
   }
-
-  /* reset the propertiesdock when the specification changes */
-  connect(specificationEditor->document(), SIGNAL(modificationChanged(bool)),
-          propertiesDock, SLOT(resetAllPropertyWidgets()));
 
   /* set the title of the main window */
   setWindowTitle("mCRL2 IDE - Unnamed project");
@@ -173,7 +172,7 @@ void MainWindow::setupMenuBar()
                           QKeySequence::SelectAll);
 
   /* Create the View Menu (actions are added in setupDocks())*/
-  viewMenu = menuBar()->addMenu("View"); 
+  viewMenu = menuBar()->addMenu("View");
 
   /* Create the Tools menu */
   QMenu* toolsMenu = menuBar()->addMenu("Tools");
