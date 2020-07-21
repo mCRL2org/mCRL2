@@ -162,6 +162,7 @@ class action_rename_rule
     }
 };
 
+
 /// \brief Read-only singly linked list of action rename rules
 // typedef atermpp::term_list<action_rename_rule> action_rename_rule_list;
 
@@ -869,6 +870,37 @@ stochastic_specification action_rename(
 } // namespace lps
 
 } // namespace mcrl2
+
+namespace std
+{
+/// \brief Output an action_rename_rule to ostream. 
+/// \param out An output stream
+/// \param x An action_rename_rule. 
+/// \return The output stream
+// Currently, the variables are not printed. The shape is also not parseable. This may be mended. 
+inline
+std::ostream& operator<<(std::ostream& out, const mcrl2::lps::action_rename_rule& r)
+{
+  return out << "(" << r.condition() << ") -> " << r.lhs() << " => " << r.rhs();
+}
+
+/// \brief Output a action_rename_rule to ostream. 
+/// \param out An output stream
+/// \param x An action_rename_rule. 
+/// \return The output stream
+// Currently, the data declaration and the action declaration are not printed. 
+inline
+std::ostream& operator<<(std::ostream& out, const mcrl2::lps::action_rename_specification& s)
+{
+  for(const mcrl2::lps::action_rename_rule& r: s.rules())
+  {
+    out << r << "\n";
+  }
+  return out;
+}
+
+
+}  // end namespace std
 
 
 #endif // MCRL2_LPS_ACTION_RENAME_H

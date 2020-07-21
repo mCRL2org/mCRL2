@@ -329,11 +329,11 @@ struct lps_well_typed_checker
     }
 
     // check 5)
-    for (auto i = action_summands.begin(); i != action_summands.end(); ++i)
+    for (const action_summand& s: action_summands)
     {
-      if (!(detail::check_action_labels(i->multi_action().actions(), declared_labels)))
+      if (!(detail::check_action_labels(s.multi_action().actions(), declared_labels)))
       {
-        error << "is_well_typed(specification) failed: some of the labels occurring in the actions " << core::detail::print_list(i->multi_action().actions()) << " are not declared in the action specification " << core::detail::print_list(spec.action_labels()) << std::endl;
+        error << "is_well_typed(specification) failed: some of the labels occurring in the actions " << core::detail::print_list(s.multi_action().actions()) << " are not declared in the action specification " << core::detail::print_list(spec.action_labels()) << std::endl;
         return false;
       }
     }
