@@ -342,6 +342,12 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     }
   }
 
+  // This case is necessary for actionrename
+  process_expression apply(const process::action& x)
+  {
+    return typecheck_action(x.label().name(), x.arguments());
+  }
+
   process_expression apply(const process::hide& x)
   {
     check_not_empty(x.hide_set(), "Hiding empty set of actions", x);
