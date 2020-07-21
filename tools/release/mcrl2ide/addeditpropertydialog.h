@@ -113,6 +113,12 @@ class AddEditPropertyDialog : public QDialog
   bool checkInput();
 
   /**
+   * @brief resetStateAfterParsing Resets the state of the dialog after parsing
+   *   is done or aborted
+   */
+  void resetStateAfterParsing();
+
+  /**
    * @brief abortPropertyParsing Abort the current property parsing process
    */
   void abortPropertyParsing();

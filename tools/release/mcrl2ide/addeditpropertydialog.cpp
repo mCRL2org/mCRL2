@@ -144,16 +144,21 @@ bool AddEditPropertyDialog::checkInput()
   return false;
 }
 
+void AddEditPropertyDialog::resetStateAfterParsing()
+{
+  propertyParsingProcessid = -1;
+  ui->parseButton->setText("Parse");
+}
+
 void AddEditPropertyDialog::abortPropertyParsing()
 {
   if (propertyParsingProcessid >= 0)
   {
-    /* we first change propertyParsingProcessid so that parsingResult doesn't
+    /* we reset the state before aborting parsing so that parsingResult doesn't
      *   get triggered */
     int parsingid = propertyParsingProcessid;
-    propertyParsingProcessid = -1;
+    resetStateAfterParsing();
     processSystem->abortProcess(parsingid);
-    ui->parseButton->setText("Parse");
   }
 }
 
@@ -216,8 +221,7 @@ void AddEditPropertyDialog::parseResults(int processid)
     }
 
     executeInformationBox(this, windowTitle, message);
-    ui->parseButton->setText("Parse");
-    propertyParsingProcessid = -1;
+    resetStateAfterParsing();
   }
 }
 
