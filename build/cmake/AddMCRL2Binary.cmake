@@ -195,6 +195,7 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
       set(DEPENDS ${DEPENDS} dparser)
       set(ARG_INCLUDE ${ARG_INCLUDE} ${CMAKE_SOURCE_DIR}/3rd-party/dparser)
     endif()
+    set(ARG_INCLUDE ${ARG_INCLUDE} ${CMAKE_SOURCE_DIR}/3rd-party/sylvan/src)
     set(SOURCES ${SRC_ABS} ${SOURCES})
   endforeach()
   
