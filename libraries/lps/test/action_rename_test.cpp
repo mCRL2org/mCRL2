@@ -43,6 +43,7 @@ void test1()
   std::istringstream ar_spec_stream(AR_SPEC);
   action_rename_specification ar_spec = parse_action_rename_specification(ar_spec_stream, spec);
   stochastic_specification new_spec = action_rename(ar_spec,spec);
+  BOOST_CHECK(check_well_typedness(new_spec));
   BOOST_CHECK(new_spec.process().summand_count()==3);
 }
 
@@ -69,6 +70,7 @@ void test2()
   std::istringstream ar_spec_stream(AR_SPEC);
   action_rename_specification ar_spec = parse_action_rename_specification(ar_spec_stream, spec);
   stochastic_specification new_spec = action_rename(ar_spec,spec);
+  BOOST_CHECK(check_well_typedness(new_spec));
   BOOST_CHECK(new_spec.process().summand_count()==2);
 }
 
@@ -91,6 +93,7 @@ void test3()
   stochastic_specification new_spec = action_rename(ar_spec,spec);
   lps::rewrite(new_spec, R);
   lps::remove_trivial_summands(new_spec);
+  BOOST_CHECK(check_well_typedness(new_spec));
   BOOST_CHECK(new_spec.process().summand_count()==2);
 }
 
@@ -118,6 +121,7 @@ void test4()
   stochastic_specification new_spec = action_rename(ar_spec,spec);
   lps::rewrite(new_spec, R);
   lps::remove_trivial_summands(new_spec);
+  BOOST_CHECK(check_well_typedness(new_spec));
   BOOST_CHECK(new_spec.process().summand_count()==2);
 }
 
@@ -164,6 +168,7 @@ void test5() // Test whether partial renaming to delta is going well. See bug re
   stochastic_specification new_spec = action_rename(ar_spec,spec);
   lps::rewrite(new_spec, R);
   lps::remove_trivial_summands(new_spec);
+  BOOST_CHECK(check_well_typedness(new_spec));
   BOOST_CHECK(new_spec.process().summand_count()==8);
 }
 
@@ -178,6 +183,7 @@ static void test_regex1()
   // This should rename a_out and ac_out, leaving the rest
   stochastic_specification new_spec = action_rename(std::regex("^([^b]*)_out"), "out_$1", spec);
 
+  BOOST_CHECK(check_well_typedness(new_spec));
   BOOST_CHECK(std::string(new_spec.action_labels().front().name()) == "out_a");
   BOOST_CHECK(std::string(new_spec.action_labels().tail().front().name()) == "b_out");
   BOOST_CHECK(std::string(new_spec.action_labels().tail().tail().front().name()) == "cout");
