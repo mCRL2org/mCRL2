@@ -50,7 +50,6 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add,
   connect(ui->cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
   connect(processSystem, SIGNAL(processFinished(int)), this,
           SLOT(parseResults(int)));
-  connect(this, SIGNAL(rejected()), this, SLOT(onRejected()));
 }
 
 AddEditPropertyDialog::~AddEditPropertyDialog()
@@ -240,8 +239,10 @@ void AddEditPropertyDialog::addEditProperty()
   }
 }
 
-void AddEditPropertyDialog::onRejected()
+void AddEditPropertyDialog::done(int r)
 {
   /* abort the parsing process */
   abortPropertyParsing();
+
+  QDialog::done(r);
 }
