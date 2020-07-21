@@ -76,5 +76,5 @@ notes on packaging.
 
   It is necessary to make the release using a clean checkout, and the
   flag ``MCRL2_PACKAGE_RELEASE`` must be set in the cmake configuration. 
-  Also, explicitly enable the developer and release tools, and do not
-  make the experimental and deprecated tools available. 
+  Also, explicitly enable the release tools, and do not
+  make the experimental, developer and deprecated tools available. 
