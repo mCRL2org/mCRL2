@@ -45,9 +45,11 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add,
   ui->initTextField1->setPurpose(true);
   ui->initTextField2->setPurpose(true);
 
-  connect(ui->parseButton, SIGNAL(clicked()), this, SLOT(parseProperty()));
-  connect(ui->saveButton, SIGNAL(clicked()), this, SLOT(addEditProperty()));
-  connect(ui->cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
+  connect(ui->saveAndParseButton, SIGNAL(clicked()), this,
+          SLOT(actionSaveAndParse()));
+  connect(ui->saveAndCloseButton, SIGNAL(clicked()), this,
+          SLOT(actionSaveAndClose()));
+  connect(ui->closeButton, SIGNAL(clicked()), this, SLOT(reject()));
   connect(processSystem, SIGNAL(processFinished(int)), this,
           SLOT(parseResults(int)));
 }
@@ -60,7 +62,7 @@ AddEditPropertyDialog::~AddEditPropertyDialog()
 
 void AddEditPropertyDialog::resetFocus()
 {
-  ui->saveButton->setFocus();
+  ui->saveAndParseButton->setFocus();
   ui->propertyNameField->setFocus();
 }
 
@@ -143,10 +145,31 @@ bool AddEditPropertyDialog::checkInput()
   return false;
 }
 
+bool AddEditPropertyDialog::saveProperty()
+{
+  bool ok = checkInput();
+
+  if (ok)
+  {
+    Property property = getProperty();
+    if (oldProperty.name.isEmpty())
+    {
+      fileSystem->newProperty(property);
+    }
+    else
+    {
+      fileSystem->editProperty(oldProperty, property);
+    }
+    oldProperty = property;
+  }
+
+  return ok;
+}
+
 void AddEditPropertyDialog::resetStateAfterParsing()
 {
   propertyParsingProcessid = -1;
-  ui->parseButton->setText("Parse");
+  ui->saveAndParseButton->setText(" Save and Parse ");
 }
 
 void AddEditPropertyDialog::abortPropertyParsing()
@@ -161,7 +184,7 @@ void AddEditPropertyDialog::abortPropertyParsing()
   }
 }
 
-void AddEditPropertyDialog::parseProperty()
+void AddEditPropertyDialog::actionSaveAndParse()
 {
   /* if a parsing process is running, abort it */
   if (propertyParsingProcessid >= 0)
@@ -171,14 +194,13 @@ void AddEditPropertyDialog::parseProperty()
   /* else parse the current property */
   else
   {
-    if (checkInput())
+    if (saveProperty())
     {
       /* save the property, start a parsing process and wait for a reply */
       Property property = getProperty();
-      fileSystem->saveProperty(property, true);
       lastParsingPropertyIsMucalculus = property.mucalculus;
       propertyParsingProcessid = processSystem->parseProperty(property);
-      ui->parseButton->setText("Abort Parsing");
+      ui->saveAndParseButton->setText(" Abort Parsing ");
     }
   }
 }
@@ -224,25 +246,19 @@ void AddEditPropertyDialog::parseResults(int processid)
   }
 }
 
-void AddEditPropertyDialog::addEditProperty()
+void AddEditPropertyDialog::actionSaveAndClose()
 {
-  /* if the input is correct, remove the original property file if possible and
-   *   save the current one */
-  if (checkInput())
+  if (saveProperty())
   {
-    if (!oldProperty.name.isEmpty())
-    {
-      fileSystem->deletePropertyFile(oldProperty);
-    }
-    fileSystem->saveProperty(getProperty());
     accept();
   }
 }
 
 void AddEditPropertyDialog::done(int r)
 {
-  /* abort the parsing process */
+  /* reset the state */
   abortPropertyParsing();
+  oldProperty = Property();  
 
   QDialog::done(r);
 }

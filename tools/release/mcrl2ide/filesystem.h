@@ -205,10 +205,9 @@ class FileSystem : public QObject
   /**
    * @brief propertyFilePath Defines the file path of a property
    * @param property The property
-   * @param forParsing Whether we want to use the file to parse the property
    * @return The file path of the property
    */
-  QString propertyFilePath(const Property& property, bool forParsing = false);
+  QString propertyFilePath(const Property& property);
 
   /**
    * @brief pbesFilePath Defines the file path of a pbes
@@ -436,9 +435,8 @@ class FileSystem : public QObject
   /**
    * @brief saveProperty Saves a property to file
    * @param property The property to save
-   * @param forParsing Whether the saved property file will be used for parsing
    */
-  void saveProperty(const Property& property, bool forParsing = false);
+  void saveProperty(const Property& property);
 
   /**
    * @brief createReinitialisedSpecification Creates a new mCRL2 specification
@@ -446,11 +444,10 @@ class FileSystem : public QObject
    *   by a given one; assumes a specification is open
    * @param property The equivalence property for which the new specification
    *   needs to be created
-   * @param forParsing Whether we want to use the file to parse the property
    * @param specType The specificationType
    */
   void createReinitialisedSpecification(const Property& property,
-                                        bool forParsing, SpecType specType);
+                                        SpecType specType);
 
   /**
    * @brief openProjectFolderInExplorer Allows the user to open the project
@@ -482,6 +479,20 @@ class FileSystem : public QObject
    * @brief newProjectOpened Is emitted whenever a new project has been opened
    */
   void newProjectOpened();
+
+  /**
+   * @brief propertyAdded Is emitted whenever a new property has been added
+   * @param newProperty The new property
+   */
+  void propertyAdded(const Property& newProperty);
+
+  /**
+   * @brief propertyEdited Is emitted whenever a property has been edited
+   * @param oldPropertyName The name of the old property that was edited
+   * @param newProperty The new property after being edited
+   */
+  void propertyEdited(const QString& oldPropertyName,
+                      const Property& newProperty);
 
   private:
   QString projectFileExtension = ".mcrl2proj";

@@ -113,11 +113,6 @@ class MainWindow : public QMainWindow
   void actionAddProperty();
 
   /**
-   * @brief actionAddPropertyResult Handles the result of adding a property
-   */
-  void actionAddPropertyResult();
-
-  /**
    * @brief actionImportProperties Allows the user to import property files to
    *   this project
    */

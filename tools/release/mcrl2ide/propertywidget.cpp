@@ -20,8 +20,6 @@ PropertyWidget::PropertyWidget(Property property, ProcessSystem* processSystem,
 {
   editPropertyDialog =
       new AddEditPropertyDialog(false, processSystem, fileSystem, this);
-  connect(editPropertyDialog, SIGNAL(accepted()), this,
-          SLOT(actionEditResult()));
 
   /* create the label for the property name */
   propertyNameLabel = new QLabel(property.name);
@@ -109,6 +107,8 @@ PropertyWidget::PropertyWidget(Property property, ProcessSystem* processSystem,
           SLOT(actionVerifyResult(int)));
   connect(processSystem, SIGNAL(processFinished(int)), this,
           SLOT(actionShowEvidenceResult(int)));
+  connect(fileSystem, SIGNAL(propertyEdited(QString, Property)), this,
+          SLOT(updateProperty(QString, Property)));
 }
 
 PropertyWidget::~PropertyWidget()
@@ -271,14 +271,11 @@ void PropertyWidget::actionEdit()
   }
 }
 
-void PropertyWidget::actionEditResult()
+void PropertyWidget::updateProperty(const QString& oldPropertyName,
+                                    const Property& newProperty)
 {
-  /* if editing was successful (Edit button was pressed), change the property
-   * we don't need to save to file as this is already done by the dialog */
-  Property newProperty = editPropertyDialog->getProperty();
-  fileSystem->editProperty(property, newProperty);
-  /* only make changes if the property changed */
-  if (property != newProperty)
+  /* check if it was the property of this widget that changed */
+  if (oldPropertyName == property.name)
   {
     property = newProperty;
     propertyNameLabel->setText(property.name);

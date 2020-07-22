@@ -171,11 +171,10 @@ QString FileSystem::ltsFilePath(mcrl2::lts::lts_equivalence equivalence,
          getEquivalenceName(equivalence, true) + ".lts";
 }
 
-QString FileSystem::propertyFilePath(const Property& property, bool forParsing)
+QString FileSystem::propertyFilePath(const Property& property)
 {
-  return (forParsing ? temporaryFolder.path() : propertiesFolderPath()) +
-         QDir::separator() + (forParsing ? projectHash() + "_" : "") +
-         property.name + (property.mucalculus ? ".mcf" : ".equ");
+  return propertiesFolderPath() + QDir::separator() + property.name +
+         (property.mucalculus ? ".mcf" : ".equ");
 }
 
 QString FileSystem::pbesFilePath(const QString& propertyName, bool evidence)
@@ -885,6 +884,8 @@ void FileSystem::newProperty(const Property& property)
   propertyElement.appendChild(propertyNameText);
 
   updateProjectFile();
+
+  emit propertyAdded(property);
 }
 
 std::list<Property> FileSystem::importProperties()
@@ -926,7 +927,10 @@ std::list<Property> FileSystem::importProperties()
 void FileSystem::editProperty(const Property& oldProperty,
                               const Property& newProperty)
 {
-  /* alter the properties list and save it */
+  /* remove the file of the old property */
+  deletePropertyFile(oldProperty);
+
+  /* alter the properties list and save the new property */
   std::replace(properties.begin(), properties.end(), oldProperty, newProperty);
   saveProperty(newProperty);
 
@@ -948,6 +952,8 @@ void FileSystem::editProperty(const Property& oldProperty,
 
     updateProjectFile();
   }
+
+  emit propertyEdited(oldProperty.name, newProperty);
 }
 
 void FileSystem::removePropertyFromProjectFile(const QString& propertyName)
@@ -1049,11 +1055,11 @@ bool FileSystem::saveAs()
   }
 }
 
-void FileSystem::saveProperty(const Property& property, bool forParsing)
+void FileSystem::saveProperty(const Property& property)
 {
   makeSurePropertiesFolderExists();
 
-  QFile propertyFile(propertyFilePath(property, forParsing));
+  QFile propertyFile(propertyFilePath(property));
   propertyFile.open(QIODevice::WriteOnly);
   QTextStream saveStream(&propertyFile);
 
@@ -1069,16 +1075,12 @@ void FileSystem::saveProperty(const Property& property, bool forParsing)
   }
 
   propertyFile.close();
-  if (!forParsing)
-  {
-    propertyModified[property.name] = false;
-    lastKnownPropertyModificationTime[property.name] =
-        QFileInfo(propertyFile).lastModified();
-  }
+  propertyModified[property.name] = false;
+  lastKnownPropertyModificationTime[property.name] =
+      QFileInfo(propertyFile).lastModified();
 }
 
 void FileSystem::createReinitialisedSpecification(const Property& property,
-                                                  bool forParsing,
                                                   SpecType specType)
 {
   /* only create a reinitialised specification if there does not already exist
@@ -1087,7 +1089,7 @@ void FileSystem::createReinitialisedSpecification(const Property& property,
   if (!upToDateOutputFileExists(
           specificationFilePath(),
           specificationFilePath(specType, property.name)) ||
-      !upToDateOutputFileExists(propertyFilePath(property, forParsing),
+      !upToDateOutputFileExists(propertyFilePath(property),
                                 specificationFilePath(specType, property.name)))
   {
     QString spec;

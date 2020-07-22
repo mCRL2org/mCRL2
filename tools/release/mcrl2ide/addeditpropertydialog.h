@@ -71,9 +71,9 @@ class AddEditPropertyDialog : public QDialog
 
   public slots:
   /**
-   * @brief parseProperty Parse the filled in property
+   * @brief actionSaveAndParse Saves and parses the filled in property
    */
-  void parseProperty();
+  void actionSaveAndParse();
 
   /**
    * @brief parseResults Handles the result of parsing the property
@@ -82,10 +82,10 @@ class AddEditPropertyDialog : public QDialog
   void parseResults(int processid);
 
   /**
-   * @brief addEditProperty Finishes adding/editing the property by saving the
-   *   property (if the input is ok)
+   * @brief actionSaveAndClose Saves the filled in property and then closes the
+   *   dialog
    */
-  void addEditProperty();
+  void actionSaveAndClose();
 
   /**
    * @brief done When done (accepted or rejected), abort the last parsing
@@ -112,6 +112,13 @@ class AddEditPropertyDialog : public QDialog
    *   isn't already in use
    */
   bool checkInput();
+
+  /**
+   * @brief saveProperty Saves the filled in property and removes the old one if
+   *   applicable
+   * @return Whether the property could be saved
+   */
+  bool saveProperty();
 
   /**
    * @brief resetStateAfterParsing Resets the state of the dialog after parsing

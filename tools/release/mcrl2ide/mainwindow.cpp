@@ -46,9 +46,6 @@ MainWindow::MainWindow(const QString& inputFilePath, QWidget* parent)
   /* change the UI whenever the IDE enters specification only mode */
   connect(fileSystem, SIGNAL(enterSpecificationOnlyMode()), this,
           SLOT(onEnterSpecificationOnlyMode()));
-  /* change the UI whenever a new property is added */
-  connect(addPropertyDialog, SIGNAL(accepted()), this,
-          SLOT(actionAddPropertyResult()));
   /* reset the propertiesdock when the specification changes */
   connect(specificationEditor->document(), SIGNAL(modificationChanged(bool)),
           propertiesDock, SLOT(resetAllPropertyWidgets()));
@@ -502,15 +499,6 @@ void MainWindow::actionAddProperty()
       addPropertyDialog->show();
     }
   }
-}
-
-void MainWindow::actionAddPropertyResult()
-{
-  /* if successful (Add button was pressed), create the new property
-   *   we don't need to save to file as this is already done by the dialog */
-  Property property = addPropertyDialog->getProperty();
-  fileSystem->newProperty(property);
-  propertiesDock->addProperty(property);
 }
 
 void MainWindow::actionVerifyAllProperties()

@@ -30,6 +30,9 @@ PropertiesDock::PropertiesDock(ProcessSystem* processSystem,
   innerDockWidget->setFrameShape(QFrame::NoFrame);
 
   this->setWidget(innerDockWidget);
+
+  connect(fileSystem, SIGNAL(propertyAdded(Property)), this,
+          SLOT(addProperty(Property)));
 }
 
 PropertiesDock::~PropertiesDock()

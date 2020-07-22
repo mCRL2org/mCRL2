@@ -85,9 +85,13 @@ class PropertyWidget : public QWidget
   void actionEdit();
 
   /**
-   * @brief actionEditResult Handles the result of editing a property
+   * @brief updateProperty Updates the property of this widget when the property
+   *   changes in the internal state
+   * @param oldPropertyName The old name of the property that was changed
+   * @param newProperty The new property
    */
-  void actionEditResult();
+  void updateProperty(const QString& oldPropertyName,
+                      const Property& newProperty);
 
   /**
    * @brief actionDelete Allows the user to delete this property

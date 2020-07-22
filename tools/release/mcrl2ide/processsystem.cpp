@@ -330,8 +330,7 @@ QProcess* ProcessSystem::createSubprocess(
   case SubprocessType::Lps2pbes:
     program = "lps2pbes";
     inputFile = fileSystem->lpsFilePath();
-    inputFile2 = fileSystem->propertyFilePath(
-        property, processType == ProcessType::Parsing);
+    inputFile2 = fileSystem->propertyFilePath(property);
     outputFile = fileSystem->pbesFilePath(property.name, evidence);
     arguments << inputFile << outputFile << "--formula=" + inputFile2
               << "--out=pbes"
@@ -473,10 +472,8 @@ int ProcessSystem::parseProperty(const Property& property)
     }
     else
     {
-      fileSystem->createReinitialisedSpecification(property, true,
-                                                   SpecType::First);
-      fileSystem->createReinitialisedSpecification(property, true,
-                                                   SpecType::Second);
+      fileSystem->createReinitialisedSpecification(property, SpecType::First);
+      fileSystem->createReinitialisedSpecification(property, SpecType::Second);
       processes[processid] = {
           createSubprocess(SubprocessType::ParseMcrl2, processid, 0, property,
                            SpecType::First),
@@ -513,10 +510,8 @@ int ProcessSystem::verifyProperty(const Property& property)
     }
     else
     {
-      fileSystem->createReinitialisedSpecification(property, false,
-                                                   SpecType::First);
-      fileSystem->createReinitialisedSpecification(property, false,
-                                                   SpecType::Second);
+      fileSystem->createReinitialisedSpecification(property, SpecType::First);
+      fileSystem->createReinitialisedSpecification(property, SpecType::Second);
       processes[processid] = {
           createSubprocess(SubprocessType::ParseMcrl2, processid, 0, property,
                            SpecType::First),
