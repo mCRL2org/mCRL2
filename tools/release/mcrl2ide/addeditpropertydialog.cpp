@@ -114,11 +114,6 @@ Property AddEditPropertyDialog::getProperty()
   }
 }
 
-void AddEditPropertyDialog::setOldProperty(const Property& oldProperty)
-{
-  this->oldProperty = oldProperty;
-}
-
 bool AddEditPropertyDialog::checkInput()
 {
   QString propertyName = ui->propertyNameField->text();

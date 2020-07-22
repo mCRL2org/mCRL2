@@ -52,12 +52,6 @@ class AddEditPropertyDialog : public QDialog
    */
   Property getProperty();
 
-  /**
-   * @brief setOldProperty Records the property as when editing began
-   * @param oldProperty The property as when editing began
-   */
-  void setOldProperty(const Property& oldProperty);
-
   public slots:
   /**
    * @brief actionSaveAndParse Saves and parses the filled in property
