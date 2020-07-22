@@ -25,7 +25,7 @@
 /**
  * @brief SpecType Defines the possible types of specification files: the main
  *   specification file and the specifications that correspond to the first
- *   respectively second initial process of an equivalance property
+ *   respectively second initial process of an equivalence property
  */
 enum SpecType
 {
@@ -473,13 +473,13 @@ class FileSystem : public QObject
 
   signals:
   /**
-   * @brief enterSpecificationOnlyMode Is emitted wheneverthe IDE is opened
+   * @brief enterSpecificationOnlyMode Is emitted whenever the IDE is opened
    *   with a specification as argument
    */
   void enterSpecificationOnlyMode();
 
   /**
-   * @brief newProjectOpened Is emitted whenever a new project has been openend
+   * @brief newProjectOpened Is emitted whenever a new project has been opened
    */
   void newProjectOpened();
 
@@ -551,7 +551,7 @@ class FileSystem : public QObject
   /**
    * @brief createNewProjectOptions Creates a DOM document containing the
    *   project options, assumes that the project state is already set
-   * @return The DOM document containg the project options
+   * @return The DOM document containing the project options
    */
   QDomDocument createNewProjectOptions();
 
@@ -566,7 +566,7 @@ class FileSystem : public QObject
    *   project file format
    * Old format: "SPEC <path to spec>", new format: DOM structure
    * This method should be removed in the future
-   * @param newProjectFolderPath The path to the project project folder
+   * @param newProjectFolderPath The path to the project folder
    * @param newProjectFilePath The path to the project file
    * @param oldFormat The contents of the project file in the old format
    * @return The new format
@@ -578,10 +578,10 @@ class FileSystem : public QObject
 
   /**
    * @brief readSpecification Reads the contents of a specification
-   * @param specText The text read from the specification file (out parmeter)
+   * @param specText The text read from the specification file (out parameter)
    * @param specPath The file path of the specification; picks the currently
    *   opened specification if empty
-   * @return Whether reading the specification was successfull
+   * @return Whether reading the specification was successful
    */
   bool readSpecification(QString& specText, QString specPath = "");
 

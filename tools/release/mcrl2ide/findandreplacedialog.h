@@ -63,7 +63,7 @@ class FindAndReplaceDialog : public QDialog
   void actionReplace();
 
   /**
-   * @brief actionReplaceAll Allows the user to replace all occurences of a
+   * @brief actionReplaceAll Allows the user to replace all occurrences of a
    *   string in the editor
    */
   void actionReplaceAll();

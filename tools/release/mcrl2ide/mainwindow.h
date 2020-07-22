@@ -263,7 +263,7 @@ class MainWindow : public QMainWindow
   /**
    * @brief assertProjectOpened Forces the user to make a project if no project
    *   was opened
-   * @return Whether a project has been succesfully made
+   * @return Whether a project has been successfully made
    */
   bool assertProjectOpened();
 

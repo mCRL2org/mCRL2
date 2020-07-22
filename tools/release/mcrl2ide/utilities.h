@@ -93,8 +93,8 @@ QString getEquivalenceName(mcrl2::lts::lts_equivalence equivalence,
 mcrl2::lts::lts_equivalence getEquivalenceFromName(const QString& name);
 
 /**
- * @brief executeInformationBox Executes an information box (popup dialog to
- *   the user with a message and an ok button)
+ * @brief executeInformationBox Executes an information box (pop-up dialog to
+ *   the user with a message and an OK button)
  * @param parent The parent of the information box
  * @param title The title of the information box
  * @param message The message body of the information box
@@ -103,7 +103,7 @@ void executeInformationBox(QWidget* parent, const QString& title,
                            const QString& message);
 
 /**
- * @brief executeBinaryQuestionBox Executes a question box (popup dialog to the
+ * @brief executeBinaryQuestionBox Executes a question box (pop-up dialog to the
  *   user with a message, a yes button and a no button)
  * @param parent The parent of the question box
  * @param title The title of the question box
@@ -115,7 +115,7 @@ bool executeBinaryQuestionBox(QWidget* parent, const QString& title,
                               const QString& message);
 
 /**
- * @brief executeQuestionBox Executes a question box (popup dialog to the user
+ * @brief executeQuestionBox Executes a question box (pop-up dialog to the user
  *   with a message, a yes button, a no button and a cancel button)
  * @param parent The parent of the question box
  * @param title The title of the question box
