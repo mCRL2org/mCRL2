@@ -41,21 +41,10 @@ class AddEditPropertyDialog : public QDialog
   ~AddEditPropertyDialog();
 
   /**
-   * @brief resetFocus Puts the focus on the add/edit button and the property
-   *   name field
+   * @brief activateDialog Activates the dialog, making it visible
+   * @param property Fill in a property if applicable
    */
-  void resetFocus();
-
-  /**
-   * @brief clearFields Empties the property name and text fields
-   */
-  void clearFields();
-
-  /**
-   * @brief setProperty Sets the property in the text fields
-   * @param property The property to fill in
-   */
-  void setProperty(const Property& property);
+  void activateDialog(const Property& property = Property());
 
   /**
    * @brief getProperty Gets the property as entered in the text fields

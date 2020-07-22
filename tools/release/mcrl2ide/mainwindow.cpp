@@ -487,17 +487,7 @@ void MainWindow::actionAddProperty()
 {
   if (assertProjectOpened())
   {
-    addPropertyDialog->clearFields();
-    addPropertyDialog->resetFocus();
-    if (addPropertyDialog->isVisible())
-    {
-      addPropertyDialog->activateWindow();
-      addPropertyDialog->setFocus();
-    }
-    else
-    {
-      addPropertyDialog->show();
-    }
+    addPropertyDialog->activateDialog();
   }
 }
 

@@ -257,18 +257,7 @@ void PropertyWidget::actionAbortVerification()
 
 void PropertyWidget::actionEdit()
 {
-  editPropertyDialog->setProperty(property);
-  editPropertyDialog->setOldProperty(property);
-  editPropertyDialog->resetFocus();
-  if (editPropertyDialog->isVisible())
-  {
-    editPropertyDialog->activateWindow();
-    editPropertyDialog->setFocus();
-  }
-  else
-  {
-    editPropertyDialog->show();
-  }
+  editPropertyDialog->activateDialog(property);
 }
 
 void PropertyWidget::updateProperty(const QString& oldPropertyName,

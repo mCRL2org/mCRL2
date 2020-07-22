@@ -60,35 +60,41 @@ AddEditPropertyDialog::~AddEditPropertyDialog()
   propertyNameValidator->deleteLater();
 }
 
-void AddEditPropertyDialog::resetFocus()
+void AddEditPropertyDialog::activateDialog(const Property& property)
 {
+  /* fill in a property if applicable */
+  if (!property.name.isEmpty())
+  {
+    ui->propertyNameField->setText(property.name);
+    if (property.mucalculus)
+    {
+      ui->formulaTextField->setPlainText(property.text);
+      ui->tabWidget->setCurrentIndex(0);
+    }
+    else
+    {
+      ui->initTextField1->setPlainText(property.text);
+      ui->equivalenceComboBox->setSelectedEquivalence(property.equivalence);
+      ui->initTextField2->setPlainText(property.text2);
+      ui->tabWidget->setCurrentIndex(1);
+    }
+
+    oldProperty = property;
+  }
+
+  /* reset focus */
   ui->saveAndParseButton->setFocus();
   ui->propertyNameField->setFocus();
-}
 
-void AddEditPropertyDialog::clearFields()
-{
-  ui->propertyNameField->clear();
-  ui->formulaTextField->clear();
-  ui->initTextField1->clear();
-  ui->initTextField2->clear();
-  ui->equivalenceComboBox->setCurrentIndex(0);
-}
-
-void AddEditPropertyDialog::setProperty(const Property& property)
-{
-  ui->propertyNameField->setText(property.name);
-  if (property.mucalculus)
+  /* make the dialog active and visible */
+  if (isVisible())
   {
-    ui->formulaTextField->setPlainText(property.text);
-    ui->tabWidget->setCurrentIndex(0);
+    activateWindow();
+    setFocus();
   }
   else
   {
-    ui->equivalenceComboBox->setSelectedEquivalence(property.equivalence);
-    ui->initTextField1->setPlainText(property.text);
-    ui->initTextField2->setPlainText(property.text2);
-    ui->tabWidget->setCurrentIndex(1);
+    show();
   }
 }
 
@@ -258,7 +264,12 @@ void AddEditPropertyDialog::done(int r)
 {
   /* reset the state */
   abortPropertyParsing();
-  oldProperty = Property();  
+  oldProperty = Property();
+  ui->propertyNameField->clear();
+  ui->formulaTextField->clear();
+  ui->initTextField1->clear();
+  ui->initTextField2->clear();
+  ui->equivalenceComboBox->setCurrentIndex(0);
 
   QDialog::done(r);
 }
