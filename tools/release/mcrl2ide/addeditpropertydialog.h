@@ -71,6 +71,12 @@ class AddEditPropertyDialog : public QDialog
   void actionSaveAndClose();
 
   /**
+   * @brief setEquivalenceTabToModified Sets the equivalence tab to modified to
+   *   when one of its child widgets becomes modified
+   */
+  void setEquivalenceTabToModified();
+
+  /**
    * @brief done When done (accepted or rejected), abort the last parsing
    *   process
    * @param r Equals 0 if rejected or 1 of accepted
@@ -113,6 +119,11 @@ class AddEditPropertyDialog : public QDialog
    * @brief abortPropertyParsing Abort the current property parsing process
    */
   void abortPropertyParsing();
+
+  /**
+   * @brief resetModificationState Puts all fields to not modified
+   */
+  void resetModificationState();
 };
 
 #endif // ADDEDITPROPERTYDIALOG_H

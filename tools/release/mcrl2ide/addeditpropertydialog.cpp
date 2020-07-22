@@ -45,6 +45,7 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add,
   ui->initTextField1->setPurpose(true);
   ui->initTextField2->setPurpose(true);
 
+  /* connections for buttons */
   connect(ui->saveAndParseButton, SIGNAL(clicked()), this,
           SLOT(actionSaveAndParse()));
   connect(ui->saveAndCloseButton, SIGNAL(clicked()), this,
@@ -52,6 +53,16 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add,
   connect(ui->closeButton, SIGNAL(clicked()), this, SLOT(reject()));
   connect(processSystem, SIGNAL(processFinished(int)), this,
           SLOT(parseResults(int)));
+
+  /* connections for modification state */
+  connect(ui->formulaTextField, SIGNAL(modificationChanged(bool)),
+          ui->tabWidget->widget(0), SLOT(setWindowModified(bool)));
+  connect(ui->initTextField1, SIGNAL(textChanged()), this,
+          SLOT(setEquivalenceTabToModified()));
+  connect(ui->formulaTextField, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(setEquivalenceTabToModified()));
+  connect(ui->initTextField2, SIGNAL(textChanged()), this,
+          SLOT(setEquivalenceTabToModified()));
 }
 
 AddEditPropertyDialog::~AddEditPropertyDialog()
@@ -82,9 +93,10 @@ void AddEditPropertyDialog::activateDialog(const Property& property)
     oldProperty = property;
   }
 
-  /* reset focus */
+  /* reset focus and modification state */
   ui->saveAndParseButton->setFocus();
   ui->propertyNameField->setFocus();
+  resetModificationState();
 
   /* make the dialog active and visible */
   if (isVisible())
@@ -162,6 +174,8 @@ bool AddEditPropertyDialog::saveProperty()
       fileSystem->editProperty(oldProperty, property);
     }
     oldProperty = property;
+
+    resetModificationState();
   }
 
   return ok;
@@ -255,8 +269,43 @@ void AddEditPropertyDialog::actionSaveAndClose()
   }
 }
 
+void AddEditPropertyDialog::setEquivalenceTabToModified()
+{
+  ui->equivalenceTab->setWindowModified(true);
+}
+
+void AddEditPropertyDialog::resetModificationState()
+{
+  ui->propertyNameField->setModified(false);
+  ui->mucalculusTab->setWindowModified(false);
+  ui->equivalenceTab->setWindowModified(false);
+}
+
 void AddEditPropertyDialog::done(int r)
 {
+  /* check for modifications */
+  if (ui->propertyNameField->isModified() ||
+      ui->tabWidget->currentWidget()->isWindowModified())
+  {
+    QMessageBox::StandardButton result =
+        executeQuestionBox(this, windowTitle,
+                           "There are unsaved changes in the current property, "
+                           "do you want to save?");
+    switch (result)
+    {
+    case QMessageBox::Yes:
+      if (saveProperty())
+      {
+        break;
+      }
+      return;
+    case QMessageBox::No:
+      break;
+    default:
+      return;
+    }
+  }
+
   /* reset the state */
   abortPropertyParsing();
   oldProperty = Property();

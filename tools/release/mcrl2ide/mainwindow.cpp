@@ -510,9 +510,10 @@ bool MainWindow::askToSaveChanges(QString context)
 {
   if (fileSystem->isSpecificationModified() && fileSystem->projectOpened())
   {
-    QMessageBox::StandardButton result = executeQuestionBox(
-        this, context,
-        "There are changes in the current project, do you want to save?");
+    QMessageBox::StandardButton result =
+        executeQuestionBox(this, context,
+                           "There are unsaved changes in the current project, "
+                           "do you want to save?");
     switch (result)
     {
     case QMessageBox::Yes:
