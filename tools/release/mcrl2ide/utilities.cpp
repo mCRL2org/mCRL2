@@ -13,7 +13,7 @@
 
 EquivalenceComboBox::EquivalenceComboBox(QWidget* parent) : QComboBox(parent)
 {
-  /* add equivalences to the combobox, including some seperators to indicate the
+  /* add equivalences to the combobox, including some separators to indicate the
    *   use of abstraction */
   QStringList items;
   int secondSeparatorIndex = 2;

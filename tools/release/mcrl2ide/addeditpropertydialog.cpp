@@ -27,7 +27,7 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add,
       new QRegularExpressionValidator(QRegularExpression("[A-Za-z0-9_\\s]*"));
   ui->propertyNameField->setValidator(propertyNameValidator);
 
-  /* change the ui depending on whether this should be an add or edit property
+  /* change the UI depending on whether this should be an add or edit property
    *   window */
   if (add)
   {

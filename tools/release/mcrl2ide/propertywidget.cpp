@@ -220,7 +220,7 @@ void PropertyWidget::actionShowEvidence()
     return;
   }
 
-  /* check if the property has veen verified */
+  /* check if the property has been verified */
   if (verificationWidgets->currentIndex() > 1)
   {
     /* start the evidence creation process */

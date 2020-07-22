@@ -100,7 +100,7 @@ void FindAndReplaceDialog::actionFind(bool forReplaceAll)
       }
       else
       {
-        showMessage("Found the first occurence");
+        showMessage("Found the first occurrence");
       }
       return;
     }
