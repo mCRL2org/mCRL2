@@ -120,6 +120,7 @@ void FindAndReplaceDialog::actionReplace()
 void FindAndReplaceDialog::actionReplaceAll()
 {
   QTextCursor originalPosition = codeEditor->textCursor();
+  originalPosition.beginEditBlock();
 
   codeEditor->moveCursor(QTextCursor::Start);
   actionFind(true);
@@ -132,6 +133,7 @@ void FindAndReplaceDialog::actionReplaceAll()
     i++;
   }
 
+  originalPosition.endEditBlock();
   showMessage(tr("Replaced %1 occurrence(s)").arg(i));
 
   codeEditor->setTextCursor(originalPosition);
