@@ -573,21 +573,6 @@ class FileSystem : public QObject
   void updateProjectFile();
 
   /**
-   * @brief convertProjectFileToNewFormat Converts a project file to the new
-   *   project file format
-   * Old format: "SPEC <path to spec>", new format: DOM structure
-   * This method should be removed in the future
-   * @param newProjectFolderPath The path to the project folder
-   * @param newProjectFilePath The path to the project file
-   * @param oldFormat The contents of the project file in the old format
-   * @return The new format
-   */
-  QDomDocument
-  convertProjectFileToNewFormat(const QString& newProjectFolderPath,
-                                const QString& newProjectFilePath,
-                                const QString& oldFormat);
-
-  /**
    * @brief readSpecification Reads the contents of a specification
    * @param specText The text read from the specification file (out parameter)
    * @param specPath The file path of the specification; picks the currently

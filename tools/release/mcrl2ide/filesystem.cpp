@@ -430,58 +430,6 @@ void FileSystem::updateProjectFile()
   lastKnownProjectFileModificationTime = QFileInfo(projectFile).lastModified();
 }
 
-QDomDocument
-FileSystem::convertProjectFileToNewFormat(const QString& newProjectFolderPath,
-                                          const QString& newProjectFilePath,
-                                          const QString& oldFormat)
-{
-  /* notify the user of the conversion */
-  executeInformationBox(parent, "Open Project",
-                        "The project file of this project has an older format. "
-                        "It will be converted to the newest format.");
-
-  QDomDocument newFormat = createNewProjectOptions();
-
-  /* read the specification path from the old format */
-  int specLineIndex = oldFormat.lastIndexOf("SPEC");
-  QString specFilePathEntry =
-      oldFormat.right(oldFormat.length() - specLineIndex - 5).simplified();
-  QDomText specPathNode =
-      newFormat.createTextNode(QFileInfo(specFilePathEntry).fileName());
-  newFormat.elementsByTagName("spec").at(0).appendChild(specPathNode);
-
-  /* get all properties */
-  QDir propertiesFolder(newProjectFolderPath + QDir::separator() +
-                        propertiesFolderName);
-  if (propertiesFolder.exists())
-  {
-    QDirIterator dirIterator(propertiesFolder);
-    QDomNode propertiesNode = newFormat.elementsByTagName("properties").at(0);
-
-    while (dirIterator.hasNext())
-    {
-      QString filePath = dirIterator.next();
-      if (QFileInfo(filePath).isFile() && filePath.endsWith(".mcf"))
-      {
-        QDomElement propertyElement = newFormat.createElement("property");
-        propertiesNode.appendChild(propertyElement);
-        QDomText propertyPathNode =
-            newFormat.createTextNode(QFileInfo(filePath).baseName());
-        propertyElement.appendChild(propertyPathNode);
-      }
-    }
-  }
-
-  /* save the new format to file */
-  QFile projectFile(newProjectFilePath);
-  projectFile.open(QIODevice::WriteOnly);
-  QTextStream saveStream(&projectFile);
-  saveStream << newFormat.toString();
-  projectFile.close();
-
-  return newFormat;
-}
-
 bool FileSystem::newProject(bool forNewProject)
 {
   bool success = false;
@@ -675,19 +623,8 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
   int parseErrorRow = 0;
   int parseErrorColumn = 0;
   QDomDocument newProjectOptions;
-  /* if the project file begins with SPEC, it is old type of project file and
-   *   should be converted to the new format
-   * this should be removed in the future */
-  if (newProjectFileContents.startsWith("SPEC"))
-  {
-    newProjectOptions = convertProjectFileToNewFormat(
-        newProjectFolderPath, newProjectFilePath, newProjectFileContents);
-  }
-  else
-  {
-    successfullyParsed = newProjectOptions.setContent(
-        newProjectFileContents, &parseError, &parseErrorRow, &parseErrorColumn);
-  }
+  successfullyParsed = newProjectOptions.setContent(
+      newProjectFileContents, &parseError, &parseErrorRow, &parseErrorColumn);
 
   if (!successfullyParsed)
   {
