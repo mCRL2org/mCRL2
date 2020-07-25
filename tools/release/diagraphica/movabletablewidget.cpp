@@ -106,7 +106,7 @@ void MovableTableWidget::dropEvent(QDropEvent *event)
   }
 
   QList<int> rowkeys = rows.keys();
-  qSort(rowkeys);
+  std::sort(rowkeys.begin(), rowkeys.end());
 
   for (int row = rowkeys.count()-1; 0 <= row ; row--)
   {

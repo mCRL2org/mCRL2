@@ -12,7 +12,6 @@
 #ifndef MARKMANAGER_H
 #define MARKMANAGER_H
 
-#include <QLinkedList>
 #include <QSet>
 #include <QVector>
 
@@ -58,7 +57,7 @@ struct MarkRule
   bool operator!=(const MarkRule &other) { return !(*this == other); }
 };
 
-typedef QLinkedList<MarkRule>::iterator MarkRuleIndex;
+typedef std::list<MarkRule>::iterator MarkRuleIndex;
 inline bool operator<(const MarkRuleIndex &index1, const MarkRuleIndex &index2) { return &*index1 < &*index2; }
 
 class MarkManager : public QObject
@@ -125,7 +124,7 @@ class MarkManager : public QObject
     MarkStyle m_markStyle;
     MatchStyle m_clusterMatchStyle;
     MatchStyle m_stateMatchStyle;
-    QLinkedList<MarkRule> m_markRules;
+    std::list<MarkRule> m_markRules;
     QVector<bool> m_markedActions;
 
     int m_markedStatesAny;
