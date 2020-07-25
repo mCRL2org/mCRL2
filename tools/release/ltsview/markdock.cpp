@@ -66,7 +66,7 @@ void MarkDock::loadLts()
     {
       QString label = QString::fromStdString(m_markManager->lts()->getActionLabel(i));
       m_actionNumbers[label] = i;
-      m_actions += label;
+      m_actions.push_back(label);
     }
     for (QMap<QString, int>::iterator i = m_actionNumbers.begin(); i != m_actionNumbers.end(); i++)
     {
@@ -146,7 +146,7 @@ void MarkDock::addMarkRule()
     QColor color = m_markRuleColors[m_markRuleNextColorIndex];
     m_markRuleNextColorIndex = (m_markRuleNextColorIndex + 1) % m_markRuleColors.size();
 
-    MarkStateRuleDialog dialog(this, m_markManager->lts(), color, 0, false, QSet<int>());
+    MarkStateRuleDialog dialog(this, m_markManager->lts(), color, 0, false, std::set<int>());
     if (dialog.exec() == QDialog::Accepted)
     {
       MarkRule rule;
@@ -249,7 +249,7 @@ QString MarkDock::markRuleDescription(MarkRuleIndex index) const
   output += QString::fromStdString(m_markManager->lts()->getParameterName(rule.parameter));
   output += rule.negated ? " not in { " : " in { ";
   bool first = true;
-  for (QSet<int>::iterator i = rule.values.begin(); i != rule.values.end(); i++)
+  for (const int& i: rule.values)
   {
     if (first)
     {
@@ -259,7 +259,7 @@ QString MarkDock::markRuleDescription(MarkRuleIndex index) const
     {
       output += ", ";
     }
-    output += QString::fromStdString(m_markManager->lts()->getParameterDomain(rule.parameter)[*i]);
+    output += QString::fromStdString(m_markManager->lts()->getParameterDomain(rule.parameter)[i]);
   }
   output += "}";
   return output;

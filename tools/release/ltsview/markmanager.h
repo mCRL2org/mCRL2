@@ -12,9 +12,6 @@
 #ifndef MARKMANAGER_H
 #define MARKMANAGER_H
 
-#include <QSet>
-#include <QVector>
-
 #include "ltsmanager.h"
 
 class Cluster;
@@ -44,7 +41,7 @@ struct MarkRule
   QColor color;
   int parameter;
   bool negated;
-  QSet<int> values;
+  std::set<int> values;
 
   bool operator==(const MarkRule &other)
   {
@@ -73,7 +70,7 @@ class MarkManager : public QObject
     MatchStyle stateMatchStyle() const { return m_stateMatchStyle; }
     QList<MarkRuleIndex> markRules();
     MarkRule markRule(MarkRuleIndex index) const { return *index; }
-    QVector<bool> markedActions() const { return m_markedActions; }
+    std::vector<bool> markedActions() const { return m_markedActions; }
     bool isActionMarked(int action) const { return m_markedActions[action]; }
     int markedStates() const;
     int markedTransitions() const { return markStyle() == MARK_TRANSITIONS ? m_markedTransitions : 0; }
@@ -125,7 +122,7 @@ class MarkManager : public QObject
     MatchStyle m_clusterMatchStyle;
     MatchStyle m_stateMatchStyle;
     std::list<MarkRule> m_markRules;
-    QVector<bool> m_markedActions;
+    std::vector<bool> m_markedActions;
 
     int m_markedStatesAny;
     int m_markedStatesAll;

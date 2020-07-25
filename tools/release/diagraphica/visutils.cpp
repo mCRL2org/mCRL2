@@ -67,11 +67,11 @@ QColor VisUtils::ListColorMap::operator()(double fraction) const
   int index = (int)scaled;
   if (index < 0)
   {
-    return m_colors.first();
+    return m_colors.front();
   }
   if (index + 1 >= m_colors.size())
   {
-    return m_colors.last();
+    return m_colors.back();
   }
   return interpolateRgb(m_colors[index], m_colors[index + 1], scaled - index);
 }

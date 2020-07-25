@@ -53,7 +53,7 @@ class MarkDock : public QWidget
   private:
     Ui::MarkDock m_ui;
     MarkManager *m_markManager;
-    QVector<QString> m_actions;
+    std::vector<QString> m_actions;
     QList<QColor> m_markRuleColors;
     int m_markRuleNextColorIndex;
     QMap<MarkRuleIndex, MarkListItem *> m_markListItems;

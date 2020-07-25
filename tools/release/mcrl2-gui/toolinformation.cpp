@@ -93,11 +93,11 @@ void ToolInformation::load()
   }
 }
 
-bool ToolInformation::inputMatchesAny(QStringList filetypes)
+bool ToolInformation::inputMatchesAny(const QStringList& filetypes)
 {
-  for (auto it = filetypes.begin(); it != filetypes.end(); ++it)
+  for (const QString& s: filetypes)
   {
-    if (input.contains(*it))
+    if (input.count(s)>0)
     {
       return true;
     }

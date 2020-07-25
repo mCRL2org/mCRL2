@@ -10,9 +10,10 @@
 #ifndef TOOLINFORMATION_H
 #define TOOLINFORMATION_H
 
+#include <set>
+
 #include <QString>
 #include <QList>
-#include <QSet>
 #include <QObject>
 #include <QProcess>
 #include <QWidget>
@@ -96,10 +97,10 @@ class ToolInformation
     void load();
     bool hasOutput() { return !output.isEmpty(); }
     bool hasSecondInput() { return !input2.isEmpty(); }
-    bool inputMatchesAny(QStringList filetypes);
+    bool inputMatchesAny(const QStringList& filetypes);
 
     QString path, name, input2, output, desc, author;
-    QSet<QString> input;
+    std::set<QString> input;
     bool guiTool, valid;
 
     QList<ToolOption> options;

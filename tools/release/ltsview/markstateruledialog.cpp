@@ -10,7 +10,7 @@
 #include <QColorDialog>
 
 
-MarkStateRuleDialog::MarkStateRuleDialog(QWidget *parent, LTS* lts, QColor color, int parameter, bool negated, QSet<int> values):
+MarkStateRuleDialog::MarkStateRuleDialog(QWidget *parent, LTS* lts, QColor color, int parameter, bool negated, const std::set<int>& values):
   QDialog(parent),
   m_lts(lts)
 {
@@ -42,18 +42,18 @@ MarkStateRuleDialog::MarkStateRuleDialog(QWidget *parent, LTS* lts, QColor color
 
   for (int i = 0; i < m_ui.valueList->count(); i++)
   {
-    m_ui.valueList->item(i)->setCheckState(values.contains(i) ? Qt::Checked : Qt::Unchecked);
+    m_ui.valueList->item(i)->setCheckState(values.count(i)>0 ? Qt::Checked : Qt::Unchecked);
   }
 }
 
-QSet<int> MarkStateRuleDialog::values()
+std::set<int> MarkStateRuleDialog::values()
 {
-  QSet<int> output;
+  std::set<int> output;
   for (int i = 0; i < m_ui.valueList->count(); i++)
   {
     if (m_ui.valueList->item(i)->checkState() == Qt::Checked)
     {
-      output += i;
+      output.insert(i);
     }
   }
   return output;

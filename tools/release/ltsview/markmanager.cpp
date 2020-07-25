@@ -328,7 +328,7 @@ void MarkManager::flushClusters()
     cluster->setNumMarkedStatesAll(allAdded);
 
     cluster->resetActionMarks();
-    for (int j = 0; j < m_markedActions.size(); j++)
+    for (std::size_t j = 0; j < m_markedActions.size(); j++)
     {
       if (m_markedActions[j])
       {
@@ -438,7 +438,7 @@ void MarkManager::unapplyRule(MarkRuleIndex index)
   }
 }
 
-bool MarkManager::matchesRule(State *state, const MarkRule &rule) const
+bool MarkManager::matchesRule(State *state, const MarkRule& rule) const
 {
-  return rule.negated ^ rule.values.contains(m_lts->getStateParameterValue(state, rule.parameter));
+  return rule.negated ^ (rule.values.count(m_lts->getStateParameterValue(state, rule.parameter))>0);
 }

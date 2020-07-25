@@ -65,7 +65,7 @@ TimeSeries::~TimeSeries()
 // -- get functions -------------------------------------------------
 
 
-void TimeSeries::getIdcsClstMarked(std::set< std::size_t > &idcs)
+void TimeSeries::getIdcsClstMarked(std::set< std::size_t >& idcs)
 {
   idcs.clear();
   std::set< std::size_t >::iterator it;
@@ -77,7 +77,7 @@ void TimeSeries::getIdcsClstMarked(std::set< std::size_t > &idcs)
 
 
 void TimeSeries::getIdcsClstMarked(
-  std::set< std::size_t > &idcs ,
+  std::set< std::size_t >& idcs ,
   QColor& col)
 {
   getIdcsClstMarked(idcs);
@@ -87,7 +87,7 @@ void TimeSeries::getIdcsClstMarked(
 
 void TimeSeries::getIdxMseOver(
   std::size_t& idxLeaf,
-  std::set< std::size_t > &idcsBndl,
+  std::set< std::size_t >& idcsBndl,
   QColor& colLeaf)
 {
   idxLeaf = NON_EXISTING;
@@ -108,7 +108,7 @@ void TimeSeries::getIdxMseOver(
 
 void TimeSeries::getCurrIdxDgrm(
   std::size_t& idxLeaf,
-  std::set< std::size_t > &idcsBndl,
+  std::set< std::size_t >& idcsBndl,
   QColor& colLeaf)
 {
   idxLeaf = NON_EXISTING;
@@ -129,7 +129,7 @@ void TimeSeries::getCurrIdxDgrm(
 
 void TimeSeries::getAnimIdxDgrm(
   std::size_t& idxLeaf,
-  std::set< std::size_t > &idcsBndl,
+  std::set< std::size_t >& idcsBndl,
   QColor& colLeaf)
 {
   if (animFrame != itemsMarked.end())
@@ -174,7 +174,7 @@ void TimeSeries::getAnimIdxDgrm(
 }
 
 
-void TimeSeries::getAttrIdcs(std::vector< std::size_t > &idcs)
+void TimeSeries::getAttrIdcs(std::vector< std::size_t >& idcs)
 {
   idcs.clear();
   for (std::size_t i = 0; i < attributes.size(); ++i)
@@ -903,7 +903,7 @@ void TimeSeries::route()
 }
 
 
-void TimeSeries::handleHits(const std::vector< int > &ids)
+void TimeSeries::handleHits(const std::vector< int >& ids)
 {
   if (ids.size() > 1)
   {
@@ -991,7 +991,7 @@ void TimeSeries::handleHits(const std::vector< int > &ids)
             attrs.push_back(m_graph->getAttribute(i));
           }
 
-          emit hoverCluster(frame, QVector<Attribute *>::fromStdVector(attrs).toList());
+          emit hoverCluster(frame, QList(attrs.begin(), attrs.end()));
 
           delete frame;
           frame = 0;

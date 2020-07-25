@@ -91,7 +91,7 @@ std::size_t Examiner::selectedClusterIndex()
 
 void Examiner::setFrame(
   Cluster* frme,
-  const std::vector< Attribute*> &attrs,
+  const std::vector< Attribute*>& attrs,
   QColor col)
 {
   delete frame;
@@ -127,7 +127,7 @@ void Examiner::clrFrame()
 
 void Examiner::addFrameHist(
   Cluster* frme,
-  const std::vector< Attribute* > &attrs)
+  const std::vector< Attribute* >& attrs)
 {
   // update flag
   dataChanged = true;
@@ -143,7 +143,7 @@ void Examiner::addFrameHist(
 
 void Examiner::addFrameHist(
   QList<Cluster*> frames,
-  const std::vector< Attribute* > &attrs)
+  const std::vector< Attribute* >& attrs)
 {
   for (int i = 0; i < frames.size(); ++i)
   {
@@ -409,7 +409,7 @@ void Examiner::clearFrames()
 // -- hit detection -------------------------------------------------
 
 
-void Examiner::handleHits(const std::vector< int > &ids)
+void Examiner::handleHits(const std::vector< int >& ids)
 {
   if (ids.size() > 0)
   {
@@ -419,7 +419,7 @@ void Examiner::handleHits(const std::vector< int > &ids)
       {
         if (ids.size() == 2 && ids[1] == ID_ICON_MORE)
         {
-          emit routingCluster(frame, QVector<Cluster *>::fromStdVector(framesHist).toList(), QVector<Attribute *>::fromStdVector(attributes).toList());
+          emit routingCluster(frame, QList(framesHist.begin(), framesHist.end()), QList(attributes.begin(), attributes.end()));
         }
       }
       else if (ids[0] == ID_FRAME_HIST)
@@ -473,7 +473,7 @@ void Examiner::handleHits(const std::vector< int > &ids)
     {
       if (ids[0] == ID_FRAME)
       {
-        emit routingCluster(frame, QVector<Cluster *>::fromStdVector(framesHist).toList(), QVector<Attribute *>::fromStdVector(attributes).toList());
+        emit routingCluster(frame, QList(framesHist.begin(),framesHist.end()), QList(attributes.begin(),attributes.end()));
       }
       else if (ids[0] == ID_FRAME_HIST)
       {
