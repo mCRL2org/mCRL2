@@ -414,7 +414,7 @@ void GLWidget::mouseReleaseEvent(QMouseEvent* e)
 void GLWidget::wheelEvent(QWheelEvent* e)
 {
   ArcballCameraView& camera = m_scene.camera();
-  camera.zoom(camera.zoom() * pow(1.0005f, -e->delta()));
+  camera.zoom(camera.zoom() * pow(1.0005f, -e->angleDelta().y()));
   update();
 }
 

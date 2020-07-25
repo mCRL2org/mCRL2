@@ -370,7 +370,7 @@ void TimeSeries::handleWheelEvent(QWheelEvent *e)
     actPixPerNode = (dist/pix)/(double)(nodesWdwScale-nodesItvSlider);
     diff -= actPixPerNode;
 
-    if (e->delta() > 0)
+    if (e->angleDelta().y() > 0)
     {
       if (actPixPerNode > minPixPerNode)
       {

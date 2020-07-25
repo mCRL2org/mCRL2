@@ -396,7 +396,7 @@ void LtsCanvas::mouseMoveEvent(QMouseEvent* event)
 
 void LtsCanvas::wheelEvent(QWheelEvent* event)
 {
-  m_position += QVector3D(0.0f, 0.0f, 0.001f * (m_baseDepth - m_position.z()) * event->delta());
+  m_position += QVector3D(0.0f, 0.0f, 0.001f * (m_baseDepth - m_position.z()) * event->angleDelta().y());
   event->accept();
   repaint();
 }
