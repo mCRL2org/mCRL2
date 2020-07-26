@@ -37,7 +37,7 @@
 %
 % Using pbes2bool this formula can be verified on smaller than the full board.
 % The table below shows on which boards red has a winning strategy.
-% This has been verified using pbes2bool -rjittyc -v -s2 -zd temp1.pbes --erase=some
+% This has been verified using pbes2bool -rjittyc -v -s2 -zd temp1.pbes --erase=some (used flags are deprecated)
 % For 7x4 and 5x6 boards typically 40Gbyte memory was required.
 %
 %       Columns
