@@ -1646,8 +1646,8 @@ void ArcDiagram::handleHits(const std::vector< int >& ids)
             else if (ids[3] == ID_DIAGRAM_MORE)
             {
               emit routingCluster(framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]], 
-                                  QList<Cluster*>(framesDgrm[currIdxDgrm].begin(), framesDgrm[currIdxDgrm].end()), 
-                                  QList<Attribute*>(attrsDgrm[currIdxDgrm].begin(),attrsDgrm[currIdxDgrm].end()));
+                                  QVector<Cluster*>::fromStdVector(framesDgrm[currIdxDgrm]).toList(), 
+                                  QVector<Attribute*>::fromStdVector(attrsDgrm[currIdxDgrm]).toList()); 
             }
             else if (ids[3] == ID_DIAGRAM_RWND)
             {
@@ -1671,8 +1671,8 @@ void ArcDiagram::handleHits(const std::vector< int >& ids)
         else if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::RightButton)
         {
           emit routingCluster(framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]], 
-                              QList<Cluster*>(framesDgrm[currIdxDgrm].begin(), framesDgrm[currIdxDgrm].end()),
-                              QList<Attribute*>(attrsDgrm[currIdxDgrm].begin(),attrsDgrm[currIdxDgrm].end()));
+                              QVector<Cluster*>::fromStdVector(framesDgrm[currIdxDgrm]).toList(),
+                              QVector<Attribute*>::fromStdVector(attrsDgrm[currIdxDgrm]).toList());
         }
         else
         {
@@ -1681,7 +1681,7 @@ void ArcDiagram::handleHits(const std::vector< int >& ids)
           updateMarkBundles();
 
           emit hoverCluster(framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]], 
-                            QList<Attribute*>(attrsDgrm[currIdxDgrm].begin(), attrsDgrm[currIdxDgrm].end()));
+                            QVector<Attribute*>::fromStdVector(attrsDgrm[currIdxDgrm]).toList());
         }
         break;
 
@@ -1819,7 +1819,7 @@ void ArcDiagram::handleRwndDiagram(const std::size_t& dgrmIdx)
   frameIdxDgrm[dgrmIdx] = 0;
 
   emit hoverCluster(framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]], 
-                    QList<Attribute*>(attrsDgrm[currIdxDgrm].begin(),attrsDgrm[currIdxDgrm].end()));
+                    QVector<Attribute*>::fromStdVector(attrsDgrm[currIdxDgrm]).toList());
 
   updateMarkBundles();
 }
@@ -1844,7 +1844,7 @@ void ArcDiagram::handlePrevDiagram(const std::size_t& dgrmIdx)
   }
 
   emit hoverCluster(framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]], 
-                    QList<Attribute*>(attrsDgrm[currIdxDgrm].begin(),attrsDgrm[currIdxDgrm].end()));
+                    QVector<Attribute*>::fromStdVector(attrsDgrm[currIdxDgrm]).toList());
 
   updateMarkBundles();
 }
@@ -1859,7 +1859,7 @@ void ArcDiagram::handlePlayDiagram(const std::size_t& dgrmIdx)
       m_animationTimer.stop();
 
       emit hoverCluster(framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]], 
-                        QList<Attribute*>(attrsDgrm[currIdxDgrm].begin(), attrsDgrm[currIdxDgrm].end()));
+                        QVector<Attribute*>::fromStdVector(attrsDgrm[currIdxDgrm]).toList());
     }
     else
     {
@@ -1893,7 +1893,7 @@ void ArcDiagram::handleNextDiagram(const std::size_t& dgrmIdx)
   }
 
   emit hoverCluster(framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]], 
-                    QList(attrsDgrm[currIdxDgrm].begin(),attrsDgrm[currIdxDgrm].end()));
+                    QVector<Attribute*>::fromStdVector(attrsDgrm[currIdxDgrm]).toList());
   updateMarkBundles();
 }
 
