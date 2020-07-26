@@ -419,7 +419,9 @@ void Examiner::handleHits(const std::vector< int >& ids)
       {
         if (ids.size() == 2 && ids[1] == ID_ICON_MORE)
         {
-          emit routingCluster(frame, QList(framesHist.begin(), framesHist.end()), QList(attributes.begin(), attributes.end()));
+          emit routingCluster(frame, 
+                              QList<Cluster*>(framesHist.begin(), framesHist.end()), 
+                              QList<Attribute*>(attributes.begin(), attributes.end()));
         }
       }
       else if (ids[0] == ID_FRAME_HIST)
@@ -473,7 +475,9 @@ void Examiner::handleHits(const std::vector< int >& ids)
     {
       if (ids[0] == ID_FRAME)
       {
-        emit routingCluster(frame, QList(framesHist.begin(),framesHist.end()), QList(attributes.begin(),attributes.end()));
+        emit routingCluster(frame, 
+                            QList<Cluster*>(framesHist.begin(),framesHist.end()), 
+                            QList<Attribute*>(attributes.begin(),attributes.end()));
       }
       else if (ids[0] == ID_FRAME_HIST)
       {
