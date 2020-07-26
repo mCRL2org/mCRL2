@@ -582,7 +582,10 @@ void MainWindow::groupValues()
   QString name = QInputDialog::getText(this, "Group values", "Enter a new name for the value group.", QLineEdit::Normal, QString(), &ok);
   if (ok)
   {
-    m_graph->getAttribute(selectedAttributes().first())->clusterValues(selectedValues().toVector().toStdVector(), name.toStdString());
+    QList<int> temp_selected_values = selectedValues();
+    m_graph->getAttribute(selectedAttributes().first())->
+                clusterValues(std::vector<int>(temp_selected_values.begin(),
+                                               temp_selected_values.end()), name.toStdString());
     updateValues();
   }
 }
@@ -662,7 +665,7 @@ void MainWindow::hoverCluster(Cluster *cluster, QList<Attribute *> attributes)
 {
   if (cluster)
   {
-    m_examiner->setFrame(cluster, attributes.toVector().toStdVector(), VisUtils::coolBlue);
+    m_examiner->setFrame(cluster, std::vector<Attribute*>(attributes.begin(),attributes.end()), VisUtils::coolBlue);
   }
   else
   {

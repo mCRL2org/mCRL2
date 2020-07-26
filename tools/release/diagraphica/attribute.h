@@ -39,7 +39,7 @@ class Attribute : public QObject
     void setType(QString type);
 
     virtual void clusterValues(
-      const std::vector< int > &indices,
+      const std::vector< int >& indices,
       const std::string& newValue);
     virtual void moveValue(
       const std::size_t& idxFr,
@@ -47,8 +47,8 @@ class Attribute : public QObject
 
     // functions overridden by AttrDiscr
     virtual void configValues(
-      const std::vector< std::string > &curDomain,
-      std::map< std::size_t, std::size_t  > &origToCurDomain);
+      const std::vector< std::string >& curDomain,
+      std::map< std::size_t, std::size_t  >& origToCurDomain);
 
     // -- get functions ---------------------------------------------
     std::size_t getIndex();

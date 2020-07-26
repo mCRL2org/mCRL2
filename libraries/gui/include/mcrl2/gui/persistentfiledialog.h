@@ -27,10 +27,20 @@ class PersistentFileDialog : QObject
 public:
     explicit PersistentFileDialog(QString directory = QString(), QWidget *parent = nullptr);
 
-    QString	getExistingDirectory  ( const QString & caption = QString(), QFileDialog::Options options = QFileDialog::ShowDirsOnly );
-    QString	getOpenFileName       ( const QString & caption = QString(), const QString & filter = QString(), QString * selectedFilter = 0, QFileDialog::Options options = 0 );
-    QStringList	getOpenFileNames  ( const QString & caption = QString(), const QString & filter = QString(), QString * selectedFilter = 0, QFileDialog::Options options = 0 );
-    QString	getSaveFileName       ( const QString & caption = QString(), const QString & filter = QString(), QString * selectedFilter = 0, QFileDialog::Options options = 0 );
+    QString getExistingDirectory(const QString& caption = QString(), 
+                                 QFileDialog::Options options = QFileDialog::ShowDirsOnly);
+    QString getOpenFileName(const QString& caption = QString(), 
+                            const QString& filter = QString(), 
+                            QString* selectedFilter = 0, 
+                            QFileDialog::Options options = QFileDialog::Options());
+    QStringList getOpenFileNames(const QString& caption = QString(), 
+                                 const QString& filter = QString(), 
+                                 QString* selectedFilter = 0, 
+                                 QFileDialog::Options options = QFileDialog::Options());
+    QString  getSaveFileName(const QString& caption = QString(), 
+                             const QString& filter = QString(), 
+                             QString* selectedFilter = 0, 
+                             QFileDialog::Options options = QFileDialog::Options());
 
 private:
     QWidget* m_parent;
