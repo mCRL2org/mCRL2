@@ -27,6 +27,7 @@ struct rewrite_pbes_expressions_builder: public Builder<rewrite_pbes_expressions
 {
   typedef Builder<rewrite_pbes_expressions_builder<Builder, Rewriter> > super;
   using super::apply;
+  using super::update;
 
   const Rewriter& R;
 
@@ -37,6 +38,13 @@ struct rewrite_pbes_expressions_builder: public Builder<rewrite_pbes_expressions
   pbes_expression apply(const pbes_expression& x)
   {
     return R(x);
+  }
+
+  void update(pbes_system::pbes& x)
+  {
+    super::update(x);
+    // Handle the initial state. It is skipped by the builder because the type is not pbes_expression
+    x.initial_state() = atermpp::down_cast<propositional_variable_instantiation>(apply(static_cast<pbes_expression>(x.initial_state())));
   }
 };
 
