@@ -425,8 +425,8 @@ available_tests = {
     'bessolve'                                    : lambda name, settings: BessolveTest(name, settings)                                                ,
     #'stochastic-ltscompare'                      : lambda name, settings: StochasticLtscompareTest(name, settings)                                     ,
 }
-if os.name != 'nt':
-    available_tests.update({ 'pbesbddsolve' : lambda name, settings: PbesbddsolveTest(name, settings) })
+#if os.name != 'nt':
+#    available_tests.update({ 'pbesbddsolve' : lambda name, settings: PbesbddsolveTest(name, settings) })
 
 def print_names(tests):
     for name in sorted(tests):
