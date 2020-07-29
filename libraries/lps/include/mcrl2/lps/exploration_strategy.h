@@ -111,7 +111,7 @@ inline std::string description(const exploration_strategy strat)
     case es_depth:
       return "depth-first search";
     case es_random:
-      return "random simulation. Out of all next states one is chosen at random independently of whether this state has already been observed. Consequently, random simultation only terminates when a deadlocked state is encountered.";
+      return "random simulation. Out of all next states one is chosen at random independently of whether this state has already been observed. Consequently, random simulation only terminates when a deadlocked state is encountered.";
     case es_value_prioritized:
       return "prioritize single actions on its first argument being of sort Nat where only those actions with the lowest value for this parameter are selected. E.g. if there are actions a(3) and b(4), a(3) remains and b(4) is skipped. Actions without a first parameter of sort Nat and multactions with more than one action are always chosen (option is experimental)";
     case es_value_random_prioritized:

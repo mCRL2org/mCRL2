@@ -87,9 +87,9 @@ std::string description(const search_strategy s)
     case depth_first: return "Compute the right hand side of a boolean variables where "
         " the last generated variable is investigated first. This corresponds to a depth-first "
         " search. This can substantially outperform breadth-first search when the validity of a"
-        " formula is determined after a larger depths. ";
-    case breadth_first_short: return "Short hand for breadth-first.";
-    case depth_first_short: return "Short hand for depth-first.";
+        " formula is determined at a larger depth. ";
+    case breadth_first_short: return "Shorthand for breadth-first.";
+    case depth_first_short: return "Shorthand for depth-first.";
   }
   throw mcrl2::runtime_error("unknown search strategy");
 }

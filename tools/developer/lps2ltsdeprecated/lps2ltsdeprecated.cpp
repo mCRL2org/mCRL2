@@ -177,7 +177,7 @@ class lps2lts_tool : public lps2lts_base
                  "not be explored. ").
       add_option("confluence", make_optional_argument("NAME", "ctau"),
                  "apply prioritization of transitions with the action label NAME. "
-                 "(when no NAME is supplied (i.e., '-c') priority is given to the action 'ctau'. To give priority to "
+                 "(when no NAME is supplied (i.e., '-c') priority is given to the action 'ctau'. To give priority "
                  "to tau use the flag -ctau. Note that if the linear process is not tau-confluent, the generated "
                  "state space is necessarily branching bisimilar to the state space of the lps. The generation "
                  "algorithm that is used does not require the linear process to be tau convergent. ", 'c').
@@ -206,7 +206,7 @@ class lps2lts_tool : public lps2lts_base
                  "set the initial size of the internally used hash tables (default is 10000). ").
       add_option("tau",make_mandatory_argument("ACTNAMES"),
                  "consider actions with a name in the comma separated list ACTNAMES to be internal. "
-                 "This list is only used and allowed when searching for divergencies. ");
+                 "This list is only used and allowed when searching for divergences. ");
     }
 
     void parse_options(const command_line_parser& parser)
