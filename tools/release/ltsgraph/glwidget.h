@@ -16,6 +16,7 @@
 #include <QVector2D>
 #include <QOpenGLDebugLogger>
 #include "ui_glwidget.h"
+#include "timer/debugTimer.h"
 
 class GLWidgetImpl;
 
@@ -204,6 +205,9 @@ private:
   bool m_is_threedimensional = false; ///< Indicates that the scene should be viewed in 3D, as opposed to 2D.
 
   std::list<GLScene::Selection> m_selections; ///< A list of the objects under the cursor.
+
+  /// \brief Measure for the time usage of the render loop
+  DebugTimer timer;
 
   /**
    * @brief Updates the selected value for all nodes.

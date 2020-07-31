@@ -146,6 +146,7 @@ GLWidget::GLWidget(Graph::Graph& graph, QWidget* parent)
 GLWidget::~GLWidget()
 {
   delete m_ui;
+  timer.printResultsTo(std::cout);
 }
 
 void GLWidget::pause()
@@ -288,16 +289,23 @@ void GLWidget::resizeGL(int width, int height)
 
 void GLWidget::paintGL()
 {
+  timer.startNewLoop();
   QPainter painter(this);
 
   if (!m_paused)
   {
     m_scene.setDevicePixelRatio(devicePixelRatio());
+    timer.startTiming("update");
     m_scene.update();
+    timer.endTiming("update");
+    timer.startTiming("render");
     m_scene.render(painter);
+    timer.endTiming("render");
 
+    timer.startTiming("selection");
     // Updates the selection percentage (and checks for new selections under the cursor).
     updateSelection();
+    timer.endTiming("selection");
   }
 }
 

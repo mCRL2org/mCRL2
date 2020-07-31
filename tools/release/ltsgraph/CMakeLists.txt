@@ -21,6 +21,9 @@ add_mcrl2_tool(ltsgraph
     shaders.cpp
     springlayout.cpp
     springlayout.ui
+    timer/debugTimer.cpp
+    highdimensionalembedding.cpp
+    matrix.cpp
   DEPENDS
     Qt5::Core
     Qt5::Gui
