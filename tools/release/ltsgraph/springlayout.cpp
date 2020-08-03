@@ -108,26 +108,23 @@ QVector3D SpringLayout::forceLinearSprings(const QVector3D& a, const QVector3D& 
   return diff * factor;
 }
 
-inline
-QVector3D repulsionForce(const QVector3D& a, const QVector3D& b, float repulsion, float natlength)
+inline QVector3D repulsionForce(const QVector3D& a, const QVector3D& b, float repulsion, float natlength)
 {
   QVector3D diff = a - b;
-  float length = diff.length();
+  float dist = diff.length();
 
-  float natFraction = natlength / 10000;
-  if (length < natFraction / 10)
+  if (dist < natlength / 1000)
   {
+    float natFraction = natlength / 10000;
     return QVector3D(
         fast_frand(-natFraction, natFraction),
         fast_frand(-natFraction, natFraction),
         fast_frand(-natFraction, natFraction)
     );
-  }
-  else
+  } else
   {
-    float r = repulsion / cube((std::max)(length / 20.0f, natlength));
-    diff = (diff / length) * r;
-    return diff;
+    float r = repulsion / cube((std::max)(dist / 2.0f, natlength / 10));
+    return diff * r;
   }
 }
 
@@ -212,21 +209,32 @@ void SpringLayout::apply()
       f = (this->*m_forceCalculation)(handle.pos(), m_graph.transitionLabel(n).pos(), 0.0);
       m_lforces[n] += f;
 
-      for (std::size_t j = 0; j < i; ++j)
+      // for both nodes on this edge
+      for (std::size_t node : {e.from(), e.to()})
       {
-        std::size_t m = sel ? m_graph.explorationEdge(j) : j;
+        int nrOfNeighbours = m_graph.nrOfNeighboursOfNode(node);
+        // for each of their neighbours
+        for (int j = 0; j < nrOfNeighbours; ++j)
+        {
+          // compute a repulsive force
+          std::size_t m = m_graph.neigboursOfNode(node, j);
+//          m = sel ? m_graph.explorationEdge(m) : m;
+          // exclude the edge on itself
+          if (m == n) continue;
 
-        // Handles
-        f = repulsionForce(handle.pos(), m_graph.handle(m).pos(), m_repulsion * m_controlPointWeight, m_natLength);
-        m_hforces[n] += f;
-        m_hforces[m] -= f;
+          // Handles
+          f = repulsionForce(handle.pos(), m_graph.handle(m).pos(), m_repulsion * m_controlPointWeight, m_natLength);
+          m_hforces[n] += f;
+          m_hforces[m] -= f;
 
-        // Labels
-        f = repulsionForce(m_graph.transitionLabel(n).pos(), m_graph.transitionLabel(m).pos(), m_repulsion * m_controlPointWeight, m_natLength);
-        m_lforces[n] += f;
-        m_lforces[m] -= f;
+          // Labels
+          f = repulsionForce(m_graph.transitionLabel(n).pos(), m_graph.transitionLabel(m).pos(), m_repulsion * m_controlPointWeight, m_natLength);
+          m_lforces[n] += f;
+          m_lforces[m] -= f;
+        }
       }
     }
+
 
     timer.endTiming("edge force computation");
     timer.startTiming("node force application");
