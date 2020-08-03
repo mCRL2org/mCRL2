@@ -189,7 +189,7 @@ void Graph::templatedLoad(const QString& filename, const QVector3D& min,
     m_stateLabels.push_back(stateLabelToQString(lts.state_label(i)));
   }
 
-  // Position nodes randomly
+  // Create nodes
   for (std::size_t i = 0; i < lts.num_states(); ++i)
   {
     const bool is_not_probabilistic = false;
@@ -213,20 +213,40 @@ void Graph::templatedLoad(const QString& filename, const QVector3D& min,
     std::size_t new_probabilistic_state = add_probabilistic_state<lts_t>(
         lts.probabilistic_state(t.to()), min, max);
     m_edges.emplace_back(t.from(), new_probabilistic_state);
-    m_handles.push_back(Node(
-        (m_nodes[t.from()].pos() + m_nodes[new_probabilistic_state].pos()) /
-        2.0));
-    m_transitionLabelnodes.emplace_back(
-        (m_nodes[t.from()].pos() + m_nodes[new_probabilistic_state].pos()) /
-            2.0,
-        t.label());
   }
+
+  for (int i = 0; i < m_edges.size(); ++i)
+  {
+    Edge& edge = m_edges[i];
+    mcrl2::lts::transition& transition = lts.get_transitions()[i];
+
+    m_handles.push_back(Node(
+        (m_nodes[edge.from()].pos() + m_nodes[edge.to()].pos()) / 2.0
+    ));
+
+    m_transitionLabelnodes.emplace_back(
+        (m_nodes[edge.from()].pos() + m_nodes[edge.to()].pos()) / 2.0,
+        transition.label()
+    );
+  }
+  // create bidirectional mapping for adjacencies
+  std::vector<std::vector<size_t>> bi_mapping;
+  // add an empty vector at every position
+  bi_mapping.resize(m_nodes.size());
+
+  for (std::size_t i = 0; i < m_edges.size(); ++i)
+  {
+    Edge& t = m_edges[i];
+    bi_mapping[t.from()].push_back(t.to());
+    bi_mapping[t.to()].push_back(t.from());
+  }
+  m_adjacencies = AdjacencyList(bi_mapping);
 
   m_initialState = add_probabilistic_state<lts_t>(
       lts.initial_probabilistic_state(), min, max);
 }
 
-template <class lts_t>
+template<class lts_t>
 std::size_t Graph::add_probabilistic_state(
     const typename lts_t::probabilistic_state_t& probabilistic_state,
     const QVector3D& min, const QVector3D& max)
@@ -245,16 +265,16 @@ std::size_t Graph::add_probabilistic_state(
         QVector3D(frand(min.x(), max.x()), frand(min.y(), max.y()), frand(min.z(), max.z())),
         is_probabilistic);
     m_stateLabelnodes.emplace_back(m_nodes[index_of_the_new_probabilistic_state].pos(),
-                  index_of_the_new_probabilistic_state);
+                                   index_of_the_new_probabilistic_state);
 
     // The following map recalls where probabilities are stored in
     // transitionLabels.
     typedef std::map<typename lts_t::probabilistic_state_t::probability_t,
-                     std::size_t>
+        std::size_t>
         probability_map_t;
     probability_map_t probability_label_indices;
     for (const typename lts_t::probabilistic_state_t::state_probability_pair&
-            p : probabilistic_state)
+          p : probabilistic_state)
     {
       // Find an index for the probabilistic label of the outgoing transition of
       // the probabilistic state.
@@ -281,7 +301,7 @@ std::size_t Graph::add_probabilistic_state(
       m_transitionLabelnodes.push_back(
           LabelNode((m_nodes[index_of_the_new_probabilistic_state].pos() +
                      m_nodes[p.state()].pos()) /
-                        2.0,
+                    2.0,
                     label_index));
     }
     return index_of_the_new_probabilistic_state;
@@ -745,5 +765,15 @@ std::size_t Graph::explorationNodeCount() const
     return 0;
   }
   return m_exploration->nodes.size();
+}
+
+int Graph::nrOfNeighboursOfNode(std::size_t node)
+{
+  return m_adjacencies.nrNeighbours(node);
+}
+
+size_t Graph::neigboursOfNode(std::size_t node, int index)
+{
+  return m_adjacencies.getEdge(node, index);
 }
 }  // namespace Graph
