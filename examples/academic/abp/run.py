@@ -1,6 +1,7 @@
 import os
 
 os.system('mcrl22lps -v abp.mcrl2 abp.lps')
+os.system('lps2lts -v abp.lps abp.aut')
 os.system('lps2pbes -v -f nodeadlock.mcf abp.lps abp.nodeadlock.pbes')
 os.system('pbes2bool -v abp.nodeadlock.pbes')
 
