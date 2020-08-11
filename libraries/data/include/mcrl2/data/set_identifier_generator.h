@@ -62,7 +62,7 @@ class set_identifier_generator: public identifier_generator<>
     /// \return True if the identifier s appears in the context.
     bool has_identifier(const core::identifier_string& s) const override
     {
-    	using utilities::detail::contains;
+      using utilities::detail::contains;
       return contains(m_identifiers, s);
     }
 

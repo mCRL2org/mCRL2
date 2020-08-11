@@ -2313,7 +2313,6 @@ class specification_basic_type
          get_fresh_variable will return the same variable for the same s,sort and reuse_triple.
          This feature is added to make it possible to avoid generating too many different variables. */
 
-      std::map < int , std::map < variable,variable > > generated_variables;
 
       if (reuse_index<0)
       {
@@ -2323,6 +2322,7 @@ class specification_basic_type
       }
       else
       {
+        static std::map < int , std::map < variable,variable > > generated_variables;
         variable table_index_term(s,sort);
         variable old_variable;
         if (generated_variables[reuse_index].count(table_index_term)>0)
