@@ -135,13 +135,10 @@ class representative_generator
       
       if (is_function_sort(sort))
       {
-        // s is a function sort. We search for a constructor of mapping of this sort
-        // Although in principle possible, we do not do a lot of effort to construct
-        // a term of this sort. We just look whether a term of exactly this sort is
-        // present.
-
-        // check if there is a mapping with sort s (constructors with sort s cannot exist).
-        for (const function_symbol& f: m_specification.mappings(atermpp::down_cast<function_sort>(sort).codomain()))
+        // s is a function sort. 
+        // First check if there is a mapping with sort s (constructors with sort s cannot exist).
+        const function_sort& fs=atermpp::down_cast<function_sort>(sort);
+        for (const function_symbol& f: m_specification.mappings(fs.codomain()))
         {
           if (f.sort()==sort)
           {
@@ -149,6 +146,27 @@ class representative_generator
             set_representative(sort, result);
             return true;
           }
+        }
+        // If no explicit constant is found of this sort, we know that its shape is "s0#..#sn -> s". 
+        // We search a term t of sort s and if found, construct a lambda term of the shape 
+        // lambda x0:s0,...,xn:sn.t. Note that this can be strengthened slightly by incorporating
+        // the variables xi in generating t, e.g. generating for D->D  the reprentant lambd d:D.d. 
+        // Incorporating the variables in the generation of terms requires adapting all algorithms,
+        // and is not done. Until now the need for such representant generators has not been felt. 
+
+        const sort_expression& s2=fs.codomain();
+        data_expression t;
+        if (find_representative(s2, visited_sorts, t))
+        {
+          variable_vector bound_variables;
+          std::size_t variable_index=0;
+          for(const sort_expression& s: fs.domain())
+          {
+            bound_variables.emplace_back("x" + std::to_string(variable_index), s);
+            variable_index++;
+          }
+          result=abstraction(lambda_binder(),variable_list(bound_variables.begin(),bound_variables.end()),t);
+          return true;
         }
       }
       else

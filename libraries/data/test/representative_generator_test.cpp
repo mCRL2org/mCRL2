@@ -71,6 +71,11 @@ void test_representative_generator()
                                                data::sort_set::true_function(data::sort_real::real_()),
                                                data::sort_fset::empty(data::sort_real::real_())));
 
+   // Check whether a proper representative term is generated for a function sort.
+   const sort_expression s1=function_sort({ basic_sort("Nat")}, basic_sort("Nat"));
+   BOOST_CHECK(default_expression_generator(s1).sort() == s1);
+   const sort_expression s2=function_sort({ basic_sort("Nat"), basic_sort("Real")}, basic_sort("Nat"));
+   BOOST_CHECK(default_expression_generator(s2).sort() == s2);
 }
 
 BOOST_AUTO_TEST_CASE(test_main)
