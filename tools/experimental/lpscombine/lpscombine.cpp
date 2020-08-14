@@ -153,54 +153,22 @@ void combine_specification(const lps::stochastic_specification& left_spec,
     C.emplace_front(action_name_multiset(list), name);
   }
 
-  // Construct the union of formal parameters, but ensure that they are unique.
-  data::variable_list formal_parameters = left_spec.process().process_parameters();
-  for (const auto& parameter : right_spec.process().process_parameters())
-  {
-    if (std::find(formal_parameters.begin(), formal_parameters.end(), parameter) == formal_parameters.end())
-    {
-      formal_parameters.push_front(parameter);
-    }
-  }
-
+  // Construct the composed process equation PQ = C(P || Q) where C is the context defined in the paper.
   process_identifier PQ(core::identifier_string("PQ"), data::variable_list());
 
-  // Construct the composed process equation PQ = C(P || Q) where C is the context defined in the paper.
-  process::process_equation composition(
-    process_identifier(PQ),
-    formal_parameters,
-    hide(H_prime,
+  stream << "init " << hide(H_prime,
       allow(A,
         hide(H,
           comm(C,
             merge(
-              process_instance_assignment(process_identifier("P", data::variable_list()), data::assignment_list()),
-              process_instance_assignment(process_identifier("Q", data::variable_list()), data::assignment_list())
+              process_instance(process_identifier("P", left_spec.process().process_parameters()), left_spec.initial_process().expressions()),
+              process_instance(process_identifier("Q", right_spec.process().process_parameters()), right_spec.initial_process().expressions())
             )
           )
         )
       )
-    )
-    );
-
-  // Print the process PQ.
-  stream << "proc " << composition << "\n\n";
-
-  // Construct the union of formal parameters, but ensure that they are unique.
-  data::assignment_list assignments = data::make_assignment_list(left_spec.process().process_parameters(), left_spec.initial_process().expressions());
-  data::assignment_list right_assignments = data::make_assignment_list(right_spec.process().process_parameters(), right_spec.initial_process().expressions());
-
-  for (const auto& assignment : right_assignments)
-  {
-    if (std::find(assignments.begin(), assignments.end(), assignment) == assignments.end())
-    {
-      assignments.push_front(assignment);
-    }
-  }
-
-  // Define the initial process expression, which depends on the assignments of the original processes.
-  data::data_expression_list values = data::replace_variables(atermpp::container_cast<data::data_expression_list>(formal_parameters), data::assignment_sequence_substitution(assignments));
-  stream << "init " << process_instance(PQ, values) << ";\n";
+    )    
+    << ";" ;
 }
 
 class lpscleave_tool : public input_input_output_tool
