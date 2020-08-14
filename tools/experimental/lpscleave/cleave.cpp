@@ -100,19 +100,16 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
   }
 
   // Add the tags for the left and right processes
-  process::action_label tagright_label("tagright", {});
-  process::action_label tagleft_label("tagleft", {});
+  process::action_label tag_label("tag", {});
 
   // Change the summands to include the parameters of the other process and added the sync action.
 
   // Extend the action specification with an actsync (that is unique) for every summand with the correct sorts, a tag and an intern action.
   std::vector<process::action_label> labels;
-  labels.push_back(tagright_label);
-  labels.push_back(tagleft_label);
+  labels.push_back(tag_label);
 
   // Create actions to be used within the summands.
-  process::action tagleft(tagleft_label, {});
-  process::action tagright(tagright_label, {});
+  process::action tag(tag_label, {});
 
   // The summands of the two specifications.
   lps::stochastic_action_summand_vector left_summands;
@@ -304,7 +301,7 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
         right_parameters,
         left_parameters,
         left_action,
-        tagleft,
+        tag,
         left_sync_label,
         left_condition,
         is_left_independent,
@@ -321,7 +318,7 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
         left_parameters,
         right_parameters,
         right_action,
-        tagright,
+        tag,
         right_sync_label,
         right_condition,
         is_right_independent,
