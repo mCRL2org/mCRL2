@@ -118,26 +118,78 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
   // Add the summands that generate the action label.
   for (std::size_t index = 0; index < process.action_summands().size(); ++index)
   {
-    // The original summand.
     const auto& summand = process.action_summands()[index];
 
-    /// 1. Split the multiaction.
+    /// Handle the update expressions
+    // The dependencies for the update expressions (on other parameters).
+    std::set<data::variable> left_update_dependencies;
+    std::set<data::variable> right_update_dependencies;
 
+    for (const data::assignment& assignment : summand.assignments())
+    {
+      auto dependencies = data::find_free_variables(assignment.rhs());
+      if (std::find(left_parameters.begin(), left_parameters.end(), assignment.lhs()) != left_parameters.end())
+      {
+        // This is an assignment for the left component's parameters.
+        left_update_dependencies.insert(dependencies.begin(), dependencies.end());
+      }
+
+      if (std::find(right_parameters.begin(), right_parameters.end(), assignment.lhs()) != right_parameters.end())
+      {
+        // This is an assignment for the right component's parameters.
+        right_update_dependencies.insert(dependencies.begin(), dependencies.end());
+      }
+    }
+
+    // Determine whether the update expressions are trivial (therefore only copy the current value).
+    bool is_left_update_trivial = is_update_trivial(summand, left_parameters);
+    bool is_right_update_trivial = is_update_trivial(summand, right_parameters);
+
+    /// Handle the action expression
+    /// Split the multi-action based on the expression dependencies.
     process::action_list left_action;
     process::action_list right_action;
 
     {
-      // Indicates that the multi-action is (for now completely) generated in the left component.
-      bool generate_left = (std::find(indices.begin(), indices.end(), index) != indices.end());
+      for (const process::action& action : summand.multi_action().actions())
+      {
+        auto dependencies = data::find_free_variables(action.arguments());
 
-      // The resulting multi-action is either alpha or internal.
-      if (generate_left)
-      {
-        left_action = summand.multi_action().actions();
-      }
-      else
-      {
-        right_action = summand.multi_action().actions();
+        // If this action belongs to one process keep it there.
+        if (is_subset(dependencies, left_parameters))
+        {
+          left_action.push_front(action);
+        }
+        else if (is_subset(dependencies, right_parameters))
+        {
+          right_action.push_front(action);
+        }
+        else
+        {
+          // If we can obtain an independent summand keep it in the non-trivial component
+          if (is_right_update_trivial)
+          {
+            left_action.push_front(action);
+          }
+          else if (is_left_update_trivial)
+          {
+            right_action.push_front(action);
+          }
+          else
+          {
+            // Use the user-defined indices to indicate the choice.
+            bool generate_left = (std::find(indices.begin(), indices.end(), index) != indices.end());
+
+            if (generate_left)
+            {
+              left_action.push_front(action);
+            }
+            else 
+            {
+              right_action.push_front(action);
+            }
+          }
+        }
       }
     }
 
@@ -157,7 +209,7 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
       right_action_dependencies.insert(dependencies.begin(), dependencies.end());
     }
 
-    /// 2. Handle the condition requirements.
+    /// Handle the condition expression.
 
     // Each one stores the condition expression and implicit constraints (expressions h_i in the paper).
     cleave_condition left_condition;
@@ -166,7 +218,6 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
     if (enable_split_condition)
     {
       std::tie(left_condition, right_condition) = split_condition(summand.condition(), left_parameters, right_parameters, summand.summation_variables());
-      mCRL2log(log::verbose) << "Split conditions into " << left_condition.expression << ", and " << right_condition.expression << "\n";
     }
     else
     {
@@ -191,28 +242,6 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
       right_condition_dependencies.insert(dependencies.begin(), dependencies.end());
     }
 
-    /// 3. Handle update expressions
-
-    // The dependencies for the update expressions (on other parameters).
-    std::set<data::variable> left_update_dependencies;
-    std::set<data::variable> right_update_dependencies;
-
-    for (const data::assignment& assignment : summand.assignments())
-    {
-      auto dependencies = data::find_free_variables(assignment.rhs());
-      if (std::find(left_parameters.begin(), left_parameters.end(), assignment.lhs()) != left_parameters.end())
-      {
-        // This is an assignment for the left component's parameters.
-        left_update_dependencies.insert(dependencies.begin(), dependencies.end());
-      }
-
-      if (std::find(right_parameters.begin(), right_parameters.end(), assignment.lhs()) != right_parameters.end())
-      {
-        // This is an assignment for the right component's parameters.
-        right_update_dependencies.insert(dependencies.begin(), dependencies.end());
-      }
-    }
-
     // Remove dependencies on our own parameter because these are not required.
     for (const data::variable& var : left_parameters)
     {
@@ -227,9 +256,6 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
       right_condition_dependencies.erase(var);
       right_action_dependencies.erase(var);
     }
-
-    bool is_left_update_trivial = is_update_trivial(summand, left_parameters);
-    bool is_right_update_trivial = is_update_trivial(summand, right_parameters);
 
     // Compute the synchronization vector (the values of h without functions)
     std::set<data::variable> synchronized;
@@ -254,10 +280,6 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
       {
         synchronized.erase(var);
       }
-
-      // Remove the summation variables from the action dependencies, which can be done because the action is fully generated in one component.
-      left_action_dependencies.erase(var);
-      right_action_dependencies.erase(var);
     }
 
     synchronized.insert(right_synchronized.begin(), right_synchronized.end());
@@ -282,12 +304,14 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
     atermpp::term_list<data::variable> right_all_parameters = right_parameters + summand.summation_variables();
     bool is_right_independent = is_left_update_trivial && is_subset(synchronized, right_all_parameters) && left_action == process::action_list();
 
-    mCRL2log(log::verbose) << std::boolalpha << "Summand " << index
-      << ", is_left_update_trivial: " << is_left_update_trivial
-      << ", is_right_update_trivial: " << is_right_update_trivial
-      << ", is_left_independent: " << is_left_independent
-      << ", is_right_independent: " << is_right_independent << ").\n";
-    print_names("Dependencies", synchronized);
+    if (is_left_independent)
+    {
+      mCRL2log(log::verbose) << "Summand " << index << " is left independent\n";
+    }
+    else if (is_right_independent)
+    {
+      mCRL2log(log::verbose) << "Summand " << index << " is right independent\n";
+    }
 
     /// 5. Add the necessary summands.
 
