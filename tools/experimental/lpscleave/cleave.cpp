@@ -150,44 +150,42 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
     process::action_list left_action;
     process::action_list right_action;
 
+    for (const process::action& action : summand.multi_action().actions())
     {
-      for (const process::action& action : summand.multi_action().actions())
-      {
-        auto dependencies = data::find_free_variables(action.arguments());
+      auto dependencies = data::find_free_variables(action.arguments());
 
-        // If this action belongs to one process keep it there.
-        if (is_subset(dependencies, left_parameters))
+      // If this action belongs to one process keep it there.
+      if (is_subset(dependencies, left_parameters))
+      {
+        left_action.push_front(action);
+      }
+      else if (is_subset(dependencies, right_parameters))
+      {
+        right_action.push_front(action);
+      }
+      else
+      {
+        // If we can obtain an independent summand keep it in the non-trivial component
+        if (is_right_update_trivial)
         {
           left_action.push_front(action);
         }
-        else if (is_subset(dependencies, right_parameters))
+        else if (is_left_update_trivial)
         {
           right_action.push_front(action);
         }
         else
         {
-          // If we can obtain an independent summand keep it in the non-trivial component
-          if (is_right_update_trivial)
+          // Use the user-defined indices to indicate the choice.
+          bool generate_left = (std::find(indices.begin(), indices.end(), index) != indices.end());
+
+          if (generate_left)
           {
             left_action.push_front(action);
           }
-          else if (is_left_update_trivial)
+          else 
           {
             right_action.push_front(action);
-          }
-          else
-          {
-            // Use the user-defined indices to indicate the choice.
-            bool generate_left = (std::find(indices.begin(), indices.end(), index) != indices.end());
-
-            if (generate_left)
-            {
-              left_action.push_front(action);
-            }
-            else 
-            {
-              right_action.push_front(action);
-            }
           }
         }
       }
@@ -209,6 +207,46 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
       right_action_dependencies.insert(dependencies.begin(), dependencies.end());
     }
 
+    /// Determine the synchronization vector.
+ 
+    // Remove dependencies on our own parameter because these are not required.
+    for (const data::variable& var : left_parameters)
+    {
+      left_update_dependencies.erase(var);
+      left_action_dependencies.erase(var);
+    }
+
+    for (const data::variable& var : right_parameters)
+    {
+      right_update_dependencies.erase(var);
+      right_action_dependencies.erase(var);
+    }
+
+    // Compute the synchronization vector (the values of h without functions)
+    std::set<data::variable> synchronized;
+    synchronized.insert(left_update_dependencies.begin(), left_update_dependencies.end());
+    synchronized.insert(left_action_dependencies.begin(), left_action_dependencies.end());
+
+    std::set<data::variable> right_synchronized;
+    right_synchronized.insert(right_update_dependencies.begin(), right_update_dependencies.end());
+    right_synchronized.insert(right_action_dependencies.begin(), right_action_dependencies.end());
+
+    // Only keep summation variables if they occur in both conditions.
+    for (const data::variable& var : summand.summation_variables())
+    {
+      if (std::find(synchronized.begin(), synchronized.end(), var) == synchronized.end())
+      {
+        right_synchronized.erase(var);
+      }
+
+      if (std::find(right_synchronized.begin(), right_synchronized.end(), var) == right_synchronized.end())
+      {
+        synchronized.erase(var);
+      }
+    }
+
+    synchronized.insert(right_synchronized.begin(), right_synchronized.end());
+
     /// Handle the condition expression.
 
     // Each one stores the condition expression and implicit constraints (expressions h_i in the paper).
@@ -217,7 +255,7 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
 
     if (enable_split_condition)
     {
-      std::tie(left_condition, right_condition) = split_condition(summand.condition(), left_parameters, right_parameters, summand.summation_variables());
+      std::tie(left_condition, right_condition) = split_condition(summand.condition(), left_parameters, right_parameters, summand.summation_variables(), synchronized);
     }
     else
     {
@@ -241,48 +279,21 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
       std::set<data::variable> dependencies = data::find_free_variables(clause);
       right_condition_dependencies.insert(dependencies.begin(), dependencies.end());
     }
-
+       
+    // Update the synchronization vector with the condition dependencies.
     // Remove dependencies on our own parameter because these are not required.
     for (const data::variable& var : left_parameters)
     {
-      left_update_dependencies.erase(var);
       left_condition_dependencies.erase(var);
-      left_action_dependencies.erase(var);
     }
 
     for (const data::variable& var : right_parameters)
     {
-      right_update_dependencies.erase(var);
       right_condition_dependencies.erase(var);
-      right_action_dependencies.erase(var);
     }
 
-    // Compute the synchronization vector (the values of h without functions)
-    std::set<data::variable> synchronized;
     synchronized.insert(left_condition_dependencies.begin(), left_condition_dependencies.end());
-    synchronized.insert(left_update_dependencies.begin(), left_update_dependencies.end());
-    synchronized.insert(left_action_dependencies.begin(), left_action_dependencies.end());
-
-    std::set<data::variable> right_synchronized;
-    right_synchronized.insert(right_condition_dependencies.begin(), right_condition_dependencies.end());
-    right_synchronized.insert(right_update_dependencies.begin(), right_update_dependencies.end());
-    right_synchronized.insert(right_action_dependencies.begin(), right_action_dependencies.end());
-
-    // Only keep summation variables if they occur in both conditions.
-    for (const data::variable& var : summand.summation_variables())
-    {
-      if (std::find(synchronized.begin(), synchronized.end(), var) == synchronized.end())
-      {
-        right_synchronized.erase(var);
-      }
-
-      if (std::find(right_synchronized.begin(), right_synchronized.end(), var) == right_synchronized.end())
-      {
-        synchronized.erase(var);
-      }
-    }
-
-    synchronized.insert(right_synchronized.begin(), right_synchronized.end());
+    synchronized.insert(right_condition_dependencies.begin(), right_condition_dependencies.end()); 
 
     // Create the actsync(p, e_i) action for our dependencies on p and e_i
     data::sort_expression_list sorts;
@@ -313,7 +324,7 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
       mCRL2log(log::verbose) << "Summand " << index << " is right independent\n";
     }
 
-    /// 5. Add the necessary summands.
+    /// Determine the summands.
 
     // Add summand to the left specification.
     if (!is_right_independent)

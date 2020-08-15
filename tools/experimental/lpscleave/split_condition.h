@@ -15,13 +15,44 @@
 using namespace mcrl2;
 
 /// \brief Make a data expression consisting of the clauses in conjective normal form.
-data::data_expression make_conjuntions(const std::list<data::data_expression>& clauses)
+data::data_expression make_conjuntions(const std::set<data::data_expression>& clauses)
 {
   data::data_expression result = data::sort_bool::true_();
   for (const data::data_expression& clause : clauses)
   {
     result = data::sort_bool::and_(result, clause);
   }
+
+  return result;
+}
+
+std::set<data::data_expression> compute_clauses(const std::set<data::data_expression>& initial_clauses, const std::list<data::data_expression>& clauses, std::set<data::variable> dependencies)
+{
+  std::set<data::data_expression> result = initial_clauses;
+
+  // Repeat until the set of left_dependencies stabilizes.
+  std::size_t old_size = 0;
+  do
+  {
+    old_size = dependencies.size();
+
+    // Add all clauses over these dependencies
+    for (const auto& clause : clauses)
+    {
+      std::set<data::variable> clause_deps = data::find_free_variables(clause);
+      std::set<data::variable> intersection;
+
+      std::set_intersection(dependencies.begin(), dependencies.end(), clause_deps.begin(), clause_deps.end(), std::inserter(intersection, intersection.begin()));
+
+      if (!intersection.empty())
+      {
+        result.insert(clause);
+        dependencies.insert(clause_deps.begin(), clause_deps.end());
+      }
+    }
+
+
+  } while (old_size != dependencies.size());
 
   return result;
 }
@@ -36,15 +67,21 @@ struct cleave_condition
 /// \brief Split the given condition based on a number of (simple) heuristics.
 std::pair<cleave_condition, cleave_condition> split_condition(
   const data::data_expression& condition,
-  data::variable_list left_parameters,
-  data::variable_list right_parameters,
-  const data::variable_list& summand_variables)
+  const data::variable_list& left_parameters,
+  const data::variable_list& right_parameters,
+  const data::variable_list& summand_variables,
+  const std::set<data::variable>& synchronized)
 {
   assert(data::sort_bool::is_bool(condition.sort()));
   mCRL2log(log::debug) << "Condition " << condition << "\n";
 
-  left_parameters = left_parameters + summand_variables;
-  right_parameters = right_parameters + summand_variables;
+  std::set<data::variable> left_dependencies;
+  left_dependencies.insert(left_parameters.begin(), left_parameters.end());
+  left_dependencies.insert(summand_variables.begin(), summand_variables.end());
+
+  std::set<data::variable> right_dependencies;
+  right_dependencies.insert(right_parameters.begin(), right_parameters.end());
+  right_dependencies.insert(summand_variables.begin(), summand_variables.end());
 
   // First of all consider each clause in a conjunctive normal form separately.
   std::list<data::data_expression> clauses;
@@ -67,49 +104,35 @@ std::pair<cleave_condition, cleave_condition> split_condition(
   }
   while (data::sort_bool::is_and_application(lhs));
 
-  // Resulting conditions.
+  // The resulting conditions.
   cleave_condition left_condition;
   cleave_condition right_condition;
 
-  // Separate the clauses.
-  std::list<data::data_expression> left_clauses;
-  std::list<data::data_expression> right_clauses;
+  // The clauses for the left or right condition
+  std::set<data::data_expression> left_clauses;
+  std::set<data::data_expression> right_clauses;
+
+  // Make equality clauses implicit if possible. 
   for (const data::data_expression& clause : clauses)
   {
-    std::set<data::variable> dependencies = data::find_free_variables(clause);
+    if (data::is_equal_to_application(clause))
+    {
+      // For equality clauses we can move the operands around.
+      const auto& application = static_cast<data::application>(clause);
 
-    // Determine where its dependencies are located.
-    // TODO: Consider other dependencies (action, and update) when throwing away conditions.
-    bool split = false;
-    if (is_subset(dependencies, left_parameters))
-    {
-      left_clauses.push_front(clause);
-      split = true;
-    }
-    if (is_subset(dependencies, right_parameters))
-    {
-      right_clauses.push_back(clause);
-      split = true;
-    }
+      std::set<data::variable> left_dependencies = data::find_free_variables(application[0]);
+      std::set<data::variable> right_dependencies = data::find_free_variables(application[1]);
 
-    if (!split)
-    {
-      if (data::is_equal_to_application(clause))
+      // These conditions are added to the synchronization.
+      if (!left_dependencies.empty() && !right_dependencies.empty())
       {
-        // For equality clauses we can move the operands around.
-        const auto& application = static_cast<data::application>(clause);
-
-        std::set<data::variable> left_dependencies = data::find_free_variables(application[0]);
-        std::set<data::variable> right_dependencies = data::find_free_variables(application[1]);
-
-        // These conditions are added to the synchronization.
-        if (is_subset(left_dependencies, left_parameters) && is_subset(right_dependencies, right_parameters))
+        if (is_subset(left_dependencies, left_dependencies) && is_subset(right_dependencies, right_dependencies))
         {
           mCRL2log(log::debug) << "Made condition " << clause << " implicit\n";
           left_condition.implicit.push_front(application[0]);
           right_condition.implicit.push_front(application[1]);
         }
-        else if (is_subset(left_dependencies, right_parameters) && is_subset(right_dependencies, left_parameters))
+        else if (is_subset(left_dependencies, right_dependencies) && is_subset(right_dependencies, left_dependencies))
         {
           mCRL2log(log::debug) << "Made condition " << clause << " implicit\n";
           right_condition.implicit.push_front(application[0]);
@@ -117,13 +140,28 @@ std::pair<cleave_condition, cleave_condition> split_condition(
         }
         else
         {
-          mCRL2log(log::debug) << "Kept condition " << clause << "\n";
-          left_clauses.push_front(clause);
-          right_clauses.push_back(clause);
+          left_clauses.insert(clause);
+          right_clauses.insert(clause);
         }
       }
+      else
+      {
+        left_clauses.insert(clause);
+        right_clauses.insert(clause);
+      }
+    }
+    else
+    {
+      left_clauses.insert(clause);
+      right_clauses.insert(clause);
     }
   }
+
+  left_dependencies.insert(synchronized.begin(), synchronized.end());
+  right_dependencies.insert(synchronized.begin(), synchronized.end());
+
+  left_clauses = compute_clauses(left_clauses, clauses, left_dependencies);
+  right_clauses = compute_clauses(right_clauses, clauses, right_dependencies);
 
   left_condition.expression = make_conjuntions(left_clauses);
   right_condition.expression = make_conjuntions(right_clauses);
