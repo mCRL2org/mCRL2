@@ -11,6 +11,7 @@
 #define MCRL2_SPLIT_CONDITION_H_
 
 #include "mcrl2/data/data_expression.h"
+#include "lpscleave_utility.h"
 
 using namespace mcrl2;
 
@@ -30,7 +31,7 @@ std::set<data::data_expression> compute_clauses(const std::set<data::data_expres
 {
   std::set<data::data_expression> result = initial_clauses;
 
-  // Repeat until the set of left_dependencies stabilizes.
+  // Repeat until the set of dependencies stabilizes.
   std::size_t old_size = 0;
   do
   {
@@ -50,7 +51,6 @@ std::set<data::data_expression> compute_clauses(const std::set<data::data_expres
         dependencies.insert(clause_deps.begin(), clause_deps.end());
       }
     }
-
 
   } while (old_size != dependencies.size());
 
@@ -73,17 +73,10 @@ std::pair<cleave_condition, cleave_condition> split_condition(
   const std::set<data::variable>& synchronized)
 {
   assert(data::sort_bool::is_bool(condition.sort()));
-  mCRL2log(log::debug) << "Condition " << condition << "\n";
 
-  std::set<data::variable> left_dependencies;
-  left_dependencies.insert(left_parameters.begin(), left_parameters.end());
-  left_dependencies.insert(summand_variables.begin(), summand_variables.end());
+  mCRL2log(log::debug) << "Splitting condition " << condition << "...\n";
 
-  std::set<data::variable> right_dependencies;
-  right_dependencies.insert(right_parameters.begin(), right_parameters.end());
-  right_dependencies.insert(summand_variables.begin(), summand_variables.end());
-
-  // First of all consider each clause in a conjunctive normal form separately.
+  // First of all consider each clause in a conjunctive form separately.
   std::list<data::data_expression> clauses;
   data::data_expression lhs = condition;
   do
@@ -104,6 +97,10 @@ std::pair<cleave_condition, cleave_condition> split_condition(
   }
   while (data::sort_bool::is_and_application(lhs));
 
+  mCRL2log(log::debug) << "Found clauses ";
+  print_elements(log::debug, clauses);
+  mCRL2log(log::debug) << "\n";
+
   // The resulting conditions.
   cleave_condition left_condition;
   cleave_condition right_condition;
@@ -113,8 +110,11 @@ std::pair<cleave_condition, cleave_condition> split_condition(
   std::set<data::data_expression> right_clauses;
 
   // Make equality clauses implicit if possible. 
-  for (const data::data_expression& clause : clauses)
+  for (auto it = clauses.begin(); it != clauses.end(); )
   {
+    const auto& clause = *it;
+
+    bool remove_clause = false;
     if (data::is_equal_to_application(clause))
     {
       // For equality clauses we can move the operands around.
@@ -123,41 +123,45 @@ std::pair<cleave_condition, cleave_condition> split_condition(
       std::set<data::variable> left_dependencies = data::find_free_variables(application[0]);
       std::set<data::variable> right_dependencies = data::find_free_variables(application[1]);
 
-      // These conditions are added to the synchronization.
       if (!left_dependencies.empty() && !right_dependencies.empty())
       {
+        // Both sides are not constants, now find their ideal side.
         if (is_subset(left_dependencies, left_dependencies) && is_subset(right_dependencies, right_dependencies))
         {
           mCRL2log(log::debug) << "Made condition " << clause << " implicit\n";
           left_condition.implicit.push_front(application[0]);
           right_condition.implicit.push_front(application[1]);
+          remove_clause = true;
         }
         else if (is_subset(left_dependencies, right_dependencies) && is_subset(right_dependencies, left_dependencies))
         {
           mCRL2log(log::debug) << "Made condition " << clause << " implicit\n";
           right_condition.implicit.push_front(application[0]);
           left_condition.implicit.push_front(application[1]);
-        }
-        else
-        {
-          left_clauses.insert(clause);
-          right_clauses.insert(clause);
+          remove_clause = true;
         }
       }
-      else
-      {
-        left_clauses.insert(clause);
-        right_clauses.insert(clause);
-      }
+    }
+
+    // Remove clause
+    if (remove_clause)
+    {
+      it = clauses.erase(it);
     }
     else
     {
-      left_clauses.insert(clause);
-      right_clauses.insert(clause);
+      ++it;
     }
   }
 
+  std::set<data::variable> left_dependencies;
+  left_dependencies.insert(left_parameters.begin(), left_parameters.end());
+  left_dependencies.insert(summand_variables.begin(), summand_variables.end());
   left_dependencies.insert(synchronized.begin(), synchronized.end());
+
+  std::set<data::variable> right_dependencies;
+  right_dependencies.insert(right_parameters.begin(), right_parameters.end());
+  right_dependencies.insert(summand_variables.begin(), summand_variables.end());
   right_dependencies.insert(synchronized.begin(), synchronized.end());
 
   left_clauses = compute_clauses(left_clauses, clauses, left_dependencies);
