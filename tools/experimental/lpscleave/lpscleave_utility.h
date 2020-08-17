@@ -121,36 +121,32 @@ data::variable_list project_parameters(const data::variable_list& parameters, co
 /// \brief Prints the parameters as comma separated values.
 template<typename Container, typename F>
 inline
-void print_values(const std::string& identifier, const Container& elements, F name)
+void print_values(log::log_level_t type, const Container& elements, F name)
 {
-  mCRL2log(log::verbose) << identifier << ": ";
-
   bool first = true;
   for (const auto& element : elements)
   {
     if (!first)
     {
-      mCRL2log(log::verbose) << ", ";
+      mCRL2log(type) << ", ";
     }
-    mCRL2log(log::verbose) << name(element);
+    mCRL2log(type) << name(element);
     first = false;
   }
-
-  mCRL2log(log::verbose) << "\n";
 }
 
 template<typename Container>
 inline
-void print_names(const std::string& identifier, const Container& variables)
+void print_names(log::log_level_t type, const Container& variables)
 {
-  print_values(identifier, variables, [](const data::variable& var) { return var.name(); });
+  print_values(type, variables, [](const data::variable& var) { return var.name(); });
 }
 
 template<template<typename ...Element> class Container, typename El>
 inline
-void print_elements(const std::string& identifier, const Container<El>& elements)
+void print_elements(log::log_level_t type, const Container<El>& elements)
 {
-  print_values(identifier, elements, [](const El& element) { return element; });
+  print_values(type, elements, [](const El& element) { return element; });
 }
 
 /// \returns A list of parameters of the given process that are not elements of the given parameters, i.e., the complement.
