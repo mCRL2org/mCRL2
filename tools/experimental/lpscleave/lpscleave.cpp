@@ -50,7 +50,11 @@ public:
     if (m_parameters.empty())
     {
       // Print the parameters and exit
-      print_names("Parameters", spec.process().process_parameters());
+      mCRL2log(log::info) << "Process parameters: ";
+      print_names(log::info, spec.process().process_parameters());
+      mCRL2log(log::info) << "\n";
+
+
       mCRL2log(log::info) << "Number of summands: " << spec.process().summand_count() << "\n";
     }
     else
@@ -79,12 +83,15 @@ public:
         }
       }
 
-      print_names("Left parameters", left_parameters);
-      print_names("Right parameters", right_parameters);
+      mCRL2log(log::verbose) << "Left parameters: ";
+      print_names(log::verbose, left_parameters);
+      mCRL2log(log::verbose) << "\nRight parameters: ";
+      print_names(log::verbose, right_parameters);
+      mCRL2log(log::verbose) << "\n";
 
       // The resulting LPSs
       stochastic_specification left_spec, right_spec;
-      std::tie(left_spec, right_spec) = cleave(spec, left_parameters, right_parameters, m_indices, m_split_condition);
+      std::tie(left_spec, right_spec) = cleave(spec, left_parameters, right_parameters, m_indices, m_split_condition, m_split_action, m_merge_heuristic);
 
       // Save the resulting components.
       lps::save_lps(left_spec, output_filename1());
@@ -102,7 +109,9 @@ protected:
     desc.add_option("parameters", utilities::make_mandatory_argument("PARAMS"), "A comma separated list of PARAMS that are used for the left process of the cleave.", 'p');
     desc.add_option("shared", utilities::make_mandatory_argument("PARAMS"), "A comma separated list of shared PARAMS that occur in both processes of the cleave.", 's');
     desc.add_option("summands", utilities::make_mandatory_argument("INDICES"), "A comma separated list of INDICES of summands where the left process generates the action.", 'l');
-    desc.add_option("split-condition", "Enable heuristics to split the condition of each summand.", 'c');
+    desc.add_option("split-condition", "Enable heuristics to split the condition expression of each summand.", 'c');
+    desc.add_option("split-action", "Enable heuristics to split the action expression of each summand, where the indices in INDICES are used as a fallback (if no optimal choice is available).", 'a');
+    desc.add_option("merge-heuristic", "Enable heuristics to merge synchronization indices of summands.", 'm');
   }
 
   void parse_options(const utilities::command_line_parser& parser) override
@@ -129,6 +138,8 @@ protected:
     }
 
     m_split_condition = parser.options.count("split-condition") > 0;
+    m_split_action = parser.options.count("split-action") > 0;
+    m_merge_heuristic = parser.options.count("merge-heuristic") > 0;
   }
 
 private:
@@ -136,6 +147,8 @@ private:
   std::list<std::string> m_duplicated;
   std::list<std::size_t> m_indices;
   bool m_split_condition;
+  bool m_split_action;
+  bool m_merge_heuristic;
 };
 
 } // namespace mcrl2
