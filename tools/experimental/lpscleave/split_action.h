@@ -33,10 +33,12 @@ std::pair<process::action_list, process::action_list> split_action(
     // If this action belongs to one process keep it there.
     if (is_subset(dependencies, left_parameters))
     {
+      mCRL2log(log::debug) << "Moved action " << action << " left based on parameter occurrences.\n";
       left_action.push_front(action);
     }
     else if (is_subset(dependencies, right_parameters))
     {
+      mCRL2log(log::debug) << "Moved action " << action << " right based on parameter occurrences.\n";
       right_action.push_front(action);
     }
     else
@@ -57,16 +59,19 @@ std::pair<process::action_list, process::action_list> split_action(
 
         if (generate_left)
         {
+          mCRL2log(log::debug) << "Moved action " << action << " left based on user input.\n";
           left_action.push_front(action);
         }
         else
         {
+          mCRL2log(log::debug) << "Moved action " << action << " right based on user input.\n";
           right_action.push_front(action);
         }
       }
     }
   }
 
+  mCRL2log(log::verbose) << "Split actions into " << left_action << " and " << right_action << ".\n";
   return std::make_pair(left_action, right_action);
 }
 

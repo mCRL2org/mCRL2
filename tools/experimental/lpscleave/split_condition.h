@@ -61,7 +61,7 @@ std::set<data::data_expression> compute_clauses(const std::set<data::data_expres
 struct cleave_condition
 {
   data::data_expression expression;
-  data::data_expression_list implicit;
+  data::data_expression_vector implicit;
 };
 
 /// \brief Split the given condition based on a number of (simple) heuristics.
@@ -126,18 +126,18 @@ std::pair<cleave_condition, cleave_condition> split_condition(
       if (!left_dependencies.empty() && !right_dependencies.empty())
       {
         // Both sides are not constants, now find their ideal side.
-        if (is_subset(left_dependencies, left_dependencies) && is_subset(right_dependencies, right_dependencies))
+        if (is_subset(left_dependencies, left_parameters) && is_subset(right_dependencies, right_parameters))
         {
           mCRL2log(log::debug) << "Made condition " << clause << " implicit\n";
-          left_condition.implicit.push_front(application[0]);
-          right_condition.implicit.push_front(application[1]);
+          left_condition.implicit.push_back(application[0]);
+          right_condition.implicit.push_back(application[1]);
           remove_clause = true;
         }
-        else if (is_subset(left_dependencies, right_dependencies) && is_subset(right_dependencies, left_dependencies))
+        else if (is_subset(left_dependencies, right_parameters) && is_subset(right_dependencies, left_parameters))
         {
           mCRL2log(log::debug) << "Made condition " << clause << " implicit\n";
-          right_condition.implicit.push_front(application[0]);
-          left_condition.implicit.push_front(application[1]);
+          left_condition.implicit.push_back(application[1]);
+          right_condition.implicit.push_back(application[0]);
           remove_clause = true;
         }
       }
@@ -170,7 +170,7 @@ std::pair<cleave_condition, cleave_condition> split_condition(
   left_condition.expression = make_conjuntions(left_clauses);
   right_condition.expression = make_conjuntions(right_clauses);
 
-  mCRL2log(log::debug) << "Split condition into " << left_condition.expression << ", and " << right_condition.expression << "\n";
+  mCRL2log(log::verbose) << "Split condition into " << left_condition.expression << ", and " << right_condition.expression << "\n";
   return std::make_pair(left_condition, right_condition);
 }
 
