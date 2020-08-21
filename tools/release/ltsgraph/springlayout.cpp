@@ -46,7 +46,8 @@ inline void clip(float& f, float min, float max)
 
 SpringLayout::SpringLayout(Graph& graph, GLWidget& glwidget)
     : m_speed(0.001f), m_attraction(0.13f), m_repulsion(50.0f), m_natLength(50.0f), m_controlPointWeight(0.001f),
-      m_graph(graph), m_ui(nullptr), m_forceCalculation(&SpringLayout::forceLTSGraph), m_glwidget(glwidget), m_maxForce(100.0f)
+    m_maxForce(100.0f), m_graph(graph), m_ui(nullptr), m_forceCalculation(&SpringLayout::forceLTSGraph),
+    m_glwidget(glwidget)
 {
   srand(time(nullptr));
 }
@@ -176,6 +177,33 @@ void SpringLayout::apply()
         m_nforces[m] -= diff;
       }
       m_sforces[n] = (this->*m_forceCalculation)(m_graph.node(n).pos(), m_graph.stateLabel(n).pos(), 0.0);
+
+      int nrOfNeighbours = m_graph.nrOfNeighboursOfNode(n);
+      // calculate repulsion between all edges.
+      for (int j = 0; j < nrOfNeighbours; ++j)
+      {
+        for (int k = j + 1; k < nrOfNeighbours; ++k)
+        {
+          QVector3D f;
+          std::size_t first = m_graph.edgeOfNode(n, j);
+          std::size_t second = m_graph.edgeOfNode(n, k);
+          second = sel ? m_graph.explorationEdge(second) : second;
+
+          // Handles
+          const QVector3D& firstHPos = m_graph.handle(first).pos();
+          const QVector3D& secondHPos = m_graph.handle(second).pos();
+          f = repulsionForce(firstHPos, secondHPos, m_repulsion * m_controlPointWeight, m_natLength);
+          m_hforces[first] += f;
+          m_hforces[second] -= f;
+
+          // Labels
+          const QVector3D& firstLPos = m_graph.transitionLabel(first).pos();
+          const QVector3D& secondLPos = m_graph.transitionLabel(second).pos();
+          f = repulsionForce(firstLPos, secondLPos, m_repulsion * m_controlPointWeight, m_natLength);
+          m_lforces[first] += f;
+          m_lforces[second] -= f;
+        }
+      }
     }
     timer.endTiming("node force computation");
     timer.startTiming("edge force computation");
@@ -208,31 +236,6 @@ void SpringLayout::apply()
 
       f = (this->*m_forceCalculation)(handle.pos(), m_graph.transitionLabel(n).pos(), 0.0);
       m_lforces[n] += f;
-
-      // for both nodes on this edge
-      for (std::size_t node : {e.from(), e.to()})
-      {
-        int nrOfNeighbours = m_graph.nrOfNeighboursOfNode(node);
-        // for each of their neighbours
-        for (int j = 0; j < nrOfNeighbours; ++j)
-        {
-          // compute a repulsive force
-          std::size_t m = m_graph.neigboursOfNode(node, j);
-//          m = sel ? m_graph.explorationEdge(m) : m;
-          // exclude the edge on itself
-          if (m == n) continue;
-
-          // Handles
-          f = repulsionForce(handle.pos(), m_graph.handle(m).pos(), m_repulsion * m_controlPointWeight, m_natLength);
-          m_hforces[n] += f;
-          m_hforces[m] -= f;
-
-          // Labels
-          f = repulsionForce(m_graph.transitionLabel(n).pos(), m_graph.transitionLabel(m).pos(), m_repulsion * m_controlPointWeight, m_natLength);
-          m_lforces[n] += f;
-          m_lforces[m] -= f;
-        }
-      }
     }
 
 

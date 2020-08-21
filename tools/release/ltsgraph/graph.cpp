@@ -230,17 +230,17 @@ void Graph::templatedLoad(const QString& filename, const QVector3D& min,
     );
   }
   // create bidirectional mapping for adjacencies
-  std::vector<std::vector<size_t>> bi_mapping;
+  std::vector<std::vector<size_t>> edge_mapping;
   // add an empty vector at every position
-  bi_mapping.resize(m_nodes.size());
+  edge_mapping.resize(m_nodes.size());
 
   for (std::size_t i = 0; i < m_edges.size(); ++i)
   {
     Edge& t = m_edges[i];
-    bi_mapping[t.from()].push_back(t.to());
-    bi_mapping[t.to()].push_back(t.from());
+    edge_mapping[t.from()].push_back(i);
+    edge_mapping[t.to()].push_back(i);
   }
-  m_adjacencies = AdjacencyList(bi_mapping);
+  m_edge_mapping = AdjacencyList(edge_mapping);
 
   m_initialState = add_probabilistic_state<lts_t>(
       lts.initial_probabilistic_state(), min, max);
@@ -769,11 +769,18 @@ std::size_t Graph::explorationNodeCount() const
 
 int Graph::nrOfNeighboursOfNode(std::size_t node)
 {
-  return m_adjacencies.nrNeighbours(node);
+  return m_edge_mapping.nrNeighbours(node);
 }
 
-size_t Graph::neigboursOfNode(std::size_t node, int index)
+std::size_t Graph::edgeOfNode(std::size_t node, int index)
 {
-  return m_adjacencies.getEdge(node, index);
+  return m_edge_mapping.getEdge(node, index);
+}
+
+std::size_t Graph::neigbourOfNode(std::size_t node, int index)
+{
+  Edge& edge = m_edges[m_edge_mapping.getEdge(node, index)];
+  // return the node index that is not the given node index
+  return (edge.from() == node) ? edge.to() : edge.from();
 }
 }  // namespace Graph
