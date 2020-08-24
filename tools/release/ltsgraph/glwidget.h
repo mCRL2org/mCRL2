@@ -16,7 +16,6 @@
 #include <QVector2D>
 #include <QOpenGLDebugLogger>
 #include "ui_glwidget.h"
-#include "timer/debugTimer.h"
 
 class GLWidgetImpl;
 

@@ -213,37 +213,28 @@ void Graph::templatedLoad(const QString& filename, const QVector3D& min,
     std::size_t new_probabilistic_state = add_probabilistic_state<lts_t>(
         lts.probabilistic_state(t.to()), min, max);
     m_edges.emplace_back(t.from(), new_probabilistic_state);
-  }
-
-  for (int i = 0; i < m_edges.size(); ++i)
-  {
-    Edge& edge = m_edges[i];
-    mcrl2::lts::transition& transition = lts.get_transitions()[i];
-
     m_handles.push_back(Node(
-        (m_nodes[edge.from()].pos() + m_nodes[edge.to()].pos()) / 2.0
-    ));
-
+        (m_nodes[t.from()].pos() + m_nodes[new_probabilistic_state].pos()) /
+        2.0));
     m_transitionLabelnodes.emplace_back(
-        (m_nodes[edge.from()].pos() + m_nodes[edge.to()].pos()) / 2.0,
-        transition.label()
-    );
+        (m_nodes[t.from()].pos() + m_nodes[new_probabilistic_state].pos()) /
+            2.0,
+        t.label());
   }
+
+  m_initialState = add_probabilistic_state<lts_t>(
+      lts.initial_probabilistic_state(), min, max);
+
   // create bidirectional mapping for adjacencies
-  std::vector<std::vector<size_t>> edge_mapping;
   // add an empty vector at every position
-  edge_mapping.resize(m_nodes.size());
+  m_edge_mapping.resize(m_nodes.size());
 
   for (std::size_t i = 0; i < m_edges.size(); ++i)
   {
     Edge& t = m_edges[i];
-    edge_mapping[t.from()].push_back(i);
-    edge_mapping[t.to()].push_back(i);
+    m_edge_mapping[t.from()].push_back(i);
+    m_edge_mapping[t.to()].push_back(i);
   }
-  m_edge_mapping = edge_mapping;
-
-  m_initialState = add_probabilistic_state<lts_t>(
-      lts.initial_probabilistic_state(), min, max);
 }
 
 template<class lts_t>
