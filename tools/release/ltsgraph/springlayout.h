@@ -42,8 +42,6 @@ public:
     linearsprings               ///< Linear spring implementation.
   };
 
-  DebugTimer timer;             ///< Timer to measure time usage of certain elements
-
 private:
   float m_speed;                ///< The rate of change each step.
   float m_attraction;           ///< The attraction of the edges.
