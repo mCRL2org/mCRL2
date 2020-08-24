@@ -12,7 +12,6 @@
 
 #include <QThread>
 #include <cstdlib>
-#include "timer/debugTimer.h"
 
 namespace Graph
 {
@@ -146,11 +145,9 @@ static QVector3D applyForce(const QVector3D& pos, const QVector3D& force, float 
 void SpringLayout::apply()
 {
   m_graph.lock(GRAPH_LOCK_TRACE); // enter critical section
-  timer.startNewLoop();
 
   if (!m_graph.stable())
   {
-    timer.startTiming("resize");
     bool sel = m_graph.hasExploration();
     std::size_t nodeCount = sel ? m_graph.explorationNodeCount() : m_graph.nodeCount();
     std::size_t edgeCount = sel ? m_graph.explorationEdgeCount() : m_graph.edgeCount();
@@ -159,9 +156,6 @@ void SpringLayout::apply()
     m_hforces.resize(m_graph.edgeCount());
     m_lforces.resize(m_graph.edgeCount());
     m_sforces.resize(m_graph.nodeCount());
-
-    timer.endTiming("resize");
-    timer.startTiming("node force computation");
 
     for (std::size_t i = 0; i < nodeCount; ++i)
     {
@@ -179,7 +173,7 @@ void SpringLayout::apply()
       m_sforces[n] = (this->*m_forceCalculation)(m_graph.node(n).pos(), m_graph.stateLabel(n).pos(), 0.0);
 
       int nrOfNeighbours = m_graph.nrOfNeighboursOfNode(n);
-      // calculate repulsion between all edges.
+      // calculate repulsion between all edges of this node.
       for (int j = 0; j < nrOfNeighbours; ++j)
       {
         for (int k = j + 1; k < nrOfNeighbours; ++k)
@@ -205,8 +199,6 @@ void SpringLayout::apply()
         }
       }
     }
-    timer.endTiming("node force computation");
-    timer.startTiming("edge force computation");
 
     for (std::size_t i = 0; i < edgeCount; ++i)
     {
@@ -238,10 +230,6 @@ void SpringLayout::apply()
       m_lforces[n] += f;
     }
 
-
-    timer.endTiming("edge force computation");
-    timer.startTiming("node force application");
-
     QVector3D clipmin = m_graph.getClipMin();
     QVector3D clipmax = m_graph.getClipMax();
     for (std::size_t i = 0; i < nodeCount; ++i)
@@ -260,9 +248,6 @@ void SpringLayout::apply()
       }
     }
 
-    timer.endTiming("node force application");
-    timer.startTiming("edge force application");
-
     for (std::size_t i = 0; i < edgeCount; ++i)
     {
       std::size_t n = sel ? m_graph.explorationEdge(i) : i;
@@ -278,8 +263,6 @@ void SpringLayout::apply()
         clipVector(m_graph.transitionLabel(n).pos_mutable(), clipmin, clipmax);
       }
     }
-
-    timer.endTiming("edge force application");
   }
 
   m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
@@ -318,7 +301,6 @@ public:
   void stop()
   {
     m_stopped = true;
-    m_layout.timer.printResultsTo(std::cout);
   }
 
   void setPeriod(int period)

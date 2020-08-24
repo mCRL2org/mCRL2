@@ -1,4 +1,4 @@
-// Author(s): Rimco Boudewijns and Sjoerd Cranen
+// Author(s): Rimco Boudewijns, Sjoerd Cranen and Geert van Ieperen
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -240,7 +240,7 @@ void Graph::templatedLoad(const QString& filename, const QVector3D& min,
     edge_mapping[t.from()].push_back(i);
     edge_mapping[t.to()].push_back(i);
   }
-  m_edge_mapping = AdjacencyList(edge_mapping);
+  m_edge_mapping = edge_mapping;
 
   m_initialState = add_probabilistic_state<lts_t>(
       lts.initial_probabilistic_state(), min, max);
@@ -767,19 +767,19 @@ std::size_t Graph::explorationNodeCount() const
   return m_exploration->nodes.size();
 }
 
-int Graph::nrOfNeighboursOfNode(std::size_t node)
+std::size_t Graph::nrOfNeighboursOfNode(std::size_t node)
 {
-  return m_edge_mapping.nrNeighbours(node);
+  return m_edge_mapping[node].size();
 }
 
 std::size_t Graph::edgeOfNode(std::size_t node, int index)
 {
-  return m_edge_mapping.getEdge(node, index);
+  return m_edge_mapping[node][index];
 }
 
 std::size_t Graph::neigbourOfNode(std::size_t node, int index)
 {
-  Edge& edge = m_edges[m_edge_mapping.getEdge(node, index)];
+  Edge& edge = m_edges[edgeOfNode(node, index)];
   // return the node index that is not the given node index
   return (edge.from() == node) ? edge.to() : edge.from();
 }

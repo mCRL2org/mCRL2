@@ -206,9 +206,6 @@ private:
 
   std::list<GLScene::Selection> m_selections; ///< A list of the objects under the cursor.
 
-  /// \brief Measure for the time usage of the render loop
-  DebugTimer timer;
-
   /**
    * @brief Updates the selected value for all nodes.
    */

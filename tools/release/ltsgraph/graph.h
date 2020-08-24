@@ -22,7 +22,6 @@
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/state_label_empty.h"
 #include "mcrl2/gui/glu.h"
-#include "adjacencylist.h"
 
 #include <QReadWriteLock>
 #include <QVector3D>
@@ -351,7 +350,7 @@ class Graph
 
     std::vector<NodeNode> m_nodes;                  ///< Vector containing all graph nodes.
     std::vector<Edge> m_edges;                      ///< Vector containing all edges.
-    AdjacencyList m_edge_mapping;                    ///< Structure containing all adjacency relations between nodes.
+    std::vector<std::vector<size_t>> m_edge_mapping; ///< Structure containing all adjacency relations between nodes.
     std::vector<Node> m_handles;                    ///< Vector containing all handles.
     std::vector<LabelString> m_transitionLabels;    ///< Vector containing all transition label strings.
     std::vector<LabelNode> m_transitionLabelnodes;  ///< Vector containing all transition label nodes.
@@ -483,7 +482,7 @@ class Graph
     NodeNode& node(std::size_t index);
     LabelNode& stateLabel(std::size_t index);
     LabelNode& transitionLabel(std::size_t edge);
-    int nrOfNeighboursOfNode(std::size_t node);
+    std::size_t nrOfNeighboursOfNode(std::size_t node);
     std::size_t edgeOfNode(std::size_t node, int index);
     std::size_t neigbourOfNode(std::size_t node, int index);
 
