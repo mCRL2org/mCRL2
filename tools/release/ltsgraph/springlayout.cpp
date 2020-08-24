@@ -45,8 +45,7 @@ inline void clip(float& f, float min, float max)
 
 SpringLayout::SpringLayout(Graph& graph, GLWidget& glwidget)
     : m_speed(0.001f), m_attraction(0.13f), m_repulsion(50.0f), m_natLength(50.0f), m_controlPointWeight(0.001f),
-    m_maxForce(100.0f), m_graph(graph), m_ui(nullptr), m_forceCalculation(&SpringLayout::forceLTSGraph),
-    m_glwidget(glwidget)
+    m_graph(graph), m_ui(nullptr), m_forceCalculation(&SpringLayout::forceLTSGraph), m_glwidget(glwidget)
 {
   srand(time(nullptr));
 }
