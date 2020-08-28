@@ -23,7 +23,8 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> cleave(
   const data::data_expression& invariant,
   bool enable_split_condition,
   bool split_action,
-  bool merge_heuristic
+  bool merge_heuristic,
+  bool use_next_state
 );
 
 } // namespace mcrl2

@@ -109,7 +109,7 @@ public:
 
       // The resulting LPSs
       stochastic_specification left_spec, right_spec;
-      std::tie(left_spec, right_spec) = cleave(spec, left_parameters, right_parameters, m_indices, invariant, m_split_condition, m_split_action, m_merge_heuristic);
+      std::tie(left_spec, right_spec) = cleave(spec, left_parameters, right_parameters, m_indices, invariant, m_split_condition, m_split_action, m_merge_heuristic, m_use_next_state);
 
       // Save the resulting components.
       lps::save_lps(left_spec, output_filename1());
@@ -130,7 +130,8 @@ protected:
     desc.add_option("split-condition", "Enable heuristics to split the condition expression of each summand.", 'c');
     desc.add_option("split-action", "Enable heuristics to split the action expression of each summand, where the indices in INDICES are used as a fallback (if no optimal choice is available).", 'a');
     desc.add_option("merge-heuristic", "Enable heuristics to merge synchronization indices of summands.", 'm');
-    desc.add_option("invariant", utilities::make_mandatory_argument("FILE"), "A file which contains a data expression which is used as an invariant to strengthened the conditions.", 'i');
+    desc.add_option("invariant", utilities::make_mandatory_argument("FILE"), "A FILE which contains a data expression to strengthen the condition expressions.", 'i');
+    desc.add_option("use-next-state", "Apply the invariant to the parameter values after the update instead of the current value", 'u');
   }
 
   void parse_options(const utilities::command_line_parser& parser) override
@@ -161,6 +162,12 @@ protected:
       m_invariant_filename = parser.option_argument_as< std::string >("invariant");
     }
 
+    m_use_next_state = parser.options.count("use-next-state") > 0;
+    if (m_use_next_state && m_invariant_filename.empty())
+    {
+      parser.error("The --use-next-state (-u) option requires an invariant file to be passed with --invariant=FILE.");
+    }
+
     m_split_condition = parser.options.count("split-condition") > 0;
     m_split_action = parser.options.count("split-action") > 0;
     m_merge_heuristic = parser.options.count("merge-heuristic") > 0;
@@ -171,6 +178,7 @@ private:
   std::list<std::string> m_duplicated;
   std::list<std::size_t> m_indices;
   std::string m_invariant_filename;
+  bool m_use_next_state;
   bool m_split_condition;
   bool m_split_action;
   bool m_merge_heuristic;

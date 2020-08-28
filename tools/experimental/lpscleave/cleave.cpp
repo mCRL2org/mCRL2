@@ -9,6 +9,8 @@
 
 #include "cleave.h"
 
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
+
 #include "lpscleave_utility.h"
 #include "split_condition.h"
 #include "split_action.h"
@@ -363,6 +365,7 @@ lps::stochastic_action_summand create_summand(
   const process::action& tag,
   const data::data_expression& invariant)
 {
+
   // Strenghten the condition expression if an invariant is present.
   data::data_expression condition = info.condition.expression;
   if (invariant != data::data_expression())
@@ -417,7 +420,8 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
   const data::data_expression& invariant,
   bool split_condition,
   bool split_action,
-  bool merge_heuristic
+  bool merge_heuristic,
+  bool use_next_state
   )
 {
   // Check sanity conditions, no timed or stochastic processes.
@@ -467,6 +471,19 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
       sorts.push_front(expression.sort());
     }
 
+    data_expression updated_invariant = invariant;
+    if (use_next_state)
+    {
+      // Construct a substitution for this update expression.
+      data::mutable_map_substitution<std::map<data::variable, data::data_expression>> subst;
+      for (const data::assignment& assignment : summand.assignments())
+      {
+        subst[assignment.lhs()] = assignment.rhs();
+      }
+
+      updated_invariant = data::replace_variables(invariant, subst);
+    }
+
     // Add summand to the left specification.
     if (!result.right.is_independent || result.left.is_independent)
     {
@@ -484,7 +501,7 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
         left_parameters,
         right_parameters,
         tag,
-        invariant));
+        updated_invariant));
     }
 
     // Add summand to the right specification.
@@ -503,7 +520,7 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
         right_parameters,
         left_parameters,
         tag,
-        invariant));
+        updated_invariant));
     }
   }
 
