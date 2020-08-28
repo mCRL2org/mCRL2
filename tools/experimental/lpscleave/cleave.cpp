@@ -56,7 +56,7 @@ std::vector<per_summand_information> static_analysis(
   const lps::stochastic_action_summand_vector& summands,
   const data::variable_list& left_parameters,
   const data::variable_list& right_parameters,
-  std::list<std::size_t>& indices,
+  const std::list<std::size_t>& indices,
   bool enable_split_condition,
   bool enable_split_action)
 {
@@ -95,140 +95,167 @@ std::vector<per_summand_information> static_analysis(
     bool is_left_update_trivial = is_update_trivial(summand.assignments(), left_parameters);
     bool is_right_update_trivial = is_update_trivial(summand.assignments(), right_parameters);
 
-    /// Handle the action expression
-    if (enable_split_action)
+    /// Determine whether the summand is independent in one of the two components.
+    if (is_left_update_trivial || is_right_update_trivial)
     {
-      std::tie(result.left.action, result.right.action) = split_action(summand.multi_action().actions(), is_left_update_trivial, is_right_update_trivial, index, left_parameters, right_parameters, indices);
-    }
-    else
-    {
-      // Use the user-defined indices to indicate the choice.
-      bool generate_left = (std::find(indices.begin(), indices.end(), index) != indices.end());
-
-      if (generate_left)
+      std::set<data::variable> action_dependencies;
+      for (const process::action& action : summand.multi_action().actions())
       {
+        auto dependencies = data::find_free_variables(action.arguments());
+        action_dependencies.insert(dependencies.begin(), dependencies.end());
+      }
+
+      std::set<data::variable> condition_dependencies = data::find_free_variables(summand.condition());
+
+      // Determine which component is independent.
+      atermpp::term_list<data::variable> left_all_parameters = left_parameters + summand.summation_variables();
+      result.left.is_independent = is_right_update_trivial
+        && is_subset(action_dependencies, left_all_parameters)
+        && is_subset(condition_dependencies, left_all_parameters)
+        && is_subset(left_update_dependencies, left_all_parameters);
+
+      atermpp::term_list<data::variable> right_all_parameters = right_parameters + summand.summation_variables();
+      result.right.is_independent = is_left_update_trivial
+        && is_subset(action_dependencies, right_all_parameters)
+        && is_subset(condition_dependencies, right_all_parameters)
+        && is_subset(right_update_dependencies, right_all_parameters);
+
+      if (result.left.is_independent)
+      {
+        result.left.condition.expression = summand.condition();
         result.left.action = summand.multi_action().actions();
+        mCRL2log(log::verbose) << "Summand " << index << " is left independent\n";
+      }
+
+      if (result.right.is_independent)
+      {
+        result.right.condition.expression = summand.condition();
+        result.right.action = summand.multi_action().actions();
+        mCRL2log(log::verbose) << "Summand " << index << " is right independent\n";
+      }
+    }
+
+    if (!result.left.is_independent && !result.right.is_independent)
+    {
+
+      /// Handle the action expression
+      if (enable_split_action)
+      {
+        std::tie(result.left.action, result.right.action) = split_action(summand.multi_action().actions(), index, left_parameters, right_parameters, indices);
       }
       else
       {
-        result.right.action = summand.multi_action().actions();
+        // Use the user-defined indices to indicate the choice.
+        bool generate_left = (std::find(indices.begin(), indices.end(), index) != indices.end());
+
+        if (generate_left)
+        {
+          result.left.action = summand.multi_action().actions();
+        }
+        else
+        {
+          result.right.action = summand.multi_action().actions();
+        }
       }
-    }
 
-    // The dependencies for the multi-action.
-    std::set<data::variable> left_action_dependencies;
-    std::set<data::variable> right_action_dependencies;
+      // The dependencies for the multi-action.
+      std::set<data::variable> left_action_dependencies;
+      std::set<data::variable> right_action_dependencies;
 
-    for (const process::action& action : result.left.action)
-    {
-      auto dependencies = data::find_free_variables(action.arguments());
-      left_action_dependencies.insert(dependencies.begin(), dependencies.end());
-    }
-
-    for (const process::action& action : result.right.action)
-    {
-      auto dependencies = data::find_free_variables(action.arguments());
-      right_action_dependencies.insert(dependencies.begin(), dependencies.end());
-    }
-
-    /// Determine the synchronization vector.
-
-    // Remove dependencies on our own parameter because these are not required.
-    for (const data::variable& var : left_parameters)
-    {
-      left_update_dependencies.erase(var);
-      left_action_dependencies.erase(var);
-    }
-
-    for (const data::variable& var : right_parameters)
-    {
-      right_update_dependencies.erase(var);
-      right_action_dependencies.erase(var);
-    }
-
-    // Compute the synchronization vector (the values of h without functions)
-    result.synchronized.insert(left_update_dependencies.begin(), left_update_dependencies.end());
-    result.synchronized.insert(left_action_dependencies.begin(), left_action_dependencies.end());
-
-    std::set<data::variable> right_synchronized;
-    right_synchronized.insert(right_update_dependencies.begin(), right_update_dependencies.end());
-    right_synchronized.insert(right_action_dependencies.begin(), right_action_dependencies.end());
-
-    // Only keep summation variables in the synchronization if they occur in both action or update expressions.
-    for (const data::variable& var : summand.summation_variables())
-    {
-      if (std::find(result.synchronized.begin(), result.synchronized.end(), var) == result.synchronized.end())
+      for (const process::action& action : result.left.action)
       {
-        right_synchronized.erase(var);
+        auto dependencies = data::find_free_variables(action.arguments());
+        left_action_dependencies.insert(dependencies.begin(), dependencies.end());
       }
 
-      if (std::find(right_synchronized.begin(), right_synchronized.end(), var) == right_synchronized.end())
+      for (const process::action& action : result.right.action)
       {
-        result.synchronized.erase(var);
+        auto dependencies = data::find_free_variables(action.arguments());
+        right_action_dependencies.insert(dependencies.begin(), dependencies.end());
       }
-    }
 
-    result.synchronized.insert(right_synchronized.begin(), right_synchronized.end());
+      /// Determine the synchronization vector.
 
-    /// Handle the condition expression.
+      // Remove dependencies on our own parameter because these are not required.
+      for (const data::variable& var : left_parameters)
+      {
+        left_update_dependencies.erase(var);
+        left_action_dependencies.erase(var);
+      }
 
-    if (enable_split_condition)
-    {
-      std::tie(result.left.condition, result.right.condition) = split_condition(summand.condition(), left_parameters, right_parameters, summand.summation_variables(), result.synchronized);
-    }
-    else
-    {
-      // Just copy the condition expressions.
-      result.left.condition.expression = summand.condition();
-      result.right.condition.expression = summand.condition();
-    }
+      for (const data::variable& var : right_parameters)
+      {
+        right_update_dependencies.erase(var);
+        right_action_dependencies.erase(var);
+      }
 
-    std::set<data::variable> left_condition_dependencies = data::find_free_variables(result.left.condition.expression);
-    std::set<data::variable> right_condition_dependencies = data::find_free_variables(result.right.condition.expression);
+      // Compute the synchronization vector (the values of h without functions)
+      result.synchronized.insert(left_update_dependencies.begin(), left_update_dependencies.end());
+      result.synchronized.insert(left_action_dependencies.begin(), left_action_dependencies.end());
 
-    // Add the dependencies of the clauses as well.
-    for (const data::data_expression& clause : result.left.condition.implicit)
-    {
-      std::set<data::variable> dependencies = data::find_free_variables(clause);
-      left_condition_dependencies.insert(dependencies.begin(), dependencies.end());
-    }
+      std::set<data::variable> right_synchronized;
+      right_synchronized.insert(right_update_dependencies.begin(), right_update_dependencies.end());
+      right_synchronized.insert(right_action_dependencies.begin(), right_action_dependencies.end());
 
-    for (const data::data_expression& clause : result.right.condition.implicit)
-    {
-      std::set<data::variable> dependencies = data::find_free_variables(clause);
-      right_condition_dependencies.insert(dependencies.begin(), dependencies.end());
-    }
+      // Only keep summation variables in the synchronization if they occur in both action or update expressions.
+      for (const data::variable& var : summand.summation_variables())
+      {
+        if (std::find(result.synchronized.begin(), result.synchronized.end(), var) == result.synchronized.end())
+        {
+          right_synchronized.erase(var);
+        }
 
-    // Update the synchronization vector with the condition dependencies.
-    // Remove dependencies on our own parameter because these are not required.
-    for (const data::variable& var : left_parameters)
-    {
-      left_condition_dependencies.erase(var);
-    }
+        if (std::find(right_synchronized.begin(), right_synchronized.end(), var) == right_synchronized.end())
+        {
+          result.synchronized.erase(var);
+        }
+      }
 
-    for (const data::variable& var : right_parameters)
-    {
-      right_condition_dependencies.erase(var);
-    }
+      result.synchronized.insert(right_synchronized.begin(), right_synchronized.end());
 
-    result.synchronized.insert(left_condition_dependencies.begin(), left_condition_dependencies.end());
-    result.synchronized.insert(right_condition_dependencies.begin(), right_condition_dependencies.end());
+      /// Handle the condition expression.
 
-    // Determine which component is independent.
-    atermpp::term_list<data::variable> left_all_parameters = left_parameters + summand.summation_variables();
-    result.left.is_independent = is_right_update_trivial && is_subset(result.synchronized, left_all_parameters) && result.right.action == process::action_list();
+      if (enable_split_condition)
+      {
+        std::tie(result.left.condition, result.right.condition) = split_condition(summand.condition(), left_parameters, right_parameters, summand.summation_variables(), result.synchronized);
+      }
+      else
+      {
+        // Just copy the condition expressions.
+        result.left.condition.expression = summand.condition();
+        result.right.condition.expression = summand.condition();
+      }
 
-    atermpp::term_list<data::variable> right_all_parameters = right_parameters + summand.summation_variables();
-    result.right.is_independent = is_left_update_trivial && is_subset(result.synchronized, right_all_parameters) && result.left.action == process::action_list();
+      std::set<data::variable> left_condition_dependencies = data::find_free_variables(result.left.condition.expression);
+      std::set<data::variable> right_condition_dependencies = data::find_free_variables(result.right.condition.expression);
 
-    if (result.left.is_independent)
-    {
-      mCRL2log(log::verbose) << "Summand " << index << " is left independent\n";
-    }
+      // Add the dependencies of the clauses as well.
+      for (const data::data_expression& clause : result.left.condition.implicit)
+      {
+        std::set<data::variable> dependencies = data::find_free_variables(clause);
+        left_condition_dependencies.insert(dependencies.begin(), dependencies.end());
+      }
 
-    if (result.right.is_independent)
-    {
-      mCRL2log(log::verbose) << "Summand " << index << " is right independent\n";
+      for (const data::data_expression& clause : result.right.condition.implicit)
+      {
+        std::set<data::variable> dependencies = data::find_free_variables(clause);
+        right_condition_dependencies.insert(dependencies.begin(), dependencies.end());
+      }
+
+      // Update the synchronization vector with the condition dependencies.
+      // Remove dependencies on our own parameter because these are not required.
+      for (const data::variable& var : left_parameters)
+      {
+        left_condition_dependencies.erase(var);
+      }
+
+      for (const data::variable& var : right_parameters)
+      {
+        right_condition_dependencies.erase(var);
+      }
+
+      result.synchronized.insert(left_condition_dependencies.begin(), left_condition_dependencies.end());
+      result.synchronized.insert(right_condition_dependencies.begin(), right_condition_dependencies.end());
     }
   }
 

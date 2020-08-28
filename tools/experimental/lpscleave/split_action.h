@@ -11,17 +11,16 @@
 #define MCRL2_SPLIT_ACTION_H_
 
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/process/process_expression.h"
 
 using namespace mcrl2;
 
 std::pair<process::action_list, process::action_list> split_action(
   const process::action_list& actions,
-  bool is_left_update_trivial,
-  bool is_right_update_trivial,
   std::size_t index,
   const data::variable_list& left_parameters,
   const data::variable_list& right_parameters,
-  std::list<std::size_t>& indices)
+  const std::list<std::size_t>& indices)
 {
   process::action_list left_action;
   process::action_list right_action;
@@ -43,31 +42,20 @@ std::pair<process::action_list, process::action_list> split_action(
     }
     else
     {
-      // If we can obtain an independent summand keep it in the non-trivial component
-      if (is_right_update_trivial)
+      // Use the user-defined indices to indicate the choice.
+      bool generate_left = (std::find(indices.begin(), indices.end(), index) != indices.end());
+
+      if (generate_left)
       {
+        mCRL2log(log::debug) << "Moved action " << action << " left based on user input.\n";
         left_action.push_front(action);
-      }
-      else if (is_left_update_trivial)
-      {
-        right_action.push_front(action);
       }
       else
       {
-        // Use the user-defined indices to indicate the choice.
-        bool generate_left = (std::find(indices.begin(), indices.end(), index) != indices.end());
-
-        if (generate_left)
-        {
-          mCRL2log(log::debug) << "Moved action " << action << " left based on user input.\n";
-          left_action.push_front(action);
-        }
-        else
-        {
-          mCRL2log(log::debug) << "Moved action " << action << " right based on user input.\n";
-          right_action.push_front(action);
-        }
+        mCRL2log(log::debug) << "Moved action " << action << " right based on user input.\n";
+        right_action.push_front(action);
       }
+
     }
   }
 
