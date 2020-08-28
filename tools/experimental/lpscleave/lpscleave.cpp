@@ -7,10 +7,12 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#include "cleave.h"
+
+#include "mcrl2/data/parse.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/utilities/input_output_output_tool.h"
 
-#include "cleave.h"
 #include "lpscleave_utility.h"
 
 namespace mcrl2
@@ -89,9 +91,25 @@ public:
       print_names(log::verbose, right_parameters);
       mCRL2log(log::verbose) << "\n";
 
+      // Load the invariant.
+      data::data_expression invariant;
+
+      if (!m_invariant_filename.empty())
+      {
+        std::ifstream instream(m_invariant_filename.c_str());
+
+        if (!instream.is_open())
+        {
+          throw mcrl2::runtime_error("cannot open input file '" + m_invariant_filename + "'");
+        }
+
+        mCRL2log(log::verbose) << "parsing input file '" <<  m_invariant_filename << "'..." << std::endl;
+        invariant = data::parse_data_expression(instream, spec.process().process_parameters(), spec.data());
+      }
+
       // The resulting LPSs
       stochastic_specification left_spec, right_spec;
-      std::tie(left_spec, right_spec) = cleave(spec, left_parameters, right_parameters, m_indices, m_split_condition, m_split_action, m_merge_heuristic);
+      std::tie(left_spec, right_spec) = cleave(spec, left_parameters, right_parameters, m_indices, invariant, m_split_condition, m_split_action, m_merge_heuristic);
 
       // Save the resulting components.
       lps::save_lps(left_spec, output_filename1());
@@ -112,6 +130,7 @@ protected:
     desc.add_option("split-condition", "Enable heuristics to split the condition expression of each summand.", 'c');
     desc.add_option("split-action", "Enable heuristics to split the action expression of each summand, where the indices in INDICES are used as a fallback (if no optimal choice is available).", 'a');
     desc.add_option("merge-heuristic", "Enable heuristics to merge synchronization indices of summands.", 'm');
+    desc.add_option("invariant", utilities::make_mandatory_argument("FILE"), "A file which contains a data expression which is used as an invariant to strengthened the conditions.", 'i');
   }
 
   void parse_options(const utilities::command_line_parser& parser) override
@@ -137,6 +156,11 @@ protected:
       }
     }
 
+    if (parser.options.count("invariant"))
+    {
+      m_invariant_filename = parser.option_argument_as< std::string >("invariant");
+    }
+
     m_split_condition = parser.options.count("split-condition") > 0;
     m_split_action = parser.options.count("split-action") > 0;
     m_merge_heuristic = parser.options.count("merge-heuristic") > 0;
@@ -146,6 +170,7 @@ private:
   std::list<std::string> m_parameters;
   std::list<std::string> m_duplicated;
   std::list<std::size_t> m_indices;
+  std::string m_invariant_filename;
   bool m_split_condition;
   bool m_split_action;
   bool m_merge_heuristic;

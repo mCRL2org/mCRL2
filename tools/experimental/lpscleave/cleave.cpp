@@ -360,13 +360,24 @@ lps::stochastic_action_summand create_summand(
   const process::action_label& sync,
   const data::variable_list& parameters, 
   const data::variable_list& other_parameters,
-  const process::action& tag)
+  const process::action& tag,
+  const data::data_expression& invariant)
 {
+  // Strenghten the condition expression if an invariant is present.
+  data::data_expression condition = info.condition.expression;
+  if (invariant != data::data_expression())
+  {
+    condition = data::sort_bool::and_(condition, invariant);
+  }
+
+  // There are extra summand variables introduced for the invariant.
+  std::set<data::variable> invariant_dependencies = data::find_free_variables(invariant);
+
   // Add a summation variable for every parameter of the other process, and for every summation variable, that we depend on.
   data::variable_list left_variables = summand.summation_variables();
   for (const data::variable& variable : other_parameters)
   {
-    if (synchronized.count(variable) > 0 && std::find(parameters.begin(), parameters.end(), variable) == parameters.end())
+    if ((synchronized.count(variable) > 0 || invariant_dependencies.count(variable) > 0) && std::find(parameters.begin(), parameters.end(), variable) == parameters.end())
     {
       left_variables.push_front(variable);
     }
@@ -395,14 +406,15 @@ lps::stochastic_action_summand create_summand(
 
   // Only update our parameters.
   data::assignment_list left_assignments = project(summand.assignments(), parameters);
-  return lps::stochastic_action_summand(left_variables, info.condition.expression, action, left_assignments, summand.distribution());
+  return lps::stochastic_action_summand(left_variables, condition, action, left_assignments, summand.distribution());
 }
 
 std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::cleave(
   const lps::stochastic_specification& spec,
   const data::variable_list& left_parameters,
   const data::variable_list& right_parameters,
-  std::list<std::size_t>& indices,
+  const std::list<std::size_t>& indices,
+  const data::data_expression& invariant,
   bool split_condition,
   bool split_action,
   bool merge_heuristic
@@ -471,7 +483,8 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
         left_sync_label,
         left_parameters,
         right_parameters,
-        tag));
+        tag,
+        invariant));
     }
 
     // Add summand to the right specification.
@@ -489,7 +502,8 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
         right_sync_label,
         right_parameters,
         left_parameters,
-        tag));
+        tag,
+        invariant));
     }
   }
 
