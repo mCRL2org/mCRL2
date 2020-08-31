@@ -370,17 +370,34 @@ lps::stochastic_action_summand create_summand(
   data::data_expression condition = info.condition.expression;
   if (invariant != data::data_expression())
   {
+    // There are extra free variables introduced by the invariant, for which we introduce existential quantifiers.
+    std::set<data::variable> invariant_dependencies = data::find_free_variables(invariant);
+    std::set<data::variable> existential;
+
+    for (const data::variable& variable : invariant_dependencies)
+    {
+      // If they occur in the synchronisation then these are added as summand variables (and as such not needed here).
+      if (synchronized.count(variable) == 0 && std::find(parameters.begin(), parameters.end(), variable) == parameters.end())
+      {
+        existential.insert(variable);
+      }
+    }
+
+    // Strengthen the condition itself with the invariant.
     condition = data::sort_bool::and_(condition, invariant);
+
+    // Only add if new variables would be introduced.
+    if (!existential.empty())
+    {
+      condition = data::exists(existential, condition);
+    }
   }
 
-  // There are extra summand variables introduced for the invariant.
-  std::set<data::variable> invariant_dependencies = data::find_free_variables(invariant);
-
-  // Add a summation variable for every parameter of the other process, and for every summation variable, that we depend on.
+  // Add a summation variable for every parameter of the other process that we depend on based on the synchronisation.
   data::variable_list left_variables = summand.summation_variables();
   for (const data::variable& variable : other_parameters)
   {
-    if ((synchronized.count(variable) > 0 || invariant_dependencies.count(variable) > 0) && std::find(parameters.begin(), parameters.end(), variable) == parameters.end())
+    if (synchronized.count(variable) > 0 && std::find(parameters.begin(), parameters.end(), variable) == parameters.end())
     {
       left_variables.push_front(variable);
     }
