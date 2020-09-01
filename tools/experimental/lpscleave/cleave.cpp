@@ -411,9 +411,6 @@ lps::stochastic_action_summand create_summand(
   dependencies.insert(action_dependencies.begin(), action_dependencies.end());
   dependencies.insert(update_dependencies.begin(), update_dependencies.end());
 
-  print_names(log::verbose, dependencies);
-  mCRL2log(log::verbose)<< "\n";
-
   data::variable_list sum_variables;
   for (const data::variable& variable : summand.summation_variables())
   {
