@@ -11,6 +11,7 @@
 
 #include <QtOpenGL>
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/gui/arcball.h"
 
 /// \brief Minimum distance for a drag to be registered (pixels)
@@ -257,13 +258,32 @@ void GLWidget::initializeGL()
   // Check whether context creation succeeded and print the OpenGL major.minor version.
   if (isValid())
   {
+
+    // Check the minimum run-time requirement; the pair ordering is lexicographical.
     QPair<int, int> version = format().version();
-    mCRL2log(mcrl2::log::verbose) << "Created an OpenGL " << version.first << "." << version.second << " Core context.\n";
+    QPair<int, int> required(3, 3);
+    if (version < required)
+    {
+      // Print a message to the console and show a message box.
+      std::stringstream message;
+
+      message << "The runtime version of OpenGL (" << version.first << "." << version.second << ") is below the least supported version of OpenGL ("
+        << required.first << "." << required.second << ").";
+      mCRL2log(mcrl2::log::error) << message.str().c_str() << "\n";
+
+      QMessageBox box(QMessageBox::Warning, "Unsupported OpenGL Version", message.str().c_str(), QMessageBox::Ok);
+      box.exec();
+
+      throw mcrl2::runtime_error("Unsupported OpenGL version.");
+    }
+    else
+    {
+      mCRL2log(mcrl2::log::verbose) << "Created an OpenGL " << version.first << "." << version.second << " context.\n";
+    }
   }
   else
   {
-    mCRL2log(mcrl2::log::error) << "The context was not created succesfully.\n";
-    std::abort();
+    mcrl2::runtime_error("Context creation failed.");
   }
 
   // Enable real-time logging of OpenGL errors when the GL_KHR_debug extension is available.
@@ -275,7 +295,7 @@ void GLWidget::initializeGL()
   }
   else
   {
-    mCRL2log(mcrl2::log::debug) << "The Qt5 OpenGL debug logger can not be initialized.\n";
+    mCRL2log(mcrl2::log::debug) << "QOpenGLDebugLogger initialisation failed.\n";
   }
 
   m_scene.initialize();

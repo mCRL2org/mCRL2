@@ -55,11 +55,12 @@ class ltsgraph_tool : public ltsgraph_base
 
       if (QVersionNumber::compare(required_version, runtime_version) > 0)
       {
-        // Check if the required version is above the currently used version.
+        // Print a message to the console and show a message box.
         std::stringstream message;
 
-        message << "The runtime version of Qt (" << runtime_version.toString().toStdString() << ") is below our least supported version of Qt ("
+        message << "The runtime version of Qt (" << runtime_version.toString().toStdString() << ") is below the least supported version of Qt ("
           << required_version.toString().toStdString() << ").";
+        mCRL2log(mcrl2::log::error) << message.str().c_str() << "\n";
 
         QMessageBox box(QMessageBox::Warning, "Unsupported Qt Version", message.str().c_str(), QMessageBox::Ok);
         box.exec();
