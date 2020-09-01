@@ -16,6 +16,9 @@
 namespace Graph
 {
 // the maximum distance a node may move in one iteration
+// This is a workaround, and prevents the graph from becoming very unstable
+// when attraction is set very high. The instability is now limited to a bit of
+// shaking of the nodes.
 static const float MAX_DISPLACEMENT = 10.0f;
 
 //
@@ -107,24 +110,14 @@ QVector3D SpringLayout::forceLinearSprings(const QVector3D& a, const QVector3D& 
   return diff * factor;
 }
 
-inline QVector3D repulsionForce(const QVector3D& a, const QVector3D& b, float repulsion, float natlength)
+inline
+QVector3D repulsionForce(const QVector3D& a, const QVector3D& b, float repulsion, float natlength)
 {
   QVector3D diff = a - b;
-  float dist = diff.length();
-
-  if (dist < natlength / 1000)
-  {
-    float natFraction = natlength / 10000;
-    return QVector3D(
-        fast_frand(-natFraction, natFraction),
-        fast_frand(-natFraction, natFraction),
-        fast_frand(-natFraction, natFraction)
-    );
-  } else
-  {
-    float r = repulsion / cube((std::max)(dist / 2.0f, natlength / 10));
-    return diff * r;
-  }
+  float r = repulsion;
+  r /= cube(std::max(diff.length() / 2.0f, natlength / 10));
+  diff = diff * r + QVector3D(fast_frand(-0.01f, 0.01f), fast_frand(-0.01f, 0.01f), fast_frand(-0.01f, 0.01f));
+  return diff;
 }
 
 static QVector3D applyForce(const QVector3D& pos, const QVector3D& force, float speed)
@@ -159,24 +152,25 @@ void SpringLayout::apply()
     for (std::size_t i = 0; i < nodeCount; ++i)
     {
       std::size_t n = sel ? m_graph.explorationNode(i) : i;
+      const QVector3D& n_pos = m_graph.node(n).pos();
 
       m_nforces[n] = QVector3D(0, 0, 0);
       for (std::size_t j = 0; j < i; ++j)
       {
         std::size_t m = sel ? m_graph.explorationNode(j) : j;
 
-        QVector3D diff = repulsionForce(m_graph.node(n).pos(), m_graph.node(m).pos(), m_repulsion, m_natLength);
+        QVector3D diff = repulsionForce(n_pos, m_graph.node(m).pos(), m_repulsion, m_natLength);
         m_nforces[n] += diff;
         m_nforces[m] -= diff;
       }
-      m_sforces[n] = (this->*m_forceCalculation)(m_graph.node(n).pos(), m_graph.stateLabel(n).pos(), 0.0);
+      m_sforces[n] = (this->*m_forceCalculation)(n_pos, m_graph.stateLabel(n).pos(), 0.0);
 
       // calculate repulsion between all edges of this node.
       // we ignore exploration, causing a small overhead when we check against invisible edges.
       std::size_t nrOfNeighbours = m_graph.nrOfNeighboursOfNode(n);
-      for (int j = 0; j < nrOfNeighbours; ++j)
+      for (std::size_t j = 0; j < nrOfNeighbours; ++j)
       {
-        for (int k = j + 1; k < nrOfNeighbours; ++k)
+        for (std::size_t k = j + 1; k < nrOfNeighbours; ++k)
         {
           QVector3D f;
           std::size_t first = m_graph.edgeOfNode(n, j);
@@ -199,15 +193,15 @@ void SpringLayout::apply()
       }
     }
 
+    QVector3D f;
     for (std::size_t i = 0; i < edgeCount; ++i)
     {
       std::size_t n = sel ? m_graph.explorationEdge(i) : i;
 
-      QVector3D f;
-      Edge e = m_graph.edge(n);
-      Node& handle = m_graph.handle(n);
-      NodeNode& node_from = m_graph.node(e.from());
-      NodeNode& node_to = m_graph.node(e.to());
+      const Edge e = m_graph.edge(n);
+      const QVector3D& handle_pos = m_graph.handle(n).pos();
+      const QVector3D& node_from_pos = m_graph.node(e.from()).pos();
+      const QVector3D& node_to_pos = m_graph.node(e.to()).pos();
 
       // Variables for repulsion calculations
       m_hforces[n] = QVector3D(0, 0, 0);
@@ -215,22 +209,22 @@ void SpringLayout::apply()
 
       if (e.is_selfloop())
       {
-        m_hforces[n] += repulsionForce(handle.pos(), node_from.pos(), m_repulsion, m_natLength);
+        m_hforces[n] += repulsionForce(handle_pos, node_from_pos, m_repulsion, m_natLength);
       }
 
-      f = (this->*m_forceCalculation)(node_to.pos(), node_from.pos(), m_natLength);
+      f = (this->*m_forceCalculation)(node_to_pos, node_from_pos, m_natLength);
       m_nforces[e.from()] += f;
       m_nforces[e.to()] -= f;
 
-      f = (this->*m_forceCalculation)((node_to.pos() + node_from.pos()) / 2.0, handle.pos(), 0.0);
+      f = (this->*m_forceCalculation)((node_to_pos + node_from_pos) / 2.0, handle_pos, 0.0);
       m_hforces[n] += f;
 
-      f = (this->*m_forceCalculation)(handle.pos(), m_graph.transitionLabel(n).pos(), 0.0);
+      f = (this->*m_forceCalculation)(handle_pos, m_graph.transitionLabel(n).pos(), 0.0);
       m_lforces[n] += f;
     }
 
-    QVector3D clipmin = m_graph.getClipMin();
-    QVector3D clipmax = m_graph.getClipMax();
+    const QVector3D clipmin = m_graph.getClipMin();
+    const QVector3D clipmax = m_graph.getClipMax();
     for (std::size_t i = 0; i < nodeCount; ++i)
     {
       std::size_t n = sel ? m_graph.explorationNode(i) : i;
@@ -403,10 +397,10 @@ void SpringLayoutUi::onRepulsionChanged(int value)
 
 void SpringLayoutUi::onSpeedChanged(int value)
 {
-//        if (m_thread != nullptr)
-//        {
-//            dynamic_cast<WorkerThread*>(m_thread)->setPeriod(100 - value);
-//        }
+ if (m_thread != nullptr)
+ {
+     dynamic_cast<WorkerThread*>(m_thread)->setPeriod(100 - value);
+ }
   m_layout.setSpeed(value);
 }
 

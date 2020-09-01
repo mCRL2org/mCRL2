@@ -48,7 +48,6 @@ private:
   float m_repulsion;            ///< The repulsion of other nodes.
   float m_natLength;            ///< The natural length of springs.
   float m_controlPointWeight;   ///< The handle repulsion wight factor.
-  ///< upper limit on the force on a node
   std::vector<QVector3D> m_nforces, m_hforces, m_lforces, m_sforces;  ///< Vector of the calculated forces..
 
   Graph& m_graph;               ///< The graph on which the algorithm is applied.

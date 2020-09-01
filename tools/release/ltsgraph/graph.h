@@ -350,7 +350,7 @@ class Graph
 
     std::vector<NodeNode> m_nodes;                  ///< Vector containing all graph nodes.
     std::vector<Edge> m_edges;                      ///< Vector containing all edges.
-    std::vector<std::vector<size_t>> m_edge_mapping; ///< Structure containing all adjacency relations between nodes.
+    std::vector<std::vector<std::size_t>> m_edge_mapping; ///< Structure containing all adjacency relations between nodes.
     std::vector<Node> m_handles;                    ///< Vector containing all handles.
     std::vector<LabelString> m_transitionLabels;    ///< Vector containing all transition label strings.
     std::vector<LabelNode> m_transitionLabelnodes;  ///< Vector containing all transition label nodes.
