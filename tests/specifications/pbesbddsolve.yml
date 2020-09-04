@@ -13,13 +13,23 @@ tools:
   t2:
     input: [l2]
     output: []
-    args: [--lace-dqsize=0 --lace-stacksize=0 --lace-workers=1 --max-cache-size=19 --max-table-size=19 --min-cache-size=19 --min-table-size=19]
+    args: [--lace-dqsize=0 --lace-stacksize=0 --lace-workers=1 --max-cache-size=19 --max-table-size=19 --min-cache-size=19 --min-table-size=19 --granularity=pbes]
     name: pbesbddsolve
   t3:
+    input: [l2]
+    output: []
+    args: [--lace-dqsize=0 --lace-stacksize=0 --lace-workers=1 --max-cache-size=19 --max-table-size=19 --min-cache-size=19 --min-table-size=19 --granularity=equation]
+    name: pbesbddsolve
+  t4:
+    input: [l2]
+    output: []
+    args: [--lace-dqsize=0 --lace-stacksize=0 --lace-workers=1 --max-cache-size=19 --max-table-size=19 --min-cache-size=19 --min-table-size=19 --granularity=summand]
+    name: pbesbddsolve
+  t5:
     input: [l2]
     output: []
     args: []
     name: pbes2bool
 result: |
-  result = ('true' in t2.stdout) == t3.value['solution']
+  result = ('true' in t2.stdout) == ('true' in t3.stdout) == ('true' in t4.stdout) == t5.value['solution']
 

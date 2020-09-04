@@ -26,6 +26,13 @@ namespace pbes_system {
 
 namespace bdd {
 
+enum class bdd_granularity
+{
+    per_pbes,
+    per_equation,
+    per_summand
+};
+
 inline
 std::vector<data::variable> add_underscore(const std::vector<data::variable>& v)
 {
@@ -233,7 +240,7 @@ class bdd_parity_game
     bdd_substitution m_substitution;
     bdd_substitution m_reverse_substitution;
     bdd_type m_V;
-    bdd_type m_E;
+    std::vector<bdd_type> m_E;
     bdd_type m_even;
     bdd_type m_odd;
     std::map<uint32_t, bdd_type> m_priorities;
@@ -248,7 +255,7 @@ class bdd_parity_game
     void print() const
     {
       info(m_V, "V", m_variables);
-      info(m_E, "E", m_all_variables);
+      info(m_bdd.any(m_E), "E", m_all_variables);
       info(m_even, "even", m_variables);
       info(m_odd, "odd", m_variables);
       info(m_initial_state, "initial state", m_variables);
@@ -266,7 +273,7 @@ class bdd_parity_game
       const bdd_substitution& substitution,
       const bdd_substitution& reverse_substitution,
       const bdd_type& V,
-      const bdd_type& E,
+      const std::vector<bdd_type>& E,
       const bdd_type& even_nodes,
       const bdd_type& odd_nodes,
       std::map<uint32_t, bdd_type>  priorities,
@@ -286,21 +293,21 @@ class bdd_parity_game
       m_initial_state(initial_state)
     {}
 
-    // check whether U = { u in V | u in U /\ exists v in V: u --> v }
-    bool has_successor(const bdd_type& U) const
-    {
-      bdd_type V_ = m_bdd.let(m_substitution, m_V);
-      bdd_type U_next = m_bdd.let(m_substitution, U);
-      bdd_type Z = m_bdd.quantify(U_next & m_E, m_next_variables, false) & U;
-      return (Z == U) != 0;
-    }
-
-    bdd_type successor(const bdd_type& U)
-    {
-      auto U_next = m_bdd.quantify(m_E & U, m_variables, false);
-      U_next = U | m_bdd.let(m_reverse_substitution, U_next);
-      return U_next;
-    }
+//    // check whether U = { u in V | u in U /\ exists v in V: u --> v }
+//    bool has_successor(const bdd_type& U) const
+//    {
+//      bdd_type V_ = m_bdd.let(m_substitution, m_V);
+//      bdd_type U_next = m_bdd.let(m_substitution, U);
+//      bdd_type Z = m_bdd.quantify(U_next & m_E, m_next_variables, false) & U;
+//      return (Z == U) != 0;
+//    }
+//
+//    bdd_type successor(const bdd_type& U)
+//    {
+//      auto U_next = m_bdd.quantify(m_E & U, m_variables, false);
+//      U_next = U | m_bdd.let(m_reverse_substitution, U_next);
+//      return U_next;
+//    }
 
     // U is a BDD representing a set of vertices
     bdd_type predecessor(bool player, const bdd_type& U)
@@ -309,10 +316,26 @@ class bdd_parity_game
       bdd_type V_opponent = (player == odd) ? m_even : m_odd;
       bdd_type V_ = m_bdd.let(m_substitution, m_V);
       bdd_type U_next = m_bdd.let(m_substitution, U);
-      bdd_type U_player = V_player & m_bdd.quantify(U_next & m_E, m_next_variables, false);
+
+      std::vector<bdd_type> W_player;
+      for (const auto& Ei: m_E)
+      {
+        W_player.push_back(m_bdd.quantify(U_next & Ei, m_next_variables, false));
+      }
+      bdd_type U_player = V_player & m_bdd.any(W_player);
+      // bdd_type U_player = V_player & m_bdd.quantify(U_next & m_E, m_next_variables, false);
+
       // V_opponent /\ {v in V | forall u in V: v --> u ==> u in U } =
       // V_opponent /\ {v in V | ~ (exists u in V: v --> u /\ u in V\U) }
-      bdd_type U_opponent = V_opponent & ~(m_bdd.quantify(m_E & V_ & ~U_next, m_next_variables, false));
+
+      std::vector<bdd_type> W_opponent;
+      for (const auto& Ei: m_E)
+      {
+        W_opponent.push_back(~(m_bdd.quantify(Ei & V_ & ~U_next, m_next_variables, false)));
+      }
+      bdd_type U_opponent = V_opponent & m_bdd.any(W_opponent);
+      // bdd_type U_opponent = V_opponent & ~(m_bdd.quantify(m_E & V_ & ~U_next, m_next_variables, false));
+
       // return union of the two sets
       return U_player | U_opponent;
     }
@@ -339,7 +362,13 @@ class bdd_parity_game
       m_even = m_even & ~A;
       m_odd = m_odd & ~A;
       bdd_type A_ = m_bdd.let(m_substitution, A);
-      m_E = m_E & ~A & ~A_;
+//      m_E = m_E & ~A & ~A_;
+      bdd_type AA = ~A & ~A_;
+      for (auto& Ei: m_E)
+      {
+        Ei = Ei & AA;
+      }
+
       std::map<uint32_t, bdd_type> priorities;
       for (const auto& [i, p_i]: m_priorities)
       {
@@ -465,6 +494,7 @@ class pbesbddsolve
 
     bdd_sylvan m_bdd;
     bool m_unary_encoding;
+    bdd_granularity m_granularity = bdd_granularity::per_pbes;
 
     bdd_type to_bdd(const data::variable& x) const
     {
@@ -640,38 +670,59 @@ class pbesbddsolve
       return m_bdd.all(v);
     }
 
+    // The result contains a bdd with an edge relation for each summand
     std::vector<bdd_type> compute_edge_relation(
-        const srf_equation& eqn,
-        std::size_t eqn_index,
+        const std::vector<srf_equation>& equations,
         const std::vector<bdd_type>& equation_ids,
         const std::vector<bdd_type>& equation_ids_next,
-        const std::vector<bdd_type>& parameters_next,
-        const bdd_substitution& sigma
+        const std::vector<bdd_type>& parameters_next
       ) const
     {
       std::vector<bdd_type> result;
-      for (const srf_summand& summand: eqn.summands())
-      {
-        const auto& condition = summand.condition();
-        const auto& variable = summand.variable();
 
-        if (!summand.parameters().empty())
+      std::size_t N = equation_ids.size();
+      for (std::size_t i = 0; i < N; i++)
+      {
+        std::vector<bdd_type> summand_bdds;
+        const srf_equation& eqn = equations[i];
+        for (const srf_summand& summand: eqn.summands())
         {
-          throw mcrl2::runtime_error("quantifiers are not yet supported");
+          const auto& condition = summand.condition();
+          const auto& variable = summand.variable();
+
+          if (!summand.parameters().empty())
+          {
+            throw mcrl2::runtime_error("quantifiers are not yet supported");
+          }
+          const bdd_type& id0 = equation_ids[i];
+          std::size_t i1 = m_pbes_index.index(variable.name());
+          bdd_type id1 = equation_ids_next[i1];
+          bdd_type f = to_bdd(condition);
+          std::vector<bdd_type> v = { id0, id1, f };
+          if (!parameters_next.empty())
+          {
+            bdd_type updates = parameter_updates(parameters_next, to_bdd(summand.variable().parameters()));
+            v.push_back(updates);
+          }
+          summand_bdds.push_back(m_bdd.all(v));
         }
-        const bdd_type& id0 = equation_ids[eqn_index];
-        std::size_t i1 = m_pbes_index.index(variable.name());
-        bdd_type id1 = equation_ids_next[i1];
-        bdd_type f = to_bdd(condition);
-        std::vector<bdd_type> v = { id0, id1, f };
-        if (!parameters_next.empty())
+        if (m_granularity == bdd_granularity::per_summand)
         {
-          bdd_type updates = parameter_updates(parameters_next, to_bdd(summand.variable().parameters()));
-          v.push_back(updates);
+          result.insert(result.end(), summand_bdds.begin(), summand_bdds.end());
         }
-        result.push_back(m_bdd.all(v));
+        else
+        {
+          result.push_back(m_bdd.any(summand_bdds));
+        }
       }
-      return result;
+      if (m_granularity == bdd_granularity::per_pbes)
+      {
+        return { m_bdd.any(result) };
+      }
+      else
+      {
+        return result;
+      }
     }
 
     bdd_type compute_initial_state(const std::vector<bdd_type>& ids) const
@@ -716,7 +767,7 @@ class pbesbddsolve
       bdd_substitution substitution;
       bdd_substitution reverse_substitution;
       bdd_type V;
-      bdd_type E;
+      std::vector<bdd_type> E;
       bdd_type even;
       bdd_type odd;
       bdd_type initial_state;
@@ -802,14 +853,8 @@ class pbesbddsolve
         priorities[r] = m_bdd.any(priority_ids[rank]);
       }
 
-      // compute the edges
-      std::vector<bdd_type> edges;
-      for (std::size_t i = 0; i < N; i++)
-      {
-        std::vector<bdd_type> edge_relation = compute_edge_relation(equations[i], i, equation_ids, equation_ids_next, parameters_bdd_next, substitution);
-        edges.insert(edges.end(), edge_relation.begin(), edge_relation.end());
-      }
-      E = m_bdd.any(edges);
+      E = compute_edge_relation(equations, equation_ids, equation_ids_next, parameters_bdd_next);
+
       initial_state = compute_initial_state(equation_ids);
 
       return bdd_parity_game(
@@ -818,8 +863,8 @@ class pbesbddsolve
     }
 
   public:
-    pbesbddsolve(const srf_pbes& p, bdd_sylvan& bdd, bool unary_encoding = false)
-        : m_pbes(p), m_pbes_index(m_pbes), m_bdd(bdd), m_unary_encoding(unary_encoding)
+    pbesbddsolve(const srf_pbes& p, bdd_sylvan& bdd, bool unary_encoding = false, bdd::bdd_granularity granularity = bdd::bdd_granularity::per_pbes)
+        : m_pbes(p), m_pbes_index(m_pbes), m_bdd(bdd), m_unary_encoding(unary_encoding), m_granularity(granularity)
     { }
 
     bool run()

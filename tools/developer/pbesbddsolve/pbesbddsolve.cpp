@@ -27,6 +27,7 @@ class pbesbddsolve_tool : public input_output_tool
     typedef input_output_tool super;
 
     bool unary_encoding = false;
+    bdd::bdd_granularity granularity = bdd::bdd_granularity::per_pbes;
 
     // Lace options
     std::size_t lace_n_workers = 0; // autodetect
@@ -43,6 +44,7 @@ class pbesbddsolve_tool : public input_output_tool
     {
       super::add_options(desc);
       desc.add_option("unary-encoding", utilities::make_optional_argument("NAME", "0"), "use a unary encoding of the predicate variables", 'u');
+      desc.add_option("granularity", utilities::make_optional_argument("NAME", "pbes"), "the granularity of the edge relation (pbes, equation or summand)", 'g');
       desc.add_option("lace-workers", utilities::make_optional_argument("NAME", "0"), "set number of Lace workers (threads for parallelization), (0=autodetect)");
       desc.add_option("lace-dqsize", utilities::make_optional_argument("NAME", "4194304"), "set length of Lace task queue (default 1024*1024*4)");
       desc.add_option("lace-stacksize", utilities::make_optional_argument("NAME", "0"), "set size of program stack in kilo bytes (0=default stack size)");
@@ -52,10 +54,28 @@ class pbesbddsolve_tool : public input_output_tool
       desc.add_option("max-cache-size", utilities::make_optional_argument("NAME", "26"), "maximum Sylvan cache size (21-27, default 26)");
     }
 
+    bdd::bdd_granularity parse_granularity(const std::string& value) const
+    {
+      if (value == "pbes")
+      {
+        return bdd::bdd_granularity::per_pbes;
+      }
+      else if (value == "equation")
+      {
+        return bdd::bdd_granularity::per_equation;
+      }
+      else if (value == "summand")
+      {
+        return bdd::bdd_granularity::per_summand;
+      }
+      throw mcrl2::runtime_error("unknown granularity value " + value);
+    }
+
     void parse_options(const utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
       unary_encoding = parser.options.count("unary-encoding") > 0;
+      granularity = parse_granularity(parser.option_argument("granularity"));
       if (parser.has_option("lace-workers"))
       {
         lace_n_workers = parser.option_argument_as<int>("lace-workers");
@@ -130,7 +150,7 @@ class pbesbddsolve_tool : public input_output_tool
       srf_pbes p = pbes2srf(pbesspec);
       unify_parameters(p);
       bdd::bdd_sylvan sylvan;
-      bool result = pbes_system::bdd::pbesbddsolve(p, sylvan, unary_encoding).run();
+      bool result = pbes_system::bdd::pbesbddsolve(p, sylvan, unary_encoding, granularity).run();
       std::cout << (result ? "true" : "false") << std::endl;
       return true;
     }
