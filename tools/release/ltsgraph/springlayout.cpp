@@ -148,6 +148,12 @@ void SpringLayout::apply()
     m_hforces.resize(m_graph.edgeCount());
     m_lforces.resize(m_graph.edgeCount());
     m_sforces.resize(m_graph.nodeCount());
+    for (std::size_t i = 0; i < edgeCount; ++i)
+    {
+      std::size_t n = sel ? m_graph.explorationEdge(i) : i;
+      m_hforces[n] = QVector3D(0,0,0);
+      m_lforces[n] = QVector3D(0,0,0);
+    }
 
     for (std::size_t i = 0; i < nodeCount; ++i)
     {
@@ -168,12 +174,12 @@ void SpringLayout::apply()
       // calculate repulsion between all edges of this node.
       // we ignore exploration, causing a small overhead when we check against invisible edges.
       std::size_t nrOfNeighbours = m_graph.nrOfNeighboursOfNode(n);
+      QVector3D f;
       for (std::size_t j = 0; j < nrOfNeighbours; ++j)
       {
+        std::size_t first = m_graph.edgeOfNode(n, j);
         for (std::size_t k = j + 1; k < nrOfNeighbours; ++k)
         {
-          QVector3D f;
-          std::size_t first = m_graph.edgeOfNode(n, j);
           std::size_t second = m_graph.edgeOfNode(n, k);
 
           // Handles
@@ -202,10 +208,6 @@ void SpringLayout::apply()
       const QVector3D& handle_pos = m_graph.handle(n).pos();
       const QVector3D& node_from_pos = m_graph.node(e.from()).pos();
       const QVector3D& node_to_pos = m_graph.node(e.to()).pos();
-
-      // Variables for repulsion calculations
-      m_hforces[n] = QVector3D(0, 0, 0);
-      m_lforces[n] = QVector3D(0, 0, 0);
 
       if (e.is_selfloop())
       {
