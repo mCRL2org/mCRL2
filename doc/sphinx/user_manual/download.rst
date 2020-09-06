@@ -8,9 +8,6 @@
 
 .. _download:
 
-A version for `archlinux <https://aur.archlinux.org/packages/mcrl2/>`_ has 
-been made available by Bart van Oort. 
-
 Download the latest release of mCRL2
 ====================================
 
@@ -35,6 +32,9 @@ latest release of the toolset.
    |Source                  | |src_tgz|              |
    +------------------------+------------------------+
 
+
+Stable releases for Arch Linux are available via the `Arch User Repository <https://aur.archlinux.org/packages/mcrl2/>`_.
+This package is currently maintained by Jorai Rijsdijk.
 
 Download a nightly build of mCRL2
 =================================
