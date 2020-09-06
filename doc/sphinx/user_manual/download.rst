@@ -8,6 +8,9 @@
 
 .. _download:
 
+A version for `archlinux <https://aur.archlinux.org/packages/mcrl2/>`_ has 
+been made available by Bart van Oort. 
+
 Download the latest release of mCRL2
 ====================================
 
