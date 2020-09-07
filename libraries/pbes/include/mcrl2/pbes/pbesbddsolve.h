@@ -291,7 +291,9 @@ class bdd_parity_game
       m_odd(odd_nodes),
       m_priorities(std::move(priorities)),
       m_initial_state(initial_state)
-    {}
+    {
+      mCRL2log(log::debug) << "|E| = " << m_E.size() << " sat count = " << m_bdd.count(m_bdd.any(m_E), all_variables) << std::endl;
+    }
 
 //    // check whether U = { u in V | u in U /\ exists v in V: u --> v }
 //    bool has_successor(const bdd_type& U) const
@@ -331,9 +333,9 @@ class bdd_parity_game
       std::vector<bdd_type> W_opponent;
       for (const auto& Ei: m_E)
       {
-        W_opponent.push_back(~(m_bdd.quantify(Ei & V_ & ~U_next, m_next_variables, false)));
+        W_opponent.push_back(m_bdd.quantify(Ei & V_ & ~U_next, m_next_variables, false));
       }
-      bdd_type U_opponent = V_opponent & m_bdd.any(W_opponent);
+      bdd_type U_opponent = V_opponent & ~m_bdd.any(W_opponent);
       // bdd_type U_opponent = V_opponent & ~(m_bdd.quantify(m_E & V_ & ~U_next, m_next_variables, false));
 
       // return union of the two sets
