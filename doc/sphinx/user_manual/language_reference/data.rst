@@ -252,12 +252,12 @@ rule will prevent us from getting into trouble.
    useful example is that of lists, for which the constructors ``[]`` and ``|>``
    are defined::
 
-    map remove: List(Nat) # Nat -> List(Nat);
-    var x, y: Nat;
-        l: List(Nat);
-    eqn remove([], x) = []; 
-        x == y -> remove(x |> l, y) = l;
-        x != y -> remove(x |> l, y) = x |> remove(l, y);
+     map remove: List(Nat) # Nat -> List(Nat);
+     var x, y: Nat;
+         l: List(Nat);
+     eqn remove([], x) = []; 
+         x == y -> remove(x |> l, y) = l;
+         x != y -> remove(x |> l, y) = x |> remove(l, y);
 
 .. _predefinedsorts:
 
