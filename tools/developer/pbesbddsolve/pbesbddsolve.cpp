@@ -28,6 +28,9 @@ class pbesbddsolve_tool : public input_output_tool
 
     bool unary_encoding = false;
     bdd::bdd_granularity granularity = bdd::bdd_granularity::per_pbes;
+    std::string load_game_filename;
+    std::string save_game_filename;
+    bool verbose;
 
     // Lace options
     std::size_t lace_n_workers = 0; // autodetect
@@ -52,6 +55,9 @@ class pbesbddsolve_tool : public input_output_tool
       desc.add_option("max-table-size", utilities::make_optional_argument("NAME", "26"), "maximum Sylvan table size (21-27, default 26)");
       desc.add_option("min-cache-size", utilities::make_optional_argument("NAME", "22"), "minimum Sylvan cache size (21-27, default 22)");
       desc.add_option("max-cache-size", utilities::make_optional_argument("NAME", "26"), "maximum Sylvan cache size (21-27, default 26)");
+
+      desc.add_hidden_option("load-game", utilities::make_optional_argument("NAME", ""), "load the parity game from disk");
+      desc.add_hidden_option("save-game", utilities::make_optional_argument("NAME", ""), "save the parity game to disk");
     }
 
     bdd::bdd_granularity parse_granularity(const std::string& value) const
@@ -74,8 +80,11 @@ class pbesbddsolve_tool : public input_output_tool
     void parse_options(const utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
-      unary_encoding = parser.options.count("unary-encoding") > 0;
+      unary_encoding = parser.has_option("unary-encoding");
+      load_game_filename = parser.option_argument("load-game");
+      save_game_filename = parser.option_argument("save-game");
       granularity = parse_granularity(parser.option_argument("granularity"));
+      verbose = parser.has_option("verbose");
       if (parser.has_option("lace-workers"))
       {
         lace_n_workers = parser.option_argument_as<int>("lace-workers");
@@ -145,12 +154,18 @@ class pbesbddsolve_tool : public input_output_tool
       // A higher granularity (e.g. 6) often results in better performance in practice
       sylvan::sylvan_init_bdd();
 
-      pbes_system::pbes pbesspec = pbes_system::detail::load_pbes(input_filename());
-      normalize(pbesspec);
-      srf_pbes p = pbes2srf(pbesspec);
-      unify_parameters(p);
+      bool result;
       bdd::bdd_sylvan sylvan;
-      bool result = pbes_system::bdd::pbesbddsolve(p, sylvan, unary_encoding, granularity).run();
+      srf_pbes p;
+
+      if (load_game_filename.empty())
+      {
+        pbes_system::pbes pbesspec = pbes_system::detail::load_pbes(input_filename());
+        normalize(pbesspec);
+        p = pbes2srf(pbesspec);
+        unify_parameters(p);
+      }
+      result = pbes_system::bdd::pbesbddsolve(p, sylvan, unary_encoding, granularity).run(load_game_filename, save_game_filename, verbose);
       std::cout << (result ? "true" : "false") << std::endl;
       return true;
     }

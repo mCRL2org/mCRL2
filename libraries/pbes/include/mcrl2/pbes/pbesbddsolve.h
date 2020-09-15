@@ -14,11 +14,14 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstdio>
+#include <fstream>
 #include <utility>
 #include "mcrl2/pbes/pbes_equation_index.h"
 #include "mcrl2/pbes/srf_pbes.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "sylvan_obj.hpp"
+#include "sylvan_bdd.h"
 
 namespace mcrl2 {
 
@@ -49,8 +52,6 @@ class bdd_sylvan
 {
   public:
     typedef sylvan::Bdd bdd_type;
-    typedef sylvan::BddMap bdd_substitution;
-    typedef sylvan::BddSet bdd_variable_set;
 
   private:
     std::map<std::string, std::size_t> m_variable_index; // maps variable names to variable indices
@@ -58,6 +59,48 @@ class bdd_sylvan
     std::vector<bdd_type> m_variables; // maps variable indices to the corresponding bdd
 
   public:
+    // we store some extra values, to compensate for the incomplete sylvan interface
+    class bdd_variable_set: public sylvan::BddSet
+    {
+      protected:
+        std::vector<std::uint32_t> v;
+
+      public:
+        bdd_variable_set() = default;
+
+        void add(std::uint32_t variable)
+        {
+          sylvan::BddSet::add(variable);
+          v.push_back(variable);
+        };
+
+        const std::vector<std::uint32_t>& as_vector() const
+        {
+          return v;
+        }
+    };
+
+    // we store some extra values, to compensate for the incomplete sylvan interface
+    class bdd_substitution: public sylvan::BddMap
+    {
+      protected:
+        std::map<std::uint32_t, bdd_type> m;
+
+      public:
+        bdd_substitution() = default;
+
+        void put(std::uint32_t key, bdd_type value)
+        {
+          sylvan::BddMap::put(key, value);
+          m[key] = value;
+        }
+
+        const std::map<std::uint32_t, bdd_type>& as_map() const
+        {
+          return m;
+        }
+    };
+
     bdd_type true_() const
     {
       return sylvan::sylvan_true;
@@ -133,7 +176,7 @@ class bdd_sylvan
       }
 
       std::vector<bool> solution = x.PickOneCube(variables);
-      std::vector<uint32_t> V = variables.toVector();
+      std::vector<std::uint32_t> V = variables.toVector();
       assert(solution.size() == variables.size());
 
       std::vector<std::string> literals;
@@ -202,6 +245,41 @@ class bdd_sylvan
     {
       return m_variable_index.at(name);
     }
+
+    void print(const std::string& msg, const bdd_type& x, const bdd_variable_set& context) const
+    {
+      std::cout << msg << " " << count(x, context) << std::endl;
+    }
+
+    void print(const std::string& msg, const std::vector<bdd_type>& x, const bdd_variable_set& context) const
+    {
+      std::cout << msg;
+      for (const auto& xi: x)
+      {
+        std::cout << " " << count(xi, context);
+      }
+      std::cout << std::endl;
+    }
+
+    void print(const std::string& msg, const bdd_variable_set& variables) const
+    {
+      std::cout << msg;
+      for (const std::size_t i: variables.as_vector())
+      {
+        std::cout << " " << i;
+      }
+      std::cout << std::endl;
+    }
+
+    void print(const std::string& msg, const std::map<std::uint32_t, bdd_sylvan::bdd_type>& m, const bdd_variable_set& context) const
+    {
+      std::cout << msg;
+      for (const auto& [i, x]: m)
+      {
+        std::cout << " (" << i << ", " << count(x, context) << ")";
+      }
+      std::cout << std::endl;
+    }
 };
 
 // returns the smallest value m such that n <= 2**m
@@ -243,7 +321,7 @@ class bdd_parity_game
     std::vector<bdd_type> m_E;
     bdd_type m_even;
     bdd_type m_odd;
-    std::map<uint32_t, bdd_type> m_priorities;
+    std::map<std::uint32_t, bdd_type> m_priorities;
     bdd_type m_initial_state;
 
     void info(const bdd_type& x, const std::string& msg, const bdd_variable_set& variables) const
@@ -276,7 +354,7 @@ class bdd_parity_game
       const std::vector<bdd_type>& E,
       const bdd_type& even_nodes,
       const bdd_type& odd_nodes,
-      std::map<uint32_t, bdd_type>  priorities,
+      const std::map<std::uint32_t, bdd_type>& priorities,
       const bdd_type& initial_state
      )
     : m_bdd(bdd),
@@ -289,7 +367,7 @@ class bdd_parity_game
       m_E(E),
       m_even(even_nodes),
       m_odd(odd_nodes),
-      m_priorities(std::move(priorities)),
+      m_priorities(priorities),
       m_initial_state(initial_state)
     {
       mCRL2log(log::debug) << "|E| = " << m_E.size() << " sat count = " << m_bdd.count(m_bdd.any(m_E), all_variables) << std::endl;
@@ -371,7 +449,7 @@ class bdd_parity_game
         Ei = Ei & AA;
       }
 
-      std::map<uint32_t, bdd_type> priorities;
+      std::map<std::uint32_t, bdd_type> priorities;
       for (const auto& [i, p_i]: m_priorities)
       {
         if ((p_i & !A) != m_bdd.false_())
@@ -410,9 +488,9 @@ class bdd_parity_game
       return m_bdd.count(m_V, m_variables);
     }
 
-    uint32_t maximum() const
+    std::uint32_t maximum() const
     {
-      uint32_t result = 0;
+      std::uint32_t result = 0;
       for (const auto& [i, p_i]: m_priorities)
       {
         result = std::max(result, i);
@@ -438,6 +516,41 @@ class bdd_parity_game
     const bdd_variable_set& variables() const
     {
       return m_variables;
+    }
+
+    const bdd_substitution& substitution() const
+    {
+      return m_substitution;
+    }
+
+    const bdd_substitution& reverse_substitution() const
+    {
+      return m_reverse_substitution;
+    }
+
+    const bdd_type& nodes() const
+    {
+      return m_V;
+    }
+
+    const std::vector<bdd_type>& edges() const
+    {
+      return m_E;
+    }
+
+    const bdd_type& even_nodes() const
+    {
+      return m_even;
+    }
+
+    const bdd_type& odd_nodes() const
+    {
+      return m_odd;
+    }
+
+    const std::map<std::uint32_t, bdd_type>& priorities() const
+    {
+      return m_priorities;
     }
 
     std::pair<bdd_type, bdd_type> zielonka(bool debug = false)
@@ -482,6 +595,189 @@ class bdd_parity_game
       }
     }
 };
+
+inline
+void save_bdd_parity_game(bdd_sylvan& sylvan, const bdd_parity_game& game, const std::string& name, bool verbose = false)
+{
+  std::ofstream index((name + ".index").c_str());
+
+  auto save_bdd = [&](const bdd_sylvan::bdd_type& x)
+  {
+    std::size_t value = sylvan::sylvan_serialize_add(x.GetBDD());
+    index << value << std::endl;
+  };
+
+  auto save_bdd_vector = [&](const std::vector<bdd_sylvan::bdd_type>& x)
+  {
+    index << x.size();
+    for (const auto& xi: x)
+    {
+      std::size_t value = sylvan::sylvan_serialize_add(xi.GetBDD());
+      index << " " << value;
+    }
+    index << std::endl;
+  };
+
+  auto save_variable_set = [&](const bdd_sylvan::bdd_variable_set& variables)
+  {
+    index << variables.size();
+    for (const std::size_t i: variables.as_vector())
+    {
+      index << " " << i;
+    }
+    index << std::endl;
+  };
+
+  auto save_bdd_map = [&](const std::map<std::uint32_t, bdd_sylvan::bdd_type>& m)
+  {
+    index << 2 * m.size();
+    for (const auto& [i, x]: m)
+    {
+      std::size_t value = sylvan::sylvan_serialize_add(x.GetBDD());
+      index << " " << i << " " << value;
+    }
+    index << std::endl;
+  };
+
+  if (verbose)
+  {
+    sylvan.print("variables", game.variables());
+    sylvan.print("next_variables", game.next_variables());
+    sylvan.print("all_variables", game.all_variables());
+    sylvan.print("substitution", game.substitution().as_map(), game.all_variables());
+    sylvan.print("reverse_substitution", game.reverse_substitution().as_map(), game.all_variables());
+    sylvan.print("V", game.nodes(), game.variables());
+    sylvan.print("E", game.edges(), game.all_variables());
+    sylvan.print("even", game.even_nodes(), game.variables());
+    sylvan.print("odd", game.odd_nodes(), game.variables());
+    sylvan.print("initial_state", game.initial_state(), game.variables());
+    sylvan.print("priorities", game.priorities(), game.variables());
+  }
+
+  sylvan::sylvan_serialize_reset();
+  save_variable_set(game.variables());
+  save_variable_set(game.next_variables());
+  save_variable_set(game.all_variables());
+  save_bdd_map(game.substitution().as_map());
+  save_bdd_map(game.reverse_substitution().as_map());
+  save_bdd(game.nodes());
+  save_bdd_vector(game.edges());
+  save_bdd(game.even_nodes());
+  save_bdd(game.odd_nodes());
+  save_bdd(game.initial_state());
+  save_bdd_map(game.priorities());
+
+  FILE* f = fopen((name + ".bdd").c_str(), "w");
+  sylvan::sylvan_serialize_tofile(f);
+  fclose(f);
+}
+
+inline
+bdd_parity_game load_bdd_parity_game(bdd_sylvan& sylvan, const std::string& name, bool verbose = false)
+{
+  std::ifstream index((name + ".index").c_str());
+  FILE* f = fopen((name + ".bdd").c_str(), "r");
+  sylvan::sylvan_serialize_fromfile(f);
+  fclose(f);
+
+  auto load_bdd = [&]()
+  {
+    std::size_t value;
+    index >> value;
+    return sylvan::sylvan_serialize_get_reversed(value);
+  };
+
+  auto load_uint32_t_vector = [&]()
+  {
+    std::vector<std::uint32_t> result;
+    std::size_t n;
+    index >> n;
+    for (std::size_t i = 0; i < n; i++)
+    {
+      std::size_t value;
+      index >> value;
+      result.push_back(value);
+    }
+    return result;
+  };
+
+  auto load_bdd_vector = [&]()
+  {
+    std::vector<bdd_sylvan::bdd_type> result;
+    std::size_t n;
+    index >> n;
+    for (std::size_t i = 0; i < n; i++)
+    {
+      result.push_back(load_bdd());
+    }
+    return result;
+  };
+
+  auto load_variable_set = [&]()
+  {
+    bdd_sylvan::bdd_variable_set result;
+    for (std::uint32_t i : load_uint32_t_vector())
+    {
+      result.add(i);
+    }
+    return result;
+  };
+
+  auto load_bdd_map = [&]()
+  {
+    std::map<std::uint32_t, bdd_sylvan::bdd_type> result;
+    std::vector<std::uint32_t> v = load_uint32_t_vector();
+    std::size_t n = v.size() / 2;
+    for (std::size_t i = 0; i < n; i++)
+    {
+      auto j = v[2 * i];
+      auto x = sylvan::sylvan_serialize_get_reversed(v[2 * i + 1]);
+      result[j] = x;
+    }
+    return result;
+  };
+
+  auto load_substitution = [&]()
+  {
+    bdd_sylvan::bdd_substitution result;
+    for (const auto& [i, x]: load_bdd_map())
+    {
+      result.put(i, x);
+    }
+    return result;
+  };
+
+  bdd_sylvan::bdd_variable_set variable_set = load_variable_set();
+  bdd_sylvan::bdd_variable_set next_variable_set = load_variable_set();
+  bdd_sylvan::bdd_variable_set all_variable_set = load_variable_set();
+  bdd_sylvan::bdd_substitution substitution = load_substitution();
+  bdd_sylvan::bdd_substitution reverse_substitution = load_substitution();
+  bdd_sylvan::bdd_type V = load_bdd();
+  std::vector<bdd_sylvan::bdd_type> E = load_bdd_vector();
+  bdd_sylvan::bdd_type even = load_bdd();
+  bdd_sylvan::bdd_type odd = load_bdd();
+  bdd_sylvan::bdd_type initial_state = load_bdd();
+  std::map<std::uint32_t, bdd_sylvan::bdd_type> priorities = load_bdd_map();
+
+  if (verbose)
+  {
+    sylvan.print("variables", variable_set);
+    sylvan.print("next_variables", next_variable_set);
+    sylvan.print("all_variables", all_variable_set);
+    sylvan.print("substitution", substitution.as_map(), all_variable_set);
+    sylvan.print("reverse_substitution", reverse_substitution.as_map(), all_variable_set);
+    sylvan.print("V", V, variable_set);
+    sylvan.print("E", E, all_variable_set);
+    sylvan.print("even", even, variable_set);
+    sylvan.print("odd", odd, variable_set);
+    sylvan.print("initial_state", initial_state, variable_set);
+    sylvan.print("priorities", priorities, variable_set);
+  }
+
+  return bdd_parity_game(
+      sylvan, variable_set, next_variable_set, all_variable_set, substitution,
+      reverse_substitution, V, E, even, odd, priorities, initial_state);
+}
 
 class pbesbddsolve
 {
@@ -773,7 +1069,7 @@ class pbesbddsolve
       bdd_type even;
       bdd_type odd;
       bdd_type initial_state;
-      std::map<uint32_t, bdd_type> priorities;
+      std::map<std::uint32_t, bdd_type> priorities;
 
       const std::vector<srf_equation>& equations = m_pbes.equations();
       std::size_t N = equations.size();
@@ -867,13 +1163,26 @@ class pbesbddsolve
   public:
     pbesbddsolve(const srf_pbes& p, bdd_sylvan& bdd, bool unary_encoding = false, bdd::bdd_granularity granularity = bdd::bdd_granularity::per_pbes)
         : m_pbes(p), m_pbes_index(m_pbes), m_bdd(bdd), m_unary_encoding(unary_encoding), m_granularity(granularity)
-    { }
+    {}
 
-    bool run()
+    bool run(const std::string& load_game_filename, const std::string& save_game_filename, bool verbose = false)
     {
-      bdd_parity_game G = compute_parity_game();
-      auto [W0, W1] = G.zielonka();
-      return (W0 | G.initial_state()) == W0;
+      if (load_game_filename.empty())
+      {
+        bdd_parity_game G = compute_parity_game();
+        if (!save_game_filename.empty())
+        {
+          save_bdd_parity_game(m_bdd, G, save_game_filename, verbose);
+        }
+        auto [W0, W1] = G.zielonka();
+        return (W0 | G.initial_state()) == W0;
+      }
+      else
+      {
+        bdd_parity_game G = load_bdd_parity_game(m_bdd, load_game_filename, verbose);
+        auto [W0, W1] = G.zielonka();
+        return (W0 | G.initial_state()) == W0;
+      }
     }
 };
 

@@ -547,6 +547,8 @@ class srf_pbes
     propositional_variable_instantiation m_initial_state;
 
   public:
+    srf_pbes() = default;
+
     srf_pbes(
       const data::data_specification& dataspec,
       std::vector<srf_equation> equations,
