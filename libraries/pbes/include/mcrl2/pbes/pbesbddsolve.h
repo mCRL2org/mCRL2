@@ -280,6 +280,31 @@ class bdd_sylvan
       }
       std::cout << std::endl;
     }
+
+    std::string hash(const bdd_type& x) const
+    {
+      char hash[65];
+      x.GetShaHash(hash);
+      return std::string(hash);
+    }
+
+    std::size_t node_count(const bdd_type& x) const
+    {
+      return x.NodeCount();
+    }
+
+    std::size_t serialize(const bdd_type& x) const
+    {
+      mCRL2log(log::verbose) << "serialize " << node_count(x) << " " << hash(x) << std::endl;
+      return sylvan::sylvan_serialize_add(x.GetBDD());
+    }
+
+    bdd_type deserialize(std::size_t index) const
+    {
+      bdd_type result = sylvan::sylvan_serialize_get_reversed(index);
+      mCRL2log(log::verbose) << "deserialize " << node_count(result) << " " << hash(result) << std::endl;
+      return result;
+    }
 };
 
 // returns the smallest value m such that n <= 2**m
@@ -553,7 +578,7 @@ class bdd_parity_game
       return m_priorities;
     }
 
-    std::pair<bdd_type, bdd_type> zielonka(bool debug = false)
+    std::pair<bdd_type, bdd_type> zielonka()
     {
       if ( (m_even | m_odd) == m_bdd.false_())
       {
@@ -603,7 +628,7 @@ void save_bdd_parity_game(bdd_sylvan& sylvan, const bdd_parity_game& game, const
 
   auto save_bdd = [&](const bdd_sylvan::bdd_type& x)
   {
-    std::size_t value = sylvan::sylvan_serialize_add(x.GetBDD());
+    std::size_t value = sylvan.serialize(x.GetBDD());
     index << value << std::endl;
   };
 
@@ -612,7 +637,7 @@ void save_bdd_parity_game(bdd_sylvan& sylvan, const bdd_parity_game& game, const
     index << x.size();
     for (const auto& xi: x)
     {
-      std::size_t value = sylvan::sylvan_serialize_add(xi.GetBDD());
+      std::size_t value = sylvan.serialize(xi.GetBDD());
       index << " " << value;
     }
     index << std::endl;
@@ -633,7 +658,7 @@ void save_bdd_parity_game(bdd_sylvan& sylvan, const bdd_parity_game& game, const
     index << 2 * m.size();
     for (const auto& [i, x]: m)
     {
-      std::size_t value = sylvan::sylvan_serialize_add(x.GetBDD());
+      std::size_t value = sylvan.serialize(x.GetBDD());
       index << " " << i << " " << value;
     }
     index << std::endl;
@@ -684,7 +709,7 @@ bdd_parity_game load_bdd_parity_game(bdd_sylvan& sylvan, const std::string& name
   {
     std::size_t value;
     index >> value;
-    return sylvan::sylvan_serialize_get_reversed(value);
+    return sylvan.deserialize(value);
   };
 
   auto load_uint32_t_vector = [&]()
@@ -731,7 +756,7 @@ bdd_parity_game load_bdd_parity_game(bdd_sylvan& sylvan, const std::string& name
     for (std::size_t i = 0; i < n; i++)
     {
       auto j = v[2 * i];
-      auto x = sylvan::sylvan_serialize_get_reversed(v[2 * i + 1]);
+      auto x = sylvan.deserialize(v[2 * i + 1]);
       result[j] = x;
     }
     return result;
