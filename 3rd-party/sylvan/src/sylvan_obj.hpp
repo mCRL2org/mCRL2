@@ -487,6 +487,7 @@ class BddMap
 public:
     BddMap() : bdd(sylvan_map_empty()) { sylvan_protect(&bdd); }
     ~BddMap() { sylvan_unprotect(&bdd); }
+    BddMap(const BddMap& other) : bdd(other.bdd) { sylvan_protect(&bdd); }
 
     BddMap(uint32_t key_variable, const Bdd value);
 
@@ -785,6 +786,7 @@ class MtbddMap
 public:
     MtbddMap() : mtbdd(mtbdd_map_empty()) { mtbdd_protect(&mtbdd); }
     ~MtbddMap() { mtbdd_unprotect(&mtbdd); }
+    MtbddMap(const MtbddMap& other) : mtbdd(other.mtbdd) { mtbdd_protect(&mtbdd); }
 
     MtbddMap(uint32_t key_variable, Mtbdd value);
 
