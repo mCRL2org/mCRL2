@@ -294,11 +294,11 @@ class bdd_parity_game
 
   private:
     bdd_sylvan& m_bdd;
-    bdd_variable_set m_variables;
-    bdd_variable_set m_next_variables;
-    bdd_variable_set m_all_variables;
-    bdd_substitution m_substitution;
-    bdd_substitution m_reverse_substitution;
+    const bdd_variable_set& m_variables;
+    const bdd_variable_set& m_next_variables;
+    const bdd_variable_set& m_all_variables;
+    const bdd_substitution& m_substitution;
+    const bdd_substitution& m_reverse_substitution;
     bdd_type m_V;
     std::vector<bdd_type> m_E;
     bdd_type m_even;
@@ -854,11 +854,23 @@ class pbesbddsolve
       return result;
     }
 
-    bdd_parity_game compute_parity_game()
+    std::tuple<
+        bdd_variable_set,
+        bdd_variable_set,
+        bdd_variable_set,
+        bdd_substitution,
+        bdd_substitution,
+        bdd_type,
+        std::vector<bdd_type>,
+        bdd_type,
+        bdd_type,
+        bdd_type,
+        std::map<std::uint32_t, bdd_type>
+        >
+    compute_parity_game()
     {
       // Attributes of the parity game
       bdd_variable_set variable_set;
-      std::vector<bdd_type> variable_vector;
       bdd_variable_set next_variable_set;
       bdd_variable_set all_variable_set;
       bdd_substitution substitution;
@@ -886,7 +898,6 @@ class pbesbddsolve
         auto [bdd0, index0] = m_bdd.add_variable(v.name());
         auto [bdd1, index1] = m_bdd.add_variable(std::string(v.name()) + "_");
         variable_set.add(index0);
-        variable_vector.push_back(bdd0);
         next_variable_set.add(index1);
         id_variables.push_back(bdd0);
         all_variable_set.add(index0);
@@ -899,7 +910,6 @@ class pbesbddsolve
         auto [bdd0, index0] = m_bdd.add_variable(v.name());
         auto [bdd1, index1] = m_bdd.add_variable(std::string(v.name()) + "_");
         variable_set.add(index0);
-        variable_vector.push_back(bdd0);
         next_variable_set.add(index1);
         all_variable_set.add(index0);
         all_variable_set.add(index1);
@@ -954,9 +964,8 @@ class pbesbddsolve
 
       initial_state = compute_initial_state(equation_ids);
 
-      return bdd_parity_game(
-        m_bdd, variable_set, next_variable_set, all_variable_set, substitution,
-           reverse_substitution, V, E, even, odd, priorities, initial_state);
+      return { variable_set, next_variable_set, all_variable_set, substitution,
+           reverse_substitution, V, E, even, odd, initial_state, priorities };
     }
 
   public:
@@ -966,14 +975,10 @@ class pbesbddsolve
 
     bool run()
     {
-      bdd_variable_set variable_set;
-      std::vector<bdd_type> variable_vector;
-      bdd_variable_set next_variable_set;
-      bdd_variable_set all_variable_set;
-      bdd_substitution substitution;
-      bdd_substitution reverse_substitution;
-
-      bdd_parity_game G = compute_parity_game();
+      auto [variable_set, next_variable_set, all_variable_set, substitution,
+            reverse_substitution, V, E, even, odd, initial_state, priorities] = compute_parity_game();
+      bdd_parity_game G(m_bdd, variable_set, next_variable_set, all_variable_set, substitution,
+                            reverse_substitution, V, E, even, odd, priorities, initial_state);
       auto [W0, W1] = G.zielonka();
       return (W0 | G.initial_state()) == W0;
     }
