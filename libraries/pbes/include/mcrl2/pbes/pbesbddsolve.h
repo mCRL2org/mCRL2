@@ -124,6 +124,12 @@ class bdd_sylvan
       return x.Compose(sigma);
     }
 
+    // Applies the inverse of the relation R to x
+    bdd_type relation_inverse(const bdd_type& R, const bdd_type& x, const bdd_variable_set& next_variables) const
+    {
+      return x.RelPrev(R, next_variables);
+    };
+
     // Returns a string representing one solution
     std::string pick_one_solution(const bdd_type& x, const bdd_variable_set& variables) const
     {
@@ -305,6 +311,7 @@ class bdd_parity_game
     bdd_type m_odd;
     std::map<std::uint32_t, bdd_type> m_priorities;
     bdd_type m_initial_state;
+    bool m_use_sylvan_optimization;
 
     void info(const bdd_type& x, const std::string& msg, const bdd_variable_set& variables) const
     {
@@ -337,7 +344,8 @@ class bdd_parity_game
       const bdd_type& even_nodes,
       const bdd_type& odd_nodes,
       const std::map<std::uint32_t, bdd_type>& priorities,
-      const bdd_type& initial_state
+      const bdd_type& initial_state,
+      bool use_sylvan_optimization = false
      )
     : m_bdd(bdd),
       m_variables(variables),
@@ -350,26 +358,11 @@ class bdd_parity_game
       m_even(even_nodes),
       m_odd(odd_nodes),
       m_priorities(priorities),
-      m_initial_state(initial_state)
+      m_initial_state(initial_state),
+      m_use_sylvan_optimization(use_sylvan_optimization)
     {
       mCRL2log(log::debug) << "|E| = " << m_E.size() << " sat count = " << m_bdd.count(m_bdd.any(m_E), all_variables) << std::endl;
     }
-
-//    // check whether U = { u in V | u in U /\ exists v in V: u --> v }
-//    bool has_successor(const bdd_type& U) const
-//    {
-//      bdd_type V_ = m_bdd.let(m_substitution, m_V);
-//      bdd_type U_next = m_bdd.let(m_substitution, U);
-//      bdd_type Z = m_bdd.quantify(U_next & m_E, m_next_variables, false) & U;
-//      return (Z == U) != 0;
-//    }
-//
-//    bdd_type successor(const bdd_type& U)
-//    {
-//      auto U_next = m_bdd.quantify(m_E & U, m_variables, false);
-//      U_next = U | m_bdd.let(m_reverse_substitution, U_next);
-//      return U_next;
-//    }
 
     // U is a BDD representing a set of vertices
     bdd_type predecessor(bool player, const bdd_type& U)
@@ -385,10 +378,6 @@ class bdd_parity_game
         W_player.push_back(m_bdd.quantify(U_next & Ei, m_next_variables, false));
       }
       bdd_type U_player = V_player & m_bdd.any(W_player);
-      // bdd_type U_player = V_player & m_bdd.quantify(U_next & m_E, m_next_variables, false);
-
-      // V_opponent /\ {v in V | forall u in V: v --> u ==> u in U } =
-      // V_opponent /\ {v in V | ~ (exists u in V: v --> u /\ u in V\U) }
 
       std::vector<bdd_type> W_opponent;
       for (const auto& Ei: m_E)
@@ -396,13 +385,34 @@ class bdd_parity_game
         W_opponent.push_back(m_bdd.quantify(Ei & V_ & ~U_next, m_next_variables, false));
       }
       bdd_type U_opponent = V_opponent & ~m_bdd.any(W_opponent);
-      // bdd_type U_opponent = V_opponent & ~(m_bdd.quantify(m_E & V_ & ~U_next, m_next_variables, false));
 
-      // return union of the two sets
       return U_player | U_opponent;
     }
 
-    // U is a BDD representing a set of vertices
+    // Apply the Sylvan RelPrev operator to improve efficiency
+    bdd_type predecessor_efficient(bool player, const bdd_type& U)
+    {
+      bdd_type V_player = (player == even) ? m_even : m_odd;
+      bdd_type V_opponent = (player == odd) ? m_even : m_odd;
+
+      std::vector<bdd_type> W_player;
+      for (const auto& Ei: m_E)
+      {
+        W_player.push_back(m_bdd.relation_inverse(Ei, U, m_next_variables));
+      }
+      bdd_type U_player = V_player & m_bdd.any(W_player);
+
+      std::vector<bdd_type> W_opponent;
+      for (const auto& Ei: m_E)
+      {
+        W_opponent.push_back(m_bdd.relation_inverse(Ei, m_V & ~U, m_next_variables));
+      }
+      bdd_type U_opponent = V_opponent & ~m_bdd.any(W_opponent);
+
+      return U_player | U_opponent;
+    }
+
+  // U is a BDD representing a set of vertices
     // player is either string 'even' or string 'odd'
     // attractor computation is a least fixpoint computation
     bdd_type attractor(bool player, const bdd_type& A)
@@ -412,7 +422,14 @@ class bdd_parity_game
       while (tmp != tmp_)
       {
         tmp = tmp_;
-        tmp_ = tmp_ | predecessor(player, tmp_);
+        if (m_use_sylvan_optimization)
+        {
+          tmp_ = tmp_ | predecessor_efficient(player, tmp_);
+        }
+        else
+        {
+          tmp_ = tmp_ | predecessor(player, tmp_);
+        }
       }
       return tmp;
     }
@@ -440,30 +457,7 @@ class bdd_parity_game
         }
       }
       m_priorities = priorities;
-      // m_bdd.collect_garbage();
     }
-
-//    void print(bool debug = false)
-//    {
-//      std::size_t n = m_variables.size();
-//      std::cout << "Number of variables: " << n << std::endl;
-//      std::cout << "Number of edges: " << m_bdd.count(m_E, m_all_variables) << std::endl;
-//      std::cout << "Number of vertices: " << m_bdd.count(m_V, m_variables)
-//                << "(" << m_bdd.count(m_even, m_variables) << " even and "
-//                << m_bdd.count(m_odd, m_variables) << " odd)" << std::endl;
-//      if (debug)
-//      {
-//        // print all sets
-//        std::cout << " Vertices: %s " << m_bdd.pick_one_solution(m_V, m_variables) << std::endl;
-//        std::cout << " Even: %s " << m_bdd.pick_one_solution(m_even, m_variables) << std::endl;
-//        std::cout << " Odd: %s " << m_bdd.pick_one_solution(m_odd, m_variables) << std::endl;
-//        for (const auto& [i, p_i]: m_priorities)
-//        {
-//          std::cout << " Priority[" << i << "]: " << m_bdd.pick_one_solution(p_i, m_variables) << std::endl;
-//        }
-//        std::cout << " Edges: %s " << m_bdd.pick_one_solution(m_E, m_all_variables) << std::endl;
-//      }
-//    }
 
     std::size_t game_size() const
     {
@@ -973,12 +967,12 @@ class pbesbddsolve
         : m_pbes(p), m_pbes_index(m_pbes), m_bdd(bdd), m_unary_encoding(unary_encoding), m_granularity(granularity)
     { }
 
-    bool run()
+    bool run(bool use_sylvan_optimization = false)
     {
       auto [variable_set, next_variable_set, all_variable_set, substitution,
             reverse_substitution, V, E, even, odd, initial_state, priorities] = compute_parity_game();
       bdd_parity_game G(m_bdd, variable_set, next_variable_set, all_variable_set, substitution,
-                            reverse_substitution, V, E, even, odd, priorities, initial_state);
+                            reverse_substitution, V, E, even, odd, priorities, initial_state, use_sylvan_optimization);
       auto [W0, W1] = G.zielonka();
       return (W0 | G.initial_state()) == W0;
     }
