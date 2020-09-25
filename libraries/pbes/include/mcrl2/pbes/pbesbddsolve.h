@@ -360,9 +360,7 @@ class bdd_parity_game
       m_priorities(priorities),
       m_initial_state(initial_state),
       m_use_sylvan_optimization(use_sylvan_optimization)
-    {
-      mCRL2log(log::debug) << "|E| = " << m_E.size() << " sat count = " << m_bdd.count(m_bdd.any(m_E), all_variables) << std::endl;
-    }
+    {}
 
     // U is a BDD representing a set of vertices
     bdd_type predecessor(bool player, const bdd_type& U)
@@ -531,6 +529,7 @@ class bdd_parity_game
 
     std::pair<bdd_type, bdd_type> zielonka()
     {
+      mCRL2log(log::debug) << "zielonka |V| = " << m_bdd.node_count(nodes()) << std::endl;
       if ( (m_even | m_odd) == m_bdd.false_())
       {
         return { m_even, m_odd };
@@ -973,6 +972,10 @@ class pbesbddsolve
             reverse_substitution, V, E, even, odd, initial_state, priorities] = compute_parity_game();
       bdd_parity_game G(m_bdd, variable_set, next_variable_set, all_variable_set, substitution,
                             reverse_substitution, V, E, even, odd, priorities, initial_state, use_sylvan_optimization);
+      mCRL2log(log::verbose) << "Computed parity game" << std::endl;
+      mCRL2log(log::debug) << "node count |V| = " << m_bdd.node_count(G.nodes()) << std::endl;
+      mCRL2log(log::debug) << "node count |E| = " << m_bdd.node_count(m_bdd.any(G.edges())) << std::endl;
+
       auto [W0, W1] = G.zielonka();
       return (W0 | G.initial_state()) == W0;
     }
