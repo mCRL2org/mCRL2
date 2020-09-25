@@ -36,6 +36,13 @@ class FindAndReplaceDialog : public QDialog
                                 QWidget* parent = 0);
   ~FindAndReplaceDialog();
 
+  /**
+   * @brief resetAndFocus Resets the focus to the find and replace window. The
+   *   find and replace fields are not reset for reuse, unless there is selected
+   *   text, in which case this is put in the find field.
+   */
+  void resetFocus();
+
   public slots:
   /**
    * @brief setFindEnabled Is called when the text in the find field changes

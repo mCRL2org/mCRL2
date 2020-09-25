@@ -359,15 +359,7 @@ void MainWindow::actionImportProperties()
 
 void MainWindow::actionFindAndReplace()
 {
-  if (findAndReplaceDialog->isVisible())
-  {
-    findAndReplaceDialog->setFocus();
-    findAndReplaceDialog->activateWindow();
-  }
-  else
-  {
-    findAndReplaceDialog->show();
-  }
+  findAndReplaceDialog->resetFocus();
 }
 
 bool MainWindow::assertProjectOpened()

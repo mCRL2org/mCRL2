@@ -43,6 +43,26 @@ void FindAndReplaceDialog::showMessage(const QString& message, bool error)
   ui->infoLabel->setText(message);
 }
 
+void FindAndReplaceDialog::resetFocus()
+{
+  ui->textToFind->setFocus();
+  QString selection = codeEditor->textCursor().selectedText();
+  if (!selection.isEmpty())
+  {
+    ui->textToFind->setText(selection);
+  }
+
+  if (isVisible())
+  {
+    setFocus();
+    activateWindow();
+  }
+  else
+  {
+    show();
+  }
+}
+
 void FindAndReplaceDialog::setFindEnabled()
 {
   ui->findButton->setEnabled(ui->textToFind->text().count() > 0);
