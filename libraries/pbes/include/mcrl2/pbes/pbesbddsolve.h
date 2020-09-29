@@ -415,10 +415,14 @@ class bdd_parity_game
     // attractor computation is a least fixpoint computation
     bdd_type attractor(bool player, const bdd_type& A)
     {
+      mCRL2log(log::debug) << "attractor" << std::endl;
+      std::size_t count = 0;
+
       bdd_type tmp = m_bdd.false_();
       bdd_type tmp_ = A;
       while (tmp != tmp_)
       {
+        mCRL2log(log::debug) << count++ << std::endl;
         tmp = tmp_;
         if (m_use_sylvan_optimization)
         {
@@ -439,11 +443,18 @@ class bdd_parity_game
       m_even = m_even & ~A;
       m_odd = m_odd & ~A;
       bdd_type A_ = m_bdd.let(m_substitution, A);
-//      m_E = m_E & ~A & ~A_;
-      bdd_type AA = ~A & ~A_;
+
+      //----------------------------------------------//
+      // bdd_type AA = ~A & ~A_; // N.B. this turns out to be very inefficient in some cases
+      // for (auto& Ei: m_E)
+      // {
+      //   Ei = Ei & AA;
+      // }
+      //----------------------------------------------//
+
       for (auto& Ei: m_E)
       {
-        Ei = Ei & AA;
+        Ei = Ei & ~A & ~A_;
       }
 
       std::map<std::uint32_t, bdd_type> priorities;
@@ -529,9 +540,15 @@ class bdd_parity_game
 
     std::pair<bdd_type, bdd_type> zielonka()
     {
-      mCRL2log(log::debug) << "zielonka |V| = " << m_bdd.node_count(nodes()) << std::endl;
+      mCRL2log(log::debug) << "start zielonka" << std::endl;
+      mCRL2log(log::debug) << "node_count(V) = " << m_bdd.node_count(nodes()) << " sat_count(V) = " << m_bdd.count(nodes(), m_variables) << std::endl;
+      mCRL2log(log::debug) << "node_count(E) = " << m_bdd.node_count(m_bdd.any(edges())) << " sat_count(E) = " << m_bdd.count(m_bdd.any(edges()), m_all_variables) << std::endl;
+      mCRL2log(log::debug) << "node_count(even) = " << m_bdd.node_count(m_even) << " sat_count(even) = " << m_bdd.count(m_even, m_all_variables) << std::endl;
+      mCRL2log(log::debug) << "node_count(odd) = " << m_bdd.node_count(m_odd) << " sat_count(odd) = " << m_bdd.count(m_odd, m_all_variables) << std::endl;
+
       if ( (m_even | m_odd) == m_bdd.false_())
       {
+        mCRL2log(log::debug) << "finish zielonka" << std::endl;
         return { m_even, m_odd };
       }
       else
@@ -545,10 +562,12 @@ class bdd_parity_game
         auto [W0, W1] = G.zielonka();
         if (parity == even && W1 == m_bdd.false_())
         {
+          mCRL2log(log::debug) << "finish zielonka" << std::endl;
           return { W0 | A, W1 };
         }
         else if (parity == odd && W0 == m_bdd.false_())
         {
+          mCRL2log(log::debug) << "finish zielonka" << std::endl;
           return { W0, A | W1 };
         }
         else
@@ -560,10 +579,12 @@ class bdd_parity_game
           auto [X0, X1] = H.zielonka();
           if (parity == even)
           {
+            mCRL2log(log::debug) << "finish zielonka" << std::endl;
             return { X0, X1 | B };
           }
           else
           {
+            mCRL2log(log::debug) << "finish zielonka" << std::endl;
             return { X0 | B, X1 };
           }
         }
