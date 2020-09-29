@@ -373,16 +373,16 @@ class bdd_parity_game
       std::vector<bdd_type> W_player;
       for (const auto& Ei: m_E)
       {
-        W_player.push_back(m_bdd.quantify(U_next & Ei, m_next_variables, false));
+        W_player.push_back(V_player & m_bdd.quantify(U_next & Ei, m_next_variables, false));
       }
-      bdd_type U_player = V_player & m_bdd.any(W_player);
+      bdd_type U_player = m_bdd.any(W_player);
 
       std::vector<bdd_type> W_opponent;
       for (const auto& Ei: m_E)
       {
-        W_opponent.push_back(m_bdd.quantify(Ei & V_ & ~U_next, m_next_variables, false));
+        W_opponent.push_back(V_opponent & ~m_bdd.quantify(Ei & V_ & ~U_next, m_next_variables, false));
       }
-      bdd_type U_opponent = V_opponent & ~m_bdd.any(W_opponent);
+      bdd_type U_opponent = m_bdd.all(W_opponent);
 
       return U_player | U_opponent;
     }
@@ -403,9 +403,9 @@ class bdd_parity_game
       std::vector<bdd_type> W_opponent;
       for (const auto& Ei: m_E)
       {
-        W_opponent.push_back(m_bdd.relation_inverse(Ei, m_V & ~U, m_next_variables));
+        W_opponent.push_back(V_opponent & ~m_bdd.relation_inverse(Ei, m_V & ~U, m_next_variables));
       }
-      bdd_type U_opponent = V_opponent & ~m_bdd.any(W_opponent);
+      bdd_type U_opponent = m_bdd.all(W_opponent);
 
       return U_player | U_opponent;
     }
