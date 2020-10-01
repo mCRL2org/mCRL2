@@ -187,7 +187,7 @@ class suminst_algorithm: public detail::lps_algorithm<Specification>
         m_sorts(sorts),
         m_tau_summands_only(tau_summands_only),
         m_rewriter(r),
-        m_enumerator(r, spec.data(), r, m_id_generator, true),
+        m_enumerator(r, spec.data(), r, m_id_generator, false),
         m_processed(0),
         m_deleted(0),
         m_added(0)
