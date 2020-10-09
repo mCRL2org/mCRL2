@@ -856,7 +856,7 @@ inline void lts_convert_aux(const lts<STATE_LABEL1, ACTION_LABEL1, LTS_BASE1>& l
   }
   lts_out.set_initial_state(lts_in.initial_state());
 
-  lts_out.set_hidden_label_map(lts_in.hidden_label_map());
+  lts_out.set_hidden_label_set(lts_in.hidden_label_set());
 }
 
 // ======================  lts -> lts  =============================

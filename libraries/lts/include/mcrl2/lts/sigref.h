@@ -384,7 +384,7 @@ protected:
     std::size_t count_prev = m_count;
     std::size_t iterations = 0;
 
-    sort_transitions(m_lts.get_transitions(), m_lts.hidden_label_map(), mcrl2::lts::lbl_tgt_src);
+    sort_transitions(m_lts.get_transitions(), m_lts.hidden_label_set(), mcrl2::lts::lbl_tgt_src);
 
     do
     {

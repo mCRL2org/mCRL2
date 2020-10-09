@@ -364,7 +364,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
         has_outgoing_transition[i] = false;
       }
 
-      sort_transitions(m_lts.get_transitions(), m_lts.hidden_label_map(), lts::src_lbl_tgt);
+      sort_transitions(m_lts.get_transitions(), m_lts.hidden_label_set(), lts::src_lbl_tgt);
       const std::vector<lts::transition> &transitions=m_lts.get_transitions();
 
       for (std::vector<lts::transition>::const_iterator i = transitions.begin(); i != transitions.end(); ++i)

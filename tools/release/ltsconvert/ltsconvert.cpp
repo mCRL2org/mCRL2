@@ -123,7 +123,8 @@ class ltsconvert_tool : public input_output_tool
 
       LTS_TYPE l;
       l.load(tool_options.infilename);
-      l.hide_actions(tool_options.tau_actions);
+      l.record_hidden_actions(tool_options.tau_actions);
+      l.apply_hidden_actions();
 
       if (tool_options.check_reach)
       {
@@ -164,7 +165,6 @@ class ltsconvert_tool : public input_output_tool
         // No lpsfile is given. Only straightforward translations are possible.
         load_lps(spec, tool_options.lpsfile);
       }
-
 
       switch (tool_options.outtype)
       {

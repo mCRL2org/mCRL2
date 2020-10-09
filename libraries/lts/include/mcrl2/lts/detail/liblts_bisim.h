@@ -271,7 +271,7 @@ class bisim_partitioner
       block initial_partition;
 
       // First store the bottom and non bottom states.
-      sort_transitions(aut.get_transitions(), aut.hidden_label_map(), mcrl2::lts::src_lbl_tgt);
+      sort_transitions(aut.get_transitions(), aut.hidden_label_set(), mcrl2::lts::src_lbl_tgt);
 
       state_type last_non_stored_state_number=0;
       bool bottom_state=true;
@@ -357,7 +357,7 @@ class bisim_partitioner
       order_on_tau_reachability(initial_partition.non_bottom_states);
 
       // Store the non-inert transitions (i.e. the non tau transitions)
-      sort_transitions(aut.get_transitions(), aut.hidden_label_map(), mcrl2::lts::lbl_tgt_src);
+      sort_transitions(aut.get_transitions(), aut.hidden_label_set(), mcrl2::lts::lbl_tgt_src);
       const std::vector<transition> & trans1=aut.get_transitions();
       for (std::vector<transition>::const_iterator r=trans1.begin(); r!=trans1.end(); ++r)
       {
@@ -1178,7 +1178,7 @@ std::set < mcrl2::trace::Trace > bisim_partitioner<LTS_TYPE>::counter_traces(
     throw mcrl2::runtime_error("Requesting a counter trace for two bisimilar states. Such a trace is not useful.");
   }
 
-  const outgoing_transitions_per_state_action_t outgoing_transitions=transitions_per_outgoing_state_action_pair(aut.get_transitions(),aut.hidden_label_map());
+  const outgoing_transitions_per_state_action_t outgoing_transitions=transitions_per_outgoing_state_action_pair(aut.get_transitions(),aut.hidden_label_set());
   return counter_traces_aux(s,t,outgoing_transitions,branching_bisimulation);
 }
 

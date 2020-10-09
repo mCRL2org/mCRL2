@@ -134,7 +134,7 @@ void reflexive_transitive_tau_closure(lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BAS
 
 
 /// \brief Removes each transition s-a->s' if also transitions s-a->-tau->s' or s-tau->-a->s' are 
-///        present. It uses the hidden_label_map to determine whether transitions are internal. 
+///        present. It uses the hidden_label_set to determine whether transitions are internal. 
 template < class STATE_LABEL_T, class ACTION_LABEL_T, class LTS_BASE_CLASS >
 void remove_redundant_transitions(lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS>& l)
 {

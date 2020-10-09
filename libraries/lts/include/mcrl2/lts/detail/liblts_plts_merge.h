@@ -93,42 +93,24 @@ void plts_merge(LTS_TYPE& l1, const LTS_TYPE& l2)
     {
       // New element has been inserted.
       new_index=l1.add_action(l2.action_label(i));
+      if (l2.is_tau(l2.apply_hidden_label_map(i)))
+      {
+        l1.hidden_label_set().insert(new_index);
+      }
     }
     else 
     {
       new_index=it.first->second; // Old index to which i is mapped.
+      // If label i occurred in l1 and were not both mapped to the hidden label, raise an exception.
+      if (l1.is_tau(l1.apply_hidden_label_map(new_index)) != l2.is_tau(l2.apply_hidden_label_map(i)))
+      {
+        throw mcrl2::runtime_error("The action " + pp(l2.action_label(i)) + " has incompatible hidden actions " +
+                                       pp(l1.action_label(l1.apply_hidden_label_map(new_index))) + " and " +
+                                       pp(l2.action_label(l2.apply_hidden_label_map(i))) + ".");
+      }
+
     }
     assert(new_index==it.first->second);
-    // Now update the hidden_label_map by setting hidden_label_map[new_index]
-    // to the index corresponding to the value of hidden_label_map(i) in l2.
-    // The values of hidden_label_map(new_index) and hidden_label_map(i) may
-    // differ due to the fact that corresponding actions in l1 and l2 are
-    // hidden in different ways. In this case an exception is raised. 
-
-    const typename LTS_TYPE::labels_size_type hidden_index_in_l1=l1.apply_hidden_label_map(new_index);
-    const typename LTS_TYPE::labels_size_type hidden_index_in_l2=l2.apply_hidden_label_map(i);
-
-    // Find the corresponding index in l1 of hidden_index_in_l2. If it does not exist, insert it.
-    const insert_type it_hidden= labs.insert(std::pair <type1,type2>
-                                  (l2.action_label(hidden_index_in_l2),l1.num_action_labels()));
-    typename LTS_TYPE::labels_size_type new_hidden_index;
-    if (it_hidden.second) 
-    {
-      // New element has been inserted.
-      new_hidden_index=l1.add_action(l2.action_label(hidden_index_in_l2));
-    }
-    else 
-    {
-      new_hidden_index=it_hidden.first->second; // Old index to which i is mapped.
-    }
-    assert(new_hidden_index==it_hidden.first->second);
-
-    // If label i occurred in l1 and was not mapped to the same hidden label, raise an exception.
-    if (!it.second && new_hidden_index!=hidden_index_in_l1) 
-    {
-      throw mcrl2::runtime_error("The action " + pp(l2.action_label(i)) + " has incompatible hidden actions " +
-                                 pp(l1.action_label(hidden_index_in_l1)) + " and " + pp(l2.action_label(hidden_index_in_l2)) + ".");
-    }
   }
 
   // Update the label numbers of all transitions of the LTS l1 to reflect

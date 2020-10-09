@@ -28,6 +28,7 @@
 #ifndef MCRL2_LTS_LIBLTS_MERGE_H
 #define MCRL2_LTS_LIBLTS_MERGE_H
 
+#include <map>
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/lts/lts.h"
 
@@ -76,7 +77,7 @@ void merge(LTS_TYPE& l1, const LTS_TYPE& l2)
   }
   // Add the labels for the LTS l2, and put them there with a new index if it was
   // not added yet.
-  // Furthermore, update the hidden_label_map. 
+  // Furthermore, update the hidden_label_set. 
   // If label a1 is mapped to a2 in l2, then this must be the same
   // in l1. It may be that label a1 did not exist yet in which case it needs
   // to be added too.
@@ -92,7 +93,7 @@ void merge(LTS_TYPE& l1, const LTS_TYPE& l2)
       new_index=l1.add_action(l2.action_label(i));
       if (l2.is_tau(l2.apply_hidden_label_map(i)))
       {
-        l1.hidden_label_map()[new_index]=l1.tau_label_index();
+        l1.hidden_label_set().insert(new_index);
       }
 
     }
@@ -100,7 +101,7 @@ void merge(LTS_TYPE& l1, const LTS_TYPE& l2)
     {
       new_index=it.first->second; // Old index to which i is mapped.
 
-      // If label i occurred in l1 and was not mapped to the same hidden label, raise an exception.
+      // If label i occurred in l1 and both were not mapped to the hidden label, raise an exception.
       if (l1.is_tau(l1.apply_hidden_label_map(new_index)) != l2.is_tau(l2.apply_hidden_label_map(i)))
       {
         throw mcrl2::runtime_error("The action " + pp(l2.action_label(i)) + " has incompatible hidden actions " +

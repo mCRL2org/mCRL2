@@ -96,8 +96,8 @@ class ltspcompare_tool : public ltscompare_base
       l1.load(tool_options.name_for_first);
       l2.load(tool_options.name_for_second);
 
-      l1.hide_actions(tool_options.tau_actions);
-      l2.hide_actions(tool_options.tau_actions);
+      l1.record_hidden_actions(tool_options.tau_actions);
+      l2.record_hidden_actions(tool_options.tau_actions);
 
       bool result = true;
       if (tool_options.equivalence != lts_probabilistic_eq_none)

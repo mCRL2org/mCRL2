@@ -893,7 +893,7 @@ bool is_deterministic(const LTS_TYPE& l)
   }
 
   std::vector<transition> temporary_copy_of_transitions = l.get_transitions();
-  sort_transitions(temporary_copy_of_transitions, l.hidden_label_map(), src_lbl_tgt);
+  sort_transitions(temporary_copy_of_transitions, l.hidden_label_set(), src_lbl_tgt);
   
   // Traverse the ordered transitions, and search for two consecutive pairs <s,l,t> and <s,l,t'> with t!=t'. 
   // Such a pair exists iff l is not deterministic.
@@ -964,8 +964,6 @@ void determinise(LTS_TYPE& l)
   std::ptrdiff_t d_id = tss.set_set_tag(tss.create_set(d_states));
   d_states.clear();
 
-  // std::multimap < transition::size_type, std::pair < transition::size_type, transition::size_type > >
-  // const outgoing_transitions_per_state_t begin(l.get_transitions(),l.hidden_label_map(),l.num_states(),true);
   const outgoing_transitions_per_state_t begin(l.get_transitions(),l.num_states(),true);
 
   l.clear_transitions();
@@ -983,7 +981,7 @@ void determinise(LTS_TYPE& l)
     detail::get_trans(begin,tss,tss.get_set(d_id),d_transs,l);
 
     // sort d_transs by label and (if labels are equal) by destination
-    const detail::compare_transitions_lts compare(l.hidden_label_map());
+    const detail::compare_transitions_lts compare(l.hidden_label_set());
     sort(d_transs.begin(),d_transs.end(),compare);
 
     n_t = d_transs.size();

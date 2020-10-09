@@ -28,27 +28,27 @@ namespace lts
 
 /** \brief Sorts the transitions using a sort style.
  * \param[in/out] transitions A vector of transitions to be sorted. 
- * \param[in] hidden_label_map A map that tells which actions are mapped on a hidden label. 
- *            Sorting takes place after applying the hidden label map.
+ * \param[in] hidden_label_set A set that tells which actions are to be interpreted as being hidden.
+ *            Sorting takes place after mapping hidden actions to zero.
  * \param[in] ts The sort style to use.
  */
 
 inline void sort_transitions(std::vector<transition>& transitions, 
-                      const std::map<transition::size_type,transition::size_type>& hidden_label_map,
+                      const std::set<transition::size_type>& hidden_label_set,
                       transition_sort_style ts = src_lbl_tgt)
 {
   switch (ts)
   {
     case lbl_tgt_src:
     {
-      const detail::compare_transitions_lts compare(hidden_label_map);
+      const detail::compare_transitions_lts compare(hidden_label_set);
       sort(transitions.begin(),transitions.end(),compare);
       break;
     }
     case src_lbl_tgt:
     default:
     {
-      const detail::compare_transitions_slt compare(hidden_label_map);
+      const detail::compare_transitions_slt compare(hidden_label_set);
       sort(transitions.begin(),transitions.end(),compare);
       break;
     }
@@ -62,23 +62,12 @@ inline void sort_transitions(std::vector<transition>& transitions,
 
 inline void sort_transitions(std::vector<transition>& transitions, transition_sort_style ts = src_lbl_tgt)
 {
-  sort_transitions(transitions, std::map<transition::size_type,transition::size_type>(), ts);
+  sort_transitions(transitions, std::set<transition::size_type>(), ts);
 }
 
 
 namespace detail
 {
-
-inline std::size_t apply_map(const std::size_t n, std::map<transition::size_type,transition::size_type>& mapping)
-{
-  const std::map<transition::size_type,transition::size_type>::const_iterator i=mapping.find(n);
-  if (i==mapping.end())  // not found
-  {
-    return n;
-  }
-  return i->second;
-}
-
 
 // An indexed sorted vector below contains the outgoing or incoming transitions per state,
 // grouped per state. The input consists of a vector of transitions. The incoming/outcoming
@@ -235,13 +224,13 @@ inline outgoing_transitions_per_state_action_t transitions_per_outgoing_state_ac
 /// \brief Provide the transitions as a multimap accessible per from state and label.
 inline outgoing_transitions_per_state_action_t transitions_per_outgoing_state_action_pair(
                  const std::vector<transition>& trans, 
-                 const std::map<transition::size_type,transition::size_type>& hide_label_map)
+                 const std::set<transition::size_type>& hide_label_set)
 {
   outgoing_transitions_per_state_action_t result;
   for (const transition& t: trans)
   {
     result.insert(std::pair<std::pair<transition::size_type, transition::size_type>, transition::size_type>(
-                    std::pair<transition::size_type, transition::size_type>(t.from(), detail::apply_map(t.label(),hide_label_map)), t.to()));
+                    std::pair<transition::size_type, transition::size_type>(t.from(), detail::apply_hidden_labels(t.label(),hide_label_set)), t.to()));
   }
   return result;
 } 
@@ -261,13 +250,13 @@ inline outgoing_transitions_per_state_action_t transitions_per_outgoing_state_ac
 /// \brief Provide the transitions as a multimap accessible per from state and label, ordered backwardly.
 inline outgoing_transitions_per_state_action_t transitions_per_outgoing_state_action_pair_reversed(
                 const std::vector<transition>& trans,
-                const std::map<transition::size_type,transition::size_type>& hide_label_map)
+                const std::set<transition::size_type>& hide_label_set)
 {
   outgoing_transitions_per_state_action_t result;
   for (const transition& t: trans)
   {
     result.insert(std::pair<std::pair<transition::size_type, transition::size_type>, transition::size_type>(
-                    std::pair<transition::size_type, transition::size_type>(t.to(), detail::apply_map(t.label(),hide_label_map)), t.from()));
+                    std::pair<transition::size_type, transition::size_type>(t.to(), detail::apply_hidden_labels(t.label(),hide_label_set)), t.from()));
   }
   return result;
 } 
