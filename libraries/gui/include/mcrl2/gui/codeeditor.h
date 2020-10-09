@@ -227,17 +227,50 @@ class CodeEditor : public QPlainTextEdit
    */
   void setFontSize(int pixelSize);
 
+  /**
+   * @brief highlightCurrentLine Highlights the line the cursor is on
+   */
+  void highlightCurrentLine();
+
+  /**
+   * @brief highlightParentheses Highlights the parenthesis that corresponds to
+   *   the one the cursor is next to
+   */
+  void highlightParentheses();
+
+  /**
+   * @brief matchingParenthesisPosition Finds the position of the parenthesis
+   *   that matches the one on the given position in the given direction
+   * @param toMatchPos The position in the text of the parenthesis to match with
+   * @param direction In which direction to look for the matching parenthesis.
+   *   Equals 1 if we need to look forward for a ')', equals -1 if we need to
+   *   look back for a '('.
+   */
+  int matchingParenthesisPosition(int toMatchPos, int direction);
+
+  /**
+   * @brief parenthesisHighlighting Creates a highlighting for a single
+   *   character on a given position for highlighting matching parentheses
+   * @param position The position of the character to highlight
+   * @returns A selection that defines a highlighted parenthesis
+   */
+  QTextEdit::ExtraSelection parenthesisHighlighting(int position);
+
+  /**
+   * @brief characterIsCommentedOut Checks whether the character at the given
+   *   position in the given string is commented out
+   * @param text The text to check the character in
+   * @param pos The position of the character to check for in the text
+   * return Whether the character is commented out
+   */
+  bool characterIsCommentedOut(const QString& text, int pos);
+
   private slots:
   /**
    * @brief showContextMenu Creates and shows a context menu
    * @param position The position where to create the context menu
    */
   void showContextMenu(const QPoint& position);
-
-  /**
-   * @brief highlightCurrentLine Highlights the line the cursor is on
-   */
-  void highlightCurrentLine();
 
   /**
    * @brief updateLineNumberAreaWidth Updates the width of the line number area

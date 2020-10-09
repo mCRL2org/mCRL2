@@ -14,6 +14,7 @@
 #include <QPainter>
 #include <QTextBlock>
 #include <QMenu>
+#include <QRegularExpression>
 
 using namespace mcrl2::gui::qt;
 
@@ -271,19 +272,113 @@ void CodeEditor::showContextMenu(const QPoint& position)
 
 void CodeEditor::highlightCurrentLine()
 {
-  QList<QTextEdit::ExtraSelection> extraSelections;
+  QList<QTextEdit::ExtraSelection> selections = extraSelections();
   QTextEdit::ExtraSelection selection;
 
-  QColor lineColor =
-      lightPalette ? QColor(Qt::lightGray) : QColor(64, 64, 64);
+  QColor lineColor = lightPalette ? QColor(Qt::lightGray) : QColor(64, 64, 64);
 
   selection.format.setBackground(lineColor);
   selection.format.setProperty(QTextFormat::FullWidthSelection, true);
   selection.cursor = textCursor();
   selection.cursor.clearSelection();
-  extraSelections.append(selection);
+  selections.append(selection);
 
-  setExtraSelections(extraSelections);
+  setExtraSelections(selections);
+}
+
+void CodeEditor::highlightParentheses()
+{
+  QString text = toPlainText();
+  QTextCursor cursor = textCursor();
+  int toMatchPos = cursor.position();
+  int matchingParenthesisPos = -1;
+
+  /* find a matching parenthesis */
+  if (!cursor.atEnd())
+  {
+    /* first look on the right, otherwise on the left */
+    QChar rightChar = text.at(toMatchPos);
+    if ((rightChar == '(' || rightChar == ')') &&
+        !characterIsCommentedOut(text, toMatchPos))
+    {
+      matchingParenthesisPos =
+          matchingParenthesisPosition(toMatchPos, rightChar == '(' ? 1 : -1);
+    }
+    else
+    {
+      if (!cursor.atStart())
+      {
+        toMatchPos -= 1;
+        QChar leftChar = text.at(toMatchPos);
+        if ((leftChar == '(' || leftChar == ')') &&
+            !characterIsCommentedOut(text, toMatchPos))
+        {
+          matchingParenthesisPos =
+              matchingParenthesisPosition(toMatchPos, leftChar == '(' ? 1 : -1);
+        }
+      }
+    }
+  }
+
+  /* highlight both the matched and matching parenthesis */
+  if (matchingParenthesisPos > -1)
+  {
+    QList<QTextEdit::ExtraSelection> selections = extraSelections();
+    selections.append(parenthesisHighlighting(toMatchPos));
+    selections.append(parenthesisHighlighting(matchingParenthesisPos));
+    setExtraSelections(selections);
+  }
+}
+
+int CodeEditor::matchingParenthesisPosition(int toMatchPos, int direction)
+{
+  QString text = toPlainText();
+  QTextCursor cursor = textCursor();
+  int pos = toMatchPos;
+  int depth = direction;
+
+  while (depth != 0 && pos > -1)
+  {
+    /* find the next first parenthesis */
+    if (direction > 0)
+    {
+      pos = text.indexOf(QRegularExpression("[()]"), pos + 1);
+    }
+    else
+    {
+      pos = text.lastIndexOf(QRegularExpression("[()]"), pos - 1);
+    }
+    /* update how deeply nested we are if the parenthesis is not a comment */
+    if (!characterIsCommentedOut(text, pos))
+    {
+      depth += text.at(pos) == '(' ? 1 : -1;
+    }
+  }
+
+  return pos;
+}
+
+QTextEdit::ExtraSelection CodeEditor::parenthesisHighlighting(int position)
+{
+  QTextCursor cursor = textCursor();
+  QTextEdit::ExtraSelection selection;
+
+  /* give the character a red colour */
+  QTextCharFormat format = selection.format;
+  format.setForeground(Qt::red);
+  format.setBackground(lightPalette ? QColor(255, 192, 192) : QColor(64, 0, 0));
+  selection.format = format;
+
+  /* select the character to highlight by moving the cursor */
+  cursor.setPosition(position);
+  cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor);
+  selection.cursor = cursor;
+  return selection;
+}
+
+bool CodeEditor::characterIsCommentedOut(const QString& text, int pos)
+{
+  return text.lastIndexOf('\n', pos) < text.lastIndexOf('%', pos);
 }
 
 void CodeEditor::paintEvent(QPaintEvent* event)
@@ -291,7 +386,9 @@ void CodeEditor::paintEvent(QPaintEvent* event)
   /* highlight the line the cursor is on when in focus */
   if (this->hasFocus())
   {
+    setExtraSelections({});
     highlightCurrentLine();
+    highlightParentheses();
   }
   QPlainTextEdit::paintEvent(event);
 }
@@ -408,7 +505,8 @@ void CodeEditor::resizeEvent(QResizeEvent* e)
 void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent* event)
 {
   QPainter painter(lineNumberArea);
-  painter.fillRect(event->rect(), lightPalette ? Qt::lightGray : QColor(64, 64, 64));
+  painter.fillRect(event->rect(),
+                   lightPalette ? Qt::lightGray : QColor(64, 64, 64));
 
   QTextBlock block = firstVisibleBlock();
   int blockNumber = block.blockNumber();
