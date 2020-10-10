@@ -652,7 +652,7 @@ class pbes_constelm_algorithm
       if (mCRL2logEnabled(log::verbose))
       {
         mCRL2log(log::verbose) << "\nremoved the following constant parameters:" << std::endl;
-        for (const std::pair<propositional_variable, std::vector<data::variable>>& i: redundant_parameters())
+        for (const std::pair<const propositional_variable, std::vector<data::variable>>& i: redundant_parameters())
         {
           for (const data::variable& var: i.second)
           {

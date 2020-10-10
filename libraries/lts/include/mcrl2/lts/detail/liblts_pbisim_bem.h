@@ -430,7 +430,7 @@ class prob_bisim_partitioner_bem
     }
 
     /* Add all the state probabilities pairs in the mapping to its actual data type*/
-    for (const std::pair<state_type, probability_fraction_type>& i : prob_state_map)
+    for (const std::pair<const state_type, probability_fraction_type>& i: prob_state_map)
     {
       new_prob_state.add(i.first, i.second);
     }

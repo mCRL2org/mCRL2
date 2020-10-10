@@ -429,10 +429,10 @@ protected:
   bool refine()
   {
     int i = 0;
-    for(const data_expression phi_k: partition)
+    for(const data_expression& phi_k: partition)
     {
       int j = 0;
-      for(const data_expression phi_l: partition)
+      for(const data_expression& phi_l: partition)
       {
         int k = 0;
         for(const lps::action_summand& as: m_spec.process().action_summands())
