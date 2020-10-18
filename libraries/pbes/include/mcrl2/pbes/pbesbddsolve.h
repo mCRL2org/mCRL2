@@ -377,7 +377,7 @@ class bdd_parity_game
       m_use_sylvan_optimization(use_sylvan_optimization)
     {}
 
-    // Apply the Sylvan RelPrev operator to improve efficiency
+    // If optimized is true, the Sylvan RelPrev operator is applied to improve efficiency
     bdd_type predecessor(bool player, const bdd_type& U, bool optimized = false)
     {
       bdd_type V_player = (player == even) ? m_even : m_odd;
@@ -428,7 +428,7 @@ class bdd_parity_game
       m_V = m_V & ~A;
       m_even = m_even & ~A;
       m_odd = m_odd & ~A;
-      bdd_type A_ = m_bdd.let(m_next_substitution, A);
+      bdd_type A_next = m_bdd.let(m_next_substitution, A);
 
       //----------------------------------------------//
       // bdd_type AA = ~A & ~A_; // N.B. this turns out to be very inefficient in some cases
@@ -440,15 +440,16 @@ class bdd_parity_game
 
       for (auto& Ei: m_E)
       {
-        Ei = Ei & ~A & ~A_;
+        Ei = Ei & ~A & ~A_next;
       }
 
       std::map<std::uint32_t, bdd_type> priorities;
       for (const auto& [i, p_i]: m_priorities)
       {
-        if ((p_i & !A) != m_bdd.false_())
+        auto priority = p_i & ~A;
+        if (priority != m_bdd.false_())
         {
-          priorities[i] = p_i & !A;
+          priorities[i] = priority;
         }
       }
       m_priorities = priorities;
@@ -744,10 +745,10 @@ class pbesbddsolve
       return result;
     }
 
-    std::vector<bdd_type> compute_equation_identifiers(std::size_t equation_count, const std::vector<sylvan::Bdd>& id_variables, bool unary_encoding)
+    std::vector<bdd_type> compute_nodes(std::size_t equation_count, const std::vector<bdd_type>& id_variables, bool unary_encoding)
     {
-      std::vector<sylvan::Bdd> result;
-      std::vector<std::vector<sylvan::Bdd>> sequences(equation_count, std::vector<sylvan::Bdd>());
+      std::vector<bdd_type> result;
+      std::vector<std::vector<bdd_type>> sequences(equation_count, std::vector<bdd_type>());
 
       if (unary_encoding)
       {
@@ -784,9 +785,9 @@ class pbesbddsolve
     }
 
     inline
-    std::map<std::size_t, std::vector<sylvan::Bdd>> compute_priority_map(const std::vector<bdd_type>& equation_ids) const
+    std::map<std::size_t, std::vector<bdd_type>> compute_priority_map(const std::vector<bdd_type>& equation_ids) const
     {
-      std::map<std::size_t, std::vector<sylvan::Bdd>> result;
+      std::map<std::size_t, std::vector<bdd_type>> result;
       const auto& equations = m_pbes.equations();
       for (std::size_t i = 0; i < equations.size(); i++)
       {
@@ -964,33 +965,33 @@ class pbesbddsolve
       std::vector<bdd_type> iparameters_bdd_next = make_bdd_variables(iparameters_next);
       std::vector<bdd_type> parameters_bdd_next = make_bdd_variables(parameters_next);
 
-      // equation ids
-      std::vector<bdd_type> equation_ids = compute_equation_identifiers(m_pbes.equations().size(), iparameters_bdd, m_unary_encoding);
-      std::vector<bdd_type> equation_ids_next = compute_equation_identifiers(m_pbes.equations().size(), iparameters_bdd_next, m_unary_encoding);
+      // each PBES variable Xi(e) is a node of the graph
+      std::vector<bdd_type> nodes = compute_nodes(m_pbes.equations().size(), iparameters_bdd, m_unary_encoding);
+      std::vector<bdd_type> nodes_next = compute_nodes(m_pbes.equations().size(), iparameters_bdd_next, m_unary_encoding);
 
       // compute the set V of graph nodes
-      V = m_bdd.any(equation_ids);
+      V = m_bdd.any(nodes);
 
       // compute the sets of even and odd graph nodes
-      std::vector<sylvan::Bdd> even_nodes;
-      std::vector<sylvan::Bdd> odd_nodes;
+      std::vector<bdd_type> even_nodes;
+      std::vector<bdd_type> odd_nodes;
       for (std::size_t i = 0; i < N; i++)
       {
         const srf_equation& eqn = equations[i];
         if (eqn.is_conjunctive())
         {
-          odd_nodes.push_back(equation_ids[i]);
+          odd_nodes.push_back(nodes[i]);
         }
         else
         {
-          even_nodes.push_back(equation_ids[i]);
+          even_nodes.push_back(nodes[i]);
         }
         even = m_bdd.any(even_nodes);
         odd = m_bdd.any(odd_nodes);
       }
 
       //  compute the priority map
-      std::map<std::size_t, std::vector<sylvan::Bdd>> priority_ids = compute_priority_map(equation_ids);
+      std::map<std::size_t, std::vector<bdd_type>> priority_ids = compute_priority_map(nodes);
       std::size_t min_rank = m_pbes_index.rank(equations.front().variable().name());
       std::size_t max_rank = m_pbes_index.rank(equations.back().variable().name());
       // We prefer a max priority game, so the ranks need to be reversed
@@ -1001,9 +1002,9 @@ class pbesbddsolve
         priorities[r] = m_bdd.any(priority_ids[rank]);
       }
 
-      E = compute_edge_relation(equations, equation_ids, equation_ids_next, parameters_bdd_next);
+      E = compute_edge_relation(equations, nodes, nodes_next, parameters_bdd_next);
 
-      initial_state = compute_initial_state(equation_ids);
+      initial_state = compute_initial_state(nodes);
 
       return { variable_set, next_variable_set, all_variable_set, substitution,
            reverse_substitution, V, E, even, odd, initial_state, priorities };
@@ -1028,7 +1029,7 @@ class pbesbddsolve
       {
         mCRL2log(log::verbose) << "Computing reachable vertices" << std::endl;
         G.remove(~G.reachable_vertices(G.initial_state()));
-        mCRL2log(log::verbose) << " Removed unreachable vertices" << std::endl;
+        mCRL2log(log::verbose) << "Removed unreachable vertices" << std::endl;
       }
       auto [W0, W1] = G.zielonka();
       return (W0 | G.initial_state()) == W0;

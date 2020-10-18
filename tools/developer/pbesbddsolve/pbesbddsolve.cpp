@@ -155,6 +155,10 @@ class pbesbddsolve_tool : public input_output_tool
       pbes_system::pbes pbesspec = pbes_system::detail::load_pbes(input_filename());
       normalize(pbesspec);
       srf_pbes p = pbes2srf(pbesspec);
+      if (remove_unreachable_vertices)
+      {
+        p.make_total();
+      }
       unify_parameters(p);
       bool result = pbes_system::bdd::pbesbddsolve(p, sylvan, unary_encoding, granularity).run(apply_sylvan_optimization, remove_unreachable_vertices);
       std::cout << (result ? "true" : "false") << std::endl;
