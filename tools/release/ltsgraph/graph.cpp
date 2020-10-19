@@ -1,4 +1,4 @@
-// Author(s): Rimco Boudewijns, Sjoerd Cranen and Geert van Ieperen
+// Author(s): Rimco Boudewijns and Sjoerd Cranen
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -189,7 +189,7 @@ void Graph::templatedLoad(const QString& filename, const QVector3D& min,
     m_stateLabels.push_back(stateLabelToQString(lts.state_label(i)));
   }
 
-  // Create nodes
+  // Position nodes randomly
   for (std::size_t i = 0; i < lts.num_states(); ++i)
   {
     const bool is_not_probabilistic = false;
@@ -224,20 +224,9 @@ void Graph::templatedLoad(const QString& filename, const QVector3D& min,
 
   m_initialState = add_probabilistic_state<lts_t>(
       lts.initial_probabilistic_state(), min, max);
-
-  // create bidirectional mapping for adjacencies
-  // add an empty vector at every position
-  m_edge_mapping.resize(m_nodes.size());
-
-  for (std::size_t i = 0; i < m_edges.size(); ++i)
-  {
-    Edge& t = m_edges[i];
-    m_edge_mapping[t.from()].push_back(i);
-    m_edge_mapping[t.to()].push_back(i);
-  }
 }
 
-template<class lts_t>
+template <class lts_t>
 std::size_t Graph::add_probabilistic_state(
     const typename lts_t::probabilistic_state_t& probabilistic_state,
     const QVector3D& min, const QVector3D& max)
@@ -256,16 +245,16 @@ std::size_t Graph::add_probabilistic_state(
         QVector3D(frand(min.x(), max.x()), frand(min.y(), max.y()), frand(min.z(), max.z())),
         is_probabilistic);
     m_stateLabelnodes.emplace_back(m_nodes[index_of_the_new_probabilistic_state].pos(),
-                                   index_of_the_new_probabilistic_state);
+                  index_of_the_new_probabilistic_state);
 
     // The following map recalls where probabilities are stored in
     // transitionLabels.
     typedef std::map<typename lts_t::probabilistic_state_t::probability_t,
-        std::size_t>
+                     std::size_t>
         probability_map_t;
     probability_map_t probability_label_indices;
     for (const typename lts_t::probabilistic_state_t::state_probability_pair&
-          p : probabilistic_state)
+            p : probabilistic_state)
     {
       // Find an index for the probabilistic label of the outgoing transition of
       // the probabilistic state.
@@ -292,7 +281,7 @@ std::size_t Graph::add_probabilistic_state(
       m_transitionLabelnodes.push_back(
           LabelNode((m_nodes[index_of_the_new_probabilistic_state].pos() +
                      m_nodes[p.state()].pos()) /
-                    2.0,
+                        2.0,
                     label_index));
     }
     return index_of_the_new_probabilistic_state;
@@ -756,22 +745,5 @@ std::size_t Graph::explorationNodeCount() const
     return 0;
   }
   return m_exploration->nodes.size();
-}
-
-std::size_t Graph::nrOfNeighboursOfNode(std::size_t node)
-{
-  return m_edge_mapping[node].size();
-}
-
-std::size_t Graph::edgeOfNode(std::size_t node, int index)
-{
-  return m_edge_mapping[node][index];
-}
-
-std::size_t Graph::neigbourOfNode(std::size_t node, int index)
-{
-  Edge& edge = m_edges[edgeOfNode(node, index)];
-  // return the node index that is not the given node index
-  return (edge.from() == node) ? edge.to() : edge.from();
 }
 }  // namespace Graph
