@@ -178,7 +178,7 @@ public:
   using const_iterator = key_iterator<true>;
 
   /// Rebind the passed to allocator to a bucket list node allocator.
-  using NodeAllocator = typename Allocator::template rebind<typename Bucket::node>::other;
+  using NodeAllocator = typename std::allocator_traits<Allocator>::template rebind_alloc<Bucket::node>;
 
   /// \returns The first element.
   Key& front() { return reinterpret_cast<node&>(*m_head.next()).key(); }

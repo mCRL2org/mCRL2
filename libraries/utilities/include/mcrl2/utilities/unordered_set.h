@@ -301,7 +301,7 @@ public:
   void rehash(size_type number_of_buckets);
 
   /// \brief Resizes the set to the given number of elements.
-  void reserve(size_type count) { rehash(std::ceil(static_cast<float>(count) / max_load_factor())); }
+  void reserve(size_type count) { rehash(static_cast<std::size_t>(std::ceil(static_cast<float>(count) / max_load_factor()))); }
 
   hasher hash_function() const { return m_hash; }
   key_equal key_eq() const { return m_equals; }
