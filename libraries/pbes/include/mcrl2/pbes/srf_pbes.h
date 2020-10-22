@@ -609,12 +609,8 @@ class srf_pbes
     void make_total()
     {
       std::size_t N = m_equations.size();
-
-      const srf_equation& eqn_false = m_equations[N-2];
-      const srf_equation& eqn_true = m_equations[N-1];
-      const srf_summand& false_summand = eqn_false.summands()[0];
-      const srf_summand& true_summand = eqn_true.summands()[0];
-
+      const srf_summand& false_summand = m_equations[N-2].summands().front();
+      const srf_summand& true_summand = m_equations[N-1].summands().front();
       for (std::size_t i = 0; i < N - 2; i++)
       {
         m_equations[i].make_total(true_summand, false_summand);

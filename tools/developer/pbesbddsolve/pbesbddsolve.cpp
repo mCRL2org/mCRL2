@@ -160,7 +160,7 @@ class pbesbddsolve_tool : public input_output_tool
         p.make_total();
       }
       unify_parameters(p);
-      bool result = pbes_system::bdd::pbesbddsolve(p, sylvan, unary_encoding, granularity).run(apply_sylvan_optimization, remove_unreachable_vertices);
+      bool result = pbes_system::bdd::pbesbddsolve(p, sylvan, unary_encoding, granularity, &timer()).run(apply_sylvan_optimization, remove_unreachable_vertices);
       std::cout << (result ? "true" : "false") << std::endl;
       return true;
     }

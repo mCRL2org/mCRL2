@@ -17,6 +17,7 @@
 #include <utility>
 #include "mcrl2/pbes/pbes_equation_index.h"
 #include "mcrl2/pbes/srf_pbes.h"
+#include "mcrl2/utilities/execution_timer.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "sylvan_obj.hpp"
 
@@ -555,7 +556,7 @@ class bdd_parity_game
       while ( (V_reachable | V_frontier) != V_reachable) // check whether V_frontier is a subset of V_reachable
       {
         V_reachable = V_reachable | V_frontier;
-        mCRL2log(log::verbose) << "  reachable_states iteration " << count++ << std::endl;
+        mCRL2log(log::debug) << "  reachable_states iteration " << count++ << std::endl;
         V_next.clear();
         for (const auto& Ei: m_E)
         {
@@ -569,10 +570,10 @@ class bdd_parity_game
     std::pair<bdd_type, bdd_type> zielonka()
     {
       mCRL2log(log::debug) << "start zielonka" << std::endl;
-      mCRL2log(log::debug) << "node_count(V) = " << m_bdd.node_count(nodes()) << " sat_count(V) = " << m_bdd.count(nodes(), m_variables) << std::endl;
-      mCRL2log(log::debug) << "node_count(E) = " << m_bdd.node_count(m_bdd.any(edges())) << " sat_count(E) = " << m_bdd.count(m_bdd.any(edges()), m_all_variables) << std::endl;
-      mCRL2log(log::debug) << "node_count(even) = " << m_bdd.node_count(m_even) << " sat_count(even) = " << m_bdd.count(m_even, m_all_variables) << std::endl;
-      mCRL2log(log::debug) << "node_count(odd) = " << m_bdd.node_count(m_odd) << " sat_count(odd) = " << m_bdd.count(m_odd, m_all_variables) << std::endl;
+//      mCRL2log(log::debug) << "node_count(V) = " << m_bdd.node_count(nodes()) << " sat_count(V) = " << m_bdd.count(nodes(), m_variables) << std::endl;
+//      mCRL2log(log::debug) << "node_count(E) = " << m_bdd.node_count(m_bdd.any(edges())) << " sat_count(E) = " << m_bdd.count(m_bdd.any(edges()), m_all_variables) << std::endl;
+//      mCRL2log(log::debug) << "node_count(even) = " << m_bdd.node_count(m_even) << " sat_count(even) = " << m_bdd.count(m_even, m_all_variables) << std::endl;
+//      mCRL2log(log::debug) << "node_count(odd) = " << m_bdd.node_count(m_odd) << " sat_count(odd) = " << m_bdd.count(m_odd, m_all_variables) << std::endl;
 
       if ( (m_even | m_odd) == m_bdd.false_())
       {
@@ -634,6 +635,23 @@ class pbesbddsolve
     bdd_sylvan m_bdd;
     bool m_unary_encoding;
     bdd_granularity m_granularity = bdd_granularity::per_pbes;
+    utilities::execution_timer* m_timer = nullptr;     // if it is non-zero, it will be used to display timing information
+
+    void start_timer(const std::string& msg) const
+    {
+      if (m_timer)
+      {
+        m_timer->start(msg);
+      }
+    }
+
+    void finish_timer(const std::string& msg) const
+    {
+      if (m_timer)
+      {
+        m_timer->finish(msg);
+      }
+    }
 
     bdd_type to_bdd(const data::variable& x) const
     {
@@ -923,7 +941,6 @@ class pbesbddsolve
       bdd_type odd;
       bdd_type initial_state;
       std::map<std::uint32_t, bdd_type> priorities;
-
       const std::vector<srf_equation>& equations = m_pbes.equations();
       std::size_t N = equations.size();
 
@@ -1011,27 +1028,35 @@ class pbesbddsolve
     }
 
   public:
-    pbesbddsolve(const srf_pbes& p, bdd_sylvan& bdd, bool unary_encoding = false, bdd::bdd_granularity granularity = bdd::bdd_granularity::per_pbes)
-        : m_pbes(p), m_pbes_index(m_pbes), m_bdd(bdd), m_unary_encoding(unary_encoding), m_granularity(granularity)
+    pbesbddsolve(const srf_pbes& p, bdd_sylvan& bdd, bool unary_encoding = false,
+               bdd::bdd_granularity granularity = bdd::bdd_granularity::per_pbes,
+               utilities::execution_timer* timer = nullptr)
+        : m_pbes(p), m_pbes_index(m_pbes), m_bdd(bdd), m_unary_encoding(unary_encoding), m_granularity(granularity), m_timer(timer)
     { }
 
     bool run(bool use_sylvan_optimization = true, bool remove_unreachable_vertices = true)
     {
+      mCRL2log(log::verbose) << "Computing parity game" << std::endl;
+      start_timer("compute-parity-game");
       auto [variable_set, next_variable_set, all_variable_set, substitution,
             reverse_substitution, V, E, even, odd, initial_state, priorities] = compute_parity_game();
       bdd_parity_game G(m_bdd, variable_set, next_variable_set, all_variable_set, substitution,
                             reverse_substitution, V, E, even, odd, priorities, initial_state, use_sylvan_optimization);
-      mCRL2log(log::verbose) << "Computed parity game" << std::endl;
-      mCRL2log(log::debug) << "node count |V| = " << m_bdd.node_count(G.nodes()) << std::endl;
-      mCRL2log(log::debug) << "node count |E| = " << m_bdd.node_count(m_bdd.any(G.edges())) << std::endl;
+      finish_timer("compute-parity-game");
+      mCRL2log(log::debug) << "bdd node count |V| = " << m_bdd.node_count(G.nodes()) << std::endl;
+      mCRL2log(log::debug) << "bdd node count |E| = " << m_bdd.node_count(m_bdd.any(G.edges())) << std::endl;
 
       if (remove_unreachable_vertices)
       {
         mCRL2log(log::verbose) << "Computing reachable vertices" << std::endl;
+        start_timer("remove-unreachable-vertices");
         G.remove(~G.reachable_vertices(G.initial_state()));
-        mCRL2log(log::verbose) << "Removed unreachable vertices" << std::endl;
+        finish_timer("remove-unreachable-vertices");
       }
+      mCRL2log(log::verbose) << "Running Zielonka algorithm" << std::endl;
+      start_timer("run-zielonka-algorithm");
       auto [W0, W1] = G.zielonka();
+      finish_timer("run-zielonka-algorithm");
       return (W0 | G.initial_state()) == W0;
     }
 };
