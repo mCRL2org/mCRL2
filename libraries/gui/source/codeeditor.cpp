@@ -163,7 +163,7 @@ CodeHighlighter::CodeHighlighter(bool spec, bool light, QTextDocument* parent)
       HighlightingRule(QRegExp("\\b[0-9]+\\b"), numberFormat));
 
   /* single line comments */
-  commentFormat.setForeground(light ? Qt::gray : Qt::lightGray);
+  commentFormat.setForeground(light ? Qt::darkGray : Qt::lightGray);
   highlightingRules.push_back(
       HighlightingRule(QRegExp("%[^\n]*"), commentFormat));
 }
@@ -275,7 +275,7 @@ void CodeEditor::highlightCurrentLine()
   QList<QTextEdit::ExtraSelection> selections = extraSelections();
   QTextEdit::ExtraSelection selection;
 
-  QColor lineColor = lightPalette ? QColor(Qt::lightGray) : QColor(64, 64, 64);
+  QColor lineColor = lightPalette ? QColor(Qt::lightGray) : QColor(Qt::darkGray);
 
   selection.format.setBackground(lineColor);
   selection.format.setProperty(QTextFormat::FullWidthSelection, true);
