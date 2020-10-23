@@ -59,7 +59,7 @@ std::pair<process::action_list, process::action_list> split_action(
     }
   }
 
-  mCRL2log(log::verbose) << "Split actions into " << left_action << " and " << right_action << ".\n";
+  mCRL2log(log::debug) << "Split actions into " << left_action << " and " << right_action << ".\n";
   return std::make_pair(left_action, right_action);
 }
 

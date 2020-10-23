@@ -192,7 +192,7 @@ std::pair<cleave_condition, cleave_condition> split_condition(
   left_condition.expression = make_conjuntions(left_clauses);
   right_condition.expression = make_conjuntions(right_clauses);
 
-  mCRL2log(log::verbose) << "Split condition into " << left_condition.expression << ", and " << right_condition.expression << "\n";
+  mCRL2log(log::debug) << "Split condition into " << left_condition.expression << ", and " << right_condition.expression << "\n";
   return std::make_pair(left_condition, right_condition);
 }
 
