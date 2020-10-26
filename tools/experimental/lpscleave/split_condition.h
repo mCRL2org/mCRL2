@@ -13,6 +13,8 @@
 #include "mcrl2/data/data_expression.h"
 #include "lpscleave_utility.h"
 
+#include <queue>
+
 using namespace mcrl2;
 
 /// \brief Make a data expression consisting of the clauses in conjective normal form.
@@ -65,29 +67,31 @@ std::set<data::data_expression> compute_clauses(const std::list<data::data_expre
 }
 
 /// \brief Split a conjunctive expression into a set of clauses.
-std::list<data::data_expression> split_clauses(const data::data_expression& condition)
+std::list<data::data_expression> split_conjunction(const data::data_expression& condition)
 {
   std::list<data::data_expression> clauses;
-  data::data_expression lhs = condition;
-  do
+
+  std::queue<data::data_expression> todo;
+  todo.push(condition);
+
+  while (!todo.empty())
   {
-    if (data::sort_bool::is_and_application(lhs))
-    {
-      const auto& application = static_cast<data::application>(lhs);
-      clauses.push_front(application[1]);
+    const data::data_expression& expr = todo.front();
+    todo.pop();
 
-      // Consider the next left hand side.
-      lhs = application[0];
+    if (data::sort_bool::is_and_application(expr))
+    {
+      const auto& application = static_cast<data::application>(expr);
+      todo.push(application[0]);
+      todo.push(application[1]);
     }
-
-    if (!data::sort_bool::is_and_application(lhs))
+    else
     {
-      clauses.push_front(lhs);
+      clauses.push_front(expr);
     }
   }
-  while (data::sort_bool::is_and_application(lhs));
 
-  mCRL2log(log::debug) << "Found clauses ";
+  mCRL2log(log::debug) << "Found clauses in " << condition;
   print_elements(log::debug, clauses);
   mCRL2log(log::debug) << "\n";
 
@@ -114,7 +118,7 @@ std::pair<cleave_condition, cleave_condition> split_condition(
   mCRL2log(log::debug) << "Splitting condition " << condition << "...\n";
 
   // First of all consider each clause in a conjunctive form separately.
-  std::list<data::data_expression> clauses = split_clauses(condition);
+  std::list<data::data_expression> clauses = split_conjunction(condition);
 
   // The resulting conditions and dependencies.
   cleave_condition left_condition;

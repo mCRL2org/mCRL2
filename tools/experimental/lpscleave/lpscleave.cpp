@@ -15,12 +15,46 @@
 
 #include "lpscleave_utility.h"
 
+#include <queue>
+
 namespace mcrl2
 {
 
 using log::log_level_t;
 using lps::stochastic_specification;
 using mcrl2::utilities::tools::input_output_output_tool;
+
+/// \brief Split a disjunctive expression into a set of clauses.
+std::list<data::data_expression> split_disjunction(const data::data_expression& condition)
+{
+  std::list<data::data_expression> clauses;
+
+  std::queue<data::data_expression> todo;
+  todo.push(condition);
+
+  while (!todo.empty())
+  {
+    const data::data_expression& expr = todo.front();
+    todo.pop();
+
+    if (data::sort_bool::is_or_application(expr))
+    {
+      const auto& application = static_cast<data::application>(expr);
+      todo.push(application[0]);
+      todo.push(application[1]);
+    }
+    else
+    {
+      clauses.push_front(expr);
+    }
+  }
+
+  mCRL2log(log::debug) << "Found clauses in " << condition;
+  print_elements(log::debug, clauses);
+  mCRL2log(log::debug) << "\n";
+
+  return clauses;
+}
 
 class lpscleave_tool : public input_output_output_tool
 {
@@ -107,6 +141,25 @@ public:
         invariant = data::parse_data_expression(instream, spec.process().process_parameters(), spec.data());
       }
 
+      // Split the summands based on disjunctive conditions.
+      if (m_split_summands)
+      {
+        std::vector<lps::stochastic_action_summand> summands;
+        for (const lps::stochastic_action_summand& summand : spec.process().action_summands())
+        {
+          for (const data::data_expression& clause : split_disjunction(summand.condition()))
+          {
+            summands.emplace_back(summand.summation_variables(), clause, summand.multi_action(), summand.assignments(), summand.distribution());
+          }
+        }
+        
+        spec = lps::stochastic_specification(spec.data(), 
+          spec.action_labels(), 
+          spec.global_variables(), 
+          lps::stochastic_linear_process(spec.process().process_parameters(), spec.process().deadlock_summands(), summands), 
+          spec.initial_process());
+      }
+
       // The resulting LPSs
       stochastic_specification left_spec, right_spec;
       std::tie(left_spec, right_spec) = cleave(spec, left_parameters, right_parameters, m_indices, invariant, m_split_condition, m_split_action, m_merge_heuristic, m_use_next_state);
@@ -129,6 +182,7 @@ protected:
     desc.add_option("summands", utilities::make_mandatory_argument("INDICES"), "A comma separated list of INDICES of summands where the left process generates the action.", 'l');
     desc.add_option("split-condition", "Enable heuristics to split the condition expression of each summand.", 'c');
     desc.add_option("split-action", "Enable heuristics to split the action expression of each summand, where the indices in INDICES are used as a fallback (if no optimal choice is available).", 'a');
+    desc.add_option("split-summands", "Split each summand with a disjunctive condition into one summand per clause", 't');
     desc.add_option("merge-heuristic", "Enable heuristics to merge synchronization indices of summands.", 'm');
     desc.add_option("invariant", utilities::make_mandatory_argument("FILE"), "A FILE which contains a data expression to strengthen the condition expressions.", 'i');
     desc.add_option("use-next-state", "Apply the invariant to the parameter values after the update instead of the current value", 'u');
@@ -170,6 +224,7 @@ protected:
 
     m_split_condition = parser.options.count("split-condition") > 0;
     m_split_action = parser.options.count("split-action") > 0;
+    m_split_summands = parser.options.count("split-summands") > 0;
     m_merge_heuristic = parser.options.count("merge-heuristic") > 0;
   }
 
@@ -181,6 +236,7 @@ private:
   bool m_use_next_state;
   bool m_split_condition;
   bool m_split_action;
+  bool m_split_summands;
   bool m_merge_heuristic;
 };
 
