@@ -352,6 +352,7 @@ std::vector<per_summand_information> static_analysis(
   return results;
 }
 
+/// Determine whether two summands have (syntactically) the same condition, action and assignment expressions.
 bool can_be_merged(
   const lps::stochastic_action_summand& summand,
   const lps::stochastic_action_summand& other_summand,
@@ -440,7 +441,6 @@ void merge_summands(const lps::stochastic_action_summand_vector& summands,
     }
   }
 }
-
 
 /// \brief Construct the summand for the given parameters.
 lps::stochastic_action_summand create_summand(
@@ -659,6 +659,14 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
   auto action_labels = spec.action_labels();
   for (const process::action_label& label : labels)
   {
+    // Abort when any of these labels already exists.
+    if (std::find(action_labels.begin(), action_labels.end(), label) != action_labels.end())
+    {
+      mCRL2log(log::error) << "The action label " << label << " is already present in the specification.\n";
+      mCRL2log(log::error) << "This means that we cannot ensure that this composition is valid.\n";
+      throw mcrl2::runtime_error("Aborted decomposition due to an error.");
+    }
+
     action_labels.push_front(label);
   }
 
