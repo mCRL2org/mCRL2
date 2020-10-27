@@ -21,6 +21,7 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> cleave(
   const data::variable_list& right_parameters,
   const std::list<std::size_t>& indices,
   const data::data_expression& invariant,
+  const std::string& action_prefix,
   bool enable_split_condition,
   bool split_action,
   bool merge_heuristic,

@@ -36,11 +36,11 @@ core::identifier_string_list nodata(const multi_action& multi_action)
 }
 
 /// \brief Replaced sync{left,right}_i by sync_i
-std::string convert_sync(const std::string& name)
+std::string convert_sync(const std::string& name, const std::string& prefix)
 {
   // Only consider the indices.
-  auto index = name.find("_");
-  return std::string("sync") += name.substr(index);
+  auto index = name.find_last_of("_");
+  return std::string(prefix) += std::string("sync") += name.substr(index);
 }
 
 /// \returns The allowed action set A for the given specification.
@@ -77,6 +77,7 @@ std::set<action_name_multiset> compute_A(const lps::stochastic_specification& sp
 inline
 void combine_specification(const lps::stochastic_specification& left_spec,
   const lps::stochastic_specification& right_spec,
+  const std::string& prefix,
   std::ostream& stream)
 {
   stream << left_spec.data();
@@ -93,12 +94,16 @@ void combine_specification(const lps::stochastic_specification& left_spec,
   // H = {actsync_i | i in I}. However, we only need to consider existing indices.
   core::identifier_string_list H;
 
+  // The name of a left synchronisation action.
+  std::string syncleft(prefix);
+  syncleft += "syncleft";
+
   for (const auto& action : left_spec.action_labels())
   {
     std::string name = action.name();
-    if (name.find("syncleft") != std::string::npos)
+    if (name.find(syncleft) != std::string::npos)
     {
-      H.emplace_front(convert_sync(name));
+      H.emplace_front(convert_sync(name, prefix));
 
       // Also insert the new action label into the action_label
       action_labels.emplace_front(action_label(H.front(), action.sorts()));
@@ -145,7 +150,7 @@ void combine_specification(const lps::stochastic_specification& left_spec,
   {
     // The sync_i action must be renamed to syncleft_i and syncright_i and put in a communication expression.
     std::string name = actsync;
-    auto index = name.find("_");
+    auto index = name.find_last_of("_");
 
     core::identifier_string_list list;
     list.emplace_front(name.substr(0, index) += std::string("left") += name.substr(index));
@@ -207,12 +212,12 @@ public:
 
     if (output_filename().empty())
     {
-      combine_specification(left_spec, right_spec, std::cout);
+      combine_specification(left_spec, right_spec, m_action_prefix, std::cout);
     }
     else
     {
       std::ofstream file(output_filename());
-      combine_specification(left_spec, right_spec, file);
+      combine_specification(left_spec, right_spec, m_action_prefix, file);
     }
 
     return true;
@@ -222,14 +227,23 @@ protected:
   void add_options(utilities::interface_description& desc) override
   {
     super::add_options(desc);
+
+    desc.add_option("prefix", utilities::make_mandatory_argument("PREFIX"),"Add a prefix to the synchronisation action labels to ensure that do not already occur in the specification", 'f');
   }
 
   void parse_options(const utilities::command_line_parser& parser) override
   {
     super::parse_options(parser);
+
+
+    if (parser.options.count("prefix"))
+    {
+      m_action_prefix = parser.option_argument_as< std::string >("prefix");
+    }
   }
 
 private:
+  std::string m_action_prefix;
 };
 
 } // namespace mcrl2

@@ -91,7 +91,7 @@ std::list<data::data_expression> split_conjunction(const data::data_expression& 
     }
   }
 
-  mCRL2log(log::debug) << "Found clauses in " << condition;
+  mCRL2log(log::debug) << "Found clauses in " << condition << ":\n";
   print_elements(log::debug, clauses);
   mCRL2log(log::debug) << "\n";
 

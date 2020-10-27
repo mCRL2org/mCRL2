@@ -549,6 +549,7 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
   const data::variable_list& right_parameters,
   const std::list<std::size_t>& indices,
   const data::data_expression& invariant,
+  const std::string& action_prefix,
   bool split_condition,
   bool split_action,
   bool merge_heuristic,
@@ -568,8 +569,8 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
 
   // The list of action labels that are added to the specification.
   std::vector<process::action_label> labels;
-  labels.push_back(tag_label);
 
+  // Perform the static analysis.
   std::vector<per_summand_information> results = static_analysis(process.action_summands(), left_parameters, right_parameters, indices, split_condition, split_action);
 
   // Create actions to be used within the summands.
@@ -618,7 +619,10 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
     // Add summand to the left specification.
     if (!result.right.is_independent || result.left.is_independent)
     {
-      process::action_label left_sync_label(std::string("syncleft_") += std::to_string(result.index), sorts);
+      std::string sync_name(action_prefix);
+      sync_name += std::string("syncleft_") += std::to_string(result.index);
+
+      process::action_label left_sync_label(sync_name, sorts);
       if (!result.left.is_independent && result.index == index)
       {
         // Add this synchronization label when the sync action is used and we are the summand with its own index (and not merged).
@@ -638,7 +642,10 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
     // Add summand to the right specification.
     if (!result.left.is_independent || result.right.is_independent)
     {
-      process::action_label right_sync_label(std::string("syncright_") += std::to_string(result.index), sorts);      
+      std::string sync_name(action_prefix);
+      sync_name += std::string("syncright_") += std::to_string(result.index);
+
+      process::action_label right_sync_label(sync_name, sorts);      
       if (!result.right.is_independent && result.index == index)
       {
         labels.push_back(right_sync_label);
@@ -669,6 +676,9 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
 
     action_labels.push_front(label);
   }
+
+  // We add the tag label as last, because this one doesnt have to be unique.
+  action_labels.push_front(tag_label);
 
   lps::deadlock_summand_vector no_deadlock_summands;
   lps::stochastic_linear_process left_process(left_parameters, no_deadlock_summands, left_summands);
