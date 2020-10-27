@@ -565,7 +565,7 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
   }
 
   // The 'tag' action is used to tag independent actions.
-  process::action_label tag_label("tag", {});
+  process::action_label tag_label(std::string(action_prefix) += "tag", {});
 
   // The list of action labels that are added to the specification.
   std::vector<process::action_label> labels;
