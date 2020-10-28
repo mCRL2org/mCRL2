@@ -17,8 +17,9 @@ namespace mcrl2
 {
 
 // Combine two LTSs resulting from the state space exploration of LPSs of lpscleave into a single LTS.
-void combine_lts(const lts::lts_lts_t& left_lts,
-  const lts::lts_lts_t& right_lts,
+// The input LTSs are modified during the process.
+void combine_lts(lts::lts_lts_t& left_lts,
+  lts::lts_lts_t& right_lts,
   const std::string& prefix,
   std::ostream& stream);
 }
