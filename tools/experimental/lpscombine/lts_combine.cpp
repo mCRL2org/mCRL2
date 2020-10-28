@@ -92,6 +92,27 @@ void mcrl2::combine_lts(lts::lts_lts_t& left_lts,
 
   std::vector<std::pair<process::action, process::timed_multi_action>> right_labels = preprocess_labels(tag, syncright, right_lts);
 
+  // For every syncleft action label we can cache the corresponding syncright label. 
+  std::vector<process::action_label> right_synclabel(left_lts.num_action_labels());
+
+  for (std::size_t i = 0; i < left_lts.num_action_labels(); ++i)
+  {
+    const auto& [sync, label] = left_labels[i];
+    
+    // Also ignore the tau action.
+    if (sync != tag && sync != process::action())
+    { 
+      // This is a synchronisation action.
+      const std::string& name = sync.label().name();
+
+      // Find the synchronisation action's index.
+      std::size_t underscore = name.find_last_of("_");
+
+      // Construct the corresponding right synchronisation action.
+      right_synclabel[i] = process::action_label(std::string(syncright) += name.substr(underscore), sync.label().sorts());
+    }
+  }
+
   // The parallel composition has pair of states that are stored in an indexed set (to keep track of processed states).
   mcrl2::utilities::indexed_set<std::pair<state_t, state_t>> states;
   const auto[initial, found] = states.insert(std::make_pair(left_lts.initial_state(), right_lts.initial_state()));
@@ -142,14 +163,7 @@ void mcrl2::combine_lts(lts::lts_lts_t& left_lts,
       }
       else
       {
-        // This is a synchronisation action, explore all outgoing transitions of the right LTS to find a corresponding right synchronisation.
-        const std::string& name = left_sync.label().name();
-
-        // Find the synchronisation action's index.
-        auto underscore = name.find_last_of("_");
-
-        // Construct the corresponding right synchronisation action.
-        core::identifier_string syncright_name(std::string(syncright) += name.substr(underscore));
+       
 
         // Find corresponding synchronisation in the outgoing transitions of the right state.
         for (state_t u = right_outgoing.lowerbound(right_state); u < right_outgoing.upperbound(right_state); ++u)
@@ -159,8 +173,7 @@ void mcrl2::combine_lts(lts::lts_lts_t& left_lts,
           // Consider the multi-action label of this transition.
           const auto& [right_sync, right_label] = right_labels[lts::label(right_transition)];
 
-          if (right_sync.label().name() == syncright_name
-            && right_sync.label().sorts() == left_sync.label().sorts()
+          if (right_sync.label() == right_synclabel[lts::label(left_transition)]
             && right_sync.arguments() == left_sync.arguments())
           {
             // Synchronisation takes place, so construct the resulting action (removing the synchronisation actions).
