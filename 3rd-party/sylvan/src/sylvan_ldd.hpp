@@ -91,12 +91,6 @@ class Ldd
       return Ldd(lddmc_getright(mdd));
     }
 
-    // <undocumented>
-    Ldd follow(std::uint32_t value) const
-    {
-      return Ldd(lddmc_follow(mdd, value));
-    }
-
     bool operator==(const Ldd& other)
     {
       return mdd == other.mdd;
@@ -122,31 +116,37 @@ inline Ldd make_node(std::uint32_t value, const Ldd& down, const Ldd& right)
 }
 
 // <undocumented>
-inline Ldd extend(const Ldd& x, std::uint32_t value, const Ldd& y)
+inline Ldd extend(const Ldd& A, std::uint32_t value, const Ldd& B)
 {
-  return Ldd(lddmc_extendnode(x.get(), value, y.get()));
+  return Ldd(lddmc_extendnode(A.get(), value, B.get()));
+}
+
+// <undocumented>
+Ldd follow(const Ldd& A, std::uint32_t value)
+{
+  return Ldd(lddmc_follow(A.get(), value));
 }
 
 // union(A,B) = A ∪ B
-inline Ldd union_(const Ldd& x, const Ldd& y)
+inline Ldd union_(const Ldd& A, const Ldd& B)
 {
   LACE_ME;
-  return Ldd(lddmc_union(x.get(), y.get()));
+  return Ldd(lddmc_union(A.get(), B.get()));
 }
 
 // minus(A,B) = A \ B
-inline Ldd minus(const Ldd& x, const Ldd& y)
+inline Ldd minus(const Ldd& A, const Ldd& B)
 {
   LACE_ME;
-  return Ldd(lddmc_minus(x.get(), y.get()));
+  return Ldd(lddmc_minus(A.get(), B.get()));
 }
 
 // zip(A,B) = (X,Y) such that X = A U B, Y = B \ A
-inline std::pair<Ldd, Ldd> zip(const Ldd& x, const Ldd& y)
+inline std::pair<Ldd, Ldd> zip(const Ldd& A, const Ldd& B)
 {
   LACE_ME;
   MDD result[2];
-  lddmc_zip(x.get(), y.get(), result);
+  lddmc_zip(A.get(), B.get(), result);
   return {Ldd(result[0]), Ldd(result[1]) };
 }
 
@@ -165,24 +165,24 @@ inline Ldd project_minus(const Ldd& A, const Ldd& p, const Ldd& B)
 }
 
 // intersect(A,B) = A ∩ B
-inline Ldd intersect(const Ldd& x, const Ldd& y)
+inline Ldd intersect(const Ldd& A, const Ldd& B)
 {
   LACE_ME;
-  return Ldd(lddmc_intersect(x.get(), y.get()));
+  return Ldd(lddmc_intersect(A.get(), B.get()));
 }
 
 // match(A,B,meta) = A ∩ B, with B defined on subset of the variables of A according to meta
-inline Ldd match(const Ldd& x, const Ldd& y, const Ldd& meta)
+inline Ldd match(const Ldd& A, const Ldd& B, const Ldd& meta)
 {
   LACE_ME;
-  return Ldd(lddmc_match(x.get(), y.get(), meta.get()));
+  return Ldd(lddmc_match(A.get(), B.get(), meta.get()));
 }
 
 // join(A,B,pA,pB) = A ∩ B, but A and B are projections of the state vector, described by pA and pB
-inline Ldd join(const Ldd& x, const Ldd& y, const Ldd& px, const Ldd& py)
+inline Ldd join(const Ldd& A, const Ldd& B, const Ldd& px, const Ldd& py)
 {
   LACE_ME;
-  return lddmc_join(x.get(), y.get(), px.get(), py.get());
+  return lddmc_join(A.get(), B.get(), px.get(), py.get());
 }
 
 // cube(v) = the singleton set containing the tuple with values in v
@@ -277,20 +277,20 @@ void match_sat(const Ldd& A, const Ldd& B, const Ldd& meta, lddmc_enum_cb cb, vo
 }
 
 inline
-Ldd pick_cube(const Ldd& x)
+Ldd pick_cube(const Ldd& A)
 {
-  return Ldd(lddmc_pick_cube(x.get()));
+  return Ldd(lddmc_pick_cube(A.get()));
 }
 
 inline
-void print_dot(const std::string& filename, const Ldd& x)
+void print_dot(const std::string& filename, const Ldd& A)
 {
   FILE* out = fopen(filename.c_str(), "w");
   if (!out)
   {
     throw std::runtime_error("Could not open file " + filename);
   }
-  lddmc_fprintdot(out, x.get());
+  lddmc_fprintdot(out, A.get());
 }
 
 } // namespace sylvan
