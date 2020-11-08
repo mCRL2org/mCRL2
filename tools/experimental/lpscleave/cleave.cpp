@@ -569,6 +569,7 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
 
   // The list of action labels that are added to the specification.
   std::vector<process::action_label> labels;
+  labels.push_back(tag_label);
 
   // Perform the static analysis.
   std::vector<per_summand_information> results = static_analysis(process.action_summands(), left_parameters, right_parameters, indices, split_condition, split_action);
@@ -676,9 +677,6 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
 
     action_labels.push_front(label);
   }
-
-  // We add the tag label as last, because this one doesnt have to be unique.
-  action_labels.push_front(tag_label);
 
   lps::deadlock_summand_vector no_deadlock_summands;
   lps::stochastic_linear_process left_process(left_parameters, no_deadlock_summands, left_summands);
