@@ -267,20 +267,6 @@ inline bdd false_()
   return bdd(sylvan_false);
 }
 
-///// \brief Returns a bdd that represents the set of variables in the sequence [first, last)
-///// The set is represented by the conjunction of the variables
-//template <typename InputIterator>
-//inline bdd make_variable_set(InputIterator first, InputIterator last)
-//{
-//  LACE_ME;
-//  bdd result = true_();
-//  for (auto i = first; i != last; ++i)
-//  {
-//    result = result & *i;
-//  }
-//  return result;
-//}
-
 /// \brief Computes \exists v: x
 /// The set of variables v is represented by a conjunction of variables
 inline bdd exists(const bdd& v, const bdd& x)
@@ -337,14 +323,16 @@ class bdd_substitution
       sylvan_protect(&m_bdd);
     }
 
+    // TODO: copying is disabled, because it leads to crashes
+    // It's not clear why, because this class is very similar to the class bdd.
+    bdd_substitution(const bdd& other) = delete;
+
 //    explicit bdd_substitution(BDD other)
 //     : m_bdd(other)
 //    {
 //      sylvan_protect(&m_bdd);
 //    }
-
-    // TODO: copying doesn't work; why???
-    bdd_substitution(const bdd& other) = delete;
+//
 //    bdd_substitution(const bdd& other)
 //     : m_bdd(other.m_bdd)
 //    {

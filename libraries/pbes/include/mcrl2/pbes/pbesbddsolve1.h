@@ -829,7 +829,7 @@ class pbesbddsolve
     }
 
   public:
-    pbesbddsolve(const srf_pbes& p, bool unary_encoding = false,
+    explicit pbesbddsolve(const srf_pbes& p, bool unary_encoding = false,
                bdd_granularity granularity = bdd_granularity::per_pbes,
                utilities::execution_timer* timer = nullptr)
         : m_pbes(p), m_pbes_index(m_pbes), m_unary_encoding(unary_encoding), m_granularity(granularity), m_timer(timer)

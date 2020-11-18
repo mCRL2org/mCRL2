@@ -1,10 +1,23 @@
-// Author(s): Wieger Wesselink
+/*
+ * Copyright 2011-2016 Formal Methods and Tools, University of Twente
+ * Copyright 2016 Tom van Dijk, Johannes Kepler University Linz
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
-//
-// Distributed under the Boost Software License, Version 1.0.
-// (See accompanying file LICENSE_1_0.txt or copy at
-// http://www.boost.org/LICENSE_1_0.txt)
+// Copyright 2020 Wieger Wesselink
 //
 /// \file mcrl2/3rdparty/sylvan/sylvan_mdd.hpp
 /// \brief add your file description here.
@@ -17,6 +30,7 @@
 
 #include <lace.h>
 #include <sylvan.h>
+#include <sylvan_table.h>
 #include <sylvan_ldd.h>
 
 namespace sylvan::ldds
@@ -37,7 +51,7 @@ namespace sylvan::ldds
 // of an LDD node is the number of "down" edges to leaf 1. All maximal paths
 // from an LDD node have the same depth.
 
-class Ldd
+class ldd
 {
   friend class Sylvan;
 
@@ -45,25 +59,25 @@ class Ldd
     MDD mdd;
 
   public:
-  Ldd()
+    ldd()
     {
       mdd = lddmc_false;
       lddmc_protect(&mdd);
     }
 
-    Ldd(const MDD other)
+    ldd(const MDD other)
      : mdd(other)
     {
       lddmc_protect(&mdd);
     }
 
-    Ldd(const Ldd& other)
+    ldd(const ldd& other)
      : mdd(other.mdd)
     {
       lddmc_protect(&mdd);
     }
 
-    ~Ldd()
+    ~ldd()
     {
       lddmc_unprotect(&mdd);
     }
@@ -80,134 +94,173 @@ class Ldd
     }
 
     // the down edge
-    Ldd down() const
+    ldd down() const
     {
-      return Ldd(lddmc_getdown(mdd));
+      return ldd(lddmc_getdown(mdd));
     }
 
     // the right edge
-    Ldd right() const
+    // invariant: right() != true_()
+    ldd right() const
     {
-      return Ldd(lddmc_getright(mdd));
+      return ldd(lddmc_getright(mdd));
     }
 
-    bool operator==(const Ldd& other)
+    bool operator==(const ldd& other)
     {
       return mdd == other.mdd;
     }
 };
 
 // the leaf false
-inline Ldd false_()
+inline ldd false_()
 {
-  return Ldd(lddmc_false);
+  return ldd(lddmc_false);
 }
 
 // the leaf true
-inline Ldd true_()
+inline ldd true_()
 {
-  return Ldd(lddmc_true);
+  return ldd(lddmc_true);
 }
 
-// <undocumented>
-inline Ldd make_node(std::uint32_t value, const Ldd& down, const Ldd& right)
+// create a node with the given value and down and right arrows
+//
+// The semantics of this operation are defined as follows:
+// [{ε}] = {ε}
+// [∅] = ∅
+// [node(a, n1, n2)] = {a w | w ∈ [n1]} ∪ [n2]
+inline ldd node(std::uint32_t value, const ldd& down = true_(), const ldd& right = false_())
 {
-  return Ldd(lddmc_makenode(value, down.get(), right.get()));
+  return ldd(lddmc_makenode(value, down.get(), right.get()));
 }
 
-// <undocumented>
-inline Ldd extend(const Ldd& A, std::uint32_t value, const Ldd& B)
+// The function extend inserts an edge
+//
+// extend(false, w, z) = false
+// extend(true, w, z) = true
+// extend(node(v, x, y), w, z) = v < w -> node(v, x, extend(y, w, z))
+//                               v = w -> node(w, z, y)
+//                               v > w -> node(w, z, node(v, x, y))
+inline ldd extend(const ldd& A, std::uint32_t value, const ldd& B)
 {
-  return Ldd(lddmc_extendnode(A.get(), value, B.get()));
+  return ldd(lddmc_extendnode(A.get(), value, B.get()));
 }
 
-// <undocumented>
-Ldd follow(const Ldd& A, std::uint32_t value)
+// The function follow searches for an edge that has a given value as target
+//
+// follow(false, w) = false
+// follow(true, w) = true
+// follow(node(v, x, y), w) = v = w -> x
+//                            v > w -> false
+//                            v < w -> follow(y, w)
+ldd follow(const ldd& A, std::uint32_t value)
 {
-  return Ldd(lddmc_follow(A.get(), value));
+  return ldd(lddmc_follow(A.get(), value));
 }
 
 // union(A,B) = A ∪ B
-inline Ldd union_(const Ldd& A, const Ldd& B)
+inline ldd union_(const ldd& A, const ldd& B)
 {
   LACE_ME;
-  return Ldd(lddmc_union(A.get(), B.get()));
+  return ldd(lddmc_union(A.get(), B.get()));
 }
 
 // minus(A,B) = A \ B
-inline Ldd minus(const Ldd& A, const Ldd& B)
+inline ldd minus(const ldd& A, const ldd& B)
 {
   LACE_ME;
-  return Ldd(lddmc_minus(A.get(), B.get()));
+  return ldd(lddmc_minus(A.get(), B.get()));
 }
 
 // zip(A,B) = (X,Y) such that X = A U B, Y = B \ A
-inline std::pair<Ldd, Ldd> zip(const Ldd& A, const Ldd& B)
+inline std::pair<ldd, ldd> zip(const ldd& A, const ldd& B)
 {
   LACE_ME;
   MDD result[2];
   lddmc_zip(A.get(), B.get(), result);
-  return {Ldd(result[0]), Ldd(result[1]) };
+  return {ldd(result[0]), ldd(result[1]) };
 }
 
 // project(A,p) = the projection of the set A according to the projection vector p
-inline Ldd project(const Ldd& A, const Ldd& p)
+inline ldd project(const ldd& A, const ldd& p)
 {
   LACE_ME;
-  return Ldd(lddmc_project(A.get(), p.get()));
+  return ldd(lddmc_project(A.get(), p.get()));
 }
 
 // project_minus(A,p,B) = minus(project(A,p),B)
-inline Ldd project_minus(const Ldd& A, const Ldd& p, const Ldd& B)
+inline ldd project_minus(const ldd& A, const ldd& p, const ldd& B)
 {
   LACE_ME;
-  return Ldd(lddmc_project_minus(A.get(), p.get(), B.get()));
+  return ldd(lddmc_project_minus(A.get(), p.get(), B.get()));
 }
 
 // intersect(A,B) = A ∩ B
-inline Ldd intersect(const Ldd& A, const Ldd& B)
+inline ldd intersect(const ldd& A, const ldd& B)
 {
   LACE_ME;
-  return Ldd(lddmc_intersect(A.get(), B.get()));
+  return ldd(lddmc_intersect(A.get(), B.get()));
 }
 
 // match(A,B,meta) = A ∩ B, with B defined on subset of the variables of A according to meta
-inline Ldd match(const Ldd& A, const Ldd& B, const Ldd& meta)
+inline ldd match(const ldd& A, const ldd& B, const ldd& meta)
 {
   LACE_ME;
-  return Ldd(lddmc_match(A.get(), B.get(), meta.get()));
+  return ldd(lddmc_match(A.get(), B.get(), meta.get()));
 }
 
 // join(A,B,pA,pB) = A ∩ B, but A and B are projections of the state vector, described by pA and pB
-inline Ldd join(const Ldd& A, const Ldd& B, const Ldd& px, const Ldd& py)
+inline ldd join(const ldd& A, const ldd& B, const ldd& px, const ldd& py)
 {
   LACE_ME;
   return lddmc_join(A.get(), B.get(), px.get(), py.get());
 }
 
 // cube(v) = the singleton set containing the tuple with values in v
-inline Ldd cube(const std::vector<std::uint32_t>& v)
+inline ldd cube(const std::vector<std::uint32_t>& v)
 {
   LACE_ME;
   return lddmc_cube(const_cast<std::uint32_t*>(v.data()), v.size());
 }
 
 // member_cube(A,v) = check if cube(v) is in the set A
-inline Ldd member_cube(const Ldd& A, const std::vector<std::uint32_t>& v)
+inline ldd member_cube(const ldd& A, const std::vector<std::uint32_t>& v)
 {
   LACE_ME;
   return lddmc_member_cube(A.get(), const_cast<std::uint32_t*>(v.data()), v.size());
 }
 
 // union_cube(A,v) = union_(A,cube(v))
-inline Ldd union_cube(const Ldd& A, const std::vector<std::uint32_t>& v)
+inline int union_cube(const ldd& A, const std::vector<std::uint32_t>& v)
 {
   LACE_ME;
   return lddmc_union_cube(A.get(), const_cast<std::uint32_t*>(v.data()), v.size());
 }
 
+// <undocumented>
+inline ldd cube_copy(const std::vector<std::uint32_t>& v, const std::vector<int>& copy)
+{
+  LACE_ME;
+  return ldd(lddmc_cube_copy(const_cast<std::uint32_t*>(v.data()), const_cast<int*>(copy.data()), v.size()));
+}
+
+// <undocumented>
+inline int member_cube_copy(const ldd& A, const std::vector<std::uint32_t>& v, const std::vector<int>& copy)
+{
+  LACE_ME;
+  return lddmc_member_cube_copy(A.get(), const_cast<std::uint32_t*>(v.data()), const_cast<int*>(copy.data()), v.size());
+}
+
+// <undocumented>
+inline ldd union_cube_copy(const ldd& A, const std::vector<std::uint32_t>& v, const std::vector<int>& copy)
+{
+  LACE_ME;
+  return ldd(lddmc_union_cube_copy(A.get(), const_cast<std::uint32_t*>(v.data()), const_cast<int*>(copy.data()), v.size()));
+}
+
 // relprod(A,B,meta) = the successors of the states in A according to the transition relation B which is described by meta
-inline Ldd relprod(const Ldd& A, const Ldd& B, const Ldd& meta)
+inline ldd relprod(const ldd& A, const ldd& B, const ldd& meta)
 {
   LACE_ME;
   return lddmc_relprod(A.get(), B.get(), meta.get());
@@ -215,37 +268,67 @@ inline Ldd relprod(const Ldd& A, const Ldd& B, const Ldd& meta)
 
 // relprod_union(A,B,meta) = union_(A,relprod(A,B,meta))
 // TODO: the parameter U is undocumented
-inline Ldd relprod_union(const Ldd& A, const Ldd& B, const Ldd& meta, const Ldd& U)
+inline ldd relprod_union(const ldd& A, const ldd& B, const ldd& meta, const ldd& U)
 {
   LACE_ME;
   return lddmc_relprod_union(A.get(), B.get(), meta.get(), U.get());
 }
 
 // relprev(A,B,meta,U) = the predecessors of the states in A according to the transition relation B which is described by meta, restricted to states in U
-inline Ldd relprev(const Ldd& A, const Ldd& B, const Ldd& meta, const Ldd& U)
+inline ldd relprev(const ldd& A, const ldd& B, const ldd& meta, const ldd& U)
 {
   LACE_ME;
   return lddmc_relprev(A.get(), B.get(), meta.get(), U.get());
 }
 
 // satcount(A) = the size of the set A
-inline double satcount(const Ldd& A)
+inline double satcount(const ldd& A)
 {
   LACE_ME;
   return lddmc_satcount(A.get());
 }
 
 // sat_one(A) = an arbitrary vector from the set A
-// TODO: the parameter v and the result are undocumented
-inline int sat_one(const Ldd& A, const std::vector<std::uint32_t>& v)
+// returns the value of the leaf node (0 or 1)
+template <typename InputIterator>
+inline int sat_one(const ldd& A, InputIterator to)
 {
+  typedef struct __attribute__((packed)) mddnode
+  {
+    uint64_t a, b;
+  } * mddnode_t; // 16 bytes
+
+  extern llmsset_t nodes;
+
+  auto LDD_GETNODE = [](MDD mdd)
+  {
+    return ((mddnode_t)llmsset_index_to_ptr(nodes, mdd));
+  };
+
+  auto mddnode_getvalue = [](mddnode_t n)
+  {
+    return *(uint32_t*)((uint8_t*)n+6);
+  };
+
+  auto mddnode_getdown = [](mddnode_t n)
+  {
+    return n->b >> 17;
+  };
+
   LACE_ME;
-  return lddmc_sat_one(A.get(), const_cast<std::uint32_t*>(v.data()), v.size());
+  MDD mdd = A.get();
+  while (mdd != lddmc_false && mdd != lddmc_true)
+  {
+    mddnode_t n = LDD_GETNODE(mdd);
+    *to++ = mddnode_getvalue(n);
+    mdd = mddnode_getdown(n);
+  }
+  return mdd == lddmc_false ? 0 : 1;
 }
 
 // sat_all_nopar(A,cb) calls the callback function cb for each vector in A
 inline
-void sat_all(const Ldd& A, lddmc_enum_cb cb, void* context = nullptr)
+void sat_all(const ldd& A, lddmc_enum_cb cb, void* context = nullptr)
 {
   LACE_ME;
   lddmc_sat_all_nopar(A.get(), cb, context);
@@ -253,7 +336,7 @@ void sat_all(const Ldd& A, lddmc_enum_cb cb, void* context = nullptr)
 
 // sat_all_par(A,cb) = sat_all(A,cb), but parallelized
 inline
-void sat_all_nopar(const Ldd& A, lddmc_enum_cb cb, void* context = nullptr)
+void sat_all_nopar(const ldd& A, lddmc_enum_cb cb, void* context = nullptr)
 {
   LACE_ME;
   lddmc_sat_all_nopar(A.get(), cb, context);
@@ -261,8 +344,7 @@ void sat_all_nopar(const Ldd& A, lddmc_enum_cb cb, void* context = nullptr)
 
 // collect(A,cb) = sat_all_par(A,cb), but the callback cb returns some set encoded as an LDD, and all returned LDDs are combined using union
 // TODO: this is probably wrong, because there are two more undocumented parameters
-inline
-Ldd collect(const Ldd& A, lddmc_collect_cb cb, void* context = nullptr)
+inline ldd collect(const ldd& A, lddmc_collect_cb cb, void* context = nullptr)
 {
   LACE_ME;
   return lddmc_collect(A.get(), cb, context);
@@ -270,20 +352,19 @@ Ldd collect(const Ldd& A, lddmc_collect_cb cb, void* context = nullptr)
 
 // match_sat(A,B,m,cb) = sat_all_par(match(A,B,m),cb)
 inline
-void match_sat(const Ldd& A, const Ldd& B, const Ldd& meta, lddmc_enum_cb cb, void* context = nullptr)
+void match_sat(const ldd& A, const ldd& B, const ldd& meta, lddmc_enum_cb cb, void* context = nullptr)
 {
   LACE_ME;
   lddmc_match_sat_par(A.get(), B.get(), meta.get(), cb, context);
 }
 
-inline
-Ldd pick_cube(const Ldd& A)
+inline ldd pick_cube(const ldd& A)
 {
-  return Ldd(lddmc_pick_cube(A.get()));
+  return ldd(lddmc_pick_cube(A.get()));
 }
 
 inline
-void print_dot(const std::string& filename, const Ldd& A)
+void print_dot(const std::string& filename, const ldd& A)
 {
   FILE* out = fopen(filename.c_str(), "w");
   if (!out)
@@ -293,6 +374,6 @@ void print_dot(const std::string& filename, const Ldd& A)
   lddmc_fprintdot(out, A.get());
 }
 
-} // namespace sylvan
+} // namespace sylvan::ldds
 
 #endif // SYLVAN_LDD_OBJ_H
