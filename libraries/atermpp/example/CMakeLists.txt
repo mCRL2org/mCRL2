@@ -8,7 +8,6 @@
 
 # ########## Project setup ##########
 project(examples_atermpp_)
-cmake_minimum_required(VERSION 2.6)
 
 # ######### General setup ##########
 set(PREFIX "example_atermpp")

@@ -8,7 +8,7 @@
 
 # ########## Project setup ##########
 project(dparser)
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.8)
 
 add_definitions(
   -DD_MAJOR_VERSION=1
