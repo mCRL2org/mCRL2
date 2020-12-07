@@ -106,10 +106,11 @@ public:
     // of quantifier-inside rewriter.
     if(is_exists(expr) || is_forall(expr))
     {
-      m_quantification_domain = accessors::var(expr);
+      for(const data::variable& v: accessors::var(expr)) {
+        m_quantification_domain.push_front(v);
+      }
       expr = accessors::arg(expr);
     }
-    mCRL2log(log::debug) << expr << " --- " << ((atermpp::aterm) expr) << std::endl;
     assert(is_propositional_variable_instantiation(expr));
     m_new_state = atermpp::down_cast<propositional_variable_instantiation>(expr);
   }
