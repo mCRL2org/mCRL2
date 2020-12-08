@@ -33,6 +33,8 @@
 #include <sylvan_table.h>
 #include <sylvan_ldd.h>
 
+extern llmsset_t nodes;
+
 namespace sylvan::ldds
 {
 
@@ -60,12 +62,13 @@ class ldd
 
   public:
     ldd()
+     : mdd(lddmc_false)
     {
-      mdd = lddmc_false;
+
       lddmc_protect(&mdd);
     }
 
-    ldd(const MDD other)
+    explicit ldd(const MDD other)
      : mdd(other)
     {
       lddmc_protect(&mdd);
@@ -106,9 +109,14 @@ class ldd
       return ldd(lddmc_getright(mdd));
     }
 
-    bool operator==(const ldd& other)
+    bool operator==(const ldd& other) const
     {
       return mdd == other.mdd;
+    }
+
+    bool operator!=(const ldd& other) const
+    {
+      return !(*this == other);
     }
 };
 
@@ -214,28 +222,28 @@ inline ldd match(const ldd& A, const ldd& B, const ldd& meta)
 inline ldd join(const ldd& A, const ldd& B, const ldd& px, const ldd& py)
 {
   LACE_ME;
-  return lddmc_join(A.get(), B.get(), px.get(), py.get());
+  return ldd(lddmc_join(A.get(), B.get(), px.get(), py.get()));
 }
 
 // cube(v) = the singleton set containing the tuple with values in v
 inline ldd cube(const std::vector<std::uint32_t>& v)
 {
   LACE_ME;
-  return lddmc_cube(const_cast<std::uint32_t*>(v.data()), v.size());
+  return ldd(lddmc_cube(const_cast<std::uint32_t*>(v.data()), v.size()));
 }
 
 // member_cube(A,v) = check if cube(v) is in the set A
 inline ldd member_cube(const ldd& A, const std::vector<std::uint32_t>& v)
 {
   LACE_ME;
-  return lddmc_member_cube(A.get(), const_cast<std::uint32_t*>(v.data()), v.size());
+  return ldd(lddmc_member_cube(A.get(), const_cast<std::uint32_t*>(v.data()), v.size()));
 }
 
 // union_cube(A,v) = union_(A,cube(v))
-inline int union_cube(const ldd& A, const std::vector<std::uint32_t>& v)
+inline ldd union_cube(const ldd& A, const std::vector<std::uint32_t>& v)
 {
   LACE_ME;
-  return lddmc_union_cube(A.get(), const_cast<std::uint32_t*>(v.data()), v.size());
+  return ldd(lddmc_union_cube(A.get(), const_cast<std::uint32_t*>(v.data()), v.size()));
 }
 
 // <undocumented>
@@ -260,10 +268,11 @@ inline ldd union_cube_copy(const ldd& A, const std::vector<std::uint32_t>& v, co
 }
 
 // relprod(A,B,meta) = the successors of the states in A according to the transition relation B which is described by meta
+// meta: -1 (end; rest not in rel), 0 (not in rel), 1 (read), 2 (write), 3 (only-read), 4 (only-write), 5 (action label)
 inline ldd relprod(const ldd& A, const ldd& B, const ldd& meta)
 {
   LACE_ME;
-  return lddmc_relprod(A.get(), B.get(), meta.get());
+  return ldd(lddmc_relprod(A.get(), B.get(), meta.get()));
 }
 
 // relprod_union(A,B,meta) = union_(A,relprod(A,B,meta))
@@ -271,14 +280,14 @@ inline ldd relprod(const ldd& A, const ldd& B, const ldd& meta)
 inline ldd relprod_union(const ldd& A, const ldd& B, const ldd& meta, const ldd& U)
 {
   LACE_ME;
-  return lddmc_relprod_union(A.get(), B.get(), meta.get(), U.get());
+  return ldd(lddmc_relprod_union(A.get(), B.get(), meta.get(), U.get()));
 }
 
 // relprev(A,B,meta,U) = the predecessors of the states in A according to the transition relation B which is described by meta, restricted to states in U
 inline ldd relprev(const ldd& A, const ldd& B, const ldd& meta, const ldd& U)
 {
   LACE_ME;
-  return lddmc_relprev(A.get(), B.get(), meta.get(), U.get());
+  return ldd(lddmc_relprev(A.get(), B.get(), meta.get(), U.get()));
 }
 
 // satcount(A) = the size of the set A
@@ -290,15 +299,13 @@ inline double satcount(const ldd& A)
 
 // sat_one(A) = an arbitrary vector from the set A
 // returns the value of the leaf node (0 or 1)
-template <typename InputIterator>
-inline int sat_one(const ldd& A, InputIterator to)
+template <typename OutputIterator>
+inline int sat_one(const ldd& A, OutputIterator to)
 {
   typedef struct __attribute__((packed)) mddnode
   {
     uint64_t a, b;
   } * mddnode_t; // 16 bytes
-
-  extern llmsset_t nodes;
 
   auto LDD_GETNODE = [](MDD mdd)
   {
@@ -326,6 +333,14 @@ inline int sat_one(const ldd& A, InputIterator to)
   return mdd == lddmc_false ? 0 : 1;
 }
 
+inline
+std::vector<std::uint32_t> sat_one_vector(const ldd& A)
+{
+  std::vector<std::uint32_t> result;
+  sat_one(A, std::back_inserter(result));
+  return result;
+}
+
 // sat_all_nopar(A,cb) calls the callback function cb for each vector in A
 inline
 void sat_all(const ldd& A, lddmc_enum_cb cb, void* context = nullptr)
@@ -347,7 +362,7 @@ void sat_all_nopar(const ldd& A, lddmc_enum_cb cb, void* context = nullptr)
 inline ldd collect(const ldd& A, lddmc_collect_cb cb, void* context = nullptr)
 {
   LACE_ME;
-  return lddmc_collect(A.get(), cb, context);
+  return ldd(lddmc_collect(A.get(), cb, context));
 }
 
 // match_sat(A,B,m,cb) = sat_all_par(match(A,B,m),cb)
