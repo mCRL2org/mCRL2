@@ -33,7 +33,7 @@ A model using sets of positive integers is given below (also available as
 :download:`gossip-blanks.mcrl2 <files/gossip-blanks.mcrl2>`. Dealing with sets,
 we first introduce constants ``N`` and ``Gossips`` of type ``Pos`` and
 ``Set(Pos)``, respectively. For the definition of the set ``Gossips`` we use set
-comprehension, ``Gossips`` comprises all positive ``k`` such that ``1 < k <=
+comprehension, ``Gossips`` comprises all positive ``k`` such that ``1 <= k <=
 N``.
 
 .. literalinclude:: files/gossip-blanks.mcrl2
