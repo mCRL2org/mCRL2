@@ -39,7 +39,7 @@ N``.
 .. literalinclude:: files/gossip-blanks.mcrl2
    :language: mcrl2
 
-We distinguish the actions ``done``, that indicate that a particular girl has
+We distinguish the actions ``done``, that indicates that a particular girl has
 gathered all gossips, and ``all_done``, that indicates that all girls know all
 gossips. Furthermore, we have actions ``call``, ``answer`` and ``exchange`` for
 initiating a phone call, picking up the phone, and the synchronized execution of
@@ -55,7 +55,7 @@ phone of another executing the action ``answer``. As the actions have place
 holders for the identifier and gossips of the other girl, the summation ``sum
 herid:Pos, hergs:Set(Pos)`` quantifies over all possible values, thereby binding
 the variables ``herid`` and ``hergs``. After excuting either a ``call`` or
-``answer`` action, the knowledge of girl owning the process gets update, it know
+``answer`` action, the knowledge of a girl owning the process gets updates, it now
 incorporates the knowledge of the other girl too.
 
 As termination condition for one ``Girl`` process, we will have equality of the
@@ -67,7 +67,7 @@ explicitly terminates the process.
 .. admonition:: Exercise
 
    Fill in the blanks in :download:`gossip-blanks.mcrl2
-   <files/gossip-blanks.mcrl2>` This means you will have to
+   <files/gossip-blanks.mcrl2>`. This means you will have to
    
    * determine the type of the function ``Gossips``,
    * finish the definition of the equation for ``Gossips``, and
