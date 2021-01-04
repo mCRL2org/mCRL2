@@ -11,8 +11,8 @@ set(R_IN_PATH "source/${R_NAME}.in")
 set(R_PATH "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${R_NAME}" )
 
 # Configure compiler
-get_filename_component(CC ${CMAKE_C_COMPILER} NAME)
-get_filename_component(CXX ${CMAKE_CXX_COMPILER} NAME)
+get_filename_component(CC_PATH ${CMAKE_C_COMPILER} NAME)
+get_filename_component(CXX_PATH ${CMAKE_CXX_COMPILER} NAME)
 
 # Configure the default build options
 set(R_CXXFLAGS ${CMAKE_CXX_FLAGS})
