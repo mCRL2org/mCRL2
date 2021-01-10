@@ -3765,7 +3765,6 @@ class specification_basic_type
         for(assignment_list::const_iterator i=dl.begin(); i!=dl.end(); ++i)
         {
           sigma[i->lhs()]=i->rhs();
-          const std::set<variable> varset=find_free_variables(i->rhs());
         }
         process_expression t3=substitute_pCRLproc(object.processbody,sigma);
         if (regular)
@@ -6279,7 +6278,6 @@ class specification_basic_type
           if (sigma(*i)==*i)  // sigma *i is undefined. 
           {
             sigma[*i]=*j;
-            const std::set<variable> varset=find_free_variables(*j);
           }
         }
         maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
@@ -6406,7 +6404,6 @@ class specification_basic_type
               if (sigma(*i)==*i)  // *i is not assigned in sigma. 
               {
                 sigma[*i]=*j;
-                std::set<variable> varset=find_free_variables(*j);
               }
             }
 
@@ -6511,7 +6508,6 @@ class specification_basic_type
               if (sigma(*i)==*i)   // sigma is not defined for *i.
               {
                 sigma[*i]=*j;
-                std::set<variable> varset=find_free_variables(*j);
               }
             }
 
@@ -6610,7 +6606,6 @@ class specification_basic_type
             if (sigma(*i)==*i)  // sigma is not defined for *i.
             {
               sigma[*i]=*j;
-              const std::set<variable> varset=find_free_variables(*j);
             }
           }
           j=auxargs.begin();
@@ -6621,7 +6616,6 @@ class specification_basic_type
             if (sigma(*i)==*i) // sigma is not defined for *i.
             {
               sigma[*i]=*j;
-              const std::set<variable> varset=find_free_variables(*j);
             }
           }
           maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
@@ -6758,7 +6752,6 @@ class specification_basic_type
             if (sigma(*i)==*i)  // sigma is not defined for *i.
             {
               sigma[*i]=*j;
-              std::set<variable> varset=find_free_variables(*j);
             }
           }
           j=auxargs.begin();
@@ -6769,7 +6762,6 @@ class specification_basic_type
             if (sigma(*i)==*i)  // sigma is not defined for *i. 
             {
               sigma[*i]=*j;
-              std::set<variable> varset=find_free_variables(*j);
             }
           }
 
@@ -6908,7 +6900,6 @@ class specification_basic_type
           if (sigma(*i)== *i) // sigma is not defined for *i. 
           {
             sigma[*i]=*j;
-            std::set<variable> varset=find_free_variables(*j);
           }
         }
 
@@ -7041,7 +7032,6 @@ class specification_basic_type
               if (sigma(*i)==*i)  // sigma is not defined for *i.
               {
                 sigma[*i]=*j;
-                std::set<variable> varset=find_free_variables(*j);
               }
             }
 
@@ -8599,7 +8589,6 @@ class specification_basic_type
           if (sigma(*i1)==*i1)
           {
             sigma[*i1]=*j1;
-            std::set<variable> varset=find_free_variables(*j);
 
           }
         }
@@ -9294,7 +9283,6 @@ class specification_basic_type
         for (assignment_list::const_iterator i=ass.begin();  i!=ass.end(); ++i)
         {
           sigma[i->lhs()]=i->rhs();
-          const std::set<variable> varset=find_free_variables(i->rhs());
         }
 
         // init=substitute_assignmentlist(init,pars,false,true,sigma);   ZZZ
@@ -9987,7 +9975,6 @@ class specification_basic_type
           for(const assignment& a:u.assignments())
           {
             local_sigma[a.lhs()]=a.rhs();
-            const std::set<variable> varset=find_free_variables(a.rhs());
           }
           return stochastic_operator(sto.variables(),
                                      replace_variables_capture_avoiding_alt(sto.distribution(),
