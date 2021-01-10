@@ -393,23 +393,22 @@ class specification_basic_type
                                       std::set < variable>& occurs_set)
     {
       variable_list result;
-      for (data_expression_list::const_iterator l1=l.begin();
-           l1!=l.end() ; ++l1)
+      for (const data_expression& e: l)
       {
         /* if the current argument of the multi-action is a variable that does
          not occur in result, use this variable. This is advantageous, when joining
          processes to one linear process where variable names are joined. If this
          is not being done (as happened before 4/1/2008) very long lists of parameters
          can occur when linearising using regular2 */
-        if (is_variable(*l1) && std::find(occurs_set.begin(),occurs_set.end(),*l1)==occurs_set.end())
+        if (is_variable(e) && std::find(occurs_set.begin(),occurs_set.end(),e)==occurs_set.end())
         {
-          const variable& v = atermpp::down_cast<variable>(*l1);
+          const variable& v = atermpp::down_cast<variable>(e);
           result.push_front(v);
           occurs_set.insert(v);
         }
         else
         {
-          result.push_front(variable(get_fresh_variable("a",l1->sort())));
+          result.push_front(variable(get_fresh_variable("a",e.sort())));
         }
       }
       return reverse(result);
@@ -518,9 +517,9 @@ class specification_basic_type
 
     void insertvariables(const variable_list& vars, const bool mustbenew)
     {
-      for (variable_list::const_iterator l=vars.begin(); l!=vars.end(); ++l)
+      for (const variable& v: vars)
       {
-        insertvariable(*l,mustbenew);
+        insertvariable(v,mustbenew);
       }
     }
 
@@ -702,9 +701,9 @@ class specification_basic_type
 
     void storeact(const process::action_label_list& acts)
     {
-      for (process::action_label_list::const_iterator l=acts.begin(); l!=acts.end(); ++l)
+      for (const process::action_label& l: acts)
       {
-        insertAction(*l);
+        insertAction(l);
       }
     }
 
@@ -743,13 +742,12 @@ class specification_basic_type
 
     void storeprocs(const std::vector< process_equation >& procs)
     {
-      for (std::vector< process_equation >::const_iterator i=procs.begin();
-           i!=procs.end(); ++i)
+      for (const process_equation& e: procs)
       {
         insert_process_declaration(
-          i->identifier(),
-          i->formal_parameters(),
-          i->expression(),
+          e.identifier(),
+          e.formal_parameters(),
+          e.expression(),
           unknown,0,false);
       }
     }
@@ -846,9 +844,9 @@ class specification_basic_type
     action_list linMergeMultiActionList(const action_list& ma1, const action_list& ma2)
     {
       action_list result=ma2;
-      for (action_list::const_iterator i=ma1.begin() ; i!=ma1.end() ; ++i)
+      for (const action& a: ma1) 
       {
-        result=linInsertActionInMultiActionList(*i,result);
+        result=linInsertActionInMultiActionList(a,result);
       }
       return result;
     }
@@ -1338,9 +1336,9 @@ class specification_basic_type
 
     bool occursintermlist(const variable& var, const data_expression_list& r) const
     {
-      for (data_expression_list::const_iterator l=r.begin() ; l!=r.end() ; ++l)
+      for (const data_expression& d: r)
       {
-        if (occursinterm(var,*l))
+        if (occursinterm(var,d))
         {
           return true;
         }
@@ -1361,10 +1359,9 @@ class specification_basic_type
       }
       // Check whether x does not occur in the assignment list. Then variable x is assigned to
       // itself, and it occurs in the process.
-      variable_list parameters=objectIndex(proc_name).parameters;
-      for (variable_list::const_iterator i=parameters.begin(); i!=parameters.end(); ++i)
+      for (const variable& v: objectIndex(proc_name).parameters)
       {
-        if (var==*i)
+        if (var==v)
         {
           if (assigned_variables.count(var)==0) // This variable is not assigned, so it does occur!
           {
@@ -1393,9 +1390,9 @@ class specification_basic_type
       const std::set < variable >& vars_set,
       std::set < variable >& vars_result_set)
     {
-      for (action_list::const_iterator ma=multiaction.begin() ; ma!=multiaction.end() ; ++ma)
+      for (const action& ma: multiaction)
       {
-        filter_vars_by_termlist(ma->arguments().begin(), ma->arguments().end(),vars_set,vars_result_set);
+        filter_vars_by_termlist(ma.arguments().begin(), ma.arguments().end(),vars_set,vars_result_set);
       }
       return;
     }
@@ -1408,11 +1405,9 @@ class specification_basic_type
     {
       const data_expression_list& l=atermpp::container_cast<data_expression_list>(parameters);
       filter_vars_by_termlist(l.begin(),l.end(),vars_set,vars_result_set);
-      for (assignment_list::const_iterator i=assignments.begin();
-           i!=assignments.end(); ++i)
+      for (const assignment& a: assignments)
       {
-        const data_expression rhs=i->rhs();
-        filter_vars_by_term(rhs,vars_set,vars_result_set);
+        filter_vars_by_term(a.rhs(),vars_set,vars_result_set);
       }
     }
 
@@ -1509,24 +1504,22 @@ class specification_basic_type
          by unique ones if these variables occur in occurvars
          or occurterms. It extends rename_vars and rename
          terms to rename the replaced variables to new ones. */
-      variable_list newsumvars;
+      variable_vector newsumvars;
 
-      for (variable_list::const_iterator l=sumvars.begin() ;
-           l!=sumvars.end() ; ++l)
+      for (const variable& var: sumvars)
       {
-        const variable var=*l;
         if (occursinpCRLterm(var,p,true))
         {
           const variable newvar=get_fresh_variable(var.name(),var.sort());
-          newsumvars.push_front(newvar);
+          newsumvars.push_back(newvar);
           sigma[var]=newvar;
         }
         else
         {
-          newsumvars.push_front(var);
+          newsumvars.push_back(var);
         }
       }
-      sumvars=reverse(newsumvars);
+      sumvars=variable_list(newsumvars.begin(), newsumvars.end());
     }
 
     template <class MutableSubstitution>
@@ -1591,20 +1584,18 @@ class specification_basic_type
       }
       if (is_if_then(p))
       {
-        std::set<variable> s=find_free_variables(if_then(p).condition());
-        for(std::set<variable>::const_iterator i=s.begin(); i!=s.end(); ++i)
+        for(const variable& v: find_free_variables(if_then(p).condition())) 
         {
-          free_variables_in_p.insert(*i);
+          free_variables_in_p.insert(v);
         }
         find_free_variables_process(if_then(p).then_case(),free_variables_in_p);
         return;
       }
       if (is_if_then_else(p))
       {
-        std::set<variable> s=find_free_variables(if_then(p).condition());
-        for(std::set<variable>::const_iterator i=s.begin(); i!=s.end(); ++i)
+        for(const variable& v: find_free_variables(if_then(p).condition()))
         {
-          free_variables_in_p.insert(*i);
+          free_variables_in_p.insert(v);
         }
         find_free_variables_process(if_then_else(p).then_case(),free_variables_in_p);
         find_free_variables_process(if_then_else(p).else_case(),free_variables_in_p);
@@ -1614,11 +1605,10 @@ class specification_basic_type
       if (is_sum(p))
       {
         find_free_variables_process(sum(p).operand(),free_variables_in_p);
-        const variable_list& sumargs=sum(p).variables();
 
-        for(variable_list::const_iterator i=sumargs.begin(); i!=sumargs.end(); ++i)
+        for(const variable& v: sum(p).variables())
         {
-          free_variables_in_p.erase(*i);
+          free_variables_in_p.erase(v);
         }
         return;
       }
@@ -1627,27 +1617,24 @@ class specification_basic_type
       {
         const stochastic_operator& sto=down_cast<const stochastic_operator>(p);
         find_free_variables_process(sto.operand(),free_variables_in_p);
-        std::set<variable> s=find_free_variables(sto.distribution());
-        for(std::set<variable>::const_iterator i=s.begin(); i!=s.end(); ++i)
+        for(const variable& v: find_free_variables(sto.distribution()))
         {
-          free_variables_in_p.insert(*i);
+          free_variables_in_p.insert(v);
         }
 
-        const variable_list& sumargs=sto.variables();
-        for(variable_list::const_iterator i=sumargs.begin(); i!=sumargs.end(); ++i)
+        for(const variable& v: sto.variables())
         {
-          free_variables_in_p.erase(*i);
+          free_variables_in_p.erase(v);
         }
         return;
       }
 
       if (is_process_instance(p))
       {
-        const process_instance q(p);
-        std::set<variable> free_variables=find_free_variables(q.actual_parameters());
-        for(std::set<variable> ::const_iterator i=free_variables.begin(); i!=free_variables.end(); ++i)
+        const process_instance q = atermpp::down_cast<process_instance>(p);
+        for(const variable& v: find_free_variables(q.actual_parameters()))
         {
-          free_variables_in_p.insert(*i);
+          free_variables_in_p.insert(v);
         }
         return;
       }
@@ -1658,39 +1645,36 @@ class specification_basic_type
         const variable_list parameters=object.parameters;
         std::set<variable> parameter_set(parameters.begin(),parameters.end());
         const assignment_list& assignments=q.assignments();
-        for(assignment_list::const_iterator i=assignments.begin(); i!=assignments.end(); ++i)
+        for(const assignment& a: assignments)
         {
-          std::set<variable> s=find_free_variables(i->rhs());
-          for(std::set<variable>::const_iterator j=s.begin(); j!=s.end(); ++j)
+          for(const variable& v: find_free_variables(a.rhs()))
           {
-            free_variables_in_p.insert(*j);
+            free_variables_in_p.insert(v);
           }
-          parameter_set.erase(i->lhs());
+          parameter_set.erase(a.lhs());
         }
         // Add all remaining variables in the parameter_set, as they have an identity assignment.
-        for(std::set<variable>::const_iterator i=parameter_set.begin(); i!=parameter_set.end(); ++i)
+        for(const variable& v: parameter_set)
         {
-          free_variables_in_p.insert(*i);
+          free_variables_in_p.insert(v);
         }
         return;
       }
 
       if (is_action(p))
       {
-        std::set<variable> s=process::find_free_variables(p);
-        for(std::set<variable>::const_iterator i=s.begin(); i!=s.end(); ++i)
+        for(const variable& v: process::find_free_variables(p))
         {
-          free_variables_in_p.insert(*i);
+          free_variables_in_p.insert(v);
         }
         return;
       }
 
       if (is_at(p))
       {
-        std::set<variable> s=data::find_free_variables(at(p).time_stamp());
-        for(std::set<variable>::const_iterator i=s.begin(); i!=s.end(); ++i)
+        for(const variable& v: data::find_free_variables(at(p).time_stamp()))
         {
-          free_variables_in_p.insert(*i);
+          free_variables_in_p.insert(v);
         }
         find_free_variables_process(at(p).operand(),free_variables_in_p);
         return;
@@ -1910,15 +1894,15 @@ class specification_basic_type
     assignment_list sort_assignments(const assignment_list& ass, const variable_list& parameters)
     {
       std::map<variable,data_expression>assignment_map;
-      for(assignment_list::const_iterator i=ass.begin(); i!=ass.end(); ++i)
+      for(const assignment& a: ass)
       {
-        assignment_map[i->lhs()]=i->rhs();
+        assignment_map[a.lhs()]=a.rhs();
       }
 
       assignment_vector result;
-      for(variable_list::const_iterator i=parameters.begin(); i!=parameters.end(); ++i)
+      for(const variable& v: parameters)
       {
-        const std::map<variable,data_expression>::const_iterator j=assignment_map.find(*i);
+        const std::map<variable,data_expression>::const_iterator j=assignment_map.find(v);
         if (j!=assignment_map.end()) // found
         {
           result.push_back(assignment(j->first,j->second));
@@ -1933,7 +1917,7 @@ class specification_basic_type
     {
       objectdatatype& object=objectIndex(id);
       variable_list parameters=object.parameters;
-      for(assignment_list::const_iterator i=assignments.begin(); i!=assignments.end(); ++i)
+      for(const assignment& a: assignments)
       {
         // Every assignment must occur in the parameter list, in the right sequence.
 
@@ -1947,7 +1931,7 @@ class specification_basic_type
           v=parameters.front();
           parameters.pop_front();
         }
-        while (v!=i->lhs());
+        while (v!=a.lhs());
 
       }
       return true;
@@ -2426,11 +2410,11 @@ class specification_basic_type
    assignment_list parameters_to_assignment_list(const variable_list& parameters, const std::set<variable>& variables_bound_in_sum)
    {
      assignment_vector result;
-     for(variable_list::const_iterator i=parameters.begin(); i!=parameters.end(); ++i)
+     for(const variable& v: parameters)
      {
-       if (variables_bound_in_sum.count(*i)>0)
+       if (variables_bound_in_sum.count(v)>0)
        {
-         result.push_back(assignment(*i,*i)); // rhs is another variable than the lhs!!
+         result.push_back(assignment(v,v)); // rhs is another variable than the lhs!!
        }
      }
      return assignment_list(result.begin(),result.end());
@@ -3300,11 +3284,11 @@ class specification_basic_type
                          const std::set<variable>& variables_bound_in_sum)
     {
       assignment_vector result;
-      for(variable_list::const_iterator i=vl.begin(); i!=vl.end(); ++i)
+      for(const variable& v: vl) 
       {
-        if (variables_bound_in_sum.count(*i)>0 && occursinpCRLterm(*i,t,false))
+        if (variables_bound_in_sum.count(v)>0 && occursinpCRLterm(v,t,false))
         {
-          result.push_back(assignment(*i,*i)); // Here an identity assignment is used, as it is possible
+          result.push_back(assignment(v,v)); // Here an identity assignment is used, as it is possible
                                                // that the *i at the lhs is not the same variable as *i at the rhs.
         }
       }
@@ -3322,10 +3306,9 @@ class specification_basic_type
         assert(pars.size()<=vl.size());
 
         std::map<variable,data_expression>sigma;
-        for(assignment_list::const_iterator i=p.assignments().begin();
-              i!=p.assignments().end(); ++i)
+        for(const assignment& a: p.assignments())
         {
-          sigma[i->lhs()]=i->rhs();
+          sigma[a.lhs()]=a.rhs();
         }
 
         assignment_list result;
@@ -3757,14 +3740,10 @@ class specification_basic_type
            we must now substitute */
         procstorealGNFrec(t,first,todo,regular);
 
-
-        const assignment_list& dl= process_instance_assignment(body).assignments();
-
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-
-        for(assignment_list::const_iterator i=dl.begin(); i!=dl.end(); ++i)
+        for(const assignment& a: process_instance_assignment(body).assignments())
         {
-          sigma[i->lhs()]=i->rhs();
+          sigma[a.lhs()]=a.rhs();
         }
         process_expression t3=substitute_pCRLproc(object.processbody,sigma);
         if (regular)
@@ -4769,14 +4748,13 @@ class specification_basic_type
         const assignment_list old_assignments=reverse(where_t.assignments());
         variable_list new_vars=vars;
         assignment_list new_assignments;
-        for (assignment_list::const_iterator i=old_assignments.begin();
-             i!=old_assignments.end(); ++i)
+        for (const assignment& a: old_assignments)
         {
-          new_vars.push_front(i->lhs());
+          new_vars.push_front(a.lhs());
           new_assignments.push_front(
                              assignment(
-                               i->lhs(),
-                               adapt_term_to_stack(i->rhs(),stack,vars,stochastic_variables)));
+                               a.lhs(),
+                               adapt_term_to_stack(a.rhs(),stack,vars,stochastic_variables)));
 
         }
         return where_clause(
@@ -4866,11 +4844,11 @@ class specification_basic_type
            If s does not occur in pars, it must be replaced
          by a dummy value.
       */
-      for (assignment_list::const_iterator i=args.begin(); i!=args.end(); ++i)
+      for (const assignment& a: args)
       {
-        if (s==i->lhs())
+        if (s==a.lhs())
         {
-          return adapt_term_to_stack(i->rhs(),stack,vars,stochastic_variables);
+          return adapt_term_to_stack(a.rhs(),stack,vars,stochastic_variables);
         }
       }
 
@@ -4911,31 +4889,31 @@ class specification_basic_type
       const variable_list& stochastic_variables)
     {
       std::map<variable,data_expression> assignment_map;
-      for(assignment_list::const_iterator k=args.begin(); k!=args.end(); ++k)
+      for(const assignment& a: args)
       {
-        assignment_map[k->lhs()]=k->rhs();
+        assignment_map[a.lhs()]=a.rhs();
       }
 
       assignment_vector result;
-      for(variable_list::const_iterator i=parlist.begin(); i!=parlist.end(); ++i)
+      for(const variable& v: parlist)
       {
-        if (std::find(stochastic_variables.begin(),stochastic_variables.end(),*i)!=stochastic_variables.end())
+        if (std::find(stochastic_variables.begin(),stochastic_variables.end(),v)!=stochastic_variables.end())
         {
-          // *i is a stochastic variable. Insert the identity assignment.
-          result.push_back(assignment(*i,*i));
+          // v is a stochastic variable. Insert the identity assignment.
+          result.push_back(assignment(v,v));
         }
-        else if (free_variables_in_body.find(*i)==free_variables_in_body.end())
+        else if (free_variables_in_body.find(v)==free_variables_in_body.end())
         {
           {
             // The variable *i must get a default value.
-            const data_expression rhs=representative_generator_internal(i->sort());
-            result.push_back(assignment(*i,rhs));
+            const data_expression rhs=representative_generator_internal(v.sort());
+            result.push_back(assignment(v,rhs));
           }
         }
         else
         {
-          const std::map<variable,data_expression>::iterator k=assignment_map.find(*i);
-          if (k!=assignment_map.end())  // There is assignment for *i. Use it.
+          const std::map<variable,data_expression>::iterator k=assignment_map.find(v);
+          if (k!=assignment_map.end())  // There is assignment for v. Use it.
           {
             result.push_back(assignment(k->first,k->second));
             assignment_map.erase(k);
@@ -5698,15 +5676,13 @@ class specification_basic_type
 
     data::function_symbol find_case_function(std::size_t index, const sort_expression& sort)
     {
-      const function_symbol_list functions=enumeratedtypes[index].functions;
-      for (function_symbol_list::const_iterator w=functions.begin();
-           w!=functions.end(); ++w)
+      for (const data::function_symbol& f: enumeratedtypes[index].functions)
       {
-        sort_expression_list domain = function_sort(w->sort()).domain();
+        sort_expression_list domain = function_sort(f.sort()).domain();
         assert(domain.size() >= 2);
         if (*(++domain.begin())==sort)
         {
-          return *w;
+          return f;
         }
       };
 
@@ -5842,14 +5818,14 @@ class specification_basic_type
           var=variable(spec.fresh_identifier_generator("e"),spec.enumeratedtypes[enumeratedtype_index].sortId);
           spec.insertvariable(var,true);
 
-          for (sort_expression_list::const_iterator w=fsorts.begin(); w!=fsorts.end(); ++w)
+          for (const sort_expression& f: fsorts)
           {
-            spec.create_case_function_on_enumeratedtype(*w,enumeratedtype_index);
+            spec.create_case_function_on_enumeratedtype(f,enumeratedtype_index);
           }
 
-          for (sort_expression_list::const_iterator w=gsorts.begin(); w!=gsorts.end(); ++w)
+          for (const sort_expression& f: gsorts)
           {
-            spec.create_case_function_on_enumeratedtype(*w,enumeratedtype_index);
+            spec.create_case_function_on_enumeratedtype(f,enumeratedtype_index);
           }
 
           spec.create_case_function_on_enumeratedtype(sort_bool::bool_(),enumeratedtype_index);
@@ -5943,9 +5919,8 @@ class specification_basic_type
 
       /* Check whether the variable occurs in the prcoess parameter list, in which case
          it also needs to be renamed */
-      for (variable_list::const_iterator i=process_parameters.begin() ; i!=process_parameters.end() ; ++i)
+      for (const variable& var1: process_parameters)
       {
-        variable var1=*i;
         if (var.name()==var1.name())
         {
           pars.push_front(var);
@@ -5954,7 +5929,6 @@ class specification_basic_type
           return false;
         }
       }
-
 
       return false;
     }
@@ -6199,14 +6173,14 @@ class specification_basic_type
 
     data_expression getRHSassignment(const variable& var, const assignment_list& as)
     {
-      for (assignment_list::const_iterator i=as.begin(); i!=as.end(); ++i)
+      for (const assignment& a: as)
       {
-        if (i->lhs()==var)
+        if (a.lhs()==var)
         {
-          return i->rhs();
+          return a.rhs();
         }
       }
-      return data_expression(var);
+      return  var; 
     }
 
     stochastic_action_summand collect_sum_arg_arg_cond(
@@ -6715,7 +6689,7 @@ class specification_basic_type
       std::size_t fcnt=0;
       data_expression_list resultnextstate;
 
-      for (variable_list::const_iterator var_it=parameters.begin(); var_it!=parameters.end(); ++var_it)
+      for (const variable& var: parameters)
       {
         equalterm=data_expression();
         equaluptillnow=1;
@@ -6741,7 +6715,7 @@ class specification_basic_type
           ++stochastic_auxrename_list_args;
 
           data_expression nextstateparameter;
-          nextstateparameter=getRHSassignment(*var_it,nextstate);
+          nextstateparameter=getRHSassignment(var,nextstate);
 
           maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
           data_expression_list::const_iterator j=stochastic_auxargs.begin();
@@ -6802,7 +6776,7 @@ class specification_basic_type
                          data_expression(application(
                                            find_case_function(
                                              e.enumeratedtype_index,
-                                             var_it->sort()),
+                                             var.sort()),
                                            tempauxresult)));
           }
           else
@@ -6811,7 +6785,7 @@ class specification_basic_type
                                    n,
                                    resultsum,
                                    auxresult,
-                                   var_it->sort(),
+                                   var.sort(),
                                    e);
             resultnextstate.push_front(temp);
           }
@@ -7088,9 +7062,9 @@ class specification_basic_type
     {
       sort_expression_list resultsorts;
 
-      for (action_list::const_iterator i=actionlist.begin(); i!=actionlist.end(); ++i)
+      for (const action& act: actionlist)
       {
-        resultsorts=i->label().sorts()+resultsorts;
+        resultsorts=act.label().sorts()+resultsorts;
       }
       return resultsorts;
     }
@@ -7108,15 +7082,12 @@ class specification_basic_type
         stochastic_action_summand_vector result;
         stochastic_action_summand_vector reducible_sumlist=action_summands;
 
-        for (stochastic_action_summand_vector::const_iterator i=action_summands.begin() ; i!=action_summands.end() ; ++i)
+        for (const stochastic_action_summand& summand1: action_summands)
         {
-          const stochastic_action_summand summand1=*i;
-
           stochastic_action_summand_vector w1;
           stochastic_action_summand_vector w2;
-          for (stochastic_action_summand_vector::const_iterator w3=reducible_sumlist.begin(); w3!=reducible_sumlist.end(); ++w3)
+          for (const stochastic_action_summand& summand2: reducible_sumlist)
           {
-            const stochastic_action_summand summand2=*w3;
             if (summandsCanBeClustered(summand1,summand2))
             {
               w1.push_back(summand2);
@@ -7148,9 +7119,9 @@ class specification_basic_type
             else
             {
               // result=w1 + result;
-              for(stochastic_action_summand_vector::const_iterator i=result.begin(); i!=result.end(); ++i)
+              for(const stochastic_action_summand& summand: result)
               {
-                w1.push_back(*i);
+                w1.push_back(summand);
               }
               w1.swap(result);
             }
@@ -7576,9 +7547,8 @@ class specification_basic_type
          each delta summand it is determined whether it ought
          to be added, or is superseded by an action or another
          delta summand */
-      for (stochastic_action_summand_vector::const_iterator i=sourcesumlist.begin(); i!=sourcesumlist.end(); ++i)
+      for (const stochastic_action_summand& smmnd: sourcesumlist)
       {
-        const stochastic_action_summand smmnd= *i;
         const variable_list& sumvars=smmnd.summation_variables();
         const action_list multiaction=smmnd.multi_action().actions();
         const data_expression actiontime=smmnd.multi_action().time();
@@ -7621,15 +7591,13 @@ class specification_basic_type
         if (!options.ignore_time) /* if a delta summand is added, conditional, timed
                                    delta's are subsumed and do not need to be added */
         {
-          for (deadlock_summand_vector::const_iterator j=resultsimpledeltasumlist.begin();
-               j!=resultsimpledeltasumlist.end(); ++j)
+          for (const deadlock_summand& summand: resultsimpledeltasumlist)
           {
-            insert_timed_delta_summand(action_summands,deadlock_summands,*j);
+            insert_timed_delta_summand(action_summands,deadlock_summands,summand);
           }
-          for (deadlock_summand_vector::const_iterator j=resultdeltasumlist.begin();
-               j!=resultdeltasumlist.end(); ++j)
+          for (const deadlock_summand& summand: resultdeltasumlist)
           {
-            insert_timed_delta_summand(action_summands,deadlock_summands,*j);
+            insert_timed_delta_summand(action_summands,deadlock_summands,summand);
           }
         }
         else
@@ -7650,11 +7618,11 @@ class specification_basic_type
     {
       const action_label& actionId=act.label();
       const identifier_string& s=actionId.name();
-      for (rename_expression_list::const_iterator i=renamings.begin(); i!=renamings.end(); ++i)
+      for (const rename_expression& renaming: renamings)
       {
-        if (s==i->source())
+        if (s==renaming.source())
         {
-          return action(action_label(i->target(),actionId.sorts()),
+          return action(action_label(renaming.target(),actionId.sorts()),
                         act.arguments());
         }
       }
@@ -8240,11 +8208,10 @@ class specification_basic_type
       /* first we sort the multiactions in communications */
       communication_expression_list resultingCommunications;
 
-      for (communication_expression_list::const_iterator i=communications.begin();
-           i!=communications.end(); ++i)
+      for (const communication_expression& comm: communications)
       {
-        const action_name_multiset source=i->action_name();
-        const identifier_string target=i->name();
+        const action_name_multiset& source=comm.action_name();
+        const identifier_string& target=comm.name();
         resultingCommunications.push_front(communication_expression(sort_action_labels(source),target));
       }
       communication_expression_list communications1=resultingCommunications;
@@ -8263,10 +8230,8 @@ class specification_basic_type
       }
       action_name_multiset_list allowlist((is_allow)?sort_multi_action_labels(allowlist1):allowlist1);
 
-      for (stochastic_action_summand_vector::const_iterator sourcesumlist=action_summands.begin();
-           sourcesumlist!=action_summands.end(); ++sourcesumlist)
+      for (const stochastic_action_summand& smmnd: action_summands)
       {
-        const stochastic_action_summand smmnd=*sourcesumlist;
         const variable_list& sumvars=smmnd.summation_variables();
         const action_list multiaction=smmnd.multi_action().actions();
         const data_expression& condition=smmnd.condition();
@@ -8287,17 +8252,16 @@ class specification_basic_type
 
           /* But first remove free variables from sumvars */
 
-          variable_list newsumvars;
-          for (variable_list::const_iterator i=sumvars.begin(); i!=sumvars.end(); ++i)
+          variable_vector newsumvars_;
+          for (const variable& sumvar: sumvars)
           {
-            const variable sumvar=*i;
             if (occursinterm(sumvar,condition) ||
                 (smmnd.has_time() && occursinterm(sumvar,smmnd.multi_action().time())))
             {
-              newsumvars.push_front(sumvar);
+              newsumvars_.push_back(sumvar);
             }
           }
-          newsumvars=reverse(newsumvars);
+          variable_list newsumvars=variable_list(newsumvars_.begin(), newsumvars_.end());
 
           resultingDeltaSummands.push_back(deadlock_summand(newsumvars,
                                                             condition,
@@ -8364,10 +8328,9 @@ class specification_basic_type
 
       if (!inline_allow && !options.nodeltaelimination)
       {
-        for (deadlock_summand_vector::const_iterator w=resultingDeltaSummands.begin();
-             w!=resultingDeltaSummands.end(); ++w)
+        for (const deadlock_summand& summand: resultingDeltaSummands)
         {
-          insert_timed_delta_summand(action_summands,deadlock_summands,*w);
+          insert_timed_delta_summand(action_summands,deadlock_summands,summand);
         }
       }
 
@@ -8452,28 +8415,27 @@ class specification_basic_type
                    data::less(timevariable,actiontime)));
         variables.push_front(timevariable);
       }
-      for (variable_list::const_iterator i=freevars.begin(); i!=freevars.end(); ++i)
+      for (const variable& v: freevars)
       {
-        if (occursinterm(*i,result))
+        if (occursinterm(v,result))
         {
-          variables.push_front(*i);
+          variables.push_front(v);
         }
       }
 
-      for (std::set<variable>::const_iterator p=global_variables.begin();
-           p!=global_variables.end() ; ++p)
+      for (const variable& v: global_variables)
       {
-        if (occursinterm(*p,result))
+        if (occursinterm(v,result))
         {
-          variables.push_front(*p);
+          variables.push_front(v);
         }
       }
 
-      for (variable_list::const_iterator s=sumvars.begin(); s!=sumvars.end(); ++s)
+      for (const variable& v: sumvars)
       {
-        if (occursinterm(*s,result))
+        if (occursinterm(v,result))
         {
-          used_sumvars.push_front(*s);
+          used_sumvars.push_front(v);
         }
       }
       used_sumvars = reverse(used_sumvars);
@@ -8492,19 +8454,17 @@ class specification_basic_type
          condition is true */
 
       variable time_variable=get_fresh_variable("timevar",sort_real::real_());
-      for (deadlock_summand_vector::const_iterator i=deadlock_summands.begin();
-           i!=deadlock_summands.end(); ++i)
+      for (const deadlock_summand& summand: deadlock_summands)
       {
-        if ((!i->deadlock().has_time()) && (i->condition()==sort_bool::true_()))
+        if ((!summand.deadlock().has_time()) && (summand.condition()==sort_bool::true_()))
         {
           return lps::detail::ultimate_delay(time_variable);
         }
       }
 
-      for (stochastic_action_summand_vector::const_iterator i=action_summands.begin();
-           i!=action_summands.end(); ++i)
+      for (const stochastic_action_summand& summand: action_summands)
       {
-        if ((!i->multi_action().has_time()) && (i->condition()==sort_bool::true_()))
+        if ((!summand.multi_action().has_time()) && (summand.condition()==sort_bool::true_()))
         {
           return lps::detail::ultimate_delay(time_variable);
         }
@@ -8611,10 +8571,11 @@ class specification_basic_type
 
       data::maintain_variables_in_rhs< data::mutable_map_substitution<> >  sigma;
 
-      for(variable_list::const_iterator i=var_list.begin(); i!=var_list.end(); ++i)
+      for(const variable& var: var_list)
       {
-        const data::variable v = get_fresh_variable(std::string(i->name()) + ((hint.empty())?"":"_") + hint, i->sort());
-        sigma[*i] = v;
+        const data::variable v = 
+              get_fresh_variable(std::string(var.name()) + ((hint.empty())?"":"_") + hint, var.sort());
+        sigma[var] = v;
       }
       return sigma;
     }
@@ -8645,10 +8606,8 @@ class specification_basic_type
                                                        ultimate_delay_condition.constraint(),
                                                        local_sigma);  // Only substitute the variables in the lhs.
       }
-      for (stochastic_action_summand_vector::const_iterator s=action_summands.begin(); s!=action_summands.end(); ++s)
+      for (const stochastic_action_summand& smmnd: action_summands)
       {
-        const stochastic_action_summand smmnd= *s;
-
         const variable_list& sumvars=smmnd.summation_variables();
         data::maintain_variables_in_rhs<data::mutable_map_substitution<> > sigma_sumvars=make_unique_variables(sumvars,hint);
         const variable_list unique_sumvars=data::replace_variables(sumvars, sigma_sumvars);
@@ -8689,7 +8648,7 @@ class specification_basic_type
         result_action_summands.push_back(stochastic_action_summand(
                                                         unique_sumvars,
                                                         condition,
-                                                        s->multi_action().has_time()?multi_action(multiaction,actiontime):multi_action(multiaction),
+                                                        smmnd.multi_action().has_time()?multi_action(multiaction,actiontime):multi_action(multiaction),
                                                         nextstate,
                                                         distribution));
       }
@@ -8700,9 +8659,8 @@ class specification_basic_type
 
       assert(unique_pars.size()==pars.size());
 
-      for (deadlock_summand_vector::const_iterator s=deadlock_summands.begin(); s!=deadlock_summands.end(); ++s)
+      for (const deadlock_summand& smmnd: deadlock_summands)
       {
-        const deadlock_summand smmnd= *s;
         const variable_list& sumvars=smmnd.summation_variables();
         maintain_variables_in_rhs<data::mutable_map_substitution<> > sigma_sumvars=make_unique_variables(sumvars,hint);
         const variable_list unique_sumvars=data::replace_variables(sumvars, sigma_sumvars);
@@ -8719,7 +8677,7 @@ class specification_basic_type
 
         result_deadlock_summands.push_back(deadlock_summand(unique_sumvars,
                                                             condition,
-                                                            s->deadlock().has_time()?deadlock(actiontime):deadlock()));
+                                                            smmnd.deadlock().has_time()?deadlock(actiontime):deadlock()));
       }
       pars=unique_pars;
       result_deadlock_summands.swap(deadlock_summands);
@@ -9277,12 +9235,11 @@ class specification_basic_type
         generateLPEmCRL(action_summands,deadlock_summands,process_instance_assignment(t).identifier(),
                         regular,pars,init,initial_stochastic_distribution,ultimate_delay_condition);
         objectdatatype& object=objectIndex(process_instance_assignment(t).identifier());
-        const assignment_list ass=process_instance_assignment(t).assignments();
 
         maintain_variables_in_rhs<mutable_map_substitution<> > sigma;
-        for (assignment_list::const_iterator i=ass.begin();  i!=ass.end(); ++i)
+        for (const assignment& a: process_instance_assignment(t).assignments())
         {
-          sigma[i->lhs()]=i->rhs();
+          sigma[a.lhs()]=a.rhs();
         }
 
         // init=substitute_assignmentlist(init,pars,false,true,sigma);   ZZZ
@@ -9341,15 +9298,14 @@ class specification_basic_type
           std::set <variable> variable_list = lps::find_free_variables(temporary_spec.process().action_summands());
           const std::set <variable> variable_list1 = lps::find_free_variables(temporary_spec.process().deadlock_summands());
           variable_list.insert(variable_list1.begin(),variable_list1.end());
-          for (std::set <variable>::const_iterator i=variable_list.begin();
-               i!=variable_list.end(); ++i)
+          for (const variable& v: variable_list)
           {
-            if (std::find(pars.begin(),pars.end(),*i)==pars.end() && // The free variable is not in pars,
-                global_variables.find(*i)==global_variables.end() // it is neither a global variable
-                // (lps::search_free_variable(temporary_spec.process().action_summands(),*i) || lps::search_free_variable(temporary_spec.process().deadlock_summands(),*i))
+            if (std::find(pars.begin(),pars.end(),v)==pars.end() && // The free variable is not in pars,
+                global_variables.find(v)==global_variables.end() // it is neither a global variable
+                // (lps::search_free_variable(temporary_spec.process().action_summands(),v) || lps::search_free_variable(temporary_spec.process().deadlock_summands(),v))
                )          // and it occurs in the summands.
             {
-              pars.push_front(*i);
+              pars.push_front(v);
             }
           }
 
@@ -10105,13 +10061,13 @@ class specification_basic_type
         {
           const stochastic_operator& r=down_cast<const stochastic_operator>(r_);
           std::set <variable> variables_in_distribution=find_all_variables(r.distribution());
-          for(variable_list::const_iterator i=s.variables().begin(); i!=s.variables().end(); ++i)
+          for(const variable& v: s.variables())
           {
-            if (variables_in_distribution.count(*i)>0)
+            if (variables_in_distribution.count(v)>0)
             {
               throw mcrl2::runtime_error("Cannot commute a sum operator over a stochastic operator in " +
                                                    process::pp(t) + ".\n" +
-                                         "The problematic variable is " + pp(*i) + ":" + pp(i->sort()) + ".");
+                                         "The problematic variable is " + pp(v) + ":" + pp(v.sort()) + ".");
             }
           }
           return stochastic_operator(r.variables(),
@@ -10299,19 +10255,19 @@ class specification_basic_type
         {
           const stochastic_operator& r=down_cast<const stochastic_operator>(r_);
           std::set <variable> variables_in_distribution=find_all_variables(r.distribution());
-          for(variable_list::const_iterator i=s.variables().begin(); i!=s.variables().end(); ++i)
+          for(const variable& v: s.variables())
           {
-            if (variables_in_distribution.count(*i)>0)
+            if (variables_in_distribution.count(v)>0)
             {
               throw mcrl2::runtime_error("Cannot commute a sum operator over a stochastic operator in " +
                                                    process::pp(t) + ".\n" +
-                                         "The problematic variable is " + pp(*i) + ":" + pp(i->sort()) + ".");
+                                         "The problematic variable is " + pp(v) + ":" + pp(v.sort()) + ".");
             }
           }
           return stochastic_operator(r.variables(),
                                      r.distribution(),
                                      sum(s.variables(),r.operand()));
-         }
+        }
         return t;
       }
 
@@ -10779,24 +10735,24 @@ class specification_basic_type
         visited_processes.insert(procId);
         objectdatatype& object=objectIndex(procId);
         const variable_list parameters=object.parameters;
-        for(variable_list::const_iterator i=parameters.begin(); i!=parameters.end(); ++i)
+        for(const variable& v: parameters)
         {
-          if (used_variable_names.count(i->name())==0)
+          if (used_variable_names.count(v.name())==0)
           {
-            used_variable_names.insert(i->name());
-            parameter_mapping[*i]=*i;  // This is the first parameter with this name. Map it to itself.
-            variables_in_lhs_of_parameter_mapping.insert(*i);
+            used_variable_names.insert(v.name());
+            parameter_mapping[v]=v;  // This is the first parameter with this name. Map it to itself.
+            variables_in_lhs_of_parameter_mapping.insert(v);
           }
           else
           {
             // A variable already exists with this name.
-            if (variables_in_lhs_of_parameter_mapping.count(*i)==0) // The variables must be separately stored, as the parameter_mapping
+            if (variables_in_lhs_of_parameter_mapping.count(v)==0) // The variables must be separately stored, as the parameter_mapping
                                                                     // forgets variables mapped to itself.
             {
               // This parameter needs a fresh name.
-              const variable fresh_var(fresh_identifier_generator(i->name()),i->sort());
-              parameter_mapping[*i]=fresh_var;
-              variables_in_lhs_of_parameter_mapping.insert(*i);
+              const variable fresh_var(fresh_identifier_generator(v.name()),v.sort());
+              parameter_mapping[v]=fresh_var;
+              variables_in_lhs_of_parameter_mapping.insert(v);
             }
           }
         }
@@ -10904,25 +10860,24 @@ class specification_basic_type
         // Also rename bound variables in a sum, such that there are no two variables with
         // the same name, but different types. We do the renaming globally, i.e. all occurrences of variables
         // x:D that require renaming are renamed to x':D.
-        const variable_list parameters=sum(t).variables();
-        for(variable_list::const_iterator i=parameters.begin(); i!=parameters.end(); ++i)
+        for(const variable& v: sum(t).variables())
         {
-          if (used_variable_names.count(i->name())==0)
+          if (used_variable_names.count(v.name())==0)
           {
-            used_variable_names.insert(i->name());
-            parameter_mapping[*i]=*i;  // This is the first parameter with this name. Map it to itself.
-            variables_in_lhs_of_parameter_mapping.insert(*i);
+            used_variable_names.insert(v.name());
+            parameter_mapping[v]=v;  // This is the first parameter with this name. Map it to itself.
+            variables_in_lhs_of_parameter_mapping.insert(v);
           }
           else
           {
             // A variable already exists with this name.
-            if (variables_in_lhs_of_parameter_mapping.count(*i)==0) // The variables must be separately stored, as the parameter_mapping
+            if (variables_in_lhs_of_parameter_mapping.count(v)==0) // The variables must be separately stored, as the parameter_mapping
                                                                     // forgets variables mapped to itself.
             {
               // This parameter needs a fresh name.
-              const variable fresh_var(fresh_identifier_generator(i->name()),i->sort());
-              parameter_mapping[*i]=fresh_var;
-              variables_in_lhs_of_parameter_mapping.insert(*i);
+              const variable fresh_var(fresh_identifier_generator(v.name()),v.sort());
+              parameter_mapping[v]=fresh_var;
+              variables_in_lhs_of_parameter_mapping.insert(v);
             }
           }
         }
@@ -10960,25 +10915,24 @@ class specification_basic_type
         // Also rename bound variables in a stochastic operator, such that there are no two variables with
         // the same name, but different types. We do the renaming globally, i.e. all occurrences of variables
         // x:D that require renaming are renamed to x':D.
-        const variable_list& parameters=sto.variables();
-        for(variable_list::const_iterator i=parameters.begin(); i!=parameters.end(); ++i)
+        for(const variable& v: sto.variables())
         {
-          if (used_variable_names.count(i->name())==0)
+          if (used_variable_names.count(v.name())==0)
           {
-            used_variable_names.insert(i->name());
-            parameter_mapping[*i]=*i;  // This is the first parameter with this name. Map it to itself.
-            variables_in_lhs_of_parameter_mapping.insert(*i);
+            used_variable_names.insert(v.name());
+            parameter_mapping[v]=v;  // This is the first parameter with this name. Map it to itself.
+            variables_in_lhs_of_parameter_mapping.insert(v);
           }
           else
           {
             // A variable already exists with this name.
-            if (variables_in_lhs_of_parameter_mapping.count(*i)==0) // The variables must be separately stored, as the parameter_mapping
+            if (variables_in_lhs_of_parameter_mapping.count(v)==0) // The variables must be separately stored, as the parameter_mapping
                                                                     // forgets variables mapped to itself.
             {
               // This parameter needs a fresh name.
-              const variable fresh_var(fresh_identifier_generator(i->name()),i->sort());
-              parameter_mapping[*i]=fresh_var;
-              variables_in_lhs_of_parameter_mapping.insert(*i);
+              const variable fresh_var(fresh_identifier_generator(v.name()),v.sort());
+              parameter_mapping[v]=fresh_var;
+              variables_in_lhs_of_parameter_mapping.insert(v);
             }
           }
         }
@@ -11124,9 +11078,8 @@ class specification_basic_type
 
     void AddTerminationActionIfNecessary(const stochastic_action_summand_vector& summands)
     {
-      for (stochastic_action_summand_vector::const_iterator i=summands.begin(); i!=summands.end(); ++i)
+      for (const stochastic_action_summand& smd: summands)
       {
-        const stochastic_action_summand smd=*i;
         const action_list multiaction=smd.multi_action().actions();
         if (multiaction == action_list({ terminationAction }))
         {
@@ -11156,22 +11109,16 @@ class specification_basic_type
       std::set < variable > vars_set(vars.begin(),vars.end());
       std::set < variable > vars_result_set;
 
-      for (deadlock_summand_vector::const_iterator smds=deadlock_summands.begin();
-           smds!=deadlock_summands.end(); ++smds)
+      for (const deadlock_summand& smd: deadlock_summands)
       {
-        const deadlock_summand smd= *smds;
-
         if (smd.deadlock().has_time())
         {
           filter_vars_by_term(smd.deadlock().time(),vars_set,vars_result_set);
         }
         filter_vars_by_term(smd.condition(),vars_set,vars_result_set);
       }
-      for (stochastic_action_summand_vector::const_iterator smds=action_summands.begin();
-           smds!=action_summands.end(); ++smds)
+      for (const stochastic_action_summand& smd: action_summands)
       {
-        const stochastic_action_summand smd= *smds;
-
         filter_vars_by_multiaction(smd.multi_action().actions(),vars_set,vars_result_set);
         filter_vars_by_assignmentlist(smd.assignments(),parameters,vars_set,vars_result_set);
 
