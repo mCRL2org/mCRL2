@@ -423,3 +423,33 @@ BOOST_AUTO_TEST_CASE(properly_order_multiactions)
 
   BOOST_CHECK(compare(ab, ba, lts_eq_bisim)); // These transition systems must be equal. 
 }
+
+// Test cases for coupled similarity
+
+const std::string philosophers_gradual =
+ "des (0,8,6)\n"
+ "(0,\"tau\",1)\n"
+ "(0,\"tau\",2)\n"
+ "(1,\"tau\",3)\n"
+ "(2,\"tau\",4)\n"
+ "(2,\"tau\",5)\n"
+ "(3,\"aEats\",3)\n"
+ "(4,\"bEats\",4)\n"
+ "(5,\"cEats\",5)\n"
+ ;
+
+const std::string philosophers_merged =
+ "des (0,6,4)\n"
+ "(0,\"tau\",1)\n"
+ "(0,\"tau\",2)\n"
+ "(0,\"tau\",3)\n"
+ "(1,\"aEats\",1)\n"
+ "(2,\"bEats\",2)\n"
+ "(3,\"cEats\",3)\n"
+ ;
+
+BOOST_AUTO_TEST_CASE(coupled_similarity_test)
+{
+  BOOST_CHECK(compare(philosophers_gradual, philosophers_merged, lts_eq_coupled_sim)); // These transition systems must be equal.
+  BOOST_CHECK(!compare(philosophers_gradual, philosophers_merged, lts_eq_bisim)); // These transition systems must be different.
+}
