@@ -50,16 +50,25 @@ namespace detail
   struct cs_game_node
   {
     unsigned char flag;
-    size_t act;
-    size_t p; size_t q;
+    std::size_t act;
+    std::size_t p; std::size_t q;
     bool swapped;  // false := p is from lts1
   };
 
   // connection between game nodes
   struct cs_game_move
   {
+    cs_game_move(cs_game_node _from,
+      cs_game_node _to,
+      std::size_t _act,
+      std::string _label_of_action,
+      bool _weak = false
+    ) :
+      from(_from), to(_to), act(_act), label_of_action(_label_of_action), weak(_weak)
+    {}
+
     cs_game_node from, to;
-    size_t act;
+    std::size_t act;
     std::string label_of_action;
     bool weak;
   };
@@ -171,7 +180,7 @@ template <class LTS_TYPE>
     // std::set<transition> l2_weak_transitions; // do I need to save them?
 
     /* filter transitions of t2. */
-    std::map<size_t, std::map<transition, bool>>  // if strong transition on true
+    std::map<std::size_t, std::map<transition, bool>>  // if strong transition on true
       l2_tran_from_node, l2_tran_into_node,
       l1_tran_from_node, l1_tran_into_node;
 
@@ -180,15 +189,15 @@ template <class LTS_TYPE>
       << std::endl;
 
     { // restructure l1 => get meta data and chain weak transitions.
-      for (const transition t1 : l1.get_transitions())
+      for (const transition& t1 : l1.get_transitions())
       {
         l1_tran_from_node[t1.from()][t1] = true;  // outgoing
         l1_tran_into_node[t1.to()][t1] = true;  // incoming
 
         /* Every transition is a weak transition, append to todo. */
-        todo_weak.push(transition(t1.from(), t1.label(), t1.to()));
+        todo_weak.push(t1);
 
-        l1_weak_transitions.insert(transition(t1.from(), t1.label(), t1.to()));
+        l1_weak_transitions.insert(t1);
 
         // add tau loop for everyone.
         l1_weak_transitions.insert(transition(t1.from(), 0, t1.from()));
@@ -203,13 +212,13 @@ template <class LTS_TYPE>
         // finish if next is second not tau.
         transition weak = todo_weak.top();
         todo_weak.pop();
-        size_t f = weak.from();
-        size_t l = weak.label();
-        size_t t = weak.to();
+        std::size_t f = weak.from();
+        std::size_t l = weak.label();
+        std::size_t t = weak.to();
         bool already_good = !l1.is_tau(l);  // path already has a good action
 
-        std::map<transition,bool> next = l1_tran_from_node[t];
-        size_t len = next.size();
+        const std::map<transition,bool>& next = l1_tran_from_node[t];
+        std::size_t len = next.size();
 
         if (true)  // also just tau chains may be later used
           // if (already_good)  // (actually already) done
@@ -229,7 +238,7 @@ template <class LTS_TYPE>
         {
           for (const auto &ntrans : next)
           {
-            size_t next_label = ntrans.first.label();
+            std::size_t next_label = ntrans.first.label();
             bool next_tau = l1.is_tau(next_label);
 
             /* If tau: extend new todo with extension.
@@ -247,19 +256,19 @@ template <class LTS_TYPE>
             }
           }
         }
-        // cuurent weak transition is done now.
-      }  // done l1 tau forest (all tau pathes).
+        // current weak transition is done now.
+      } // done l1 tau forest (all tau pathes).
     }
 
     { // ANALOG for l2
-      for (const transition t2 : l2.get_transitions())
+      for (const transition& t2 : l2.get_transitions())
       {
         l2_tran_from_node[t2.from()][t2] = true;  // outgoing
         l2_tran_into_node[t2.to()][t2] = true;  // incoming
 
         /* Every transition is a weak transition, append to todo. */
-        todo_weak.push(transition(t2.from(), t2.label(), t2.to()));
-        l2_weak_transitions.insert(transition(t2.from(), t2.label(), t2.to()));
+        todo_weak.push(t2);
+        l2_weak_transitions.insert(t2);
 
         // add tau loop for everyone.
         l2_weak_transitions.insert(transition(t2.from(), 0, t2.from()));
@@ -274,13 +283,13 @@ template <class LTS_TYPE>
         // finish if next is second not tau.
         transition weak = todo_weak.top();
         todo_weak.pop();
-        size_t f = weak.from();
-        size_t l = weak.label();
-        size_t t = weak.to();
+        std::size_t f = weak.from();
+        std::size_t l = weak.label();
+        std::size_t t = weak.to();
         bool already_good = !l2.is_tau(l);  // path already has a good action
 
         std::map<transition,bool> next = l2_tran_from_node[t];
-        size_t len = next.size();
+        std::size_t len = next.size();
 
         if (true)  // all, also just tau chains may be requeseted later
           // if (already_good)  // (actually already) done
@@ -300,7 +309,7 @@ template <class LTS_TYPE>
         {
           for (const auto &ntrans : next)
           {
-            size_t next_label = ntrans.first.label();
+            std::size_t next_label = ntrans.first.label();
             bool next_tau = l2.is_tau(next_label);
 
             /* If tau: extend new todo with extension.
@@ -325,9 +334,9 @@ template <class LTS_TYPE>
       << "Creating now the cs-game arena."
       << std::endl;
 
-    for (size_t p0 = 0; p0 < l1.num_states(); p0++)
+    for (std::size_t p0 = 0; p0 < l1.num_states(); p0++)
     {
-      for (size_t q0 = 0; q0 < l2.num_states(); q0++)
+      for (std::size_t q0 = 0; q0 < l2.num_states(); q0++)
       {
         cs_game_node p0q0 = {NODE_ATK, 0, p0, q0, false};  // atk (p0,q0)
         cs_game_node cplp0q0 = {NODE_CPL, 0, p0, q0, false}; // (cpl,p0,q0)
@@ -341,12 +350,12 @@ template <class LTS_TYPE>
         defender_nodes.insert(cplp0q0);
         defender_nodes.insert(cplq0p0);
 
-        moves.insert({p0q0, cplp0q0, 0, "cpl"});  // (p0,q0) -> (Cpl,p0,q0)
-        moves.insert({q0p0, cplq0p0, 0, "cpl"});  // (q0,p0) -> (Cpl,q0,p0)
+        moves.emplace(p0q0, cplp0q0, 0, "cpl");  // (p0,q0) -> (Cpl,p0,q0)
+        moves.emplace(q0p0, cplq0p0, 0, "cpl");  // (q0,p0) -> (Cpl,q0,p0)
 
         /* bisim: coupling answer q'=q, p'=p*/
-        moves.insert({cplp0q0, q0p0, 0, "bisim"});
-        moves.insert({cplq0p0, p0q0, 0, "bisim"});
+        moves.emplace(cplp0q0, q0p0, 0, "bisim");
+        moves.emplace(cplq0p0, p0q0, 0, "bisim");
 
         std::map<cs_game_move, bool> todo_if;
 
@@ -358,8 +367,8 @@ template <class LTS_TYPE>
          */
         for (const auto t1 : l1_tran_from_node[p0])
         {
-          size_t a = t1.first.label();
-          size_t p1 = t1.first.to();
+          std::size_t a = t1.first.label();
+          std::size_t p1 = t1.first.to();
           bool atau = l1.is_tau(a);
           bool strong = t1.second;  // transition was strong
 
@@ -376,13 +385,13 @@ template <class LTS_TYPE>
             /* (p0,q0) -> (a,p1,q0),  if [p0] a -> [p1] */
             cs_game_node ap1q0 = {NODE_DEF, a, p1, q0, false};
             defender_nodes.insert(ap1q0);
-            moves.insert({p0q0, ap1q0, a, move_label});
+            moves.emplace(p0q0, ap1q0, a, move_label);
 
             if (atau)  // => answering q0 can also stay.
             {
               cs_game_node q0_stay = {NODE_ATK, 0, p1, q0, false};
               attacker_nodes.insert(q0_stay);
-              moves.insert({ap1q0, q0_stay, 0, ""});
+              moves.emplace(ap1q0, q0_stay, 0, "");
             }
           }
 
@@ -392,7 +401,7 @@ template <class LTS_TYPE>
           // XXX reconsider, maybe TODO with delayed checks, bc l2_transitions are later reviewed
           for (const transition &bq1 : l2.get_transitions())
           {
-            size_t b = bq1.label(), q1 = bq1.to();
+            std::size_t b = bq1.label(), q1 = bq1.to();
 
             // strong q a-> q1 demonstrates, p0 a=> p1 simulates.
             if (l2.action_label(b) == l1.action_label(a))
@@ -403,7 +412,7 @@ template <class LTS_TYPE>
               defender_nodes.insert(bqp0);
               attacker_nodes.insert(qp1);
               // todo_if.insert();  // waiting list for this move on condition.
-              moves.insert({bqp0, qp1, a, move_label});
+              moves.emplace(bqp0, qp1, a, move_label);
             }
           }
 
@@ -412,7 +421,7 @@ template <class LTS_TYPE>
           {
             cs_game_node p0p1 = {NODE_ATK, 0, p1, q0, false};  // swapping
             attacker_nodes.insert(p0p1);
-            moves.insert({cplq0p0, p0p1, 0, "p \21d2 p'"});
+            moves.emplace(cplq0p0, p0p1, 0, "p \21d2 p'");
           }
         }
 
@@ -424,8 +433,8 @@ template <class LTS_TYPE>
          */
         for (const auto &t2 : l2_tran_from_node[q0])
         {
-          size_t b = t2.first.label();
-          size_t q1 = t2.first.to();
+          std::size_t b = t2.first.label();
+          std::size_t q1 = t2.first.to();
           bool btau = l2.is_tau(b);
           bool strong = t2.second; // transition was strong
 
@@ -443,13 +452,13 @@ template <class LTS_TYPE>
              * (q0,p0) -> (a,q1,p0),  if [q0] a -> [q1] */
             cs_game_node bq1p0 = {NODE_DEF, b, q1, p0, true};
             defender_nodes.insert(bq1p0);
-            moves.insert({q0p0, bq1p0, b, move_label});
+            moves.emplace(q0p0, bq1p0, b, move_label);
 
             if (btau)  // => answering q0 can also stay.
             {
               cs_game_node p0_stay = {NODE_ATK, 0, q1, p0, true};
               attacker_nodes.insert(p0_stay);
-              moves.insert({bq1p0, p0_stay, 0, ""});
+              moves.emplace(bq1p0, p0_stay, 0, "");
             }
           }
 
@@ -459,7 +468,7 @@ template <class LTS_TYPE>
           // XXX reconsider, maybe TODO with delayed checks, bc l2_transitions are later reviewed
           for (const transition &ap1 : l1.get_transitions())
           {
-            size_t a = ap1.label(), p1 = ap1.to();
+            std::size_t a = ap1.label(), p1 = ap1.to();
 
             // strong q a-> q1 demonstrates, p0 a=> p1 simulates.
             if (l2.action_label(b) == l1.action_label(a))
@@ -470,7 +479,7 @@ template <class LTS_TYPE>
               defender_nodes.insert(apq0);
               attacker_nodes.insert(pq1);
               // todo_if.insert();  // waiting list for this move on condition.
-              moves.insert({apq0, pq1, b, move_label});
+              moves.emplace(apq0, pq1, b, move_label);
             }
           }
 
@@ -479,7 +488,7 @@ template <class LTS_TYPE>
           {
             cs_game_node q0q1 = {NODE_ATK, 0, q1, p0, true};  // swapping
             attacker_nodes.insert(q0q1);
-            moves.insert({cplp0q0, q0q1, 0, "q \21d2 q'"});
+            moves.emplace(cplp0q0, q0q1, 0, "q \21d2 q'");
           }
         }
       }
