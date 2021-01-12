@@ -33,6 +33,7 @@ terminal. Commands that should be entered at the prompt are displayed as::
    ropebridge/index
    phonebook/index
    gossip/index
+   probability/index
    mcrl2-gui/index
    
 References

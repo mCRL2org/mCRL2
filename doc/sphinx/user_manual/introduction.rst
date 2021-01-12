@@ -167,8 +167,13 @@ structural properties like :ref:`tool-ltsview`.
 Apart from these visualisation tools, a powerful tool is :ref:`tool-ltsconvert` which
 can reduce an LTS modulo various equivalences. This often produces an LTS that
 is dramatically smaller than the original LTS, while important properties are
-maintained. The tool can also convert between various LTS file formats, some of
-which are textual, others binary.
+maintained. The tool can also convert between the various LTS file formats (.aut,
+.lts and .fsm). The .aut and .fsm formats are human readable, but do not contain
+the data and action declarations from the mcrl2 specificaton. The .fsm format extends
+the .aut format in that it contains state labels. The .lts format 
+contains all the declarations from the mcrl2 file, and by default all state labels. 
+The tool :ref:`tool-ltspbisim` can reduce probabilistic state spaces modulo strong
+bisimulation. 
 
 An equally powerful tool is :ref:`tool-ltscompare` which can check whether two LTSs
 are behaviourally equivalent or similar using various notions of

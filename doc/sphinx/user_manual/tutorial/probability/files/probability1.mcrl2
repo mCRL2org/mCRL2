@@ -1,0 +1,16 @@
+% Below a process is modelled where a can happen with probability 1/7, b with
+% probability 2/7, a (again) now with probability 3/7 and c with probabilty 1/7.
+% The c action goes back to the initial process. Example is provided by  Susmoy Das. 
+
+act a,b,c;
+proc P = dist n:Pos[if(n==1,1/7,if(n==2,2/7, if(n==3,3/7,if(n==4,1/7,0))))].
+             ((n==1)->a. Q +
+              (n==2)->b. R +
+              (n==3)->a. S +
+              (n==4)->c. P);
+     Q = delta;
+     R = delta;
+     S = delta;
+
+init P;
+
