@@ -10,6 +10,8 @@ add_mcrl2_library(pbes
     # This test fails due to circular dependencies between the bes and
     # pbes libraries on a mac. Therefore it is disabled.
     mcrl2/pbes/pbes_solver_test.h
+    # The headertest below fails as the sylvan library is required for it. 
+    mcrl2/pbes/pbesbddsolve1.h
   SOURCES
     algorithms.cpp
     pbes.cpp
@@ -24,7 +26,6 @@ add_mcrl2_library(pbes
     mcrl2_lps
     mcrl2_modal_formula
     mcrl2_lts
-    sylvan
   INCLUDE
     # TODO: Get rid of dependency on BES library
     ${CMAKE_SOURCE_DIR}/libraries/bes/include
