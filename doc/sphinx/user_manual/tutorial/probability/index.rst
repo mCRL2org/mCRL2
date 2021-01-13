@@ -14,13 +14,13 @@ toolset.
 
 Probabilistic processes are specified using the ``dist d:D[f(d)].p`` operator.
 This operator selects a variable ``d`` of sort ``D`` with probability ``f(d)``.
-For example doing an action ``a`` with probability ``/1/3`` and an action ``b``
+For example doing an action ``a`` with probability ``1/3`` and an action ``b``
 with probability ``2/3`` can be denoted by ``dist d:Bool[if(d,1/3,2/3)](d -> a <> b)``.
 
 A larger example is the following:
 
 .. literalinclude:: files/probability1.mcrl2 
-   : language: mcrl2
+   :language: mcrl2
 
 The generated state space for this example is
 
@@ -32,7 +32,7 @@ state ``2`` is reached with probability ``2/7``, and state ``3`` is reached
 with the remaining probability ``1/7``. 
 
 The notation ``dist d:D[f(d)].p`` is chosen as it also allows the domain ``D`` and
-the distribution to range over infinite domains, and as such support both discrete
+the distribution to range over infinite domains, and as such supports both discrete
 and continuous distributions. As it stands the tools do not support continuous 
 distributions. A major reason is that the combination of continous probability
 distribution in combination with nondeterminism over uncountable domains is not
