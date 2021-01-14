@@ -74,7 +74,7 @@ namespace detail
   };
 
   // support
-  bool operator==(const cs_game_node &n0, const cs_game_node &n1)
+  inline bool operator==(const cs_game_node &n0, const cs_game_node &n1)
   {
     return n0.flag == n1.flag
       && n0.swapped == n1.swapped
@@ -84,13 +84,13 @@ namespace detail
   }
 
   // support
-  bool operator!=(const cs_game_node &n0, const cs_game_node &n1)
+  inline bool operator!=(const cs_game_node &n0, const cs_game_node &n1)
   {
     return !(n0 == n1);
   }
 
   // support
-  bool operator<(const cs_game_node &n0, const cs_game_node &n1)
+  inline bool operator<(const cs_game_node &n0, const cs_game_node &n1)
   {
     return n0.flag != n1.flag ? n0.flag < n1.flag
       : n0.act != n1.act ? n0.act < n1.act
@@ -100,7 +100,7 @@ namespace detail
   }
 
   // support / debug (display struct cs_game_node;
-  std::string to_string(const cs_game_node &n)
+  inline std::string to_string(const cs_game_node &n)
   {
     std::string fst = !n.swapped ? "p" : "q";
     std::string snd = !n.swapped ? "q" : "p";
@@ -128,7 +128,7 @@ namespace detail
   }
 
   // support
-  bool equals(
+  inline bool equals(
       const cs_game_move &m0,
       const cs_game_move &m1,
       bool weak_transition = false)
@@ -137,7 +137,7 @@ namespace detail
   }
 
   // support
-  bool operator<(const cs_game_move &m0, const cs_game_move &m1)
+  inline bool operator<(const cs_game_move &m0, const cs_game_move &m1)
   {
     return m0.from != m1.from ? m0.from < m1.from : m0.to < m1.to;
   }
@@ -218,15 +218,11 @@ template <class LTS_TYPE>
         const std::map<transition,bool>& next = l1_tran_from_node[t];
         std::size_t len = next.size();
 
-        if (true)  // also just tau chains may be later used
-          // if (already_good)  // (actually already) done
-        {
-          /* The current todo weak transition is already valid.*/
-          // if it was strong before, it stays strong, else added as weak.
-          l1_weak_transitions.insert(weak);
-          l1_tran_into_node[t][weak] |= false;
-          l1_tran_from_node[f][weak] |= false;
-        }
+        // XXX if (already_good) The current todo weak transition is already valid.
+        // if it was strong before, it stays strong, else added as weak.
+        l1_weak_transitions.insert(weak);
+        l1_tran_into_node[t][weak] |= false;
+        l1_tran_from_node[f][weak] |= false;
 
         if (len < 1)  // no further steps.
         {
@@ -234,7 +230,7 @@ template <class LTS_TYPE>
         }
         else  // just extend simply.
         {
-          for (const auto &ntrans : next)
+          for (const auto& ntrans : next)
           {
             std::size_t next_label = ntrans.first.label();
             bool next_tau = l1.is_tau(next_label);
@@ -289,15 +285,11 @@ template <class LTS_TYPE>
         const std::map<transition,bool>& next = l2_tran_from_node[t];
         std::size_t len = next.size();
 
-        if (true)  // all, also just tau chains may be requeseted later
-          // if (already_good)  // (actually already) done
-        {
-          /* The current todo weak transition is already valid.*/
-          // if it was strong before, it stays strong, else added as weak.
-          l2_weak_transitions.insert(weak);
-          l2_tran_into_node[t][weak] |= false;
-          l2_tran_from_node[f][weak] |= false;
-        }
+        // TODO: if (already_good) The current todo weak transition is already valid.
+        // if it was strong before, it stays strong, else added as weak.
+        l2_weak_transitions.insert(weak);
+        l2_tran_into_node[t][weak] |= false;
+        l2_tran_from_node[f][weak] |= false;
 
         if (len < 1)  // no further steps.
         {
@@ -363,7 +355,7 @@ template <class LTS_TYPE>
          * answers : p0 a => p1, if there's q0 a -> q1
          * coupling : p0 => p1
          */
-        for (const auto t1 : l1_tran_from_node[p0])
+        for (const auto& t1 : l1_tran_from_node[p0])
         {
           std::size_t a = t1.first.label();
           std::size_t p1 = t1.first.to();
@@ -519,7 +511,7 @@ template <class LTS_TYPE>
     }
 
     std::stack<cs_game_node> todo;
-    for (cs_game_node d : defender_nodes) todo.push(d); // XXX make me better
+    for (const cs_game_node& d : defender_nodes) todo.push(d); // XXX make me better
     // todo.assign(defender_nodes.begin(), defender_nodes.end());
 
     mCRL2log(log::verbose)
@@ -541,7 +533,7 @@ template <class LTS_TYPE>
           /* now reduce it from all predecessors as successor.
            * and check if the predecessor is also about to be won by the
            * attacker. */
-          for (cs_game_node pred : predecessors[n])
+          for (const cs_game_node& pred : predecessors[n])
           {
             successor_count[pred] -= 1;
             if (successor_count[pred] < 1 || attacker_nodes.count(pred))
