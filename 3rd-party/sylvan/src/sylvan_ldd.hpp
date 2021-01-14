@@ -32,11 +32,81 @@
 #include <sylvan.h>
 #include <sylvan_table.h>
 #include <sylvan_ldd.h>
+#include <boost/iterator/iterator_facade.hpp>
 
 extern llmsset_t nodes;
 
 namespace sylvan::ldds
 {
+
+namespace detail
+{
+
+typedef struct __attribute__((packed)) mddnode
+{
+  uint64_t a, b;
+} * mddnode_t; // 16 bytes
+
+inline
+mddnode_t LDD_GETNODE(MDD x)
+{
+  return ((mddnode_t)llmsset_index_to_ptr(nodes, x));
+};
+
+inline
+std::uint32_t mddnode_getvalue(mddnode_t n)
+{
+  return *(uint32_t*)((uint8_t*)n+6);
+};
+
+inline
+MDD mddnode_getdown(mddnode_t n)
+{
+  return n->b >> 17;
+};
+
+/// \brief Forward iterator used for iterating over an ldd cube.
+class ldd_iterator: public boost::iterator_facade<ldd_iterator, const std::uint32_t, boost::forward_traversal_tag, std::uint32_t>
+{
+  private:
+    MDD mdd;
+    mddnode_t node;
+
+  public:
+    explicit ldd_iterator(MDD mdd_)
+      : mdd(mdd_)
+    {
+      assert(mdd != lddmc_false);
+      if (mdd != lddmc_true)
+      {
+        node = LDD_GETNODE(mdd);
+      }
+    }
+
+  private:
+    friend class boost::iterator_core_access;
+
+    void increment()
+    {
+      mdd = mddnode_getdown(node);
+      if (mdd != lddmc_true)
+      {
+        node = LDD_GETNODE(mdd);
+      }
+    }
+
+    bool equal(const ldd_iterator& other) const
+    {
+      return this->mdd == other.mdd;
+    }
+
+    std::uint32_t dereference() const
+    {
+      return mddnode_getvalue(node);
+    }
+};
+
+} // namespace detail
 
 // From the PhD thesis of Tom van Dijk:
 //
@@ -118,6 +188,18 @@ class ldd
     {
       return !(*this == other);
     }
+
+    // iterator for a cube in this ldd
+    detail::ldd_iterator begin() const
+    {
+      assert(mdd != lddmc_false);
+      return detail::ldd_iterator(mdd);
+    }
+
+    detail::ldd_iterator end() const
+    {
+      return detail::ldd_iterator(lddmc_true);
+    }
 };
 
 // the leaf false
@@ -126,10 +208,20 @@ inline ldd false_()
   return ldd(lddmc_false);
 }
 
+inline ldd empty_set()
+{
+  return false_();
+}
+
 // the leaf true
 inline ldd true_()
 {
   return ldd(lddmc_true);
+}
+
+inline ldd empty_list()
+{
+  return true_();
 }
 
 // create a node with the given value and down and right arrows
@@ -226,10 +318,16 @@ inline ldd join(const ldd& A, const ldd& B, const ldd& px, const ldd& py)
 }
 
 // cube(v) = the singleton set containing the tuple with values in v
-inline ldd cube(const std::vector<std::uint32_t>& v)
+inline ldd cube(const std::uint32_t* v, std::size_t n)
 {
   LACE_ME;
-  return ldd(lddmc_cube(const_cast<std::uint32_t*>(v.data()), v.size()));
+  return ldd(lddmc_cube(const_cast<std::uint32_t*>(v), n));
+}
+
+// cube(v) = the singleton set containing the tuple with values in v
+inline ldd cube(const std::vector<std::uint32_t>& v)
+{
+  return cube(v.data(), v.size());
 }
 
 // member_cube(A,v) = check if cube(v) is in the set A
@@ -240,10 +338,16 @@ inline ldd member_cube(const ldd& A, const std::vector<std::uint32_t>& v)
 }
 
 // union_cube(A,v) = union_(A,cube(v))
-inline ldd union_cube(const ldd& A, const std::vector<std::uint32_t>& v)
+inline ldd union_cube(const ldd& A, const std::uint32_t* v, std::size_t n)
 {
   LACE_ME;
-  return ldd(lddmc_union_cube(A.get(), const_cast<std::uint32_t*>(v.data()), v.size()));
+  return ldd(lddmc_union_cube(A.get(), const_cast<std::uint32_t*>(v), n));
+}
+
+// union_cube(A,v) = union_(A,cube(v))
+inline ldd union_cube(const ldd& A, const std::vector<std::uint32_t>& v)
+{
+  return union_cube(A, v.data(), v.size());
 }
 
 // <undocumented>
@@ -302,31 +406,11 @@ inline double satcount(const ldd& A)
 template <typename OutputIterator>
 inline int sat_one(const ldd& A, OutputIterator to)
 {
-  typedef struct __attribute__((packed)) mddnode
-  {
-    uint64_t a, b;
-  } * mddnode_t; // 16 bytes
-
-  auto LDD_GETNODE = [](MDD mdd)
-  {
-    return ((mddnode_t)llmsset_index_to_ptr(nodes, mdd));
-  };
-
-  auto mddnode_getvalue = [](mddnode_t n)
-  {
-    return *(uint32_t*)((uint8_t*)n+6);
-  };
-
-  auto mddnode_getdown = [](mddnode_t n)
-  {
-    return n->b >> 17;
-  };
-
   LACE_ME;
   MDD mdd = A.get();
   while (mdd != lddmc_false && mdd != lddmc_true)
   {
-    mddnode_t n = LDD_GETNODE(mdd);
+    detail::mddnode_t n = detail::LDD_GETNODE(mdd);
     *to++ = mddnode_getvalue(n);
     mdd = mddnode_getdown(n);
   }
@@ -346,7 +430,7 @@ inline
 void sat_all(const ldd& A, lddmc_enum_cb cb, void* context = nullptr)
 {
   LACE_ME;
-  lddmc_sat_all_nopar(A.get(), cb, context);
+  lddmc_sat_all_par(A.get(), cb, context);
 }
 
 // sat_all_par(A,cb) = sat_all(A,cb), but parallelized
