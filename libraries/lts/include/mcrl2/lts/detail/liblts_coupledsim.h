@@ -166,7 +166,6 @@ template <class LTS_TYPE>
     std::map<cs_game_node,int> node_winner;
     const int WIN_DEFENDER = 0, WIN_ATTACKER = 1;
 
-    std::set<transition> l1_weak_transitions, l2_weak_transitions;
 
     std::set<cs_game_move> moves;  // moves (node,node)
     std::string move_label; // label as string representation.
@@ -176,8 +175,7 @@ template <class LTS_TYPE>
 
     /* Get Weak transitions. */
     std::stack<transition> todo_weak;
-    // std::set<transition> l1_weak_transitions;
-    // std::set<transition> l2_weak_transitions; // do I need to save them?
+    std::set<transition> l1_weak_transitions, l2_weak_transitions; // do I need to save them?
 
     /* filter transitions of t2. */
     std::map<std::size_t, std::map<transition, bool>>  // if strong transition on true
@@ -288,7 +286,7 @@ template <class LTS_TYPE>
         std::size_t t = weak.to();
         bool already_good = !l2.is_tau(l);  // path already has a good action
 
-        std::map<transition,bool> next = l2_tran_from_node[t];
+        const std::map<transition,bool>& next = l2_tran_from_node[t];
         std::size_t len = next.size();
 
         if (true)  // all, also just tau chains may be requeseted later
@@ -326,8 +324,8 @@ template <class LTS_TYPE>
             }
           }
         }
-        // cuurent weak transition is done now.
-      }  // done l2 tau forest (all tau pathes).
+        // current weak transition is done now.
+      } // done l2 tau forest (all tau pathes).
     }
 
     mCRL2log(log::verbose)
@@ -359,7 +357,7 @@ template <class LTS_TYPE>
 
         std::map<cs_game_move, bool> todo_if;
 
-        // TODO this includes also weak, as challenge giver invalid, solve!
+        // TODO This includes also weak, as challenge giver invalid, and that is unnecessary!
         /* CREATED:
          * challenge: p0 a -> p1
          * answers : p0 a => p1, if there's q0 a -> q1
@@ -425,7 +423,7 @@ template <class LTS_TYPE>
           }
         }
 
-        // TODO this includes also weak, as challenge giver invalid, solve!
+        // TODO This includes also weak, as challenge giver invalid, and that is unnecessary!
         /* CREATED:
          * challenge: q0 b -> q1
          * answers : q0 b => q1,  if there's p0 b -> p1
@@ -567,12 +565,14 @@ template <class LTS_TYPE>
     std::set<cs_game_node> cs_relation;
     for (const auto &n : attacker_nodes)
     {
+#ifndef NDEBUG
       if (node_winner.find(n) == node_winner.end())
       {
         std::cerr
           << "I am requested, but never listed."
           << " Set to default. (" << to_string(n) << std::endl;
       }
+#endif // NDEBUG
 
       if (node_winner[n] == WIN_DEFENDER)
       {
