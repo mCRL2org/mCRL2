@@ -27,8 +27,9 @@ inline QString svgHeader(int width, int height, std::size_t fontSize)
     "\t\t.edge { stroke: black; fill: none; }\n"
     "\t\t.node { stroke: black; fill: white; }\n"
     "\t\t.arrow { stroke: none; fill: black; }\n"
-    "\t\t.initial { fill: Lime; }\n"
+    "\t\t.initial { fill: Lime !important; }\n"
     "\t\t.inactive { stroke-dasharray: 3.5; }\n"
+    "\t\t.prob { stroke-width: 5px; }\n"
     "\t\t.label { text-anchor: middle; dominant-baseline: middle;"
       " font-family: sans-serif; font-size: %7px; }\n"
     "\t</style>\n\n";
@@ -53,11 +54,12 @@ inline QString svgNode(const Export::Node& node, const GLScene& scene)
   QVector3D pos = scene.camera().worldToWindow(node.pos());
   float size = scene.sizeOnScreen(node.pos(), scene.nodeSize()) / 2.0;
 
-  return QString("\t<circle class=\"%5%6node\" cx=\"%1\" cy=\"%2\" r=\"%3\"%4/>\n")
+  return QString("\t<circle class=\"%5%6%7node\" cx=\"%1\" cy=\"%2\" r=\"%3\"%4/>\n")
     .arg(pos.x(), 6, 'f').arg(pos.y(), 6, 'f').arg(size)
     .arg(svgColor(node.color()))
     .arg(node.initial() ? "initial " : "")
-    .arg(!node.active() ? "inactive " : "");
+    .arg(!node.active() ? "inactive " : "")
+    .arg(node.probabilistic() ? "prob " : "");
 }
 
 inline QString svgArrowhead(const QVector3D& tip, const QVector3D& top, float size)

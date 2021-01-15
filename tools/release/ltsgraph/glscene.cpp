@@ -563,22 +563,16 @@ void GLScene::renderNode(std::size_t i, const QMatrix4x4& viewProjMatrix, bool t
     nodeMatrix.scale(0.5f * nodeSizeScaled());
     m_global_shader.setWorldViewProjMatrix(viewProjMatrix * nodeMatrix);
 
+    // Apply fogging the node color and draw the node.
+    m_global_shader.setColor(QVector4D(applyFog(fill, fog), alpha));
     if (node.is_probabilistic())
     {
-      QVector3D blue(0.35f, 0.7f, 1.0f);
-      if(node.locked())
-      {
-        blue *= 0.7f;
-      }
-      m_global_shader.setColor(QVector4D(applyFog(blue, fog), alpha));
-
-      // Draw only only the inner part of the half sphere that makes up a node in blue
+      // Draw only the top section of the half sphere
+      // This gives the appearance of a thicker border
       glDrawArrays(GL_TRIANGLE_STRIP, OFFSET_NODE_SPHERE, VERTICES_NODE_SPHERE / 2);
     }
     else
     {
-      // Apply fogging the node color and draw the node.
-      m_global_shader.setColor(QVector4D(applyFog(fill, fog), alpha));
       // Draw the half sphere
       glDrawArrays(GL_TRIANGLE_STRIP, OFFSET_NODE_SPHERE, VERTICES_NODE_SPHERE);
     }

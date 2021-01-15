@@ -39,14 +39,15 @@ inline QString tikzNode(const Export::Node& node, bool exportStateNumbers, bool 
     .arg(nodeColorVec.x(), 0, 'f', 3).arg(nodeColorVec.y(), 0, 'f', 3).arg(nodeColorVec.z(), 0, 'f', 3);
   QString color2 = QString("\\definecolor{currentlabelcolor}{rgb}{%1,%2,%3}\n")
     .arg(labelColorVec.x(), 0, 'f', 3).arg(labelColorVec.y(), 0, 'f', 3).arg(labelColorVec.z(), 0, 'f', 3);
-  QString ret = "\\node[label={[color=currentlabelcolor]above:%6}] at (%1pt, %2pt) [fill=currentcolor, %3state%7] (state%4) {%5};\n";
+  QString ret = "\\node[label={[color=currentlabelcolor]above:%6}] at (%1pt, %2pt) [fill=currentcolor, %3state%7%8] (state%4) {%5};\n";
 
   ret = ret.arg(node.pos().x(), 6, 'f').arg(node.pos().y(), 6, 'f');
   ret = ret.arg(node.initial() ? "init" : "");
   ret = ret.arg(node.id());
   ret = ret.arg(exportStateNumbers ? QString::number(node.id()) : "");
   ret = ret.arg(exportStateLabels ? escapeLatex(node.label()) : "");
-  ret = ret.arg(!node.active() ? ", dashed" : "");
+  ret = ret.arg(!node.active() ? ", inactive" : "");
+  ret = ret.arg(node.probabilistic() ? ", prob" : "");
 
   return color1 + color2 + ret;
 }
@@ -82,6 +83,8 @@ template <> void GLWidget::saveVector<Export::Tikz>(const QString& filename)
       "\\begin{tikzpicture}\n"
       "   \\tikzstyle{state}=[circle,draw,minimum width=%1pt,minimum height=%1pt]\n"
       "   \\tikzstyle{initstate}=[state,fill=green]\n"
+      "   \\tikzstyle{inactive}=[dashed]\n"
+      "   \\tikzstyle{prob}=[line width = 2.5pt]\n"
       "   \\tikzstyle{transition}=[->,arrows={-Stealth[scale=2,inset=1pt]}]\n")
       .arg(m_scene.nodeSizeScaled());
 

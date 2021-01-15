@@ -61,6 +61,11 @@ class Node : public Entity
     {
       return !m_graph.hasExploration() || m_graph.node(m_id).active();
     }
+    /** @brief Returns true when the node represents a probabilistic state */
+    bool probabilistic() const
+    {
+      return m_graph.node(m_id).is_probabilistic();
+    }
     const QString& label() const
     {
       return m_graph.stateLabelstring(m_graph.stateLabel(m_id).labelindex());

@@ -287,7 +287,11 @@ class NodeNode : public NodeWithColor
     NodeNode(const QVector3D& p, const bool is_probabilistic)
       : NodeWithColor(p), m_is_probabilistic(is_probabilistic), m_active(false)
     {
-      if (!m_is_probabilistic) // Color action states white (probabilistic states remain black)
+      if (m_is_probabilistic) // Color probabilistic states light blue
+      {
+        m_color = QVector3D(0.35f, 0.7f, 1.0f);
+      }
+      else // Color normal states white
       {
         m_color = QVector3D(1.0f, 1.0f, 1.0f);
       }
