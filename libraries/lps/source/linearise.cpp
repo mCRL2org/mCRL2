@@ -1037,13 +1037,6 @@ class specification_basic_type
         return multiAction;
       }
 
-      if (is_process_instance(body))
-      {
-        assert(0);
-        determine_process_status(process_instance(body).identifier(),status);
-        return status;
-      }
-
       if (is_process_instance_assignment(body))
       {
         determine_process_status(process_instance_assignment(body).identifier(),status);
@@ -1202,13 +1195,6 @@ class specification_basic_type
       if (is_at(body))
       {
         collectPcrlProcesses_term(at(body).operand(),pcrlprocesses,visited);
-        return;
-      }
-
-      if (is_process_instance(body))
-      {
-        assert(0);
-        collectPcrlProcesses(process_instance(body).identifier(),pcrlprocesses,visited);
         return;
       }
 
@@ -1458,11 +1444,6 @@ class specification_basic_type
                       (occursinterm(var,sto.distribution()) ||
                        occursinpCRLterm(var,sto.operand(),strict));
         }
-      }
-      if (is_process_instance(p))
-      {
-        assert(0);
-        return occursintermlist(var,process_instance(p).actual_parameters());
       }
       if (is_process_instance_assignment(p))
       {
@@ -2037,11 +2018,6 @@ class specification_basic_type
                             sumargs,
                             replace_variables_capture_avoiding_alt(sto.distribution(),sigma),
                             substitute_pCRLproc(sto.operand(),local_sigma));
-      }
-
-      if (is_process_instance(p))
-      {
-        assert(0);
       }
 
       if (is_process_instance_assignment(p))
@@ -2731,13 +2707,6 @@ class specification_basic_type
                                          containstimebody(body1));
         assert(check_valid_process_instance_assignment(newproc,parameters_to_assignment_list(objectIndex(newproc).parameters,variables_bound_in_sum)));
         return process_instance_assignment(newproc,parameters_to_assignment_list(objectIndex(newproc).parameters,variables_bound_in_sum));
-      }
-
-      if (is_process_instance(body))
-      {
-        assert(0);
-        // return body;
-        return transform_process_instance_to_process_instance_assignment(atermpp::down_cast<process_instance>(body));
       }
 
       if (is_process_instance_assignment(body))
@@ -9721,16 +9690,6 @@ class specification_basic_type
         return r1||r2;
       }
 
-      if (is_process_instance(t))
-      {
-        assert(0);
-        if (allowrecursion)
-        {
-          return (containstime_rec(process_instance(t).identifier(),stable,visited,contains_if_then));
-        }
-        return objectIndex(process_instance(t).identifier()).containstime;
-      }
-
       if (is_process_instance_assignment(t))
       {
         if (allowrecursion)
@@ -10361,16 +10320,6 @@ class specification_basic_type
         return r1&&r2;
       }
 
-      if (is_process_instance(t))
-      {
-        assert(0);
-        if (allowrecursion)
-        {
-          return (canterminate_rec(process_instance(t).identifier(),stable,visited));
-        }
-        return objectIndex(process_instance(t).identifier()).canterminate;
-      }
-
       if (is_process_instance_assignment(t))
       {
         const process_instance_assignment u(t);
@@ -10571,6 +10520,7 @@ class specification_basic_type
 */
 
 
+    /* This function replaces all process instances by a process instance assignment */
     void transform_process_arguments(
             const process_identifier& procId,
             std::set<process_identifier>& visited_processes)
@@ -10587,14 +10537,16 @@ class specification_basic_type
       }
     }
 
+    /* This function replaces all process instances by a process instance assignment */
     void transform_process_arguments(const process_identifier& procId)
     {
       std::set<process_identifier> visited_processes;
       transform_process_arguments(procId,visited_processes);
     }
 
+    /* This function replaces all process instances by a process instance assignment */
     process_expression transform_process_arguments_body(
-      const process_expression& t, // intentionally not a reference.
+      const process_expression& t, 
       const std::set<variable>& bound_variables,
       std::set<process_identifier>& visited_processes)
     {
@@ -10974,16 +10926,6 @@ class specification_basic_type
                  split_body(process::merge(t).left(),visited_id,visited_proc,parameters),
                  split_body(process::merge(t).right(),visited_id,visited_proc,parameters));
       }
-      else if (is_process_instance(t))
-      {
-        assert(0);
-        const process_instance_assignment u=transform_process_instance_to_process_instance_assignment(atermpp::down_cast<process_instance>(t));
-        assert(check_valid_process_instance_assignment(split_process(u.identifier(),visited_id,visited_proc),
-                 u.assignments()));
-        result=process_instance_assignment(
-                 split_process(u.identifier(),visited_id,visited_proc),
-                 u.assignments());
-      }
       else if (is_process_instance_assignment(t))
       {
         const process_instance_assignment u(t);
@@ -11067,7 +11009,7 @@ class specification_basic_type
     }
 
     process_identifier splitmCRLandpCRLprocsAndAddTerminatedAction(
-      const process_identifier& procId)
+                             const process_identifier& procId)
     {
       std::map < process_identifier,process_identifier> visited_id;
       std::map < process_expression,process_expression> visited_proc;
