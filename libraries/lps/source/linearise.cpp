@@ -1933,15 +1933,26 @@ class specification_basic_type
     {
       if (is_choice(p))
       {
-        return choice(
-                 substitute_pCRLproc(choice(p).left(),sigma),
-                 substitute_pCRLproc(choice(p).right(),sigma));
+        process_expression left=substitute_pCRLproc(choice(p).left(),sigma);
+        if (left==delta_at_zero())
+        {
+          return substitute_pCRLproc(choice(p).right(),sigma);
+        }
+        process_expression right=substitute_pCRLproc(choice(p).right(),sigma);
+        if (right==delta_at_zero())
+        {
+          return left;
+        }
+        return choice(left,right);
       }
       if (is_seq(p))
       {
-        return seq(
-                 substitute_pCRLproc(seq(p).left(),sigma),
-                 substitute_pCRLproc(seq(p).right(),sigma));
+        process_expression q=substitute_pCRLproc(seq(p).left(),sigma);
+        if (q==delta_at_zero())
+        { 
+          return q;
+        }
+        return seq(q, substitute_pCRLproc(seq(p).right(),sigma));
       }
       if (is_sync(p))
       {
@@ -1951,7 +1962,7 @@ class specification_basic_type
       }
       if (is_if_then(p))
       {
-        data_expression condition=replace_variables_capture_avoiding_alt(if_then(p).condition(), sigma);
+        data_expression condition=RewriteTerm(replace_variables_capture_avoiding_alt(if_then(p).condition(), sigma));
         if (condition==sort_bool::false_())
         {
           return delta_at_zero();
@@ -1964,7 +1975,7 @@ class specification_basic_type
       }
       if (is_if_then_else(p))
       {
-        data_expression condition=replace_variables_capture_avoiding_alt(if_then_else(p).condition(), sigma);
+        data_expression condition=RewriteTerm(replace_variables_capture_avoiding_alt(if_then_else(p).condition(), sigma));
         if (condition==sort_bool::false_())
         {
           return substitute_pCRLproc(if_then_else(p).else_case(),sigma);
@@ -2742,13 +2753,13 @@ class specification_basic_type
 
     void procstovarheadGNF(const std::vector < process_identifier>& procs)
     {
-      /* transform the processes in procs into newprocs */
+      /* transform the processes in procs into pre-Greibach Normal Form */
       for (const process_identifier& i: procs)
       {
         objectdatatype& object=objectIndex(i);
 
         // The intermediate variable result is needed here
-        // because objectdata can be realloced as a side
+        // because objectdata can be reallocated as a side
         // effect of bodytovarheadGNF.
 
         std::set<variable> variables_bound_in_sum;
@@ -10432,14 +10443,11 @@ class specification_basic_type
       if (visited.count(procId)==0)
       {
         visited.insert(procId);
-        const bool ct=canterminatebody(object.processbody,stable,visited,1);
+        const bool ct=canterminatebody(object.processbody,stable,visited,true);
         if (object.canterminate!=ct)
         {
           object.canterminate=ct;
-          if (stable)
-          {
-            stable=false;
-          }
+          stable=false;
         }
       }
       return (object.canterminate);
@@ -10511,16 +10519,61 @@ class specification_basic_type
       return procId;
     }
 
+/* expand_process_instance_assignment takes a process instance assignment X(...) and
+ * replaces it by Y if X=Y. This process is repeated until the right hand side of
+ * an equation is not a process instance anymore */
+
+    process_instance_assignment expand_process_instance_assignment(
+                                 const process_instance_assignment& t,
+                                 std::set<process_identifier>& visited_processes)
+    {
+      if (visited_processes.count(t.identifier())>0)
+      {
+        throw mcrl2::runtime_error("Process " + pp(t.identifier()) + " is unguardedly defined in itself");
+      };
+      
+      visited_processes.insert(t.identifier());
+      objectdatatype& object=objectIndex(t.identifier());
+      if (is_process_instance_assignment(object.processbody))
+      {
+        const process_instance_assignment q=expand_process_instance_assignment(
+                                                 down_cast<process_instance_assignment>(object.processbody),
+                                                 visited_processes);
+
+        maintain_variables_in_rhs<mutable_map_substitution<> > sigma;
+        for (const assignment& a: process_instance_assignment(t).assignments())
+        {
+          sigma[a.lhs()]=a.rhs();
+        }
+
+        return down_cast<process_instance_assignment>(substitute_pCRLproc(q,sigma));
+      }
+      return t;
+    }
+
+    process_instance_assignment expand_process_instance_assignment(const process_instance_assignment& t)
+    {
+      std::set<process_identifier> visited_processes;
+      return expand_process_instance_assignment(t,visited_processes);
+    }
+
 /* Transform process_arguments
  *   This function replaces process_instances by process_instance_assignments.
  *   All assignments in a process_instance_assignment are ordered in the same
  *   sequence as the parameters belonging to that assignment.
  *   All assignments in a process_instance_assignment of the form x=x where
  *   x is not a bound variable are removed.
+ *   Furthermore, process occurrences X where X is defined as X=X1, X1=X2...Xn-1=Xn
+ *   are replaced by Xn, with the necessary substitutions for data parameters. 
+ *   The reason for this is that only Xn will become a process in the linear
+ *   process, with its own state. Otherwise there is a risk that all process
+ *   variables X, X1, X2, etc. have separate states, and worse, for all of them
+ *   a copy of the summands will be added. 
 */
 
 
-    /* This function replaces all process instances by a process instance assignment */
+    /* This function replaces all process instances by a process instance assignment,
+       furthermore, if a process consists of only a process instantionation, i.e., X=Y, */
     void transform_process_arguments(
             const process_identifier& procId,
             std::set<process_identifier>& visited_processes)
@@ -10553,7 +10606,8 @@ class specification_basic_type
       if (is_process_instance(t))
       {
         transform_process_arguments(process_instance(t).identifier(),visited_processes);
-        return transform_process_instance_to_process_instance_assignment(atermpp::down_cast<process_instance>(t),bound_variables);
+        process_instance_assignment t1=transform_process_instance_to_process_instance_assignment(atermpp::down_cast<process_instance>(t),bound_variables);
+        return expand_process_instance_assignment(t1);
       }
       if (is_process_instance_assignment(t))
       {
@@ -10562,9 +10616,9 @@ class specification_basic_type
         objectdatatype& object=objectIndex(u.identifier());
         assert(check_valid_process_instance_assignment(u.identifier(),
                  sort_assignments(u.assignments(),object.parameters)));
-        return process_instance_assignment(
-                     u.identifier(),
-                     sort_assignments(u.assignments(),object.parameters));
+        process_instance_assignment t1(u.identifier(),
+                                       sort_assignments(u.assignments(),object.parameters));
+        return expand_process_instance_assignment(t1);
       }
       if (is_hide(t))
       {
