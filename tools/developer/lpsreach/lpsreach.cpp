@@ -242,7 +242,7 @@ std::vector<T> as_vector(const atermpp::term_list<T>& x)
   return std::vector<T>(x.begin(), x.end());
 }
 
-lps_summand make_summand(const lps::action_summand& summand, const data::variable_list& process_parameters)
+lps_summand make_summand(const lps::action_summand& summand, const data::variable_list& process_parameters, bool use_projections = true)
 {
   lps_summand result;
 
@@ -258,6 +258,15 @@ lps_summand make_summand(const lps::action_summand& summand, const data::variabl
   {
     bool read = read_parameters.find(param) != read_parameters.end();
     bool write = write_parameters.find(param) != write_parameters.end();
+
+    // TODO: make a distinction between read and write parameters. This requires a better understanding of the
+    // Sylvan relprod interface.
+    if (read || write || !use_projections)
+    {
+      read = true;
+      write = true;
+    }
+
     if (!read && !write)
     {
       Ir.push_back(0);
@@ -266,10 +275,14 @@ lps_summand make_summand(const lps::action_summand& summand, const data::variabl
     else
     {
       used.push_back(j);
-      // TODO: make a distinction between read and write parameters. This requires a better understanding of the
-      // Sylvan relprod interface.
-      Ir.push_back(1);
-      Ir.push_back(2);
+      if (read)
+      {
+        Ir.push_back(1);
+      }
+      if (write)
+      {
+        Ir.push_back(2);
+      }
       Ip.push_back(1);
     }
     j++;
@@ -414,6 +427,7 @@ class lpsreach_algorithm
     std::vector<data_expression_index> m_data_index;
     std::vector<lps_summand> m_summands;
     data::data_expression_list m_initial_state;
+    bool m_use_projections;
 
     ldd state2ldd(const data::data_expression_list& x)
     {
@@ -497,10 +511,11 @@ class lpsreach_algorithm
     }
 
   public:
-    lpsreach_algorithm(const lps::specification& lpsspec, const lps::explorer_options& options_)
+    lpsreach_algorithm(const lps::specification& lpsspec, const lps::explorer_options& options_, bool use_projections)
       : m_options(options_),
         m_rewr(construct_rewriter(lpsspec, m_options.remove_unused_rewrite_rules)),
-        m_enumerator(m_rewr, lpsspec.data(), m_rewr, m_id_generator, false)
+        m_enumerator(m_rewr, lpsspec.data(), m_rewr, m_id_generator, false),
+        m_use_projections(use_projections)
     {
       lps::specification lpsspec_ = preprocess(lpsspec);
       m_process_parameters = lpsspec_.process().process_parameters();
@@ -514,7 +529,7 @@ class lpsreach_algorithm
 
       for (const lps::action_summand& summand: lpsspec_.process().action_summands())
       {
-        m_summands.push_back(make_summand(summand, m_process_parameters));
+        m_summands.push_back(make_summand(summand, m_process_parameters, m_use_projections));
       }
 
       for (std::size_t i = 0; i < m_summands.size(); i++)
@@ -541,9 +556,11 @@ class lpsreach_algorithm
       ldd x = state2ldd(m_initial_state);
       ldd visited = x;
       ldd todo = x;
+      mCRL2log(log::verbose) << "found " << satcount(visited) << " states after " << iteration_count << " iterations" << std::endl;
 
       while (todo != empty_set())
       {
+        iteration_count++;
         mCRL2log(log::debug) << "--- iteration " << ++iteration_count << " ---" << std::endl;
         mCRL2log(log::debug) << "todo = " << print_states(m_data_index, todo) << std::endl;
         for (std::size_t i = 0; i < R.size(); i++)
@@ -559,6 +576,7 @@ class lpsreach_algorithm
         }
         todo = minus(todo1, visited);
         visited = union_(visited, todo);
+        mCRL2log(log::verbose) << "found " << satcount(visited) << " states after " << iteration_count << " iterations" << std::endl;
       }
 
       std::cout << "number of states = " << satcount(visited) << std::endl;
@@ -579,14 +597,11 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t n,
   using namespace sylvan::ldds;
   using enumerator_element = data::enumerator_list_element_with_substitution<>;
 
-  auto& [algorithm, summand] = *reinterpret_cast<std::pair<lpsreach_algorithm&, lps_summand&>*>(context);
+  auto p = reinterpret_cast<std::pair<lpsreach_algorithm&, lps_summand&>*>(context);
+  auto& algorithm = p->first;
+  auto& summand = p->second;
   auto& sigma = algorithm.m_sigma;
   const auto& rewr = algorithm.m_rewr;
-  auto& condition_variables = summand.condition_variables;
-  const auto& used = summand.used;
-  const auto& next_state = summand.next_state;
-  auto& L = summand.L;
-  const auto& used_parameters = summand.used_parameters;
   auto& data_index = algorithm.m_data_index;
   const auto& enumerator = algorithm.m_enumerator;
   std::uint32_t xy[2*n]; // TODO: avoid this C99 construction
@@ -595,31 +610,31 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t n,
   // add x to the transition xy
   for (std::size_t j = 0; j < n; j++)
   {
-    sigma[used_parameters[j]] = data_index[used[j]].value(x[j]);
+    sigma[summand.used_parameters[j]] = data_index[summand.used[j]].value(x[j]);
     xy[2*j] = x[j];
   }
 
   data::data_expression condition = rewr(summand.condition, sigma);
   if (!data::is_false(condition))
   {
-    enumerator.enumerate(enumerator_element(condition_variables, condition),
+    enumerator.enumerate(enumerator_element(summand.condition_variables, condition),
                          sigma,
                          [&](const enumerator_element& p) {
-                           // check_enumerator_solution(p, summand);
-                           p.add_assignments(condition_variables, sigma, rewr);
+                           check_enumerator_solution(p, summand);
+                           p.add_assignments(summand.condition_variables, sigma, rewr);
                            for (std::size_t j = 0; j < n; j++)
                            {
-                             xy[2 * j + 1] = data_index[used[j]].index(rewr(next_state[j], sigma));
+                             xy[2 * j + 1] = data_index[summand.used[j]].index(rewr(summand.next_state[j], sigma));
                            }
-                           mCRL2log(log::debug) << "  " << print_transition(data_index, xy, used) << std::endl;
-                           L = union_cube(L, xy, 2 * n);
+                           mCRL2log(log::debug) << "  " << print_transition(data_index, xy, summand.used) << std::endl;
+                           summand.L = union_cube(summand.L, xy, 2 * n);
                            return false;
                          },
                          data::is_false
     );
   }
-  data::remove_assignments(sigma, condition_variables);
-  data::remove_assignments(sigma, used_parameters);
+  data::remove_assignments(sigma, summand.condition_variables);
+  data::remove_assignments(sigma, summand.used_parameters);
 }
 
 class lpsreach_tool: public rewriter_tool<input_output_tool>
@@ -628,6 +643,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
 
   protected:
     lps::explorer_options options;
+    bool use_projections;
 
     // Lace options
     std::size_t lace_n_workers = 1;
@@ -652,7 +668,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       desc.add_option("max-cache-size", utilities::make_optional_argument("NAME", "26"), "maximum Sylvan cache size (21-27, default 26)");
       desc.add_hidden_option("no-remove-unused-rewrite-rules", "do not remove unused rewrite rules. ", 'u');
       desc.add_hidden_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
-      desc.add_hidden_option("no-replace-constants-by-variables", "do not move constant expressions to a substitution");
+      desc.add_option("no-projections", "do not use projections on used parameters");
     }
 
     void parse_options(const utilities::command_line_parser& parser) override
@@ -660,7 +676,8 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       super::parse_options(parser);
       options.one_point_rule_rewrite                = !parser.has_option("no-one-point-rule-rewrite");
       options.remove_unused_rewrite_rules           = !parser.has_option("no-remove-unused-rewrite-rules");
-      options.replace_constants_by_variables        = !parser.has_option("no-replace-constants-by-variables");
+      options.replace_constants_by_variables        = false; // This option cannot be used in the symbolic algorithm
+      use_projections                               = !parser.has_option("no-projections");
       if (parser.has_option("lace-workers"))
       {
         lace_n_workers = parser.option_argument_as<int>("lace-workers");
@@ -718,7 +735,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
         throw mcrl2::runtime_error("Processes without parameters are not supported");
       }
 
-      lpsreach_algorithm algorithm(lpsspec, options);
+      lpsreach_algorithm algorithm(lpsspec, options, use_projections);
       algorithm.run();
 
       sylvan::sylvan_quit();
