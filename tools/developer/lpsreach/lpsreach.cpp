@@ -8,6 +8,7 @@
 //
 /// \file lpsreach.cpp
 
+#include <chrono>
 #include <sylvan_ldd.hpp>
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/specification.h"
@@ -175,6 +176,7 @@ struct lps_summand
   std::vector<data::variable> used_parameters; // the projected process parameters
   std::vector<std::size_t> used; // indices of the used parameters
   sylvan::ldds::ldd L; // the projected transition relation
+  sylvan::ldds::ldd Ldomain; // the domain of L
   sylvan::ldds::ldd Ir; // meta data needed by sylvan::ldds::relprod
   sylvan::ldds::ldd Ip; // meta data needed by sylvan::ldds::project
 
@@ -293,6 +295,7 @@ lps_summand make_summand(const lps::action_summand& summand, const data::variabl
   result.next_state = project(as_vector(summand.next_state(process_parameters)), used);
   result.used_parameters = project(as_vector(process_parameters), used);
   result.L = sylvan::ldds::empty_set();
+  result.Ldomain = sylvan::ldds::empty_set();
   result.Ir = sylvan::ldds::cube(Ir);
   result.Ip = sylvan::ldds::cube(Ip);
 
@@ -463,7 +466,6 @@ class lpsreach_algorithm
       mCRL2log(log::debug) << "learn successors of summand " << i << " for X = " << print_states(m_data_index, X, R.used) << " used = " << core::detail::print_list(R.used) << std::endl;
 
       using namespace sylvan::ldds;
-      check_arguments(R, X);
       std::pair<lpsreach_algorithm&, lps_summand&> context{*this, R};
       sat_all_nopar(X, learn_successors_callback, &context);
     }
@@ -553,19 +555,22 @@ class lpsreach_algorithm
 
       mCRL2log(log::debug) << "initial state = " << core::detail::print_list(m_initial_state) << std::endl;
 
+      auto start = std::chrono::steady_clock::now();
       ldd x = state2ldd(m_initial_state);
+      std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - start;
       ldd visited = x;
       ldd todo = x;
-      mCRL2log(log::verbose) << "found " << satcount(visited) << " states after " << iteration_count << " iterations" << std::endl;
+      mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(visited) << " states after " << std::setw(3) << iteration_count << " iterations (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)" << std::endl;
 
       while (todo != empty_set())
       {
+        start = std::chrono::steady_clock::now();
         iteration_count++;
         mCRL2log(log::debug) << "--- iteration " << ++iteration_count << " ---" << std::endl;
         mCRL2log(log::debug) << "todo = " << print_states(m_data_index, todo) << std::endl;
         for (std::size_t i = 0; i < R.size(); i++)
         {
-          learn_successors(i, R[i], project(todo, R[i].Ip));
+          learn_successors(i, R[i], minus(project(todo, R[i].Ip), R[i].Ldomain));
           mCRL2log(log::debug) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].used) << std::endl;
         }
         ldd todo1 = empty_set();
@@ -576,7 +581,8 @@ class lpsreach_algorithm
         }
         todo = minus(todo1, visited);
         visited = union_(visited, todo);
-        mCRL2log(log::verbose) << "found " << satcount(visited) << " states after " << iteration_count << " iterations" << std::endl;
+        elapsed_seconds = std::chrono::steady_clock::now() - start;
+        mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(visited) << " states after " << std::setw(3) << iteration_count << " iterations (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)" << std::endl;
       }
 
       std::cout << "number of states = " << satcount(visited) << std::endl;
@@ -627,6 +633,7 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t n,
                              xy[2 * j + 1] = data_index[summand.used[j]].index(rewr(summand.next_state[j], sigma));
                            }
                            mCRL2log(log::debug) << "  " << print_transition(data_index, xy, summand.used) << std::endl;
+                           summand.Ldomain = union_cube(summand.Ldomain, x, n);
                            summand.L = union_cube(summand.L, xy, 2 * n);
                            return false;
                          },
