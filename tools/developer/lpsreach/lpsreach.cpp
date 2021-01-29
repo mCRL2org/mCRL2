@@ -173,40 +173,44 @@ struct lps_summand
   data::data_expression condition;
   data::variable_list condition_variables; // the free variables of the condition
   std::vector<data::data_expression> next_state; // the projected next state vector
-  std::vector<data::variable> used_parameters; // the projected process parameters
-  std::vector<std::size_t> used; // indices of the used parameters
+  std::vector<data::variable> read_parameters; // the read parameters
+  std::vector<std::size_t> read; // indices of the read parameters
+  std::vector<std::size_t> read_pos; // indices of the read parameters in a zipped transition xy
+  std::vector<data::variable> write_parameters; // the write parameters
+  std::vector<std::size_t> write; // indices of the write parameters
+  std::vector<std::size_t> write_pos; // indices of the write parameters in a zipped transition xy
   sylvan::ldds::ldd L; // the projected transition relation
   sylvan::ldds::ldd Ldomain; // the domain of L
   sylvan::ldds::ldd Ir; // meta data needed by sylvan::ldds::relprod
   sylvan::ldds::ldd Ip; // meta data needed by sylvan::ldds::project
 
-  void self_check(const std::vector<data::variable>& process_parameters, const std::vector<data_expression_index>& data_index) const
+  void compute_read_write_pos()
   {
-    using namespace sylvan::ldds;
-
-    std::size_t m = used.size();
-    std::size_t n = process_parameters.size();
-
-    assert(used_parameters.size() == used.size());
-
-    for (auto i: used)
+    auto ri = read.begin();
+    auto wi = write.begin();
+    std::size_t index = 0;
+    while (ri != read.end() && wi != write.end())
     {
-      assert(0 <= i && i < n);
-    }
-
-    for (std::size_t j = 0; j < m; j++)
-    {
-      assert(used_parameters[j] == process_parameters[used[j]]);
-    }
-
-    for (const auto& v: ldd_solutions(L))
-    {
-      assert(v.size() == 2*m);
-      for (std::size_t j = 0; j < m; j++)
+      if (*ri <= *wi)
       {
-        assert(data_index[used[j]].has_index(v[2*j]));
-        assert(data_index[used[j]].has_index(v[2*j+1]));
+        read_pos.push_back(index++);
+        ri++;
       }
+      else
+      {
+        write_pos.push_back(index++);
+        wi++;
+      }
+    }
+    while (ri != read.end())
+    {
+      read_pos.push_back(index++);
+      ri++;
+    }
+    while (wi != write.end())
+    {
+      write_pos.push_back(index++);
+      wi++;
     }
   }
 };
@@ -217,8 +221,12 @@ std::ostream& operator<<(std::ostream& out, const lps_summand& x)
   using namespace sylvan::ldds;
   out << "condition = " << x.condition << std::endl;
   out << "condition variables = " << core::detail::print_list(x.condition_variables) << std::endl;
-  out << "used = " << core::detail::print_list(x.used) << std::endl;
-  out << "used parameters = " << core::detail::print_list(x.used_parameters) << std::endl;
+  out << "read = " << core::detail::print_list(x.read) << std::endl;
+  out << "read parameters = " << core::detail::print_list(x.read_parameters) << std::endl;
+  out << "read_pos = " << core::detail::print_list(x.read_pos) << std::endl;
+  out << "write = " << core::detail::print_list(x.write) << std::endl;
+  out << "write parameters = " << core::detail::print_list(x.write_parameters) << std::endl;
+  out << "write_pos = " << core::detail::print_list(x.write_pos) << std::endl;
   out << "next state = " << core::detail::print_list(x.next_state) << std::endl;
   out << "L = " << print_ldd(x.L) << std::endl;
   out << "Ir = " << print_ldd(x.Ir) << std::endl;
@@ -244,14 +252,12 @@ std::vector<T> as_vector(const atermpp::term_list<T>& x)
   return std::vector<T>(x.begin(), x.end());
 }
 
-lps_summand make_summand(const lps::action_summand& summand, const data::variable_list& process_parameters, bool use_projections = true)
+lps_summand make_summand(const lps::action_summand& summand, const data::variable_list& process_parameters, bool discard_read, bool discard_write)
 {
   lps_summand result;
 
   std::set<data::variable> process_parameter_set(process_parameters.begin(), process_parameters.end());
   auto [read_parameters, write_parameters] = read_write_parameters(summand, process_parameter_set);
-
-  auto& used = result.used;
 
   std::vector<std::uint32_t> Ir; // used parameter meta data for relprod
   std::vector<std::uint32_t> Ip; // used parameter meta data for project
@@ -261,43 +267,49 @@ lps_summand make_summand(const lps::action_summand& summand, const data::variabl
     bool read = read_parameters.find(param) != read_parameters.end();
     bool write = write_parameters.find(param) != write_parameters.end();
 
-    // TODO: make a distinction between read and write parameters. This requires a better understanding of the
-    // Sylvan relprod interface.
-    if (read || write || !use_projections)
+    if (read || write)
     {
-      read = true;
-      write = true;
+      if (!discard_read)
+      {
+        read = true;
+      }
+      if (!discard_write)
+      {
+        write = true;
+      }
+    }
+
+    Ip.push_back(read ? 1 : 0);
+
+    if (read)
+    {
+      result.read.push_back(j);
+      Ir.push_back(1);
+    }
+
+    if (write)
+    {
+      result.write.push_back(j);
+      Ir.push_back(read ? 2 : 4);
     }
 
     if (!read && !write)
     {
       Ir.push_back(0);
-      Ip.push_back(0);
-    }
-    else
-    {
-      used.push_back(j);
-      if (read)
-      {
-        Ir.push_back(1);
-      }
-      if (write)
-      {
-        Ir.push_back(2);
-      }
-      Ip.push_back(1);
     }
     j++;
   }
 
   result.condition = summand.condition();
   result.condition_variables = summand.summation_variables();
-  result.next_state = project(as_vector(summand.next_state(process_parameters)), used);
-  result.used_parameters = project(as_vector(process_parameters), used);
+  result.next_state = project(as_vector(summand.next_state(process_parameters)), result.write);
+  result.read_parameters = project(as_vector(process_parameters), result.read);
+  result.write_parameters = project(as_vector(process_parameters), result.write);
   result.L = sylvan::ldds::empty_set();
   result.Ldomain = sylvan::ldds::empty_set();
   result.Ir = sylvan::ldds::cube(Ir);
   result.Ip = sylvan::ldds::cube(Ip);
+  result.compute_read_write_pos();
 
   return result;
 }
@@ -388,30 +400,110 @@ std::string print_transition(const std::vector<data_expression_index>& data_inde
   return print_state(data_index, x) + " -> " + print_state(data_index, y);
 }
 
-std::string print_transition(const std::vector<data_expression_index>& data_index, const std::uint32_t* xy, const std::vector<std::size_t>& used)
+std::string print_transition(const std::vector<data_expression_index>& data_index, const std::uint32_t* xy, const std::vector<std::size_t>& read, const std::vector<std::size_t>& write)
 {
-  std::size_t n = used.size();
-  std::vector<std::uint32_t> x(n);
-  std::vector<std::uint32_t> y(n);
-  for (std::size_t i = 0; i < n; i++)
+  std::vector<std::uint32_t> x;
+  std::vector<std::uint32_t> y;
+  auto ri = read.begin();
+  auto wi = write.begin();
+  auto xyi = xy;
+  while (ri != read.end() && wi != write.end())
   {
-    x[i] = xy[2*i];
-    y[i] = xy[2*i+1];
+    if (*ri <= *wi)
+    {
+      ri++;
+      x.push_back(*xyi++);
+    }
+    else
+    {
+      wi++;
+      y.push_back(*xyi++);
+    }
   }
-  return print_state(data_index, x, used) + " -> " + print_state(data_index, y, used);
+  while (ri != read.end())
+  {
+    ri++;
+    x.push_back(*xyi++);
+  }
+  while (wi != write.end())
+  {
+    wi++;
+    y.push_back(*xyi++);
+  }
+  return print_state(data_index, x, read) + " -> " + print_state(data_index, y, write);
 }
 
-std::string print_relation(const std::vector<data_expression_index>& data_index, const sylvan::ldds::ldd& R, const std::vector<std::size_t>& used)
+std::string print_relation(const std::vector<data_expression_index>& data_index, const sylvan::ldds::ldd& R, const std::vector<std::size_t>& read, const std::vector<std::size_t>& write)
 {
   std::ostringstream out;
   for (const std::vector<std::uint32_t>& xy: ldd_solutions(R))
   {
-    out << print_transition(data_index, xy.data(), used) << std::endl;
+    out << print_transition(data_index, xy.data(), read, write) << std::endl;
   }
   return out.str();
 }
 
 void learn_successors_callback(WorkerP*, Task*, std::uint32_t* v, std::size_t n, void* context = nullptr);
+
+// A very inefficient implementation of relprod, that matches the specification closely
+sylvan::ldds::ldd alternative_relprod(const sylvan::ldds::ldd& todo, const lps_summand& R)
+{
+  using namespace sylvan::ldds;
+
+  auto split = [&](const std::vector<std::uint32_t>& xy)
+  {
+    std::vector<std::uint32_t> x;
+    std::vector<std::uint32_t> y;
+    for (std::size_t j: R.read_pos)
+    {
+      x.push_back(xy[j]);
+    }
+    for (std::size_t j: R.write_pos)
+    {
+      y.push_back(xy[j]);
+    }
+    return std::make_pair(x, y);
+  };
+
+  auto match = [&](const std::vector<std::uint32_t>& x, const std::vector<std::uint32_t>& x_)
+  {
+    for (std::size_t j = 0; j < x_.size(); j++)
+    {
+      if (x[R.read[j]] != x_[j])
+      {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  auto replace = [&](std::vector<std::uint32_t> x, const std::vector<std::uint32_t>& y_)
+  {
+    for (std::size_t j = 0; j < y_.size(); j++)
+    {
+      x[R.write[j]] = y_[j];
+    }
+    return x;
+  };
+
+  ldd result = empty_set();
+
+  auto todo_elements = ldd_solutions(todo);
+  for (const std::vector<std::uint32_t>& xy: ldd_solutions(R.L))
+  {
+    auto [x_, y_] = split(xy);
+    for (const auto& x: todo_elements)
+    {
+      if (match(x, x_))
+      {
+        auto y = replace(x, y_);
+        result = union_cube(result, y);
+      }
+    }
+  }
+  return result;
+  // return relprod(todo, R.L, R.Ir);
+}
 
 class lpsreach_algorithm
 {
@@ -430,7 +522,9 @@ class lpsreach_algorithm
     std::vector<data_expression_index> m_data_index;
     std::vector<lps_summand> m_summands;
     data::data_expression_list m_initial_state;
-    bool m_use_projections;
+    bool m_discard_read;
+    bool m_discard_write;
+    bool m_use_alternative_relprod;
 
     ldd state2ldd(const data::data_expression_list& x)
     {
@@ -445,25 +539,10 @@ class lpsreach_algorithm
       return sylvan::ldds::cube(v, x.size());
     };
 
-    void check_arguments(const lps_summand& R, const ldd& X) const
-    {
-      using namespace sylvan::ldds;
-      const auto& used = R.used;
-      std::size_t m = used.size();
-      for (const auto& v: ldd_solutions(X))
-      {
-        assert(v.size() == m);
-        for (std::size_t j = 0; j < m; j++)
-        {
-          assert(m_data_index[used[j]].has_index(v[j]));
-        }
-      }
-    }
-
     // R.L := R.L U {(x,y) in R | x in X}
     void learn_successors(std::size_t i, lps_summand& R, const ldd& X)
     {
-      mCRL2log(log::debug) << "learn successors of summand " << i << " for X = " << print_states(m_data_index, X, R.used) << " used = " << core::detail::print_list(R.used) << std::endl;
+      mCRL2log(log::debug) << "learn successors of summand " << i << " for X = " << print_states(m_data_index, X, R.read) << std::endl;
 
       using namespace sylvan::ldds;
       std::pair<lpsreach_algorithm&, lps_summand&> context{*this, R};
@@ -513,11 +592,11 @@ class lpsreach_algorithm
     }
 
   public:
-    lpsreach_algorithm(const lps::specification& lpsspec, const lps::explorer_options& options_, bool use_projections)
+    lpsreach_algorithm(const lps::specification& lpsspec, const lps::explorer_options& options_, bool discard_read, bool discard_write, bool use_alternative_relprod = false)
       : m_options(options_),
         m_rewr(construct_rewriter(lpsspec, m_options.remove_unused_rewrite_rules)),
         m_enumerator(m_rewr, lpsspec.data(), m_rewr, m_id_generator, false),
-        m_use_projections(use_projections)
+        m_discard_read(discard_read), m_discard_write(discard_write), m_use_alternative_relprod(use_alternative_relprod)
     {
       lps::specification lpsspec_ = preprocess(lpsspec);
       m_process_parameters = lpsspec_.process().process_parameters();
@@ -531,19 +610,12 @@ class lpsreach_algorithm
 
       for (const lps::action_summand& summand: lpsspec_.process().action_summands())
       {
-        m_summands.push_back(make_summand(summand, m_process_parameters, m_use_projections));
+        m_summands.push_back(make_summand(summand, m_process_parameters, m_discard_read, m_discard_write));
       }
 
       for (std::size_t i = 0; i < m_summands.size(); i++)
       {
         mCRL2log(log::debug) << "=== summand " << i << " ===\n" << m_summands[i] << std::endl;
-      }
-
-      // TODO: remove these checks
-      auto process_parameters_vector = as_vector(m_process_parameters);
-      for (const auto& summand: m_summands)
-      {
-        summand.self_check(process_parameters_vector, m_data_index);
       }
     }
 
@@ -571,13 +643,22 @@ class lpsreach_algorithm
         for (std::size_t i = 0; i < R.size(); i++)
         {
           learn_successors(i, R[i], minus(project(todo, R[i].Ip), R[i].Ldomain));
-          mCRL2log(log::debug) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].used) << std::endl;
+          mCRL2log(log::debug) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
         }
         ldd todo1 = empty_set();
         for (std::size_t i = 0; i < R.size(); i++)
         {
-          mCRL2log(log::debug) << "relprod(" << i << ", todo) = " << print_states(m_data_index, relprod(todo, R[i].L, R[i].Ir)) << std::endl;
-          todo1 = relprod_union(todo, R[i].L, R[i].Ir, todo1);
+          if (m_use_alternative_relprod)
+          {
+            ldd z = alternative_relprod(todo, R[i]);
+            mCRL2log(log::debug) << "relprod(" << i << ", todo) = " << print_states(m_data_index, z) << std::endl;
+            todo1 = union_(z, todo1);
+          }
+          else
+          {
+            mCRL2log(log::debug) << "relprod(" << i << ", todo) = " << print_states(m_data_index, relprod(todo, R[i].L, R[i].Ir)) << std::endl;
+            todo1 = relprod_union(todo, R[i].L, R[i].Ir, todo1);
+          }
         }
         todo = minus(todo1, visited);
         visited = union_(visited, todo);
@@ -610,14 +691,17 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t n,
   const auto& rewr = algorithm.m_rewr;
   auto& data_index = algorithm.m_data_index;
   const auto& enumerator = algorithm.m_enumerator;
-  std::uint32_t xy[2*n]; // TODO: avoid this C99 construction
+  std::size_t x_size = summand.read.size();
+  std::size_t y_size = summand.write.size();
+  std::size_t xy_size = x_size + y_size;
+  std::uint32_t xy[xy_size]; // TODO: avoid this C99 construction
 
   // add the assignments corresponding to x to sigma
   // add x to the transition xy
-  for (std::size_t j = 0; j < n; j++)
+  for (std::size_t j = 0; j < x_size; j++)
   {
-    sigma[summand.used_parameters[j]] = data_index[summand.used[j]].value(x[j]);
-    xy[2*j] = x[j];
+    sigma[summand.read_parameters[j]] = data_index[summand.read[j]].value(x[j]);
+    xy[summand.read_pos[j]] = x[j];
   }
 
   data::data_expression condition = rewr(summand.condition, sigma);
@@ -628,20 +712,20 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t n,
                          [&](const enumerator_element& p) {
                            check_enumerator_solution(p, summand);
                            p.add_assignments(summand.condition_variables, sigma, rewr);
-                           for (std::size_t j = 0; j < n; j++)
+                           for (std::size_t j = 0; j < y_size; j++)
                            {
-                             xy[2 * j + 1] = data_index[summand.used[j]].index(rewr(summand.next_state[j], sigma));
+                             xy[summand.write_pos[j]] = data_index[summand.write[j]].index(rewr(summand.next_state[j], sigma));
                            }
-                           mCRL2log(log::debug) << "  " << print_transition(data_index, xy, summand.used) << std::endl;
-                           summand.Ldomain = union_cube(summand.Ldomain, x, n);
-                           summand.L = union_cube(summand.L, xy, 2 * n);
+                           mCRL2log(log::debug) << "  " << print_transition(data_index, xy, summand.read, summand.write) << std::endl;
+                           summand.Ldomain = union_cube(summand.Ldomain, x, x_size);
+                           summand.L = union_cube(summand.L, xy, xy_size);
                            return false;
                          },
                          data::is_false
     );
   }
   data::remove_assignments(sigma, summand.condition_variables);
-  data::remove_assignments(sigma, summand.used_parameters);
+  data::remove_assignments(sigma, summand.read_parameters);
 }
 
 class lpsreach_tool: public rewriter_tool<input_output_tool>
@@ -650,7 +734,9 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
 
   protected:
     lps::explorer_options options;
-    bool use_projections;
+    bool discard_read;
+    bool discard_write;
+    bool use_alternative_relprod;
 
     // Lace options
     std::size_t lace_n_workers = 1;
@@ -676,6 +762,9 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       desc.add_hidden_option("no-remove-unused-rewrite-rules", "do not remove unused rewrite rules. ", 'u');
       desc.add_hidden_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
       desc.add_option("no-projections", "do not use projections on used parameters");
+      desc.add_option("read", "discard read independent parameters to increase efficiency");
+      desc.add_option("write", "discard write independent parameters to increase efficiency");
+      desc.add_option("relprod", "use an inefficient alternative version of relprod (for debugging)");
     }
 
     void parse_options(const utilities::command_line_parser& parser) override
@@ -684,7 +773,9 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       options.one_point_rule_rewrite                = !parser.has_option("no-one-point-rule-rewrite");
       options.remove_unused_rewrite_rules           = !parser.has_option("no-remove-unused-rewrite-rules");
       options.replace_constants_by_variables        = false; // This option cannot be used in the symbolic algorithm
-      use_projections                               = !parser.has_option("no-projections");
+      discard_read                                  = parser.has_option("read");
+      discard_write                                 = parser.has_option("write");
+      use_alternative_relprod                       = parser.has_option("relprod");
       if (parser.has_option("lace-workers"))
       {
         lace_n_workers = parser.option_argument_as<int>("lace-workers");
@@ -712,6 +803,10 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       if (parser.has_option("max-cache-size"))
       {
         max_cachesize = parser.option_argument_as<std::size_t>("max-cache-size");
+      }
+      if (discard_write && !discard_read && !use_alternative_relprod)
+      {
+        mCRL2log(log::warning) << "WARNING: the option --write doesn't work correctly without --read, unless --relprod is set" << std::endl;
       }
     }
 
@@ -742,7 +837,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
         throw mcrl2::runtime_error("Processes without parameters are not supported");
       }
 
-      lpsreach_algorithm algorithm(lpsspec, options, use_projections);
+      lpsreach_algorithm algorithm(lpsspec, options, discard_read, discard_write, use_alternative_relprod);
       algorithm.run();
 
       sylvan::sylvan_quit();
