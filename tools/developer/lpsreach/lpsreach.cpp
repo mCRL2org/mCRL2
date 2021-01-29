@@ -290,7 +290,7 @@ lps_summand make_summand(const lps::action_summand& summand, const data::variabl
     if (write)
     {
       result.write.push_back(j);
-      Ir.push_back(read ? 2 : 4);
+      Ir.push_back(2);
     }
 
     if (!read && !write)
@@ -804,9 +804,9 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       {
         max_cachesize = parser.option_argument_as<std::size_t>("max-cache-size");
       }
-      if (discard_write && !discard_read && !use_alternative_relprod)
+      if (discard_write && !use_alternative_relprod)
       {
-        mCRL2log(log::warning) << "WARNING: the option --write doesn't work correctly without --read, unless --relprod is set" << std::endl;
+        mCRL2log(log::warning) << "WARNING: the option --write doesn't work correctly without --relprod" << std::endl;
       }
     }
 
