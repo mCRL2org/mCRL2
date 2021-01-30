@@ -9,6 +9,7 @@
 /// \file lpsreach.cpp
 
 #include <chrono>
+#include <boost/dynamic_bitset.hpp>
 #include <sylvan_ldd.hpp>
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/specification.h"
@@ -89,24 +90,36 @@ std::string print_ldd(const sylvan::ldds::ldd& x)
 //-----------------------------------------------------------------------------------//
 
 inline
+std::map<data::variable, std::size_t> compute_process_parameter_index(const lps::specification& lpsspec)
+{
+  std::map<data::variable, std::size_t> result;
+  std::size_t i = 0;
+  for (const data::variable& v: lpsspec.process().process_parameters())
+  {
+    result[v] = i++;
+  }
+  return result;
+}
+
+inline
 std::pair<std::set<data::variable>, std::set<data::variable>> read_write_parameters(const lps::action_summand& summand, const std::set<data::variable>& process_parameters)
 {
   using utilities::detail::set_union;
   using utilities::detail::set_intersection;
 
-  std::set<data::variable> used_read_variables = set_union(data::find_free_variables(summand.condition()), lps::find_free_variables(summand.multi_action()));
-  std::set<data::variable> used_write_variables;
+  std::set<data::variable> read_parameters = set_union(data::find_free_variables(summand.condition()), lps::find_free_variables(summand.multi_action()));
+  std::set<data::variable> write_parameters;
 
   for (const auto& assignment: summand.assignments())
   {
     if (assignment.lhs() != assignment.rhs())
     {
-      data::find_all_variables(assignment.lhs(), std::inserter(used_write_variables, used_write_variables.end()));
-      data::find_all_variables(assignment.rhs(), std::inserter(used_read_variables, used_read_variables.end()));
+      write_parameters.insert(assignment.lhs());
+      data::find_all_variables(assignment.rhs(), std::inserter(read_parameters, read_parameters.end()));
     }
   }
 
-  return { set_intersection(used_read_variables, process_parameters), set_intersection(used_write_variables, process_parameters) };
+  return {set_intersection(read_parameters, process_parameters), set_intersection(write_parameters, process_parameters) };
 }
 
 /// \brief A bidirectional mapping between data expressions of a given sort and numbers
@@ -166,6 +179,21 @@ std::ostream& operator<<(std::ostream& out, const data_expression_index& x)
 {
   out << "data index with sort = " << x.sort() << " values = " << core::detail::print_list(x.m_values);
   return out;
+}
+
+inline
+boost::dynamic_bitset<> make_read_write_pattern(const std::vector<std::size_t>& read, const std::vector<std::size_t>& write, std::size_t n)
+{
+  boost::dynamic_bitset<> result(2*n);
+  for (std::size_t j: read)
+  {
+    result[2*j] = true;
+  }
+  for (std::size_t j: write)
+  {
+    result[2*j + 1] = true;
+  }
+  return result;
 }
 
 struct lps_summand
@@ -252,7 +280,7 @@ std::vector<T> as_vector(const atermpp::term_list<T>& x)
   return std::vector<T>(x.begin(), x.end());
 }
 
-lps_summand make_summand(const lps::action_summand& summand, const data::variable_list& process_parameters, bool discard_read, bool discard_write)
+lps_summand make_summand(const lps::action_summand& summand, const data::variable_list& process_parameters, bool no_discard, bool no_discard_read, bool no_discard_write)
 {
   lps_summand result;
 
@@ -267,13 +295,19 @@ lps_summand make_summand(const lps::action_summand& summand, const data::variabl
     bool read = read_parameters.find(param) != read_parameters.end();
     bool write = write_parameters.find(param) != write_parameters.end();
 
-    if (read || write)
+    // disable discarding some of the parameters
+    if (no_discard)
     {
-      if (!discard_read)
+      read = true;
+      write = true;
+    }
+    else if (read || write)
+    {
+      if (no_discard_read)
       {
         read = true;
       }
-      if (!discard_write)
+      if (no_discard_write)
       {
         write = true;
       }
@@ -284,13 +318,13 @@ lps_summand make_summand(const lps::action_summand& summand, const data::variabl
     if (read)
     {
       result.read.push_back(j);
-      Ir.push_back(1);
+      Ir.push_back(write ? 1 : 3);
     }
 
     if (write)
     {
       result.write.push_back(j);
-      Ir.push_back(2);
+      Ir.push_back(read ? 2 : 4);
     }
 
     if (!read && !write)
@@ -522,8 +556,9 @@ class lpsreach_algorithm
     std::vector<data_expression_index> m_data_index;
     std::vector<lps_summand> m_summands;
     data::data_expression_list m_initial_state;
-    bool m_discard_read;
-    bool m_discard_write;
+    bool m_no_discard;
+    bool m_no_discard_read;
+    bool m_no_discard_write;
     bool m_use_alternative_relprod;
 
     ldd state2ldd(const data::data_expression_list& x)
@@ -592,11 +627,11 @@ class lpsreach_algorithm
     }
 
   public:
-    lpsreach_algorithm(const lps::specification& lpsspec, const lps::explorer_options& options_, bool discard_read, bool discard_write, bool use_alternative_relprod = false)
+    lpsreach_algorithm(const lps::specification& lpsspec, const lps::explorer_options& options_, bool no_discard, bool no_discard_read, bool no_discard_write, bool use_alternative_relprod = false)
       : m_options(options_),
         m_rewr(construct_rewriter(lpsspec, m_options.remove_unused_rewrite_rules)),
         m_enumerator(m_rewr, lpsspec.data(), m_rewr, m_id_generator, false),
-        m_discard_read(discard_read), m_discard_write(discard_write), m_use_alternative_relprod(use_alternative_relprod)
+        m_no_discard(no_discard), m_no_discard_read(no_discard_read), m_no_discard_write(no_discard_write), m_use_alternative_relprod(use_alternative_relprod)
     {
       lps::specification lpsspec_ = preprocess(lpsspec);
       m_process_parameters = lpsspec_.process().process_parameters();
@@ -610,7 +645,7 @@ class lpsreach_algorithm
 
       for (const lps::action_summand& summand: lpsspec_.process().action_summands())
       {
-        m_summands.push_back(make_summand(summand, m_process_parameters, m_discard_read, m_discard_write));
+        m_summands.push_back(make_summand(summand, m_process_parameters, m_no_discard, m_no_discard_read, m_no_discard_write));
       }
 
       for (std::size_t i = 0; i < m_summands.size(); i++)
@@ -734,8 +769,9 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
 
   protected:
     lps::explorer_options options;
-    bool discard_read;
-    bool discard_write;
+    bool no_discard;
+    bool no_discard_read;
+    bool no_discard_write;
     bool use_alternative_relprod;
 
     // Lace options
@@ -761,9 +797,9 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       desc.add_option("max-cache-size", utilities::make_optional_argument("NAME", "26"), "maximum Sylvan cache size (21-27, default 26)");
       desc.add_hidden_option("no-remove-unused-rewrite-rules", "do not remove unused rewrite rules. ", 'u');
       desc.add_hidden_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
-      desc.add_option("no-projections", "do not use projections on used parameters");
-      desc.add_option("read", "discard read independent parameters to increase efficiency");
-      desc.add_option("write", "discard write independent parameters to increase efficiency");
+      desc.add_option("no-discard", "do not discard any parameters");
+      desc.add_option("no-read", "do not discard only-read parameters");
+      desc.add_option("no-write", "do not discard only-write parameters");
       desc.add_option("relprod", "use an inefficient alternative version of relprod (for debugging)");
     }
 
@@ -773,8 +809,9 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       options.one_point_rule_rewrite                = !parser.has_option("no-one-point-rule-rewrite");
       options.remove_unused_rewrite_rules           = !parser.has_option("no-remove-unused-rewrite-rules");
       options.replace_constants_by_variables        = false; // This option cannot be used in the symbolic algorithm
-      discard_read                                  = parser.has_option("read");
-      discard_write                                 = parser.has_option("write");
+      no_discard                                    = parser.has_option("no-discard");
+      no_discard_read                               = parser.has_option("no-read");
+      no_discard_write                              = parser.has_option("no-write");
       use_alternative_relprod                       = parser.has_option("relprod");
       if (parser.has_option("lace-workers"))
       {
@@ -803,10 +840,6 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       if (parser.has_option("max-cache-size"))
       {
         max_cachesize = parser.option_argument_as<std::size_t>("max-cache-size");
-      }
-      if (discard_write && !use_alternative_relprod)
-      {
-        mCRL2log(log::warning) << "WARNING: the option --write doesn't work correctly without --relprod" << std::endl;
       }
     }
 
@@ -837,7 +870,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
         throw mcrl2::runtime_error("Processes without parameters are not supported");
       }
 
-      lpsreach_algorithm algorithm(lpsspec, options, discard_read, discard_write, use_alternative_relprod);
+      lpsreach_algorithm algorithm(lpsspec, options, no_discard, no_discard_read, no_discard_write, use_alternative_relprod);
       algorithm.run();
 
       sylvan::sylvan_quit();
