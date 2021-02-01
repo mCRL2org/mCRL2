@@ -27,5 +27,5 @@ You should note the following
 #. Set “Trace kind” to “Straces”.
 
 The picture below shows the setup screen of JTorx. 
-.. image:: pictures/jtorx-setup.png
+.. image:: _pictures/jtorx-setup.png
 
