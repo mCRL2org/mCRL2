@@ -12,6 +12,7 @@
 #include <boost/dynamic_bitset.hpp>
 #include <sylvan_ldd.hpp>
 #include "mcrl2/data/rewriter_tool.h"
+#include "mcrl2/data/undefined.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/detail/container_utility.h"
@@ -100,6 +101,8 @@ std::set<T> as_set(const atermpp::term_list<T>& x)
 {
   return std::set<T>(x.begin(), x.end());
 }
+
+constexpr std::uint32_t relprod_ignore = std::numeric_limits<std::uint32_t>::max();
 
 inline
 std::pair<std::set<data::variable>, std::set<data::variable>> read_write_parameters(const lps::action_summand& summand, const std::set<data::variable>& process_parameters)
@@ -217,6 +220,42 @@ void adjust_read_write_patterns(std::vector<boost::dynamic_bitset<>>& patterns, 
   }
 }
 
+// Sets additional read bits in the summand groups, to avoid issues with write parameters for which no value is available.
+inline
+void fix_write_parameters(std::vector<boost::dynamic_bitset<>>& group_patterns, const std::vector<std::vector<std::size_t>>& group_indices, const std::vector<boost::dynamic_bitset<>>& patterns)
+{
+  auto has_copy_write_summands = [&](const std::vector<std::size_t>& indices, std::size_t j)
+  {
+    bool has_copy = false;
+    bool has_write = false;
+    for (std::size_t i: indices)
+    {
+      const boost::dynamic_bitset<>& pattern = patterns[i];
+      bool read = pattern[2*j];
+      bool write = pattern[2*j + 1];
+      has_copy = has_copy || (!read && !write);
+      has_write = has_write || (!read && write);
+    }
+    return has_copy && has_write;
+  };
+
+  for (std::size_t k = 0; k < group_patterns.size(); k++)
+  {
+    boost::dynamic_bitset<>& pattern = group_patterns[k];
+    const std::vector<std::size_t>& indices = group_indices[k];
+    std::size_t n = pattern.size() / 2;
+    for (std::size_t j = 0; j < n; j++)
+    {
+      bool read = pattern[2*j];
+      bool write = pattern[2*j + 1];
+      if (!read && write && has_copy_write_summands(indices, j))
+      {
+        pattern[2*j] = true;
+      }
+    }
+  }
+}
+
 /// \brief A bidirectional mapping between data expressions of a given sort and numbers
 class data_expression_index
 {
@@ -241,7 +280,12 @@ class data_expression_index
       {
         return i->second;
       }
-      assert(is_constant(value));
+
+       if (data::is_variable(value))
+       {
+         return relprod_ignore;
+       }
+
       std::uint32_t index = m_values.size();
       m_value2index[value] = index;
       m_values.push_back(value);
@@ -416,12 +460,82 @@ std::ostream& operator<<(std::ostream& out, const summand_group& x)
   return out;
 }
 
+// A very inefficient implementation of relprod, that matches the specification closely
+sylvan::ldds::ldd alternative_relprod(const sylvan::ldds::ldd& todo, const summand_group& R)
+{
+  using namespace sylvan::ldds;
+
+  auto split = [&](const std::vector<std::uint32_t>& xy)
+  {
+    std::vector<std::uint32_t> x;
+    std::vector<std::uint32_t> y;
+    for (std::size_t j: R.read_pos)
+    {
+      x.push_back(xy[j]);
+    }
+    for (std::size_t j: R.write_pos)
+    {
+      y.push_back(xy[j]);
+    }
+    return std::make_pair(x, y);
+  };
+
+  auto match = [&](const std::vector<std::uint32_t>& x, const std::vector<std::uint32_t>& x_)
+  {
+    for (std::size_t j = 0; j < x_.size(); j++)
+    {
+      if (x[R.read[j]] != x_[j])
+      {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  auto replace = [&](std::vector<std::uint32_t> x, const std::vector<std::uint32_t>& y_)
+  {
+    for (std::size_t j = 0; j < y_.size(); j++)
+    {
+      if (y_[j] != relprod_ignore)
+      {
+        x[R.write[j]] = y_[j];
+      }
+    }
+    return x;
+  };
+
+  ldd result = empty_set();
+
+  auto todo_elements = ldd_solutions(todo);
+  for (const std::vector<std::uint32_t>& xy: ldd_solutions(R.L))
+  {
+    auto [x_, y_] = split(xy);
+    for (const auto& x: todo_elements)
+    {
+      if (match(x, x_))
+      {
+        auto y = replace(x, y_);
+        result = union_cube(result, y);
+      }
+    }
+  }
+  return result;
+  // return relprod(todo, R.L, R.Ir);
+}
+
 std::vector<data::data_expression> ldd2state(const std::vector<data_expression_index>& data_index, const std::vector<std::uint32_t>& x)
 {
   std::vector<data::data_expression> result;
   for (std::size_t i = 0; i < x.size(); i++)
   {
-    result.push_back(data_index[i].value(x[i]));
+    if (x[i] == relprod_ignore)
+    {
+      result.push_back(data::undefined_data_expression());
+    }
+    else
+    {
+      result.push_back(data_index[i].value(x[i]));
+    }
   }
   return result;
 }
@@ -431,7 +545,14 @@ std::vector<data::data_expression> ldd2state(const std::vector<data_expression_i
   std::vector<data::data_expression> result;
   for (std::size_t i = 0; i < used.size(); i++)
   {
-    result.push_back(data_index[used[i]].value(x[i]));
+    if (x[i] == relprod_ignore)
+    {
+      result.push_back(data::undefined_data_expression());
+    }
+    else
+    {
+      result.push_back(data_index[used[i]].value(x[i]));
+    }
   }
   return result;
 }
@@ -547,66 +668,6 @@ std::string print_relation(const std::vector<data_expression_index>& data_index,
 
 void learn_successors_callback(WorkerP*, Task*, std::uint32_t* v, std::size_t n, void* context = nullptr);
 
-// A very inefficient implementation of relprod, that matches the specification closely
-sylvan::ldds::ldd alternative_relprod(const sylvan::ldds::ldd& todo, const summand_group& R)
-{
-  using namespace sylvan::ldds;
-
-  auto split = [&](const std::vector<std::uint32_t>& xy)
-  {
-    std::vector<std::uint32_t> x;
-    std::vector<std::uint32_t> y;
-    for (std::size_t j: R.read_pos)
-    {
-      x.push_back(xy[j]);
-    }
-    for (std::size_t j: R.write_pos)
-    {
-      y.push_back(xy[j]);
-    }
-    return std::make_pair(x, y);
-  };
-
-  auto match = [&](const std::vector<std::uint32_t>& x, const std::vector<std::uint32_t>& x_)
-  {
-    for (std::size_t j = 0; j < x_.size(); j++)
-    {
-      if (x[R.read[j]] != x_[j])
-      {
-        return false;
-      }
-    }
-    return true;
-  };
-
-  auto replace = [&](std::vector<std::uint32_t> x, const std::vector<std::uint32_t>& y_)
-  {
-    for (std::size_t j = 0; j < y_.size(); j++)
-    {
-      x[R.write[j]] = y_[j];
-    }
-    return x;
-  };
-
-  ldd result = empty_set();
-
-  auto todo_elements = ldd_solutions(todo);
-  for (const std::vector<std::uint32_t>& xy: ldd_solutions(R.L))
-  {
-    auto [x_, y_] = split(xy);
-    for (const auto& x: todo_elements)
-    {
-      if (match(x, x_))
-      {
-        auto y = replace(x, y_);
-        result = union_cube(result, y);
-      }
-    }
-  }
-  return result;
-  // return relprod(todo, R.L, R.Ir);
-}
-
 class lpsreach_algorithm
 {
   using ldd = sylvan::ldds::ldd;
@@ -697,7 +758,12 @@ class lpsreach_algorithm
     // TODO: implement this
     std::vector<boost::dynamic_bitset<>> compute_summand_groups(const std::vector<boost::dynamic_bitset<>>& patterns) const
     {
-      return patterns;
+      // join the last two summands in a group
+      std::vector<boost::dynamic_bitset<>> result = patterns;
+      auto last = result.back();
+      result.pop_back();
+      result.back() = result.back() | last;
+      return result;
     }
 
     // Returns summand indices for each summand group pattern
@@ -753,6 +819,10 @@ class lpsreach_algorithm
       adjust_read_write_patterns(patterns, m_no_discard, m_no_discard_read, m_no_discard_write);
       std::vector<boost::dynamic_bitset<>> group_patterns = compute_summand_groups(patterns);
       std::vector<std::vector<std::size_t>> group_indices = summand_group_indices(patterns, group_patterns);
+      if (!use_alternative_relprod)
+      {
+        fix_write_parameters(group_patterns, group_indices, patterns);
+      }
       const auto& action_summands = lpsspec_.process().action_summands();
       for (std::size_t j = 0; j < group_patterns.size(); j++)
       {
