@@ -89,16 +89,16 @@ std::string print_ldd(const sylvan::ldds::ldd& x)
 
 //-----------------------------------------------------------------------------------//
 
-inline
-std::map<data::variable, std::size_t> compute_process_parameter_index(const lps::specification& lpsspec)
+template <typename T>
+std::vector<T> as_vector(const atermpp::term_list<T>& x)
 {
-  std::map<data::variable, std::size_t> result;
-  std::size_t i = 0;
-  for (const data::variable& v: lpsspec.process().process_parameters())
-  {
-    result[v] = i++;
-  }
-  return result;
+  return std::vector<T>(x.begin(), x.end());
+}
+
+template <typename T>
+std::set<T> as_set(const atermpp::term_list<T>& x)
+{
+  return std::set<T>(x.begin(), x.end());
 }
 
 inline
@@ -120,6 +120,101 @@ std::pair<std::set<data::variable>, std::set<data::variable>> read_write_paramet
   }
 
   return {set_intersection(read_parameters, process_parameters), set_intersection(write_parameters, process_parameters) };
+}
+
+inline
+std::map<data::variable, std::size_t> process_parameter_index(const lps::specification& lpsspec)
+{
+  std::map<data::variable, std::size_t> result;
+  std::size_t i = 0;
+  for (const data::variable& v: lpsspec.process().process_parameters())
+  {
+    result[v] = i++;
+  }
+  return result;
+}
+
+inline
+std::set<std::size_t> parameter_indices(const std::set<data::variable>& parameters, const std::map<data::variable, std::size_t>& index)
+{
+  std::set<std::size_t> result;
+  for (const data::variable& p: parameters)
+  {
+    result.insert(index.at(p));
+  }
+  return result;
+}
+
+inline
+std::vector<boost::dynamic_bitset<>> read_write_patterns(const lps::specification& lpsspec)
+{
+  std::vector<boost::dynamic_bitset<>> result;
+
+  auto process_parameters = as_set(lpsspec.process().process_parameters());
+  std::size_t n = process_parameters.size();
+  std::map<data::variable, std::size_t> index = process_parameter_index(lpsspec);
+
+  for (const auto& summand: lpsspec.process().action_summands())
+  {
+    auto [read_parameters, write_parameters] = read_write_parameters(summand, process_parameters);
+    auto read = parameter_indices(read_parameters, index);
+    auto write = parameter_indices(write_parameters, index);
+    boost::dynamic_bitset<> rw(2*n);
+    for (std::size_t j: read)
+    {
+      rw[2*j] = true;
+    }
+    for (std::size_t j: write)
+    {
+      rw[2*j + 1] = true;
+    }
+    result.push_back(rw);
+  }
+
+  return result;
+}
+
+inline
+std::string print_read_write_patterns(const std::vector<boost::dynamic_bitset<>>& patterns)
+{
+  std::ostringstream out;
+  for (const auto& pattern: patterns)
+  {
+    out << pattern << std::endl;
+  }
+  return out.str();
+}
+
+inline
+void adjust_read_write_patterns(std::vector<boost::dynamic_bitset<>>& patterns, bool no_discard, bool no_discard_read, bool no_discard_write)
+{
+  for (boost::dynamic_bitset<>& pattern: patterns)
+  {
+    std::size_t n = pattern.size() / 2;
+    for (std::size_t j = 0; j < n; j++)
+    {
+      bool read = pattern[2*j];
+      bool write = pattern[2*j + 1];
+      if (no_discard)
+      {
+        read = true;
+        write = true;
+      }
+      else if (read || write)
+      {
+        if (no_discard_read)
+        {
+          read = true;
+        }
+        if (no_discard_write)
+        {
+          write = true;
+        }
+      }
+      pattern[2*j] = read;
+      pattern[2*j + 1] = write;
+    }
+  }
 }
 
 /// \brief A bidirectional mapping between data expressions of a given sort and numbers
@@ -146,6 +241,7 @@ class data_expression_index
       {
         return i->second;
       }
+      assert(is_constant(value));
       std::uint32_t index = m_values.size();
       m_value2index[value] = index;
       m_values.push_back(value);
@@ -181,26 +277,32 @@ std::ostream& operator<<(std::ostream& out, const data_expression_index& x)
   return out;
 }
 
-inline
-boost::dynamic_bitset<> make_read_write_pattern(const std::vector<std::size_t>& read, const std::vector<std::size_t>& write, std::size_t n)
+template <typename T>
+std::vector<T> project(const std::vector<T>& v, const std::vector<std::size_t>& used)
 {
-  boost::dynamic_bitset<> result(2*n);
-  for (std::size_t j: read)
+  std::vector<T> result;
+  result.reserve(used.size());
+  for (std::size_t i = 0; i < used.size(); i++)
   {
-    result[2*j] = true;
-  }
-  for (std::size_t j: write)
-  {
-    result[2*j + 1] = true;
+    result.push_back(v[used[i]]);
   }
   return result;
 }
 
-struct lps_summand
+struct summand_group
 {
-  data::data_expression condition;
-  data::variable_list condition_variables; // the free variables of the condition
-  std::vector<data::data_expression> next_state; // the projected next state vector
+  struct summand
+  {
+    data::data_expression condition;
+    data::variable_list variables; // the summand variables
+    std::vector<data::data_expression> next_state; // the projected next state vector
+
+    summand(const data::data_expression& condition_, const data::variable_list& variables_, const std::vector<data::data_expression>& next_state_)
+     : condition(condition_), variables(variables_), next_state(next_state_)
+    {}
+  };
+
+  std::vector<summand> summands; // the summands of the group
   std::vector<data::variable> read_parameters; // the read parameters
   std::vector<std::size_t> read; // indices of the read parameters
   std::vector<std::size_t> read_pos; // indices of the read parameters in a zipped transition xy
@@ -241,111 +343,77 @@ struct lps_summand
       wi++;
     }
   }
+
+  summand_group(const lps::specification& lpsspec, const std::vector<std::size_t>& summand_indices, const boost::dynamic_bitset<>& read_write_pattern)
+  {
+    const data::variable_list& process_parameters = lpsspec.process().process_parameters();
+    std::size_t n = process_parameters.size();
+    const auto& lps_summands = lpsspec.process().action_summands();
+
+    std::vector<std::uint32_t> Ir_values;
+    std::vector<std::uint32_t> Ip_values;
+
+    for (std::size_t j = 0; j < n; j++)
+    {
+      bool is_read = read_write_pattern[2*j];
+      bool is_write = read_write_pattern[2*j + 1];
+
+      Ip_values.push_back(is_read ? 1 : 0);
+
+      if (is_read)
+      {
+        read.push_back(j);
+        Ir_values.push_back(is_write ? 1 : 3);
+      }
+
+      if (is_write)
+      {
+        write.push_back(j);
+        Ir_values.push_back(is_read ? 2 : 4);
+      }
+
+      if (!is_read && !is_write)
+      {
+        Ir_values.push_back(0);
+      }
+    }
+
+    for (std::size_t i: summand_indices)
+    {
+      const auto& smd = lps_summands[i];
+      summands.emplace_back(smd.condition(), smd.summation_variables(), project(as_vector(smd.next_state(process_parameters)), write));
+    }
+
+    read_parameters = project(as_vector(process_parameters), read);
+    write_parameters = project(as_vector(process_parameters), write);
+    L = sylvan::ldds::empty_set();
+    Ldomain = sylvan::ldds::empty_set();
+    Ir = sylvan::ldds::cube(Ir_values);
+    Ip = sylvan::ldds::cube(Ip_values);
+    compute_read_write_pos();
+  }
 };
 
 inline
-std::ostream& operator<<(std::ostream& out, const lps_summand& x)
+std::ostream& operator<<(std::ostream& out, const summand_group& x)
 {
   using namespace sylvan::ldds;
-  out << "condition = " << x.condition << std::endl;
-  out << "condition variables = " << core::detail::print_list(x.condition_variables) << std::endl;
+  for (const auto& smd: x.summands)
+  {
+    out << "condition = " << smd.condition << std::endl;
+    out << "variables = " << core::detail::print_list(smd.variables) << std::endl;
+    out << "next state = " << core::detail::print_list(smd.next_state) << std::endl;
+  }
   out << "read = " << core::detail::print_list(x.read) << std::endl;
   out << "read parameters = " << core::detail::print_list(x.read_parameters) << std::endl;
   out << "read_pos = " << core::detail::print_list(x.read_pos) << std::endl;
   out << "write = " << core::detail::print_list(x.write) << std::endl;
   out << "write parameters = " << core::detail::print_list(x.write_parameters) << std::endl;
   out << "write_pos = " << core::detail::print_list(x.write_pos) << std::endl;
-  out << "next state = " << core::detail::print_list(x.next_state) << std::endl;
   out << "L = " << print_ldd(x.L) << std::endl;
   out << "Ir = " << print_ldd(x.Ir) << std::endl;
   out << "Ip = " << print_ldd(x.Ip) << std::endl;
   return out;
-}
-
-template <typename T>
-std::vector<T> project(const std::vector<T>& v, const std::vector<std::size_t>& used)
-{
-  std::vector<T> result;
-  result.reserve(used.size());
-  for (std::size_t i = 0; i < used.size(); i++)
-  {
-    result.push_back(v[used[i]]);
-  }
-  return result;
-}
-
-template <typename T>
-std::vector<T> as_vector(const atermpp::term_list<T>& x)
-{
-  return std::vector<T>(x.begin(), x.end());
-}
-
-lps_summand make_summand(const lps::action_summand& summand, const data::variable_list& process_parameters, bool no_discard, bool no_discard_read, bool no_discard_write)
-{
-  lps_summand result;
-
-  std::set<data::variable> process_parameter_set(process_parameters.begin(), process_parameters.end());
-  auto [read_parameters, write_parameters] = read_write_parameters(summand, process_parameter_set);
-
-  std::vector<std::uint32_t> Ir; // used parameter meta data for relprod
-  std::vector<std::uint32_t> Ip; // used parameter meta data for project
-  std::size_t j = 0;
-  for (const data::variable& param: process_parameters)
-  {
-    bool read = read_parameters.find(param) != read_parameters.end();
-    bool write = write_parameters.find(param) != write_parameters.end();
-
-    // disable discarding some of the parameters
-    if (no_discard)
-    {
-      read = true;
-      write = true;
-    }
-    else if (read || write)
-    {
-      if (no_discard_read)
-      {
-        read = true;
-      }
-      if (no_discard_write)
-      {
-        write = true;
-      }
-    }
-
-    Ip.push_back(read ? 1 : 0);
-
-    if (read)
-    {
-      result.read.push_back(j);
-      Ir.push_back(write ? 1 : 3);
-    }
-
-    if (write)
-    {
-      result.write.push_back(j);
-      Ir.push_back(read ? 2 : 4);
-    }
-
-    if (!read && !write)
-    {
-      Ir.push_back(0);
-    }
-    j++;
-  }
-
-  result.condition = summand.condition();
-  result.condition_variables = summand.summation_variables();
-  result.next_state = project(as_vector(summand.next_state(process_parameters)), result.write);
-  result.read_parameters = project(as_vector(process_parameters), result.read);
-  result.write_parameters = project(as_vector(process_parameters), result.write);
-  result.L = sylvan::ldds::empty_set();
-  result.Ldomain = sylvan::ldds::empty_set();
-  result.Ir = sylvan::ldds::cube(Ir);
-  result.Ip = sylvan::ldds::cube(Ip);
-  result.compute_read_write_pos();
-
-  return result;
 }
 
 std::vector<data::data_expression> ldd2state(const std::vector<data_expression_index>& data_index, const std::vector<std::uint32_t>& x)
@@ -480,7 +548,7 @@ std::string print_relation(const std::vector<data_expression_index>& data_index,
 void learn_successors_callback(WorkerP*, Task*, std::uint32_t* v, std::size_t n, void* context = nullptr);
 
 // A very inefficient implementation of relprod, that matches the specification closely
-sylvan::ldds::ldd alternative_relprod(const sylvan::ldds::ldd& todo, const lps_summand& R)
+sylvan::ldds::ldd alternative_relprod(const sylvan::ldds::ldd& todo, const summand_group& R)
 {
   using namespace sylvan::ldds;
 
@@ -554,7 +622,7 @@ class lpsreach_algorithm
     data::variable_list m_process_parameters;
     std::size_t m_n;
     std::vector<data_expression_index> m_data_index;
-    std::vector<lps_summand> m_summands;
+    std::vector<summand_group> m_summand_groups;
     data::data_expression_list m_initial_state;
     bool m_no_discard;
     bool m_no_discard_read;
@@ -575,12 +643,12 @@ class lpsreach_algorithm
     };
 
     // R.L := R.L U {(x,y) in R | x in X}
-    void learn_successors(std::size_t i, lps_summand& R, const ldd& X)
+    void learn_successors(std::size_t i, summand_group& R, const ldd& X)
     {
-      mCRL2log(log::debug) << "learn successors of summand " << i << " for X = " << print_states(m_data_index, X, R.read) << std::endl;
+      mCRL2log(log::debug) << "learn successors of summand group " << i << " for X = " << print_states(m_data_index, X, R.read) << std::endl;
 
       using namespace sylvan::ldds;
-      std::pair<lpsreach_algorithm&, lps_summand&> context{*this, R};
+      std::pair<lpsreach_algorithm&, summand_group&> context{*this, R};
       sat_all_nopar(X, learn_successors_callback, &context);
     }
 
@@ -626,6 +694,44 @@ class lpsreach_algorithm
       }
     }
 
+    // TODO: implement this
+    std::vector<boost::dynamic_bitset<>> compute_summand_groups(const std::vector<boost::dynamic_bitset<>>& patterns) const
+    {
+      return patterns;
+    }
+
+    // Returns summand indices for each summand group pattern
+    std::vector<std::vector<std::size_t>> summand_group_indices(const std::vector<boost::dynamic_bitset<>>& patterns, const std::vector<boost::dynamic_bitset<>>& group_patterns) const
+    {
+      std::vector<std::vector<std::size_t>> result(group_patterns.size());
+      for (std::size_t i = 0; i < patterns.size(); i++)
+      {
+        const auto& pattern = patterns[i];
+
+        // assign pattern to a matching group with the least number of bits
+        std::size_t group = std::numeric_limits<std::size_t>::max();
+        std::size_t group_count = std::numeric_limits<std::size_t>::max();
+        for (std::size_t j = 0; j < group_patterns.size(); j++)
+        {
+          if (pattern.is_subset_of(group_patterns[j]))
+          {
+            std::size_t count = group_patterns[j].count();
+            if (count < group_count)
+            {
+              group = j;
+              group_count = count;
+            }
+          }
+        }
+        if (group == std::numeric_limits<std::size_t>::max())
+        {
+          throw mcrl2::runtime_error("could not find a group for summand " + std::to_string(i));
+        }
+        result[group].push_back(i);
+      }
+      return result;
+    }
+
   public:
     lpsreach_algorithm(const lps::specification& lpsspec, const lps::explorer_options& options_, bool no_discard, bool no_discard_read, bool no_discard_write, bool use_alternative_relprod = false)
       : m_options(options_),
@@ -643,21 +749,26 @@ class lpsreach_algorithm
         m_data_index.push_back(data_expression_index(param.sort()));
       }
 
-      for (const lps::action_summand& summand: lpsspec_.process().action_summands())
+      std::vector<boost::dynamic_bitset<>> patterns = read_write_patterns(lpsspec_);
+      adjust_read_write_patterns(patterns, m_no_discard, m_no_discard_read, m_no_discard_write);
+      std::vector<boost::dynamic_bitset<>> group_patterns = compute_summand_groups(patterns);
+      std::vector<std::vector<std::size_t>> group_indices = summand_group_indices(patterns, group_patterns);
+      const auto& action_summands = lpsspec_.process().action_summands();
+      for (std::size_t j = 0; j < group_patterns.size(); j++)
       {
-        m_summands.push_back(make_summand(summand, m_process_parameters, m_no_discard, m_no_discard_read, m_no_discard_write));
+        m_summand_groups.emplace_back(lpsspec_, group_indices[j], group_patterns[j]);
       }
 
-      for (std::size_t i = 0; i < m_summands.size(); i++)
+      for (std::size_t i = 0; i < m_summand_groups.size(); i++)
       {
-        mCRL2log(log::debug) << "=== summand " << i << " ===\n" << m_summands[i] << std::endl;
+        mCRL2log(log::debug) << "=== summand group " << i << " ===\n" << m_summand_groups[i] << std::endl;
       }
     }
 
     void run()
     {
       using namespace sylvan::ldds;
-      auto& R = m_summands;
+      auto& R = m_summand_groups;
       std::size_t iteration_count = 0;
 
       mCRL2log(log::debug) << "initial state = " << core::detail::print_list(m_initial_state) << std::endl;
@@ -706,10 +817,11 @@ class lpsreach_algorithm
 };
 
 template <typename EnumeratorElement>
-void check_enumerator_solution(const EnumeratorElement& p, const lps_summand& summand)
+void check_enumerator_solution(const EnumeratorElement& p, const summand_group& summand)
 {
   if (p.expression() != data::sort_bool::true_())
   {
+    // TODO: print the problematic expression, like it is done in lps2lts
     throw data::enumerator_error("Expression does not rewrite to true or false");
   }
 }
@@ -719,15 +831,15 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t n,
   using namespace sylvan::ldds;
   using enumerator_element = data::enumerator_list_element_with_substitution<>;
 
-  auto p = reinterpret_cast<std::pair<lpsreach_algorithm&, lps_summand&>*>(context);
+  auto p = reinterpret_cast<std::pair<lpsreach_algorithm&, summand_group&>*>(context);
   auto& algorithm = p->first;
-  auto& summand = p->second;
+  auto& group = p->second;
   auto& sigma = algorithm.m_sigma;
   const auto& rewr = algorithm.m_rewr;
   auto& data_index = algorithm.m_data_index;
   const auto& enumerator = algorithm.m_enumerator;
-  std::size_t x_size = summand.read.size();
-  std::size_t y_size = summand.write.size();
+  std::size_t x_size = group.read.size();
+  std::size_t y_size = group.write.size();
   std::size_t xy_size = x_size + y_size;
   std::uint32_t xy[xy_size]; // TODO: avoid this C99 construction
 
@@ -735,32 +847,35 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t n,
   // add x to the transition xy
   for (std::size_t j = 0; j < x_size; j++)
   {
-    sigma[summand.read_parameters[j]] = data_index[summand.read[j]].value(x[j]);
-    xy[summand.read_pos[j]] = x[j];
+    sigma[group.read_parameters[j]] = data_index[group.read[j]].value(x[j]);
+    xy[group.read_pos[j]] = x[j];
   }
 
-  data::data_expression condition = rewr(summand.condition, sigma);
-  if (!data::is_false(condition))
+  for (const auto& smd: group.summands)
   {
-    enumerator.enumerate(enumerator_element(summand.condition_variables, condition),
-                         sigma,
-                         [&](const enumerator_element& p) {
-                           check_enumerator_solution(p, summand);
-                           p.add_assignments(summand.condition_variables, sigma, rewr);
-                           for (std::size_t j = 0; j < y_size; j++)
-                           {
-                             xy[summand.write_pos[j]] = data_index[summand.write[j]].index(rewr(summand.next_state[j], sigma));
-                           }
-                           mCRL2log(log::debug) << "  " << print_transition(data_index, xy, summand.read, summand.write) << std::endl;
-                           summand.Ldomain = union_cube(summand.Ldomain, x, x_size);
-                           summand.L = union_cube(summand.L, xy, xy_size);
-                           return false;
-                         },
-                         data::is_false
-    );
+    data::data_expression condition = rewr(smd.condition, sigma);
+    if (!data::is_false(condition))
+    {
+      enumerator.enumerate(enumerator_element(smd.variables, condition),
+                           sigma,
+                           [&](const enumerator_element& p) {
+                             check_enumerator_solution(p, group);
+                             p.add_assignments(smd.variables, sigma, rewr);
+                             for (std::size_t j = 0; j < y_size; j++)
+                             {
+                               xy[group.write_pos[j]] = data_index[group.write[j]].index(rewr(smd.next_state[j], sigma));
+                             }
+                             mCRL2log(log::debug) << "  " << print_transition(data_index, xy, group.read, group.write) << std::endl;
+                             group.Ldomain = union_cube(group.Ldomain, x, x_size);
+                             group.L = union_cube(group.L, xy, xy_size);
+                             return false;
+                           },
+                           data::is_false
+      );
+    }
+    data::remove_assignments(sigma, smd.variables);
   }
-  data::remove_assignments(sigma, summand.condition_variables);
-  data::remove_assignments(sigma, summand.read_parameters);
+  data::remove_assignments(sigma, group.read_parameters);
 }
 
 class lpsreach_tool: public rewriter_tool<input_output_tool>
@@ -773,6 +888,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
     bool no_discard_read;
     bool no_discard_write;
     bool use_alternative_relprod;
+    bool print_patterns;
 
     // Lace options
     std::size_t lace_n_workers = 1;
@@ -801,6 +917,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       desc.add_option("no-read", "do not discard only-read parameters");
       desc.add_option("no-write", "do not discard only-write parameters");
       desc.add_option("relprod", "use an inefficient alternative version of relprod (for debugging)");
+      desc.add_option("print-patterns", "prints the read write patterns of the summands");
     }
 
     void parse_options(const utilities::command_line_parser& parser) override
@@ -813,6 +930,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       no_discard_read                               = parser.has_option("no-read");
       no_discard_write                              = parser.has_option("no-write");
       use_alternative_relprod                       = parser.has_option("relprod");
+      print_patterns                                = parser.has_option("print-patterns");
       if (parser.has_option("lace-workers"))
       {
         lace_n_workers = parser.option_argument_as<int>("lace-workers");
@@ -868,6 +986,12 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       if (lpsspec.process().process_parameters().empty())
       {
         throw mcrl2::runtime_error("Processes without parameters are not supported");
+      }
+
+      if (print_patterns)
+      {
+        std::cout << print_read_write_patterns(read_write_patterns(lpsspec));
+        return true;
       }
 
       lpsreach_algorithm algorithm(lpsspec, options, no_discard, no_discard_read, no_discard_write, use_alternative_relprod);
