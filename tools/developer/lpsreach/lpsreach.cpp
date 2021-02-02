@@ -188,6 +188,7 @@ std::string print_read_write_patterns(const std::vector<boost::dynamic_bitset<>>
   return out.str();
 }
 
+// Set some additional read and write bits to true in patterns. This is only used for testing purposes.
 inline
 void adjust_read_write_patterns(std::vector<boost::dynamic_bitset<>>& patterns, bool no_discard, bool no_discard_read, bool no_discard_write)
 {
@@ -280,12 +281,6 @@ class data_expression_index
       {
         return i->second;
       }
-
-       if (data::is_variable(value))
-       {
-         return relprod_ignore;
-       }
-
       std::uint32_t index = m_values.size();
       m_value2index[value] = index;
       m_values.push_back(value);
@@ -933,7 +928,8 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t n,
                              p.add_assignments(smd.variables, sigma, rewr);
                              for (std::size_t j = 0; j < y_size; j++)
                              {
-                               xy[group.write_pos[j]] = data_index[group.write[j]].index(rewr(smd.next_state[j], sigma));
+                               data::data_expression value = rewr(smd.next_state[j], sigma);
+                               xy[group.write_pos[j]] = data::is_variable(value) ? relprod_ignore : data_index[group.write[j]].index(value);
                              }
                              mCRL2log(log::debug) << "  " << print_transition(data_index, xy, group.read, group.write) << std::endl;
                              group.Ldomain = union_cube(group.Ldomain, x, x_size);
