@@ -594,6 +594,11 @@ class srf_pbes
       return m_dataspec;
     }
 
+    data::data_specification& data()
+    {
+      return m_dataspec;
+    }
+
     pbes to_pbes() const
     {
       std::vector<pbes_equation> v;

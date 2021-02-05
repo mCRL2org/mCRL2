@@ -27,6 +27,8 @@
 #include "mcrl2/lps/replace_constants_by_variables.h"
 #include "mcrl2/lps/resolve_name_clashes.h"
 #include "mcrl2/utilities/detail/io.h"
+#include "mcrl2/utilities/parse_numbers.h"
+#include "mcrl2/utilities/text_utility.h"
 
 using namespace mcrl2;
 using data::tools::rewriter_tool;
@@ -102,6 +104,12 @@ std::set<T> as_set(const atermpp::term_list<T>& x)
   return std::set<T>(x.begin(), x.end());
 }
 
+template <typename T>
+std::set<T> as_set(const std::vector<T>& x)
+{
+  return std::set<T>(x.begin(), x.end());
+}
+
 constexpr std::uint32_t relprod_ignore = std::numeric_limits<std::uint32_t>::max();
 
 struct lpsreach_options
@@ -115,7 +123,7 @@ struct lpsreach_options
   bool no_discard_write = false;
   bool no_fix_write_parameters = false;
   bool no_relprod = false;
-  bool summand_groups = false;
+  std::string summand_groups;
   bool remove_unreachable_vertices = false;
 };
 
@@ -131,7 +139,7 @@ std::ostream& operator<<(std::ostream& out, const lpsreach_options& options)
   out << "no-write = " << std::boolalpha << options.no_discard_write << std::endl;
   out << "no-fix = " << std::boolalpha << options.no_fix_write_parameters << std::endl;
   out << "no-relprod = " << std::boolalpha << options.no_relprod << std::endl;
-  out << "groups = " << std::boolalpha << options.summand_groups << std::endl;
+  out << "groups = " << options.summand_groups << std::endl;
   out << "remove-unreachable-vertices = " << std::boolalpha << options.remove_unreachable_vertices << std::endl;
   return out;
 }
@@ -213,9 +221,9 @@ inline
 std::string print_read_write_patterns(const std::vector<boost::dynamic_bitset<>>& patterns)
 {
   std::ostringstream out;
-  for (const auto& pattern: patterns)
+  for (std::size_t i = 0; i < patterns.size(); i++)
   {
-    out << pattern << std::endl;
+    out << std::setw(4) << i << " " << patterns[i] << std::endl;
   }
   return out.str();
 }
@@ -255,9 +263,9 @@ void adjust_read_write_patterns(std::vector<boost::dynamic_bitset<>>& patterns, 
 
 // Sets additional read bits in the summand groups, to avoid issues with write parameters for which no value is available.
 inline
-void fix_write_parameters(std::vector<boost::dynamic_bitset<>>& group_patterns, const std::vector<std::vector<std::size_t>>& group_indices, const std::vector<boost::dynamic_bitset<>>& patterns)
+void fix_write_parameters(std::vector<boost::dynamic_bitset<>>& group_patterns, const std::vector<std::set<std::size_t>>& groups, const std::vector<boost::dynamic_bitset<>>& patterns)
 {
-  auto has_copy_write_summands = [&](const std::vector<std::size_t>& indices, std::size_t j)
+  auto has_copy_write_summands = [&](const std::set<std::size_t>& indices, std::size_t j)
   {
     bool has_copy = false;
     bool has_write = false;
@@ -275,7 +283,7 @@ void fix_write_parameters(std::vector<boost::dynamic_bitset<>>& group_patterns, 
   for (std::size_t k = 0; k < group_patterns.size(); k++)
   {
     boost::dynamic_bitset<>& pattern = group_patterns[k];
-    const std::vector<std::size_t>& indices = group_indices[k];
+    const std::set<std::size_t>& indices = groups[k];
     std::size_t n = pattern.size() / 2;
     for (std::size_t j = 0; j < n; j++)
     {
@@ -415,7 +423,7 @@ struct summand_group
     }
   }
 
-  summand_group(const lps::specification& lpsspec, const std::vector<std::size_t>& summand_indices, const boost::dynamic_bitset<>& read_write_pattern)
+  summand_group(const lps::specification& lpsspec, const std::set<std::size_t>& summand_indices, const boost::dynamic_bitset<>& read_write_pattern)
   {
     const data::variable_list& process_parameters = lpsspec.process().process_parameters();
     std::size_t n = process_parameters.size();
@@ -712,10 +720,6 @@ class lpsreach_algorithm
     std::vector<data_expression_index> m_data_index;
     std::vector<summand_group> m_summand_groups;
     data::data_expression_list m_initial_state;
-    bool m_no_discard;
-    bool m_no_discard_read;
-    bool m_no_discard_write;
-    bool m_no_relprod;
 
     ldd state2ldd(const data::data_expression_list& x)
     {
@@ -782,48 +786,49 @@ class lpsreach_algorithm
       }
     }
 
-    // TODO: implement this
-    std::vector<boost::dynamic_bitset<>> compute_summand_groups(const std::vector<boost::dynamic_bitset<>>& patterns, bool use_summand_groups) const
+    std::vector<std::set<std::size_t>> parse_summand_groups(std::string text, std::size_t n)
     {
-      std::vector<boost::dynamic_bitset<>> result = patterns;
-      if (use_summand_groups && result.size() > 1)
+      using utilities::regex_split;
+      using utilities::trim_copy;
+
+      std::vector<std::set<std::size_t>> result;
+
+      text = trim_copy(text);
+      if (text.empty())
       {
-        // join the last two summands in a group. N.B. this is only for testing
-        auto last = result.back();
-        result.pop_back();
-        result.back() = result.back() | last;
+        for (std::size_t i = 0; i < n; i++)
+        {
+          result.push_back({i});
+        }
       }
+      else
+      {
+        for (const std::string& numbers: regex_split(text, "\\s*;\\s*"))
+        {
+          result.push_back(as_set(utilities::parse_natural_number_sequence(numbers)));
+        }
+      }
+
       return result;
     }
 
-    // Returns summand indices for each summand group pattern
-    std::vector<std::vector<std::size_t>> summand_group_indices(const std::vector<boost::dynamic_bitset<>>& patterns, const std::vector<boost::dynamic_bitset<>>& group_patterns) const
+    std::vector<boost::dynamic_bitset<>> compute_summand_group_patterns(const std::vector<boost::dynamic_bitset<>>& patterns, const std::vector<std::set<std::size_t>> groups) const
     {
-      std::vector<std::vector<std::size_t>> result(group_patterns.size());
-      for (std::size_t i = 0; i < patterns.size(); i++)
-      {
-        const auto& pattern = patterns[i];
+      std::vector<boost::dynamic_bitset<>> result;
+      boost::dynamic_bitset<> empty(patterns.front().size());
 
-        // assign pattern to a matching group with the least number of bits
-        std::size_t group = std::numeric_limits<std::size_t>::max();
-        std::size_t group_count = std::numeric_limits<std::size_t>::max();
-        for (std::size_t j = 0; j < group_patterns.size(); j++)
+      for (const std::set<std::size_t>& group: groups)
+      {
+        if (group.empty())
         {
-          if (pattern.is_subset_of(group_patterns[j]))
-          {
-            std::size_t count = group_patterns[j].count();
-            if (count < group_count)
-            {
-              group = j;
-              group_count = count;
-            }
-          }
+          continue;
         }
-        if (group == std::numeric_limits<std::size_t>::max())
+        boost::dynamic_bitset<> pattern = empty;
+        for (std::size_t i: group)
         {
-          throw mcrl2::runtime_error("could not find a group for summand " + std::to_string(i));
+          pattern |= patterns[i];
         }
-        result[group].push_back(i);
+        result.push_back(pattern);
       }
       return result;
     }
@@ -845,17 +850,21 @@ class lpsreach_algorithm
       }
 
       std::vector<boost::dynamic_bitset<>> patterns = read_write_patterns(lpsspec_);
-      adjust_read_write_patterns(patterns, m_no_discard, m_no_discard_read, m_no_discard_write);
-      std::vector<boost::dynamic_bitset<>> group_patterns = compute_summand_groups(patterns, m_options.summand_groups);
-      std::vector<std::vector<std::size_t>> group_indices = summand_group_indices(patterns, group_patterns);
+      adjust_read_write_patterns(patterns, m_options.no_discard, m_options.no_discard_read, m_options.no_discard_write);
+      std::vector<std::set<std::size_t>> groups = parse_summand_groups(m_options.summand_groups, lpsspec_.process().action_summands().size());
+      for (const auto& group: groups)
+      {
+        mCRL2log(log::debug) << "group " << core::detail::print_set(group) << std::endl;
+      }
+      std::vector<boost::dynamic_bitset<>> group_patterns = compute_summand_group_patterns(patterns, groups);
       if (!m_options.no_relprod && !m_options.no_fix_write_parameters)
       {
-        fix_write_parameters(group_patterns, group_indices, patterns);
+        fix_write_parameters(group_patterns, groups, patterns);
       }
       const auto& action_summands = lpsspec_.process().action_summands();
       for (std::size_t j = 0; j < group_patterns.size(); j++)
       {
-        m_summand_groups.emplace_back(lpsspec_, group_indices[j], group_patterns[j]);
+        m_summand_groups.emplace_back(lpsspec_, groups[j], group_patterns[j]);
       }
 
       for (std::size_t i = 0; i < m_summand_groups.size(); i++)
@@ -893,7 +902,7 @@ class lpsreach_algorithm
         ldd todo1 = empty_set();
         for (std::size_t i = 0; i < R.size(); i++)
         {
-          if (m_no_relprod)
+          if (m_options.no_relprod)
           {
             ldd z = alternative_relprod(todo, R[i]);
             mCRL2log(log::debug) << "relprod(" << i << ", todo) = " << print_states(m_data_index, z) << std::endl;
@@ -1014,7 +1023,8 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       desc.add_option("no-write", "do not discard only-write parameters");
       desc.add_option("no-fix", "do not fix write parameters");
       desc.add_option("no-relprod", "use an inefficient alternative version of relprod (for debugging)");
-      desc.add_option("groups", "use summand groups (N.B. this is just a simple test, the groups are not computed yet)");
+      desc.add_option("print", "prints the read write patterns of the summands");
+      desc.add_option("groups",utilities::make_optional_argument("GROUPS", ""), "a list of summand groups separated by semi colons, e.g. '0; 1 3 4; 2 5");
     }
 
     void parse_options(const utilities::command_line_parser& parser) override
@@ -1028,7 +1038,8 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       options.no_discard_write                      = parser.has_option("no-write");
       options.no_fix_write_parameters               = parser.has_option("no-fix");
       options.no_relprod                            = parser.has_option("no-relprod");
-      options.summand_groups                        = parser.has_option("groups");
+      options.summand_groups                        = parser.option_argument("groups");
+      print_patterns                                = parser.has_option("print");
       if (parser.has_option("lace-workers"))
       {
         lace_n_workers = parser.option_argument_as<int>("lace-workers");
