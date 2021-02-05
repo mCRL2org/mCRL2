@@ -9,6 +9,7 @@
 /// \file lpsreach.cpp
 
 #include <chrono>
+#include <iomanip>
 #include <boost/dynamic_bitset.hpp>
 #include <sylvan_ldd.hpp>
 #include "mcrl2/data/rewriter_tool.h"
@@ -20,7 +21,6 @@
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/substitution_utility.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
-#include "mcrl2/lps/explorer_options.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/lps/one_point_rule_rewrite.h"
 #include "mcrl2/lps/order_summand_variables.h"
@@ -103,6 +103,38 @@ std::set<T> as_set(const atermpp::term_list<T>& x)
 }
 
 constexpr std::uint32_t relprod_ignore = std::numeric_limits<std::uint32_t>::max();
+
+struct lpsreach_options
+{
+  data::rewrite_strategy rewrite_strategy = data::jitty;
+  bool one_point_rule_rewrite = false;
+  bool replace_constants_by_variables = false;
+  bool remove_unused_rewrite_rules = false;
+  bool no_discard = false;
+  bool no_discard_read = false;
+  bool no_discard_write = false;
+  bool no_fix_write_parameters = false;
+  bool no_relprod = false;
+  bool summand_groups = false;
+  bool remove_unreachable_vertices = false;
+};
+
+inline
+std::ostream& operator<<(std::ostream& out, const lpsreach_options& options)
+{
+  out << "rewrite-strategy = " << options.rewrite_strategy << std::endl;
+  out << "one-point-rule-rewrite = " << std::boolalpha << options.one_point_rule_rewrite << std::endl;
+  out << "replace-constants-by-variables = " << std::boolalpha << options.replace_constants_by_variables << std::endl;
+  out << "remove-unused-rewrite-rules = " << std::boolalpha << options.remove_unused_rewrite_rules << std::endl;
+  out << "no-discard = " << std::boolalpha << options.no_discard << std::endl;
+  out << "no-read = " << std::boolalpha << options.no_discard_read << std::endl;
+  out << "no-write = " << std::boolalpha << options.no_discard_write << std::endl;
+  out << "no-fix = " << std::boolalpha << options.no_fix_write_parameters << std::endl;
+  out << "no-relprod = " << std::boolalpha << options.no_relprod << std::endl;
+  out << "groups = " << std::boolalpha << options.summand_groups << std::endl;
+  out << "remove-unreachable-vertices = " << std::boolalpha << options.remove_unreachable_vertices << std::endl;
+  return out;
+}
 
 inline
 std::pair<std::set<data::variable>, std::set<data::variable>> read_write_parameters(const lps::action_summand& summand, const std::set<data::variable>& process_parameters)
@@ -445,10 +477,10 @@ std::ostream& operator<<(std::ostream& out, const summand_group& x)
   }
   out << "read = " << core::detail::print_list(x.read) << std::endl;
   out << "read parameters = " << core::detail::print_list(x.read_parameters) << std::endl;
-  out << "read_pos = " << core::detail::print_list(x.read_pos) << std::endl;
+  // out << "read_pos = " << core::detail::print_list(x.read_pos) << std::endl;
   out << "write = " << core::detail::print_list(x.write) << std::endl;
   out << "write parameters = " << core::detail::print_list(x.write_parameters) << std::endl;
-  out << "write_pos = " << core::detail::print_list(x.write_pos) << std::endl;
+  // out << "write_pos = " << core::detail::print_list(x.write_pos) << std::endl;
   out << "L = " << print_ldd(x.L) << std::endl;
   out << "Ir = " << print_ldd(x.Ir) << std::endl;
   out << "Ip = " << print_ldd(x.Ip) << std::endl;
@@ -670,7 +702,7 @@ class lpsreach_algorithm
   friend void learn_successors_callback(WorkerP*, Task*, std::uint32_t* v, std::size_t n, void* context);
 
   protected:
-    const lps::explorer_options& m_options; // TODO: make a separate lpsreach_options class
+    const lpsreach_options& m_options; // TODO: make a separate lpsreach_options class
     data::rewriter m_rewr;
     mutable data::mutable_indexed_substitution<> m_sigma;
     data::enumerator_identifier_generator m_id_generator;
@@ -751,12 +783,12 @@ class lpsreach_algorithm
     }
 
     // TODO: implement this
-    std::vector<boost::dynamic_bitset<>> compute_summand_groups(const std::vector<boost::dynamic_bitset<>>& patterns, bool no_summand_groups) const
+    std::vector<boost::dynamic_bitset<>> compute_summand_groups(const std::vector<boost::dynamic_bitset<>>& patterns, bool use_summand_groups) const
     {
       std::vector<boost::dynamic_bitset<>> result = patterns;
-      if (result.size() > 1 && !no_summand_groups)
+      if (use_summand_groups && result.size() > 1)
       {
-        // join the last two summands in a group
+        // join the last two summands in a group. N.B. this is only for testing
         auto last = result.back();
         result.pop_back();
         result.back() = result.back() | last;
@@ -797,14 +829,10 @@ class lpsreach_algorithm
     }
 
   public:
-    lpsreach_algorithm(const lps::specification& lpsspec, const lps::explorer_options& options_, bool no_discard, bool no_discard_read, bool no_discard_write, bool no_fix_write_parameters, bool no_summand_groups, bool no_relprod = false)
+    lpsreach_algorithm(const lps::specification& lpsspec, const lpsreach_options& options_)
       : m_options(options_),
         m_rewr(construct_rewriter(lpsspec, m_options.remove_unused_rewrite_rules)),
-        m_enumerator(m_rewr, lpsspec.data(), m_rewr, m_id_generator, false),
-        m_no_discard(no_discard),
-        m_no_discard_read(no_discard_read),
-        m_no_discard_write(no_discard_write),
-        m_no_relprod(no_relprod)
+        m_enumerator(m_rewr, lpsspec.data(), m_rewr, m_id_generator, false)
     {
       lps::specification lpsspec_ = preprocess(lpsspec);
       m_process_parameters = lpsspec_.process().process_parameters();
@@ -818,9 +846,9 @@ class lpsreach_algorithm
 
       std::vector<boost::dynamic_bitset<>> patterns = read_write_patterns(lpsspec_);
       adjust_read_write_patterns(patterns, m_no_discard, m_no_discard_read, m_no_discard_write);
-      std::vector<boost::dynamic_bitset<>> group_patterns = compute_summand_groups(patterns, no_summand_groups);
+      std::vector<boost::dynamic_bitset<>> group_patterns = compute_summand_groups(patterns, m_options.summand_groups);
       std::vector<std::vector<std::size_t>> group_indices = summand_group_indices(patterns, group_patterns);
-      if (!no_relprod && !no_fix_write_parameters)
+      if (!m_options.no_relprod && !m_options.no_fix_write_parameters)
       {
         fix_write_parameters(group_patterns, group_indices, patterns);
       }
@@ -955,13 +983,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
   typedef rewriter_tool<input_output_tool> super;
 
   protected:
-    lps::explorer_options options;
-    bool no_discard;
-    bool no_discard_read;
-    bool no_discard_write;
-    bool no_fix_write_parameters;
-    bool no_summand_groups;
-    bool no_relprod;
+    lpsreach_options options;
     bool print_patterns;
 
     // Lace options
@@ -990,10 +1012,9 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       desc.add_option("no-discard", "do not discard any parameters");
       desc.add_option("no-read", "do not discard only-read parameters");
       desc.add_option("no-write", "do not discard only-write parameters");
-      desc.add_option("no-groups", "do not use summand groups");
       desc.add_option("no-fix", "do not fix write parameters");
       desc.add_option("no-relprod", "use an inefficient alternative version of relprod (for debugging)");
-      desc.add_option("print-patterns", "prints the read write patterns of the summands");
+      desc.add_option("groups", "use summand groups (N.B. this is just a simple test, the groups are not computed yet)");
     }
 
     void parse_options(const utilities::command_line_parser& parser) override
@@ -1002,13 +1023,12 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       options.one_point_rule_rewrite                = !parser.has_option("no-one-point-rule-rewrite");
       options.remove_unused_rewrite_rules           = !parser.has_option("no-remove-unused-rewrite-rules");
       options.replace_constants_by_variables        = false; // This option cannot be used in the symbolic algorithm
-      no_discard                                    = parser.has_option("no-discard");
-      no_discard_read                               = parser.has_option("no-read");
-      no_discard_write                              = parser.has_option("no-write");
-      no_fix_write_parameters                       = parser.has_option("no-fix");
-      no_summand_groups                             = parser.has_option("no-groups");
-      no_relprod                                    = parser.has_option("no-relprod");
-      print_patterns                                = parser.has_option("print-patterns");
+      options.no_discard                            = parser.has_option("no-discard");
+      options.no_discard_read                       = parser.has_option("no-read");
+      options.no_discard_write                      = parser.has_option("no-write");
+      options.no_fix_write_parameters               = parser.has_option("no-fix");
+      options.no_relprod                            = parser.has_option("no-relprod");
+      options.summand_groups                        = parser.has_option("groups");
       if (parser.has_option("lace-workers"))
       {
         lace_n_workers = parser.option_argument_as<int>("lace-workers");
@@ -1072,7 +1092,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
         return true;
       }
 
-      lpsreach_algorithm algorithm(lpsspec, options, no_discard, no_discard_read, no_discard_write, no_fix_write_parameters, no_summand_groups, no_relprod);
+      lpsreach_algorithm algorithm(lpsspec, options);
       algorithm.run();
 
       sylvan::sylvan_quit();
