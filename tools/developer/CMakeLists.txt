@@ -13,8 +13,8 @@ set(MCRL2_TOOLS
 
 if (UNIX)
   list(APPEND MCRL2_TOOLS pbesbddsolve)
-  list(APPEND MCRL2_TOOLS pbesbddsolve1)
   list(APPEND MCRL2_TOOLS lpsreach)
+  list(APPEND MCRL2_TOOLS pbesreach)
 endif (UNIX)
 
 # N.B. Some developer tools are needed for the random tests.

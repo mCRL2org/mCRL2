@@ -6,59 +6,104 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file lpsreach.cpp
+/// \file pbesreach.cpp
 
 #include <chrono>
 #include <iomanip>
 #include <boost/dynamic_bitset.hpp>
 #include <sylvan_ldd.hpp>
 #include "mcrl2/data/rewriter_tool.h"
-#include "mcrl2/lps/specification.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/merge_data_specifications.h"
 #include "mcrl2/data/substitution_utility.h"
-#include "mcrl2/lps/detail/instantiate_global_variables.h"
-#include "mcrl2/lps/io.h"
-#include "mcrl2/lps/one_point_rule_rewrite.h"
-#include "mcrl2/lps/order_summand_variables.h"
-#include "mcrl2/lps/replace_constants_by_variables.h"
-#include "mcrl2/lps/resolve_name_clashes.h"
 #include "mcrl2/lps/symbolic_reachability.h"
-#include "mcrl2/utilities/parse_numbers.h"
+#include "mcrl2/pbes/detail/instantiate_global_variables.h"
+#include "mcrl2/pbes/detail/pbes_io.h"
+#include "mcrl2/pbes/normalize.h"
+#include "mcrl2/pbes/replace_constants_by_variables.h"
+#include "mcrl2/pbes/resolve_name_clashes.h"
+#include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
+#include "mcrl2/pbes/srf_pbes.h"
+#include "mcrl2/pbes/unify_parameters.h"
+#include "mcrl2/utilities/text_utility.h"
 
 using namespace mcrl2;
 using data::tools::rewriter_tool;
 using utilities::tools::input_output_tool;
 
+// Returns a data specification containing a structured sort with the names of the propositional variables
+// in the PBES as elements.
 inline
-std::pair<std::set<data::variable>, std::set<data::variable>> read_write_parameters(const lps::action_summand& summand, const std::set<data::variable>& process_parameters)
+data::data_specification construct_propositional_variable_data_specification(const pbes_system::srf_pbes& pbesspec, const std::string& sort_name)
 {
-  using utilities::detail::set_union;
-  using utilities::detail::set_intersection;
-
-  std::set<data::variable> read_parameters = set_union(data::find_free_variables(summand.condition()), lps::find_free_variables(summand.multi_action()));
-  std::set<data::variable> write_parameters;
-
-  for (const auto& assignment: summand.assignments())
+  // TODO: it should be possible to add a structured sort to pbesspec.data() directly, but I don't know how
+  std::vector<std::string> names;
+  for (const auto& equation: pbesspec.equations())
   {
-    if (assignment.lhs() != assignment.rhs())
-    {
-      write_parameters.insert(assignment.lhs());
-      data::find_free_variables(assignment.rhs(), std::inserter(read_parameters, read_parameters.end()));
-    }
+    names.push_back(equation.variable().name());
   }
+  std::string text = "sort " + sort_name + " = struct " +   utilities::string_join(names, " | ") + ";";
+  return data::parse_data_specification(text);
+}
 
-  return {set_intersection(read_parameters, process_parameters), set_intersection(write_parameters, process_parameters) };
+struct symbolic_reachability_options: public lps::symbolic_reachability_options
+{
+  bool make_total = false;
+};
+
+inline
+std::ostream& operator<<(std::ostream& out, const symbolic_reachability_options& options)
+{
+  out << static_cast<lps::symbolic_reachability_options>(options);
+  out << "total = " << std::boolalpha << options.make_total << std::endl;
+  return out;
 }
 
 inline
-std::map<data::variable, std::size_t> process_parameter_index(const lps::specification& lpsspec)
+std::pair<std::set<data::variable>, std::set<data::variable>> read_write_parameters(
+  const pbes_system::srf_equation& equation,
+  const pbes_system::srf_summand& summand,
+  const data::variable_list& process_parameters)
+{
+  using utilities::detail::set_union;
+  using utilities::detail::set_intersection;
+  using utilities::as_set;
+
+  std::set<data::variable> read_parameters = data::find_free_variables(summand.condition());
+  std::set<data::variable> write_parameters;
+
+  // We need special handling for the first parameter, since the clause 'propvar == X' is not in the condition yet
+  read_parameters.insert(process_parameters.front());
+  if (equation.variable().name() != summand.variable().name())
+  {
+    write_parameters.insert(process_parameters.front());
+  }
+
+  const data::data_expression_list& expressions = summand.variable().parameters();
+  auto pi = ++process_parameters.begin(); // skip the first parameter
+  auto ei = expressions.begin();
+  for (; ei != expressions.end(); ++pi, ++ei)
+  {
+    if (*pi != *ei)
+    {
+      write_parameters.insert(*pi);
+      data::find_free_variables(*ei, std::inserter(read_parameters, read_parameters.end()));
+    }
+  }
+
+  auto process_parameter_set = as_set(process_parameters);
+  return { set_intersection(read_parameters, process_parameter_set), set_intersection(write_parameters, process_parameter_set) };
+}
+
+inline
+std::map<data::variable, std::size_t> process_parameter_index(const data::variable_list& process_parameters)
 {
   std::map<data::variable, std::size_t> result;
   std::size_t i = 0;
-  for (const data::variable& v: lpsspec.process().process_parameters())
+  for (const data::variable& v: process_parameters)
   {
     result[v] = i++;
   }
@@ -66,57 +111,78 @@ std::map<data::variable, std::size_t> process_parameter_index(const lps::specifi
 }
 
 inline
-std::vector<boost::dynamic_bitset<>> read_write_patterns(const lps::specification& lpsspec)
+std::vector<boost::dynamic_bitset<>> read_write_patterns(const pbes_system::srf_pbes& pbesspec, const data::variable_list& process_parameters)
 {
-  using utilities::as_set;
-
   std::vector<boost::dynamic_bitset<>> result;
 
-  auto process_parameters = as_set(lpsspec.process().process_parameters());
   std::size_t n = process_parameters.size();
-  std::map<data::variable, std::size_t> index = process_parameter_index(lpsspec);
+  std::map<data::variable, std::size_t> index = process_parameter_index(process_parameters);
 
-  for (const auto& summand: lpsspec.process().action_summands())
+  for (const auto& equation: pbesspec.equations())
   {
-    auto [read_parameters, write_parameters] = read_write_parameters(summand, process_parameters);
-    auto read = lps::parameter_indices(read_parameters, index);
-    auto write = lps::parameter_indices(write_parameters, index);
-    boost::dynamic_bitset<> rw(2*n);
-    for (std::size_t j: read)
+    for (const auto& summand: equation.summands())
     {
-      rw[2*j] = true;
+      auto [read_parameters, write_parameters] = read_write_parameters(equation, summand, process_parameters);
+      auto read = lps::parameter_indices(read_parameters, index);
+      auto write = lps::parameter_indices(write_parameters, index);
+      boost::dynamic_bitset<> rw(2*n);
+      for (std::size_t j: read)
+      {
+        rw[2*j] = true;
+      }
+      for (std::size_t j: write)
+      {
+        rw[2*j + 1] = true;
+      }
+      result.push_back(rw);
     }
-    for (std::size_t j: write)
-    {
-      rw[2*j + 1] = true;
-    }
-    result.push_back(rw);
   }
 
   return result;
 }
 
+inline
+data::data_expression_list make_state(const pbes_system::propositional_variable_instantiation& x, const std::unordered_map<core::identifier_string, data::data_expression>& propvar_map)
+{
+  data::data_expression_list result = x.parameters();
+  result.push_front(propvar_map.at(x.name()));
+  return result;
+}
+
 struct summand_group: public lps::summand_group
 {
-  summand_group(const lps::specification& lpsspec, const std::set<std::size_t>& summand_indices, const boost::dynamic_bitset<>& read_write_pattern)
-    : lps::summand_group(lpsspec.process().process_parameters(), read_write_pattern)
+  summand_group(
+    const pbes_system::srf_pbes& pbesspec,
+    const data::variable_list& process_parameters,
+    const std::unordered_map<core::identifier_string, data::data_expression>& propvar_map,
+    const std::set<std::size_t>& summand_group_indices,
+    const boost::dynamic_bitset<>& read_write_pattern
+  )
+    : lps::summand_group(process_parameters, read_write_pattern)
   {
     using lps::project;
     using utilities::as_vector;
+    using utilities::detail::contains;
 
-    const auto& lps_summands = lpsspec.process().action_summands();
-    const auto& process_parameters = lpsspec.process().process_parameters();
-    for (std::size_t i: summand_indices)
+    const auto& equations = pbesspec.equations();
+    std::size_t k = 0;
+    for (std::size_t i = 0; i < equations.size(); i++)
     {
-      const auto& smd = lps_summands[i];
-      summands.emplace_back(smd.condition(), smd.summation_variables(), project(as_vector(smd.next_state(process_parameters)), write));
+      const core::identifier_string& X_i = equations[i].variable().name();
+      const auto& equation_summands = equations[i].summands();
+      for (std::size_t j = 0; j < equation_summands.size(); j++, k++)
+      {
+        if (contains(summand_group_indices, k))
+        {
+          const pbes_system::srf_summand& smd = equation_summands[j];
+          summands.emplace_back(data::and_(data::equal_to(process_parameters.front(), propvar_map.at(X_i)), smd.condition()), smd.parameters(), project(as_vector(make_state(smd.variable(), propvar_map)), write));
+        }
+      }
     }
   }
 };
 
-// void learn_successors_callback(WorkerP*, Task*, std::uint32_t* v, std::size_t n, void* context = nullptr);
-
-class lpsreach_algorithm
+class pbesreach_algorithm
 {
   using ldd = sylvan::ldds::ldd;
   using enumerator_element = data::enumerator_list_element_with_substitution<>;
@@ -125,7 +191,8 @@ class lpsreach_algorithm
   friend void lps::learn_successors_callback(WorkerP*, Task*, std::uint32_t* v, std::size_t n, void* context);
 
   protected:
-    const lps::symbolic_reachability_options& m_options;
+    const symbolic_reachability_options& m_options;
+    pbes_system::srf_pbes m_pbes;
     data::rewriter m_rewr;
     mutable data::mutable_indexed_substitution<> m_sigma;
     data::enumerator_identifier_generator m_id_generator;
@@ -155,39 +222,57 @@ class lpsreach_algorithm
       mCRL2log(log::debug) << "learn successors of summand group " << i << " for X = " << print_states(m_data_index, X, R.read) << std::endl;
 
       using namespace sylvan::ldds;
-      std::pair<lpsreach_algorithm&, summand_group&> context{*this, R};
-      sat_all_nopar(X, lps::learn_successors_callback<std::pair<lpsreach_algorithm&, summand_group&>>, &context);
+      std::pair<pbesreach_algorithm&, summand_group&> context{*this, R};
+      sat_all_nopar(X, lps::learn_successors_callback<std::pair<pbesreach_algorithm&, summand_group&>>, &context);
     }
 
-    template <typename Specification>
-    Specification preprocess(const Specification& lpsspec)
+    pbes_system::srf_pbes preprocess(pbes_system::pbes pbesspec, bool make_total)
     {
-      Specification result = lpsspec;
-      lps::detail::instantiate_global_variables(result);
-      lps::order_summand_variables(result);
-      resolve_summand_variable_name_clashes(result); // N.B. This is a required preprocessing step.
+      pbes_system::detail::instantiate_global_variables(pbesspec);
+      normalize(pbesspec);
       if (m_options.one_point_rule_rewrite)
       {
-        one_point_rule_rewrite(result);
+        pbes_system::one_point_rule_rewriter R;
+        pbes_system::replace_pbes_expressions(pbesspec, R, false);
       }
       if (m_options.replace_constants_by_variables)
       {
-        replace_constants_by_variables(result, m_rewr, m_sigma);
+        pbes_system::replace_constants_by_variables(pbesspec, m_rewr, m_sigma);
       }
+
+      pbes_system::srf_pbes result = pbes2srf(pbesspec);
+      if (make_total)
+      {
+        result.make_total();
+      }
+      unify_parameters(result);
+      pbes_system::resolve_summand_variable_name_clashes(result, result.equations().front().variable().parameters()); // N.B. This is a required preprocessing step.
+
+      // add a sort for the propositional variable names
+      data::data_specification propvar_dataspec = construct_propositional_variable_data_specification(result, "PropositionalVariable");
+      result.data() = data::merge_data_specifications(result.data(), propvar_dataspec);
+      mCRL2log(log::debug) << "--- srf pbes ---\n" << result.to_pbes() << std::endl;
+
       return result;
     }
 
   public:
-    lpsreach_algorithm(const lps::specification& lpsspec, const lps::symbolic_reachability_options& options_)
+    pbesreach_algorithm(const pbes_system::pbes& pbesspec, const symbolic_reachability_options& options_)
       : m_options(options_),
-        m_rewr(lps::construct_rewriter(lpsspec.data(), m_options.rewrite_strategy, lps::find_function_symbols(lpsspec), m_options.remove_unused_rewrite_rules)),
-        m_enumerator(m_rewr, lpsspec.data(), m_rewr, m_id_generator, false)
+        m_pbes(preprocess(pbesspec, options_.make_total)),
+        m_rewr(lps::construct_rewriter(m_pbes.data(), m_options.rewrite_strategy, pbes_system::find_function_symbols(pbesspec), m_options.remove_unused_rewrite_rules)),
+        m_enumerator(m_rewr, m_pbes.data(), m_rewr, m_id_generator, false)
     {
-      lps::specification lpsspec_ = preprocess(lpsspec);
-
-      m_process_parameters = lpsspec_.process().process_parameters();
+      data::basic_sort propvar_sort("PropositionalVariable");
+      std::unordered_map<core::identifier_string, data::data_expression> propvar_map;
+      for (const auto& equation: m_pbes.equations())
+      {
+        propvar_map[equation.variable().name()] = data::function_symbol(equation.variable().name(), propvar_sort);
+      }
+      m_process_parameters = m_pbes.equations().front().variable().parameters();
+      m_process_parameters.push_front(data::variable("propvar", propvar_sort));
       m_n = m_process_parameters.size();
-      m_initial_state = lpsspec_.initial_process().expressions();
+      m_initial_state = make_state(m_pbes.initial_state(), propvar_map);
 
       mCRL2log(log::debug) << "process parameters = " << core::detail::print_list(m_process_parameters) << std::endl;
       mCRL2log(log::debug) << "initial state = " << core::detail::print_list(m_initial_state) << std::endl;
@@ -197,7 +282,7 @@ class lpsreach_algorithm
         m_data_index.push_back(lps::data_expression_index(param.sort()));
       }
 
-      std::vector<boost::dynamic_bitset<>> patterns = read_write_patterns(lpsspec_);
+      std::vector<boost::dynamic_bitset<>> patterns = read_write_patterns(m_pbes, m_process_parameters);
       mCRL2log(log::debug) << lps::print_read_write_patterns(patterns);
       lps::adjust_read_write_patterns(patterns, m_options);
       std::vector<std::set<std::size_t>> groups = utilities::parse_summand_groups(m_options.summand_groups, patterns.size());
@@ -212,7 +297,7 @@ class lpsreach_algorithm
       }
       for (std::size_t j = 0; j < group_patterns.size(); j++)
       {
-        m_summand_groups.emplace_back(lpsspec_, groups[j], group_patterns[j]);
+        m_summand_groups.emplace_back(m_pbes, m_process_parameters, propvar_map, groups[j], group_patterns[j]);
       }
 
       for (std::size_t i = 0; i < m_summand_groups.size(); i++)
@@ -273,12 +358,12 @@ class lpsreach_algorithm
     }
 };
 
-class lpsreach_tool: public rewriter_tool<input_output_tool>
+class pbesreach_tool: public rewriter_tool<input_output_tool>
 {
   typedef rewriter_tool<input_output_tool> super;
 
   protected:
-    lps::symbolic_reachability_options options;
+    symbolic_reachability_options options;
 
     // Lace options
     std::size_t lace_n_workers = 1;
@@ -309,6 +394,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       desc.add_option("no-fix", "do not fix write parameters");
       desc.add_option("no-relprod", "use an inefficient alternative version of relprod (for debugging)");
       desc.add_option("groups", utilities::make_optional_argument("GROUPS", ""), "a list of summand groups separated by semicolons, e.g. '0; 1 3 4; 2 5");
+      desc.add_option("total", "make the SRF PBES total", 't');
     }
 
     void parse_options(const utilities::command_line_parser& parser) override
@@ -323,6 +409,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       options.no_fix_write_parameters               = parser.has_option("no-fix");
       options.no_relprod                            = parser.has_option("no-relprod");
       options.summand_groups                        = parser.option_argument("groups");
+      options.make_total           = parser.has_option("total");
       if (parser.has_option("lace-workers"))
       {
         lace_n_workers = parser.option_argument_as<int>("lace-workers");
@@ -354,11 +441,11 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
     }
 
   public:
-    lpsreach_tool()
-      : super("lpsreach",
+    pbesreach_tool()
+      : super("pbesreach",
               "Wieger Wesselink",
-              "applies a symbolic reachability algorithm to an LPS",
-              "read an LPS from INFILE and write output to OUTFILE. If OUTFILE "
+              "applies a symbolic reachability algorithm to a PBES",
+              "read a PBES from INFILE and write output to OUTFILE. If OUTFILE "
               "is not present, stdout is used. If INFILE is not present, stdin is used."
              )
     {}
@@ -373,16 +460,14 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
 
       mCRL2log(log::debug) << options << std::endl;
 
-      lps::stochastic_specification stochastic_lpsspec;
-      lps::load_lps(stochastic_lpsspec, input_filename());
-      lps::specification lpsspec = lps::remove_stochastic_operators(stochastic_lpsspec);
+      pbes_system::pbes pbesspec = pbes_system::detail::load_pbes(input_filename());
 
-      if (lpsspec.process().process_parameters().empty())
+      if (pbesspec.initial_state().empty())
       {
-        throw mcrl2::runtime_error("Processes without parameters are not supported");
+        throw mcrl2::runtime_error("PBESses without parameters are not supported");
       }
 
-      lpsreach_algorithm algorithm(lpsspec, options);
+      pbesreach_algorithm algorithm(pbesspec, options);
       algorithm.run();
 
       sylvan::sylvan_quit();
@@ -393,5 +478,5 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
 
 int main(int argc, char* argv[])
 {
-  return lpsreach_tool().execute(argc, argv);
+  return pbesreach_tool().execute(argc, argv);
 }
