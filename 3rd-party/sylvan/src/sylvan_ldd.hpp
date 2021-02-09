@@ -364,11 +364,18 @@ inline int member_cube_copy(const ldd& A, const std::vector<std::uint32_t>& v, c
   return lddmc_member_cube_copy(A.get(), const_cast<std::uint32_t*>(v.data()), const_cast<int*>(copy.data()), v.size());
 }
 
+// union_cube(A,v) = union_(A,cube(v))
+inline ldd union_cube_copy(const ldd& A, const std::uint32_t* v, const int* copy, std::size_t n)
+{
+  LACE_ME;
+  return ldd(lddmc_union_cube_copy(A.get(), const_cast<std::uint32_t*>(v), const_cast<int*>(copy), n));
+}
+
 // <undocumented>
 inline ldd union_cube_copy(const ldd& A, const std::vector<std::uint32_t>& v, const std::vector<int>& copy)
 {
   LACE_ME;
-  return ldd(lddmc_union_cube_copy(A.get(), const_cast<std::uint32_t*>(v.data()), const_cast<int*>(copy.data()), v.size()));
+  return union_cube_copy(A, v.data(), copy.data(), v.size());
 }
 
 // relprod(A,B,meta) = the successors of the states in A according to the transition relation B which is described by meta

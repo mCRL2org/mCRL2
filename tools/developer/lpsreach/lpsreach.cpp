@@ -98,7 +98,7 @@ std::vector<boost::dynamic_bitset<>> read_write_patterns(const lps::specificatio
 
 struct summand_group: public lps::summand_group
 {
-  summand_group(const lps::specification& lpsspec, const std::set<std::size_t>& summand_indices, const boost::dynamic_bitset<>& read_write_pattern)
+  summand_group(const lps::specification& lpsspec, const std::set<std::size_t>& summand_indices, const boost::dynamic_bitset<>& read_write_pattern, const std::vector<boost::dynamic_bitset<>>& read_write_patterns)
     : lps::summand_group(lpsspec.process().process_parameters(), read_write_pattern)
   {
     using lps::project;
@@ -108,8 +108,17 @@ struct summand_group: public lps::summand_group
     const auto& process_parameters = lpsspec.process().process_parameters();
     for (std::size_t i: summand_indices)
     {
+      std::vector<int> copy(read.size(), 0);
+      for (std::size_t j = 0; j < write.size(); j++)
+      {
+        bool r = read_write_pattern[2*j];
+        bool w = read_write_pattern[2*j+1];
+        bool ri = read_write_patterns[i][2*j];
+        bool wi = read_write_patterns[i][2*j+1];
+        copy.push_back(!ri && !wi && !r && w);
+      }
       const auto& smd = lps_summands[i];
-      summands.emplace_back(smd.condition(), smd.summation_variables(), project(as_vector(smd.next_state(process_parameters)), write));
+      summands.emplace_back(smd.condition(), smd.summation_variables(), project(as_vector(smd.next_state(process_parameters)), write), copy);
     }
   }
 };
@@ -206,13 +215,9 @@ class lpsreach_algorithm
         mCRL2log(log::debug) << "group " << core::detail::print_set(group) << std::endl;
       }
       std::vector<boost::dynamic_bitset<>> group_patterns = lps::compute_summand_group_patterns(patterns, groups);
-      if (!m_options.no_relprod && !m_options.no_fix_write_parameters)
-      {
-        lps::fix_write_parameters(group_patterns, groups, patterns);
-      }
       for (std::size_t j = 0; j < group_patterns.size(); j++)
       {
-        m_summand_groups.emplace_back(lpsspec_, groups[j], group_patterns[j]);
+        m_summand_groups.emplace_back(lpsspec_, groups[j], group_patterns[j], group_patterns);
       }
 
       for (std::size_t i = 0; i < m_summand_groups.size(); i++)
@@ -306,7 +311,6 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       desc.add_option("no-discard", "do not discard any parameters");
       desc.add_option("no-read", "do not discard only-read parameters");
       desc.add_option("no-write", "do not discard only-write parameters");
-      desc.add_option("no-fix", "do not fix write parameters");
       desc.add_option("no-relprod", "use an inefficient alternative version of relprod (for debugging)");
       desc.add_option("groups", utilities::make_optional_argument("GROUPS", ""), "a list of summand groups separated by semicolons, e.g. '0; 1 3 4; 2 5");
     }
@@ -320,7 +324,6 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       options.no_discard                            = parser.has_option("no-discard");
       options.no_discard_read                       = parser.has_option("no-read");
       options.no_discard_write                      = parser.has_option("no-write");
-      options.no_fix_write_parameters               = parser.has_option("no-fix");
       options.no_relprod                            = parser.has_option("no-relprod");
       options.summand_groups                        = parser.option_argument("groups");
       if (parser.has_option("lace-workers"))

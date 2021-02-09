@@ -138,7 +138,6 @@ struct symbolic_reachability_options
   bool no_discard = false;
   bool no_discard_read = false;
   bool no_discard_write = false;
-  bool no_fix_write_parameters = false;
   bool no_relprod = false;
   std::string summand_groups;
 };
@@ -153,7 +152,6 @@ std::ostream& operator<<(std::ostream& out, const symbolic_reachability_options&
   out << "no-discard = " << std::boolalpha << options.no_discard << std::endl;
   out << "no-read = " << std::boolalpha << options.no_discard_read << std::endl;
   out << "no-write = " << std::boolalpha << options.no_discard_write << std::endl;
-  out << "no-fix = " << std::boolalpha << options.no_fix_write_parameters << std::endl;
   out << "no-relprod = " << std::boolalpha << options.no_relprod << std::endl;
   out << "groups = " << options.summand_groups << std::endl;
   return out;
@@ -210,42 +208,6 @@ void adjust_read_write_patterns(std::vector<boost::dynamic_bitset<>>& patterns, 
       }
       pattern[2*j] = read;
       pattern[2*j + 1] = write;
-    }
-  }
-}
-
-// Sets additional read bits in the summand groups, to avoid issues with write parameters for which no value is available.
-inline
-void fix_write_parameters(std::vector<boost::dynamic_bitset<>>& group_patterns, const std::vector<std::set<std::size_t>>& groups, const std::vector<boost::dynamic_bitset<>>& patterns)
-{
-  auto has_copy_write_summands = [&](const std::set<std::size_t>& indices, std::size_t j)
-  {
-    bool has_copy = false;
-    bool has_write = false;
-    for (std::size_t i: indices)
-    {
-      const boost::dynamic_bitset<>& pattern = patterns[i];
-      bool read = pattern[2*j];
-      bool write = pattern[2*j + 1];
-      has_copy = has_copy || (!read && !write);
-      has_write = has_write || (!read && write);
-    }
-    return has_copy && has_write;
-  };
-
-  for (std::size_t k = 0; k < group_patterns.size(); k++)
-  {
-    boost::dynamic_bitset<>& pattern = group_patterns[k];
-    const std::set<std::size_t>& indices = groups[k];
-    std::size_t n = pattern.size() / 2;
-    for (std::size_t j = 0; j < n; j++)
-    {
-      bool read = pattern[2*j];
-      bool write = pattern[2*j + 1];
-      if (!read && write && has_copy_write_summands(indices, j))
-      {
-        pattern[2*j] = true;
-      }
     }
   }
 }
@@ -350,9 +312,10 @@ struct summand_group
     data::data_expression condition;
     data::variable_list variables; // the summand variables
     std::vector<data::data_expression> next_state; // the projected next state vector
+    std::vector<int> copy; // indices of only-write nodes that need to be ignored
 
-    summand(const data::data_expression& condition_, const data::variable_list& variables_, const std::vector<data::data_expression>& next_state_)
-      : condition(condition_), variables(variables_), next_state(next_state_)
+    summand(const data::data_expression& condition_, const data::variable_list& variables_, const std::vector<data::data_expression>& next_state_, const std::vector<int>& copy_)
+      : condition(condition_), variables(variables_), next_state(next_state_), copy(copy_)
     {}
   };
 
@@ -755,7 +718,7 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t n,
                              }
                              mCRL2log(log::debug) << "  " << print_transition(data_index, xy, group.read, group.write) << std::endl;
                              group.Ldomain = union_cube(group.Ldomain, x, x_size);
-                             group.L = union_cube(group.L, xy, xy_size);
+                             group.L = union_cube_copy(group.L, xy, smd.copy.data(), xy_size);
                              return false;
                            },
                            data::is_false
