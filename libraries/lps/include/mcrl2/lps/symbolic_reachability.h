@@ -84,6 +84,12 @@ std::vector<T> as_vector(const atermpp::term_list<T>& x)
 }
 
 template <typename T>
+std::vector<T> as_vector(const std::set<T>& x)
+{
+  return std::vector<T>(x.begin(), x.end());
+}
+
+template <typename T>
 std::set<T> as_set(const atermpp::term_list<T>& x)
 {
   return std::set<T>(x.begin(), x.end());
@@ -414,6 +420,7 @@ std::ostream& operator<<(std::ostream& out, const summand_group& x)
     out << "condition = " << smd.condition << std::endl;
     out << "variables = " << core::detail::print_list(smd.variables) << std::endl;
     out << "next state = " << core::detail::print_list(smd.next_state) << std::endl;
+    out << "copy = " << core::detail::print_list(smd.copy) << std::endl;
     std::vector<std::string> assignments;
     auto vi = x.write_parameters.begin();
     auto ni = smd.next_state.begin();
@@ -718,7 +725,7 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t n,
                              }
                              mCRL2log(log::debug) << "  " << print_transition(data_index, xy, group.read, group.write) << std::endl;
                              group.Ldomain = union_cube(group.Ldomain, x, x_size);
-                             group.L = union_cube_copy(group.L, xy, smd.copy.data(), xy_size);
+                             group.L = algorithm.m_options.no_relprod ? union_cube(group.L, xy, xy_size) : union_cube_copy(group.L, xy, smd.copy.data(), xy_size);
                              return false;
                            },
                            data::is_false

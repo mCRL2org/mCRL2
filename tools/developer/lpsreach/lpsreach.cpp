@@ -98,24 +98,34 @@ std::vector<boost::dynamic_bitset<>> read_write_patterns(const lps::specificatio
 
 struct summand_group: public lps::summand_group
 {
-  summand_group(const lps::specification& lpsspec, const std::set<std::size_t>& summand_indices, const boost::dynamic_bitset<>& read_write_pattern, const std::vector<boost::dynamic_bitset<>>& read_write_patterns)
-    : lps::summand_group(lpsspec.process().process_parameters(), read_write_pattern)
+  summand_group(const lps::specification& lpsspec, const std::set<std::size_t>& group_indices, const boost::dynamic_bitset<>& group_pattern, const std::vector<boost::dynamic_bitset<>>& read_write_patterns)
+    : lps::summand_group(lpsspec.process().process_parameters(), group_pattern)
   {
     using lps::project;
     using utilities::as_vector;
+    using utilities::as_set;
+    using utilities::detail::set_union;
+
+    std::set<std::size_t> used;
+    for (std::size_t j: read)
+    {
+      used.insert(2*j);
+    }
+    for (std::size_t j: write)
+    {
+      used.insert(2*j + 1);
+    }
 
     const auto& lps_summands = lpsspec.process().action_summands();
     const auto& process_parameters = lpsspec.process().process_parameters();
-    for (std::size_t i: summand_indices)
+
+    for (std::size_t i: group_indices)
     {
-      std::vector<int> copy(read.size(), 0);
-      for (std::size_t j = 0; j < write.size(); j++)
+      std::vector<int> copy;
+      for (std::size_t j: used)
       {
-        bool r = read_write_pattern[2*j];
-        bool w = read_write_pattern[2*j+1];
-        bool ri = read_write_patterns[i][2*j];
-        bool wi = read_write_patterns[i][2*j+1];
-        copy.push_back(!ri && !wi && !r && w);
+        bool b = read_write_patterns[i][j];
+        copy.push_back(b ? 0 : 1);
       }
       const auto& smd = lps_summands[i];
       summands.emplace_back(smd.condition(), smd.summation_variables(), project(as_vector(smd.next_state(process_parameters)), write), copy);
@@ -217,7 +227,7 @@ class lpsreach_algorithm
       std::vector<boost::dynamic_bitset<>> group_patterns = lps::compute_summand_group_patterns(patterns, groups);
       for (std::size_t j = 0; j < group_patterns.size(); j++)
       {
-        m_summand_groups.emplace_back(lpsspec_, groups[j], group_patterns[j], group_patterns);
+        m_summand_groups.emplace_back(lpsspec_, groups[j], group_patterns[j], patterns);
       }
 
       for (std::size_t i = 0; i < m_summand_groups.size(); i++)

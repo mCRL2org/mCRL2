@@ -163,7 +163,19 @@ struct summand_group: public lps::summand_group
   {
     using lps::project;
     using utilities::as_vector;
+    using utilities::as_set;
+    using utilities::detail::set_union;
     using utilities::detail::contains;
+
+    std::set<std::size_t> used;
+    for (std::size_t j: read)
+    {
+      used.insert(2*j);
+    }
+    for (std::size_t j: write)
+    {
+      used.insert(2*j + 1);
+    }
 
     const auto& equations = pbesspec.equations();
     std::size_t k = 0;
@@ -175,14 +187,11 @@ struct summand_group: public lps::summand_group
       {
         if (contains(summand_group_indices, k))
         {
-          std::vector<int> copy(read.size(), 0);
-          for (std::size_t q = 0; q < write.size(); q++)
+          std::vector<int> copy;
+          for (std::size_t q: used)
           {
-            bool r = read_write_pattern[2*q];
-            bool w = read_write_pattern[2*q+1];
-            bool rk = read_write_patterns[k][2*q];
-            bool wk = read_write_patterns[k][2*q+1];
-            copy.push_back(!rk && !wk && !r && w);
+            bool b = read_write_patterns[k][q];
+            copy.push_back(b ? 0 : 1);
           }
           const pbes_system::srf_summand& smd = equation_summands[j];
           summands.emplace_back(data::and_(data::equal_to(process_parameters.front(), propvar_map.at(X_i)), smd.condition()), smd.parameters(), project(as_vector(make_state(smd.variable(), propvar_map)), write), copy);
@@ -303,7 +312,7 @@ class pbesreach_algorithm
       std::vector<boost::dynamic_bitset<>> group_patterns = lps::compute_summand_group_patterns(patterns, groups);
       for (std::size_t j = 0; j < group_patterns.size(); j++)
       {
-        m_summand_groups.emplace_back(m_pbes, m_process_parameters, propvar_map, groups[j], group_patterns[j], group_patterns);
+        m_summand_groups.emplace_back(m_pbes, m_process_parameters, propvar_map, groups[j], group_patterns[j], patterns);
       }
 
       for (std::size_t i = 0; i < m_summand_groups.size(); i++)
