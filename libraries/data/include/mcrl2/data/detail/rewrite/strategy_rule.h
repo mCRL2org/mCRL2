@@ -51,7 +51,7 @@ class strategy_rule : public atermpp::aterm
     std::size_t rewrite_index() const
     {
       assert(is_rewrite_index());
-      return (atermpp::down_cast<atermpp::aterm_int>(static_cast<atermpp::aterm>(*this))).value();
+      return (atermpp::down_cast<atermpp::aterm_int>(static_cast<const atermpp::aterm&>(*this))).value();
     }
 };
 
