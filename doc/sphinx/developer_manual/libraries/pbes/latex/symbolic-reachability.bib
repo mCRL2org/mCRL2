@@ -1,0 +1,105 @@
+@inproceedings{DBLP:conf/hvc/MeijerKBP14,
+  author    = {Jeroen Meijer and
+               Gijs Kant and
+               Stefan Blom and
+               Jaco van de Pol},
+  editor    = {Eran Yahav},
+  title     = {Read, Write and Copy Dependencies for Symbolic Model Checking},
+  booktitle = {Hardware and Software: Verification and Testing - 10th International
+               Haifa Verification Conference, {HVC} 2014, Haifa, Israel, November
+               18-20, 2014. Proceedings},
+  series    = {Lecture Notes in Computer Science},
+  volume    = {8855},
+  pages     = {204--219},
+  publisher = {Springer},
+  year      = {2014},
+  url       = {https://doi.org/10.1007/978-3-319-13338-6\_16},
+  doi       = {10.1007/978-3-319-13338-6\_16},
+  timestamp = {Tue, 14 May 2019 10:00:42 +0200},
+  biburl    = {https://dblp.org/rec/conf/hvc/MeijerKBP14.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@phdthesis{Meijer2019,
+title = "Efficient learning and analysis of system behavior",
+abstract = "In this thesis, we present techniques for more efficient learning and analysis of system behavior. The first part covers novel algorithms and tooling for testing systems based on active automata learning and Linear-time Temporal Logic (LTL) model checking, also called Learning-Based Testing (LBT). Next, we provide an improved learning algorithm that is able to deal with huge alphabets. These are commonly seen in large-scale industrial systems where input symbols contain data parameters.In the second part we discuss improvements for analyzing formal system specifications. We start out by looking at separated read, write and copy dependencies for symbolic model checking to speed up the verification of these specifications. Then, we show that bandwidth reduction techniques, originally designed for sparse matrix solvers, are very capable at reducing the memory footprint of the specifications' symbolic state space. Implementations of the presented algorithms are subjected to case studies and rigorous experimentation with scientific software competitions.",
+author = "Jeroen Meijer",
+year = "2019",
+month = sep,
+day = "20",
+doi = "10.3990/1.9789036548441",
+language = "English",
+isbn = "978-90-365-4844-1",
+series = "DSI Ph.D. thesis series",
+publisher = "University of Twente",
+number = "19-015",
+address = "Netherlands",
+school = "University of Twente",
+}
+
+
+@inproceedings{MeijerBlomPol2008,
+title = "Symbolic Reachability for Process Algebras with Recursive Data Types",
+abstract = "In this paper, we present a symbolic reachability algorithm for process algebras with recursive data types. Like the various saturation based algorithms of Ciardo et al, the algorithm is based on partitioning of the transition relation into events whose influence is local. As new features, our algorithm supports recursive data types and allows unbounded non-determinism, which is needed to support open systems with data. The algorithm does not use any specific features of process algebras. That is, it will work for any system that consists of a fixed number of communicating processes, where in each atomic step only a subset of the processes participate. As proof of concept we have implemented the algorithm in the context of the μCRL toolset. We also compared the performance of this prototype with the performance of the existing explicit tools on a set of typical case studies.",
+keywords = "EWI-13443, FMT-MC: MODEL CHECKING, METIS-251187, EC Grant Agreement nr.: FP6/043235, IR-62465",
+author = "Stefan Blom and {van de Pol}, {Jan Cornelis}",
+year = "2008",
+month = aug,
+day = "25",
+doi = "10.1007/978-3-540-85762-4_6",
+language = "Undefined",
+isbn = "978-3-540-85761-7",
+series = "Lecture Notes in Computer Science",
+publisher = "Springer",
+number = "Supplement",
+pages = "81--95",
+editor = "J.S. Fitzgerald and A.E. Haxthausen and H. Yenigun",
+booktitle = "Theoretical Aspects of Computing - ICTAC 2008",
+}
+
+@misc{Meijer2014,
+          author = {J.J.G. {Meijer}},
+           title = {Improving Reachability Analysis in Ltsmin - Guards, Read, Write and Copy Dependencies for mcrl2, Promela and Dve},
+            year = {2014},
+           month = {March},
+             url = {http://essay.utwente.nl/64834/},
+        abstract = {To improve symbolic reachability analysis in the model checking toolset LTSmin, we present two improve-
+ments to existing reachability algorithms. LTSmin uses a disjunctive partitioning scheme to efficiently
+analyze models of asynchronous systems. In these models transitions can be partitioned into groups,
+which modify only a small part of the state vector. Currently, there are no well defined notions, for
+whether a transition group reads and/or writes to an element in the state vector, which can be used in
+symbolic algorithms. Therefore, we present new definitions for read and write dependencies and show
+how algorithms can exploit these. This improvement always results in faster state space generation and
+many models such as 1-safe Petri nets highly benefit of these changes. A major issue we solved to sepa-
+rate dependencies correctly is that we had to cope with copying values. We provide examples that were
+intractable for LTSmin before, but can now be computed in a matter of minutes.
+A transition in a model specification is often of the form ?if condition(x1,...,xn) =? A . X(x1?,...,xn?)?.
+Our second improvement divides the condition into multiple conjuncts. These conjuncts can then be
+evaluated separately. Symbolic algorithms can exploit this information and prevent computing successors
+for large sets of states for only one conjunct evaluation. This greatly speeds up state space generation for
+models such as Sokoban or dining philosophers. We provide examples that show a speedup ranging from
+twice as fast to hundreds of times faster. An important issue in algorithms that exploit guard-splitting
+is that they need to support a ternary logic for the evaluation of guards. This is due to the fact that a
+guard can not only evaluate to true or false, but also to ?maybe?. Consider for example a term rewriting
+system that splits the term someterm ? false and rewrites both conjuncts individually.
+We present clear benchmarking results in the form of scatter plots with time and memory usage as well
+as tables with detailed information about the size of the data structures. We make some important
+assumptions such as on the completeness of model specifications. We use these assumptions and the
+benchmarking results to validate our work.}
+}
+
+@article{DBLP:journals/sttt/DijkP17,
+  author    = {Tom van Dijk and
+               Jaco van de Pol},
+  title     = {Sylvan: multi-core framework for decision diagrams},
+  journal   = {Int. J. Softw. Tools Technol. Transf.},
+  volume    = {19},
+  number    = {6},
+  pages     = {675--696},
+  year      = {2017},
+  url       = {https://doi.org/10.1007/s10009-016-0433-2},
+  doi       = {10.1007/s10009-016-0433-2},
+  timestamp = {Thu, 02 Apr 2020 08:37:22 +0200},
+  biburl    = {https://dblp.org/rec/journals/sttt/DijkP17.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}

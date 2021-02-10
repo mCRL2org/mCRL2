@@ -1,0 +1,633 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{fullpage}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage[noend]{algpseudocode}
+\usepackage{multicol}
+\usepackage{xspace}
+\usepackage{stmaryrd}
+\usepackage{graphicx}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+
+\newcommand{\var}[1]{\ensuremath{\textit{#1}}}
+
+\newcommand{\emptylist}{\ensuremath{[\:]}}
+
+\title{Symbolic Reachability using LDDs}
+\author{Wieger Wesselink}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+In this document we describe a symbolic reachability algorithm that uses list decision diagrams (LDDs) to store states and transitions.
+It is based on the work in \cite{MeijerBlomPol2008} and \cite{Meijer2019}.
+
+\subsection{Definitions}
+Let $S$ be a set of states, and $R \subseteq S \times S$ a transition relation. There is a transition from $x$ to $y$ if $(x,y) \in R$.
+
+\noindent
+We assume that the set of states $S$ is a Cartesian product
+
+\[
+S = S_1 \times \ldots \times S_m
+\]
+
+\noindent
+In other words, states are vectors of $m$ elements. \\
+
+\begin{definition}
+The domain of a relation $R$ is defined as
+\[
+\textsf{domain}(R) = \{ x \in S \mid \exists y \in S:  (x,y) \in R \}
+\]
+\end{definition}
+
+\begin{definition}
+The function \textsf{next} returns the successors of an element $x \in S$:
+\[
+\textsf{next}(R, x) = \{ y \in S \mid (x,y) \in R \}
+\]
+It can be lifted to a subset $X \subseteq S$ using
+\[
+\textsf{next}(R, X) = \cup \{ \textsf{next}(R, x) \mid x \in X \}
+\]
+\end{definition}
+
+\begin{definition}
+The set of reachable states that can be reached from an initial state $x \in S$ is defined as
+\[
+    \textsf{reachable\_states}(R, x) = \{ y \in S \mid \exists n \geq 0: (x, y) \in R^n \}
+\]
+\end{definition}
+
+\section{Read, write and copy parameters}
+
+In \cite{DBLP:conf/hvc/MeijerKBP14} three types of dependencies for the parameters of a relation are distinguished: \emph{read dependence} (whether the value of a parameter influences transitions), \emph{must-write dependence} (whether a parameter
+is written to), and \emph{may-write dependence} (whether a parameter may be written to, depending on the value of some other parameter). The may-write versus must-write distinction is introduced for arrays, that do not exist in mCRL2. So for our use
+cases may- and must-write dependence coincide, and we will refer to it as
+\emph{write dependence} instead.
+
+\vspace{0.5cm}
+\noindent
+Before we formalize the notions \emph{read independent} and \emph{write independent}, it is important to understand the application that they are used for. We assume that we have a sparse relation $R$ that is defined as a set of pairs $(x,y)$ with $x,y \in S$.
+Our goal is to define the notions read and write independent such that the values of read and write independent parameters are not needed for the successor computation of $R$. So for the values $x_i,y_i$ corresponding to a read independent parameter $d_i$ we do not need to store value $x_i$, and for the values corresponding to a write independent parameter we do not need to store the value $y_i$.
+
+In order to satisfy these requirements we define a
+read independent parameter as a parameter whose value is always copied ($y_i = x_i$), or mapped to a constant value ($y_i = c$). However, this is not enough for being able to discard the value of such a parameter. In addition, the corresponding transition has
+to be enabled for any value in its domain. We define a write independent parameter as a parameter whose value is always copied  ($y_i = x_i$).
+
+\begin{definition}
+For a vector $x = [x_1, \ldots, x_m] \in S$ we define the following notation for updating the element at position $i$ with value $y \in S_i$:
+\[
+x[i=y] = [x_1, \ldots, x_{i-1}, y, x_{i+1}, \ldots, x_m]
+\]
+We lift this definition to a set as follows.
+Let $I = \{ i_1, \ldots i_k \}$ with $1 \leq i_1 < \ldots < i_k \leq m$ be a set of parameter indices, and
+$y \in S_{i_1} \times \ldots \times S_{i_k}$. Then
+\[
+x[I = y] = z \text{ with } z_r = 
+  \left\{
+    \begin{array}{ll}
+         x_r & \text{if } r \notin I \\
+         y_r & \text{otherwise}
+    \end{array}
+  \right. 
+\]
+\end{definition}
+
+\begin{definition}
+\[
+\textsf{always\_copy}(R, i) = 
+  (\forall (x, y) \in R: x_i = y_i) \land
+  (\forall (x, y) \in R, d \in S_i: (x[i=d], y[i=d]) \in R)
+\]
+\end{definition}
+
+\begin{definition}
+\[
+\textsf{always\_constant}(R, i) = 
+  (\exists d \in S_i: \forall (x, y) \in R: y_i = d) \land
+  (\forall (x, y) \in R, d \in S_i: (x[i=d], y) \in R)
+\]
+\end{definition}
+
+\begin{definition}
+\[
+\textsf{read\_independent}(R, i) = 
+\textsf{always\_copy}(R, i) \lor \textsf{always\_constant}(R, i)
+\]
+\end{definition}
+
+\begin{definition}
+\[
+\textsf{write\_independent}(R, i) = 
+  \forall (x, y) \in R: x_i = y_i
+\]
+\end{definition}
+
+\noindent
+Note that our definitions differ slightly from the ones in \cite{DBLP:conf/hvc/MeijerKBP14},
+but they are equivalent. To illustrate these definitions, consider the
+following example. 
+
+\begin{example}
+Let $S = \mathbb{N} \times \mathbb{N} \times \mathbb{N}$ and let $R$ be a relation on the variables $x_1$, $x_2$ and
+$x_3$ defined by the statement
+
+\[
+\textsf{if } x_3 > 4 \textsf{ then begin } x_2 := 3 \textsf{ end}
+\]
+In this case $x_1$ is both read and write independent, $x_2$ is 
+read independent, and $x_3$ is write independent. Even though the
+value of $x_3$ is always copied, we do not consider it read independent. This is because for values $x_3 \leq 4$ the transition is not enabled,
+and this information would be lost if we discard those values from
+the transition relation. Now instead of storing the transition
+$((1,2,5), (1,3,5))$, we only need to store $((5),(3))$ to be able
+to derive that a transition from $(1,2,5)$ to $(1,3,5)$ is possible.
+\end{example}
+
+\noindent
+Read and write parameters are defined using
+
+\begin{definition}
+\[
+\textsf{read}(R, i) = 
+\neg \textsf{read\_independent}(R, i)
+\]
+\end{definition}
+
+\begin{definition}
+\[
+\textsf{write}(R, i) = \neg \textsf{write\_independent}(R, i)
+\]
+\end{definition}
+
+\begin{definition}
+\[
+\textsf{read\_parameters}(R) = \{ i \mid \textsf{read}(R, i) \}
+\]
+\end{definition}
+
+\begin{definition}
+\[
+\textsf{write\_parameters}(R) = \{ i \mid \textsf{write}(R, i) \}
+\]
+\end{definition}
+
+\vspace{0.5cm}
+\noindent
+Now let us consider an mCRL2 summand $P$ of the following shape:
+\[
+P(d) = c(d) \rightarrow a(f(d)) . P(g(d))
+\]
+
+\noindent
+For such a summand \cite{DBLP:conf/hvc/MeijerKBP14} defines the following approximations of read and write parameters:
+\[
+\textsf{read}_s(P, i) =
+\begin{array}{ll}
+d_i \in \textsf{freevars}(c(d)) & \lor \\
+(d_i \in \textsf{freevars}(g_i(d)) \land d_i \neq g_i(d)) & \lor \\   
+\exists 1 \leq k \leq m: (d_i \in \textsf{freevars}(g_k(d)) \land i \neq k)   
+\end{array}
+\]
+
+\[
+\textsf{write}_s(P, i) = (d_i \neq g_i)
+\]
+
+\vspace{0.5cm}
+\noindent
+Indeed we have $\textsf{read}_s(P, i) \Rightarrow \textsf{read}(P, i)$ and
+$\textsf{write}_s(P, i) \Rightarrow \textsf{write}(P, i)$.
+
+\newpage
+\section{List Decision Diagrams}
+
+A List Decision Diagram (LDD) is a DAG. It has two types of leaf nodes, \textsf{false} and \textsf{true}, or 0 and 1. The third type of node has a label $a$ and two successors \var{down} and \var{right}, or $=$ and $>$.
+An LDD represents a set of lists, as follows:
+
+\begin{equation*}
+\begin{array}{lll}
+  \llbracket \textsf{false} \rrbracket & = & \emptyset \\
+  \llbracket \textsf{true} \rrbracket & = & \{ \emptylist \} \\
+  \llbracket \textsf{node}(v, \var{down}, \var{right}) \rrbracket & = & 
+    \{ vx \mid x \in \llbracket \var{down} \rrbracket \} \cup \llbracket \var{right} \rrbracket
+\end{array}
+\end{equation*}
+
+\noindent
+In \cite{MeijerBlomPol2008} an LDD is defined as
+
+\begin{definition}
+A List decision diagram (LDD) is a
+directed acyclic graph with the following properties:
+\begin{enumerate}
+    \item There is a single root node and two terminal nodes 0 and 1.
+    \item Each non-terminal node $p$ is labeled with a value $v$, denoted by $val(p) = v$,
+and has two outgoing edges labeled $=$ and $>$ that point to nodes denoted by
+$p[x_i = v]$ and $p[x_i > v]$.
+    \item For all non-terminal nodes $p$, $p[x_i = v] \neq 0$ and $p[x_i > v] \neq 1$.
+    \item For all non-terminal nodes $p$, $val(p[x_i > v]) > v$.
+    \item There are no duplicate nodes.
+ \end{enumerate}
+\end{definition}
+
+\noindent
+LDDs are well suited to store lists that differ in only a few positions.
+Consider the transition relation $R$ on $S = \mathbb{N}^{10}$ with initial state
+$x = [0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0]$, that is defined by
+
+\[
+\textsf{if } x_5 > 0 \textsf{ then begin } x_5 := x_5 - 1; x_6 := x_6 + 1 \textsf{ end}
+\]
+
+Clearly this is a sparse relation with $\textsf{used}(R) = \{ 5, 6 \}$. The state space
+consists of 11 states that differ only in the 5th and 6th parameter. It can be compactly
+represented using an LDD, see the figure below. For our applications we use the LDD implementation that is part of the Sylvan multi-core framework for decision diagrams, see
+\cite{DBLP:journals/sttt/DijkP17}.
+
+\includegraphics[width=15cm]{ldd_if_then.pdf}
+
+\newpage
+\section{Reachability}
+
+\subsection{Computing the set of reachable states}
+A straightforward algorithm to compute the set of reachable states from an initial state
+$x \in S$ is the following.
+
+\begin{algorithm}[ht]
+\caption{Reachability}
+\label{alg:reachability}
+\begin{algorithmic}[1]
+\Function{ReachableStates}{$R$, $x$}
+\State $\var{visited} := \{ x \}$
+\State $\var{todo} := \{ x \}$
+\While {$\var{todo} \neq \emptyset$}
+    \State $\var{todo} := \textsf{next}(R, \var{todo}) \setminus \var{visited}$
+    \State $\var{visited} := \var{visited} \cup \var{todo}$
+\EndWhile
+\State \Return \var{visited}
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\noindent
+There are two bottlenecks in this algorithm. First of all the set \var{visited} may be large and therefore consume a lot of memory. Second, the computation of \textsf{next}(R, \var{todo}) may become 
+expensive once \var{todo} becomes large.
+
+\subsection{Reachability with learning}
+To reduce the memory usage, we store the sets $visited$ and $todo$ using LDDs. It is not always feasible to store the entire transition relation $R$ using LDDs, because it may be huge or even have infinite size. To deal with this, we only store the subset $L$ of $R$ that is necessary for the reachability computation in an LDD. The relation $L$ is computed (learned) on the fly.
+
+\begin{algorithm}[ht]
+\caption{Reachability with learning}
+\label{alg:reachability}
+\begin{algorithmic}[1]
+\Function{ReachableStates}{$R$, $x$}
+\State $\var{visited} := \{ x \}$
+\State $\var{todo} := \{ x \}$
+\State $L := \emptyset$ \Comment{$L$ is the learned relation}
+\While {$\var{todo} \neq \emptyset$}
+    \State $L := L \cup \{ (x,y) \in R \mid x \in \var{todo} \} $ \Comment{This operation is expensive}
+    \State $\var{todo} := \textsf{next}(L, \var{todo}) \setminus \var{visited}$ \Comment{This operation is cheap}
+    \State $\var{visited} := \var{visited} \cup \var{todo}$
+\EndWhile
+\State \Return \var{visited}
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\newpage
+\subsection{Reachability of a sparse relation}
+
+Suppose that we have a sparse relation $R$, i.e. the number of read and write parameters is small. In that case we can use projections to increase the efficiency. \\
+
+\begin{definition}
+The projection of a state $x \in S$ with respect to a set of parameter indices $\{ i_1, \ldots i_k \}$ with $1 \leq i_1 < \ldots < i_k \leq m$ is defined as
+\[
+\textsf{project}(x, \{ i_1, \ldots, i_k \} ) = (x_{i_1}, \ldots, x_{i_k})
+\]
+
+\noindent
+We lift this to a relation $R$ with read parameter indices $I_r$ and write parameter indices $I_w$ as follows:
+
+\[
+\textsf{project}(R, I_r, I_w) = \{ (\textsf{project}(x,I_r), \textsf{project}(y,I_w)) \mid (x,y) \in R \}
+\]
+\end{definition}
+
+\noindent
+The application of a projected relation to an unprojected state is defined using the function \textsf{relprod}. The Sylvan function \textsf{relprod} implements this, or something similar.
+
+\begin{definition}
+Let $R$ be a relation with read parameter indices $I_r$ and write parameter indices $I_w$, let $x \in S$ and let
+ $\hat{R} = \textsf{project}(R, I_r, I_w)$. Then we define
+
+\[
+    \textsf{relprod}(\hat{R}, x, I_r, I_w) =
+        \{ 
+          x[I_w = \hat{y}] \mid \textsf{project}(x, I_r) = \hat{x} \land 
+          (\hat{x}, \hat{y}) \in \hat{R}
+        \}
+\]
+\end{definition}
+
+\begin{algorithm}[h]
+\caption{Reachability of a sparse relation using projections}
+\label{alg:reachability3}
+\begin{algorithmic}[1]
+\Function{ReachableStates}{$R$, $x$}
+\State $\var{visited} := \{ x \}$
+\State $\var{todo} := \{ x \}$
+\State $L := \emptyset$ \Comment{$L$ is a projected relation}
+\State $I_r, I_w := \textsf{read\_parameters}(R), \textsf{write\_parameters}(R)$
+\While {$\var{todo} \neq \emptyset$}
+    \State $L := L \cup \textsf{project}(\{ (x,y) \in R \mid x \in \var{todo} \}, I_r, I_w) $  \label{line:r_successors}
+    \State $\var{todo} := \textsf{relprod}(L, \var{todo}, I_r, I_w) \setminus \var{visited}$ 
+    \State $\var{visited} := \var{visited} \cup \var{todo}$
+\EndWhile
+\State \Return \var{visited}
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\noindent
+In this new version of the algorithm, the computation of the successors in line \ref{line:r_successors} is still the bottleneck:
+
+\[
+L := L \cup \textsf{project}(\{ (x,y) \in R \mid x \in \var{todo} \}, I_r, I_w)
+\]
+
+\noindent
+An important observation is that the same result can be obtained by applying the projected relation to the projected arguments:
+
+\[
+L := L \cup \{ (x,y) \in \textsf{project}(R, I_r, I_w) \mid x \in \textsf{project}(\var{todo}, I_r) \}
+\]
+
+\noindent
+For our applications, the set $\textsf{project}(\var{todo}, I_r \cup I_w) \}$ is typically much smaller than $\var{todo}$, which means that a lot of duplicate successor computations in line \ref{line:r_successors} are avoided.
+
+\newpage
+\subsection{Reachability of a union of sparse relations}
+
+We now consider a relation $R$ that is the union of a number of sparse relations. Examples of these sparse relations are the summands of an LPS or of a PBES in SRF format.
+
+\[
+R = \bigcup_{i=1}^{n} R_i
+\]
+
+\begin{algorithm}[h]
+\caption{Reachability of a union of sparse relations}
+\label{alg:reachability3}
+\begin{algorithmic}[1]
+\Function{ReachableStates}{$\{R_1, \ldots, R_n\}$, $x$}
+\State $\var{visited} := \{ x \}$
+\State $\var{todo} := \{ x \}$
+\For {$1 \leq i \leq n$}
+    \State $L_i := \emptyset$
+    \State $I_{r,i}, I_{w,i} := \textsf{read\_parameters}(R_i), \textsf{write\_parameters}(R_i)$
+\EndFor
+\While {$\var{todo} \neq \emptyset$}
+    \For {$1 \leq i \leq n$}
+        \State $L_i := L_i \cup \{ (x,y) \in \textsf{project}(R_i, I_{r,i}, I_{w,i}) \mid x \in \textsf{project}(\var{todo}, I_{r,i})  \setminus \textsf{domain}(L_i) \}$
+    \EndFor
+    \State $\var{todo} := \left( \bigcup\limits_{i=1}^n \textsf{relprod}(L_i, \var{todo}, I_r, I_w) \right) \setminus \var{visited}$
+    \State $\var{visited} := \var{visited} \cup \var{todo}$
+\EndWhile
+\State \Return \var{visited}
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+\noindent
+Note that in line 9 another optimization has been applied, by excluding elements in the projected todo list that are already in the domain of $L_i$.
+
+\subsection{Joining relations}
+If two or more of the relations $R_i$ have approximately the same set of read and write parameters, it can be beneficial to join them into one relation. In \cite{Meijer2019} this is called combining transition groups. 
+In order to
+determine how well two relations match, we define a bit pattern for a relation that contains the read and write information of the parameters.
+
+\begin{definition}
+The read write pattern of a relation $R$ is defined as
+\[
+\textsf{read\_write\_pattern}(R) = [r_1, w_1, \ldots, r_m, w_m]
+\]
+with
+\[
+  r_i = \textsf{read}(R, i) \text{ and } w_i = \textsf{write}(R, i) \hspace{1cm} (1 \leq i \leq m)
+\]
+\end{definition}
+For two read write patterns $p$ and $q$, we define $p \lor q$ as the bitwise or of both patterns. In other words, if $r = p \lor q$, then $r_i = p_i \lor q_i ~ (1 \leq i \leq 2m)$. Similarly we say that $p \leq q$ iff $p_i \leq q_i$ for $1 \leq i \leq 2m$.
+
+\begin{example}
+Let $S = \mathbb{N} \times \mathbb{N}$ and let $T$ and $U$ be relations on the variables $x$, $y$. Let $T$ be defined by 
+$(x,y) \rightarrow (x + 1, x)$
+and let $U$ be defined by
+$x, y := x + 2, y$.
+In this case $x$ is a read independent parameter in both $T$ and $U$, but according to the definition $x$ is not a read independent parameter of 
+$T \cup U$.
+Hence $\textsf{read\_write\_pattern}(T) = 1101$,
+$\textsf{read\_write\_pattern}(U) = 1100$, and
+$\textsf{read\_write\_pattern}(T \cup U) = 1111$. 
+\end{example}
+
+\subsubsection{Row subsumption}
+In \cite{Meijer2019} a notion called \emph{row subsumption} is
+introduced for joining relations. This notion is based on an extension to the theory, which ensures that the following property holds for two relations $T$ and $U$:
+
+\begin{equation} \label{bitwise_or}
+\textsf{read\_write\_pattern}(T \cup U) = \textsf{read\_write\_pattern}(T) \lor \textsf{read\_write\_pattern}(U)
+\end{equation}
+
+\noindent
+It works as follows. Suppose we have a transition $(x, y) \in T$, and let $L$ be the projected transition relation corresponding to $T \cup U$. Then we insert the special value $\blacktriangle$ in $L$ for all entries of $y$ that correspond to a copy parameter of $T$ (i.e. with read write values 00). The meaning of this special value is that the corresponding parameter will not be overwritten by $L$. The 
+
+This is achieved by using
+$\textsf{relprod}^\blacktriangle$ instead of \textsf{relprod}, which is
+defined as follows:
+
+\[
+x[I = y]^\blacktriangle = z \text{ with } z_r = 
+  \left\{
+    \begin{array}{ll}
+         x_r & \text{if } r \notin I \text{ or } y_r = \blacktriangle \\
+         y_r & \text{otherwise}
+    \end{array}
+  \right. 
+\]
+
+\[
+    \textsf{relprod}^\blacktriangle(\hat{R}, x, I_r, I_w) =
+        \{ 
+          x[I_w = \hat{y}]^\blacktriangle \mid \textsf{project}(x, I_r) = \hat{x} \land 
+          (\hat{x}, \hat{y}) \in \hat{R}
+        \}
+\]
+
+N.B. In the Sylvan \textsf{relprod} function this functionality is implemented in a slightly different way, using a concept called 'copy nodes'. It requires that the matrix $L$ is assembled using the function \textsf{union\_cube\_copy} instead of \textsf{union\_cube}.  
+
+\subsection{An algorithm for partitioning a union of relations}
+In this section we sketch an approach for making a partition of a union of relations $R = \bigcup_{i=1}^n R_i$ that is based on property \ref{bitwise_or}. The goal is to create groups of relations $R_i$ that have approximately the same read write patterns. The main idea is that each group of the partition can be characterized by a read write pattern.
+
+\vspace{0.5cm}
+\noindent
+If we choose $K$ read write patterns $p_1, \ldots, p_K$ such that
+\[
+\bigvee\limits_{k=1}^K p_k = \textsf{read\_write\_pattern}(R)
+\]
+and
+\[
+\forall 1 \leq i \leq n: \exists 1 \leq k \leq K: \textsf{read\_write\_pattern}(R_i) \leq p_k
+\]
+then we can define $K$ groups by assigning relation $R_i$ to group $k$ if $\textsf{read\_write\_pattern}(R_i) \leq p_k$. Note that a
+relation $R_i$ can match multiple read write patterns $p_k$, but in that case an arbitrary pattern may be chosen.
+
+\vspace{0.5cm}
+\noindent
+A heuristic for selecting suitable patterns $p_k$ is to choose them such that both
+\[
+\sum\limits_{1 \leq k \leq K} \textsf{bitcount}(p_k)
+\]
+and
+\[
+\sum\limits_{1 \leq k < l \leq K} \textsf{bitcount}(p_k \land p_l)
+\]
+are small. For example an SMT solver might be used to determine them.
+
+\newpage
+\section{Application: LPS Reachability}
+Consider the following untimed linear process specification $P$, with initial state $d_0$.
+\[
+\begin{array}{l}
+P(d: D)=
+\sum\limits_{i\in I}\sum\limits_{e_i}c_i(d, e_i)\rightarrow a_i(f_i(d,e_i)) \cdot P(g_i(d,e_i))
+\end{array}
+\]
+
+\noindent
+Each summand $i \in I$ defines a transition relation $R_i$ characterized by
+
+\[
+\left\{
+\begin{array}{ll}
+    e_i & \text{a sequence of summation variables} \\
+    c_i(d, e_i) & \text{a condition} \\
+    a_i(f_i(d,e_i)) & \text{a transition label} \\
+    g_i(d,e_i) & \text{the successor states} \\
+\end{array}
+\right.
+\]
+
+\vspace{0.5cm}
+\noindent
+The set of states is $D$, which is naturally defined as a
+Cartesian product
+
+\[
+D = D_1 \times \ldots \times D_m
+\]
+
+In order to apply the reachability algorithm, we need the following ingredients:
+
+\begin{center}
+\label{table:ingredients}
+\begin{tabular}{ |l|l| }
+\hline
+$\{ (x,y) \in R_i \mid x \in todo \}$ & enumerate solutions of condition \\
+conversion between states and LDDs & map values to integers \\
+$\textsf{read\_parameters}(R_i)$ & syntactic analysis \\
+$\textsf{write\_parameters}(R_i)$ & syntactic analysis \\
+$\textsf{project}(R_i, I_{r,i}, I_{w,i})$ & discard unused parameters \\
+$\textsf{project}(\var{todo}, I_{r,i} \cup I_{w,i})$ & \textsf{project} (Sylvan function) \\
+$\textsf{relprod}(L_i, \var{todo}, I_r, I_w)$ & \textsf{relprod} (Sylvan function) \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent
+For a summand of the shape $R_i = c_i \rightarrow a_i(f_i) \cdot P(g_i)$ we will now define the read and write dependencies.
+
+\[
+\textsf{read}(R_i, j) = 
+d_j \in \textsf{freevars}(c_i) \lor
+\exists 1 \leq k \leq m: (d_j \in \textsf{freevars}(g_{i,k}) \land (d_k \neq d_j \lor g_{i,j} \neq d_j))
+\]
+
+\[
+\textsf{write}(R_i, j) = (d_j \neq g_{i,j})
+\]
+
+\newpage
+\section{Application: PBES Reachability}
+
+\begin{definition}
+A parameterised Boolean equation system (PBES) is a sequence of equations as defined by the following grammar:
+\[
+\mathcal{E} ::= \emptyset \mid (\mu X(d:D) = \varphi) \mathcal{E} \mid (\mu X(d:D) = \varphi) \mathcal{E}
+\]
+\end{definition}
+where $\emptyset$ is the empty PBES, $\mu$ and $\nu$ denote the least and greatest fixpoint operator, respectively, and $X \in \chi$ is a predicate
+variable of sort $D \rightarrow B$. The right-hand side $\varphi$ is a syntactically monotone predicate formula. Lastly, $d \in V$ is a parameter of
+sort $D$.
+
+\begin{definition}
+Let $\mathcal{E}$ be a PBES. Then $\mathcal{E}$ is in standard recursive form (SRF) iff for all ($\sigma_i X_i(d:D) = \varphi) \in \mathcal{E}$, where
+$\varphi$ is either disjunctive or conjunctive, i.e., the equation for $X_i$ has the shape
+\[
+  \sigma_i X_i(d:D) = \bigvee\limits_{j \in J_i} \exists e_j: E_j . f_{ij}(d,e_j) \land X_{g_{ij}}(h_{ij}(d, e_j))
+\]
+or
+\[
+  \sigma_i X_i(d:D) = \bigwedge\limits_{j \in J_i} \forall e_j: E_j . f_{ij}(d,e_j) \land X_{g_{ij}}(h_{ij}(d, e_j)),
+\]
+where $d = (d_1, \ldots, d_m)$.
+\end{definition}
+
+\subsection{PBES Reachability}
+We will now define reachability for a PBES.
+The set of states is $S = \{ X_i(d) \mid 1 \leq i \leq n \land d \in D \}$.
+Each summand $(i,j)$ with $j \in J_i$ defines a transition relation $R_{ij}$ that is characterized by the parameters
+
+\[
+\left\{
+\begin{array}{ll}
+    \sigma_i & \text{a fixpoint symbol} \\
+    e_j & \text{a sequence of quantifier variables} \\
+    (X = X_i) \land f_{ij}(d,e_j) & \text{a condition} \\
+    X_{g_{ij}}(h_{ij}(d, e_j)) & \text{the successor states,} \\
+\end{array}
+\right.
+\]
+where $X(d)$ is the current state.
+
+In order to apply the reachability algorithm, we need the following ingredients (exactly the same as for LPSs):
+
+\begin{center}
+\label{table:ingredients}
+\begin{tabular}{ |l|l| }
+\hline
+$\{ (x,y) \in R_i \mid x \in todo \}$ & enumerate solutions of condition \\
+conversion between states and LDDs & map values to integers \\
+$\textsf{read\_parameters}(R_i)$ & syntactic analysis \\
+$\textsf{write\_parameters}(R_i)$ & syntactic analysis \\
+$\textsf{project}(R_i, I_{r,i}, I_{w,i})$ & discard unused parameters \\
+$\textsf{project}(\var{todo}, I_{r,i} \cup I_{w,i})$ & \textsf{project} (Sylvan function) \\
+$\textsf{relprod}(L_i, \var{todo}, I_r, I_w)$ & \textsf{relprod} (Sylvan function) \\
+\hline
+\end{tabular}
+\end{center}
+
+\newpage
+\bibliographystyle{plain}
+\bibliography{symbolic-reachability}
+\end{document}
