@@ -227,7 +227,7 @@ class state_data_type: public pins_data_type
     std::string serialize(int i) const override
     {
       data::data_expression e = index2expression(i);
-      atermpp::aterm t = data::detail::remove_index(static_cast<atermpp::aterm>(e));
+      atermpp::aterm t = data::detail::remove_index(static_cast<atermpp::aterm&>(e));
       return pp(t);
     }
 

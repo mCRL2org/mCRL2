@@ -82,7 +82,7 @@ struct hash<mcrl2::core::identifier_string>
 {
   std::size_t operator()(const mcrl2::core::identifier_string& x) const
   {
-    return std::hash<atermpp::aterm>()(static_cast<atermpp::aterm>(x));
+    return std::hash<atermpp::aterm>()(static_cast<const atermpp::aterm&>(x));
   }
 };
 

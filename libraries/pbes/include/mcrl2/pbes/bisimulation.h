@@ -180,7 +180,7 @@ class bisimulation_algorithm
     /// \return The created propositional variable
     propositional_variable_instantiation var(const core::identifier_string& name, const data::variable_list& parameters) const
     {
-      return propositional_variable_instantiation(name, atermpp::down_cast<data::data_expression_list>(static_cast<atermpp::aterm>(parameters)));
+      return propositional_variable_instantiation(name, atermpp::down_cast<data::data_expression_list>(static_cast<const atermpp::aterm&>(parameters)));
     }
 
     /// \brief Creates a propositional variable.
