@@ -15,6 +15,7 @@ if (UNIX)
   list(APPEND MCRL2_TOOLS pbesbddsolve)
   list(APPEND MCRL2_TOOLS lpsreach)
   list(APPEND MCRL2_TOOLS pbesreach)
+  list(APPEND MCRL2_TOOLS pbessolvesymbolic)
 endif (UNIX)
 
 # N.B. Some developer tools are needed for the random tests.

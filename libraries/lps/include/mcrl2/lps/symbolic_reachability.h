@@ -318,7 +318,7 @@ struct summand_group
     data::data_expression condition;
     data::variable_list variables; // the summand variables
     std::vector<data::data_expression> next_state; // the projected next state vector
-    std::vector<int> copy; // indices of only-write nodes that need to be ignored
+    std::vector<int> copy; // copy node information that is needed by sylvan::ldds::relprod
 
     summand(const data::data_expression& condition_, const data::variable_list& variables_, const std::vector<data::data_expression>& next_state_, const std::vector<int>& copy_)
       : condition(condition_), variables(variables_), next_state(next_state_), copy(copy_)
@@ -501,6 +501,13 @@ sylvan::ldds::ldd alternative_relprod(const sylvan::ldds::ldd& todo, const summa
   }
   return result;
   // return relprod(todo, R.L, R.Ir);
+}
+
+// A very inefficient implementation of relprev, that matches the specification closely
+sylvan::ldds::ldd alternative_relprev(const sylvan::ldds::ldd& todo, const summand_group& R, const sylvan::ldds::ldd& V)
+{
+  // TODO: implement this
+  return todo;
 }
 
 std::vector<data::data_expression> ldd2state(const std::vector<data_expression_index>& data_index, const std::vector<std::uint32_t>& x)

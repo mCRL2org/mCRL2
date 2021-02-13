@@ -133,8 +133,6 @@ struct summand_group: public lps::summand_group
   }
 };
 
-// void learn_successors_callback(WorkerP*, Task*, std::uint32_t* v, std::size_t n, void* context = nullptr);
-
 class lpsreach_algorithm
 {
   using ldd = sylvan::ldds::ldd;
@@ -146,7 +144,7 @@ class lpsreach_algorithm
   protected:
     const lps::symbolic_reachability_options& m_options;
     data::rewriter m_rewr;
-    mutable data::mutable_indexed_substitution<> m_sigma;
+    data::mutable_indexed_substitution<> m_sigma;
     data::enumerator_identifier_generator m_id_generator;
     data::enumerator_algorithm<> m_enumerator;
     data::variable_list m_process_parameters;

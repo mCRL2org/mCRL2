@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file pbesreach.cpp
+/// \file pbessolvesymbolic.cpp
 
 #include <chrono>
 #include <iomanip>
@@ -21,7 +21,7 @@ using namespace mcrl2;
 using data::tools::rewriter_tool;
 using utilities::tools::input_output_tool;
 
-class pbesreach_tool: public rewriter_tool<input_output_tool>
+class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
 {
   typedef rewriter_tool<input_output_tool> super;
 
@@ -56,7 +56,6 @@ class pbesreach_tool: public rewriter_tool<input_output_tool>
       desc.add_option("no-write", "do not discard only-write parameters");
       desc.add_option("no-relprod", "use an inefficient alternative version of relprod (for debugging)");
       desc.add_option("groups", utilities::make_optional_argument("GROUPS", ""), "a list of summand groups separated by semicolons, e.g. '0; 1 3 4; 2 5");
-      desc.add_option("total", "make the SRF PBES total", 't');
     }
 
     void parse_options(const utilities::command_line_parser& parser) override
@@ -70,7 +69,7 @@ class pbesreach_tool: public rewriter_tool<input_output_tool>
       options.no_discard_write                      = parser.has_option("no-write");
       options.no_relprod                            = parser.has_option("no-relprod");
       options.summand_groups                        = parser.option_argument("groups");
-      options.make_total           = parser.has_option("total");
+      options.make_total                            = true; // This is a required setting
       if (parser.has_option("lace-workers"))
       {
         lace_n_workers = parser.option_argument_as<int>("lace-workers");
@@ -102,17 +101,21 @@ class pbesreach_tool: public rewriter_tool<input_output_tool>
     }
 
   public:
-    pbesreach_tool()
-      : super("pbesreach",
+    pbessolvesymbolic_tool()
+      : super("pbessolvesymbolic",
               "Wieger Wesselink",
-              "applies a symbolic reachability algorithm to a PBES",
-              "read a PBES from INFILE and write output to OUTFILE. If OUTFILE "
-              "is not present, stdout is used. If INFILE is not present, stdin is used."
+              "Solves a PBES using symbolic data structures",
+              "Solves PBES from INFILE. "
+              "If INFILE is not present, stdin is used. "
+              "The PBES is first instantiated into a parity game, "
+              "which is then solved using Zielonka's algorithm. "
              )
     {}
 
     bool run() override
     {
+      using namespace sylvan::ldds;
+
       lace_init(lace_n_workers, lace_dqsize);
       lace_startup(lace_stacksize, nullptr, nullptr);
       sylvan::sylvan_set_sizes(1LL<<min_tablesize, 1LL<<max_tablesize, 1LL<<min_cachesize, 1LL<<max_cachesize);
@@ -128,8 +131,28 @@ class pbesreach_tool: public rewriter_tool<input_output_tool>
         throw mcrl2::runtime_error("PBESses without parameters are not supported");
       }
 
-      pbes_system::pbesreach_algorithm algorithm(pbesspec, options);
-      algorithm.run();
+      pbes_system::pbesreach_algorithm reach(pbesspec, options);
+      ldd V = reach.run();
+      ldd init = reach.initial_state();
+
+      std::vector<std::size_t> rank;
+      std::set<std::size_t> even;
+      pbes_system::pbes_equation_index equation_index(reach.pbes());
+      std::size_t i = 0;
+      for (const auto& equation: reach.pbes().equations())
+      {
+        rank.push_back(equation_index.rank(equation.variable().name()));
+        if (!equation.is_conjunctive())
+        {
+          even.insert(i);
+        }
+        i++;
+      }
+      pbes_system::symbolic_pbessolve_algorithm solver(V, reach.process_parameters().size(), reach.summand_groups(), rank, even);
+      timer().start("solving");
+      bool result = solver.solve(V, init);
+      timer().finish("solving");
+      std::cout << (result ? "true" : "false") << std::endl;
 
       sylvan::sylvan_quit();
       lace_exit();
@@ -139,5 +162,5 @@ class pbesreach_tool: public rewriter_tool<input_output_tool>
 
 int main(int argc, char* argv[])
 {
-  return pbesreach_tool().execute(argc, argv);
+  return pbessolvesymbolic_tool().execute(argc, argv);
 }
