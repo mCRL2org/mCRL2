@@ -56,6 +56,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       desc.add_option("no-write", "do not discard only-write parameters");
       desc.add_option("no-relprod", "use an inefficient alternative version of relprod (for debugging)");
       desc.add_option("groups", utilities::make_optional_argument("GROUPS", ""), "a list of summand groups separated by semicolons, e.g. '0; 1 3 4; 2 5");
+      desc.add_hidden_option("srf", utilities::make_optional_argument("NAME", ""), "save the preprocessed PBES in SRF format");
     }
 
     void parse_options(const utilities::command_line_parser& parser) override
@@ -70,6 +71,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       options.no_relprod                            = parser.has_option("no-relprod");
       options.summand_groups                        = parser.option_argument("groups");
       options.make_total                            = true; // This is a required setting
+      options.srf                                   = parser.option_argument("srf");
       if (parser.has_option("lace-workers"))
       {
         lace_n_workers = parser.option_argument_as<int>("lace-workers");

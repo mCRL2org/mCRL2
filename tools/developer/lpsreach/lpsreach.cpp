@@ -234,7 +234,7 @@ class lpsreach_algorithm
       }
     }
 
-    void run()
+    ldd run()
     {
       using namespace sylvan::ldds;
       auto& R = m_summand_groups;
@@ -283,6 +283,13 @@ class lpsreach_algorithm
 
       elapsed_seconds = std::chrono::steady_clock::now() - start;
       std::cout << "number of states = " << satcount(visited) << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)" << std::endl;
+
+      return visited;
+    }
+
+    const std::vector<summand_group>& summand_groups() const
+    {
+      return m_summand_groups;
     }
 };
 
@@ -321,6 +328,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       desc.add_option("no-write", "do not discard only-write parameters");
       desc.add_option("no-relprod", "use an inefficient alternative version of relprod (for debugging)");
       desc.add_option("groups", utilities::make_optional_argument("GROUPS", ""), "a list of summand groups separated by semicolons, e.g. '0; 1 3 4; 2 5");
+      desc.add_hidden_option("test", "test the successor/predecessor computations");
     }
 
     void parse_options(const utilities::command_line_parser& parser) override
@@ -333,6 +341,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       options.no_discard_read                       = parser.has_option("no-read");
       options.no_discard_write                      = parser.has_option("no-write");
       options.no_relprod                            = parser.has_option("no-relprod");
+      options.test                                  = parser.has_option("test");
       options.summand_groups                        = parser.option_argument("groups");
       if (parser.has_option("lace-workers"))
       {
@@ -376,6 +385,8 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
 
     bool run() override
     {
+      using namespace sylvan::ldds;
+
       lace_init(lace_n_workers, lace_dqsize);
       lace_startup(lace_stacksize, nullptr, nullptr);
       sylvan::sylvan_set_sizes(1LL<<min_tablesize, 1LL<<max_tablesize, 1LL<<min_cachesize, 1LL<<max_cachesize);
@@ -394,7 +405,12 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       }
 
       lpsreach_algorithm algorithm(lpsspec, options);
-      algorithm.run();
+      ldd V = algorithm.run();
+
+      if (options.test)
+      {
+        lps::test_successor_predecessor(algorithm.summand_groups(), V);
+      }
 
       sylvan::sylvan_quit();
       lace_exit();

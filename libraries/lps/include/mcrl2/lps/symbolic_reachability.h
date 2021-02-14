@@ -12,6 +12,9 @@
 #ifndef MCRL2_LPS_SYMBOLIC_REACHABILITY_H
 #define MCRL2_LPS_SYMBOLIC_REACHABILITY_H
 
+#include <algorithm>
+#include <iterator>
+#include <random>
 #include <sylvan_ldd.hpp>
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/undefined.h"
@@ -47,6 +50,17 @@ std::vector<std::vector<std::uint32_t>> ldd_solutions(const sylvan::ldds::ldd& x
 {
   std::vector<std::vector<std::uint32_t>> result;
   sat_all(x, ldd_solutions_callback, &result);
+  return result;
+}
+
+inline
+ldd make_ldd(const std::vector<std::vector<std::uint32_t>>& V)
+{
+  ldd result = empty_set();
+  for (const auto& v: V)
+  {
+    result = union_cube(result, v);
+  }
   return result;
 }
 
@@ -145,6 +159,7 @@ struct symbolic_reachability_options
   bool no_discard_read = false;
   bool no_discard_write = false;
   bool no_relprod = false;
+  bool test = false;
   std::string summand_groups;
 };
 
@@ -159,6 +174,7 @@ std::ostream& operator<<(std::ostream& out, const symbolic_reachability_options&
   out << "no-read = " << std::boolalpha << options.no_discard_read << std::endl;
   out << "no-write = " << std::boolalpha << options.no_discard_write << std::endl;
   out << "no-relprod = " << std::boolalpha << options.no_relprod << std::endl;
+  out << "test = " << std::boolalpha << options.test << std::endl;
   out << "groups = " << options.summand_groups << std::endl;
   return out;
 }
@@ -741,6 +757,55 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t n,
     data::remove_assignments(sigma, smd.variables);
   }
   data::remove_assignments(sigma, group.read_parameters);
+}
+
+template <typename SummandGroup>
+void test_successor_predecessor(const std::vector<SummandGroup>& R, const sylvan::ldds::ldd& V, bool no_relprod = false)
+{
+  using namespace sylvan::ldds;
+
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  
+  // returns a random value n: low <= n <= high
+  auto random = [&](std::uint32_t low, std::uint32_t high)
+  {
+    std::uniform_int_distribution<std::uint32_t> dist(low, high);
+    return dist(mt);
+  };
+  
+  auto succ = [&](const ldd& U)
+  {
+    ldd V = empty_set();
+    for (std::size_t i = 0; i < R.size(); i++)
+    {
+      V = no_relprod ? union_(V, alternative_relprod(U, R[i])) : relprod_union(U, R[i].L, R[i].Ir, V);
+    }
+    return V;
+  };
+
+  auto pred = [&](const ldd& U, const ldd& V)
+  {
+    ldd W = empty_set();
+    for (std::size_t i = 0; i < R.size(); i++)
+    {
+      W = no_relprod ? union_(W, alternative_relprev(U, R[i], V)) : union_(W, relprev(U, R[i].L, R[i].Ir, V));
+    }
+    return W;
+  };
+
+  auto solutions = ldd_solutions(V);
+  std::vector<std::vector<std::uint32_t>> U_elements;
+  std::size_t n = random(1, solutions.size() - 1);
+  std::sample(solutions.begin(), solutions.end(), std::back_inserter(U_elements), n, mt);
+  ldd U = make_ldd(U_elements); // U is a random subset of V
+  if (pred(U, succ(U)) != U)
+  {
+    std::cout << "U = " << print_ldd(U) << std::endl;
+    std::cout << "succ(U) = " << print_ldd(succ(U)) << std::endl;
+    std::cout << "pred(U, succ(U)) = " << print_ldd(pred(U, succ(U))) << std::endl;
+    throw mcrl2::runtime_error("test_successor_predecessor failed!");
+  }
 }
 
 } // namespace lps

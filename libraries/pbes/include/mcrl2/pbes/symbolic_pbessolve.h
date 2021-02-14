@@ -46,8 +46,7 @@ class symbolic_pbessolve_algorithm
   typedef sylvan::ldds::ldd ldd;
 
   protected:
-    ldd m_all_nodes; // the set of nodes of the parity game
-    ldd m_V[2]; // m_V_[0] is the set of even nodes, m_V_[1] is the set of odd nodes
+    ldd m_V[2]; // m_V[0] is the set of even nodes, m_V[1] is the set of odd nodes
     const std::vector<summand_group>& m_summand_groups;
     const std::vector<std::size_t>& m_rank;
     std::map<std::size_t, ldd> m_rank_map;
@@ -61,7 +60,7 @@ class symbolic_pbessolve_algorithm
       const std::vector<std::size_t>& rank, // rank[i] is the rank of equation i
       const std::set<std::size_t>& even // the indices of the even equations
     )
-      : m_all_nodes(V), m_summand_groups(summand_groups), m_rank(rank)
+      : m_summand_groups(summand_groups), m_rank(rank)
     {
       using namespace sylvan::ldds;
       using utilities::detail::contains;
@@ -75,7 +74,7 @@ class symbolic_pbessolve_algorithm
       {
         I_values.push_back(i == 0 ? 0 : 1);
       }
-      ldd V1 = project(V, cube(I_values)); // The LDD m_V without the first layer
+      ldd V1 = project(V, cube(I_values)); // The LDD V without the first layer
       for (std::size_t i = 0; i < n; i++)
       {
         ldd P_i = intersect(V, node(i, V1)); // TODO: can this be implemented using sylvan::ldds::match?
@@ -102,31 +101,24 @@ class symbolic_pbessolve_algorithm
       }
     }
 
-    std::pair<vertex_set, vertex_set> solve_recursive(const vertex_set& V, const vertex_set& A)
-    {
-      using namespace sylvan::ldds;
-      return solve_recursive(minus(V, A));
-    }
-
-    ldd predecessors(const ldd& U)
+    // returns { u in U | exists v in V: u -> v }
+    ldd predecessors(const ldd& U, const ldd& V)
     {
       using namespace sylvan::ldds;
       const auto& R = m_summand_groups;
-      const auto& V = m_all_nodes;
 
       ldd result = empty_set();
       for (std::size_t i = 0; i < R.size(); i++)
       {
-        ldd prev_i = m_no_relprod ? lps::alternative_relprev(U, R[i], V) : relprev(U, R[i].L, R[i].Ir, V);
+        ldd prev_i = m_no_relprod ? lps::alternative_relprev(V, R[i], U) : relprev(V, R[i].L, R[i].Ir, U);
         result = union_(result, prev_i);
       }
       return result;
     }
 
-    ldd attractor(std::size_t alpha, const ldd& U)
+    ldd attractor(const ldd& U, std::size_t alpha, const ldd& V)
     {
       using namespace sylvan::ldds;
-      const ldd& V = m_all_nodes;
       const ldd* V_ = m_V;
 
       ldd X = empty_set();
@@ -134,8 +126,8 @@ class symbolic_pbessolve_algorithm
       while (X != X_)
       {
         X = X_;
-        ldd X1 = intersect(V_[alpha], predecessors(X_));
-        ldd X2 = intersect(V_[1 - alpha], minus(V, predecessors(minus(V, X_))));
+        ldd X1 = intersect(V_[alpha], predecessors(V, X_));
+        ldd X2 = intersect(V_[1 - alpha], minus(V, predecessors(V, minus(V, X_))));
         X_ = union_(X_, union_(X1, X2));
       }
       return X;
@@ -162,10 +154,9 @@ class symbolic_pbessolve_algorithm
     }
 
     // pre: V does not contain nodes with decoration true or false.
-    std::pair<vertex_set, vertex_set> solve_recursive(const vertex_set& V)
+    std::pair<vertex_set, vertex_set> zielonka(const vertex_set& V)
     {
       using namespace sylvan::ldds;
-      mCRL2log(log::debug) << "\n  --- solve_recursive input ---\n" << V << std::endl;
 
       if (V == empty_set())
       {
@@ -176,11 +167,11 @@ class symbolic_pbessolve_algorithm
 
       std::size_t alpha = m % 2; // 0 = disjunctive, 1 = conjunctive
 
-      vertex_set W[2] = { empty_set(), empty_set() };
+      vertex_set W[2];
       vertex_set W_1[2];
 
-      vertex_set A = attractor(alpha, U);
-      std::tie(W_1[0], W_1[1]) = solve_recursive(V, A);
+      vertex_set A = attractor(U, alpha, V);
+      std::tie(W_1[0], W_1[1]) = zielonka(minus(V, A));
 
       // Original Zielonka version
       if (W_1[1 - alpha] == empty_set())
@@ -190,14 +181,15 @@ class symbolic_pbessolve_algorithm
       }
       else
       {
-        vertex_set B = attractor(1 - alpha, W_1[1 - alpha]);
-        std::tie(W[0], W[1]) = solve_recursive(V, B);
+        vertex_set B = attractor(W_1[1 - alpha], 1 - alpha, V);
+        std::tie(W[0], W[1]) = zielonka(minus(V, B));
         W[1 - alpha] = union_(W[1 - alpha], B);
       }
 
-      mCRL2log(log::debug) << "\n  --- solution for solve_recursive input ---\n" << V << std::endl;
+      mCRL2log(log::debug) << "\n  --- solution for zielonka input ---\n" << V << std::endl;
       mCRL2log(log::debug) << "   W0 = " << W[0] << std::endl;
       mCRL2log(log::debug) << "   W1 = " << W[1] << std::endl;
+      assert(union_(W[0], W[1]) == V);
       return { W[0], W[1] };
     }
 
@@ -208,21 +200,19 @@ class symbolic_pbessolve_algorithm
 
       mCRL2log(log::verbose) << "Solving parity game..." << std::endl;
       mCRL2log(log::debug) << V << std::endl;
-      auto [W0, W1] = solve_recursive(V);
-      bool is_disjunctive;
+      auto [W0, W1] = zielonka(V);
       if (includes(W0, initial_vertex))
       {
-        is_disjunctive = true;
+        return true;
       }
       else if (includes(W1, initial_vertex))
       {
-        is_disjunctive = false;
+        return false;
       }
       else
       {
-        throw mcrl2::runtime_error("No solution found!!!");
+        throw mcrl2::runtime_error("No solution found!");
       }
-      return is_disjunctive;
     }
 };
 

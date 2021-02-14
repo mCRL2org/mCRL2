@@ -56,6 +56,7 @@ data::data_specification construct_propositional_variable_data_specification(con
 struct symbolic_reachability_options: public lps::symbolic_reachability_options
 {
   bool make_total = false;
+  std::string srf;
 };
 
 inline
@@ -379,6 +380,11 @@ class pbesreach_algorithm
 
       elapsed_seconds = std::chrono::steady_clock::now() - start;
       std::cout << "number of states = " << satcount(visited) << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)" << std::endl;
+
+      if (!m_options.srf.empty())
+      {
+        detail::save_pbes(m_pbes.to_pbes(), m_options.srf);
+      }
 
       return visited;
     }
