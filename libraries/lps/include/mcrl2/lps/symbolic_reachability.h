@@ -306,6 +306,11 @@ class data_expression_index
     {
       return i < m_values.size();
     }
+
+    const std::vector<data::data_expression>& values() const
+    {
+      return m_values;
+    }
 };
 
 inline

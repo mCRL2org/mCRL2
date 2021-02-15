@@ -57,10 +57,30 @@ std::string print_pbes_info(const srf_pbes& pbesspec)
 
 // print the subgraph U of V
 template <typename SummandGroup>
-std::string print_graph(const sylvan::ldds::ldd& U, const sylvan::ldds::ldd& V, const std::vector<SummandGroup>& R, const std::vector<lps::data_expression_index>& data_index)
+std::string print_graph(
+  const sylvan::ldds::ldd& U,
+  const sylvan::ldds::ldd& V,
+  const std::vector<SummandGroup>& R,
+  const std::vector<lps::data_expression_index>& data_index,
+  const sylvan::ldds::ldd& V0, // disjunctive nodes
+  const sylvan::ldds::ldd& V1, // conjunctive nodes
+  const std::map<std::size_t, sylvan::ldds::ldd>& rank_map // maps rank to the corresponding set of nodes
+)
 {
   using namespace sylvan::ldds;
   using utilities::detail::contains;
+
+  auto rank = [&](const ldd& u)
+  {
+    for (const auto& [r, U]: rank_map)
+    {
+      if (includes(U, u))
+      {
+        return r;
+      }
+    }
+    throw mcrl2::runtime_error("print_graph: could not find a rank");
+  };
 
   auto index = [](const std::vector<ldd>& v, const ldd& x)
   {
@@ -103,7 +123,6 @@ std::string print_graph(const sylvan::ldds::ldd& U, const sylvan::ldds::ldd& V, 
     ldd u = U_values[i];
     std::size_t u_index = index(V_values, u);
 
-    std::string state = print_state(data_index, U_solutions[i]);
     ldd W = succ(u);
     auto [W_values, W_solutions] = values(W);
     std::vector<std::uint32_t> u_successors;
@@ -114,14 +133,14 @@ std::string print_graph(const sylvan::ldds::ldd& U, const sylvan::ldds::ldd& V, 
         u_successors.push_back(index(V_values, w));
       }
     }
-    text[i] = std::to_string(u_index) + " " + state + " successors = " + core::detail::print_list(u_successors);
+    text[i] = std::to_string(u_index) + " " + print_state(data_index, U_solutions[i]) + ", decoration = " + (includes(V0, u) ? "disjunctive" : "conjunctive") + ", rank = " + std::to_string(rank(u)) + ", successors = " + core::detail::print_list(u_successors);
   }
   return utilities::string_join(text, "\n");
 }
 
 // print the indices of U (subset of V)
 template <typename SummandGroup>
-std::string print_solution(const sylvan::ldds::ldd& W0, const sylvan::ldds::ldd& W1, const sylvan::ldds::ldd& V, const std::vector<SummandGroup>& R, const std::vector<lps::data_expression_index>& data_index)
+std::string print_nodes(const sylvan::ldds::ldd& U, const sylvan::ldds::ldd& V, const std::vector<SummandGroup>& R, const std::vector<lps::data_expression_index>& data_index)
 {
   using namespace sylvan::ldds;
 
@@ -147,20 +166,14 @@ std::string print_solution(const sylvan::ldds::ldd& W0, const sylvan::ldds::ldd&
   };
 
   auto [V_values, V_solutions] = values(V);
-  auto [W0_values, W0_solutions] = values(W0);
-  auto [W1_values, W1_solutions] = values(W1);
+  auto [U_values, W0_solutions] = values(U);
 
-  std::vector<std::size_t> w0;
-  std::vector<std::size_t> w1;
-  for (const ldd& w: W0_values)
+  std::vector<std::size_t> u;
+  for (const ldd& x: U_values)
   {
-    w0.push_back(index(V_values, w));
+    u.push_back(index(V_values, x));
   }
-  for (const ldd& w: W1_values)
-  {
-    w1.push_back(index(V_values, w));
-  }
-  return "W0 = " + core::detail::print_set(w0) + "\nW1 = " + core::detail::print_set(w1);
+  return core::detail::print_set(u);
 }
 
 class symbolic_pbessolve_algorithm
@@ -170,7 +183,6 @@ class symbolic_pbessolve_algorithm
   protected:
     ldd m_V[2]; // m_V[0] is the set of even nodes, m_V[1] is the set of odd nodes
     const std::vector<summand_group>& m_summand_groups;
-    const std::vector<std::size_t>& m_rank;
     std::map<std::size_t, ldd> m_rank_map;
     bool m_no_relprod = false;
 
@@ -182,12 +194,11 @@ class symbolic_pbessolve_algorithm
       const ldd& V,
       std::size_t m, // the number of parameters
       const std::vector<summand_group>& summand_groups,
-      const std::vector<std::size_t>& rank, // rank[i] is the rank of equation i
-      const std::set<std::size_t>& disjunctive, // the indices of the disjunctive equations
+      const std::map<std::size_t, std::pair<std::size_t, bool>>& equation_info, // maps ldd values to (rank, is_disjunctive)
       bool no_relprod,
       const std::vector<lps::data_expression_index>& data_index
     )
-      : m_summand_groups(summand_groups), m_rank(rank), m_no_relprod(no_relprod), m_data_index(data_index), m_all_nodes(V)
+      : m_summand_groups(summand_groups), m_no_relprod(no_relprod), m_data_index(data_index), m_all_nodes(V)
     {
       using namespace sylvan::ldds;
       using utilities::detail::contains;
@@ -195,35 +206,29 @@ class symbolic_pbessolve_algorithm
       m_V[0] = empty_set();
       m_V[1] = empty_set();
 
-      std::size_t n = rank.size();
       std::vector<std::uint32_t> I_values;
-      for (std::uint32_t i = 0; i < m; i++)
-      {
-        I_values.push_back(i == 0 ? 0 : 1);
-      }
-      ldd V1 = project(V, cube(I_values)); // The LDD V without the first layer
-      for (std::size_t i = 0; i < n; i++)
-      {
-        ldd P_i = intersect(V, node(i, V1)); // TODO: can this be implemented using sylvan::ldds::match?
 
-        std::size_t rank_i = m_rank[i];
-        auto j = m_rank_map.find(rank_i);
+      // Construct m_rank_map in a very inefficient manner.
+      // TODO: implement this using Sylvan
+      for (const auto& v_values: ldd_solutions(V))
+      {
+        auto [rank, is_disjunctive] = equation_info.at(v_values[0]);
+        auto j = m_rank_map.find(rank);
         if (j == m_rank_map.end())
         {
-          m_rank_map[rank_i] = P_i;
+          m_rank_map[rank] = cube(v_values);
         }
         else
         {
-          j->second = union_(j->second, P_i);
+          j->second = union_cube(j->second, v_values);
         }
-
-        if (contains(disjunctive, i))
+        if (is_disjunctive)
         {
-          m_V[0] = union_(m_V[0], P_i);
+          m_V[0] = union_cube(m_V[0], v_values);
         }
         else
         {
-          m_V[1] = union_(m_V[1], P_i);
+          m_V[1] = union_cube(m_V[1], v_values);
         }
       }
     }
@@ -298,6 +303,7 @@ class symbolic_pbessolve_algorithm
       vertex_set W_1[2];
 
       vertex_set A = attractor(U, alpha, V);
+      mCRL2log(log::debug) << "A = attractor(" << print_nodes(U, m_all_nodes, m_summand_groups, m_data_index) << ", " << print_nodes(V, m_all_nodes, m_summand_groups, m_data_index) << ") = " << print_nodes(A, m_all_nodes, m_summand_groups, m_data_index) << std::endl;
       std::tie(W_1[0], W_1[1]) = zielonka(minus(V, A));
 
       // Original Zielonka version
@@ -309,12 +315,14 @@ class symbolic_pbessolve_algorithm
       else
       {
         vertex_set B = attractor(W_1[1 - alpha], 1 - alpha, V);
+        mCRL2log(log::debug) << "B = attractor(" << print_nodes(W_1[1 - alpha], m_all_nodes, m_summand_groups, m_data_index) << ", " << print_nodes(V, m_all_nodes, m_summand_groups, m_data_index) << ") = " << print_nodes(B, m_all_nodes, m_summand_groups, m_data_index) << std::endl;
         std::tie(W[0], W[1]) = zielonka(minus(V, B));
         W[1 - alpha] = union_(W[1 - alpha], B);
       }
 
-      mCRL2log(log::debug) << "\n  --- zielonka solution for ---\n" << print_graph(V, m_all_nodes, m_summand_groups, m_data_index) << std::endl;
-      mCRL2log(log::debug) << print_solution(W[0], W[1], m_all_nodes, m_summand_groups, m_data_index) << std::endl;
+      mCRL2log(log::debug) << "\n  --- zielonka solution for ---\n" << print_graph(V, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_V[1], m_rank_map) << std::endl;
+      mCRL2log(log::debug) << "W0 = " << print_nodes(W[0], m_all_nodes, m_summand_groups, m_data_index) << std::endl;
+      mCRL2log(log::debug) << "W1 = " << print_nodes(W[1], m_all_nodes, m_summand_groups, m_data_index) << std::endl;
       assert(union_(W[0], W[1]) == V);
       return { W[0], W[1] };
     }
@@ -324,7 +332,7 @@ class symbolic_pbessolve_algorithm
     {
       using namespace sylvan::ldds;
 
-      mCRL2log(log::debug) << "\n--- apply zielonka to ---\n" << print_graph(V, m_all_nodes, m_summand_groups, m_data_index) << std::endl;
+      mCRL2log(log::debug) << "\n--- apply zielonka to ---\n" << print_graph(V, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_V[1], m_rank_map) << std::endl;
       auto [W0, W1] = zielonka(V);
       if (includes(W0, initial_vertex))
       {
