@@ -161,6 +161,7 @@ struct symbolic_reachability_options
   bool no_relprod = false;
   bool test = false;
   std::string summand_groups;
+  std::string dot_file;
 };
 
 inline
@@ -176,6 +177,7 @@ std::ostream& operator<<(std::ostream& out, const symbolic_reachability_options&
   out << "no-relprod = " << std::boolalpha << options.no_relprod << std::endl;
   out << "test = " << std::boolalpha << options.test << std::endl;
   out << "groups = " << options.summand_groups << std::endl;
+  out << "dot = " << options.dot_file << std::endl;
   return out;
 }
 

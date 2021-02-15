@@ -59,6 +59,7 @@ class pbesreach_tool: public rewriter_tool<input_output_tool>
       desc.add_option("total", "make the SRF PBES total", 't');
       desc.add_hidden_option("test", "test the successor/predecessor computations");
       desc.add_hidden_option("srf", utilities::make_optional_argument("NAME", ""), "save the preprocessed PBES in SRF format");
+      desc.add_hidden_option("dot", utilities::make_optional_argument("NAME", ""), "print the LDD of the parity game in dot format");
     }
 
     void parse_options(const utilities::command_line_parser& parser) override
@@ -76,6 +77,7 @@ class pbesreach_tool: public rewriter_tool<input_output_tool>
       options.test                                  = parser.has_option("test");
       options.srf                                   = parser.option_argument("srf");
       options.rewrite_strategy                      = rewrite_strategy();
+      options.dot_file                              = parser.option_argument("dot");
       if (parser.has_option("lace-workers"))
       {
         lace_n_workers = parser.option_argument_as<int>("lace-workers");
@@ -141,6 +143,11 @@ class pbesreach_tool: public rewriter_tool<input_output_tool>
       if (options.test)
       {
         lps::test_successor_predecessor(algorithm.summand_groups(), V, options.no_relprod);
+      }
+
+      if (!options.dot_file.empty())
+      {
+        print_dot(options.dot_file, V);
       }
 
       sylvan::sylvan_quit();
