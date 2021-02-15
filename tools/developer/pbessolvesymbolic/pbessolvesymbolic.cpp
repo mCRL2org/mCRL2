@@ -56,6 +56,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       desc.add_option("no-write", "do not discard only-write parameters");
       desc.add_option("no-relprod", "use an inefficient alternative version of relprod (for debugging)");
       desc.add_option("groups", utilities::make_optional_argument("GROUPS", ""), "a list of summand groups separated by semicolons, e.g. '0; 1 3 4; 2 5");
+      desc.add_hidden_option("test", "test the successor/predecessor computations");
       desc.add_hidden_option("srf", utilities::make_optional_argument("NAME", ""), "save the preprocessed PBES in SRF format");
     }
 
@@ -71,6 +72,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       options.no_relprod                            = parser.has_option("no-relprod");
       options.summand_groups                        = parser.option_argument("groups");
       options.make_total                            = true; // This is a required setting
+      options.test                                  = parser.has_option("test");
       options.srf                                   = parser.option_argument("srf");
       if (parser.has_option("lace-workers"))
       {
@@ -138,7 +140,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       ldd init = reach.initial_state();
 
       std::vector<std::size_t> rank;
-      std::set<std::size_t> even;
+      std::set<std::size_t> disjunctive;
       pbes_system::pbes_equation_index equation_index(reach.pbes());
       std::size_t i = 0;
       for (const auto& equation: reach.pbes().equations())
@@ -146,15 +148,20 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
         rank.push_back(equation_index.rank(equation.variable().name()));
         if (!equation.is_conjunctive())
         {
-          even.insert(i);
+          disjunctive.insert(i);
         }
         i++;
       }
-      pbes_system::symbolic_pbessolve_algorithm solver(V, reach.process_parameters().size(), reach.summand_groups(), rank, even);
+      pbes_system::symbolic_pbessolve_algorithm solver(V, reach.process_parameters().size(), reach.summand_groups(), rank, disjunctive, options.no_relprod);
       timer().start("solving");
       bool result = solver.solve(V, init);
       timer().finish("solving");
       std::cout << (result ? "true" : "false") << std::endl;
+
+      if (options.test)
+      {
+        lps::test_successor_predecessor(reach.summand_groups(), V, options.no_relprod);
+      }
 
       sylvan::sylvan_quit();
       lace_exit();

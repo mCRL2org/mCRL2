@@ -520,10 +520,21 @@ sylvan::ldds::ldd alternative_relprod(const sylvan::ldds::ldd& todo, const summa
 }
 
 // A very inefficient implementation of relprev, that matches the specification closely
-sylvan::ldds::ldd alternative_relprev(const sylvan::ldds::ldd& todo, const summand_group& R, const sylvan::ldds::ldd& V)
+sylvan::ldds::ldd alternative_relprev(const sylvan::ldds::ldd& Y, const summand_group& R, const sylvan::ldds::ldd& X)
 {
-  // TODO: implement this
-  return todo;
+  using namespace sylvan::ldds;
+
+  ldd result = empty_set();
+  for (const std::vector<std::uint32_t>& x_values: ldd_solutions(X))
+  {
+    ldd x = cube(x_values);
+    ldd y = alternative_relprod(x, R);
+    if (intersect(y, Y) != empty_set())
+    {
+      result = union_(result, x);
+    }
+  }
+  return result;
 }
 
 std::vector<data::data_expression> ldd2state(const std::vector<data_expression_index>& data_index, const std::vector<std::uint32_t>& x)
@@ -776,28 +787,29 @@ void test_successor_predecessor(const std::vector<SummandGroup>& R, const sylvan
   
   auto succ = [&](const ldd& U)
   {
-    ldd V = empty_set();
+    ldd result = empty_set();
     for (std::size_t i = 0; i < R.size(); i++)
     {
-      V = no_relprod ? union_(V, alternative_relprod(U, R[i])) : relprod_union(U, R[i].L, R[i].Ir, V);
+      result = no_relprod ? union_(result, alternative_relprod(U, R[i])) : relprod_union(U, R[i].L, R[i].Ir, result);
     }
-    return V;
+    return result;
   };
 
+  // Returns { u in U | exists v in V: u -> v }
   auto pred = [&](const ldd& U, const ldd& V)
   {
-    ldd W = empty_set();
+    ldd result = empty_set();
     for (std::size_t i = 0; i < R.size(); i++)
     {
-      W = no_relprod ? union_(W, alternative_relprev(U, R[i], V)) : union_(W, relprev(U, R[i].L, R[i].Ir, V));
+      result = no_relprod ? union_(result, alternative_relprev(V, R[i], U)) : union_(result, relprev(V, R[i].L, R[i].Ir, U));
     }
-    return W;
+    return result;
   };
 
-  auto solutions = ldd_solutions(V);
+  std::vector<std::vector<std::uint32_t>> V_elements = ldd_solutions(V);
+  std::size_t n = random(1, V_elements.size() - 1);
   std::vector<std::vector<std::uint32_t>> U_elements;
-  std::size_t n = random(1, solutions.size() - 1);
-  std::sample(solutions.begin(), solutions.end(), std::back_inserter(U_elements), n, mt);
+  std::sample(V_elements.begin(), V_elements.end(), std::back_inserter(U_elements), n, mt);
   ldd U = make_ldd(U_elements); // U is a random subset of V
   if (pred(U, succ(U)) != U)
   {

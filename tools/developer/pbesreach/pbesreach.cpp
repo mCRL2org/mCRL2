@@ -55,9 +55,10 @@ class pbesreach_tool: public rewriter_tool<input_output_tool>
       desc.add_option("no-read", "do not discard only-read parameters");
       desc.add_option("no-write", "do not discard only-write parameters");
       desc.add_option("no-relprod", "use an inefficient alternative version of relprod (for debugging)");
-      desc.add_hidden_option("test", "test the successor/predecessor computations");
       desc.add_option("groups", utilities::make_optional_argument("GROUPS", ""), "a list of summand groups separated by semicolons, e.g. '0; 1 3 4; 2 5");
       desc.add_option("total", "make the SRF PBES total", 't');
+      desc.add_hidden_option("test", "test the successor/predecessor computations");
+      desc.add_hidden_option("srf", utilities::make_optional_argument("NAME", ""), "save the preprocessed PBES in SRF format");
     }
 
     void parse_options(const utilities::command_line_parser& parser) override
@@ -70,9 +71,10 @@ class pbesreach_tool: public rewriter_tool<input_output_tool>
       options.no_discard_read                       = parser.has_option("no-read");
       options.no_discard_write                      = parser.has_option("no-write");
       options.no_relprod                            = parser.has_option("no-relprod");
-      options.test                                  = parser.has_option("test");
       options.summand_groups                        = parser.option_argument("groups");
-      options.make_total           = parser.has_option("total");
+      options.make_total                            = parser.has_option("total");
+      options.test                                  = parser.has_option("test");
+      options.srf                                   = parser.option_argument("srf");
       if (parser.has_option("lace-workers"))
       {
         lace_n_workers = parser.option_argument_as<int>("lace-workers");
@@ -137,7 +139,7 @@ class pbesreach_tool: public rewriter_tool<input_output_tool>
 
       if (options.test)
       {
-        lps::test_successor_predecessor(algorithm.summand_groups(), V);
+        lps::test_successor_predecessor(algorithm.summand_groups(), V, options.no_relprod);
       }
 
       sylvan::sylvan_quit();

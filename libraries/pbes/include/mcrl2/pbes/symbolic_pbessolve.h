@@ -38,7 +38,7 @@ inline
 bool includes(const sylvan::ldds::ldd& U, const sylvan::ldds::ldd& V)
 {
   using namespace sylvan::ldds;
-  return intersect(U, V) == V;
+  return union_(U, V) == U;
 }
 
 class symbolic_pbessolve_algorithm
@@ -58,9 +58,10 @@ class symbolic_pbessolve_algorithm
       std::size_t m, // the number of parameters
       const std::vector<summand_group>& summand_groups,
       const std::vector<std::size_t>& rank, // rank[i] is the rank of equation i
-      const std::set<std::size_t>& even // the indices of the even equations
+      const std::set<std::size_t>& disjunctive, // the indices of the disjunctive equations
+      bool no_relprod
     )
-      : m_summand_groups(summand_groups), m_rank(rank)
+      : m_summand_groups(summand_groups), m_rank(rank), m_no_relprod(no_relprod)
     {
       using namespace sylvan::ldds;
       using utilities::detail::contains;
@@ -90,7 +91,7 @@ class symbolic_pbessolve_algorithm
           j->second = union_(j->second, P_i);
         }
 
-        if (contains(even, i))
+        if (contains(disjunctive, i))
         {
           m_V[0] = union_(m_V[0], P_i);
         }
@@ -126,8 +127,8 @@ class symbolic_pbessolve_algorithm
       while (X != X_)
       {
         X = X_;
-        ldd X1 = intersect(V_[alpha], predecessors(V, X_));
-        ldd X2 = intersect(V_[1 - alpha], minus(V, predecessors(V, minus(V, X_))));
+        ldd X1 = intersect(intersect(V, V_[alpha]), predecessors(V, X_));
+        ldd X2 = intersect(intersect(V, V_[1 - alpha]), minus(V, predecessors(V, minus(V, X_))));
         X_ = union_(X_, union_(X1, X2));
       }
       return X;

@@ -409,7 +409,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
 
       if (options.test)
       {
-        lps::test_successor_predecessor(algorithm.summand_groups(), V);
+        lps::test_successor_predecessor(algorithm.summand_groups(), V, options.no_relprod);
       }
 
       sylvan::sylvan_quit();
