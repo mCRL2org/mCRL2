@@ -85,6 +85,22 @@ std::string print_ldd(const sylvan::ldds::ldd& x)
   return out.str();
 }
 
+// Returns { x in X | x[0] = value }
+inline
+ldd fix_first_element(const ldd& X, std::uint32_t value)
+{
+  ldd x = X;
+  while (x.value() != value)
+  {
+    x = x.right();
+    if (x == false_())
+    {
+      return empty_set();
+    }
+  }
+  return node(value, x.down());
+}
+
 } // sylvan::ldds
 
 namespace mcrl2 {

@@ -138,8 +138,10 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
         throw mcrl2::runtime_error("PBESses without parameters are not supported");
       }
 
+      timer().start("exploring");
       pbes_system::pbesreach_algorithm reach(pbesspec, options);
       ldd V = reach.run();
+      timer().finish("exploring");
       ldd init = reach.initial_state();
 
       pbes_system::pbes_equation_index equation_index(reach.pbes());

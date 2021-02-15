@@ -206,29 +206,28 @@ class symbolic_pbessolve_algorithm
       m_V[0] = empty_set();
       m_V[1] = empty_set();
 
-      std::vector<std::uint32_t> I_values;
-
-      // Construct m_rank_map in a very inefficient manner.
-      // TODO: implement this using Sylvan
-      for (const auto& v_values: ldd_solutions(V))
+      for (const auto& [value, p]: equation_info)
       {
-        auto [rank, is_disjunctive] = equation_info.at(v_values[0]);
+        auto rank = p.first;
+        auto is_disjunctive = p.second;
+        ldd X = fix_first_element(V, value);
+
         auto j = m_rank_map.find(rank);
         if (j == m_rank_map.end())
         {
-          m_rank_map[rank] = cube(v_values);
+          m_rank_map[rank] = X;
         }
         else
         {
-          j->second = union_cube(j->second, v_values);
+          j->second = union_(j->second, X);
         }
         if (is_disjunctive)
         {
-          m_V[0] = union_cube(m_V[0], v_values);
+          m_V[0] = union_(m_V[0], X);
         }
         else
         {
-          m_V[1] = union_cube(m_V[1], v_values);
+          m_V[1] = union_(m_V[1], X);
         }
       }
     }
