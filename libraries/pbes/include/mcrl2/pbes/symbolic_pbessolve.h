@@ -41,6 +41,81 @@ bool includes(const sylvan::ldds::ldd& U, const sylvan::ldds::ldd& V)
   return union_(U, V) == U;
 }
 
+inline
+std::string print_pbes_info(const srf_pbes& pbesspec)
+{
+  std::ostringstream out;
+  pbes_equation_index equation_index(pbesspec);
+  for (const auto& equation: pbesspec.equations())
+  {
+    const auto& name = equation.variable().name();
+    out << name << " rank = " << equation_index.rank(name) << " decoration = " << (equation.is_conjunctive() ? "conjunctive" : "disjunctive") << std::endl;
+  }
+  return out.str();
+}
+
+template <typename SummandGroup>
+std::string print_graph(const sylvan::ldds::ldd& V, const std::vector<SummandGroup>& R, const std::vector<lps::data_expression_index>& data_index)
+{
+  using namespace sylvan::ldds;
+
+  auto values = [](const ldd& X)
+  {
+    std::vector<ldd> result;
+    auto X_elements = ldd_solutions(X);
+    for (const auto& x: X_elements)
+    {
+      result.push_back(cube(x));
+    }
+    return std::make_pair(result, X_elements);
+  };
+
+  auto succ = [&](const ldd& U)
+  {
+    ldd result = empty_set();
+    for (std::size_t i = 0; i < R.size(); i++)
+    {
+      result = union_(result, alternative_relprod(U, R[i]));
+    }
+    return result;
+  };
+
+  std::ostringstream out;
+
+  auto [V_values, V_solutions] = values(V);
+
+  for (std::size_t i = 0; i < V_values.size(); i++)
+  {
+    std::string state = print_state(data_index, V_solutions[i]);
+    ldd W = succ(V_values[i]);
+    auto [W_values, W_solutions] = values(W);
+    std::vector<std::uint32_t> successors;
+    for (const ldd& w: W_values)
+    {
+      std::size_t j = std::find(V_values.begin(), V_values.end(), w) - V_values.begin();
+      successors.push_back(j);
+    }
+    out << i << " " << state << " successors = " << core::detail::print_list(successors) << std::endl;
+  }
+  return out.str();
+}
+
+template <typename SummandGroup>
+std::string print_nodes(const std::string& msg, const sylvan::ldds::ldd& V, const std::vector<SummandGroup>& R, const std::vector<lps::data_expression_index>& data_index)
+{
+  using namespace sylvan::ldds;
+
+  std::ostringstream out;
+  out << "--- " << msg << " ---" << std::endl;
+  for (const auto& v_values: ldd_solutions(V))
+  {
+    ldd v = cube(v_values);
+    std::string state = print_state(data_index, v_values);
+    out << state << std::endl;
+  }
+  return out.str();
+}
+
 class symbolic_pbessolve_algorithm
 {
   typedef sylvan::ldds::ldd ldd;
@@ -51,6 +126,7 @@ class symbolic_pbessolve_algorithm
     const std::vector<std::size_t>& m_rank;
     std::map<std::size_t, ldd> m_rank_map;
     bool m_no_relprod = false;
+    const std::vector<lps::data_expression_index>& m_data_index; // for debugging only
 
   public:
     symbolic_pbessolve_algorithm(
@@ -59,9 +135,10 @@ class symbolic_pbessolve_algorithm
       const std::vector<summand_group>& summand_groups,
       const std::vector<std::size_t>& rank, // rank[i] is the rank of equation i
       const std::set<std::size_t>& disjunctive, // the indices of the disjunctive equations
-      bool no_relprod
+      bool no_relprod,
+      const std::vector<lps::data_expression_index>& data_index
     )
-      : m_summand_groups(summand_groups), m_rank(rank), m_no_relprod(no_relprod)
+      : m_summand_groups(summand_groups), m_rank(rank), m_no_relprod(no_relprod), m_data_index(data_index)
     {
       using namespace sylvan::ldds;
       using utilities::detail::contains;
@@ -159,6 +236,8 @@ class symbolic_pbessolve_algorithm
     {
       using namespace sylvan::ldds;
 
+      mCRL2log(log::debug) << "\n  --- zielonka ---\n" << print_graph(V, m_summand_groups, m_data_index) << std::endl;
+
       if (V == empty_set())
       {
         return { empty_set(), empty_set() };
@@ -187,9 +266,9 @@ class symbolic_pbessolve_algorithm
         W[1 - alpha] = union_(W[1 - alpha], B);
       }
 
-      mCRL2log(log::debug) << "\n  --- solution for zielonka input ---\n" << V << std::endl;
-      mCRL2log(log::debug) << "   W0 = " << W[0] << std::endl;
-      mCRL2log(log::debug) << "   W1 = " << W[1] << std::endl;
+      mCRL2log(log::debug) << "\n  --- solution for graph ---\n" << print_graph(V, m_summand_groups, m_data_index) << std::endl;
+      mCRL2log(log::debug) << print_nodes("W0", W[0], m_summand_groups, m_data_index) << std::endl;
+      mCRL2log(log::debug) << print_nodes("W1", W[1], m_summand_groups, m_data_index) << std::endl;
       assert(union_(W[0], W[1]) == V);
       return { W[0], W[1] };
     }
@@ -199,8 +278,6 @@ class symbolic_pbessolve_algorithm
     {
       using namespace sylvan::ldds;
 
-      mCRL2log(log::verbose) << "Solving parity game..." << std::endl;
-      mCRL2log(log::debug) << V << std::endl;
       auto [W0, W1] = zielonka(V);
       if (includes(W0, initial_vertex))
       {

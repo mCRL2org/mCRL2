@@ -135,7 +135,6 @@ class solve_structure_graph_algorithm
       auto q = get_minmax_rank(G);
       std::size_t m = std::get<0>(q);
       const vertex_set& U = std::get<2>(q);
-      mCRL2log(log::debug) << " m = " << m << " U = " << U << std::endl;
 
       std::size_t alpha = m % 2; // 0 = disjunctive, 1 = conjunctive
 
@@ -173,7 +172,6 @@ class solve_structure_graph_algorithm
       vertex_set W_1[2];
 
       vertex_set A = attr_default(G, U, alpha);
-      mCRL2log(log::debug) << " A = " << A << std::endl;
       std::tie(W_1[0], W_1[1]) = solve_recursive(G, A);
 
       if (use_toms_optimization)
@@ -197,15 +195,12 @@ class solve_structure_graph_algorithm
          // Original Zielonka version
          if (W_1[1 - alpha].is_empty())
          {
-           mCRL2log(log::debug) << "EMPTY" << std::endl;
            W[alpha] = set_union(A, W_1[alpha]);
            W[1 - alpha].clear();
          }
          else
          {
-           mCRL2log(log::debug) << " Attr(" << W_1[1 - alpha] << ", " << (1-alpha) << " G = " << G << ")" << std::endl;
            vertex_set B = attr_default(G, W_1[1 - alpha], 1 - alpha);
-           mCRL2log(log::debug) << " B = " << B << std::endl;
            std::tie(W[0], W[1]) = solve_recursive(G, B);
            W[1 - alpha] = set_union(W[1 - alpha], B);
          }
@@ -557,7 +552,7 @@ class lts_solve_structure_graph_algorithm: public solve_structure_graph_algorith
 inline
 bool solve_structure_graph(structure_graph& G, bool check_strategy = false)
 {
-  bool use_toms_optimization = false;
+  bool use_toms_optimization = !check_strategy;
   solve_structure_graph_algorithm algorithm(check_strategy, use_toms_optimization);
   return algorithm.solve(G);
 }

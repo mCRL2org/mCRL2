@@ -403,6 +403,11 @@ class pbesreach_algorithm
     {
       return m_process_parameters;
     }
+
+    const std::vector<lps::data_expression_index>& data_index() const
+    {
+      return m_data_index;
+    }
 };
 
 } // namespace pbes_system
