@@ -154,12 +154,15 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       std::map<std::size_t, std::pair<std::size_t, bool>> equation_info;
       for (const auto& equation: reach.pbes().equations())
       {
-        const auto& name = equation.variable().name();
+        const core::identifier_string& name = equation.variable().name();
         std::size_t rank = equation_index.rank(name);
-        std::size_t i = equation_index.index(name);
         bool is_disjunctive = !equation.is_conjunctive();
-        std::uint32_t ldd_value = propvar_index[name];
-        equation_info[ldd_value] = { rank, is_disjunctive };
+        auto i = propvar_index.find(name);
+        if (i != propvar_index.end())
+        {
+          std::uint32_t ldd_value = i->second;
+          equation_info[ldd_value] = { rank, is_disjunctive };
+        }
       }
 
       pbes_system::symbolic_pbessolve_algorithm solver(V, reach.process_parameters().size(), reach.summand_groups(), equation_info, options.no_relprod, reach.data_index());
