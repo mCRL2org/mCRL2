@@ -19,6 +19,7 @@
 #include "mcrl2/data/substitution_utility.h"
 #include "mcrl2/lps/symbolic_reachability.h"
 #include "mcrl2/pbes/pbesreach.h"
+#include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2 {
 
@@ -54,10 +55,22 @@ std::string print_pbes_info(const srf_pbes& pbesspec)
   return out.str();
 }
 
+// print the subgraph U of V
 template <typename SummandGroup>
-std::string print_graph(const sylvan::ldds::ldd& V, const std::vector<SummandGroup>& R, const std::vector<lps::data_expression_index>& data_index)
+std::string print_graph(const sylvan::ldds::ldd& U, const sylvan::ldds::ldd& V, const std::vector<SummandGroup>& R, const std::vector<lps::data_expression_index>& data_index)
 {
   using namespace sylvan::ldds;
+  using utilities::detail::contains;
+
+  auto index = [](const std::vector<ldd>& v, const ldd& x)
+  {
+    auto i = std::find(v.begin(), v.end(), x);
+    if (i == v.end())
+    {
+      throw mcrl2::runtime_error("print_graph: index error");
+    }
+    return i - v.begin();
+  };
 
   auto values = [](const ldd& X)
   {
@@ -80,40 +93,74 @@ std::string print_graph(const sylvan::ldds::ldd& V, const std::vector<SummandGro
     return result;
   };
 
-  std::ostringstream out;
-
+  auto [U_values, U_solutions] = values(U);
   auto [V_values, V_solutions] = values(V);
 
-  for (std::size_t i = 0; i < V_values.size(); i++)
+  std::vector<std::string> text(U_values.size());
+
+  for (std::size_t i = 0; i < U_values.size(); i++)
   {
-    std::string state = print_state(data_index, V_solutions[i]);
-    ldd W = succ(V_values[i]);
+    ldd u = U_values[i];
+    std::size_t u_index = index(V_values, u);
+
+    std::string state = print_state(data_index, U_solutions[i]);
+    ldd W = succ(u);
     auto [W_values, W_solutions] = values(W);
-    std::vector<std::uint32_t> successors;
+    std::vector<std::uint32_t> u_successors;
     for (const ldd& w: W_values)
     {
-      std::size_t j = std::find(V_values.begin(), V_values.end(), w) - V_values.begin();
-      successors.push_back(j);
+      if (contains(U_values, w))
+      {
+        u_successors.push_back(index(V_values, w));
+      }
     }
-    out << i << " " << state << " successors = " << core::detail::print_list(successors) << std::endl;
+    text[i] = std::to_string(u_index) + " " + state + " successors = " + core::detail::print_list(u_successors);
   }
-  return out.str();
+  return utilities::string_join(text, "\n");
 }
 
+// print the indices of U (subset of V)
 template <typename SummandGroup>
-std::string print_nodes(const std::string& msg, const sylvan::ldds::ldd& V, const std::vector<SummandGroup>& R, const std::vector<lps::data_expression_index>& data_index)
+std::string print_solution(const sylvan::ldds::ldd& W0, const sylvan::ldds::ldd& W1, const sylvan::ldds::ldd& V, const std::vector<SummandGroup>& R, const std::vector<lps::data_expression_index>& data_index)
 {
   using namespace sylvan::ldds;
 
-  std::ostringstream out;
-  out << "--- " << msg << " ---" << std::endl;
-  for (const auto& v_values: ldd_solutions(V))
+  auto index = [](const std::vector<ldd>& v, const ldd& x)
   {
-    ldd v = cube(v_values);
-    std::string state = print_state(data_index, v_values);
-    out << state << std::endl;
+    auto i = std::find(v.begin(), v.end(), x);
+    if (i == v.end())
+    {
+      throw mcrl2::runtime_error("print_graph: index error");
+    }
+    return i - v.begin();
+  };
+
+  auto values = [](const ldd& X)
+  {
+    std::vector<ldd> result;
+    auto X_elements = ldd_solutions(X);
+    for (const auto& x: X_elements)
+    {
+      result.push_back(cube(x));
+    }
+    return std::make_pair(result, X_elements);
+  };
+
+  auto [V_values, V_solutions] = values(V);
+  auto [W0_values, W0_solutions] = values(W0);
+  auto [W1_values, W1_solutions] = values(W1);
+
+  std::vector<std::size_t> w0;
+  std::vector<std::size_t> w1;
+  for (const ldd& w: W0_values)
+  {
+    w0.push_back(index(V_values, w));
   }
-  return out.str();
+  for (const ldd& w: W1_values)
+  {
+    w1.push_back(index(V_values, w));
+  }
+  return "W0 = " + core::detail::print_set(w0) + "\nW1 = " + core::detail::print_set(w1);
 }
 
 class symbolic_pbessolve_algorithm
@@ -126,7 +173,9 @@ class symbolic_pbessolve_algorithm
     const std::vector<std::size_t>& m_rank;
     std::map<std::size_t, ldd> m_rank_map;
     bool m_no_relprod = false;
+
     const std::vector<lps::data_expression_index>& m_data_index; // for debugging only
+    ldd m_all_nodes; // for debugging only
 
   public:
     symbolic_pbessolve_algorithm(
@@ -138,7 +187,7 @@ class symbolic_pbessolve_algorithm
       bool no_relprod,
       const std::vector<lps::data_expression_index>& data_index
     )
-      : m_summand_groups(summand_groups), m_rank(rank), m_no_relprod(no_relprod), m_data_index(data_index)
+      : m_summand_groups(summand_groups), m_rank(rank), m_no_relprod(no_relprod), m_data_index(data_index), m_all_nodes(V)
     {
       using namespace sylvan::ldds;
       using utilities::detail::contains;
@@ -236,8 +285,6 @@ class symbolic_pbessolve_algorithm
     {
       using namespace sylvan::ldds;
 
-      mCRL2log(log::debug) << "\n  --- zielonka ---\n" << print_graph(V, m_summand_groups, m_data_index) << std::endl;
-
       if (V == empty_set())
       {
         return { empty_set(), empty_set() };
@@ -266,9 +313,8 @@ class symbolic_pbessolve_algorithm
         W[1 - alpha] = union_(W[1 - alpha], B);
       }
 
-      mCRL2log(log::debug) << "\n  --- solution for graph ---\n" << print_graph(V, m_summand_groups, m_data_index) << std::endl;
-      mCRL2log(log::debug) << print_nodes("W0", W[0], m_summand_groups, m_data_index) << std::endl;
-      mCRL2log(log::debug) << print_nodes("W1", W[1], m_summand_groups, m_data_index) << std::endl;
+      mCRL2log(log::debug) << "\n  --- zielonka solution for ---\n" << print_graph(V, m_all_nodes, m_summand_groups, m_data_index) << std::endl;
+      mCRL2log(log::debug) << print_solution(W[0], W[1], m_all_nodes, m_summand_groups, m_data_index) << std::endl;
       assert(union_(W[0], W[1]) == V);
       return { W[0], W[1] };
     }
@@ -278,6 +324,7 @@ class symbolic_pbessolve_algorithm
     {
       using namespace sylvan::ldds;
 
+      mCRL2log(log::debug) << "\n--- apply zielonka to ---\n" << print_graph(V, m_all_nodes, m_summand_groups, m_data_index) << std::endl;
       auto [W0, W1] = zielonka(V);
       if (includes(W0, initial_vertex))
       {
