@@ -343,6 +343,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       options.no_relprod                            = parser.has_option("no-relprod");
       options.test                                  = parser.has_option("test");
       options.summand_groups                        = parser.option_argument("groups");
+      options.rewrite_strategy                      = rewrite_strategy();
       if (parser.has_option("lace-workers"))
       {
         lace_n_workers = parser.option_argument_as<int>("lace-workers");

@@ -75,6 +75,7 @@ class pbesreach_tool: public rewriter_tool<input_output_tool>
       options.make_total                            = parser.has_option("total");
       options.test                                  = parser.has_option("test");
       options.srf                                   = parser.option_argument("srf");
+      options.rewrite_strategy                      = rewrite_strategy();
       if (parser.has_option("lace-workers"))
       {
         lace_n_workers = parser.option_argument_as<int>("lace-workers");
