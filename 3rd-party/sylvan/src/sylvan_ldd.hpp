@@ -480,6 +480,89 @@ void print_dot(const std::string& filename, const ldd& A)
   lddmc_fprintdot(out, A.get());
 }
 
+inline
+void ldd_solutions_callback(WorkerP*, Task*, std::uint32_t* v, std::size_t n, void* context = nullptr)
+{
+  std::vector<std::vector<std::uint32_t>>& V = *reinterpret_cast<std::vector<std::vector<std::uint32_t>>*>(context);
+  V.push_back(std::vector<std::uint32_t>(v, v + n));
+}
+
+inline
+std::vector<std::vector<std::uint32_t>> ldd_solutions(const sylvan::ldds::ldd& x)
+{
+  std::vector<std::vector<std::uint32_t>> result;
+  sat_all(x, ldd_solutions_callback, &result);
+  return result;
+}
+
+// Returns { x in X | x[0] = value }
+inline
+ldd fix_first_element(const ldd& X, std::uint32_t value)
+{
+  ldd x = X;
+  while (x.value() != value)
+  {
+    x = x.right();
+    if (x == false_())
+    {
+      return empty_set();
+    }
+  }
+  return node(value, x.down());
+}
+
+// Computes the meta for relprod and relprev
+// read = the indices of read variables
+// write = the indices of write variables
+inline
+ldd compute_meta(const std::vector<std::size_t>& read, const std::vector<std::size_t>& write)
+{
+  std::vector<std::uint32_t> meta;
+
+  std::size_t r_k = read.size();
+  std::size_t w_k = write.size();
+  std::size_t r_i = 0;
+  std::size_t w_i = 0;
+  std::size_t i=0;
+
+  for (;;)
+  {
+    // compute the type (0=read+write, 1=read, 2=write, 3=only-read, 4=only-write (???)
+    std::size_t type = 0;
+    if (r_i < r_k && read[r_i] == i)
+    {
+      r_i++;
+      type += 1; // read
+    }
+    if (w_i < w_k && write[w_i] == i)
+    {
+      w_i++;
+      type += 2; // write
+    }
+
+    // now that we have type, set meta */
+    if (type == 0) meta.push_back(0);
+    else if (type == 1) { meta.push_back(3); }
+    else if (type == 2) { meta.push_back(4); }
+    else if (type == 3) { meta.push_back(1); meta.push_back(2); }
+    if (r_i == r_k && w_i == w_k)
+    {
+      meta.push_back((std::uint32_t)-1);
+      break;
+    }
+    i++;
+  }
+  return cube(meta);
+}
+
+// Returns true if V is a subset of U
+inline
+bool includes(const sylvan::ldds::ldd& U, const sylvan::ldds::ldd& V)
+{
+  using namespace sylvan::ldds;
+  return union_(U, V) == U;
+}
+
 } // namespace sylvan::ldds
 
 #endif // SYLVAN_LDD_OBJ_H

@@ -29,20 +29,6 @@ typedef sylvan::ldds::ldd vertex_set;
 typedef sylvan::ldds::ldd vertex;
 
 inline
-std::ostream& operator<<(std::ostream& out, const sylvan::ldds::ldd& x)
-{
-  return out << sylvan::ldds::print_ldd(x);
-}
-
-// Returns true if V is a subset of U
-inline
-bool includes(const sylvan::ldds::ldd& U, const sylvan::ldds::ldd& V)
-{
-  using namespace sylvan::ldds;
-  return union_(U, V) == U;
-}
-
-inline
 std::string print_pbes_info(const srf_pbes& pbesspec)
 {
   std::ostringstream out;
@@ -250,13 +236,13 @@ class symbolic_pbessolve_algorithm
       const ldd* V_ = m_V;
 
       ldd X = empty_set();
-      ldd X_ = U;
-      while (X != X_)
+      ldd Xnext = U;
+      while (X != Xnext)
       {
-        X = X_;
-        ldd X1 = intersect(intersect(V, V_[alpha]), predecessors(V, X_));
-        ldd X2 = intersect(intersect(V, V_[1 - alpha]), minus(V, predecessors(V, minus(V, X_))));
-        X_ = union_(X_, union_(X1, X2));
+        X = Xnext;
+        ldd X1 = intersect(intersect(V, V_[alpha]), predecessors(V, Xnext));
+        ldd X2 = intersect(intersect(V, V_[1 - alpha]), minus(V, predecessors(V, minus(V, Xnext))));
+        Xnext = union_(Xnext, union_(X1, X2));
       }
       return X;
     }

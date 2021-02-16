@@ -35,34 +35,6 @@ struct hash<mcrl2::data::sort_expression>
 } // namespace std
 
 namespace sylvan::ldds {
-//-----------------------------------------------------------------------------------//
-// LDD functions
-//-----------------------------------------------------------------------------------//
-inline
-void ldd_solutions_callback(WorkerP*, Task*, std::uint32_t* v, std::size_t n, void* context = nullptr)
-{
-  std::vector<std::vector<std::uint32_t>>& V = *reinterpret_cast<std::vector<std::vector<std::uint32_t>>*>(context);
-  V.push_back(std::vector<std::uint32_t>(v, v + n));
-}
-
-inline
-std::vector<std::vector<std::uint32_t>> ldd_solutions(const sylvan::ldds::ldd& x)
-{
-  std::vector<std::vector<std::uint32_t>> result;
-  sat_all(x, ldd_solutions_callback, &result);
-  return result;
-}
-
-inline
-ldd make_ldd(const std::vector<std::vector<std::uint32_t>>& V)
-{
-  ldd result = empty_set();
-  for (const auto& v: V)
-  {
-    result = union_cube(result, v);
-  }
-  return result;
-}
 
 inline
 std::string print_ldd(const sylvan::ldds::ldd& x)
@@ -85,63 +57,10 @@ std::string print_ldd(const sylvan::ldds::ldd& x)
   return out.str();
 }
 
-// Returns { x in X | x[0] = value }
 inline
-ldd fix_first_element(const ldd& X, std::uint32_t value)
+std::ostream& operator<<(std::ostream& out, const sylvan::ldds::ldd& x)
 {
-  ldd x = X;
-  while (x.value() != value)
-  {
-    x = x.right();
-    if (x == false_())
-    {
-      return empty_set();
-    }
-  }
-  return node(value, x.down());
-}
-
-// Computes the meta for relprod and relprev
-// read = the indices of read variables
-// write = the indices of write variables
-ldd compute_meta(const std::vector<std::size_t>& r_proj, const std::vector<std::size_t>& w_proj)
-{
-  std::vector<std::uint32_t> meta;
-
-  std::size_t r_k = r_proj.size();
-  std::size_t w_k = w_proj.size();
-  std::size_t r_i = 0;
-  std::size_t w_i = 0;
-  std::size_t i=0;
-
-  for (;;)
-  {
-    // compute the type (0=read+write, 1=read, 2=write, 3=only-read, 4=only-write (???)
-    std::size_t type = 0;
-    if (r_i < r_k && r_proj[r_i] == i)
-    {
-      r_i++;
-      type += 1; // read
-    }
-    if (w_i < w_k && w_proj[w_i] == i)
-    {
-      w_i++;
-      type += 2; // write
-    }
-
-    // now that we have type, set meta */
-    if (type == 0) meta.push_back(0);
-    else if (type == 1) { meta.push_back(3); }
-    else if (type == 2) { meta.push_back(4); }
-    else if (type == 3) { meta.push_back(1); meta.push_back(2); }
-    if (r_i == r_k && w_i == w_k)
-    {
-      meta.push_back((std::uint32_t)-1);
-      break;
-    }
-    i++;
-  }
-  return cube(meta);
+  return out << sylvan::ldds::print_ldd(x);
 }
 
 } // sylvan::ldds
@@ -218,7 +137,6 @@ struct symbolic_reachability_options
   bool no_discard_read = false;
   bool no_discard_write = false;
   bool no_relprod = false;
-  bool test = false;
   std::string summand_groups;
   std::string dot_file;
 };
@@ -234,7 +152,6 @@ std::ostream& operator<<(std::ostream& out, const symbolic_reachability_options&
   out << "no-read = " << std::boolalpha << options.no_discard_read << std::endl;
   out << "no-write = " << std::boolalpha << options.no_discard_write << std::endl;
   out << "no-relprod = " << std::boolalpha << options.no_relprod << std::endl;
-  out << "test = " << std::boolalpha << options.test << std::endl;
   out << "groups = " << options.summand_groups << std::endl;
   out << "dot = " << options.dot_file << std::endl;
   return out;
@@ -823,56 +740,6 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t n,
     data::remove_assignments(sigma, smd.variables);
   }
   data::remove_assignments(sigma, group.read_parameters);
-}
-
-template <typename SummandGroup>
-void test_successor_predecessor(const std::vector<SummandGroup>& R, const sylvan::ldds::ldd& V, bool no_relprod = false)
-{
-  using namespace sylvan::ldds;
-
-  std::random_device rd;
-  std::mt19937 mt(rd());
-  
-  // returns a random value n: low <= n <= high
-  auto random = [&](std::uint32_t low, std::uint32_t high)
-  {
-    std::uniform_int_distribution<std::uint32_t> dist(low, high);
-    return dist(mt);
-  };
-  
-  auto succ = [&](const ldd& U)
-  {
-    ldd result = empty_set();
-    for (std::size_t i = 0; i < R.size(); i++)
-    {
-      result = no_relprod ? union_(result, alternative_relprod(U, R[i])) : relprod_union(U, R[i].L, R[i].Ir, result);
-    }
-    return result;
-  };
-
-  // Returns { u in U | exists v in V: u -> v }
-  auto pred = [&](const ldd& U, const ldd& V)
-  {
-    ldd result = empty_set();
-    for (std::size_t i = 0; i < R.size(); i++)
-    {
-      result = no_relprod ? union_(result, alternative_relprev(V, R[i], U)) : union_(result, relprev(V, R[i].L, R[i].Ir, U));
-    }
-    return result;
-  };
-
-  std::vector<std::vector<std::uint32_t>> V_elements = ldd_solutions(V);
-  std::size_t n = random(1, V_elements.size() - 1);
-  std::vector<std::vector<std::uint32_t>> U_elements;
-  std::sample(V_elements.begin(), V_elements.end(), std::back_inserter(U_elements), n, mt);
-  ldd U = make_ldd(U_elements); // U is a random subset of V
-  if (pred(U, succ(U)) != U)
-  {
-    std::cout << "U = " << print_ldd(U) << std::endl;
-    std::cout << "succ(U) = " << print_ldd(succ(U)) << std::endl;
-    std::cout << "pred(U, succ(U)) = " << print_ldd(pred(U, succ(U))) << std::endl;
-    throw mcrl2::runtime_error("test_successor_predecessor failed!");
-  }
 }
 
 } // namespace lps

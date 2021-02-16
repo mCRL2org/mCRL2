@@ -328,7 +328,6 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       desc.add_option("no-write", "do not discard only-write parameters");
       desc.add_option("no-relprod", "use an inefficient alternative version of relprod (for debugging)");
       desc.add_option("groups", utilities::make_optional_argument("GROUPS", ""), "a list of summand groups separated by semicolons, e.g. '0; 1 3 4; 2 5");
-      desc.add_hidden_option("test", "test the successor/predecessor computations");
       desc.add_hidden_option("dot", utilities::make_optional_argument("NAME", ""), "print the LDD of the parity game in dot format");
     }
 
@@ -342,7 +341,6 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       options.no_discard_read                       = parser.has_option("no-read");
       options.no_discard_write                      = parser.has_option("no-write");
       options.no_relprod                            = parser.has_option("no-relprod");
-      options.test                                  = parser.has_option("test");
       options.summand_groups                        = parser.option_argument("groups");
       options.rewrite_strategy                      = rewrite_strategy();
       options.dot_file                              = parser.option_argument("dot");
@@ -409,11 +407,6 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
 
       lpsreach_algorithm algorithm(lpsspec, options);
       ldd V = algorithm.run();
-
-      if (options.test)
-      {
-        lps::test_successor_predecessor(algorithm.summand_groups(), V, options.no_relprod);
-      }
 
       if (!options.dot_file.empty())
       {

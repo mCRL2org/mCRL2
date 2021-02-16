@@ -57,7 +57,6 @@ class pbesreach_tool: public rewriter_tool<input_output_tool>
       desc.add_option("no-relprod", "use an inefficient alternative version of relprod (for debugging)");
       desc.add_option("groups", utilities::make_optional_argument("GROUPS", ""), "a list of summand groups separated by semicolons, e.g. '0; 1 3 4; 2 5");
       desc.add_option("total", "make the SRF PBES total", 't');
-      desc.add_hidden_option("test", "test the successor/predecessor computations");
       desc.add_hidden_option("srf", utilities::make_optional_argument("NAME", ""), "save the preprocessed PBES in SRF format");
       desc.add_hidden_option("dot", utilities::make_optional_argument("NAME", ""), "print the LDD of the parity game in dot format");
     }
@@ -74,7 +73,6 @@ class pbesreach_tool: public rewriter_tool<input_output_tool>
       options.no_relprod                            = parser.has_option("no-relprod");
       options.summand_groups                        = parser.option_argument("groups");
       options.make_total                            = parser.has_option("total");
-      options.test                                  = parser.has_option("test");
       options.srf                                   = parser.option_argument("srf");
       options.rewrite_strategy                      = rewrite_strategy();
       options.dot_file                              = parser.option_argument("dot");
@@ -139,11 +137,6 @@ class pbesreach_tool: public rewriter_tool<input_output_tool>
 
       pbes_system::pbesreach_algorithm algorithm(pbesspec, options);
       ldd V = algorithm.run();
-
-      if (options.test)
-      {
-        lps::test_successor_predecessor(algorithm.summand_groups(), V, options.no_relprod);
-      }
 
       if (!options.dot_file.empty())
       {
