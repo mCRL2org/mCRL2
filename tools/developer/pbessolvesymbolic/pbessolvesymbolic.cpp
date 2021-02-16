@@ -138,10 +138,10 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
         throw mcrl2::runtime_error("PBESses without parameters are not supported");
       }
 
-      timer().start("exploring");
       pbes_system::pbesreach_algorithm reach(pbesspec, options);
+      timer().start("instantiation");
       ldd V = reach.run();
-      timer().finish("exploring");
+      timer().finish("instantiation");
       ldd init = reach.initial_state();
 
       pbes_system::pbes_equation_index equation_index(reach.pbes());
@@ -170,7 +170,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
         }
       }
 
-      pbes_system::symbolic_pbessolve_algorithm solver(V, reach.process_parameters().size(), reach.summand_groups(), equation_info, options.no_relprod, reach.data_index());
+      pbes_system::symbolic_pbessolve_algorithm solver(V, reach.summand_groups(), equation_info, options.no_relprod, reach.data_index());
       mCRL2log(log::debug) << pbes_system::print_pbes_info(reach.pbes()) << std::endl;
       timer().start("solving");
       bool result = solver.solve(V, init);

@@ -101,6 +101,49 @@ ldd fix_first_element(const ldd& X, std::uint32_t value)
   return node(value, x.down());
 }
 
+// Computes the meta for relprod and relprev
+// read = the indices of read variables
+// write = the indices of write variables
+ldd compute_meta(const std::vector<std::size_t>& r_proj, const std::vector<std::size_t>& w_proj)
+{
+  std::vector<std::uint32_t> meta;
+
+  std::size_t r_k = r_proj.size();
+  std::size_t w_k = w_proj.size();
+  std::size_t r_i = 0;
+  std::size_t w_i = 0;
+  std::size_t i=0;
+
+  for (;;)
+  {
+    // compute the type (0=read+write, 1=read, 2=write, 3=only-read, 4=only-write (???)
+    std::size_t type = 0;
+    if (r_i < r_k && r_proj[r_i] == i)
+    {
+      r_i++;
+      type += 1; // read
+    }
+    if (w_i < w_k && w_proj[w_i] == i)
+    {
+      w_i++;
+      type += 2; // write
+    }
+
+    // now that we have type, set meta */
+    if (type == 0) meta.push_back(0);
+    else if (type == 1) { meta.push_back(3); }
+    else if (type == 2) { meta.push_back(4); }
+    else if (type == 3) { meta.push_back(1); meta.push_back(2); }
+    if (r_i == r_k && w_i == w_k)
+    {
+      meta.push_back((std::uint32_t)-1);
+      break;
+    }
+    i++;
+  }
+  return cube(meta);
+}
+
 } // sylvan::ldds
 
 namespace mcrl2 {
@@ -408,44 +451,34 @@ struct summand_group
 
   summand_group(const data::variable_list& process_parameters, const boost::dynamic_bitset<>& read_write_pattern)
   {
+    using namespace sylvan::ldds;
     using utilities::as_vector;
 
     std::size_t n = process_parameters.size();
 
-    std::vector<std::uint32_t> Ir_values;
     std::vector<std::uint32_t> Ip_values;
 
     for (std::size_t j = 0; j < n; j++)
     {
       bool is_read = read_write_pattern[2*j];
       bool is_write = read_write_pattern[2*j + 1];
-
       Ip_values.push_back(is_read ? 1 : 0);
-
       if (is_read)
       {
         read.push_back(j);
-        Ir_values.push_back(is_write ? 1 : 3);
       }
-
       if (is_write)
       {
         write.push_back(j);
-        Ir_values.push_back(is_read ? 2 : 4);
-      }
-
-      if (!is_read && !is_write)
-      {
-        Ir_values.push_back(0);
       }
     }
 
     read_parameters = project(as_vector(process_parameters), read);
     write_parameters = project(as_vector(process_parameters), write);
-    L = sylvan::ldds::empty_set();
-    Ldomain = sylvan::ldds::empty_set();
-    Ir = sylvan::ldds::cube(Ir_values);
-    Ip = sylvan::ldds::cube(Ip_values);
+    L = empty_set();
+    Ldomain = empty_set();
+    Ir = compute_meta(read, write);
+    Ip = cube(Ip_values);
     compute_read_write_pos();
   }
 };
@@ -539,7 +572,6 @@ sylvan::ldds::ldd alternative_relprod(const sylvan::ldds::ldd& todo, const summa
     }
   }
   return result;
-  // return relprod(todo, R.L, R.Ir);
 }
 
 // A very inefficient implementation of relprev, that matches the specification closely

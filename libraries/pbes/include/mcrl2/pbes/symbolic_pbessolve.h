@@ -63,7 +63,6 @@ std::string print_graph(
   const std::vector<SummandGroup>& R,
   const std::vector<lps::data_expression_index>& data_index,
   const sylvan::ldds::ldd& V0, // disjunctive nodes
-  const sylvan::ldds::ldd& V1, // conjunctive nodes
   const std::map<std::size_t, sylvan::ldds::ldd>& rank_map // maps rank to the corresponding set of nodes
 )
 {
@@ -139,8 +138,7 @@ std::string print_graph(
 }
 
 // print the indices of U (subset of V)
-template <typename SummandGroup>
-std::string print_nodes(const sylvan::ldds::ldd& U, const sylvan::ldds::ldd& V, const std::vector<SummandGroup>& R, const std::vector<lps::data_expression_index>& data_index)
+std::string print_nodes(const sylvan::ldds::ldd& U, const sylvan::ldds::ldd& V)
 {
   using namespace sylvan::ldds;
 
@@ -192,7 +190,6 @@ class symbolic_pbessolve_algorithm
   public:
     symbolic_pbessolve_algorithm(
       const ldd& V,
-      std::size_t m, // the number of parameters
       const std::vector<summand_group>& summand_groups,
       const std::map<std::size_t, std::pair<std::size_t, bool>>& equation_info, // maps ldd values to (rank, is_disjunctive)
       bool no_relprod,
@@ -302,7 +299,7 @@ class symbolic_pbessolve_algorithm
       vertex_set W_1[2];
 
       vertex_set A = attractor(U, alpha, V);
-      mCRL2log(log::debug) << "A = attractor(" << print_nodes(U, m_all_nodes, m_summand_groups, m_data_index) << ", " << print_nodes(V, m_all_nodes, m_summand_groups, m_data_index) << ") = " << print_nodes(A, m_all_nodes, m_summand_groups, m_data_index) << std::endl;
+      mCRL2log(log::debug) << "A = attractor(" << print_nodes(U, m_all_nodes) << ", " << print_nodes(V, m_all_nodes) << ") = " << print_nodes(A, m_all_nodes) << std::endl;
       std::tie(W_1[0], W_1[1]) = zielonka(minus(V, A));
 
       // Original Zielonka version
@@ -314,14 +311,14 @@ class symbolic_pbessolve_algorithm
       else
       {
         vertex_set B = attractor(W_1[1 - alpha], 1 - alpha, V);
-        mCRL2log(log::debug) << "B = attractor(" << print_nodes(W_1[1 - alpha], m_all_nodes, m_summand_groups, m_data_index) << ", " << print_nodes(V, m_all_nodes, m_summand_groups, m_data_index) << ") = " << print_nodes(B, m_all_nodes, m_summand_groups, m_data_index) << std::endl;
+        mCRL2log(log::debug) << "B = attractor(" << print_nodes(W_1[1 - alpha], m_all_nodes) << ", " << print_nodes(V, m_all_nodes) << ") = " << print_nodes(B, m_all_nodes) << std::endl;
         std::tie(W[0], W[1]) = zielonka(minus(V, B));
         W[1 - alpha] = union_(W[1 - alpha], B);
       }
 
-      mCRL2log(log::debug) << "\n  --- zielonka solution for ---\n" << print_graph(V, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_V[1], m_rank_map) << std::endl;
-      mCRL2log(log::debug) << "W0 = " << print_nodes(W[0], m_all_nodes, m_summand_groups, m_data_index) << std::endl;
-      mCRL2log(log::debug) << "W1 = " << print_nodes(W[1], m_all_nodes, m_summand_groups, m_data_index) << std::endl;
+      mCRL2log(log::debug) << "\n  --- zielonka solution for ---\n" << print_graph(V, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
+      mCRL2log(log::debug) << "W0 = " << print_nodes(W[0], m_all_nodes) << std::endl;
+      mCRL2log(log::debug) << "W1 = " << print_nodes(W[1], m_all_nodes) << std::endl;
       assert(union_(W[0], W[1]) == V);
       return { W[0], W[1] };
     }
@@ -331,7 +328,7 @@ class symbolic_pbessolve_algorithm
     {
       using namespace sylvan::ldds;
 
-      mCRL2log(log::debug) << "\n--- apply zielonka to ---\n" << print_graph(V, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_V[1], m_rank_map) << std::endl;
+      mCRL2log(log::debug) << "\n--- apply zielonka to ---\n" << print_graph(V, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
       auto [W0, W1] = zielonka(V);
       if (includes(W0, initial_vertex))
       {
