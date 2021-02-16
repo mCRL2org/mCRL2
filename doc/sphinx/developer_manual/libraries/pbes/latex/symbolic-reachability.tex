@@ -20,6 +20,11 @@
 
 \newcommand{\emptylist}{\ensuremath{[\:]}}
 
+\newcommand{\pnot}[1]{\bar{#1}}
+\newcommand{\attrsym}{\ensuremath{\textit{Attr}}}
+\newcommand{\attr}[3][]{\ensuremath{\attrsym^{#1}_{#2}(#3)}}
+\newcommand{\pred}{\ensuremath{\textit{pred}}}
+
 \title{Symbolic Reachability using LDDs}
 \author{Wieger Wesselink}
 \date{\today}
@@ -340,6 +345,15 @@ Let $R$ be a relation with read parameter indices $I_r$ and write parameter indi
           (\hat{x}, \hat{y}) \in \hat{R}
         \}
 \]
+
+\[
+    \textsf{relprev}(\hat{R}, y, I_r, I_w, X) =
+        \{ 
+           x \in X \mid y \in \textsf{relprod}(\hat{R}, x, I_r, I_w)
+        %   y[I_r = \hat{x}] \mid \textsf{project}(y, I_w) = \hat{y} \land 
+        %   (\hat{x}, \hat{y}) \in \hat{R}
+        \}
+\]
 \end{definition}
 
 \begin{algorithm}[h]
@@ -467,7 +481,7 @@ x[I = y]^\blacktriangle = z \text{ with } z_r =
 \]
 
 \[
-    \textsf{relprod}^\blacktriangle(\hat{R}, x, I_r, I_w) =
+    \textsf{relprod}^\blacktriangle(\hat{R}, x, I_r, I_w, X) =
         \{ 
           x[I_w = \hat{y}]^\blacktriangle \mid \textsf{project}(x, I_r) = \hat{x} \land 
           (\hat{x}, \hat{y}) \in \hat{R}
@@ -626,6 +640,60 @@ $\textsf{relprod}(L_i, \var{todo}, I_r, I_w)$ & \textsf{relprod} (Sylvan functio
 \hline
 \end{tabular}
 \end{center}
+
+\newpage
+\section{Zielonka}
+Let $V$ be the nodes of a parity game.
+For a non-empty set $U \subseteq V$ and a player $\alpha$, the
+$\alpha$-attractor into $U$, denoted $\attr{\alpha}{U,V}$,
+is the set of vertices for which player
+$\alpha$ can force play into $U$. We define $\attr{\alpha}{U,V}$ as
+$\bigcup\limits_{i \ge 0} \attr[i]{\alpha}{U,V}$,
+the limit of approximations\label{def:attractor} of the
+sets $\attr[n]{\alpha}{U,V}$, which are inductively defined as follows:
+\[
+\begin{array}{lcl}
+\attr[0]{\alpha}{U, V} & = & U \\
+\attr[n+1]{\alpha}{U, V} & = & \attr[n]{\alpha}{U, V} \\
+      & \cup & \{u \in V_{\alpha} ~|~ \exists v \in \attr[n]{\alpha}{U,V}:~ u \to v \} \\
+      & \cup & \{u \in V_{1 - \alpha} ~|~ \forall v \in V: u \to v \Rightarrow v \in \attr[n]{\alpha}{U, V}\} \\
+\end{array}
+\]
+We reformulate this into
+\[
+\begin{array}{lcl}
+\attr[0]{\alpha}{U, V} & = & U \\
+\attr[n+1]{\alpha}{U, V} & = & \attr[n]{\alpha}{U, V} \\
+      & \cup & (V_{\alpha} \cap \pred(V, \attr[n]{\alpha}{U, V})) \\
+      & \cup & (V_{1 - \alpha} \cap (V \setminus \pred(V, V \setminus \attr[n]{\alpha}{U,V})) \\
+\end{array}
+\]
+where $\pred(U, V) = \{ u \in U \mid \exists v \in V: u \rightarrow v \}$.
+
+\begin{algorithm}[h]
+\caption{Zielonka}
+\label{alg:zielonka}
+\begin{algorithmic}[1]
+\Function{Zielonka}{$V$}
+\If {$V = \emptyset$}
+  \State \Return {$\emptyset, \emptyset$}
+\EndIf
+\State $m:=\min (\{r(v)\mid v\in V\})$ 
+\State $\alpha := m \bmod 2$
+\State $U:=\{v\in V\mid r(v)=m\}$ 
+\State $A := \attr{\alpha}{U,V}$
+\State $W_{0}^{\prime },W_{1}^{\prime}:= \textsc{Zielonka}(V\setminus A)$
+\If {$W_{1-\alpha }^{\prime }= \emptyset$}
+  \State $W_{\alpha },W_{1-\alpha }:=A\cup W_{\alpha }^{\prime},\emptyset$ 
+\Else
+  \State $B := \attr{1-\alpha}{W_{1-\alpha }^{\prime }, V}$
+  \State $W_{0},W_{1}:=\textsc{Zielonka}(V\setminus B)$ 
+  \State $W_{1-\alpha } := W_{1-\alpha }\cup B$ 
+\EndIf
+\State \Return $W_{0},W_{1}$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
 
 \newpage
 \bibliographystyle{plain}
