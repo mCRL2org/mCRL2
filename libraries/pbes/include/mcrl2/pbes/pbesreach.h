@@ -309,7 +309,15 @@ class pbesreach_algorithm
       std::vector<boost::dynamic_bitset<>> patterns = read_write_patterns(m_pbes, m_process_parameters);
       mCRL2log(log::debug) << lps::print_read_write_patterns(patterns);
       lps::adjust_read_write_patterns(patterns, m_options);
-      std::vector<std::set<std::size_t>> groups = utilities::parse_summand_groups(m_options.summand_groups, patterns.size());
+      std::vector<std::set<std::size_t>> groups;
+      if (m_options.summand_groups == "simple")
+      {
+        groups = lps::compute_summand_groups_simple(patterns);
+      }
+      else
+      {
+        groups = lps::parse_summand_groups(m_options.summand_groups, patterns.size());
+      }
       for (const auto& group: groups)
       {
         mCRL2log(log::debug) << "group " << core::detail::print_set(group) << std::endl;

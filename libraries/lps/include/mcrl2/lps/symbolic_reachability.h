@@ -93,6 +93,12 @@ std::set<T> as_set(const std::vector<T>& x)
   return std::set<T>(x.begin(), x.end());
 }
 
+} // namespace utilities
+
+namespace lps {
+
+constexpr std::uint32_t relprod_ignore = std::numeric_limits<std::uint32_t>::max();
+
 inline
 std::vector<std::set<std::size_t>> parse_summand_groups(std::string text, std::size_t n)
 {
@@ -121,11 +127,22 @@ std::vector<std::set<std::size_t>> parse_summand_groups(std::string text, std::s
   return result;
 }
 
-} // namespace utilities
-
-namespace lps {
-
-constexpr std::uint32_t relprod_ignore = std::numeric_limits<std::uint32_t>::max();
+// joins summands with exactly the same pattern
+inline
+std::vector<std::set<std::size_t>> compute_summand_groups_simple(const std::vector<boost::dynamic_bitset<>>& patterns)
+{
+  std::map<boost::dynamic_bitset<>, std::set<std::size_t>> group_map;
+  for (std::size_t i = 0; i < patterns.size(); i++)
+  {
+    group_map[patterns[i]].insert(i);
+  }
+  std::vector<std::set<std::size_t>> groups;
+  for (const auto& [_, group]: group_map)
+  {
+    groups.push_back(group);
+  }
+  return groups;
+}
 
 struct symbolic_reachability_options
 {
