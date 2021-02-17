@@ -50,14 +50,17 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       desc.add_option("min-cache-size", utilities::make_optional_argument("NAME", "22"), "minimum Sylvan cache size (21-27, default 22)");
       desc.add_option("max-cache-size", utilities::make_optional_argument("NAME", "26"), "maximum Sylvan cache size (21-27, default 26)");
       desc.add_hidden_option("no-remove-unused-rewrite-rules", "do not remove unused rewrite rules. ", 'u');
+      desc.add_option("groups", utilities::make_optional_argument("GROUPS", "none"),
+                      "'none' (default) no summand groups\n"
+                      "'simple' summands with the same read/write variables are joined\n"
+                      "a list of summand groups separated by semicolons, e.g. '0; 1 3 4; 2 5'");
       desc.add_hidden_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
-      desc.add_option("no-discard", "do not discard any parameters");
-      desc.add_option("no-read", "do not discard only-read parameters");
-      desc.add_option("no-write", "do not discard only-write parameters");
-      desc.add_option("no-relprod", "use an inefficient alternative version of relprod (for debugging)");
-      desc.add_option("groups", utilities::make_optional_argument("GROUPS", ""), "a list of summand groups separated by semicolons, e.g. '0; 1 3 4; 2 5");
-      desc.add_hidden_option("srf", utilities::make_optional_argument("NAME", ""), "save the preprocessed PBES in SRF format");
-      desc.add_hidden_option("dot", utilities::make_optional_argument("NAME", ""), "print the LDD of the parity game in dot format");
+      desc.add_hidden_option("no-discard", "do not discard any parameters");
+      desc.add_hidden_option("no-read", "do not discard only-read parameters");
+      desc.add_hidden_option("no-write", "do not discard only-write parameters");
+      desc.add_hidden_option("no-relprod", "use an inefficient alternative version of relprod (for debugging)");
+      desc.add_hidden_option("srf", utilities::make_optional_argument("FILE", ""), "save the preprocessed PBES in SRF format");
+      desc.add_hidden_option("dot", utilities::make_optional_argument("FILE", ""), "print the LDD of the parity game in dot format");
     }
 
     void parse_options(const utilities::command_line_parser& parser) override
@@ -65,7 +68,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       super::parse_options(parser);
       options.one_point_rule_rewrite                = !parser.has_option("no-one-point-rule-rewrite");
       options.remove_unused_rewrite_rules           = !parser.has_option("no-remove-unused-rewrite-rules");
-      options.replace_constants_by_variables        = false; // This option cannot be used in the symbolic algorithm
+      options.replace_constants_by_variables        = false; // This option doesn't work in the current implementation
       options.no_discard                            = parser.has_option("no-discard");
       options.no_discard_read                       = parser.has_option("no-read");
       options.no_discard_write                      = parser.has_option("no-write");

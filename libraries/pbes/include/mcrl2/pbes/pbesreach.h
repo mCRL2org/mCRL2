@@ -309,15 +309,7 @@ class pbesreach_algorithm
       std::vector<boost::dynamic_bitset<>> patterns = read_write_patterns(m_pbes, m_process_parameters);
       mCRL2log(log::debug) << lps::print_read_write_patterns(patterns);
       lps::adjust_read_write_patterns(patterns, m_options);
-      std::vector<std::set<std::size_t>> groups;
-      if (m_options.summand_groups == "simple")
-      {
-        groups = lps::compute_summand_groups_simple(patterns);
-      }
-      else
-      {
-        groups = lps::parse_summand_groups(m_options.summand_groups, patterns.size());
-      }
+      std::vector<std::set<std::size_t>> groups = lps::compute_summand_groups(m_options.summand_groups, patterns);
       for (const auto& group: groups)
       {
         mCRL2log(log::debug) << "group " << core::detail::print_set(group) << std::endl;
@@ -339,7 +331,7 @@ class pbesreach_algorithm
       return state2ldd(m_initial_state);
     }
 
-    ldd run()
+    ldd run(bool report_states = false)
     {
       using namespace sylvan::ldds;
       auto& R = m_summand_groups;
@@ -387,7 +379,14 @@ class pbesreach_algorithm
       }
 
       elapsed_seconds = std::chrono::steady_clock::now() - start;
-      std::cout << "number of states = " << satcount(visited) << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)" << std::endl;
+      if (report_states)
+      {
+        std::cout << "number of states = " << satcount(visited) << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)" << std::endl;
+      }
+      else
+      {
+        mCRL2log(log::verbose) << "number of states = " << satcount(visited) << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)" << std::endl;
+      }
 
       if (!m_options.srf.empty())
       {

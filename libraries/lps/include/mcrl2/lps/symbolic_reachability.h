@@ -15,10 +15,12 @@
 #include <algorithm>
 #include <iterator>
 #include <random>
+#include <regex>
 #include <sylvan_ldd.hpp>
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/undefined.h"
 #include "mcrl2/utilities/parse_numbers.h"
+#include "mcrl2/utilities/text_utility.h"
 
 namespace std
 {
@@ -106,24 +108,53 @@ std::vector<std::set<std::size_t>> parse_summand_groups(std::string text, std::s
   using utilities::trim_copy;
   using utilities::as_set;
 
+  // check if the format of the group is correct
+  std::string group_format = R"(\s*\d+(\s+\d+)*\s*)";
+  if (!std::regex_match(text, std::regex(group_format + "(;" + group_format + ")*")))
+  {
+    throw mcrl2::runtime_error("The format of the groups '" + text + "' is incorrect.");
+  }
+
   std::vector<std::set<std::size_t>> result;
-
   text = trim_copy(text);
-  if (text.empty())
+  for (const std::string& numbers: regex_split(text, "\\s*;\\s*"))
   {
-    for (std::size_t i = 0; i < n; i++)
-    {
-      result.push_back({i});
-    }
-  }
-  else
-  {
-    for (const std::string& numbers: regex_split(text, "\\s*;\\s*"))
-    {
-      result.push_back(as_set(utilities::parse_natural_number_sequence(numbers)));
-    }
+    result.push_back(as_set(utilities::parse_natural_number_sequence(numbers)));
   }
 
+  // check if result is a partition of [0 .. n)
+  std::set<std::size_t> all;
+  std::set<std::size_t> expected;
+  for (std::size_t i = 0; i < n; i++)
+  {
+    expected.insert(i);
+  }
+  for (const auto& group: result)
+  {
+    std::size_t size = all.size();
+    all.insert(group.begin(), group.end());
+    if (all.size() != size + group.size())
+    {
+      throw mcrl2::runtime_error("The groups in '" + text + "' are not disjoint.");
+    }
+  }
+  if (all != expected)
+  {
+    throw mcrl2::runtime_error("The groups '" + text + "' do not form a partition of [0 .. " + std::to_string(n-1) + "].");
+  }
+
+  return result;
+}
+
+// puts every summand in a separate group
+inline
+std::vector<std::set<std::size_t>> compute_summand_groups_default(const std::vector<boost::dynamic_bitset<>>& patterns)
+{
+  std::vector<std::set<std::size_t>> result;
+  for (std::size_t i = 0; i < patterns.size(); i++)
+  {
+    result.push_back({i});
+  }
   return result;
 }
 
@@ -142,6 +173,23 @@ std::vector<std::set<std::size_t>> compute_summand_groups_simple(const std::vect
     groups.push_back(group);
   }
   return groups;
+}
+
+inline
+std::vector<std::set<std::size_t>> compute_summand_groups(const std::string& text, const std::vector<boost::dynamic_bitset<>>& patterns)
+{
+  if (text == "none")
+  {
+    return compute_summand_groups_default(patterns);
+  }
+  else if (text == "simple")
+  {
+    return compute_summand_groups_simple(patterns);
+  }
+  else
+  {
+    return parse_summand_groups(text, patterns.size());
+  }
 }
 
 struct symbolic_reachability_options

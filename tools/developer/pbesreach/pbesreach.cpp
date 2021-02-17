@@ -55,10 +55,13 @@ class pbesreach_tool: public rewriter_tool<input_output_tool>
       desc.add_option("no-read", "do not discard only-read parameters");
       desc.add_option("no-write", "do not discard only-write parameters");
       desc.add_option("no-relprod", "use an inefficient alternative version of relprod (for debugging)");
-      desc.add_option("groups", utilities::make_optional_argument("GROUPS", ""), "a list of summand groups separated by semicolons, e.g. '0; 1 3 4; 2 5");
+      desc.add_option("groups", utilities::make_optional_argument("GROUPS", "none"),
+                      "'none' (default) no summand groups\n"
+                      "'simple' summands with the same read/write variables are joined\n"
+                      "a list of summand groups separated by semicolons, e.g. '0; 1 3 4; 2 5'");
       desc.add_option("total", "make the SRF PBES total", 't');
-      desc.add_hidden_option("srf", utilities::make_optional_argument("NAME", ""), "save the preprocessed PBES in SRF format");
-      desc.add_hidden_option("dot", utilities::make_optional_argument("NAME", ""), "print the LDD of the parity game in dot format");
+      desc.add_hidden_option("srf", utilities::make_optional_argument("FILE", ""), "save the preprocessed PBES in SRF format");
+      desc.add_hidden_option("dot", utilities::make_optional_argument("FILE", ""), "print the LDD of the parity game in dot format");
     }
 
     void parse_options(const utilities::command_line_parser& parser) override
@@ -136,7 +139,7 @@ class pbesreach_tool: public rewriter_tool<input_output_tool>
       }
 
       pbes_system::pbesreach_algorithm algorithm(pbesspec, options);
-      ldd V = algorithm.run();
+      ldd V = algorithm.run(true);
 
       if (!options.dot_file.empty())
       {
