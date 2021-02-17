@@ -59,6 +59,11 @@ class pbesreach_tool: public rewriter_tool<input_output_tool>
                       "'none' (default) no summand groups\n"
                       "'simple' summands with the same read/write variables are joined\n"
                       "a list of summand groups separated by semicolons, e.g. '0; 1 3 4; 2 5'");
+      desc.add_option("reorder", utilities::make_optional_argument("ORDER", "none"),
+                      "'none' (default) no variable reordering\n"
+                      "'random' variables are put in a random order\n"
+                      "'<order>' a user defined permutation e.g. '1 3 2 0 4'"
+      );
       desc.add_option("total", "make the SRF PBES total", 't');
       desc.add_hidden_option("srf", utilities::make_optional_argument("FILE", ""), "save the preprocessed PBES in SRF format");
       desc.add_hidden_option("dot", utilities::make_optional_argument("FILE", ""), "print the LDD of the parity game in dot format");
@@ -75,6 +80,7 @@ class pbesreach_tool: public rewriter_tool<input_output_tool>
       options.no_discard_write                      = parser.has_option("no-write");
       options.no_relprod                            = parser.has_option("no-relprod");
       options.summand_groups                        = parser.option_argument("groups");
+      options.variable_order                        = parser.option_argument("reorder");
       options.make_total                            = parser.has_option("total");
       options.srf                                   = parser.option_argument("srf");
       options.rewrite_strategy                      = rewrite_strategy();

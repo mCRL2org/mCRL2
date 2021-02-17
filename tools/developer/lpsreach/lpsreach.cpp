@@ -98,8 +98,15 @@ std::vector<boost::dynamic_bitset<>> read_write_patterns(const lps::specificatio
 
 struct summand_group: public lps::summand_group
 {
-  summand_group(const lps::specification& lpsspec, const std::set<std::size_t>& group_indices, const boost::dynamic_bitset<>& group_pattern, const std::vector<boost::dynamic_bitset<>>& read_write_patterns)
-    : lps::summand_group(lpsspec.process().process_parameters(), group_pattern)
+  summand_group(
+    const lps::specification& lpsspec,
+    const data::variable_list& process_parameters, // the reordered process parameters
+    const std::set<std::size_t>& group_indices,
+    const boost::dynamic_bitset<>& group_pattern,
+    const std::vector<boost::dynamic_bitset<>>& read_write_patterns,
+    const std::vector<std::size_t> variable_order // a permutation of [0 .. |process_parameters| - 1]
+  )
+    : lps::summand_group(process_parameters, group_pattern)
   {
     using lps::project;
     using utilities::as_vector;
@@ -117,8 +124,6 @@ struct summand_group: public lps::summand_group
     }
 
     const auto& lps_summands = lpsspec.process().action_summands();
-    const auto& process_parameters = lpsspec.process().process_parameters();
-
     for (std::size_t i: group_indices)
     {
       std::vector<int> copy;
@@ -128,7 +133,7 @@ struct summand_group: public lps::summand_group
         copy.push_back(b ? 0 : 1);
       }
       const auto& smd = lps_summands[i];
-      summands.emplace_back(smd.condition(), smd.summation_variables(), project(as_vector(smd.next_state(process_parameters)), write), copy);
+      summands.emplace_back(smd.condition(), smd.summation_variables(), project(as_vector(utilities::permute_copy(smd.next_state(lpsspec.process().process_parameters()), variable_order)), write), copy);
     }
   }
 };
@@ -200,12 +205,23 @@ class lpsreach_algorithm
         m_rewr(lps::construct_rewriter(lpsspec.data(), m_options.rewrite_strategy, lps::find_function_symbols(lpsspec), m_options.remove_unused_rewrite_rules)),
         m_enumerator(m_rewr, lpsspec.data(), m_rewr, m_id_generator, false)
     {
-      lps::specification lpsspec_ = preprocess(lpsspec);
+      using utilities::as_vector;
 
+      lps::specification lpsspec_ = preprocess(lpsspec);
       m_process_parameters = lpsspec_.process().process_parameters();
       m_n = m_process_parameters.size();
       m_initial_state = lpsspec_.initial_process().expressions();
 
+      std::vector<boost::dynamic_bitset<>> patterns = read_write_patterns(lpsspec_);
+      lps::adjust_read_write_patterns(patterns, m_options);
+
+      std::vector<std::size_t> variable_order = lps::compute_variable_order(m_options.variable_order, patterns);
+      mCRL2log(log::debug) << "variable order = " << core::detail::print_list(variable_order) << std::endl;
+      patterns = lps::reorder_read_write_patterns(patterns, variable_order);
+      mCRL2log(log::debug) << lps::print_read_write_patterns(patterns);
+
+      m_process_parameters = utilities::permute_copy(m_process_parameters, variable_order);
+      m_initial_state = utilities::permute_copy(m_initial_state, variable_order);
       mCRL2log(log::debug) << "process parameters = " << core::detail::print_list(m_process_parameters) << std::endl;
       mCRL2log(log::debug) << "initial state = " << core::detail::print_list(m_initial_state) << std::endl;
 
@@ -214,9 +230,6 @@ class lpsreach_algorithm
         m_data_index.push_back(lps::data_expression_index(param.sort()));
       }
 
-      std::vector<boost::dynamic_bitset<>> patterns = read_write_patterns(lpsspec_);
-      mCRL2log(log::debug) << lps::print_read_write_patterns(patterns);
-      lps::adjust_read_write_patterns(patterns, m_options);
       std::vector<std::set<std::size_t>> groups = lps::compute_summand_groups(m_options.summand_groups, patterns);
       for (const auto& group: groups)
       {
@@ -225,7 +238,7 @@ class lpsreach_algorithm
       std::vector<boost::dynamic_bitset<>> group_patterns = lps::compute_summand_group_patterns(patterns, groups);
       for (std::size_t j = 0; j < group_patterns.size(); j++)
       {
-        m_summand_groups.emplace_back(lpsspec_, groups[j], group_patterns[j], patterns);
+        m_summand_groups.emplace_back(lpsspec_, m_process_parameters, groups[j], group_patterns[j], patterns, variable_order);
       }
 
       for (std::size_t i = 0; i < m_summand_groups.size(); i++)
@@ -330,7 +343,12 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       desc.add_option("groups", utilities::make_optional_argument("GROUPS", "none"),
                       "'none' (default) no summand groups\n"
                       "'simple' summands with the same read/write variables are joined\n"
-                      "a list of summand groups separated by semicolons, e.g. '0; 1 3 4; 2 5'");
+                      "'<groups>' a user defined list of summand groups separated by semicolons, e.g. '0; 1 3 4; 2 5'");
+      desc.add_option("reorder", utilities::make_optional_argument("ORDER", "none"),
+                      "'none' (default) no variable reordering\n"
+                      "'random' variables are put in a random order\n"
+                      "'<order>' a user defined permutation e.g. '1 3 2 0 4'"
+                      );
       desc.add_hidden_option("dot", utilities::make_optional_argument("FILE", ""), "print the LDD of the parity game in dot format");
     }
 
@@ -345,6 +363,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       options.no_discard_write                      = parser.has_option("no-write");
       options.no_relprod                            = parser.has_option("no-relprod");
       options.summand_groups                        = parser.option_argument("groups");
+      options.variable_order                        = parser.option_argument("reorder");
       options.rewrite_strategy                      = rewrite_strategy();
       options.dot_file                              = parser.option_argument("dot");
       if (parser.has_option("lace-workers"))

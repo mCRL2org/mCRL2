@@ -158,11 +158,12 @@ struct summand_group: public lps::summand_group
 {
   summand_group(
     const pbes_system::srf_pbes& pbesspec,
-    const data::variable_list& process_parameters,
+    const data::variable_list& process_parameters, // the reordered process parameters
     const std::unordered_map<core::identifier_string, data::data_expression>& propvar_map,
     const std::set<std::size_t>& summand_group_indices,
     const boost::dynamic_bitset<>& read_write_pattern,
-    const std::vector<boost::dynamic_bitset<>>& read_write_patterns
+    const std::vector<boost::dynamic_bitset<>>& read_write_patterns,
+    const std::vector<std::size_t> variable_order // a permutation of [0 .. |process_parameters| - 1]
   )
     : lps::summand_group(process_parameters, read_write_pattern)
   {
@@ -199,7 +200,9 @@ struct summand_group: public lps::summand_group
             copy.push_back(b ? 0 : 1);
           }
           const pbes_system::srf_summand& smd = equation_summands[j];
-          summands.emplace_back(data::and_(data::equal_to(process_parameters.front(), propvar_map.at(X_i)), smd.condition()), smd.parameters(), project(as_vector(make_state(smd.variable(), propvar_map)), write), copy);
+          auto next_state = make_state(smd.variable(), propvar_map);
+          next_state = utilities::permute_copy(next_state, variable_order);
+          summands.emplace_back(data::and_(data::equal_to(process_parameters.front(), propvar_map.at(X_i)), smd.condition()), smd.parameters(), project(as_vector(next_state), write), copy);
         }
       }
     }
@@ -293,22 +296,25 @@ class pbesreach_algorithm
       {
         propvar_map[equation.variable().name()] = data::function_symbol(equation.variable().name(), propvar_sort);
       }
+
       m_process_parameters = m_pbes.equations().front().variable().parameters();
       m_process_parameters.push_front(data::variable("propvar", propvar_sort));
       m_n = m_process_parameters.size();
       m_initial_state = make_state(m_pbes.initial_state(), propvar_map);
 
+      std::vector<boost::dynamic_bitset<>> patterns = read_write_patterns(m_pbes, m_process_parameters);
+      lps::adjust_read_write_patterns(patterns, m_options);
+
+      std::vector<std::size_t> variable_order = lps::compute_variable_order(m_options.variable_order, patterns, true);
+      mCRL2log(log::debug) << "variable order = " << core::detail::print_list(variable_order) << std::endl;
+      patterns = lps::reorder_read_write_patterns(patterns, variable_order);
+      mCRL2log(log::debug) << lps::print_read_write_patterns(patterns);
+
+      m_process_parameters = utilities::permute_copy(m_process_parameters, variable_order);
+      m_initial_state = utilities::permute_copy(m_initial_state, variable_order);
       mCRL2log(log::debug) << "process parameters = " << core::detail::print_list(m_process_parameters) << std::endl;
       mCRL2log(log::debug) << "initial state = " << core::detail::print_list(m_initial_state) << std::endl;
 
-      for (const data::variable& param: m_process_parameters)
-      {
-        m_data_index.push_back(lps::data_expression_index(param.sort()));
-      }
-
-      std::vector<boost::dynamic_bitset<>> patterns = read_write_patterns(m_pbes, m_process_parameters);
-      mCRL2log(log::debug) << lps::print_read_write_patterns(patterns);
-      lps::adjust_read_write_patterns(patterns, m_options);
       std::vector<std::set<std::size_t>> groups = lps::compute_summand_groups(m_options.summand_groups, patterns);
       for (const auto& group: groups)
       {
@@ -317,12 +323,17 @@ class pbesreach_algorithm
       std::vector<boost::dynamic_bitset<>> group_patterns = lps::compute_summand_group_patterns(patterns, groups);
       for (std::size_t j = 0; j < group_patterns.size(); j++)
       {
-        m_summand_groups.emplace_back(m_pbes, m_process_parameters, propvar_map, groups[j], group_patterns[j], patterns);
+        m_summand_groups.emplace_back(m_pbes, m_process_parameters, propvar_map, groups[j], group_patterns[j], patterns, variable_order);
       }
 
       for (std::size_t i = 0; i < m_summand_groups.size(); i++)
       {
         mCRL2log(log::debug) << "=== summand group " << i << " ===\n" << m_summand_groups[i] << std::endl;
+      }
+
+      for (const data::variable& param: m_process_parameters)
+      {
+        m_data_index.push_back(lps::data_expression_index(param.sort()));
       }
     }
 

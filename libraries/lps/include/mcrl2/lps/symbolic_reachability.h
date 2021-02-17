@@ -95,6 +95,24 @@ std::set<T> as_set(const std::vector<T>& x)
   return std::set<T>(x.begin(), x.end());
 }
 
+// Return a permuted copy of v (N.B. the implementation is not efficient)
+// v'[i] = v[permutation[i]]
+template <typename Container>
+Container permute_copy(const Container& v, const std::vector<std::size_t>& permutation)
+{
+  using T = typename Container::value_type;
+
+  std::size_t n = v.size();
+  assert(permutation.size() == n);
+  std::vector<T> v_(v.begin(), v.end());
+  std::vector<T> result(n);
+  for (std::size_t i = 0; i < n; i++)
+  {
+    result[i] = v_[permutation[i]];
+  }
+  return Container(result.begin(), result.end());
+}
+
 } // namespace utilities
 
 namespace lps {
@@ -192,6 +210,102 @@ std::vector<std::set<std::size_t>> compute_summand_groups(const std::string& tex
   }
 }
 
+inline
+std::vector<std::size_t> compute_variable_order_default(std::size_t n)
+{
+  std::vector<std::size_t> result;
+  for (std::size_t i = 0; i < n; i++)
+  {
+    result.push_back(i);
+  }
+  return result;
+}
+
+inline
+std::vector<std::size_t> compute_variable_order_random(std::size_t n, bool exclude_first_variable = false)
+{
+  std::vector<std::size_t> result;
+  for (std::size_t i = 0; i < n; i++)
+  {
+    result.push_back(i);
+  }
+  std::random_device rd;
+  std::mt19937 g(rd());
+  std::size_t first = exclude_first_variable ? 1 : 0;
+  std::shuffle(result.begin() + first, result.end(), g);
+  return result;
+}
+
+inline
+std::vector<std::size_t> parse_variable_order(std::string text, std::size_t n, bool exclude_first_variable = false)
+{
+  using utilities::trim_copy;
+  using utilities::as_set;
+
+  // check if the format of the order is correct
+  std::string format = R"(\s*\d+(\s+\d+)*\s*)";
+  if (!std::regex_match(text, std::regex(format)))
+  {
+    throw mcrl2::runtime_error("The format of the variable order '" + text + "' is incorrect.");
+  }
+
+  text = trim_copy(text);
+  std::vector<std::size_t> result = utilities::parse_natural_number_sequence(trim_copy(text));
+
+  std::set<std::size_t> expected;
+  for (std::size_t i = 0; i < n; i++)
+  {
+    expected.insert(i);
+  }
+  if (as_set(result) != expected)
+  {
+    throw mcrl2::runtime_error("The variable order '" + text + "' is not a permutation of [0 .. " + std::to_string(n-1) + "].");
+  }
+
+  if (exclude_first_variable && result[0] != 0)
+  {
+    throw mcrl2::runtime_error("The variable order '" + text + "' does not start with a zero.");
+  }
+  return result;
+}
+
+inline
+std::vector<std::size_t> compute_variable_order(const std::string& text, const std::vector<boost::dynamic_bitset<>>& patterns, bool exclude_first_variable = false)
+{
+  std::size_t n = patterns.front().size() / 2;
+  if (text == "none")
+  {
+    return compute_variable_order_default(n);
+  }
+  else if (text == "random")
+  {
+    return compute_variable_order_random(n, exclude_first_variable);
+  }
+  else
+  {
+    return parse_variable_order(text, n, exclude_first_variable);
+  }
+}
+
+inline
+std::vector<boost::dynamic_bitset<>> reorder_read_write_patterns(const std::vector<boost::dynamic_bitset<>>& patterns, const std::vector<std::size_t>& variable_order)
+{
+  std::size_t n = variable_order.size();
+  std::vector<boost::dynamic_bitset<>> result;
+  for (const auto& pattern: patterns)
+  {
+    boost::dynamic_bitset<> reordered_pattern(2*n);
+    for (std::size_t i = 0; i < n; i++)
+    {
+      std::size_t j = variable_order[i];
+      reordered_pattern[2*i] = pattern[2*j];
+      reordered_pattern[2*i+1] = pattern[2*j+1];
+    }
+    result.push_back(reordered_pattern);
+  }
+  return result;
+}
+
 struct symbolic_reachability_options
 {
   data::rewrite_strategy rewrite_strategy = data::jitty;
@@ -203,6 +317,7 @@ struct symbolic_reachability_options
   bool no_discard_write = false;
   bool no_relprod = false;
   std::string summand_groups;
+  std::string variable_order;
   std::string dot_file;
 };
 
@@ -218,6 +333,7 @@ std::ostream& operator<<(std::ostream& out, const symbolic_reachability_options&
   out << "no-write = " << std::boolalpha << options.no_discard_write << std::endl;
   out << "no-relprod = " << std::boolalpha << options.no_relprod << std::endl;
   out << "groups = " << options.summand_groups << std::endl;
+  out << "reorder = " << options.variable_order << std::endl;
   out << "dot = " << options.dot_file << std::endl;
   return out;
 }
@@ -401,8 +517,11 @@ struct summand_group
   sylvan::ldds::ldd Ir; // meta data needed by sylvan::ldds::relprod
   sylvan::ldds::ldd Ip; // meta data needed by sylvan::ldds::project
 
-  void compute_read_write_pos()
+  std::pair<std::vector<std::size_t>, std::vector<std::size_t>> compute_read_write_pos() const
   {
+    std::vector<std::size_t> rpos;
+    std::vector<std::size_t> wpos;
+
     auto ri = read.begin();
     auto wi = write.begin();
     std::size_t index = 0;
@@ -410,25 +529,27 @@ struct summand_group
     {
       if (*ri <= *wi)
       {
-        read_pos.push_back(index++);
+        rpos.push_back(index++);
         ri++;
       }
       else
       {
-        write_pos.push_back(index++);
+        wpos.push_back(index++);
         wi++;
       }
     }
     while (ri != read.end())
     {
-      read_pos.push_back(index++);
+      rpos.push_back(index++);
       ri++;
     }
     while (wi != write.end())
     {
-      write_pos.push_back(index++);
+      wpos.push_back(index++);
       wi++;
     }
+
+    return { rpos, wpos };
   }
 
   summand_group(const data::variable_list& process_parameters, const boost::dynamic_bitset<>& read_write_pattern)
@@ -461,7 +582,7 @@ struct summand_group
     Ldomain = empty_set();
     Ir = compute_meta(read, write);
     Ip = cube(Ip_values);
-    compute_read_write_pos();
+    std::tie(read_pos, write_pos) = compute_read_write_pos();
   }
 };
 
