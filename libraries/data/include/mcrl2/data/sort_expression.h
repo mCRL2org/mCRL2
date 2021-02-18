@@ -147,5 +147,19 @@ std::set<data::sort_expression> find_sort_expressions(const data::sort_expressio
 
 } // namespace mcrl2
 
+namespace std
+{
+
+template <>
+struct hash<mcrl2::data::sort_expression>
+{
+  std::size_t operator()(const mcrl2::data::sort_expression& x) const
+  {
+    return hash<atermpp::aterm>()(x);
+  }
+};
+
+} // namespace std
+
 #endif // MCRL2_DATA_SORT_EXPRESSION_H
 
