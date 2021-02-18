@@ -105,7 +105,7 @@ public:
     typedef data::data_expression (Derived::*function_pointer)(const data::data_expression&);
     function_pointer fp = &Derived::apply;
     data_expression result = application(
-       derived().apply(x.head()),
+       x.head(),
        x.begin(),
        x.end(),
        std::bind(fp, derived(), std::placeholders::_1)

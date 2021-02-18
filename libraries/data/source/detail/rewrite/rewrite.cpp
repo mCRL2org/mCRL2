@@ -262,7 +262,9 @@ data_expression Rewriter::rewrite_lambda_application(
   return application(result,
                      t.begin()+vl.size(),
                      t.end(),
-                     [this, &sigma](const data_expression& t) -> data_expression { return rewrite(t, sigma); });
+                     [this, &sigma](const data_expression& t) -> data_expression { return rewrite(t, sigma); },
+                     false // This false indicates that the function is not applied to head, i.e., result. 
+                    );
 }
 
 data_expression Rewriter::existential_quantifier_enumeration(

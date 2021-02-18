@@ -66,7 +66,7 @@ struct add_sort_expressions: public Builder<Derived>
     typedef data::data_expression (Derived::*function_pointer)(const data::data_expression&);
     function_pointer fp = &Derived::apply;
     data::application result = data::application(
-       static_cast<Derived&>(*this).apply(x.head()),
+       x.head(),
        x.begin(),
        x.end(),
        std::bind(fp, static_cast<Derived*>(this), std::placeholders::_1)
@@ -409,7 +409,7 @@ struct add_data_expressions: public Builder<Derived>
     typedef data::data_expression (Derived::*function_pointer)(const data::data_expression&);
     function_pointer fp = &Derived::apply;
     data::application result = data::application(
-       static_cast<Derived&>(*this).apply(x.head()),
+       x.head(),
        x.begin(),
        x.end(),
        std::bind(fp, static_cast<Derived*>(this), std::placeholders::_1)
@@ -635,7 +635,7 @@ struct add_variables: public Builder<Derived>
     typedef data::data_expression (Derived::*function_pointer)(const data::data_expression&);
     function_pointer fp = &Derived::apply;
     data::application result = data::application(
-       static_cast<Derived&>(*this).apply(x.head()),
+       x.head(),
        x.begin(),
        x.end(),
        std::bind(fp, static_cast<Derived*>(this), std::placeholders::_1)

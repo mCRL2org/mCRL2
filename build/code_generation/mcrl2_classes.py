@@ -1191,7 +1191,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                         visit_text = '''typedef data::data_expression (Derived::*function_pointer)(const data::data_expression&);
 function_pointer fp = &Derived::apply;
 %s result = data::application(
-   static_cast<Derived&>(*this).apply(x.head()),
+   x.head(),
    x.begin(),
    x.end(),
    std::bind(fp, static_cast<Derived*>(this), std::placeholders::_1)

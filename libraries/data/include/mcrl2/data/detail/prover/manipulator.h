@@ -83,7 +83,7 @@ class Manipulator
       }
 
       const application& t=atermpp::down_cast<application>(a_formula);
-      data_expression v_result = application(set_true_auxiliary(t.head(), a_guard,f_set_true),
+      data_expression v_result = application(t.head(),
                                              t.begin(),
                                              t.end(),
                                              [&a_guard, &f_set_true, this](const data_expression& d){ return set_true_auxiliary(d, a_guard,f_set_true);});
@@ -127,7 +127,7 @@ class Manipulator
       }
 
       const application t(a_formula);
-      data_expression v_result = application(set_false_auxiliary(t.head(), a_guard,f_set_false),
+      data_expression v_result = application(t.head(),
                                              t.begin(),
                                              t.end(),
                                              [&a_guard, &f_set_false, this](const data_expression& d){ return set_false_auxiliary(d, a_guard,f_set_false);});
@@ -174,7 +174,7 @@ class Manipulator
       }
 
       const application& a = atermpp::down_cast<application>(a_term);
-      application v_result(orient(a.head()), a.begin(), a.end(), [this](const data_expression& d){return orient(d); });
+      application v_result(a.head(), a.begin(), a.end(), [this](const data_expression& d){return orient(d); });
 
       if (is_equal_to_application(v_result))
       {

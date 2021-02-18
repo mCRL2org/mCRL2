@@ -28,7 +28,7 @@ inline
 application replace_argument(const application& x, std::size_t i, const data_expression& y)
 {
   std::size_t j = 0;
-  return application(x.head(), x.begin(), x.end(), [&](const data_expression& x_i) { return (j++ == i) ? y : x_i; });
+  return application(x.head(), x.begin(), x.end(), [&](const data_expression& x_i) { return (j++ == i+1) ? y : x_i; });
 }
 
 inline

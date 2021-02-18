@@ -181,75 +181,30 @@ class term_appl_prepend_iterator
     }
 };
 
-/// \brief Iterator for term_appl which prepends a single term to the list, applying ArgumentConvertor to all arguments.
-template <typename InputIterator, class ArgumentConverter>
-class transforming_term_appl_prepend_iterator: public term_appl_prepend_iterator<InputIterator>
+// The class below transforms a function that is to be applied to
+// the arguments of an application into a function that is not applied
+// to the head, and only applied to the arguments. 
+template <class ArgumentConverter>
+class skip_function_application_to_head
 {
-  public:
-    // The transforming_term_appl_prepend_iterator is an input iterator. The iterator can only
-    // be traversed once, as the an ArgumentConverter is applied when traversing the iterator.
-    // The ArgumentConverter should not be applied multiple times.
-    typedef std::input_iterator_tag iterator_category;
-
   protected:
-    mutable data_expression m_stable_store;
-    ArgumentConverter m_argument_converter;
-
+    ArgumentConverter& m_f;
+    std::size_t m_current_index;
+    const bool m_skip_head;
   public:
-
-    /// \brief Constructor.
-    /// \param it Iterator pointing to the argument list.
-    /// \param prepend Pointer to a term to be prepended to the argument list.
-    /// \param arg_convert A function that is applied to the terms in the argument list.
-    transforming_term_appl_prepend_iterator(InputIterator it,
-                                            const data_expression* prepend,
-                                            const ArgumentConverter arg_convert)
-      : term_appl_prepend_iterator<InputIterator>(it,prepend),
-        m_argument_converter(arg_convert)
+    skip_function_application_to_head(ArgumentConverter&f, const bool skip_head )
+     : m_f(f),
+       m_current_index(0),
+       m_skip_head(skip_head)
     {}
 
-    /// \brief The copy constructor.
-    /// \param other The iterator that is copy constructed.
-    transforming_term_appl_prepend_iterator(const transforming_term_appl_prepend_iterator& other)
-      : term_appl_prepend_iterator<InputIterator>(other),
-        m_stable_store(other.m_stable_store),
-        m_argument_converter(other.m_argument_converter)
+    data_expression operator()(const data_expression& d)
     {
-    }
-
-    /// \brief The assignment operator.
-    /// \param other The term to be assigned.
-    /// \return A reference to the assigned iterator.
-    transforming_term_appl_prepend_iterator& operator=(const transforming_term_appl_prepend_iterator& other)
-    {
-      term_appl_prepend_iterator<InputIterator>::operator=(other);
-      m_stable_store=other.m_stable_store;
-      m_argument_converter=other.m_argument_converter;
-      return *this;
-    }
-
-    /// \brief The dereference operator.
-    /// \return The dereferenced term.
-    typename term_appl_prepend_iterator<InputIterator>::reference operator*()
-    {
-      if (term_appl_prepend_iterator<InputIterator>::m_prepend)
+      if (m_skip_head && m_current_index++==0)
       {
-        return *term_appl_prepend_iterator<InputIterator>::m_prepend;
+        return d;
       }
-      m_stable_store=m_argument_converter(*term_appl_prepend_iterator<InputIterator>::m_it);
-      return m_stable_store;
-    }
-
-    /// \brief Dereference the current iterator.
-    /// \return The dereference term.
-    typename term_appl_prepend_iterator<InputIterator>::pointer operator->()
-    {
-      if (term_appl_prepend_iterator<InputIterator>::m_prepend)
-      {
-        return term_appl_prepend_iterator<InputIterator>::m_prepend;
-      }
-      m_stable_store=m_argument_converter(*term_appl_prepend_iterator<InputIterator>::m_it);
-      return &m_stable_store;
+      return m_f(d);
     }
 };
 
@@ -463,20 +418,30 @@ class application: public data_expression
 
 
     /// \brief Constructor.
+    /// \details Construct at term head(arg_first,...,arg_last) where convert_arguments
+    ///          has been applied to the head and all the arguments. 
+    /// \parameter head This is the new head for the application.
+    /// \parameter first This is a forward iterator yielding the first argument.
+    /// \parameter last  This is an iterator beyond the last argument.
+    /// \parameter convert_arguments This is a function applied to optionally the head and the arguments.
+    /// \parameter skip_first_argument A boolean which is true if the function must not be applied to the head.
     template <typename FwdIter, class ArgumentConverter>
     application(const data_expression& head,
                 FwdIter first,
                 FwdIter last,
                 ArgumentConverter convert_arguments,
+                const bool skip_first_argument=false,
                 typename std::enable_if< !std::is_base_of<data_expression, FwdIter>::value>::type* = nullptr,
                 typename std::enable_if< !std::is_base_of<data_expression, ArgumentConverter>::value>::type* = nullptr)
-      : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(std::distance(first, last) + 1),
-                                         detail::transforming_term_appl_prepend_iterator<FwdIter, ArgumentConverter>(first, &head, convert_arguments),
-                                         detail::transforming_term_appl_prepend_iterator<FwdIter, ArgumentConverter>(last,nullptr,convert_arguments)))
+      : data_expression(atermpp::term_appl<aterm>(
+                                 core::detail::function_symbol_DataAppl(std::distance(first, last) + 1),
+                                 detail::term_appl_prepend_iterator<FwdIter>(first, &head),
+                                 detail::term_appl_prepend_iterator<FwdIter>(last),
+                                 detail::skip_function_application_to_head(convert_arguments,skip_first_argument)))
     {
       assert(first!=last);
       assert(detail::check_whether_sorts_match(head,data_expression_list(begin(), end())));
-    }
+    } 
 
     /// Move semantics
     application(const application&) noexcept = default;

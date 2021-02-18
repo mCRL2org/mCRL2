@@ -74,8 +74,7 @@ data_expression move_constants_to_substitution(const data_expression& t,
     else
     {
       const application& ta=atermpp::down_cast<application>(t);
-      const data_expression h=move_constants_to_substitution(ta.head(),r,sigma,expression_to_variable_map,identifier_generator);
-      return application(h,
+      return application(ta.head(),
                          ta.begin(),
                          ta.end(),
                          [&](const data_expression& t)

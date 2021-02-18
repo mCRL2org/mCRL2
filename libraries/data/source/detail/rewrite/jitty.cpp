@@ -93,7 +93,7 @@ data_expression remove_normal_form_function(const data_expression& t)
       return ta[0];
     }
 
-    return application(remove_normal_form_function(ta.head()),ta.begin(),ta.end(),remove_normal_form_function);
+    return application(ta.head(), ta.begin(), ta.end(), remove_normal_form_function);
   }
 
 
@@ -289,9 +289,7 @@ static data_expression subst_values(
   else
   {
     const application& t1 = atermpp::down_cast<application>(t);
-    return application(subst_values(assignments,
-                                    t1.head(),
-                                    generator),
+    return application(t1.head(),
                        t1.begin(),
                        t1.end(),
                        [&](const data_expression& t){ return subst_values(assignments,t,generator);});
@@ -408,7 +406,8 @@ data_expression RewriterJitty::rewrite_aux(
     {
       // return appl(t,t1,...,tn) where t1,...,tn still need to be rewritten.
       jitty_argument_rewriter r(sigma,*this);
-      return application(t,tapp.begin(),tapp.end(),r); // Replacing r by a lambda term requires 16 more bytes on the stack. 
+      const bool do_not_rewrite_head=false;
+      return application(t,tapp.begin(),tapp.end(),r, do_not_rewrite_head); // Replacing r by a lambda term requires 16 more bytes on the stack. 
     }
     assert(is_abstraction(t));
     const abstraction& ta=atermpp::down_cast<abstraction>(t);
