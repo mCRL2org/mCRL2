@@ -75,7 +75,7 @@ std::pair<std::set<data::variable>, std::set<data::variable>> read_write_paramet
 {
   using utilities::detail::set_union;
   using utilities::detail::set_intersection;
-  using utilities::as_set;
+  using utilities::detail::as_set;
 
   std::set<data::variable> read_parameters = data::find_free_variables(summand.condition());
   std::set<data::variable> write_parameters;
@@ -168,8 +168,8 @@ struct summand_group: public lps::summand_group
     : lps::summand_group(process_parameters, read_write_pattern)
   {
     using lps::project;
-    using utilities::as_vector;
-    using utilities::as_set;
+    using utilities::detail::as_vector;
+    using utilities::detail::as_set;
     using utilities::detail::set_union;
     using utilities::detail::contains;
 
@@ -201,7 +201,7 @@ struct summand_group: public lps::summand_group
           }
           const pbes_system::srf_summand& smd = equation_summands[j];
           auto next_state = make_state(smd.variable(), propvar_map);
-          next_state = utilities::permute_copy(next_state, variable_order);
+          next_state = lps::permute_copy(next_state, variable_order);
           summands.emplace_back(data::and_(data::equal_to(process_parameters.front(), propvar_map.at(X_i)), smd.condition()), smd.parameters(), project(as_vector(next_state), write), copy);
         }
       }
@@ -290,7 +290,7 @@ class pbesreach_algorithm
         m_rewr(lps::construct_rewriter(m_pbes.data(), m_options.rewrite_strategy, pbes_system::find_function_symbols(pbesspec), m_options.remove_unused_rewrite_rules)),
         m_enumerator(m_rewr, m_pbes.data(), m_rewr, m_id_generator, false)
     {
-      data::basic_sort propvar_sort("PropositionalVariable");
+      data::basic_sort propvar_sort("PropositionalVariable"); // todo: choose a unique name
       std::unordered_map<core::identifier_string, data::data_expression> propvar_map;
       for (const auto& equation: m_pbes.equations())
       {
@@ -298,7 +298,7 @@ class pbesreach_algorithm
       }
 
       m_process_parameters = m_pbes.equations().front().variable().parameters();
-      m_process_parameters.push_front(data::variable("propvar", propvar_sort));
+      m_process_parameters.push_front(data::variable("propvar", propvar_sort)); // todo: choose a unique name
       m_n = m_process_parameters.size();
       m_initial_state = make_state(m_pbes.initial_state(), propvar_map);
 
@@ -306,12 +306,13 @@ class pbesreach_algorithm
       lps::adjust_read_write_patterns(patterns, m_options);
 
       std::vector<std::size_t> variable_order = lps::compute_variable_order(m_options.variable_order, patterns, true);
+      assert(variable_order[0] == 0); // It is required that the propositional variable name stays up front
       mCRL2log(log::debug) << "variable order = " << core::detail::print_list(variable_order) << std::endl;
       patterns = lps::reorder_read_write_patterns(patterns, variable_order);
       mCRL2log(log::debug) << lps::print_read_write_patterns(patterns);
 
-      m_process_parameters = utilities::permute_copy(m_process_parameters, variable_order);
-      m_initial_state = utilities::permute_copy(m_initial_state, variable_order);
+      m_process_parameters = lps::permute_copy(m_process_parameters, variable_order);
+      m_initial_state = lps::permute_copy(m_initial_state, variable_order);
       mCRL2log(log::debug) << "process parameters = " << core::detail::print_list(m_process_parameters) << std::endl;
       mCRL2log(log::debug) << "initial state = " << core::detail::print_list(m_initial_state) << std::endl;
 

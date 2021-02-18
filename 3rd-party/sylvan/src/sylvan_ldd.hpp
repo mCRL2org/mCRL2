@@ -514,8 +514,9 @@ ldd fix_first_element(const ldd& X, std::uint32_t value)
 // Computes the meta for relprod and relprev
 // read = the indices of read variables
 // write = the indices of write variables
+// has_action: if true, then a 5 is added to indicate there is an extra parameter that corresponds to an action
 inline
-ldd compute_meta(const std::vector<std::size_t>& read, const std::vector<std::size_t>& write)
+ldd compute_meta(const std::vector<std::size_t>& read, const std::vector<std::size_t>& write, bool has_action = false)
 {
   std::vector<std::uint32_t> meta;
 
@@ -547,6 +548,10 @@ ldd compute_meta(const std::vector<std::size_t>& read, const std::vector<std::si
     else if (type == 3) { meta.push_back(1); meta.push_back(2); }
     if (r_i == r_k && w_i == w_k)
     {
+      if (has_action)
+      {
+        meta.push_back(5);
+      }
       meta.push_back((std::uint32_t)-1);
       break;
     }

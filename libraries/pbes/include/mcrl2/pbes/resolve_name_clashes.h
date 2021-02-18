@@ -13,6 +13,7 @@
 #define MCRL2_PBES_RESOLVE_NAME_CLASHES_H
 
 #include "mcrl2/lps/resolve_name_clashes.h"
+#include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/srf_pbes.h"
 
 namespace mcrl2 {

@@ -216,6 +216,30 @@ bool set_includes(const std::set<T>& x, const std::set<T>& y)
   return std::includes(x.begin(), x.end(), y.begin(), y.end());
 }
 
+template <typename T>
+std::vector<T> as_vector(const atermpp::term_list<T>& x)
+{
+  return std::vector<T>(x.begin(), x.end());
+}
+
+template <typename T>
+std::vector<T> as_vector(const std::set<T>& x)
+{
+  return std::vector<T>(x.begin(), x.end());
+}
+
+template <typename T>
+std::set<T> as_set(const atermpp::term_list<T>& x)
+{
+  return std::set<T>(x.begin(), x.end());
+}
+
+template <typename T>
+std::set<T> as_set(const std::vector<T>& x)
+{
+  return std::set<T>(x.begin(), x.end());
+}
+
 } // namespace detail
 
 } // namespace utilities

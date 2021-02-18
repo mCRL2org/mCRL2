@@ -13,11 +13,17 @@
 #define MCRL2_LPS_SYMBOLIC_REACHABILITY_H
 
 #include <algorithm>
+#include <iomanip>
 #include <iterator>
 #include <random>
 #include <regex>
 #include <sylvan_ldd.hpp>
+#include <boost/dynamic_bitset.hpp>
 #include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/data/consistency.h"
+#include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/substitution_utility.h"
 #include "mcrl2/data/undefined.h"
 #include "mcrl2/utilities/parse_numbers.h"
 #include "mcrl2/utilities/text_utility.h"
@@ -55,34 +61,12 @@ std::ostream& operator<<(std::ostream& out, const sylvan::ldds::ldd& x)
 
 namespace mcrl2 {
 
-namespace utilities {
+namespace lps {
 
-template <typename T>
-std::vector<T> as_vector(const atermpp::term_list<T>& x)
-{
-  return std::vector<T>(x.begin(), x.end());
-}
+constexpr std::uint32_t relprod_ignore = std::numeric_limits<std::uint32_t>::max();
 
-template <typename T>
-std::vector<T> as_vector(const std::set<T>& x)
-{
-  return std::vector<T>(x.begin(), x.end());
-}
-
-template <typename T>
-std::set<T> as_set(const atermpp::term_list<T>& x)
-{
-  return std::set<T>(x.begin(), x.end());
-}
-
-template <typename T>
-std::set<T> as_set(const std::vector<T>& x)
-{
-  return std::set<T>(x.begin(), x.end());
-}
-
-// Return a permuted copy of v (N.B. the implementation is not efficient)
-// v'[i] = v[permutation[i]]
+// Return a permuted copy v' of v with v'[i] = v[permutation[i]]
+// N.B. the implementation is not efficient
 template <typename Container>
 Container permute_copy(const Container& v, const std::vector<std::size_t>& permutation)
 {
@@ -99,18 +83,12 @@ Container permute_copy(const Container& v, const std::vector<std::size_t>& permu
   return Container(result.begin(), result.end());
 }
 
-} // namespace utilities
-
-namespace lps {
-
-constexpr std::uint32_t relprod_ignore = std::numeric_limits<std::uint32_t>::max();
-
 inline
 std::vector<std::set<std::size_t>> parse_summand_groups(std::string text, std::size_t n)
 {
   using utilities::regex_split;
   using utilities::trim_copy;
-  using utilities::as_set;
+  using utilities::detail::as_set;
 
   // check if the format of the group is correct
   std::string group_format = R"(\s*\d+(\s+\d+)*\s*)";
@@ -226,7 +204,7 @@ inline
 std::vector<std::size_t> parse_variable_order(std::string text, std::size_t n, bool exclude_first_variable = false)
 {
   using utilities::trim_copy;
-  using utilities::as_set;
+  using utilities::detail::as_set;
 
   // check if the format of the order is correct
   std::string format = R"(\s*\d+(\s+\d+)*\s*)";
@@ -541,7 +519,7 @@ struct summand_group
   summand_group(const data::variable_list& process_parameters, const boost::dynamic_bitset<>& read_write_pattern)
   {
     using namespace sylvan::ldds;
-    using utilities::as_vector;
+    using utilities::detail::as_vector;
 
     std::size_t n = process_parameters.size();
 
@@ -855,8 +833,8 @@ void check_enumerator_solution(const EnumeratorElement& p, const summand_group& 
 {
   if (p.expression() != data::sort_bool::true_())
   {
-    // TODO: print the problematic expression, like it is done in lps2lts
-    throw data::enumerator_error("Expression does not rewrite to true or false: " + data::pp(p.expression()) + " " + atermpp::pp(atermpp::aterm(p.expression())));
+    // TODO: print the problematic expression in the same way it is done in lps2lts(?)
+    throw data::enumerator_error("Expression does not rewrite to true or false: " + data::pp(p.expression()));
   }
 }
 
