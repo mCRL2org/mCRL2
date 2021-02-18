@@ -22,20 +22,6 @@
 #include "mcrl2/utilities/parse_numbers.h"
 #include "mcrl2/utilities/text_utility.h"
 
-namespace std
-{
-
-template <>
-struct hash<mcrl2::data::sort_expression>
-{
-  std::size_t operator()(const mcrl2::data::sort_expression& x) const
-  {
-    return hash<atermpp::aterm>()(x);
-  }
-};
-
-} // namespace std
-
 namespace sylvan::ldds {
 
 inline
