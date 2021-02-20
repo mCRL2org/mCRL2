@@ -2230,7 +2230,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void apply(const data::abstraction& x)
   {
     derived().enter(x);
-    data::abstraction result;
     if (data::is_forall(x))
     {
       derived().apply(atermpp::down_cast<data::forall>(x));
