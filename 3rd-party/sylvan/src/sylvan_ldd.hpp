@@ -495,6 +495,42 @@ std::vector<std::vector<std::uint32_t>> ldd_solutions(const sylvan::ldds::ldd& x
   return result;
 }
 
+inline
+std::string print_ldd(const sylvan::ldds::ldd& x)
+{
+  std::ostringstream out;
+  auto solutions = ldd_solutions(x);
+  bool multiline = solutions.size() > 1;
+  std::string sep = multiline ? ",\n" : ", ";
+
+  out << "{" << (multiline ? "\n" : " ");
+  for (auto i = solutions.begin(); i != solutions.end(); ++i)
+  {
+    const std::vector<std::uint32_t>& solution = *i;
+    if (i != solutions.begin())
+    {
+      out << sep;
+    }
+    out << "[ ";
+    for (auto j = solution.begin(); j != solution.end(); ++j)
+    {
+      if (j != solution.begin())
+      {
+        out << ", ";
+      }
+      out << *j;
+    }
+    out << " ]";
+  }
+  return out.str();
+}
+
+inline
+std::ostream& operator<<(std::ostream& out, const sylvan::ldds::ldd& x)
+{
+  return out << sylvan::ldds::print_ldd(x);
+}
+
 // Returns { x in X | x[0] = value }
 inline
 ldd fix_first_element(const ldd& X, std::uint32_t value)

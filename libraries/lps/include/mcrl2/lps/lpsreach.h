@@ -68,7 +68,7 @@ std::map<data::variable, std::size_t> process_parameter_index(const lps::specifi
 }
 
 inline
-std::vector<boost::dynamic_bitset<>> read_write_patterns(const lps::specification& lpsspec)
+std::vector<boost::dynamic_bitset<>> compute_read_write_patterns(const lps::specification& lpsspec)
 {
   using utilities::detail::as_set;
 
@@ -159,6 +159,7 @@ class lpsreach_algorithm
     std::vector<lps::data_expression_index> m_data_index;
     std::vector<lps_summand_group> m_summand_groups;
     data::data_expression_list m_initial_state;
+    std::vector<boost::dynamic_bitset<>> m_patterns;
 
     ldd state2ldd(const data::data_expression_list& x)
     {
@@ -214,13 +215,13 @@ class lpsreach_algorithm
       m_n = m_process_parameters.size();
       m_initial_state = lpsspec_.initial_process().expressions();
 
-      std::vector<boost::dynamic_bitset<>> patterns = read_write_patterns(lpsspec_);
-      lps::adjust_read_write_patterns(patterns, m_options);
+      m_patterns = compute_read_write_patterns(lpsspec_);
+      lps::adjust_read_write_patterns(m_patterns, m_options);
 
-      std::vector<std::size_t> variable_order = lps::compute_variable_order(m_options.variable_order, patterns);
+      std::vector<std::size_t> variable_order = lps::compute_variable_order(m_options.variable_order, m_patterns);
       mCRL2log(log::debug) << "variable order = " << core::detail::print_list(variable_order) << std::endl;
-      patterns = lps::reorder_read_write_patterns(patterns, variable_order);
-      mCRL2log(log::debug) << lps::print_read_write_patterns(patterns);
+      m_patterns = lps::reorder_read_write_patterns(m_patterns, variable_order);
+      mCRL2log(log::debug) << lps::print_read_write_patterns(m_patterns);
 
       m_process_parameters = permute_copy(m_process_parameters, variable_order);
       m_initial_state = permute_copy(m_initial_state, variable_order);
@@ -232,15 +233,15 @@ class lpsreach_algorithm
         m_data_index.push_back(lps::data_expression_index(param.sort()));
       }
 
-      std::vector<std::set<std::size_t>> groups = lps::compute_summand_groups(m_options.summand_groups, patterns);
+      std::vector<std::set<std::size_t>> groups = lps::compute_summand_groups(m_options.summand_groups, m_patterns);
       for (const auto& group: groups)
       {
         mCRL2log(log::debug) << "group " << core::detail::print_set(group) << std::endl;
       }
-      std::vector<boost::dynamic_bitset<>> group_patterns = lps::compute_summand_group_patterns(patterns, groups);
+      std::vector<boost::dynamic_bitset<>> group_patterns = lps::compute_summand_group_patterns(m_patterns, groups);
       for (std::size_t j = 0; j < group_patterns.size(); j++)
       {
-        m_summand_groups.emplace_back(lpsspec_, m_process_parameters, groups[j], group_patterns[j], patterns, variable_order);
+        m_summand_groups.emplace_back(lpsspec_, m_process_parameters, groups[j], group_patterns[j], m_patterns, variable_order);
       }
 
       for (std::size_t i = 0; i < m_summand_groups.size(); i++)
@@ -300,6 +301,11 @@ class lpsreach_algorithm
       std::cout << "number of states = " << satcount(visited) << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)" << std::endl;
 
       return visited;
+    }
+
+    const std::vector<boost::dynamic_bitset<>>& read_write_patterns() const
+    {
+      return m_patterns;
     }
 };
 

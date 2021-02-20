@@ -116,7 +116,7 @@ std::map<data::variable, std::size_t> process_parameter_index(const data::variab
 }
 
 inline
-std::vector<boost::dynamic_bitset<>> read_write_patterns(const pbes_system::srf_pbes& pbesspec, const data::variable_list& process_parameters)
+std::vector<boost::dynamic_bitset<>> compute_read_write_patterns(const pbes_system::srf_pbes& pbesspec, const data::variable_list& process_parameters)
 {
   std::vector<boost::dynamic_bitset<>> result;
 
@@ -229,6 +229,7 @@ class pbesreach_algorithm
     std::vector<lps::data_expression_index> m_data_index;
     std::vector<summand_group> m_summand_groups;
     data::data_expression_list m_initial_state;
+    std::vector<boost::dynamic_bitset<>> m_patterns;
 
     ldd state2ldd(const data::data_expression_list& x)
     {
@@ -302,29 +303,29 @@ class pbesreach_algorithm
       m_n = m_process_parameters.size();
       m_initial_state = make_state(m_pbes.initial_state(), propvar_map);
 
-      std::vector<boost::dynamic_bitset<>> patterns = read_write_patterns(m_pbes, m_process_parameters);
-      lps::adjust_read_write_patterns(patterns, m_options);
+      m_patterns = compute_read_write_patterns(m_pbes, m_process_parameters);
+      lps::adjust_read_write_patterns(m_patterns, m_options);
 
-      std::vector<std::size_t> variable_order = lps::compute_variable_order(m_options.variable_order, patterns, true);
+      std::vector<std::size_t> variable_order = lps::compute_variable_order(m_options.variable_order, m_patterns, true);
       assert(variable_order[0] == 0); // It is required that the propositional variable name stays up front
       mCRL2log(log::debug) << "variable order = " << core::detail::print_list(variable_order) << std::endl;
-      patterns = lps::reorder_read_write_patterns(patterns, variable_order);
-      mCRL2log(log::debug) << lps::print_read_write_patterns(patterns);
+      m_patterns = lps::reorder_read_write_patterns(m_patterns, variable_order);
+      mCRL2log(log::debug) << lps::print_read_write_patterns(m_patterns);
 
       m_process_parameters = lps::permute_copy(m_process_parameters, variable_order);
       m_initial_state = lps::permute_copy(m_initial_state, variable_order);
       mCRL2log(log::debug) << "process parameters = " << core::detail::print_list(m_process_parameters) << std::endl;
       mCRL2log(log::debug) << "initial state = " << core::detail::print_list(m_initial_state) << std::endl;
 
-      std::vector<std::set<std::size_t>> groups = lps::compute_summand_groups(m_options.summand_groups, patterns);
+      std::vector<std::set<std::size_t>> groups = lps::compute_summand_groups(m_options.summand_groups, m_patterns);
       for (const auto& group: groups)
       {
         mCRL2log(log::debug) << "group " << core::detail::print_set(group) << std::endl;
       }
-      std::vector<boost::dynamic_bitset<>> group_patterns = lps::compute_summand_group_patterns(patterns, groups);
+      std::vector<boost::dynamic_bitset<>> group_patterns = lps::compute_summand_group_patterns(m_patterns, groups);
       for (std::size_t j = 0; j < group_patterns.size(); j++)
       {
-        m_summand_groups.emplace_back(m_pbes, m_process_parameters, propvar_map, groups[j], group_patterns[j], patterns, variable_order);
+        m_summand_groups.emplace_back(m_pbes, m_process_parameters, propvar_map, groups[j], group_patterns[j], m_patterns, variable_order);
       }
 
       for (std::size_t i = 0; i < m_summand_groups.size(); i++)
@@ -426,6 +427,11 @@ class pbesreach_algorithm
     const std::vector<lps::data_expression_index>& data_index() const
     {
       return m_data_index;
+    }
+
+    const std::vector<boost::dynamic_bitset<>>& read_write_patterns() const
+    {
+      return m_patterns;
     }
 };
 

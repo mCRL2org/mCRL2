@@ -55,6 +55,7 @@ class pbesreach_tool: public rewriter_tool<input_output_tool>
       desc.add_option("no-read", "do not discard only-read parameters");
       desc.add_option("no-write", "do not discard only-write parameters");
       desc.add_option("no-relprod", "use an inefficient alternative version of relprod (for debugging)");
+      desc.add_option("info", "print read/write information of the summands");
       desc.add_option("groups", utilities::make_optional_argument("GROUPS", "none"),
                       "'none' (default) no summand groups\n"
                       "'simple' summands with the same read/write variables are joined\n"
@@ -79,6 +80,7 @@ class pbesreach_tool: public rewriter_tool<input_output_tool>
       options.no_discard_read                       = parser.has_option("no-read");
       options.no_discard_write                      = parser.has_option("no-write");
       options.no_relprod                            = parser.has_option("no-relprod");
+      options.info                                  = parser.has_option("info");
       options.summand_groups                        = parser.option_argument("groups");
       options.variable_order                        = parser.option_argument("reorder");
       options.make_total                            = parser.has_option("total");
@@ -145,11 +147,18 @@ class pbesreach_tool: public rewriter_tool<input_output_tool>
       }
 
       pbes_system::pbesreach_algorithm algorithm(pbesspec, options);
-      ldd V = algorithm.run(true);
 
-      if (!options.dot_file.empty())
+      if (options.info)
       {
-        print_dot(options.dot_file, V);
+        std::cout << lps::print_read_write_patterns(algorithm.read_write_patterns());
+      }
+      else
+      {
+        ldd V = algorithm.run(true);
+        if (!options.dot_file.empty())
+        {
+          print_dot(options.dot_file, V);
+        }
       }
 
       sylvan::sylvan_quit();

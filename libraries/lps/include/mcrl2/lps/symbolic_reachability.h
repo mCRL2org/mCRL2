@@ -28,42 +28,11 @@
 #include "mcrl2/utilities/parse_numbers.h"
 #include "mcrl2/utilities/text_utility.h"
 
-namespace sylvan::ldds {
-
-inline
-std::string print_ldd(const sylvan::ldds::ldd& x)
-{
-  std::ostringstream out;
-  auto solutions = ldd_solutions(x);
-  bool multiline = solutions.size() > 1;
-  std::string sep = multiline ? ",\n" : ", ";
-
-  out << "{" << (multiline ? "\n" : " ");
-  for (std::size_t i = 0; i < solutions.size(); i++)
-  {
-    if (i > 0)
-    {
-      out << sep;
-    }
-    out << mcrl2::core::detail::print_list(solutions[i]);
-  }
-  out << (multiline ? "\n" : " ") << "}";
-  return out.str();
-}
-
-inline
-std::ostream& operator<<(std::ostream& out, const sylvan::ldds::ldd& x)
-{
-  return out << sylvan::ldds::print_ldd(x);
-}
-
-} // sylvan::ldds
-
 namespace mcrl2 {
 
 namespace lps {
 
-constexpr std::uint32_t relprod_ignore = std::numeric_limits<std::uint32_t>::max();
+constexpr std::uint32_t relprod_ignore = std::numeric_limits<std::uint32_t>::max(); // used by alternative_relprod/relprev
 
 // Return a permuted copy v' of v with v'[i] = v[permutation[i]]
 // N.B. the implementation is not efficient
@@ -280,6 +249,7 @@ struct symbolic_reachability_options
   bool no_discard_read = false;
   bool no_discard_write = false;
   bool no_relprod = false;
+  bool info = false;
   std::string summand_groups;
   std::string variable_order;
   std::string dot_file;
@@ -296,6 +266,7 @@ std::ostream& operator<<(std::ostream& out, const symbolic_reachability_options&
   out << "no-read = " << std::boolalpha << options.no_discard_read << std::endl;
   out << "no-write = " << std::boolalpha << options.no_discard_write << std::endl;
   out << "no-relprod = " << std::boolalpha << options.no_relprod << std::endl;
+  out << "info = " << std::boolalpha << options.info << std::endl;
   out << "groups = " << options.summand_groups << std::endl;
   out << "reorder = " << options.variable_order << std::endl;
   out << "dot = " << options.dot_file << std::endl;
@@ -316,10 +287,81 @@ std::set<std::size_t> parameter_indices(const std::set<data::variable>& paramete
 inline
 std::string print_read_write_patterns(const std::vector<boost::dynamic_bitset<>>& patterns)
 {
+  std::size_t n = patterns.front().size() / 2;
+
+  auto print_used = [n](const boost::dynamic_bitset<>& pattern)
+  {
+    std::ostringstream out;
+    for (std::size_t i = 0; i < n; i++)
+    {
+      bool read = pattern[2*i];
+      bool write = pattern[2*i+1];
+      bool used = read || write;
+      out << (used ? "1" : "0");
+    }
+    return out.str();
+  };
+
+  // N.B. The stream operator of boost::dynamic_bitset prints the bits in reverse order(!)
+  auto print_rw = [n](const boost::dynamic_bitset<>& pattern)
+  {
+    std::ostringstream out;
+    for (std::size_t i = 0; i < n; i++)
+    {
+      bool read = pattern[2*i];
+      bool write = pattern[2*i+1];
+      out << (read ? "1" : "0");
+      out << (write ? "1" : "0");
+    }
+    return out.str();
+  };
+
+  auto print_compact = [n](const boost::dynamic_bitset<>& pattern)
+  {
+    std::ostringstream out;
+    for (std::size_t i = 0; i < n; i++)
+    {
+      bool read = pattern[2*i];
+      bool write = pattern[2*i+1];
+      if (read && write)
+      {
+        out << '+';
+      }
+      else if (read)
+      {
+        out << 'r';
+      }
+      else if (write)
+      {
+        out << 'w';
+      }
+      else
+      {
+        out << '-';
+      }
+    }
+    return out.str();
+  };
+
   std::ostringstream out;
+  out << "used parameters" << std::endl;
   for (std::size_t i = 0; i < patterns.size(); i++)
   {
-    out << std::setw(4) << i << " " << patterns[i] << std::endl;
+    out << std::setw(4) << i << " " << print_used(patterns[i]) << std::endl;
+  }
+  out << std::endl;
+
+  out << "read/write patterns" << std::endl;
+  for (std::size_t i = 0; i < patterns.size(); i++)
+  {
+    out << std::setw(4) << i << " " << print_rw(patterns[i]) << std::endl;
+  }
+  out << std::endl;
+
+  out << "read/write patterns compacted" << std::endl;
+  for (std::size_t i = 0; i < patterns.size(); i++)
+  {
+    out << std::setw(4) << i << " " << print_compact(patterns[i]) << std::endl;
   }
   return out.str();
 }

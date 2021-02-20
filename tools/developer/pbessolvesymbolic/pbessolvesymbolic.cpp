@@ -59,6 +59,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
                       "'random' variables are put in a random order\n"
                       "'<order>' a user defined permutation e.g. '1 3 2 0 4'"
       );
+      desc.add_option("info", "print read/write information of the summands");
       desc.add_hidden_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
       desc.add_hidden_option("no-discard", "do not discard any parameters");
       desc.add_hidden_option("no-read", "do not discard only-read parameters");
@@ -78,6 +79,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       options.no_discard_read                       = parser.has_option("no-read");
       options.no_discard_write                      = parser.has_option("no-write");
       options.no_relprod                            = parser.has_option("no-relprod");
+      options.info                                  = parser.has_option("info");
       options.summand_groups                        = parser.option_argument("groups");
       options.variable_order                        = parser.option_argument("reorder");
       options.make_total                            = true; // This is a required setting
@@ -146,47 +148,55 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       }
 
       pbes_system::pbesreach_algorithm reach(pbesspec, options);
-      timer().start("instantiation");
-      ldd V = reach.run();
-      timer().finish("instantiation");
-      ldd init = reach.initial_state();
 
-      pbes_system::pbes_equation_index equation_index(reach.pbes());
-
-      // map propositional variable names to the corresponding ldd value
-      std::map<core::identifier_string, std::uint32_t> propvar_index;
-      for (const data::data_expression& X: reach.data_index()[0].values())
+      if (options.info)
       {
-        const auto& X_ = atermpp::down_cast<data::function_symbol>(X);
-        std::uint32_t i = propvar_index.size();
-        propvar_index[X_.name()] = i;
+        std::cout << lps::print_read_write_patterns(reach.read_write_patterns());
       }
-
-      // maps ldd values to (rank, is_disjunctive)
-      std::map<std::size_t, std::pair<std::size_t, bool>> equation_info;
-      for (const auto& equation: reach.pbes().equations())
+      else
       {
-        const core::identifier_string& name = equation.variable().name();
-        std::size_t rank = equation_index.rank(name);
-        bool is_disjunctive = !equation.is_conjunctive();
-        auto i = propvar_index.find(name);
-        if (i != propvar_index.end())
+        timer().start("instantiation");
+        ldd V = reach.run();
+        timer().finish("instantiation");
+        ldd init = reach.initial_state();
+
+        pbes_system::pbes_equation_index equation_index(reach.pbes());
+
+        // map propositional variable names to the corresponding ldd value
+        std::map<core::identifier_string, std::uint32_t> propvar_index;
+        for (const data::data_expression& X: reach.data_index()[0].values())
         {
-          std::uint32_t ldd_value = i->second;
-          equation_info[ldd_value] = { rank, is_disjunctive };
+          const auto& X_ = atermpp::down_cast<data::function_symbol>(X);
+          std::uint32_t i = propvar_index.size();
+          propvar_index[X_.name()] = i;
         }
-      }
 
-      pbes_system::symbolic_pbessolve_algorithm solver(V, reach.summand_groups(), equation_info, options.no_relprod, reach.data_index());
-      mCRL2log(log::debug) << pbes_system::print_pbes_info(reach.pbes()) << std::endl;
-      timer().start("solving");
-      bool result = solver.solve(V, init);
-      timer().finish("solving");
-      std::cout << (result ? "true" : "false") << std::endl;
+        // maps ldd values to (rank, is_disjunctive)
+        std::map<std::size_t, std::pair<std::size_t, bool>> equation_info;
+        for (const auto& equation: reach.pbes().equations())
+        {
+          const core::identifier_string& name = equation.variable().name();
+          std::size_t rank = equation_index.rank(name);
+          bool is_disjunctive = !equation.is_conjunctive();
+          auto i = propvar_index.find(name);
+          if (i != propvar_index.end())
+          {
+            std::uint32_t ldd_value = i->second;
+            equation_info[ldd_value] = { rank, is_disjunctive };
+          }
+        }
 
-      if (!options.dot_file.empty())
-      {
-        print_dot(options.dot_file, V);
+        pbes_system::symbolic_pbessolve_algorithm solver(V, reach.summand_groups(), equation_info, options.no_relprod, reach.data_index());
+        mCRL2log(log::debug) << pbes_system::print_pbes_info(reach.pbes()) << std::endl;
+        timer().start("solving");
+        bool result = solver.solve(V, init);
+        timer().finish("solving");
+        std::cout << (result ? "true" : "false") << std::endl;
+
+        if (!options.dot_file.empty())
+        {
+          print_dot(options.dot_file, V);
+        }
       }
 
       sylvan::sylvan_quit();
