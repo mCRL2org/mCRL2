@@ -25,8 +25,7 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-typedef sylvan::ldds::ldd vertex_set;
-typedef sylvan::ldds::ldd vertex;
+using sylvan::ldds::ldd;
 
 inline
 std::string print_pbes_info(const srf_pbes& pbesspec)
@@ -44,12 +43,12 @@ std::string print_pbes_info(const srf_pbes& pbesspec)
 // print the subgraph U of V
 template <typename SummandGroup>
 std::string print_graph(
-  const sylvan::ldds::ldd& U,
-  const sylvan::ldds::ldd& V,
+  const ldd& U,
+  const ldd& V,
   const std::vector<SummandGroup>& R,
   const std::vector<lps::data_expression_index>& data_index,
-  const sylvan::ldds::ldd& V0, // disjunctive nodes
-  const std::map<std::size_t, sylvan::ldds::ldd>& rank_map // maps rank to the corresponding set of nodes
+  const ldd& V0, // disjunctive nodes
+  const std::map<std::size_t, ldd>& rank_map // maps rank to the corresponding set of nodes
 )
 {
   using namespace sylvan::ldds;
@@ -124,7 +123,7 @@ std::string print_graph(
 }
 
 // print the indices of U (subset of V)
-std::string print_nodes(const sylvan::ldds::ldd& U, const sylvan::ldds::ldd& V)
+std::string print_nodes(const ldd& U, const ldd& V)
 {
   using namespace sylvan::ldds;
 
@@ -162,8 +161,6 @@ std::string print_nodes(const sylvan::ldds::ldd& U, const sylvan::ldds::ldd& V)
 
 class symbolic_pbessolve_algorithm
 {
-  typedef sylvan::ldds::ldd ldd;
-
   protected:
     ldd m_V[2]; // m_V[0] is the set of even nodes, m_V[1] is the set of odd nodes
     const std::vector<summand_group>& m_summand_groups;
@@ -250,7 +247,7 @@ class symbolic_pbessolve_algorithm
     // Returns (min, Vmin) with
     //   min is the minimum rank in V
     //   Vmin is the set of vertices with the minimum rank in V
-    std::pair<std::size_t, vertex_set> get_min_rank(const vertex_set& V)
+    std::pair<std::size_t, ldd> get_min_rank(const ldd& V)
     {
       using namespace sylvan::ldds;
 
@@ -268,7 +265,7 @@ class symbolic_pbessolve_algorithm
     }
 
     // pre: V does not contain nodes with decoration true or false.
-    std::pair<vertex_set, vertex_set> zielonka(const vertex_set& V)
+    std::pair<ldd, ldd> zielonka(const ldd& V)
     {
       using namespace sylvan::ldds;
 
@@ -281,10 +278,10 @@ class symbolic_pbessolve_algorithm
 
       std::size_t alpha = m % 2; // 0 = disjunctive, 1 = conjunctive
 
-      vertex_set W[2];
-      vertex_set W_1[2];
+      ldd W[2];
+      ldd W_1[2];
 
-      vertex_set A = attractor(U, alpha, V);
+      ldd A = attractor(U, alpha, V);
       mCRL2log(log::debug) << "A = attractor(" << print_nodes(U, m_all_nodes) << ", " << print_nodes(V, m_all_nodes) << ") = " << print_nodes(A, m_all_nodes) << std::endl;
       std::tie(W_1[0], W_1[1]) = zielonka(minus(V, A));
 
@@ -296,7 +293,7 @@ class symbolic_pbessolve_algorithm
       }
       else
       {
-        vertex_set B = attractor(W_1[1 - alpha], 1 - alpha, V);
+        ldd B = attractor(W_1[1 - alpha], 1 - alpha, V);
         mCRL2log(log::debug) << "B = attractor(" << print_nodes(W_1[1 - alpha], m_all_nodes) << ", " << print_nodes(V, m_all_nodes) << ") = " << print_nodes(B, m_all_nodes) << std::endl;
         std::tie(W[0], W[1]) = zielonka(minus(V, B));
         W[1 - alpha] = union_(W[1 - alpha], B);
@@ -310,7 +307,7 @@ class symbolic_pbessolve_algorithm
     }
 
   public:
-    bool solve(const vertex_set& V, const vertex& initial_vertex)
+    bool solve(const ldd& V, const ldd& initial_vertex)
     {
       using namespace sylvan::ldds;
 
