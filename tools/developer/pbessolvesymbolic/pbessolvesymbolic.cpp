@@ -151,7 +151,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
 
       if (options.info)
       {
-        std::cout << lps::print_read_write_patterns(reach.read_write_patterns());
+        std::cout << lps::print_read_write_patterns(reach.read_write_group_patterns());
       }
       else
       {

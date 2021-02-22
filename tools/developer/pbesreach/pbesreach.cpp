@@ -150,7 +150,7 @@ class pbesreach_tool: public rewriter_tool<input_output_tool>
 
       if (options.info)
       {
-        std::cout << lps::print_read_write_patterns(algorithm.read_write_patterns());
+        std::cout << lps::print_read_write_patterns(algorithm.read_write_group_patterns());
       }
       else
       {
