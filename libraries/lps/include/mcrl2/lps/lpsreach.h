@@ -161,6 +161,7 @@ class lpsreach_algorithm
     data::data_expression_list m_initial_state;
     std::vector<boost::dynamic_bitset<>> m_summand_patterns;
     std::vector<boost::dynamic_bitset<>> m_group_patterns;
+    std::vector<std::size_t> m_variable_order;
 
     ldd state2ldd(const data::data_expression_list& x)
     {
@@ -219,13 +220,13 @@ class lpsreach_algorithm
       m_summand_patterns = compute_read_write_patterns(lpsspec_);
       lps::adjust_read_write_patterns(m_summand_patterns, m_options);
 
-      std::vector<std::size_t> variable_order = lps::compute_variable_order(m_options.variable_order, m_summand_patterns);
-      mCRL2log(log::debug) << "variable order = " << core::detail::print_list(variable_order) << std::endl;
-      m_summand_patterns = lps::reorder_read_write_patterns(m_summand_patterns, variable_order);
+      m_variable_order = lps::compute_variable_order(m_options.variable_order, m_summand_patterns);
+      mCRL2log(log::debug) << "variable order = " << core::detail::print_list(m_variable_order) << std::endl;
+      m_summand_patterns = lps::reorder_read_write_patterns(m_summand_patterns, m_variable_order);
       mCRL2log(log::debug) << lps::print_read_write_patterns(m_summand_patterns);
 
-      m_process_parameters = permute_copy(m_process_parameters, variable_order);
-      m_initial_state = permute_copy(m_initial_state, variable_order);
+      m_process_parameters = permute_copy(m_process_parameters, m_variable_order);
+      m_initial_state = permute_copy(m_initial_state, m_variable_order);
       mCRL2log(log::debug) << "process parameters = " << core::detail::print_list(m_process_parameters) << std::endl;
       mCRL2log(log::debug) << "initial state = " << core::detail::print_list(m_initial_state) << std::endl;
 
@@ -242,7 +243,7 @@ class lpsreach_algorithm
       m_group_patterns = lps::compute_summand_group_patterns(m_summand_patterns, groups);
       for (std::size_t j = 0; j < m_group_patterns.size(); j++)
       {
-        m_summand_groups.emplace_back(lpsspec_, m_process_parameters, groups[j], m_group_patterns[j], m_summand_patterns, variable_order);
+        m_summand_groups.emplace_back(lpsspec_, m_process_parameters, groups[j], m_group_patterns[j], m_summand_patterns, m_variable_order);
       }
 
       for (std::size_t i = 0; i < m_summand_groups.size(); i++)
@@ -300,6 +301,8 @@ class lpsreach_algorithm
 
       elapsed_seconds = std::chrono::steady_clock::now() - start;
       std::cout << "number of states = " << satcount(visited) << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)" << std::endl;
+      mCRL2log(log::verbose) << "LDD size = " << nodecount(visited) << std::endl;
+      mCRL2log(log::verbose) << "used variable order = " << core::detail::print_list(m_variable_order) << std::endl;
 
       return visited;
     }

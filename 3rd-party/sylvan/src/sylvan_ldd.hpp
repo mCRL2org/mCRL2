@@ -409,6 +409,13 @@ inline double satcount(const ldd& A)
   return lddmc_satcount(A.get());
 }
 
+// nodecount(A) = the number of nodes of the LDD A
+inline
+std::size_t nodecount(const ldd& A)
+{
+  return lddmc_nodecount(A.get());
+}
+
 // sat_one(A) = an arbitrary vector from the set A
 // returns the value of the leaf node (0 or 1)
 template <typename OutputIterator>
