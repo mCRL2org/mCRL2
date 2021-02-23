@@ -43,8 +43,3 @@ Setup
 For compiling the toolset itself and the build configuration, see :doc:`compilation`. If you are able to compile the toolset then enable the MCRL2_ENABLE_BENCHMARKS CMake option to enable the generation of benchmark targets. Compile the ``benchmarks`` target, this will generate the necessary files to perform the benchmarks. It will also compile the tools and microbenchmarks if necessary.
 
 After this step, performing the benchmarks can be done using ctest. For each tool, specification and option it generates a target named ``benchmark_<tool>_<specification>_<options>``. Each benchmark target has the ``benchmark`` label. For example to run all benchmarks pertaining the 1394-fin specification use ``ctest -L benchmark -R 1394-fin``, or to benchmark a specific tool use ``ctest -L benchmark -R lps2lts``. 
-
-Obsolete
-==========================
-
-For the previously automated performance measurement results see :doc:`performance_old/index`. Differences in the flags and hardware used make these results largely incomparable. Also the setup was not reproducible, so these results are only kept for historical reasons.
