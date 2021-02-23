@@ -26,7 +26,8 @@ Contents
    - `Git repository <https://github.com/mCRL2org/mCRL2>`_ (explanation: :doc:`repository`)
    - `Issue tracker <https://github.com/mCRL2org/mCRL2/issues>`_
    - `Code coverage <https://mcrl2.org/web/coverage/>`_
-   - `Results of regression testing <http://mcrl2build1.win.tue.nl:8111>`_ (explanation: :doc:`testing`)
+   - `Results of regression testing <http://mcrl2build1.win.tue.nl:8111>`_ (explanation: :doc:`teamcity_testing`)
+   - :doc:`testing`
    - :doc:`guidelines`
    - :doc:`code_generation`
    - :doc:`performance`
@@ -45,6 +46,7 @@ Old pages
 
    developer
    repository
+   teamcity_testing
    testing
    guidelines
    code_generation

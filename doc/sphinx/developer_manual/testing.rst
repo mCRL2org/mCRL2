@@ -1,236 +1,193 @@
 ================================
-Regression testing with TeamCity
+Toolset tests
 ================================
 
-The quality of the mCRL2 toolset is continuously monitored through
-regression tests, which are run automatically in a TeamCity setup.
-The results of the regression tests can be found at `<http://mcrl2build1.win.tue.nl:8111>`_.
-(You will need an account to access it)
+The toolset contains several types of regression tests. These tests are
+automatically executed on a continuous integration service to maintain the
+quality of the toolset, for information see :doc:`teamcity_testing`. First of
+all, each library contains a `test` directory consisting of several :file:`.cpp`
+files in which unit and integration tests are defined using the unit testing
+framework of the Boost library. Existing tests give an idea on how the tests are
+defined.
 
-In TeamCity there are two top-level projects that are of importance:
+There are also tests which execute the compiled tools themselves and check for
+errors in the results. Here, we have random tests that generate random (P)BES or
+mCRL2 specifications. See the section below for a detailed description of their
+setup and how to declare new tests. There are also regression tests with
+concrete specifications as input for issues that have been reported in the past
+or that have been observed during development. Regression tests are located in
+the :file:`tests/regression/` directory and use a similar setup as random
+testing.
 
-- *Debug* is a continuous build that is run on all supported platforms
-  in Debug mode after every commit to any branch (includes pull requests).
-- *Nightly* is a build that is run every night and builds the ``master`` branch
-  on all supported platforms in Release mode, after which the resulting builds are packaged.
-  Nightly also builds the website including the documentation from the Sphinx sources.
-  When all builds pass, the website, documentation and nightly packages are uploaded to `<http://mcrl2.org>`_.
+All tests are set up such that they can be executed locally by using ctest. For
+example, by executing :option:`ctest -j8` in the build directory we can run all
+test on eight cores. This can take more than an hour to complete. Furthermore,
+using the :option:`-R` option we can only execute tests that contain
+the given string in their name.
 
-Setup
-=====
+Random Testing
+----------------------------
 
-The TeamCity build system runs on 4 different machines:
+The random tests are implemented by the :file:`tests/random/random_testing.py`
+script. There are three types of random tests, modeled by the following classes:
 
-- ``mcrl2build1`` (Ubuntu Linux)
-- ``mcrl2build2`` (Ubuntu Linux)
-- ``mcrl2build3`` (Mac OS X, Mac Mini)
-- ``mcrl2build4`` (Ubuntu Linux)
-  
-On ``mcrl2build3``, we only run MacOSX and the corresponding builds.
-On each of the other machines, a number of virtual machines is run
-using KVM. A nice overview of how to configure virtual machines on
-Ubuntu using KVM can be found
-on http://www.howtogeek.com/117635/how-to-install-kvm-and-create-virtual-machines-on-ubuntu/.
-Some notes on managing LVM in Ubuntu are described
-here (http://www.howtogeek.com/howto/40702/how-to-manage-and-use-lvm-logical-volume-management-in-ubuntu/).
+ - ProcessTest - tests with a randomly generated process specification as input
+ - PbesTest - tests with a randomly generated PBES as input
+ - BesTest - tests with a randomly generated BES as input
 
-The main system running the TeamCity server is ``mcrl2build1``.
-On all systems and virtual machines a TeamCity agent is run.
+In the constructor of each of these classes the parameters of the random generation are set.
 
-==============================
-TeamCity project configuration
-==============================
+To add a random test, the following steps must be taken:
 
-In TeamCity, build configurations are contained in projects. Projects can contain other projects in a tree-like structure.
-Projects and build configurations inherit configuration from their parent projects.
+(1) Define a new class that inherits from one of those three. There are many examples of this in the script.
+(2) Optionally change the parameters of the random generation in the constructor.
+(3) Create a test specification in the directory tests/specification. This is a graph specified in YAML format, with three sections.
 
-A single project can contain multiple build configurations. Build configurations can be based on templates.
+The section 'tools' contains nodes that represent tool invocations. For example
+the following specifies an invocation of the tool lps2pbes with inputs l2 (an
+LPS) and l5 (a modal formula), output l8 (a PBES) and with additional command
+line flag --structured::
 
-For the mCRL2 toolset, the TeamCity projects are structured as follows:
+  t5:
+    input: [l2, l5]
+    output: [l8]
+    args: [--structured]
+    name: lps2pbes
 
-- **Root project** -
-  TeamCity's root project. Has no configuration related to mCRL2.
+The section 'nodes' contains nodes of the types below. These nodes are the inputs and outputs of tools:
 
-- **mCRL2 project** -
-  This project contains the default configuration for all other projects.
-  This project also contains all build configuration templates used in the child projects.
+  - mcrl2 - a process specification in text format
+  - lps - a linearized process specification in .lps format
+  - lts - an LTS in .lts format
+  - aut - an LTS in .aut format
+  - pbesspec - a PBES in text format
+  - pbes - a PBES in .pbes format
+  - mcf - a modal formula in text format
+  - text - a text file
 
-- **Build type level** -
-  These projects contain the configuration specific to the build types *Debug* or *Nightly*.
-  On this level, environment variables are configured that configure the correct build types in the CMake files.
-  There is also a *Release* project on this level but this is not used right now.
+For example::
 
-- **Build tool level** -
-  This level contains the configuration for certain build tools, eg. gcc, clang and Visual Studio.
+  nodes:
+    l1:
+      type: pbesspec
+    l2:
+      type: pbes
+    l3:
+      type: pbes
 
-- **Build platform level** -
-  This level contains the configuration for the different platforms, eg. Ubuntu, Fedora and Windows.
+The section 'result' contains a python expression that is used to evaluate the result, for example::
 
-The lowest project levels contain one or more build configurations each based on a template.
-The following templates are currently in use for building mCRL2 in the projects:
+  result: |
+    result = t4.value['solution'] == t6.value['solution'] == t8.value['solution'] == (not t2.value['has-deadlock'])
 
-- **Build & Test Unix Fast** -
-  Triggers a build on changes in the mCRL2 repository. Each build consists of 4 steps:
+Note that after a tool node has been executed, the results of the execution are put in the mapping value. The command line output of the execution is stored in the attributes stdout and stderr, so if needed this can also be used to determine the result of a test. There are many examples available in the directory tests/specifications. Moreover there is a python script draw.py that generates a graphical representation of the test. This is useful to check if the test has been specified correctly.
 
-  - Configure -- runs a CMake configure step
-  - Build -- runs a CMake build step
-  - Test -- executes the tests
-  - CPack -- runs a CPack step
+(4) Add an entry in the mapping available_tests. For example::
 
-  The steps will be explained later.
+     'lpsconstelm' : lambda name, settings: LpsConstelmTest(name, settings)
 
-- **Build & Test Unix Delayed** -
-  Triggers a build on changes in the mCRL2 repository. The build is delayed for 90 minutes to collect
-  multiple changes to the repository. The steps are the same as the Build & Test Unix Fast template.
+The parameter settings is the dictionary that corresponds to the YAML file of the random test. This file has to be specified during construction of the class LpsConstelmTest.
 
-- **Build & Test Windows Fast** -
-  Triggers a build on changes in the mCRL2 repository. Has the same 4 steps as the Unix builds and one additional
-  step (before the configure step) to setup the Visual Studio build environment.
+The random tests can be run using commands like this::
 
-Build steps
-===========
+  --- run one repetition of all available tests ---
+  python3 random_testing.py -r1
+  alphabet-reduce_0 Pass
+  bessolve_0 Pass
+  bisimulation-bisim_0 Pass
+  bisimulation-bisim-gjkw_0 Pass
+  bisimulation-bisim-gv_0 Indeterminate
+  bisimulation-branching-bisim_0 Pass
+  bisimulation-branching-bisim-gjkw_0 Pass
+  bisimulation-branching-bisim-gv_0 Pass
+  bisimulation-weak-bisim_0 Pass
+  lps-quantifier-one-point_0 Pass
+  lps2lts-algorithms_0 Pass
+  lps2pbes_0 Pass
+  lpsbinary_0 Indeterminate
+  lpsconfcheck-commutative_0 Pass
+  lpsconfcheck-commutative-disjoint_0 Pass
+  lpsconfcheck-disjoint_0 Pass
+  lpsconfcheck-triangular_0 Pass
+  lpsconfcheck-trivial_0 Pass
+  lpsconstelm_0 Pass
+  lpsparelm_0 Pass
+  lpsstategraph_0 Indeterminate
+  lpssumelm_0 Pass
+  lpssuminst_0 Pass
+  lts2pbes_0 Pass
+  ltscompare-bisim_0 Pass
+  ltscompare-bisim-gjkw_0 Pass
+  ltscompare-bisim-gv_0 Pass
+  ltscompare-branching-bisim_0 Pass
+  ltscompare-branching-bisim-gjkw_0 Pass
+  ltscompare-branching-bisim-gv_0 Pass
+  ltscompare-dpbranching-bisim_0 Pass
+  ltscompare-dpbranching-bisim-gjkw_0 Pass
+  ltscompare-dpbranching-bisim-gv_0 Pass
+  ltscompare-dpweak-bisim_0 Pass
+  ltscompare-ready-sim_0 Pass
+  ltscompare-sim_0 Pass
+  ltscompare-trace_0 Pass
+  ltscompare-weak-bisim_0 Pass
+  ltscompare-weak-trace_0 Pass
+  pbes-srf_0 Indeterminate
+  pbes-unify-parameters_0 Pass
+  pbesconstelm_0 Pass
+  pbesinst-alternative_lazy_0 Pass
+  pbesinst-finite_0 Pass
+  pbesinst-lazy_0 Pass
+  pbesparelm_0 Pass
+  pbespareqelm_0 Pass
+  pbespgsolve_0 Pass
+  pbespor2_0 Pass
+  pbesrewr-data-rewriter_0 Pass
+  pbesrewr-pfnf_0 Pass
+  pbesrewr-quantifier-all_0 Pass
+  pbesrewr-quantifier-finite_0 Pass
+  pbesrewr-quantifier-inside_0 Pass
+  pbesrewr-quantifier-one-point_0 Pass
+  pbesrewr-simplify_0 Pass
+  pbesrewr-simplify-data-rewriter_0 Pass
+  pbesrewr-simplify-quantifiers-data-rewriter_0 Pass
+  pbesrewr-simplify-quantifiers-rewriter_0 Pass
+  pbesrewr-simplify-rewriter_0 Pass
+  pbessolve_0 Pass
+  pbessolve-counter-example-optimization-0_0 Pass
+  pbessolve-counter-example-optimization-1_0 Pass
+  pbessolve-counter-example-optimization-2_0 Pass
+  pbessolve-counter-example-optimization-3_0 Pass
+  pbessolve-counter-example-optimization-4_0 Pass
+  pbessolve-counter-example-optimization-5_0 Pass
+  pbessolve-counter-example-optimization-6_0 Pass
+  pbessolve-counter-example-optimization-7_0 Pass
+  pbessolve-depth-first_0 Pass
+  pbesstategraph_0 Pass
 
-Configure
----------
+  --- run 5 repetitions of all tests that match the pattern parelm ---
+  python3 random_testing.py -pparelm -r5
+  lpsparelm_0 Pass
+  lpsparelm_1 Pass
+  lpsparelm_2 Pass
+  lpsparelm_3 Pass
+  lpsparelm_4 Pass
+  pbesparelm_0 Pass
+  pbesparelm_1 Pass
+  pbesparelm_2 Pass
+  pbesparelm_3 Pass
+  pbesparelm_4 Pass
 
-The *configure* build step is a Meta-runner_ called ``mcrl2_Conf`` with the following script:
+  --- run 10 repetitions of bessolve and keep the results ---
+  python3 random_testing.py -pbessolve -r10 -k
+  bessolve_0 Pass
+  bessolve_1 Pass
+  bessolve_2 Pass
+  bessolve_3 Pass
+  bessolve_4 Pass
+  bessolve_5 Pass
+  bessolve_6 Pass
+  bessolve_7 Pass
+  bessolve_8 Pass
+  bessolve_9 Pass
 
-.. code:: xml
-
-  <?xml version="1.0" encoding="UTF-8"?>
-  <meta-runner name="Configure">
-    <description>Configure mCRL2</description>
-    <settings>
-      <build-runners>
-        <runner name="CMake Configure" type="jetbrains-cmake-conf">
-          <parameters>
-            <param name="teamcity.build.workingDir" value="build" />
-            <param name="teamcity.step.mode" value="default" />
-            <param name="ui-jetbrains-cmake-conf-additional-cmd-params"><![CDATA[-DCMAKE_BUILD_TYPE=%cfg_buildtype%
-  %cfg_mcrl2_options%
-  %cfg_compiler%]]></param>
-            <param name="ui-jetbrains-cmake-conf-developer-warnings" value="%cfg_developer_warnings%" />
-            <param name="ui-jetbrains-cmake-conf-makefile-generator" value="%cfg_generator%" />
-            <param name="ui-jetbrains-cmake-conf-redirect-stderr" value="true" />
-            <param name="ui-jetbrains-cmake-conf-source-path" value="../src" />
-            <param name="ui-jetbrains-cmake-conf-warn-unused-vars" value="false" />
-          </parameters>
-        </runner>
-      </build-runners>
-      <requirements />
-    </settings>
-  </meta-runner>
-
-This meta-runner executes the *CMake Configure* build runner from the `TeamCity CMake plugin`_ with additional parameters:
-
-- ``cfg_buildtype`` - CMake build type. Either ``Release`` or ``Debug``. Configured on the **Build type level** projects.
-- ``cfg_mcrl2_options`` - Additional mCRL2 build options. For example ``-DMCRL2_ENABLE_EXPERIMENTAL=ON -DMCRL2_ENABLE_DEPRECATED=ON -DMCRL2_SKIP_LONG_TESTS=ON``. Configured on various levels.
-- ``cfg_compiler`` - The compiler to use. For example ``-DCMAKE_C_COMPILER=/usr/bin/gcc-6 -DCMAKE_CXX_COMPILER=/usr/bin/g++-6``. Configured on the **Build tool level** projects.
-- ``cfg_developer_warnings`` - Enable or disable developer warnings. Either ``true`` or ``false``. Configured on the **Build type level** projects.
-- ``cfg_generator`` - Always empty
-
-
-Build
------
-
-The *build* build step is a Meta-runner_ called ``mcrl2_BuildTools`` with the following script:
-
-.. code:: xml
-
-  <?xml version="1.0" encoding="UTF-8"?>
-  <meta-runner name="BuildTools">
-    <description>Build mCRL2 tools</description>
-    <settings>
-      <build-runners>
-        <runner name="CMake build" type="jetbrains-cmake-build">
-          <parameters>
-            <param name="teamcity.build.workingDir" value="build" />
-            <param name="teamcity.step.mode" value="default" />
-            <param name="ui-jetbrains-cmake-build-native-tool-params" value="-j%build_jobs%" />
-            <param name="ui-jetbrains-cmake-build-redirect-stderr" value="true" />
-          </parameters>
-        </runner>
-      </build-runners>
-      <requirements />
-    </settings>
-  </meta-runner>
-
-This meta-runner executes the *CMake Builder* build runner from the `TeamCity CMake plugin`_ with one additional parameter:
-
-- ``build_jobs`` - Number of make jobs (``-j`` argument of make). This parameter is configured in the .ini file of
-  build agents. It is usually configured as one more than the number of CPUs available to the agent.
-
-Test
-----
-
-The *test* build step is a Meta-runner_ called ``mcrl2_Test`` with the following script:
-
-.. code:: xml
-
-  <?xml version="1.0" encoding="UTF-8"?>
-  <meta-runner name="Test">
-    <description>Test mCRL2</description>
-    <settings>
-      <build-runners>
-        <runner name="Test" type="simpleRunner">
-          <parameters>
-            <param name="command.executable" value="ctest" />
-            <param name="command.parameters" value="-T Test --output-on-failure --no-compress-output -j%build_jobs% %test_mcrl2_headertest%" />
-            <param name="teamcity.build.workingDir" value="build" />
-            <param name="teamcity.step.mode" value="default" />
-          </parameters>
-        </runner>
-      </build-runners>
-      <requirements />
-    </settings>
-  </meta-runner>
-
-This meta-runner executes a *simpleRunner* build running built-in into TeamCity executing the ``ctest`` command.
-It has two additional parameters:
-
-- ``build_jobs`` - Number of make jobs (``-j`` argument of make). This parameter is configured in the .ini file of
-  build agents. It is usually configured as one more than the number of CPUs available to the agent.
-- ``test_mcrl2_headertest`` - An additional option used by some projects. This is either empty or contains the
-  string ``-LE headertest``.  Configured on the **Build type level** projects.
-
-CPack
------
-
-The *cpack* build step is a command line runner that executes a command line with one configurable parameter.
-
-The executed command is ``cpack``. The command is executed with the arguments ``-G %pack_type%``. This has one
-configurable parameter:
-
-- ``pack_type`` - A string that defines the generator to use. See the CPack documentation for the possible
-  values.  This is configured on the **Build platform level**.
-
-Setup VS Env
-------------
-
-This special build step is only required for Windows builds. It is used to set up the required environment
-variables for Visual Studio. This step executes a windows shell script using the `Command line`_ runner
-
-.. code:: PowerShell
-
-  REM - execute script to update environment
-  IF EXIST "C:\Program Files (x86)\%visual_studio_version%\VC\vcvarsall.bat" (
-    CALL "C:\Program Files (x86)\%visual_studio_version%\VC\vcvarsall.bat" x86_amd64
-  ) ELSE (
-    CALL "C:\Program Files\%visual_studio_version%\VC\vcvarsall.bat" x86
-  )
-
-  REM - make TeamCity update build environment
-  %env.TEAMCITY_CAPTURE_ENV%
-
-The special instruction ``%env.TEAMCITY_CAPTURE_ENV%`` instructs TeamCity to capture the current environment
-and use this for the following build steps.
-
-This script calls the ``vcvarsall.bat`` script supplied by Visual Studio. It contains one configurable parameter:
-
-- ``visual_studio_version`` - A string that contains the installation directory, including the version number,
-  of the Visual Studio installation to use. For example, ``Microsoft Visual Studio 12.0``.
-  Configured on the **Build tool level** projects for Windows platforms.
-
-.. _Meta-runner: https://confluence.jetbrains.com/display/TCD10/Working+with+Meta-Runner
-.. _Command line: https://confluence.jetbrains.com/display/TCD10/Command+Line
-.. _TeamCity CMake plugin: https://confluence.jetbrains.com/display/TW/CMake+Plugin
+When a test results in Indeterminate, it means that there was either a timeout, or the memory limit was exceeded. 
