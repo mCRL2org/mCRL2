@@ -87,20 +87,20 @@ def run(args):
     random.seed()
 
     # compute a good variable ordering
-    cmd = 'pbesreach --info --groups={} {}'.format(args.groups, args.pbesfile)
+    cmd = 'pbessolvesymbolic --info --groups={} {}'.format(args.groups, args.pbesfile)
     text = run_command(cmd)
     columns = parse_read_write_matrix(text)
     permutation = maximize_cost(columns, args.iterations)
 
     # check the permutation
-    cmd = 'pbesreach --info --groups={} --reorder="{}" {}'.format(args.groups, ' '.join(list(map(str, permutation))), args.pbesfile)
+    cmd = 'pbessolvesymbolic --info --groups={} --reorder="{}" {}'.format(args.groups, ' '.join(list(map(str, permutation))), args.pbesfile)
     text = run_command(cmd)
     columns = parse_read_write_matrix(text)
     cost = compute_cost(columns)
     print('final solution has {} zeroes'.format(cost))
 
     # print the command with optimum reordering
-    cmd = 'pbesreach -v --groups={} --reorder="{}" {}'.format(args.groups, ' '.join(list(map(str, permutation))), args.pbesfile)
+    cmd = 'pbessolvesymbolic -v --groups={} --reorder="{}" {}'.format(args.groups, ' '.join(list(map(str, permutation))), args.pbesfile)
     print(cmd)
     os.system(cmd)
 
