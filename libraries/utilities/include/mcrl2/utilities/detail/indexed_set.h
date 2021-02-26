@@ -128,10 +128,10 @@ inline typename indexed_set<Key,Hash,Equals,Allocator>::size_type indexed_set<Ke
 template <class Key, typename Hash, typename Equals, typename Allocator>
 inline typename indexed_set<Key,Hash,Equals,Allocator>::const_iterator indexed_set<Key,Hash,Equals,Allocator>::find(const key_type& key) const
 {
-  const std::size_t index = index(key);
-  if (index < m_keys.size())
+  const std::size_t idx = index(key);
+  if (idx < m_keys.size())
   {
-    return m_keys[index];
+    return begin() + idx;
   }
 
   return end();

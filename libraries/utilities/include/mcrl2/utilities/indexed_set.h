@@ -103,13 +103,13 @@ public:
 
   /// \brief Forward iterator which runs through the elements from the lowest to the largest number.
   /// \details Complexity is constant per operation.
-  iterator begin() const
+  const_iterator begin() const
   {
     return m_keys.begin();
   }
 
   /// \brief End of the forward iterator.
-  iterator end() const
+  const_iterator end() const
   {
     return m_keys.end();
   }
