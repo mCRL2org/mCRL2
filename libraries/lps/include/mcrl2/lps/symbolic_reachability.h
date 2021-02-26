@@ -27,6 +27,7 @@
 #include "mcrl2/data/undefined.h"
 #include "mcrl2/utilities/parse_numbers.h"
 #include "mcrl2/utilities/text_utility.h"
+#include "mcrl2/utilities/indexed_set.h"
 
 namespace mcrl2 {
 
@@ -428,8 +429,7 @@ class data_expression_index
 
   protected:
     data::sort_expression m_sort;
-    std::unordered_map<data::data_expression, std::uint32_t> m_value2index;
-    std::vector<data::data_expression> m_values;
+    mcrl2::utilities::indexed_set<data::data_expression> m_values;
 
   public:
     data_expression_index(const data::sort_expression& sort)
@@ -440,15 +440,7 @@ class data_expression_index
     std::uint32_t index(const data::data_expression& value)
     {
       assert(value.sort() == m_sort);
-      auto i = m_value2index.find(value);
-      if (i != m_value2index.end())
-      {
-        return i->second;
-      }
-      std::uint32_t index = m_values.size();
-      m_value2index[value] = index;
-      m_values.push_back(value);
-      return index;
+      return m_values.insert(value).first;
     }
 
     /// \brief Returns the value corresponding to index
@@ -464,7 +456,7 @@ class data_expression_index
 
     bool has_value(const data::data_expression& value) const
     {
-      return m_value2index.find(value) != m_value2index.end();
+      return m_values.find(value) != m_values.end();
     }
 
     bool has_index(std::uint32_t i) const
@@ -472,9 +464,14 @@ class data_expression_index
       return i < m_values.size();
     }
 
-    const std::vector<data::data_expression>& values() const
+    auto begin() const
     {
-      return m_values;
+      return m_values.begin();
+    }
+
+    auto end() const
+    {
+      return m_values.end();
     }
 };
 

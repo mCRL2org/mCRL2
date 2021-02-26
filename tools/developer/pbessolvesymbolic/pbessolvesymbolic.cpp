@@ -164,7 +164,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
 
         // map propositional variable names to the corresponding ldd value
         std::map<core::identifier_string, std::uint32_t> propvar_index;
-        for (const data::data_expression& X: reach.data_index()[0].values())
+        for (const data::data_expression& X: reach.data_index()[0])
         {
           const auto& X_ = atermpp::down_cast<data::function_symbol>(X);
           std::uint32_t i = propvar_index.size();
