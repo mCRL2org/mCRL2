@@ -29,6 +29,7 @@
 #include "mcrl2/lps/resolve_name_clashes.h"
 #include "mcrl2/lps/symbolic_reachability.h"
 #include "mcrl2/utilities/parse_numbers.h"
+#include "mcrl2/utilities/stack_array.h"
 
 namespace mcrl2 {
 
@@ -165,15 +166,17 @@ class lpsreach_algorithm
 
     ldd state2ldd(const data::data_expression_list& x)
     {
-      std::uint32_t v[x.size()]; // TODO: avoid this C99 construction
-      auto vi = v;
+      MCRL2_DECLARE_STACK_ARRAY(v, std::uint32_t, x.size());
+
+      auto vi = v.begin();
       auto di = m_data_index.begin();
       auto xi = x.begin();
       for (; di != m_data_index.end(); ++vi, ++di, ++xi)
       {
         *vi = di->index(*xi);
       }
-      return sylvan::ldds::cube(v, x.size());
+
+      return sylvan::ldds::cube(v.data(), x.size());
     };
 
     // R.L := R.L U {(x,y) in R | x in X}

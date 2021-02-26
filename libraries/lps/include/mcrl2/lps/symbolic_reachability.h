@@ -896,7 +896,8 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t n,
   std::size_t x_size = group.read.size();
   std::size_t y_size = group.write.size();
   std::size_t xy_size = x_size + y_size;
-  std::uint32_t xy[xy_size]; // TODO: avoid this C99 construction
+
+  MCRL2_DECLARE_STACK_ARRAY(xy, std::uint32_t, xy_size);
 
   // add the assignments corresponding to x to sigma
   // add x to the transition xy
@@ -921,9 +922,9 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t n,
                                data::data_expression value = rewr(smd.next_state[j], sigma);
                                xy[group.write_pos[j]] = data::is_variable(value) ? lps::relprod_ignore : data_index[group.write[j]].index(value);
                              }
-                             mCRL2log(log::debug) << "  " << print_transition(data_index, xy, group.read, group.write) << std::endl;
+                             mCRL2log(log::debug) << "  " << print_transition(data_index, xy.data(), group.read, group.write) << std::endl;
                              group.Ldomain = union_cube(group.Ldomain, x, x_size);
-                             group.L = algorithm.m_options.no_relprod ? union_cube(group.L, xy, xy_size) : union_cube_copy(group.L, xy, smd.copy.data(), xy_size);
+                             group.L = algorithm.m_options.no_relprod ? union_cube(group.L, xy.data(), xy_size) : union_cube_copy(group.L, xy.data(), smd.copy.data(), xy_size);
                              return false;
                            },
                            data::is_false
