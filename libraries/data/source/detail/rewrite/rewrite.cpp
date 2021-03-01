@@ -183,14 +183,14 @@ data_expression Rewriter::rewrite_lambda_application(
 {
   if (is_lambda(t))
   {
-    const abstraction& ta(t);
+    const abstraction& ta=atermpp::down_cast<abstraction>(t);
     return rewrite_single_lambda(ta.variables(),ta.body(),false,sigma);
   }
 
   const application ta(t);
   if (is_lambda(ta.head()))
   {
-    return rewrite_lambda_application(ta.head(),ta,sigma);
+    return rewrite_lambda_application(atermpp::down_cast<abstraction>(ta.head()),ta,sigma);
   }
 
   return rewrite(application(rewrite_lambda_application(ta.head(),sigma),ta.begin(),ta.end()),sigma);

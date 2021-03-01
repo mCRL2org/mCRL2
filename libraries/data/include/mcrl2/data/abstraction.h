@@ -32,7 +32,7 @@ class abstraction: public data_expression
 
     /// \brief Constructor.
     /// \param term A term
-    abstraction(const atermpp::aterm& term)
+    explicit abstraction(const atermpp::aterm& term)
       : data_expression(term)
     {
       assert(core::detail::check_term_Binder(*this));

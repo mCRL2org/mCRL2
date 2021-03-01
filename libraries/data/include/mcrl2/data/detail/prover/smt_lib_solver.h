@@ -780,7 +780,7 @@ class SMT_LIB_Solver: public SMT_Solver
       f_bool2pred = false;
 
       f_formula = "  :formula (and";
-      mCRL2log(log::verbose) << "Formula to be solved: " << a_formula << std::endl;
+      mCRL2log(log::verbose) << "Formula to be solved: " << data::pp(a_formula) << std::endl;
       while (!a_formula.empty())
       {
         v_clause = a_formula.front();

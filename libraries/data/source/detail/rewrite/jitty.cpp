@@ -389,7 +389,7 @@ data_expression RewriterJitty::rewrite_aux(
   
     const application& tapp=atermpp::down_cast<application>(term);
     
-    const data_expression& t = rewrite_aux(tapp.head(),sigma);
+    const data_expression t = rewrite_aux(tapp.head(),sigma);
     // Here t has the shape f(u1,....,un)(u1',...,um')....: f applied several times to arguments,
     // x(u1,....,un)(u1',...,um')....: x applied several times to arguments, or
     // binder x1,...,xn.t' where the binder is a lambda, exists or forall.
@@ -414,16 +414,16 @@ data_expression RewriterJitty::rewrite_aux(
     const binder_type& binder(ta.binding_operator());
     if (is_lambda_binder(binder))
     {
-      return rewrite_lambda_application(t,tapp,sigma);
+      return rewrite_lambda_application(ta,tapp,sigma);
     }
     if (is_exists_binder(binder))
     {
       assert(term.size()==1);
-      return existential_quantifier_enumeration(t,sigma);
+      return existential_quantifier_enumeration(ta,sigma);
     }
     assert(is_forall_binder(binder));
     assert(term.size()==1);
-    return universal_quantifier_enumeration(head1,sigma);
+    return universal_quantifier_enumeration(ta,sigma);
   }
   // Here term does not have the shape appl(t1,...,tn)
   if (is_function_symbol(term))
@@ -442,8 +442,7 @@ data_expression RewriterJitty::rewrite_aux(
   }
 
   { 
-    assert(is_abstraction(term));
-    const abstraction& ta(term);
+    const abstraction& ta=atermpp::down_cast<abstraction>(term);
     if (is_exists(ta))
     {
       return existential_quantifier_enumeration(ta,sigma);

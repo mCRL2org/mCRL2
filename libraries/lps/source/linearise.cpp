@@ -4715,7 +4715,7 @@ class specification_basic_type
 
       if (is_abstraction(t))
       {
-        const abstraction& abs_t(t);
+        const abstraction& abs_t=down_cast<abstraction>(t);
         return abstraction(
                  abs_t.binding_operator(),
                  abs_t.variables(),

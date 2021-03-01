@@ -12,12 +12,12 @@
 #ifndef MCRL2_UTILITIES_DETAIL_CONTAINER_UTILITY_H
 #define MCRL2_UTILITIES_DETAIL_CONTAINER_UTILITY_H
 
-#include "mcrl2/utilities/exception.h"
 #include <algorithm>
 #include <iterator>
 #include <map>
 #include <set>
 #include <unordered_set>
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2 {
 
@@ -216,11 +216,11 @@ bool set_includes(const std::set<T>& x, const std::set<T>& y)
   return std::includes(x.begin(), x.end(), y.begin(), y.end());
 }
 
-template <typename T>
+template <typename T>    // Utilities are not dependent on aterms, this function does not belong here. 
 std::vector<T> as_vector(const atermpp::term_list<T>& x)
 {
   return std::vector<T>(x.begin(), x.end());
-}
+} 
 
 template <typename T>
 std::vector<T> as_vector(const std::set<T>& x)

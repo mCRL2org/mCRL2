@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file atermpp/detail/indexed_set.cpp
+/// \file utilities/detail/indexed_set.cpp
 /// \brief This file contains some constants and functions shared
 ///        between indexed_sets and tables.
 
