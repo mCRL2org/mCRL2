@@ -38,9 +38,15 @@ typedef atermpp::detail::_aterm* unprotected_data_expression;    // Idem, but no
 
 struct jitty_variable_assignment_for_a_rewrite_rule
 {
-  unprotected_variable var;
-  unprotected_data_expression term;
+  const variable& var;
+  const data_expression& term;
   bool variable_is_a_normal_form;
+
+   jitty_variable_assignment_for_a_rewrite_rule(const variable& m_var,  const data_expression& m_term, bool m_nf)
+   : var(m_var),
+     term(m_term),
+     variable_is_a_normal_form(m_nf)
+  {}
 };
 
 struct jitty_assignments_for_a_rewrite_rule
@@ -210,14 +216,14 @@ static data_expression subst_values(
   {
     for (std::size_t i=0; i<assignments.size; i++)
     {
-      if (atermpp::detail::address(t)==assignments.assignment[i].var)
+      if (t==assignments.assignment[i].var)
       {
         if (assignments.assignment[i].variable_is_a_normal_form)
         {
           // Variables that are in normal form get a tag that they are in normal form.
-          return application(this_term_is_in_normal_form(),atermpp::down_cast<data_expression>(atermpp::aterm(assignments.assignment[i].term)));  
+          return application(this_term_is_in_normal_form(),assignments.assignment[i].term);  
         }
-        return atermpp::down_cast<data_expression>(atermpp::aterm(assignments.assignment[i].term));
+        return assignments.assignment[i].term;
       }
     }
     return t;
@@ -231,9 +237,9 @@ static data_expression subst_values(
     std::set<variable> variables_in_substitution;
     for(std::size_t i=0; i<assignments.size; ++i)
     {
-      std::set<variable> s=find_free_variables(atermpp::down_cast<data_expression>(atermpp::aterm(assignments.assignment[i].term)));
+      std::set<variable> s=find_free_variables(assignments.assignment[i].term);
       variables_in_substitution.insert(s.begin(),s.end());
-      variables_in_substitution.insert(atermpp::down_cast<variable>(atermpp::aterm(assignments.assignment[i].var)));
+      variables_in_substitution.insert(assignments.assignment[i].var);
     }
 
     variable_vector new_variables;
@@ -272,7 +278,7 @@ static data_expression subst_values(
     {
       for(const assignment_expression& a: local_assignments)
       {
-        assert(a[0]!= atermpp::aterm(assignments.assignment[i].var));
+        assert(a[0]!= assignments.assignment[i].var);
       }
     }
 #endif
@@ -312,15 +318,17 @@ static bool match_jitty(
 
     for (std::size_t i=0; i<assignments.size; i++)
     {
-      if (atermpp::detail::address(p)==assignments.assignment[i].var)
+      if (p==assignments.assignment[i].var)
       {
-        return atermpp::detail::address(t)==assignments.assignment[i].term;
+        return t==assignments.assignment[i].term;
       }
     }
 
-    assignments.assignment[assignments.size].var=atermpp::detail::address(p);
-    assignments.assignment[assignments.size].term=atermpp::detail::address(t);
-    assignments.assignment[assignments.size].variable_is_a_normal_form=term_context_guarantees_normal_form;
+    new (&assignments.assignment[assignments.size])
+              jitty_variable_assignment_for_a_rewrite_rule(
+                                atermpp::down_cast<variable>(p),
+                                t,
+                                term_context_guarantees_normal_form);
     assignments.size++;
     return true;
   }
