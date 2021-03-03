@@ -291,6 +291,10 @@ class PbessymbolicbisimTest(PbesTest):
     def __init__(self, name, settings):
         super(PbessymbolicbisimTest, self).__init__(name, ymlfile('pbessymbolicbisim'), settings)
 
+class PbessolvesymbolicTest(PbesTest):
+    def __init__(self, name, settings):
+        super(PbessolvesymbolicTest, self).__init__(name, ymlfile('pbessolvesymbolic'), settings)
+
 class Pbes2boolTest(PbesTest):
     def __init__(self, name, settings):
         super(Pbes2boolTest, self).__init__(name, ymlfile('pbessolve'), settings)
@@ -409,6 +413,7 @@ available_tests = {
     'pbesinst-finite'                             : lambda name, settings: PbesinstTest(name, ['-sfinite', '-f*(*:Bool)'], settings)                   ,
     'pbespgsolve'                                 : lambda name, settings: PbespgsolveTest(name, settings)                                             ,
     'pbessolve'                                   : lambda name, settings: Pbes2boolTest(name, settings)                                               ,
+    'pbessolvesymbolic'                           : lambda name, settings: PbessolvesymbolicTest(name, settings)                                               ,
     'pbessolve-depth-first'                       : lambda name, settings: Pbes2boolDepthFirstTest(name, settings)                                     ,
     'pbessolve-counter-example-optimization-0'    : lambda name, settings: Pbes2bool_counter_exampleTest(name, 0, settings)                            ,
     'pbessolve-counter-example-optimization-1'    : lambda name, settings: Pbes2bool_counter_exampleTest(name, 1, settings)                            ,
