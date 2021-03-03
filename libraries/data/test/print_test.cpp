@@ -422,10 +422,6 @@ BOOST_AUTO_TEST_CASE(test_mod)
   std::cout << "left = " << left << " " << data::pp(left) << std::endl;
   BOOST_CHECK(data::detail::is_plus(left));
 
-  application left1 = atermpp::down_cast<application>(detail::remove_numeric_casts(left));
-  std::cout << "left1 = " << left1 << " " << data::pp(left1) << std::endl;
-  BOOST_CHECK(data::detail::is_plus(left1));
-
   BOOST_CHECK(data::pp(x) == "(1 + 2) mod 3");
   std::cout << "x = " << x << " " << data::pp(x) << std::endl;
 
@@ -437,11 +433,6 @@ BOOST_AUTO_TEST_CASE(test_mod)
 
   BOOST_CHECK(data::sort_nat::is_nat(x.sort()));
   BOOST_CHECK(data::sort_int::is_mod_application(x));
-
-  left1 = atermpp::down_cast<application>(detail::remove_numeric_casts(left));
-  std::cout << "left1 = " << left1 << " " << data::pp(left1) << std::endl;
-  BOOST_CHECK(data::detail::is_minus(left1));
-  std::cout << "precedence(left1) = " << precedence(left1) << std::endl;
 
   BOOST_CHECK(data::pp(x) == "(2 - 1) mod 3");
   std::cout << "x = " << x << " " << data::pp(x) << std::endl;

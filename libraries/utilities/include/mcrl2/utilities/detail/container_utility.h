@@ -217,6 +217,7 @@ bool set_includes(const std::set<T>& x, const std::set<T>& y)
 }
 
 template <typename T>    // Utilities are not dependent on aterms, this function does not belong here. 
+                         // Leads to failing header test. 
 std::vector<T> as_vector(const atermpp::term_list<T>& x)
 {
   return std::vector<T>(x.begin(), x.end());

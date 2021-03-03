@@ -40,7 +40,16 @@ bool is_numeric_cast(const data_expression& x)
           ;
 }
 
-inline
+inline bool look_through_numeric_casts(const data_expression& x, std::function<bool(const data_expression&)> f)
+{
+  if (is_numeric_cast(x))
+  {
+    return look_through_numeric_casts(atermpp::down_cast<application>(x)[0], f);
+  }
+  return f(x);
+}
+
+/* inline
 data_expression remove_numeric_casts(data_expression x)
 {
   while (is_numeric_cast(x))
@@ -48,48 +57,66 @@ data_expression remove_numeric_casts(data_expression x)
     x = *atermpp::down_cast<application>(x).begin();
   }
   return x;
-}
+} */
 
 inline
 bool is_plus(const application& x)
 {
-  return sort_int::is_plus_application(remove_numeric_casts(x)) ||
-         sort_nat::is_plus_application(remove_numeric_casts(x)) ||
-         sort_pos::is_plus_application(remove_numeric_casts(x)) ||
-         sort_real::is_plus_application(remove_numeric_casts(x));
+  return look_through_numeric_casts(
+                x,
+                [](const data_expression& x)
+                   { return sort_int::is_plus_application(x) ||
+                            sort_nat::is_plus_application(x) ||
+                            sort_pos::is_plus_application(x) ||
+                            sort_real::is_plus_application(x); });
 }
 
 inline
 bool is_minus(const application& x)
 {
-  return sort_int::is_minus_application(remove_numeric_casts(x)) ||
-         sort_real::is_minus_application(remove_numeric_casts(x));
+  return look_through_numeric_casts(
+                x,
+                [](const data_expression& x)
+                   { return sort_int::is_minus_application(x) ||
+                            sort_real::is_minus_application(x); });
 }
 
 inline
 bool is_mod(const application& x)
 {
-  return sort_int::is_mod_application(remove_numeric_casts(x)) ||
-         sort_nat::is_mod_application(remove_numeric_casts(x));
+  return look_through_numeric_casts(
+                x,
+                [](const data_expression& x)
+                   { return sort_int::is_mod_application(x) ||
+                            sort_nat::is_mod_application(x); });
 }
 
 inline
 bool is_div(const application& x)
 {
-  return sort_int::is_div_application(remove_numeric_casts(x)) ||
-         sort_nat::is_div_application(remove_numeric_casts(x));
+  return look_through_numeric_casts(
+                x,
+                [](const data_expression& x)
+                   { return sort_int::is_div_application(x) ||
+                            sort_nat::is_div_application(x); });
 }
 
 inline
 bool is_divmod(const application& x)
 {
-  return sort_nat::is_divmod_application(remove_numeric_casts(x));
+  return look_through_numeric_casts(
+                x,
+                [](const data_expression& x)
+                   { return sort_nat::is_divmod_application(x); });
 }
 
 inline
 bool is_divides(const application& x)
 {
-  return sort_real::is_divides_application(remove_numeric_casts(x));
+  return look_through_numeric_casts(
+                x,
+                [](const data_expression& x)
+                   { return sort_real::is_divides_application(x); });
 }
 
 inline
@@ -179,7 +206,10 @@ bool is_in(const application& x)
 inline
 bool is_times(const application& x)
 {
-  return sort_int::is_times_application(remove_numeric_casts(x));
+  return look_through_numeric_casts(
+                x,
+                [](const data_expression& x)
+                   { return sort_int::is_times_application(x); });
 }
 
 inline
