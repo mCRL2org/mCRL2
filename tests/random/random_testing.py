@@ -34,7 +34,7 @@ class RandomTest(YmlTest):
 
     # create input files for the random test, and add the filenames to self.inputfiles
     def create_inputfiles(self, runpath = '.'):
-        raise NotImplemented
+        raise NotImplementedError
 
     # removes input files that are in the runpath directory
     def remove_inputfiles(self, runpath = '.'):
