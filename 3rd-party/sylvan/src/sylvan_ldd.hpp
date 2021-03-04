@@ -530,6 +530,8 @@ std::string print_ldd(const sylvan::ldds::ldd& x)
     }
     out << " ]";
   }
+  out << (multiline ? "\n" : " ") << "}";
+
   return out.str();
 }
 

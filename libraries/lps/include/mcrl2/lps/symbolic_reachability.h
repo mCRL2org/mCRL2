@@ -599,6 +599,7 @@ std::ostream& operator<<(std::ostream& out, const summand_group& x)
     out << "variables = " << core::detail::print_list(smd.variables) << std::endl;
     out << "next state = " << core::detail::print_list(smd.next_state) << std::endl;
     out << "copy = " << core::detail::print_list(smd.copy) << std::endl;
+
     std::vector<std::string> assignments;
     auto vi = x.write_parameters.begin();
     auto ni = smd.next_state.begin();
@@ -606,7 +607,7 @@ std::ostream& operator<<(std::ostream& out, const summand_group& x)
     {
       assignments.push_back(data::pp(*vi) + " := " + data::pp(*ni));
     }
-    out << "(" << smd.condition << ") -> " << core::detail::print_list(assignments) << std::endl;
+    out << "assignments = " << core::detail::print_list(assignments) << std::endl;
   }
   out << "read = " << core::detail::print_list(x.read) << std::endl;
   out << "read parameters = " << core::detail::print_list(x.read_parameters) << std::endl;
