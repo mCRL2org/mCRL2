@@ -35,14 +35,14 @@ class pbesreach_tool: public rewriter_tool<input_output_tool>
 
     // Sylvan options
     std::size_t min_tablesize = 22;
-    std::size_t max_tablesize = 25;
+    std::size_t max_tablesize = 26;
     std::size_t min_cachesize = 22;
-    std::size_t max_cachesize = 25;
+    std::size_t max_cachesize = 26;
 
     void add_options(utilities::interface_description& desc) override
     {
       super::add_options(desc);
-      desc.add_option("lace-workers", utilities::make_optional_argument("NAME", "0"), "set number of Lace workers (threads for parallelization), (0=autodetect)");
+      desc.add_option("lace-workers", utilities::make_optional_argument("NAME", "1"), "set number of Lace workers (threads for parallelization), (0=autodetect, default 1)");
       desc.add_option("lace-dqsize", utilities::make_optional_argument("NAME", "4194304"), "set length of Lace task queue (default 1024*1024*4)");
       desc.add_option("lace-stacksize", utilities::make_optional_argument("NAME", "0"), "set size of program stack in kilo bytes (0=default stack size)");
       desc.add_option("min-table-size", utilities::make_optional_argument("NAME", "22"), "minimum Sylvan table size (21-27, default 22)");
