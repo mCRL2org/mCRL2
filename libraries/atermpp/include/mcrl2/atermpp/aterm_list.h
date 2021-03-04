@@ -355,6 +355,20 @@ template <typename Term>
 inline
 term_list<Term> push_back(const term_list<Term>& l, const Term& el);
 
+/// \brief Converts the given term list to a vector.
+template <typename T>
+std::vector<T> as_vector(const atermpp::term_list<T>& x)
+{
+  return std::vector<T>(x.begin(), x.end());
+}
+
+/// \brief Converts the given term list to a set.
+template <typename T>
+std::set<T> as_set(const atermpp::term_list<T>& x)
+{
+  return std::set<T>(x.begin(), x.end());
+}
+
 } // namespace atermpp
 
 

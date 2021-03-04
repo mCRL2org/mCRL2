@@ -6,8 +6,6 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/utilities/detail/container_utility.h
-/// \brief add your file description here.
 
 #ifndef MCRL2_UTILITIES_DETAIL_CONTAINER_UTILITY_H
 #define MCRL2_UTILITIES_DETAIL_CONTAINER_UTILITY_H
@@ -134,11 +132,14 @@ void remove_if(ContainerT& items, const PredicateT& predicate)
 {
   for (auto it = items.begin(); it != items.end();)
   {
-	if (predicate(*it))
-	{
-	  it = items.erase(it);
-	}
-	else ++it;
+    if (predicate(*it))
+    {
+      it = items.erase(it);
+    }
+    else
+    {
+      ++it;
+    }
   }
 }
 
@@ -216,23 +217,11 @@ bool set_includes(const std::set<T>& x, const std::set<T>& y)
   return std::includes(x.begin(), x.end(), y.begin(), y.end());
 }
 
-template <typename T>    // Utilities are not dependent on aterms, this function does not belong here. 
-                         // Leads to failing header test. 
-std::vector<T> as_vector(const atermpp::term_list<T>& x)
-{
-  return std::vector<T>(x.begin(), x.end());
-} 
 
 template <typename T>
 std::vector<T> as_vector(const std::set<T>& x)
 {
   return std::vector<T>(x.begin(), x.end());
-}
-
-template <typename T>
-std::set<T> as_set(const atermpp::term_list<T>& x)
-{
-  return std::set<T>(x.begin(), x.end());
 }
 
 template <typename T>
