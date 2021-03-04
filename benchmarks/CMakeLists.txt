@@ -109,6 +109,6 @@ foreach(benchmark ${STATESPACE_BENCHMARKS})
   add_tool_benchmark("${NAME}_jittyc" lpsreach "${LPS_FILENAME}" "" "-rjittyc")
 
   # Benchmark solving PBES symbolically.
-  add_tool_benchmark("${NAME}_jittyc" pbessolvesymbolic "${NODEADLOCK_PBES_FILENAME}" "" "-rjittyc")
+  add_tool_benchmark("${NAME}_jittyc" pbessolvesymbolic "${NODEADLOCK_PBES_FILENAME}" "" "-Q0" "-rjittyc")
 
 endforeach()
