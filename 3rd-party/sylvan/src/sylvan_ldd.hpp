@@ -499,7 +499,7 @@ inline
 std::vector<std::vector<std::uint32_t>> ldd_solutions(const sylvan::ldds::ldd& x)
 {
   std::vector<std::vector<std::uint32_t>> result;
-  sat_all(x, ldd_solutions_callback, &result);
+  sat_all_nopar(x, ldd_solutions_callback, &result);
   return result;
 }
 
