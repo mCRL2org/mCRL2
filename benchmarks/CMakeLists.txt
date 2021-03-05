@@ -44,7 +44,7 @@ set(GAME_BENCHMARKS
 
 # This target is used to generate all intermediate files required for benchmarks. 
 add_custom_target(benchmarks)
-add_dependencies(benchmarks lps2lts lpsreach pbes2bool pbessolvesymbolic ltsconvert)
+add_dependencies(benchmarks lps2lts pbes2bool ltsconvert)
 
 foreach(benchmark ${STATESPACE_BENCHMARKS} ${GAME_BENCHMARKS})
   # Obtain just <name>.mcrl2, split off <name> for the benchmark name and output lps <name>.lps
@@ -97,18 +97,24 @@ foreach(benchmark ${STATESPACE_BENCHMARKS} ${GAME_BENCHMARKS})
 
 endforeach()
 
-foreach(benchmark ${STATESPACE_BENCHMARKS})
-  # Obtain just <name>.mcrl2, split off <name> for the benchmark name and output lps <name>.lps
-  get_filename_component(MCRL2_FILENAME ${benchmark} NAME)
-  string(REPLACE ".mcrl2" "" NAME ${MCRL2_FILENAME})
+# Only add the symbolic benchmarks when the tools are part of the build, i.e., developer tools enabled and Sylvan can be compiled.
+if (TARGET lpsreach AND TARGET pbessolvesymbolic)
 
-  set(LPS_FILENAME "${BENCHMARK_WORKSPACE}/${NAME}.lps")
-  set(NODEADLOCK_PBES_FILENAME "${BENCHMARK_WORKSPACE}/${NAME}.nodeadlock.pbes")
+  add_dependencies(benchmarks lpsreach pbessolvesymbolic)
 
-  # Benchmark symbolic statespace generation.
-  add_tool_benchmark("${NAME}_jittyc" lpsreach "${LPS_FILENAME}" "" "-rjittyc")
+  foreach(benchmark ${STATESPACE_BENCHMARKS})
+    # Obtain just <name>.mcrl2, split off <name> for the benchmark name and output lps <name>.lps
+    get_filename_component(MCRL2_FILENAME ${benchmark} NAME)
+    string(REPLACE ".mcrl2" "" NAME ${MCRL2_FILENAME})
 
-  # Benchmark solving PBES symbolically.
-  add_tool_benchmark("${NAME}_jittyc" pbessolvesymbolic "${NODEADLOCK_PBES_FILENAME}" "" "-Q0" "-rjittyc")
+    set(LPS_FILENAME "${BENCHMARK_WORKSPACE}/${NAME}.lps")
+    set(NODEADLOCK_PBES_FILENAME "${BENCHMARK_WORKSPACE}/${NAME}.nodeadlock.pbes")
 
-endforeach()
+    # Benchmark symbolic statespace generation.
+    add_tool_benchmark("${NAME}_jittyc" lpsreach "${LPS_FILENAME}" "" "-rjittyc")
+
+    # Benchmark solving PBES symbolically.
+    add_tool_benchmark("${NAME}_jittyc" pbessolvesymbolic "${NODEADLOCK_PBES_FILENAME}" "" "-Q0" "-rjittyc")
+
+  endforeach()
+endif()
