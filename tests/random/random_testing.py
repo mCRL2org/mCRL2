@@ -413,7 +413,6 @@ available_tests = {
     'pbesinst-finite'                             : lambda name, settings: PbesinstTest(name, ['-sfinite', '-f*(*:Bool)'], settings)                   ,
     'pbespgsolve'                                 : lambda name, settings: PbespgsolveTest(name, settings)                                             ,
     'pbessolve'                                   : lambda name, settings: Pbes2boolTest(name, settings)                                               ,
-    'pbessolvesymbolic'                           : lambda name, settings: PbessolvesymbolicTest(name, settings)                                               ,
     'pbessolve-depth-first'                       : lambda name, settings: Pbes2boolDepthFirstTest(name, settings)                                     ,
     'pbessolve-counter-example-optimization-0'    : lambda name, settings: Pbes2bool_counter_exampleTest(name, 0, settings)                            ,
     'pbessolve-counter-example-optimization-1'    : lambda name, settings: Pbes2bool_counter_exampleTest(name, 1, settings)                            ,
@@ -430,7 +429,10 @@ available_tests = {
     'bessolve'                                    : lambda name, settings: BessolveTest(name, settings)                                                ,
     #'stochastic-ltscompare'                      : lambda name, settings: StochasticLtscompareTest(name, settings)                                     ,
 }
-#if os.name != 'nt':
+
+# These test do not work on Windows due to dependencies.
+if os.name != 'nt':
+    available_tests.update({'pbessolvesymbolic' : lambda name, settings: PbessolvesymbolicTest(name, settings) })
 #    available_tests.update({ 'pbesbddsolve' : lambda name, settings: PbesbddsolveTest(name, settings) })
 
 def print_names(tests):
