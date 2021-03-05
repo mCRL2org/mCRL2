@@ -32,9 +32,9 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
 
     // Sylvan options
     std::size_t min_tablesize = 22;
-    std::size_t max_tablesize = 26;
+    std::size_t max_tablesize = 25;
     std::size_t min_cachesize = 22;
-    std::size_t max_cachesize = 26;
+    std::size_t max_cachesize = 25;
 
     void add_options(utilities::interface_description& desc) override
     {
@@ -42,10 +42,10 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       desc.add_option("lace-workers", utilities::make_optional_argument("NAME", "1"), "set number of Lace workers (threads for parallelization), (0=autodetect, default 1)");
       desc.add_option("lace-dqsize", utilities::make_optional_argument("NAME", "4194304"), "set length of Lace task queue (default 1024*1024*4)");
       desc.add_option("lace-stacksize", utilities::make_optional_argument("NAME", "0"), "set size of program stack in kilo bytes (0=default stack size)");
-      desc.add_option("min-table-size", utilities::make_optional_argument("NAME", "22"), "minimum Sylvan table size (21-27, default 22)");
-      desc.add_option("max-table-size", utilities::make_optional_argument("NAME", "26"), "maximum Sylvan table size (21-27, default 26)");
-      desc.add_option("min-cache-size", utilities::make_optional_argument("NAME", "22"), "minimum Sylvan cache size (21-27, default 22)");
-      desc.add_option("max-cache-size", utilities::make_optional_argument("NAME", "26"), "maximum Sylvan cache size (21-27, default 26)");
+      desc.add_option("min-table-size", utilities::make_optional_argument("NAME", "22"), "minimum Sylvan table size (21-40, default 22)");
+      desc.add_option("max-table-size", utilities::make_optional_argument("NAME", "25"), "maximum Sylvan table size (21-40, default 25)");
+      desc.add_option("min-cache-size", utilities::make_optional_argument("NAME", "22"), "minimum Sylvan cache size (21-40, default 22)");
+      desc.add_option("max-cache-size", utilities::make_optional_argument("NAME", "25"), "maximum Sylvan cache size (21-40, default 25)");
       desc.add_hidden_option("no-remove-unused-rewrite-rules", "do not remove unused rewrite rules. ", 'u');
       desc.add_hidden_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
       desc.add_option("no-discard", "do not discard any parameters");
@@ -126,7 +126,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
 
       lace_init(lace_n_workers, lace_dqsize);
       lace_startup(lace_stacksize, nullptr, nullptr);
-      sylvan::sylvan_set_sizes(1LL<<min_tablesize, 1LL<<max_tablesize, 1LL<<min_cachesize, 1LL<<max_cachesize);
+      sylvan::sylvan_set_sizes(1ULL<<min_tablesize, 1ULL<<max_tablesize, 1ULL<<min_cachesize, 1ULL<<max_cachesize);
       sylvan::sylvan_init_package();
       sylvan::sylvan_init_ldd();
 
