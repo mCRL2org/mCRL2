@@ -98,7 +98,7 @@ foreach(benchmark ${STATESPACE_BENCHMARKS} ${GAME_BENCHMARKS})
 endforeach()
 
 # Only add the symbolic benchmarks when the tools are part of the build, i.e., developer tools enabled and Sylvan can be compiled.
-if (TARGET lpsreach AND TARGET pbessolvesymbolic)
+if (MCRL2_ENABLE_DEVELOPER AND TARGET sylvan)
 
   add_dependencies(benchmarks lpsreach pbessolvesymbolic)
 

@@ -86,14 +86,14 @@ if(MCRL2_ENABLE_CODE_COVERAGE)
   include(CodeCoverage)
 endif()
 
-if (${MCRL2_ENABLE_BENCHMARKS})
-  add_subdirectory(benchmarks)
-endif()
-
 add_subdirectory(3rd-party/dparser)
 if (UNIX)
   add_subdirectory(3rd-party/sylvan/src)
-endif (UNIX)
+endif()
+
+if (MCRL2_ENABLE_BENCHMARKS)
+  add_subdirectory(benchmarks)
+endif()
 
 add_subdirectory(libraries)
 add_subdirectory(tools)
