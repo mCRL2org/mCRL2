@@ -23,17 +23,22 @@ namespace detail
 
 // Component that helps applying the Singleton design pattern
 template < typename Derived, typename Expression = atermpp::aterm_appl >
-struct singleton_expression : public Expression
+class singleton_expression 
 {
-  static Expression const& instance()
-  {
-    static Expression single_instance = Expression(Derived::initialise());
+  public:
+    static const Expression& instance()
+    {
+      static Expression single_instance = Expression(Derived::initialise());
+      return single_instance;
+    }
 
-    return single_instance;
-  }
+    singleton_expression(const singleton_expression&) = delete;
+    singleton_expression& operator=(const singleton_expression &) = delete;
+    singleton_expression(singleton_expression &&) = delete;
+    singleton_expression & operator=(singleton_expression &&) = delete;
 
-  singleton_expression() : Expression(instance())
-  { }
+  protected:
+    singleton_expression() {}
 };
 
 template < typename Derived >

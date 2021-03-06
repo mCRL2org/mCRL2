@@ -465,12 +465,12 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       (name == data::sort_bool::implies_name())      ||
       (name == data::sort_bool::and_name())          ||
       (name == data::sort_bool::or_name())           ||
-      (name == data::detail::equal_symbol())         ||
-      (name == data::detail::not_equal_symbol())     ||
-      (name == data::detail::less_symbol())          ||
-      (name == data::detail::less_equal_symbol())    ||
-      (name == data::detail::greater_symbol())       ||
-      (name == data::detail::greater_equal_symbol()) ||
+      data::detail::equal_symbol::is_symbol(name)    ||
+      data::detail::not_equal_symbol::is_symbol(name)     ||
+      data::detail::less_symbol::is_symbol(name)          ||
+      data::detail::less_equal_symbol::is_symbol(name)    ||
+      data::detail::greater_symbol::is_symbol(name)       ||
+      data::detail::greater_equal_symbol::is_symbol(name) ||
       (name == data::sort_list::in_name())           ||
       (name == data::sort_list::cons_name())         ||
       (name == data::sort_list::snoc_name())         ||

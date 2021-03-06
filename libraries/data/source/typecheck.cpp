@@ -2008,7 +2008,7 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
                       atermpp::down_cast<const untyped_identifier>(d).name():
                             (down_cast<const data::function_symbol>(d).name());
 
-  if (data::detail::if_symbol()==data_term_name)
+  if (data::detail::if_symbol::is_symbol(data_term_name))
   {
     sort_expression NewType;
     if (!MatchIf(atermpp::down_cast<function_sort>(Type), NewType))
@@ -2018,12 +2018,12 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
     Type=NewType;
   }
 
-  if (data::detail::equal_symbol()==data_term_name
-      || data::detail::not_equal_symbol()==data_term_name
-      || data::detail::less_symbol()==data_term_name
-      || data::detail::less_equal_symbol()==data_term_name
-      || data::detail::greater_symbol()==data_term_name
-      || data::detail::greater_equal_symbol()==data_term_name
+  if (data::detail::equal_symbol::is_symbol(data_term_name)
+      || data::detail::not_equal_symbol::is_symbol(data_term_name)
+      || data::detail::less_symbol::is_symbol(data_term_name)
+      || data::detail::less_equal_symbol::is_symbol(data_term_name)
+      || data::detail::greater_symbol::is_symbol(data_term_name)
+      || data::detail::greater_equal_symbol::is_symbol(data_term_name)
      )
   {
     sort_expression NewType;
