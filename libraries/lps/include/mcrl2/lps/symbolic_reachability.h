@@ -869,7 +869,7 @@ data::rewriter construct_rewriter(const data::data_specification& dataspec, data
 }
 
 template <typename EnumeratorElement>
-void check_enumerator_solution(const EnumeratorElement& p, const summand_group& summand)
+void check_enumerator_solution(const EnumeratorElement& p, const summand_group&)
 {
   if (p.expression() != data::sort_bool::true_())
   {
@@ -879,7 +879,7 @@ void check_enumerator_solution(const EnumeratorElement& p, const summand_group& 
 }
 
 template <typename Context>
-void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t n, void* context)
+void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t, void* context)
 {
   using namespace sylvan::ldds;
   using enumerator_element = data::enumerator_list_element_with_substitution<>;
