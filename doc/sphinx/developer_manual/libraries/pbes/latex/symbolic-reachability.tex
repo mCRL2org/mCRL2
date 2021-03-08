@@ -670,6 +670,19 @@ We reformulate this into
 \]
 where $\pred(U, V) = \{ u \in U \mid \exists v \in V: u \rightarrow v \}$.
 
+This can be further optimised by avoiding two intersections and only computing predecessors within $V_{1 - \alpha}$. 
+Furthermore, for a union of sparse relations $\rightarrow \,= \bigcup_{i=1}^{n} \rightarrow_i$ we can also apply the transition relations $\rightarrow_i$ directly instead of determining $\rightarrow$ first.
+For $\pred_i(U, V) = \{ u \in U \mid \exists v \in V: u \rightarrow_i v \}$ we define:
+
+\[
+\begin{array}{lcl}
+\attr[0]{\alpha}{U, V} & = & U \\
+\attr[n+1]{\alpha}{U, V} & = & \attr[n]{\alpha}{U, V} \\
+      & \cup & \bigcup_{i=1}^{n} \pred_i(V_{\alpha}, \attr[n]{\alpha}{U, V}) \\
+      & \cup & (V_{1 - \alpha} \setminus \bigcup_{i=1}^{n} \pred_i(V_{1 - \alpha}, V \setminus \attr[n]{\alpha}{U,V}) \\
+\end{array}
+\]
+
 \begin{algorithm}[h]
 \caption{Zielonka}
 \label{alg:zielonka}

@@ -212,35 +212,92 @@ class symbolic_pbessolve_algorithm
       }
     }
 
-    // returns { u in U | exists v in V: u -> v }
+    /// \returns The set { u in U | exists v in V: u -> v }, where -> is described by the given group.
+    ldd predecessors(const ldd& U, const ldd& V, const summand_group& group)
+    {
+      return m_no_relprod ? lps::alternative_relprev(V, group, U) : relprev(V, group.L, group.Ir, U);
+    }
+
+    /// \returns The set { u in U | exists v in V: u -> v }
     ldd predecessors(const ldd& U, const ldd& V)
     {
       using namespace sylvan::ldds;
-      const auto& R = m_summand_groups;
 
       ldd result = empty_set();
-      for (std::size_t i = 0; i < R.size(); i++)
+      for (std::size_t i = 0; i < m_summand_groups.size(); ++i)
       {
-        ldd prev_i = m_no_relprod ? lps::alternative_relprev(V, R[i], U) : relprev(V, R[i].L, R[i].Ir, U);
+        const summand_group& group = m_summand_groups[i];
+
+        auto group_start = std::chrono::steady_clock::now();
+        ldd prev_i = predecessors(U, V, group);
         result = union_(result, prev_i);
+
+        std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - group_start;
+        mCRL2log(log::debug) << "adding predecessors for group " << i << " out of " << m_summand_groups.size()
+                               << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)\n";
       }
       return result;
     }
 
-    ldd attractor(const ldd& U, std::size_t alpha, const ldd& V)
-    {
-      using namespace sylvan::ldds;
-      const ldd* V_ = m_V;
+    /// \brief Compute the attractor set for U.
+    /// \param alpha the current player
+    /// \param V is the set of states
+    /// \param Vplayer a partitioning of the nodes into the sets of even nodes V[0] and odd V[1].
+    ldd attractor(const ldd& U, std::size_t alpha, const ldd& V, const std::array<const ldd, 2>& Vplayer)
+    {      
+      auto start = std::chrono::steady_clock::now();
+      mCRL2log(log::verbose) << "start attractor set computation\n";
 
+      using namespace sylvan::ldds;
+      const ldd& Valpha = Vplayer[alpha];
+      const ldd& Vother = Vplayer[1-alpha];
+
+      std::size_t iter = 0;
       ldd X = empty_set();
       ldd Xnext = U;
       while (X != Xnext)
       {
+        auto iter_start = std::chrono::steady_clock::now();
         X = Xnext;
-        ldd X1 = intersect(intersect(V, V_[alpha]), predecessors(V, Xnext));
-        ldd X2 = intersect(intersect(V, V_[1 - alpha]), minus(V, predecessors(V, minus(V, Xnext))));
-        Xnext = union_(Xnext, union_(X1, X2));
+
+        // Determine transitions into the current player's nodes.
+        for (std::size_t i = 0; i < m_summand_groups.size(); ++i)
+        {
+          const summand_group& group = m_summand_groups[i];
+
+          auto group_start = std::chrono::steady_clock::now();
+          Xnext = union_(Xnext, predecessors(Valpha, Xnext, group));
+
+          std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - group_start;
+          mCRL2log(log::debug) << "adding alpha predecessors for group " << i << " out of " << m_summand_groups.size()
+                                 << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)\n";
+        }
+
+        // Determine nodes of the other player that can reach outside of X (called Xoutside).
+        ldd Xoutside = minus(V, Xnext);
+        ldd Xother = empty_set();
+        for (std::size_t i = 0; i < m_summand_groups.size(); ++i)
+        {
+          const summand_group& group = m_summand_groups[i];
+
+          auto group_start = std::chrono::steady_clock::now();
+          Xother = union_(Xother, predecessors(Vother, Xoutside, group));
+
+          std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - group_start;
+          mCRL2log(log::debug) << "removing 1 - alpha predecessors for group " << i << " out of " << m_summand_groups.size()
+                                 << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)\n";
+        }
+
+        Xnext = union_(Xnext, minus(Vother, Xother));
+
+        std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - iter_start;
+        mCRL2log(log::verbose) << "finished attractor set iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)\n";
+
+        ++iter;
       }
+
+      std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - start;
+      mCRL2log(log::verbose) << "finished attractor set computation (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)\n";
       return X;
     }
 
@@ -274,14 +331,19 @@ class symbolic_pbessolve_algorithm
         return { empty_set(), empty_set() };
       }
 
+      auto start = std::chrono::steady_clock::now();
+      mCRL2log(log::verbose) << "start zielonka recursion\n";
       auto [m, U] = get_min_rank(V);
 
       std::size_t alpha = m % 2; // 0 = disjunctive, 1 = conjunctive
 
+      // Compute the partitioning of V for players 0 (in V[0]) and 1 (in V[1]).
+      std::array<const ldd, 2> Vplayer = { intersect(V, m_V[0]), intersect(V, m_V[1]) };
+
       ldd W[2];
       ldd W_1[2];
 
-      ldd A = attractor(U, alpha, V);
+      ldd A = attractor(U, alpha, V, Vplayer);
       mCRL2log(log::debug) << "A = attractor(" << print_nodes(U, m_all_nodes) << ", " << print_nodes(V, m_all_nodes) << ") = " << print_nodes(A, m_all_nodes) << std::endl;
       std::tie(W_1[0], W_1[1]) = zielonka(minus(V, A));
 
@@ -293,11 +355,14 @@ class symbolic_pbessolve_algorithm
       }
       else
       {
-        ldd B = attractor(W_1[1 - alpha], 1 - alpha, V);
+        ldd B = attractor(W_1[1 - alpha], 1 - alpha, V, Vplayer);
         mCRL2log(log::debug) << "B = attractor(" << print_nodes(W_1[1 - alpha], m_all_nodes) << ", " << print_nodes(V, m_all_nodes) << ") = " << print_nodes(B, m_all_nodes) << std::endl;
         std::tie(W[0], W[1]) = zielonka(minus(V, B));
         W[1 - alpha] = union_(W[1 - alpha], B);
       }
+
+      std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - start;
+      mCRL2log(log::verbose) << "finished zielonka recursion (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)\n";
 
       mCRL2log(log::debug) << "\n  --- zielonka solution for ---\n" << print_graph(V, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
       mCRL2log(log::debug) << "W0 = " << print_nodes(W[0], m_all_nodes) << std::endl;
