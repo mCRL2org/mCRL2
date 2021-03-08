@@ -295,6 +295,11 @@ class pbesreach_algorithm
         m_rewr(lps::construct_rewriter(m_pbes.data(), m_options.rewrite_strategy, pbes_system::find_function_symbols(pbesspec), m_options.remove_unused_rewrite_rules)),
         m_enumerator(m_rewr, m_pbes.data(), m_rewr, m_id_generator, false)
     {
+      if (!m_options.srf.empty())
+      {
+        detail::save_pbes(m_pbes.to_pbes(), m_options.srf);
+      }
+
       data::basic_sort propvar_sort("PropositionalVariable"); // todo: choose a unique name
       std::unordered_map<core::identifier_string, data::data_expression> propvar_map;
       for (const auto& equation: m_pbes.equations())
@@ -406,11 +411,6 @@ class pbesreach_algorithm
       }
       mCRL2log(log::verbose) << "LDD size = " << nodecount(visited) << std::endl;
       mCRL2log(log::verbose) << "used variable order = " << core::detail::print_list(m_variable_order) << std::endl;
-
-      if (!m_options.srf.empty())
-      {
-        detail::save_pbes(m_pbes.to_pbes(), m_options.srf);
-      }
 
       return visited;
     }
