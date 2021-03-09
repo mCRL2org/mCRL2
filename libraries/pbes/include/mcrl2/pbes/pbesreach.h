@@ -397,7 +397,10 @@ class pbesreach_algorithm
         todo = minus(todo1, visited);
         visited = union_(visited, todo);
         elapsed_seconds = std::chrono::steady_clock::now() - loop_start;
-        mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(visited) << " states after " << std::setw(3) << iteration_count << " iterations (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)" << std::endl;
+        mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(visited) << " states after "
+                               << std::setw(3) << iteration_count << " iterations (time = " << std::setprecision(2)
+                               << std::fixed << elapsed_seconds.count() << "s)" << std::endl;
+        mCRL2log(log::verbose) << "LDD size = " << nodecount(visited) << std::endl;
       }
 
       elapsed_seconds = std::chrono::steady_clock::now() - start;
