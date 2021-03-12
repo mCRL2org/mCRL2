@@ -266,9 +266,8 @@ class lpsreach_algorithm
       auto start = std::chrono::steady_clock::now();
       ldd x = state2ldd(m_initial_state);
       std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - start;
-      ldd visited = x;
+      ldd visited = empty_set();
       ldd todo = x;
-      mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(visited) << " states after " << std::setw(3) << iteration_count << " iterations (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)" << std::endl;
 
       while (todo != empty_set())
       {
@@ -276,28 +275,29 @@ class lpsreach_algorithm
         iteration_count++;
         mCRL2log(log::debug) << "--- iteration " << iteration_count << " ---" << std::endl;
         mCRL2log(log::debug) << "todo = " << print_states(m_data_index, todo) << std::endl;
+
+        ldd todo1 = m_options.chaining ? todo : empty_set();
         for (std::size_t i = 0; i < R.size(); i++)
         {
-          learn_successors(i, R[i], minus(project(todo, R[i].Ip), R[i].Ldomain));
+          learn_successors(i, R[i], minus(project(m_options.chaining ? todo1 : todo, R[i].Ip), R[i].Ldomain));
           mCRL2log(log::debug) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
-        }
-        ldd todo1 = empty_set();
-        for (std::size_t i = 0; i < R.size(); i++)
-        {
+
           if (m_options.no_relprod)
           {
-            ldd z = lps::alternative_relprod(todo, R[i]);
+            ldd z = lps::alternative_relprod(m_options.chaining ? todo1 : todo, R[i]);
             mCRL2log(log::debug) << "relprod(" << i << ", todo) = " << print_states(m_data_index, z) << std::endl;
             todo1 = union_(z, todo1);
           }
           else
           {
             mCRL2log(log::debug) << "relprod(" << i << ", todo) = " << print_states(m_data_index, relprod(todo, R[i].L, R[i].Ir)) << std::endl;
-            todo1 = relprod_union(todo, R[i].L, R[i].Ir, todo1);
+            todo1 = relprod_union(m_options.chaining ? todo1 : todo, R[i].L, R[i].Ir, todo1);
           }
         }
-        todo = minus(todo1, visited);
+
         visited = union_(visited, todo);
+        todo = minus(todo1, visited);
+
         elapsed_seconds = std::chrono::steady_clock::now() - loop_start;
         mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(visited) << " states after "
                                << std::setw(3) << iteration_count << " iterations (time = " << std::setprecision(2)

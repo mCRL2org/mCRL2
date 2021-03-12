@@ -243,6 +243,7 @@ std::vector<boost::dynamic_bitset<>> reorder_read_write_patterns(const std::vect
 struct symbolic_reachability_options
 {
   data::rewrite_strategy rewrite_strategy = data::jitty;
+  bool chaining = false;
   bool one_point_rule_rewrite = false;
   bool replace_constants_by_variables = false;
   bool remove_unused_rewrite_rules = false;
@@ -260,6 +261,7 @@ inline
 std::ostream& operator<<(std::ostream& out, const symbolic_reachability_options& options)
 {
   out << "rewrite-strategy = " << options.rewrite_strategy << std::endl;
+  out << "chaining = " << std::boolalpha << options.chaining << std::endl;
   out << "one-point-rule-rewrite = " << std::boolalpha << options.one_point_rule_rewrite << std::endl;
   out << "replace-constants-by-variables = " << std::boolalpha << options.replace_constants_by_variables << std::endl;
   out << "remove-unused-rewrite-rules = " << std::boolalpha << options.remove_unused_rewrite_rules << std::endl;

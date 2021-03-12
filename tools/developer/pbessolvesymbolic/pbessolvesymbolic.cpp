@@ -60,6 +60,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
                       "'<order>' a user defined permutation e.g. '1 3 2 0 4'"
       );
       desc.add_option("info", "print read/write information of the summands");
+      desc.add_option("chaining", "apply the transition groups as a series");
       desc.add_hidden_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
       desc.add_hidden_option("no-discard", "do not discard any parameters");
       desc.add_hidden_option("no-read", "do not discard only-read parameters");
@@ -72,6 +73,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
     void parse_options(const utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
+      options.chaining                              = parser.has_option("chaining");
       options.one_point_rule_rewrite                = !parser.has_option("no-one-point-rule-rewrite");
       options.remove_unused_rewrite_rules           = !parser.has_option("no-remove-unused-rewrite-rules");
       options.replace_constants_by_variables        = false; // This option doesn't work in the current implementation

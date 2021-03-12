@@ -46,8 +46,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       desc.add_option("max-table-size", utilities::make_optional_argument("NAME", "25"), "maximum Sylvan table size (21-40, default 25)");
       desc.add_option("min-cache-size", utilities::make_optional_argument("NAME", "22"), "minimum Sylvan cache size (21-40, default 22)");
       desc.add_option("max-cache-size", utilities::make_optional_argument("NAME", "25"), "maximum Sylvan cache size (21-40, default 25)");
-      desc.add_hidden_option("no-remove-unused-rewrite-rules", "do not remove unused rewrite rules. ", 'u');
-      desc.add_hidden_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
+      desc.add_option("chaining", "apply the transition groups as a series");
       desc.add_option("no-discard", "do not discard any parameters");
       desc.add_option("no-read", "do not discard only-read parameters");
       desc.add_option("no-write", "do not discard only-write parameters");
@@ -62,12 +61,15 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
                       "'random' variables are put in a random order\n"
                       "'<order>' a user defined permutation e.g. '1 3 2 0 4'"
                       );
+      desc.add_hidden_option("no-remove-unused-rewrite-rules", "do not remove unused rewrite rules. ", 'u');
+      desc.add_hidden_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
       desc.add_hidden_option("dot", utilities::make_optional_argument("FILE", ""), "print the LDD of the parity game in dot format");
     }
 
     void parse_options(const utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
+      options.chaining                              = parser.has_option("chaining");
       options.one_point_rule_rewrite                = !parser.has_option("no-one-point-rule-rewrite");
       options.remove_unused_rewrite_rules           = !parser.has_option("no-remove-unused-rewrite-rules");
       options.replace_constants_by_variables        = false; // This option cannot be used in the symbolic algorithm

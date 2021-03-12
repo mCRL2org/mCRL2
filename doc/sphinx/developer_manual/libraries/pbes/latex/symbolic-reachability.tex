@@ -403,7 +403,7 @@ R = \bigcup_{i=1}^{n} R_i
 
 \begin{algorithm}[h]
 \caption{Reachability of a union of sparse relations}
-\label{alg:reachability3}
+\label{alg:reachability4}
 \begin{algorithmic}[1]
 \Function{ReachableStates}{$\{R_1, \ldots, R_n\}$, $x$}
 \State $\var{visited} := \{ x \}$
@@ -425,6 +425,37 @@ R = \bigcup_{i=1}^{n} R_i
 \end{algorithm}
 \noindent
 Note that in line 9 another optimization has been applied, by excluding elements in the projected todo list that are already in the domain of $L_i$.
+
+\subsection{Reachability with chaining}
+
+For symbolic reachability it can be useful to reduce the amount of breadth-first search iterations because this also reduces the amount of symbolic operations that have to be applied.
+Updating the todo set after applying each sparse relation can potentially increase the amount of states that are visited and thus reduce the amount of breadth-first search iterations necessary.
+Note that we only add the states for which all sparse relations have been applied to visited.
+
+\begin{algorithm}[H]
+\caption{Reachability of a union of sparse relations}
+\label{alg:reachability5}
+\begin{algorithmic}[1]
+\Function{ReachableStates}{$\{R_1, \ldots, R_n\}$, $x$}
+\State $\var{visited} := \{ x \}$
+\State $\var{todo} := \{ x \}$
+\For {$1 \leq i \leq n$}
+    \State $L_i := \emptyset$
+    \State $I_{r,i}, I_{w,i} := \textsf{read\_parameters}(R_i), \textsf{write\_parameters}(R_i)$
+\EndFor
+\While {$\var{todo} \neq \emptyset$}
+    \State $\var{todo1} := \var{todo}$
+    \For {$1 \leq i \leq n$}
+        \State $L_i := L_i \cup \{ (x,y) \in \textsf{project}(R_i, I_{r,i}, I_{w,i}) \mid x \in \textsf{project}(\var{todo1}, I_{r,i})  \setminus \textsf{domain}(L_i) \}$
+        \State $\var{todo1} := \var{todo1} \cup \textsf{relprod}(L_i, \var{todo1}, I_r, I_w)$
+    \EndFor
+    \State $\var{visited} := \var{visited} \cup \var{todo}$
+    \State $\var{todo} := \var{todo1} \setminus \var{visited}$
+\EndWhile
+\State \Return \var{visited}
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
 
 \subsection{Joining relations}
 If two or more of the relations $R_i$ have approximately the same set of read and write parameters, it can be beneficial to join them into one relation. In \cite{Meijer2019} this is called combining transition groups. 
