@@ -271,7 +271,7 @@ class symbolic_pbessolve_algorithm
           Xnext = union_(Xnext, predecessors(Valpha, m_chaining ? Xnext : X, group));
 
           std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - group_start;
-          mCRL2log(log::debug) << "adding alpha predecessors for group " << i << " out of " << m_summand_groups.size()
+          mCRL2log(log::debug) << "added alpha predecessors for group " << i << " out of " << m_summand_groups.size()
                                  << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)\n";
         }
 
@@ -286,14 +286,14 @@ class symbolic_pbessolve_algorithm
           Xother = union_(Xother, predecessors(Vother, Xoutside, group));
 
           std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - group_start;
-          mCRL2log(log::debug) << "removing 1 - alpha predecessors for group " << i << " out of " << m_summand_groups.size()
+          mCRL2log(log::debug) << "removed 1 - alpha predecessors for group " << i << " out of " << m_summand_groups.size()
                                  << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)\n";
         }
 
         Xnext = union_(Xnext, minus(Vother, Xother));
 
         std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - iter_start;
-        mCRL2log(log::verbose) << "finished attractor set iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)\n";
+        mCRL2log(log::verbose) << "attractor set iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)\n";
 
         ++iter;
       }

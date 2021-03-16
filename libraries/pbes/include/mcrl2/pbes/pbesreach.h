@@ -412,8 +412,14 @@ class pbesreach_algorithm
       {
         mCRL2log(log::verbose) << "number of states = " << satcount(visited) << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)" << std::endl;
       }
+
       mCRL2log(log::verbose) << "LDD size = " << nodecount(visited) << std::endl;
       mCRL2log(log::verbose) << "used variable order = " << core::detail::print_list(m_variable_order) << std::endl;
+
+      for (std::size_t i = 0; i < R.size(); i++)
+      {
+        mCRL2log(log::verbose) << "group " << std::setw(4) << i << " contains " << std::setw(7) << satcount(R[i].L) << " transitions" << std::endl;
+      }
 
       return visited;
     }
