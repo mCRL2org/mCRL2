@@ -166,6 +166,7 @@ class symbolic_pbessolve_algorithm
     const std::vector<summand_group>& m_summand_groups;
     std::map<std::size_t, ldd> m_rank_map;
     bool m_no_relprod = false;
+    bool m_chaining = false;
 
     const std::vector<lps::data_expression_index>& m_data_index; // for debugging only
     ldd m_all_nodes; // for debugging only
@@ -176,9 +177,10 @@ class symbolic_pbessolve_algorithm
       const std::vector<summand_group>& summand_groups,
       const std::map<std::size_t, std::pair<std::size_t, bool>>& equation_info, // maps ldd values to (rank, is_disjunctive)
       bool no_relprod,
+      bool chaining,
       const std::vector<lps::data_expression_index>& data_index
     )
-      : m_summand_groups(summand_groups), m_no_relprod(no_relprod), m_data_index(data_index), m_all_nodes(V)
+      : m_summand_groups(summand_groups), m_no_relprod(no_relprod), m_chaining(chaining), m_data_index(data_index), m_all_nodes(V)
     {
       using namespace sylvan::ldds;
       using utilities::detail::contains;
@@ -266,7 +268,7 @@ class symbolic_pbessolve_algorithm
           const summand_group& group = m_summand_groups[i];
 
           auto group_start = std::chrono::steady_clock::now();
-          Xnext = union_(Xnext, predecessors(Valpha, Xnext, group));
+          Xnext = union_(Xnext, predecessors(Valpha, m_chaining ? Xnext : X, group));
 
           std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - group_start;
           mCRL2log(log::debug) << "adding alpha predecessors for group " << i << " out of " << m_summand_groups.size()
@@ -274,7 +276,7 @@ class symbolic_pbessolve_algorithm
         }
 
         // Determine nodes of the other player that can reach outside of X (called Xoutside).
-        ldd Xoutside = minus(V, Xnext);
+        ldd Xoutside = minus(V, m_chaining ? Xnext : X);
         ldd Xother = empty_set();
         for (std::size_t i = 0; i < m_summand_groups.size(); ++i)
         {

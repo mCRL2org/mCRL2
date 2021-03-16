@@ -188,7 +188,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
           }
         }
 
-        pbes_system::symbolic_pbessolve_algorithm solver(V, reach.summand_groups(), equation_info, options.no_relprod, reach.data_index());
+        pbes_system::symbolic_pbessolve_algorithm solver(V, reach.summand_groups(), equation_info, options.no_relprod, options.chaining, reach.data_index());
         mCRL2log(log::debug) << pbes_system::print_pbes_info(reach.pbes()) << std::endl;
         timer().start("solving");
         bool result = solver.solve(V, init);
