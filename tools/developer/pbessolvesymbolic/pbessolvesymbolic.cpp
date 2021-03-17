@@ -140,7 +140,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       sylvan::sylvan_init_package();
       sylvan::sylvan_init_ldd();
 
-      mCRL2log(log::debug) << options << std::endl;
+      mCRL2log(log::verbose) << options << std::endl;
 
       pbes_system::pbes pbesspec = pbes_system::detail::load_pbes(input_filename());
 

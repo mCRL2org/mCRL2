@@ -132,7 +132,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       sylvan::sylvan_init_package();
       sylvan::sylvan_init_ldd();
 
-      mCRL2log(log::debug) << options << std::endl;
+      mCRL2log(log::verbose) << options << std::endl;
 
       lps::stochastic_specification stochastic_lpsspec;
       lps::load_lps(stochastic_lpsspec, input_filename());
