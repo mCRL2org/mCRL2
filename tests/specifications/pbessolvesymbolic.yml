@@ -23,8 +23,18 @@ tools:
   t4:
     input: [l2]
     output: []
+    args: [--total]
+    name: pbessolvesymbolic
+  t5:
+    input: [l2]
+    output: []
     args: [--chaining]
+    name: pbessolvesymbolic
+  t6:
+    input: [l2]
+    output: []
+    args: [--chaining, --total]
     name: pbessolvesymbolic
 
 result: |
-  result = t2.value['solution'] == t3.value['solution'] == t4.value['solution']
+  result = t2.value['solution'] == t3.value['solution'] == t4.value['solution'] == t5.value['solution'] == t6.value['solution']

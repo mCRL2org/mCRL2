@@ -188,6 +188,7 @@ class symbolic_pbessolve_algorithm
       m_V[0] = empty_set();
       m_V[1] = empty_set();
 
+      // determine the rank and owner of all states.
       for (const auto& [value, p]: equation_info)
       {
         auto rank = p.first;
@@ -203,6 +204,7 @@ class symbolic_pbessolve_algorithm
         {
           j->second = union_(j->second, X);
         }
+
         if (is_disjunctive)
         {
           m_V[0] = union_(m_V[0], X);
@@ -374,12 +376,36 @@ class symbolic_pbessolve_algorithm
     }
 
   public:
-    bool solve(const ldd& V, const ldd& initial_vertex)
+    bool solve(const ldd& V, const ldd& Vdeadlock, const ldd& initial_vertex)
     {
       using namespace sylvan::ldds;
 
-      mCRL2log(log::debug) << "\n--- apply zielonka to ---\n" << print_graph(V, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
-      auto [W0, W1] = zielonka(V);
+      ldd Vtotal = V;
+      if (Vdeadlock != empty_set())
+      {
+        // Determine winners from the deadlocks (the owner loses).
+        mCRL2log(log::verbose) << "preprocessing to obtain total graph" << std::endl;
+        std::array<const ldd, 2> Vwinning = { intersect(Vdeadlock, m_V[1]), intersect(Vdeadlock, m_V[0]) };
+        std::array<const ldd, 2> Vplayer = { intersect(V, m_V[0]), intersect(V, m_V[1]) };
+
+        std::array<const ldd, 2> Vwon = { attractor(Vwinning[0], 0, V, Vplayer), attractor(Vwinning[1], 1, V, Vplayer) };
+
+        // We have already determined the winner for the initial vertex.
+        if (includes(Vwon[0], initial_vertex))
+        {
+          return true;
+        }
+        else if (includes(Vwon[1], initial_vertex))
+        {
+          return false;
+        }
+
+        // After removing the deadlock (winning) states the resulting set of states is a total graph.
+        Vtotal = minus(V, union_(Vwon[0], Vwon[1]));
+      }
+
+      mCRL2log(log::debug) << "\n--- apply zielonka to ---\n" << print_graph(Vtotal, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
+      auto [W0, W1] = zielonka(Vtotal);
       if (includes(W0, initial_vertex))
       {
         return true;

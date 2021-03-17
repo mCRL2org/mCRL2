@@ -61,6 +61,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       );
       desc.add_option("info", "print read/write information of the summands");
       desc.add_option("chaining", "apply the transition groups as a series");
+      desc.add_option("total", "make the SRF PBES total", 't');
       desc.add_hidden_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
       desc.add_hidden_option("no-discard", "do not discard any parameters");
       desc.add_hidden_option("no-read", "do not discard only-read parameters");
@@ -84,7 +85,11 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       options.info                                  = parser.has_option("info");
       options.summand_groups                        = parser.option_argument("groups");
       options.variable_order                        = parser.option_argument("reorder");
-      options.make_total                            = true; // This is a required setting
+      options.make_total                            = parser.has_option("total");
+      if (!options.make_total)
+      {
+        options.detect_deadlocks                    = true; // This is a required setting if the pbes is not total.
+      }
       options.srf                                   = parser.option_argument("srf");
       options.rewrite_strategy                      = rewrite_strategy();
       options.dot_file                              = parser.option_argument("dot");
@@ -191,7 +196,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
         pbes_system::symbolic_pbessolve_algorithm solver(V, reach.summand_groups(), equation_info, options.no_relprod, options.chaining, reach.data_index());
         mCRL2log(log::debug) << pbes_system::print_pbes_info(reach.pbes()) << std::endl;
         timer().start("solving");
-        bool result = solver.solve(V, init);
+        bool result = solver.solve(V, reach.deadlocks(), init);
         timer().finish("solving");
         std::cout << (result ? "true" : "false") << std::endl;
 

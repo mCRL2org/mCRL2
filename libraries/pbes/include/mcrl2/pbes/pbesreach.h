@@ -56,6 +56,7 @@ data::data_specification construct_propositional_variable_data_specification(con
 struct symbolic_reachability_options: public lps::symbolic_reachability_options
 {
   bool make_total = false;
+  bool detect_deadlocks = false;
   std::string srf;
 };
 
@@ -64,6 +65,7 @@ std::ostream& operator<<(std::ostream& out, const symbolic_reachability_options&
 {
   out << static_cast<lps::symbolic_reachability_options>(options);
   out << "total = " << std::boolalpha << options.make_total << std::endl;
+  out << "detect_deadlocks = " << std::boolalpha << options.detect_deadlocks << std::endl;
   return out;
 }
 
@@ -233,6 +235,8 @@ class pbesreach_algorithm
     std::vector<boost::dynamic_bitset<>> m_group_patterns;
     std::vector<std::size_t> m_variable_order;
 
+    ldd m_deadlocks; // the set of deadlock states.
+
     ldd state2ldd(const data::data_expression_list& x)
     {
       MCRL2_DECLARE_STACK_ARRAY(v, std::uint32_t, x.size());
@@ -353,6 +357,12 @@ class pbesreach_algorithm
       return state2ldd(m_initial_state);
     }
 
+    /// \returns The set of deadlock states.
+    ldd deadlocks()
+    {
+      return m_deadlocks;
+    }
+
     ldd run(bool report_states = false)
     {
       using namespace sylvan::ldds;
@@ -366,6 +376,7 @@ class pbesreach_algorithm
       std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - start;
       ldd visited = empty_set();
       ldd todo = x;
+      ldd deadlocks = empty_set();
 
       while (todo != empty_set())
       {
@@ -375,6 +386,8 @@ class pbesreach_algorithm
         mCRL2log(log::debug) << "todo = " << print_states(m_data_index, todo) << std::endl;
 
         ldd todo1 = m_options.chaining ? todo : empty_set();
+        ldd potential_deadlocks = todo;
+
         for (std::size_t i = 0; i < R.size(); i++)
         {
           learn_successors(i, R[i], minus(project(m_options.chaining ? todo1 : todo, R[i].Ip), R[i].Ldomain));
@@ -391,15 +404,31 @@ class pbesreach_algorithm
             mCRL2log(log::debug) << "relprod(" << i << ", todo) = " << print_states(m_data_index, relprod(todo, R[i].L, R[i].Ir)) << std::endl;
             todo1 = relprod_union(m_options.chaining ? todo1 : todo, R[i].L, R[i].Ir, todo1);
           }
+
+          if (m_options.detect_deadlocks)
+          {
+            potential_deadlocks = minus(potential_deadlocks, relprev(todo1, R[i].L, R[i].Ir, potential_deadlocks));
+          }
         }
 
         visited = union_(visited, todo);
         todo = minus(todo1, visited);
 
+        // after all transition groups are applied the remaining potential deadlocks are actual deadlocks.
+        if (m_options.detect_deadlocks)
+        {
+          deadlocks = union_(deadlocks, potential_deadlocks);
+        }
+
         elapsed_seconds = std::chrono::steady_clock::now() - loop_start;
         mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(visited) << " states after "
                                << std::setw(3) << iteration_count << " iterations (time = " << std::setprecision(2)
                                << std::fixed << elapsed_seconds.count() << "s)" << std::endl;
+
+        if (m_options.detect_deadlocks)
+        {
+          mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(deadlocks) << " deadlocks" << std::endl;
+        }
         mCRL2log(log::verbose) << "LDD size = " << nodecount(visited) << std::endl;
       }
 
@@ -421,6 +450,7 @@ class pbesreach_algorithm
         mCRL2log(log::verbose) << "group " << std::setw(4) << i << " contains " << std::setw(7) << satcount(R[i].L) << " transitions" << std::endl;
       }
 
+      m_deadlocks = deadlocks;
       return visited;
     }
 
