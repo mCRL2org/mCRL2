@@ -10,6 +10,7 @@
 #include "cleave.h"
 
 #include "mcrl2/data/parse.h"
+#include "mcrl2/data/standard_utility.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/utilities/input_output_output_tool.h"
 
@@ -23,38 +24,6 @@ namespace mcrl2
 using log::log_level_t;
 using lps::stochastic_specification;
 using mcrl2::utilities::tools::input_output_output_tool;
-
-/// \brief Split a disjunctive expression into a set of clauses.
-std::list<data::data_expression> split_disjunction(const data::data_expression& condition)
-{
-  std::list<data::data_expression> clauses;
-
-  std::queue<data::data_expression> todo;
-  todo.push(condition);
-
-  while (!todo.empty())
-  {
-    const data::data_expression& expr = todo.front();
-    todo.pop();
-
-    if (data::sort_bool::is_or_application(expr))
-    {
-      const auto& application = static_cast<data::application>(expr);
-      todo.push(application[0]);
-      todo.push(application[1]);
-    }
-    else
-    {
-      clauses.push_front(expr);
-    }
-  }
-
-  mCRL2log(log::debug) << "Found clauses in " << condition << ":\n";
-  print_elements(log::debug, clauses);
-  mCRL2log(log::debug) << "\n";
-
-  return clauses;
-}
 
 class lpscleave_tool : public input_output_output_tool
 {

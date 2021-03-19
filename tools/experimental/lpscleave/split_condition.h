@@ -11,6 +11,7 @@
 #define MCRL2_SPLIT_CONDITION_H_
 
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/standard_utility.h"
 #include "lpscleave_utility.h"
 
 #include <queue>
@@ -64,38 +65,6 @@ std::set<data::data_expression> compute_clauses(const std::list<data::data_expre
   } while (old_size != dependencies.size());
 
   return result;
-}
-
-/// \brief Split a conjunctive expression into a set of clauses.
-std::list<data::data_expression> split_conjunction(const data::data_expression& condition)
-{
-  std::list<data::data_expression> clauses;
-
-  std::queue<data::data_expression> todo;
-  todo.push(condition);
-
-  while (!todo.empty())
-  {
-    const data::data_expression& expr = todo.front();
-    todo.pop();
-
-    if (data::sort_bool::is_and_application(expr))
-    {
-      const auto& application = static_cast<data::application>(expr);
-      todo.push(application[0]);
-      todo.push(application[1]);
-    }
-    else
-    {
-      clauses.push_front(expr);
-    }
-  }
-
-  mCRL2log(log::debug) << "Found clauses in " << condition << ":\n";
-  print_elements(log::debug, clauses);
-  mCRL2log(log::debug) << "\n";
-
-  return clauses;
 }
 
 /// \brief Stores the information about the conditions.
