@@ -158,6 +158,11 @@ class srf_equation
       return m_summands;
     }
 
+    bool& is_conjunctive()
+    {
+      return m_conjunctive;
+    }
+
     bool is_conjunctive() const
     {
       return m_conjunctive;

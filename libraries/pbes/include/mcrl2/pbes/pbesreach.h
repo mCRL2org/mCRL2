@@ -17,6 +17,7 @@
 #include <boost/dynamic_bitset.hpp>
 #include <sylvan_ldd.hpp>
 #include "mcrl2/data/rewriter_tool.h"
+#include "mcrl2/data/standard_utility.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/data/consistency.h"
@@ -57,6 +58,7 @@ struct symbolic_reachability_options: public lps::symbolic_reachability_options
 {
   bool make_total = false;
   bool detect_deadlocks = false;
+  bool split_conditions = false;
   std::string srf;
 };
 
@@ -66,6 +68,7 @@ std::ostream& operator<<(std::ostream& out, const symbolic_reachability_options&
   out << static_cast<lps::symbolic_reachability_options>(options);
   out << "total = " << std::boolalpha << options.make_total << std::endl;
   out << "detect_deadlocks = " << std::boolalpha << options.detect_deadlocks << std::endl;
+  out << "split_conditions = " << std::boolalpha << options.split_conditions << std::endl;
   return out;
 }
 
@@ -211,6 +214,121 @@ struct summand_group: public lps::summand_group
   }
 };
 
+pbes_system::srf_pbes split_conditions(const pbes_system::srf_pbes& pbes)
+{
+  mCRL2log(log::debug) << "splitting conditions" << std::endl;
+
+  // Find existing identifiers.
+  data::set_identifier_generator id_generator;
+  for (const srf_equation& equation : pbes.equations())
+  {
+    id_generator.add_identifier(equation.variable().name());
+  }
+
+  pbes_system::srf_pbes result = pbes;
+  std::vector<srf_equation> added_equations; // These equations are added at the end of the pbes.
+  for (srf_equation& equation : result.equations())
+  {
+    std::vector<srf_summand> split_summands; // The updated summands.
+    for (const srf_summand& summand : equation.summands())
+    {
+      mCRL2log(log::debug) << "splitting condition " << summand.condition() << std::endl;
+
+      // Heuristics to determine when to split.
+      bool should_split = find_free_variables(summand.condition()).size() >= 4;
+
+      // Split conditions into one summand per clause.
+      std::vector<srf_summand> split_summands_inner; // The summands for the added equations.
+      if (should_split && data::sort_bool::is_or_application(summand.condition()))
+      {
+        // For disjunctive conditions we can introduce one summand per clause.
+        for (const data::data_expression& clause : split_disjunction(summand.condition()))
+        {
+          split_summands_inner.emplace_back(summand.parameters(), clause, summand.variable());
+        }
+
+        // If the equation is conjunctive we make it disjunctive if there was only one summand, or introduce a new disjunctive equation otherwise.
+        if (equation.is_conjunctive())
+        {
+          if (equation.summands().size() > 1)
+          {
+            const propositional_variable& X = equation.variable();
+            propositional_variable X1(id_generator(X.name()), X.parameters());
+
+            split_summands.emplace_back(data::variable_list(), true_(), propositional_variable_instantiation(X1.name(), data::make_data_expression_list(X1.parameters())));
+
+            added_equations.emplace_back(equation.symbol(), X1, split_summands_inner, false);
+            mCRL2log(log::debug) << "added disjunctive equation " << added_equations.back().to_pbes() << std::endl;
+          }
+          else
+          {
+            split_summands = split_summands_inner;
+            equation.is_conjunctive() = false;
+          }
+        }
+        else
+        {
+          split_summands.insert(split_summands.end(), split_summands_inner.begin(), split_summands_inner.end());
+        }
+      }
+      else if (should_split && data::sort_bool::is_and_application(summand.condition()))
+      {
+        // For conjunctive conditions we introduce one equation per clause.
+        for (const data::data_expression& clause : split_conjunction(summand.condition()))
+        {
+          const propositional_variable& X = equation.variable();
+          propositional_variable X1(id_generator(X.name()), X.parameters());
+
+          // Add nu X1 = clause && X1 as equation.
+          std::vector<srf_summand> summands;
+          summands.emplace_back(summand.parameters(), clause, propositional_variable_instantiation(X1.name(), data::make_data_expression_list(X1.parameters())));
+          added_equations.emplace_back(fixpoint_symbol::nu(), X1, summands, false);
+          mCRL2log(log::debug) << "added clause equation " << added_equations.back().to_pbes() << std::endl;
+
+          // Add true && X1 as summand to the current equation.
+          split_summands_inner.emplace_back(data::variable_list(), true_(), propositional_variable_instantiation(X1.name(), data::make_data_expression_list(X.parameters())));
+        }
+
+        // Add the original transition with trivial condition.
+        split_summands_inner.emplace_back(summand.parameters(), true_(), summand.variable());
+        if (!equation.is_conjunctive())
+        {
+          if (equation.summands().size() > 1)
+          {
+            const propositional_variable& X = equation.variable();
+            propositional_variable X1(id_generator(X.name()), X.parameters());
+
+            split_summands.emplace_back(data::variable_list(), true_(), propositional_variable_instantiation(X1.name(), data::make_data_expression_list(X1.parameters())));
+
+            added_equations.emplace_back(equation.symbol(), X1, split_summands_inner, true);
+            mCRL2log(log::debug) << "added conjunctive equation " << added_equations.back().to_pbes() << std::endl;
+          }
+          else
+          {
+            split_summands = split_summands_inner;
+            equation.is_conjunctive() = true;
+          }
+        }
+        else
+        {
+          split_summands.insert(split_summands.end(), split_summands_inner.begin(), split_summands_inner.end());
+        }
+      }
+      else
+      {
+        split_summands.emplace_back(summand);
+      }
+    }
+
+    equation.summands() = split_summands;
+  }
+
+  // The last two equations must be Xfalse and Xtrue.
+  result.equations().insert(result.equations().end()-2, added_equations.begin(), added_equations.end());
+
+  return result;
+}
+
 class pbesreach_algorithm
 {
     using ldd = sylvan::ldds::ldd;
@@ -266,21 +384,29 @@ class pbesreach_algorithm
     {
       pbes_system::detail::instantiate_global_variables(pbesspec);
       normalize(pbesspec);
+
       if (m_options.one_point_rule_rewrite)
       {
         pbes_system::one_point_rule_rewriter R;
         pbes_system::replace_pbes_expressions(pbesspec, R, false);
       }
+
       if (m_options.replace_constants_by_variables)
       {
         pbes_system::replace_constants_by_variables(pbesspec, m_rewr, m_sigma);
       }
 
       pbes_system::srf_pbes result = pbes2srf(pbesspec);
+      if (m_options.split_conditions)
+      {
+        result = split_conditions(result);
+      }
+
       if (make_total)
       {
         result.make_total();
       }
+
       unify_parameters(result);
       pbes_system::resolve_summand_variable_name_clashes(result, result.equations().front().variable().parameters()); // N.B. This is a required preprocessing step.
 

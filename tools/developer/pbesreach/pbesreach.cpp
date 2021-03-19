@@ -63,7 +63,8 @@ class pbesreach_tool: public rewriter_tool<input_output_tool>
                       "'none' (default) no variable reordering\n"
                       "'random' variables are put in a random order\n"
                       "'<order>' a user defined permutation e.g. '1 3 2 0 4'"
-      );
+      );      
+      desc.add_option("split-conditions", "split conjunctive and disjunctive conditions into one clause per summand", 's');
       desc.add_option("total", "make the SRF PBES total", 't');
       desc.add_hidden_option("no-remove-unused-rewrite-rules", "do not remove unused rewrite rules. ", 'u');
       desc.add_hidden_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
@@ -85,6 +86,7 @@ class pbesreach_tool: public rewriter_tool<input_output_tool>
       options.info                                  = parser.has_option("info");
       options.summand_groups                        = parser.option_argument("groups");
       options.variable_order                        = parser.option_argument("reorder");
+      options.split_conditions                      = parser.has_option("split-conditions");
       options.make_total                            = parser.has_option("total");
       options.srf                                   = parser.option_argument("srf");
       options.rewrite_strategy                      = rewrite_strategy();

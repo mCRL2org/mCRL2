@@ -49,7 +49,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       desc.add_option("max-table-size", utilities::make_optional_argument("NAME", "25"), "maximum Sylvan table size (21-40, default 25)");
       desc.add_option("min-cache-size", utilities::make_optional_argument("NAME", "22"), "minimum Sylvan cache size (21-40, default 22)");
       desc.add_option("max-cache-size", utilities::make_optional_argument("NAME", "25"), "maximum Sylvan cache size (21-40, default 25)");
-      desc.add_hidden_option("no-remove-unused-rewrite-rules", "do not remove unused rewrite rules. ", 'u');
+      desc.add_option("chaining", "apply the transition groups as a series");
       desc.add_option("groups", utilities::make_optional_argument("GROUPS", "none"),
                       "'none' (default) no summand groups\n"
                       "'simple' summands with the same read/write variables are joined\n"
@@ -60,8 +60,9 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
                       "'<order>' a user defined permutation e.g. '1 3 2 0 4'"
       );
       desc.add_option("info", "print read/write information of the summands");
-      desc.add_option("chaining", "apply the transition groups as a series");
+      desc.add_option("split-conditions", "split conjunctive and disjunctive conditions into one clause per summand", 's');
       desc.add_option("total", "make the SRF PBES total", 't');
+      desc.add_hidden_option("no-remove-unused-rewrite-rules", "do not remove unused rewrite rules. ", 'u');
       desc.add_hidden_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
       desc.add_hidden_option("no-discard", "do not discard any parameters");
       desc.add_hidden_option("no-read", "do not discard only-read parameters");
@@ -85,6 +86,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       options.info                                  = parser.has_option("info");
       options.summand_groups                        = parser.option_argument("groups");
       options.variable_order                        = parser.option_argument("reorder");
+      options.split_conditions                      = parser.has_option("split-conditions");
       options.make_total                            = parser.has_option("total");
       if (!options.make_total)
       {
