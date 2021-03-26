@@ -412,6 +412,10 @@ class lps_solve_structure_graph_algorithm: public solve_structure_graph_algorith
         if (std::regex_match(Zname, match, re))
         {
           std::size_t summand_index = std::stoul(match[2]);
+          if (summand_index >= lpsspec.process().action_summands().size())
+          {
+            throw mcrl2::runtime_error("Counter-example cannot be reconstructed from this LPS. Did you supply the correct file?");
+          }
           lps::action_summand summand = lpsspec.process().action_summands()[summand_index];
 
           std::size_t equation_index = p_index.index(Z.name());
@@ -497,6 +501,10 @@ class lts_solve_structure_graph_algorithm: public solve_structure_graph_algorith
       std::vector<lts::transition> transitions;
       for (std::size_t i: transition_indices)
       {
+        if (i >= lts_transitions.size())
+        {
+          throw mcrl2::runtime_error("Counter-example cannot be reconstructed from this LTS. Did you supply the correct file?");
+        }
         transitions.push_back(lts_transitions[i]);
       }
       ltsspec.get_transitions() = transitions;
