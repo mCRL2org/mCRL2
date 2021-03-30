@@ -251,6 +251,7 @@ class symbolic_pbessolve_algorithm
     {      
       auto start = std::chrono::steady_clock::now();
       mCRL2log(log::verbose) << "start attractor set computation\n";
+      mCRL2log(log::verbose) << "LDD size = " << nodecount(U) << std::endl;
 
       using namespace sylvan::ldds;
       const ldd& Valpha = Vplayer[alpha];
@@ -296,12 +297,14 @@ class symbolic_pbessolve_algorithm
 
         std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - iter_start;
         mCRL2log(log::verbose) << "attractor set iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)\n";
+        mCRL2log(log::verbose) << "LDD size = " << nodecount(Xnext) << std::endl;
 
         ++iter;
       }
 
       std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - start;
       mCRL2log(log::verbose) << "finished attractor set computation (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)\n";
+      mCRL2log(log::verbose) << "LDD size = " << nodecount(X) << std::endl;
       return X;
     }
 
