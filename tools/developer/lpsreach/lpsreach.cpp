@@ -46,6 +46,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       desc.add_option("max-table-size", utilities::make_optional_argument("NAME", "25"), "maximum Sylvan table size (21-40, default 25)");
       desc.add_option("min-cache-size", utilities::make_optional_argument("NAME", "22"), "minimum Sylvan cache size (21-40, default 22)");
       desc.add_option("max-cache-size", utilities::make_optional_argument("NAME", "25"), "maximum Sylvan cache size (21-40, default 25)");
+      desc.add_option("cached", "use transition group caching to speed up state space exploration");
       desc.add_option("chaining", "apply the transition groups as a series");
       desc.add_option("no-discard", "do not discard any parameters");
       desc.add_option("no-read", "do not discard only-read parameters");
@@ -69,6 +70,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
     void parse_options(const utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
+      options.cached                                = parser.has_option("cached");
       options.chaining                              = parser.has_option("chaining");
       options.one_point_rule_rewrite                = !parser.has_option("no-one-point-rule-rewrite");
       options.remove_unused_rewrite_rules           = !parser.has_option("no-remove-unused-rewrite-rules");

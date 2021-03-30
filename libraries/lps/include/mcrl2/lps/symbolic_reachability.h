@@ -243,6 +243,7 @@ std::vector<boost::dynamic_bitset<>> reorder_read_write_patterns(const std::vect
 struct symbolic_reachability_options
 {
   data::rewrite_strategy rewrite_strategy = data::jitty;
+  bool cached = false;
   bool chaining = false;
   bool one_point_rule_rewrite = false;
   bool replace_constants_by_variables = false;
@@ -261,6 +262,7 @@ inline
 std::ostream& operator<<(std::ostream& out, const symbolic_reachability_options& options)
 {
   out << "rewrite-strategy = " << options.rewrite_strategy << std::endl;
+  out << "cached = " << std::boolalpha << options.cached << std::endl;
   out << "chaining = " << std::boolalpha << options.chaining << std::endl;
   out << "one-point-rule-rewrite = " << std::boolalpha << options.one_point_rule_rewrite << std::endl;
   out << "replace-constants-by-variables = " << std::boolalpha << options.replace_constants_by_variables << std::endl;
@@ -890,8 +892,9 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t, v
   auto& algorithm = p->first;
   auto& group = p->second;
   auto& sigma = algorithm.m_sigma;
-  const auto& rewr = algorithm.m_rewr;
   auto& data_index = algorithm.m_data_index;
+  const auto& options = algorithm.m_options;
+  const auto& rewr = algorithm.m_rewr;
   const auto& enumerator = algorithm.m_enumerator;
   std::size_t x_size = group.read.size();
   std::size_t y_size = group.write.size();
@@ -907,7 +910,6 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t, v
     xy[group.read_pos[j]] = x[j];
   }
 
-  group.Ldomain = union_cube(group.Ldomain, x, x_size);
   for (const auto& smd: group.summands)
   {
     data::data_expression condition = rewr(smd.condition, sigma);
@@ -933,6 +935,11 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t, v
     data::remove_assignments(sigma, smd.variables);
   }
   data::remove_assignments(sigma, group.read_parameters);
+
+  if (options.cached)
+  {
+    group.Ldomain = union_cube(group.Ldomain, x, x_size);
+  }
 }
 
 } // namespace lps
