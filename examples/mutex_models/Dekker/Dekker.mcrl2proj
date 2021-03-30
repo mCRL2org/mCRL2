@@ -1,0 +1,9 @@
+<root>
+ <spec>Dekker_spec.mcrl2</spec>
+ <properties>
+  <property>Mutual exclusion</property>
+  <property>Always eventually request</property>
+  <property>Eventual access</property>
+  <property>Eventual access if fair</property>
+ </properties>
+</root>

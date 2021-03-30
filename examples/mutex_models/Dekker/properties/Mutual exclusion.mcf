@@ -1,0 +1,2 @@
+[true*][exists i1: Nat . enter(i1)]
+  [!(exists i2: Nat . leave(i2))*][exists i3: Nat . enter(i3)]false

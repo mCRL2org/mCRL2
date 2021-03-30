@@ -1,0 +1,1 @@
+[true*]forall i: Nat . val(i <= 1) => <true* . wish(i)|set_flag(i, true)>true

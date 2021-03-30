@@ -1,0 +1,7 @@
+<root>
+ <spec>Improved-mutex-naive_spec.mcrl2</spec>
+ <properties>
+  <property>Mutual exclusion</property>
+  <property>Always eventually request</property>
+ </properties>
+</root>

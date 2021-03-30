@@ -1,0 +1,8 @@
+<root>
+ <spec>Petersons-3_spec.mcrl2</spec>
+ <properties>
+  <property>Mutual exclusion</property>
+  <property>Always eventually request</property>
+  <property>Eventual access</property>
+ </properties>
+</root>

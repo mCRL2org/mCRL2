@@ -1,0 +1,2 @@
+[true*]forall i: Nat . val(i <= 1) 
+  => [exists b: Bool . wish(i)|set_flag(i,b)]mu X . ([!enter(i)]X && <true>true)

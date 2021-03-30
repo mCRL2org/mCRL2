@@ -1,0 +1,6 @@
+<root>
+ <spec>Mutex-naive_spec.mcrl2</spec>
+ <properties>
+  <property>Mutual exclusion</property>
+ </properties>
+</root>

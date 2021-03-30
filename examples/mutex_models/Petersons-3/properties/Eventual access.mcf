@@ -1,0 +1,2 @@
+[true*] forall i: Nat. 
+    [exists n: Nat . wish(i)|set_flag(i,n)]( mu X. [!enter(i)]X && <true>true )

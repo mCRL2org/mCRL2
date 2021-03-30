@@ -1,0 +1,5 @@
+[true*]forall i: Nat . val(i <= 1) => 
+  [exists b: Bool . wish(i)|set_flag(i,b)] 
+    nu X . mu Y .
+      ([!enter(i) && !(exists i1: Nat . get_flag(i1, true) || get_turn(i1))]Y &&
+       [exists i1: Nat . get_flag(i1, true) ||  get_turn(i1)]X)

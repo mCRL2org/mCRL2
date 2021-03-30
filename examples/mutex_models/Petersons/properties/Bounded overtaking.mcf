@@ -1,0 +1,4 @@
+[true*] forall i: Nat. [exists b: Bool . wish(i)|set_flag(i,b)]
+  ( nu Y(n: Nat = 0). val(n<=2) && 
+      [!(exists i1: Nat . enter(i1))]Y(n) &&
+      [enter(other(i))]Y(n+1) )
