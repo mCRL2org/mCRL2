@@ -280,10 +280,16 @@ class lpsreach_algorithm
         for (std::size_t i = 0; i < R.size(); i++)
         {
           ldd proj = project(m_options.chaining ? todo1 : todo, R[i].Ip);
+
+          auto start = std::chrono::steady_clock::now();
           learn_successors(i, R[i], m_options.cached ? minus(proj, R[i].Ldomain) : proj);
+
+          std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - start;
+          R[i].learn_time += elapsed_seconds.count();
 
           mCRL2log(log::debug) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
 
+          start = std::chrono::steady_clock::now();
           if (m_options.no_relprod)
           {
             ldd z = lps::alternative_relprod(m_options.chaining ? todo1 : todo, R[i]);
@@ -295,8 +301,10 @@ class lpsreach_algorithm
             mCRL2log(log::debug) << "relprod(" << i << ", todo) = " << print_states(m_data_index, relprod(todo, R[i].L, R[i].Ir)) << std::endl;
             todo1 = relprod_union(m_options.chaining ? todo1 : todo, R[i].L, R[i].Ir, todo1);
           }
-        }
 
+          elapsed_seconds = std::chrono::steady_clock::now() - start;
+          R[i].apply_time += elapsed_seconds.count();
+        }
         visited = union_(visited, todo);
         todo = minus(todo1, visited);
 
@@ -314,7 +322,10 @@ class lpsreach_algorithm
 
       for (std::size_t i = 0; i < R.size(); i++)
       {
-        mCRL2log(log::verbose) << "group " << std::setw(4) << i << " contains " << std::setw(7) << satcount(R[i].L) << " transitions" << std::endl;
+        mCRL2log(log::verbose) << "group " << std::setw(4) << i << " contains " << std::setw(7) << satcount(R[i].L) << " transitions (learn time = "
+                               << std::setw(5) << std::setprecision(2) << std::fixed << R[i].learn_time << " and apply time = "
+                               << std::setw(5) << std::setprecision(2) << std::fixed << R[i].apply_time << ")" <<std::endl;
+        mCRL2log(log::verbose) << "transition LDD size = " << nodecount(R[i].L) << " and cache LDD size = " << nodecount(R[i].Ldomain) << std::endl;
       }
 
       return visited;

@@ -523,6 +523,8 @@ struct summand_group
   sylvan::ldds::ldd Ldomain; // the domain of L
   sylvan::ldds::ldd Ir; // meta data needed by sylvan::ldds::relprod
   sylvan::ldds::ldd Ip; // meta data needed by sylvan::ldds::project
+  double learn_time = 0.0; // The time to learn the transitions for this group.
+  double apply_time = 0.0; // The time to apply the transitions for this group.
 
   std::pair<std::vector<std::size_t>, std::vector<std::size_t>> compute_read_write_pos() const
   {
