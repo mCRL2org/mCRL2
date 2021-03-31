@@ -57,7 +57,6 @@ data::data_specification construct_propositional_variable_data_specification(con
 struct symbolic_reachability_options: public lps::symbolic_reachability_options
 {
   bool make_total = false;
-  bool detect_deadlocks = false;
   bool split_conditions = false;
   std::string srf;
 };
@@ -67,7 +66,6 @@ std::ostream& operator<<(std::ostream& out, const symbolic_reachability_options&
 {
   out << static_cast<lps::symbolic_reachability_options>(options);
   out << "total = " << std::boolalpha << options.make_total << std::endl;
-  out << "detect_deadlocks = " << std::boolalpha << options.detect_deadlocks << std::endl;
   out << "split_conditions = " << std::boolalpha << options.split_conditions << std::endl;
   return out;
 }

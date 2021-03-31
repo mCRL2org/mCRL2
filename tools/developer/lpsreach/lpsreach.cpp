@@ -48,6 +48,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       desc.add_option("max-cache-size", utilities::make_optional_argument("NAME", "25"), "maximum Sylvan cache size (21-40, default 25)");
       desc.add_option("cached", "use transition group caching to speed up state space exploration");
       desc.add_option("chaining", "apply the transition groups as a series");
+      desc.add_option("deadlock", "report the number of deadlocks (i.e. states with no outgoing transitions).");
       desc.add_option("no-discard", "do not discard any parameters");
       desc.add_option("no-read", "do not discard only-read parameters");
       desc.add_option("no-write", "do not discard only-write parameters");
@@ -72,6 +73,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       super::parse_options(parser);
       options.cached                                = parser.has_option("cached");
       options.chaining                              = parser.has_option("chaining");
+      options.detect_deadlocks                      = parser.has_option("deadlock");
       options.one_point_rule_rewrite                = !parser.has_option("no-one-point-rule-rewrite");
       options.remove_unused_rewrite_rules           = !parser.has_option("no-remove-unused-rewrite-rules");
       options.replace_constants_by_variables        = false; // This option cannot be used in the symbolic algorithm

@@ -268,6 +268,7 @@ class lpsreach_algorithm
       std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - start;
       ldd visited = empty_set();
       ldd todo = x;
+      ldd deadlocks = empty_set();
 
       while (todo != empty_set())
       {
@@ -277,6 +278,8 @@ class lpsreach_algorithm
         mCRL2log(log::debug) << "todo = " << print_states(m_data_index, todo) << std::endl;
 
         ldd todo1 = m_options.chaining ? todo : empty_set();
+        ldd potential_deadlocks = todo;
+
         for (std::size_t i = 0; i < R.size(); i++)
         {
           ldd proj = project(m_options.chaining ? todo1 : todo, R[i].Ip);
@@ -302,16 +305,32 @@ class lpsreach_algorithm
             todo1 = relprod_union(m_options.chaining ? todo1 : todo, R[i].L, R[i].Ir, todo1);
           }
 
+          if (m_options.detect_deadlocks)
+          {
+            potential_deadlocks = minus(potential_deadlocks, relprev(todo1, R[i].L, R[i].Ir, potential_deadlocks));
+          }
+
           elapsed_seconds = std::chrono::steady_clock::now() - start;
           R[i].apply_time += elapsed_seconds.count();
         }
+
         visited = union_(visited, todo);
         todo = minus(todo1, visited);
+
+        // after all transition groups are applied the remaining potential deadlocks are actual deadlocks.
+        if (m_options.detect_deadlocks)
+        {
+          deadlocks = union_(deadlocks, potential_deadlocks);
+        }
 
         elapsed_seconds = std::chrono::steady_clock::now() - loop_start;
         mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(visited) << " states after "
                                << std::setw(3) << iteration_count << " iterations (time = " << std::setprecision(2)
                                << std::fixed << elapsed_seconds.count() << "s)" << std::endl;
+        if (m_options.detect_deadlocks)
+        {
+          mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(deadlocks) << " deadlocks" << std::endl;
+        }
         mCRL2log(log::verbose) << "LDD size = " << nodecount(visited) << std::endl;
       }
 

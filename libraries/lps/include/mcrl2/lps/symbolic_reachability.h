@@ -245,6 +245,7 @@ struct symbolic_reachability_options
   data::rewrite_strategy rewrite_strategy = data::jitty;
   bool cached = false;
   bool chaining = false;
+  bool detect_deadlocks = false;
   bool one_point_rule_rewrite = false;
   bool replace_constants_by_variables = false;
   bool remove_unused_rewrite_rules = false;
@@ -264,6 +265,7 @@ std::ostream& operator<<(std::ostream& out, const symbolic_reachability_options&
   out << "rewrite-strategy = " << options.rewrite_strategy << std::endl;
   out << "cached = " << std::boolalpha << options.cached << std::endl;
   out << "chaining = " << std::boolalpha << options.chaining << std::endl;
+  out << "detect_deadlocks = " << std::boolalpha << options.detect_deadlocks << std::endl;
   out << "one-point-rule-rewrite = " << std::boolalpha << options.one_point_rule_rewrite << std::endl;
   out << "replace-constants-by-variables = " << std::boolalpha << options.replace_constants_by_variables << std::endl;
   out << "remove-unused-rewrite-rules = " << std::boolalpha << options.remove_unused_rewrite_rules << std::endl;
