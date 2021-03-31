@@ -425,6 +425,11 @@ R = \bigcup_{i=1}^{n} R_i
 \end{algorithm}
 \noindent
 Note that in line 9 another optimization has been applied, by excluding elements in the projected todo list that are already in the domain of $L_i$.
+For all values in $\textsf{domain}(L_i)$ the outgoing transitions have already been determined.
+We can also replace $\textsf{domain}(L_i)$ by a set $X$ that keeps track of all values of $x$ that have already been processed.
+Let $X$ be initially the empty set and updated to $X \gets X \cup \{x \in \textsf{project}(\var{todo}, I_{r,i})\}$ at line 9.
+The set $X$ contains all elements in $\textsf{domain}(L_i)$ but also all $x$ with no outgoing transitions.
+In practice, the transitions of $R_i$ are computed on-the-fly and this additional caching can avoid these computations with the downside that it requires more memory.
 
 \subsection{Reachability with chaining}
 
