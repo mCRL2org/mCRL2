@@ -665,14 +665,14 @@ variable of sort $D \rightarrow B$. The right-hand side $\varphi$ is a syntactic
 sort $D$.
 
 \begin{definition}
-Let $\mathcal{E}$ be a PBES. Then $\mathcal{E}$ is in standard recursive form (SRF) iff for all ($\sigma_i X_i(d:D) = \varphi) \in \mathcal{E}$, where
+Let $\mathcal{E}$ be a PBES. Then $\mathcal{E}$ is in standard recursive form (SRF) iff for all $\sigma_i X_i(d:D) = \varphi) \in \mathcal{E}$, where
 $\varphi$ is either disjunctive or conjunctive, i.e., the equation for $X_i$ has the shape
 \[
   \sigma_i X_i(d:D) = \bigvee\limits_{j \in J_i} \exists e_j: E_j . f_{ij}(d,e_j) \land X_{g_{ij}}(h_{ij}(d, e_j))
 \]
 or
 \[
-  \sigma_i X_i(d:D) = \bigwedge\limits_{j \in J_i} \forall e_j: E_j . f_{ij}(d,e_j) \land X_{g_{ij}}(h_{ij}(d, e_j)),
+  \sigma_i X_i(d:D) = \bigwedge\limits_{j \in J_i} \forall e_j: E_j . f_{ij}(d,e_j) \implies X_{g_{ij}}(h_{ij}(d, e_j)),
 \]
 where $d = (d_1, \ldots, d_m)$.
 \end{definition}
@@ -697,7 +697,7 @@ where $X(d)$ is the current state.
 In order to apply the reachability algorithm, we need the following ingredients (exactly the same as for LPSs):
 
 \begin{center}
-\label{table:ingredients}
+\label{table:pbes_ingredients}
 \begin{tabular}{ |l|l| }
 \hline
 $\{ (x,y) \in R_i \mid x \in todo \}$ & enumerate solutions of condition \\
@@ -710,6 +710,31 @@ $\textsf{relprod}(L_i, \var{todo}, I_r, I_w)$ & \textsf{relprod} (Sylvan functio
 \hline
 \end{tabular}
 \end{center}
+
+\subsection{Splitting Conditions}
+
+Symbolic reachability is most effective when the number of read/write parameters and the number of transitions per transition group are small.
+For disjunctive conditions we can derive the following:
+Consider a PBES $\mathcal{E}$ in SRF with an equation $\sigma_i X_i(d:D) \in \mathcal{E}$ of the shape:
+\begin{align*}
+  \sigma_i X_i(d:D) &= \bigwedge\limits_{j \in J_i} \forall e_j : E_j . (\bigvee\limits_{k \in K_j} f_{ijk}(d,e_j)) \implies X_{g_{ij}}(h_{ij}(d, e_j)) \\  
+  \sigma_i X_i(d:D) &= \bigwedge\limits_{j \in J_i} \forall e_j : E_j . \bigwedge\limits_{k \in K_j} f_{ijk}(d,e_j) \implies X_{g_{ij}}(h_{ij}(d, e_j)) \\
+  \sigma_i X_i(d:D) &= \bigwedge\limits_{j \in J_i}\bigwedge\limits_{k \in K_j} \forall e_j : E_j .  f_{ijk}(d,e_j) \implies X_{g_{ij}}(h_{ij}(d, e_j))
+\end{align*}
+For the final equation every clause $f_{ijk}(d,e_j))$, for $k \in K_j$, can be treated as its own transition group.
+For conjunctive conditions we have to introduce a new equation to ensure that the result in SRF.
+\begin{align*}
+  \sigma_i X_i(d:D) &= \bigwedge\limits_{j \in J_i} \forall e_j : E_j . (\bigwedge\limits_{k \in K_j} f_{ijk}(d,e_j)) \implies X_{g_{ij}}(h_{ij}(d, e_j)) \\  
+  \sigma_i X_i(d:D) &= \bigwedge\limits_{j \in J_i} \forall e_j : E_j . \bigvee\limits_{k \in K_j} \neg f_{ijk}(d,e_j) \lor X_{g_{ij}}(h_{ij}(d, e_j)) \\
+  \sigma_i X_i(d:D) &= \bigwedge\limits_{j \in J_i}\bigwedge\limits_{k \in K_j} \forall e_j : E_j .  \textit{true} \implies Y_j(h_{ij}(d, e_j), e_j)
+\end{align*}
+Where $Y_j$ is a fresh name and its equation defined as follows:
+\begin{align*}
+  \nu Y_j(d : D, e_j : E_j) &= (\bigvee\limits_{k \in K_j} \neg f_{ijk}(d,e_j) \land Y_j(d, e_j)) \lor (\textit{true} \land X_{g_{ij}}(h_{ij}(d, e_j)))
+\end{align*}
+Note that this transformations makes the variable $e_j$ visible in the statespace and it is also quantified without a condition.
+In practice, this means that the latter transformation can be unwanted in the presence of quantifiers.
+The cases for a disjunctive or conjunctive condition within a disjunctive equation are completely dual.
 
 \newpage
 \section{Zielonka}
