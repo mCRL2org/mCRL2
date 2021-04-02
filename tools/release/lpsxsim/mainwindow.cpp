@@ -47,6 +47,9 @@ MainWindow::MainWindow(QThread *atermThread, mcrl2::data::rewrite_strategy strat
   m_animationTimer->setInterval(1000);
   connect(m_animationTimer, SIGNAL(timeout()), this, SLOT(animationStep()));
 
+  m_ui.transitionTable->setHorizontalScrollMode(QAbstractItemView::ScrollMode::ScrollPerPixel);
+  m_ui.traceTable->setHorizontalScrollMode(QAbstractItemView::ScrollMode::ScrollPerPixel);
+  m_ui.stateTable->setHorizontalScrollMode(QAbstractItemView::ScrollMode::ScrollPerPixel);
   m_ui.actionPlayTrace->setEnabled(false);
   m_ui.actionRandomPlay->setEnabled(false);
   m_ui.actionStop->setEnabled(false);
@@ -234,6 +237,10 @@ void MainWindow::updateSimulation()
   {
     m_ui.transitionTable->setCurrentCell(0, 0);
   }
+
+  m_ui.transitionTable->resizeColumnToContents(1);
+  m_ui.traceTable->resizeColumnToContents(2);
+  m_ui.stateTable->resizeColumnToContents(1);
 
   assert(m_trace[selectedState].state.size() == m_ui.stateTable->rowCount());
   for (int i = 0; i < m_trace[selectedState].state.size(); i++)
