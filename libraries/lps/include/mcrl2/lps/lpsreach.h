@@ -30,6 +30,7 @@
 #include "mcrl2/lps/symbolic_reachability.h"
 #include "mcrl2/utilities/parse_numbers.h"
 #include "mcrl2/utilities/stack_array.h"
+#include "mcrl2/utilities/stopwatch.h"
 
 namespace mcrl2 {
 
@@ -272,7 +273,7 @@ class lpsreach_algorithm
 
       while (todo != empty_set())
       {
-        auto loop_start = std::chrono::steady_clock::now();
+        stopwatch loop_start;
         iteration_count++;
         mCRL2log(log::debug) << "--- iteration " << iteration_count << " ---" << std::endl;
         mCRL2log(log::debug) << "todo = " << print_states(m_data_index, todo) << std::endl;
@@ -284,15 +285,11 @@ class lpsreach_algorithm
         {
           ldd proj = project(m_options.chaining ? todo1 : todo, R[i].Ip);
 
-          auto start = std::chrono::steady_clock::now();
+          stopwatch learn_start;
           learn_successors(i, R[i], m_options.cached ? minus(proj, R[i].Ldomain) : proj);
-
-          std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - start;
-          R[i].learn_time += elapsed_seconds.count();
+          R[i].learn_time += learn_start.seconds();
 
           mCRL2log(log::debug) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
-
-          start = std::chrono::steady_clock::now();
           if (m_options.no_relprod)
           {
             ldd z = lps::alternative_relprod(m_options.chaining ? todo1 : todo, R[i]);
@@ -309,9 +306,6 @@ class lpsreach_algorithm
           {
             potential_deadlocks = minus(potential_deadlocks, relprev(todo1, R[i].L, R[i].Ir, potential_deadlocks));
           }
-
-          elapsed_seconds = std::chrono::steady_clock::now() - start;
-          R[i].apply_time += elapsed_seconds.count();
         }
 
         visited = union_(visited, todo);
@@ -323,10 +317,9 @@ class lpsreach_algorithm
           deadlocks = union_(deadlocks, potential_deadlocks);
         }
 
-        elapsed_seconds = std::chrono::steady_clock::now() - loop_start;
         mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(visited) << " states after "
                                << std::setw(3) << iteration_count << " iterations (time = " << std::setprecision(2)
-                               << std::fixed << elapsed_seconds.count() << "s)" << std::endl;
+                               << std::fixed << loop_start.seconds() << "s)" << std::endl;
         if (m_options.detect_deadlocks)
         {
           mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(deadlocks) << " deadlocks" << std::endl;
@@ -342,8 +335,7 @@ class lpsreach_algorithm
       for (std::size_t i = 0; i < R.size(); i++)
       {
         mCRL2log(log::verbose) << "group " << std::setw(4) << i << " contains " << std::setw(7) << satcount(R[i].L) << " transitions (learn time = "
-                               << std::setw(5) << std::setprecision(2) << std::fixed << R[i].learn_time << " and apply time = "
-                               << std::setw(5) << std::setprecision(2) << std::fixed << R[i].apply_time << ")" <<std::endl;
+                               << std::setw(5) << std::setprecision(2) << std::fixed << R[i].learn_time << "s)" <<std::endl;
         mCRL2log(log::verbose) << "transition LDD size = " << nodecount(R[i].L) << " and cache LDD size = " << nodecount(R[i].Ldomain) << std::endl;
       }
 

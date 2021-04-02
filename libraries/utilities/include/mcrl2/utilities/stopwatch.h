@@ -24,17 +24,23 @@ public:
   /// \brief Reset the stopwatch to count from this moment onwards.
   void reset()
   {
-    m_timestamp = std::chrono::system_clock::now();
+    m_timestamp = std::chrono::steady_clock::now();
   }
 
   /// \returns The time in milliseconds since the last reset.
   long long time()
   {
-    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - m_timestamp).count();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - m_timestamp).count();
+  }
+
+  /// \returns The time in seconds since the last reset.
+  double seconds()
+  {
+    return std::chrono::duration<double>(std::chrono::steady_clock::now() - m_timestamp).count();
   }
 
 private:
-  std::chrono::time_point<std::chrono::system_clock> m_timestamp;
+  std::chrono::time_point<std::chrono::steady_clock> m_timestamp;
 };
 
 #endif // MCRL2_UTILITIES_STOPWATCH_H_

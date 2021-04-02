@@ -32,6 +32,7 @@
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/srf_pbes.h"
 #include "mcrl2/pbes/unify_parameters.h"
+#include "mcrl2/utilities/stopwatch.h"
 #include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2 {
@@ -473,7 +474,7 @@ class pbesreach_algorithm
 
       while (todo != empty_set())
       {
-        auto loop_start = std::chrono::steady_clock::now();
+        stopwatch loop_start;
         iteration_count++;
         mCRL2log(log::debug) << "--- iteration " << iteration_count << " ---" << std::endl;
         mCRL2log(log::debug) << "todo = " << print_states(m_data_index, todo) << std::endl;
@@ -484,7 +485,10 @@ class pbesreach_algorithm
         for (std::size_t i = 0; i < R.size(); i++)
         {          
           ldd proj = project(m_options.chaining ? todo1 : todo, R[i].Ip);
+
+          stopwatch learn_start;
           learn_successors(i, R[i], m_options.cached ? minus(proj, R[i].Ldomain) : proj);
+          R[i].learn_time += learn_start.seconds();
 
           mCRL2log(log::debug) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
 
@@ -515,10 +519,9 @@ class pbesreach_algorithm
           deadlocks = union_(deadlocks, potential_deadlocks);
         }
 
-        elapsed_seconds = std::chrono::steady_clock::now() - loop_start;
         mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(visited) << " states after "
                                << std::setw(3) << iteration_count << " iterations (time = " << std::setprecision(2)
-                               << std::fixed << elapsed_seconds.count() << "s)" << std::endl;
+                               << std::fixed << loop_start.seconds() << "s)" << std::endl;
 
         if (m_options.detect_deadlocks)
         {
@@ -542,7 +545,9 @@ class pbesreach_algorithm
 
       for (std::size_t i = 0; i < R.size(); i++)
       {
-        mCRL2log(log::verbose) << "group " << std::setw(4) << i << " contains " << std::setw(7) << satcount(R[i].L) << " transitions" << std::endl;
+        mCRL2log(log::verbose) << "group " << std::setw(4) << i << " contains " << std::setw(7) << satcount(R[i].L) << " transitions (learn time = "
+                               << std::setw(5) << std::setprecision(2) << std::fixed << R[i].learn_time << "s)" <<std::endl;
+        mCRL2log(log::verbose) << "transition LDD size = " << nodecount(R[i].L) << " and cache LDD size = " << nodecount(R[i].Ldomain) << std::endl;
       }
 
       m_deadlocks = deadlocks;
