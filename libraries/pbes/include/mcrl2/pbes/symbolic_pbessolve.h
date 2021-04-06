@@ -265,35 +265,41 @@ class symbolic_pbessolve_algorithm
         auto iter_start = std::chrono::steady_clock::now();
         X = Xnext;
 
-        // Determine transitions into the current player's nodes.
+        // The predecessors of X.
+        ldd Xpred = m_chaining ? X : empty_set();
         for (std::size_t i = 0; i < m_summand_groups.size(); ++i)
         {
           const summand_group& group = m_summand_groups[i];
 
           auto group_start = std::chrono::steady_clock::now();
-          Xnext = union_(Xnext, predecessors(Valpha, m_chaining ? Xnext : X, group));
+          Xpred = union_(Xpred, predecessors(V, m_chaining ? Xpred : X, group));
 
           std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - group_start;
-          mCRL2log(log::debug) << "added alpha predecessors for group " << i << " out of " << m_summand_groups.size()
+          mCRL2log(log::debug) << "added predecessors for group " << i << " out of " << m_summand_groups.size()
                                  << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)\n";
         }
 
-        // Determine nodes of the other player that can reach outside of X (called Xoutside).
-        ldd Xoutside = minus(V, m_chaining ? Xnext : X);
-        ldd Xother = empty_set();
+        // Determine current player's nodes that can reach X (and X itself).
+        Xnext = union_(X, intersect(Xpred, Valpha));
+
+        // Determine nodes outside of X.
+        ldd Xoutside = minus(V, Xnext);
+
+        // The nodes of the other player in the predecessors.
+        ldd Xother = intersect(Xpred, Vother);
         for (std::size_t i = 0; i < m_summand_groups.size(); ++i)
         {
           const summand_group& group = m_summand_groups[i];
 
           auto group_start = std::chrono::steady_clock::now();
-          Xother = union_(Xother, predecessors(Vother, Xoutside, group));
+          Xother = minus(Xother, predecessors(Xother, Xoutside, group));
 
           std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - group_start;
           mCRL2log(log::debug) << "removed 1 - alpha predecessors for group " << i << " out of " << m_summand_groups.size()
                                  << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)\n";
         }
 
-        Xnext = union_(Xnext, minus(Vother, Xother));
+        Xnext = union_(Xnext, Xother);
 
         std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - iter_start;
         mCRL2log(log::verbose) << "attractor set iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)\n";

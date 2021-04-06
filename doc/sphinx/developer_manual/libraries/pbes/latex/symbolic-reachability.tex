@@ -778,6 +778,18 @@ For $\pred_i(U, V) = \{ u \in U \mid \exists v \in V: u \rightarrow_i v \}$ we d
 \end{array}
 \]
 
+Instead of determining all predecessors for states in $V \setminus \attr[n]{\alpha}{U,V})$ in the final step we only have to determine predecessors that can actually reach $V \setminus \attr[n]{\alpha}{U,V})$ in one step.
+
+\[
+\begin{array}{lcl}
+\attr[0]{\alpha}{U, V} & = & U \\
+\attr[n+1]{\alpha}{U, V} & = & \attr[n]{\alpha}{U, V} \\
+      & \cup & (T \cap V_\alpha) \\
+      & \cup & ((T \cap V_{1-\alpha}) \setminus \bigcup_{i=1}^{n} \pred_i((T \cap V_{1-\alpha}), V \setminus \attr[n]{\alpha}{U,V}) \\
+\end{array}
+\]
+Where $T = \bigcup_{i=1}^{n} \pred_i(V, \attr[n]{\alpha}{U, V})$.
+
 \begin{algorithm}[h]
 \caption{Zielonka}
 \label{alg:zielonka}
