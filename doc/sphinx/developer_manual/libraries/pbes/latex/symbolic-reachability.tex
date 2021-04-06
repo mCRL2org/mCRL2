@@ -779,16 +779,34 @@ For $\pred_i(U, V) = \{ u \in U \mid \exists v \in V: u \rightarrow_i v \}$ we d
 \]
 
 Instead of determining all predecessors for states in $V \setminus \attr[n]{\alpha}{U,V})$ in the final step we only have to determine predecessors that can actually reach $V \setminus \attr[n]{\alpha}{U,V})$ in one step.
+Furthermore, we can actually keep track of the states that have been added in the last iteration and were not yet part of the attractor set.
+We then only have to compute predecessors with respect to this todo set.
 
-\[
-\begin{array}{lcl}
-\attr[0]{\alpha}{U, V} & = & U \\
-\attr[n+1]{\alpha}{U, V} & = & \attr[n]{\alpha}{U, V} \\
-      & \cup & (T \cap V_\alpha) \\
-      & \cup & ((T \cap V_{1-\alpha}) \setminus \bigcup_{i=1}^{n} \pred_i((T \cap V_{1-\alpha}), V \setminus \attr[n]{\alpha}{U,V}) \\
-\end{array}
-\]
-Where $T = \bigcup_{i=1}^{n} \pred_i(V, \attr[n]{\alpha}{U, V})$.
+\begin{algorithm}[h]
+\caption{Attractor set computation for a union of sparse relations}
+\label{alg:attractor_set}
+\begin{algorithmic}[1]
+\Function{Attr$_\alpha$}{$U$, $V$}
+\State $\var{todo} := U$
+\State $\var{X} := U$
+
+\While {$\var{todo} \neq \emptyset$}
+  \State $P := \textsf{pred}(V, todo)$
+  \State $P_\alpha := P \cap V_\alpha$
+  \State $\var{todo} := P_\alpha \setminus X$
+  \State $X := X \cup P_\alpha$
+  \State $P_\textit{forced} := P \setminus X$
+  \For {$1 \leq i \leq n$}
+    \State $P_\textit{forced} := P_\textit{forced} \setminus \textsf{pred}_i(P_\textit{forced}, V \setminus X)$
+  
+  \EndFor
+  \State $\var{todo} := \var{todo} \cup P_\textit{forced}$
+  \State $X := X \cup P_\textit{forced}$
+\EndWhile
+\State \Return \var{X}
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
 
 \begin{algorithm}[h]
 \caption{Zielonka}

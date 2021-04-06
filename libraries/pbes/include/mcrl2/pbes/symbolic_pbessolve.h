@@ -227,17 +227,16 @@ class symbolic_pbessolve_algorithm
     {
       using namespace sylvan::ldds;
 
-      ldd result = empty_set();
+      ldd result = m_chaining ? V : empty_set();
       for (std::size_t i = 0; i < m_summand_groups.size(); ++i)
       {
         const summand_group& group = m_summand_groups[i];
 
         auto group_start = std::chrono::steady_clock::now();
-        ldd prev_i = predecessors(U, V, group);
-        result = union_(result, prev_i);
+        result = union_(result, predecessors(U, m_chaining ? result : V, group));
 
         std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - group_start;
-        mCRL2log(log::debug) << "adding predecessors for group " << i << " out of " << m_summand_groups.size()
+        mCRL2log(log::debug) << "added predecessors for group " << i << " out of " << m_summand_groups.size()
                                << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)\n";
       }
       return result;
@@ -255,62 +254,53 @@ class symbolic_pbessolve_algorithm
 
       using namespace sylvan::ldds;
       const ldd& Valpha = Vplayer[alpha];
-      const ldd& Vother = Vplayer[1-alpha];
 
       std::size_t iter = 0;
-      ldd X = empty_set();
-      ldd Xnext = U;
-      while (X != Xnext)
+      ldd X = U;
+      ldd todo = U;
+
+      while (todo != empty_set())
       {
         auto iter_start = std::chrono::steady_clock::now();
-        X = Xnext;
 
-        // The predecessors of X.
-        ldd Xpred = m_chaining ? X : empty_set();
-        for (std::size_t i = 0; i < m_summand_groups.size(); ++i)
-        {
-          const summand_group& group = m_summand_groups[i];
-
-          auto group_start = std::chrono::steady_clock::now();
-          Xpred = union_(Xpred, predecessors(V, m_chaining ? Xpred : X, group));
-
-          std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - group_start;
-          mCRL2log(log::debug) << "added predecessors for group " << i << " out of " << m_summand_groups.size()
-                                 << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)\n";
-        }
+        // The predecessors of the todo set; we update the todo set in this iteration to only include newly added states.
+        ldd P = predecessors(V, todo);
 
         // Determine current player's nodes that can reach X (and X itself).
-        Xnext = union_(X, intersect(Xpred, Valpha));
+        ldd Palpha = intersect(P, Valpha);
+        todo = minus(Palpha, X);
+        X = union_(X, Palpha);
 
         // Determine nodes outside of X.
-        ldd Xoutside = minus(V, Xnext);
+        ldd Xoutside = minus(V, X);
 
-        // The nodes of the other player in the predecessors.
-        ldd Xother = intersect(Xpred, Vother);
+        // The nodes of the other player in the predecessors that are not part of the attractor set (note that Xnext contains all Valpha nodes in Xpred).
+        ldd Pforced = minus(P, X);
         for (std::size_t i = 0; i < m_summand_groups.size(); ++i)
         {
           const summand_group& group = m_summand_groups[i];
 
           auto group_start = std::chrono::steady_clock::now();
-          Xother = minus(Xother, predecessors(Xother, Xoutside, group));
+          Pforced = minus(Pforced, predecessors(Pforced, Xoutside, group));
 
           std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - group_start;
           mCRL2log(log::debug) << "removed 1 - alpha predecessors for group " << i << " out of " << m_summand_groups.size()
                                  << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)\n";
         }
 
-        Xnext = union_(Xnext, Xother);
+        todo = union_(todo, Pforced);
+        X = union_(X, Pforced);
 
         std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - iter_start;
         mCRL2log(log::verbose) << "attractor set iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)\n";
-        mCRL2log(log::verbose) << "LDD size = " << nodecount(Xnext) << std::endl;
+        mCRL2log(log::verbose) << "attractor LDD size = " << nodecount(X) << " and todo LDD size = " << nodecount(todo) << std::endl;
 
         ++iter;
       }
 
       std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - start;
       mCRL2log(log::verbose) << "finished attractor set computation (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)\n";
-      mCRL2log(log::verbose) << "LDD size = " << nodecount(X) << std::endl;
+      mCRL2log(log::verbose) << "attractor LDD size = " << nodecount(X) << std::endl;
       return X;
     }
 
