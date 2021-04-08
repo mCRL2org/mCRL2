@@ -19,6 +19,8 @@
 #include "mcrl2/data/substitution_utility.h"
 #include "mcrl2/lps/symbolic_reachability.h"
 #include "mcrl2/pbes/pbesreach.h"
+#include "mcrl2/pbes/srf_pbes.h"
+#include "mcrl2/pbes/pbes_equation_index.h"
 #include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2 {
@@ -163,6 +165,7 @@ class symbolic_pbessolve_algorithm
 {
   protected:
     ldd m_V[2]; // m_V[0] is the set of even nodes, m_V[1] is the set of odd nodes
+    ldd m_W[2]; // m_W[0] is the set of nodes that even won after solving and m_W[1] is the set of nodes that odd wins.
     const std::vector<summand_group>& m_summand_groups;
     std::map<std::size_t, ldd> m_rank_map;
     bool m_no_relprod = false;
@@ -375,41 +378,52 @@ class symbolic_pbessolve_algorithm
     }
 
   public:
-    bool solve(const ldd& V, const ldd& Vdeadlock, const ldd& initial_vertex)
+    bool solve(const ldd& V,
+               const ldd& initial_vertex,
+               const ldd& Vdeadlock = sylvan::ldds::empty_set(),
+               const ldd& W0 = sylvan::ldds::empty_set(),
+               const ldd& W1 = sylvan::ldds::empty_set())
     {
       using namespace sylvan::ldds;
 
-      ldd Vtotal = V;
+      std::array<const ldd, 2> Vplayer = { intersect(V, m_V[0]), intersect(V, m_V[1]) };
+      m_W[0] = W0;
+      m_W[1] = W1;
+
       if (Vdeadlock != empty_set())
       {
         // Determine winners from the deadlocks (the owner loses).
         mCRL2log(log::verbose) << "preprocessing to obtain total graph" << std::endl;
-        std::array<const ldd, 2> Vwinning = { intersect(Vdeadlock, m_V[1]), intersect(Vdeadlock, m_V[0]) };
-        std::array<const ldd, 2> Vplayer = { intersect(V, m_V[0]), intersect(V, m_V[1]) };
-
-        std::array<const ldd, 2> Vwon = { attractor(Vwinning[0], 0, V, Vplayer), attractor(Vwinning[1], 1, V, Vplayer) };
-
-        // We have already determined the winner for the initial vertex.
-        if (includes(Vwon[0], initial_vertex))
-        {
-          return true;
-        }
-        else if (includes(Vwon[1], initial_vertex))
-        {
-          return false;
-        }
-
-        // After removing the deadlock (winning) states the resulting set of states is a total graph.
-        Vtotal = minus(V, union_(Vwon[0], Vwon[1]));
+        m_W[0] = union_(m_W[0], intersect(Vdeadlock, m_V[1]));
+        m_W[1] = union_(m_W[1], intersect(Vdeadlock, m_V[0]));
       }
 
-      mCRL2log(log::debug) << "\n--- apply zielonka to ---\n" << print_graph(Vtotal, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
-      auto [W0, W1] = zielonka(Vtotal);
-      if (includes(W0, initial_vertex))
+      ldd Vtotal = V;
+      std::array<const ldd, 2> Vwon = { attractor(m_W[0], 0, V, Vplayer), attractor(m_W[1], 1, V, Vplayer) };
+
+      // We have already determined the winner for the initial vertex.
+      if (includes(Vwon[0], initial_vertex))
       {
         return true;
       }
-      else if (includes(W1, initial_vertex))
+      else if (includes(Vwon[1], initial_vertex))
+      {
+        return false;
+      }
+
+      // After removing the deadlock (winning) states the resulting set of states is a total graph.
+      Vtotal = minus(V, union_(Vwon[0], Vwon[1]));
+
+      mCRL2log(log::debug) << "\n--- apply zielonka to ---\n" << print_graph(Vtotal, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
+      auto [win0, win1] = zielonka(Vtotal);
+      m_W[0] = union_(m_W[0], win0);
+      m_W[1] = union_(m_W[1], win1);
+
+      if (includes(win0, initial_vertex))
+      {
+        return true;
+      }
+      else if (includes(win1, initial_vertex))
       {
         return false;
       }
@@ -417,6 +431,18 @@ class symbolic_pbessolve_algorithm
       {
         throw mcrl2::runtime_error("No solution found!");
       }
+    }
+
+    /// \returns The set of states won by even (excluding W0 passed to solve).
+    ldd W0()
+    {
+      return m_W[0];
+    }
+
+    /// \returns The set of states won by odd (excluding W1 passed to solve).
+    ldd W1()
+    {
+      return m_W[1];
     }
 };
 

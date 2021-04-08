@@ -344,7 +344,9 @@ class pbesreach_algorithm
     std::vector<boost::dynamic_bitset<>> m_group_patterns;
     std::vector<std::size_t> m_variable_order;
 
-    ldd m_deadlocks; // the set of deadlock states.
+    ldd m_visited;
+    ldd m_todo;
+    ldd m_deadlocks;
 
     ldd state2ldd(const data::data_expression_list& x)
     {
@@ -361,7 +363,7 @@ class pbesreach_algorithm
       return sylvan::ldds::cube(v.data(), x.size());
     };
 
-    // R.L := R.L U {(x,y) in R | x in X}
+    /// \brief Updates R.L := R.L U {(x,y) in R | x in X}
     void learn_successors(std::size_t i, summand_group& R, const ldd& X)
     {
       mCRL2log(log::debug) << "learn successors of summand group " << i << " for X = " << print_states(m_data_index, X, R.read) << std::endl;
@@ -469,6 +471,8 @@ class pbesreach_algorithm
       }
     }
 
+    virtual ~pbesreach_algorithm() {};
+
     ldd initial_state()
     {
       return state2ldd(m_initial_state);
@@ -489,26 +493,26 @@ class pbesreach_algorithm
       mCRL2log(log::debug) << "initial state = " << core::detail::print_list(m_initial_state) << std::endl;
 
       auto start = std::chrono::steady_clock::now();
-      ldd x = state2ldd(m_initial_state);
+      ldd initial_state = state2ldd(m_initial_state);
       std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - start;
-      ldd visited = empty_set();
-      ldd todo = x;
-      ldd deadlocks = empty_set();
+      m_visited = empty_set();
+      m_todo = initial_state;
+      m_deadlocks = empty_set();
 
-      while (todo != empty_set())
+      while (m_todo != empty_set() && !solution_found(initial_state))
       {
         stopwatch loop_start;
         iteration_count++;
         mCRL2log(log::debug) << "--- iteration " << iteration_count << " ---" << std::endl;
-        mCRL2log(log::debug) << "todo = " << print_states(m_data_index, todo) << std::endl;
+        mCRL2log(log::debug) << "todo = " << print_states(m_data_index, m_todo) << std::endl;
 
-        ldd todo1 = m_options.chaining ? todo : empty_set();
-        ldd potential_deadlocks = todo;
+        ldd todo1 = m_options.chaining ? m_todo : empty_set();
+        ldd potential_deadlocks = m_todo;
 
         for (std::size_t i = 0; i < R.size(); i++)
         {          
-          ldd proj = project(m_options.chaining ? todo1 : todo, R[i].Ip);
-
+          ldd proj = project(m_options.chaining ? todo1 : m_todo, R[i].Ip);
+          
           stopwatch learn_start;
           learn_successors(i, R[i], m_options.cached ? minus(proj, R[i].Ldomain) : proj);
           R[i].learn_time += learn_start.seconds();
@@ -517,14 +521,14 @@ class pbesreach_algorithm
 
           if (m_options.no_relprod)
           {
-            ldd z = lps::alternative_relprod(m_options.chaining ? todo1 : todo, R[i]);
+            ldd z = lps::alternative_relprod(m_options.chaining ? todo1 : m_todo, R[i]);
             mCRL2log(log::debug) << "relprod(" << i << ", todo) = " << print_states(m_data_index, z) << std::endl;
             todo1 = union_(z, todo1);
           }
           else
           {
-            mCRL2log(log::debug) << "relprod(" << i << ", todo) = " << print_states(m_data_index, relprod(todo, R[i].L, R[i].Ir)) << std::endl;
-            todo1 = relprod_union(m_options.chaining ? todo1 : todo, R[i].L, R[i].Ir, todo1);
+            mCRL2log(log::debug) << "relprod(" << i << ", todo) = " << print_states(m_data_index, relprod(m_todo, R[i].L, R[i].Ir)) << std::endl;
+            todo1 = relprod_union(m_options.chaining ? todo1 : m_todo, R[i].L, R[i].Ir, todo1);
           }
 
           if (m_options.detect_deadlocks)
@@ -533,37 +537,39 @@ class pbesreach_algorithm
           }
         }
 
-        visited = union_(visited, todo);
-        todo = minus(todo1, visited);
+        m_visited = union_(m_visited, m_todo);
+        m_todo = minus(todo1, m_visited);
 
         // after all transition groups are applied the remaining potential deadlocks are actual deadlocks.
         if (m_options.detect_deadlocks)
         {
-          deadlocks = union_(deadlocks, potential_deadlocks);
+          m_deadlocks = union_(m_deadlocks, potential_deadlocks);
         }
 
-        mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(visited) << " states after "
+        mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(m_visited) << " states after "
                                << std::setw(3) << iteration_count << " iterations (time = " << std::setprecision(2)
                                << std::fixed << loop_start.seconds() << "s)" << std::endl;
 
         if (m_options.detect_deadlocks)
         {
-          mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(deadlocks) << " deadlocks" << std::endl;
+          mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(m_deadlocks) << " deadlocks" << std::endl;
         }
-        mCRL2log(log::verbose) << "LDD size = " << nodecount(visited) << std::endl;
+        mCRL2log(log::verbose) << "LDD size = " << nodecount(m_visited) << std::endl;
+
+        on_end_while_loop();
       }
 
       elapsed_seconds = std::chrono::steady_clock::now() - start;
       if (report_states)
       {
-        std::cout << "number of states = " << satcount(visited) << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)" << std::endl;
+        std::cout << "number of states = " << satcount(m_visited) << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)" << std::endl;
       }
       else
       {
-        mCRL2log(log::verbose) << "number of states = " << satcount(visited) << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)" << std::endl;
+        mCRL2log(log::verbose) << "number of states = " << satcount(m_visited) << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)" << std::endl;
       }
 
-      mCRL2log(log::verbose) << "LDD size = " << nodecount(visited) << std::endl;
+      mCRL2log(log::verbose) << "LDD size = " << nodecount(m_visited) << std::endl;
       mCRL2log(log::verbose) << "used variable order = " << core::detail::print_list(m_variable_order) << std::endl;
 
       for (std::size_t i = 0; i < R.size(); i++)
@@ -573,8 +579,22 @@ class pbesreach_algorithm
         mCRL2log(log::verbose) << "transition LDD size = " << nodecount(R[i].L) << " and cache LDD size = " << nodecount(R[i].Ldomain) << std::endl;
       }
 
-      m_deadlocks = deadlocks;
-      return visited;
+      return m_visited;
+    }
+
+    /// \brief This function is called right after the while loop is finished.
+    virtual void on_end_while_loop()
+    { }
+
+    /// \returns True iff the solution was already found.
+    virtual bool solution_found(const sylvan::ldds::ldd&)
+    {
+      return false;
+    }
+
+    virtual bool solution() const
+    {
+      return false;
     }
 
     const std::vector<summand_group>& summand_groups() const

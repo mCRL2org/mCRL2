@@ -8,6 +8,7 @@
 //
 /// \file pbessolvesymbolic.cpp
 
+#include <array>
 #include <chrono>
 #include <iomanip>
 #include <sylvan_ldd.hpp>
@@ -21,6 +22,92 @@
 using namespace mcrl2;
 using data::tools::rewriter_tool;
 using utilities::tools::input_output_tool;
+
+namespace mcrl2::pbes_system {
+
+class pbesreach_algorithm_partial : public pbes_system::pbesreach_algorithm
+{
+public:
+
+  pbesreach_algorithm_partial(const pbes_system::pbes& pbesspec, const symbolic_reachability_options& options_) :
+    pbes_system::pbesreach_algorithm(pbesspec, options_)
+  {}
+
+  void on_end_while_loop() override
+  {
+    ++iteration_count;
+    if (iteration_count % 10 == 0)
+    {
+      // partial solving.
+      pbes_system::pbes_equation_index equation_index(pbes());
+
+      // map propositional variable names to the corresponding ldd value
+      std::map<core::identifier_string, std::uint32_t> propvar_index;
+      for (const data::data_expression& X: data_index()[0])
+      {
+        const auto& X_ = atermpp::down_cast<data::function_symbol>(X);
+        std::uint32_t i = propvar_index.size();
+        propvar_index[X_.name()] = i;
+      }
+
+      // maps ldd values to (rank, is_disjunctive)
+      std::map<std::size_t, std::pair<std::size_t, bool>> equation_info;
+      for (const auto& equation: pbes().equations())
+      {
+        const core::identifier_string& name = equation.variable().name();
+        std::size_t rank = equation_index.rank(name);
+        bool is_disjunctive = !equation.is_conjunctive();
+        auto i = propvar_index.find(name);
+        if (i != propvar_index.end())
+        {
+          std::uint32_t ldd_value = i->second;
+          equation_info[ldd_value] = { rank, is_disjunctive };
+        }
+      }
+
+      pbes_system::symbolic_pbessolve_algorithm solver(m_visited, summand_groups(), equation_info, m_options.no_relprod, m_options.chaining, data_index());
+
+      // Solve assuming that even wins all todo nodes.
+      solver.solve(m_visited, initial_state(), m_deadlocks, union_(m_todo, m_Vwon[0]), m_Vwon[1]);
+      m_Vwon[1] = union_(m_Vwon[1], solver.W1());
+
+      // Solve assuming that odd wins all todo nodes.
+      solver.solve(m_visited, initial_state(), m_deadlocks, m_Vwon[0], union_(m_todo, m_Vwon[1]));
+      m_Vwon[0] = union_(m_Vwon[0], solver.W0());
+
+      mCRL2log(log::verbose) << "partial solving found solution for" << std::setw(12) << satcount(m_Vwon[0]) + satcount(m_Vwon[1]) << " states" << std::endl;
+    }
+  }
+
+  bool solution_found(const sylvan::ldds::ldd& initial_state) override
+  {
+    if (includes(m_Vwon[0], initial_state))
+    {
+      m_result = true;
+      return true;
+    }
+    else if (includes(m_Vwon[1], initial_state))
+    {
+      m_result = false;
+      return true;
+    }
+
+    return false;
+  }
+
+  bool solution() const override
+  {
+    return m_result;
+  }
+
+private:
+  // States for which winners have already been determined.
+  std::array<sylvan::ldds::ldd, 2> m_Vwon;
+  bool m_result = false;
+  std::size_t iteration_count = 0;
+};
+
+} // namespace mcrl2::pbes_system
 
 class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
 {
@@ -39,6 +126,9 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
     std::size_t max_tablesize = 25;
     std::size_t min_cachesize = 22;
     std::size_t max_cachesize = 25;
+
+    // Solve strategy option
+    std::size_t m_solve_strategy = 0;
 
     void add_options(utilities::interface_description& desc) override
     {
@@ -62,6 +152,12 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
                       "'<order>' a user defined permutation e.g. '1 3 2 0 4'"
       );
       desc.add_option("info", "print read/write information of the summands");
+      desc.add_option("solve-strategy",
+                      utilities::make_enum_argument<int>("NUM")
+                        .add_value_desc(0, "No on-the-fly solving is applied", true)
+                        .add_value_desc(1, "Solve subgames using the solver."),
+                      "Use solve strategy NUM. Strategy 1 periodically applies on-the-fly solving, which may lead to early termination.",
+                      's');
       desc.add_option("split-conditions",
                       utilities::make_optional_argument("NUM", "0"),
                       "split conditions to obtain possibly smaller transition groups\n"
@@ -136,6 +232,12 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       {
         options.split_conditions = parser.option_argument_as<std::size_t>("split-conditions");
       }
+
+      m_solve_strategy =  parser.option_argument_as<int>("solve-strategy");
+      if (m_solve_strategy < 0 || m_solve_strategy > 1)
+      {
+        throw mcrl2::runtime_error("Invalid strategy " + std::to_string(m_solve_strategy));
+      }
     }
 
   public:
@@ -150,26 +252,9 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
              )
     {}
 
-    bool run() override
+    void solve(pbes_system::pbesreach_algorithm& reach)
     {
       using namespace sylvan::ldds;
-
-      lace_init(lace_n_workers, lace_dqsize);
-      lace_startup(lace_stacksize, nullptr, nullptr);
-      sylvan::sylvan_set_sizes(1ULL<<min_tablesize, 1ULL<<max_tablesize, 1ULL<<min_cachesize, 1ULL<<max_cachesize);
-      sylvan::sylvan_init_package();
-      sylvan::sylvan_init_ldd();
-
-      mCRL2log(log::verbose) << options << std::endl;
-
-      pbes_system::pbes pbesspec = pbes_system::detail::load_pbes(input_filename());
-
-      if (pbesspec.initial_state().empty())
-      {
-        throw mcrl2::runtime_error("PBESses without parameters are not supported");
-      }
-
-      pbes_system::pbesreach_algorithm reach(pbesspec, options);
 
       if (options.info)
       {
@@ -180,44 +265,84 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
         timer().start("instantiation");
         ldd V = reach.run();
         timer().finish("instantiation");
-        ldd init = reach.initial_state();
 
-        pbes_system::pbes_equation_index equation_index(reach.pbes());
-
-        // map propositional variable names to the corresponding ldd value
-        std::map<core::identifier_string, std::uint32_t> propvar_index;
-        for (const data::data_expression& X: reach.data_index()[0])
+        if (reach.solution_found(reach.initial_state()))
         {
-          const auto& X_ = atermpp::down_cast<data::function_symbol>(X);
-          std::uint32_t i = propvar_index.size();
-          propvar_index[X_.name()] = i;
+          std::cout << (reach.solution() ? "true" : "false") << std::endl;
         }
-
-        // maps ldd values to (rank, is_disjunctive)
-        std::map<std::size_t, std::pair<std::size_t, bool>> equation_info;
-        for (const auto& equation: reach.pbes().equations())
+        else
         {
-          const core::identifier_string& name = equation.variable().name();
-          std::size_t rank = equation_index.rank(name);
-          bool is_disjunctive = !equation.is_conjunctive();
-          auto i = propvar_index.find(name);
-          if (i != propvar_index.end())
+          pbes_system::pbes_equation_index equation_index(reach.pbes());
+
+          // map propositional variable names to the corresponding ldd value
+          std::map<core::identifier_string, std::uint32_t> propvar_index;
+          for (const data::data_expression& X: reach.data_index()[0])
           {
-            std::uint32_t ldd_value = i->second;
-            equation_info[ldd_value] = { rank, is_disjunctive };
+            const auto& X_ = atermpp::down_cast<data::function_symbol>(X);
+            std::uint32_t i = propvar_index.size();
+            propvar_index[X_.name()] = i;
           }
-        }
 
-        pbes_system::symbolic_pbessolve_algorithm solver(V, reach.summand_groups(), equation_info, options.no_relprod, options.chaining, reach.data_index());
-        mCRL2log(log::debug) << pbes_system::print_pbes_info(reach.pbes()) << std::endl;
-        timer().start("solving");
-        bool result = solver.solve(V, reach.deadlocks(), init);
-        timer().finish("solving");
-        std::cout << (result ? "true" : "false") << std::endl;
+          // maps ldd values to (rank, is_disjunctive)
+          std::map<std::size_t, std::pair<std::size_t, bool>> equation_info;
+          for (const auto& equation: reach.pbes().equations())
+          {
+            const core::identifier_string& name = equation.variable().name();
+            std::size_t rank = equation_index.rank(name);
+            bool is_disjunctive = !equation.is_conjunctive();
+            auto i = propvar_index.find(name);
+            if (i != propvar_index.end())
+            {
+              std::uint32_t ldd_value = i->second;
+              equation_info[ldd_value] = { rank, is_disjunctive };
+            }
+          }
+
+          pbes_system::symbolic_pbessolve_algorithm solver(V, reach.summand_groups(), equation_info, options.no_relprod, options.chaining, reach.data_index());
+          mCRL2log(log::debug) << pbes_system::print_pbes_info(reach.pbes()) << std::endl;
+          timer().start("solving");
+          bool result = solver.solve(V, reach.initial_state(), reach.deadlocks());
+          timer().finish("solving");
+
+          std::cout << (result ? "true" : "false") << std::endl;
+        }
 
         if (!options.dot_file.empty())
         {
           print_dot(options.dot_file, V);
+        }
+      }
+    }
+
+    bool run() override
+    {
+      lace_init(lace_n_workers, lace_dqsize);
+      lace_startup(lace_stacksize, nullptr, nullptr);
+      sylvan::sylvan_set_sizes(1ULL<<min_tablesize, 1ULL<<max_tablesize, 1ULL<<min_cachesize, 1ULL<<max_cachesize);
+      sylvan::sylvan_init_package();
+      sylvan::sylvan_init_ldd();
+
+      mCRL2log(log::verbose) << options << std::endl;
+      mCRL2log(log::verbose) << "solve_strategy" << m_solve_strategy << std::endl;
+
+      pbes_system::pbes pbesspec = pbes_system::detail::load_pbes(input_filename());
+
+      if (pbesspec.initial_state().empty())
+      {
+        throw mcrl2::runtime_error("PBESses without parameters are not supported");
+      }
+
+      else
+      {
+        if (m_solve_strategy == 0)
+        {
+          pbes_system::pbesreach_algorithm reach(pbesspec, options);
+          solve(reach);
+        }
+        else
+        {
+          pbes_system::pbesreach_algorithm_partial reach(pbesspec, options);
+          solve(reach);
         }
       }
 
