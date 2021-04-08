@@ -13,6 +13,7 @@
 #include <sylvan_ldd.hpp>
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/pbes/detail/pbes_io.h"
+#include "mcrl2/pbes/pbesreach.h"
 #include "mcrl2/pbes/symbolic_pbessolve.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/detail/container_utility.h"
@@ -61,7 +62,14 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
                       "'<order>' a user defined permutation e.g. '1 3 2 0 4'"
       );
       desc.add_option("info", "print read/write information of the summands");
-      desc.add_option("split-conditions", "split conjunctive and disjunctive conditions into one clause per summand", 's');
+      desc.add_option("split-conditions",
+                      utilities::make_optional_argument("NUM", "0"),
+                      "split conditions to obtain possibly smaller transition groups\n"
+                      "0 (default) no splitting performed.\n"
+                      "1 only split disjunctive conditions.\n"
+                      "2 also split conjunctive conditions into multiple equations which often yield more reachable states.\n"
+                      "3 alternative split for conjunctive conditions where even more states can become reachable.",
+                      'c');
       desc.add_option("total", "make the SRF PBES total", 't');
       desc.add_hidden_option("no-remove-unused-rewrite-rules", "do not remove unused rewrite rules. ", 'u');
       desc.add_hidden_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
@@ -88,7 +96,6 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       options.info                                  = parser.has_option("info");
       options.summand_groups                        = parser.option_argument("groups");
       options.variable_order                        = parser.option_argument("reorder");
-      options.split_conditions                      = parser.has_option("split-conditions");
       options.make_total                            = parser.has_option("total");
       if (!options.make_total)
       {
@@ -124,6 +131,10 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       if (parser.has_option("max-cache-size"))
       {
         max_cachesize = parser.option_argument_as<std::size_t>("max-cache-size");
+      }
+      if (parser.has_option("split-conditions"))
+      {
+        options.split_conditions = parser.option_argument_as<std::size_t>("split-conditions");
       }
     }
 

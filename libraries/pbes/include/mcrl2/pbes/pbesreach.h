@@ -57,7 +57,7 @@ data::data_specification construct_propositional_variable_data_specification(con
 struct symbolic_reachability_options: public lps::symbolic_reachability_options
 {
   bool make_total = false;
-  bool split_conditions = false;
+  std::size_t split_conditions = 0;
   std::string srf;
 };
 
@@ -66,7 +66,7 @@ std::ostream& operator<<(std::ostream& out, const symbolic_reachability_options&
 {
   out << static_cast<lps::symbolic_reachability_options>(options);
   out << "total = " << std::boolalpha << options.make_total << std::endl;
-  out << "split_conditions = " << std::boolalpha << options.split_conditions << std::endl;
+  out << "split_conditions = " << options.split_conditions << std::endl;
   return out;
 }
 
@@ -212,7 +212,7 @@ struct summand_group: public lps::summand_group
   }
 };
 
-pbes_system::srf_pbes split_conditions(const pbes_system::srf_pbes& pbes)
+pbes_system::srf_pbes split_conditions(const pbes_system::srf_pbes& pbes, std::size_t granularity)
 {
   mCRL2log(log::debug) << "splitting conditions" << std::endl;
 
@@ -236,8 +236,8 @@ pbes_system::srf_pbes split_conditions(const pbes_system::srf_pbes& pbes)
     {
       mCRL2log(log::debug) << "splitting summand " << summand << std::endl;
 
-      // Heuristics to determine when to split.
-      bool should_split = summand.parameters().empty(); // && find_free_variables(summand.condition()).size() >= 4;
+      // Heuristics to determine when to split conjunctive conditions.
+      bool should_split = summand.parameters().empty() && granularity > 1; // && find_free_variables(summand.condition()).size() >= 4;
 
       if (data::sort_bool::is_or_application(summand.condition()))
       {
@@ -250,26 +250,48 @@ pbes_system::srf_pbes split_conditions(const pbes_system::srf_pbes& pbes)
       }
       else if (should_split && data::sort_bool::is_and_application(summand.condition()))
       {
+        // The summand is simple if there is only a dependency on true or false.
+        bool simple = granularity == 3 || summand.variable().name() == Xtrue.name() || summand.variable().name() == Xfalse.name();
+
         std::vector<srf_summand> split_summands_inner; // The summands for the added equation.
         for (const data::data_expression& clause : split_conjunction(summand.condition()))
         {
-          // For conjunctive equations add !condition => Xfalse, and !condition && Xtrue otherwise.
-          split_summands_inner.emplace_back(summand.parameters(),
-                                            data::lazy::not_(clause),
-                                            !equation.is_conjunctive()
-                                            ? propositional_variable_instantiation(Xtrue.name(), data::make_data_expression_list(equation.variable().parameters())) :
-                                              propositional_variable_instantiation(Xfalse.name(), data::make_data_expression_list(equation.variable().parameters()))
-                                            );
+          if (simple)
+          {
+            // For conjunctive equations add !condition => Xfalse, and !condition && Xtrue otherwise.
+            split_summands_inner.emplace_back(data::variable_list(),
+                                              data::lazy::not_(clause),
+                                              !equation.is_conjunctive()
+                                              ? propositional_variable_instantiation(Xtrue.name(), {}) :
+                                                propositional_variable_instantiation(Xfalse.name(), {})
+                                              );
+          }
+          else
+          {
+            // Add a new equation per clause.
+            const propositional_variable& Y = equation.variable();
+            propositional_variable Y1(id_generator(Y.name()), Y.parameters());
+
+            split_summands_inner.emplace_back(data::variable_list(), true_(), propositional_variable_instantiation(Y1.name(), data::make_data_expression_list(Y1.parameters())));
+            std::vector<srf_summand> summands;
+            summands.emplace_back(data::variable_list(), clause, summand.variable());
+            added_equations.emplace_back(equation.symbol(), Y1, summands, !equation.is_conjunctive());
+            mCRL2log(log::debug) << "Added equation " << added_equations.back() << std::endl;
+          }
           mCRL2log(log::debug) << "Added summand " << split_summands_inner.back() << std::endl;
         }
 
-        split_summands_inner.emplace_back(data::variable_list(), true_(), summand.variable());
+        if (simple)
+        {
+          split_summands_inner.emplace_back(data::variable_list(), true_(), summand.variable());
+        }
 
         if (equation.summands().size() == 1)
         {
           // Change the current equation.
           split_summands = split_summands_inner;
           equation.is_conjunctive() = !equation.is_conjunctive();
+          mCRL2log(log::debug) << "Changed equation type (conjunctive or disjunctive)" << std::endl;
         }
         else
         {
@@ -279,6 +301,7 @@ pbes_system::srf_pbes split_conditions(const pbes_system::srf_pbes& pbes)
 
           split_summands.emplace_back(data::variable_list(), true_(), propositional_variable_instantiation(Y1.name(), data::make_data_expression_list(Y1.parameters())));
           added_equations.emplace_back(equation.symbol(), Y1, split_summands_inner, !equation.is_conjunctive());
+          mCRL2log(log::debug) << "Added equation " << added_equations.back() << std::endl;
         }
       }
       else
@@ -365,9 +388,9 @@ class pbesreach_algorithm
       }
 
       pbes_system::srf_pbes result = pbes2srf(pbesspec);
-      if (m_options.split_conditions)
+      if (m_options.split_conditions > 0)
       {
-        result = split_conditions(result);
+        result = split_conditions(result, m_options.split_conditions);
       }
 
       if (make_total)

@@ -717,24 +717,34 @@ Symbolic reachability is most effective when the number of read/write parameters
 For disjunctive conditions we can derive the following:
 Consider a PBES $\mathcal{E}$ in SRF with an equation $\sigma_i X_i(d:D) \in \mathcal{E}$ of the shape:
 \begin{align*}
-  \sigma_i X_i(d:D) &= \bigwedge\limits_{j \in J_i} \forall e_j : E_j . (\bigvee\limits_{k \in K_j} f_{ijk}(d,e_j)) \implies X_{g_{ij}}(h_{ij}(d, e_j)) \\  
-  \sigma_i X_i(d:D) &= \bigwedge\limits_{j \in J_i} \forall e_j : E_j . \bigwedge\limits_{k \in K_j} f_{ijk}(d,e_j) \implies X_{g_{ij}}(h_{ij}(d, e_j)) \\
-  \sigma_i X_i(d:D) &= \bigwedge\limits_{j \in J_i}\bigwedge\limits_{k \in K_j} \forall e_j : E_j .  f_{ijk}(d,e_j) \implies X_{g_{ij}}(h_{ij}(d, e_j))
+  \sigma_i X_i(d:D) &= \bigwedge\limits_{j \in J_i} \forall e_j : E_j . (\bigvee\limits_{k \in K_{ij}} f_{ijk}(d,e_j)) \implies X_{g_{ij}}(h_{ij}(d, e_j)) \\  
+  \sigma_i X_i(d:D) &= \bigwedge\limits_{j \in J_i} \forall e_j : E_j . \bigwedge\limits_{k \in K_{ij}} f_{ijk}(d,e_j) \implies X_{g_{ij}}(h_{ij}(d, e_j)) \\
+  \sigma_i X_i(d:D) &= \bigwedge\limits_{j \in J_i}\bigwedge\limits_{k \in K_{ij}} \forall e_j : E_{ij} .  f_{ijk}(d,e_j) \implies X_{g_{ij}}(h_{ij}(d, e_j))
 \end{align*}
 For the final equation every clause $f_{ijk}(d,e_j))$, for $k \in K_j$, can be treated as its own transition group.
-For conjunctive conditions we have to introduce a new equation to ensure that the result in SRF.
+For conjunctive conditions we have to introduce a new equation to ensure that the result is in SRF.
 \begin{align*}
-  \sigma_i X_i(d:D) &= \bigwedge\limits_{j \in J_i} \forall e_j : E_j . (\bigwedge\limits_{k \in K_j} f_{ijk}(d,e_j)) \implies X_{g_{ij}}(h_{ij}(d, e_j)) \\  
-  \sigma_i X_i(d:D) &= \bigwedge\limits_{j \in J_i} \forall e_j : E_j . \bigvee\limits_{k \in K_j} \neg f_{ijk}(d,e_j) \lor X_{g_{ij}}(h_{ij}(d, e_j)) \\
-  \sigma_i X_i(d:D) &= \bigwedge\limits_{j \in J_i}\bigwedge\limits_{k \in K_j} \forall e_j : E_j .  \textit{true} \implies Y_j(h_{ij}(d, e_j), e_j)
+  \sigma_i X_i(d:D) &= \bigwedge\limits_{j \in J_i} \forall e_j : E_j . (\bigwedge\limits_{k \in K_{ij}} f_{ijk}(d,e_j)) \implies X_{g_{ij}}(h_{ij}(d, e_j)) \\  
+  \sigma_i X_i(d:D) &= \bigwedge\limits_{j \in J_i} \forall e_j : E_j . \bigvee\limits_{k \in K_{ij}} (\neg f_{ijk}(d,e_j) \lor X_{g_{ij}}(h_{ij}(d, e_j))) \\
+  \sigma_i X_i(d:D) &= \bigwedge\limits_{j \in J_i} \forall e_j : E_j .  \textit{true} \implies Y_j(h_{ij}(d, e_j), e_j)
 \end{align*}
 Where $Y_j$ is a fresh name and its equation defined as follows:
 \begin{align*}
-  \nu Y_j(d : D, e_j : E_j) &= (\bigvee\limits_{k \in K_j} \neg f_{ijk}(d,e_j) \land Y_j(d, e_j)) \lor (\textit{true} \land X_{g_{ij}}(h_{ij}(d, e_j)))
+  \nu Y_j(d : D, e_j : E_j) &= (\bigvee\limits_{k \in K_{ij}} \neg f_{ijk}(d,e_j) \land Y_j(d, e_j)) \lor (\textit{true} \land X_{g_{ij}}(d, e_j))
 \end{align*}
-Note that this transformations makes the variable $e_j$ visible in the statespace and it is also quantified without a condition.
-In practice, this means that the latter transformation can be unwanted in the presence of quantifiers.
+Note that this transformations makes the variable $e_j$ visible in the state space.
+Furthermore, this parameter is also quantified without a condition.
+In practice, this means that the latter transformation is probably unwanted in the presence of quantifiers.
+Note that every $j \in J_i$ can be transformed according to whether the condition is conjunctive or disjunctive respectively, or not transformed at all.
 The cases for a disjunctive or conjunctive condition within a disjunctive equation are completely dual.
+
+We can also observe that in the equation for $Y_j$ there is always a dependency on $X_{g_{ij}}(h_{ij}(d, e_j))$, whereas, in the original equation this was guarded by $(\bigwedge\limits_{k \in K_j} f_{ijk}(d,e_j))$.
+Alternatively, we can also consider the following equation for $Y_j$ such that $X_{g_{ij}}(h_{ij}(d, e_j))$ still has (weakened) guards.
+
+\begin{align*}
+  \nu Y_j(d : D, e_j : E_j) &= \bigvee\limits_{k \in K_j} \textit{true} \land Y_{jk}(d, e_j) \\
+  \nu Y_{jk}(d : D, e_j : E_j) &= f_{ijk}(d,e_j) \implies X_{g_{ij}}(h_{ij}(d, e_j))) & \text{for } k \in K_i
+\end{align*}
 
 \newpage
 \section{Zielonka}
