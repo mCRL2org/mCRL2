@@ -249,7 +249,6 @@ class symbolic_pbessolve_algorithm
     /// \param V is the set of states
     /// \param Vplayer a partitioning of the nodes into the sets of even nodes V[0] and odd V[1].
     ldd attractor(const ldd& U, std::size_t alpha, const ldd& V, const std::array<const ldd, 2>& Vplayer)
-    {      
     {
       stopwatch attractor_watch;
       mCRL2log(log::verbose) << "start attractor set computation\n";
@@ -425,6 +424,40 @@ class symbolic_pbessolve_algorithm
       else
       {
         throw mcrl2::runtime_error("No solution found!");
+      }
+    }
+
+    void detect_cycles(const ldd& V)
+    {
+      using namespace sylvan::ldds;
+      std::array<const ldd, 2> Vplayer = { intersect(V, m_V[0]), intersect(V, m_V[1]) };
+
+      for (const auto&[rank, Vrank] : m_rank_map)
+      {
+        // Determine the cycles for this priority and player.
+        std::size_t alpha = rank % 2;
+        ldd U = empty_set();
+        ldd Unext = intersect(Vrank, Vplayer[alpha]);
+
+        mCRL2log(log::verbose) << "start cycle detection\n";
+        mCRL2log(log::verbose) << "LDD size = " << nodecount(Unext) << std::endl;
+
+        std::size_t iter = 0;
+        while (U != Unext)
+        {
+          stopwatch timer;
+          U = Unext;
+          Unext = predecessors(U, U);
+
+          mCRL2log(log::verbose) << "cycle detection iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
+          mCRL2log(log::verbose) << "LDD size = " << nodecount(Unext) << std::endl;
+
+          ++iter;
+        }
+
+        mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(U) << " states in cycles for priority " << rank << "\n";
+
+        m_W[alpha] = union_(m_W[alpha], attractor(U, alpha, V, Vplayer));
       }
     }
 

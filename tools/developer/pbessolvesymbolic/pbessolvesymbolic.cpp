@@ -38,7 +38,6 @@ public:
     ++iteration_count;
     if (iteration_count % 10 == 0)
     {
-      // partial solving.
       pbes_system::pbes_equation_index equation_index(pbes());
 
       // map propositional variable names to the corresponding ldd value
@@ -67,13 +66,25 @@ public:
 
       pbes_system::symbolic_pbessolve_algorithm solver(m_visited, summand_groups(), equation_info, m_options.no_relprod, m_options.chaining, data_index());
 
-      // Solve assuming that even wins all todo nodes.
-      solver.solve(m_visited, initial_state(), m_deadlocks, union_(m_todo, m_Vwon[0]), m_Vwon[1]);
-      m_Vwon[1] = union_(m_Vwon[1], solver.W1());
+      if (m_options.solve_strategy == 1)
+      {
+        solver.detect_cycles(m_visited);
+        m_Vwon[0] = union_(m_Vwon[0], solver.W0());
+        m_Vwon[1] = union_(m_Vwon[1], solver.W1());
 
-      // Solve assuming that odd wins all todo nodes.
-      solver.solve(m_visited, initial_state(), m_deadlocks, m_Vwon[0], union_(m_todo, m_Vwon[1]));
-      m_Vwon[0] = union_(m_Vwon[0], solver.W0());
+      }
+      else if (m_options.solve_strategy == 2)
+      {
+        mCRL2log(log::verbose) << "start partial solving" << std::endl;
+
+        // Solve assuming that even wins all todo nodes.
+        solver.solve(m_visited, initial_state(), m_deadlocks, union_(m_todo, m_Vwon[0]), m_Vwon[1]);
+        m_Vwon[1] = union_(m_Vwon[1], solver.W1());
+
+        // Solve assuming that odd wins all todo nodes.
+        solver.solve(m_visited, initial_state(), m_deadlocks, m_Vwon[0], union_(m_todo, m_Vwon[1]));
+        m_Vwon[0] = union_(m_Vwon[0], solver.W0());
+      }
 
       mCRL2log(log::verbose) << "partial solving found solution for" << std::setw(12) << satcount(m_Vwon[0]) + satcount(m_Vwon[1]) << " states" << std::endl;
     }
@@ -152,7 +163,8 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       desc.add_option("solve-strategy",
                       utilities::make_enum_argument<int>("NUM")
                         .add_value_desc(0, "No on-the-fly solving is applied", true)
-                        .add_value_desc(1, "Solve subgames using the solver."),
+                        .add_value_desc(1, "Detect winning loops.")
+                        .add_value_desc(2, "Solve subgames using the solver."),
                       "Use solve strategy NUM. Strategy 1 periodically applies on-the-fly solving, which may lead to early termination.",
                       's');
       desc.add_option("split-conditions",
