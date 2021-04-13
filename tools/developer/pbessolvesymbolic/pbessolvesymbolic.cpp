@@ -127,9 +127,6 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
     std::size_t min_cachesize = 22;
     std::size_t max_cachesize = 25;
 
-    // Solve strategy option
-    std::size_t m_solve_strategy = 0;
-
     void add_options(utilities::interface_description& desc) override
     {
       super::add_options(desc);
@@ -233,10 +230,10 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
         options.split_conditions = parser.option_argument_as<std::size_t>("split-conditions");
       }
 
-      m_solve_strategy =  parser.option_argument_as<int>("solve-strategy");
-      if (m_solve_strategy < 0 || m_solve_strategy > 1)
+      options.solve_strategy =  parser.option_argument_as<int>("solve-strategy");
+      if (options.solve_strategy < 0 || options.solve_strategy > 2)
       {
-        throw mcrl2::runtime_error("Invalid strategy " + std::to_string(m_solve_strategy));
+        throw mcrl2::runtime_error("Invalid strategy " + std::to_string(options.solve_strategy));
       }
     }
 
@@ -323,7 +320,6 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       sylvan::sylvan_init_ldd();
 
       mCRL2log(log::verbose) << options << std::endl;
-      mCRL2log(log::verbose) << "solve_strategy" << m_solve_strategy << std::endl;
 
       pbes_system::pbes pbesspec = pbes_system::detail::load_pbes(input_filename());
 
@@ -334,7 +330,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
 
       else
       {
-        if (m_solve_strategy == 0)
+        if (options.solve_strategy == 0)
         {
           pbes_system::pbesreach_algorithm reach(pbesspec, options);
           solve(reach);

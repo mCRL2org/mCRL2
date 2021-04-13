@@ -57,6 +57,7 @@ data::data_specification construct_propositional_variable_data_specification(con
 struct symbolic_reachability_options: public lps::symbolic_reachability_options
 {
   bool make_total = false;
+  std::size_t solve_strategy = 0;
   std::size_t split_conditions = 0;
   std::string srf;
 };
@@ -65,8 +66,9 @@ inline
 std::ostream& operator<<(std::ostream& out, const symbolic_reachability_options& options)
 {
   out << static_cast<lps::symbolic_reachability_options>(options);
-  out << "total = " << std::boolalpha << options.make_total << std::endl;
+  out << "solve_strategy = " << options.solve_strategy << std::endl;
   out << "split_conditions = " << options.split_conditions << std::endl;
+  out << "total = " << std::boolalpha << options.make_total << std::endl;
   return out;
 }
 
@@ -322,13 +324,13 @@ pbes_system::srf_pbes split_conditions(const pbes_system::srf_pbes& pbes, std::s
 
 class pbesreach_algorithm
 {
-    using ldd = sylvan::ldds::ldd;
     using enumerator_element = data::enumerator_list_element_with_substitution<>;
 
     template <typename Context>
     friend void lps::learn_successors_callback(WorkerP*, Task*, std::uint32_t* v, std::size_t n, void* context);
 
   protected:
+    using ldd = sylvan::ldds::ldd;
     const symbolic_reachability_options& m_options;
     pbes_system::srf_pbes m_pbes;
     data::rewriter m_rewr;
