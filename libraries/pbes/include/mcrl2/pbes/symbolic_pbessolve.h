@@ -22,6 +22,7 @@
 #include "mcrl2/pbes/srf_pbes.h"
 #include "mcrl2/pbes/pbes_equation_index.h"
 #include "mcrl2/utilities/text_utility.h"
+#include "mcrl2/utilities/stopwatch.h"
 
 namespace mcrl2 {
 
@@ -235,12 +236,10 @@ class symbolic_pbessolve_algorithm
       {
         const summand_group& group = m_summand_groups[i];
 
-        auto group_start = std::chrono::steady_clock::now();
+        stopwatch watch;
         result = union_(result, predecessors(U, m_chaining ? result : V, group));
-
-        std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - group_start;
         mCRL2log(log::debug) << "added predecessors for group " << i << " out of " << m_summand_groups.size()
-                               << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)\n";
+                               << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";
       }
       return result;
     }
@@ -251,9 +250,10 @@ class symbolic_pbessolve_algorithm
     /// \param Vplayer a partitioning of the nodes into the sets of even nodes V[0] and odd V[1].
     ldd attractor(const ldd& U, std::size_t alpha, const ldd& V, const std::array<const ldd, 2>& Vplayer)
     {      
-      auto start = std::chrono::steady_clock::now();
+    {
+      stopwatch attractor_watch;
       mCRL2log(log::verbose) << "start attractor set computation\n";
-      mCRL2log(log::verbose) << "LDD size = " << nodecount(U) << std::endl;
+      mCRL2log(log::verbose) << "attractor LDD size = " << nodecount(U) << std::endl;
 
       using namespace sylvan::ldds;
       const ldd& Valpha = Vplayer[alpha];
@@ -264,7 +264,7 @@ class symbolic_pbessolve_algorithm
 
       while (todo != empty_set())
       {
-        auto iter_start = std::chrono::steady_clock::now();
+        stopwatch iter_start;
 
         // The predecessors of the todo set; we update the todo set in this iteration to only include newly added states.
         ldd P = predecessors(V, todo);
@@ -283,27 +283,23 @@ class symbolic_pbessolve_algorithm
         {
           const summand_group& group = m_summand_groups[i];
 
-          auto group_start = std::chrono::steady_clock::now();
+          stopwatch watch;
           Pforced = minus(Pforced, predecessors(Pforced, Xoutside, group));
 
-          std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - group_start;
           mCRL2log(log::debug) << "removed 1 - alpha predecessors for group " << i << " out of " << m_summand_groups.size()
-                                 << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)\n";
+                                 << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";
         }
 
         todo = union_(todo, Pforced);
         X = union_(X, Pforced);
 
-        std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - iter_start;
-        mCRL2log(log::verbose) << "attractor set iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)\n";
+        mCRL2log(log::verbose) << "attractor set iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << iter_start.seconds() << "s)\n";
         mCRL2log(log::verbose) << "attractor LDD size = " << nodecount(X) << " and todo LDD size = " << nodecount(todo) << std::endl;
 
         ++iter;
       }
 
-      std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - start;
-      mCRL2log(log::verbose) << "finished attractor set computation (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)\n";
-      mCRL2log(log::verbose) << "attractor LDD size = " << nodecount(X) << std::endl;
+      mCRL2log(log::verbose) << "finished attractor set computation (time = " << std::setprecision(2) << std::fixed << attractor_watch.seconds() << "s)\n";
       return X;
     }
 
@@ -337,7 +333,7 @@ class symbolic_pbessolve_algorithm
         return { empty_set(), empty_set() };
       }
 
-      auto start = std::chrono::steady_clock::now();
+      stopwatch timer;
       mCRL2log(log::verbose) << "start zielonka recursion\n";
       auto [m, U] = get_min_rank(V);
 
@@ -367,8 +363,7 @@ class symbolic_pbessolve_algorithm
         W[1 - alpha] = union_(W[1 - alpha], B);
       }
 
-      std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - start;
-      mCRL2log(log::verbose) << "finished zielonka recursion (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)\n";
+      mCRL2log(log::verbose) << "finished zielonka recursion (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
 
       mCRL2log(log::debug) << "\n  --- zielonka solution for ---\n" << print_graph(V, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
       mCRL2log(log::debug) << "W0 = " << print_nodes(W[0], m_all_nodes) << std::endl;

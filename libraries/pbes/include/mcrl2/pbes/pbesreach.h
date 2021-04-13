@@ -492,9 +492,8 @@ class pbesreach_algorithm
 
       mCRL2log(log::debug) << "initial state = " << core::detail::print_list(m_initial_state) << std::endl;
 
-      auto start = std::chrono::steady_clock::now();
+      stopwatch timer;
       ldd initial_state = state2ldd(m_initial_state);
-      std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - start;
       m_visited = empty_set();
       m_todo = initial_state;
       m_deadlocks = empty_set();
@@ -554,22 +553,21 @@ class pbesreach_algorithm
         {
           mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(m_deadlocks) << " deadlocks" << std::endl;
         }
-        mCRL2log(log::verbose) << "LDD size = " << nodecount(m_visited) << std::endl;
+        mCRL2log(log::verbose) << "visited LDD size = " << nodecount(m_visited) << " and todo LDD size = " << nodecount(m_todo) << std::endl;
 
         on_end_while_loop();
       }
 
-      elapsed_seconds = std::chrono::steady_clock::now() - start;
       if (report_states)
       {
-        std::cout << "number of states = " << satcount(m_visited) << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)" << std::endl;
+        std::cout << "number of states = " << satcount(m_visited) << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)" << std::endl;
       }
       else
       {
-        mCRL2log(log::verbose) << "number of states = " << satcount(m_visited) << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)" << std::endl;
+        mCRL2log(log::verbose) << "number of states = " << satcount(m_visited) << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)" << std::endl;
       }
 
-      mCRL2log(log::verbose) << "LDD size = " << nodecount(m_visited) << std::endl;
+      mCRL2log(log::verbose) << "visited LDD size = " << nodecount(m_visited) << std::endl;
       mCRL2log(log::verbose) << "used variable order = " << core::detail::print_list(m_variable_order) << std::endl;
 
       for (std::size_t i = 0; i < R.size(); i++)

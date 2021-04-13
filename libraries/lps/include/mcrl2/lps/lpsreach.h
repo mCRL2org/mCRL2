@@ -324,12 +324,12 @@ class lpsreach_algorithm
         {
           mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(deadlocks) << " deadlocks" << std::endl;
         }
-        mCRL2log(log::verbose) << "LDD size = " << nodecount(visited) << std::endl;
+        mCRL2log(log::verbose) << "visited LDD size = " << nodecount(visited) << " and todo LDD size = " << nodecount(todo) << std::endl;
       }
 
       elapsed_seconds = std::chrono::steady_clock::now() - start;
       std::cout << "number of states = " << satcount(visited) << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)" << std::endl;
-      mCRL2log(log::verbose) << "LDD size = " << nodecount(visited) << std::endl;
+      mCRL2log(log::verbose) << "visited LDD size = " << nodecount(visited) << std::endl;
       mCRL2log(log::verbose) << "used variable order = " << core::detail::print_list(m_variable_order) << std::endl;
 
       for (std::size_t i = 0; i < R.size(); i++)
