@@ -143,18 +143,6 @@ inline aterm_ostream& operator<<(aterm_ostream&& stream, const T& t) { stream <<
 template<typename T>
 inline aterm_istream& operator>>(aterm_istream&& stream, T& t) { stream >> t; return stream; }
 
-/// \brief Send the term in textual form to the ostream.
-std::ostream& operator<<(std::ostream& out, const aterm& t);
-
-/// \param t The input aterm.
-/// \return A string representation of the given term derived from an aterm.
-inline std::string pp(const aterm& t)
-{
-  std::ostringstream oss;
-  oss << t;
-  return oss.str();
-}
-
 /// \brief Sends the name of a function symbol to an ostream.
 /// \param out The out stream.
 /// \param f The function symbol to be output.

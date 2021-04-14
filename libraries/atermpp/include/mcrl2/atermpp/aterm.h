@@ -10,6 +10,7 @@
 #ifndef MCRL2_ATERMPP_ATERM_H
 #define MCRL2_ATERMPP_ATERM_H
 
+#include <sstream>
 #include "mcrl2/atermpp/detail/aterm.h"
 #include "mcrl2/atermpp/type_traits.h"
 
@@ -331,6 +332,22 @@ namespace detail
   }
 }
 
+/// \brief Send the term in textual form to the ostream.
+/// \param out The stream to which the term is sent. 
+/// \param t   The term that is printed to the stream.
+/// \return The stream to which the term is written.
+std::ostream& operator<<(std::ostream& out, const atermpp::aterm& t);
+
+/// \brief Transform an aterm to an ascii string.
+/// \param t The input aterm.
+/// \return A string representation of the given term derived from an aterm.
+inline std::string pp(const atermpp::aterm& t)
+{
+  std::ostringstream oss;
+  oss << t;
+  return oss.str();
+}
+
 } // namespace atermpp
 
 namespace std
@@ -350,7 +367,6 @@ inline void swap(atermpp::unprotected_aterm& t1, atermpp::unprotected_aterm& t2)
 {
   t1.swap(t2);
 }
-
 } // namespace std
 
 #endif // MCRL2_ATERMPP_ATERM_H
