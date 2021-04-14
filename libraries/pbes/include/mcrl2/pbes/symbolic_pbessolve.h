@@ -439,7 +439,7 @@ class symbolic_pbessolve_algorithm
         ldd U = empty_set();
         ldd Unext = intersect(Vrank, Vplayer[alpha]);
 
-        mCRL2log(log::verbose) << "start cycle detection\n";
+        mCRL2log(log::verbose) << "cycle detection for rank " << rank << "\n";
         mCRL2log(log::verbose) << "LDD size = " << nodecount(Unext) << std::endl;
 
         std::size_t iter = 0;
@@ -455,7 +455,7 @@ class symbolic_pbessolve_algorithm
           ++iter;
         }
 
-        mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(U) << " states in cycles for priority " << rank << "\n";
+        mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(U) << " states in cycles\n";
 
         m_W[alpha] = union_(m_W[alpha], attractor(U, alpha, V, Vplayer));
       }

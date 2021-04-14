@@ -31,7 +31,10 @@ public:
 
   pbesreach_algorithm_partial(const pbes_system::pbes& pbesspec, const symbolic_reachability_options& options_) :
     pbes_system::pbesreach_algorithm(pbesspec, options_)
-  {}
+  {
+    m_Vwon[0] = sylvan::ldds::empty_set();
+    m_Vwon[1] = sylvan::ldds::empty_set();
+  }
 
   void on_end_while_loop() override
   {
@@ -68,9 +71,13 @@ public:
 
       if (m_options.solve_strategy == 1)
       {
+        mCRL2log(log::verbose) << "start cycle detection\n";
+
         solver.detect_cycles(m_visited);
         m_Vwon[0] = union_(m_Vwon[0], solver.W0());
         m_Vwon[1] = union_(m_Vwon[1], solver.W1());
+
+        mCRL2log(log::verbose) << "cycle detection found solution for" << std::setw(12) << satcount(m_Vwon[0]) + satcount(m_Vwon[1]) << " states" << std::endl;
 
       }
       else if (m_options.solve_strategy == 2)
@@ -84,9 +91,9 @@ public:
         // Solve assuming that odd wins all todo nodes.
         solver.solve(m_visited, initial_state(), m_deadlocks, m_Vwon[0], union_(m_todo, m_Vwon[1]));
         m_Vwon[0] = union_(m_Vwon[0], solver.W0());
-      }
 
-      mCRL2log(log::verbose) << "partial solving found solution for" << std::setw(12) << satcount(m_Vwon[0]) + satcount(m_Vwon[1]) << " states" << std::endl;
+        mCRL2log(log::verbose) << "partial solving found solution for" << std::setw(12) << satcount(m_Vwon[0]) + satcount(m_Vwon[1]) << " states" << std::endl;
+      }
     }
   }
 
