@@ -73,9 +73,9 @@ public:
       {
         mCRL2log(log::verbose) << "start cycle detection\n";
 
-        solver.detect_cycles(m_visited);
-        m_Vwon[0] = union_(m_Vwon[0], solver.W0());
-        m_Vwon[1] = union_(m_Vwon[1], solver.W1());
+        auto result = solver.detect_cycles(m_visited);
+        m_Vwon[0] = result.first;
+        m_Vwon[1] = result.second;
 
         mCRL2log(log::verbose) << "cycle detection found solution for" << std::setw(12) << satcount(m_Vwon[0]) + satcount(m_Vwon[1]) << " states" << std::endl;
 
@@ -85,12 +85,10 @@ public:
         mCRL2log(log::verbose) << "start partial solving" << std::endl;
 
         // Solve assuming that even wins all todo nodes.
-        solver.solve(m_visited, initial_state(), m_deadlocks, union_(m_todo, m_Vwon[0]), m_Vwon[1]);
-        m_Vwon[1] = union_(m_Vwon[1], solver.W1());
+        m_Vwon[1] = solver.solve_impl(m_visited, initial_state(), m_deadlocks, union_(m_todo, m_Vwon[0]), m_Vwon[1]).second;
 
         // Solve assuming that odd wins all todo nodes.
-        solver.solve(m_visited, initial_state(), m_deadlocks, m_Vwon[0], union_(m_todo, m_Vwon[1]));
-        m_Vwon[0] = union_(m_Vwon[0], solver.W0());
+        m_Vwon[0] = solver.solve_impl(m_visited, initial_state(), m_deadlocks, m_Vwon[0], union_(m_todo, m_Vwon[1])).first;
 
         mCRL2log(log::verbose) << "partial solving found solution for" << std::setw(12) << satcount(m_Vwon[0]) + satcount(m_Vwon[1]) << " states" << std::endl;
       }
