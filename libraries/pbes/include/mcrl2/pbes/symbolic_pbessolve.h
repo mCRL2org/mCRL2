@@ -240,7 +240,9 @@ class symbolic_pbessolve_algorithm
         mCRL2log(log::debug) << "added predecessors for group " << i << " out of " << m_summand_groups.size()
                                << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";
       }
-      return result;
+
+      // With chaining we need to remove V from the result set to ensure that it only contains elements in U.
+      return m_chaining ? minus(result, V) : result;
     }
 
     /// \brief Compute the attractor set for U.
@@ -260,23 +262,24 @@ class symbolic_pbessolve_algorithm
       ldd X = U;
       ldd todo = U;
 
+      ldd Xoutside = minus(V, X);
       while (todo != empty_set())
       {
         stopwatch iter_start;
 
         // The predecessors of the todo set; we update the todo set in this iteration to only include newly added states.
-        ldd P = predecessors(V, todo);
+        ldd P = predecessors(Xoutside, todo);
 
-        // Determine current player's nodes that can reach X (and X itself).
+        // Determine current player's nodes that can reach X (without the elements already in X).
         ldd Palpha = intersect(P, Valpha);
-        todo = minus(Palpha, X);
+        todo = Palpha;
         X = union_(X, Palpha);
 
         // Determine nodes outside of X.
-        ldd Xoutside = minus(V, X);
+        Xoutside = minus(Xoutside, Palpha);
 
-        // The nodes of the other player in the predecessors that are not part of the attractor set (note that Xnext contains all Valpha nodes in Xpred).
-        ldd Pforced = minus(P, X);
+        // The nodes of the other player in the predecessors that are not part of the attractor set.
+        ldd Pforced = minus(P, Palpha);
         for (std::size_t i = 0; i < m_summand_groups.size(); ++i)
         {
           const summand_group& group = m_summand_groups[i];
@@ -291,13 +294,16 @@ class symbolic_pbessolve_algorithm
         todo = union_(todo, Pforced);
         X = union_(X, Pforced);
 
-        mCRL2log(log::verbose) << "attractor set iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << iter_start.seconds() << "s)\n";
+        // Update nodes outside of X.
+        Xoutside = minus(Xoutside, Pforced);
+
+        mCRL2log(log::verbose) << "attractor set iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << iter_start.seconds() << "s)" << std::endl;
         mCRL2log(log::verbose) << "attractor LDD size = " << nodecount(X) << " and todo LDD size = " << nodecount(todo) << std::endl;
 
         ++iter;
       }
 
-      mCRL2log(log::verbose) << "finished attractor set computation (time = " << std::setprecision(2) << std::fixed << attractor_watch.seconds() << "s)\n";
+      mCRL2log(log::verbose) << "finished attractor set computation (time = " << std::setprecision(2) << std::fixed << attractor_watch.seconds() << "s)" << std::endl;
       return X;
     }
 
