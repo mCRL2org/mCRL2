@@ -228,7 +228,7 @@ data_expression Rewriter::rewrite_lambda_application(
   // Calculate the values that must be substituted for the variables in vl and store these in vl_backup.
   for(std::size_t count=0; count<vl.size(); count++)
   {
-    new (&vl_backup[count]) data_expression(rewrite(data_expression(t[count]),sigma));
+    new (&vl_backup[count]) data_expression(rewrite(t[count],sigma));
   }
 
   // Swap the values assigned to variables in vl with those in vl_backup.
@@ -237,7 +237,7 @@ data_expression Rewriter::rewrite_lambda_application(
   {
     const data_expression temp=sigma(v);
     sigma[v]=vl_backup[count];
-    vl_backup[count]=temp;
+    vl_backup[count]=temp; 
     count++;
   }
 
