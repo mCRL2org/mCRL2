@@ -799,19 +799,22 @@ We then only have to compute predecessors with respect to this todo set.
 \Function{Attr$_\alpha$}{$U$, $V$}
 \State $\var{todo} := U$
 \State $\var{X} := U$
+\State $\var{X}_\textit{outside} := V \setminus X$
 
 \While {$\var{todo} \neq \emptyset$}
-  \State $P := \textsf{pred}(V, todo)$
-  \State $P_\alpha := P \cap V_\alpha$
-  \State $\var{todo} := P_\alpha \setminus X$
-  \State $X := X \cup P_\alpha$
-  \State $P_\textit{forced} := P \setminus X$
+  \State $\var{P} := \textsf{pred}(\var{X}_\textit{outside}, \var{todo})$
+  \State $\var{P}_\alpha := \var{P} \cap \var{V}_\alpha$
+  \State $\var{todo} := \var{P}_\alpha$
+  \State $\var{X} := \var{X} \cup \var{P}_\alpha$
+  \State $\var{X}_\textit{outside} := \var{X}_\textit{outside} \setminus \var{P}_\alpha$
+  \State $\var{P}_\textit{forced} := \var{P} \setminus \var{P}_\alpha$
   \For {$1 \leq i \leq n$}
-    \State $P_\textit{forced} := P_\textit{forced} \setminus \textsf{pred}_i(P_\textit{forced}, V \setminus X)$
+    \State $\var{P}_\textit{forced} := \var{P}_\textit{forced} \setminus \textsf{pred}_i(\var{P}_\textit{forced}, \var{X}_\textit{outside})$
   
   \EndFor
-  \State $\var{todo} := \var{todo} \cup P_\textit{forced}$
-  \State $X := X \cup P_\textit{forced}$
+  \State $\var{todo} := \var{todo} \cup \var{P}_\textit{forced}$
+  \State $\var{X} := \var{X} \cup \var{P}_\textit{forced}$
+  \State $\var{X}_\textit{outside} := \var{X}_\textit{outside} \setminus \var{P}_\textit{forced}$
 \EndWhile
 \State \Return \var{X}
 \EndFunction
@@ -844,6 +847,31 @@ We then only have to compute predecessors with respect to this todo set.
 \end{algorithm}
 
 \newpage
+\subsection{Winning Cycle Detection}
+
+First, we implement cycle detection for a set of vertices $V$ by determining the largest subset $U$ of $V$ such that every vertex in $U$ has a predecessor in $U$, as presented in Algorithm~\ref{alg:cycles}.
+If $U$ satisfies this condition then every vertex in $U$ is part of a cycle.
+
+\begin{algorithm}[h]
+\caption{Cycle detection}
+\label{alg:cycles}
+\begin{algorithmic}[1]
+\Function{detect-cycles}{$V$}
+\State $U := \emptyset$
+\State $U' := V$
+\While {$U \neq U'$}
+  \State $U := U'$
+  \State $U' := U \cap \textsf{pred}(U, U)$
+\EndWhile
+\State \Return $U$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+If one of the players can force a play through a cycle of its own priority then these vertices (and all vertices in a attractor to that set) are won by that player.
+Therefore, for every priority $p$ let $\alpha = p \mod 2$ be a player and let $P = \{v \in V_\alpha \mid r(v) = p\}$ be a subset of vertices owned by player of parity $p$.
+Then the set of vertices resulting from $\attr{\alpha}{\textsf{detect-cycles}(V), V}$ are won by player $\alpha$.
+
 \bibliographystyle{plain}
 \bibliography{symbolic-reachability}
 \end{document}
