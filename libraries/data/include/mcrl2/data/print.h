@@ -1056,9 +1056,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       derived().print("!");
       derived().apply(sort_set::arg3(x));
     }
-    else
+    else if (is_function_sort(sort_set::arg1(x).sort()))
     {
-      sort_expression s = function_sort(sort_set::arg1(x).sort()).domain().front();
+      const sort_expression& s = atermpp::down_cast<function_sort>(sort_set::arg1(x).sort()).domain().front();
       core::identifier_string name = generate_identifier("x", x);
       variable var(name, s);
       data_expression body = sort_bool::and_(sort_bool::not_(g(var)), sort_set::in(s, var, sort_set::arg3(x)));
@@ -1067,6 +1067,13 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       derived().print(" | ");
       derived().apply(body);
       derived().print(" }");
+    }
+    else 
+    {
+      // In this case the term is not well formed, for instance because it contains a "Rewritten@@term" function.
+      // We print the residue as an aterm. 
+      derived().print(pp(atermpp::aterm(x)));
+      return;
     }
 
     // print operator
