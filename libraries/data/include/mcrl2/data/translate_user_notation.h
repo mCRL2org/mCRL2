@@ -101,15 +101,13 @@ public:
         return sort_fbag::fbag(element_sort, derived().apply(data_expression_list(x.begin(), x.end())));
       }
     }
-
-    typedef data::data_expression (Derived::*function_pointer)(const data::data_expression&);
-    function_pointer fp = &Derived::apply;
+   
     data_expression result = application(
        x.head(),
        x.begin(),
        x.end(),
-       std::bind(fp, derived(), std::placeholders::_1)
-    );
+       [&](const data_expression& d){ return derived().apply(d); }
+    ); 
     derived().leave(x);
     return result;
   }
