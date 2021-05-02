@@ -15,6 +15,7 @@
 #ifndef MCRL2_DATA_INT_H
 #define MCRL2_DATA_INT_H
 
+#include "functional"    // std::function
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
@@ -30,20 +31,20 @@ namespace mcrl2 {
 
   namespace data {
 
-    /// \brief Namespace for system defined sort int_
+    /// \brief Namespace for system defined sort int_.
     namespace sort_int {
 
       inline
-      core::identifier_string const& int_name()
+      const core::identifier_string& int_name()
       {
         static core::identifier_string int_name = core::identifier_string("Int");
         return int_name;
       }
 
-      /// \brief Constructor for sort expression Int
-      /// \return Sort expression Int
+      /// \brief Constructor for sort expression Int.
+      /// \return Sort expression Int.
       inline
-      basic_sort const& int_()
+      const basic_sort& int_()
       {
         static basic_sort int_ = basic_sort(int_name());
         return int_;
@@ -63,28 +64,28 @@ namespace mcrl2 {
       }
 
 
-      /// \brief Generate identifier \@cInt
-      /// \return Identifier \@cInt
+      /// \brief Generate identifier \@cInt.
+      /// \return Identifier \@cInt.
       inline
-      core::identifier_string const& cint_name()
+      const core::identifier_string& cint_name()
       {
         static core::identifier_string cint_name = core::identifier_string("@cInt");
         return cint_name;
       }
 
-      /// \brief Constructor for function symbol \@cInt
+      /// \brief Constructor for function symbol \@cInt.
       
-      /// \return Function symbol cint
+      /// \return Function symbol cint.
       inline
-      function_symbol const& cint()
+      const  function_symbol& cint()
       {
         static function_symbol cint(cint_name(), make_function_sort(sort_nat::nat(), int_()));
         return cint;
       }
 
-      /// \brief Recogniser for function \@cInt
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@cInt
+      /// \brief Recogniser for function \@cInt.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@cInt.
       inline
       bool is_cint_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -95,48 +96,48 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@cInt
+      /// \brief Application of function symbol \@cInt.
       
-      /// \param arg0 A data expression
-      /// \return Application of \@cInt to a number of arguments
+      /// \param arg0 A data expression.
+      /// \return Application of \@cInt to a number of arguments.
       inline
       application cint(const data_expression& arg0)
       {
         return sort_int::cint()(arg0);
       }
 
-      /// \brief Recogniser for application of \@cInt
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@cInt.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol cint to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_cint_application(const atermpp::aterm_appl& e)
       {
         return is_application(e) && is_cint_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
-      /// \brief Generate identifier \@cNeg
-      /// \return Identifier \@cNeg
+      /// \brief Generate identifier \@cNeg.
+      /// \return Identifier \@cNeg.
       inline
-      core::identifier_string const& cneg_name()
+      const core::identifier_string& cneg_name()
       {
         static core::identifier_string cneg_name = core::identifier_string("@cNeg");
         return cneg_name;
       }
 
-      /// \brief Constructor for function symbol \@cNeg
+      /// \brief Constructor for function symbol \@cNeg.
       
-      /// \return Function symbol cneg
+      /// \return Function symbol cneg.
       inline
-      function_symbol const& cneg()
+      const  function_symbol& cneg()
       {
         static function_symbol cneg(cneg_name(), make_function_sort(sort_pos::pos(), int_()));
         return cneg;
       }
 
-      /// \brief Recogniser for function \@cNeg
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@cNeg
+      /// \brief Recogniser for function \@cNeg.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@cNeg.
       inline
       bool is_cneg_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -147,27 +148,27 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@cNeg
+      /// \brief Application of function symbol \@cNeg.
       
-      /// \param arg0 A data expression
-      /// \return Application of \@cNeg to a number of arguments
+      /// \param arg0 A data expression.
+      /// \return Application of \@cNeg to a number of arguments.
       inline
       application cneg(const data_expression& arg0)
       {
         return sort_int::cneg()(arg0);
       }
 
-      /// \brief Recogniser for application of \@cNeg
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@cNeg.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol cneg to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_cneg_application(const atermpp::aterm_appl& e)
       {
         return is_application(e) && is_cneg_function_symbol(atermpp::down_cast<application>(e).head());
       }
-      /// \brief Give all system defined constructors for int_
-      /// \return All system defined constructors for int_
+      /// \brief Give all system defined constructors for int_.
+      /// \return All system defined constructors for int_.
       inline
       function_symbol_vector int_generate_constructors_code()
       {
@@ -177,29 +178,47 @@ namespace mcrl2 {
 
         return result;
       }
-
-      /// \brief Generate identifier Nat2Int
-      /// \return Identifier Nat2Int
+      /// \brief Give all defined constructors which can be used in mCRL2 specs for int_.
+      /// \return All system defined constructors that can be used in an mCRL2 specification for int_.
       inline
-      core::identifier_string const& nat2int_name()
+      function_symbol_vector int_mCRL2_usable_constructors()
+      {
+        function_symbol_vector result;
+        return result;
+      }
+      // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
+      typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;
+      /// \brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for int_.
+      /// \return All system defined constructors that are to be implemented in C++ for int_.
+      inline
+      implementation_map int_cpp_implementable_constructors()
+      {
+        implementation_map result;
+        return result;
+      }
+
+      /// \brief Generate identifier Nat2Int.
+      /// \return Identifier Nat2Int.
+      inline
+      const core::identifier_string& nat2int_name()
       {
         static core::identifier_string nat2int_name = core::identifier_string("Nat2Int");
         return nat2int_name;
       }
 
-      /// \brief Constructor for function symbol Nat2Int
+      /// \brief Constructor for function symbol Nat2Int.
       
-      /// \return Function symbol nat2int
+      /// \return Function symbol nat2int.
       inline
-      function_symbol const& nat2int()
+      const  function_symbol& nat2int()
       {
         static function_symbol nat2int(nat2int_name(), make_function_sort(sort_nat::nat(), int_()));
         return nat2int;
       }
 
-      /// \brief Recogniser for function Nat2Int
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching Nat2Int
+      /// \brief Recogniser for function Nat2Int.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching Nat2Int.
       inline
       bool is_nat2int_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -210,48 +229,48 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol Nat2Int
+      /// \brief Application of function symbol Nat2Int.
       
-      /// \param arg0 A data expression
-      /// \return Application of Nat2Int to a number of arguments
+      /// \param arg0 A data expression.
+      /// \return Application of Nat2Int to a number of arguments.
       inline
       application nat2int(const data_expression& arg0)
       {
         return sort_int::nat2int()(arg0);
       }
 
-      /// \brief Recogniser for application of Nat2Int
-      /// \param e A data expression
+      /// \brief Recogniser for application of Nat2Int.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol nat2int to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_nat2int_application(const atermpp::aterm_appl& e)
       {
         return is_application(e) && is_nat2int_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
-      /// \brief Generate identifier Int2Nat
-      /// \return Identifier Int2Nat
+      /// \brief Generate identifier Int2Nat.
+      /// \return Identifier Int2Nat.
       inline
-      core::identifier_string const& int2nat_name()
+      const core::identifier_string& int2nat_name()
       {
         static core::identifier_string int2nat_name = core::identifier_string("Int2Nat");
         return int2nat_name;
       }
 
-      /// \brief Constructor for function symbol Int2Nat
+      /// \brief Constructor for function symbol Int2Nat.
       
-      /// \return Function symbol int2nat
+      /// \return Function symbol int2nat.
       inline
-      function_symbol const& int2nat()
+      const  function_symbol& int2nat()
       {
         static function_symbol int2nat(int2nat_name(), make_function_sort(int_(), sort_nat::nat()));
         return int2nat;
       }
 
-      /// \brief Recogniser for function Int2Nat
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching Int2Nat
+      /// \brief Recogniser for function Int2Nat.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching Int2Nat.
       inline
       bool is_int2nat_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -262,48 +281,48 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol Int2Nat
+      /// \brief Application of function symbol Int2Nat.
       
-      /// \param arg0 A data expression
-      /// \return Application of Int2Nat to a number of arguments
+      /// \param arg0 A data expression.
+      /// \return Application of Int2Nat to a number of arguments.
       inline
       application int2nat(const data_expression& arg0)
       {
         return sort_int::int2nat()(arg0);
       }
 
-      /// \brief Recogniser for application of Int2Nat
-      /// \param e A data expression
+      /// \brief Recogniser for application of Int2Nat.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol int2nat to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_int2nat_application(const atermpp::aterm_appl& e)
       {
         return is_application(e) && is_int2nat_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
-      /// \brief Generate identifier Pos2Int
-      /// \return Identifier Pos2Int
+      /// \brief Generate identifier Pos2Int.
+      /// \return Identifier Pos2Int.
       inline
-      core::identifier_string const& pos2int_name()
+      const core::identifier_string& pos2int_name()
       {
         static core::identifier_string pos2int_name = core::identifier_string("Pos2Int");
         return pos2int_name;
       }
 
-      /// \brief Constructor for function symbol Pos2Int
+      /// \brief Constructor for function symbol Pos2Int.
       
-      /// \return Function symbol pos2int
+      /// \return Function symbol pos2int.
       inline
-      function_symbol const& pos2int()
+      const  function_symbol& pos2int()
       {
         static function_symbol pos2int(pos2int_name(), make_function_sort(sort_pos::pos(), int_()));
         return pos2int;
       }
 
-      /// \brief Recogniser for function Pos2Int
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching Pos2Int
+      /// \brief Recogniser for function Pos2Int.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching Pos2Int.
       inline
       bool is_pos2int_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -314,48 +333,48 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol Pos2Int
+      /// \brief Application of function symbol Pos2Int.
       
-      /// \param arg0 A data expression
-      /// \return Application of Pos2Int to a number of arguments
+      /// \param arg0 A data expression.
+      /// \return Application of Pos2Int to a number of arguments.
       inline
       application pos2int(const data_expression& arg0)
       {
         return sort_int::pos2int()(arg0);
       }
 
-      /// \brief Recogniser for application of Pos2Int
-      /// \param e A data expression
+      /// \brief Recogniser for application of Pos2Int.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol pos2int to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_pos2int_application(const atermpp::aterm_appl& e)
       {
         return is_application(e) && is_pos2int_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
-      /// \brief Generate identifier Int2Pos
-      /// \return Identifier Int2Pos
+      /// \brief Generate identifier Int2Pos.
+      /// \return Identifier Int2Pos.
       inline
-      core::identifier_string const& int2pos_name()
+      const core::identifier_string& int2pos_name()
       {
         static core::identifier_string int2pos_name = core::identifier_string("Int2Pos");
         return int2pos_name;
       }
 
-      /// \brief Constructor for function symbol Int2Pos
+      /// \brief Constructor for function symbol Int2Pos.
       
-      /// \return Function symbol int2pos
+      /// \return Function symbol int2pos.
       inline
-      function_symbol const& int2pos()
+      const  function_symbol& int2pos()
       {
         static function_symbol int2pos(int2pos_name(), make_function_sort(int_(), sort_pos::pos()));
         return int2pos;
       }
 
-      /// \brief Recogniser for function Int2Pos
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching Int2Pos
+      /// \brief Recogniser for function Int2Pos.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching Int2Pos.
       inline
       bool is_int2pos_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -366,30 +385,30 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol Int2Pos
+      /// \brief Application of function symbol Int2Pos.
       
-      /// \param arg0 A data expression
-      /// \return Application of Int2Pos to a number of arguments
+      /// \param arg0 A data expression.
+      /// \return Application of Int2Pos to a number of arguments.
       inline
       application int2pos(const data_expression& arg0)
       {
         return sort_int::int2pos()(arg0);
       }
 
-      /// \brief Recogniser for application of Int2Pos
-      /// \param e A data expression
+      /// \brief Recogniser for application of Int2Pos.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol int2pos to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_int2pos_application(const atermpp::aterm_appl& e)
       {
         return is_application(e) && is_int2pos_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
-      /// \brief Generate identifier max
-      /// \return Identifier max
+      /// \brief Generate identifier max.
+      /// \return Identifier max.
       inline
-      core::identifier_string const& maximum_name()
+      const core::identifier_string& maximum_name()
       {
         static core::identifier_string maximum_name = core::identifier_string("max");
         return maximum_name;
@@ -397,62 +416,57 @@ namespace mcrl2 {
 
       // This function is not intended for public use and therefore not documented in Doxygen.
       inline
-      function_symbol const& maximum(const sort_expression& s0, const sort_expression& s1)
+      function_symbol maximum(const sort_expression& s0, const sort_expression& s1)
       {
+        sort_expression target_sort;
         if (s0 == sort_pos::pos() && s1 == int_())
         {
-          static function_symbol maximum(maximum_name(), make_function_sort(sort_pos::pos(), int_(), sort_pos::pos()));
-          return maximum;
+          target_sort = sort_pos::pos();
         }
         else if (s0 == int_() && s1 == sort_pos::pos())
         {
-          static function_symbol maximum(maximum_name(), make_function_sort(int_(), sort_pos::pos(), sort_pos::pos()));
-          return maximum;
+          target_sort = sort_pos::pos();
         }
         else if (s0 == sort_nat::nat() && s1 == int_())
         {
-          static function_symbol maximum(maximum_name(), make_function_sort(sort_nat::nat(), int_(), sort_nat::nat()));
-          return maximum;
+          target_sort = sort_nat::nat();
         }
         else if (s0 == int_() && s1 == sort_nat::nat())
         {
-          static function_symbol maximum(maximum_name(), make_function_sort(int_(), sort_nat::nat(), sort_nat::nat()));
-          return maximum;
+          target_sort = sort_nat::nat();
         }
         else if (s0 == int_() && s1 == int_())
         {
-          static function_symbol maximum(maximum_name(), make_function_sort(int_(), int_(), int_()));
-          return maximum;
+          target_sort = int_();
         }
         else if (s0 == sort_pos::pos() && s1 == sort_nat::nat())
         {
-          static function_symbol maximum(maximum_name(), make_function_sort(sort_pos::pos(), sort_nat::nat(), sort_pos::pos()));
-          return maximum;
+          target_sort = sort_pos::pos();
         }
         else if (s0 == sort_nat::nat() && s1 == sort_pos::pos())
         {
-          static function_symbol maximum(maximum_name(), make_function_sort(sort_nat::nat(), sort_pos::pos(), sort_pos::pos()));
-          return maximum;
+          target_sort = sort_pos::pos();
         }
         else if (s0 == sort_nat::nat() && s1 == sort_nat::nat())
         {
-          static function_symbol maximum(maximum_name(), make_function_sort(sort_nat::nat(), sort_nat::nat(), sort_nat::nat()));
-          return maximum;
+          target_sort = sort_nat::nat();
         }
         else if (s0 == sort_pos::pos() && s1 == sort_pos::pos())
         {
-          static function_symbol maximum(maximum_name(), make_function_sort(sort_pos::pos(), sort_pos::pos(), sort_pos::pos()));
-          return maximum;
+          target_sort = sort_pos::pos();
         }
         else
         {
           throw mcrl2::runtime_error("cannot compute target sort for maximum with domain sorts " + pp(s0) + ", " + pp(s1));
         }
+
+        function_symbol maximum(maximum_name(), make_function_sort(s0, s1, target_sort));
+        return maximum;
       }
 
-      /// \brief Recogniser for function max
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching max
+      /// \brief Recogniser for function max.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching max.
       inline
       bool is_maximum_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -464,31 +478,31 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol max
+      /// \brief Application of function symbol max.
       
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of max to a number of arguments
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return Application of max to a number of arguments.
       inline
       application maximum(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_int::maximum(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of max
-      /// \param e A data expression
+      /// \brief Recogniser for application of max.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol maximum to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_maximum_application(const atermpp::aterm_appl& e)
       {
         return is_application(e) && is_maximum_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
-      /// \brief Generate identifier min
-      /// \return Identifier min
+      /// \brief Generate identifier min.
+      /// \return Identifier min.
       inline
-      core::identifier_string const& minimum_name()
+      const core::identifier_string& minimum_name()
       {
         static core::identifier_string minimum_name = core::identifier_string("min");
         return minimum_name;
@@ -496,32 +510,33 @@ namespace mcrl2 {
 
       // This function is not intended for public use and therefore not documented in Doxygen.
       inline
-      function_symbol const& minimum(const sort_expression& s0, const sort_expression& s1)
+      function_symbol minimum(const sort_expression& s0, const sort_expression& s1)
       {
+        sort_expression target_sort;
         if (s0 == int_() && s1 == int_())
         {
-          static function_symbol minimum(minimum_name(), make_function_sort(int_(), int_(), int_()));
-          return minimum;
+          target_sort = int_();
         }
         else if (s0 == sort_nat::nat() && s1 == sort_nat::nat())
         {
-          static function_symbol minimum(minimum_name(), make_function_sort(sort_nat::nat(), sort_nat::nat(), sort_nat::nat()));
-          return minimum;
+          target_sort = sort_nat::nat();
         }
         else if (s0 == sort_pos::pos() && s1 == sort_pos::pos())
         {
-          static function_symbol minimum(minimum_name(), make_function_sort(sort_pos::pos(), sort_pos::pos(), sort_pos::pos()));
-          return minimum;
+          target_sort = sort_pos::pos();
         }
         else
         {
           throw mcrl2::runtime_error("cannot compute target sort for minimum with domain sorts " + pp(s0) + ", " + pp(s1));
         }
+
+        function_symbol minimum(minimum_name(), make_function_sort(s0, s1, target_sort));
+        return minimum;
       }
 
-      /// \brief Recogniser for function min
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching min
+      /// \brief Recogniser for function min.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching min.
       inline
       bool is_minimum_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -533,49 +548,49 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol min
+      /// \brief Application of function symbol min.
       
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of min to a number of arguments
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return Application of min to a number of arguments.
       inline
       application minimum(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_int::minimum(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of min
-      /// \param e A data expression
+      /// \brief Recogniser for application of min.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol minimum to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_minimum_application(const atermpp::aterm_appl& e)
       {
         return is_application(e) && is_minimum_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
-      /// \brief Generate identifier abs
-      /// \return Identifier abs
+      /// \brief Generate identifier abs.
+      /// \return Identifier abs.
       inline
-      core::identifier_string const& abs_name()
+      const core::identifier_string& abs_name()
       {
         static core::identifier_string abs_name = core::identifier_string("abs");
         return abs_name;
       }
 
-      /// \brief Constructor for function symbol abs
+      /// \brief Constructor for function symbol abs.
       
-      /// \return Function symbol abs
+      /// \return Function symbol abs.
       inline
-      function_symbol const& abs()
+      const  function_symbol& abs()
       {
         static function_symbol abs(abs_name(), make_function_sort(int_(), sort_nat::nat()));
         return abs;
       }
 
-      /// \brief Recogniser for function abs
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching abs
+      /// \brief Recogniser for function abs.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching abs.
       inline
       bool is_abs_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -586,30 +601,30 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol abs
+      /// \brief Application of function symbol abs.
       
-      /// \param arg0 A data expression
-      /// \return Application of abs to a number of arguments
+      /// \param arg0 A data expression.
+      /// \return Application of abs to a number of arguments.
       inline
       application abs(const data_expression& arg0)
       {
         return sort_int::abs()(arg0);
       }
 
-      /// \brief Recogniser for application of abs
-      /// \param e A data expression
+      /// \brief Recogniser for application of abs.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol abs to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_abs_application(const atermpp::aterm_appl& e)
       {
         return is_application(e) && is_abs_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
-      /// \brief Generate identifier -
-      /// \return Identifier -
+      /// \brief Generate identifier -.
+      /// \return Identifier -.
       inline
-      core::identifier_string const& negate_name()
+      const core::identifier_string& negate_name()
       {
         static core::identifier_string negate_name = core::identifier_string("-");
         return negate_name;
@@ -617,32 +632,16 @@ namespace mcrl2 {
 
       // This function is not intended for public use and therefore not documented in Doxygen.
       inline
-      function_symbol const& negate(const sort_expression& s0)
+      function_symbol negate(const sort_expression& s0)
       {
-        if (s0 == sort_pos::pos())
-        {
-          static function_symbol negate(negate_name(), make_function_sort(sort_pos::pos(), int_()));
-          return negate;
-        }
-        else if (s0 == sort_nat::nat())
-        {
-          static function_symbol negate(negate_name(), make_function_sort(sort_nat::nat(), int_()));
-          return negate;
-        }
-        else if (s0 == int_())
-        {
-          static function_symbol negate(negate_name(), make_function_sort(int_(), int_()));
-          return negate;
-        }
-        else
-        {
-          throw mcrl2::runtime_error("cannot compute target sort for negate with domain sorts " + pp(s0));
-        }
+        sort_expression target_sort(int_());
+        function_symbol negate(negate_name(), make_function_sort(s0, target_sort));
+        return negate;
       }
 
-      /// \brief Recogniser for function -
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching -
+      /// \brief Recogniser for function -.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching -.
       inline
       bool is_negate_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -654,30 +653,30 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol -
+      /// \brief Application of function symbol -.
       
-      /// \param arg0 A data expression
-      /// \return Application of - to a number of arguments
+      /// \param arg0 A data expression.
+      /// \return Application of - to a number of arguments.
       inline
       application negate(const data_expression& arg0)
       {
         return sort_int::negate(arg0.sort())(arg0);
       }
 
-      /// \brief Recogniser for application of -
-      /// \param e A data expression
+      /// \brief Recogniser for application of -.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol negate to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_negate_application(const atermpp::aterm_appl& e)
       {
         return is_application(e) && is_negate_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
-      /// \brief Generate identifier succ
-      /// \return Identifier succ
+      /// \brief Generate identifier succ.
+      /// \return Identifier succ.
       inline
-      core::identifier_string const& succ_name()
+      const core::identifier_string& succ_name()
       {
         static core::identifier_string succ_name = core::identifier_string("succ");
         return succ_name;
@@ -685,32 +684,33 @@ namespace mcrl2 {
 
       // This function is not intended for public use and therefore not documented in Doxygen.
       inline
-      function_symbol const& succ(const sort_expression& s0)
+      function_symbol succ(const sort_expression& s0)
       {
+        sort_expression target_sort;
         if (s0 == int_())
         {
-          static function_symbol succ(succ_name(), make_function_sort(int_(), int_()));
-          return succ;
+          target_sort = int_();
         }
         else if (s0 == sort_nat::nat())
         {
-          static function_symbol succ(succ_name(), make_function_sort(sort_nat::nat(), sort_pos::pos()));
-          return succ;
+          target_sort = sort_pos::pos();
         }
         else if (s0 == sort_pos::pos())
         {
-          static function_symbol succ(succ_name(), make_function_sort(sort_pos::pos(), sort_pos::pos()));
-          return succ;
+          target_sort = sort_pos::pos();
         }
         else
         {
           throw mcrl2::runtime_error("cannot compute target sort for succ with domain sorts " + pp(s0));
         }
+
+        function_symbol succ(succ_name(), make_function_sort(s0, target_sort));
+        return succ;
       }
 
-      /// \brief Recogniser for function succ
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching succ
+      /// \brief Recogniser for function succ.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching succ.
       inline
       bool is_succ_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -722,30 +722,30 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol succ
+      /// \brief Application of function symbol succ.
       
-      /// \param arg0 A data expression
-      /// \return Application of succ to a number of arguments
+      /// \param arg0 A data expression.
+      /// \return Application of succ to a number of arguments.
       inline
       application succ(const data_expression& arg0)
       {
         return sort_int::succ(arg0.sort())(arg0);
       }
 
-      /// \brief Recogniser for application of succ
-      /// \param e A data expression
+      /// \brief Recogniser for application of succ.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol succ to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_succ_application(const atermpp::aterm_appl& e)
       {
         return is_application(e) && is_succ_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
-      /// \brief Generate identifier pred
-      /// \return Identifier pred
+      /// \brief Generate identifier pred.
+      /// \return Identifier pred.
       inline
-      core::identifier_string const& pred_name()
+      const core::identifier_string& pred_name()
       {
         static core::identifier_string pred_name = core::identifier_string("pred");
         return pred_name;
@@ -753,32 +753,33 @@ namespace mcrl2 {
 
       // This function is not intended for public use and therefore not documented in Doxygen.
       inline
-      function_symbol const& pred(const sort_expression& s0)
+      function_symbol pred(const sort_expression& s0)
       {
+        sort_expression target_sort;
         if (s0 == sort_nat::nat())
         {
-          static function_symbol pred(pred_name(), make_function_sort(sort_nat::nat(), int_()));
-          return pred;
+          target_sort = int_();
         }
         else if (s0 == int_())
         {
-          static function_symbol pred(pred_name(), make_function_sort(int_(), int_()));
-          return pred;
+          target_sort = int_();
         }
         else if (s0 == sort_pos::pos())
         {
-          static function_symbol pred(pred_name(), make_function_sort(sort_pos::pos(), sort_nat::nat()));
-          return pred;
+          target_sort = sort_nat::nat();
         }
         else
         {
           throw mcrl2::runtime_error("cannot compute target sort for pred with domain sorts " + pp(s0));
         }
+
+        function_symbol pred(pred_name(), make_function_sort(s0, target_sort));
+        return pred;
       }
 
-      /// \brief Recogniser for function pred
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching pred
+      /// \brief Recogniser for function pred.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching pred.
       inline
       bool is_pred_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -790,30 +791,30 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol pred
+      /// \brief Application of function symbol pred.
       
-      /// \param arg0 A data expression
-      /// \return Application of pred to a number of arguments
+      /// \param arg0 A data expression.
+      /// \return Application of pred to a number of arguments.
       inline
       application pred(const data_expression& arg0)
       {
         return sort_int::pred(arg0.sort())(arg0);
       }
 
-      /// \brief Recogniser for application of pred
-      /// \param e A data expression
+      /// \brief Recogniser for application of pred.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol pred to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_pred_application(const atermpp::aterm_appl& e)
       {
         return is_application(e) && is_pred_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
-      /// \brief Generate identifier +
-      /// \return Identifier +
+      /// \brief Generate identifier +.
+      /// \return Identifier +.
       inline
-      core::identifier_string const& plus_name()
+      const core::identifier_string& plus_name()
       {
         static core::identifier_string plus_name = core::identifier_string("+");
         return plus_name;
@@ -821,42 +822,41 @@ namespace mcrl2 {
 
       // This function is not intended for public use and therefore not documented in Doxygen.
       inline
-      function_symbol const& plus(const sort_expression& s0, const sort_expression& s1)
+      function_symbol plus(const sort_expression& s0, const sort_expression& s1)
       {
+        sort_expression target_sort;
         if (s0 == int_() && s1 == int_())
         {
-          static function_symbol plus(plus_name(), make_function_sort(int_(), int_(), int_()));
-          return plus;
+          target_sort = int_();
         }
         else if (s0 == sort_pos::pos() && s1 == sort_nat::nat())
         {
-          static function_symbol plus(plus_name(), make_function_sort(sort_pos::pos(), sort_nat::nat(), sort_pos::pos()));
-          return plus;
+          target_sort = sort_pos::pos();
         }
         else if (s0 == sort_nat::nat() && s1 == sort_pos::pos())
         {
-          static function_symbol plus(plus_name(), make_function_sort(sort_nat::nat(), sort_pos::pos(), sort_pos::pos()));
-          return plus;
+          target_sort = sort_pos::pos();
         }
         else if (s0 == sort_nat::nat() && s1 == sort_nat::nat())
         {
-          static function_symbol plus(plus_name(), make_function_sort(sort_nat::nat(), sort_nat::nat(), sort_nat::nat()));
-          return plus;
+          target_sort = sort_nat::nat();
         }
         else if (s0 == sort_pos::pos() && s1 == sort_pos::pos())
         {
-          static function_symbol plus(plus_name(), make_function_sort(sort_pos::pos(), sort_pos::pos(), sort_pos::pos()));
-          return plus;
+          target_sort = sort_pos::pos();
         }
         else
         {
           throw mcrl2::runtime_error("cannot compute target sort for plus with domain sorts " + pp(s0) + ", " + pp(s1));
         }
+
+        function_symbol plus(plus_name(), make_function_sort(s0, s1, target_sort));
+        return plus;
       }
 
-      /// \brief Recogniser for function +
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching +
+      /// \brief Recogniser for function +.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching +.
       inline
       bool is_plus_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -868,31 +868,31 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol +
+      /// \brief Application of function symbol +.
       
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of + to a number of arguments
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return Application of + to a number of arguments.
       inline
       application plus(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_int::plus(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of +
-      /// \param e A data expression
+      /// \brief Recogniser for application of +.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol plus to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_plus_application(const atermpp::aterm_appl& e)
       {
         return is_application(e) && is_plus_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
-      /// \brief Generate identifier -
-      /// \return Identifier -
+      /// \brief Generate identifier -.
+      /// \return Identifier -.
       inline
-      core::identifier_string const& minus_name()
+      const core::identifier_string& minus_name()
       {
         static core::identifier_string minus_name = core::identifier_string("-");
         return minus_name;
@@ -900,32 +900,16 @@ namespace mcrl2 {
 
       // This function is not intended for public use and therefore not documented in Doxygen.
       inline
-      function_symbol const& minus(const sort_expression& s0, const sort_expression& s1)
+      function_symbol minus(const sort_expression& s0, const sort_expression& s1)
       {
-        if (s0 == sort_pos::pos() && s1 == sort_pos::pos())
-        {
-          static function_symbol minus(minus_name(), make_function_sort(sort_pos::pos(), sort_pos::pos(), int_()));
-          return minus;
-        }
-        else if (s0 == sort_nat::nat() && s1 == sort_nat::nat())
-        {
-          static function_symbol minus(minus_name(), make_function_sort(sort_nat::nat(), sort_nat::nat(), int_()));
-          return minus;
-        }
-        else if (s0 == int_() && s1 == int_())
-        {
-          static function_symbol minus(minus_name(), make_function_sort(int_(), int_(), int_()));
-          return minus;
-        }
-        else
-        {
-          throw mcrl2::runtime_error("cannot compute target sort for minus with domain sorts " + pp(s0) + ", " + pp(s1));
-        }
+        sort_expression target_sort(int_());
+        function_symbol minus(minus_name(), make_function_sort(s0, s1, target_sort));
+        return minus;
       }
 
-      /// \brief Recogniser for function -
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching -
+      /// \brief Recogniser for function -.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching -.
       inline
       bool is_minus_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -937,31 +921,31 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol -
+      /// \brief Application of function symbol -.
       
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of - to a number of arguments
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return Application of - to a number of arguments.
       inline
       application minus(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_int::minus(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of -
-      /// \param e A data expression
+      /// \brief Recogniser for application of -.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol minus to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_minus_application(const atermpp::aterm_appl& e)
       {
         return is_application(e) && is_minus_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
-      /// \brief Generate identifier *
-      /// \return Identifier *
+      /// \brief Generate identifier *.
+      /// \return Identifier *.
       inline
-      core::identifier_string const& times_name()
+      const core::identifier_string& times_name()
       {
         static core::identifier_string times_name = core::identifier_string("*");
         return times_name;
@@ -969,32 +953,33 @@ namespace mcrl2 {
 
       // This function is not intended for public use and therefore not documented in Doxygen.
       inline
-      function_symbol const& times(const sort_expression& s0, const sort_expression& s1)
+      function_symbol times(const sort_expression& s0, const sort_expression& s1)
       {
+        sort_expression target_sort;
         if (s0 == int_() && s1 == int_())
         {
-          static function_symbol times(times_name(), make_function_sort(int_(), int_(), int_()));
-          return times;
+          target_sort = int_();
         }
         else if (s0 == sort_nat::nat() && s1 == sort_nat::nat())
         {
-          static function_symbol times(times_name(), make_function_sort(sort_nat::nat(), sort_nat::nat(), sort_nat::nat()));
-          return times;
+          target_sort = sort_nat::nat();
         }
         else if (s0 == sort_pos::pos() && s1 == sort_pos::pos())
         {
-          static function_symbol times(times_name(), make_function_sort(sort_pos::pos(), sort_pos::pos(), sort_pos::pos()));
-          return times;
+          target_sort = sort_pos::pos();
         }
         else
         {
           throw mcrl2::runtime_error("cannot compute target sort for times with domain sorts " + pp(s0) + ", " + pp(s1));
         }
+
+        function_symbol times(times_name(), make_function_sort(s0, s1, target_sort));
+        return times;
       }
 
-      /// \brief Recogniser for function *
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching *
+      /// \brief Recogniser for function *.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching *.
       inline
       bool is_times_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -1006,31 +991,31 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol *
+      /// \brief Application of function symbol *.
       
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of * to a number of arguments
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return Application of * to a number of arguments.
       inline
       application times(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_int::times(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of *
-      /// \param e A data expression
+      /// \brief Recogniser for application of *.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol times to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_times_application(const atermpp::aterm_appl& e)
       {
         return is_application(e) && is_times_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
-      /// \brief Generate identifier div
-      /// \return Identifier div
+      /// \brief Generate identifier div.
+      /// \return Identifier div.
       inline
-      core::identifier_string const& div_name()
+      const core::identifier_string& div_name()
       {
         static core::identifier_string div_name = core::identifier_string("div");
         return div_name;
@@ -1038,27 +1023,29 @@ namespace mcrl2 {
 
       // This function is not intended for public use and therefore not documented in Doxygen.
       inline
-      function_symbol const& div(const sort_expression& s0, const sort_expression& s1)
+      function_symbol div(const sort_expression& s0, const sort_expression& s1)
       {
+        sort_expression target_sort;
         if (s0 == int_() && s1 == sort_pos::pos())
         {
-          static function_symbol div(div_name(), make_function_sort(int_(), sort_pos::pos(), int_()));
-          return div;
+          target_sort = int_();
         }
         else if (s0 == sort_nat::nat() && s1 == sort_pos::pos())
         {
-          static function_symbol div(div_name(), make_function_sort(sort_nat::nat(), sort_pos::pos(), sort_nat::nat()));
-          return div;
+          target_sort = sort_nat::nat();
         }
         else
         {
           throw mcrl2::runtime_error("cannot compute target sort for div with domain sorts " + pp(s0) + ", " + pp(s1));
         }
+
+        function_symbol div(div_name(), make_function_sort(s0, s1, target_sort));
+        return div;
       }
 
-      /// \brief Recogniser for function div
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching div
+      /// \brief Recogniser for function div.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching div.
       inline
       bool is_div_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -1070,31 +1057,31 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol div
+      /// \brief Application of function symbol div.
       
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of div to a number of arguments
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return Application of div to a number of arguments.
       inline
       application div(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_int::div(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of div
-      /// \param e A data expression
+      /// \brief Recogniser for application of div.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol div to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_div_application(const atermpp::aterm_appl& e)
       {
         return is_application(e) && is_div_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
-      /// \brief Generate identifier mod
-      /// \return Identifier mod
+      /// \brief Generate identifier mod.
+      /// \return Identifier mod.
       inline
-      core::identifier_string const& mod_name()
+      const core::identifier_string& mod_name()
       {
         static core::identifier_string mod_name = core::identifier_string("mod");
         return mod_name;
@@ -1102,27 +1089,16 @@ namespace mcrl2 {
 
       // This function is not intended for public use and therefore not documented in Doxygen.
       inline
-      function_symbol const& mod(const sort_expression& s0, const sort_expression& s1)
+      function_symbol mod(const sort_expression& s0, const sort_expression& s1)
       {
-        if (s0 == int_() && s1 == sort_pos::pos())
-        {
-          static function_symbol mod(mod_name(), make_function_sort(int_(), sort_pos::pos(), sort_nat::nat()));
-          return mod;
-        }
-        else if (s0 == sort_nat::nat() && s1 == sort_pos::pos())
-        {
-          static function_symbol mod(mod_name(), make_function_sort(sort_nat::nat(), sort_pos::pos(), sort_nat::nat()));
-          return mod;
-        }
-        else
-        {
-          throw mcrl2::runtime_error("cannot compute target sort for mod with domain sorts " + pp(s0) + ", " + pp(s1));
-        }
+        sort_expression target_sort(sort_nat::nat());
+        function_symbol mod(mod_name(), make_function_sort(s0, s1, target_sort));
+        return mod;
       }
 
-      /// \brief Recogniser for function mod
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching mod
+      /// \brief Recogniser for function mod.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching mod.
       inline
       bool is_mod_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -1134,31 +1110,31 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol mod
+      /// \brief Application of function symbol mod.
       
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of mod to a number of arguments
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return Application of mod to a number of arguments.
       inline
       application mod(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_int::mod(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of mod
-      /// \param e A data expression
+      /// \brief Recogniser for application of mod.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol mod to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_mod_application(const atermpp::aterm_appl& e)
       {
         return is_application(e) && is_mod_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
-      /// \brief Generate identifier exp
-      /// \return Identifier exp
+      /// \brief Generate identifier exp.
+      /// \return Identifier exp.
       inline
-      core::identifier_string const& exp_name()
+      const core::identifier_string& exp_name()
       {
         static core::identifier_string exp_name = core::identifier_string("exp");
         return exp_name;
@@ -1166,32 +1142,33 @@ namespace mcrl2 {
 
       // This function is not intended for public use and therefore not documented in Doxygen.
       inline
-      function_symbol const& exp(const sort_expression& s0, const sort_expression& s1)
+      function_symbol exp(const sort_expression& s0, const sort_expression& s1)
       {
+        sort_expression target_sort;
         if (s0 == int_() && s1 == sort_nat::nat())
         {
-          static function_symbol exp(exp_name(), make_function_sort(int_(), sort_nat::nat(), int_()));
-          return exp;
+          target_sort = int_();
         }
         else if (s0 == sort_pos::pos() && s1 == sort_nat::nat())
         {
-          static function_symbol exp(exp_name(), make_function_sort(sort_pos::pos(), sort_nat::nat(), sort_pos::pos()));
-          return exp;
+          target_sort = sort_pos::pos();
         }
         else if (s0 == sort_nat::nat() && s1 == sort_nat::nat())
         {
-          static function_symbol exp(exp_name(), make_function_sort(sort_nat::nat(), sort_nat::nat(), sort_nat::nat()));
-          return exp;
+          target_sort = sort_nat::nat();
         }
         else
         {
           throw mcrl2::runtime_error("cannot compute target sort for exp with domain sorts " + pp(s0) + ", " + pp(s1));
         }
+
+        function_symbol exp(exp_name(), make_function_sort(s0, s1, target_sort));
+        return exp;
       }
 
-      /// \brief Recogniser for function exp
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching exp
+      /// \brief Recogniser for function exp.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching exp.
       inline
       bool is_exp_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -1203,21 +1180,21 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol exp
+      /// \brief Application of function symbol exp.
       
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of exp to a number of arguments
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return Application of exp to a number of arguments.
       inline
       application exp(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_int::exp(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of exp
-      /// \param e A data expression
+      /// \brief Recogniser for application of exp.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol exp to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_exp_application(const atermpp::aterm_appl& e)
       {
@@ -1256,40 +1233,99 @@ namespace mcrl2 {
         result.push_back(sort_int::exp(int_(), sort_nat::nat()));
         return result;
       }
-      ///\brief Function for projecting out argument
-      ///        left from an application
-      /// \param e A data expression
-      /// \pre left is defined for e
-      /// \return The argument of e that corresponds to left
+      
+      /// \brief Give all system defined mappings and constructors for int_
+      /// \return All system defined mappings for int_
+      inline
+      function_symbol_vector int_generate_constructors_and_functions_code()
+      {
+        function_symbol_vector result=int_generate_functions_code();
+        for(const function_symbol& f: int_generate_constructors_code())
+        {
+          result.push_back(f);
+        }
+        return result;
+      }
+      
+      /// \brief Give all system defined mappings that can be used in mCRL2 specs for int_
+      /// \return All system defined mappings for that can be used in mCRL2 specificationis int_
+      inline
+      function_symbol_vector int_mCRL2_usable_mappings()
+      {
+        function_symbol_vector result;
+        result.push_back(sort_int::nat2int());
+        result.push_back(sort_int::int2nat());
+        result.push_back(sort_int::pos2int());
+        result.push_back(sort_int::int2pos());
+        result.push_back(sort_int::maximum(sort_pos::pos(), int_()));
+        result.push_back(sort_int::maximum(int_(), sort_pos::pos()));
+        result.push_back(sort_int::maximum(sort_nat::nat(), int_()));
+        result.push_back(sort_int::maximum(int_(), sort_nat::nat()));
+        result.push_back(sort_int::maximum(int_(), int_()));
+        result.push_back(sort_int::minimum(int_(), int_()));
+        result.push_back(sort_int::abs());
+        result.push_back(sort_int::negate(sort_pos::pos()));
+        result.push_back(sort_int::negate(sort_nat::nat()));
+        result.push_back(sort_int::negate(int_()));
+        result.push_back(sort_int::succ(int_()));
+        result.push_back(sort_int::pred(sort_nat::nat()));
+        result.push_back(sort_int::pred(int_()));
+        result.push_back(sort_int::plus(int_(), int_()));
+        result.push_back(sort_int::minus(sort_pos::pos(), sort_pos::pos()));
+        result.push_back(sort_int::minus(sort_nat::nat(), sort_nat::nat()));
+        result.push_back(sort_int::minus(int_(), int_()));
+        result.push_back(sort_int::times(int_(), int_()));
+        result.push_back(sort_int::div(int_(), sort_pos::pos()));
+        result.push_back(sort_int::mod(int_(), sort_pos::pos()));
+        result.push_back(sort_int::exp(int_(), sort_nat::nat()));
+        return result;
+      }
+
+
+      // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
+      typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;
+      /// \brief Give all system defined mappings that are to be implemented in C++ code for int_
+      /// \return A mapping from C++ implementable function symbols to system defined mappings implemented in C++ code for int_
+      inline
+      implementation_map int_cpp_implementable_mappings()
+      {
+        implementation_map result;
+        return result;
+      }
+      ///\brief Function for projecting out argument.
+      ///        left from an application.
+      /// \param e A data expression.
+      /// \pre left is defined for e.
+      /// \return The argument of e that corresponds to left.
       inline
       const data_expression& left(const data_expression& e)
       {
         assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e));
-        return atermpp::down_cast<const application >(e)[0];
+        return atermpp::down_cast<application>(e)[0];
       }
 
-      ///\brief Function for projecting out argument
-      ///        right from an application
-      /// \param e A data expression
-      /// \pre right is defined for e
-      /// \return The argument of e that corresponds to right
+      ///\brief Function for projecting out argument.
+      ///        right from an application.
+      /// \param e A data expression.
+      /// \pre right is defined for e.
+      /// \return The argument of e that corresponds to right.
       inline
       const data_expression& right(const data_expression& e)
       {
         assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e));
-        return atermpp::down_cast<const application >(e)[1];
+        return atermpp::down_cast<application>(e)[1];
       }
 
-      ///\brief Function for projecting out argument
-      ///        arg from an application
-      /// \param e A data expression
-      /// \pre arg is defined for e
-      /// \return The argument of e that corresponds to arg
+      ///\brief Function for projecting out argument.
+      ///        arg from an application.
+      /// \param e A data expression.
+      /// \pre arg is defined for e.
+      /// \return The argument of e that corresponds to arg.
       inline
       const data_expression& arg(const data_expression& e)
       {
         assert(is_cint_application(e) || is_cneg_application(e) || is_nat2int_application(e) || is_int2nat_application(e) || is_pos2int_application(e) || is_int2pos_application(e) || is_abs_application(e) || is_negate_application(e) || is_succ_application(e) || is_pred_application(e));
-        return atermpp::down_cast<const application >(e)[0];
+        return atermpp::down_cast<application>(e)[0];
       }
 
       /// \brief Give all system defined equations for int_

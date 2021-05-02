@@ -12,17 +12,17 @@
 
 sort Pos <"pos">;
 
-cons @c1 <"c1">:Pos;
-     @cDub <"cdub">:Bool <"left"> #Pos <"right"> ->Pos;
+cons @c1 <"c1">:Pos                                                               internal defined_by_rewrite_rules;
+     @cDub <"cdub">:Bool <"left"> #Pos <"right"> ->Pos                            internal defined_by_rewrite_rules;
 
-map max <"maximum">:Pos <"left"> #Pos <"right">->Pos;
-    min <"minimum">:Pos <"left"> #Pos <"right">->Pos;
-    succ <"succ">:Pos <"arg">->Pos;
-    @pospred <"pos_predecessor">:Pos <"arg">->Pos;
-    + <"plus">:Pos <"left"> #Pos <"right">->Pos;
-    @addc <"add_with_carry">:Bool <"arg1"> #Pos <"arg2"> #Pos <"arg3">->Pos;
-    * <"times">:Pos <"left"> #Pos <"right">->Pos;
-    @powerlog2 <"powerlog2_pos">:Pos <"arg"> -> Pos;
+map max <"maximum">:Pos <"left"> #Pos <"right">->Pos                              external defined_by_rewrite_rules;
+    min <"minimum">:Pos <"left"> #Pos <"right">->Pos                              external defined_by_rewrite_rules;
+    succ <"succ">:Pos <"arg">->Pos                                                external defined_by_rewrite_rules;
+    @pospred <"pos_predecessor">:Pos <"arg">->Pos                                 internal defined_by_rewrite_rules;
+    + <"plus">:Pos <"left"> #Pos <"right">->Pos                                   external defined_by_rewrite_rules;
+    @addc <"add_with_carry">:Bool <"arg1"> #Pos <"arg2"> #Pos <"arg3">->Pos       internal defined_by_rewrite_rules;
+    * <"times">:Pos <"left"> #Pos <"right">->Pos                                  external defined_by_rewrite_rules;
+    @powerlog2 <"powerlog2_pos">:Pos <"arg"> -> Pos                               internal defined_by_rewrite_rules;
 
 var b:Bool;
     c:Bool;

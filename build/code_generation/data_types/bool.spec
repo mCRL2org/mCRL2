@@ -10,13 +10,13 @@
 
 sort Bool <"bool_">;
 
-cons true <"true_"> : Bool;
-     false <"false_"> : Bool;
+cons true <"true_"> : Bool                                         external defined_by_rewrite_rules;
+     false <"false_"> : Bool                                       external defined_by_rewrite_rules;
 
-map ! <"not_"> : Bool <"arg"> -> Bool;
-    && <"and_"> : Bool <"left"> # Bool <"right"> -> Bool;
-    || <"or_"> : Bool <"left"> # Bool <"right"> -> Bool;
-    => <"implies"> : Bool <"left"> # Bool <"right"> -> Bool;
+map ! <"not_"> : Bool <"arg"> -> Bool                              external defined_by_rewrite_rules;
+    && <"and_"> : Bool <"left"> # Bool <"right"> -> Bool           external defined_by_rewrite_rules;
+    || <"or_"> : Bool <"left"> # Bool <"right"> -> Bool            external defined_by_rewrite_rules;
+    => <"implies"> : Bool <"left"> # Bool <"right"> -> Bool        external defined_by_rewrite_rules;
 
 var b:Bool;
 eqn !(true) = false;

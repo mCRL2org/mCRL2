@@ -18,33 +18,36 @@
 
 sort Real <"real_">;
 
-map @cReal <"creal">: Int <"left"> # Pos <"right"> -> Real;
-    Pos2Real <"pos2real"> : Pos <"arg"> -> Real;
-    Nat2Real <"nat2real"> : Nat <"arg"> -> Real;
-    Int2Real <"int2real"> : Int <"arg"> -> Real;
-    Real2Pos <"real2pos"> : Real <"arg"> -> Pos;
-    Real2Nat <"real2nat"> : Real <"arg"> -> Nat;
-    Real2Int <"real2int"> : Real <"arg"> -> Int;
-    max <"maximum"> : Real <"left"> # Real <"right"> -> Real;
-    min <"minimum"> : Real <"left"> # Real <"right"> -> Real;
-    abs <"abs"> : Real <"arg"> -> Real;
-    - <"negate"> : Real <"arg"> -> Real;
-    succ <"succ"> : Real <"arg"> -> Real;
-    pred <"pred"> : Real <"arg"> -> Real;
-    + <"plus"> : Real <"left"> # Real <"right"> -> Real;
-    - <"minus"> : Real <"left"> # Real <"right"> -> Real;
-    * <"times"> : Real <"left"> # Real <"right"> -> Real;
-    exp <"exp"> : Real <"left"> # Int <"right"> -> Real;
-    / <"divides"> : Pos <"left"> # Pos <"right"> -> Real;
-    / <"divides"> : Nat <"left"> # Nat <"right"> -> Real;
-    / <"divides"> : Int <"left"> # Int <"right"> -> Real;
-    / <"divides"> : Real <"left"> # Real <"right"> -> Real;
-    floor <"floor"> : Real <"arg"> -> Int;
-    ceil <"ceil"> : Real <"arg"> -> Int;
-    round <"round"> : Real <"arg"> -> Int;
-    @redfrac <"reduce_fraction"> : Int <"left"> # Int <"right"> -> Real;
-    @redfracwhr <"reduce_fraction_where"> : Pos <"arg1"> # Int <"arg2"> # Nat <"arg3"> -> Real;
-    @redfrachlp <"reduce_fraction_helper"> : Real <"left"> # Int <"right"> -> Real;
+map @cReal <"creal">: Int <"left"> # Pos <"right"> -> Real     internal defined_by_rewrite_rules;
+    Pos2Real <"pos2real"> : Pos <"arg"> -> Real                external defined_by_rewrite_rules;
+    Nat2Real <"nat2real"> : Nat <"arg"> -> Real                external defined_by_rewrite_rules;
+    Int2Real <"int2real"> : Int <"arg"> -> Real                external defined_by_rewrite_rules;
+    Real2Pos <"real2pos"> : Real <"arg"> -> Pos                external defined_by_rewrite_rules;
+    Real2Nat <"real2nat"> : Real <"arg"> -> Nat                external defined_by_rewrite_rules;
+    Real2Int <"real2int"> : Real <"arg"> -> Int                external defined_by_rewrite_rules;
+    max <"maximum"> : Real <"left"> # Real <"right"> -> Real   external defined_by_rewrite_rules;
+    min <"minimum"> : Real <"left"> # Real <"right"> -> Real   external defined_by_rewrite_rules;
+    abs <"abs"> : Real <"arg"> -> Real                         external defined_by_rewrite_rules;
+    - <"negate"> : Real <"arg"> -> Real                        external defined_by_rewrite_rules;
+    succ <"succ"> : Real <"arg"> -> Real                       external defined_by_rewrite_rules;
+    pred <"pred"> : Real <"arg"> -> Real                       external defined_by_rewrite_rules;
+    + <"plus"> : Real <"left"> # Real <"right"> -> Real        external defined_by_rewrite_rules;
+    - <"minus"> : Real <"left"> # Real <"right"> -> Real       external defined_by_rewrite_rules;
+    * <"times"> : Real <"left"> # Real <"right"> -> Real       external defined_by_rewrite_rules;
+    exp <"exp"> : Real <"left"> # Int <"right"> -> Real        external defined_by_rewrite_rules;
+    / <"divides"> : Pos <"left"> # Pos <"right"> -> Real       external defined_by_rewrite_rules;
+    / <"divides"> : Nat <"left"> # Nat <"right"> -> Real       external defined_by_rewrite_rules;
+    / <"divides"> : Int <"left"> # Int <"right"> -> Real       external defined_by_rewrite_rules;
+    / <"divides"> : Real <"left"> # Real <"right"> -> Real     external defined_by_rewrite_rules;
+    floor <"floor"> : Real <"arg"> -> Int                      external defined_by_rewrite_rules;
+    ceil <"ceil"> : Real <"arg"> -> Int                        external defined_by_rewrite_rules;
+    round <"round"> : Real <"arg"> -> Int                      external defined_by_rewrite_rules;
+    @redfrac <"reduce_fraction"> : Int <"left"> # Int <"right"> -> Real        
+                                                               internal defined_by_rewrite_rules;
+    @redfracwhr <"reduce_fraction_where"> : Pos <"arg1"> # Int <"arg2"> # Nat <"arg3"> -> Real
+                                                               internal defined_by_rewrite_rules;
+    @redfrachlp <"reduce_fraction_helper"> : Real <"left"> # Int <"right"> -> Real
+                                                               internal defined_by_rewrite_rules;
 
 var m:Nat;
     n:Nat;

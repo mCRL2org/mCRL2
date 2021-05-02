@@ -17,27 +17,30 @@
 
 sort Bag(S) <"bag">;
 
-cons @bag <"constructor">: (S -> Nat) <"left"> # FBag(S) <"right"> -> Bag(S);
-map @bagfbag <"bag_fbag">: FBag(S) <"arg"> -> Bag(S);
-    @bagcomp <"bag_comprehension">: (S -> Nat) <"arg"> -> Bag(S);
-    count <"count">: S <"left"> # Bag(S) <"right"> -> Nat;
-    in <"in">: S <"left"> # Bag(S) <"right"> -> Bool;
-    + <"union_">: Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S);
-    * <"intersection">: Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S);
-    - <"difference">: Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S);
-    Bag2Set <"bag2set">: Bag(S) <"arg"> -> Set(S);
-    Set2Bag <"set2bag">: Set(S) <"arg"> -> Bag(S);
-    @zero_ <"zero_function">: S <"arg"> -> Nat;
-    @one_ <"one_function">: S <"arg"> -> Nat;
-    @add_ <"add_function">: (S -> Nat) <"left"> # (S -> Nat) <"right"> -> S -> Nat;
-    @min_ <"min_function">: (S -> Nat) <"left"> # (S -> Nat) <"right"> -> S -> Nat;
-    @monus_ <"monus_function">: (S -> Nat) <"left"> # (S -> Nat) <"right"> -> S -> Nat;
-    @Nat2Bool_ <"nat2bool_function">: (S -> Nat) <"arg"> -> S -> Bool;
-    @Bool2Nat_ <"bool2nat_function">: (S -> Bool) <"arg"> -> S -> Nat;
-    @fbag_join <"fbag_join"> : (S -> Nat) <"arg1"> # (S -> Nat) <"arg2"> # FBag(S) <"arg3"> # FBag(S) <"arg4"> -> FBag(S);
-    @fbag_inter <"fbag_intersect">: (S -> Nat) <"arg1"> # (S -> Nat) <"arg2"> # FBag(S) <"arg3"> # FBag(S) <"arg4"> -> FBag(S);
-    @fbag_diff <"fbag_difference">: (S -> Nat) <"arg1"> # (S -> Nat) <"arg2"> # FBag(S) <"arg3"> # FBag(S) <"arg4"> -> FBag(S);
-    @fbag2fset <"fbag2fset">: (S -> Nat) <"left"> # FBag(S) <"right"> -> FSet(S);
+cons @bag <"constructor">: (S -> Nat) <"left"> # FBag(S) <"right"> -> Bag(S)              internal defined_by_rewrite_rules;
+map @bagfbag <"bag_fbag">: FBag(S) <"arg"> -> Bag(S)                                      internal defined_by_rewrite_rules;
+    @bagcomp <"bag_comprehension">: (S -> Nat) <"arg"> -> Bag(S)                          internal defined_by_rewrite_rules;
+    count <"count">: S <"left"> # Bag(S) <"right"> -> Nat                                 external defined_by_rewrite_rules;
+    in <"in">: S <"left"> # Bag(S) <"right"> -> Bool                                      external defined_by_rewrite_rules;
+    + <"union_">: Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S)                            external defined_by_rewrite_rules;
+    * <"intersection">: Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S)                      external defined_by_rewrite_rules;
+    - <"difference">: Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S)                        external defined_by_rewrite_rules;
+    Bag2Set <"bag2set">: Bag(S) <"arg"> -> Set(S)                                         external defined_by_rewrite_rules;
+    Set2Bag <"set2bag">: Set(S) <"arg"> -> Bag(S)                                         external defined_by_rewrite_rules;
+    @zero_ <"zero_function">: S <"arg"> -> Nat                                            internal defined_by_rewrite_rules;
+    @one_ <"one_function">: S <"arg"> -> Nat                                              internal defined_by_rewrite_rules;
+    @add_ <"add_function">: (S -> Nat) <"left"> # (S -> Nat) <"right"> -> S -> Nat        internal defined_by_rewrite_rules;
+    @min_ <"min_function">: (S -> Nat) <"left"> # (S -> Nat) <"right"> -> S -> Nat        internal defined_by_rewrite_rules;
+    @monus_ <"monus_function">: (S -> Nat) <"left"> # (S -> Nat) <"right"> -> S -> Nat    internal defined_by_rewrite_rules;
+    @Nat2Bool_ <"nat2bool_function">: (S -> Nat) <"arg"> -> S -> Bool                     internal defined_by_rewrite_rules;
+    @Bool2Nat_ <"bool2nat_function">: (S -> Bool) <"arg"> -> S -> Nat                     internal defined_by_rewrite_rules;
+    @fbag_join <"fbag_join"> : (S -> Nat) <"arg1"> # (S -> Nat) <"arg2"> # FBag(S) <"arg3"> # FBag(S) <"arg4"> -> FBag(S) 
+                                                                                          internal defined_by_rewrite_rules;
+    @fbag_inter <"fbag_intersect">: (S -> Nat) <"arg1"> # (S -> Nat) <"arg2"> # FBag(S) <"arg3"> # FBag(S) <"arg4"> -> FBag(S) 
+                                                                                          internal defined_by_rewrite_rules;
+    @fbag_diff <"fbag_difference">: (S -> Nat) <"arg1"> # (S -> Nat) <"arg2"> # FBag(S) <"arg3"> # FBag(S) <"arg4"> -> FBag(S) 
+                                                                                          internal defined_by_rewrite_rules;
+    @fbag2fset <"fbag2fset">: (S -> Nat) <"left"> # FBag(S) <"right"> -> FSet(S)          internal defined_by_rewrite_rules;
 
 var b: FBag(S);
     c: FBag(S);

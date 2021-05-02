@@ -83,6 +83,7 @@ class data_type_checker: public sort_type_checker
     void initialise_system_defined_functions(void);
     void add_system_constant(const data::function_symbol& f);
     void add_system_function(const data::function_symbol& f);
+    void add_system_constants_and_functions(const std::vector<data::function_symbol>& v);
     bool TypeMatchA(const sort_expression& Type_in, const sort_expression& PosType_in, sort_expression& result) const;
     bool TypeMatchL(const sort_expression_list& TypeList, const sort_expression_list& PosTypeList, sort_expression_list& result) const;
     sort_expression UnwindType(const sort_expression& Type) const;

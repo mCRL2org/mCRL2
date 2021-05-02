@@ -15,18 +15,18 @@
 
 sort List(S) <"list">;
 
-cons [] <"empty"> : List(S);
-     |> <"cons_"> : S <"left"> # List(S) <"right"> -> List(S);
+cons [] <"empty"> : List(S)                                         external defined_by_rewrite_rules;
+     |> <"cons_"> : S <"left"> # List(S) <"right"> -> List(S)       external defined_by_rewrite_rules;
 
-map in <"in"> : S <"left"> # List(S) <"right"> -> Bool;
-    # <"count"> : List(S) <"arg"> -> Nat;
-    <| <"snoc"> : List(S) <"left"> # S <"right"> -> List(S);
-    ++ <"concat"> : List(S) <"left"> # List(S) <"right"> -> List(S);
-    . <"element_at"> : List(S) <"left"> # Nat <"right"> -> S;
-    head <"head"> : List(S) <"arg"> -> S;
-    tail <"tail"> : List(S) <"arg"> -> List(S);
-    rhead <"rhead"> : List(S) <"arg"> -> S;
-    rtail <"rtail"> : List(S) <"arg"> -> List(S);
+map in <"in"> : S <"left"> # List(S) <"right"> -> Bool              external defined_by_rewrite_rules;
+    # <"count"> : List(S) <"arg"> -> Nat                            external defined_by_rewrite_rules;
+    <| <"snoc"> : List(S) <"left"> # S <"right"> -> List(S)         external defined_by_rewrite_rules;
+    ++ <"concat"> : List(S) <"left"> # List(S) <"right"> -> List(S) external defined_by_rewrite_rules;
+    . <"element_at"> : List(S) <"left"> # Nat <"right"> -> S        external defined_by_rewrite_rules;
+    head <"head"> : List(S) <"arg"> -> S                            external defined_by_rewrite_rules;
+    tail <"tail"> : List(S) <"arg"> -> List(S)                      external defined_by_rewrite_rules;
+    rhead <"rhead"> : List(S) <"arg"> -> S                          external defined_by_rewrite_rules;
+    rtail <"rtail"> : List(S) <"arg"> -> List(S)                    external defined_by_rewrite_rules;
 
 var d:S;
     e:S;

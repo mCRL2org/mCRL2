@@ -31,18 +31,18 @@
 
 sort FBag(S) <"fbag">;
 
-cons {:} <"empty"> : FBag(S);
-     @fbag_insert <"insert"> : S <"arg1"> # Pos <"arg2"> # FBag(S) <"arg3"> -> FBag(S);
+cons {:} <"empty"> : FBag(S)                                                               external defined_by_rewrite_rules;
+     @fbag_insert <"insert"> : S <"arg1"> # Pos <"arg2"> # FBag(S) <"arg3"> -> FBag(S)     internal defined_by_rewrite_rules;
 
-map @fbag_cons <"cons_"> : S <"arg1"> # Pos <"arg2"> # FBag(S) <"arg3"> -> FBag(S);
-    @fbag_cinsert <"cinsert"> : S <"arg1"> # Nat <"arg2"> # FBag(S) <"arg3"> -> FBag(S);
-    count <"count"> : S <"left"> # FBag(S) <"right"> -> Nat;
-    in <"in"> : S <"left"> # FBag(S) <"right"> -> Bool;
-    @fset2fbag <"fset2fbag">: FSet(S) <"arg"> -> FBag(S);
-    + <"union_"> : FBag(S) <"left"> # FBag(S) <"right"> -> FBag(S);
-    * <"intersection"> : FBag(S) <"left"> # FBag(S) <"right"> -> FBag(S);
-    - <"difference"> : FBag(S) <"left"> # FBag(S) <"right"> -> FBag(S);
-    # <"count_all"> : FBag(S) <"arg"> -> Nat;
+map @fbag_cons <"cons_"> : S <"arg1"> # Pos <"arg2"> # FBag(S) <"arg3"> -> FBag(S)         internal defined_by_rewrite_rules;
+    @fbag_cinsert <"cinsert"> : S <"arg1"> # Nat <"arg2"> # FBag(S) <"arg3"> -> FBag(S)    internal defined_by_rewrite_rules;
+    count <"count"> : S <"left"> # FBag(S) <"right"> -> Nat                                external defined_by_rewrite_rules;
+    in <"in"> : S <"left"> # FBag(S) <"right"> -> Bool                                     external defined_by_rewrite_rules;
+    @fset2fbag <"fset2fbag">: FSet(S) <"arg"> -> FBag(S)                                   internal defined_by_rewrite_rules;
+    + <"union_"> : FBag(S) <"left"> # FBag(S) <"right"> -> FBag(S)                         external defined_by_rewrite_rules;
+    * <"intersection"> : FBag(S) <"left"> # FBag(S) <"right"> -> FBag(S)                   external defined_by_rewrite_rules;
+    - <"difference"> : FBag(S) <"left"> # FBag(S) <"right"> -> FBag(S)                     external defined_by_rewrite_rules;
+    # <"count_all"> : FBag(S) <"arg"> -> Nat                                               external defined_by_rewrite_rules;
 
 
 var d: S;

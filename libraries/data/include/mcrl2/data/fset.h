@@ -15,6 +15,7 @@
 #ifndef MCRL2_DATA_FSET_H
 #define MCRL2_DATA_FSET_H
 
+#include "functional"    // std::function
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
@@ -30,7 +31,7 @@ namespace mcrl2 {
 
   namespace data {
 
-    /// \brief Namespace for system defined sort fset
+    /// \brief Namespace for system defined sort fset.
     namespace sort_fset {
 
       /// \brief Constructor for sort expression FSet(S)
@@ -58,28 +59,28 @@ namespace mcrl2 {
       }
 
 
-      /// \brief Generate identifier {}
-      /// \return Identifier {}
+      /// \brief Generate identifier {}.
+      /// \return Identifier {}.
       inline
-      core::identifier_string const& empty_name()
+      const core::identifier_string& empty_name()
       {
         static core::identifier_string empty_name = core::identifier_string("{}");
         return empty_name;
       }
 
-      /// \brief Constructor for function symbol {}
-      /// \param s A sort expression
-      /// \return Function symbol empty
+      /// \brief Constructor for function symbol {}.
+      /// \param s A sort expression.
+      /// \return Function symbol empty.
       inline
-      function_symbol empty(const sort_expression& s)
+       function_symbol empty(const sort_expression& s)
       {
         function_symbol empty(empty_name(), fset(s));
         return empty;
       }
 
-      /// \brief Recogniser for function {}
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching {}
+      /// \brief Recogniser for function {}.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching {}.
       inline
       bool is_empty_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -90,28 +91,28 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@fset_insert
-      /// \return Identifier \@fset_insert
+      /// \brief Generate identifier \@fset_insert.
+      /// \return Identifier \@fset_insert.
       inline
-      core::identifier_string const& insert_name()
+      const core::identifier_string& insert_name()
       {
         static core::identifier_string insert_name = core::identifier_string("@fset_insert");
         return insert_name;
       }
 
-      /// \brief Constructor for function symbol \@fset_insert
-      /// \param s A sort expression
-      /// \return Function symbol insert
+      /// \brief Constructor for function symbol \@fset_insert.
+      /// \param s A sort expression.
+      /// \return Function symbol insert.
       inline
-      function_symbol insert(const sort_expression& s)
+       function_symbol insert(const sort_expression& s)
       {
         function_symbol insert(insert_name(), make_function_sort(s, fset(s), fset(s)));
         return insert;
       }
 
-      /// \brief Recogniser for function \@fset_insert
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@fset_insert
+      /// \brief Recogniser for function \@fset_insert.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@fset_insert.
       inline
       bool is_insert_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -122,29 +123,29 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@fset_insert
-      /// \param s A sort expression
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of \@fset_insert to a number of arguments
+      /// \brief Application of function symbol \@fset_insert.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return Application of \@fset_insert to a number of arguments.
       inline
       application insert(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         return sort_fset::insert(s)(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of \@fset_insert
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@fset_insert.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol insert to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_insert_application(const atermpp::aterm_appl& e)
       {
         return is_application(e) && is_insert_function_symbol(atermpp::down_cast<application>(e).head());
       }
-      /// \brief Give all system defined constructors for fset
-      /// \param s A sort expression
-      /// \return All system defined constructors for fset
+      /// \brief Give all system defined constructors for fset.
+      /// \param s A sort expression.
+      /// \return All system defined constructors for fset.
       inline
       function_symbol_vector fset_generate_constructors_code(const sort_expression& s)
       {
@@ -154,29 +155,52 @@ namespace mcrl2 {
 
         return result;
       }
-
-      /// \brief Generate identifier \@fset_cons
-      /// \return Identifier \@fset_cons
+      /// \brief Give all defined constructors which can be used in mCRL2 specs for fset.
+      /// \param s A sort expression.
+      /// \return All system defined constructors that can be used in an mCRL2 specification for fset.
       inline
-      core::identifier_string const& cons_name()
+      function_symbol_vector fset_mCRL2_usable_constructors(const sort_expression& s)
+      {
+        function_symbol_vector result;
+        result.push_back(sort_fset::empty(s));
+
+        return result;
+      }
+      // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
+      typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;
+      /// \brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for fset.
+      /// \param s A sort expression.
+      /// \return All system defined constructors that are to be implemented in C++ for fset.
+      inline
+      implementation_map fset_cpp_implementable_constructors(const sort_expression& s)
+      {
+        implementation_map result;
+        static_cast< void >(s); // suppress unused variable warnings
+        return result;
+      }
+
+      /// \brief Generate identifier \@fset_cons.
+      /// \return Identifier \@fset_cons.
+      inline
+      const core::identifier_string& cons_name()
       {
         static core::identifier_string cons_name = core::identifier_string("@fset_cons");
         return cons_name;
       }
 
-      /// \brief Constructor for function symbol \@fset_cons
-      /// \param s A sort expression
-      /// \return Function symbol cons_
+      /// \brief Constructor for function symbol \@fset_cons.
+      /// \param s A sort expression.
+      /// \return Function symbol cons_.
       inline
-      function_symbol cons_(const sort_expression& s)
+       function_symbol cons_(const sort_expression& s)
       {
         function_symbol cons_(cons_name(), make_function_sort(s, fset(s), fset(s)));
         return cons_;
       }
 
-      /// \brief Recogniser for function \@fset_cons
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@fset_cons
+      /// \brief Recogniser for function \@fset_cons.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@fset_cons.
       inline
       bool is_cons_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -187,49 +211,49 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@fset_cons
-      /// \param s A sort expression
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of \@fset_cons to a number of arguments
+      /// \brief Application of function symbol \@fset_cons.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return Application of \@fset_cons to a number of arguments.
       inline
       application cons_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         return sort_fset::cons_(s)(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of \@fset_cons
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@fset_cons.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol cons_ to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_cons_application(const atermpp::aterm_appl& e)
       {
         return is_application(e) && is_cons_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
-      /// \brief Generate identifier \@fset_cinsert
-      /// \return Identifier \@fset_cinsert
+      /// \brief Generate identifier \@fset_cinsert.
+      /// \return Identifier \@fset_cinsert.
       inline
-      core::identifier_string const& cinsert_name()
+      const core::identifier_string& cinsert_name()
       {
         static core::identifier_string cinsert_name = core::identifier_string("@fset_cinsert");
         return cinsert_name;
       }
 
-      /// \brief Constructor for function symbol \@fset_cinsert
-      /// \param s A sort expression
-      /// \return Function symbol cinsert
+      /// \brief Constructor for function symbol \@fset_cinsert.
+      /// \param s A sort expression.
+      /// \return Function symbol cinsert.
       inline
-      function_symbol cinsert(const sort_expression& s)
+       function_symbol cinsert(const sort_expression& s)
       {
         function_symbol cinsert(cinsert_name(), make_function_sort(s, sort_bool::bool_(), fset(s), fset(s)));
         return cinsert;
       }
 
-      /// \brief Recogniser for function \@fset_cinsert
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@fset_cinsert
+      /// \brief Recogniser for function \@fset_cinsert.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@fset_cinsert.
       inline
       bool is_cinsert_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -240,50 +264,50 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@fset_cinsert
-      /// \param s A sort expression
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \param arg2 A data expression
-      /// \return Application of \@fset_cinsert to a number of arguments
+      /// \brief Application of function symbol \@fset_cinsert.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \return Application of \@fset_cinsert to a number of arguments.
       inline
       application cinsert(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
         return sort_fset::cinsert(s)(arg0, arg1, arg2);
       }
 
-      /// \brief Recogniser for application of \@fset_cinsert
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@fset_cinsert.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol cinsert to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_cinsert_application(const atermpp::aterm_appl& e)
       {
         return is_application(e) && is_cinsert_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
-      /// \brief Generate identifier in
-      /// \return Identifier in
+      /// \brief Generate identifier in.
+      /// \return Identifier in.
       inline
-      core::identifier_string const& in_name()
+      const core::identifier_string& in_name()
       {
         static core::identifier_string in_name = core::identifier_string("in");
         return in_name;
       }
 
-      /// \brief Constructor for function symbol in
-      /// \param s A sort expression
-      /// \return Function symbol in
+      /// \brief Constructor for function symbol in.
+      /// \param s A sort expression.
+      /// \return Function symbol in.
       inline
-      function_symbol in(const sort_expression& s)
+       function_symbol in(const sort_expression& s)
       {
         function_symbol in(in_name(), make_function_sort(s, fset(s), sort_bool::bool_()));
         return in;
       }
 
-      /// \brief Recogniser for function in
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching in
+      /// \brief Recogniser for function in.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching in.
       inline
       bool is_in_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -294,49 +318,49 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol in
-      /// \param s A sort expression
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of in to a number of arguments
+      /// \brief Application of function symbol in.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return Application of in to a number of arguments.
       inline
       application in(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         return sort_fset::in(s)(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of in
-      /// \param e A data expression
+      /// \brief Recogniser for application of in.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol in to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_in_application(const atermpp::aterm_appl& e)
       {
         return is_application(e) && is_in_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
-      /// \brief Generate identifier -
-      /// \return Identifier -
+      /// \brief Generate identifier -.
+      /// \return Identifier -.
       inline
-      core::identifier_string const& difference_name()
+      const core::identifier_string& difference_name()
       {
         static core::identifier_string difference_name = core::identifier_string("-");
         return difference_name;
       }
 
-      /// \brief Constructor for function symbol -
-      /// \param s A sort expression
-      /// \return Function symbol difference
+      /// \brief Constructor for function symbol -.
+      /// \param s A sort expression.
+      /// \return Function symbol difference.
       inline
-      function_symbol difference(const sort_expression& s)
+       function_symbol difference(const sort_expression& s)
       {
         function_symbol difference(difference_name(), make_function_sort(fset(s), fset(s), fset(s)));
         return difference;
       }
 
-      /// \brief Recogniser for function -
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching -
+      /// \brief Recogniser for function -.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching -.
       inline
       bool is_difference_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -347,49 +371,49 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol -
-      /// \param s A sort expression
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of - to a number of arguments
+      /// \brief Application of function symbol -.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return Application of - to a number of arguments.
       inline
       application difference(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         return sort_fset::difference(s)(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of -
-      /// \param e A data expression
+      /// \brief Recogniser for application of -.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol difference to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_difference_application(const atermpp::aterm_appl& e)
       {
         return is_application(e) && is_difference_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
-      /// \brief Generate identifier +
-      /// \return Identifier +
+      /// \brief Generate identifier +.
+      /// \return Identifier +.
       inline
-      core::identifier_string const& union_name()
+      const core::identifier_string& union_name()
       {
         static core::identifier_string union_name = core::identifier_string("+");
         return union_name;
       }
 
-      /// \brief Constructor for function symbol +
-      /// \param s A sort expression
-      /// \return Function symbol union_
+      /// \brief Constructor for function symbol +.
+      /// \param s A sort expression.
+      /// \return Function symbol union_.
       inline
-      function_symbol union_(const sort_expression& s)
+       function_symbol union_(const sort_expression& s)
       {
         function_symbol union_(union_name(), make_function_sort(fset(s), fset(s), fset(s)));
         return union_;
       }
 
-      /// \brief Recogniser for function +
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching +
+      /// \brief Recogniser for function +.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching +.
       inline
       bool is_union_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -400,49 +424,49 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol +
-      /// \param s A sort expression
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of + to a number of arguments
+      /// \brief Application of function symbol +.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return Application of + to a number of arguments.
       inline
       application union_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         return sort_fset::union_(s)(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of +
-      /// \param e A data expression
+      /// \brief Recogniser for application of +.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol union_ to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_union_application(const atermpp::aterm_appl& e)
       {
         return is_application(e) && is_union_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
-      /// \brief Generate identifier *
-      /// \return Identifier *
+      /// \brief Generate identifier *.
+      /// \return Identifier *.
       inline
-      core::identifier_string const& intersection_name()
+      const core::identifier_string& intersection_name()
       {
         static core::identifier_string intersection_name = core::identifier_string("*");
         return intersection_name;
       }
 
-      /// \brief Constructor for function symbol *
-      /// \param s A sort expression
-      /// \return Function symbol intersection
+      /// \brief Constructor for function symbol *.
+      /// \param s A sort expression.
+      /// \return Function symbol intersection.
       inline
-      function_symbol intersection(const sort_expression& s)
+       function_symbol intersection(const sort_expression& s)
       {
         function_symbol intersection(intersection_name(), make_function_sort(fset(s), fset(s), fset(s)));
         return intersection;
       }
 
-      /// \brief Recogniser for function *
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching *
+      /// \brief Recogniser for function *.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching *.
       inline
       bool is_intersection_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -453,49 +477,49 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol *
-      /// \param s A sort expression
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of * to a number of arguments
+      /// \brief Application of function symbol *.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return Application of * to a number of arguments.
       inline
       application intersection(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         return sort_fset::intersection(s)(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of *
-      /// \param e A data expression
+      /// \brief Recogniser for application of *.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol intersection to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_intersection_application(const atermpp::aterm_appl& e)
       {
         return is_application(e) && is_intersection_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
-      /// \brief Generate identifier #
-      /// \return Identifier #
+      /// \brief Generate identifier #.
+      /// \return Identifier #.
       inline
-      core::identifier_string const& count_name()
+      const core::identifier_string& count_name()
       {
         static core::identifier_string count_name = core::identifier_string("#");
         return count_name;
       }
 
-      /// \brief Constructor for function symbol #
-      /// \param s A sort expression
-      /// \return Function symbol count
+      /// \brief Constructor for function symbol #.
+      /// \param s A sort expression.
+      /// \return Function symbol count.
       inline
-      function_symbol count(const sort_expression& s)
+       function_symbol count(const sort_expression& s)
       {
         function_symbol count(count_name(), make_function_sort(fset(s), sort_nat::nat()));
         return count;
       }
 
-      /// \brief Recogniser for function #
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching #
+      /// \brief Recogniser for function #.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching #.
       inline
       bool is_count_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -506,20 +530,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol #
-      /// \param s A sort expression
-      /// \param arg0 A data expression
-      /// \return Application of # to a number of arguments
+      /// \brief Application of function symbol #.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \return Application of # to a number of arguments.
       inline
       application count(const sort_expression& s, const data_expression& arg0)
       {
         return sort_fset::count(s)(arg0);
       }
 
-      /// \brief Recogniser for application of #
-      /// \param e A data expression
+      /// \brief Recogniser for application of #.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol count to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_count_application(const atermpp::aterm_appl& e)
       {
@@ -541,76 +565,119 @@ namespace mcrl2 {
         result.push_back(sort_fset::count(s));
         return result;
       }
-      ///\brief Function for projecting out argument
-      ///        right from an application
-      /// \param e A data expression
-      /// \pre right is defined for e
-      /// \return The argument of e that corresponds to right
+      
+      /// \brief Give all system defined mappings and constructors for fset
+      /// \param s A sort expression
+      /// \return All system defined mappings for fset
+      inline
+      function_symbol_vector fset_generate_constructors_and_functions_code(const sort_expression& s)
+      {
+        function_symbol_vector result=fset_generate_functions_code(s);
+        for(const function_symbol& f: fset_generate_constructors_code(s))
+        {
+          result.push_back(f);
+        }
+        return result;
+      }
+      
+      /// \brief Give all system defined mappings that can be used in mCRL2 specs for fset
+      /// \param s A sort expression
+      /// \return All system defined mappings for that can be used in mCRL2 specificationis fset
+      inline
+      function_symbol_vector fset_mCRL2_usable_mappings(const sort_expression& s)
+      {
+        function_symbol_vector result;
+        result.push_back(sort_fset::in(s));
+        result.push_back(sort_fset::difference(s));
+        result.push_back(sort_fset::union_(s));
+        result.push_back(sort_fset::intersection(s));
+        result.push_back(sort_fset::count(s));
+        return result;
+      }
+
+
+      // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
+      typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;
+      /// \brief Give all system defined mappings that are to be implemented in C++ code for fset
+      /// \param s A sort expression
+      /// \return A mapping from C++ implementable function symbols to system defined mappings implemented in C++ code for fset
+      inline
+      implementation_map fset_cpp_implementable_mappings(const sort_expression& s)
+      {
+        implementation_map result;
+        static_cast< void >(s); // suppress unused variable warnings
+        return result;
+      }
+      ///\brief Function for projecting out argument.
+      ///        right from an application.
+      /// \param e A data expression.
+      /// \pre right is defined for e.
+      /// \return The argument of e that corresponds to right.
       inline
       const data_expression& right(const data_expression& e)
       {
         assert(is_insert_application(e) || is_cons_application(e) || is_in_application(e) || is_difference_application(e) || is_union_application(e) || is_intersection_application(e));
-        return atermpp::down_cast<const application >(e)[1];
+        return atermpp::down_cast<application>(e)[1];
       }
 
-      ///\brief Function for projecting out argument
-      ///        arg1 from an application
-      /// \param e A data expression
-      /// \pre arg1 is defined for e
-      /// \return The argument of e that corresponds to arg1
+      ///\brief Function for projecting out argument.
+      ///        arg1 from an application.
+      /// \param e A data expression.
+      /// \pre arg1 is defined for e.
+      /// \return The argument of e that corresponds to arg1.
       inline
       const data_expression& arg1(const data_expression& e)
       {
         assert(is_cinsert_application(e));
-        return atermpp::down_cast<const application >(e)[0];
+        return atermpp::down_cast<application>(e)[0];
       }
 
-      ///\brief Function for projecting out argument
-      ///        arg2 from an application
-      /// \param e A data expression
-      /// \pre arg2 is defined for e
-      /// \return The argument of e that corresponds to arg2
+      ///\brief Function for projecting out argument.
+      ///        arg2 from an application.
+      /// \param e A data expression.
+      /// \pre arg2 is defined for e.
+      /// \return The argument of e that corresponds to arg2.
       inline
       const data_expression& arg2(const data_expression& e)
       {
         assert(is_cinsert_application(e));
-        return atermpp::down_cast<const application >(e)[1];
+        return atermpp::down_cast<application>(e)[1];
       }
 
-      ///\brief Function for projecting out argument
-      ///        arg3 from an application
-      /// \param e A data expression
-      /// \pre arg3 is defined for e
-      /// \return The argument of e that corresponds to arg3
+      ///\brief Function for projecting out argument.
+      ///        arg3 from an application.
+      /// \param e A data expression.
+      /// \pre arg3 is defined for e.
+      /// \return The argument of e that corresponds to arg3.
       inline
       const data_expression& arg3(const data_expression& e)
       {
         assert(is_cinsert_application(e));
-        return atermpp::down_cast<const application >(e)[2];
+        return atermpp::down_cast<application>(e)[2];
       }
 
-      ///\brief Function for projecting out argument
-      ///        arg from an application
-      /// \param e A data expression
-      /// \pre arg is defined for e
-      /// \return The argument of e that corresponds to arg
+      ///\brief Function for projecting out argument.
+      ///        arg from an application.
+      /// \param e A data expression.
+      /// \pre arg is defined for e.
+      /// \return The argument of e that corresponds to arg.
       inline
       const data_expression& arg(const data_expression& e)
       {
         assert(is_count_application(e));
-        return atermpp::down_cast<const application >(e)[0];
+        return atermpp::down_cast<application>(e)[0];
       }
 
-      ///\brief Function for projecting out argument
-      ///        left from an application
-      /// \param e A data expression
-      /// \pre left is defined for e
-      /// \return The argument of e that corresponds to left
+      ///\brief Function for projecting out argument.
+      ///        left from an application.
+      /// \param e A data expression.
+      /// \pre left is defined for e.
+      /// \return The argument of e that corresponds to left.
       inline
       const data_expression& left(const data_expression& e)
       {
         assert(is_insert_application(e) || is_cons_application(e) || is_in_application(e) || is_difference_application(e) || is_union_application(e) || is_intersection_application(e));
-        return atermpp::down_cast<const application >(e)[0];
+        return atermpp::down_cast<application>(e)[0];
       }
 
       /// \brief Give all system defined equations for fset

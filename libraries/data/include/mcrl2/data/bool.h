@@ -15,6 +15,7 @@
 #ifndef MCRL2_DATA_BOOL_H
 #define MCRL2_DATA_BOOL_H
 
+#include "functional"    // std::function
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
@@ -27,20 +28,20 @@ namespace mcrl2 {
 
   namespace data {
 
-    /// \brief Namespace for system defined sort bool_
+    /// \brief Namespace for system defined sort bool_.
     namespace sort_bool {
 
       inline
-      core::identifier_string const& bool_name()
+      const core::identifier_string& bool_name()
       {
         static core::identifier_string bool_name = core::identifier_string("Bool");
         return bool_name;
       }
 
-      /// \brief Constructor for sort expression Bool
-      /// \return Sort expression Bool
+      /// \brief Constructor for sort expression Bool.
+      /// \return Sort expression Bool.
       inline
-      basic_sort const& bool_()
+      const basic_sort& bool_()
       {
         static basic_sort bool_ = basic_sort(bool_name());
         return bool_;
@@ -60,28 +61,28 @@ namespace mcrl2 {
       }
 
 
-      /// \brief Generate identifier true
-      /// \return Identifier true
+      /// \brief Generate identifier true.
+      /// \return Identifier true.
       inline
-      core::identifier_string const& true_name()
+      const core::identifier_string& true_name()
       {
         static core::identifier_string true_name = core::identifier_string("true");
         return true_name;
       }
 
-      /// \brief Constructor for function symbol true
+      /// \brief Constructor for function symbol true.
       
-      /// \return Function symbol true_
+      /// \return Function symbol true_.
       inline
-      function_symbol const& true_()
+      const  function_symbol& true_()
       {
         static function_symbol true_(true_name(), bool_());
         return true_;
       }
 
-      /// \brief Recogniser for function true
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching true
+      /// \brief Recogniser for function true.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching true.
       inline
       bool is_true_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -92,28 +93,28 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier false
-      /// \return Identifier false
+      /// \brief Generate identifier false.
+      /// \return Identifier false.
       inline
-      core::identifier_string const& false_name()
+      const core::identifier_string& false_name()
       {
         static core::identifier_string false_name = core::identifier_string("false");
         return false_name;
       }
 
-      /// \brief Constructor for function symbol false
+      /// \brief Constructor for function symbol false.
       
-      /// \return Function symbol false_
+      /// \return Function symbol false_.
       inline
-      function_symbol const& false_()
+      const  function_symbol& false_()
       {
         static function_symbol false_(false_name(), bool_());
         return false_;
       }
 
-      /// \brief Recogniser for function false
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching false
+      /// \brief Recogniser for function false.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching false.
       inline
       bool is_false_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -123,8 +124,8 @@ namespace mcrl2 {
         }
         return false;
       }
-      /// \brief Give all system defined constructors for bool_
-      /// \return All system defined constructors for bool_
+      /// \brief Give all system defined constructors for bool_.
+      /// \return All system defined constructors for bool_.
       inline
       function_symbol_vector bool_generate_constructors_code()
       {
@@ -134,29 +135,50 @@ namespace mcrl2 {
 
         return result;
       }
-
-      /// \brief Generate identifier !
-      /// \return Identifier !
+      /// \brief Give all defined constructors which can be used in mCRL2 specs for bool_.
+      /// \return All system defined constructors that can be used in an mCRL2 specification for bool_.
       inline
-      core::identifier_string const& not_name()
+      function_symbol_vector bool_mCRL2_usable_constructors()
+      {
+        function_symbol_vector result;
+        result.push_back(sort_bool::true_());
+        result.push_back(sort_bool::false_());
+
+        return result;
+      }
+      // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
+      typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;
+      /// \brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for bool_.
+      /// \return All system defined constructors that are to be implemented in C++ for bool_.
+      inline
+      implementation_map bool_cpp_implementable_constructors()
+      {
+        implementation_map result;
+        return result;
+      }
+
+      /// \brief Generate identifier !.
+      /// \return Identifier !.
+      inline
+      const core::identifier_string& not_name()
       {
         static core::identifier_string not_name = core::identifier_string("!");
         return not_name;
       }
 
-      /// \brief Constructor for function symbol !
+      /// \brief Constructor for function symbol !.
       
-      /// \return Function symbol not_
+      /// \return Function symbol not_.
       inline
-      function_symbol const& not_()
+      const  function_symbol& not_()
       {
         static function_symbol not_(not_name(), make_function_sort(bool_(), bool_()));
         return not_;
       }
 
-      /// \brief Recogniser for function !
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching !
+      /// \brief Recogniser for function !.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching !.
       inline
       bool is_not_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -167,48 +189,48 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol !
+      /// \brief Application of function symbol !.
       
-      /// \param arg0 A data expression
-      /// \return Application of ! to a number of arguments
+      /// \param arg0 A data expression.
+      /// \return Application of ! to a number of arguments.
       inline
       application not_(const data_expression& arg0)
       {
         return sort_bool::not_()(arg0);
       }
 
-      /// \brief Recogniser for application of !
-      /// \param e A data expression
+      /// \brief Recogniser for application of !.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol not_ to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_not_application(const atermpp::aterm_appl& e)
       {
         return is_application(e) && is_not_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
-      /// \brief Generate identifier &&
-      /// \return Identifier &&
+      /// \brief Generate identifier &&.
+      /// \return Identifier &&.
       inline
-      core::identifier_string const& and_name()
+      const core::identifier_string& and_name()
       {
         static core::identifier_string and_name = core::identifier_string("&&");
         return and_name;
       }
 
-      /// \brief Constructor for function symbol &&
+      /// \brief Constructor for function symbol &&.
       
-      /// \return Function symbol and_
+      /// \return Function symbol and_.
       inline
-      function_symbol const& and_()
+      const  function_symbol& and_()
       {
         static function_symbol and_(and_name(), make_function_sort(bool_(), bool_(), bool_()));
         return and_;
       }
 
-      /// \brief Recogniser for function &&
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching &&
+      /// \brief Recogniser for function &&.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching &&.
       inline
       bool is_and_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -219,49 +241,49 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol &&
+      /// \brief Application of function symbol &&.
       
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of && to a number of arguments
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return Application of && to a number of arguments.
       inline
       application and_(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_bool::and_()(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of &&
-      /// \param e A data expression
+      /// \brief Recogniser for application of &&.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol and_ to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_and_application(const atermpp::aterm_appl& e)
       {
         return is_application(e) && is_and_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
-      /// \brief Generate identifier ||
-      /// \return Identifier ||
+      /// \brief Generate identifier ||.
+      /// \return Identifier ||.
       inline
-      core::identifier_string const& or_name()
+      const core::identifier_string& or_name()
       {
         static core::identifier_string or_name = core::identifier_string("||");
         return or_name;
       }
 
-      /// \brief Constructor for function symbol ||
+      /// \brief Constructor for function symbol ||.
       
-      /// \return Function symbol or_
+      /// \return Function symbol or_.
       inline
-      function_symbol const& or_()
+      const  function_symbol& or_()
       {
         static function_symbol or_(or_name(), make_function_sort(bool_(), bool_(), bool_()));
         return or_;
       }
 
-      /// \brief Recogniser for function ||
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching ||
+      /// \brief Recogniser for function ||.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching ||.
       inline
       bool is_or_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -272,49 +294,49 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol ||
+      /// \brief Application of function symbol ||.
       
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of || to a number of arguments
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return Application of || to a number of arguments.
       inline
       application or_(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_bool::or_()(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of ||
-      /// \param e A data expression
+      /// \brief Recogniser for application of ||.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol or_ to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_or_application(const atermpp::aterm_appl& e)
       {
         return is_application(e) && is_or_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
-      /// \brief Generate identifier =>
-      /// \return Identifier =>
+      /// \brief Generate identifier =>.
+      /// \return Identifier =>.
       inline
-      core::identifier_string const& implies_name()
+      const core::identifier_string& implies_name()
       {
         static core::identifier_string implies_name = core::identifier_string("=>");
         return implies_name;
       }
 
-      /// \brief Constructor for function symbol =>
+      /// \brief Constructor for function symbol =>.
       
-      /// \return Function symbol implies
+      /// \return Function symbol implies.
       inline
-      function_symbol const& implies()
+      const  function_symbol& implies()
       {
         static function_symbol implies(implies_name(), make_function_sort(bool_(), bool_(), bool_()));
         return implies;
       }
 
-      /// \brief Recogniser for function =>
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching =>
+      /// \brief Recogniser for function =>.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching =>.
       inline
       bool is_implies_function_symbol(const atermpp::aterm_appl& e)
       {
@@ -325,21 +347,21 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol =>
+      /// \brief Application of function symbol =>.
       
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of => to a number of arguments
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return Application of => to a number of arguments.
       inline
       application implies(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_bool::implies()(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of =>
-      /// \param e A data expression
+      /// \brief Recogniser for application of =>.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol implies to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_implies_application(const atermpp::aterm_appl& e)
       {
@@ -357,40 +379,78 @@ namespace mcrl2 {
         result.push_back(sort_bool::implies());
         return result;
       }
-      ///\brief Function for projecting out argument
-      ///        left from an application
-      /// \param e A data expression
-      /// \pre left is defined for e
-      /// \return The argument of e that corresponds to left
+      
+      /// \brief Give all system defined mappings and constructors for bool_
+      /// \return All system defined mappings for bool_
+      inline
+      function_symbol_vector bool_generate_constructors_and_functions_code()
+      {
+        function_symbol_vector result=bool_generate_functions_code();
+        for(const function_symbol& f: bool_generate_constructors_code())
+        {
+          result.push_back(f);
+        }
+        return result;
+      }
+      
+      /// \brief Give all system defined mappings that can be used in mCRL2 specs for bool_
+      /// \return All system defined mappings for that can be used in mCRL2 specificationis bool_
+      inline
+      function_symbol_vector bool_mCRL2_usable_mappings()
+      {
+        function_symbol_vector result;
+        result.push_back(sort_bool::not_());
+        result.push_back(sort_bool::and_());
+        result.push_back(sort_bool::or_());
+        result.push_back(sort_bool::implies());
+        return result;
+      }
+
+
+      // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
+      typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;
+      /// \brief Give all system defined mappings that are to be implemented in C++ code for bool_
+      /// \return A mapping from C++ implementable function symbols to system defined mappings implemented in C++ code for bool_
+      inline
+      implementation_map bool_cpp_implementable_mappings()
+      {
+        implementation_map result;
+        return result;
+      }
+      ///\brief Function for projecting out argument.
+      ///        left from an application.
+      /// \param e A data expression.
+      /// \pre left is defined for e.
+      /// \return The argument of e that corresponds to left.
       inline
       const data_expression& left(const data_expression& e)
       {
         assert(is_and_application(e) || is_or_application(e) || is_implies_application(e));
-        return atermpp::down_cast<const application >(e)[0];
+        return atermpp::down_cast<application>(e)[0];
       }
 
-      ///\brief Function for projecting out argument
-      ///        right from an application
-      /// \param e A data expression
-      /// \pre right is defined for e
-      /// \return The argument of e that corresponds to right
+      ///\brief Function for projecting out argument.
+      ///        right from an application.
+      /// \param e A data expression.
+      /// \pre right is defined for e.
+      /// \return The argument of e that corresponds to right.
       inline
       const data_expression& right(const data_expression& e)
       {
         assert(is_and_application(e) || is_or_application(e) || is_implies_application(e));
-        return atermpp::down_cast<const application >(e)[1];
+        return atermpp::down_cast<application>(e)[1];
       }
 
-      ///\brief Function for projecting out argument
-      ///        arg from an application
-      /// \param e A data expression
-      /// \pre arg is defined for e
-      /// \return The argument of e that corresponds to arg
+      ///\brief Function for projecting out argument.
+      ///        arg from an application.
+      /// \param e A data expression.
+      /// \pre arg is defined for e.
+      /// \return The argument of e that corresponds to arg.
       inline
       const data_expression& arg(const data_expression& e)
       {
         assert(is_not_application(e));
-        return atermpp::down_cast<const application >(e)[0];
+        return atermpp::down_cast<application>(e)[0];
       }
 
       /// \brief Give all system defined equations for bool_
