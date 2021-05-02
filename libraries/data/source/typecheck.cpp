@@ -3859,8 +3859,16 @@ void mcrl2::data::data_type_checker::initialise_system_defined_functions(void)
   add_system_constants_and_functions(sort_list::list_mCRL2_usable_constructors(data::untyped_sort()));
   add_system_constants_and_functions(sort_list::list_mCRL2_usable_mappings(data::untyped_sort()));
 
+  //FSets
+  add_system_constants_and_functions(sort_fset::fset_mCRL2_usable_constructors(data::untyped_sort()));
+  add_system_constants_and_functions(sort_fset::fset_mCRL2_usable_mappings(data::untyped_sort()));
+
   //Sets
-  add_system_function(sort_bag::set2bag(data::untyped_sort()));
+  // add_system_constants_and_functions(sort_set::set_mCRL2_usable_constructors(data::untyped_sort()));
+  // add_system_constants_and_functions(sort_set::set_mCRL2_usable_mappings(data::untyped_sort()));
+  add_system_function(sort_set::false_function(data::untyped_sort())); // Needed as it is used within the typechecker.
+  add_system_function(sort_set::constructor(data::untyped_sort())); // Needed as it is used within the typechecker.
+
   add_system_function(sort_set::in(data::untyped_sort(), data::untyped_sort(), sort_fset::fset(data::untyped_sort())));
   add_system_function(sort_set::in(data::untyped_sort(), data::untyped_sort(), sort_set::set_(data::untyped_sort())));
   add_system_function(sort_set::union_(data::untyped_sort(), sort_fset::fset(data::untyped_sort()), sort_fset::fset(data::untyped_sort())));
@@ -3869,22 +3877,29 @@ void mcrl2::data::data_type_checker::initialise_system_defined_functions(void)
   add_system_function(sort_set::difference(data::untyped_sort(), sort_set::set_(data::untyped_sort()), sort_set::set_(data::untyped_sort())));
   add_system_function(sort_set::intersection(data::untyped_sort(), sort_fset::fset(data::untyped_sort()), sort_fset::fset(data::untyped_sort())));
   add_system_function(sort_set::intersection(data::untyped_sort(), sort_set::set_(data::untyped_sort()), sort_set::set_(data::untyped_sort())));
-  add_system_function(sort_set::false_function(data::untyped_sort())); // Needed as it is used within the typechecker.
-  add_system_function(sort_set::constructor(data::untyped_sort())); // Needed as it is used within the typechecker.
-  //**** add_system_function(sort_bag::set2bag(data::untyped_sort()));
+  // **** add_system_function(sort_bag::set2bag(data::untyped_sort()));
   // add_system_constant(sort_set::empty(data::untyped_sort()));
   // add_system_function(sort_set::in(data::untyped_sort()));
   // add_system_function(sort_set::union_(data::untyped_sort()));
   // add_system_function(sort_set::difference(data::untyped_sort()));
   // add_system_function(sort_set::intersection(data::untyped_sort()));
-  add_system_function(sort_set::complement(data::untyped_sort()));
+  add_system_function(sort_set::complement(data::untyped_sort())); 
 
-  //FSets
-  add_system_constants_and_functions(sort_fset::fset_mCRL2_usable_constructors(data::untyped_sort()));
-  add_system_constants_and_functions(sort_fset::fset_mCRL2_usable_mappings(data::untyped_sort()));
+  //FBags
+  add_system_constants_and_functions(sort_fbag::fbag_mCRL2_usable_constructors(data::untyped_sort()));
+  add_system_constants_and_functions(sort_fbag::fbag_mCRL2_usable_mappings(data::untyped_sort()));
+  /* add_system_constant(sort_fbag::empty(data::untyped_sort()));
+  // add_system_function(sort_fbag::count(data::untyped_sort()));
+  // add_system_function(sort_fbag::in(data::untyped_sort()));
+  // add_system_function(sort_fbag::union_(data::untyped_sort()));
+  // add_system_function(sort_fbag::intersection(data::untyped_sort()));
+  // add_system_function(sort_fbag::difference(data::untyped_sort()));
+  add_system_function(sort_fbag::count_all(data::untyped_sort()));
+  add_system_function(sort_fbag::cinsert(data::untyped_sort())); // Needed as it is used within the typechecker. */
 
   //Bags
   add_system_function(sort_bag::bag2set(data::untyped_sort()));
+  add_system_function(sort_bag::set2bag(data::untyped_sort()));
   add_system_function(sort_bag::in(data::untyped_sort(), data::untyped_sort(), sort_fbag::fbag(data::untyped_sort())));
   add_system_function(sort_bag::in(data::untyped_sort(), data::untyped_sort(), sort_bag::bag(data::untyped_sort())));
   add_system_function(sort_bag::union_(data::untyped_sort(), sort_fbag::fbag(data::untyped_sort()), sort_fbag::fbag(data::untyped_sort())));
@@ -3904,16 +3919,6 @@ void mcrl2::data::data_type_checker::initialise_system_defined_functions(void)
   // add_system_function(sort_bag::intersection(data::untyped_sort()));
   add_system_function(sort_bag::zero_function(data::untyped_sort())); // Needed as it is used within the typechecker.
   add_system_function(sort_bag::constructor(data::untyped_sort())); // Needed as it is used within the typechecker.
-
-  //FBags
-  add_system_constant(sort_fbag::empty(data::untyped_sort()));
-  // add_system_function(sort_fbag::count(data::untyped_sort()));
-  // add_system_function(sort_fbag::in(data::untyped_sort()));
-  // add_system_function(sort_fbag::union_(data::untyped_sort()));
-  // add_system_function(sort_fbag::intersection(data::untyped_sort()));
-  // add_system_function(sort_fbag::difference(data::untyped_sort()));
-  add_system_function(sort_fbag::count_all(data::untyped_sort()));
-  add_system_function(sort_fbag::cinsert(data::untyped_sort())); // Needed as it is used within the typechecker.
 
   // function update
   // add_system_constants_and_functions(data::function_update_mCRL2_usable_constructors());
