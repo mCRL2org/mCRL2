@@ -3880,13 +3880,8 @@ void mcrl2::data::data_type_checker::initialise_system_defined_functions(void)
   add_system_function(sort_set::complement(data::untyped_sort()));
 
   //FSets
-  add_system_constant(sort_fset::empty(data::untyped_sort()));
-  // add_system_function(sort_fset::in(data::untyped_sort()));
-  // add_system_function(sort_fset::union_(data::untyped_sort()));
-  // add_system_function(sort_fset::intersection(data::untyped_sort()));
-  // add_system_function(sort_fset::difference(data::untyped_sort()));
-  add_system_function(sort_fset::count(data::untyped_sort()));
-  add_system_function(sort_fset::insert(data::untyped_sort())); // Needed as it is used within the typechecker.
+  add_system_constants_and_functions(sort_fset::fset_mCRL2_usable_constructors(data::untyped_sort()));
+  add_system_constants_and_functions(sort_fset::fset_mCRL2_usable_mappings(data::untyped_sort()));
 
   //Bags
   add_system_function(sort_bag::bag2set(data::untyped_sort()));
@@ -3921,7 +3916,8 @@ void mcrl2::data::data_type_checker::initialise_system_defined_functions(void)
   add_system_function(sort_fbag::cinsert(data::untyped_sort())); // Needed as it is used within the typechecker.
 
   // function update
-  add_system_function(data::function_update(data::untyped_sort(),data::untyped_sort()));
+  // add_system_constants_and_functions(data::function_update_mCRL2_usable_constructors());
+  add_system_constants_and_functions(data::function_update_mCRL2_usable_mappings(data::untyped_sort(),data::untyped_sort()));
 }
 
 void mcrl2::data::data_type_checker::add_function(const data::function_symbol& f, const std::string& msg, bool allow_double_decls)

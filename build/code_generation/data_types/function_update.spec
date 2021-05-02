@@ -1,7 +1,7 @@
 #using S
 #using T
 
-map @func_update <"function_update">: (S -> T) <"arg1"> # S <"arg2"> # T <"arg3"> -> (S -> T)                   internal defined_by_rewrite_rules;
+map @func_update <"function_update">: (S -> T) <"arg1"> # S <"arg2"> # T <"arg3"> -> (S -> T)                   external defined_by_rewrite_rules;
 % Potential new mappings, under study. 
 %    @func_update_stable <"function_update_stable">: (S -> T) <"arg1"> # S <"arg2"> # T <"arg3"> -> (S -> T);
 %    @func_base <"function_base">: (S->T) -> (S->T);

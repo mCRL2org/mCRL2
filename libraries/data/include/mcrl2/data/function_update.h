@@ -115,8 +115,7 @@ namespace mcrl2 {
       function_symbol_vector function_update_mCRL2_usable_mappings(const sort_expression& s, const sort_expression& t)
       {
         function_symbol_vector result;
-        static_cast< void >(s); // suppress unused variable warnings
-        static_cast< void >(t); // suppress unused variable warnings
+        result.push_back(function_update(s, t));
         return result;
       }
 
