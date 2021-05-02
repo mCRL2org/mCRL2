@@ -35,7 +35,7 @@ map Pos2Nat <"pos2nat"> : Pos <"arg"> -> Nat                                    
     @dubsucc <"dubsucc">:Nat <"arg"> -> Pos                                                                   internal defined_by_rewrite_rules;
     + <"plus">:Pos <"left"> #Nat <"right">->Pos                                                               external defined_by_rewrite_rules;
     + <"plus">:Nat <"left"> #Pos <"right">->Pos                                                               external defined_by_rewrite_rules;
-    + <"plus">:Nat <"left"> #Nat <"right">->Nat                                                               internal defined_by_rewrite_rules;
+    + <"plus">:Nat <"left"> #Nat <"right">->Nat                                                               external defined_by_rewrite_rules;
     @gtesubtb <"gte_subtract_with_borrow">: Bool <"arg1"> # Pos <"arg2"> # Pos <"arg3"> -> Nat                internal defined_by_rewrite_rules;
     * <"times">:Nat <"left"> #Nat <"right">->Nat                                                              external defined_by_rewrite_rules;
     div <"div">: Nat <"left"> # Pos <"right"> -> Nat                                                          external defined_by_rewrite_rules;

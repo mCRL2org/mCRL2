@@ -3065,7 +3065,6 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
     }
     data_expression_list Arguments=reverse(NewArguments);
     sort_expression_list ArgumentTypes=reverse(NewArgumentTypes);
-
     //function
     data_expression Data=appl.head();
     sort_expression NewType;
@@ -3840,16 +3839,25 @@ void mcrl2::data::data_type_checker::initialise_system_defined_functions(void)
   add_system_function(not_equal_to(data::untyped_sort()));
 
   //Bool
-  add_system_constants_and_functions(sort_bool::bool_generate_constructors_and_functions_code());
+  add_system_constants_and_functions(sort_bool::bool_mCRL2_usable_constructors());
+  add_system_constants_and_functions(sort_bool::bool_mCRL2_usable_mappings());
+  // add_system_constants_and_functions(sort_bool::bool_generate_constructors_and_functions_code());
 
   //Numbers
-  add_system_constants_and_functions(sort_pos::pos_generate_constructors_and_functions_code());
-  add_system_constants_and_functions(sort_nat::nat_generate_constructors_and_functions_code());
-  add_system_constants_and_functions(sort_int::int_generate_constructors_and_functions_code());
-  add_system_constants_and_functions(sort_real::real_generate_constructors_and_functions_code());
+  add_system_constants_and_functions(sort_pos::pos_mCRL2_usable_constructors());
+  add_system_constants_and_functions(sort_pos::pos_mCRL2_usable_mappings());
+  add_system_constants_and_functions(sort_nat::nat_mCRL2_usable_constructors());
+  add_system_function(sort_nat::cnat()); // This function is explicitly required by the typechecker. 
+                                         // It adds it and then typechecks the terms containing this function. 
+  add_system_constants_and_functions(sort_nat::nat_mCRL2_usable_mappings());
+  add_system_constants_and_functions(sort_int::int_mCRL2_usable_constructors());
+  add_system_constants_and_functions(sort_int::int_mCRL2_usable_mappings());
+  add_system_constants_and_functions(sort_real::real_mCRL2_usable_constructors());
+  add_system_constants_and_functions(sort_real::real_mCRL2_usable_mappings());
 
   //Lists
-  add_system_constants_and_functions(sort_list::list_generate_constructors_and_functions_code(data::untyped_sort()));
+  add_system_constants_and_functions(sort_list::list_mCRL2_usable_constructors(data::untyped_sort()));
+  add_system_constants_and_functions(sort_list::list_mCRL2_usable_mappings(data::untyped_sort()));
 
   //Sets
   add_system_function(sort_bag::set2bag(data::untyped_sort()));

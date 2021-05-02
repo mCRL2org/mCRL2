@@ -1841,6 +1841,7 @@ namespace mcrl2 {
         result.push_back(sort_nat::pred());
         result.push_back(sort_nat::plus(sort_pos::pos(), nat()));
         result.push_back(sort_nat::plus(nat(), sort_pos::pos()));
+        result.push_back(sort_nat::plus(nat(), nat()));
         result.push_back(sort_nat::times(nat(), nat()));
         result.push_back(sort_nat::div());
         result.push_back(sort_nat::mod());
