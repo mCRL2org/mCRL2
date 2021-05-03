@@ -3846,14 +3846,20 @@ void mcrl2::data::data_type_checker::initialise_system_defined_functions(void)
   //Numbers
   add_system_constants_and_functions(sort_pos::pos_mCRL2_usable_constructors());
   add_system_constants_and_functions(sort_pos::pos_mCRL2_usable_mappings());
+  add_system_constant(sort_pos::c1());   // This function is explicitly required by the typechecker. 
+                                         // It adds it and then typechecks the terms containing this function. 
   add_system_constants_and_functions(sort_nat::nat_mCRL2_usable_constructors());
+  add_system_constants_and_functions(sort_nat::nat_mCRL2_usable_mappings());
   add_system_function(sort_nat::cnat()); // This function is explicitly required by the typechecker. 
                                          // It adds it and then typechecks the terms containing this function. 
-  add_system_constants_and_functions(sort_nat::nat_mCRL2_usable_mappings());
   add_system_constants_and_functions(sort_int::int_mCRL2_usable_constructors());
   add_system_constants_and_functions(sort_int::int_mCRL2_usable_mappings());
+  add_system_function(sort_int::cint()); // This function is explicitly required by the typechecker. 
+                                         // It adds it and then typechecks the terms containing this function. 
   add_system_constants_and_functions(sort_real::real_mCRL2_usable_constructors());
   add_system_constants_and_functions(sort_real::real_mCRL2_usable_mappings());
+  add_system_function(sort_real::creal()); // This function is explicitly required by the typechecker. 
+                                           // It adds it and then typechecks the terms containing this function. 
 
   //Lists
   add_system_constants_and_functions(sort_list::list_mCRL2_usable_constructors(data::untyped_sort()));
