@@ -3,5 +3,4 @@ add_mcrl2_tool(lpsreach
     lpsreach.cpp
   DEPENDS
     mcrl2_lps
-    sylvan
 )

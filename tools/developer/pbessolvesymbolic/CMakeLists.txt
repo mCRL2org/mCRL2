@@ -3,5 +3,4 @@ add_mcrl2_tool(pbessolvesymbolic
     pbessolvesymbolic.cpp
   DEPENDS
     mcrl2_pbes
-    sylvan
 )

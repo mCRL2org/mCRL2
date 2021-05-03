@@ -19,4 +19,8 @@ add_mcrl2_library(lps
     ${Boost_INCLUDE_DIRS}
 )
 
+if (UNIX)
+  target_link_libraries(mcrl2_lps sylvan)
+endif()
+
 add_subdirectory(example)
