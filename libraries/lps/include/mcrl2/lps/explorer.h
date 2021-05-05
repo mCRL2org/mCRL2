@@ -459,7 +459,7 @@ class explorer: public abortable
     {
       if (p.expression() != data::sort_bool::true_())
       {
-        data::data_expression condition = data::replace_variables(summand.condition, m_sigma);
+        data::data_expression condition = m_rewr(summand.condition, m_sigma);
 
         data::remove_assignments(m_sigma, m_process_parameters);
         data::remove_assignments(m_sigma, summand.variables);
