@@ -138,6 +138,9 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
   // The initial state is stored and set as last.
   std::optional<probabilistic_lts_lts_t::probabilistic_state_t> initial_state;
 
+  // Ensure unique indices for the probabilistic states.
+  mcrl2::utilities::indexed_set<probabilistic_lts_lts_t::probabilistic_state_t> probabilistic_states;
+
   // Keep track of the number of states (derived from the transitions).
   std::size_t number_of_states = 1;
 
@@ -161,13 +164,23 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
       stream >> to;
 
       const action_label_lts lts_action(lps::multi_action(action.actions(),action.time()));
-      auto [index, inserted] = multi_actions.insert(lts_action);
+      const auto [index, inserted] = multi_actions.insert(lts_action);
 
       std::size_t target_index = to.value();
       if constexpr (std::is_same<LTS, probabilistic_lts_lts_t>::value)
       {
+        probabilistic_lts_lts_t::probabilistic_state_t lts_state(to.value());
+
         // For probabilistic lts it is necessary to add the state first (and use the returned index).
-        target_index = lts.add_probabilistic_state(probabilistic_lts_lts_t::probabilistic_state_t(to.value()));
+        bool state_inserted;
+        std::tie(target_index, state_inserted) = probabilistic_states.insert(lts_state);
+
+        if (state_inserted)
+        {
+          std::size_t actual_index = lts.add_probabilistic_state(lts_state);
+          utilities::mcrl2_unused(actual_index);
+          assert(actual_index == target_index);
+        }
       }
 
       // Add the transition and update the number of states.
@@ -195,10 +208,18 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
         stream >> to;
 
         const action_label_lts lts_action(lps::multi_action(action.actions(),action.time()));
-        auto [index, inserted] = multi_actions.insert(lts_action);
+        const auto [index, inserted] = multi_actions.insert(lts_action);
 
-        // Compute the index of the probabilistic state by adding it.
-        std::size_t to_index = lts.add_probabilistic_state(to);
+        // Compute the index of the probabilistic state.
+        const auto [to_index, state_inserted] = probabilistic_states.insert(to);
+
+        if (state_inserted)
+        {
+          std::size_t actual_index = lts.add_probabilistic_state(to);
+          utilities::mcrl2_unused(actual_index);
+          assert(actual_index == to_index);
+        }
+
         lts.add_transition(transition(from.value(), index, to_index));
 
         // Update the number of states
