@@ -431,13 +431,20 @@ class function_declaration_list():
       projection = []
 
       if len(index_table) == 1:
+        # The same position is projected in all cases, just take this position, no need to generate a condition.
         projection.append("return atermpp::down_cast<application>(e)[{0}];".format(index_table.keys()[0]))
       else:
-        projection_case = '''        if ({0})
-        {
-          return atermpp::down_cast<application>(e)[%s];\n" % (i)
-        }'''.format(" || ".join(["is_{0}_application(e)".format(c[1] for c in index_table[i])]), i)
-        projection.append(projection_case)
+        # A projection function of the same name is used to project different positions. We need to generate code for
+        # each of the positions.
+        for (index, id_label_pairs) in index_table.items():
+          conditions = ["is_{}_application(e)".format(label) for (_, label) in id_label_pairs]
+          condition = " || ".join(conditions)
+          projection_case = '''if ({0})
+        {{
+          return atermpp::down_cast<application>(e)[{1}];
+        }}'''.format(condition, index)
+          projection.append(projection_case)
+
 
       function = '''      ///\\brief Function for projecting out argument.
       ///        {0} from an application.
