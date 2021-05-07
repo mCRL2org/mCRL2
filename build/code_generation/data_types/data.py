@@ -246,7 +246,7 @@ class function_declaration():
 
     return "        result.push_back({0}({1}));\n".format(add_namespace(self.label, self.namespace), ", ".join([s.code(spec) for s in sort_params] + extra_parameters))
 
-  def cplusplus_implementable_functions(self, spec, function_declarations):
+  def cplusplus_implementable_functions(self, spec, data_parameters, function_declarations):
     if self.namespace <> self.original_namespace or self.namespace <> function_declarations.namespace or self.namespace <> spec.namespace or not self.definedby.is_defined_by_code():
       return ""
 
@@ -259,7 +259,7 @@ class function_declaration():
         extra_parameters.append(self.sort_expression.domain.code(spec))
       except:
         pass # in case sort_expression has no domain
-    return "        result[{0}()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>({0}_application,".format(add_namespace(self.label, self.namespace), ", ".join([s.code(spec) for s in sort_params] + extra_parameters)) + \
+    return "        result[{0}({1})]=std::pair<std::function<data_expression(const data_expression&)>, std::string>({0}_application,".format(add_namespace(self.label, self.namespace), ", ".join([s.code(spec) for s in sort_params] + extra_parameters), data_parameters) + \
                     "\"{0}_manual_implementation\");\n".format(add_namespace(self.label, self.namespace))
 
 
@@ -394,11 +394,11 @@ class function_declaration_list():
         code += e.mCRL2_usable_functions(spec, self)
     return code
 
-  def cplusplus_implementable_functions(self, spec, is_constructor_declaration = False):
+  def cplusplus_implementable_functions(self, spec, data_parameters, is_constructor_declaration = False):
     code = ""
     for e in self.elements:
       if not is_constructor_declaration or not spec.sort_specification.is_alias(target_sort(e.sort_expression)):
-        code += e.cplusplus_implementable_functions(spec, self)
+        code += e.cplusplus_implementable_functions(spec, data_parameters, self)
     return code
 
   def projection_code(self, spec):
@@ -444,7 +444,6 @@ class function_declaration_list():
           return atermpp::down_cast<application>(e)[{1}];
         }}'''.format(condition, index)
           projection.append(projection_case)
-
 
       function = '''      ///\\brief Function for projecting out argument.
       ///        {0} from an application.
@@ -507,7 +506,7 @@ class function_declaration_list():
       ${sortparameterstring}
       /// \\return Function symbol ${functionname}.
       inline
-      ${const} function_symbol${reference} ${functionname}(${sortparameters})
+      ${const}function_symbol${reference} ${functionname}(${sortparameters})
       {
         ${static}function_symbol ${functionname}(${functionname}_name(), ${sortname});
         return ${functionname};
@@ -686,27 +685,30 @@ ${cases}
         CODE_TEMPLATE = Template('''
       /// \\brief The data expression of an application of the constant symbol ${namestring}.
       /// \\details This function is to be implemented manually. \
-      ${sortparameterstring}
       /// \\return The data expression corresponding to an application of ${namestring} to a number of arguments.
       inline
-      const data_expression& ${functionname}_manual_implementation(${parameters});
+      const data_expression& ${functionname}_manual_implementation();
 
+      /// \\brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       data_expression ${functionname}_application(const data_expression& a)
       {
         static_cast< void >(a); // suppress unused variable warning.
         assert(is_function_symbol(a));
-        assert(a==${functionname}());
-        return ${functionname}_manual_implementation();
+        // assert(a==${functionname}());
+        return ${functionname}_manual_implementation(${domain_parameters});
       }\n
 ''')
 
         formal_sort_params = map(lambda x: 'const sort_expression& {0}'.format(fcode(x, spec)), sort_params)
+        formal_data_params = map(lambda x: 'const data_expression& {0}'.format(fcode(x, spec)), data_params)
         domain_params = map(lambda x: '{0}.sort()'.format(x), data_params) if polymorphic else []
         return CODE_TEMPLATE.substitute(
           namestring = escape(fullname),
           sortparameterstring = '' if sort_params == '' else '\n      '.join(map(lambda x: '/// \\param {0} A sort expression.'.format(fcode(x, spec)), sort_params)),
           functionname = name,
+          actsortparameters = ', '.join(map(lambda x: fcode(x, spec), sort_params + domain_params)),
+          domain_parameters = ''.join(map(lambda x: fcode(x, spec) + ', ', domain_params)),
           parameters = ', '.join(formal_sort_params),
         )
 
@@ -716,19 +718,19 @@ ${cases}
         CODE_TEMPLATE = Template('''
       /// \\brief The data expression of an application of the function symbol ${namestring}.
       /// \\details This function is to be implemented manually. 
-      ${sortparameterstring} 
       ${dataparameterstring}
       /// \\return The data expression corresponding to an application of ${namestring} to a number of arguments.
       inline
       data_expression ${functionname}_manual_implementation(${parameters});\n
 
+      /// \\brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
       data_expression ${functionname}_application(const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
-        assert(a.head()==${functionname}());
-        return ${functionname}_manual_implementation(${aaparameters});
+        // assert(a.head()==${functionname}());
+        return ${functionname}_manual_implementation(${domain_parameters}${aaparameters});
       }\n
 ''')
 
@@ -740,7 +742,9 @@ ${cases}
           sortparameterstring = '' if sort_params == '' else '\n      '.join(map(lambda x: '/// \\param {0} A sort expression.'.format(fcode(x, spec)), sort_params)),
           dataparameterstring = '' if data_params == '' else '\n      '.join(map(lambda x: '/// \\param {0} A data expression.'.format(fcode(x, spec)), data_params)),
           functionname = name,
-          parameters = ', '.join(formal_sort_params + formal_data_params),
+          parameters = ', '.join(formal_data_params),
+          domain_parameters = ''.join(map(lambda x: fcode(x, spec) + ', ', domain_params)),
+          actsortparameters = ', '.join(map(lambda x: fcode(x, spec), sort_params + domain_params)),
           aaparameters=", ".join(["a[%s]" %e for e in range(0,len(data_params))])
         )
 
@@ -1894,6 +1898,7 @@ class mapping_specification():
       assert(isinstance(spec, specification))
       sort_parameters = string.join(map(lambda x: "const sort_expression& %s" % (str(x).lower()), self.declarations.sort_parameters(spec)), ", ")
       data_parameters = string.join(map(lambda x: "%s" % (str(x).lower()), self.declarations.sort_parameters(spec)), ", ")
+      constructor_data_parameters = string.join(map(lambda x: "%s" % (str(x).lower()), spec.function_specification.constructor_specification.declarations.sort_parameters(spec)), ", ")
       assert(self.namespace == spec.namespace)
       namespace_string = self.namespace
       if namespace_string == "undefined":
@@ -1922,7 +1927,7 @@ class mapping_specification():
       code += "      {\n"
       code += "        function_symbol_vector result=%s_generate_functions_code(%s);\n" % (namespace_string, data_parameters)
       if not spec.function_specification.constructor_specification.declarations.empty():
-        code += "        for(const function_symbol& f: %s_generate_constructors_code(%s))\n" % (namespace_string, data_parameters)
+        code += "        for(const function_symbol& f: %s_generate_constructors_code(%s))\n" % (namespace_string, constructor_data_parameters)
         code += "        {\n"
         code += "          result.push_back(f);\n"
         code += "        }\n"
@@ -1957,7 +1962,7 @@ class mapping_specification():
       code += "      implementation_map %s_cpp_implementable_mappings(%s)\n" % (namespace_string, sort_parameters)
       code += "      {\n"
       code += "        implementation_map result;\n"
-      add_mappings_code = self.declarations.cplusplus_implementable_functions(spec)
+      add_mappings_code = self.declarations.cplusplus_implementable_functions(spec, data_parameters)
       if add_mappings_code == "":
         for s in self.declarations.sort_parameters(spec):
           code += "        static_cast< void >(%s); // suppress unused variable warnings\n" % (str(s).lower())
@@ -1995,76 +2000,74 @@ class constructor_specification():
     self.declarations.merge_declarations(spec.declarations, is_supertype)
 
   def code(self, spec):
-    if not self.declarations.empty():
-      assert(isinstance(spec, specification))
-      sort_parameters = string.join(map(lambda x: "const sort_expression& %s" % (str(x).lower()), self.declarations.sort_parameters(spec)), ", ")
-      assert(self.namespace == spec.namespace)
-      namespace_string = self.namespace
-      if namespace_string == "undefined":
-        namespace_string = spec.get_namespace()
-      code  = self.declarations.code(spec)
+    assert(isinstance(spec, specification))
+    sort_parameters = string.join(map(lambda x: "const sort_expression& %s" % (str(x).lower()), self.declarations.sort_parameters(spec)), ", ")
+    data_parameters = string.join(map(lambda x: "%s" % (str(x).lower()), self.declarations.sort_parameters(spec)), ", ")
+    assert(self.namespace == spec.namespace)
+    namespace_string = self.namespace
+    if namespace_string == "undefined":
+      namespace_string = spec.get_namespace()
+    code  = self.declarations.code(spec)
 
-      code += "      /// \\brief Give all system defined constructors for %s.\n" % (escape(namespace_string))
+    code += "      /// \\brief Give all system defined constructors for %s.\n" % (escape(namespace_string))
+    for s in self.declarations.sort_parameters(spec):
+      code += "      /// \\param %s A sort expression.\n" % (escape(str(s).lower()))
+    code += "      /// \\return All system defined constructors for %s.\n" % (escape(namespace_string))
+    code += "      inline\n"
+    code += "      function_symbol_vector %s_generate_constructors_code(%s)\n" % (namespace_string,sort_parameters)
+    code += "      {\n"
+    code += "        function_symbol_vector result;\n"
+    add_constructors_code = self.declarations.generator_code(spec) + (spec.sort_specification.structured_sort_constructor_code())
+    if add_constructors_code == "":
       for s in self.declarations.sort_parameters(spec):
-        code += "      /// \\param %s A sort expression.\n" % (escape(str(s).lower()))
-      code += "      /// \\return All system defined constructors for %s.\n" % (escape(namespace_string))
-      code += "      inline\n"
-      code += "      function_symbol_vector %s_generate_constructors_code(%s)\n" % (namespace_string,sort_parameters)
-      code += "      {\n"
-      code += "        function_symbol_vector result;\n"
-      add_constructors_code = self.declarations.generator_code(spec) + (spec.sort_specification.structured_sort_constructor_code())
-      if add_constructors_code == "":
-        for s in self.declarations.sort_parameters(spec):
-          code += "        static_cast< void >(%s); // suppress unused variable warnings\n" % (str(s).lower())
-      else:
-        code += "%s" % (spec.sort_specification.structured_sort_constructor_code())
-        code += "%s\n" % (self.declarations.generator_code(spec, True))
-      code += "        return result;\n"
-      code += "      }\n"
-
-      code += "      /// \\brief Give all defined constructors which can be used in mCRL2 specs for %s.\n" % (escape(namespace_string))
-      for s in self.declarations.sort_parameters(spec):
-        code += "      /// \\param %s A sort expression.\n" % (escape(str(s).lower()))
-      code += "      /// \\return All system defined constructors that can be used in an mCRL2 specification for %s.\n" % (escape(namespace_string))
-      code += "      inline\n"
-      code += "      function_symbol_vector %s_mCRL2_usable_constructors(%s)\n" % (namespace_string,sort_parameters)
-      code += "      {\n"
-      code += "        function_symbol_vector result;\n"
-      add_constructors_code = self.declarations.mCRL2_usable_functions(spec) + (spec.sort_specification.structured_sort_constructor_code())
-      if add_constructors_code == "":
-        for s in self.declarations.sort_parameters(spec):
-          code += "        static_cast< void >(%s); // suppress unused variable warnings\n" % (str(s).lower())
-      else:
-        code += "%s" % (spec.sort_specification.structured_sort_constructor_code())
-        code += "%s\n" % (self.declarations.mCRL2_usable_functions(spec, True))
-      code += "        return result;\n"
-      code += "      }\n"
-
-      code += "      // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it\n"
-      code += "      typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;\n"
-      code += "      /// \\brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for %s.\n" % (escape(namespace_string))
-      for s in self.declarations.sort_parameters(spec):
-        code += "      /// \\param %s A sort expression.\n" % (escape(str(s).lower()))
-      code += "      /// \\return All system defined constructors that are to be implemented in C++ for %s.\n" % (escape(namespace_string))
-      code += "      inline\n"
-      code += "      implementation_map %s_cpp_implementable_constructors(%s)\n" % (namespace_string,sort_parameters)
-      code += "      {\n"
-      code += "        implementation_map result;\n"
-      add_constructors_code = self.declarations.cplusplus_implementable_functions(spec) + (spec.sort_specification.structured_sort_constructor_code())
-      if add_constructors_code == "":
-        for s in self.declarations.sort_parameters(spec):
-          code += "        static_cast< void >(%s); // suppress unused variable warnings\n" % (str(s).lower())
-      else:
-        code += "%s" % (spec.sort_specification.structured_sort_constructor_code())
-        code += "%s\n" % (self.declarations.cplusplus_implementable_functions(spec, True))
-      code += "        return result;\n"
-      code += "      }\n"
-      return code
+        code += "        static_cast< void >(%s); // suppress unused variable warnings\n" % (str(s).lower())
     else:
-      return ""
+      code += "%s" % (spec.sort_specification.structured_sort_constructor_code())
+      code += "%s\n" % (self.declarations.generator_code(spec, True))
+    code += "        return result;\n"
+    code += "      }\n"
+
+    code += "      /// \\brief Give all defined constructors which can be used in mCRL2 specs for %s.\n" % (escape(namespace_string))
+    for s in self.declarations.sort_parameters(spec):
+      code += "      /// \\param %s A sort expression.\n" % (escape(str(s).lower()))
+    code += "      /// \\return All system defined constructors that can be used in an mCRL2 specification for %s.\n" % (escape(namespace_string))
+    code += "      inline\n"
+    code += "      function_symbol_vector %s_mCRL2_usable_constructors(%s)\n" % (namespace_string,sort_parameters)
+    code += "      {\n"
+    code += "        function_symbol_vector result;\n"
+    add_constructors_code = self.declarations.mCRL2_usable_functions(spec) + (spec.sort_specification.structured_sort_constructor_code())
+    if add_constructors_code == "":
+      for s in self.declarations.sort_parameters(spec):
+        code += "        static_cast< void >(%s); // suppress unused variable warnings\n" % (str(s).lower())
+    else:
+      code += "%s" % (spec.sort_specification.structured_sort_constructor_code())
+      code += "%s\n" % (self.declarations.mCRL2_usable_functions(spec, True))
+    code += "        return result;\n"
+    code += "      }\n"
+
+    code += "      // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it\n"
+    code += "      typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;\n"
+    code += "      /// \\brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for %s.\n" % (escape(namespace_string))
+    for s in self.declarations.sort_parameters(spec):
+      code += "      /// \\param %s A sort expression.\n" % (escape(str(s).lower()))
+    code += "      /// \\return All system defined constructors that are to be implemented in C++ for %s.\n" % (escape(namespace_string))
+    code += "      inline\n"
+    code += "      implementation_map %s_cpp_implementable_constructors(%s)\n" % (namespace_string,sort_parameters)
+    code += "      {\n"
+    code += "        implementation_map result;\n"
+    add_constructors_code = self.declarations.cplusplus_implementable_functions(spec,data_parameters) + (spec.sort_specification.structured_sort_constructor_code())
+    if add_constructors_code == "":
+      for s in self.declarations.sort_parameters(spec):
+        code += "        static_cast< void >(%s); // suppress unused variable warnings\n" % (str(s).lower())
+    else:
+      code += "%s" % (spec.sort_specification.structured_sort_constructor_code())
+      code += "%s\n" % (self.declarations.cplusplus_implementable_functions(spec, data_parameters, True))
+    code += "        return result;\n"
+    code += "      }\n"
+    return code
 
 class function_specification():
-  def __init__(self, mapping_spec, constructor_spec = constructor_specification(function_declaration_list([]))):
+  def __init__(self, mapping_spec, constructor_spec):
     assert(isinstance(mapping_spec, mapping_specification))
     assert(isinstance(constructor_spec, constructor_specification))
     self.constructor_specification = constructor_spec

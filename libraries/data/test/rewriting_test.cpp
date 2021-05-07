@@ -25,7 +25,7 @@ using namespace mcrl2::data;
 typedef std::vector<rewrite_strategy > rewrite_strategy_vector;
 
 template <typename Rewriter>
-void data_rewrite_test(Rewriter& R, data_expression const& input, data_expression const& expected_output)
+void data_rewrite_test(Rewriter& R, const data_expression& input, const data_expression& expected_output)
 {
   data_expression output = R(input);
 
@@ -1493,7 +1493,7 @@ BOOST_AUTO_TEST_CASE(Check_normal_forms_in_function_update)   // In the jitty re
     data::rewriter R(specification, *strat);
 
     data::data_expression e(parse_data_expression("update(a,0,0,0)", specification));
-    data::data_expression f(parse_data_expression("a[0 -> a(0)[0 -> 0]]", specification));
+    data::data_expression f(R(parse_data_expression("a[0 -> a(0)[0 -> 0]]", specification)));
     data_rewrite_test(R, e, f);
   }
 }

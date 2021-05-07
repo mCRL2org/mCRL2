@@ -276,13 +276,14 @@ static void term2seq(const data_expression& t, match_tree_list& s, std::size_t *
   }
 
   std::size_t j=1;
-  for (application::const_iterator i=ta.begin(); i!=ta.end(); ++i,++j)
+  for (const data_expression& u: ta)
   {
-    term2seq(*i,s,var_cnt,false);
+    term2seq(u,s,var_cnt,false);
     if (j<arity)
     {
       s.push_front(match_tree_N(dummy,0));
     }
+    ++j;
   }
 
   if (!ommit_head)
@@ -2199,14 +2200,93 @@ public:
     }
   }
 
+  std::string implement_body_of_cplusplus_defined_function(
+             const std::size_t arity,
+             const std::string& head,
+             const function_sort& s,
+             std::size_t& used_arguments)
+  {
+    // In this case opid is used in a higher order fashion. 
+    const std::size_t domain_size = s.domain().size();
+    std::stringstream ss;
+    ss << appl_function(domain_size) << "(" << head;
+
+    for (std::size_t i = 0; i < domain_size; ++i)
+    {
+        ss << ", local_rewrite(arg_not_nf" << used_arguments + i << ",this_rewriter)";
+    }
+    ss << ")";
+
+    used_arguments += domain_size;
+    if (used_arguments<arity)
+    {
+      return implement_body_of_cplusplus_defined_function(arity,
+                                                          ss.str(), 
+                                                          down_cast<function_sort>(s.codomain()), 
+                                                          used_arguments);
+    }
+    else
+    {
+      return ss.str();
+    }
+  };
+
+  void implement_a_cplusplus_defined_function(
+             std::ostream& m_stream,
+             std::size_t arity,
+             const function_symbol& opid,
+             const data_specification& data_spec)
+  {
+    m_stream << m_padding << "// Implement function " << opid << " by calling a user defined rewrite function.\n";
+    const std::string cplusplus_function_name = data_spec.cpp_implemented_functions().find(opid)->second.second;
+    m_stream << m_padding << "return ";
+
+    // First calculate the core function, which may be surrounded by extra applications. 
+    std::stringstream ss;
+    ss << cplusplus_function_name << "(";
+    for(size_t i=0; i<get_direct_arity(opid); ++i)
+    {
+      ss << (i>0?",":"");
+      ss << "local_rewrite(arg_not_nf" << i << ",this_rewriter)";
+    }
+    ss << ")";
+
+    if (arity==get_direct_arity(opid))
+    {
+      m_stream << ss.str() << ";";
+      return;
+    }
+    // else it is a higher order function, and it must be surrounded by "application"s. 
+    assert(arity>get_direct_arity(opid));
+    std::size_t used_arguments = get_direct_arity(opid);
+    std::string result=implement_body_of_cplusplus_defined_function(
+                                         arity,
+                                         ss.str(), 
+                                         down_cast<function_sort>(down_cast<function_sort>(opid.sort()).codomain()),
+                                         used_arguments);
+    assert(used_arguments == arity);
+   
+    // If there applications surrounding the term, it may not be a normalform anymore, but its arguments
+    // are in normal form. That is why rewrite_aux has as second argument true. 
+    m_stream << "rewrite_aux(" << result << ",true,this_rewriter);";
+  }
+
   void implement_strategy(
              std::ostream& m_stream, 
              match_tree_list strat, 
              std::size_t arity, 
              const function_symbol& opid,
              bracket_level_data& brackets,
-             std::stack<std::string>& auxiliary_code_fragments)
+             std::stack<std::string>& auxiliary_code_fragments,
+             const data_specification& data_spec)
   {
+    // First check whether this is a predefined function with the right arity. 
+    if (data_spec.cpp_implemented_functions().find(opid)!=data_spec.cpp_implemented_functions().end() &&
+        arity>=get_direct_arity(opid))
+    {
+      implement_a_cplusplus_defined_function(m_stream, arity, opid, data_spec);
+      return;
+    }
     bool added_new_parameters_in_brackets=false;
     m_used=nfs_array(arity); // This vector maintains which arguments are in normal form.
     // m_nnfvars=variable_or_number_list();
@@ -2442,7 +2522,8 @@ public:
              std::ostream& m_stream, 
              const data::function_symbol& func, 
              std::size_t arity, 
-             match_tree_list strategy)
+             match_tree_list strategy,
+             const data_specification& data_spec)
 
   {
     bracket_level_data brackets;
@@ -2453,7 +2534,7 @@ public:
     rewr_function_signature(m_stream, index, arity, brackets);
     m_stream << "\n" << m_padding << "{\n";
     m_padding.indent();
-    implement_strategy(m_stream, strategy, arity, func, brackets, auxiliary_code_fragments);
+    implement_strategy(m_stream, strategy, arity, func, brackets, auxiliary_code_fragments,data_spec);
     m_padding.unindent();
     m_stream << m_padding << "}\n\n";
 
@@ -2548,7 +2629,7 @@ public:
     m_stream << m_padding << "\n";
   }
 
-  void generate_rewr_functions(std::ostream& m_stream)
+  void generate_rewr_functions(std::ostream& m_stream, const data_specification& data_spec)
   {
     while (!m_rewr_functions.empty())
     {
@@ -2561,7 +2642,7 @@ public:
       else
       {
         const match_tree_list strategy = m_rewriter.create_strategy(m_rewriter.jittyc_eqns[spec.fs()], spec.arity());
-        rewr_function_implementation(m_stream, spec.fs(), spec.arity(), strategy);
+        rewr_function_implementation(m_stream, spec.fs(), spec.arity(), strategy, data_spec);
       }
     }
   }
@@ -2707,7 +2788,7 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
 
   rewr_code << "  // We're declaring static members in a struct rather than simple functions in\n"
                "  // the global scope, so that we don't have to worry about forward declarations.\n";
-  code_generator.generate_rewr_functions(rewr_code);
+  code_generator.generate_rewr_functions(rewr_code,m_data_specification_for_enumeration);
   rewr_code << "};\n"
                "} // namespace\n";
 

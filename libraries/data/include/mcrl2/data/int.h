@@ -77,7 +77,7 @@ namespace mcrl2 {
       
       /// \return Function symbol cint.
       inline
-      const  function_symbol& cint()
+      const function_symbol& cint()
       {
         static function_symbol cint(cint_name(), make_function_sort(sort_nat::nat(), int_()));
         return cint;
@@ -129,7 +129,7 @@ namespace mcrl2 {
       
       /// \return Function symbol cneg.
       inline
-      const  function_symbol& cneg()
+      const function_symbol& cneg()
       {
         static function_symbol cneg(cneg_name(), make_function_sort(sort_pos::pos(), int_()));
         return cneg;
@@ -210,7 +210,7 @@ namespace mcrl2 {
       
       /// \return Function symbol nat2int.
       inline
-      const  function_symbol& nat2int()
+      const function_symbol& nat2int()
       {
         static function_symbol nat2int(nat2int_name(), make_function_sort(sort_nat::nat(), int_()));
         return nat2int;
@@ -262,7 +262,7 @@ namespace mcrl2 {
       
       /// \return Function symbol int2nat.
       inline
-      const  function_symbol& int2nat()
+      const function_symbol& int2nat()
       {
         static function_symbol int2nat(int2nat_name(), make_function_sort(int_(), sort_nat::nat()));
         return int2nat;
@@ -314,7 +314,7 @@ namespace mcrl2 {
       
       /// \return Function symbol pos2int.
       inline
-      const  function_symbol& pos2int()
+      const function_symbol& pos2int()
       {
         static function_symbol pos2int(pos2int_name(), make_function_sort(sort_pos::pos(), int_()));
         return pos2int;
@@ -366,7 +366,7 @@ namespace mcrl2 {
       
       /// \return Function symbol int2pos.
       inline
-      const  function_symbol& int2pos()
+      const function_symbol& int2pos()
       {
         static function_symbol int2pos(int2pos_name(), make_function_sort(int_(), sort_pos::pos()));
         return int2pos;
@@ -582,7 +582,7 @@ namespace mcrl2 {
       
       /// \return Function symbol abs.
       inline
-      const  function_symbol& abs()
+      const function_symbol& abs()
       {
         static function_symbol abs(abs_name(), make_function_sort(int_(), sort_nat::nat()));
         return abs;

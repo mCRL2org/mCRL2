@@ -241,7 +241,7 @@ void test_functions()
   std::for_each(fghl.begin(), fghl.end(), std::bind(&data_specification::add_mapping, &spec1, std::placeholders::_1));
 
 std::cerr << "#mappings " << spec.mappings().size() << "\n";
-  BOOST_CHECK(spec.mappings().size() == 51);
+  BOOST_CHECK(spec.mappings().size() == 54);
 
   function_symbol_vector mappings(spec.mappings());
   BOOST_CHECK(std::find(mappings.begin(), mappings.end(), f) != mappings.end());

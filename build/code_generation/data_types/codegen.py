@@ -973,8 +973,8 @@ parser = Parser(spec)
 #
 # Global variables to collect needed information during parsing.
 #
-verbose = False       # Switch on debug output?
-debug = False         # Switch on verbose output? 
+verbose = False       # Switch on verbose output?
+debug = False         # Switch on debug output? 
 includes_table = {}   # Maps sorts to include files
 
 if __name__ == "__main__":

@@ -354,7 +354,7 @@ int precedence(const application& x)
   {
     return 12;
   }
-  else if (is_function_update_application(x))
+  else if (is_function_update_application(x) || is_function_update_stable_application(x))
   {
     return 13;
   }
@@ -2028,7 +2028,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //-------------------------------------------------------------------//
     //                            function update
     //-------------------------------------------------------------------//
-    else if (is_function_update_application(x))
+    else if (is_function_update_application(x) || is_function_update_stable_application(x))
     {
       data_expression x1 = data::arg1(x);
       data_expression x2 = data::arg2(x);

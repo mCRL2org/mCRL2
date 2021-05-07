@@ -38,6 +38,15 @@ class RewriterJitty: public Rewriter
     std::map< function_symbol, data_equation_list > jitty_eqns;
     std::vector<strategy> jitty_strat;
 
+    template <class ITERATOR>
+    data_expression apply_cpp_code_to_higher_order_term(
+                  const application& t,
+                  const std::function<data_expression(const data_expression&)> rewrite_cpp_code,
+                  ITERATOR begin,
+                  ITERATOR end,
+                  substitution_type& sigma);
+
+
     data_expression rewrite_aux(const data_expression& term, substitution_type& sigma);
 
     data_expression rewrite_aux_function_symbol(
@@ -52,7 +61,11 @@ class RewriterJitty: public Rewriter
     /// \brief Auxiliary function to take care that the array jitty_strat is sufficiently large
     ///        to access element i.
     void make_jitty_strat_sufficiently_larger(const std::size_t i);
-    void rebuild_strategy();
+
+    strategy create_a_cpp_function_based_strategy(const function_symbol& f, const data_specification& data_spec);
+    strategy create_a_rewriting_based_strategy(const function_symbol& f, const data_equation_list& rules1);
+    strategy create_strategy(const function_symbol& f, const data_equation_list& rules1, const data_specification& data_spec);
+    void rebuild_strategy(const data_specification& data_spec, const mcrl2::data::used_data_equation_selector& equation_selector);
 };
 
 /// \brief removes auxiliary expressions this_term_is_in_normal_form from data_expressions that are being rewritten.

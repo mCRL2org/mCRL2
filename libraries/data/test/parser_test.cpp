@@ -30,7 +30,7 @@ void parser_test()
   BOOST_CHECK(spec.sorts().size() == 7); // Bool, Pos, S, List(S), S->List(S), Nat, @NatPair.
   BOOST_CHECK(spec.constructors(data::basic_sort("S")).size() == 1);
   std::cerr << "number of functions " << spec.mappings().size() << "\n";
-  BOOST_CHECK(spec.mappings().size() == 104);
+  BOOST_CHECK(spec.mappings().size() == 107);
 
   BOOST_CHECK(data::parse_data_expression("2") == data::sort_pos::pos(2));
   BOOST_CHECK(data::parse_data_expression("0") == data::sort_nat::nat(0));

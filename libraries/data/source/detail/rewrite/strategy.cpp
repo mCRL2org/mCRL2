@@ -8,16 +8,22 @@
 //
 
 #include "mcrl2/data/detail/rewrite/strategy_rule.h"
+#include "mcrl2/data/detail/rewrite/jitty.h"
 #include "mcrl2/data/detail/rewrite/jitty_jittyc.h"
 
-using namespace mcrl2::data;
-
-namespace
+namespace mcrl2
+{
+namespace data
+{
+namespace detail
 {
 
-/// \brief
 class dependencies_rewrite_rule_pair
 {
+  protected:
+    std::set<std::size_t> m_dependencies;
+    data_equation m_equation;
+
   public:
     dependencies_rewrite_rule_pair(std::set<std::size_t>& dependencies, const data_equation& eq)
      : m_dependencies(dependencies), m_equation(eq)
@@ -28,30 +34,22 @@ class dependencies_rewrite_rule_pair
       return m_dependencies;
     }
 
-    const data_equation& equation() const
+    const data_equation equation() const
     {
       return m_equation;
     }
-
-  protected:
-    std::set<std::size_t> m_dependencies;
-    data_equation m_equation;
 };
 
-}
-
-namespace mcrl2
+// Create a strategy for the rewrite rules belonging to one particular symbol.
+// It is a prerequisite for this function to that all rewrite rules in rules1 have
+// the same main function symbol in the lhs. 
+strategy RewriterJitty::create_a_rewriting_based_strategy(const function_symbol& f, const data_equation_list& rules1)
 {
-namespace data
-{
-namespace detail
-{
-
-strategy create_strategy(data_equation_list rules)
-{
+  static_cast<void>(f); // Avoid an unused variable warning. 
+  data_equation_list rules=rules1;
   std::vector<strategy_rule> strat;
 
-  std::vector<bool> used;
+  std::vector <bool> used;
 
   std::size_t arity = 0;
   std::size_t max_number_of_variables = 0;
@@ -182,7 +180,7 @@ strategy create_strategy(data_equation_list rules)
 
       for (std::size_t i = 0; i < arity; i++)
       {
-        assert(i < static_cast<std::size_t>(1) << (8 * sizeof(int) - 1));
+        assert(i<((std::size_t)1)<<(8*sizeof(int)-1));
         if (args[i] > max)
         {
           maxidx = i+1;
@@ -216,8 +214,44 @@ strategy create_strategy(data_equation_list rules)
     rules = reverse(l);
     arity++;
   }
+  
+  return strategy(max_number_of_variables,strat);
+}
 
-  return strategy(max_number_of_variables, atermpp::term_list<data::detail::strategy_rule>(strat.begin(), strat.end()));
+// Create an explicit rewrite strategy when rewriting using an explicitly given 
+// C++ function. First rewrite all the arguments, then apply the function. 
+strategy RewriterJitty::create_a_cpp_function_based_strategy(const function_symbol& f, const data_specification& data_spec)
+{
+  size_t number_of_arguments=0;
+  if (is_function_sort(f.sort()))
+  {
+    number_of_arguments=atermpp::down_cast<function_sort>(f.sort()).domain().size();
+  }
+  // Indicate that all arguments must be rewritten first. 
+  std::vector<strategy_rule> result;
+  for(size_t i=0; i<number_of_arguments; ++i)
+  {
+    result.push_back(strategy_rule(i));
+  }
+  result.push_back(strategy_rule(data_spec.cpp_implemented_functions().find(f)->second.first));
+  
+  return strategy(0,result);
+}
+
+// Create a strategy to rewrite terms. This can either be a strategy that is based on rewrite
+// rules or it can be a strategy based on an explicitly given c++ function for this function symbol. 
+strategy RewriterJitty::create_strategy(const function_symbol& f, const data_equation_list& rules1, const data_specification& data_spec)
+{
+  if (data_spec.cpp_implemented_functions().count(f)==0)    // There is no explicit implementation.
+  {
+    return create_a_rewriting_based_strategy(f, rules1);
+  } 
+  else 
+  {
+    assert(rules1.size()==0);  // There should be no explicit rewrite rules, as this function is implemented by 
+                               // an explicit C++ function. 
+    return create_a_cpp_function_based_strategy(f, data_spec);
+  }
 }
 
 } // namespace detail

@@ -104,7 +104,7 @@ namespace mcrl2 {
       
       /// \return Function symbol creal.
       inline
-      const  function_symbol& creal()
+      const function_symbol& creal()
       {
         static function_symbol creal(creal_name(), make_function_sort(sort_int::int_(), sort_pos::pos(), real_()));
         return creal;
@@ -157,7 +157,7 @@ namespace mcrl2 {
       
       /// \return Function symbol pos2real.
       inline
-      const  function_symbol& pos2real()
+      const function_symbol& pos2real()
       {
         static function_symbol pos2real(pos2real_name(), make_function_sort(sort_pos::pos(), real_()));
         return pos2real;
@@ -209,7 +209,7 @@ namespace mcrl2 {
       
       /// \return Function symbol nat2real.
       inline
-      const  function_symbol& nat2real()
+      const function_symbol& nat2real()
       {
         static function_symbol nat2real(nat2real_name(), make_function_sort(sort_nat::nat(), real_()));
         return nat2real;
@@ -261,7 +261,7 @@ namespace mcrl2 {
       
       /// \return Function symbol int2real.
       inline
-      const  function_symbol& int2real()
+      const function_symbol& int2real()
       {
         static function_symbol int2real(int2real_name(), make_function_sort(sort_int::int_(), real_()));
         return int2real;
@@ -313,7 +313,7 @@ namespace mcrl2 {
       
       /// \return Function symbol real2pos.
       inline
-      const  function_symbol& real2pos()
+      const function_symbol& real2pos()
       {
         static function_symbol real2pos(real2pos_name(), make_function_sort(real_(), sort_pos::pos()));
         return real2pos;
@@ -365,7 +365,7 @@ namespace mcrl2 {
       
       /// \return Function symbol real2nat.
       inline
-      const  function_symbol& real2nat()
+      const function_symbol& real2nat()
       {
         static function_symbol real2nat(real2nat_name(), make_function_sort(real_(), sort_nat::nat()));
         return real2nat;
@@ -417,7 +417,7 @@ namespace mcrl2 {
       
       /// \return Function symbol real2int.
       inline
-      const  function_symbol& real2int()
+      const function_symbol& real2int()
       {
         static function_symbol real2int(real2int_name(), make_function_sort(real_(), sort_int::int_()));
         return real2int;
@@ -1282,7 +1282,7 @@ namespace mcrl2 {
       
       /// \return Function symbol floor.
       inline
-      const  function_symbol& floor()
+      const function_symbol& floor()
       {
         static function_symbol floor(floor_name(), make_function_sort(real_(), sort_int::int_()));
         return floor;
@@ -1334,7 +1334,7 @@ namespace mcrl2 {
       
       /// \return Function symbol ceil.
       inline
-      const  function_symbol& ceil()
+      const function_symbol& ceil()
       {
         static function_symbol ceil(ceil_name(), make_function_sort(real_(), sort_int::int_()));
         return ceil;
@@ -1386,7 +1386,7 @@ namespace mcrl2 {
       
       /// \return Function symbol round.
       inline
-      const  function_symbol& round()
+      const function_symbol& round()
       {
         static function_symbol round(round_name(), make_function_sort(real_(), sort_int::int_()));
         return round;
@@ -1438,7 +1438,7 @@ namespace mcrl2 {
       
       /// \return Function symbol reduce_fraction.
       inline
-      const  function_symbol& reduce_fraction()
+      const function_symbol& reduce_fraction()
       {
         static function_symbol reduce_fraction(reduce_fraction_name(), make_function_sort(sort_int::int_(), sort_int::int_(), real_()));
         return reduce_fraction;
@@ -1491,7 +1491,7 @@ namespace mcrl2 {
       
       /// \return Function symbol reduce_fraction_where.
       inline
-      const  function_symbol& reduce_fraction_where()
+      const function_symbol& reduce_fraction_where()
       {
         static function_symbol reduce_fraction_where(reduce_fraction_where_name(), make_function_sort(sort_pos::pos(), sort_int::int_(), sort_nat::nat(), real_()));
         return reduce_fraction_where;
@@ -1545,7 +1545,7 @@ namespace mcrl2 {
       
       /// \return Function symbol reduce_fraction_helper.
       inline
-      const  function_symbol& reduce_fraction_helper()
+      const function_symbol& reduce_fraction_helper()
       {
         static function_symbol reduce_fraction_helper(reduce_fraction_helper_name(), make_function_sort(real_(), sort_int::int_(), real_()));
         return reduce_fraction_helper;

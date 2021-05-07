@@ -21,59 +21,100 @@ namespace detail
 {
 
 /// \brief Is either a rewrite rule to be matched or an index that should be rewritten.
-class strategy_rule : public atermpp::aterm
+class strategy_rule 
 {
+  protected:
+    // Only one of the fields rewrite_rule, rewrite_index or cpp_function will be used
+    // at any given time. As this hardly requires a lot of memory, we do not optimise
+    // this using for instance a union type. 
+    enum { data_equation_type, rewrite_index_type, cpp_function_type } m_strategy_element_type;
+    data_equation m_rewrite_rule;
+    size_t m_rewrite_index;
+    std::function<data_expression(const data_expression&)> m_cpp_function;
+
   public:
     strategy_rule(const std::size_t n)
-      : aterm(atermpp::aterm_int(n))
+      : m_strategy_element_type(rewrite_index_type),
+        m_rewrite_index(n)
+    {}
+
+    strategy_rule(const std::function<data_expression(const data_expression&)> f)
+      :  m_strategy_element_type(cpp_function_type),
+         m_cpp_function(f)
     {}
 
     strategy_rule(const data_equation& eq)
-      : aterm(eq)
+      : m_strategy_element_type(data_equation_type),
+        m_rewrite_rule(eq)
     {}
 
     bool is_rewrite_index() const
     {
-      return type_is_int();
+      return m_strategy_element_type==rewrite_index_type;
+    }
+
+    bool is_cpp_code() const
+    {
+
+      return m_strategy_element_type==cpp_function_type;
     }
 
     bool is_equation() const
     {
-      return !type_is_int();
+      return m_strategy_element_type==data_equation_type;
     }
 
-    const data_equation& equation() const
+    data_equation equation() const
     {
       assert(is_equation());
-      return atermpp::down_cast<data_equation>(*this);
+      assert(is_data_equation(m_rewrite_rule));
+      return m_rewrite_rule;
     }
 
     std::size_t rewrite_index() const
     {
       assert(is_rewrite_index());
-      return (atermpp::down_cast<atermpp::aterm_int>(static_cast<const atermpp::aterm&>(*this))).value();
+      return m_rewrite_index;
+    }
+
+    const std::function<data_expression(const data_expression&)> rewrite_cpp_code() const
+    {
+      assert(is_cpp_code());
+      return m_cpp_function;
     }
 };
 
 /// A strategy is a list of rules and the number of variables that occur in it.
 class strategy
 {
-public:
-  strategy(size_t n, const atermpp::term_list<strategy_rule>& r)
-   : m_number_of_variables(n),
-     m_rules(r)
-  {}
- 
-  strategy()
-   : m_number_of_variables(0)
-  {}
+  protected:
+    std::size_t m_number_of_variables;
+    std::vector<strategy_rule> m_rules;
 
-  std::size_t number_of_variables() const { return m_number_of_variables; }
-  const atermpp::term_list<strategy_rule>& rules() const { return m_rules; }
+  public:
+    /// \brief Default constructor. 
+    strategy(size_t n, const std::vector<strategy_rule>& r)
+     : m_number_of_variables(n),
+       m_rules(r)
+    {}
+   
+    /// \brief Default constructor. 
+    strategy()
+     : m_number_of_variables(0)
+    {}
+  
+    /// \brief Provides the maximal number of variables used in the rewrite rules making up this strategy. 
+    std::size_t number_of_variables() const 
+    { 
+      return m_number_of_variables; 
+    }
 
-private:
-  std::size_t m_number_of_variables;
-  atermpp::term_list<strategy_rule> m_rules;
+    /// \brief Yield the rules of the strategy. 
+    const std::vector<strategy_rule>& rules() const 
+    { 
+      return m_rules; 
+    }
+
 };
 
 /// \brief Creates a strategy for given set of rewrite rules with head symbol f.

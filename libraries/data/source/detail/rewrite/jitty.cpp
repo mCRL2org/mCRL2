@@ -144,6 +144,31 @@ class jitty_argument_rewriter
   }
 };
 
+class dependencies_rewrite_rule_pair
+{
+  protected:
+    std::set<std::size_t> m_dependencies;
+    data_equation m_equation;
+
+  public:
+    dependencies_rewrite_rule_pair(std::set<std::size_t>& dependencies, const data_equation& eq)
+     : m_dependencies(dependencies), m_equation(eq)
+    {}
+
+    const std::set<std::size_t>& dependencies() const
+    {
+      return m_dependencies;
+    }
+
+    const data_equation equation() const
+    {
+      return m_equation;
+    }
+};
+
+
+
+
 
 void RewriterJitty::make_jitty_strat_sufficiently_larger(const std::size_t i)
 {
@@ -153,16 +178,27 @@ void RewriterJitty::make_jitty_strat_sufficiently_larger(const std::size_t i)
   }
 }
 
-void RewriterJitty::rebuild_strategy()
+void RewriterJitty::rebuild_strategy(const data_specification& data_spec, const mcrl2::data::used_data_equation_selector& equation_selector)
 {
   jitty_strat.clear();
-  for(std::map< function_symbol, data_equation_list >::const_iterator l=jitty_eqns.begin(); l!=jitty_eqns.end(); ++l)
+  function_symbol_vector function_symbols=data_spec.constructors();
+  function_symbols.insert(function_symbols.end(), data_spec.mappings().begin(), data_spec.mappings().end());
+  for(const function_symbol& f: function_symbols)
   {
-    const std::size_t i=core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(l->first);
-    make_jitty_strat_sufficiently_larger(i);
-    jitty_strat[i] = create_strategy(reverse(l->second));
+    if (equation_selector(f))
+    {
+      const std::size_t i=core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(f);
+      make_jitty_strat_sufficiently_larger(i);
+      std::map< function_symbol, data_equation_list >::const_iterator j=jitty_eqns.find(f);
+      jitty_strat[i] =
+            (j==jitty_eqns.end()
+                 ?create_strategy(f,data_equation_list(), data_spec)
+                 :create_strategy(f,reverse(j->second), data_spec));
+    }
   }
+
 }
+
 
 RewriterJitty::RewriterJitty(
            const data_specification& data_spec,
@@ -196,7 +232,7 @@ RewriterJitty::RewriterJitty(
     }
   }
 
-  rebuild_strategy();
+  rebuild_strategy(data_spec, equation_selector);
 }
 
 RewriterJitty::~RewriterJitty()
@@ -367,6 +403,34 @@ static bool match_jitty(
   }
 }
 
+
+// This function applies the rewrite_cpp_code on a higher order term t with op as head symbol for
+// which the code in rewrite_cpp_code must be applied. 
+template <class ITERATOR>
+data_expression RewriterJitty::apply_cpp_code_to_higher_order_term(
+                  const application& t,
+                  const std::function<data_expression(const data_expression&)> rewrite_cpp_code,
+                  ITERATOR begin,
+                  ITERATOR end,
+                  substitution_type& sigma)
+{
+  if (is_function_symbol(t.head()))
+  {
+    return rewrite_cpp_code(application(t.head(),begin,end));
+  }
+
+  const application& ta=atermpp::down_cast<application>(t.head());
+  std::size_t n_args=recursive_number_of_args(ta);
+  const data_expression rewrite_result=application(apply_cpp_code_to_higher_order_term(ta,rewrite_cpp_code,begin,begin+n_args,sigma));
+  return rewrite_aux(application(rewrite_result,
+                                 begin+n_args,
+                                 end,
+                                 [](const data_expression& t){ return this_term_is_in_normal_form()(t); } ),
+                     sigma);
+}
+
+
+
 data_expression RewriterJitty::rewrite_aux(
                       const data_expression& term,
                       substitution_type& sigma)
@@ -509,6 +573,39 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
           break;
         }
       }
+      else if (rule.is_cpp_code())
+      {
+        // Here it is assumed that precompiled code only works on the exact right number of arguments and
+        // precompiled functions are not used in a higher order fashion. Maybe this requires an explicit check. 
+        if (arity==0)
+        {
+          return rule.rewrite_cpp_code()(op);
+        }
+        else 
+        {
+          const application& terma = atermpp::down_cast<application>(term);
+          if (terma.head()==op) 
+          { 
+            // application rewriteable_term(op,0,arity,[&rewritten, &rewritten_defined](size_t i){assert(rewritten_defined[i]); return rewritten[i];});
+            application rewriteable_term(op, &rewritten[0], &rewritten[arity]);
+            return rule.rewrite_cpp_code()(rewriteable_term);
+          }
+          else
+          {
+            // Guarantee that all higher order arguments are in normal form. Maybe this had to be done in the strategy for higher
+            // order terms. 
+            for(std::size_t i=0; i<recursive_number_of_args(terma); i++)
+            {
+              if (!rewritten_defined[i])
+              {
+                new (&rewritten[i]) data_expression(rewrite_aux(detail::get_argument_of_higher_order_term(atermpp::down_cast<application>(term),i),sigma));
+                rewritten_defined[i]=true;
+              }
+            }
+            return apply_cpp_code_to_higher_order_term(terma,  rule.rewrite_cpp_code(), &rewritten[0], &rewritten[arity], sigma);
+          }
+        }
+      }
       else
       {
         const data_equation& rule1=rule.equation();
@@ -643,13 +740,34 @@ data_expression RewriterJitty::rewrite_aux_const_function_symbol(
 
   const std::size_t op_value=core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(op);
   make_jitty_strat_sufficiently_larger(op_value);
+
+  // Cache the rhs's as they are rewritten very often. 
+  static std::vector<data_expression> rhs_cache;
+  if (rhs_cache.size()<=op_value)
+  {
+    rhs_cache.resize(op_value+1);
+  }
+  const data_expression& cached_rhs = rhs_cache[op_value];
+  if (cached_rhs!=data_expression())
+  {
+    return cached_rhs;
+  }
+
   const strategy& strat=jitty_strat[op_value];
 
   for (const strategy_rule& rule : strat.rules())
   {
     if (rule.is_rewrite_index())
     {
+      // In this case a standalone function symbol is rewritten, which could have arguments. 
+      // It is not needed to rewrite the arguments. 
       break;
+    }
+    else if (rule.is_cpp_code())
+    {
+      const data_expression result=rule.rewrite_cpp_code()(op);
+      rhs_cache[op_value]=result;
+      return result;
     }
     else
     {
@@ -664,11 +782,14 @@ data_expression RewriterJitty::rewrite_aux_const_function_symbol(
 
       if (rule1.condition()==sort_bool::true_() || rewrite_aux(rule1.condition(),sigma)==sort_bool::true_())
       {
+        const data_expression result=rewrite_aux(rule1.rhs(),sigma);
+        rhs_cache[op_value]=result;
         return rewrite_aux(rule1.rhs(),sigma);
       }
     }
   }
 
+  rhs_cache[op_value]=op;
   return op; 
 }
 

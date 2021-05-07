@@ -459,18 +459,14 @@ class explorer: public abortable
     {
       if (p.expression() != data::sort_bool::true_())
       {
-        data::data_expression condition = m_rewr(summand.condition, m_sigma);
-
+        std::string printed_condition = data::pp(p.expression());
         data::remove_assignments(m_sigma, m_process_parameters);
         data::remove_assignments(m_sigma, summand.variables);
         data::data_expression reduced_condition = m_rewr(summand.condition, m_sigma);
-
-        std::string printed_condition = data::pp(condition).substr(0, 300);
-
-        throw data::enumerator_error("Expression " + data::pp(reduced_condition) +
-                                     " does not rewrite to true or false in the condition "
-                                     + printed_condition
-                                     + (printed_condition.size() >= 300 ? "..." : ""));
+        throw data::enumerator_error("Condition " + data::pp(reduced_condition) +
+                                     " does not rewrite to true or false. Culprit: "
+                                     + printed_condition.substr(0,300)
+                                     + (printed_condition.size() > 300 ? "..." : ""));
       }
     }
 

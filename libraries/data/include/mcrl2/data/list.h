@@ -73,7 +73,7 @@ namespace mcrl2 {
       /// \param s A sort expression.
       /// \return Function symbol empty.
       inline
-       function_symbol empty(const sort_expression& s)
+      function_symbol empty(const sort_expression& s)
       {
         function_symbol empty(empty_name(), list(s));
         return empty;
@@ -105,7 +105,7 @@ namespace mcrl2 {
       /// \param s A sort expression.
       /// \return Function symbol cons_.
       inline
-       function_symbol cons_(const sort_expression& s)
+      function_symbol cons_(const sort_expression& s)
       {
         function_symbol cons_(cons_name(), make_function_sort(s, list(s), list(s)));
         return cons_;
@@ -194,7 +194,7 @@ namespace mcrl2 {
       /// \param s A sort expression.
       /// \return Function symbol in.
       inline
-       function_symbol in(const sort_expression& s)
+      function_symbol in(const sort_expression& s)
       {
         function_symbol in(in_name(), make_function_sort(s, list(s), sort_bool::bool_()));
         return in;
@@ -247,7 +247,7 @@ namespace mcrl2 {
       /// \param s A sort expression.
       /// \return Function symbol count.
       inline
-       function_symbol count(const sort_expression& s)
+      function_symbol count(const sort_expression& s)
       {
         function_symbol count(count_name(), make_function_sort(list(s), sort_nat::nat()));
         return count;
@@ -299,7 +299,7 @@ namespace mcrl2 {
       /// \param s A sort expression.
       /// \return Function symbol snoc.
       inline
-       function_symbol snoc(const sort_expression& s)
+      function_symbol snoc(const sort_expression& s)
       {
         function_symbol snoc(snoc_name(), make_function_sort(list(s), s, list(s)));
         return snoc;
@@ -352,7 +352,7 @@ namespace mcrl2 {
       /// \param s A sort expression.
       /// \return Function symbol concat.
       inline
-       function_symbol concat(const sort_expression& s)
+      function_symbol concat(const sort_expression& s)
       {
         function_symbol concat(concat_name(), make_function_sort(list(s), list(s), list(s)));
         return concat;
@@ -405,7 +405,7 @@ namespace mcrl2 {
       /// \param s A sort expression.
       /// \return Function symbol element_at.
       inline
-       function_symbol element_at(const sort_expression& s)
+      function_symbol element_at(const sort_expression& s)
       {
         function_symbol element_at(element_at_name(), make_function_sort(list(s), sort_nat::nat(), s));
         return element_at;
@@ -458,7 +458,7 @@ namespace mcrl2 {
       /// \param s A sort expression.
       /// \return Function symbol head.
       inline
-       function_symbol head(const sort_expression& s)
+      function_symbol head(const sort_expression& s)
       {
         function_symbol head(head_name(), make_function_sort(list(s), s));
         return head;
@@ -510,7 +510,7 @@ namespace mcrl2 {
       /// \param s A sort expression.
       /// \return Function symbol tail.
       inline
-       function_symbol tail(const sort_expression& s)
+      function_symbol tail(const sort_expression& s)
       {
         function_symbol tail(tail_name(), make_function_sort(list(s), list(s)));
         return tail;
@@ -562,7 +562,7 @@ namespace mcrl2 {
       /// \param s A sort expression.
       /// \return Function symbol rhead.
       inline
-       function_symbol rhead(const sort_expression& s)
+      function_symbol rhead(const sort_expression& s)
       {
         function_symbol rhead(rhead_name(), make_function_sort(list(s), s));
         return rhead;
@@ -614,7 +614,7 @@ namespace mcrl2 {
       /// \param s A sort expression.
       /// \return Function symbol rtail.
       inline
-       function_symbol rtail(const sort_expression& s)
+      function_symbol rtail(const sort_expression& s)
       {
         function_symbol rtail(rtail_name(), make_function_sort(list(s), list(s)));
         return rtail;

@@ -82,7 +82,7 @@ class data_equation: public atermpp::aterm_appl
       return atermpp::down_cast<data_expression>((*this)[3]);
     }
 //--- start user section data_equation ---//
-    /// \brief Constructor
+    /// \brief Constructor.
     ///
     /// \param[in] variables The free variables of the data_equation.
     /// \param[in] lhs The left hand side of the data_equation.
@@ -97,7 +97,7 @@ class data_equation: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::function_symbol_DataEqn(), variable_list(variables.begin(),variables.end()), sort_bool::true_(), lhs, rhs)
     {}
 
-    /// \brief Constructor
+    /// \brief Constructor.
     ///
     /// \param[in] lhs The left hand side of the data equation.
     /// \param[in] rhs The right hand side of the data equation.
@@ -110,10 +110,10 @@ class data_equation: public atermpp::aterm_appl
 //--- end user section data_equation ---//
 };
 
-/// \brief list of data_equations
+/// \brief list of data_equations.
 typedef atermpp::term_list<data_equation> data_equation_list;
 
-/// \brief vector of data_equations
+/// \brief vector of data_equations.
 typedef std::vector<data_equation>    data_equation_vector;
 
 // prototype declaration
@@ -135,6 +135,14 @@ inline void swap(data_equation& t1, data_equation& t2)
   t1.swap(t2);
 }
 //--- end generated class data_equation ---//
+
+/// \brief Recognizer function.
+/// \param[in] t A aterm appl of which it is checked whether it is a data_equation.
+/// \returns True if the provided argument is a data_equation. 
+inline bool is_data_equation(const atermpp::aterm_appl& t)
+{
+  return t.function()==core::detail::function_symbol_DataEqn();
+}
 
 // template function overloads
 std::string pp(const data_equation_list& x);

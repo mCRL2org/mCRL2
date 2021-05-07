@@ -74,7 +74,7 @@ namespace mcrl2 {
       /// \param s A sort expression.
       /// \return Function symbol empty.
       inline
-       function_symbol empty(const sort_expression& s)
+      function_symbol empty(const sort_expression& s)
       {
         function_symbol empty(empty_name(), fbag(s));
         return empty;
@@ -106,7 +106,7 @@ namespace mcrl2 {
       /// \param s A sort expression.
       /// \return Function symbol insert.
       inline
-       function_symbol insert(const sort_expression& s)
+      function_symbol insert(const sort_expression& s)
       {
         function_symbol insert(insert_name(), make_function_sort(s, sort_pos::pos(), fbag(s), fbag(s)));
         return insert;
@@ -195,7 +195,7 @@ namespace mcrl2 {
       /// \param s A sort expression.
       /// \return Function symbol cons_.
       inline
-       function_symbol cons_(const sort_expression& s)
+      function_symbol cons_(const sort_expression& s)
       {
         function_symbol cons_(cons_name(), make_function_sort(s, sort_pos::pos(), fbag(s), fbag(s)));
         return cons_;
@@ -249,7 +249,7 @@ namespace mcrl2 {
       /// \param s A sort expression.
       /// \return Function symbol cinsert.
       inline
-       function_symbol cinsert(const sort_expression& s)
+      function_symbol cinsert(const sort_expression& s)
       {
         function_symbol cinsert(cinsert_name(), make_function_sort(s, sort_nat::nat(), fbag(s), fbag(s)));
         return cinsert;
@@ -303,7 +303,7 @@ namespace mcrl2 {
       /// \param s A sort expression.
       /// \return Function symbol count.
       inline
-       function_symbol count(const sort_expression& s)
+      function_symbol count(const sort_expression& s)
       {
         function_symbol count(count_name(), make_function_sort(s, fbag(s), sort_nat::nat()));
         return count;
@@ -356,7 +356,7 @@ namespace mcrl2 {
       /// \param s A sort expression.
       /// \return Function symbol in.
       inline
-       function_symbol in(const sort_expression& s)
+      function_symbol in(const sort_expression& s)
       {
         function_symbol in(in_name(), make_function_sort(s, fbag(s), sort_bool::bool_()));
         return in;
@@ -409,7 +409,7 @@ namespace mcrl2 {
       /// \param s A sort expression.
       /// \return Function symbol fset2fbag.
       inline
-       function_symbol fset2fbag(const sort_expression& s)
+      function_symbol fset2fbag(const sort_expression& s)
       {
         function_symbol fset2fbag(fset2fbag_name(), make_function_sort(sort_fset::fset(s), fbag(s)));
         return fset2fbag;
@@ -461,7 +461,7 @@ namespace mcrl2 {
       /// \param s A sort expression.
       /// \return Function symbol union_.
       inline
-       function_symbol union_(const sort_expression& s)
+      function_symbol union_(const sort_expression& s)
       {
         function_symbol union_(union_name(), make_function_sort(fbag(s), fbag(s), fbag(s)));
         return union_;
@@ -514,7 +514,7 @@ namespace mcrl2 {
       /// \param s A sort expression.
       /// \return Function symbol intersection.
       inline
-       function_symbol intersection(const sort_expression& s)
+      function_symbol intersection(const sort_expression& s)
       {
         function_symbol intersection(intersection_name(), make_function_sort(fbag(s), fbag(s), fbag(s)));
         return intersection;
@@ -567,7 +567,7 @@ namespace mcrl2 {
       /// \param s A sort expression.
       /// \return Function symbol difference.
       inline
-       function_symbol difference(const sort_expression& s)
+      function_symbol difference(const sort_expression& s)
       {
         function_symbol difference(difference_name(), make_function_sort(fbag(s), fbag(s), fbag(s)));
         return difference;
@@ -620,7 +620,7 @@ namespace mcrl2 {
       /// \param s A sort expression.
       /// \return Function symbol count_all.
       inline
-       function_symbol count_all(const sort_expression& s)
+      function_symbol count_all(const sort_expression& s)
       {
         function_symbol count_all(count_all_name(), make_function_sort(fbag(s), sort_nat::nat()));
         return count_all;

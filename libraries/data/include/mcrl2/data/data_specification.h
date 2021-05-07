@@ -6,6 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
+/// \file mcrl2/data/data_specification.h
+/// \brief The class data_specification.
 
 #ifndef MCRL2_DATA_DATA_SPECIFICATION_H
 #define MCRL2_DATA_DATA_SPECIFICATION_H
@@ -44,6 +46,9 @@ bool is_data_specification(const atermpp::aterm_appl& x)
 
 class data_specification: public sort_specification
 {
+  public:
+    typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;
+
   private:
 
     /// \cond INTERNAL_DOCS
@@ -63,12 +68,25 @@ class data_specification: public sort_specification
       template <typename Container>
       void group_functions_by_target_sort(std::map<sort_expression, std::vector<function_symbol> >& c, const Container& functions)
       {
-        for (typename Container::const_iterator i = functions.begin(); i != functions.end(); ++i)
+        for (const function_symbol& f: functions)
         {
-          sort_expression index_sort(i->sort().target_sort());
-          if(c.find(index_sort) == c.end() || std::find(c[index_sort].begin(), c[index_sort].end(), *i) == c[index_sort].end())
+          const sort_expression s=f.sort();
+          const sort_expression& index_sort = s.target_sort();
+          if(c.find(index_sort) == c.end() || std::find(c[index_sort].begin(), c[index_sort].end(), f) == c[index_sort].end())
           {
-            c[index_sort].push_back(*i);
+            // Insert the constructors, such that those with the smallest number of elements occur first.
+            // As there are in general only few constructors, this linear insertion should not take too much time. 
+            std::vector<function_symbol>& relevant_rhs = c[index_sort]; // .push_back(f);
+            const std::size_t f_arity=(is_function_sort(s)?atermpp::down_cast<function_sort>(s).size():0);
+            std::vector<function_symbol>::iterator i=
+                   std::find_if(relevant_rhs.begin(),
+                                relevant_rhs.end(),
+                                [f_arity](const function_symbol& g)
+                                          { const std::size_t g_arity=(is_function_sort(g.sort())?
+                                                                atermpp::down_cast<function_sort>(g.sort()).size():0);
+                                            return f_arity<g_arity;
+                                          });
+            relevant_rhs.insert(i,f);
           }
         }
       }
@@ -131,6 +149,17 @@ class data_specification: public sort_specification
     ///          can become large, in which case removing duplicates while inserting equations can be
     ///          very time consuming.
     mutable std::set<data_equation> m_normalised_equations;
+
+    /// \brief A map that for function symbols gives how it can be implemented.
+    /// \details For each function symbol there is a function : application -> data_expression that
+    ///          when applied to a term in normal form with the function symbol as head symbol
+    ///          returns a function that can be applied to calculate this term. 
+    ///          Furthermore, it provides the name of a function that when applied to the
+    ///          number of arguments that the function expects can be used to rewrite the term.
+    ///          This last string can be used for code generation. 
+    mutable implementation_map m_cpp_implemented_functions;
+
+
 
     void data_is_not_necessarily_normalised_anymore() const
     {
@@ -208,6 +237,16 @@ class data_specification: public sort_specification
       for(Iterator i=begin; i!=end; ++i)
       {
         data_specification::add_normalised_equation(*i);
+      }
+    }
+
+    void add_normalised_cpp_implemented_functions(const implementation_map& c) const
+    {
+      typedef std::pair < function_symbol, std::pair<std::function<data_expression(const data_expression&)>, std::string> > map_result_type;
+      for(const map_result_type f: c)
+      {
+        const function_symbol g(normalize_sorts(f.first,*this));
+        m_cpp_implemented_functions[g]=f.second;
       }
     }
 
@@ -369,6 +408,18 @@ class data_specification: public sort_specification
       return m_normalised_equations;
     }
 
+    /// \brief Gets all equations in this specification including those that are system defined
+    ///
+    /// \details The time complexity of this operation is the same as that for sort().
+    /// \return All equations in this specification, including those for
+    ///  structured sorts.
+    inline
+    const implementation_map& cpp_implemented_functions() const
+    {
+      normalise_data_specification_if_required();
+      return m_cpp_implemented_functions;
+    }
+
     /// \brief Gets all user defined equations.
     ///
     /// \details The time complexity of this operation is constant.
@@ -437,6 +488,7 @@ class data_specification: public sort_specification
       m_normalised_constructors.clear();
       m_normalised_mappings.clear();
       m_normalised_equations.clear();
+      m_cpp_implemented_functions.clear();
 
       for (const sort_expression& sort: sorts())
       {
@@ -488,6 +540,7 @@ class data_specification: public sort_specification
                        std::set < function_symbol >& constructors,
                        std::set < function_symbol >& mappings,
                        std::set < data_equation >& equations,
+                       implementation_map& cpp_implemented_functions,
                        const bool skip_equations=false) const;
 
     ///\brief Adds the system defined sorts in a sequence.
@@ -502,12 +555,14 @@ class data_specification: public sort_specification
       std::set < function_symbol > constructors;
       std::set < function_symbol > mappings;
       std::set < data_equation > equations;
-      find_associated_system_defined_data_types_for_a_sort(sort, constructors, mappings, equations);
+      implementation_map cpp_function_symbols;
+      find_associated_system_defined_data_types_for_a_sort(sort, constructors, mappings, equations, cpp_function_symbols);
 
       // add normalised constructors, mappings and equations
       add_normalised_constructors(constructors.begin(), constructors.end());
       add_normalised_mappings(mappings.begin(), mappings.end());
       add_normalised_equations(equations.begin(), equations.end());
+      add_normalised_cpp_implemented_functions(cpp_function_symbols);
     }
 
   public:
@@ -811,11 +866,11 @@ inline
 std::set<core::identifier_string> function_and_mapping_identifiers(const data_specification& dataspec)
 {
   std::set<core::identifier_string> result;
-  for (auto const& f: dataspec.constructors())
+  for (const function_symbol& f: dataspec.constructors())
   {
     result.insert(f.name());
   }
-  for (auto const& f: dataspec.mappings())
+  for (const function_symbol& f: dataspec.mappings())
   {
     result.insert(f.name());
   }
