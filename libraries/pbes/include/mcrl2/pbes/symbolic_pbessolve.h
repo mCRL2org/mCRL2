@@ -406,6 +406,7 @@ class symbolic_pbessolve_algorithm
                const ldd& W1 = sylvan::ldds::empty_set())
     {
       using namespace sylvan::ldds;
+      stopwatch timer;
 
       std::array<const ldd, 2> Vplayer = { intersect(V, m_V[0]), intersect(V, m_V[1]) };
       std::pair<ldd, ldd> results;
@@ -435,12 +436,15 @@ class symbolic_pbessolve_algorithm
       won0 = union_(won0, solved0);
       won1 = union_(won1, solved1);
 
+      mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
       return { won0, won1 };
     }
 
     std::pair<ldd, ldd> detect_cycles(const ldd& V)
     {
       using namespace sylvan::ldds;
+      stopwatch timer;
+
       std::array<const ldd, 2> Vplayer = { intersect(V, m_V[0]), intersect(V, m_V[1]) };
       std::array<ldd, 2> won;
 
@@ -472,6 +476,7 @@ class symbolic_pbessolve_algorithm
         won[alpha] = union_(won[alpha], attractor(U, alpha, V, Vplayer));
       }
 
+      mCRL2log(log::verbose) << "finished cycle detection (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
       return { won[0], won[1] };
     }
 };
