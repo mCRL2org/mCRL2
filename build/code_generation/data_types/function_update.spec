@@ -15,7 +15,6 @@ var x: S;
     w: T;
     f: S -> T;
 
-% Potentially new rules, still under study.
 % The first rule below should only be applied if f is not preceded by a @func_update_stable, or a @func_update. 
 eqn  @is_not_an_update(f) -> @func_update(f,x,v) = @if_always_else(==(f(x),v),f,@func_update_stable(f,x,v));
      @func_update(@func_update_stable(f,x,w),x,v) = @if_always_else(==(f(x),v),f,@func_update_stable(f,x,v));
@@ -26,6 +25,8 @@ eqn  @is_not_an_update(f) -> @func_update(f,x,v) = @if_always_else(==(f(x),v),f,
                                      @func_update_stable(@func_update_stable(f,y,w), x,v));
      !=(x,y) -> @func_update_stable(f,x,v)(y) = f(y);
      @func_update_stable(f,x,v)(x) = v;
+     !=(x,y) -> @func_update(f,x,v)(y) = f(y);
+     @func_update(f,x,v)(x) = v;
 
 % Below are the old rules. Although theoretically elegant, they require exponential time, and therefore are very slow. 
 % map @func_update <"function_update">: (S -> T) <"arg1"> # S <"arg2"> # T <"arg3"> -> (S -> T)                   external defined_by_rewrite_rules;

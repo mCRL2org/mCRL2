@@ -2896,13 +2896,16 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   }
 
 #ifdef NDEBUG // In non debug mode clear compiled files directly after loading.
-  try
+  if (logger::get_reporting_level()>debug)  // leave the files in debug mode. 
   {
-    rewriter_so->cleanup();
-  }
-  catch (std::runtime_error& error)
-  {
-    mCRL2log(mcrl2::log::error) << "Could not cleanup temporary files: " << error.what() << std::endl;
+    try
+    {
+      rewriter_so->cleanup();
+    }
+    catch (std::runtime_error& error)
+    {
+      mCRL2log(mcrl2::log::error) << "Could not cleanup temporary files: " << error.what() << std::endl;
+    }
   }
 #endif
 

@@ -32,8 +32,8 @@ class finiteness_helper
 
     bool is_finite_aux(const sort_expression& s)
     {
-      function_symbol_vector constructors(m_specification.constructors(s));
-      if(constructors.empty())
+      const function_symbol_vector& constructors=m_specification.constructors(s);
+      if (constructors.empty())
       {
         return false;
       }
@@ -42,7 +42,7 @@ class finiteness_helper
       {
         if (is_function_sort(f.sort()))
         {
-          const function_sort f_sort(f.sort());
+          const function_sort& f_sort=atermpp::down_cast<function_sort>(f.sort());
           const sort_expression_list& l=f_sort.domain();
 
           for(const sort_expression& e: l)

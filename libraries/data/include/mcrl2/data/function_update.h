@@ -430,6 +430,8 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vf, vv, vw, vx, vy}), less(vx, vy), function_update(s, t, function_update_stable(s, t, vf, vy, vw), vx, vv), if_always_else(s, t, equal_to(vf(vx), vv), function_update_stable(s, t, vf, vy, vw), function_update_stable(s, t, function_update_stable(s, t, vf, vy, vw), vx, vv))));
         result.push_back(data_equation(variable_list({vf, vv, vx, vy}), not_equal_to(vx, vy), function_update_stable(s, t, vf, vx, vv)(vy), vf(vy)));
         result.push_back(data_equation(variable_list({vf, vv, vx}), function_update_stable(s, t, vf, vx, vv)(vx), vv));
+        result.push_back(data_equation(variable_list({vf, vv, vx, vy}), not_equal_to(vx, vy), function_update(s, t, vf, vx, vv)(vy), vf(vy)));
+        result.push_back(data_equation(variable_list({vf, vv, vx}), function_update(s, t, vf, vx, vv)(vx), vv));
         return result;
       }
 
