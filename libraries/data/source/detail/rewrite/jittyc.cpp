@@ -2896,7 +2896,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   }
 
 #ifdef NDEBUG // In non debug mode clear compiled files directly after loading.
-  if (logger::get_reporting_level()>debug)  // leave the files in debug mode. 
+  if (logger::get_reporting_level()<debug)  // leave the files in debug mode. 
   {
     try
     {
