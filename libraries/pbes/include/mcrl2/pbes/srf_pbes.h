@@ -641,7 +641,7 @@ srf_pbes pbes2srf(const pbes& p)
 
   core::identifier_string X_false = id_generator("X_false");
   core::identifier_string X_true = id_generator("X_true");
-  pbes_equation eqn_false(fixpoint_symbol::mu(), propositional_variable(X_false, {}), propositional_variable_instantiation(X_false, {}));
+  pbes_equation eqn_false(fixpoint_symbol::mu(), propositional_variable(X_false, {}), or_(data::sort_bool::false_(), propositional_variable_instantiation(X_false, {})));
   pbes_equation eqn_true(fixpoint_symbol::nu(), propositional_variable(X_true, {}), propositional_variable_instantiation(X_true, {}));
 
   const auto& p_equations = p.equations();

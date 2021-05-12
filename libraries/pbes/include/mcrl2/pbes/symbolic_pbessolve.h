@@ -440,13 +440,22 @@ class symbolic_pbessolve_algorithm
       return { won0, won1 };
     }
 
-    std::pair<ldd, ldd> detect_cycles(const ldd& V)
+    std::pair<ldd, ldd> detect_cycles(const ldd& V, const ldd& Vdeadlock)
     {
       using namespace sylvan::ldds;
       stopwatch timer;
 
       std::array<const ldd, 2> Vplayer = { intersect(V, m_V[0]), intersect(V, m_V[1]) };
       std::array<ldd, 2> won;
+
+      if (Vdeadlock != empty_set())
+      {
+        // Determine winners from the deadlocks (the owner loses).
+        mCRL2log(log::verbose) << "determining winners for deadlock states" << std::endl;
+
+        won[0] = intersect(Vdeadlock, m_V[1]);
+        won[1] = intersect(Vdeadlock, m_V[0]);
+      }
 
       for (const auto&[rank, Vrank] : m_rank_map)
       {

@@ -73,7 +73,7 @@ public:
       {
         mCRL2log(log::verbose) << "start cycle detection\n";
 
-        auto result = solver.detect_cycles(m_visited);
+        auto result = solver.detect_cycles(m_visited, m_deadlocks);
         m_Vwon[0] = result.first;
         m_Vwon[1] = result.second;
 
