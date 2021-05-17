@@ -162,7 +162,8 @@ public:
   template <class Iter, class  ATermConverter>
   explicit term_list(Iter first, Iter last, const ATermConverter& convert_to_aterm,
                      typename std::enable_if< !std::is_base_of<
-                       std::random_access_iterator_tag,
+                       std::bidirectional_iterator_tag,
+                       // std::random_access_iterator_tag,
                        typename std::iterator_traits<Iter>::iterator_category
                      >::value>::type* = nullptr):
        aterm(detail::make_list_forward<Term,Iter,ATermConverter>
