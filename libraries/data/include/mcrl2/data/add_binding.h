@@ -17,6 +17,10 @@
 #include "mcrl2/data/forall.h"
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/where_clause.h"
+#include "mcrl2/data/set_comprehension.h"
+#include "mcrl2/data/bag_comprehension.h"
+#include "mcrl2/data/untyped_set_or_bag_comprehension.h"
+
 
 namespace mcrl2
 {
@@ -88,6 +92,36 @@ struct add_data_variable_binding: public core::add_binding<Builder, Derived, var
   }
 
   void leave(const data::lambda& x)
+  {
+    decrease_bind_count(x.variables());
+  }
+
+  void enter(const data::set_comprehension& x)
+  { 
+    increase_bind_count(x.variables());
+  }
+
+  void leave(const data::set_comprehension& x)
+  {
+    decrease_bind_count(x.variables());
+  }
+
+  void enter(const data::bag_comprehension& x)
+  {
+    increase_bind_count(x.variables());
+  }
+
+  void leave(const data::bag_comprehension& x)
+  {
+    decrease_bind_count(x.variables());
+  }
+
+  void enter(const data::untyped_set_or_bag_comprehension& x)
+  {
+    increase_bind_count(x.variables());
+  }
+
+  void leave(const data::untyped_set_or_bag_comprehension& x)
   {
     decrease_bind_count(x.variables());
   }
