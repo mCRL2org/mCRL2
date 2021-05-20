@@ -555,7 +555,6 @@ class pbesreach_algorithm
         {
           mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(m_deadlocks) << " deadlocks" << std::endl;
         }
-        mCRL2log(log::verbose) << "visited LDD size = " << nodecount(m_visited) << " and todo LDD size = " << nodecount(m_todo) << std::endl;
 
         on_end_while_loop();
       }
@@ -576,7 +575,7 @@ class pbesreach_algorithm
       {
         mCRL2log(log::verbose) << "group " << std::setw(4) << i << " contains " << std::setw(7) << satcount(R[i].L) << " transitions (learn time = "
                                << std::setw(5) << std::setprecision(2) << std::fixed << R[i].learn_time << "s)" <<std::endl;
-        mCRL2log(log::verbose) << "transition LDD size = " << nodecount(R[i].L) << " and cache LDD size = " << nodecount(R[i].Ldomain) << std::endl;
+        mCRL2log(log::verbose) << "cached " << satcount(R[i].Ldomain) << " values" << std::endl;
       }
 
       return m_visited;

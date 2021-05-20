@@ -253,7 +253,6 @@ class symbolic_pbessolve_algorithm
     {
       stopwatch attractor_watch;
       mCRL2log(log::verbose) << "start attractor set computation\n";
-      mCRL2log(log::verbose) << "attractor LDD size = " << nodecount(U) << std::endl;
 
       using namespace sylvan::ldds;
       const ldd& Valpha = Vplayer[alpha];
@@ -298,7 +297,6 @@ class symbolic_pbessolve_algorithm
         Xoutside = minus(Xoutside, Pforced);
 
         mCRL2log(log::verbose) << "attractor set iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << iter_start.seconds() << "s)" << std::endl;
-        mCRL2log(log::verbose) << "attractor LDD size = " << nodecount(X) << " and todo LDD size = " << nodecount(todo) << std::endl;
 
         ++iter;
       }
@@ -469,7 +467,6 @@ class symbolic_pbessolve_algorithm
         ldd Unext = intersect(Vrank, Vplayer[alpha]);
 
         mCRL2log(log::verbose) << "cycle detection for rank " << rank << "\n";
-        mCRL2log(log::verbose) << "LDD size = " << nodecount(Unext) << std::endl;
 
         std::size_t iter = 0;
         while (U != Unext)
@@ -479,7 +476,6 @@ class symbolic_pbessolve_algorithm
           Unext = predecessors(U, U);
 
           mCRL2log(log::verbose) << "cycle detection iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
-          mCRL2log(log::verbose) << "LDD size = " << nodecount(Unext) << std::endl;
 
           ++iter;
         }

@@ -324,7 +324,6 @@ class lpsreach_algorithm
         {
           mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(deadlocks) << " deadlocks" << std::endl;
         }
-        mCRL2log(log::verbose) << "visited LDD size = " << nodecount(visited) << " and todo LDD size = " << nodecount(todo) << std::endl;
       }
 
       elapsed_seconds = std::chrono::steady_clock::now() - start;
@@ -336,7 +335,7 @@ class lpsreach_algorithm
       {
         mCRL2log(log::verbose) << "group " << std::setw(4) << i << " contains " << std::setw(7) << satcount(R[i].L) << " transitions (learn time = "
                                << std::setw(5) << std::setprecision(2) << std::fixed << R[i].learn_time << "s)" <<std::endl;
-        mCRL2log(log::verbose) << "transition LDD size = " << nodecount(R[i].L) << " and cache LDD size = " << nodecount(R[i].Ldomain) << std::endl;
+        mCRL2log(log::verbose) << "cached " << satcount(R[i].Ldomain) << " values" << std::endl;
       }
 
       return visited;
