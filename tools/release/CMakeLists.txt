@@ -15,6 +15,7 @@ set(MCRL2_TOOLS
   lpspp
   lpsrewr
   lpssim
+  lpsstategraph
   lpssumelm
   lpssuminst
   lpsuntime

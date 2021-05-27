@@ -4,7 +4,6 @@ set(MCRL2_TOOLS
   lpscleave
   lpscombine
   lpsrealelm
-  lpsstategraph
   lpssymbolicbisim
   pbesabsinthe
   pbespareqelm
