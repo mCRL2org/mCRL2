@@ -70,8 +70,11 @@ void FindAndReplaceDialog::setFindEnabled()
 
 void FindAndReplaceDialog::setReplaceEnabled()
 {
-  ui->replaceButton->setEnabled(codeEditor->textCursor().selectedText() ==
-                                ui->textToFind->text());
+  Qt::CaseSensitivity flag =
+      ui->caseCheckBox->isChecked() ? Qt::CaseSensitive : Qt::CaseInsensitive;
+  ui->replaceButton->setEnabled(
+      QString::compare(codeEditor->textCursor().selectedText(),
+                       ui->textToFind->text(), flag) == 0);
 }
 
 void FindAndReplaceDialog::actionFind(bool forReplaceAll)
