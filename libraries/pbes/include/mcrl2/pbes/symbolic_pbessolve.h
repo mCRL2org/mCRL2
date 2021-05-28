@@ -183,7 +183,7 @@ class symbolic_pbessolve_algorithm
       bool chaining,
       const std::vector<lps::data_expression_index>& data_index
     )
-      : m_summand_groups(summand_groups), m_no_relprod(no_relprod), m_chaining(chaining), m_data_index(data_index), m_all_nodes(V)
+      : m_summand_groups(summand_groups), m_no_relprod(no_relprod), m_chaining(false), m_data_index(data_index), m_all_nodes(V)
     {
       using namespace sylvan::ldds;
       using utilities::detail::contains;

@@ -75,7 +75,7 @@ public:
     if (iteration_count % 10 == 0)
     {
       auto equation_info = compute_equation_info(pbes(), data_index());
-      pbes_system::symbolic_pbessolve_algorithm solver(m_visited, summand_groups(), equation_info, m_options.no_relprod, false, data_index());
+      pbes_system::symbolic_pbessolve_algorithm solver(m_visited, summand_groups(), equation_info, m_options.no_relprod, m_options.chaining, data_index());
 
       if (m_options.solve_strategy == 1)
       {
