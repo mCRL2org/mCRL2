@@ -746,6 +746,8 @@ BOOST_AUTO_TEST_CASE(test_elementary_formulas)
     "a         #  [a && a && b]false            #   true   \n"
     "a         #  [a && a && !b]false           #   false  \n"
     "a         #  [a || a]false                 #   false  \n"
+    "a         #  nu X.mu X.X                   #   false  \n"  // These two tests check for proper renaming. 
+    "a         #  mu X.nu X.X                   #   true   \n"
     ;
 
   std::vector<std::string> lines = utilities::regex_split(formulas, "\\n");

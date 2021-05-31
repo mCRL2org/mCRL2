@@ -105,7 +105,7 @@ class state_variable_name_clash_resolver: public state_formulas::state_formula_b
     }
 
     // Rename variable
-    state_formula operator()(const variable& x)
+    state_formula apply(const variable& x)
     {
       return variable(m_names[x.name()].back(), x.arguments());
     }
