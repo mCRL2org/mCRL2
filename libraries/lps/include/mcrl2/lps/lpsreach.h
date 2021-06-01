@@ -219,7 +219,15 @@ class lpsreach_algorithm
       lps::specification lpsspec_ = preprocess(lpsspec);
       m_process_parameters = lpsspec_.process().process_parameters();
       m_n = m_process_parameters.size();
-      m_initial_state = lpsspec_.initial_process().expressions();
+
+      // Rewrite the initial expressions to normal form,
+      std::vector<data::data_expression> initial_values;
+      for (const data::data_expression& expression : lpsspec_.initial_process().expressions())
+      {
+        initial_values.push_back(m_rewr(expression));
+      }
+
+      m_initial_state = data::data_expression_list(initial_values.begin(), initial_values.end());
 
       m_summand_patterns = compute_read_write_patterns(lpsspec_);
       lps::adjust_read_write_patterns(m_summand_patterns, m_options);

@@ -435,7 +435,15 @@ class pbesreach_algorithm
       m_process_parameters = m_pbes.equations().front().variable().parameters();
       m_process_parameters.push_front(data::variable("propvar", propvar_sort)); // todo: choose a unique name
       m_n = m_process_parameters.size();
-      m_initial_state = make_state(m_pbes.initial_state(), propvar_map);
+
+      // Rewrite the initial expressions to normal form,
+      std::vector<data::data_expression> initial_values;
+      for (const data::data_expression& expression : make_state(m_pbes.initial_state(), propvar_map))
+      {
+        initial_values.push_back(m_rewr(expression));
+      }
+
+      m_initial_state = data::data_expression_list(initial_values.begin(), initial_values.end());
 
       m_summand_patterns = compute_read_write_patterns(m_pbes, m_process_parameters);
       lps::adjust_read_write_patterns(m_summand_patterns, m_options);
