@@ -103,6 +103,7 @@ void AddEditPropertyDialog::activateDialog(const Property& property)
   {
     activateWindow();
     setFocus();
+    raise(); // for MacOS
   }
   else
   {

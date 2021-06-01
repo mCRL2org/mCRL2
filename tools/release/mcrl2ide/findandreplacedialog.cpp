@@ -56,6 +56,7 @@ void FindAndReplaceDialog::resetFocus()
   {
     setFocus();
     activateWindow();
+    raise(); // for MacOS
   }
   else
   {
