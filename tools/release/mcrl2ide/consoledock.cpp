@@ -21,10 +21,7 @@ ConsoleWidget::ConsoleWidget(QWidget* parent) : QPlainTextEdit(parent)
           SLOT(showContextMenu(const QPoint&)));
 
   /* set the font */
-  QFont logFont;
-  logFont.setFamily("Monospace");
-  logFont.setFixedPitch(true);
-  logFont.setWeight(QFont::Light);
+  QFont logFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
   this->setFont(logFont);
 }
 
