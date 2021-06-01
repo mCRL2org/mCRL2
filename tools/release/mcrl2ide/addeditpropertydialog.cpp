@@ -59,7 +59,7 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add,
           ui->tabWidget->widget(0), SLOT(setWindowModified(bool)));
   connect(ui->initTextField1, SIGNAL(textChanged()), this,
           SLOT(setEquivalenceTabToModified()));
-  connect(ui->formulaTextField, SIGNAL(currentIndexChanged(int)), this,
+  connect(ui->equivalenceComboBox, SIGNAL(currentIndexChanged(int)), this,
           SLOT(setEquivalenceTabToModified()));
   connect(ui->initTextField2, SIGNAL(textChanged()), this,
           SLOT(setEquivalenceTabToModified()));
