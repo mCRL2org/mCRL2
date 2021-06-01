@@ -39,7 +39,7 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add,
   }
 
   setWindowTitle(windowTitle);
-  setWindowFlags(Qt::Window);
+  setWindowFlags(Qt::Dialog);
 
   ui->formulaTextField->setPurpose(false);
   ui->initTextField1->setPurpose(true);

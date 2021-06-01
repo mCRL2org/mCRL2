@@ -16,7 +16,7 @@ FindAndReplaceDialog::FindAndReplaceDialog(
 {
   ui->setupUi(this);
 
-  setWindowFlags(Qt::Window);
+  setWindowFlags(Qt::Dialog);
 
   connect(ui->textToFind, SIGNAL(textChanged(QString)), this,
           SLOT(setFindEnabled()));
