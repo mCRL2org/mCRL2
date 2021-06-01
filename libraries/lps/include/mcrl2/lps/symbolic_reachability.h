@@ -569,6 +569,7 @@ struct summand_group
 
     std::size_t n = process_parameters.size();
 
+    // Indicates for every position whether the parameter should be projected on (for read dependencies).
     std::vector<std::uint32_t> Ip_values;
 
     for (std::size_t j = 0; j < n; j++)
@@ -584,6 +585,23 @@ struct summand_group
       {
         write.push_back(j);
       }
+    }
+
+    // The index after which all values in Ip_values are the same.
+    int i = Ip_values.size() - 1;
+    while (i > 0 && Ip_values[i] == Ip_values.back())
+    {
+      --i;
+    }
+
+    Ip_values = std::vector<std::uint32_t>(Ip_values.begin(), Ip_values.begin() + i + 2);
+    if (Ip_values.back() == 0)
+    {
+      Ip_values.back() = static_cast<std::uint32_t>(-2);
+    }
+    else
+    {
+      Ip_values.back() = static_cast<std::uint32_t>(-1);
     }
 
     read_parameters = project(as_vector(process_parameters), read);
