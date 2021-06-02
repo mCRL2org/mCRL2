@@ -586,6 +586,20 @@ class pbesreach_algorithm
         mCRL2log(log::verbose) << "cached " << satcount(R[i].Ldomain) << " values" << std::endl;
       }
 
+      std::size_t i = 0;
+      for (const auto& param : m_process_parameters)
+      {
+        auto& table = m_data_index[i];
+
+        mCRL2log(log::verbose) << "Parameter " << i << " (" << param << ")" << " has " << table.size() << " values."<< std::endl;
+        for (const auto& data : table)
+        {
+          mCRL2log(log::debug) << table.index(data) << ": " << data << std::endl;
+        }
+
+        ++i;
+      }
+
       return m_visited;
     }
 

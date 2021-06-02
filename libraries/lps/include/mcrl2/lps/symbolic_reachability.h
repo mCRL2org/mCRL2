@@ -470,6 +470,11 @@ class data_expression_index
       return i < m_values.size();
     }
 
+    std::size_t size() const
+    {
+      return m_values.size();
+    }
+
     auto begin() const
     {
       return m_values.begin();
