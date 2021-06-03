@@ -163,6 +163,9 @@ namespace mcrl2 {
       function_symbol_vector pos_mCRL2_usable_constructors()
       {
         function_symbol_vector result;
+        result.push_back(sort_pos::c1());
+        result.push_back(sort_pos::cdub());
+
         return result;
       }
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
@@ -636,8 +639,11 @@ namespace mcrl2 {
         result.push_back(sort_pos::maximum());
         result.push_back(sort_pos::minimum());
         result.push_back(sort_pos::succ());
+        result.push_back(sort_pos::pos_predecessor());
         result.push_back(sort_pos::plus());
+        result.push_back(sort_pos::add_with_carry());
         result.push_back(sort_pos::times());
+        result.push_back(sort_pos::powerlog2_pos());
         return result;
       }
 

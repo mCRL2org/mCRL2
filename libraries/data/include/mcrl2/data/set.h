@@ -130,7 +130,8 @@ namespace mcrl2 {
       function_symbol_vector set_mCRL2_usable_constructors(const sort_expression& s)
       {
         function_symbol_vector result;
-        static_cast< void >(s); // suppress unused variable warnings
+        result.push_back(sort_set::constructor(s));
+
         return result;
       }
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
@@ -969,11 +970,20 @@ namespace mcrl2 {
       function_symbol_vector set_mCRL2_usable_mappings(const sort_expression& s)
       {
         function_symbol_vector result;
+        result.push_back(sort_set::set_fset(s));
+        result.push_back(sort_set::set_comprehension(s));
         result.push_back(sort_set::in(s, s, set_(s)));
         result.push_back(sort_set::complement(s));
         result.push_back(sort_set::union_(s, set_(s), set_(s)));
         result.push_back(sort_set::intersection(s, set_(s), set_(s)));
         result.push_back(sort_set::difference(s, set_(s), set_(s)));
+        result.push_back(sort_set::false_function(s));
+        result.push_back(sort_set::true_function(s));
+        result.push_back(sort_set::not_function(s));
+        result.push_back(sort_set::and_function(s));
+        result.push_back(sort_set::or_function(s));
+        result.push_back(sort_set::fset_union(s));
+        result.push_back(sort_set::fset_intersection(s));
         return result;
       }
 

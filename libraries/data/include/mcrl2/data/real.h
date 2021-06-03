@@ -1639,6 +1639,7 @@ namespace mcrl2 {
       function_symbol_vector real_mCRL2_usable_mappings()
       {
         function_symbol_vector result;
+        result.push_back(sort_real::creal());
         result.push_back(sort_real::pos2real());
         result.push_back(sort_real::nat2real());
         result.push_back(sort_real::int2real());
@@ -1662,6 +1663,9 @@ namespace mcrl2 {
         result.push_back(sort_real::floor());
         result.push_back(sort_real::ceil());
         result.push_back(sort_real::round());
+        result.push_back(sort_real::reduce_fraction());
+        result.push_back(sort_real::reduce_fraction_where());
+        result.push_back(sort_real::reduce_fraction_helper());
         return result;
       }
 

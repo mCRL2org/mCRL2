@@ -246,6 +246,10 @@ namespace mcrl2 {
       function_symbol_vector nat_mCRL2_usable_constructors()
       {
         function_symbol_vector result;
+        result.push_back(sort_nat::c0());
+        result.push_back(sort_nat::cnat());
+        result.push_back(sort_nat::cpair());
+
         return result;
       }
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
@@ -1839,15 +1843,30 @@ namespace mcrl2 {
         result.push_back(sort_nat::minimum(nat(), nat()));
         result.push_back(sort_nat::succ(nat()));
         result.push_back(sort_nat::pred());
+        result.push_back(sort_nat::dub());
+        result.push_back(sort_nat::dubsucc());
         result.push_back(sort_nat::plus(sort_pos::pos(), nat()));
         result.push_back(sort_nat::plus(nat(), sort_pos::pos()));
         result.push_back(sort_nat::plus(nat(), nat()));
+        result.push_back(sort_nat::gte_subtract_with_borrow());
         result.push_back(sort_nat::times(nat(), nat()));
         result.push_back(sort_nat::div());
         result.push_back(sort_nat::mod());
         result.push_back(sort_nat::exp(sort_pos::pos(), nat()));
         result.push_back(sort_nat::exp(nat(), nat()));
+        result.push_back(sort_nat::even());
+        result.push_back(sort_nat::monus());
+        result.push_back(sort_nat::swap_zero());
+        result.push_back(sort_nat::swap_zero_add());
+        result.push_back(sort_nat::swap_zero_min());
+        result.push_back(sort_nat::swap_zero_monus());
         result.push_back(sort_nat::sqrt());
+        result.push_back(sort_nat::sqrt_nat_aux_func());
+        result.push_back(sort_nat::first());
+        result.push_back(sort_nat::last());
+        result.push_back(sort_nat::divmod());
+        result.push_back(sort_nat::generalised_divmod());
+        result.push_back(sort_nat::doubly_generalised_divmod());
         return result;
       }
 

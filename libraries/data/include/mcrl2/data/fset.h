@@ -163,6 +163,7 @@ namespace mcrl2 {
       {
         function_symbol_vector result;
         result.push_back(sort_fset::empty(s));
+        result.push_back(sort_fset::insert(s));
 
         return result;
       }
@@ -587,6 +588,8 @@ namespace mcrl2 {
       function_symbol_vector fset_mCRL2_usable_mappings(const sort_expression& s)
       {
         function_symbol_vector result;
+        result.push_back(sort_fset::cons_(s));
+        result.push_back(sort_fset::cinsert(s));
         result.push_back(sort_fset::in(s));
         result.push_back(sort_fset::difference(s));
         result.push_back(sort_fset::union_(s));

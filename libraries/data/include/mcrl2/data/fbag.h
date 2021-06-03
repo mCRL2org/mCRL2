@@ -166,6 +166,7 @@ namespace mcrl2 {
       {
         function_symbol_vector result;
         result.push_back(sort_fbag::empty(s));
+        result.push_back(sort_fbag::insert(s));
 
         return result;
       }
@@ -698,8 +699,11 @@ namespace mcrl2 {
       function_symbol_vector fbag_mCRL2_usable_mappings(const sort_expression& s)
       {
         function_symbol_vector result;
+        result.push_back(sort_fbag::cons_(s));
+        result.push_back(sort_fbag::cinsert(s));
         result.push_back(sort_fbag::count(s));
         result.push_back(sort_fbag::in(s));
+        result.push_back(sort_fbag::fset2fbag(s));
         result.push_back(sort_fbag::union_(s));
         result.push_back(sort_fbag::intersection(s));
         result.push_back(sort_fbag::difference(s));

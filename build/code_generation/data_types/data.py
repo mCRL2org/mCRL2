@@ -231,7 +231,7 @@ class function_declaration():
     return "        result.push_back({0}({1}));\n".format(add_namespace(self.label, self.namespace), ", ".join([s.code(spec) for s in sort_params] + extra_parameters))
 
   def mCRL2_usable_functions(self, spec, function_declarations):
-    if self.namespace <> self.original_namespace or self.namespace <> function_declarations.namespace or self.namespace <> spec.namespace or self.internextern.is_internal():
+    if self.namespace <> self.original_namespace or self.namespace <> function_declarations.namespace or self.namespace <> spec.namespace: # or self.internextern.is_internal(): Also functions declared internal are externally usable, as they can occur in lps's en pbes's that are sometimes typechecked, for instance when merging two specifications. 
       return ""
 
     sort_params = self.sort_expression.sort_parameters(spec)

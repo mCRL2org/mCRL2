@@ -356,6 +356,9 @@ namespace mcrl2 {
       {
         function_symbol_vector result;
         result.push_back(function_update(s, t));
+        result.push_back(function_update_stable(s, t));
+        result.push_back(is_not_a_function_update(s, t));
+        result.push_back(if_always_else(s, t));
         return result;
       }
 
