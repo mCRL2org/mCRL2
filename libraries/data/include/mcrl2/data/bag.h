@@ -132,7 +132,8 @@ namespace mcrl2 {
       function_symbol_vector bag_mCRL2_usable_constructors(const sort_expression& s)
       {
         function_symbol_vector result;
-        static_cast< void >(s); // suppress unused variable warnings
+        result.push_back(sort_bag::constructor(s));
+
         return result;
       }
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
@@ -1319,6 +1320,8 @@ namespace mcrl2 {
       function_symbol_vector bag_mCRL2_usable_mappings(const sort_expression& s)
       {
         function_symbol_vector result;
+        result.push_back(sort_bag::bag_fbag(s));
+        result.push_back(sort_bag::bag_comprehension(s));
         result.push_back(sort_bag::count(s, s, bag(s)));
         result.push_back(sort_bag::in(s, s, bag(s)));
         result.push_back(sort_bag::union_(s, bag(s), bag(s)));
@@ -1326,6 +1329,17 @@ namespace mcrl2 {
         result.push_back(sort_bag::difference(s, bag(s), bag(s)));
         result.push_back(sort_bag::bag2set(s));
         result.push_back(sort_bag::set2bag(s));
+        result.push_back(sort_bag::zero_function(s));
+        result.push_back(sort_bag::one_function(s));
+        result.push_back(sort_bag::add_function(s));
+        result.push_back(sort_bag::min_function(s));
+        result.push_back(sort_bag::monus_function(s));
+        result.push_back(sort_bag::nat2bool_function(s));
+        result.push_back(sort_bag::bool2nat_function(s));
+        result.push_back(sort_bag::fbag_join(s));
+        result.push_back(sort_bag::fbag_intersect(s));
+        result.push_back(sort_bag::fbag_difference(s));
+        result.push_back(sort_bag::fbag2fset(s));
         return result;
       }
 
