@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <vector>
 #include <map>
 #include <set>
 #include <unordered_set>
