@@ -183,7 +183,7 @@ class symbolic_pbessolve_algorithm
       bool chaining,
       const std::vector<lps::data_expression_index>& data_index
     )
-      : m_summand_groups(summand_groups), m_no_relprod(no_relprod), m_chaining(false), m_data_index(data_index), m_all_nodes(V)
+      : m_summand_groups(summand_groups), m_no_relprod(no_relprod), m_chaining(chaining), m_data_index(data_index), m_all_nodes(V)
     {
       using namespace sylvan::ldds;
       using utilities::detail::contains;
@@ -266,11 +266,32 @@ class symbolic_pbessolve_algorithm
       {
         stopwatch iter_start;
 
-        // The predecessors of the todo set; we update the todo set in this iteration to only include newly added states.
-        ldd P = predecessors(Xoutside, todo);
-
         // Determine current player's nodes that can reach X (without the elements already in X).
-        ldd Palpha = intersect(P, Valpha);
+        ldd Palpha;
+
+        // The predecessors of the todo set; we update the todo set in this iteration to only include newly added states.
+        ldd P;
+
+        if (m_chaining)
+        {
+          ldd result = todo;
+          for (int i = m_summand_groups.size() - 1; i >= 0; --i)
+          {
+            const summand_group& group = m_summand_groups[i];
+
+            ldd pred = predecessors(Xoutside, result, group);
+            result = union_(result, intersect(pred, Valpha));
+            P = union_(P, pred);
+          }
+
+          Palpha = minus(result, todo);
+        }
+        else
+        {
+          P = predecessors(Xoutside, todo);
+          Palpha = intersect(P, Valpha);
+        }
+
         todo = Palpha;
         X = union_(X, Palpha);
 
