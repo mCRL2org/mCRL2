@@ -425,14 +425,16 @@ class symbolic_pbessolve_algorithm
 
     bool solve(const ldd& V,
                const ldd& initial_vertex,
-               const ldd& Vdeadlock = sylvan::ldds::empty_set())
+               const ldd& Vdeadlock = sylvan::ldds::empty_set(),
+               const ldd& W0 = sylvan::ldds::empty_set(),
+               const ldd& W1 = sylvan::ldds::empty_set())
     {
-      auto const& [W0, W1] = solve_impl(V, initial_vertex, Vdeadlock);
-      if (includes(W0, initial_vertex))
+      auto const& [solved0, solved1] = solve_impl(V, initial_vertex, Vdeadlock, W0, W1);
+      if (includes(solved0, initial_vertex))
       {
         return true;
       }
-      else if (includes(W1, initial_vertex))
+      else if (includes(solved1, initial_vertex))
       {
         return false;
       }

@@ -103,31 +103,33 @@ public:
     }
   }
 
-  bool solution_found(const sylvan::ldds::ldd& initial_state) override
+  bool solution_found(const ldd& initial_state) const override
   {
     if (includes(m_Vwon[0], initial_state))
     {
-      m_result = true;
       return true;
     }
     else if (includes(m_Vwon[1], initial_state))
     {
-      m_result = false;
       return true;
     }
 
     return false;
   }
 
-  bool solution() const override
+  ldd W0() const override
   {
-    return m_result;
+    return m_Vwon[0];
+  }
+
+  ldd W1() const override
+  {
+    return m_Vwon[1];
   }
 
 private:
   // States for which winners have already been determined.
   std::array<sylvan::ldds::ldd, 2> m_Vwon;
-  bool m_result = false;
   std::size_t iteration_count = 0;
 };
 
@@ -290,7 +292,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
 
         if (reach.solution_found(reach.initial_state()))
         {
-          std::cout << (reach.solution() ? "true" : "false") << std::endl;
+          std::cout << (includes(reach.W0(), (reach.initial_state())) ? "true" : "false") << std::endl;
         }
         else
         {
@@ -298,7 +300,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
           pbes_system::symbolic_pbessolve_algorithm solver(V, reach.summand_groups(), equation_info, options.no_relprod, options.chaining, reach.data_index());
           mCRL2log(log::debug) << pbes_system::print_pbes_info(reach.pbes()) << std::endl;
           timer().start("solving");
-          bool result = solver.solve(V, reach.initial_state(), reach.deadlocks());
+          bool result = solver.solve(V, reach.initial_state(), reach.deadlocks(), reach.W0(), reach.W1());
           timer().finish("solving");
 
           std::cout << (result ? "true" : "false") << std::endl;

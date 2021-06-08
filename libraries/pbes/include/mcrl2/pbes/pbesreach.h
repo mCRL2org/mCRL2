@@ -607,15 +607,21 @@ class pbesreach_algorithm
     virtual void on_end_while_loop()
     { }
 
-    /// \returns True iff the solution was already found.
-    virtual bool solution_found(const sylvan::ldds::ldd&)
+    /// \returns True iff the solution for the given vertex is known.
+    virtual bool solution_found(const sylvan::ldds::ldd&) const
     {
       return false;
     }
 
-    virtual bool solution() const
+    /// \returns True iff the vertex is won by even and nothing if the solution has not been determined.
+    virtual sylvan::ldds::ldd W0() const
     {
-      return false;
+      return sylvan::ldds::empty_set();
+    }
+
+    virtual sylvan::ldds::ldd W1() const
+    {
+      return sylvan::ldds::empty_set();
     }
 
     const std::vector<summand_group>& summand_groups() const
