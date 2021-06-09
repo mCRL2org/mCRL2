@@ -1,4 +1,28 @@
 ===============================================================================
+Changes between toolset releases 202006.0 and 202106.0:
+===============================================================================
+
+This release brings several UI improvements and important bug fixes. For
+mcrl2ide we have added a confirmation when the edit property dialog is closed
+with unsaved changes. Furthermore, the find and replace functionality has also
+been improved. Finally, we have also added matching bracket highlighting and
+fixed other minor bugs. There have also been minor improvements to lpsxsim and
+ltsgraph.
+
+The ltscompare tool has been extended with coupled simulation equivalence
+checking, available under the new flag '-ecoupled-sim', by an external
+contributor. Two other external pull requests have been merged. We always
+welcome pull requests even for minor usability improvements or to fix typos.
+
+26 issues were closed since the last release.
+List of other changes:
+  - Rewriting of function updates has been made significantly more efficient by
+    replacing the rewrite rules with exponential complexity by rules with linear
+    complexity.  
+  - Fixed reading of probabilistic labelled transition systems in the .lts
+    format. These can now be properly used with ltsgraph or ltsinfo.
+
+===============================================================================
 Changes between toolset releases 201908.0 and 202006.0:
 ===============================================================================
 
