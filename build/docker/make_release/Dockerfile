@@ -2,11 +2,12 @@ FROM ubuntu:focal
 LABEL version="1.0"
 LABEL description="prepares the "
 
-ARG MCRL2_RELEASE_BRANCH="release-202006"
-ARG MCRL2_VERSION="202006.0"
+ARG MCRL2_RELEASE_BRANCH="release-202106"
+ARG MCRL2_VERSION="202106.0"
 
 # 1. Install packages needed for compilation.
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y \
  build-essential \
  cmake \
  git \
