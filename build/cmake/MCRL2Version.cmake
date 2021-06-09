@@ -24,7 +24,7 @@
 #     not be generated from a clean Git clone.
 #
 # Package maintainers may set the variable below to issue a new release.
-set(MCRL2_MAJOR_VERSION "202006.0")
+set(MCRL2_MAJOR_VERSION "202106.0")
 string(SUBSTRING ${MCRL2_MAJOR_VERSION} 0 4 MCRL2_COPYRIGHT_YEAR)
 
 option(MCRL2_PACKAGE_RELEASE "Include release version information. This discards Git commit information and only uses the MCRL2_MAJOR_VERSION CMake variable." FALSE)
