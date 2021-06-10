@@ -55,6 +55,7 @@ RUN cd ~/mcrl2-build && cpack -G RPM
 RUN cd ~/mcrl2-build \
     && cmake -DMCRL2_ENABLE_EXPERIMENTAL=ON \
              -DMCRL2_ENABLE_TESTS=ON . \
+    && make -j8 \
     && ctest . -j8
 
 # 7. Build the documentation
