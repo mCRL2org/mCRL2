@@ -535,7 +535,8 @@ class pbesreach_algorithm
           else
           {
             mCRL2log(log::debug) << "relprod(" << i << ", todo) = " << print_states(m_data_index, relprod(m_todo, R[i].L, R[i].Ir)) << std::endl;
-            todo1 = relprod_union(m_options.chaining ? todo1 : m_todo, R[i].L, R[i].Ir, todo1);
+            ldd z = relprod(m_options.chaining ? todo1 : m_todo, R[i].L, R[i].Ir);
+            todo1 = union_(z, todo1);
           }
 
           if (m_options.detect_deadlocks)
