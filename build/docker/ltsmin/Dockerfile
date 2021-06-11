@@ -45,11 +45,11 @@ RUN cd ~/mcrl2-build && make -j8 install
 RUN cd ~/ && git clone --depth=1 --branch=v1.4.1 https://github.com/trolando/sylvan.git sylvan
 
 # Disabled a specific warning as error since sylvan cannot be compiled otherwise.
-RUN cd ~/sylvan && cmake -DCMAKE_C_FLAGS="-Wno-error=array-parameter" . && make -j8 install
+RUN cd ~/sylvan && cmake -DCMAKE_C_FLAGS="-Wno-error=array-parameter" -DBUILD_SHARED_LIBS=OFF . && make -j8 install
 
 # Clone ltsmin git repository.
 RUN cd ~/ && git clone -b v3.0.2 https://github.com/utwente-fmt/ltsmin.git ltsmin
-#RUN cd ~/ltsmin && git checkout fea250ecc03ac456f26e272f44b8035eae968b9f
+RUN cd ~/ltsmin && git checkout fea250ecc03ac456f26e272f44b8035eae968b9f
 
 # This step is necessary according to the 'Building from a Git Repository' section of the readme.
 RUN cd ~/ltsmin && git submodule update --init
@@ -61,6 +61,7 @@ RUN cd ~/ltsmin/ltl2ba && git checkout ea33bb2091a34f6af8dba8e26978fecb969aa93b
 COPY ltsmin.patch /root/ltsmin/
 RUN cd ~/ltsmin && git apply ltsmin.patch
 
-# Build the toolset.
-RUN cd ~/ltsmin && ./ltsminreconf && ./configure --prefix=/root/ltsmin-build/
-RUN cd ~/ltsmin && make -j8 install
+# Build the ltsmin toolset.
+RUN cd ~/ltsmin && ./ltsminreconf && ./configure --disable-dependency-tracking --prefix=/root/ltsmin-build/ && cd ~/ltsmin && make -j8 install
+
+# We can now copy the /root/ltsmin-build directory from the resulting image and install the mcrl2 release locally for the shared libraries and jittyc headers.
