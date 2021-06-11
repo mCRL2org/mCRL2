@@ -3235,7 +3235,6 @@ class specification_basic_type
             const process_identifier procId=process_instance_assignment(first).identifier();
             const variable_list pars=parscollect(seq(oldbody).right(),newbody);
             variable_list pars1, pars2;
-
             const variable_list new_pars=construct_renaming(pars,objectIndex(procId).parameters,pars1,pars2,false);
             assignment_vector new_assignment;
             for(variable_list::const_iterator i=pars2.begin(), j=new_pars.begin(); i!=pars2.end(); ++i,++j)
@@ -3245,7 +3244,9 @@ class specification_basic_type
             }
             assert(check_valid_process_instance_assignment(procId,assignment_list(new_assignment.begin(),new_assignment.end())));
             newbody=seq(process_instance_assignment(procId,assignment_list(new_assignment.begin(),new_assignment.end())),newbody);
-            return pars1+pars;
+            const variable_list result=pars1+pars;
+            assert(std::set(result.begin(),result.end()).size()==result.size()); // all elements in the result are unique. 
+            return result;
           }
           else
           {
@@ -7705,7 +7706,7 @@ class specification_basic_type
       {
         const variable& var2=pars2.front();
         variable var3=var2;
-        for (int i=0 ; occursin(var3,pars1) ; ++i)
+        for (std::size_t i=0 ; occursin(var3,pars1)||occursin(var3,pars2) ; ++i)
         {
           var3=get_fresh_variable(var2.name(),var2.sort(),(unique?-1:i));
         }
