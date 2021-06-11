@@ -1,3 +1,10 @@
+diff --git a/ltl2ba b/ltl2ba
+index d71bf20d..ea33bb20 160000
+--- a/ltl2ba
++++ b/ltl2ba
+@@ -1 +1 @@
+-Subproject commit d71bf20df3f576f736b7b9ed2d45298889979b22
++Subproject commit ea33bb2091a34f6af8dba8e26978fecb969aa93b
 diff --git a/src/pins-lib/modules/pbes-pins.cpp b/src/pins-lib/modules/pbes-pins.cpp
 index 76f904a8..3f5af0b5 100644
 --- a/src/pins-lib/modules/pbes-pins.cpp
@@ -11,3 +18,19 @@ index 76f904a8..3f5af0b5 100644
  
  namespace ltsmin
  {
+diff --git a/src/pins2lts-sym/aux/options.h b/src/pins2lts-sym/aux/options.h
+index 0928c53f..7a85b4fa 100644
+--- a/src/pins2lts-sym/aux/options.h
++++ b/src/pins2lts-sym/aux/options.h
+@@ -121,8 +121,8 @@ extern int* priority; // priorities of variables
+ extern int min_priority;
+ extern int max_priority;
+ 
+-ltsmin_expr_t* mu_exprs;
+-ltsmin_parse_env_t* mu_parse_env;
++extern ltsmin_expr_t* mu_exprs;
++extern ltsmin_parse_env_t* mu_parse_env;
+ 
+ extern lts_type_t ltstype;
+ extern int N;
+ 
