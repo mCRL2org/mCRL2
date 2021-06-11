@@ -332,6 +332,8 @@ class lpsreach_algorithm
         {
           mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(deadlocks) << " deadlocks" << std::endl;
         }
+
+        sylvan::sylvan_stats_report(stderr);
       }
 
       elapsed_seconds = std::chrono::steady_clock::now() - start;
@@ -339,12 +341,16 @@ class lpsreach_algorithm
       mCRL2log(log::verbose) << "visited LDD size = " << nodecount(visited) << std::endl;
       mCRL2log(log::verbose) << "used variable order = " << core::detail::print_list(m_variable_order) << std::endl;
 
+      double total_time = 0.0;
       for (std::size_t i = 0; i < R.size(); i++)
       {
         mCRL2log(log::verbose) << "group " << std::setw(4) << i << " contains " << std::setw(7) << satcount(R[i].L) << " transitions (learn time = "
-                               << std::setw(5) << std::setprecision(2) << std::fixed << R[i].learn_time << "s)" <<std::endl;
+                               << std::setw(5) << std::setprecision(2) << std::fixed << R[i].learn_time << "s with " << std::setw(9) << R[i].learn_calls << " calls)" << std::endl;
         mCRL2log(log::verbose) << "cached " << satcount(R[i].Ldomain) << " values" << std::endl;
+
+        total_time += R[i].learn_time;
       }
+      mCRL2log(log::verbose) << "learning transitions took " << total_time << "s" << std::endl;
 
       std::size_t i = 0;
       for (const auto& param : m_process_parameters)

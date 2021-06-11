@@ -522,9 +522,7 @@ class pbesreach_algorithm
         {          
           ldd proj = project(m_options.chaining ? todo1 : m_todo, R[i].Ip);
           
-          stopwatch learn_start;
           learn_successors(i, R[i], m_options.cached ? minus(proj, R[i].Ldomain) : proj);
-          R[i].learn_time += learn_start.seconds();
 
           mCRL2log(log::debug) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
 
@@ -565,6 +563,7 @@ class pbesreach_algorithm
         }
 
         on_end_while_loop();
+        sylvan::sylvan_stats_report(stderr);
       }
 
       if (report_states)
@@ -579,12 +578,16 @@ class pbesreach_algorithm
       mCRL2log(log::verbose) << "visited LDD size = " << nodecount(m_visited) << std::endl;
       mCRL2log(log::verbose) << "used variable order = " << core::detail::print_list(m_variable_order) << std::endl;
 
+      double total_time = 0.0;
       for (std::size_t i = 0; i < R.size(); i++)
       {
         mCRL2log(log::verbose) << "group " << std::setw(4) << i << " contains " << std::setw(7) << satcount(R[i].L) << " transitions (learn time = "
-                               << std::setw(5) << std::setprecision(2) << std::fixed << R[i].learn_time << "s)" <<std::endl;
+                               << std::setw(5) << std::setprecision(2) << std::fixed << R[i].learn_time << "s with " << std::setw(9) << R[i].learn_calls << " calls)" << std::endl;
         mCRL2log(log::verbose) << "cached " << satcount(R[i].Ldomain) << " values" << std::endl;
+
+        total_time += R[i].learn_time;
       }
+      mCRL2log(log::verbose) << "learning transitions took " << total_time << "s" << std::endl;
 
       std::size_t i = 0;
       for (const auto& param : m_process_parameters)

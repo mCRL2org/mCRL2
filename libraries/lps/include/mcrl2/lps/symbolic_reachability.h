@@ -28,6 +28,7 @@
 #include "mcrl2/utilities/parse_numbers.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/indexed_set.h"
+#include "mcrl2/utilities/stopwatch.h"
 
 namespace mcrl2 {
 
@@ -243,6 +244,7 @@ std::vector<boost::dynamic_bitset<>> reorder_read_write_patterns(const std::vect
 struct symbolic_reachability_options
 {
   data::rewrite_strategy rewrite_strategy = data::jitty;
+  std::size_t max_workers = 0;
   bool cached = false;
   bool chaining = false;
   bool detect_deadlocks = false;
@@ -531,6 +533,7 @@ struct summand_group
   sylvan::ldds::ldd Ir; // meta data needed by sylvan::ldds::relprod
   sylvan::ldds::ldd Ip; // meta data needed by sylvan::ldds::project
   double learn_time = 0.0; // The time to learn the transitions for this group.
+  std::size_t learn_calls = 0; // Number of learn transition calls.
 
   std::pair<std::vector<std::size_t>, std::vector<std::size_t>> compute_read_write_pos() const
   {
@@ -930,6 +933,7 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t, v
 
   // add the assignments corresponding to x to sigma
   // add x to the transition xy
+  stopwatch learn_start;
   for (std::size_t j = 0; j < x_size; j++)
   {
     sigma[group.read_parameters[j]] = data_index[group.read[j]].value(x[j]);
@@ -961,6 +965,8 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t, v
     data::remove_assignments(sigma, smd.variables);
   }
   data::remove_assignments(sigma, group.read_parameters);
+  group.learn_calls += 1;
+  group.learn_time += learn_start.seconds();
 
   if (options.cached)
   {
