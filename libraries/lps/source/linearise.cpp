@@ -3245,7 +3245,7 @@ class specification_basic_type
             assert(check_valid_process_instance_assignment(procId,assignment_list(new_assignment.begin(),new_assignment.end())));
             newbody=seq(process_instance_assignment(procId,assignment_list(new_assignment.begin(),new_assignment.end())),newbody);
             const variable_list result=pars1+pars;
-            assert(std::set(result.begin(),result.end()).size()==result.size()); // all elements in the result are unique. 
+            assert(std::set<variable>(result.begin(),result.end()).size()==result.size()); // all elements in the result are unique. 
             return result;
           }
           else
