@@ -25,31 +25,25 @@ proc
   + get_turn_s(n).Turn(n);
 
   % Main process for Dekker's algorithm.
-  Dekker(i: Nat) = 
+  Dekker(i: Nat) =
     wish(i)|set_flag_s(i, true) .
 	Dekker_outer_loop(i);
 
-  Dekker_outer_loop(i: Nat) = 
-    % Read shared variable flag
-	sum flag_other: Bool . get_flag_r(other(i), flag_other) . 
-	flag_other -> (                      % while flag(other(i))
-	  sum turn: Nat . get_turn_r(turn) . % Read shared variable turn
-      (turn != i) -> (
-        set_flag_s(i, false) .          % flag[i] := false           
-        get_turn_r(i) .                 % while turn != i { /* busy wait */}
-        set_flag_s(i, true) .           % flag[i] := true
-        Dekker_outer_loop(i)            % loop
-      ) <> Dekker_outer_loop(i)         % if turn == i, loop
-    ) <> (                                   
-      Dekker_CS(i)	% !flag(other(i)), break from the outer loop
-    );
-
-   Dekker_CS(i: Nat) =                      % outer loop terminated, enter CS
-     set_turn_s(other(i)) .                 % turn := other(i)
-     enter(i) .
-     leave(i) .
-     set_flag_s(i, false) .                 % flag[i] := false
-     Dekker(i);
+  Dekker_outer_loop(i: Nat) =
+      % Read shared variable flag
+	  sum flag_other: Bool . get_flag_r(other(i), flag_other) .
+	  flag_other -> ( sum turn: Nat . get_turn_r(turn) .   % Read shared variable turn
+                    (turn != i) -> (set_flag_s(i, false) . % flag[i] := false
+                                    get_turn_r(i) .        % while turn != i { /* busy wait */}
+                                    set_flag_s(i, true) .  % flag[i] := true
+                                    Dekker_outer_loop(i)   % loop
+                                   )
+                                <> Dekker_outer_loop(i))  % if turn == i, loop
+               <> (set_turn_s(other(i)) .                 % turn := other(i)
+                   enter(i) .
+                   leave(i) .
+                   set_flag_s(i, false) .                 % flag[i] := false
+                  Dekker(i));
 
 init
     allow({ wish|set_flag, enter, leave,

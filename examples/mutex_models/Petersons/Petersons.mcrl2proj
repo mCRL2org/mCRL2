@@ -5,5 +5,6 @@
   <property>Eventual access</property>
   <property>Bounded overtaking</property>
   <property>Always eventually request</property>
+  <property>Eventual access without cooperation</property>
  </properties>
 </root>

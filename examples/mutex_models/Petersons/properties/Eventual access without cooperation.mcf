@@ -1,0 +1,6 @@
+nu X(n: Nat = 0).
+  ([exists id: Nat. wish(id)|set_flag(id,true)]X(n+1) && [exists id: Nat. leave(id)]X(max(0,n-1))) &&
+  [!exists id: Nat. wish(id)|set_flag(id,true) || leave(id)]X(n) &&
+  (val(n==0) => forall id:Nat. [wish(id)|set_flag(id,true)]
+    ( mu Y. ([!enter(id) && !(wish(other(id))|set_flag(other(id),true) || enter(other(id)))]Y &&
+        <!(wish(other(id))|set_flag(other(id),true) || enter(other(id)))> true)))
