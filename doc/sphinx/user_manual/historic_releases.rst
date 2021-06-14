@@ -7,6 +7,43 @@ Previous releases of mCRL2
 
 This page shows a list of historic releases of mCRL2.
 
+Release 202006.0
+----------------
+
+.. |bin_w64_202006.0| replace:: Windows Installer (64-bit)
+.. _bin_w64_202006.0: http://www.mcrl2.org/download/release/mcrl2-202006.0_x86_64.exe
+
+.. |zip_w64_202006.0| replace:: Windows ZIP (64-bit)
+.. _zip_w64_202006.0: http://www.mcrl2.org/download/release/mcrl2-202006.0_x86_64.zip
+
+.. |bin_osx_202006.0| replace:: macOS DMG (64-bit)
+.. _bin_osx_202006.0: http://www.mcrl2.org/download/release/mcrl2-202006.0_x86_64.dmg
+
+.. |bin_ppa_202006.0| replace:: PPA release
+.. _bin_ppa_202006.0: https://launchpad.net/~mcrl2/+archive/release-ppa
+
+.. |bin_fedora64_202006.0| replace:: Fedora RPM (64-bit)
+.. _bin_fedora64_202006.0: http://www.mcrl2.org/download/release/mcrl2-202006.0_x86_64.rpm
+
+.. |src_tgz_202006.0| replace:: GZipped Tarball
+.. _src_tgz_202006.0: http://www.mcrl2.org/download/release/mcrl2-202006.0.tar.gz
+
+   +------------------------+--------------------------+
+   |Operating system        | Release (202006.0)       |
+   +========================+==========================+
+   |Windows                 | |bin_w64_202006.0|_      |
+   |                        +--------------------------+
+   |                        | |zip_w64_202006.0|_      |
+   +------------------------+--------------------------+
+   |macOS                   | |bin_osx_202006.0|_      |
+   +------------------------+--------------------------+
+   |Ubuntu                  | |bin_ppa_202006.0|_      |
+   +------------------------+--------------------------+
+   |Fedora                  | |bin_fedora64_202006.0|_ |
+   +------------------------+--------------------------+
+   |Source                  | |src_tgz_202006.0|_      |
+   +------------------------+--------------------------+
+
 Release 201908.0
 ----------------
 
