@@ -158,23 +158,27 @@ requires an account on Launchpad. Note that a failed upload requires the version
 number to be increased, so proper testing of the package is required before
 attempting to upload it.
 
-Windows installer
-^^^^^^^^^^^^^^^^^
+Windows release
+^^^^^^^^^^^^^^^
 
-First, clone ``mcrl2-VERSION`` using a Git client, assume to
-``mcrl2-VERSION``.
+We assume here that cpack.exe (provided by CMake) is in PATH.
 
-The following commands can be run in a Visual Studio x64 native command prompt
-(available via the start menu) to build the package on 64-bit Windows.
-We assume that CMake and Git binaries are available in the path::
+First, clone the correct release branch of the mCRL2 source using a Git client
+to some folder (called ``source`` from now on). Then open CMake, enter
+``source`` as the folder with the source code and enter some folder for the
+binaries (called ``build`` from now on). On top of :doc:`configuring the CMake
+options normally <../user_manual/build_instructions/configuration>`, also set
+MCRL2_PACKAGE_RELEASE to true. Then click on configure and set the generator to
+visual studio (the version used for development) and the platform to x64.
+Afterwards click on generate and then on open project to open the project in
+Visual Studio. Put the project in the ``Release`` configuration and build it
+(by building ``BUILD_ALL``).
 
-  mkdir package
-  cd package
-  cmake ..\mcrl2-VERSION -G "NMake Makefiles" -DCMAKE_BUILD_TYPE:STRING="Release" -DMCRL2_PACKAGE_RELEASE=ON
-  make -j8
-  cpack -G NSIS
+When the project is done building, open ``build`` in a command prompt. Then
+execute ``cpack -G NSIS`` to create the installer and ``cpack -G ZIP`` to create
+the zip file.
 
-Upload the installer that has been generated to
+Lastly, upload both the generated installer and the zip file to
 ``http://www.mcrl2.org/download/release``.
 
 Mac OS-X installer for 10.5+
