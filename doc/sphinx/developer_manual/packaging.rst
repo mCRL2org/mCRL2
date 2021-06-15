@@ -169,7 +169,7 @@ to some folder (called ``source`` from now on). Then open CMake, enter
 binaries (called ``build`` from now on). On top of :doc:`configuring the CMake
 options normally <../user_manual/build_instructions/configuration>`, also set
 MCRL2_PACKAGE_RELEASE to true. Then click on configure and set the generator to
-visual studio (the version used for development) and the platform to x64.
+Visual Studio (the version used for development) and the platform to x64.
 Afterwards click on generate and then on open project to open the project in
 Visual Studio. Put the project in the ``Release`` configuration and build it
 (by building ``BUILD_ALL``).
