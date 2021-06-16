@@ -1,6 +1,6 @@
 FROM ubuntu:focal
 LABEL version="1.0"
-LABEL description="prepares the "
+LABEL description="prepares the ppa release using the make_release scripts"
 
 ARG MCRL2_RELEASE_BRANCH="release-202106"
 ARG MCRL2_VERSION="202106.0"
@@ -21,8 +21,8 @@ RUN apt-get update && apt-get install -y \
  python-psutil \
  python-yaml
 
-# 2. Clone the release branch of the repository.
-RUN mkdir ~/packaging && cd ~/packaging && git clone -b $MCRL2_RELEASE_BRANCH git://github.com/mcrl2org/mcrl2.git mcrl2
+# 2. Clone the latest version of the repository in case that the make_release script must be updated.
+RUN mkdir ~/ppa && cd ~/ppa && git clone git://github.com/mcrl2org/mcrl2.git mcrl2
 
 # 3. Build the mCRL2 release.
 RUN ["/bin/bash", "-c", "cd ~/packaging && source mcrl2/build/make_release/make_release && MCRL2_VERSION=$MCRL2_VERSION build_mcrl2_release"]
@@ -30,9 +30,10 @@ RUN ["/bin/bash", "-c", "cd ~/packaging && source mcrl2/build/make_release/make_
 # 4. Package the source package.
 RUN ["/bin/bash", "-c", "cd ~/packaging && source mcrl2/build/make_release/make_release && MCRL2_VERSION=$MCRL2_VERSION build_source_package"]
 
-# 5. Test the debian packages.
-RUN ["/bin/bash", "-c", "cd ~/packaging && source mcrl2/build/make_release/make_release && MCRL2_VERSION=$MCRL2_VERSION test_ppa_package bionic "]
-RUN ["/bin/bash", "-c", "cd ~/packaging && source mcrl2/build/make_release/make_release && MCRL2_VERSION=$MCRL2_VERSION test_ppa_package focal "]
-RUN ["/bin/bash", "-c", "cd ~/packaging && source mcrl2/build/make_release/make_release && MCRL2_VERSION=$MCRL2_VERSION test_ppa_package groovy "]
+# Here we have to add the gpg key into the docker image.
 
-# 6. Enter the docker image, copy your ssh key to ~/.ssh/ and execute build_ppa_package for every package.
+# 5. Test the debian packages.
+#RUN ["/bin/bash", "-c", "cd ~/packaging && source mcrl2/build/make_release/make_release && MCRL2_VERSION=$MCRL2_VERSION test_ppa_package bionic "]
+#RUN ["/bin/bash", "-c", "cd ~/packaging && source mcrl2/build/make_release/make_release && MCRL2_VERSION=$MCRL2_VERSION test_ppa_package focal "]
+#RUN ["/bin/bash", "-c", "cd ~/packaging && source mcrl2/build/make_release/make_release && MCRL2_VERSION=$MCRL2_VERSION test_ppa_package groovy "]
+

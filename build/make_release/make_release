@@ -33,8 +33,8 @@
 MCRL2_RELEASE_BRANCH="release-202106"
 MCRL2_VERSION="202106.0"
 UBUNTU_VERSION="1ubuntu1ppa1"
-DEBEMAIL="j.w.wesselink@tue.nl"
-DEBFULLNAME="Wieger Wesselink"
+DEBEMAIL="m.laveaux@tue.nl"
+DEBFULLNAME="Maurice Laveaux"
 
 #-----------------------------------------------------------#
 # Setup
@@ -235,8 +235,8 @@ function test_debian_package
   echo "-----------------------------------------------------"
   echo "- Test debian package for $1"
   echo "-----------------------------------------------------"
-  export DEBEMAIL="j.w.wesselink@tue.nl"
-  export DEBFULLNAME="Wieger Wesselink"
+  export DEBEMAIL=$DEBEMAIL
+  export DEBFULLNAME=$DEBFULLNAME
   if [ ! -f ~/pbuilder/$1-base.tgz ]
   then
       pbuilder-dist $1 create

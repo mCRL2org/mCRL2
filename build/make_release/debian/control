@@ -1,7 +1,7 @@
 Source: mcrl2
 Section: math
 Priority: extra
-Maintainer: Wieger Wesselink <j.w.wesselink@tue.nl>
+Maintainer: Maurice Laveaux <m.laveaux@tue.nl>
 Uploaders: Paul van Tilburg <paulvt@debian.org>
 Build-Depends: debhelper (>= 5),
  cmake,
