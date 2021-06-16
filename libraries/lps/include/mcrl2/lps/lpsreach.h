@@ -292,10 +292,7 @@ class lpsreach_algorithm
         for (std::size_t i = 0; i < R.size(); i++)
         {
           ldd proj = project(m_options.chaining ? todo1 : todo, R[i].Ip);
-
-          stopwatch learn_start;
           learn_successors(i, R[i], m_options.cached ? minus(proj, R[i].Ldomain) : proj);
-          R[i].learn_time += learn_start.seconds();
 
           mCRL2log(log::debug) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
           if (m_options.no_relprod)

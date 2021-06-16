@@ -520,8 +520,7 @@ class pbesreach_algorithm
 
         for (std::size_t i = 0; i < R.size(); i++)
         {          
-          ldd proj = project(m_options.chaining ? todo1 : m_todo, R[i].Ip);
-          
+          ldd proj = project(m_options.chaining ? todo1 : m_todo, R[i].Ip);          
           learn_successors(i, R[i], m_options.cached ? minus(proj, R[i].Ldomain) : proj);
 
           mCRL2log(log::debug) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
