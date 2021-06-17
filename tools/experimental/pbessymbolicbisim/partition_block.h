@@ -6,14 +6,13 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file block.h
 
-#ifndef MCRL2_PBESSYMBOLICBISIM_BLOCK_H
-#define MCRL2_PBESSYMBOLICBISIM_BLOCK_H
+#ifndef MCRL2_PBESSYMBOLICBISIM_PARTITION_BLOCK_H
+#define MCRL2_PBESSYMBOLICBISIM_PARTITION_BLOCK_H
 
 #include "mcrl2/pbes/structure_graph.h"
 
-#include "subblock.h"
+#include "partition_subblock.h"
 
 namespace mcrl2
 {
@@ -214,4 +213,4 @@ namespace std
 
 }
 
-#endif // MCRL2_PBESSYMBOLICBISIM_BLOCK_H
+#endif // MCRL2_PBESSYMBOLICBISIM_PARTITION_BLOCK_H

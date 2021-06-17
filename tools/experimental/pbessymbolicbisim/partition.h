@@ -28,7 +28,7 @@
 #define RED(S)    "\033[" S ";31m"
 #define NORMAL    "\033[0;0m"
 #include "ppg_parser.h"
-#include "block.h"
+#include "partition_block.h"
 
 
 namespace mcrl2

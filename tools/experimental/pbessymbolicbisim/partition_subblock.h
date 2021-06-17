@@ -6,10 +6,9 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file subblock.h
 
-#ifndef MCRL2_PBESSYMBOLICBISIM_SUBBLOCK_H
-#define MCRL2_PBESSYMBOLICBISIM_SUBBLOCK_H
+#ifndef MCRL2_PBESSYMBOLICBISIM_PARTITION_SUBBLOCK_H
+#define MCRL2_PBESSYMBOLICBISIM_PARTITION_SUBBLOCK_H
 
 #include "eliminate_real_if.h"
 #include "utilities.h"
@@ -281,4 +280,4 @@ namespace std
 
 }
 
-#endif // MCRL2_PBESSYMBOLICBISIM_SUBBLOCK_H
+#endif // MCRL2_PBESSYMBOLICBISIM_PARTITION_SUBBLOCK_H
