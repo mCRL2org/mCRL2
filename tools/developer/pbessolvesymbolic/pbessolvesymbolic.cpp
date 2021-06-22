@@ -75,13 +75,13 @@ public:
     if (iteration_count % 10 == 0)
     {
       auto equation_info = compute_equation_info(pbes(), data_index());
-      pbes_system::symbolic_pbessolve_algorithm solver(m_visited, summand_groups(), equation_info, m_options.no_relprod, m_options.chaining, data_index());
+      pbes_system::symbolic_pbessolve_algorithm solver(union_(m_visited, m_todo), summand_groups(), equation_info, m_options.no_relprod, m_options.chaining, data_index());
 
       if (m_options.solve_strategy == 1)
       {
         mCRL2log(log::verbose) << "start cycle detection\n";
 
-        auto result = solver.detect_cycles(m_visited, m_deadlocks);
+        auto result = solver.detect_cycles(m_visited, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1]);
         m_Vwon[0] = result.first;
         m_Vwon[1] = result.second;
 
@@ -93,10 +93,10 @@ public:
         mCRL2log(log::verbose) << "start partial solving" << std::endl;
 
         // Solve assuming that even wins all todo nodes.
-        m_Vwon[1] = solver.solve_impl(m_visited, initial_state(), m_deadlocks, union_(m_todo, m_Vwon[0]), m_Vwon[1]).second;
+        m_Vwon[1] = solver.solve_impl(m_visited, m_todo, m_deadlocks, union_(m_todo, m_Vwon[0]), m_Vwon[1]).second;
 
         // Solve assuming that odd wins all todo nodes.
-        m_Vwon[0] = solver.solve_impl(m_visited, initial_state(), m_deadlocks, m_Vwon[0], union_(m_todo, m_Vwon[1])).first;
+        m_Vwon[0] = solver.solve_impl(m_visited, m_todo, m_deadlocks, m_Vwon[0], union_(m_todo, m_Vwon[1])).first;
 
         mCRL2log(log::verbose) << "partial solving found solution for" << std::setw(12) << satcount(m_Vwon[0]) + satcount(m_Vwon[1]) << " states" << std::endl;
       }
@@ -300,7 +300,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
           pbes_system::symbolic_pbessolve_algorithm solver(V, reach.summand_groups(), equation_info, options.no_relprod, options.chaining, reach.data_index());
           mCRL2log(log::debug) << pbes_system::print_pbes_info(reach.pbes()) << std::endl;
           timer().start("solving");
-          bool result = solver.solve(V, reach.initial_state(), reach.deadlocks(), reach.W0(), reach.W1());
+          bool result = solver.solve(reach.initial_state(), V, reach.deadlocks(), reach.W0(), reach.W1());
           timer().finish("solving");
 
           std::cout << (result ? "true" : "false") << std::endl;

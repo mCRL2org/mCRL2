@@ -248,14 +248,18 @@ class symbolic_pbessolve_algorithm
     /// \brief Compute the attractor set for U.
     /// \param alpha the current player
     /// \param V is the set of states
+    /// \param W is a set of vertices which is considered for forced vertices, but is never added to the attractor set itself.
     /// \param Vplayer a partitioning of the nodes into the sets of even nodes V[0] and odd V[1].
-    ldd attractor(const ldd& U, std::size_t alpha, const ldd& V, const std::array<const ldd, 2>& Vplayer)
+    ldd attractor(const ldd& U, std::size_t alpha, ldd V, const ldd& W, const std::array<const ldd, 2>& Vplayer)
     {
       stopwatch attractor_watch;
       mCRL2log(log::verbose) << "start attractor set computation\n";
 
       using namespace sylvan::ldds;
       const ldd& Valpha = Vplayer[alpha];
+
+      // Complete the set of states.
+      V = union_(V, W);
 
       std::size_t iter = 0;
       ldd X = U;
@@ -313,6 +317,8 @@ class symbolic_pbessolve_algorithm
                                  << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";
         }
 
+        // Remove vertices which should not be added to the attractor set.
+        Pforced = minus(Pforced, W);
         todo = union_(todo, Pforced);
         X = union_(X, Pforced);
 
@@ -370,7 +376,7 @@ class symbolic_pbessolve_algorithm
       ldd W[2];
       ldd W_1[2];
 
-      ldd A = attractor(U, alpha, V, Vplayer);
+      ldd A = attractor(U, alpha, V, empty_set(), Vplayer);
       mCRL2log(log::debug) << "A = attractor(" << print_nodes(U, m_all_nodes) << ", " << print_nodes(V, m_all_nodes) << ") = " << print_nodes(A, m_all_nodes) << std::endl;
       std::tie(W_1[0], W_1[1]) = zielonka(minus(V, A));
 
@@ -382,7 +388,7 @@ class symbolic_pbessolve_algorithm
       }
       else
       {
-        ldd B = attractor(W_1[1 - alpha], 1 - alpha, V, Vplayer);
+        ldd B = attractor(W_1[1 - alpha], 1 - alpha, V, empty_set(), Vplayer);
         mCRL2log(log::debug) << "B = attractor(" << print_nodes(W_1[1 - alpha], m_all_nodes) << ", " << print_nodes(V, m_all_nodes) << ") = " << print_nodes(B, m_all_nodes) << std::endl;
         std::tie(W[0], W[1]) = zielonka(minus(V, B));
         W[1 - alpha] = union_(W[1 - alpha], B);
@@ -398,11 +404,12 @@ class symbolic_pbessolve_algorithm
     }
 
     ldd compute_total_graph(const ldd& V,
+        const ldd& todo,
         const ldd& Vdeadlock,
         std::array<ldd, 2>& won)
     {
       using namespace sylvan::ldds;
-      std::array<const ldd, 2> Vplayer = { m_V[0],  m_V[1] };
+      std::array<const ldd, 2> Vplayer = { intersect(V, m_V[0]),  intersect(V, m_V[1]) };
 
       // After removing the deadlock (winning) states the resulting set of states is a total graph.
       if (Vdeadlock != empty_set())
@@ -416,8 +423,8 @@ class symbolic_pbessolve_algorithm
 
       mCRL2log(log::verbose) << "preprocessing to obtain total graph" << std::endl;
       ldd Vtotal = V;
-      won[0] = attractor(won[0], 0, V, Vplayer);
-      won[1] = attractor(won[1], 1, V, Vplayer);
+      won[0] = attractor(won[0], 0, V, todo, Vplayer);
+      won[1] = attractor(won[1], 1, V, todo, Vplayer);
 
       // After removing the deadlock (winning) states the resulting set of states is a total graph.
       return minus(minus(V, won[0]), won[1]);
@@ -425,13 +432,13 @@ class symbolic_pbessolve_algorithm
 
   public:
 
-    bool solve(const ldd& V,
-               const ldd& initial_vertex,
-               const ldd& Vdeadlock = sylvan::ldds::empty_set(),
-               const ldd& W0 = sylvan::ldds::empty_set(),
-               const ldd& W1 = sylvan::ldds::empty_set())
+    bool solve(const ldd& initial_vertex,
+        const ldd& V,
+        const ldd& Vdeadlock = sylvan::ldds::empty_set(),
+        const ldd& W0 = sylvan::ldds::empty_set(),
+        const ldd& W1 = sylvan::ldds::empty_set())
     {
-      auto const& [solved0, solved1] = solve_impl(V, initial_vertex, Vdeadlock, W0, W1);
+      auto const& [solved0, solved1] = solve_impl(V, sylvan::ldds::empty_set(), Vdeadlock, W0, W1);
       if (includes(solved0, initial_vertex))
       {
         return true;
@@ -448,7 +455,7 @@ class symbolic_pbessolve_algorithm
 
     /// \returns The winning partition where first is the set won by player even.
     std::pair<ldd, ldd> solve_impl(const ldd& V,
-        const ldd& initial_vertex,
+        const ldd& todo,
         const ldd& Vdeadlock = sylvan::ldds::empty_set(),
         const ldd& W0 = sylvan::ldds::empty_set(),
         const ldd& W1 = sylvan::ldds::empty_set())
@@ -459,9 +466,8 @@ class symbolic_pbessolve_algorithm
       std::pair<ldd, ldd> results;
 
       std::array<ldd, 2> won = { W0, W1 };
-      ldd Vtotal = compute_total_graph(V, Vdeadlock, won);
-      std::array<const ldd, 2> Vplayer = { intersect(Vtotal, m_V[0]), intersect(Vtotal, m_V[1]) };
-      
+      ldd Vtotal = compute_total_graph(V, todo, Vdeadlock, won);
+      std::array<const ldd, 2> Vplayer = { intersect(Vtotal, m_V[0]), intersect(Vtotal, m_V[1]) };      
 
       mCRL2log(log::debug) << "\n--- apply zielonka to ---\n" << print_graph(Vtotal, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
       const auto& [solved0, solved1] = zielonka(Vtotal);
@@ -476,15 +482,17 @@ class symbolic_pbessolve_algorithm
     }
 
     std::pair<ldd, ldd> detect_cycles(const ldd& V,
+        const ldd& todo,
         const ldd& Vdeadlock,
         const ldd& W0 = sylvan::ldds::empty_set(),
         const ldd& W1 = sylvan::ldds::empty_set())
     {
+
       using namespace sylvan::ldds;
       stopwatch timer;
 
       std::array<ldd, 2> won = { W0, W1 };
-      ldd Vtotal = compute_total_graph(V, Vdeadlock, won);
+      ldd Vtotal = compute_total_graph(V, todo, Vdeadlock, won);
       std::array<const ldd, 2> Vplayer = { intersect(Vtotal, m_V[0]), intersect(Vtotal, m_V[1]) };
 
       mCRL2log(log::debug) << "\n--- apply cycle detection to ---\n" << print_graph(Vtotal, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
@@ -511,13 +519,14 @@ class symbolic_pbessolve_algorithm
 
         mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(U) << " states in cycles for priority " << rank << "\n";
 
-        won[alpha] = union_(won[alpha], attractor(U, alpha, V, Vplayer));
+        won[alpha] = union_(won[alpha], attractor(U, alpha, Vtotal, todo, Vplayer));
       }
 
       mCRL2log(log::verbose) << "finished cycle detection (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
       mCRL2log(log::debug) << print_graph(Vtotal, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
       mCRL2log(log::debug) << "W0 = " << print_nodes(won[0], m_all_nodes) << std::endl;
       mCRL2log(log::debug) << "W1 = " << print_nodes(won[1], m_all_nodes) << std::endl;
+
       return { won[0], won[1] };
     }
 };
