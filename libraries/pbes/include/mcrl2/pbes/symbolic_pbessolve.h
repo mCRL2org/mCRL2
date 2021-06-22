@@ -264,6 +264,8 @@ class symbolic_pbessolve_algorithm
       ldd Xoutside = minus(V, X);
       while (todo != empty_set())
       {
+        mCRL2log(log::debug) << "todo = " << print_nodes(todo, m_all_nodes) << std::endl;
+        mCRL2log(log::debug) << "Xoutside = " << print_nodes(Xoutside, m_all_nodes) << std::endl;
         stopwatch iter_start;
 
         // Determine current player's nodes that can reach X (without the elements already in X).
@@ -467,6 +469,9 @@ class symbolic_pbessolve_algorithm
       won[1] = union_(won[1], solved1);
 
       mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
+      mCRL2log(log::debug) << "W0 = " << print_nodes(won[0], m_all_nodes) << std::endl;
+      mCRL2log(log::debug) << "W1 = " << print_nodes(won[1], m_all_nodes) << std::endl;
+
       return { won[0], won[1] };
     }
 
@@ -482,6 +487,7 @@ class symbolic_pbessolve_algorithm
       ldd Vtotal = compute_total_graph(V, Vdeadlock, won);
       std::array<const ldd, 2> Vplayer = { intersect(Vtotal, m_V[0]), intersect(Vtotal, m_V[1]) };
 
+      mCRL2log(log::debug) << "\n--- apply cycle detection to ---\n" << print_graph(Vtotal, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
       for (const auto&[rank, Vrank] : m_rank_map)
       {
         // Determine the cycles for this priority and player.
@@ -509,6 +515,9 @@ class symbolic_pbessolve_algorithm
       }
 
       mCRL2log(log::verbose) << "finished cycle detection (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
+      mCRL2log(log::debug) << print_graph(Vtotal, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
+      mCRL2log(log::debug) << "W0 = " << print_nodes(won[0], m_all_nodes) << std::endl;
+      mCRL2log(log::debug) << "W1 = " << print_nodes(won[1], m_all_nodes) << std::endl;
       return { won[0], won[1] };
     }
 };
