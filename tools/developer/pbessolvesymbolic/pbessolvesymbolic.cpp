@@ -243,6 +243,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
                       "3 alternative split for conjunctive conditions where even more states can become reachable.",
                       'c');
       desc.add_option("total", "make the SRF PBES total", 't');
+      desc.add_option("reset", "set constant values when introducing parameters", '?');
       desc.add_hidden_option("no-remove-unused-rewrite-rules", "do not remove unused rewrite rules. ", 'u');
       desc.add_hidden_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
       desc.add_hidden_option("no-discard", "do not discard any parameters");
@@ -270,6 +271,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       options.summand_groups                        = parser.option_argument("groups");
       options.variable_order                        = parser.option_argument("reorder");
       options.make_total                            = parser.has_option("total");
+      options.reset_parameters                      = parser.has_option("reset");
       if (!options.make_total)
       {
         options.detect_deadlocks                    = true; // This is a required setting if the pbes is not total.

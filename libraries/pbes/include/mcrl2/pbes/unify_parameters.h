@@ -41,6 +41,9 @@ struct unify_parameters_replace_function
   // reuse this vector for constructing new parameters
   mutable std::vector<data::data_expression> tmp_parameters;
 
+  // If true then the newly introduced parameters will be reset to a default value instead of copying the value.
+  bool m_reset = true;
+
   data::variable_list compute_parameters()
   {
     std::vector<data::variable> parameter_vector;
@@ -62,9 +65,10 @@ struct unify_parameters_replace_function
 
   unify_parameters_replace_function(
     const std::map<core::identifier_string, data::variable_list>& propositional_variable_parameters_,
-    const data::data_specification& dataspec
+    const data::data_specification& dataspec,
+    bool reset = true
   )
-    : propositional_variable_parameters(propositional_variable_parameters_), generator(dataspec)
+    : propositional_variable_parameters(propositional_variable_parameters_), generator(dataspec), m_reset(reset)
   {
     using utilities::detail::contains;
 
@@ -107,7 +111,15 @@ struct unify_parameters_replace_function
     for (const data::variable& v: missing_parameters[variables])
     {
       std::size_t pos = parameter_positions[v];
-      tmp_parameters[pos] = generator(v.sort());
+
+      if (m_reset)
+      {
+        tmp_parameters[pos] = generator(v.sort());
+      }
+      else
+      {
+        tmp_parameters[pos] = v;
+      }
     }
     return propositional_variable_instantiation(x.name(), data::data_expression_list(tmp_parameters.begin(), tmp_parameters.end()));
   };
@@ -139,7 +151,7 @@ void unify_parameters(pbes& p)
 }
 
 inline
-void unify_parameters(srf_pbes& p)
+void unify_parameters(srf_pbes& p, bool reset = true)
 {
   std::map<core::identifier_string, data::variable_list> propositional_variable_parameters;
   for (const srf_equation& eqn: p.equations())
@@ -147,7 +159,7 @@ void unify_parameters(srf_pbes& p)
     propositional_variable_parameters[eqn.variable().name()] = eqn.variable().parameters();
   }
 
-  unify_parameters_replace_function replace(propositional_variable_parameters, p.data());
+  unify_parameters_replace_function replace(propositional_variable_parameters, p.data(), reset);
 
   // update the equations
   for (srf_equation& eqn: p.equations())

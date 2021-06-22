@@ -58,6 +58,7 @@ struct symbolic_reachability_options: public lps::symbolic_reachability_options
 {
   bool make_total = false;
   bool prune_todo_list = false;
+  bool reset_parameters = false;
   std::size_t solve_strategy = 0;
   std::size_t split_conditions = 0;
   std::string srf;
