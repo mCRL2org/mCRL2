@@ -4,6 +4,7 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
+\usepackage{amsthm}
 \usepackage{algorithm}
 \usepackage{algorithmicx}
 \usepackage[noend]{algpseudocode}
@@ -13,10 +14,12 @@
 \usepackage{graphicx}
 
 \newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{definition}[theorem]{Definition}
 \newtheorem{example}[theorem]{Example}
 
 \newcommand{\var}[1]{\ensuremath{\textit{#1}}}
+\newcommand{\interpret}[1]{\llbracket #1 \rrbracket}
 
 \newcommand{\emptylist}{\ensuremath{[\:]}}
 
@@ -26,7 +29,7 @@
 \newcommand{\pred}{\ensuremath{\textit{pred}}}
 
 \title{Symbolic Reachability using LDDs}
-\author{Wieger Wesselink}
+\author{Wieger Wesselink and Maurice Laveaux}
 \date{\today}
 
 \begin{document}
@@ -714,15 +717,18 @@ $\textsf{relprod}(L_i, \var{todo}, I_r, I_w)$ & \textsf{relprod} (Sylvan functio
 \subsection{Splitting Conditions}
 
 Symbolic reachability is most effective when the number of read/write parameters and the number of transitions per transition group are small.
-For disjunctive conditions we can derive the following:
+We can split the disjunctive conditions in a conjunctive equation as follows:
 Consider a PBES $\mathcal{E}$ in SRF with an equation $\sigma_i X_i(d:D) \in \mathcal{E}$ of the shape:
 \begin{align*}
   \sigma_i X_i(d:D) &= \bigwedge\limits_{j \in J_i} \forall e_j : E_j . (\bigvee\limits_{k \in K_{ij}} f_{ijk}(d,e_j)) \implies X_{g_{ij}}(h_{ij}(d, e_j)) \\  
   \sigma_i X_i(d:D) &= \bigwedge\limits_{j \in J_i} \forall e_j : E_j . \bigwedge\limits_{k \in K_{ij}} f_{ijk}(d,e_j) \implies X_{g_{ij}}(h_{ij}(d, e_j)) \\
   \sigma_i X_i(d:D) &= \bigwedge\limits_{j \in J_i}\bigwedge\limits_{k \in K_{ij}} \forall e_j : E_{ij} .  f_{ijk}(d,e_j) \implies X_{g_{ij}}(h_{ij}(d, e_j))
 \end{align*}
-For the final equation every clause $f_{ijk}(d,e_j))$, for $k \in K_j$, can be treated as its own transition group.
-For conjunctive conditions we have to introduce a new equation to ensure that the result is in SRF.
+This transformation is safe and allows us to consider every $f_{ijk}(d,e_j))$ as its own transition group.
+A similar transformation can be applied to conjunctions in a disjunctive equation.
+
+We can apply another transformation to conjunctive conditions inside conjunctive equations.
+By introducing a new equation for every conjunctive clause $f_{ijk}(d,e_j))$, for $k \in K_j$, we can remain in SRF by the following transformation:
 \begin{align*}
   \sigma_i X_i(d:D) &= \bigwedge\limits_{j \in J_i} \forall e_j : E_j . (\bigwedge\limits_{k \in K_{ij}} f_{ijk}(d,e_j)) \implies X_{g_{ij}}(h_{ij}(d, e_j)) \\  
   \sigma_i X_i(d:D) &= \bigwedge\limits_{j \in J_i} \forall e_j : E_j . \bigvee\limits_{k \in K_{ij}} (\neg f_{ijk}(d,e_j) \lor X_{g_{ij}}(h_{ij}(d, e_j))) \\
@@ -739,7 +745,7 @@ Note that every $j \in J_i$ can be transformed according to whether the conditio
 The cases for a disjunctive or conjunctive condition within a disjunctive equation are completely dual.
 
 We can also observe that in the equation for $Y_j$ there is always a dependency on $X_{g_{ij}}(h_{ij}(d, e_j))$, whereas, in the original equation this was guarded by $(\bigwedge\limits_{k \in K_j} f_{ijk}(d,e_j))$.
-Alternatively, we can also consider the following equation for $Y_j$ such that $X_{g_{ij}}(h_{ij}(d, e_j))$ still has (weakened) guards.
+Alternatively, we can also consider the following equation for $Y_j$ such that $X_{g_{ij}}(h_{ij}(d, e_j))$ still has (weaker) guards.
 
 \begin{align*}
   \nu Y_j(d : D, e_j : E_j) &= \bigvee\limits_{k \in K_j} \textit{true} \land Y_{jk}(d, e_j) \\
@@ -747,8 +753,9 @@ Alternatively, we can also consider the following equation for $Y_j$ such that $
 \end{align*}
 
 \newpage
-\section{Zielonka}
-Let $V$ be the nodes of a parity game.
+\section{Parity Game Solving}
+Let $V$ be the nodes of a parity game and $V_0$ and $V_1$ the vertices owned by $0$ (even) and $1$ (odd) respectively.
+Furthermore, we denote the priority of $v \in V$ by $r(v)$.
 For a non-empty set $U \subseteq V$ and a player $\alpha$, the
 $\alpha$-attractor into $U$, denoted $\attr{\alpha}{U,V}$,
 is the set of vertices for which player
@@ -792,7 +799,7 @@ Instead of determining all predecessors for states in $V \setminus \attr[n]{\alp
 Furthermore, we can actually keep track of the states that have been added in the last iteration and were not yet part of the attractor set.
 We then only have to compute predecessors with respect to this todo set.
 
-\begin{algorithm}[h]
+\begin{algorithm}[H]
 \caption{Attractor set computation for a union of sparse relations}
 \label{alg:attractor_set}
 \begin{algorithmic}[1]
@@ -821,7 +828,32 @@ We then only have to compute predecessors with respect to this todo set.
 \end{algorithmic}
 \end{algorithm}
 
-\begin{algorithm}[h]
+The standard Zielonka solving algorithm, defined in Algorithm~\ref{alg:zielonka} requires that every vertex has an outgoing edge.
+If this is the case then the graph is called \emph{total}.
+We can achieve this by extending every disjunctive PBES equation with $\textsf{true} \land X_\textsf{false}$ where $X_\textsf{false}$ is defined as $\mu X_\textsf{false} = \textsf{true} \land X_\textsf{false}$ and similarly for the conjunctive PBES equations with $X_\textsf{true}$.
+However, adding these unnecessary transitions can be costly.
+
+Therefore, if we perform the deadlock detection we can avoid extending the PBES and obtain a total graph by performing the preprocessing step described in Algorithm~\ref{alg:preprocess}.
+Every disjunctive vertex that is a deadlock is won by player odd (previously indicated by a transition to $X_\textsf{false}$) and every conjunctive vertex that is a deadlock by player even.
+If we compute the attractors to these won vertices then the resulting graph is total and can be used in the Zielonka algorithm as follows $\textsc{zielonka}(\textsc{preprocess}(V, D, \emptyset, \emptyset))$.
+
+\begin{algorithm}[H]
+\caption{Preprocess the graph to be total and remove deadlocks $D$ already solved vertices $W_0, W_1$ where $W_0$ is won by even and $W_1$ by odd.}
+\label{alg:preprocess}
+\begin{algorithmic}[1]
+\Function{Preprocess}{$V, D, W_0, W_1$}
+	\State {$W'_0 \gets W_0 \cup (D \cap V_1)$}	
+	\State {$W'_1 \gets W_1 \cup (D \cap V_0)$}
+	
+	\State {$W'_0 \gets \attr{0}{W'_0, V}$}
+	\State {$W'_1 \gets \attr{1}{W'_1, V}$}
+	
+	\State \Return $V \setminus (W'_0 \cup W'_1)$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
 \caption{Zielonka}
 \label{alg:zielonka}
 \begin{algorithmic}[1]
