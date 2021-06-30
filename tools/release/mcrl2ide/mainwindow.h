@@ -80,6 +80,17 @@ class MainWindow : public QMainWindow
   void actionOpenProjectFolderInExplorer();
 
   /**
+   * @brief actionImportProperties Allows the user to import property files to
+   *   this project
+   */
+  void actionImportProperties();
+
+  /**
+   * @brief actionOpenMcrl2gui Allows the user to open mcrl2-gui
+   */
+  void actionOpenMcrl2gui();
+
+  /**
    * @brief actionFindAndReplace Allows the user to find and replace strings in
    *   the text editor
    */
@@ -111,12 +122,6 @@ class MainWindow : public QMainWindow
    * @brief actionAddProperty Allows the user to add a property
    */
   void actionAddProperty();
-
-  /**
-   * @brief actionImportProperties Allows the user to import property files to
-   *   this project
-   */
-  void actionImportProperties();
 
   /**
    * @brief actionVerifyAllProperties Allows the user to verify all defined
@@ -175,6 +180,7 @@ class MainWindow : public QMainWindow
 
   QAction* openProjectFolderInExplorerAction;
   QAction* importPropertiesAction;
+  QAction* openGuiAction;
   QAction* exitAction;
 
   QAction* undoAction;
