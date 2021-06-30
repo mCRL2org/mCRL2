@@ -486,9 +486,13 @@ class lts: public LTS_BASE
       {
         ACTION_LABEL_T a=action_label(i);
         a.hide_actions(tau_actions);
-        if (a!=action_label(i))  // If hiding has no effect, nothing needs to be done. 
+        if (a==ACTION_LABEL_T())  
         {
           m_hidden_label_set.insert(i);
+        }
+        else if (a!=action_label(i))
+        {
+          set_action_label(i,a);  
         }
       }
     }

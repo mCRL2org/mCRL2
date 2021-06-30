@@ -158,19 +158,16 @@ class action_label_lts: public mcrl2::lps::multi_action
     */
     void hide_actions(const std::vector<std::string>& tau_actions)
     {
-      const process::action_list mas = this->actions();
-      process::action_list new_action_list;
-      for (process::action_list:: const_iterator i=mas.begin(); i!=mas.end(); ++i)
+      process::action_vector new_multi_action;
+      for (const process::action& a: this->actions()) 
       {
-        const process::action a=*i;
-
         if (std::find(tau_actions.begin(),tau_actions.end(),
                       std::string(a.label().name()))==tau_actions.end())  // this action must not be hidden.
         {
-          new_action_list.push_front(a);
+          new_multi_action.push_back(a);
         }
       }
-      m_actions=new_action_list;
+      m_actions=process::action_list(new_multi_action.begin(), new_multi_action.end());
     }
 
     /* \brief The action label that represents the internal action.
