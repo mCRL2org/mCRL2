@@ -394,9 +394,12 @@ class explorer: public abortable
     template <typename SummandSequence>
     state find_representative(state& u0, const SummandSequence& summands)
     {
+      bool recursive_undo = m_recursive;
+      m_recursive = true;
       data::data_expression_list process_parameter_undo = process_parameter_values();
       state result = lps::find_representative(u0, [&](const state& u) { return generate_successors(u, summands); });
       set_process_parameter_values(process_parameter_undo);
+      m_recursive = recursive_undo;
       return result;
     }
 
@@ -604,7 +607,7 @@ class explorer: public abortable
       return transitions;
     }
 
-    // pre: d0 is in normal form
+    // pre: s0 is in normal form
     template <typename SummandSequence>
     std::vector<state> generate_successors(
       const state& s0,
