@@ -14,9 +14,16 @@
 #include "mcrl2/utilities/detail/bucket_list.h"
 
 #include <cmath>
+#include <mutex>
 
 namespace mcrl2::utilities
 {
+
+/// \brief Enables lockfree implementation of emplace.
+constexpr static bool EnableLockfreeInsertion = true;
+
+/// \brief Number of buckets per mutex.
+constexpr static long BucketsPerMutex = 256;
 
 /// \brief Prints various information for unordered_set like data structures.
 template<typename T>
@@ -39,19 +46,25 @@ class unordered_map;
 ///          Additionally, the unordered_set supports allocators that have a specialized allocate_args(args...) to vary the allocation size based
 ///          on the arguments used. This is required to store _aterm_appl classes with the function symbol arity determined at runtime.
 ///
+///          Threadsafe enables concurrent emplace calls, and Resize enables automatically resizing if needed.
+///
 /// \todo Does not implement std::unordered_map equal_range and swap.
 template<typename Key,
          typename Hash = std::hash<Key>,
          typename Equals = std::equal_to<Key>,
          typename Allocator = std::allocator<Key>,
-         bool ThreadSafe = false>
+         bool ThreadSafe = false,
+         bool Resize = true>
 class unordered_set
 {
+  static_assert (!(ThreadSafe && Resize), "ThreadSafe cannot be enabled together with automatic resizing.");
+
 private:
   /// \brief Combine the bucket list and a lock that locks modifications to the bucket list.
   using bucket_type = detail::bucket_list<Key, Allocator>;
   using bucket_iterator = typename std::vector<bucket_type>::iterator;
   using const_bucket_iterator = typename std::vector<bucket_type>::const_iterator;
+  using mutex_type = std::mutex;
 
   template<typename Key_, typename T, typename Hash_, typename KeyEqual, typename Allocator_, bool ThreadSafe_>
   friend class unordered_map;
@@ -253,6 +266,7 @@ public:
   /// \brief Inserts an element Key(args...) into the set if it did not already exist.
   /// \returns A pair of the iterator pointing to the element and a boolean that is true iff
   ///         a new element was inserted (as opposed to it already existing in the set).
+  /// \threadsafe
   template<typename ...Args>
   std::pair<iterator, bool> emplace(Args&&... args);
 
@@ -310,6 +324,10 @@ public:
   /// \details Not standard.
   size_type capacity() const noexcept { return m_buckets.size(); }
 
+  /// \brief Resizes the hash table if necessary.
+  /// \details Not standard.
+  void rehash_if_needed();
+
 private:
   template<typename Key_, typename T, typename Hash_, typename KeyEqual, typename Allocator_, bool ThreadSafe_>
   friend class unordered_map;
@@ -326,6 +344,7 @@ private:
   : std::true_type { };
 
   /// \brief Inserts T(args...) into the given bucket, assumes that it did not exists before.
+  /// \threadsafe
   template<typename ...Args>
   std::pair<iterator, bool> emplace_impl(size_type bucket_index, Args&&... args);
 
@@ -341,19 +360,17 @@ private:
   template<typename ...Args>
   const_iterator find_impl(size_type bucket_index, const Args&... args) const;
 
-  /// \brief Resizes the hash table if required.
-  void rehash_if_needed();
-
   /// \brief True iff the hash and equals functions allow transparent lookup,
   static constexpr bool allow_transparent = is_transparent<Hash>() && is_transparent<Equals>();
 
   /// \brief The number of elements stored in this set.
-  size_type m_number_of_elements = 0;
+  std::conditional_t<ThreadSafe, std::atomic<size_type>, size_type> m_number_of_elements = 0;
 
   /// \brief Always equal to m_buckets.size() - 1.
   size_type m_buckets_mask;
 
   std::vector<bucket_type> m_buckets;
+  std::vector<std::mutex> m_bucket_mutexes;
 
   float m_max_load_factor = 1.0f;
 
