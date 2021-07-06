@@ -167,54 +167,41 @@ class aterm : public unprotected_aterm
 public:
 
   /// \brief Default constructor.
-  aterm() noexcept = default;
+  aterm() noexcept;
 
   /// \brief Standard destructor.
-  ~aterm()
-  {
-    decrement_reference_count();
-  }
+  ~aterm() noexcept;
 
   /// \brief Constructor based on an internal term data structure. This is not for public use.
   /// \details Takes ownership of the passed underlying term.
   /// \param t A pointer to an internal aterm data structure.
   /// \todo Should be protected, but this cannot yet be done due to a problem
   ///       in the compiling rewriter.
-  explicit aterm(const detail::_aterm *t) noexcept
-  {
-    t->increment_reference_count();
-    m_term = t;
-  }
+  explicit aterm(const detail::_aterm *t) noexcept;
 
   /// \brief Copy constructor.
   /// \param other The aterm that is copied.
   /// \details  This class has a non-trivial destructor so explicitly define the copy and move operators.
-  aterm(const aterm& other) noexcept
-   : unprotected_aterm(other.m_term)
-  {
-    increment_reference_count();
-  }
+  aterm(const aterm& other) noexcept;
 
   /// \brief Move constructor.
   /// \param other The aterm that is moved into the new term. This term may have changed after this operation.
   /// \details This operation does not employ increments and decrements of reference counts and is therefore more
   ///          efficient than the standard copy construct.
-  aterm(aterm&& other) noexcept
-   : unprotected_aterm(other.m_term)
-  {
-    other.m_term=nullptr;
-  }
+  aterm(aterm&& other) noexcept;
 
   /// \brief Assignment operator.
   /// \param other The aterm that will be assigned.
   /// \return A reference to the assigned term.
   aterm& operator=(const aterm& other) noexcept
   {
+#ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
     // Increment first to prevent the same term from becoming reference zero temporarily.
     other.increment_reference_count();
 
     // Decrement the reference from the term that is currently referred to.
     decrement_reference_count();
+#endif
 
     m_term = other.m_term;
     return *this;
@@ -226,11 +213,16 @@ public:
   /// \return A reference to the assigned term.
   aterm& operator=(aterm&& other) noexcept
   {
+#ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
     std::swap(m_term, other.m_term);
+#else
+    m_term = other.m_term;    // Using hash set protection it is cheaper just to move the value to the new term.
+#endif
     return *this;
   }
 
 protected:
+#ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
   /// \brief Increment the reference count.
   /// \details This increments the reference count unless the term contains null.
   ///          Use with care as this destroys the reference count mechanism.
@@ -252,6 +244,7 @@ protected:
       m_term->decrement_reference_count();
     }
   }
+#endif
 };
 
 template <class Term1, class Term2>

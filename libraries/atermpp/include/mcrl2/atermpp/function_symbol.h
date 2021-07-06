@@ -36,20 +36,6 @@ public:
   function_symbol()
   {}
 
-  /// \brief Destructor
-  ~function_symbol()
-  {
-    // The function symbol that was moved from should not reduce reference counter.
-    if (m_function_symbol.defined())
-    {
-      m_function_symbol->decrement_reference_count();
-      if (m_function_symbol->reference_count() == 0)
-      {
-        destroy();
-      }
-    }
-  }
-
   /// This class has non-trivial destructor so declare default copy and move operators.
   function_symbol(const function_symbol& other) noexcept = default;
   function_symbol& operator=(const function_symbol& other) noexcept = default;
