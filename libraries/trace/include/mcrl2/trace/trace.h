@@ -19,7 +19,6 @@
 #ifndef _TRACE_H__
 #define _TRACE_H__
 
-// #include <iostream>
 #include <fstream>
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/state.h"
@@ -98,8 +97,6 @@ class Trace
 #define TRACE_MCRL2_MARKER_SIZE 10
 #define TRACE_MCRL2_VERSION "\x01\x00"
 #define TRACE_MCRL2_VERSION_SIZE 2
-
-#define INIT_BUF_SIZE 64
 
   public:
     /// \brief Default constructor for an empty trace.
