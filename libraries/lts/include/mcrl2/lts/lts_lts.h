@@ -167,7 +167,7 @@ class action_label_lts: public mcrl2::lps::multi_action
           new_multi_action.push_back(a);
         }
       }
-      m_actions=process::action_list(new_multi_action.begin(), new_multi_action.end());
+      *this= action_label_lts(lps::multi_action(process::action_list(new_multi_action.begin(), new_multi_action.end()),time()));
     }
 
     /* \brief The action label that represents the internal action.

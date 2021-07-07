@@ -14,6 +14,7 @@
 
 #include "mcrl2/core/print.h"
 #include "mcrl2/process/process_expression.h"
+#include "mcrl2/process/timed_multi_action.h"
 
 namespace mcrl2
 {
@@ -26,8 +27,54 @@ bool is_multi_action(const atermpp::aterm_appl& x);
 
 /// \brief Represents a multi action
 /// \details Multi actions consist of a list of actions together with an optional time tag.
-class multi_action
+class multi_action : public process::timed_multi_action
 {
+  public:
+    /// \brief Constructor
+    explicit multi_action(const process::action_list& actions = process::action_list(), 
+                          data::data_expression time = data::undefined_real())
+      : timed_multi_action(actions,time) 
+    {
+      assert(data::sort_real::is_real(time.sort()));
+    }
+
+    /// \brief Constructor
+    explicit multi_action(const atermpp::aterm& t1)
+      : timed_multi_action(process::is_action(atermpp::down_cast<atermpp::aterm_appl>(t1)) 
+                                ? atermpp::down_cast<process::action_list>(t1)
+                                : atermpp::down_cast<process::action_list>(atermpp::down_cast<atermpp::aterm_appl>(t1)[0]),
+                           data::undefined_real())
+    {
+      const atermpp::aterm_appl& t = atermpp::down_cast<atermpp::aterm_appl>(t1);
+      assert(process::is_action(t) || lps::is_multi_action(t));
+    }
+
+    /// \brief Constructor
+    explicit multi_action(const process::action& l)
+      : timed_multi_action(process::action_list({ l }),data::undefined_real())
+    {}
+
+    /// \brief Returns the arguments of the multi action.
+    /// \return The arguments of the multi action.
+    // [[deprecated]]      // This is not a natural function, and should not be part of this interface. 
+    /* data::data_expression_list arguments() const
+    {
+      assert(actions().size()>0);
+      return actions().front().arguments();
+    } */
+
+    /// \brief Joins the actions of both multi actions.
+    /// \pre The time of both multi actions must be equal.
+    multi_action operator+(const multi_action& other) const
+    {
+      assert(time() == other.time());
+      return multi_action(actions() + other.actions(), time());
+    }
+
+};
+
+/*
+{ 
     friend class action_summand;
 
   protected:
@@ -144,7 +191,7 @@ class multi_action
       swap(m_actions, other.m_actions);
       swap(m_time, other.m_time);
     }
-};
+}; */
 
 //--- start generated class multi_action ---//
 /// \brief list of multi_actions
@@ -181,8 +228,8 @@ bool is_multi_action(const atermpp::aterm_appl& x)
 }
 
 // template function overloads
-void normalize_sorts(multi_action& x, const data::sort_specification& sortspec);
-void translate_user_notation(lps::multi_action& x);
+lps::multi_action normalize_sorts(const multi_action& x, const data::sort_specification& sortspec);
+lps::multi_action translate_user_notation(const lps::multi_action& x);
 std::set<data::variable> find_all_variables(const lps::multi_action& x);
 std::set<data::variable> find_free_variables(const lps::multi_action& x);
 

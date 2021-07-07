@@ -469,14 +469,16 @@ lps::stochastic_action_summand create_summand(
   }
 
   lps::multi_action action(info.action);
+  process::action_list al=action.actions();
   if (info.is_independent)
   {
-    action.actions().push_front(process::action(tag));
+    al.push_front(process::action(tag));
   }
   else
   {
-    action.actions().push_front(process::action(sync, sync_values));
+    al.push_front(process::action(sync, sync_values));
   }
+  action = multi_action(al,action.time());
 
   // The update expression.
   data::assignment_list assignments = project(summand.assignments(), parameters);

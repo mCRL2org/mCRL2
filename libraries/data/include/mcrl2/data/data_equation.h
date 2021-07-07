@@ -110,10 +110,10 @@ class data_equation: public atermpp::aterm_appl
 //--- end user section data_equation ---//
 };
 
-/// \brief list of data_equations.
+/// \brief list of data_equations
 typedef atermpp::term_list<data_equation> data_equation_list;
 
-/// \brief vector of data_equations.
+/// \brief vector of data_equations
 typedef std::vector<data_equation>    data_equation_vector;
 
 // prototype declaration

@@ -255,7 +255,7 @@ struct commutative_confluence_condition
     }
     else
     {
-      const auto& fi = summand_i.multi_action.arguments();
+      const auto& fi = summand_i.multi_action.actions().front().arguments();
       data::data_expression_list fi_gj_ei1 = data::replace_variables_capture_avoiding(fi, sigma);
       result = imp(data::and_(ci, cj),
         data::make_exists(ei1 + ej1,
@@ -311,7 +311,7 @@ struct square_confluence_condition
     }
     else
     {
-      const auto& fi = summand_i.multi_action.arguments();
+      const auto& fi = summand_i.multi_action.actions().front().arguments();
       data::data_expression_list fi_gj = data::replace_variables_capture_avoiding(fi, sigma);
       data::remove_assignments(sigma, d);
       result = imp(data::and_(ci, cj), detail::make_and(ci_gj, cj_gi, detail::equal_to(fi, fi_gj), detail::equal_to(gj_gi, gi_gj)));
@@ -359,7 +359,7 @@ struct triangular_confluence_condition
     }
     else
     {
-      const auto& fi = summand_i.multi_action.arguments();
+      const auto& fi = summand_i.multi_action.actions().front().arguments();
       data::data_expression_list fi_gj = data::replace_variables_capture_avoiding(fi, sigma);
       data::remove_assignments(sigma, d);
       result = imp(and_(ci, cj), detail::make_and(ci_gj, detail::equal_to(fi, fi_gj), detail::equal_to(gi_gj, gi)));

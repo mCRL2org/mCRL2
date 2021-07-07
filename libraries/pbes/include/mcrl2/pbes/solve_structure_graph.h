@@ -447,7 +447,7 @@ class lps_solve_structure_graph_algorithm: public solve_structure_graph_algorith
 
           summand.summation_variables() = data::variable_list();
           summand.condition() = data::join_and(condition.begin(), condition.end());
-          summand.multi_action().actions() = process::action_list(actions.begin(), actions.end());
+          summand.multi_action() = lps::multi_action(process::action_list(actions.begin(), actions.end()),summand.multi_action().time());
           summand.assignments() = data::assignment_list(next_state_assignments.begin(), next_state_assignments.end());
 
           action_summands.push_back(summand);
