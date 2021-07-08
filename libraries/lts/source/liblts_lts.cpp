@@ -156,15 +156,14 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
     if (term == transition_mark())
     {
       aterm_int from;
-      process::timed_multi_action action;
+      action_label_lts action;
       aterm_int to;
 
       stream >> from;
       stream >> action;
       stream >> to;
 
-      const action_label_lts lts_action(lps::multi_action(action.actions(),action.time()));
-      const auto [index, inserted] = multi_actions.insert(lts_action);
+      const auto [index, inserted] = multi_actions.insert(action);
 
       std::size_t target_index = to.value();
       if constexpr (std::is_same<LTS, probabilistic_lts_lts_t>::value)
@@ -189,7 +188,7 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
 
       if (inserted)
       {
-        std::size_t actual_index = lts.add_action(lts_action);
+        std::size_t actual_index = lts.add_action(action);
         utilities::mcrl2_unused(actual_index);
         assert(actual_index == index);
       }
@@ -200,15 +199,14 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
       if constexpr (std::is_same<LTS, probabilistic_lts_lts_t>::value)
       {
         aterm_int from;
-        process::timed_multi_action action;
+        action_label_lts action;
         probabilistic_lts_lts_t::probabilistic_state_t to;
 
         stream >> from;
         stream >> action;
         stream >> to;
 
-        const action_label_lts lts_action(lps::multi_action(action.actions(),action.time()));
-        const auto [index, inserted] = multi_actions.insert(lts_action);
+        const auto [index, inserted] = multi_actions.insert(action);
 
         // Compute the index of the probabilistic state.
         const auto [to_index, state_inserted] = probabilistic_states.insert(to);
@@ -227,7 +225,7 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
 
         if (inserted)
         {
-          std::size_t actual_index = lts.add_action(action_label_lts(lps::multi_action(action.actions())));
+          std::size_t actual_index = lts.add_action(action);
           utilities::mcrl2_unused(actual_index);
           assert(actual_index == index);
         }
@@ -337,17 +335,17 @@ static void write_lts(atermpp::aterm_ostream& stream, const LTS& lts)
    lts.process_parameters(),
    lts.action_label_declarations());
 
-  for (auto& trans : lts.get_transitions())
+  for (const transition& trans : lts.get_transitions())
   {
     lts_lts_t::action_label_t label = lts.action_label(lts.apply_hidden_label_map(trans.label()));
 
     if constexpr (std::is_same<LTS, probabilistic_lts_lts_t>::value)
     {
-      write_transition(stream, trans.from(), process::timed_multi_action(label.actions(), label.time()), lts.probabilistic_state(trans.to()));
+      write_transition(stream, trans.from(), label, lts.probabilistic_state(trans.to()));
     }
     else
     {
-      write_transition(stream, trans.from(), process::timed_multi_action(label.actions(), label.time()), trans.to());
+      write_transition(stream, trans.from(), label, trans.to());
     }
   }
 
@@ -436,7 +434,7 @@ void write_lts_header(atermpp::aterm_ostream& stream,
   stream << action_labels;
 }
 
-void write_transition(atermpp::aterm_ostream& stream, std::size_t from, const process::timed_multi_action& label, std::size_t to)
+void write_transition(atermpp::aterm_ostream& stream, std::size_t from, const lps::multi_action& label, std::size_t to)
 {
   stream << detail::transition_mark();
   stream << atermpp::aterm_int(from);
@@ -444,7 +442,7 @@ void write_transition(atermpp::aterm_ostream& stream, std::size_t from, const pr
   stream << atermpp::aterm_int(to);
 }
 
-void write_transition(atermpp::aterm_ostream& stream, std::size_t from, const process::timed_multi_action& label, const probabilistic_lts_lts_t::probabilistic_state_t& to)
+void write_transition(atermpp::aterm_ostream& stream, std::size_t from, const lps::multi_action& label, const probabilistic_lts_lts_t::probabilistic_state_t& to)
 {
   if (to.size() == 1)
   {

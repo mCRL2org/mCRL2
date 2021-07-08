@@ -37,7 +37,7 @@ struct add_sort_expressions: public Builder<Derived>
     static_cast<Derived&>(*this).enter(x);
     if (x.has_time())
     {
-      x.time() = static_cast<Derived&>(*this).apply(x.time());
+      x.time() = static_cast<Derived&>(*this).apply(x.time());    
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -45,7 +45,9 @@ struct add_sort_expressions: public Builder<Derived>
   lps::multi_action apply(const lps::multi_action& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    lps::multi_action result = lps::multi_action(static_cast<Derived&>(*this).apply(x.actions()), static_cast<Derived&>(*this).apply(x.time()));
+    lps::multi_action result = x.has_time() ?
+      lps::multi_action(static_cast<Derived&>(*this).apply(x.actions()), static_cast<Derived&>(*this).apply(x.time())) :
+      lps::multi_action(static_cast<Derived&>(*this).apply(x.actions()), x.time());
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -167,7 +169,7 @@ struct add_data_expressions: public Builder<Derived>
     static_cast<Derived&>(*this).enter(x);
     if (x.has_time())
     {
-      x.time() = static_cast<Derived&>(*this).apply(x.time());
+      x.time() = static_cast<Derived&>(*this).apply(x.time());    
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -175,7 +177,9 @@ struct add_data_expressions: public Builder<Derived>
   lps::multi_action apply(const lps::multi_action& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    lps::multi_action result = lps::multi_action(static_cast<Derived&>(*this).apply(x.actions()), static_cast<Derived&>(*this).apply(x.time()));
+    lps::multi_action result = x.has_time() ?
+      lps::multi_action(static_cast<Derived&>(*this).apply(x.actions()), static_cast<Derived&>(*this).apply(x.time())) :
+      lps::multi_action(static_cast<Derived&>(*this).apply(x.actions()), x.time());
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -287,7 +291,7 @@ struct add_variables: public Builder<Derived>
     static_cast<Derived&>(*this).enter(x);
     if (x.has_time())
     {
-      x.time() = static_cast<Derived&>(*this).apply(x.time());
+      x.time() = static_cast<Derived&>(*this).apply(x.time());    
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -295,7 +299,9 @@ struct add_variables: public Builder<Derived>
   lps::multi_action apply(const lps::multi_action& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    lps::multi_action result = lps::multi_action(static_cast<Derived&>(*this).apply(x.actions()), static_cast<Derived&>(*this).apply(x.time()));
+    lps::multi_action result = x.has_time() ?
+      lps::multi_action(static_cast<Derived&>(*this).apply(x.actions()), static_cast<Derived&>(*this).apply(x.time())) :
+      lps::multi_action(static_cast<Derived&>(*this).apply(x.actions()), x.time());
     static_cast<Derived&>(*this).leave(x);
     return result;
   }

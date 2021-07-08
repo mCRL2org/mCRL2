@@ -62,7 +62,6 @@ std::string pp(const process::stochastic_operator& x) { return process::pp< proc
 std::string pp(const process::sum& x) { return process::pp< process::sum >(x); }
 std::string pp(const process::sync& x) { return process::pp< process::sync >(x); }
 std::string pp(const process::tau& x) { return process::pp< process::tau >(x); }
-std::string pp(const process::timed_multi_action& x) { return process::pp< process::timed_multi_action >(x); }
 std::string pp(const process::untyped_multi_action& x) { return process::pp< process::untyped_multi_action >(x); }
 std::string pp(const process::untyped_process_assignment& x) { return process::pp< process::untyped_process_assignment >(x); }
 process::action normalize_sorts(const process::action& x, const data::sort_specification& sortspec) { return process::normalize_sorts< process::action >(x, sortspec); }

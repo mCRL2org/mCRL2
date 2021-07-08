@@ -174,7 +174,7 @@ atermpp::aterm_appl action_summand_to_aterm(const action_summand& s)
   atermpp::aterm_appl result = atermpp::aterm_appl(core::detail::function_symbol_LinearProcessSummand(),
                        s.summation_variables(),
                        s.condition(),
-                       lps::detail::multi_action_to_aterm(s.multi_action()),
+                       s.multi_action(),
                        s.multi_action().time(),
                        s.assignments(),
                        lps::stochastic_distribution()

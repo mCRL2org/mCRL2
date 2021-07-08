@@ -109,15 +109,16 @@ struct <BUILDER>: public <ADD_BUILDER><<PARENT_BUILDER>, Derived>
 
     #----------------------------------------------------------------------------------------#
     # N.B. THIS IS AN UGLY HACK to deal with the optional time function in some LPS classes
-    # TODO: investigate if the time interface can be improved
+    # TODO: investigate if the time interface can be improved. 
+    # The first substitution is still necessary for a timed_deadlock summand. This needs to be adapted. 
     text = text.replace('x.time() = static_cast<Derived&>(*this).apply(x.time());', '''if (x.has_time())
     {
-      x.time() = static_cast<Derived&>(*this).apply(x.time());
+      x.time() = static_cast<Derived&>(*this).apply(x.time());    
     }''')
-    text = text.replace('process::timed_multi_action result = process::timed_multi_action(static_cast<Derived&>(*this).apply(x.actions()), static_cast<Derived&>(*this).apply(x.time()));',
-'''process::timed_multi_action result = x.has_time() ?
-      process::timed_multi_action(static_cast<Derived&>(*this).apply(x.actions()), static_cast<Derived&>(*this).apply(x.time())) :
-      process::timed_multi_action(static_cast<Derived&>(*this).apply(x.actions()), x.time());''')
+    text = text.replace('lps::multi_action result = lps::multi_action(static_cast<Derived&>(*this).apply(x.actions()), static_cast<Derived&>(*this).apply(x.time()));',
+'''lps::multi_action result = x.has_time() ?
+      lps::multi_action(static_cast<Derived&>(*this).apply(x.actions()), static_cast<Derived&>(*this).apply(x.time())) :
+      lps::multi_action(static_cast<Derived&>(*this).apply(x.actions()), x.time());''')
     #----------------------------------------------------------------------------------------#
 
     label = add_builder

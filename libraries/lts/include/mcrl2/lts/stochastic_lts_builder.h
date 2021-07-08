@@ -22,15 +22,15 @@ struct stochastic_lts_builder
 {
   // All LTS classes use integers to represent actions in transitions. A mapping from actions to integers
   // is needed to avoid duplicates.
-  utilities::unordered_map_large<process::timed_multi_action, std::size_t> m_actions;
+  utilities::unordered_map_large<lps::multi_action, std::size_t> m_actions;
 
   stochastic_lts_builder()
   {
-    process::timed_multi_action tau(process::action_list(), data::undefined_real());
+    lps::multi_action tau(process::action_list(), data::undefined_real());
     m_actions.emplace(std::make_pair(tau, m_actions.size()));
   }
 
-  std::size_t add_action(const process::timed_multi_action& a)
+  std::size_t add_action(const lps::multi_action& a)
   {
     auto i = m_actions.find(a);
     if (i == m_actions.end())
@@ -44,7 +44,7 @@ struct stochastic_lts_builder
   virtual void set_initial_state(const std::list<std::size_t>& targets, const std::vector<data::data_expression>& probabilities) = 0;
 
   // Add a transition to the LTS
-  virtual void add_transition(std::size_t from, const process::timed_multi_action& a, const std::list<std::size_t>& targets, const std::vector<data::data_expression>& probabilities) = 0;
+  virtual void add_transition(std::size_t from, const lps::multi_action& a, const std::list<std::size_t>& targets, const std::vector<data::data_expression>& probabilities) = 0;
 
   // Add actions and states to the LTS
   virtual void finalize(const utilities::indexed_set<lps::state>& state_map, bool timed) = 0;
@@ -61,7 +61,7 @@ class stochastic_lts_none_builder: public stochastic_lts_builder
     void set_initial_state(const std::list<std::size_t>& /* to */, const std::vector<data::data_expression>& /* probabilities */) override
     {}
 
-    void add_transition(std::size_t /* from */, const process::timed_multi_action& /* a */, const std::list<std::size_t>& /* targets */, const std::vector<data::data_expression>& /* probabilities */) override
+    void add_transition(std::size_t /* from */, const lps::multi_action& /* a */, const std::list<std::size_t>& /* targets */, const std::vector<data::data_expression>& /* probabilities */) override
     {}
 
     void finalize(const utilities::indexed_set<lps::state>& /* state_map */, bool /* timed */) override
@@ -129,7 +129,7 @@ class stochastic_lts_aut_builder: public stochastic_lts_builder
     }
 
     // Add a transition to the LTS
-    void add_transition(std::size_t from, const process::timed_multi_action& a, const std::list<std::size_t>& targets, const std::vector<data::data_expression>& probabilities) override
+    void add_transition(std::size_t from, const lps::multi_action& a, const std::list<std::size_t>& targets, const std::vector<data::data_expression>& probabilities) override
     {
       std::size_t to = m_stochastic_states.size();
       std::size_t label = add_action(a);
@@ -145,7 +145,7 @@ class stochastic_lts_aut_builder: public stochastic_lts_builder
 
     void save(std::ostream& out) const
     {
-      std::vector<process::timed_multi_action> actions{ m_actions.size() };
+      std::vector<lps::multi_action> actions{ m_actions.size() };
       for (const auto& p: m_actions)
       {
         actions[p.second] = p.first;
@@ -223,7 +223,7 @@ class stochastic_lts_lts_builder: public stochastic_lts_builder
     }
 
     // Add a transition to the LTS
-    void add_transition(std::size_t from, const process::timed_multi_action& a, const std::list<std::size_t>& targets, const std::vector<data::data_expression>& probabilities) override
+    void add_transition(std::size_t from, const lps::multi_action& a, const std::list<std::size_t>& targets, const std::vector<data::data_expression>& probabilities) override
     {
       auto s1 = make_probabilistic_state(targets, probabilities);
       std::size_t label = add_action(a);

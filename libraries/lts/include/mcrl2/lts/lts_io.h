@@ -294,7 +294,7 @@ atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const probabi
 //  write_lts_header(data_spec, parameters, action_labels)
 //
 // In any order:
-//  Write transitions (to, label, from), where 'to' and 'from' are indices and 'label' the timed_multi_action, as necessary.
+//  Write transitions (to, label, from), where 'to' and 'from' are indices and 'label' the multi_action, as necessary.
 //  Write state labels (state_label_lts) in their order such that writing the i-th state label belongs to state with index i.
 //  Write the initial state.
 
@@ -305,8 +305,8 @@ void write_lts_header(atermpp::aterm_ostream& stream,
   const process::action_label_list& action_labels);
 
 /// \brief Write a transition to the LTS stream.
-void write_transition(atermpp::aterm_ostream& stream, std::size_t from, const process::timed_multi_action& label, std::size_t to);
-void write_transition(atermpp::aterm_ostream& stream, std::size_t from, const process::timed_multi_action& label, const probabilistic_lts_lts_t::probabilistic_state_t& to);
+void write_transition(atermpp::aterm_ostream& stream, std::size_t from, const lps::multi_action& label, std::size_t to);
+void write_transition(atermpp::aterm_ostream& stream, std::size_t from, const lps::multi_action& label, const probabilistic_lts_lts_t::probabilistic_state_t& to);
 
 /// \brief Write a state label to the LTS stream.
 void write_state_label(atermpp::aterm_ostream& stream, const state_label_lts& label);

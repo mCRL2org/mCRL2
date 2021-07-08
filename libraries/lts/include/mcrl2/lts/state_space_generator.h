@@ -457,7 +457,7 @@ class divergence_detector
           utilities::skip(), // tree_edge
 
           // back_edge
-          [&](const lps::state& s0, const process::timed_multi_action& a, const state_type& s1) {
+          [&](const lps::state& s0, const lps::multi_action& a, const state_type& s1) {
             mCRL2log(log::info) << "Divergent state found (state index: " + std::to_string(s_index) + ")";
             if (m_trace_count < m_max_trace_count)
             {
@@ -468,7 +468,7 @@ class divergence_detector
                 m_divergent_states[u] = s_index;
               }
               tr_loop.setState(first_state(s1));
-              tr_loop.addAction(lps::multi_action(a.actions(), a.time()));
+              tr_loop.addAction(a);
               std::string filename = filename_prefix + "_divergence_" + std::to_string(m_trace_count) + ".trc";
               std::string loop_filename = filename_prefix + "_divergence_loop" + std::to_string(m_trace_count++) + ".trc";
               save_traces(tr, filename, tr_loop, loop_filename);
@@ -493,7 +493,7 @@ class divergence_detector
           utilities::skip(), // tree_edge
 
           // back_edge
-          [&](const lps::state& s0, const process::timed_multi_action& a, const state_type& s1) {
+          [&](const lps::state& s0, const lps::multi_action& a, const state_type& s1) {
             mCRL2log(log::info) << "Divergent state found (state index: " + std::to_string(s_index) + ")";
             if (m_trace_count < m_max_trace_count)
             {
@@ -504,7 +504,7 @@ class divergence_detector
                 m_divergent_states[u] = s_index;
               }
               tr_loop.setState(first_state(s1));
-              tr_loop.addAction(lps::multi_action(a.actions(), a.time()));
+              tr_loop.addAction(a);
               std::string filename = filename_prefix + "_divergence_" + std::to_string(m_trace_count) + ".trc";
               std::string loop_filename = filename_prefix + "_divergence_loop" + std::to_string(m_trace_count++) + ".trc";
               save_traces(tr, filename, tr_loop, loop_filename);
@@ -683,7 +683,7 @@ struct state_space_generator
         },
 
         // examine_transition
-        [&](const lps::state& s0, std::size_t s0_index, const process::timed_multi_action& a, const auto& s1, const auto& s1_index, std::size_t summand_index)
+        [&](const lps::state& s0, std::size_t s0_index, const lps::multi_action& a, const auto& s1, const auto& s1_index, std::size_t summand_index)
         {
           if constexpr (Stochastic)
           {
@@ -696,11 +696,11 @@ struct state_space_generator
           has_outgoing_transitions = true;
           if (options.detect_action)
           {
-            m_action_detector.detect_action(s0, s0_index, lps::multi_action(a.actions(), a.time()), first_state(s1), summand_index);
+            m_action_detector.detect_action(s0, s0_index, a, first_state(s1), summand_index);
           }
           if (options.detect_nondeterminism)
           {
-            m_nondeterminism_detector.detect_nondeterminism(s0, s0_index, lps::multi_action(a.actions(), a.time()), first_state(s1));
+            m_nondeterminism_detector.detect_nondeterminism(s0, s0_index, a, first_state(s1));
           }
           if (!options.suppress_progress_messages)
           {

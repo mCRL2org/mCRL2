@@ -20,9 +20,9 @@ using state_t = std::size_t;
 using namespace mcrl2;
 
 /// Sort the action labels such that the first action is the action labelled with 'tag' or 'syncname'.
-std::vector<std::pair<process::action, process::timed_multi_action>> preprocess_labels(const process::action& tag, std::string& syncname, lts::lts_lts_t& lts)
+std::vector<std::pair<process::action, lps::multi_action>> preprocess_labels(const process::action& tag, std::string& syncname, lts::lts_lts_t& lts)
 {
-  std::vector<std::pair<process::action, process::timed_multi_action>> labels(lts.num_action_labels());
+  std::vector<std::pair<process::action, lps::multi_action>> labels(lts.num_action_labels());
 
   for (std::size_t i = 0; i < lts.num_action_labels(); ++i)
   {
@@ -61,7 +61,7 @@ std::vector<std::pair<process::action, process::timed_multi_action>> preprocess_
     }
 
     assert(label.actions().size() == 0 || first != process::action()); // There should be exactly one.
-    labels[i] = std::make_pair(first, process::timed_multi_action(actions, label.time()));
+    labels[i] = std::make_pair(first, lps::multi_action(actions, label.time()));
   }
 
   return labels;
@@ -84,13 +84,13 @@ void mcrl2::combine_lts(lts::lts_lts_t& left_lts,
   std::string syncleft(prefix);
   syncleft += "syncleft";
 
-  std::vector<std::pair<process::action, process::timed_multi_action>> left_labels = preprocess_labels(tag, syncleft, left_lts);
+  std::vector<std::pair<process::action, lps::multi_action>> left_labels = preprocess_labels(tag, syncleft, left_lts);
 
   // The same preprocessing for the right LTS.
   std::string syncright(prefix);
   syncright += "syncright";
 
-  std::vector<std::pair<process::action, process::timed_multi_action>> right_labels = preprocess_labels(tag, syncright, right_lts);
+  std::vector<std::pair<process::action, lps::multi_action>> right_labels = preprocess_labels(tag, syncright, right_lts);
 
   // For every syncleft action label we can cache the corresponding syncright label. 
   std::vector<process::action_label> right_synclabel(left_lts.num_action_labels());
@@ -186,7 +186,7 @@ void mcrl2::combine_lts(lts::lts_lts_t& left_lts,
             // Add the transition with the remaining actions on each label.
             progress_monitor.examine_transition();
             lts::write_transition(output, state_index,
-              process::timed_multi_action(left_label.actions() + right_label.actions(), data::undefined_real()), new_state);
+              lps::multi_action(left_label.actions() + right_label.actions(), data::undefined_real()), new_state);
           }
         }
       }
