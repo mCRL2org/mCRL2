@@ -19,43 +19,38 @@ namespace atermpp
 namespace detail
 {
 
-/// \brief Enable to print hashtable collision, size and number of buckets.
-constexpr static bool EnableFunctionSymbolHashtableMetrics = false;
-
-/// \brief Enable to obtain the percentage of function symbols found compared to created.
-constexpr static bool EnableFunctionSymbolMetrics = false;
-
 /// \brief This class stores a set of function symbols.
 class function_symbol_pool : private mcrl2::utilities::noncopyable
 {
 public:
   function_symbol_pool();
-  ~function_symbol_pool();
 
   /// \brief Creates a function symbol pair (name, arity), returns a pointer to an existing element
   ///        if this pair is already defined.
   /// \param check_for_registered_functions Check whether there is a registered prefix p such that
   ///           name equal pn where n is a number. In that case prevent that pn will be generated
   ///           as a fresh function name.
+  /// \threadsafe
   function_symbol create(const std::string& name, const std::size_t arity, const bool check_for_registered_functions = false);
 
-  /// \brief Frees the memory used by the passed element and remove it from the set.
-  void destroy(const _function_symbol& f);
-
   /// \brief Restore the index back to index before registering this prefix.
+  /// \threadsafe
   void deregister(const std::string& prefix);
 
   /// \returns An index that is always a safe index for the given prefix.
   /// \todo These functions are all used by the function_symbol_generator and should probably not
   ///       be public.
+  /// \threadsafe
   std::shared_ptr<std::size_t> register_prefix(const std::string& prefix);
 
+  /// \brief Resize the function symbol pool if necessary.
+  void resize_if_needed();
   /// \brief Get an index such that no function symbol with name prefix + returned value
   ///        and any value above it already exists.
   std::size_t get_sufficiently_large_postfix_index(const std::string& prefix) const;
 
-  /// \brief Print various performance statistics of this function symbol pool.
-  void print_performance_stats() const noexcept;
+  /// \brief Collect all garbage function symbols.
+  void sweep();
 
   /// \returns The function symbol used by integral terms.
   const function_symbol& as_int() noexcept { return m_as_int; }
@@ -75,7 +70,8 @@ private:
     function_symbol_hasher,
     function_symbol_equals,
     mcrl2::utilities::block_allocator<_function_symbol, 1024, GlobalThreadSafe>,
-    GlobalThreadSafe>;
+    GlobalThreadSafe,
+    false>;
 
   /// \brief Stores the underlying function symbols.
   unordered_set m_symbol_set;
@@ -85,7 +81,9 @@ private:
   ///        prefix string is registered.
   std::map<std::string, std::shared_ptr<std::size_t>> m_prefix_to_register_function_map;
 
-  // Several default function symbols.
+  mutable std::mutex m_mutex; // Mutex for m_prefix_to_register_function_map.
+
+  // Default function symbols.
   function_symbol m_as_int;
   function_symbol m_as_list;
   function_symbol m_as_empty_list;

@@ -25,14 +25,16 @@ namespace detail
 // Forward declaration
 class aterm_pool;
 
+/// \brief Marks a term and recursively all arguments that are not reachable.
+inline void mark_term(const _aterm& root, std::stack<std::reference_wrapper<_aterm>>& todo);
+
 /// \brief This class provides for all types of term storage. It also
 ///       provides garbage collection via its mark and sweep functions.
 /// \details Internally a hash set is used to ensure that the created terms are unique.
 template<typename Element,
          typename Hash = aterm_hasher<>,
          typename Equals = aterm_equals<>,
-         std::size_t N = DynamicNumberOfArguments,
-         bool ThreadSafe = false>
+         std::size_t N = DynamicNumberOfArguments>
 class aterm_pool_storage : private mcrl2::utilities::noncopyable
 {
 public:
@@ -42,8 +44,10 @@ public:
     Equals,
     typename std::conditional<N == DynamicNumberOfArguments,
       atermpp::detail::_aterm_appl_allocator<>,
-      mcrl2::utilities::block_allocator<Element, 1024, ThreadSafe>>::type,
-    ThreadSafe>;
+      typename std::conditional<EnableBlockAllocator, mcrl2::utilities::block_allocator<Element, 1024, GlobalThreadSafe>, std::allocator<Element>>::type
+      >::type,
+    GlobalThreadSafe,
+    false>;
   using iterator = typename unordered_set::iterator;
   using const_iterator = typename unordered_set::const_iterator;
 
@@ -62,59 +66,68 @@ public:
   std::size_t capacity() const noexcept { return m_term_set.capacity(); }
 
   /// \brief Creates a integral term with the given value.
-  aterm create_int(std::size_t value);
+  bool create_int(aterm& term, std::size_t value);
 
   /// \brief Creates a term with the given function symbol.
-  aterm create_term(const function_symbol& sym);
+  bool create_term(aterm& term, const function_symbol& sym);
 
   /// \brief Creates a function application with the given function symbol and arguments.
   template<class ...Terms>
-  aterm create_appl(const function_symbol& sym, const Terms&... arguments);
+  bool create_appl(aterm& term, const function_symbol& sym, const Terms&... arguments);
 
   /// \brief Creates a function application with the given function symbol and the arguments
   ///       as provided by the given iterator. This function assumes that the arity of the
   ///       function symbol is equal to N and that the iterator has exactly N elements.
   template<typename ForwardIterator>
-  aterm create_appl_iterator(const function_symbol& sym,
-                              ForwardIterator begin,
-                              ForwardIterator end);
+  bool create_appl_iterator(aterm& term,
+                            const function_symbol& sym,
+                            ForwardIterator begin,
+                            ForwardIterator end);
 
   /// \brief Creates a function application with the given function symbol and the arguments
   ///       as provided by the given iterator. This function assumes that the arity of the
   ///       function symbol is equal to N and that the iterator has exactly N elements.
   template<typename InputIterator,
            typename TermConverter>
-  aterm create_appl_iterator(const function_symbol& sym,
-                              TermConverter converter,
-                              InputIterator begin,
-                              InputIterator end);
+  bool create_appl_iterator(aterm& term,
+                            const function_symbol& sym,
+                            TermConverter converter,
+                            InputIterator begin,
+                            InputIterator end);
 
   /// \brief Creates a function application with the given function symbol and the arguments
   ///        as provided by the given iterator.
   template<typename ForwardIterator>
-  aterm create_appl_dynamic(const function_symbol& sym,
-                              ForwardIterator begin,
-                              ForwardIterator end);
+  bool create_appl_dynamic(aterm& term,
+                           const function_symbol& sym,
+                           ForwardIterator begin,
+                           ForwardIterator end);
 
   /// \brief Creates a function application with the given function symbol and the arguments
   ///        as provided by the given iterator, but the converter is applied to each argument.
   template<typename InputIterator,
            typename TermConverter>
-  aterm create_appl_dynamic(const function_symbol& sym,
-                              TermConverter converter,
-                              InputIterator begin,
-                              InputIterator end);
+  bool create_appl_dynamic(aterm& term,
+                           const function_symbol& sym,
+                           TermConverter converter,
+                           InputIterator begin,
+                           InputIterator end);
 
   /// \brief Prints various performance statistics for this storage.
   /// \param identifier A string to identify the printed message for this storage.
   void print_performance_stats(const char* identifier) const;
 
+#ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
   /// \brief Marks all terms that are reachable and should not be destroyed.
   void mark();
+#endif
 
   /// \brief sweep Destroys all terms that are not reachable. Requires that
   ///        mark() was called first.
   void sweep();
+
+  /// \brief Resizes the hash table if necessary.
+  void resize_if_needed();
 
   /// \returns The number of terms stored in this storage.
   std::size_t size() const { return m_term_set.size(); }
@@ -135,9 +148,11 @@ private:
   using callback_pair = std::pair<function_symbol, term_callback>;
 
   /// \brief Calls the creation hook attached to the function symbol of this term.
+  /// \threadsafe
   void call_creation_hook(unprotected_aterm term);
 
   /// \brief Calls the deletion hook attached to the function symbol of this term.
+  /// \threadsafe
   void call_deletion_hook(unprotected_aterm term);
 
   /// \brief Removes an element from the unordered set and deallocates it.
@@ -145,14 +160,11 @@ private:
 
   /// \brief Inserts a term constructed by the given arguments, checks for existing term.
   template<typename ...Args>
-  aterm emplace(Args&&... args);
+  bool emplace(aterm& term, Args&&... args);
 
   /// \returns True if and only if this term storage can store term applications with a dynamic
   ///          number of arguments.
   constexpr bool is_dynamic_storage() const;
-
-  /// \brief Marks a term and recursively all arguments that are not reachable.
-  void mark_term(const _aterm& root);
 
   /// \brief Verify that the given term was constructed properly.
   template<std::size_t Arity = N>

@@ -27,29 +27,25 @@ function_symbol_pool::function_symbol_pool()
   g_as_list = m_as_list;
   g_as_empty_list = m_as_empty_list;
 }
-
-function_symbol_pool::~function_symbol_pool()
-{
-  print_performance_stats();
-}
-
 function_symbol function_symbol_pool::create(const std::string& name, const std::size_t arity, const bool check_for_registered_functions)
 {
   auto it = m_symbol_set.find(name, arity);
   if (it != m_symbol_set.end())
   {
-    if (EnableFunctionSymbolMetrics) { m_function_symbol_metrics.hit(); }
+    if constexpr (EnableCreationMetrics) { m_function_symbol_metrics.hit(); }
 
     // The element already exists so return it.
     return function_symbol(_function_symbol::ref(&(*it)));
   }
   else
   {
-    if (EnableFunctionSymbolMetrics) { m_function_symbol_metrics.miss(); }
+    if constexpr (EnableCreationMetrics) { m_function_symbol_metrics.miss(); }
 
     const _function_symbol& symbol = *m_symbol_set.emplace(name, arity).first;
     if (check_for_registered_functions)
     {
+      if constexpr (GlobalThreadSafe) { m_mutex.lock(); }
+
       // Check whether there is a registered prefix p such that name equal pn where n is a number.
       // In that case prevent that pn will be generated as a fresh function name.
       std::size_t start_of_index = name.find_last_not_of("0123456789") + 1;
@@ -73,30 +69,29 @@ function_symbol function_symbol_pool::create(const std::string& name, const std:
           }
         }
       }
+
+      if  constexpr (GlobalThreadSafe) { m_mutex.unlock(); }
     }
 
     return function_symbol(_function_symbol::ref(&symbol));
   }
 }
 
-void function_symbol_pool::destroy(const _function_symbol& f)
-{
-  assert(f.reference_count() == 0);
-
-  // Remove it from the function symbol pool.
-  m_symbol_set.erase(f);
-}
-
 void function_symbol_pool::deregister(const std::string& prefix)
 {
+  if constexpr (GlobalThreadSafe) { m_mutex.lock(); }
   m_prefix_to_register_function_map.erase(prefix);
+  if constexpr (GlobalThreadSafe) { m_mutex.unlock(); }
 }
 
 std::shared_ptr<std::size_t> function_symbol_pool::register_prefix(const std::string& prefix)
 {
+  if constexpr (GlobalThreadSafe) { m_mutex.lock(); }
+
   auto it = m_prefix_to_register_function_map.find(prefix);
   if (it != m_prefix_to_register_function_map.end())
   {
+    if constexpr (GlobalThreadSafe) { m_mutex.unlock(); }
     return it->second;
   }
   else
@@ -104,6 +99,8 @@ std::shared_ptr<std::size_t> function_symbol_pool::register_prefix(const std::st
     std::size_t index = get_sufficiently_large_postfix_index(prefix);
     std::shared_ptr<std::size_t> shared_index = std::make_shared<std::size_t>(index);
     m_prefix_to_register_function_map[prefix] = shared_index;
+
+    if constexpr (GlobalThreadSafe) { m_mutex.unlock(); }
     return shared_index;
   }
 }
@@ -141,14 +138,43 @@ std::size_t function_symbol_pool::get_sufficiently_large_postfix_index(const std
   return index;
 }
 
-void function_symbol_pool::print_performance_stats() const noexcept
+void function_symbol_pool::sweep()
 {
-  if (EnableFunctionSymbolHashtableMetrics)
+  auto timestamp = std::chrono::system_clock::now();
+  std::size_t old_size = size();
+
+  // Clean up function symbols with a zero reference count.
+  for (auto it = m_symbol_set.begin(); it != m_symbol_set.end(); )
+  {
+    if (it->reference_count() == 0)
+    {
+      it = m_symbol_set.erase(it);
+    }
+    else
+    {
+      ++it;
+    }
+  }
+
+  std::size_t erased_blocks = m_symbol_set.get_allocator().consolidate();
+
+  if (EnableGarbageCollectionMetrics)
+  {
+    auto sweep_duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - timestamp).count();
+
+    // Print the relevant information.
+    mCRL2log(mcrl2::log::info, "Performance") << "function_symbol_pool: Garbage collected " << old_size - size() << " function symbols, " << size() << " function symbols remaining in "
+      << sweep_duration << " ms.\n";
+
+    mCRL2log(mcrl2::log::info, "Performance") << "function_symbol_pool: Consolidate removed " << erased_blocks << " blocks.\n";
+  }
+
+  if constexpr (EnableHashtableMetrics)
   {
     print_performance_statistics(m_symbol_set);
   }
 
-  if (EnableFunctionSymbolMetrics)
+  if (EnableCreationMetrics)
   {
     mCRL2log(mcrl2::log::info, "Performance") << "g_function_symbol_pool: Stores " << size() << " function symbols. create() " << m_function_symbol_metrics.message() << ".\n";
   }
@@ -157,4 +183,8 @@ void function_symbol_pool::print_performance_stats() const noexcept
   {
     mCRL2log(mcrl2::log::info, "Performance") << "g_function_symbol_pool: all reference counts changed " << _function_symbol::reference_count_changes() << " times.\n";
   }
+}
+void function_symbol_pool::resize_if_needed()
+{
+  m_symbol_set.rehash_if_needed();
 }

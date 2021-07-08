@@ -19,16 +19,34 @@ namespace detail
 {
 
 /// Define several specializations of the term pool storage objects.
-using integer_term_storage = aterm_pool_storage<_aterm_int, aterm_int_hasher, aterm_int_equals, 0, GlobalThreadSafe>;
-using term_storage = aterm_pool_storage<_aterm, aterm_hasher_finite<0>, aterm_equals_finite<0>, 0, GlobalThreadSafe>;
+using integer_term_storage = aterm_pool_storage<_aterm_int, aterm_int_hasher, aterm_int_equals, 0>;
+using term_storage = aterm_pool_storage<_aterm, aterm_hasher_finite<0>, aterm_equals_finite<0>, 0>;
 using arbitrary_function_application_storage = aterm_pool_storage<_aterm_appl<1>,
   aterm_hasher<DynamicNumberOfArguments>,
   aterm_equals<DynamicNumberOfArguments>,
-  DynamicNumberOfArguments,
-  GlobalThreadSafe>;
+  DynamicNumberOfArguments>;
 
 template<std::size_t N>
-using function_application_storage = aterm_pool_storage<_aterm_appl<N>, aterm_hasher_finite<N>, aterm_equals_finite<N>, N, GlobalThreadSafe>;
+using function_application_storage = aterm_pool_storage<_aterm_appl<N>, aterm_hasher_finite<N>, aterm_equals_finite<N>, N>;
+
+/// \brief A thread specific aterm pool that provides a local interface to the global term pool.
+///        Ensures that terms created by this thread are protected during garbage collection.
+class thread_aterm_pool_interface
+{
+public:
+  virtual ~thread_aterm_pool_interface() {}
+
+  /// \brief Print performance statistics for data stored for this thread.
+  virtual void print_local_performance_statistics() const = 0;
+
+  /// \brief Blocks until the thread pool is not busy.
+  virtual void wait_for_busy() const = 0;
+
+  /// \brief Blocks until the thread pool is not busy.
+  virtual void set_forbidden(bool value) = 0;
+};
+
+class thread_aterm_pool;
 
 /// \brief The interface for the term library. Provides the storage of
 ///        of all classes of terms.
@@ -38,65 +56,35 @@ using function_application_storage = aterm_pool_storage<_aterm_appl<N>, aterm_ha
 class aterm_pool : public mcrl2::utilities::noncopyable
 {
 public:
-
-  /// \brief Should be able to call mark() from any storage.
-  /// \todo Make mark() private and change enable this friend class.
-  template<typename Element, typename Hash, typename Equals, std::size_t N, bool ThreadSafe>
-  friend class aterm_pool_storage;
-
   inline aterm_pool();
   inline ~aterm_pool();
 
-  /// \brief Add a callback that is triggered whenever a term with the given function symbol is created.
-  inline void add_creation_hook(function_symbol sym, term_callback callback);
+  friend class thread_aterm_pool;
 
-  /// \brief Add a callback that is triggered whenever a term with the given function symbol is destroyed.
-  inline void add_deletion_hook(function_symbol sym, term_callback callback);
+  /// \brief Creates a function symbol pair (name, arity).
+  /// \see function_symbol_pool.
+  inline function_symbol create_function_symbol(const std::string& name, const std::size_t arity, const bool check_for_registered_functions = false);
+
+  /// \brief Force garbage collection on all storages.
+  /// \threadsafe
+  inline void collect();
+
+  /// \brief Register a thread specific aterm pool.
+  /// \threadsafe
+  inline void register_thread_aterm_pool(thread_aterm_pool_interface& pool);
+
+  /// \brief Remove thread specific aterm pool.
+  /// \threadsafe
+  inline void remove_thread_aterm_pool(thread_aterm_pool_interface& pool);
 
   /// \brief The number of terms that can be stored without resizing.
   inline std::size_t capacity() const noexcept;
 
-  /// \brief Triggers garbage collection when certain conditions are met.
-  inline void trigger_collection();
-
-  /// \brief Triggers garbage collection on all storages.
-  inline void collect();
-
-  /// \brief Enable garbage collection when passing true and disable otherwise.
-  inline void enable_garbage_collection(bool enable);
-
-  /// \brief Creates a integral term with the given value.
-  inline aterm create_int(std::size_t val);
-
-  /// \brief Creates a term with the given function symbol.
-  inline aterm create_term(const function_symbol& sym);
-
-  /// \brief Creates a function application with the given function symbol and arguments.
-  template<class ...Terms>
-  aterm create_appl(const function_symbol& sym, const Terms&... arguments);
-
-  /// \brief Creates a function application with the given function symbol and the arguments
-  ///       as provided by the given iterator. This function assumes that the arity of the
-  ///       function symbol is equal to the number of elements in the iterator.
-  template<typename ForwardIterator>
-  aterm create_appl_dynamic(const function_symbol& sym,
-                              ForwardIterator begin,
-                              ForwardIterator end);
-
-  /// \brief Creates a function application with the given function symbol and the arguments
-  ///       as provided by the given iterator. This function assumes that the arity of the
-  ///       function symbol is equal to the number of elements in the iterator.
-  template<typename InputIterator, typename ATermConverter>
-  aterm create_appl_dynamic(const function_symbol& sym,
-                              ATermConverter convert_to_aterm,
-                              InputIterator begin,
-                              InputIterator end);
+  /// \returns The total number of terms residing in the pool.
+  inline std::size_t size() const;
 
   /// \brief Prints various performance statistics for the term pool.
   inline void print_performance_statistics() const;
-
-  /// \returns The total number of terms residing in the pool.
-  inline std::size_t size() const;
 
   /// \returns A global term that indicates the empty list.
   aterm& empty_list() noexcept { return m_empty_list; }
@@ -110,14 +98,82 @@ public:
   /// \returns The function symbol used by the term indicating the empty list.
   const function_symbol& as_empty_list() noexcept { return m_function_symbol_pool.as_empty_list(); }
 
-  /// \returns The pool of function symbols.
-  function_symbol_pool& get_symbol_pool() { return m_function_symbol_pool; }
+  /// \brief Add a callback that is triggered whenever a term with the given function symbol is created.
+  inline void add_creation_hook(function_symbol sym, term_callback callback);
+
+  /// \brief Add a callback that is triggered whenever a term with the given function symbol is destroyed.
+  inline void add_deletion_hook(function_symbol sym, term_callback callback);
+
+  /// \brief Enable garbage collection when passing true and disable otherwise.
+  inline void enable_garbage_collection(bool enable) { m_enable_garbage_collection = enable; };
+
+  inline function_symbol_pool& get_symbol_pool() { return m_function_symbol_pool; }
+
+  // These functions of the aterm pool should be called through a thread_aterm_pool.
 private:
 
-  /// Storage for the function symbols.
+  /// \brief Triggers garbage collection and resizing when conditions are met.
+  /// \param allow_collect Actually perform the garbage collection instead of only updating the counters.
+  /// \param thread The pool that called this function.
+  /// \threadsafe
+  inline void created_term(bool allow_collect, thread_aterm_pool_interface* thread);
+
+  /// \brief Collect garbage on all storages.
+  /// \threadsafe
+  inline void collect_impl(thread_aterm_pool_interface* thread);
+
+  /// \brief Creates a integral term with the given value.
+  inline bool create_int(aterm& term, std::size_t val);
+
+  /// \brief Creates a term with the given function symbol.
+  inline bool create_term(aterm& term, const function_symbol& sym);
+
+  /// \brief Creates a function application with the given function symbol and arguments.
+  template<class ...Terms>
+  inline bool create_appl(aterm& term, const function_symbol& sym, const Terms&... arguments);
+
+  /// \brief Creates a function application with the given function symbol and the arguments
+  ///       as provided by the given iterator. This function assumes that the arity of the
+  ///       function symbol is equal to the number of elements in the iterator.
+  template<typename ForwardIterator>
+  bool create_appl_dynamic(aterm& term,
+      const function_symbol& sym,
+      ForwardIterator begin,
+      ForwardIterator end);
+
+  /// \brief Creates a function application with the given function symbol and the arguments
+  ///       as provided by the given iterator. This function assumes that the arity of the
+  ///       function symbol is equal to the number of elements in the iterator.
+  template<typename InputIterator, typename ATermConverter>
+  bool create_appl_dynamic(aterm& term,
+      const function_symbol& sym,
+      ATermConverter convert_to_aterm,
+      InputIterator begin,
+      InputIterator end);
+
+  /// \brief Resizes all storages if necessary.
+  /// \threadsafe.
+  inline void resize_if_needed(thread_aterm_pool_interface* thread);
+
+  /// \returns Wait for the mutex to unlock.
+  inline void wait();
+
+  /// \brief Prevent any other thread aterm pool from creating or retrieving terms.
+  inline void lock(thread_aterm_pool_interface* thread);
+
+  /// \brief Allow all thread pools to resume their threads.
+  inline void unlock();
+
+  /// \brief The set of local aterm pools.
+  std::vector<thread_aterm_pool_interface*> m_thread_pools;
+
+  /// \brief Mutex for adding/removing local pools in m_thread_pools.
+  std::mutex m_mutex;
+
+  /// \brief Storage for the function symbols.
   function_symbol_pool m_function_symbol_pool;
 
-  /// Storage for integral terms.
+  /// \brief Storage for integral terms.
   integer_term_storage m_int_storage;
 
   /// Storage for function applications with a fixed number of arguments.
@@ -135,18 +191,11 @@ private:
   /// Storage for term_appl with a dynamic number of arguments larger than 7.
   arbitrary_function_application_storage m_appl_dynamic_storage;
 
-  /// Track the number of  terms destroyed and reduce the freelist.
-  std::size_t m_countUntilCollection;
+  /// Track the number of terms destroyed and reduce the freelist.
+  std::atomic<long> m_count_until_collection = 0;
+  std::atomic<long> m_count_until_resize = 0;
 
-  /// It can happen that during create_appl with converter the converter generates new terms.
-  /// As such these terms might only be protected after the term_appl was actually created.
-  std::size_t m_creation_depth = 0;
-
-  /// Defer garbage collection until the creation depth is equal to zero again.
-  bool m_deferred_garbage_collection = false;
-
-  /// Enable automatically triggered garbage collection.
-  bool m_enable_garbage_collection = true;
+  std::atomic<bool> m_enable_garbage_collection = EnableGarbageCollection; /// Garbage collection is enabled.
 
   /// Represents an empty list.
   aterm m_empty_list;
