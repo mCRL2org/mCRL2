@@ -26,14 +26,15 @@ void pbesconstelm(const std::string& input_filename,
                   data::rewrite_strategy rewrite_strategy,
                   pbes_rewriter_type rewriter_type,
                   bool compute_conditions,
-                  bool remove_redundant_equations
+                  bool remove_redundant_equations,
+                  bool check_quantifiers
                  )
 {
   // load the pbes
   pbes p;
   load_pbes(p, input_filename, input_format);
 
-  constelm(p, rewrite_strategy, rewriter_type, compute_conditions, remove_redundant_equations);
+  constelm(p, rewrite_strategy, rewriter_type, compute_conditions, remove_redundant_equations, check_quantifiers);
 
   // save the result
   save_pbes(p, output_filename, output_format);
