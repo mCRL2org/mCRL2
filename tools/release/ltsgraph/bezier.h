@@ -185,7 +185,7 @@ template <int Order> struct Intersection<Circle, Bezier<Order>>
 
 // Implementation for cubic bezier curves
 
-template <> constexpr Vector Bezier<3>::at(Scalar t) const
+template <> inline constexpr Vector Bezier<3>::at(Scalar t) const
 {
   const Scalar t2  = t * t,
                t3  = t2 * t,
@@ -198,7 +198,7 @@ template <> constexpr Vector Bezier<3>::at(Scalar t) const
        + m_control[3] * t3;
 }
 
-template <> constexpr Vector Bezier<3>::tangent(Scalar t) const
+template <> inline constexpr Vector Bezier<3>::tangent(Scalar t) const
 {
   const Scalar t2  = t * t,
                tn  = 1.0f - t,
@@ -208,7 +208,7 @@ template <> constexpr Vector Bezier<3>::tangent(Scalar t) const
        + (m_control[3] - m_control[2]) * 3.0f * t2;
 }
 
-template <> constexpr std::array<Vector, 7> Bezier<3>::interpolate(Scalar t) const
+template <> inline constexpr std::array<Vector, 7> Bezier<3>::interpolate(Scalar t) const
 {
   const QVector3D p01   = lerp(m_control[0], m_control[1], t),
                   p12   = lerp(m_control[1], m_control[2], t),
@@ -221,7 +221,7 @@ template <> constexpr std::array<Vector, 7> Bezier<3>::interpolate(Scalar t) con
 
 // Implementation for quadratic bezier curves
 
-template <> constexpr Vector Bezier<2>::at(Scalar t) const
+template <> inline constexpr Vector Bezier<2>::at(Scalar t) const
 {
   const Scalar t2  = t * t,
                tn  = 1.0f - t,
@@ -231,14 +231,14 @@ template <> constexpr Vector Bezier<2>::at(Scalar t) const
        + m_control[2] * t2;
 }
 
-template <> constexpr Vector Bezier<2>::tangent(Scalar t) const
+template <> inline constexpr Vector Bezier<2>::tangent(Scalar t) const
 {
   const Scalar tn  = 1.0f - t;
   return (m_control[1] - m_control[0]) * 2.0f * tn
        + (m_control[2] - m_control[1]) * 2.0f * t;
 }
 
-template <> constexpr std::array<Vector, 5> Bezier<2>::interpolate(Scalar t) const
+template <> inline constexpr std::array<Vector, 5> Bezier<2>::interpolate(Scalar t) const
 {
   const QVector3D p01   = lerp(m_control[0], m_control[1], t),
                   p12   = lerp(m_control[1], m_control[2], t),
