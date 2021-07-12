@@ -58,10 +58,10 @@ MainWindow::MainWindow(QWidget *parent) :
   m_ui.treeFiles->restore(settings);
 }
 
-// workaround for QTBUG-57687
-#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0) || not defined MCRL2_PLATFORM_WINDOWS
 void MainWindow::onOpenIDE()
 {
+// workaround for QTBUG-57687
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0) || not defined MCRL2_PLATFORM_WINDOWS
   QDir appDir = QDir(QCoreApplication::applicationDirPath());
   QString path = appDir.absoluteFilePath("mcrl2ide");
 
@@ -78,9 +78,8 @@ void MainWindow::onOpenIDE()
     QMessageBox::warning(this, "mCRL2-gui", "Failed to start mcrl2ide: could not find its executable");
   }
 #endif
-
-}
 #endif
+}
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
