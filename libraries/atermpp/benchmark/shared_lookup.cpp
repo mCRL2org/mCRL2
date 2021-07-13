@@ -9,15 +9,12 @@
 
 #include "benchmark_shared.h"
 
-#include "mcrl2/utilities/stopwatch.h"
-
 using namespace atermpp;
 
 int main(int argc, char* argv[])
 {
-  std::size_t number_of_arguments = 0;
-  std::size_t size = 2000000;
-  std::size_t iterations = 1000;
+  detail::g_term_pool().enable_garbage_collection(false);
+  std::size_t number_of_arguments = 1;
   std::size_t number_of_threads = 1;
 
   // Accept one argument for the number of arguments.
@@ -27,27 +24,26 @@ int main(int argc, char* argv[])
     number_of_arguments = static_cast<std::size_t>(std::stoi(argv[1]));
   }
 
-  // Define a function that repeatedly creates nested function applications.
-  auto nested_function = [iterations, number_of_arguments, size, number_of_threads](void) -> void
-    {
-      // Track the time that the first iteration (when the term is created) takes.
-      stopwatch stopwatch;
-      bool first_run = true;
+  if (argc > 2)
+  {
+    // The first argument is the path of the executable.
+    number_of_threads = static_cast<std::size_t>(std::stoi(argv[2]));
+  }
 
+  std::size_t size = 400000;
+  std::size_t iterations = 1000;
+  aterm_appl f = create_nested_function("f", "c", number_of_arguments, size);
+
+  // Define a function that repeatedly creates nested function applications.
+  auto nested_function = [&](int id) -> void
+    {
       aterm_appl f;
       for (std::size_t i = 0; i < iterations / number_of_threads; ++i)
       {
-        f = create_nested_function("f", "c", number_of_arguments, size / (number_of_arguments + 1));
-
-        if (first_run)
-        {
-          first_run = false;
-          std::cerr << "Creating nested function application with " << number_of_arguments << " arguments and " << (size / (number_of_arguments + 1)) << " depth took " << stopwatch.time() << " milliseconds.\n";
-        }
+        f = create_nested_function("f", "c", number_of_arguments, size);
       }
     };
 
-  detail::g_term_pool().enable_garbage_collection(false);
   benchmark_threads(number_of_threads, nested_function);
 
   return 0;
