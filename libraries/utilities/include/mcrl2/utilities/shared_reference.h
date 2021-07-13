@@ -42,14 +42,28 @@ public:
   /// \brief Increment the reference count by one.
   void increment_reference_count() const
   {
-    ++m_reference_count;
+    if constexpr (ThreadSafe)
+    {
+      m_reference_count.fetch_add(1, std::memory_order_relaxed);
+    }
+    else
+    {
+      ++m_reference_count;
+    }
     increment_reference_count_changes();
   }
 
   /// \brief Decrement the reference count by one.
   void decrement_reference_count() const
   {
-    --m_reference_count;
+    if constexpr (ThreadSafe)
+    {
+      m_reference_count.fetch_sub(1, std::memory_order_relaxed);
+    }
+    else
+    {
+      --m_reference_count;
+    }
     increment_reference_count_changes();
   }
 
