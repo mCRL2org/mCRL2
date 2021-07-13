@@ -31,17 +31,17 @@ struct lts_builder
 {
   // All LTS classes use integers to represent actions in transitions. A mapping from actions to integers
   // is needed to avoid duplicates.
-  utilities::unordered_map_large<process::timed_multi_action, std::size_t> m_actions;
+  utilities::unordered_map_large<lps::multi_action, std::size_t> m_actions;
 
   lts_builder()
   {
-    process::timed_multi_action tau(process::action_list(), data::undefined_real());
+    lps::multi_action tau(process::action_list(), data::undefined_real());
     m_actions.emplace(std::make_pair(tau, m_actions.size()));
   }
 
-  std::size_t add_action(const process::timed_multi_action& a)
+  std::size_t add_action(const lps::multi_action& a)
   {
-    process::timed_multi_action sorted_multi_action(a.sort_actions());
+    lps::multi_action sorted_multi_action(a.sort_actions());
     auto i = m_actions.find(sorted_multi_action);
     if (i == m_actions.end())
     {
@@ -51,7 +51,7 @@ struct lts_builder
   }
 
   // Add a transition to the LTS
-  virtual void add_transition(std::size_t from, const process::timed_multi_action& a, std::size_t to) = 0;
+  virtual void add_transition(std::size_t from, const lps::multi_action& a, std::size_t to) = 0;
 
   // Add actions and states to the LTS
   virtual void finalize(const utilities::indexed_set<lps::state>& state_map, bool timed) = 0;
@@ -65,7 +65,7 @@ struct lts_builder
 class lts_none_builder: public lts_builder
 {
   public:
-    void add_transition(std::size_t /* from */, const process::timed_multi_action& /* a */, std::size_t /* to */) override
+    void add_transition(std::size_t /* from */, const lps::multi_action& /* a */, std::size_t /* to */) override
     {}
 
     void finalize(const utilities::indexed_set<lps::state>& /* state_map */, bool /* timed */) override
@@ -83,7 +83,7 @@ class lts_aut_builder: public lts_builder
   public:
     lts_aut_builder() = default;
 
-    void add_transition(std::size_t from, const process::timed_multi_action& a, std::size_t to) override
+    void add_transition(std::size_t from, const lps::multi_action& a, std::size_t to) override
     {
       std::size_t label = add_action(a);
       m_lts.add_transition(transition(from, label, to));
@@ -96,7 +96,7 @@ class lts_aut_builder: public lts_builder
       m_lts.set_num_action_labels(m_actions.size());
       for (const auto& p: m_actions)
       {
-        m_lts.set_action_label(p.second, action_label_string(process::pp(p.first)));
+        m_lts.set_action_label(p.second, action_label_string(lps::pp(p.first)));
       }
 
       m_lts.set_num_states(state_map.size());
@@ -128,10 +128,10 @@ class lts_aut_disk_builder: public lts_builder
       out << "des                                                \n"; // write a dummy header that will be overwritten
     }
 
-    void add_transition(std::size_t from, const process::timed_multi_action& a, std::size_t to) override
+    void add_transition(std::size_t from, const lps::multi_action& a, std::size_t to) override
     {
       m_transition_count++;
-      out << "(" << from << ",\"" << process::pp(a) << "\"," << to << ")\n";
+      out << "(" << from << ",\"" << lps::pp(a) << "\"," << to << ")\n";
     }
 
     // Add actions and states to the LTS
@@ -167,7 +167,7 @@ class lts_lts_builder: public lts_builder
       m_lts.set_action_label_declarations(action_labels);
     }
 
-    void add_transition(std::size_t from, const process::timed_multi_action& a, std::size_t to) override
+    void add_transition(std::size_t from, const lps::multi_action& a, std::size_t to) override
     {
       std::size_t label = add_action(a);
       m_lts.add_transition(transition(from, label, to));
@@ -241,7 +241,7 @@ class lts_lts_disk_builder: public lts_builder
       mcrl2::lts::write_lts_header(*stream, dataspec, process_parameters, action_labels);
     }
 
-    void add_transition(std::size_t from, const process::timed_multi_action& a, std::size_t to) override
+    void add_transition(std::size_t from, const lps::multi_action& a, std::size_t to) override
     {
       write_transition(*stream, from, a, to);
     }

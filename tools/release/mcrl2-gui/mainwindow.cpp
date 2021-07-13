@@ -9,7 +9,9 @@
 
 #include "mainwindow.h"
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/platform.h"
 
+#include <QtGlobal>
 #include <QMessageBox>
 #include <QSettings>
 
@@ -43,8 +45,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
   createToolMenu();
 
+// workaround for QTBUG-57687
+#if QT_VERSION > QT_VERSION_CHECK(5, 10, 0) || not defined MCRL2_PLATFORM_WINDOWS
   fileMenu->addSeparator();
   fileMenu->addAction(QString("Open mcrl2ide"), this, SLOT(onOpenIDE()));
+#endif
 
   m_state = saveState();
   QSettings settings("mCRL2", "mCRL2-gui");
@@ -55,13 +60,25 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::onOpenIDE()
 {
+// workaround for QTBUG-57687
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0) || not defined MCRL2_PLATFORM_WINDOWS
   QDir appDir = QDir(QCoreApplication::applicationDirPath());
   QString path = appDir.absoluteFilePath("mcrl2ide");
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+  QProcess* p = new QProcess();
+  p->setProgram(path);
+  if (!p->startDetached())
+  {
+    QMessageBox::warning(this, "mCRL2-gui", "Failed to start mcrl2ide: " + p->errorString());
+  }
+#else
   if (!QProcess::startDetached(path))
   {
-    QMessageBox::warning(this, "mCRL2-gui", "Failed to start mrl2ide: could "
-      "not find its executable");
+    QMessageBox::warning(this, "mCRL2-gui", "Failed to start mcrl2ide: could not find its executable");
   }
+#endif
+#endif
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

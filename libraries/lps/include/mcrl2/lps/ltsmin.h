@@ -289,7 +289,7 @@ class action_label_data_type: public pins_data_type
     std::size_t parse(const std::string& s) override
     {
       lps::multi_action m = lps::parse_multi_action(s, m_action_labels, m_data);
-      return m_indexed_set.insert(detail::multi_action_to_aterm(m)).first;
+      return m_indexed_set.insert(m).first;
     }
 
     const std::string& name() const override
@@ -864,7 +864,7 @@ class pins
         {
           dest[j] = state_type_map(j)[destination[j]];
         }
-        labels[0] = action_label_type_map()[detail::multi_action_to_aterm(i->action())];
+        labels[0] = action_label_type_map()[i->action()];
         f(dest, labels);
       }
     }
@@ -924,7 +924,7 @@ class pins
         {
           dest[j] = state_type_map(j)[destination[j]];
         }
-        labels[0] = action_label_type_map()[detail::multi_action_to_aterm(i->action())];
+        labels[0] = action_label_type_map()[i->action()];
         f(dest, labels);
       }
     }

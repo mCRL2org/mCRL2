@@ -36,6 +36,11 @@ latest release of the toolset.
 Stable releases for Arch Linux are available via the `Arch User Repository <https://aur.archlinux.org/packages/mcrl2/>`_.
 This package is currently maintained by Jorai Rijsdijk.
 
+.. note::
+
+   The Windows release has received a minor fix on the 12th of July, 2021,
+   which resolves not being able to open mcrl2ide from mcrl2-gui.
+
 Download a nightly build of mCRL2
 =================================
 

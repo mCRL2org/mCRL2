@@ -4,6 +4,7 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
+\usepackage{amsthm}
 \usepackage{algorithm}
 \usepackage{algorithmicx}
 \usepackage[noend]{algpseudocode}
@@ -13,10 +14,12 @@
 \usepackage{graphicx}
 
 \newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{definition}[theorem]{Definition}
 \newtheorem{example}[theorem]{Example}
 
 \newcommand{\var}[1]{\ensuremath{\textit{#1}}}
+\newcommand{\interpret}[1]{\llbracket #1 \rrbracket}
 
 \newcommand{\emptylist}{\ensuremath{[\:]}}
 
@@ -26,7 +29,7 @@
 \newcommand{\pred}{\ensuremath{\textit{pred}}}
 
 \title{Symbolic Reachability using LDDs}
-\author{Wieger Wesselink}
+\author{Wieger Wesselink and Maurice Laveaux}
 \date{\today}
 
 \begin{document}
@@ -714,15 +717,18 @@ $\textsf{relprod}(L_i, \var{todo}, I_r, I_w)$ & \textsf{relprod} (Sylvan functio
 \subsection{Splitting Conditions}
 
 Symbolic reachability is most effective when the number of read/write parameters and the number of transitions per transition group are small.
-For disjunctive conditions we can derive the following:
+We can split the disjunctive conditions in a conjunctive equation as follows:
 Consider a PBES $\mathcal{E}$ in SRF with an equation $\sigma_i X_i(d:D) \in \mathcal{E}$ of the shape:
 \begin{align*}
   \sigma_i X_i(d:D) &= \bigwedge\limits_{j \in J_i} \forall e_j : E_j . (\bigvee\limits_{k \in K_{ij}} f_{ijk}(d,e_j)) \implies X_{g_{ij}}(h_{ij}(d, e_j)) \\  
   \sigma_i X_i(d:D) &= \bigwedge\limits_{j \in J_i} \forall e_j : E_j . \bigwedge\limits_{k \in K_{ij}} f_{ijk}(d,e_j) \implies X_{g_{ij}}(h_{ij}(d, e_j)) \\
   \sigma_i X_i(d:D) &= \bigwedge\limits_{j \in J_i}\bigwedge\limits_{k \in K_{ij}} \forall e_j : E_{ij} .  f_{ijk}(d,e_j) \implies X_{g_{ij}}(h_{ij}(d, e_j))
 \end{align*}
-For the final equation every clause $f_{ijk}(d,e_j))$, for $k \in K_j$, can be treated as its own transition group.
-For conjunctive conditions we have to introduce a new equation to ensure that the result is in SRF.
+This transformation is safe and allows us to consider every $f_{ijk}(d,e_j))$ as its own transition group.
+A similar transformation can be applied to conjunctions in a disjunctive equation.
+
+We can apply another transformation to conjunctive conditions inside conjunctive equations.
+By introducing a new equation for every conjunctive clause $f_{ijk}(d,e_j))$, for $k \in K_j$, we can remain in SRF by the following transformation:
 \begin{align*}
   \sigma_i X_i(d:D) &= \bigwedge\limits_{j \in J_i} \forall e_j : E_j . (\bigwedge\limits_{k \in K_{ij}} f_{ijk}(d,e_j)) \implies X_{g_{ij}}(h_{ij}(d, e_j)) \\  
   \sigma_i X_i(d:D) &= \bigwedge\limits_{j \in J_i} \forall e_j : E_j . \bigvee\limits_{k \in K_{ij}} (\neg f_{ijk}(d,e_j) \lor X_{g_{ij}}(h_{ij}(d, e_j))) \\
@@ -739,7 +745,7 @@ Note that every $j \in J_i$ can be transformed according to whether the conditio
 The cases for a disjunctive or conjunctive condition within a disjunctive equation are completely dual.
 
 We can also observe that in the equation for $Y_j$ there is always a dependency on $X_{g_{ij}}(h_{ij}(d, e_j))$, whereas, in the original equation this was guarded by $(\bigwedge\limits_{k \in K_j} f_{ijk}(d,e_j))$.
-Alternatively, we can also consider the following equation for $Y_j$ such that $X_{g_{ij}}(h_{ij}(d, e_j))$ still has (weakened) guards.
+Alternatively, we can also consider the following equation for $Y_j$ such that $X_{g_{ij}}(h_{ij}(d, e_j))$ still has (weaker) guards.
 
 \begin{align*}
   \nu Y_j(d : D, e_j : E_j) &= \bigvee\limits_{k \in K_j} \textit{true} \land Y_{jk}(d, e_j) \\
@@ -747,8 +753,9 @@ Alternatively, we can also consider the following equation for $Y_j$ such that $
 \end{align*}
 
 \newpage
-\section{Zielonka}
-Let $V$ be the nodes of a parity game.
+\section{Parity Game Solving}
+Let $V$ be the nodes of a parity game and $V_0$ and $V_1$ the vertices owned by $0$ (even) and $1$ (odd) respectively.
+Furthermore, we denote the priority of $v \in V$ by $r(v)$.
 For a non-empty set $U \subseteq V$ and a player $\alpha$, the
 $\alpha$-attractor into $U$, denoted $\attr{\alpha}{U,V}$,
 is the set of vertices for which player
@@ -792,7 +799,7 @@ Instead of determining all predecessors for states in $V \setminus \attr[n]{\alp
 Furthermore, we can actually keep track of the states that have been added in the last iteration and were not yet part of the attractor set.
 We then only have to compute predecessors with respect to this todo set.
 
-\begin{algorithm}[h]
+\begin{algorithm}[H]
 \caption{Attractor set computation for a union of sparse relations}
 \label{alg:attractor_set}
 \begin{algorithmic}[1]
@@ -821,7 +828,32 @@ We then only have to compute predecessors with respect to this todo set.
 \end{algorithmic}
 \end{algorithm}
 
-\begin{algorithm}[h]
+The standard Zielonka solving algorithm, defined in Algorithm~\ref{alg:zielonka} requires that every vertex has an outgoing edge.
+If this is the case then the graph is called \emph{total}.
+We can achieve this by extending every disjunctive PBES equation with $\textsf{true} \land X_\textsf{false}$ where $X_\textsf{false}$ is defined as $\mu X_\textsf{false} = \textsf{true} \land X_\textsf{false}$ and similarly for the conjunctive PBES equations with $X_\textsf{true}$.
+However, adding these unnecessary transitions can be costly.
+
+Therefore, if we perform the deadlock detection we can avoid extending the PBES and obtain a total graph by performing the preprocessing step described in Algorithm~\ref{alg:preprocess}.
+Every disjunctive vertex that is a deadlock is won by player odd (previously indicated by a transition to $X_\textsf{false}$) and every conjunctive vertex that is a deadlock by player even.
+If we compute the attractors to these won vertices then the resulting graph is total and can be used in the Zielonka algorithm as follows $\textsc{zielonka}(\textsc{preprocess}(V, D, \emptyset, \emptyset))$.
+
+\begin{algorithm}[H]
+\caption{Preprocess the graph to be total and remove deadlocks $D$ already solved vertices $W_0, W_1$ where $W_0$ is won by even and $W_1$ by odd.}
+\label{alg:preprocess}
+\begin{algorithmic}[1]
+\Function{Preprocess}{$V, D, W_0, W_1$}
+	\State {$W'_0 \gets W_0 \cup (D \cap V_1)$}	
+	\State {$W'_1 \gets W_1 \cup (D \cap V_0)$}
+	
+	\State {$W'_0 \gets \attr{0}{W'_0, V}$}
+	\State {$W'_1 \gets \attr{1}{W'_1, V}$}
+	
+	\State \Return $V \setminus (W'_0 \cup W'_1)$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
 \caption{Zielonka}
 \label{alg:zielonka}
 \begin{algorithmic}[1]
@@ -871,6 +903,179 @@ If $U$ satisfies this condition then every vertex in $U$ is part of a cycle.
 If one of the players can force a play through a cycle of its own priority then these vertices (and all vertices in a attractor to that set) are won by that player.
 Therefore, for every priority $p$ let $\alpha = p \mod 2$ be a player and let $P = \{v \in V_\alpha \mid r(v) = p\}$ be a subset of vertices owned by player of parity $p$.
 Then the set of vertices resulting from $\attr{\alpha}{\textsf{detect-cycles}(V), V}$ are won by player $\alpha$.
+
+\newpage
+\section{LDD Operations}
+
+\newcommand{\lddnode}{\textsf{node}}
+\newcommand{\lddright}{\textit{right}}
+\newcommand{\ldddown}{\textit{down}}
+\newcommand{\lddval}{\textit{val}}
+\newcommand{\lddtrue}{\textsf{true}}
+\newcommand{\lddfalse}{\textsf{false}}
+
+For an LDD $A$ we use $\ldddown(A)$ to denote $A[x_i = v]$ and $\lddright(A)$ to denote $A[x_i > v]$.
+We use $|A|$ to denote the size of the LDD, determined by the number of nodes.
+Given a vector $v = x_0\,x_1 \cdots x_n$ we define its length, denoted by $|v|$, as $n + 1$.
+Note that an LDD can represent (some) sets where two vectors have different lengths.
+For example the set $\{1\,1, 0\}$ can be represented by an LDD.
+However, the set $\{1\,1, 1\}$ cannot be represented since the root node can either have $\textsf{true}$ or $\var{node}(1, \textsf{true}, \textsf{false})$ as the down node and $\textsf{true}$ has no down or right nodes.
+In general, we cannot represent a set with vectors that are strict prefixes (any vector $x_0 \cdots x_m$ with $m < n$ is a strict prefix of $v$) of other vectors in the set.
+In practice, this means that we only consider LDDs where every vector in the represented set has the same length.
+We refer to this length as the height of the LDD.
+We often require that the input LDDs have equal height since not every output can be represented.
+For example the union of $\{1\,1\}$ and $\{1\}$ cannot be represented as previously shown.
+
+\subsection{Union}
+
+We define the union operator on two equal height LDDs $A$ and $B$.
+This computes the union of the represented sets of vectors.
+
+\begin{algorithm}[h]
+\caption{Union of two equal height LDDs $\var{A}$ and $\var{B}$}
+\begin{algorithmic}[1]
+\Function{union}{$A, B$}
+\If{$A = B$}
+	\State \Return $a$
+\ElsIf{$A = \textsf{false}$}
+	\State \Return $b$
+\ElsIf{$B = \textsf{false}$}
+	\State \Return $a$
+\EndIf
+
+\If{$val(A) < val(B)$}
+	\State \Return $node(val(A), down(A), \textsc{union}(right(A), B))$
+\ElsIf{$val(A) = val(B)$}
+	\State \Return $node(val(A), \textsc{union}(down(A), down(B)), \textsc{union}(\lddright(A), right(B)))$
+\ElsIf{$val(A) > val(B)$}
+	\State \Return $node(val(B), down(B), \textsc{union}(A, right(B)))$	
+\EndIf
+
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{lemma}
+	For all LDDs $A$ and $B$ it holds that $\interpret{\textsc{union}(A, B)} = \interpret{A} \cup \interpret{B}$.
+\end{lemma}
+\begin{proof}
+	Pick arbitrary LDDs $A$ and $B$.
+	Proof by induction on the structure of $A$ and $B$.	
+	For all LDDs $A'$ and $B'$ we assume that $\interpret{\textsc{union}(A', right(B'))} = \interpret{A'} \cup \interpret{right(B')}$ and $\interpret{\textsc{union}(A', down(B'))} = \interpret{A'} \cup \interpret{down(B')}$.
+	Furthermore, $\interpret{\textsc{union}(\var{right}(A'), B')} = \interpret{\var{right}(A')} \cup \interpret{B'}$ and $\interpret{\textsc{union}(down(A'), B')} = \interpret{\var{down}(A')} \cup \interpret{B'}$.
+	
+	Base case.
+	The LDD $A$ is either $\textsf{true}$ or $\textsf{false}$.
+	Then $B$ is either $\textsf{true}$ or $\textsf{false}$ due to the equal height assumption.
+	In both cases t he terminal conditions ensure correctness.
+	For example $\interpret{\textsc{union}(\textsf{true}, \textsf{false})} = \interpret{\textsf{true}}$ and $\{[]\} \cup \emptyset = \{[]\}$.	
+	Similarly, for the case where $B$ is either $\textsf{true}$ or $\textsf{false}$.
+	
+	Inductive step.
+	\begin{itemize}
+	\item Case $val(A) < val(B)$.
+		Since $A$ is an LDD we know that $\lddval(A) < \lddval(\lddright(A))$.
+		Therefore, we know that $\interpret{node(val(A), down(A), \textsc{union}(right(A), B))}$ is equal to $\{val(A)\,x \mid x \in \interpret{down(A)}\} \cup \interpret{\textsc{union}(right(A), B)}$.
+		It follows that $\interpret{\textsc{union}(right(A), B)}$ is equal to $\interpret{right(A)} \cup \interpret{B}$.
+		From which we can derive $\interpret{A} \cup \interpret{B}$.
+
+	\item Case $val(A) = val(B)$.
+		Since $A$ is an LDD we know that $\lddval(A) < \lddval(\lddright(A))$ and similarly because $B$ is an LDD we know that $\lddval(A) < \lddval(\lddright(B))$.
+		Therefore, the following node is valid and $\interpret{node(val(A), \textsc{union}(down(A), down(B)), \textsc{union}(right(A), \var{right}(B)))}$ is equal to  $\{val(A)\,x \mid x \in \interpret{\textsc{union}(down(A), down(B))}\} \cup \interpret{\textsc{union}(right(A), right(B))}$.
+		It follows that the interpretation $\{val(A)\,x \mid x \in \interpret{\textsc{union}(down(A), down(B))}$ is equal to $\{val(A)\,x \mid x \in \interpret{down(A)}\} \cup \{val(A)\,x \mid x \in \interpret{down(B)}\}$ and $\interpret{\textsc{union}(right(A), right(B))}$ is equal to $\interpret{(right(A)} \cup \interpret{right(B))}$.
+%		From which we can derive $\interpret{right(A)} \cup \interpret{right(B)}$.
+	
+	\item Case $val(A) > val(B)$.
+		Similar to the $val(A) < val(B)$ case.	\qedhere	
+	\end{itemize} 
+\end{proof}
+
+We can show that $|\textsc{union(A, B)}|$ for any LDDs $A$ and $B$ is at most $|A| + |B|$.
+The time complexity of $\textsc{union(A, B)}$ is also of order $\mathcal{O}(|A| + |B|)$.
+
+\subsection{Project}
+
+Given a vector $x_0\,\cdots\,x_n$ and a subset $I \subseteq \mathbb{N}$, we define the \emph{projection}, denoted by $\textit{project}(x_0\,\cdots\,x_n, I)$, as the vector $x_{i_0}, \ldots, x_{i_l}$ for the largest $l \in \mathbb{N}$ such that $i_0 < i_1 < \ldots < i_l \leq n$ and $i_k \in I$ for $0 \leq k \leq l$.
+We define the projection operator for an LDD where every vector in the set is projected.
+For the LDD operator it is more convenient to specify the indices $I \subseteq \mathbb{N}$ by a vector $x_0\,\cdots\,x_n$ such that for $0 \leq i \leq n$ variable $x_i$ is one iff $i \in I$.
+The operator takes an LDD $A$ of height $n$ and a sequence of numbers $x_0\,x_1,\cdots\,x_n$.
+
+\begin{algorithm}[h]
+\caption{Project vectors of an LDD $\var{A}$ of height $n$ using a sequence $x_0\,\cdots\,x_n$}
+\begin{algorithmic}[1]
+\Function{project}{$A, x_0\,x_1\,\cdots\,x_n$}
+	\If{$A = \lddtrue$}
+		\State \Return $\lddtrue$
+	\ElsIf{$A = \lddfalse$}
+		\State \Return $\lddfalse$
+	\EndIf
+	
+	\If{$x_0 = 1$}
+		\State \Return{$\lddnode(\lddval(A), \textsc{project}(\ldddown(A), x_1\,\cdots\,x_n), \textsc{project}(\lddright(A), x_0\,\cdots\,x_n))$}
+	\ElsIf{$x_0 = 0$}
+		\State $a \gets A$
+		\State $R \gets \lddfalse$
+		\While {$a \neq \lddfalse$}
+			\State $R \gets \textsc{union}(R, \textsc{project}(\ldddown(a), x_1\,\cdots\,x_n))$
+			\State $a \gets \lddright(a)$		
+		\EndWhile			
+		\State \Return {$R$}
+	\EndIf
+
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{lemma}
+	For all LDDs $A$ and sequences $x_0\,x_1\,\cdots\,x_n $it holds that $\interpret{\textsc{project}(A, x_0\,\cdots\,x_n)}$ is equal to $\{\textit{project}(v, x_0\,\cdots\,x_n) \in \interpret{A}\}$.
+\end{lemma}
+
+Note that for a sequence of $|A|$ zeroes $\textsc{project}(A, 0\,\cdots\,0)$ is equal to $\lddtrue$ and for a sequence of $|A|$ ones $\textsc{project}(A, 1\,\cdots\,1)$ is equal to $A$.
+
+\subsection{Caching}
+
+We can speed up LDD operations at the cost of memory by using an operation cache.
+For every operation there will be a separate \emph{global} cache, represented by a set, that stores a tuple of the inputs and the output.
+We use \emph{global} to emphasize that every recursion sees the latest values stored in the cache.  
+For example the $\textsc{union}(A, B)$ operation has a cache $C_\textsc{union}$ and the pseudocode of $\textsc{union}$ is changed such that after the terminal cases first we check whether $\exists R : (A, B, R) \in C_\textsc{union}$ and return the result $R$ if that is the case.
+Otherwise, we perform the computation as before but store the result in $C_\textsc{union}$ instead before returning it.
+Thus we obtain the following algorithm:
+
+\begin{algorithm}[H]
+\caption{Union of two LDDs $\var{A}$ and $\var{B}$.
+	With a set $C_\textsc{union}$ as operation cache}
+\begin{algorithmic}[1]
+\Function{union}{$A, B,  C_\textsc{union}$}
+\If{$A = B$}
+	\State \Return $a$
+\ElsIf{$A = \textsf{false}$}
+	\State \Return $b$
+\ElsIf{$B = \textsf{false}$}
+	\State \Return $a$
+\EndIf
+
+\If{$\exists R: (A, B, R) \in C_\textsc{union}$}
+	\Return $R$
+\EndIf
+
+\If{$val(A) < val(B)$}
+	\State $R \gets node(val(A), down(A), \textsc{union}(right(A), B, C_\textsc{union}))$
+\ElsIf{$val(A) = val(B)$}
+	\State $R \gets node(val(A), union(down(A), down(B), union(right(A), right(B), C_\textsc{union}))$
+\ElsIf{$val(A) > val(B)$}
+	\State $R \gets node(val(B), down(B), \textsc{union}(A, right(B), C_\textsc{union}))$
+\EndIf
+
+\State $C_\textsc{union} \gets C_\textsc{union} \cup \{(A, B, R)\}$
+\State \Return $R$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Parallelism}
+
+In some cases we can improve the performance further by computing several results in parallel during the operation.
+For example in the union of two LDDs $A$ and $B$ in the case $val(A) = val(B)$ we could determine the result of both unions in parallel and only merge them after they have finished.
 
 \bibliographystyle{plain}
 \bibliography{symbolic-reachability}

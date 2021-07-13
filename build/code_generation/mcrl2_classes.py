@@ -148,7 +148,7 @@ state_formula_specification(const data::data_specification& data, const process:
 # N.B. This one is problematic due to the optional time in deadlock/multi_action.
 LPS_CLASSES = r'''
 deadlock(const data::data_expression& time)                                                                                                                                                                                                                   | CMS  | None              | A deadlock
-multi_action(const process::action_list& actions, const data::data_expression& time)                                                                                                                                                                          | CMS  | None              | A multi-action
+multi_action(const process::action_list& actions, const data::data_expression& time)                                                                                                                                             : public atermpp::aterm_appl | CIUs | TimedMultAct      | A timed multi-action
 deadlock_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::deadlock& deadlock)                                                                                                                       | CMS  | None              | A deadlock summand
 action_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::multi_action& multi_action, const data::assignment_list& assignments)                                                                       | CMS  | None              | An action summand
 process_initializer(const data::data_expression_list& expressions)                                                                                                                                                               : public atermpp::aterm_appl | CIUS | LinearProcessInit | A process initializer
@@ -170,7 +170,6 @@ rename_expression(core::identifier_string& source, core::identifier_string& targ
 communication_expression(const action_name_multiset& action_name, const core::identifier_string& name)                                                                           : public atermpp::aterm_appl | CI   | CommExpr           | A communication expression
 action_name_multiset(const core::identifier_string_list& names)                                                                                                                  : public atermpp::aterm_appl | CI   | MultActName        | A multiset of action names
 untyped_multi_action(const data::untyped_data_parameter_list& actions)                                                                                                           : public atermpp::aterm_appl | CI   | UntypedMultiAction | An untyped multi action or data application
-timed_multi_action(const process::action_list& actions, const data::data_expression& time)                                                                                       : public atermpp::aterm_appl | CIU  | TimedMultAct       | A timed multi-action
 '''
 
 PROCESS_EXPRESSION_CLASSES = r'''

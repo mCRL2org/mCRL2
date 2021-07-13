@@ -15,7 +15,7 @@
 #include "mcrl2/data/builder.h"
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/untyped_multi_action.h"
-#include "mcrl2/process/timed_multi_action.h"
+// #include "mcrl2/lps/multi_action.h"
 
 namespace mcrl2
 {
@@ -72,16 +72,6 @@ struct add_sort_expressions: public Builder<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     process::untyped_multi_action result = process::untyped_multi_action(static_cast<Derived&>(*this).apply(x.actions()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
-  process::timed_multi_action apply(const process::timed_multi_action& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    process::timed_multi_action result = x.has_time() ?
-      process::timed_multi_action(static_cast<Derived&>(*this).apply(x.actions()), static_cast<Derived&>(*this).apply(x.time())) :
-      process::timed_multi_action(static_cast<Derived&>(*this).apply(x.actions()), x.time());
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -402,16 +392,6 @@ struct add_data_expressions: public Builder<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     process::untyped_multi_action result = process::untyped_multi_action(static_cast<Derived&>(*this).apply(x.actions()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
-  process::timed_multi_action apply(const process::timed_multi_action& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    process::timed_multi_action result = x.has_time() ?
-      process::timed_multi_action(static_cast<Derived&>(*this).apply(x.actions()), static_cast<Derived&>(*this).apply(x.time())) :
-      process::timed_multi_action(static_cast<Derived&>(*this).apply(x.actions()), x.time());
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -740,16 +720,6 @@ struct add_variables: public Builder<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     process::untyped_multi_action result = process::untyped_multi_action(static_cast<Derived&>(*this).apply(x.actions()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
-  process::timed_multi_action apply(const process::timed_multi_action& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    process::timed_multi_action result = x.has_time() ?
-      process::timed_multi_action(static_cast<Derived&>(*this).apply(x.actions()), static_cast<Derived&>(*this).apply(x.time())) :
-      process::timed_multi_action(static_cast<Derived&>(*this).apply(x.actions()), x.time());
     static_cast<Derived&>(*this).leave(x);
     return result;
   }

@@ -24,134 +24,93 @@ namespace lps
 // prototype declaration
 bool is_multi_action(const atermpp::aterm_appl& x);
 
-/// \brief Represents a multi action
-/// \details Multi actions consist of a list of actions together with an optional time tag.
-class multi_action
+//--- start generated class multi_action ---//
+/// \brief A timed multi-action
+class multi_action: public atermpp::aterm_appl
 {
-    friend class action_summand;
-
-  protected:
-    /// \brief The actions of the summand
-    process::action_list m_actions;
-
-    /// \brief The time of the summand. If <tt>m_time == data::undefined_real()</tt>
-    /// the multi action has no time.
-    data::data_expression m_time;
-
   public:
-    /// \brief Constructor
-    explicit multi_action(const process::action_list& actions = process::action_list(), data::data_expression time = data::undefined_real())
-      : m_actions(actions), m_time(time)
+
+
+    /// Move semantics
+    multi_action(const multi_action&) noexcept = default;
+    multi_action(multi_action&&) noexcept = default;
+    multi_action& operator=(const multi_action&) noexcept = default;
+    multi_action& operator=(multi_action&&) noexcept = default;
+
+    const process::action_list& actions() const
     {
-      assert(data::sort_real::is_real(m_time.sort()));
+      return atermpp::down_cast<process::action_list>((*this)[0]);
     }
 
-    /// \brief Constructor
-    explicit multi_action(const atermpp::aterm& t1)
-      : m_time(data::undefined_real())
+    const data::data_expression& time() const
     {
-      const atermpp::aterm_appl& t = atermpp::down_cast<atermpp::aterm_appl>(t1);
-      assert(process::is_action(t) || lps::is_multi_action(t));
-      m_actions = process::is_action(t) ? atermpp::down_cast<process::action_list>(t1) 
-                                        : atermpp::down_cast<process::action_list>(t[0]);
+      return atermpp::down_cast<data::data_expression>((*this)[1]);
+    }
+//--- start user section multi_action ---//
+    /// \brief Constructor
+    explicit multi_action(const process::action_list& actions = process::action_list(), 
+                          data::data_expression time = data::undefined_real())
+      : atermpp::aterm_appl(core::detail::function_symbol_TimedMultAct(), actions, time)
+    {
+      assert(data::sort_real::is_real(time.sort()));
+    }
+
+    /// \brief Constructor.
+    /// \param term A term
+    explicit multi_action(const atermpp::aterm& term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(core::detail::check_term_TimedMultAct(*this));
     }
 
     /// \brief Constructor
     explicit multi_action(const process::action& l)
-      : m_actions({ l }),
-        m_time(data::undefined_real())
+      : multi_action(process::action_list({ l }),data::undefined_real())
     {}
 
     /// \brief Returns true if time is available.
     /// \return True if time is available.
     bool has_time() const
     {
-      return m_time != data::undefined_real();
-    }
-
-    /// \brief Returns the sequence of actions.
-    /// \return The sequence of actions.
-    const process::action_list& actions() const
-    {
-      return m_actions;
-    }
-
-    /// \brief Returns the sequence of actions.
-    /// \return The sequence of actions.
-    process::action_list& actions()
-    {
-      return m_actions;
-    }
-
-    /// \brief Returns the time.
-    /// \return The time.
-    const data::data_expression& time() const
-    {
-      return m_time;
-    }
-
-    /// \brief Returns the time.
-    /// \return The time.
-    data::data_expression& time()
-    {
-      return m_time;
-    }
-
-    /// \brief Returns the name of the first action.
-    /// \return The name of the first action.
-    core::identifier_string name() const
-    {
-      return m_actions.front().label().name();
-    }
-
-    /// \brief Returns the arguments of the multi action.
-    /// \return The arguments of the multi action.
-    data::data_expression_list arguments() const
-    {
-      return m_actions.front().arguments();
+      return time() != data::undefined_real();
     }
 
     /// \brief Joins the actions of both multi actions.
     /// \pre The time of both multi actions must be equal.
     multi_action operator+(const multi_action& other) const
     {
-      assert(m_time == other.m_time);
-      return multi_action(m_actions + other.m_actions, m_time);
+      assert(time() == other.time());
+      return multi_action(actions() + other.actions(), time());
     }
 
-    /// \brief Comparison operator
-    bool operator==(const multi_action& other) const
+    /// \brief Returns the multiaction in which the list of actions is sorted. 
+    /// \return A multi-action with a sorted list.
+    multi_action sort_actions() const
     {
-      return m_actions == other.m_actions && m_time == other.m_time;
+      if (actions().size()<=1)  // There is almost always only one action. 
+      {
+        return *this;
+      }
+      return multi_action(atermpp::sort_list(actions()),time());
     }
 
-    /// \brief Comparison operator
-    bool operator!=(const multi_action& other) const
-    {
-      return !(*this == other);
-    }
-
-    /// \brief Inequality on multi_actions
-    bool operator<(const multi_action& other) const
-    {
-      return m_actions < other.m_actions || (m_actions == other.m_actions && m_time < other.m_time);
-    }
-
-    /// \brief Swaps the contents
-    void swap(multi_action& other)
-    {
-      using std::swap;
-      swap(m_actions, other.m_actions);
-      swap(m_time, other.m_time);
-    }
+   //--- end user section multi_action ---//
 };
 
-//--- start generated class multi_action ---//
 /// \brief list of multi_actions
 typedef atermpp::term_list<multi_action> multi_action_list;
 
 /// \brief vector of multi_actions
 typedef std::vector<multi_action>    multi_action_vector;
+
+/// \brief Test for a multi_action expression
+/// \param x A term
+/// \return True if \a x is a multi_action expression
+inline
+bool is_multi_action(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::TimedMultAct;
+}
 
 // prototype declaration
 std::string pp(const multi_action& x);
@@ -173,30 +132,16 @@ inline void swap(multi_action& t1, multi_action& t2)
 }
 //--- end generated class multi_action ---//
 
-/// \brief Returns true if the term t is a multi action
-inline
-bool is_multi_action(const atermpp::aterm_appl& x)
-{
-  return x.function() == core::detail::function_symbols::MultAct;
-}
 
 // template function overloads
-void normalize_sorts(multi_action& x, const data::sort_specification& sortspec);
-void translate_user_notation(lps::multi_action& x);
+lps::multi_action normalize_sorts(const multi_action& x, const data::sort_specification& sortspec);
+lps::multi_action translate_user_notation(const lps::multi_action& x);
 std::set<data::variable> find_all_variables(const lps::multi_action& x);
 std::set<data::variable> find_free_variables(const lps::multi_action& x);
 
 /// \cond INTERNAL_DOCS
 namespace detail
 {
-
-/// \brief Conversion to aterm_appl.
-/// \return The multi action converted to aterm format.
-inline
-atermpp::aterm_appl multi_action_to_aterm(const multi_action& m)
-{
-  return atermpp::aterm_appl(core::detail::function_symbol_MultAct(), m.actions());
-}
 
 /// \brief Visits all permutations of the arrays, and calls f for each instance.
 /// \pre The range [first, last) contains sorted arrays.

@@ -232,7 +232,7 @@ struct explorer_summand
 {
   data::variable_list variables;
   data::data_expression condition;
-  process::timed_multi_action multi_action;
+  lps::multi_action multi_action;
   stochastic_distribution distribution;
   std::vector<data::data_expression> next_state;
   std::size_t index;
@@ -247,7 +247,7 @@ struct explorer_summand
   explorer_summand(const ActionSummand& summand, std::size_t summand_index, const data::variable_list& process_parameters, caching cache_strategy_)
     : variables(summand.summation_variables()),
       condition(summand.condition()),
-      multi_action(summand.multi_action().actions(), summand.multi_action().time()),
+      multi_action(summand.multi_action()),
       distribution(summand_distribution(summand)),
       next_state(make_data_expression_vector(summand.next_state(process_parameters))),
       index(summand_index),
@@ -312,7 +312,7 @@ std::ostream& operator<<(std::ostream& out, const explorer_summand& summand)
   return out << lps::stochastic_action_summand(
     summand.variables,
     summand.condition,
-    lps::multi_action(summand.multi_action.actions(), summand.multi_action.time()),
+    summand.multi_action,
     data::make_assignment_list(summand.variables, summand.next_state),
     summand.distribution
   );
@@ -337,10 +337,10 @@ class explorer: public abortable
 
     struct transition
     {
-      process::timed_multi_action action;
+      lps::multi_action action;
       state_type state;
 
-      transition(process::timed_multi_action  action_, const state_type& state_)
+      transition(lps::multi_action  action_, const state_type& state_)
        : action(std::move(action_)), state(state_)
       {}
     };
@@ -439,12 +439,12 @@ class explorer: public abortable
       return result;
     }
 
-    process::timed_multi_action rewrite_action(const process::timed_multi_action& a) const
+    lps::multi_action rewrite_action(const lps::multi_action& a) const
     {
       const process::action_list& actions = a.actions();
       const data::data_expression& time = a.time();
       return
-        process::timed_multi_action(
+        lps::multi_action(
           process::action_list(
             actions.begin(),
             actions.end(),
@@ -496,7 +496,7 @@ class explorer: public abortable
                       [&](const enumerator_element& p) {
                         check_enumerator_solution(p, summand);
                         p.add_assignments(summand.variables, m_sigma, m_rewr);
-                        process::timed_multi_action a = rewrite_action(summand.multi_action);
+                        lps::multi_action a = rewrite_action(summand.multi_action);
                         state_type s1;
                         if constexpr (Stochastic)
                         {
@@ -547,7 +547,7 @@ class explorer: public abortable
         for (const data::data_expression_list& e: q->second)
         {
           data::add_assignments(m_sigma, summand.variables, e);
-          process::timed_multi_action a = rewrite_action(summand.multi_action);
+          lps::multi_action a = rewrite_action(summand.multi_action);
           state_type s1;
           if constexpr (Stochastic)
           {
@@ -584,7 +584,7 @@ class explorer: public abortable
         generate_transitions(
           summand,
           confluent_summands,
-          [&](const process::timed_multi_action& a, const state_type& s1)
+          [&](const lps::multi_action& a, const state_type& s1)
           {
             if constexpr (Timed)
             {
@@ -622,7 +622,7 @@ class explorer: public abortable
         generate_transitions(
           summand,
           confluent_summands,
-          [&](const process::timed_multi_action& /* a */, const state& s1)
+          [&](const lps::multi_action& /* a */, const state& s1)
           {
             result.push_back(s1);
           }
@@ -817,7 +817,7 @@ class explorer: public abortable
           generate_transitions(
             summand,
             confluent_summands,
-            [&](const process::timed_multi_action& a, const state_type& s1)
+            [&](const lps::multi_action& a, const state_type& s1)
             {
               if constexpr (Timed)
               {
@@ -930,7 +930,7 @@ class explorer: public abortable
         generate_transitions(
           summand,
           m_confluent_summands,
-          [&](const process::timed_multi_action& a, const state_type& d1)
+          [&](const lps::multi_action& a, const state_type& d1)
           {
             result.emplace_back(lps::multi_action(a.actions(), a.time()), d1);
           }
@@ -957,7 +957,7 @@ class explorer: public abortable
       generate_transitions(
         m_regular_summands[i],
         m_confluent_summands,
-        [&](const process::timed_multi_action& a, const state_type& d1)
+        [&](const lps::multi_action& a, const state_type& d1)
         {
           result.emplace_back(lps::multi_action(a), d1);
         }

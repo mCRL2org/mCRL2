@@ -259,7 +259,7 @@ void replace_summand_variables(specification& spec, data::mutable_map_substituti
   {
     s.summation_variables() = data::replace_variables(s.summation_variables(), sigma);
     s.condition() = data::replace_variables_capture_avoiding(s.condition(), sigma, id_generator);
-    lps::replace_variables_capture_avoiding(s.multi_action(), sigma, id_generator);
+    s.multi_action() = lps::replace_variables_capture_avoiding(s.multi_action(), sigma, id_generator);
     s.assignments() = data::replace_variables_capture_avoiding(s.assignments(), sigma, id_generator);
   }
   for (deadlock_summand& s: spec.process().deadlock_summands())

@@ -469,24 +469,6 @@ struct printer: public process::add_traverser_sort_expressions<data::detail::pri
     derived().leave(x);
   }
 
-  void apply(const process::timed_multi_action& x)
-  {
-    derived().enter(x);
-    if (x.actions().empty())
-    {
-      derived().print("tau");
-    }
-    else
-    {
-      print_list(x.actions(), "", "", "|");
-    }
-    if (x.has_time())
-    {
-      derived().print(" @ ");
-      print_expression(x.time(), precedence(x.time()) < core::detail::max_precedence);
-    }
-    derived().leave(x);
-  }
 };
 
 } // namespace detail

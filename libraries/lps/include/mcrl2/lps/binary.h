@@ -124,7 +124,8 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
       std::list<data::variable> selected_params;
       if (use_selection)
       {
-        auto sel = detail::parse_lps_parameter_selection(process_parameters, m_spec.data(), parameter_selection);
+        const data::variable_vector sel = 
+                   detail::parse_lps_parameter_selection(process_parameters, m_spec.data(), parameter_selection);
         selected_params = std::list<data::variable>(sel.begin(), sel.end());
       }
       else
@@ -354,7 +355,7 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
     void update_action_summand(action_summand& s)
     {
       s.condition() = data::replace_variables_capture_avoiding(s.condition(), m_if_trees, m_if_trees_generator);
-      lps::replace_variables_capture_avoiding(s.multi_action(), m_if_trees, m_if_trees_generator);
+      s.multi_action()=lps::replace_variables_capture_avoiding(s.multi_action(), m_if_trees, m_if_trees_generator);
       s.assignments() = replace_enumerated_parameters_in_assignments(s.assignments());
     }
 
@@ -411,16 +412,14 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
       // Summands
       mCRL2log(log::debug) << "Updating summands" << std::endl;
 
-      auto& action_summands = m_spec.process().action_summands();
-      for (auto i = action_summands.begin(); i != action_summands.end(); ++i)
+      for (action_summand& a: m_spec.process().action_summands())
       {
-        update_action_summand(*i);
+        update_action_summand(a);
       }
 
-      auto& deadlock_summands = m_spec.process().deadlock_summands();
-      for (auto i = deadlock_summands.begin(); i != deadlock_summands.end(); ++i)
+      for (deadlock_summand& d: m_spec.process().deadlock_summands())
       {
-        update_deadlock_summand(*i);
+        update_deadlock_summand(d);
       }
     }
 };

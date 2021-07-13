@@ -8,7 +8,9 @@
 //
 
 #include "mainwindow.h"
+#include "mcrl2/utilities/platform.h"
 
+#include <QtGlobal>
 #include <QMenu>
 #include <QMenuBar>
 #include <QToolBar>
@@ -130,10 +132,14 @@ void MainWindow::setupMenuBar()
       QKeySequence(Qt::ALT + Qt::Key_I));
   importPropertiesAction->setEnabled(false);
 
+// workaround for QTBUG-57687
+#if QT_VERSION > QT_VERSION_CHECK(5, 10, 0) ||                                 \
+    not defined MCRL2_PLATFORM_WINDOWS
   fileMenu->addSeparator();
 
   openGuiAction =
       fileMenu->addAction("Open mcrl2-gui", this, SLOT(actionOpenMcrl2gui()));
+#endif
 
   fileMenu->addSeparator();
 
@@ -364,12 +370,23 @@ void MainWindow::actionImportProperties()
 
 void MainWindow::actionOpenMcrl2gui()
 {
+// workaround for QTBUG-57687
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+  QProcess* p = new QProcess();
+  p->setProgram(fileSystem->toolPath("mcrl2-gui"));
+  if (!p->startDetached())
+  {
+    QMessageBox::warning(this, "mCRL2 IDE",
+                         "Failed to start mcrl2-gui: " + p->errorString());
+  }
+#elif not defined MCRL2_PLATFORM_WINDOWS
   if (!QProcess::startDetached(fileSystem->toolPath("mcrl2-gui")))
   {
     executeInformationBox(
         this, "mCRL2 IDE",
         "Failed to start mcrl2-gui: could not find its executable");
   }
+#endif
 }
 
 void MainWindow::actionFindAndReplace()

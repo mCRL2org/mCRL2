@@ -247,18 +247,21 @@ void lps2lts_algorithm::initialise_lts_generation(const lts_generation_options& 
   {
     for (std::size_t i = 0; i < specification.process().action_summands().size(); i++)
     {
-      specification.process().action_summands()[i].multi_action().actions() = process::action_list();
+      multi_action& a=specification.process().action_summands()[i].multi_action(); 
+      a = multi_action(process::action_list(),a.time());
     }
 
     if (m_use_confluence_reduction)
     {
       for (std::size_t i = 0; i < nonprioritised_summands.size(); i++)
       {
-        nonprioritised_summands[i].multi_action().actions() = process::action_list();
+        multi_action& a=nonprioritised_summands[i].multi_action();
+        a = multi_action(process::action_list(),a.time());
       }
       for (std::size_t i = 0; i < prioritised_summands.size(); i++)
       {
-        prioritised_summands[i].multi_action().actions() = process::action_list();
+        multi_action& a=prioritised_summands[i].multi_action();
+        a = multi_action(process::action_list(),a.time());
       }
     }
   }

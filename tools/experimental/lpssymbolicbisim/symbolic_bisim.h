@@ -52,7 +52,7 @@ struct hash<std::tuple<mcrl2::data::data_expression, mcrl2::data::data_expressio
     seed = std::hash<atermpp::aterm>()(get<2>(x).multi_action().actions()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     if(!get<2>(x).multi_action().actions().empty())
     {
-      seed = std::hash<atermpp::aterm>()(get<2>(x).multi_action().arguments()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+      seed = std::hash<atermpp::aterm>()(get<2>(x).multi_action().actions().front().arguments()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     }
     seed = std::hash<atermpp::aterm>()(get<2>(x).assignments()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     seed = std::hash<atermpp::aterm>()(get<2>(x).summation_variables()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
@@ -262,7 +262,7 @@ protected:
     // tau.
     if(!as.multi_action().actions().empty())
     {
-      for(const data_expression& expr: as.multi_action().arguments())
+      for(const data_expression& expr: as.multi_action().actions().front().arguments())
       {
         arguments_equal = lazy::and_(arguments_equal, equal_to(expr, rewr(expr, sub_primed)));
       }

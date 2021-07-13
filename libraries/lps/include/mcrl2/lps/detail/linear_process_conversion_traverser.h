@@ -239,7 +239,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
     }
     else
     {
-      m_multi_action.time() = x.time_stamp();
+      m_multi_action=lps::multi_action(m_multi_action.actions(), x.time_stamp());
       mCRL2log(log::debug) << "adding multi action\n" << m_multi_action << std::endl;
     }
   }
@@ -638,7 +638,7 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
     }
     else
     {
-      m_multi_action.time() = x.time_stamp();
+      m_multi_action=lps::multi_action(m_multi_action.actions(), x.time_stamp());
       mCRL2log(log::debug) << "adding multi action\n" << m_multi_action << std::endl;
     }
   }
