@@ -62,8 +62,8 @@ class pbesreach_algorithm_partial : public pbes_system::pbesreach_algorithm
 {
 public:
 
-  pbesreach_algorithm_partial(const pbes_system::pbes& pbesspec, const symbolic_reachability_options& options_) :
-    pbes_system::pbesreach_algorithm(pbesspec, options_)
+  pbesreach_algorithm_partial(const pbes_system::pbes& pbesspec, const symbolic_reachability_options& options_, std::size_t num_lace_workers) :
+    pbes_system::pbesreach_algorithm(pbesspec, options_, num_lace_workers)
   {
     m_Vwon[0] = sylvan::ldds::empty_set();
     m_Vwon[1] = sylvan::ldds::empty_set();
@@ -389,12 +389,12 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       {
         if (options.solve_strategy == 0)
         {
-          pbes_system::pbesreach_algorithm reach(pbesspec, options);
+          pbes_system::pbesreach_algorithm reach(pbesspec, options, lace_n_workers);
           solve(reach);
         }
         else
         {
-          pbes_system::pbesreach_algorithm_partial reach(pbesspec, options);
+          pbes_system::pbesreach_algorithm_partial reach(pbesspec, options, lace_n_workers);
           solve(reach);
         }
       }

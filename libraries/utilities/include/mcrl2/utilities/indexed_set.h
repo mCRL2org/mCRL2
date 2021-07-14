@@ -35,14 +35,13 @@ private:
   Equals m_equals;
 
   /// \brief Mutex for the m_hashtable and m_keys data structures.
-  mutable std::unique_ptr<std::mutex> m_mutex;
+  mutable std::shared_ptr<std::mutex> m_mutex;
 
   /// \brief Inserts the given (key, n) pair into the indexed set.
   std::size_t put_in_hashtable(const Key& key, std::size_t value);
 
   /// \brief Resizes the hash table to twice its current size.
   inline void resize_hashtable();
-
 
 public:
   typedef Key key_type;

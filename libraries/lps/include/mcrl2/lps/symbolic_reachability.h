@@ -536,6 +536,8 @@ struct summand_group
   sylvan::ldds::ldd Ldomain; // the domain of L
   sylvan::ldds::ldd Ir; // meta data needed by sylvan::ldds::relprod
   sylvan::ldds::ldd Ip; // meta data needed by sylvan::ldds::project
+
+  std::unique_ptr<std::mutex> m_mutex; // A mutex per summand group for updating L.
   double learn_time = 0.0; // The time to learn the transitions for this group.
   std::size_t learn_calls = 0; // Number of learn transition calls.
 
@@ -574,7 +576,8 @@ struct summand_group
     return { rpos, wpos };
   }
 
-  summand_group(const data::variable_list& process_parameters, const boost::dynamic_bitset<>& read_write_pattern)
+  summand_group(const data::variable_list& process_parameters, const boost::dynamic_bitset<>& read_write_pattern) :
+    m_mutex(new std::mutex())
   {
     using namespace sylvan::ldds;
     using utilities::detail::as_vector;
@@ -916,7 +919,7 @@ void check_enumerator_solution(const EnumeratorElement& p, const summand_group&)
 }
 
 template <typename Context>
-void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t, void* context)
+void learn_successors_callback(WorkerP* worker, Task*, std::uint32_t* x, std::size_t n, void* context)
 {
   using namespace sylvan::ldds;
   using enumerator_element = data::enumerator_list_element_with_substitution<>;
@@ -924,11 +927,13 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t, v
   auto p = reinterpret_cast<Context*>(context);
   auto& algorithm = p->first;
   auto& group = p->second;
-  auto& sigma = algorithm.m_sigma;
   auto& data_index = algorithm.m_data_index;
-  const auto& options = algorithm.m_options;
+  auto& per_worker = algorithm.m_workers[worker->worker];
+  auto& sigma = per_worker.m_sigma;
+
   const auto& rewr = algorithm.m_rewr;
   const auto& enumerator = algorithm.m_enumerator;
+  const auto& options = algorithm.m_options;
   std::size_t x_size = group.read.size();
   std::size_t y_size = group.write.size();
   std::size_t xy_size = x_size + y_size;
@@ -960,7 +965,21 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t, v
                                xy[group.write_pos[j]] = data::is_variable(value) ? lps::relprod_ignore : data_index[group.write[j]].index(value);
                              }
                              mCRL2log(log::debug) << "  " << print_transition(data_index, xy.data(), group.read, group.write) << std::endl;
+
+                             if constexpr (atermpp::detail::GlobalThreadSafe)
+                             {
+                               while (!group.m_mutex->try_lock())
+                               {
+                                 // During the union_cube we can trigger garbage collection. The garbage collection uses a barrier to wait for other threads to cooperate,
+                                 // but since we are going to block this worker we yield if necessary.
+                                 LACE_ME;
+                                 YIELD_NEWFRAME();
+                               }
+                             }
+
+                             group.Ldomain = union_cube(group.Ldomain, x, x_size);
                              group.L = algorithm.m_options.no_relprod ? union_cube(group.L, xy.data(), xy_size) : union_cube_copy(group.L, xy.data(), smd.copy.data(), xy_size);
+                             if constexpr (atermpp::detail::GlobalThreadSafe) { group.m_mutex->unlock(); }
                              return false;
                            },
                            data::is_false
@@ -969,8 +988,11 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t, v
     data::remove_assignments(sigma, smd.variables);
   }
   data::remove_assignments(sigma, group.read_parameters);
+
+  if constexpr (atermpp::detail::GlobalThreadSafe) { group.m_mutex->lock(); }
   group.learn_calls += 1;
   group.learn_time += learn_start.seconds();
+  if constexpr (atermpp::detail::GlobalThreadSafe) { group.m_mutex->unlock(); }
 
   if (options.cached)
   {
