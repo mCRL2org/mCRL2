@@ -36,9 +36,8 @@ static constexpr std::size_t PRIME_NUMBER = 999953;
 
 } // namespace detail
 
-template <class Key, typename Hash, typename Equals, typename Allocator>
-inline
-std::size_t indexed_set<Key,Hash,Equals,Allocator>::put_in_hashtable(const key_type& key, std::size_t value)
+template <class Key, typename Hash, typename Equals, typename Allocator, bool ThreadSafe>
+inline std::size_t indexed_set<Key,Hash,Equals,Allocator,ThreadSafe>::put_in_hashtable(const key_type& key, std::size_t value)
 {
   // Find a place to insert key and find whether key already exists.
   std::size_t start = (m_hasher(key) * detail::PRIME_NUMBER) % m_hashtable.size();
@@ -69,9 +68,8 @@ std::size_t indexed_set<Key,Hash,Equals,Allocator>::put_in_hashtable(const key_t
   return position;
 }
 
-
-template <class Key, typename Hash, typename Equals, typename Allocator>
-inline void indexed_set<Key, Hash, Equals, Allocator>::resize_hashtable()
+template <class Key, typename Hash, typename Equals, typename Allocator, bool ThreadSafe>
+inline void indexed_set<Key,Hash,Equals,Allocator,ThreadSafe>::resize_hashtable()
 {
   m_hashtable = std::vector<std::size_t>(m_hashtable.size() * 2, detail::EMPTY);
 
@@ -83,23 +81,24 @@ inline void indexed_set<Key, Hash, Equals, Allocator>::resize_hashtable()
   }
 }
 
-template <class Key, typename Hash, typename Equals, typename Allocator>
-inline indexed_set<Key,Hash,Equals,Allocator>::indexed_set()
+template <class Key, typename Hash, typename Equals, typename Allocator, bool ThreadSafe>
+inline indexed_set<Key,Hash,Equals,Allocator,ThreadSafe>::indexed_set()
   : indexed_set(128)
 {
 } 
 
-template <class Key, typename Hash, typename Equals, typename Allocator>
-inline indexed_set<Key,Hash,Equals,Allocator>::indexed_set(std::size_t initial_size,
+template <class Key, typename Hash, typename Equals, typename Allocator, bool ThreadSafe>
+inline indexed_set<Key,Hash,Equals,Allocator,ThreadSafe>::indexed_set(std::size_t initial_size,
   const hasher& hasher,
   const key_equal& equals)
       : m_hashtable(std::max(initial_size, detail::minimal_hashtable_size), detail::EMPTY),
+        m_mutex(new std::mutex()),
         m_hasher(hasher),
         m_equals(equals)
 {}
 
-template <class Key, typename Hash, typename Equals, typename Allocator>
-inline typename indexed_set<Key,Hash,Equals,Allocator>::size_type indexed_set<Key,Hash,Equals,Allocator>::index(const key_type& key) const
+template <class Key, typename Hash, typename Equals, typename Allocator, bool ThreadSafe>
+inline typename indexed_set<Key,Hash,Equals,Allocator,ThreadSafe>::size_type indexed_set<Key,Hash,Equals,Allocator,ThreadSafe>::index(const key_type& key) const
 {
   std::size_t start = (m_hasher(key) * detail::PRIME_NUMBER) % m_hashtable.size();
   std::size_t position = start;
@@ -125,8 +124,8 @@ inline typename indexed_set<Key,Hash,Equals,Allocator>::size_type indexed_set<Ke
   return npos; // Not found.
 }
 
-template <class Key, typename Hash, typename Equals, typename Allocator>
-inline typename indexed_set<Key,Hash,Equals,Allocator>::const_iterator indexed_set<Key,Hash,Equals,Allocator>::find(const key_type& key) const
+template <class Key, typename Hash, typename Equals, typename Allocator, bool ThreadSafe>
+inline typename indexed_set<Key,Hash,Equals,Allocator,ThreadSafe>::const_iterator indexed_set<Key,Hash,Equals,Allocator,ThreadSafe>::find(const key_type& key) const
 {
   const std::size_t idx = index(key);
   if (idx < m_keys.size())
@@ -138,8 +137,8 @@ inline typename indexed_set<Key,Hash,Equals,Allocator>::const_iterator indexed_s
 }
 
 
-template <class Key, typename Hash, typename Equals, typename Allocator>
-inline const Key& indexed_set<Key,Hash,Equals,Allocator>::at(std::size_t index) const
+template <class Key, typename Hash, typename Equals, typename Allocator, bool ThreadSafe>
+inline const Key& indexed_set<Key,Hash,Equals,Allocator,ThreadSafe>::at(std::size_t index) const
 {
   if (index >= m_keys.size())
   {
@@ -149,29 +148,35 @@ inline const Key& indexed_set<Key,Hash,Equals,Allocator>::at(std::size_t index) 
   return m_keys[index];
 }
 
-template <class Key, typename Hash, typename Equals, typename Allocator>
-inline const Key& indexed_set<Key,Hash,Equals,Allocator>::operator[](std::size_t index) const
+template <class Key, typename Hash, typename Equals, typename Allocator, bool ThreadSafe>
+inline const Key& indexed_set<Key,Hash,Equals,Allocator,ThreadSafe>::operator[](std::size_t index) const
 {
+  if constexpr (ThreadSafe) { m_mutex->lock(); }
   assert(index<m_keys.size());
-  return m_keys[index];
+  const Key& key = m_keys[index];
+  if constexpr (ThreadSafe) { m_mutex->unlock(); }
+  return key;
 }
 
-template <class Key, typename Hash, typename Equals, typename Allocator>
-inline void indexed_set<Key,Hash,Equals,Allocator>::clear()
+template <class Key, typename Hash, typename Equals, typename Allocator, bool ThreadSafe>
+inline void indexed_set<Key,Hash,Equals,Allocator,ThreadSafe>::clear()
 {
   m_hashtable.assign(m_hashtable.size(), detail::EMPTY);
   m_keys.clear();
 }
 
 
-template <class Key, typename Hash, typename Equals, typename Allocator>
-inline std::pair<std::size_t, bool> indexed_set<Key,Hash,Equals,Allocator>::insert(const Key& key)
+template <class Key, typename Hash, typename Equals, typename Allocator, bool ThreadSafe>
+inline std::pair<std::size_t, bool> indexed_set<Key,Hash,Equals,Allocator,ThreadSafe>::insert(const Key& key)
 {
+  if constexpr (ThreadSafe) { m_mutex->lock(); }
+
   const std::size_t new_index = m_keys.size();
   const std::size_t index = put_in_hashtable(key, new_index);
 
   if (index != new_index) // Key already exists.
   {
+    if constexpr (ThreadSafe) { m_mutex->unlock(); }
     return std::make_pair(index, false);
   }
 
@@ -182,6 +187,7 @@ inline std::pair<std::size_t, bool> indexed_set<Key,Hash,Equals,Allocator>::inse
     resize_hashtable();
   }
 
+  if constexpr (ThreadSafe) { m_mutex->unlock(); }
   return std::make_pair(index, true);
 }
 

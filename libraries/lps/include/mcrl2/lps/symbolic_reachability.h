@@ -437,7 +437,11 @@ class data_expression_index
 
   protected:
     data::sort_expression m_sort;
-    mcrl2::utilities::indexed_set<data::data_expression> m_values;
+    mcrl2::utilities::indexed_set<data::data_expression,
+      std::hash<data::data_expression>,
+      std::equal_to<data::data_expression>,
+      std::allocator<data::data_expression>,
+      true> m_values;
 
   public:
     data_expression_index(const data::sort_expression& sort)
