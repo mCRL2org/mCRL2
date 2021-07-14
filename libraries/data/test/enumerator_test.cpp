@@ -488,13 +488,15 @@ BOOST_AUTO_TEST_CASE(enumerate_expressions_test)
   data::variable v = parse_variable(variable_text, dataspec);
   rewriter r(dataspec);
 
-  data::data_expression_vector result = enumerate_expressions(v.sort(), dataspec, r);
-  data::data_expression_vector expected_result = {
+  data::data_expression_vector result_as_vector = enumerate_expressions(v.sort(), dataspec, r);
+
+  std::set<data::data_expression> result(result_as_vector.begin(), result_as_vector.end());
+  std::set<data::data_expression> expected_result = {
       parse_data_expression("d1(e2)", dataspec),
       parse_data_expression("d1(e1)", dataspec),
       parse_data_expression("d2(e2)", dataspec),
       parse_data_expression("d2(e1)", dataspec)
   };
 
-  BOOST_VERIFY(std::equal(result.begin(), result.end(), expected_result.begin(), expected_result.end()));
+  BOOST_CHECK_EQUAL_COLLECTIONS(result.begin(), result.end(), expected_result.begin(), expected_result.end());
 }
