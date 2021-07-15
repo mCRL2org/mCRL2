@@ -280,6 +280,154 @@ public:
   }
 };
 
+
+/// \brief Make an empty list and put it in target;
+/// \param target The variable to which the empty list is assigned. 
+template <class Term>
+void make_term_list(term_list<Term>& target)
+{
+  target=detail::g_term_pool().empty_list();
+}
+
+/// \brief Creates a term_list with the elements from first to last.
+/// \details It is assumed that the range can be traversed from last to first.
+/// \param target The variable to which the list is assigned. 
+/// \param first The start of a range of elements.
+/// \param last The end of a range of elements.
+template <class Term, class Iter>
+void make_term_list(term_list<Term>& target, Iter first, Iter last, typename std::enable_if<std::is_base_of<
+                                         std::bidirectional_iterator_tag,
+                                         typename std::iterator_traits<Iter>::iterator_category >::value>::type* = nullptr)
+{
+  target=detail::make_list_backward<Term,Iter,
+              detail::do_not_convert_term<Term> >(first, last,detail::do_not_convert_term<Term>());
+  assert(!target.defined() || target.type_is_list());
+}
+
+/// \brief Creates a term_list with the elements from first to last converting the elements before inserting.
+/// \details It is assumed that the range can be traversed from last to first. The operator () in the class
+///          ATermConverter is applied to each element before inserting it in the list.
+/// \param target The variable to which the list is assigned. 
+/// \param first The start of a range of elements.
+/// \param last The end of a range of elements.
+/// \param convert_to_aterm A class with a () operation, which is applied to each element
+///                   before it is put into the list.
+template <class Term, class Iter, class ATermConverter>
+void make_term_list(term_list<Term>& target, Iter first, Iter last, const ATermConverter& convert_to_aterm,
+                            typename std::enable_if<std::is_base_of<
+                              std::bidirectional_iterator_tag,
+                              typename std::iterator_traits<Iter>::iterator_category
+                            >::value>::type* = 0)
+{
+  target=detail::make_list_backward<Term,Iter,ATermConverter>(first, last, convert_to_aterm);
+  assert(!target.defined() || target.type_is_list());
+}
+
+/// \brief Creates a term_list with the elements from first to last, converting and filtering the list.
+/// \details It is assumed that the range can be traversed from last to first. The operator () in the class
+///          ATermConverter is applied to each element before inserting it in the list. Elements are only
+///          inserted if the operator () of the class ATermFilter yields true when applied to such an element.
+/// \param target The variable to which the list is assigned. 
+/// \param first The start of a range of elements.
+/// \param last The end of a range of elements.
+/// \param convert_to_aterm A class with a () operation, which is applied to each element
+///                   before it is put into the list.
+/// \param aterm_filter A class with an operator () that is used to determine whether elements can be inserted in the list.
+template <class Term, class Iter, class ATermConverter, class ATermFilter>
+void make_term_list(term_list<Term>& target, Iter first, Iter last, const ATermConverter& convert_to_aterm, const ATermFilter& aterm_filter,
+                            typename std::enable_if<std::is_base_of<
+                              std::bidirectional_iterator_tag,
+                              typename std::iterator_traits<Iter>::iterator_category
+                            >::value>::type* = 0)
+{
+  target=detail::make_list_backward<Term,Iter,ATermConverter,ATermFilter>(first, last, convert_to_aterm, aterm_filter);
+  assert(!target.defined() || target.type_is_list());
+}
+
+/// \brief Creates a term_list from the elements from first to last.
+/// \details The range is traversed from first to last. This requires
+///           to copy the elements internally, which is less efficient
+///           than this function with random access iterators as arguments.
+/// \param target The variable to which the list is assigned. 
+/// \param first The start of a range of elements.
+/// \param last The end of a range of elements.
+template <class Term, class Iter>
+void make_term_list(term_list<Term>& target, Iter first, Iter last,
+                             typename std::enable_if< !std::is_base_of<
+                               std::bidirectional_iterator_tag,
+                               typename std::iterator_traits<Iter>::iterator_category
+                             >::value>::type* = nullptr)
+{
+  target=detail::make_list_forward<Term,Iter,detail::do_not_convert_term<Term> >
+                             (first, last, detail::do_not_convert_term<Term>());
+  assert(!result.defined() || result.type_is_list());
+}
+
+/// \brief Creates a term_list from the elements from first to last converting the elements before inserting.
+/// \details The range is traversed from first to last. This requires
+///           to copy the elements internally, which is less efficient
+///           than this function with random access iterators as arguments.
+///           The operator () in the class
+///           ATermConverter is applied to each element before inserting it in the list.
+/// \param target The variable to which the list is assigned. 
+/// \param first The start of a range of elements.
+/// \param last The end of a range of elements.
+/// \param convert_to_aterm A class with a () operation, whic is applied to each element
+///                      before it is put into the list.
+template <class Term, class Iter, class  ATermConverter>
+void make_term_list(term_list<Term>& target, Iter first, Iter last, const ATermConverter& convert_to_aterm,
+                              typename std::enable_if< !std::is_base_of<
+                                std::bidirectional_iterator_tag,
+                                // std::random_access_iterator_tag,
+                                typename std::iterator_traits<Iter>::iterator_category
+                              >::value>::type* = nullptr)
+{
+  target=detail::make_list_forward<Term,Iter,ATermConverter>
+                             (first, last, convert_to_aterm);
+  assert(!target.defined() || target.type_is_list());
+}
+
+/// \brief Creates a term_list from the elements from first to last converting and filtering the elements before inserting.
+/// \details The range is traversed from first to last. This requires
+///           to copy the elements internally, which is less efficient
+///           than this function with random access iterators as arguments.
+///           The operator () in the class ATermConverter is applied to
+///           each element before inserting it in the list. Elements are only
+///           inserted if the operator () of the class ATermFilter yields true when applied to such an element.
+/// \param target The variable to which the list is assigned. 
+/// \param first The start of a range of elements.
+/// \param last The end of a range of elements.
+/// \param convert_to_aterm A class with a () operation, whic is applied to each element
+///                      before it is put into the list.
+/// \param aterm_filter A class with an operator () that is used to determine whether elements can be inserted in the list.
+template <class Term, class Iter, class  ATermConverter, class ATermFilter>
+void make_term_list(term_list<Term>& target, Iter first, Iter last, const ATermConverter& convert_to_aterm, const ATermFilter& aterm_filter,
+                               typename std::enable_if< !std::is_base_of<
+                                 std::random_access_iterator_tag,
+                                 typename std::iterator_traits<Iter>::iterator_category
+                               >::value>::type* = nullptr)
+{
+  target=detail::make_list_forward<Term,Iter,ATermConverter>
+                             (first, last, convert_to_aterm, aterm_filter);
+  assert(!target.defined() || target.type_is_list());
+}
+
+/// \brief A constructor based on an initializer list.
+/// \details This constructor is not made explicit to conform to initializer lists in standard containers.
+/// \param target The variable to which the list is assigned. 
+/// \param init The initialiser list.
+template <class Term>
+void make_term_list(term_list<Term>& target, std::initializer_list<Term> init)
+{
+  target=detail::make_list_backward<Term,
+                                    typename std::initializer_list<Term>::const_iterator,
+                                    detail::do_not_convert_term<Term> >
+              (init.begin(), init.end(), detail::do_not_convert_term<Term>());
+  assert(!target.defined() || target.type_is_list());
+}
+
+
+
 /// \cond INTERNAL_DOCS
 namespace detail
 {

@@ -79,10 +79,11 @@ public:
   term_appl(term_appl&& other) noexcept = default;
   term_appl& operator=(term_appl&& other) noexcept = default;
 
+  /// \brief Constructor that provides an aterm_appl based on a function symbol and forward iterator providing the arguments. 
   /// \details The iterator range is traversed more than once. If only one traversal is required
   ///          use term_appl with a TermConverter argument. But this function
   ///          is substantially less efficient.
-  ///          The length of the iterator range should must match the arity of the function symbol.
+  ///          The length of the iterator range must match the arity of the function symbol.
   /// \param sym A function symbol.
   /// \param begin The start of a range of elements.
   /// \param end The end of a range of elements.
@@ -103,6 +104,7 @@ public:
                   "A forward iterator has more requirements than an output iterator.");
   }
 
+  /// \brief Constructor that provides an aterm_appl based on a function symbol and an input iterator providing the arguments. 
   /// \details The given iterator is traversed only once. So it can be used with an input iterator.
   ///          This means that the TermConverter is applied exactly once to each element.
   ///          The length of the iterator range must be equal to the arity of the function symbol.
@@ -220,7 +222,120 @@ public:
   }
 };
 
+
+/// \brief Constructor an aterm_appl in a variable based on a function symbol and an forward iterator providing the arguments. 
+/// \details The iterator range is traversed more than once. If only one traversal is required
+///          use term_appl with a TermConverter argument. But this function
+///          is substantially less efficient.
+///          The length of the iterator range must match the arity of the function symbol.
+/// \param target The variable in which the result will be put. This variable may be used for scratch purposes.
+/// \param sym A function symbol.
+/// \param begin The start of a range of elements.
+/// \param end The end of a range of elements.
+template <class Term,
+          class ForwardIterator,
+          typename std::enable_if<mcrl2::utilities::is_iterator<ForwardIterator>::value>::type* = nullptr,
+          typename std::enable_if<!std::is_same<typename ForwardIterator::iterator_category, std::input_iterator_tag>::value>::type* = nullptr,
+          typename std::enable_if<!std::is_same<typename ForwardIterator::iterator_category, std::output_iterator_tag>::value>::type* = nullptr>
+void make_term_appl(term_appl<Term>& target,
+                    const function_symbol& sym,
+                    ForwardIterator begin,
+                    ForwardIterator end)
+{
+  detail::g_thread_term_pool().create_appl_dynamic(target, sym, begin, end);
+  
+  static_assert((std::is_base_of<aterm, Term>::value),"Term must be derived from an aterm");
+  static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
+  static_assert(!std::is_same<typename ForwardIterator::iterator_category, std::input_iterator_tag>::value,
+                "A forward iterator has more requirements than an input iterator.");
+  static_assert(!std::is_same<typename ForwardIterator::iterator_category, std::output_iterator_tag>::value,
+                "A forward iterator has more requirements than an output iterator.");
+}
+
+
+/// \brief Constructor an aterm_appl in a variable based on a function symbol and an input iterator providing the arguments. 
+/// \details The given iterator is traversed only once. So it can be used with an input iterator.
+///          This means that the TermConverter is applied exactly once to each element.
+///          The length of the iterator range must be equal to the arity of the function symbol.
+/// \param target The variable in which the result will be put. This variable may be used for scratch purposes.
+/// \param sym A function symbol.
+/// \param begin The start of a range of elements.
+/// \param end The end of a range of elements.
+template <class Term,
+          class InputIterator,
+          typename std::enable_if<mcrl2::utilities::is_iterator<InputIterator>::value>::type* = nullptr,
+          typename std::enable_if<std::is_same<typename InputIterator::iterator_category, std::input_iterator_tag>::value>::type* = nullptr>
+void make_term_appl(term_appl<Term>& target,
+                    const function_symbol& sym,
+                    InputIterator begin,
+                    InputIterator end)
+{
+  make_term_appl(target, sym, begin, end, [](const Term& term) -> const Term& { return term; } );
+
+  static_assert((std::is_base_of<aterm, Term>::value),"Term must be derived from an aterm");
+  static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
+  static_assert(std::is_same<typename InputIterator::iterator_category, std::input_iterator_tag>::value,
+                "The InputIterator is missing the input iterator tag.");
+}
+
+/// \brief Constructor an aterm_appl in a variable based on a function symbol and an forward iterator providing the arguments. 
+/// \details The given iterator is traversed only once. So it can be used with an input iterator.
+///          This means that the TermConverter is applied exactly once to each element.
+///          The length of the iterator range must be equal to the arity of the function symbol.
+/// \param target The variable in which the result will be put. This variable may be used for scratch purposes.
+/// \param sym A function symbol.
+/// \param begin The start of a range of elements.
+/// \param end The end of a range of elements.
+/// \param converter An class or lambda term containing an operator Term operator()(const Term& t) which is
+///        applied to each each element in the iterator range before it becomes an argument of this term.
+template <class Term,
+          class InputIterator,
+          class TermConverter,
+          typename std::enable_if<mcrl2::utilities::is_iterator<InputIterator>::value>::type* = nullptr>
+void make_term_appl(term_appl<Term>& target,
+                    const function_symbol& sym,
+                    InputIterator begin,
+                    InputIterator end,
+                    TermConverter converter)
+{
+  detail::g_thread_term_pool().create_appl_dynamic(target, sym, converter, begin, end);
+
+  static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+  static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
+  static_assert(!std::is_same<typename InputIterator::iterator_category, std::output_iterator_tag>::value,
+                "The InputIterator has the output iterator tag.");
+}
+
+/// \brief Make an term_appl consisting of a single function symbol. 
+/// \param target The variable in which the result will be put. This variable may be used for scratch purposes.
+/// \param sym A function symbol.
+template <class Term>
+void make_term_appl(term_appl<Term>& target,
+                    const function_symbol& sym)
+{
+  detail::g_thread_term_pool().create_term(target, sym);
+
+  static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+  static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
+}
+
+/// \brief Make an aterm application for n-arity function application.
+/// \param target The variable in which the result will be put. This variable may be used for scratch purposes.
+/// \param symbol A function symbol.
+/// \param arguments The arguments of the function application.
+template<class Term,
+         typename ...Terms>
+void make_term_appl(term_appl<Term>& target, const function_symbol& symbol, const Terms& ...arguments)
+{
+  detail::g_thread_term_pool().create_appl(target, symbol, arguments...);
+
+  static_assert(detail::are_terms<Terms...>::value, "Arguments of function application should be terms.");
+  static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+  static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
+}
+
 typedef term_appl<aterm> aterm_appl;
+
 } // namespace atermpp
 
 namespace std
