@@ -360,7 +360,7 @@ void make_term_list(term_list<Term>& target, Iter first, Iter last,
 {
   target=detail::make_list_forward<Term,Iter,detail::do_not_convert_term<Term> >
                              (first, last, detail::do_not_convert_term<Term>());
-  assert(!result.defined() || result.type_is_list());
+  assert(!target.defined() || target.type_is_list());
 }
 
 /// \brief Creates a term_list from the elements from first to last converting the elements before inserting.
