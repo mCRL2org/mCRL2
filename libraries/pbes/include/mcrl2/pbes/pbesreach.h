@@ -555,7 +555,7 @@ class pbesreach_algorithm
           m_deadlocks = union_(m_deadlocks, potential_deadlocks);
         }
 
-        mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(m_visited) << " states after "
+        mCRL2log(log::verbose) << "generated " << std::setw(12) << satcount(m_visited) << " BES equations after "
                                << std::setw(3) << iteration_count << " iterations (time = " << std::setprecision(2)
                                << std::fixed << loop_start.seconds() << "s)" << std::endl;
 
@@ -570,11 +570,11 @@ class pbesreach_algorithm
 
       if (report_states)
       {
-        std::cout << "number of states = " << satcount(m_visited) << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)" << std::endl;
+        std::cout << "number of BES equations = " << satcount(m_visited) << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)" << std::endl;
       }
       else
       {
-        mCRL2log(log::verbose) << "number of states = " << satcount(m_visited) << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)" << std::endl;
+        mCRL2log(log::verbose) << "number of BES equations = " << satcount(m_visited) << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)" << std::endl;
       }
 
       mCRL2log(log::verbose) << "visited LDD size = " << nodecount(m_visited) << std::endl;

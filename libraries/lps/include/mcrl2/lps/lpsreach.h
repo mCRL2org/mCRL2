@@ -322,7 +322,7 @@ class lpsreach_algorithm
           deadlocks = union_(deadlocks, potential_deadlocks);
         }
 
-        mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(visited) << " states after "
+        mCRL2log(log::verbose) << "explored " << std::setw(12) << satcount(visited) << " states after "
                                << std::setw(3) << iteration_count << " iterations (time = " << std::setprecision(2)
                                << std::fixed << loop_start.seconds() << "s)" << std::endl;
         if (m_options.detect_deadlocks)
