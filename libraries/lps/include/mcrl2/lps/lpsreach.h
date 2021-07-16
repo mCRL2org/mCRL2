@@ -183,7 +183,7 @@ class lpsreach_algorithm
     // R.L := R.L U {(x,y) in R | x in X}
     void learn_successors(std::size_t i, summand_group& R, const ldd& X)
     {
-      mCRL2log(log::debug) << "learn successors of summand group " << i << " for X = " << print_states(m_data_index, X, R.read) << std::endl;
+      mCRL2log(log::debug1) << "learn successors of summand group " << i << " for X = " << print_states(m_data_index, X, R.read) << std::endl;
 
       using namespace sylvan::ldds;
       std::pair<lpsreach_algorithm&, summand_group&> context{*this, R};
@@ -240,7 +240,6 @@ class lpsreach_algorithm
       m_process_parameters = permute_copy(m_process_parameters, m_variable_order);
       m_initial_state = permute_copy(m_initial_state, m_variable_order);
       mCRL2log(log::debug) << "process parameters = " << core::detail::print_list(m_process_parameters) << std::endl;
-      mCRL2log(log::debug) << "initial state = " << core::detail::print_list(m_initial_state) << std::endl;
 
       for (const data::variable& param: m_process_parameters)
       {
@@ -270,7 +269,7 @@ class lpsreach_algorithm
       auto& R = m_summand_groups;
       std::size_t iteration_count = 0;
 
-      mCRL2log(log::debug) << "initial state = " << core::detail::print_list(m_initial_state) << std::endl;
+      mCRL2log(log::debug1) << "initial state = " << core::detail::print_list(m_initial_state) << std::endl;
 
       auto start = std::chrono::steady_clock::now();
       ldd x = state2ldd(m_initial_state);
@@ -283,8 +282,8 @@ class lpsreach_algorithm
       {
         stopwatch loop_start;
         iteration_count++;
-        mCRL2log(log::debug) << "--- iteration " << iteration_count << " ---" << std::endl;
-        mCRL2log(log::debug) << "todo = " << print_states(m_data_index, todo) << std::endl;
+        mCRL2log(log::debug1) << "--- iteration " << iteration_count << " ---" << std::endl;
+        mCRL2log(log::debug1) << "todo = " << print_states(m_data_index, todo) << std::endl;
 
         ldd todo1 = m_options.chaining ? todo : empty_set();
         ldd potential_deadlocks = todo;
@@ -294,16 +293,16 @@ class lpsreach_algorithm
           ldd proj = project(m_options.chaining ? todo1 : todo, R[i].Ip);
           learn_successors(i, R[i], m_options.cached ? minus(proj, R[i].Ldomain) : proj);
 
-          mCRL2log(log::debug) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
+          mCRL2log(log::debug1) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
           if (m_options.no_relprod)
           {
             ldd z = lps::alternative_relprod(m_options.chaining ? todo1 : todo, R[i]);
-            mCRL2log(log::debug) << "relprod(" << i << ", todo) = " << print_states(m_data_index, z) << std::endl;
+            mCRL2log(log::debug1) << "relprod(" << i << ", todo) = " << print_states(m_data_index, z) << std::endl;
             todo1 = union_(z, todo1);
           }
           else
           {
-            mCRL2log(log::debug) << "relprod(" << i << ", todo) = " << print_states(m_data_index, relprod(todo, R[i].L, R[i].Ir)) << std::endl;
+            mCRL2log(log::debug1) << "relprod(" << i << ", todo) = " << print_states(m_data_index, relprod(todo, R[i].L, R[i].Ir)) << std::endl;
             ldd z = relprod(m_options.chaining ? todo1 : todo, R[i].L, R[i].Ir);
             todo1 = union_(z, todo1);
           }

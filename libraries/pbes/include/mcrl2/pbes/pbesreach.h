@@ -371,7 +371,7 @@ class pbesreach_algorithm
     /// \brief Updates R.L := R.L U {(x,y) in R | x in X}
     void learn_successors(std::size_t i, summand_group& R, const ldd& X)
     {
-      mCRL2log(log::debug) << "learn successors of summand group " << i << " for X = " << print_states(m_data_index, X, R.read) << std::endl;
+      mCRL2log(log::debug1) << "learn successors of summand group " << i << " for X = " << print_states(m_data_index, X, R.read) << std::endl;
 
       using namespace sylvan::ldds;
       std::pair<pbesreach_algorithm&, summand_group&> context{*this, R};
@@ -411,7 +411,7 @@ class pbesreach_algorithm
       // add a sort for the propositional variable names
       data::data_specification propvar_dataspec = construct_propositional_variable_data_specification(result, "PropositionalVariable");
       result.data() = data::merge_data_specifications(result.data(), propvar_dataspec);
-      mCRL2log(log::debug) << "--- srf pbes ---\n" << result.to_pbes() << std::endl;
+      mCRL2log(log::debug1) << "--- srf pbes ---\n" << result.to_pbes() << std::endl;
 
       return result;
     }
@@ -460,7 +460,6 @@ class pbesreach_algorithm
       m_process_parameters = lps::permute_copy(m_process_parameters, m_variable_order);
       m_initial_state = lps::permute_copy(m_initial_state, m_variable_order);
       mCRL2log(log::debug) << "process parameters = " << core::detail::print_list(m_process_parameters) << std::endl;
-      mCRL2log(log::debug) << "initial state = " << core::detail::print_list(m_initial_state) << std::endl;
 
       std::vector<std::set<std::size_t>> groups = lps::compute_summand_groups(m_options.summand_groups, m_summand_patterns);
       for (const auto& group: groups)
@@ -503,7 +502,7 @@ class pbesreach_algorithm
       auto& R = m_summand_groups;
       std::size_t iteration_count = 0;
 
-      mCRL2log(log::debug) << "initial state = " << core::detail::print_list(m_initial_state) << std::endl;
+      mCRL2log(log::debug1) << "initial state = " << core::detail::print_list(m_initial_state) << std::endl;
 
       stopwatch timer;
       ldd initial_state = state2ldd(m_initial_state);
@@ -515,8 +514,8 @@ class pbesreach_algorithm
       {
         stopwatch loop_start;
         iteration_count++;
-        mCRL2log(log::debug) << "--- iteration " << iteration_count << " ---" << std::endl;
-        mCRL2log(log::debug) << "todo = " << print_states(m_data_index, m_todo) << std::endl;
+        mCRL2log(log::debug1) << "--- iteration " << iteration_count << " ---" << std::endl;
+        mCRL2log(log::debug1) << "todo = " << print_states(m_data_index, m_todo) << std::endl;
 
         ldd todo1 = m_options.chaining ? m_todo : empty_set();
         ldd potential_deadlocks = m_todo;
@@ -526,17 +525,17 @@ class pbesreach_algorithm
           ldd proj = project(m_options.chaining ? todo1 : m_todo, R[i].Ip);          
           learn_successors(i, R[i], m_options.cached ? minus(proj, R[i].Ldomain) : proj);
 
-          mCRL2log(log::debug) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
+          mCRL2log(log::debug1) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
 
           if (m_options.no_relprod)
           {
             ldd z = lps::alternative_relprod(m_options.chaining ? todo1 : m_todo, R[i]);
-            mCRL2log(log::debug) << "relprod(" << i << ", todo) = " << print_states(m_data_index, z) << std::endl;
+            mCRL2log(log::debug1) << "relprod(" << i << ", todo) = " << print_states(m_data_index, z) << std::endl;
             todo1 = union_(z, todo1);
           }
           else
           {
-            mCRL2log(log::debug) << "relprod(" << i << ", todo) = " << print_states(m_data_index, relprod(m_todo, R[i].L, R[i].Ir)) << std::endl;
+            mCRL2log(log::debug1) << "relprod(" << i << ", todo) = " << print_states(m_data_index, relprod(m_todo, R[i].L, R[i].Ir)) << std::endl;
             ldd z = relprod(m_options.chaining ? todo1 : m_todo, R[i].L, R[i].Ir);
             todo1 = union_(z, todo1);
           }

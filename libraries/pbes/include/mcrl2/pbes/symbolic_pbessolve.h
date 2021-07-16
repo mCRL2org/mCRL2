@@ -268,8 +268,8 @@ class symbolic_pbessolve_algorithm
       ldd Xoutside = minus(V, X);
       while (todo != empty_set())
       {
-        mCRL2log(log::debug) << "todo = " << print_nodes(todo, m_all_nodes) << std::endl;
-        mCRL2log(log::debug) << "Xoutside = " << print_nodes(Xoutside, m_all_nodes) << std::endl;
+        mCRL2log(log::debug1) << "todo = " << print_nodes(todo, m_all_nodes) << std::endl;
+        mCRL2log(log::debug1) << "Xoutside = " << print_nodes(Xoutside, m_all_nodes) << std::endl;
         stopwatch iter_start;
 
         // Determine current player's nodes that can reach X (without the elements already in X).
@@ -377,7 +377,7 @@ class symbolic_pbessolve_algorithm
       ldd W_1[2];
 
       ldd A = attractor(U, alpha, V, empty_set(), Vplayer);
-      mCRL2log(log::debug) << "A = attractor(" << print_nodes(U, m_all_nodes) << ", " << print_nodes(V, m_all_nodes) << ") = " << print_nodes(A, m_all_nodes) << std::endl;
+      mCRL2log(log::debug1) << "A = attractor(" << print_nodes(U, m_all_nodes) << ", " << print_nodes(V, m_all_nodes) << ") = " << print_nodes(A, m_all_nodes) << std::endl;
       std::tie(W_1[0], W_1[1]) = zielonka(minus(V, A));
 
       // Original Zielonka version
@@ -389,16 +389,16 @@ class symbolic_pbessolve_algorithm
       else
       {
         ldd B = attractor(W_1[1 - alpha], 1 - alpha, V, empty_set(), Vplayer);
-        mCRL2log(log::debug) << "B = attractor(" << print_nodes(W_1[1 - alpha], m_all_nodes) << ", " << print_nodes(V, m_all_nodes) << ") = " << print_nodes(B, m_all_nodes) << std::endl;
+        mCRL2log(log::debug1) << "B = attractor(" << print_nodes(W_1[1 - alpha], m_all_nodes) << ", " << print_nodes(V, m_all_nodes) << ") = " << print_nodes(B, m_all_nodes) << std::endl;
         std::tie(W[0], W[1]) = zielonka(minus(V, B));
         W[1 - alpha] = union_(W[1 - alpha], B);
       }
 
       mCRL2log(log::verbose) << "finished zielonka recursion (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
 
-      mCRL2log(log::debug) << "\n  --- zielonka solution for ---\n" << print_graph(V, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
-      mCRL2log(log::debug) << "W0 = " << print_nodes(W[0], m_all_nodes) << std::endl;
-      mCRL2log(log::debug) << "W1 = " << print_nodes(W[1], m_all_nodes) << std::endl;
+      mCRL2log(log::debug1) << "\n  --- zielonka solution for ---\n" << print_graph(V, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
+      mCRL2log(log::debug1) << "W0 = " << print_nodes(W[0], m_all_nodes) << std::endl;
+      mCRL2log(log::debug1) << "W1 = " << print_nodes(W[1], m_all_nodes) << std::endl;
       assert(union_(W[0], W[1]) == V);
       return { W[0], W[1] };
     }
@@ -469,14 +469,14 @@ class symbolic_pbessolve_algorithm
       ldd Vtotal = compute_total_graph(V, todo, Vdeadlock, won);
       std::array<const ldd, 2> Vplayer = { intersect(Vtotal, m_V[0]), intersect(Vtotal, m_V[1]) };      
 
-      mCRL2log(log::debug) << "\n--- apply zielonka to ---\n" << print_graph(Vtotal, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
+      mCRL2log(log::debug1) << "\n--- apply zielonka to ---\n" << print_graph(Vtotal, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
       const auto& [solved0, solved1] = zielonka(Vtotal);
       won[0] = union_(won[0], solved0);
       won[1] = union_(won[1], solved1);
 
       mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
-      mCRL2log(log::debug) << "W0 = " << print_nodes(won[0], m_all_nodes) << std::endl;
-      mCRL2log(log::debug) << "W1 = " << print_nodes(won[1], m_all_nodes) << std::endl;
+      mCRL2log(log::debug1) << "W0 = " << print_nodes(won[0], m_all_nodes) << std::endl;
+      mCRL2log(log::debug1) << "W1 = " << print_nodes(won[1], m_all_nodes) << std::endl;
 
       return { won[0], won[1] };
     }
@@ -495,7 +495,7 @@ class symbolic_pbessolve_algorithm
       ldd Vtotal = compute_total_graph(V, todo, Vdeadlock, won);
       std::array<const ldd, 2> Vplayer = { intersect(Vtotal, m_V[0]), intersect(Vtotal, m_V[1]) };
 
-      mCRL2log(log::debug) << "\n--- apply cycle detection to ---\n" << print_graph(Vtotal, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
+      mCRL2log(log::debug1) << "\n--- apply cycle detection to ---\n" << print_graph(Vtotal, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
       for (const auto&[rank, Vrank] : m_rank_map)
       {
         // Determine the cycles for this priority and player.
@@ -523,9 +523,8 @@ class symbolic_pbessolve_algorithm
       }
 
       mCRL2log(log::verbose) << "finished cycle detection (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
-      mCRL2log(log::debug) << print_graph(Vtotal, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
-      mCRL2log(log::debug) << "W0 = " << print_nodes(won[0], m_all_nodes) << std::endl;
-      mCRL2log(log::debug) << "W1 = " << print_nodes(won[1], m_all_nodes) << std::endl;
+      mCRL2log(log::debug1) << "W0 = " << print_nodes(won[0], m_all_nodes) << std::endl;
+      mCRL2log(log::debug1) << "W1 = " << print_nodes(won[1], m_all_nodes) << std::endl;
 
       return { won[0], won[1] };
     }
