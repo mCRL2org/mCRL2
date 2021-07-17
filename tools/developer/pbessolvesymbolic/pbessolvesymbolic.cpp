@@ -376,7 +376,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
     {
       lace_init(lace_n_workers, lace_dqsize);
       lace_startup(lace_stacksize, nullptr, nullptr);
-      sylvan::sylvan_set_limits(memory_limit * 1024 * 1024 * 1024, table_ratio, initial_ratio);
+      sylvan::sylvan_set_limits(memory_limit * 1024 * 1024 * 1024, std::log2(table_ratio), std::log2(initial_ratio));
       sylvan::sylvan_init_package();
       sylvan::sylvan_init_ldd();
 
