@@ -11,7 +11,7 @@
 #define NAME "tracepp"
 #define AUTHOR "Muck van Weerdenburg"
 
-#include "mcrl2/trace/trace.h"
+#include "mcrl2/lts/trace.h"
 #include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
@@ -19,7 +19,7 @@ using namespace mcrl2::log;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::core;
-using namespace mcrl2::trace;
+using namespace mcrl2::lts;
 
 enum output_type { otPlain, otMcrl2, otDot, otAut, /*otSvc,*/ otNone, otStates };
 
@@ -104,83 +104,83 @@ static void print_state(std::ostream& os, const mcrl2::lps::state &s)
   os << ")";
 }
 
-static void trace2dot(std::ostream& os, Trace& trace, const std::string& name)
+static void trace2dot(std::ostream& os, trace& trace, const std::string& name)
 {
   os << "digraph \"" << name << "\" {" << std::endl;
   os << "center = TRUE;" << std::endl;
   os << "mclimit = 10.0;" << std::endl;
   os << "nodesep = 0.05;" << std::endl;
 
-  trace.resetPosition();
+  trace.reset_position();
 
   os << 0 << " [label=\"";
   if (trace.current_state_exists())
   {
-    print_state(os,trace.currentState());
+    print_state(os,trace.current_state());
   }
   os << "\",peripheries=2];" << std::endl;
 
-  for(std::size_t i=0; i<trace.number_of_actions(); ++i, trace.increasePosition())
+  for(std::size_t i=0; i<trace.number_of_actions(); ++i, trace.increase_position())
   {
     os << i+1 << " [label=\"";
-    trace.increasePosition();
+    trace.increase_position();
     if (trace.current_state_exists())
     {
-      print_state(os,trace.currentState());
+      print_state(os,trace.current_state());
     }
-    trace.decreasePosition();
+    trace.decrease_position();
     os << "\"];" << std::endl;
     os << i << " -> " << i+1 << " [label=\"";
-    os << mcrl2::lps::pp(trace.currentAction());
+    os << mcrl2::lps::pp(trace.current_action());
     os << "\"];" << std::endl;
   }
   os << "}" << std::endl;
 }
 
-static void trace2statevector(std::ostream& os, Trace& trace)
+static void trace2statevector(std::ostream& os, trace& trace)
 {
-  trace.resetPosition();
+  trace.reset_position();
 
-  for(std::size_t i=0; i<trace.number_of_actions(); ++i, trace.increasePosition())
+  for(std::size_t i=0; i<trace.number_of_actions(); ++i, trace.increase_position())
   {
     if (trace.current_state_exists())
     {
-      print_state(os,trace.currentState());
+      print_state(os,trace.current_state());
     }
     os << " -";
-    os << mcrl2::lps::pp(trace.currentAction());
+    os << mcrl2::lps::pp(trace.current_action());
     os << "-> " << std::endl;
   }
   if (trace.current_state_exists())
   {
-    print_state(os, trace.currentState());
+    print_state(os, trace.current_state());
   }
   os << std::endl;
 }
 
-static void trace2aut(std::ostream& os, Trace& trace)
+static void trace2aut(std::ostream& os, trace& trace)
 {
   os << "des (0," << trace.number_of_actions() << "," << trace.number_of_actions()+1 << ")" << std::endl;
-  trace.resetPosition();
+  trace.reset_position();
 
-  for(std::size_t i=0; i<trace.number_of_actions(); ++i, trace.increasePosition())
+  for(std::size_t i=0; i<trace.number_of_actions(); ++i, trace.increase_position())
   {
     os << "(" << i << ",\"";
-    os << mcrl2::lps::pp(trace.currentAction());
+    os << mcrl2::lps::pp(trace.current_action());
     os << "\"," << i+1 << ")" << std::endl;
   }
 }
 
-inline void save_trace(Trace& trace, output_type outtype, std::ostream& out, const std::string& name)
+inline void save_trace(trace& trace, output_type outtype, std::ostream& out, const std::string& name, const std::string& output_filename)
 {
   mCRL2log(verbose) << "writing result in " << description(outtype) << "..." << std::endl;
   switch (outtype)
   {
     case otPlain:
-      trace.save(out,tfPlain);
+      trace.save(output_filename,trace::tfPlain);
       break;
     case otMcrl2:
-      trace.save(out,tfMcrl2);
+      trace.save(output_filename,trace::tfMcrl2);
       break;
     case otAut:
       trace2aut(out,trace);
@@ -215,13 +215,13 @@ class tracepp_tool: public input_output_tool
 
     bool run()
     {
-      Trace trace;
+      trace trace;
 
       if (input_filename().empty())
       {
         mCRL2log(verbose) << "reading input from stdin..." << std::endl;
 
-        trace.load(std::cin);
+        trace.load("");  // Load from stdin. 
       }
       else
       {
@@ -231,7 +231,7 @@ class tracepp_tool: public input_output_tool
 
         if (in.good())
         {
-          trace.load(in);
+          trace.load(input_filename());
         }
         else
         {
@@ -243,7 +243,7 @@ class tracepp_tool: public input_output_tool
       if (output_filename().empty())
       {
         mCRL2log(verbose) << "writing result to stdout..." << std::endl;
-        save_trace(trace, format_for_output, std::cout,"stdin");
+        save_trace(trace, format_for_output, std::cout,"stdin", output_filename());
       }
       else
       {
@@ -253,7 +253,7 @@ class tracepp_tool: public input_output_tool
 
         if (out.good())
         {
-          save_trace(trace, format_for_output, out, input_filename().substr(input_filename().find_last_of('.')));
+          save_trace(trace, format_for_output, out, input_filename().substr(input_filename().find_last_of('.')), output_filename());
         }
         else
         {

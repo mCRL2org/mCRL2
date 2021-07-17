@@ -62,11 +62,6 @@ class transition
 
     /// \brief Copy constructor.
     transition(const transition& t) = default;
-    /* {
-      m_from = t.m_from;
-      m_label = t.m_label;
-      m_to = t.m_to;
-    } */
 
     /// \brief The source of the transition.
     size_type

@@ -10,7 +10,7 @@
 #define MCRL2_LPS_SIMULATION_H
 
 #include "mcrl2/lps/next_state_generator.h"
-#include "mcrl2/trace/trace.h"
+#include "mcrl2/lts/trace.h"
 
 namespace mcrl2
 {
@@ -65,7 +65,7 @@ class simulation
     void push_back(const lps::state& lps_state);
     bool is_prioritized(const multi_action& action);
     void prioritize_trace();
-    bool match_trace(trace::Trace& trace);
+    bool match_trace(lts::trace& trace);
     bool match(const state& left, const state& right);
 
     stochastic_specification m_specification;

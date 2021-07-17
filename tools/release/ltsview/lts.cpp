@@ -15,7 +15,6 @@
 #include "state.h"
 #include "transition.h"
 
-using namespace mcrl2::trace;
 using namespace mcrl2::core;
 using namespace mcrl2::lts;
 using namespace MathUtils;

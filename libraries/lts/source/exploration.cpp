@@ -610,7 +610,7 @@ void lps2lts_algorithm::value_prioritize(std::vector<next_state_generator::trans
   transitions.resize(new_position);
 }
 
-void lps2lts_algorithm::construct_trace(const lps::state& state1, mcrl2::trace::Trace& trace)
+void lps2lts_algorithm::construct_trace(const lps::state& state1, mcrl2::lts::trace& trace)
 {
   lps::state state=state1;
   std::deque<lps::state> states;
@@ -621,7 +621,7 @@ void lps2lts_algorithm::construct_trace(const lps::state& state1, mcrl2::trace::
     state = source->second;
   }
 
-  trace.setState(state);
+  trace.set_state(state);
   next_state_generator::enumerator_queue_t enumeration_queue;
   for (std::deque<lps::state>::iterator i = states.begin(); i != states.end(); i++)
   {
@@ -635,7 +635,7 @@ void lps2lts_algorithm::construct_trace(const lps::state& state1, mcrl2::trace::
       }
       if (destination == *i)
       {
-        trace.addAction(j->action());
+        trace.add_action(j->action());
         found=true;
         break;
       }
@@ -647,7 +647,7 @@ void lps2lts_algorithm::construct_trace(const lps::state& state1, mcrl2::trace::
     }
     enumeration_queue.clear();
     state = *i;
-    trace.setState(state);
+    trace.set_state(state);
   }
 
 }
@@ -655,7 +655,7 @@ void lps2lts_algorithm::construct_trace(const lps::state& state1, mcrl2::trace::
 // Contruct a trace to state1 and store in in filename.
 bool lps2lts_algorithm::save_trace(const lps::state& state1, const std::string& filename)
 {
-  mcrl2::trace::Trace trace;
+  mcrl2::lts::trace trace;
   lps2lts_algorithm::construct_trace(state1, trace);
   m_traces_saved++;
 
@@ -675,10 +675,10 @@ bool lps2lts_algorithm::save_trace(const lps::state& state1,
                                    const next_state_generator::transition_t& transition,
                                    const std::string& filename)
 {
-  mcrl2::trace::Trace trace;
+  mcrl2::lts::trace trace;
   lps2lts_algorithm::construct_trace(state1, trace);
-  trace.addAction(transition.action());
-  trace.setState(transition.target_state());
+  trace.add_action(transition.action());
+  trace.set_state(transition.target_state());
   m_traces_saved++;
 
   try

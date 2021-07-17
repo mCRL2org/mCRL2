@@ -87,4 +87,6 @@ private:
 
 } // namespace atermpp
 
+bool is_a_binary_aterm(std::istream& is);
+
 #endif // MCRL2_ATERMPP_ATERM_IO_BINARY_H

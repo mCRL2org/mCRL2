@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "mcrl2/lps/simulation.h"
+#include "mcrl2/lts/simulation.h"
 
 using namespace mcrl2;
 using namespace mcrl2::lps;
@@ -109,12 +109,12 @@ void simulation::enable_tau_prioritization(bool enable, const std::string& actio
 
 void simulation::save(const std::string &filename)
 {
-  trace::Trace trace;
-  trace.setState(m_full_trace[0].source_state);
+  lts::trace trace;
+  trace.set_state(m_full_trace[0].source_state);
   for (std::size_t i = 0; i + 1 < m_full_trace.size(); i++)
   {
-    trace.addAction(m_full_trace[i].transitions[m_full_trace[i].transition_number].action);
-    trace.setState(m_full_trace[i+1].source_state);
+    trace.add_action(m_full_trace[i].transitions[m_full_trace[i].transition_number].action);
+    trace.set_state(m_full_trace[i+1].source_state);
   }
   trace.save(filename);
 }
@@ -122,8 +122,8 @@ void simulation::save(const std::string &filename)
 void simulation::load(const std::string &filename)
 {
   // Load the trace from file
-  trace::Trace trace(filename, m_specification.data(), m_specification.action_labels());
-  trace.resetPosition();
+  lts::trace trace(filename, m_specification.data(), m_specification.action_labels());
+  trace.reset_position();
 
   // Get the first state from the generator
   m_full_trace.clear();
@@ -135,7 +135,7 @@ void simulation::load(const std::string &filename)
   push_back(m_generator.initial_states().front().state());
 
   // Check that the first state (if given) matches the first state of our generator
-  if (trace.current_state_exists() && trace.currentState() != m_full_trace.back().source_state)
+  if (trace.current_state_exists() && trace.current_state() != m_full_trace.back().source_state)
   {
     throw mcrl2::runtime_error("The initial state of the trace does not match the initial state "
                                "of this specification");
@@ -146,7 +146,7 @@ void simulation::load(const std::string &filename)
   {
     std::stringstream ss;
     ss << "could not perform action " << (m_full_trace.size() - 1) << " ("
-       << pp(trace.currentAction()) << ") from trace";
+       << pp(trace.current_action()) << ") from trace";
     throw mcrl2::runtime_error(ss.str());
   }
 
@@ -255,20 +255,20 @@ void simulation::push_back(const lps::state& lps_state)
   m_full_trace.push_back(state);
 }
 
-bool simulation::match_trace(trace::Trace& trace)
+bool simulation::match_trace(lts::trace& trace)
 {
   state_t& current = m_full_trace.back();
-  lps::multi_action action = trace.currentAction();
-  trace.increasePosition();
+  lps::multi_action action = trace.current_action();
+  trace.increase_position();
   for (std::size_t i = 0; i < current.transitions.size(); ++i)
   {
     if (current.transitions[i].action == action &&
         (!trace.current_state_exists() ||
-         current.transitions[i].destination == trace.currentState()))
+         current.transitions[i].destination == trace.current_state()))
     {
       current.transition_number = i;
-      push_back(trace.currentState());
-      if (trace.getPosition() == trace.number_of_actions() || match_trace(trace))
+      push_back(trace.current_state());
+      if (trace.get_position() == trace.number_of_actions() || match_trace(trace))
       {
         return true;
       }

@@ -3,4 +3,5 @@ add_mcrl2_tool(tracepp
     tracepp.cpp
   DEPENDS
     mcrl2_lps
+    mcrl2_lts
 )

@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "mcrl2/trace/trace.h"
+#include "mcrl2/lts/trace.h"
 #include "transition.h"
 #include "state.h"
 
@@ -130,24 +130,24 @@ void Simulation::traceback()
   if (m_currentState)
   {
     State *initialState = m_ltsRef.getInitialState();
-    State *currentState = m_history.isEmpty() ? m_currentState : m_history.first()->getBeginState();
+    State *current_state = m_history.isEmpty() ? m_currentState : m_history.first()->getBeginState();
 
-    while (currentState != initialState)
+    while (current_state != initialState)
     {
-      // Loop through the incoming transitions of currentState.
+      // Loop through the incoming transitions of current_state.
       // Because of the way the LTS is structured, we know that there is at least
       // one incoming transition that is not a selfloop and not a backpointer.
       // We take the first such transition, because that guarantees that the
       // source state of that transition is in the previous level.
       // Just taking the first incoming transition may lead to infinite loops.
-      for (int i = 0; i < currentState->getNumInTransitions(); i++)
+      for (int i = 0; i < current_state->getNumInTransitions(); i++)
       {
-        Transition *transition = currentState->getInTransition(i);
+        Transition *transition = current_state->getInTransition(i);
         if (!transition->isBackpointer() && !transition->isSelfLoop())
         {
           m_history.prepend(transition);
-          currentState = transition->getBeginState();
-          currentState->increaseSimulation();
+          current_state = transition->getBeginState();
+          current_state->increaseSimulation();
           break;
         }
       }
@@ -159,7 +159,7 @@ void Simulation::traceback()
 
 bool Simulation::loadTrace(QString filename)
 {
-  mcrl2::trace::Trace trace;
+  mcrl2::lts::trace trace;
   try
   {
     trace.load(filename.toStdString());
@@ -184,7 +184,7 @@ bool Simulation::loadTrace(QString filename)
 
   Simulation simulation(0, m_ltsRef);
   State* initialState = m_ltsRef.getInitialState();
-  if (trace.currentState().size() != m_ltsRef.getNumParameters())
+  if (trace.current_state().size() != m_ltsRef.getNumParameters())
   {
     mCRL2log(mcrl2::log::error) << "The trace in " << filename.toStdString() << " and the labelled transition system have state information of unequal lengths.";
     return false;
@@ -193,13 +193,13 @@ bool Simulation::loadTrace(QString filename)
   simulation.start();
 
   // Get the first state of the trace 
-  mcrl2::lps::state currentState = trace.currentState();
+  mcrl2::lps::state current_state = trace.current_state();
 
   // Load the rest of the trace.
-  while (trace.getPosition() != trace.number_of_actions())
+  while (trace.get_position() != trace.number_of_actions())
   {
-    std::string action = pp(trace.currentAction());
-    trace.increasePosition();
+    std::string action = pp(trace.current_action());
+    trace.increase_position();
 
     QList<Transition *> transitions = simulation.availableTransitions();
     int possibilities = 0;
@@ -219,7 +219,7 @@ bool Simulation::loadTrace(QString filename)
       // More than one possibility, meaning that choosing on action name is
       // ambiguous. Solve disambiguation by looking at states
 
-      currentState = trace.currentState();
+      current_state = trace.current_state();
 
       // Match is the score keeping track of how well a state matches an LPS
       // state. The (unique) state with the maximum match will be chosen.
@@ -233,9 +233,9 @@ bool Simulation::loadTrace(QString filename)
         State *state = transitions[i]->getEndState();
         int match = 0;
 
-        for (std::size_t j = 0; j < currentState.size(); j++)
+        for (std::size_t j = 0; j < current_state.size(); j++)
         {
-          if (mcrl2::data::pp(currentState[j]) == m_ltsRef.getStateParameterValueStr(state, j))
+          if (mcrl2::data::pp(current_state[j]) == m_ltsRef.getStateParameterValueStr(state, j))
           {
             match++;
           }

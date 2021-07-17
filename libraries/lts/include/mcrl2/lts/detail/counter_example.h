@@ -19,7 +19,7 @@
 #define _LIBLTS_COUNTER_EXAMPLE_H
 
 #include "mcrl2/lts/lts_lts.h"
-#include "mcrl2/trace/trace.h"
+#include "mcrl2/lts/trace.h"
 
 
 namespace mcrl2
@@ -108,10 +108,10 @@ class counter_example_constructor
         reversed_label_indices.push(m_backward_tree[current_index].label_index());
       }
 
-      trace::Trace result;
+      trace result;
       while (!reversed_label_indices.empty())
       {
-        result.addAction(mcrl2::lps::multi_action(mcrl2::process::action(
+        result.add_action(mcrl2::lps::multi_action(mcrl2::process::action(
                                 mcrl2::process::action_label(
                                        core::identifier_string(mcrl2::lts::pp(l.action_label(reversed_label_indices.top()))),
                                        mcrl2::data::sort_expression_list()),
@@ -122,7 +122,7 @@ class counter_example_constructor
       /* Add the actions in extra actions. */
       for(const size_t& a: extra_actions)
       {
-        result.addAction(mcrl2::lps::multi_action(mcrl2::process::action(
+        result.add_action(mcrl2::lps::multi_action(mcrl2::process::action(
                                 mcrl2::process::action_label(
                                        core::identifier_string(mcrl2::lts::pp(l.action_label(a))),
                                        mcrl2::data::sort_expression_list()),
@@ -131,7 +131,7 @@ class counter_example_constructor
       if (m_structured_output)
       {
         std::cout << m_name << ": ";
-        result.save(std::cout, mcrl2::trace::tfLine);
+        result.save("", mcrl2::lts::trace::tfPlain);   // Write to stdout. 
       }
       else
       {
