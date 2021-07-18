@@ -253,8 +253,8 @@ class action_detector
       if (m_trace_count < m_max_trace_count)
       {
         class trace tr = m_trace_constructor.construct_trace(s0);
-        tr.set_state(s1);
         tr.add_action(a);
+        tr.set_state(s1);
         std::string filename = create_filename(a);
         save_trace(tr, filename);
         result = true;
@@ -345,8 +345,8 @@ class nondeterminism_detector
         if (m_trace_count < m_max_trace_count)
         {
           class trace tr = m_trace_constructor.construct_trace(s0);
-          tr.set_state(s1);
           tr.add_action(a);
+          tr.set_state(s1);
           std::string filename = filename_prefix + "_nondeterministic_" + std::to_string(m_trace_count++) + ".trc";
           save_trace(tr, filename);
           result = true;
@@ -469,8 +469,8 @@ class divergence_detector
               {
                 m_divergent_states[u] = s_index;
               }
-              tr_loop.set_state(first_state(s1));
               tr_loop.add_action(a);
+              tr_loop.set_state(first_state(s1));
               std::string filename = filename_prefix + "_divergence_" + std::to_string(m_trace_count) + ".trc";
               std::string loop_filename = filename_prefix + "_divergence_loop" + std::to_string(m_trace_count++) + ".trc";
               save_traces(tr, filename, tr_loop, loop_filename);
@@ -505,8 +505,8 @@ class divergence_detector
               {
                 m_divergent_states[u] = s_index;
               }
-              tr_loop.set_state(first_state(s1));
               tr_loop.add_action(a);
+              tr_loop.set_state(first_state(s1));
               std::string filename = filename_prefix + "_divergence_" + std::to_string(m_trace_count) + ".trc";
               std::string loop_filename = filename_prefix + "_divergence_loop" + std::to_string(m_trace_count++) + ".trc";
               save_traces(tr, filename, tr_loop, loop_filename);
