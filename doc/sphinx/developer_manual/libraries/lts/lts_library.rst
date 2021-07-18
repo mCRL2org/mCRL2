@@ -1,7 +1,11 @@
 Introduction
 ============
 The LTS library provides data structures and methods to handle *labelled
-transition systems* (LTS). LTS's can be created, transfered from and to 
+transition systems* (LTS). There are derived classes for probabilistic LTSs. 
+There is also a separate class of traces, which are essentially LTSs consisting
+of a single trace. Traces are not probabilistic. 
+
+LTSs can be created, transfered from and to 
 file and transformed by for instance a bisimulation reduction, determinisation
 or the removal of unreachable states.
 
@@ -13,8 +17,13 @@ action has an associated label, for instance a string. Optionally, each state in
 has also an associated label. Finally, each label is either internal
 (eg., hidden or a tau action) or externally visible. 
 
-A labelled transition system has template parameters for the state and 
-action labels. There are several standard labelled transition systems defined.
+For probabilistic transition systems the target of a transition refers to a probabilistic
+state. A probabilistic state is a vector of state_probability pairs `s,p` indicating
+with which probability `p` an ordinary state `s` can be reached. For a probabilistic
+transition system the initial state is also a probabilistic transition system. 
+
+A labelled transition system has template parameters for the state labels,
+action labels and probabilistic states. There are several standard labelled transition systems defined.
 For example, the :cpp:type:`lts_aut_t` is an LTS with strings as transition labels, and no state
 labels. The :cpp:type:`lts_lts_t` has multi actions as state labels, and vectors
 of data expressions as state labels. Furthermore, this latter contains
@@ -37,15 +46,13 @@ class behaves as a standard container, in the sense that any class that can be
 used in a standard C++ container is usable for the labels in a labelled transition 
 system. 
 
-There are six standard template instantiations of labelled transitions systems:
+There are four standard template instantiations of labelled transitions systems:
   * :cpp:type:`lts_lts_t`: Multi actions as label values. Vectors of data expressions as state values. Contains a data specification, action declarations and process parameters.
   * :cpp:type:`lts_aut_t`: Strings as label values. No state values. Is stored in the aut file format.
   * :cpp:type:`lts_fsm_t`: Strings as label values. Vectors of strings as state values. Contains the names and sorts of process parameters. Is stored in the fsm file format.
-  * :cpp:type:`lts_bcg_t`: Strings as label values. No state values. Is stored in the bcg file format.
-  * :cpp:type:`lts_dot_t`: Label values are strings. State values are a pair of a state name, and a state label.
+  * :cpp:type:`lts_dot_t`: Label values are strings. State values are a pair of a state name, and a state label. 
 
-Each of these six classes contains at least load and save functionality, as well as as function pp to
-transform state and label values to strings. 
+The first three classes contain load and save functionality. The `lts_dot_t` is only provided for saving. 
 
 Creating and accessing an LTS
 =============================
@@ -73,7 +80,10 @@ information is extracted.
     l.add_state("Red");
 
     // Add an action label with index 0. The second (optional) argument
-    // indicates that this is not an internal label.
+    // indicates that this is not an internal label. All action labels
+    // must be unique. Reduction algorithms use the index of action
+    // labels, and confusion can arise when multiple identical action labels
+    // exist. The lts library does not enforce that action labels are unique.
     l.add_label("Become green",true);
     
     // Add a transition from state 1 to 0.
@@ -93,7 +103,7 @@ information is extracted.
     std::cout << "Initial state is " << l.initial_state() << "\n";
 
     // Traverse and print the state labels.
-    for(unsigned int i=0; i<l.num_state_values(); ++i)
+    for(std::size_t i=0; i<l.num_state_values(); ++i)
     {
       std::cerr << "State " << i << " has value " << l.state_value(i) << "\n";
     }
@@ -117,23 +127,27 @@ information is extracted.
     l.clear();
   } 
 
-Note that there are no standard load and save methods as these depend on the nature of the state and
-action values. There are however standard functions to make actions internal, based on a set
+Note that there are no load and save methods in this base class as these depend on the nature of the state and
+action values. They are provided in the derived classes belonging to each specific format. 
+There are however standard functions to make actions internal, based on a set
 of action strings, as well as utility functions to sort the transitions based on various criteria.
 See the __lts_reference__ for this.
 
 The standard labelled transition systems
 ========================================
 
-There are six standard labelled transition systems. In addition to determining the 
+There are four standard labelled transition systems. In addition to determining the 
 value types of states and action labels, they can contain additional information. 
-Each of theselabelled transition systems are related to some file format and therefore,
+Each of these labelled transition systems are related to some file format and therefore,
 they all provide load and save functionality. 
 
 The enumerated type :cpp:type:`lts_type` contains for all the formats an element. The default element
 is :cpp:member:`lts_none`, not referring to any type.
 Furthermore, each standard
-labelled transition system has its own file extension. The table below shows them.
+labelled transition system has its own file extension. The Extra information refers to data and action declarations for the 
+`lts_lts_t` format. For the `lts_fsm_t` it is recalled which variables occur in the state vector, which labels a state, and
+for each of these variables the values that it can attain are also recalled. 
+The table below shows them.
 
 .. table:: Standard LTS formats
 
@@ -148,8 +162,6 @@ labelled transition system has its own file extension. The table below shows the
    +-----------------------+-----------------------+----------------+-----------------------------+-------------------------------+-------------------+   
    |:cpp:class:`lts_dot_t` | :cpp:member:`lts_dot` | .dot           |:cpp:type:`state_label_dot`  |:cpp:type:`action_label_string`|No                 |
    +-----------------------+-----------------------+----------------+-----------------------------+-------------------------------+-------------------+   
-   |:cpp:class:`lts_bcg_t` | :cpp:member:`lts_bcg` | .bcg           |:cpp:type:`state_label_empty`|:cpp:type:`action_label_string`|No                 |
-   +-----------------------+-----------------------+----------------+-----------------------------+-------------------------------+-------------------+
 
 
 For the reduction we simply call the reduce() method with the option
@@ -159,12 +171,12 @@ lts_eq_trace.
 
   l.reduce(lts_eq_trace);
 
-The LTS l has now been reduced, so we can print the result. We iterate over all\
+The LTS l has now been reduced, so we can print the result. We iterate over all
 transitions in a loop as follows.
 
 .. code-block:: c++
 
-  for (transition_iterator i = l.get_transitions(); i.more(); ++i)
+  for (const transition& t: l.get_transitions())
   {
 
 We show the states by printing their identifiers (i.e. the unsigned integers),
@@ -173,13 +185,13 @@ obtain as follows.
 
 .. code-block:: c++
 
-    string label = l.label_value_str(i.label());
+    string label = pp(l.action_label(t.label());
 
 To print each transition we do the following.
 
 .. code-block:: c++
 
-    cout << i.from() << "  -- " << label << " -->  " i.to() << endl;
+    cout << t.from() << "  -- " << label << " -->  " t.to() << endl;
   }
 
 The output is as follows::
@@ -194,11 +206,13 @@ Note that the initial state is 1. To verify this one could also print
 Reducing and comparing labelled transition systems
 ==================================================
 
-It is possible to reduce an lts modulo different equivalencies. 
+It is possible to reduce an lts modulo different equivalences. 
 The transition system will be replaced by another transition system
 that is generally smaller in such a way that the initial state is
-still equivalent to the old initial state. The equivalencies that
-have been implemented are:
+still equivalent to the old initial state. The equivalence that 
+are available change all the time. It is best to see the help
+text of tools such as `ltscompare` and `ltsconvert` for the latest
+available reductions. Some that have been implemented are:
 
   * :cpp:member:`lts_eq_none`:             No reduction
   * :cpp:member:`lts_eq_bisim`:            Strong bisimulation equivalence, using an O(m log m) algorithm [Groote/Jansen/Keiren/Wijs 2017]
@@ -226,17 +240,14 @@ lts is replaced by the reduced lts. The original lts will be destroyed.
 
 .. code-block:: c++
 
-    lts l("an_lts.aut");
-    if (l.reduce(lts_eq_branching_bisim))
-    { cout << "Transition system is succesfully reduced modulo branching bisimulation";
-    }
-    else 
-    { cout << "Reduction failed";
-    }
+    lts_aut_t l;
+    l.load("an_lts.aut");
+    reduce(l,lts_eq_branching_bisim))
+    cout << "Transition system is succesfully reduced modulo branching bisimulation";
 
 It is also possible to compare an lts to another lts. This can be done
 using the equivalence options mentioned above. But it is also possible to
-use the following preorders. 
+use the other preorders such as: 
 
   * :cpp:member:`lts_pre_none`:             No preorder 
   * :cpp:member:`lts_pre_sim`:              Strong simulation preorder
@@ -254,29 +265,94 @@ transition systems.
 
 .. code-block:: c++
 
-    lts l1("lts1.aut");
-    lts l2("lts2.aut");
+    lts_lts_t l1,l2;
+    l1.load("lts1.lts");
+    l2.load("lts2.lts");
 
-    if (l1.compare(l2,lts_eq_bisim))    // Non destructive compare.
+    if (compare(l1,l2,lts_eq_bisim))    // Non destructive compare.
     { cout << "Transition systems are bisimilar\n";
     }
     else
     { cout << "Transitions systems are not bisimilar";
     }
     
-    if (l1.destructive_compare(l2,lts_pre_sim))  // Destructive compare.
+    if (destructive_compare(l1,l2,lts_pre_sim))  // Destructive compare.
     { cout << "Transitions system l1 is strongly simulated by l2";
     }
     else
     { cout << "Lts l1 is not strongly simulated by l2";
     }
 
+The non-destructive compares may make a copy of the transition system, which can
+be expensive as transition systems can be large. 
+
 Some utility functions
 ======================
-Explain:
+There are a number of standard functions implemented on labelled transition systems,
+such as making a transition system deterministic (can lead to a huge transition system),
+calculating the strongly connected components, etc. 
    
   * determinise(l);
   * reachability_check(l,remove_unreachable);
   * is_deterministic(l);
   * scc_reduce(l, preserve_divergence_loops);
  
+Traces
+======
+
+There is a special class `trace` to store traces. 
+A trace is a sequence of multi actions [^a1 a2 a3 ... an]. Between the multi actions there can
+be states and the multi actions can have time tags. In the most extensive form
+a trace is a sequence [^s1 a1@t1 s2 a2@t2 ... an@tn sn+1] where [^si]
+is a state [^i], [^ti] is a time tag [^i] and [^ai] is a multiaction [^i].
+
+Traces can be generated using a
+simulation tool but they can also be the result of an analysis tool. E.g., an
+analysis tool can generate one or more traces to a deadlock. Such a generated
+trace can subsequently be inspected by a tool capable of reading a trace.
+A trace can be stored in readable format, as a sequence of multi-actions, or
+in internal format, in which case it is stored as a lts_lts_t transition system.
+This has the advantage that tools such as `ltsgraph` can be used to view them.
+
+Internally traces are stored as a vector of multi actions, an optional vector
+of state labels and a position indicating what the current position in the
+trace is. Traces are typically used by simulators, such as the tool `lpssim` of
+`lpsxsim`. They are generated by for instance the tool `lps2lts`, to indicate
+a path to for instance a deadlock or a particular action. 
+
+The following fragment of code shows how to read a trace from standard in and
+print its contents to standard out. Moving to the next transition in the
+state is done by incrementing the current position explicitly. 
+
+.. code-block:: c++
+
+  #include <iostream>
+  #include "mcrl2/trace/trace.h"
+
+  using namespace std;
+  using namespace mcrl2::lts;
+
+  int main(int argc, char **argv)
+  {
+    trace t;
+    t.load(""); // read trace from stdin
+
+    for(std::size_t i=0 ; i<tr.number_of_actions() ; i++)
+    {
+      if (t.current_state_exists())
+      {
+        std::cout << "State: " << t.current_state() << "\n";
+      }
+      std::cout << "Action: " << t.current_action() << "\n";
+      t.increase_position();
+    }
+    if (t.current_state_exists())
+    {
+      std::cout << "Final state: " << t.next_state() << "\n";
+    }
+  }
+
+There are many other methods available, such as methods to truncate the current
+trace, adding new states and transitions. This is for instance useful when 
+doing a simulation, where it is decided that halfway a simulation another branch
+of the behaviour needs to be explored. 
