@@ -1,4 +1,4 @@
-// Author(s): Muck van Weerdenburg. Documentation Jan Friso Groote.
+// Author(s): Muck van Weerdenburg. Jan Friso Groote.
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -9,11 +9,9 @@
 /// \file mcrl2/lts/trace.h
 /// \brief This class allows to flexibly manipulate traces.
 /// \details This class allows to build, traverse and store traces.
-/// Traces are sequences of state-action-time triples.
-/// The state is a vector of data values, the action is the outgoing
-/// action in this state, and the time is an absolute
-/// real number indicating the current time or NIL if the trace
-/// is untimed.
+/// Traces are sequences of (possibly timed) multi actions, that may be endowed with state
+/// information for the intermediate states. In the trace the current position is being
+/// maintained. Adding actions or setting states is always relative to the current position. 
 /// \author Muck van Weerdenburg
 
 #ifndef MCRL2_LTS_TRACE_H
@@ -124,7 +122,7 @@ class trace
     /// \param[in] filename The name of the file from which the trace is read.
     /// \param[in] tf The format in which the trace was stored. Default: '''tfUnknown'''.
     /// \exception mcrl2::runtime_error message in case of failure
-    trace(std::string const& filename, trace_format tf = tfUnknown)
+    trace(const std::string& filename, trace_format tf = tfUnknown)
       : m_data_specification_and_act_decls_are_defined(false)
     {
       init();
@@ -139,7 +137,7 @@ class trace
     /// \param[in] act_decls A list of action declarations.
     /// \param[in] tf The format in which the trace was stored. Default: '''tfUnknown'''.
     /// \exception mcrl2::runtime_error message in case of failure
-    trace(std::string const& filename,
+    trace(const std::string& filename,
           const mcrl2::data::data_specification& spec,
           const mcrl2::process::action_label_list& act_decls,
           trace_format tf = tfUnknown)
@@ -402,15 +400,8 @@ class trace
     /// the format is tfPlain only actions are written. Default: tfMcrl2.
     /// \exception mcrl2::runtime_error message in case of failure
 
-    void save(std::string const& filename, trace_format tf = tfMcrl2)
+    void save(const std::string& filename, trace_format tf = tfMcrl2)
     {
-      using std::ofstream;
-      ofstream os(filename.c_str(),ofstream::binary|ofstream::out|ofstream::trunc);
-      if (!os.is_open())
-      {
-        throw runtime_error("error saving trace (could not open file)");
-      }
-
       try
       {
         switch (tf)
@@ -419,22 +410,19 @@ class trace
             save_mcrl2(filename);
             break;
           case tfPlain:
-            save_plain(os);
+            save_plain(filename);
             break;
           case tfLine:
-            save_line(os);
+            save_line(filename);
             break;
           default:
-            break;
+            throw runtime_error("Error saving trace to " + (filename.empty()?std::string(" stdout"):filename) + ".");
         }
       }
       catch (runtime_error& err)
       {
-        os.close();
-        throw runtime_error(std::string("Error saving trace (") + err.what() + ").");
+        throw runtime_error("Error saving trace to " + (filename.empty()?std::string(" stdout"):filename) + ".\n" + err.what());
       }
-
-      os.close();
     }
 
     const std::vector<lps::state>& states() const
@@ -639,7 +627,7 @@ class trace
       lts.save(filename);
     }
 
-    void save_text(std::ostream& os, std::string separator)
+    void save_text_to_stream(std::ostream& os, std::string separator)
     {
       std::string sep;
       for (std::size_t i=0; i<m_actions.size(); i++)
@@ -648,21 +636,41 @@ class trace
         sep = separator;
         if (os.bad())
         {
-          throw runtime_error("Could not write to stream.");
+          throw runtime_error("Could not write to stream.");  
         }
+      }
+      os << std::endl;
+    }
+
+    void save_text(const std::string& filename, std::string separator)
+    {
+      if (filename=="")
+      {
+        save_text_to_stream(std::cout, separator);
+      }
+      else 
+      {
+        using std::ofstream;
+        ofstream os;
+        os.open(filename.c_str(),ofstream::binary|ofstream::out|ofstream::trunc);
+        if (!os.is_open())
+        {
+          os.close();
+          throw runtime_error("Could not open file.");
+        }
+        save_text_to_stream(os, separator);
+        os.close();
       }
     }
 
-    void save_line(std::ostream& os)
+    void save_line(const std::string& filename)
     {
-      save_text(os, ";");
-      os << std::endl;
+      save_text(filename, ";");
     }
 
-    void save_plain(std::ostream& os)
+    void save_plain(const std::string& filename)
     {
-      save_text(os, "\n");
-      os << std::endl;
+      save_text(filename, "\n");
     }
 
 };
