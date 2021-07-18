@@ -193,7 +193,6 @@ class lts: public LTS_BASE
      */
     void set_num_states(const states_size_type n, const bool has_state_labels = true)
     {
-std::cerr << "STE NUMER OF STATES " << n << "\n";
       m_nstates = n;
       if (has_state_labels)
       {
@@ -248,7 +247,6 @@ std::cerr << "STE NUMER OF STATES " << n << "\n";
      * state. */
     void set_initial_state(const states_size_type state)
     {
-std::cerr << "CMOPAR " << state << "   " << m_nstates << "\n";
       assert(state<m_nstates);
       m_init_state = state;
     }
@@ -365,7 +363,6 @@ std::cerr << "CMOPAR " << state << "   " << m_nstates << "\n";
      * \return The label of the state. */
     STATE_LABEL_T state_label(const states_size_type state) const
     {
-std::cerr << "STATES LABEL " << state << " MAX " << m_nstates << "VECTOR " << m_state_labels.size() << "\n";
       assert(state<m_nstates);
       assert(m_nstates==m_state_labels.size());
       return m_state_labels[state];
@@ -386,7 +383,6 @@ std::cerr << "STATES LABEL " << state << " MAX " << m_nstates << "VECTOR " << m_
      *  \return The label of the action. */
     ACTION_LABEL_T action_label(const labels_size_type action) const
     {
-std::cerr << "m_action_labels.size " << m_action_labels.size() << "    " << action << "\n";
       assert(action < m_action_labels.size());
       return m_action_labels[action];
     }

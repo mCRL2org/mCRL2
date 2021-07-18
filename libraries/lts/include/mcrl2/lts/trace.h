@@ -467,7 +467,6 @@ class trace
 
     trace_format detectFormat(std::istream& is)
     {
-std::cerr << "Detect format \n";
       trace_format fmt = tfPlain;
 
       char c=is.peek();
@@ -480,7 +479,6 @@ std::cerr << "Detect format \n";
                  // for a trace in textual format. 
       {
         fmt = tfMcrl2;
-std::cerr << "Detect format Mcrl2 \n";
       }
 
       return fmt;
@@ -569,7 +567,6 @@ std::cerr << "Detect format Mcrl2 \n";
 
     void load_plain(std::istream& is)
     {
-std::cerr << "Load plain\n";
       reset_position();
       truncate();
       m_states.clear(); // Throw all states away, also the initial state. 
@@ -584,14 +581,8 @@ std::cerr << "Load plain\n";
         }
  
         action = action.substr(0,action.find_last_not_of(" \r")+1);
-std::cerr << "Load line " << action << "\n";
-for(char c: action)
-{
-  std::cerr << "CHAR " << c << "  " << size_t(c) << "\n";
-}
         if (!action.empty())
         {
-std::cerr << "ADD ACTION |" << action << "|\n";
           if (m_data_specification_and_act_decls_are_defined)
           {
             add_action(mcrl2::lps::parse_multi_action(action,m_act_decls,m_spec));
@@ -611,7 +602,6 @@ std::cerr << "ADD ACTION |" << action << "|\n";
 
     void save_mcrl2(const std::string& filename)
     {
-std::cerr << "Save mcrl2 " << filename << "\n";
       // The trace is saved as an .lts in lts format. 
       lts_lts_t lts;
       if (m_data_specification_and_act_decls_are_defined) 
@@ -654,7 +644,6 @@ std::cerr << "Save mcrl2 " << filename << "\n";
       std::string sep;
       for (std::size_t i=0; i<m_actions.size(); i++)
       {
-std::cerr << "PRINT OUT ACTINO " << m_actions[i] << "\n";
         os << sep << pp(m_actions[i]);
         sep = separator;
         if (os.bad())
@@ -672,10 +661,8 @@ std::cerr << "PRINT OUT ACTINO " << m_actions[i] << "\n";
 
     void save_plain(std::ostream& os)
     {
-std::cerr << "Save plain " << "\n";
       save_text(os, "\n");
       os << std::endl;
-std::cerr << "Save plain done " << "\n";
     }
 
 };
