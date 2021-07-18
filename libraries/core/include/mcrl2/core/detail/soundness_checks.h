@@ -5823,7 +5823,6 @@ bool check_term_ActFalse(const Term& t)
 template <typename Term>
 bool check_term_ActId(const Term& t)
 {
-std::cerr << "ACTIDCHECK " << t << "\n";
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
