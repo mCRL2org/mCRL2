@@ -842,45 +842,45 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
       if (generate_counter_example)
       {
         detail::counter_example_constructor cec("counter_example_trace_preorder", structured_output);
-        return destructive_refinement_checker(l1, l2, trace_preorder, false, strategy, preprocess, cec);
+        return destructive_refinement_checker(l1, l2, refinement_type::trace, false, strategy, preprocess, cec);
       }
-      return destructive_refinement_checker(l1, l2, trace_preorder, false, strategy, preprocess);
+      return destructive_refinement_checker(l1, l2, refinement_type::trace, false, strategy, preprocess);
     }
     case lts_pre_weak_trace_anti_chain:
     {
       if (generate_counter_example)
       {
         detail::counter_example_constructor cec("counter_example_weak_trace_preorder", structured_output);
-        return destructive_refinement_checker(l1, l2, trace_preorder, true, strategy, preprocess, cec);
+        return destructive_refinement_checker(l1, l2, refinement_type::trace, true, strategy, preprocess, cec);
       }
-      return destructive_refinement_checker(l1, l2, trace_preorder, true, strategy, preprocess);
+      return destructive_refinement_checker(l1, l2, refinement_type::trace, true, strategy, preprocess);
     }
     case lts_pre_failures_refinement:
     {
       if (generate_counter_example)
       {
         detail::counter_example_constructor cec("counter_example_failures_refinement", structured_output);
-        return destructive_refinement_checker(l1, l2, failures_preorder, false, strategy, preprocess, cec);
+        return destructive_refinement_checker(l1, l2, refinement_type::failures, false, strategy, preprocess, cec);
       }
-      return destructive_refinement_checker(l1, l2, failures_preorder, false, strategy, preprocess);
+      return destructive_refinement_checker(l1, l2, refinement_type::failures, false, strategy, preprocess);
     }
     case lts_pre_weak_failures_refinement:
     {
       if (generate_counter_example)
       {
         detail::counter_example_constructor cec("counter_example_weak_failures_refinement", structured_output);
-        return destructive_refinement_checker(l1, l2, failures_preorder, true, strategy, preprocess, cec);
+        return destructive_refinement_checker(l1, l2, refinement_type::failures, true, strategy, preprocess, cec);
       }
-      return destructive_refinement_checker(l1, l2, failures_preorder, true, strategy, preprocess);
+      return destructive_refinement_checker(l1, l2, refinement_type::failures, true, strategy, preprocess);
     }
     case lts_pre_failures_divergence_refinement:
     {
       if (generate_counter_example)
       {
         detail::counter_example_constructor cec("counter_example_failures_divergence_refinement", structured_output);
-        return destructive_refinement_checker(l1, l2, failures_divergence_preorder, true, strategy, preprocess, cec);
+        return destructive_refinement_checker(l1, l2, refinement_type::failures_divergence, true, strategy, preprocess, cec);
       }
-      return destructive_refinement_checker(l1, l2, failures_divergence_preorder, true, strategy, preprocess);
+      return destructive_refinement_checker(l1, l2, refinement_type::failures_divergence, true, strategy, preprocess);
     }
     default:
       mCRL2log(log::error) << "Comparison for this preorder is not available\n";
