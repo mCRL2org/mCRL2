@@ -31,7 +31,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
     std::size_t lace_stacksize = 0; // use default
 
     // Sylvan options
-    std::size_t memory_limit = 4;
+    std::size_t memory_limit = 3;
     std::size_t initial_ratio = 16;
     std::size_t table_ratio = 1;
 
@@ -41,7 +41,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       desc.add_option("lace-workers", utilities::make_optional_argument("NUM", "1"), "set number of Lace workers (threads for parallelization), (0=autodetect, default 1)");
       desc.add_option("lace-dqsize", utilities::make_optional_argument("NUM", "4194304"), "set length of Lace task queue (default 1024*1024*4)");
       desc.add_option("lace-stacksize", utilities::make_optional_argument("NUM", "0"), "set size of program stack in kilobytes (0=default stack size)");
-      desc.add_option("memory-limit", utilities::make_optional_argument("NUM", "4"), "Sylvan memory limit in gigabytes (default 4)", 'm');
+      desc.add_option("memory-limit", utilities::make_optional_argument("NUM", "3"), "Sylvan memory limit in gigabytes (default 3)", 'm');
 
       desc.add_option("cached", "use transition group caching to speed up state space exploration");
       desc.add_option("chaining", "apply the transition groups as a series");
