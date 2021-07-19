@@ -87,12 +87,6 @@ class trace
     process::action_label_list m_act_decls;
     bool m_data_specification_and_act_decls_are_defined;
 
-    const atermpp::function_symbol& trace_pair() const
-    {
-      static atermpp::function_symbol trace_pair = atermpp::function_symbol("pair",2);
-      return trace_pair;
-    }
-
   public:
     /// \brief Default constructor for an empty trace.
     /// \details The current position
@@ -437,16 +431,6 @@ class trace
 
   protected:
 
-    bool isTimedMAct(const atermpp::aterm_appl& t)
-    {
-      return t.type_is_appl() && t.function()==trace_pair();
-    }
-
-    atermpp::aterm_appl makeTimedMAct(const mcrl2::lps::multi_action& ma)
-    {
-      return atermpp::aterm_appl(trace_pair(),ma.actions(), ma.time());
-    }
-
     void init()
     {
       m_pos = 0;
@@ -470,19 +454,6 @@ class trace
       }
 
       return fmt;
-    }
-
-    atermpp::aterm readATerm(std::istream& is)
-    {
-      atermpp::aterm t;
-      atermpp::binary_aterm_istream(is) >> mcrl2::data::detail::add_index_impl >> t;
-
-      if (!t.defined())
-      {
-        throw runtime_error("Failed to read aterm from stream.");
-      }
-
-      return t;
     }
 
     void load_mcrl2(const std::string& filename)
@@ -598,7 +569,6 @@ class trace
         lts.set_action_label_declarations(m_act_decls);
       }
       assert(m_actions.size()+1 >= m_states.size());
-      atermpp::aterm_list trace;
 
       lts.add_state(m_states.size()>0?
                         lts_lts_t::state_label_t(m_states[0]):
