@@ -394,7 +394,7 @@ class trace
     /// the format is tfPlain only actions are written. Default: tfMcrl2.
     /// \exception mcrl2::runtime_error message in case of failure
 
-    void save(const std::string& filename, trace_format tf = tfMcrl2)
+    void save(const std::string& filename, trace_format tf = tfMcrl2) const
     {
       try
       {
@@ -559,7 +559,7 @@ class trace
       reset_position();
     }
 
-    void save_mcrl2(const std::string& filename)
+    void save_mcrl2(const std::string& filename) const
     {
       // The trace is saved as an .lts in lts format. 
       lts_lts_t lts;
@@ -597,7 +597,7 @@ class trace
       lts.save(filename);
     }
 
-    void save_text_to_stream(std::ostream& os, std::string separator)
+    void save_text_to_stream(std::ostream& os, std::string separator) const
     {
       std::string sep;
       for (std::size_t i=0; i<m_actions.size(); i++)
@@ -612,7 +612,7 @@ class trace
       os << std::endl;
     }
 
-    void save_text(const std::string& filename, std::string separator)
+    void save_text(const std::string& filename, std::string separator) const
     {
       if (filename=="")
       {
@@ -633,12 +633,12 @@ class trace
       }
     }
 
-    void save_line(const std::string& filename)
+    void save_line(const std::string& filename) const
     {
       save_text(filename, ";");
     }
 
-    void save_plain(const std::string& filename)
+    void save_plain(const std::string& filename) const
     {
       save_text(filename, "\n");
     }

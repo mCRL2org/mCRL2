@@ -1242,17 +1242,15 @@ bool destructive_bisimulation_compare(
   detail::bisim_partitioner<LTS_TYPE> bisim_part(l1, branching, preserve_divergences);
   if (generate_counter_examples && !bisim_part.in_same_class(l1.initial_state(),init_l2))
   {
-    std::set < class mcrl2::lts::trace > counter_example_traces=bisim_part.counter_traces(l1.initial_state(),init_l2,branching);
     std::size_t count=0;
-    for (std::set < class mcrl2::lts::trace >::const_iterator i=counter_example_traces.begin();
-         i!=counter_example_traces.end(); ++i,++count)
+    for (const mcrl2::lts::trace& i_trace: bisim_part.counter_traces(l1.initial_state(),init_l2,branching))
     {
       std::stringstream filename_s;
       filename_s << "Counterexample" << count << ".trc";
       const std::string filename(filename_s.str());
-      class mcrl2::lts::trace i_trace= *i;
       i_trace.save(filename, mcrl2::lts::trace::tfPlain);
       mCRL2log(mcrl2::log::info) << "Saved counterexample to: \"" << filename << "\"" << std::endl;
+      ++count;
     }
   }
   return bisim_part.in_same_class(l1.initial_state(),init_l2);
