@@ -31,11 +31,11 @@ private:
   std::vector<std::size_t> m_hashtable;
   std::deque<Key, Allocator> m_keys;
 
-  Hash m_hasher;
-  Equals m_equals;
-
   /// \brief Mutex for the m_hashtable and m_keys data structures.
   mutable std::shared_ptr<std::mutex> m_mutex;
+
+  Hash m_hasher;
+  Equals m_equals;
 
   /// \brief Inserts the given (key, n) pair into the indexed set.
   std::size_t put_in_hashtable(const Key& key, std::size_t value);
