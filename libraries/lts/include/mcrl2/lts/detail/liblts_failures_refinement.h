@@ -188,7 +188,7 @@ namespace detail
 
 } // namespace detail
 
-enum refinement_type { trace, failures, failures_divergence };
+enum refinement_type { trace_preorder, failures_preorder, failures_divergence_preorder };
 
 template<typename T>
 struct refinement_statistics
@@ -272,7 +272,7 @@ bool destructive_refinement_checker(
   // Therefore, we apply bisimulation reduction preserving divergences.
   // A typical example is a.(b+c) which is not weak-failures included n a.tau*.(b+c). The lhs has failure pairs
   // <a,{a}>, <a,{}> while the rhs has only failure pairs <a,{}>, as the state after the a is not stable.
-  const bool preserve_divergence = weak_reduction && (refinement != trace);
+  const bool preserve_divergence = weak_reduction && (refinement != trace_preorder);
 
   if (!generate_counter_example.is_dummy() && preprocess)
   {
@@ -328,7 +328,7 @@ bool destructive_refinement_checker(
                              // Small scale experiments show that this is a little bit more expensive than doing the explicit check below.
 
     bool spec_diverges = false;
-    if (refinement == failures_divergence)
+    if (refinement == failures_divergence_preorder)
     {
       // Only compute when the result is required.
       for (detail::state_type s : impl_spec.states())
@@ -341,17 +341,17 @@ bool destructive_refinement_checker(
       }
     }
 
-    // if not diverges(spec) or not CheckDiv (refinement == failures_divergence)
-    if (!spec_diverges || refinement != failures_divergence)
+    // if not diverges(spec) or not CheckDiv (refinement == failures_divergence_preorder)
+    if (!spec_diverges || refinement != failures_divergence_preorder)
     {
-      if (weak_property_cache.diverges(impl_spec.state()) && refinement == failures_divergence) // if impl diverges and CheckDiv
+      if (weak_property_cache.diverges(impl_spec.state()) && refinement == failures_divergence_preorder) // if impl diverges and CheckDiv
       {
         generate_counter_example.save_counter_example(impl_spec.counter_example_index(),l1);
         report_statistics(stats);
         return false;  // return false;
       }
 
-      if (refinement == failures || refinement == failures_divergence)
+      if (refinement == failures_preorder || refinement == failures_divergence_preorder)
       {
         detail::label_type offending_action=std::size_t(-1);
         // if refusals(impl) not contained in refusals(spec) then
