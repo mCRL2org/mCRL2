@@ -202,7 +202,7 @@ class lts: public LTS_BASE
         }
         else
         {
-          m_state_labels = std::vector<STATE_LABEL_T>();
+          m_state_labels = std::vector<STATE_LABEL_T>(n);
         }
       }
       else

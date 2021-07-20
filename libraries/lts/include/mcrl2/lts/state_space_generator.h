@@ -13,9 +13,10 @@
 #define MCRL2_LTS_STATE_SPACE_GENERATOR_H
 
 #include "mcrl2/lps/explorer.h"
-#include "mcrl2/trace/trace.h"
+#include "mcrl2/lts/trace.h"
 
-namespace mcrl2::lts {
+namespace mcrl2::lts 
+{
 
 inline
 std::ostream& operator<<(std::ostream& out, const lps::state& s)
@@ -35,11 +36,12 @@ const lps::state& first_state(const lps::stochastic_state& s)
   return s.states.front();
 }
 
-namespace detail {
+namespace detail 
+{
 
 inline
 bool save_trace(
-  trace::Trace& tr,
+  class trace& tr,
   const std::string& filename
 )
 {
@@ -58,9 +60,9 @@ bool save_trace(
 
 inline
 void save_traces(
-  trace::Trace& tr,
+  class trace& tr,
   const std::string& filename1,
-  trace::Trace& tr2,
+  class trace& tr2,
   const std::string& filename2
 )
 {
@@ -119,7 +121,7 @@ class trace_constructor
     {}
 
     // Constructs a trace ending in s, using the backpointers map.
-    trace::Trace construct_trace(const lps::state& s)
+    class trace construct_trace(const lps::state& s)
     {
       std::deque<lps::state> states{ s };
       std::deque<lps::multi_action> actions;
@@ -136,13 +138,13 @@ class trace_constructor
         actions.push_front(find_action(s0, s1));
       }
 
-      trace::Trace tr;
+      class trace tr;
       for (std::size_t i = 0; i < actions.size(); i++)
       {
-        tr.setState(states[i]);
-        tr.addAction(actions[i]);
+        tr.set_state(states[i]);
+        tr.add_action(actions[i]);
       }
-      tr.setState(states.back());
+      tr.set_state(states.back());
       return tr;
     }
 
@@ -250,9 +252,9 @@ class action_detector
       mCRL2log(log::info) << "Action '" + lps::pp(a) + "' found (state index: " + std::to_string(s0_index) + ")";
       if (m_trace_count < m_max_trace_count)
       {
-        trace::Trace tr = m_trace_constructor.construct_trace(s0);
-        tr.setState(s1);
-        tr.addAction(a);
+        class trace tr = m_trace_constructor.construct_trace(s0);
+        tr.add_action(a);
+        tr.set_state(s1);
         std::string filename = create_filename(a);
         save_trace(tr, filename);
         result = true;
@@ -291,7 +293,7 @@ class deadlock_detector
       mCRL2log(log::info) << "Deadlock found (state index: " + std::to_string(s_index) + ")";
       if (m_trace_count < m_max_trace_count)
       {
-        trace::Trace tr = m_trace_constructor.construct_trace(s);
+        class trace tr = m_trace_constructor.construct_trace(s);
         std::string filename = filename_prefix + "_dlk_" + std::to_string(m_trace_count++) + ".trc";
         save_trace(tr, filename);
       }
@@ -342,9 +344,9 @@ class nondeterminism_detector
         mCRL2log(log::info) << "Nondeterministic state found (state index: " + std::to_string(s0_index) + ")";
         if (m_trace_count < m_max_trace_count)
         {
-          trace::Trace tr = m_trace_constructor.construct_trace(s0);
-          tr.setState(s1);
-          tr.addAction(a);
+          class trace tr = m_trace_constructor.construct_trace(s0);
+          tr.add_action(a);
+          tr.set_state(s1);
           std::string filename = filename_prefix + "_nondeterministic_" + std::to_string(m_trace_count++) + ".trc";
           save_trace(tr, filename);
           result = true;
@@ -461,14 +463,14 @@ class divergence_detector
             mCRL2log(log::info) << "Divergent state found (state index: " + std::to_string(s_index) + ")";
             if (m_trace_count < m_max_trace_count)
             {
-              trace::Trace tr = global_trace_constructor.construct_trace(s);
-              trace::Trace tr_loop = m_local_trace_constructor.construct_trace(s0);
+              class trace tr = global_trace_constructor.construct_trace(s);
+              class trace tr_loop = m_local_trace_constructor.construct_trace(s0);
               for (const lps::state& u: tr_loop.states())
               {
                 m_divergent_states[u] = s_index;
               }
-              tr_loop.setState(first_state(s1));
-              tr_loop.addAction(a);
+              tr_loop.add_action(a);
+              tr_loop.set_state(first_state(s1));
               std::string filename = filename_prefix + "_divergence_" + std::to_string(m_trace_count) + ".trc";
               std::string loop_filename = filename_prefix + "_divergence_loop" + std::to_string(m_trace_count++) + ".trc";
               save_traces(tr, filename, tr_loop, loop_filename);
@@ -497,14 +499,14 @@ class divergence_detector
             mCRL2log(log::info) << "Divergent state found (state index: " + std::to_string(s_index) + ")";
             if (m_trace_count < m_max_trace_count)
             {
-              trace::Trace tr = global_trace_constructor.construct_trace(s);
-              trace::Trace tr_loop = m_local_trace_constructor.construct_trace(s0);
+              class trace tr = global_trace_constructor.construct_trace(s);
+              class trace tr_loop = m_local_trace_constructor.construct_trace(s0);
               for (const lps::state& u: tr_loop.states())
               {
                 m_divergent_states[u] = s_index;
               }
-              tr_loop.setState(first_state(s1));
-              tr_loop.addAction(a);
+              tr_loop.add_action(a);
+              tr_loop.set_state(first_state(s1));
               std::string filename = filename_prefix + "_divergence_" + std::to_string(m_trace_count) + ".trc";
               std::string loop_filename = filename_prefix + "_divergence_loop" + std::to_string(m_trace_count++) + ".trc";
               save_traces(tr, filename, tr_loop, loop_filename);
@@ -750,7 +752,7 @@ struct state_space_generator
       if (options.save_error_trace)
       {
         const lps::state& s = *source;
-        trace::Trace tr = m_trace_constructor.construct_trace(s);
+        class trace tr = m_trace_constructor.construct_trace(s);
         std::string filename = options.trace_prefix + "_error.trc";
         detail::save_trace(tr, filename);
       }

@@ -10,6 +10,7 @@ add_mcrl2_tool(lpsxsim
     simulation.cpp
   DEPENDS
     mcrl2_lps
+    mcrl2_lts
     mcrl2_gui
     Qt5::Core
     Qt5::Gui

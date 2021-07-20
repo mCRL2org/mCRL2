@@ -18,6 +18,7 @@
 #include "mcrl2/pbes/symbolic_pbessolve.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/detail/container_utility.h"
+#include "mcrl2/utilities/power_of_two.h"
 
 using namespace mcrl2;
 using data::tools::rewriter_tool;
@@ -199,21 +200,18 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
     std::size_t lace_stacksize = 0; // use default
 
     // Sylvan options
-    std::size_t min_tablesize = 22;
-    std::size_t max_tablesize = 25;
-    std::size_t min_cachesize = 22;
-    std::size_t max_cachesize = 25;
+    std::size_t memory_limit = 3;
+    std::size_t initial_ratio = 16;
+    std::size_t table_ratio = 1;
 
     void add_options(utilities::interface_description& desc) override
     {
       super::add_options(desc);
-      desc.add_option("lace-workers", utilities::make_optional_argument("NAME", "1"), "set number of Lace workers (threads for parallelization), (0=autodetect, default 1)");
-      desc.add_option("lace-dqsize", utilities::make_optional_argument("NAME", "4194304"), "set length of Lace task queue (default 1024*1024*4)");
-      desc.add_option("lace-stacksize", utilities::make_optional_argument("NAME", "0"), "set size of program stack in kilo bytes (0=default stack size)");
-      desc.add_option("min-table-size", utilities::make_optional_argument("NAME", "22"), "minimum Sylvan table size (21-40, default 22)");
-      desc.add_option("max-table-size", utilities::make_optional_argument("NAME", "25"), "maximum Sylvan table size (21-40, default 25)");
-      desc.add_option("min-cache-size", utilities::make_optional_argument("NAME", "22"), "minimum Sylvan cache size (21-40, default 22)");
-      desc.add_option("max-cache-size", utilities::make_optional_argument("NAME", "25"), "maximum Sylvan cache size (21-40, default 25)");
+      desc.add_option("lace-workers", utilities::make_optional_argument("NUM", "1"), "set number of Lace workers (threads for parallelization), (0=autodetect, default 1)");
+      desc.add_option("lace-dqsize", utilities::make_optional_argument("NUM", "4194304"), "set length of Lace task queue (default 1024*1024*4)");
+      desc.add_option("lace-stacksize", utilities::make_optional_argument("NUM", "0"), "set size of program stack in kilobytes (0=default stack size)");
+      desc.add_option("memory-limit", utilities::make_optional_argument("NUM", "3"), "Sylvan memory limit in gigabytes (default 3)", 'm');
+
       desc.add_option("cached", "use transition group caching to speed up state space exploration");
       desc.add_option("chaining", "apply the transition groups as a series");
       desc.add_option("groups", utilities::make_optional_argument("GROUPS", "none"),
@@ -243,13 +241,15 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
                       "3 alternative split for conjunctive conditions where even more states can become reachable.",
                       'c');
       desc.add_option("total", "make the SRF PBES total", 't');
-      desc.add_option("reset", "set constant values when introducing parameters", '?');
+      desc.add_option("reset", "set constant values when introducing parameters");
       desc.add_hidden_option("no-remove-unused-rewrite-rules", "do not remove unused rewrite rules. ", 'u');
       desc.add_hidden_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
       desc.add_hidden_option("no-discard", "do not discard any parameters");
       desc.add_hidden_option("no-read", "do not discard only-read parameters");
       desc.add_hidden_option("no-write", "do not discard only-write parameters");
       desc.add_hidden_option("no-relprod", "use an inefficient alternative version of relprod (for debugging)");
+      desc.add_hidden_option("initial-ratio", utilities::make_optional_argument("NUM", "16"), "power-of-two ratio of initial and maximum table size (default 16)");
+      desc.add_hidden_option("table-ratio", utilities::make_optional_argument("NUM", "16"), "power-of-two ratio of node table and cache table (default 1)");
       desc.add_hidden_option("srf", utilities::make_optional_argument("FILE", ""), "save the preprocessed PBES in SRF format");
       desc.add_hidden_option("dot", utilities::make_optional_argument("FILE", ""), "print the LDD of the parity game in dot format");
     }
@@ -291,21 +291,25 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       {
         lace_stacksize = parser.option_argument_as<int>("lace-stacksize");
       }
-      if (parser.has_option("min-table-size"))
+      if (parser.has_option("memory-limit"))
       {
-        min_tablesize = parser.option_argument_as<std::size_t>("min-table-size");
+        memory_limit = parser.option_argument_as<std::size_t>("memory-limit");
       }
-      if (parser.has_option("max-table-size"))
+      if (parser.has_option("initial-ratio"))
       {
-        max_tablesize = parser.option_argument_as<std::size_t>("max-table-size");
+        initial_ratio = parser.option_argument_as<std::size_t>("initial-ratio");
+        if (!utilities::is_power_of_two(initial_ratio))
+        {
+          throw mcrl2::runtime_error("The initial-ratio should be a power of two.");
+        }
       }
-      if (parser.has_option("min-cache-size"))
+      if (parser.has_option("table-ratio"))
       {
-        min_cachesize = parser.option_argument_as<std::size_t>("min-cache-size");
-      }
-      if (parser.has_option("max-cache-size"))
-      {
-        max_cachesize = parser.option_argument_as<std::size_t>("max-cache-size");
+        table_ratio = parser.option_argument_as<std::size_t>("table-ratio");
+        if (!utilities::is_power_of_two(table_ratio))
+        {
+          throw mcrl2::runtime_error("The table-ratio should be a power of two.");
+        }
       }
       if (parser.has_option("split-conditions"))
       {
@@ -372,7 +376,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
     {
       lace_init(lace_n_workers, lace_dqsize);
       lace_startup(lace_stacksize, nullptr, nullptr);
-      sylvan::sylvan_set_sizes(1ULL<<min_tablesize, 1ULL<<max_tablesize, 1ULL<<min_cachesize, 1ULL<<max_cachesize);
+      sylvan::sylvan_set_limits(memory_limit * 1024 * 1024 * 1024, std::log2(table_ratio), std::log2(initial_ratio));
       sylvan::sylvan_init_package();
       sylvan::sylvan_init_ldd();
 

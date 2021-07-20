@@ -3,4 +3,5 @@ add_mcrl2_tool(lpssim
     lpssim.cpp
   DEPENDS
     mcrl2_lps
+    mcrl2_lts
 )

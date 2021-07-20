@@ -13,9 +13,9 @@
 
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
-#include "mcrl2/lps/simulation.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
+#include "mcrl2/lts/simulation.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;

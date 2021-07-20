@@ -18,7 +18,7 @@
 #include <QThread>
 
 #ifndef Q_MOC_RUN // Workaround for QTBUG-22829
-#include "mcrl2/lps/simulation.h"
+#include "mcrl2/lts/simulation.h"
 #endif // Q_MOC_RUN
 
 class Simulation : public QObject

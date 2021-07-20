@@ -111,14 +111,6 @@ mCRL2 library documentation
           libraries/smt/smt_library
           libraries/smt/reference
 
-     - **Trace**
-
-       .. toctree::
-          :maxdepth: 1
-
-          libraries/trace/trace_library
-          libraries/trace/reference
-
    * - **Utilities**
 
        .. toctree::

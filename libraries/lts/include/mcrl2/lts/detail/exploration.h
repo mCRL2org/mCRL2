@@ -10,7 +10,7 @@
 #ifndef MCRL2_LTS_DETAIL_EXPLORATION_NEW_H
 #define MCRL2_LTS_DETAIL_EXPLORATION_NEW_H
 
-#include "mcrl2/trace/trace.h"
+#include "mcrl2/lts/trace.h"
 #include "mcrl2/lts/detail/bithashtable.h"
 #include "mcrl2/lts/detail/queue.h"
 #include "mcrl2/lts/detail/lts_generation_options.h"
@@ -143,7 +143,7 @@ class lps2lts_algorithm
     void value_prioritize(std::vector<next_state_generator::transition_t>& transitions);
     bool save_trace(const lps::state& state1, const std::string& filename);
     bool save_trace(const lps::state& state1, const next_state_generator::transition_t& transition, const std::string& filename);
-    void construct_trace(const lps::state& state1, mcrl2::trace::Trace& trace);
+    void construct_trace(const lps::state& state1, mcrl2::lts::trace& trace);
 
     bool is_nondeterministic(std::vector<lps2lts_algorithm::next_state_generator::transition_t>& transitions,
                              next_state_generator::transition_t& nondeterminist_transition);

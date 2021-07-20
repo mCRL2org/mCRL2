@@ -10,7 +10,7 @@
 
 #ifndef _LIBLTS_BISIM_H
 #define _LIBLTS_BISIM_H
-#include "mcrl2/trace/trace.h"
+#include "mcrl2/lts/trace.h"
 #include "mcrl2/lts/lts_utilities.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
 #include "mcrl2/lts/detail/liblts_merge.h"
@@ -185,7 +185,7 @@ class bisim_partitioner
      *  \param[in] t A state number.
      *  \param[in] branching_bisimulation A boolean indicating whether the branching bisimulation partitioner has been used.
      *  \return A vector containing counter traces. */
-    std::set < mcrl2::trace::Trace > counter_traces(const std::size_t s, const std::size_t t, const bool branching_bisimulation);
+    std::set < class mcrl2::lts::trace > counter_traces(const std::size_t s, const std::size_t t, const bool branching_bisimulation);
 
   private:
 
@@ -756,7 +756,7 @@ class bisim_partitioner
       new_non_bottom_states.swap(non_bottom_states);
     }
 
-    std::set < mcrl2::trace::Trace > counter_traces_aux(
+    std::set < class mcrl2::lts::trace > counter_traces_aux(
       const state_type s,
       const state_type t,
       const mcrl2::lts::outgoing_transitions_per_state_action_t& outgoing_transitions,
@@ -848,7 +848,7 @@ class bisim_partitioner
       assert((B_s_reacha.empty() && !B_t_reacha.empty()) ||
              (!B_s_reacha.empty() && B_t_reacha.empty()));
 
-      std::set < mcrl2::trace::Trace > resulting_counter_traces;
+      std::set < class mcrl2::lts::trace > resulting_counter_traces;
 
       if (B_s_reacha.empty())
       {
@@ -862,8 +862,8 @@ class bisim_partitioner
       if (B_t_nonreacha.empty())
       {
         // The counter trace is simply the label l.
-        mcrl2::trace::Trace counter_trace;
-        counter_trace.addAction(mcrl2::lps::multi_action(mcrl2::process::action(
+        class mcrl2::lts::trace counter_trace;
+        counter_trace.add_action(mcrl2::lps::multi_action(mcrl2::process::action(
                                 mcrl2::process::action_label(core::identifier_string(mcrl2::lts::pp(aut.action_label(l))),mcrl2::data::sort_expression_list()),
                                 mcrl2::data::data_expression_list())));
         resulting_counter_traces.insert(counter_trace);
@@ -876,22 +876,22 @@ class bisim_partitioner
           for (std::set < state_type>::const_iterator i_t=B_t_nonreacha.begin();
                i_t!=B_t_nonreacha.end(); ++i_t)
           {
-            const std::set < mcrl2::trace::Trace > counter_traces=
+            const std::set < class mcrl2::lts::trace > counter_traces=
                             counter_traces_aux(*i_s,*i_t,outgoing_transitions,branching_bisimulation);
             // Add l to these traces and add them to resulting_counter_traces
-            for (std::set< mcrl2::trace::Trace >::const_iterator j=counter_traces.begin();
+            for (std::set< class mcrl2::lts::trace >::const_iterator j=counter_traces.begin();
                  j!=counter_traces.end(); ++j)
             {
-              mcrl2::trace::Trace new_counter_trace;
-              new_counter_trace.addAction(mcrl2::lps::multi_action(mcrl2::process::action(
+              class mcrl2::lts::trace new_counter_trace;
+              new_counter_trace.add_action(mcrl2::lps::multi_action(mcrl2::process::action(
                                 mcrl2::process::action_label(core::identifier_string(mcrl2::lts::pp(aut.action_label(l))),mcrl2::data::sort_expression_list()),
                                 mcrl2::data::data_expression_list())));
-              mcrl2::trace::Trace old_counter_trace=*j;
-              old_counter_trace.resetPosition();
+              class mcrl2::lts::trace old_counter_trace=*j;
+              old_counter_trace.reset_position();
               for (std::size_t k=0 ; k< old_counter_trace.number_of_actions(); k++)
               {
-                new_counter_trace.addAction(old_counter_trace.currentAction());
-                old_counter_trace.increasePosition();
+                new_counter_trace.add_action(old_counter_trace.current_action());
+                old_counter_trace.increase_position();
               }
               resulting_counter_traces.insert(new_counter_trace);
             }
@@ -1168,7 +1168,7 @@ bool bisimulation_compare(
 
 
 template < class LTS_TYPE>
-std::set < mcrl2::trace::Trace > bisim_partitioner<LTS_TYPE>::counter_traces(
+std::set < class mcrl2::lts::trace > bisim_partitioner<LTS_TYPE>::counter_traces(
   const std::size_t s,
   const std::size_t t,
   const bool branching_bisimulation)
@@ -1242,17 +1242,15 @@ bool destructive_bisimulation_compare(
   detail::bisim_partitioner<LTS_TYPE> bisim_part(l1, branching, preserve_divergences);
   if (generate_counter_examples && !bisim_part.in_same_class(l1.initial_state(),init_l2))
   {
-    std::set < mcrl2::trace::Trace > counter_example_traces=bisim_part.counter_traces(l1.initial_state(),init_l2,branching);
     std::size_t count=0;
-    for (std::set < mcrl2::trace::Trace >::const_iterator i=counter_example_traces.begin();
-         i!=counter_example_traces.end(); ++i,++count)
+    for (const mcrl2::lts::trace& i_trace: bisim_part.counter_traces(l1.initial_state(),init_l2,branching))
     {
       std::stringstream filename_s;
       filename_s << "Counterexample" << count << ".trc";
       const std::string filename(filename_s.str());
-      mcrl2::trace::Trace i_trace= *i;
-      i_trace.save(filename,mcrl2::trace::tfPlain);
+      i_trace.save(filename, mcrl2::lts::trace::tfPlain);
       mCRL2log(mcrl2::log::info) << "Saved counterexample to: \"" << filename << "\"" << std::endl;
+      ++count;
     }
   }
   return bisim_part.in_same_class(l1.initial_state(),init_l2);
