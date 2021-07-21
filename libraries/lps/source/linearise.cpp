@@ -5730,7 +5730,7 @@ class specification_basic_type
       /* first find out whether the function exists already, in which
          case nothing needs to be done */
 
-      const function_symbol_list functions=enumeratedtypes[enumeratedtype_index].functions;
+      const function_symbol_list& functions=enumeratedtypes[enumeratedtype_index].functions;
       const function_symbol_list::const_iterator i = std::find_if(functions.begin(), functions.end(), [&sort](const data::function_symbol& w){
         const function_sort& w1sort(down_cast<function_sort>(w.sort()));
         assert(function_sort(w1sort).domain().size()>1);
