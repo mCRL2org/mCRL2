@@ -51,7 +51,7 @@ aterm_appl create_nested_function(const std::string& function_name,  const std::
   aterm_appl c_term(c);
 
   // Initialize a wide function application.
-  std::vector<unprotected_aterm> arguments(f.arity());
+  std::vector<aterm> arguments(f.arity());
   for (std::size_t i = 0; i < arguments.size(); ++i)
   {
     arguments[i] = c_term;
@@ -67,12 +67,12 @@ aterm_appl create_nested_function(const std::string& function_name,  const std::
     }
 
     if (with_converter)
-    {
-      f_term = aterm_appl(f, arguments.begin(), arguments.end(), detail::do_not_convert_term<unprotected_aterm>());
+    {      
+      make_term_appl(f_term, f, arguments.begin(), arguments.end(), detail::do_not_convert_term<aterm>());
     }
     else
     {
-      f_term = aterm_appl(f, arguments.begin(), arguments.end());
+      make_term_appl(f_term, f, arguments.begin(), arguments.end());
     }
   }
 
@@ -93,7 +93,7 @@ aterm_appl create_nested_function(std::size_t depth)
 
   for (std::size_t j = 0; j < depth; ++j)
   {
-    f_term = aterm_appl(f, f_term, f_term);
+    make_term_appl(f_term, f, f_term, f_term);
   }
 
   return f_term;
