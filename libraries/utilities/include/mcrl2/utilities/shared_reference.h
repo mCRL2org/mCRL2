@@ -68,16 +68,16 @@ public:
   }
 
   /// \brief Obtain the number of times that this reference count has changed.
-  static std::size_t& reference_count_changes()
+  static std::atomic<std::size_t>& reference_count_changes()
   {
-    static std::size_t g_reference_count_changes;
+    static std::atomic<std::size_t> g_reference_count_changes;
     return g_reference_count_changes;
   }
 
   /// \brief Increment the number of reference count changes.
   static void increment_reference_count_changes()
   {
-    if (EnableReferenceCountMetrics)
+    if constexpr (EnableReferenceCountMetrics)
     {
       ++reference_count_changes();
     }
