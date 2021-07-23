@@ -187,6 +187,13 @@ class structured_sort_constructor: public atermpp::aterm_appl
 //--- end user section structured_sort_constructor ---//
 };
 
+/// \brief Make_structured_sort_constructor constructs a new term into a given address.
+/// \ \param t The reference into which the new structured_sort_constructor is constructed. XXXXX
+inline void make_structured_sort_constructor(structured_sort_constructor& t, const core::identifier_string& name, const structured_sort_constructor_argument_list& arguments, core::identifier_string& recogniser)
+{
+  make_term_appl(t, core::detail::function_symbol_StructCons(), name, arguments, recogniser);
+}
+
 /// \brief list of structured_sort_constructors
 typedef atermpp::term_list<structured_sort_constructor> structured_sort_constructor_list;
 

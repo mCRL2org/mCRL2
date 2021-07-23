@@ -70,6 +70,13 @@ class function_symbol: public data_expression
 //--- end user section function_symbol ---//
 };
 
+/// \brief Make_function_symbol constructs a new term into a given address.
+/// \ \param t The reference into which the new function_symbol is constructed. XXXXX
+inline void make_function_symbol(function_symbol& t, const core::identifier_string& name, const sort_expression& sort)
+{
+  make_term_appl(t, core::detail::function_symbol_OpId(), name, sort);
+}
+
 /// \brief list of function_symbols
 typedef atermpp::term_list<function_symbol> function_symbol_list;
 

@@ -272,6 +272,13 @@ class not_: public state_formula
     }
 };
 
+/// \brief Make_not_ constructs a new term into a given address.
+/// \ \param t The reference into which the new not_ is constructed. XXXXX
+inline void make_not_(not_& t, const state_formula& operand)
+{
+  make_term_appl(t, core::detail::function_symbol_StateNot(), operand);
+}
+
 /// \brief Test for a not expression
 /// \param x A term
 /// \return True if \a x is a not expression
@@ -339,6 +346,13 @@ class and_: public state_formula
       return atermpp::down_cast<state_formula>((*this)[1]);
     }
 };
+
+/// \brief Make_and_ constructs a new term into a given address.
+/// \ \param t The reference into which the new and_ is constructed. XXXXX
+inline void make_and_(and_& t, const state_formula& left, const state_formula& right)
+{
+  make_term_appl(t, core::detail::function_symbol_StateAnd(), left, right);
+}
 
 /// \brief Test for a and expression
 /// \param x A term
@@ -408,6 +422,13 @@ class or_: public state_formula
     }
 };
 
+/// \brief Make_or_ constructs a new term into a given address.
+/// \ \param t The reference into which the new or_ is constructed. XXXXX
+inline void make_or_(or_& t, const state_formula& left, const state_formula& right)
+{
+  make_term_appl(t, core::detail::function_symbol_StateOr(), left, right);
+}
+
 /// \brief Test for a or expression
 /// \param x A term
 /// \return True if \a x is a or expression
@@ -475,6 +496,13 @@ class imp: public state_formula
       return atermpp::down_cast<state_formula>((*this)[1]);
     }
 };
+
+/// \brief Make_imp constructs a new term into a given address.
+/// \ \param t The reference into which the new imp is constructed. XXXXX
+inline void make_imp(imp& t, const state_formula& left, const state_formula& right)
+{
+  make_term_appl(t, core::detail::function_symbol_StateImp(), left, right);
+}
 
 /// \brief Test for a imp expression
 /// \param x A term
@@ -544,6 +572,13 @@ class forall: public state_formula
     }
 };
 
+/// \brief Make_forall constructs a new term into a given address.
+/// \ \param t The reference into which the new forall is constructed. XXXXX
+inline void make_forall(forall& t, const data::variable_list& variables, const state_formula& body)
+{
+  make_term_appl(t, core::detail::function_symbol_StateForall(), variables, body);
+}
+
 /// \brief Test for a forall expression
 /// \param x A term
 /// \return True if \a x is a forall expression
@@ -611,6 +646,13 @@ class exists: public state_formula
       return atermpp::down_cast<state_formula>((*this)[1]);
     }
 };
+
+/// \brief Make_exists constructs a new term into a given address.
+/// \ \param t The reference into which the new exists is constructed. XXXXX
+inline void make_exists(exists& t, const data::variable_list& variables, const state_formula& body)
+{
+  make_term_appl(t, core::detail::function_symbol_StateExists(), variables, body);
+}
 
 /// \brief Test for a exists expression
 /// \param x A term
@@ -680,6 +722,13 @@ class must: public state_formula
     }
 };
 
+/// \brief Make_must constructs a new term into a given address.
+/// \ \param t The reference into which the new must is constructed. XXXXX
+inline void make_must(must& t, const regular_formulas::regular_formula& formula, const state_formula& operand)
+{
+  make_term_appl(t, core::detail::function_symbol_StateMust(), formula, operand);
+}
+
 /// \brief Test for a must expression
 /// \param x A term
 /// \return True if \a x is a must expression
@@ -747,6 +796,13 @@ class may: public state_formula
       return atermpp::down_cast<state_formula>((*this)[1]);
     }
 };
+
+/// \brief Make_may constructs a new term into a given address.
+/// \ \param t The reference into which the new may is constructed. XXXXX
+inline void make_may(may& t, const regular_formulas::regular_formula& formula, const state_formula& operand)
+{
+  make_term_appl(t, core::detail::function_symbol_StateMay(), formula, operand);
+}
 
 /// \brief Test for a may expression
 /// \param x A term
@@ -864,6 +920,13 @@ class yaled_timed: public state_formula
     }
 };
 
+/// \brief Make_yaled_timed constructs a new term into a given address.
+/// \ \param t The reference into which the new yaled_timed is constructed. XXXXX
+inline void make_yaled_timed(yaled_timed& t, const data::data_expression& time_stamp)
+{
+  make_term_appl(t, core::detail::function_symbol_StateYaledTimed(), time_stamp);
+}
+
 /// \brief Test for a yaled_timed expression
 /// \param x A term
 /// \return True if \a x is a yaled_timed expression
@@ -980,6 +1043,13 @@ class delay_timed: public state_formula
     }
 };
 
+/// \brief Make_delay_timed constructs a new term into a given address.
+/// \ \param t The reference into which the new delay_timed is constructed. XXXXX
+inline void make_delay_timed(delay_timed& t, const data::data_expression& time_stamp)
+{
+  make_term_appl(t, core::detail::function_symbol_StateDelayTimed(), time_stamp);
+}
+
 /// \brief Test for a delay_timed expression
 /// \param x A term
 /// \return True if \a x is a delay_timed expression
@@ -1052,6 +1122,13 @@ class variable: public state_formula
       return atermpp::down_cast<data::data_expression_list>((*this)[1]);
     }
 };
+
+/// \brief Make_variable constructs a new term into a given address.
+/// \ \param t The reference into which the new variable is constructed. XXXXX
+inline void make_variable(variable& t, const core::identifier_string& name, const data::data_expression_list& arguments)
+{
+  make_term_appl(t, core::detail::function_symbol_StateVar(), name, arguments);
+}
 
 /// \brief Test for a variable expression
 /// \param x A term
@@ -1131,6 +1208,13 @@ class nu: public state_formula
     }
 };
 
+/// \brief Make_nu constructs a new term into a given address.
+/// \ \param t The reference into which the new nu is constructed. XXXXX
+inline void make_nu(nu& t, const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand)
+{
+  make_term_appl(t, core::detail::function_symbol_StateNu(), name, assignments, operand);
+}
+
 /// \brief Test for a nu expression
 /// \param x A term
 /// \return True if \a x is a nu expression
@@ -1208,6 +1292,13 @@ class mu: public state_formula
       return atermpp::down_cast<state_formula>((*this)[2]);
     }
 };
+
+/// \brief Make_mu constructs a new term into a given address.
+/// \ \param t The reference into which the new mu is constructed. XXXXX
+inline void make_mu(mu& t, const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand)
+{
+  make_term_appl(t, core::detail::function_symbol_StateMu(), name, assignments, operand);
+}
 
 /// \brief Test for a mu expression
 /// \param x A term

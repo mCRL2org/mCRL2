@@ -66,6 +66,13 @@ class rename_expression: public atermpp::aterm_appl
     }
 };
 
+/// \brief Make_rename_expression constructs a new term into a given address.
+/// \ \param t The reference into which the new rename_expression is constructed. XXXXX
+inline void make_rename_expression(rename_expression& t, core::identifier_string& source, core::identifier_string& target)
+{
+  make_term_appl(t, core::detail::function_symbol_RenameExpr(), source, target);
+}
+
 /// \brief list of rename_expressions
 typedef atermpp::term_list<rename_expression> rename_expression_list;
 

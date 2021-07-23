@@ -134,6 +134,13 @@ class assignment: public assignment_expression
 //--- end user section assignment ---//
 };
 
+/// \brief Make_assignment constructs a new term into a given address.
+/// \ \param t The reference into which the new assignment is constructed. XXXXX
+inline void make_assignment(assignment& t, const variable& lhs, const data_expression& rhs)
+{
+  make_term_appl(t, core::detail::function_symbol_DataVarIdInit(), lhs, rhs);
+}
+
 /// \brief list of assignments
 typedef atermpp::term_list<assignment> assignment_list;
 
@@ -221,6 +228,13 @@ class untyped_identifier_assignment: public assignment_expression
     }
 //--- end user section untyped_identifier_assignment ---//
 };
+
+/// \brief Make_untyped_identifier_assignment constructs a new term into a given address.
+/// \ \param t The reference into which the new untyped_identifier_assignment is constructed. XXXXX
+inline void make_untyped_identifier_assignment(untyped_identifier_assignment& t, const core::identifier_string& lhs, const data_expression& rhs)
+{
+  make_term_appl(t, core::detail::function_symbol_UntypedIdentifierAssignment(), lhs, rhs);
+}
 
 /// \brief list of untyped_identifier_assignments
 typedef atermpp::term_list<untyped_identifier_assignment> untyped_identifier_assignment_list;

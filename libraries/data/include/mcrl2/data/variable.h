@@ -79,6 +79,13 @@ class variable: public data_expression
 //--- end user section variable ---//
 };
 
+/// \brief Make_variable constructs a new term into a given address.
+/// \ \param t The reference into which the new variable is constructed. XXXXX
+inline void make_variable(variable& t, const core::identifier_string& name, const sort_expression& sort)
+{
+  make_term_appl(t, core::detail::function_symbol_DataVarId(), name, sort);
+}
+
 /// \brief list of variables
 typedef atermpp::term_list<variable> variable_list;
 

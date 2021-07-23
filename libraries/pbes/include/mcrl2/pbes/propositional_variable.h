@@ -66,6 +66,13 @@ class propositional_variable: public atermpp::aterm_appl
     }
 };
 
+/// \brief Make_propositional_variable constructs a new term into a given address.
+/// \ \param t The reference into which the new propositional_variable is constructed. XXXXX
+inline void make_propositional_variable(propositional_variable& t, const core::identifier_string& name, const data::variable_list& parameters)
+{
+  make_term_appl(t, core::detail::function_symbol_PropVarDecl(), name, parameters);
+}
+
 /// \brief list of propositional_variables
 typedef atermpp::term_list<propositional_variable> propositional_variable_list;
 

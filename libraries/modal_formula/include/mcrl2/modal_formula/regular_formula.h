@@ -142,6 +142,13 @@ class seq: public regular_formula
     }
 };
 
+/// \brief Make_seq constructs a new term into a given address.
+/// \ \param t The reference into which the new seq is constructed. XXXXX
+inline void make_seq(seq& t, const regular_formula& left, const regular_formula& right)
+{
+  make_term_appl(t, core::detail::function_symbol_RegSeq(), left, right);
+}
+
 /// \brief Test for a seq expression
 /// \param x A term
 /// \return True if \a x is a seq expression
@@ -210,6 +217,13 @@ class alt: public regular_formula
     }
 };
 
+/// \brief Make_alt constructs a new term into a given address.
+/// \ \param t The reference into which the new alt is constructed. XXXXX
+inline void make_alt(alt& t, const regular_formula& left, const regular_formula& right)
+{
+  make_term_appl(t, core::detail::function_symbol_RegAlt(), left, right);
+}
+
 /// \brief Test for a alt expression
 /// \param x A term
 /// \return True if \a x is a alt expression
@@ -273,6 +287,13 @@ class trans: public regular_formula
     }
 };
 
+/// \brief Make_trans constructs a new term into a given address.
+/// \ \param t The reference into which the new trans is constructed. XXXXX
+inline void make_trans(trans& t, const regular_formula& operand)
+{
+  make_term_appl(t, core::detail::function_symbol_RegTrans(), operand);
+}
+
 /// \brief Test for a trans expression
 /// \param x A term
 /// \return True if \a x is a trans expression
@@ -335,6 +356,13 @@ class trans_or_nil: public regular_formula
       return atermpp::down_cast<regular_formula>((*this)[0]);
     }
 };
+
+/// \brief Make_trans_or_nil constructs a new term into a given address.
+/// \ \param t The reference into which the new trans_or_nil is constructed. XXXXX
+inline void make_trans_or_nil(trans_or_nil& t, const regular_formula& operand)
+{
+  make_term_appl(t, core::detail::function_symbol_RegTransOrNil(), operand);
+}
 
 /// \brief Test for a trans_or_nil expression
 /// \param x A term
@@ -413,6 +441,13 @@ class untyped_regular_formula: public regular_formula
       return atermpp::down_cast<regular_formula>((*this)[2]);
     }
 };
+
+/// \brief Make_untyped_regular_formula constructs a new term into a given address.
+/// \ \param t The reference into which the new untyped_regular_formula is constructed. XXXXX
+inline void make_untyped_regular_formula(untyped_regular_formula& t, const core::identifier_string& name, const regular_formula& left, const regular_formula& right)
+{
+  make_term_appl(t, core::detail::function_symbol_UntypedRegFrm(), name, left, right);
+}
 
 /// \brief Test for a untyped_regular_formula expression
 /// \param x A term

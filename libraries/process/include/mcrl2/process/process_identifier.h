@@ -77,6 +77,13 @@ class process_identifier: public atermpp::aterm_appl
 //--- end user section process_identifier ---//
 };
 
+/// \brief Make_process_identifier constructs a new term into a given address.
+/// \ \param t The reference into which the new process_identifier is constructed. XXXXX
+inline void make_process_identifier(process_identifier& t, const core::identifier_string& name, const data::variable_list& variables)
+{
+  make_term_appl(t, core::detail::function_symbol_ProcVarId(), name, variables);
+}
+
 /// \brief list of process_identifiers
 typedef atermpp::term_list<process_identifier> process_identifier_list;
 

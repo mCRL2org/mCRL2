@@ -63,6 +63,13 @@ class untyped_data_parameter: public atermpp::aterm_appl
     }
 };
 
+/// \brief Make_untyped_data_parameter constructs a new term into a given address.
+/// \ \param t The reference into which the new untyped_data_parameter is constructed. XXXXX
+inline void make_untyped_data_parameter(untyped_data_parameter& t, const core::identifier_string& name, const data_expression_list& arguments)
+{
+  make_term_appl(t, core::detail::function_symbol_UntypedDataParameter(), name, arguments);
+}
+
 /// \brief list of untyped_data_parameters
 typedef atermpp::term_list<untyped_data_parameter> untyped_data_parameter_list;
 

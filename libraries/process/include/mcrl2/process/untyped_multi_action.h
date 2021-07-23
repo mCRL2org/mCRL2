@@ -53,6 +53,13 @@ class untyped_multi_action: public atermpp::aterm_appl
     }
 };
 
+/// \brief Make_untyped_multi_action constructs a new term into a given address.
+/// \ \param t The reference into which the new untyped_multi_action is constructed. XXXXX
+inline void make_untyped_multi_action(untyped_multi_action& t, const data::untyped_data_parameter_list& actions)
+{
+  make_term_appl(t, core::detail::function_symbol_UntypedMultiAction(), actions);
+}
+
 /// \brief list of untyped_multi_actions
 typedef atermpp::term_list<untyped_multi_action> untyped_multi_action_list;
 

@@ -892,6 +892,20 @@ class Class:
         text = re.sub('<MOVE_SEMANTICS>'  , move_semantics, text)
         return text
 
+    # Generate the make_...  functions that allow the construction of a class member in situ. 
+    def make_function(self):
+        text = r'''/// \\brief Make_<CLASSNAME> constructs a new term into a given address.
+/// \\ \param t The reference into which the new <CLASSNAME> is constructed. 
+inline void make_<CLASSNAME>(<CLASSNAME>& t, <ARGUMENTS>)
+{
+  make_term_appl(t, core::detail::function_symbol_<ATERM>(), <PARAMETERS>);
+}'''
+        text = re.sub('<CLASSNAME>', self.classname(), text)
+        text = re.sub('<ATERM>', self.aterm, text)
+        text = re.sub('<ARGUMENTS>', ', '.join([p.type() + ' ' + p.name() for p in self.constructor.parameters()]), text)
+        text = re.sub('<PARAMETERS>', ', '.join([p.name() for p in self.constructor.parameters()]), text)
+        return text
+
     # Returns typedefs for term lists and term vectors.
     def container_typedefs(self):
         text = r'''/// \\brief list of <CLASSNAME>s
@@ -964,6 +978,9 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                 text = re.sub('check_term', 'check_rule', text)
 
         # generate additional functions
+        # if not ('s' in self.modifiers() or 'S' in self.modifiers()):
+        if not 'S' in self.modifiers() and self.constructor.parameters():
+            text = text + '\n\n' + self.make_function()
         if 'C' in self.modifiers():
             text = text + '\n\n' + self.container_typedefs()
         if 'I' in self.modifiers():

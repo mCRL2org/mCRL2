@@ -173,6 +173,13 @@ class propositional_variable_instantiation: public pbes_expression
 //--- end user section propositional_variable_instantiation ---//
 };
 
+/// \brief Make_propositional_variable_instantiation constructs a new term into a given address.
+/// \ \param t The reference into which the new propositional_variable_instantiation is constructed. XXXXX
+inline void make_propositional_variable_instantiation(propositional_variable_instantiation& t, const core::identifier_string& name, const data::data_expression_list& parameters)
+{
+  make_term_appl(t, core::detail::function_symbol_PropVarInst(), name, parameters);
+}
+
 /// \brief list of propositional_variable_instantiations
 typedef atermpp::term_list<propositional_variable_instantiation> propositional_variable_instantiation_list;
 
@@ -242,6 +249,13 @@ class not_: public pbes_expression
     }
 };
 
+/// \brief Make_not_ constructs a new term into a given address.
+/// \ \param t The reference into which the new not_ is constructed. XXXXX
+inline void make_not_(not_& t, const pbes_expression& operand)
+{
+  make_term_appl(t, core::detail::function_symbol_PBESNot(), operand);
+}
+
 /// \brief Test for a not expression
 /// \param x A term
 /// \return True if \a x is a not expression
@@ -309,6 +323,13 @@ class and_: public pbes_expression
       return atermpp::down_cast<pbes_expression>((*this)[1]);
     }
 };
+
+/// \brief Make_and_ constructs a new term into a given address.
+/// \ \param t The reference into which the new and_ is constructed. XXXXX
+inline void make_and_(and_& t, const pbes_expression& left, const pbes_expression& right)
+{
+  make_term_appl(t, core::detail::function_symbol_PBESAnd(), left, right);
+}
 
 /// \brief Test for a and expression
 /// \param x A term
@@ -378,6 +399,13 @@ class or_: public pbes_expression
     }
 };
 
+/// \brief Make_or_ constructs a new term into a given address.
+/// \ \param t The reference into which the new or_ is constructed. XXXXX
+inline void make_or_(or_& t, const pbes_expression& left, const pbes_expression& right)
+{
+  make_term_appl(t, core::detail::function_symbol_PBESOr(), left, right);
+}
+
 /// \brief Test for a or expression
 /// \param x A term
 /// \return True if \a x is a or expression
@@ -445,6 +473,13 @@ class imp: public pbes_expression
       return atermpp::down_cast<pbes_expression>((*this)[1]);
     }
 };
+
+/// \brief Make_imp constructs a new term into a given address.
+/// \ \param t The reference into which the new imp is constructed. XXXXX
+inline void make_imp(imp& t, const pbes_expression& left, const pbes_expression& right)
+{
+  make_term_appl(t, core::detail::function_symbol_PBESImp(), left, right);
+}
 
 /// \brief Test for a imp expression
 /// \param x A term
@@ -514,6 +549,13 @@ class forall: public pbes_expression
     }
 };
 
+/// \brief Make_forall constructs a new term into a given address.
+/// \ \param t The reference into which the new forall is constructed. XXXXX
+inline void make_forall(forall& t, const data::variable_list& variables, const pbes_expression& body)
+{
+  make_term_appl(t, core::detail::function_symbol_PBESForall(), variables, body);
+}
+
 /// \brief Test for a forall expression
 /// \param x A term
 /// \return True if \a x is a forall expression
@@ -581,6 +623,13 @@ class exists: public pbes_expression
       return atermpp::down_cast<pbes_expression>((*this)[1]);
     }
 };
+
+/// \brief Make_exists constructs a new term into a given address.
+/// \ \param t The reference into which the new exists is constructed. XXXXX
+inline void make_exists(exists& t, const data::variable_list& variables, const pbes_expression& body)
+{
+  make_term_appl(t, core::detail::function_symbol_PBESExists(), variables, body);
+}
 
 /// \brief Test for a exists expression
 /// \param x A term

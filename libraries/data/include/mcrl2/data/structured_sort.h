@@ -433,6 +433,13 @@ public:
 //--- end user section structured_sort ---//
 };
 
+/// \brief Make_structured_sort constructs a new term into a given address.
+/// \ \param t The reference into which the new structured_sort is constructed. XXXXX
+inline void make_structured_sort(structured_sort& t, const structured_sort_constructor_list& constructors)
+{
+  make_term_appl(t, core::detail::function_symbol_SortStruct(), constructors);
+}
+
 /// \brief list of structured_sorts
 typedef atermpp::term_list<structured_sort> structured_sort_list;
 

@@ -243,6 +243,13 @@ class not_: public boolean_expression
     }
 };
 
+/// \brief Make_not_ constructs a new term into a given address.
+/// \ \param t The reference into which the new not_ is constructed. XXXXX
+inline void make_not_(not_& t, const boolean_expression& operand)
+{
+  make_term_appl(t, core::detail::function_symbol_BooleanNot(), operand);
+}
+
 /// \brief Test for a not expression
 /// \param x A term
 /// \return True if \a x is a not expression
@@ -310,6 +317,13 @@ class and_: public boolean_expression
       return atermpp::down_cast<boolean_expression>((*this)[1]);
     }
 };
+
+/// \brief Make_and_ constructs a new term into a given address.
+/// \ \param t The reference into which the new and_ is constructed. XXXXX
+inline void make_and_(and_& t, const boolean_expression& left, const boolean_expression& right)
+{
+  make_term_appl(t, core::detail::function_symbol_BooleanAnd(), left, right);
+}
 
 /// \brief Test for a and expression
 /// \param x A term
@@ -379,6 +393,13 @@ class or_: public boolean_expression
     }
 };
 
+/// \brief Make_or_ constructs a new term into a given address.
+/// \ \param t The reference into which the new or_ is constructed. XXXXX
+inline void make_or_(or_& t, const boolean_expression& left, const boolean_expression& right)
+{
+  make_term_appl(t, core::detail::function_symbol_BooleanOr(), left, right);
+}
+
 /// \brief Test for a or expression
 /// \param x A term
 /// \return True if \a x is a or expression
@@ -446,6 +467,13 @@ class imp: public boolean_expression
       return atermpp::down_cast<boolean_expression>((*this)[1]);
     }
 };
+
+/// \brief Make_imp constructs a new term into a given address.
+/// \ \param t The reference into which the new imp is constructed. XXXXX
+inline void make_imp(imp& t, const boolean_expression& left, const boolean_expression& right)
+{
+  make_term_appl(t, core::detail::function_symbol_BooleanImp(), left, right);
+}
 
 /// \brief Test for a imp expression
 /// \param x A term
@@ -523,6 +551,13 @@ class boolean_variable: public boolean_expression
     {}
 //--- end user section boolean_variable ---//
 };
+
+/// \brief Make_boolean_variable constructs a new term into a given address.
+/// \ \param t The reference into which the new boolean_variable is constructed. XXXXX
+inline void make_boolean_variable(boolean_variable& t, const core::identifier_string& name)
+{
+  make_term_appl(t, core::detail::function_symbol_BooleanVariable(), name);
+}
 
 /// \brief Test for a boolean_variable expression
 /// \param x A term
