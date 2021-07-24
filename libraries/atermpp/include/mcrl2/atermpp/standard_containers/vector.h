@@ -19,96 +19,70 @@
 #define MCRL2_ATERMPP_STANDARD_CONTAINER_VECTOR_H
 
 #include <vector.h>
-#include "mcrl2/atermpp/type_traits.h"
+#include "mcrl2/atermpp/detail/aterm_container.h"
 
 /// \brief The main namespace for the aterm++ library.
 namespace atermpp
 {
 
 /// \brief A vector class in which aterms can be stored. 
-class aterm : public unprotected_aterm
+template < class T, class Alloc = allocator<reference_aterm<T> > > 
+class vector : protected generic_aterm_container, public std::vector< reference_aterm<T>, Alloc >
 {
-public:
+protected 
+  typedef std::vector< reference_aterm<T>, Alloc > super;
 
+public:
+  
   /// \brief Default constructor.
-  aterm() noexcept;
+  vector():
+   : super::vector()
+  {}
+
+  /// \brief Constructor.
+  explicit vector (const allocator_type& alloc)
+   : super::vector(alloc)
+  {}
+
+  /// \brief Constructor.
+  explicit vector (size_type n, const allocator_type& alloc = allocator_type())
+   : super::vector(n, alloc)
+  {}
+
+  vector (size_type n, const value_type& val, const allocator_type& alloc = allocator_type());
+   : super::vector(n, reference_aterm(val), alloc)
+  {}
+
+  /// \brief Constructor.
+  template <class InputIterator>
+  vector (InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type())
+   : super::vector(first, last, alloc)
+  {}
+    
+  /// \brief Constructor.
+  vector (const vector& x)=default;
+
+  /// \brief Constructor.
+  vector (const vector& x, const allocator_type& alloc)
+   : super::vector(x, alloc)
+  {}
+  
+  /// \brief Constructor.
+  vector (vector&& x)=default;
+
+  /// \brief Constructor.
+  vector (vector&& x, const allocator_type& alloc);
+   : super::vector(x, alloc)
+  {}
+
+  /// \brief Constructor.
+  vector (initializer_list<value_type> il, const allocator_type& alloc = allocator_type())
+   : super::vector(il, alloc)
+  {}
 
   /// \brief Standard destructor.
-  ~aterm() noexcept;
+  ~vector()=default;
 
-  /// \brief Constructor based on an internal term data structure. This is not for public use.
-  /// \details Takes ownership of the passed underlying term.
-  /// \param t A pointer to an internal aterm data structure.
-  /// \todo Should be protected, but this cannot yet be done due to a problem
-  ///       in the compiling rewriter.
-  explicit aterm(const detail::_aterm *t) noexcept;
-
-  /// \brief Copy constructor.
-  /// \param other The aterm that is copied.
-  /// \details  This class has a non-trivial destructor so explicitly define the copy and move operators.
-  aterm(const aterm& other) noexcept;
-
-  /// \brief Move constructor.
-  /// \param other The aterm that is moved into the new term. This term may have changed after this operation.
-  /// \details This operation does not employ increments and decrements of reference counts and is therefore more
-  ///          efficient than the standard copy construct.
-  aterm(aterm&& other) noexcept;
-
-  /// \brief Assignment operator.
-  /// \param other The aterm that will be assigned.
-  /// \return A reference to the assigned term.
-  aterm& operator=(const aterm& other) noexcept
-  {
-#ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
-    // Increment first to prevent the same term from becoming reference zero temporarily.
-    other.increment_reference_count();
-
-    // Decrement the reference from the term that is currently referred to.
-    decrement_reference_count();
-#endif
-
-    m_term = other.m_term;
-    return *this;
-  }
-
-  /// \brief Move assignment operator.
-  /// \brief This move assignment operator
-  /// \param other The aterm that will be assigned.
-  /// \return A reference to the assigned term.
-  aterm& operator=(aterm&& other) noexcept
-  {
-#ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
-    std::swap(m_term, other.m_term);
-#else
-    m_term = other.m_term;    // Using hash set protection it is cheaper just to move the value to the new term.
-#endif
-    return *this;
-  }
-
-protected:
-#ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
-  /// \brief Increment the reference count.
-  /// \details This increments the reference count unless the term contains null.
-  ///          Use with care as this destroys the reference count mechanism.
-  void increment_reference_count() const
-  {
-    if (defined())
-    {
-      m_term->increment_reference_count();
-    }
-  }
-
-  /// \brief Decrement the reference count.
-  /// \details This decrements the reference count unless the term contains null.
-  ///          Use with care as this destroys the reference count mechanism.
-  void decrement_reference_count() const
-  {
-    if (defined())
-    {
-      m_term->decrement_reference_count();
-    }
-  }
-#endif
 };
 
 } // namespace atermpp

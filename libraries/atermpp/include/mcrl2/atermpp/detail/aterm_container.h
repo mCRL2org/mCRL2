@@ -50,11 +50,15 @@ public:
   /// Converts implicitly to a protected term of type T.
   operator T&()
   {
+    static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+    static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
     return reinterpret_cast<T&>(*this);
   }
 
   operator const T&() const
   {
+    static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+    static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
     return reinterpret_cast<const T&>(*this);
   }
 };
