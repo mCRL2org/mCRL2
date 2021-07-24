@@ -96,7 +96,7 @@ void thread_aterm_pool::register_variable(aterm* variable)
   unlock_shared();
 }
 
-void thread_aterm_pool::remove_variable(aterm* variable)
+void thread_aterm_pool::deregister_variable(aterm* variable)
 {
   lock_shared();
   m_variables.erase(variable);
@@ -117,7 +117,7 @@ void thread_aterm_pool::register_container(aterm_container* container)
   unlock_shared();
 }
 
-void thread_aterm_pool::remove_container(aterm_container* container)
+void thread_aterm_pool::deregister_container(aterm_container* container)
 {
   lock_shared();
   m_containers.erase(container);

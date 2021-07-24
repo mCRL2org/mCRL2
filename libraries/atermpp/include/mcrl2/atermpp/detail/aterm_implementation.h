@@ -12,9 +12,23 @@
 #pragma once
 
 #include "mcrl2/atermpp/detail/global_aterm_pool.h"
+#include "mcrl2/atermpp/detail/aterm_container.h"
 
 namespace atermpp
 {
+
+namespace detail
+{
+  aterm_container::aterm_container()
+  {
+    g_thread_term_pool().register_container(this);
+  }
+
+  aterm_container::~aterm_container()
+  {
+    g_thread_term_pool().deregister_container(this);
+  }
+}
 
 inline aterm::aterm() noexcept
 {

@@ -70,13 +70,13 @@ public:
   inline void register_variable(aterm* variable);
 
   /// \brief Removes the given variable from the active variables.
-  inline void remove_variable(aterm* variable);
+  inline void deregister_variable(aterm* variable);
 
   /// \brief Consider the given container when marking underlying terms.
   inline void register_container(aterm_container* variable);
 
   /// \brief Removes the given container from the active variables.
-  inline void remove_container(aterm_container* variable);
+  inline void deregister_container(aterm_container* variable);
 
   // Implementation of thread_aterm_pool_interface
   inline void mark() override;
