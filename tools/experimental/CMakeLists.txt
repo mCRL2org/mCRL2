@@ -10,6 +10,7 @@ set(MCRL2_TOOLS
   pbespor
   pbessymbolicbisim
   symbolic_exploration
+  lps2lts_parallel
 )
 
 if(MCRL2_ENABLE_EXPERIMENTAL)

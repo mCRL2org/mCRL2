@@ -18,7 +18,7 @@
 #ifndef MCRL2_ATERMPP_STANDARD_CONTAINER_VECTOR_H
 #define MCRL2_ATERMPP_STANDARD_CONTAINER_VECTOR_H
 
-#include <vector.h>
+#include <vector>
 #include "mcrl2/atermpp/detail/aterm_container.h"
 
 /// \brief The main namespace for the aterm++ library.
@@ -26,17 +26,23 @@ namespace atermpp
 {
 
 /// \brief A vector class in which aterms can be stored. 
-template < class T, class Alloc = allocator<reference_aterm<T> > > 
-class vector : protected generic_aterm_container, public std::vector< reference_aterm<T>, Alloc >
+template < class T, class Alloc = std::allocator<detail::reference_aterm<T> > > 
+class vector : protected detail::generic_aterm_container<std::vector<detail::reference_aterm<T>, Alloc> >, 
+               public std::vector< detail::reference_aterm<T>, Alloc >
 {
-protected 
-  typedef std::vector< reference_aterm<T>, Alloc > super;
+protected:
+  typedef std::vector< detail::reference_aterm<T>, Alloc > super;
+  typedef typename super::value_type value_type;
+  typedef typename super::size_type size_type;
 
 public:
   
+  /// Standard typedefs.
+  typedef Alloc allocator_type;
+  
   /// \brief Default constructor.
-  vector():
-   : super::vector()
+  vector()
+   : super()
   {}
 
   /// \brief Constructor.
@@ -49,8 +55,8 @@ public:
    : super::vector(n, alloc)
   {}
 
-  vector (size_type n, const value_type& val, const allocator_type& alloc = allocator_type());
-   : super::vector(n, reference_aterm(val), alloc)
+  vector (size_type n, const value_type& val, const allocator_type& alloc = allocator_type())
+   : super::vector(n, detail::reference_aterm(val), alloc)
   {}
 
   /// \brief Constructor.
@@ -71,14 +77,14 @@ public:
   vector (vector&& x)=default;
 
   /// \brief Constructor.
-  vector (vector&& x, const allocator_type& alloc);
+  vector (vector&& x, const allocator_type& alloc)
    : super::vector(x, alloc)
   {}
 
-  /// \brief Constructor.
-  vector (initializer_list<value_type> il, const allocator_type& alloc = allocator_type())
-   : super::vector(il, alloc)
-  {}
+  /// \brief Constructor. To be done later....
+  // vector (initializer_list<value_type> il, const allocator_type& alloc = allocator_type())
+  //  : super::vector(il, alloc)
+  // {}
 
   /// \brief Standard destructor.
   ~vector()=default;
