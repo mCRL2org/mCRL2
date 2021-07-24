@@ -81,8 +81,92 @@ void thread_aterm_pool::create_appl_dynamic(aterm& term,
   if (added) { m_pool.created_term(m_creation_depth == 0, this); }
 }
 
+void thread_aterm_pool::register_variable(aterm* variable)
+{
+  if constexpr (EnableVariableRegistrationMetrics) { ++m_variable_insertions; }
+
+  lock_shared();
+  auto [it, inserted] = m_variables.insert(variable);
+
+  // The variable must be inserted.
+  assert(inserted);
+  mcrl2::utilities::mcrl2_unused(it);
+  mcrl2::utilities::mcrl2_unused(inserted);
+
+  unlock_shared();
+}
+
+void thread_aterm_pool::remove_variable(aterm* variable)
+{
+  lock_shared();
+  m_variables.erase(variable);
+  unlock_shared();
+}
+
+void thread_aterm_pool::register_container(aterm_container* container)
+{
+  if constexpr (EnableVariableRegistrationMetrics) { ++m_container_insertions; }
+
+  lock_shared();
+  auto [it, inserted] = m_containers.insert(container);
+
+  // The container must be inserted.
+  assert(inserted);
+  mcrl2::utilities::mcrl2_unused(it);
+  mcrl2::utilities::mcrl2_unused(inserted);
+  unlock_shared();
+}
+
+void thread_aterm_pool::remove_container(aterm_container* container)
+{
+  lock_shared();
+  m_containers.erase(container);
+  unlock_shared();
+}
+
+void thread_aterm_pool::mark()
+{
+
+#ifndef MCRL2_ATERMPP_REFERENCE_COUNTED
+  // Marks all terms that are reachable from any tagged variable. Furthermore, remove variables that are not tagged.
+  for (auto it = m_variables.begin(); it != m_variables.end(); ++it)
+  {
+    const aterm* variable = *it;
+    if (variable != nullptr)
+    {
+      // Mark all terms (and their subterms) that are reachable, i.e the root set.
+      _aterm* term = detail::address(*variable);
+      if (variable->defined() && !term->is_marked())
+      {
+        // Mark the term itself as reachable.
+        term->mark();
+
+        // This variable is not a default term and that term has not been marked.
+        mark_term(*term, m_todo);
+      }
+    }
+  }
+#endif // MCRL2_ATERMPP_REFERENCE_COUNTED
+
+  for (auto it = m_containers.begin(); it != m_containers.end(); ++it)
+  {
+    const aterm_container* container = *it;
+
+    if (container != nullptr)
+    {
+      // The container marks the contained terms itself.
+      container->mark(m_todo);
+    }
+  }
+}
+
 void thread_aterm_pool::print_local_performance_statistics() const
 {
+  if constexpr (EnableVariableRegistrationMetrics)
+  {
+    mCRL2log(mcrl2::log::info, "Performance") << "thread_aterm_pool: " << m_variables.size() << " variables in root set (" << m_variable_insertions << " total insertions)"
+                                              << " and " << m_containers.size() << " containers in root set (" << m_container_insertions << " total insertions).\n";
+  }
 }
 
 void thread_aterm_pool::wait_for_busy() const

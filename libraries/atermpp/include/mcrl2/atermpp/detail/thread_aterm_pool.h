@@ -11,6 +11,8 @@
 #define ATERMPP_DETAIL_THREAD_ATERM_POOL_H
 
 #include "mcrl2/atermpp/detail/aterm_pool.h"
+#include "mcrl2/atermpp/detail/aterm_container.h"
+#include "mcrl2/utilities/hashtable.h"
 
 #include <atomic>
 
@@ -64,7 +66,20 @@ public:
       InputIterator begin,
       InputIterator end);
 
+  /// \brief Consider the given variable when marking underlying terms.
+  inline void register_variable(aterm* variable);
+
+  /// \brief Removes the given variable from the active variables.
+  inline void remove_variable(aterm* variable);
+
+  /// \brief Consider the given container when marking underlying terms.
+  inline void register_container(aterm_container* variable);
+
+  /// \brief Removes the given container from the active variables.
+  inline void remove_container(aterm_container* variable);
+
   // Implementation of thread_aterm_pool_interface
+  inline void mark() override;
   inline void print_local_performance_statistics() const override;
   inline void wait_for_busy() const override;
   inline void set_forbidden(bool value) override;
@@ -77,6 +92,13 @@ private:
   inline void unlock_shared();
 
   aterm_pool& m_pool;
+
+  /// Keeps track of pointers to all existing aterm variables and containers.
+  mcrl2::utilities::hashtable<aterm*> m_variables;
+  mcrl2::utilities::hashtable<detail::aterm_container*> m_containers;
+
+  std::size_t m_variable_insertions = 0;
+  std::size_t m_container_insertions = 0;
 
   /// \brief It can happen that during create_appl with converter the converter generates new terms.
   ///        As such these terms might only be protected after the term_appl was actually created.

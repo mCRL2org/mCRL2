@@ -36,6 +36,9 @@ class thread_aterm_pool_interface
 public:
   virtual ~thread_aterm_pool_interface() {}
 
+  /// \brief Mark the terms created by this thread to prevent them being garbage collected.
+  virtual void mark() = 0;
+
   /// \brief Print performance statistics for data stored for this thread.
   virtual void print_local_performance_statistics() const = 0;
 

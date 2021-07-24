@@ -269,6 +269,12 @@ void aterm_pool::collect_impl(thread_aterm_pool_interface* thread)
   m_appl_dynamic_storage.mark();
 #endif // MCRL2_ATERMPP_REFERENCE_COUNTED
 
+  // Mark the terms referenced by all thread pools.
+  for (const auto& pool : m_thread_pools)
+  {
+    pool->mark();
+  }
+
   assert(std::get<0>(m_appl_storage).verify_mark());
   assert(std::get<1>(m_appl_storage).verify_mark());
   assert(std::get<2>(m_appl_storage).verify_mark());
