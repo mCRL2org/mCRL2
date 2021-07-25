@@ -748,7 +748,8 @@ data_expression RewriterJitty::rewrite_aux_const_function_symbol(
     rhs_cache.resize(op_value+1);
   }
   const data_expression& cached_rhs = rhs_cache[op_value];
-  if (cached_rhs!=data_expression())
+  // if (cached_rhs!=data_expression())
+  if (!cached_rhs.is_default_data_expression())
   {
     return cached_rhs;
   }

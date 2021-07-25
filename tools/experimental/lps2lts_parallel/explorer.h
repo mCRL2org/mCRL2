@@ -349,7 +349,7 @@ class explorer: public abortable
 
     const explorer_options& m_options;
     data::rewriter m_rewr;
-    // mutable data::mutable_indexed_substitution<> m_sigma;
+    // mutable data::mutable_indexed_substitution<> m_sigma; This is necessary per thread, otherwise concurrency problems. 
     std::mutex m_exclusive_state_access;
     std::mutex m_exclusive_transition_access;
     data::enumerator_identifier_generator m_id_generator;
@@ -785,8 +785,8 @@ class explorer: public abortable
       FinishState finish_state
     )
     {
-      data::mutable_indexed_substitution<> m_sigma;  // JFG This must be a thread local substitution.
       mCRL2log(log::verbose) << "Start thread " << process_number << ".\n";
+      data::mutable_indexed_substitution<> m_sigma;  // JFG This must be a thread local substitution.
       while (number_of_active_processes>0)
       {
         m_exclusive_state_access.lock();
@@ -920,7 +920,7 @@ class explorer: public abortable
       threads.reserve(number_of_threads);
       for(std::size_t i=0; i<number_of_threads; ++i)
       {
-        std::thread tr ([&](){ generate_state_space_thread< StateType, SummandSequence, 
+        std::thread tr ([&, i](){ generate_state_space_thread< StateType, SummandSequence, 
                                                        DiscoverState, ExamineTransition, 
                                                        StartState, FinishState, 
                                                        DiscoverInitialState >

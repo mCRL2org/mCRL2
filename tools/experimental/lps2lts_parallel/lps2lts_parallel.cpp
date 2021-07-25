@@ -78,6 +78,10 @@ class lps2lts_parallel_tool: public rewriter_tool<input_output_tool>
       if (parser.has_option("threads"))
       {
         options.number_of_threads = parser.option_argument_as<std::size_t>("threads");
+        if (options.number_of_threads<1)
+        {
+          throw mcrl2::runtime_error("The number of threads should at least be 1.");
+        }
       }
       else 
       {
