@@ -68,7 +68,7 @@ struct jitty_assignments_for_a_rewrite_rule
 
 static const function_symbol& this_term_is_in_normal_form()
 {
-  static const function_symbol this_term_is_in_normal_form(
+  thread_local const function_symbol this_term_is_in_normal_form(
                          std::string("Rewritten@@term"),
                          function_sort({ untyped_sort() },untyped_sort()));
   return this_term_is_in_normal_form;
@@ -742,7 +742,7 @@ data_expression RewriterJitty::rewrite_aux_const_function_symbol(
   make_jitty_strat_sufficiently_larger(op_value);
 
   // Cache the rhs's as they are rewritten very often. 
-  static std::vector<data_expression> rhs_cache;
+  thread_local std::vector<data_expression> rhs_cache;
   if (rhs_cache.size()<=op_value)
   {
     rhs_cache.resize(op_value+1);

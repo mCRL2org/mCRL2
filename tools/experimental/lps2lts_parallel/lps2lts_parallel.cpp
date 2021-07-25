@@ -17,7 +17,7 @@
 #include "mcrl2/lps/is_stochastic.h"
 #include "mcrl2/lts/lts_io.h"
 #include "lts_builder.h"
-#include "mcrl2/lts/state_space_generator.h"
+#include "state_space_generator.h"
 #include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
@@ -48,11 +48,13 @@ class lps2lts_parallel_tool: public rewriter_tool<input_output_tool>
     {
       super::add_options(desc);
       desc.add_option("out", utilities::make_mandatory_argument("FORMAT"), "save the output in the specified FORMAT. ", 'o');
+      desc.add_option("threads", utilities::make_mandatory_argument("NUM"), "run exploration with NUM threads (default=1). ");
     }
 
     void parse_options(const utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
+       options.search_strategy = lps::es_breadth;
 
       if (parser.has_option("out"))
       {
@@ -71,6 +73,15 @@ class lps2lts_parallel_tool: public rewriter_tool<input_output_tool>
           mCRL2log(log::warning) << "no output format set or detected; using default (lts)" << std::endl;
           output_format = lts::lts_lts;
         }
+      }
+
+      if (parser.has_option("threads"))
+      {
+        options.number_of_threads = parser.option_argument_as<std::size_t>("threads");
+      }
+      else 
+      {
+        options.number_of_threads = 1;
       }
 
       options.rewrite_strategy = rewrite_strategy();

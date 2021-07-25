@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Jan Friso Groote based on work by Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -6,13 +6,13 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lts/lts_builder.h
-/// \brief add your file description here.
+/// \file tools/experimental/lps2lts_parallel/lts_builder.h
+/// \brief An experimental parallel state space generator. 
 
 #ifndef MCRL2_LTS_BUILDER_H
 #define MCRL2_LTS_BUILDER_H
 
-#include "mcrl2/lps/explorer.h"
+#include "explorer.h"
 #include "mcrl2/lts/detail/lts_convert.h"
 #include "mcrl2/lts/lts_io.h"
 
