@@ -12,12 +12,13 @@
 #ifndef DETAIL_FUNCTION_SYMBOL_H
 #define DETAIL_FUNCTION_SYMBOL_H
 
-#include "mcrl2/atermpp/detail/aterm_configuration.h"
-#include "mcrl2/utilities/noncopyable.h"
-#include "mcrl2/utilities/shared_reference.h"
-
 #include <string>
 #include <cstddef>
+
+#include "mcrl2/utilities/noncopyable.h"
+#include "mcrl2/utilities/shared_reference.h"
+#include "mcrl2/atermpp/detail/aterm_configuration.h"
+
 
 namespace atermpp
 {
