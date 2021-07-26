@@ -471,7 +471,7 @@ data_expression RewriterJitty::rewrite_aux(
     {
       // In this case t has the shape f(u1...un)(u1'...um')....  where all u1,...,un,u1',...,um' are normal formas.
       // In the invocation of rewrite_aux_function_symbol these terms are rewritten to normalform again.
-      const data_expression& result=application(t,tapp.begin(), tapp.end()); 
+      const data_expression result=application(t,tapp.begin(), tapp.end()); 
       return rewrite_aux_function_symbol(atermpp::down_cast<function_symbol>(head1),result,sigma);
     }
     else if (is_variable(head1))
@@ -640,7 +640,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
 
             if (arity == rule_arity)
             {
-              const data_expression& result=rewrite_aux(subst_values(assignments,rhs,m_generator),sigma);
+              const data_expression result=rewrite_aux(subst_values(assignments,rhs,m_generator),sigma);
               for (std::size_t i=0; i<arity; i++)
               {
                 if (rewritten_defined[i])
@@ -801,7 +801,7 @@ data_expression RewriterJitty::rewrite(
 #ifdef MCRL2_DISPLAY_REWRITE_STATISTICS
   data::detail::increment_rewrite_count();
 #endif
-  const data_expression& t=rewrite_aux(term, sigma);
+  const data_expression t=rewrite_aux(term, sigma);
   assert(remove_normal_form_function(t)==t);
   return t;
 }
