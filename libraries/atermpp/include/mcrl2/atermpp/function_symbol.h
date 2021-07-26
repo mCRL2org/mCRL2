@@ -14,26 +14,26 @@
 
 namespace atermpp
 {
-class aterm;
+namespace detail
+{
+class function_symbol_pool;
+class _aterm;
+}
 
 class function_symbol
 {
   friend class function_symbol_generator;
+  friend class detail::function_symbol_pool;
+  friend class detail::_aterm;
+
   friend struct std::hash<function_symbol>;
 
 public:
+  function_symbol() = default;
 
   /// \brief Defines a function symbol from a name and arity combination.
   function_symbol(const std::string& name, const std::size_t arity_)
    : function_symbol(name, arity_, true)
-  {}
-
-  /// \brief Constructor for internal use only.
-  function_symbol(detail::_function_symbol::ref&& f)
-   : m_function_symbol(std::forward<detail::_function_symbol::ref>(f))
-  {}
-
-  function_symbol()
   {}
 
   /// This class has non-trivial destructor so declare default copy and move operators.
@@ -120,6 +120,11 @@ public:
   }
 
 private:
+  /// \brief Constructor for internal use only.
+  function_symbol(detail::_function_symbol::ref&& f)
+   : m_function_symbol(std::forward<detail::_function_symbol::ref>(f))
+  {}
+
   /// \brief Constructor for internal use only
   function_symbol(const std::string& name, const std::size_t arity, const bool check_for_registered_functions);
 

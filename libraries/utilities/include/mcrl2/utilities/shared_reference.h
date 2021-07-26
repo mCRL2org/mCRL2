@@ -175,7 +175,7 @@ public:
   /// \brief Check whether the shared_reference has a valid reference.
   bool defined() const
   {
-    return m_reference != nullptr;
+    return m_reference.get() != nullptr;
   }
 
   bool operator ==(const shared_reference<T>& other) const noexcept
@@ -212,13 +212,13 @@ public:
   T* operator->() const noexcept
   {
     assert(defined());
-    return m_reference;
+    return m_reference.get();
   }
 
   T* get() const noexcept
   {
     assert(defined());
-    return m_reference;
+    return m_reference.get();
   }
 
   T& operator*() const noexcept
@@ -235,24 +235,23 @@ public:
     swap(m_reference, other.m_reference);
   }
 
-  // These functions break the underlying pointer and reset must be called before accessing it.
   bool tagged() const noexcept
   {
-    return mcrl2::utilities::tagged(m_reference);
+    return m_reference.tagged();
   }
 
   void tag() const
   {
-    m_reference = mcrl2::utilities::tag(m_reference);
+    m_reference.tag();
   }
 
-  void reset() const
+  void untag() const
   {
-    m_reference = mcrl2::utilities::pointer(m_reference);
+    m_reference.untag();
   }
 
 protected:
-  mutable T* m_reference;
+  mutable utilities::tagged_pointer<T> m_reference;
 };
 
 } // namespace utilities

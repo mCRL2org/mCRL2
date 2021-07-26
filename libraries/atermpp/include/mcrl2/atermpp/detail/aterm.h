@@ -20,8 +20,7 @@ namespace atermpp
 
 // Forward declaration.
 class unprotected_aterm;
-
-constexpr static std::size_t MarkedReferenceCount = std::numeric_limits<std::size_t>::max();
+class aterm;
 
 namespace detail
 {
@@ -50,54 +49,22 @@ public:
     return m_function_symbol;
   }
 
-  /// \brief Mark this term to be garbage collected.
-  /// \details Changes the reference count, so only apply whenever !is_reachable().
+  /// \brief Mark this term to be reachable.
   void mark() const
   {
-#ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
-    assert(!is_reachable());
-    m_reference_count = MarkedReferenceCount;
-    count_reference_count_changes();
-#else
     m_function_symbol.m_function_symbol.tag();
-#endif
   }
 
   /// \brief Remove the mark from a term.
-  /// \details Changes the reference count, so only apply whenever it was marked.
-  void reset() const
-  {    
-#ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
-    assert(is_marked());
-    m_reference_count = 0;
-    count_reference_count_changes();
-#else
-    m_function_symbol.m_function_symbol.reset();
-#endif
-  }
-
-  /// \brief During garbage collection a term will be marked whenever it occurs as the argument
-  ///        of a reachable term, but is not protected itself.
-  /// \returns True whenever this term has been marked.
-  bool is_marked() const noexcept
+  void unmark() const
   {
-#ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
-    return m_reference_count == MarkedReferenceCount;
-#else
-    return m_function_symbol.m_function_symbol.tagged();
-#endif
+    m_function_symbol.m_function_symbol.untag();
   }
 
-  /// \brief A term is reachable in the garbage collection graph if it is protected or whenever it occurs
-  ///        as an argument of a reachable term. The latter will be ensured in the marking phase of garbage collection.
-  /// \returns True whenever the term is reachable ie either marked or protected.
-  bool is_reachable() const noexcept
-  {   
-#ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
-    return m_reference_count > 0;
-#else
+  /// \brief Check if the term is already marked.
+  bool is_marked() const
+  {
     return m_function_symbol.m_function_symbol.tagged();
-#endif
   }
 
 private:

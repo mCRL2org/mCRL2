@@ -265,8 +265,8 @@ void aterm_pool::collect_impl(thread_aterm_pool_interface* thread)
 #ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
   // Marks all terms that are reachable via any reachable term to
   // not be garbage collected.
-  // For integer and terms without arguments the marking is not needed, because
-  // they do not have arguments that might have to be marked.
+  m_int_storage.mark();
+  std::get<0>(m_appl_storage).mark();
   std::get<1>(m_appl_storage).mark();
   std::get<2>(m_appl_storage).mark();
   std::get<3>(m_appl_storage).mark();

@@ -97,6 +97,26 @@ public:
     return !(*this == other);
   }
 
+  bool operator <(const tagged_pointer& other) const noexcept
+  {
+    return get() < other.get();
+  }
+
+  bool operator <=(const tagged_pointer& other) const noexcept
+  {
+    return get() <= other.get();
+  }
+
+  bool operator >(const tagged_pointer& other) const noexcept
+  {
+    return get() > other.get();
+  }
+
+  bool operator >=(const tagged_pointer& other) const noexcept
+  {
+    return get() >= other.get();
+  }
+
   const T& operator*() const
   {
     return *get();
