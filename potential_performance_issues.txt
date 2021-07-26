@@ -1,0 +1,9 @@
+Potentiele performance issues.
+
+De variabele m_count_until_collection wordt atomair, en is globaal over alle
+threads. Dat betekent dat bij het aanmaken van een term er een globale 
+variabele moet worden gedecrement, en van cache naar cache verplaatst.
+Als er veel termen worden aangemaakt, kan dit een probleem zijn. 
+De variabele hoeft mogelijkerwijs ook niet atomair te zijn, want
+decrements koment niet zo precies. 
+
