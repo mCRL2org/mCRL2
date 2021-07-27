@@ -32,53 +32,68 @@ class vector : protected detail::generic_aterm_container<std::vector<detail::ref
 {
 protected:
   typedef std::vector< detail::reference_aterm<T>, Alloc > super;
-  typedef typename super::value_type value_type;
-  typedef typename super::size_type size_type;
+  typedef detail::generic_aterm_container<std::vector<detail::reference_aterm<T>, Alloc> > container_wrapper;
 
 public:
   
   /// Standard typedefs.
   typedef Alloc allocator_type;
+  typedef typename super::value_type value_type;
+  typedef typename super::size_type size_type;
   
   /// \brief Default constructor.
   vector()
-   : super()
+   : container_wrapper(*this, true),
+     super()
   {}
 
   /// \brief Constructor.
   explicit vector (const allocator_type& alloc)
-   : super::vector(alloc)
+   : container_wrapper(*this, true),
+     super::vector(alloc)
   {}
 
   /// \brief Constructor.
   explicit vector (size_type n, const allocator_type& alloc = allocator_type())
-   : super::vector(n, alloc)
+   : container_wrapper(*this, true),
+     super::vector(n, alloc)
   {}
 
   vector (size_type n, const value_type& val, const allocator_type& alloc = allocator_type())
-   : super::vector(n, detail::reference_aterm(val), alloc)
+   : container_wrapper(*this, true),
+     super::vector(n, detail::reference_aterm(val), alloc)
   {}
 
   /// \brief Constructor.
   template <class InputIterator>
   vector (InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type())
-   : super::vector(first, last, alloc)
+   : container_wrapper(*this, true),
+     super::vector(first, last, alloc)
   {}
     
   /// \brief Constructor.
-  vector (const vector& x)=default;
+  vector (const vector& x)
+   : container_wrapper(*this, true),
+     super::vector(x)
+  {}
 
   /// \brief Constructor.
   vector (const vector& x, const allocator_type& alloc)
-   : super::vector(x, alloc)
+   : container_wrapper(*this, true),
+     super::vector(x, alloc)
   {}
   
   /// \brief Constructor.
-  vector (vector&& x)=default;
+  vector (vector&& x)
+   : container_wrapper(*this, true),
+     super::vector(std::move(x))
+  {}
+
 
   /// \brief Constructor.
   vector (vector&& x, const allocator_type& alloc)
-   : super::vector(x, alloc)
+   : container_wrapper(*this, true),
+     super::vector(x, alloc)
   {}
 
   /// \brief Constructor. To be done later....

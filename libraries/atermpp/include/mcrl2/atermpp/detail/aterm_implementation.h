@@ -28,6 +28,18 @@ namespace detail
   {
     g_thread_term_pool().deregister_container(this);
   }
+
+  aterm_container::aterm_container(const aterm_container& c)
+  { 
+    g_thread_term_pool().register_container(this);
+  }
+  
+  aterm_container::aterm_container(aterm_container&& c)
+  { 
+    g_thread_term_pool().register_container(this);
+  }
+  
+
 }
 
 inline aterm::aterm() noexcept

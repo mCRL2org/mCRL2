@@ -29,6 +29,25 @@ public:
 
   /// \brief Ensure that all the terms in the containers.
   virtual void mark(std::stack<std::reference_wrapper<detail::_aterm>>& todo) const = 0;
+
+  /// \brief Copy constructor
+  inline aterm_container(const aterm_container& c);
+
+  /// \brief Move constructor
+  inline aterm_container(aterm_container&& c);
+
+  /// \brief Assignment
+  aterm_container& operator=(const aterm_container& c)
+  {
+    return *this;
+  }
+
+  /// \brief Move assignment
+  aterm_container& operator=(aterm_container&& c)
+  {
+    return *this;
+  }
+
 };
 
 /// \brief An unprotected term that is stored inside an aterm_container.
@@ -36,8 +55,10 @@ template<typename T>
 class reference_aterm : public unprotected_aterm
 {
 public:
+  /// \brief Default constructor.
   reference_aterm() noexcept = default;
-  reference_aterm(const unprotected_aterm& other) noexcept
+
+  explicit reference_aterm(const unprotected_aterm& other) noexcept
   {
     m_term = detail::address(other);
   }
@@ -45,6 +66,12 @@ public:
   reference_aterm(unprotected_aterm&& other) noexcept
   {
     m_term = detail::address(other);
+  }
+
+  const reference_aterm& operator=(const unprotected_aterm& other) noexcept
+  {
+    m_term = detail::address(other);
+    return reinterpret_cast<const reference_aterm&>(m_term);
   }
 
   /// Converts implicitly to a protected term of type T.
@@ -67,16 +94,20 @@ template<typename Container>
 class generic_aterm_container : public aterm_container
 {
 public:
+  /// \construct
+  generic_aterm_container(const Container& container, bool)
+   : m_container(container)
+  {}
+
   /// \brief Provides access to the underlying container.
-  Container& container() { return m_container; }
-  const Container& container() const { return m_container; }
+  // Container& container() { return m_container; }
+  // const Container& container() const { return m_container; }
 
   void mark(std::stack<std::reference_wrapper<detail::_aterm>>& todo) const override
   {
-    for (auto it = m_container.begin(); it != m_container.end(); ++it)
+std::cerr << "MARK " << m_container.size() << "\n";
+    for (const aterm& element: m_container) 
     {
-      const aterm& element = *it;
-
       // Mark all terms (and their subterms) that are reachable, i.e the root set.
       detail::_aterm* term = detail::address(element);
       if (element.defined() && !term->is_marked())
@@ -90,8 +121,8 @@ public:
     }
   }
 
-private:
-  Container m_container;
+protected:
+  const Container& m_container;
 };
 
 } // namespace atermpp::detail
