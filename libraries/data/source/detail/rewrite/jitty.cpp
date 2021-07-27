@@ -579,33 +579,38 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
       {
         // Here it is assumed that precompiled code only works on the exact right number of arguments and
         // precompiled functions are not used in a higher order fashion. Maybe this requires an explicit check. 
-        if (arity==0)
-        {
-          return rule.rewrite_cpp_code()(op);
-        }
-        else 
-        {
-          if (term.head()==op) 
-          { 
-            // application rewriteable_term(op,0,arity,[&rewritten, &rewritten_defined](size_t i){assert(rewritten_defined[i]); return rewritten[i];});
-            application rewriteable_term(op, &rewritten[0], &rewritten[arity]);
-            return rule.rewrite_cpp_code()(rewriteable_term);
-          }
-          else
+        assert(arity>0);
+        if (term.head()==op) 
+        { 
+          // application rewriteable_term(op,0,arity,[&rewritten, &rewritten_defined](size_t i){assert(rewritten_defined[i]); return rewritten[i];});
+          application rewriteable_term(op, &rewritten[0], &rewritten[arity]);
+          
+          for (std::size_t i=0; i<arity; i++)
           {
-            // Guarantee that all higher order arguments are in normal form. Maybe this had to be done in the strategy for higher
-            // order terms. 
-            for(std::size_t i=0; i<recursive_number_of_args(term); i++)
-            {
-              if (!rewritten_defined[i])
-              {
-                new (&rewritten[i]) data_expression(rewrite_aux(detail::get_argument_of_higher_order_term(term,i),sigma));
-                rewritten_defined[i]=true;
-              }
-            }
-            return apply_cpp_code_to_higher_order_term(term, rule.rewrite_cpp_code(), &rewritten[0], &rewritten[arity], sigma);
+            rewritten[i].~data_expression();
           }
+          return rule.rewrite_cpp_code()(rewriteable_term);
         }
+        else
+        {
+          // Guarantee that all higher order arguments are in normal form. Maybe this had to be done in the strategy for higher
+          // order terms. 
+          for(std::size_t i=0; i<recursive_number_of_args(term); i++)
+          {
+            if (!rewritten_defined[i])
+            {
+              new (&rewritten[i]) data_expression(rewrite_aux(detail::get_argument_of_higher_order_term(term,i),sigma));
+              rewritten_defined[i]=true;
+            }
+          }
+          data_expression result=apply_cpp_code_to_higher_order_term(term, rule.rewrite_cpp_code(), &rewritten[0], &rewritten[arity], sigma);
+          for (std::size_t i=0; i<arity; i++)
+          {
+            rewritten[i].~data_expression();
+          }
+          return result;
+        }
+        
       }
       else
       {
@@ -714,16 +719,17 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
   //Construct this potential higher order term.
   data_expression result=op;
   std::size_t i = 0;
-  sort_expression sort = op.sort();
-  while (i < arity && is_function_sort(sort))
+  const sort_expression* sort = &op.sort();
+  do
   {
-    const function_sort& fsort=atermpp::down_cast<function_sort>(sort);
+    const function_sort& fsort=atermpp::down_cast<function_sort>(*sort);
     const std::size_t end=i+fsort.domain().size();
     assert(end-1<arity);
     result = application(result,&rewritten[0]+i,&rewritten[0]+end);
     i=end;
-    sort = fsort.codomain();
+    sort = &fsort.codomain();
   }
+  while (i < arity && is_function_sort(*sort));
 
   for (std::size_t i=0; i<arity; i++)
   {
