@@ -456,7 +456,7 @@ data_expression RewriterJitty::rewrite_aux(
   
     if (is_function_symbol(head) && head!=this_term_is_in_normal_form())
     {
-      return rewrite_aux_function_symbol(atermpp::down_cast<function_symbol>(head),term,sigma);
+      return rewrite_aux_function_symbol(atermpp::down_cast<function_symbol>(head),terma,sigma);
     }
   
     const application& tapp=atermpp::down_cast<application>(term);
@@ -471,7 +471,7 @@ data_expression RewriterJitty::rewrite_aux(
     {
       // In this case t has the shape f(u1...un)(u1'...um')....  where all u1,...,un,u1',...,um' are normal formas.
       // In the invocation of rewrite_aux_function_symbol these terms are rewritten to normalform again.
-      const data_expression result=application(t,tapp.begin(), tapp.end()); 
+      const application result(t,tapp.begin(), tapp.end()); 
       return rewrite_aux_function_symbol(atermpp::down_cast<function_symbol>(head1),result,sigma);
     }
     else if (is_variable(head1))
@@ -530,12 +530,14 @@ data_expression RewriterJitty::rewrite_aux(
 
 data_expression RewriterJitty::rewrite_aux_function_symbol(
                       const function_symbol& op,
-                      const data_expression& term,
+                      const application& term,
                       substitution_type& sigma)
 {
   // The first term is function symbol; apply the necessary rewrite rules using a jitty strategy.
+  assert(is_function_sort(op.sort()));
 
-  const std::size_t arity=(is_function_symbol(term)?0:detail::recursive_number_of_args(term));
+  const std::size_t arity=detail::recursive_number_of_args(term);
+  assert(arity!=0);
 
   data_expression* rewritten = MCRL2_SPECIFIC_STACK_ALLOCATOR(data_expression, arity);
   bool* rewritten_defined = MCRL2_SPECIFIC_STACK_ALLOCATOR(bool, arity);
@@ -563,7 +565,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
           assert(!rewritten_defined[i]||i==0);
           if (!rewritten_defined[i])
           {
-            new (&rewritten[i]) data_expression(rewrite_aux(detail::get_argument_of_higher_order_term(atermpp::down_cast<application>(term),i),sigma));
+            new (&rewritten[i]) data_expression(rewrite_aux(detail::get_argument_of_higher_order_term(term,i),sigma));
             rewritten_defined[i]=true;
           }
           assert(rewritten[i].defined());
@@ -583,8 +585,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
         }
         else 
         {
-          const application& terma = atermpp::down_cast<application>(term);
-          if (terma.head()==op) 
+          if (term.head()==op) 
           { 
             // application rewriteable_term(op,0,arity,[&rewritten, &rewritten_defined](size_t i){assert(rewritten_defined[i]); return rewritten[i];});
             application rewriteable_term(op, &rewritten[0], &rewritten[arity]);
@@ -594,15 +595,15 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
           {
             // Guarantee that all higher order arguments are in normal form. Maybe this had to be done in the strategy for higher
             // order terms. 
-            for(std::size_t i=0; i<recursive_number_of_args(terma); i++)
+            for(std::size_t i=0; i<recursive_number_of_args(term); i++)
             {
               if (!rewritten_defined[i])
               {
-                new (&rewritten[i]) data_expression(rewrite_aux(detail::get_argument_of_higher_order_term(atermpp::down_cast<application>(term),i),sigma));
+                new (&rewritten[i]) data_expression(rewrite_aux(detail::get_argument_of_higher_order_term(term,i),sigma));
                 rewritten_defined[i]=true;
               }
             }
-            return apply_cpp_code_to_higher_order_term(terma,  rule.rewrite_cpp_code(), &rewritten[0], &rewritten[arity], sigma);
+            return apply_cpp_code_to_higher_order_term(term, rule.rewrite_cpp_code(), &rewritten[0], &rewritten[arity], sigma);
           }
         }
       }
@@ -623,7 +624,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
         for (std::size_t i=0; i<rule_arity; i++)
         {
           assert(i<arity);
-          if (!match_jitty(rewritten_defined[i]?rewritten[i]:detail::get_argument_of_higher_order_term(atermpp::down_cast<application>(term),i),
+          if (!match_jitty(rewritten_defined[i]?rewritten[i]:detail::get_argument_of_higher_order_term(term,i),
                            detail::get_argument_of_higher_order_term(atermpp::down_cast<application>(lhs),i),
                            assignments,rewritten_defined[i]))
           {
@@ -663,11 +664,11 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
               {
                 if (rewritten_defined[i])
                 {
-                  rewritten[i]=detail::get_argument_of_higher_order_term(atermpp::down_cast<application>(term),i);
+                  rewritten[i]=detail::get_argument_of_higher_order_term(term,i);
                 }
                 else
                 {
-                  new (&rewritten[i]) data_expression(detail::get_argument_of_higher_order_term(atermpp::down_cast<application>(term),i));
+                  new (&rewritten[i]) data_expression(detail::get_argument_of_higher_order_term(term,i));
                   rewritten_defined[i]=true;
                 }
               }
@@ -706,7 +707,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
   {
     if (!rewritten_defined[i])
     {
-      new (&rewritten[i]) data_expression(rewrite_aux(detail::get_argument_of_higher_order_term(atermpp::down_cast<application>(term),i),sigma));
+      new (&rewritten[i]) data_expression(rewrite_aux(detail::get_argument_of_higher_order_term(term,i),sigma));
     }
   }
 
@@ -714,7 +715,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
   data_expression result=op;
   std::size_t i = 0;
   sort_expression sort = op.sort();
-  while (is_function_sort(sort) && (i < arity))
+  while (i < arity && is_function_sort(sort))
   {
     const function_sort& fsort=atermpp::down_cast<function_sort>(sort);
     const std::size_t end=i+fsort.domain().size();
