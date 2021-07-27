@@ -51,7 +51,7 @@ class RewriterJitty: public Rewriter
 
     data_expression rewrite_aux_function_symbol(
                       const function_symbol& op,
-                      const data_expression& term,
+                      const application& term,
                       substitution_type& sigma);
 
     data_expression rewrite_aux_const_function_symbol(
