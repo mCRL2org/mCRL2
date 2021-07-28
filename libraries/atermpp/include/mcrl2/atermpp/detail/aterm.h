@@ -57,7 +57,7 @@ public:
 #ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
     assert(!is_reachable());
     m_reference_count = MarkedReferenceCount;
-    increment_reference_count_changes();
+    count_reference_count_changes();
 #else
     m_function_symbol.m_function_symbol.tag();
 #endif
@@ -70,7 +70,7 @@ public:
 #ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
     assert(is_marked());
     m_reference_count = 0;
-    increment_reference_count_changes();
+    count_reference_count_changes();
 #else
     m_function_symbol.m_function_symbol.reset();
 #endif

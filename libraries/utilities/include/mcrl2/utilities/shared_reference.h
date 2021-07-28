@@ -52,7 +52,7 @@ public:
     {
       ++m_reference_count;
     }
-    increment_reference_count_changes();
+    count_reference_count_changes();
   }
 
   /// \brief Decrement the reference count by one.
@@ -66,7 +66,7 @@ public:
     {
       --m_reference_count;
     }
-    increment_reference_count_changes();
+    count_reference_count_changes();
   }
 
   /// \brief Obtain the number of times that this reference count has changed.
@@ -77,7 +77,7 @@ public:
   }
 
   /// \brief Increment the number of reference count changes.
-  static void increment_reference_count_changes()
+  static void count_reference_count_changes()
   {
     if constexpr (EnableReferenceCountMetrics)
     {

@@ -105,13 +105,15 @@ class trace_constructor
       else
       {
         data::mutable_indexed_substitution<> m_sigma; // ADDED BY JFG.
-        for (const std::pair<lps::multi_action, lps::state>& t: m_explorer.generate_transitions(s0, m_sigma))
-        {
+        assert(0); // This code must be adapted with rewr and enumerator. 
+        // for (const std::pair<lps::multi_action, lps::state>& t: m_explorer.generate_transitions(s0, m_sigma,
+        //       m_global_rewr,m_global_enumerator))  // ADDED BY JFG, MAY NEED TO BE LOCAL REWR and ENUM. 
+        /* {
           if (t.second == s1)
           {
             return t.first;
           }
-        }
+        } */
       }
       throw mcrl2::runtime_error("no transition found in find_action");
     }

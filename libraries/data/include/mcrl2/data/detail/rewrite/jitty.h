@@ -10,6 +10,7 @@
 #ifndef MCRL2_DATA_DETAIL_REWRITE_JITTY_H
 #define MCRL2_DATA_DETAIL_REWRITE_JITTY_H
 
+#include "mcrl2/atermpp/standard_containers/vector.h"
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/rewrite/strategy_rule.h"
 
@@ -34,7 +35,40 @@ class RewriterJitty: public Rewriter
 
     RewriterJitty& operator=(const RewriterJitty& other)=delete;
 
+    void increase_rewrite_stack(std::size_t distance) 
+    {
+      if (m_rewrite_stack.capacity()<1000)
+      {
+        m_rewrite_stack.reserve(1000);
+      }
+      m_rewrite_stack.resize(m_rewrite_stack.size()+distance);
+    }
+
+    void decrease_rewrite_stack(std::size_t distance)
+    {
+      m_rewrite_stack.resize(m_rewrite_stack.size()-distance);
+    }
+
+    void set_element_in_rewrite_stack(std::size_t pos, std::size_t frame_size, const data_expression& d)
+    {
+      assert(m_top_of_the_stack>pos);
+      m_rewrite_stack[m_rewrite_stack.size()-frame_size+pos]=d;
+    }
+
+    const data_expression& get_element_from_rewrite_stack(std::size_t pos, std::size_t frame_size) const
+    {
+      assert(m_top_of_the_stack>pos);
+      return m_rewrite_stack.at(m_rewrite_stack.size()-frame_size+pos);
+    }
+
+    atermpp::vector<data_expression>& rewrite_stack()
+    {
+      return m_rewrite_stack;
+    } 
+
   private:
+    atermpp::vector<data_expression> m_rewrite_stack;     // Stack for intermediate rewrite results.
+
     std::map< function_symbol, data_equation_list > jitty_eqns;
     std::vector<strategy> jitty_strat;
 

@@ -64,7 +64,7 @@ class strategy_rule
       return m_strategy_element_type==data_equation_type;
     }
 
-    data_equation equation() const
+    const data_equation& equation() const
     {
       assert(is_equation());
       assert(is_data_equation(m_rewrite_rule));

@@ -105,7 +105,6 @@ public:
 
   void mark(std::stack<std::reference_wrapper<detail::_aterm>>& todo) const override
   {
-std::cerr << "MARK " << m_container.size() << "\n";
     for (const aterm& element: m_container) 
     {
       // Mark all terms (and their subterms) that are reachable, i.e the root set.
