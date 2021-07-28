@@ -128,19 +128,14 @@ void thread_aterm_pool::mark()
 {
 
 #ifndef MCRL2_ATERMPP_REFERENCE_COUNTED
-  // Marks all terms that are reachable from any tagged variable. Furthermore, remove variables that are not tagged.
-  for (auto it = m_variables.begin(); it != m_variables.end(); ++it)
+  for (const aterm* variable : m_variables)
   {
-    const aterm* variable = *it;
     if (variable != nullptr)
     {
       // Mark all terms (and their subterms) that are reachable, i.e the root set.
       _aterm* term = detail::address(*variable);
-      if (variable->defined() && !term->is_marked())
+      if (term != nullptr && !term->is_marked())
       {
-        // Mark the term itself as reachable.
-        term->mark();
-
         // This variable is not a default term and that term has not been marked.
         mark_term(*term, m_todo);
       }

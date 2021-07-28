@@ -29,12 +29,12 @@ namespace detail
     g_thread_term_pool().deregister_container(this);
   }
 
-  aterm_container::aterm_container(const aterm_container& c)
+  aterm_container::aterm_container(const aterm_container&)
   { 
     g_thread_term_pool().register_container(this);
   }
   
-  aterm_container::aterm_container(aterm_container&& c)
+  aterm_container::aterm_container(aterm_container&&)
   { 
     g_thread_term_pool().register_container(this);
   }
@@ -54,7 +54,7 @@ inline aterm::~aterm() noexcept
 #ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
   decrement_reference_count();
 #else
-  detail::g_thread_term_pool().remove_variable(this);
+  detail::g_thread_term_pool().deregister_variable(this);
 #endif
 }
 
