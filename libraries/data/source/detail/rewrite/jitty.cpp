@@ -726,8 +726,8 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
                 // result = application(result,&rewritten[0]+i,&rewritten[0]+end);
                 // result = application(result,&rewrite_stack()[rewrite_stack().size()-arity+i],&rewrite_stack()[rewrite_stack().size()-arity+end]);
                 result = application(result,
-                                     &rewrite_stack()[rewrite_stack().size()-arity],
-                                     &rewrite_stack()[rewrite_stack().size()]);
+                                     &rewrite_stack()[rewrite_stack().size()-arity+i],
+                                     &rewrite_stack()[rewrite_stack().size()-arity+end]);
                 i=end;
                 sort = fsort.codomain();
               }
@@ -763,7 +763,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
   const std::size_t end=fsort.domain().size();
   assert(end-1<arity);
   data_expression result = application(op,&rewrite_stack()[rewrite_stack().size()-arity],
-                                          &rewrite_stack()[rewrite_stack().size()]);
+                                          &rewrite_stack()[rewrite_stack().size()-arity+end]);
   std::size_t i=end;
   const sort_expression* sort = &fsort.codomain();
   while (i<arity && is_function_sort(*sort))
@@ -771,8 +771,8 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
     const function_sort& fsort=atermpp::down_cast<function_sort>(*sort);
     const std::size_t end=i+fsort.domain().size();
     assert(end-1<arity);
-    result = application(result,&rewrite_stack()[rewrite_stack().size()-arity],
-                                &rewrite_stack()[rewrite_stack().size()]); 
+    result = application(result,&rewrite_stack()[rewrite_stack().size()-arity+i],
+                                &rewrite_stack()[rewrite_stack().size()]-arity+end); 
     i=end;
     sort = &fsort.codomain();
   }

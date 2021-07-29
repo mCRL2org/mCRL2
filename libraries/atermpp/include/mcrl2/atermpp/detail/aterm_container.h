@@ -36,8 +36,8 @@ public:
   /// \brief Move constructor
   inline aterm_container(aterm_container&& c);
 
-  /// \brief Assignment
-  aterm_container& operator=(const aterm_container& c)
+  /// \brief Assignment This may have to be redefined in due time. 
+  /* aterm_container& operator=(const aterm_container& c)
   {
     return *this;
   }
@@ -46,7 +46,7 @@ public:
   aterm_container& operator=(aterm_container&& c)
   {
     return *this;
-  }
+  } */
 
 };
 
