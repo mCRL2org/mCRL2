@@ -27,7 +27,7 @@ class ToolInstance : public QWidget
 
     ToolInformation information() { return m_info; }
     QString executable();
-    QStringList arguments();
+    QStringList arguments(bool addQuotesAroundValuesWithSpaces);
 
   public slots:
     void onStateChange(QProcess::ProcessState state);

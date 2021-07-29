@@ -295,7 +295,7 @@ QString ToolInstance::executable()
   return m_info.path;
 }
 
-QStringList ToolInstance::arguments()
+QStringList ToolInstance::arguments(bool addQuotesAroundValuesWithSpaces)
 {
   QFileInfo info(m_filename);
   QStringList result(info.fileName());
@@ -321,9 +321,10 @@ QStringList ToolInstance::arguments()
   for (int i = 0; i < m_optionValues.count(); i++)
   {
     OptionValue& val =  *m_optionValues[i];
-    if (!val.value().isEmpty())
+    QString valueAsString = val.value(addQuotesAroundValuesWithSpaces);
+    if (!valueAsString.isEmpty())
     {
-      result.append(val.value());
+      result.append(valueAsString);
     }
   }
 
@@ -423,25 +424,25 @@ void ToolInstance::onRun()
   {
     // For GUI-based tools we spawn a new process
     m_mprocess->setProgram(executable());
-    m_mprocess->setArguments(arguments());
+    m_mprocess->setArguments(arguments(false));
     m_process = m_mprocess->start(QIODevice::ReadOnly);
   }
   else
   {
     m_process->setProgram(executable());
-    m_process->setArguments(arguments());
+    m_process->setArguments(arguments(false));
     m_process->start(QIODevice::ReadOnly);
   }
 
   if (m_process->waitForStarted(1000))
   {
-    mCRL2log(mcrl2::log::info) << "Started " << executable().toStdString() << arguments().join(" ").toStdString() << std::endl;
+    mCRL2log(mcrl2::log::info) << "Started " << executable().toStdString() << arguments(true).join(" ").toStdString() << std::endl;
     m_ui.tabWidget->setCurrentIndex(1);
   }
   else
   {
     mCRL2log(mcrl2::log::error) << m_process->errorString().toStdString()
-      << " (" << executable().toStdString() << arguments().join(" ").toStdString() << ")" << std::endl;
+      << " (" << executable().toStdString() << arguments(true).join(" ").toStdString() << ")" << std::endl;
     onStateChange(QProcess::NotRunning);
   }
 }
