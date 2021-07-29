@@ -51,13 +51,13 @@ class RewriterJitty: public Rewriter
 
     void set_element_in_rewrite_stack(std::size_t pos, std::size_t frame_size, const data_expression& d)
     {
-      assert(m_top_of_the_stack>pos);
+      //assert(m_top_of_the_stack>pos);
       m_rewrite_stack[m_rewrite_stack.size()-frame_size+pos]=d;
     }
 
     const data_expression& get_element_from_rewrite_stack(std::size_t pos, std::size_t frame_size) const
     {
-      assert(m_top_of_the_stack>pos);
+      //assert(m_top_of_the_stack>pos);
       return m_rewrite_stack.at(m_rewrite_stack.size()-frame_size+pos);
     }
 
