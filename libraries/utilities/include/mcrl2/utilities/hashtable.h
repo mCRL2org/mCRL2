@@ -132,6 +132,9 @@ public:
   /// \returns An iterator to the next key.
   iterator erase(const key_type& key);
 
+  /// \brief Find the given key and returns an iterator to that position.
+  iterator find(const key_type& key);
+
   /// \brief The number of elements in the indexed set.
   /// \return The number of elements in the indexed set. 
   size_type size() const

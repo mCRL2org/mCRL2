@@ -103,6 +103,8 @@ inline std::pair<typename hashtable<Key,Hash,Equals,Allocator>::iterator, bool> 
 template <class Key, typename Hash, typename Equals, typename Allocator>
 inline typename hashtable<Key,Hash,Equals,Allocator>::iterator hashtable<Key,Hash,Equals,Allocator>::erase(const Key& key)
 {
+  assert(find(key) != end());
+
   auto it = begin() + get_index(key);
 
   // Find the key.
@@ -113,17 +115,26 @@ inline typename hashtable<Key,Hash,Equals,Allocator>::iterator hashtable<Key,Has
     {
       it = begin();
     }
-
-    if (it == begin() + get_index(key))
-    {
-      // This is a workaround for the thread_local hashsets that are deleted before the global aterms.
-      return it;
-    }
   }
 
   *it = nullptr;
   --m_number_of_elements;
   return it;
+}
+
+
+template <class Key, typename Hash, typename Equals, typename Allocator>
+inline typename hashtable<Key,Hash,Equals,Allocator>::iterator hashtable<Key,Hash,Equals,Allocator>::find(const Key& key)
+{
+  for (auto it = begin(); it != end(); ++it)
+  {
+    if (*it == key)
+    {
+      return it;
+    }
+  }
+
+  return end();
 }
 
 // PRIVATE FUNCTIONS

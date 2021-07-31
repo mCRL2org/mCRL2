@@ -45,6 +45,7 @@ public:
 
   /// \brief Resize the function symbol pool if necessary.
   void resize_if_needed();
+
   /// \brief Get an index such that no function symbol with name prefix + returned value
   ///        and any value above it already exists.
   std::size_t get_sufficiently_large_postfix_index(const std::string& prefix) const;

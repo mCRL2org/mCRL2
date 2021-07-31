@@ -27,6 +27,7 @@ function_symbol_pool::function_symbol_pool()
   g_as_list = m_as_list;
   g_as_empty_list = m_as_empty_list;
 }
+
 function_symbol function_symbol_pool::create(const std::string& name, const std::size_t arity, const bool check_for_registered_functions)
 {
   auto it = m_symbol_set.find(name, arity);
