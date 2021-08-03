@@ -15,6 +15,7 @@
 #include <random>
 #include <thread>
 #include <chrono>
+#include "mcrl2/atermpp/standard_container/deque.h"
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/substitution_utility.h"
@@ -55,7 +56,7 @@ std::vector<data::data_expression> make_data_expression_vector(const data::data_
 class todo_set
 {
   protected:
-    std::deque<state> todo;
+    atermpp::deque<state> todo;
 
   public:
     explicit todo_set(const state& init)

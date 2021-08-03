@@ -12,7 +12,6 @@
 
 #include <csignal>
 #include <memory>
-#include "mcrl2/atermpp/standard_containers/vector.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/is_stochastic.h"
 #include "mcrl2/lts/lts_io.h"
