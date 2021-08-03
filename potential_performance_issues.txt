@@ -7,3 +7,8 @@ Als er veel termen worden aangemaakt, kan dit een probleem zijn.
 De variabele hoeft mogelijkerwijs ook niet atomair te zijn, want
 decrements koment niet zo precies. 
 
+
+Voordat een term wordt gedestroyed moet zijn deletion hook worden 
+aangeroepen in plaats van andersom. 
+
+

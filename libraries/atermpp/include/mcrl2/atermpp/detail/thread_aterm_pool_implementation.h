@@ -141,7 +141,7 @@ void thread_aterm_pool::mark()
       }
     }
   }
-#endif // MCRL2_ATERMPP_REFERENCE_COUNTED
+#endif // NOT MCRL2_ATERMPP_REFERENCE_COUNTED
 
   for (auto it = m_containers.begin(); it != m_containers.end(); ++it)
   {
