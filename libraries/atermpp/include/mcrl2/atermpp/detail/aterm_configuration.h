@@ -39,7 +39,7 @@ constexpr static bool EnableVariableRegistrationMetrics = false;
 /// \brief Switch between reference counting and tracking term variables.
 /// \details This is a macro because for constexpr booleans we cannot change inheritance and remove members.
 ///          Outcomment to enable the protection set approach to protect aterms. 
-#define MCRL2_ATERMPP_REFERENCE_COUNTED
+// #define MCRL2_ATERMPP_REFERENCE_COUNTED
 
 } // namespace detail
 } // namespace atermpp

@@ -63,6 +63,12 @@ public:
     m_term = detail::address(other);
   }
 
+  reference_aterm(const T& other) noexcept
+   : unprotected_aterm(detail::address(other))
+  {
+    // m_term = detail::address(other);
+  }
+
   reference_aterm(unprotected_aterm&& other) noexcept
   {
     m_term = detail::address(other);

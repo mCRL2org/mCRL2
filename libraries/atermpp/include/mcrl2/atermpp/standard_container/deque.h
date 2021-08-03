@@ -28,7 +28,7 @@ namespace atermpp
 /// \brief A deque class in which aterms can be stored. 
 template < class T, class Alloc = std::allocator<detail::reference_aterm<T> > > 
 class deque : protected detail::generic_aterm_container<std::deque<detail::reference_aterm<T>, Alloc> >, 
-               public std::deque< detail::reference_aterm<T>, Alloc >
+              public std::deque< detail::reference_aterm<T>, Alloc >
 {
 protected:
   typedef std::deque< detail::reference_aterm<T>, Alloc > super;
@@ -38,7 +38,7 @@ public:
   
   /// Standard typedefs.
   typedef Alloc allocator_type;
-  typedef typename super::value_type value_type;
+  typedef T value_type;
   typedef typename super::size_type size_type;
   
   /// \brief Default constructor.
@@ -59,6 +59,7 @@ public:
      super::deque(n, alloc)
   {}
 
+  /// \brief Constructor.
   deque (size_type n, const value_type& val, const allocator_type& alloc = allocator_type())
    : container_wrapper(*this, true),
      super::deque(n, detail::reference_aterm(val), alloc)
@@ -96,10 +97,10 @@ public:
      super::deque(std::move(x), alloc)
   {}
 
-  /// \brief Constructor. To be done later....
-  // deque (initializer_list<value_type> il, const allocator_type& alloc = allocator_type())
-  //  : super::deque(il, alloc)
-  // {}
+  /// \brief Constructor. 
+  deque (std::initializer_list<value_type> il, const allocator_type& alloc = allocator_type())
+    : super::deque(il.begin(), il.end(), alloc)
+  {}
 
   /// \brief Standard destructor.
   ~deque()=default;

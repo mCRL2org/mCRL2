@@ -60,7 +60,8 @@ class todo_set
 
   public:
     explicit todo_set(const state& init)
-      : todo{init}
+    //   : todo({init})   Old code, which is not accepted by the compiler....
+      : todo(1,init)
     {}
 
     template<typename ForwardIterator>

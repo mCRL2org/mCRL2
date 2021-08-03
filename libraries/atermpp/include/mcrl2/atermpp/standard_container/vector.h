@@ -38,7 +38,7 @@ public:
   
   /// Standard typedefs.
   typedef Alloc allocator_type;
-  typedef typename super::value_type value_type;
+  typedef T value_type;
   typedef typename super::size_type size_type;
   
   /// \brief Default constructor.
@@ -97,9 +97,9 @@ public:
   {}
 
   /// \brief Constructor. To be done later....
-  // vector (initializer_list<value_type> il, const allocator_type& alloc = allocator_type())
-  //  : super::vector(il, alloc)
-  // {}
+  vector (std::initializer_list<value_type> il, const allocator_type& alloc = allocator_type())
+    : super::vector(il, alloc)
+  {}
 
   /// \brief Standard destructor.
   ~vector()=default;
