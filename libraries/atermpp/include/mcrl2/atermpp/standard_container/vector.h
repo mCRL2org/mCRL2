@@ -98,7 +98,8 @@ public:
 
   /// \brief Constructor. To be done later....
   vector (std::initializer_list<value_type> il, const allocator_type& alloc = allocator_type())
-    : super::vector(il, alloc)
+    : container_wrapper(*this, true),
+      super::vector(il, alloc)
   {}
 
   /// \brief Standard destructor.

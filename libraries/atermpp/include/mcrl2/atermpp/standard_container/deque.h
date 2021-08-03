@@ -99,7 +99,8 @@ public:
 
   /// \brief Constructor. 
   deque (std::initializer_list<value_type> il, const allocator_type& alloc = allocator_type())
-    : super::deque(il.begin(), il.end(), alloc)
+    : container_wrapper(*this, true),
+      super::deque(il.begin(), il.end(), alloc)
   {}
 
   /// \brief Standard destructor.
