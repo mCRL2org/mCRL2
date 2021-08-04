@@ -24,12 +24,13 @@ template<typename Key,
          typename Hash = std::hash<Key>,
          typename Equals = std::equal_to<Key>,
          typename Allocator = std::allocator<Key>,
-         bool ThreadSafe = false>
+         bool ThreadSafe = false,
+         typename KeyTable = std::deque< Key, std::allocator<Key> > >   // This can also be atermpp::deque. 
 class indexed_set
 {
 private:
   std::vector<std::size_t> m_hashtable;
-  std::deque<Key, Allocator> m_keys;
+  KeyTable m_keys;
 
   /// \brief Mutex for the m_hashtable and m_keys data structures.
   mutable std::shared_ptr<std::mutex> m_mutex;

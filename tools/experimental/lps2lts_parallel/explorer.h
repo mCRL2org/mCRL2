@@ -16,6 +16,7 @@
 #include <thread>
 #include <chrono>
 #include "mcrl2/atermpp/standard_container/deque.h"
+#include "mcrl2/atermpp/standard_container/indexed_set.h"
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/substitution_utility.h"
@@ -368,7 +369,7 @@ class explorer: public abortable
 
     // N.B. The keys are stored in term_appl instead of data_expression_list for performance reasons.
     utilities::unordered_map<atermpp::term_appl<data::data_expression>, std::list<data::data_expression_list>> global_cache;
-    utilities::indexed_set<state> m_discovered;
+    atermpp::indexed_set<state> m_discovered;
 
     // used by make_timed_state, to avoid needless creation of vectors
     mutable std::vector<data::data_expression> timed_state;
@@ -790,7 +791,7 @@ class explorer: public abortable
       std::atomic<std::size_t>& number_of_active_processes,
       const SummandSequence& regular_summands,
       const SummandSequence& confluent_summands,
-      utilities::indexed_set<state>& discovered,
+      atermpp::indexed_set<state>& discovered,
       DiscoverState discover_state,
       ExamineTransition examine_transition,
       StartState start_state,
@@ -912,7 +913,7 @@ class explorer: public abortable
       const StateType& s0,
       const SummandSequence& regular_summands,
       const SummandSequence& confluent_summands,
-      utilities::indexed_set<state>& discovered,
+      atermpp::indexed_set<state>& discovered,
       DiscoverState discover_state = DiscoverState(),
       ExamineTransition examine_transition = ExamineTransition(),
       StartState start_state = StartState(),
@@ -1295,7 +1296,7 @@ class explorer: public abortable
     }
 
     /// \brief Returns a mapping containing all discovered states.
-    const utilities::indexed_set<state>& state_map() const
+    const atermpp::indexed_set<state>& state_map() const
     {
       return m_discovered;
     }
