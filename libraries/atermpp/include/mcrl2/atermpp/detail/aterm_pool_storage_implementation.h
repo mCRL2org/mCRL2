@@ -47,35 +47,38 @@ inline std::array<unprotected_aterm, N> construct_arguments(InputIterator it, In
 }
 void mark_term(const _aterm& root, std::stack<std::reference_wrapper<_aterm>>& todo)
 {
-  // Do not use the stack, because this might run out of stack memory for large lists.
-  todo.push(const_cast<_aterm&>(root));
-
-  // Mark the term depth-first to reduce the maximum todo size required.
-  while (!todo.empty())
+  if (!root.is_marked())
   {
-    _aterm& term = todo.top();
-    todo.pop();
+    // Do not use the stack, because this might run out of stack memory for large lists.
+    todo.push(const_cast<_aterm&>(root));
 
-    // Each term should be marked.
-    term.mark();
-    // Determine the arity of the function application.
-    const std::size_t arity = term.function().arity();
-    _term_appl& term_appl = static_cast<_term_appl&>(term);
-
-    for (std::size_t i = 0; i < arity; ++i)
+    // Mark the term depth-first to reduce the maximum todo size required.
+    while (!todo.empty())
     {
-      // Marks all arguments that are not already (marked as) reachable, because the current
-      // term is reachable and as such its arguments are reachable as well.
-      _aterm& argument = *detail::address(term_appl.arg(i));
-      if (!argument.is_marked())
+      _aterm& term = todo.top();
+      todo.pop();
+
+      // Each term should be marked.
+      term.mark();
+      // Determine the arity of the function application.
+      const std::size_t arity = term.function().arity();
+      _term_appl& term_appl = static_cast<_term_appl&>(term);
+
+      for (std::size_t i = 0; i < arity; ++i)
       {
-        argument.mark();
+        // Marks all arguments that are not already (marked as) reachable, because the current
+        // term is reachable and as such its arguments are reachable as well.
+        _aterm& argument = *detail::address(term_appl.arg(i));
+        if (!argument.is_marked())
+        {
+          argument.mark();
 
-        // Add the argument to be explored as well.
-        todo.push(argument);
+          // Add the argument to be explored as well.
+          todo.push(argument);
+        }
       }
-    }
 
+    }
   }
 }
 

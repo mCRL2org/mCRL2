@@ -103,7 +103,7 @@ class breadth_first_todo_set : public todo_set
 
     state choose_element() override
     {
-      auto s = todo.front();
+      const state s = todo.front();
       todo.pop_front();
       return s;
     }

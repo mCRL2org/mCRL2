@@ -10,8 +10,7 @@
 #ifndef MCRL2_CORE_INDEX_TRAITS_H
 #define MCRL2_CORE_INDEX_TRAITS_H
 
-#include <unordered_map>
-
+#include "mcrl2/atermpp/standard_container/unordered_map.h"
 #include "mcrl2/atermpp/detail/aterm_configuration.h"
 #include "mcrl2/core/identifier_string.h"
 
@@ -20,9 +19,9 @@ namespace mcrl2 {
 namespace core {
 
 template <typename Variable, typename KeyType>
-std::unordered_map<KeyType, std::size_t>& variable_index_map()
+atermpp::unordered_map<KeyType, std::size_t>& variable_index_map()
 {
-  static std::unordered_map<KeyType, std::size_t> m;
+  static atermpp::unordered_map<KeyType, std::size_t> m;
   return m;
 }
 
