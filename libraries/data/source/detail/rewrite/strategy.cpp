@@ -214,7 +214,6 @@ strategy RewriterJitty::create_a_rewriting_based_strategy(const function_symbol&
     rules = reverse(l);
     arity++;
   }
-  
   return strategy(max_number_of_variables,strat);
 }
 

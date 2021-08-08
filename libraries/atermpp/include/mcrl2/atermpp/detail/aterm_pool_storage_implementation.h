@@ -27,24 +27,59 @@ namespace detail
 template<std::size_t N,
          typename InputIterator,
          typename TermConverter,
-         typename std::enable_if<mcrl2::utilities::is_iterator<InputIterator>::value, void>::type* = nullptr>
+         typename std::enable_if<mcrl2::utilities::is_iterator<InputIterator>::value, void>::type* = nullptr,
+         typename std::enable_if<std::is_convertible<
+                                    typename std::invoke_result<TermConverter, typename InputIterator::value_type>::type,
+                                    aterm>::value, void>::type* = nullptr>
 inline std::array<unprotected_aterm, N> construct_arguments(InputIterator it, InputIterator end, TermConverter converter)
 {
   // The end is only used for debugging to ensure that the arity and std::distance(it, end) match.
   mcrl2::utilities::mcrl2_unused(end);
-
+ 
   // Copy the arguments into this array. Doesn't change any reference count, because they are unprotected terms.
   std::array<unprotected_aterm, N> arguments;
   for (size_t i = 0; i < N; ++i)
   {
     assert(it != end);
     arguments[i] = converter(*it);
+ 
     ++it;
   }
   assert(it == end);
-
+ 
   return arguments;
 }
+
+/// \brief Construct the proxy where its arguments are given by applying the converter
+///        to each element in the iterator.
+template<std::size_t N,
+         typename InputIterator,
+         typename TermConverter,
+         typename std::enable_if<mcrl2::utilities::is_iterator<InputIterator>::value, void>::type* = nullptr,
+         typename std::enable_if<std::is_same<
+                                    typename std::invoke_result<TermConverter,
+                                                                typename InputIterator::value_type&,
+                                                                typename InputIterator::value_type>::type,
+                                    void>::value, void>::type* = nullptr>
+inline std::array<unprotected_aterm, N> construct_arguments(InputIterator it, InputIterator end, TermConverter converter)
+{
+  // The end is only used for debugging to ensure that the arity and std::distance(it, end) match.
+  mcrl2::utilities::mcrl2_unused(end);
+ 
+  // Copy the arguments into this array. Doesn't change any reference count, because they are unprotected terms.
+  std::array<unprotected_aterm, N> arguments;
+  for (size_t i = 0; i < N; ++i)
+  {
+    assert(it != end);
+    typename InputIterator::value_type& t= *reinterpret_cast<typename InputIterator::value_type*>(&arguments[i]);
+    converter(t, *it);
+    ++it;
+  }
+  assert(it == end);
+ 
+  return arguments;
+}
+
 void mark_term(const _aterm& root, std::stack<std::reference_wrapper<_aterm>>& todo)
 {
   if (!root.is_marked())
@@ -172,7 +207,10 @@ bool ATERM_POOL_STORAGE::create_appl_dynamic(aterm& term,
 
 ATERM_POOL_STORAGE_TEMPLATES
 template<typename InputIterator,
-          typename TermConverter>
+         typename TermConverter,
+         typename std::enable_if<std::is_convertible<
+                                    typename std::invoke_result<TermConverter, typename InputIterator::value_type>::type,
+                                    aterm>::value, void>::type*>
 bool ATERM_POOL_STORAGE::create_appl_dynamic(aterm& term,
                                         const function_symbol& symbol,
                                         TermConverter converter,
@@ -181,20 +219,52 @@ bool ATERM_POOL_STORAGE::create_appl_dynamic(aterm& term,
 {
   // The end is only used for debugging to ensure that the arity and std::distance(it, end) match.
   mcrl2::utilities::mcrl2_unused(end);
-
+ 
   MCRL2_DECLARE_STACK_ARRAY(arguments, unprotected_aterm, symbol.arity());
   for (std::size_t i = 0; i < symbol.arity(); ++i)
   {
     assert(it != end);
     arguments[i] = converter(*it);
-    assert(arguments[i].defined());
     ++it;
   }
   assert(it == end);
-
+ 
   // Find or create a new term and return it.
   return emplace(term, symbol, arguments.begin(), arguments.end());
 }
+ 
+ATERM_POOL_STORAGE_TEMPLATES
+template<typename InputIterator,
+         typename TermConverter,
+         typename std::enable_if<std::is_same<
+                                    typename std::invoke_result<TermConverter,
+                                                                typename InputIterator::value_type&,
+                                                                typename InputIterator::value_type>::type,
+                                    void>::value, void>::type*>
+bool ATERM_POOL_STORAGE::create_appl_dynamic(aterm& term,
+                                        const function_symbol& symbol,
+                                        TermConverter converter,
+                                        InputIterator it,
+                                        InputIterator end)
+{
+  // The end is only used for debugging to ensure that the arity and std::distance(it, end) match.
+  mcrl2::utilities::mcrl2_unused(end);
+ 
+  MCRL2_DECLARE_STACK_ARRAY(arguments, unprotected_aterm, symbol.arity());
+  for (std::size_t i = 0; i < symbol.arity(); ++i)
+  {
+    assert(it != end);
+    typename InputIterator::value_type t;
+    converter(t,*it);
+    arguments[i]=t;
+    ++it;
+  }
+  assert(it == end);
+ 
+  // Find or create a new term and return it.
+  return emplace(term, symbol, arguments.begin(), arguments.end());
+}
+ 
 
 ATERM_POOL_STORAGE_TEMPLATES
 void ATERM_POOL_STORAGE::print_performance_stats(const char* identifier) const

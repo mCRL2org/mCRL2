@@ -237,7 +237,7 @@ template <class Term,
           typename std::enable_if<mcrl2::utilities::is_iterator<ForwardIterator>::value>::type* = nullptr,
           typename std::enable_if<!std::is_same<typename ForwardIterator::iterator_category, std::input_iterator_tag>::value>::type* = nullptr,
           typename std::enable_if<!std::is_same<typename ForwardIterator::iterator_category, std::output_iterator_tag>::value>::type* = nullptr>
-void make_term_appl(term_appl<Term>& target,
+void make_term_appl(Term& target,
                     const function_symbol& sym,
                     ForwardIterator begin,
                     ForwardIterator end)
@@ -265,7 +265,7 @@ template <class Term,
           class InputIterator,
           typename std::enable_if<mcrl2::utilities::is_iterator<InputIterator>::value>::type* = nullptr,
           typename std::enable_if<std::is_same<typename InputIterator::iterator_category, std::input_iterator_tag>::value>::type* = nullptr>
-void make_term_appl(term_appl<Term>& target,
+void make_term_appl(Term& target,
                     const function_symbol& sym,
                     InputIterator begin,
                     InputIterator end)
@@ -292,7 +292,7 @@ template <class Term,
           class InputIterator,
           class TermConverter,
           typename std::enable_if<mcrl2::utilities::is_iterator<InputIterator>::value>::type* = nullptr>
-void make_term_appl(term_appl<Term>& target,
+void make_term_appl(Term& target,
                     const function_symbol& sym,
                     InputIterator begin,
                     InputIterator end,
@@ -310,7 +310,7 @@ void make_term_appl(term_appl<Term>& target,
 /// \param target The variable in which the result will be put. This variable may be used for scratch purposes.
 /// \param sym A function symbol.
 template <class Term>
-void make_term_appl(term_appl<Term>& target,
+void make_term_appl(Term& target,
                     const function_symbol& sym)
 {
   detail::g_thread_term_pool().create_term(target, sym);
@@ -325,7 +325,7 @@ void make_term_appl(term_appl<Term>& target,
 /// \param arguments The arguments of the function application.
 template<class Term,
          typename ...Terms>
-void make_term_appl(term_appl<Term>& target, const function_symbol& symbol, const Terms& ...arguments)
+void make_term_appl(Term& target, const function_symbol& symbol, const Terms& ...arguments)
 {
   detail::g_thread_term_pool().create_appl(target, symbol, arguments...);
 

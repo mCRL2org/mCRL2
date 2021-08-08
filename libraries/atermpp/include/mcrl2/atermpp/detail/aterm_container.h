@@ -130,7 +130,7 @@ public:
     return m_t;
   }
 
-  void mark(std::stack<std::reference_wrapper<detail::_aterm>>& todo) const
+  void mark(std::stack<std::reference_wrapper<detail::_aterm>>& /* todo */) const
   {
     /* Do nothing */
   } 
