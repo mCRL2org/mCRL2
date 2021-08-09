@@ -502,7 +502,7 @@ void RewriterJitty::rewrite_aux(
   }
   if (is_variable(term))
   {
-    result=sigma(atermpp::down_cast<variable>(term));      /* TODO Optimize */
+    sigma.apply(atermpp::down_cast<variable>(term),result);
     return;
   }
   if (is_where_clause(term))
@@ -529,34 +529,6 @@ void RewriterJitty::rewrite_aux(
     return;
   }
 }
-
-/* static inline void clean_up_rewritten(const size_t arity, data_expression* rewritten, bool* rewritten_defined)
-{
-  for (std::size_t i=0; i<arity; ++i)
-  {
-    if (rewritten_defined[i])
-    {
-      rewritten[i].~data_expression();
-    }
-  } 
-}
-
-static inline void clean_up_rewritten_all(const size_t arity, data_expression* rewritten)
-{
-  for (std::size_t i=0; i<arity; ++i)
-  {
-    rewritten[i].~data_expression();
-  } 
-} */
-
-/* static atermpp::vector<data_expression>& rewrite_stack()     // Stack for intermediate rewrite results.
-{
-  thread_local atermpp::vector<data_expression> m_rewrite_stack;
-  m_rewrite_stack.reserve(100000);                           // Start with a substantial initial size,
-  return m_rewrite_stack;                                    // as moving the stack in memory leads to crashes. 
-} */
-
-// thread_local std::vector<data_expression> rewrite_stack; // Stack for intermediate rewrite results.
 
 void RewriterJitty::rewrite_aux_function_symbol(
                       data_expression& result, 
