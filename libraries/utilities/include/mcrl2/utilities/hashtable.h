@@ -142,12 +142,6 @@ public:
     return m_number_of_elements;
   }
 
-  ~hashtable()
-  {
-    std::cerr << "DESTROY HASHTABLE " << typeid(Key).name() << "\n";
-    for(auto& k: m_hashtable){ std::cerr << k << "\n"; }
-  }
-
 private:
   /// \return The index where this key should be stored.
   std::size_t get_index(const key_type& key);

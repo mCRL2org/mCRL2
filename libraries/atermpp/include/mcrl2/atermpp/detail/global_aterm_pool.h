@@ -24,12 +24,6 @@ extern typename std::aligned_storage<sizeof(aterm_pool), alignof(aterm_pool)>::t
 /// \brief A reference to the global term pool storage
 static aterm_pool& g_aterm_pool_instance = *static_cast<aterm_pool*>(static_cast<void*>(&g_aterm_pool_storage));
 
-inline thread_aterm_pool& g_thread_term_pool()
-{
-  static thread_local thread_aterm_pool per_thread_pool(g_aterm_pool_instance);
-  return per_thread_pool;
-}
-
 /// \brief obtain a reference to the global aterm pool.
 /// \details provides lazy initialization which should be used when instantiating
 ///          global terms and function symbols.
@@ -48,6 +42,25 @@ inline aterm_pool& g_term_pool()
 
   return g_aterm_pool_instance;
 }
+
+extern thread_local typename std::aligned_storage<sizeof(thread_aterm_pool), alignof(thread_aterm_pool)>::type 
+                                     thread_aterm_pool_storage;  
+
+/// \brief A reference to the global term pool storage
+static thread_local thread_aterm_pool& thread_aterm_pool_instance = *static_cast<thread_aterm_pool*>(static_cast<void*>(&thread_aterm_pool_storage));
+
+inline thread_aterm_pool& g_thread_term_pool()
+{
+  static thread_local bool initialized = false;
+  if (!initialized)
+  {
+    new (&thread_aterm_pool_instance) thread_aterm_pool(g_aterm_pool_instance);
+    initialized = true;
+  }
+
+  return thread_aterm_pool_instance;
+}
+
 
 } // namespace detail
 } // namespace atermpp

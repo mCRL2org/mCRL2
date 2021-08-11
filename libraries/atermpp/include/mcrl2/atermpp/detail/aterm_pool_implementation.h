@@ -129,43 +129,36 @@ void aterm_pool::add_deletion_hook(function_symbol sym, term_callback callback)
   }
 }
 
-void aterm_pool::collect() // JFG: Does not appear to be used. 
+/* void aterm_pool::collect() // JFG: Does not appear to be used. 
 {
   m_count_until_collection = 0;
   collect_impl(nullptr);   // Dit lijkt erg gevaarlijke code, want nullptr verwijst naar niets,
                            // maar in collect_impl wordt het wel gebruikt. 
-} 
+} */
 
 void aterm_pool::register_thread_aterm_pool(thread_aterm_pool_interface& pool)
 {
-std::cerr << "LOCK3\n";
   if constexpr (GlobalThreadSafe) { m_mutex.lock(); }
 
   mCRL2log(mcrl2::log::debug) << "Registered thread_local aterm pool\n";
-  m_thread_pools.insert(m_thread_pools.end(), 
-                        std::unique_ptr<thread_aterm_pool_interface,skip_deletion_of_aterm_pool_interface>(&pool));
+  m_thread_pools.insert(m_thread_pools.end(), &pool);
 
-std::cerr << "UNLOCK3\n";
   if constexpr (GlobalThreadSafe) { m_mutex.unlock(); }
 }
 
 void aterm_pool::remove_thread_aterm_pool(thread_aterm_pool_interface& pool)
 {
-std::cerr << "LOCK4\n";
   if constexpr (GlobalThreadSafe) { m_mutex.lock(); }
 
   mCRL2log(mcrl2::log::debug) << "Removed thread_local aterm pool\n";
-/* FOUT 
-  auto it = std::find(m_thread_pools.begin(), m_thread_pools.end(), 
-                     std::unique_ptr<thread_aterm_pool_interface,skip_deletion_of_aterm_pool_interface>(&pool));
+  auto it = std::find(m_thread_pools.begin(), m_thread_pools.end(), &pool);
   if (it != m_thread_pools.end())
   {
-    // m_thread_pools.erase(it->get());     // This only removes the pointer, not the underlying data
-                                  // structure, which only disappears when the thread is removed. 
+    m_thread_pools.erase(it);  // This only removes the pointer, not the underlying data
+                               // structure, which only disappears when the thread is removed. 
   }
-*/
 
-std::cerr << "UNLOCK4\n";
+
   if constexpr (GlobalThreadSafe) { m_mutex.unlock(); }
 }
 
@@ -190,7 +183,7 @@ void aterm_pool::print_performance_statistics() const
   }
 #endif
   // Print information for the local aterm pools.
-  for (const std::unique_ptr<thread_aterm_pool_interface,skip_deletion_of_aterm_pool_interface>& local : m_thread_pools)
+  for (const thread_aterm_pool_interface* local : m_thread_pools)
   {
     local->print_local_performance_statistics();
   }
@@ -479,7 +472,6 @@ void aterm_pool::resize_if_needed(thread_aterm_pool_interface* thread)
 
 void aterm_pool::wait()
 {
-std::cerr << "LOCK1\n";
   std::unique_lock lock(m_mutex);
 }
 
@@ -488,13 +480,12 @@ void aterm_pool::lock(thread_aterm_pool_interface* thread)
   if constexpr (!GlobalThreadSafe) { return; }
 
   // Only one thread can halt everything.
-std::cerr << "LOCK2\n";
   m_mutex.lock();
 
   // Indicate that threads must wait.
   for (auto& pool : m_thread_pools)
   {
-    if (pool.get() != thread)
+    if (pool != thread)
     {
       pool->set_forbidden(true);
     }
@@ -516,7 +507,6 @@ void aterm_pool::unlock()
     pool->set_forbidden(false);
   }
 
-std::cerr << "UNLOCK\n";
   m_mutex.unlock();
 }
 

@@ -10,7 +10,6 @@
 #ifndef ATERMPP_DETAIL_ATERM_POOL_H
 #define ATERMPP_DETAIL_ATERM_POOL_H
 
-#include <memory>
 #include "mcrl2/atermpp/detail/aterm_pool_storage.h"
 #include "mcrl2/atermpp/detail/function_symbol_pool.h"
 
@@ -48,14 +47,6 @@ public:
 
   /// \brief Blocks until the thread pool is not busy.
   virtual void set_forbidden(bool value) = 0;
-};
-
-struct skip_deletion_of_aterm_pool_interface
-{
-  void operator()(thread_aterm_pool_interface* )
-  {
-    // Do not destroy this object. 
-  }
 };
 
 class thread_aterm_pool;
@@ -177,7 +168,7 @@ private:
   inline void unlock();
 
   /// \brief The set of local aterm pools.
-  std::vector<std::unique_ptr<thread_aterm_pool_interface, skip_deletion_of_aterm_pool_interface> > m_thread_pools;
+  std::vector<thread_aterm_pool_interface* > m_thread_pools;
 
   /// \brief Mutex for adding/removing local pools in m_thread_pools.
   std::mutex m_mutex;
