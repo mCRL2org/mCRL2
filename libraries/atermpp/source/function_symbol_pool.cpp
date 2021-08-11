@@ -45,6 +45,7 @@ function_symbol function_symbol_pool::create(const std::string& name, const std:
     const _function_symbol& symbol = *m_symbol_set.emplace(name, arity).first;
     if (check_for_registered_functions)
     {
+std::cerr << "LOCK6\n";
       if constexpr (GlobalThreadSafe) { m_mutex.lock(); }
 
       // Check whether there is a registered prefix p such that name equal pn where n is a number.
@@ -71,6 +72,7 @@ function_symbol function_symbol_pool::create(const std::string& name, const std:
         }
       }
 
+std::cerr << "UNLOCK6\n";
       if  constexpr (GlobalThreadSafe) { m_mutex.unlock(); }
     }
 
@@ -80,18 +82,22 @@ function_symbol function_symbol_pool::create(const std::string& name, const std:
 
 void function_symbol_pool::deregister(const std::string& prefix)
 {
+std::cerr << "LOCK7\n";
   if constexpr (GlobalThreadSafe) { m_mutex.lock(); }
   m_prefix_to_register_function_map.erase(prefix);
+std::cerr << "LOCK7\n";
   if constexpr (GlobalThreadSafe) { m_mutex.unlock(); }
 }
 
 std::shared_ptr<std::size_t> function_symbol_pool::register_prefix(const std::string& prefix)
 {
+std::cerr << "LOCK8\n";
   if constexpr (GlobalThreadSafe) { m_mutex.lock(); }
 
   auto it = m_prefix_to_register_function_map.find(prefix);
   if (it != m_prefix_to_register_function_map.end())
   {
+std::cerr << "LOCK8a\n";
     if constexpr (GlobalThreadSafe) { m_mutex.unlock(); }
     return it->second;
   }
@@ -101,6 +107,7 @@ std::shared_ptr<std::size_t> function_symbol_pool::register_prefix(const std::st
     std::shared_ptr<std::size_t> shared_index = std::make_shared<std::size_t>(index);
     m_prefix_to_register_function_map[prefix] = shared_index;
 
+std::cerr << "LOCK8b\n";
     if constexpr (GlobalThreadSafe) { m_mutex.unlock(); }
     return shared_index;
   }
