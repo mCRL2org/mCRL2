@@ -850,6 +850,7 @@ class explorer: public abortable
                 }
                 else
                 {
+                  m_exclusive_state_access.lock();
                   std::size_t s1_index = discovered.index(s1);
                   if (s1_index >= discovered.size())
                   {
@@ -864,13 +865,12 @@ class explorer: public abortable
                     }
                     else
                     {
-                      m_exclusive_state_access.lock();
                       s1_index = discovered.insert(s1).first;
                       discover_state(s1, s1_index);
                       todo.insert(s1);
-                      m_exclusive_state_access.unlock();
                     }
                   }
+                  m_exclusive_state_access.unlock();
                   m_exclusive_transition_access.lock();
                   examine_transition(s, s_index, a, s1, s1_index, summand.index);
                   m_exclusive_transition_access.unlock();
