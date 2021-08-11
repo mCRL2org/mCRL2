@@ -494,7 +494,10 @@ void aterm_pool::lock(thread_aterm_pool_interface* thread)
   // Wait for all pools to indicate that they are not busy.
   for (const auto& pool : m_thread_pools)
   {
-    pool->wait_for_busy();
+    if (pool != thread)
+    {
+      pool->wait_for_busy();
+    }
   }
 }
 
