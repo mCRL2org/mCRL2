@@ -71,14 +71,23 @@ inline void hashtable<Key,Hash,Equals,Allocator>::clear()
 }
 
 template <class Key, typename Hash, typename Equals, typename Allocator>
+bool hashtable<Key,Hash,Equals,Allocator>::must_resize()
+{
+  return (2 * m_number_of_elements >= m_hashtable.size());
+}
+
+template <class Key, typename Hash, typename Equals, typename Allocator>
+void hashtable<Key,Hash,Equals,Allocator>::resize()
+{
+  rehash(2 * m_hashtable.size());
+}
+
+template <class Key, typename Hash, typename Equals, typename Allocator>
 inline std::pair<typename hashtable<Key,Hash,Equals,Allocator>::iterator, bool> hashtable<Key,Hash,Equals,Allocator>::insert(const Key& key)
 {
+  // Resize hashtable must be done explicitly.
+  assert(!must_resize());
   ++m_number_of_elements;
-  // Resize hashtable if necessary.
-  if (2 * m_number_of_elements >= m_hashtable.size())
-  {
-    rehash(2 * m_hashtable.size());
-  }
 
   auto it = begin() + get_index(key);
 

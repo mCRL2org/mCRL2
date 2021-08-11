@@ -38,16 +38,16 @@ public:
   inline aterm_container(aterm_container&& c);
 
   /// \brief Assignment This may have to be redefined in due time. 
-  /* aterm_container& operator=(const aterm_container& c)
+  aterm_container& operator=(const aterm_container& )
   {
     return *this;
   }
 
   /// \brief Move assignment
-  aterm_container& operator=(aterm_container&& c)
+  aterm_container& operator=(aterm_container&& )
   {
     return *this;
-  } */
+  } 
 
 };
 

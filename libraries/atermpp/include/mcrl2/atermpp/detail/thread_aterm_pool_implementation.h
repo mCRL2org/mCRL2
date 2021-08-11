@@ -85,6 +85,14 @@ void thread_aterm_pool::register_variable(aterm* variable)
 {
   if constexpr (EnableVariableRegistrationMetrics) { ++m_variable_insertions; }
 
+  /* Resizing of the protection set should not interfere with garbage collection and rehashing */
+  if (m_variables.must_resize())
+  {
+    m_pool.lock(this);
+    m_variables.resize();
+    m_pool.unlock();
+  }
+
   lock_shared();
   auto [it, inserted] = m_variables.insert(variable);
 

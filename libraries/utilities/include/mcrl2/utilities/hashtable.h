@@ -142,6 +142,13 @@ public:
     return m_number_of_elements;
   }
 
+  /// \brief Check whether the hashtable must be resized. This is not automatic and must be done explicitly. 
+  bool must_resize();
+
+  /// \brief Resize the hashtable. This is not done automatically. 
+  void resize();
+
+
 private:
   /// \return The index where this key should be stored.
   std::size_t get_index(const key_type& key);
