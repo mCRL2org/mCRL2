@@ -112,8 +112,6 @@ inline std::pair<typename hashtable<Key,Hash,Equals,Allocator>::iterator, bool> 
 template <class Key, typename Hash, typename Equals, typename Allocator>
 inline typename hashtable<Key,Hash,Equals,Allocator>::iterator hashtable<Key,Hash,Equals,Allocator>::erase(const Key& key)
 {
-  assert(find(key) != end());
-
   auto it = begin() + get_index(key);
 
   // Find the key.
@@ -124,6 +122,8 @@ inline typename hashtable<Key,Hash,Equals,Allocator>::iterator hashtable<Key,Has
     {
       it = begin();
     }
+
+    assert(it != begin() + get_index(key));
   }
 
   *it = nullptr;
