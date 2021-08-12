@@ -9,7 +9,7 @@
 #ifndef MCRL2_ATERMPP_INDEXED_SET_H
 #define MCRL2_ATERMPP_INDEXED_SET_H
 
-#include <mcrl2/atermpp/standard_container/deque.h>
+#include <mcrl2/atermpp/standard_containers/deque.h>
 
 #include "mcrl2/utilities/indexed_set.h"
 

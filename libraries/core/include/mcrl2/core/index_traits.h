@@ -10,7 +10,7 @@
 #ifndef MCRL2_CORE_INDEX_TRAITS_H
 #define MCRL2_CORE_INDEX_TRAITS_H
 
-#include "mcrl2/atermpp/standard_container/unordered_map.h"
+#include "mcrl2/atermpp/standard_containers/unordered_map.h"
 #include "mcrl2/atermpp/detail/aterm_configuration.h"
 #include "mcrl2/core/identifier_string.h"
 

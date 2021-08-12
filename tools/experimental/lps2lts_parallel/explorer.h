@@ -15,8 +15,8 @@
 #include <random>
 #include <thread>
 #include <chrono>
-#include "mcrl2/atermpp/standard_container/deque.h"
-#include "mcrl2/atermpp/standard_container/indexed_set.h"
+#include "mcrl2/atermpp/standard_containers/deque.h"
+#include "mcrl2/atermpp/standard_containers/indexed_set.h"
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/substitution_utility.h"
