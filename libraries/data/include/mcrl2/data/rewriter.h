@@ -32,7 +32,8 @@ class basic_rewriter
 
   protected:
     /// \brief The wrapped Rewriter.
-    std::shared_ptr<detail::Rewriter> m_rewriter;
+    // std::shared_ptr<detail::Rewriter> m_rewriter;  A rewriter can have local data, such as a local stack, and this cannot be shared, especially not in a parallel context. 
+    std::unique_ptr<detail::Rewriter> m_rewriter;  
 
   public:
 
@@ -46,15 +47,22 @@ class basic_rewriter
 
     /// \brief Constructor.
     /// \param[in] r A rewriter
-    explicit basic_rewriter(const std::shared_ptr<detail::Rewriter>& r) :
-      m_rewriter(r)
+    // explicit basic_rewriter(const std::shared_ptr<detail::Rewriter>& r) :     OLD REMOVE.
+    explicit basic_rewriter(const std::unique_ptr<detail::Rewriter>& r) : 
+      m_rewriter(r->clone())
     {}
 
     /// \brief Copy Constructor
-    basic_rewriter(const basic_rewriter& other)=default;
+    basic_rewriter(const basic_rewriter& other)
+      : m_rewriter(other.m_rewriter->clone())
+    {}
 
     /// \brief Assignment operator
-    basic_rewriter& operator=(const basic_rewriter& other)=default;
+    basic_rewriter& operator=(const basic_rewriter& other)
+    {
+      m_rewriter=other.m_rewriter->clone(); // Note that this is an assign move. 
+      return *this;
+    }
 
     /// \brief Constructor.
     /// \param[in] d A data specification

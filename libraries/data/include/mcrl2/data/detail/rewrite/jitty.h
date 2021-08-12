@@ -54,13 +54,23 @@ class RewriterJitty: public Rewriter
     typedef Rewriter::substitution_type substitution_type;
 
     RewriterJitty(const data_specification& data_spec, const used_data_equation_selector &);
+    
+    // The copy constructor.
+    RewriterJitty(const RewriterJitty& other) = default;
+
+    // The assignment operator.
+    RewriterJitty& operator=(const RewriterJitty& other) = default;
+
     virtual ~RewriterJitty();
 
     rewrite_strategy getStrategy();
 
     data_expression rewrite(const data_expression &term, substitution_type &sigma);
 
-    RewriterJitty& operator=(const RewriterJitty& other)=delete;
+    std::unique_ptr<detail::Rewriter> clone()
+    {
+      return std::unique_ptr<Rewriter>(new RewriterJitty(*this));
+    }
 
     void increase_rewrite_stack(std::size_t distance) 
     {
@@ -108,7 +118,7 @@ class RewriterJitty: public Rewriter
     // A dedicated function symbol that indicates that a term is in normal form. It has name "Rewritten@@term".
     // The function symbol below is used to administrate that a term is in normal form. It is put around a term.
     // Terms with this auxiliary function symbol cannot be printed using the pretty printer for data expressions.
-    const function_symbol this_term_is_in_normal_form_symbol;
+    function_symbol this_term_is_in_normal_form_symbol;
 
     atermpp::vector<data_expression> m_rewrite_stack;     // Stack for intermediate rewrite results.
 

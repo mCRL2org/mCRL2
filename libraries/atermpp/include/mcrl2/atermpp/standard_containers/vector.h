@@ -89,7 +89,6 @@ public:
      super::vector(std::move(x))
   {}
 
-
   /// \brief Constructor.
   vector (vector&& x, const allocator_type& alloc)
    : container_wrapper(*this, true),
@@ -101,6 +100,12 @@ public:
     : container_wrapper(*this, true),
       super::vector(il, alloc)
   {}
+
+  /// \brief Assignment operator.
+  vector& operator= (const vector& x) = default;
+  
+  /// \brief Move assignment operator
+  vector& operator=(vector&& x) = default;
 
   /// \brief Standard destructor.
   ~vector()=default;

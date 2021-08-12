@@ -452,7 +452,7 @@ data_expression Rewriter::quantifier_enumeration(
 }
 
 
-std::shared_ptr<Rewriter> createRewriter(
+std::unique_ptr<Rewriter> createRewriter(
             const data_specification& data_spec,
             const used_data_equation_selector& equations_selector,
             const rewrite_strategy strategy)
@@ -460,16 +460,16 @@ std::shared_ptr<Rewriter> createRewriter(
   switch (strategy)
   {
     case jitty:
-      return std::shared_ptr<Rewriter>(new RewriterJitty(data_spec,equations_selector));
+      return std::unique_ptr<Rewriter>(new RewriterJitty(data_spec,equations_selector));
 #ifdef MCRL2_JITTYC_AVAILABLE
     case jitty_compiling:
-      return std::shared_ptr<Rewriter>(new RewriterCompilingJitty(data_spec,equations_selector));
+      return std::unique_ptr<Rewriter>(new RewriterCompilingJitty(data_spec,equations_selector));
 #endif
     case jitty_prover:
-      return std::shared_ptr<Rewriter>(new RewriterProver(data_spec,jitty,equations_selector));
+      return std::unique_ptr<Rewriter>(new RewriterProver(data_spec,jitty,equations_selector));
 #ifdef MCRL2_JITTYC_AVAILABLE
     case jitty_compiling_prover:
-      return std::shared_ptr<Rewriter>(new RewriterProver(data_spec,jitty_compiling,equations_selector));
+      return std::unique_ptr<Rewriter>(new RewriterProver(data_spec,jitty_compiling,equations_selector));
 #endif
     default: throw mcrl2::runtime_error("Cannot create a rewriter using strategy " + pp(strategy) + ".");
   }

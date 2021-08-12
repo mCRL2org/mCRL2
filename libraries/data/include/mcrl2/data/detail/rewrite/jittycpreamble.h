@@ -349,7 +349,6 @@ bool init(rewriter_interface* i, RewriterCompilingJitty* this_rewriter)
 #endif
   i->rewrite_external = &rewrite;
   i->rewrite_cleanup = &rewrite_cleanup;
-  // this_rewriter = i->rewriter;
   set_the_precompiled_rewrite_functions_in_a_lookup_table(this_rewriter);
   i->status = "rewriter loaded successfully.";
   return true;

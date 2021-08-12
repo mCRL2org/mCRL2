@@ -19,10 +19,10 @@
 namespace atermpp {
 
 /// \brief Generates unique function symbols with a given prefix.
-class function_symbol_generator : private mcrl2::utilities::noncopyable
+class function_symbol_generator // : private mcrl2::utilities::noncopyable
 {
 protected:
-  const std::string m_prefix;
+  std::string m_prefix;
 
   /// \brief Cache the value that is set in the constructor
   std::size_t  m_initial_index;

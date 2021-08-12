@@ -43,6 +43,14 @@ class Rewriter
   protected:
     enumerator_identifier_generator m_generator;  //name for variables.
 
+    /** \brief The copy assignment operator is protected. Public copying is not allowed.
+    **/
+    Rewriter& operator=(const Rewriter& other) = default;
+
+    /** \brief The copy constructor operator is protected. Public copying is not allowed.
+    **/
+    Rewriter(const Rewriter& other) = default;
+
   public:
     typedef mutable_indexed_substitution<> substitution_type;
 
@@ -57,10 +65,6 @@ class Rewriter
           m_data_specification_for_enumeration(data_spec)
     {
     }
-
-    /** \brief The copy assignment operator is deleted. Copying is not allowed.
-    **/
-    Rewriter& operator=(const Rewriter& other)=delete;
 
     /** \brief Destructor. */
     virtual ~Rewriter()
@@ -105,6 +109,12 @@ class Rewriter
     {
       return rewrite(term,sigma);
     }
+
+    /**
+     * \brief Clone a rewriter.
+     * \return A (pointer to a) a clone of the rewriter.
+     **/
+    virtual std::unique_ptr<detail::Rewriter> clone() = 0;
 
   public:
   /* The functions below are public, because they are used in the compiling jitty rewriter */
@@ -155,7 +165,7 @@ class Rewriter
 
   protected:
 
-    const mcrl2::data::data_specification m_data_specification_for_enumeration;
+    mcrl2::data::data_specification m_data_specification_for_enumeration;
 
     data_expression quantifier_enumeration(
           const variable_list& vl,
@@ -176,7 +186,7 @@ class Rewriter
  * \return A (pointer to a) rewriter that uses the data specification DataSpec
  *         and strategy Strategy to rewrite.
  **/
-std::shared_ptr<detail::Rewriter> createRewriter(
+std::unique_ptr<detail::Rewriter> createRewriter(
              const data_specification& DataSpec,
              const used_data_equation_selector& equations_selector,
              const rewrite_strategy Strategy = jitty);

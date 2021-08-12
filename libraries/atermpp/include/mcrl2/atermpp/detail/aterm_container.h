@@ -317,10 +317,20 @@ template<typename Container>
 class generic_aterm_container : public aterm_container
 {
 public:
-  /// \construct
+  /// \brief Constructor
   generic_aterm_container(const Container& container, bool)
    : m_container(container)
   {}
+
+  /// \brief Assignment operator
+  generic_aterm_container& operator=(const generic_aterm_container& )
+  {
+    // m_container is not replaced. It refers automatically to the newly copied container. 
+    return *this;
+  }
+
+  /// \brief Assignment move operator
+  generic_aterm_container& operator=(generic_aterm_container&& ) = default;
 
   /// \brief Provides access to the underlying container.
   // Container& container() { return m_container; }

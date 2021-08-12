@@ -795,12 +795,14 @@ class explorer: public abortable
       DiscoverState discover_state,
       ExamineTransition examine_transition,
       StartState start_state,
-      FinishState finish_state
+      FinishState finish_state,
+      data::rewriter rewriter_for_this_thread
     )
     {
       mCRL2log(log::verbose) << "Start thread " << process_number << ".\n";
-      data::rewriter m_rewr(construct_rewriter(m_lpsspec, m_options.remove_unused_rewrite_rules));
-      data::enumerator_algorithm<> m_enumerator(m_rewr, m_lpsspec.data(), m_rewr, m_id_generator, false);
+      // data::rewriter m_rewr(construct_rewriter(m_lpsspec, m_options.remove_unused_rewrite_rules));
+      
+      data::enumerator_algorithm<> m_enumerator(rewriter_for_this_thread, m_lpsspec.data(), rewriter_for_this_thread, m_id_generator, false);
       data::mutable_indexed_substitution<> m_sigma;  // JFG This must be a thread local substitution.
       while (number_of_active_processes>0)
       {
@@ -818,14 +820,14 @@ class explorer: public abortable
               summand,
               confluent_summands,
               m_sigma,
-              m_rewr,
+              rewriter_for_this_thread,
               m_enumerator,
               [&](const lps::multi_action& a, const state_type& s1)
               {
                 if constexpr (Timed)
                 {
                   const data::data_expression& t = s[m_n];
-                  if (a.has_time() && less_equal(a.time(), t, m_rewr))
+                  if (a.has_time() && less_equal(a.time(), t, rewriter_for_this_thread))
                   {
                     return;
                   }
@@ -943,7 +945,7 @@ class explorer: public abortable
                                                        DiscoverInitialState >
                                 (todo,i,number_of_active_processes,
                                  regular_summands,confluent_summands,discovered, discover_state, 
-                                 examine_transition, start_state, finish_state); } );
+                                 examine_transition, start_state, finish_state, m_global_rewr); } );
         threads.push_back(std::move(tr));
       }
 

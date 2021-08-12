@@ -605,9 +605,14 @@ class BDD_Prover: protected rewriter
     }
 
     /// \brief Returns the rewriter used by this prover (i.e. it returns Prover::f_rewriter).
-    std::shared_ptr<detail::Rewriter> get_rewriter()
+    /* std::unique_ptr<detail::Rewriter> get_rewriter()
     {
       return m_rewriter;
+    } */
+
+    strategy rewriter_strategy() const
+    {
+      return m_rewriter->getStrategy();
     }
 
     /// \brief Sets Prover::f_formula to formula.

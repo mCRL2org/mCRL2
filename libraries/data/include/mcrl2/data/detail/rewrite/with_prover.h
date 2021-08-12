@@ -41,7 +41,7 @@ class RewriterProver: public Rewriter
 
     rewrite_strategy getStrategy()
     {
-      switch (prover_obj.get_rewriter()->getStrategy())
+      switch (prover_obj.rewriter_strategy())
       {
         case jitty:
           return jitty_prover;
@@ -76,7 +76,19 @@ class RewriterProver: public Rewriter
       //}
     }
 
+  protected:
 
+    // Protected copy constructor.
+    RewriterProver(const RewriterProver& other)
+      : Rewriter(other),
+        prover_obj(other.prover_obj)
+    {}
+    
+    std::unique_ptr<Rewriter> clone()
+    {
+      RewriterProver* new_prover = new RewriterProver(*this);
+      return std::unique_ptr<Rewriter>(new_prover);
+    }
 };
 
 }

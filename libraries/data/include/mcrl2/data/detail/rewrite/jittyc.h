@@ -130,7 +130,12 @@ class RewriterCompilingJitty: public Rewriter
     // Standard assignment operator.
     RewriterCompilingJitty& operator=(const RewriterCompilingJitty& other)=delete;
 
-  private:
+    std::unique_ptr<detail::Rewriter> clone()
+    {
+      return std::unique_ptr<Rewriter>(new RewriterCompilingJitty(*this));
+    }
+
+  protected:
     class ImplementTree;
     friend class ImplementTree;
     
@@ -142,6 +147,9 @@ class RewriterCompilingJitty: public Rewriter
 
     std::shared_ptr<uncompiled_library> rewriter_so;
     normal_form_cache m_nf_cache;
+
+    // Copy construction. Not (yet) for public use.
+    RewriterCompilingJitty(RewriterCompilingJitty& other) = default;
 
     void (*so_rewr_cleanup)();
     data_expression(*so_rewr)(const data_expression&, RewriterCompilingJitty*);
