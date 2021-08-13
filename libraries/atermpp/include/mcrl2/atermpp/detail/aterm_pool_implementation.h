@@ -129,12 +129,11 @@ void aterm_pool::add_deletion_hook(function_symbol sym, term_callback callback)
   }
 }
 
-/* void aterm_pool::collect() // JFG: Does not appear to be used. 
+void aterm_pool::collect()
 {
   m_count_until_collection = 0;
-  collect_impl(nullptr);   // Dit lijkt erg gevaarlijke code, want nullptr verwijst naar niets,
-                           // maar in collect_impl wordt het wel gebruikt. 
-} */
+  collect_impl(nullptr);   // TODO: This code looks incorrect. The collect function is only used in tests. 
+} 
 
 void aterm_pool::register_thread_aterm_pool(thread_aterm_pool_interface& pool)
 {

@@ -444,53 +444,59 @@ void RewriterJitty::rewrite_aux(
     const application& tapp=atermpp::down_cast<application>(term);
     
     // const data_expression t = rewrite_aux(tapp.head(),sigma);
-    increase_rewrite_stack(1);
-    rewrite_aux(top_of_rewrite_stack(),tapp.head(),sigma);
+    increase_rewrite_stack(2);
+
+    const std::size_t t = 0;  // Index of variable t in the stack. 
+    rewrite_aux(element_from_rewrite_stack(t,2),tapp.head(),sigma);
 
     // Here t has the shape f(u1,....,un)(u1',...,um')....: f applied several times to arguments,
     // x(u1,....,un)(u1',...,um')....: x applied several times to arguments, or
     // binder x1,...,xn.t' where the binder is a lambda, exists or forall.
   
-    const data_expression& head1 = get_nested_head(top_of_rewrite_stack());
-    if (is_function_symbol(head1))
+    const std::size_t head1 = 1;  // Index of variable head1 in the stack. 
+    element_from_rewrite_stack(head1,2) = get_nested_head(element_from_rewrite_stack(t,2));
+    if (is_function_symbol(element_from_rewrite_stack(head1,2)))
     {
       // In this case t (is top of the rewrite stack) has the shape f(u1...un)(u1'...um')....  where all u1,...,un,u1',...,um' are normal formas.
       // In the invocation of rewrite_aux_function_symbol these terms are rewritten to normalform again.
-      make_application(result, top_of_rewrite_stack(), tapp.begin(), tapp.end()); 
-      top_of_rewrite_stack()=result;
-      rewrite_aux_function_symbol(result,atermpp::down_cast<function_symbol>(head1),atermpp::down_cast<application>(top_of_rewrite_stack()),sigma);
-      decrease_rewrite_stack(1);
+      make_application(result, element_from_rewrite_stack(t,2) , tapp.begin(), tapp.end()); 
+      rewrite_aux_function_symbol(element_from_rewrite_stack(t,2),
+                                  atermpp::down_cast<function_symbol>(element_from_rewrite_stack(head1,2)),
+                                  atermpp::down_cast<application>(result),
+                                  sigma);
+      result=element_from_rewrite_stack(t,2);
+      decrease_rewrite_stack(2);
       return;
     }
-    else if (is_variable(head1))
+    else if (is_variable(element_from_rewrite_stack(head1,2)))
     {
       // return appl(t,t1,...,tn) where t1,...,tn still need to be rewritten.
       jitty_argument_rewriter r(sigma,*this);
       const bool do_not_rewrite_head=false;
-      make_application(result, top_of_rewrite_stack(), tapp.begin(), tapp.end(), r, do_not_rewrite_head); // Replacing r by a lambda term requires 16 more bytes on the stack. 
-      decrease_rewrite_stack(1);
+      make_application(result, element_from_rewrite_stack(t,2) , tapp.begin(), tapp.end(), r, do_not_rewrite_head); // Replacing r by a lambda term requires 16 more bytes on the stack. 
+      decrease_rewrite_stack(2);
       return;
     }
     assert(is_abstraction(top_of_rewrite_stack()));
-    const abstraction& ta=atermpp::down_cast<abstraction>(top_of_rewrite_stack());
+    const abstraction& ta=atermpp::down_cast<abstraction>(element_from_rewrite_stack(t,2) );
     const binder_type& binder(ta.binding_operator());
     if (is_lambda_binder(binder))
     {
       result=rewrite_lambda_application(ta,tapp,sigma);   /* TODO Optimize */
-      decrease_rewrite_stack(1);
+      decrease_rewrite_stack(2);
       return;
     }
     if (is_exists_binder(binder))
     {
       assert(term.size()==1);
       result=existential_quantifier_enumeration(ta,sigma); /* TODO Optimize */
-      decrease_rewrite_stack(1);
+      decrease_rewrite_stack(2);
       return;
     }
     assert(is_forall_binder(binder));
     assert(term.size()==1);
     result=universal_quantifier_enumeration(ta,sigma);     /* TODO Optimize */
-    decrease_rewrite_stack(1);
+    decrease_rewrite_stack(2);
     return;
   }
   // Here term does not have the shape appl(t1,...,tn)
@@ -536,7 +542,6 @@ void RewriterJitty::rewrite_aux_function_symbol(
                       const application& term,
                       substitution_type& sigma)
 {
-// std::cerr << "REWR " << term << "   " << rewrite_stack().size() << "\n";
   // The first term is function symbol; apply the necessary rewrite rules using a jitty strategy.
   assert(is_function_sort(op.sort()));
 
