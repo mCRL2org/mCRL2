@@ -130,9 +130,9 @@ class RewriterCompilingJitty: public Rewriter
     // Standard assignment operator.
     RewriterCompilingJitty& operator=(const RewriterCompilingJitty& other)=delete;
 
-    std::unique_ptr<detail::Rewriter> clone()
+    std::shared_ptr<detail::Rewriter> clone()
     {
-      return std::unique_ptr<Rewriter>(new RewriterCompilingJitty(*this));
+      return std::shared_ptr<Rewriter>(new RewriterCompilingJitty(*this));
     }
 
   protected:

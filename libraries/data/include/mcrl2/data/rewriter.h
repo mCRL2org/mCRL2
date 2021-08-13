@@ -32,8 +32,7 @@ class basic_rewriter
 
   protected:
     /// \brief The wrapped Rewriter.
-    // std::shared_ptr<detail::Rewriter> m_rewriter;  A rewriter can have local data, such as a local stack, and this cannot be shared, especially not in a parallel context. 
-    std::unique_ptr<detail::Rewriter> m_rewriter;  
+    std::shared_ptr<detail::Rewriter> m_rewriter;
 
   public:
 
@@ -47,22 +46,15 @@ class basic_rewriter
 
     /// \brief Constructor.
     /// \param[in] r A rewriter
-    // explicit basic_rewriter(const std::shared_ptr<detail::Rewriter>& r) :     OLD REMOVE.
-    explicit basic_rewriter(const std::unique_ptr<detail::Rewriter>& r) : 
-      m_rewriter(r->clone())
+    explicit basic_rewriter(const std::shared_ptr<detail::Rewriter>& r) :
+      m_rewriter(r)
     {}
 
     /// \brief Copy Constructor
-    basic_rewriter(const basic_rewriter& other)
-      : m_rewriter(other.m_rewriter->clone())
-    {}
+    basic_rewriter(const basic_rewriter& other)=default;
 
     /// \brief Assignment operator
-    basic_rewriter& operator=(const basic_rewriter& other)
-    {
-      m_rewriter=other.m_rewriter->clone(); // Note that this is an assign move. 
-      return *this;
-    }
+    basic_rewriter& operator=(const basic_rewriter& other)=default;
 
     /// \brief Constructor.
     /// \param[in] d A data specification
@@ -102,6 +94,12 @@ class rewriter: public basic_rewriter<data_expression>
       return specification;
     }
 
+    /// \brief Constructor for internal use.
+    /// \param[in] r A rewriter
+    explicit rewriter(const std::shared_ptr<detail::Rewriter>& r) :
+      basic_rewriter(r)
+    {}
+
 #ifdef MCRL2_COUNT_DATA_REWRITE_CALLS
     mutable std::size_t rewrite_calls = 0;
 #endif
@@ -128,6 +126,14 @@ class rewriter: public basic_rewriter<data_expression>
     rewriter(const data_specification& d, const EquationSelector& selector, const strategy s = jitty) :
       basic_rewriter<data_expression>(d, selector, s)
     {
+    }
+
+    /// \brief Create a clone of the rewriter in which the underlying rewriter is copied, and not passed as a shared pointer. 
+    /// \details This is useful when the rewriter is used in different parallel processes. One rewriter can only be used sequentially. 
+    /// \return A rewriter, with a copy of the underlying jitty, jittyc or jittyp rewriting engine. 
+    rewriter clone()
+    {
+      return rewriter(m_rewriter->clone());
     }
 
     /// \brief Rewrites a data expression.

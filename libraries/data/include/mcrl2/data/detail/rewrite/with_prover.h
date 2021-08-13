@@ -84,10 +84,9 @@ class RewriterProver: public Rewriter
         prover_obj(other.prover_obj)
     {}
     
-    std::unique_ptr<Rewriter> clone()
+    std::shared_ptr<Rewriter> clone()
     {
-      RewriterProver* new_prover = new RewriterProver(*this);
-      return std::unique_ptr<Rewriter>(new_prover);
+      return std::shared_ptr<Rewriter>(new RewriterProver(*this));
     }
 };
 

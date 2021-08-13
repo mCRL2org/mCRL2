@@ -67,9 +67,9 @@ class RewriterJitty: public Rewriter
 
     data_expression rewrite(const data_expression &term, substitution_type &sigma);
 
-    std::unique_ptr<detail::Rewriter> clone()
+    std::shared_ptr<detail::Rewriter> clone()
     {
-      return std::unique_ptr<Rewriter>(new RewriterJitty(*this));
+      return std::shared_ptr<Rewriter>(new RewriterJitty(*this));
     }
 
     void increase_rewrite_stack(std::size_t distance) 

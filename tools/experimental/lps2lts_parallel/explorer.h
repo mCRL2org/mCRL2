@@ -945,7 +945,8 @@ class explorer: public abortable
                                                        DiscoverInitialState >
                                 (todo,i,number_of_active_processes,
                                  regular_summands,confluent_summands,discovered, discover_state, 
-                                 examine_transition, start_state, finish_state, m_global_rewr); } );
+                                 examine_transition, start_state, finish_state, m_global_rewr.clone()); } );  // It is essential that the rewriter is cloned as
+                                                                                                              // one rewriter cannot be used in parallel. 
         threads.push_back(std::move(tr));
       }
 

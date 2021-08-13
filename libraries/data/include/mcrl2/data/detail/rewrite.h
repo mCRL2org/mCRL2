@@ -114,7 +114,7 @@ class Rewriter
      * \brief Clone a rewriter.
      * \return A (pointer to a) a clone of the rewriter.
      **/
-    virtual std::unique_ptr<detail::Rewriter> clone() = 0;
+    virtual std::shared_ptr<detail::Rewriter> clone() = 0;
 
   public:
   /* The functions below are public, because they are used in the compiling jitty rewriter */
@@ -186,7 +186,7 @@ class Rewriter
  * \return A (pointer to a) rewriter that uses the data specification DataSpec
  *         and strategy Strategy to rewrite.
  **/
-std::unique_ptr<detail::Rewriter> createRewriter(
+std::shared_ptr<detail::Rewriter> createRewriter(
              const data_specification& DataSpec,
              const used_data_equation_selector& equations_selector,
              const rewrite_strategy Strategy = jitty);
