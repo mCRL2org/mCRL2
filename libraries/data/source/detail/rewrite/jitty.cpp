@@ -782,7 +782,7 @@ void RewriterJitty::rewrite_aux_function_symbol(
     const std::size_t end=i+fsort.domain().size();
     assert(end-1<arity);
     make_application(result,result,&rewrite_stack()[rewrite_stack().size()-arity-1+i],
-                                &rewrite_stack()[rewrite_stack().size()]-arity-1+end); 
+                                &rewrite_stack()[rewrite_stack().size()-arity-1+end]); 
     i=end;
     sort = &fsort.codomain();
   }
