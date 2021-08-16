@@ -83,6 +83,7 @@ struct is_reference_aterm : public is_reference_aterm_helper<typename std::decay
 template<class T, typename Type >
 class reference_aterm
 {
+  reference_aterm() noexcept = default;
   reference_aterm(const T& other) = delete;
   reference_aterm(T&& other) = delete;
   T& operator=(const T& other) = delete;
