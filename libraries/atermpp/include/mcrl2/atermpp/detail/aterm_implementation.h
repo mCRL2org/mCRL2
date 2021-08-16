@@ -19,6 +19,14 @@ namespace atermpp
 
 namespace detail
 {
+  template<typename T, typename Allocator>
+  void aterm_allocator<T,Allocator>::deallocate(T* p, size_type n)
+  {
+    g_thread_term_pool().lock_shared();
+    m_allocator.deallocate(p, n);
+    g_thread_term_pool().unlock_shared();
+  }
+
   aterm_container::aterm_container()
   {
     g_thread_term_pool().register_container(this);
@@ -38,8 +46,6 @@ namespace detail
   { 
     g_thread_term_pool().register_container(this);
   }
-  
-
 }
 
 inline aterm::aterm() noexcept

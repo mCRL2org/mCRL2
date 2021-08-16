@@ -314,6 +314,43 @@ public:
   }
 }; 
 
+template<typename T, typename Allocator>
+class aterm_allocator
+{
+public:
+  using value_type = T;
+  using size_type = std::size_t;
+  using difference_type = std::ptrdiff_t;
+
+  //static_assert(std::is_same_v<value_type, typename Allocator::value_type>, "Types should be equal");
+
+  template <class U>
+  struct rebind
+  {
+      typedef aterm_allocator<U, typename Allocator::template rebind<U>::other> other;
+  };
+
+  aterm_allocator() = default;
+
+  /// \details The unused parameter is to make the interface equivalent
+  ///          to the allocator.
+  T* allocate(size_type n, const void* hint = nullptr)
+  {
+    return m_allocator.allocate(n, hint);
+  }
+
+  /// \details The unused parameter is to make the interface equivalent
+  ///          to the allocator.
+  void deallocate(T* p, size_type n);
+
+  // Move assignment and construction is possible.
+  aterm_allocator(aterm_allocator&&) = default;
+  aterm_allocator& operator=(aterm_allocator&&) = default;
+
+private:
+  Allocator m_allocator;
+};
+
 template<typename Container>
 class generic_aterm_container : public aterm_container
 {
