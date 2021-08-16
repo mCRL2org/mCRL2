@@ -329,6 +329,7 @@ pbes_system::srf_pbes split_conditions(const pbes_system::srf_pbes& pbes, std::s
 struct per_worker_information
 {
   data::mutable_indexed_substitution<> m_sigma;
+  data::rewriter m_rewr;
 };
 
 class pbesreach_algorithm
@@ -404,6 +405,7 @@ class pbesreach_algorithm
       for (std::size_t i = 1; i < m_workers.size(); ++i)
       {
         m_workers[i].m_sigma = m_workers[0].m_sigma;
+        m_workers[i].m_rewr = m_rewr.clone();
       }
 
       pbes_system::srf_pbes result = pbes2srf(pbesspec);

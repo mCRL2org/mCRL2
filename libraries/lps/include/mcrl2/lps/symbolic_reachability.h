@@ -19,6 +19,7 @@
 #include <regex>
 #include <sylvan_ldd.hpp>
 #include <boost/dynamic_bitset.hpp>
+#include "mcrl2/atermpp/standard_containers/indexed_set.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/data_specification.h"
@@ -437,7 +438,7 @@ class data_expression_index
 
   protected:
     data::sort_expression m_sort;
-    mcrl2::utilities::indexed_set<data::data_expression,
+    atermpp::indexed_set<data::data_expression,
       std::hash<data::data_expression>,
       std::equal_to<data::data_expression>,
       std::allocator<data::data_expression>,
@@ -930,8 +931,8 @@ void learn_successors_callback(WorkerP* worker, Task*, std::uint32_t* x, std::si
   auto& data_index = algorithm.m_data_index;
   auto& per_worker = algorithm.m_workers[worker->worker];
   auto& sigma = per_worker.m_sigma;
+  const auto& rewr = per_worker.m_rewr;
 
-  const auto& rewr = algorithm.m_rewr;
   const auto& enumerator = algorithm.m_enumerator;
   const auto& options = algorithm.m_options;
   std::size_t x_size = group.read.size();

@@ -84,13 +84,13 @@ public:
   inline void wait_for_busy() const override;
   inline void set_forbidden(bool value) override;
 
-private:
   /// \brief Called before entering the global term pool.
   inline void lock_shared();
 
   /// \brief Called after leaving the global term pool.
   inline void unlock_shared();
 
+private:
   aterm_pool& m_pool;
 
   /// Keeps track of pointers to all existing aterm variables and containers.
