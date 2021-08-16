@@ -165,11 +165,8 @@ public:
     m_term = detail::address(other);
   }
 
-  const reference_aterm& operator=(const unprotected_aterm& other) noexcept
-  {
-    m_term = detail::address(other);
-    return reinterpret_cast<const reference_aterm&>(m_term);
-  }
+  const reference_aterm& operator=(const unprotected_aterm& other) noexcept;
+  const reference_aterm& operator=(unprotected_aterm&& other) noexcept;
 
   /// Converts implicitly to a protected term of type T.
   operator T&()
