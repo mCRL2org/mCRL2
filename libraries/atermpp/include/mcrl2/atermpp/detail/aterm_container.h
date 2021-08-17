@@ -91,7 +91,8 @@ class reference_aterm
 
 };
 
-/// \brief An unprotected term that is stored inside an aterm_container.
+/// \brief A reference aterm applied to fundamental types, such as int, bool. Nothing needs to happen with such
+///       terms. But a special class is needed, because such types are not classes, and we cannot derive from it.
 template<class T>
 class reference_aterm < T, typename std::enable_if<std::is_fundamental<typename std::decay<T>::type>::value>::type >
 {
@@ -233,7 +234,8 @@ reference_aterm_pair_constructor_helper(const T& other)
 
 
 
-/// \brief An unprotected term that is stored inside an aterm_container.
+/// \brief A pair that is stored into an atermpp container. This class takes care that all aterms that occur (recursively) inside
+///        such a pair are marked, whears non-aterm types are not marked. 
 template<typename T>
 class reference_aterm<T, typename std::enable_if<is_pair<T>::value>::type > : 
                          public std::pair<typename std::conditional<is_reference_aterm<typename T::first_type>::value,
