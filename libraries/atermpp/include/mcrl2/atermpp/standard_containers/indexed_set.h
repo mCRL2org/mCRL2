@@ -22,8 +22,8 @@ template<typename Key,
          typename Equals = std::equal_to<Key>,
          typename Allocator = std::allocator<Key>,
          bool ThreadSafe = false,
-         typename KeyTable = std::deque< Key, std::allocator<Key> > >   // This can also be atermpp::deque. 
-class indexed_set: public mcrl2::utilities::indexed_set<Key, Hash, Equals, Allocator, ThreadSafe, atermpp::deque< Key, std::allocator<atermpp::detail::reference_aterm<Key> > > >
+         typename KeyTable = std::deque< Key, std::allocator<detail::reference_aterm<Key> > > >   // This can also be atermpp::deque.
+class indexed_set: public mcrl2::utilities::indexed_set<Key, Hash, Equals, Allocator, ThreadSafe, KeyTable>
 {};
 
 } // end namespace atermppp
