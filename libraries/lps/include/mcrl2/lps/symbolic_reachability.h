@@ -438,7 +438,7 @@ class data_expression_index
 
   protected:
     data::sort_expression m_sort;
-    atermpp::indexed_set<data::data_expression,
+    utilities::indexed_set<data::data_expression,
       std::hash<data::data_expression>,
       std::equal_to<data::data_expression>,
       std::allocator<data::data_expression>,
