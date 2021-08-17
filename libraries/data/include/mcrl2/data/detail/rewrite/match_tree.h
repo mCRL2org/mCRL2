@@ -547,6 +547,31 @@ typedef std::vector < match_tree > match_tree_vector;
 typedef atermpp::term_list < match_tree_list > match_tree_list_list;
 typedef atermpp::term_list < match_tree_list_list > match_tree_list_list_list;
 
+// Structure for build_tree parameters
+class build_pars
+{
+public:
+  match_tree_list_list Flist;       // List of sequences of which the first action is an F
+  match_tree_list_list Slist;       // List of sequences of which the first action is an S
+  match_tree_list_list Mlist;       // List of sequences of which the first action is an M
+  match_tree_list_list_list stack;  // Stack to maintain the sequences that do not have to
+                                    // do anything in the current term
+  match_tree_list_list upstack;     // List of sequences that have done an F at the current
+                                    // level
+
+  // Initialise. 
+  build_pars()
+   : Flist(),
+     Slist(),
+     Mlist(),
+     stack({ match_tree_list_list() }),
+     upstack()
+
+  {
+  }
+};
+
+
 inline
 std::ostream& operator<<(std::ostream& s, const match_tree& t)
 {
