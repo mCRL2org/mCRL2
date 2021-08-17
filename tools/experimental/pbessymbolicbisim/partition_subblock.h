@@ -172,7 +172,7 @@ public:
       make_abstraction(lambda_binder(), equation().variable().parameters(),
         block2_body
       );
-    block2 = m_dm.simpl->at(equation().variable())->apply(down_cast<lambda>(block2));
+    block2 = m_dm.simpl->at(equation().variable())->apply(atermpp::down_cast<lambda>(block2));
     data_expression block1 =
       make_abstraction(lambda_binder(), equation().variable().parameters(),
         sort_bool::and_(
@@ -181,7 +181,7 @@ public:
         )
       );
 
-    block1 = m_dm.simpl->at(equation().variable())->apply(down_cast<lambda>(block1));
+    block1 = m_dm.simpl->at(equation().variable())->apply(atermpp::down_cast<lambda>(block1));
     if(block1 == make_abstraction(lambda_binder(), equation().variable().parameters(), sort_bool::false_()))
     {
       throw mcrl2::runtime_error("Found an empty block1. This is most likely caused by a bug.");
