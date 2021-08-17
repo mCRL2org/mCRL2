@@ -71,7 +71,7 @@ inline bool is_function_symbol(const atermpp::aterm_appl& x)
 }
 
 /// \brief Returns true if the term t is a variable
-inline bool is_variable(const atermpp::aterm_appl& x)
+inline bool is_variable(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::DataVarId;
 }

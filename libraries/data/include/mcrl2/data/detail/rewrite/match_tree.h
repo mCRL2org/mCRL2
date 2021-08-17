@@ -33,7 +33,7 @@ class variable_or_number: public atermpp::aterm
     variable_or_number(const atermpp::aterm& v):
        atermpp::aterm(v)
     {
-      assert(is_variable(atermpp::down_cast<atermpp::aterm_appl>(v)) || v.type_is_int());
+      assert(is_variable(v) || v.type_is_int());
     }
 };
 
@@ -51,7 +51,9 @@ class match_tree:public atermpp::aterm_appl
     match_tree(const atermpp::aterm& t):
       atermpp::aterm_appl(t)
     {
-      assert(is_defined() || isS() || isA() || isM() || isF() || isN() || isD() || isR () || isC() || isX() || isRe() || isCRe() || isMe());
+      assert(!is_defined() || isS() || isA() || isM() || isF() || 
+             isN() || isD() || isR () || isC() || isX() || isRe() || 
+             isCRe() || isMe());
     }
   
   protected:

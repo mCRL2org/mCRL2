@@ -277,7 +277,7 @@ static atermpp::aterm_appl add_index_impl(const atermpp::aterm_appl& x)
 {
   if (x.function() == core::detail::function_symbol_BooleanVariableNoIndex())
   {
-    const bes::boolean_variable& y = atermpp::down_cast<const bes::boolean_variable>(x);
+    const bes::boolean_variable& y = reinterpret_cast<const bes::boolean_variable&>(x);
     std::size_t index = core::index_traits<bes::boolean_variable, bes::boolean_variable_key_type, 1>::insert(y.name());
     return atermpp::aterm_appl(core::detail::function_symbol_BooleanVariable(), x[0], atermpp::aterm_int(index));
   }
