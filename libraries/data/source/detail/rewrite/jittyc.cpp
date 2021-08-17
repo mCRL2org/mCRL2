@@ -1591,7 +1591,7 @@ class RewriterCompilingJitty::ImplementTree
     }
 
     assert(is_variable(head)); // Here we must consider the case where head is variable.
-    return calc_inner_term_appl_variable(s, a, down_cast<variable>(a.head()), startarg, require_normal_form, result_type, type_of_code_variables);
+    return calc_inner_term_appl_variable(s, a, down_cast<variable>(head), startarg, require_normal_form, result_type, type_of_code_variables);
   }
 
   ///
