@@ -174,9 +174,14 @@ namespace detail
   class lhs_t: public atermpp::term_list<variable_with_a_rational_factor>
   {
     public:
-      /// \brief Constructor
+      /// \brief Constructor.
       lhs_t()
        : atermpp::term_list<variable_with_a_rational_factor>()
+      {}
+
+      /// \brief Constructor from an aterm.
+      explicit lhs_t(const aterm& t)
+       : atermpp::term_list<variable_with_a_rational_factor>(t)
       {}
 
       /// \brief Constructor

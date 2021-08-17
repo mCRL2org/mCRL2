@@ -23,7 +23,7 @@ namespace data
 {
 
 /// \brief Returns true if the term t is an abstraction
-inline bool is_abstraction(const atermpp::aterm_appl& x)
+inline bool is_abstraction(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::Binder;
 }

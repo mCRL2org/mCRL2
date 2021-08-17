@@ -29,9 +29,9 @@ class lambda: public abstraction
 
     /// Constructor.
     ///
-    /// \param[in] d A data expression.
+    /// \param[in] d An aterm.
     /// \pre d is a lambda abstraction.
-    lambda(const data_expression& d)
+    explicit lambda(const aterm& d)
       : abstraction(d)
     {
       assert(is_abstraction(d));

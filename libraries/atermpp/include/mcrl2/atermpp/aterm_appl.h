@@ -34,16 +34,6 @@ protected:
     static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
   }
 
-  /// \brief Explicit constructor from an aterm.
-  /// \param t The aterm from which the term is constructed.
-  /// \details This function is explicitly protected, to avoid its use in general code. 
-  explicit term_appl(const aterm& t) 
-   : aterm(t)
-  {
-    static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
-    static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
-  } 
-
 public:
   /// The type of object, T stored in the term_appl.
   typedef Term value_type;
@@ -72,6 +62,16 @@ public:
   /// \brief Default constructor.
   term_appl():aterm()
   {}
+
+  /// \brief Explicit constructor from an aterm.
+  /// \param t The aterm from which the term is constructed.
+  explicit term_appl(const aterm& t) 
+   : aterm(t)
+  {
+    assert(type_is_appl());
+    static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+    static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
+  } 
 
   /// This class has user-declared copy constructor so declare default copy and move operators.
   term_appl(const term_appl& other) noexcept = default;

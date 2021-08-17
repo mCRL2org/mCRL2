@@ -28,10 +28,10 @@ class exists: public abstraction
 
     /// Constructor.
     ///
-    /// \param[in] d A data expression
+    /// \param[in] d An aterm.
     /// \pre d has the internal structure of an abstraction.
     /// \pre d is an existential quantification.
-    exists(const data_expression& d)
+    explicit exists(const aterm& d)
       : abstraction(d)
     {
       assert(is_abstraction(d));

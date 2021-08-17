@@ -10615,7 +10615,7 @@ class specification_basic_type
       if (is_hide(t))
       {
         return hide(hide(t).hide_set(),
-                    transform_process_arguments_body(atermpp::down_cast<process_instance>(hide(t).operand()),bound_variables,visited_processes));
+                    transform_process_arguments_body(hide(t).operand(),bound_variables,visited_processes));
       }
       if (is_rename(t))
       {

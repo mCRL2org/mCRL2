@@ -10,6 +10,7 @@
 #ifndef MCRL2_ATERMPP_ATERM_H
 #define MCRL2_ATERMPP_ATERM_H
 
+#include <assert.h>
 #include <sstream>
 #include "mcrl2/atermpp/detail/aterm.h"
 #include "mcrl2/atermpp/type_traits.h"
@@ -279,6 +280,7 @@ const Derived& down_cast(const Base& t,
 {
   static_assert(sizeof(Derived) == sizeof(aterm),
                 "aterm cast cannot be applied types derived from aterms where extra fields are added");
+  assert(Derived(static_cast<const aterm&>(t)) != aterm());
   return reinterpret_cast<const Derived&>(t);
 }
 
@@ -293,7 +295,7 @@ const DerivedCont& container_cast(const Cont<Base>& t,
 {
   static_assert(sizeof(typename DerivedCont::value_type) == sizeof(aterm),
                 "aterm cast cannot be applied types derived from aterms where extra fields are added");
-  // assert(std::all_of(t.begin(),t.end(),[](const Base& u){ return DerivedCont::value_type(static_cast<const aterm>&)(u) != aterm();} ));
+  assert(std::all_of(t.begin(),t.end(),[](const Base& u){ return typename DerivedCont::value_type(static_cast<const aterm&>(u)) != aterm();} ));
   return reinterpret_cast<const DerivedCont&>(t);
 }
 
@@ -308,6 +310,7 @@ const Derived& vertical_cast(const Base& t,
 {
   static_assert(sizeof(Derived) == sizeof(aterm),
                 "aterm cast cannot be applied types derived from aterms where extra fields are added");
+  assert(Derived(static_cast<const aterm&>(t)) != aterm());
   return reinterpret_cast<const Derived&>(t);
 }
 
@@ -321,6 +324,7 @@ const DerivedCont& vertical_cast(const Cont<Base>& t,
 {
   static_assert(sizeof(typename DerivedCont::value_type) == sizeof(aterm),
                 "aterm cast cannot be applied types derived from aterms where extra fields are added");
+  assert(std::all_of(t.begin(),t.end(),[](const Base& u){ return typename DerivedCont::value_type(static_cast<const aterm&>(u)) != aterm();} ));
   return reinterpret_cast<const DerivedCont&>(t);
 }
 
