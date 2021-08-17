@@ -457,7 +457,7 @@ BOOST_AUTO_TEST_CASE(enumerate_callback)
     }
     else if (is_exists(x))
     {
-      const auto& x_ = atermpp::down_cast<forall>(x);
+      const exists& x_ = atermpp::down_cast<exists>(x);
       result = false_();
       E.enumerate(enumerator_element(x_.variables(), r(x_.body())),
                   sigma,

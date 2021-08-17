@@ -463,7 +463,8 @@ match_tree_list RewriterCompilingJitty::subst_var(const match_tree_list& l,
           n.push_front(l.front());
         }
       }
-      head = match_tree_CRe(replace_free_variables(headCRe.condition(),substs),replace_free_variables(headCRe.result(),substs),m, n);
+      head = match_tree_CRe(replace_variables_capture_avoiding(headCRe.condition(),substs),
+                            replace_variables_capture_avoiding(headCRe.result(),substs),m, n);
     }
     else if (head.isRe())
     {
@@ -481,7 +482,7 @@ match_tree_list RewriterCompilingJitty::subst_var(const match_tree_list& l,
           m.push_front(l.front());
         }
       }
-      head = match_tree_Re(replace_free_variables(headRe.result(),substs),m);
+      head = match_tree_Re(replace_variables_capture_avoiding(headRe.result(),substs),m);
     }
     result.push_back(head);
   }
