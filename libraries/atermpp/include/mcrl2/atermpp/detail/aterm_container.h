@@ -118,7 +118,14 @@ public:
     static_assert(std::is_base_of<aterm, T>::value);
     m_t=other;
     return m_t;
-  } 
+  }
+
+  const T& operator=(T&& other) noexcept
+  {
+    static_assert(std::is_base_of<aterm, T>::value);
+    m_t = other;
+    return m_t;
+  }
 
   /// Converts implicitly to a protected term of type T.
   operator T&()
@@ -277,6 +284,21 @@ public:
     super::second=other.second;
     return *this;
   }
+
+  reference_aterm& operator=(reference_aterm&& other) noexcept
+  {
+    super::first = other.first;
+    super::second = other.second;
+    return *this;
+  }
+
+  const reference_aterm& operator=(std_pair&& other) noexcept
+  {
+    super::first = other.first;
+    super::second = other.second;
+    return *this;
+  }
+
 
   /// Converts implicitly to a protected term of type std::pair<T,U>..
   operator std_pair&()
