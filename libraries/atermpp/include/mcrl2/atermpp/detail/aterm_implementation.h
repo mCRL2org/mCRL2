@@ -20,8 +20,8 @@ namespace atermpp
 namespace detail
 {
   template<typename T>
-  const reference_aterm<T, typename std::enable_if<std::is_base_of<aterm, T>::value>::type>&
-    reference_aterm<T, typename std::enable_if<std::is_base_of<aterm, T>::value>::type>::operator=(const unprotected_aterm& other) noexcept
+  const reference_aterm<T, typename std::enable_if_t<std::is_base_of<aterm, T>::value>>&
+    reference_aterm<T, typename std::enable_if_t<std::is_base_of<aterm, T>::value>>::operator=(const unprotected_aterm& other) noexcept
   {
     g_thread_term_pool().lock_shared();
     m_term = address(other);
@@ -30,8 +30,8 @@ namespace detail
   }
 
   template<typename T>
-  const reference_aterm<T, typename std::enable_if<std::is_base_of<aterm, T>::value>::type>&
-    reference_aterm<T, typename std::enable_if<std::is_base_of<aterm, T>::value>::type>::operator=(unprotected_aterm&& other) noexcept
+  const reference_aterm<T, typename std::enable_if_t<std::is_base_of<aterm, T>::value>>&
+    reference_aterm<T, typename std::enable_if_t<std::is_base_of<aterm, T>::value>>::operator=(unprotected_aterm&& other) noexcept
   {
     g_thread_term_pool().lock_shared();
     m_term = address(other);
