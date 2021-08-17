@@ -293,6 +293,7 @@ const DerivedCont& container_cast(const Cont<Base>& t,
 {
   static_assert(sizeof(typename DerivedCont::value_type) == sizeof(aterm),
                 "aterm cast cannot be applied types derived from aterms where extra fields are added");
+  // assert(std::all_of(t.begin(),t.end(),[](const Base& u){ return DerivedCont::value_type(static_cast<const aterm>&)(u) != aterm();} ));
   return reinterpret_cast<const DerivedCont&>(t);
 }
 
