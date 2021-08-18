@@ -406,51 +406,54 @@ class lps_solve_structure_graph_algorithm: public solve_structure_graph_algorith
       for (structure_graph::index_type vi: V)
       {
         const auto& v = G.find_vertex(vi);
-        const auto& Z = atermpp::down_cast<propositional_variable_instantiation>(v.formula);
-        std::string Zname = Z.name();
-        std::smatch match;
-        if (std::regex_match(Zname, match, re))
+        if (is_propositional_variable_instantiation(v.formula))           // Condition added by JFG (18/8/2021) as v.formula can be more complex. 
         {
-          std::size_t summand_index = std::stoul(match[2]);
-          if (summand_index >= lpsspec.process().action_summands().size())
+          const auto& Z = atermpp::down_cast<propositional_variable_instantiation>(v.formula);
+          std::string Zname = Z.name();
+          std::smatch match;
+          if (std::regex_match(Zname, match, re))
           {
-            throw mcrl2::runtime_error("Counter-example cannot be reconstructed from this LPS. Did you supply the correct file?");
+            std::size_t summand_index = std::stoul(match[2]);
+            if (summand_index >= lpsspec.process().action_summands().size())
+            {
+              throw mcrl2::runtime_error("Counter-example cannot be reconstructed from this LPS. Did you supply the correct file?");
+            }
+            lps::action_summand summand = lpsspec.process().action_summands()[summand_index];
+
+            std::size_t equation_index = p_index.index(Z.name());
+            const pbes_equation& eqn = p.equations()[equation_index];
+            const data::variable_list& d = eqn.variable().parameters();
+            data::variable_vector d1(d.begin(), d.end());
+
+            const data::data_expression_list& e = Z.parameters();
+            data::data_expression_vector e1(e.begin(), e.end());
+
+            data::data_expression_vector condition;
+            data::assignment_vector next_state_assignments;
+            std::size_t m = d.size() - 2 * n;
+
+            for (std::size_t i = 0; i < n; i++)
+            {
+              condition.push_back(data::equal_to(d1[i], e1[i]));
+              next_state_assignments.emplace_back(d1[i], e1[n + m + i]);
+            }
+
+            process::action_vector actions;
+            std::size_t index = 0;
+            for (const process::action& a: summand.multi_action().actions())
+            {
+              process::action a1(a.label(), data::data_expression_list(e1.begin() + n + index, e1.begin() + n + index + a.arguments().size()));
+              actions.push_back(a1);
+              index = index + a.arguments().size();
+            }
+
+            summand.summation_variables() = data::variable_list();
+            summand.condition() = data::join_and(condition.begin(), condition.end());
+            summand.multi_action() = lps::multi_action(process::action_list(actions.begin(), actions.end()),summand.multi_action().time());
+            summand.assignments() = data::assignment_list(next_state_assignments.begin(), next_state_assignments.end());
+
+            action_summands.push_back(summand);
           }
-          lps::action_summand summand = lpsspec.process().action_summands()[summand_index];
-
-          std::size_t equation_index = p_index.index(Z.name());
-          const pbes_equation& eqn = p.equations()[equation_index];
-          const data::variable_list& d = eqn.variable().parameters();
-          data::variable_vector d1(d.begin(), d.end());
-
-          const data::data_expression_list& e = Z.parameters();
-          data::data_expression_vector e1(e.begin(), e.end());
-
-          data::data_expression_vector condition;
-          data::assignment_vector next_state_assignments;
-          std::size_t m = d.size() - 2 * n;
-
-          for (std::size_t i = 0; i < n; i++)
-          {
-            condition.push_back(data::equal_to(d1[i], e1[i]));
-            next_state_assignments.emplace_back(d1[i], e1[n + m + i]);
-          }
-
-          process::action_vector actions;
-          std::size_t index = 0;
-          for (const process::action& a: summand.multi_action().actions())
-          {
-            process::action a1(a.label(), data::data_expression_list(e1.begin() + n + index, e1.begin() + n + index + a.arguments().size()));
-            actions.push_back(a1);
-            index = index + a.arguments().size();
-          }
-
-          summand.summation_variables() = data::variable_list();
-          summand.condition() = data::join_and(condition.begin(), condition.end());
-          summand.multi_action() = lps::multi_action(process::action_list(actions.begin(), actions.end()),summand.multi_action().time());
-          summand.assignments() = data::assignment_list(next_state_assignments.begin(), next_state_assignments.end());
-
-          action_summands.push_back(summand);
         }
       }
       return result;
