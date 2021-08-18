@@ -1550,7 +1550,6 @@ class RewriterCompilingJitty::ImplementTree
   bool calc_inner_term_appl_variable
                            (std::ostream& s,
                             const application& a,
-                            const variable& ,
                             const std::size_t startarg,
                             const bool require_normal_form,
                             std::ostream& result_type,
@@ -1568,7 +1567,6 @@ class RewriterCompilingJitty::ImplementTree
     // Generate an application which is rewritten when it is needed.
     write_delayed_application_to_stream_in_normal_form(s,a,startarg, result_type, type_of_code_variables);
     return false;
-
   }
 
   bool calc_inner_term_application(std::ostream& s,
@@ -1590,8 +1588,8 @@ class RewriterCompilingJitty::ImplementTree
       return calc_inner_term_appl_lambda_abstraction(s, a, down_cast<abstraction>(head), startarg, require_normal_form, result_type, type_of_code_variables);
     }
 
-    assert(is_variable(head)); // Here we must consider the case where head is variable.
-    return calc_inner_term_appl_variable(s, a, down_cast<variable>(head), startarg, require_normal_form, result_type, type_of_code_variables);
+    assert(is_variable(head)); // Here we must consider the case where head is a variable.
+    return calc_inner_term_appl_variable(s, a, startarg, require_normal_form, result_type, type_of_code_variables);
   }
 
   ///
