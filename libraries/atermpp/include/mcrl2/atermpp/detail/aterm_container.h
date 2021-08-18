@@ -256,45 +256,45 @@ protected:
 
 public:
   /// \brief Default constructor.
-  reference_aterm() noexcept = default;
+  reference_aterm() = default;
 
-  reference_aterm(const reference_aterm& other) noexcept
+  reference_aterm(const reference_aterm& other)
   {
     *this = other;
   }
 
 
-  reference_aterm(const std_pair& other) noexcept
+  reference_aterm(const std_pair& other)
     : super(reference_aterm_pair_constructor_helper(other))
   {}
 
-  reference_aterm(std_pair&& other) noexcept
+  reference_aterm(std_pair&& other)
    : super(reference_aterm<typename T::first_type >(std::move(other.first)),
            reference_aterm<typename T::second_type>(std::move(other.second)))
   {} 
 
-  reference_aterm& operator=(const reference_aterm& other) noexcept
+  reference_aterm& operator=(const reference_aterm& other)
   {
     super::first=other.first;
     super::second=other.second;
     return *this;
   }
 
-  const reference_aterm& operator=(const std_pair& other) noexcept
+  const reference_aterm& operator=(const std_pair& other)
   {
     super::first=other.first;
     super::second=other.second;
     return *this;
   }
 
-  reference_aterm& operator=(reference_aterm&& other) noexcept
+  reference_aterm& operator=(reference_aterm&& other)
   {
     super::first = other.first;
     super::second = other.second;
     return *this;
   }
 
-  const reference_aterm& operator=(std_pair&& other) noexcept
+  const reference_aterm& operator=(std_pair&& other)
   {
     super::first = other.first;
     super::second = other.second;
