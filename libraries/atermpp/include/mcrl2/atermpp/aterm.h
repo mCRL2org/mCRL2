@@ -10,6 +10,7 @@
 #ifndef MCRL2_ATERMPP_ATERM_H
 #define MCRL2_ATERMPP_ATERM_H
 
+#include <algorithm>
 #include <assert.h>
 #include <sstream>
 #include "mcrl2/atermpp/detail/aterm.h"
