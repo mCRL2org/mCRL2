@@ -28,7 +28,6 @@
 #include "mcrl2/data/undefined.h"
 #include "mcrl2/utilities/parse_numbers.h"
 #include "mcrl2/utilities/text_utility.h"
-#include "mcrl2/utilities/indexed_set.h"
 #include "mcrl2/utilities/stopwatch.h"
 
 namespace mcrl2 {
@@ -438,7 +437,7 @@ class data_expression_index
 
   protected:
     data::sort_expression m_sort;
-    utilities::indexed_set<data::data_expression,
+    atermpp::indexed_set<data::data_expression,
       std::hash<data::data_expression>,
       std::equal_to<data::data_expression>,
       std::allocator<data::data_expression>,

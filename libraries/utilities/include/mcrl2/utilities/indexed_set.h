@@ -56,11 +56,11 @@ public:
   typedef value_type* pointer;
   typedef const value_type* const_pointer;
 
-  typedef typename std::deque < Key >::iterator iterator;
-  typedef typename std::deque < Key >::const_iterator const_iterator;
+  typedef typename KeyTable::iterator iterator;
+  typedef typename KeyTable::const_iterator const_iterator;
 
-  typedef typename std::deque < Key >::reverse_iterator reverse_iterator;
-  typedef typename std::deque < Key >::const_reverse_iterator const_reverse_iterator;
+  typedef typename KeyTable::reverse_iterator reverse_iterator;
+  typedef typename KeyTable::const_reverse_iterator const_reverse_iterator;
 
   typedef std::ptrdiff_t difference_type;
   
