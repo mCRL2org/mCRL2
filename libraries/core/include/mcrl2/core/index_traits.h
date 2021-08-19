@@ -112,7 +112,7 @@ struct index_traits
   static inline
   void erase(const KeyType& x)
   {
-    if constexpr (atermpp::detail::GlobalThreadSafe) { variable_mutex<Variable, KeyType>().unlock(); }
+    if constexpr (atermpp::detail::GlobalThreadSafe) { variable_mutex<Variable, KeyType>().lock(); }
 
     auto& m = variable_index_map<Variable, KeyType>();
     auto& s = variable_map_free_numbers<Variable, KeyType>();
