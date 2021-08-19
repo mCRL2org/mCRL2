@@ -35,6 +35,13 @@ public:
     detail::g_thread_term_pool().create_int(*this, value);
   }
 
+  /// \brief Constructs an integer term from an aterm.
+  explicit aterm_int(const aterm& t)
+   : aterm(t)
+  {
+    assert(type_is_int() || !defined());
+  }
+
   /// This class has user-declared copy constructor so declare default copy and move operators.
   aterm_int(const aterm_int& other) noexcept = default;
   aterm_int& operator=(const aterm_int& other) noexcept = default;

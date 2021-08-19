@@ -23,7 +23,6 @@
 #include "mcrl2/data/detail/rewrite/jittyc.h"
 #include "mcrl2/data/detail/rewrite/jitty_jittyc.h"
 #include "mcrl2/data/replace.h"
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 
 #ifdef MCRL2_DISPLAY_REWRITE_STATISTICS
 #include "mcrl2/data/detail/rewrite_statistics.h"
@@ -162,8 +161,6 @@ static std::set<variable> find_variables_in_the_scope_of_main_function_symbol_in
 
 typedef atermpp::term_list<variable_list> variable_list_list;
 
-static const match_tree dummy=match_tree();
-
 std::set< std::size_t > m_required_appl_functions;
 
 static std::vector<bool> dep_vars(const data_equation& eqn)
@@ -232,7 +229,7 @@ static bool arity_is_allowed(const sort_expression& s, const std::size_t a)
   return false;
 }
 
-static void term2seq(const data_expression& t, match_tree_list& s, std::size_t *var_cnt, const bool ommit_head)
+void RewriterCompilingJitty::term2seq(const data_expression& t, match_tree_list& s, std::size_t *var_cnt, const bool omit_head)
 {
   if (is_function_symbol(t))
   {
@@ -265,10 +262,10 @@ static void term2seq(const data_expression& t, match_tree_list& s, std::size_t *
 
   if (is_application(ta.head()))
   {
-    term2seq(ta.head(),s,var_cnt,ommit_head);
+    term2seq(ta.head(),s,var_cnt,omit_head);
     s.push_front(match_tree_N(dummy,0));
   }
-  else if (!ommit_head)
+  else if (!omit_head)
   {
     {
       s.push_front(match_tree_F(function_symbol(ta.head()),dummy,dummy));
@@ -286,7 +283,7 @@ static void term2seq(const data_expression& t, match_tree_list& s, std::size_t *
     ++j;
   }
 
-  if (!ommit_head)
+  if (!omit_head)
   {
     s.push_front(match_tree_D(dummy,0));
   }
@@ -298,7 +295,7 @@ static variable_or_number_list get_used_vars(const data_expression& t)
   return variable_or_number_list(vars.begin(),vars.end());
 }
 
-static match_tree_list create_sequence(const data_equation& rule, std::size_t* var_cnt)
+match_tree_list RewriterCompilingJitty::create_sequence(const data_equation& rule, std::size_t* var_cnt)
 {
   const data_expression lhs_inner = rule.lhs();
   const data_expression cond = rule.condition();
@@ -338,33 +335,6 @@ static match_tree_list create_sequence(const data_equation& rule, std::size_t* v
 
   return reverse(rseq);
 }
-
-
-// Structure for build_tree parameters
-class build_pars 
-{
-public:
-  match_tree_list_list Flist;       // List of sequences of which the first action is an F
-  match_tree_list_list Slist;       // List of sequences of which the first action is an S
-  match_tree_list_list Mlist;       // List of sequences of which the first action is an M
-  match_tree_list_list_list stack;  // Stack to maintain the sequences that do not have to
-                                    // do anything in the current term
-  match_tree_list_list upstack;     // List of sequences that have done an F at the current
-                                    // level
-
-  // Initialise. 
-  build_pars()
-   : Flist(), 
-     Slist(),
-     Mlist(),
-     stack({ match_tree_list_list() }),
-     upstack()
-
-  {
-  }
-};
-
-
 
 
 static match_tree_list_list_list add_to_stack(const match_tree_list_list_list& stack, const match_tree_list_list& seqs, match_tree_Re& r, match_tree_list& cr)
@@ -444,11 +414,11 @@ static variable createFreshVar(const sort_expression& sort, std::size_t* i)
   return data::variable(tree_var_str, sort);
 }
 
-static match_tree_list subst_var(const match_tree_list& l,
-                                 const variable& old,
-                                 const variable& new_val,
-                                 const std::size_t num,
-                                 const mutable_map_substitution<>& substs)
+match_tree_list RewriterCompilingJitty::subst_var(const match_tree_list& l,
+                                                  const variable& old,
+                                                  const variable& new_val,
+                                                  const std::size_t num,
+                                                  const mutable_map_substitution<>& substs)
 {
   match_tree_vector result;
   for(match_tree_list::const_iterator i=l.begin(); i!=l.end(); ++i)
@@ -493,7 +463,8 @@ static match_tree_list subst_var(const match_tree_list& l,
           n.push_front(l.front());
         }
       }
-      head = match_tree_CRe(replace_free_variables(headCRe.condition(),substs),replace_free_variables(headCRe.result(),substs),m, n);
+      head = match_tree_CRe(replace_variables_capture_avoiding(headCRe.condition(),substs),
+                            replace_variables_capture_avoiding(headCRe.result(),substs),m, n);
     }
     else if (head.isRe())
     {
@@ -511,7 +482,7 @@ static match_tree_list subst_var(const match_tree_list& l,
           m.push_front(l.front());
         }
       }
-      head = match_tree_Re(replace_free_variables(headRe.result(),substs),m);
+      head = match_tree_Re(replace_variables_capture_avoiding(headRe.result(),substs),m);
     }
     result.push_back(head);
   }
@@ -531,7 +502,7 @@ static void inc_usedcnt(const variable_or_number_list& l)
   }
 }
 
-static match_tree build_tree(build_pars pars, std::size_t i)
+match_tree RewriterCompilingJitty::build_tree(build_pars pars, std::size_t i)
 {
   if (!pars.Slist.empty())
   {
@@ -762,7 +733,7 @@ static match_tree build_tree(build_pars pars, std::size_t i)
   }
 }
 
-static match_tree create_tree(const data_equation_list& rules)
+match_tree RewriterCompilingJitty::create_tree(const data_equation_list& rules)
 // Create a match tree for OpId int2term[opid].
 //
 // Pre:  rules is a list of rewrite rules for some function symbol f.
@@ -1579,7 +1550,6 @@ class RewriterCompilingJitty::ImplementTree
   bool calc_inner_term_appl_variable
                            (std::ostream& s,
                             const application& a,
-                            const variable& ,
                             const std::size_t startarg,
                             const bool require_normal_form,
                             std::ostream& result_type,
@@ -1597,7 +1567,6 @@ class RewriterCompilingJitty::ImplementTree
     // Generate an application which is rewritten when it is needed.
     write_delayed_application_to_stream_in_normal_form(s,a,startarg, result_type, type_of_code_variables);
     return false;
-
   }
 
   bool calc_inner_term_application(std::ostream& s,
@@ -1619,8 +1588,8 @@ class RewriterCompilingJitty::ImplementTree
       return calc_inner_term_appl_lambda_abstraction(s, a, down_cast<abstraction>(head), startarg, require_normal_form, result_type, type_of_code_variables);
     }
 
-    assert(is_variable(head)); // Here we must consider the case where head is variable.
-    return calc_inner_term_appl_variable(s, a, down_cast<variable>(a.head()), startarg, require_normal_form, result_type, type_of_code_variables);
+    assert(is_variable(head)); // Here we must consider the case where head is a variable.
+    return calc_inner_term_appl_variable(s, a, startarg, require_normal_form, result_type, type_of_code_variables);
   }
 
   ///

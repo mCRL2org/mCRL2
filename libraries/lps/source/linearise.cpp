@@ -5680,45 +5680,44 @@ class specification_basic_type
       data_expression_list args;
       data_expression_list xxxterm;
 
-      const sort_expression& normalised_sort=sort;
-      const variable v1=get_fresh_variable("x",normalised_sort);
+      const variable v1=get_fresh_variable("x",sort);
       const std::size_t n=enumeratedtypes[index].size;
       for (std::size_t j=0; (j<n); j++)
       {
-        const variable v=get_fresh_variable("y",normalised_sort);
+        const variable v=get_fresh_variable("y",sort);
         vars.push_front(v);
-        args.push_front(data_expression(v));
-        xxxterm.push_front(data_expression(v1));
+        args.push_front(v);
+        xxxterm.push_front(v1);
       }
 
       /* I generate here an equation of the form
          C(e,x,x,x,...x)=x for a variable x. */
-      const sort_expression s=enumeratedtypes[index].sortId;
+      const sort_expression& s=enumeratedtypes[index].sortId;
       const variable v=get_fresh_variable("e",s);
-      data_expression_list tempxxxterm=xxxterm;
-      tempxxxterm.push_front(data_expression(v));
+
+      // we add e in front of xxxterm; note that xxxterm is not used afterwards
+      // anymore, so we don't need to create a temporary copy for it here.
+      xxxterm.push_front(data_expression(v));
       data.add_equation(
         data_equation(
           variable_list({ v1, v }),
-          application(functionname,tempxxxterm),
-          data_expression(v1)));
+          application(functionname,xxxterm),
+          v1));
       fresh_equation_added=true;
 
       variable_list auxvars=vars;
 
-      const data_expression_list elementnames=enumeratedtypes[index].elementnames;
-      for (data_expression_list::const_iterator w=elementnames.begin();
-           w!=elementnames.end() ; ++w)
+      const data_expression_list& elementnames=enumeratedtypes[index].elementnames;
+      for (const data_expression& w: elementnames)
       {
         assert(auxvars.size()>0);
-        data_expression_list tempargs=args;
-        tempargs.push_front(*w);
+        args.push_front(w);
         data.add_equation(data_equation(
                           vars,
-                          application(functionname,tempargs),
+                          application(functionname,args),
                           auxvars.front()));
-        fresh_equation_added=true;
-
+        //fresh_equation_added=true; already set before the loop, omitting here
+        args.pop_front();
         auxvars.pop_front();
       }
     }
@@ -5731,49 +5730,41 @@ class specification_basic_type
       /* first find out whether the function exists already, in which
          case nothing needs to be done */
 
-      const function_symbol_list functions=enumeratedtypes[enumeratedtype_index].functions;
-      for (function_symbol_list::const_iterator w=functions.begin();
-           w!=functions.end(); ++w)
-      {
-        const sort_expression w1sort=w->sort();
+      const function_symbol_list& functions=enumeratedtypes[enumeratedtype_index].functions;
+      const function_symbol_list::const_iterator i = std::find_if(functions.begin(), functions.end(), [&sort](const data::function_symbol& w){
+        const function_sort& w1sort(down_cast<function_sort>(w.sort()));
         assert(function_sort(w1sort).domain().size()>1);
-        // Check that the second sort of the case function equals sort
-        if (*(++(function_sort(w1sort).domain().begin()))==sort)
-        {
-          return; // The case function does already exist
-        }
-      };
-
+        // w matches if the second sort of the case function equals sort
+        return *(++(w1sort.domain().begin())) == sort;
+      });
+      if(i != functions.end()) {
+        return;
+      }
       /* The function does not exist;
          Create a new function of enumeratedtype e, on sort */
 
       if (enumeratedtypes[enumeratedtype_index].sortId==sort_bool::bool_())
       {
         /* take the if function on sort 'sort' */
-        function_symbol_list f=enumeratedtypes[enumeratedtype_index].functions;
-        f.push_front(if_(sort));
-        enumeratedtypes[enumeratedtype_index].functions=f;
+        enumeratedtypes[enumeratedtype_index].functions.push_front(if_(sort));
         return;
       }
       // else
       sort_expression_list newsortlist;
-      std::size_t n=enumeratedtypes[enumeratedtype_index].size;
-      for (std::size_t j=0; j<n ; j++)
+      const std::size_t n=enumeratedtypes[enumeratedtype_index].size;
+      for (std::size_t j=0; j<n ; ++j)
       {
         newsortlist.push_front(sort);
       }
-      sort_expression sid=enumeratedtypes[enumeratedtype_index].sortId;
+      const sort_expression& sid=enumeratedtypes[enumeratedtype_index].sortId;
       newsortlist.push_front(sid);
 
       const function_sort newsort(newsortlist,sort);
       const data::function_symbol casefunction(
         fresh_identifier_generator("C" + std::to_string(n) + "_" +
                          (!is_basic_sort(newsort)?"":std::string(basic_sort(sort).name()))), newsort);
-      // insertmapping(casefunction,true);
       data.add_mapping(casefunction);
-      function_symbol_list f=enumeratedtypes[enumeratedtype_index].functions;
-      f.push_front(casefunction);
-      enumeratedtypes[enumeratedtype_index].functions=f;
+      enumeratedtypes[enumeratedtype_index].functions.push_front(casefunction);
 
       define_equations_for_case_function(enumeratedtype_index,casefunction,sort);
       return;
@@ -10624,7 +10615,7 @@ class specification_basic_type
       if (is_hide(t))
       {
         return hide(hide(t).hide_set(),
-                    transform_process_arguments_body(atermpp::down_cast<process_instance>(hide(t).operand()),bound_variables,visited_processes));
+                    transform_process_arguments_body(hide(t).operand(),bound_variables,visited_processes));
       }
       if (is_rename(t))
       {

@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file generatelts.cpp
+/// \file lps2lts.cpp
 
 #include <csignal>
 #include <memory>
@@ -21,7 +21,7 @@ using namespace mcrl2;
 using data::tools::rewriter_tool;
 using utilities::tools::input_output_tool;
 
-class generatelts_tool: public rewriter_tool<input_output_tool>
+class lps2lts_tool: public rewriter_tool<input_output_tool>
 {
   typedef rewriter_tool<input_output_tool> super;
 
@@ -31,11 +31,11 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
   std::set<std::string> trace_multiaction_strings;
 
   public:
-    generatelts_tool()
+    lps2lts_tool()
       : super("lps2lts",
               "Wieger Wesselink",
               "generates an LTS from an LPS",
-              "Transforms the LPS in INFILE and writes a corresponding LTS in .aut format "
+              "Transforms the LPS in INFILE and writes a corresponding LTS "
               " to OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not "
               " present, stdin is used."
              )
@@ -363,7 +363,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
     }
 };
 
-std::unique_ptr<generatelts_tool> tool_instance;
+std::unique_ptr<lps2lts_tool> tool_instance;
 
 static void premature_termination_handler(int)
 {
@@ -375,7 +375,7 @@ static void premature_termination_handler(int)
 
 int main(int argc, char** argv)
 {
-  tool_instance = std::make_unique<generatelts_tool>();
+  tool_instance = std::make_unique<lps2lts_tool>();
   signal(SIGABRT, premature_termination_handler);
   signal(SIGINT, premature_termination_handler); // At ^C invoke the termination handler.
   return tool_instance->execute(argc, argv);

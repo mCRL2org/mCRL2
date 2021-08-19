@@ -58,6 +58,15 @@ public:
     : aterm(detail::g_term_pool().empty_list())
   {}
 
+  /// \brief Constructor from an aterm.
+  /// \param t A list.
+  explicit term_list(const aterm& t) noexcept
+    : aterm(t)
+  {
+    // assert(!defined() || type_is_list());
+    assert(type_is_list());  // A list should not be a default aterm. 
+  }
+
   /// \brief Copy constructor.
   /// \param t A list.
   term_list(const term_list<Term>& t) noexcept

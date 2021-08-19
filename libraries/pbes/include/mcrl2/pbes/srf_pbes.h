@@ -538,7 +538,7 @@ bool is_conjunctive(const pbes_expression& phi)
   }
   else if (is_and(phi))
   {
-    const auto& phi_ = atermpp::down_cast<or_>(phi);
+    const auto& phi_ = atermpp::down_cast<and_>(phi);
     return !((is_simple_expression(phi_.left()) && is_propositional_variable_instantiation(phi_.right())) ||
              (is_simple_expression(phi_.right()) && is_propositional_variable_instantiation(phi_.left())));
   }

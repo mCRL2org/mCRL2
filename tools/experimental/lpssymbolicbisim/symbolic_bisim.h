@@ -343,7 +343,7 @@ protected:
 
     std::set< data_expression > new_blocks;
     // Enumerate over all values of primed variables to obtain the new blocks
-    enumerate(enumeration_condition, free_vars_list, split_block, lli, new_blocks);
+    enumerate(enumeration_condition, free_vars_list, atermpp::down_cast<lambda>(split_block), lli, new_blocks);
 
     // Update the caches and the partition
     refinement_cache.insert(std::make_tuple(phi_k, phi_l, as));

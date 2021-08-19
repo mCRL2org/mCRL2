@@ -32,7 +32,7 @@ public:
     explicit OptionValue(ToolOption option, QCheckBox *cbEnabled, FilePicker *argValue, QObject* parent=NULL);
     explicit OptionValue(ToolOption option, QCheckBox *cbEnabled, QCheckBox *argValue, QObject* parent=NULL);
 
-    QString value();
+    QString value(bool addQuotesAroundValuesWithSpaces=false);
 private:
     ToolOption m_option;
     QCheckBox *m_enabled;

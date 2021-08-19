@@ -10,6 +10,11 @@
 #ifndef MCRL2_ATERMPP_ATERM_BALANCED_TREE_H
 #define MCRL2_ATERMPP_ATERM_BALANCED_TREE_H
 
+/* NOTE: A aterm_balanced_tree is actually not always an aterm_appl, namely when numbers
+ *       or lists are stored in it. In that case the balanced tree of size 1 is a number
+ *       or a list. So, a proper type for a term_balanced_tree should be "aterm" and not
+ *       aterm_appl. This ought to be adapted. */
+
 #include "mcrl2/atermpp/aterm_appl.h"
 
 #include <boost/iterator/iterator_facade.hpp>
@@ -57,7 +62,7 @@ class term_balanced_tree : public aterm_appl
 
       if (size==1)
       {
-        term = down_cast<aterm_appl>(static_cast<const aterm&>(transformer(*(p++))));
+        term = reinterpret_cast<const aterm_appl&>(static_cast<const aterm&>(transformer(*(p++))));
         return;
       }
 
@@ -108,7 +113,7 @@ class term_balanced_tree : public aterm_appl
 
     /// \brief Construction from aterm.
     explicit term_balanced_tree(const aterm& tree) 
-       : aterm_appl(down_cast<aterm_appl>(tree))
+       : aterm_appl(reinterpret_cast<const aterm_appl&>(tree))
     {
     }
 

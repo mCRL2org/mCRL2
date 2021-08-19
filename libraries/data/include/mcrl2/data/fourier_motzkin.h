@@ -330,7 +330,7 @@ struct fourier_motzkin_sigma
 
       if (negate)
       {
-        return rewr(new_variables.empty() ? sort_bool::not_(new_body) : forall(new_variables, sort_bool::not_(new_body)));
+        return (new_variables.empty() ? rewr(sort_bool::not_(new_body)) : rewr(forall(new_variables, sort_bool::not_(new_body))));
       }
       else
       {

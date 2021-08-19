@@ -273,7 +273,7 @@ struct find_equalities_traverser: public Traverser<Derived>
     {
       auto const& left = binary_left(x);
       auto const& right = binary_right(x);
-      if (is_variable(left) && !search_free_variable(atermpp::down_cast<variable>(right), atermpp::down_cast<variable>(left)))
+      if (is_variable(left) && !search_free_variable(right, atermpp::down_cast<variable>(left)))
       {
         push(find_equalities_expression(atermpp::down_cast<variable>(left), right, false));
       }

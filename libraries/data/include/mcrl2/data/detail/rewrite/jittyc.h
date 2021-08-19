@@ -11,11 +11,12 @@
 #ifndef __REWR_JITTYC_H
 #define __REWR_JITTYC_H
 
-#include "mcrl2/data/detail/rewrite/jitty.h"
-#include "mcrl2/data/detail/rewrite/match_tree.h"
 #include "mcrl2/utilities/uncompiledlibrary.h"
 #include "mcrl2/utilities/toolset_version.h"
+#include "mcrl2/data/detail/rewrite/jitty.h"
+#include "mcrl2/data/detail/rewrite/match_tree.h"
 #include "mcrl2/data/detail/rewrite/nfs_array.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 
 #ifdef MCRL2_JITTYC_AVAILABLE
 
@@ -141,6 +142,7 @@ class RewriterCompilingJitty: public Rewriter
     
     RewriterJitty jitty_rewriter;
     std::set < data_equation > rewrite_rules;
+    const match_tree dummy=match_tree();
     bool made_files;
     std::map<function_symbol, data_equation_list> jittyc_eqns;
     std::set<function_symbol> m_extra_symbols;
@@ -166,7 +168,15 @@ class RewriterCompilingJitty: public Rewriter
     bool lift_rewrite_rule_to_right_arity(data_equation& e, const std::size_t requested_arity);
     sort_list_vector get_residual_sorts(const sort_expression& s, const std::size_t actual_arity, const std::size_t requested_arity);
     match_tree_list create_strategy(const data_equation_list& rules, const std::size_t arity);
-
+    void term2seq(const data_expression& t, match_tree_list& s, std::size_t *var_cnt, const bool omit_head);
+    match_tree_list create_sequence(const data_equation& rule, std::size_t* var_cnt);
+    match_tree_list subst_var(const match_tree_list& l,
+                                 const variable& old,
+                                 const variable& new_val,
+                                 const std::size_t num,
+                                 const mutable_map_substitution<>& substs);
+    match_tree build_tree(build_pars pars, std::size_t i);
+    match_tree create_tree(const data_equation_list& rules);
 };
 
 struct rewriter_interface

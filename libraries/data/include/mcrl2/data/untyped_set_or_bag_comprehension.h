@@ -26,10 +26,10 @@ class untyped_set_or_bag_comprehension: public abstraction
 
     /// Constructor.
     ///
-    /// \param[in] d A data expression.
+    /// \param[in] d An aterm. 
     /// \pre d has the interal structure of an abstraction.
     /// \pre d is a universal quantification.
-    untyped_set_or_bag_comprehension(const data_expression& d)
+    explicit untyped_set_or_bag_comprehension(const aterm& d)
       : abstraction(d)
     {
       assert(is_abstraction(d));
