@@ -406,7 +406,7 @@ class lps_solve_structure_graph_algorithm: public solve_structure_graph_algorith
       for (structure_graph::index_type vi: V)
       {
         const auto& v = G.find_vertex(vi);
-        if (is_propositional_variable_instantiation(v.formula))           // Condition added by JFG (18/8/2021) as v.formula can be more complex. 
+        if (is_propositional_variable_instantiation(v.formula))
         {
           const auto& Z = atermpp::down_cast<propositional_variable_instantiation>(v.formula);
           std::string Zname = Z.name();
@@ -526,13 +526,16 @@ class lts_solve_structure_graph_algorithm: public solve_structure_graph_algorith
       for (structure_graph::index_type vi: V)
       {
         const auto& v = G.find_vertex(vi);
-        const auto& Z = atermpp::down_cast<propositional_variable_instantiation>(v.formula);
-        std::string Zname = Z.name();
-        std::smatch match;
-        if (std::regex_match(Zname, match, re))
+        if (is_propositional_variable_instantiation(v.formula))
         {
-          std::size_t transition_index = std::stoul(match[2]);
-          transition_indices.insert(transition_index);
+          const propositional_variable_instantiation& Z = atermpp::down_cast<propositional_variable_instantiation>(v.formula);
+          std::string Zname = Z.name();
+          std::smatch match;
+          if (std::regex_match(Zname, match, re))
+          {
+            std::size_t transition_index = std::stoul(match[2]);
+            transition_indices.insert(transition_index);
+          }
         }
       }
       filter_transitions(ltsspec, transition_indices);
