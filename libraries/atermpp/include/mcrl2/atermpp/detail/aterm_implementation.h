@@ -107,9 +107,10 @@ inline aterm::aterm(const aterm& other) noexcept
 inline aterm::aterm(aterm&& other) noexcept
  : unprotected_aterm(other.m_term)
 {
-#ifndef MCRL2_ATERMPP_REFERENCE_COUNTED
+#ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
+  other.m_term=nullptr;   // This is not needed when using protection sets. 
+#else
   detail::g_thread_term_pool().register_variable(this);
-  other.m_term=nullptr;   // This is not needed/allowed when using protection sets. 
 #endif
 }
 
