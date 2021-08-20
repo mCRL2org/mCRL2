@@ -164,6 +164,19 @@ public:
 };
 
 /// \brief The aterm base class that provides protection of the underlying shared terms.
+/// \details Terms are protected using one of the following two invariants:
+///          (1) A term that can be accessed is a subterm of a term with a reference count
+///              larger than 0 (when reference counting is used). Or, 
+///          (2) A term that can be accessed if it is a subterm of a term that occurs at
+///              an address which exist in the protection set of a process, or which sits
+///              in an atermpp container, which automatically is a container protection set.
+///              Furthermore, every address in a protection set contains a valid term.
+///          During garbage collection or rehashing, this situation is stable in the sense
+///          that all terms that are protected remain protected until the end of the 
+///          garbage collection or rehashing phase by the same address or term. This means
+///          that during garbage collection no terms can be deleted, for instance in an
+///          assignment, or in a destruct. 
+//               
 class aterm : public unprotected_aterm
 {
 public:

@@ -109,8 +109,8 @@ inline aterm::aterm(aterm&& other) noexcept
 {
 #ifndef MCRL2_ATERMPP_REFERENCE_COUNTED
   detail::g_thread_term_pool().register_variable(this);
+  other.m_term=nullptr;   // This is not needed/allowed when using protection sets. 
 #endif
-  other.m_term=nullptr;
 }
 
 } // namespace atermpp
