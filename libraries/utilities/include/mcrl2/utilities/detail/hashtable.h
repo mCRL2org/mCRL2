@@ -30,7 +30,8 @@ inline void hashtable<Key, Hash, Equals, Allocator>::rehash(std::size_t size)
 
   for (const Key& key : old)
   {
-    auto it = begin() + get_index(key);
+    const std::size_t key_index = get_index(key);
+    auto it = begin() + key_index;
     // Find the first empty position.
     while (*it != nullptr)
     {
@@ -40,7 +41,7 @@ inline void hashtable<Key, Hash, Equals, Allocator>::rehash(std::size_t size)
         it = begin();
       }
 
-      assert(it != begin() + get_index(key));
+      assert(it != begin() + key_index);
     }
 
     // Found an empty spot, insert a new index belonging to key,
@@ -89,7 +90,8 @@ inline std::pair<typename hashtable<Key,Hash,Equals,Allocator>::iterator, bool> 
   assert(!must_resize());
   ++m_number_of_elements;
 
-  auto it = begin() + get_index(key);
+  const std::size_t key_index = get_index(key);
+  auto it = begin() + key_index;
 
   // Find the first empty position.
   while (*it != nullptr)
@@ -100,7 +102,7 @@ inline std::pair<typename hashtable<Key,Hash,Equals,Allocator>::iterator, bool> 
       it = begin();
     }
 
-    assert(it != begin() + get_index(key));
+    assert(it != begin() + key_index);
   }
 
   // Found an empty spot, insert a new index belonging to key,
@@ -112,7 +114,8 @@ inline std::pair<typename hashtable<Key,Hash,Equals,Allocator>::iterator, bool> 
 template <class Key, typename Hash, typename Equals, typename Allocator>
 inline typename hashtable<Key,Hash,Equals,Allocator>::iterator hashtable<Key,Hash,Equals,Allocator>::erase(const Key& key)
 {
-  auto it = begin() + get_index(key);
+  const std::size_t key_index = get_index(key);
+  auto it = begin() + key_index;
 
   // Find the key.
   while (!m_equals(*it, key))
@@ -123,7 +126,15 @@ inline typename hashtable<Key,Hash,Equals,Allocator>::iterator hashtable<Key,Has
       it = begin();
     }
 
-    assert(it != begin() + get_index(key));
+    if (it == begin() + key_index)
+    {
+      // An element not in the hashset is begin removed.
+      // When optimizing, the gcc compiler tends to generate
+      // destructions of non generated aterms. If this is
+      // repaired, this safety escape can be removed. 
+      return it; 
+    }
+    assert(it != begin() + key_index);
   }
 
   *it = nullptr;
