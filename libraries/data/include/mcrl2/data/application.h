@@ -219,7 +219,7 @@ class skip_function_application_to_head_assignment
     std::size_t m_current_index;
     const bool m_skip_head;
   public:
-    skip_function_application_to_head_assignment(ArgumentConverter&f, const bool skip_head )
+    skip_function_application_to_head_assignment(ArgumentConverter& f, const bool skip_head )
      : m_f(f),
        m_current_index(0),
        m_skip_head(skip_head)

@@ -11,9 +11,9 @@
 #define ATERMPP_DETAIL_ATERM_POOL_IMPLEMENTATION_H
 #pragma once
 
+#include <chrono>
 #include "aterm_pool.h"
 
-#include <chrono>
 
 namespace atermpp
 {

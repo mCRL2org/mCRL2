@@ -11,6 +11,7 @@
 #define MCRL2_UTILITIES_DETAIL_HASHTABLE_H
 #pragma once
 
+#include "mcrl2/utilities/power_of_two.h" 
 #include "mcrl2/utilities/hashtable.h"    // necessary for header test.
 #include "mcrl2/utilities/indexed_set.h"    // necessary for header test.
 
@@ -52,7 +53,8 @@ inline void hashtable<Key, Hash, Equals, Allocator>::rehash(std::size_t size)
 template <class Key, typename Hash, typename Equals, typename Allocator>
 inline hashtable<Key,Hash,Equals,Allocator>::hashtable()
   : hashtable(128)
-{} 
+{
+} 
 
 template <class Key, typename Hash, typename Equals, typename Allocator>
 inline hashtable<Key,Hash,Equals,Allocator>::hashtable(std::size_t initial_size,
@@ -62,6 +64,7 @@ inline hashtable<Key,Hash,Equals,Allocator>::hashtable(std::size_t initial_size,
         m_hasher(hasher),
         m_equals(equals)
 {
+  assert(utilities::is_power_of_two(initial_size));
   m_buckets_mask = m_hashtable.size() - 1;
 }
 

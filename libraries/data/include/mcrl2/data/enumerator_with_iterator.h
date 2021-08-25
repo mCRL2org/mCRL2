@@ -432,7 +432,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm_without_ca
 
     const iterator& end()
     {
-      static iterator result(m_accept);
+      thread_local iterator result(m_accept);  
       return result;
     }
 };
