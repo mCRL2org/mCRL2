@@ -52,7 +52,8 @@ class bisim_partitioner
     bisim_partitioner(
       LTS_TYPE& l,
       const bool branching=false,
-      const bool preserve_divergence=false)
+      const bool preserve_divergence=false,
+      const bool generate_counter_examples=false)
        : max_state_index(0), 
          aut(l) 
     {
@@ -61,6 +62,12 @@ class bisim_partitioner
                   (branching?"ranching b":"") << "isimulation partitioner created for "
                   << l.num_states() << " states and " <<
                   l.num_transitions() << " transitions\n";
+
+      if (generate_counter_examples)
+      {
+        outgoing_transitions = transitions_per_outgoing_state_action_pair(aut.get_transitions(), aut.hidden_label_set());
+      }
+
       create_initial_partition(branching,preserve_divergence);
       refine_partition_until_it_becomes_stable(branching, preserve_divergence);
     }
@@ -261,6 +268,10 @@ class bisim_partitioner
 
     std::vector< block_index_type > to_be_processed;
     std::vector< block_index_type > BL;
+
+    // map from source state and action to target state, makes generating counterexample info easier
+    outgoing_transitions_per_state_action_t outgoing_transitions;
+
 
     void create_initial_partition(const bool branching,
                                   const bool preserve_divergences)
@@ -759,7 +770,6 @@ class bisim_partitioner
     std::set < class mcrl2::lts::trace > counter_traces_aux(
       const state_type s,
       const state_type t,
-      const mcrl2::lts::outgoing_transitions_per_state_action_t& outgoing_transitions,
       const bool branching_bisimulation) const
     {
       // First find the smallest block containing both states s and t.
@@ -787,7 +797,7 @@ class bisim_partitioner
       const block_index_type B__=blocks[b_C].splitter.second;
       std::set < state_type > l_reachable_states_for_s;
       std::set < state_type > visited1;
-      reachable_states_in_block_s_via_label_l(s,b_C,l,outgoing_transitions, l_reachable_states_for_s,visited1,branching_bisimulation);
+      reachable_states_in_block_s_via_label_l(s,b_C,l, l_reachable_states_for_s,visited1,branching_bisimulation);
 
       std::set < state_type> B_s_reacha;
       std::set < state_type> B_s_nonreacha;
@@ -817,7 +827,7 @@ class bisim_partitioner
 
       std::set < state_type > l_reachable_states_for_t;
       std::set < state_type > visited2;
-      reachable_states_in_block_s_via_label_l(t,b_C,l,outgoing_transitions, l_reachable_states_for_t,visited2,branching_bisimulation);
+      reachable_states_in_block_s_via_label_l(t,b_C,l, l_reachable_states_for_t,visited2,branching_bisimulation);
 
       std::set < state_type> B_t_reacha;
       std::set < state_type> B_t_nonreacha;
@@ -877,7 +887,7 @@ class bisim_partitioner
                i_t!=B_t_nonreacha.end(); ++i_t)
           {
             const std::set < class mcrl2::lts::trace > counter_traces=
-                            counter_traces_aux(*i_s,*i_t,outgoing_transitions,branching_bisimulation);
+                            counter_traces_aux(*i_s,*i_t,branching_bisimulation);
             // Add l to these traces and add them to resulting_counter_traces
             for (std::set< class mcrl2::lts::trace >::const_iterator j=counter_traces.begin();
                  j!=counter_traces.end(); ++j)
@@ -908,7 +918,6 @@ class bisim_partitioner
       const state_type s,
       const block_index_type block_index_for_bottom_state,
       const label_type l,
-      const mcrl2::lts::outgoing_transitions_per_state_action_t& outgoing_transitions,
       std::set < state_type > &result_set,
       std::set < state_type > &visited,
       const bool branching_bisimulation) const
@@ -953,7 +962,6 @@ class bisim_partitioner
                   to(i),
                   block_index_for_bottom_state,
                   l,
-                  outgoing_transitions,
                   result_set,
                   visited,
                   branching_bisimulation);
@@ -1178,8 +1186,7 @@ std::set < class mcrl2::lts::trace > bisim_partitioner<LTS_TYPE>::counter_traces
     throw mcrl2::runtime_error("Requesting a counter trace for two bisimilar states. Such a trace is not useful.");
   }
 
-  const outgoing_transitions_per_state_action_t outgoing_transitions=transitions_per_outgoing_state_action_pair(aut.get_transitions(),aut.hidden_label_set());
-  return counter_traces_aux(s,t,outgoing_transitions,branching_bisimulation);
+  return counter_traces_aux(s,t,branching_bisimulation);
 }
 
 
@@ -1239,7 +1246,7 @@ bool destructive_bisimulation_compare(
     init_l2 = scc_part.get_eq_class(init_l2);
   }
 
-  detail::bisim_partitioner<LTS_TYPE> bisim_part(l1, branching, preserve_divergences);
+  detail::bisim_partitioner<LTS_TYPE> bisim_part(l1, branching, preserve_divergences, generate_counter_examples);
   if (generate_counter_examples && !bisim_part.in_same_class(l1.initial_state(),init_l2))
   {
     std::size_t count=0;
