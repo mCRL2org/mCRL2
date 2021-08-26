@@ -55,7 +55,9 @@ class bisim_partitioner
       const bool preserve_divergence=false,
       const bool generate_counter_examples=false)
        : max_state_index(0), 
-         aut(l) 
+         aut(l),
+         branching(branching),
+         store_counter_info(generate_counter_examples)
     {
       assert(branching || !preserve_divergence);
       mCRL2log(log::verbose) << (preserve_divergence?"Divergence preserving b":"B") <<
@@ -202,6 +204,8 @@ class bisim_partitioner
 
     state_type max_state_index;
     LTS_TYPE& aut;
+    bool branching;
+    bool store_counter_info;
 
     struct non_bottom_state
     {
@@ -223,9 +227,6 @@ class bisim_partitioner
       block_index_type parent_block_index;      // Index of the parent block.
       // If there is no parent block, this refers to the block
       // itself.
-      std::pair < label_type, block_index_type > splitter;
-      // The action and block that caused this block to split.
-      // This information is only defined if the block has been split.
       std::vector < state_type > bottom_states; // The non bottom states must be ordered
       // on tau reachability. The deepest
       // states occur first in the vector.
@@ -248,9 +249,6 @@ class bisim_partitioner
         b.parent_block_index=parent_block_index;
         parent_block_index=parent_block_index1;
 
-        std::pair < label_type, block_index_type > splitter1=b.splitter;
-        b.splitter=splitter;
-        splitter=splitter1;
         bottom_states.swap(b.bottom_states);
         non_bottom_states.swap(b.non_bottom_states);
         non_inert_transitions.swap(b.non_inert_transitions);
@@ -269,6 +267,18 @@ class bisim_partitioner
     std::vector< block_index_type > to_be_processed;
     std::vector< block_index_type > BL;
 
+    // Counter example information based on "Computing Distinguishing Formulas for Branching Bisimulation", 1991 by Henri Korver
+    // Given a block B that is split using action alpha and block B' into blocks L and R, with P as the partition just before this split, then
+    // right_child[B] = R
+    std::map < block_index_type, block_index_type > right_child;
+    // split_by_action[B] = alpha,
+    std::map < block_index_type, label_type > split_by_action;
+    // split_by_block[B] = B',
+    std::map < block_index_type, block_index_type > split_by_block;
+    // r_alpha[R] = { C \in P | \exists_{s \in R, s' \in C} : s -a-> s'} and
+    std::map < block_index_type, std::set < block_index_type > > r_alpha;
+    // r_tau[R] = { C \in P | \exists_{s \in R, s' \in C} : s -tau-> s' && C != B}.
+    std::map < block_index_type, std::set < block_index_type > > r_tauP;
     // map from source state and action to target state, makes generating counterexample info easier
     outgoing_transitions_per_state_action_t outgoing_transitions;
 
@@ -385,7 +395,6 @@ class bisim_partitioner
       initial_partition.state_index=0;
       max_state_index=1;
       initial_partition.parent_block_index=0;
-      initial_partition.splitter=std::pair< label_type, block_index_type > (0,0);
       blocks.push_back(block());
       blocks.back().swap(initial_partition);
       block_index_of_a_state=std::vector < block_index_type >(aut.num_states(),0);
@@ -532,8 +541,6 @@ class bisim_partitioner
               mCRL2log(log::debug) << "Bisimulation partitioner: create block " << (blocks.size()+1)/2 << std::endl;
             }
           }
-          // Record how block *i1 is split, to use this to generate counter examples.
-          blocks[*i1].splitter=std::pair< label_type, block_index_type > (splitter_label,splitter_block);
 
           // Create a first new block.
           blocks.push_back(block());
@@ -565,6 +572,53 @@ class bisim_partitioner
                j!=reference_to_flagged_states_of_block2.end(); ++j)
           {
             block_index_of_a_state[*j]=new_block2;
+          }
+
+          // NOTES: new_block1 = R, new_block2 = L
+          // Store counter formula info
+          if (store_counter_info)
+          {
+            right_child[*i1] = new_block1;
+            split_by_action[*i1] = splitter_label;
+            split_by_block[*i1] = splitter_block;
+
+            // compute r_alpha[new_block1]
+            std::set<block_index_type> reachable_blocks = {};
+            for (state_type source_state : blocks[new_block1].bottom_states)
+            {
+              for (outgoing_transitions_per_state_action_t::const_iterator i = outgoing_transitions.lower_bound(std::pair<state_type, label_type>(source_state, splitter_label));
+                i != outgoing_transitions.upper_bound(std::pair<state_type, label_type>(source_state, splitter_label)); ++i)
+              {
+                state_type target_state = to(i);
+                block_index_type target_block = block_index_of_a_state[target_state];
+                reachable_blocks.insert(target_block == new_block1 || target_block == new_block2 ? *i1 : target_block);
+              }
+            }
+            r_alpha[new_block1] = reachable_blocks;
+
+            if (branching) {
+              // compute r_tau[new_block1]
+              std::set<block_index_type> reachable_blocks = {};
+              for (state_type source_state : blocks[new_block1].bottom_states)
+              {
+                for (label_type lab = 0; lab < aut.num_action_labels(); ++lab)
+                {
+                  if (aut.is_tau(aut.apply_hidden_label_map(lab)))
+                  {
+                    for (outgoing_transitions_per_state_action_t::const_iterator i = outgoing_transitions.lower_bound(std::pair<state_type, label_type>(source_state, lab));
+                      i != outgoing_transitions.upper_bound(std::pair<state_type, label_type>(source_state, lab)); ++i)
+                    {
+                      state_type target_state = to(i);
+                      block_index_type target_block = block_index_of_a_state[target_state];
+                      if (!(target_block == *i1 || target_block == new_block1 || target_block == new_block2))
+                      {
+                        reachable_blocks.insert(target_block);
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
 
           // Put the indices of second split block to to_be_processed.
@@ -725,6 +779,7 @@ class bisim_partitioner
       }
       BL.clear();
     }
+
     void order_recursively_on_tau_reachability(
       const state_type s,
       std::map < state_type, std::vector < state_type > >& inert_transition_map,
@@ -793,8 +848,8 @@ class bisim_partitioner
 
       // Now b_C is the smallest block containing both s and t.
 
-      const label_type l=blocks[b_C].splitter.first;
-      const block_index_type B__=blocks[b_C].splitter.second;
+      const label_type l=split_by_action.at(b_C);
+      const block_index_type B__= split_by_block.at(b_C);
       std::set < state_type > l_reachable_states_for_s;
       std::set < state_type > visited1;
       reachable_states_in_block_s_via_label_l(s,b_C,l, l_reachable_states_for_s,visited1,branching_bisimulation);
