@@ -548,7 +548,6 @@ void RewriterJitty::rewrite_aux_function_symbol(
   const std::size_t arity=detail::recursive_number_of_args(term);
   assert(arity>0);
   // data_expression* rewritten = MCRL2_SPECIFIC_STACK_ALLOCATOR(data_expression, arity);
-  // rewrite_stack().resize(rewrite_stack().size()+arity);
   increase_rewrite_stack(arity+1); 
   bool* rewritten_defined = MCRL2_SPECIFIC_STACK_ALLOCATOR(bool, arity);
 
@@ -576,14 +575,11 @@ void RewriterJitty::rewrite_aux_function_symbol(
           if (!rewritten_defined[i])
           {
             // new (&rewritten[i]) data_expression(rewrite_aux(detail::get_argument_of_higher_order_term(term,i),sigma));
-            // rewrite_stack()[rewrite_stack().size()-arity+i]=rewrite_aux(detail::get_argument_of_higher_order_term(term,i),sigma);
-            // set_element_in_rewrite_stack(i,arity,rewrite_aux(detail::get_argument_of_higher_order_term(term,i),sigma));
             rewrite_aux(element_from_rewrite_stack(i,arity+1),detail::get_argument_of_higher_order_term(term,i),sigma);
             
             rewritten_defined[i]=true;
           }
           // assert(rewritten[i].defined());
-          // assert(rewrite_stack()[rewrite_stack().size()-arity+i].defined());
           assert(element_from_rewrite_stack(i,arity+1).defined());
         }
         else
@@ -599,9 +595,9 @@ void RewriterJitty::rewrite_aux_function_symbol(
         if (term.head()==op) 
         { 
           // application rewriteable_term(op, &rewritten[0], &rewritten[arity]);
-          // application rewriteable_term(op, &rewrite_stack()[rewrite_stack().size()-arity], &rewrite_stack()[rewrite_stack().size()]);
-          application rewriteable_term(op, &rewrite_stack()[rewrite_stack().size()-arity-1], 
-                                           &rewrite_stack()[rewrite_stack().size()-1]); /* TODO Optimize */
+          assert(rewrite_stack().size()>=arity+1);
+          application rewriteable_term(op, stack_iterator(0,arity+1),
+                                           stack_iterator(arity,arity+1)); /* TODO Optimize */
           result=rule.rewrite_cpp_code()(rewriteable_term);
           // clean_up_rewritten_all(arity,rewritten);
           // rewrite_stack().resize(rewrite_stack().size()-arity);
@@ -617,22 +613,17 @@ void RewriterJitty::rewrite_aux_function_symbol(
             if (!rewritten_defined[i])
             {
               // new (&rewritten[i]) data_expression(rewrite_aux(detail::get_argument_of_higher_order_term(term,i),sigma));
-              // rewrite_stack()[rewrite_stack().size()-arity+i]=rewrite_aux(detail::get_argument_of_higher_order_term(term,i),sigma);
-              // set_element_in_rewrite_stack(i,arity,rewrite_aux(detail::get_argument_of_higher_order_term(term,i),sigma));
               rewrite_aux(element_from_rewrite_stack(i,arity+1),detail::get_argument_of_higher_order_term(term,i),sigma);
               rewritten_defined[i]=true;
             }
           }
           // return apply_cpp_code_to_higher_order_term(term,  rule.rewrite_cpp_code(), &rewritten[0], &rewritten[arity], sigma);
-          // data_expression result=apply_cpp_code_to_higher_order_term(term,  rule.rewrite_cpp_code(), &rewrite_stack()[rewrite_stack().size()-arity], &rewrite_stack()[rewrite_stack().size()], sigma);
           apply_cpp_code_to_higher_order_term(
                                            result,
                                            term,  
                                            rule.rewrite_cpp_code(),  
-                                           &rewrite_stack()[rewrite_stack().size()-arity-1], 
-                                           &rewrite_stack()[rewrite_stack().size()-1], sigma);
-          // clean_up_rewritten_all(arity,rewritten);
-          // rewrite_stack().resize(rewrite_stack().size()-arity);
+                                           stack_iterator(0,arity+1),
+                                           stack_iterator(arity,arity+1), sigma);
           decrease_rewrite_stack(arity+1); 
           return;
         }
@@ -696,29 +687,17 @@ void RewriterJitty::rewrite_aux_function_symbol(
             }
             else
             {
-
               assert(arity>rule_arity);
               // There are more arguments than those that have been rewritten.
               // Get those, put them in rewritten.
 
               for(std::size_t i=rule_arity; i<arity; ++i)
               {
-                /* if (rewritten_defined[i])
-                {
-                  // rewritten[i]=detail::get_argument_of_higher_order_term(term,i);
-                  // rewrite_stack()[rewrite_stack().size()-arity+i]=detail::get_argument_of_higher_order_term(term,i);
-                  set_element_in_rewrite_stack(i,arity,detail::get_argument_of_higher_order_term(term,i));
-                }
-                else
-                { */
-                  // new (&rewritten[i]) data_expression(detail::get_argument_of_higher_order_term(term,i));
-                  // rewrite_stack()[rewrite_stack().size()-arity+i]=detail::get_argument_of_higher_order_term(term,i);
-                  set_element_in_rewrite_stack(i,arity+1,detail::get_argument_of_higher_order_term(term,i));
-                  rewritten_defined[i]=true;
-                // }
+                set_element_in_rewrite_stack(i,arity+1,detail::get_argument_of_higher_order_term(term,i));
+                rewritten_defined[i]=true;
               }
 
-              subst_values(result,assignments,rhs,m_generator);
+              subst_values(top_of_rewrite_stack(),assignments,rhs,m_generator);
               std::size_t i = rule_arity;
               sort_expression sort = detail::residual_sort(op.sort(),i);
               while (is_function_sort(sort) && (i < arity))
@@ -727,10 +706,13 @@ void RewriterJitty::rewrite_aux_function_symbol(
                 const std::size_t end=i+fsort.domain().size();
                 assert(end-1<arity);
                 // result = application(result,&rewritten[0]+i,&rewritten[0]+end);
-                // result = application(result,&rewrite_stack()[rewrite_stack().size()-arity+i],&rewrite_stack()[rewrite_stack().size()-arity+end]);
-                make_application(result,result,
-                                     &rewrite_stack()[rewrite_stack().size()-arity-1+i],
-                                     &rewrite_stack()[rewrite_stack().size()-arity-1+end]);
+                assert(rewrite_stack().size()+i>=arity+1);
+                assert(end<arity+1);
+                assert(end>=i);
+
+                make_application(top_of_rewrite_stack(),top_of_rewrite_stack(),
+                                     stack_iterator(i,arity+1),
+                                     stack_iterator(end,arity+1));
                 i=end;
                 sort = fsort.codomain();
               }
@@ -739,8 +721,7 @@ void RewriterJitty::rewrite_aux_function_symbol(
               // rewrite_stack().resize(rewrite_stack().size()-arity);
               // return rewrite_aux(result,sigma);
 
-              rewrite_aux(top_of_rewrite_stack(),result,sigma);
-              result=top_of_rewrite_stack();
+              rewrite_aux(result,top_of_rewrite_stack(),sigma);
               decrease_rewrite_stack(arity+1);
               return;
             }
@@ -760,7 +741,6 @@ void RewriterJitty::rewrite_aux_function_symbol(
     if (!rewritten_defined[i])
     {
       // new (&rewritten[i]) data_expression(rewrite_aux(detail::get_argument_of_higher_order_term(term,i),sigma));
-      // rewrite_stack()[rewrite_stack().size()-arity+i]=rewrite_aux(detail::get_argument_of_higher_order_term(term,i),sigma);
       rewrite_aux(element_from_rewrite_stack(i,arity+1),detail::get_argument_of_higher_order_term(term,i),sigma);
     }
   }
@@ -769,20 +749,20 @@ void RewriterJitty::rewrite_aux_function_symbol(
   // main loop. 
   const function_sort& fsort=atermpp::down_cast<function_sort>(op.sort());
   const std::size_t end=fsort.domain().size();
-  assert(end-1<arity);
   //data_expression intermediate_result = application(op,&rewrite_stack()[rewrite_stack().size()-arity],
   //                                        &rewrite_stack()[rewrite_stack().size()-arity+end]);
-  make_application(result,op,&rewrite_stack()[rewrite_stack().size()-arity-1],
-                                          &rewrite_stack()[rewrite_stack().size()-arity-1+end]);
+
+  make_application(result,op,stack_iterator(0,arity+1), stack_iterator(end,arity+1));
   std::size_t i=end;
   const sort_expression* sort = &fsort.codomain();
   while (i<arity && is_function_sort(*sort))
   {
     const function_sort& fsort=atermpp::down_cast<function_sort>(*sort);
     const std::size_t end=i+fsort.domain().size();
-    assert(end-1<arity);
-    make_application(result,result,&rewrite_stack()[rewrite_stack().size()-arity-1+i],
-                                &rewrite_stack()[rewrite_stack().size()-arity-1+end]); 
+    assert(rewrite_stack().size()+i>=arity+1);
+    assert(end<arity+1);
+    assert(end>=i);
+    make_application(result,result,stack_iterator(i,arity+1), stack_iterator(end,arity+1));
     i=end;
     sort = &fsort.codomain();
   }
