@@ -801,8 +801,9 @@ class explorer: public abortable
     {
       mCRL2log(log::verbose) << "Start thread " << process_number << ".\n";
       // data::rewriter m_rewr(construct_rewriter(m_lpsspec, m_options.remove_unused_rewrite_rules));
-      
-      data::enumerator_algorithm<> m_enumerator(rewriter_for_this_thread, m_lpsspec.data(), rewriter_for_this_thread, m_id_generator, false);
+      data::enumerator_identifier_generator thread_id_generator("t_");;
+      data::data_specification thread_data_specification = m_lpsspec.data();
+      data::enumerator_algorithm<> m_enumerator(rewriter_for_this_thread, thread_data_specification, rewriter_for_this_thread, thread_id_generator, false);
       data::mutable_indexed_substitution<> m_sigma;  // JFG This must be a thread local substitution.
       while (number_of_active_processes>0)
       {

@@ -18,6 +18,19 @@
 
 namespace atermpp {
 
+static inline std::mutex& function_symbol_generator_mutex()
+{
+  static std::mutex m_function_symbol_generator_mutex;
+  return m_function_symbol_generator_mutex;
+}
+
+static inline std::size_t generator_sequence_number()
+{
+  static size_t n=0;
+  return n++;
+}
+
+
 /// \brief Generates unique function symbols with a given prefix.
 class function_symbol_generator // : private mcrl2::utilities::noncopyable
 {
@@ -38,39 +51,55 @@ public:
   /// \param[in] prefix The prefix of the generated generated strings.
   /// \pre The prefix may not be empty, and it may not have trailing digits
   function_symbol_generator(const std::string& prefix)
-    : m_prefix(prefix),
+    : m_prefix(prefix + std::to_string(generator_sequence_number()) + "_"),
       m_string_buffer(prefix)
   {
+    if constexpr (atermpp::detail::GlobalThreadSafe) function_symbol_generator_mutex().lock();
     assert(!prefix.empty() && !(std::isdigit(*prefix.rbegin())));
 
     // Obtain a reference to the first index possible.
     m_index = detail::g_term_pool().get_symbol_pool().register_prefix(prefix);
 
     m_initial_index = *m_index;
+    if constexpr (atermpp::detail::GlobalThreadSafe) function_symbol_generator_mutex().unlock();
   }
 
   /// \brief Restores the index back to the value that was initially assigned in the constructor.
+
   void clear()
   {
-    *m_index = m_initial_index;
-  }
+//    TODO: This has temporarily been switched off as it causes crashes in the parallel setting.
+//    It most likely gives rise to a lot of memory usage, and should therefore be reinstated. 
+//
+//    if constexpr (atermpp::detail::GlobalThreadSafe) function_symbol_generator_mutex().lock();
+//    *m_index = m_initial_index;
+//    if constexpr (atermpp::detail::GlobalThreadSafe) function_symbol_generator_mutex().unlock();
+  } 
 
   ~function_symbol_generator()
   {
+    if constexpr (atermpp::detail::GlobalThreadSafe) function_symbol_generator_mutex().lock();
     detail::g_term_pool().get_symbol_pool().deregister(m_prefix);
+    if constexpr (atermpp::detail::GlobalThreadSafe) function_symbol_generator_mutex().unlock();
   }
 
   /// \brief Generates a unique function symbol with the given prefix followed by a number.
   function_symbol operator()(std::size_t arity = 0)
   {
     // Put the number m_index after the prefix in the string buffer.
+    // Note: By using an atomic fetch the lock can most likely be omitted. 
+    // Each thread should have a unique name generator. 
+    // Most likely there is no need to protect this with a mutex lock. 
+    // if constexpr (atermpp::detail::GlobalThreadSafe) function_symbol_generator_mutex().lock();
     mcrl2::utilities::number2string(*m_index, m_string_buffer, m_prefix.size());
 
     // Increase the index.
     ++(*m_index);
 
     // Generate a new function symbol with prefix + index.
-    return function_symbol(m_string_buffer, arity, false);
+    function_symbol f(m_string_buffer, arity, false);
+    // if constexpr (atermpp::detail::GlobalThreadSafe) function_symbol_generator_mutex().unlock();
+    return f;
   }
 };
 
