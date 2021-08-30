@@ -334,6 +334,100 @@ class symbolic_pbessolve_algorithm
       return X;
     }
 
+    /// \brief Compute the monotone attractor set for U.
+    /// \param alpha the current player.
+    /// \param c priority.
+    /// \param V the set of all vertices.
+    /// \param Vplayer a partitioning of the nodes into the sets of even nodes V[0] and odd V[1].
+    ldd monotone_attractor(const ldd& U,  std::size_t alpha, std::size_t c, const ldd& V, const std::array<const ldd, 2>& Vplayer)
+    {
+      stopwatch attractor_watch;
+      mCRL2log(log::verbose) << "start monotone attractor set computation\n";
+
+      using namespace sylvan::ldds;
+      const ldd& Valpha = Vplayer[alpha];
+
+      // Compute the set of states with at least priority c.
+      ldd Vc = empty_set();
+      for (const auto&[rank, Vrank] : m_rank_map)
+      {
+        if (rank >= c)
+        {
+          Vc = union_(Vc, Vrank);
+        }
+      }
+
+      std::size_t iter = 0;
+      ldd X = empty_set();
+      ldd todo = U;
+
+      ldd Xoutside = V;
+      while (todo != empty_set())
+      {
+        mCRL2log(log::debug1) << "todo = " << print_nodes(todo, m_all_nodes) << std::endl;
+        mCRL2log(log::debug1) << "Xoutside = " << print_nodes(Xoutside, m_all_nodes) << std::endl;
+        stopwatch iter_start;
+
+        // Determine current player's nodes that can reach X (without the elements already in X).
+        ldd Palpha;
+
+        // The predecessors of the todo set; we update the todo set in this iteration to only include newly added states.
+        ldd P;
+
+        if (m_chaining)
+        {
+          ldd result = todo;
+          for (int i = m_summand_groups.size() - 1; i >= 0; --i)
+          {
+            const summand_group& group = m_summand_groups[i];
+
+            ldd pred = predecessors(Xoutside, result, group);
+            result = union_(result, intersect(pred, Valpha));
+            P = union_(P, pred);
+          }
+
+          Palpha = minus(result, todo);
+        }
+        else
+        {
+          P = predecessors(Xoutside, todo);
+          Palpha = intersect(P, Valpha);
+        }
+
+        todo = Palpha;
+        X = union_(X, Palpha);
+
+        // Determine nodes outside of X.
+        Xoutside = minus(Xoutside, Palpha);
+
+        // The nodes of the other player in the predecessors that are not part of the attractor set.
+        ldd Pforced = minus(P, Palpha);
+        for (std::size_t i = 0; i < m_summand_groups.size(); ++i)
+        {
+          const summand_group& group = m_summand_groups[i];
+
+          stopwatch watch;
+          Pforced = minus(Pforced, predecessors(Pforced, Xoutside, group));
+
+          mCRL2log(log::debug) << "removed 1 - alpha predecessors for group " << i << " out of " << m_summand_groups.size()
+                                 << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";
+        }
+
+        todo = union_(todo, Pforced);
+        X = union_(X, Pforced);
+
+        // Update nodes outside of X.
+        Xoutside = minus(Xoutside, Pforced);
+
+        mCRL2log(log::verbose) << "monotone attractor set iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << iter_start.seconds() << "s)" << std::endl;
+
+        ++iter;
+      }
+
+      mCRL2log(log::verbose) << "finished monotone attractor set computation (time = " << std::setprecision(2) << std::fixed << attractor_watch.seconds() << "s)" << std::endl;
+      return X;
+    }
+
     // Returns (min, Vmin) with
     //   min is the minimum rank in V
     //   Vmin is the set of vertices with the minimum rank in V
@@ -487,7 +581,6 @@ class symbolic_pbessolve_algorithm
         const ldd& W0 = sylvan::ldds::empty_set(),
         const ldd& W1 = sylvan::ldds::empty_set())
     {
-
       using namespace sylvan::ldds;
       stopwatch timer;
 
@@ -496,14 +589,21 @@ class symbolic_pbessolve_algorithm
       std::array<const ldd, 2> Vplayer = { intersect(Vtotal, m_V[0]), intersect(Vtotal, m_V[1]) };
 
       mCRL2log(log::debug1) << "\n--- apply cycle detection to ---\n" << print_graph(Vtotal, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
+
+      // Computes two vertex sets of all even priority and odd priority nodes respectively.
+      std::array<ldd, 2> parity;
       for (const auto&[rank, Vrank] : m_rank_map)
       {
-        // Determine the cycles for this priority and player.
-        std::size_t alpha = rank % 2;
-        ldd U = empty_set();
-        ldd Unext = intersect(Vrank, Vplayer[alpha]);
+        parity[rank % 2] = union_(parity[rank % 2], Vrank);
+      }
 
-        mCRL2log(log::verbose) << "cycle detection for rank " << rank << "\n";
+      for (std::size_t alpha = 0; alpha <= 1; ++alpha)
+      {
+        // Determine the cycles for this player.
+        ldd U = empty_set();
+        ldd Unext = intersect(parity[alpha], Vplayer[alpha]);
+
+        mCRL2log(log::verbose) << "cycle detection for player " << alpha << "\n";
 
         std::size_t iter = 0;
         while (U != Unext)
@@ -517,7 +617,7 @@ class symbolic_pbessolve_algorithm
           ++iter;
         }
 
-        mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(U) << " states in cycles for priority " << rank << "\n";
+        mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(U) << " states in cycles for player " << alpha << "\n";
 
         won[alpha] = union_(won[alpha], attractor(U, alpha, Vtotal, todo, Vplayer));
       }
@@ -525,6 +625,47 @@ class symbolic_pbessolve_algorithm
       mCRL2log(log::verbose) << "finished cycle detection (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
       mCRL2log(log::debug1) << "W0 = " << print_nodes(won[0], m_all_nodes) << std::endl;
       mCRL2log(log::debug1) << "W1 = " << print_nodes(won[1], m_all_nodes) << std::endl;
+
+      return { won[0], won[1] };
+    }
+
+    std::pair<ldd, ldd> detect_fatal_attractors(const ldd& V,
+        const ldd& todo,
+        const ldd& Vdeadlock,
+        const ldd& W0 = sylvan::ldds::empty_set(),
+        const ldd& W1 = sylvan::ldds::empty_set())
+    {      
+      using namespace sylvan::ldds;
+      stopwatch timer;
+
+      std::array<ldd, 2> won = { W0, W1 };
+      ldd Vtotal = compute_total_graph(V, todo, Vdeadlock, won);
+      std::array<const ldd, 2> Vplayer = { intersect(Vtotal, m_V[0]), intersect(Vtotal, m_V[1]) };
+
+      mCRL2log(log::debug1) << "\n--- apply fatal attractor detection to ---\n" << print_graph(Vtotal, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
+
+      // For priorities in descending order
+      for (auto it = m_rank_map.rbegin(); it != m_rank_map.rend(); it++)
+      {
+        std::size_t c = it->first;
+        ldd X = it->second;
+        ldd Y = empty_set();
+
+        while (X != empty_set() && X != Y)
+        {
+          Y = X;
+          ldd Z = monotone_attractor(X, c % 2, c, Vtotal, Vplayer);
+          if (includes(Z, X))
+          {
+            won[c % 2] = union_(won[c % 2], Z);
+            break;
+          }
+          else
+          {
+            X = intersect(X, Z);
+          }
+        }
+      }
 
       return { won[0], won[1] };
     }

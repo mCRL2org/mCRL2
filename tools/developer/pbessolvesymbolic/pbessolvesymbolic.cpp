@@ -26,7 +26,7 @@ using utilities::tools::input_output_tool;
 
 
 /// \brief maps proposition variable ldd values to (rank, is_disjunctive)
-std::map<std::size_t, std::pair<std::size_t, bool>> compute_equation_info(const pbes_system::srf_pbes& pbes, const std::vector<lps::data_expression_index>& data_index)
+std::map<std::size_t, std:pair<std::size_t, bool>> compute_equation_info(const pbes_system::srf_pbes& pbes, const std::vector<lps::data_expression_index>& data_index)
 {
   pbes_system::pbes_equation_index equation_index(pbes);
 
@@ -90,9 +90,19 @@ public:
         m_Vwon[1] = result.second;
 
         mCRL2log(log::verbose) << "cycle detection found solution for" << std::setw(12) << satcount(m_Vwon[0]) + satcount(m_Vwon[1]) << " states" << std::endl;
+      }      
+      else if (m_options.solve_strategy == 2)
+      {
+        mCRL2log(log::verbose) << "start fatal attractor detection\n";
+
+        auto result = solver.detect_fatal_attractors(m_visited, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1]);
+        m_Vwon[0] = result.first;
+        m_Vwon[1] = result.second;
+
+        mCRL2log(log::verbose) << "fatal attractor detection found solution for" << std::setw(12) << satcount(m_Vwon[0]) + satcount(m_Vwon[1]) << " states" << std::endl;
 
       }
-      else if (m_options.solve_strategy == 2)
+      else if (m_options.solve_strategy == 3)
       {
         mCRL2log(log::verbose) << "start partial solving" << std::endl;
 
@@ -229,7 +239,8 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
                       utilities::make_enum_argument<int>("NUM")
                         .add_value_desc(0, "No on-the-fly solving is applied", true)
                         .add_value_desc(1, "Detect winning loops.")
-                        .add_value_desc(2, "Solve subgames using the solver."),
+                        .add_value_desc(2, "Detect fatal attractors.")
+                        .add_value_desc(3, "Solve subgames using a Zielonka solver."),
                       "Use solve strategy NUM. Strategy 1 periodically applies on-the-fly solving, which may lead to early termination.",
                       's');
       desc.add_option("split-conditions",
@@ -317,7 +328,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       }
 
       options.solve_strategy =  parser.option_argument_as<int>("solve-strategy");
-      if (options.solve_strategy < 0 || options.solve_strategy > 2)
+      if (options.solve_strategy < 0 || options.solve_strategy > 3)
       {
         throw mcrl2::runtime_error("Invalid strategy " + std::to_string(options.solve_strategy));
       }
