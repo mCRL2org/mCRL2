@@ -52,7 +52,7 @@ public:
   /// \pre The prefix may not be empty, and it may not have trailing digits
   function_symbol_generator(const std::string& prefix)
     : m_prefix(prefix + std::to_string(generator_sequence_number()) + "_"),
-      m_string_buffer(prefix)
+      m_string_buffer(m_prefix)
   {
     if constexpr (atermpp::detail::GlobalThreadSafe) function_symbol_generator_mutex().lock();
     assert(!prefix.empty() && !(std::isdigit(*prefix.rbegin())));
