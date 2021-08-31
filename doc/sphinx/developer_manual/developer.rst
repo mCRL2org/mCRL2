@@ -111,6 +111,8 @@ mCRL2 library documentation
           libraries/smt/smt_library
           libraries/smt/reference
 
+     -
+
    * - **Utilities**
 
        .. toctree::
@@ -119,5 +121,4 @@ mCRL2 library documentation
           libraries/utilities/utilities_library
           libraries/utilities/reference
 
-     - \  
-    
+     -
