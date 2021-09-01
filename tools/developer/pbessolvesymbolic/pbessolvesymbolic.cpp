@@ -26,7 +26,7 @@ using utilities::tools::input_output_tool;
 
 
 /// \brief maps proposition variable ldd values to (rank, is_disjunctive)
-std::map<std::size_t, std:pair<std::size_t, bool>> compute_equation_info(const pbes_system::srf_pbes& pbes, const std::vector<lps::data_expression_index>& data_index)
+std::map<std::size_t, std::pair<std::size_t, bool>> compute_equation_info(const pbes_system::srf_pbes& pbes, const std::vector<lps::data_expression_index>& data_index)
 {
   pbes_system::pbes_equation_index equation_index(pbes);
 
@@ -73,7 +73,7 @@ public:
   void on_end_while_loop() override
   {
     ++iteration_count;
-    if (iteration_count % 10 == 0)
+    if (iteration_count % 10 == 0 || m_options.aggressive)
     {
       // Store the set of won states to keep track of whether new states have been solved.
       std::array<sylvan::ldds::ldd, 2> Vwon = m_Vwon;
@@ -117,6 +117,7 @@ public:
 
       if (m_options.prune_todo_list && Vwon != m_Vwon)
       {
+        // Remove todo set vertices where an earlier vertex on every path from the initial vertex is already won.
         mCRL2log(log::verbose) << "start pruning todo list" << std::endl;
 
         using namespace sylvan::ldds;
@@ -160,7 +161,7 @@ public:
         }
 
         mCRL2log(log::verbose) << "pruned todo list from " << satcount(m_todo) << " states to " << satcount(todo) << " states" << std::endl;
-        m_todo = todo;
+        m_todo = minus(minus(todo, m_Vwon[0]), m_Vwon[1]);
       }
     }
   }
@@ -241,7 +242,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
                         .add_value_desc(1, "Detect winning loops.")
                         .add_value_desc(2, "Detect fatal attractors.")
                         .add_value_desc(3, "Solve subgames using a Zielonka solver."),
-                      "Use solve strategy NUM. Strategy 1 periodically applies on-the-fly solving, which may lead to early termination.",
+                      "Use solve strategy NUM. All strategies except 0 periodically apply on-the-fly solving, which may lead to early termination.",
                       's');
       desc.add_option("split-conditions",
                       utilities::make_optional_argument("NUM", "0"),
@@ -253,6 +254,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
                       'c');
       desc.add_option("total", "make the SRF PBES total", 't');
       desc.add_option("reset", "set constant values when introducing parameters");
+      desc.add_hidden_option("aggressive", "apply on-the-fly solving after every iteration to detect bugs");
       desc.add_hidden_option("no-remove-unused-rewrite-rules", "do not remove unused rewrite rules. ", 'u');
       desc.add_hidden_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
       desc.add_hidden_option("no-discard", "do not discard any parameters");
@@ -268,6 +270,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
     void parse_options(const utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
+      options.aggressive                            = parser.has_option("aggressive");
       options.cached                                = parser.has_option("cached");
       options.chaining                              = parser.has_option("chaining");
       options.one_point_rule_rewrite                = !parser.has_option("no-one-point-rule-rewrite");

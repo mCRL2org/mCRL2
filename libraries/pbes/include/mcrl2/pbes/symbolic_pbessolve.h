@@ -648,16 +648,17 @@ class symbolic_pbessolve_algorithm
       for (auto it = m_rank_map.rbegin(); it != m_rank_map.rend(); it++)
       {
         std::size_t c = it->first;
+        std::size_t alpha = c % 2;
         ldd X = it->second;
         ldd Y = empty_set();
 
         while (X != empty_set() && X != Y)
         {
           Y = X;
-          ldd Z = monotone_attractor(X, c % 2, c, Vtotal, Vplayer);
+          ldd Z = monotone_attractor(X, alpha, c, Vtotal, Vplayer);
           if (includes(Z, X))
           {
-            won[c % 2] = union_(won[c % 2], Z);
+            won[alpha] = union_(won[alpha], attractor(Z, alpha, Vtotal, todo, Vplayer));
             break;
           }
           else
