@@ -10,7 +10,7 @@
 
 #ifndef _LIBLTS_BISIM_H
 #define _LIBLTS_BISIM_H
-#include "mcrl2/lts/trace.h"
+#include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/lts/lts_utilities.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
 #include "mcrl2/lts/detail/liblts_merge.h"
@@ -184,17 +184,15 @@ class bisim_partitioner
     }
 
 
-    /** \brief Returns a vector of counter traces.
+    /** \brief Creates a state formula that distinguishes state s from state t.
      *  \details The states s and t are non bisimilar states. If they are
-     *           bisimilar an exception is raised. A counter trace of the form sigma a is
-     *           returned, which has the property that s-sigma->s'-a-> and t-sigma->t'-/a->,
-     *           or vice versa, s-sigma->s'-/a-> and t-sigma->t'-a->. A vector of such
-     *           counter traces is returned.
-     *  \param[in] s A state number.
-     *  \param[in] t A state number.
-     *  \param[in] branching_bisimulation A boolean indicating whether the branching bisimulation partitioner has been used.
-     *  \return A vector containing counter traces. */
-    std::set < class mcrl2::lts::trace > counter_traces(const std::size_t s, const std::size_t t, const bool branching_bisimulation);
+     *           bisimilar an exception is raised. A counter state formula phi is
+     *           returned, which has the property that s |= phi and not t |= phi.
+     *           Based on "Computing Distinguishing Formulas for Branching Bisimulation", 1991 by Henri Korver
+     *  \param[in] s The state number for which the resulting formula should be true
+     *  \param[in] t The state number for which the resulting formula should be false
+     *  \return A distinguishing state formula. */
+    mcrl2::state_formulas::state_formula counter_formula(const std::size_t s, const std::size_t t);
 
   private:
 
@@ -822,152 +820,94 @@ class bisim_partitioner
       new_non_bottom_states.swap(non_bottom_states);
     }
 
-    std::set < class mcrl2::lts::trace > counter_traces_aux(
-      const state_type s,
-      const state_type t,
-      const bool branching_bisimulation) const
+    /**
+     * \brief conjunction Creates a conjunction of state formulas
+     * \param[in] terms The terms of the conjunction
+     * \return The conjunctive state formula
+     */
+    mcrl2::state_formulas::state_formula conjunction(std::set<mcrl2::state_formulas::state_formula> terms) const
     {
-      // First find the smallest block containing both states s and t.
-      // Find all blocks containing s.
-      std::set < block_index_type > blocks_containing_s;
-      block_index_type b_s=block_index_of_a_state[s];
-      blocks_containing_s.insert(b_s);
-      while (blocks[b_s].parent_block_index!=b_s)
+      return utilities::detail::join<mcrl2::state_formulas::state_formula>(terms.begin(), terms.end(),
+        [](mcrl2::state_formulas::state_formula a, mcrl2::state_formulas::state_formula b)
+        { return mcrl2::state_formulas::and_(a, b); }, mcrl2::state_formulas::true_());
+    }
+
+    /**
+     * \brief createRegularFormula Creates a regular formula that represents action a
+     * \details In case the action comes from an LTS in the lts format.
+     * \param[in] a The action for which to create a regular formula
+     * \return The created regular formula
+     */
+    regular_formulas::regular_formula createRegularFormula(const mcrl2::lps::multi_action& a) const
+    {
+      return regular_formulas::regular_formula(action_formulas::multi_action(a.actions()));
+    }
+
+    /**
+     * \brief createRegularFormula Creates a regular formula that represents action a
+     * \details In case the action comes from an LTS in the aut or fsm format.
+     * \param[in] a The action for which to create a regular formula
+     * \return The created regular formula
+     */
+    regular_formulas::regular_formula createRegularFormula(const mcrl2::lts::action_label_string& a) const
+    {
+      return mcrl2::regular_formulas::regular_formula(mcrl2::action_formulas::multi_action(
+        process::action_list({ process::action(process::action_label(a, {}), {}) })));
+    }
+
+    /* \brief Creates a state formula that distinguishes states in block B1 from state in block B2.
+       \details Based on "Computing Distinguishing Formulas for Branching Bisimulation", 1991 by Henri Korver.
+                Variable names used below correspond to definitions in this paper.
+       \param[in] B1 The block on which the resulting formula must be true.
+       \param[in] B2 The block on which the resulting formula must be false.
+       \return A distinguishing state formula.
+    */
+    mcrl2::state_formulas::state_formula counter_formula_aux(const block_index_type B1, const block_index_type B2) const
+    {
+      // First find the smallest block containing both B1 and B2.
+      // Find all blocks containing B1.
+      std::set < block_index_type > blocks_containing_B1;
+      block_index_type B1p = B1;
+      blocks_containing_B1.insert(B1p);
+      while (blocks[B1p].parent_block_index != B1p)
       {
-        b_s=blocks[b_s].parent_block_index;
-        blocks_containing_s.insert(b_s);
+        B1p = blocks[B1p].parent_block_index;
+        blocks_containing_B1.insert(B1p);
       }
 
-      // Find the first smallest block containing t and s
-      block_index_type b_C=block_index_of_a_state[t];
-      while (blocks_containing_s.count(b_C)==0)
+      // Go up the block tree from B2 until we find a block that contains B1.
+      block_index_type DB = B2;
+      while (blocks_containing_B1.count(DB) == 0)
       {
-        assert(blocks[b_C].parent_block_index!=b_C);
-        b_C=blocks[b_C].parent_block_index;
+        assert(blocks[DB].parent_block_index != DB);
+        DB = blocks[DB].parent_block_index;
       }
 
-      // Now b_C is the smallest block containing both s and t.
+      // Now DB is the smallest block containing both B1 and B2.
 
-      const label_type l=split_by_action.at(b_C);
-      const block_index_type B__= split_by_block.at(b_C);
-      std::set < state_type > l_reachable_states_for_s;
-      std::set < state_type > visited1;
-      reachable_states_in_block_s_via_label_l(s,b_C,l, l_reachable_states_for_s,visited1,branching_bisimulation);
+      const block_index_type R = right_child.at(DB);
+      const label_type a = split_by_action.at(DB);
+      const block_index_type Bp = split_by_block.at(DB);
 
-      std::set < state_type> B_s_reacha;
-      std::set < state_type> B_s_nonreacha;
-      for (const state_type i: l_reachable_states_for_s)
+      // We distinguish Bp with every block in r_alpha[R]
+      std::set<mcrl2::state_formulas::state_formula> Gamma2;
+      for (block_index_type PPB : r_alpha.at(R))
       {
-        block_index_type b=block_index_of_a_state[i];
-        bool reached=b==B__;
-        do
-        {
-          b=blocks[b].parent_block_index;
-          if (b==B__)
-          {
-            reached=true;
-          }
-        }
-        while (!reached && b!=blocks[b].parent_block_index);
-
-        if (reached)
-        {
-          B_s_reacha.insert(i);
-        }
-        else
-        {
-          B_s_nonreacha.insert(i);
-        }
+        Gamma2.insert(counter_formula_aux(Bp, PPB));
       }
+      mcrl2::state_formulas::state_formula Phi2 = conjunction(Gamma2);
 
-      std::set < state_type > l_reachable_states_for_t;
-      std::set < state_type > visited2;
-      reachable_states_in_block_s_via_label_l(t,b_C,l, l_reachable_states_for_t,visited2,branching_bisimulation);
+      mcrl2::state_formulas::state_formula Phi = mcrl2::state_formulas::may(createRegularFormula(aut.action_label(a)), Phi2);
 
-      std::set < state_type> B_t_reacha;
-      std::set < state_type> B_t_nonreacha;
-      for (std::set < state_type >::const_iterator i=l_reachable_states_for_t.begin();
-           i!=l_reachable_states_for_t.end(); ++i)
+      if (blocks_containing_B1.count(R) == 0)
       {
-        block_index_type b=block_index_of_a_state[*i];
-        bool reached=b==B__;
-        do
-        {
-          b=blocks[b].parent_block_index;
-          if (b==B__)
-          {
-            reached=true;
-          }
-        }
-        while (!reached && b!=blocks[b].parent_block_index);
-
-        if (reached)
-        {
-          B_t_reacha.insert(*i);
-        }
-        else
-        {
-          B_t_nonreacha.insert(*i);
-        }
-      }
-      assert((B_s_reacha.empty() && !B_t_reacha.empty()) ||
-             (!B_s_reacha.empty() && B_t_reacha.empty()));
-
-      std::set < class mcrl2::lts::trace > resulting_counter_traces;
-
-      if (B_s_reacha.empty())
-      {
-        B_s_reacha.swap(B_t_reacha);
-        B_s_nonreacha.swap(B_t_nonreacha);
-      }
-
-      assert(!B_s_reacha.empty());
-
-
-      if (B_t_nonreacha.empty())
-      {
-        // The counter trace is simply the label l.
-        class mcrl2::lts::trace counter_trace;
-        counter_trace.add_action(mcrl2::lps::multi_action(mcrl2::process::action(
-                                mcrl2::process::action_label(core::identifier_string(mcrl2::lts::pp(aut.action_label(l))),mcrl2::data::sort_expression_list()),
-                                mcrl2::data::data_expression_list())));
-        resulting_counter_traces.insert(counter_trace);
+        return Phi;
       }
       else
       {
-        for (std::set < state_type>::const_iterator i_s=B_s_reacha.begin();
-             i_s!=B_s_reacha.end(); ++i_s)
-        {
-          for (std::set < state_type>::const_iterator i_t=B_t_nonreacha.begin();
-               i_t!=B_t_nonreacha.end(); ++i_t)
-          {
-            const std::set < class mcrl2::lts::trace > counter_traces=
-                            counter_traces_aux(*i_s,*i_t,branching_bisimulation);
-            // Add l to these traces and add them to resulting_counter_traces
-            for (std::set< class mcrl2::lts::trace >::const_iterator j=counter_traces.begin();
-                 j!=counter_traces.end(); ++j)
-            {
-              class mcrl2::lts::trace new_counter_trace;
-              new_counter_trace.add_action(mcrl2::lps::multi_action(mcrl2::process::action(
-                                mcrl2::process::action_label(core::identifier_string(mcrl2::lts::pp(aut.action_label(l))),mcrl2::data::sort_expression_list()),
-                                mcrl2::data::data_expression_list())));
-              class mcrl2::lts::trace old_counter_trace=*j;
-              old_counter_trace.reset_position();
-              for (std::size_t k=0 ; k< old_counter_trace.number_of_actions(); k++)
-              {
-                new_counter_trace.add_action(old_counter_trace.current_action());
-                old_counter_trace.increase_position();
-              }
-              resulting_counter_traces.insert(new_counter_trace);
-            }
-          }
-        }
-
+        return mcrl2::state_formulas::not_(Phi);
       }
-      return resulting_counter_traces;
     }
-
-
 
     void reachable_states_in_block_s_via_label_l(
       const state_type s,
@@ -1231,17 +1171,15 @@ bool bisimulation_compare(
 
 
 template < class LTS_TYPE>
-std::set < class mcrl2::lts::trace > bisim_partitioner<LTS_TYPE>::counter_traces(
-  const std::size_t s,
-  const std::size_t t,
-  const bool branching_bisimulation)
+mcrl2::state_formulas::state_formula bisim_partitioner<LTS_TYPE>::counter_formula(
+  const std::size_t s, const std::size_t t)
 {
   if (get_eq_class(s)==get_eq_class(t))
   {
-    throw mcrl2::runtime_error("Requesting a counter trace for two bisimilar states. Such a trace is not useful.");
+    throw mcrl2::runtime_error("Requesting a counter state formula for two bisimilar states. Such a state formula is not useful.");
   }
 
-  return counter_traces_aux(s,t,branching_bisimulation);
+  return counter_formula_aux(block_index_of_a_state[s], block_index_of_a_state[t]);
 }
 
 
@@ -1292,7 +1230,6 @@ bool destructive_bisimulation_compare(
   mcrl2::lts::detail::merge(l1,l2);
   l2.clear(); // No use for l2 anymore.
 
-
   // First remove tau loops in case of branching bisimulation.
   if (branching)
   {
@@ -1302,18 +1239,16 @@ bool destructive_bisimulation_compare(
   }
 
   detail::bisim_partitioner<LTS_TYPE> bisim_part(l1, branching, preserve_divergences, generate_counter_examples);
-  if (generate_counter_examples && !bisim_part.in_same_class(l1.initial_state(),init_l2))
+  if (generate_counter_examples && !bisim_part.in_same_class(l1.initial_state(), init_l2))
   {
-    std::size_t count=0;
-    for (const mcrl2::lts::trace& i_trace: bisim_part.counter_traces(l1.initial_state(),init_l2,branching))
-    {
-      std::stringstream filename_s;
-      filename_s << "Counterexample" << count << ".trc";
-      const std::string filename(filename_s.str());
-      i_trace.save(filename, mcrl2::lts::trace::tfPlain);
-      mCRL2log(mcrl2::log::info) << "Saved counterexample to: \"" << filename << "\"" << std::endl;
-      ++count;
-    }
+    mcrl2::state_formulas::state_formula counter_example_formula = bisim_part.counter_formula(l1.initial_state(), init_l2);
+
+    std::string filename = "Counterexample.mcf";
+    std::ofstream counter_file(filename);
+    counter_file << mcrl2::state_formulas::pp(counter_example_formula);
+    counter_file.close();
+    mCRL2log(mcrl2::log::info) << "Saved counterexample to: \"" << filename << "\"" << std::endl;
+
   }
   return bisim_part.in_same_class(l1.initial_state(),init_l2);
 }
