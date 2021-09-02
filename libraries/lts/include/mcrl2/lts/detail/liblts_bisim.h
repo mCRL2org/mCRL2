@@ -909,64 +909,6 @@ class bisim_partitioner
       }
     }
 
-    void reachable_states_in_block_s_via_label_l(
-      const state_type s,
-      const block_index_type block_index_for_bottom_state,
-      const label_type l,
-      std::set < state_type > &result_set,
-      std::set < state_type > &visited,
-      const bool branching_bisimulation) const
-    {
-      // This function yields a set of states that are reachable via a sequence of tau steps
-      // in block block_index_for_bottom_state, followed by an l step.
-      // The technique used is to search through tau transitions from s, until a bottom state
-      // in the current class is found. From this state all reachable states are put in the result set.
-      if (visited.count(s)>0)
-      {
-        return;
-      }
-
-      visited.insert(s);
-      // Put all l reachable states in the result set.
-      for (outgoing_transitions_per_state_action_t::const_iterator i1=outgoing_transitions.lower_bound(std::pair<state_type,label_type>(s,l));
-           i1!=outgoing_transitions.upper_bound(std::pair<state_type, label_type>(s,l)); ++i1)
-      {
-        result_set.insert(to(i1));
-      }
-
-      // Search for tau reachable states that are still in the block with block_index_for_bottom_state.
-      if (branching_bisimulation)
-      {
-        for (label_type lab=0; lab<aut.num_action_labels(); ++lab)
-        {
-          if (aut.is_tau(aut.apply_hidden_label_map(lab)))
-          {
-            for (outgoing_transitions_per_state_action_t::const_iterator i=outgoing_transitions.lower_bound(std::pair<state_type,label_type>(s,lab));
-                 i!=outgoing_transitions.upper_bound(std::pair<state_type, label_type>(s,lab)); ++i)
-            {
-              // Now find out whether the block index of to(i) is part of the block with index block_index_for_bottom_state.
-              block_index_type b=block_index_of_a_state[to(i)];
-              while (b!=block_index_for_bottom_state && blocks[b].parent_block_index!=b)
-              {
-                assert(blocks[b].parent_block_index!=b);
-                b=blocks[b].parent_block_index;
-              }
-              if (b==block_index_for_bottom_state)
-              {
-                reachable_states_in_block_s_via_label_l(
-                  to(i),
-                  block_index_for_bottom_state,
-                  l,
-                  result_set,
-                  visited,
-                  branching_bisimulation);
-              }
-            }
-          }
-        }
-      }
-    }
-
 
 #ifndef NDEBUG
     // The method below is intended to check the consistency of the internal data
