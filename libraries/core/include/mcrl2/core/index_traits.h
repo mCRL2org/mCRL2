@@ -83,10 +83,10 @@ struct index_traits
 
     auto& m = variable_index_map<Variable, KeyType>();
     auto i = m.find(x);
+    std::size_t value;
     if (i == m.end())
     {
       auto& s = variable_map_free_numbers<Variable, KeyType>();
-      std::size_t value;
       if (s.empty())
       {
         value = m.size();
@@ -98,13 +98,13 @@ struct index_traits
         s.pop();
       }
       m[x] = value;
-
-      if constexpr (atermpp::detail::GlobalThreadSafe) { variable_mutex<Variable, KeyType>().unlock(); }
-      return value;
     }
-
+    else 
+    {
+      value = i->second;
+    }
     if constexpr (atermpp::detail::GlobalThreadSafe) { variable_mutex<Variable, KeyType>().unlock(); }
-    return i->second;
+    return value;
   }
 
   /// \brief Note: intended for internal use only!
