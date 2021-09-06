@@ -72,7 +72,7 @@ public:
 //    It most likely gives rise to a lot of memory usage, and should therefore be reinstated. 
 //
 //    if constexpr (atermpp::detail::GlobalThreadSafe) function_symbol_generator_mutex().lock();
-//    *m_index = m_initial_index;
+    *m_index = m_initial_index;
 //    if constexpr (atermpp::detail::GlobalThreadSafe) function_symbol_generator_mutex().unlock();
   } 
 

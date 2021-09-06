@@ -223,7 +223,6 @@ public:
   }
 
   /// \brief Move assignment operator.
-  /// \brief This move assignment operator
   /// \param other The aterm that will be assigned.
   /// \return A reference to the assigned term.
   aterm& operator=(aterm&& other) noexcept
@@ -235,6 +234,16 @@ public:
 #endif
     return *this;
   }
+
+#ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
+  /// \brief Obtain the reference count of this term.
+  /// \detail This function is only intended for low level inspection of terms. 
+  /// \return The current reference count of this term.
+  std::size_t reference_count() const
+  {
+    return m_term->reference_count();
+  }
+#endif
 
 protected:
 #ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
