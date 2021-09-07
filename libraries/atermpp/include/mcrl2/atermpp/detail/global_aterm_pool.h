@@ -43,22 +43,11 @@ inline aterm_pool& g_term_pool()
   return g_aterm_pool_instance;
 }
 
-extern thread_local typename std::aligned_storage<sizeof(thread_aterm_pool), alignof(thread_aterm_pool)>::type 
-                                     thread_aterm_pool_storage;  
-
-/// \brief A reference to the global term pool storage
-static thread_local thread_aterm_pool& thread_aterm_pool_instance = *static_cast<thread_aterm_pool*>(static_cast<void*>(&thread_aterm_pool_storage));
-
+/// \brief A reference to the thread local term pool storage
 inline thread_aterm_pool& g_thread_term_pool()
 {
-  static thread_local bool initialized = false;
-  if (!initialized)
-  {
-    new (&thread_aterm_pool_instance) thread_aterm_pool(g_aterm_pool_instance);
-    initialized = true;
-  }
-
-  return thread_aterm_pool_instance;
+  thread_local thread_aterm_pool instance(g_aterm_pool_instance);
+  return instance;
 }
 
 
