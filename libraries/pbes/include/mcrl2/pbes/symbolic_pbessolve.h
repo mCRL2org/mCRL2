@@ -217,6 +217,14 @@ class symbolic_pbessolve_algorithm
           m_V[1] = union_(m_V[1], X);
         }
       }
+
+      mCRL2log(log::verbose) << "parity game information: " << std::endl;
+      for (const auto&[rank, Vrank] : m_rank_map)
+      {
+        mCRL2log(log::verbose) << "priority " << rank << ": there are " << nodecount(Vrank) << " vertices.\n";
+      }
+
+      mCRL2log(log::verbose) << "there are " << satcount(m_V[0]) << " even vertices and " << satcount(m_V[1]) << " odd vertices.\n";
     }
 
     /// \returns The set { u in U | exists v in V: u -> v }, where -> is described by the given group.
