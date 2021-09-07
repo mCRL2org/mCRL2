@@ -231,7 +231,7 @@ class symbolic_pbessolve_algorithm
       using namespace sylvan::ldds;
 
       ldd result = m_chaining ? V : empty_set();
-      for (std::size_t i = 0; i < m_summand_groups.size(); ++i)
+      for (int i = m_summand_groups.size() - 1; i >= 0; --i)
       {
         const summand_group& group = m_summand_groups[i];
 
@@ -241,8 +241,8 @@ class symbolic_pbessolve_algorithm
                                << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";
       }
 
-      // With chaining we need to remove V from the result set to ensure that it only contains elements in U.
-      return m_chaining ? minus(result, V) : result;
+      // With chaining we need to ensure the result only contains elements in U.
+      return m_chaining ? intersect(result, U) : result;
     }
 
     /// \brief Compute the attractor set for U.
