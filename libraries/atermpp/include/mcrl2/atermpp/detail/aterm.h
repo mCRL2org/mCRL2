@@ -10,8 +10,9 @@
 #ifndef MCRL2_ATERMPP_DETAIL_ATERM_H
 #define MCRL2_ATERMPP_DETAIL_ATERM_H
 
-#include "mcrl2/atermpp/function_symbol.h"
+#include <iostream> //  FOR DEBUGGING. 
 #include "mcrl2/utilities/type_traits.h"
+#include "mcrl2/atermpp/function_symbol.h"
 
 #include <limits>
 
@@ -24,6 +25,9 @@ class aterm;
 
 namespace detail
 {
+
+class _aterm;
+inline void debug_print(std::ostream& o, const _aterm* t, const std::size_t d = 3);
 
 /// \brief Can be used to check whether all elements in the parameter pack are derived from aterms.
 template<typename ...Terms>
@@ -52,6 +56,10 @@ public:
   /// \brief Mark this term to be reachable.
   void mark() const
   {
+/* std::cerr << "MARK ";
+debug_print(std::cerr, this, 3);
+std::cerr << "\n"; */
+
     m_function_symbol.m_function_symbol.tag();
   }
 
@@ -72,6 +80,34 @@ private:
 };
 
 inline _aterm* address(const unprotected_aterm& t);
+
+#ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
+const std::size_t offset = 2;
+#else
+const std::size_t offset = 2;
+#endif
+
+inline void debug_print(std::ostream& out, const _aterm* t, const std::size_t d)
+{
+// std::cerr << "PTR " << t << "\n";
+  if (d==0) { out << "..."; return; }
+  if (!t->function().defined()) { out << "UNDEFFUNC"; return; }
+
+  out << t->function().name();
+  std::string separator="(";
+
+  for(std::size_t i=0; i< t->function().arity() ; ++i)
+  {
+    out << separator;
+    debug_print(out, *((reinterpret_cast<_aterm *const*>(t))+offset+i),d-1);
+    separator = ",";
+  }
+  if (t->function().arity()>0)
+  {
+    out << ")";
+  }
+}
+
 
 } // namespace detail
 } // namespace atermpp
