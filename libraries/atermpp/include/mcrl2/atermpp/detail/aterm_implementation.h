@@ -78,9 +78,7 @@ inline aterm::aterm() noexcept
 inline aterm::~aterm() noexcept
 {
 #ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
-  detail::g_thread_term_pool().lock_shared();
   decrement_reference_count();
-  detail::g_thread_term_pool().unlock_shared();
 #else
   detail::g_thread_term_pool().deregister_variable(this);
 #endif
@@ -110,9 +108,7 @@ inline aterm::aterm(aterm&& other) noexcept
  : unprotected_aterm(other.m_term)
 {
 #ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
-  detail::g_thread_term_pool().lock_shared();
   other.m_term=nullptr;   // This is not needed when using protection sets. 
-  detail::g_thread_term_pool().unlock_shared();
 #else
   detail::g_thread_term_pool().register_variable(this);
 #endif
@@ -120,29 +116,29 @@ inline aterm::aterm(aterm&& other) noexcept
 
 inline aterm& aterm::operator=(const aterm& other) noexcept
 {
-  detail::g_thread_term_pool().lock_shared();
 #ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
   // Increment first to prevent the same term from becoming reference zero temporarily.
   other.increment_reference_count();
-
   // Decrement the reference from the term that is currently referred to.
   decrement_reference_count();
-#endif
-
+  m_term = other.m_term;
+#else
+  detail::g_thread_term_pool().lock_shared();
   m_term = other.m_term;
   detail::g_thread_term_pool().unlock_shared();
+#endif
   return *this;
 }
 
 inline aterm& aterm::operator=(aterm&& other) noexcept
 {
-  detail::g_thread_term_pool().lock_shared();
 #ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
   std::swap(m_term, other.m_term);
 #else
+  detail::g_thread_term_pool().lock_shared();
   m_term = other.m_term;    // Using hash set protection it is cheaper just to move the value to the new term.
-#endif
   detail::g_thread_term_pool().unlock_shared();
+#endif
   return *this;
 }
 
