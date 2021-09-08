@@ -44,7 +44,8 @@ protected:
   std::string  m_string_buffer;
 
   /// \brief A reference to the index as present in the function symbol generator.
-  std::shared_ptr<std::size_t> m_index;
+  // std::shared_ptr<std::size_t> m_index;
+  std::size_t m_index;
 
 public:
   /// \brief Constructor
@@ -58,9 +59,9 @@ public:
     assert(!prefix.empty() && !(std::isdigit(*prefix.rbegin())));
 
     // Obtain a reference to the first index possible.
-    m_index = detail::g_term_pool().get_symbol_pool().register_prefix(prefix);
+    m_index = *detail::g_term_pool().get_symbol_pool().register_prefix(prefix);
 
-    m_initial_index = *m_index;
+    m_initial_index = m_index;
     if constexpr (atermpp::detail::GlobalThreadSafe) function_symbol_generator_mutex().unlock();
   }
 
@@ -72,7 +73,7 @@ public:
 //    It most likely gives rise to a lot of memory usage, and should therefore be reinstated. 
 //
 //    if constexpr (atermpp::detail::GlobalThreadSafe) function_symbol_generator_mutex().lock();
-    *m_index = m_initial_index;
+    m_index = m_initial_index;
 //    if constexpr (atermpp::detail::GlobalThreadSafe) function_symbol_generator_mutex().unlock();
   } 
 
@@ -91,10 +92,10 @@ public:
     // Each thread should have a unique name generator. 
     // Most likely there is no need to protect this with a mutex lock. 
     // if constexpr (atermpp::detail::GlobalThreadSafe) function_symbol_generator_mutex().lock();
-    mcrl2::utilities::number2string(*m_index, m_string_buffer, m_prefix.size());
+    mcrl2::utilities::number2string(m_index, m_string_buffer, m_prefix.size());
 
     // Increase the index.
-    ++(*m_index);
+    ++m_index;
 
     // Generate a new function symbol with prefix + index.
     function_symbol f(m_string_buffer, arity, false);
