@@ -52,10 +52,11 @@ public:
   /// \param[in] prefix The prefix of the generated generated strings.
   /// \pre The prefix may not be empty, and it may not have trailing digits
   function_symbol_generator(const std::string& prefix)
-    : m_prefix(prefix + std::to_string(generator_sequence_number()) + "_"),
-      m_string_buffer(m_prefix)
   {
     if constexpr (atermpp::detail::GlobalThreadSafe) function_symbol_generator_mutex().lock();
+
+    m_prefix=prefix + std::to_string(generator_sequence_number()) + "_";
+    m_string_buffer=m_prefix;
     assert(!prefix.empty() && !(std::isdigit(*prefix.rbegin())));
 
     // Obtain a reference to the first index possible.
@@ -69,12 +70,7 @@ public:
 
   void clear()
   {
-//    TODO: This has temporarily been switched off as it causes crashes in the parallel setting.
-//    It most likely gives rise to a lot of memory usage, and should therefore be reinstated. 
-//
-//    if constexpr (atermpp::detail::GlobalThreadSafe) function_symbol_generator_mutex().lock();
     m_index = m_initial_index;
-//    if constexpr (atermpp::detail::GlobalThreadSafe) function_symbol_generator_mutex().unlock();
   } 
 
   ~function_symbol_generator()
@@ -91,7 +87,6 @@ public:
     // Note: By using an atomic fetch the lock can most likely be omitted. 
     // Each thread should have a unique name generator. 
     // Most likely there is no need to protect this with a mutex lock. 
-    // if constexpr (atermpp::detail::GlobalThreadSafe) function_symbol_generator_mutex().lock();
     mcrl2::utilities::number2string(m_index, m_string_buffer, m_prefix.size());
 
     // Increase the index.
@@ -99,7 +94,6 @@ public:
 
     // Generate a new function symbol with prefix + index.
     function_symbol f(m_string_buffer, arity, false);
-    // if constexpr (atermpp::detail::GlobalThreadSafe) function_symbol_generator_mutex().unlock();
     return f;
   }
 };
