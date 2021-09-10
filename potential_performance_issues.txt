@@ -12,3 +12,8 @@ Voordat een term wordt gedestroyed moet zijn deletion hook worden
 aangeroepen in plaats van andersom. 
 
 
+Waarom heeft een StructCons een leeg derde argument. 
+
+libraries/data/include/mcrl2/data/index_traits.h
+lijken mij de callbacks bij constructie van functies en variables overbodig.
+Dit komt ook elders, bij pbessen, voor. 
