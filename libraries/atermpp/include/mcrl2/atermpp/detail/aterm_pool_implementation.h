@@ -259,7 +259,6 @@ void aterm_pool::collect_impl(thread_aterm_pool_interface* thread)
     unlock();
     return;
   }
-
   auto timestamp = std::chrono::system_clock::now();
   std::size_t old_size = size();
 
@@ -299,16 +298,16 @@ void aterm_pool::collect_impl(thread_aterm_pool_interface* thread)
   timestamp = std::chrono::system_clock::now();
 
   // Garbage collect terms that are not reachable.
-  m_int_storage.sweep();
-  std::get<0>(m_appl_storage).sweep();
-  std::get<1>(m_appl_storage).sweep();
-  std::get<2>(m_appl_storage).sweep();
-  std::get<3>(m_appl_storage).sweep();
-  std::get<4>(m_appl_storage).sweep();
-  std::get<5>(m_appl_storage).sweep();
-  std::get<6>(m_appl_storage).sweep();
-  std::get<7>(m_appl_storage).sweep();
   m_appl_dynamic_storage.sweep();
+  std::get<7>(m_appl_storage).sweep();
+  std::get<6>(m_appl_storage).sweep();
+  std::get<5>(m_appl_storage).sweep();
+  std::get<4>(m_appl_storage).sweep();
+  std::get<3>(m_appl_storage).sweep();
+  std::get<2>(m_appl_storage).sweep();
+  std::get<1>(m_appl_storage).sweep();
+  std::get<0>(m_appl_storage).sweep();
+  m_int_storage.sweep();
 
   // Check that after sweeping the terms are consistent.
   assert(m_int_storage.verify_sweep());

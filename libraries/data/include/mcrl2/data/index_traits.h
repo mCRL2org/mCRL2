@@ -21,36 +21,62 @@ namespace data {
 inline
 void on_create_function_symbol(const atermpp::aterm& t)
 {
-  const data::function_symbol& v = atermpp::down_cast<const data::function_symbol>(t);
-  core::index_traits<data::function_symbol, function_symbol_key_type, 2>::insert(std::make_pair(v.name(), v.sort()));
+  /* const data::function_symbol& v = atermpp::down_cast<const data::function_symbol>(t);
+  std::size_t i = core::index_traits<data::function_symbol, function_symbol_key_type, 2>::insert(std::make_pair(v.name(), v.sort()));
+  if (i!=core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(v))
+  {
+std::cerr << "FUNCTION SYMBOL INS " << i << "      " << core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(v) << "      " << t << "\n";
+    std::size_t* p=nullptr; *p=-1;
+  } */
 }
 
 inline
 void on_delete_function_symbol(const atermpp::aterm& t)
 {
   const data::function_symbol& v = atermpp::down_cast<const data::function_symbol>(t);
+// debug code.
+/*  std::size_t i = core::index_traits<data::function_symbol, function_symbol_key_type, 2>::insert(std::make_pair(v.name(), v.sort()));
+  if (i!=core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(v))
+  {
+std::cerr << "FUNCTION SYMBOL DEL " << i << "     " << core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(v) << "      " << t << "\n";
+    std::size_t* p=nullptr; *p=-1;
+  } */
+// end debug code. 
   core::index_traits<data::function_symbol, function_symbol_key_type, 2>::erase(std::make_pair(v.name(), v.sort()));
 }
 
 inline
 void on_create_variable(const atermpp::aterm& t)
 {
-  const data::variable& v = atermpp::down_cast<const data::variable>(t);
-  core::index_traits<data::variable, variable_key_type, 2>::insert(std::make_pair(v.name(), v.sort()));
+  /*const data::variable& v = atermpp::down_cast<const data::variable>(t);
+  std::size_t i=core::index_traits<data::variable, variable_key_type, 2>::insert(std::make_pair(v.name(), v.sort()));
+  if (i!=core::index_traits<data::variable, variable_key_type, 2>::index(v))
+  {
+std::cerr << "VARIABELE INS " << i << "      " << core::index_traits<data::variable, variable_key_type, 2>::index(v) << "     " << t << "\n";
+    std::size_t* p=nullptr; *p=-1;
+  } */
 }
 
 inline
 void on_delete_variable(const atermpp::aterm& t)
 {
   const data::variable& v = atermpp::down_cast<const data::variable>(t);
+// debug code
+/*   std::size_t i=core::index_traits<data::variable, variable_key_type, 2>::insert(std::make_pair(v.name(), v.sort()));
+  if (i!=core::index_traits<data::variable, variable_key_type, 2>::index(v))
+  {
+std::cerr << "VARIABELE DEL " << i << "      " << core::index_traits<data::variable, variable_key_type, 2>::index(v) << "     " << t << "\n";
+    std::size_t* p=nullptr; *p=-1;
+  } */
+// end debug code. 
   core::index_traits<data::variable, variable_key_type, 2>::erase(std::make_pair(v.name(), v.sort()));
 }
 
 inline
 void register_function_symbol_hooks()
 {
-  add_creation_hook(core::detail::function_symbol_OpId(), on_create_function_symbol);
-  add_deletion_hook(core::detail::function_symbol_OpId(), on_delete_function_symbol);
+// add_creation_hook(core::detail::function_symbol_OpId(), on_create_function_symbol);
+// add_deletion_hook(core::detail::function_symbol_OpId(), on_delete_function_symbol);
 }
 
 inline

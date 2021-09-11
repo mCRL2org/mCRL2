@@ -60,22 +60,60 @@ class variable: public data_expression
     }
 
     /// \brief Constructor.
-    variable(const core::identifier_string& name, const sort_expression& sort)
+/*    variable(const core::identifier_string& name, const sort_expression& sort)
       : data_expression(atermpp::aterm_appl(core::detail::function_symbol_DataVarId(),
           name,
           sort,
           atermpp::aterm_int(core::index_traits<variable, variable_key_type, 2>::insert(std::make_pair(name, sort))
         )))
-    {}
+    {} */
+   variable(const core::identifier_string& name, const sort_expression& sort)
+    {
+       std::vector<aterm> arguments = { name, sort, atermpp::aterm_int(0) };
+
+       *this = variable(atermpp::aterm_appl(core::detail::function_symbol_DataVarId(), arguments.begin(), arguments.end(),
+         [&](const aterm& t)
+         {
+           if (t.type_is_int())
+           {
+             return aterm(atermpp::aterm_int(core::index_traits<variable, variable_key_type, 2>::insert(std::make_pair(name, sort))));
+           }
+           else
+           {
+             return t;
+           }
+         }));
+    }
+
 
     /// \brief Constructor.
-    variable(const std::string& name, const sort_expression& sort)
+/*    variable(const std::string& name, const sort_expression& sort)
       : data_expression(atermpp::aterm_appl(core::detail::function_symbol_DataVarId(),
           core::identifier_string(name),
           sort,
           atermpp::aterm_int(core::index_traits<variable, variable_key_type, 2>::insert(std::make_pair(core::identifier_string(name), sort))
         )))
     {}
+*/
+
+    variable(const std::string& name, const sort_expression& sort)
+    {
+       std::vector<aterm> arguments = { core::identifier_string(name), sort, atermpp::aterm_int(0) };
+
+       *this = variable(atermpp::aterm_appl(core::detail::function_symbol_DataVarId(), arguments.begin(), arguments.end(),
+         [&](const aterm& t)
+         {
+           if (t.type_is_int())
+           {
+             return aterm(atermpp::aterm_int(core::index_traits<variable, variable_key_type, 2>::insert(std::make_pair(core::identifier_string(name), sort))));
+           }
+           else
+           {
+             return t;
+           }
+         }));
+    }
+
 //--- end user section variable ---//
 };
 
