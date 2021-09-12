@@ -75,14 +75,14 @@ std::cerr << "VARIABELE DEL " << i << "      " << core::index_traits<data::varia
 inline
 void register_function_symbol_hooks()
 {
-// add_creation_hook(core::detail::function_symbol_OpId(), on_create_function_symbol);
-// add_deletion_hook(core::detail::function_symbol_OpId(), on_delete_function_symbol);
+//  add_creation_hook(core::detail::function_symbol_OpId(), on_create_function_symbol);
+  add_deletion_hook(core::detail::function_symbol_OpId(), on_delete_function_symbol);
 }
 
 inline
 void register_variable_hooks()
 {
-  add_creation_hook(core::detail::function_symbol_DataVarId(), on_create_variable);
+//  add_creation_hook(core::detail::function_symbol_DataVarId(), on_create_variable);
   add_deletion_hook(core::detail::function_symbol_DataVarId(), on_delete_variable);
 }
 
