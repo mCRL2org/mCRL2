@@ -22,8 +22,8 @@ namespace process {
 inline
 void on_create_process_identifier(const atermpp::aterm& t)
 {
-  const process_identifier& p = atermpp::down_cast<const process_identifier>(t);
-  core::index_traits<process_identifier, process_identifier_key_type, 2>::insert(std::make_pair(p.name(), p.variables()));
+//  const process_identifier& p = atermpp::down_cast<const process_identifier>(t);
+//  core::index_traits<process_identifier, process_identifier_key_type, 2>::insert(std::make_pair(p.name(), p.variables()));
 }
 
 inline
@@ -36,7 +36,7 @@ void on_delete_process_identifier(const atermpp::aterm& t)
 inline
 void register_process_identifier_hooks()
 {
-  add_creation_hook(core::detail::function_symbol_ProcVarId(), on_create_process_identifier);
+//  add_creation_hook(core::detail::function_symbol_ProcVarId(), on_create_process_identifier);
   add_deletion_hook(core::detail::function_symbol_ProcVarId(), on_delete_process_identifier);
 }
 

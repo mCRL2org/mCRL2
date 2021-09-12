@@ -21,8 +21,8 @@ namespace bes {
 inline
 void on_create_boolean_variable(const atermpp::aterm& t)
 {
-  const boolean_variable& v = atermpp::down_cast<const boolean_variable>(t);
-  core::index_traits<boolean_variable, boolean_variable_key_type, 1>::insert(v.name());
+//  const boolean_variable& v = atermpp::down_cast<const boolean_variable>(t);
+//  core::index_traits<boolean_variable, boolean_variable_key_type, 1>::insert(v.name());
 }
 
 inline
@@ -35,7 +35,7 @@ void on_delete_boolean_variable(const atermpp::aterm& t)
 inline
 void register_boolean_variable_hooks()
 {
-  add_creation_hook(core::detail::function_symbol_BooleanVariable(), on_create_boolean_variable);
+//  add_creation_hook(core::detail::function_symbol_BooleanVariable(), on_create_boolean_variable);
   add_deletion_hook(core::detail::function_symbol_BooleanVariable(), on_delete_boolean_variable);
 }
 
