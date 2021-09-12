@@ -21,8 +21,8 @@ namespace data {
 inline
 void on_create_function_symbol(const atermpp::aterm& t)
 {
-  const data::function_symbol& v = atermpp::down_cast<const data::function_symbol>(t);
-  core::index_traits<data::function_symbol, function_symbol_key_type, 2>::insert(std::make_pair(v.name(), v.sort()));
+//  const data::function_symbol& v = atermpp::down_cast<const data::function_symbol>(t);
+//  core::index_traits<data::function_symbol, function_symbol_key_type, 2>::insert(std::make_pair(v.name(), v.sort()));
 }
 
 inline
@@ -35,8 +35,8 @@ void on_delete_function_symbol(const atermpp::aterm& t)
 inline
 void on_create_variable(const atermpp::aterm& t)
 {
-  const data::variable& v = atermpp::down_cast<const data::variable>(t);
-  core::index_traits<data::variable, variable_key_type, 2>::insert(std::make_pair(v.name(), v.sort()));
+//  const data::variable& v = atermpp::down_cast<const data::variable>(t);
+//  core::index_traits<data::variable, variable_key_type, 2>::insert(std::make_pair(v.name(), v.sort()));
 }
 
 inline
@@ -49,14 +49,14 @@ void on_delete_variable(const atermpp::aterm& t)
 inline
 void register_function_symbol_hooks()
 {
-  add_creation_hook(core::detail::function_symbol_OpId(), on_create_function_symbol);
+//  add_creation_hook(core::detail::function_symbol_OpId(), on_create_function_symbol);
   add_deletion_hook(core::detail::function_symbol_OpId(), on_delete_function_symbol);
 }
 
 inline
 void register_variable_hooks()
 {
-  add_creation_hook(core::detail::function_symbol_DataVarId(), on_create_variable);
+//  add_creation_hook(core::detail::function_symbol_DataVarId(), on_create_variable);
   add_deletion_hook(core::detail::function_symbol_DataVarId(), on_delete_variable);
 }
 
