@@ -23,6 +23,14 @@ namespace data
 namespace detail
 {
 
+/// This is an exception that is thrown when the rewrite 
+/// stack must be resized. As the rewrite stack is a vector
+/// this invalidates all references and iterators in it,
+/// and that means that when resizing is necessary, the 
+/// current term must be resized. When this exception is
+/// thrown, the current substitution must also be restored. 
+struct recalculate_term_as_stack_is_too_small {};
+
 /**
  * \brief Rewriter interface class.
  *
@@ -88,17 +96,14 @@ class Rewriter
      * \param Term The term to be rewritten. This term should be a data_term
      * \return The normal form of Term.
      **/
-
     virtual data_expression rewrite(const data_expression& term, substitution_type& sigma) = 0;
 
     /**
-     * \brief Rewrite a list of mCRL2 data terms.
-     * \param Terms The list of terms to be rewritten. These terms
-     *              should be in the internal mCRL2 format.
-     * \return The list Terms where each element is replaced by its
-     *         normal form.
+     * \brief Rewrite an mCRL2 data term.
+     * \param Term The term to be rewritten. This term should be a data_term
+     * \return The normal form of Term.
      **/
-    /* virtual data_expression_list rewrite_list(const data_expression_list& terms, substitution_type& sigma); */
+    virtual void rewrite(data_expression& result, const data_expression& term, substitution_type& sigma) = 0;
 
     /**
      * \brief Provide the rewriter with a () operator, such that it can also
@@ -137,10 +142,13 @@ class Rewriter
          substitution_type& sigma);
 
     // Rewrite a where expression where the subdataexpressions are in internal format.
-    // It yields a term without a where expression.
-    data_expression rewrite_where(
-                      const where_clause& term,
-                      substitution_type& sigma);
+    // It yields a term without a where expression. The result is passed back in the variable result. 
+    void rewrite_where(data_expression& result,
+                       const where_clause& term,
+                       substitution_type& sigma);
+
+    data_expression rewrite_where(const where_clause& term,    // TODO: THIS SHOULD BE REMOVED IN DUE TIME. 
+                                  substitution_type& sigma);
 
     // Rewrite an expression with a lambda as outermost symbol. The expression is in internal format.
     // Bound variables are replaced by new variables to avoid a clash with variables in the right hand sides

@@ -54,8 +54,8 @@ class RewriterProver: public Rewriter
       }
     }
 
-
-    data_expression rewrite(
+    void rewrite(
+         data_expression& result,
          const data_expression& t,
          substitution_type& sigma)
     {
@@ -68,12 +68,22 @@ class RewriterProver: public Rewriter
       // {
         prover_obj.set_substitution(sigma);
         prover_obj.set_formula(t);
-        return prover_obj.get_bdd();
+        result=prover_obj.get_bdd();
+        return;
       // }
       // else
       //{
       //  return prover_obj.get_rewriter()->rewrite(t,sigma);
       //}
+    }
+
+    data_expression rewrite(
+         const data_expression& t,
+         substitution_type& sigma)
+    {
+      data_expression result;
+      rewrite(result,t,sigma);
+      return result;
     }
 
   protected:

@@ -67,7 +67,7 @@ class variable: public data_expression
           atermpp::aterm_int(core::index_traits<variable, variable_key_type, 2>::insert(std::make_pair(name, sort))
         )))
     {} */
-   variable(const core::identifier_string& name, const sort_expression& sort)
+    variable(const core::identifier_string& name, const sort_expression& sort)
     {
        std::vector<aterm> arguments = { name, sort, atermpp::aterm_int(0) };
 
@@ -82,7 +82,25 @@ class variable: public data_expression
            {
              return t;
            }
-         }));
+         })); 
+ 
+       /* std::size_t index=0;
+       *this = variable(atermpp::aterm_appl(core::detail::function_symbol_DataVarId(), index, 3,
+         [&sort, &name](const std::size_t i)->atermpp::aterm
+         {
+           switch (i)
+           {
+             case 0:
+               return name;
+             case 1:
+               return sort;
+             case 2:
+               return aterm(atermpp::aterm_int(core::index_traits<variable, variable_key_type, 2>::insert(std::make_pair(name, sort))));
+             default:
+               assert(0);
+           }
+         })); */
+       
     }
 
 

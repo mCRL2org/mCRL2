@@ -82,12 +82,14 @@ class RewriterCompilingJitty: public Rewriter
     typedef Rewriter::substitution_type substitution_type;
     typedef data_expression (*rewriter_function)(const application&, RewriterCompilingJitty*);
 
-    RewriterCompilingJitty(const data_specification& DataSpec, const used_data_equation_selector &);
+    RewriterCompilingJitty(const data_specification& DataSpec, const used_data_equation_selector&);
     virtual ~RewriterCompilingJitty();
 
     rewrite_strategy getStrategy();
 
     data_expression rewrite(const data_expression& term, substitution_type& sigma);
+
+    void rewrite(data_expression& result, const data_expression& term, substitution_type& sigma);
 
     // The variable global_sigma is a temporary store to maintain the substitution 
     // sigma during rewriting a single term. It is not a variable for public use. 

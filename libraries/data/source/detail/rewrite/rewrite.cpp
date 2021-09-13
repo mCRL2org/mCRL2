@@ -65,18 +65,36 @@ data_expression Rewriter::rewrite_where(
                       const where_clause& term,
                       substitution_type& sigma)
 {
+  data_expression result;
+  rewrite_where(result, term, sigma);
+  return result;
+}
+
+void Rewriter::rewrite_where(
+                      data_expression& result,
+                      const where_clause& term,
+                      substitution_type& sigma)
+{
   const assignment_list& assignments = term.assignments();
   const data_expression& body=term.body();
 
   mutable_map_substitution<std::map < variable,data_expression> > variable_renaming;
-  for (const assignment& a: assignments)
+  bool rewrite_stack_too_big_exception_thrown=false;
+  try
   {
-    const variable& v=a.lhs();
-    const variable v_fresh(m_generator(), v.sort());
-    variable_renaming[v]=v_fresh;
-    sigma[v_fresh]=rewrite(a.rhs(),sigma);
+    for (const assignment& a: assignments)
+    {
+      const variable& v=a.lhs();
+      const variable v_fresh(m_generator(), v.sort());
+      variable_renaming[v]=v_fresh;
+      sigma[v_fresh]=rewrite(a.rhs(),sigma);
+    }
+    rewrite(result, replace_variables(body,variable_renaming),sigma);
+  } 
+  catch (recalculate_term_as_stack_is_too_small)
+  {
+    rewrite_stack_too_big_exception_thrown=true;
   }
-  const data_expression result=rewrite(replace_variables(body,variable_renaming),sigma);
 
   // Reset variables in sigma
   for (mutable_map_substitution<std::map < variable,data_expression> >::const_iterator it=variable_renaming.begin();
@@ -84,7 +102,11 @@ data_expression Rewriter::rewrite_where(
   {
     sigma[atermpp::down_cast<variable>(it->second)]=it->second;
   }
-  return result;
+  if (rewrite_stack_too_big_exception_thrown)
+  {
+    throw recalculate_term_as_stack_is_too_small();
+  }
+  return;
 }
 
 abstraction Rewriter::rewrite_single_lambda(
@@ -156,7 +178,15 @@ abstraction Rewriter::rewrite_single_lambda(
       }
     }
     // ... then we rewrite with the new sigma ...
-    result = rewrite(body,sigma);
+    bool rewrite_stack_too_big_exception_thrown=false;
+    try
+    {
+      rewrite(result,body,sigma);
+    }
+    catch  (recalculate_term_as_stack_is_too_small)
+    {
+      rewrite_stack_too_big_exception_thrown=true;
+    }
     // ... and then we restore sigma to its old state.
     std::size_t new_variable_count = 0;
     for(v = vl.begin(), count = 0; v != vl.end(); ++v, ++count)
@@ -165,6 +195,10 @@ abstraction Rewriter::rewrite_single_lambda(
       {
         sigma[*v] = saved_substitutions[new_variable_count++];
       }
+    }
+    if (rewrite_stack_too_big_exception_thrown)
+    {
+      throw recalculate_term_as_stack_is_too_small();
     }
   }
   variable_list new_variable_list(new_variables.begin(), new_variables.end());
@@ -241,7 +275,16 @@ data_expression Rewriter::rewrite_lambda_application(
     count++;
   }
 
-  const data_expression result=rewrite(lambda_body,sigma);
+  bool rewrite_stack_too_big_exception_thrown=false;
+  data_expression result;
+  try
+  {
+    rewrite(result,lambda_body,sigma);
+  }
+  catch (recalculate_term_as_stack_is_too_small)
+  {
+    rewrite_stack_too_big_exception_thrown=true;
+  }
 
   // Reset variables in sigma and destroy the elements in vl_backup.
   count=0;
@@ -250,6 +293,10 @@ data_expression Rewriter::rewrite_lambda_application(
     sigma[v]=vl_backup[count];
     vl_backup[count].~data_expression();
     count++;
+  }
+  if (rewrite_stack_too_big_exception_thrown)
+  {
+    throw recalculate_term_as_stack_is_too_small();
   }
 
   if (vl.size()==arity)

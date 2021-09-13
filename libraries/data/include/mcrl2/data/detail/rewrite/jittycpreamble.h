@@ -225,11 +225,19 @@ data_expression rewrite_appl_aux(const application& t, RewriterCompilingJitty* t
   }
   // Here the head symbol of, which can be deeply nested, is not a function_symbol.
   const data_expression& head0 = get_nested_head(t);
-  const data_expression head = (is_variable(head0)
-                             ? sigma(this_rewriter)(down_cast<const variable>(head0))
-                             : (is_where_clause(head0)
-                               ? this_rewriter->rewrite_where(atermpp::down_cast<where_clause>(head0), sigma(this_rewriter))
-                               : head0));
+  data_expression head;
+  if (is_variable(head0))
+  { 
+    head=sigma(this_rewriter)(down_cast<const variable>(head0));
+  }
+  else if (is_where_clause(head0))
+  { 
+    this_rewriter->rewrite_where(head, atermpp::down_cast<where_clause>(head0), sigma(this_rewriter));
+  }
+  else
+  {
+    head= head0;
+  }
 
   // Reconstruct term t.
   const application t1((head0 == head) ? t : replace_nested_head(t, head));
@@ -329,7 +337,9 @@ data_expression rewrite_aux(const data_expression& t, const bool arguments_in_no
   else
   {
     assert(is_where_clause(t));
-    return this_rewriter->rewrite_where(down_cast<where_clause>(t), sigma(this_rewriter));
+    data_expression result;
+    this_rewriter->rewrite_where(result,down_cast<where_clause>(t), sigma(this_rewriter));
+    return result;
   }
 }
 

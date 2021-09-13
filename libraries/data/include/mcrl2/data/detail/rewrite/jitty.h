@@ -10,7 +10,7 @@
 #ifndef MCRL2_DATA_DETAIL_REWRITE_JITTY_H
 #define MCRL2_DATA_DETAIL_REWRITE_JITTY_H
 
-#include "mcrl2/atermpp/standard_containers/deque.h"
+#include "mcrl2/atermpp/standard_containers/vector.h"
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/rewrite/strategy_rule.h"
 
@@ -53,7 +53,7 @@ class RewriterJitty: public Rewriter
 
     typedef Rewriter::substitution_type substitution_type;
 
-    RewriterJitty(const data_specification& data_spec, const used_data_equation_selector &);
+    RewriterJitty(const data_specification& data_spec, const used_data_equation_selector& );
     
     // The copy constructor.
     RewriterJitty(const RewriterJitty& other) = default;
@@ -65,7 +65,9 @@ class RewriterJitty: public Rewriter
 
     rewrite_strategy getStrategy();
 
-    data_expression rewrite(const data_expression &term, substitution_type &sigma);
+    data_expression rewrite(const data_expression& term, substitution_type& sigma);
+
+    void rewrite(data_expression& result, const data_expression& term, substitution_type& sigma);
 
     std::shared_ptr<detail::Rewriter> clone()
     {
@@ -74,6 +76,10 @@ class RewriterJitty: public Rewriter
 
     void increase_rewrite_stack(std::size_t distance) 
     {
+      if (m_rewrite_stack.size()+distance>=m_rewrite_stack.capacity())
+      {
+        throw recalculate_term_as_stack_is_too_small();
+      }
       m_rewrite_stack.resize(m_rewrite_stack.size()+distance);
     }
 
@@ -100,13 +106,13 @@ class RewriterJitty: public Rewriter
       return m_rewrite_stack[m_rewrite_stack.size()-frame_size+pos];
     }
 
-    atermpp::deque<data_expression>::const_iterator stack_iterator(std::size_t pos, std::size_t frame_size) const
+    atermpp::vector<data_expression>::const_iterator stack_iterator(std::size_t pos, std::size_t frame_size) const
     {
       assert(m_rewrite_stack.size()+pos>=frame_size && pos<frame_size);
       return m_rewrite_stack.begin()+m_rewrite_stack.size()-frame_size+pos;
     }
 
-    atermpp::deque<data_expression>& rewrite_stack()
+    atermpp::vector<data_expression>& rewrite_stack()
     {
       return m_rewrite_stack;
     } 
@@ -122,8 +128,9 @@ class RewriterJitty: public Rewriter
     // The function symbol below is used to administrate that a term is in normal form. It is put around a term.
     // Terms with this auxiliary function symbol cannot be printed using the pretty printer for data expressions.
     function_symbol this_term_is_in_normal_form_symbol;
+    bool rewriting_in_progress;
 
-    atermpp::deque<data_expression> m_rewrite_stack;     // Stack for intermediate rewrite results.
+    atermpp::vector<data_expression> m_rewrite_stack;     // Stack for intermediate rewrite results.
 
     std::vector<data_expression> rhs_for_constants_cache; // Cache that contains normal forms for constants. 
     std::map< function_symbol, data_equation_list > jitty_eqns;

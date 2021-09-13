@@ -9,6 +9,7 @@
 
 #define NAME std::string("rewr_jitty")
 
+#include <algorithm>
 #include "mcrl2/data/detail/rewrite/jitty.h"
 #include "mcrl2/data/detail/rewrite/jitty_jittyc.h"
 
@@ -164,7 +165,8 @@ RewriterJitty::RewriterJitty(
         Rewriter(data_spec,equation_selector),
         this_term_is_in_normal_form_symbol(
                          std::string("Rewritten@@term"),
-                         function_sort({ untyped_sort() },untyped_sort()))
+                         function_sort({ untyped_sort() },untyped_sort())),
+        rewriting_in_progress(false)
 {
   for (const data_equation& eq: data_spec.equations())
   {
@@ -514,7 +516,7 @@ void RewriterJitty::rewrite_aux(
   if (is_where_clause(term))
   {
     const where_clause& w = atermpp::down_cast<where_clause>(term);
-    result=rewrite_where(w,sigma);                         /* TODO Optimize */
+    rewrite_where(result,w,sigma);
     return;
   }
 
@@ -844,7 +846,8 @@ void RewriterJitty::rewrite_aux_const_function_symbol(
   return;
 }
 
-data_expression RewriterJitty::rewrite(
+void RewriterJitty::rewrite(
+     data_expression& result,
      const data_expression& term,
      substitution_type& sigma)
 {
@@ -852,11 +855,45 @@ data_expression RewriterJitty::rewrite(
   data::detail::increment_rewrite_count();
 #endif
   data_expression t;
-  rewrite_aux(t, term, sigma);
-  assert(remove_normal_form_function(t)==t);
-// std::cerr << "REWRITE " << term << " --> \n" << t << "\n--------------\n";
-  return t;
+  if (rewriting_in_progress)
+  {
+    rewrite_aux(result, term, sigma);
+  }
+  else
+  {
+    rewriting_in_progress=true;
+    try
+    {
+      rewrite_aux(result, term, sigma);
+    }
+    catch (recalculate_term_as_stack_is_too_small&)
+    {
+      rewriting_in_progress=false; // Restart rewriting, due to a stack overflow.
+                                   // The stack is a vector, and it may be relocated in memory when
+                                   // resized. References to the stack loose their validity. 
+      m_rewrite_stack.resize(0);
+      m_rewrite_stack.reserve(std::max(2*m_rewrite_stack.capacity(),static_cast<std::size_t>(128)));
+      rewrite(result,term,sigma);
+      return;
+    }
+    rewriting_in_progress=false;
+  }
+
+  assert(m_rewrite_stack.size()==0);
+  assert(remove_normal_form_function(result)==result);
+// std::cerr << "REWRITE " << term << " --> \n" << result << "\n--------------\n";
+  return;
 }
+
+data_expression RewriterJitty::rewrite(
+     const data_expression& term,
+     substitution_type& sigma)
+{
+  data_expression result;
+  rewrite(result, term, sigma);
+  return result;
+}
+
 
 rewrite_strategy RewriterJitty::getStrategy()
 {

@@ -2931,7 +2931,8 @@ RewriterCompilingJitty::~RewriterCompilingJitty()
   CleanupRewriteSystem();
 }
 
-data_expression RewriterCompilingJitty::rewrite(
+void RewriterCompilingJitty::rewrite(
+     data_expression& result,
      const data_expression& term,
      substitution_type& sigma)
 {
@@ -2942,8 +2943,17 @@ data_expression RewriterCompilingJitty::rewrite(
   // substitutions, due to the enumerator.
   substitution_type *saved_sigma=global_sigma;
   global_sigma=&sigma;
-  const data_expression& result=so_rewr(term, this);
+  result=so_rewr(term, this);
   global_sigma=saved_sigma;
+  return;
+}
+
+data_expression RewriterCompilingJitty::rewrite(
+     const data_expression& term,
+     substitution_type& sigma)
+{
+  data_expression result;
+  rewrite(result, term, sigma);
   return result;
 }
 
