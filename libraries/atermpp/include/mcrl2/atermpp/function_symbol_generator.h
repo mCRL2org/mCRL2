@@ -24,10 +24,10 @@ static inline std::mutex& function_symbol_generator_mutex()
   return m_function_symbol_generator_mutex;
 }
 
-static inline std::size_t generator_sequence_number()
+static inline std::size_t& generator_sequence_number()
 {
   static size_t n=0;
-  return n++;
+  return n;
 }
 
 
@@ -55,7 +55,7 @@ public:
   {
     if constexpr (atermpp::detail::GlobalThreadSafe) function_symbol_generator_mutex().lock();
 
-    m_prefix=prefix + std::to_string(generator_sequence_number()) + "_";
+    m_prefix=prefix + (generator_sequence_number()==0?std::to_string(generator_sequence_number()++) + "_":"");
     m_string_buffer=m_prefix;
     assert(!prefix.empty() && !(std::isdigit(*prefix.rbegin())));
 
@@ -70,7 +70,7 @@ public:
 
   void clear()
   {
-    m_index = m_initial_index;
+    m_index = *detail::g_term_pool().get_symbol_pool().register_prefix(m_prefix);
   } 
 
   ~function_symbol_generator()
@@ -83,10 +83,13 @@ public:
   /// \brief Generates a unique function symbol with the given prefix followed by a number.
   function_symbol operator()(std::size_t arity = 0)
   {
+    // Check whether in the meantime other variables have been used with the same prefix. 
+    if (m_initial_index!=*detail::g_term_pool().get_symbol_pool().register_prefix(m_prefix))
+    {
+      m_index=*detail::g_term_pool().get_symbol_pool().register_prefix(m_prefix);
+      m_initial_index=m_index;
+    }
     // Put the number m_index after the prefix in the string buffer.
-    // Note: By using an atomic fetch the lock can most likely be omitted. 
-    // Each thread should have a unique name generator. 
-    // Most likely there is no need to protect this with a mutex lock. 
     mcrl2::utilities::number2string(m_index, m_string_buffer, m_prefix.size());
 
     // Increase the index.
