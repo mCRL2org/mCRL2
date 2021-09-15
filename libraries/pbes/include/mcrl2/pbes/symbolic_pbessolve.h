@@ -674,6 +674,7 @@ class symbolic_pbessolve_algorithm
           if (includes(Z, X))
           {
             won[alpha] = union_(won[alpha], attractor(Z, alpha, Vtotal, todo, Vplayer));
+            mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(Z) << " states in fatal attractors for player " << alpha << " and priority " << c << "\n";
             break;
           }
           else
@@ -682,6 +683,10 @@ class symbolic_pbessolve_algorithm
           }
         }
       }
+
+      mCRL2log(log::verbose) << "finished fatal attractor detection (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
+      mCRL2log(log::debug1) << "W0 = " << print_nodes(won[0], m_all_nodes) << std::endl;
+      mCRL2log(log::debug1) << "W1 = " << print_nodes(won[1], m_all_nodes) << std::endl;
 
       return { won[0], won[1] };
     }
