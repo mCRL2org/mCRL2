@@ -169,7 +169,6 @@ public:
     static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
   }
 
-
   /// \brief Returns the function symbol belonging to an aterm_appl.
   /// \return The function symbol of this term.
   const function_symbol& function() const
@@ -329,6 +328,20 @@ void make_term_appl(Term& target, const function_symbol& symbol, const Terms& ..
 {
   detail::g_thread_term_pool().create_appl(target, symbol, arguments...);
 
+  static_assert(detail::are_terms<Terms...>::value, "Arguments of function application should be terms.");
+  static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+  static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
+}
+
+/// \brief Constructor for n-arity function application with an index.
+/// \param target The variable in which the result will be put. This variable may be used for scratch purposes.
+/// \param symbol A function symbol.
+/// \param arguments The arguments of the function application.
+template<class Term,
+         typename ...Terms>
+void make_term_appl_with_index(Term& target, const function_symbol& symbol, const Terms& ...arguments)
+{
+  detail::g_thread_term_pool().create_appl_index<Term>(target, symbol, arguments...);
   static_assert(detail::are_terms<Terms...>::value, "Arguments of function application should be terms.");
   static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
   static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");

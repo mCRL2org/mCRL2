@@ -56,7 +56,7 @@ class action_name_multiset: public atermpp::aterm_appl
 };
 
 /// \brief Make_action_name_multiset constructs a new term into a given address.
-/// \ \param t The reference into which the new action_name_multiset is constructed. XXXXX
+/// \ \param t The reference into which the new action_name_multiset is constructed. 
 inline void make_action_name_multiset(action_name_multiset& t, const core::identifier_string_list& names)
 {
   make_term_appl(t, core::detail::function_symbol_MultActName(), names);

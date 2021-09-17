@@ -52,6 +52,10 @@ public:
   inline void create_appl(aterm& term, const function_symbol& sym, const Terms&... arguments);
 
   /// \threadsafe
+  template<class Term, class ...Terms>
+  inline void create_appl_index(aterm& term, const function_symbol& sym, const Terms&... arguments);
+
+  /// \threadsafe
   template<typename ForwardIterator>
   inline void create_appl_dynamic(aterm& term,
       const function_symbol& sym,

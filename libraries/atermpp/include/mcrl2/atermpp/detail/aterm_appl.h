@@ -14,7 +14,6 @@
 #include "mcrl2/utilities/unused.h"
 
 #include <array>
-#include <tuple>
 
 namespace atermpp
 {

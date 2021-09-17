@@ -154,30 +154,24 @@ class propositional_variable_instantiation: public pbes_expression
 
     /// \brief Constructor.
     propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters)
-      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PropVarInst(),
-          name,
-          parameters,
-          atermpp::aterm_int(core::index_traits<propositional_variable_instantiation, propositional_variable_key_type, 2>::insert(std::make_pair(name, parameters)))
-       ))
-    {}
+    {
+      atermpp::make_term_appl_with_index(*this,core::detail::function_symbol_PropVarInst(), name, parameters);
+    }
 
     /// \brief Constructor.
     propositional_variable_instantiation(const std::string& name, const data::data_expression_list& parameters)
-      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PropVarInst(),
-          core::identifier_string(name),
-          parameters,
-          atermpp::aterm_int(core::index_traits<propositional_variable_instantiation, propositional_variable_key_type, 2>::insert(std::make_pair(name, parameters)))
-        ))
-    {}
+    {
+      atermpp::make_term_appl_with_index(*this,core::detail::function_symbol_PropVarInst(), core::identifier_string(name), parameters);
+    }
 
 //--- end user section propositional_variable_instantiation ---//
 };
 
 /// \brief Make_propositional_variable_instantiation constructs a new term into a given address.
-/// \ \param t The reference into which the new propositional_variable_instantiation is constructed. XXXXX
+/// \ \param t The reference into which the new propositional_variable_instantiation is constructed. 
 inline void make_propositional_variable_instantiation(propositional_variable_instantiation& t, const core::identifier_string& name, const data::data_expression_list& parameters)
 {
-  make_term_appl(t, core::detail::function_symbol_PropVarInst(), name, parameters);
+  make_term_appl_with_index(t, core::detail::function_symbol_PropVarInst(), name, parameters);
 }
 
 /// \brief list of propositional_variable_instantiations
@@ -250,7 +244,7 @@ class not_: public pbes_expression
 };
 
 /// \brief Make_not_ constructs a new term into a given address.
-/// \ \param t The reference into which the new not_ is constructed. XXXXX
+/// \ \param t The reference into which the new not_ is constructed. 
 inline void make_not_(not_& t, const pbes_expression& operand)
 {
   make_term_appl(t, core::detail::function_symbol_PBESNot(), operand);
@@ -325,7 +319,7 @@ class and_: public pbes_expression
 };
 
 /// \brief Make_and_ constructs a new term into a given address.
-/// \ \param t The reference into which the new and_ is constructed. XXXXX
+/// \ \param t The reference into which the new and_ is constructed. 
 inline void make_and_(and_& t, const pbes_expression& left, const pbes_expression& right)
 {
   make_term_appl(t, core::detail::function_symbol_PBESAnd(), left, right);
@@ -400,7 +394,7 @@ class or_: public pbes_expression
 };
 
 /// \brief Make_or_ constructs a new term into a given address.
-/// \ \param t The reference into which the new or_ is constructed. XXXXX
+/// \ \param t The reference into which the new or_ is constructed. 
 inline void make_or_(or_& t, const pbes_expression& left, const pbes_expression& right)
 {
   make_term_appl(t, core::detail::function_symbol_PBESOr(), left, right);
@@ -475,7 +469,7 @@ class imp: public pbes_expression
 };
 
 /// \brief Make_imp constructs a new term into a given address.
-/// \ \param t The reference into which the new imp is constructed. XXXXX
+/// \ \param t The reference into which the new imp is constructed. 
 inline void make_imp(imp& t, const pbes_expression& left, const pbes_expression& right)
 {
   make_term_appl(t, core::detail::function_symbol_PBESImp(), left, right);
@@ -550,7 +544,7 @@ class forall: public pbes_expression
 };
 
 /// \brief Make_forall constructs a new term into a given address.
-/// \ \param t The reference into which the new forall is constructed. XXXXX
+/// \ \param t The reference into which the new forall is constructed. 
 inline void make_forall(forall& t, const data::variable_list& variables, const pbes_expression& body)
 {
   make_term_appl(t, core::detail::function_symbol_PBESForall(), variables, body);
@@ -625,7 +619,7 @@ class exists: public pbes_expression
 };
 
 /// \brief Make_exists constructs a new term into a given address.
-/// \ \param t The reference into which the new exists is constructed. XXXXX
+/// \ \param t The reference into which the new exists is constructed. 
 inline void make_exists(exists& t, const data::variable_list& variables, const pbes_expression& body)
 {
   make_term_appl(t, core::detail::function_symbol_PBESExists(), variables, body);

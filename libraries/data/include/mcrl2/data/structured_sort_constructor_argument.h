@@ -82,7 +82,7 @@ class structured_sort_constructor_argument: public atermpp::aterm_appl
 };
 
 /// \brief Make_structured_sort_constructor_argument constructs a new term into a given address.
-/// \ \param t The reference into which the new structured_sort_constructor_argument is constructed. XXXXX
+/// \ \param t The reference into which the new structured_sort_constructor_argument is constructed. 
 inline void make_structured_sort_constructor_argument(structured_sort_constructor_argument& t, const core::identifier_string& name, const sort_expression& sort)
 {
   make_term_appl(t, core::detail::function_symbol_StructProj(), name, sort);

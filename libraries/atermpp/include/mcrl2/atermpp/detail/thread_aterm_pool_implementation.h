@@ -11,9 +11,11 @@
 #define ATERMPP_DETAIL_THREAD_ATERM_POOL_IMPLEMENTATION_H
 #pragma once
 
-#include "thread_aterm_pool.h"
-
 #include <chrono>
+
+#include "thread_aterm_pool.h"
+#include "mcrl2/atermpp/detail/index_traits.h"
+
 
 namespace atermpp
 {
@@ -49,6 +51,26 @@ void thread_aterm_pool::create_appl(aterm& term, const function_symbol& sym, con
 {
   lock_shared();
   bool added = m_pool.create_appl(term, sym, arguments...);
+  unlock_shared();
+  if (added) { m_pool.created_term(m_creation_depth == 0, this); }
+}
+
+template<class Term, class ...Terms>
+void thread_aterm_pool::create_appl_index(aterm& term, const function_symbol& sym, const Terms&... arguments)
+{
+  lock_shared();
+  static_assert(sizeof...(arguments)==1 || sizeof...(arguments)==2);
+  if constexpr (sizeof...(arguments)==1)
+  {
+    m_pool.create_int(term, atermpp::detail::index_traits<Term, Terms..., 1>::insert(arguments...));
+  }
+  else
+  {
+    m_pool.create_int(term, atermpp::detail::index_traits<Term, std::pair<Terms...>, 2>::insert(std::make_pair(arguments...)));
+    // m_pool.create_int(term, atermpp::detail::index_traits<variable, variable_key_type, 2>::insert(std::make_pair(name, sort));
+    // m_pool.create_int(term, atermpp::detail::index_traits<...Terms, sizeof(arguments)>::insert(std::make_pair(arguments));
+  }
+  bool added = m_pool.create_appl(term, sym, arguments..., term);
   unlock_shared();
   if (added) { m_pool.created_term(m_creation_depth == 0, this); }
 }

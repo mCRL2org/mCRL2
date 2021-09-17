@@ -22,7 +22,7 @@ inline
 void on_create_function_symbol(const atermpp::aterm& t)
 {
 //  const data::function_symbol& v = atermpp::down_cast<const data::function_symbol>(t);
-//  std::size_t i = core::index_traits<data::function_symbol, function_symbol_key_type, 2>::insert(std::make_pair(v.name(), v.sort()));
+//  std::size_t i = atermpp::detail::index_traits<data::function_symbol, function_symbol_key_type, 2>::insert(std::make_pair(v.name(), v.sort()));
 }
 
 inline
@@ -30,18 +30,18 @@ void on_delete_function_symbol(const atermpp::aterm& t)
 {
   const data::function_symbol& v = atermpp::down_cast<const data::function_symbol>(t);
 #ifndef NDEBUG
-  typedef core::index_traits<data::function_symbol, function_symbol_key_type, 2> function_symbol_index_trait_type;
+  typedef atermpp::detail::index_traits<data::function_symbol, function_symbol_key_type, 2> function_symbol_index_trait_type;
   std::size_t i = function_symbol_index_trait_type::insert(std::make_pair(v.name(), v.sort()));
   assert(i==function_symbol_index_trait_type::index(v));
 #endif
-  core::index_traits<data::function_symbol, function_symbol_key_type, 2>::erase(std::make_pair(v.name(), v.sort()));
+  atermpp::detail::index_traits<data::function_symbol, function_symbol_key_type, 2>::erase(std::make_pair(v.name(), v.sort()));
 }
 
 inline
 void on_create_variable(const atermpp::aterm& t)
 {
 //  const data::variable& v = atermpp::down_cast<const data::variable>(t);
-//  std::size_t i=core::index_traits<data::variable, variable_key_type, 2>::insert(std::make_pair(v.name(), v.sort()));
+//  std::size_t i=atermpp::detail::index_traits<data::variable, variable_key_type, 2>::insert(std::make_pair(v.name(), v.sort()));
 }
 
 inline
@@ -49,11 +49,11 @@ void on_delete_variable(const atermpp::aterm& t)
 {
   const data::variable& v = atermpp::down_cast<const data::variable>(t);
 #ifndef NDEBUG
-  typedef core::index_traits<data::variable, variable_key_type, 2> variable_index_trait_type;
+  typedef atermpp::detail::index_traits<data::variable, variable_key_type, 2> variable_index_trait_type;
   std::size_t i=variable_index_trait_type::insert(std::make_pair(v.name(), v.sort()));
   assert(i==variable_index_trait_type::index(v));
 #endif
-  core::index_traits<data::variable, variable_key_type, 2>::erase(std::make_pair(v.name(), v.sort()));
+  atermpp::detail::index_traits<data::variable, variable_key_type, 2>::erase(std::make_pair(v.name(), v.sort()));
 }
 
 inline

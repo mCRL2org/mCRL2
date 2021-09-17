@@ -144,7 +144,7 @@ assignment_expression_list jittyc_local_push_front(assignment_expression_list l,
 static inline
 std::size_t get_index(const function_symbol& func)
 {
-  return mcrl2::core::index_traits<function_symbol, function_symbol_key_type, 2>::index(func);
+  return atermpp::detail::index_traits<function_symbol, function_symbol_key_type, 2>::index(func);
 }
 
 static inline

@@ -61,7 +61,7 @@ class alias: public atermpp::aterm_appl
 };
 
 /// \brief Make_alias constructs a new term into a given address.
-/// \ \param t The reference into which the new alias is constructed. XXXXX
+/// \ \param t The reference into which the new alias is constructed. 
 inline void make_alias(alias& t, const basic_sort& name, const sort_expression& reference)
 {
   make_term_appl(t, core::detail::function_symbol_SortRef(), name, reference);

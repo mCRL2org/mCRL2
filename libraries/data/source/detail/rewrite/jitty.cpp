@@ -146,7 +146,7 @@ void RewriterJitty::rebuild_strategy(const data_specification& data_spec, const 
   {
     if (equation_selector(f))
     {
-      const std::size_t i=core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(f);
+      const std::size_t i=atermpp::detail::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(f);
       make_jitty_strat_sufficiently_larger(i);
       std::map< function_symbol, data_equation_list >::const_iterator j=jitty_eqns.find(f);
       jitty_strat[i] =
@@ -558,7 +558,7 @@ void RewriterJitty::rewrite_aux_function_symbol(
     rewritten_defined[i]=false;
   }
 
-  const std::size_t op_value=core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(op);
+  const std::size_t op_value=atermpp::detail::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(op);
   make_jitty_strat_sufficiently_larger(op_value);
   const strategy& strat=jitty_strat[op_value];
 
@@ -783,7 +783,7 @@ void RewriterJitty::rewrite_aux_const_function_symbol(
   // This is special code to rewrite a function symbol. Note that the function symbol can be higher order,
   // e.g., it can be a function symbol f for which a rewrite rule f(n)=... exists. 
 
-  const std::size_t op_value=core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(op);
+  const std::size_t op_value=atermpp::detail::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(op);
   make_jitty_strat_sufficiently_larger(op_value);
 
   // Cache the rhs's as they are rewritten very often. 
@@ -854,7 +854,6 @@ void RewriterJitty::rewrite(
 #ifdef MCRL2_DISPLAY_REWRITE_STATISTICS
   data::detail::increment_rewrite_count();
 #endif
-  data_expression t;
   if (rewriting_in_progress)
   {
     rewrite_aux(result, term, sigma);
@@ -877,11 +876,10 @@ void RewriterJitty::rewrite(
       return;
     }
     rewriting_in_progress=false;
+    assert(m_rewrite_stack.size()==0);
   }
 
-  assert(m_rewrite_stack.size()==0);
   assert(remove_normal_form_function(result)==result);
-// std::cerr << "REWRITE " << term << " --> \n" << result << "\n--------------\n";
   return;
 }
 

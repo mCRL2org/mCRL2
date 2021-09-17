@@ -60,7 +60,7 @@ class untyped_possible_sorts: public sort_expression
 };
 
 /// \brief Make_untyped_possible_sorts constructs a new term into a given address.
-/// \ \param t The reference into which the new untyped_possible_sorts is constructed. XXXXX
+/// \ \param t The reference into which the new untyped_possible_sorts is constructed. 
 inline void make_untyped_possible_sorts(untyped_possible_sorts& t, const sort_expression_list& sorts)
 {
   make_term_appl(t, core::detail::function_symbol_UntypedSortsPossible(), sorts);

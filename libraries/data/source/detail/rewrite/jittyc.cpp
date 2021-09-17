@@ -1023,7 +1023,7 @@ class rewr_function_spec
       {
         name << "delayed_";
       }
-      name << "rewr_" << core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(m_fs)
+      name << "rewr_" << atermpp::detail::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(m_fs)
            << "_" << m_arity;
       return name.str();
     }
@@ -2498,7 +2498,7 @@ public:
     bracket_level_data brackets;
     std::stack<std::string> auxiliary_code_fragments;
 
-    std::size_t index = core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(func);
+    std::size_t index = atermpp::detail::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(func);
     m_stream << m_padding << "// [" << index << "] " << func << ": " << func.sort() << "\n";
     rewr_function_signature(m_stream, index, arity, brackets);
     m_stream << "\n" << m_padding << "{\n";
@@ -2543,7 +2543,7 @@ public:
 
   void generate_delayed_normal_form_generating_function(std::ostream& m_stream, const data::function_symbol& func, std::size_t arity)
   {
-    std::size_t index = core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(func);
+    std::size_t index = atermpp::detail::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(func);
     m_stream << m_padding << "// [" << index << "] " << func << ": " << func.sort() << "\n";
     if (arity>0)
     {
@@ -2725,7 +2725,7 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
   // jittycpreamble.h.
   ImplementTree code_generator(*this, function_symbols);
 
-  index_bound = core::index_traits<data::function_symbol, function_symbol_key_type, 2>::max_index() + 1;
+  index_bound = atermpp::detail::index_traits<data::function_symbol, function_symbol_key_type, 2>::max_index() + 1;
 
   functions_when_arguments_are_not_in_normal_form = std::vector<rewriter_function>(arity_bound * index_bound);
   functions_when_arguments_are_in_normal_form = std::vector<rewriter_function>(arity_bound * index_bound);
@@ -2777,11 +2777,11 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
     if (!it->delayed())
     {
       cpp_file << "  this_rewriter->functions_when_arguments_are_not_in_normal_form[this_rewriter->arity_bound * "
-               << core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(it->fs())
+               << atermpp::detail::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(it->fs())
                << " + " << it->arity() << "] = rewr_functions::"
                << it->name() << "_term;\n";
       cpp_file << "  this_rewriter->functions_when_arguments_are_in_normal_form[this_rewriter->arity_bound * "
-               << core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(it->fs())
+               << atermpp::detail::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(it->fs())
                << " + " << it->arity() << "] = rewr_functions::"
                << it->name() << "_term_arg_in_normal_form;\n";
     }

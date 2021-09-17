@@ -24,6 +24,7 @@ import string
 # U = generate user section
 # X = it is an expression super class
 # W = do not generate swap overload
+# N = term has an additional index as last argument  TODO: Constructors must still be adapted. 
 
 CORE_CLASSES = r'''
 identifier_string() : public atermpp::aterm_string | SC | String | An identifier
@@ -71,13 +72,13 @@ untyped_identifier_assignment(const core::identifier_string& lhs, const data_exp
 '''
 
 DATA_EXPRESSION_CLASSES = r'''
-data_expression()                                                                                             : public atermpp::aterm_appl   | XCU   | DataExpr          | A data expression
-variable(const core::identifier_string& name, const sort_expression& sort)                                    : public data::data_expression | EOCUs | DataVarId         | A data variable
-function_symbol(const core::identifier_string& name, const sort_expression& sort)                             : public data::data_expression | EOCUs | OpId              | A function symbol
-application(const data_expression& head, data_expression_list const& arguments)                               : public data::data_expression | EOUSW | DataAppl          | An application of a data expression to a number of arguments
-where_clause(const data_expression& body, const assignment_expression_list& declarations)                     : public data::data_expression | EOU   | Whr               | A where expression
-abstraction(const binder_type& binding_operator, const variable_list& variables, const data_expression& body) : public data::data_expression | EO    | Binder            | An abstraction expression
-untyped_identifier(const core::identifier_string& name)                                                       : public data::data_expression | EO    | UntypedIdentifier | An untyped identifier
+data_expression()                                                                                             : public atermpp::aterm_appl   | XCU    | DataExpr          | A data expression
+variable(const core::identifier_string& name, const sort_expression& sort)                                    : public data::data_expression | EOCUsN | DataVarId         | A data variable
+function_symbol(const core::identifier_string& name, const sort_expression& sort)                             : public data::data_expression | EOCUsN | OpId              | A function symbol
+application(const data_expression& head, data_expression_list const& arguments)                               : public data::data_expression | EOUSW  | DataAppl          | An application of a data expression to a number of arguments
+where_clause(const data_expression& body, const assignment_expression_list& declarations)                     : public data::data_expression | EOU    | Whr               | A where expression
+abstraction(const binder_type& binding_operator, const variable_list& variables, const data_expression& body) : public data::data_expression | EO     | Binder            | An abstraction expression
+untyped_identifier(const core::identifier_string& name)                                                       : public data::data_expression | EO     | UntypedIdentifier | An untyped identifier
 '''
 
 ABSTRACTION_EXPRESSION_CLASSES = r'''
@@ -164,7 +165,7 @@ stochastic_process_initializer(const data::data_expression_list& expressions, co
 PROCESS_CLASSES = r'''
 action_label(const core::identifier_string& name, const data::sort_expression_list& sorts)                                                                                       : public atermpp::aterm_appl | CI   | ActId              | An action label
 process_specification(const data::data_specification& data, const process::action_label_list& action_labels, const std::set<data::variable>& global_variables, const std::vector<process::process_equation>& equations, const process_expression& init)           | SMW | ProcSpec    | A process specification
-process_identifier(const core::identifier_string& name, const data::variable_list& variables)                                                                                    : public atermpp::aterm_appl | CIUs | ProcVarId          | A process identifier
+process_identifier(const core::identifier_string& name, const data::variable_list& variables)                                                                                    : public atermpp::aterm_appl | CIUsN| ProcVarId          | A process identifier
 process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)                                       : public atermpp::aterm_appl | CI   | ProcEqn            | A process equation
 rename_expression(core::identifier_string& source, core::identifier_string& target)                                                                                              : public atermpp::aterm_appl | CI   | RenameExpr         | A rename expression
 communication_expression(const action_name_multiset& action_name, const core::identifier_string& name)                                                                           : public atermpp::aterm_appl | CI   | CommExpr           | A communication expression
@@ -207,7 +208,7 @@ pbes(const data::data_specification& data, const std::vector<pbes_system::pbes_e
 
 PBES_EXPRESSION_CLASSES = r'''
 pbes_expression()                                                                                                       : public atermpp::aterm_appl          | XCI   | PBExpr            | A pbes expression
-propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters) : public pbes_system::pbes_expression | ECIUs | PropVarInst       | A propositional variable instantiation
+propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters) : public pbes_system::pbes_expression | ECIUsN| PropVarInst       | A propositional variable instantiation
 not_(const pbes_expression& operand)                                                                                    : public pbes_system::pbes_expression | EI    | PBESNot           | The not operator for pbes expressions
 and_(const pbes_expression& left, const pbes_expression& right)                                                         : public pbes_system::pbes_expression | EI    | PBESAnd           | The and operator for pbes expressions
 or_(const pbes_expression& left, const pbes_expression& right)                                                          : public pbes_system::pbes_expression | EI    | PBESOr            | The or operator for pbes expressions
@@ -229,7 +230,7 @@ not_(const boolean_expression& operand)                               : public b
 and_(const boolean_expression& left, const boolean_expression& right) : public bes::boolean_expression | EI   | BooleanAnd           | The and operator for boolean expressions
 or_(const boolean_expression& left, const boolean_expression& right)  : public bes::boolean_expression | EI   | BooleanOr            | The or operator for boolean expressions
 imp(const boolean_expression& left, const boolean_expression& right)  : public bes::boolean_expression | EI   | BooleanImp           | The implication operator for boolean expressions
-boolean_variable(const core::identifier_string& name)                 : public bes::boolean_expression | EIUs | BooleanVariable      | A boolean variable
+boolean_variable(const core::identifier_string& name)                 : public bes::boolean_expression | EIUsN| BooleanVariable      | A boolean variable
 '''
 
 BDD_EXPRESSION_CLASSES = r'''
@@ -898,12 +899,16 @@ class Class:
 /// \\ \param t The reference into which the new <CLASSNAME> is constructed. 
 inline void make_<CLASSNAME>(<CLASSNAME>& t, <ARGUMENTS>)
 {
-  make_term_appl(t, core::detail::function_symbol_<ATERM>(), <PARAMETERS>);
+  make_term_appl<HASINDEX>(t, core::detail::function_symbol_<ATERM>(), <PARAMETERS>);
 }'''
         text = re.sub('<CLASSNAME>', self.classname(), text)
         text = re.sub('<ATERM>', self.aterm, text)
         text = re.sub('<ARGUMENTS>', ', '.join([p.type() + ' ' + p.name() for p in self.constructor.parameters()]), text)
         text = re.sub('<PARAMETERS>', ', '.join([p.name() for p in self.constructor.parameters()]), text)
+        if 'N' in self.modifiers():
+          text = re.sub('<HASINDEX>', '_with_index', text)
+        else:
+          text = re.sub('<HASINDEX>', '', text)
         return text
 
     # Returns typedefs for term lists and term vectors.

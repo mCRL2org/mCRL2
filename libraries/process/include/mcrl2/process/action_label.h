@@ -66,7 +66,7 @@ class action_label: public atermpp::aterm_appl
 };
 
 /// \brief Make_action_label constructs a new term into a given address.
-/// \ \param t The reference into which the new action_label is constructed. XXXXX
+/// \ \param t The reference into which the new action_label is constructed. 
 inline void make_action_label(action_label& t, const core::identifier_string& name, const data::sort_expression_list& sorts)
 {
   make_term_appl(t, core::detail::function_symbol_ActId(), name, sorts);

@@ -66,7 +66,7 @@ class process_equation: public atermpp::aterm_appl
 };
 
 /// \brief Make_process_equation constructs a new term into a given address.
-/// \ \param t The reference into which the new process_equation is constructed. XXXXX
+/// \ \param t The reference into which the new process_equation is constructed. 
 inline void make_process_equation(process_equation& t, const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)
 {
   make_term_appl(t, core::detail::function_symbol_ProcEqn(), identifier, formal_parameters, expression);

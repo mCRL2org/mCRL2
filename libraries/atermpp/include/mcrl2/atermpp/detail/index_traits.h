@@ -7,16 +7,15 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifndef MCRL2_CORE_INDEX_TRAITS_H
-#define MCRL2_CORE_INDEX_TRAITS_H
+#ifndef MCRL2_ATERMPP_INDEX_TRAITS_H
+#define MCRL2_ATERMPP_INDEX_TRAITS_H
 
 #include "mcrl2/atermpp/standard_containers/unordered_map.h"
 #include "mcrl2/atermpp/detail/aterm_configuration.h"
-#include "mcrl2/core/identifier_string.h"
 
-namespace mcrl2 {
+namespace atermpp {
 
-namespace core {
+namespace detail {
 
 template <typename Variable, typename KeyType>
 atermpp::unordered_map<KeyType, std::size_t>& variable_index_map()
@@ -59,12 +58,14 @@ std::size_t& variable_map_max_index()
 template <typename Variable, typename KeyType, const int N>
 struct index_traits
 {
+
+public:
   /// \brief Returns the index of the variable.
   static inline
   std::size_t index(const Variable& x)
   {
-    const atermpp::aterm_int& i = atermpp::down_cast<const atermpp::aterm_int>(x[N]);
-    return i.value();
+    const _aterm_int* i = reinterpret_cast<const _aterm_int*>(address(x[N]));
+    return i->value();
   }
 
   /// \brief Returns an upper bound for the largest index of a variable that is currently in use.
@@ -134,8 +135,8 @@ struct index_traits
   }
 };
 
-} // namespace core
+} // namespace detail
 
-} // namespace mcrl2
+} // namespace atermpp
 
-#endif // MCRL2_CORE_INDEX_TRAITS_H
+#endif // MCRL2_ATERMPP_INDEX_TRAITS_H

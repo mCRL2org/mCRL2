@@ -73,7 +73,7 @@ class where_clause: public data_expression
 };
 
 /// \brief Make_where_clause constructs a new term into a given address.
-/// \ \param t The reference into which the new where_clause is constructed. XXXXX
+/// \ \param t The reference into which the new where_clause is constructed. 
 inline void make_where_clause(where_clause& t, const data_expression& body, const assignment_expression_list& declarations)
 {
   make_term_appl(t, core::detail::function_symbol_Whr(), body, declarations);

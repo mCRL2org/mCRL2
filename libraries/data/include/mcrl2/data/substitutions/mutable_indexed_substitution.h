@@ -92,7 +92,7 @@ public:
     {
       assert(e.defined());
 
-      std::size_t i = core::index_traits<data::variable, data::variable_key_type, 2>::index(m_variable);
+      std::size_t i = atermpp::detail::index_traits<data::variable, data::variable_key_type, 2>::index(m_variable);
 
       if (e != m_variable)
       {
@@ -196,7 +196,7 @@ public:
  
   const expression_type operator()(const variable_type& v) const
   {
-    const std::size_t i = core::index_traits<data::variable, data::variable_key_type, 2>::index(v);
+    const std::size_t i = atermpp::detail::index_traits<data::variable, data::variable_key_type, 2>::index(v);
     if (i < m_index_table.size())
     {
       const std::size_t j = m_index_table[i];
@@ -217,7 +217,7 @@ public:
  
   void apply(const variable_type& v, data_expression& target)
   {
-    const std::size_t i = core::index_traits<data::variable, data::variable_key_type, 2>::index(v);
+    const std::size_t i = atermpp::detail::index_traits<data::variable, data::variable_key_type, 2>::index(v);
     if (i < m_index_table.size())
     {
       const std::size_t j = m_index_table[i];

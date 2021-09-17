@@ -67,7 +67,7 @@ class function_sort: public sort_expression
 };
 
 /// \brief Make_function_sort constructs a new term into a given address.
-/// \ \param t The reference into which the new function_sort is constructed. XXXXX
+/// \ \param t The reference into which the new function_sort is constructed. 
 inline void make_function_sort(function_sort& t, const sort_expression_list& domain, const sort_expression& codomain)
 {
   make_term_appl(t, core::detail::function_symbol_SortArrow(), domain, codomain);

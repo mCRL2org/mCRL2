@@ -261,7 +261,7 @@ class not_: public action_formula
 };
 
 /// \brief Make_not_ constructs a new term into a given address.
-/// \ \param t The reference into which the new not_ is constructed. XXXXX
+/// \ \param t The reference into which the new not_ is constructed. 
 inline void make_not_(not_& t, const action_formula& operand)
 {
   make_term_appl(t, core::detail::function_symbol_ActNot(), operand);
@@ -336,7 +336,7 @@ class and_: public action_formula
 };
 
 /// \brief Make_and_ constructs a new term into a given address.
-/// \ \param t The reference into which the new and_ is constructed. XXXXX
+/// \ \param t The reference into which the new and_ is constructed. 
 inline void make_and_(and_& t, const action_formula& left, const action_formula& right)
 {
   make_term_appl(t, core::detail::function_symbol_ActAnd(), left, right);
@@ -411,7 +411,7 @@ class or_: public action_formula
 };
 
 /// \brief Make_or_ constructs a new term into a given address.
-/// \ \param t The reference into which the new or_ is constructed. XXXXX
+/// \ \param t The reference into which the new or_ is constructed. 
 inline void make_or_(or_& t, const action_formula& left, const action_formula& right)
 {
   make_term_appl(t, core::detail::function_symbol_ActOr(), left, right);
@@ -486,7 +486,7 @@ class imp: public action_formula
 };
 
 /// \brief Make_imp constructs a new term into a given address.
-/// \ \param t The reference into which the new imp is constructed. XXXXX
+/// \ \param t The reference into which the new imp is constructed. 
 inline void make_imp(imp& t, const action_formula& left, const action_formula& right)
 {
   make_term_appl(t, core::detail::function_symbol_ActImp(), left, right);
@@ -561,7 +561,7 @@ class forall: public action_formula
 };
 
 /// \brief Make_forall constructs a new term into a given address.
-/// \ \param t The reference into which the new forall is constructed. XXXXX
+/// \ \param t The reference into which the new forall is constructed. 
 inline void make_forall(forall& t, const data::variable_list& variables, const action_formula& body)
 {
   make_term_appl(t, core::detail::function_symbol_ActForall(), variables, body);
@@ -636,7 +636,7 @@ class exists: public action_formula
 };
 
 /// \brief Make_exists constructs a new term into a given address.
-/// \ \param t The reference into which the new exists is constructed. XXXXX
+/// \ \param t The reference into which the new exists is constructed. 
 inline void make_exists(exists& t, const data::variable_list& variables, const action_formula& body)
 {
   make_term_appl(t, core::detail::function_symbol_ActExists(), variables, body);
@@ -711,7 +711,7 @@ class at: public action_formula
 };
 
 /// \brief Make_at constructs a new term into a given address.
-/// \ \param t The reference into which the new at is constructed. XXXXX
+/// \ \param t The reference into which the new at is constructed. 
 inline void make_at(at& t, const action_formula& operand, const data::data_expression& time_stamp)
 {
   make_term_appl(t, core::detail::function_symbol_ActAt(), operand, time_stamp);
@@ -781,7 +781,7 @@ class multi_action: public action_formula
 };
 
 /// \brief Make_multi_action constructs a new term into a given address.
-/// \ \param t The reference into which the new multi_action is constructed. XXXXX
+/// \ \param t The reference into which the new multi_action is constructed. 
 inline void make_multi_action(multi_action& t, const process::action_list& actions)
 {
   make_term_appl(t, core::detail::function_symbol_ActMultAct(), actions);
