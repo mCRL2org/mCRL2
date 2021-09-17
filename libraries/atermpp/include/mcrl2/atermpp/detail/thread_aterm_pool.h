@@ -30,12 +30,29 @@ public:
     : m_pool(global_pool)
   {
     m_pool.register_thread_aterm_pool(*this);
+
+    /// Identify the first constructor call as the main thread.
+    static bool is_main_thread = true;
+    if (is_main_thread)
+    {
+      m_is_main_thread = true;
+      is_main_thread = false;
+    }
+
+    m_variables = new mcrl2::utilities::hashtable<aterm*>();
+    m_containers = new mcrl2::utilities::hashtable<detail::aterm_container*>();
   }
 
   ~thread_aterm_pool() override
   {
     m_pool.remove_thread_aterm_pool(*this);
     print_local_performance_statistics();
+
+    if (!m_is_main_thread)
+    {
+      delete m_variables;
+      delete m_containers;
+    }
   }
 
   /// \threadsafe
@@ -98,8 +115,8 @@ private:
   aterm_pool& m_pool;
 
   /// Keeps track of pointers to all existing aterm variables and containers.
-  mcrl2::utilities::hashtable<aterm*> m_variables;
-  mcrl2::utilities::hashtable<detail::aterm_container*> m_containers;
+  mcrl2::utilities::hashtable<aterm*>* m_variables;
+  mcrl2::utilities::hashtable<detail::aterm_container*>* m_containers;
 
   std::size_t m_variable_insertions = 0;
   std::size_t m_container_insertions = 0;
@@ -113,6 +130,8 @@ private:
   std::atomic<bool> m_forbidden_flag = false;
 
   std::stack<std::reference_wrapper<_aterm>> m_todo; ///< A reusable todo stack.
+
+  bool m_is_main_thread = false;
 };
 
 } // namespace detail

@@ -108,15 +108,15 @@ void thread_aterm_pool::register_variable(aterm* variable)
   if constexpr (EnableVariableRegistrationMetrics) { ++m_variable_insertions; }
 
   /* Resizing of the protection set should not interfere with garbage collection and rehashing */
-  if (m_variables.must_resize())
+  if (m_variables->must_resize())
   {
-    m_pool.lock(this);
-    m_variables.resize();
-    m_pool.unlock();
+    lock_shared();
+    m_variables->resize();
+    unlock_shared();
   }
 
   lock_shared();
-  auto [it, inserted] = m_variables.insert(variable);
+  auto [it, inserted] = m_variables->insert(variable);
 
   // The variable must be inserted.
   assert(inserted);
@@ -129,7 +129,7 @@ void thread_aterm_pool::register_variable(aterm* variable)
 void thread_aterm_pool::deregister_variable(aterm* variable)
 {
   lock_shared();
-  m_variables.erase(variable);
+  m_variables->erase(variable);
   unlock_shared();
 }
 
@@ -138,7 +138,7 @@ void thread_aterm_pool::register_container(aterm_container* container)
   if constexpr (EnableVariableRegistrationMetrics) { ++m_container_insertions; }
 
   lock_shared();
-  auto [it, inserted] = m_containers.insert(container);
+  auto [it, inserted] = m_containers->insert(container);
 
   // The container must be inserted.
   assert(inserted);
@@ -150,7 +150,7 @@ void thread_aterm_pool::register_container(aterm_container* container)
 void thread_aterm_pool::deregister_container(aterm_container* container)
 {
   lock_shared();
-  m_containers.erase(container);
+  m_containers->erase(container);
   unlock_shared();
 }
 
@@ -158,7 +158,7 @@ void thread_aterm_pool::mark()
 {
 
 #ifndef MCRL2_ATERMPP_REFERENCE_COUNTED
-  for (const aterm* variable : m_variables)
+  for (const aterm* variable : *m_variables)
   {
     if (variable != nullptr)
     {
@@ -173,7 +173,7 @@ void thread_aterm_pool::mark()
   }
 #endif // NOT MCRL2_ATERMPP_REFERENCE_COUNTED
 
-  for (auto it = m_containers.begin(); it != m_containers.end(); ++it)
+  for (auto it = m_containers->begin(); it != m_containers->end(); ++it)
   {
     const aterm_container* container = *it;
 
@@ -189,8 +189,8 @@ void thread_aterm_pool::print_local_performance_statistics() const
 {
   if constexpr (EnableVariableRegistrationMetrics)
   {
-    mCRL2log(mcrl2::log::info, "Performance") << "thread_aterm_pool: " << m_variables.size() << " variables in root set (" << m_variable_insertions << " total insertions)"
-                                              << " and " << m_containers.size() << " containers in root set (" << m_container_insertions << " total insertions).\n";
+    mCRL2log(mcrl2::log::info, "Performance") << "thread_aterm_pool: " << m_variables->size() << " variables in root set (" << m_variable_insertions << " total insertions)"
+                                              << " and " << m_containers->size() << " containers in root set (" << m_container_insertions << " total insertions).\n";
   }
 }
 
