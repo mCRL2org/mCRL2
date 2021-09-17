@@ -561,6 +561,11 @@ class enumerator_algorithm
 #endif
     }
 
+    void reset_id_generator()
+    {
+      id_generator.clear();
+    }
+ 
     template <typename T>
     struct always_false
     {

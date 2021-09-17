@@ -61,9 +61,10 @@ public:
     assert(!prefix.empty() && !(std::isdigit(*prefix.rbegin())));
 
     // Obtain a reference to the first index possible.
-    m_index = *detail::g_term_pool().get_symbol_pool().register_prefix(prefix);
+    m_index = *detail::g_term_pool().get_symbol_pool().register_prefix(m_prefix);
 
     m_initial_index = m_index;
+
     if constexpr (atermpp::detail::GlobalThreadSafe) function_symbol_generator_mutex().unlock();
   }
 
@@ -71,7 +72,7 @@ public:
 
   void clear()
   {
-    m_index = *detail::g_term_pool().get_symbol_pool().register_prefix(m_prefix);
+    m_index = m_initial_index;
   } 
 
   ~function_symbol_generator()
@@ -85,11 +86,11 @@ public:
   function_symbol operator()(std::size_t arity = 0)
   {
     // Check whether in the meantime other variables have been used with the same prefix. 
-    if (m_initial_index!=*detail::g_term_pool().get_symbol_pool().register_prefix(m_prefix))
+    if (m_index<=*detail::g_term_pool().get_symbol_pool().register_prefix(m_prefix))
     {
       m_index=*detail::g_term_pool().get_symbol_pool().register_prefix(m_prefix);
       m_initial_index=m_index;
-    }
+    } 
     // Put the number m_index after the prefix in the string buffer.
     mcrl2::utilities::number2string(m_index, m_string_buffer, m_prefix.size());
 

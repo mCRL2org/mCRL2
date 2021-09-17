@@ -499,7 +499,7 @@ class explorer: public abortable
     {
       if (!m_recursive)
       {
-        m_id_generator.clear();
+        m_enumerator.reset_id_generator();  //CHANGE FOR THE PARALLEL EXPLORER.
       }
       if (summand.cache_strategy == caching::none)
       {

@@ -36,12 +36,12 @@ BOOST_AUTO_TEST_CASE(test_generator)
   function_symbol a10("a10", 0);
   function_symbol_generator agenerator(prefix);
   function_symbol g = agenerator();
-  BOOST_CHECK(g.name() == "a11");
+  BOOST_CHECK(g.name() == "a1_0");
   BOOST_CHECK(g.name() != a10.name());
 
-  function_symbol a100("a100", 0);
+  function_symbol a100("a1_10", 0);
   g = agenerator();
-  BOOST_CHECK(g.name() == "a101");
+  BOOST_CHECK(g.name() == "a1_11");
 
   function_symbol_generator zgen("z");
   function_symbol q1 = zgen();
