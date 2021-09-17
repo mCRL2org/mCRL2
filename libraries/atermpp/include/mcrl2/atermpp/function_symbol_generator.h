@@ -38,10 +38,10 @@ protected:
   std::string m_prefix;
 
   /// \brief Cache the value that is set in the constructor
-  std::size_t  m_initial_index;
+  std::size_t m_initial_index;
 
   /// \brief A local string cache to prevent allocating new strings for every function symbol generated.
-  std::string  m_string_buffer;
+  std::string m_string_buffer;
 
   /// \brief A reference to the index as present in the function symbol generator.
   // std::shared_ptr<std::size_t> m_index;
@@ -55,7 +55,8 @@ public:
   {
     if constexpr (atermpp::detail::GlobalThreadSafe) function_symbol_generator_mutex().lock();
 
-    m_prefix=prefix + (generator_sequence_number()==0?std::to_string(generator_sequence_number()++) + "_":"");
+    m_prefix=prefix + (generator_sequence_number()>0?std::to_string(generator_sequence_number()) + "_":"");
+    generator_sequence_number()++;
     m_string_buffer=m_prefix;
     assert(!prefix.empty() && !(std::isdigit(*prefix.rbegin())));
 
