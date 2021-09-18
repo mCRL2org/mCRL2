@@ -171,17 +171,18 @@ class rewriter: public basic_rewriter<data_expression>
 
     data_expression operator()(const data_expression& d, substitution_type& sigma) const
     {
+      data_expression result;
 #ifdef MCRL2_COUNT_DATA_REWRITE_CALLS
       rewrite_calls++;
 #endif
-# ifdef MCRL2_PRINT_REWRITE_STEPS
+#ifdef MCRL2_PRINT_REWRITE_STEPS
       mCRL2log(log::debug) << "REWRITE " << d << "\n";
-      data_expression result(m_rewriter->rewrite(d,sigma));
-      mCRL2log(log::debug) << " ------------> " << result << std::endl;
-      return result;
-#else
-      return m_rewriter->rewrite(d,sigma);
 #endif
+      m_rewriter->rewrite(result,d,sigma);
+#ifdef MCRL2_PRINT_REWRITE_STEPS
+      mCRL2log(log::debug) << " ------------> " << result << std::endl;
+#endif
+      return result;
     }
 
     ~rewriter()

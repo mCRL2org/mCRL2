@@ -71,7 +71,7 @@ class todo_set
 
     virtual ~todo_set() = default;
 
-    virtual state choose_element() = 0;
+    virtual void choose_element(state& result) = 0;
 
     virtual void insert(const state& s) = 0;
 
@@ -101,11 +101,11 @@ class breadth_first_todo_set : public todo_set
       : todo_set(first, last)
     {}
 
-    state choose_element() override
+    void choose_element(state& result) override
     {
-      const state s = todo.front();
+      result = todo.front();
       todo.pop_front();
-      return s;
+      return;
     }
 
     void insert(const state& s) override
@@ -126,11 +126,11 @@ class depth_first_todo_set : public todo_set
       : todo_set(first, last)
     {}
 
-    state choose_element() override
+    void choose_element(state& result) override
     {
-      auto s = todo.back();
+      result = todo.back();
       todo.pop_back();
-      return s;
+      return;
     }
 
     void insert(const state& s) override
@@ -170,11 +170,11 @@ class highway_todo_set : public todo_set
     {
     }
 
-    state choose_element() override
+    void choose_element(state& result) override
     {
-      auto s = todo.front();
+      result = todo.front();
       todo.pop_front();
-      return s;
+      return;
     }
 
     void insert(const state& s) override
@@ -499,7 +499,7 @@ class explorer: public abortable
     {
       if (!m_recursive)
       {
-        m_enumerator.reset_id_generator();  //CHANGE FOR THE PARALLEL EXPLORER.
+        m_enumerator.reset_id_generator();  //CHANGED FOR THE PARALLEL EXPLORER.
       }
       if (summand.cache_strategy == caching::none)
       {
@@ -805,16 +805,17 @@ class explorer: public abortable
       data::data_specification thread_data_specification = m_lpsspec.data();
       data::enumerator_algorithm<> m_enumerator(rewriter_for_this_thread, thread_data_specification, rewriter_for_this_thread, thread_id_generator, false);
       data::mutable_indexed_substitution<> m_sigma;  // JFG This must be a thread local substitution.
+      state current_state;
       while (number_of_active_processes>0)
       {
         m_exclusive_state_access.lock();
         while (!todo.empty() && !m_must_abort)
         {
-          state s = todo.choose_element();
-          std::size_t s_index = discovered.index(s);
+          todo.choose_element(current_state);
+          std::size_t s_index = discovered.index(current_state);
           m_exclusive_state_access.unlock();
-          start_state(s, s_index);
-          data::add_assignments(m_sigma, m_process_parameters, s);
+          start_state(current_state, s_index);
+          data::add_assignments(m_sigma, m_process_parameters, current_state);
           for (const explorer_summand& summand: regular_summands)
           {
             generate_transitions(
@@ -827,7 +828,7 @@ class explorer: public abortable
               {
                 if constexpr (Timed)
                 {
-                  const data::data_expression& t = s[m_n];
+                  const data::data_expression& t = current_state[m_n];
                   if (a.has_time() && less_equal(a.time(), t, rewriter_for_this_thread))
                   {
                     return;
@@ -849,7 +850,7 @@ class explorer: public abortable
                     }
                     s1_index.push_back(k);
                   }
-                  examine_transition(s, s_index, a, s1, s1_index, summand.index);
+                  examine_transition(current_state, s_index, a, s1, s1_index, summand.index);
                 }
                 else
                 {
@@ -859,7 +860,7 @@ class explorer: public abortable
                   {
                     if constexpr (Timed)
                     {
-                      const data::data_expression& t = s[m_n];
+                      const data::data_expression& t = current_state[m_n];
                       data::data_expression t1 = a.has_time() ? a.time() : t;
                       state s1_at_t1 = make_timed_state(s1, t1);
                       s1_index = discovered.insert(s1_at_t1).first;
@@ -875,14 +876,14 @@ class explorer: public abortable
                   }
                   m_exclusive_state_access.unlock();
                   m_exclusive_transition_access.lock();
-                  examine_transition(s, s_index, a, s1, s1_index, summand.index);
+                  examine_transition(current_state, s_index, a, s1, s1_index, summand.index);
                   m_exclusive_transition_access.unlock();
                 }
               }
             );
           }
           m_exclusive_state_access.lock();
-          finish_state(s, s_index, todo.size());
+          finish_state(current_state, s_index, todo.size());
           todo.finish_state();
         }
         m_exclusive_state_access.unlock();

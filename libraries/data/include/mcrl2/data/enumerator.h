@@ -764,7 +764,7 @@ class enumerator_algorithm
           {
             if (data::is_function_sort(c.sort()))
             {
-              auto const& domain = atermpp::down_cast<data::function_sort>(c.sort()).domain();
+              const sort_expression_list& domain = atermpp::down_cast<data::function_sort>(c.sort()).domain();
               data::variable_list y(domain.begin(), domain.end(), [&](const data::sort_expression& s) { return data::variable(id_generator(), s); });
               data_expression cy = r(application(c, y.begin(), y.end()));
               sigma[v1] = cy;
@@ -776,7 +776,7 @@ class enumerator_algorithm
             }
             else
             {
-              const auto e1 = r(c);
+              const data_expression e1 = r(c);
               sigma[v1] = e1;
               if (add_element(v_tail, phi, v1, e1))
               {
