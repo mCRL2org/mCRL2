@@ -59,6 +59,7 @@ template<class Term, class ...Terms>
 void thread_aterm_pool::create_appl_index(aterm& term, const function_symbol& sym, const Terms&... arguments)
 {
   lock_shared();
+  ++m_creation_depth;
   static_assert(sizeof...(arguments)==1 || sizeof...(arguments)==2);
   if constexpr (sizeof...(arguments)==1)
   {
@@ -67,10 +68,9 @@ void thread_aterm_pool::create_appl_index(aterm& term, const function_symbol& sy
   else
   {
     m_pool.create_int(term, atermpp::detail::index_traits<Term, std::pair<Terms...>, 2>::insert(std::make_pair(arguments...)));
-    // m_pool.create_int(term, atermpp::detail::index_traits<variable, variable_key_type, 2>::insert(std::make_pair(name, sort));
-    // m_pool.create_int(term, atermpp::detail::index_traits<...Terms, sizeof(arguments)>::insert(std::make_pair(arguments));
   }
   bool added = m_pool.create_appl(term, sym, arguments..., term);
+  --m_creation_depth;
   unlock_shared();
   if (added) { m_pool.created_term(m_creation_depth == 0, this); }
 }
@@ -203,6 +203,7 @@ void thread_aterm_pool::lock_shared()
 {
   if (GlobalThreadSafe && m_creation_depth == 0)
   {
+    assert(m_busy_flag);
     m_busy_flag.store(true);
 
     // Wait for the forbidden flag to become false.
@@ -219,6 +220,7 @@ void thread_aterm_pool::unlock_shared()
 {
   if (GlobalThreadSafe && m_creation_depth == 0)
   {
+    assert(!m_busy_flag);
     m_busy_flag.store(false, std::memory_order_release);
   }
 }
