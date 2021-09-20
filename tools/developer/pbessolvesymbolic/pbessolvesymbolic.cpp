@@ -127,6 +127,7 @@ public:
         ldd initial_state = state2ldd(m_initial_state);
         ldd visited = union_(m_Vwon[0], m_Vwon[1]);
         ldd todo = initial_state;
+        ldd _; // ignored
 
         for (std::size_t iter = 1; iter <= iteration_count; ++iter)
         {
@@ -134,25 +135,7 @@ public:
           mCRL2log(log::debug) << "--- iteration " << iter << " ---" << std::endl;
           mCRL2log(log::debug) << "todo = " << print_states(m_data_index, todo) << std::endl;
 
-          ldd todo1 = m_options.chaining ? todo : empty_set();
-
-          for (std::size_t i = 0; i < R.size(); i++)
-          {
-            if (m_options.no_relprod)
-            {
-              ldd z = lps::alternative_relprod(m_options.chaining ? todo1 : todo, R[i]);
-              mCRL2log(log::debug) << "relprod(" << i << ", todo) = " << print_states(m_data_index, z) << std::endl;
-              todo1 = union_(z, todo1);
-            }
-            else
-            {
-              mCRL2log(log::debug) << "relprod(" << i << ", todo) = " << print_states(m_data_index, relprod(todo, R[i].L, R[i].Ir)) << std::endl;
-              todo1 = relprod_union(m_options.chaining ? todo1 : todo, R[i].L, R[i].Ir, todo1);
-            }
-          }
-
-          visited = union_(visited, todo);
-          todo = minus(todo1, visited);
+          std::tie(visited, todo, _) = step(visited, todo, false, false);
 
           mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(visited) << " states after "
                                  << std::setw(3) << iter << " iterations (time = " << std::setprecision(2)
@@ -161,7 +144,7 @@ public:
         }
 
         mCRL2log(log::verbose) << "pruned todo list from " << satcount(m_todo) << " states to " << satcount(todo) << " states" << std::endl;
-        m_todo = minus(minus(todo, m_Vwon[0]), m_Vwon[1]);
+        m_todo = todo;
       }
     }
   }

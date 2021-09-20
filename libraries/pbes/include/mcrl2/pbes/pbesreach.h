@@ -367,7 +367,7 @@ class pbesreach_algorithm
       }
 
       return sylvan::ldds::cube(v.data(), x.size());
-    };
+    }
 
     /// \brief Updates R.L := R.L U {(x,y) in R | x in X}
     void learn_successors(std::size_t i, summand_group& R, const ldd& X)
@@ -484,7 +484,7 @@ class pbesreach_algorithm
       }
     }
 
-    virtual ~pbesreach_algorithm() {};
+    virtual ~pbesreach_algorithm() {}
 
     ldd initial_state()
     {
@@ -495,6 +495,49 @@ class pbesreach_algorithm
     ldd deadlocks()
     {
       return m_deadlocks;
+    }
+
+    /// \brief Perform a single breadth first step.
+    /// \returns The tuple <visited, todo, deadlocks>
+    std::tuple<ldd, ldd, ldd> step(const ldd& visited, const ldd& todo, bool learn_transitions = true, bool detect_deadlocks = false)
+    {
+      using namespace sylvan::ldds;
+      auto& R = m_summand_groups;
+
+      ldd todo1 = m_options.chaining ? todo : empty_set();
+      ldd potential_deadlocks = detect_deadlocks ? todo : empty_set();
+
+      for (std::size_t i = 0; i < R.size(); i++)
+      {
+        if (learn_transitions)
+        {
+          ldd proj = project(m_options.chaining ? todo1 : todo, R[i].Ip);
+          learn_successors(i, R[i], m_options.cached ? minus(proj, R[i].Ldomain) : proj);
+
+          mCRL2log(log::debug1) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
+        }
+
+        if (m_options.no_relprod)
+        {
+          ldd z = lps::alternative_relprod(m_options.chaining ? todo1 : todo, R[i]);
+          mCRL2log(log::debug1) << "relprod(" << i << ", todo) = " << print_states(m_data_index, z) << std::endl;
+          todo1 = union_(z, todo1);
+        }
+        else
+        {
+          mCRL2log(log::debug1) << "relprod(" << i << ", todo) = " << print_states(m_data_index, relprod(todo, R[i].L, R[i].Ir)) << std::endl;
+          ldd z = relprod(m_options.chaining ? todo1 : todo, R[i].L, R[i].Ir);
+          todo1 = union_(z, todo1);
+        }
+
+        if (detect_deadlocks)
+        {
+          potential_deadlocks = minus(potential_deadlocks, relprev(todo1, R[i].L, R[i].Ir, potential_deadlocks));
+        }
+      }
+
+      // after all transition groups are applied the remaining potential deadlocks are actual deadlocks.
+      return std::make_tuple(union_(visited, todo), minus(todo1, visited), potential_deadlocks);
     }
 
     ldd run(bool report_states = false)
@@ -517,43 +560,13 @@ class pbesreach_algorithm
         iteration_count++;
         mCRL2log(log::debug1) << "--- iteration " << iteration_count << " ---" << std::endl;
         mCRL2log(log::debug1) << "todo = " << print_states(m_data_index, m_todo) << std::endl;
+        ldd deadlocks = empty_set();
 
-        ldd todo1 = m_options.chaining ? m_todo : empty_set();
-        ldd potential_deadlocks = m_todo;
+        std::tie(m_visited, m_todo, deadlocks) = step(m_visited, m_todo, true, m_options.detect_deadlocks);
 
-        for (std::size_t i = 0; i < R.size(); i++)
-        {          
-          ldd proj = project(m_options.chaining ? todo1 : m_todo, R[i].Ip);          
-          learn_successors(i, R[i], m_options.cached ? minus(proj, R[i].Ldomain) : proj);
-
-          mCRL2log(log::debug1) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
-
-          if (m_options.no_relprod)
-          {
-            ldd z = lps::alternative_relprod(m_options.chaining ? todo1 : m_todo, R[i]);
-            mCRL2log(log::debug1) << "relprod(" << i << ", todo) = " << print_states(m_data_index, z) << std::endl;
-            todo1 = union_(z, todo1);
-          }
-          else
-          {
-            mCRL2log(log::debug1) << "relprod(" << i << ", todo) = " << print_states(m_data_index, relprod(m_todo, R[i].L, R[i].Ir)) << std::endl;
-            ldd z = relprod(m_options.chaining ? todo1 : m_todo, R[i].L, R[i].Ir);
-            todo1 = union_(z, todo1);
-          }
-
-          if (m_options.detect_deadlocks)
-          {
-            potential_deadlocks = minus(potential_deadlocks, relprev(todo1, R[i].L, R[i].Ir, potential_deadlocks));
-          }
-        }
-
-        m_visited = union_(m_visited, m_todo);
-        m_todo = minus(todo1, m_visited);
-
-        // after all transition groups are applied the remaining potential deadlocks are actual deadlocks.
         if (m_options.detect_deadlocks)
         {
-          m_deadlocks = union_(m_deadlocks, potential_deadlocks);
+          m_deadlocks = union_(m_deadlocks, deadlocks);
         }
 
         mCRL2log(log::verbose) << "generated " << std::setw(12) << satcount(m_visited) << " BES equations after "
