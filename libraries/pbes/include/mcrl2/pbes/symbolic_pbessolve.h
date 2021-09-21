@@ -234,7 +234,8 @@ class symbolic_pbessolve_algorithm
     }
 
     /// \returns The set { u in U | exists v in V: u -> v } without chaining.
-    ldd predecessors(const ldd& U, const ldd& V, bool chaining = false)
+    ///          With chaining returns a subset of { u in U | exists v in V: u ->* v } where ->* only visits intermediate states in W.
+    ldd predecessors(const ldd& U, const ldd& V, bool chaining = false, ldd W = sylvan::ldds::empty_set())
     {
       using namespace sylvan::ldds;
 
@@ -252,7 +253,7 @@ class symbolic_pbessolve_algorithm
                                  << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";
 
           result = union_(result, todo1);
-          todo = union_(todo, todo1);
+          todo = union_(todo, intersect(todo1, W));
         }
       }
       else
@@ -302,27 +303,8 @@ class symbolic_pbessolve_algorithm
         ldd Palpha;
 
         // The predecessors of the todo set; we update the todo set in this iteration to only include newly added states.
-        ldd P;
-
-        if (m_chaining)
-        {
-          ldd result = todo;
-          for (int i = m_summand_groups.size() - 1; i >= 0; --i)
-          {
-            const summand_group& group = m_summand_groups[i];
-
-            ldd pred = predecessors(Xoutside, result, group);
-            result = union_(result, intersect(pred, Valpha));
-            P = union_(P, pred);
-          }
-
-          Palpha = minus(result, todo);
-        }
-        else
-        {
-          P = predecessors(Xoutside, todo);
-          Palpha = intersect(P, Valpha);
-        }
+        ldd P = predecessors(Xoutside, todo, m_chaining, Valpha);
+        Palpha = intersect(P, Valpha);
 
         todo = Palpha;
         X = union_(X, Palpha);
@@ -398,29 +380,8 @@ class symbolic_pbessolve_algorithm
         ldd Palpha;
 
         // The predecessors of the todo set; we update the todo set in this iteration to only include newly added states.
-        ldd P;
-
-        if (m_chaining)
-        {
-          ldd result = union_(todo, U);
-          for (int i = m_summand_groups.size() - 1; i >= 0; --i)
-          {
-            const summand_group& group = m_summand_groups[i];
-
-            ldd pred = predecessors(Xoutside, result, group);
-            result = union_(result, intersect(intersect(pred, Valpha), Vc));
-            P = union_(P, pred);
-          }
-
-          P = minus(P, X);
-          Palpha = minus(result, todo);
-        }
-        else
-        {
-          P = intersect(predecessors(Xoutside, union_(todo, U)), Vc);
-          P = minus(P, X);
-          Palpha = intersect(P, Valpha);
-        }
+        ldd P = intersect(predecessors(Xoutside, todo, m_chaining, intersect(Valpha, Vc)), Vc);
+        Palpha = intersect(P, Valpha);
 
         todo = Palpha;
         X = union_(X, Palpha);
@@ -641,7 +602,7 @@ class symbolic_pbessolve_algorithm
         {
           stopwatch timer;
           U = Unext;
-          Unext = predecessors(U, U);
+          Unext = predecessors(U, U, m_chaining, U);
 
           mCRL2log(log::verbose) << "cycle detection iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
 
