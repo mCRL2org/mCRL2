@@ -115,7 +115,7 @@ public:
         mCRL2log(log::verbose) << "partial solving found solution for" << std::setw(12) << satcount(m_Vwon[0]) + satcount(m_Vwon[1]) << " states" << std::endl;
       }
 
-      if (m_options.prune_todo_list && Vwon != m_Vwon)
+      if (false && Vwon != m_Vwon)
       {
         // Remove todo set vertices where an earlier vertex on every path from the initial vertex is already won.
         mCRL2log(log::verbose) << "start pruning todo list" << std::endl;
