@@ -233,24 +233,42 @@ class symbolic_pbessolve_algorithm
       return m_no_relprod ? lps::alternative_relprev(V, group, U) : relprev(V, group.L, group.Ir, U);
     }
 
-    /// \returns The set { u in U | exists v in V: u -> v }
-    ldd predecessors(const ldd& U, const ldd& V)
+    /// \returns The set { u in U | exists v in V: u -> v } without chaining.
+    ldd predecessors(const ldd& U, const ldd& V, bool chaining = false)
     {
       using namespace sylvan::ldds;
 
-      ldd result = m_chaining ? V : empty_set();
-      for (int i = m_summand_groups.size() - 1; i >= 0; --i)
+      ldd result = empty_set();
+      if (chaining)
       {
-        const summand_group& group = m_summand_groups[i];
+        ldd todo = V;
+        for (int i = m_summand_groups.size() - 1; i >= 0; --i)
+        {
+          const summand_group& group = m_summand_groups[i];
 
-        stopwatch watch;
-        result = union_(result, predecessors(U, m_chaining ? result : V, group));
-        mCRL2log(log::debug) << "added predecessors for group " << i << " out of " << m_summand_groups.size()
-                               << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";
+          stopwatch watch;
+          ldd todo1 = predecessors(U, todo, group);
+          mCRL2log(log::debug) << "added predecessors for group " << i << " out of " << m_summand_groups.size()
+                                 << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";
+
+          result = union_(result, todo1);
+          todo = union_(todo, todo1);
+        }
+      }
+      else
+      {
+        for (int i = m_summand_groups.size() - 1; i >= 0; --i)
+        {
+          const summand_group& group = m_summand_groups[i];
+
+          stopwatch watch;
+          result = union_(result, predecessors(U, V, group));
+          mCRL2log(log::debug) << "added predecessors for group " << i << " out of " << m_summand_groups.size()
+                                 << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";
+        }
       }
 
-      // With chaining we need to ensure the result only contains elements in U.
-      return m_chaining ? intersect(result, U) : result;
+      return result;
     }
 
     /// \brief Compute the attractor set for U.
