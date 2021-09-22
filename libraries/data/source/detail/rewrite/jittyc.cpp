@@ -2847,7 +2847,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     throw mcrl2::runtime_error(std::string("Could not compile rewriter: ") + e.what());
   }
 
-  mCRL2log(verbose) << "compiled in " << time.time() << "ms, loading rewriter..." << std::endl;
+  mCRL2log(verbose) << "compiled in " << std::round(time.seconds()) << " seconds, loading rewriter..." << std::endl;
 
   bool (*init)(rewriter_interface*, RewriterCompilingJitty* this_rewriter);
   rewriter_interface interface = { mcrl2::utilities::get_toolset_version(), "Unknown error when loading rewriter.", this, NULL, NULL };
