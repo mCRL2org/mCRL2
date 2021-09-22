@@ -75,45 +75,40 @@ public:
     ++iteration_count;
     if (iteration_count % 10 == 0 || m_options.aggressive)
     {
+      mCRL2log(log::verbose) << "start partial solving\n";
+      stopwatch timer;
+
       // Store the set of won states to keep track of whether new states have been solved.
       std::array<sylvan::ldds::ldd, 2> Vwon = m_Vwon;
 
       auto equation_info = compute_equation_info(pbes(), data_index());
-      pbes_system::symbolic_pbessolve_algorithm solver(union_(m_visited, m_todo), summand_groups(), equation_info, m_options.no_relprod, m_options.chaining, data_index());
+      ldd V = union_(m_visited, m_todo);
+      pbes_system::symbolic_pbessolve_algorithm solver(V, summand_groups(), equation_info, m_options.no_relprod, m_options.chaining, data_index());
 
       if (m_options.solve_strategy == 1)
       {
-        mCRL2log(log::verbose) << "start cycle detection\n";
 
-        auto result = solver.detect_cycles(m_visited, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1]);
+        auto result = solver.detect_cycles(V, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1]);
         m_Vwon[0] = result.first;
         m_Vwon[1] = result.second;
-
-        mCRL2log(log::verbose) << "cycle detection found solution for" << std::setw(12) << satcount(m_Vwon[0]) + satcount(m_Vwon[1]) << " states" << std::endl;
       }      
       else if (m_options.solve_strategy == 2)
       {
-        mCRL2log(log::verbose) << "start fatal attractor detection\n";
-
-        auto result = solver.detect_fatal_attractors(m_visited, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1]);
+        auto result = solver.detect_fatal_attractors(V, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1]);
         m_Vwon[0] = result.first;
         m_Vwon[1] = result.second;
-
-        mCRL2log(log::verbose) << "fatal attractor detection found solution for" << std::setw(12) << satcount(m_Vwon[0]) + satcount(m_Vwon[1]) << " states" << std::endl;
-
       }
       else if (m_options.solve_strategy == 3)
       {
-        mCRL2log(log::verbose) << "start partial solving" << std::endl;
-
         // Solve assuming that even wins all todo nodes.
-        m_Vwon[1] = solver.solve_impl(m_visited, m_todo, m_deadlocks, union_(m_todo, m_Vwon[0]), m_Vwon[1]).second;
+        m_Vwon[1] = solver.solve_impl(V, m_todo, m_deadlocks, union_(m_todo, m_Vwon[0]), m_Vwon[1]).second;
 
         // Solve assuming that odd wins all todo nodes.
-        m_Vwon[0] = solver.solve_impl(m_visited, m_todo, m_deadlocks, m_Vwon[0], union_(m_todo, m_Vwon[1])).first;
-
-        mCRL2log(log::verbose) << "partial solving found solution for" << std::setw(12) << satcount(m_Vwon[0]) + satcount(m_Vwon[1]) << " states" << std::endl;
+        m_Vwon[0] = solver.solve_impl(V, m_todo, m_deadlocks, m_Vwon[0], union_(m_todo, m_Vwon[1])).first;
       }
+
+      mCRL2log(log::verbose) << "found solution solution for" << std::setw(12) << satcount(m_Vwon[0]) + satcount(m_Vwon[1]) << " BES equations" << std::endl;
+      mCRL2log(log::verbose) << "finished partial solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
 
       if (false && Vwon != m_Vwon)
       {

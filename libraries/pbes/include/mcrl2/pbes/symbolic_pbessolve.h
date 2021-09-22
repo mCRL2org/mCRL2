@@ -275,18 +275,15 @@ class symbolic_pbessolve_algorithm
     /// \brief Compute the attractor set for U.
     /// \param alpha the current player
     /// \param V is the set of states
-    /// \param W is a set of vertices which is considered for forced vertices, but is never added to the attractor set itself.
+    /// \param W is a set of vertices (subset of V) which is considered for forced vertices, but is never added to the attractor set itself.
     /// \param Vplayer a partitioning of the nodes into the sets of even nodes V[0] and odd V[1].
-    ldd attractor(const ldd& U, std::size_t alpha, ldd V, const ldd& W, const std::array<const ldd, 2>& Vplayer)
+    ldd attractor(const ldd& U, std::size_t alpha, const ldd& W, const ldd& V, const std::array<const ldd, 2>& Vplayer)
     {
       stopwatch attractor_watch;
       mCRL2log(log::verbose) << "start attractor set computation\n";
 
       using namespace sylvan::ldds;
       const ldd& Valpha = Vplayer[alpha];
-
-      // Complete the set of states.
-      V = union_(V, W);
 
       std::size_t iter = 0;
       ldd X = U;
@@ -462,7 +459,7 @@ class symbolic_pbessolve_algorithm
       ldd W[2];
       ldd W_1[2];
 
-      ldd A = attractor(U, alpha, V, empty_set(), Vplayer);
+      ldd A = attractor(U, alpha, empty_set(), V, Vplayer);
       mCRL2log(log::debug1) << "A = attractor(" << print_nodes(U, m_all_nodes) << ", " << print_nodes(V, m_all_nodes) << ") = " << print_nodes(A, m_all_nodes) << std::endl;
       std::tie(W_1[0], W_1[1]) = zielonka(minus(V, A));
 
@@ -474,7 +471,7 @@ class symbolic_pbessolve_algorithm
       }
       else
       {
-        ldd B = attractor(W_1[1 - alpha], 1 - alpha, V, empty_set(), Vplayer);
+        ldd B = attractor(W_1[1 - alpha], 1 - alpha, empty_set(), V, Vplayer);
         mCRL2log(log::debug1) << "B = attractor(" << print_nodes(W_1[1 - alpha], m_all_nodes) << ", " << print_nodes(V, m_all_nodes) << ") = " << print_nodes(B, m_all_nodes) << std::endl;
         std::tie(W[0], W[1]) = zielonka(minus(V, B));
         W[1 - alpha] = union_(W[1 - alpha], B);
@@ -489,6 +486,7 @@ class symbolic_pbessolve_algorithm
       return { W[0], W[1] };
     }
 
+    /// \brief Removes all deadlock and won states (updates won).
     ldd compute_total_graph(const ldd& V,
         const ldd& todo,
         const ldd& Vdeadlock,
@@ -501,16 +499,15 @@ class symbolic_pbessolve_algorithm
       if (Vdeadlock != empty_set())
       {
         // Determine winners from the deadlocks (the owner loses).
-        mCRL2log(log::verbose) << "determining winners for deadlock states" << std::endl;
+        mCRL2log(log::debug) << "determining winners for deadlock states" << std::endl;
 
         won[0] = union_(won[0], intersect(Vdeadlock, m_V[1]));
         won[1] = union_(won[1], intersect(Vdeadlock, m_V[0]));
       }
 
-      mCRL2log(log::verbose) << "removing winning regions" << std::endl;
-      ldd Vtotal = V;
-      won[0] = attractor(won[0], 0, V, todo, Vplayer);
-      won[1] = attractor(won[1], 1, V, todo, Vplayer);
+      mCRL2log(log::debug) << "removing winning regions" << std::endl;
+      won[0] = attractor(won[0], 0, todo, V, Vplayer);
+      won[1] = attractor(won[1], 1, todo, V, Vplayer);
 
       // After removing the deadlock (winning) states the resulting set of states is a total graph.
       return minus(minus(V, won[0]), won[1]);
@@ -574,7 +571,6 @@ class symbolic_pbessolve_algorithm
         const ldd& W1 = sylvan::ldds::empty_set())
     {
       using namespace sylvan::ldds;
-      stopwatch timer;
 
       std::array<ldd, 2> won = { W0, W1 };
       ldd Vtotal = compute_total_graph(V, todo, Vdeadlock, won);
@@ -595,7 +591,7 @@ class symbolic_pbessolve_algorithm
         ldd U = empty_set();
         ldd Unext = intersect(parity[alpha], Vplayer[alpha]);
 
-        mCRL2log(log::verbose) << "cycle detection for player " << alpha << "\n";
+        mCRL2log(log::debug) << "cycle detection for player " << alpha << "\n";
 
         std::size_t iter = 0;
         while (U != Unext)
@@ -604,17 +600,16 @@ class symbolic_pbessolve_algorithm
           U = Unext;
           Unext = predecessors(U, U, m_chaining, U);
 
-          mCRL2log(log::verbose) << "cycle detection iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
+          mCRL2log(log::debug) << "cycle detection iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
 
           ++iter;
         }
 
-        mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(U) << " states in cycles for player " << alpha << "\n";
+        mCRL2log(log::debug) << "found " << std::setw(12) << satcount(U) << " states in cycles for player " << alpha << "\n";
 
-        won[alpha] = union_(won[alpha], attractor(U, alpha, Vtotal, todo, Vplayer));
+        won[alpha] = union_(won[alpha], attractor(U, alpha, todo, Vtotal, Vplayer));
       }
 
-      mCRL2log(log::verbose) << "finished cycle detection (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
       mCRL2log(log::debug1) << "W0 = " << print_nodes(won[0], m_all_nodes) << std::endl;
       mCRL2log(log::debug1) << "W1 = " << print_nodes(won[1], m_all_nodes) << std::endl;
 
@@ -652,7 +647,7 @@ class symbolic_pbessolve_algorithm
           ldd Z = monotone_attractor(X, alpha, c, Vsafe[alpha], Vplayer);
           if (includes(Z, X))
           {
-            won[alpha] = union_(won[alpha], attractor(Z, alpha, Vtotal, todo, Vplayer));
+            won[alpha] = union_(won[alpha], attractor(Z, alpha, todo, Vtotal, Vplayer));
             mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(Z) << " states in fatal attractors for player " << alpha << " and priority " << c << "\n";
             break;
           }
