@@ -87,16 +87,11 @@ public:
 
       if (m_options.solve_strategy == 1)
       {
-
-        auto result = solver.detect_cycles(V, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1]);
-        m_Vwon[0] = result.first;
-        m_Vwon[1] = result.second;
+        std::tie(m_Vwon[0], m_Vwon[1]) = solver.detect_cycles(V, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1]);
       }      
       else if (m_options.solve_strategy == 2)
       {
-        auto result = solver.detect_fatal_attractors(V, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1]);
-        m_Vwon[0] = result.first;
-        m_Vwon[1] = result.second;
+        std::tie(m_Vwon[0], m_Vwon[1]) = solver.detect_fatal_attractors(V, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1]);
       }
       else if (m_options.solve_strategy == 3)
       {
@@ -122,7 +117,6 @@ public:
         ldd initial_state = state2ldd(m_initial_state);
         ldd visited = union_(m_Vwon[0], m_Vwon[1]);
         ldd todo = initial_state;
-        ldd _; // ignored
 
         for (std::size_t iter = 1; iter <= iteration_count; ++iter)
         {
@@ -130,7 +124,7 @@ public:
           mCRL2log(log::debug) << "--- iteration " << iter << " ---" << std::endl;
           mCRL2log(log::debug) << "todo = " << print_states(m_data_index, todo) << std::endl;
 
-          std::tie(visited, todo, _) = step(visited, todo, false, false);
+          std::tie(visited, todo, std::ignore) = step(visited, todo, false, false);
 
           mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(visited) << " states after "
                                  << std::setw(3) << iter << " iterations (time = " << std::setprecision(2)
