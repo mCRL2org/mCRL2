@@ -263,24 +263,21 @@ class lpsreach_algorithm
       }
     }
 
-    /// \brief Computes union(U, relprod(U, group)).
-    ldd relprod_impl(const ldd& U, const lps_summand_group& group)
+    /// \brief Computes relprod(U, group).
+    ldd relprod_impl(const ldd& U, const lps_summand_group& group, std::size_t i)
     {
-      ldd result = U;
       if (m_options.no_relprod)
       {
         ldd z = lps::alternative_relprod(U, group);
         mCRL2log(log::debug1) << "relprod(" << i << ", todo) = " << print_states(m_data_index, z) << std::endl;
-        result = union_(z, result);
+        return z;
       }
       else
       {
-        mCRL2log(log::debug1) << "relprod(" << i << ", todo) = " << print_states(m_data_index, relprod(todo, group.L, group.Ir)) << std::endl;
         ldd z = relprod(U, group.L, group.Ir);
-        result = union_(z, result);
+        mCRL2log(log::debug1) << "relprod(" << i << ", todo) = " << print_states(m_data_index, z) << std::endl;
+        return z;
       }
-
-      return result;
     }
 
     /// \brief Perform a single breadth first step.
@@ -293,7 +290,7 @@ class lpsreach_algorithm
       ldd todo1 = empty_set();
       ldd potential_deadlocks = detect_deadlocks ? todo : empty_set();
 
-      if (m_options.saturation)
+      if (!m_options.saturation)
       {
         // chaining and regular.
         todo1 = m_options.chaining ? todo : empty_set();
@@ -308,7 +305,7 @@ class lpsreach_algorithm
             mCRL2log(log::debug1) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
           }
 
-          todo1 = relprod_impl(m_options.chaining ? todo1 : todo, R[i]);
+          todo1 = union_(todo1, relprod_impl(m_options.chaining ? todo1 : todo, R[i], i));
 
           if (detect_deadlocks)
           {
@@ -333,18 +330,18 @@ class lpsreach_algorithm
             mCRL2log(log::debug1) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
           }
 
-          if (detect_deadlocks)
-          {
-            potential_deadlocks = minus(potential_deadlocks, relprev(todo1, R[i].L, R[i].Ir, potential_deadlocks));
-          }
-
           // Apply one transition relation repeatedly.
           do
           {
             todo1_old = todo1;
-            todo1 = relprod_impl(todo1, R[i]);
+            todo1 = union_(todo1, relprod_impl(todo1, R[i], i));
           }
           while (todo1 != todo1_old);
+
+          if (detect_deadlocks)
+          {
+            potential_deadlocks = minus(potential_deadlocks, relprev(todo1, R[i].L, R[i].Ir, potential_deadlocks));
+          }
 
           // Apply all learned transition relations repeatedly.
           do
@@ -353,7 +350,7 @@ class lpsreach_algorithm
 
             for (std::size_t j = 0; j <= i; j++)
             {
-              todo1 = relprod_impl(todo1, R[j]);
+              todo1 = union_(todo1, relprod_impl(todo1, R[j], j));
             }
           }
           while (todo1 != todo1_old);
