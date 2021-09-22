@@ -251,6 +251,7 @@ struct symbolic_reachability_options
   bool one_point_rule_rewrite = false;
   bool replace_constants_by_variables = false;
   bool remove_unused_rewrite_rules = false;
+  bool saturation = false;
   bool no_discard = false;
   bool no_discard_read = false;
   bool no_discard_write = false;

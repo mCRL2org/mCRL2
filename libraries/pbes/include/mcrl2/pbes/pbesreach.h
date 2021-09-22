@@ -497,6 +497,26 @@ class pbesreach_algorithm
       return m_deadlocks;
     }
 
+    /// \brief Computes union(U, relprod(U, group)).
+    ldd relprod_impl(const ldd& U, const summand_group& group)
+    {
+      ldd result = U;
+      if (m_options.no_relprod)
+      {
+        ldd z = lps::alternative_relprod(U, group);
+        mCRL2log(log::debug1) << "relprod(" << i << ", todo) = " << print_states(m_data_index, z) << std::endl;
+        result = union_(z, result);
+      }
+      else
+      {
+        mCRL2log(log::debug1) << "relprod(" << i << ", todo) = " << print_states(m_data_index, relprod(todo, group.L, group.Ir)) << std::endl;
+        ldd z = relprod(U, group.L, group.Ir);
+        result = union_(z, result);
+      }
+
+      return result;
+    }
+
     /// \brief Perform a single breadth first step.
     /// \returns The tuple <visited, todo, deadlocks>
     std::tuple<ldd, ldd, ldd> step(const ldd& visited, const ldd& todo, bool learn_transitions = true, bool detect_deadlocks = false)
@@ -504,35 +524,73 @@ class pbesreach_algorithm
       using namespace sylvan::ldds;
       auto& R = m_summand_groups;
 
-      ldd todo1 = m_options.chaining ? todo : empty_set();
+      ldd todo1 = empty_set();
       ldd potential_deadlocks = detect_deadlocks ? todo : empty_set();
 
-      for (std::size_t i = 0; i < R.size(); i++)
+      if (m_options.saturation)
       {
-        if (learn_transitions)
-        {
-          ldd proj = project(m_options.chaining ? todo1 : todo, R[i].Ip);
-          learn_successors(i, R[i], m_options.cached ? minus(proj, R[i].Ldomain) : proj);
+        // chaining and regular.
+        todo1 = m_options.chaining ? todo : empty_set();
 
-          mCRL2log(log::debug1) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
-        }
+        for (std::size_t i = 0; i < R.size(); i++)
+        {
+          if (learn_transitions)
+          {
+            ldd proj = project(m_options.chaining ? todo1 : todo, R[i].Ip);
+            learn_successors(i, R[i], m_options.cached ? minus(proj, R[i].Ldomain) : proj);
 
-        if (m_options.no_relprod)
-        {
-          ldd z = lps::alternative_relprod(m_options.chaining ? todo1 : todo, R[i]);
-          mCRL2log(log::debug1) << "relprod(" << i << ", todo) = " << print_states(m_data_index, z) << std::endl;
-          todo1 = union_(z, todo1);
-        }
-        else
-        {
-          mCRL2log(log::debug1) << "relprod(" << i << ", todo) = " << print_states(m_data_index, relprod(todo, R[i].L, R[i].Ir)) << std::endl;
-          ldd z = relprod(m_options.chaining ? todo1 : todo, R[i].L, R[i].Ir);
-          todo1 = union_(z, todo1);
-        }
+            mCRL2log(log::debug1) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
+          }
 
-        if (detect_deadlocks)
+          todo1 = relprod_impl(m_options.chaining ? todo1 : todo, R[i]);
+
+          if (detect_deadlocks)
+          {
+            potential_deadlocks = minus(potential_deadlocks, relprev(todo1, R[i].L, R[i].Ir, potential_deadlocks));
+          }
+        }
+      }
+      else
+      {
+        // saturation
+        todo1 = todo;
+        ldd todo1_old; // the old todo set.
+        std::size_t j; // The last transition group learned.
+
+        for (std::size_t i = 0; i < R.size(); i++)
         {
-          potential_deadlocks = minus(potential_deadlocks, relprev(todo1, R[i].L, R[i].Ir, potential_deadlocks));
+          if (learn_transitions)
+          {
+            ldd proj = project(todo1, R[i].Ip);
+            learn_successors(i, R[i], m_options.cached ? minus(proj, R[i].Ldomain) : proj);
+
+            mCRL2log(log::debug1) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
+          }
+
+          if (detect_deadlocks)
+          {
+            potential_deadlocks = minus(potential_deadlocks, relprev(todo1, R[i].L, R[i].Ir, potential_deadlocks));
+          }
+
+          // Apply one transition relation repeatedly.
+          do
+          {
+            todo1_old = todo1;
+            todo1 = relprod_impl(todo1, R[i]);
+          }
+          while (todo1 != todo1_old);
+
+          // Apply all learned transition relations repeatedly.
+          do
+          {
+            todo1_old = todo1;
+
+            for (std::size_t j = 0; j <= i; j++)
+            {
+              todo1 = relprod_impl(todo1, R[j]);
+            }
+          }
+          while (todo1 != todo1_old);
         }
       }
 
