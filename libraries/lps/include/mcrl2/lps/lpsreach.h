@@ -178,7 +178,7 @@ class lpsreach_algorithm
       }
 
       return sylvan::ldds::cube(v.data(), x.size());
-    };
+    }
 
     // R.L := R.L U {(x,y) in R | x in X}
     void learn_successors(std::size_t i, summand_group& R, const ldd& X)
@@ -318,7 +318,6 @@ class lpsreach_algorithm
         // saturation
         todo1 = todo;
         ldd todo1_old; // the old todo set.
-        std::size_t j = 0; // The last transition group learned.
 
         for (std::size_t i = 0; i < R.size(); i++)
         {

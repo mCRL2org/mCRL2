@@ -111,6 +111,36 @@ std::vector<std::set<std::size_t>> compute_summand_groups_default(const std::vec
   return result;
 }
 
+// joins summands that depend on the same parameters
+inline
+std::vector<std::set<std::size_t>> compute_summand_groups_used(const std::vector<boost::dynamic_bitset<>>& patterns)
+{
+  std::map<boost::dynamic_bitset<>, std::set<std::size_t>> group_map;
+  for (std::size_t i = 0; i < patterns.size(); i++)
+  {
+    // Only keep track of whether the parameter is used (either read or write).
+    boost::dynamic_bitset<> pattern = patterns[i];
+    boost::dynamic_bitset<> new_pattern = pattern;
+    for (std::size_t j = 0; j < pattern.size(); j+=2)
+    {
+      if (pattern[j] || pattern[j+1])
+      {
+        new_pattern[j] = 1;
+        new_pattern[j+1] = 1;
+      }
+    }
+
+    group_map[new_pattern].insert(i);
+  }
+
+  std::vector<std::set<std::size_t>> groups;
+  for (const auto& [_, group]: group_map)
+  {
+    groups.push_back(group);
+  }
+  return groups;
+}
+
 // joins summands with exactly the same pattern
 inline
 std::vector<std::set<std::size_t>> compute_summand_groups_simple(const std::vector<boost::dynamic_bitset<>>& patterns)
@@ -134,6 +164,10 @@ std::vector<std::set<std::size_t>> compute_summand_groups(const std::string& tex
   if (text == "none")
   {
     return compute_summand_groups_default(patterns);
+  }
+  else if (text == "used")
+  {
+    return compute_summand_groups_used(patterns);
   }
   else if (text == "simple")
   {

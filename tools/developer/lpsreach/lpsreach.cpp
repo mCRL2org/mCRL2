@@ -49,6 +49,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       desc.add_option("info", "print read/write information of the summands");
       desc.add_option("groups", utilities::make_optional_argument("GROUPS", "none"),
                       "'none' (default) no summand groups\n"
+                      "'used' summands with the same variables are joined\n"
                       "'simple' summands with the same read/write variables are joined\n"
                       "'<groups>' a user defined list of summand groups separated by semicolons, e.g. '0; 1 3 4; 2 5'");
       desc.add_option("reorder", utilities::make_optional_argument("ORDER", "none"),

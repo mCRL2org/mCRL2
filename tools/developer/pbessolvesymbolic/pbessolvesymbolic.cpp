@@ -199,6 +199,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       desc.add_option("chaining", "reduce the amount of breadth-first iterations by applying the transition groups consecutively");
       desc.add_option("groups", utilities::make_optional_argument("GROUPS", "none"),
                       "'none' (default) no summand groups\n"
+                      "'used' summands with the same variables are joined\n"
                       "'simple' summands with the same read/write variables are joined\n"
                       "a list of summand groups separated by semicolons, e.g. '0; 1 3 4; 2 5'");
       desc.add_option("prune-todo-list", "Prune the todo list periodically.");
