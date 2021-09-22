@@ -280,7 +280,7 @@ class symbolic_pbessolve_algorithm
     ldd attractor(const ldd& U, std::size_t alpha, const ldd& W, const ldd& V, const std::array<const ldd, 2>& Vplayer)
     {
       stopwatch attractor_watch;
-      mCRL2log(log::verbose) << "start attractor set computation\n";
+      mCRL2log(log::debug) << "start attractor set computation\n";
 
       using namespace sylvan::ldds;
       const ldd& Valpha = Vplayer[alpha];
@@ -330,12 +330,12 @@ class symbolic_pbessolve_algorithm
         // Update nodes outside of X.
         Xoutside = minus(Xoutside, Pforced);
 
-        mCRL2log(log::verbose) << "attractor set iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << iter_start.seconds() << "s)" << std::endl;
+        mCRL2log(log::debug) << "attractor set iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << iter_start.seconds() << "s)" << std::endl;
 
         ++iter;
       }
 
-      mCRL2log(log::verbose) << "finished attractor set computation (time = " << std::setprecision(2) << std::fixed << attractor_watch.seconds() << "s)" << std::endl;
+      mCRL2log(log::debug) << "finished attractor set computation (time = " << std::setprecision(2) << std::fixed << attractor_watch.seconds() << "s)" << std::endl;
       return X;
     }
 
@@ -344,10 +344,10 @@ class symbolic_pbessolve_algorithm
     /// \param c priority.
     /// \param V the set of all vertices.
     /// \param Vplayer a partitioning of the nodes into the sets of even nodes V[0] and odd V[1].
-    ldd monotone_attractor(const ldd& U, std::size_t alpha, std::size_t c, const ldd& V, const std::array<const ldd, 2>& Vplayer)
+    ldd monotone_attractor(const ldd& U, std::size_t alpha, std::size_t c, const ldd& W, const ldd& V, const std::array<const ldd, 2>& Vplayer)
     {
       stopwatch attractor_watch;
-      mCRL2log(log::verbose) << "start monotone attractor set computation\n";
+      mCRL2log(log::debug) << "start monotone attractor set computation\n";
 
       using namespace sylvan::ldds;
       const ldd& Valpha = Vplayer[alpha];
@@ -402,18 +402,19 @@ class symbolic_pbessolve_algorithm
                                  << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";
         }
 
+        Pforced = minus(Pforced, W);
         todo = union_(todo, Pforced);
         X = union_(X, Pforced);
 
         // Update nodes outside of X.
         Xoutside = minus(Xoutside, Pforced);
 
-        mCRL2log(log::verbose) << "monotone attractor set iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << iter_start.seconds() << "s)" << std::endl;
+        mCRL2log(log::debug) << "monotone attractor set iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << iter_start.seconds() << "s)" << std::endl;
 
         ++iter;
       }
 
-      mCRL2log(log::verbose) << "finished monotone attractor set computation (time = " << std::setprecision(2) << std::fixed << attractor_watch.seconds() << "s)" << std::endl;
+      mCRL2log(log::debug) << "finished monotone attractor set computation (time = " << std::setprecision(2) << std::fixed << attractor_watch.seconds() << "s)" << std::endl;
       return X;
     }
 
@@ -448,7 +449,7 @@ class symbolic_pbessolve_algorithm
       }
 
       stopwatch timer;
-      mCRL2log(log::verbose) << "start zielonka recursion\n";
+      mCRL2log(log::debug) << "start zielonka recursion\n";
       auto [m, U] = get_min_rank(V);
 
       std::size_t alpha = m % 2; // 0 = disjunctive, 1 = conjunctive
@@ -477,7 +478,7 @@ class symbolic_pbessolve_algorithm
         W[1 - alpha] = union_(W[1 - alpha], B);
       }
 
-      mCRL2log(log::verbose) << "finished zielonka recursion (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
+      mCRL2log(log::debug) << "finished zielonka recursion (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
 
       mCRL2log(log::debug1) << "\n  --- zielonka solution for ---\n" << print_graph(V, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
       mCRL2log(log::debug1) << "W0 = " << print_nodes(W[0], m_all_nodes) << std::endl;
@@ -557,7 +558,7 @@ class symbolic_pbessolve_algorithm
       won[0] = union_(won[0], solved0);
       won[1] = union_(won[1], solved1);
 
-      mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
+      mCRL2log(log::debug) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
       mCRL2log(log::debug1) << "W0 = " << print_nodes(won[0], m_all_nodes) << std::endl;
       mCRL2log(log::debug1) << "W1 = " << print_nodes(won[1], m_all_nodes) << std::endl;
 
@@ -628,7 +629,6 @@ class symbolic_pbessolve_algorithm
       std::array<ldd, 2> won = { W0, W1 };
       ldd Vtotal = compute_total_graph(V, todo, Vdeadlock, won);
       std::array<const ldd, 2> Vplayer = { intersect(Vtotal, m_V[0]), intersect(Vtotal, m_V[1]) };
-      std::array<const ldd, 2> Vsafe = { minus(Vplayer[0], attractor(intersect(todo, Vplayer[1]), 1, Vtotal, empty_set(), Vplayer)), minus(Vplayer[1], attractor(intersect(todo, Vplayer[0]), 0, Vtotal, empty_set(), Vplayer)) };
 
       mCRL2log(log::debug1) << "\n--- apply fatal attractor detection to ---\n" << print_graph(Vtotal, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
 
@@ -637,18 +637,18 @@ class symbolic_pbessolve_algorithm
       {
         std::size_t c = it->first;
         std::size_t alpha = c % 2;
-        mCRL2log(log::verbose) << "fatal attractor detection for player " << alpha << " and priority " << c << "\n";
+        mCRL2log(log::debug) << "fatal attractor detection for player " << alpha << " and priority " << c << "\n";
         ldd X = it->second;
         ldd Y = empty_set();
 
         while (X != empty_set() && X != Y)
         {
           Y = X;
-          ldd Z = monotone_attractor(X, alpha, c, Vsafe[alpha], Vplayer);
+          ldd Z = monotone_attractor(X, alpha, c, todo, Vtotal, Vplayer);
           if (includes(Z, X))
           {
             won[alpha] = union_(won[alpha], attractor(Z, alpha, todo, Vtotal, Vplayer));
-            mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(Z) << " states in fatal attractors for player " << alpha << " and priority " << c << "\n";
+            mCRL2log(log::debug) << "found " << std::setw(12) << satcount(Z) << " states in fatal attractors for player " << alpha << " and priority " << c << "\n";
             break;
           }
           else
@@ -658,7 +658,7 @@ class symbolic_pbessolve_algorithm
         }
       }
 
-      mCRL2log(log::verbose) << "finished fatal attractor detection (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
+      mCRL2log(log::debug) << "finished fatal attractor detection (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
       mCRL2log(log::debug1) << "W0 = " << print_nodes(won[0], m_all_nodes) << std::endl;
       mCRL2log(log::debug1) << "W1 = " << print_nodes(won[1], m_all_nodes) << std::endl;
 
