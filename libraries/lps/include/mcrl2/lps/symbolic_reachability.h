@@ -306,6 +306,7 @@ std::ostream& operator<<(std::ostream& out, const symbolic_reachability_options&
   out << "one-point-rule-rewrite = " << std::boolalpha << options.one_point_rule_rewrite << std::endl;
   out << "replace-constants-by-variables = " << std::boolalpha << options.replace_constants_by_variables << std::endl;
   out << "remove-unused-rewrite-rules = " << std::boolalpha << options.remove_unused_rewrite_rules << std::endl;
+  out << "saturation = " << std::boolalpha << options.saturation << std::endl;
   out << "no-discard = " << std::boolalpha << options.no_discard << std::endl;
   out << "no-read = " << std::boolalpha << options.no_discard_read << std::endl;
   out << "no-write = " << std::boolalpha << options.no_discard_write << std::endl;
