@@ -406,7 +406,7 @@ class pbesreach_algorithm
         result.make_total();
       }
 
-      unify_parameters(result);
+      unify_parameters(result, m_options.reset_parameters);
       pbes_system::resolve_summand_variable_name_clashes(result, result.equations().front().variable().parameters()); // N.B. This is a required preprocessing step.
 
       // add a sort for the propositional variable names
