@@ -45,7 +45,7 @@ History
 -------
 
 Around 1980 many process algebras were designed to model behaviour. Most notably
-were CCS (Calculus of Communicating Processes, Milner), ACP (Algebra of
+were CCS (Calculus of Communicating Systems, Milner), ACP (Algebra of
 Communicating Processes, Bergstra and Klop) and CSP (Communicating Sequential
 Processes, Hoare). These process algebras were mainly used as an object of
 study, mainly due to their lack of proper data types.
