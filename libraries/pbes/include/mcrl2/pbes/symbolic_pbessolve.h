@@ -438,7 +438,6 @@ class symbolic_pbessolve_algorithm
       throw mcrl2::runtime_error("get_min_rank did not find any nodes");
     }
 
-    // pre: V does not contain nodes with decoration true or false.
     std::pair<ldd, ldd> zielonka(const ldd& V)
     {
       using namespace sylvan::ldds;
@@ -558,7 +557,7 @@ class symbolic_pbessolve_algorithm
       won[0] = union_(won[0], solved0);
       won[1] = union_(won[1], solved1);
 
-      mCRL2log(log::debug) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
+      mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
       mCRL2log(log::debug1) << "W0 = " << print_nodes(won[0], m_all_nodes) << std::endl;
       mCRL2log(log::debug1) << "W1 = " << print_nodes(won[1], m_all_nodes) << std::endl;
 
