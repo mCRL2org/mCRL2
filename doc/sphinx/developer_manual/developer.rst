@@ -111,14 +111,10 @@ mCRL2 library documentation
           libraries/smt/smt_library
           libraries/smt/reference
 
-     -
-
-   * - **Utilities**
+     - **Utilities**
 
        .. toctree::
           :maxdepth: 1
           
           libraries/utilities/utilities_library
           libraries/utilities/reference
-
-     -
