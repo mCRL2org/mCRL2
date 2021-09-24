@@ -526,7 +526,7 @@ class pbesreach_algorithm
 
       if (!m_options.saturation)
       {
-        // chaining and regular.
+        // regular and chaining.
         todo1 = m_options.chaining ? todo : empty_set();
 
         for (std::size_t i = 0; i < R.size(); i++)
@@ -549,7 +549,7 @@ class pbesreach_algorithm
       }
       else
       {
-        // saturation
+        // saturation and chaining
         todo1 = todo;
         ldd todo1_old; // the old todo set.
         std::size_t j = 0; // The last transition group learned.
@@ -577,17 +577,19 @@ class pbesreach_algorithm
             potential_deadlocks = minus(potential_deadlocks, relprev(todo1, R[i].L, R[i].Ir, potential_deadlocks));
           }
 
-          // Apply all learned transition relations repeatedly.
-          do
+          // Apply all previously learned transition relations repeatedly.
+          if (m_options.chaining)
           {
-            todo1_old = todo1;
-
-            for (std::size_t j = 0; j <= i; j++)
+            do
             {
-              todo1 = union_(todo1, relprod_impl(todo1, R[j], j));
+              todo1_old = todo1;
+              for (std::size_t j = 0; j <= i; j++)
+              {
+                todo1 = union_(todo1, relprod_impl(todo1, R[j], j));
+              }
             }
+            while (todo1 != todo1_old);
           }
-          while (todo1 != todo1_old);
         }
       }
 

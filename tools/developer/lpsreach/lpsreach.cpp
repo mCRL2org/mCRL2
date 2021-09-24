@@ -120,10 +120,6 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
           throw mcrl2::runtime_error("The table-ratio should be a power of two.");
         }
       }
-      if (options.chaining && options.saturation)
-      {
-        throw mcrl2::runtime_error("Either chaining or saturation is allowed.");
-      }
     }
 
   public:

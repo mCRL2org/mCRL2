@@ -310,10 +310,6 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       {
         throw mcrl2::runtime_error("Invalid strategy " + std::to_string(options.solve_strategy));
       }
-      if (options.chaining && options.saturation)
-      {
-        throw mcrl2::runtime_error("Either chaining or saturation is allowed.");
-      }
     }
 
   public:
