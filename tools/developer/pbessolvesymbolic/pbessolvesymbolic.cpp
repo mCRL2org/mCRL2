@@ -95,11 +95,7 @@ public:
       }
       else if (m_options.solve_strategy == 3)
       {
-        // Solve assuming that even wins all todo nodes.
-        m_Vwon[1] = solver.solve_impl(V, m_todo, m_deadlocks, union_(m_todo, m_Vwon[0]), m_Vwon[1]).second;
-
-        // Solve assuming that odd wins all todo nodes.
-        m_Vwon[0] = solver.solve_impl(V, m_todo, m_deadlocks, m_Vwon[0], union_(m_todo, m_Vwon[1])).first;
+        std::tie(m_Vwon[0], m_Vwon[1]) = solver.partial_solve(V, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1]);
       }
 
       mCRL2log(log::verbose) << "found solution solution for" << std::setw(12) << satcount(m_Vwon[0]) + satcount(m_Vwon[1]) << " BES equations" << std::endl;

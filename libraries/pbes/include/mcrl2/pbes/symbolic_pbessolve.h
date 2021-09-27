@@ -362,6 +362,8 @@ class symbolic_pbessolve_algorithm
         }
       }
 
+      // Vertices of player alpha and priority c
+      ldd Valphac = intersect(Valpha, Vc);
       std::size_t iter = 0;
       ldd X = empty_set();
       ldd todo = U; // union of U and X
@@ -377,7 +379,7 @@ class symbolic_pbessolve_algorithm
         ldd Palpha;
 
         // The predecessors of the todo set; we update the todo set in this iteration to only include newly added states.
-        ldd P = intersect(predecessors(Xoutside, todo, m_chaining, intersect(Valpha, Vc)), Vc);
+        ldd P = intersect(predecessors(Xoutside, todo, m_chaining, Valphac), Vc);
         Palpha = intersect(P, Valpha);
 
         todo = Palpha;
@@ -416,6 +418,12 @@ class symbolic_pbessolve_algorithm
 
       mCRL2log(log::debug) << "finished monotone attractor set computation (time = " << std::setprecision(2) << std::fixed << attractor_watch.seconds() << "s)" << std::endl;
       return X;
+    }
+
+    /// \brief Computes the set of vertices in U that are sinks (no outgoing edges).
+    ldd sinks(const ldd& U)
+    {
+      return minus(U, predecessors(U, U));
     }
 
     // Returns (min, Vmin) with
@@ -513,6 +521,14 @@ class symbolic_pbessolve_algorithm
       return minus(minus(V, won[0]), won[1]);
     }
 
+    /// \brief Computes the set of vertices for which partial solving is safe.
+    std::pair<ldd, ldd> compute_safe_vertices(const ldd& V, const ldd& todo, const std::array<const ldd, 2>& Vplayer)
+    {
+      using namespace sylvan::ldds;
+      return std::make_pair(minus(V, attractor(union_(intersect(V, Vplayer[1]), sinks(todo)), 1, empty_set(), V, Vplayer)),
+                            minus(V, attractor(union_(intersect(V, Vplayer[0]), sinks(todo)), 0, empty_set(), V, Vplayer)));
+    }
+
   public:
 
     bool solve(const ldd& initial_vertex,
@@ -521,7 +537,12 @@ class symbolic_pbessolve_algorithm
         const ldd& W0 = sylvan::ldds::empty_set(),
         const ldd& W1 = sylvan::ldds::empty_set())
     {
-      auto const& [solved0, solved1] = solve_impl(V, sylvan::ldds::empty_set(), Vdeadlock, W0, W1);
+      using namespace sylvan::ldds;
+      std::array<ldd, 2> won = { W0, W1 };
+      ldd Vtotal = compute_total_graph(V, empty_set(), Vdeadlock, won);
+      std::array<const ldd, 2> Vplayer = { intersect(Vtotal, m_V[0]), intersect(Vtotal, m_V[1]) };
+
+      auto const& [solved0, solved1] = solve_impl(Vtotal, Vplayer);
       if (includes(solved0, initial_vertex))
       {
         return true;
@@ -537,33 +558,24 @@ class symbolic_pbessolve_algorithm
     }
 
     /// \returns The winning partition where first is the set won by player even.
-    std::pair<ldd, ldd> solve_impl(const ldd& V,
-        const ldd& todo,
-        const ldd& Vdeadlock = sylvan::ldds::empty_set(),
-        const ldd& W0 = sylvan::ldds::empty_set(),
-        const ldd& W1 = sylvan::ldds::empty_set())
+    std::pair<ldd, ldd> solve_impl(const ldd& V, const std::array<const ldd, 2>& Vplayer)
     {
       using namespace sylvan::ldds;
       stopwatch timer;
 
       std::pair<ldd, ldd> results;
 
-      std::array<ldd, 2> won = { W0, W1 };
-      ldd Vtotal = compute_total_graph(V, todo, Vdeadlock, won);
-      std::array<const ldd, 2> Vplayer = { intersect(Vtotal, m_V[0]), intersect(Vtotal, m_V[1]) };      
-
-      mCRL2log(log::debug1) << "\n--- apply zielonka to ---\n" << print_graph(Vtotal, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
-      const auto& [solved0, solved1] = zielonka(Vtotal);
-      won[0] = union_(won[0], solved0);
-      won[1] = union_(won[1], solved1);
+      mCRL2log(log::debug1) << "\n--- apply zielonka to ---\n" << print_graph(V, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
+      std::pair<ldd, ldd> won = zielonka(V);
 
       mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
-      mCRL2log(log::debug1) << "W0 = " << print_nodes(won[0], m_all_nodes) << std::endl;
-      mCRL2log(log::debug1) << "W1 = " << print_nodes(won[1], m_all_nodes) << std::endl;
+      mCRL2log(log::debug1) << "W0 = " << print_nodes(won.first, m_all_nodes) << std::endl;
+      mCRL2log(log::debug1) << "W1 = " << print_nodes(won.second, m_all_nodes) << std::endl;
 
-      return { won[0], won[1] };
+      return won;
     }
 
+    /// \returns Partial solve using the cycle detection strategy.
     std::pair<ldd, ldd> detect_cycles(const ldd& V,
         const ldd& todo,
         const ldd& Vdeadlock,
@@ -616,6 +628,7 @@ class symbolic_pbessolve_algorithm
       return { won[0], won[1] };
     }
 
+    /// \returns Partial solve using the fatal attractors.
     std::pair<ldd, ldd> detect_fatal_attractors(const ldd& V,
         const ldd& todo,
         const ldd& Vdeadlock,
@@ -636,7 +649,7 @@ class symbolic_pbessolve_algorithm
       {
         std::size_t c = it->first;
         std::size_t alpha = c % 2;
-        mCRL2log(log::debug) << "fatal attractor detection for player " << alpha << " and priority " << c << "\n";
+        mCRL2log(log::debug) << "fatal attractor detection for priority " << c << "\n";
         ldd X = it->second;
         ldd Y = empty_set();
 
@@ -660,6 +673,28 @@ class symbolic_pbessolve_algorithm
       mCRL2log(log::debug) << "finished fatal attractor detection (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
       mCRL2log(log::debug1) << "W0 = " << print_nodes(won[0], m_all_nodes) << std::endl;
       mCRL2log(log::debug1) << "W1 = " << print_nodes(won[1], m_all_nodes) << std::endl;
+
+      return { won[0], won[1] };
+    }
+
+    /// \returns Partial solve using the Zielonka solver.
+    std::pair<ldd, ldd> partial_solve(const ldd& V,
+        const ldd& todo,
+        const ldd& Vdeadlock,
+        const ldd& W0 = sylvan::ldds::empty_set(),
+        const ldd& W1 = sylvan::ldds::empty_set())
+    {
+      using namespace sylvan::ldds;
+
+      std::array<ldd, 2> won = { W0, W1 };
+      ldd Vtotal = compute_total_graph(V, todo, Vdeadlock, won);
+      std::array<const ldd, 2> Vplayer = { intersect(Vtotal, m_V[0]), intersect(Vtotal, m_V[1]) };
+
+      std::pair<ldd, ldd> safe = compute_safe_vertices(Vtotal, todo, Vplayer);
+
+      // Solve with the safe vertices.
+      won[0] = union_(won[0], solve_impl(safe.first, Vplayer).first);
+      won[1] = union_(won[1], solve_impl(safe.second, Vplayer).second);
 
       return { won[0], won[1] };
     }
