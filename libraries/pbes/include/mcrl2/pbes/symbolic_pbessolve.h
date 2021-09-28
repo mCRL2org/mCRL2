@@ -642,6 +642,8 @@ class symbolic_pbessolve_algorithm
       ldd Vtotal = compute_total_graph(V, todo, Vdeadlock, won);
       std::array<const ldd, 2> Vplayer = { intersect(Vtotal, m_V[0]), intersect(Vtotal, m_V[1]) };
 
+      std::pair<ldd, ldd> safe = compute_safe_vertices(Vtotal, todo, Vplayer);
+
       mCRL2log(log::debug1) << "\n--- apply fatal attractor detection to ---\n" << print_graph(Vtotal, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
 
       // For priorities in descending order
@@ -650,16 +652,17 @@ class symbolic_pbessolve_algorithm
         std::size_t c = it->first;
         std::size_t alpha = c % 2;
         mCRL2log(log::debug) << "fatal attractor detection for priority " << c << "\n";
-        ldd X = it->second;
+        ldd Vsafe = alpha ? safe.second : safe.first;
+        ldd X = intersect(it->second, Vsafe);
         ldd Y = empty_set();
 
         while (X != empty_set() && X != Y)
         {
           Y = X;
-          ldd Z = monotone_attractor(X, alpha, c, todo, Vtotal, Vplayer);
+          ldd Z = monotone_attractor(X, alpha, c, empty_set(), Vtotal, Vplayer);
           if (includes(Z, X))
           {
-            won[alpha] = union_(won[alpha], attractor(Z, alpha, todo, Vtotal, Vplayer));
+            won[alpha] = union_(won[alpha], attractor(Z, alpha, empty_set(), Vtotal, Vplayer));
             mCRL2log(log::debug) << "found " << std::setw(12) << satcount(Z) << " states in fatal attractors for player " << alpha << " and priority " << c << "\n";
             break;
           }
