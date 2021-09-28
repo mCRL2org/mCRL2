@@ -100,37 +100,6 @@ public:
 
       mCRL2log(log::verbose) << "found solution solution for" << std::setw(12) << satcount(m_Vwon[0]) + satcount(m_Vwon[1]) << " BES equations" << std::endl;
       mCRL2log(log::verbose) << "finished partial solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
-
-      if (false && Vwon != m_Vwon)
-      {
-        // Remove todo set vertices where an earlier vertex on every path from the initial vertex is already won.
-        mCRL2log(log::verbose) << "start pruning todo list" << std::endl;
-
-        using namespace sylvan::ldds;
-        auto& R = m_summand_groups;
-
-        stopwatch timer;
-        ldd initial_state = state2ldd(m_initial_state);
-        ldd visited = union_(m_Vwon[0], m_Vwon[1]);
-        ldd todo = initial_state;
-
-        for (std::size_t iter = 1; iter <= iteration_count; ++iter)
-        {
-          stopwatch loop_start;
-          mCRL2log(log::debug) << "--- iteration " << iter << " ---" << std::endl;
-          mCRL2log(log::debug) << "todo = " << print_states(m_data_index, todo) << std::endl;
-
-          std::tie(visited, todo, std::ignore) = step(visited, todo, false, false);
-
-          mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(visited) << " states after "
-                                 << std::setw(3) << iter << " iterations (time = " << std::setprecision(2)
-                                 << std::fixed << loop_start.seconds() << "s)" << std::endl;
-          mCRL2log(log::verbose) << "todo LDD size= " << nodecount(todo) << std::endl;
-        }
-
-        mCRL2log(log::verbose) << "pruned todo list from " << satcount(m_todo) << " states to " << satcount(todo) << " states" << std::endl;
-        m_todo = todo;
-      }
     }
   }
 
@@ -198,7 +167,6 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
                       "'used' summands with the same variables are joined\n"
                       "'simple' summands with the same read/write variables are joined\n"
                       "a list of summand groups separated by semicolons, e.g. '0; 1 3 4; 2 5'");
-      desc.add_option("prune-todo-list", "Prune the todo list periodically.");
       desc.add_option("reorder", utilities::make_optional_argument("ORDER", "none"),
                       "'none' (default) no variable reordering\n"
                       "'random' variables are put in a random order\n"
@@ -251,7 +219,6 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       options.no_discard_read                       = parser.has_option("no-read");
       options.no_discard_write                      = parser.has_option("no-write");
       options.no_relprod                            = parser.has_option("no-relprod");
-      options.prune_todo_list                       = parser.has_option("prune-todo-list");
       options.info                                  = parser.has_option("info");
       options.summand_groups                        = parser.option_argument("groups");
       options.variable_order                        = parser.option_argument("reorder");

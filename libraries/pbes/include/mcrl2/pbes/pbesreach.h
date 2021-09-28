@@ -57,7 +57,6 @@ data::data_specification construct_propositional_variable_data_specification(con
 struct symbolic_reachability_options: public lps::symbolic_reachability_options
 {
   bool make_total = false;
-  bool prune_todo_list = false;
   bool reset_parameters = false;
   bool aggressive = false;
   std::size_t solve_strategy = 0;
@@ -69,7 +68,6 @@ inline
 std::ostream& operator<<(std::ostream& out, const symbolic_reachability_options& options)
 {
   out << static_cast<lps::symbolic_reachability_options>(options);
-  out << "prune_todo_list = " << std::boolalpha << options.prune_todo_list << std::endl;
   out << "solve_strategy = " << options.solve_strategy << std::endl;
   out << "split_conditions = " << options.split_conditions << std::endl;
   out << "total = " << std::boolalpha << options.make_total << std::endl;
