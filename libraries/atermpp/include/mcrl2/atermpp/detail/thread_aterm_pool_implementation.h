@@ -203,7 +203,7 @@ void thread_aterm_pool::lock_shared()
 {
   if (GlobalThreadSafe && m_creation_depth == 0)
   {
-    assert(m_busy_flag);
+    assert(!m_busy_flag);
     m_busy_flag.store(true);
 
     // Wait for the forbidden flag to become false.
@@ -220,7 +220,7 @@ void thread_aterm_pool::unlock_shared()
 {
   if (GlobalThreadSafe && m_creation_depth == 0)
   {
-    assert(!m_busy_flag);
+    assert(m_busy_flag);
     m_busy_flag.store(false, std::memory_order_release);
   }
 }
