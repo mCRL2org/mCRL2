@@ -87,15 +87,15 @@ public:
 
       if (m_options.solve_strategy == 1)
       {
-        std::tie(m_Vwon[0], m_Vwon[1]) = solver.detect_cycles(V, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1]);
+        std::tie(m_Vwon[0], m_Vwon[1]) = solver.detect_cycles(m_initial_vertex, V, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1]);
       }      
       else if (m_options.solve_strategy == 2)
       {
-        std::tie(m_Vwon[0], m_Vwon[1]) = solver.detect_fatal_attractors(V, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1]);
+        std::tie(m_Vwon[0], m_Vwon[1]) = solver.detect_fatal_attractors(m_initial_vertex, V, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1]);
       }
       else if (m_options.solve_strategy == 3)
       {
-        std::tie(m_Vwon[0], m_Vwon[1]) = solver.partial_solve(V, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1]);
+        std::tie(m_Vwon[0], m_Vwon[1]) = solver.partial_solve(m_initial_vertex, V, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1]);
       }
 
       mCRL2log(log::verbose) << "found solution solution for" << std::setw(12) << satcount(m_Vwon[0]) + satcount(m_Vwon[1]) << " BES equations" << std::endl;
@@ -103,13 +103,13 @@ public:
     }
   }
 
-  bool solution_found(const ldd& initial_state) const override
+  bool solution_found() const override
   {
-    if (includes(m_Vwon[0], initial_state))
+    if (includes(m_Vwon[0], m_initial_vertex))
     {
       return true;
     }
-    else if (includes(m_Vwon[1], initial_state))
+    else if (includes(m_Vwon[1], m_initial_vertex))
     {
       return true;
     }
@@ -301,7 +301,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
         ldd V = reach.run();
         timer().finish("instantiation");
 
-        if (reach.solution_found(reach.initial_state()))
+        if (reach.solution_found())
         {
           std::cout << (includes(reach.W0(), (reach.initial_state())) ? "true" : "false") << std::endl;
         }

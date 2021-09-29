@@ -351,6 +351,7 @@ class pbesreach_algorithm
     ldd m_visited;
     ldd m_todo;
     ldd m_deadlocks;
+    ldd m_initial_vertex;
 
     ldd state2ldd(const data::data_expression_list& x)
     {
@@ -604,12 +605,12 @@ class pbesreach_algorithm
       mCRL2log(log::debug1) << "initial state = " << core::detail::print_list(m_initial_state) << std::endl;
 
       stopwatch timer;
-      ldd initial_state = state2ldd(m_initial_state);
+      m_initial_vertex = state2ldd(m_initial_state);
       m_visited = empty_set();
-      m_todo = initial_state;
+      m_todo = m_initial_vertex;
       m_deadlocks = empty_set();
 
-      while (m_todo != empty_set() && !solution_found(initial_state))
+      while (m_todo != empty_set() && !solution_found())
       {
         stopwatch loop_start;
         iteration_count++;
@@ -681,8 +682,8 @@ class pbesreach_algorithm
     virtual void on_end_while_loop()
     { }
 
-    /// \returns True iff the solution for the given vertex is known.
-    virtual bool solution_found(const sylvan::ldds::ldd&) const
+    /// \returns True iff the solution for the initial state is true.
+    virtual bool solution_found() const
     {
       return false;
     }
