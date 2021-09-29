@@ -539,9 +539,18 @@ class symbolic_pbessolve_algorithm
     {
       using namespace sylvan::ldds;
       std::array<ldd, 2> won = { W0, W1 };
-      ldd Vtotal = compute_total_graph(V, empty_set(), Vdeadlock, won);
-      std::array<const ldd, 2> Vplayer = { intersect(Vtotal, m_V[0]), intersect(Vtotal, m_V[1]) };
+      ldd Vtotal = compute_total_graph(V, empty_set(), Vdeadlock, won);      
+      if (includes(won[0], initial_vertex))
+      {
+        return true;
+      }
+      else if (includes(won[1], initial_vertex))
+      {
+        return false;
+      }
 
+      // If the initial vertex has not yet been won then run the zielonka solver as well.
+      std::array<const ldd, 2> Vplayer = { intersect(Vtotal, m_V[0]), intersect(Vtotal, m_V[1]) };
       auto const& [solved0, solved1] = solve_impl(Vtotal, Vplayer);
       if (includes(solved0, initial_vertex))
       {
