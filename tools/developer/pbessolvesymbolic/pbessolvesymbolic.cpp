@@ -72,8 +72,11 @@ public:
 
   void on_end_while_loop() override
   {
+    time_exploring += explore_timer.seconds();
     ++iteration_count;
-    if (iteration_count % 10 == 0 || m_options.aggressive)
+
+    //if (iteration_count % 10 == 0 || m_options.aggressive)
+    if (time_solving * 10 < (time_solving + time_exploring) || m_options.aggressive)
     {
       mCRL2log(log::verbose) << "start partial solving\n";
       stopwatch timer;
@@ -100,7 +103,11 @@ public:
 
       mCRL2log(log::verbose) << "found solution solution for" << std::setw(12) << satcount(m_Vwon[0]) + satcount(m_Vwon[1]) << " BES equations" << std::endl;
       mCRL2log(log::verbose) << "finished partial solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
+
+      time_solving += timer.seconds();
     }
+
+    explore_timer.reset();
   }
 
   bool solution_found() const override
@@ -131,6 +138,10 @@ private:
   // States for which winners have already been determined.
   std::array<sylvan::ldds::ldd, 2> m_Vwon;
   std::size_t iteration_count = 0;
+
+  double time_solving = 0.0;
+  double time_exploring = 0.0;
+  stopwatch explore_timer;
 };
 
 } // namespace mcrl2::pbes_system
