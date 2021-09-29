@@ -349,7 +349,7 @@ int CodeEditor::matchingParenthesisPosition(int toMatchPos, int direction)
       pos = text.lastIndexOf(QRegularExpression("[()]"), pos - 1);
     }
     /* update how deeply nested we are if the parenthesis is not a comment */
-    if (!characterIsCommentedOut(text, pos))
+    if (pos > -1 && !characterIsCommentedOut(text, pos))
     {
       depth += text.at(pos) == '(' ? 1 : -1;
     }
