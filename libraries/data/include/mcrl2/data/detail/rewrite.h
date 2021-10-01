@@ -23,14 +23,6 @@ namespace data
 namespace detail
 {
 
-/// This is an exception that is thrown when the rewrite 
-/// stack must be resized. As the rewrite stack is a vector
-/// this invalidates all references and iterators in it,
-/// and that means that when resizing is necessary, the 
-/// current term must be resized. When this exception is
-/// thrown, the current substitution must also be restored. 
-struct recalculate_term_as_stack_is_too_small {};
-
 /**
  * \brief Rewriter interface class.
  *
@@ -123,19 +115,23 @@ class Rewriter
 
   public:
   /* The functions below are public, because they are used in the compiling jitty rewriter */
-    data_expression existential_quantifier_enumeration(
+    void existential_quantifier_enumeration(
+         data_expression& result,
          const abstraction& t,
          substitution_type& sigma);
-    data_expression existential_quantifier_enumeration(
+    void existential_quantifier_enumeration(
+         data_expression& result,
          const variable_list& vl,
          const data_expression& t1,
          const bool t1_is_normal_form,
          substitution_type& sigma);
 
-    data_expression universal_quantifier_enumeration(
+    void universal_quantifier_enumeration(
+         data_expression& result,
          const abstraction& t,
          substitution_type& sigma);
-    data_expression universal_quantifier_enumeration(
+    void universal_quantifier_enumeration(
+         data_expression& result,
          const variable_list& vl,
          const data_expression& t1,
          const bool t1_is_normal_form,
@@ -154,18 +150,21 @@ class Rewriter
     // Bound variables are replaced by new variables to avoid a clash with variables in the right hand sides
     // of sigma.
 
-    abstraction rewrite_single_lambda(
+    void rewrite_single_lambda(
+                      data_expression& result,
                       const variable_list& vl,
                       const data_expression& body,
                       const bool body_in_normal_form,
                       substitution_type& sigma);
 
     /// Rewrite t, assuming that the headsymbol of t, which can be nested, is a lambda term.
-    data_expression rewrite_lambda_application(
+    void rewrite_lambda_application(
+                      data_expression& result,
                       const data_expression& t,
                       substitution_type& sigma);
 
-    data_expression rewrite_lambda_application(
+    void rewrite_lambda_application(
+                      data_expression& result,
                       const abstraction& lambda_term,
                       const application& t,
                       substitution_type& sigma);
@@ -175,7 +174,8 @@ class Rewriter
 
     mcrl2::data::data_specification m_data_specification_for_enumeration;
 
-    data_expression quantifier_enumeration(
+    void quantifier_enumeration(
+          data_expression& result,
           const variable_list& vl,
           const data_expression& t1,
           const bool t1_is_normal_form,

@@ -71,6 +71,11 @@ class abstraction: public data_expression
     }
 };
 
+inline void make_abstraction(data_expression& result, const binder_type& binding_operator, const variable_list& variables, const data_expression& body)
+{
+  make_term_appl(result, core::detail::function_symbol_Binder(), binding_operator, variables, body);
+}
+
 //--- start generated class abstraction ---//
 // prototype declaration
 std::string pp(const abstraction& x);
