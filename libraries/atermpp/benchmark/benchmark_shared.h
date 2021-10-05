@@ -82,11 +82,11 @@ aterm_appl create_nested_function(const std::string& function_name,  const std::
 /// \brief Create a nested function application f_depth. Where f_0 = c and f_i = f(f_i-1,...,f_i-1).
 ///        However, this function uses the fixed arity constructor of length N which should be faster.
 template<std::size_t N>
-aterm_appl create_nested_function(std::size_t depth)
+aterm_appl create_nested_function(const std::string& function_name, const std::string& leaf_name, std::size_t depth)
 {
   // Create a suitable function application.
-  function_symbol f("f", N);
-  function_symbol c("c", 0);
+  function_symbol f(function_name, N);
+  function_symbol c(leaf_name, 0);
 
   aterm_appl c_term(c);
   aterm_appl f_term(f, c_term, c_term);

@@ -14,20 +14,12 @@ using namespace atermpp;
 int main(int argc, char* argv[])
 {
   detail::g_term_pool().enable_garbage_collection(false);
-  std::size_t number_of_arguments = 1;
   std::size_t number_of_threads = 1;
 
-  // Accept one argument for the number of arguments.
+  // Accept one argument for the number of threads.
   if (argc > 1)
   {
-    // The first argument is the path of the executable.
-    number_of_arguments = static_cast<std::size_t>(std::stoi(argv[1]));
-  }
-
-  if (argc > 2)
-  {
-    // The first argument is the path of the executable.
-    number_of_threads = static_cast<std::size_t>(std::stoi(argv[2]));
+    number_of_threads = static_cast<std::size_t>(std::stoi(argv[1]));
   }
 
   std::size_t size = 400000;
@@ -36,7 +28,7 @@ int main(int argc, char* argv[])
   std::vector<aterm_appl> terms;
   for (int id = 0; id < number_of_threads; ++id)
   {
-    terms.push_back(create_nested_function("f", std::to_string(id), number_of_arguments, size));
+    terms.push_back(create_nested_function<2>("f", std::to_string(id), size));
   }
 
   // Define a function that repeatedly creates nested function applications.
@@ -45,7 +37,7 @@ int main(int argc, char* argv[])
       aterm_appl f;
       for (std::size_t i = 0; i < iterations / number_of_threads; ++i)
       {
-        f = create_nested_function("f", std::to_string(id), number_of_arguments, size);
+        f = create_nested_function<2>("f", std::to_string(id), size);
       }
     };
 

@@ -14,20 +14,12 @@ using namespace atermpp;
 int main(int argc, char* argv[])
 {
   detail::g_term_pool().enable_garbage_collection(false);
-  std::size_t number_of_arguments = 1;
   std::size_t number_of_threads = 1;
 
-  // Accept one argument for the number of arguments.
+  // Accept one argument for the number of threads.
   if (argc > 1)
   {
-    // The first argument is the path of the executable.
-    number_of_arguments = static_cast<std::size_t>(std::stoi(argv[1]));
-  }
-
-  if (argc > 2)
-  {
-    // The first argument is the path of the executable.
-    number_of_threads = static_cast<std::size_t>(std::stoi(argv[2]));
+    number_of_threads = static_cast<std::size_t>(std::stoi(argv[1]));
   }
 
   std::size_t size = 400000;
@@ -35,7 +27,7 @@ int main(int argc, char* argv[])
   // Define a function that repeatedly creates nested function applications.
   auto nested_function = [&](int id) -> void
     {
-      aterm_appl f = create_nested_function("f", "c", number_of_arguments, size);
+      aterm_appl f = create_nested_function<2>("f", "c",  size);
     };
 
   benchmark_threads(number_of_threads, nested_function);
