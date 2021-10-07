@@ -41,12 +41,16 @@
 
 class uncompiled_library : public dynamic_library
 {
-  private:
+  protected:
     std::list<std::string> m_tempfiles;
     std::string m_compile_script;
 
+    uncompiled_library() = delete;
+
   public:
-    uncompiled_library(const std::string& script) : m_compile_script(script) {}
+    uncompiled_library(const std::string& script) 
+     : m_compile_script(script) 
+    {}
 
     void compile(const std::string& filename) 
     {
@@ -55,7 +59,7 @@ class uncompiled_library : public dynamic_library
       
       // Execute script.
       FILE* stream = popen(commandline.str().c_str(), "r");
-      if (stream == NULL)
+      if (stream == nullptr)
       {
         throw std::runtime_error("Could not execute compile script.");
       }
@@ -67,7 +71,7 @@ class uncompiled_library : public dynamic_library
       char buf[1024];
       while(!feof(stream))
       {        
-        if(fgets(buf, sizeof(buf), stream) != NULL)
+        if (fgets(buf, sizeof(buf), stream) != nullptr)
         {
           std::string line(buf);
           assert(*line.rbegin() == '\n');
@@ -80,7 +84,7 @@ class uncompiled_library : public dynamic_library
           {
             mCRL2log(mcrl2::log::error) << "Compile script " << m_compile_script << " produced unexpected output:\n";
             mCRL2log(mcrl2::log::error) << line << std::endl;
-            while (fgets(buf, sizeof(buf), stream) != NULL)
+            while (fgets(buf, sizeof(buf), stream) != nullptr)
             {
               mCRL2log(mcrl2::log::error) << std::string(buf);
             }

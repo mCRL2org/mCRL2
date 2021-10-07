@@ -193,9 +193,9 @@ inline const data_expression replace_nested_head(const data_expression& t, const
 }
 
 template <class ARGUMENT_REWRITER>
-inline const data_expression rewrite_all_arguments(const application& t, const ARGUMENT_REWRITER rewriter)
+inline void rewrite_all_arguments(data_expression& result, const application& t, const ARGUMENT_REWRITER rewriter)
 {
-  return application(t.head(),t.begin(),t.end(),rewriter);
+  make_application(result,t.head(),t.begin(),t.end(),rewriter);
 } 
 
 }

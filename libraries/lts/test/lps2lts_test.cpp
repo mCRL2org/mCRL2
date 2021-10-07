@@ -14,7 +14,7 @@
 #endif
 
 #define BOOST_TEST_MODULE lps2lts_test
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/data/detail/rewrite_strategies.h"
 #include "mcrl2/lts/detail/exploration.h"
@@ -124,7 +124,8 @@ void check_lts(
   const std::string& priority_action = ""
 )
 {
-  std::clog << "Translating LPS to LTS with exploration strategy " << estrategy << ", rewrite strategy " << rstrategy << "." << std::endl;
+  std::cerr << "Translating LPS to LTS with exploration strategy " << estrategy << ", rewrite strategy " << rstrategy << "." << std::endl;
+  std::cerr << format << " FORMAT\n";
   LTSType result1;
   LTSType result2;
   lts::lts_type output_format = result1.type();
@@ -135,7 +136,6 @@ void check_lts(
   result1.load(outputfile1);
   result2.load(outputfile2);
 
-  std::cerr << format << " FORMAT\n";
   BOOST_CHECK_EQUAL(result1.num_states(), expected_states);
   BOOST_CHECK_EQUAL(result1.num_transitions(), expected_transitions);
   BOOST_CHECK_EQUAL(result1.num_action_labels(), expected_labels);

@@ -47,12 +47,12 @@
     DWORD x = FormatMessage(
       FORMAT_MESSAGE_ALLOCATE_BUFFER | // Let Windows allocate string
       FORMAT_MESSAGE_FROM_SYSTEM,      // Retrieve a system error message
-        NULL,               // No source needed
+        nullptr,               // No source needed
         last,               // Requested error message
         0,             // Default language
         reinterpret_cast<LPSTR>(&buffer), // Output buffer
         0,             // Minimum allocation size
-        NULL             // No arguments here
+        nullptr             // No arguments here
       );
     if (x)
     {
@@ -73,7 +73,8 @@
   inline
   library_handle get_module_handle(const std::string& fname)
   {
-    return dlopen(fname.c_str(), RTLD_LAZY);
+    // return dlopen(fname.c_str(), RTLD_LAZY);
+    return dlopen(fname.c_str(), RTLD_NOW);
   }
 
   inline
@@ -97,40 +98,41 @@
 
 class dynamic_library 
 {
-  private:
+  protected:
     library_handle m_library;
+    std::string m_filename;
+
     void load() 
     {
-      if (m_library == NULL)
+      if (m_library == nullptr)
       {
         m_library = get_module_handle(m_filename.c_str());
-        if (m_library == NULL)
+        if (m_library == nullptr)
         {
-          std::stringstream s;
-          s << "Could not load library (" << m_filename << "): " << get_last_error();
-          throw std::runtime_error(s.str());
+          throw std::runtime_error("Could not load library (" + m_filename + "): " + get_last_error());
         }
       }
     }
   
-  protected:
-    std::string m_filename;
     void unload() 
     {
-      if (m_library)
+      if (m_library!=nullptr)
       {
         if (!close_module_handle(m_library))
         {
-          std::stringstream s;
-          s << "Could not close library (" << m_filename << "): " << get_last_error();
-          throw std::runtime_error(s.str());
+          throw std::runtime_error("Could not close library (" + m_filename + "): " + get_last_error());
         }
-        m_library = NULL;
+        m_library = nullptr;
       }
     }
   
   public:
-    dynamic_library(const std::string& filename = std::string()) : m_library(0), m_filename(filename) {}
+    dynamic_library(const std::string& filename = std::string()) 
+     : m_library(nullptr), 
+       m_filename(filename) 
+    {
+    }
+
     virtual ~dynamic_library() 
     {
       try
@@ -145,16 +147,14 @@ class dynamic_library
   
     library_proc proc_address(const std::string& name) 
     {
-      if (m_library == 0)
+      if (m_library == nullptr)
       {
         load();
       }
       library_proc result = get_proc_address(m_library, name.c_str());
       if (result == 0)
       {
-        std::stringstream s;
-        s << "Could not find proc address (" << m_filename << ":" << name << "): " << get_last_error();
-        throw std::runtime_error(s.str());
+        throw std::runtime_error("Could not find proc address (" + m_filename + ":" + name + "): " + get_last_error());
       }
       return result;
     }

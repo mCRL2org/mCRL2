@@ -45,7 +45,10 @@ class rewrite_stack : public atermpp::vector<data_expression>
   public:
 
     /// \brief Constructor
-    rewrite_stack() = default;
+    rewrite_stack() 
+    {
+      reserve_more_space();
+    }
 
     void reserve_more_space() 
     {
@@ -90,11 +93,6 @@ class rewrite_stack : public atermpp::vector<data_expression>
       assert(size()+pos>=frame_size && pos<frame_size);
       return begin()+size()-frame_size+pos;
     }
-
-    /* atermpp::vector<data_expression>& rewrite_stack()
-    {
-      return m_rewrite_stack;
-    } */
 };
 
 } // namespace detail

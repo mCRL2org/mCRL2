@@ -563,7 +563,8 @@ void RewriterJitty::rewrite_aux_function_symbol(
 
   if (!strat.rules().empty())
   {
-    jitty_assignments_for_a_rewrite_rule assignments(MCRL2_SPECIFIC_STACK_ALLOCATOR(jitty_variable_assignment_for_a_rewrite_rule, strat.number_of_variables()));
+    jitty_assignments_for_a_rewrite_rule assignments(
+             MCRL2_SPECIFIC_STACK_ALLOCATOR(jitty_variable_assignment_for_a_rewrite_rule, strat.number_of_variables()));
 
     for (const strategy_rule& rule : strat.rules())
     {
@@ -596,12 +597,10 @@ void RewriterJitty::rewrite_aux_function_symbol(
         if (term.head()==op) 
         { 
           // application rewriteable_term(op, &rewritten[0], &rewritten[arity]);
-          assert(rewrite_stack().size()>=arity+1);
+          assert(m_rewrite_stack.size()>=arity+1);
           application rewriteable_term(op, m_rewrite_stack.stack_iterator(0,arity+1),
                                            m_rewrite_stack.stack_iterator(arity,arity+1)); /* TODO Optimize */
           result=rule.rewrite_cpp_code()(rewriteable_term);
-          // clean_up_rewritten_all(arity,rewritten);
-          // rewrite_stack().resize(rewrite_stack().size()-arity);
           m_rewrite_stack.decrease(arity+1);
           return;
         }
@@ -681,8 +680,6 @@ void RewriterJitty::rewrite_aux_function_symbol(
               // const data_expression result=rewrite_aux(subst_values(assignments,rhs,m_generator),sigma);
               subst_values(m_rewrite_stack.top(),assignments,rhs,m_generator);
               rewrite_aux(result, m_rewrite_stack.top(),sigma);
-              // clean_up_rewritten(arity,rewritten,rewritten_defined);
-              // rewrite_stack().resize(rewrite_stack().size()-arity);
               m_rewrite_stack.decrease(arity+1);
               return;
             }
@@ -707,7 +704,7 @@ void RewriterJitty::rewrite_aux_function_symbol(
                 const std::size_t end=i+fsort.domain().size();
                 assert(end-1<arity);
                 // result = application(result,&rewritten[0]+i,&rewritten[0]+end);
-                assert(rewrite_stack().size()+i>=arity+1);
+                assert(m_rewrite_stack.size()+i>=arity+1);
                 assert(end<arity+1);
                 assert(end>=i);
 
@@ -717,10 +714,6 @@ void RewriterJitty::rewrite_aux_function_symbol(
                 i=end;
                 sort = fsort.codomain();
               }
-
-              // clean_up_rewritten(arity,rewritten,rewritten_defined);
-              // rewrite_stack().resize(rewrite_stack().size()-arity);
-              // return rewrite_aux(result,sigma);
 
               rewrite_aux(result,m_rewrite_stack.top(),sigma);
               m_rewrite_stack.decrease(arity+1);
@@ -750,8 +743,6 @@ void RewriterJitty::rewrite_aux_function_symbol(
   // main loop. 
   const function_sort& fsort=atermpp::down_cast<function_sort>(op.sort());
   const std::size_t end=fsort.domain().size();
-  //data_expression intermediate_result = application(op,&rewrite_stack()[rewrite_stack().size()-arity],
-  //                                        &rewrite_stack()[rewrite_stack().size()-arity+end]);
 
   make_application(result,op,m_rewrite_stack.stack_iterator(0,arity+1), m_rewrite_stack.stack_iterator(end,arity+1));
   std::size_t i=end;
@@ -760,7 +751,7 @@ void RewriterJitty::rewrite_aux_function_symbol(
   {
     const function_sort& fsort=atermpp::down_cast<function_sort>(*sort);
     const std::size_t end=i+fsort.domain().size();
-    assert(rewrite_stack().size()+i>=arity+1);
+    assert(m_rewrite_stack.size()+i>=arity+1);
     assert(end<arity+1);
     assert(end>=i);
     make_application(result,result,m_rewrite_stack.stack_iterator(i,arity+1), m_rewrite_stack.stack_iterator(end,arity+1));
@@ -768,8 +759,6 @@ void RewriterJitty::rewrite_aux_function_symbol(
     sort = &fsort.codomain();
   }
 
-  // clean_up_rewritten_all(arity,rewritten);
-  // rewrite_stack().resize(rewrite_stack().size()-arity);
   m_rewrite_stack.decrease(arity+1);
   return; 
 }
