@@ -101,7 +101,7 @@ public:
         std::tie(m_Vwon[0], m_Vwon[1]) = solver.partial_solve(m_initial_vertex, V, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1]);
       }
 
-      mCRL2log(log::verbose) << "found solution solution for" << std::setw(12) << satcount(m_Vwon[0]) + satcount(m_Vwon[1]) << " BES equations" << std::endl;
+      mCRL2log(log::verbose) << "found solution for" << std::setw(12) << satcount(m_Vwon[0]) + satcount(m_Vwon[1]) << " BES equations" << std::endl;
       mCRL2log(log::verbose) << "finished partial solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
 
       time_solving += timer.seconds();

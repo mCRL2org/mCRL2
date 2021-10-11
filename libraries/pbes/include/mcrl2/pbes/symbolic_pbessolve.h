@@ -542,8 +542,8 @@ class symbolic_pbessolve_algorithm
     std::pair<ldd, ldd> compute_safe_vertices(const ldd& V, const ldd& todo, const std::array<const ldd, 2>& Vplayer)
     {
       using namespace sylvan::ldds;
-      return std::make_pair(minus(V, attractor(union_(intersect(V, Vplayer[1]), sinks(todo)), 1, V, Vplayer)),
-                            minus(V, attractor(union_(intersect(V, Vplayer[0]), sinks(todo)), 0, V, Vplayer)));
+      return std::make_pair(minus(V, attractor(union_(intersect(todo, Vplayer[1]), sinks(todo)), 1, V, Vplayer)),
+                            minus(V, attractor(union_(intersect(todo, Vplayer[0]), sinks(todo)), 0, V, Vplayer)));
     }
 
   public:
