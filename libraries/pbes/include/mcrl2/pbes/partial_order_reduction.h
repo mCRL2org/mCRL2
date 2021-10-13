@@ -1495,7 +1495,7 @@ class partial_order_reduction_algorithm
           mCRL2log(log::debug) << "stubborn_set(X_e) = " << print_summand_set(stubborn_set_X_e) << std::endl;
           next = succ(X_e, stubborn_set_X_e & en_X_e);
 
-          bool vis_expanded = stubborn_set_X_e.is_subset_of(m_vis);
+          bool vis_expanded = m_vis.is_subset_of(stubborn_set_X_e);
           s = vis_expanded ? DONE : DONE_PARTIALLY;
           if (!vis_expanded)
           {
