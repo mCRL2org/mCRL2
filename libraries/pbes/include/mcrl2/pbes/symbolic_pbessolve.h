@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Maurice Laveaux and Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -6,23 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/symbolic_pbessolve.h
-/// \brief add your file description here.
 
 #ifndef MCRL2_PBES_SYMBOLIC_PBESSOLVE_H
 #define MCRL2_PBES_SYMBOLIC_PBESSOLVE_H
 
-#include <sylvan_ldd.hpp>
-#include <boost/dynamic_bitset.hpp>
-#include "mcrl2/data/consistency.h"
-#include "mcrl2/data/enumerator.h"
-#include "mcrl2/data/substitution_utility.h"
-#include "mcrl2/lps/symbolic_reachability.h"
-#include "mcrl2/pbes/pbesreach.h"
-#include "mcrl2/pbes/srf_pbes.h"
-#include "mcrl2/pbes/pbes_equation_index.h"
-#include "mcrl2/utilities/text_utility.h"
-#include "mcrl2/utilities/stopwatch.h"
+#include "symbolic_parity_game.h"
 
 namespace mcrl2 {
 
@@ -30,438 +18,15 @@ namespace pbes_system {
 
 using sylvan::ldds::ldd;
 
-inline
-std::string print_pbes_info(const srf_pbes& pbesspec)
-{
-  std::ostringstream out;
-  pbes_equation_index equation_index(pbesspec);
-  for (const auto& equation: pbesspec.equations())
-  {
-    const auto& name = equation.variable().name();
-    out << name << " rank = " << equation_index.rank(name) << " decoration = " << (equation.is_conjunctive() ? "conjunctive" : "disjunctive") << std::endl;
-  }
-  return out.str();
-}
-
-// print the subgraph U of V
-template <typename SummandGroup>
-std::string print_graph(
-  const ldd& U,
-  const ldd& V,
-  const std::vector<SummandGroup>& R,
-  const std::vector<lps::data_expression_index>& data_index,
-  const ldd& V0, // disjunctive nodes
-  const std::map<std::size_t, ldd>& rank_map // maps rank to the corresponding set of nodes
-)
-{
-  using namespace sylvan::ldds;
-  using utilities::detail::contains;
-
-  auto rank = [&](const ldd& u)
-  {
-    for (const auto& [r, U]: rank_map)
-    {
-      if (includes(U, u))
-      {
-        return r;
-      }
-    }
-    throw mcrl2::runtime_error("print_graph: could not find a rank");
-  };
-
-  auto index = [](const std::vector<ldd>& v, const ldd& x)
-  {
-    auto i = std::find(v.begin(), v.end(), x);
-    if (i == v.end())
-    {
-      throw mcrl2::runtime_error("print_graph: index error");
-    }
-    return i - v.begin();
-  };
-
-  auto values = [](const ldd& X)
-  {
-    std::vector<ldd> result;
-    auto X_elements = ldd_solutions(X);
-    for (const auto& x: X_elements)
-    {
-      result.push_back(cube(x));
-    }
-    return std::make_pair(result, X_elements);
-  };
-
-  auto succ = [&](const ldd& U)
-  {
-    ldd result = empty_set();
-    for (std::size_t i = 0; i < R.size(); i++)
-    {
-      result = union_(result, alternative_relprod(U, R[i]));
-    }
-    return result;
-  };
-
-  auto [U_values, U_solutions] = values(U);
-  auto [V_values, V_solutions] = values(V);
-
-  std::vector<std::string> text(U_values.size());
-
-  for (std::size_t i = 0; i < U_values.size(); i++)
-  {
-    ldd u = U_values[i];
-    std::size_t u_index = index(V_values, u);
-
-    ldd W = succ(u);
-    auto [W_values, W_solutions] = values(W);
-    std::vector<std::uint32_t> u_successors;
-    for (const ldd& w: W_values)
-    {
-      if (contains(U_values, w))
-      {
-        u_successors.push_back(index(V_values, w));
-      }
-    }
-    text[i] = std::to_string(u_index) + " " + print_state(data_index, U_solutions[i]) + ", decoration = " + (includes(V0, u) ? "disjunctive" : "conjunctive") + ", rank = " + std::to_string(rank(u)) + ", successors = " + core::detail::print_list(u_successors);
-  }
-  return utilities::string_join(text, "\n");
-}
-
-// print the indices of U (subset of V)
-std::string print_nodes(const ldd& U, const ldd& V)
-{
-  using namespace sylvan::ldds;
-
-  auto index = [](const std::vector<ldd>& v, const ldd& x)
-  {
-    auto i = std::find(v.begin(), v.end(), x);
-    if (i == v.end())
-    {
-      throw mcrl2::runtime_error("print_graph: index error");
-    }
-    return i - v.begin();
-  };
-
-  auto values = [](const ldd& X)
-  {
-    std::vector<ldd> result;
-    auto X_elements = ldd_solutions(X);
-    for (const auto& x: X_elements)
-    {
-      result.push_back(cube(x));
-    }
-    return std::make_pair(result, X_elements);
-  };
-
-  auto [V_values, V_solutions] = values(V);
-  auto [U_values, W0_solutions] = values(U);
-
-  std::vector<std::size_t> u;
-  for (const ldd& x: U_values)
-  {
-    u.push_back(index(V_values, x));
-  }
-  return core::detail::print_set(u);
-}
-
 class symbolic_pbessolve_algorithm
 {
-  protected:
-    ldd m_V[2]; // m_V[0] is the set of even nodes, m_V[1] is the set of odd nodes
-    const std::vector<summand_group>& m_summand_groups;
-    std::map<std::size_t, ldd> m_rank_map;
-    bool m_no_relprod = false;
-    bool m_chaining = false;
-
-    const std::vector<lps::data_expression_index>& m_data_index; // for debugging only
-    ldd m_all_nodes; // for debugging only
+  private:
+    symbolic_parity_game m_G;
 
   public:
-    symbolic_pbessolve_algorithm(
-      const ldd& V,
-      const std::vector<summand_group>& summand_groups,
-      const std::map<std::size_t, std::pair<std::size_t, bool>>& equation_info, // maps ldd values to (rank, is_disjunctive)
-      bool no_relprod,
-      bool chaining,
-      const std::vector<lps::data_expression_index>& data_index
-    )
-      : m_summand_groups(summand_groups), m_no_relprod(no_relprod), m_chaining(chaining), m_data_index(data_index), m_all_nodes(V)
-    {
-      using namespace sylvan::ldds;
-      using utilities::detail::contains;
-
-      m_V[0] = empty_set();
-      m_V[1] = empty_set();
-
-      // determine the rank and owner of all states.
-      for (const auto& [value, p]: equation_info)
-      {
-        auto rank = p.first;
-        auto is_disjunctive = p.second;
-        ldd X = fix_first_element(V, value);
-
-        auto j = m_rank_map.find(rank);
-        if (j == m_rank_map.end())
-        {
-          m_rank_map[rank] = X;
-        }
-        else
-        {
-          j->second = union_(j->second, X);
-        }
-
-        if (is_disjunctive)
-        {
-          m_V[0] = union_(m_V[0], X);
-        }
-        else
-        {
-          m_V[1] = union_(m_V[1], X);
-        }
-      }
-
-      mCRL2log(log::verbose) << "--- parity game information ---" << std::endl;
-      for (const auto&[rank, Vrank] : m_rank_map)
-      {
-        mCRL2log(log::verbose) << "priority " << rank << ": there are " << satcount(Vrank) << " vertices.\n";
-      }
-
-      mCRL2log(log::verbose) << "there are " << satcount(m_V[0]) << " even vertices and " << satcount(m_V[1]) << " odd vertices.\n";
-    }
-
-    /// \returns The set { u in U | exists v in V: u -> v }, where -> is described by the given group.
-    ldd predecessors(const ldd& U, const ldd& V, const summand_group& group)
-    {
-      return m_no_relprod ? lps::alternative_relprev(V, group, U) : relprev(V, group.L, group.Ir, U);
-    }
-
-    /// \returns The set { u in U | exists v in V: u -> v } without chaining.
-    ///          With chaining returns a subset of { u in U | exists v in V: u ->* v } where ->* only visits intermediate states in W.
-    ldd predecessors(const ldd& U, const ldd& V, bool chaining = false, ldd W = sylvan::ldds::empty_set())
-    {
-      using namespace sylvan::ldds;
-
-      ldd result = empty_set();
-      if (chaining)
-      {
-        ldd todo = V;
-        for (int i = m_summand_groups.size() - 1; i >= 0; --i)
-        {
-          const summand_group& group = m_summand_groups[i];
-
-          stopwatch watch;
-          ldd todo1 = predecessors(U, todo, group);
-          mCRL2log(log::debug) << "added predecessors for group " << i << " out of " << m_summand_groups.size()
-                                 << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";
-
-          result = union_(result, todo1);
-          todo = union_(todo, intersect(todo1, W));
-        }
-      }
-      else
-      {
-        for (int i = m_summand_groups.size() - 1; i >= 0; --i)
-        {
-          const summand_group& group = m_summand_groups[i];
-
-          stopwatch watch;
-          result = union_(result, predecessors(U, V, group));
-          mCRL2log(log::debug) << "added predecessors for group " << i << " out of " << m_summand_groups.size()
-                                 << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";
-        }
-      }
-
-      return result;
-    }
-
-    /// \brief Compute the attractor set for U.
-    /// \param alpha the current player
-    /// \param V is the set of states
-    /// \param Vplayer a partitioning of the nodes into the sets of even nodes V[0] and odd V[1].
-    /// \param W is a set of vertices (subset of V) which is considered for forced vertices, but is never added to the attractor set itself.
-    /// \param T A set of states such that iteration stops when one of them occurs in the attractor.
-    ldd attractor(const ldd& U,
-      std::size_t alpha,
-      const ldd& V,
-      const std::array<const ldd, 2>& Vplayer,
-      const ldd& W = sylvan::ldds::empty_set(),
-      const ldd& T = sylvan::ldds::empty_set())
-    {
-      stopwatch attractor_watch;
-      mCRL2log(log::debug) << "start attractor set computation\n";
-
-      using namespace sylvan::ldds;
-      const ldd& Valpha = Vplayer[alpha];
-
-      std::size_t iter = 0;
-      ldd X = U;
-      ldd todo = U;
-
-      ldd Xoutside = minus(V, X);
-      while (todo != empty_set())
-      {
-        // Terminate early when a vertex in T was found.
-        if (intersect(T, X) != empty_set() )
-        {
-          return X;
-        }
-
-        mCRL2log(log::debug1) << "todo = " << print_nodes(todo, m_all_nodes) << std::endl;
-        mCRL2log(log::debug1) << "Xoutside = " << print_nodes(Xoutside, m_all_nodes) << std::endl;
-        stopwatch iter_start;
-
-        // Determine current player's nodes that can reach X (without the elements already in X).
-        ldd Palpha;
-
-        // The predecessors of the todo set; we update the todo set in this iteration to only include newly added states.
-        ldd P = predecessors(Xoutside, todo, m_chaining, Valpha);
-        Palpha = intersect(P, Valpha);
-
-        todo = Palpha;
-        X = union_(X, Palpha);
-
-        // Determine nodes outside of X.
-        Xoutside = minus(Xoutside, Palpha);
-
-        // The nodes of the other player in the predecessors that are not part of the attractor set.
-        ldd Pforced = minus(P, Palpha);
-        for (std::size_t i = 0; i < m_summand_groups.size(); ++i)
-        {
-          const summand_group& group = m_summand_groups[i];
-
-          stopwatch watch;
-          Pforced = minus(Pforced, predecessors(Pforced, Xoutside, group));
-
-          mCRL2log(log::debug) << "removed 1 - alpha predecessors for group " << i << " out of " << m_summand_groups.size()
-                                 << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";
-        }
-
-        // Remove vertices which should not be added to the attractor set.
-        Pforced = minus(Pforced, W);
-        todo = union_(todo, Pforced);
-        X = union_(X, Pforced);
-
-        // Update nodes outside of X.
-        Xoutside = minus(Xoutside, Pforced);
-
-        mCRL2log(log::debug) << "attractor set iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << iter_start.seconds() << "s)" << std::endl;
-
-        ++iter;
-      }
-
-      mCRL2log(log::debug) << "finished attractor set computation (time = " << std::setprecision(2) << std::fixed << attractor_watch.seconds() << "s)" << std::endl;
-      return X;
-    }
-
-    /// \brief Compute the monotone attractor set for U.
-    /// \param alpha the current player.
-    /// \param c priority.
-    /// \param V the set of all vertices.
-    /// \param Vplayer a partitioning of the nodes into the sets of even nodes V[0] and odd V[1].
-    ldd monotone_attractor(const ldd& U,
-       std::size_t alpha,
-       std::size_t c,
-       const ldd& V,
-       const std::array<const ldd, 2>& Vplayer,
-       const ldd& W = sylvan::ldds::empty_set())
-    {
-      stopwatch attractor_watch;
-      mCRL2log(log::debug) << "start monotone attractor set computation\n";
-
-      using namespace sylvan::ldds;
-      const ldd& Valpha = Vplayer[alpha];
-
-      // Compute the set of states with at least priority c.
-      ldd Vc = empty_set();
-      for (const auto&[rank, Vrank] : m_rank_map)
-      {
-        if (rank >= c)
-        {
-          Vc = union_(Vc, Vrank);
-        }
-      }
-
-      // Vertices of player alpha and priority c
-      ldd Valphac = intersect(Valpha, Vc);
-      std::size_t iter = 0;
-      ldd X = empty_set();
-      ldd todo = U; // union of U and X
-
-      ldd Xoutside = V;
-      while (todo != empty_set())
-      {
-        mCRL2log(log::debug1) << "todo = " << print_nodes(todo, m_all_nodes) << std::endl;
-        mCRL2log(log::debug1) << "Xoutside = " << print_nodes(Xoutside, m_all_nodes) << std::endl;
-        stopwatch iter_start;
-
-        // Determine current player's nodes that can reach X (without the elements already in X).
-        ldd Palpha;
-
-        // The predecessors of the todo set; we update the todo set in this iteration to only include newly added states.
-        ldd P = intersect(predecessors(Xoutside, todo, m_chaining, Valphac), Vc);
-        Palpha = intersect(P, Valpha);
-
-        todo = Palpha;
-        X = union_(X, Palpha);
-
-        // Update nodes outside of X.
-        Xoutside = minus(Xoutside, Palpha);
-
-        // Nodes outside of X and U
-        ldd Outside = minus(Xoutside, U);
-
-        // The nodes of the other player in the predecessors that are not part of the attractor set.
-        ldd Pforced = minus(P, Palpha);
-        for (std::size_t i = 0; i < m_summand_groups.size(); ++i)
-        {
-          const summand_group& group = m_summand_groups[i];
-
-          stopwatch watch;
-          Pforced = minus(Pforced, predecessors(Pforced, Outside, group));
-
-          mCRL2log(log::debug) << "removed 1 - alpha predecessors for group " << i << " out of " << m_summand_groups.size()
-                                 << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";
-        }
-
-        Pforced = minus(Pforced, W);
-        todo = union_(todo, Pforced);
-        X = union_(X, Pforced);
-
-        // Update nodes outside of X.
-        Xoutside = minus(Xoutside, Pforced);
-
-        mCRL2log(log::debug) << "monotone attractor set iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << iter_start.seconds() << "s)" << std::endl;
-
-        ++iter;
-      }
-
-      mCRL2log(log::debug) << "finished monotone attractor set computation (time = " << std::setprecision(2) << std::fixed << attractor_watch.seconds() << "s)" << std::endl;
-      return X;
-    }
-
-    /// \brief Computes the set of vertices in U that are sinks (no outgoing edges).
-    ldd sinks(const ldd& U)
-    {
-      return minus(U, predecessors(U, U));
-    }
-
-    // Returns (min, Vmin) with
-    //   min is the minimum rank in V
-    //   Vmin is the set of vertices with the minimum rank in V
-    std::pair<std::size_t, ldd> get_min_rank(const ldd& V)
-    {
-      using namespace sylvan::ldds;
-
-      for (auto i = m_rank_map.begin(); i != m_rank_map.end(); ++i)
-      {
-        ldd Vmin = intersect(V, i->second);
-        if (Vmin != empty_set())
-        {
-          std::size_t min_rank = i->first;
-          return { min_rank, Vmin };
-        }
-      }
-
-      throw mcrl2::runtime_error("get_min_rank did not find any nodes");
-    }
+    symbolic_pbessolve_algorithm(symbolic_parity_game G) :
+      m_G(G)
+    {}
 
     std::pair<ldd, ldd> zielonka(const ldd& V)
     {
@@ -474,18 +39,18 @@ class symbolic_pbessolve_algorithm
 
       stopwatch timer;
       mCRL2log(log::debug) << "start zielonka recursion\n";
-      auto [m, U] = get_min_rank(V);
+      auto [m, U] = m_G.get_min_rank(V);
 
       std::size_t alpha = m % 2; // 0 = disjunctive, 1 = conjunctive
 
       // Compute the partitioning of V for players 0 (in V[0]) and 1 (in V[1]).
-      std::array<const ldd, 2> Vplayer = { intersect(V, m_V[0]), intersect(V, m_V[1]) };
+      std::array<const ldd, 2> Vplayer = m_G.players(V);
 
       ldd W[2];
       ldd W_1[2];
 
-      ldd A = attractor(U, alpha, V, Vplayer);
-      mCRL2log(log::debug1) << "A = attractor(" << print_nodes(U, m_all_nodes) << ", " << print_nodes(V, m_all_nodes) << ") = " << print_nodes(A, m_all_nodes) << std::endl;
+      ldd A = m_G.safe_attractor(U, alpha, V, Vplayer);
+      mCRL2log(log::debug1) << "A = attractor(" << m_G.print_nodes(U) << ", " << m_G.print_nodes(V) << ") = " << m_G.print_nodes(A) << std::endl;
       std::tie(W_1[0], W_1[1]) = zielonka(minus(V, A));
 
       // Original Zielonka version
@@ -496,79 +61,51 @@ class symbolic_pbessolve_algorithm
       }
       else
       {
-        ldd B = attractor(W_1[1 - alpha], 1 - alpha, V, Vplayer);
-        mCRL2log(log::debug1) << "B = attractor(" << print_nodes(W_1[1 - alpha], m_all_nodes) << ", " << print_nodes(V, m_all_nodes) << ") = " << print_nodes(B, m_all_nodes) << std::endl;
+        ldd B = m_G.safe_attractor(W_1[1 - alpha], 1 - alpha, V, Vplayer);
+        mCRL2log(log::debug1) << "B = attractor(" << m_G.print_nodes(W_1[1 - alpha]) << ", " << m_G.print_nodes(V) << ") = " << m_G.print_nodes(B) << std::endl;
         std::tie(W[0], W[1]) = zielonka(minus(V, B));
         W[1 - alpha] = union_(W[1 - alpha], B);
       }
 
       mCRL2log(log::debug) << "finished zielonka recursion (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
 
-      mCRL2log(log::debug1) << "\n  --- zielonka solution for ---\n" << print_graph(V, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
-      mCRL2log(log::debug1) << "W0 = " << print_nodes(W[0], m_all_nodes) << std::endl;
-      mCRL2log(log::debug1) << "W1 = " << print_nodes(W[1], m_all_nodes) << std::endl;
+      mCRL2log(log::debug1) << "\n  --- zielonka solution for ---\n" << m_G.print_graph(V) << std::endl;
+      mCRL2log(log::debug1) << "W0 = " << m_G.print_nodes(W[0]) << std::endl;
+      mCRL2log(log::debug1) << "W1 = " << m_G.print_nodes(W[1]) << std::endl;
       assert(union_(W[0], W[1]) == V);
       return { W[0], W[1] };
     }
 
-    /// \brief Removes all deadlock and won states (updates won).
-    ldd compute_total_graph(const ldd& V,
-        const ldd& todo,
-        const ldd& Vdeadlock,
-        std::array<ldd, 2>& won)
-    {
-      using namespace sylvan::ldds;
-      std::array<const ldd, 2> Vplayer = { intersect(V, m_V[0]),  intersect(V, m_V[1]) };
-
-      // After removing the deadlock (winning) states the resulting set of states is a total graph.
-      if (Vdeadlock != empty_set())
-      {
-        // Determine winners from the deadlocks (the owner loses).
-        mCRL2log(log::debug) << "determining winners for deadlock states" << std::endl;
-
-        won[0] = union_(won[0], intersect(Vdeadlock, m_V[1]));
-        won[1] = union_(won[1], intersect(Vdeadlock, m_V[0]));
-      }
-
-      mCRL2log(log::debug) << "removing winning regions" << std::endl;
-      won[0] = attractor(won[0], 0, V, Vplayer, todo);
-      won[1] = attractor(won[1], 1, V, Vplayer, todo);
-
-      // After removing the deadlock (winning) states the resulting set of states is a total graph.
-      return minus(minus(V, won[0]), won[1]);
-    }
-
-    /// \brief Computes the set of vertices for which partial solving is safe.
-    std::pair<ldd, ldd> compute_safe_vertices(const ldd& V, const ldd& todo, const std::array<const ldd, 2>& Vplayer)
-    {
-      using namespace sylvan::ldds;
-      return std::make_pair(minus(V, attractor(union_(intersect(todo, Vplayer[1]), sinks(todo)), 1, V, Vplayer)),
-                            minus(V, attractor(union_(intersect(todo, Vplayer[0]), sinks(todo)), 0, V, Vplayer)));
-    }
-
   public:
 
+    /// \brief Solve the given game restricted to V with Zielonka's recursive algorithm as solver.
+    ///        The remaining parameters are sinks, vertices won by even and odd respectively.
+    ///        Terminates early when initial_vertex has been solved.
     bool solve(const ldd& initial_vertex,
         const ldd& V,
-        const ldd& Vdeadlock = sylvan::ldds::empty_set(),
+        const ldd& Vsinks = sylvan::ldds::empty_set(),
         const ldd& W0 = sylvan::ldds::empty_set(),
         const ldd& W1 = sylvan::ldds::empty_set())
     {
       using namespace sylvan::ldds;
-      std::array<ldd, 2> won = { W0, W1 };
-      ldd Vtotal = compute_total_graph(V, empty_set(), Vdeadlock, won);      
-      if (includes(won[0], initial_vertex))
+      std::array<ldd, 2> winning = { W0, W1 };
+      ldd Vtotal = m_G.compute_total_graph(V, empty_set(), Vsinks, winning);
+      if (includes(winning[0], initial_vertex))
       {
         return true;
       }
-      else if (includes(won[1], initial_vertex))
+      else if (includes(winning[1], initial_vertex))
       {
         return false;
       }
 
       // If the initial vertex has not yet been won then run the zielonka solver as well.
-      std::array<const ldd, 2> Vplayer = { intersect(Vtotal, m_V[0]), intersect(Vtotal, m_V[1]) };
-      auto const& [solved0, solved1] = solve_impl(Vtotal, Vplayer);
+      mCRL2log(log::debug1) << "\n--- apply zielonka to ---\n" << m_G.print_graph(V) << std::endl;
+      stopwatch timer;
+      auto const& [solved0, solved1] = zielonka(Vtotal);
+      mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
+      mCRL2log(log::debug1) << "W0 = " << m_G.print_nodes(solved0) << std::endl;
+      mCRL2log(log::debug1) << "W1 = " << m_G.print_nodes(solved1) << std::endl;
       if (includes(solved0, initial_vertex))
       {
         return true;
@@ -583,152 +120,36 @@ class symbolic_pbessolve_algorithm
       }
     }
 
-    /// \returns The winning partition where first is the set won by player even.
-    std::pair<ldd, ldd> solve_impl(const ldd& V, const std::array<const ldd, 2>& Vplayer)
+    /// \brief Solve the given incomplete parity game (m_G, I) restricted to V.
+    ///        The remaining parameters are sinks, vertices won by even and odd respectively.
+    ///        Terminates early when initial_vertex has been solved.
+    std::pair<const ldd, const ldd> partial_solve(const ldd& initial_vertex,
+      const ldd& V,
+      const ldd& I,
+      const ldd& Vsinks = sylvan::ldds::empty_set(),
+      const ldd& W0 = sylvan::ldds::empty_set(),
+      const ldd& W1 = sylvan::ldds::empty_set())
     {
       using namespace sylvan::ldds;
-      stopwatch timer;
-
-      std::pair<ldd, ldd> results;
-
-      mCRL2log(log::debug1) << "\n--- apply zielonka to ---\n" << print_graph(V, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
-      std::pair<ldd, ldd> won = zielonka(V);
-
-      mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
-      mCRL2log(log::debug1) << "W0 = " << print_nodes(won.first, m_all_nodes) << std::endl;
-      mCRL2log(log::debug1) << "W1 = " << print_nodes(won.second, m_all_nodes) << std::endl;
-
-      return won;
-    }
-
-    /// \returns Partial solve using the cycle detection strategy.
-    std::pair<ldd, ldd> detect_cycles(const ldd& initial_vertex,
-        const ldd& V,
-        const ldd& todo,
-        const ldd& Vdeadlock,
-        const ldd& W0 = sylvan::ldds::empty_set(),
-        const ldd& W1 = sylvan::ldds::empty_set())
-    {
-      using namespace sylvan::ldds;
-
-      std::array<ldd, 2> won = { W0, W1 };
-      ldd Vtotal = compute_total_graph(V, todo, Vdeadlock, won);
-      std::array<const ldd, 2> Vplayer = { intersect(Vtotal, m_V[0]), intersect(Vtotal, m_V[1]) };
-
-      mCRL2log(log::debug1) << "\n--- apply cycle detection to ---\n" << print_graph(Vtotal, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
-
-      // Computes two vertex sets of all even priority and odd priority nodes respectively.
-      std::array<ldd, 2> parity;
-      for (const auto&[rank, Vrank] : m_rank_map)
+      std::array<ldd, 2> winning = { W0, W1 };
+      std::array<const ldd, 2> Vsafe = m_G.compute_safe_vertices(V, I, Vsinks, winning);
+      if (includes(winning[0], initial_vertex))
       {
-        parity[rank % 2] = union_(parity[rank % 2], Vrank);
+        return { winning[0], winning[1] };
+      }
+      else if (includes(winning[1], initial_vertex))
+      {
+        return { winning[0], winning[1] };
       }
 
-      for (std::size_t alpha = 0; alpha <= 1; ++alpha)
+      ldd solved0 = union_(zielonka(Vsafe[0]).first, winning[0]);
+      if (includes(solved0, initial_vertex))
       {
-        // Determine the cycles for this player.
-        ldd U = empty_set();
-        ldd Unext = intersect(parity[alpha], Vplayer[alpha]);
-
-        mCRL2log(log::debug) << "cycle detection for player " << alpha << "\n";
-
-        std::size_t iter = 0;
-        while (U != Unext)
-        {
-          stopwatch timer;
-          U = Unext;
-          Unext = predecessors(U, U, m_chaining, U);
-
-          mCRL2log(log::debug) << "cycle detection iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
-
-          ++iter;
-        }
-
-        mCRL2log(log::debug) << "found " << std::setw(12) << satcount(U) << " states in cycles for player " << alpha << "\n";
-
-        won[alpha] = union_(won[alpha], attractor(U, alpha, Vtotal, Vplayer, todo));
+        // Terminate early if possible.
+        return { solved0, winning[1] };
       }
-
-      mCRL2log(log::debug1) << "W0 = " << print_nodes(won[0], m_all_nodes) << std::endl;
-      mCRL2log(log::debug1) << "W1 = " << print_nodes(won[1], m_all_nodes) << std::endl;
-
-      return { won[0], won[1] };
-    }
-
-    /// \returns Partial solve using the fatal attractors.
-    std::pair<ldd, ldd> detect_fatal_attractors(const ldd& initial_vertex,
-        const ldd& V,
-        const ldd& todo,
-        const ldd& Vdeadlock,
-        const ldd& W0 = sylvan::ldds::empty_set(),
-        const ldd& W1 = sylvan::ldds::empty_set())
-    {      
-      using namespace sylvan::ldds;
-      stopwatch timer;
-
-      std::array<ldd, 2> won = { W0, W1 };
-      ldd Vtotal = compute_total_graph(V, todo, Vdeadlock, won);
-      std::array<const ldd, 2> Vplayer = { intersect(Vtotal, m_V[0]), intersect(Vtotal, m_V[1]) };
-
-      std::pair<ldd, ldd> safe = compute_safe_vertices(Vtotal, todo, Vplayer);
-
-      mCRL2log(log::debug1) << "\n--- apply fatal attractor detection to ---\n" << print_graph(Vtotal, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map) << std::endl;
-
-      // For priorities in descending order
-      for (auto it = m_rank_map.rbegin(); it != m_rank_map.rend(); it++)
-      {
-        std::size_t c = it->first;
-        std::size_t alpha = c % 2;
-        mCRL2log(log::debug) << "fatal attractor detection for priority " << c << "\n";
-        ldd Vsafe = alpha ? safe.second : safe.first;
-        ldd X = intersect(it->second, Vsafe);
-        ldd Y = empty_set();
-
-        while (X != empty_set() && X != Y)
-        {
-          Y = X;
-          ldd Z = monotone_attractor(X, alpha, c, Vtotal, Vplayer);
-          if (includes(Z, X))
-          {
-            won[alpha] = union_(won[alpha], attractor(Z, alpha, Vtotal, Vplayer));
-            mCRL2log(log::debug) << "found " << std::setw(12) << satcount(Z) << " states in fatal attractors for priority " << c << "\n";
-            break;
-          }
-          else
-          {
-            X = intersect(X, Z);
-          }
-        }
-      }
-
-      mCRL2log(log::debug) << "finished fatal attractor detection (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
-      mCRL2log(log::debug1) << "W0 = " << print_nodes(won[0], m_all_nodes) << std::endl;
-      mCRL2log(log::debug1) << "W1 = " << print_nodes(won[1], m_all_nodes) << std::endl;
-
-      return { won[0], won[1] };
-    }
-
-    /// \returns Partial solve using the Zielonka solver.
-    std::pair<ldd, ldd> partial_solve(const ldd& initial_vertex,
-        const ldd& V,
-        const ldd& todo,
-        const ldd& Vdeadlock,
-        const ldd& W0 = sylvan::ldds::empty_set(),
-        const ldd& W1 = sylvan::ldds::empty_set())
-    {
-      using namespace sylvan::ldds;
-
-      std::array<ldd, 2> won = { W0, W1 };
-      ldd Vtotal = compute_total_graph(V, todo, Vdeadlock, won);
-      std::array<const ldd, 2> Vplayer = { intersect(Vtotal, m_V[0]), intersect(Vtotal, m_V[1]) };
-
-      std::pair<ldd, ldd> safe = compute_safe_vertices(Vtotal, todo, Vplayer);
-
-      // Solve with the safe vertices.
-      won[0] = union_(won[0], solve_impl(safe.first, Vplayer).first);
-      won[1] = union_(won[1], solve_impl(safe.second, Vplayer).second);
-
-      return { won[0], won[1] };
+      ldd solved1 = union_(zielonka(Vsafe[1]).second, winning[1]);
+      return { solved0, solved1 };
     }
 };
 
