@@ -47,9 +47,6 @@ public:
   inline aterm_pool();
   inline ~aterm_pool();
 
-  /// \brief Add a callback that is triggered whenever a term with the given function symbol is created.
-  inline void add_creation_hook(function_symbol sym, term_callback callback);
-
   /// \brief Add a callback that is triggered whenever a term with the given function symbol is destroyed.
   inline void add_deletion_hook(function_symbol sym, term_callback callback);
 

@@ -285,6 +285,19 @@ class application: public data_expression
     {}
 
     /// \brief Constructor.
+    template<typename ...Terms,
+             typename = std::enable_if_t<std::conjunction_v<std::is_convertible<Terms, data_expression>...>> >
+    application(const data_expression& head,
+                const data_expression& arg1,
+                const Terms& ...other_arguments
+               )
+      : data_expression(atermpp::term_appl<aterm>(
+              core::detail::function_symbol_DataAppl(sizeof...(Terms)+2),head,arg1,other_arguments...))
+    {
+      assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, other_arguments...}));
+    }
+
+/*    /// \brief Constructor.
     application(const data_expression& head,
                 const data_expression& arg1)
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(2),head,arg1))
@@ -345,7 +358,7 @@ class application: public data_expression
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(7),head,arg1,arg2,arg3,arg4,arg5,arg6))
     {
       assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, arg2, arg3, arg4, arg5, arg6}));
-    }
+    } */
 
     /// \brief Constructor.
     /// \param term A term
@@ -443,7 +456,7 @@ class application: public data_expression
       assert(detail::check_whether_sorts_match(head,data_expression_list(begin(), end())));
     } 
 
-    /// Move semantics
+    /// Default constructors. 
     application(const application&) noexcept = default;
     application(application&&) noexcept = default;
     application& operator=(const application&) noexcept = default;

@@ -52,9 +52,6 @@ public:
 
   aterm_pool_storage(aterm_pool& pool);
 
-  /// \brief Add a callback that is triggered whenever a term with the given function symbol is created.
-  void add_creation_hook(function_symbol sym, term_callback callback);
-
   /// \brief Add a callback that is triggered whenever a term with the given function symbol is destroyed.
   void add_deletion_hook(function_symbol sym, term_callback callback);
 
@@ -134,9 +131,6 @@ public:
 private:
   using callback_pair = std::pair<function_symbol, term_callback>;
 
-  /// \brief Calls the creation hook attached to the function symbol of this term.
-  void call_creation_hook(unprotected_aterm term);
-
   /// \brief Calls the deletion hook attached to the function symbol of this term.
   void call_deletion_hook(unprotected_aterm term);
 
@@ -165,7 +159,6 @@ private:
   unordered_set m_term_set;
 
   /// This array stores creation, resp deletion, hooks for function symbols.
-  std::vector<callback_pair> m_creation_hooks;
   std::vector<callback_pair> m_deletion_hooks;
 
   /// A reusable todo stack.

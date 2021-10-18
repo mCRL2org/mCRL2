@@ -56,23 +56,8 @@ ATERM_POOL_STORAGE::aterm_pool_storage(aterm_pool& pool) :
 {}
 
 ATERM_POOL_STORAGE_TEMPLATES
-void ATERM_POOL_STORAGE::add_creation_hook(function_symbol sym, term_callback callback)
-{
-  // The code handling the hooks is currently assuming that there is only one
-  // hook per function symbol. If more hooks are allowed, then this code
-  // should be changed.
-  for (const auto& hook : m_creation_hooks)
-  {
-    mcrl2::utilities::mcrl2_unused(hook);
-    assert(hook.first != sym);
-  }
-  m_creation_hooks.emplace_back(sym, callback);
-}
-
-ATERM_POOL_STORAGE_TEMPLATES
 void ATERM_POOL_STORAGE::add_deletion_hook(function_symbol sym, term_callback callback)
 {
-  // See the comments at add_creation_hook.
   for (const auto& hook : m_deletion_hooks)
   {
     mcrl2::utilities::mcrl2_unused(hook);
@@ -220,18 +205,6 @@ void ATERM_POOL_STORAGE::sweep()
 /// PRIVATE FUNCTIONS
 
 ATERM_POOL_STORAGE_TEMPLATES
-void ATERM_POOL_STORAGE::call_creation_hook(unprotected_aterm term)
-{
-  for (const auto& [symbol, callback] : m_creation_hooks)
-  {
-    if (symbol == term.function())
-    {
-      callback(static_cast<const aterm&>(term));
-    }
-  }
-}
-
-ATERM_POOL_STORAGE_TEMPLATES
 void ATERM_POOL_STORAGE::call_deletion_hook(unprotected_aterm term)
 {
   for (const auto& [symbol, callback] : m_deletion_hooks)
@@ -302,7 +275,6 @@ aterm ATERM_POOL_STORAGE::emplace(Args&&... args)
     // A new term was created
     if (EnableTermCreationMetrics) { m_term_metric.miss(); }
     m_pool.trigger_collection();
-    call_creation_hook(term);
   }
   else if (EnableTermCreationMetrics)
   {

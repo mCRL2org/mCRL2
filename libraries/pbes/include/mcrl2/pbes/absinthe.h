@@ -645,7 +645,7 @@ struct absinthe_algorithm
         else
         {
           data::function_symbol h = i->second;
-          rhs = data::application(h, { f1 });
+          rhs = data::application(h, f1);
           //pbes_system::detail::absinthe_check_expression(rhs);
         }
       }
@@ -666,22 +666,22 @@ struct absinthe_algorithm
 
         data::variable_vector x = make_variables(fs2.domain(), "x", sigma);
         variables = data::variable_list(x.begin(),x.end());
-        lhs = data::application(f2, data::data_expression_list(x.begin(), x.end()));
-        data::application f_x(f1, data::data_expression_list(x.begin(), x.end()));
+        lhs = data::application(f2, x.begin(), x.end());
+        data::application f_x(f1, x.begin(), x.end());
 
         data::function_symbol f1_sigma(f1.name(), sigma(f1.sort()));
 
         auto i = sigmaH.find(detail::target_sort(f1.sort()));
         if (i == sigmaH.end())
         {
-          data::application f1_sigma_x(f1_sigma, data::data_expression_list(x.begin(), x.end()));
+          data::application f1_sigma_x(f1_sigma, x.begin(), x.end());
           rhs = data::detail::create_finite_set(f_x);
           //pbes_system::detail::absinthe_check_expression(rhs);
         }
         else
         {
           data::function_symbol h = i->second;
-          rhs = data::detail::create_finite_set(data::application(h, { f_x }));
+          rhs = data::detail::create_finite_set(data::application(h, f_x));
           //pbes_system::detail::absinthe_check_expression(rhs);
         }
       }
@@ -773,9 +773,9 @@ struct absinthe_algorithm
         std::vector<data::variable> X = make_variables(fs3.domain(), "X", sigma);
 
         variables = data::variable_list(X.begin(), X.end());
-        lhs = data::application(f3, data::data_expression_list(X.begin(), X.end()));
+        lhs = data::application(f3, X.begin(), X.end());
         data::variable y("y", data::detail::get_set_sort(atermpp::down_cast<data::container_sort>(fs2.codomain())));
-        data::data_expression Y = data::application(f2, data::data_expression_list(x.begin(), x.end()));
+        data::data_expression Y = data::application(f2, x.begin(), x.end());
         data::data_expression body = data::and_(enumerate_domain(x, X), data::detail::create_set_in(y, Y));
         rhs = data::detail::create_set_comprehension(y, data::exists(x, body));
       }
