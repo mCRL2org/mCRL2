@@ -2650,7 +2650,16 @@ static std::string generate_cpp_filename(std::size_t unique)
   {
     filedir = "./";
   }
-  filename << filedir << "jittyc_" << getpid() << "_" << unique << ".cpp";
+  time_t now = time(0);
+  struct tm tstruct = *localtime(&now);
+
+  std::size_t unique_time = ((((tstruct.tm_year*12+tstruct.tm_mon)*31+tstruct.tm_mday)*24+
+                                tstruct.tm_hour)*60+tstruct.tm_min)*60 + tstruct.tm_sec;
+  // the name below must be unique. If two .cpp files have the same name, loading the second
+  // may effectively load the first. The pid of the current process and the this pointer in 
+  // unique could lead to duplicate filenames, as happened in September 2021. A time tag has
+  // been added to guarantee further uniqueness. 
+  filename << filedir << "jittyc_" << getpid() << "_" << (unique % 100000000) << "_" << unique_time << ".cpp";
   return filename.str();
 }
 
