@@ -268,7 +268,15 @@ aterm aterm_pool::create_term(const atermpp::function_symbol& sym)
 template<class ...Terms>
 aterm aterm_pool::create_appl(const function_symbol& sym, const Terms&... arguments)
 {
-  return std::get<sizeof...(Terms)>(m_appl_storage).create_appl(sym, arguments...);
+  if constexpr (sizeof...(Terms) <= 7)
+  {
+    return std::get<sizeof...(Terms)>(m_appl_storage).create_appl(sym, arguments...);
+  }
+  else
+  {
+    std::array<unprotected_aterm, sizeof...(Terms)> array({arguments...});
+    return m_appl_dynamic_storage.create_appl_dynamic(sym, array.begin(), array.end());
+  }
 }
 
 template<typename ForwardIterator>
