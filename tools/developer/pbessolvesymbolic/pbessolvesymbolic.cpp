@@ -58,13 +58,17 @@ public:
 
       if (m_options.solve_strategy == 1)
       {
-        //std::tie(m_Vwon[0], m_Vwon[1]) = solver.detect_cycles(m_initial_vertex, V, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1]);
+        std::tie(m_Vwon[0], m_Vwon[1]) = solver.detect_solitair_cycles(m_initial_vertex, V, m_todo, true, m_deadlocks, m_Vwon[0], m_Vwon[1]);
       }      
       else if (m_options.solve_strategy == 2)
       {
-        //std::tie(m_Vwon[0], m_Vwon[1]) = solver.detect_fatal_attractors(m_initial_vertex, V, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1]);
+        std::tie(m_Vwon[0], m_Vwon[1]) = solver.detect_forced_cycles(m_initial_vertex, V, m_todo, true, m_deadlocks, m_Vwon[0], m_Vwon[1]);
       }
       else if (m_options.solve_strategy == 3)
+      {
+        //std::tie(m_Vwon[0], m_Vwon[1]) = solver.detect_fatal_attractors(m_initial_vertex, V, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1]);
+      }
+      else if (m_options.solve_strategy == 4)
       {
         std::tie(m_Vwon[0], m_Vwon[1]) = solver.partial_solve(m_initial_vertex, V, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1]);
       }
@@ -156,9 +160,10 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       desc.add_option("solve-strategy",
                       utilities::make_enum_argument<int>("NUM")
                         .add_value_desc(0, "No on-the-fly solving is applied", true)
-                        .add_value_desc(1, "Detect winning loops.")
-                        .add_value_desc(2, "Detect fatal attractors.")
-                        .add_value_desc(3, "Solve subgames using a Zielonka solver."),
+                        .add_value_desc(1, "Detect solitair winning loops.")
+                        .add_value_desc(2, "Detect forced winning loops.")
+                        .add_value_desc(3, "Detect fatal attractors.")
+                        .add_value_desc(4, "Solve subgames using a Zielonka solver."),
                       "Use solve strategy NUM. All strategies except 0 periodically apply on-the-fly solving, which may lead to early termination.",
                       's');
       desc.add_option("split-conditions",
@@ -248,7 +253,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       }
 
       options.solve_strategy =  parser.option_argument_as<int>("solve-strategy");
-      if (options.solve_strategy < 0 || options.solve_strategy > 3)
+      if (options.solve_strategy < 0 || options.solve_strategy > 4)
       {
         throw mcrl2::runtime_error("Invalid strategy " + std::to_string(options.solve_strategy));
       }

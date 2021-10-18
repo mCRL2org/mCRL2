@@ -321,7 +321,7 @@ class symbolic_parity_game
         mCRL2log(log::debug1) << "Xoutside = " << print_nodes(Zoutside) << std::endl;
         stopwatch iter_start;
 
-        todo = safe_control_predecessors(alpha, todo, Zoutside, Vplayer, I);
+        todo = safe_control_predecessors_impl(alpha, todo, Zoutside, Vplayer, I);
         Z = union_(Z, todo);
         Zoutside = minus(Zoutside, todo);
 
@@ -382,7 +382,7 @@ class symbolic_parity_game
         mCRL2log(log::debug1) << "Zoutside = " << print_nodes(Zoutside) << std::endl;
         stopwatch iter_start;
 
-        todo = intersect(Vc, safe_control_predecessors(alpha, todo, Zoutside, Vplayer, I));
+        todo = intersect(Vc, safe_control_predecessors_impl(alpha, todo, Zoutside, Vplayer, I));
         Z = union_(Z, todo);
         Zoutside = minus(Zoutside, todo);
 
@@ -439,32 +439,22 @@ class symbolic_parity_game
       return minus(minus(V, winning[0]), winning[1]);
     }
 
-    /// \brief Computes the set of vertices for which partial solving is safe.
-    std::array<const ldd, 2> compute_safe_vertices(const ldd& V,
-                                           const ldd& I,
-                                           const ldd& Vsinks,
-                                           std::array<ldd, 2>& winning)
+    /// \brief Computes the set of vertices for which partial solving is safe w.r.t. alpha.
+    ldd compute_safe_vertices(
+        std::size_t alpha,
+        const ldd& V,
+        const ldd& I)
     {
       using namespace sylvan::ldds;
 
-      // Make the game total.
-      ldd Vtotal = compute_total_graph(V, I, Vsinks, winning);
-
       // Compute the safe sets from the resulting subgraph.
-      std::array<const ldd, 2> Vplayer = players(Vtotal);
-      ldd S = sinks(I, Vtotal);
-      std::array<const ldd, 2> Vsafe = { minus(Vtotal, safe_attractor(union_(intersect(I, Vplayer[1]), S), 1, Vtotal, Vplayer)),
-                                         minus(Vtotal, safe_attractor(union_(intersect(I, Vplayer[0]), S), 0, Vtotal, Vplayer)) };
-
-      return Vsafe;
+      std::array<const ldd, 2> Vplayer = players(V);
+      ldd S = sinks(I, V);
+      return minus(V, safe_attractor(union_(intersect(I, Vplayer[1-alpha]), S), 1-alpha, V, Vplayer));
     }
 
-private:
-    /// \returns The set { u in U | exists v in V: u -> v }, where -> is described by the given group.
-    ldd predecessors(const ldd& U, const ldd& V, const summand_group& group)
-    {
-      return m_no_relprod ? lps::alternative_relprev(V, group, U) : relprev(V, group.L, group.Ir, U);
-    }
+    /// \brief Returns the mapping from priorities (ranks) to vertex sets.
+    const std::map<std::size_t, ldd>& ranks() { return m_rank_map; }
 
     /// \returns The set { u in U | exists v in V: u -> v }
     ldd predecessors(const ldd& U, const ldd& V)
@@ -484,6 +474,24 @@ private:
 
       return result;
     }
+
+    /// \brief Compute the safe control attractor set for U.
+    ldd safe_control_predecessors(std::size_t alpha,
+      const ldd& U,
+      const ldd& V,
+      const std::array<const ldd, 2>& Vplayer,
+      const ldd& I = sylvan::ldds::empty_set())
+    {
+      return safe_control_predecessors_impl(alpha, U, minus(V, U), Vplayer, I);
+    }
+
+private:
+    /// \returns The set { u in U | exists v in V: u -> v }, where -> is described by the given group.
+    ldd predecessors(const ldd& U, const ldd& V, const summand_group& group)
+    {
+      return m_no_relprod ? lps::alternative_relprev(V, group, U) : relprev(V, group.L, group.Ir, U);
+    }
+
 
     /// \returns A pair (P, Q) such that:
     ///             P is a subset of { u in W | exists v in V: u ->* v } where ->* only visits intermediate vertices in W (without chaining ->* = ->)
@@ -523,7 +531,7 @@ private:
     }
 
     /// \brief Compute the safe control attractor set for U.
-    ldd safe_control_predecessors(std::size_t alpha,
+    ldd safe_control_predecessors_impl(std::size_t alpha,
       const ldd& todo,
       const ldd& Zoutside,
       const std::array<const ldd, 2>& Vplayer,
@@ -552,7 +560,7 @@ private:
     ldd sinks(const ldd& U, const ldd& V)
     {
       return minus(U, predecessors(U, V));
-    }
+    }    
 };
 
 } // namespace pbes_system

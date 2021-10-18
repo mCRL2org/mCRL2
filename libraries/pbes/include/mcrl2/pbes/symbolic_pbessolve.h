@@ -130,26 +130,183 @@ class symbolic_pbessolve_algorithm
       const ldd& W0 = sylvan::ldds::empty_set(),
       const ldd& W1 = sylvan::ldds::empty_set())
     {
+      // Make the game total.
       using namespace sylvan::ldds;
       std::array<ldd, 2> winning = { W0, W1 };
-      std::array<const ldd, 2> Vsafe = m_G.compute_safe_vertices(V, I, Vsinks, winning);
-      if (includes(winning[0], initial_vertex))
-      {
-        return { winning[0], winning[1] };
-      }
-      else if (includes(winning[1], initial_vertex))
+      ldd Vtotal = m_G.compute_total_graph(V, empty_set(), Vsinks, winning);
+      if (includes(winning[0], initial_vertex) || includes(winning[1], initial_vertex))
       {
         return { winning[0], winning[1] };
       }
 
-      ldd solved0 = union_(zielonka(Vsafe[0]).first, winning[0]);
+      // Solve with zielonka twice for the safe sets.
+      ldd solved0 = union_(zielonka(m_G.compute_safe_vertices(0, Vtotal, I)).first, winning[0]);
       if (includes(solved0, initial_vertex))
       {
-        // Terminate early if possible.
         return { solved0, winning[1] };
       }
-      ldd solved1 = union_(zielonka(Vsafe[1]).second, winning[1]);
+      ldd solved1 = union_(zielonka(m_G.compute_safe_vertices(1, Vtotal, I)).second, winning[1]);
       return { solved0, solved1 };
+    }
+
+    /// \brief Detect solitair winning cycles for the given incomplete parity game (m_G, I) restricted to V.
+    ///        The remaining parameters are sinks, vertices won by even and odd respectively.
+    ///        Terminates early when initial_vertex has been solved.
+    /// \param safe Whether to use the safe attractor variant (as opposed to computing safe vertices first).
+    std::pair<const ldd, const ldd> detect_solitair_cycles(const ldd& initial_vertex,
+      const ldd& V,
+      const ldd& I,
+      bool safe_variant,
+      const ldd& Vsinks = sylvan::ldds::empty_set(),
+      const ldd& W0 = sylvan::ldds::empty_set(),
+      const ldd& W1 = sylvan::ldds::empty_set())
+    {
+      using namespace sylvan::ldds;
+
+      // Make the game total and removed winning sets.
+      std::array<ldd, 2> winning = { W0, W1 };
+      ldd Vtotal = m_G.compute_total_graph(V, empty_set(), Vsinks, winning);
+      if (includes(winning[0], initial_vertex) || includes(winning[1], initial_vertex))
+      {
+        return { winning[0], winning[1] };
+      }
+
+      mCRL2log(log::debug1) << "\n--- apply cycle detection to ---\n" << m_G.print_graph(V) << std::endl;
+
+      // Computes two vertex sets of all even priority and odd priority nodes respectively.
+      std::array<ldd, 2> parity;
+      std::array<const ldd, 2> Vplayer = m_G.players(Vtotal);
+      for (const auto&[rank, Vrank] : m_G.ranks())
+      {
+        parity[rank % 2] = union_(parity[rank % 2], Vrank);
+      }
+
+      std::array<ldd, 2> Vsafe;
+      if (!safe_variant)
+      {
+        Vsafe = { m_G.compute_safe_vertices(0, Vtotal, I), m_G.compute_safe_vertices(1, Vtotal, I) };
+      }
+
+      for (std::size_t alpha = 0; alpha <= 1; ++alpha)
+      {
+        // Determine the cycles for this player.
+        ldd U = empty_set();
+        ldd Unext = intersect(parity[alpha], Vplayer[alpha]);
+        if (!safe_variant)
+        {
+          Unext = intersect(Unext, Vsafe[alpha]);
+        }
+
+        mCRL2log(log::debug) << "solitair winning cycle detection for player " << alpha << "\n";
+
+        std::size_t iter = 0;
+        while (U != Unext)
+        {
+          stopwatch timer;
+          U = Unext;
+          Unext = m_G.predecessors(U, U);
+
+          mCRL2log(log::debug) << "iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
+
+          ++iter;
+        }
+
+        mCRL2log(log::debug) << "found " << std::setw(12) << satcount(U) << " states in cycles for player " << alpha << "\n";
+
+        if (safe_variant)
+        {
+          winning[alpha] = union_(winning[alpha], m_G.safe_attractor(U, alpha, Vtotal, Vplayer, I));
+        }
+        else
+        {
+          winning[alpha] = union_(winning[alpha], m_G.safe_attractor(U, alpha, Vsafe[alpha], Vplayer));
+        }
+      }
+
+      mCRL2log(log::debug1) << "W0 = " << m_G.print_nodes(winning[0]) << std::endl;
+      mCRL2log(log::debug1) << "W1 = " << m_G.print_nodes(winning[1]) << std::endl;
+
+      return { winning[0], winning[1] };
+    }
+
+    /// \brief Detect forced winning cycles for the given incomplete parity game (m_G, I) restricted to V.
+    ///        The remaining parameters are sinks, vertices won by even and odd respectively.
+    ///        Terminates early when initial_vertex has been solved.
+    /// \param safe Whether to use the safe attractor variant (as opposed to computing safe vertices first).
+    std::pair<const ldd, const ldd> detect_forced_cycles(const ldd& initial_vertex,
+      const ldd& V,
+      const ldd& I,
+      bool safe_variant,
+      const ldd& Vsinks = sylvan::ldds::empty_set(),
+      const ldd& W0 = sylvan::ldds::empty_set(),
+      const ldd& W1 = sylvan::ldds::empty_set())
+    {
+      using namespace sylvan::ldds;
+
+      // Make the game total and removed winning sets.
+      std::array<ldd, 2> winning = { W0, W1 };
+      ldd Vtotal = m_G.compute_total_graph(V, empty_set(), Vsinks, winning);
+      if (includes(winning[0], initial_vertex) || includes(winning[1], initial_vertex))
+      {
+        return { winning[0], winning[1] };
+      }
+
+      mCRL2log(log::debug1) << "\n--- apply cycle detection to ---\n" << m_G.print_graph(V) << std::endl;
+
+      // Computes two vertex sets of all even priority and odd priority nodes respectively.
+      std::array<ldd, 2> parity;
+      std::array<const ldd, 2> Vplayer = m_G.players(Vtotal);
+      for (const auto&[rank, Vrank] : m_G.ranks())
+      {
+        parity[rank % 2] = union_(parity[rank % 2], Vrank);
+      }
+
+      std::array<ldd, 2> Vsafe;
+      if (!safe_variant)
+      {
+        Vsafe = { m_G.compute_safe_vertices(0, Vtotal, I), m_G.compute_safe_vertices(1, Vtotal, I) };
+      }
+
+      for (std::size_t alpha = 0; alpha <= 1; ++alpha)
+      {
+        // Determine the cycles for this player.
+        ldd U = empty_set();
+        ldd Unext = parity[alpha];
+        if (!safe_variant)
+        {
+          Unext = intersect(Unext, Vsafe[alpha]);
+        }
+
+        mCRL2log(log::debug) << "forced winning cycle detection for player " << alpha << "\n";
+
+        std::size_t iter = 0;
+        while (U != Unext)
+        {
+          stopwatch timer;
+          U = Unext;
+          Unext = m_G.safe_control_predecessors(alpha, U, Vtotal, Vplayer, safe_variant ? I : empty_set());
+
+          mCRL2log(log::debug) << "iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
+
+          ++iter;
+        }
+
+        mCRL2log(log::debug) << "found " << std::setw(12) << satcount(U) << " states in cycles for player " << alpha << "\n";
+
+        if (safe_variant)
+        {
+          winning[alpha] = union_(winning[alpha], m_G.safe_attractor(U, alpha, Vtotal, Vplayer, I));
+        }
+        else
+        {
+          winning[alpha] = union_(winning[alpha], m_G.safe_attractor(U, alpha, Vsafe[alpha], Vplayer));
+        }
+      }
+
+      mCRL2log(log::debug1) << "W0 = " << m_G.print_nodes(winning[0]) << std::endl;
+      mCRL2log(log::debug1) << "W1 = " << m_G.print_nodes(winning[1]) << std::endl;
+
+      return { winning[0], winning[1] };
     }
 };
 
