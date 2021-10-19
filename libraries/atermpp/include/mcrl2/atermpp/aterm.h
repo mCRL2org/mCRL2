@@ -22,7 +22,6 @@ namespace atermpp
 
 typedef void(*term_callback)(const aterm&);
 
-extern void add_creation_hook(const function_symbol&, term_callback);
 extern void add_deletion_hook(const function_symbol&, term_callback);
 
 /// \brief An unprotected term does not change the reference count of the

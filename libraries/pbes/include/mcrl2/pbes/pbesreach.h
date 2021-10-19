@@ -57,8 +57,8 @@ data::data_specification construct_propositional_variable_data_specification(con
 struct symbolic_reachability_options: public lps::symbolic_reachability_options
 {
   bool make_total = false;
-  bool prune_todo_list = false;
   bool reset_parameters = false;
+  bool aggressive = false;
   std::size_t solve_strategy = 0;
   std::size_t split_conditions = 0;
   std::string srf;
@@ -68,7 +68,6 @@ inline
 std::ostream& operator<<(std::ostream& out, const symbolic_reachability_options& options)
 {
   out << static_cast<lps::symbolic_reachability_options>(options);
-  out << "prune_todo_list = " << std::boolalpha << options.prune_todo_list << std::endl;
   out << "solve_strategy = " << options.solve_strategy << std::endl;
   out << "split_conditions = " << options.split_conditions << std::endl;
   out << "total = " << std::boolalpha << options.make_total << std::endl;
@@ -359,6 +358,7 @@ class pbesreach_algorithm
     ldd m_visited;
     ldd m_todo;
     ldd m_deadlocks;
+    ldd m_initial_vertex;
 
     ldd state2ldd(const data::data_expression_list& x)
     {
@@ -373,7 +373,7 @@ class pbesreach_algorithm
       }
 
       return sylvan::ldds::cube(v.data(), x.size());
-    };
+    }
 
     /// \brief Updates R.L := R.L U {(x,y) in R | x in X}
     void learn_successors(std::size_t i, summand_group& R, const ldd& X)
@@ -419,7 +419,7 @@ class pbesreach_algorithm
         result.make_total();
       }
 
-      unify_parameters(result);
+      unify_parameters(result, m_options.reset_parameters);
       pbes_system::resolve_summand_variable_name_clashes(result, result.equations().front().variable().parameters()); // N.B. This is a required preprocessing step.
 
       // add a sort for the propositional variable names
@@ -498,7 +498,7 @@ class pbesreach_algorithm
       }
     }
 
-    virtual ~pbesreach_algorithm() {};
+    virtual ~pbesreach_algorithm() {}
 
     ldd initial_state()
     {
@@ -511,6 +511,106 @@ class pbesreach_algorithm
       return m_deadlocks;
     }
 
+    /// \brief Computes relprod(U, group).
+    ldd relprod_impl(const ldd& U, const summand_group& group, std::size_t i)
+    {
+      if (m_options.no_relprod)
+      {
+        ldd z = lps::alternative_relprod(U, group);
+        mCRL2log(log::debug1) << "relprod(" << i << ", todo) = " << print_states(m_data_index, z) << std::endl;
+        return z;
+      }
+      else
+      {
+        ldd z = relprod(U, group.L, group.Ir);
+        mCRL2log(log::debug1) << "relprod(" << i << ", todo) = " << print_states(m_data_index, z) << std::endl;
+        return z;
+      }
+    }
+
+    /// \brief Perform a single breadth first step.
+    /// \returns The tuple <visited, todo, deadlocks>
+    std::tuple<ldd, ldd, ldd> step(const ldd& visited, const ldd& todo, bool learn_transitions = true, bool detect_deadlocks = false)
+    {
+      using namespace sylvan::ldds;
+      auto& R = m_summand_groups;
+
+      ldd todo1 = empty_set();
+      ldd potential_deadlocks = detect_deadlocks ? todo : empty_set();
+
+      if (!m_options.saturation)
+      {
+        // regular and chaining.
+        todo1 = m_options.chaining ? todo : empty_set();
+
+        for (std::size_t i = 0; i < R.size(); i++)
+        {
+          if (learn_transitions)
+          {
+            ldd proj = project(m_options.chaining ? todo1 : todo, R[i].Ip);
+            learn_successors(i, R[i], m_options.cached ? minus(proj, R[i].Ldomain) : proj);
+
+            mCRL2log(log::debug1) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
+          }
+
+          todo1 = union_(todo1, relprod_impl(m_options.chaining ? todo1 : todo, R[i], i));
+
+          if (detect_deadlocks)
+          {
+            potential_deadlocks = minus(potential_deadlocks, relprev(todo1, R[i].L, R[i].Ir, potential_deadlocks));
+          }
+        }
+      }
+      else
+      {
+        // saturation and chaining
+        todo1 = todo;
+        ldd todo1_old; // the old todo set.
+        std::size_t j = 0; // The last transition group learned.
+
+        for (std::size_t i = 0; i < R.size(); i++)
+        {
+          if (learn_transitions)
+          {
+            ldd proj = project(todo1, R[i].Ip);
+            learn_successors(i, R[i], m_options.cached ? minus(proj, R[i].Ldomain) : proj);
+
+            mCRL2log(log::debug1) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
+          }
+
+          // Apply one transition relation repeatedly.
+          do
+          {
+            todo1_old = todo1;
+            todo1 = union_(todo1, relprod_impl(todo1, R[i], i));
+          }
+          while (todo1 != todo1_old);
+
+          if (detect_deadlocks)
+          {
+            potential_deadlocks = minus(potential_deadlocks, relprev(todo1, R[i].L, R[i].Ir, potential_deadlocks));
+          }
+
+          // Apply all previously learned transition relations repeatedly.
+          if (m_options.chaining)
+          {
+            do
+            {
+              todo1_old = todo1;
+              for (std::size_t j = 0; j <= i; j++)
+              {
+                todo1 = union_(todo1, relprod_impl(todo1, R[j], j));
+              }
+            }
+            while (todo1 != todo1_old);
+          }
+        }
+      }
+
+      // after all transition groups are applied the remaining potential deadlocks are actual deadlocks.
+      return std::make_tuple(union_(visited, todo), minus(todo1, visited), potential_deadlocks);
+    }
+
     ldd run(bool report_states = false)
     {
       using namespace sylvan::ldds;
@@ -520,54 +620,24 @@ class pbesreach_algorithm
       mCRL2log(log::debug1) << "initial state = " << core::detail::print_list(m_initial_state) << std::endl;
 
       stopwatch timer;
-      ldd initial_state = state2ldd(m_initial_state);
+      m_initial_vertex = state2ldd(m_initial_state);
       m_visited = empty_set();
-      m_todo = initial_state;
+      m_todo = m_initial_vertex;
       m_deadlocks = empty_set();
 
-      while (m_todo != empty_set() && !solution_found(initial_state))
+      while (m_todo != empty_set() && !solution_found())
       {
         stopwatch loop_start;
         iteration_count++;
         mCRL2log(log::debug1) << "--- iteration " << iteration_count << " ---" << std::endl;
         mCRL2log(log::debug1) << "todo = " << print_states(m_data_index, m_todo) << std::endl;
+        ldd deadlocks = empty_set();
 
-        ldd todo1 = m_options.chaining ? m_todo : empty_set();
-        ldd potential_deadlocks = m_todo;
+        std::tie(m_visited, m_todo, deadlocks) = step(m_visited, m_todo, true, m_options.detect_deadlocks);
 
-        for (std::size_t i = 0; i < R.size(); i++)
-        {          
-          ldd proj = project(m_options.chaining ? todo1 : m_todo, R[i].Ip);          
-          learn_successors(i, R[i], m_options.cached ? minus(proj, R[i].Ldomain) : proj);
-
-          mCRL2log(log::debug1) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
-
-          if (m_options.no_relprod)
-          {
-            ldd z = lps::alternative_relprod(m_options.chaining ? todo1 : m_todo, R[i]);
-            mCRL2log(log::debug1) << "relprod(" << i << ", todo) = " << print_states(m_data_index, z) << std::endl;
-            todo1 = union_(z, todo1);
-          }
-          else
-          {
-            mCRL2log(log::debug1) << "relprod(" << i << ", todo) = " << print_states(m_data_index, relprod(m_todo, R[i].L, R[i].Ir)) << std::endl;
-            ldd z = relprod(m_options.chaining ? todo1 : m_todo, R[i].L, R[i].Ir);
-            todo1 = union_(z, todo1);
-          }
-
-          if (m_options.detect_deadlocks)
-          {
-            potential_deadlocks = minus(potential_deadlocks, relprev(todo1, R[i].L, R[i].Ir, potential_deadlocks));
-          }
-        }
-
-        m_visited = union_(m_visited, m_todo);
-        m_todo = minus(todo1, m_visited);
-
-        // after all transition groups are applied the remaining potential deadlocks are actual deadlocks.
         if (m_options.detect_deadlocks)
         {
-          m_deadlocks = union_(m_deadlocks, potential_deadlocks);
+          m_deadlocks = union_(m_deadlocks, deadlocks);
         }
 
         mCRL2log(log::verbose) << "generated " << std::setw(12) << satcount(m_visited) << " BES equations after "
@@ -627,8 +697,8 @@ class pbesreach_algorithm
     virtual void on_end_while_loop()
     { }
 
-    /// \returns True iff the solution for the given vertex is known.
-    virtual bool solution_found(const sylvan::ldds::ldd&) const
+    /// \returns True iff the solution for the initial state is true.
+    virtual bool solution_found() const
     {
       return false;
     }

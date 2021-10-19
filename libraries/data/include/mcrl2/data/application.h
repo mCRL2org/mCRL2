@@ -315,66 +315,16 @@ class application: public data_expression
     {}
 
     /// \brief Constructor.
-    application(const data_expression& head,
-                const data_expression& arg1)
-      : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(2),head,arg1))
-    {
-      assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1}));
-    }
-
-    /// \brief Constructor.
+    template<typename ...Terms,
+             typename = std::enable_if_t<std::conjunction_v<std::is_convertible<Terms, data_expression>...>> >
     application(const data_expression& head,
                 const data_expression& arg1,
-                const data_expression& arg2)
-      : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(3),head,arg1,arg2))
+                const Terms& ...other_arguments
+               )
+      : data_expression(atermpp::term_appl<aterm>(
+              core::detail::function_symbol_DataAppl(sizeof...(Terms)+2),head,arg1,other_arguments...))
     {
-      assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, arg2}));
-    }
-
-    /// \brief Constructor.
-    application(const data_expression& head,
-                const data_expression& arg1,
-                const data_expression& arg2,
-                const data_expression& arg3)
-      : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(4),head,arg1,arg2,arg3))
-    {
-      assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, arg2, arg3}));
-    }
-
-    /// \brief Constructor.
-    application(const data_expression& head,
-                const data_expression& arg1,
-                const data_expression& arg2,
-                const data_expression& arg3,
-                const data_expression& arg4)
-      : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(5),head,arg1,arg2,arg3,arg4))
-    {
-      assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, arg2, arg3, arg4}));
-    }
-
-    /// \brief Constructor
-    application(const data_expression& head,
-                const data_expression& arg1,
-                const data_expression& arg2,
-                const data_expression& arg3,
-                const data_expression& arg4,
-                const data_expression& arg5)
-      : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(6),head,arg1,arg2,arg3,arg4,arg5))
-    {
-      assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, arg2, arg3, arg4, arg5}));
-    }
-
-    /// \brief Constructor
-    application(const data_expression& head,
-                const data_expression& arg1,
-                const data_expression& arg2,
-                const data_expression& arg3,
-                const data_expression& arg4,
-                const data_expression& arg5,
-                const data_expression& arg6)
-      : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(7),head,arg1,arg2,arg3,arg4,arg5,arg6))
-    {
-      assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, arg2, arg3, arg4, arg5, arg6}));
+      assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, other_arguments...}));
     }
 
     /// \brief Constructor.

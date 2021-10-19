@@ -44,11 +44,12 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       desc.add_option("memory-limit", utilities::make_optional_argument("NUM", "3"), "Sylvan memory limit in gigabytes (default 3)", 'm');
 
       desc.add_option("cached", "use transition group caching to speed up state space exploration");
-      desc.add_option("chaining", "apply the transition groups as a series");
+      desc.add_option("chaining", "reduce the amount of breadth-first iterations by applying the transition groups consecutively");
       desc.add_option("deadlock", "report the number of deadlocks (i.e. states with no outgoing transitions).");
       desc.add_option("info", "print read/write information of the summands");
       desc.add_option("groups", utilities::make_optional_argument("GROUPS", "none"),
                       "'none' (default) no summand groups\n"
+                      "'used' summands with the same variables are joined\n"
                       "'simple' summands with the same read/write variables are joined\n"
                       "'<groups>' a user defined list of summand groups separated by semicolons, e.g. '0; 1 3 4; 2 5'");
       desc.add_option("reorder", utilities::make_optional_argument("ORDER", "none"),
@@ -56,6 +57,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
                       "'random' variables are put in a random order\n"
                       "'<order>' a user defined permutation e.g. '1 3 2 0 4'"
                       );
+      desc.add_option("saturation", "reduce the amount of breadth-first iterations by applying the transition groups until fixed point");
       desc.add_hidden_option("no-discard", "do not discard any parameters");
       desc.add_hidden_option("no-read", "do not discard only-read parameters");
       desc.add_hidden_option("no-write", "do not discard only-write parameters");
@@ -76,6 +78,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       options.one_point_rule_rewrite                = !parser.has_option("no-one-point-rule-rewrite");
       options.remove_unused_rewrite_rules           = !parser.has_option("no-remove-unused-rewrite-rules");
       options.replace_constants_by_variables        = false; // This option cannot be used in the symbolic algorithm
+      options.saturation                            = parser.has_option("saturation");
       options.no_discard                            = parser.has_option("no-discard");
       options.no_discard_read                       = parser.has_option("no-read");
       options.no_discard_write                      = parser.has_option("no-write");

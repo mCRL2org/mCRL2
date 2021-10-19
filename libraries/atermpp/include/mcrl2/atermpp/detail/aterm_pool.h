@@ -101,9 +101,6 @@ public:
   /// \returns The function symbol used by the term indicating the empty list.
   const function_symbol& as_empty_list() noexcept { return m_function_symbol_pool.as_empty_list(); }
 
-  /// \brief Add a callback that is triggered whenever a term with the given function symbol is created.
-  inline void add_creation_hook(function_symbol sym, term_callback callback);
-
   /// \brief Add a callback that is triggered whenever a term with the given function symbol is destroyed.
   inline void add_deletion_hook(function_symbol sym, term_callback callback);
 

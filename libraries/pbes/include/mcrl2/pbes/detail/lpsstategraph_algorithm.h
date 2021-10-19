@@ -79,7 +79,7 @@ class lpsstategraph_algorithm: public local_reset_variables_algorithm
         data::data_expression x = ci;
         for (const data::variable& v: lps::find_free_variables(summand.multi_action()))
         {
-          x = data::and_(x, data::application(functions[v.sort()], { v }));
+          x = data::and_(x, data::application(functions[v.sort()], v ));
         }
         propositional_variable_instantiation Xi(X, gi);
         conjuncts.push_back(make_forall(ei, imp(x, Xi)));
