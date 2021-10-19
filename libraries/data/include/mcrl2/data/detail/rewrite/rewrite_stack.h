@@ -66,8 +66,11 @@ class rewrite_stack : public atermpp::vector<data_expression>
 
     void decrease(std::size_t distance)
     { 
-      assert(distance<=size());
-      resize(size()-distance);
+      if (distance>0)
+      {
+        assert(distance<=size());
+        resize(size()-distance);
+      }
     }
 
     data_expression& top()

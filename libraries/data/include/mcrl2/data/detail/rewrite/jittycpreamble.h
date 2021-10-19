@@ -35,12 +35,13 @@ extern "C" {
 // A rewrite_term is a term that may or may not be in normal form. If the method"
 // normal_form is invoked, it will calculate a normal form for itself as efficiently as possible."
 template <class REWRITE_TERM>
-static data_expression local_rewrite(const REWRITE_TERM& t)
+static data_expression& local_rewrite(const REWRITE_TERM& t, std::size_t& stack_increment)
 {
-  return t.normal_form();
+  normal_form(t, stack_increment);
+  return t;
 }
 
-static const data_expression& local_rewrite(const data_expression& t)
+static const data_expression& local_rewrite(const data_expression& t, std::size_t& stack_increment)
 {
   return t;
 } 
@@ -93,11 +94,9 @@ class term_not_in_normal_form
        : m_term(term), this_rewriter(tr)
     {}
 
-    data_expression normal_form() const
+    void normal_form(data_expression& result, size_t&) const
     {
-      data_expression result; // TODO: Optimize
       rewrite_aux(result, m_term, false, this_rewriter);
-      return result;
     }
 };
 
@@ -119,12 +118,10 @@ class delayed_abstraction
        : m_binding_operator(binding_operator), m_variables(variables), m_body(body), this_rewriter(tr)
     {}
 
-    data_expression normal_form() const
+    void normal_form(data_expression& result, size_t&) const
     {
-      data_expression result;  // TODO: Optimize
       const abstraction t(m_binding_operator,m_variables,local_rewrite(m_body));
       rewrite_abstraction_aux(result, t,t,this_rewriter);
-      return result;
     }
 };
 
@@ -149,9 +146,9 @@ struct rewrite_functor
 // Miscellaneous helper functions
 //
 static inline
-const data_expression& pass_on(const data_expression& t)
+void pass_on(data_expression& result, const data_expression& t)
 {
-  return t;
+  result=t;
 }
 
 static inline
