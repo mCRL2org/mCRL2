@@ -318,10 +318,10 @@ class symbolic_parity_game
         }
 
         mCRL2log(log::debug1) << "todo = " << print_nodes(todo) << std::endl;
-        mCRL2log(log::debug1) << "Xoutside = " << print_nodes(Zoutside) << std::endl;
+        mCRL2log(log::debug1) << "Zoutside = " << print_nodes(Zoutside) << std::endl;
         stopwatch iter_start;
 
-        todo = safe_control_predecessors_impl(alpha, todo, Zoutside, Vplayer, I);
+        todo = minus(safe_control_predecessors_impl(alpha, todo, V, Zoutside, Zoutside, Vplayer, I), Z);
         Z = union_(Z, todo);
         Zoutside = minus(Zoutside, todo);
 
@@ -382,7 +382,7 @@ class symbolic_parity_game
         mCRL2log(log::debug1) << "Zoutside = " << print_nodes(Zoutside) << std::endl;
         stopwatch iter_start;
 
-        todo = intersect(Vc, safe_control_predecessors_impl(alpha, todo, Zoutside, Vplayer, I));
+        todo = intersect(Vc, minus(safe_control_predecessors_impl(alpha, todo, V, Zoutside, Zoutside, Vplayer, I), Z));
         Z = union_(Z, todo);
         Zoutside = minus(Zoutside, todo);
 
@@ -456,7 +456,7 @@ class symbolic_parity_game
     /// \brief Returns the mapping from priorities (ranks) to vertex sets.
     const std::map<std::size_t, ldd>& ranks() { return m_rank_map; }
 
-    /// \returns The set { u in U | exists v in V: u -> v }
+    /// \returns The set { u in U | exists v in V: u ->* v } where with chaining ->* only visits states in V (if U subseteq V)
     ldd predecessors(const ldd& U, const ldd& V)
     {
       using namespace sylvan::ldds;
@@ -475,35 +475,15 @@ class symbolic_parity_game
       return result;
     }
 
-    /// \brief Compute the safe control attractor set for U.
-    ldd safe_control_predecessors(std::size_t alpha,
-      const ldd& U,
-      const ldd& V,
-      const std::array<const ldd, 2>& Vplayer,
-      const ldd& I = sylvan::ldds::empty_set())
-    {
-      return safe_control_predecessors_impl(alpha, U, minus(V, U), Vplayer, I);
-    }
-
-private:
-    /// \returns The set { u in U | exists v in V: u -> v }, where -> is described by the given group.
-    ldd predecessors(const ldd& U, const ldd& V, const summand_group& group)
-    {
-      return m_no_relprod ? lps::alternative_relprev(V, group, U) : relprev(V, group.L, group.Ir, U);
-    }
-
-
-    /// \returns A pair (P, Q) such that:
-    ///             P is a subset of { u in W | exists v in V: u ->* v } where ->* only visits intermediate vertices in W (without chaining ->* = ->)
-    ///             Q is equal to intersect(U, predecessors(P union V)) and in particular possibly outside of W.
-    std::pair<ldd, ldd> predecessors(const ldd& U, const ldd& V, bool chaining, const ldd& W)
+    /// \returns A set of vertices { u in U | exists v in V: u ->* v } where ->* only visits intermediate vertices in W (without chaining ->* = ->)
+    /// \pre U,W subseteq V.
+    ldd predecessors(const ldd& U, const ldd& V, const ldd& W)
     {
       using namespace sylvan::ldds;
 
-      if (chaining)
+      if (m_chaining)
       {
         ldd P = empty_set();
-        ldd Q = empty_set();
         ldd todo = V;
         for (int i = m_summand_groups.size() - 1; i >= 0; --i)
         {
@@ -514,32 +494,52 @@ private:
           mCRL2log(log::debug) << "added predecessors for group " << i << " out of " << m_summand_groups.size()
                                  << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";
 
-          // Vertices restricted to W.
-          ldd R = intersect(todo1, W);
-          P = union_(P, R);
-          Q = union_(Q, todo1);
-          todo = union_(todo, R);
+          P = union_(P, todo1);
+          todo = union_(todo, intersect(todo1, W));
         }
 
-        return std::make_pair(P, Q);
+        return P;
       }
       else
       {
-        ldd Q = predecessors(U, V);
-        return std::make_pair(intersect(Q, W), Q);
+        return predecessors(U, V);
       }
     }
 
-    /// \brief Compute the safe control attractor set for U.
+    /// \brief Compute the safe control attractor set for U w.r.t. vertices in V.
+    ///        The set W is a set of vertices that restrict chaining.
+    ldd safe_control_predecessors(std::size_t alpha,
+      const ldd& U,
+      const ldd& V,
+      const ldd& W,
+      const std::array<const ldd, 2>& Vplayer,
+      const ldd& I = sylvan::ldds::empty_set())
+    {
+      ldd outside = minus(V, U);
+      return safe_control_predecessors_impl(alpha, U, V, outside, W, Vplayer, I);
+    }
+
+private:
+    /// \returns The set { u in U | exists v in V: u -> v }, where -> is described by the given group.
+    ldd predecessors(const ldd& U, const ldd& V, const summand_group& group)
+    {
+      return m_no_relprod ? lps::alternative_relprev(V, group, U) : relprev(V, group.L, group.Ir, U);
+    }
+
+    /// \brief Compute the safe control attractor set for todo where chaining is restricted to W.
+    ///        The set outside should be minus(V, U)
     ldd safe_control_predecessors_impl(std::size_t alpha,
-      const ldd& todo,
-      const ldd& Zoutside,
+      const ldd& U,
+      const ldd& V,
+      const ldd& outside,
+      const ldd& W,
       const std::array<const ldd, 2>& Vplayer,
       const ldd& I = sylvan::ldds::empty_set())
     {
       using namespace sylvan::ldds;
 
-      const auto [Palpha, P] = predecessors(Zoutside, todo, m_chaining, Vplayer[alpha]);
+      ldd P = predecessors(V, U, intersect(Vplayer[alpha], W));
+      ldd Palpha = intersect(P, Vplayer[alpha]);
       ldd Pforced = minus(intersect(P, Vplayer[1-alpha]), I);
 
       for (std::size_t i = 0; i < m_summand_groups.size(); ++i)
@@ -547,7 +547,7 @@ private:
         const summand_group& group = m_summand_groups[i];
 
         stopwatch watch;
-        Pforced = minus(Pforced, predecessors(Pforced, Zoutside, group));
+        Pforced = minus(Pforced, predecessors(Pforced, outside, group));
 
         mCRL2log(log::debug) << "removed 1 - alpha predecessors for group " << i << " out of " << m_summand_groups.size()
                                << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";

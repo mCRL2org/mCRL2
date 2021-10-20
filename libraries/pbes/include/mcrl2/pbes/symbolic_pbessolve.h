@@ -157,7 +157,7 @@ class symbolic_pbessolve_algorithm
       const ldd& V,
       const ldd& I,
       bool safe_variant,
-      const ldd& Vsinks = sylvan::ldds::empty_set(),
+      const ldd& Vsinks,
       const ldd& W0 = sylvan::ldds::empty_set(),
       const ldd& W1 = sylvan::ldds::empty_set())
     {
@@ -171,7 +171,7 @@ class symbolic_pbessolve_algorithm
         return { winning[0], winning[1] };
       }
 
-      mCRL2log(log::debug1) << "\n--- apply cycle detection to ---\n" << m_G.print_graph(V) << std::endl;
+      mCRL2log(log::debug1) << "\n--- apply solitair winning cycle detection to ---\n" << m_G.print_graph(V) << std::endl;
 
       // Computes two vertex sets of all even priority and odd priority nodes respectively.
       std::array<ldd, 2> parity;
@@ -204,7 +204,7 @@ class symbolic_pbessolve_algorithm
         {
           stopwatch timer;
           U = Unext;
-          Unext = m_G.predecessors(U, U);
+          Unext = m_G.predecessors(U, U, U); // TODO: the restriction on U is unnecessary since the predecessors are already in U.
 
           mCRL2log(log::debug) << "iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
 
@@ -237,7 +237,7 @@ class symbolic_pbessolve_algorithm
       const ldd& V,
       const ldd& I,
       bool safe_variant,
-      const ldd& Vsinks = sylvan::ldds::empty_set(),
+      const ldd& Vsinks,
       const ldd& W0 = sylvan::ldds::empty_set(),
       const ldd& W1 = sylvan::ldds::empty_set())
     {
@@ -251,7 +251,7 @@ class symbolic_pbessolve_algorithm
         return { winning[0], winning[1] };
       }
 
-      mCRL2log(log::debug1) << "\n--- apply cycle detection to ---\n" << m_G.print_graph(V) << std::endl;
+      mCRL2log(log::debug1) << "\n--- apply forced winning cycle detection to ---\n" << m_G.print_graph(V) << std::endl;
 
       // Computes two vertex sets of all even priority and odd priority nodes respectively.
       std::array<ldd, 2> parity;
@@ -284,7 +284,15 @@ class symbolic_pbessolve_algorithm
         {
           stopwatch timer;
           U = Unext;
-          Unext = m_G.safe_control_predecessors(alpha, U, Vtotal, Vplayer, safe_variant ? I : empty_set());
+          std::cerr << satcount(U) << std::endl;
+          if (safe_variant)
+          {
+            Unext = intersect(U, m_G.safe_control_predecessors(alpha, U, Vtotal, U, Vplayer, I));
+          }
+          else
+          {
+            Unext = intersect(U, m_G.safe_control_predecessors(alpha, U, Vsafe[alpha], U, Vplayer));
+          }
 
           mCRL2log(log::debug) << "iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
 
@@ -303,6 +311,78 @@ class symbolic_pbessolve_algorithm
         }
       }
 
+      mCRL2log(log::debug1) << "W0 = " << m_G.print_nodes(winning[0]) << std::endl;
+      mCRL2log(log::debug1) << "W1 = " << m_G.print_nodes(winning[1]) << std::endl;
+
+      return { winning[0], winning[1] };
+    }
+
+    /// \returns Partial solve using the fatal attractors.
+    std::pair<ldd, ldd> detect_fatal_attractors(const ldd& initial_vertex,
+        const ldd& V,
+        const ldd& I,
+        bool safe_variant,
+        const ldd& Vsinks,
+        const ldd& W0 = sylvan::ldds::empty_set(),
+        const ldd& W1 = sylvan::ldds::empty_set())
+    {
+      using namespace sylvan::ldds;
+      stopwatch timer;
+
+      std::array<ldd, 2> winning = { W0, W1 };
+      ldd Vtotal = m_G.compute_total_graph(V, I, Vsinks, winning);
+      if (includes(winning[0], initial_vertex) || includes(winning[1], initial_vertex))
+      {
+        return { winning[0], winning[1] };
+      }
+
+      std::array<const ldd, 2> Vplayer = m_G.players(Vtotal);
+
+      // Compute safe vertices if necessary
+      std::array<ldd, 2> Vsafe;
+      if (!safe_variant)
+      {
+        Vsafe = { m_G.compute_safe_vertices(0, Vtotal, I), m_G.compute_safe_vertices(1, Vtotal, I) };
+      }
+
+      mCRL2log(log::debug1) << "\n--- apply fatal attractor detection to ---\n" << m_G.print_graph(Vtotal) << std::endl;
+
+      // For priorities in descending order
+      for (auto it = m_G.ranks().rbegin(); it != m_G.ranks().rend(); it++)
+      {
+        std::size_t c = it->first;
+        std::size_t alpha = c % 2;
+        mCRL2log(log::debug) << "fatal attractor detection for priority " << c << "\n";
+        ldd X = safe_variant ? it->second : intersect(it->second, Vsafe[alpha]);
+        ldd Y = empty_set();
+
+        while (X != empty_set() && X != Y)
+        {
+          Y = X;
+          ldd Z = m_G.safe_monotone_attractor(X, alpha, c, safe_variant ? Vtotal : Vsafe[alpha], Vplayer, safe_variant ? I : empty_set());
+
+
+          if (includes(Z, X))
+          {
+            if (safe_variant)
+            {
+              winning[alpha] = union_(winning[alpha], m_G.safe_attractor(Z, alpha, Vtotal, Vplayer, I));
+            }
+            else
+            {
+              winning[alpha] = union_(winning[alpha], m_G.safe_attractor(Z, alpha, Vsafe[alpha], Vplayer));
+            }
+            mCRL2log(log::debug) << "found " << std::setw(12) << satcount(Z) << " states in fatal attractors for priority " << c << "\n";
+            break;
+          }
+          else
+          {
+            X = intersect(X, Z);
+          }
+        }
+      }
+
+      mCRL2log(log::debug) << "finished fatal attractor detection (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
       mCRL2log(log::debug1) << "W0 = " << m_G.print_nodes(winning[0]) << std::endl;
       mCRL2log(log::debug1) << "W1 = " << m_G.print_nodes(winning[1]) << std::endl;
 

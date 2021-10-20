@@ -62,11 +62,11 @@ public:
       }      
       else if (m_options.solve_strategy == 2)
       {
-        std::tie(m_Vwon[0], m_Vwon[1]) = solver.detect_forced_cycles(m_initial_vertex, V, m_todo, true, m_deadlocks, m_Vwon[0], m_Vwon[1]);
+        std::tie(m_Vwon[0], m_Vwon[1]) = solver.detect_forced_cycles(m_initial_vertex, V, m_todo, false, m_deadlocks, m_Vwon[0], m_Vwon[1]);
       }
       else if (m_options.solve_strategy == 3)
       {
-        //std::tie(m_Vwon[0], m_Vwon[1]) = solver.detect_fatal_attractors(m_initial_vertex, V, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1]);
+        std::tie(m_Vwon[0], m_Vwon[1]) = solver.detect_fatal_attractors(m_initial_vertex, V, m_todo, true, m_deadlocks, m_Vwon[0], m_Vwon[1]);
       }
       else if (m_options.solve_strategy == 4)
       {
