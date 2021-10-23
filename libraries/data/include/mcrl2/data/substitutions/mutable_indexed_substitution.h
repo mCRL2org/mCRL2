@@ -193,7 +193,6 @@ public:
   /// \details This must deliver an expression, and not a reference
   ///          to an expression, as the expressions are stored in 
   ///          a vector that can be resized and moved. 
- 
   const expression_type operator()(const variable_type& v) const
   {
     const std::size_t i = atermpp::detail::index_traits<data::variable, data::variable_key_type, 2>::index(v);
@@ -210,12 +209,14 @@ public:
     // no value assigned to v;
     return v;
   }
+
   /// \brief Application operator; applies substitution to v.
   /// \details This must deliver an expression, and not a reference
   ///          to an expression, as the expressions are stored in 
   ///          a vector that can be resized and moved. 
- 
-  void apply(const variable_type& v, data_expression& target)
+  /// \param   v The variable to which the subsitution is applied.
+  /// \param   target The target into which the substitution is stored. 
+  void apply(const variable_type& v, expression_type& target)
   {
     const std::size_t i = atermpp::detail::index_traits<data::variable, data::variable_key_type, 2>::index(v);
     if (i < m_index_table.size())

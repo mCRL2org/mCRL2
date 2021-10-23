@@ -507,7 +507,24 @@ inline void make_application(data_expression& result)
 
 /// \brief Constructor.
 /// \param result variable into which the application is constructed.
-inline void make_application(data_expression& result,
+template<typename ...Terms,
+             typename = std::enable_if_t<std::conjunction_v<std::is_convertible<Terms, data_expression>...>> >
+inline void make_application(
+                data_expression& result,
+                const data_expression& head,
+                const data_expression& arg1,
+                const Terms& ...other_arguments
+               )
+{
+  assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, other_arguments...}));
+  atermpp::make_term_appl(result,
+                          core::detail::function_symbol_DataAppl(sizeof...(Terms)+2),
+                          head,
+                          arg1, 
+                          other_arguments...);
+}
+
+/* inline void make_application(data_expression& result,
                       const data_expression& head,
                       const data_expression& arg1)
 {
@@ -578,7 +595,7 @@ inline void make_application(data_expression& result,
 {
   assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, arg2, arg3, arg4, arg5, arg6}));
   atermpp::make_term_appl(result,core::detail::function_symbol_DataAppl(7),head,arg1,arg2,arg3,arg4,arg5,arg6);
-}
+} */
 
 /// \brief Constructor.
 /// \param result variable into which the application is constructed.

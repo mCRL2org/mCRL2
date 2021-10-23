@@ -335,7 +335,7 @@ BOOST_AUTO_TEST_CASE(test_struct)
     "init P(1);\n"
   );
   check_lps2lts_specification(spec, 2, 1, 2);
-}
+} 
 
 BOOST_AUTO_TEST_CASE(test_alias_complex)
 {

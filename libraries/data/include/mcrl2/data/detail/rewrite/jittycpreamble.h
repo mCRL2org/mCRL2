@@ -37,11 +37,10 @@ extern "C" {
 template <class REWRITE_TERM>
 static data_expression& local_rewrite(const REWRITE_TERM& t, std::size_t& stack_increment)
 {
-  normal_form(t, stack_increment);
-  return t;
+  return t.normal_form(stack_increment);
 }
 
-static const data_expression& local_rewrite(const data_expression& t, std::size_t& stack_increment)
+static const data_expression& local_rewrite(const data_expression& t, std::size_t&)
 {
   return t;
 } 
@@ -94,9 +93,13 @@ class term_not_in_normal_form
        : m_term(term), this_rewriter(tr)
     {}
 
-    void normal_form(data_expression& result, size_t&) const
+    data_expression& normal_form(size_t& stack_increment) const
     {
-      rewrite_aux(result, m_term, false, this_rewriter);
+      this_rewriter->m_rewrite_stack.increase(1);
+      stack_increment++;
+      data_expression& local_store = this_rewriter->m_rewrite_stack.top();
+      rewrite_aux(local_store, m_term, false, this_rewriter);
+      return local_store;
     }
 };
 
@@ -118,10 +121,18 @@ class delayed_abstraction
        : m_binding_operator(binding_operator), m_variables(variables), m_body(body), this_rewriter(tr)
     {}
 
-    void normal_form(data_expression& result, size_t&) const
+    data_expression& normal_form(std::size_t& stack_increment) const
     {
-      const abstraction t(m_binding_operator,m_variables,local_rewrite(m_body));
-      rewrite_abstraction_aux(result, t,t,this_rewriter);
+      this_rewriter->m_rewrite_stack.increase(1);
+      stack_increment++;
+      data_expression& t = this_rewriter->m_rewrite_stack.top();
+      make_abstraction(t, m_binding_operator,m_variables,local_rewrite(m_body, stack_increment));
+      // const abstraction t(m_binding_operator,m_variables,local_rewrite(m_body));
+      this_rewriter->m_rewrite_stack.increase(1);
+      stack_increment++;
+      data_expression& result = this_rewriter->m_rewrite_stack.top();
+      rewrite_abstraction_aux(result, atermpp::down_cast<abstraction>(t),t,this_rewriter);
+      return result;
     }
 };
 
@@ -334,7 +345,7 @@ void rewrite_aux(data_expression& result, const data_expression& t, const bool a
   else
   if (is_variable(t))
   {
-    result=sigma(this_rewriter)(down_cast<variable>(t));
+    sigma(this_rewriter).apply(down_cast<variable>(t),result);
     return;
   }
   else
