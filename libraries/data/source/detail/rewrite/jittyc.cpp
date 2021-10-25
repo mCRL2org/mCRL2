@@ -2781,6 +2781,7 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
 
   // Fill tables with the rewrite functions
   RewriterCompilingJitty::substitution_type sigma;
+  normal_forms_for_constants.clear();
   for (const rewr_function_spec& f: code_generator.implemented_rewrs())
   {
     if (!f.delayed())
