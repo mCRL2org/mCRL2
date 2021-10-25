@@ -138,6 +138,9 @@ class RewriterCompilingJitty: public Rewriter
     // for rewriting. They are used to find the relevant compiled rewriting code quickly. 
     std::vector<rewriter_function> functions_when_arguments_are_not_in_normal_form;
     std::vector<rewriter_function> functions_when_arguments_are_in_normal_form;
+ 
+    // The following vector is to store normal forms of constants, indexed by the sequence number in a constant. 
+    std::vector<data_expression> normal_forms_for_constants;
 
     // Standard assignment operator.
     RewriterCompilingJitty& operator=(const RewriterCompilingJitty& other)=delete;

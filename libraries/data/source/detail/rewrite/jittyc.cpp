@@ -2956,20 +2956,31 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
            << "  }\n";
 
   // Fill tables with the rewrite functions
-  for (std::set<rewr_function_spec>::const_iterator
-            it = code_generator.implemented_rewrs().begin();
-            it != code_generator.implemented_rewrs().end(); ++it)
+  RewriterCompilingJitty::substitution_type sigma;
+  for (const rewr_function_spec& f: code_generator.implemented_rewrs())
   {
-    if (!it->delayed())
+    if (!f.delayed())
     {
-      cpp_file << "  this_rewriter->functions_when_arguments_are_not_in_normal_form[this_rewriter->arity_bound * "
-               << atermpp::detail::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(it->fs())
-               << " + " << it->arity() << "] = rewr_functions::"
-               << it->name() << "_term;\n";
-      cpp_file << "  this_rewriter->functions_when_arguments_are_in_normal_form[this_rewriter->arity_bound * "
-               << atermpp::detail::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(it->fs())
-               << " + " << it->arity() << "] = rewr_functions::"
-               << it->name() << "_term_arg_in_normal_form;\n";
+      std::size_t index = atermpp::detail::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(f.fs());
+      if (f.arity()>0)
+      {
+        cpp_file << "  this_rewriter->functions_when_arguments_are_not_in_normal_form[this_rewriter->arity_bound * "
+                 << index
+                 << " + " << f.arity() << "] = rewr_functions::"
+                 << f.name() << "_term;\n";
+        cpp_file << "  this_rewriter->functions_when_arguments_are_in_normal_form[this_rewriter->arity_bound * "
+                 << index
+                 << " + " << f.arity() << "] = rewr_functions::"
+                 << f.name() << "_term_arg_in_normal_form;\n";
+      }
+      else
+      { 
+        if (index>=normal_forms_for_constants.size())
+        {
+          normal_forms_for_constants.resize(index+1);
+        }
+        normal_forms_for_constants[index]=jitty_rewriter(f.fs(),sigma);
+      }
     }
   }
 
@@ -3055,7 +3066,8 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   {
     try
     {
-      rewriter_so->cleanup();
+std::cerr << "DO NOT REMOVE REWRITE .cpp FILE\n";
+//      rewriter_so->cleanup();
     }
     catch (std::runtime_error& error)
     {

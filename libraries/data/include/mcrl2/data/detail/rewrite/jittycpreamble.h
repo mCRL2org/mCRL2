@@ -249,7 +249,7 @@ void rewrite_appl_aux(data_expression& result, const application& t, RewriterCom
       return;
     }
     make_application(result, t.head(), t.begin(), t.end(), rewrite_functor(this_rewriter));
-    return;
+    return; 
   }
   // Here the head symbol of, which can be deeply nested, is not a function_symbol.
   const data_expression& head0 = get_nested_head(t);
@@ -306,16 +306,15 @@ void rewrite_aux(data_expression& result, const data_expression& t, const bool a
 {
   if (is_function_symbol(t))
   {
-    const std::size_t arity=0;
-    const rewriter_function f = get_precompiled_rewrite_function(down_cast<function_symbol>(t), arity, false,this_rewriter);
-    if (f != nullptr)
+    const std::size_t index = get_index(down_cast<function_symbol>(t));
+    if (index<this_rewriter->normal_forms_for_constants.size());
     {
-      f(result, application(),this_rewriter); // The argument is not used.
-      assert(result.sort()==t.sort());
+      result = this_rewriter->normal_forms_for_constants[index];
+      assert(t.sort()==result.sort());
       return;
     }
     result=t;
-    return;
+    return; 
   }
   else
   if (is_application_no_check(t))
