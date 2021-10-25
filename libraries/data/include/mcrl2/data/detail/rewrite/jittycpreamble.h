@@ -267,12 +267,11 @@ data_expression rewrite_aux(const data_expression& t, const bool arguments_in_no
 {
   if (is_function_symbol(t))
   {
-    const std::size_t arity=0;
-    const rewriter_function f = get_precompiled_rewrite_function(down_cast<function_symbol>(t), arity, false,this_rewriter);
-    if (f != NULL)
+    const std::size_t index = get_index(down_cast<function_symbol>(t));
+    if (index<this_rewriter->normal_forms_for_constants.size());
     {
-      const data_expression& result=f(application(),this_rewriter); // The argument is not used.
-      assert(result.sort()==t.sort());
+      const data_expression& result = this_rewriter->normal_forms_for_constants[index];
+      assert(t.sort()==result.sort());
       return result;
     }
     return t;

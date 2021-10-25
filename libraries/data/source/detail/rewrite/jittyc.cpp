@@ -2653,7 +2653,8 @@ static std::string generate_cpp_filename(std::size_t unique)
   time_t now = time(0);
   struct tm tstruct = *localtime(&now);
 
-  std::size_t unique_time = ((((tstruct.tm_year*12+tstruct.tm_mon)*31+tstruct.tm_mday)*24+
+  // The static_cast<std::size_t> is required, as the calculation does not fit into a 32 bit int, yielding a negative number. 
+  std::size_t unique_time = ((((static_cast<std::size_t>(tstruct.tm_year)*12+tstruct.tm_mon)*31+tstruct.tm_mday)*24+
                                 tstruct.tm_hour)*60+tstruct.tm_min)*60 + tstruct.tm_sec;
   // the name below must be unique. If two .cpp files have the same name, loading the second
   // may effectively load the first. The pid of the current process and the this pointer in 
@@ -2779,20 +2780,31 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
               "{\n";
 
   // Fill tables with the rewrite functions
-  for (std::set<rewr_function_spec>::const_iterator
-            it = code_generator.implemented_rewrs().begin();
-            it != code_generator.implemented_rewrs().end(); ++it)
+  RewriterCompilingJitty::substitution_type sigma;
+  for (const rewr_function_spec& f: code_generator.implemented_rewrs())
   {
-    if (!it->delayed())
+    if (!f.delayed())
     {
-      cpp_file << "  this_rewriter->functions_when_arguments_are_not_in_normal_form[this_rewriter->arity_bound * "
-               << core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(it->fs())
-               << " + " << it->arity() << "] = rewr_functions::"
-               << it->name() << "_term;\n";
-      cpp_file << "  this_rewriter->functions_when_arguments_are_in_normal_form[this_rewriter->arity_bound * "
-               << core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(it->fs())
-               << " + " << it->arity() << "] = rewr_functions::"
-               << it->name() << "_term_arg_in_normal_form;\n";
+      std::size_t index = core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(f.fs());
+      if (f.arity()>0)
+      {
+        cpp_file << "  this_rewriter->functions_when_arguments_are_not_in_normal_form[this_rewriter->arity_bound * "
+                 << index
+                 << " + " << f.arity() << "] = rewr_functions::"
+                 << f.name() << "_term;\n";
+        cpp_file << "  this_rewriter->functions_when_arguments_are_in_normal_form[this_rewriter->arity_bound * "
+                 << index
+                 << " + " << f.arity() << "] = rewr_functions::"
+                 << f.name() << "_term_arg_in_normal_form;\n";
+      }
+      else
+      { 
+        if (index>=normal_forms_for_constants.size())
+        {
+          normal_forms_for_constants.resize(index+1);
+        }
+        normal_forms_for_constants[index]=jitty_rewriter(f.fs(),sigma);
+      }
     }
   }
 
