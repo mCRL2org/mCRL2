@@ -161,8 +161,6 @@ static std::set<variable> find_variables_in_the_scope_of_main_function_symbol_in
 
 typedef atermpp::term_list<variable_list> variable_list_list;
 
-std::set< std::size_t > m_required_appl_functions;
-
 static std::vector<bool> dep_vars(const data_equation& eqn)
 {
   std::vector<bool> result(recursive_number_of_args(eqn.lhs()), true);
@@ -1167,14 +1165,7 @@ class RewriterCompilingJitty::ImplementTree
     {
       return "pass_on";  // This is to avoid confusion with atermpp::aterm_appl on a function symbol and two iterators.
     }
-    if (arity <= 6)
-    {
-      return "make_application";
-    }
-
-    // Take care that the required function is generated.
-    m_required_appl_functions.insert(arity);
-    return "make_term_with_many_arguments";
+    return "make_application";
   }
 
   inline
@@ -2669,30 +2660,33 @@ public:
     m_padding.unindent();
     m_stream << m_padding << "}\n\n";
 
-    m_stream << m_padding <<
-                  "static inline void rewr_" << index << "_" << arity << "_term" 
-                  "(data_expression& result, const application&" << (arity == 0 ? "" : " t") << ", RewriterCompilingJitty* this_rewriter) "
-                  "{ rewr_" << index << "_" << arity << "(result";
-    for(std::size_t i = 0; i < arity; ++i)
+    if (arity>0)
     {
-      assert(is_function_sort(func.sort()));
-      m_stream << ", term_not_in_normal_form(";
-      get_recursive_argument(m_stream, down_cast<function_sort>(func.sort()), i, "t", arity);
-      m_stream << ", this_rewriter)";
-    }
-    m_stream << ", this_rewriter); }\n\n";
+      m_stream << m_padding <<
+                    "static inline void rewr_" << index << "_" << arity << "_term" 
+                    "(data_expression& result, const application&" << (arity == 0 ? "" : " t") << ", RewriterCompilingJitty* this_rewriter) "
+                    "{ rewr_" << index << "_" << arity << "(result";
+      for(std::size_t i = 0; i < arity; ++i)
+      {
+        assert(is_function_sort(func.sort()));
+        m_stream << ", term_not_in_normal_form(";
+        get_recursive_argument(m_stream, down_cast<function_sort>(func.sort()), i, "t", arity);
+        m_stream << ", this_rewriter)";
+      }
+      m_stream << ", this_rewriter); }\n\n";
 
-    m_stream << m_padding <<
-                  "static inline void rewr_" << index << "_" << arity << "_term_arg_in_normal_form" 
-                  "(data_expression& result, const application&" << (arity == 0 ? "" : " t") << ", RewriterCompilingJitty* this_rewriter) "
-                  "{ rewr_" << index << "_" << arity << "(result";
-    for(std::size_t i = 0; i < arity; ++i)
-    {
-      assert(is_function_sort(func.sort()));
-      m_stream << ", ";
-      get_recursive_argument(m_stream, down_cast<function_sort>(func.sort()), i, "t", arity);
+      m_stream << m_padding <<
+                    "static inline void rewr_" << index << "_" << arity << "_term_arg_in_normal_form" 
+                    "(data_expression& result, const application&" << (arity == 0 ? "" : " t") << ", RewriterCompilingJitty* this_rewriter) "
+                    "{ rewr_" << index << "_" << arity << "(result";
+      for(std::size_t i = 0; i < arity; ++i)
+      {
+        assert(is_function_sort(func.sort()));
+        m_stream << ", ";
+        get_recursive_argument(m_stream, down_cast<function_sort>(func.sort()), i, "t", arity);
+      }
+      m_stream << ", this_rewriter); }\n\n";
     }
-    m_stream << ", this_rewriter); }\n\n";
 
     while (!auxiliary_code_fragments.empty())
     {
@@ -2818,7 +2812,9 @@ static std::string generate_cpp_filename(std::size_t unique)
   time_t now = time(nullptr);
   struct tm tstruct = *localtime(&now);
 
-  std::size_t unique_time = ((((tstruct.tm_year*12+tstruct.tm_mon)*31+tstruct.tm_mday)*24+
+
+  // The static_cast<std::size_t> is required, as the calculation does not fit into a 32 bit int, yielding a negative number. 
+  std::size_t unique_time = ((((static_cast<std::size_t>(tstruct.tm_year)*12+tstruct.tm_mon)*31+tstruct.tm_mday)*24+
                                 tstruct.tm_hour)*60+tstruct.tm_min)*60 + tstruct.tm_sec;
   // the name below must be unique. If two .cpp files have the same name, loading the second
   // may effectively load the first. The pid of the current process and the this pointer in 
@@ -2843,38 +2839,6 @@ void filter_function_symbols(const function_symbol_vector& source, function_symb
     if (filter(*it))
     {
       dest.push_back(*it);
-    }
-  }
-}
-
-///
-/// \brief generate_make_appl_functions defines functions that create data::application terms
-///        for function symbols with more than 6 arguments.
-/// \param s The stream to which the generated C++ code is written.
-/// \param max_arity The maximum arity plus one of the functions that are to be generated.
-///
-static void generate_make_appl_functions(std::ostream& s, std::size_t max_arity)
-{
-  // The casting magic in these functions is done to avoid triggering the ATerm
-  // reference counting mechanism.
-  for (std::size_t i = 7; i < max_arity; ++i)
-  {
-    if (m_required_appl_functions.count(i)>0)
-    {
-      s << "static void make_term_with_many_arguments(data_expression& result, const data_expression& head";
-      for (std::size_t j = 1; j <= i; ++j)
-      {
-        s << ", const data_expression& arg" << j;
-      }
-      s << ")\n{\n";
-      s << "  atermpp::detail::_aterm* buffer[" << i << "];\n";
-      for (std::size_t j=0; j<i; ++j)
-      {
-        s << "  buffer[" << j << "] = atermpp::detail::address(arg" << j + 1 << ");\n";
-      }
-      s << "  make_application(result, head, reinterpret_cast<data_expression*>(buffer), reinterpret_cast<data_expression*>(buffer) + " << i << ");\n"
-           "}\n"
-           "\n";
     }
   }
 }
@@ -2937,7 +2901,6 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
   rewr_code << "};\n"
                "} // namespace\n";
 
-  generate_make_appl_functions(cpp_file, arity_bound);
   code_generator.generate_delayed_application_functions(cpp_file);
 
   cpp_file << rewr_code.str();
@@ -2957,6 +2920,7 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
 
   // Fill tables with the rewrite functions
   RewriterCompilingJitty::substitution_type sigma;
+  normal_forms_for_constants.clear();
   for (const rewr_function_spec& f: code_generator.implemented_rewrs())
   {
     if (!f.delayed())
