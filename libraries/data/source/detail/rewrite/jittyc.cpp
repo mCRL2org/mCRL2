@@ -1532,25 +1532,50 @@ class RewriterCompilingJitty::ImplementTree
     nfs_array rewr_args(arity);
     rewr_args.fill();
     std::stringstream dummy_result_type;  // As we rewrite to normal forms, these are always data_expressions.
-    if (is_variable(a.head()))
-    {
-      s << m_padding << appl_function(arity) << "(" << target_for_output << ",";
-      calc_inner_term(s, "", down_cast<variable>(a.head()), startarg, true, dummy_result_type, type_of_code_variables);
-    }
-    else
-    {
-      assert(is_application(a.head()));
-      write_application_to_stream_in_normal_form(s,target_for_output,down_cast<application>(a.head()),startarg, type_of_code_variables);
-      s << m_padding << appl_function(arity) << "(" << target_for_output << "," << target_for_output;
-      std::stringstream dummy_result_type;  // As we rewrite to normal forms, these are always data_expressions.
-    }
-    for(const data_expression& t: a)
-    {
-      s << ", ";
 
-      calc_inner_term(s, "", t, startarg, rewr_args, dummy_result_type, type_of_code_variables);
+    if (target_for_output.empty())
+    {
+      if (is_variable(a.head()))
+      {
+        s << "application(";
+        calc_inner_term(s, "", down_cast<variable>(a.head()), startarg, true, dummy_result_type, type_of_code_variables);
+      }
+      else
+      {
+        assert(is_application(a.head()));
+        s << "application(";
+        write_application_to_stream_in_normal_form(s,"",down_cast<application>(a.head()),startarg, type_of_code_variables);
+      }
+      for(const data_expression& t: a)
+      {
+        s << ", ";
+
+        calc_inner_term(s, "", t, startarg, rewr_args, dummy_result_type, type_of_code_variables);
+      }
+      s << ")";
     }
-    s << ");\n";
+    else 
+    {
+      if (is_variable(a.head()))
+      {
+        s << m_padding << appl_function(arity) << "(" << target_for_output << ",";
+        calc_inner_term(s, "", down_cast<variable>(a.head()), startarg, true, dummy_result_type, type_of_code_variables);
+      }
+      else
+      {
+        assert(is_application(a.head()));
+        write_application_to_stream_in_normal_form(s,target_for_output,down_cast<application>(a.head()),startarg, type_of_code_variables);
+        s << m_padding << appl_function(arity) << "(" << target_for_output << "," << target_for_output;
+        std::stringstream dummy_result_type;  // As we rewrite to normal forms, these are always data_expressions.
+      }
+      for(const data_expression& t: a)
+      {
+        s << ", ";
+
+        calc_inner_term(s, "", t, startarg, rewr_args, dummy_result_type, type_of_code_variables);
+      }
+      s << ");\n";
+    }
   }
 
   std::string delayed_application(const std::size_t arity)
