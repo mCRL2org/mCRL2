@@ -597,7 +597,7 @@ void RewriterJitty::rewrite_aux_function_symbol(
         if (term.head()==op) 
         { 
           // application rewriteable_term(op, &rewritten[0], &rewritten[arity]);
-          assert(m_rewrite_stack.size()>=arity+1);
+          assert(m_rewrite_stack.stack_size()>=arity+1);
           application rewriteable_term(op, m_rewrite_stack.stack_iterator(0,arity+1),
                                            m_rewrite_stack.stack_iterator(arity,arity+1)); /* TODO Optimize */
           result=rule.rewrite_cpp_code()(rewriteable_term);
@@ -704,7 +704,7 @@ void RewriterJitty::rewrite_aux_function_symbol(
                 const std::size_t end=i+fsort.domain().size();
                 assert(end-1<arity);
                 // result = application(result,&rewritten[0]+i,&rewritten[0]+end);
-                assert(m_rewrite_stack.size()+i>=arity+1);
+                assert(m_rewrite_stack.stack_size()+i>=arity+1);
                 assert(end<arity+1);
                 assert(end>=i);
 
@@ -751,7 +751,7 @@ void RewriterJitty::rewrite_aux_function_symbol(
   {
     const function_sort& fsort=atermpp::down_cast<function_sort>(*sort);
     const std::size_t end=i+fsort.domain().size();
-    assert(m_rewrite_stack.size()+i>=arity+1);
+    assert(m_rewrite_stack.stack_size()+i>=arity+1);
     assert(end<arity+1);
     assert(end>=i);
     make_application(result,result,m_rewrite_stack.stack_iterator(i,arity+1), m_rewrite_stack.stack_iterator(end,arity+1));
@@ -858,13 +858,12 @@ void RewriterJitty::rewrite(
       rewriting_in_progress=false; // Restart rewriting, due to a stack overflow.
                                    // The stack is a vector, and it may be relocated in memory when
                                    // resized. References to the stack loose their validity. 
-      m_rewrite_stack.resize(0);
       m_rewrite_stack.reserve_more_space();
       rewrite(result,term,sigma);
       return;
     }
     rewriting_in_progress=false;
-    assert(m_rewrite_stack.size()==0);
+    assert(m_rewrite_stack.stack_size()==0);
   }
 
   assert(remove_normal_form_function(result)==result);

@@ -26,7 +26,8 @@ namespace
 {
   global_function_symbol g_empty("@empty@", 0);
   global_function_symbol g_tree_node("@node@", 2);
-  aterm_appl g_empty_tree(g_empty);
+  global_function_symbol g_dummy_left_tree("@dummy_left_tree@", 0);
+  global_function_symbol g_dummy_right_tree("@dummy_right_tree@", 0);
 }
 
 /// \brief Read-only balanced binary tree of terms.
@@ -37,37 +38,67 @@ class term_balanced_tree : public aterm_appl
 
     static const atermpp::function_symbol& tree_empty_function() { return g_empty; }
     static const function_symbol& tree_node_function() { return g_tree_node; }
-    static const aterm_appl& empty_tree() { return g_empty_tree; }
+    static const aterm_appl& empty_tree() 
+    { 
+      static aterm_appl g_empty_tree(g_empty);
+      return g_empty_tree; 
+    }
+    static const aterm_appl& dummy_left_tree() 
+    { 
+      static aterm_appl g_empty_tree(g_dummy_left_tree);
+      return g_empty_tree; 
+    }
+    static const aterm_appl& dummy_right_tree() 
+    { 
+      static aterm_appl g_empty_tree(g_dummy_right_tree);
+      return g_empty_tree; 
+    }
 
-    static void make_node(aterm& term, const term_balanced_tree& left_tree, const term_balanced_tree& right_tree)
+    static const std::vector<aterm_appl>& aux_dummy_tree()
     {
-      detail::g_thread_term_pool().create_appl(term, tree_node_function(), left_tree, right_tree);
+      static const std::vector<aterm_appl> g_aux_dummy_tree({ dummy_left_tree(), dummy_right_tree() });
+      return g_aux_dummy_tree;
     }
 
     template < typename ForwardTraversalIterator, class Transformer >
-    void make_tree(aterm& term, ForwardTraversalIterator& p, const std::size_t size, Transformer transformer )
+    void make_tree_helper(aterm& result, ForwardTraversalIterator& p, const std::size_t size, Transformer transformer)
     {
-      if (size>1)
-      {
-        std::size_t left_size = (size + 1) >> 1; // size/2 rounded up.
-        term_balanced_tree left_tree;
-        make_tree(left_tree, p, left_size, transformer);
-        std::size_t right_size = size >> 1; // size/2 rounded down.
-        term_balanced_tree right_tree;
-        make_tree(right_tree, p, right_size, transformer);
-
-        make_node(term, left_tree, right_tree);
-        return;
-      }
-
       if (size==1)
       {
-        term = reinterpret_cast<const aterm_appl&>(static_cast<const aterm&>(transformer(*(p++))));
+        result = reinterpret_cast<const aterm_appl&>(static_cast<const aterm&>(transformer(*(p++))));
         return;
       }
 
-      assert(size==0);
-      term = empty_tree();
+      make_term_appl(result,tree_node_function(),aux_dummy_tree().begin(), aux_dummy_tree().end(),
+                     [&size, &transformer, &p, this](aterm& target, const aterm_appl& dummy_tree)
+                        { 
+                          assert(size>1);
+                          
+                          std::size_t new_size;
+                          if (dummy_tree==dummy_left_tree())
+                          {
+                            new_size = (size + 1) >> 1; // size/2 rounded up.
+                          }
+                          else
+                          {
+                            assert(dummy_tree==dummy_right_tree());
+                            new_size = size >> 1; // size/2 rounded down.
+                          }
+                          make_tree_helper(target, p, new_size, transformer);
+                        });
+    }
+
+    template < typename ForwardTraversalIterator, class Transformer >
+    void make_tree(aterm& result, ForwardTraversalIterator& p, const std::size_t size, Transformer transformer)
+    {
+      if (size==0)
+      {
+        result = empty_tree(); 
+      }
+      else
+      {
+        make_tree_helper(result, p, size, transformer);
+      }
     }
 
     explicit term_balanced_tree(detail::_term_appl* t)

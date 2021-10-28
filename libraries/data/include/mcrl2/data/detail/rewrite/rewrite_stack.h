@@ -36,65 +36,78 @@ namespace detail
 /// and that means that when resizing is necessary, the 
 /// current term must be resized. When this exception is
 /// thrown, the current substitution must also be restored. 
+///
+/// Note that the vector leaves terms on the stack as protected
+/// members when the stack is decreased. This is done intentionally
+/// because the stack is intensively used by the rewriters, and
+/// destroying and creating elements in the vector is a relatively
+/// expensive operation. 
+
 struct recalculate_term_as_stack_is_too_small {};
 
 
-class rewrite_stack : public atermpp::vector<data_expression>
+class rewrite_stack : protected atermpp::vector<data_expression>
 {
+  protected:
+    std::size_t m_stack_size;
 
   public:
 
     /// \brief Constructor
     rewrite_stack() 
+      : m_stack_size(0)
     {
       reserve_more_space();
     }
 
     void reserve_more_space() 
     {
-      reserve(std::max(2*capacity(),static_cast<std::size_t>(128)));
+      resize(std::max(2*size(),static_cast<std::size_t>(128)));
+      m_stack_size=0;
     }
 
     void increase(std::size_t distance)
     { 
-      if (size()+distance>=capacity())
+      if (m_stack_size+distance>=size())
       { 
         throw recalculate_term_as_stack_is_too_small();
       }
-      resize(size()+distance);
+      m_stack_size=m_stack_size+distance;
     }
 
     void decrease(std::size_t distance)
     { 
-      if (distance>0)
-      {
-        assert(distance<=size());
-        resize(size()-distance);
-      }
+      assert(distance<=m_stack_size);
+      m_stack_size=m_stack_size-distance;
     }
 
     data_expression& top()
     { 
-      assert(size()>0);
-      return back();
+      assert(m_stack_size>0);
+      return operator[](m_stack_size-1);
     }
 
     void set_element(std::size_t pos, std::size_t frame_size, const data_expression& d)
     {
-      assert(size()+pos>=frame_size && pos<frame_size);
-      operator[](size()-frame_size+pos)=d;
+      assert(m_stack_size+pos>=frame_size && pos<frame_size);
+      operator[](m_stack_size-frame_size+pos)=d;
     }
 
     data_expression& element(std::size_t pos, std::size_t frame_size)
     {
-      assert(size()+pos>=frame_size && pos<frame_size);
-      return at(size()-frame_size+pos);
+      assert(m_stack_size+pos>=frame_size && pos<frame_size);
+      return operator[](m_stack_size-frame_size+pos);
     }
 
     atermpp::vector<data_expression>::const_iterator stack_iterator(std::size_t pos, std::size_t frame_size) const
     {
-      assert(size()+pos>=frame_size && pos<frame_size);
-      return begin()+size()-frame_size+pos;
+      assert(m_stack_size+pos>=frame_size && pos<frame_size);
+      return begin()+m_stack_size-frame_size+pos;
+    }
+
+    std::size_t stack_size() const
+    {
+      return m_stack_size;
     }
 };
 

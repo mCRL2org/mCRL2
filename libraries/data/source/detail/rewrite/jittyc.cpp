@@ -2539,39 +2539,6 @@ public:
       return;
     }
 
-    /* const std::size_t domain_size = s.domain().size();
-    if (is_function_sort(s.codomain()))
-    {
-      used_arguments += domain_size;
-      rewr_function_finish_term(m_stream, arity - domain_size, head, down_cast<function_sort>(s.codomain()), used_arguments);
-      used_arguments -= domain_size;
-    }
-    else
-    {
-      m_stream << m_padding << appl_function(domain_size) << "(result, ";
-      if (arity>domain_size)
-      {  
-        m_stream << "result";
-      }
-      else
-      {
-        m_stream << head;
-      }
-
-      for (std::size_t i = 0; i < domain_size; ++i)
-      {
-        if (m_used[used_arguments + i])
-        {
-          m_stream << ", arg" << used_arguments + i;
-        }
-        else
-        {
-          m_stream << ", local_rewrite(arg_not_nf" << used_arguments + i << ",this_rewriter,stack_increment)";
-        }
-      }
-      m_stream << ");\n";
-    } */
-
     sort_expression current_sort=s;
     std::size_t used_arguments=0;
     while (used_arguments<arity)
@@ -2621,9 +2588,9 @@ public:
     else
     {
       std::stringstream ss;
-      ss << "atermpp::down_cast<data_expression>(atermpp::aterm(reinterpret_cast<atermpp::detail::_aterm*>(" 
-         << (void*)atermpp::detail::address(opid) 
-         << ")))";
+      ss << "this_rewriter->normal_forms_for_constants[" 
+         << atermpp::detail::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(opid) 
+         << "]";
       rewr_function_finish_term(m_stream, arity, ss.str(), down_cast<function_sort>(opid.sort()));
     } 
   }
@@ -3150,13 +3117,12 @@ void RewriterCompilingJitty::rewrite(
       rewriting_in_progress=false; // Restart rewriting, due to a stack overflow.
                                    // The stack is a vector, and it may be relocated in memory when
                                    // resized. References to the stack loose their validity. 
-      m_rewrite_stack.resize(0);
       m_rewrite_stack.reserve_more_space();
       rewrite(result,term,sigma);
       return;
     }
     rewriting_in_progress=false;
-    assert(m_rewrite_stack.size()==0);
+    assert(m_rewrite_stack.stack_size()==0);
   }
 
   global_sigma=saved_sigma;
