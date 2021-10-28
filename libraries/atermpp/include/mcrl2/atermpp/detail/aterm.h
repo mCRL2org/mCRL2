@@ -56,10 +56,6 @@ public:
   /// \brief Mark this term to be reachable.
   void mark() const
   {
-/* std::cerr << "MARK ";
-debug_print(std::cerr, this, 3);
-std::cerr << "\n"; */
-
     m_function_symbol.m_function_symbol.tag();
   }
 
@@ -89,7 +85,6 @@ const std::size_t offset = 2;
 
 inline void debug_print(std::ostream& out, const _aterm* t, const std::size_t d)
 {
-// std::cerr << "PTR " << t << "\n";
   if (d==0) { out << "..."; return; }
   if (!t->function().defined()) { out << "UNDEFFUNC"; return; }
 

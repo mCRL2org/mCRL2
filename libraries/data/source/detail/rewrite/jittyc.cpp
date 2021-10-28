@@ -3093,7 +3093,6 @@ void RewriterCompilingJitty::rewrite(
      const data_expression& term,
      substitution_type& sigma)
 {
-// std::cerr << "REWRITE " << term << "\n";
 #ifdef MCRL2_DISPLAY_REWRITE_STATISTICS
   data::detail::increment_rewrite_count();
 #endif
@@ -3126,7 +3125,6 @@ void RewriterCompilingJitty::rewrite(
   }
 
   global_sigma=saved_sigma;
-// std::cerr << "REWRITE " << term << " --> " << result << "\n";
   return;
 }
 
