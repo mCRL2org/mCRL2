@@ -8,6 +8,7 @@
 //
 
 #include "mcrl2/atermpp/aterm_io.h"
+#include "mcrl2/atermpp/detail/global_aterm_pool.h"
 
 using namespace atermpp;
 using namespace atermpp::detail;
@@ -22,6 +23,17 @@ void atermpp::add_deletion_hook(const function_symbol& function, term_callback c
 {  
   g_term_pool().add_deletion_hook(function, callback);
 }
+
+namespace atermpp::detail
+{
+/// \brief A reference to the thread local term pool storage
+thread_aterm_pool& g_thread_term_pool()
+{
+  thread_local thread_aterm_pool instance(g_aterm_pool_instance);
+  return instance;
+}
+
+} // end namespace atermpp::detail
 
 aterm_stream::~aterm_stream() {}
 
