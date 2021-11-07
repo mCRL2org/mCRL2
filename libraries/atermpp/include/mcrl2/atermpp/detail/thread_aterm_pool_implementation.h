@@ -22,6 +22,9 @@ namespace atermpp
 namespace detail
 {
 
+/// \brief A reference to the thread local term pool storage
+thread_aterm_pool& g_thread_term_pool();
+
 function_symbol thread_aterm_pool::create_function_symbol(const std::string& name, const std::size_t arity, const bool check_for_registered_functions)
 {
   lock_shared();
@@ -216,12 +219,47 @@ void thread_aterm_pool::lock_shared()
   }
 }
 
+/// The function lock_shared that does not access thread local variables directly.
+/// Instead it uses the necessary variables through explicit access of pointers stored
+/// in rewriters. This is faster, but may be removed in due time when access to thread
+/// local variables is sped up. 
+void inline lock_shared(std::atomic<bool>* busy_flag,
+                        std::atomic<bool>* forbidden_flag,
+                        std::size_t* creation_depth)
+{
+  assert(busy_flag != nullptr && m_forbidden_flag != nullptr && m_creation_depth != nullptr);
+  if (GlobalThreadSafe && *creation_depth == 0)
+  {
+    assert(!*busy_flag);
+    busy_flag->store(true);
+
+    // Wait for the forbidden flag to become false.
+    if (forbidden_flag->load())
+    {
+      *busy_flag = false;
+      atermpp::detail::g_thread_term_pool().lock_shared();
+    }
+  }
+}
+
+
 void thread_aterm_pool::unlock_shared()
 {
   if (GlobalThreadSafe && m_creation_depth == 0)
   {
     assert(m_busy_flag);
     m_busy_flag.store(false, std::memory_order_release);
+  }
+}
+
+/// An alternative to unlock shared access.. 
+void inline unlock_shared(std::atomic<bool>* busy_flag,
+                   std::size_t* creation_depth)
+{
+  if (GlobalThreadSafe && *creation_depth == 0)
+  {
+    assert(*busy_flag);
+    busy_flag->store(false, std::memory_order_release);
   }
 }
 

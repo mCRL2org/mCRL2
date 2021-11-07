@@ -43,9 +43,6 @@ inline aterm_pool& g_term_pool()
   return g_aterm_pool_instance;
 }
 
-/// \brief A reference to the thread local term pool storage
-thread_aterm_pool& g_thread_term_pool();
-
 /* Implemented in a .cpp file. 
 inline thread_aterm_pool& g_thread_term_pool();
 { 

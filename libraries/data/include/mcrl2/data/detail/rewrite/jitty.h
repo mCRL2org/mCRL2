@@ -93,6 +93,11 @@ class RewriterJitty: public Rewriter
     std::map< function_symbol, data_equation_list > jitty_eqns;
     std::vector<strategy> jitty_strat;
 
+    std::atomic<bool>* m_busy_flag = nullptr;
+    std::atomic<bool>* m_forbidden_flag = nullptr;
+    std::size_t* m_creation_depth = nullptr;
+
+
     template <class ITERATOR>
     void apply_cpp_code_to_higher_order_term(
                   data_expression& result,
@@ -131,6 +136,13 @@ class RewriterJitty: public Rewriter
             const jitty_assignments_for_a_rewrite_rule& assignments,
             const data_expression& t,
             data::enumerator_identifier_generator& generator);
+     
+    void thread_initialise()
+    {
+      m_busy_flag = atermpp::detail::g_thread_term_pool().get_busy_flag();
+      m_forbidden_flag = atermpp::detail::g_thread_term_pool().get_forbidden_flag();
+      m_creation_depth = atermpp::detail::g_thread_term_pool().get_creation_depth();
+    }
 };
 
 /// \brief removes auxiliary expressions this_term_is_in_normal_form from data_expressions that are being rewritten.

@@ -130,6 +130,26 @@ inline aterm& aterm::operator=(const aterm& other) noexcept
   return *this;
 }
 
+inline aterm& aterm::assign(const aterm& other,
+                            std::atomic<bool>* busy_flag,
+                            std::atomic<bool>* forbidden_flag,
+                            std::size_t* creation_depth) noexcept
+{
+#ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
+  // Increment first to prevent the same term from becoming reference zero temporarily.
+  other.increment_reference_count();
+  // Decrement the reference from the term that is currently referred to.
+  decrement_reference_count();
+  m_term = other.m_term;
+#else
+  detail::lock_shared(busy_flag,forbidden_flag,creation_depth);
+  m_term = other.m_term;
+  detail::unlock_shared(busy_flag,creation_depth);
+#endif
+  return *this;
+}
+
+
 inline aterm& aterm::operator=(aterm&& other) noexcept
 {
 #ifdef MCRL2_ATERMPP_REFERENCE_COUNTED

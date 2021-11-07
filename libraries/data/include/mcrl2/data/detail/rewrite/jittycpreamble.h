@@ -309,7 +309,14 @@ void rewrite_aux(data_expression& result, const data_expression& t, const bool a
     const std::size_t index = get_index(down_cast<function_symbol>(t));
     if (index<this_rewriter->normal_forms_for_constants.size())
     {
-      result = this_rewriter->normal_forms_for_constants[index];
+      // The following line is replaced by the more efficient assign, but should be reinstalled
+      // in due time, when the compiler can more efficiently handle thread local terms. 
+      // result = this_rewriter->normal_forms_for_constants[index];
+      result.assign(this_rewriter->normal_forms_for_constants[index], 
+                    this_rewriter->m_busy_flag,
+                    this_rewriter->m_forbidden_flag,
+                    this_rewriter->m_creation_depth);
+             
       if (!result.is_default_data_expression())
       {  
         assert(t.sort()==result.sort());

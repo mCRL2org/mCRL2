@@ -3051,6 +3051,7 @@ RewriterCompilingJitty::RewriterCompilingJitty(
     jitty_rewriter(data_spec,equation_selector),
     m_nf_cache(new normal_form_cache())
 {
+  thread_initialise();
   assert(m_nf_cache->empty());
   so_rewr_cleanup = nullptr;
   so_rewr = nullptr;

@@ -150,7 +150,6 @@ class RewriterCompilingJitty: public Rewriter
       return std::shared_ptr<Rewriter>(new RewriterCompilingJitty(*this));
     }
 
-
   protected:
     class ImplementTree;
     friend class ImplementTree;
@@ -165,6 +164,17 @@ class RewriterCompilingJitty: public Rewriter
     std::shared_ptr<uncompiled_library> rewriter_so;
     std::shared_ptr<normal_form_cache> m_nf_cache;
 
+    // The rewriter maintains a copy of busy and forbidden flag,
+    // to allow for faster access to them. These flags are used extensively and
+    // in clang version 2021 access to them via the compiler, using tlv_get_access,
+    // is relatively slow. It is expected that in some future version of the compiler
+    // such access is faster, and no copy of these flags is needed anymore. 
+  public:
+    std::atomic<bool>* m_busy_flag = nullptr;
+    std::atomic<bool>* m_forbidden_flag = nullptr;
+    std::size_t* m_creation_depth = nullptr;
+
+  protected:
     // Copy construction. Not (yet) for public use.
     RewriterCompilingJitty(RewriterCompilingJitty& other) = default;
 
@@ -192,6 +202,14 @@ class RewriterCompilingJitty: public Rewriter
                                  const mutable_map_substitution<>& substs);
     match_tree build_tree(build_pars pars, std::size_t i);
     match_tree create_tree(const data_equation_list& rules);
+
+  void thread_initialise()
+  {
+std::cerr << "INITIALISE BUSY/FORBIDDEN FLAGS\n";
+    m_busy_flag = atermpp::detail::g_thread_term_pool().get_busy_flag();
+    m_forbidden_flag = atermpp::detail::g_thread_term_pool().get_forbidden_flag();
+    m_creation_depth = atermpp::detail::g_thread_term_pool().get_creation_depth();
+  }
 };
 
 struct rewriter_interface

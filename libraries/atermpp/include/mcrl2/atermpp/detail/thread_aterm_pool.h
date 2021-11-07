@@ -111,6 +111,27 @@ public:
   /// \brief Called after leaving the global term pool.
   inline void unlock_shared();
 
+  /// \brief Deliver the busy flag to rewriters for faster access.
+  /// \details This is a performance optimisation to be deleted in due time. 
+  inline std::atomic<bool>* get_busy_flag()
+  {
+    return &m_busy_flag;
+  }
+
+  /// \brief Deliver the forbidden flag to rewriters for faster access.
+  /// \details This is a performance optimisation to be deleted in due time. 
+  inline std::atomic<bool>* get_forbidden_flag()
+  {
+    return &m_forbidden_flag;
+  }
+
+  /// \brief Deliver the creation_depth to rewriters for faster access.
+  /// \details This is a performance optimisation to be deleted in due time. 
+  inline std::size_t* get_creation_depth()
+  {
+    return &m_creation_depth;
+  }
+
 private:
   aterm_pool& m_pool;
 

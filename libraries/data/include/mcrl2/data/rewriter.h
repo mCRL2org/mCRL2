@@ -136,6 +136,16 @@ class rewriter: public basic_rewriter<data_expression>
       return rewriter(m_rewriter->clone());
     }
 
+    /// \brief Initialises this rewriter with thread dependent information. 
+    /// \details This function sets a pointer to the m_busy_flag and m_forbidden_flag of this
+    ///          process, such that rewriter can access these faster than via the general thread
+    ///          local mechanism. It is expected that this is not needed when compilers become
+    ///          faster, and should be removed in due time. 
+    void thread_initialise()
+    {
+      m_rewriter->thread_initialise();
+    }
+
     /// \brief Rewrites a data expression.
     /// \param[in] d A data expression
     /// \return The normal form of d.

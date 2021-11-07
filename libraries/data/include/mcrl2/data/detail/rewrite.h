@@ -221,6 +221,10 @@ class Rewriter
                       const application& t,
                       substitution_type& sigma);
 
+    virtual void thread_initialise()
+    {
+      std::cerr << "REWRITER DOES NOT INITIALISE THREAD\n";
+    }
 
   protected:
 

@@ -209,6 +209,15 @@ public:
   /// \return A reference to the assigned term.
   aterm& operator=(const aterm& other) noexcept;
 
+  /// \brief Assignment operator, to be used if busy and forbidden flags are explicitly available.
+  /// \param other The aterm that will be assigned.
+  //  \brief This can be used as an optimisation, because it avoids getting access to thread local variables,
+  //         which is as it stands relatively expensive. The effect is equal to the assignment operator =. 
+  aterm& assign(const aterm& other,
+                std::atomic<bool>* busy_flag,
+                std::atomic<bool>* forbidden_flag,
+                std::size_t* creation_depth) noexcept;
+
   /// \brief Move assignment operator.
   /// \param other The aterm that will be assigned.
   /// \return A reference to the assigned term.
