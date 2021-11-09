@@ -799,6 +799,7 @@ class explorer: public abortable
       data::rewriter rewriter_for_this_thread
     )
     {
+      rewriter_for_this_thread.thread_initialise();
       mCRL2log(log::verbose) << "Start thread " << process_number << ".\n";
       // data::rewriter m_rewr(construct_rewriter(m_lpsspec, m_options.remove_unused_rewrite_rules));
       data::enumerator_identifier_generator thread_id_generator("t_");;
