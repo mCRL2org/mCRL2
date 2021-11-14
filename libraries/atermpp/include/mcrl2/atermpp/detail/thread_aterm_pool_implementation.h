@@ -225,10 +225,10 @@ void thread_aterm_pool::lock_shared()
 /// local variables is sped up. 
 void inline lock_shared(std::atomic<bool>* busy_flag,
                         std::atomic<bool>* forbidden_flag,
-                        std::size_t* creation_depth)
+                        std::size_t creation_depth)
 {
-  assert(busy_flag != nullptr && m_forbidden_flag != nullptr && m_creation_depth != nullptr);
-  if (GlobalThreadSafe && *creation_depth == 0)
+  assert(busy_flag != nullptr && forbidden_flag != nullptr);
+  if (GlobalThreadSafe && creation_depth == 0)
   {
     assert(!*busy_flag);
     busy_flag->store(true);
@@ -254,9 +254,9 @@ void thread_aterm_pool::unlock_shared()
 
 /// An alternative to unlock shared access.. 
 void inline unlock_shared(std::atomic<bool>* busy_flag,
-                   std::size_t* creation_depth)
+                   std::size_t creation_depth)
 {
-  if (GlobalThreadSafe && *creation_depth == 0)
+  if (GlobalThreadSafe && creation_depth == 0)
   {
     assert(*busy_flag);
     busy_flag->store(false, std::memory_order_release);

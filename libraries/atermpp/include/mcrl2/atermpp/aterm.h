@@ -216,7 +216,7 @@ public:
   aterm& assign(const aterm& other,
                 std::atomic<bool>* busy_flag,
                 std::atomic<bool>* forbidden_flag,
-                std::size_t* creation_depth) noexcept;
+                std::size_t creation_depth) noexcept;
 
   /// \brief Move assignment operator.
   /// \param other The aterm that will be assigned.

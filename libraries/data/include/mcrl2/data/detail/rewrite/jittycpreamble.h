@@ -315,7 +315,7 @@ void rewrite_aux(data_expression& result, const data_expression& t, const bool a
       result.assign(this_rewriter->normal_forms_for_constants[index], 
                     this_rewriter->m_busy_flag,
                     this_rewriter->m_forbidden_flag,
-                    this_rewriter->m_creation_depth);
+                    *this_rewriter->m_creation_depth);
              
       if (!result.is_default_data_expression())
       {  
@@ -354,7 +354,10 @@ void rewrite_aux(data_expression& result, const data_expression& t, const bool a
   else
   if (is_variable(t))
   {
-    sigma(this_rewriter).apply(down_cast<variable>(t),result);
+    sigma(this_rewriter).apply(down_cast<variable>(t),result,
+                               this_rewriter->m_busy_flag,           // Adding the busy/forbidden/creation depth is an optimisation.
+                               this_rewriter->m_forbidden_flag,
+                               *this_rewriter->m_creation_depth);
     return;
   }
   else

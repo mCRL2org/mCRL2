@@ -1219,7 +1219,9 @@ class RewriterCompilingJitty::ImplementTree
           }
           else 
           {
-            s << m_padding << target_for_output << " = " << variable_name.substr(1) << ";\n";
+            // s << m_padding << target_for_output << " = " << variable_name.substr(1) << ";\n";
+            s << m_padding << target_for_output << ".assign(" << variable_name.substr(1) 
+                           << ", this_rewriter->m_busy_flag, this_rewriter->m_forbidden_flag, *this_rewriter->m_creation_depth);\n";
           }
         }
         else 
@@ -1230,8 +1232,10 @@ class RewriterCompilingJitty::ImplementTree
           }
           else
           {
-            s << m_padding << target_for_output << " = " << 
-                 "local_rewrite(" << variable_name.substr(1) << ", this_rewriter, stack_increment);\n";
+            // s << m_padding << target_for_output << " = " << 
+            //     "local_rewrite(" << variable_name.substr(1) << ", this_rewriter, stack_increment);\n";
+            s << m_padding << target_for_output << ".assign(local_rewrite(" << variable_name.substr(1) 
+                           << ", this_rewriter, stack_increment), this_rewriter->m_busy_flag, this_rewriter->m_forbidden_flag, *this_rewriter->m_creation_depth);\n";
           }
         }
         result_type << "data_expression";
@@ -1260,9 +1264,11 @@ class RewriterCompilingJitty::ImplementTree
       }
       else
       {
-
-        s << m_padding << target_for_output << " = " << 
-             "static_cast<const data_expression&>(this_rewriter->bound_variable_get(" << m_rewriter.bound_variable_index(v) << "))\n";
+        // s << m_padding << target_for_output << " = " << 
+        //     "static_cast<const data_expression&>(this_rewriter->bound_variable_get(" << m_rewriter.bound_variable_index(v) << "))\n";
+        s << m_padding << target_for_output << ".assign(" 
+          << "static_cast<const data_expression&>(this_rewriter->bound_variable_get(" << m_rewriter.bound_variable_index(v) << ")), " 
+          << "this_rewriter, stack_increment), this_rewriter->m_busy_flag, this_rewriter->m_forbidden_flag, *this_rewriter->m_creation_depth);\n";
       }
       result_type << "data_expression";
       return;
@@ -1711,8 +1717,9 @@ class RewriterCompilingJitty::ImplementTree
       {
         RewriterCompilingJitty::substitution_type sigma;
         s << m_padding << target_for_output 
-          << " = " 
-          << m_rewriter.m_nf_cache->insert(m_rewriter.jitty_rewriter(t,sigma)) << ";\n";
+          << ".assign("
+          << m_rewriter.m_nf_cache->insert(m_rewriter.jitty_rewriter(t,sigma)) 
+          << ", this_rewriter->m_busy_flag, this_rewriter->m_forbidden_flag, *this_rewriter->m_creation_depth);\n";
       }
       result_type << "data_expression";
       return;
@@ -2335,7 +2342,9 @@ public:
       }
       else
       {
-        m_stream << m_padding << target_for_output << " = " << ss.str() << ";\n";
+        // m_stream << m_padding << target_for_output << " = " << ss.str() << ";\n";
+        m_stream << m_padding << target_for_output << ".assign(" << ss.str() 
+                 << ", this_rewriter->m_busy_flag, this_rewriter->m_forbidden_flag, *this_rewriter->m_creation_depth);\n";
       }
       return;
     }

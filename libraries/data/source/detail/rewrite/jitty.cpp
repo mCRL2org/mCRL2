@@ -167,6 +167,7 @@ RewriterJitty::RewriterJitty(
                          function_sort({ untyped_sort() },untyped_sort())),
         rewriting_in_progress(false)
 {
+  thread_initialise();
   for (const data_equation& eq: data_spec.equations())
   {
     if (equation_selector(eq))
@@ -209,7 +210,11 @@ void RewriterJitty::subst_values(
 {
   if (is_function_symbol(t))
   {
-    result=t;
+    // result=t;  The following is more efficient as it avoids a call to thread local variables. Should be removed in due time. 
+    result.assign(t,
+                  this->m_busy_flag,
+                  this->m_forbidden_flag,
+                  *this->m_creation_depth);
     return;
   }
   else if (is_variable(t))
@@ -224,11 +229,19 @@ void RewriterJitty::subst_values(
           make_application(result,this_term_is_in_normal_form(),assignments.assignment[i].term);  
           return;
         }
-        result=assignments.assignment[i].term;
+        // result=assignments.assignment[i].term;
+        result.assign(assignments.assignment[i].term,
+                      this->m_busy_flag,
+                      this->m_forbidden_flag,
+                      *this->m_creation_depth);
         return;
       }
     }
-    result=t;
+    // result=t;
+    result.assign(t,
+                  this->m_busy_flag,
+                  this->m_forbidden_flag,
+                  *this->m_creation_depth);
     return;
   }
   else if (is_abstraction(t))
@@ -422,7 +435,11 @@ void RewriterJitty::rewrite_aux(
     {
       assert(terma.size()==1);
       assert(remove_normal_form_function(terma[0])==terma[0]);
-      result=terma[0];
+      // result=terma[0]; the following is more efficient.
+      result.assign(terma[0],
+                    this->m_busy_flag,
+                    this->m_forbidden_flag,
+                    *this->m_creation_depth);
       return;
     }
 
@@ -509,7 +526,10 @@ void RewriterJitty::rewrite_aux(
   }
   if (is_variable(term))
   {
-    sigma.apply(atermpp::down_cast<variable>(term),result);
+    sigma.apply(atermpp::down_cast<variable>(term),result, 
+                  this->m_busy_flag,                         // Adding the busy/forbidden/creation depth is an optimisation.
+                  this->m_forbidden_flag,
+                  *this->m_creation_depth);
     return;
   }
   if (is_where_clause(term))
@@ -782,7 +802,11 @@ void RewriterJitty::rewrite_aux_const_function_symbol(
   const data_expression& cached_rhs = rhs_for_constants_cache[op_value];
   if (!cached_rhs.is_default_data_expression())
   {
-    result=cached_rhs;
+    // result=cached_rhs;
+    result.assign(cached_rhs,
+                  this->m_busy_flag,
+                  this->m_forbidden_flag,
+                  *this->m_creation_depth);
     return;
   }
 

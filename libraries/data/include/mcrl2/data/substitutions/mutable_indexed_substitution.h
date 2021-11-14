@@ -234,6 +234,43 @@ public:
     target=v;
   }
 
+  /// \brief Application operator; applies substitution to v.
+  /// \details This must deliver an expression, and not a reference
+  ///          to an expression, as the expressions are stored in 
+  ///          a vector that can be resized and moved. 
+  /// \param   v The variable to which the subsitution is applied.
+  /// \param   target The target into which the substitution is stored. 
+  void apply(const variable_type& v, 
+             expression_type& target,
+             std::atomic<bool>* busy_flag,
+             std::atomic<bool>* forbidden_flag,
+             std::size_t creation_depth)
+
+  {
+    const std::size_t i = atermpp::detail::index_traits<data::variable, data::variable_key_type, 2>::index(v);
+    if (i < m_index_table.size())
+    {
+      const std::size_t j = m_index_table[i];
+      if (j!=std::size_t(-1))
+      {
+        // the variable has an assigned value.
+        assert(j<m_container.size());
+        // target=m_container[j].second;
+        target.assign(m_container[j].second,
+                      busy_flag,
+                      forbidden_flag,
+                      creation_depth);
+        return;
+      }
+    }
+    // no value assigned to v;
+    // target=v; Code below is more efficient, but ugly. 
+    target.assign(v,
+                  busy_flag,
+                  forbidden_flag,
+                  creation_depth);
+   }
+
   /// \brief Index operator.
   assignment operator[](variable_type const& v)
   {

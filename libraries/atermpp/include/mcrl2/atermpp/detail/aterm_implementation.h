@@ -133,7 +133,7 @@ inline aterm& aterm::operator=(const aterm& other) noexcept
 inline aterm& aterm::assign(const aterm& other,
                             std::atomic<bool>* busy_flag,
                             std::atomic<bool>* forbidden_flag,
-                            std::size_t* creation_depth) noexcept
+                            std::size_t creation_depth) noexcept
 {
 #ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
   // Increment first to prevent the same term from becoming reference zero temporarily.
