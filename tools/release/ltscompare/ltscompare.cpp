@@ -251,7 +251,7 @@ class ltscompare_tool : public ltscompare_base
                  "be internal (tau) actions in addition to those defined as such by "
                  "the input").
       add_option("counter-example",
-                 "generate counter example traces if the input lts's are not equivalent",'c');
+                 "generate counter example if the input lts's are not equivalent",'c');
       desc.add_hidden_option("structured-output",
                  "generate counter examples on stdout");
       desc.add_hidden_option("no-preprocessing",

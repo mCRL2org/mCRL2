@@ -128,7 +128,7 @@ bool destructive_compare(LTS_TYPE& l1,
     {
       if (generate_counter_examples)
       {
-        mCRL2log(log::warning) << "Cannot generate counter example traces for weak bisimulation\n";
+        mCRL2log(log::warning) << "Cannot generate counter examples for weak bisimulation\n";
       }
       return detail::destructive_weak_bisimulation_compare(l1,l2,false);
     }
@@ -136,7 +136,7 @@ bool destructive_compare(LTS_TYPE& l1,
     {
       if (generate_counter_examples)
       {
-        mCRL2log(log::warning) << "Cannot generate counter example traces for for divergence-preserving weak bisimulation\n";
+        mCRL2log(log::warning) << "Cannot generate counter examples for divergence-preserving weak bisimulation\n";
       }
       return detail::destructive_weak_bisimulation_compare(l1,l2, true);
     }
@@ -144,7 +144,7 @@ bool destructive_compare(LTS_TYPE& l1,
     {
       if (generate_counter_examples)
       {
-        mCRL2log(log::warning) << "Cannot generate counter example traces for simulation equivalence\n";
+        mCRL2log(log::warning) << "Cannot generate counter examples for simulation equivalence\n";
       }
       // Run the partitioning algorithm on this merged LTS
       std::size_t init_l2 = l2.initial_state() + l1.num_states();
@@ -159,7 +159,7 @@ bool destructive_compare(LTS_TYPE& l1,
     {
       if (generate_counter_examples)
       {
-        mCRL2log(log::warning) << "Cannot generate counter example traces for ready-simulation equivalence\n";
+        mCRL2log(log::warning) << "Cannot generate counter examples for ready-simulation equivalence\n";
       }
       // Run the partitioning algorithm on this merged LTS
       std::size_t init_l2 = l2.initial_state() + l1.num_states();
