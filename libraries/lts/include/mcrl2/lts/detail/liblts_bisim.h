@@ -280,6 +280,9 @@ class bisim_partitioner
     // map from source state and action to target state, makes generating counterexample info easier
     outgoing_transitions_per_state_action_t outgoing_transitions;
 
+    // A counter for creating fresh variables
+    int freshVarCounter = 0;
+
 
     void create_initial_partition(const bool branching,
                                   const bool preserve_divergences)
@@ -596,7 +599,7 @@ class bisim_partitioner
 
             if (branching) {
               // compute r_tau[new_block1]
-              std::set<block_index_type> reachable_blocks = {};
+              std::set<block_index_type> tau_reachable_blocks = {};
               for (state_type source_state : blocks[new_block1].bottom_states)
               {
                 for (label_type lab = 0; lab < aut.num_action_labels(); ++lab)
@@ -610,12 +613,13 @@ class bisim_partitioner
                       block_index_type target_block = block_index_of_a_state[target_state];
                       if (!(target_block == *i1 || target_block == new_block1 || target_block == new_block2))
                       {
-                        reachable_blocks.insert(target_block);
+                        tau_reachable_blocks.insert(target_block);
                       }
                     }
                   }
                 }
               }
+              r_tauP[new_block1] = tau_reachable_blocks;
             }
           }
 
@@ -855,6 +859,35 @@ class bisim_partitioner
         process::action_list({ process::action(process::action_label(a, {}), {}) })));
     }
 
+    /**
+     * \brief untilFormula Creates a state formula that corresponds to the until operator phi1<a>phi2 from HMLU
+     * \details This operator intuitively means: "phi1 holds while stuttering until we can do an a-step after which phi2 holds"
+     *          In the operators of the mu-calculus that mCRL2 supports we can define this as:
+     *              phi2 || (mu X.phi1 && (<tau>X || <a>phi2))  if a = tau
+     *              mu X.phi1 && (<tau>X || <a>phi2)            else
+     * \param[in] phi1 The first state formula for the until operator
+     * \param[in] a The action for the until operator
+     * \param[in] phi2 The second state formula for the until operator
+     * \return A state formula that corresponds to the until operator phi1<a>phi2 from HMLU
+     */
+    mcrl2::state_formulas::state_formula untilFormula(const mcrl2::state_formulas::state_formula& phi1, const label_type& a,
+                                                      const mcrl2::state_formulas::state_formula& phi2)
+    {
+      std::string var = "X" + std::to_string(freshVarCounter++);
+      mcrl2::state_formulas::state_formula tauStep =
+          mcrl2::state_formulas::may(regular_formulas::regular_formula(action_formulas::multi_action()), mcrl2::state_formulas::variable(var, {}));
+      mcrl2::state_formulas::state_formula lastStep = mcrl2::state_formulas::may(createRegularFormula(aut.action_label(a)), phi2);
+
+      mcrl2::state_formulas::state_formula until =
+          mcrl2::state_formulas::mu(var, {}, mcrl2::state_formulas::and_(phi1, mcrl2::state_formulas::or_(tauStep, lastStep)));
+
+      if (aut.is_tau(aut.apply_hidden_label_map(a)))
+      {
+        until = mcrl2::state_formulas::or_(phi2, until);
+      }
+      return until;
+    }
+
     /* \brief Creates a state formula that distinguishes states in block B1 from state in block B2.
        \details Based on "Computing Distinguishing Formulas for Branching Bisimulation", 1991 by Henri Korver.
                 Variable names used below correspond to definitions in this paper.
@@ -862,7 +895,7 @@ class bisim_partitioner
        \param[in] B2 The block on which the resulting formula must be false.
        \return A distinguishing state formula.
     */
-    mcrl2::state_formulas::state_formula counter_formula_aux(const block_index_type B1, const block_index_type B2) const
+    mcrl2::state_formulas::state_formula counter_formula_aux(const block_index_type B1, const block_index_type B2)
     {
       // First find the smallest block containing both B1 and B2.
       // Find all blocks containing B1.
@@ -897,7 +930,29 @@ class bisim_partitioner
       }
       mcrl2::state_formulas::state_formula Phi2 = conjunction(Gamma2);
 
-      mcrl2::state_formulas::state_formula Phi = mcrl2::state_formulas::may(createRegularFormula(aut.action_label(a)), Phi2);
+      mcrl2::state_formulas::state_formula Phi;
+      if (branching)
+      {
+        // We distinguish DB with every block in r_tauP[R]
+        std::set<mcrl2::state_formulas::state_formula> Gamma1;
+        for (block_index_type PPB : r_tauP.at(R))
+        {
+          Gamma1.insert(counter_formula_aux(DB, PPB));
+        }
+        mcrl2::state_formulas::state_formula Phi1 = conjunction(Gamma1);
+
+        // In case a == tau, we also need to distinguish Bp with R
+        if (aut.is_tau(aut.apply_hidden_label_map(a)))
+        {
+          Phi2 = mcrl2::state_formulas::and_(Phi2, counter_formula_aux(Bp, R));
+        }
+
+        Phi = untilFormula(Phi1, a, Phi2);
+      }
+      else
+      {
+        Phi = mcrl2::state_formulas::may(createRegularFormula(aut.action_label(a)), Phi2);
+      }
 
       if (blocks_containing_B1.count(R) == 0)
       {
