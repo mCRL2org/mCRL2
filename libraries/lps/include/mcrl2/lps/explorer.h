@@ -13,6 +13,11 @@
 #define MCRL2_LPS_EXPLORER_H
 
 #include <random>
+#include <thread>
+#include "mcrl2/utilities/detail/io.h"
+#include "mcrl2/utilities/skip.h"
+#include "mcrl2/atermpp/standard_containers/deque.h"
+#include "mcrl2/atermpp/standard_containers/indexed_set.h"
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/substitution_utility.h"
@@ -24,8 +29,6 @@
 #include "mcrl2/lps/replace_constants_by_variables.h"
 #include "mcrl2/lps/resolve_name_clashes.h"
 #include "mcrl2/lps/stochastic_state.h"
-#include "mcrl2/utilities/detail/io.h"
-#include "mcrl2/utilities/skip.h"
 
 namespace mcrl2::lps {
 
@@ -53,7 +56,7 @@ std::vector<data::data_expression> make_data_expression_vector(const data::data_
 class todo_set
 {
   protected:
-    std::deque<state> todo;
+    atermpp::deque<state> todo;
 
   public:
     explicit todo_set(const state& init)
@@ -67,7 +70,7 @@ class todo_set
 
     virtual ~todo_set() = default;
 
-    virtual state choose_element() = 0;
+    virtual void choose_element(state& result) = 0;
 
     virtual void insert(const state& s) = 0;
 
@@ -97,11 +100,10 @@ class breadth_first_todo_set : public todo_set
       : todo_set(first, last)
     {}
 
-    state choose_element() override
+    void choose_element(state& result) override
     {
-      auto s = todo.front();
+      result = todo.front();
       todo.pop_front();
-      return s;
     }
 
     void insert(const state& s) override
@@ -122,11 +124,10 @@ class depth_first_todo_set : public todo_set
       : todo_set(first, last)
     {}
 
-    state choose_element() override
+    void choose_element(state& result) override
     {
-      auto s = todo.back();
+      result = todo.back();
       todo.pop_back();
-      return s;
     }
 
     void insert(const state& s) override
@@ -166,11 +167,10 @@ class highway_todo_set : public todo_set
     {
     }
 
-    state choose_element() override
+    void choose_element(state& result) override
     {
-      auto s = todo.front();
+      result = todo.front();
       todo.pop_front();
-      return s;
     }
 
     void insert(const state& s) override
@@ -362,7 +362,7 @@ class explorer: public abortable
 
     // N.B. The keys are stored in term_appl instead of data_expression_list for performance reasons.
     utilities::unordered_map<atermpp::term_appl<data::data_expression>, std::list<data::data_expression_list>> global_cache;
-    utilities::indexed_set<state> m_discovered;
+    atermpp::indexed_set<state> m_discovered;
 
     // used by make_timed_state, to avoid needless creation of vectors
     mutable std::vector<data::data_expression> timed_state;
@@ -765,7 +765,7 @@ class explorer: public abortable
       const StateType& s0,
       const SummandSequence& regular_summands,
       const SummandSequence& confluent_summands,
-      utilities::indexed_set<state>& discovered,
+      atermpp::indexed_set<state>& discovered,
       DiscoverState discover_state = DiscoverState(),
       ExamineTransition examine_transition = ExamineTransition(),
       StartState start_state = StartState(),
@@ -806,9 +806,10 @@ class explorer: public abortable
         discover_state(s0, s0_index);
       }
 
+      state s;
       while (!todo->empty() && !m_must_abort)
       {
-        state s = todo->choose_element();
+        todo->choose_element(s);
         std::size_t s_index = discovered.index(s);
         start_state(s, s_index);
         data::add_assignments(m_sigma, m_process_parameters, s);
@@ -1205,7 +1206,7 @@ class explorer: public abortable
     }
 
     /// \brief Returns a mapping containing all discovered states.
-    const utilities::indexed_set<state>& state_map() const
+    const atermpp::indexed_set<state>& state_map() const
     {
       return m_discovered;
     }
