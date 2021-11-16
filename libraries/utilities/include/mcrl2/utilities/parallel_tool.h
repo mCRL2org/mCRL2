@@ -23,7 +23,7 @@ namespace utilities
 namespace tools
 {
 
-/// \brief Base class for tools that use a rewriter.
+/// \brief Base class for tools that are using multiple threads.
 template <typename Tool>
 class parallel_tool: public Tool
 {
@@ -65,15 +65,14 @@ class parallel_tool: public Tool
                   const std::string& tool_description,
                   std::string known_issues = ""
                  )
-      : Tool(name, author, what_is, tool_description, known_issues),
-        m_rewrite_strategy(mcrl2::data::jitty)
+      : Tool(name, author, what_is, tool_description, known_issues)
     {}
 
     /// \brief Returns the number of threads in this tool.
     /// \return The number of threads.
     std::size_t number_of_threads() const
     {
-      return m_rewrite_strategy;
+      return m_number_of_threads;
     }
 };
 
