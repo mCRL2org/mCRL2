@@ -185,6 +185,11 @@ bool destructive_compare(LTS_TYPE& l1,
     }
     case lts_eq_weak_trace:
     {
+      if (generate_counter_examples)
+      {
+        mCRL2log(log::warning) << "Cannot generate counter examples for weak trace equivalence\n";
+      }
+
       // Eliminate silent steps and determinise first LTS
       detail::bisimulation_reduce(l1,true,false);
       detail::tau_star_reduce(l1);
@@ -198,7 +203,7 @@ bool destructive_compare(LTS_TYPE& l1,
       determinise(l2);
 
       // Weak trace equivalence now corresponds to bisimilarity
-      return detail::destructive_bisimulation_compare(l1,l2,false,false,generate_counter_examples,structured_output);
+      return detail::destructive_bisimulation_compare(l1,l2,false,false,false,structured_output);
     }
     case lts_eq_coupled_sim:
     {
