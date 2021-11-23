@@ -82,7 +82,6 @@ enum Answer
 };
 
 
-// class BDD_Prover: public Prover
 class BDD_Prover: protected rewriter
 {
   public:
@@ -140,7 +139,7 @@ class BDD_Prover: protected rewriter
     std::unordered_map < data_expression, data_expression > f_smallest;
 
     /// \brief Class that simplifies a BDD.
-    BDD_Simplifier* f_bdd_simplifier;
+    std::shared_ptr<BDD_Simplifier> f_bdd_simplifier;
 
     /// \brief Class that creates all statements needed to prove a given property using induction.
     Induction f_induction;
@@ -467,11 +466,13 @@ class BDD_Prover: protected rewriter
       bool a_path_eliminator = false,
       smt_solver_type a_solver_type = solver_type_cvc,
       bool a_apply_induction = false)
-    : rewriter(data_spec, equations_selector, a_rewrite_strategy)
-    , f_time_limit(a_time_limit)
-    , f_apply_induction(a_apply_induction)
-    , f_bdd_simplifier(a_path_eliminator ? new BDD_Path_Eliminator(a_solver_type) : new BDD_Simplifier())
+    : rewriter(data_spec, equations_selector, a_rewrite_strategy),
+      f_time_limit(a_time_limit),
+      f_apply_induction(a_apply_induction),
+      f_bdd_simplifier(a_path_eliminator ? std::shared_ptr<BDD_Simplifier>(new BDD_Path_Eliminator(a_solver_type)) : 
+                                           std::shared_ptr<BDD_Simplifier>(new BDD_Simplifier()))
     {
+      rewriter::thread_initialise();
       switch (a_rewrite_strategy)
       {
         case(jitty):
@@ -502,17 +503,19 @@ class BDD_Prover: protected rewriter
     }
 
     BDD_Prover(const rewriter& r, int time_limit = 0, bool apply_induction = false)
-    : rewriter(r)
-    , f_time_limit(time_limit)
-    , f_apply_induction(apply_induction)
-    , f_bdd_simplifier(new BDD_Simplifier())
-    {}
+    : rewriter(r),
+      f_time_limit(time_limit),
+      f_apply_induction(apply_induction),
+      f_bdd_simplifier(new BDD_Simplifier())
+    {
+      rewriter::thread_initialise();
+    }
 
     /// \brief Destructor that destroys the BDD simplifier BDD_Prover::f_bdd_simplifier.
     ~BDD_Prover()
     {
-      delete f_bdd_simplifier;
-      f_bdd_simplifier = nullptr;
+      // delete f_bdd_simplifier;
+      // f_bdd_simplifier = nullptr;
     }
 
     /// \brief Set the substitution to be used to construct the BDD
@@ -623,6 +626,16 @@ class BDD_Prover: protected rewriter
       f_formula = formula;
       f_processed = false;
       mCRL2log(log::debug) << "The formula has been set." << std::endl;
+    }
+
+    BDD_Prover clone()
+    {
+      return BDD_Prover(rewriter::clone());
+    }
+
+    void thread_initialise()
+    {
+      rewriter::thread_initialise();
     }
 
 

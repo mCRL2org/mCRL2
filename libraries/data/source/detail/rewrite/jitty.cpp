@@ -872,6 +872,7 @@ void RewriterJitty::rewrite(
   }
   else
   {
+    assert(m_rewrite_stack.stack_size()==0);
     rewriting_in_progress=true;
     try
     {

@@ -87,7 +87,8 @@ class trace_constructor
     std::map<lps::state, lps::state> m_backpointers;
 
     // Finds a transition s0 --a--> s1, and returns a.
-    lps::multi_action find_action(const lps::state& s0, const lps::state& s1)
+    lps::multi_action find_action(const lps::state& s0, 
+                                  const lps::state& s1)
     {
       if constexpr (Explorer::is_stochastic)
       {
