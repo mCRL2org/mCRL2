@@ -217,7 +217,6 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
       options.discard_lts_state_labels              = parser.has_option("no-info");
       options.search_strategy = parser.option_argument_as<lps::exploration_strategy>("strategy");
       options.number_of_threads = number_of_threads();
-
       // highway search
       if (parser.has_option("todo-max"))
       {
@@ -225,11 +224,11 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
       }
       if (options.search_strategy == lps::es_highway && !parser.has_option("todo-max"))
       {
-        parser.error("Search strategy 'highway' requires that the option todo-max is set");
+        parser.error("Search strategy 'highway' requires that the option todo-max is set.");
       }
       if (options.search_strategy != lps::es_highway && parser.has_option("todo-max"))
       {
-        parser.error("Option 'todo-max' can only be used in combination with highway search");
+        parser.error("Option 'todo-max' can only be used in combination with highway search.");
       }
 
       if (parser.has_option("out"))
@@ -246,7 +245,7 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
         output_format = lts::detail::guess_format(output_filename());
         if (output_format == lts::lts_none)
         {
-          mCRL2log(log::warning) << "no output format set or detected; using default (lts)" << std::endl;
+          mCRL2log(log::warning) << "No output format set or detected; using default (lts)." << std::endl;
           output_format = lts::lts_lts;
         }
       }
@@ -311,6 +310,26 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
       {
         parser.error("Option '--no-info' requires that the output is in .lts format.");
       }
+      if (options.number_of_threads>1)
+      { 
+         /* if (options.detect_divergence)
+         {
+           parser.error("Option 'divergence' can only be used in single thread mode.");
+         } */
+         if (options.save_error_trace)
+         {
+           parser.error("Option 'error-trace' can only be used in single thread mode.");
+         }
+         /* if (parser.has_option("multiaction"))
+         {
+           parser.error("Option 'multiaction' can only be used in single thread mode.");
+         } */
+         if (options.generate_traces)
+         {
+           parser.error("Option 'trace' can only be used in single thread mode.");
+         }
+      }
+
     }
 
     template <bool Stochastic, bool Timed, typename Specification, typename LTSBuilder>

@@ -557,8 +557,8 @@ class explorer: public abortable
       }
       else
       {
-        static std::mutex cache_mutex;
-        cache_mutex.lock();
+        static std::mutex cache_mutex; // This mutex could be created per summand. This may allow for more parallel behaviour if required. 
+        if (m_options.number_of_threads>0) cache_mutex.lock();
         auto key = summand.compute_key(sigma);
         auto& cache = summand.cache_strategy == caching::global ? global_cache : summand.local_cache;
         auto q = cache.find(key);
@@ -580,7 +580,7 @@ class explorer: public abortable
           }
           q = cache.insert({key, solutions}).first;
         }
-        cache_mutex.unlock();
+        if (m_options.number_of_threads>0) cache_mutex.unlock();
         for (const data::data_expression_list& e: q->second)
         {
           data::add_assignments(sigma, summand.variables, e);
