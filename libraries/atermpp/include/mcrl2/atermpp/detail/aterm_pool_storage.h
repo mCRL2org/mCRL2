@@ -202,7 +202,7 @@ private:
   unordered_set m_term_set;
 
   /// This array stores creation, resp deletion, hooks for function symbols.
-  std::vector<callback_pair> m_creation_hooks;
+  // std::vector<callback_pair> m_creation_hooks; Not needed anymore. 
   std::vector<callback_pair> m_deletion_hooks;
 
   /// A reusable todo stack.

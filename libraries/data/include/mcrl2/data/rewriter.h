@@ -137,9 +137,9 @@ class rewriter: public basic_rewriter<data_expression>
     }
 
     /// \brief Initialises this rewriter with thread dependent information. 
-    /// \details This function sets a pointer to the m_busy_flag and m_forbidden_flag of this
-    ///          process, such that rewriter can access these faster than via the general thread
-    ///          local mechanism. It is expected that this is not needed when compilers become
+    /// \details This function sets a pointer to the m_busy_flag and m_forbidden_flag of this.
+    ///          process, such that rewriter can access these faster than via the general thread.
+    ///          local mechanism. It is expected that this is not needed when compilers become.
     ///          faster, and should be removed in due time. 
     void thread_initialise()
     {
@@ -147,17 +147,17 @@ class rewriter: public basic_rewriter<data_expression>
     }
 
     /// \brief Rewrites a data expression.
-    /// \param[in] d A data expression
+    /// \param[in] d A data expression.
     /// \return The normal form of d.
     data_expression operator()(const data_expression& d) const
     {
       return (*this)(d, empty_substitution());
     }
 
-    /// \brief Rewrites the data expression d, and on the fly applies a substitution function
+    /// \brief Rewrites the data expression d, and on the fly applies a substitution function.
     /// to data variables.
-    /// \param[in] d A data expression
-    /// \param[in] sigma A substitution function
+    /// \param[in] d A data expression.
+    /// \param[in] sigma A substitution function.
     /// \return The normal form of the term.
     template <typename SubstitutionFunction>
     data_expression operator()(const data_expression& d, const SubstitutionFunction& sigma) const
@@ -171,17 +171,46 @@ class rewriter: public basic_rewriter<data_expression>
       return (*this)(d, sigma_with_iterator);
     }
 
+    /// \brief Rewrites the data expression d, and on the fly applies a substitution function.
+    /// to data variables.
+    /// \param[out] result The normal form of the term is placed in result.
+    /// \param[in] d A data expression.
+    /// \param[in] sigma A substitution function.
+    template <typename SubstitutionFunction>
+    void operator()(data_expression& result, const data_expression& d, const SubstitutionFunction& sigma) const
+    {
+      substitution_type sigma_with_iterator;
+      std::set<variable> free_variables = data::find_free_variables(d);
+      for(const variable& free_variable: free_variables)
+      {
+        sigma_with_iterator[free_variable] = sigma(free_variable);
+      }
+      (*this)(result, d, sigma_with_iterator);
+    }
+
     /// \brief Rewrites the data expression d, and on the fly applies a substitution function
     /// to data variables.
-    /// \param[in] d A data expression
-    /// \param[in] sigma A substitution function
+    /// \param[in] d A data expression.
+    /// \param[in] sigma A substitution function.
     /// \return The normal form of the term.
     //  Added bij JFG, to avoid the use of find_free_variables in the function operator() with
     //  an arbitrary SubstitionFunction, as this is prohibitively costly.
-
     data_expression operator()(const data_expression& d, substitution_type& sigma) const
     {
       data_expression result;
+      (*this)(result, d, sigma);
+      return result;
+    }
+
+    /// \brief Rewrites the data expression d, and on the fly applies a substitution function
+    /// to data variables.
+    /// \param[out] result The normal form of the term is put in resul is put in result
+    /// \param[in] d A data expression.
+    /// \param[in] sigma A substitutionA. function
+    //  Added bij JFG, to avoid the use of find_free_variables in the function operator() with
+    //  an arbitrary SubstitionFunction, as this is prohibitively costly.
+    void operator()(data_expression& result, const data_expression& d, substitution_type& sigma) const
+    {
 #ifdef MCRL2_COUNT_DATA_REWRITE_CALLS
       rewrite_calls++;
 #endif
@@ -192,7 +221,6 @@ class rewriter: public basic_rewriter<data_expression>
 #ifdef MCRL2_PRINT_REWRITE_STEPS
       mCRL2log(log::debug) << " ------------> " << result << std::endl;
 #endif
-      return result;
     }
 
     ~rewriter()

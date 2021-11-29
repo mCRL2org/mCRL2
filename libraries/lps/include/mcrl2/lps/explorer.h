@@ -426,7 +426,7 @@ class explorer: public abortable
                         data::mutable_indexed_substitution<>& sigma,
                         data::rewriter& rewr) const
     {
-      return state(v.begin(), m_n, [&](const data::data_expression& x) { return rewr(x, sigma); });
+      return state(v.begin(), m_n, [&](data::data_expression& result, const data::data_expression& x) { return rewr(result, x, sigma); });
     }
 
     template <typename DataExpressionSequence>
@@ -477,8 +477,11 @@ class explorer: public abortable
             [&](const process::action& a)
             {
               const auto& args = a.arguments();
+//  XXXX kan dit met een iterator, direct op actions, zonder een data_expression_list????
               return process::action(a.label(), 
-                                     data::data_expression_list(args.begin(), args.end(), [&](const data::data_expression& x) { return rewr(x, sigma); }));     //  XXXX kan dit met een iterator, direct op actions, zonder een data_expression_list????
+                                     data::data_expression_list(args.begin(), args.end(), 
+                                                                [&](const data::data_expression& x) 
+                                                                            { return rewr(x, sigma); }));     
             }
           ),
           a.has_time() ? rewr(time, sigma) : time
@@ -511,6 +514,7 @@ class explorer: public abortable
       const SummandSequence& confluent_summands,
       data::mutable_indexed_substitution<>& sigma,
       data::rewriter& rewr,
+      data::data_expression& condition,
       data::enumerator_algorithm<>& enumerator,
       data::enumerator_identifier_generator& id_generator,
       ReportTransition report_transition = ReportTransition()
@@ -522,7 +526,7 @@ class explorer: public abortable
       }
       if (summand.cache_strategy == caching::none)
       {
-        data::data_expression condition = rewr(summand.condition, sigma);
+        rewr(condition, summand.condition, sigma);
         if (!data::is_false(condition))
         {
           enumerator.enumerate(enumerator_element(summand.variables, condition),
@@ -564,7 +568,7 @@ class explorer: public abortable
         auto q = cache.find(key);
         if (q == cache.end())
         {
-          data::data_expression condition = rewr(summand.condition, sigma);
+          rewr(condition, summand.condition, sigma);
           std::list<data::data_expression_list> solutions;
           if (!data::is_false(condition))
           {
@@ -621,6 +625,7 @@ class explorer: public abortable
                                     data::enumerator_identifier_generator& id_generator
                                    )
     {
+      data::data_expression condition;   // This variable is used often, and it is time consuming to declare it too often.
       std::list<transition> transitions;
       data::add_assignments(sigma, m_process_parameters, s);
       for (const explorer_summand& summand: regular_summands)
@@ -630,6 +635,7 @@ class explorer: public abortable
           confluent_summands,
           sigma,
           rewr,
+          condition,
           enumerator,
           id_generator,
           [&](const lps::multi_action& a, const state_type& s1)
@@ -641,7 +647,7 @@ class explorer: public abortable
               {
                 return;
               }
-              data::data_expression t1 = a.has_time() ? a.time() : t;
+              const data::data_expression& t1 = a.has_time() ? a.time() : t;
               state s1_at_t1 = make_timed_state(s1, t1);
               transitions.emplace_back(a, s1_at_t1);
             }
@@ -667,6 +673,7 @@ class explorer: public abortable
       const SummandSequence& confluent_summands = SummandSequence()
     )
     {
+      data::data_expression condition; 
       std::vector<state> result;
       data::add_assignments(sigma, m_process_parameters, s0);
       for (const explorer_summand& summand: summands)
@@ -676,6 +683,7 @@ class explorer: public abortable
           confluent_summands,
           sigma,
           rewr,
+          condition,
           enumerator,
           id_generator,
           [&](const lps::multi_action& /* a */, const state& s1)
@@ -836,6 +844,7 @@ class explorer: public abortable
       data::data_specification thread_data_specification = m_global_lpsspec.data(); /// XXXX Nodig??
       data::enumerator_algorithm<> thread_enumerator(thread_rewr, thread_data_specification, thread_rewr, thread_id_generator, false);
       state current_state;
+      data::data_expression condition;  // The condition is used often, and it is effective not to declare it too often. 
       while (number_of_active_processes>0)
       {
         if (m_options.number_of_threads>0) m_exclusive_state_access.lock();
@@ -853,6 +862,7 @@ class explorer: public abortable
               confluent_summands,
               thread_sigma,
               thread_rewr,
+              condition,
               thread_enumerator,
               thread_id_generator,
               [&](const lps::multi_action& a, const state_type& s1)
@@ -899,7 +909,7 @@ class explorer: public abortable
                     if constexpr (Timed)
                     { 
                       const data::data_expression& t = current_state[m_n];
-                      data::data_expression t1 = a.has_time() ? a.time() : t;
+                      const data::data_expression& t1 = a.has_time() ? a.time() : t;
                       state s1_at_t1 = make_timed_state(s1, t1);
                       s1_index = discovered.insert(s1_at_t1).first;
                       discover_state(s1_at_t1, s1_index);
@@ -1079,6 +1089,7 @@ class explorer: public abortable
       data::data_expression_list process_parameter_undo = process_parameter_values(sigma);
       std::vector<std::pair<lps::multi_action, state_type>> result;
       data::add_assignments(sigma, m_process_parameters, d0);
+      data::data_expression condition;
       for (const explorer_summand& summand: m_regular_summands)
       {
         generate_transitions(
@@ -1086,6 +1097,7 @@ class explorer: public abortable
           m_confluent_summands,
           sigma,
           rewr,
+          condition,
           enumerator,
           id_generator,
           [&](const lps::multi_action& a, const state_type& d1)
@@ -1123,6 +1135,7 @@ std::cerr << "A GLOBAL REWRITER IS INVOKED. HOPEFULLY NOT IN A PARALLEL THREAD\n
                 std::size_t i,
                 data::mutable_indexed_substitution<>& sigma,
                 data::rewriter& rewr,
+                data::data_expression& condition,
                 data::enumerator_algorithm<>& enumerator,
                 data::enumerator_identifier_generator& id_generator)
     {
@@ -1135,6 +1148,7 @@ std::cerr << "A GLOBAL REWRITER IS INVOKED. HOPEFULLY NOT IN A PARALLEL THREAD\n
         m_confluent_summands,
         sigma,
         rewr,
+        condition,
         enumerator,
         id_generator,
         [&](const lps::multi_action& a, const state_type& d1)
@@ -1200,7 +1214,7 @@ std::cerr << "DFS EXPLORATION NOT THREAD SAFE\n";
           if constexpr (Timed)
           {
             const data::data_expression& t = s0[m_n];
-            data::data_expression t1 = a.has_time() ? a.time() : t;
+            const data::data_expression& t1 = a.has_time() ? a.time() : t;
             state s1_at_t1 = make_timed_state(s1, t1);
             discovered.insert(s1_at_t1);
           }
@@ -1314,7 +1328,7 @@ std::cerr << "DFS EXPLORATION NOT THREAD SAFE\n";
             if constexpr (Timed)
             {
               const data::data_expression& t = (*s)[m_n];
-              data::data_expression t1 = a.has_time() ? a.time() : t;
+              const data::data_expression& t1 = a.has_time() ? a.time() : t;
               state s1_at_t1 = make_timed_state(s1, t1);
               discovered.insert(s1_at_t1);
               discover_state(s1_at_t1);

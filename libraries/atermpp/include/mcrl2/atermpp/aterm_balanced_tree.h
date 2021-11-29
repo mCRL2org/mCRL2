@@ -43,48 +43,80 @@ class term_balanced_tree : public aterm_appl
       static aterm_appl g_empty_tree(g_empty);
       return g_empty_tree; 
     }
-    static const aterm_appl& dummy_left_tree() 
-    { 
-      static aterm_appl g_empty_tree(g_dummy_left_tree);
-      return g_empty_tree; 
-    }
-    static const aterm_appl& dummy_right_tree() 
-    { 
-      static aterm_appl g_empty_tree(g_dummy_right_tree);
-      return g_empty_tree; 
-    }
 
-    static const std::vector<aterm_appl>& aux_dummy_tree()
+    struct dummy_iterator
     {
-      static const std::vector<aterm_appl> g_aux_dummy_tree({ dummy_left_tree(), dummy_right_tree() });
-      return g_aux_dummy_tree;
-    }
+      typedef std::size_t difference_type;
+      typedef aterm_appl value_type;
+      typedef aterm* pointer;
+      typedef aterm& reference;
+      typedef std::forward_iterator_tag iterator_category;
+
+      const aterm_appl& dummy() const
+      {
+        static const aterm_appl g_dummy;
+        return g_dummy;
+      }
+
+      void operator++()
+      {}
+
+      bool operator !=(const dummy_iterator ) const    // Operator is only used to fool assertions. 
+      {
+        return true;
+      }
+
+      bool operator ==(const dummy_iterator ) const    // Operator is only used to fool assertions.
+      {
+        return true;
+      }
+
+      const aterm_appl& operator*() const
+      {
+        return dummy();
+      }
+
+    };
+
+    struct dummy_iterator_object
+    {
+      dummy_iterator begin()
+      {
+        return dummy_iterator();
+      }
+
+      dummy_iterator end()
+      {
+        return dummy_iterator();
+      }
+    };
 
     template < typename ForwardTraversalIterator, class Transformer >
     void make_tree_helper(aterm& result, ForwardTraversalIterator& p, const std::size_t size, Transformer transformer)
     {
-      if (size==1)
-      {
-        result = reinterpret_cast<const aterm_appl&>(static_cast<const aterm&>(transformer(*(p++))));
-        return;
-      }
-
-      make_term_appl(result,tree_node_function(),aux_dummy_tree().begin(), aux_dummy_tree().end(),
-                     [&size, &transformer, &p, this](aterm& target, const aterm_appl& dummy_tree)
+      assert(size>1);
+      enum { e_left_tree, e_right_tree } b=e_left_tree;
+      make_term_appl(result, tree_node_function(), dummy_iterator_object().begin(), dummy_iterator_object().end(),
+                     [&size, &transformer, &p, &b, this](aterm& target, const aterm_appl& )
                         { 
                           assert(size>1);
                           
                           std::size_t new_size;
-                          if (dummy_tree==dummy_left_tree())
+                          if (b==e_left_tree)
                           {
                             new_size = (size + 1) >> 1; // size/2 rounded up.
+                            b=e_right_tree;
                           }
                           else
                           {
-                            assert(dummy_tree==dummy_right_tree());
+                            assert(b==e_right_tree);
                             new_size = size >> 1; // size/2 rounded down.
                           }
-                          make_tree_helper(target, p, new_size, transformer);
+                          if (new_size==1)
+                          {
+                            transformer(reinterpret_cast<Term&>(target), *(p++));
+                          }
+                          else make_tree_helper(target, p, new_size, transformer);
                         });
     }
 
@@ -94,6 +126,10 @@ class term_balanced_tree : public aterm_appl
       if (size==0)
       {
         result = empty_tree(); 
+      }
+      else if (size==1)
+      {
+        transformer(reinterpret_cast<Term&>(result), *(p++));
       }
       else
       {
@@ -154,7 +190,7 @@ class term_balanced_tree : public aterm_appl
     template<typename ForwardTraversalIterator>
     term_balanced_tree(ForwardTraversalIterator first, const std::size_t size)
     {
-        make_tree(*this, first, size, [](const Term& t) { return t; });
+        make_tree(*this, first, size, [](Term& result, const Term& t) { result=t; });
     }
 
     /// \brief Creates an term_balanced_tree with a copy of a range, where a transformer is applied to each term

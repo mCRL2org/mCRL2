@@ -28,9 +28,9 @@ class rewriter_class
          m_sigma(sigma)
     {}
 
-    const data_expression operator()(const data_expression& t) const
+    void operator()(data_expression& result, const data_expression& t) const
     {
-      return m_r(t,m_sigma);
+      m_r(result, t,m_sigma);
     }
 }; 
 
