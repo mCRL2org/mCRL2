@@ -336,7 +336,6 @@ class lpsreach_algorithm
         // saturation and chaining
         todo1 = todo;
         ldd todo1_old; // the old todo set.
-        std::size_t j = 0; // The last transition group learned.
 
         for (std::size_t i = 0; i < R.size(); i++)
         {
