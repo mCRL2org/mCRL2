@@ -10,6 +10,7 @@
 #ifndef MCRL2_LTS_DETAIL_EXPLORATION_NEW_H
 #define MCRL2_LTS_DETAIL_EXPLORATION_NEW_H
 
+#include "mcrl2/atermpp/standard_containers/indexed_set.h"
 #include "mcrl2/lts/trace.h"
 #include "mcrl2/lts/detail/bithashtable.h"
 #include "mcrl2/lts/detail/queue.h"
@@ -53,7 +54,7 @@ namespace detail
     class multi_action_indexed_set 
     {
       protected:
-        utilities::indexed_set<action_label_lts> storage;
+        atermpp::indexed_set<action_label_lts> storage;
       
       public:
         inline
@@ -79,7 +80,7 @@ class lps2lts_algorithm
     next_state_generator::summand_subset_t m_nonprioritized_subset;
     next_state_generator::summand_subset_t m_prioritized_subset;
 
-    utilities::indexed_set<lps::state> m_state_numbers;
+    atermpp::indexed_set<lps::state> m_state_numbers;
 
     bit_hash_table m_bit_hash_table;
 

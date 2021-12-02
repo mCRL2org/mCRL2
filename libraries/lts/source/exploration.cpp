@@ -98,7 +98,7 @@ void lps2lts_algorithm::initialise_lts_generation(const lts_generation_options& 
   }
   else
   {
-    m_state_numbers = utilities::indexed_set<lps::state>(m_options.initial_table_size);
+    m_state_numbers = atermpp::indexed_set<lps::state>(m_options.initial_table_size);
   }
 
   m_num_states = 0;

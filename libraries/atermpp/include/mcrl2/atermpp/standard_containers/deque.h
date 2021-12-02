@@ -90,7 +90,6 @@ public:
      super::deque(std::move(x))
   {}
 
-
   /// \brief Constructor.
   deque (deque&& x, const allocator_type& alloc)
    : container_wrapper(*this, true),
@@ -102,6 +101,12 @@ public:
     : container_wrapper(*this, true),
       super::deque(il.begin(), il.end(), alloc)
   {}
+
+  /// \brief Copy assignment operator.
+  deque& operator=(const deque& other) = default;
+
+  /// \brief Move assignment operator.
+  deque& operator=(deque&& other) = default;
 
   /// \brief Standard destructor.
   ~deque()=default;
