@@ -60,44 +60,44 @@ public:
   {}
 
   /// \brief Constructor.
-  deque (size_type n, const value_type& val, const allocator_type& alloc = allocator_type())
+  deque(size_type n, const value_type& val, const allocator_type& alloc = allocator_type())
    : container_wrapper(*this, true),
      super::deque(n, detail::reference_aterm(val), alloc)
   {}
 
   /// \brief Constructor.
   template <class InputIterator>
-  deque (InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type())
+  deque(InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type())
    : container_wrapper(*this, true),
      super::deque(first, last, alloc)
   {}
     
   /// \brief Constructor.
-  deque (const deque& x)
+  deque(const deque& x)
    : container_wrapper(*this, true),
      super::deque(x)
   {}
 
   /// \brief Constructor.
-  deque (const deque& x, const allocator_type& alloc)
+  deque(const deque& x, const allocator_type& alloc)
    : container_wrapper(*this, true),
      super::deque(x, alloc)
   {}
   
   /// \brief Constructor.
-  deque (deque&& x)
+  deque(deque&& x)
    : container_wrapper(*this, true),
      super::deque(std::move(x))
   {}
 
   /// \brief Constructor.
-  deque (deque&& x, const allocator_type& alloc)
+  deque(deque&& x, const allocator_type& alloc)
    : container_wrapper(*this, true),
      super::deque(std::move(x), alloc)
   {}
 
   /// \brief Constructor. 
-  deque (std::initializer_list<value_type> il, const allocator_type& alloc = allocator_type())
+  deque(std::initializer_list<value_type> il, const allocator_type& alloc = allocator_type())
     : container_wrapper(*this, true),
       super::deque(il.begin(), il.end(), alloc)
   {}

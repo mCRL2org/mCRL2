@@ -83,11 +83,66 @@ struct is_reference_aterm : public is_reference_aterm_helper<typename std::decay
 template<class T, typename Type >
 class reference_aterm
 {
+protected:
+  typedef typename std::decay<T>::type T_type;
+  T_type m_t;
+public:
   reference_aterm() noexcept = default;
-  reference_aterm(const T& other) = delete;
-  reference_aterm(T&& other) = delete;
-  T& operator=(const T& other) = delete;
-  T& operator=(T&& other) = delete;
+
+  reference_aterm(const T& other) noexcept
+   : m_t(other)
+  { }
+ 
+  template <class... Args>
+  reference_aterm(Args&&... args) noexcept
+   : m_t(std::forward<Args>(args)...)
+  { }
+ 
+  template <class... Args>
+  reference_aterm(const Args&... args) noexcept
+   : m_t(std::forward<Args>(args)...)
+  { }
+ 
+  reference_aterm(T_type&& other) noexcept
+   : m_t(std::forward(other))
+  {}
+
+  const T& operator=(const T& other) noexcept
+  {
+    static_assert(std::is_base_of<aterm, T>::value);
+    m_t=other;
+    return m_t;
+  }
+
+  const T& operator=(T&& other) noexcept
+  {
+    static_assert(std::is_base_of<aterm, T>::value);
+    m_t = std::forward(other);
+    return m_t;
+  }
+
+  /// Converts implicitly to a protected term of type T.
+  operator T&()
+  {
+    return m_t;
+  }
+
+  operator const T&() const
+  {
+    return m_t;
+  }
+
+  /// For types that are not a std::pair, or a type convertible to an aterm
+  /// it is necessary that a dedicated mark function is provided that calls mark_term
+  /// on all aterm types in the class T, when this class is stored in an atermpp container.
+  /// See below for an example, where the code is given for pairs, aterms and built in types.
+  /// The container is traversed during garbage collection, such that all terms in these
+  /// containers are protected individually, without putting them all explicitly in 
+  /// protection sets. 
+  void mark(std::stack<std::reference_wrapper<detail::_aterm>>& todo) const
+  {
+    m_t.mark(todo);
+  }
 
 };
 
@@ -98,10 +153,9 @@ class reference_aterm < T, typename std::enable_if<std::is_fundamental<typename 
 {
 protected:
   typedef typename std::decay<T>::type T_type;
+  T_type m_t;
 
 public:
-
-  T_type m_t;
 
   /// \brief Default constructor.
   reference_aterm() noexcept = default;
@@ -124,7 +178,7 @@ public:
   const T& operator=(T&& other) noexcept
   {
     static_assert(std::is_base_of<aterm, T>::value);
-    m_t = other;
+    m_t = std::move(other);
     return m_t;
   }
 
@@ -169,11 +223,12 @@ public:
   { }
 
   reference_aterm(unprotected_aterm&& other) noexcept
+   : unprotected_aterm(detail::address(other))
   {
-    m_term = detail::address(other);
   }
 
   const reference_aterm& operator=(const unprotected_aterm& other) noexcept;
+
   const reference_aterm& operator=(unprotected_aterm&& other) noexcept;
 
   /// Converts implicitly to a protected term of type T.
@@ -289,8 +344,8 @@ public:
 
   reference_aterm& operator=(reference_aterm&& other)
   {
-    super::first = other.first;
-    super::second = other.second;
+    super::first = std::move(other.first);
+    super::second = std::move(other.second);
     return *this;
   }
 

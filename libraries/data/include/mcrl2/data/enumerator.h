@@ -12,13 +12,14 @@
 #ifndef MCRL2_DATA_ENUMERATOR_H
 #define MCRL2_DATA_ENUMERATOR_H
 
+// #include <deque>
+#include <boost/iterator/iterator_facade.hpp>
+#include "mcrl2/atermpp/standard_containers/deque.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/detail/enumerator_iteration_limit.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/substitutions/enumerator_substitution.h"
 #include "mcrl2/utilities/math.h"
-#include <boost/iterator/iterator_facade.hpp>
-#include <deque>
 
 namespace mcrl2
 {
@@ -291,6 +292,16 @@ class enumerator_list_element
     {
       return phi != data::undefined_data_expression();
     }
+ 
+    /// \brief The following function is needed to mark the aterms in this class,
+    ///        when elements of this class are used in an atermpp standard container.
+    ///        When garbage collection of aterms is taking place this function is
+    ///        called for all elements of this class in the atermpp container. 
+    void mark(std::stack<std::reference_wrapper<atermpp::detail::_aterm>>& todo) const
+    {
+      mark_term(*atermpp::detail::address(v), todo);
+      mark_term(*atermpp::detail::address(phi), todo);
+    }
 };
 
 /// \brief An element for the todo list of the enumerator that collects the substitution
@@ -376,6 +387,17 @@ class enumerator_list_element_with_substitution: public enumerator_list_element<
     {
       return data::enumerator_substitution(m_variables, m_expressions);
     }
+ 
+    /// \brief The following function is needed to mark the aterms in this class,
+    ///        when elements of this class are used in an atermpp standard container.
+    ///        When garbage collection of aterms is taking place this function is
+    ///        called for all elements of this class in the atermpp container. 
+    void mark(std::stack<std::reference_wrapper<atermpp::detail::_aterm>>& todo) const
+    {
+      mark_term(*atermpp::detail::address(m_variables), todo);
+      mark_term(*atermpp::detail::address(m_expressions), todo);
+      static_cast<enumerator_list_element<Expression>>(*this).mark(todo);
+    }
 };
 
 template <typename Expression>
@@ -415,11 +437,11 @@ template <typename EnumeratorListElement>
 class enumerator_queue
 {
   protected:
-    std::deque<EnumeratorListElement> P;
+    atermpp::deque<EnumeratorListElement> P;
 
   public:
     typedef EnumeratorListElement value_type;
-    typedef typename std::deque<EnumeratorListElement>::size_type size_type;
+    typedef typename atermpp::deque<EnumeratorListElement>::size_type size_type;
 
     /// \brief Default constructor
     enumerator_queue() = default;
@@ -456,7 +478,7 @@ class enumerator_queue
       P.clear();
     }
 
-    typename std::deque<EnumeratorListElement>::size_type size() const
+    typename atermpp::deque<EnumeratorListElement>::size_type size() const
     {
       return P.size();
     }
