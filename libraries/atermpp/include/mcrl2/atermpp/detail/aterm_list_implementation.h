@@ -281,50 +281,60 @@ operator+(const term_list<Term1>& l, const term_list<Term2>& m)
 namespace detail
 {
   template <class Term, class Iter, class ATermConverter, class ATermFilter>
-  inline aterm make_list_backward(Iter first, Iter last, ATermConverter convert_to_aterm, ATermFilter aterm_filter)
+  inline void make_list_backward(aterm_list& result, Iter first, Iter last, ATermConverter convert_to_aterm, ATermFilter aterm_filter)
   {
     static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
     static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
 
-    aterm_list list;
+    Term t;
     while (first != last)
     {
       --last;
-      const Term t = convert_to_aterm(*last);
+      t = convert_to_aterm(*last);
       if (aterm_filter(t))
       {
-        list.push_front(t);
+        result.push_front(t);
       }
     }
+  }
 
-    return mcrl2::workaround::return_std_move(list);
+  template <class Term, class Iter, class ATermConverter, class ATermFilter>
+  inline aterm make_list_backward(Iter first, Iter last, ATermConverter convert_to_aterm, ATermFilter aterm_filter)
+  {
+    aterm_list result_list;
+    make_list_backward<Term, Iter, ATermConverter, ATermFilter>(result_list, first, last, convert_to_aterm, aterm_filter);
+    return mcrl2::workaround::return_std_move(result_list);
+  }
+
+  template <class Term, class Iter, class ATermConverter>
+  inline void make_list_backward(aterm_list& result, Iter first, Iter last, ATermConverter convert_to_aterm)
+  {
+    static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+    static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
+
+    while (first != last)
+    {
+      --last;
+      result.push_front(convert_to_aterm(*last));
+    }
   }
 
   template <class Term, class Iter, class ATermConverter>
   inline aterm make_list_backward(Iter first, Iter last, ATermConverter convert_to_aterm)
   {
-    static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
-    static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
-
-    aterm_list list;
-    while (first != last)
-    {
-      --last;
-      list.push_front(convert_to_aterm(*last));
-    }
-
-    return mcrl2::workaround::return_std_move(list);
+    aterm_list result_list;
+    make_list_backward<Term, Iter, ATermConverter>(result_list, first, last, convert_to_aterm);
+    return mcrl2::workaround::return_std_move(result_list);
   }
 
   // See the note at make_list_backwards for why there are two almost similar version of make_list_forward.
+  // The resulting list is put in result.
   template <class Term, class Iter, class ATermConverter, class ATermFilter>
-  inline aterm make_list_forward(Iter first, Iter last, ATermConverter convert_to_aterm, ATermFilter aterm_filter)
+  inline void make_list_forward(aterm_list& result, Iter first, Iter last, ATermConverter convert_to_aterm, ATermFilter aterm_filter)
   {
     static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
     static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
 
-    // The list that will be returned.
-    aterm_list list;
 
     const std::size_t len = std::distance(first,last);
     if (len < LengthOfShortList)  // If the list is sufficiently short, use the stack.
@@ -347,7 +357,7 @@ namespace detail
       for( ; i != buffer_begin; )
       {
         --i;
-        list.push_front(*i);
+        result.push_front(*i);
         (*i).~Term(); // Destroy the elements in the buffer explicitly.
       }
     }
@@ -369,21 +379,24 @@ namespace detail
       // Construct the list using the temporary array of elements.
       for(typename std::vector<Term>::const_reverse_iterator i = buffer.rbegin(); i != buffer.rend(); ++i)
       {
-        list.push_front(*i);
+        result.push_front(*i);
       }
     }
+  }
 
-    return mcrl2::workaround::return_std_move(list);
+  template <class Term, class Iter, class ATermConverter, class ATermFilter>
+  inline aterm make_list_forward(Iter first, Iter last, ATermConverter convert_to_aterm, ATermFilter aterm_filter)
+  {
+    aterm_list result_list;
+    make_list_forward<Term, Iter, ATermConverter, ATermFilter>(result_list, first, last, convert_to_aterm, aterm_filter);
+    return mcrl2::workaround::return_std_move(result_list);
   }
 
   template <class Term, class Iter, class ATermConverter>
-  inline aterm make_list_forward(Iter first, Iter last, ATermConverter convert_to_aterm)
+  inline void make_list_forward(aterm_list& result, Iter first, Iter last, ATermConverter convert_to_aterm)
   {
     static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
     static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
-
-    // The list that will be returned.
-    aterm_list list;
 
     const std::size_t len = std::distance(first,last);
     if (len < LengthOfShortList) // If the list is sufficiently short, use the stack.
@@ -400,7 +413,7 @@ namespace detail
       for( ; i != buffer_begin; )
       {
         --i;
-        list.push_front(*i);
+        result.push_front(*i);
         (*i).~Term(); // Destroy the elements in the buffer explicitly.
       }
     }
@@ -416,11 +429,17 @@ namespace detail
 
       for(typename std::vector<Term>::const_reverse_iterator i = buffer.rbegin(); i != buffer.rend(); ++i)
       {
-        list.push_front(*i);
+        result.push_front(*i);
       }
     }
+  }
 
-    return mcrl2::workaround::return_std_move(list);
+  template <class Term, class Iter, class ATermConverter>
+  inline aterm make_list_forward(Iter first, Iter last, ATermConverter convert_to_aterm)
+  {
+    aterm_list result_list;
+    make_list_forward<Term,Iter,ATermConverter>(result_list, first, last, convert_to_aterm);
+    return mcrl2::workaround::return_std_move(result_list);
   }
 } // detail
 

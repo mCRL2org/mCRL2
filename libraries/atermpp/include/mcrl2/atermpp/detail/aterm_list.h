@@ -16,11 +16,18 @@
 
 namespace atermpp
 {
+
+template <class Term>
+class term_list;
+
+typedef term_list<aterm> aterm_list;
+
 namespace detail
 {
 
 template <class Term>
 class _term_list;
+
 
 template <class Term>
 struct do_not_convert_term
@@ -42,23 +49,40 @@ struct do_not_convert_term
 /// 			 The reason for this is that there is a 5% loss of speed of the toolset when merging these two functions.
 ///          This is caused by storing and protecting the intermediate value of the converted aterm. See Term t = convert_to_aterm(...).
 template <typename Term, typename Iter, typename ATermConverter>
-aterm make_list_backward(Iter first, Iter last, ATermConverter convert_to_aterm);
+inline aterm make_list_backward(Iter first, Iter last, ATermConverter convert_to_aterm);
+
+/// \brief Constructs a list starting from first to last where the result is put in result.
+template <class Term, class Iter, class ATermConverter>
+inline void make_list_backward(aterm_list& result, Iter first, Iter last, ATermConverter convert_to_aterm);
+
 
 /// \brief Constructs a list starting from first to last. The iterators are traversed backwards and each element is
 /// 		   converted using the TermConverter and inserted whenever TermFilter yields true for the converted element.
 template <typename Term, typename Iter, typename ATermConverter, typename ATermFilter>
-aterm make_list_backward(Iter first, Iter last, ATermConverter convert_to_aterm, ATermFilter aterm_filter);
+inline aterm make_list_backward(Iter first, Iter last, ATermConverter convert_to_aterm, ATermFilter aterm_filter);
+
+/// \brief Construct a list iterating from the last to the first element. Result is put in the variable result.
+template <class Term, class Iter, class ATermConverter, class ATermFilter>
+inline void make_list_backward(aterm_list& result, Iter first, Iter last, ATermConverter convert_to_aterm, ATermFilter aterm_filter);
 
 /// \brief Constructs a list starting from first to last. Each element is converted using the TermConverter.
 /// \details Will first store the converted elements in an array and then insert them into the list.
 template <typename Term, class Iter, class ATermConverter>
 aterm make_list_forward(Iter first, Iter last, ATermConverter convert_to_aterm);
 
+/// \brief Constructs a list starting from the first iterator element to the last. The result is put into the variable result. 
+template <class Term, class Iter, class ATermConverter>
+inline void make_list_backward(aterm_list& result, Iter first, Iter last, ATermConverter convert_to_aterm);
+
 /// \brief Constructs a list starting from first to last. Each element is converted using the TermConverter and inserted
 /// 		   whenever TermFilter yields true for the converted element.
 /// \details Will first store the converted elements in an array and then insert them into the list.
 template <typename Term, class Iter, class ATermConverter, class ATermFilter>
 aterm make_list_forward(Iter first, Iter last, ATermConverter convert_to_aterm, ATermFilter aterm_filter);
+
+/// \brief Constructs a list traversing the iterator from first to last, putting the result in place in the variable result. 
+template <class Term, class Iter, class ATermConverter, class ATermFilter>
+inline void make_list_forward(aterm_list& result, Iter first, Iter last, ATermConverter convert_to_aterm, ATermFilter aterm_filter);
 
 } // namespace detail
 

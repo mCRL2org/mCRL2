@@ -308,8 +308,8 @@ void make_term_list(term_list<Term>& target, Iter first, Iter last, typename std
                                          std::bidirectional_iterator_tag,
                                          typename std::iterator_traits<Iter>::iterator_category >::value>::type* = nullptr)
 {
-  target=detail::make_list_backward<Term,Iter,
-              detail::do_not_convert_term<Term> >(first, last,detail::do_not_convert_term<Term>());
+  detail::make_list_backward<Term,Iter,
+              detail::do_not_convert_term<Term> >(target, first, last,detail::do_not_convert_term<Term>());
   assert(!target.defined() || target.type_is_list());
 }
 
@@ -328,7 +328,7 @@ void make_term_list(term_list<Term>& target, Iter first, Iter last, const ATermC
                               typename std::iterator_traits<Iter>::iterator_category
                             >::value>::type* = 0)
 {
-  target=detail::make_list_backward<Term,Iter,ATermConverter>(first, last, convert_to_aterm);
+  detail::make_list_backward<Term,Iter,ATermConverter>(target, first, last, convert_to_aterm);
   assert(!target.defined() || target.type_is_list());
 }
 
@@ -349,7 +349,7 @@ void make_term_list(term_list<Term>& target, Iter first, Iter last, const ATermC
                               typename std::iterator_traits<Iter>::iterator_category
                             >::value>::type* = 0)
 {
-  target=detail::make_list_backward<Term,Iter,ATermConverter,ATermFilter>(first, last, convert_to_aterm, aterm_filter);
+  detail::make_list_backward<Term,Iter,ATermConverter,ATermFilter>(target, first, last, convert_to_aterm, aterm_filter);
   assert(!target.defined() || target.type_is_list());
 }
 
@@ -367,8 +367,8 @@ void make_term_list(term_list<Term>& target, Iter first, Iter last,
                                typename std::iterator_traits<Iter>::iterator_category
                              >::value>::type* = nullptr)
 {
-  target=detail::make_list_forward<Term,Iter,detail::do_not_convert_term<Term> >
-                             (first, last, detail::do_not_convert_term<Term>());
+  detail::make_list_forward<Term,Iter,detail::do_not_convert_term<Term> >
+                             (target, first, last, detail::do_not_convert_term<Term>());
   assert(!target.defined() || target.type_is_list());
 }
 
@@ -391,8 +391,8 @@ void make_term_list(term_list<Term>& target, Iter first, Iter last, const ATermC
                                 typename std::iterator_traits<Iter>::iterator_category
                               >::value>::type* = nullptr)
 {
-  target=detail::make_list_forward<Term,Iter,ATermConverter>
-                             (first, last, convert_to_aterm);
+  detail::make_list_forward<Term,Iter,ATermConverter>
+                             (target, first, last, convert_to_aterm);
   assert(!target.defined() || target.type_is_list());
 }
 
@@ -416,8 +416,8 @@ void make_term_list(term_list<Term>& target, Iter first, Iter last, const ATermC
                                  typename std::iterator_traits<Iter>::iterator_category
                                >::value>::type* = nullptr)
 {
-  target=detail::make_list_forward<Term,Iter,ATermConverter>
-                             (first, last, convert_to_aterm, aterm_filter);
+  detail::make_list_forward<Term,Iter,ATermConverter>
+                             (target, first, last, convert_to_aterm, aterm_filter);
   assert(!target.defined() || target.type_is_list());
 }
 

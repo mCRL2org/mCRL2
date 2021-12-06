@@ -12,7 +12,6 @@
 #ifndef MCRL2_DATA_ENUMERATOR_H
 #define MCRL2_DATA_ENUMERATOR_H
 
-// #include <deque>
 #include <boost/iterator/iterator_facade.hpp>
 #include "mcrl2/atermpp/standard_containers/deque.h"
 #include "mcrl2/core/detail/print_utility.h"
