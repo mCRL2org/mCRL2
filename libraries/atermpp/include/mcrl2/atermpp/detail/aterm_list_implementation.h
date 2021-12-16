@@ -11,6 +11,7 @@
 #define MCRL2_ATERMPP_DETAIL_ATERM_LIST_IMPLEMENTATION_H
 #pragma once
 
+#include <type_traits>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 
@@ -392,22 +393,187 @@ namespace detail
     return mcrl2::workaround::return_std_move(result_list);
   }
 
+  /* template <class Iter, class ATermConverter>
+  struct auxiliary_iterator_context
+  {
+    typename std::remove_const<Iter>::type m_iterator;
+    const Iter m_iterator_end;
+    ATermConverter m_convert_aterm;
+
+    auxiliary_iterator_context(typename std::remove_const<Iter>::type& iterator,
+                           const Iter& iterator_end,
+                           ATermConverter convert_aterm)
+     : m_iterator(iterator),
+       m_iterator_end(iterator_end),
+       m_convert_aterm(convert_aterm)
+    {}
+  };
+
+
+  template <class Iter, class ATermConverter>
+  struct auxiliary_iterator
+  { 
+    typedef std::size_t difference_type;
+    typedef aterm_appl value_type;
+    typedef aterm* pointer;
+    typedef aterm& reference;
+    typedef typename Iter::iterator_category iterator_category;
+    
+    std::size_t m_count;
+    auxiliary_iterator_context<Iter,ATermConverter>& m_data_container;
+
+    auxiliary_iterator(std::size_t c, auxiliary_iterator_context<Iter,ATermConverter>& cont)
+     : m_count(c),
+       m_data_container(cont)
+    {
+    }
+
+    void operator++()
+    {
+      m_count++;
+    }
+    
+    bool operator ==(const auxiliary_iterator& other) const 
+    { 
+      return m_count==other.m_count;
+    }
+    
+    bool operator !=(const auxiliary_iterator& other) const
+    { 
+      return !operator==(other);
+    }
+    
+    const aterm operator*()
+    { 
+      if (m_count==0)
+      {
+        assert(m_data_container.m_iterator!=m_data_container.m_iterator_end);
+        return m_data_container.m_convert_aterm(*m_data_container.m_iterator++);   // This leads to the protection of an aterm. 
+      }
+      assert(m_count==1);
+      if (m_data_container.m_iterator==m_data_container.m_iterator_end)
+      {
+        return aterm_list();
+      }
+      return aterm_appl(detail::g_term_pool().as_list(), 
+                        auxiliary_iterator(0,m_data_container), 
+                        auxiliary_iterator(2,m_data_container),
+                        [](const aterm& t)->const aterm& { return t;});
+    }
+  }; */
+
+  struct dummy_iterator
+  {
+    typedef std::size_t difference_type;
+    typedef aterm_appl value_type;
+    typedef aterm* pointer;
+    typedef aterm& reference;
+    typedef std::forward_iterator_tag iterator_category;
+
+    const aterm_appl& dummy() const
+    {
+      static const aterm_appl g_dummy;
+      return g_dummy;
+    }
+
+    void operator++()
+    {}
+
+    bool operator !=(const dummy_iterator ) const    // Operator is only used to fool assertions. 
+    {
+      return true;
+    }
+
+    bool operator ==(const dummy_iterator ) const    // Operator is only used to fool assertions.
+    {
+      return true;
+    }
+
+    const aterm_appl& operator*() const
+    {
+      return dummy();
+    }
+
+  };
+
+  struct dummy_iterator_object
+  {
+    dummy_iterator begin()
+    {
+      return dummy_iterator();
+    }
+
+    dummy_iterator end()
+    {
+      return dummy_iterator();
+    }
+  };
+
+  template < class Term, typename ForwardTraversalIterator, class Transformer >
+  void make_list_forward_helper(term_list<Term>& result, ForwardTraversalIterator& p, const std::size_t size, Transformer transformer)
+  {
+    assert(size>0);
+    enum { e_data, e_next } b=e_data;
+    make_term_appl(result, detail::g_term_pool().as_list(), dummy_iterator_object().begin(), dummy_iterator_object().end(),
+                   [&size, &transformer, &p, &b](aterm& result, const aterm_appl& )
+                      {
+                        assert(size>0);
+                        
+                        if (b==e_data)
+                        {
+                          if constexpr (mcrl2::utilities::is_applicable2<Transformer, Term&, const Term>::value)   
+                          {
+                            transformer(reinterpret_cast<Term&>(result), *(p++));
+                          }
+                          else
+                          {
+                            reinterpret_cast<Term&>(result)=transformer(*(p++));
+                          }
+                          b=e_next;
+                        }
+                        else
+                        {
+                          assert(b==e_next);
+                          if (size==1)
+                          {
+                            make_term_list(reinterpret_cast<term_list<Term>& >(result));
+                          }
+                          else 
+                          {
+                            make_list_forward_helper(reinterpret_cast<term_list<Term>& >(result), p, size-1, transformer);
+                          }
+                        }
+                      });
+  }
+
   template <class Term, class Iter, class ATermConverter>
-  inline void make_list_forward(aterm_list& result, Iter first, Iter last, ATermConverter convert_to_aterm)
+  inline void make_list_forward(term_list<Term>& result, Iter first, Iter last, ATermConverter convert_aterm)
   {
     static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
     static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
 
     const std::size_t len = std::distance(first,last);
-    if (len < LengthOfShortList) // If the list is sufficiently short, use the stack.
+    if (len==0)
     {
-      Term* buffer = MCRL2_SPECIFIC_STACK_ALLOCATOR(Term, len);
+      make_term_list(result); // Put the empty list in result.
+      return;
+    }
+    else if (len < LengthOfShortList) // If the list is sufficiently short, use the stack.
+    {
+      make_list_forward_helper(result, first, len, convert_aterm);
+      /* auxiliary_iterator_context cont(first, last, convert_aterm);
+      make_term_appl(result, 
+                     detail::g_term_pool().as_list(), 
+                     auxiliary_iterator(0,cont), 
+                     auxiliary_iterator(2,cont),
+                     [](const aterm& t) -> const aterm& { return t;}); */
+      /* Term* buffer = MCRL2_SPECIFIC_STACK_ALLOCATOR(Term, len);
       Term *const buffer_begin = buffer;
       Term* i = buffer_begin;
       for(; first != last; ++first,++i)
       {
         // Placement new; The buffer is not properly initialised.
-        new (i) Term(convert_to_aterm(*first));
+        new (i) Term(convert_aterm(*first));
       }
 
       for( ; i != buffer_begin; )
@@ -415,7 +581,7 @@ namespace detail
         --i;
         result.push_front(*i);
         (*i).~Term(); // Destroy the elements in the buffer explicitly.
-      }
+      } */
     }
     else
     {
@@ -424,7 +590,16 @@ namespace detail
       buffer.reserve(len);
       for(; first != last; ++first)
       {
-        buffer.push_back(convert_to_aterm(*first));
+        if constexpr (mcrl2::utilities::is_applicable2<ATermConverter, Term&, const Term>::value)
+        {
+          buffer.emplace_back();
+          convert_aterm(buffer.back(), *first);
+        }
+        else
+        {
+          buffer.emplace_back(convert_aterm(*first));
+        }
+
       }
 
       for(typename std::vector<Term>::const_reverse_iterator i = buffer.rbegin(); i != buffer.rend(); ++i)
@@ -437,7 +612,7 @@ namespace detail
   template <class Term, class Iter, class ATermConverter>
   inline aterm make_list_forward(Iter first, Iter last, ATermConverter convert_to_aterm)
   {
-    aterm_list result_list;
+    term_list<Term> result_list;
     make_list_forward<Term,Iter,ATermConverter>(result_list, first, last, convert_to_aterm);
     return mcrl2::workaround::return_std_move(result_list);
   }

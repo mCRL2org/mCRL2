@@ -52,6 +52,30 @@ constexpr bool is_iterable_v = is_iterable<T>::value;
 template <typename T>
 constexpr bool is_iterator_v = is_iterator<T>::value;
 
+template <typename FunctionType, typename ArgumentType, typename = void>
+struct is_applicable 
+    : public std::false_type
+{
+};
+
+template <typename FunctionType, typename ArgumentType>
+struct is_applicable<FunctionType, ArgumentType,
+                     typename std::result_of<FunctionType(ArgumentType)>::type>
+    : public std::true_type
+{};
+
+template <typename FunctionType, typename ArgumentType1, typename ArgumentType2, typename = void>
+struct is_applicable2 
+    : public std::false_type
+{
+};
+
+template <typename FunctionType, typename ArgumentType1, typename ArgumentType2>
+struct is_applicable2<FunctionType, ArgumentType1, ArgumentType2,
+                      typename std::result_of<FunctionType(ArgumentType1,ArgumentType2)>::type>
+    : public std::true_type
+{};
+
 } // namespace mcrl2::utilities
 
 #endif // MCRL2_UTILITIES_TYPE_TRAITS_H

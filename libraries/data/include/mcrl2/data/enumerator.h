@@ -620,56 +620,56 @@ class enumerator_algorithm
                         ) const
     {
       assert(!P.empty());
-      const auto& p = P.front();
+      const EnumeratorListElement& p = P.front();
 
       auto add_element = [&](const data::variable_list& variables,
                              const typename EnumeratorListElement::expression_type& phi,
                              const data::variable& v,
                              const data::data_expression& e
-      )
-      {
-        auto phi1 = rewrite(phi, sigma);
-        if (reject(phi1))
-        {
-          return false;
-        }
-        if ((accept(phi1) && m_accept_solutions_with_variables) || variables.empty())
-        {
-          EnumeratorListElement q(variables, phi1, p, v, e);
-          return report_solution(q);
-        }
-        P.emplace_back(variables, phi1, p, v, e);
-        return false;
-      };
+                            ) -> bool
+                            {
+                              auto phi1 = rewrite(phi, sigma);
+                              if (reject(phi1))
+                              {
+                                return false;
+                              }
+                              if ((accept(phi1) && m_accept_solutions_with_variables) || variables.empty())
+                              {
+                                EnumeratorListElement q(variables, phi1, p, v, e);
+                                return report_solution(q);
+                              }
+                              P.emplace_back(variables, phi1, p, v, e);
+                              return false;
+                            };
 
       auto add_element_with_variables = [&](const data::variable_list& variables,
                                             const data::variable_list& added_variables,
                                             const typename EnumeratorListElement::expression_type& phi,
                                             const data::variable& v,
                                             const data::data_expression& e
-      )
-      {
-        auto phi1 = rewrite(phi, sigma);
-        if (reject(phi1))
-        {
-          return false;
-        }
-        bool added_variables_empty = added_variables.empty() || (phi1 == phi && m_accept_solutions_with_variables);
-        if ((accept(phi1) && m_accept_solutions_with_variables) || (variables.empty() && added_variables_empty))
-        {
-          EnumeratorListElement q(variables + added_variables, phi1, p, v, e);
-          return report_solution(q);
-        }
-        if (added_variables_empty)
-        {
-          P.emplace_back(variables, phi1, p, v, e);
-        }
-        else
-        {
-          P.emplace_back(variables + added_variables, phi1, p, v, e);
-        }
-        return false;
-      };
+                                           ) -> bool
+                                           {
+                                             auto phi1 = rewrite(phi, sigma);
+                                             if (reject(phi1))
+                                             {
+                                               return false;
+                                             }
+                                             bool added_variables_empty = added_variables.empty() || (phi1 == phi && m_accept_solutions_with_variables);
+                                             if ((accept(phi1) && m_accept_solutions_with_variables) || (variables.empty() && added_variables_empty))
+                                             {
+                                               EnumeratorListElement q(variables + added_variables, phi1, p, v, e);
+                                               return report_solution(q);
+                                             }
+                                             if (added_variables_empty)
+                                             {
+                                               P.emplace_back(variables, phi1, p, v, e);
+                                             }
+                                             else
+                                             {
+                                               P.emplace_back(variables + added_variables, phi1, p, v, e);
+                                             }
+                                             return false;
+                                           };
 
       const auto& v = p.variables();
       const auto& phi = p.expression();

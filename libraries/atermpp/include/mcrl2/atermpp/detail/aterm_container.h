@@ -22,29 +22,33 @@ namespace atermpp::detail
 
 /// \brief Provides safe storage of unprotected_aterm instances in a container by marking
 ///        them during garbage collection.
-class aterm_container
+class _aterm_container
 {
 public:
-  inline aterm_container();
-  virtual inline ~aterm_container();
+  inline _aterm_container();
+  virtual inline ~_aterm_container();
 
   /// \brief Ensure that all the terms in the containers.
-  virtual void mark(std::stack<std::reference_wrapper<detail::_aterm>>& todo) const = 0;
+  virtual inline void mark(std::stack<std::reference_wrapper<detail::_aterm>>& /* todo*/) const
+  {
+    // Nothing needs to be done, as this container is not yet in use, 
+    // as otherwise an override would be called. 
+  }
 
   /// \brief Copy constructor
-  inline aterm_container(const aterm_container& c);
+  inline _aterm_container(const _aterm_container& c);
 
   /// \brief Move constructor
-  inline aterm_container(aterm_container&& c);
+  inline _aterm_container(_aterm_container&& c);
 
   /// \brief Assignment This may have to be redefined in due time. 
-  aterm_container& operator=(const aterm_container& )
+  _aterm_container& operator=(const _aterm_container& )
   {
     return *this;
   }
 
   /// \brief Move assignment
-  aterm_container& operator=(aterm_container&& )
+  _aterm_container& operator=(_aterm_container&& )
   {
     return *this;
   } 
@@ -428,7 +432,7 @@ private:
 };
 
 template<typename Container>
-class generic_aterm_container : public aterm_container
+class generic_aterm_container : public _aterm_container
 {
 public:
   /// \brief Constructor
@@ -450,19 +454,19 @@ public:
   // Container& container() { return m_container; }
   // const Container& container() const { return m_container; }
 
-  void mark(std::stack<std::reference_wrapper<detail::_aterm>>& todo) const override
+  virtual void inline mark(std::stack<std::reference_wrapper<detail::_aterm>>& todo) const override
   {
     for (const typename Container::value_type& element: m_container) 
     {
-      static_assert(is_reference_aterm<reference_aterm<typename Container::value_type> >::value,"TEST1");
+      static_assert(is_reference_aterm<reference_aterm<typename Container::value_type> >::value);
       if constexpr (is_reference_aterm<typename Container::value_type>::value)
       {
-        static_assert(is_reference_aterm<typename Container::value_type >::value,"TEST2");
+        static_assert(is_reference_aterm<typename Container::value_type >::value);
         element.mark(todo);
       }
       else
       {
-        static_assert(!is_reference_aterm<typename Container::value_type >::value,"TEST3");
+        static_assert(!is_reference_aterm<typename Container::value_type >::value);
         reference_aterm<typename Container::value_type>(element).mark(todo);
       }
     }

@@ -32,6 +32,11 @@ class _term_list;
 template <class Term>
 struct do_not_convert_term
 {
+  void operator()(Term& result, const Term& t) const
+  {
+    result=t;
+  }
+
   const Term& operator()(const Term& t) const
   {
     return t;
@@ -40,7 +45,7 @@ struct do_not_convert_term
   Term& operator()(Term& t) const
   {
     return t;
-  }
+  } 
 };
 
 /// \brief Constructs a list starting from first to last. The iterators are traversed backwards and each element is

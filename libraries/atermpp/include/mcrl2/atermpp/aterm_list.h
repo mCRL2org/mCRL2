@@ -172,7 +172,6 @@ public:
   explicit term_list(Iter first, Iter last, const ATermConverter& convert_to_aterm,
                      typename std::enable_if< !std::is_base_of<
                        std::bidirectional_iterator_tag,
-                       // std::random_access_iterator_tag,
                        typename std::iterator_traits<Iter>::iterator_category
                      >::value>::type* = nullptr):
        aterm(detail::make_list_forward<Term,Iter,ATermConverter>
@@ -295,7 +294,7 @@ public:
 template <class Term>
 void make_term_list(term_list<Term>& target)
 {
-  target=detail::g_term_pool().empty_list();
+  target=atermpp::down_cast<term_list<Term>>(detail::g_term_pool().empty_list());
 }
 
 /// \brief Creates a term_list with the elements from first to last.
@@ -381,13 +380,12 @@ void make_term_list(term_list<Term>& target, Iter first, Iter last,
 /// \param target The variable to which the list is assigned. 
 /// \param first The start of a range of elements.
 /// \param last The end of a range of elements.
-/// \param convert_to_aterm A class with a () operation, whic is applied to each element
+/// \param convert_to_aterm A class with a () operation, which is applied to each element
 ///                      before it is put into the list.
 template <class Term, class Iter, class  ATermConverter>
 void make_term_list(term_list<Term>& target, Iter first, Iter last, const ATermConverter& convert_to_aterm,
                               typename std::enable_if< !std::is_base_of<
                                 std::bidirectional_iterator_tag,
-                                // std::random_access_iterator_tag,
                                 typename std::iterator_traits<Iter>::iterator_category
                               >::value>::type* = nullptr)
 {

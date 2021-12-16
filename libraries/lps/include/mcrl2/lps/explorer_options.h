@@ -37,12 +37,15 @@ struct explorer_options
   bool detect_divergence = false;
   bool detect_action = false;
   bool check_probabilities = false;
-  bool save_error_trace = true;
+  bool save_error_trace = false;
   bool generate_traces = false;
   bool suppress_progress_messages = false;
   bool save_at_end = false;
   bool dfs_recursive = false;
   bool discard_lts_state_labels = false;
+  bool rewrite_actions = true;    // If false, this option prevents rewriting actions.
+                                  // Rewriting actions is only needed if they occur in the
+                                  // generated lts, or in traces. 
   std::size_t max_states = std::numeric_limits<std::size_t>::max();
   std::size_t max_traces = 0;
   std::size_t highway_todo_max = std::numeric_limits<std::size_t>::max();

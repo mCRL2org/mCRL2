@@ -85,7 +85,9 @@ void thread_aterm_pool::create_appl_dynamic(aterm& term,
                             InputIterator end)
 {
   lock_shared();
+  ++m_creation_depth;
   bool added = m_pool.create_appl_dynamic(term, sym, begin, end);
+  --m_creation_depth;
   unlock_shared();
   if (added) { m_pool.created_term(m_creation_depth == 0, this); }
 }
@@ -136,7 +138,7 @@ void thread_aterm_pool::deregister_variable(aterm* variable)
   unlock_shared();
 }
 
-void thread_aterm_pool::register_container(aterm_container* container)
+void thread_aterm_pool::register_container(_aterm_container* container)
 {
   if constexpr (EnableVariableRegistrationMetrics) { ++m_container_insertions; }
 
@@ -150,7 +152,7 @@ void thread_aterm_pool::register_container(aterm_container* container)
   unlock_shared();
 }
 
-void thread_aterm_pool::deregister_container(aterm_container* container)
+void thread_aterm_pool::deregister_container(_aterm_container* container)
 {
   lock_shared();
   m_containers->erase(container);
@@ -178,7 +180,7 @@ void thread_aterm_pool::mark()
 
   for (auto it = m_containers->begin(); it != m_containers->end(); ++it)
   {
-    const aterm_container* container = *it;
+    const _aterm_container* container = *it;
 
     if (container != nullptr)
     {

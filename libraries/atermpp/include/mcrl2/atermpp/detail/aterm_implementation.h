@@ -47,22 +47,22 @@ namespace detail
     g_thread_term_pool().unlock_shared();
   }
 
-  aterm_container::aterm_container()
+  _aterm_container::_aterm_container()
   {
     g_thread_term_pool().register_container(this);
   }
 
-  aterm_container::~aterm_container()
+  _aterm_container::~_aterm_container()
   {
     g_thread_term_pool().deregister_container(this);
   }
 
-  aterm_container::aterm_container(const aterm_container&)
+  _aterm_container::_aterm_container(const _aterm_container&)
   { 
     g_thread_term_pool().register_container(this);
   }
   
-  aterm_container::aterm_container(aterm_container&&)
+  _aterm_container::_aterm_container(_aterm_container&&)
   { 
     g_thread_term_pool().register_container(this);
   }

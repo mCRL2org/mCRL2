@@ -14,6 +14,7 @@
 
 #include <random>
 #include <thread>
+#include <type_traits>
 #include "mcrl2/utilities/detail/io.h"
 #include "mcrl2/utilities/skip.h"
 #include "mcrl2/atermpp/standard_containers/deque.h"
@@ -463,25 +464,28 @@ class explorer: public abortable
       return result;
     }
 
-    lps::multi_action rewrite_action(const lps::multi_action& a,
-                                     data::mutable_indexed_substitution<>& sigma,
-                                     data::rewriter& rewr) const
+    /// Rewrite action a, and put it back in place. 
+    lps::multi_action rewrite_action(
+                             const lps::multi_action& a,
+                             data::mutable_indexed_substitution<>& sigma,
+                             data::rewriter& rewr) const
     {
       const process::action_list& actions = a.actions();
       const data::data_expression& time = a.time();
-      return
-        lps::multi_action(
+      return lps::multi_action(
           process::action_list(
             actions.begin(),
             actions.end(),
-            [&](const process::action& a)
+            [&](process::action& result, const process::action& a)
             {
-              const auto& args = a.arguments();
-//  XXXX kan dit met een iterator, direct op actions, zonder een data_expression_list????
-              return process::action(a.label(), 
-                                     data::data_expression_list(args.begin(), args.end(), 
-                                                                [&](const data::data_expression& x) 
-                                                                            { return rewr(x, sigma); }));     
+              const data::data_expression_list& args = a.arguments();
+              return process::make_action(result, 
+                                          a.label(), 
+                                          data::data_expression_list(args.begin(), 
+                                                                     args.end(), 
+                                                                     [&](data::data_expression& result, 
+                                                                         const data::data_expression& x) -> void
+                                                                                 { rewr(result, x, sigma); }));     
             }
           ),
           a.has_time() ? rewr(time, sigma) : time
@@ -534,7 +538,6 @@ class explorer: public abortable
                       [&](const enumerator_element& p) {
                         check_enumerator_solution(p, summand,sigma,rewr);
                         p.add_assignments(summand.variables, sigma, rewr);
-                        lps::multi_action a = rewrite_action(summand.multi_action,sigma,rewr);
                         state_type s1;
                         if constexpr (Stochastic)
                         {
@@ -552,7 +555,23 @@ class explorer: public abortable
                         {
                           data::remove_assignments(sigma, summand.variables);
                         }
-                        report_transition(a, s1);
+                        // Check whether report transition only needs a state, and no action.
+                        if constexpr (utilities::is_applicable<ReportTransition,state_type,void>::value)
+                        {
+                          report_transition(s1);
+                        }
+                        else 
+                        {
+                          if (m_options.rewrite_actions)
+                          {
+                            lps::multi_action a=rewrite_action(summand.multi_action,sigma,rewr);
+                            report_transition(a,s1);
+                          }
+                          else
+                          {
+                            report_transition(summand.multi_action,s1);
+                          }
+                        }
                         return false;
                       },
                       data::is_false
@@ -585,11 +604,11 @@ class explorer: public abortable
           q = cache.insert({key, solutions}).first;
         }
         if (m_options.number_of_threads>0) cache_mutex.unlock();
+
+        state_type s1;
         for (const data::data_expression_list& e: q->second)
         {
           data::add_assignments(sigma, summand.variables, e);
-          lps::multi_action a = rewrite_action(summand.multi_action,sigma,rewr);
-          state_type s1;
           if constexpr (Stochastic)
           {
             s1 = compute_stochastic_state(summand.distribution, summand.next_state, sigma, rewr, enumerator);
@@ -606,7 +625,23 @@ class explorer: public abortable
           {
             data::remove_assignments(sigma, summand.variables);
           }
-          report_transition(a, s1);
+          // If report transition does not require a transition, do not calculate it. 
+          if constexpr (utilities::is_applicable<ReportTransition,state_type,void>::value)
+          {
+            report_transition(s1);
+          }
+          else
+          {
+            if (m_options.rewrite_actions)
+            {
+              lps::multi_action a=rewrite_action(summand.multi_action,sigma,rewr);
+              report_transition(a,s1);
+            }
+            else
+            {
+              report_transition(summand.multi_action,s1);
+            }
+          }
         }
       }
       if (!m_recursive)
@@ -686,7 +721,8 @@ class explorer: public abortable
           condition,
           enumerator,
           id_generator,
-          [&](const lps::multi_action& /* a */, const state& s1)
+          // [&](const lps::multi_action& /* a */, const state& s1) OLD. Calculates transitions, that are not used. 
+          [&](const state& s1)
           {
             result.push_back(s1);
           }
@@ -844,7 +880,7 @@ class explorer: public abortable
       data::data_specification thread_data_specification = m_global_lpsspec.data(); /// XXXX Nodig??
       data::enumerator_algorithm<> thread_enumerator(thread_rewr, thread_data_specification, thread_rewr, thread_id_generator, false);
       state current_state;
-      data::data_expression condition;  // The condition is used often, and it is effective not to declare it too often. 
+      data::data_expression condition;  // The condition is used often, and it is effective not to declare it whenever it is used.
       while (number_of_active_processes>0)
       {
         if (m_options.number_of_threads>0) m_exclusive_state_access.lock();

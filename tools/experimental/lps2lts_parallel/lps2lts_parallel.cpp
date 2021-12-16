@@ -330,6 +330,10 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
          }
       }
 
+      options.rewrite_actions = output_format!=lts::lts_none ||
+                                options.save_error_trace ||
+                                options.generate_traces;
+
     }
 
     template <bool Stochastic, bool Timed, typename Specification, typename LTSBuilder>
