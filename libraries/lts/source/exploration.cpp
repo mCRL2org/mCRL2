@@ -1080,7 +1080,7 @@ void lps2lts_algorithm::get_transitions(const lps::state& state,
         std::string filename_divergence_loop = m_options.trace_prefix + "_divergence_loop" + std::to_string(m_traces_saved);
         check_divergence<detail::counter_example_constructor>(
                 detail::state_index_pair<detail::counter_example_constructor>(state,detail::counter_example_constructor::root_index()),
-                detail::counter_example_constructor(filename_divergence_loop, structured_output));
+                detail::counter_example_constructor(filename_divergence_loop, "", structured_output));
       }
       else
       {

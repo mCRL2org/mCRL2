@@ -1135,6 +1135,7 @@ void bisimulation_reduce(
  * \param[in] branching If true branching bisimulation is used, otherwise strong bisimulation is applied.
  * \param[in] preserve_divergences If true and branching is true, preserve tau loops on states.
  * \param[in] generate_counter_examples Whether to generate a counter example
+ * \param[in] counter_example_file The file to store the counter example in
  * \param[in] structured_output
  * \retval True iff the initial states of the current transition system and l2 are (divergence preserving) (branching) bisimilar */
 template < class LTS_TYPE>
@@ -1144,6 +1145,7 @@ bool destructive_bisimulation_compare(
   const bool branching = false,
   const bool preserve_divergences = false,
   const bool generate_counter_examples = false,
+  const std::string& counter_example_file = "",
   const bool structured_output = false);
 
 
@@ -1158,6 +1160,7 @@ bool destructive_bisimulation_compare(
  * \param[in] branching If true branching bisimulation is used, otherwise strong bisimulation is applied.
  * \param[in] preserve_divergences If true and branching is true, preserve tau loops on states.
  * \param[in] generate_counter_examples Whether to generate a counter example
+ * \param[in] counter_example_file The file to store the counter example in
  * \param[in] structured_output
  * \retval True iff the initial states of the current transition system and l2 are (divergence preserving) (branching) bisimilar */
 template < class LTS_TYPE>
@@ -1167,6 +1170,7 @@ bool bisimulation_compare(
   const bool branching = false,
   const bool preserve_divergences = false,
   const bool generate_counter_examples = false,
+  const std::string& counter_example_file = "",
   const bool structured_output = false);
 
 
@@ -1212,6 +1216,7 @@ bool bisimulation_compare(
   const bool branching /* =false*/,
   const bool preserve_divergences /*=false*/,
   const bool generate_counter_examples /*= false*/,
+  const std::string& counter_example_file /*= ""*/,
   const bool structured_output /* = false */)
 {
   LTS_TYPE l1_copy(l1);
@@ -1227,6 +1232,7 @@ bool destructive_bisimulation_compare(
   const bool branching /* =false*/,
   const bool preserve_divergences /*=false*/,
   const bool generate_counter_examples /* = false */,
+  const std::string& counter_example_file /*= ""*/,
   const bool /*structured_output = false */)
 {
   std::size_t init_l2 = l2.initial_state() + l1.num_states();
@@ -1247,6 +1253,10 @@ bool destructive_bisimulation_compare(
     mcrl2::state_formulas::state_formula counter_example_formula = bisim_part.counter_formula(l1.initial_state(), init_l2);
 
     std::string filename = "Counterexample.mcf";
+    if (!counter_example_file.empty())
+    {
+      filename = counter_example_file;
+    }
     std::ofstream counter_file(filename);
     counter_file << mcrl2::state_formulas::pp(counter_example_formula);
     counter_file.close();

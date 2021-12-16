@@ -34,6 +34,7 @@ struct t_tool_options
   mcrl2::lps::exploration_strategy strategy = mcrl2::lps::es_breadth;
   std::vector<std::string> tau_actions;   // Actions with these labels must be considered equal to tau.
   bool generate_counter_examples = false;
+  std::string counter_example_file = "";
   bool structured_output = false;
   bool enable_preprocessing      = true;
 };
@@ -100,7 +101,7 @@ class ltscompare_tool : public ltscompare_base
         mCRL2log(verbose) << "comparing LTSs using " <<
                      tool_options.equivalence << "..." << std::endl;
 
-        result = destructive_compare(l1, l2, tool_options.equivalence, tool_options.generate_counter_examples, tool_options.structured_output);
+        result = destructive_compare(l1, l2, tool_options.equivalence, tool_options.generate_counter_examples, tool_options.counter_example_file, tool_options.structured_output);
 
         mCRL2log(info) << "LTSs are " << ((result) ? "" : "not ")
                        << "equal ("
@@ -113,7 +114,7 @@ class ltscompare_tool : public ltscompare_base
                      description(tool_options.preorder) << "..."
                      " using the " << print_exploration_strategy(tool_options.strategy) << " strategy.\n";
 
-        result = destructive_compare(l1, l2, tool_options.preorder, tool_options.generate_counter_examples, tool_options.structured_output, tool_options.strategy, tool_options.enable_preprocessing);
+        result = destructive_compare(l1, l2, tool_options.preorder, tool_options.generate_counter_examples, tool_options.counter_example_file, tool_options.structured_output, tool_options.strategy, tool_options.enable_preprocessing);
 
         if (!tool_options.structured_output)
         {
@@ -251,7 +252,9 @@ class ltscompare_tool : public ltscompare_base
                  "be internal (tau) actions in addition to those defined as such by "
                  "the input").
       add_option("counter-example",
-                 "generate counter example if the input lts's are not equivalent",'c');
+                 "generate counter example if the input lts's are not equivalent",'c').
+      add_option("counter-example-file", mcrl2::utilities::make_file_argument("NAME"),
+                 "the file to which the counterexample should be written");
       desc.add_hidden_option("structured-output",
                  "generate counter examples on stdout");
       desc.add_hidden_option("no-preprocessing",
@@ -296,6 +299,12 @@ class ltscompare_tool : public ltscompare_base
       }
 
       tool_options.generate_counter_examples = parser.has_option("counter-example");
+
+      if (parser.has_option("counter-example-file"))
+      {
+        tool_options.counter_example_file = parser.option_argument("counter-example-file");
+      }
+
       tool_options.structured_output = parser.has_option("structured-output");
 
       if (parser.arguments.size() == 1)

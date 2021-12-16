@@ -70,11 +70,13 @@ class counter_example_constructor
     static const index_type m_root_index=-1;
     std::deque< action_index_pair > m_backward_tree;
     const std::string m_name;
+    const std::string m_counter_example_file;
     const bool m_structured_output;
   
   public:
-    counter_example_constructor(const std::string& name, bool structured_output)
+    counter_example_constructor(const std::string& name, const std::string& counter_example_file, bool structured_output)
      : m_name(name)
+     , m_counter_example_file(counter_example_file)
      , m_structured_output(structured_output)
     {}
 
@@ -136,6 +138,10 @@ class counter_example_constructor
       else
       {
         std::string filename = m_name + ".trc";
+        if (!m_counter_example_file.empty())
+        {
+          filename = m_counter_example_file;
+        }
         mCRL2log(log::verbose) << "Saved trace to file " + filename + "\n";
         result.save(filename);
       }
