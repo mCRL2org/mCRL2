@@ -39,7 +39,7 @@ namespace lts
 /** \brief Applies a reduction algorithm to this LTS.
  * \param[in] l A labelled transition system that must be reduced.
  * \param[in] eq The equivalence with respect to which the LTS will be
- * reduced.
+ *            reduced.
  **/
 template <class LTS_TYPE>
 void reduce(LTS_TYPE& l, lts_equivalence eq);
@@ -48,8 +48,8 @@ void reduce(LTS_TYPE& l, lts_equivalence eq);
  * \param[in] l1 The first LTS that will be compared.
  * \param[in] l2 The second LTS that will be compared.
  * \param[in] eq The equivalence with respect to which the LTSs will be
- * compared.
- * \param[in] generate_counter_examples
+ *            compared.
+ * \param[in] generate_counter_examples Whether to generate a counter example
  * \retval true if the LTSs are found to be equivalent.
  * \retval false otherwise.
  * \warning This function alters the internal data structure of
@@ -222,8 +222,8 @@ bool destructive_compare(LTS_TYPE& l1,
  * \param[in] l1 The first LTS to compare.
  * \param[in] l2 The second LTS to compare.
  * \param[in] eq The equivalence with respect to which the LTSs will be
- * compared.
- * \param[in] generate_counter_examples If true counter examples are written to file.
+ *            compared.
+ * \param[in] generate_counter_examples Whether to generate a counter example
  * \retval true if the LTSs are found to be equivalent.
  * \retval false otherwise.
  */
@@ -239,9 +239,8 @@ bool compare(const LTS_TYPE& l1,
  * \param[in] l1 The first LTS to be compared.
  * \param[in] l2 The second LTS to be compared.
  * \param[in] pre The preorder with respect to which the LTSs will be
- * compared.
- * \param[in] generate_counter_example Indicates whether a file containing a counter example is
- *            generated when the comparison fails.
+ *            compared.
+ * \param[in] generate_counter_examples Whether to generate a counter example
  * \param[in] strategy Choose breadth-first or depth-first for exploration strategy
  *            of the antichain algorithms.
  * \param[in] preprocess Whether to allow preprocessing of the given LTSs.
@@ -269,8 +268,7 @@ bool destructive_compare(LTS_TYPE& l1,
  * \param[in] l1 The first LTS to be compared.
  * \param[in] l2 The second LTS to be compared.
  * \param[in] pre The preorder with respect to which the LTSs will be compared.
- * \param[in] generate_counter_example Indicates whether a file containing a counter example is
- *            generated when the comparison fails.
+ * \param[in] generate_counter_examples Whether to generate a counter example
  * \param[in] strategy Choose breadth-first or depth-first for exploration strategy
  *            of the antichain algorithms.
  * \param[in] preprocess Whether to allow preprocessing of the given LTSs.

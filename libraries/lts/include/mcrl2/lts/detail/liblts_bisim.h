@@ -1132,36 +1132,42 @@ void bisimulation_reduce(
  *          algorithm by Groote and Vaandrager from 1990.
  * \param[in/out] l1 A first transition system.
  * \param[in/out] l2 A second transition system.
- * \param[branching] If true branching bisimulation is used, otherwise strong bisimulation is applied.
- * \param[preserve_divergences] If true and branching is true, preserve tau loops on states.
+ * \param[in] branching If true branching bisimulation is used, otherwise strong bisimulation is applied.
+ * \param[in] preserve_divergences If true and branching is true, preserve tau loops on states.
+ * \param[in] generate_counter_examples Whether to generate a counter example
+ * \param[in] structured_output
  * \retval True iff the initial states of the current transition system and l2 are (divergence preserving) (branching) bisimilar */
 template < class LTS_TYPE>
 bool destructive_bisimulation_compare(
   LTS_TYPE& l1,
   LTS_TYPE& l2,
-  const bool branching=false,
-  const bool preserve_divergences=false,
-  const bool generate_counter_examples = false);
+  const bool branching = false,
+  const bool preserve_divergences = false,
+  const bool generate_counter_examples = false,
+  const bool structured_output = false);
 
 
 /** \brief Checks whether the two initial states of two lts's are strong or branching bisimilar.
- *  \details The current transitions system and the lts l2 are first duplicated and subsequently
- *           reduced modulo bisimulation. If memory space is a concern, one could consider to
- *           use destructive_bisimulation_compare. This routine uses the Groote-Vaandrager
- *           branching bisimulation routine. It runs in O(mn) and uses O(n) memory where n is the
- *           number of states and m is the number of transitions.
+ * \details The current transitions system and the lts l2 are first duplicated and subsequently
+ *          reduced modulo bisimulation. If memory space is a concern, one could consider to
+ *          use destructive_bisimulation_compare. This routine uses the Groote-Vaandrager
+ *          branching bisimulation routine. It runs in O(mn) and uses O(n) memory where n is the
+ *          number of states and m is the number of transitions.
  * \param[in/out] l1 A first transition system.
  * \param[in/out] l2 A second transistion system.
- * \param[branching] If true branching bisimulation is used, otherwise strong bisimulation is applied.
- * \param[preserve_divergences] If true and branching is true, preserve tau loops on states.
+ * \param[in] branching If true branching bisimulation is used, otherwise strong bisimulation is applied.
+ * \param[in] preserve_divergences If true and branching is true, preserve tau loops on states.
+ * \param[in] generate_counter_examples Whether to generate a counter example
+ * \param[in] structured_output
  * \retval True iff the initial states of the current transition system and l2 are (divergence preserving) (branching) bisimilar */
 template < class LTS_TYPE>
 bool bisimulation_compare(
   const LTS_TYPE& l1,
   const LTS_TYPE& l2,
-  const bool branching=false,
-  const bool preserve_divergences=false,
-  const bool generate_counter_examples = false);
+  const bool branching = false,
+  const bool preserve_divergences = false,
+  const bool generate_counter_examples = false,
+  const bool structured_output = false);
 
 
 
