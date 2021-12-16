@@ -1916,6 +1916,7 @@ template <class LTS_TYPE>
 bool destructive_bisimulation_compare_gjkw(LTS_TYPE& l1, LTS_TYPE& l2,
           bool branching /* = false */, bool preserve_divergence /* = false */,
                                            bool generate_counter_examples /* = false */,
+                                           const std::string& /*counter_example_file = "" */,
                                            bool /*structured_output = false */)
 {
   if (generate_counter_examples)
