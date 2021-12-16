@@ -10,6 +10,10 @@
 
 #include "diagram.h"
 
+#include "mcrl2/gui/utilities.h"
+
+using namespace mcrl2::gui::qt;
+
 // -- constructors and destructor -----------------------------------
 
 
@@ -85,7 +89,7 @@ void Diagram::moveShapeForward(int index)
 {
   if (0 < index && index < m_shapes.size())
   {
-    m_shapes.swap(index, index-1);
+    swapItemsAt(m_shapes, index, index-1);
     m_shapes[index]->setIndex(index);
     m_shapes[index-1]->setIndex(index-1);
   }
@@ -96,7 +100,7 @@ void Diagram::moveShapeBackward(int index)
 {
   if (index < m_shapes.size()-1)
   {
-    m_shapes.swap(index, index+1);
+    swapItemsAt(m_shapes, index, index-1);
     m_shapes[index]->setIndex(index);
     m_shapes[index+1]->setIndex(index+1);
   }
