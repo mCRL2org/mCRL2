@@ -10,6 +10,8 @@
 
 #include "simulator.h"
 
+#include "mcrl2/gui/utilities.h"
+
 #include <QMessageBox>
 #include <QToolTip>
 
@@ -17,7 +19,7 @@ static const int labelHeight = 40;
 static const int timerInterval = 10;
 static const double animationPixelsPerMS =  1.0;
 
-
+using namespace mcrl2::gui::qt;
 
 // -- constructors and destructor -----------------------------------
 
@@ -1112,21 +1114,21 @@ void Simulator::markFrameClusts()
   {
     if (0 <= m_currentSelectionIndex && static_cast <std::size_t>(m_currentSelectionIndex) < m_previousFrames.size())
     {
-      emit hoverCluster(m_previousFrames[m_currentSelectionIndex], QVector<Attribute*>::fromStdVector(m_attributes).toList());
+      emit hoverCluster(m_previousFrames[m_currentSelectionIndex], makeQList<Attribute*>(m_attributes.begin(), m_attributes.end()));
     }
   }
   else if (m_currentSelection == ID_FRAME_CURR)
   {
     if (m_currentFrame != 0)
     {
-      emit hoverCluster(m_currentFrame, QVector<Attribute*>::fromStdVector(m_attributes).toList());
+      emit hoverCluster(m_currentFrame, makeQList<Attribute*>(m_attributes.begin(), m_attributes.end()));
     }
   }
   else if (m_currentSelection == ID_FRAME_NEXT)
   {
     if (0 <= m_currentSelectionIndex && static_cast <std::size_t>(m_currentSelectionIndex) < m_nextFrames.size())
     {
-      emit hoverCluster(m_previousFrames[m_currentSelectionIndex], QVector<Attribute*>::fromStdVector(m_attributes).toList());
+      emit hoverCluster(m_previousFrames[m_currentSelectionIndex], makeQList<Attribute*>(m_attributes.begin(), m_attributes.end()));
     }
   }
 }
@@ -1314,7 +1316,7 @@ void Simulator::handleHits(const std::vector< int > &ids)
         Cluster *frame = m_currentSelection == ID_FRAME_PREV ? m_previousFrames[m_currentSelectionIndex] :
                          m_currentSelection == ID_FRAME_NEXT ? m_nextFrames[m_currentSelectionIndex] :
                          m_currentFrame;
-        emit routingCluster(frame, QList<Cluster *>(), QVector<Attribute*>::fromStdVector(m_attributes).toList());
+        emit routingCluster(frame, QList<Cluster *>(), makeQList<Attribute*>(m_attributes.begin(), m_attributes.end()));
       }
     }
     else if (ids[1] == ID_BUNDLE_LBL)

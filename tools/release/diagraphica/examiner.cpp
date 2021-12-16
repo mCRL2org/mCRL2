@@ -9,12 +9,15 @@
 /// \file ./examiner.cpp
 
 #include <iostream>
+
 #include "examiner.h"
+#include "mcrl2/gui/utilities.h"
 
 #include <QMessageBox>
 #include <QMenu>
 #include <QToolTip>
 
+using namespace mcrl2::gui::qt;
 
 static const int hgtHstPix = 80;
 
@@ -421,8 +424,8 @@ void Examiner::handleHits(const std::vector< int >& ids)
         if (ids.size() == 2 && ids[1] == ID_ICON_MORE)
         {
           emit routingCluster(frame, 
-                              QVector<Cluster*>::fromStdVector(framesHist).toList(),
-                              QVector<Attribute*>::fromStdVector(attributes).toList());
+                              makeQList<Cluster*>(framesHist.begin(), framesHist.end()),
+                              makeQList<Attribute*>(attributes.begin(), attributes.end()));
         }
       }
       else if (ids[0] == ID_FRAME_HIST)
@@ -477,8 +480,8 @@ void Examiner::handleHits(const std::vector< int >& ids)
       if (ids[0] == ID_FRAME)
       {
         emit routingCluster(frame, 
-                            QVector<Cluster*>::fromStdVector(framesHist).toList(), 
-                            QVector<Attribute*>::fromStdVector(attributes).toList());
+                            makeQList<Cluster*>(framesHist.begin(), framesHist.end()),
+                            makeQList<Attribute*>(attributes.begin(), attributes.end()));
       }
       else if (ids[0] == ID_FRAME_HIST)
       {

@@ -12,8 +12,11 @@
 #include <iostream>
 
 #include "timeseries.h"
+#include "mcrl2/gui/utilities.h"
+
 #include <QToolTip>
 
+using namespace mcrl2::gui::qt;
 
 // -- static variables ----------------------------------------------
 
@@ -990,7 +993,7 @@ void TimeSeries::handleHits(const std::vector< int >& ids)
             attrs.push_back(m_graph->getAttribute(i));
           }
 
-          emit hoverCluster(frame, QVector<Attribute*>::fromStdVector(attrs).toList());
+          emit hoverCluster(frame, makeQList< Attribute* >(attrs.begin(), attrs.end()));
 
           delete frame;
           frame = 0;
