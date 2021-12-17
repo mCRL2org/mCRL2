@@ -13,7 +13,6 @@
 #include <QMetaObject>
 #include <QUrl>
 #include <QSettings>
-#include <QRandomGenerator>
 #include <climits>
 
 MainWindow::MainWindow(QThread *atermThread, mcrl2::data::rewrite_strategy strategy, bool do_not_use_dummies)
@@ -403,8 +402,7 @@ void MainWindow::animationStep()
     {
       m_selectedState++;
     }
-    const quint32 rvalue = QRandomGenerator::global()->generate();
-    select(rvalue % m_trace.last().transitions.size());
+    select(qrand() % m_trace.last().transitions.size());
   }
   else
   {

@@ -372,7 +372,7 @@ void GLWidget::mousePressEvent(QMouseEvent* e)
         if (e->button() == Qt::RightButton && m_is_threedimensional) {
           m_dragmode = dm_rotate;
         }
-        else if (e->button() == Qt::MiddleButton || ((e->buttons() & (Qt::LeftButton | Qt::RightButton)) == (Qt::LeftButton | Qt::RightButton))) {
+        else if (e->button() == Qt::MidButton || ((e->buttons() & (Qt::LeftButton | Qt::RightButton)) == (Qt::LeftButton | Qt::RightButton))) {
           m_dragmode = dm_zoom;
         }
       }

@@ -374,7 +374,7 @@ void ToolInstance::onStateChange(QProcess::ProcessState state)
   }
 }
 
-void ToolInstance::onOutputLog(const QString &outText)
+void ToolInstance::onOutputLog(const QByteArray &outText)
 {
   QScrollBar* scrollbar = m_ui.edtOutput->verticalScrollBar();
   bool end = scrollbar->value() == scrollbar->maximum();
@@ -388,7 +388,7 @@ void ToolInstance::onOutputLog(const QString &outText)
   }
 }
 
-void ToolInstance::onErrorLog(const QString &outText)
+void ToolInstance::onErrorLog(const QByteArray &outText)
 {
   QScrollBar* scrollbar = m_ui.edtOutput->verticalScrollBar();
   bool end = scrollbar->value() == scrollbar->maximum();

@@ -31,8 +31,8 @@ class ToolInstance : public QWidget
 
   public slots:
     void onStateChange(QProcess::ProcessState state);
-    void onOutputLog(const QString &outText);
-    void onErrorLog(const QString &outText);
+    void onOutputLog(const QByteArray &outText);
+    void onErrorLog(const QByteArray &outText);
     void onRun();
     void onAbort();
     void onSave();

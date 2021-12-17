@@ -85,7 +85,7 @@ void Diagram::moveShapeForward(int index)
 {
   if (0 < index && index < m_shapes.size())
   {
-    m_shapes.swapItemsAt(index, index-1);
+    m_shapes.swap(index, index-1);
     m_shapes[index]->setIndex(index);
     m_shapes[index-1]->setIndex(index-1);
   }
@@ -96,7 +96,7 @@ void Diagram::moveShapeBackward(int index)
 {
   if (index < m_shapes.size()-1)
   {
-    m_shapes.swapItemsAt(index, index+1);
+    m_shapes.swap(index, index+1);
     m_shapes[index]->setIndex(index);
     m_shapes[index+1]->setIndex(index+1);
   }

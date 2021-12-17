@@ -29,10 +29,10 @@ QMultiProcess::Process* QMultiProcess::start(QIODevice::OpenMode mode)
   return process;
 }
 
-static inline QString readAll(ReadMethod method, Processes &processes,
+static inline QByteArray readAll(ReadMethod method, Processes &processes,
   size_type &last)
 {
-  QString output;
+  QByteArray output;
   size_type current = 0;
   for (size_type i = 0; i < processes.size(); ++i)
   {
@@ -49,12 +49,12 @@ static inline QString readAll(ReadMethod method, Processes &processes,
   return output;
 }
 
-QString QMultiProcess::readAllStandardError()
+QByteArray QMultiProcess::readAllStandardError()
 {
   return ::readAll(&Process::readAllStandardError, m_processes, m_last);
 }
 
-QString QMultiProcess::readAllStandardOutput()
+QByteArray QMultiProcess::readAllStandardOutput()
 {
   return ::readAll(&Process::readAllStandardOutput, m_processes, m_last);
 }

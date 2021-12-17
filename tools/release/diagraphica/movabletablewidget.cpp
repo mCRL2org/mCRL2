@@ -128,7 +128,7 @@ void MovableTableWidget::dropEvent(QDropEvent *event)
     {
       QString value = cols[colkeys[col]];
       setItem(targetRow+row, col, new QTableWidgetItem(value));
-      item(targetRow + row, col)->setSelected(true);
+      setItemSelected(item(targetRow+row, col), true);
     }
     emit(itemMoved(rowkeys[row],targetRow+row));
   }

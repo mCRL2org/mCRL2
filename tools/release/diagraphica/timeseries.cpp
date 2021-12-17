@@ -991,7 +991,7 @@ void TimeSeries::handleHits(const std::vector< int >& ids)
             attrs.push_back(m_graph->getAttribute(i));
           }
 
-          emit hoverCluster(frame, QList< Attribute* >(attrs.begin(), attrs.end()));
+          emit hoverCluster(frame, QVector<Attribute*>::fromStdVector(attrs).toList());
 
           delete frame;
           frame = 0;

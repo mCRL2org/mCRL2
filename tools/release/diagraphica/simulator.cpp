@@ -1111,21 +1111,21 @@ void Simulator::markFrameClusts()
   {
     if (0 <= m_currentSelectionIndex && static_cast <std::size_t>(m_currentSelectionIndex) < m_previousFrames.size())
     {
-      emit hoverCluster(m_previousFrames[m_currentSelectionIndex], QList<Attribute*>(m_attributes.begin(), m_attributes.end()));
+      emit hoverCluster(m_previousFrames[m_currentSelectionIndex], QVector<Attribute*>::fromStdVector(m_attributes).toList());
     }
   }
   else if (m_currentSelection == ID_FRAME_CURR)
   {
     if (m_currentFrame != 0)
     {
-      emit hoverCluster(m_currentFrame, QList<Attribute*>(m_attributes.begin(), m_attributes.end()));
+      emit hoverCluster(m_currentFrame, QVector<Attribute*>::fromStdVector(m_attributes).toList());
     }
   }
   else if (m_currentSelection == ID_FRAME_NEXT)
   {
     if (0 <= m_currentSelectionIndex && static_cast <std::size_t>(m_currentSelectionIndex) < m_nextFrames.size())
     {
-      emit hoverCluster(m_previousFrames[m_currentSelectionIndex], QList<Attribute*>(m_attributes.begin(), m_attributes.end()));
+      emit hoverCluster(m_previousFrames[m_currentSelectionIndex], QVector<Attribute*>::fromStdVector(m_attributes).toList());
     }
   }
 }
@@ -1313,7 +1313,7 @@ void Simulator::handleHits(const std::vector< int > &ids)
         Cluster *frame = m_currentSelection == ID_FRAME_PREV ? m_previousFrames[m_currentSelectionIndex] :
                          m_currentSelection == ID_FRAME_NEXT ? m_nextFrames[m_currentSelectionIndex] :
                          m_currentFrame;
-        emit routingCluster(frame, QList<Cluster *>(), QList<Attribute*>(m_attributes.begin(), m_attributes.end()));
+        emit routingCluster(frame, QList<Cluster *>(), QVector<Attribute*>::fromStdVector(m_attributes).toList());
       }
     }
     else if (ids[1] == ID_BUNDLE_LBL)

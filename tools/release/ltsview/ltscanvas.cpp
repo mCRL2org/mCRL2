@@ -75,7 +75,7 @@ void LtsCanvas::determineActiveTool(QMouseEvent* event, bool useModifiers)
   {
     setActiveTool(PanTool);
   }
-  else if ((event->buttons() & Qt::MiddleButton) || ((event->buttons() & Qt::LeftButton) && (event->buttons() & Qt::RightButton)))
+  else if ((event->buttons() & Qt::MidButton) || ((event->buttons() & Qt::LeftButton) && (event->buttons() & Qt::RightButton)))
   {
     setActiveTool(ZoomTool);
   }
