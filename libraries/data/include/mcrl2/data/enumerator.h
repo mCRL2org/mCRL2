@@ -301,6 +301,41 @@ class enumerator_list_element
       mark_term(*atermpp::detail::address(v), todo);
       mark_term(*atermpp::detail::address(phi), todo);
     }
+
+    /// \brief Set the variables and the condition explicitly.
+    /// \param v_ The variable list.
+    /// \param phi_ The condition.
+    void set(const data::variable_list& v_, const Expression& phi_)
+    {
+      v=v_;
+      phi=phi_;
+    }
+
+    /// \brief Set the variables and the condition explicitly.
+    /// \param v_ The variable list.
+    /// \param phi_ The condition.
+    /// \details Other arguments than the first two are ignored. 
+    void set(const data::variable_list& v_, const Expression& phi_,const enumerator_list_element&)
+    {
+      v=v_;
+      phi=phi_;
+    }
+
+    /// \brief Set the variable ands and the expression explicitly
+    ///        as the element (v, phi, e.sigma[v := x]).
+    /// \param v_ The variable list.
+    /// \param phi_ The condition.
+    /// \details Other arguments than the first two are ignored. 
+    void set(const data::variable_list& v_,
+             const Expression& phi_,
+             const enumerator_list_element&,
+             const data::variable&,
+             const data::data_expression&)
+    {
+      v=v_;
+      phi=phi_;
+    }
+
 };
 
 /// \brief An element for the todo list of the enumerator that collects the substitution
@@ -397,6 +432,32 @@ class enumerator_list_element_with_substitution: public enumerator_list_element<
       mark_term(*atermpp::detail::address(m_expressions), todo);
       static_cast<enumerator_list_element<Expression>>(*this).mark(todo);
     }
+    
+    /// \brief Set the variable ands and the expression explicitly
+    ///        as the element (v, phi, e.sigma[v := x]).
+    void set(const data::variable_list& v,
+             const Expression& phi,
+             const enumerator_list_element_with_substitution<Expression>& elem,
+             const data::variable& d,
+             const data::data_expression& e)
+    {
+      enumerator_list_element<Expression>::set(v, phi);
+      m_variables=elem.m_variables;
+      m_expressions=elem.m_expressions;
+      m_variables.push_front(d);
+      m_expressions.push_front(e);
+    }
+
+    /// \brief Set the variable ands and the expression explicitly
+    ///        as the element (v, phi, e.sigma[v := x]).
+    void set(const data::variable_list& v,
+             const Expression& phi,
+             const enumerator_list_element_with_substitution<Expression>& elem)
+    {
+      enumerator_list_element<Expression>::set(v, phi);
+      m_variables=elem.m_variables;
+      m_expressions=elem.m_expressions;
+    }
 };
 
 template <typename Expression>
@@ -437,8 +498,19 @@ class enumerator_queue
 {
   protected:
     atermpp::deque<EnumeratorListElement> P;
+    EnumeratorListElement m_enumerator_element_cache;  // This element is used to temporarily store
+                                                       // information, which is more efficient than
+                                                       // declaring such a variable on the stack
+                                                       // as its protection using a protection set
+                                                       // is expensive. 
 
   public:
+    // The following variables are used for local store, to prevent the
+    // variables to be inserted and removed continuously in a protection set. 
+    typename EnumeratorListElement::expression_type scratch_expression;
+    data_expression scratch_data_expression;
+    variable_list scratch_variable_list;
+
     typedef EnumeratorListElement value_type;
     typedef typename atermpp::deque<EnumeratorListElement>::size_type size_type;
 
@@ -511,6 +583,13 @@ class enumerator_queue
     {
       P.pop_back();
     }
+
+    template <class... Args>
+    const EnumeratorListElement& enumerator_element_cache(const Args&... args)
+    {
+      m_enumerator_element_cache.set(args...);
+      return m_enumerator_element_cache;
+    }
 };
 
 /// \brief An enumerator algorithm that generates solutions of a condition.
@@ -555,6 +634,16 @@ class enumerator_algorithm
       rewrite_calls++;
 #endif
       return const_cast<Rewriter&>(R)(phi, sigma);
+    }
+
+    template <typename Expression, typename MutableSubstitution>
+    inline
+    void rewrite(Expression& result, const Expression& phi, MutableSubstitution& sigma) const
+    {
+#ifdef MCRL2_ENUMERATOR_COUNT_REWRITE_CALLS
+      rewrite_calls++;
+#endif
+      const_cast<Rewriter&>(R)(result, phi, sigma);
     }
 
   public:
@@ -628,17 +717,18 @@ class enumerator_algorithm
                              const data::data_expression& e
                             ) -> bool
                             {
-                              auto phi1 = rewrite(phi, sigma);
-                              if (reject(phi1))
+                              rewrite(P.scratch_expression, phi, sigma);
+                              if (reject(P.scratch_expression))
                               {
                                 return false;
                               }
-                              if ((accept(phi1) && m_accept_solutions_with_variables) || variables.empty())
+                              if ((accept(P.scratch_expression) && m_accept_solutions_with_variables) || variables.empty())
                               {
-                                EnumeratorListElement q(variables, phi1, p, v, e);
-                                return report_solution(q);
+                                // EnumeratorListElement q(variables, phi1, p, v, e);
+                                // return report_solution(q);
+                                return report_solution(P.enumerator_element_cache(variables, P.scratch_expression, p, v, e));
                               }
-                              P.emplace_back(variables, phi1, p, v, e);
+                              P.emplace_back(variables, P.scratch_expression, p, v, e);
                               return false;
                             };
 
@@ -649,40 +739,40 @@ class enumerator_algorithm
                                             const data::data_expression& e
                                            ) -> bool
                                            {
-                                             auto phi1 = rewrite(phi, sigma);
-                                             if (reject(phi1))
+                                             rewrite(P.scratch_expression, phi, sigma);
+                                             if (reject(P.scratch_expression))
                                              {
                                                return false;
                                              }
-                                             bool added_variables_empty = added_variables.empty() || (phi1 == phi && m_accept_solutions_with_variables);
-                                             if ((accept(phi1) && m_accept_solutions_with_variables) || (variables.empty() && added_variables_empty))
+                                             bool added_variables_empty = added_variables.empty() || (P.scratch_expression == phi && m_accept_solutions_with_variables);
+                                             if ((accept(P.scratch_expression) && m_accept_solutions_with_variables) || (variables.empty() && added_variables_empty))
                                              {
-                                               EnumeratorListElement q(variables + added_variables, phi1, p, v, e);
-                                               return report_solution(q);
+                                               // EnumeratorListElement q(variables + added_variables, phi1, p, v, e);
+                                               return report_solution(P.enumerator_element_cache(variables + added_variables, P.scratch_expression, p, v, e));
                                              }
                                              if (added_variables_empty)
                                              {
-                                               P.emplace_back(variables, phi1, p, v, e);
+                                               P.emplace_back(variables, P.scratch_expression, p, v, e);
                                              }
                                              else
                                              {
-                                               P.emplace_back(variables + added_variables, phi1, p, v, e);
+                                               P.emplace_back(variables + added_variables, P.scratch_expression, p, v, e);
                                              }
                                              return false;
                                            };
 
-      const auto& v = p.variables();
+      const data::variable_list& v = p.variables();
       const auto& phi = p.expression();
 
       if (v.empty())
       {
-        auto phi1 = rewrite(phi, sigma);
-        if (reject(phi1))
+        rewrite(P.scratch_expression, phi, sigma);
+        if (reject(P.scratch_expression))
         {
           return false;
         }
-        EnumeratorListElement q(v, phi1, p);
-        return report_solution(q);
+        // EnumeratorListElement q(v, phi1, p);
+        return report_solution(P.enumerator_element_cache(v, P.scratch_expression, p));
       }
 
       const auto& v1 = v.front();
@@ -786,10 +876,15 @@ class enumerator_algorithm
             if (data::is_function_sort(c.sort()))
             {
               const sort_expression_list& domain = atermpp::down_cast<data::function_sort>(c.sort()).domain();
-              data::variable_list y(domain.begin(), domain.end(), [&](const data::sort_expression& s) { return data::variable(id_generator(), s); });
-              data_expression cy = r(application(c, y.begin(), y.end()));
-              sigma[v1] = cy;
-              if (add_element_with_variables(v_tail, y, phi, v1, cy))
+              atermpp::make_term_list(P.scratch_variable_list, 
+                                       domain.begin(), 
+                                       domain.end(), 
+                                       [&](const data::sort_expression& s) { return data::variable(id_generator(), s); });
+              // data_expression cy = r(application(c, y.begin(), y.end()));
+              // below sigma is not used, but it prevents generating a dummy sigma. 
+              r(P.scratch_data_expression, application(c, P.scratch_variable_list.begin(), P.scratch_variable_list.end()),sigma); 
+              sigma[v1] = P.scratch_data_expression;
+              if (add_element_with_variables(v_tail, P.scratch_variable_list, phi, v1, P.scratch_data_expression))
               {
                 sigma[v1] = v1;
                 return true;
@@ -797,9 +892,10 @@ class enumerator_algorithm
             }
             else
             {
-              const data_expression e1 = r(c);
-              sigma[v1] = e1;
-              if (add_element(v_tail, phi, v1, e1))
+              // const data_expression e1 = r(c);
+              r(P.scratch_data_expression,c,sigma); // sigma is not used, but in this way no dummy sigma needs to be created. 
+              sigma[v1] = P.scratch_data_expression;
+              if (add_element(v_tail, phi, v1, P.scratch_data_expression))
               {
                 sigma[v1] = v1;
                 return true;
@@ -886,6 +982,37 @@ class enumerator_algorithm
       return enumerate_all(P, sigma, report_solution, reject, accept);
     }
 
+    /// \brief Enumerates the variables v for condition c. Solutions are reported using the callback function report_solution.
+    /// The enumeration is interrupted when report_solution returns true for the reported solution.
+    /// \param p An enumerator element, i.e. an expression with a list of variables.
+    /// \param sigma A substitution.
+    /// \param reject Elements p for which reject(p) is true are discarded.
+    /// \param accept Elements p for which accept(p) is true are reported as a solution, even if the list of variables of the enumerator element is non-empty.
+    /// \param report_solution A callback function that is called whenever a solution is found.
+    /// It takes an enumerator element as argument.
+    /// If report_solution returns true, the enumeration is interrupted.
+    /// N.B. If the enumeration is resumed after an interruption, the element p that
+    /// was interrupted will be enumerated again.
+    /// \return The number of elements that have been processed
+    template <typename EnumeratorListElement,
+              typename MutableSubstitution,
+              typename ReportSolution,
+              typename Reject = always_false<typename EnumeratorListElement::expression_type>,
+              typename Accept = always_false<typename EnumeratorListElement::expression_type>
+    >
+    std::size_t enumerate(const variable_list& vars,
+                          const typename EnumeratorListElement::expression_type& cond,
+                          MutableSubstitution& sigma,
+                          ReportSolution report_solution,
+                          Reject reject = Reject(),
+                          Accept accept = Accept()
+    ) const
+    {
+      enumerator_queue<EnumeratorListElement> P;
+      P.emplace_back(vars, cond);
+      return enumerate_all(P, sigma, report_solution, reject, accept);
+    }
+
     std::size_t max_count() const
     {
       return m_max_count;
@@ -914,7 +1041,9 @@ data_expression_vector enumerate_expressions(const sort_expression& s,
   mutable_indexed_substitution<> sigma;
   const variable v("@var@", s);
   const variable_list v_list{ v };
-  E.enumerate(enumerator_element(v_list, sort_bool::true_()),
+  E.template enumerate<enumerator_element>(
+              v_list, 
+              sort_bool::true_(),
               sigma,
               [&](const enumerator_element& p)
               {

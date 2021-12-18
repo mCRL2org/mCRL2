@@ -185,6 +185,13 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   {
     return derived().apply(x);
   }
+
+  // N.B. This function has been added to make this class operate well with the enumerator.
+  //      that employs the "make_rewrite" variant with an explicit result. 
+  void operator()(pbes_expression& result, const pbes_expression& x, MutableSubstitution&)
+  {
+    result=derived().apply(x);
+  }
 };
 
 template <template <class, class, class> class Builder, class DataRewriter, class MutableSubstitution>

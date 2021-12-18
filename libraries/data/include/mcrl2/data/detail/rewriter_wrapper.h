@@ -41,10 +41,21 @@ struct rewriter_wrapper
       return m_rewriter->rewrite(t,sigma);
     }
 
+    void operator()(data_expression& result, const data_expression& t, Rewriter::substitution_type& sigma) const
+    {
+      return m_rewriter->rewrite(result, t, sigma);
+    }
+
     data_expression operator()(const data_expression& t) const
     {
       Rewriter::substitution_type sigma;
       return m_rewriter->rewrite(t,sigma);
+    }
+
+    void operator()(data_expression& result, const data_expression& t) const
+    {
+      Rewriter::substitution_type sigma;
+      m_rewriter->rewrite(result, t, sigma);
     }
 
   protected:

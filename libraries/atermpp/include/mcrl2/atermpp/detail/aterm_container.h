@@ -104,7 +104,7 @@ public:
  
   template <class... Args>
   reference_aterm(const Args&... args) noexcept
-   : m_t(std::forward<Args>(args)...)
+   : m_t(args...)
   { }
  
   reference_aterm(T_type&& other) noexcept

@@ -128,6 +128,12 @@ struct simplify_data_rewriter
   {
     return detail::make_apply_rewriter_builder<pbes_system::detail::simplify_data_rewriter_builder>(R, sigma).apply(x);
   }
+
+  template <typename SubstitutionFunction>
+  void operator()(pbes_expression& result, const pbes_expression& x, SubstitutionFunction& sigma) const
+  {
+    result=detail::make_apply_rewriter_builder<pbes_system::detail::simplify_data_rewriter_builder>(R, sigma).apply(x);
+  }
 };
 
 } // namespace pbes_system

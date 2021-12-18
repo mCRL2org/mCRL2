@@ -23,7 +23,10 @@ namespace detail {
 
 // applies the enumerator substitution defined by variables and expressions to x
 template <typename T>
-data_expression enumerator_replace(const T& x, const variable_list& variables, const data_expression_list& expressions);
+data_expression enumerator_replace(const T& x, 
+                                   const variable_list::const_iterator variables_begin, 
+                                   const variable_list::const_iterator variables_end,  
+                                   const data_expression_list::const_iterator expressions_begin);
 
 struct enumerator_replace_builder: public data_expression_builder<enumerator_replace_builder>
 {
@@ -33,40 +36,55 @@ struct enumerator_replace_builder: public data_expression_builder<enumerator_rep
   using super::apply;
   using super::update;
 
-  const variable_list& variables;
-  const data_expression_list& expressions;
+  const variable_list::const_iterator m_vars_begin;
+  const variable_list::const_iterator m_vars_end;
+  const data_expression_list::const_iterator m_expressions_begin;
 
-  enumerator_replace_builder(const variable_list& variables_, const data_expression_list& expressions_)
-    : variables(variables_),
-      expressions(expressions_)
+  enumerator_replace_builder(const variable_list::const_iterator variables_begin, 
+                             const variable_list::const_iterator variables_end, 
+                             const data_expression_list::const_iterator expressions_begin)
+    : m_vars_begin(variables_begin),
+      m_vars_end(variables_end),
+      m_expressions_begin(expressions_begin)
   {}
 
   data_expression apply(const variable& x)
   {
-    variable_list vars = variables;
-    data_expression_list exprs = expressions;
-    while (!vars.empty() && x != vars.front())
+    variable_list::const_iterator i_vars = m_vars_begin;
+    data_expression_list::const_iterator i_exprs = m_expressions_begin;
+    while (i_vars!=m_vars_end && x != *i_vars)
     {
-      vars.pop_front();
-      exprs.pop_front();
+      ++i_vars;
+      ++i_exprs;
     }
-    if (vars.empty())
+    if (i_vars==m_vars_end)
     {
       return x;
     }
     else
     {
-      return enumerator_replace(exprs.front(), vars.tail(), exprs.tail());
+      return enumerator_replace(*i_exprs, i_vars, m_vars_end, i_exprs);
     }
   }
 };
 
 template <typename T>
 inline
+data_expression enumerator_replace(const T& x, 
+                                   const variable_list::const_iterator variables_begin, 
+                                   const variable_list::const_iterator variables_end,  
+                                   const data_expression_list::const_iterator expressions_begin)
+{
+  enumerator_replace_builder f(variables_begin, variables_end, expressions_begin);
+  return f.apply(x);
+}
+
+template <typename T>
+inline
 data_expression enumerator_replace(const T& x, const variable_list& variables, const data_expression_list& expressions)
 {
-  enumerator_replace_builder f(variables, expressions);
-  return f.apply(x);
+  assert(variables.size()==expressions.size());
+  return enumerator_replace(x, variables.begin(), variables.end(), expressions.begin());
 }
 
 } // namespace detail

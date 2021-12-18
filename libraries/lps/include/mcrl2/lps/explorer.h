@@ -440,7 +440,9 @@ class explorer: public abortable
       stochastic_state result;                     
       if (distribution.is_defined())
       {
-        enumerator.enumerate(enumerator_element(distribution.variables(), distribution.distribution()),
+        enumerator.enumerate<enumerator_element>(
+                    distribution.variables(), 
+                    distribution.distribution(),
                     sigma,
                     [&](const enumerator_element& p) {
                       p.add_assignments(distribution.variables(), sigma, rewr);
@@ -492,14 +494,14 @@ class explorer: public abortable
         );
     }
 
-    void check_enumerator_solution(const enumerator_element& p, 
+    void check_enumerator_solution(const data::data_expression& p_expression, // WAS: const enumerator_element& p, 
                                    const explorer_summand& summand,
                                    data::mutable_indexed_substitution<>& sigma,
                                    data::rewriter& rewr) const
     {
-      if (p.expression() != data::sort_bool::true_())
+      if (p_expression != data::sort_bool::true_())
       {
-        std::string printed_condition = data::pp(p.expression());
+        std::string printed_condition = data::pp(p_expression);
         data::remove_assignments(sigma, m_process_parameters);
         data::remove_assignments(sigma, summand.variables);
         data::data_expression reduced_condition = rewr(summand.condition, sigma);
@@ -533,49 +535,89 @@ class explorer: public abortable
         rewr(condition, summand.condition, sigma);
         if (!data::is_false(condition))
         {
-          enumerator.enumerate(enumerator_element(summand.variables, condition),
-                      sigma,
-                      [&](const enumerator_element& p) {
-                        check_enumerator_solution(p, summand,sigma,rewr);
-                        p.add_assignments(summand.variables, sigma, rewr);
-                        state_type s1;
-                        if constexpr (Stochastic)
-                        {
-                          s1 = compute_stochastic_state(summand.distribution, summand.next_state, sigma, rewr, enumerator);
-                        }
-                        else
-                        {
-                          s1 = compute_state(summand.next_state,sigma,rewr);
-                          if (!confluent_summands.empty())
+          if (summand.variables.size()==0)
+          {
+            // There is only one solution that is generated as there are no variables. 
+            check_enumerator_solution(condition, summand,sigma,rewr);
+            state_type s1;
+            if constexpr (Stochastic)
+            {
+              s1 = compute_stochastic_state(summand.distribution, summand.next_state, sigma, rewr, enumerator);
+            }
+            else
+            {
+              s1 = compute_state(summand.next_state,sigma,rewr);
+              if (!confluent_summands.empty())
+              {
+                s1 = find_representative(s1, confluent_summands, sigma, rewr, enumerator, id_generator); 
+              }
+            }
+            // Check whether report transition only needs a state, and no action.
+            if constexpr (utilities::is_applicable<ReportTransition,state_type,void>::value)
+            {
+              report_transition(s1);
+            }
+            else
+            {
+              if (m_options.rewrite_actions)
+              {
+                lps::multi_action a=rewrite_action(summand.multi_action,sigma,rewr);
+                report_transition(a,s1);
+              }
+              else
+              {
+                report_transition(summand.multi_action,s1);
+              }
+            }
+          }
+          else // There are variables to be enumerated.
+          {
+            enumerator.enumerate<enumerator_element>(
+                        summand.variables, 
+                        condition,
+                        sigma,
+                        [&](const enumerator_element& p) {
+                          check_enumerator_solution(p.expression(), summand, sigma, rewr);
+                          p.add_assignments(summand.variables, sigma, rewr);
+                          state_type s1;
+                          if constexpr (Stochastic)
                           {
-                            s1 = find_representative(s1, confluent_summands, sigma, rewr, enumerator, id_generator);
-                          }
-                        }
-                        if (m_recursive)
-                        {
-                          data::remove_assignments(sigma, summand.variables);
-                        }
-                        // Check whether report transition only needs a state, and no action.
-                        if constexpr (utilities::is_applicable<ReportTransition,state_type,void>::value)
-                        {
-                          report_transition(s1);
-                        }
-                        else 
-                        {
-                          if (m_options.rewrite_actions)
-                          {
-                            lps::multi_action a=rewrite_action(summand.multi_action,sigma,rewr);
-                            report_transition(a,s1);
+                            s1 = compute_stochastic_state(summand.distribution, summand.next_state, sigma, rewr, enumerator);
                           }
                           else
                           {
-                            report_transition(summand.multi_action,s1);
+                            s1 = compute_state(summand.next_state,sigma,rewr);
+                            if (!confluent_summands.empty())
+                            {
+                              s1 = find_representative(s1, confluent_summands, sigma, rewr, enumerator, id_generator);
+                            }
                           }
-                        }
-                        return false;
-                      },
-                      data::is_false
-          );
+                          if (m_recursive)
+                          {
+                            data::remove_assignments(sigma, summand.variables);
+                          }
+                          // Check whether report transition only needs a state, and no action.
+                          if constexpr (utilities::is_applicable<ReportTransition,state_type,void>::value)
+                          {
+                            report_transition(s1);
+                          }
+                          else 
+                          {
+                            if (m_options.rewrite_actions)
+                            {
+                              lps::multi_action a=rewrite_action(summand.multi_action,sigma,rewr);
+                              report_transition(a,s1);
+                            }
+                            else
+                            {
+                              report_transition(summand.multi_action,s1);
+                            }
+                          }
+                          return false;
+                        },
+                        data::is_false
+            );
+          }
         }
       }
       else
@@ -591,10 +633,12 @@ class explorer: public abortable
           std::list<data::data_expression_list> solutions;
           if (!data::is_false(condition))
           {
-            enumerator.enumerate(enumerator_element(summand.variables, condition),
+            enumerator.enumerate<enumerator_element>(
+                        summand.variables, 
+                        condition,
                         sigma,
                         [&](const enumerator_element& p) {
-                          check_enumerator_solution(p, summand, sigma, rewr);
+                          check_enumerator_solution(p.expression(), summand, sigma, rewr);
                           solutions.push_back(p.assign_expressions(summand.variables, rewr));
                           return false;
                         },
