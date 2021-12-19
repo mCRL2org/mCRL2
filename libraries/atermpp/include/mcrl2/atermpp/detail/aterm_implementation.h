@@ -23,9 +23,9 @@ namespace detail
   const reference_aterm<T, typename std::enable_if_t<std::is_base_of<aterm, T>::value>>&
     reference_aterm<T, typename std::enable_if_t<std::is_base_of<aterm, T>::value>>::operator=(const unprotected_aterm& other) noexcept
   {
-    g_thread_term_pool().lock_shared();
+    if constexpr (GlobalThreadSafe) g_thread_term_pool().lock_shared();
     m_term = address(other);
-    g_thread_term_pool().unlock_shared();
+    if constexpr (GlobalThreadSafe) g_thread_term_pool().unlock_shared();
     return *this;
   }
 
@@ -33,18 +33,18 @@ namespace detail
   const reference_aterm<T, typename std::enable_if_t<std::is_base_of<aterm, T>::value>>&
     reference_aterm<T, typename std::enable_if_t<std::is_base_of<aterm, T>::value>>::operator=(unprotected_aterm&& other) noexcept
   {
-    g_thread_term_pool().lock_shared();
+    if constexpr (GlobalThreadSafe) g_thread_term_pool().lock_shared();
     m_term = address(other);
-    g_thread_term_pool().unlock_shared();
+    if constexpr (GlobalThreadSafe) g_thread_term_pool().unlock_shared();
     return *this;
   }
 
   template<typename T, typename Allocator>
   void aterm_allocator<T,Allocator>::deallocate(T* p, size_type n)
   {
-    g_thread_term_pool().lock_shared();
+    if constexpr (GlobalThreadSafe) g_thread_term_pool().lock_shared();
     m_allocator.deallocate(p, n);
-    g_thread_term_pool().unlock_shared();
+    if constexpr (GlobalThreadSafe) g_thread_term_pool().unlock_shared();
   }
 
   _aterm_container::_aterm_container()
@@ -123,9 +123,9 @@ inline aterm& aterm::operator=(const aterm& other) noexcept
   decrement_reference_count();
   m_term = other.m_term;
 #else
-  detail::g_thread_term_pool().lock_shared();
+  if constexpr (detail::GlobalThreadSafe) detail::g_thread_term_pool().lock_shared();
   m_term = other.m_term;
-  detail::g_thread_term_pool().unlock_shared();
+  if constexpr (detail::GlobalThreadSafe) detail::g_thread_term_pool().unlock_shared();
 #endif
   return *this;
 }
@@ -142,9 +142,9 @@ inline aterm& aterm::assign(const aterm& other,
   decrement_reference_count();
   m_term = other.m_term;
 #else
-  detail::lock_shared(busy_flag,forbidden_flag,creation_depth);
+  if constexpr (detail::GlobalThreadSafe) detail::lock_shared(busy_flag,forbidden_flag,creation_depth);
   m_term = other.m_term;
-  detail::unlock_shared(busy_flag,creation_depth);
+  if constexpr (detail::GlobalThreadSafe) detail::unlock_shared(busy_flag,creation_depth);
 #endif
   return *this;
 }
@@ -155,9 +155,9 @@ inline aterm& aterm::operator=(aterm&& other) noexcept
 #ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
   std::swap(m_term, other.m_term);
 #else
-  detail::g_thread_term_pool().lock_shared();
+  if constexpr (detail::GlobalThreadSafe) detail::g_thread_term_pool().lock_shared();
   m_term = other.m_term;    // Using hash set protection it is cheaper just to move the value to the new term.
-  detail::g_thread_term_pool().unlock_shared();
+  if constexpr (detail::GlobalThreadSafe) detail::g_thread_term_pool().unlock_shared();
 #endif
   return *this;
 }

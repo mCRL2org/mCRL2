@@ -27,42 +27,43 @@ thread_aterm_pool& g_thread_term_pool();
 
 function_symbol thread_aterm_pool::create_function_symbol(const std::string& name, const std::size_t arity, const bool check_for_registered_functions)
 {
-  lock_shared();
+  if constexpr (GlobalThreadSafe) lock_shared();
   function_symbol symbol = m_pool.create_function_symbol(name, arity, check_for_registered_functions);
-  unlock_shared();
+  if constexpr (GlobalThreadSafe) unlock_shared();
   return symbol;
 }
 
 void thread_aterm_pool::create_int(aterm& term, size_t val)
 {
-  lock_shared();
+  if constexpr (GlobalThreadSafe) lock_shared();
   bool added = m_pool.create_int(term, val);
-  unlock_shared();
+  if constexpr (GlobalThreadSafe) unlock_shared();
   if (added) { m_pool.created_term(m_creation_depth == 0, this); }
 }
 
 void thread_aterm_pool::create_term(aterm& term, const atermpp::function_symbol& sym)
 {
-  lock_shared();
+  if constexpr (GlobalThreadSafe) lock_shared();
   bool added = m_pool.create_term(term, sym);
-  unlock_shared();
+  if constexpr (GlobalThreadSafe) unlock_shared();
   if (added) { m_pool.created_term(m_creation_depth == 0, this); }
 }
 
 template<class ...Terms>
 void thread_aterm_pool::create_appl(aterm& term, const function_symbol& sym, const Terms&... arguments)
 {
-  lock_shared();
+  if constexpr (GlobalThreadSafe) lock_shared();
   bool added = m_pool.create_appl(term, sym, arguments...);
-  unlock_shared();
+  if constexpr (GlobalThreadSafe) unlock_shared();
   if (added) { m_pool.created_term(m_creation_depth == 0, this); }
 }
 
 template<class Term, class ...Terms>
 void thread_aterm_pool::create_appl_index(aterm& term, const function_symbol& sym, const Terms&... arguments)
 {
-  lock_shared();
+  if constexpr (GlobalThreadSafe) lock_shared();
   ++m_creation_depth;
+
   static_assert(sizeof...(arguments)==1 || sizeof...(arguments)==2);
   if constexpr (sizeof...(arguments)==1)
   {
@@ -73,8 +74,10 @@ void thread_aterm_pool::create_appl_index(aterm& term, const function_symbol& sy
     m_pool.create_int(term, atermpp::detail::index_traits<Term, std::pair<Terms...>, 2>::insert(std::make_pair(arguments...)));
   }
   bool added = m_pool.create_appl(term, sym, arguments..., term);
+
   --m_creation_depth;
-  unlock_shared();
+  if constexpr (GlobalThreadSafe) unlock_shared();
+
   if (added) { m_pool.created_term(m_creation_depth == 0, this); }
 }
 
@@ -84,11 +87,14 @@ void thread_aterm_pool::create_appl_dynamic(aterm& term,
                             InputIterator begin,
                             InputIterator end)
 {
-  lock_shared();
+  if constexpr (GlobalThreadSafe) lock_shared();
   ++m_creation_depth;
+  
   bool added = m_pool.create_appl_dynamic(term, sym, begin, end);
   --m_creation_depth;
-  unlock_shared();
+
+  if constexpr (GlobalThreadSafe) unlock_shared();
+  
   if (added) { m_pool.created_term(m_creation_depth == 0, this); }
 }
 
@@ -99,11 +105,12 @@ void thread_aterm_pool::create_appl_dynamic(aterm& term,
                             InputIterator begin,
                             InputIterator end)
 {
-  lock_shared();
+  if constexpr (GlobalThreadSafe) lock_shared();
   ++m_creation_depth;
+
   bool added = m_pool.create_appl_dynamic(term, sym, convert_to_aterm, begin, end);
   --m_creation_depth;
-  unlock_shared();
+  if constexpr (GlobalThreadSafe) unlock_shared();
 
   if (added) { m_pool.created_term(m_creation_depth == 0, this); }
 }
@@ -115,12 +122,12 @@ void thread_aterm_pool::register_variable(aterm* variable)
   /* Resizing of the protection set should not interfere with garbage collection and rehashing */
   if (m_variables->must_resize())
   {
-    lock_shared();
+    if constexpr (GlobalThreadSafe) lock_shared();
     m_variables->resize();
-    unlock_shared();
+    if constexpr (GlobalThreadSafe) unlock_shared();
   }
 
-  lock_shared();
+  if constexpr (GlobalThreadSafe) lock_shared();
   auto [it, inserted] = m_variables->insert(variable);
 
   // The variable must be inserted.
@@ -128,35 +135,35 @@ void thread_aterm_pool::register_variable(aterm* variable)
   mcrl2::utilities::mcrl2_unused(it);
   mcrl2::utilities::mcrl2_unused(inserted);
 
-  unlock_shared();
+  if constexpr (GlobalThreadSafe) unlock_shared();
 }
 
 void thread_aterm_pool::deregister_variable(aterm* variable)
 {
-  lock_shared();
+  if constexpr (GlobalThreadSafe) lock_shared();
   m_variables->erase(variable);
-  unlock_shared();
+  if constexpr (GlobalThreadSafe) unlock_shared();
 }
 
 void thread_aterm_pool::register_container(_aterm_container* container)
 {
   if constexpr (EnableVariableRegistrationMetrics) { ++m_container_insertions; }
 
-  lock_shared();
+  if constexpr (GlobalThreadSafe) lock_shared();
   auto [it, inserted] = m_containers->insert(container);
 
   // The container must be inserted.
   assert(inserted);
   mcrl2::utilities::mcrl2_unused(it);
   mcrl2::utilities::mcrl2_unused(inserted);
-  unlock_shared();
+  if constexpr (GlobalThreadSafe) unlock_shared();
 }
 
 void thread_aterm_pool::deregister_container(_aterm_container* container)
 {
-  lock_shared();
+  if constexpr (GlobalThreadSafe) lock_shared();
   m_containers->erase(container);
-  unlock_shared();
+  if constexpr (GlobalThreadSafe) unlock_shared();
 }
 
 void thread_aterm_pool::mark()

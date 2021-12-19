@@ -11,10 +11,9 @@
 #define MCRL2_ATERMPP_DETAIL_ATERM_H
 
 #include <iostream> //  FOR DEBUGGING. 
+#include <limits>
 #include "mcrl2/utilities/type_traits.h"
 #include "mcrl2/atermpp/function_symbol.h"
-
-#include <limits>
 
 namespace atermpp
 {

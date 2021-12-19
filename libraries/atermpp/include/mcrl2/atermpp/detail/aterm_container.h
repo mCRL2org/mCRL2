@@ -91,7 +91,7 @@ protected:
   typedef typename std::decay<T>::type T_type;
   T_type m_t;
 public:
-  reference_aterm() noexcept = default;
+  reference_aterm() = default;
 
   reference_aterm(const T& other) noexcept
    : m_t(other)
