@@ -55,6 +55,12 @@ struct stochastic_state
     probabilities.push_back(probability);
     states.push_back(s);
   }
+
+  void clear()
+  {
+    probabilities.clear();
+    states.clear();
+  }
 };
 
 inline

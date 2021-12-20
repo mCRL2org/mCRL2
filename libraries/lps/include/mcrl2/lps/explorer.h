@@ -431,13 +431,14 @@ class explorer: public abortable
     }
 
     template <typename DataExpressionSequence>
-    stochastic_state compute_stochastic_state(const stochastic_distribution& distribution, 
-                                              const DataExpressionSequence& next_state,
-                                              data::mutable_indexed_substitution<>& sigma,
-                                              data::rewriter& rewr, 
-                                              data::enumerator_algorithm<>& enumerator) const
+    void compute_stochastic_state(stochastic_state& result,
+                                  const stochastic_distribution& distribution, 
+                                  const DataExpressionSequence& next_state,
+                                  data::mutable_indexed_substitution<>& sigma,
+                                  data::rewriter& rewr, 
+                                  data::enumerator_algorithm<>& enumerator) const
     {                                              
-      stochastic_state result;                     
+      result.clear();
       if (distribution.is_defined())
       {
         enumerator.enumerate<enumerator_element>(
@@ -463,7 +464,6 @@ class explorer: public abortable
         result.probabilities.push_back(real_one());
         result.states.push_back(compute_state(next_state,sigma,rewr));
       }
-      return result;
     }
 
     /// Rewrite action a, and put it back in place. 
@@ -521,6 +521,7 @@ class explorer: public abortable
       data::mutable_indexed_substitution<>& sigma,
       data::rewriter& rewr,
       data::data_expression& condition,
+      state_type& s1,
       data::enumerator_algorithm<>& enumerator,
       data::enumerator_identifier_generator& id_generator,
       ReportTransition report_transition = ReportTransition()
@@ -542,7 +543,7 @@ class explorer: public abortable
             state_type s1;
             if constexpr (Stochastic)
             {
-              s1 = compute_stochastic_state(summand.distribution, summand.next_state, sigma, rewr, enumerator);
+              compute_stochastic_state(s1, summand.distribution, summand.next_state, sigma, rewr, enumerator);
             }
             else
             {
@@ -582,7 +583,7 @@ class explorer: public abortable
                           state_type s1;
                           if constexpr (Stochastic)
                           {
-                            s1 = compute_stochastic_state(summand.distribution, summand.next_state, sigma, rewr, enumerator);
+                            compute_stochastic_state(s1, summand.distribution, summand.next_state, sigma, rewr, enumerator);
                           }
                           else
                           {
@@ -657,7 +658,7 @@ class explorer: public abortable
           data::add_assignments(sigma, summand.variables, e);
           if constexpr (Stochastic)
           {
-            s1 = compute_stochastic_state(summand.distribution, summand.next_state, sigma, rewr, enumerator);
+            compute_stochastic_state(s1, summand.distribution, summand.next_state, sigma, rewr, enumerator);
           }
           else
           {
@@ -707,6 +708,7 @@ class explorer: public abortable
                                    )
     {
       data::data_expression condition;   // This variable is used often, and it is time consuming to declare it too often.
+      state_type state_;                  // The same holds for this variable. 
       std::list<transition> transitions;
       data::add_assignments(sigma, m_process_parameters, s);
       for (const explorer_summand& summand: regular_summands)
@@ -717,6 +719,7 @@ class explorer: public abortable
           sigma,
           rewr,
           condition,
+          state_,
           enumerator,
           id_generator,
           [&](const lps::multi_action& a, const state_type& s1)
@@ -729,8 +732,8 @@ class explorer: public abortable
                 return;
               }
               const data::data_expression& t1 = a.has_time() ? a.time() : t;
-              state s1_at_t1 = make_timed_state(s1, t1);
-              transitions.emplace_back(a, s1_at_t1);
+              state_ = make_timed_state(s1, t1);
+              transitions.emplace_back(a, state_);
             }
             else
             {
@@ -755,6 +758,7 @@ class explorer: public abortable
     )
     {
       data::data_expression condition; 
+      state_type state_;
       std::vector<state> result;
       data::add_assignments(sigma, m_process_parameters, s0);
       for (const explorer_summand& summand: summands)
@@ -765,6 +769,7 @@ class explorer: public abortable
           sigma,
           rewr,
           condition,
+          state_,
           enumerator,
           id_generator,
           // [&](const lps::multi_action& /* a */, const state& s1) OLD. Calculates transitions, that are not used. 
@@ -927,6 +932,7 @@ class explorer: public abortable
       data::enumerator_algorithm<> thread_enumerator(thread_rewr, thread_data_specification, thread_rewr, thread_id_generator, false);
       state current_state;
       data::data_expression condition;  // The condition is used often, and it is effective not to declare it whenever it is used.
+      state_type state_;                 // The same holds for state.
       while (number_of_active_processes>0)
       {
         if (m_options.number_of_threads>0) m_exclusive_state_access.lock();
@@ -945,6 +951,7 @@ class explorer: public abortable
               thread_sigma,
               thread_rewr,
               condition,
+              state_,
               thread_enumerator,
               thread_id_generator,
               [&](const lps::multi_action& a, const state_type& s1)
@@ -992,10 +999,10 @@ class explorer: public abortable
                     { 
                       const data::data_expression& t = current_state[m_n];
                       const data::data_expression& t1 = a.has_time() ? a.time() : t;
-                      state s1_at_t1 = make_timed_state(s1, t1);
-                      s1_index = discovered.insert(s1_at_t1).first;
-                      discover_state(s1_at_t1, s1_index);
-                      todo->insert(s1_at_t1);
+                      state_ = make_timed_state(s1, t1);
+                      s1_index = discovered.insert(state_).first;
+                      discover_state(state_, s1_index);
+                      todo->insert(state_);
                     } 
                     else
                     { 
@@ -1142,7 +1149,7 @@ class explorer: public abortable
       state_type s0;
       if constexpr (Stochastic)
       {
-        s0 = compute_stochastic_state(m_initial_distribution, m_initial_state, m_global_sigma, m_global_rewr, m_global_enumerator);
+        compute_stochastic_state(s0, m_initial_distribution, m_initial_state, m_global_sigma, m_global_rewr, m_global_enumerator);
       }
       else
       {
@@ -1172,6 +1179,7 @@ class explorer: public abortable
       std::vector<std::pair<lps::multi_action, state_type>> result;
       data::add_assignments(sigma, m_process_parameters, d0);
       data::data_expression condition;
+      state_type state;
       for (const explorer_summand& summand: m_regular_summands)
       {
         generate_transitions(
@@ -1180,6 +1188,7 @@ class explorer: public abortable
           sigma,
           rewr,
           condition,
+          state,
           enumerator,
           id_generator,
           [&](const lps::multi_action& a, const state_type& d1)
@@ -1218,11 +1227,12 @@ std::cerr << "A GLOBAL REWRITER IS INVOKED. HOPEFULLY NOT IN A PARALLEL THREAD\n
                 data::mutable_indexed_substitution<>& sigma,
                 data::rewriter& rewr,
                 data::data_expression& condition,
+                state_type& d0,
                 data::enumerator_algorithm<>& enumerator,
                 data::enumerator_identifier_generator& id_generator)
     {
       data::data_expression_list process_parameter_undo = process_parameter_values(sigma);
-      state d0 = compute_state(init,sigma,rewr);
+      d0 = compute_state(init,sigma,rewr);
       std::vector<std::pair<lps::multi_action, state_type>> result;
       data::add_assignments(sigma, m_process_parameters, d0);
       generate_transitions(
@@ -1231,6 +1241,7 @@ std::cerr << "A GLOBAL REWRITER IS INVOKED. HOPEFULLY NOT IN A PARALLEL THREAD\n
         sigma,
         rewr,
         condition,
+        d0,
         enumerator,
         id_generator,
         [&](const lps::multi_action& a, const state_type& d1)
