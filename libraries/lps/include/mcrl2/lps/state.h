@@ -23,6 +23,28 @@ namespace lps
 
 typedef atermpp::term_balanced_tree<data::data_expression> state;
 
+template<class ForwardTraversalIterator, class Transformer>
+void make_state(state& result,
+                ForwardTraversalIterator p,
+                const std::size_t size,
+                Transformer transformer)
+{
+  // make_term_balanced_tree<data::data_expression>(result, p, size, transformer);
+  make_term_balanced_tree(result, p, size, transformer);
+}
+ 
+template<class ForwardTraversalIterator>
+void make_state(state& result,
+                ForwardTraversalIterator p,
+                const std::size_t size)
+{
+  // make_term_balanced_tree<data::data_expression>(result, p, size, transformer);
+  make_term_balanced_tree(result, 
+                          p, 
+                          size, 
+                          [](data::data_expression& result, const data::data_expression& t){ result=t; });
+}
+ 
 // template function overloads
 inline std::string pp(const lps::state& x)
 {

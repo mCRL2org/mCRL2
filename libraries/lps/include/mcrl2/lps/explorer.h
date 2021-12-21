@@ -423,11 +423,15 @@ class explorer: public abortable
     }
 
     template <typename DataExpressionSequence>
-    state compute_state(const DataExpressionSequence& v,
-                        data::mutable_indexed_substitution<>& sigma,
-                        data::rewriter& rewr) const
+    void compute_state(state& result,
+                       const DataExpressionSequence& v,
+                       data::mutable_indexed_substitution<>& sigma,
+                       data::rewriter& rewr) const
     {
-      return state(v.begin(), m_n, [&](data::data_expression& result, const data::data_expression& x) { return rewr(result, x, sigma); });
+      lps::make_state(result, 
+                      v.begin(), 
+                      m_n, 
+                      [&](data::data_expression& result, const data::data_expression& x) { return rewr(result, x, sigma); });
     }
 
     template <typename DataExpressionSequence>
@@ -448,7 +452,8 @@ class explorer: public abortable
                     [&](const enumerator_element& p) {
                       p.add_assignments(distribution.variables(), sigma, rewr);
                       result.probabilities.push_back(p.expression());
-                      result.states.push_back(compute_state(next_state,sigma,rewr));
+                      result.states.emplace_back();
+                      compute_state(result.states.back(), next_state, sigma, rewr);
                       return false;
                     },
                     [](const data::data_expression& x) { return x == real_zero(); }
@@ -462,7 +467,8 @@ class explorer: public abortable
       else
       {
         result.probabilities.push_back(real_one());
-        result.states.push_back(compute_state(next_state,sigma,rewr));
+        result.states.emplace_back();
+        compute_state(result.states.back(),next_state,sigma,rewr);
       }
     }
 
@@ -540,14 +546,14 @@ class explorer: public abortable
           {
             // There is only one solution that is generated as there are no variables. 
             check_enumerator_solution(condition, summand,sigma,rewr);
-            state_type s1;
+            // state_type s1;
             if constexpr (Stochastic)
             {
               compute_stochastic_state(s1, summand.distribution, summand.next_state, sigma, rewr, enumerator);
             }
             else
             {
-              s1 = compute_state(summand.next_state,sigma,rewr);
+              compute_state(s1,summand.next_state,sigma,rewr);
               if (!confluent_summands.empty())
               {
                 s1 = find_representative(s1, confluent_summands, sigma, rewr, enumerator, id_generator); 
@@ -587,7 +593,7 @@ class explorer: public abortable
                           }
                           else
                           {
-                            s1 = compute_state(summand.next_state,sigma,rewr);
+                            compute_state(s1,summand.next_state,sigma,rewr);
                             if (!confluent_summands.empty())
                             {
                               s1 = find_representative(s1, confluent_summands, sigma, rewr, enumerator, id_generator);
@@ -662,7 +668,7 @@ class explorer: public abortable
           }
           else
           {
-            s1 = compute_state(summand.next_state,sigma,rewr);
+            compute_state(s1,summand.next_state,sigma,rewr);
             if (!confluent_summands.empty())
             {
               s1 = find_representative(s1, confluent_summands, sigma, rewr, enumerator, id_generator);
@@ -732,7 +738,7 @@ class explorer: public abortable
                 return;
               }
               const data::data_expression& t1 = a.has_time() ? a.time() : t;
-              state_ = make_timed_state(s1, t1);
+              make_timed_state(state_, s1, t1);
               transitions.emplace_back(a, state_);
             }
             else
@@ -877,11 +883,11 @@ class explorer: public abortable
     ~explorer() = default;
 
     // Returns the concatenation of s and [t]
-    state make_timed_state(const state& s, const data::data_expression& t) const
+    void make_timed_state(state& result, const state& s, const data::data_expression& t) const
     {
       std::copy(s.begin(), s.end(), timed_state.begin());
       timed_state.back() = t;
-      return state(timed_state.begin(), m_n + 1);
+      lps::make_state(result, timed_state.begin(), m_n + 1);
     }
 
     state_type make_state(const state& s) const
@@ -999,7 +1005,7 @@ class explorer: public abortable
                     { 
                       const data::data_expression& t = current_state[m_n];
                       const data::data_expression& t1 = a.has_time() ? a.time() : t;
-                      state_ = make_timed_state(s1, t1);
+                      make_timed_state(state_, s1, t1);
                       s1_index = discovered.insert(state_).first;
                       discover_state(state_, s1_index);
                       todo->insert(state_);
@@ -1153,14 +1159,14 @@ class explorer: public abortable
       }
       else
       {
-        s0 = compute_state(m_initial_state,m_global_sigma, m_global_rewr);
+        compute_state(s0,m_initial_state,m_global_sigma, m_global_rewr);
         if (!m_confluent_summands.empty())
         {
           s0 = find_representative(s0, m_confluent_summands, m_global_sigma, m_global_rewr, m_global_enumerator, m_global_id_generator);
         }
         if constexpr (Timed)
         {
-          s0 = make_timed_state(s0, real_zero());
+          make_timed_state(s0, s0, real_zero());
         }
       }
       generate_state_space(recursive, s0, m_regular_summands, m_confluent_summands, m_discovered, discover_state, 
@@ -1216,7 +1222,8 @@ std::cerr << "A GLOBAL REWRITER IS INVOKED. HOPEFULLY NOT IN A PARALLEL THREAD\n
               data::mutable_indexed_substitution<>& sigma,
               data::rewriter& rewr)
     {
-      state d0 = compute_state(init,sigma,rewr);
+      state d0;
+      compute_state(d0,init,sigma,rewr);
       return generate_transitions(d0);
     }
 
@@ -1232,7 +1239,7 @@ std::cerr << "A GLOBAL REWRITER IS INVOKED. HOPEFULLY NOT IN A PARALLEL THREAD\n
                 data::enumerator_identifier_generator& id_generator)
     {
       data::data_expression_list process_parameter_undo = process_parameter_values(sigma);
-      d0 = compute_state(init,sigma,rewr);
+      compute_state(d0,init,sigma,rewr);
       std::vector<std::pair<lps::multi_action, state_type>> result;
       data::add_assignments(sigma, m_process_parameters, d0);
       generate_transitions(
@@ -1308,7 +1315,8 @@ std::cerr << "DFS EXPLORATION NOT THREAD SAFE\n";
           {
             const data::data_expression& t = s0[m_n];
             const data::data_expression& t1 = a.has_time() ? a.time() : t;
-            state s1_at_t1 = make_timed_state(s1, t1);
+            state s1_at_t1;
+            make_timed_state(s1_at_t1, s1, t1);
             discovered.insert(s1_at_t1);
           }
           else
@@ -1352,7 +1360,8 @@ std::cerr << "DFS EXPLORATION NOT THREAD SAFE\n";
       std::unordered_set<state> gray;
       std::unordered_set<state> discovered;
 
-      state s0 = compute_state(m_initial_state, m_global_sigma, m_global_rewr);
+      state s0;
+      compute_state(s0, m_initial_state, m_global_sigma, m_global_rewr);
       if (!m_confluent_summands.empty())
       {
         s0 = find_representative(s0, m_confluent_summands, m_global_sigma, m_global_rewr, m_global_enumerator, m_global_id_generator);
@@ -1422,7 +1431,8 @@ std::cerr << "DFS EXPLORATION NOT THREAD SAFE\n";
             {
               const data::data_expression& t = (*s)[m_n];
               const data::data_expression& t1 = a.has_time() ? a.time() : t;
-              state s1_at_t1 = make_timed_state(s1, t1);
+              state s1_at_t1;
+              make_timed_state(s1_at_t1, s1, t1);
               discovered.insert(s1_at_t1);
               discover_state(s1_at_t1);
             }
@@ -1475,7 +1485,8 @@ std::cerr << "DFS EXPLORATION NOT THREAD SAFE\n";
       m_recursive = recursive;
       std::unordered_set<state> discovered;
 
-      state s0 = compute_state(m_initial_state,m_global_sigma, m_global_rewr);
+      state s0;
+      compute_state(s0,m_initial_state,m_global_sigma, m_global_rewr);
       if (!m_confluent_summands.empty())
       {
         s0 = find_representative(s0, m_confluent_summands, m_global_sigma, m_global_rewr, m_global_enumerator, m_global_id_generator);
