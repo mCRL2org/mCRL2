@@ -10,6 +10,7 @@
 
 #ifndef _LIBLTS_BISIM_H
 #define _LIBLTS_BISIM_H
+#include <fstream>
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/lts/lts_utilities.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
