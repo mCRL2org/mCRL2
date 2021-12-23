@@ -1084,7 +1084,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                     dependent = True
                     # special case for arguments of a data application
                     if self.classname(True) == 'data::application' and p.name() == 'arguments':
-                        update = 'for (auto i = x.begin(); i != x.end(); ++i) { static_cast<Derived&>(*this).apply(*i); }'
+                        update = 'for (const data_expression& t: x) { static_cast<Derived&>(*this).apply(t); }'
                     else:
                         update = 'static_cast<Derived&>(*this).apply(x.%s());' % p.name()
                     # special case for stochastic distribution
