@@ -35,7 +35,7 @@ class term_balanced_tree;
 
 template <class Term, class ForwardTraversalIterator, class Transformer>
 void make_term_balanced_tree(term_balanced_tree<Term>& result,
-                             ForwardTraversalIterator& p,
+                             ForwardTraversalIterator p,
                              const std::size_t size,
                              Transformer transformer);
 
@@ -47,7 +47,7 @@ class term_balanced_tree : public aterm_appl
 
     template <class Term1, class ForwardTraversalIterator, class Transformer>
     friend void make_term_balanced_tree(term_balanced_tree<Term1>& result,
-                                        ForwardTraversalIterator& p,
+                                        ForwardTraversalIterator p,
                                         const std::size_t size,
                                         Transformer transformer);
    
@@ -414,7 +414,7 @@ class term_balanced_tree : public aterm_appl
 
 template <class Term, class ForwardTraversalIterator, class Transformer>
 void make_term_balanced_tree(term_balanced_tree<Term>& result, 
-                             ForwardTraversalIterator& p, 
+                             ForwardTraversalIterator p, 
                              const std::size_t size, 
                              Transformer transformer)
 {
