@@ -59,62 +59,27 @@ class term_balanced_tree : public aterm_appl
       return g_empty_tree; 
     }
 
-    struct dummy_iterator
-    {
-      typedef std::size_t difference_type;
-      typedef aterm_appl value_type;
-      typedef aterm* pointer;
-      typedef aterm& reference;
-      typedef std::forward_iterator_tag iterator_category;
-
-      const aterm_appl& dummy() const
-      {
-        static const aterm_appl g_dummy;
-        return g_dummy;
-      }
-
-      void operator++()
-      {}
-
-      bool operator !=(const dummy_iterator ) const    // Operator is only used to fool assertions. 
-      {
-        return true;
-      }
-
-      bool operator ==(const dummy_iterator ) const    // Operator is only used to fool assertions.
-      {
-        return true;
-      }
-
-      const aterm_appl& operator*() const
-      {
-        return dummy();
-      }
-
-    };
-
-
     template < typename ForwardTraversalIterator, class Transformer >
     static void make_tree_helper(aterm& result, ForwardTraversalIterator& p, const std::size_t size, Transformer transformer)
     {
       assert(size>1);
-      enum { e_left_tree, e_right_tree } b=e_left_tree;
-      make_term_appl(result, tree_node_function(), dummy_iterator(), dummy_iterator(),
-                     [&size, &transformer, &p, &b](aterm& target, const aterm_appl& )
+      make_term_appl(result, tree_node_function(), 
+                     [&size, &transformer, &p](aterm& target)
                         { 
                           assert(size>1);
                           
-                          std::size_t new_size;
-                          if (b==e_left_tree)
+                          std::size_t new_size = (size + 1) >> 1; // size/2 rounded up.
+                          if (new_size==1)
                           {
-                            new_size = (size + 1) >> 1; // size/2 rounded up.
-                            b=e_right_tree;
+                            transformer(reinterpret_cast<Term&>(target), *(p++));
                           }
-                          else
-                          {
-                            assert(b==e_right_tree);
-                            new_size = size >> 1; // size/2 rounded down.
-                          }
+                          else make_tree_helper(target, p, new_size, transformer);
+                        },
+                     [&size, &transformer, &p](aterm& target)
+                        { 
+                          assert(size>1);
+                          
+                          std::size_t new_size = size >> 1; // size/2 rounded down.
                           if (new_size==1)
                           {
                             transformer(reinterpret_cast<Term&>(target), *(p++));

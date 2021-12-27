@@ -11,11 +11,12 @@
 #define MCRL2_ATERMPP_ATERM_POOL_STORAGE_IMPLEMENTION_H
 #pragma once
 
+#include <type_traits>
+#include <cstring>
+#include "mcrl2/utilities/stack_array.h"
 #include "mcrl2/atermpp/detail/aterm_pool.h"
 
-#include "mcrl2/utilities/stack_array.h"
 
-#include <cstring>
 
 namespace atermpp
 {
@@ -155,7 +156,37 @@ template<class ...Terms>
 bool ATERM_POOL_STORAGE::create_appl(aterm& term, const function_symbol& symbol, const Terms&... arguments)
 {
   assert(symbol.arity() == sizeof...(arguments));
-  return emplace(term, symbol, arguments...);
+  if constexpr (detail::are_terms<Terms...>::value)
+  {
+    return emplace(term, symbol, arguments...);
+  }
+  else 
+  {
+    std::array<unprotected_aterm, N> argument_array;
+    
+    // Evaluate the functions or terms and put the result in "argument_array".
+    int i = 0;
+    ([&] (auto& function_or_term)
+    {
+      typedef decltype(function_or_term) FUNCTION_TERM_TYPE;
+      if constexpr (std::is_convertible<FUNCTION_TERM_TYPE,atermpp::aterm>::value)
+      {
+        argument_array[i]=function_or_term;
+      }
+      // check whether the function_or_term invoked on an empty argument yields an aterm.
+      else if constexpr (mcrl2::utilities::is_applicable< FUNCTION_TERM_TYPE, void>::value)
+      {
+        argument_array[i]=function_or_term();
+      }
+      // Otherwise function_or_term is supposed to  have type void(term& result), putting the term in result. 
+      else 
+      {
+        function_or_term(static_cast<aterm&>(argument_array[i]));
+      }
+      ++i;
+    } (arguments), ...);
+    return emplace(term, symbol, argument_array.begin(), argument_array.end());
+  }
 }
 
 ATERM_POOL_STORAGE_TEMPLATES

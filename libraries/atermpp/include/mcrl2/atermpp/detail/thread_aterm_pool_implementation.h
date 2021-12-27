@@ -52,8 +52,17 @@ void thread_aterm_pool::create_term(aterm& term, const atermpp::function_symbol&
 template<class ...Terms>
 void thread_aterm_pool::create_appl(aterm& term, const function_symbol& sym, const Terms&... arguments)
 {
+  using are_terms = mcrl2::utilities::forall<std::is_convertible<Terms, unprotected_aterm>...>;
   if constexpr (GlobalThreadSafe) lock_shared();
+  if constexpr (!are_terms::value)
+  {
+    ++m_creation_depth;
+  }
   bool added = m_pool.create_appl(term, sym, arguments...);
+  if constexpr (!are_terms::value)
+  {
+    --m_creation_depth;
+  }
   if constexpr (GlobalThreadSafe) unlock_shared();
   if (added) { m_pool.created_term(m_creation_depth == 0, this); }
 }
