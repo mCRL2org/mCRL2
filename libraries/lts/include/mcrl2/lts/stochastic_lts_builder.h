@@ -20,6 +20,9 @@ namespace lts {
 
 struct stochastic_lts_builder
 {
+  typedef atermpp::indexed_set<lps::state, std::hash<lps::state>,
+                               std::equal_to<lps::state>, std::allocator<lps::state>,
+                               atermpp::detail::GlobalThreadSafe> indexed_set_for_states_type;
   // All LTS classes use integers to represent actions in transitions. A mapping from actions to integers
   // is needed to avoid duplicates.
   utilities::unordered_map_large<lps::multi_action, std::size_t> m_actions;
@@ -47,7 +50,7 @@ struct stochastic_lts_builder
   virtual void add_transition(std::size_t from, const lps::multi_action& a, const std::list<std::size_t>& targets, const std::vector<data::data_expression>& probabilities) = 0;
 
   // Add actions and states to the LTS
-  virtual void finalize(const atermpp::indexed_set<lps::state>& state_map, bool timed) = 0;
+  virtual void finalize(const indexed_set_for_states_type& state_map, bool timed) = 0;
 
   // Save the LTS to a file
   virtual void save(const std::string& filename) = 0;
@@ -64,7 +67,7 @@ class stochastic_lts_none_builder: public stochastic_lts_builder
     void add_transition(std::size_t /* from */, const lps::multi_action& /* a */, const std::list<std::size_t>& /* targets */, const std::vector<data::data_expression>& /* probabilities */) override
     {}
 
-    void finalize(const atermpp::indexed_set<lps::state>& /* state_map */, bool /* timed */) override
+    void finalize(const indexed_set_for_states_type& /* state_map */, bool /* timed */) override
     {}
 
     void save(const std::string& /* filename */) override
@@ -138,7 +141,7 @@ class stochastic_lts_aut_builder: public stochastic_lts_builder
     }
 
     // Add actions and states to the LTS
-    void finalize(const atermpp::indexed_set<lps::state>& state_map, bool /* timed */) override
+    void finalize(const indexed_set_for_states_type& state_map, bool /* timed */) override
     {
       m_number_of_states = state_map.size();
     }
@@ -232,7 +235,7 @@ class stochastic_lts_lts_builder: public stochastic_lts_builder
     }
 
     // Add actions and states to the LTS
-    void finalize(const atermpp::indexed_set<lps::state>& state_map, bool timed) override
+    void finalize(const indexed_set_for_states_type& state_map, bool timed) override
     {
       // add actions
       m_lts.set_num_action_labels(m_actions.size());

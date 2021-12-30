@@ -98,7 +98,8 @@ inline indexed_set<Key,Hash,Equals,Allocator,ThreadSafe,KeyTable>::indexed_set(s
 {}
 
 template <class Key, typename Hash, typename Equals, typename Allocator, bool ThreadSafe, typename KeyTable>
-inline typename indexed_set<Key,Hash,Equals,Allocator,ThreadSafe, KeyTable>::size_type indexed_set<Key,Hash,Equals,Allocator,ThreadSafe,KeyTable>::index(const key_type& key) const
+inline typename indexed_set<Key,Hash,Equals,Allocator,ThreadSafe, KeyTable>::size_type 
+                        indexed_set<Key,Hash,Equals,Allocator,ThreadSafe,KeyTable>::index(const key_type& key) const
 {
   std::size_t start = (m_hasher(key) * detail::PRIME_NUMBER) % m_hashtable.size();
   std::size_t position = start;

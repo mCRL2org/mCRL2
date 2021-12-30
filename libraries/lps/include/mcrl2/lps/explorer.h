@@ -18,6 +18,7 @@
 #include "mcrl2/utilities/detail/io.h"
 #include "mcrl2/utilities/skip.h"
 #include "mcrl2/atermpp/standard_containers/deque.h"
+#include "mcrl2/atermpp/standard_containers/vector.h"
 #include "mcrl2/atermpp/standard_containers/indexed_set.h"
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/enumerator.h"
@@ -333,6 +334,8 @@ class explorer: public abortable
     static constexpr bool is_stochastic = Stochastic;
     static constexpr bool is_timed = Timed;
 
+    typedef atermpp::indexed_set<state, std::hash<state>, std::equal_to<state>, std::allocator<state>,  atermpp::detail::GlobalThreadSafe> indexed_set_for_states_type;
+
   protected:
     using enumerator_element = data::enumerator_list_element_with_substitution<>;
 
@@ -358,6 +361,7 @@ class explorer: public abortable
     // Mutexes
     std::mutex m_exclusive_state_access;
     std::mutex m_exclusive_transition_access;
+    // std::mutex m_exclusive_indexed_set_access;
 
     std::vector<data::variable> m_process_parameters;
     std::size_t m_n; // m_n = m_process_parameters.size()
@@ -371,7 +375,8 @@ class explorer: public abortable
 
     // N.B. The keys are stored in term_appl instead of data_expression_list for performance reasons.
     utilities::unordered_map<atermpp::term_appl<data::data_expression>, std::list<data::data_expression_list>> global_cache;
-    atermpp::indexed_set<state> m_discovered;
+
+    indexed_set_for_states_type m_discovered;
 
     // used by make_timed_state, to avoid needless creation of vectors
     mutable std::vector<data::data_expression> timed_state;
@@ -922,7 +927,7 @@ class explorer: public abortable
       std::atomic<std::size_t>& number_of_active_processes,
       const SummandSequence& regular_summands,
       const SummandSequence& confluent_summands,
-      atermpp::indexed_set<state>& discovered,
+      indexed_set_for_states_type& discovered,
       DiscoverState discover_state,
       ExamineTransition examine_transition,
       StartState start_state,
@@ -937,8 +942,9 @@ class explorer: public abortable
       data::data_specification thread_data_specification = m_global_lpsspec.data(); /// XXXX Nodig??
       data::enumerator_algorithm<> thread_enumerator(thread_rewr, thread_data_specification, thread_rewr, thread_id_generator, false);
       state current_state;
-      data::data_expression condition;  // The condition is used often, and it is effective not to declare it whenever it is used.
+      data::data_expression condition;   // The condition is used often, and it is effective not to declare it whenever it is used.
       state_type state_;                 // The same holds for state.
+      atermpp::vector<state> newly_found_states; // The new states for each process are temporarily stored in this vector for each thread. 
       while (number_of_active_processes>0)
       {
         if (m_options.number_of_threads>0) m_exclusive_state_access.lock();
@@ -975,49 +981,54 @@ class explorer: public abortable
                   std::list<std::size_t> s1_index;
                   const auto& S1 = s1.states;
                   // TODO: join duplicate targets
-                  if (m_options.number_of_threads>0) m_exclusive_state_access.lock();
+                  // if (m_options.number_of_threads>0) m_exclusive_indexed_set_access.lock();
                   for (const state& s1_: S1)
                   { 
                     std::size_t k = discovered.index(s1_);
                     if (k >= discovered.size())
                     { 
-                      todo->insert(s1_);
+                      newly_found_states.push_back(s1_);
                       k = discovered.insert(s1_).first;
                       discover_state(s1_, k);
                     }
                     s1_index.push_back(k);
                   }
-                  if (m_options.number_of_threads>0) 
-                  {
-                    m_exclusive_state_access.unlock();
-                    m_exclusive_transition_access.lock();
-                  }
+                  // if (m_options.number_of_threads>0) m_exclusive_indexed_set_access.unlock();
+
+                  if (m_options.number_of_threads>0) m_exclusive_transition_access.lock();
                   examine_transition(current_state, s_index, a, s1, s1_index, summand.index);
                   if (m_options.number_of_threads>0) m_exclusive_transition_access.unlock();
                 } 
                 else 
                 { 
-                  if (m_options.number_of_threads>0) m_exclusive_state_access.lock();
-                  std::size_t s1_index = discovered.index(s1);
-                  if (s1_index >= discovered.size())
-                  {   
-                    if constexpr (Timed)
-                    { 
+                  std::size_t s1_index; 
+                  // if (m_options.number_of_threads>0) m_exclusive_indexed_set_access.lock();
+                  if constexpr (Timed)
+                  { 
+                    s1_index = discovered.index(s1);
+                    if (s1_index >= discovered.size())
+                    {   
                       const data::data_expression& t = current_state[m_n];
                       const data::data_expression& t1 = a.has_time() ? a.time() : t;
                       make_timed_state(state_, s1, t1);
                       s1_index = discovered.insert(state_).first;
+                      // if (m_options.number_of_threads>0) m_exclusive_indexed_set_access.unlock();
                       discover_state(state_, s1_index);
-                      todo->insert(state_);
+                      newly_found_states.push_back(state_);
                     } 
-                    else
-                    { 
-                      s1_index = discovered.insert(s1).first;
+                  }
+                  else
+                  { 
+                    std::pair<std::size_t,bool> p = discovered.insert(s1);
+                    // if (m_options.number_of_threads>0) m_exclusive_indexed_set_access.unlock();
+                    s1_index=p.first;
+                    if (p.second)  // Index is newly added. 
+                    {
                       discover_state(s1, s1_index);
-                      todo->insert(s1); 
+                      newly_found_states.push_back(s1); 
                     }
                   }
-                  if (m_options.number_of_threads>0) m_exclusive_state_access.unlock();
+
                   if (m_options.number_of_threads>0) m_exclusive_transition_access.lock();
                   examine_transition(current_state, s_index, a, s1, s1_index, summand.index);
                   if (m_options.number_of_threads>0) m_exclusive_transition_access.unlock();
@@ -1026,6 +1037,11 @@ class explorer: public abortable
             );
           }
           if (m_options.number_of_threads>0) m_exclusive_state_access.lock();
+          for(const state& s: newly_found_states)
+          {
+            todo->insert(s);
+          }
+          newly_found_states.clear();
           finish_state(current_state, s_index, todo->size());
           todo->finish_state();
         }
@@ -1062,7 +1078,7 @@ class explorer: public abortable
       const StateType& s0,
       const SummandSequence& regular_summands,
       const SummandSequence& confluent_summands,
-      atermpp::indexed_set<state>& discovered,
+      indexed_set_for_states_type& discovered,
       DiscoverState discover_state = DiscoverState(),
       ExamineTransition examine_transition = ExamineTransition(),
       StartState start_state = StartState(),
@@ -1506,7 +1522,7 @@ std::cerr << "DFS EXPLORATION NOT THREAD SAFE\n";
     }
 
     /// \brief Returns a mapping containing all discovered states.
-    const atermpp::indexed_set<state>& state_map() const
+    const indexed_set_for_states_type& state_map() const
     {
       return m_discovered;
     }

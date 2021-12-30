@@ -678,7 +678,12 @@ struct state_space_generator
           //--- Workaround for Visual Studio 2019 ---//
           if (max_states_exceeded())
           {
-            mCRL2log(log::verbose) << "Explored the maximum number (" << options.max_states << ") of states, terminating." << std::endl;
+            static bool not_reported_yet=true;
+            if (not_reported_yet)
+            {
+              not_reported_yet=false;
+              mCRL2log(log::verbose) << "Explored the maximum number (" << options.max_states << ") of states, terminating." << std::endl;
+            }
             //--- Workaround for Visual Studio 2019 ---//
             // explorer.abort();
             static_cast<lps::abortable&>(explorer).abort();

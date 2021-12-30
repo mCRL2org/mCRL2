@@ -274,25 +274,20 @@ bool aterm_equals<N>::operator()(const _aterm& first, const _aterm& second) cons
     return true;
   }
 
-  if (first.function() == second.function())
+  // The arity is defined by the function symbol iff N is unchanged and the arity is N otherwise.
+  const std::size_t arity = (N == DynamicNumberOfArguments) ? first.function().arity() : N;
+
+  // Check whether the remaining arguments match
+  for (std::size_t i = 0; i < arity; ++i)
   {
-    // The arity is defined by the function symbol iff N is unchanged and the arity is N otherwise.
-    const std::size_t arity = (N == DynamicNumberOfArguments) ? first.function().arity() : N;
-
-    // Check whether the remaining arguments match
-    for (std::size_t i = 0; i < arity; ++i)
+    if (static_cast<const _term_appl&>(first).arg(i)
+          != static_cast<const _term_appl&>(second).arg(i))
     {
-      if (static_cast<const _term_appl&>(first).arg(i)
-            != static_cast<const _term_appl&>(second).arg(i))
-      {
-        return false;
-      }
+      return false;
     }
-
-    return true; // The function symbol and all arguments match.
   }
 
-  return false; // Function symbols are different.
+  return first.function() == second.function();
 }
 
 template<std::size_t N>
@@ -304,21 +299,16 @@ bool aterm_equals<N>::operator()(const _aterm& term, const function_symbol& symb
 template<std::size_t N>
 bool aterm_equals<N>::operator()(const _aterm& term, const function_symbol& symbol, unprotected_aterm arguments[]) const noexcept
 {
-  if (term.function() == symbol)
+  // Each argument should be equal.
+  for (std::size_t i = 0; i < symbol.arity(); ++i)
   {
-    // Each argument should be equal.
-    for (std::size_t i = 0; i < symbol.arity(); ++i)
+    if (static_cast<const _term_appl&>(term).arg(i) != arguments[i])
     {
-      if (static_cast<const _term_appl&>(term).arg(i) != arguments[i])
-      {
-        return false;
-      }
+      return false;
     }
-
-    return true;
   }
 
-  return false;
+  return term.function() == symbol;
 }
 
 template<std::size_t N>
@@ -329,46 +319,36 @@ inline bool aterm_equals<N>::operator()(const _aterm& term, const function_symbo
   // The end is only used for debugging to ensure that the arity and std::distance(it, end) match.
   mcrl2::utilities::mcrl2_unused(end);
 
-  if (term.function() == symbol)
+  const std::size_t arity = (N == DynamicNumberOfArguments) ? symbol.arity() : N;
+
+  // Each argument should be equal.
+  for (std::size_t i = 0; i < arity; ++i)
   {
-    const std::size_t arity = (N == DynamicNumberOfArguments) ? symbol.arity() : N;
-
-    // Each argument should be equal.
-    for (std::size_t i = 0; i < arity; ++i)
+    assert(it != end);
+    if (static_cast<const _term_appl&>(term).arg(i) != (*it))
     {
-      assert(it != end);
-      if (static_cast<const _term_appl&>(term).arg(i) != (*it))
-      {
-        return false;
-      }
-      ++it;
+      return false;
     }
-
-    assert(it == end);
-    return true;
+    ++it;
   }
 
-  return false;
+  assert(it == end);
+  return term.function() == symbol;
 }
 
 template<std::size_t N>
 bool aterm_equals_finite<N>::operator()(const _aterm& term, const function_symbol& symbol, std::array<unprotected_aterm, N> arguments) const noexcept
 {
-  if (term.function() == symbol)
+  // Each argument should be equal.
+  for (std::size_t i = 0; i < N; ++i)
   {
-    // Each argument should be equal.
-    for (std::size_t i = 0; i < N; ++i)
+    if (static_cast<const _aterm_appl<N>&>(term).arg(i) != arguments[i])
     {
-      if (static_cast<const _aterm_appl<N>&>(term).arg(i) != arguments[i])
-      {
-        return false;
-      }
+      return false;
     }
-
-    return true;
   }
 
-  return false;
+  return term.function() == symbol;
 }
 
 template<std::size_t I = 0,
@@ -391,7 +371,7 @@ template<std::size_t N>
 template<typename ...Args>
 bool aterm_equals_finite<N>::operator()(const _aterm& term, const function_symbol& symbol, const Args&... args) const noexcept
 {
-  return (term.function() == symbol && equal_args(static_cast<const _aterm_appl<8>&>(term), args...));
+  return term.function() == symbol && equal_args(static_cast<const _aterm_appl<8>&>(term), args...);
 }
 
 bool aterm_int_equals::operator()(const _aterm_int& first, const _aterm_int& second) const noexcept

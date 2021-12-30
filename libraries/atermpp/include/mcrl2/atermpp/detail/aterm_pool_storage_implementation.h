@@ -421,8 +421,9 @@ bool ATERM_POOL_STORAGE::emplace(aterm& term, Args&&... args)
 #ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
   term = atermpp::aterm(&(*it));
 #else
-  atermpp::unprotected_aterm result(&(*it));
-  term.swap(result);
+  // atermpp::unprotected_aterm result(&(*it));
+  // term.swap(result);
+  new (&term) atermpp::unprotected_aterm(&*it); // Seems somewhat faster than the previous two lines. 
 #endif
 
   if (added)
