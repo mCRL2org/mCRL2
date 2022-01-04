@@ -284,7 +284,6 @@ class symbolic_pbessolve_algorithm
         {
           stopwatch timer;
           U = Unext;
-          std::cerr << satcount(U) << std::endl;
           if (safe_variant)
           {
             Unext = intersect(U, m_G.safe_control_predecessors(alpha, U, Vtotal, U, Vplayer, I));
