@@ -257,13 +257,16 @@ class lts_lts_disk_builder: public lts_builder
         // Write the state labels in the order of their indices.
         for (std::size_t i = 0; i < state_map.size(); i++)
         {
-          if (timed)
+          if (is_aterm_balanced_tree(state_map[i]))  // in a parallel context not all positions may be filled.
           {
-            write_state_label(*stream, state_label_lts(remove_time_stamp(state_map[i])));
-          }
-          else
-          {
-            write_state_label(*stream, state_label_lts(state_map[i]));
+            if (timed)
+            {
+              write_state_label(*stream, state_label_lts(remove_time_stamp(state_map[i])));
+            }
+            else
+            {
+              write_state_label(*stream, state_label_lts(state_map[i]));
+            }
           }
         }
       }

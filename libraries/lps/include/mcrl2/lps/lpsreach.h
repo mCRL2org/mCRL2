@@ -261,7 +261,8 @@ class lpsreach_algorithm
 
       for (const data::variable& param: m_process_parameters)
       {
-        m_data_index.push_back(lps::data_expression_index(param.sort()));
+        // m_data_index.push_back(lps::data_expression_index(param.sort()));
+        m_data_index.emplace_back(param.sort());
       }
 
       std::vector<std::set<std::size_t>> groups = lps::compute_summand_groups(m_options.summand_groups, m_summand_patterns);

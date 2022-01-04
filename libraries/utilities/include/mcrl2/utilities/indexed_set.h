@@ -18,6 +18,53 @@ namespace mcrl2
 {
 namespace utilities
 {
+namespace detail
+{
+
+struct alignas (64) thread_control
+{
+  std::atomic<bool> busy_flag;
+  std::atomic<bool> forbidden_flag;
+  // For this thread the keys at positions reserved_numbers_begin until
+  // reserved_numbers_end have been reserved for this thread. 
+  std::size_t reserved_numbers_begin=0, reserved_numbers_end=0;
+
+  thread_control() = default;
+
+  thread_control(const thread_control& other)
+  {
+    // Do not copy the busy and forbidden flags. 
+    reserved_numbers_begin=other.reserved_numbers_begin;
+    reserved_numbers_end=other.reserved_numbers_end;
+  }
+
+  thread_control(thread_control&& other)
+  {
+    // Do not copy the busy and forbidden flags. 
+    reserved_numbers_begin=other.reserved_numbers_begin;
+    reserved_numbers_end=other.reserved_numbers_end;
+  }
+
+  thread_control& operator=(const thread_control& other)
+  {
+    // Do not copy the busy and forbidden flags. 
+    reserved_numbers_begin=other.reserved_numbers_begin;
+    reserved_numbers_end=other.reserved_numbers_end;
+    return *this;
+  }
+
+  thread_control& operator=(thread_control&& other)
+  {
+    // Do not copy the busy and forbidden flags. 
+    reserved_numbers_begin=other.reserved_numbers_begin;
+    reserved_numbers_end=other.reserved_numbers_end;
+    return *this;
+  }
+
+  
+};
+
+} // namespace detail
 
 /// \brief A set that assigns each element an unique index.
 template<typename Key,
@@ -25,19 +72,34 @@ template<typename Key,
          typename Equals = std::equal_to<Key>,
          typename Allocator = std::allocator<Key>,
          bool ThreadSafe = false,
-         typename KeyTable = std::deque< Key, std::allocator<Key> > >   // This can also be atermpp::deque. 
+         typename KeyTable = std::deque< Key, Allocator > > 
 class indexed_set
 {
 private:
+  // std::vector<std::atomic<std::size_t> > m_hashtable;
   std::vector<std::size_t> m_hashtable;
   KeyTable m_keys;
 
   /// \brief Mutex for the m_hashtable and m_keys data structures.
   mutable std::shared_ptr<std::mutex> m_mutex;
+  mutable std::vector<detail::thread_control> m_thread_control;
 
   Hash m_hasher;
   Equals m_equals;
 
+  void lock_shared(std::size_t thread_index) const;
+  void unlock_shared(std::size_t thread_index) const;
+  void lock_exclusive(std::size_t thread_index) const;
+  void unlock_exclusive(std::size_t thread_index) const;
+
+  /// \brief Check whether this index is refers to a valid object,
+  //         or to a reserved, non used spot. In the latter case false is returned.
+  bool check_index_validity(std::size_t index);
+  
+  /// \brief Reserve indices that this thread can use. Doing this 
+  ///        infrequently prevents obtaining an exclusive lock for the
+  ///        indexed set too often. 
+  void reserve_indices_for_this_thread(std::size_t thread_index);
   /// \brief Inserts the given (key, n) pair into the indexed set.
   std::size_t put_in_hashtable(const Key& key, std::size_t value);
 
@@ -68,20 +130,35 @@ public:
   /// \return Value indicating non existing element, equal to std::numeric_limits<std::size_t>::max(). 
   static constexpr size_type npos = std::numeric_limits<std::size_t>::max();
 
-  /// \brief Constructor of an empty indexed set. Starts with a hashtable of size 128.
-  indexed_set();
+  /// \brief Constructor of an empty indexed set. Starts with a hashtable of size 128 and assumes one single thread.
+  indexed_set()
+    : indexed_set(1)
+  {}
+
+  /// \brief Constructor of an empty indexed set. 
+  /// \detail With a single thread it delivers contiguous values for states.
+  ///         With multiple threads some indices may be skipped. Each thread
+  ///         reserves numbers, which it hands out. If a thread does not have
+  ///         the opportunity to hand out all numbers, holes in the contiguous
+  ///         numbering can occur. The holes are always of limited size. 
+  /// \param The number of threads that use this index set. 
+  indexed_set(std::size_t number_of_threads);
 
   /// \brief Constructor of an empty index set. Starts with a hashtable of the indicated size. 
+  /// \details With one thread the numbering is contiguous. With multiple threads limited size holes
+  ///          can occur in the numbering. 
+  /// \param The number of threads that use this index set. 
   /// \param initial_hashtable_size The initial size of the hashtable.
   /// \param hash The hash function.
   /// \param equals The comparison function for its elements.
-  indexed_set(std::size_t initial_hashtable_size,
+  indexed_set(std::size_t number_of_threads,
+    std::size_t initial_hashtable_size,
     const hasher& hash = hasher(),
     const key_equal& equals = key_equal());
 
   /// \brief Returns a reference to the mapped value.
   /// \details Returns an invalid value, larger or equal than the size of the indexed set, if there is no element with the given key.
-  size_type index(const key_type& key) const;
+  size_type index(const key_type& key, std::size_t thread_index=0) const;
 
   /// \brief Returns a reference to the mapped value.
   /// \details Returns an out_of_range exception if there is no element with the given key.
@@ -158,7 +235,7 @@ public:
   }
 
   /// \brief Clears the indexed set by removing all its elements. It is not guaranteed that the memory is released too. 
-  void clear();
+  void clear(std::size_t thread_index=0);
 
   /// \brief Insert a key in the indexed set and return its index. 
   /// \details If the element was already in the set, the resulting bool is true, and the existing index is returned.
@@ -166,19 +243,24 @@ public:
   /// \param  key The key to be inserted in the set.
   /// \return The index of the key and a boolean indicating whether the element was actually inserted.
   /// \threadsafe
-  std::pair<size_type, bool> insert(const key_type& key);
+  std::pair<size_type, bool> insert(const key_type& key, std::size_t thread_index=0);
 
   /// \brief Provides an iterator to the stored key in the indexed set.
   /// \param key The key that is sought.
   /// \return An iterator to the key, otherwise end().
-  const_iterator find(const key_type& key) const;
+  const_iterator find(const key_type& key, std::size_t thread_index=0) const;
 
   /// \brief The number of elements in the indexed set.
   /// \return The number of elements in the indexed set. 
   /// \threadsafe
   size_type size() const
   { 
-    return m_keys.size();
+    std::size_t correction=0;
+    for(detail::thread_control& c: m_thread_control)
+    {
+      correction=correction + c.reserved_numbers_end-c.reserved_numbers_begin;
+    }
+    return m_keys.size()-correction;
   }
 };
 

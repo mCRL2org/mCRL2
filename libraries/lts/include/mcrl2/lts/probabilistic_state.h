@@ -108,6 +108,14 @@ class probabilistic_state
       return m_probabilistic_state==other.m_probabilistic_state;
     }
 
+    /** \brief Standard equality operator.
+     *  \result Returns true iff the probabilistic states are equal.
+     */
+    bool operator!=(const probabilistic_state& other) const
+    {
+      return m_probabilistic_state!=other.m_probabilistic_state;
+    }
+
     /** \brief Swap this probabilistic state.
      * \param[in] s A probabilistic state. */
     void swap(probabilistic_state& s)

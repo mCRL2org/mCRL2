@@ -859,7 +859,8 @@ class explorer: public abortable
       : m_options(options_),
         m_global_rewr(construct_rewriter(lpsspec, m_options.remove_unused_rewrite_rules)),
         m_global_enumerator(m_global_rewr, lpsspec.data(), m_global_rewr, m_global_id_generator, false),
-        m_global_lpsspec(preprocess(lpsspec))
+        m_global_lpsspec(preprocess(lpsspec)),
+        m_discovered(m_options.number_of_threads)
     {
       const data::variable_list& params = m_global_lpsspec.process().process_parameters();
       m_process_parameters = std::vector<data::variable>(params.begin(), params.end());
@@ -951,7 +952,7 @@ class explorer: public abortable
         while (!todo->empty() && !m_must_abort)
         { 
           todo->choose_element(current_state);
-          std::size_t s_index = discovered.index(current_state);
+          std::size_t s_index = discovered.index(current_state,process_number);
           if (m_options.number_of_threads>0) m_exclusive_state_access.unlock();
           start_state(current_state, s_index);
           data::add_assignments(thread_sigma, m_process_parameters, current_state);
@@ -984,11 +985,11 @@ class explorer: public abortable
                   // if (m_options.number_of_threads>0) m_exclusive_indexed_set_access.lock();
                   for (const state& s1_: S1)
                   { 
-                    std::size_t k = discovered.index(s1_);
+                    std::size_t k = discovered.index(s1_,process_number);
                     if (k >= discovered.size())
                     { 
                       newly_found_states.push_back(s1_);
-                      k = discovered.insert(s1_).first;
+                      k = discovered.insert(s1_,process_number).first;
                       discover_state(s1_, k);
                     }
                     s1_index.push_back(k);
@@ -1005,13 +1006,13 @@ class explorer: public abortable
                   // if (m_options.number_of_threads>0) m_exclusive_indexed_set_access.lock();
                   if constexpr (Timed)
                   { 
-                    s1_index = discovered.index(s1);
+                    s1_index = discovered.index(s1,process_number);
                     if (s1_index >= discovered.size())
                     {   
                       const data::data_expression& t = current_state[m_n];
                       const data::data_expression& t1 = a.has_time() ? a.time() : t;
                       make_timed_state(state_, s1, t1);
-                      s1_index = discovered.insert(state_).first;
+                      s1_index = discovered.insert(state_,process_number).first;
                       // if (m_options.number_of_threads>0) m_exclusive_indexed_set_access.unlock();
                       discover_state(state_, s1_index);
                       newly_found_states.push_back(state_);
@@ -1019,7 +1020,7 @@ class explorer: public abortable
                   }
                   else
                   { 
-                    std::pair<std::size_t,bool> p = discovered.insert(s1);
+                    std::pair<std::size_t,bool> p = discovered.insert(s1,process_number);
                     // if (m_options.number_of_threads>0) m_exclusive_indexed_set_access.unlock();
                     s1_index=p.first;
                     if (p.second)  // Index is newly added. 

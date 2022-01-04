@@ -389,6 +389,12 @@ void make_term_balanced_tree(term_balanced_tree<Term>& result,
 /// \brief A term_balanced_tree with elements of type aterm.
 typedef term_balanced_tree<aterm> aterm_balanced_tree;
 
+
+inline bool is_aterm_balanced_tree(const aterm_appl& t)
+{
+  return t.defined() && (t.function()==g_empty || t.function()==g_tree_node);
+}
+
 template <class Term>
 std::string pp(const term_balanced_tree<Term> t)
 {
