@@ -2,10 +2,6 @@
 
 .. title:: Home
 
-.. image:: /_static/mcrl2.png
-   :align: center
-   :class: frontpage-logo
-
 .. _release: https://www.mcrl2.org/release/user_manual/download.html
 .. _version: download.html
 
