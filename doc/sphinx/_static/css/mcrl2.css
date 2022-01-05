@@ -1,0 +1,179 @@
+/**
+ * mCRL2 homepage specific updates of the sphinx theme.
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ */
+
+@import 'theme.css';
+
+/* -- non-standard classes -------------------------------------------------- */
+table.docutils { margin: 0 auto; }
+table.docutils td { padding: 0.3em 0; }
+table.docutils caption { font-family: sans-serif; padding-bottom: 0.5em; border-bottom: 1px solid black; }
+
+table.docutils.field-list { margin: 0; }
+
+.citation {
+  display: flex;
+  flex-wrap: wrap;
+}
+.citation dt {
+  width: 7rem;
+  background-color: transparent; /* cancel highlighting of targeted line */
+}
+.citation dd {
+  width: calc(100% - 7rem);
+  margin-left: 0;
+  margin-top: 0;
+}
+.citation dd > p {
+  margin-bottom: 0;
+}
+/* citations don't have square brackets around them, so we add them with CSS */
+.citation .brackets:before { content: "["; }
+.citation .brackets:after { content: "]"; }
+
+dl.function, dl.type, dl.member, dl.class  { border: solid 1px #80B090; } /* For reference manual */
+dl.function dt, dl.type dt, dl.member dt, dl.class dt {
+  background-color: #A0E0C0;
+  padding: 2px;
+  padding-left: 4px;
+}
+dl.function dd, dl.type dd, dl.member dd, dl.class dd {
+  margin-left: 30px;
+  margin-right: 30px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+div.admonition.collapse .admonition-title:hover { color: #406756; }
+div.admonition.collapse .admonition-title:after { content: ''; }
+div.admonition.collapse .admonition-title.collapsed:before { content: '▾ '; }
+div.admonition.collapse .admonition-title:before { content: '▴ '; }
+div.admonition.collapse .collapsed { display: none; }
+div.admonition.collapse.collapsed { display: block; }
+div.admonition.collapse .admonition-title { display: block; }
+div.admonition.collapse { border: 1px solid #e0e0e0; }
+
+div.tool-docs li { float: left; display: inline; width: 20%; }
+
+div.dparser .admonition-title {
+  font-family: monospace;
+}
+/*
+div.mainmenu {
+  background-color: white;
+}
+div.mainmenu ul {
+  display: table;
+  width: 100%;
+  margin: 0 6px;
+  padding: 0;
+  font-family: sans-serif;
+}
+div.mainmenu ul li {
+  float: left;
+  display: inline;
+  padding: 4px;
+  padding-right: 8px;
+}
+div.mainmenu ul li a {
+  color: #104020;
+}
+
+div.mainmenu ul li.search {
+  float: right;
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+*/
+
+.admonition.platform-specific {
+  background-position: top left;
+  background-repeat: no-repeat;
+  margin-top: 0px;
+  border: 1px solid #e0e0e0;
+  border-top: 0px;
+}
+div.platform-buttons {
+  border: 1px solid #e0e0e0;
+  border-bottom: 0px;
+  margin-bottom:0px;
+  padding:5px;
+  padding-bottom:0px;
+  height: 45px;
+}
+.platform-button {
+  display: block;
+  float: left;
+  padding: 0px;
+  margin: 0px;
+  height: 38px;
+  width: 38px;
+  opacity: 0.3;
+  filter: alpha(opacity=30); /* For IE8 and earlier */
+}
+.platform-button.platform-selected, .platform-button:hover {
+  opacity: 1;
+  filter: alpha(opacity=100);
+}
+.platform-button.win {
+  background-image: url('/_static/win-only.png');
+}
+.platform-button.mac {
+  background-image: url('/_static/mac-only.jpg');
+}
+.platform-button.linux {
+  background-image: url('/_static/linux-only.jpg');
+}
+.admonition.platform-specific .admonition-title {
+  display: none;
+}
+
+.admonition.admonition-release .admonition-title { display: none; }
+.admonition.admonition-release { margin: 1em 0; font-family: sans-serif; text-align: center; }
+
+/*
+.admonition.tip {
+    border: 1px solid #3030ff;
+    background-color: #d0d0ff;
+}
+*/
+
+.invisible {
+    display: none;
+}
+
+.smallcaps {
+    font-variant: small-caps;
+}
+
+table.libdoc strong {
+    display: block;
+    background-color: #f0f0f0;
+    padding: 4px;
+    font-family: Trebuchet MS, sans-serif;
+    font-size: x-large;
+    font-weight: normal;
+    border-bottom: 1px solid #406756;
+}
+
+table.libdoc td {
+    border: none;
+    vertical-align: top;
+}
+
+table.libdoc td p {
+    margin: 0px;
+    margin-bottom: -10px;
+}
+
+table.libdoc td p em {
+    padding-left: 20px;
+}
+
+/* -- custom layout ----------------------------------------------------------- */
+
+table.frontpage-table td { border: 0; margin: 0; padding: 0; }
+table.teamcity-blurb { margin-top: 1em; width: 100%; }
+table.teamcity-blurb td { border: 0; vertical-align: middle; }
+img.frontpage-logo { margin-top: 1.5em; }

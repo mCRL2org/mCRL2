@@ -7,10 +7,11 @@ from man import call
 from sphinx.util import logging
 from sphinx.util.console import colorize, term_width_line
 
-# Flag to globally disable generating Doxygen documentation as part of the
-# mCRL2 documentation.
+# Flag to globally disable generating Doxygen documentation and PDF documentation
+# for libraries as part of the mCRL2 documentation.
 # TODO remove this flag
 _GENERATE_DOXYGEN = False
+_GENERATE_PDF = False
 
 #
 # Some constants and abbreviations
@@ -204,7 +205,7 @@ def generate_rst(temppath):
       generate_library_rst(dirname)
     log_nonl('transformed all library XML into reST')
     _LOG.info('')
-  if os.path.exists(_PDFTAG):
+  if not _GENERATE_PDF or os.path.exists(_PDFTAG):
       _LOG.info('assuming generated PDF is up-to-date')
   else:
     open(_PDFTAG, 'w+').close()

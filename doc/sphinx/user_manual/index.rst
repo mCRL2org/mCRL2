@@ -2,7 +2,7 @@
 
 .. title:: Home
 
-.. image:: /_templates/mcrl2/static/mcrl2.png
+.. image:: /_static/mcrl2.png
    :align: center
    :class: frontpage-logo
 
@@ -15,7 +15,6 @@
 
 .. list-table::
    :class: frontpage-table
-   :widths: 40,60
 
    * - .. image:: /_static/book.*
           :align: left
@@ -111,7 +110,6 @@
 
 .. list-table::
    :class: teamcity-blurb
-   :widths: 13,87
 
    * - .. image:: /_static/teamcity.*
           :width: 75
