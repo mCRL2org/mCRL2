@@ -102,7 +102,7 @@ html_theme_options = {
     'logo_only': True,
     'style_external_links': True
 }
-html_logo = '_templates/mcrl2/static/mcrl2.png'
+html_logo = '_static/mcrl2.png'
 html_sidebars = {
    '**': ['localtoc.html', 'relations.html', 'sourcelink.html', 'searchbox.html'],
 }
@@ -115,6 +115,13 @@ html_static_path = ['_static']
 # Additional files that are copied as such to the output directory, for example the index.html.
 html_extra_path = ['_html']
 
+html_css_files = [
+    'css/mcrl2.css'
+]
+
+html_js_files = [
+    'js/mcrl2.js'
+]
 
 # Tweaking how the "last updated" is displayed
 today_fmt = '%d-%m-%Y'
