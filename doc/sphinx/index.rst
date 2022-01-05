@@ -118,9 +118,42 @@
      - The mCRL2 project uses `TeamCity <https://www.jetbrains.com/teamcity/>`_ for regression testing during
        development and building the daily snapshots.
 
+
 .. toctree::
+   :caption: Home
+   :maxdepth: 2
    :hidden:
 
-   user
-   build_instructions/boost
-   ../developer_manual/index
+   /introduction
+   /download
+   /support
+   /publications
+   /showcases
+
+.. toctree::
+   :caption: Using mCRL2
+   :maxdepth: 2
+   :hidden:
+   :glob:
+
+   /user_manual/tutorial/tutorial
+   /user_manual/language_reference/index
+   /user_manual/tools
+   /user_manual/build_instructions/index
+   /user_manual/articles/*
+
+.. toctree::
+   :caption: Development
+   :maxdepth: 2
+   :hidden:
+
+   /developer_manual/contributing
+   /developer_manual/developer
+   /developer_manual/repository
+   /developer_manual/teamcity_testing
+   /developer_manual/testing
+   /developer_manual/guidelines
+   /developer_manual/code_generation
+   /developer_manual/performance
+   /developer_manual/packaging
+   /developer_manual/cronjobs
