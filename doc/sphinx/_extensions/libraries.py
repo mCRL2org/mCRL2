@@ -7,6 +7,11 @@ from man import call
 from sphinx.util import logging
 from sphinx.util.console import colorize, term_width_line
 
+# Flag to globally disable generating Doxygen documentation as part of the
+# mCRL2 documentation.
+# TODO remove this flag
+_GENERATE_DOXYGEN = False
+
 #
 # Some constants and abbreviations
 #
@@ -185,13 +190,13 @@ def generate_rst(temppath):
 
   doxychanged = False
 
-  if os.path.exists(_DOXYTAG):
+  if not _GENERATE_DOXYGEN or os.path.exists(_DOXYTAG):
     _LOG.info('assuming Doxygen XML is up-to-date')
   else:
     open(_DOXYTAG, 'w+').close()
     doxychanged = True
     generate_xml()
-  if os.path.exists(_RSTTAG) and not doxychanged:
+  if not _GENERATE_DOXYGEN or (os.path.exists(_RSTTAG) and not doxychanged):
       _LOG.info('assuming Doxygen reST is up-to-date')
   else:
     open(_RSTTAG, 'w+').close()
