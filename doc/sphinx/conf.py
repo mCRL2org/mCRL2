@@ -11,7 +11,8 @@ from pathlib import Path
 import re
 # used to add paths for extensions
 import sys
-
+# The ReadTheDocs theme.
+import sphinx_rtd_theme
 
 # -- Path setup --------------------------------------------------------------
 
@@ -66,7 +67,8 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
-    'sphinxcontrib.tikz'
+    'sphinxcontrib.tikz',
+    'sphinx_rtd_theme'
 ]
 
 # Extension configuration
@@ -94,8 +96,12 @@ exclude_patterns = ['.svn', '.git', 'Thumbs.db', '.DS_Store']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'mcrl2'
-html_theme_path = ['_templates']
+html_theme = 'sphinx_rtd_theme'
+html_theme_options = {
+    'collapse_navigation': False,
+    'logo_only': True,
+    'style_external_links': True
+}
 html_logo = '_templates/mcrl2/static/mcrl2.png'
 html_sidebars = {
    '**': ['localtoc.html', 'relations.html', 'sourcelink.html', 'searchbox.html'],
@@ -108,6 +114,7 @@ html_static_path = ['_static']
 
 # Additional files that are copied as such to the output directory, for example the index.html.
 html_extra_path = ['_html']
+
 
 # Tweaking how the "last updated" is displayed
 today_fmt = '%d-%m-%Y'
