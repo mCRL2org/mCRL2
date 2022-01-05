@@ -1,15 +1,18 @@
-.. include:: ../_includes/toplevel.inc
+.. include:: /_includes/toplevel.inc
 
 .. The links to the release are hard coded in downloads-release.inc.
 .. The nightly builds are linked in downloads-nightly.inc.
 
-.. include:: ../_includes/downloads-release.inc
-.. include:: ../_includes/downloads-nightly.inc
+.. include:: /_includes/downloads-release.inc
+.. include:: /_includes/downloads-nightly.inc
 
 .. _download:
 
-Download the latest release of mCRL2
-====================================
+Download mCRL2
+==============
+
+Latest release
+--------------
 
 The mCRL2 toolkit can be run on a number of different platforms. For some
 platforms, precompiled binaries are available. The table below provides the
@@ -60,13 +63,6 @@ They are available here.
 
 If you are using a Linux distribution that is not listed, you may wish to try
 :ref:`compiling mCRL2 yourself <build>`.
-
-
-Known issues
-------------
-
-There are no major known issues at the moment.
-
 
 
 Previous releases
