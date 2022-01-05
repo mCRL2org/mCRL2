@@ -66,7 +66,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
-    'tikz'
+    'sphinxcontrib.tikz'
 ]
 
 # Extension configuration
