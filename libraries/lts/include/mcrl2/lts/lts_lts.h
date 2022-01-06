@@ -65,7 +65,8 @@ class state_label_lts : public atermpp::term_list< lps::state >
     */
     explicit state_label_lts(const lps::state& l)
     {
-      this->push_front(lps::state(l.begin(),l.size()));
+      // this->push_front(lps::state(l.begin(),l.size()));
+      this->push_front(l);
     }
 
     /** \brief Construct a state label out of list of balanced trees of data expressions, representing a state label.

@@ -27,41 +27,50 @@ struct alignas (64) thread_control
   std::atomic<bool> forbidden_flag;
   // For this thread the keys at positions reserved_numbers_begin until
   // reserved_numbers_end have been reserved for this thread. 
-  std::size_t reserved_numbers_begin=0, reserved_numbers_end=0;
 
   thread_control() = default;
 
-  thread_control(const thread_control& other)
+  thread_control(const thread_control& )
   {
     // Do not copy the busy and forbidden flags. 
-    reserved_numbers_begin=other.reserved_numbers_begin;
-    reserved_numbers_end=other.reserved_numbers_end;
   }
 
-  thread_control(thread_control&& other)
+  thread_control(thread_control&& )
   {
     // Do not copy the busy and forbidden flags. 
-    reserved_numbers_begin=other.reserved_numbers_begin;
-    reserved_numbers_end=other.reserved_numbers_end;
   }
 
-  thread_control& operator=(const thread_control& other)
+  thread_control& operator=(const thread_control& )
   {
     // Do not copy the busy and forbidden flags. 
-    reserved_numbers_begin=other.reserved_numbers_begin;
-    reserved_numbers_end=other.reserved_numbers_end;
     return *this;
   }
 
-  thread_control& operator=(thread_control&& other)
+  thread_control& operator=(thread_control&& )
   {
     // Do not copy the busy and forbidden flags. 
-    reserved_numbers_begin=other.reserved_numbers_begin;
-    reserved_numbers_end=other.reserved_numbers_end;
     return *this;
   }
 
-  
+};
+
+// The purpose of this wrapper is to allow copying of atomic size_t's. 
+struct atomic_size_t_wrapper: public std::atomic<std::size_t>
+{
+  atomic_size_t_wrapper()
+   : std::atomic<std::size_t>(0)
+  {}
+
+  atomic_size_t_wrapper(const atomic_size_t_wrapper& other)
+  {
+    store(other.load());
+  }
+
+  atomic_size_t_wrapper& operator=(const atomic_size_t_wrapper& other)
+  {
+    store(other.load());
+    return *this;
+  }
 };
 
 } // namespace detail
@@ -76,13 +85,16 @@ template<typename Key,
 class indexed_set
 {
 private:
-  // std::vector<std::atomic<std::size_t> > m_hashtable;
   std::vector<std::size_t> m_hashtable;
   KeyTable m_keys;
 
   /// \brief Mutex for the m_hashtable and m_keys data structures.
   mutable std::shared_ptr<std::mutex> m_mutex;
   mutable std::vector<detail::thread_control> m_thread_control;
+  /// m_next_index indicates the next index that 
+  //  has not yet been used. This allows to increase m_keys in 
+  //  large steps, avoiding exclusive access too often.  
+  detail::atomic_size_t_wrapper m_next_index;
 
   Hash m_hasher;
   Equals m_equals;
@@ -92,16 +104,12 @@ private:
   void lock_exclusive(std::size_t thread_index) const;
   void unlock_exclusive(std::size_t thread_index) const;
 
-  /// \brief Check whether this index is refers to a valid object,
-  //         or to a reserved, non used spot. In the latter case false is returned.
-  bool check_index_validity(std::size_t index);
-  
   /// \brief Reserve indices that this thread can use. Doing this 
   ///        infrequently prevents obtaining an exclusive lock for the
   ///        indexed set too often. 
   void reserve_indices_for_this_thread(std::size_t thread_index);
   /// \brief Inserts the given (key, n) pair into the indexed set.
-  std::size_t put_in_hashtable(const Key& key, std::size_t value);
+  std::size_t put_in_hashtable(const Key& key, std::size_t value, std::size_t& new_position);
 
   /// \brief Resizes the hash table to twice its current size.
   inline void resize_hashtable();
@@ -174,64 +182,94 @@ public:
 
   /// \brief Forward iterator which runs through the elements from the lowest to the largest number.
   /// \details Complexity is constant per operation.
-  iterator begin() 
+  iterator begin(std::size_t thread_index=0) 
   { 
-    return m_keys.begin(); 
+    lock_shared(thread_index);
+    const_iterator i=m_keys.begin();
+    unlock_shared(thread_index);
+    return i;
   }
 
   /// \brief End of the forward iterator.
-  iterator end()
+  iterator end(std::size_t thread_index=0)
   { 
-    return m_keys.end(); 
+    lock_shared(thread_index);
+    const_iterator i=m_keys.end()+m_next_index-m_keys.size();
+    unlock_shared(thread_index);
+    return i;
   }
 
   /// \brief Forward iterator which runs through the elements from the lowest to the largest number.
   /// \details Complexity is constant per operation.
-  const_iterator begin() const
+  const_iterator begin(std::size_t thread_index=0) const
   {
-    return m_keys.begin();
+    lock_shared(thread_index);
+    const_iterator i=m_keys.begin();
+    unlock_shared(thread_index);
+    return i;
   }
 
   /// \brief End of the forward iterator.
-  const_iterator end() const
+  const_iterator end(std::size_t thread_index=0) const
   {
-    return m_keys.end();
+    lock_shared(thread_index);
+    const_iterator i=m_keys.end()+m_next_index-m_keys.size();
+    unlock_shared(thread_index);
+    return i;
   }
 
   /// \brief const_iterator going through the elements in the set numbered from zero upwards. 
-  const_iterator cbegin() const
+  const_iterator cbegin(std::size_t thread_index=0) const
   { 
-    return m_keys.cbegin(); 
+    lock_shared(thread_index);
+    const_iterator i=m_keys.begin();
+    unlock_shared(thread_index);
+    return i;
   }
 
   /// \brief End of the forward const_iterator. 
-  const_iterator cend() const 
+  const_iterator cend(std::size_t thread_index=0) const 
   { 
-    return m_keys.cend(); 
+    lock_shared(thread_index);
+    const_iterator i=m_keys.cend()+m_next_index-m_keys.size();
+    unlock_shared(thread_index);
+    return i;
   }
 
   /// \brief Reverse iterator going through the elements in the set from the largest to the smallest index. 
-  iterator rbegin() 
+  reverse_iterator rbegin(std::size_t thread_index=0) 
   { 
-    return m_keys.rbegin(); 
+    lock_shared(thread_index);
+    reverse_iterator i=m_keys.rbegin()+m_next_index-m_keys.size();
+    unlock_shared(thread_index);
+    return i;
   }
 
   /// \brief End of the reverse iterator. 
-  iterator rend()
+  reverse_iterator rend(std::size_t thread_index=0)
   { 
-    return m_keys.rend(); 
+    lock_shared(thread_index);
+    reverse_iterator i=m_keys.cend();
+    unlock_shared(thread_index);
+    return i;
   }
 
   /// \brief Reverse const_iterator going through the elements from the highest to the lowest numbered element. 
-  const_iterator crbegin() const
+  const_reverse_iterator crbegin(std::size_t thread_index=0) const
   { 
-    return m_keys.crbegin(); 
+    lock_shared(thread_index);
+    const_reverse_iterator i=m_keys.crbegin()+m_next_index-m_keys.size();
+    unlock_shared(thread_index);
+    return i;
   }
 
   /// \brief End of the reverse const_iterator. 
-  const_iterator crend() const 
+  const_reverse_iterator crend(std::size_t thread_index=0) const 
   { 
-    return m_keys.crend(); 
+    lock_shared(thread_index);
+    reverse_iterator i=m_keys.crend();
+    unlock_shared(thread_index);
+    return i;
   }
 
   /// \brief Clears the indexed set by removing all its elements. It is not guaranteed that the memory is released too. 
@@ -253,14 +291,12 @@ public:
   /// \brief The number of elements in the indexed set.
   /// \return The number of elements in the indexed set. 
   /// \threadsafe
-  size_type size() const
+  size_type size(std::size_t thread_index=0) const
   { 
-    std::size_t correction=0;
-    for(detail::thread_control& c: m_thread_control)
-    {
-      correction=correction + c.reserved_numbers_end-c.reserved_numbers_begin;
-    }
-    return m_keys.size()-correction;
+    lock_shared(thread_index);
+    size_type result=m_next_index;
+    unlock_shared(thread_index);
+    return result;
   }
 };
 
