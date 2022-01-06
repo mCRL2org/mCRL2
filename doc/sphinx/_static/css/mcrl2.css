@@ -32,19 +32,6 @@ table.docutils.field-list { margin: 0; }
 .citation .brackets:before { content: "["; }
 .citation .brackets:after { content: "]"; }
 
-dl.function, dl.type, dl.member, dl.class  { border: solid 1px #80B090; } /* For reference manual */
-dl.function dt, dl.type dt, dl.member dt, dl.class dt {
-  background-color: #A0E0C0;
-  padding: 2px;
-  padding-left: 4px;
-}
-dl.function dd, dl.type dd, dl.member dd, dl.class dd {
-  margin-left: 30px;
-  margin-right: 30px;
-  margin-top: 10px;
-  margin-bottom: 10px;
-}
-
 div.admonition.collapse .admonition-title:hover { color: #406756; }
 div.admonition.collapse .admonition-title:after { content: ''; }
 div.admonition.collapse .admonition-title.collapsed:before { content: '▾ '; }
