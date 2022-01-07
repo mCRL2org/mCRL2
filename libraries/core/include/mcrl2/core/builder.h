@@ -177,7 +177,7 @@ class update_apply_builder_arg1: public Builder<update_apply_builder_arg1<Builde
 
   using super::enter;
   using super::leave;
-	using super::apply;
+  using super::apply;
   using super::update;
   
   using argument_type = typename Function::argument_type; ///< The argument_type is required to restrict the overloads of apply(x) to that type.
