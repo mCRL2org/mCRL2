@@ -848,7 +848,7 @@ class yaled_timed: public state_formula
     }
 
     /// \brief Constructor.
-    yaled_timed(const data::data_expression& time_stamp)
+    explicit yaled_timed(const data::data_expression& time_stamp)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateYaledTimed(), time_stamp))
     {}
 
@@ -964,7 +964,7 @@ class delay_timed: public state_formula
     }
 
     /// \brief Constructor.
-    delay_timed(const data::data_expression& time_stamp)
+    explicit delay_timed(const data::data_expression& time_stamp)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateDelayTimed(), time_stamp))
     {}
 
