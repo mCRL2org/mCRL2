@@ -35,9 +35,13 @@ static constexpr float max_load_factor = 0.75f; ///< The load factor before the 
 
 static constexpr std::size_t PRIME_NUMBER = 999953;
 
+#ifndef NDEBUG  // Numbers are small in debug mode for more intensive checks. 
+static constexpr std::size_t minimal_hashtable_size = 8; 
+static constexpr std::size_t RESERVATION_SIZE = 8;
+#else
 static constexpr std::size_t minimal_hashtable_size = 1024;
-
-static constexpr std::size_t RESERVATION_SIZE= 1024;
+static constexpr std::size_t RESERVATION_SIZE = 1024;
+#endif
 
 static_assert(RESERVATION_SIZE <= minimal_hashtable_size);
 static_assert(minimal_hashtable_size>=8);       ///< With a max_load of 0.75 the minimal size of the hashtable must be 8.
@@ -54,7 +58,8 @@ inline void INDEXED_SET::reserve_indices_for_this_thread(std::size_t thread_inde
   if (m_next_index+m_thread_control.size()>=m_keys.size())   // otherwise another process already reserved entries, and nothing needs to be done. 
   {
     assert(thread_index<m_thread_control.size());
-    assert(m_next_index==m_keys.size());
+std::cerr << "AAAA " << m_next_index << "     " << m_keys.size() << "\n";
+    assert(m_next_index<=m_keys.size());
     m_keys.resize(m_keys.size()+detail::RESERVATION_SIZE);
 
     while ((detail::max_load_factor * m_hashtable.size()) < m_keys.size())
@@ -319,6 +324,7 @@ inline std::pair<typename INDEXED_SET::size_type, bool> INDEXED_SET::insert(cons
 {
   lock_shared(thread_index);
   assert(m_next_index<=m_keys.size());
+std::cerr << "BBB " << m_next_index << "    " << m_thread_control.size() << "    " << m_keys.size() << "\n";
   if (m_next_index+m_thread_control.size()>=m_keys.size())
   {
     unlock_shared(thread_index);
