@@ -37,7 +37,7 @@ class untyped_possible_sorts: public sort_expression
     }
 
     /// \brief Constructor.
-    untyped_possible_sorts(const sort_expression_list& sorts)
+    explicit untyped_possible_sorts(const sort_expression_list& sorts)
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedSortsPossible(), sorts))
     {}
 

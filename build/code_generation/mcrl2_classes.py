@@ -470,17 +470,21 @@ class Constructor:
         text = re.sub('<ATERM>'              , self.aterm              , text)
         text = re.sub('<PARAMETERS>'         , self.parameters         , text)
         text = re.sub('<TEMPLATE_PARAMETERS>', self.template_parameters, text)
+        if len(self.parameters)>0 and self.parameters.find(',')<0:     # There is only one parameter. Add explicit. 
+            text = re.sub('<EXPLICIT>','explicit ',text)
+        else:
+            text = re.sub('<EXPLICIT>','',text)
         return text
 
     def inline_definition(self):
         if self.superclass == 'atermpp::aterm_appl':
             text = r'''    /// \\\\brief Constructor.
-    <CLASSNAME>(<ARGUMENTS>)
+    <EXPLICIT><CLASSNAME>(<ARGUMENTS>)
       : atermpp::aterm_appl(core::detail::function_symbol_<ATERM>(), <PARAMETERS>)
     {}'''
         else:
             text = r'''    /// \\\\brief Constructor.
-    <CLASSNAME>(<ARGUMENTS>)
+    <EXPLICIT><CLASSNAME>(<ARGUMENTS>)
       : <SUPERCLASS>(atermpp::aterm_appl(core::detail::function_symbol_<ATERM>(), <PARAMETERS>))
     {}'''
         return self.expand_text(text)
@@ -493,12 +497,12 @@ class Constructor:
     def definition(self, inline = False):
         if self.superclass == 'atermpp::aterm_appl':
             text = r'''    /// \\\\brief Constructor.
-    <INLINE><CLASSNAME>::<CLASSNAME>(<ARGUMENTS>)
+    <EXPLICIT><INLINE><CLASSNAME>::<CLASSNAME>(<ARGUMENTS>)
       : atermpp::aterm_appl(core::detail::function_symbol_<ATERM>(), <PARAMETERS>)
     {}'''
         else:
             text = r'''    /// \\\\brief Constructor.
-    <INLINE><CLASSNAME>::<CLASSNAME>(<ARGUMENTS>)
+    <EXPLICIT><INLINE><CLASSNAME>::<CLASSNAME>(<ARGUMENTS>)
       : <SUPERCLASS>(atermpp::aterm_appl(core::detail::function_symbol_<ATERM>(), <PARAMETERS>))
     {}'''
         if inline:

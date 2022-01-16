@@ -227,7 +227,7 @@ class not_: public boolean_expression
     }
 
     /// \brief Constructor.
-    not_(const boolean_expression& operand)
+    explicit not_(const boolean_expression& operand)
       : boolean_expression(atermpp::aterm_appl(core::detail::function_symbol_BooleanNot(), operand))
     {}
 

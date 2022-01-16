@@ -39,7 +39,7 @@ class action_name_multiset: public atermpp::aterm_appl
     }
 
     /// \brief Constructor.
-    action_name_multiset(const core::identifier_string_list& names)
+    explicit action_name_multiset(const core::identifier_string_list& names)
       : atermpp::aterm_appl(core::detail::function_symbol_MultActName(), names)
     {}
 

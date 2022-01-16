@@ -479,7 +479,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       }
       else
       {
-        MActs.push_front(A.names());
+        MActs.push_front(mcrl2::process::action_name_multiset(A.names()));
       }
     }
     return allow(x.allow_set(), (*this).apply(x.operand()));

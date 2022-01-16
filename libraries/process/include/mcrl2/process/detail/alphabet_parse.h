@@ -188,7 +188,7 @@ communication_expression_list parse_comm_set(const std::string& text)
   for (const std::string& word: set_elements(text))
   {
     auto [lhs, rhs] = split_arrow(word);
-    result.emplace_back(make_identifier_string_list(split_bar(lhs)), core::identifier_string(rhs));
+    result.emplace_back(action_name_multiset(make_identifier_string_list(split_bar(lhs))), core::identifier_string(rhs));
   }
   return communication_expression_list(result.begin(), result.end());
 }

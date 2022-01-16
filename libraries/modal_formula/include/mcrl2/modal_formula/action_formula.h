@@ -244,7 +244,7 @@ class not_: public action_formula
     }
 
     /// \brief Constructor.
-    not_(const action_formula& operand)
+    explicit not_(const action_formula& operand)
       : action_formula(atermpp::aterm_appl(core::detail::function_symbol_ActNot(), operand))
     {}
 
@@ -715,7 +715,7 @@ class multi_action: public action_formula
     }
 
     /// \brief Constructor.
-    multi_action(const process::action_list& actions)
+    explicit multi_action(const process::action_list& actions)
       : action_formula(atermpp::aterm_appl(core::detail::function_symbol_ActMultAct(), actions))
     {}
 

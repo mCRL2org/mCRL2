@@ -39,7 +39,7 @@ class basic_sort: public sort_expression
     }
 
     /// \brief Constructor.
-    basic_sort(const core::identifier_string& name)
+    explicit basic_sort(const core::identifier_string& name)
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortId(), name))
     {}
 

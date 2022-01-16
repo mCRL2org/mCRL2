@@ -257,7 +257,7 @@ class trans: public regular_formula
     }
 
     /// \brief Constructor.
-    trans(const regular_formula& operand)
+    explicit trans(const regular_formula& operand)
       : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_RegTrans(), operand))
     {}
 
@@ -320,7 +320,7 @@ class trans_or_nil: public regular_formula
     }
 
     /// \brief Constructor.
-    trans_or_nil(const regular_formula& operand)
+    explicit trans_or_nil(const regular_formula& operand)
       : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_RegTransOrNil(), operand))
     {}
 

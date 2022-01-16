@@ -3978,7 +3978,7 @@ void mcrl2::data::data_type_checker::read_sort(const sort_expression& sort_expr)
 {
   if (is_basic_sort(sort_expr))
   {
-    check_basic_sort_is_declared(down_cast<basic_sort>(sort_expr).name());
+    check_basic_sort_is_declared(down_cast<basic_sort>(sort_expr));
     return;
   }
 

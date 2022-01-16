@@ -69,7 +69,7 @@ class structured_sort: public sort_expression
     }
 
     /// \brief Constructor.
-    structured_sort(const structured_sort_constructor_list& constructors)
+    explicit structured_sort(const structured_sort_constructor_list& constructors)
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortStruct(), constructors))
     {}
 

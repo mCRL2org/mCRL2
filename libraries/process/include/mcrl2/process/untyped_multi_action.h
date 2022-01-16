@@ -37,7 +37,7 @@ class untyped_multi_action: public atermpp::aterm_appl
     }
 
     /// \brief Constructor.
-    untyped_multi_action(const data::untyped_data_parameter_list& actions)
+    explicit untyped_multi_action(const data::untyped_data_parameter_list& actions)
       : atermpp::aterm_appl(core::detail::function_symbol_UntypedMultiAction(), actions)
     {}
 

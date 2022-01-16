@@ -256,7 +256,7 @@ class not_: public state_formula
     }
 
     /// \brief Constructor.
-    not_(const state_formula& operand)
+    explicit not_(const state_formula& operand)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateNot(), operand))
     {}
 

@@ -37,7 +37,7 @@ class untyped_sort_variable: public sort_expression
     }
 
     /// \brief Constructor.
-    untyped_sort_variable(const atermpp::aterm_int& value)
+    explicit untyped_sort_variable(const atermpp::aterm_int& value)
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedSortVariable(), value))
     {}
 

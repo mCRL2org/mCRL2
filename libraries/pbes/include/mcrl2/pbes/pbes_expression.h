@@ -226,7 +226,7 @@ class not_: public pbes_expression
     }
 
     /// \brief Constructor.
-    not_(const pbes_expression& operand)
+    explicit not_(const pbes_expression& operand)
       : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESNot(), operand))
     {}
 
