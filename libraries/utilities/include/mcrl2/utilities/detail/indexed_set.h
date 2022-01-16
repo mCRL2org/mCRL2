@@ -58,7 +58,6 @@ inline void INDEXED_SET::reserve_indices_for_this_thread(std::size_t thread_inde
   if (m_next_index+m_thread_control.size()>=m_keys.size())   // otherwise another process already reserved entries, and nothing needs to be done. 
   {
     assert(thread_index<m_thread_control.size());
-std::cerr << "AAAA " << m_next_index << "     " << m_keys.size() << "\n";
     assert(m_next_index<=m_keys.size());
     m_keys.resize(m_keys.size()+detail::RESERVATION_SIZE);
 
