@@ -76,7 +76,7 @@ core::identifier_string iff_name()
 
 function_symbol iff()
 {
-  static function_symbol iff(iff_name(), make_function_sort(sort_bool::bool_(), sort_bool::bool_(), sort_bool::bool_()));
+  static function_symbol iff(iff_name(), make_function_sort_(sort_bool::bool_(), sort_bool::bool_(), sort_bool::bool_()));
   return iff;
 }
 

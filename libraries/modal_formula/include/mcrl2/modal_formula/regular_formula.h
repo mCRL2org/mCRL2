@@ -144,9 +144,10 @@ class seq: public regular_formula
 
 /// \brief Make_seq constructs a new term into a given address.
 /// \ \param t The reference into which the new seq is constructed. 
-inline void make_seq(seq& t, const regular_formula& left, const regular_formula& right)
+template <class... ARGUMENTS>
+inline void make_seq(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_RegSeq(), left, right);
+  make_term_appl(t, core::detail::function_symbol_RegSeq(), args...);
 }
 
 /// \brief Test for a seq expression
@@ -219,9 +220,10 @@ class alt: public regular_formula
 
 /// \brief Make_alt constructs a new term into a given address.
 /// \ \param t The reference into which the new alt is constructed. 
-inline void make_alt(alt& t, const regular_formula& left, const regular_formula& right)
+template <class... ARGUMENTS>
+inline void make_alt(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_RegAlt(), left, right);
+  make_term_appl(t, core::detail::function_symbol_RegAlt(), args...);
 }
 
 /// \brief Test for a alt expression
@@ -271,7 +273,7 @@ class trans: public regular_formula
     }
 
     /// \brief Constructor.
-    trans(const regular_formula& operand)
+    explicit trans(const regular_formula& operand)
       : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_RegTrans(), operand))
     {}
 
@@ -289,9 +291,10 @@ class trans: public regular_formula
 
 /// \brief Make_trans constructs a new term into a given address.
 /// \ \param t The reference into which the new trans is constructed. 
-inline void make_trans(trans& t, const regular_formula& operand)
+template <class... ARGUMENTS>
+inline void make_trans(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_RegTrans(), operand);
+  make_term_appl(t, core::detail::function_symbol_RegTrans(), args...);
 }
 
 /// \brief Test for a trans expression
@@ -341,7 +344,7 @@ class trans_or_nil: public regular_formula
     }
 
     /// \brief Constructor.
-    trans_or_nil(const regular_formula& operand)
+    explicit trans_or_nil(const regular_formula& operand)
       : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_RegTransOrNil(), operand))
     {}
 
@@ -359,9 +362,10 @@ class trans_or_nil: public regular_formula
 
 /// \brief Make_trans_or_nil constructs a new term into a given address.
 /// \ \param t The reference into which the new trans_or_nil is constructed. 
-inline void make_trans_or_nil(trans_or_nil& t, const regular_formula& operand)
+template <class... ARGUMENTS>
+inline void make_trans_or_nil(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_RegTransOrNil(), operand);
+  make_term_appl(t, core::detail::function_symbol_RegTransOrNil(), args...);
 }
 
 /// \brief Test for a trans_or_nil expression
@@ -444,9 +448,10 @@ class untyped_regular_formula: public regular_formula
 
 /// \brief Make_untyped_regular_formula constructs a new term into a given address.
 /// \ \param t The reference into which the new untyped_regular_formula is constructed. 
-inline void make_untyped_regular_formula(untyped_regular_formula& t, const core::identifier_string& name, const regular_formula& left, const regular_formula& right)
+template <class... ARGUMENTS>
+inline void make_untyped_regular_formula(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_UntypedRegFrm(), name, left, right);
+  make_term_appl(t, core::detail::function_symbol_UntypedRegFrm(), args...);
 }
 
 /// \brief Test for a untyped_regular_formula expression

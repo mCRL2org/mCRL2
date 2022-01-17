@@ -128,6 +128,7 @@ struct my_assignment_sequence_substitution
   using variable_type = variable;
   using expression_type = data_expression;
   using argument_type = variable;
+  using result_type = data_expression;
 
   assignment_list assignments;
 
@@ -267,6 +268,7 @@ void test_mutable_substitution_composer()
 struct my_sort_substitution
 {
   using argument_type = data::basic_sort;
+  using result_type = data::sort_expression;
 
   data::sort_expression operator()(const data::basic_sort& s)
   {

@@ -41,7 +41,6 @@ std::string SPEC =
 void test_remove_parameters()
 {
   specification spec = parse_linear_process_specification(SPEC);
-
   // remove parameters
   std::set<data::variable> to_be_removed;
   to_be_removed.insert(variable("s", sort_pos::pos()));
@@ -64,7 +63,7 @@ void test_instantiate_free_variables()
   algorithm.instantiate_free_variables();
 }
 
-void test_remove_rundant_assignments()
+void test_remove_redundant_assignments()
 {
   std::string lpsspec_text =
     "act  a;\n"
@@ -102,5 +101,5 @@ BOOST_AUTO_TEST_CASE(test_main)
 {
   test_remove_parameters();
   test_instantiate_free_variables();
-  test_remove_rundant_assignments();
+  test_remove_redundant_assignments();
 }

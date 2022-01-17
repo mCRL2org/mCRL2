@@ -224,8 +224,8 @@ BOOST_AUTO_TEST_CASE(exists_test)
 BOOST_AUTO_TEST_CASE(set_comprehension_test)
 {
   basic_sort s("S");
-  variable x("x", make_function_sort(s,sort_bool::bool_()));
-  data::function_symbol f("f", make_function_sort(s, sort_bool::bool_()));
+  variable x("x", make_function_sort_(s,sort_bool::bool_()));
+  data::function_symbol f("f", make_function_sort_(s, sort_bool::bool_()));
   data_expression e(sort_set::set_comprehension(s, x));
   BOOST_CHECK(e.sort() == sort_set::set_(s));
 }
@@ -233,7 +233,7 @@ BOOST_AUTO_TEST_CASE(set_comprehension_test)
 BOOST_AUTO_TEST_CASE(bag_comprehension_test)
 {
   basic_sort s("S");
-  data::function_symbol f("f", make_function_sort(s, sort_nat::nat()));
+  data::function_symbol f("f", make_function_sort_(s, sort_nat::nat()));
   data_expression e(sort_bag::bag_comprehension(s, f));
   BOOST_CHECK(e.sort() == sort_bag::bag(s));
 }

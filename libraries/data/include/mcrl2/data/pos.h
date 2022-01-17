@@ -109,7 +109,7 @@ namespace mcrl2 {
       inline
       const function_symbol& cdub()
       {
-        static function_symbol cdub(cdub_name(), make_function_sort(sort_bool::bool_(), pos(), pos()));
+        static function_symbol cdub(cdub_name(), make_function_sort_(sort_bool::bool_(), pos(), pos()));
         return cdub;
       }
 
@@ -194,7 +194,7 @@ namespace mcrl2 {
       inline
       const function_symbol& maximum()
       {
-        static function_symbol maximum(maximum_name(), make_function_sort(pos(), pos(), pos()));
+        static function_symbol maximum(maximum_name(), make_function_sort_(pos(), pos(), pos()));
         return maximum;
       }
 
@@ -247,7 +247,7 @@ namespace mcrl2 {
       inline
       const function_symbol& minimum()
       {
-        static function_symbol minimum(minimum_name(), make_function_sort(pos(), pos(), pos()));
+        static function_symbol minimum(minimum_name(), make_function_sort_(pos(), pos(), pos()));
         return minimum;
       }
 
@@ -300,7 +300,7 @@ namespace mcrl2 {
       inline
       const function_symbol& succ()
       {
-        static function_symbol succ(succ_name(), make_function_sort(pos(), pos()));
+        static function_symbol succ(succ_name(), make_function_sort_(pos(), pos()));
         return succ;
       }
 
@@ -352,7 +352,7 @@ namespace mcrl2 {
       inline
       const function_symbol& pos_predecessor()
       {
-        static function_symbol pos_predecessor(pos_predecessor_name(), make_function_sort(pos(), pos()));
+        static function_symbol pos_predecessor(pos_predecessor_name(), make_function_sort_(pos(), pos()));
         return pos_predecessor;
       }
 
@@ -404,7 +404,7 @@ namespace mcrl2 {
       inline
       const function_symbol& plus()
       {
-        static function_symbol plus(plus_name(), make_function_sort(pos(), pos(), pos()));
+        static function_symbol plus(plus_name(), make_function_sort_(pos(), pos(), pos()));
         return plus;
       }
 
@@ -457,7 +457,7 @@ namespace mcrl2 {
       inline
       const function_symbol& add_with_carry()
       {
-        static function_symbol add_with_carry(add_with_carry_name(), make_function_sort(sort_bool::bool_(), pos(), pos(), pos()));
+        static function_symbol add_with_carry(add_with_carry_name(), make_function_sort_(sort_bool::bool_(), pos(), pos(), pos()));
         return add_with_carry;
       }
 
@@ -511,7 +511,7 @@ namespace mcrl2 {
       inline
       const function_symbol& times()
       {
-        static function_symbol times(times_name(), make_function_sort(pos(), pos(), pos()));
+        static function_symbol times(times_name(), make_function_sort_(pos(), pos(), pos()));
         return times;
       }
 
@@ -564,7 +564,7 @@ namespace mcrl2 {
       inline
       const function_symbol& powerlog2_pos()
       {
-        static function_symbol powerlog2_pos(powerlog2_pos_name(), make_function_sort(pos(), pos()));
+        static function_symbol powerlog2_pos(powerlog2_pos_name(), make_function_sort_(pos(), pos()));
         return powerlog2_pos;
       }
 

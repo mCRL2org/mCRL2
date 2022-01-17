@@ -75,7 +75,7 @@ namespace mcrl2 {
       inline
       function_symbol constructor(const sort_expression& s)
       {
-        function_symbol constructor(constructor_name(), make_function_sort(make_function_sort(s, sort_bool::bool_()), sort_fset::fset(s), set_(s)));
+        function_symbol constructor(constructor_name(), make_function_sort_(make_function_sort_(s, sort_bool::bool_()), sort_fset::fset(s), set_(s)));
         return constructor;
       }
 
@@ -162,7 +162,7 @@ namespace mcrl2 {
       inline
       function_symbol set_fset(const sort_expression& s)
       {
-        function_symbol set_fset(set_fset_name(), make_function_sort(sort_fset::fset(s), set_(s)));
+        function_symbol set_fset(set_fset_name(), make_function_sort_(sort_fset::fset(s), set_(s)));
         return set_fset;
       }
 
@@ -214,7 +214,7 @@ namespace mcrl2 {
       inline
       function_symbol set_comprehension(const sort_expression& s)
       {
-        function_symbol set_comprehension(set_comprehension_name(), make_function_sort(make_function_sort(s, sort_bool::bool_()), set_(s)));
+        function_symbol set_comprehension(set_comprehension_name(), make_function_sort_(make_function_sort_(s, sort_bool::bool_()), set_(s)));
         return set_comprehension;
       }
 
@@ -265,7 +265,7 @@ namespace mcrl2 {
       function_symbol in(const sort_expression& , const sort_expression& s0, const sort_expression& s1)
       {
         sort_expression target_sort(sort_bool::bool_());
-        function_symbol in(in_name(), make_function_sort(s0, s1, target_sort));
+        function_symbol in(in_name(), make_function_sort_(s0, s1, target_sort));
         return in;
       }
 
@@ -319,7 +319,7 @@ namespace mcrl2 {
       inline
       function_symbol complement(const sort_expression& s)
       {
-        function_symbol complement(complement_name(), make_function_sort(set_(s), set_(s)));
+        function_symbol complement(complement_name(), make_function_sort_(set_(s), set_(s)));
         return complement;
       }
 
@@ -383,7 +383,7 @@ namespace mcrl2 {
           throw mcrl2::runtime_error("cannot compute target sort for union_ with domain sorts " + pp(s0) + ", " + pp(s1));
         }
 
-        function_symbol union_(union_name(), make_function_sort(s0, s1, target_sort));
+        function_symbol union_(union_name(), make_function_sort_(s0, s1, target_sort));
         return union_;
       }
 
@@ -449,7 +449,7 @@ namespace mcrl2 {
           throw mcrl2::runtime_error("cannot compute target sort for intersection with domain sorts " + pp(s0) + ", " + pp(s1));
         }
 
-        function_symbol intersection(intersection_name(), make_function_sort(s0, s1, target_sort));
+        function_symbol intersection(intersection_name(), make_function_sort_(s0, s1, target_sort));
         return intersection;
       }
 
@@ -515,7 +515,7 @@ namespace mcrl2 {
           throw mcrl2::runtime_error("cannot compute target sort for difference with domain sorts " + pp(s0) + ", " + pp(s1));
         }
 
-        function_symbol difference(difference_name(), make_function_sort(s0, s1, target_sort));
+        function_symbol difference(difference_name(), make_function_sort_(s0, s1, target_sort));
         return difference;
       }
 
@@ -569,7 +569,7 @@ namespace mcrl2 {
       inline
       function_symbol false_function(const sort_expression& s)
       {
-        function_symbol false_function(false_function_name(), make_function_sort(s, sort_bool::bool_()));
+        function_symbol false_function(false_function_name(), make_function_sort_(s, sort_bool::bool_()));
         return false_function;
       }
 
@@ -621,7 +621,7 @@ namespace mcrl2 {
       inline
       function_symbol true_function(const sort_expression& s)
       {
-        function_symbol true_function(true_function_name(), make_function_sort(s, sort_bool::bool_()));
+        function_symbol true_function(true_function_name(), make_function_sort_(s, sort_bool::bool_()));
         return true_function;
       }
 
@@ -673,7 +673,7 @@ namespace mcrl2 {
       inline
       function_symbol not_function(const sort_expression& s)
       {
-        function_symbol not_function(not_function_name(), make_function_sort(make_function_sort(s, sort_bool::bool_()), make_function_sort(s, sort_bool::bool_())));
+        function_symbol not_function(not_function_name(), make_function_sort_(make_function_sort_(s, sort_bool::bool_()), make_function_sort_(s, sort_bool::bool_())));
         return not_function;
       }
 
@@ -725,7 +725,7 @@ namespace mcrl2 {
       inline
       function_symbol and_function(const sort_expression& s)
       {
-        function_symbol and_function(and_function_name(), make_function_sort(make_function_sort(s, sort_bool::bool_()), make_function_sort(s, sort_bool::bool_()), make_function_sort(s, sort_bool::bool_())));
+        function_symbol and_function(and_function_name(), make_function_sort_(make_function_sort_(s, sort_bool::bool_()), make_function_sort_(s, sort_bool::bool_()), make_function_sort_(s, sort_bool::bool_())));
         return and_function;
       }
 
@@ -778,7 +778,7 @@ namespace mcrl2 {
       inline
       function_symbol or_function(const sort_expression& s)
       {
-        function_symbol or_function(or_function_name(), make_function_sort(make_function_sort(s, sort_bool::bool_()), make_function_sort(s, sort_bool::bool_()), make_function_sort(s, sort_bool::bool_())));
+        function_symbol or_function(or_function_name(), make_function_sort_(make_function_sort_(s, sort_bool::bool_()), make_function_sort_(s, sort_bool::bool_()), make_function_sort_(s, sort_bool::bool_())));
         return or_function;
       }
 
@@ -831,7 +831,7 @@ namespace mcrl2 {
       inline
       function_symbol fset_union(const sort_expression& s)
       {
-        function_symbol fset_union(fset_union_name(), make_function_sort(make_function_sort(s, sort_bool::bool_()), make_function_sort(s, sort_bool::bool_()), sort_fset::fset(s), sort_fset::fset(s), sort_fset::fset(s)));
+        function_symbol fset_union(fset_union_name(), make_function_sort_(make_function_sort_(s, sort_bool::bool_()), make_function_sort_(s, sort_bool::bool_()), sort_fset::fset(s), sort_fset::fset(s), sort_fset::fset(s)));
         return fset_union;
       }
 
@@ -886,7 +886,7 @@ namespace mcrl2 {
       inline
       function_symbol fset_intersection(const sort_expression& s)
       {
-        function_symbol fset_intersection(fset_intersection_name(), make_function_sort(make_function_sort(s, sort_bool::bool_()), make_function_sort(s, sort_bool::bool_()), sort_fset::fset(s), sort_fset::fset(s), sort_fset::fset(s)));
+        function_symbol fset_intersection(fset_intersection_name(), make_function_sort_(make_function_sort_(s, sort_bool::bool_()), make_function_sort_(s, sort_bool::bool_()), sort_fset::fset(s), sort_fset::fset(s), sort_fset::fset(s)));
         return fset_intersection;
       }
 
@@ -1094,8 +1094,8 @@ namespace mcrl2 {
         variable ve("e",s);
         variable vs("s",sort_fset::fset(s));
         variable vt("t",sort_fset::fset(s));
-        variable vf("f",make_function_sort(s, sort_bool::bool_()));
-        variable vg("g",make_function_sort(s, sort_bool::bool_()));
+        variable vf("f",make_function_sort_(s, sort_bool::bool_()));
+        variable vg("g",make_function_sort_(s, sort_bool::bool_()));
         variable vx("x",set_(s));
         variable vy("y",set_(s));
         variable vc("c",s);

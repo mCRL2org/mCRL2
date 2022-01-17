@@ -136,9 +136,10 @@ class assignment: public assignment_expression
 
 /// \brief Make_assignment constructs a new term into a given address.
 /// \ \param t The reference into which the new assignment is constructed. 
-inline void make_assignment(assignment& t, const variable& lhs, const data_expression& rhs)
+template <class... ARGUMENTS>
+inline void make_assignment(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_DataVarIdInit(), lhs, rhs);
+  make_term_appl(t, core::detail::function_symbol_DataVarIdInit(), args...);
 }
 
 /// \brief list of assignments
@@ -231,9 +232,10 @@ class untyped_identifier_assignment: public assignment_expression
 
 /// \brief Make_untyped_identifier_assignment constructs a new term into a given address.
 /// \ \param t The reference into which the new untyped_identifier_assignment is constructed. 
-inline void make_untyped_identifier_assignment(untyped_identifier_assignment& t, const core::identifier_string& lhs, const data_expression& rhs)
+template <class... ARGUMENTS>
+inline void make_untyped_identifier_assignment(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_UntypedIdentifierAssignment(), lhs, rhs);
+  make_term_appl(t, core::detail::function_symbol_UntypedIdentifierAssignment(), args...);
 }
 
 /// \brief list of untyped_identifier_assignments

@@ -48,6 +48,7 @@ struct find_subterm_traverser: public pbes_expression_traverser<find_subterm_tra
     super::apply(x);
     counter.decrease();
   }
+  
   void apply(const and_& x)
   {
     visit(x);
@@ -116,45 +117,52 @@ struct replace_subterm_builder: public pbes_expression_builder<replace_subterm_b
     }
     else
     {
-      result = super::apply(x);
+      super::apply(result, x);
     }
     counter.decrease();
     return result;
   }
 
-  pbes_expression apply(const data::data_expression& x)
+  template <class T>
+  void apply(T& result, const data::data_expression& x)
   {
-    return visit(x);
+    result = visit(x);
   }
 
-  pbes_expression apply(const propositional_variable_instantiation& x)
+  template <class T>
+  void apply(T& result, const propositional_variable_instantiation& x)
   {
-    return visit(x);
+    result = visit(x);
   }
 
-  pbes_system::pbes_expression apply(const pbes_system::forall& x)
+  template <class T>
+  void apply(T& result, const pbes_system::forall& x)
   {
-    return visit(x);
+    result = visit(x);
   }
 
-  pbes_system::pbes_expression apply(const pbes_system::exists& x)
+  template <class T>
+  void apply(T& result, const pbes_system::exists& x)
   {
-    return visit(x);
+    result = visit(x);
   }
 
-  pbes_system::pbes_expression apply(const pbes_system::and_& x)
+  template <class T>
+  void apply(T& result, const pbes_system::and_& x)
   {
-    return visit(x);
+    result = visit(x);
   }
 
-  pbes_system::pbes_expression apply(const pbes_system::or_& x)
+  template <class T>
+  void apply(T& result, const pbes_system::or_& x)
   {
-    return visit(x);
+    result = visit(x);
   }
 
-  pbes_system::pbes_expression apply(const pbes_system::imp& x)
+  template <class T>
+  void apply(T& result, const pbes_system::imp& x)
   {
-    return visit(x);
+    result = visit(x);
   }
 };
 
@@ -165,7 +173,9 @@ inline
 pbes_expression replace_subterm(const pbes_expression& expr, std::size_t x, std::size_t y, const pbes_expression& replacement)
 {
   detail::replace_subterm_builder f(x, y, replacement);
-  return f.apply(expr);
+  pbes_expression result;
+  f.apply(result, expr);
+  return result;
 }
 
 /// \brief Replace the subterm at position (x, y) with a given term

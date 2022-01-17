@@ -149,7 +149,9 @@ T replace_variables_capture_avoiding(const T& x,
 )
 {
   data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
-  return data::detail::apply_replace_capture_avoiding_variables_builder<lps::data_expression_builder, lps::detail::add_capture_avoiding_replacement>(sigma1).apply(x);
+  T result;
+  data::detail::apply_replace_capture_avoiding_variables_builder<lps::data_expression_builder, lps::detail::add_capture_avoiding_replacement>(sigma1).apply(result, x);
+  return result;
 }
 
 /// \brief Applies sigma as a capture avoiding substitution to x.

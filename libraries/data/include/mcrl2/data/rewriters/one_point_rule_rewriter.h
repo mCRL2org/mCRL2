@@ -192,9 +192,11 @@ class one_point_rule_rewrite_builder: public data_expression_builder<Derived>
       return static_cast<Derived&>(*this);
     }
 
-    data_expression apply(const forall& x)
+    template <class T>
+    void apply(T& result, const forall& x)
     {
-      data_expression body = derived().apply(x.body());
+      data_expression body; 
+      derived().apply(body, x.body());
       std::vector<variable> variables;
 
       std::map<variable, std::set<data_expression> > inequalities = find_inequalities(body);
@@ -211,19 +213,23 @@ class one_point_rule_rewrite_builder: public data_expression_builder<Derived>
           if (remaining_variables.empty())
           {
             mCRL2log(log::debug) << "Replaced " << x << "\nwith " << body << std::endl;
-            return body;
+            result = body;
+            return;
           }
           data::variable_list v(remaining_variables.begin(), remaining_variables.end());
           mCRL2log(log::debug) << "Replaced " << x << "\nwith " << forall(v, body) << std::endl;
-          return forall(v, body);
+          make_forall(result, v, body);
+          return;
         }
       }
-      return forall(x.variables(), body);
+      make_forall(result, x.variables(), body);
     }
 
-    data_expression apply(const exists& x)
+    template <class T>
+    void apply(T& result, const exists& x)
     {
-      data_expression body = derived().apply(x.body());
+      data_expression body;
+      derived().apply(body, x.body());
       std::vector<variable> variables;
 
       std::map<variable, std::set<data_expression> > equalities = find_equalities(body);
@@ -240,14 +246,16 @@ class one_point_rule_rewrite_builder: public data_expression_builder<Derived>
           if (remaining_variables.empty())
           {
             mCRL2log(log::debug) << "Replaced " << x << "\nwith " << body << std::endl;
-            return body;
+            result = body;
+            return;
           }
           data::variable_list v(remaining_variables.begin(), remaining_variables.end());
           mCRL2log(log::debug) << "Replaced " << x << "\nwith " << exists(v, body) << std::endl;
-          return exists(v, body);
+          make_exists(result, v, body);
+          return;
         }
       }
-      return exists(x.variables(), body);
+      make_exists(result, x.variables(), body);
     }
 };
 
@@ -256,10 +264,13 @@ class one_point_rule_rewrite_builder: public data_expression_builder<Derived>
 struct one_point_rule_rewriter
 {
   using argument_type = data_expression;
+  using result_type = data_expression;
 
   data_expression operator()(const data_expression& x) const
   {
-    return core::make_apply_builder<detail::one_point_rule_rewrite_builder>().apply(x);
+    data_expression result;
+    core::make_apply_builder<detail::one_point_rule_rewrite_builder>().apply(result, x);
+    return result;
   }
 };
 
@@ -272,7 +283,8 @@ void one_point_rule_rewrite(T& x, typename std::enable_if< !std::is_base_of< ate
 template <typename T>
 T one_point_rule_rewrite(const T& x, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0)
 {
-  T result = core::make_update_apply_builder<data::data_expression_builder>(one_point_rule_rewriter()).apply(x);
+  T result;
+  core::make_update_apply_builder<data::data_expression_builder>(one_point_rule_rewriter()).apply(result, x);
   return result;
 }
 

@@ -174,12 +174,14 @@ struct add_capture_avoiding_replacement_with_an_identifier_generator : public Bu
     {
     }
 
-    data_expression apply(const variable& v)
+    template <class T>
+    void apply(T& result, const variable& v)
     {
-      return update_sigma.substitution()(v);
+      result = update_sigma.substitution()(v);
     }
 
-    data_expression apply(const data::where_clause& x)
+    template <class T>
+    void apply(T& result, const data::where_clause& x)
     {
       const auto& assignments = atermpp::container_cast<data::assignment_list>(x.declarations());
       std::vector<data::variable> tmp;
@@ -190,7 +192,8 @@ struct add_capture_avoiding_replacement_with_an_identifier_generator : public Bu
       std::vector<data::variable> v = update_sigma.push(tmp);
 
       // The updated substitution should be applied to the body.
-      const data::data_expression new_body = apply(x.body());
+      data::data_expression new_body;
+      apply(new_body, x.body());
       update_sigma.pop(v);
 
       // The original substitution should be applied to the right hand sides of the assignments.
@@ -198,36 +201,45 @@ struct add_capture_avoiding_replacement_with_an_identifier_generator : public Bu
       std::vector<data::variable>::const_iterator j = v.begin();
       for (data::assignment_list::const_iterator i = assignments.begin(); i != assignments.end(); ++i, ++j)
       {
-        a.push_back(data::assignment(*j, apply(i->rhs())));
+        data::data_expression rhs;
+        apply(rhs, i->rhs());
+        a.push_back(data::assignment(*j, rhs));
       }
-      return data::where_clause(new_body, assignment_list(a.begin(), a.end()));
+      data::make_where_clause(result, new_body, assignment_list(a.begin(), a.end()));
     }
 
-    data_expression apply(const data::forall& x)
+    template <class T>
+    void apply(T& result, const data::forall& x)
     {
-      data::variable_list v = update_sigma.push(x.variables());
-      data_expression result = data::forall(v, apply(x.body()));
+      const data::variable_list v = update_sigma.push(x.variables());
+      data::data_expression body;
+      apply(body, x.body());
+      data::make_forall(result, v, body);
       update_sigma.pop(v);
-      return result;
     }
 
-    data_expression apply(const data::exists& x)
+    template <class T>
+    void apply(T& result, const data::exists& x)
     {
-      data::variable_list v = update_sigma.push(x.variables());
-      data_expression result = data::exists(v, apply(x.body()));
+      const data::variable_list v = update_sigma.push(x.variables());
+      data::data_expression body;
+      apply(body, x.body());
+      data::make_exists(result, v, body);
       update_sigma.pop(v);
-      return result;
     }
 
-    data_expression apply(const data::lambda& x)
+    template <class T>
+    void apply(T& result, const data::lambda& x)
     {
-      data::variable_list v = update_sigma.push(x.variables());
-      data_expression result = data::lambda(v, apply(x.body()));
+      const data::variable_list v = update_sigma.push(x.variables());
+      data::data_expression body;
+      apply(body, x.body());
+      data::make_lambda(result, v, body);
       update_sigma.pop(v);
-      return result;
     }
 
-    data_equation apply(data_equation& /* x */)
+    template <class T>
+    void apply(T& /* result */, data_equation& /* x */)
     {
       throw mcrl2::runtime_error("not implemented yet");
     }
@@ -271,7 +283,9 @@ T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                    )
 {
-  return data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<data::data_expression_builder, data::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).apply(x);
+  T result;
+  data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<data::data_expression_builder, data::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).apply(result, x);
+  return result;
 }
 //--- end generated data replace_capture_avoiding_with_identifier_generator code ---//
 

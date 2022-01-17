@@ -28,12 +28,13 @@ struct action_formula_builder_base: public core::builder<Derived>
   typedef core::builder<Derived> super;
   using super::apply;
 
-  action_formula apply(const data::data_expression& x)
+  template <class T>
+  void apply(T& result, const data::data_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 };
 
@@ -47,144 +48,145 @@ struct add_sort_expressions: public Builder<Derived>
   using super::update;
   using super::apply;
 
-  action_formulas::true_ apply(const action_formulas::true_& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::true_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  action_formulas::false_ apply(const action_formulas::false_& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::false_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  action_formulas::not_ apply(const action_formulas::not_& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::not_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::not_ result = action_formulas::not_(static_cast<Derived&>(*this).apply(x.operand()));
+    action_formulas::make_not_(result, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::and_ apply(const action_formulas::and_& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::and_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::and_ result = action_formulas::and_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    action_formulas::make_and_(result, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::or_ apply(const action_formulas::or_& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::or_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::or_ result = action_formulas::or_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    action_formulas::make_or_(result, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::imp apply(const action_formulas::imp& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::imp& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::imp result = action_formulas::imp(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    action_formulas::make_imp(result, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::forall apply(const action_formulas::forall& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::forall& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::forall result = action_formulas::forall(static_cast<Derived&>(*this).apply(x.variables()), static_cast<Derived&>(*this).apply(x.body()));
+    action_formulas::make_forall(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::exists apply(const action_formulas::exists& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::exists& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::exists result = action_formulas::exists(static_cast<Derived&>(*this).apply(x.variables()), static_cast<Derived&>(*this).apply(x.body()));
+    action_formulas::make_exists(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::at apply(const action_formulas::at& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::at& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::at result = action_formulas::at(static_cast<Derived&>(*this).apply(x.operand()), static_cast<Derived&>(*this).apply(x.time_stamp()));
+    action_formulas::make_at(result, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); }, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.time_stamp()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::multi_action apply(const action_formulas::multi_action& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::multi_action& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::multi_action result = action_formulas::multi_action(static_cast<Derived&>(*this).apply(x.actions()));
+    action_formulas::make_multi_action(result, [&](process::action_list& result){ static_cast<Derived&>(*this).apply(result, x.actions()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::action_formula apply(const action_formulas::action_formula& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::action_formula& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::action_formula result;
     if (data::is_data_expression(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::data_expression>(x));
     }
     else if (action_formulas::is_true(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::true_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::true_>(x));
     }
     else if (action_formulas::is_false(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::false_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::false_>(x));
     }
     else if (action_formulas::is_not(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::not_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::not_>(x));
     }
     else if (action_formulas::is_and(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::and_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::and_>(x));
     }
     else if (action_formulas::is_or(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::or_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::or_>(x));
     }
     else if (action_formulas::is_imp(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::imp>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::imp>(x));
     }
     else if (action_formulas::is_forall(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::forall>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::forall>(x));
     }
     else if (action_formulas::is_exists(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::exists>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::exists>(x));
     }
     else if (action_formulas::is_at(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::at>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::at>(x));
     }
     else if (action_formulas::is_multi_action(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::multi_action>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::multi_action>(x));
     }
     else if (process::is_untyped_multi_action(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_multi_action>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::untyped_multi_action>(x));
     }
     else if (data::is_untyped_data_parameter(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
 };
@@ -206,144 +208,145 @@ struct add_data_expressions: public Builder<Derived>
   using super::update;
   using super::apply;
 
-  action_formulas::true_ apply(const action_formulas::true_& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::true_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  action_formulas::false_ apply(const action_formulas::false_& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::false_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  action_formulas::not_ apply(const action_formulas::not_& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::not_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::not_ result = action_formulas::not_(static_cast<Derived&>(*this).apply(x.operand()));
+    action_formulas::make_not_(result, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::and_ apply(const action_formulas::and_& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::and_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::and_ result = action_formulas::and_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    action_formulas::make_and_(result, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::or_ apply(const action_formulas::or_& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::or_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::or_ result = action_formulas::or_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    action_formulas::make_or_(result, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::imp apply(const action_formulas::imp& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::imp& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::imp result = action_formulas::imp(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    action_formulas::make_imp(result, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::forall apply(const action_formulas::forall& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::forall& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::forall result = action_formulas::forall(x.variables(), static_cast<Derived&>(*this).apply(x.body()));
+    action_formulas::make_forall(result, x.variables(), [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::exists apply(const action_formulas::exists& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::exists& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::exists result = action_formulas::exists(x.variables(), static_cast<Derived&>(*this).apply(x.body()));
+    action_formulas::make_exists(result, x.variables(), [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::at apply(const action_formulas::at& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::at& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::at result = action_formulas::at(static_cast<Derived&>(*this).apply(x.operand()), static_cast<Derived&>(*this).apply(x.time_stamp()));
+    action_formulas::make_at(result, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); }, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.time_stamp()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::multi_action apply(const action_formulas::multi_action& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::multi_action& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::multi_action result = action_formulas::multi_action(static_cast<Derived&>(*this).apply(x.actions()));
+    action_formulas::make_multi_action(result, [&](process::action_list& result){ static_cast<Derived&>(*this).apply(result, x.actions()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::action_formula apply(const action_formulas::action_formula& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::action_formula& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::action_formula result;
     if (data::is_data_expression(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::data_expression>(x));
     }
     else if (action_formulas::is_true(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::true_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::true_>(x));
     }
     else if (action_formulas::is_false(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::false_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::false_>(x));
     }
     else if (action_formulas::is_not(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::not_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::not_>(x));
     }
     else if (action_formulas::is_and(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::and_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::and_>(x));
     }
     else if (action_formulas::is_or(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::or_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::or_>(x));
     }
     else if (action_formulas::is_imp(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::imp>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::imp>(x));
     }
     else if (action_formulas::is_forall(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::forall>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::forall>(x));
     }
     else if (action_formulas::is_exists(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::exists>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::exists>(x));
     }
     else if (action_formulas::is_at(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::at>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::at>(x));
     }
     else if (action_formulas::is_multi_action(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::multi_action>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::multi_action>(x));
     }
     else if (process::is_untyped_multi_action(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_multi_action>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::untyped_multi_action>(x));
     }
     else if (data::is_untyped_data_parameter(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
 };
@@ -365,144 +368,145 @@ struct add_variables: public Builder<Derived>
   using super::update;
   using super::apply;
 
-  action_formulas::true_ apply(const action_formulas::true_& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::true_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  action_formulas::false_ apply(const action_formulas::false_& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::false_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  action_formulas::not_ apply(const action_formulas::not_& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::not_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::not_ result = action_formulas::not_(static_cast<Derived&>(*this).apply(x.operand()));
+    action_formulas::make_not_(result, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::and_ apply(const action_formulas::and_& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::and_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::and_ result = action_formulas::and_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    action_formulas::make_and_(result, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::or_ apply(const action_formulas::or_& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::or_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::or_ result = action_formulas::or_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    action_formulas::make_or_(result, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::imp apply(const action_formulas::imp& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::imp& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::imp result = action_formulas::imp(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    action_formulas::make_imp(result, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::forall apply(const action_formulas::forall& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::forall& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::forall result = action_formulas::forall(static_cast<Derived&>(*this).apply(x.variables()), static_cast<Derived&>(*this).apply(x.body()));
+    action_formulas::make_forall(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::exists apply(const action_formulas::exists& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::exists& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::exists result = action_formulas::exists(static_cast<Derived&>(*this).apply(x.variables()), static_cast<Derived&>(*this).apply(x.body()));
+    action_formulas::make_exists(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::at apply(const action_formulas::at& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::at& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::at result = action_formulas::at(static_cast<Derived&>(*this).apply(x.operand()), static_cast<Derived&>(*this).apply(x.time_stamp()));
+    action_formulas::make_at(result, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); }, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.time_stamp()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::multi_action apply(const action_formulas::multi_action& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::multi_action& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::multi_action result = action_formulas::multi_action(static_cast<Derived&>(*this).apply(x.actions()));
+    action_formulas::make_multi_action(result, [&](process::action_list& result){ static_cast<Derived&>(*this).apply(result, x.actions()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::action_formula apply(const action_formulas::action_formula& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::action_formula& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::action_formula result;
     if (data::is_data_expression(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::data_expression>(x));
     }
     else if (action_formulas::is_true(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::true_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::true_>(x));
     }
     else if (action_formulas::is_false(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::false_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::false_>(x));
     }
     else if (action_formulas::is_not(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::not_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::not_>(x));
     }
     else if (action_formulas::is_and(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::and_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::and_>(x));
     }
     else if (action_formulas::is_or(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::or_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::or_>(x));
     }
     else if (action_formulas::is_imp(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::imp>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::imp>(x));
     }
     else if (action_formulas::is_forall(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::forall>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::forall>(x));
     }
     else if (action_formulas::is_exists(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::exists>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::exists>(x));
     }
     else if (action_formulas::is_at(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::at>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::at>(x));
     }
     else if (action_formulas::is_multi_action(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::multi_action>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::multi_action>(x));
     }
     else if (process::is_untyped_multi_action(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_multi_action>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::untyped_multi_action>(x));
     }
     else if (data::is_untyped_data_parameter(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
 };
@@ -524,144 +528,146 @@ struct add_action_formula_expressions: public Builder<Derived>
   using super::update;
   using super::apply;
 
-  action_formulas::true_ apply(const action_formulas::true_& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::true_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  action_formulas::false_ apply(const action_formulas::false_& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::false_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  action_formulas::not_ apply(const action_formulas::not_& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::not_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::not_ result = action_formulas::not_(static_cast<Derived&>(*this).apply(x.operand()));
+    action_formulas::make_not_(result, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::and_ apply(const action_formulas::and_& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::and_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::and_ result = action_formulas::and_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    action_formulas::make_and_(result, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::or_ apply(const action_formulas::or_& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::or_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::or_ result = action_formulas::or_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    action_formulas::make_or_(result, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::imp apply(const action_formulas::imp& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::imp& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::imp result = action_formulas::imp(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    action_formulas::make_imp(result, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::forall apply(const action_formulas::forall& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::forall& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::forall result = action_formulas::forall(x.variables(), static_cast<Derived&>(*this).apply(x.body()));
+    action_formulas::make_forall(result, x.variables(), [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::exists apply(const action_formulas::exists& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::exists& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::exists result = action_formulas::exists(x.variables(), static_cast<Derived&>(*this).apply(x.body()));
+    action_formulas::make_exists(result, x.variables(), [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::at apply(const action_formulas::at& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::at& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::at result = action_formulas::at(static_cast<Derived&>(*this).apply(x.operand()), x.time_stamp());
+    action_formulas::make_at(result, [&](action_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); }, x.time_stamp());
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  action_formulas::multi_action apply(const action_formulas::multi_action& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::multi_action& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  action_formulas::action_formula apply(const action_formulas::action_formula& x)
-  {
+  template <class T>
+  void apply(T& result, const action_formulas::action_formula& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::action_formula result;
     if (data::is_data_expression(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::data_expression>(x));
     }
     else if (action_formulas::is_true(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::true_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::true_>(x));
     }
     else if (action_formulas::is_false(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::false_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::false_>(x));
     }
     else if (action_formulas::is_not(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::not_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::not_>(x));
     }
     else if (action_formulas::is_and(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::and_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::and_>(x));
     }
     else if (action_formulas::is_or(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::or_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::or_>(x));
     }
     else if (action_formulas::is_imp(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::imp>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::imp>(x));
     }
     else if (action_formulas::is_forall(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::forall>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::forall>(x));
     }
     else if (action_formulas::is_exists(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::exists>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::exists>(x));
     }
     else if (action_formulas::is_at(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::at>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::at>(x));
     }
     else if (action_formulas::is_multi_action(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::multi_action>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::multi_action>(x));
     }
     else if (process::is_untyped_multi_action(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_multi_action>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::untyped_multi_action>(x));
     }
     else if (data::is_untyped_data_parameter(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
 };
@@ -685,12 +691,20 @@ struct regular_formula_builder_base: public core::builder<Derived>
   typedef core::builder<Derived> super;
   using super::apply;
 
-  regular_formula apply(const data::data_expression& x)
+  void apply(regular_formula& result, const data::data_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
+  }
+ 
+  void apply(regular_formula& result, const action_formulas::action_formula& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+    result = x;
   }
 };
 
@@ -704,80 +718,79 @@ struct add_sort_expressions: public Builder<Derived>
   using super::update;
   using super::apply;
 
-  regular_formulas::seq apply(const regular_formulas::seq& x)
-  {
+  template <class T>
+  void apply(T& result, const regular_formulas::seq& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    regular_formulas::seq result = regular_formulas::seq(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    regular_formulas::make_seq(result, [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  regular_formulas::alt apply(const regular_formulas::alt& x)
-  {
+  template <class T>
+  void apply(T& result, const regular_formulas::alt& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    regular_formulas::alt result = regular_formulas::alt(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    regular_formulas::make_alt(result, [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  regular_formulas::trans apply(const regular_formulas::trans& x)
-  {
+  template <class T>
+  void apply(T& result, const regular_formulas::trans& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    regular_formulas::trans result = regular_formulas::trans(static_cast<Derived&>(*this).apply(x.operand()));
+    regular_formulas::make_trans(result, [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  regular_formulas::trans_or_nil apply(const regular_formulas::trans_or_nil& x)
-  {
+  template <class T>
+  void apply(T& result, const regular_formulas::trans_or_nil& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    regular_formulas::trans_or_nil result = regular_formulas::trans_or_nil(static_cast<Derived&>(*this).apply(x.operand()));
+    regular_formulas::make_trans_or_nil(result, [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  regular_formulas::untyped_regular_formula apply(const regular_formulas::untyped_regular_formula& x)
-  {
+  template <class T>
+  void apply(T& result, const regular_formulas::untyped_regular_formula& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    regular_formulas::untyped_regular_formula result = regular_formulas::untyped_regular_formula(x.name(), static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    regular_formulas::make_untyped_regular_formula(result, x.name(), [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  regular_formulas::regular_formula apply(const regular_formulas::regular_formula& x)
-  {
+  template <class T>
+  void apply(T& result, const regular_formulas::regular_formula& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    regular_formulas::regular_formula result;
     if (action_formulas::is_action_formula(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::action_formula>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::action_formula>(x));
     }
     else if (data::is_data_expression(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::data_expression>(x));
     }
     else if (regular_formulas::is_seq(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::seq>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<regular_formulas::seq>(x));
     }
     else if (regular_formulas::is_alt(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::alt>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<regular_formulas::alt>(x));
     }
     else if (regular_formulas::is_trans(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::trans>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<regular_formulas::trans>(x));
     }
     else if (regular_formulas::is_trans_or_nil(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::trans_or_nil>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<regular_formulas::trans_or_nil>(x));
     }
     else if (regular_formulas::is_untyped_regular_formula(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::untyped_regular_formula>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<regular_formulas::untyped_regular_formula>(x));
     }
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
 };
@@ -799,80 +812,79 @@ struct add_data_expressions: public Builder<Derived>
   using super::update;
   using super::apply;
 
-  regular_formulas::seq apply(const regular_formulas::seq& x)
-  {
+  template <class T>
+  void apply(T& result, const regular_formulas::seq& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    regular_formulas::seq result = regular_formulas::seq(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    regular_formulas::make_seq(result, [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  regular_formulas::alt apply(const regular_formulas::alt& x)
-  {
+  template <class T>
+  void apply(T& result, const regular_formulas::alt& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    regular_formulas::alt result = regular_formulas::alt(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    regular_formulas::make_alt(result, [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  regular_formulas::trans apply(const regular_formulas::trans& x)
-  {
+  template <class T>
+  void apply(T& result, const regular_formulas::trans& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    regular_formulas::trans result = regular_formulas::trans(static_cast<Derived&>(*this).apply(x.operand()));
+    regular_formulas::make_trans(result, [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  regular_formulas::trans_or_nil apply(const regular_formulas::trans_or_nil& x)
-  {
+  template <class T>
+  void apply(T& result, const regular_formulas::trans_or_nil& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    regular_formulas::trans_or_nil result = regular_formulas::trans_or_nil(static_cast<Derived&>(*this).apply(x.operand()));
+    regular_formulas::make_trans_or_nil(result, [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  regular_formulas::untyped_regular_formula apply(const regular_formulas::untyped_regular_formula& x)
-  {
+  template <class T>
+  void apply(T& result, const regular_formulas::untyped_regular_formula& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    regular_formulas::untyped_regular_formula result = regular_formulas::untyped_regular_formula(x.name(), static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    regular_formulas::make_untyped_regular_formula(result, x.name(), [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  regular_formulas::regular_formula apply(const regular_formulas::regular_formula& x)
-  {
+  template <class T>
+  void apply(T& result, const regular_formulas::regular_formula& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    regular_formulas::regular_formula result;
     if (action_formulas::is_action_formula(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::action_formula>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::action_formula>(x));
     }
     else if (data::is_data_expression(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::data_expression>(x));
     }
     else if (regular_formulas::is_seq(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::seq>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<regular_formulas::seq>(x));
     }
     else if (regular_formulas::is_alt(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::alt>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<regular_formulas::alt>(x));
     }
     else if (regular_formulas::is_trans(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::trans>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<regular_formulas::trans>(x));
     }
     else if (regular_formulas::is_trans_or_nil(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::trans_or_nil>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<regular_formulas::trans_or_nil>(x));
     }
     else if (regular_formulas::is_untyped_regular_formula(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::untyped_regular_formula>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<regular_formulas::untyped_regular_formula>(x));
     }
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
 };
@@ -894,80 +906,79 @@ struct add_variables: public Builder<Derived>
   using super::update;
   using super::apply;
 
-  regular_formulas::seq apply(const regular_formulas::seq& x)
-  {
+  template <class T>
+  void apply(T& result, const regular_formulas::seq& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    regular_formulas::seq result = regular_formulas::seq(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    regular_formulas::make_seq(result, [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  regular_formulas::alt apply(const regular_formulas::alt& x)
-  {
+  template <class T>
+  void apply(T& result, const regular_formulas::alt& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    regular_formulas::alt result = regular_formulas::alt(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    regular_formulas::make_alt(result, [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  regular_formulas::trans apply(const regular_formulas::trans& x)
-  {
+  template <class T>
+  void apply(T& result, const regular_formulas::trans& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    regular_formulas::trans result = regular_formulas::trans(static_cast<Derived&>(*this).apply(x.operand()));
+    regular_formulas::make_trans(result, [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  regular_formulas::trans_or_nil apply(const regular_formulas::trans_or_nil& x)
-  {
+  template <class T>
+  void apply(T& result, const regular_formulas::trans_or_nil& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    regular_formulas::trans_or_nil result = regular_formulas::trans_or_nil(static_cast<Derived&>(*this).apply(x.operand()));
+    regular_formulas::make_trans_or_nil(result, [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  regular_formulas::untyped_regular_formula apply(const regular_formulas::untyped_regular_formula& x)
-  {
+  template <class T>
+  void apply(T& result, const regular_formulas::untyped_regular_formula& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    regular_formulas::untyped_regular_formula result = regular_formulas::untyped_regular_formula(x.name(), static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    regular_formulas::make_untyped_regular_formula(result, x.name(), [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  regular_formulas::regular_formula apply(const regular_formulas::regular_formula& x)
-  {
+  template <class T>
+  void apply(T& result, const regular_formulas::regular_formula& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    regular_formulas::regular_formula result;
     if (action_formulas::is_action_formula(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::action_formula>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::action_formula>(x));
     }
     else if (data::is_data_expression(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::data_expression>(x));
     }
     else if (regular_formulas::is_seq(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::seq>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<regular_formulas::seq>(x));
     }
     else if (regular_formulas::is_alt(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::alt>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<regular_formulas::alt>(x));
     }
     else if (regular_formulas::is_trans(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::trans>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<regular_formulas::trans>(x));
     }
     else if (regular_formulas::is_trans_or_nil(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::trans_or_nil>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<regular_formulas::trans_or_nil>(x));
     }
     else if (regular_formulas::is_untyped_regular_formula(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::untyped_regular_formula>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<regular_formulas::untyped_regular_formula>(x));
     }
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
 };
@@ -989,80 +1000,79 @@ struct add_regular_formula_expressions: public Builder<Derived>
   using super::update;
   using super::apply;
 
-  regular_formulas::seq apply(const regular_formulas::seq& x)
-  {
+  template <class T>
+  void apply(T& result, const regular_formulas::seq& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    regular_formulas::seq result = regular_formulas::seq(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    regular_formulas::make_seq(result, [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  regular_formulas::alt apply(const regular_formulas::alt& x)
-  {
+  template <class T>
+  void apply(T& result, const regular_formulas::alt& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    regular_formulas::alt result = regular_formulas::alt(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    regular_formulas::make_alt(result, [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  regular_formulas::trans apply(const regular_formulas::trans& x)
-  {
+  template <class T>
+  void apply(T& result, const regular_formulas::trans& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    regular_formulas::trans result = regular_formulas::trans(static_cast<Derived&>(*this).apply(x.operand()));
+    regular_formulas::make_trans(result, [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  regular_formulas::trans_or_nil apply(const regular_formulas::trans_or_nil& x)
-  {
+  template <class T>
+  void apply(T& result, const regular_formulas::trans_or_nil& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    regular_formulas::trans_or_nil result = regular_formulas::trans_or_nil(static_cast<Derived&>(*this).apply(x.operand()));
+    regular_formulas::make_trans_or_nil(result, [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  regular_formulas::untyped_regular_formula apply(const regular_formulas::untyped_regular_formula& x)
-  {
+  template <class T>
+  void apply(T& result, const regular_formulas::untyped_regular_formula& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    regular_formulas::untyped_regular_formula result = regular_formulas::untyped_regular_formula(x.name(), static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    regular_formulas::make_untyped_regular_formula(result, x.name(), [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  regular_formulas::regular_formula apply(const regular_formulas::regular_formula& x)
-  {
+  template <class T>
+  void apply(T& result, const regular_formulas::regular_formula& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    regular_formulas::regular_formula result;
     if (action_formulas::is_action_formula(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::action_formula>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::action_formula>(x));
     }
     else if (data::is_data_expression(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::data_expression>(x));
     }
     else if (regular_formulas::is_seq(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::seq>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<regular_formulas::seq>(x));
     }
     else if (regular_formulas::is_alt(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::alt>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<regular_formulas::alt>(x));
     }
     else if (regular_formulas::is_trans(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::trans>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<regular_formulas::trans>(x));
     }
     else if (regular_formulas::is_trans_or_nil(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::trans_or_nil>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<regular_formulas::trans_or_nil>(x));
     }
     else if (regular_formulas::is_untyped_regular_formula(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::untyped_regular_formula>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<regular_formulas::untyped_regular_formula>(x));
     }
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
 };
@@ -1105,232 +1115,239 @@ struct add_sort_expressions: public Builder<Derived>
   using super::update;
   using super::apply;
 
-  state_formulas::true_ apply(const state_formulas::true_& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::true_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  state_formulas::false_ apply(const state_formulas::false_& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::false_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  state_formulas::not_ apply(const state_formulas::not_& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::not_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::not_ result = state_formulas::not_(static_cast<Derived&>(*this).apply(x.operand()));
+    state_formulas::make_not_(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::and_ apply(const state_formulas::and_& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::and_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::and_ result = state_formulas::and_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    state_formulas::make_and_(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::or_ apply(const state_formulas::or_& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::or_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::or_ result = state_formulas::or_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    state_formulas::make_or_(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::imp apply(const state_formulas::imp& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::imp& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::imp result = state_formulas::imp(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    state_formulas::make_imp(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::forall apply(const state_formulas::forall& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::forall& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::forall result = state_formulas::forall(static_cast<Derived&>(*this).apply(x.variables()), static_cast<Derived&>(*this).apply(x.body()));
+    state_formulas::make_forall(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::exists apply(const state_formulas::exists& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::exists& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::exists result = state_formulas::exists(static_cast<Derived&>(*this).apply(x.variables()), static_cast<Derived&>(*this).apply(x.body()));
+    state_formulas::make_exists(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::must apply(const state_formulas::must& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::must& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::must result = state_formulas::must(static_cast<Derived&>(*this).apply(x.formula()), static_cast<Derived&>(*this).apply(x.operand()));
+    state_formulas::make_must(result, [&](regular_formulas::regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.formula()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::may apply(const state_formulas::may& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::may& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::may result = state_formulas::may(static_cast<Derived&>(*this).apply(x.formula()), static_cast<Derived&>(*this).apply(x.operand()));
+    state_formulas::make_may(result, [&](regular_formulas::regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.formula()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::yaled apply(const state_formulas::yaled& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-    return x;
-  }
-
-  state_formulas::yaled_timed apply(const state_formulas::yaled_timed& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    state_formulas::yaled_timed result = state_formulas::yaled_timed(static_cast<Derived&>(*this).apply(x.time_stamp()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
-  state_formulas::delay apply(const state_formulas::delay& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::yaled& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  state_formulas::delay_timed apply(const state_formulas::delay_timed& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::yaled_timed& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::delay_timed result = state_formulas::delay_timed(static_cast<Derived&>(*this).apply(x.time_stamp()));
+    state_formulas::make_yaled_timed(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.time_stamp()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::variable apply(const state_formulas::variable& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::delay& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::variable result = state_formulas::variable(x.name(), static_cast<Derived&>(*this).apply(x.arguments()));
+    // skip
     static_cast<Derived&>(*this).leave(x);
-    return result;
+    result = x;
   }
 
-  state_formulas::nu apply(const state_formulas::nu& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::delay_timed& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::nu result = state_formulas::nu(x.name(), static_cast<Derived&>(*this).apply(x.assignments()), static_cast<Derived&>(*this).apply(x.operand()));
+    state_formulas::make_delay_timed(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.time_stamp()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::mu apply(const state_formulas::mu& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::variable& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::mu result = state_formulas::mu(x.name(), static_cast<Derived&>(*this).apply(x.assignments()), static_cast<Derived&>(*this).apply(x.operand()));
+    state_formulas::make_variable(result, x.name(), [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.arguments()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
+  }
+
+  template <class T>
+  void apply(T& result, const state_formulas::nu& x)
+  { 
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_nu(result, x.name(), [&](data::assignment_list& result){ static_cast<Derived&>(*this).apply(result, x.assignments()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const state_formulas::mu& x)
+  { 
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_mu(result, x.name(), [&](data::assignment_list& result){ static_cast<Derived&>(*this).apply(result, x.assignments()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    static_cast<Derived&>(*this).leave(x);
   }
 
   void update(state_formulas::state_formula_specification& x)
-  {
+  { 
     static_cast<Derived&>(*this).enter(x);
-    x.action_labels() = static_cast<Derived&>(*this).apply(x.action_labels());
-    x.formula() = static_cast<Derived&>(*this).apply(x.formula());
+    process::action_label_list result_action_labels;
+    static_cast<Derived&>(*this).apply(result_action_labels, x.action_labels());
+    x.action_labels() = result_action_labels;
+    state_formula result_formula;
+    static_cast<Derived&>(*this).apply(result_formula, x.formula());
+    x.formula() = result_formula;
     static_cast<Derived&>(*this).leave(x);
   }
 
-  state_formulas::state_formula apply(const state_formulas::state_formula& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::state_formula& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::state_formula result;
     if (data::is_data_expression(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::data_expression>(x));
     }
     else if (data::is_untyped_data_parameter(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     else if (state_formulas::is_true(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::true_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::true_>(x));
     }
     else if (state_formulas::is_false(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::false_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::false_>(x));
     }
     else if (state_formulas::is_not(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::not_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::not_>(x));
     }
     else if (state_formulas::is_and(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::and_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::and_>(x));
     }
     else if (state_formulas::is_or(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::or_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::or_>(x));
     }
     else if (state_formulas::is_imp(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::imp>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::imp>(x));
     }
     else if (state_formulas::is_forall(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::forall>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::forall>(x));
     }
     else if (state_formulas::is_exists(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::exists>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::exists>(x));
     }
     else if (state_formulas::is_must(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::must>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::must>(x));
     }
     else if (state_formulas::is_may(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::may>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::may>(x));
     }
     else if (state_formulas::is_yaled(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::yaled>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::yaled>(x));
     }
     else if (state_formulas::is_yaled_timed(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::yaled_timed>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::yaled_timed>(x));
     }
     else if (state_formulas::is_delay(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::delay>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::delay>(x));
     }
     else if (state_formulas::is_delay_timed(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::delay_timed>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::delay_timed>(x));
     }
     else if (state_formulas::is_variable(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::variable>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::variable>(x));
     }
     else if (state_formulas::is_nu(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::nu>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::nu>(x));
     }
     else if (state_formulas::is_mu(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::mu>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::mu>(x));
     }
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
 };
@@ -1352,231 +1369,236 @@ struct add_data_expressions: public Builder<Derived>
   using super::update;
   using super::apply;
 
-  state_formulas::true_ apply(const state_formulas::true_& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::true_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  state_formulas::false_ apply(const state_formulas::false_& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::false_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  state_formulas::not_ apply(const state_formulas::not_& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::not_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::not_ result = state_formulas::not_(static_cast<Derived&>(*this).apply(x.operand()));
+    state_formulas::make_not_(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::and_ apply(const state_formulas::and_& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::and_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::and_ result = state_formulas::and_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    state_formulas::make_and_(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::or_ apply(const state_formulas::or_& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::or_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::or_ result = state_formulas::or_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    state_formulas::make_or_(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::imp apply(const state_formulas::imp& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::imp& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::imp result = state_formulas::imp(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    state_formulas::make_imp(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::forall apply(const state_formulas::forall& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::forall& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::forall result = state_formulas::forall(x.variables(), static_cast<Derived&>(*this).apply(x.body()));
+    state_formulas::make_forall(result, x.variables(), [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::exists apply(const state_formulas::exists& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::exists& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::exists result = state_formulas::exists(x.variables(), static_cast<Derived&>(*this).apply(x.body()));
+    state_formulas::make_exists(result, x.variables(), [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::must apply(const state_formulas::must& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::must& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::must result = state_formulas::must(static_cast<Derived&>(*this).apply(x.formula()), static_cast<Derived&>(*this).apply(x.operand()));
+    state_formulas::make_must(result, [&](regular_formulas::regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.formula()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::may apply(const state_formulas::may& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::may& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::may result = state_formulas::may(static_cast<Derived&>(*this).apply(x.formula()), static_cast<Derived&>(*this).apply(x.operand()));
+    state_formulas::make_may(result, [&](regular_formulas::regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.formula()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::yaled apply(const state_formulas::yaled& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-    return x;
-  }
-
-  state_formulas::yaled_timed apply(const state_formulas::yaled_timed& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    state_formulas::yaled_timed result = state_formulas::yaled_timed(static_cast<Derived&>(*this).apply(x.time_stamp()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
-  state_formulas::delay apply(const state_formulas::delay& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::yaled& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  state_formulas::delay_timed apply(const state_formulas::delay_timed& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::yaled_timed& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::delay_timed result = state_formulas::delay_timed(static_cast<Derived&>(*this).apply(x.time_stamp()));
+    state_formulas::make_yaled_timed(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.time_stamp()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::variable apply(const state_formulas::variable& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::delay& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::variable result = state_formulas::variable(x.name(), static_cast<Derived&>(*this).apply(x.arguments()));
+    // skip
     static_cast<Derived&>(*this).leave(x);
-    return result;
+    result = x;
   }
 
-  state_formulas::nu apply(const state_formulas::nu& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::delay_timed& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::nu result = state_formulas::nu(x.name(), static_cast<Derived&>(*this).apply(x.assignments()), static_cast<Derived&>(*this).apply(x.operand()));
+    state_formulas::make_delay_timed(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.time_stamp()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::mu apply(const state_formulas::mu& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::variable& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::mu result = state_formulas::mu(x.name(), static_cast<Derived&>(*this).apply(x.assignments()), static_cast<Derived&>(*this).apply(x.operand()));
+    state_formulas::make_variable(result, x.name(), [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.arguments()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
+  }
+
+  template <class T>
+  void apply(T& result, const state_formulas::nu& x)
+  { 
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_nu(result, x.name(), [&](data::assignment_list& result){ static_cast<Derived&>(*this).apply(result, x.assignments()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const state_formulas::mu& x)
+  { 
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_mu(result, x.name(), [&](data::assignment_list& result){ static_cast<Derived&>(*this).apply(result, x.assignments()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    static_cast<Derived&>(*this).leave(x);
   }
 
   void update(state_formulas::state_formula_specification& x)
-  {
+  { 
     static_cast<Derived&>(*this).enter(x);
-    x.formula() = static_cast<Derived&>(*this).apply(x.formula());
+    state_formula result_formula;
+    static_cast<Derived&>(*this).apply(result_formula, x.formula());
+    x.formula() = result_formula;
     static_cast<Derived&>(*this).leave(x);
   }
 
-  state_formulas::state_formula apply(const state_formulas::state_formula& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::state_formula& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::state_formula result;
     if (data::is_data_expression(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::data_expression>(x));
     }
     else if (data::is_untyped_data_parameter(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     else if (state_formulas::is_true(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::true_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::true_>(x));
     }
     else if (state_formulas::is_false(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::false_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::false_>(x));
     }
     else if (state_formulas::is_not(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::not_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::not_>(x));
     }
     else if (state_formulas::is_and(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::and_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::and_>(x));
     }
     else if (state_formulas::is_or(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::or_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::or_>(x));
     }
     else if (state_formulas::is_imp(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::imp>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::imp>(x));
     }
     else if (state_formulas::is_forall(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::forall>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::forall>(x));
     }
     else if (state_formulas::is_exists(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::exists>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::exists>(x));
     }
     else if (state_formulas::is_must(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::must>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::must>(x));
     }
     else if (state_formulas::is_may(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::may>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::may>(x));
     }
     else if (state_formulas::is_yaled(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::yaled>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::yaled>(x));
     }
     else if (state_formulas::is_yaled_timed(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::yaled_timed>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::yaled_timed>(x));
     }
     else if (state_formulas::is_delay(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::delay>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::delay>(x));
     }
     else if (state_formulas::is_delay_timed(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::delay_timed>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::delay_timed>(x));
     }
     else if (state_formulas::is_variable(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::variable>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::variable>(x));
     }
     else if (state_formulas::is_nu(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::nu>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::nu>(x));
     }
     else if (state_formulas::is_mu(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::mu>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::mu>(x));
     }
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
 };
@@ -1598,231 +1620,236 @@ struct add_variables: public Builder<Derived>
   using super::update;
   using super::apply;
 
-  state_formulas::true_ apply(const state_formulas::true_& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::true_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  state_formulas::false_ apply(const state_formulas::false_& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::false_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  state_formulas::not_ apply(const state_formulas::not_& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::not_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::not_ result = state_formulas::not_(static_cast<Derived&>(*this).apply(x.operand()));
+    state_formulas::make_not_(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::and_ apply(const state_formulas::and_& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::and_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::and_ result = state_formulas::and_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    state_formulas::make_and_(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::or_ apply(const state_formulas::or_& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::or_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::or_ result = state_formulas::or_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    state_formulas::make_or_(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::imp apply(const state_formulas::imp& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::imp& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::imp result = state_formulas::imp(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    state_formulas::make_imp(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::forall apply(const state_formulas::forall& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::forall& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::forall result = state_formulas::forall(static_cast<Derived&>(*this).apply(x.variables()), static_cast<Derived&>(*this).apply(x.body()));
+    state_formulas::make_forall(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::exists apply(const state_formulas::exists& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::exists& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::exists result = state_formulas::exists(static_cast<Derived&>(*this).apply(x.variables()), static_cast<Derived&>(*this).apply(x.body()));
+    state_formulas::make_exists(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::must apply(const state_formulas::must& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::must& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::must result = state_formulas::must(static_cast<Derived&>(*this).apply(x.formula()), static_cast<Derived&>(*this).apply(x.operand()));
+    state_formulas::make_must(result, [&](regular_formulas::regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.formula()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::may apply(const state_formulas::may& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::may& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::may result = state_formulas::may(static_cast<Derived&>(*this).apply(x.formula()), static_cast<Derived&>(*this).apply(x.operand()));
+    state_formulas::make_may(result, [&](regular_formulas::regular_formula& result){ static_cast<Derived&>(*this).apply(result, x.formula()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::yaled apply(const state_formulas::yaled& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-    return x;
-  }
-
-  state_formulas::yaled_timed apply(const state_formulas::yaled_timed& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    state_formulas::yaled_timed result = state_formulas::yaled_timed(static_cast<Derived&>(*this).apply(x.time_stamp()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
-  state_formulas::delay apply(const state_formulas::delay& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::yaled& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  state_formulas::delay_timed apply(const state_formulas::delay_timed& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::yaled_timed& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::delay_timed result = state_formulas::delay_timed(static_cast<Derived&>(*this).apply(x.time_stamp()));
+    state_formulas::make_yaled_timed(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.time_stamp()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::variable apply(const state_formulas::variable& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::delay& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::variable result = state_formulas::variable(x.name(), static_cast<Derived&>(*this).apply(x.arguments()));
+    // skip
     static_cast<Derived&>(*this).leave(x);
-    return result;
+    result = x;
   }
 
-  state_formulas::nu apply(const state_formulas::nu& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::delay_timed& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::nu result = state_formulas::nu(x.name(), static_cast<Derived&>(*this).apply(x.assignments()), static_cast<Derived&>(*this).apply(x.operand()));
+    state_formulas::make_delay_timed(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.time_stamp()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::mu apply(const state_formulas::mu& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::variable& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::mu result = state_formulas::mu(x.name(), static_cast<Derived&>(*this).apply(x.assignments()), static_cast<Derived&>(*this).apply(x.operand()));
+    state_formulas::make_variable(result, x.name(), [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.arguments()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
+  }
+
+  template <class T>
+  void apply(T& result, const state_formulas::nu& x)
+  { 
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_nu(result, x.name(), [&](data::assignment_list& result){ static_cast<Derived&>(*this).apply(result, x.assignments()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const state_formulas::mu& x)
+  { 
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_mu(result, x.name(), [&](data::assignment_list& result){ static_cast<Derived&>(*this).apply(result, x.assignments()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    static_cast<Derived&>(*this).leave(x);
   }
 
   void update(state_formulas::state_formula_specification& x)
-  {
+  { 
     static_cast<Derived&>(*this).enter(x);
-    x.formula() = static_cast<Derived&>(*this).apply(x.formula());
+    state_formula result_formula;
+    static_cast<Derived&>(*this).apply(result_formula, x.formula());
+    x.formula() = result_formula;
     static_cast<Derived&>(*this).leave(x);
   }
 
-  state_formulas::state_formula apply(const state_formulas::state_formula& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::state_formula& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::state_formula result;
     if (data::is_data_expression(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::data_expression>(x));
     }
     else if (data::is_untyped_data_parameter(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     else if (state_formulas::is_true(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::true_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::true_>(x));
     }
     else if (state_formulas::is_false(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::false_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::false_>(x));
     }
     else if (state_formulas::is_not(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::not_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::not_>(x));
     }
     else if (state_formulas::is_and(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::and_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::and_>(x));
     }
     else if (state_formulas::is_or(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::or_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::or_>(x));
     }
     else if (state_formulas::is_imp(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::imp>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::imp>(x));
     }
     else if (state_formulas::is_forall(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::forall>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::forall>(x));
     }
     else if (state_formulas::is_exists(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::exists>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::exists>(x));
     }
     else if (state_formulas::is_must(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::must>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::must>(x));
     }
     else if (state_formulas::is_may(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::may>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::may>(x));
     }
     else if (state_formulas::is_yaled(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::yaled>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::yaled>(x));
     }
     else if (state_formulas::is_yaled_timed(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::yaled_timed>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::yaled_timed>(x));
     }
     else if (state_formulas::is_delay(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::delay>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::delay>(x));
     }
     else if (state_formulas::is_delay_timed(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::delay_timed>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::delay_timed>(x));
     }
     else if (state_formulas::is_variable(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::variable>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::variable>(x));
     }
     else if (state_formulas::is_nu(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::nu>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::nu>(x));
     }
     else if (state_formulas::is_mu(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::mu>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::mu>(x));
     }
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
 };
@@ -1844,231 +1871,239 @@ struct add_state_formula_expressions: public Builder<Derived>
   using super::update;
   using super::apply;
 
-  state_formulas::true_ apply(const state_formulas::true_& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::true_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  state_formulas::false_ apply(const state_formulas::false_& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::false_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  state_formulas::not_ apply(const state_formulas::not_& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::not_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::not_ result = state_formulas::not_(static_cast<Derived&>(*this).apply(x.operand()));
+    state_formulas::make_not_(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::and_ apply(const state_formulas::and_& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::and_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::and_ result = state_formulas::and_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    state_formulas::make_and_(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::or_ apply(const state_formulas::or_& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::or_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::or_ result = state_formulas::or_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    state_formulas::make_or_(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::imp apply(const state_formulas::imp& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::imp& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::imp result = state_formulas::imp(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    state_formulas::make_imp(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::forall apply(const state_formulas::forall& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::forall& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::forall result = state_formulas::forall(x.variables(), static_cast<Derived&>(*this).apply(x.body()));
+    state_formulas::make_forall(result, x.variables(), [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::exists apply(const state_formulas::exists& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::exists& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::exists result = state_formulas::exists(x.variables(), static_cast<Derived&>(*this).apply(x.body()));
+    state_formulas::make_exists(result, x.variables(), [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::must apply(const state_formulas::must& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::must& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::must result = state_formulas::must(x.formula(), static_cast<Derived&>(*this).apply(x.operand()));
+    state_formulas::make_must(result, x.formula(), [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::may apply(const state_formulas::may& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::may& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::may result = state_formulas::may(x.formula(), static_cast<Derived&>(*this).apply(x.operand()));
+    state_formulas::make_may(result, x.formula(), [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  state_formulas::yaled apply(const state_formulas::yaled& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-    return x;
-  }
-
-  state_formulas::yaled_timed apply(const state_formulas::yaled_timed& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::yaled& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  state_formulas::delay apply(const state_formulas::delay& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::yaled_timed& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  state_formulas::delay_timed apply(const state_formulas::delay_timed& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::delay& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  state_formulas::variable apply(const state_formulas::variable& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::delay_timed& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  state_formulas::nu apply(const state_formulas::nu& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::variable& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::nu result = state_formulas::nu(x.name(), x.assignments(), static_cast<Derived&>(*this).apply(x.operand()));
+    // skip
     static_cast<Derived&>(*this).leave(x);
-    return result;
+    result = x;
   }
 
-  state_formulas::mu apply(const state_formulas::mu& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::nu& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::mu result = state_formulas::mu(x.name(), x.assignments(), static_cast<Derived&>(*this).apply(x.operand()));
+    state_formulas::make_nu(result, x.name(), x.assignments(), [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
+  }
+
+  template <class T>
+  void apply(T& result, const state_formulas::mu& x)
+  { 
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_mu(result, x.name(), x.assignments(), [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    static_cast<Derived&>(*this).leave(x);
   }
 
   void update(state_formulas::state_formula_specification& x)
-  {
+  { 
     static_cast<Derived&>(*this).enter(x);
-    x.formula() = static_cast<Derived&>(*this).apply(x.formula());
+    state_formula result_formula;
+    static_cast<Derived&>(*this).apply(result_formula, x.formula());
+    x.formula() = result_formula;
     static_cast<Derived&>(*this).leave(x);
   }
 
-  state_formulas::state_formula apply(const state_formulas::state_formula& x)
-  {
+  template <class T>
+  void apply(T& result, const state_formulas::state_formula& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::state_formula result;
     if (data::is_data_expression(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::data_expression>(x));
     }
     else if (data::is_untyped_data_parameter(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     else if (state_formulas::is_true(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::true_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::true_>(x));
     }
     else if (state_formulas::is_false(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::false_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::false_>(x));
     }
     else if (state_formulas::is_not(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::not_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::not_>(x));
     }
     else if (state_formulas::is_and(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::and_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::and_>(x));
     }
     else if (state_formulas::is_or(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::or_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::or_>(x));
     }
     else if (state_formulas::is_imp(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::imp>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::imp>(x));
     }
     else if (state_formulas::is_forall(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::forall>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::forall>(x));
     }
     else if (state_formulas::is_exists(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::exists>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::exists>(x));
     }
     else if (state_formulas::is_must(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::must>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::must>(x));
     }
     else if (state_formulas::is_may(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::may>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::may>(x));
     }
     else if (state_formulas::is_yaled(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::yaled>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::yaled>(x));
     }
     else if (state_formulas::is_yaled_timed(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::yaled_timed>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::yaled_timed>(x));
     }
     else if (state_formulas::is_delay(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::delay>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::delay>(x));
     }
     else if (state_formulas::is_delay_timed(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::delay_timed>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::delay_timed>(x));
     }
     else if (state_formulas::is_variable(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::variable>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::variable>(x));
     }
     else if (state_formulas::is_nu(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::nu>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::nu>(x));
     }
     else if (state_formulas::is_mu(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::mu>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::mu>(x));
     }
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
 };

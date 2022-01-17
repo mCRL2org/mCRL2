@@ -29,7 +29,7 @@ constexpr std::size_t LengthOfShortList = 10000;  /// \brief The length of a sho
 template <class Term>
 void term_list<Term>::push_front(const Term& el)
 {
-   detail::g_thread_term_pool().create_appl(*this, detail::g_term_pool().as_list(), el, *this);
+   detail::g_thread_term_pool().create_appl<Term>(*this, detail::g_term_pool().as_list(), el, *this);
 }
 
 template <class Term>
@@ -413,9 +413,9 @@ namespace detail
     assert(p!=last);
     make_term_appl(result, 
                    detail::g_term_pool().as_list(), 
-                   [&transformer, &p](aterm& result)
+                   [&transformer, &p](Term& result)
                       {
-                        if constexpr (mcrl2::utilities::is_applicable2<Transformer, Term&, const Term>::value)   
+                        if constexpr (mcrl2::utilities::is_applicable2<Transformer, Term&, const Term&>::value)   
                         {
                           transformer(reinterpret_cast<Term&>(result), *(p++));
                         }
@@ -424,7 +424,7 @@ namespace detail
                           reinterpret_cast<Term&>(result)=transformer(*(p++));
                         }
                       },
-                   [&transformer, &p, last](aterm& result)
+                   [&transformer, &p, last](term_list<Term>& result)
                       {
                         if (p==last)
                         {

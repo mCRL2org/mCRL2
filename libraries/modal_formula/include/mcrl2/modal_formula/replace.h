@@ -39,7 +39,9 @@ T replace_sort_expressions(const T& x,
                            typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                           )
 {
-  return data::detail::make_replace_sort_expressions_builder<action_formulas::sort_expression_builder>(sigma, innermost).apply(x);
+  T result;
+  data::detail::make_replace_sort_expressions_builder<action_formulas::sort_expression_builder>(sigma, innermost).apply(result, x);
+  return result;
 }
 
 template <typename T, typename Substitution>
@@ -59,8 +61,11 @@ T replace_data_expressions(const T& x,
                            typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                           )
 {
-  return data::detail::make_replace_data_expressions_builder<action_formulas::data_expression_builder>(sigma, innermost).apply(x);
+  T result;
+  data::detail::make_replace_data_expressions_builder<action_formulas::data_expression_builder>(sigma, innermost).apply(result, x);
+  return result;
 }
+
 
 template <typename T, typename Substitution>
 void replace_variables(T& x,
@@ -77,7 +82,9 @@ T replace_variables(const T& x,
                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                    )
 {
-  return core::make_update_apply_builder<action_formulas::data_expression_builder>(sigma).apply(x);
+  T result;
+  core::make_update_apply_builder<action_formulas::data_expression_builder>(sigma).apply(result, x);
+  return result;
 }
 
 template <typename T, typename Substitution>
@@ -95,7 +102,9 @@ T replace_all_variables(const T& x,
                         typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                        )
 {
-  return core::make_update_apply_builder<action_formulas::variable_builder>(sigma).apply(x);
+  T result;
+  core::make_update_apply_builder<action_formulas::variable_builder>(sigma).apply(result, x);
+  return result;
 }
 
 /// \brief Applies the substitution sigma to x.
@@ -119,7 +128,9 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return data::detail::make_replace_free_variables_builder<action_formulas::data_expression_builder, action_formulas::add_data_variable_builder_binding>(sigma).apply(x);
+  T result;
+  data::detail::make_replace_free_variables_builder<action_formulas::data_expression_builder, action_formulas::add_data_variable_builder_binding>(sigma).apply(result, x);
+  return result;
 }
 
 /// \brief Applies the substitution sigma to x, where the elements of bound_variables are treated as bound variables.
@@ -145,7 +156,9 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return data::detail::make_replace_free_variables_builder<action_formulas::data_expression_builder, action_formulas::add_data_variable_builder_binding>(sigma).apply(x, bound_variables);
+  T result;
+  data::detail::make_replace_free_variables_builder<action_formulas::data_expression_builder, action_formulas::add_data_variable_builder_binding>(sigma).apply(result, x, bound_variables);
+  return result;
 }
 //--- end generated action_formulas replace code ---//
 
@@ -172,7 +185,9 @@ T replace_sort_expressions(const T& x,
                            typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                           )
 {
-  return data::detail::make_replace_sort_expressions_builder<regular_formulas::sort_expression_builder>(sigma, innermost).apply(x);
+  T result;
+  data::detail::make_replace_sort_expressions_builder<regular_formulas::sort_expression_builder>(sigma, innermost).apply(result, x);
+  return result;
 }
 
 template <typename T, typename Substitution>
@@ -192,8 +207,11 @@ T replace_data_expressions(const T& x,
                            typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                           )
 {
-  return data::detail::make_replace_data_expressions_builder<regular_formulas::data_expression_builder>(sigma, innermost).apply(x);
+  T result;
+  data::detail::make_replace_data_expressions_builder<regular_formulas::data_expression_builder>(sigma, innermost).apply(result, x);
+  return result;
 }
+
 
 template <typename T, typename Substitution>
 void replace_variables(T& x,
@@ -210,7 +228,9 @@ T replace_variables(const T& x,
                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                    )
 {
-  return core::make_update_apply_builder<regular_formulas::data_expression_builder>(sigma).apply(x);
+  T result;
+  core::make_update_apply_builder<regular_formulas::data_expression_builder>(sigma).apply(result, x);
+  return result;
 }
 
 template <typename T, typename Substitution>
@@ -228,7 +248,9 @@ T replace_all_variables(const T& x,
                         typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                        )
 {
-  return core::make_update_apply_builder<regular_formulas::variable_builder>(sigma).apply(x);
+  T result;
+  core::make_update_apply_builder<regular_formulas::variable_builder>(sigma).apply(result, x);
+  return result;
 }
 
 /// \brief Applies the substitution sigma to x.
@@ -252,7 +274,9 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return data::detail::make_replace_free_variables_builder<regular_formulas::data_expression_builder, regular_formulas::add_data_variable_builder_binding>(sigma).apply(x);
+  T result;
+  data::detail::make_replace_free_variables_builder<regular_formulas::data_expression_builder, regular_formulas::add_data_variable_builder_binding>(sigma).apply(result, x);
+  return result;
 }
 
 /// \brief Applies the substitution sigma to x, where the elements of bound_variables are treated as bound variables.
@@ -278,7 +302,9 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return data::detail::make_replace_free_variables_builder<regular_formulas::data_expression_builder, regular_formulas::add_data_variable_builder_binding>(sigma).apply(x, bound_variables);
+  T result;
+  data::detail::make_replace_free_variables_builder<regular_formulas::data_expression_builder, regular_formulas::add_data_variable_builder_binding>(sigma).apply(result, x, bound_variables);
+  return result;
 }
 //--- end generated regular_formulas replace code ---//
 
@@ -305,7 +331,9 @@ T replace_sort_expressions(const T& x,
                            typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                           )
 {
-  return data::detail::make_replace_sort_expressions_builder<state_formulas::sort_expression_builder>(sigma, innermost).apply(x);
+  T result;
+  data::detail::make_replace_sort_expressions_builder<state_formulas::sort_expression_builder>(sigma, innermost).apply(result, x);
+  return result;
 }
 
 template <typename T, typename Substitution>
@@ -325,8 +353,11 @@ T replace_data_expressions(const T& x,
                            typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                           )
 {
-  return data::detail::make_replace_data_expressions_builder<state_formulas::data_expression_builder>(sigma, innermost).apply(x);
+  T result;
+  data::detail::make_replace_data_expressions_builder<state_formulas::data_expression_builder>(sigma, innermost).apply(result, x);
+  return result;
 }
+
 
 template <typename T, typename Substitution>
 void replace_variables(T& x,
@@ -343,7 +374,9 @@ T replace_variables(const T& x,
                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                    )
 {
-  return core::make_update_apply_builder<state_formulas::data_expression_builder>(sigma).apply(x);
+  T result;
+  core::make_update_apply_builder<state_formulas::data_expression_builder>(sigma).apply(result, x);
+  return result;
 }
 
 template <typename T, typename Substitution>
@@ -361,7 +394,9 @@ T replace_all_variables(const T& x,
                         typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                        )
 {
-  return core::make_update_apply_builder<state_formulas::variable_builder>(sigma).apply(x);
+  T result;
+  core::make_update_apply_builder<state_formulas::variable_builder>(sigma).apply(result, x);
+  return result;
 }
 
 /// \brief Applies the substitution sigma to x.
@@ -385,7 +420,9 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return data::detail::make_replace_free_variables_builder<state_formulas::data_expression_builder, state_formulas::add_data_variable_builder_binding>(sigma).apply(x);
+  T result;
+  data::detail::make_replace_free_variables_builder<state_formulas::data_expression_builder, state_formulas::add_data_variable_builder_binding>(sigma).apply(result, x);
+  return result;
 }
 
 /// \brief Applies the substitution sigma to x, where the elements of bound_variables are treated as bound variables.
@@ -411,7 +448,9 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return data::detail::make_replace_free_variables_builder<state_formulas::data_expression_builder, state_formulas::add_data_variable_builder_binding>(sigma).apply(x, bound_variables);
+  T result;
+  data::detail::make_replace_free_variables_builder<state_formulas::data_expression_builder, state_formulas::add_data_variable_builder_binding>(sigma).apply(result, x, bound_variables);
+  return result;
 }
 //--- end generated state_formulas replace code ---//
 
@@ -436,14 +475,17 @@ struct substitute_state_formulas_builder: public Builder<substitute_state_formul
       innermost(innermost_)
   {}
 
-  state_formula apply(const state_formula& x)
+  template <class T>
+  void apply(T& result, const state_formula& x)
   {
     if (innermost)
     {
-      state_formula y = super::apply(x);
-      return sigma(y);
+      state_formula y;
+      super::apply(y, x);
+      result = sigma(y);
+      return;
     }
-    return sigma(x);
+    result = sigma(x);
   }
 };
 
@@ -474,7 +516,9 @@ T replace_state_formulas(const T& x,
                            typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
                           )
 {
-  return state_formulas::detail::make_replace_state_formulas_builder<state_formulas::state_formula_builder>(sigma, innermost).apply(x);
+  T result;
+  state_formulas::detail::make_replace_state_formulas_builder<state_formulas::state_formula_builder>(sigma, innermost).apply(result, x);
+  return result;
 }
 
 } // namespace state_formulas

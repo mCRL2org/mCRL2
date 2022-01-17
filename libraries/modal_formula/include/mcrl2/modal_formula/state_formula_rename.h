@@ -62,7 +62,8 @@ struct state_formula_predicate_variable_rename_builder: public state_formulas::s
   /// \brief Visit var node.
   /// \param x A variable.
   /// \return The result of visiting the node
-  state_formula apply(const variable& x)
+  template <class T>
+  void apply(T& result, const variable& x)
   {
     core::identifier_string new_name = x.name();
     for (std::deque<std::pair<core::identifier_string, core::identifier_string> >::iterator i = replacements.begin(); i != replacements.end(); ++i)
@@ -73,29 +74,33 @@ struct state_formula_predicate_variable_rename_builder: public state_formulas::s
         break;
       }
     }
-    return variable(new_name, x.arguments());
+    result = variable(new_name, x.arguments());
   }
 
   /// \brief Visit mu node.
   /// \param x The mu state variable.
   /// \return The result of visiting the node
-  state_formula apply(const mu& x)
+  template <class T>
+  void apply(T& result, const mu& x)
   {
     core::identifier_string new_name = push(x.name());
-    state_formula new_formula = apply(x.operand());
+    state_formula new_formula;
+    apply(new_formula, x.operand());
     pop();
-    return mu(new_name, x.assignments(), new_formula);
+    make_mu(result, new_name, x.assignments(), new_formula);
   }
 
   /// \brief Visit nu node.
   /// \param x The visited nu node.
   /// \return The result of visiting the node
-  state_formula apply(const nu& x)
+  template <class T>
+  void apply(T& result, const nu& x)
   {
     core::identifier_string new_name = push(x.name());
-    state_formula new_formula = apply(x.operand());
+    state_formula new_formula;
+    apply(new_formula, x.operand());
     pop();
-    return nu(new_name, x.assignments(), new_formula);
+    make_nu(result, new_name, x.assignments(), new_formula);
   }
 };
 
@@ -116,7 +121,9 @@ state_formula_predicate_variable_rename_builder<IdentifierGenerator> make_state_
 template <typename IdentifierGenerator>
 state_formula rename_predicate_variables(const state_formula& f, IdentifierGenerator& generator)
 {
-  return make_state_formula_predicate_variable_rename_builder(generator).apply(f);
+  state_formula result;
+  make_state_formula_predicate_variable_rename_builder(generator).apply(result, f);
+  return result;
 }
 
 /// Visitor that renames variables using the specified identifier generator. Also bound variables are renamed!
@@ -159,19 +166,22 @@ struct state_formula_variable_rename_builder: public state_formulas::sort_expres
   }
 
   // do not traverse sorts
-  data::sort_expression apply(const data::sort_expression& x)
+  template <class T>
+  void apply(T& result, const data::sort_expression& x)
   {
-    return x;
+    result = x;
   }
 
-  data::variable apply(const data::variable& x)
+  template <class T>
+  void apply(T& result, const data::variable& x)
   {
     using utilities::detail::contains;
     if (!contains(forbidden_identifiers, x.name()))
     {
-      return x;
+      result = x;
+      return;
     }
-    return data::variable(create_name(x.name()), x.sort());
+    data::make_variable(result, create_name(x.name()), x.sort());
   }
 };
 
@@ -182,7 +192,9 @@ struct state_formula_variable_rename_builder: public state_formulas::sort_expres
 inline
 state_formula rename_variables(const state_formula& f, const std::set<core::identifier_string>& forbidden_identifiers)
 {
-  return state_formula_variable_rename_builder(forbidden_identifiers).apply(f);
+  state_formula result;
+  state_formula_variable_rename_builder(forbidden_identifiers).apply(result, f);
+  return result;
 }
 
 } // namespace state_formulas

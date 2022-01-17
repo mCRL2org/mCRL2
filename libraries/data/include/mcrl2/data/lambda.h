@@ -26,6 +26,9 @@ namespace data
 class lambda: public abstraction
 {
   public:
+    /// Constructor.
+    lambda()
+    {}
 
     /// Constructor.
     ///
@@ -70,6 +73,13 @@ class lambda: public abstraction
     lambda& operator=(lambda&&) noexcept = default;
 
 }; // class lambda
+
+template <class... ARGUMENTS>
+void make_lambda(atermpp::aterm& result, ARGUMENTS... arguments)
+{
+  make_abstraction(result, lambda_binder(), arguments...);
+}
+
 
 //--- start generated class lambda ---//
 // prototype declaration

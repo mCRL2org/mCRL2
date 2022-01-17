@@ -38,54 +38,67 @@ struct remove_data_parameters_builder: public process_expression_builder<remove_
       labels.push_back(action_label(l.name(), {}));
     }
     x.action_labels() = action_label_list(labels.begin(), labels.end());
-    x.init() = apply(x.init());
+    process_expression init;
+    apply(init, x.init());
+    x.init() = init;
     update(x.equations());
   }
 
-  process_equation apply(const process_equation& x)
+  template <class T>
+  void apply(T& result, const process_equation& x)
   {
-    process_expression expression = apply(x.expression());
+    process_expression expression;
+    apply(expression, x.expression());
     process_identifier identifier(x.identifier().name(), {});
-    return process_equation(identifier, {}, expression);
+    result = process_equation(identifier, {}, expression);
   }
 
-  process_expression apply(const process::sum& x)
+  template <class T>
+  void apply(T& result, const process::sum& x)
   {
-    return apply(x.operand());
+    apply(result, x.operand());
   }
 
-  process_expression apply(const process::action& x)
+  template <class T>
+  void apply(T& result, const process::action& x)
   {
-    return action(action_label(x.label().name(), {}), {});
+    result = action(action_label(x.label().name(), {}), {});
   }
 
-  process_expression apply(const process::at& x)
+  template <class T>
+  void apply(T& result, const process::at& x)
   {
-    return apply(x.operand());
+    apply(result, x.operand());
   }
 
-  process_expression apply(const process::if_then& x)
+  template <class T>
+  void apply(T& result, const process::if_then& x)
   {
-    return apply(x.then_case());
+    apply(result, x.then_case());
   }
 
-  process_expression apply(const process::if_then_else& x)
+  template <class T>
+  void apply(T& result, const process::if_then_else& x)
   {
-    process_expression then_case = apply(x.then_case());
-    process_expression else_case = apply(x.else_case());
-    return if_then_else(data::sort_bool::true_(), then_case, else_case);
+    process_expression then_case;
+    apply(then_case, x.then_case());
+    process_expression else_case;
+    apply(else_case, x.else_case());
+    make_if_then_else(result, data::sort_bool::true_(), then_case, else_case);
   }
 
-  process_expression apply(const process::process_instance& x)
+  template <class T>
+  void apply(T& result, const process::process_instance& x)
   {
     process_identifier identifier(x.identifier().name(), {});
-    return process_instance(identifier, {});
+    result = process_instance(identifier, {});
   }
 
-  process_expression apply(const process::process_instance_assignment& x)
+  template <class T>
+  void apply(T& result, const process::process_instance_assignment& x)
   {
     process_identifier identifier(x.identifier().name(), {});
-    return process_instance(identifier, {});
+    result = process_instance(identifier, {});
   }
 };
 

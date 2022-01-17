@@ -32,110 +32,116 @@ struct add_boolean_expressions: public Builder<Derived>
   using super::apply;
 
   void update(bes::boolean_equation& x)
-  {
+  { 
     static_cast<Derived&>(*this).enter(x);
-    x.formula() = static_cast<Derived&>(*this).apply(x.formula());
+    boolean_expression result_formula;
+    static_cast<Derived&>(*this).apply(result_formula, x.formula());
+    x.formula() = result_formula;
     static_cast<Derived&>(*this).leave(x);
   }
 
   void update(bes::boolean_equation_system& x)
-  {
+  { 
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).update(x.equations());
-    x.initial_state() = static_cast<Derived&>(*this).apply(x.initial_state());
+    boolean_expression result_initial_state;
+    static_cast<Derived&>(*this).apply(result_initial_state, x.initial_state());
+    x.initial_state() = result_initial_state;
     static_cast<Derived&>(*this).leave(x);
   }
 
-  bes::true_ apply(const bes::true_& x)
-  {
+  template <class T>
+  void apply(T& result, const bes::true_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  bes::false_ apply(const bes::false_& x)
-  {
+  template <class T>
+  void apply(T& result, const bes::false_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  bes::not_ apply(const bes::not_& x)
-  {
+  template <class T>
+  void apply(T& result, const bes::not_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    bes::not_ result = bes::not_(static_cast<Derived&>(*this).apply(x.operand()));
+    bes::make_not_(result, [&](boolean_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  bes::and_ apply(const bes::and_& x)
-  {
+  template <class T>
+  void apply(T& result, const bes::and_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    bes::and_ result = bes::and_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    bes::make_and_(result, [&](boolean_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](boolean_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  bes::or_ apply(const bes::or_& x)
-  {
+  template <class T>
+  void apply(T& result, const bes::or_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    bes::or_ result = bes::or_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    bes::make_or_(result, [&](boolean_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](boolean_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  bes::imp apply(const bes::imp& x)
-  {
+  template <class T>
+  void apply(T& result, const bes::imp& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    bes::imp result = bes::imp(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    bes::make_imp(result, [&](boolean_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](boolean_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  bes::boolean_variable apply(const bes::boolean_variable& x)
-  {
+  template <class T>
+  void apply(T& result, const bes::boolean_variable& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  bes::boolean_expression apply(const bes::boolean_expression& x)
-  {
+  template <class T>
+  void apply(T& result, const bes::boolean_expression& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    bes::boolean_expression result;
     if (bes::is_true(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<bes::true_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<bes::true_>(x));
     }
     else if (bes::is_false(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<bes::false_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<bes::false_>(x));
     }
     else if (bes::is_not(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<bes::not_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<bes::not_>(x));
     }
     else if (bes::is_and(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<bes::and_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<bes::and_>(x));
     }
     else if (bes::is_or(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<bes::or_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<bes::or_>(x));
     }
     else if (bes::is_imp(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<bes::imp>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<bes::imp>(x));
     }
     else if (bes::is_boolean_variable(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<bes::boolean_variable>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<bes::boolean_variable>(x));
     }
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
 };
@@ -158,111 +164,119 @@ struct add_boolean_variables: public Builder<Derived>
   using super::apply;
 
   void update(bes::boolean_equation& x)
-  {
+  { 
     static_cast<Derived&>(*this).enter(x);
-    x.variable() = static_cast<Derived&>(*this).apply(x.variable());
-    x.formula() = static_cast<Derived&>(*this).apply(x.formula());
+    boolean_variable result_variable;
+    static_cast<Derived&>(*this).apply(result_variable, x.variable());
+    x.variable() = result_variable;
+    boolean_expression result_formula;
+    static_cast<Derived&>(*this).apply(result_formula, x.formula());
+    x.formula() = result_formula;
     static_cast<Derived&>(*this).leave(x);
   }
 
   void update(bes::boolean_equation_system& x)
-  {
+  { 
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).update(x.equations());
-    x.initial_state() = static_cast<Derived&>(*this).apply(x.initial_state());
+    boolean_expression result_initial_state;
+    static_cast<Derived&>(*this).apply(result_initial_state, x.initial_state());
+    x.initial_state() = result_initial_state;
     static_cast<Derived&>(*this).leave(x);
   }
 
-  bes::true_ apply(const bes::true_& x)
-  {
+  template <class T>
+  void apply(T& result, const bes::true_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  bes::false_ apply(const bes::false_& x)
-  {
+  template <class T>
+  void apply(T& result, const bes::false_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  bes::not_ apply(const bes::not_& x)
-  {
+  template <class T>
+  void apply(T& result, const bes::not_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    bes::not_ result = bes::not_(static_cast<Derived&>(*this).apply(x.operand()));
+    bes::make_not_(result, [&](boolean_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  bes::and_ apply(const bes::and_& x)
-  {
+  template <class T>
+  void apply(T& result, const bes::and_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    bes::and_ result = bes::and_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    bes::make_and_(result, [&](boolean_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](boolean_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  bes::or_ apply(const bes::or_& x)
-  {
+  template <class T>
+  void apply(T& result, const bes::or_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    bes::or_ result = bes::or_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    bes::make_or_(result, [&](boolean_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](boolean_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  bes::imp apply(const bes::imp& x)
-  {
+  template <class T>
+  void apply(T& result, const bes::imp& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    bes::imp result = bes::imp(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    bes::make_imp(result, [&](boolean_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](boolean_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  bes::boolean_variable apply(const bes::boolean_variable& x)
-  {
+  template <class T>
+  void apply(T& result, const bes::boolean_variable& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  bes::boolean_expression apply(const bes::boolean_expression& x)
-  {
+  template <class T>
+  void apply(T& result, const bes::boolean_expression& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    bes::boolean_expression result;
     if (bes::is_true(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<bes::true_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<bes::true_>(x));
     }
     else if (bes::is_false(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<bes::false_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<bes::false_>(x));
     }
     else if (bes::is_not(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<bes::not_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<bes::not_>(x));
     }
     else if (bes::is_and(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<bes::and_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<bes::and_>(x));
     }
     else if (bes::is_or(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<bes::or_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<bes::or_>(x));
     }
     else if (bes::is_imp(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<bes::imp>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<bes::imp>(x));
     }
     else if (bes::is_boolean_variable(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<bes::boolean_variable>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<bes::boolean_variable>(x));
     }
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
 };

@@ -34,7 +34,9 @@ T translate_user_notation(const T& x,
                           typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value >::type* = nullptr
                          )
 {
-  return core::make_update_apply_builder<process::data_expression_builder>(data::detail::translate_user_notation_function()).apply(x);
+  T result;
+  core::make_update_apply_builder<process::data_expression_builder>(data::detail::translate_user_notation_function()).apply(result, x);
+  return result;
 }
 
 } // namespace process

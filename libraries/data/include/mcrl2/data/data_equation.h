@@ -112,9 +112,10 @@ class data_equation: public atermpp::aterm_appl
 
 /// \brief Make_data_equation constructs a new term into a given address.
 /// \ \param t The reference into which the new data_equation is constructed. 
-inline void make_data_equation(data_equation& t, const variable_list& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs)
+template <class... ARGUMENTS>
+inline void make_data_equation(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_DataEqn(), variables, condition, lhs, rhs);
+  make_term_appl(t, core::detail::function_symbol_DataEqn(), args...);
 }
 
 /// \brief list of data_equations

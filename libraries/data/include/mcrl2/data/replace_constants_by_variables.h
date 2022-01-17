@@ -45,23 +45,24 @@ struct replace_constants_by_variables_builder: public Builder<replace_constants_
     : r(r_), sigma(sigma_)
   {}
 
-  data::data_expression apply(const data::application& x)
+  template <class T>
+  void apply(T& result, const data::application& x)
   {
     auto i = substitutions.find(x);
     if (i != substitutions.end())
     {
-      return i->second;
+      result = i->second;
     }
     else if (is_constant(x))
     {
       data::variable v(id_generator("@rewr_var"), x.sort());
       substitutions[x] = v;
       sigma[v] = r(x, sigma);
-      return std::move(v);
+      result = v;
     }
     else
     {
-      return super::apply(x);
+      super::apply(result, x);
     }
   }
 };

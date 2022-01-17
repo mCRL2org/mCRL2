@@ -58,6 +58,13 @@ class untyped_set_or_bag_comprehension: public abstraction
 
 }; // class untyped_set_or_bag_comprehension
 
+template <class... ARGUMENTS>
+void make_untyped_set_or_bag_comprehension(atermpp::aterm& result, ARGUMENTS... arguments)
+{
+  make_abstraction(result, untyped_set_or_bag_comprehension_binder(), arguments...);
+}
+
+
 //--- start generated class untyped_set_or_bag_comprehension ---//
 // prototype declaration
 std::string pp(const untyped_set_or_bag_comprehension& x);

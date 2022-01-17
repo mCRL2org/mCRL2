@@ -37,7 +37,7 @@ class untyped_sort_variable: public sort_expression
     }
 
     /// \brief Constructor.
-    untyped_sort_variable(const atermpp::aterm_int& value)
+    explicit untyped_sort_variable(const atermpp::aterm_int& value)
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedSortVariable(), value))
     {}
 
@@ -61,9 +61,10 @@ class untyped_sort_variable: public sort_expression
 
 /// \brief Make_untyped_sort_variable constructs a new term into a given address.
 /// \ \param t The reference into which the new untyped_sort_variable is constructed. 
-inline void make_untyped_sort_variable(untyped_sort_variable& t, const atermpp::aterm_int& value)
+template <class... ARGUMENTS>
+inline void make_untyped_sort_variable(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_UntypedSortVariable(), value);
+  make_term_appl(t, core::detail::function_symbol_UntypedSortVariable(), args...);
 }
 
 /// \brief Test for a untyped_sort_variable expression

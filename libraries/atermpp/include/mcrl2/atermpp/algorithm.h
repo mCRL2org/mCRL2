@@ -38,10 +38,18 @@ struct replace_aterm_builder: public Builder<replace_aterm_builder<Builder, Repl
     : f(f_)
   {}
 
-  aterm apply(const aterm_appl& x)
+  template <class T>
+  void apply(T& result, const aterm_appl& x)
   {
-    const aterm fx = f(x);
-    return (x == fx) ? super::apply(x) : fx;
+    const T fx(f(x));
+    if (x == fx) 
+    {
+      super::apply(result, x); 
+    }
+    else 
+    {
+      result = fx;
+    }
   }
 };
 
@@ -67,10 +75,18 @@ struct partial_replace_aterm_builder: public Builder<partial_replace_aterm_build
     : f(f_)
   {}
 
-  aterm apply(const aterm_appl& x)
+  template <class T>
+  void apply(T& result, const aterm_appl& x)
   {
     std::pair<aterm_appl, bool> p = f(x);
-    return p.second ? super::apply(x) : p.first;
+    if (p.second)
+    { 
+      super::apply(result, x);
+    } 
+    else 
+    {
+      result = p.first;
+    }
   }
 };
 
@@ -96,9 +112,12 @@ struct bottom_up_replace_aterm_builder: public Builder<bottom_up_replace_aterm_b
     : f(f_)
   {}
 
-  aterm apply(const aterm_appl& x)
+  template <class T>
+  void apply(T& result, const aterm_appl& x)
   {
-    return f(down_cast<aterm_appl>(super::apply(x)));
+    aterm_appl t;
+    super::apply(t, x);
+    result = static_cast<T>(f(t));
   }
 };
 
@@ -125,16 +144,19 @@ struct cached_bottom_up_replace_aterm_builder: public Builder<cached_bottom_up_r
     : f(f_), cache(cache_)
   {}
 
-  aterm apply(const aterm_appl& x)
+  template <class T>
+  void apply(T& result, const aterm_appl& x)
   {
     auto i = cache.find(x);
     if (i != cache.end())
     {
-      return i->second;
+      result = i->second;
+      return;
     }
-    aterm result = f(down_cast<aterm_appl>(super::apply(x)));
+    aterm t;
+    super::apply(t, x);
+    result = f(down_cast<aterm_appl>(t));
     cache[x] = result;
-    return result;
   }
 };
 
@@ -223,7 +245,9 @@ void partial_find_all_if(Term t, MatchPredicate match, StopPredicate stop, Outpu
 template <typename Term, typename ReplaceFunction>
 Term replace(const Term& t, ReplaceFunction r)
 {
-  return vertical_cast<Term>(detail::make_replace_aterm_builder<atermpp::builder>(r).apply(t));
+  Term result;
+  detail::make_replace_aterm_builder<atermpp::builder>(r).apply(result,t);
+  return result;
 }
 
 /// \brief Replaces each subterm in t that is equal to old_value with new_value.
@@ -251,7 +275,9 @@ Term replace(const Term& t, const aterm& old_value, const aterm& new_value)
 template <typename Term, typename ReplaceFunction>
 Term bottom_up_replace(Term t, ReplaceFunction r)
 {
-  return vertical_cast<Term>(detail::make_bottom_up_replace_aterm_builder<atermpp::builder>(r).apply(t));
+  Term result;
+  detail::make_bottom_up_replace_aterm_builder<atermpp::builder>(r).apply(result, t);
+  return result;
 }
 
 /// \brief Replaces each subterm in t that is equal to old_value with new_value.
@@ -281,7 +307,9 @@ Term bottom_up_replace(Term t, const aterm_appl& old_value, const aterm_appl& ne
 template <typename Term, typename ReplaceFunction>
 Term partial_replace(Term t, ReplaceFunction r)
 {
-  return vertical_cast<Term>(detail::make_partial_replace_aterm_builder<atermpp::builder>(r).apply(t));
+  Term result;
+  detail::make_partial_replace_aterm_builder<atermpp::builder>(r).apply(result, t);
+  return result;
 }
 
 /// \brief Replaces each subterm x of t by r(x). The ReplaceFunction r has
@@ -297,7 +325,9 @@ Term partial_replace(Term t, ReplaceFunction r)
 template <typename Term, typename ReplaceFunction>
 Term bottom_up_replace(Term t, ReplaceFunction r, std::unordered_map<aterm_appl, aterm>& cache)
 {
-  return vertical_cast<Term>(detail::make_cached_bottom_up_replace_aterm_builder<atermpp::builder>(r, cache).apply(t));
+  Term result;
+  detail::make_cached_bottom_up_replace_aterm_builder<atermpp::builder>(r, cache).apply(result, t);
+  return result;
 }
 
 } // namespace atermpp

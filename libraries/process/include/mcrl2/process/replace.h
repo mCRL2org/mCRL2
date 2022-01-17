@@ -39,7 +39,9 @@ T replace_sort_expressions(const T& x,
                            typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                           )
 {
-  return data::detail::make_replace_sort_expressions_builder<process::sort_expression_builder>(sigma, innermost).apply(x);
+  T result;
+  data::detail::make_replace_sort_expressions_builder<process::sort_expression_builder>(sigma, innermost).apply(result, x);
+  return result;
 }
 
 template <typename T, typename Substitution>
@@ -59,8 +61,11 @@ T replace_data_expressions(const T& x,
                            typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                           )
 {
-  return data::detail::make_replace_data_expressions_builder<process::data_expression_builder>(sigma, innermost).apply(x);
+  T result;
+  data::detail::make_replace_data_expressions_builder<process::data_expression_builder>(sigma, innermost).apply(result, x);
+  return result;
 }
+
 
 template <typename T, typename Substitution>
 void replace_variables(T& x,
@@ -77,7 +82,9 @@ T replace_variables(const T& x,
                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                    )
 {
-  return core::make_update_apply_builder<process::data_expression_builder>(sigma).apply(x);
+  T result;
+  core::make_update_apply_builder<process::data_expression_builder>(sigma).apply(result, x);
+  return result;
 }
 
 template <typename T, typename Substitution>
@@ -95,7 +102,9 @@ T replace_all_variables(const T& x,
                         typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                        )
 {
-  return core::make_update_apply_builder<process::variable_builder>(sigma).apply(x);
+  T result;
+  core::make_update_apply_builder<process::variable_builder>(sigma).apply(result, x);
+  return result;
 }
 
 /// \brief Applies the substitution sigma to x.
@@ -119,7 +128,9 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return data::detail::make_replace_free_variables_builder<process::data_expression_builder, process::add_data_variable_builder_binding>(sigma).apply(x);
+  T result;
+  data::detail::make_replace_free_variables_builder<process::data_expression_builder, process::add_data_variable_builder_binding>(sigma).apply(result, x);
+  return result;
 }
 
 /// \brief Applies the substitution sigma to x, where the elements of bound_variables are treated as bound variables.
@@ -145,7 +156,9 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return data::detail::make_replace_free_variables_builder<process::data_expression_builder, process::add_data_variable_builder_binding>(sigma).apply(x, bound_variables);
+  T result;
+  data::detail::make_replace_free_variables_builder<process::data_expression_builder, process::add_data_variable_builder_binding>(sigma).apply(result, x, bound_variables);
+  return result;
 }
 //--- end generated process replace code ---//
 
@@ -186,7 +199,9 @@ T replace_process_identifiers(const T& x,
                     typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value >::type* = nullptr
                    )
 {
-  return core::make_update_apply_builder<process::process_identifier_builder>(sigma).apply(x);
+  T result;
+  core::make_update_apply_builder<process::process_identifier_builder>(sigma).apply(result, x);
+  return result;
 }
 
 } // namespace process

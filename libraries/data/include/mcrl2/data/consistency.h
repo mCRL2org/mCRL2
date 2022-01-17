@@ -149,7 +149,7 @@ sort_expression bool_()
 /// \param x A data expression
 /// \return The value <tt>forall v.x</tt>
 inline
-data_expression make_forall(const data::variable_list& v, const data_expression& x)
+data_expression make_forall_(const data::variable_list& v, const data_expression& x)
 {
   if (v.empty())
   {
@@ -164,7 +164,7 @@ data_expression make_forall(const data::variable_list& v, const data_expression&
 /// \param x A data expression
 /// \return The value <tt>exists v.x</tt>
 inline
-data_expression make_exists(const data::variable_list& v, const data_expression& x)
+data_expression make_exists_(const data::variable_list& v, const data_expression& x)
 {
   if (v.empty())
   {

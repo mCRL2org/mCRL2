@@ -102,7 +102,7 @@ namespace mcrl2 {
       inline
       function_symbol const& cbound()
       {
-        static function_symbol cbound(cbound_name(), make_function_sort(sort_real::real_(), sort_inequality::inequality(), bound()));
+        static function_symbol cbound(cbound_name(), make_function_sort_(sort_real::real_(), sort_inequality::inequality(), bound()));
         return cbound;
       }
 
@@ -171,7 +171,7 @@ namespace mcrl2 {
       inline
       function_symbol const& lt()
       {
-        static function_symbol lt(lt_name(), make_function_sort(bound(), bound(), sort_bool::bool_()));
+        static function_symbol lt(lt_name(), make_function_sort_(bound(), bound(), sort_bool::bool_()));
         return lt;
       }
 
@@ -228,7 +228,7 @@ namespace mcrl2 {
       inline
       function_symbol const& add()
       {
-        static function_symbol add(add_name(), make_function_sort(bound(), bound(), bound()));
+        static function_symbol add(add_name(), make_function_sort_(bound(), bound(), bound()));
         return add;
       }
 
@@ -285,7 +285,7 @@ namespace mcrl2 {
       inline
       function_symbol const& min_b()
       {
-        static function_symbol min_b(min_b_name(), make_function_sort(bound(), bound(), bound()));
+        static function_symbol min_b(min_b_name(), make_function_sort_(bound(), bound(), bound()));
         return min_b;
       }
 
@@ -342,7 +342,7 @@ namespace mcrl2 {
       inline
       function_symbol const& max_b()
       {
-        static function_symbol max_b(max_b_name(), make_function_sort(bound(), bound(), bound()));
+        static function_symbol max_b(max_b_name(), make_function_sort_(bound(), bound(), bound()));
         return max_b;
       }
 
@@ -399,7 +399,7 @@ namespace mcrl2 {
       inline
       function_symbol const& not_b()
       {
-        static function_symbol not_b(not_b_name(), make_function_sort(bound(), bound()));
+        static function_symbol not_b(not_b_name(), make_function_sort_(bound(), bound()));
         return not_b;
       }
 

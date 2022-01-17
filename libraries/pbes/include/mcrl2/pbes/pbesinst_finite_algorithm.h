@@ -200,7 +200,8 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
     return data::data_expression_list(v.begin(), v.end(), [&](const data::data_expression& x) { return rewr(x, sigma); });
   }
 
-  pbes_expression apply(const propositional_variable_instantiation& x)
+  template <class T>
+  void apply(T& result, const propositional_variable_instantiation& x)
   {
     typedef data::enumerator_list_element_with_substitution<> enumerator_element;
 
@@ -221,7 +222,7 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
       di = vi->second;
     }
 
-    std::set<pbes_expression> result;
+    std::set<pbes_expression> result_set;
     bool accept_solutions_with_variables = false;
     data::enumerator_identifier_generator id_generator;
     data::enumerator_algorithm<> E(super::R, m_data_spec, super::R, id_generator, accept_solutions_with_variables);
@@ -238,11 +239,11 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
                     di_copy = data::replace_free_variables(di_copy, sigma_i);
                     data::data_expression c = make_condition(di_copy, d_copy);
                     core::identifier_string Y = m_rename(Xi, di_copy);
-                    result.insert(and_(c, propositional_variable_instantiation(Y, e_copy)));
+                    result_set.insert(and_(c, propositional_variable_instantiation(Y, e_copy)));
                     return false;
                 }
     );
-    return join_or(result.begin(), result.end());
+    result = join_or(result_set.begin(), result_set.end());
   }
 
   /// \return Visits the initial state
@@ -364,7 +365,8 @@ class pbesinst_finite_algorithm
                       core::identifier_string name = rename(eqn.variable().name(), data::data_expression_list(finite.begin(), finite.end()));
                       propositional_variable X(name, infinite);
                       detail::pbesinst_finite_builder<data::rewriter, data::mutable_indexed_substitution<>> visitor(rewr, sigma_j, rename, pbesspec.data(), index_map, variable_map);
-                      pbes_expression formula = visitor.apply(eqn.formula());
+                      pbes_expression formula;
+                      visitor.apply(formula, eqn.formula());
                       equations.emplace_back(eqn.symbol(), X, formula);
                       mCRL2log(log::debug, "pbesinst_finite") << print_equation_count(++m_equation_count);
                       mCRL2log(log::debug, "pbesinst_finite") << "Added equation " << pbes_system::pp(eqn) << "\n";

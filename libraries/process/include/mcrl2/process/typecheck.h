@@ -281,7 +281,8 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     }
   }
 
-  process_expression apply(const untyped_process_assignment& x)
+  template <class T>
+  void apply(T& result, const untyped_process_assignment& x)
   {
     mCRL2log(log::debug) << "typechecking a process call with short-hand assignments " << x << "" << std::endl;
     if (!is_process_name(x.name()))
@@ -323,18 +324,19 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       check_assignments(*m_current_equation, P, assignments, x);
     }
 
-    return process_instance_assignment(P, data::assignment_list(assignments.begin(), assignments.end()));
+    result = process_instance_assignment(P, data::assignment_list(assignments.begin(), assignments.end()));
   }
 
-  process_expression apply(const data::untyped_data_parameter& x)
+  template <class T>
+  void apply(T& result, const data::untyped_data_parameter& x)
   {
     if (is_action_name(x.name()))
     {
-      return typecheck_action(x.name(), x.arguments());
+      result = typecheck_action(x.name(), x.arguments());
     }
     else if (is_process_name(x.name()))
     {
-      return typecheck_process_instance(x.name(), x.arguments());
+      result = typecheck_process_instance(x.name(), x.arguments());
     }
     else
     {
@@ -343,26 +345,32 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   }
 
   // This case is necessary for actionrename
-  process_expression apply(const process::action& x)
+  template <class T>
+  void apply(T& result, const process::action& x)
   {
-    return typecheck_action(x.label().name(), x.arguments());
+    result = typecheck_action(x.label().name(), x.arguments());
   }
 
-  process_expression apply(const process::hide& x)
+  template <class T>
+  void apply(T& result, const process::hide& x)
   {
     check_not_empty(x.hide_set(), "Hiding empty set of actions", x);
     check_actions_declared(x.hide_set(), x);
-    return process::hide(x.hide_set(), (*this).apply(x.operand()));
+    process::make_hide(result, 
+                       x.hide_set(), 
+                       [&](process_expression& result){ (*this).apply(result, x.operand()); } );
   }
 
-  process_expression apply(const process::block& x)
+  template <class T>
+  void apply(T& result, const process::block& x)
   {
     check_not_empty(x.block_set(), "Blocking empty set of actions", x);
     check_actions_declared(x.block_set(), x);
-    return block(x.block_set(), (*this).apply(x.operand()));
+    make_block(result, x.block_set(), [&]( process_expression& result){ (*this).apply(result, x.operand()); });
   }
 
-  process_expression apply(const process::rename& x)
+  template <class T>
+  void apply(T& result, const process::rename& x)
   {
     check_not_empty(x.rename_set(), "Renaming empty set of actions", x);
 
@@ -378,11 +386,12 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
         throw mcrl2::runtime_error("renaming action " + core::pp(r.source()) + " twice (typechecking " + process::pp(x) + ")");
       }
     }
-    return rename(x.rename_set(), (*this).apply(x.operand()));
+    make_rename(result, x.rename_set(), [&](process_expression& r){ (*this).apply(r, x.operand()); } );
   }
 
   //comm: like renaming multiactions (with the same parameters) to action/tau
-  process_expression apply(const process::comm& x)
+  template <class T>
+  void apply(T& result, const process::comm& x)
   {
     check_not_empty(x.comm_set(), "synchronizing empty set of (multi)actions", x);
 
@@ -456,10 +465,11 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
                      " occurs at the left and the right in a communication (typechecking " + process::pp(x) + ")");
       }
     }
-    return comm(x.comm_set(), (*this).apply(x.operand()));
+    make_comm(result, x.comm_set(), [&](process_expression& r){ (*this).apply(r, x.operand()); } );
   }
 
-  process_expression apply(const process::allow& x)
+  template <class T>
+  void apply(T& result, const process::allow& x)
   {
     check_not_empty(x.allow_set(), "Allowing empty set of (multi) actions", x);
     action_name_multiset_list MActs;
@@ -479,39 +489,47 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       }
       else
       {
-        MActs.push_front(A.names());
+        MActs.push_front(mcrl2::process::action_name_multiset(A.names()));
       }
     }
-    return allow(x.allow_set(), (*this).apply(x.operand()));
+    make_allow(result, x.allow_set(), [&](process_expression& r){ (*this).apply(r, x.operand()); } );
   }
 
-  process_expression apply(const process::at& x)
+  template <class T>
+  void apply(T& result, const process::at& x)
   {
     data::data_expression new_time = m_data_type_checker.typecheck_data_expression(x.time_stamp(), data::sort_real::real_(), m_variable_context);
-    return at((*this).apply(x.operand()), new_time);
+    make_at(result, [&](process_expression& r){ (*this).apply(r, x.operand()); }, new_time);
   }
 
-  process_expression apply(const process::if_then& x)
+  template <class T>
+  void apply(T& result, const process::if_then& x)
   {
     data::data_expression condition = m_data_type_checker.typecheck_data_expression(x.condition(), data::sort_bool::bool_(), m_variable_context);
-    return if_then(condition, (*this).apply(x.then_case()));
+    make_if_then(result, condition, [&](process_expression& r){ (*this).apply(r, x.then_case()); } );
   }
 
-  process_expression apply(const process::if_then_else& x)
+  template <class T>
+  void apply(T& result, const process::if_then_else& x)
   {
     data::data_expression condition = m_data_type_checker.typecheck_data_expression(x.condition(), data::sort_bool::bool_(), m_variable_context);
-    return if_then_else(condition, (*this).apply(x.then_case()), (*this).apply(x.else_case()));
+    make_if_then_else(result, 
+                      condition, 
+                      [&](process_expression& r){ (*this).apply(r, x.then_case()); }, 
+                      [&](process_expression& r){ (*this).apply(r, x.else_case()); } );
   }
 
-  process_expression apply(const process::sum& x)
+  template <class T>
+  void apply(T& result, const process::sum& x)
   {
     try
     {
       auto m_variable_context_copy = m_variable_context;
       m_variable_context.add_context_variables(x.variables(), m_data_type_checker);
-      process_expression operand = (*this).apply(x.operand());
+      process_expression operand;
+      (*this).apply(operand, x.operand());
       m_variable_context = m_variable_context_copy;
-      return sum(x.variables(), operand);
+      make_sum(result, x.variables(), operand);
     }
     catch (mcrl2::runtime_error& e)
     {
@@ -519,16 +537,18 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     }
   }
 
-  process_expression apply(const process::stochastic_operator& x)
+  template <class T>
+  void apply(T& result, const process::stochastic_operator& x)
   {
     try
     {
       auto m_variable_context_copy = m_variable_context;
       m_variable_context.add_context_variables(x.variables(), m_data_type_checker);
       data::data_expression distribution = m_data_type_checker.typecheck_data_expression(x.distribution(), data::sort_real::real_(), m_variable_context);
-      process_expression operand = (*this).apply(x.operand());
+      process_expression operand;
+      (*this).apply(operand, x.operand());
       m_variable_context = m_variable_context_copy;
-      return stochastic_operator(x.variables(), distribution, operand);
+      make_stochastic_operator(result, x.variables(), distribution, operand);
     }
     catch (mcrl2::runtime_error& e)
     {
@@ -635,7 +655,9 @@ class process_type_checker
   protected:
     process_expression typecheck_process_expression(const data::detail::variable_context& variables, const process_expression& x, const process_identifier* current_equation = nullptr)
     {
-      return detail::make_typecheck_builder(m_data_type_checker, variables, m_process_context, m_action_context, current_equation).apply(x);
+      process_expression result;
+      detail::make_typecheck_builder(m_data_type_checker, variables, m_process_context, m_action_context, current_equation).apply(result, x);
+      return result;
     }
 };
 

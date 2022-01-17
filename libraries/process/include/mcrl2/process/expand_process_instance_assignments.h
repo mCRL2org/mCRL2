@@ -36,7 +36,8 @@ struct expand_process_instance_assignments_builder: public process_expression_bu
 
   /// \brief Converts a process instance P(e) into p[d := e], where P(d) = p is the equation
   /// corresponding to P.
-  process_expression apply(const process::process_instance& x)
+  template <class T>
+  void apply(T& result, const process::process_instance& x)
   {
     const process_equation& eqn = find_equation(equations, x.identifier());
     const process_expression& p = eqn.expression();
@@ -49,13 +50,13 @@ struct expand_process_instance_assignments_builder: public process_expression_bu
     {
       sigma[*di] = *ei;
     }
-    process_expression result = process::replace_variables_capture_avoiding(p, sigma);
-    return result;
+    result = process::replace_variables_capture_avoiding(p, sigma);
   }
 
   /// \brief Converts a process instance assignment P(d = e) into p[d := e], where P(d) = p is the equation
   /// corresponding to P.
-  process_expression apply(const process::process_instance_assignment& x)
+  template <class T>
+  void apply(T& result, const process::process_instance_assignment& x)
   {
     const process_equation& eqn = find_equation(equations, x.identifier());
     const process_expression& p = eqn.expression();
@@ -64,8 +65,7 @@ struct expand_process_instance_assignments_builder: public process_expression_bu
     {
       sigma[a.lhs()] = a.rhs();
     }
-    process_expression result = process::replace_variables_capture_avoiding(p, sigma);
-    return result;
+    result = process::replace_variables_capture_avoiding(p, sigma);
   }
 };
 
@@ -76,7 +76,9 @@ inline
 process_expression expand_process_instance_assignments(const process_expression& x, const std::vector<process_equation>& equations)
 {
   detail::expand_process_instance_assignments_builder f(equations);
-  return f.apply(x);
+  process_expression result;
+  f.apply(result, x);
+  return result;
 }
 
 // Converts a process_instance_assignment into a process_instance, by expanding assignments

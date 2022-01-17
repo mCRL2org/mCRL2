@@ -49,7 +49,8 @@ struct add_capture_avoiding_replacement_with_an_identifier_generator: public dat
     : super(sigma, id_generator)
   { }
 
-  process::process_expression apply(const process::process_instance_assignment& x)
+  template <class T>
+  void apply(T& result, const process::process_instance_assignment& x)
   {
     static_cast<Derived&>(*this).enter(x);
     const data::assignment_list& a = x.assignments();
@@ -60,7 +61,8 @@ struct add_capture_avoiding_replacement_with_an_identifier_generator: public dat
       const data::assignment_list::const_iterator k = find_variable(a, variable);
       if (k == a.end())
       {
-        data::data_expression e = apply(variable);
+        data::data_expression e;
+        apply(e, variable);
         if (e != variable)
         {
           v.emplace_back(variable, e);
@@ -68,20 +70,23 @@ struct add_capture_avoiding_replacement_with_an_identifier_generator: public dat
       }
       else
       {
-        v.emplace_back(k->lhs(), apply(k->rhs()));
+        data::data_expression rhs;
+        apply(rhs, k->rhs());
+        v.emplace_back(k->lhs(), rhs);
       }
     }
-    process::process_expression result = process::process_instance_assignment(x.identifier(), data::assignment_list(v.begin(), v.end()));
+    process::make_process_instance_assignment(result, x.identifier(), data::assignment_list(v.begin(), v.end()));
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process_expression apply(const sum& x)
+  template <class T>
+  void apply(T& result, const sum& x)
   {
     data::variable_list v = update_sigma.push(x.variables());
-    process_expression result = sum(v, apply(x.operand()));
+    process_expression body;
+    apply(body, x.operand());
+    make_sum(result, v, body);
     update_sigma.pop(v);
-    return result;
   }
 };
 
@@ -144,7 +149,9 @@ T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                    )
 {
-  return data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<process::data_expression_builder, process::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).apply(x);
+  T result;
+  data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<process::data_expression_builder, process::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).apply(result, x);
+  return result;
 }
 //--- end generated process replace_capture_avoiding_with_identifier_generator code ---//
 

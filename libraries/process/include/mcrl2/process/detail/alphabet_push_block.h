@@ -184,20 +184,22 @@ struct push_block_builder: public process_expression_builder<Derived>
     return static_cast<Derived&>(*this);
   }
 
-  process::process_expression apply(const process::action& x)
+  template <class T>
+  void apply(T& result, const process::action& x)
   {
     using utilities::detail::contains;
     if (contains(B, x.label().name()))
     {
-      return delta();
+      result = delta();
     }
     else
     {
-      return x;
+      result = x;
     }
   }
 
-  process::process_expression apply(const process::process_instance& x)
+  template <class T>
+  void apply(T& result, const process::process_instance& x)
   {
     // Let x = P(e)
     // The corresponding equation is P(d) = p
@@ -209,7 +211,8 @@ struct push_block_builder: public process_expression_builder<Derived>
       {
         if (B == j.first)
         {
-          return j.second;
+          result = j.second;
+          return;
         }
       }
     }
@@ -229,37 +232,40 @@ struct push_block_builder: public process_expression_builder<Derived>
     process_equation eqn1(P1, d, p1);
     equations.push_back(eqn1);
 
-    process_instance result(P1, x.actual_parameters());
-    return workaround::return_std_move(result);
+    result = process_instance(P1, x.actual_parameters());
   }
 
-  process::process_expression apply(const process::process_instance_assignment& x)
+  template <class T>
+  void apply(T& result, const process::process_instance_assignment& x)
   {
     process_instance x1 = expand_assignments(x, equations);
-    return derived().apply(x1);
+    derived().apply(result, x1);
   }
 
-  process::process_expression apply(const process::block& x)
+  template <class T>
+  void apply(T& result, const process::block& x)
   {
     std::set<core::identifier_string> B1 = block_operations::set_union(B, x.block_set());
     mCRL2log(log::debug) << push_block_printer(B).print(x, B1);
-    return push_block(B1, x.operand(), equations, W, id_generator);
+    result = push_block(B1, x.operand(), equations, W, id_generator);
   }
 
-  process::process_expression apply(const process::hide& x)
+  template <class T>
+  void apply(T& result, const process::hide& x)
   {
     const core::identifier_string_list& I = x.hide_set();
     std::set<core::identifier_string> B1 = block_operations::set_difference(B, I);
     mCRL2log(log::debug) << push_block_printer(B).print(x, B1);
-    return make_hide(I, push_block(B1, x.operand(), equations, W, id_generator));
+    make_hide(result, I, push_block(B1, x.operand(), equations, W, id_generator));
   }
 
-  process::process_expression apply(const process::rename& x)
+  template <class T>
+  void apply(T& result, const process::rename& x)
   {
     const rename_expression_list& R = x.rename_set();
     std::set<core::identifier_string> B1 = block_operations::rename_inverse(R, B);
     mCRL2log(log::debug) << push_block_printer(B).print(x, B1);
-    return process::rename(R, push_block(B1, x.operand(), equations, W, id_generator));
+    process::make_rename(result, R, push_block(B1, x.operand(), equations, W, id_generator));
   }
 
   bool restrict_(const core::identifier_string& b, const std::set<core::identifier_string>& B, const communication_expression_list& C) const
@@ -290,16 +296,17 @@ struct push_block_builder: public process_expression_builder<Derived>
     return result;
   }
 
-  process::process_expression apply(const process::comm& x)
+  template <class T>
+  void apply(T& result, const process::comm& x)
   {
     std::set<core::identifier_string> B1 = restrict_block(B, x.comm_set());
     process_expression y = push_block(B1, x.operand(), equations, W, id_generator);
-    process_expression result = make_block(core::identifier_string_list(B.begin(), B.end()), make_comm(x.comm_set(), y));
+    result = make_block(core::identifier_string_list(B.begin(), B.end()), make_comm(x.comm_set(), y));
     mCRL2log(log::debug) << push_block_printer(B).print(x, result);
-    return result;
   }
 
-  process::process_expression apply(const process::allow& x)
+  template <class T>
+  void apply(T& result, const process::allow& x)
   {
     allow_set A(alphabet_operations::make_name_set(x.allow_set()));
     core::identifier_string_list B1(B.begin(), B.end());
@@ -307,15 +314,18 @@ struct push_block_builder: public process_expression_builder<Derived>
     detail::push_allow_cache W_allow(id_generator, W.pcrl_equation_cache);
     detail::push_allow_node node = detail::push_allow(x.operand(), A1, equations, W_allow, true);
     mCRL2log(log::debug) << push_block_printer(B).print(x, A1);
-    return node.expression;
+    result = node.expression;
   }
 
   // This function is needed because the linearization algorithm does not handle the case 'delta | delta'.
-  process::process_expression apply(const process::sync& x)
+  template <class T>
+  void apply(T& result, const process::sync& x)
   {
-    process_expression left = derived().apply(x.left());
-    process_expression right = derived().apply(x.right());
-    return make_sync(left, right);
+    process_expression left;
+    derived().apply(left, x.left());
+    process_expression right;
+    derived().apply(right, x.right());
+    result = make_sync(left, right);
   }
 };
 
@@ -337,7 +347,9 @@ inline
 process_expression push_block(const std::set<core::identifier_string>& B, const process_expression& x, std::vector<process_equation>& equations, push_block_cache& W, data::set_identifier_generator& id_generator)
 {
   apply_push_block_builder<push_block_builder> f(equations, W, B, id_generator);
-  return f.apply(x);
+  process_expression result;
+  f.apply(result, x);
+  return result;
 }
 
 } // namespace detail

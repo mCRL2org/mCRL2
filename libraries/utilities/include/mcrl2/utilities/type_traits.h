@@ -52,6 +52,18 @@ constexpr bool is_iterable_v = is_iterable<T>::value;
 template <typename T>
 constexpr bool is_iterator_v = is_iterator<T>::value;
 
+template <typename FunctionType, typename ResultType, typename = void>
+struct is_constant_function_yielding 
+    : public std::false_type
+{
+};
+
+template <typename FunctionType, typename ResultType>
+struct is_constant_function_yielding<FunctionType, ResultType,
+                     typename std::is_convertible<typename std::result_of<FunctionType()>::type, ResultType> >
+    : public std::true_type
+{};
+
 template <typename FunctionType, typename ArgumentType, typename = void>
 struct is_applicable 
     : public std::false_type
@@ -75,6 +87,30 @@ struct is_applicable2<FunctionType, ArgumentType1, ArgumentType2,
                       typename std::result_of<FunctionType(ArgumentType1,ArgumentType2)>::type>
     : public std::true_type
 {};
+
+template <typename T>
+struct function_traits
+    : public function_traits<decltype(&T::operator())>
+{};
+// For generic types, directly use the result of the signature of its 'operator()'
+
+template <typename ClassType, typename ReturnType, typename... Args>
+struct function_traits<ReturnType(ClassType::*)(Args...) const>
+// we specialize for pointers to member function
+{
+    enum { arity = sizeof...(Args) };
+    // arity is the number of arguments.
+
+    typedef ReturnType result_type;
+
+    template <size_t i>
+    struct arg
+    {
+        typedef typename std::tuple_element<i, std::tuple<Args...>>::type type;
+        // the i-th argument is equivalent to the i-th tuple element of a tuple
+        // composed of those arguments.
+    };
+};
 
 } // namespace mcrl2::utilities
 

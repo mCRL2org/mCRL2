@@ -54,7 +54,9 @@ struct builder
   void update(T& x, typename atermpp::disable_if_container<T>::type* = nullptr)
   {
     msg("non-container visit");
-    x = static_cast<Derived*>(this)->apply(x);
+    T result;
+    static_cast<Derived*>(this)->apply(result, x);
+    x = result;
   }
 
   // container visit
@@ -83,11 +85,14 @@ struct builder
   }
 
   // term_list visit copy
-  template <typename T>
-  atermpp::term_list<T> apply(const atermpp::term_list<T>& x)
+  template <typename T, typename U>
+  void apply(atermpp::term_list<T>& result, const atermpp::term_list<U>& x)
   {
     msg("term_list traversal");
-    return atermpp::term_list<T>(x.begin(), x.end(), [&](const T& v) { return atermpp::vertical_cast<T>(static_cast<Derived*>(this)->apply(v)); } );
+    atermpp::make_term_list<T>(static_cast<atermpp::term_list<T>&>(result), 
+                               x.begin(), 
+                               x.end(), 
+                               [&](T& result, const U& v) { static_cast<Derived*>(this)->apply(result, v); } );
   }
 };
 
@@ -96,7 +101,7 @@ struct builder
 template <template <class> class Builder>
 class apply_builder: public Builder<apply_builder<Builder> >
 {
-    typedef Builder<apply_builder<Builder> > super;
+  typedef Builder<apply_builder<Builder> > super;
 
   public:
 
@@ -117,7 +122,7 @@ make_apply_builder()
 template <template <class> class Builder, class Arg1>
 class apply_builder_arg1: public Builder<apply_builder_arg1<Builder, Arg1> >
 {
-    typedef Builder<apply_builder_arg1<Builder, Arg1> > super;
+  typedef Builder<apply_builder_arg1<Builder, Arg1> > super;
 
   public:
     using super::enter;
@@ -150,11 +155,14 @@ struct update_apply_builder: public Builder<update_apply_builder<Builder, Functi
   using super::update;
 
   using argument_type = typename Function::argument_type; ///< The argument_type is required to restrict the overloads of apply(x) to that type.
+  using result_type = typename Function::result_type; ///< The argument_type is required to restrict the overloads of apply(x) to that type.
   const Function& f_;
   
-  auto apply(const argument_type& x) -> decltype(f_(x))
+  template <class T>
+  void apply(T& result, const argument_type& x) // -> decltype(f_(x))
   {
-    return f_(x);
+    // static_cast<result_type&>(result) = f_(x);
+    result = static_cast<T>(f_(x));
   }
 
   update_apply_builder(const Function& f)
@@ -181,11 +189,13 @@ class update_apply_builder_arg1: public Builder<update_apply_builder_arg1<Builde
   using super::update;
   
   using argument_type = typename Function::argument_type; ///< The argument_type is required to restrict the overloads of apply(x) to that type.
+  using result_type = typename Function::result_type;
   const Function& f_;
   
-  auto apply(const argument_type& x) -> decltype(f_(x))
+  template <class T>
+  void apply(T& result, const argument_type& x) // -> decltype(f_(x))
   {
-    return f_(x);
+    result = f_(x);
   }
 
   update_apply_builder_arg1(const Function& f, const Arg1& arg1):

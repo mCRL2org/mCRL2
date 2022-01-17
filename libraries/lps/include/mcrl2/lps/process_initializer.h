@@ -64,6 +64,14 @@ class process_initializer: public atermpp::aterm_appl
     }
 };
 
+
+template <class EXPRESSION_LIST>
+inline void make_process_initializer(atermpp::aterm_appl& t, EXPRESSION_LIST args)
+{
+  make_term_appl(t, core::detail::function_symbol_LinearProcessInit(), args, stochastic_distribution());
+}
+
+
 //--- start generated class process_initializer ---//
 /// \brief list of process_initializers
 typedef atermpp::term_list<process_initializer> process_initializer_list;

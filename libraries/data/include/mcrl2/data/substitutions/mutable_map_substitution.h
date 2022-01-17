@@ -41,6 +41,7 @@ public:
   typedef typename AssociativeContainer::const_iterator const_iterator;
   typedef typename AssociativeContainer::iterator iterator;
   using argument_type = variable_type;
+  using result_type = expression_type;
 
   /// \brief Wrapper class for internal storage and substitution updates using operator()
   struct assignment

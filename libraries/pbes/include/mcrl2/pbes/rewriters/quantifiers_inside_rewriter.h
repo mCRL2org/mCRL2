@@ -68,18 +68,22 @@ struct quantifiers_inside_builder: public pbes_expression_builder<quantifiers_in
   typedef pbes_expression_builder<quantifiers_inside_builder> super;
   using super::apply;
 
-  pbes_expression apply(const forall& x)
+  template <class T>
+  void apply(T& result, const forall& x)
   {
     pbes_expression const& phi = x.body();
     std::set<data::variable> W = data::detail::make_variable_set(x.variables());
-    return quantifiers_inside_forall(W, apply(phi));
+    apply(result, phi);
+    result = quantifiers_inside_forall(W, result);
   }
 
-  pbes_expression apply(const exists& x)
+  template <class T>
+  void apply(T& result, const exists& x)
   {
     pbes_expression const& phi = x.body();
     std::set<data::variable> W = data::detail::make_variable_set(x.variables());
-    return quantifiers_inside_exists(W, apply(phi));
+    apply(result, phi);
+    result = quantifiers_inside_exists(W, result);
   }
 };
 
@@ -94,7 +98,7 @@ struct quantifiers_inside_forall_builder: public data_expression_builder<quantif
       : V(V_)
   {}
 
-  static pbes_expression make_forall(const data::variable_list& vars, const pbes_expression& body)
+  static pbes_expression make_forall_(const data::variable_list& vars, const pbes_expression& body)
   {
     return vars.empty() ? body : forall(vars, body);
   }
@@ -105,30 +109,34 @@ struct quantifiers_inside_forall_builder: public data_expression_builder<quantif
   {
     using utilities::detail::set_intersection;
     std::set<data::variable> W = set_intersection(V, find_free_variables(x));
-    return make_forall(data::variable_list(W.begin(), W.end()), x);
+    return make_forall_(data::variable_list(W.begin(), W.end()), x);
   }
 
-  pbes_expression apply(const forall& x)
+  template <class T>
+  void apply(T& result, const forall& x)
   {
     using utilities::detail::set_union;
     std::set<data::variable> W = data::detail::make_variable_set(x.variables());
-    return quantifiers_inside_forall(set_union(V, W), x.body());
+    result = quantifiers_inside_forall(set_union(V, W), x.body());
   }
 
-  pbes_expression apply(const not_& x)
+  template <class T>
+  void apply(T& result, const not_& x)
   {
     const auto& phi = x.operand();
-    return not_(quantifiers_inside_exists(V, phi));
+    result = not_(quantifiers_inside_exists(V, phi));
   }
 
-  pbes_expression apply(const and_& x)
+  template <class T>
+  void apply(T& result, const and_& x)
   {
     const pbes_expression& phi = x.left();
     const pbes_expression& psi = x.right();
-    return and_(quantifiers_inside_forall(V, phi), quantifiers_inside_forall(V, psi));
+    make_and_(result, quantifiers_inside_forall(V, phi), quantifiers_inside_forall(V, psi));
   }
 
-  pbes_expression apply(const or_& x)
+  template <class T>
+  void apply(T& result, const or_& x)
   {
     using utilities::detail::set_difference;
     using utilities::detail::set_intersection;
@@ -139,11 +147,12 @@ struct quantifiers_inside_forall_builder: public data_expression_builder<quantif
     const auto [Phi, Psi] = compute_Phi_Psi(X, V, tr::or_, tr::false_());
     if (is_false(Psi))
     {
-      return make_forall(data::detail::make_variable_list(set_intersection(V, find_free_variables(x))), x);
+      result = make_forall_(data::detail::make_variable_list(set_intersection(V, find_free_variables(x))), x);
+      return;
     }
     std::set<data::variable> vars_Phi = find_free_variables(Phi);
     std::set<data::variable> vars_Psi = find_free_variables(Psi);
-    return make_forall(data::detail::make_variable_list(set_intersection(V, set_intersection(vars_Phi, vars_Psi))),
+    result = make_forall_(data::detail::make_variable_list(set_intersection(V, set_intersection(vars_Phi, vars_Psi))),
                        optimized_or(
                            quantifiers_inside_forall(set_difference(set_intersection(V, vars_Phi), vars_Psi), Phi),
                            quantifiers_inside_forall(set_difference(set_intersection(V, vars_Psi), vars_Phi), Psi)
@@ -151,24 +160,28 @@ struct quantifiers_inside_forall_builder: public data_expression_builder<quantif
     );
   }
 
-  pbes_expression apply(const imp& x)
+  template <class T>
+  void apply(T& result, const imp& x)
   {
-    return quantifiers_inside_forall(V, or_(not_(x.left()), x.right()));
+    result = quantifiers_inside_forall(V, or_(not_(x.left()), x.right()));
   }
 
-  pbes_expression apply(const propositional_variable_instantiation& x)
+  template <class T>
+  void apply(T& result, const propositional_variable_instantiation& x)
   {
-    return apply_default(x);
+    result = apply_default(x);
   }
 
-  pbes_expression apply(const exists& x)
+  template <class T>
+  void apply(T& result, const exists& x)
   {
-    return apply_default(x);
+    result = apply_default(x);
   }
 
-  pbes_expression apply(const data::data_expression& x)
+  template <class T>
+  void apply(T& result, const data::data_expression& x)
   {
-    return data::detail::quantifiers_inside_forall(V, x);
+    result = data::detail::quantifiers_inside_forall(V, x);
   }
 };
 
@@ -183,7 +196,7 @@ struct quantifiers_inside_exists_builder: public pbes_expression_builder<quantif
       : V(V_)
   {}
 
-  static pbes_expression make_exists(const data::variable_list& vars, const pbes_expression& body)
+  static pbes_expression make_exists_(const data::variable_list& vars, const pbes_expression& body)
   {
     return vars.empty() ? body : exists(vars, body);
   }
@@ -194,30 +207,34 @@ struct quantifiers_inside_exists_builder: public pbes_expression_builder<quantif
   {
     using utilities::detail::set_intersection;
     std::set<data::variable> W = set_intersection(V, find_free_variables(x));
-    return make_exists(data::variable_list(W.begin(), W.end()), x);
+    return make_exists_(data::variable_list(W.begin(), W.end()), x);
   }
 
-  pbes_expression apply(const exists& x)
+  template <class T>
+  void apply(T& result, const exists& x)
   {
     using utilities::detail::set_union;
     std::set<data::variable> W = data::detail::make_variable_set(x.variables());
-    return quantifiers_inside_exists(set_union(V, W), x.body());
+    result = quantifiers_inside_exists(set_union(V, W), x.body());
   }
 
-  pbes_expression apply(const not_& x)
+  template <class T>
+  void apply(T& result, const not_& x)
   {
     const auto& phi = x.operand();
-    return not_(quantifiers_inside_forall(V, phi));
+    result = not_(quantifiers_inside_forall(V, phi));
   }
 
-  pbes_expression apply(const or_& x)
+  template <class T>
+  void apply(T& result, const or_& x)
   {
     const pbes_expression& phi = x.left();
     const pbes_expression& psi = x.right();
-    return or_(quantifiers_inside_exists(V, phi), quantifiers_inside_exists(V, psi));
+    result = or_(quantifiers_inside_exists(V, phi), quantifiers_inside_exists(V, psi));
   }
 
-  pbes_expression apply(const and_& x)
+  template <class T>
+  void apply(T& result, const and_& x)
   {
     using utilities::detail::set_difference;
     using utilities::detail::set_intersection;
@@ -228,11 +245,12 @@ struct quantifiers_inside_exists_builder: public pbes_expression_builder<quantif
     const auto [Phi, Psi] = compute_Phi_Psi(X, V, tr::and_, tr::true_());
     if (is_true(Psi))
     {
-      return make_exists(data::detail::make_variable_list(set_intersection(V, find_free_variables(x))), x);
+      result = make_exists_(data::detail::make_variable_list(set_intersection(V, find_free_variables(x))), x);
+      return;
     }
     std::set<data::variable> vars_Phi = find_free_variables(Phi);
     std::set<data::variable> vars_Psi = find_free_variables(Psi);
-    return make_exists(data::detail::make_variable_list(set_intersection(V, set_intersection(vars_Phi, vars_Psi))),
+    result = make_exists_(data::detail::make_variable_list(set_intersection(V, set_intersection(vars_Phi, vars_Psi))),
                        optimized_and(
                            quantifiers_inside_exists(set_difference(set_intersection(V, vars_Phi), vars_Psi), Phi),
                            quantifiers_inside_exists(set_difference(set_intersection(V, vars_Psi), vars_Phi), Psi)
@@ -240,24 +258,28 @@ struct quantifiers_inside_exists_builder: public pbes_expression_builder<quantif
     );
   }
 
-  pbes_expression apply(const imp& x)
+  template <class T>
+  void apply(T& result, const imp& x)
   {
-    return quantifiers_inside_exists(V, and_(not_(x.left()), x.right()));
+    result = quantifiers_inside_exists(V, and_(not_(x.left()), x.right()));
   }
 
-  pbes_expression apply(const propositional_variable_instantiation& x)
+  template <class T>
+  void apply(T& result, const propositional_variable_instantiation& x)
   {
-    return apply_default(x);
+    result = apply_default(x);
   }
 
-  pbes_expression apply(const forall& x)
+  template <class T>
+  void apply(T& result, const forall& x)
   {
-    return apply_default(x);
+    result = apply_default(x);
   }
 
-  pbes_expression apply(const data::data_expression& x)
+  template <class T>
+  void apply(T& result, const data::data_expression& x)
   {
-    return data::detail::quantifiers_inside_exists(V, x);
+    result = data::detail::quantifiers_inside_exists(V, x);
   }
 };
 
@@ -265,21 +287,27 @@ inline
 pbes_expression quantifiers_inside(const pbes_expression& x)
 {
   quantifiers_inside_builder f;
-  return f.apply(x);
+  pbes_expression result;
+  f.apply(result, x);
+  return result;
 }
 
 inline
 pbes_expression quantifiers_inside_forall(const std::set<data::variable>& variables, const pbes_expression& x)
 {
   quantifiers_inside_forall_builder f(variables);
-  return f.apply(x);
+  pbes_expression result;
+  f.apply(result, x);
+  return result;
 }
 
 inline
 pbes_expression quantifiers_inside_exists(const std::set<data::variable>& variables, const pbes_expression& x)
 {
   quantifiers_inside_exists_builder f(variables);
-  return f.apply(x);
+  pbes_expression result;
+  f.apply(result, x);
+  return result;
 }
 
 } // namespace detail

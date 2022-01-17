@@ -29,12 +29,14 @@ struct eliminate_real_if_builder: public Builder<eliminate_real_if_builder<Build
   using super::apply;
   using super::update;
 
-  application apply(const application& x)
+  void apply(application& result, const application& x)
   {
-    const application y = super::apply(x);
-    if(is_if_application(y))
+    application y;
+    super::apply(y, x);
+    if (is_if_application(y))
     {
-      return y;
+      result = y;
+      return;
     }
     const data_expression& f = y.head();
     std::list<data_expression> arguments(y.begin(), y.end());
@@ -49,10 +51,12 @@ struct eliminate_real_if_builder: public Builder<eliminate_real_if_builder<Build
         const data_expression left = application(f, arguments.begin(), arguments.end());
         *i = else_part;
         const data_expression right = application(f, arguments.begin(), arguments.end());
-        return if_(condition, apply(left), apply(right));
+        make_if_(result, condition, [&](data_expression& r){ apply(r, left); }, 
+                                    [&](data_expression& r){ apply(right); });
+        return;
       }
     }
-    return y;
+    result = y;
   }
 };
 
@@ -79,7 +83,9 @@ T eliminate_real_if(const T x,
                      typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                     )
 {
-  return data::detail::make_eliminate_real_if_builder<data::data_expression_builder>().apply(x);
+  T result; 
+  data::detail::make_eliminate_real_if_builder<data::data_expression_builder>().apply(result, x);
+  return result;
 }
 
 } // namespace mcrl2

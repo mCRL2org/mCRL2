@@ -126,12 +126,14 @@ struct anonymize_builder: public data::sort_expression_builder<Derived>
     add_name(x.name(), variable_name_substitution, "v");
   }
 
-  variable apply(const variable& x)
+  template <class T>
+  void apply(T& result, const variable& x)
   {
     derived().enter(x);
-    variable result(variable_name_substitution[x.name()], derived().apply(x.sort()));
+    sort_expression sort;
+    derived().apply(sort, x.sort());
+    make_variable(result,variable_name_substitution[x.name()], sort);
     derived().leave(x);
-    return result;
   }
 
   void enter(const function_symbol& x)
@@ -139,12 +141,14 @@ struct anonymize_builder: public data::sort_expression_builder<Derived>
     add_name(x.name(), function_symbol_name_substitution, "f");
   }
 
-  function_symbol apply(const function_symbol& x)
+  template <class T>
+  void apply(T& result, const function_symbol& x)
   {
     derived().enter(x);
-    function_symbol result(function_symbol_name_substitution[x.name()], derived().apply(x.sort()));
+    sort_expression sort;
+    derived().apply(sort, x.sort());
+    make_function_symbol(result,function_symbol_name_substitution[x.name()], sort);
     derived().leave(x);
-    return result;
   }
 
   void enter(const basic_sort& x)
@@ -152,12 +156,12 @@ struct anonymize_builder: public data::sort_expression_builder<Derived>
     add_name(x.name(), sort_name_substitution, "s");
   }
 
-  basic_sort apply(const basic_sort& x)
+  template <class T>
+  void apply(T& result, const basic_sort& x)
   {
     derived().enter(x);
-    basic_sort result(sort_name_substitution[x.name()]);
+    make_basic_sort(result,sort_name_substitution[x.name()]);
     derived().leave(x);
-    return result;
   }
 
   void enter(const structured_sort_constructor& x)
@@ -169,16 +173,17 @@ struct anonymize_builder: public data::sort_expression_builder<Derived>
     }
   }
 
-  structured_sort_constructor apply(const structured_sort_constructor& x)
+  template <class T>
+  void apply(T& result, const structured_sort_constructor& x)
   {
     derived().enter(x);
-    structured_sort_constructor result(
-          function_symbol_name_substitution[x.name()],
-          derived().apply(x.arguments()),
-          x.recogniser() == atermpp::empty_string() ? x.recogniser() : function_symbol_name_substitution[x.recogniser()]
-        );
+    structured_sort_constructor_argument_list arguments;
+    derived().apply(arguments, x.arguments());
+    make_structured_sort_constructor(result, 
+                  function_symbol_name_substitution[x.name()],
+                  arguments,
+                  x.recogniser() == atermpp::empty_string() ? x.recogniser() : function_symbol_name_substitution[x.recogniser()]);
     derived().leave(x);
-    return result;
   }
 
   void enter(const structured_sort_constructor_argument& x)
@@ -186,20 +191,26 @@ struct anonymize_builder: public data::sort_expression_builder<Derived>
     add_name(x.name(), function_symbol_name_substitution, "f");
   }
 
-  structured_sort_constructor_argument apply(const structured_sort_constructor_argument& x)
+  template <class T>
+  void apply(T& result, const structured_sort_constructor_argument& x)
   {
     derived().enter(x);
-    structured_sort_constructor_argument result(function_symbol_name_substitution[x.name()], derived().apply(x.sort()));
+    sort_expression sort;
+    derived().apply(sort, x.sort());
+    result = structured_sort_constructor_argument(function_symbol_name_substitution[x.name()], sort);
     derived().leave(x);
-    return result;
   }
 
-  alias apply(const alias& x)
+  template <class T>
+  void apply(T& result, const alias& x)
   {
     derived().enter(x);
-    alias result(derived().apply(x.name()), derived().apply(x.reference()));
+    sort_expression sort;
+    derived().apply(sort, x.reference());
+    basic_sort name;
+    derived().apply(name, x.name());
+    make_alias(result, name, sort);
     derived().leave(x);
-    return result;
   }
 };
 

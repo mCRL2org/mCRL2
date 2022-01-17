@@ -36,7 +36,9 @@ T normalize_sorts(const T& x,
                   typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
                  )
 {
-  return core::make_update_apply_builder<action_formulas::sort_expression_builder>(data::detail::normalize_sorts_function(sortspec)).apply(x);
+  T result;
+  core::make_update_apply_builder<action_formulas::sort_expression_builder>(data::detail::normalize_sorts_function(sortspec)).apply(result, x);
+  return result;
 }
 
 } // namespace action_formulas
@@ -59,7 +61,9 @@ T normalize_sorts(const T& x,
                   typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
                  )
 {
-  return core::make_update_apply_builder<regular_formulas::sort_expression_builder>(data::detail::normalize_sorts_function(sortspec)).apply(x);
+  T result;
+  core::make_update_apply_builder<regular_formulas::sort_expression_builder>(data::detail::normalize_sorts_function(sortspec)).apply(result, x);
+  return result;
 }
 
 } // namespace regular_formulas
@@ -82,7 +86,9 @@ T normalize_sorts(const T& x,
                   typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
                  )
 {
-  return core::make_update_apply_builder<state_formulas::sort_expression_builder>(data::detail::normalize_sorts_function(sortspec)).apply(x);
+  T result;
+  core::make_update_apply_builder<state_formulas::sort_expression_builder>(data::detail::normalize_sorts_function(sortspec)).apply(result, x);
+  return result;
 }
 
 } // namespace state_formulas

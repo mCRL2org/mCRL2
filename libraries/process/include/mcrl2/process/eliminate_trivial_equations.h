@@ -104,23 +104,27 @@ struct process_instance_replace_builder: public process_expression_builder<proce
     : substitutions(substitutions_)
   {}
 
-  process_expression apply(const process::process_instance& x)
+  template <class T>
+  void apply(T& result, const process::process_instance& x)
   {
     auto i = substitutions.find(x.identifier());
     if (i == substitutions.end())
     {
-      return x;
+      result = x;
+      return;
     }
     else
     {
       data::mutable_map_substitution<> sigma = make_process_instance_substitution(x);
-      return apply_substitution(i->second, sigma);
+      result = apply_substitution(i->second, sigma);
+      return;
     }
   }
 
-  process_expression apply(const process::process_instance_assignment& x)
+  template <class T>
+  void apply(T& result, const process::process_instance_assignment& x)
   {
-    return (*this).apply(make_process_instance(x));
+    (*this).apply(result, make_process_instance(x));
   }
 };
 
@@ -130,7 +134,9 @@ inline
 process_expression process_instance_replace(const process_expression& x, const std::map<process_identifier, process_instance>& substitutions)
 {
   detail::process_instance_replace_builder f(substitutions);
-  return f.apply(x);
+  process_expression result;
+  f.apply(result, x);
+  return result;
 }
 
 inline

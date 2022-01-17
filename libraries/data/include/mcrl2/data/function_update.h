@@ -72,7 +72,7 @@ namespace mcrl2 {
       inline
       function_symbol function_update(const sort_expression& s, const sort_expression& t)
       {
-        function_symbol function_update(function_update_name(), make_function_sort(make_function_sort(s, t), s, t, make_function_sort(s, t)));
+        function_symbol function_update(function_update_name(), make_function_sort_(make_function_sort_(s, t), s, t, make_function_sort_(s, t)));
         return function_update;
       }
 
@@ -128,7 +128,7 @@ namespace mcrl2 {
       inline
       function_symbol function_update_stable(const sort_expression& s, const sort_expression& t)
       {
-        function_symbol function_update_stable(function_update_stable_name(), make_function_sort(make_function_sort(s, t), s, t, make_function_sort(s, t)));
+        function_symbol function_update_stable(function_update_stable_name(), make_function_sort_(make_function_sort_(s, t), s, t, make_function_sort_(s, t)));
         return function_update_stable;
       }
 
@@ -184,7 +184,7 @@ namespace mcrl2 {
       inline
       function_symbol is_not_a_function_update(const sort_expression& s, const sort_expression& t)
       {
-        function_symbol is_not_a_function_update(is_not_a_function_update_name(), make_function_sort(make_function_sort(s, t), sort_bool::bool_()));
+        function_symbol is_not_a_function_update(is_not_a_function_update_name(), make_function_sort_(make_function_sort_(s, t), sort_bool::bool_()));
         return is_not_a_function_update;
       }
 
@@ -257,7 +257,7 @@ namespace mcrl2 {
       inline
       function_symbol if_always_else(const sort_expression& s, const sort_expression& t)
       {
-        function_symbol if_always_else(if_always_else_name(), make_function_sort(sort_bool::bool_(), make_function_sort(s, t), make_function_sort(s, t), make_function_sort(s, t)));
+        function_symbol if_always_else(if_always_else_name(), make_function_sort_(sort_bool::bool_(), make_function_sort_(s, t), make_function_sort_(s, t), make_function_sort_(s, t)));
         return if_always_else;
       }
 
@@ -424,7 +424,7 @@ namespace mcrl2 {
         variable vy("y",s);
         variable vv("v",t);
         variable vw("w",t);
-        variable vf("f",make_function_sort(s, t));
+        variable vf("f",make_function_sort_(s, t));
 
         data_equation_vector result;
         result.push_back(data_equation(variable_list({vf, vv, vx}), is_not_a_function_update(s, t, vf), function_update(s, t, vf, vx, vv), if_always_else(s, t, equal_to(vf(vx), vv), vf, function_update_stable(s, t, vf, vx, vv))));

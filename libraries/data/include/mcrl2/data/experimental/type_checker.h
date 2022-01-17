@@ -34,7 +34,7 @@ bool is_nat(const core::identifier_string& Number)
 }
 
 inline
-function_sort make_function_sort(const sort_expression& domain, const sort_expression& codomain)
+function_sort make_function_sort_(const sort_expression& domain, const sort_expression& codomain)
 {
   return function_sort({ domain }, codomain);
 }
@@ -396,7 +396,7 @@ class type_checker: public sort_type_checker
           core::identifier_string name = constructor.recogniser();
           if (name != core::empty_identifier_string())
           {
-            add_function(data::function_symbol(name, make_function_sort(x, sort_bool::bool_())), "recognizer");
+            add_function(data::function_symbol(name, make_function_sort_(x, sort_bool::bool_())), "recognizer");
           }
 
           // constructor type and projections

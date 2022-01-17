@@ -69,7 +69,7 @@ class structured_sort: public sort_expression
     }
 
     /// \brief Constructor.
-    structured_sort(const structured_sort_constructor_list& constructors)
+    explicit structured_sort(const structured_sort_constructor_list& constructors)
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortStruct(), constructors))
     {}
 
@@ -110,25 +110,25 @@ class structured_sort: public sort_expression
 
     function_symbol to_pos_function(const sort_expression& s) const
     {
-      function_symbol to_pos_function_("@to_pos", make_function_sort(s, sort_pos::pos()));
+      function_symbol to_pos_function_("@to_pos", make_function_sort_(s, sort_pos::pos()));
       return to_pos_function_;
     }
 
     function_symbol equal_arguments_function(const sort_expression& s) const
     {
-      function_symbol equal_arguments_function_("@equal_arguments", make_function_sort(s, s, sort_bool::bool_()));
+      function_symbol equal_arguments_function_("@equal_arguments", make_function_sort_(s, s, sort_bool::bool_()));
       return equal_arguments_function_;
     }
 
     function_symbol smaller_arguments_function(const sort_expression& s) const
     {
-      function_symbol smaller_arguments_function_("@less_arguments", make_function_sort(s, s, sort_bool::bool_()));
+      function_symbol smaller_arguments_function_("@less_arguments", make_function_sort_(s, s, sort_bool::bool_()));
       return smaller_arguments_function_;
     }
 
     function_symbol smaller_equal_arguments_function(const sort_expression& s) const
     {
-      function_symbol smaller_equal_arguments_function_("@less_equal_arguments", make_function_sort(s, s, sort_bool::bool_()));
+      function_symbol smaller_equal_arguments_function_("@less_equal_arguments", make_function_sort_(s, s, sort_bool::bool_()));
       return smaller_equal_arguments_function_;
     }
 
@@ -316,7 +316,7 @@ class structured_sort: public sort_expression
           {
             if (j->name() != core::empty_identifier_string())
             {
-              application lhs(function_symbol(j->name(), make_function_sort(s, j->sort()))
+              application lhs(function_symbol(j->name(), make_function_sort_(s, j->sort()))
                               (application(i.constructor_function(s), variables)));
 
               result.push_back(data_equation(variables, lhs, *v));
@@ -435,9 +435,10 @@ public:
 
 /// \brief Make_structured_sort constructs a new term into a given address.
 /// \ \param t The reference into which the new structured_sort is constructed. 
-inline void make_structured_sort(structured_sort& t, const structured_sort_constructor_list& constructors)
+template <class... ARGUMENTS>
+inline void make_structured_sort(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_SortStruct(), constructors);
+  make_term_appl(t, core::detail::function_symbol_SortStruct(), args...);
 }
 
 /// \brief list of structured_sorts

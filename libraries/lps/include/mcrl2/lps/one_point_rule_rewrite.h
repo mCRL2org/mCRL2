@@ -29,9 +29,10 @@ struct one_point_rule_rewrite_builder: public lps::data_expression_builder<one_p
 
   data::one_point_rule_rewriter r;
 
-  data::data_expression apply(const data::data_expression& x)
+  template <class T>
+  void apply(T& result, const data::data_expression& x)
   {
-    return r(x);
+    result = r(x);
   }
 };
 
@@ -52,8 +53,10 @@ void one_point_rule_rewrite(T& x, typename std::enable_if<!std::is_base_of<aterm
 template <typename T>
 T one_point_rule_rewrite(const T& x, typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr)
 {
+  T result;
   detail::one_point_rule_rewrite_builder f;
-  return f.apply(x);
+  f.apply(result, x);
+  return result;
 }
 
 } // namespace lps

@@ -29,9 +29,10 @@ struct if_rewrite_builder: public lps::data_expression_builder<if_rewrite_builde
 
   data::if_rewriter r;
 
-  data::data_expression apply(const data::data_expression& x)
+  template <class T>
+  void apply(T& result, const data::data_expression& x)
   {
-    return r(x);
+    result = r(x);
   }
 };
 
@@ -52,8 +53,10 @@ void if_rewrite(T& x, typename std::enable_if<!std::is_base_of<atermpp::aterm, T
 template <typename T>
 T if_rewrite(const T& x, typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr)
 {
+  T result;
   detail::if_rewrite_builder f;
-  return f.apply(x);
+  f.apply(result, x);
+  return result;
 }
 
 } // namespace lps

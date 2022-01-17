@@ -226,7 +226,7 @@ class not_: public boolean_expression
     }
 
     /// \brief Constructor.
-    not_(const boolean_expression& operand)
+    explicit not_(const boolean_expression& operand)
       : boolean_expression(atermpp::aterm_appl(core::detail::function_symbol_BooleanNot(), operand))
     {}
 
@@ -244,9 +244,10 @@ class not_: public boolean_expression
 
 /// \brief Make_not_ constructs a new term into a given address.
 /// \ \param t The reference into which the new not_ is constructed. 
-inline void make_not_(not_& t, const boolean_expression& operand)
+template <class... ARGUMENTS>
+inline void make_not_(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_BooleanNot(), operand);
+  make_term_appl(t, core::detail::function_symbol_BooleanNot(), args...);
 }
 
 /// \brief Test for a not expression
@@ -319,9 +320,10 @@ class and_: public boolean_expression
 
 /// \brief Make_and_ constructs a new term into a given address.
 /// \ \param t The reference into which the new and_ is constructed. 
-inline void make_and_(and_& t, const boolean_expression& left, const boolean_expression& right)
+template <class... ARGUMENTS>
+inline void make_and_(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_BooleanAnd(), left, right);
+  make_term_appl(t, core::detail::function_symbol_BooleanAnd(), args...);
 }
 
 /// \brief Test for a and expression
@@ -394,9 +396,10 @@ class or_: public boolean_expression
 
 /// \brief Make_or_ constructs a new term into a given address.
 /// \ \param t The reference into which the new or_ is constructed. 
-inline void make_or_(or_& t, const boolean_expression& left, const boolean_expression& right)
+template <class... ARGUMENTS>
+inline void make_or_(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_BooleanOr(), left, right);
+  make_term_appl(t, core::detail::function_symbol_BooleanOr(), args...);
 }
 
 /// \brief Test for a or expression
@@ -469,9 +472,10 @@ class imp: public boolean_expression
 
 /// \brief Make_imp constructs a new term into a given address.
 /// \ \param t The reference into which the new imp is constructed. 
-inline void make_imp(imp& t, const boolean_expression& left, const boolean_expression& right)
+template <class... ARGUMENTS>
+inline void make_imp(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_BooleanImp(), left, right);
+  make_term_appl(t, core::detail::function_symbol_BooleanImp(), args...);
 }
 
 /// \brief Test for a imp expression
@@ -536,22 +540,25 @@ class boolean_variable: public boolean_expression
     /// \brief Constructor.
     boolean_variable(const core::identifier_string& name)
     {
-      atermpp::make_term_appl_with_index(*this,core::detail::function_symbol_BooleanVariable(), name);
+      atermpp::make_term_appl_with_index<boolean_variable,core::identifier_string>
+                      (*this,core::detail::function_symbol_BooleanVariable(), name);
     }
 
     /// \brief Constructor.
     boolean_variable(const std::string& name)
     {
-      atermpp::make_term_appl_with_index(*this,core::detail::function_symbol_BooleanVariable(), core::identifier_string(name));
+      atermpp::make_term_appl_with_index<boolean_variable,core::identifier_string>
+                      (*this,core::detail::function_symbol_BooleanVariable(), core::identifier_string(name));
     }
 //--- end user section boolean_variable ---//
 };
 
 /// \brief Make_boolean_variable constructs a new term into a given address.
 /// \ \param t The reference into which the new boolean_variable is constructed. 
-inline void make_boolean_variable(boolean_variable& t, const core::identifier_string& name)
+template <class... ARGUMENTS>
+inline void make_boolean_variable(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl_with_index(t, core::detail::function_symbol_BooleanVariable(), name);
+  make_term_appl_with_index<boolean_variable,core::identifier_string>(t, core::detail::function_symbol_BooleanVariable(), args...);
 }
 
 /// \brief Test for a boolean_variable expression

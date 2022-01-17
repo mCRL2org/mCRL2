@@ -60,6 +60,12 @@ class forall: public abstraction
 
 }; // class forall
 
+template <class... ARGUMENTS>
+void make_forall(atermpp::aterm& result, ARGUMENTS... arguments)
+{
+  make_abstraction(result, forall_binder(), arguments...);
+}
+
 //--- start generated class forall ---//
 // prototype declaration
 std::string pp(const forall& x);

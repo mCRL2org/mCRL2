@@ -48,6 +48,13 @@ class stochastic_process_initializer: public process_initializer
     }
 };
 
+template <class... ARGUMENTS>
+inline void make_stochastic_process_initializer(atermpp::aterm_appl& t, ARGUMENTS... args)
+{
+  make_term_appl(t, core::detail::function_symbol_LinearProcessInit(), args...);
+}
+
+
 //--- start generated class stochastic_process_initializer ---//
 /// \brief list of stochastic_process_initializers
 typedef atermpp::term_list<stochastic_process_initializer> stochastic_process_initializer_list;

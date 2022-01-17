@@ -39,7 +39,7 @@ class action_name_multiset: public atermpp::aterm_appl
     }
 
     /// \brief Constructor.
-    action_name_multiset(const core::identifier_string_list& names)
+    explicit action_name_multiset(const core::identifier_string_list& names)
       : atermpp::aterm_appl(core::detail::function_symbol_MultActName(), names)
     {}
 
@@ -57,9 +57,10 @@ class action_name_multiset: public atermpp::aterm_appl
 
 /// \brief Make_action_name_multiset constructs a new term into a given address.
 /// \ \param t The reference into which the new action_name_multiset is constructed. 
-inline void make_action_name_multiset(action_name_multiset& t, const core::identifier_string_list& names)
+template <class... ARGUMENTS>
+inline void make_action_name_multiset(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_MultActName(), names);
+  make_term_appl(t, core::detail::function_symbol_MultActName(), args...);
 }
 
 /// \brief list of action_name_multisets

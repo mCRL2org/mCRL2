@@ -9206,6 +9206,7 @@ class specification_basic_type
       {
         generateLPEmCRL(action_summands,deadlock_summands,process_instance_assignment(t).identifier(),
                         regular,pars,init,initial_stochastic_distribution,ultimate_delay_condition);
+
         objectdatatype& object=objectIndex(process_instance_assignment(t).identifier());
 
         maintain_variables_in_rhs<mutable_map_substitution<> > sigma;
@@ -9214,7 +9215,6 @@ class specification_basic_type
           sigma[a.lhs()]=a.rhs();
         }
 
-        // init=substitute_assignmentlist(init,pars,false,true,sigma);   ZZZ
         init=replace_variables_capture_avoiding_alt(init,sigma);
 
         // Make the bound variables and parameters in this process unique.
@@ -9242,7 +9242,6 @@ class specification_basic_type
           // stacks are being used.
 
           stochastic_linear_process lps(pars,deadlock_summands,action_summands);
-          // stochastic_process_initializer initializer(init,stochastic_distribution(variable_list(),real_one())); // Default distribution.
           stochastic_process_initializer initializer(init,initial_stochastic_distribution); 
 
           stochastic_specification temporary_spec(data,acts,global_variables,lps,initializer);
@@ -9262,7 +9261,6 @@ class specification_basic_type
           init=temporary_spec.initial_process().expressions();     
           pars=temporary_spec.process().process_parameters();
           assert(init.size()==pars.size());
-
           // Add all free variables in object.parameters that are not already in the parameter list
           // and are not global variables to pars. This can occur when a parameter of the process is replaced
           // by a constant, which by itself is a parameter.
@@ -9488,6 +9486,7 @@ class specification_basic_type
           }
         }
 
+        assert(init.size() == pars.size());
         return;
       }
       /* process is a mCRLdone */
@@ -9498,6 +9497,7 @@ class specification_basic_type
         object.processstatus=mCRLlin;
         generateLPEmCRLterm(action_summands, deadlock_summands, object.processbody,
                                    regular, false, pars, init, initial_stochastic_distribution, ultimate_delay_condition);
+        assert(init.size() == pars.size());
         return;
       }
 
@@ -11261,7 +11261,6 @@ mcrl2::lps::stochastic_specification mcrl2::lps::linearise(
   std::set<data::variable> global_variables;
   global_variables.insert(globals1.begin(), globals1.end());
   global_variables.insert(globals2.begin(), globals2.end());
-
   stochastic_linear_process lps(parameters,
                                 deadlock_summands,
                                 action_summands);

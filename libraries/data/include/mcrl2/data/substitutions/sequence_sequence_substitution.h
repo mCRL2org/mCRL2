@@ -31,6 +31,7 @@ struct sequence_sequence_substitution
   typedef typename ExpressionContainer::value_type  expression_type;
 
   using argument_type = variable_type;
+  using result_type = expression_type;
 
   const VariableContainer& variables;
   const ExpressionContainer& expressions;

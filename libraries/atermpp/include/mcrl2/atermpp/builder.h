@@ -35,49 +35,51 @@ struct builder
   void leave(const T&)
   {}
 
-  aterm apply(const aterm_int& x)
+  template <class T>
+  void apply(T& result, const aterm_int& x)
   {
     derived().enter(x);
     derived().leave(x);
-    return x;
+    result=x;
   }
 
-  aterm apply(const aterm_list& x)
+  template <class T>
+  void apply(T& result, const aterm_list& x)
   {
     derived().enter(x);
-    aterm_list result(x.begin(), x.end(), [&](const aterm& v) { return derived().apply(v); } ) ;
+    make_term_list(static_cast<aterm_list&>(result), x.begin(), x.end(), [&](aterm& r, const aterm& v) { return derived().apply(r, v); } ) ;
     derived().leave(x);
 
-    return mcrl2::workaround::return_std_move(result);
+    // return mcrl2::workaround::return_std_move(result);
   }
 
-  aterm apply(const aterm_appl& x)
+  template <class T>
+  void apply(T& result, const aterm_appl& x)
   {
     derived().enter(x);
-    aterm_appl result(x.function() , x.begin(), x.end(), [&](const aterm& v) { return derived().apply(v); } );
+    make_term_appl(result, x.function() , x.begin(), x.end(), [&](aterm& r, const aterm& v) { return derived().apply(r, v); } );
     derived().leave(x);
 
-    return mcrl2::workaround::return_std_move(result);
+    // return mcrl2::workaround::return_std_move(result);
   }
 
-  aterm apply(const aterm& x)
+  template <class T>
+  void apply(T& result, const aterm& x)
   {
     derived().enter(x);
-    aterm result;
     if (x.type_is_appl())
     {
-      result = derived().apply(atermpp::down_cast<aterm_appl>(x));
+      derived().apply(result, atermpp::down_cast<aterm_appl>(x));
     }
     else if (x.type_is_list())
     {
-      result = derived().apply(atermpp::down_cast<aterm_list>(x));
+      derived().apply(result, atermpp::down_cast<aterm_list>(x));
     }
     else if (x.type_is_int())
     {
-      result = derived().apply(atermpp::down_cast<aterm_int>(x));
+      derived().apply(result, atermpp::down_cast<aterm_int>(x));
     }
     derived().leave(x);
-    return result;
   }
 };
 

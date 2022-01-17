@@ -27,6 +27,7 @@ namespace detail
 struct normalize_sorts_function
 {
   using argument_type = sort_expression;
+  using result_type = sort_expression;
 
   /* const sort_specification& m_sort_spec; */
   const std::map< sort_expression, sort_expression >& m_normalised_aliases;
@@ -124,8 +125,10 @@ T normalize_sorts(const T& x,
                   typename std::enable_if< std::is_base_of<atermpp::aterm, T>::value >::type* = nullptr
                  )
 {
-  return core::make_update_apply_builder<data::sort_expression_builder>
-         (data::detail::normalize_sorts_function(sort_spec)).apply(x);
+  T result;
+  core::make_update_apply_builder<data::sort_expression_builder>
+         (data::detail::normalize_sorts_function(sort_spec)).apply(result, x);
+  return result;
 }
 
 /* The functions below are defined as the function normalize_sorts

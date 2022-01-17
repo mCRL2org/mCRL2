@@ -77,8 +77,8 @@ BOOST_AUTO_TEST_CASE(function_sort_test)
   BOOST_CHECK_EQUAL(fs_e_.domain(), fs.domain());
   BOOST_CHECK_EQUAL(fs_e_.codomain(), fs.codomain());
 
-  BOOST_CHECK_EQUAL(fs, make_function_sort(s0, s1, s));
-  BOOST_CHECK_EQUAL(fs.domain(), make_function_sort(s0, s1, s).domain());
+  BOOST_CHECK_EQUAL(fs, make_function_sort_(s0, s1, s));
+  BOOST_CHECK_EQUAL(fs.domain(), make_function_sort_(s0, s1, s).domain());
 }
 
 BOOST_AUTO_TEST_CASE(alias_test)

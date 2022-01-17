@@ -31,9 +31,10 @@ struct pbes_expression_builder_base: public core::builder<Derived>
   using super::update;
   using super::apply;
   	
-  data::data_expression apply(const data::data_expression& x)
+  template <class T>
+  void apply(T& result, const data::data_expression& x)
   {
-    return x;
+    result = x;
   }
 };
 
@@ -48,133 +49,138 @@ struct add_sort_expressions: public Builder<Derived>
   using super::update;
   using super::apply;
 
-  pbes_system::propositional_variable apply(const pbes_system::propositional_variable& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::propositional_variable& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::propositional_variable result = pbes_system::propositional_variable(x.name(), static_cast<Derived&>(*this).apply(x.parameters()));
+    pbes_system::make_propositional_variable(result, x.name(), [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.parameters()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
   void update(pbes_system::pbes_equation& x)
-  {
+  { 
     static_cast<Derived&>(*this).enter(x);
-    x.variable() = static_cast<Derived&>(*this).apply(x.variable());
-    x.formula() = static_cast<Derived&>(*this).apply(x.formula());
+    propositional_variable result_variable;
+    static_cast<Derived&>(*this).apply(result_variable, x.variable());
+    x.variable() = result_variable;
+    pbes_expression result_formula;
+    static_cast<Derived&>(*this).apply(result_formula, x.formula());
+    x.formula() = result_formula;
     static_cast<Derived&>(*this).leave(x);
   }
 
   void update(pbes_system::pbes& x)
-  {
+  { 
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).update(x.equations());
     static_cast<Derived&>(*this).update(x.global_variables());
-    x.initial_state() = static_cast<Derived&>(*this).apply(x.initial_state());
+    propositional_variable_instantiation result_initial_state;
+    static_cast<Derived&>(*this).apply(result_initial_state, x.initial_state());
+    x.initial_state() = result_initial_state;
     static_cast<Derived&>(*this).leave(x);
   }
 
-  pbes_system::propositional_variable_instantiation apply(const pbes_system::propositional_variable_instantiation& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::propositional_variable_instantiation& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::propositional_variable_instantiation result = pbes_system::propositional_variable_instantiation(x.name(), static_cast<Derived&>(*this).apply(x.parameters()));
+    pbes_system::make_propositional_variable_instantiation(result, x.name(), [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.parameters()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  pbes_system::not_ apply(const pbes_system::not_& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::not_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::not_ result = pbes_system::not_(static_cast<Derived&>(*this).apply(x.operand()));
+    pbes_system::make_not_(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  pbes_system::and_ apply(const pbes_system::and_& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::and_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::and_ result = pbes_system::and_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    pbes_system::make_and_(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  pbes_system::or_ apply(const pbes_system::or_& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::or_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::or_ result = pbes_system::or_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    pbes_system::make_or_(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  pbes_system::imp apply(const pbes_system::imp& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::imp& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::imp result = pbes_system::imp(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    pbes_system::make_imp(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  pbes_system::forall apply(const pbes_system::forall& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::forall& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::forall result = pbes_system::forall(static_cast<Derived&>(*this).apply(x.variables()), static_cast<Derived&>(*this).apply(x.body()));
+    pbes_system::make_forall(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  pbes_system::exists apply(const pbes_system::exists& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::exists& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::exists result = pbes_system::exists(static_cast<Derived&>(*this).apply(x.variables()), static_cast<Derived&>(*this).apply(x.body()));
+    pbes_system::make_exists(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  pbes_system::pbes_expression apply(const pbes_system::pbes_expression& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::pbes_expression& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::pbes_expression result;
     if (data::is_data_expression(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::data_expression>(x));
     }
     else if (pbes_system::is_propositional_variable_instantiation(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::propositional_variable_instantiation>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pbes_system::propositional_variable_instantiation>(x));
     }
     else if (pbes_system::is_not(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::not_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pbes_system::not_>(x));
     }
     else if (pbes_system::is_and(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::and_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pbes_system::and_>(x));
     }
     else if (pbes_system::is_or(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::or_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pbes_system::or_>(x));
     }
     else if (pbes_system::is_imp(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::imp>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pbes_system::imp>(x));
     }
     else if (pbes_system::is_forall(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::forall>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pbes_system::forall>(x));
     }
     else if (pbes_system::is_exists(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::exists>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pbes_system::exists>(x));
     }
     else if (data::is_variable(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::variable>(x));
     }
     else if (data::is_untyped_data_parameter(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
 };
@@ -198,122 +204,125 @@ struct add_data_expressions: public Builder<Derived>
   using super::apply;
 
   void update(pbes_system::pbes_equation& x)
-  {
+  { 
     static_cast<Derived&>(*this).enter(x);
-    x.formula() = static_cast<Derived&>(*this).apply(x.formula());
+    pbes_expression result_formula;
+    static_cast<Derived&>(*this).apply(result_formula, x.formula());
+    x.formula() = result_formula;
     static_cast<Derived&>(*this).leave(x);
   }
 
   void update(pbes_system::pbes& x)
-  {
+  { 
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).update(x.equations());
-    x.initial_state() = static_cast<Derived&>(*this).apply(x.initial_state());
+    propositional_variable_instantiation result_initial_state;
+    static_cast<Derived&>(*this).apply(result_initial_state, x.initial_state());
+    x.initial_state() = result_initial_state;
     static_cast<Derived&>(*this).leave(x);
   }
 
-  pbes_system::propositional_variable_instantiation apply(const pbes_system::propositional_variable_instantiation& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::propositional_variable_instantiation& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::propositional_variable_instantiation result = pbes_system::propositional_variable_instantiation(x.name(), static_cast<Derived&>(*this).apply(x.parameters()));
+    pbes_system::make_propositional_variable_instantiation(result, x.name(), [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.parameters()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  pbes_system::not_ apply(const pbes_system::not_& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::not_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::not_ result = pbes_system::not_(static_cast<Derived&>(*this).apply(x.operand()));
+    pbes_system::make_not_(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  pbes_system::and_ apply(const pbes_system::and_& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::and_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::and_ result = pbes_system::and_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    pbes_system::make_and_(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  pbes_system::or_ apply(const pbes_system::or_& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::or_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::or_ result = pbes_system::or_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    pbes_system::make_or_(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  pbes_system::imp apply(const pbes_system::imp& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::imp& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::imp result = pbes_system::imp(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    pbes_system::make_imp(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  pbes_system::forall apply(const pbes_system::forall& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::forall& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::forall result = pbes_system::forall(x.variables(), static_cast<Derived&>(*this).apply(x.body()));
+    pbes_system::make_forall(result, x.variables(), [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  pbes_system::exists apply(const pbes_system::exists& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::exists& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::exists result = pbes_system::exists(x.variables(), static_cast<Derived&>(*this).apply(x.body()));
+    pbes_system::make_exists(result, x.variables(), [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  pbes_system::pbes_expression apply(const pbes_system::pbes_expression& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::pbes_expression& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::pbes_expression result;
     if (data::is_data_expression(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::data_expression>(x));
     }
     else if (pbes_system::is_propositional_variable_instantiation(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::propositional_variable_instantiation>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pbes_system::propositional_variable_instantiation>(x));
     }
     else if (pbes_system::is_not(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::not_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pbes_system::not_>(x));
     }
     else if (pbes_system::is_and(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::and_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pbes_system::and_>(x));
     }
     else if (pbes_system::is_or(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::or_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pbes_system::or_>(x));
     }
     else if (pbes_system::is_imp(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::imp>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pbes_system::imp>(x));
     }
     else if (pbes_system::is_forall(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::forall>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pbes_system::forall>(x));
     }
     else if (pbes_system::is_exists(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::exists>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pbes_system::exists>(x));
     }
     else if (data::is_variable(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::variable>(x));
     }
     else if (data::is_untyped_data_parameter(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
 };
@@ -335,133 +344,138 @@ struct add_variables: public Builder<Derived>
   using super::update;
   using super::apply;
 
-  pbes_system::propositional_variable apply(const pbes_system::propositional_variable& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::propositional_variable& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::propositional_variable result = pbes_system::propositional_variable(x.name(), static_cast<Derived&>(*this).apply(x.parameters()));
+    pbes_system::make_propositional_variable(result, x.name(), [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.parameters()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
   void update(pbes_system::pbes_equation& x)
-  {
+  { 
     static_cast<Derived&>(*this).enter(x);
-    x.variable() = static_cast<Derived&>(*this).apply(x.variable());
-    x.formula() = static_cast<Derived&>(*this).apply(x.formula());
+    propositional_variable result_variable;
+    static_cast<Derived&>(*this).apply(result_variable, x.variable());
+    x.variable() = result_variable;
+    pbes_expression result_formula;
+    static_cast<Derived&>(*this).apply(result_formula, x.formula());
+    x.formula() = result_formula;
     static_cast<Derived&>(*this).leave(x);
   }
 
   void update(pbes_system::pbes& x)
-  {
+  { 
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).update(x.equations());
     static_cast<Derived&>(*this).update(x.global_variables());
-    x.initial_state() = static_cast<Derived&>(*this).apply(x.initial_state());
+    propositional_variable_instantiation result_initial_state;
+    static_cast<Derived&>(*this).apply(result_initial_state, x.initial_state());
+    x.initial_state() = result_initial_state;
     static_cast<Derived&>(*this).leave(x);
   }
 
-  pbes_system::propositional_variable_instantiation apply(const pbes_system::propositional_variable_instantiation& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::propositional_variable_instantiation& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::propositional_variable_instantiation result = pbes_system::propositional_variable_instantiation(x.name(), static_cast<Derived&>(*this).apply(x.parameters()));
+    pbes_system::make_propositional_variable_instantiation(result, x.name(), [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.parameters()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  pbes_system::not_ apply(const pbes_system::not_& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::not_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::not_ result = pbes_system::not_(static_cast<Derived&>(*this).apply(x.operand()));
+    pbes_system::make_not_(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  pbes_system::and_ apply(const pbes_system::and_& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::and_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::and_ result = pbes_system::and_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    pbes_system::make_and_(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  pbes_system::or_ apply(const pbes_system::or_& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::or_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::or_ result = pbes_system::or_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    pbes_system::make_or_(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  pbes_system::imp apply(const pbes_system::imp& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::imp& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::imp result = pbes_system::imp(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    pbes_system::make_imp(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  pbes_system::forall apply(const pbes_system::forall& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::forall& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::forall result = pbes_system::forall(static_cast<Derived&>(*this).apply(x.variables()), static_cast<Derived&>(*this).apply(x.body()));
+    pbes_system::make_forall(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  pbes_system::exists apply(const pbes_system::exists& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::exists& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::exists result = pbes_system::exists(static_cast<Derived&>(*this).apply(x.variables()), static_cast<Derived&>(*this).apply(x.body()));
+    pbes_system::make_exists(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  pbes_system::pbes_expression apply(const pbes_system::pbes_expression& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::pbes_expression& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::pbes_expression result;
     if (data::is_data_expression(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::data_expression>(x));
     }
     else if (pbes_system::is_propositional_variable_instantiation(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::propositional_variable_instantiation>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pbes_system::propositional_variable_instantiation>(x));
     }
     else if (pbes_system::is_not(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::not_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pbes_system::not_>(x));
     }
     else if (pbes_system::is_and(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::and_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pbes_system::and_>(x));
     }
     else if (pbes_system::is_or(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::or_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pbes_system::or_>(x));
     }
     else if (pbes_system::is_imp(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::imp>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pbes_system::imp>(x));
     }
     else if (pbes_system::is_forall(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::forall>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pbes_system::forall>(x));
     }
     else if (pbes_system::is_exists(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::exists>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pbes_system::exists>(x));
     }
     else if (data::is_variable(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::variable>(x));
     }
     else if (data::is_untyped_data_parameter(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
 };
@@ -485,121 +499,123 @@ struct add_pbes_expressions: public Builder<Derived>
   using super::apply;
 
   void update(pbes_system::pbes_equation& x)
-  {
+  { 
     static_cast<Derived&>(*this).enter(x);
-    x.formula() = static_cast<Derived&>(*this).apply(x.formula());
+    pbes_expression result_formula;
+    static_cast<Derived&>(*this).apply(result_formula, x.formula());
+    x.formula() = result_formula;
     static_cast<Derived&>(*this).leave(x);
   }
 
   void update(pbes_system::pbes& x)
-  {
+  { 
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).update(x.equations());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  pbes_system::propositional_variable_instantiation apply(const pbes_system::propositional_variable_instantiation& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::propositional_variable_instantiation& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  pbes_system::not_ apply(const pbes_system::not_& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::not_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::not_ result = pbes_system::not_(static_cast<Derived&>(*this).apply(x.operand()));
+    pbes_system::make_not_(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  pbes_system::and_ apply(const pbes_system::and_& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::and_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::and_ result = pbes_system::and_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    pbes_system::make_and_(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  pbes_system::or_ apply(const pbes_system::or_& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::or_& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::or_ result = pbes_system::or_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    pbes_system::make_or_(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  pbes_system::imp apply(const pbes_system::imp& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::imp& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::imp result = pbes_system::imp(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    pbes_system::make_imp(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  pbes_system::forall apply(const pbes_system::forall& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::forall& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::forall result = pbes_system::forall(x.variables(), static_cast<Derived&>(*this).apply(x.body()));
+    pbes_system::make_forall(result, x.variables(), [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  pbes_system::exists apply(const pbes_system::exists& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::exists& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::exists result = pbes_system::exists(x.variables(), static_cast<Derived&>(*this).apply(x.body()));
+    pbes_system::make_exists(result, x.variables(), [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  pbes_system::pbes_expression apply(const pbes_system::pbes_expression& x)
-  {
+  template <class T>
+  void apply(T& result, const pbes_system::pbes_expression& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::pbes_expression result;
     if (data::is_data_expression(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::data_expression>(x));
     }
     else if (pbes_system::is_propositional_variable_instantiation(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::propositional_variable_instantiation>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pbes_system::propositional_variable_instantiation>(x));
     }
     else if (pbes_system::is_not(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::not_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pbes_system::not_>(x));
     }
     else if (pbes_system::is_and(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::and_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pbes_system::and_>(x));
     }
     else if (pbes_system::is_or(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::or_>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pbes_system::or_>(x));
     }
     else if (pbes_system::is_imp(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::imp>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pbes_system::imp>(x));
     }
     else if (pbes_system::is_forall(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::forall>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pbes_system::forall>(x));
     }
     else if (pbes_system::is_exists(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::exists>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pbes_system::exists>(x));
     }
     else if (data::is_variable(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::variable>(x));
     }
     else if (data::is_untyped_data_parameter(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
 };

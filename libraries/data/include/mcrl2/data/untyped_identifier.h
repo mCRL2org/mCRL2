@@ -37,7 +37,7 @@ class untyped_identifier: public data_expression
     }
 
     /// \brief Constructor.
-    untyped_identifier(const core::identifier_string& name)
+    explicit untyped_identifier(const core::identifier_string& name)
       : data_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedIdentifier(), name))
     {}
 
@@ -60,9 +60,10 @@ class untyped_identifier: public data_expression
 
 /// \brief Make_untyped_identifier constructs a new term into a given address.
 /// \ \param t The reference into which the new untyped_identifier is constructed. 
-inline void make_untyped_identifier(untyped_identifier& t, const core::identifier_string& name)
+template <class... ARGUMENTS>
+inline void make_untyped_identifier(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_UntypedIdentifier(), name);
+  make_term_appl(t, core::detail::function_symbol_UntypedIdentifier(), args...);
 }
 
 // prototype declaration

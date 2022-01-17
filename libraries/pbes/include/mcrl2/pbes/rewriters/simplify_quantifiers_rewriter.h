@@ -26,11 +26,12 @@ struct add_simplify_quantifiers: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::apply;
 
-  pbes_expression apply(const forall& x)
+  template <class T>
+  void apply(T& result, const forall& x)
   {
-    pbes_expression result;
-    pbes_expression body = super::apply(x.body());
-    auto const& variables = x.variables();
+    pbes_expression body;
+    super::apply(body, x.body());
+    const data::variable_list& variables = x.variables();
 
     if (variables.empty())
     {
@@ -69,14 +70,14 @@ struct add_simplify_quantifiers: public Builder<Derived>
     {
       result = data::optimized_forall(variables, body, true);
     }
-    return result;
   }
 
-  pbes_expression apply(const exists& x)
+  template <class T>
+  void apply(T& result, const exists& x)
   {
-    pbes_expression result;
-    pbes_expression body = super::apply(x.body());
-    auto const& variables = x.variables();
+    pbes_expression body;
+    super::apply(body, x.body());
+    const data::variable_list& variables = x.variables();
 
     if (variables.empty())
     {
@@ -115,7 +116,6 @@ struct add_simplify_quantifiers: public Builder<Derived>
     {
       result = data::optimized_exists(variables, body, true);
     }
-    return result;
   }
 };
 
@@ -145,7 +145,9 @@ struct simplify_quantifiers_rewriter
 
   pbes_expression operator()(const pbes_expression& x) const
   {
-    return core::make_apply_builder<detail::simplify_quantifiers_builder>().apply(x);
+    pbes_expression result;
+    core::make_apply_builder<detail::simplify_quantifiers_builder>().apply(result, x);
+    return result;
   }
 };
 
@@ -165,13 +167,17 @@ struct simplify_quantifiers_data_rewriter
   pbes_expression operator()(const pbes_expression& x) const
   {
     data::no_substitution sigma;
-    return detail::make_apply_rewriter_builder<detail::simplify_quantifiers_data_rewriter_builder>(R, sigma).apply(x);
+    pbes_expression result;
+    detail::make_apply_rewriter_builder<detail::simplify_quantifiers_data_rewriter_builder>(R, sigma).apply(result, x);
+    return result;
   }
 
   template <typename SubstitutionFunction>
   pbes_expression operator()(const pbes_expression& x, SubstitutionFunction& sigma) const
   {
-    return detail::make_apply_rewriter_builder<detail::simplify_quantifiers_data_rewriter_builder>(R, sigma).apply(x);
+    pbes_expression result;
+    detail::make_apply_rewriter_builder<detail::simplify_quantifiers_data_rewriter_builder>(R, sigma).apply(result, x);
+    return result;
   }
 };
 

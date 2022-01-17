@@ -125,7 +125,7 @@ struct greater_equal_symbol : public symbol< greater_equal_symbol >
 /// \return function symbol equal_to
 inline function_symbol equal_to(const sort_expression& s)
 {
-  return function_symbol(detail::equal_symbol::instance(), make_function_sort(s, s, sort_bool::bool_()));
+  return function_symbol(detail::equal_symbol::instance(), make_function_sort_(s, s, sort_bool::bool_()));
 }
 
 /// \brief Recogniser for function ==
@@ -162,7 +162,7 @@ inline bool is_equal_to_application(const DataExpression& e)
 /// \return function symbol not_equal_to
 inline function_symbol not_equal_to(const sort_expression& s)
 {
-  return function_symbol(detail::not_equal_symbol::instance(), make_function_sort(s, s, sort_bool::bool_()));
+  return function_symbol(detail::not_equal_symbol::instance(), make_function_sort_(s, s, sort_bool::bool_()));
 }
 
 /// \brief Recogniser for function !=
@@ -199,7 +199,7 @@ inline bool is_not_equal_to_application(const DataExpression& e)
 /// \return function symbol if_
 inline function_symbol if_(const sort_expression& s)
 {
-  return function_symbol(detail::if_symbol::instance(), make_function_sort(sort_bool::bool_(), s, s, s));
+  return function_symbol(detail::if_symbol::instance(), make_function_sort_(sort_bool::bool_(), s, s, s));
 }
 
 /// \brief Recogniser for function if
@@ -239,7 +239,7 @@ inline bool is_if_application(const DataExpression& e)
 /// \return function symbol less
 inline function_symbol less(const sort_expression& s)
 {
-  return function_symbol(detail::less_symbol::instance(), make_function_sort(s, s, sort_bool::bool_()));
+  return function_symbol(detail::less_symbol::instance(), make_function_sort_(s, s, sort_bool::bool_()));
 }
 
 /// \brief Recogniser for function <
@@ -276,7 +276,7 @@ inline bool is_less_application(const DataExpression& e)
 /// \return function symbol less_equal
 inline function_symbol less_equal(const sort_expression& s)
 {
-  return function_symbol(detail::less_equal_symbol::instance(), make_function_sort(s, s, sort_bool::bool_()));
+  return function_symbol(detail::less_equal_symbol::instance(), make_function_sort_(s, s, sort_bool::bool_()));
 }
 
 /// \brief Recogniser for function <=
@@ -313,7 +313,7 @@ inline bool is_less_equal_application(const DataExpression& e)
 /// \return function symbol greater
 inline function_symbol greater(const sort_expression& s)
 {
-  return function_symbol(detail::greater_symbol::instance(), make_function_sort(s, s, sort_bool::bool_()));
+  return function_symbol(detail::greater_symbol::instance(), make_function_sort_(s, s, sort_bool::bool_()));
 }
 
 /// \brief Recogniser for function >
@@ -350,7 +350,7 @@ inline bool is_greater_application(const DataExpression& e)
 /// \return function symbol greater_equal
 inline function_symbol greater_equal(const sort_expression& s)
 {
-  return function_symbol(detail::greater_equal_symbol::instance(), make_function_sort(s, s, sort_bool::bool_()));
+  return function_symbol(detail::greater_equal_symbol::instance(), make_function_sort_(s, s, sort_bool::bool_()));
 }
 
 /// \brief Recogniser for function >=

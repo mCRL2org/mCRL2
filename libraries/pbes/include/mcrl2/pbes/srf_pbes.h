@@ -100,11 +100,11 @@ class srf_summand
     {
       if (conjunctive)
       {
-        return make_forall(m_parameters, imp(m_condition, m_X));
+        return make_forall_(m_parameters, imp(m_condition, m_X));
       }
       else
       {
-        return make_exists(m_parameters, and_(m_condition, m_X));
+        return make_exists_(m_parameters, and_(m_condition, m_X));
       }
     }
 };

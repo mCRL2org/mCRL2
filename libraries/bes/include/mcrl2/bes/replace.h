@@ -24,6 +24,7 @@ struct boolean_variable_substitution
   const boolean_expression& phi;
 
   using argument_type = boolean_variable;
+  using result_type = boolean_expression;
 
   boolean_variable_substitution(const boolean_variable& v_, const boolean_expression& phi_)
     : v(v_), phi(phi_)
@@ -46,7 +47,9 @@ struct boolean_variable_substitution
 template <typename Substitution>
 boolean_expression replace_boolean_variables(const boolean_expression& x, Substitution sigma)
 {
-  return core::make_update_apply_builder<boolean_expression_builder>(sigma).apply(x);
+  boolean_expression result;
+  core::make_update_apply_builder<boolean_expression_builder>(sigma).apply(result, x);
+  return result;
 }
 
 template <typename T, typename Substitution>
@@ -64,7 +67,9 @@ T replace_all_boolean_variables(const T& x,
                                 typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                                )
 {
-  return core::make_update_apply_builder<bes::boolean_variable_builder>(sigma).apply(x);
+  T result;
+  core::make_update_apply_builder<bes::boolean_variable_builder>(sigma).apply(result, x);
+  return result;
 }
 
 } // namespace bes

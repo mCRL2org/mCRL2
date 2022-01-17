@@ -78,14 +78,17 @@ struct normalize_and_or_builder: public pbes_expression_builder<Derived>
   }
 
   // to prevent default operator() being called
-  data::data_expression apply(const data::data_expression& x)
+  template <class T>
+  void apply(T& result, const data::data_expression& x)
   {
-    return x;
+    result = x;
   }
 
-  pbes_expression apply(const pbes_expression& x)
+  template <class T>
+  void apply(T& result, const pbes_expression& x)
   {
-    return normalize(super::apply(x));
+    super::apply(result, x);
+    result = normalize(result);
   }
 };
 
@@ -94,7 +97,9 @@ T normalize_and_or(const T& x,
                    typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
                   )
 {
-  return core::make_apply_builder<normalize_and_or_builder>().apply(x);
+  T result;
+  core::make_apply_builder<normalize_and_or_builder>().apply(result, x);
+  return result;
 }
 
 template <typename T>

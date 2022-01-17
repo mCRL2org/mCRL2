@@ -82,29 +82,31 @@ struct remove_parameters_builder: public data_expression_builder<remove_paramete
   }
 
   /// \brief Removes parameters from a list of variables.
-  data::variable_list apply(const data::variable_list& x)
+  template <class T>
+  void apply(atermpp::term_list<T>& result, const data::variable_list& x)
   {
     using utilities::detail::contains;
 
-    std::vector<data::variable> result;
+    std::vector<data::variable> result_vec;
     for (const data::variable& v: x)
     {
       if (!contains(to_be_removed, v))
       {
-        result.push_back(v);
+        result_vec.push_back(v);
       }
     }
-    return data::variable_list(result.begin(), result.end());
+    result = data::variable_list(result_vec.begin(), result_vec.end());
   }
 
   /// \brief Removes parameters from a list of assignments.
   /// Assignments to removed parameters are removed.
-  data::assignment_list apply(const data::assignment_list& x)
+  template <class T>
+  void apply(atermpp::term_list<T>& result, const data::assignment_list& x)
   {
     using utilities::detail::contains;
     std::vector<data::assignment> a(x.begin(), x.end());
     a.erase(std::remove_if(a.begin(), a.end(), [&](const data::assignment& y) {	return contains(to_be_removed, y.lhs()); }), a.end());
-    return data::assignment_list(a.begin(), a.end());
+    result = data::assignment_list(a.begin(), a.end());
   }
 
   /// \brief Removes parameters from a linear_process
@@ -112,7 +114,9 @@ struct remove_parameters_builder: public data_expression_builder<remove_paramete
   void update(linear_process& x)
   {
     super::update(x);
-    x.process_parameters() = apply(x.process_parameters());
+    data::variable_list parameters;
+    apply(parameters, x.process_parameters());
+    x.process_parameters() = parameters;
   }
 
   /// \brief Removes parameters from a linear_process
@@ -120,7 +124,9 @@ struct remove_parameters_builder: public data_expression_builder<remove_paramete
   void update(stochastic_linear_process& x)
   {
     super::update(x);
-    x.process_parameters() = apply(x.process_parameters());
+    data::variable_list parameters;
+    apply(parameters, x.process_parameters());
+    x.process_parameters() = parameters;
   }
 
   /// \brief Removes expressions from e at the corresponding positions of process_parameters
@@ -142,17 +148,20 @@ struct remove_parameters_builder: public data_expression_builder<remove_paramete
     return data::data_expression_list(result.begin(), result.end());
   }
 
-  process_initializer apply(const process_initializer& x)
+  template <class T>
+  void apply(T& result, const process_initializer& x)
   {
     auto expressions = remove_expressions(x.expressions());
-    return process_initializer(expressions);
+    result = process_initializer(expressions);
   }
 
-  stochastic_process_initializer apply(const stochastic_process_initializer& x)
+  template <class T>
+  void apply(T& result,  const stochastic_process_initializer& x)
   {
     auto expressions = remove_expressions(x.expressions());
-    auto distribution = super::apply(x.distribution());
-    return stochastic_process_initializer(expressions, distribution);
+    lps::stochastic_distribution distribution;
+    super::apply(distribution, x.distribution());
+    result = stochastic_process_initializer(expressions, distribution);
   }
 
   /// \brief Removes parameters from a linear process specification

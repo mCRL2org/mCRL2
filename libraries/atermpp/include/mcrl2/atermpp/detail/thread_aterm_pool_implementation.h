@@ -67,22 +67,32 @@ void thread_aterm_pool::create_appl(aterm& term, const function_symbol& sym, con
   if (added) { m_pool.created_term(m_creation_depth == 0, this); }
 }
 
-template<class Term, class ...Terms>
+template<class Term, class INDEX_TYPE, class ...Terms>
 void thread_aterm_pool::create_appl_index(aterm& term, const function_symbol& sym, const Terms&... arguments)
 {
   if constexpr (GlobalThreadSafe) lock_shared();
   ++m_creation_depth;
 
-  static_assert(sizeof...(arguments)==1 || sizeof...(arguments)==2);
+  std::array<unprotected_aterm, sizeof...(arguments)> argument_array;
+  store_in_argument_array(0, argument_array, arguments...);
+
+  bool added;
   if constexpr (sizeof...(arguments)==1)
   {
-    m_pool.create_int(term, atermpp::detail::index_traits<Term, Terms..., 1>::insert(arguments...));
+    m_pool.create_int(term, atermpp::detail::index_traits<Term, INDEX_TYPE, 1>::
+           insert(static_cast<INDEX_TYPE>(static_cast<aterm>(address(argument_array[0])))));
+    added = m_pool.create_appl(term, sym, argument_array[0], term);
   }
   else
   {
-    m_pool.create_int(term, atermpp::detail::index_traits<Term, std::pair<Terms...>, 2>::insert(std::make_pair(arguments...)));
+    m_pool.create_int(
+         term,
+         atermpp::detail::index_traits<Term, INDEX_TYPE, 2>::
+           insert(std::make_pair(static_cast<typename INDEX_TYPE::first_type>(static_cast<aterm>(address(argument_array[0]))),
+                                 static_cast<typename INDEX_TYPE::second_type>(static_cast<aterm>(address(argument_array[1]))))));
+    added = m_pool.create_appl(term, sym, argument_array[0], argument_array[1], term);
   }
-  bool added = m_pool.create_appl(term, sym, arguments..., term);
+
 
   --m_creation_depth;
   if constexpr (GlobalThreadSafe) unlock_shared();

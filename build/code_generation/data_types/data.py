@@ -1424,7 +1424,7 @@ class sort_arrow(sort_expression):
 
   def code(self, spec):
     assert(isinstance(spec, specification))
-    return "make_function_sort(%s, %s)" % (self.domain.code(spec), self.codomain.code(spec))
+    return "make_function_sort_(%s, %s)" % (self.domain.code(spec), self.codomain.code(spec))
 
 class sort_container(sort_expression):
   def __init__(self, container, element_sort):

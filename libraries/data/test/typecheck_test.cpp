@@ -909,7 +909,7 @@ BOOST_AUTO_TEST_CASE(test_lambda_variable_aliasing)
     "lambda x: S. x(x)",
     "sort S;\n"
     "     T;\n",
-    { var("x", make_function_sort(data::basic_sort("S"), data::basic_sort("T"))) },
+    { var("x", make_function_sort_(data::basic_sort("S"), data::basic_sort("T"))) },
     false);
 }
 

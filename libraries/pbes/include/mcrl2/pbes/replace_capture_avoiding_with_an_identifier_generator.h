@@ -35,27 +35,33 @@ struct add_capture_avoiding_replacement_with_an_identifier_generator
   using super::apply;
   using super::update_sigma;
 
-  pbes_expression apply(const forall& x)
+  template <class T>
+  void apply(T& result, const forall& x)
   {
     data::variable_list v = update_sigma.push(x.variables());
-    pbes_expression result = forall(v, apply(x.body()));
+    pbes_expression body;
+    apply(body, x.body());
+    make_forall(body, v, apply(x.body()));
     update_sigma.pop(v);
-    return result;
   }
 
-  pbes_expression apply(const exists& x)
+  template <class T>
+  void apply(T& result, const exists& x)
   {
     data::variable_list v = update_sigma.push(x.variables());
-    pbes_expression result = exists(v, apply(x.body()));
+    pbes_expression body;
+    apply(body, x.body());
+    make_exists(result, v, apply(x.body()));
     update_sigma.pop(v);
-    return result;
   }
 
   void update(pbes_equation& x)
   {
     data::variable_list v = update_sigma.push(x.variable().parameters());
     x.variable() = propositional_variable(x.variable().name(), v);
-    x.formula() = apply(x.formula());
+    pbes_expression formula;
+    apply(formula, x.formula());
+    x.formula() = formula;
     update_sigma.pop(v);
   }
 
@@ -111,7 +117,9 @@ T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                    )
 {
-  return data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<pbes_system::data_expression_builder, pbes_system::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).apply(x);
+  T result;
+  data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<pbes_system::data_expression_builder, pbes_system::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).apply(result, x);
+  return result;
 }
 //--- end generated pbes_system replace_capture_avoiding_with_identifier_generator code ---//
 

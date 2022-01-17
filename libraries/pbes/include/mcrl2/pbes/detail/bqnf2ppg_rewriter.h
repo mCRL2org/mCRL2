@@ -139,7 +139,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
             }
           }
           if (!qvars.empty()) {
-            expr = make_forall(qvars, expr);
+            expr = make_forall_(qvars, expr);
           }
 
           // Add sigma X(d) = forall (qvars) . phi => fresh_X(d+qvars).
@@ -242,7 +242,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
             expr = and_(phi, fresh_var_instantiation);
           }
           if (!qvars.empty()) {
-            expr = make_exists(qvars, expr);
+            expr = make_exists_(qvars, expr);
           }
 
           // Add sigma X(d) = exists (qvars) . phi && fresh_X(d+qvars).
@@ -355,7 +355,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
             }
           }
           if (is_forall(e)) {
-            expr = make_forall(qvars, expr);
+            expr = make_forall_(qvars, expr);
           }
 
           // New equation: sigma fresh_X(d+qvars) = psi.
@@ -459,7 +459,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
             expr = and_(phi, fresh_var_instantiation);
           }
           if (is_exists(e)) {
-            expr = make_exists(qvars, expr);
+            expr = make_exists_(qvars, expr);
           }
 
           // New equation: sigma fresh_X(d+qvars) = psi.

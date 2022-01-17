@@ -243,9 +243,10 @@ class if_: public bdd_expression
 
 /// \brief Make_if_ constructs a new term into a given address.
 /// \ \param t The reference into which the new if_ is constructed. 
-inline void make_if_(if_& t, const core::identifier_string& name, const bdd_expression& left, const bdd_expression& right)
+template <class... ARGUMENTS>
+inline void make_if_(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_BddIf(), name, left, right);
+  make_term_appl(t, core::detail::function_symbol_BddIf(), args...);
 }
 
 /// \brief Test for a if expression

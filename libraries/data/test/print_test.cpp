@@ -198,8 +198,8 @@ BOOST_AUTO_TEST_CASE(test_function_symbol_print)
 
 BOOST_AUTO_TEST_CASE(test_application_print)
 {
-  data::function_symbol f("f", make_function_sort(bool_(), bool_()));
-  data::function_symbol g("g", make_function_sort(bool_(), nat(), bool_()));
+  data::function_symbol f("f", make_function_sort_(bool_(), bool_()));
+  data::function_symbol g("g", make_function_sort_(bool_(), nat(), bool_()));
 
   PRINT_CHECK(f(true_()), "f(true)");
   PRINT_CHECK(g(false_(), sort_nat::nat(10)), "g(false, 10)");

@@ -33,7 +33,9 @@ T rewrite(const T& x,
           typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
          )
 {
-  return data::detail::make_rewrite_data_expressions_builder<NAMESPACE::data_expression_builder>(R).apply(x);
+  T result;
+  data::detail::make_rewrite_data_expressions_builder<NAMESPACE::data_expression_builder>(R).apply(result, x);
+  return result;
 }
 
 /// \\\\brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
@@ -62,7 +64,9 @@ T rewrite(const T& x,
           typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
          )
 {
-  return data::detail::make_rewrite_data_expressions_with_substitution_builder<NAMESPACE::data_expression_builder>(R, sigma).apply(x);
+  T result; 
+  data::detail::make_rewrite_data_expressions_with_substitution_builder<NAMESPACE::data_expression_builder>(R, sigma).apply(result, x);
+  return result;
 }
 '''
 
@@ -83,7 +87,9 @@ T replace_sort_expressions(const T& x,
                            typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                           )
 {
-  return data::detail::make_replace_sort_expressions_builder<NAMESPACE::sort_expression_builder>(sigma, innermost).apply(x);
+  T result;
+  data::detail::make_replace_sort_expressions_builder<NAMESPACE::sort_expression_builder>(sigma, innermost).apply(result, x);
+  return result;
 }
 
 template <typename T, typename Substitution>
@@ -103,8 +109,11 @@ T replace_data_expressions(const T& x,
                            typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                           )
 {
-  return data::detail::make_replace_data_expressions_builder<NAMESPACE::data_expression_builder>(sigma, innermost).apply(x);
+  T result;
+  data::detail::make_replace_data_expressions_builder<NAMESPACE::data_expression_builder>(sigma, innermost).apply(result, x);
+  return result;
 }
+
 
 template <typename T, typename Substitution>
 void replace_variables(T& x,
@@ -121,7 +130,9 @@ T replace_variables(const T& x,
                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                    )
 {
-  return core::make_update_apply_builder<NAMESPACE::data_expression_builder>(sigma).apply(x);
+  T result;
+  core::make_update_apply_builder<NAMESPACE::data_expression_builder>(sigma).apply(result, x);
+  return result;
 }
 
 template <typename T, typename Substitution>
@@ -139,7 +150,9 @@ T replace_all_variables(const T& x,
                         typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                        )
 {
-  return core::make_update_apply_builder<NAMESPACE::variable_builder>(sigma).apply(x);
+  T result;
+  core::make_update_apply_builder<NAMESPACE::variable_builder>(sigma).apply(result, x);
+  return result;
 }
 
 /// \\\\brief Applies the substitution sigma to x.
@@ -163,7 +176,9 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_builder_binding>(sigma).apply(x);
+  T result;
+  data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_builder_binding>(sigma).apply(result, x);
+  return result;
 }
 
 /// \\\\brief Applies the substitution sigma to x, where the elements of bound_variables are treated as bound variables.
@@ -189,7 +204,9 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_builder_binding>(sigma).apply(x, bound_variables);
+  T result;
+  data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_builder_binding>(sigma).apply(result, x, bound_variables);
+  return result;
 }
 '''
 
@@ -220,7 +237,9 @@ T replace_variables_capture_avoiding(const T& x,
 )
 {
   data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
-  return data::detail::apply_replace_capture_avoiding_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::detail::add_capture_avoiding_replacement>(sigma1).apply(x);
+  T result;
+  data::detail::apply_replace_capture_avoiding_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::detail::add_capture_avoiding_replacement>(sigma1).apply(result, x);
+  return result;
 }
 
 /// \\\\brief Applies sigma as a capture avoiding substitution to x.
@@ -295,7 +314,9 @@ T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                    )
 {
-  return data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<NAMESPACE::data_expression_builder, NAMESPACE::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).apply(x);
+  T result;
+  data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<NAMESPACE::data_expression_builder, NAMESPACE::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).apply(result, x);
+  return result;
 }
 '''
 

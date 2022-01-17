@@ -93,7 +93,7 @@ protected:
 public:
   reference_aterm() = default;
 
-  reference_aterm(const T& other) noexcept
+  reference_aterm(const T_type& other) noexcept
    : m_t(other)
   { }
  
@@ -111,27 +111,27 @@ public:
    : m_t(std::forward(other))
   {}
 
-  const T& operator=(const T& other) noexcept
+  const reference_aterm& operator=(const T_type& other) noexcept
   {
-    static_assert(std::is_base_of<aterm, T>::value);
+    static_assert(std::is_base_of<aterm, T_type>::value);
     m_t=other;
     return m_t;
   }
 
-  const T& operator=(T&& other) noexcept
+  const reference_aterm& operator=(T_type&& other) noexcept
   {
-    static_assert(std::is_base_of<aterm, T>::value);
+    static_assert(std::is_base_of<aterm, T_type>::value);
     m_t = std::forward(other);
     return m_t;
   }
 
   /// Converts implicitly to a protected term of type T.
-  operator T&()
+  operator T_type&()
   {
     return m_t;
   }
 
-  operator const T&() const
+  operator const T_type&() const
   {
     return m_t;
   }

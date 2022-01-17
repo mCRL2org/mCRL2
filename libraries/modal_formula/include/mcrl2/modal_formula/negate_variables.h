@@ -39,13 +39,15 @@ struct state_variable_negator: public state_formulas::state_formula_builder<Deri
   /// \brief Visit variable node.
   /// \param x A term.
   /// \return The result of visiting the node.
-  state_formula apply(const variable& x)
+  template <class T>
+  void apply(T& result, const variable& x)
   {
     if (x.name() == m_name)
     {
-      return state_formulas::not_(x);
+      state_formulas::make_not_(result, x);
+      return;
     }
-    return x;
+    result = x;
   }
 };
 
@@ -57,7 +59,9 @@ inline
 /// \param x The state formula. 
 state_formula negate_variables(const core::identifier_string& name, const state_formula& x)
 {
-  return core::make_apply_builder_arg1<detail::state_variable_negator>(name).apply(x);
+  state_formula result;
+  core::make_apply_builder_arg1<detail::state_variable_negator>(name).apply(result, x);
+  return result;
 }
 
 } // namespace state_formulas

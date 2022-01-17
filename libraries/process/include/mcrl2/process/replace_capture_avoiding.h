@@ -49,7 +49,8 @@ struct add_capture_avoiding_replacement
     : super(sigma)
   { }
 
-  process::process_expression apply(const process::process_instance_assignment& x)
+  template <class T>
+  void apply(T& result, const process::process_instance_assignment& x)
   {
     static_cast<Derived&>(*this).enter(x);
     const data::assignment_list& a = x.assignments();
@@ -60,7 +61,8 @@ struct add_capture_avoiding_replacement
       auto k = find_variable(a, variable);
       if (k == a.end())
       {
-        data::data_expression e = apply(variable);
+        data::data_expression e;
+        apply(e, variable);
         if (e != variable)
         {
           v.emplace_back(variable, e);
@@ -68,20 +70,23 @@ struct add_capture_avoiding_replacement
       }
       else
       {
-        v.emplace_back(k->lhs(), apply(k->rhs()));
+        data::data_expression rhs;
+        apply(rhs, k->rhs());
+        v.emplace_back(k->lhs(), rhs);
       }
     }
-    process_expression result = process_instance_assignment(x.identifier(),data::assignment_list(v.begin(), v.end()));
+    make_process_instance_assignment(result, x.identifier(),data::assignment_list(v.begin(), v.end()));
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process_expression apply(const sum& x)
+  template <class T>
+  void apply(T& result, const sum& x)
   {
     data::variable_list v1 = sigma.add_fresh_variable_assignments(x.variables());
-    process_expression result = sum(v1, apply(x.operand()));
+    process_expression body;
+    apply(body, x.operand());
+    make_sum(result, v1, body);
     sigma.remove_fresh_variable_assignments(x.variables());
-    return result;
   }
 };
 
@@ -115,7 +120,9 @@ T replace_variables_capture_avoiding(const T& x,
 )
 {
   data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
-  return data::detail::apply_replace_capture_avoiding_variables_builder<process::data_expression_builder, process::detail::add_capture_avoiding_replacement>(sigma1).apply(x);
+  T result;
+  data::detail::apply_replace_capture_avoiding_variables_builder<process::data_expression_builder, process::detail::add_capture_avoiding_replacement>(sigma1).apply(result, x);
+  return result;
 }
 
 /// \brief Applies sigma as a capture avoiding substitution to x.

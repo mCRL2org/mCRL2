@@ -155,44 +155,60 @@ struct stategraph_simplify_builder: public simplify_quantifiers_data_rewriter_bu
     return result;
   }
 
-  pbes_expression apply(const data::data_expression& x)
+  template <class T>
+  void apply(T& result, const data::data_expression& x)
   {
-    return post_process(super::apply(data::simplify(x)));
+    super::apply(result, data::simplify(x));
+    result = post_process(result);
   }
 
-  pbes_expression apply(const not_& x)
+  template <class T>
+  void apply(T& result, const not_& x)
   {
-    return post_process(super::apply(x));
+    super::apply(result, x);
+    result = post_process(result);
   }
 
-  pbes_expression apply(const and_& x)
+  template <class T>
+  void apply(T& result, const and_& x)
   {
-    return post_process(super::apply(x));
+
+    super::apply(result, x);
+    result = post_process(result);
   }
 
-  pbes_expression apply(const or_& x)
+  template <class T>
+  void apply(T& result, const or_& x)
   {
-    return post_process(super::apply(x));
+    super::apply(result, x);
+    result = post_process(result);
   }
 
-  pbes_expression apply(const imp& x)
+  template <class T>
+  void apply(T& result, const imp& x)
   {
-    return derived().apply(or_(not_(x.left()), x.right()));
+    derived().apply(result, or_(not_(x.left()), x.right()));
   }
 
-  pbes_expression apply(const forall& x)
+  template <class T>
+  void apply(T& result, const forall& x)
   {
-    return post_process(super::apply(x));
+    super::apply(result, x);
+    result = post_process(result);
   }
 
-  pbes_expression apply(const exists& x)
+  template <class T>
+  void apply(T& result, const exists& x)
   {
-    return post_process(super::apply(x));
+    super::apply(result, x);
+    result = post_process(result);
   }
 
-  pbes_expression apply(const propositional_variable_instantiation& x)
+  template <class T>
+  void apply(T& result, const propositional_variable_instantiation& x)
   {
-    return post_process(super::apply(x));
+    super::apply(result, x);
+    result = post_process(result);
   }
 };
 
@@ -223,7 +239,9 @@ class stategraph_simplify_rewriter
     pbes_expression operator()(const pbes_expression& x) const
     {
       data::no_substitution sigma;
-      return detail::make_apply_rewriter_builder<stategraph_simplify_builder>(m_rewriter, sigma).apply(x);
+      pbes_expression result;
+      detail::make_apply_rewriter_builder<stategraph_simplify_builder>(m_rewriter, sigma).apply(result, x);
+      return result;
     }
 
     /// \brief Rewrites a pbes expression.
@@ -233,7 +251,9 @@ class stategraph_simplify_rewriter
     template <typename SubstitutionFunction>
     pbes_expression operator()(const pbes_expression& x, SubstitutionFunction& sigma) const
     {
-      return detail::make_apply_rewriter_builder<stategraph_simplify_builder>(m_rewriter, sigma).apply(x);
+      pbes_expression result;
+      detail::make_apply_rewriter_builder<stategraph_simplify_builder>(m_rewriter, sigma).apply(result, x);
+      return result;
     }
 };
 

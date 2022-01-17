@@ -30,9 +30,10 @@ struct if_rewrite_builder: public pbes_system::data_expression_builder<if_rewrit
 
   data::if_rewriter r;
 
-  data::data_expression apply(const data::data_expression& x)
+  template <class T>
+  void apply(T& result, const data::data_expression& x)
   {
-    return r(x);
+    result = r(x);
   }
 };
 
@@ -53,7 +54,9 @@ class if_rewriter
   pbes_expression operator()(const pbes_expression& x) const
   {
     detail::if_rewrite_builder f;
-    return f.apply(x);
+    pbes_expression result;
+    f.apply(result, x);
+    return result;
   }
 };
 

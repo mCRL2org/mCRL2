@@ -35,15 +35,18 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
     return static_cast<Derived&>(*this);
   }
 
-  data::data_expression apply(const data::data_expression& x)
+  template <class T>
+  void apply(T& result, const data::data_expression& x)
   {
     data::one_point_rule_rewriter r;
-    return r(x);
+    result = r(x);
   }
 
-  pbes_expression apply(const forall& x)
+  template <class T>
+  void apply(T& result, const forall& x)
   {
-    pbes_expression body = derived().apply(forall(x).body());
+    pbes_expression body;
+    derived().apply(body, forall(x).body());
 
     std::map<data::variable, std::set<data::data_expression> > inequalities = find_inequalities(body);
     mCRL2log(log::debug) << "x = " << x << std::endl;
@@ -61,19 +64,23 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
         if (remaining_variables.empty())
         {
           mCRL2log(log::debug) << "Replaced " << x << "\nwith " << body << std::endl;
-          return body;
+          result = body;
+          return;
         }
         data::variable_list v(remaining_variables.begin(), remaining_variables.end());
         mCRL2log(log::debug) << "Replaced " << x << "\nwith " << forall(v, body) << std::endl;
-        return forall(v, body);
+        make_forall(result, v, body);
+        return;
       }
     }
-    return forall(x.variables(), body);
+    make_forall(result, x.variables(), body);
   }
 
-  pbes_expression apply(const exists& x)
+  template <class T>
+  void apply(T& result, const exists& x)
   {
-    pbes_expression body = derived().apply(exists(x).body());
+    pbes_expression body;
+    derived().apply(body, exists(x).body());
 
     std::map<data::variable, std::set<data::data_expression> > equalities = find_equalities(body);
     mCRL2log(log::debug) << "x = " << body << "\nequalities(x) = " << data::print_inequalities(equalities) << std::endl;
@@ -90,28 +97,32 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
         if (remaining_variables.empty())
         {
           mCRL2log(log::debug) << "Replaced " << x << "\nwith " << body << std::endl;
-          return body;
+          result = body;
+          return;
         }
         data::variable_list v(remaining_variables.begin(), remaining_variables.end());
         mCRL2log(log::debug) << "Replaced " << x << "\nwith " << exists(v, body) << std::endl;
-        return exists(v, body);
+        make_exists(result, v, body);
+        return;
       }
     }
-    return exists(x.variables(), body);
+    make_exists(result, x.variables(), body);
   }
 
   // TODO: This case was added to prevent a data not to be transformed into a PBES not.
   // It should not be necessary to do this, but otherwise a PFNF test case fails.
-  pbes_expression apply(const not_& x)
+  template <class T>
+  void apply(T& result, const not_& x)
   {
-    pbes_expression operand = derived().apply(x.operand());
+    pbes_expression operand; 
+    derived().apply(operand, x.operand());
     if (data::is_data_expression(operand))
     {
-      return data::not_(atermpp::down_cast<data::data_expression>(operand));
+      result = data::not_(atermpp::down_cast<data::data_expression>(operand));
     }
     else
     {
-      return not_(operand);
+      result = not_(operand);
     }
   }
 };
@@ -134,7 +145,9 @@ class one_point_rule_rewriter
     /// \return The rewrite result.
     pbes_expression operator()(const pbes_expression& x) const
     {
-      return core::make_apply_builder<detail::one_point_rule_rewrite_builder>().apply(x);
+      pbes_expression result;
+      core::make_apply_builder<detail::one_point_rule_rewrite_builder>().apply(result, x);
+      return result;
     }
 };
 

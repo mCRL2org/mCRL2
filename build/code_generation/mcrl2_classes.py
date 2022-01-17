@@ -471,17 +471,21 @@ class Constructor:
         text = re.sub('<ATERM>'              , self.aterm              , text)
         text = re.sub('<PARAMETERS>'         , self.parameters         , text)
         text = re.sub('<TEMPLATE_PARAMETERS>', self.template_parameters, text)
+        if len(self.parameters)>0 and self.parameters.find(',')<0:     # There is only one parameter. Add explicit. 
+            text = re.sub('<EXPLICIT>','explicit ',text)
+        else:
+           text = re.sub('<EXPLICIT>','',text)
         return text
 
     def inline_definition(self):
         if self.superclass == 'atermpp::aterm_appl':
             text = r'''    /// \\\\brief Constructor.
-    <CLASSNAME>(<ARGUMENTS>)
+    <EXPLICIT><CLASSNAME>(<ARGUMENTS>)
       : atermpp::aterm_appl(core::detail::function_symbol_<ATERM>(), <PARAMETERS>)
     {}'''
         else:
             text = r'''    /// \\\\brief Constructor.
-    <CLASSNAME>(<ARGUMENTS>)
+    <EXPLICIT><CLASSNAME>(<ARGUMENTS>)
       : <SUPERCLASS>(atermpp::aterm_appl(core::detail::function_symbol_<ATERM>(), <PARAMETERS>))
     {}'''
         return self.expand_text(text)
@@ -494,12 +498,12 @@ class Constructor:
     def definition(self, inline = False):
         if self.superclass == 'atermpp::aterm_appl':
             text = r'''    /// \\\\brief Constructor.
-    <INLINE><CLASSNAME>::<CLASSNAME>(<ARGUMENTS>)
+    <EXPLICIT><INLINE><CLASSNAME>::<CLASSNAME>(<ARGUMENTS>)
       : atermpp::aterm_appl(core::detail::function_symbol_<ATERM>(), <PARAMETERS>)
     {}'''
         else:
             text = r'''    /// \\\\brief Constructor.
-    <INLINE><CLASSNAME>::<CLASSNAME>(<ARGUMENTS>)
+    <EXPLICIT><INLINE><CLASSNAME>::<CLASSNAME>(<ARGUMENTS>)
       : <SUPERCLASS>(atermpp::aterm_appl(core::detail::function_symbol_<ATERM>(), <PARAMETERS>))
     {}'''
         if inline:
@@ -897,18 +901,23 @@ class Class:
     def make_function(self):
         text = r'''/// \\brief Make_<CLASSNAME> constructs a new term into a given address.
 /// \\ \param t The reference into which the new <CLASSNAME> is constructed. 
-inline void make_<CLASSNAME>(<CLASSNAME>& t, <ARGUMENTS>)
+template <class... ARGUMENTS>
+inline void make_<CLASSNAME>(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl<HASINDEX>(t, core::detail::function_symbol_<ATERM>(), <PARAMETERS>);
+  make_term_appl<HASINDEX>(t, core::detail::function_symbol_<ATERM>(), args...);
 }'''
-        text = re.sub('<CLASSNAME>', self.classname(), text)
         text = re.sub('<ATERM>', self.aterm, text)
         text = re.sub('<ARGUMENTS>', ', '.join([p.type() + ' ' + p.name() for p in self.constructor.parameters()]), text)
         text = re.sub('<PARAMETERS>', ', '.join([p.name() for p in self.constructor.parameters()]), text)
         if 'N' in self.modifiers():
-          text = re.sub('<HASINDEX>', '_with_index', text)
+          if len(self.constructor.parameters()) == 1:
+              text = re.sub('<HASINDEX>', '_with_index<<CLASSNAME>,<PARAMETER_SORTS>>', text)
+          else:
+              text = re.sub('<HASINDEX>', '_with_index<<CLASSNAME>,std::pair<<PARAMETER_SORTS>>>', text)
         else:
           text = re.sub('<HASINDEX>', '', text)
+        text = re.sub('<CLASSNAME>', self.classname(), text)
+        text = re.sub('<PARAMETER_SORTS>',', '.join([re.sub('const ','',re.sub('&','',p.type())) for p in self.constructor.parameters()]), text)
         return text
 
     # Returns typedefs for term lists and term vectors.
@@ -1121,8 +1130,8 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
     #    return result
 
     def builder_function(self, all_classes, dependencies, modifiability_map):
-        text = r'''<RETURN_TYPE> <METHOD>(<CONST><CLASS_NAME>& x)
-{
+        text = r'''<TEMPLATE>void <METHOD>(<RESULT><CONST><CLASS_NAME>& x)
+{ 
   static_cast<Derived&>(*this).enter(x);<VISIT_TEXT>
   static_cast<Derived&>(*this).leave(x);<RETURN_STATEMENT>
 }
@@ -1133,11 +1142,14 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
 
         method = 'apply'
         if is_modifiable_type(classname, modifiability_map):
+            template = ''
             return_type = 'void'
             const = ''
             method = 'update'
+            result = ''
         else:
             const = 'const '
+            template = 'template <class T>'
             # We currently return the same class as we get passed as parameter.
             # The following statement was not present in previous versions of this
             # file.
@@ -1149,6 +1161,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             # with it.
             if 'data::abstraction' in return_type:
                 return_type = 'data::data_expression'
+            result = 'T& result, '
 
         if is_modifiable_type(classname, modifiability_map):
             return_statement = ''
@@ -1166,7 +1179,13 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                     if is_modifiable_type(qtype, modifiability_map):
                         updates.append('static_cast<Derived&>(*this).update(x.%s());' % p.name())
                     else:
-                        updates.append('x.%s() = static_cast<Derived&>(*this).apply(x.%s());' % (p.name(), p.name()))
+                        local_type = re.sub('const ','',re.sub('&','',p.type()))
+                        if classname == 'lps::stochastic_specification' and local_type == 'process_initializer':
+                            local_type = 'stochastic_process_initializer'   # Unclear why this needs to be done. Appears to be a bug. 
+                            print 'ADAPTED', local_type
+                        local_variable = 'result_%s' % p.name()
+                        updates.append('%s %s;\nstatic_cast<Derived&>(*this).apply(%s, x.%s());\nx.%s() = %s;' \
+                                         % (local_type, local_variable, local_variable, p.name(), p.name(), local_variable))
                 else:
                     continue
             if dependent:
@@ -1185,14 +1204,14 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                         cast = 'atermpp::down_cast<%s>(x)' % c.classname(True)
                     updates.append('''if (%s(x))
 {
-  result = static_cast<Derived&>(*this).apply(%s);
+  static_cast<Derived&>(*this).apply(result, %s);
 }''' % (is_function, cast))
                 if len(updates) == 0:
                     visit_text = '// skip'
-                    return_statement = 'return x;'
+                    return_statement = 'result = x;'
                 else:
-                    visit_text = '%s result;\n' % return_type + '\nelse '.join(updates)
-                    return_statement = 'return result;'
+                    visit_text = '\nelse '.join(updates)
+                    return_statement = ''
             else:
                 updates = []
                 f = self.constructor
@@ -1203,45 +1222,50 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                         pclass = all_classes[ptype]
                     if is_dependent_type(dependencies, ptype):
                         dependent = True
-                        updates.append('static_cast<Derived&>(*this).apply(x.%s())' % p.name())
+                        updates.append('[&](%s result){ static_cast<Derived&>(*this).apply(result, x.%s()); }' \
+                             % (re.sub('const ','',p.type()), p.name()))
                     else:
                         updates.append('x.%s()' % p.name())
                 if dependent:
                     # special case for arguments of a data application
+                    make_class_function = re.sub('::', '::make_', classname)
                     if self.classname(True) == 'data::application' and p.name() == 'arguments':
-                        visit_text = '''typedef data::data_expression (Derived::*function_pointer)(const data::data_expression&);
-function_pointer fp = &Derived::apply;
-%s result = data::application(
+                        visit_text = '''data::make_application(result,
    x.head(),
    x.begin(),
    x.end(),
-   std::bind(fp, static_cast<Derived*>(this), std::placeholders::_1)
-);''' % return_type
+   [&](data_expression& result, const data::data_expression& t){ static_cast<Derived&>(*this).apply(result,t);} );''' 
                     # special case for stochastic distribution
                     elif return_type == 'lps::stochastic_distribution':
-                        visit_text = '%s result = x; if (x.is_defined()) { result = %s(%s); }' % (return_type, classname, ', '.join(updates))
+                        visit_text = 'result = x; if (x.is_defined()) { %s(result, %s); }' % (make_class_function, ', '.join(updates))
                     else:
-                        visit_text = '%s result = %s(%s);' % (return_type, classname, ', '.join(updates))
-                    return_statement = 'return result;'
+                        visit_text = '%s(result, %s);' % (make_class_function, ', '.join(updates))
+                    return_statement = ''
                 else:
                     visit_text = '// skip'
-                    return_statement = 'return x;'
+                    return_statement = 'result = x;'
 
         # fix the layout
+        if template != '':
+            template = template + '\n'
         if return_statement != '':
             return_statement = '\n  ' + return_statement
         if visit_text != '':
             visit_text = '\n' + indent_text(visit_text, '  ')
 
+        text = re.sub('<TEMPLATE>', template, text)
         text = re.sub('<RETURN_TYPE>', return_type, text)
+        text = re.sub('<RESULT>', result, text)
         text = re.sub('<CONST>', const, text)
-        text = re.sub('<CLASS_NAME>', classname, text)
         text = re.sub('<VISIT_TEXT>', visit_text, text)
+        text = re.sub('<CLASS_NAME>', classname, text)
         text = re.sub('<RETURN_STATEMENT>', return_statement, text)
         text = re.sub('<METHOD>', method, text)
         if self.constructor.is_template():
             text = 'template <typename ' + ', typename '.join(f.template_parameters()) + '>\n' + text
         return text
+
+##########################################################################################################################
 
 def extract_namespace(text):
     if text == None:

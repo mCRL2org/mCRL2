@@ -172,7 +172,7 @@ namespace mcrl2 {
       inline
       const function_symbol& not_()
       {
-        static function_symbol not_(not_name(), make_function_sort(bool_(), bool_()));
+        static function_symbol not_(not_name(), make_function_sort_(bool_(), bool_()));
         return not_;
       }
 
@@ -224,7 +224,7 @@ namespace mcrl2 {
       inline
       const function_symbol& and_()
       {
-        static function_symbol and_(and_name(), make_function_sort(bool_(), bool_(), bool_()));
+        static function_symbol and_(and_name(), make_function_sort_(bool_(), bool_(), bool_()));
         return and_;
       }
 
@@ -277,7 +277,7 @@ namespace mcrl2 {
       inline
       const function_symbol& or_()
       {
-        static function_symbol or_(or_name(), make_function_sort(bool_(), bool_(), bool_()));
+        static function_symbol or_(or_name(), make_function_sort_(bool_(), bool_(), bool_()));
         return or_;
       }
 
@@ -330,7 +330,7 @@ namespace mcrl2 {
       inline
       const function_symbol& implies()
       {
-        static function_symbol implies(implies_name(), make_function_sort(bool_(), bool_(), bool_()));
+        static function_symbol implies(implies_name(), make_function_sort_(bool_(), bool_(), bool_()));
         return implies;
       }
 

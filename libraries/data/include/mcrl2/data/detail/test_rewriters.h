@@ -61,20 +61,24 @@ struct normalize_and_or_builder: public data_expression_builder<Derived>
     return result;
   }
 
-  data_expression apply(const application& x)
+  template<class T>
+  void apply(T& result, const application& x)
   {
-    data_expression y = super::apply(x);
+    data_expression y;
+    super::apply(y, x);
     if (sort_bool::is_and_application(y))
     {
       std::multiset<data_expression> s = split_and(y);
-      return data::join_and(s.begin(), s.end());
+      result = data::join_and(s.begin(), s.end());
+      return;
     }
     else if (sort_bool::is_or_application(y))
     {
       std::multiset<data_expression> s = split_or(y);
-      return data::join_or(s.begin(), s.end());
+      result = data::join_or(s.begin(), s.end());
+      return;
     }
-    return y;
+    result = y;
   }
 };
 
@@ -83,7 +87,9 @@ T normalize_and_or(const T& x,
                    typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
                   )
 {
-  return core::make_apply_builder<normalize_and_or_builder>().apply(x);
+  T result;
+  core::make_apply_builder<normalize_and_or_builder>().apply(result, x);
+  return result;
 }
 
 template <typename T>
@@ -103,20 +109,24 @@ struct normalize_equality_builder: public data_expression_builder<Derived>
   using super::leave;
   using super::apply;
 
-  data_expression apply(const application& x)
+  template<class T>
+  void apply(T& result, const application& x)
   {
-    data_expression y = super::apply(x);
+    data_expression y;
+    super::apply(y, x);
     if (data::is_equal_to_application(y))
     {
       const data_expression& left = data::binary_left1(y);
       const data_expression& right = data::binary_right1(y);
       if (left < right)
       {
-        return data::equal_to(left, right);
+        result = data::equal_to(left, right);
+        return;
       }
       else
       {
-        return data::equal_to(right, left);
+        result = data::equal_to(right, left);
+        return;
       }
     }
     else if (data::is_not_equal_to_application(y))
@@ -125,14 +135,16 @@ struct normalize_equality_builder: public data_expression_builder<Derived>
       const data_expression& right = data::binary_right1(y);
       if (left < right)
       {
-        return data::not_equal_to(left, right);
+        result = data::not_equal_to(left, right);
+        return;
       }
       else
       {
-        return data::not_equal_to(right, left);
+        result = data::not_equal_to(right, left);
+        return;
       }
     }
-    return y;
+    result = y;
   }
 };
 
@@ -141,7 +153,9 @@ T normalize_equality(const T& x,
                      typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
                     )
 {
-  return core::make_apply_builder<normalize_equality_builder>().apply(x);
+  T result;
+  core::make_apply_builder<normalize_equality_builder>().apply(result, x);
+  return result;
 }
 
 template <typename T>

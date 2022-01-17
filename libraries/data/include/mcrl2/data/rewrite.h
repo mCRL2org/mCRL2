@@ -36,9 +36,10 @@ struct rewrite_data_expressions_builder: public Builder<rewrite_data_expressions
     : R(R_)
   {}
 
-  data_expression apply(const data_expression& x)
+  template <class T>
+  void apply(T& result, const data_expression& x)
   {
-    return R(x);
+    result = R(x);
   }
 };
 
@@ -66,9 +67,10 @@ struct rewrite_data_expressions_with_substitution_builder: public Builder<rewrit
       sigma(sigma_)
   {}
 
-  data_expression apply(const data_expression& x)
+  template <class T>
+  void apply(T& result, const data_expression& x)
   {
-    return R(x, sigma);
+    result = R(x, sigma);
   }
 };
 
@@ -105,7 +107,9 @@ T rewrite(const T& x,
           typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
          )
 {
-  return data::detail::make_rewrite_data_expressions_builder<data::data_expression_builder>(R).apply(x);
+  T result;
+  data::detail::make_rewrite_data_expressions_builder<data::data_expression_builder>(R).apply(result, x);
+  return result;
 }
 
 /// \brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
@@ -134,7 +138,9 @@ T rewrite(const T& x,
           typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
          )
 {
-  return data::detail::make_rewrite_data_expressions_with_substitution_builder<data::data_expression_builder>(R, sigma).apply(x);
+  T result; 
+  data::detail::make_rewrite_data_expressions_with_substitution_builder<data::data_expression_builder>(R, sigma).apply(result, x);
+  return result;
 }
 //--- end generated data rewrite code ---//
 

@@ -187,115 +187,136 @@ struct replace_subterm_builder: public process_expression_builder<replace_subter
     }
     else
     {
-      result = super::apply(x);
+      super::apply(result, x);
     }
     counter.decrease();
     return result;
   }
 
-  process_expression apply(const action& x)
+  template <class T>
+  void apply(T& result, const action& x)
   {
-    return visit(x);
+    result = visit(x);
   }
 
-  process_expression apply(const process_instance& x)
+  template <class T>
+  void apply(T& result, const process_instance& x)
   {
-    return visit(x);
+    result = visit(x);
   }
 
-  process_expression apply(const process_instance_assignment& x)
+  template <class T>
+  void apply(T& result, const process_instance_assignment& x)
   {
-    return visit(x);
+    result = visit(x);
   }
 
-  process_expression apply(const delta& x)
+  template <class T>
+  void apply(T& result, const delta& x)
   {
-    return visit(x);
+    result = visit(x);
   }
 
-  process_expression apply(const tau& x)
+  template <class T>
+  void apply(T& result, const tau& x)
   {
-    return visit(x);
+    result = visit(x);
   }
 
-  process_expression apply(const sum& x)
+  template <class T>
+  void apply(T& result, const sum& x)
   {
-    return visit(x);
+    result = visit(x);
   }
 
-  process_expression apply(const block& x)
+  template <class T>
+  void apply(T& result, const block& x)
   {
-    return visit(x);
+    result = visit(x);
   }
 
-  process_expression apply(const hide& x)
+  template <class T>
+  void apply(T& result, const hide& x)
   {
-    return visit(x);
+    result = visit(x);
   }
 
-  process_expression apply(const rename& x)
+  template <class T>
+  void apply(T& result, const rename& x)
   {
-    return visit(x);
+    result = visit(x);
   }
 
-  process_expression apply(const comm& x)
+  template <class T>
+  void apply(T& result, const comm& x)
   {
-    return visit(x);
+    result = visit(x);
   }
 
-  process_expression apply(const allow& x)
+  template <class T>
+  void apply(T& result, const allow& x)
   {
-    return visit(x);
+    result = visit(x);
   }
 
-  process_expression apply(const sync& x)
+  template <class T>
+  void apply(T& result, const sync& x)
   {
-    return visit(x);
+    result = visit(x);
   }
 
-  process_expression apply(const at& x)
+  template <class T>
+  void apply(T& result, const at& x)
   {
-    return visit(x);
+    result = visit(x);
   }
 
-  process_expression apply(const seq& x)
+  template <class T>
+  void apply(T& result, const seq& x)
   {
-    return visit(x);
+    result = visit(x);
   }
 
-  process_expression apply(const if_then& x)
+  template <class T>
+  void apply(T& result, const if_then& x)
   {
-    return visit(x);
+    result = visit(x);
   }
 
-  process_expression apply(const if_then_else& x)
+  template <class T>
+  void apply(T& result, const if_then_else& x)
   {
-    return visit(x);
+    result = visit(x);
   }
 
-  process_expression apply(const bounded_init& x)
+  template <class T>
+  void apply(T& result, const bounded_init& x)
   {
-    return visit(x);
+    result = visit(x);
   }
 
-  process_expression apply(const merge& x)
+  template <class T>
+  void apply(T& result, const merge& x)
   {
-    return visit(x);
+    result = visit(x);
   }
 
-  process_expression apply(const left_merge& x)
+  template <class T>
+  void apply(T& result, const left_merge& x)
   {
-    return visit(x);
+    result = visit(x);
   }
 
-  process_expression apply(const choice& x)
+  template <class T>
+  void apply(T& result, const choice& x)
   {
-    return visit(x);
+    result = visit(x);
   }
 
-  process_expression apply(const stochastic_operator& x)
+  template <class T>
+  void apply(T& result, const stochastic_operator& x)
   {
-    return visit(x);
+    result = visit(x);
   }
 };
 
@@ -306,7 +327,9 @@ inline
 process_expression replace_subterm(const process_expression& expr, std::size_t x, std::size_t y, const process_expression& replacement)
 {
   detail::replace_subterm_builder f(x, y, replacement);
-  return f.apply(expr);
+  process_expression result;
+  f.apply(result, expr);
+  return result;
 }
 
 /// \brief Replace the subterm at position (x, y) with a given term

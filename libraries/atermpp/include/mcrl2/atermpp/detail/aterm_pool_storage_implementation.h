@@ -173,9 +173,12 @@ void store_in_argument_array(std::size_t i,
   // Otherwise function_or_term is supposed to  have type void(term& result), putting the term in result. 
   else
   {
-    function_or_term(static_cast<aterm&>(argument_array[i]));
+    // function_or_term(static_cast<Term&>(argument_array[i]));
+
+    typedef mcrl2::utilities::function_traits<decltype(&FUNCTION_OR_TERM_TYPE::operator())> traits;
+    function_or_term(static_cast<typename traits::template arg<0>::type&>(argument_array[i]));
   }
-   store_in_argument_array(i+1, argument_array, args...);
+  store_in_argument_array(i+1, argument_array, args...);
 }
 
 
@@ -193,7 +196,7 @@ bool ATERM_POOL_STORAGE::create_appl(aterm& term, const function_symbol& symbol,
     std::array<unprotected_aterm, N> argument_array;
     
     // Evaluate the functions or terms and put the result in "argument_array".
-     store_in_argument_array(0, argument_array, arguments...);
+    store_in_argument_array(0, argument_array, arguments...);
 
 
     // The code below is fine, but does not compile on GCC under certain circumstances. 

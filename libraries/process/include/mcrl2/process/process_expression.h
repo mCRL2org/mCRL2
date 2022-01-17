@@ -177,9 +177,10 @@ class action: public process_expression
 
 /// \brief Make_action constructs a new term into a given address.
 /// \ \param t The reference into which the new action is constructed. 
-inline void make_action(action& t, const action_label& label, const data::data_expression_list& arguments)
+template <class... ARGUMENTS>
+inline void make_action(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_Action(), label, arguments);
+  make_term_appl(t, core::detail::function_symbol_Action(), args...);
 }
 
 /// \brief list of actions
@@ -258,9 +259,10 @@ class process_instance: public process_expression
 
 /// \brief Make_process_instance constructs a new term into a given address.
 /// \ \param t The reference into which the new process_instance is constructed. 
-inline void make_process_instance(process_instance& t, const process_identifier& identifier, const data::data_expression_list& actual_parameters)
+template <class... ARGUMENTS>
+inline void make_process_instance(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_Process(), identifier, actual_parameters);
+  make_term_appl(t, core::detail::function_symbol_Process(), args...);
 }
 
 /// \brief Test for a process_instance expression
@@ -333,9 +335,10 @@ class process_instance_assignment: public process_expression
 
 /// \brief Make_process_instance_assignment constructs a new term into a given address.
 /// \ \param t The reference into which the new process_instance_assignment is constructed. 
-inline void make_process_instance_assignment(process_instance_assignment& t, const process_identifier& identifier, const data::assignment_list& assignments)
+template <class... ARGUMENTS>
+inline void make_process_instance_assignment(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_ProcessAssignment(), identifier, assignments);
+  make_term_appl(t, core::detail::function_symbol_ProcessAssignment(), args...);
 }
 
 /// \brief Test for a process_instance_assignment expression
@@ -514,9 +517,10 @@ class sum: public process_expression
 
 /// \brief Make_sum constructs a new term into a given address.
 /// \ \param t The reference into which the new sum is constructed. 
-inline void make_sum(sum& t, const data::variable_list& variables, const process_expression& operand)
+template <class... ARGUMENTS>
+inline void make_sum(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_Sum(), variables, operand);
+  make_term_appl(t, core::detail::function_symbol_Sum(), args...);
 }
 
 /// \brief Test for a sum expression
@@ -589,9 +593,10 @@ class block: public process_expression
 
 /// \brief Make_block constructs a new term into a given address.
 /// \ \param t The reference into which the new block is constructed. 
-inline void make_block(block& t, const core::identifier_string_list& block_set, const process_expression& operand)
+template <class... ARGUMENTS>
+inline void make_block(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_Block(), block_set, operand);
+  make_term_appl(t, core::detail::function_symbol_Block(), args...);
 }
 
 /// \brief Test for a block expression
@@ -664,9 +669,10 @@ class hide: public process_expression
 
 /// \brief Make_hide constructs a new term into a given address.
 /// \ \param t The reference into which the new hide is constructed. 
-inline void make_hide(hide& t, const core::identifier_string_list& hide_set, const process_expression& operand)
+template <class... ARGUMENTS>
+inline void make_hide(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_Hide(), hide_set, operand);
+  make_term_appl(t, core::detail::function_symbol_Hide(), args...);
 }
 
 /// \brief Test for a hide expression
@@ -739,9 +745,10 @@ class rename: public process_expression
 
 /// \brief Make_rename constructs a new term into a given address.
 /// \ \param t The reference into which the new rename is constructed. 
-inline void make_rename(rename& t, const rename_expression_list& rename_set, const process_expression& operand)
+template <class... ARGUMENTS>
+inline void make_rename(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_Rename(), rename_set, operand);
+  make_term_appl(t, core::detail::function_symbol_Rename(), args...);
 }
 
 /// \brief Test for a rename expression
@@ -814,9 +821,10 @@ class comm: public process_expression
 
 /// \brief Make_comm constructs a new term into a given address.
 /// \ \param t The reference into which the new comm is constructed. 
-inline void make_comm(comm& t, const communication_expression_list& comm_set, const process_expression& operand)
+template <class... ARGUMENTS>
+inline void make_comm(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_Comm(), comm_set, operand);
+  make_term_appl(t, core::detail::function_symbol_Comm(), args...);
 }
 
 /// \brief Test for a comm expression
@@ -889,9 +897,10 @@ class allow: public process_expression
 
 /// \brief Make_allow constructs a new term into a given address.
 /// \ \param t The reference into which the new allow is constructed. 
-inline void make_allow(allow& t, const action_name_multiset_list& allow_set, const process_expression& operand)
+template <class... ARGUMENTS>
+inline void make_allow(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_Allow(), allow_set, operand);
+  make_term_appl(t, core::detail::function_symbol_Allow(), args...);
 }
 
 /// \brief Test for a allow expression
@@ -964,9 +973,10 @@ class sync: public process_expression
 
 /// \brief Make_sync constructs a new term into a given address.
 /// \ \param t The reference into which the new sync is constructed. 
-inline void make_sync(sync& t, const process_expression& left, const process_expression& right)
+template <class... ARGUMENTS>
+inline void make_sync(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_Sync(), left, right);
+  make_term_appl(t, core::detail::function_symbol_Sync(), args...);
 }
 
 /// \brief Test for a sync expression
@@ -1039,9 +1049,10 @@ class at: public process_expression
 
 /// \brief Make_at constructs a new term into a given address.
 /// \ \param t The reference into which the new at is constructed. 
-inline void make_at(at& t, const process_expression& operand, const data::data_expression& time_stamp)
+template <class... ARGUMENTS>
+inline void make_at(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_AtTime(), operand, time_stamp);
+  make_term_appl(t, core::detail::function_symbol_AtTime(), args...);
 }
 
 /// \brief Test for a at expression
@@ -1114,9 +1125,10 @@ class seq: public process_expression
 
 /// \brief Make_seq constructs a new term into a given address.
 /// \ \param t The reference into which the new seq is constructed. 
-inline void make_seq(seq& t, const process_expression& left, const process_expression& right)
+template <class... ARGUMENTS>
+inline void make_seq(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_Seq(), left, right);
+  make_term_appl(t, core::detail::function_symbol_Seq(), args...);
 }
 
 /// \brief Test for a seq expression
@@ -1189,9 +1201,10 @@ class if_then: public process_expression
 
 /// \brief Make_if_then constructs a new term into a given address.
 /// \ \param t The reference into which the new if_then is constructed. 
-inline void make_if_then(if_then& t, const data::data_expression& condition, const process_expression& then_case)
+template <class... ARGUMENTS>
+inline void make_if_then(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_IfThen(), condition, then_case);
+  make_term_appl(t, core::detail::function_symbol_IfThen(), args...);
 }
 
 /// \brief Test for a if_then expression
@@ -1269,9 +1282,10 @@ class if_then_else: public process_expression
 
 /// \brief Make_if_then_else constructs a new term into a given address.
 /// \ \param t The reference into which the new if_then_else is constructed. 
-inline void make_if_then_else(if_then_else& t, const data::data_expression& condition, const process_expression& then_case, const process_expression& else_case)
+template <class... ARGUMENTS>
+inline void make_if_then_else(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_IfThenElse(), condition, then_case, else_case);
+  make_term_appl(t, core::detail::function_symbol_IfThenElse(), args...);
 }
 
 /// \brief Test for a if_then_else expression
@@ -1344,9 +1358,10 @@ class bounded_init: public process_expression
 
 /// \brief Make_bounded_init constructs a new term into a given address.
 /// \ \param t The reference into which the new bounded_init is constructed. 
-inline void make_bounded_init(bounded_init& t, const process_expression& left, const process_expression& right)
+template <class... ARGUMENTS>
+inline void make_bounded_init(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_BInit(), left, right);
+  make_term_appl(t, core::detail::function_symbol_BInit(), args...);
 }
 
 /// \brief Test for a bounded_init expression
@@ -1419,9 +1434,10 @@ class merge: public process_expression
 
 /// \brief Make_merge constructs a new term into a given address.
 /// \ \param t The reference into which the new merge is constructed. 
-inline void make_merge(merge& t, const process_expression& left, const process_expression& right)
+template <class... ARGUMENTS>
+inline void make_merge(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_Merge(), left, right);
+  make_term_appl(t, core::detail::function_symbol_Merge(), args...);
 }
 
 /// \brief Test for a merge expression
@@ -1494,9 +1510,10 @@ class left_merge: public process_expression
 
 /// \brief Make_left_merge constructs a new term into a given address.
 /// \ \param t The reference into which the new left_merge is constructed. 
-inline void make_left_merge(left_merge& t, const process_expression& left, const process_expression& right)
+template <class... ARGUMENTS>
+inline void make_left_merge(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_LMerge(), left, right);
+  make_term_appl(t, core::detail::function_symbol_LMerge(), args...);
 }
 
 /// \brief Test for a left_merge expression
@@ -1569,9 +1586,10 @@ class choice: public process_expression
 
 /// \brief Make_choice constructs a new term into a given address.
 /// \ \param t The reference into which the new choice is constructed. 
-inline void make_choice(choice& t, const process_expression& left, const process_expression& right)
+template <class... ARGUMENTS>
+inline void make_choice(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_Choice(), left, right);
+  make_term_appl(t, core::detail::function_symbol_Choice(), args...);
 }
 
 /// \brief Test for a choice expression
@@ -1649,9 +1667,10 @@ class stochastic_operator: public process_expression
 
 /// \brief Make_stochastic_operator constructs a new term into a given address.
 /// \ \param t The reference into which the new stochastic_operator is constructed. 
-inline void make_stochastic_operator(stochastic_operator& t, const data::variable_list& variables, const data::data_expression& distribution, const process_expression& operand)
+template <class... ARGUMENTS>
+inline void make_stochastic_operator(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_StochasticOperator(), variables, distribution, operand);
+  make_term_appl(t, core::detail::function_symbol_StochasticOperator(), args...);
 }
 
 /// \brief Test for a stochastic_operator expression
@@ -1729,9 +1748,10 @@ class untyped_process_assignment: public process_expression
 
 /// \brief Make_untyped_process_assignment constructs a new term into a given address.
 /// \ \param t The reference into which the new untyped_process_assignment is constructed. 
-inline void make_untyped_process_assignment(untyped_process_assignment& t, const core::identifier_string& name, const data::untyped_identifier_assignment_list& assignments)
+template <class... ARGUMENTS>
+inline void make_untyped_process_assignment(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_UntypedProcessAssignment(), name, assignments);
+  make_term_appl(t, core::detail::function_symbol_UntypedProcessAssignment(), args...);
 }
 
 /// \brief Test for a untyped_process_assignment expression

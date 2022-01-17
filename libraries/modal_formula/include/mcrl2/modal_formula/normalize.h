@@ -73,173 +73,191 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
     : negated(negated_)
   {}
 
-  state_formula apply(const data::data_expression& x)
+  template <class T>
+  void apply(T& result, const data::data_expression& x)
   {
-    return negated ? data::sort_bool::not_(x) : x;
+    result = negated ? data::sort_bool::not_(x) : x;
   }
 
-  state_formula apply(const true_& /*x*/)
-  {
-    if (negated)
-    {
-      return false_();
-    }
-    else
-    {
-      return true_();
-    }
-  }
-
-  state_formula apply(const false_& /*x*/)
+  template <class T>
+  void apply(T& result, const true_& /*x*/)
   {
     if (negated)
     {
-      return true_();
+      result = false_();
     }
     else
     {
-      return false_();
+      result = true_();
     }
   }
 
-  state_formula apply(const not_& x)
+  template <class T>
+  void apply(T& result, const false_& /*x*/)
   {
-    return normalize(x.operand(), !negated);
+    if (negated)
+    {
+      result = true_();
+    }
+    else
+    {
+      result = false_();
+    }
   }
 
-  state_formula apply(const and_& x)
+  template <class T>
+  void apply(T& result, const not_& x)
+  {
+    result = normalize(x.operand(), !negated);
+  }
+
+  template <class T>
+  void apply(T& result, const and_& x)
   {
     state_formula left = normalize(x.left(), negated);
     state_formula right = normalize(x.right(), negated);
     if (negated)
     {
-      return or_(left, right);
+      result = or_(left, right);
     }
     else
     {
-      return and_(left, right);
+      result = and_(left, right);
     }
   }
 
-  state_formula apply(const or_& x)
+  template <class T>
+  void apply(T& result, const or_& x)
   {
     state_formula left = normalize(x.left(), negated);
     state_formula right = normalize(x.right(), negated);
     if (negated)
     {
-      return and_(left, right);
+      result = and_(left, right);
     }
     else
     {
-      return or_(left, right);
+      result = or_(left, right);
     }
   }
 
-  state_formula apply(const imp& x)
+  template <class T>
+  void apply(T& result, const imp& x)
   {
     state_formula y = or_(not_(x.left()), x.right());
-    return normalize(y, negated);
+    result = normalize(y, negated);
   }
 
-  state_formula apply(const forall& x)
+  template <class T>
+  void apply(T& result, const forall& x)
   {
     if (negated)
     {
-      return exists(x.variables(), normalize(x.body(), true));
+      result = exists(x.variables(), normalize(x.body(), true));
     }
     else
     {
-      return forall(x.variables(), normalize(x.body(), false));
+      result = forall(x.variables(), normalize(x.body(), false));
     }
   }
 
-  state_formula apply(const exists& x)
+  template <class T>
+  void apply(T& result, const exists& x)
   {
     if (negated)
     {
-      return forall(x.variables(), normalize(x.body(), true));
+      result = forall(x.variables(), normalize(x.body(), true));
     }
     else
     {
-      return exists(x.variables(), normalize(x.body(), false));
+      result = exists(x.variables(), normalize(x.body(), false));
     }
   }
 
-  state_formula apply(const variable& x)
+  template <class T>
+  void apply(T& result, const variable& x)
   {
     if (negated)
     {
       throw mcrl2::runtime_error(std::string("normalize error: illegal argument ") + pp(x));
     }
-    return x;
+    result = x;
   }
 
-  state_formula apply(const must& x)
+  template <class T>
+  void apply(T& result, const must& x)
   {
     if (negated)
     {
-      return may(x.formula(), normalize(x.operand(), negated));
+      result = may(x.formula(), normalize(x.operand(), negated));
     }
     else
     {
-      return must(x.formula(), normalize(x.operand(), negated));
+      result = must(x.formula(), normalize(x.operand(), negated));
     }
   }
 
-  state_formula apply(const may& x)
+  template <class T>
+  void apply(T& result, const may& x)
   {
     if (negated)
     {
-      return must(x.formula(), normalize(x.operand(), negated));
+      result = must(x.formula(), normalize(x.operand(), negated));
     }
     else
     {
-      return may(x.formula(), normalize(x.operand(), negated));
+      result = may(x.formula(), normalize(x.operand(), negated));
     }
   }
 
-  state_formula apply(const mu& x)
+  template <class T>
+  void apply(T& result, const mu& x)
   {
     if (negated)
     {
-      return nu(x.name(), x.assignments(), normalize(negate_variables(x.name(), x.operand()), true));
+      result = nu(x.name(), x.assignments(), normalize(negate_variables(x.name(), x.operand()), true));
     }
     else
     {
-      return mu(x.name(), x.assignments(), normalize(x.operand(), false));
+      result = mu(x.name(), x.assignments(), normalize(x.operand(), false));
     }
   }
 
-  state_formula apply(const nu& x)
+  template <class T>
+  void apply(T& result, const nu& x)
   {
     if (negated)
     {
-      return mu(x.name(), x.assignments(), normalize(negate_variables(x.name(), x.operand()), true));
+      result = mu(x.name(), x.assignments(), normalize(negate_variables(x.name(), x.operand()), true));
     }
     else
     {
-      return nu(x.name(), x.assignments(), normalize(x.operand(), false));
+      result = nu(x.name(), x.assignments(), normalize(x.operand(), false));
     }
   }
 
-  state_formula apply(const delay& x)
+  template <class T>
+  void apply(T& result, const delay& x)
   {
-    return x;
+    result = x;
   }
 
-  state_formula apply(const delay_timed& x)
+  template <class T>
+  void apply(T& result, const delay_timed& x)
   {
-    return x;
+    result = x;
   }
 
-  state_formula apply(const yaled& x)
+  template <class T>
+  void apply(T& result, const yaled& x)
   {
-    return x;
+    result = x;
   }
 
-  state_formula apply(const yaled_timed& x)
+  template <class T>
+  void apply(T& result,  const yaled_timed& x)
   {
-    return x;
+    result = x;
   }
 };
 /// \endcond
@@ -273,8 +291,10 @@ void normalize(T& x, bool negated, typename std::enable_if< !std::is_base_of< at
 template <typename T>
 T normalize(const T& x, bool negated, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type*)
 {
+  T result;
   normalize_builder f(negated);
-  return f.apply(x);
+  f.apply(result, x);
+  return result;
 }
 
 } // namespace state_formulas

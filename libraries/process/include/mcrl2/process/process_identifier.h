@@ -61,22 +61,25 @@ class process_identifier: public atermpp::aterm_appl
     /// \brief Constructor.
     process_identifier(const core::identifier_string& name, const data::variable_list& variables)
     {
-      atermpp::make_term_appl_with_index(*this, core::detail::function_symbol_ProcVarId(), name, variables);
+      atermpp::make_term_appl_with_index<process_identifier, std::pair<core::identifier_string, data::variable_list> >
+                 (*this, core::detail::function_symbol_ProcVarId(), name, variables);
     }
 
     /// \brief Constructor.
     process_identifier(const std::string& name, const data::variable_list& variables)
     {
-      atermpp::make_term_appl_with_index(*this, core::detail::function_symbol_ProcVarId(), core::identifier_string(name), variables);
+      atermpp::make_term_appl_with_index<process_identifier, std::pair<core::identifier_string, data::variable_list> >
+                 (*this, core::detail::function_symbol_ProcVarId(), core::identifier_string(name), variables);
     }
 //--- end user section process_identifier ---//
 };
 
 /// \brief Make_process_identifier constructs a new term into a given address.
 /// \ \param t The reference into which the new process_identifier is constructed. 
-inline void make_process_identifier(process_identifier& t, const core::identifier_string& name, const data::variable_list& variables)
+template <class... ARGUMENTS>
+inline void make_process_identifier(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl_with_index(t, core::detail::function_symbol_ProcVarId(), name, variables);
+  make_term_appl_with_index<process_identifier,std::pair<core::identifier_string, data::variable_list>>(t, core::detail::function_symbol_ProcVarId(), args...);
 }
 
 /// \brief list of process_identifiers

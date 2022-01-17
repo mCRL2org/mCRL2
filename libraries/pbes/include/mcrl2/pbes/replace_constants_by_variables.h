@@ -58,8 +58,10 @@ T replace_constants_by_variables(const T& x,
                                  typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                                 )
 {
+  T result;
   detail::replace_constants_by_variables_builder f(r, sigma);
-  return f.apply(x);
+  f.apply(result, x);
+  return result;
 }
 
 } // namespace pbes_system

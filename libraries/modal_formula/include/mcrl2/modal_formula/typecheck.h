@@ -49,18 +49,21 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
     return process::typecheck_action(name, parameters, m_data_type_checker, m_variable_context, m_action_context);
   }
 
-  action_formula apply(const data::data_expression& x)
+  template <class T>
+  void apply(T& result, const data::data_expression& x)
   {
-    return m_data_type_checker.typecheck_data_expression(x, data::sort_bool::bool_(), m_variable_context);
+    result = m_data_type_checker.typecheck_data_expression(x, data::sort_bool::bool_(), m_variable_context);
   }
 
-  action_formula apply(const action_formulas::at& x)
+  template <class T>
+  void apply(T& result, const action_formulas::at& x)
   {
     data::data_expression new_time = m_data_type_checker.typecheck_data_expression(x.time_stamp(), data::sort_real::real_(), m_variable_context);
-    return at((*this).apply(x.operand()), new_time);
+    make_at(result, [&](action_formula& r){ (*this).apply(r, x.operand()); }, new_time);
   }
 
-  action_formula apply(const process::untyped_multi_action& x)
+  template <class T>
+  void apply(T& result, const process::untyped_multi_action& x)
   {
     // If x has size 1, first try to type check it as a data expression.
     if (x.actions().size() == 1)
@@ -68,7 +71,8 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
       const data::untyped_data_parameter& y = x.actions().front();
       try
       {
-        return data::typecheck_untyped_data_parameter(m_data_type_checker, y.name(), y.arguments(), data::sort_bool::bool_(), m_variable_context);
+        result = data::typecheck_untyped_data_parameter(m_data_type_checker, y.name(), y.arguments(), data::sort_bool::bool_(), m_variable_context);
+        return;
       }
       catch (mcrl2::runtime_error& )
       {
@@ -82,18 +86,20 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
       new_arguments.push_front(typecheck_action(a.name(), a.arguments()));
     }
     new_arguments = atermpp::reverse(new_arguments);
-    return action_formulas::multi_action(new_arguments);
+    result = action_formulas::multi_action(new_arguments);
   }
 
-  action_formula apply(const action_formulas::forall& x)
+  template <class T>
+  void apply(T& result, const action_formulas::forall& x)
   {
     try
     {
       auto m_variable_context_copy = m_variable_context;
       m_variable_context.add_context_variables(x.variables(), m_data_type_checker);
-      action_formula body = (*this).apply(x.body());
+      action_formula body;
+      (*this).apply(body, x.body());
       m_variable_context = m_variable_context_copy;
-      return forall(x.variables(), body);
+      result = forall(x.variables(), body);
     }
     catch (mcrl2::runtime_error& e)
     {
@@ -101,15 +107,17 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
     }
   }
 
-  action_formula apply(const action_formulas::exists& x)
+  template <class T>
+  void apply(T& result,  const action_formulas::exists& x)
   {
     try
     {
       auto m_variable_context_copy = m_variable_context;
       m_variable_context.add_context_variables(x.variables(), m_data_type_checker);
-      action_formula body = (*this).apply(x.body());
+      action_formula body;
+      (*this).apply(body, x.body());
       m_variable_context = m_variable_context_copy;
-      return exists(x.variables(), body);
+      result = exists(x.variables(), body);
     }
     catch (mcrl2::runtime_error& e)
     {
@@ -142,7 +150,10 @@ action_formula typecheck_action_formula(const action_formula& x,
   variable_context.add_context_variables(variables, data_typechecker);
   process::detail::action_context action_context;
   action_context.add_context_action_labels(actions, data_typechecker);
-  return detail::make_typecheck_builder(data_typechecker, variable_context, action_context).apply(action_formulas::normalize_sorts(x, data_typechecker.typechecked_data_specification()));
+  action_formula result;
+  detail::make_typecheck_builder(data_typechecker, variable_context, action_context).
+             apply(result, action_formulas::normalize_sorts(x, data_typechecker.typechecked_data_specification()));
+  return result;
 }
 
 inline
@@ -249,37 +260,42 @@ struct typecheck_builder: public regular_formula_builder<typecheck_builder>
     return data::sort_list::element_at(cs.element_sort(), left, right);
   }
 
-  regular_formula apply(const regular_formulas::untyped_regular_formula& x)
+  template <class T>
+  void apply(T& result, const regular_formulas::untyped_regular_formula& x)
   {
-    regular_formula left = (*this).apply(x.left());
-    regular_formula right = (*this).apply(x.right());
+    regular_formula left;
+    (*this).apply(left, x.left());
+    regular_formula right;
+    (*this).apply(right, x.right());
     if (data::is_data_expression(left) && data::is_data_expression(right))
     {
       if (x.name() == core::identifier_string("."))
       {
-        return make_element_at(atermpp::down_cast<data::data_expression>(left), atermpp::down_cast<data::data_expression>(right));
+        result = make_element_at(atermpp::down_cast<data::data_expression>(left), atermpp::down_cast<data::data_expression>(right));
       }
       else
       {
-        return make_plus(atermpp::down_cast<data::data_expression>(left), atermpp::down_cast<data::data_expression>(right));
+        result = make_plus(atermpp::down_cast<data::data_expression>(left), atermpp::down_cast<data::data_expression>(right));
       }
     }
     else
     {
       if (x.name() == core::identifier_string("."))
       {
-        return seq(left, right);
+        result = seq(left, right);
       }
       else
       {
-        return alt(left, right);
+        result = alt(left, right);
       }
     }
   }
 
-  regular_formula apply(const action_formulas::action_formula& x)
+  /* Has to be a regular formula as result.... */
+  // template <class T>A
+  void apply(regular_formula& result, const action_formulas::action_formula& x)
   {
-    return action_formulas::detail::make_typecheck_builder(m_data_type_checker, m_variable_context, m_action_context).apply(x);
+    action_formulas::detail::make_typecheck_builder(m_data_type_checker, m_variable_context, m_action_context).apply(result, x);
   }
 };
 
@@ -307,7 +323,10 @@ regular_formula typecheck_regular_formula(const regular_formula& x,
   variable_context.add_context_variables(variables, data_typechecker);
   process::detail::action_context action_context;
   action_context.add_context_action_labels(actions, data_typechecker);
-  return detail::make_typecheck_builder(data_typechecker, variable_context, action_context).apply(regular_formulas::normalize_sorts(x, data_typechecker.typechecked_data_specification()));
+  regular_formula result;
+  detail::make_typecheck_builder(data_typechecker, variable_context, action_context).
+           apply(result, regular_formulas::normalize_sorts(x, data_typechecker.typechecked_data_specification()));
+  return result;
 }
 
 inline
@@ -345,20 +364,23 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
       m_state_variable_context(state_variable_context)
   {}
 
-  state_formula apply(const data::data_expression& x)
+  template <class T>
+  void apply(T& result, const data::data_expression& x)
   {
-    return m_data_type_checker.typecheck_data_expression(x, data::sort_bool::bool_(), m_variable_context);
+    result = m_data_type_checker.typecheck_data_expression(x, data::sort_bool::bool_(), m_variable_context);
   }
 
-  state_formula apply(const state_formulas::forall& x)
+  template <class T>
+  void apply(T& result, const state_formulas::forall& x)
   {
     try
     {
       auto m_variable_context_copy = m_variable_context;
       m_variable_context.add_context_variables(x.variables(), m_data_type_checker);
-      state_formula body = (*this).apply(x.body());
+      state_formula body;
+      (*this).apply(body, x.body());
       m_variable_context = m_variable_context_copy;
-      return forall(x.variables(), body);
+      result = forall(x.variables(), body);
     }
     catch (mcrl2::runtime_error& e)
     {
@@ -366,15 +388,17 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
     }
   }
 
-  state_formula apply(const state_formulas::exists& x)
+  template <class T>
+  void apply(T& result, const state_formulas::exists& x)
   {
     try
     {
       auto m_variable_context_copy = m_variable_context;
       m_variable_context.add_context_variables(x.variables(), m_data_type_checker);
-      state_formula body = (*this).apply(x.body());
+      state_formula body;
+      (*this).apply(body, x.body());
       m_variable_context = m_variable_context_copy;
-      return exists(x.variables(), body);
+      result = exists(x.variables(), body);
     }
     catch (mcrl2::runtime_error& e)
     {
@@ -382,26 +406,38 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
     }
   }
 
-  state_formula apply(const state_formulas::may& x)
+  template <class T>
+  void apply(T& result, const state_formulas::may& x)
   {
-    return may(regular_formulas::detail::make_typecheck_builder(m_data_type_checker, m_variable_context, m_action_context).apply(x.formula()), (*this).apply(x.operand()));
+    regular_formulas::regular_formula formula;
+    regular_formulas::detail::make_typecheck_builder(m_data_type_checker, m_variable_context, m_action_context).apply(formula, x.formula());
+    state_formula operand;
+    (*this).apply(operand, x.operand());
+    make_may(result, formula, operand);
   }
 
-  state_formula apply(const state_formulas::must& x)
+  template <class T>
+  void apply(T& result, const state_formulas::must& x)
   {
-    return must(regular_formulas::detail::make_typecheck_builder(m_data_type_checker, m_variable_context, m_action_context).apply(x.formula()), (*this).apply(x.operand()));
+    regular_formulas::regular_formula formula;
+    regular_formulas::detail::make_typecheck_builder(m_data_type_checker, m_variable_context, m_action_context).apply(formula, x.formula());
+    state_formula operand;
+    (*this).apply(operand, x.operand());
+    make_must(result, formula, operand);
   }
 
-  state_formula apply(const state_formulas::delay_timed& x)
+  template <class T>
+  void apply(T& result, const state_formulas::delay_timed& x)
   {
     data::data_expression new_time = m_data_type_checker.typecheck_data_expression(x.time_stamp(), data::sort_real::real_(), m_variable_context);
-    return delay_timed(new_time);
+    make_delay_timed(result, new_time);
   }
 
-  state_formula apply(const state_formulas::yaled_timed& x)
+  template <class T>
+  void apply(T& result, const state_formulas::yaled_timed& x)
   {
     data::data_expression new_time = m_data_type_checker.typecheck_data_expression(x.time_stamp(), data::sort_real::real_(), m_variable_context);
-    return yaled_timed(new_time);
+    make_yaled_timed(result, new_time);
   }
 
   state_formula apply_untyped_parameter(const core::identifier_string& name, const data::data_expression_list& arguments)
@@ -418,14 +454,16 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
     return state_formulas::variable(name, new_arguments);
   }
 
-  state_formula apply(const state_formulas::variable& x)
+  template <class T>
+  void apply(T& result, const state_formulas::variable& x)
   {
-    return apply_untyped_parameter(x.name(), x.arguments());
+    result = apply_untyped_parameter(x.name(), x.arguments());
   }
 
-  state_formula apply(const data::untyped_data_parameter& x)
+  template <class T>
+  void apply(T& result, const data::untyped_data_parameter& x)
   {
-    return apply_untyped_parameter(x.name(), x.arguments());
+    result = apply_untyped_parameter(x.name(), x.arguments());
   }
 
   data::variable_list assignment_variables(const data::assignment_list& x) const
@@ -453,7 +491,8 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
     m_state_variable_context.add_state_variable(x.name(), x_variables, m_data_type_checker);
 
     // typecheck the operand
-    state_formula new_operand = (*this).apply(x.operand());
+    state_formula new_operand;
+    (*this).apply(new_operand, x.operand());
 
     // restore the context
     m_variable_context = m_variable_context_copy;
@@ -469,14 +508,16 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
     }
   }
 
-  state_formula apply(const state_formulas::nu& x)
+  template <class T>
+  void apply(T& result, const state_formulas::nu& x)
   {
-    return apply_mu_nu(x, false);
+    result = apply_mu_nu(x, false);
   }
 
-  state_formula apply(const state_formulas::mu& x)
+  template <class T>
+  void apply(T& result, const state_formulas::mu& x)
   {
-    return apply_mu_nu(x, true);
+    result = apply_mu_nu(x, true);
   }
 };
 
@@ -529,7 +570,10 @@ class state_formula_type_checker
     state_formula typecheck_state_formula(const state_formula& x)
     {
       mCRL2log(log::verbose) << "type checking state formula..." << std::endl;
-      return detail::make_typecheck_builder(m_data_type_checker, m_variable_context, m_action_context, m_state_variable_context).apply(state_formulas::normalize_sorts(x, m_data_type_checker.typechecked_data_specification()));
+      state_formula result;
+      detail::make_typecheck_builder(m_data_type_checker, m_variable_context, m_action_context, m_state_variable_context).
+               apply(result, state_formulas::normalize_sorts(x, m_data_type_checker.typechecked_data_specification()));
+      return result;
     }
 };
 

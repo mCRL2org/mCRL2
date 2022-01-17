@@ -42,7 +42,9 @@ T rewrite(const T& x,
           typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
          )
 {
-  return data::detail::make_rewrite_data_expressions_builder<lps::data_expression_builder>(R).apply(x);
+  T result;
+  data::detail::make_rewrite_data_expressions_builder<lps::data_expression_builder>(R).apply(result, x);
+  return result;
 }
 
 /// \brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
@@ -71,7 +73,9 @@ T rewrite(const T& x,
           typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
          )
 {
-  return data::detail::make_rewrite_data_expressions_with_substitution_builder<lps::data_expression_builder>(R, sigma).apply(x);
+  T result; 
+  data::detail::make_rewrite_data_expressions_with_substitution_builder<lps::data_expression_builder>(R, sigma).apply(result, x);
+  return result;
 }
 //--- end generated lps rewrite code ---//
 

@@ -34,322 +34,327 @@ struct add_sort_expressions: public Builder<Derived>
   using super::update;
   using super::apply;
 
-  process::action_label apply(const process::action_label& x)
-  {
+  template <class T>
+  void apply(T& result, const process::action_label& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::action_label result = process::action_label(x.name(), static_cast<Derived&>(*this).apply(x.sorts()));
+    process::make_action_label(result, x.name(), [&](data::sort_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.sorts()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
   void update(process::process_specification& x)
-  {
+  { 
     static_cast<Derived&>(*this).enter(x);
-    x.action_labels() = static_cast<Derived&>(*this).apply(x.action_labels());
+    process::action_label_list result_action_labels;
+    static_cast<Derived&>(*this).apply(result_action_labels, x.action_labels());
+    x.action_labels() = result_action_labels;
     static_cast<Derived&>(*this).update(x.global_variables());
     static_cast<Derived&>(*this).update(x.equations());
-    x.init() = static_cast<Derived&>(*this).apply(x.init());
+    process_expression result_init;
+    static_cast<Derived&>(*this).apply(result_init, x.init());
+    x.init() = result_init;
     static_cast<Derived&>(*this).leave(x);
   }
 
-  process::process_identifier apply(const process::process_identifier& x)
-  {
+  template <class T>
+  void apply(T& result, const process::process_identifier& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::process_identifier result = process::process_identifier(x.name(), static_cast<Derived&>(*this).apply(x.variables()));
+    process::make_process_identifier(result, x.name(), [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::process_equation apply(const process::process_equation& x)
-  {
+  template <class T>
+  void apply(T& result, const process::process_equation& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::process_equation result = process::process_equation(static_cast<Derived&>(*this).apply(x.identifier()), static_cast<Derived&>(*this).apply(x.formal_parameters()), static_cast<Derived&>(*this).apply(x.expression()));
+    process::make_process_equation(result, [&](process_identifier& result){ static_cast<Derived&>(*this).apply(result, x.identifier()); }, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.formal_parameters()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.expression()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::untyped_multi_action apply(const process::untyped_multi_action& x)
-  {
+  template <class T>
+  void apply(T& result, const process::untyped_multi_action& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::untyped_multi_action result = process::untyped_multi_action(static_cast<Derived&>(*this).apply(x.actions()));
+    process::make_untyped_multi_action(result, [&](data::untyped_data_parameter_list& result){ static_cast<Derived&>(*this).apply(result, x.actions()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::action apply(const process::action& x)
-  {
+  template <class T>
+  void apply(T& result, const process::action& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::action result = process::action(static_cast<Derived&>(*this).apply(x.label()), static_cast<Derived&>(*this).apply(x.arguments()));
+    process::make_action(result, [&](action_label& result){ static_cast<Derived&>(*this).apply(result, x.label()); }, [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.arguments()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::process_instance apply(const process::process_instance& x)
-  {
+  template <class T>
+  void apply(T& result, const process::process_instance& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::process_instance result = process::process_instance(static_cast<Derived&>(*this).apply(x.identifier()), static_cast<Derived&>(*this).apply(x.actual_parameters()));
+    process::make_process_instance(result, [&](process_identifier& result){ static_cast<Derived&>(*this).apply(result, x.identifier()); }, [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.actual_parameters()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::process_instance_assignment apply(const process::process_instance_assignment& x)
-  {
+  template <class T>
+  void apply(T& result, const process::process_instance_assignment& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::process_instance_assignment result = process::process_instance_assignment(static_cast<Derived&>(*this).apply(x.identifier()), static_cast<Derived&>(*this).apply(x.assignments()));
+    process::make_process_instance_assignment(result, [&](process_identifier& result){ static_cast<Derived&>(*this).apply(result, x.identifier()); }, [&](data::assignment_list& result){ static_cast<Derived&>(*this).apply(result, x.assignments()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::delta apply(const process::delta& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-    return x;
-  }
-
-  process::tau apply(const process::tau& x)
-  {
+  template <class T>
+  void apply(T& result, const process::delta& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  process::sum apply(const process::sum& x)
-  {
+  template <class T>
+  void apply(T& result, const process::tau& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::sum result = process::sum(static_cast<Derived&>(*this).apply(x.variables()), static_cast<Derived&>(*this).apply(x.operand()));
+    // skip
     static_cast<Derived&>(*this).leave(x);
-    return result;
+    result = x;
   }
 
-  process::block apply(const process::block& x)
-  {
+  template <class T>
+  void apply(T& result, const process::sum& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::block result = process::block(x.block_set(), static_cast<Derived&>(*this).apply(x.operand()));
+    process::make_sum(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::hide apply(const process::hide& x)
-  {
+  template <class T>
+  void apply(T& result, const process::block& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::hide result = process::hide(x.hide_set(), static_cast<Derived&>(*this).apply(x.operand()));
+    process::make_block(result, x.block_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::rename apply(const process::rename& x)
-  {
+  template <class T>
+  void apply(T& result, const process::hide& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::rename result = process::rename(x.rename_set(), static_cast<Derived&>(*this).apply(x.operand()));
+    process::make_hide(result, x.hide_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::comm apply(const process::comm& x)
-  {
+  template <class T>
+  void apply(T& result, const process::rename& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::comm result = process::comm(x.comm_set(), static_cast<Derived&>(*this).apply(x.operand()));
+    process::make_rename(result, x.rename_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::allow apply(const process::allow& x)
-  {
+  template <class T>
+  void apply(T& result, const process::comm& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::allow result = process::allow(x.allow_set(), static_cast<Derived&>(*this).apply(x.operand()));
+    process::make_comm(result, x.comm_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::sync apply(const process::sync& x)
-  {
+  template <class T>
+  void apply(T& result, const process::allow& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::sync result = process::sync(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    process::make_allow(result, x.allow_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::at apply(const process::at& x)
-  {
+  template <class T>
+  void apply(T& result, const process::sync& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::at result = process::at(static_cast<Derived&>(*this).apply(x.operand()), static_cast<Derived&>(*this).apply(x.time_stamp()));
+    process::make_sync(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::seq apply(const process::seq& x)
-  {
+  template <class T>
+  void apply(T& result, const process::at& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::seq result = process::seq(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    process::make_at(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); }, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.time_stamp()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::if_then apply(const process::if_then& x)
-  {
+  template <class T>
+  void apply(T& result, const process::seq& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::if_then result = process::if_then(static_cast<Derived&>(*this).apply(x.condition()), static_cast<Derived&>(*this).apply(x.then_case()));
+    process::make_seq(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::if_then_else apply(const process::if_then_else& x)
-  {
+  template <class T>
+  void apply(T& result, const process::if_then& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::if_then_else result = process::if_then_else(static_cast<Derived&>(*this).apply(x.condition()), static_cast<Derived&>(*this).apply(x.then_case()), static_cast<Derived&>(*this).apply(x.else_case()));
+    process::make_if_then(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.condition()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.then_case()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::bounded_init apply(const process::bounded_init& x)
-  {
+  template <class T>
+  void apply(T& result, const process::if_then_else& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::bounded_init result = process::bounded_init(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    process::make_if_then_else(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.condition()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.then_case()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.else_case()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::merge apply(const process::merge& x)
-  {
+  template <class T>
+  void apply(T& result, const process::bounded_init& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::merge result = process::merge(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    process::make_bounded_init(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::left_merge apply(const process::left_merge& x)
-  {
+  template <class T>
+  void apply(T& result, const process::merge& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::left_merge result = process::left_merge(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    process::make_merge(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::choice apply(const process::choice& x)
-  {
+  template <class T>
+  void apply(T& result, const process::left_merge& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::choice result = process::choice(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    process::make_left_merge(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::stochastic_operator apply(const process::stochastic_operator& x)
-  {
+  template <class T>
+  void apply(T& result, const process::choice& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::stochastic_operator result = process::stochastic_operator(static_cast<Derived&>(*this).apply(x.variables()), static_cast<Derived&>(*this).apply(x.distribution()), static_cast<Derived&>(*this).apply(x.operand()));
+    process::make_choice(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::untyped_process_assignment apply(const process::untyped_process_assignment& x)
-  {
+  template <class T>
+  void apply(T& result, const process::stochastic_operator& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::untyped_process_assignment result = process::untyped_process_assignment(x.name(), static_cast<Derived&>(*this).apply(x.assignments()));
+    process::make_stochastic_operator(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.distribution()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::process_expression apply(const process::process_expression& x)
-  {
+  template <class T>
+  void apply(T& result, const process::untyped_process_assignment& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::process_expression result;
+    process::make_untyped_process_assignment(result, x.name(), [&](data::untyped_identifier_assignment_list& result){ static_cast<Derived&>(*this).apply(result, x.assignments()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const process::process_expression& x)
+  { 
+    static_cast<Derived&>(*this).enter(x);
     if (process::is_action(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::action>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::action>(x));
     }
     else if (process::is_process_instance(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::process_instance>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::process_instance>(x));
     }
     else if (process::is_process_instance_assignment(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::process_instance_assignment>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::process_instance_assignment>(x));
     }
     else if (process::is_delta(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::delta>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::delta>(x));
     }
     else if (process::is_tau(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::tau>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::tau>(x));
     }
     else if (process::is_sum(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::sum>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::sum>(x));
     }
     else if (process::is_block(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::block>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::block>(x));
     }
     else if (process::is_hide(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::hide>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::hide>(x));
     }
     else if (process::is_rename(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::rename>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::rename>(x));
     }
     else if (process::is_comm(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::comm>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::comm>(x));
     }
     else if (process::is_allow(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::allow>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::allow>(x));
     }
     else if (process::is_sync(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::sync>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::sync>(x));
     }
     else if (process::is_at(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::at>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::at>(x));
     }
     else if (process::is_seq(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::seq>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::seq>(x));
     }
     else if (process::is_if_then(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::if_then>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::if_then>(x));
     }
     else if (process::is_if_then_else(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::if_then_else>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::if_then_else>(x));
     }
     else if (process::is_bounded_init(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::bounded_init>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::bounded_init>(x));
     }
     else if (process::is_merge(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::merge>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::merge>(x));
     }
     else if (process::is_left_merge(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::left_merge>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::left_merge>(x));
     }
     else if (process::is_choice(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::choice>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::choice>(x));
     }
     else if (process::is_stochastic_operator(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::stochastic_operator>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::stochastic_operator>(x));
     }
     else if (process::is_untyped_process_assignment(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_process_assignment>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::untyped_process_assignment>(x));
     }
     else if (data::is_untyped_data_parameter(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
 };
@@ -373,303 +378,306 @@ struct add_data_expressions: public Builder<Derived>
   using super::apply;
 
   void update(process::process_specification& x)
-  {
+  { 
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).update(x.equations());
-    x.init() = static_cast<Derived&>(*this).apply(x.init());
+    process_expression result_init;
+    static_cast<Derived&>(*this).apply(result_init, x.init());
+    x.init() = result_init;
     static_cast<Derived&>(*this).leave(x);
   }
 
-  process::process_equation apply(const process::process_equation& x)
-  {
+  template <class T>
+  void apply(T& result, const process::process_equation& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::process_equation result = process::process_equation(x.identifier(), x.formal_parameters(), static_cast<Derived&>(*this).apply(x.expression()));
+    process::make_process_equation(result, x.identifier(), x.formal_parameters(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.expression()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::untyped_multi_action apply(const process::untyped_multi_action& x)
-  {
+  template <class T>
+  void apply(T& result, const process::untyped_multi_action& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::untyped_multi_action result = process::untyped_multi_action(static_cast<Derived&>(*this).apply(x.actions()));
+    process::make_untyped_multi_action(result, [&](data::untyped_data_parameter_list& result){ static_cast<Derived&>(*this).apply(result, x.actions()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::action apply(const process::action& x)
-  {
+  template <class T>
+  void apply(T& result, const process::action& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::action result = process::action(x.label(), static_cast<Derived&>(*this).apply(x.arguments()));
+    process::make_action(result, x.label(), [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.arguments()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::process_instance apply(const process::process_instance& x)
-  {
+  template <class T>
+  void apply(T& result, const process::process_instance& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::process_instance result = process::process_instance(x.identifier(), static_cast<Derived&>(*this).apply(x.actual_parameters()));
+    process::make_process_instance(result, x.identifier(), [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.actual_parameters()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::process_instance_assignment apply(const process::process_instance_assignment& x)
-  {
+  template <class T>
+  void apply(T& result, const process::process_instance_assignment& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::process_instance_assignment result = process::process_instance_assignment(x.identifier(), static_cast<Derived&>(*this).apply(x.assignments()));
+    process::make_process_instance_assignment(result, x.identifier(), [&](data::assignment_list& result){ static_cast<Derived&>(*this).apply(result, x.assignments()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::delta apply(const process::delta& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-    return x;
-  }
-
-  process::tau apply(const process::tau& x)
-  {
+  template <class T>
+  void apply(T& result, const process::delta& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  process::sum apply(const process::sum& x)
-  {
+  template <class T>
+  void apply(T& result, const process::tau& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::sum result = process::sum(x.variables(), static_cast<Derived&>(*this).apply(x.operand()));
+    // skip
     static_cast<Derived&>(*this).leave(x);
-    return result;
+    result = x;
   }
 
-  process::block apply(const process::block& x)
-  {
+  template <class T>
+  void apply(T& result, const process::sum& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::block result = process::block(x.block_set(), static_cast<Derived&>(*this).apply(x.operand()));
+    process::make_sum(result, x.variables(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::hide apply(const process::hide& x)
-  {
+  template <class T>
+  void apply(T& result, const process::block& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::hide result = process::hide(x.hide_set(), static_cast<Derived&>(*this).apply(x.operand()));
+    process::make_block(result, x.block_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::rename apply(const process::rename& x)
-  {
+  template <class T>
+  void apply(T& result, const process::hide& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::rename result = process::rename(x.rename_set(), static_cast<Derived&>(*this).apply(x.operand()));
+    process::make_hide(result, x.hide_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::comm apply(const process::comm& x)
-  {
+  template <class T>
+  void apply(T& result, const process::rename& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::comm result = process::comm(x.comm_set(), static_cast<Derived&>(*this).apply(x.operand()));
+    process::make_rename(result, x.rename_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::allow apply(const process::allow& x)
-  {
+  template <class T>
+  void apply(T& result, const process::comm& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::allow result = process::allow(x.allow_set(), static_cast<Derived&>(*this).apply(x.operand()));
+    process::make_comm(result, x.comm_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::sync apply(const process::sync& x)
-  {
+  template <class T>
+  void apply(T& result, const process::allow& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::sync result = process::sync(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    process::make_allow(result, x.allow_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::at apply(const process::at& x)
-  {
+  template <class T>
+  void apply(T& result, const process::sync& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::at result = process::at(static_cast<Derived&>(*this).apply(x.operand()), static_cast<Derived&>(*this).apply(x.time_stamp()));
+    process::make_sync(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::seq apply(const process::seq& x)
-  {
+  template <class T>
+  void apply(T& result, const process::at& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::seq result = process::seq(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    process::make_at(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); }, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.time_stamp()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::if_then apply(const process::if_then& x)
-  {
+  template <class T>
+  void apply(T& result, const process::seq& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::if_then result = process::if_then(static_cast<Derived&>(*this).apply(x.condition()), static_cast<Derived&>(*this).apply(x.then_case()));
+    process::make_seq(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::if_then_else apply(const process::if_then_else& x)
-  {
+  template <class T>
+  void apply(T& result, const process::if_then& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::if_then_else result = process::if_then_else(static_cast<Derived&>(*this).apply(x.condition()), static_cast<Derived&>(*this).apply(x.then_case()), static_cast<Derived&>(*this).apply(x.else_case()));
+    process::make_if_then(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.condition()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.then_case()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::bounded_init apply(const process::bounded_init& x)
-  {
+  template <class T>
+  void apply(T& result, const process::if_then_else& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::bounded_init result = process::bounded_init(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    process::make_if_then_else(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.condition()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.then_case()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.else_case()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::merge apply(const process::merge& x)
-  {
+  template <class T>
+  void apply(T& result, const process::bounded_init& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::merge result = process::merge(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    process::make_bounded_init(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::left_merge apply(const process::left_merge& x)
-  {
+  template <class T>
+  void apply(T& result, const process::merge& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::left_merge result = process::left_merge(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    process::make_merge(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::choice apply(const process::choice& x)
-  {
+  template <class T>
+  void apply(T& result, const process::left_merge& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::choice result = process::choice(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    process::make_left_merge(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::stochastic_operator apply(const process::stochastic_operator& x)
-  {
+  template <class T>
+  void apply(T& result, const process::choice& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::stochastic_operator result = process::stochastic_operator(x.variables(), static_cast<Derived&>(*this).apply(x.distribution()), static_cast<Derived&>(*this).apply(x.operand()));
+    process::make_choice(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::untyped_process_assignment apply(const process::untyped_process_assignment& x)
-  {
+  template <class T>
+  void apply(T& result, const process::stochastic_operator& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::untyped_process_assignment result = process::untyped_process_assignment(x.name(), static_cast<Derived&>(*this).apply(x.assignments()));
+    process::make_stochastic_operator(result, x.variables(), [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.distribution()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::process_expression apply(const process::process_expression& x)
-  {
+  template <class T>
+  void apply(T& result, const process::untyped_process_assignment& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::process_expression result;
+    process::make_untyped_process_assignment(result, x.name(), [&](data::untyped_identifier_assignment_list& result){ static_cast<Derived&>(*this).apply(result, x.assignments()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const process::process_expression& x)
+  { 
+    static_cast<Derived&>(*this).enter(x);
     if (process::is_action(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::action>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::action>(x));
     }
     else if (process::is_process_instance(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::process_instance>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::process_instance>(x));
     }
     else if (process::is_process_instance_assignment(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::process_instance_assignment>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::process_instance_assignment>(x));
     }
     else if (process::is_delta(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::delta>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::delta>(x));
     }
     else if (process::is_tau(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::tau>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::tau>(x));
     }
     else if (process::is_sum(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::sum>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::sum>(x));
     }
     else if (process::is_block(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::block>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::block>(x));
     }
     else if (process::is_hide(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::hide>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::hide>(x));
     }
     else if (process::is_rename(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::rename>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::rename>(x));
     }
     else if (process::is_comm(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::comm>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::comm>(x));
     }
     else if (process::is_allow(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::allow>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::allow>(x));
     }
     else if (process::is_sync(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::sync>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::sync>(x));
     }
     else if (process::is_at(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::at>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::at>(x));
     }
     else if (process::is_seq(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::seq>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::seq>(x));
     }
     else if (process::is_if_then(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::if_then>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::if_then>(x));
     }
     else if (process::is_if_then_else(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::if_then_else>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::if_then_else>(x));
     }
     else if (process::is_bounded_init(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::bounded_init>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::bounded_init>(x));
     }
     else if (process::is_merge(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::merge>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::merge>(x));
     }
     else if (process::is_left_merge(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::left_merge>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::left_merge>(x));
     }
     else if (process::is_choice(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::choice>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::choice>(x));
     }
     else if (process::is_stochastic_operator(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::stochastic_operator>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::stochastic_operator>(x));
     }
     else if (process::is_untyped_process_assignment(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_process_assignment>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::untyped_process_assignment>(x));
     }
     else if (data::is_untyped_data_parameter(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
 };
@@ -692,312 +700,315 @@ struct add_variables: public Builder<Derived>
   using super::apply;
 
   void update(process::process_specification& x)
-  {
+  { 
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).update(x.global_variables());
     static_cast<Derived&>(*this).update(x.equations());
-    x.init() = static_cast<Derived&>(*this).apply(x.init());
+    process_expression result_init;
+    static_cast<Derived&>(*this).apply(result_init, x.init());
+    x.init() = result_init;
     static_cast<Derived&>(*this).leave(x);
   }
 
-  process::process_identifier apply(const process::process_identifier& x)
-  {
+  template <class T>
+  void apply(T& result, const process::process_identifier& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::process_identifier result = process::process_identifier(x.name(), static_cast<Derived&>(*this).apply(x.variables()));
+    process::make_process_identifier(result, x.name(), [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::process_equation apply(const process::process_equation& x)
-  {
+  template <class T>
+  void apply(T& result, const process::process_equation& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::process_equation result = process::process_equation(static_cast<Derived&>(*this).apply(x.identifier()), static_cast<Derived&>(*this).apply(x.formal_parameters()), static_cast<Derived&>(*this).apply(x.expression()));
+    process::make_process_equation(result, [&](process_identifier& result){ static_cast<Derived&>(*this).apply(result, x.identifier()); }, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.formal_parameters()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.expression()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::untyped_multi_action apply(const process::untyped_multi_action& x)
-  {
+  template <class T>
+  void apply(T& result, const process::untyped_multi_action& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::untyped_multi_action result = process::untyped_multi_action(static_cast<Derived&>(*this).apply(x.actions()));
+    process::make_untyped_multi_action(result, [&](data::untyped_data_parameter_list& result){ static_cast<Derived&>(*this).apply(result, x.actions()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::action apply(const process::action& x)
-  {
+  template <class T>
+  void apply(T& result, const process::action& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::action result = process::action(x.label(), static_cast<Derived&>(*this).apply(x.arguments()));
+    process::make_action(result, x.label(), [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.arguments()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::process_instance apply(const process::process_instance& x)
-  {
+  template <class T>
+  void apply(T& result, const process::process_instance& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::process_instance result = process::process_instance(static_cast<Derived&>(*this).apply(x.identifier()), static_cast<Derived&>(*this).apply(x.actual_parameters()));
+    process::make_process_instance(result, [&](process_identifier& result){ static_cast<Derived&>(*this).apply(result, x.identifier()); }, [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.actual_parameters()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::process_instance_assignment apply(const process::process_instance_assignment& x)
-  {
+  template <class T>
+  void apply(T& result, const process::process_instance_assignment& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::process_instance_assignment result = process::process_instance_assignment(static_cast<Derived&>(*this).apply(x.identifier()), static_cast<Derived&>(*this).apply(x.assignments()));
+    process::make_process_instance_assignment(result, [&](process_identifier& result){ static_cast<Derived&>(*this).apply(result, x.identifier()); }, [&](data::assignment_list& result){ static_cast<Derived&>(*this).apply(result, x.assignments()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::delta apply(const process::delta& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-    return x;
-  }
-
-  process::tau apply(const process::tau& x)
-  {
+  template <class T>
+  void apply(T& result, const process::delta& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  process::sum apply(const process::sum& x)
-  {
+  template <class T>
+  void apply(T& result, const process::tau& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::sum result = process::sum(static_cast<Derived&>(*this).apply(x.variables()), static_cast<Derived&>(*this).apply(x.operand()));
+    // skip
     static_cast<Derived&>(*this).leave(x);
-    return result;
+    result = x;
   }
 
-  process::block apply(const process::block& x)
-  {
+  template <class T>
+  void apply(T& result, const process::sum& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::block result = process::block(x.block_set(), static_cast<Derived&>(*this).apply(x.operand()));
+    process::make_sum(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::hide apply(const process::hide& x)
-  {
+  template <class T>
+  void apply(T& result, const process::block& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::hide result = process::hide(x.hide_set(), static_cast<Derived&>(*this).apply(x.operand()));
+    process::make_block(result, x.block_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::rename apply(const process::rename& x)
-  {
+  template <class T>
+  void apply(T& result, const process::hide& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::rename result = process::rename(x.rename_set(), static_cast<Derived&>(*this).apply(x.operand()));
+    process::make_hide(result, x.hide_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::comm apply(const process::comm& x)
-  {
+  template <class T>
+  void apply(T& result, const process::rename& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::comm result = process::comm(x.comm_set(), static_cast<Derived&>(*this).apply(x.operand()));
+    process::make_rename(result, x.rename_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::allow apply(const process::allow& x)
-  {
+  template <class T>
+  void apply(T& result, const process::comm& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::allow result = process::allow(x.allow_set(), static_cast<Derived&>(*this).apply(x.operand()));
+    process::make_comm(result, x.comm_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::sync apply(const process::sync& x)
-  {
+  template <class T>
+  void apply(T& result, const process::allow& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::sync result = process::sync(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    process::make_allow(result, x.allow_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::at apply(const process::at& x)
-  {
+  template <class T>
+  void apply(T& result, const process::sync& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::at result = process::at(static_cast<Derived&>(*this).apply(x.operand()), static_cast<Derived&>(*this).apply(x.time_stamp()));
+    process::make_sync(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::seq apply(const process::seq& x)
-  {
+  template <class T>
+  void apply(T& result, const process::at& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::seq result = process::seq(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    process::make_at(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); }, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.time_stamp()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::if_then apply(const process::if_then& x)
-  {
+  template <class T>
+  void apply(T& result, const process::seq& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::if_then result = process::if_then(static_cast<Derived&>(*this).apply(x.condition()), static_cast<Derived&>(*this).apply(x.then_case()));
+    process::make_seq(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::if_then_else apply(const process::if_then_else& x)
-  {
+  template <class T>
+  void apply(T& result, const process::if_then& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::if_then_else result = process::if_then_else(static_cast<Derived&>(*this).apply(x.condition()), static_cast<Derived&>(*this).apply(x.then_case()), static_cast<Derived&>(*this).apply(x.else_case()));
+    process::make_if_then(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.condition()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.then_case()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::bounded_init apply(const process::bounded_init& x)
-  {
+  template <class T>
+  void apply(T& result, const process::if_then_else& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::bounded_init result = process::bounded_init(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    process::make_if_then_else(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.condition()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.then_case()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.else_case()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::merge apply(const process::merge& x)
-  {
+  template <class T>
+  void apply(T& result, const process::bounded_init& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::merge result = process::merge(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    process::make_bounded_init(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::left_merge apply(const process::left_merge& x)
-  {
+  template <class T>
+  void apply(T& result, const process::merge& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::left_merge result = process::left_merge(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    process::make_merge(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::choice apply(const process::choice& x)
-  {
+  template <class T>
+  void apply(T& result, const process::left_merge& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::choice result = process::choice(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    process::make_left_merge(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::stochastic_operator apply(const process::stochastic_operator& x)
-  {
+  template <class T>
+  void apply(T& result, const process::choice& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::stochastic_operator result = process::stochastic_operator(static_cast<Derived&>(*this).apply(x.variables()), static_cast<Derived&>(*this).apply(x.distribution()), static_cast<Derived&>(*this).apply(x.operand()));
+    process::make_choice(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::untyped_process_assignment apply(const process::untyped_process_assignment& x)
-  {
+  template <class T>
+  void apply(T& result, const process::stochastic_operator& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::untyped_process_assignment result = process::untyped_process_assignment(x.name(), static_cast<Derived&>(*this).apply(x.assignments()));
+    process::make_stochastic_operator(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.distribution()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::process_expression apply(const process::process_expression& x)
-  {
+  template <class T>
+  void apply(T& result, const process::untyped_process_assignment& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::process_expression result;
+    process::make_untyped_process_assignment(result, x.name(), [&](data::untyped_identifier_assignment_list& result){ static_cast<Derived&>(*this).apply(result, x.assignments()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const process::process_expression& x)
+  { 
+    static_cast<Derived&>(*this).enter(x);
     if (process::is_action(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::action>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::action>(x));
     }
     else if (process::is_process_instance(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::process_instance>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::process_instance>(x));
     }
     else if (process::is_process_instance_assignment(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::process_instance_assignment>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::process_instance_assignment>(x));
     }
     else if (process::is_delta(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::delta>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::delta>(x));
     }
     else if (process::is_tau(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::tau>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::tau>(x));
     }
     else if (process::is_sum(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::sum>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::sum>(x));
     }
     else if (process::is_block(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::block>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::block>(x));
     }
     else if (process::is_hide(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::hide>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::hide>(x));
     }
     else if (process::is_rename(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::rename>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::rename>(x));
     }
     else if (process::is_comm(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::comm>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::comm>(x));
     }
     else if (process::is_allow(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::allow>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::allow>(x));
     }
     else if (process::is_sync(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::sync>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::sync>(x));
     }
     else if (process::is_at(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::at>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::at>(x));
     }
     else if (process::is_seq(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::seq>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::seq>(x));
     }
     else if (process::is_if_then(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::if_then>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::if_then>(x));
     }
     else if (process::is_if_then_else(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::if_then_else>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::if_then_else>(x));
     }
     else if (process::is_bounded_init(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::bounded_init>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::bounded_init>(x));
     }
     else if (process::is_merge(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::merge>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::merge>(x));
     }
     else if (process::is_left_merge(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::left_merge>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::left_merge>(x));
     }
     else if (process::is_choice(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::choice>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::choice>(x));
     }
     else if (process::is_stochastic_operator(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::stochastic_operator>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::stochastic_operator>(x));
     }
     else if (process::is_untyped_process_assignment(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_process_assignment>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::untyped_process_assignment>(x));
     }
     else if (data::is_untyped_data_parameter(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
 };
@@ -1021,295 +1032,302 @@ struct add_process_expressions: public Builder<Derived>
   using super::apply;
 
   void update(process::process_specification& x)
-  {
+  { 
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).update(x.equations());
-    x.init() = static_cast<Derived&>(*this).apply(x.init());
+    process_expression result_init;
+    static_cast<Derived&>(*this).apply(result_init, x.init());
+    x.init() = result_init;
     static_cast<Derived&>(*this).leave(x);
   }
 
-  process::process_equation apply(const process::process_equation& x)
-  {
+  template <class T>
+  void apply(T& result, const process::process_equation& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::process_equation result = process::process_equation(x.identifier(), x.formal_parameters(), static_cast<Derived&>(*this).apply(x.expression()));
+    process::make_process_equation(result, x.identifier(), x.formal_parameters(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.expression()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::action apply(const process::action& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-    return x;
-  }
-
-  process::process_instance apply(const process::process_instance& x)
-  {
+  template <class T>
+  void apply(T& result, const process::action& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  process::process_instance_assignment apply(const process::process_instance_assignment& x)
-  {
+  template <class T>
+  void apply(T& result, const process::process_instance& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  process::delta apply(const process::delta& x)
-  {
+  template <class T>
+  void apply(T& result, const process::process_instance_assignment& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  process::tau apply(const process::tau& x)
-  {
+  template <class T>
+  void apply(T& result, const process::delta& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  process::sum apply(const process::sum& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    process::sum result = process::sum(x.variables(), static_cast<Derived&>(*this).apply(x.operand()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
-  process::block apply(const process::block& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    process::block result = process::block(x.block_set(), static_cast<Derived&>(*this).apply(x.operand()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
-  process::hide apply(const process::hide& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    process::hide result = process::hide(x.hide_set(), static_cast<Derived&>(*this).apply(x.operand()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
-  process::rename apply(const process::rename& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    process::rename result = process::rename(x.rename_set(), static_cast<Derived&>(*this).apply(x.operand()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
-  process::comm apply(const process::comm& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    process::comm result = process::comm(x.comm_set(), static_cast<Derived&>(*this).apply(x.operand()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
-  process::allow apply(const process::allow& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    process::allow result = process::allow(x.allow_set(), static_cast<Derived&>(*this).apply(x.operand()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
-  process::sync apply(const process::sync& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    process::sync result = process::sync(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
-  process::at apply(const process::at& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    process::at result = process::at(static_cast<Derived&>(*this).apply(x.operand()), x.time_stamp());
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
-  process::seq apply(const process::seq& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    process::seq result = process::seq(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
-  process::if_then apply(const process::if_then& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    process::if_then result = process::if_then(x.condition(), static_cast<Derived&>(*this).apply(x.then_case()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
-  process::if_then_else apply(const process::if_then_else& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    process::if_then_else result = process::if_then_else(x.condition(), static_cast<Derived&>(*this).apply(x.then_case()), static_cast<Derived&>(*this).apply(x.else_case()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
-  process::bounded_init apply(const process::bounded_init& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    process::bounded_init result = process::bounded_init(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
-  process::merge apply(const process::merge& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    process::merge result = process::merge(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
-  process::left_merge apply(const process::left_merge& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    process::left_merge result = process::left_merge(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
-  process::choice apply(const process::choice& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    process::choice result = process::choice(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
-  process::stochastic_operator apply(const process::stochastic_operator& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    process::stochastic_operator result = process::stochastic_operator(x.variables(), x.distribution(), static_cast<Derived&>(*this).apply(x.operand()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
-  process::untyped_process_assignment apply(const process::untyped_process_assignment& x)
-  {
+  template <class T>
+  void apply(T& result, const process::tau& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  process::process_expression apply(const process::process_expression& x)
-  {
+  template <class T>
+  void apply(T& result, const process::sum& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::process_expression result;
+    process::make_sum(result, x.variables(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const process::block& x)
+  { 
+    static_cast<Derived&>(*this).enter(x);
+    process::make_block(result, x.block_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const process::hide& x)
+  { 
+    static_cast<Derived&>(*this).enter(x);
+    process::make_hide(result, x.hide_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const process::rename& x)
+  { 
+    static_cast<Derived&>(*this).enter(x);
+    process::make_rename(result, x.rename_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const process::comm& x)
+  { 
+    static_cast<Derived&>(*this).enter(x);
+    process::make_comm(result, x.comm_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const process::allow& x)
+  { 
+    static_cast<Derived&>(*this).enter(x);
+    process::make_allow(result, x.allow_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const process::sync& x)
+  { 
+    static_cast<Derived&>(*this).enter(x);
+    process::make_sync(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const process::at& x)
+  { 
+    static_cast<Derived&>(*this).enter(x);
+    process::make_at(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); }, x.time_stamp());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const process::seq& x)
+  { 
+    static_cast<Derived&>(*this).enter(x);
+    process::make_seq(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const process::if_then& x)
+  { 
+    static_cast<Derived&>(*this).enter(x);
+    process::make_if_then(result, x.condition(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.then_case()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const process::if_then_else& x)
+  { 
+    static_cast<Derived&>(*this).enter(x);
+    process::make_if_then_else(result, x.condition(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.then_case()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.else_case()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const process::bounded_init& x)
+  { 
+    static_cast<Derived&>(*this).enter(x);
+    process::make_bounded_init(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const process::merge& x)
+  { 
+    static_cast<Derived&>(*this).enter(x);
+    process::make_merge(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const process::left_merge& x)
+  { 
+    static_cast<Derived&>(*this).enter(x);
+    process::make_left_merge(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const process::choice& x)
+  { 
+    static_cast<Derived&>(*this).enter(x);
+    process::make_choice(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const process::stochastic_operator& x)
+  { 
+    static_cast<Derived&>(*this).enter(x);
+    process::make_stochastic_operator(result, x.variables(), x.distribution(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const process::untyped_process_assignment& x)
+  { 
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+    result = x;
+  }
+
+  template <class T>
+  void apply(T& result, const process::process_expression& x)
+  { 
+    static_cast<Derived&>(*this).enter(x);
     if (process::is_action(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::action>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::action>(x));
     }
     else if (process::is_process_instance(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::process_instance>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::process_instance>(x));
     }
     else if (process::is_process_instance_assignment(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::process_instance_assignment>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::process_instance_assignment>(x));
     }
     else if (process::is_delta(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::delta>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::delta>(x));
     }
     else if (process::is_tau(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::tau>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::tau>(x));
     }
     else if (process::is_sum(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::sum>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::sum>(x));
     }
     else if (process::is_block(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::block>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::block>(x));
     }
     else if (process::is_hide(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::hide>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::hide>(x));
     }
     else if (process::is_rename(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::rename>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::rename>(x));
     }
     else if (process::is_comm(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::comm>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::comm>(x));
     }
     else if (process::is_allow(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::allow>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::allow>(x));
     }
     else if (process::is_sync(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::sync>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::sync>(x));
     }
     else if (process::is_at(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::at>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::at>(x));
     }
     else if (process::is_seq(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::seq>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::seq>(x));
     }
     else if (process::is_if_then(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::if_then>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::if_then>(x));
     }
     else if (process::is_if_then_else(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::if_then_else>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::if_then_else>(x));
     }
     else if (process::is_bounded_init(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::bounded_init>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::bounded_init>(x));
     }
     else if (process::is_merge(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::merge>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::merge>(x));
     }
     else if (process::is_left_merge(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::left_merge>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::left_merge>(x));
     }
     else if (process::is_choice(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::choice>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::choice>(x));
     }
     else if (process::is_stochastic_operator(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::stochastic_operator>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::stochastic_operator>(x));
     }
     else if (process::is_untyped_process_assignment(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_process_assignment>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::untyped_process_assignment>(x));
     }
     else if (data::is_untyped_data_parameter(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
 };
@@ -1332,303 +1350,309 @@ struct add_process_identifiers: public Builder<Derived>
   using super::apply;
 
   void update(process::process_specification& x)
-  {
+  { 
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).update(x.equations());
-    x.init() = static_cast<Derived&>(*this).apply(x.init());
+    process_expression result_init;
+    static_cast<Derived&>(*this).apply(result_init, x.init());
+    x.init() = result_init;
     static_cast<Derived&>(*this).leave(x);
   }
 
-  process::process_identifier apply(const process::process_identifier& x)
-  {
+  template <class T>
+  void apply(T& result, const process::process_identifier& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  process::process_equation apply(const process::process_equation& x)
-  {
+  template <class T>
+  void apply(T& result, const process::process_equation& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::process_equation result = process::process_equation(static_cast<Derived&>(*this).apply(x.identifier()), x.formal_parameters(), static_cast<Derived&>(*this).apply(x.expression()));
+    process::make_process_equation(result, [&](process_identifier& result){ static_cast<Derived&>(*this).apply(result, x.identifier()); }, x.formal_parameters(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.expression()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::action apply(const process::action& x)
-  {
+  template <class T>
+  void apply(T& result, const process::action& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  process::process_instance apply(const process::process_instance& x)
-  {
+  template <class T>
+  void apply(T& result, const process::process_instance& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::process_instance result = process::process_instance(static_cast<Derived&>(*this).apply(x.identifier()), x.actual_parameters());
+    process::make_process_instance(result, [&](process_identifier& result){ static_cast<Derived&>(*this).apply(result, x.identifier()); }, x.actual_parameters());
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::process_instance_assignment apply(const process::process_instance_assignment& x)
-  {
+  template <class T>
+  void apply(T& result, const process::process_instance_assignment& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::process_instance_assignment result = process::process_instance_assignment(static_cast<Derived&>(*this).apply(x.identifier()), x.assignments());
+    process::make_process_instance_assignment(result, [&](process_identifier& result){ static_cast<Derived&>(*this).apply(result, x.identifier()); }, x.assignments());
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::delta apply(const process::delta& x)
-  {
+  template <class T>
+  void apply(T& result, const process::delta& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  process::tau apply(const process::tau& x)
-  {
+  template <class T>
+  void apply(T& result, const process::tau& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  process::sum apply(const process::sum& x)
-  {
+  template <class T>
+  void apply(T& result, const process::sum& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::sum result = process::sum(x.variables(), static_cast<Derived&>(*this).apply(x.operand()));
+    process::make_sum(result, x.variables(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::block apply(const process::block& x)
-  {
+  template <class T>
+  void apply(T& result, const process::block& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::block result = process::block(x.block_set(), static_cast<Derived&>(*this).apply(x.operand()));
+    process::make_block(result, x.block_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::hide apply(const process::hide& x)
-  {
+  template <class T>
+  void apply(T& result, const process::hide& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::hide result = process::hide(x.hide_set(), static_cast<Derived&>(*this).apply(x.operand()));
+    process::make_hide(result, x.hide_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::rename apply(const process::rename& x)
-  {
+  template <class T>
+  void apply(T& result, const process::rename& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::rename result = process::rename(x.rename_set(), static_cast<Derived&>(*this).apply(x.operand()));
+    process::make_rename(result, x.rename_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::comm apply(const process::comm& x)
-  {
+  template <class T>
+  void apply(T& result, const process::comm& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::comm result = process::comm(x.comm_set(), static_cast<Derived&>(*this).apply(x.operand()));
+    process::make_comm(result, x.comm_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::allow apply(const process::allow& x)
-  {
+  template <class T>
+  void apply(T& result, const process::allow& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::allow result = process::allow(x.allow_set(), static_cast<Derived&>(*this).apply(x.operand()));
+    process::make_allow(result, x.allow_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::sync apply(const process::sync& x)
-  {
+  template <class T>
+  void apply(T& result, const process::sync& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::sync result = process::sync(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    process::make_sync(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::at apply(const process::at& x)
-  {
+  template <class T>
+  void apply(T& result, const process::at& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::at result = process::at(static_cast<Derived&>(*this).apply(x.operand()), x.time_stamp());
+    process::make_at(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); }, x.time_stamp());
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::seq apply(const process::seq& x)
-  {
+  template <class T>
+  void apply(T& result, const process::seq& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::seq result = process::seq(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    process::make_seq(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::if_then apply(const process::if_then& x)
-  {
+  template <class T>
+  void apply(T& result, const process::if_then& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::if_then result = process::if_then(x.condition(), static_cast<Derived&>(*this).apply(x.then_case()));
+    process::make_if_then(result, x.condition(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.then_case()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::if_then_else apply(const process::if_then_else& x)
-  {
+  template <class T>
+  void apply(T& result, const process::if_then_else& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::if_then_else result = process::if_then_else(x.condition(), static_cast<Derived&>(*this).apply(x.then_case()), static_cast<Derived&>(*this).apply(x.else_case()));
+    process::make_if_then_else(result, x.condition(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.then_case()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.else_case()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::bounded_init apply(const process::bounded_init& x)
-  {
+  template <class T>
+  void apply(T& result, const process::bounded_init& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::bounded_init result = process::bounded_init(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    process::make_bounded_init(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::merge apply(const process::merge& x)
-  {
+  template <class T>
+  void apply(T& result, const process::merge& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::merge result = process::merge(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    process::make_merge(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::left_merge apply(const process::left_merge& x)
-  {
+  template <class T>
+  void apply(T& result, const process::left_merge& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::left_merge result = process::left_merge(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    process::make_left_merge(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::choice apply(const process::choice& x)
-  {
+  template <class T>
+  void apply(T& result, const process::choice& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::choice result = process::choice(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    process::make_choice(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::stochastic_operator apply(const process::stochastic_operator& x)
-  {
+  template <class T>
+  void apply(T& result, const process::stochastic_operator& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::stochastic_operator result = process::stochastic_operator(x.variables(), x.distribution(), static_cast<Derived&>(*this).apply(x.operand()));
+    process::make_stochastic_operator(result, x.variables(), x.distribution(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
-  process::untyped_process_assignment apply(const process::untyped_process_assignment& x)
-  {
+  template <class T>
+  void apply(T& result, const process::untyped_process_assignment& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 
-  process::process_expression apply(const process::process_expression& x)
-  {
+  template <class T>
+  void apply(T& result, const process::process_expression& x)
+  { 
     static_cast<Derived&>(*this).enter(x);
-    process::process_expression result;
     if (process::is_action(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::action>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::action>(x));
     }
     else if (process::is_process_instance(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::process_instance>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::process_instance>(x));
     }
     else if (process::is_process_instance_assignment(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::process_instance_assignment>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::process_instance_assignment>(x));
     }
     else if (process::is_delta(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::delta>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::delta>(x));
     }
     else if (process::is_tau(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::tau>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::tau>(x));
     }
     else if (process::is_sum(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::sum>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::sum>(x));
     }
     else if (process::is_block(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::block>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::block>(x));
     }
     else if (process::is_hide(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::hide>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::hide>(x));
     }
     else if (process::is_rename(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::rename>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::rename>(x));
     }
     else if (process::is_comm(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::comm>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::comm>(x));
     }
     else if (process::is_allow(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::allow>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::allow>(x));
     }
     else if (process::is_sync(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::sync>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::sync>(x));
     }
     else if (process::is_at(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::at>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::at>(x));
     }
     else if (process::is_seq(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::seq>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::seq>(x));
     }
     else if (process::is_if_then(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::if_then>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::if_then>(x));
     }
     else if (process::is_if_then_else(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::if_then_else>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::if_then_else>(x));
     }
     else if (process::is_bounded_init(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::bounded_init>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::bounded_init>(x));
     }
     else if (process::is_merge(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::merge>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::merge>(x));
     }
     else if (process::is_left_merge(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::left_merge>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::left_merge>(x));
     }
     else if (process::is_choice(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::choice>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::choice>(x));
     }
     else if (process::is_stochastic_operator(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::stochastic_operator>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::stochastic_operator>(x));
     }
     else if (process::is_untyped_process_assignment(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_process_assignment>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::untyped_process_assignment>(x));
     }
     else if (data::is_untyped_data_parameter(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 
 };

@@ -60,6 +60,13 @@ class exists: public abstraction
 
 }; // class exists
 
+template <class... ARGUMENTS>
+void make_exists(atermpp::aterm& result, ARGUMENTS... arguments)
+{
+  make_abstraction(result, exists_binder(), arguments...);
+}
+
+
 //--- start generated class exists ---//
 // prototype declaration
 std::string pp(const exists& x);

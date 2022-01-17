@@ -500,7 +500,7 @@ inline void swap(application& t1, application& t2)
 
 /// \brief Make function for an application. 
 /// \param result variable into which the application is constructed.
-inline void make_application(data_expression& result)
+inline void make_application(atermpp::aterm& result)
 {
   atermpp::make_term_appl(result,core::detail::function_symbol_DataAppl(1));
 }
@@ -510,7 +510,7 @@ inline void make_application(data_expression& result)
 template<typename ...Terms,
              typename = std::enable_if_t<std::conjunction_v<std::is_convertible<Terms, data_expression>...>> >
 inline void make_application(
-                data_expression& result,
+                atermpp::aterm& result,
                 const data_expression& head,
                 const data_expression& arg1,
                 const Terms& ...other_arguments
@@ -616,7 +616,7 @@ inline void make_application(data_expression& result,
 /// \brief Constructor.
 /// \param result variable into which the application is constructed.
 template <typename FwdIter>
-inline void make_application(data_expression& result,
+inline void make_application(atermpp::aterm& result,
                       const data_expression& head,
                       FwdIter first,
                       FwdIter last,
@@ -635,7 +635,7 @@ inline void make_application(data_expression& result,
 /// \brief Constructor.
 /// \param result variable into which the application is constructed.
 template <typename FwdIter>
-inline void make_application(data_expression& result,
+inline void make_application(atermpp::aterm& result,
                       const std::size_t arity,
                       const data_expression& head,
                       FwdIter first,
@@ -664,7 +664,7 @@ inline void make_application(data_expression& result,
 /// \parameter convert_arguments This is a function applied to optionally the head and the arguments.
 /// \parameter skip_first_argument A boolean which is true if the function must not be applied to the head.
 template <typename FwdIter, class ArgumentConverter>
-inline void make_application(data_expression& result,
+inline void make_application(atermpp::aterm& result,
                       const data_expression& head,
                       FwdIter first,
                       FwdIter last,
@@ -696,7 +696,7 @@ inline void make_application(data_expression& result,
 /// \parameter skip_first_argument A boolean which is true if the function must not be applied to the head.
 template <typename FwdIter, class ArgumentConverter>
 static inline void make_application(
-            data_expression& result,
+            atermpp::aterm& result,
             const data_expression& head,
             FwdIter first,
             FwdIter last,
@@ -706,7 +706,7 @@ static inline void make_application(
             typename std::enable_if< !std::is_base_of<data_expression, ArgumentConverter>::value>::type* = nullptr,
             typename std::enable_if<std::is_same<typename std::invoke_result<ArgumentConverter,data_expression&,typename FwdIter::value_type>::type, void>::value>::type* = nullptr)
 {
-  atermpp::make_term_appl<data_expression>(
+  atermpp::make_term_appl(
                           result,
                           core::detail::function_symbol_DataAppl(std::distance(first, last) + 1),
                           detail::term_appl_prepend_iterator<FwdIter>(first, &head),

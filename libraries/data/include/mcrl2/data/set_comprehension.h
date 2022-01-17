@@ -58,6 +58,13 @@ class set_comprehension: public abstraction
 
 }; // class set_comprehension
 
+template <class... ARGUMENTS>
+void make_set_comprehension(atermpp::aterm& result, ARGUMENTS... arguments)
+{
+  make_abstraction(result, set_comprehension_binder(), arguments...);
+}
+
+
 //--- start generated class set_comprehension ---//
 // prototype declaration
 std::string pp(const set_comprehension& x);

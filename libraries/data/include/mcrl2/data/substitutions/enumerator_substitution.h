@@ -48,7 +48,8 @@ struct enumerator_replace_builder: public data_expression_builder<enumerator_rep
       m_expressions_begin(expressions_begin)
   {}
 
-  data_expression apply(const variable& x)
+  template <class T>
+  void apply(T& result, const variable& x)
   {
     variable_list::const_iterator i_vars = m_vars_begin;
     data_expression_list::const_iterator i_exprs = m_expressions_begin;
@@ -59,11 +60,13 @@ struct enumerator_replace_builder: public data_expression_builder<enumerator_rep
     }
     if (i_vars==m_vars_end)
     {
-      return x;
+      result = x;
+      return;
     }
     else
     {
-      return enumerator_replace(*i_exprs, i_vars, m_vars_end, i_exprs);
+      result = enumerator_replace(*i_exprs, i_vars, m_vars_end, i_exprs);
+      return;
     }
   }
 };
@@ -75,8 +78,10 @@ data_expression enumerator_replace(const T& x,
                                    const variable_list::const_iterator variables_end,  
                                    const data_expression_list::const_iterator expressions_begin)
 {
+  data_expression result;
   enumerator_replace_builder f(variables_begin, variables_end, expressions_begin);
-  return f.apply(x);
+  f.apply(result, x);
+  return result;
 }
 
 template <typename T>

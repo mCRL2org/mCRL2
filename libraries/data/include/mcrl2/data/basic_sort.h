@@ -39,7 +39,7 @@ class basic_sort: public sort_expression
     }
 
     /// \brief Constructor.
-    basic_sort(const core::identifier_string& name)
+    explicit basic_sort(const core::identifier_string& name)
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortId(), name))
     {}
 
@@ -62,9 +62,10 @@ class basic_sort: public sort_expression
 
 /// \brief Make_basic_sort constructs a new term into a given address.
 /// \ \param t The reference into which the new basic_sort is constructed. 
-inline void make_basic_sort(basic_sort& t, const core::identifier_string& name)
+template <class... ARGUMENTS>
+inline void make_basic_sort(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_SortId(), name);
+  make_term_appl(t, core::detail::function_symbol_SortId(), args...);
 }
 
 // prototype declaration

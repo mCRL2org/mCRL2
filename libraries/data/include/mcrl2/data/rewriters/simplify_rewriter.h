@@ -65,53 +65,63 @@ class simplify_rewrite_builder: public data_expression_builder<Derived>
       return data::is_exists(x);
     }
 
-    data_expression apply(const application& x)
+    template <class T>
+    void apply(T& result, const application& x)
     {
-      data_expression result;
       derived().enter(x);
       if (is_not(x)) // x = !y
       {
-        data_expression y = derived().apply(*x.begin());
+        data_expression y;
+        derived().apply(y, *x.begin());
         result = data::optimized_not(y);
       }
       else if (is_and(x)) // x = y && z
       {
-        data_expression y = derived().apply(binary_left(x));
-        data_expression z = derived().apply(binary_right(x));
+        data_expression y;
+        derived().apply(y, binary_left(x));
+        data_expression z;
+        derived().apply(z, binary_right(x));
         result = data::optimized_and(y, z);
       }
       else if (is_or(x)) // x = y || z
       {
-        data_expression y = derived().apply(binary_left(x));
-        data_expression z = derived().apply(binary_right(x));
+        data_expression y;
+        derived().apply(y, binary_left(x));
+        data_expression z;
+        derived().apply(z, binary_right(x));
         result = data::optimized_or(y, z);
       }
       else if (is_imp(x)) // x = y => z
       {
-        data_expression y = derived().apply(binary_left(x));
-        data_expression z = derived().apply(binary_right(x));
+        data_expression y;
+        derived().apply(y, binary_left(x));
+        data_expression z;
+        derived().apply(z, binary_right(x));
         result = data::optimized_imp(y, z);
       }
       else
       {
-        result = super::apply(x);
+        super::apply(result, x);
       }
       derived().leave(x);
-      return result;
     }
 
-    data_expression apply(const forall& x) // x = forall d. y
+    template <class T>
+    void apply(T& result, const forall& x) // x = forall d. y
     {
       variable_list d = forall(x).variables();
-      data_expression y = derived().apply(forall(x).body());
-      return data::optimized_forall(d, y, true);
+      data_expression y;
+      derived().apply(y, forall(x).body());
+      result = data::optimized_forall(d, y, true);
     }
 
-    data_expression apply(const exists& x) // x = exists d. y
+    template <class T>
+    void apply(T& result, const exists& x) // x = exists d. y
     {
       variable_list d = exists(x).variables();
-      data_expression y = derived().apply(exists(x).body());
-      return data::optimized_exists(d, y, true);
+      data_expression y;
+      derived().apply(y, exists(x).body());
+      result = data::optimized_exists(d, y, true);
     }
 };
 
@@ -120,10 +130,13 @@ class simplify_rewrite_builder: public data_expression_builder<Derived>
 struct simplify_rewriter
 {
   using argument_type = data_expression;
+  using result_type = data_expression;
 
   data_expression operator()(const data_expression& x) const
   {
-    return core::make_apply_builder<detail::simplify_rewrite_builder>().apply(x);
+    data_expression result;
+    core::make_apply_builder<detail::simplify_rewrite_builder>().apply(result, x);
+    return result;
   }
 };
 
@@ -136,7 +149,8 @@ void simplify(T& x, typename std::enable_if< !std::is_base_of< atermpp::aterm, T
 template <typename T>
 T simplify(const T& x, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr)
 {
-  T result = core::make_update_apply_builder<data::data_expression_builder>(simplify_rewriter()).apply(x);
+  T result;
+  core::make_update_apply_builder<data::data_expression_builder>(simplify_rewriter()).apply(result, x);
   return result;
 }
 

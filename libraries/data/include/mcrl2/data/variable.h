@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_VARIABLE_H
 #define MCRL2_DATA_VARIABLE_H
 
+#include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/data_expression.h"
 
@@ -62,14 +63,16 @@ class variable: public data_expression
     /// \brief Constructor.
     variable(const core::identifier_string& name, const sort_expression& sort)
     {
-      atermpp::make_term_appl_with_index(*this, core::detail::function_symbol_DataVarId(), name, sort);
+      atermpp::make_term_appl_with_index<variable, std::pair<core::identifier_string, sort_expression> >
+                (*this, core::detail::function_symbol_DataVarId(), name, sort);
     }
 
 
     /// \brief Constructor.
     variable(const std::string& name, const sort_expression& sort)
     {
-      atermpp::make_term_appl_with_index(*this, core::detail::function_symbol_DataVarId(), core::identifier_string(name), sort);
+      atermpp::make_term_appl_with_index<variable, std::pair<core::identifier_string, sort_expression> >
+                (*this, core::detail::function_symbol_DataVarId(), core::identifier_string(name), sort);
     }
 
 //--- end user section variable ---//
@@ -77,9 +80,10 @@ class variable: public data_expression
 
 /// \brief Make_variable constructs a new term into a given address.
 /// \ \param t The reference into which the new variable is constructed. 
-inline void make_variable(variable& t, const core::identifier_string& name, const sort_expression& sort)
+template <class... ARGUMENTS>
+inline void make_variable(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl_with_index(t, core::detail::function_symbol_DataVarId(), name, sort);
+  make_term_appl_with_index<variable,std::pair<core::identifier_string, sort_expression>>(t, core::detail::function_symbol_DataVarId(), args...);
 }
 
 /// \brief list of variables

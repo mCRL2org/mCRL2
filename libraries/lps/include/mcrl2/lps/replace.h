@@ -45,7 +45,9 @@ T replace_sort_expressions(const T& x,
                            typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                           )
 {
-  return data::detail::make_replace_sort_expressions_builder<lps::sort_expression_builder>(sigma, innermost).apply(x);
+  T result;
+  data::detail::make_replace_sort_expressions_builder<lps::sort_expression_builder>(sigma, innermost).apply(result, x);
+  return result;
 }
 
 template <typename T, typename Substitution>
@@ -65,8 +67,11 @@ T replace_data_expressions(const T& x,
                            typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                           )
 {
-  return data::detail::make_replace_data_expressions_builder<lps::data_expression_builder>(sigma, innermost).apply(x);
+  T result;
+  data::detail::make_replace_data_expressions_builder<lps::data_expression_builder>(sigma, innermost).apply(result, x);
+  return result;
 }
+
 
 template <typename T, typename Substitution>
 void replace_variables(T& x,
@@ -83,7 +88,9 @@ T replace_variables(const T& x,
                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                    )
 {
-  return core::make_update_apply_builder<lps::data_expression_builder>(sigma).apply(x);
+  T result;
+  core::make_update_apply_builder<lps::data_expression_builder>(sigma).apply(result, x);
+  return result;
 }
 
 template <typename T, typename Substitution>
@@ -101,7 +108,9 @@ T replace_all_variables(const T& x,
                         typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                        )
 {
-  return core::make_update_apply_builder<lps::variable_builder>(sigma).apply(x);
+  T result;
+  core::make_update_apply_builder<lps::variable_builder>(sigma).apply(result, x);
+  return result;
 }
 
 /// \brief Applies the substitution sigma to x.
@@ -125,7 +134,9 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return data::detail::make_replace_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_builder_binding>(sigma).apply(x);
+  T result;
+  data::detail::make_replace_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_builder_binding>(sigma).apply(result, x);
+  return result;
 }
 
 /// \brief Applies the substitution sigma to x, where the elements of bound_variables are treated as bound variables.
@@ -151,7 +162,9 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return data::detail::make_replace_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_builder_binding>(sigma).apply(x, bound_variables);
+  T result;
+  data::detail::make_replace_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_builder_binding>(sigma).apply(result, x, bound_variables);
+  return result;
 }
 //--- end generated lps replace code ---//
 
@@ -184,20 +197,35 @@ struct replace_process_parameter_builder: public Binder<Builder, replace_process
     increase_bind_count(bound_variables);
   }
 
-  data::data_expression apply(const data::variable& x)
+  void apply(data::variable& result, const data::variable& x)
   {
     if (bound_variables().count(x) == count)
     {
-      return sigma(x);
+      result = atermpp::down_cast<data::variable>(sigma(x));
+      return;
     }
-    return x;
+    result = x;
   }
 
-  data::assignment_expression apply(const data::assignment& x)
+  template <class T>
+  void apply(T& result, const data::variable& x)
   {
-    data::variable lhs = atermpp::down_cast<data::variable>(apply(x.lhs()));
-    data::data_expression rhs = apply(x.rhs());
-    return data::assignment(lhs, rhs);
+    if (bound_variables().count(x) == count)
+    {
+      result = sigma(x);
+      return;
+    }
+    result = static_cast<data::data_expression>(x);
+  }
+
+  template <class T>
+  void apply(T& result, const data::assignment& x)
+  {
+    data::variable lhs;
+    apply(lhs, x.lhs());
+    data::data_expression rhs; 
+    apply(rhs, x.rhs());
+    data::make_assignment(result, lhs, rhs);
   }
 
   void update(lps::deadlock_summand& x)
@@ -210,7 +238,9 @@ struct replace_process_parameter_builder: public Binder<Builder, replace_process
   {
     count = 1;
     super::update(x);
-    x.assignments() = super::apply(x.assignments());
+    data::assignment_list assignments;
+    super::apply(assignments, x.assignments());
+    x.assignments() = assignments;
   }
 
 //  lps::process_initializer apply(const lps::process_initializer& x)
@@ -224,7 +254,9 @@ struct replace_process_parameter_builder: public Binder<Builder, replace_process
   {
     super::update(x);
     count = 0;
-    x.process_parameters() = super::apply(x.process_parameters());
+    data::variable_list process_parameters;
+    super::apply(process_parameters, x.process_parameters());
+    x.process_parameters() = process_parameters;
   }
 };
 

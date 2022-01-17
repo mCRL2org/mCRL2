@@ -44,6 +44,7 @@ BOOST_AUTO_TEST_CASE(test_pbes)
   state_formulas::state_formula formula = state_formulas::parse_state_formula(FORMULA2, spec);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);
+
   pbes_expression e = p.equations().front().formula();
 
   BOOST_CHECK(!is_bes(p));
@@ -112,6 +113,7 @@ BOOST_AUTO_TEST_CASE(test_complement_method_builder)
   std::cout << "p             = " << mcrl2::pbes_system::pp(p) << std::endl;
   std::cout << "q             = " << mcrl2::pbes_system::pp(q) << std::endl;
   std::cout << "complement(p) = " << mcrl2::pbes_system::pp(complement(p)) << std::endl;
+
   BOOST_CHECK(complement(p) == q);
 }
 

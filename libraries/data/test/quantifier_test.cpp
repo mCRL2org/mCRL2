@@ -187,7 +187,6 @@ void quantifier_inside_test(const std::string& expr1_text, const std::string& ex
 {
   data_expression expr1 = parse_data_expression(expr1_text, vars, dataspec);
   data_expression expr2 = parse_data_expression(expr2_text, vars, dataspec);
-
   BOOST_CHECK_EQUAL(quantifiers_inside_rewrite(expr1), expr2);
 }
 

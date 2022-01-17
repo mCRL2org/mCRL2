@@ -28,15 +28,18 @@ struct balance_summands_builder
   typedef process_expression_builder<balance_summands_builder> super;
   using super::apply;
 
-  process_expression apply(const process::choice& x)
+  template <class T>
+  void apply(T& result, const process::choice& x)
   {
     std::vector<process_expression> summands = split_summands(x);
-    for (auto& summand: summands)
+    process_expression new_summand;
+    for (process_expression& summand: summands)
     {
-      summand = super::apply(summand);
+      super::apply(new_summand, summand);
+      summand = new_summand;
     }
     
-    return utilities::detail::join_balanced<process_expression>(
+    result = utilities::detail::join_balanced<process_expression>(
         summands.begin(), 
         summands.end(),
         [](const process::process_expression& x, const process_expression& y) {
@@ -59,8 +62,10 @@ void balance_summands(T& x, typename std::enable_if<!std::is_base_of<atermpp::at
 template <typename T>
 T balance_summands(const T& x, typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr)
 {
+  T result;
   detail::balance_summands_builder f;
-  return f.apply(x);
+  f.apply(result, x);
+  return result;
 }
 
 } // namespace process

@@ -25,13 +25,13 @@ namespace detail {
 pbes_expression quantifier_propagate(const pbes_expression& x);
 
 inline
-pbes_expression make_exists(std::set<data::variable> vars, const pbes_expression& expr)
+pbes_expression make_exists_(std::set<data::variable> vars, const pbes_expression& expr)
 {
   return vars.empty() ? expr : exists(data::variable_list(vars.begin(), vars.end()), expr);
 }
 
 inline
-pbes_expression make_forall(std::set<data::variable> vars, const pbes_expression& expr)
+pbes_expression make_forall_(std::set<data::variable> vars, const pbes_expression& expr)
 {
   return vars.empty() ? expr : forall(data::variable_list(vars.begin(), vars.end()), expr);
 }
@@ -50,7 +50,7 @@ protected:
 
   pbes_expression make_expr(const std::set<data::variable>& vars, const pbes_expression& expr) const
   {
-    return m_is_forall ? make_forall(vars, expr) : make_exists(vars, expr);
+    return m_is_forall ? make_forall_(vars, expr) : make_exists_(vars, expr);
   }
 
 public:
@@ -158,7 +158,8 @@ public:
     pbes_expression x = make_quantifier(is_forall, vars, body);
     quantified_context.push_back(x);
 
-    pbes_expression result = apply(body);
+    pbes_expression result;
+    apply(result, body);
 
     if(quantified_context.empty())
     {
@@ -184,14 +185,16 @@ public:
     }
   }
 
-  pbes_expression apply(const forall& x)
+  template <class T>
+  void apply(T& result, const forall& x)
   {
-    return apply_quantifier(true, x.variables(), x.body());
+    result = apply_quantifier(true, x.variables(), x.body());
   }
 
-  pbes_expression apply(const exists& x)
+  template <class T>
+  void apply(T& result, const exists& x)
   {
-    return apply_quantifier(false, x.variables(), x.body());
+    result = apply_quantifier(false, x.variables(), x.body());
   }
 
   void enter(const and_& /*x*/)
@@ -214,7 +217,8 @@ public:
     quantified_context.clear();
   }
 
-  pbes_expression apply(const propositional_variable_instantiation& X_e)
+  template <class T>
+  void apply(T& result, const propositional_variable_instantiation& X_e)
   {
     using utilities::detail::contains;
     using utilities::detail::set_difference;
@@ -224,7 +228,8 @@ public:
     std::list<quantifier> qvars = make_quantifier_list(quantified_context);
     if(qvars.empty())
     {
-      return X_e;
+      result = X_e;
+      return;
     }
 
     const std::vector<data::variable> parameters(find_equation(X_e).variable().parameters().begin(), find_equation(X_e).variable().parameters().end());
@@ -308,7 +313,8 @@ public:
     if(independent_pars.empty() ||
       set_difference(qvars.back().variables(), seen).empty())
     {
-      return X_e;
+      result = X_e;
+      return;
     }
 
     // Build a new equation based on the independent parameters found
@@ -348,7 +354,7 @@ public:
     pbes_equation new_eqn(find_equation(X_e).symbol(), propositional_variable(new_name, new_parameter_list), new_rhs_X);
     m_new_equations.emplace_back(X_e.name(), new_eqn);
 
-    return new_Q_X_e;
+    result = new_Q_X_e;
   }
 };
 

@@ -36,20 +36,24 @@ struct add_capture_avoiding_replacement: public lps::detail::add_capture_avoidin
     : super(sigma)
   { }
 
-  action_formula apply(const forall& x)
+  template <class T>
+  void apply(T& result, const forall& x)
   {
     data::variable_list v1 = sigma.add_fresh_variable_assignments(x.variables());
-    action_formula result = forall(v1, apply(x.body()));
+    action_formula body;
+    apply(body, x.body());
+    make_forall(result, v1, body);
     sigma.remove_fresh_variable_assignments(x.variables());
-    return result;
   }
 
-  action_formula apply(const exists& x)
+  template <class T>
+  void apply(T& result, const exists& x)
   {
     data::variable_list v1 = sigma.add_fresh_variable_assignments(x.variables());
-    action_formula result = exists(v1, apply(x.body()));
+    action_formula body;
+    apply(body, x.body());
+    make_exists(result, v1, body);
     sigma.remove_fresh_variable_assignments(x.variables());
-    return result;
   }
 };
 
@@ -83,7 +87,9 @@ T replace_variables_capture_avoiding(const T& x,
 )
 {
   data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
-  return data::detail::apply_replace_capture_avoiding_variables_builder<action_formulas::data_expression_builder, action_formulas::detail::add_capture_avoiding_replacement>(sigma1).apply(x);
+  T result;
+  data::detail::apply_replace_capture_avoiding_variables_builder<action_formulas::data_expression_builder, action_formulas::detail::add_capture_avoiding_replacement>(sigma1).apply(result, x);
+  return result;
 }
 
 /// \brief Applies sigma as a capture avoiding substitution to x.
@@ -178,7 +184,9 @@ T replace_variables_capture_avoiding(const T& x,
 )
 {
   data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
-  return data::detail::apply_replace_capture_avoiding_variables_builder<regular_formulas::data_expression_builder, regular_formulas::detail::add_capture_avoiding_replacement>(sigma1).apply(x);
+  T result;
+  data::detail::apply_replace_capture_avoiding_variables_builder<regular_formulas::data_expression_builder, regular_formulas::detail::add_capture_avoiding_replacement>(sigma1).apply(result, x);
+  return result;
 }
 
 /// \brief Applies sigma as a capture avoiding substitution to x.
@@ -289,7 +297,9 @@ T replace_variables_capture_avoiding(const T& x,
 )
 {
   data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
-  return data::detail::apply_replace_capture_avoiding_variables_builder<state_formulas::data_expression_builder, state_formulas::detail::add_capture_avoiding_replacement>(sigma1).apply(x);
+  T result;
+  data::detail::apply_replace_capture_avoiding_variables_builder<state_formulas::data_expression_builder, state_formulas::detail::add_capture_avoiding_replacement>(sigma1).apply(result, x);
+  return result;
 }
 
 /// \brief Applies sigma as a capture avoiding substitution to x.

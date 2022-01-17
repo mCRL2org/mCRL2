@@ -27,42 +27,57 @@ struct add_simplify: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::apply;
 
-  boolean_expression apply(const not_& x)
+  template <class T>
+  void apply(T& result, const not_& x)
   {
-    return data::optimized_not(apply(x.operand()));
+    boolean_expression op;
+    apply(op, x.operand());
+    result = data::optimized_not(op);
   }
 
-  boolean_expression apply(const and_& x)
+  template <class T>
+  void apply(T& result, const and_& x)
   {
-    auto left = apply(x.left());
+    boolean_expression left; 
+    apply(left, x.left());
     if (is_false(left))
     {
-      return false_();
+      result = false_();
+      return;
     }
-    auto right = apply(x.right());
-    return data::optimized_and(left, right);
+    boolean_expression right;
+    apply(right, x.right());
+    result = data::optimized_and(left, right);
   }
 
-  boolean_expression apply(const or_& x)
+  template <class T>
+  void apply(T& result, const or_& x)
   {
-    auto left = apply(x.left());
+    boolean_expression left;
+    apply(left, x.left());
     if (is_true(left))
     {
-      return true_();
+      result = true_();
+      return;
     }
-    auto right = apply(x.right());
-    return data::optimized_or(left, right);
+    boolean_expression right;
+    apply(right, x.right());
+    result = data::optimized_or(left, right);
   }
 
-  boolean_expression apply(const imp& x)
+  template <class T>
+  void apply(T& result, const imp& x)
   {
-    auto left = apply(x.left());
+    boolean_expression left;
+    apply(left, x.left());
     if (is_false(left))
     {
-      return true_();
+      result = true_();
+      return;
     }
-    auto right = apply(x.right());
-    return data::optimized_imp(left, right);
+    boolean_expression right;
+    apply(right, x.right());
+    result = data::optimized_imp(left, right);
   }
 };
 
@@ -80,7 +95,9 @@ struct simplify_rewriter
 
   boolean_expression operator()(const boolean_expression& x) const
   {
-    return core::make_apply_builder<detail::simplify_builder>().apply(x);
+    boolean_expression result;
+    core::make_apply_builder<detail::simplify_builder>().apply(result, x);
+    return result;
   }
 };
 

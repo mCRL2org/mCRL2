@@ -147,18 +147,23 @@ struct if_rewrite_builder: public data_expression_builder<Derived>
     }
   }
 
-  data_expression apply(const application& x)
+  template <class T>
+  void apply(T& result, const application& x)
   {
     if (is_if_application(x))
     {
-      data_expression b = super::apply(x[0]);
-      data_expression t1 = super::apply(x[1]);
-      data_expression t2 = super::apply(x[2]);
-      return apply_if(b, t1, t2);
+      data_expression b;
+      super::apply(b, x[0]);
+      data_expression t1;
+      super::apply(t1, x[1]);
+      data_expression t2;
+      super::apply(t2, x[2]);
+      result = apply_if(b, t1, t2);
     }
     else
     {
-      return push_if_outside(super::apply(x));
+      super::apply(result, x);
+      result = push_if_outside(atermpp::down_cast<application>(result));
     }
   }
 };
@@ -174,21 +179,25 @@ struct if_rewrite_with_rewriter_builder: public if_rewrite_builder<if_rewrite_wi
   explicit if_rewrite_with_rewriter_builder(data::rewriter& rewr_) : rewr(rewr_)
   {}
 
-  data_expression apply(const application& x)
+  template <class T>
+  void apply(T& result, const application& x)
   {
-    data_expression result;
     if (is_if_application(x))
     {
-      data_expression b = super::apply(x[0]);
-      data_expression t1 = super::apply(x[1]);
-      data_expression t2 = super::apply(x[2]);
+      data_expression b; 
+      super::apply(b, x[0]);
+      data_expression t1;
+      super::apply(t1, x[1]);
+      data_expression t2;
+      super::apply(t2, x[2]);
       result = apply_if(b, t1, t2);
     }
     else
     {
-      result = push_if_outside(atermpp::down_cast<application>(super::apply(x)));
+      super::apply(result, x);
+      result = push_if_outside(atermpp::down_cast<application>(result));
     }
-    return rewr(result);
+    result = rewr(result);
   }
 };
 
@@ -197,10 +206,13 @@ struct if_rewrite_with_rewriter_builder: public if_rewrite_builder<if_rewrite_wi
 struct if_rewriter
 {
   using argument_type = data_expression;
+  using result_type = data_expression;
 
   data_expression operator()(const data_expression& x) const
   {
-    return core::make_apply_builder<detail::if_rewrite_builder>().apply(x);
+    data_expression result;
+    core::make_apply_builder<detail::if_rewrite_builder>().apply(result, x);
+    return result;
   }
 };
 
@@ -213,7 +225,8 @@ void if_rewrite(T& x, typename std::enable_if< !std::is_base_of< atermpp::aterm,
 template <typename T>
 T if_rewrite(const T& x, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0)
 {
-  T result = core::make_update_apply_builder<data::data_expression_builder>(if_rewriter()).apply(x);
+  T result;
+  core::make_update_apply_builder<data::data_expression_builder>(if_rewriter()).apply(result, x);
   return result;
 }
 

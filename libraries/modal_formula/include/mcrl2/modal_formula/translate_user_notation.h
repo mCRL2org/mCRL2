@@ -34,7 +34,9 @@ T translate_user_notation(const T& x,
                           typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
                          )
 {
-  return core::make_update_apply_builder<action_formulas::data_expression_builder>(data::detail::translate_user_notation_function()).apply(x);
+  T result;
+  core::make_update_apply_builder<action_formulas::data_expression_builder>(data::detail::translate_user_notation_function()).apply(result, x);
+  return result;
 }
 
 } // namespace action_formulas
@@ -55,7 +57,9 @@ T translate_user_notation(const T& x,
                           typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
                          )
 {
-  return core::make_update_apply_builder<regular_formulas::data_expression_builder>(data::detail::translate_user_notation_function()).apply(x);
+  T result;
+  core::make_update_apply_builder<regular_formulas::data_expression_builder>(data::detail::translate_user_notation_function()).apply(result, x);
+  return result;
 }
 
 } // namespace regular_formulas
@@ -76,7 +80,9 @@ T translate_user_notation(const T& x,
                           typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
                          )
 {
-  return core::make_update_apply_builder<state_formulas::data_expression_builder>(data::detail::translate_user_notation_function()).apply(x);
+  T result;
+  core::make_update_apply_builder<state_formulas::data_expression_builder>(data::detail::translate_user_notation_function()).apply(result, x);
+  return result;
 }
 
 } // namespace state_formulas

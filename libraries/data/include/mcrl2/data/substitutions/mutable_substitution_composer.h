@@ -38,6 +38,7 @@ class mutable_substitution_composer
     using substitution_type = Substitution;
 
     using argument_type = variable_type;
+    using result_type = expression_type;
 
   protected:
     /// \brief The wrapped substitution.
@@ -91,6 +92,7 @@ class mutable_substitution_composer<mutable_map_substitution<AssociativeContaine
     using assignment = typename substitution_type::assignment;
     
     using argument_type = variable_type;
+    using result_type = expression_type;
 
   protected:
     /// \brief object on which substitution manipulations are performed.
@@ -143,6 +145,7 @@ class mutable_substitution_composer<mutable_indexed_substitution<VariableType, E
     using assignment = typename substitution_type::assignment;
 
     using argument_type = variable_type;
+    using result_type = expression_type;
 
   protected:
     /// \brief object on which substitution manipulations are performed.

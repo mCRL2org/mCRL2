@@ -37,7 +37,7 @@ class untyped_possible_sorts: public sort_expression
     }
 
     /// \brief Constructor.
-    untyped_possible_sorts(const sort_expression_list& sorts)
+    explicit untyped_possible_sorts(const sort_expression_list& sorts)
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedSortsPossible(), sorts))
     {}
 
@@ -61,9 +61,10 @@ class untyped_possible_sorts: public sort_expression
 
 /// \brief Make_untyped_possible_sorts constructs a new term into a given address.
 /// \ \param t The reference into which the new untyped_possible_sorts is constructed. 
-inline void make_untyped_possible_sorts(untyped_possible_sorts& t, const sort_expression_list& sorts)
+template <class... ARGUMENTS>
+inline void make_untyped_possible_sorts(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_UntypedSortsPossible(), sorts);
+  make_term_appl(t, core::detail::function_symbol_UntypedSortsPossible(), args...);
 }
 
 // prototype declaration

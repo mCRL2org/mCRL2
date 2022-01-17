@@ -36,7 +36,9 @@ T normalize_sorts(const T& x,
                   typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value >::type* = 0
                  )
 {
-  return core::make_update_apply_builder<lps::sort_expression_builder>(data::detail::normalize_sorts_function(sortspec)).apply(x);
+  T result;
+  core::make_update_apply_builder<lps::sort_expression_builder>(data::detail::normalize_sorts_function(sortspec)).apply(result, x);
+  return result;
 }
 
 } // namespace lps

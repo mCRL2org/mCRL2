@@ -266,39 +266,49 @@ struct state_formula_preprocess_nested_modal_operators_builder: public state_for
     pop();
   }
 
-  state_formula apply(const must& x)
+  template <class T>
+  void apply(T& result, const must& x)
   {
-    state_formula operand = apply(x.operand());
+    state_formula operand;
+    apply(operand, x.operand());
     if (!has_unscoped_modal_formulas(operand))
     {
-      return must(x.formula(), operand);
+      make_must(result, x.formula(), operand);
+      return;
     }
     core::identifier_string X = generator("X");
     if (is_mu())
     {
-      return must(x.formula(), mu(X, {}, operand));
+      make_must(result, x.formula(), mu(X, {}, operand));
+      return;
     }
     else
     {
-      return must(x.formula(), nu(X, {}, operand));
+      make_must(result, x.formula(), nu(X, {}, operand));
+      return;
     }
   }
 
-  state_formula apply(const may& x)
+  template <class T>
+  void apply(T& result, const may& x)
   {
-    state_formula operand = apply(x.operand());
+    state_formula operand;
+    apply(operand, x.operand());
     if (!has_unscoped_modal_formulas(operand))
     {
-      return x;
+      result = x;
+      return;
     }
     core::identifier_string X = generator("X");
     if (is_mu())
     {
-      return may(x.formula(), mu(X, {}, operand));
+      make_may(result, x.formula(), mu(X, {}, operand));
+      return;
     }
     else
     {
-      return may(x.formula(), nu(X, {}, operand));
+      make_may(result, x.formula(), nu(X, {}, operand));
+      return;
     }
   }
 };
@@ -322,7 +332,9 @@ state_formula preprocess_nested_modal_operators(const state_formula& x)
   data::set_identifier_generator generator;
   std::set<core::identifier_string> ids = state_formulas::find_identifiers(x);
   generator.add_identifiers(ids);
-  return detail::make_state_formula_preprocess_nested_modal_operators_builder(generator).apply(x);
+  state_formula result;
+  detail::make_state_formula_preprocess_nested_modal_operators_builder(generator).apply(result, x);
+  return result;
 }
 
 /// \brief Renames data variables and predicate variables in the formula \p f, and

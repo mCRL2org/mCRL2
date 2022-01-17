@@ -72,9 +72,10 @@ struct pbes2data_builder: public pbes_expression_builder<Derived>
     }
   }
 
-  data::data_expression apply(const pbes_expression& x)
+  template <class T>
+  void apply(T& result, const pbes_expression& x)
   {
-    return pbes2data(x);
+    result = pbes2data(x);
   }
 };
 
@@ -83,7 +84,9 @@ T pbes2data(const T& x,
             typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
            )
 {
-  return core::make_apply_builder<pbes2data_builder>().apply(x);
+  T result;
+  core::make_apply_builder<pbes2data_builder>().apply(result, x);
+  return result;
 }
 
 template <typename T>

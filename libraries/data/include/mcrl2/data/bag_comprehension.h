@@ -58,6 +58,13 @@ class bag_comprehension: public abstraction
 
 }; // class bag_comprehension
 
+template <class... ARGUMENTS>
+void make_bag_comprehension(atermpp::aterm& result, ARGUMENTS... arguments)
+{
+  make_abstraction(result, bag_comprehension_binder(), arguments...);
+}
+
+
 //--- start generated class bag_comprehension ---//
 // prototype declaration
 std::string pp(const bag_comprehension& x);

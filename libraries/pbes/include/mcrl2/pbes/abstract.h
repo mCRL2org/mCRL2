@@ -69,7 +69,8 @@ struct pbes_abstract_builder: public pbes_expression_builder<pbes_abstract_build
   }
 
   /// \brief Visit data_expression node
-  pbes_expression apply(const data::data_expression& d)
+  template <class T>
+  void apply(T& result, const data::data_expression& d)
   {
     std::set<data::variable> FV = data::find_free_variables(d);
     for (const data::variable& v: FV)
@@ -81,28 +82,33 @@ struct pbes_abstract_builder: public pbes_expression_builder<pbes_abstract_build
       if (!is_bound(v))
       {
         //std::clog << "Reducing data expression " << data::pp(d) << " to " << data::pp(m_value) << "." << std::endl;
-        return m_value;
+        result = m_value;
+        return;
       }
     }
-    return d;
+    result = d;
   }
 
   /// \brief Visit forall node
-  pbes_expression apply(const forall& x)
+  template <class T>
+  void apply(T& result, const forall& x)
   {
     push_variables(x.variables());
-    pbes_expression new_expression = apply(x.body());
+    pbes_expression new_expression;
+    apply(new_expression, x.body());
     pop_variables();
-    return make_forall(x.variables(), new_expression);
+    result = make_forall_(x.variables(), new_expression);
   }
 
   /// \brief Visit exists node
-  pbes_expression apply(const exists& x)
+  template <class T>
+  void apply(T& result, const exists& x)
   {
     push_variables(x.variables());
-    pbes_expression new_expression = apply(x.body());
+    pbes_expression new_expression;
+    apply(new_expression, x.body());
     pop_variables();
-    return make_exists(x.variables(), new_expression);
+    result = make_exists_(x.variables(), new_expression);
   }
 };
 
@@ -128,7 +134,9 @@ class pbes_abstract_algorithm
         if (j != parameter_map.end())
         {
           detail::pbes_abstract_builder builder(j->second, value_true);
-          eqn.formula() = builder.apply(eqn.formula());
+          pbes_expression result;
+          builder.apply(result, eqn.formula());
+          eqn.formula() = result;
         }
       }
     }

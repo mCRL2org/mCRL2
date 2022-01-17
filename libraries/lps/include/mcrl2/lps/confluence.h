@@ -58,10 +58,10 @@ std::pair<std::size_t, std::size_t> make_sorted_pair(std::size_t i, std::size_t 
 }
 
 inline
-data::data_expression make_forall(const data::data_expression& x)
+data::data_expression make_forall_(const data::data_expression& x)
 {
   std::set<data::variable> freevars = data::find_free_variables(x);
-  return data::make_forall(data::variable_list(freevars.begin(), freevars.end()), x);
+  return data::make_forall_(data::variable_list(freevars.begin(), freevars.end()), x);
 }
 
 } // namespace detail
@@ -248,7 +248,7 @@ struct commutative_confluence_condition
     if (summand_i.is_tau())
     {
       result = imp(data::and_(ci, cj),
-        data::make_exists(ei1 + ej1,
+        data::make_exists_(ei1 + ej1,
           or_(detail::equal_to(gi, gj), detail::make_and(ci_gj_ei1, cj_gi_ej1, detail::equal_to(gj_gi_ej1, gi_gj_ei1)))
         )
       );
@@ -258,7 +258,7 @@ struct commutative_confluence_condition
       const auto& fi = summand_i.multi_action.actions().front().arguments();
       data::data_expression_list fi_gj_ei1 = data::replace_variables_capture_avoiding(fi, sigma);
       result = imp(data::and_(ci, cj),
-        data::make_exists(ei1 + ej1,
+        data::make_exists_(ei1 + ej1,
           detail::make_and(ci_gj_ei1, cj_gi_ej1, detail::equal_to(fi, fi_gj_ei1), detail::equal_to(gj_gi_ej1, gi_gj_ei1))
         )
       );
@@ -266,7 +266,7 @@ struct commutative_confluence_condition
 
     data::remove_assignments(sigma, ei); // sigma = [d := gj]
     data::remove_assignments(sigma, d);  // sigma = []
-    return detail::make_forall(result);
+    return detail::make_forall_(result);
   }
 };
 
@@ -317,7 +317,7 @@ struct square_confluence_condition
       result = imp(data::and_(ci, cj), detail::make_and(ci_gj, cj_gi, detail::equal_to(fi, fi_gj), detail::equal_to(gj_gi, gi_gj)));
     }
 
-    return detail::make_forall(result);
+    return detail::make_forall_(result);
   }
 };
 
@@ -365,7 +365,7 @@ struct triangular_confluence_condition
       result = imp(and_(ci, cj), detail::make_and(ci_gj, detail::equal_to(fi, fi_gj), detail::equal_to(gi_gj, gi)));
     }
     
-    return detail::make_forall(result);
+    return detail::make_forall_(result);
   }
 };
 
@@ -397,7 +397,7 @@ struct trivial_confluence_condition
 
     result = imp(and_(cj, ci), and_(aj_is_tau, detail::equal_to(gj, gi)));
 
-    return detail::make_forall(result);
+    return detail::make_forall_(result);
   }
 };
 

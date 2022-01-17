@@ -31,14 +31,20 @@ struct order_quantified_variables_builder: public pbes_expression_builder<order_
     : dataspec(dataspec_)
   {}
 
-  pbes_expression apply(const forall& x)
+  template <class T>
+  void apply(T& result, const forall& x)
   {
-    return make_forall(data::order_variables_to_optimise_enumeration(x.variables(), dataspec), apply(x.body()));
+    pbes_expression body;
+    apply(body, x.body());
+    result = make_forall_(data::order_variables_to_optimise_enumeration(x.variables(), dataspec), body);
   }
 
-  pbes_expression apply(const exists& x)
+  template <class T>
+  void apply(T& result, const exists& x)
   {
-    return make_exists(data::order_variables_to_optimise_enumeration(x.variables(), dataspec), apply(x.body()));
+    pbes_expression body;
+    apply(body, x.body());
+    result = make_exists_(data::order_variables_to_optimise_enumeration(x.variables(), dataspec), body);
   }
 };
 
@@ -48,7 +54,9 @@ inline
 pbes_expression order_quantified_variables(const pbes_expression& x, const data::data_specification& dataspec)
 {
   detail::order_quantified_variables_builder f(dataspec);
-  return f.apply(x);
+  pbes_expression result;
+  f.apply(result, x);
+  return result;
 }
 
 } // namespace pbes_system

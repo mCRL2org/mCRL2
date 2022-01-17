@@ -26,6 +26,7 @@ struct assignment_sequence_substitution
   using variable_type = variable;
   using expression_type = data_expression;
   using argument_type = variable;
+  using result_type = data_expression;
 
   const assignment_list& assignments;
 

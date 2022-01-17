@@ -69,7 +69,9 @@ struct if_rewriter_with_rewriter_command: public lps::detail::lps_rewriter_comma
     data::detail::if_rewrite_with_rewriter_builder f(rewr);
     lps::rewrite(lpsspec, [&](const data::data_expression& x)
     {
-      return f.apply(x);
+      data::data_expression result;
+      f.apply(result, x);
+      return result;
     });
     lps::detail::save_lps(lpsspec, output_filename);
   }

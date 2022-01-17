@@ -25,6 +25,7 @@ struct data_expression_assignment
   using variable_type = data_expression;
   using expression_type = data_expression;
   using argument_type = data_expression;
+  using result_type = data_expression;
 
   const data_expression& lhs;
   const data_expression& rhs;

@@ -33,20 +33,24 @@ struct add_capture_avoiding_replacement_with_an_identifier_generator: public lps
   using super::apply;
   using super::update_sigma;
 
-  action_formula apply(const forall& x)
+  template <class T>
+  void apply(T& result, const forall& x)
   {
     data::variable_list v = update_sigma.push(x.variables());
-    action_formula result = forall(v, apply(x.body()));
+    action_formula body;
+    apply(body, x.body());
+    make_forall(result, v, body);
     update_sigma.pop(v);
-    return result;
   }
 
-  action_formula apply(const exists& x)
+  template <class T>
+  void apply(T& result, const exists& x)
   {
     data::variable_list v = update_sigma.push(x.variables());
-    action_formula result = exists(v, apply(x.body()));
+    action_formula body;
+    apply(body, x.body());
+    make_exists(result, v, body);
     update_sigma.pop(v);
-    return result;
   }
 
   add_capture_avoiding_replacement_with_an_identifier_generator(Substitution& sigma, IdentifierGenerator& id_generator)
@@ -92,7 +96,9 @@ T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                    )
 {
-  return data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<action_formulas::data_expression_builder, action_formulas::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).apply(x);
+  T result;
+  data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<action_formulas::data_expression_builder, action_formulas::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).apply(result, x);
+  return result;
 }
 //--- end generated action_formulas replace_capture_avoiding_with_identifier_generator code ---//
 
@@ -167,7 +173,9 @@ T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                    )
 {
-  return data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<regular_formulas::data_expression_builder, regular_formulas::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).apply(x);
+  T result;
+  data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<regular_formulas::data_expression_builder, regular_formulas::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).apply(result, x);
+  return result;
 }
 //--- end generated regular_formulas replace_capture_avoiding_with_identifier_generator code ---//
 
@@ -260,7 +268,9 @@ T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
                    )
 {
-  return data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<state_formulas::data_expression_builder, state_formulas::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).apply(x);
+  T result;
+  data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<state_formulas::data_expression_builder, state_formulas::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).apply(result, x);
+  return result;
 }
 //--- end generated state_formulas replace_capture_avoiding_with_identifier_generator code ---//
 

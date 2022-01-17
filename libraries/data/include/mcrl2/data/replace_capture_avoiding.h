@@ -140,24 +140,27 @@ struct add_capture_avoiding_replacement: public Builder<Derived>
   { }
 
   // applies the substitution to the right hand sides of the assignments
-  assignment_list apply(const assignment_list& x)
+  template <class T>
+  void apply(atermpp::term_list<T>& result, const assignment_list& x)
   {
-    return assignment_list(
+    result = assignment_list(
       x.begin(),
       x.end(),
-      [&](const data::assignment& a)
+      [&](data::assignment&r, const data::assignment& a)
       {
-        return data::assignment(a.lhs(), apply(a.rhs()));
+        data::make_assignment(r, a.lhs(), [&](data_expression& r){ apply(r, a.rhs() ); } );
       }
     );
   }
 
-  data_expression apply(const variable& v)
+  template <class T>
+  void apply(T& result, const variable& v)
   {
-    return sigma(v);
+    result = sigma(v);
   }
 
-  data_expression apply(const data::where_clause& x)
+  template <class T>
+  void apply(T& result, const data::where_clause& x)
   {
     const auto& declarations = atermpp::container_cast<data::assignment_list>(x.declarations());
 
@@ -170,10 +173,14 @@ struct add_capture_avoiding_replacement: public Builder<Derived>
         const data_expression& x1 = a.rhs();
         // add the assignment [v := v'] to sigma
         data::variable v1 = sigma.add_fresh_variable_assignment(v);
-        return assignment(v1, apply(x1));
+        data::data_expression rhs;
+        apply(rhs, x1);
+        return assignment(v1, rhs);
       }
     );
-    data_expression result = where_clause(apply(x.body()), declarations1);
+    data::data_expression body;
+    apply(body, x.body());
+    make_where_clause(result, body, declarations1);
 
     // remove the assignments [v := v'] from sigma
     for (const assignment& a: declarations)
@@ -181,35 +188,40 @@ struct add_capture_avoiding_replacement: public Builder<Derived>
       const variable& v = a.lhs();
       sigma.remove_fresh_variable_assignment(v);
     }
-
-    return result;
   }
 
-  data_expression apply(const data::forall& x)
+  template <class T>
+  void apply(T& result, const data::forall& x)
   {
     variable_list v1 = sigma.add_fresh_variable_assignments(x.variables());
-    data_expression result = data::forall(v1, apply(x.body()));
+    data::data_expression body;
+    apply(body, x.body());
+    data::make_forall(result, v1, body);
     sigma.remove_fresh_variable_assignments(x.variables());
-    return result;
   }
 
-  data_expression apply(const data::exists& x)
+  template <class T>
+  void apply(T& result, const data::exists& x)
   {
     variable_list v1 = sigma.add_fresh_variable_assignments(x.variables());
-    data_expression result = data::exists(v1, apply(x.body()));
+    data::data_expression body;
+    apply(body, x.body());
+    data::make_exists(result, v1, body);
     sigma.remove_fresh_variable_assignments(x.variables());
-    return result;
   }
 
-  data_expression apply(const data::lambda& x)
+  template <class T>
+  void apply(T& result, const data::lambda& x)
   {
     variable_list v1 = sigma.add_fresh_variable_assignments(x.variables());
-    data_expression result = data::lambda(v1, apply(x.body()));
+    data::data_expression body;
+    apply(body, x.body());
+    data::make_lambda(result, v1, body);
     sigma.remove_fresh_variable_assignments(x.variables());
-    return result;
   }
 
-  data_equation apply(data_equation& /* x */)
+  template <class T>
+  void apply(T& /* result */, data_equation& /* x */)
   {
     throw mcrl2::runtime_error("not implemented yet");
   }
@@ -245,7 +257,9 @@ T replace_variables_capture_avoiding(const T& x,
 )
 {
   data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
-  return data::detail::apply_replace_capture_avoiding_variables_builder<data::data_expression_builder, data::detail::add_capture_avoiding_replacement>(sigma1).apply(x);
+  T result;
+  data::detail::apply_replace_capture_avoiding_variables_builder<data::data_expression_builder, data::detail::add_capture_avoiding_replacement>(sigma1).apply(result, x);
+  return result;
 }
 
 /// \brief Applies sigma as a capture avoiding substitution to x.

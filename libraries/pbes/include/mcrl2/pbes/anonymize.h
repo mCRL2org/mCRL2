@@ -45,12 +45,14 @@ struct anonymize_builder: public add_sort_expressions<data::detail::anonymize_bu
     add_name(x.name(), propositional_variable_name_substitution, "X");
   }
 
-  propositional_variable apply(const propositional_variable& x)
+  template <class T>
+  void apply(T& result, const propositional_variable& x)
   {
     derived().enter(x);
-    propositional_variable result(propositional_variable_name_substitution[x.name()], derived().apply(x.parameters()));
+    data::variable_list parameters;
+    derived().apply(parameters, x.parameters());
+    make_propositional_variable(result,propositional_variable_name_substitution[x.name()], parameters);
     derived().leave(x);
-    return result;
   }
 
   void enter(const propositional_variable_instantiation& x)
@@ -58,12 +60,14 @@ struct anonymize_builder: public add_sort_expressions<data::detail::anonymize_bu
     add_name(x.name(), propositional_variable_name_substitution, "X");
   }
 
-  propositional_variable_instantiation apply(const propositional_variable_instantiation& x)
+  template <class T>
+  void apply(T& result, const propositional_variable_instantiation& x)
   {
     derived().enter(x);
-    propositional_variable_instantiation result = propositional_variable_instantiation(propositional_variable_name_substitution[x.name()], derived().apply(x.parameters()));
+    data::data_expression_list parameters;
+    derived().apply(parameters, x.parameters());
+    make_propositional_variable_instantiation(result, propositional_variable_name_substitution[x.name()], parameters);
     derived().leave(x);
-    return result;
   }
 };
 

@@ -79,7 +79,7 @@ namespace mcrl2 {
       inline
       const function_symbol& cint()
       {
-        static function_symbol cint(cint_name(), make_function_sort(sort_nat::nat(), int_()));
+        static function_symbol cint(cint_name(), make_function_sort_(sort_nat::nat(), int_()));
         return cint;
       }
 
@@ -131,7 +131,7 @@ namespace mcrl2 {
       inline
       const function_symbol& cneg()
       {
-        static function_symbol cneg(cneg_name(), make_function_sort(sort_pos::pos(), int_()));
+        static function_symbol cneg(cneg_name(), make_function_sort_(sort_pos::pos(), int_()));
         return cneg;
       }
 
@@ -215,7 +215,7 @@ namespace mcrl2 {
       inline
       const function_symbol& nat2int()
       {
-        static function_symbol nat2int(nat2int_name(), make_function_sort(sort_nat::nat(), int_()));
+        static function_symbol nat2int(nat2int_name(), make_function_sort_(sort_nat::nat(), int_()));
         return nat2int;
       }
 
@@ -267,7 +267,7 @@ namespace mcrl2 {
       inline
       const function_symbol& int2nat()
       {
-        static function_symbol int2nat(int2nat_name(), make_function_sort(int_(), sort_nat::nat()));
+        static function_symbol int2nat(int2nat_name(), make_function_sort_(int_(), sort_nat::nat()));
         return int2nat;
       }
 
@@ -319,7 +319,7 @@ namespace mcrl2 {
       inline
       const function_symbol& pos2int()
       {
-        static function_symbol pos2int(pos2int_name(), make_function_sort(sort_pos::pos(), int_()));
+        static function_symbol pos2int(pos2int_name(), make_function_sort_(sort_pos::pos(), int_()));
         return pos2int;
       }
 
@@ -371,7 +371,7 @@ namespace mcrl2 {
       inline
       const function_symbol& int2pos()
       {
-        static function_symbol int2pos(int2pos_name(), make_function_sort(int_(), sort_pos::pos()));
+        static function_symbol int2pos(int2pos_name(), make_function_sort_(int_(), sort_pos::pos()));
         return int2pos;
       }
 
@@ -463,7 +463,7 @@ namespace mcrl2 {
           throw mcrl2::runtime_error("cannot compute target sort for maximum with domain sorts " + pp(s0) + ", " + pp(s1));
         }
 
-        function_symbol maximum(maximum_name(), make_function_sort(s0, s1, target_sort));
+        function_symbol maximum(maximum_name(), make_function_sort_(s0, s1, target_sort));
         return maximum;
       }
 
@@ -533,7 +533,7 @@ namespace mcrl2 {
           throw mcrl2::runtime_error("cannot compute target sort for minimum with domain sorts " + pp(s0) + ", " + pp(s1));
         }
 
-        function_symbol minimum(minimum_name(), make_function_sort(s0, s1, target_sort));
+        function_symbol minimum(minimum_name(), make_function_sort_(s0, s1, target_sort));
         return minimum;
       }
 
@@ -587,7 +587,7 @@ namespace mcrl2 {
       inline
       const function_symbol& abs()
       {
-        static function_symbol abs(abs_name(), make_function_sort(int_(), sort_nat::nat()));
+        static function_symbol abs(abs_name(), make_function_sort_(int_(), sort_nat::nat()));
         return abs;
       }
 
@@ -638,7 +638,7 @@ namespace mcrl2 {
       function_symbol negate(const sort_expression& s0)
       {
         sort_expression target_sort(int_());
-        function_symbol negate(negate_name(), make_function_sort(s0, target_sort));
+        function_symbol negate(negate_name(), make_function_sort_(s0, target_sort));
         return negate;
       }
 
@@ -707,7 +707,7 @@ namespace mcrl2 {
           throw mcrl2::runtime_error("cannot compute target sort for succ with domain sorts " + pp(s0));
         }
 
-        function_symbol succ(succ_name(), make_function_sort(s0, target_sort));
+        function_symbol succ(succ_name(), make_function_sort_(s0, target_sort));
         return succ;
       }
 
@@ -776,7 +776,7 @@ namespace mcrl2 {
           throw mcrl2::runtime_error("cannot compute target sort for pred with domain sorts " + pp(s0));
         }
 
-        function_symbol pred(pred_name(), make_function_sort(s0, target_sort));
+        function_symbol pred(pred_name(), make_function_sort_(s0, target_sort));
         return pred;
       }
 
@@ -853,7 +853,7 @@ namespace mcrl2 {
           throw mcrl2::runtime_error("cannot compute target sort for plus with domain sorts " + pp(s0) + ", " + pp(s1));
         }
 
-        function_symbol plus(plus_name(), make_function_sort(s0, s1, target_sort));
+        function_symbol plus(plus_name(), make_function_sort_(s0, s1, target_sort));
         return plus;
       }
 
@@ -906,7 +906,7 @@ namespace mcrl2 {
       function_symbol minus(const sort_expression& s0, const sort_expression& s1)
       {
         sort_expression target_sort(int_());
-        function_symbol minus(minus_name(), make_function_sort(s0, s1, target_sort));
+        function_symbol minus(minus_name(), make_function_sort_(s0, s1, target_sort));
         return minus;
       }
 
@@ -976,7 +976,7 @@ namespace mcrl2 {
           throw mcrl2::runtime_error("cannot compute target sort for times with domain sorts " + pp(s0) + ", " + pp(s1));
         }
 
-        function_symbol times(times_name(), make_function_sort(s0, s1, target_sort));
+        function_symbol times(times_name(), make_function_sort_(s0, s1, target_sort));
         return times;
       }
 
@@ -1042,7 +1042,7 @@ namespace mcrl2 {
           throw mcrl2::runtime_error("cannot compute target sort for div with domain sorts " + pp(s0) + ", " + pp(s1));
         }
 
-        function_symbol div(div_name(), make_function_sort(s0, s1, target_sort));
+        function_symbol div(div_name(), make_function_sort_(s0, s1, target_sort));
         return div;
       }
 
@@ -1095,7 +1095,7 @@ namespace mcrl2 {
       function_symbol mod(const sort_expression& s0, const sort_expression& s1)
       {
         sort_expression target_sort(sort_nat::nat());
-        function_symbol mod(mod_name(), make_function_sort(s0, s1, target_sort));
+        function_symbol mod(mod_name(), make_function_sort_(s0, s1, target_sort));
         return mod;
       }
 
@@ -1165,7 +1165,7 @@ namespace mcrl2 {
           throw mcrl2::runtime_error("cannot compute target sort for exp with domain sorts " + pp(s0) + ", " + pp(s1));
         }
 
-        function_symbol exp(exp_name(), make_function_sort(s0, s1, target_sort));
+        function_symbol exp(exp_name(), make_function_sort_(s0, s1, target_sort));
         return exp;
       }
 

@@ -162,7 +162,7 @@ mcrl2::data::function_symbol lpsparunfold::create_determine_function()
   str.append(std::string(fresh_basic_sort.name()).append("_"));
   mcrl2::core::identifier_string idstr = generate_fresh_constructor_and_mapping_name(str);
   mcrl2::data::sort_expression_list fsl;
-  fs = data::function_symbol(idstr , mcrl2::data::make_function_sort(m_unfold_process_parameter , fresh_basic_sort));
+  fs = data::function_symbol(idstr , mcrl2::data::make_function_sort_(m_unfold_process_parameter , fresh_basic_sort));
   mCRL2log(debug) << "\t" <<  fs << std::endl;
 
   return fs;
@@ -184,7 +184,7 @@ mcrl2::data::function_symbol_vector lpsparunfold::create_projection_functions(fu
       for (sort_expression_list::const_iterator j = sel.begin(); j != sel.end(); j++)
       {
         mcrl2::core::identifier_string idstr = generate_fresh_constructor_and_mapping_name(str);
-        data::function_symbol map(idstr , mcrl2::data::make_function_sort(m_unfold_process_parameter , *j));
+        data::function_symbol map(idstr , mcrl2::data::make_function_sort_(m_unfold_process_parameter , *j));
         m_data_specification.add_mapping(map);
         sfs.push_back(map);
         processed.insert(*j);
@@ -331,7 +331,7 @@ void lpsparunfold::create_data_equations(
              pi(if(b,x,y))=if(b,pi(x),pi(y));
           */
           sort_expression if_arg_sort(function_sort(projection_functions.at(projection_function_index).sort()).domain().front());
-          data::function_symbol if_function_symbol("if", make_function_sort(sort_bool::bool_(), if_arg_sort, if_arg_sort , if_arg_sort));
+          data::function_symbol if_function_symbol("if", make_function_sort_(sort_bool::bool_(), if_arg_sort, if_arg_sort , if_arg_sort));
           m_data_specification.add_equation(create_distribution_law_over_case(projection_functions.at(projection_function_index), if_function_symbol, false));
           /* Add additional distribution laws for projection function pi over case
 
@@ -356,7 +356,7 @@ void lpsparunfold::create_data_equations(
                Det(if(b,x,y))=if(b,Det(x),Det(y));
     */
     sort_expression if_arg_sort(function_sort(determine_function.sort()).domain().front());
-    data::function_symbol if_function_symbol("if", make_function_sort(sort_bool::bool_(), if_arg_sort, if_arg_sort , if_arg_sort));
+    data::function_symbol if_function_symbol("if", make_function_sort_(sort_bool::bool_(), if_arg_sort, if_arg_sort , if_arg_sort));
     m_data_specification.add_equation(create_distribution_law_over_case(determine_function, if_function_symbol, false));
 
     /*  Add additional distribution laws for Det over case

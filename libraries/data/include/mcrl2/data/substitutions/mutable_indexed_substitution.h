@@ -65,6 +65,7 @@ public:
   typedef ExpressionType expression_type;
 
   using argument_type = variable_type;
+  using result_type = expression_type;
 
   /// \brief Default constructor
   mutable_indexed_substitution()

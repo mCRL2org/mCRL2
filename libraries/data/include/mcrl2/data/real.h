@@ -106,7 +106,7 @@ namespace mcrl2 {
       inline
       const function_symbol& creal()
       {
-        static function_symbol creal(creal_name(), make_function_sort(sort_int::int_(), sort_pos::pos(), real_()));
+        static function_symbol creal(creal_name(), make_function_sort_(sort_int::int_(), sort_pos::pos(), real_()));
         return creal;
       }
 
@@ -159,7 +159,7 @@ namespace mcrl2 {
       inline
       const function_symbol& pos2real()
       {
-        static function_symbol pos2real(pos2real_name(), make_function_sort(sort_pos::pos(), real_()));
+        static function_symbol pos2real(pos2real_name(), make_function_sort_(sort_pos::pos(), real_()));
         return pos2real;
       }
 
@@ -211,7 +211,7 @@ namespace mcrl2 {
       inline
       const function_symbol& nat2real()
       {
-        static function_symbol nat2real(nat2real_name(), make_function_sort(sort_nat::nat(), real_()));
+        static function_symbol nat2real(nat2real_name(), make_function_sort_(sort_nat::nat(), real_()));
         return nat2real;
       }
 
@@ -263,7 +263,7 @@ namespace mcrl2 {
       inline
       const function_symbol& int2real()
       {
-        static function_symbol int2real(int2real_name(), make_function_sort(sort_int::int_(), real_()));
+        static function_symbol int2real(int2real_name(), make_function_sort_(sort_int::int_(), real_()));
         return int2real;
       }
 
@@ -315,7 +315,7 @@ namespace mcrl2 {
       inline
       const function_symbol& real2pos()
       {
-        static function_symbol real2pos(real2pos_name(), make_function_sort(real_(), sort_pos::pos()));
+        static function_symbol real2pos(real2pos_name(), make_function_sort_(real_(), sort_pos::pos()));
         return real2pos;
       }
 
@@ -367,7 +367,7 @@ namespace mcrl2 {
       inline
       const function_symbol& real2nat()
       {
-        static function_symbol real2nat(real2nat_name(), make_function_sort(real_(), sort_nat::nat()));
+        static function_symbol real2nat(real2nat_name(), make_function_sort_(real_(), sort_nat::nat()));
         return real2nat;
       }
 
@@ -419,7 +419,7 @@ namespace mcrl2 {
       inline
       const function_symbol& real2int()
       {
-        static function_symbol real2int(real2int_name(), make_function_sort(real_(), sort_int::int_()));
+        static function_symbol real2int(real2int_name(), make_function_sort_(real_(), sort_int::int_()));
         return real2int;
       }
 
@@ -515,7 +515,7 @@ namespace mcrl2 {
           throw mcrl2::runtime_error("cannot compute target sort for maximum with domain sorts " + pp(s0) + ", " + pp(s1));
         }
 
-        function_symbol maximum(maximum_name(), make_function_sort(s0, s1, target_sort));
+        function_symbol maximum(maximum_name(), make_function_sort_(s0, s1, target_sort));
         return maximum;
       }
 
@@ -589,7 +589,7 @@ namespace mcrl2 {
           throw mcrl2::runtime_error("cannot compute target sort for minimum with domain sorts " + pp(s0) + ", " + pp(s1));
         }
 
-        function_symbol minimum(minimum_name(), make_function_sort(s0, s1, target_sort));
+        function_symbol minimum(minimum_name(), make_function_sort_(s0, s1, target_sort));
         return minimum;
       }
 
@@ -655,7 +655,7 @@ namespace mcrl2 {
           throw mcrl2::runtime_error("cannot compute target sort for abs with domain sorts " + pp(s0));
         }
 
-        function_symbol abs(abs_name(), make_function_sort(s0, target_sort));
+        function_symbol abs(abs_name(), make_function_sort_(s0, target_sort));
         return abs;
       }
 
@@ -728,7 +728,7 @@ namespace mcrl2 {
           throw mcrl2::runtime_error("cannot compute target sort for negate with domain sorts " + pp(s0));
         }
 
-        function_symbol negate(negate_name(), make_function_sort(s0, target_sort));
+        function_symbol negate(negate_name(), make_function_sort_(s0, target_sort));
         return negate;
       }
 
@@ -801,7 +801,7 @@ namespace mcrl2 {
           throw mcrl2::runtime_error("cannot compute target sort for succ with domain sorts " + pp(s0));
         }
 
-        function_symbol succ(succ_name(), make_function_sort(s0, target_sort));
+        function_symbol succ(succ_name(), make_function_sort_(s0, target_sort));
         return succ;
       }
 
@@ -874,7 +874,7 @@ namespace mcrl2 {
           throw mcrl2::runtime_error("cannot compute target sort for pred with domain sorts " + pp(s0));
         }
 
-        function_symbol pred(pred_name(), make_function_sort(s0, target_sort));
+        function_symbol pred(pred_name(), make_function_sort_(s0, target_sort));
         return pred;
       }
 
@@ -955,7 +955,7 @@ namespace mcrl2 {
           throw mcrl2::runtime_error("cannot compute target sort for plus with domain sorts " + pp(s0) + ", " + pp(s1));
         }
 
-        function_symbol plus(plus_name(), make_function_sort(s0, s1, target_sort));
+        function_symbol plus(plus_name(), make_function_sort_(s0, s1, target_sort));
         return plus;
       }
 
@@ -1029,7 +1029,7 @@ namespace mcrl2 {
           throw mcrl2::runtime_error("cannot compute target sort for minus with domain sorts " + pp(s0) + ", " + pp(s1));
         }
 
-        function_symbol minus(minus_name(), make_function_sort(s0, s1, target_sort));
+        function_symbol minus(minus_name(), make_function_sort_(s0, s1, target_sort));
         return minus;
       }
 
@@ -1103,7 +1103,7 @@ namespace mcrl2 {
           throw mcrl2::runtime_error("cannot compute target sort for times with domain sorts " + pp(s0) + ", " + pp(s1));
         }
 
-        function_symbol times(times_name(), make_function_sort(s0, s1, target_sort));
+        function_symbol times(times_name(), make_function_sort_(s0, s1, target_sort));
         return times;
       }
 
@@ -1177,7 +1177,7 @@ namespace mcrl2 {
           throw mcrl2::runtime_error("cannot compute target sort for exp with domain sorts " + pp(s0) + ", " + pp(s1));
         }
 
-        function_symbol exp(exp_name(), make_function_sort(s0, s1, target_sort));
+        function_symbol exp(exp_name(), make_function_sort_(s0, s1, target_sort));
         return exp;
       }
 
@@ -1230,7 +1230,7 @@ namespace mcrl2 {
       function_symbol divides(const sort_expression& s0, const sort_expression& s1)
       {
         sort_expression target_sort(real_());
-        function_symbol divides(divides_name(), make_function_sort(s0, s1, target_sort));
+        function_symbol divides(divides_name(), make_function_sort_(s0, s1, target_sort));
         return divides;
       }
 
@@ -1284,7 +1284,7 @@ namespace mcrl2 {
       inline
       const function_symbol& floor()
       {
-        static function_symbol floor(floor_name(), make_function_sort(real_(), sort_int::int_()));
+        static function_symbol floor(floor_name(), make_function_sort_(real_(), sort_int::int_()));
         return floor;
       }
 
@@ -1336,7 +1336,7 @@ namespace mcrl2 {
       inline
       const function_symbol& ceil()
       {
-        static function_symbol ceil(ceil_name(), make_function_sort(real_(), sort_int::int_()));
+        static function_symbol ceil(ceil_name(), make_function_sort_(real_(), sort_int::int_()));
         return ceil;
       }
 
@@ -1388,7 +1388,7 @@ namespace mcrl2 {
       inline
       const function_symbol& round()
       {
-        static function_symbol round(round_name(), make_function_sort(real_(), sort_int::int_()));
+        static function_symbol round(round_name(), make_function_sort_(real_(), sort_int::int_()));
         return round;
       }
 
@@ -1440,7 +1440,7 @@ namespace mcrl2 {
       inline
       const function_symbol& reduce_fraction()
       {
-        static function_symbol reduce_fraction(reduce_fraction_name(), make_function_sort(sort_int::int_(), sort_int::int_(), real_()));
+        static function_symbol reduce_fraction(reduce_fraction_name(), make_function_sort_(sort_int::int_(), sort_int::int_(), real_()));
         return reduce_fraction;
       }
 
@@ -1493,7 +1493,7 @@ namespace mcrl2 {
       inline
       const function_symbol& reduce_fraction_where()
       {
-        static function_symbol reduce_fraction_where(reduce_fraction_where_name(), make_function_sort(sort_pos::pos(), sort_int::int_(), sort_nat::nat(), real_()));
+        static function_symbol reduce_fraction_where(reduce_fraction_where_name(), make_function_sort_(sort_pos::pos(), sort_int::int_(), sort_nat::nat(), real_()));
         return reduce_fraction_where;
       }
 
@@ -1547,7 +1547,7 @@ namespace mcrl2 {
       inline
       const function_symbol& reduce_fraction_helper()
       {
-        static function_symbol reduce_fraction_helper(reduce_fraction_helper_name(), make_function_sort(real_(), sort_int::int_(), real_()));
+        static function_symbol reduce_fraction_helper(reduce_fraction_helper_name(), make_function_sort_(real_(), sort_int::int_(), real_()));
         return reduce_fraction_helper;
       }
 

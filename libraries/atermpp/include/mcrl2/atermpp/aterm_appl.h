@@ -163,7 +163,7 @@ public:
   template<typename ...Terms>
   term_appl(const function_symbol& symbol, const Terms& ...arguments)
   {
-    detail::g_thread_term_pool().create_appl(*this, symbol, arguments...);
+    detail::g_thread_term_pool().create_appl<Term>(*this, symbol, arguments...);
     static_assert(detail::are_terms<Terms...>::value, "Arguments of function application should be terms.");
     static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
     static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
@@ -328,8 +328,8 @@ void make_term_appl(Term& target, const function_symbol& symbol, const Terms& ..
 {
   detail::g_thread_term_pool().create_appl(target, symbol, arguments...);
 
-  // TODO: Allow functions constructing terms in the static assert below. 
-  // static_assert(detail::are_terms<Terms...>::value, "Arguments of function application should be terms.");
+  // TODO: enable the static_assert below. Doesn't seem to work properly now. 
+  // static_assert(detail::are_terms_or_functions<Terms...>::value, "Arguments of function application should be terms.");
   static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
   static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
 }
@@ -338,12 +338,14 @@ void make_term_appl(Term& target, const function_symbol& symbol, const Terms& ..
 /// \param target The variable in which the result will be put. This variable may be used for scratch purposes.
 /// \param symbol A function symbol.
 /// \param arguments The arguments of the function application.
-template<class Term,
+template<class Term, 
+         class INDEX_TYPE,
          typename ...Terms>
-void make_term_appl_with_index(Term& target, const function_symbol& symbol, const Terms& ...arguments)
+void make_term_appl_with_index(aterm& target, const function_symbol& symbol, const Terms& ...arguments)
 {
-  detail::g_thread_term_pool().create_appl_index<Term>(target, symbol, arguments...);
-  static_assert(detail::are_terms<Terms...>::value, "Arguments of function application should be terms.");
+  detail::g_thread_term_pool().create_appl_index<Term, INDEX_TYPE>(target, symbol, arguments...);
+  // TODO: enable the static_assert below. Doesn't seem to work properly now. 
+  // static_assert(detail::are_terms_or_functions<Terms...>::value, "Arguments of function application should be terms.");
   static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
   static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
 }

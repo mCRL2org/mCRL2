@@ -149,13 +149,13 @@ struct absinthe_algorithm
         generator(generator_)
     {}
 
-    data::sort_expression apply(const data::sort_expression& x)
+    template <class T>
+    void apply(T& result, const data::sort_expression& x)
     {
-      data::sort_expression result;
       auto i = sigmaS.find(x);
       if (i == sigmaS.end())
       {
-        result = super::apply(x);
+        super::apply(result, x);
         //pbes_system::detail::absinthe_check_expression(result);
       }
       else
@@ -163,19 +163,19 @@ struct absinthe_algorithm
         result = i->second;
         //pbes_system::detail::absinthe_check_expression(result);
       }
-      return result;
     }
 
-    data::data_expression apply(const data::function_symbol& x)
+    template <class T>
+    void apply(T& result, const data::function_symbol& x)
     {
       auto i = sigmaF.find(x);
       if (i != sigmaF.end())
       {
         //pbes_system::detail::absinthe_check_expression(i->second);
-        return i->second;
+        result = i->second;
+        return;
       }
       throw mcrl2::runtime_error("function symbol " + print_symbol(x) + " not present in the function symbol mapping!");
-      return data::undefined_data_expression();
     }
 
     //data::data_expression apply(const data::variable& x)
@@ -186,44 +186,48 @@ struct absinthe_algorithm
     //  return result;
     //}
 
-    data::data_expression apply(const data::application& x)
+    template <class T>
+    void apply(T& result, const data::application& x)
     {
       if (data::is_variable(x.head()))
       {
         data::variable v = atermpp::down_cast<data::variable>(x.head());
-        v = data::variable(v.name(), super::apply(v.sort()));
-        return data::detail::create_finite_set(data::application(v, x.begin(), x.end()));
+        data::sort_expression sort;
+        super::apply(sort, v.sort());
+        v = data::variable(v.name(), sort);
+        result = data::detail::create_finite_set(data::application(v, x.begin(), x.end()));
+        return;
       }
       else if (data::is_function_symbol(x.head()))
       {
-        return super::apply(x);
+        super::apply(result, x);
+        return;
       }
       else
       {
         throw mcrl2::runtime_error("don't know how to handle arbitrary expression as head: " + data::pp(x));
       }
-      return data::undefined_data_expression();
     }
 
-    data::data_expression apply(const data::lambda& x)
+    template <class T>
+    void apply(T& result, const data::lambda& x)
     {
-      data::data_expression body = super::apply(x);
+      data::data_expression body;
+      super::apply(body, x);
       //pbes_system::detail::absinthe_check_expression(body);
       data::sort_expression s = body.sort();
       generator.add_identifiers(data::find_identifiers(x));
       data::variable v(generator("v"), s);
-      data::data_expression result = data::detail::create_set_comprehension(v, data::equal_to(v, body));
+      result = data::detail::create_set_comprehension(v, data::equal_to(v, body));
       //pbes_system::detail::absinthe_check_expression(result);
-      return result;
     }
 
-    data::data_expression apply(const data::data_expression& x)
+    template <class T>
+    void apply(T& result, const data::data_expression& x)
     {
-      data::data_expression result;
-
       if (data::is_variable(x))
       {
-        result = super::apply(x);
+        super::apply(result, x);
         result = data::detail::create_finite_set(result);
         //pbes_system::detail::absinthe_check_expression(result);
       }
@@ -240,11 +244,10 @@ struct absinthe_algorithm
         else
         {
           // first apply the sort and function symbol transformations
-          result = super::apply(x);
+          super::apply(result, x);
           //pbes_system::detail::absinthe_check_expression(result);
         }
       }
-      return result;
     }
   };
 
@@ -252,6 +255,7 @@ struct absinthe_algorithm
   struct sort_function
   {
     using argument_type = data::sort_expression;
+    using result_type = data::sort_expression;
 
     absinthe_sort_expression_builder f;
 
@@ -265,7 +269,9 @@ struct absinthe_algorithm
 
     data::sort_expression operator()(const data::sort_expression& x)
     {
-      return f.apply(x);
+      data::sort_expression sort;
+      f.apply(sort, x);
+      return sort;
     }
   };
 
@@ -294,22 +300,30 @@ struct absinthe_algorithm
 
     data::data_expression lift(const data::data_expression& x)
     {
-      return absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF, generator).apply(x);
+      data::data_expression result;
+      absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF, generator).apply(result, x);
+      return result;
     }
 
     data::data_expression_list lift(const data::data_expression_list& x)
     {
-      return absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF, generator).apply(x);
+      data::data_expression_list result;
+      absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF, generator).apply(result, x);
+      return result;
     }
 
     data::variable_list lift(const data::variable_list& x)
     {
-      return absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF, generator).apply(x);
+      data::variable_list result;
+      absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF, generator).apply(result, x);
+      return result;
     }
 
     pbes_system::propositional_variable lift(const pbes_system::propositional_variable& x)
     {
-      return absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF, generator).apply(x);
+      pbes_system::propositional_variable result;
+      absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF, generator).apply(result, x);
+      return result;
     }
 
     absinthe_data_expression_builder(const abstraction_map& sigmaA_,
@@ -324,9 +338,9 @@ struct absinthe_algorithm
         m_is_over_approximation(is_over_approximation)
     {}
 
-    pbes_expression apply(const data::data_expression& x)
+    template <class T>
+    void apply(T& result, const data::data_expression& x)
     {
-      data::data_expression result;
       data::data_expression x1 = lift(x);
       if (m_is_over_approximation)
       {
@@ -336,12 +350,11 @@ struct absinthe_algorithm
       {
         result = data::not_(data::detail::create_set_in(data::false_(), x1));
       }
-      return result;
     }
 
-    pbes_expression apply(const propositional_variable_instantiation& x)
+    template <class T>
+    void apply(T& result, const propositional_variable_instantiation& x)
     {
-      pbes_expression result;
       data::data_expression_list e = lift(x.parameters());
       data::variable_list variables = make_variables(x.parameters(), "x", sort_function(sigmaH, sigmaS, sigmaF, generator));
       data::data_expression_list::iterator i = e.begin();
@@ -354,37 +367,43 @@ struct absinthe_algorithm
       data::data_expression q = data::lazy::join_and(z.begin(), z.end());
       if (m_is_over_approximation)
       {
-        result = make_exists(variables, and_(q, propositional_variable_instantiation(x.name(), atermpp::container_cast<data::data_expression_list>(variables))));
+        result = make_exists_(variables, and_(q, propositional_variable_instantiation(x.name(), atermpp::container_cast<data::data_expression_list>(variables))));
       }
       else
       {
-        result = make_forall(variables, imp(q, propositional_variable_instantiation(x.name(), atermpp::container_cast<data::data_expression_list>(variables))));
+        result = make_forall_(variables, imp(q, propositional_variable_instantiation(x.name(), atermpp::container_cast<data::data_expression_list>(variables))));
       }
-      return result;
     }
 
-    pbes_system::pbes_expression apply(const pbes_system::forall& x)
+    template <class T>
+    void apply(T& result, const pbes_system::forall& x)
     {
-      pbes_expression result = make_forall(lift(x.variables()), super::apply(x.body()));
-      return result;
+      pbes_system::pbes_expression body;
+      super::apply(body, x.body());
+      result = make_forall_(lift(x.variables()), body);
     }
 
-    pbes_system::pbes_expression apply(const pbes_system::exists& x)
+    template <class T>
+    void apply(T& result, const pbes_system::exists& x)
     {
-      pbes_expression result = make_exists(lift(x.variables()), super::apply(x.body()));
-      return result;
+      pbes_system::pbes_expression body;
+      super::apply(body, x.body());
+      result = make_exists_(lift(x.variables()), body);
     }
 
     void update(pbes_system::pbes_equation& x)
     {
       x.variable() = lift(x.variable());
-      x.formula() = super::apply(x.formula());
+      pbes_system::pbes_expression result;
+      super::apply(result, x.formula());
+      x.formula() = result;
     }
 
     void update(pbes_system::pbes& x)
     {
       super::update(x.equations());
-      pbes_expression kappa = apply(x.initial_state());
+      pbes_expression kappa;
+      apply(kappa, x.initial_state());
       core::identifier_string name("GeneratedZ");
       propositional_variable Z(name, data::variable_list());
       x.equations().emplace_back(fixpoint_symbol::mu(), Z, kappa);

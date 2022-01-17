@@ -64,82 +64,97 @@ struct normalize_builder: public pbes_expression_builder<normalize_builder>
     : negated(false)
   {}
 
-  pbes_expression apply(const data::data_expression& x)
+  template <class T>
+  void apply(T& result, const data::data_expression& x)
   {
-    return negated ? data::not_(x) : x;
+    result = negated ? data::not_(x) : x;
   }
 
-  pbes_expression apply(const not_& x)
+  template <class T>
+  void apply(T& result, const not_& x)
   {
     negated = !negated;
-    pbes_expression result = super::apply(x.operand());
+    super::apply(result, x.operand());
     negated = !negated;
-    return result;
   }
 
-  pbes_expression apply(const and_& x)
+  template <class T>
+  void apply(T& result, const and_& x)
   {
-    pbes_expression left = super::apply(x.left());
-    pbes_expression right = super::apply(x.right());
+    pbes_expression left;
+    super::apply(left, x.left());
+    pbes_expression right;
+    super::apply(right, x.right());
     if (negated)
     {
-      return or_(left, right);
+      make_or_(result, left, right);
     }
     else
     {
-      return and_(left, right);
+      make_and_(result, left, right);
     }
   }
 
-  pbes_expression apply(const or_& x)
+  template <class T>
+  void apply(T& result, const or_& x)
   {
-    pbes_expression left = super::apply(x.left());
-    pbes_expression right = super::apply(x.right());
+    pbes_expression left;
+    super::apply(left, x.left());
+    pbes_expression right;
+    super::apply(right, x.right());
     if (negated)
     {
-      return and_(left, right);
+      make_and_(result, left, right);
     }
     else
     {
-      return or_(left, right);
+      make_or_(result, left, right);
     }
   }
 
-  pbes_expression apply(const imp& x)
+  template <class T>
+  void apply(T& result, const imp& x)
   {
     negated = !negated;
-    pbes_expression left = super::apply(x.left());
+    pbes_expression left;
+    super::apply(left, x.left());
     negated = !negated;
-    pbes_expression right = super::apply(x.right());
+    pbes_expression right;
+    super::apply(right, x.right());
     if (negated)
     {
-      return and_(left, right);
+      make_and_(result, left, right);
     }
     else
     {
-      return or_(left, right);
+      make_or_(result, left, right);
     }
   }
 
-  pbes_expression apply(const forall& x)
+  template <class T>
+  void apply(T& result, const forall& x)
   {
-    pbes_expression body = super::apply(x.body());
-    return negated ? make_exists(x.variables(), body) : make_forall(x.variables(), body);
+    pbes_expression body;
+    super::apply(body, x.body());
+    result = negated ? make_exists_(x.variables(), body) : make_forall_(x.variables(), body);
   }
 
-  pbes_expression apply(const exists& x)
+  template <class T>
+  void apply(T& result, const exists& x)
   {
-    pbes_expression body = super::apply(x.body());
-    return negated ? make_forall(x.variables(), body) : make_exists(x.variables(), body);
+    pbes_expression body;
+    super::apply(body, x.body());
+    result = negated ? make_forall_(x.variables(), body) : make_exists_(x.variables(), body);
   }
 
-  pbes_expression apply(const propositional_variable_instantiation& x)
+  template <class T>
+  void apply(T& result, const propositional_variable_instantiation& x)
   {
     if (negated)
     {
       throw mcrl2::runtime_error(std::string("normalize error: illegal argument ") + pp(x));
     }
-    return x;
+    result = x;
   }
 };
 /// \endcond
@@ -175,8 +190,10 @@ T normalize(const T& x,
             typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
            )
 {
+  T result;
   normalize_builder f;
-  return f.apply(x);
+  f.apply(result, x);
+  return result;
 }
 
 } // namespace pbes_system

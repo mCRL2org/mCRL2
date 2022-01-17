@@ -36,7 +36,9 @@ T normalize_sorts(const T& x,
                   typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
                  )
 {
-  return core::make_update_apply_builder<pbes_system::sort_expression_builder>(data::detail::normalize_sorts_function(sortspec)).apply(x);
+  T result;
+  core::make_update_apply_builder<pbes_system::sort_expression_builder>(data::detail::normalize_sorts_function(sortspec)).apply(result, x);
+  return result;
 }
 
 } // namespace pbes_system

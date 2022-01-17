@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE(test_parse)
   lps::specification lpsspec = remove_stochastic_operators(lps::linearise(spec_text));
   state_formulas::state_formula f = state_formulas::parse_state_formula(formula_text, lpsspec);
 
-  std::cerr << "--- f ---\n" << state_formulas::pp(f) << "\n\n" << f << std::endl;
+  std::cerr << "--- f ---\n" << state_formulas::pp(f) << std::endl;
   std::set<core::identifier_string> ids = state_formulas::find_identifiers(f);
   BOOST_CHECK(ids.find(core::identifier_string("1")) == ids.end());
   BOOST_CHECK(ids.find(core::identifier_string("@c1")) != ids.end());

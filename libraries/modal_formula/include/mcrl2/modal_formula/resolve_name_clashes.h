@@ -79,35 +79,40 @@ class state_variable_name_clash_resolver: public state_formulas::state_formula_b
     }
 
     // Rename variable
-    state_formula apply(const mu& x)
+    template <class T>
+    void apply(T& result, const mu& x)
     {
       enter(x);
       // N.B. If the two lines below are replace by
       //   state_formula result = mu(m_names[x.name()].back(), x.assignments(), (*this)(x.operand()));
       // a memory error occurs with the clang and intel compilers!
       core::identifier_string name = m_names[x.name()].back();
-      state_formula result = mu(name, x.assignments(), apply(x.operand()));
+      state_formula f;
+      apply(f, x.operand());
+      result = mu(name, x.assignments(), f);
       leave(x);
-      return result;
     }
 
     // Rename variable
-    state_formula apply(const nu& x)
+    template <class T>
+    void apply(T& result, const nu& x)
     {
       enter(x);
       // N.B. If the two lines below are replace by
       //   state_formula result = nu(m_names[x.name()].back(), x.assignments(), (*this)(x.operand()));
       // a memory error occurs with the clang and intel compilers!
       core::identifier_string name = m_names[x.name()].back();
-      state_formula result = nu(name, x.assignments(), apply(x.operand()));
+      state_formula f;
+      apply(f, x.operand());
+      result = nu(name, x.assignments(), f);
       leave(x);
-      return result;
     }
 
     // Rename variable
-    state_formula apply(const variable& x)
+    template <class T>
+    void apply(T& result, const variable& x)
     {
-      return variable(m_names[x.name()].back(), x.arguments());
+      result = variable(m_names[x.name()].back(), x.arguments());
     }
 };
 
@@ -189,91 +194,100 @@ class state_formula_data_variable_name_clash_resolver: public state_formulas::da
       );
     }
 
-    state_formula apply(const mu& x)
+    template <class T>
+    void apply(T& result, const mu& x)
     {
       for (const data::assignment& a: x.assignments())
       {
         insert(a.lhs());
       }
-      state_formula result = mu(x.name(), apply_assignments(x.assignments()), apply(x.operand()));
+      apply(result, x.operand());
+      result = mu(x.name(), apply_assignments(x.assignments()), result);
       for (const data::assignment& a: x.assignments())
       {
         erase(a.lhs());
       }
-      return result;
     }
 
-    state_formula apply(const nu& x)
+    template <class T>
+    void apply(T& result, const nu& x)
     {
       for (const data::assignment& a: x.assignments())
       {
         insert(a.lhs());
       }
-      state_formula result = nu(x.name(), apply_assignments(x.assignments()), apply(x.operand()));
+      apply(result, x.operand());
+      result = nu(x.name(), apply_assignments(x.assignments()), result);
       for (const data::assignment& a: x.assignments())
       {
         erase(a.lhs());
       }
-      return result;
     }
 
-    state_formula apply(const forall& x)
+    template <class T>
+    void apply(T& result, const forall& x)
     {
       for (const data::variable& v: x.variables())
       {
         insert(v);
       }
-      state_formula result = forall(apply_variables(x.variables()), apply(x.body()));
+      apply(result,x.body());
+      result = forall(apply_variables(x.variables()), result);
       for (const data::variable& v: x.variables())
       {
         erase(v);
       }
-      return result;
     }
 
-    state_formula apply(const exists& x)
+    template <class T>
+    void apply(T& result, const exists& x)
     {
       for (const data::variable& v: x.variables())
       {
         insert(v);
       }
-      state_formula result = exists(apply_variables(x.variables()), apply(x.body()));
+      apply(result, x.body());
+      result = exists(apply_variables(x.variables()), result);
       for (const data::variable& v: x.variables())
       {
         erase(v);
       }
-      return result;
     }
 
-    action_formulas::action_formula apply(const action_formulas::forall& x)
+    template <class T>
+    void apply(T& result, const action_formulas::forall& x)
     {
       for (const data::variable& v: x.variables())
       {
         insert(v);
       }
-      action_formulas::action_formula result = action_formulas::forall(apply_variables(x.variables()), apply(x.body()));
+      action_formulas::action_formula body;
+      apply(body, x.body());
+      result = action_formulas::forall(apply_variables(x.variables()), body);
       for (const data::variable& v: x.variables())
       {
         erase(v);
       }
-      return result;
     }
 
-    action_formulas::action_formula apply(const action_formulas::exists& x)
+    template <class T>
+    void apply(T& result, const action_formulas::exists& x)
     {
       for (const data::variable& v: x.variables())
       {
         insert(v);
       }
-      action_formulas::action_formula result = action_formulas::exists(apply_variables(x.variables()), apply(x.body()));
+      action_formulas::action_formula body;
+      apply(body, x.body());
+      result = action_formulas::exists(apply_variables(x.variables()), body);
       for (const data::variable& v: x.variables())
       {
         erase(v);
       }
-      return result;
     }
 
-    data::data_expression apply(const data::data_expression& x)
+    template <class T>
+    void apply(T& result, const data::data_expression& x)
     {
       auto sigma = [&](const data::variable& v) -> data::data_expression
       {
@@ -285,7 +299,7 @@ class state_formula_data_variable_name_clash_resolver: public state_formulas::da
         return i->second.back();
       };
 
-      return data::replace_free_variables(x, sigma);
+      result=data::replace_free_variables(x, sigma);
     }
 };
 
@@ -295,7 +309,9 @@ class state_formula_data_variable_name_clash_resolver: public state_formulas::da
 inline
 state_formula resolve_state_variable_name_clashes(const state_formula& x)
 {
-  return core::make_apply_builder<detail::state_variable_name_clash_resolver>().apply(x);
+  state_formula result;
+  core::make_apply_builder<detail::state_variable_name_clash_resolver>().apply(result, x);
+  return result;
 }
 
 /// \brief Resolves name clashes in data variables of formula x
@@ -306,7 +322,9 @@ state_formula resolve_state_formula_data_variable_name_clashes(const state_formu
   generator.add_identifiers(state_formulas::find_identifiers(x));
   generator.add_identifiers(context_ids);
   detail::state_formula_data_variable_name_clash_resolver f(generator);
-  return f.apply(x);
+  state_formula result;
+  f.apply(result, x);
+  return result;
 }
 
 } // namespace mcrl2::state_formulas
