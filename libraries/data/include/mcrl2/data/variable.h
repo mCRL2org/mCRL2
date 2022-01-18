@@ -83,7 +83,7 @@ class variable: public data_expression
 template <class... ARGUMENTS>
 inline void make_variable(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl_with_index<variable,std::pair<core::identifier_string, sort_expression>>(t, core::detail::function_symbol_DataVarId(), args...);
+  atermpp::make_term_appl_with_index<variable,std::pair<core::identifier_string, sort_expression>>(t, core::detail::function_symbol_DataVarId(), args...);
 }
 
 /// \brief list of variables

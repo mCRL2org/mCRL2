@@ -174,7 +174,7 @@ class propositional_variable_instantiation: public pbes_expression
 template <class... ARGUMENTS>
 inline void make_propositional_variable_instantiation(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl_with_index<propositional_variable_instantiation,std::pair<core::identifier_string, data::data_expression_list>>(t, core::detail::function_symbol_PropVarInst(), args...);
+  atermpp::make_term_appl_with_index<propositional_variable_instantiation,std::pair<core::identifier_string, data::data_expression_list>>(t, core::detail::function_symbol_PropVarInst(), args...);
 }
 
 /// \brief list of propositional_variable_instantiations

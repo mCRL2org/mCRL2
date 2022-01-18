@@ -558,7 +558,7 @@ class boolean_variable: public boolean_expression
 template <class... ARGUMENTS>
 inline void make_boolean_variable(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl_with_index<boolean_variable,core::identifier_string>(t, core::detail::function_symbol_BooleanVariable(), args...);
+  atermpp::make_term_appl_with_index<boolean_variable,core::identifier_string>(t, core::detail::function_symbol_BooleanVariable(), args...);
 }
 
 /// \brief Test for a boolean_variable expression
