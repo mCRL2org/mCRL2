@@ -74,6 +74,12 @@ class counter_example_constructor
     const bool m_structured_output;
   
   public:
+    /// \brief Constructor
+    //  \param name The name of the model that the counter example is for
+    //  \param counter_example_file The name of the file to save the counter example to
+    //  \param structured_output Whether the counterexample should be printed to std:cout
+    //  \detail If structured_output=true, the counter example is not saved to file.
+    //          If counter_example_file="", the name of the counter example file name is derived from name (the parameter)
     counter_example_constructor(const std::string& name, const std::string& counter_example_file, bool structured_output)
      : m_name(name)
      , m_counter_example_file(counter_example_file)
