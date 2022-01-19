@@ -282,7 +282,7 @@ class bisim_partitioner
     outgoing_transitions_per_state_action_t outgoing_transitions;
 
     // A counter for creating fresh variables
-    int freshVarCounter = 0;
+    int fresh_var_counter = 0;
 
 
     void create_initial_partition(const bool branching,
@@ -838,30 +838,30 @@ class bisim_partitioner
     }
 
     /**
-     * \brief createRegularFormula Creates a regular formula that represents action a
+     * \brief create_regular_formula Creates a regular formula that represents action a
      * \details In case the action comes from an LTS in the lts format.
      * \param[in] a The action for which to create a regular formula
      * \return The created regular formula
      */
-    regular_formulas::regular_formula createRegularFormula(const mcrl2::lps::multi_action& a) const
+    regular_formulas::regular_formula create_regular_formula(const mcrl2::lps::multi_action& a) const
     {
       return regular_formulas::regular_formula(action_formulas::multi_action(a.actions()));
     }
 
     /**
-     * \brief createRegularFormula Creates a regular formula that represents action a
+     * \brief create_regular_formula Creates a regular formula that represents action a
      * \details In case the action comes from an LTS in the aut or fsm format.
      * \param[in] a The action for which to create a regular formula
      * \return The created regular formula
      */
-    regular_formulas::regular_formula createRegularFormula(const mcrl2::lts::action_label_string& a) const
+    regular_formulas::regular_formula create_regular_formula(const mcrl2::lts::action_label_string& a) const
     {
       return mcrl2::regular_formulas::regular_formula(mcrl2::action_formulas::multi_action(
         process::action_list({ process::action(process::action_label(a, {}), {}) })));
     }
 
     /**
-     * \brief untilFormula Creates a state formula that corresponds to the until operator phi1<a>phi2 from HMLU
+     * \brief until_formula Creates a state formula that corresponds to the until operator phi1<a>phi2 from HMLU
      * \details This operator intuitively means: "phi1 holds while stuttering until we can do an a-step after which phi2 holds"
      *          In the operators of the mu-calculus that mCRL2 supports we can define this as:
      *              phi2 || (mu X.phi1 && (<tau>X || <a>phi2))  if a = tau
@@ -871,13 +871,13 @@ class bisim_partitioner
      * \param[in] phi2 The second state formula for the until operator
      * \return A state formula that corresponds to the until operator phi1<a>phi2 from HMLU
      */
-    mcrl2::state_formulas::state_formula untilFormula(const mcrl2::state_formulas::state_formula& phi1, const label_type& a,
-                                                      const mcrl2::state_formulas::state_formula& phi2)
+    mcrl2::state_formulas::state_formula until_formula(const mcrl2::state_formulas::state_formula& phi1, const label_type& a,
+                                                       const mcrl2::state_formulas::state_formula& phi2)
     {
-      std::string var = "X" + std::to_string(freshVarCounter++);
+      std::string var = "X" + std::to_string(fresh_var_counter++);
       mcrl2::state_formulas::state_formula tauStep =
           mcrl2::state_formulas::may(regular_formulas::regular_formula(action_formulas::multi_action()), mcrl2::state_formulas::variable(var, {}));
-      mcrl2::state_formulas::state_formula lastStep = mcrl2::state_formulas::may(createRegularFormula(aut.action_label(a)), phi2);
+      mcrl2::state_formulas::state_formula lastStep = mcrl2::state_formulas::may(create_regular_formula(aut.action_label(a)), phi2);
 
       mcrl2::state_formulas::state_formula until =
           mcrl2::state_formulas::mu(var, {}, mcrl2::state_formulas::and_(phi1, mcrl2::state_formulas::or_(tauStep, lastStep)));
@@ -948,11 +948,11 @@ class bisim_partitioner
           Phi2 = mcrl2::state_formulas::and_(Phi2, counter_formula_aux(Bp, R));
         }
 
-        Phi = untilFormula(Phi1, a, Phi2);
+        Phi = until_formula(Phi1, a, Phi2);
       }
       else
       {
-        Phi = mcrl2::state_formulas::may(createRegularFormula(aut.action_label(a)), Phi2);
+        Phi = mcrl2::state_formulas::may(create_regular_formula(aut.action_label(a)), Phi2);
       }
 
       if (blocks_containing_B1.count(R) == 0)
