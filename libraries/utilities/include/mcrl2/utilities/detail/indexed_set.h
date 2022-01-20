@@ -323,7 +323,6 @@ inline std::pair<typename INDEXED_SET::size_type, bool> INDEXED_SET::insert(cons
 {
   lock_shared(thread_index);
   assert(m_next_index<=m_keys.size());
-std::cerr << "BBB " << m_next_index << "    " << m_thread_control.size() << "    " << m_keys.size() << "\n";
   if (m_next_index+m_thread_control.size()>=m_keys.size())
   {
     unlock_shared(thread_index);
