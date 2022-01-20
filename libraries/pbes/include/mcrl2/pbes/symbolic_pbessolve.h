@@ -88,20 +88,23 @@ class symbolic_pbessolve_algorithm
         const ldd& W1 = sylvan::ldds::empty_set())
     {
       using namespace sylvan::ldds;
+      stopwatch timer;
+      
       std::array<ldd, 2> winning = { W0, W1 };
       ldd Vtotal = m_G.compute_total_graph(V, empty_set(), Vsinks, winning);
       if (includes(winning[0], initial_vertex))
       {
+        mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
         return true;
       }
       else if (includes(winning[1], initial_vertex))
       {
+        mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
         return false;
       }
 
       // If the initial vertex has not yet been won then run the zielonka solver as well.
       mCRL2log(log::debug1) << "\n--- apply zielonka to ---\n" << m_G.print_graph(V) << std::endl;
-      stopwatch timer;
       auto const& [solved0, solved1] = zielonka(Vtotal);
       mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
       mCRL2log(log::debug1) << "W0 = " << m_G.print_nodes(solved0) << std::endl;
