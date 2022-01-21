@@ -136,7 +136,7 @@ class symbolic_pbessolve_algorithm
       // Make the game total.
       using namespace sylvan::ldds;
       std::array<ldd, 2> winning = { W0, W1 };
-      ldd Vtotal = m_G.compute_total_graph(V, empty_set(), Vsinks, winning);
+      ldd Vtotal = m_G.compute_total_graph(V, I, Vsinks, winning);
       if (includes(winning[0], initial_vertex) || includes(winning[1], initial_vertex))
       {
         return { winning[0], winning[1] };
@@ -168,7 +168,7 @@ class symbolic_pbessolve_algorithm
 
       // Make the game total and removed winning sets.
       std::array<ldd, 2> winning = { W0, W1 };
-      ldd Vtotal = m_G.compute_total_graph(V, empty_set(), Vsinks, winning);
+      ldd Vtotal = m_G.compute_total_graph(V, I, Vsinks, winning);
       if (includes(winning[0], initial_vertex) || includes(winning[1], initial_vertex))
       {
         return { winning[0], winning[1] };
@@ -248,7 +248,7 @@ class symbolic_pbessolve_algorithm
 
       // Make the game total and removed winning sets.
       std::array<ldd, 2> winning = { W0, W1 };
-      ldd Vtotal = m_G.compute_total_graph(V, empty_set(), Vsinks, winning);
+      ldd Vtotal = m_G.compute_total_graph(V, I, Vsinks, winning);
       if (includes(winning[0], initial_vertex) || includes(winning[1], initial_vertex))
       {
         return { winning[0], winning[1] };
