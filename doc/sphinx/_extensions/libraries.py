@@ -38,6 +38,10 @@ _REFINDEXTEMPLATE = string.Template(
 _ARTICLEINDEXTEMPLATE= string.Template(
   open(os.path.join(_PWD, 'libraries_templates', 'articles.rst.template')).read())
 
+def get_libraries():
+  """Returns a dictionary of libraries with directoryname as key, and human
+     readable name as value. E.g key='atermpp', value='ATemp++'"""
+  return _LIBRARIES
 
 def log_nonl(msg):
   _LOG.info(term_width_line(msg), nonl = True)
@@ -155,36 +159,6 @@ def generate_library_pdf(lib_dir, lib_name):
       os.chdir(olddir)
 
 
-def generate_library_rst(lib_dir):
-  '''Generate reStructuredText documentation for a single library.'''
-  xml_path = os.path.join(_XML, 'libraries', lib_dir)
-  rst_path = os.path.join(_RST, 'libraries', lib_dir)
-  refindex = os.path.join(rst_path, 'reference.rst')
-  transform = os.path.join(_PWD, 'libraries_templates', 'compound.xsl')
-  if not os.path.exists(rst_path):
-    os.makedirs(rst_path)
-  classrst = []
-  headerrst = []
-  for f in os.listdir(xml_path):
-    base, ext = os.path.splitext(f)
-    if ext == '.xml' and base != "index":
-      src = os.path.join(xml_path, f)
-      dst = os.path.join(rst_path, base + '.rst')
-      if base.startswith('class') and not base.startswith('classstd') and not base.endswith('_8h'):
-        classrst.append(base)
-        xsltproc(src, transform, dst, "'{0}'".format(xml_path))
-        log_generated(dst)
-      elif base.endswith('_8h'):
-        headerrst.append(base)
-        xsltproc(src, transform, dst, "'{0}'".format(xml_path))
-        log_generated(dst)
-  open(refindex, 'w+').write(_REFINDEXTEMPLATE.substitute(
-    CLASSES='\n   '.join(sorted(classrst)),
-    FILES='\n   '.join(sorted(headerrst))
-  ))
-  log_generated(refindex)
-
-
 def generate_rst(temppath):
   '''Generate reStructuredText documentation for all libraries.'''
   setvars(temppath)
@@ -197,14 +171,6 @@ def generate_rst(temppath):
     open(_DOXYTAG, 'w+').close()
     doxychanged = True
     generate_xml()
-  if not _GENERATE_DOXYGEN or (os.path.exists(_RSTTAG) and not doxychanged):
-      _LOG.info('assuming Doxygen reST is up-to-date')
-  else:
-    open(_RSTTAG, 'w+').close()
-    for dirname in _LIBRARIES:
-      generate_library_rst(dirname)
-    log_nonl('transformed all library XML into reST')
-    _LOG.info('')
   if not _GENERATE_PDF or os.path.exists(_PDFTAG):
       _LOG.info('assuming generated PDF is up-to-date')
   else:
