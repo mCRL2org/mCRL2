@@ -321,7 +321,7 @@ class symbolic_parity_game
         mCRL2log(log::debug1) << "Zoutside = " << print_nodes(Zoutside) << std::endl;
         stopwatch iter_start;
 
-        todo = minus(safe_control_predecessors_impl(alpha, todo, V, Zoutside, Zoutside, Vplayer, I), Z);
+        todo = minus(safe_control_predecessors_impl(alpha, todo, V, Zoutside, V, Vplayer, I), Z);
         Z = union_(Z, todo);
         Zoutside = minus(Zoutside, todo);
 
@@ -382,7 +382,7 @@ class symbolic_parity_game
         mCRL2log(log::debug1) << "Zoutside = " << print_nodes(Zoutside) << std::endl;
         stopwatch iter_start;
 
-        todo = intersect(Vc, minus(safe_control_predecessors_impl(alpha, todo, V, Zoutside, Zoutside, Vplayer, I), Z));
+        todo = intersect(Vc, minus(safe_control_predecessors_impl(alpha, todo, V, Zoutside, Vc, Vplayer, I), Z));
         Z = union_(Z, todo);
         Zoutside = minus(Zoutside, todo);
 
