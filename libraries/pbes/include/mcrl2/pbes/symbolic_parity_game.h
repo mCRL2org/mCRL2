@@ -468,7 +468,7 @@ class symbolic_parity_game
 
         stopwatch watch;
         result = union_(result, predecessors(U, V, group));
-        mCRL2log(log::debug) << "added predecessors for group " << i << " out of " << m_summand_groups.size()
+        mCRL2log(log::debug1) << "added predecessors for group " << i << " out of " << m_summand_groups.size()
                                << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";
       }
 
@@ -491,7 +491,7 @@ class symbolic_parity_game
 
           stopwatch watch;
           ldd todo1 = predecessors(U, todo, group);
-          mCRL2log(log::debug) << "added predecessors for group " << i << " out of " << m_summand_groups.size()
+          mCRL2log(log::debug1) << "added predecessors for group " << i << " out of " << m_summand_groups.size()
                                  << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";
 
           P = union_(P, todo1);
@@ -549,7 +549,7 @@ private:
         stopwatch watch;
         Pforced = minus(Pforced, predecessors(Pforced, outside, group));
 
-        mCRL2log(log::debug) << "removed 1 - alpha predecessors for group " << i << " out of " << m_summand_groups.size()
+        mCRL2log(log::debug1) << "removed 1 - alpha predecessors for group " << i << " out of " << m_summand_groups.size()
                                << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";
       }
 
