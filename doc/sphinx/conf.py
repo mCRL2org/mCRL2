@@ -19,7 +19,8 @@ import sphinx_rtd_theme
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here.
 sys.path.insert(0, (Path(__file__).parent / '_extensions').as_posix())
-
+import exhale_multiproject_monkeypatch
+import libraries
 
 # -- Project information -----------------------------------------------------
 
@@ -68,10 +69,43 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
     'sphinxcontrib.tikz',
-    'sphinx_rtd_theme'
+    'sphinx_rtd_theme',
+    'breathe',
+    'exhale'
 ]
 
-# Extension configuration
+# First initialize the data structures for breathe and exhale. They are
+# populated below.
+breathe_projects = {}
+breathe_projects_source = {}
+breathe_default_projects = list(libraries.get_libraries().keys())[0]
+exhale_projects_args = {}
+
+# Common arguments for Exhale
+exhale_args = {
+    "rootFileTitle": "Unknown",
+    "containmentFolder": "unknown",
+    "rootFileName": "library_root.rst",
+    "createTreeView": True,
+    "exhaleExecutesDoxygen": True,
+    "exhaleDoxygenStdin": '''
+BUILTIN_STL_SUPPORT = YES
+EXCLUDE_PATTERNS = */detail/*
+''',
+    "doxygenStripFromPath":  f'{src_path}',
+}
+
+# Populate exhale and breathe variables for all libraries
+for lib, name in libraries.get_libraries().items():
+    breathe_projects[lib] = "./_doxygen/{}/xml".format(lib)
+    breathe_projects_source[lib] = f'{src_path}/libraries/' + lib
+    exhale_projects_args[lib] = {
+        "rootFileTitle":        "{} Library API".format(name),
+        "exhaleDoxygenStdin":   exhale_args["exhaleDoxygenStdin"] + "INPUT = {}/libraries/{}/include".format(f'{src_path}', lib),
+        "containmentFolder":    "./sphinx/source/api-{}".format(lib)
+    }
+
+# Extension configuration for using Tikz pictures in Sphinx documentation
 tikz_latex_preamble = r'''
   \tikzstyle{every state}=[
     draw,
@@ -128,7 +162,6 @@ suppress_warnings = ['ref.citation']
 
 def setup(app):
     # Generate rst files from man pages
-    import libraries
     import man
 
     temppath = f'{app.outdir}/../temp'
