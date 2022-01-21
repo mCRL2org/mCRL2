@@ -179,7 +179,7 @@ std::size_t aterm_pool::size() const
 void aterm_pool::created_term(bool allow_collect, thread_aterm_pool_interface* thread)
 {
   // Defer garbage collection when it happens too often.
-  if (m_count_until_collection.load(std::memory_order_relaxed) == 0)
+  if (m_count_until_collection.load(std::memory_order_relaxed) <= 0)
   {
     if (allow_collect)
     {
@@ -191,7 +191,7 @@ void aterm_pool::created_term(bool allow_collect, thread_aterm_pool_interface* t
     m_count_until_collection.fetch_sub(1, std::memory_order_relaxed);
   }
 
-  if (m_count_until_resize.load(std::memory_order_relaxed) == 0)
+  if (m_count_until_resize.load(std::memory_order_relaxed) <= 0)
   {
     if (allow_collect)
     {

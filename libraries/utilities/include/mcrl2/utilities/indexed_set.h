@@ -104,10 +104,11 @@ private:
   void lock_exclusive(std::size_t thread_index) const;
   void unlock_exclusive(std::size_t thread_index) const;
 
-  /// \brief Reserve indices that this thread can use. Doing this 
+  /// \brief Reserve indices that can be used. Doing this 
   ///        infrequently prevents obtaining an exclusive lock for the
-  ///        indexed set too often. 
-  void reserve_indices_for_this_thread(std::size_t thread_index);
+  ///        indexed set too often. This operation requires a
+  ///        resize of m_keys. 
+  void reserve_indices(std::size_t thread_index);
   /// \brief Inserts the given (key, n) pair into the indexed set.
   std::size_t put_in_hashtable(const Key& key, std::size_t value, std::size_t& new_position);
 
