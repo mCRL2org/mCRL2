@@ -382,8 +382,7 @@ class symbolic_parity_game
         mCRL2log(log::debug1) << "Zoutside = " << print_nodes(Zoutside) << std::endl;
         stopwatch iter_start;
 
-        ldd control = safe_control_predecessors_impl(alpha, union_(todo, U), V, minus(Zoutside, U), Vc, Vplayer, I);
-        todo = intersect(Vc, minus(safe_control_predecessors_impl(alpha, todo, V, Zoutside, Vc, Vplayer, I), Z));
+        todo = intersect(Vc, minus(safe_control_predecessors_impl(alpha, union_(todo, U), V, minus(Zoutside, U), Vc, Vplayer, I), Z));
         Z = union_(Z, todo);
         Zoutside = minus(Zoutside, todo);
 
