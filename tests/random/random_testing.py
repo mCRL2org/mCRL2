@@ -433,6 +433,7 @@ available_tests = {
 # These test do not work on Windows due to dependencies.
 if os.name != 'nt':
     available_tests.update({'pbessolvesymbolic' : lambda name, settings: PbessolvesymbolicTest(name, settings) })
+    available_tests.update({'pbessolvesymbolic-partial' : lambda name, settings: PbessolvesymbolicTest(name, settings) })
 #    available_tests.update({ 'pbesbddsolve' : lambda name, settings: PbesbddsolveTest(name, settings) })
 
 def print_names(tests):
