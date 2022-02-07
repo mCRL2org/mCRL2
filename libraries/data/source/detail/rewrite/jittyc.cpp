@@ -1804,18 +1804,19 @@ class RewriterCompilingJitty::ImplementTree
       static std::size_t auxiliary_method_name_index=0;
 
       m_stream << m_padding 
-               << "const data_expression& result" << auxiliary_method_name_index << "= auxiliary_function_to_reduce_bracket_nesting" << auxiliary_method_name_index << "("
+               << "auxiliary_function_to_reduce_bracket_nesting" << auxiliary_method_name_index << "(result, "
                << brackets.current_data_arguments.top() << ",this_rewriter);\n";
       m_stream << m_padding 
-               << "if (result" << auxiliary_method_name_index << " != data_expression()) { return result" << auxiliary_method_name_index << "; }\n";
+               << "if (result != data_expression()) { return; }\n";
 
       const std::size_t old_indent=m_padding.reset();
       std::stringstream s;
       s << "  template < " << brackets.current_template_parameters << ">\n"
-        << "  static inline data_expression auxiliary_function_to_reduce_bracket_nesting" << auxiliary_method_name_index 
-        << "(" 
+        << "  static inline void auxiliary_function_to_reduce_bracket_nesting" << auxiliary_method_name_index 
+        << "(data_expression& result" 
         << brackets.current_data_parameters.top() << (brackets.current_data_parameters.top().empty()?"":", ") << "RewriterCompilingJitty* this_rewriter)\n" 
-        << "  {\n";
+        << "  {\n"
+        << "    std::size_t stack_increment=0;\n";
       
       auxiliary_method_name_index++;
 
@@ -1823,7 +1824,7 @@ class RewriterCompilingJitty::ImplementTree
       brackets.bracket_nesting_level=0;
       implement_tree(s,tree,cur_arg,parent,level,cnt,arity, opid, brackets,auxiliary_code_fragments, type_of_code_variables);
       brackets.bracket_nesting_level=old_bracket_nesting_level;
-      s << "    return data_expression(); // This indicates that no result has been calculated;\n"
+      s << "    result = data_expression(); return; // This indicates that no result has been calculated;\n"
         << "  }\n"
         << "\n";
       m_padding.restore(old_indent);
