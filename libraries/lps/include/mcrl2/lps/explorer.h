@@ -279,31 +279,34 @@ struct explorer_summand
     return result;
   }
 
-  atermpp::term_appl<data::data_expression> compute_key(data::mutable_indexed_substitution<>& sigma) const
+  void compute_key(atermpp::term_appl<data::data_expression>& key,
+                   data::mutable_indexed_substitution<>& sigma) const
   {
     if (cache_strategy == caching::global)
     {
       bool is_first_element = true;
-      return atermpp::term_appl<data::data_expression>(f_gamma, gamma.begin(), gamma.end(),
-                                                       [&](const data::variable& x)
-                                                       {
-                                                         if (is_first_element)
-                                                         {
-                                                           is_first_element = false;
-                                                           return condition;
-                                                         }
-                                                         return sigma(x);
-                                                       }
-      );
+      atermpp::make_term_appl(key, f_gamma, gamma.begin(), gamma.end(),
+                                        [&](data::data_expression& result, const data::variable& x)
+                                        {
+                                          if (is_first_element)
+                                          {
+                                            is_first_element = false;
+                                            result=condition;
+                                            return;
+                                          }
+                                          sigma.apply(x, result);
+                                          return;
+                                        }
+                             );
     }
     else
     {
-      return atermpp::term_appl<data::data_expression>(f_gamma, gamma.begin(), gamma.end(),
-                                                       [&](const data::variable& x)
-                                                       {
-                                                         return sigma(x);
-                                                       }
-      );
+      atermpp::make_term_appl(key, f_gamma, gamma.begin(), gamma.end(),
+                                        [&](data::data_expression& result, const data::variable& x)
+                                        {
+                                          sigma.apply(x, result);
+                                        }
+                              );
     }
   }
 };
@@ -531,8 +534,9 @@ class explorer: public abortable
       const SummandSequence& confluent_summands,
       data::mutable_indexed_substitution<>& sigma,
       data::rewriter& rewr,
-      data::data_expression& condition,
-      state_type& s1,
+      data::data_expression& condition,                // These variables are passed on such
+      state_type& s1,                                  // that they don't have to be declared often.
+      atermpp::term_appl<data::data_expression>& key,  
       data::enumerator_algorithm<>& enumerator,
       data::enumerator_identifier_generator& id_generator,
       ReportTransition report_transition = ReportTransition()
@@ -635,7 +639,7 @@ class explorer: public abortable
       else
       {
         static std::mutex cache_mutex; // This mutex could be created per summand. This may allow for more parallel behaviour if required. 
-        auto key = summand.compute_key(sigma);
+        summand.compute_key(key, sigma);
         auto& cache = summand.cache_strategy == caching::global ? global_cache : summand.local_cache;
         if (m_options.number_of_threads>0) cache_mutex.lock();
         auto q = cache.find(key);
@@ -720,6 +724,7 @@ class explorer: public abortable
     {
       data::data_expression condition;   // This variable is used often, and it is time consuming to declare it too often.
       state_type state_;                  // The same holds for this variable. 
+      atermpp::term_appl<data::data_expression> key;  
       std::list<transition> transitions;
       data::add_assignments(sigma, m_process_parameters, s);
       for (const explorer_summand& summand: regular_summands)
@@ -731,6 +736,7 @@ class explorer: public abortable
           rewr,
           condition,
           state_,
+          key,
           enumerator,
           id_generator,
           [&](const lps::multi_action& a, const state_type& s1)
@@ -770,6 +776,7 @@ class explorer: public abortable
     {
       data::data_expression condition; 
       state_type state_;
+      atermpp::term_appl<data::data_expression> key;  
       std::vector<state> result;
       data::add_assignments(sigma, m_process_parameters, s0);
       for (const explorer_summand& summand: summands)
@@ -781,6 +788,7 @@ class explorer: public abortable
           rewr,
           condition,
           state_,
+          key,
           enumerator,
           id_generator,
           // [&](const lps::multi_action& /* a */, const state& s1) OLD. Calculates transitions, that are not used. 
@@ -945,6 +953,7 @@ class explorer: public abortable
       state current_state;
       data::data_expression condition;   // The condition is used often, and it is effective not to declare it whenever it is used.
       state_type state_;                 // The same holds for state.
+      atermpp::term_appl<data::data_expression> key;  
       atermpp::vector<state> newly_found_states; // The new states for each process are temporarily stored in this vector for each thread. 
       while (number_of_active_processes>0)
       {
@@ -965,6 +974,7 @@ class explorer: public abortable
               thread_rewr,
               condition,
               state_,
+              key,
               thread_enumerator,
               thread_id_generator,
               [&](const lps::multi_action& a, const state_type& s1)
@@ -1202,6 +1212,7 @@ class explorer: public abortable
       std::vector<std::pair<lps::multi_action, state_type>> result;
       data::add_assignments(sigma, m_process_parameters, d0);
       data::data_expression condition;
+      atermpp::term_appl<data::data_expression> key;
       state_type state;
       for (const explorer_summand& summand: m_regular_summands)
       {
@@ -1212,6 +1223,7 @@ class explorer: public abortable
           rewr,
           condition,
           state,
+          key,
           enumerator,
           id_generator,
           [&](const lps::multi_action& a, const state_type& d1)

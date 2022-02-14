@@ -1807,7 +1807,7 @@ class RewriterCompilingJitty::ImplementTree
                << "auxiliary_function_to_reduce_bracket_nesting" << auxiliary_method_name_index << "(result, "
                << brackets.current_data_arguments.top() << ",this_rewriter);\n";
       m_stream << m_padding 
-               << "if (result != data_expression()) { return; }\n";
+               << "if (!result.is_default_data_expression()) { return; }\n";
 
       const std::size_t old_indent=m_padding.reset();
       std::stringstream s;
@@ -1824,7 +1824,7 @@ class RewriterCompilingJitty::ImplementTree
       brackets.bracket_nesting_level=0;
       implement_tree(s,tree,cur_arg,parent,level,cnt,arity, opid, brackets,auxiliary_code_fragments, type_of_code_variables);
       brackets.bracket_nesting_level=old_bracket_nesting_level;
-      s << "    result = data_expression(); return; // This indicates that no result has been calculated;\n"
+      s << "    make_data_expression(result); return; // This indicates that no result has been calculated;\n"
         << "  }\n"
         << "\n";
       m_padding.restore(old_indent);

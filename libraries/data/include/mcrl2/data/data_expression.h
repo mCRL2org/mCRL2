@@ -204,6 +204,11 @@ inline void swap(data_expression& t1, data_expression& t2)
 }
 //--- end generated class data_expression ---//
 
+inline void make_data_expression(data_expression& result)
+{
+  static_cast<atermpp::aterm_appl&>(result)=core::detail::default_values::DataExpr;
+}
+
 /// \brief Test for a data_expression expression
 /// \param x A term
 /// \return True if it is a data_expression expression
