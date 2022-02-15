@@ -286,7 +286,8 @@ struct explorer_summand
     {
       bool is_first_element = true;
       atermpp::make_term_appl(key, f_gamma, gamma.begin(), gamma.end(),
-                                        [&](data::data_expression& result, const data::variable& x)
+    //                                    [&](data::data_expression& result, const data::variable& x)
+                                        [&](atermpp::unprotected_aterm& result, const data::variable& x)
                                         {
                                           if (is_first_element)
                                           {
@@ -302,7 +303,8 @@ struct explorer_summand
     else
     {
       atermpp::make_term_appl(key, f_gamma, gamma.begin(), gamma.end(),
-                                        [&](data::data_expression& result, const data::variable& x)
+    //                                    [&](data::data_expression& result, const data::variable& x)
+                                        [&](atermpp::unprotected_aterm& result, const data::variable& x)
                                         {
                                           sigma.apply(x, result);
                                         }

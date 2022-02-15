@@ -217,8 +217,11 @@ public:
   ///          a vector that can be resized and moved. 
   /// \param   v The variable to which the subsitution is applied.
   /// \param   target The target into which the substitution is stored. 
-  void apply(const variable_type& v, expression_type& target)
+  template <class ResultType>
+  void apply(const variable_type& v, ResultType& target)
   {
+    static_assert(std::is_same<ResultType&,expression_type&>::value ||
+                  std::is_same<ResultType&,atermpp::unprotected_aterm&>::value);
     const std::size_t i = atermpp::detail::index_traits<data::variable, data::variable_key_type, 2>::index(v);
     if (i < m_index_table.size())
     {
