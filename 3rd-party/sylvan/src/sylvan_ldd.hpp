@@ -151,6 +151,24 @@ class ldd
       lddmc_protect(&mdd);
     }
 
+    ldd& operator=(const ldd& other)
+    {
+      mdd = other.mdd;
+      return *this;
+    }
+
+    ldd(ldd&& other)
+     : mdd(other.mdd)
+    {
+      lddmc_protect(&mdd);
+    }
+
+    ldd& operator=(ldd&& other)
+    {
+      mdd = other.mdd;
+      return *this;
+    }
+
     ~ldd()
     {
       lddmc_unprotect(&mdd);
