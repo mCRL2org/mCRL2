@@ -253,6 +253,17 @@ T replace_propositional_variables(const T& x,
   return result;
 }
 
+/// \brief Applies a propositional variable substitution.
+template <typename T, typename Substitution>
+void replace_propositional_variables(T& result,
+                                     const T& x,
+                                     const Substitution& sigma,
+                                     typename std::enable_if<std::is_base_of< atermpp::aterm, T>::value>::type* = nullptr
+                                    )
+{
+  pbes_system::detail::make_replace_propositional_variables_builder<pbes_system::pbes_expression_builder>(sigma).apply(result, x);
+}
+
 template <typename T, typename Substitution>
 void replace_pbes_expressions(T& x,
                               const Substitution& sigma,

@@ -12,6 +12,9 @@
 #ifndef MCRL2_PBES_PBESINST_STRUCTURE_GRAPH2_H
 #define MCRL2_PBES_PBESINST_STRUCTURE_GRAPH2_H
 
+#include "mcrl2/atermpp/standard_containers/deque.h"
+#include "mcrl2/atermpp/standard_containers/indexed_set.h"
+#include "mcrl2/atermpp/standard_containers/vector.h"
 #include "mcrl2/pbes/pbesinst_fatal_attractors.h"
 #include "mcrl2/pbes/pbesinst_find_loops.h"
 #include "mcrl2/pbes/pbesinst_partial_solve.h"
@@ -74,7 +77,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     std::array<strategy_vector, 2> tau;
     std::array<detail::computation_guard, 2> S_guard;
 
-    pbes_expression b; // to store the result of the Rplus computation
+    atermpp::vector<pbes_expression> b; // to store the result of the Rplus computation
     detail::computation_guard find_loops_guard;
     detail::computation_guard fatal_attractors_guard;
     detail::periodic_guard reset_guard;
@@ -112,6 +115,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       std::array<vertex_set, 2>& S;
 
       detail::structure_graph_builder& graph_builder;
+      // TODO: repalce with aterm container
       std::vector<stack_element> stack;
 
       Rplus_traverser(std::array<vertex_set, 2>& S_, detail::structure_graph_builder& graph_builder_)
@@ -367,16 +371,17 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       }
 
       simple_structure_graph G(m_graph_builder.vertices());
-      std::unordered_set<pbes_expression> todo1{init};
-      std::unordered_set<pbes_expression> done1;
-      std::unordered_set<propositional_variable_instantiation> new_todo;
+      atermpp::deque<pbes_expression> todo1{init};
+      atermpp::indexed_set<pbes_expression> done1;
+      atermpp::indexed_set<propositional_variable_instantiation> new_todo;
 
+      pbes_expression X;
       while (!todo1.empty())
       {
         using utilities::detail::contains;
 
-        auto X = *todo1.begin();
-        todo1.erase(todo1.begin());
+        X = todo1.front();
+        todo1.pop_front();
         done1.insert(X);
         auto u = m_graph_builder.find_vertex(X);
         const auto& u_ = m_graph_builder.vertex(u);
@@ -399,7 +404,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
               {
                 continue;
               }
-              todo1.insert(Y);
+              todo1.push_back(Y);
             }
           }
         }
@@ -408,7 +413,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       // new_todo_list := new_todo \cap (todo U irrelevant)
       // N.B. An attempt is made to preserve the order of the current todo list, to not
       // disturb breadth first and depth first search.
-      std::deque<propositional_variable_instantiation> new_todo_list;
+      atermpp::deque<propositional_variable_instantiation> new_todo_list;
       for (const propositional_variable_instantiation& X: todo.irrelevant_elements())
       {
         if (contains(new_todo, X))
@@ -466,42 +471,50 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       structure_graph& G
     )
       : pbesinst_structure_graph_algorithm(options, p, G),
-        find_loops_guard(2), fatal_attractors_guard(2)
+        b(options.number_of_threads), find_loops_guard(2), fatal_attractors_guard(2)
     {}
 
     // Optimization 2 is implemented by overriding the function rewrite_psi.
-    pbes_expression rewrite_psi(const fixpoint_symbol& symbol,
-                                const propositional_variable_instantiation& X,
-                                const pbes_expression& psi
-                               ) override
+    void rewrite_psi(const std::size_t thread_index,
+                     pbes_expression& result,
+                     const fixpoint_symbol& symbol,
+                     const propositional_variable_instantiation& X,
+                     const pbes_expression& psi
+                    ) override
     {
-      auto result = Rplus(super::rewrite_psi(symbol, X, psi));
-      b = result.b;
-      if (is_true(b))
+      super::rewrite_psi(thread_index, result, symbol, X, psi);
+      auto rplus_result = Rplus(result);
+      b[thread_index] = rplus_result.b;
+      if (is_true(rplus_result.b))
       {
-        return result.g0;
+        result = rplus_result.g0;
+        return;
       }
-      else if (is_false(b))
+      else if (is_false(rplus_result.b))
       {
-        return result.g1;
+        result = rplus_result.g1;
+        return;
       }
-      return result.f;
+      result = rplus_result.f;
     }
 
-    void on_report_equation(const propositional_variable_instantiation& X, const pbes_expression& psi, std::size_t k) override
+    void on_report_equation(const std::size_t thread_index,
+                            const propositional_variable_instantiation& X,
+                            const pbes_expression& psi, std::size_t k
+                           ) override
     {
-      super::on_report_equation(X, psi, k);
+      super::on_report_equation(thread_index, X, psi, k);
 
       // The structure graph has just been extended, so S[0] and S[1] need to be resized.
       S[0].resize(m_graph_builder.extent());
       S[1].resize(m_graph_builder.extent());
 
       auto u = m_graph_builder.find_vertex(X);
-      if (is_true(b))
+      if (is_true(b[thread_index]))
       {
         S[0].insert(u);
       }
-      else if (is_false(b))
+      else if (is_false(b[thread_index]))
       {
         S[1].insert(u);
       }

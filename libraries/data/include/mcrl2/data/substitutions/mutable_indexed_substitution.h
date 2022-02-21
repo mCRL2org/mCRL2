@@ -73,6 +73,18 @@ public:
   {
   }
 
+  mutable_indexed_substitution(std::vector<substitution_type> container,
+                               std::vector<std::size_t> index_table,
+                               std::stack<std::size_t> free_positions,
+                               bool variables_in_rhs_set_is_defined,
+                               std::multiset<variable> variables_in_rhs)
+      : m_container(container), m_index_table(index_table),
+        m_free_positions(free_positions),
+        m_variables_in_rhs_set_is_defined(variables_in_rhs_set_is_defined),
+        m_variables_in_rhs(variables_in_rhs)
+  {
+  }
+
   /// \brief Wrapper class for internal storage and substitution updates using operator()
   struct assignment
   {
@@ -289,6 +301,18 @@ public:
     m_free_positions=std::stack<std::size_t>();
     m_variables_in_rhs_set_is_defined=false;
     m_variables_in_rhs.clear();
+  }
+
+  /// \brief Create a clone of the rewriter in which the underlying rewriter is
+  /// copied, and not passed as a shared pointer.
+  /// \details This is useful when the rewriter is used in different parallel
+  /// processes. One rewriter can only be used sequentially. \return A rewriter,
+  /// with a copy of the underlying jitty, jittyc or jittyp rewriting engine.
+  mutable_indexed_substitution<VariableType, ExpressionType> clone()
+  {
+    return mutable_indexed_substitution<VariableType, ExpressionType>(
+        m_container, m_index_table, m_free_positions,
+        m_variables_in_rhs_set_is_defined, m_variables_in_rhs);
   }
 
   /// \brief Compare substitutions

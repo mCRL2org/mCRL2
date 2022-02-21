@@ -134,6 +134,11 @@ struct simplify_rewriter
     core::make_apply_builder<detail::simplify_builder>().apply(result, x);
     return result;
   }
+
+  void operator()(pbes_expression& result, const pbes_expression& x) const
+  {
+    core::make_apply_builder<detail::simplify_builder>().apply(result, x);
+  }
 };
 
 /// \brief A rewriter that simplifies boolean expressions in a term, and rewrites data expressions.

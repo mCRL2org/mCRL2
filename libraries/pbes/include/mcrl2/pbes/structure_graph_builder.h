@@ -37,12 +37,12 @@ struct structure_graph_builder
     return m_graph.extent();
   }
 
-  std::vector<structure_graph::vertex>& vertices()
+  atermpp::vector<structure_graph::vertex>& vertices()
   {
     return m_graph.m_vertices;
   }
 
-  const std::vector<structure_graph::vertex>& vertices() const
+  const atermpp::vector<structure_graph::vertex>& vertices() const
   {
     return m_graph.m_vertices;
   }
@@ -222,7 +222,7 @@ struct structure_graph_builder
     m_vertex_map.clear();
     for (std::size_t i = 0; i < vertices().size(); i++)
     {
-      m_vertex_map.insert({vertices()[i].formula, i});
+      m_vertex_map.insert({vertex(i).formula, i});
     }
   }
 };
@@ -232,7 +232,7 @@ struct manual_structure_graph_builder
   typedef structure_graph::index_type index_type;
 
   structure_graph& m_graph;
-  std::vector<structure_graph::vertex> m_vertices;
+  atermpp::vector<structure_graph::vertex> m_vertices;
   index_type m_initial_state; // The initial state.
 
   explicit manual_structure_graph_builder(structure_graph& G)
@@ -249,8 +249,8 @@ struct manual_structure_graph_builder
   void insert_edge(index_type ui, index_type vi)
   {
     using utilities::detail::contains;
-    auto& u = m_vertices[ui];
-    auto& v = m_vertices[vi];
+    structure_graph::vertex& u = m_vertices[ui];
+    structure_graph::vertex& v = m_vertices[vi];
     if (!contains(u.successors, vi))
     {
       u.successors.push_back(vi);
@@ -260,8 +260,8 @@ struct manual_structure_graph_builder
 
   void remove_edge(index_type ui, index_type vi)
   {
-    auto& u = m_vertices[ui];
-    auto& v = m_vertices[vi];
+    structure_graph::vertex& u = m_vertices[ui];
+    structure_graph::vertex& v = m_vertices[vi];
     u.remove_successor(vi);
     v.remove_predecessor(ui);
   }

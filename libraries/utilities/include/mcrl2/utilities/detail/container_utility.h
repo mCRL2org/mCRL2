@@ -16,6 +16,7 @@
 #include <map>
 #include <set>
 #include <unordered_set>
+#include "mcrl2/atermpp/standard_containers/indexed_set.h"
 #include "mcrl2/utilities/exception.h"
 
 namespace mcrl2 {
@@ -57,6 +58,13 @@ template <typename Container>
 bool contains(const Container& c, const typename Container::value_type& v)
 {
   return std::find(c.begin(), c.end(), v) != c.end();
+}
+
+// specialization
+template <typename T>
+bool contains(const atermpp::indexed_set<T>& c, const typename atermpp::indexed_set<T>::key_type& v)
+{
+  return c.find(v) != c.end();
 }
 
 // specialization

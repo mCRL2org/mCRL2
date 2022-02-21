@@ -15,6 +15,8 @@
 #include <iomanip>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/range/adaptor/filtered.hpp>
+
+#include "mcrl2/atermpp/standard_containers/vector.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/pbes/pbes.h"
 
@@ -116,10 +118,15 @@ class structure_graph
         return  ((decoration != structure_graph::d_none) || (rank != data::undefined_index()))
              && (!successors.empty() || (decoration == d_true || decoration == d_false));
       }
+      
+      void inline mark(std::stack<std::reference_wrapper<atermpp::detail::_aterm>>& todo) const
+      {
+        mark_term(*atermpp::detail::address(formula), todo);
+      }
     };
 
   protected:
-    std::vector<vertex> m_vertices;
+    atermpp::vector<vertex> m_vertices;
     index_type m_initial_vertex = 0;
     boost::dynamic_bitset<> m_exclude;
 
@@ -139,17 +146,17 @@ class structure_graph
 
     struct vertices_not_contained_in
     {
-      const std::vector<vertex>& vertices;
+      const atermpp::vector<vertex>& vertices;
       const boost::dynamic_bitset<>& subset;
 
-      vertices_not_contained_in(const std::vector<vertex>& vertices_, const boost::dynamic_bitset<>& subset_)
+      vertices_not_contained_in(const atermpp::vector<vertex>& vertices_, const boost::dynamic_bitset<>& subset_)
         : vertices(vertices_),
           subset(subset_)
       {}
 
       bool operator()(const vertex& v) const
       {
-        auto i = &v - &(vertices.front());
+        std::size_t i = &v - &static_cast<const vertex&>(vertices.front());
         return !subset[i];
       }
     };
@@ -157,7 +164,7 @@ class structure_graph
   public:
     structure_graph() = default;
 
-    structure_graph(std::vector<vertex>  vertices, index_type initial_vertex, boost::dynamic_bitset<>  exclude)
+    structure_graph(atermpp::vector<vertex> vertices, index_type initial_vertex, boost::dynamic_bitset<> exclude)
       : m_vertices(std::move(vertices)),
         m_initial_vertex(initial_vertex),
         m_exclude(std::move(exclude))
@@ -175,30 +182,30 @@ class structure_graph
 
     decoration_type decoration(index_type u) const
     {
-      return m_vertices[u].decoration;
+      return find_vertex(u).decoration;
     }
 
     std::size_t rank(index_type u) const
     {
-      return m_vertices[u].rank;
+      return find_vertex(u).rank;
     }
 
-    const std::vector<vertex>& all_vertices() const
+    const atermpp::vector<vertex>& all_vertices() const
     {
       return m_vertices;
     }
 
     const std::vector<index_type>& all_predecessors(index_type u) const
     {
-      return m_vertices[u].predecessors;
+      return find_vertex(u).predecessors;
     }
 
     const std::vector<index_type>& all_successors(index_type u) const
     {
-      return m_vertices[u].successors;
+      return find_vertex(u).successors;
     }
 
-    boost::filtered_range<vertices_not_contained_in, const std::vector<vertex>> vertices() const
+    boost::filtered_range<vertices_not_contained_in, const atermpp::vector<vertex>> vertices() const
     {
       return all_vertices() | boost::adaptors::filtered(vertices_not_contained_in(m_vertices, m_exclude));
     }
@@ -215,7 +222,7 @@ class structure_graph
 
     index_type strategy(index_type u) const
     {
-      return m_vertices[u].strategy;
+      return find_vertex(u).strategy;
     }
 
     vertex& find_vertex(index_type u)

@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_SIMPLE_STRUCTURE_GRAPH_H
 #define MCRL2_PBES_SIMPLE_STRUCTURE_GRAPH_H
 
+#include "mcrl2/atermpp/standard_containers/vector.h"
 #include "mcrl2/pbes/structure_graph.h"
 
 namespace mcrl2 {
@@ -27,16 +28,16 @@ class simple_structure_graph
     typedef structure_graph::vertex vertex;
 
   protected:
-    const std::vector<vertex>& m_vertices;
+    const atermpp::vector<vertex>& m_vertices;
 
   public:
-    explicit simple_structure_graph(const std::vector<vertex>& vertices)
+    explicit simple_structure_graph(const atermpp::vector<vertex>& vertices)
       : m_vertices(vertices)
     {}
 
     decoration_type decoration(index_type u) const
     {
-      return m_vertices[u].decoration;
+      return find_vertex(u).decoration;
     }
 
     std::size_t extent() const
@@ -46,32 +47,32 @@ class simple_structure_graph
 
     std::size_t rank(index_type u) const
     {
-      return m_vertices[u].rank;
+      return find_vertex(u).rank;
     }
 
-    const std::vector<vertex>& vertices() const
+    const atermpp::vector<vertex>& vertices() const
     {
       return m_vertices;
     }
 
-    const std::vector<vertex>& all_vertices() const
+    const atermpp::vector<vertex>& all_vertices() const
     {
       return m_vertices;
     }
 
     const std::vector<index_type>& predecessors(index_type u) const
     {
-      return m_vertices[u].predecessors;
+      return find_vertex(u).predecessors;
     }
 
     const std::vector<index_type>& successors(index_type u) const
     {
-      return m_vertices[u].successors;
+      return find_vertex(u).successors;
     }
 
     index_type strategy(index_type u) const
     {
-      return m_vertices[u].strategy;
+      return find_vertex(u).strategy;
     }
 
     const vertex& find_vertex(index_type u)

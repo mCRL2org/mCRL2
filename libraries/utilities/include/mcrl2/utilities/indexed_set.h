@@ -299,6 +299,17 @@ public:
     unlock_shared(thread_index);
     return result;
   }
+
+  /// \brief Check for elements in the indexed set.
+  /// \return True if there are no elements in the indexed set.
+  /// \threadsafe
+  bool empty(std::size_t thread_index = 0) const
+  {
+    lock_shared(thread_index);
+    bool result = m_keys.empty();
+    unlock_shared(thread_index);
+    return result;
+  }
 };
 
 } // end namespace utilities

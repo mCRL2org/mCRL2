@@ -37,6 +37,8 @@ struct pbessolve_options
   bool check_strategy = false;
 
   bool prune_todo_alternative = false;
+
+  std::size_t number_of_threads = 1;
 };
 
 inline
@@ -51,6 +53,7 @@ std::ostream& operator<<(std::ostream& out, const pbessolve_options& options)
   out << "aggressive = " << std::boolalpha << options.aggressive << std::endl;
   out << "check-strategy = " << std::boolalpha << options.check_strategy << std::endl;
   out << "prune-todo-alternative = " << std::boolalpha << options.prune_todo_alternative << std::endl;
+  out << "threads = " << options.number_of_threads << std::endl;
   return out;
 }
 
