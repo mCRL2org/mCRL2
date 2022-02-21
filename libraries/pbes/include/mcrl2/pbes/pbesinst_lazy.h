@@ -433,7 +433,6 @@ class pbesinst_lazy_algorithm
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         if (number_of_active_processes > 0)
         {
-          break;
           number_of_active_processes++;
         }
       }
