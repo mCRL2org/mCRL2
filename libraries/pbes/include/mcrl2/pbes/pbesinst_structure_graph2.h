@@ -12,6 +12,8 @@
 #ifndef MCRL2_PBES_PBESINST_STRUCTURE_GRAPH2_H
 #define MCRL2_PBES_PBESINST_STRUCTURE_GRAPH2_H
 
+#include <shared_mutex>
+
 #include "mcrl2/atermpp/standard_containers/deque.h"
 #include "mcrl2/atermpp/standard_containers/indexed_set.h"
 #include "mcrl2/atermpp/standard_containers/vector.h"
@@ -499,11 +501,12 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     }
 
     void on_report_equation(const std::size_t thread_index,
+                            std::shared_mutex& realloc_mutex,
                             const propositional_variable_instantiation& X,
                             const pbes_expression& psi, std::size_t k
                            ) override
     {
-      super::on_report_equation(thread_index, X, psi, k);
+      super::on_report_equation(thread_index, realloc_mutex, X, psi, k);
 
       // The structure graph has just been extended, so S[0] and S[1] need to be resized.
       S[0].resize(m_graph_builder.extent());

@@ -307,6 +307,7 @@ class pbesinst_lazy_algorithm
     /// \brief Reports BES equations that are produced by the algorithm.
     /// This function is called for every BES equation X = psi with rank k that is produced. By default it does nothing.
     virtual void on_report_equation(const std::size_t thread_index,
+                                    std::shared_mutex& realloc_mutex,
                                     const propositional_variable_instantiation& /* X */,
                                     const pbes_expression& /* psi */, std::size_t /* k */
                                    )
@@ -409,7 +410,7 @@ class pbesinst_lazy_algorithm
           m_todo_access.lock();
           mCRL2log(log::debug) << "generated equation " << X_e << " = " << psi_e
                                << " with rank " << k << std::endl;
-          on_report_equation(thread_index, X_e, psi_e, k);
+          on_report_equation(thread_index, m_graph_access, X_e, psi_e, k);
           todo.insert(occ.begin(), occ.end(), discovered);
           for (auto i = occ.begin(); i != occ.end(); ++i)
           {
