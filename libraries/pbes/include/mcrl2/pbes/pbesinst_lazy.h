@@ -204,9 +204,8 @@ class pbesinst_lazy_algorithm
     enumerate_quantifiers_rewriter m_global_R;
 
     // Mutexes
-    std::mutex m_exclusive_todo_access;
-    std::mutex m_write_graph_access;
-    std::shared_mutex m_read_graph_access;
+    std::mutex m_todo_access;
+    std::shared_mutex m_graph_access;
 
     volatile bool m_must_abort = false;
 
@@ -380,7 +379,7 @@ class pbesinst_lazy_algorithm
 
       while (number_of_active_processes > 0)
       {
-        m_exclusive_todo_access.lock();
+        m_todo_access.lock();
         while (!todo.elements().empty() && !m_must_abort)
         {
           ++m_iteration_count;
@@ -388,7 +387,7 @@ class pbesinst_lazy_algorithm
           detail::check_bes_equation_limit(m_iteration_count);
 
           next_todo(X_e);
-          m_exclusive_todo_access.unlock();
+          m_todo_access.unlock();
 
           std::size_t index = m_equation_index.index(X_e.name());
           const pbes_equation& eqn = m_pbes.equations()[index];
@@ -399,15 +398,15 @@ class pbesinst_lazy_algorithm
           data::remove_assignments(sigma, eqn.variable().parameters());
 
           // optional step
-          m_read_graph_access.lock_shared();
+          m_graph_access.lock_shared();
           rewrite_psi(thread_index, psi_e, eqn.symbol(), X_e, psi_e);
-          m_read_graph_access.unlock_shared();
+          m_graph_access.unlock_shared();
 
           std::set<propositional_variable_instantiation> occ = find_propositional_variable_instantiations(psi_e);
 
           // report the generated equation
           std::size_t k = m_equation_index.rank(X_e.name());
-          m_exclusive_todo_access.lock();
+          m_todo_access.lock();
           mCRL2log(log::debug) << "generated equation " << X_e << " = " << psi_e
                                << " with rank " << k << std::endl;
           on_report_equation(thread_index, X_e, psi_e, k);
@@ -423,7 +422,7 @@ class pbesinst_lazy_algorithm
             break;
           }
         }
-        m_exclusive_todo_access.unlock();
+        m_todo_access.unlock();
 
         // Check whether all processes are ready. If so the
         // number_of_active_processes becomes 0. Otherwise, this thread becomes
