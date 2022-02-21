@@ -81,7 +81,7 @@ class structure_graph
 
     struct vertex
     {
-      pbes_expression formula;
+      atermpp::detail::reference_aterm<pbes_expression> m_formula;
       decoration_type decoration;
       std::size_t rank;
       std::vector<index_type> predecessors;
@@ -95,7 +95,7 @@ class structure_graph
              std::vector<index_type> succ_ = std::vector<index_type>(),
              index_type strategy_ = undefined_vertex()
             )
-        : formula(std::move(formula_)),
+        : m_formula(std::move(formula_)),
           decoration(decoration_),
           rank(rank_),
           predecessors(std::move(pred_)),
@@ -106,6 +106,12 @@ class structure_graph
       void remove_predecessor(index_type u)
       {
         predecessors.erase(std::remove(predecessors.begin(), predecessors.end(), u), predecessors.end());
+      }
+
+      // Downcast reference aterm
+      inline pbes_expression formula() const
+      {
+        return m_formula;
       }
 
       void remove_successor(index_type u)
@@ -121,7 +127,7 @@ class structure_graph
       
       void inline mark(std::stack<std::reference_wrapper<atermpp::detail::_aterm>>& todo) const
       {
-        mark_term(*atermpp::detail::address(formula), todo);
+        mark_term(*atermpp::detail::address(m_formula), todo);
       }
     };
 
@@ -304,7 +310,7 @@ std::ostream& operator<<(std::ostream& out, const structure_graph::decoration_ty
 inline
 std::ostream& operator<<(std::ostream& out, const structure_graph::vertex& u)
 {
-  out << "vertex(formula = " << u.formula
+  out << "vertex(formula = " << u.formula()
       << ", decoration = " << u.decoration
       << ", rank = " << (u.rank == data::undefined_index() ? std::string("undefined") : std::to_string(u.rank))
       << ", predecessors = " << core::detail::print_list(u.predecessors)
@@ -324,7 +330,7 @@ std::ostream& print_structure_graph(std::ostream& out, const StructureGraph& G)
     {
       const structure_graph::vertex& u = G.find_vertex(i);
       out << std::setw(4) << i << " "
-          << "vertex(formula = " << u.formula
+          << "vertex(formula = " << u.formula()
           << ", decoration = " << u.decoration
           << ", rank = " << (u.rank == data::undefined_index() ? std::string("undefined") : std::to_string(u.rank))
           << ", predecessors = " << core::detail::print_list(structure_graph_predecessors(G, i))

@@ -406,9 +406,9 @@ class lps_solve_structure_graph_algorithm: public solve_structure_graph_algorith
       for (structure_graph::index_type vi: V)
       {
         const auto& v = G.find_vertex(vi);
-        if (is_propositional_variable_instantiation(v.formula))
+        if (is_propositional_variable_instantiation(v.formula()))
         {
-          const auto& Z = atermpp::down_cast<propositional_variable_instantiation>(v.formula);
+          const auto& Z = atermpp::down_cast<propositional_variable_instantiation>(v.formula());
           std::string Zname = Z.name();
           std::smatch match;
           if (std::regex_match(Zname, match, re))
@@ -526,9 +526,9 @@ class lts_solve_structure_graph_algorithm: public solve_structure_graph_algorith
       for (structure_graph::index_type vi: V)
       {
         const auto& v = G.find_vertex(vi);
-        if (is_propositional_variable_instantiation(v.formula))
+        if (is_propositional_variable_instantiation(v.formula()))
         {
-          const propositional_variable_instantiation& Z = atermpp::down_cast<propositional_variable_instantiation>(v.formula);
+          const propositional_variable_instantiation& Z = atermpp::down_cast<propositional_variable_instantiation>(v.formula());
           std::string Zname = Z.name();
           std::smatch match;
           if (std::regex_match(Zname, match, re))

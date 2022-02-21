@@ -99,10 +99,10 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
       struct stack_element
       {
-        pbes_expression b;
-        pbes_expression f;
-        pbes_expression g0;
-        pbes_expression g1;
+        atermpp::detail::reference_aterm<pbes_expression> b;
+        atermpp::detail::reference_aterm<pbes_expression> f;
+        atermpp::detail::reference_aterm<pbes_expression> g0;
+        atermpp::detail::reference_aterm<pbes_expression> g1;
 
         stack_element(
           pbes_expression b_,
@@ -112,13 +112,21 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         )
          : b(std::move(b_)), f(std::move(f_)), g0(std::move(g0_)), g1(std::move(g1_))
         {}
+
+        void mark(std::stack<std::reference_wrapper<atermpp::detail::_aterm>>& todo) const
+        {
+          mark_term(*atermpp::detail::address(b), todo);
+          mark_term(*atermpp::detail::address(f), todo);
+          mark_term(*atermpp::detail::address(g0), todo);
+          mark_term(*atermpp::detail::address(g1), todo);
+        }
       };
 
       std::array<vertex_set, 2>& S;
 
       detail::structure_graph_builder& graph_builder;
       // TODO: repalce with aterm container
-      std::vector<stack_element> stack;
+      atermpp::vector<stack_element> stack;
 
       Rplus_traverser(std::array<vertex_set, 2>& S_, detail::structure_graph_builder& graph_builder_)
        : S(S_), graph_builder(graph_builder_)
@@ -390,8 +398,8 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
         if (u_.decoration == structure_graph::d_none && u_.successors.empty())
         {
-          assert(is_propositional_variable_instantiation(u_.formula));
-          new_todo.insert(atermpp::down_cast<propositional_variable_instantiation>(u_.formula));
+          assert(is_propositional_variable_instantiation(u_.formula()));
+          new_todo.insert(atermpp::down_cast<propositional_variable_instantiation>(u_.formula()));
         }
         else
         {
@@ -401,7 +409,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
             for (auto v: G.successors(u))
             {
               const auto& v_ = m_graph_builder.vertex(v);
-              const auto& Y = v_.formula;
+              const auto& Y = v_.formula();
               if (contains(done1, Y))
               {
                 continue;

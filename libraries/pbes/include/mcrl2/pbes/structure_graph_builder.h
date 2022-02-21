@@ -264,7 +264,7 @@ struct structure_graph_builder
     m_vertex_map.clear();
     for (std::size_t i = 0; i < vertices().size(); i++)
     {
-      m_vertex_map.insert({vertex(i).formula, i});
+      m_vertex_map.insert({vertex(i).formula(), i});
     }
   }
 };
