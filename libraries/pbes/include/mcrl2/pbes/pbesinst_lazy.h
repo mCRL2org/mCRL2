@@ -200,7 +200,6 @@ class pbesinst_lazy_algorithm
     std::size_t m_iteration_count = 0;
 
     // The data structures that must be separate per thread.
-    mutable data::mutable_indexed_substitution<> m_global_sigma;
     /// \brief The rewriter.
     enumerate_quantifiers_rewriter m_global_R;
 
@@ -394,8 +393,7 @@ class pbesinst_lazy_algorithm
           std::size_t index = m_equation_index.index(X_e.name());
           const pbes_equation& eqn = m_pbes.equations()[index];
           const auto& phi = eqn.formula();
-          data::add_assignments(sigma, eqn.variable().parameters(),
-                                X_e.parameters());
+          data::add_assignments(sigma, eqn.variable().parameters(), X_e.parameters());
           R(psi_e, phi, sigma);
           R.clear_identifier_generator();
           data::remove_assignments(sigma, eqn.variable().parameters());
@@ -469,7 +467,7 @@ class pbesinst_lazy_algorithm
           run_thread(i,
                      todo,
                      number_of_active_processes,
-                     m_global_sigma.clone(),
+                     sigma.clone(),
                      m_global_R.clone()
                     );
         });
