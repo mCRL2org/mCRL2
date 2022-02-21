@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_STRUCTURE_GRAPH_BUILDER_H
 #define MCRL2_PBES_STRUCTURE_GRAPH_BUILDER_H
 
+#include <mcrl2/atermpp/standard_containers/unordered_map.h>
 #include "mcrl2/pbes/pbessolve_vertex_set.h"
 
 namespace mcrl2 {
@@ -25,7 +26,7 @@ struct structure_graph_builder
   typedef structure_graph::index_type index_type;
 
   structure_graph& m_graph;
-  std::unordered_map<pbes_expression, index_type> m_vertex_map;
+  atermpp::unordered_map<pbes_expression, index_type> m_vertex_map;
   pbes_expression m_initial_state; // The initial state.
 
   explicit structure_graph_builder(structure_graph& G)
