@@ -121,7 +121,7 @@ class pfnf_quantifier
     }
 
     // applies the quantifier to a pbes expression
-    pbes_expression apply(const pbes_expression& phi) const
+    pbes_expression apply_(const pbes_expression& phi) const
     {
       if (m_is_forall)
       {
@@ -233,7 +233,7 @@ class pfnf_equation
       // apply quantifiers
       for (auto i = m_quantifiers.rbegin(); i != m_quantifiers.rend(); ++i)
       {
-        phi = i->apply(phi);
+        phi = i->apply_(phi);
       }
       return pbes_equation(m_symbol, m_X, phi);
     }
@@ -247,7 +247,7 @@ class pfnf_equation
       // apply quantifiers
       for (auto i = m_quantifiers.rbegin(); i != m_quantifiers.rend(); ++i)
       {
-        phi = i->apply(phi);
+        phi = i->apply_(phi);
       }
       return pbes_equation(m_symbol, m_X, phi);
     }

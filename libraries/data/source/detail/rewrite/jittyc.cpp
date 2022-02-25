@@ -964,7 +964,7 @@ void RewriterCompilingJitty::extend_nfs(nfs_array& nfs, const function_symbol& o
   data_equation_list eqns = jittyc_eqns[opid];
   if (eqns.empty())
   {
-    nfs.fill(arity);
+    nfs.fill(true);
     return;
   }
   match_tree_list strat = create_strategy(eqns,arity);
@@ -1081,77 +1081,6 @@ class RewriterCompilingJitty::ImplementTree
     return true;
   }
 
-  ///
-  /// \brief calc_nfs tries to establish whether t is in normal form.
-  /// \param t the data expression to investigate.
-  /// \param nnfvars a list of variables that is known not to be in normal form.
-  /// \return false if t is not in normal form, true or false otherwise.
-  ///
-  /* bool calc_nfs(const data_expression& t, variable_or_number_list nnfvars)
-  {
-    if (is_function_symbol(t))
-    {
-      return opid_is_nf(down_cast<function_symbol>(t), 0);
-    }
-    else if (is_variable(t))
-    {
-      return std::find(nnfvars.begin(), nnfvars.end(), down_cast<variable>(t)) == nnfvars.end();
-    }
-    else if (is_abstraction(t))
-    {
-      // It the term has the shape lambda x:D.t and t is a normal form, then the whole
-      // term is a normal form.
-      const abstraction& abstr = down_cast<abstraction>(t);
-      if (is_lambda_binder(abstr.binding_operator()))
-      {
-        return calc_nfs(abstr.body(), nnfvars);
-      }
-      // An expression with an exists/forall is never a normal form.
-      return false;
-    }
-    else if (is_where_clause(t))
-    {
-      // I assume that a where clause is not in normal form by default.
-      // This might be too weak, and may require to be reinvestigated later.
-      return false;
-    }
-    else
-    {
-      assert(is_application(t));
-      // t has the shape application(head,t1,...,tn)
-      const application& appl = down_cast<application>(t);
-      const std::size_t arity = recursive_number_of_args(appl);
-      const data_expression& head = appl.head();
-      
-      if (!is_function_symbol(get_nested_head(head)))
-      {
-        return false;
-      }
-      assert(arity != 0);
-      if (!opid_is_nf(down_cast<function_symbol>(head), arity))
-      {
-        return false;
-      }
-      return calc_nfs_list(appl, nnfvars).is_filled();
-    }
-  }
-
-  ///
-  /// \brief calc_nfs_list applies calc_nfs to all elements of an application, and
-  ///        returns the results as a vector.
-  ///
-  nfs_array calc_nfs_list(const application& appl, variable_or_number_list nnfvars)
-  {
-    const std::size_t arity = recursive_number_of_args(appl);
-    nfs_array result(arity);
-    for(std::size_t i = 0; i < arity; ++i)
-    {
-      result.at(i) = calc_nfs(get_argument_of_higher_order_term(appl, i), nnfvars);
-    }
-    return result;
-  } */
-
-  ///
   /// \brief appl_function returns the name of a function that can construct a data::application of
   ///        arity `arity`.
   /// \param arity the arity of the application that is to be constructed with the function.
@@ -1507,7 +1436,7 @@ class RewriterCompilingJitty::ImplementTree
     {
       // !require_normal_form
       nfs_array args_nfs(arity);
-      args_nfs.fill();
+      args_nfs.fill(true);
 
       s << m_padding << appl_function(arity) << "(" << target_for_output;
       std::stringstream types_for_arguments;
@@ -1536,7 +1465,7 @@ class RewriterCompilingJitty::ImplementTree
 
     const std::size_t arity = a.size();
     nfs_array rewr_args(arity);
-    rewr_args.fill();
+    rewr_args.fill(true);
     std::stringstream dummy_result_type;  // As we rewrite to normal forms, these are always data_expressions.
 
     if (target_for_output.empty())
@@ -1602,8 +1531,6 @@ class RewriterCompilingJitty::ImplementTree
     // the application is either application(variable,t1,..,tn) or application(application(...),t1,..,tn).
 
     const std::size_t arity = a.size();
-    nfs_array rewr_args(arity);
-    rewr_args.fill();
     std::stringstream code_string;
     std::stringstream result_types;
 
@@ -1621,7 +1548,7 @@ class RewriterCompilingJitty::ImplementTree
     {
       result_types << ",";
       code_string << ", ";
-      calc_inner_term(code_string, "", t, startarg, rewr_args, result_types, type_of_code_variables);
+      calc_inner_term(code_string, "", t, startarg, true, result_types, type_of_code_variables);
     }
 
     s << delayed_application(arity) << "<" << result_types.str() << ">(";

@@ -106,13 +106,13 @@ struct add_data_variable_builder_binding: public add_data_variable_binding<Build
   using super::increase_bind_count;
   using super::decrease_bind_count;
 
-  data::where_clause apply(const data::where_clause& x)
+  
+  void apply(data::where_clause& result, const data::where_clause& x)
   {
     auto declarations = static_cast<Derived&>(*this).apply(x.declarations());
     static_cast<Derived&>(*this).enter(x);
-    data::where_clause result = data::where_clause(static_cast<Derived&>(*this).apply(x.body()), declarations);
+    result = data::where_clause(static_cast<Derived&>(*this).apply(x.body()), declarations);
     static_cast<Derived&>(*this).leave(x);
-    return result;
   }
 };
 

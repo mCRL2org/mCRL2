@@ -29,12 +29,12 @@ struct pbes_expression_traverser_base: public core::traverser<Derived>
   using super::enter;
   using super::leave;
 
-  pbes_expression apply(const data::data_expression& x)
+  void apply(pbes_expression& result, const data::data_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result=x;
   }
 };
 

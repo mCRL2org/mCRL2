@@ -33,75 +33,22 @@ public:
     : std::vector<bool>(size, false)
   { }
 
-  void fill(bool val = true)
+  void fill(bool val)
   {
     assign(size(), val);
   }
 
-  ///
-  /// \brief next iterates to the next combination of booleans (in terms of bit vectors:
-  ///        if the nfs_array represents integer i, it computes i + 1).
-  /// \return true if the operation was successful, false if an overflow occurred (i.e.,
-  ///        if the bit vector was is_filled(), in which case after calling next(), it is
-  ///        is_clear().
-  ///
-  bool next()
+  operator bool() const
   {
-    std::size_t index = 0;
-    while (index < size())
+    for (const bool b: *this)
     {
-      if (at(index))
+      if (b)
       {
-        at(index) = false;
-        ++index;
-      }
-      else
-      {
-        at(index) = true;
         return true;
       }
     }
     return false;
-  }
-
-  operator std::size_t() const
-  {
-    assert(8 * sizeof(std::size_t) > size());
-    std::size_t result = 0;
-    std::size_t mask = 1;
-    for (std::size_t i = 0; i < size(); ++i, mask <<= 1)
-    {
-      if (at(i))
-      {
-        result |= mask;
-      }
-    }
-    return result;
-  }
-
-  bool is_clear() const
-  {
-    for(std::vector<bool>::const_iterator i=begin(); i!=end(); ++i)
-    {
-      if (*i)
-      {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  bool is_filled() const
-  {
-    for(std::vector<bool>::const_iterator i=begin(); i!=end(); ++i)
-    {
-      if (!*i)
-      {
-        return false;
-      }
-    }
-    return true;
-  }
+  } 
 };
 
 }

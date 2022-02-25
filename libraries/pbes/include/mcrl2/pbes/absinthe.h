@@ -178,14 +178,6 @@ struct absinthe_algorithm
       throw mcrl2::runtime_error("function symbol " + print_symbol(x) + " not present in the function symbol mapping!");
     }
 
-    //data::data_expression apply(const data::variable& x)
-    //{
-    //  data::data_expression result = super::apply(x);
-    //  result = data::detail::create_finite_set(result);
-    //  pbes_system::detail::absinthe_check_expression(result);
-    //  return result;
-    //}
-
     template <class T>
     void apply(T& result, const data::application& x)
     {
