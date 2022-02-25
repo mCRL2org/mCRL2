@@ -1096,12 +1096,12 @@ struct state_formula_builder_base: public core::builder<Derived>
   typedef core::builder<Derived> super;
   using super::apply;
 
-  state_formula apply(const data::data_expression& x)
+  void apply(state_formula& result, const data::data_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    result = x;
   }
 };
 
