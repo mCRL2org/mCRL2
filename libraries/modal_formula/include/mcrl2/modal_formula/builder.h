@@ -1096,13 +1096,15 @@ struct state_formula_builder_base: public core::builder<Derived>
   typedef core::builder<Derived> super;
   using super::apply;
 
-  void apply(state_formula& result, const data::data_expression& x)
+  template <class T>
+  void apply(T& result, const data::data_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
     result = x;
-  }
+  } 
+
 };
 
 //--- start generated state_formulas::add_sort_expressions code ---//
