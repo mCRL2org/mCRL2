@@ -691,7 +691,9 @@ struct regular_formula_builder_base: public core::builder<Derived>
   typedef core::builder<Derived> super;
   using super::apply;
 
-  void apply(regular_formula& result, const data::data_expression& x)
+  template <class T>
+  void apply(T& result, const data::data_expression& x)
+  // void apply(regular_formula& result, const data::data_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
     // skip
@@ -699,7 +701,9 @@ struct regular_formula_builder_base: public core::builder<Derived>
     result = x;
   }
  
-  void apply(regular_formula& result, const action_formulas::action_formula& x)
+  template <class T>
+  void apply(T& result, const action_formulas::action_formula& x)
+  // void apply(regular_formula& result, const action_formulas::action_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
     // skip
