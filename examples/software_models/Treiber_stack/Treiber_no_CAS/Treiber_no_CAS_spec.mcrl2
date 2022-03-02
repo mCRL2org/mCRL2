@@ -23,7 +23,7 @@ proc
     sum id: ID, a,v: Nat. set_next_r(id, a, v).treibers_stack(hd, next[a -> v]) +
     sum id: ID, a: Nat. get_next_s(id, a, next(a)).treibers_stack(hd, next) +
     sum id: ID, v: Nat. set_head_r(id, v).treibers_stack(v, next) +
-    sum id: ID. get_head_s(id, hd).treibers_stack(hd, next) +
+    sum id: ID. get_head_s(id, hd).treibers_stack(hd, next);
 
 proc
   release_elmnt(id: ID, v: Nat, owns: Set(Nat)) =
@@ -43,15 +43,10 @@ proc
     retrieve_elmnt(id, owns) +
     sum v: Nat. (v in owns) -> release(id, v).release_elmnt(id, v, owns);
 
-proc P(id:ID, nodes:FSet(Nat)) =
-         retrieve_node(id,nodes) +
-         sum v:Nat.(v in nodes)->release(id,v).release_node(id,v,nodes);
-
-init allow({ set_next, get_next, cmpswp_hd, get_head,
+init allow({ set_next, get_next, get_head,
              nothing, retrieve, release },
        comm({ set_next_r|set_next_s -> set_next,
               get_next_r|get_next_s -> get_next,
-              set_next_r|set_next_s -> set_next,
               get_head_r|get_head_s -> get_head },
          treibers_stack(N, lambda l: Nat. max(0, l-1)) ||
          P(p1, {}) || P(p2, {})));
