@@ -132,6 +132,11 @@ struct simplify_rewriter
   using argument_type = data_expression;
   using result_type = data_expression;
 
+  void operator()(data_expression& result, const data_expression& x) const
+  {
+    core::make_apply_builder<detail::simplify_rewrite_builder>().apply(result, x);
+  }
+
   data_expression operator()(const data_expression& x) const
   {
     data_expression result;

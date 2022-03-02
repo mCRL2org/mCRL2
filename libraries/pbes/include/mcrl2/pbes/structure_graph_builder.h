@@ -12,6 +12,9 @@
 #ifndef MCRL2_PBES_STRUCTURE_GRAPH_BUILDER_H
 #define MCRL2_PBES_STRUCTURE_GRAPH_BUILDER_H
 
+#include <shared_mutex>
+
+#include <mcrl2/atermpp/standard_containers/unordered_map.h>
 #include "mcrl2/pbes/pbessolve_vertex_set.h"
 
 namespace mcrl2 {
@@ -25,24 +28,61 @@ struct structure_graph_builder
   typedef structure_graph::index_type index_type;
 
   structure_graph& m_graph;
-  std::unordered_map<pbes_expression, index_type> m_vertex_map;
+  atermpp::unordered_map<pbes_expression, index_type> m_vertex_map;
   pbes_expression m_initial_state; // The initial state.
 
   explicit structure_graph_builder(structure_graph& G)
     : m_graph(G), m_initial_state(data::undefined_data_expression())
   {}
 
+  // Ensure that exclusive access is obtained before a reallocation happens.
+  void ensure_vertex_capacity(std::shared_mutex& realloc_mutex) {
+    std::size_t n = vertices().size() + 1;
+    std::size_t capacity = vertices().capacity();
+    if (n >= capacity) {
+      realloc_mutex.lock();
+      vertices().reserve(2 * capacity);
+      realloc_mutex.unlock();
+    }
+
+    capacity = m_vertex_map.max_load_factor() * m_vertex_map.bucket_count();
+    if (n >= capacity) {
+      realloc_mutex.lock();
+      m_vertex_map.reserve(2 * capacity);
+      realloc_mutex.unlock();
+    }
+  }
+
+  // Ensure that exclusive access is obtained before a reallocation happens.
+  void ensure_edge_capacity(std::shared_mutex& realloc_mutex, structure_graph::vertex& u, structure_graph::vertex& v) {
+    std::size_t n = u.successors.size() + 1;
+    std::size_t capacity = u.successors.capacity();
+    if (n >= capacity) {
+      realloc_mutex.lock();
+      u.successors.reserve(2 * capacity);
+      realloc_mutex.unlock();
+    }
+
+    n = v.predecessors.size() + 1;
+    capacity = v.predecessors.capacity();
+    if (n >= capacity) {
+      realloc_mutex.lock();
+      v.predecessors.reserve(2 * capacity);
+      realloc_mutex.unlock();
+    }
+  }
+
   std::size_t extent() const
   {
     return m_graph.extent();
   }
 
-  std::vector<structure_graph::vertex>& vertices()
+  atermpp::vector<structure_graph::vertex>& vertices()
   {
     return m_graph.m_vertices;
   }
 
-  const std::vector<structure_graph::vertex>& vertices() const
+  const atermpp::vector<structure_graph::vertex>& vertices() const
   {
     return m_graph.m_vertices;
   }
@@ -82,9 +122,10 @@ struct structure_graph_builder
     throw std::runtime_error("structure_graph_builder: encountered unsupported pbes_expression " + pp(x));
   }
 
-  index_type create_vertex(const pbes_expression& x)
+  index_type create_vertex(const pbes_expression& x, std::shared_mutex& realloc_mutex)
   {
     assert(m_vertex_map.find(x) == m_vertex_map.end());
+    ensure_vertex_capacity(realloc_mutex);
     vertices().emplace_back(x, decoration(x));
     index_type index = vertices().size() - 1;
     m_vertex_map.insert({ x, index });
@@ -92,10 +133,10 @@ struct structure_graph_builder
   }
 
   // insert the variable corresponding to the equation x = phi; overwrites existing value, but leaves pred/succ intact
-  index_type insert_variable(const pbes_expression& x, const pbes_expression& psi, std::size_t k)
+  index_type insert_variable(const pbes_expression& x, const pbes_expression& psi, std::size_t k, std::shared_mutex& realloc_mutex)
   {
     auto i = m_vertex_map.find(x);
-    index_type ui = i == m_vertex_map.end() ? create_vertex(x) : i->second;
+    index_type ui = i == m_vertex_map.end() ? create_vertex(x, realloc_mutex) : i->second;
     auto& u = vertex(ui);
     u.decoration = decoration(psi);
     u.rank = k;
@@ -103,7 +144,7 @@ struct structure_graph_builder
   }
 
   // insert the variable x; does not overwrite existing value
-  index_type insert_variable(const pbes_expression& x)
+  index_type insert_variable(const pbes_expression& x, std::shared_mutex& realloc_mutex)
   {
     auto i = m_vertex_map.find(x);
     if (i != m_vertex_map.end())
@@ -112,11 +153,11 @@ struct structure_graph_builder
     }
     else
     {
-      return create_vertex(x);
+      return create_vertex(x, realloc_mutex);
     }
   }
 
-  index_type insert_vertex(const pbes_expression& x)
+  index_type insert_vertex(const pbes_expression& x, std::shared_mutex& realloc_mutex)
   {
     // if the vertex already exists, return it
     auto i = m_vertex_map.find(x);
@@ -126,16 +167,17 @@ struct structure_graph_builder
     }
 
     // create a new vertex, and return it
-    return create_vertex(x);
+    return create_vertex(x, realloc_mutex);
   }
 
-  void insert_edge(index_type ui, index_type vi)
+  void insert_edge(index_type ui, index_type vi, std::shared_mutex& realloc_mutex)
   {
     using utilities::detail::contains;
     auto& u = vertex(ui);
     auto& v = vertex(vi);
     if (!contains(u.successors, vi))
     {
+      ensure_edge_capacity(realloc_mutex, u, v);
       u.successors.push_back(vi);
       v.predecessors.push_back(ui);
     }
@@ -222,7 +264,7 @@ struct structure_graph_builder
     m_vertex_map.clear();
     for (std::size_t i = 0; i < vertices().size(); i++)
     {
-      m_vertex_map.insert({vertices()[i].formula, i});
+      m_vertex_map.insert({vertex(i).formula(), i});
     }
   }
 };
@@ -232,7 +274,7 @@ struct manual_structure_graph_builder
   typedef structure_graph::index_type index_type;
 
   structure_graph& m_graph;
-  std::vector<structure_graph::vertex> m_vertices;
+  atermpp::vector<structure_graph::vertex> m_vertices;
   index_type m_initial_state; // The initial state.
 
   explicit manual_structure_graph_builder(structure_graph& G)
@@ -249,8 +291,8 @@ struct manual_structure_graph_builder
   void insert_edge(index_type ui, index_type vi)
   {
     using utilities::detail::contains;
-    auto& u = m_vertices[ui];
-    auto& v = m_vertices[vi];
+    structure_graph::vertex& u = m_vertices[ui];
+    structure_graph::vertex& v = m_vertices[vi];
     if (!contains(u.successors, vi))
     {
       u.successors.push_back(vi);
@@ -260,8 +302,8 @@ struct manual_structure_graph_builder
 
   void remove_edge(index_type ui, index_type vi)
   {
-    auto& u = m_vertices[ui];
-    auto& v = m_vertices[vi];
+    structure_graph::vertex& u = m_vertices[ui];
+    structure_graph::vertex& v = m_vertices[vi];
     u.remove_successor(vi);
     v.remove_predecessor(ui);
   }

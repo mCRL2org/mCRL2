@@ -276,16 +276,33 @@ struct is_convertible : public
 ///        and contain no additional information than a
 ///          single aterm.
 /// \param   t A term of a type inheriting from an aterm.
-/// \return  A term of type Derived.
+/// \return  A term of type const Derived&.
 template <class Derived, class Base>
 const Derived& down_cast(const Base& t,
                          typename std::enable_if<is_convertible<Base, Derived>::value &&
                                                  !std::is_base_of<Derived, Base>::value>::type* = nullptr)
 {
   static_assert(sizeof(Derived) == sizeof(aterm),
-                "aterm cast cannot be applied types derived from aterms where extra fields are added");
+                "aterm cast can only be applied ot types derived from aterms where no extra fields are added");
   assert(Derived(static_cast<const aterm&>(t)) != aterm());
   return reinterpret_cast<const Derived&>(t);
+}
+
+/// \brief A cast from one aterm based type to another, as a reference, allowing to assign to it.
+//         This can be useful when assigning to a term type that contains the derived term type. 
+/// \param   t A term of a type inheriting from an aterm.
+/// \return  A term of type Derived&.
+template <class Derived, class Base>
+Derived& reference_cast(Base& t,
+                         typename std::enable_if<is_convertible<Base, Derived>::value &&
+                                                 !std::is_base_of<Derived, Base>::value>::type* = nullptr)
+{
+  static_assert(sizeof(Base) == sizeof(aterm), 
+                "aterm cast can only be applied to terms directly derived from aterms");
+  static_assert(sizeof(Derived) == sizeof(aterm),
+                "aterm cast can only be applied to types derived from aterms where no extra fields are added");
+  assert(Derived(static_cast<const aterm&>(t)) != aterm());
+  return reinterpret_cast<Derived&>(t);
 }
 
 template < typename DerivedCont, typename Base, template <typename Elem> class Cont >

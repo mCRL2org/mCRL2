@@ -71,15 +71,13 @@ bool find_loop(const simple_structure_graph& G,
   return false;
 }
 
-inline
-void find_loops(const simple_structure_graph& G,
-                const std::unordered_set<propositional_variable_instantiation>& discovered,
-                const pbesinst_lazy_todo& todo,
-                std::array<vertex_set, 2>& S,
-                std::array<strategy_vector, 2>& tau,
-                std::size_t iteration_count,
-                const detail::structure_graph_builder& graph_builder
-)
+template <class Container>
+inline void find_loops(const simple_structure_graph& G,
+                       const Container& discovered,
+                       const pbesinst_lazy_todo& todo, std::array<vertex_set, 2>& S,
+                       std::array<strategy_vector, 2>& tau, std::size_t iteration_count,
+                       const detail::structure_graph_builder& graph_builder
+                      )
 {
   mCRL2log(log::debug) << "Apply find loops (iteration " << iteration_count << ") to graph:\n" << G << std::endl;
 
