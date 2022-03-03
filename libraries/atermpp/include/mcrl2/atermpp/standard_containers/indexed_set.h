@@ -9,9 +9,10 @@
 #ifndef MCRL2_ATERMPP_INDEXED_SET_H
 #define MCRL2_ATERMPP_INDEXED_SET_H
 
+#include "mcrl2/utilities/detail/container_utility.h"
+#include "mcrl2/utilities/indexed_set.h"
 #include <mcrl2/atermpp/standard_containers/deque.h>
 
-#include "mcrl2/utilities/indexed_set.h"
 
 namespace atermpp
 {
@@ -50,5 +51,27 @@ class indexed_set: public mcrl2::utilities::indexed_set<Key, Hash, Equals, Alloc
 };
 
 } // end namespace atermppp
+
+namespace mcrl2 {
+
+namespace utilities {
+
+namespace detail {
+
+// Specialization of a function defined in mcrl2/utilities/detail/container_utility.h.
+// In utilities, atermpp is not known. 
+template <typename T>
+bool contains(const atermpp::indexed_set<T>& c, const typename atermpp::indexed_set<T>::key_type& v)
+{
+  return c.find(v) != c.end();
+}
+
+} // namespace detail
+
+} // namespace utilities
+
+} // namespace mcrl2
+
+
 
 #endif // MCRL2_ATERMPP_INDEXED_SET_H

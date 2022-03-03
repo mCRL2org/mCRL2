@@ -301,7 +301,7 @@ Derived& reference_cast(Base& t,
                 "aterm cast can only be applied to terms directly derived from aterms");
   static_assert(sizeof(Derived) == sizeof(aterm),
                 "aterm cast can only be applied to types derived from aterms where no extra fields are added");
-  assert(Derived(static_cast<const aterm&>(t)) != aterm());
+  // We do not check types as the content of the term t is likely to be overwritten shortly. 
   return reinterpret_cast<Derived&>(t);
 }
 
