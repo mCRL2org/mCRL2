@@ -12,10 +12,11 @@
 #ifndef MCRL2_PBES_REWRITERS_ENUMERATE_QUANTIFIERS_REWRITER_H
 #define MCRL2_PBES_REWRITERS_ENUMERATE_QUANTIFIERS_REWRITER_H
 
+#include <numeric>
+#include "mcrl2/atermpp/standard_containers/vector.h"
 #include "mcrl2/data/detail/split_finite_variables.h"
 #include "mcrl2/pbes/enumerator.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
-#include <numeric>
 
 namespace mcrl2 {
 
@@ -64,9 +65,9 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     return static_cast<Derived&>(*this);
   }
 
-  std::vector<data::data_expression> undo_substitution(const data::variable_list& variables)
+  atermpp::vector<data::data_expression> undo_substitution(const data::variable_list& variables)
   {
-    std::vector<data::data_expression> result;
+    atermpp::vector<data::data_expression> result;
     for (const data::variable& v : variables)
     {
       result.push_back(sigma(v));
@@ -75,7 +76,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     return result;
   }
 
-  void redo_substitution(const data::variable_list& v, const std::vector<data::data_expression>& undo)
+  void redo_substitution(const data::variable_list& v, const atermpp::vector<data::data_expression>& undo)
   {
     assert(v.size() == undo.size());
     auto i = v.begin();
