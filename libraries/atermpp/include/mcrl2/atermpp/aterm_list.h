@@ -53,6 +53,9 @@ public:
   /// Const iterator used to iterate through an term_list.
   typedef term_list_iterator<Term> const_iterator;
 
+  /// Const iterator used to iterate through an term_list.
+  typedef reverse_term_list_iterator<Term> const_reverse_iterator;
+
   /// \brief Default constructor. Creates an empty list.
   term_list() noexcept
     : aterm(detail::g_term_pool().empty_list())
@@ -280,6 +283,21 @@ public:
     return const_iterator(detail::address(detail::g_term_pool().empty_list()));
   }
 
+  /// \brief Returns a const_reverse_iterator pointing to the end of the term_list.
+  /// \details This operator requires linear time and memory in the size of the list to yield the iterator.
+  /// \return The end of the list.
+  const_reverse_iterator rbegin() const
+  {
+    return const_reverse_iterator(m_term);
+  }
+
+  /// \brief Returns a const_iterator pointing to the end of the term_list.
+  /// \return The end of the list.
+  const_reverse_iterator rend() const
+  {
+    return const_reverse_iterator();
+  }
+
   /// \brief Returns the largest possible size of the term_list.
   /// \return The largest possible size of the list.
   size_type max_size() const
@@ -455,6 +473,19 @@ public:
 
   /// \returns A reference to the tail of the list.
   const term_list<Term>& tail() const { return static_cast<const term_list<Term>&>(arg(1)); }
+
+  std::size_t size() const
+  {
+    std::size_t size=0;
+    for(_aterm_list const* i=this; 
+        i->function()!=detail::g_term_pool().as_empty_list(); 
+        i=static_cast<_aterm_list const*>(address(i->tail())))
+    {
+      ++size;
+    }
+    return size;
+  }
+
 };
 
 } // namespace detail

@@ -153,6 +153,135 @@ class term_list_iterator
 
 };
 
+/// \brief Reverse iterator for term_list.
+template <typename Term>
+class reverse_term_list_iterator 
+{
+    template<class T>
+    friend class term_list;
+
+  protected:
+    std::size_t m_position;   // m_position refers one above the position to be deliverd. 
+    std::unique_ptr<detail::_aterm_list<Term> const*[]> m_list_element_references;
+
+    /// \brief Constructor from an aterm which must be a list.
+    /// \param l A sequence of terms
+    reverse_term_list_iterator(detail::_aterm const* l)
+      : m_position(reinterpret_cast<const detail::_aterm_list<Term>*>(l)->size()),
+        m_list_element_references((m_position==0?nullptr:new typename detail::_aterm_list<Term> const*[m_position]))
+    { 
+      assert(l->function()==detail::g_term_pool().as_list()
+             || l->function()==detail::g_term_pool().as_empty_list());
+      std::size_t j=0;
+      for(detail::_aterm_list<Term> const* t=reinterpret_cast<detail::_aterm_list<Term> const*>(l); 
+              t->function()==detail::g_term_pool().as_list(); 
+              t=reinterpret_cast<detail::_aterm_list<Term> const*>(detail::address(t->tail())), j++)
+      {
+        m_list_element_references[j]=t;
+      }
+    } 
+
+  public:
+    typedef Term value_type;
+    typedef Term& reference;
+    typedef Term* pointer;
+    typedef ptrdiff_t difference_type;
+    typedef std::forward_iterator_tag iterator_category;
+
+    /// \brief Default constructor.
+    reverse_term_list_iterator()
+      : m_position(0),
+        m_list_element_references(nullptr)
+    {
+    }
+
+    /// \brief The copy constructor is not available.
+    /// \param other A sequence of terms
+    reverse_term_list_iterator(const reverse_term_list_iterator& other) = delete;
+
+    /// \brief Assignment is not available.
+    /// \param other A sequence of terms
+    reverse_term_list_iterator& operator=(const reverse_term_list_iterator& other) = delete;
+
+    /// \brief Dereference operator on an iterator
+    const Term& operator*() const
+    {
+      assert(m_list_element_references[m_position-1]->function()==detail::g_term_pool().as_list());
+      return m_list_element_references[m_position-1]->head();
+    }
+
+    /// Arrow operator on an iterator
+    const Term* operator->() const
+    {
+      assert(m_list_element_references[m_position-1]->function()==detail::g_term_pool().as_list());
+      return &(m_list_element_references[m_position-1]->head());
+    }
+    
+    /// \brief Prefix increment operator on iterator.
+    reverse_term_list_iterator& operator++()
+    {
+      assert(m_list_element_references[m_position-1]->function() == detail::g_term_pool().as_list());
+      m_position--;
+      return *this;
+    }
+
+    /// \brief Postfix increment operator on iterator.
+    void operator++(int)
+    {
+      assert(m_list_element_references[m_position-1]->function() == detail::g_term_pool().as_list());
+      m_position--;
+    }
+
+    /// \brief Equality of iterators.
+    /// \param other The iterator with which this iterator is compared.
+    /// \return true if the iterators point to the same term_list.
+    bool operator ==(const reverse_term_list_iterator& other) const
+    {
+      return m_position == other.m_position;
+    }
+
+    /// \brief Inequality of iterators.
+    /// \param other The iterator with which this iterator is compared.
+    /// \return true if the iterators do not point to the same term_list.
+    bool operator !=(const reverse_term_list_iterator& other) const
+    {
+      return !(*this == other);
+    }
+
+    /// \brief Comparison of iterators.
+    /// \param other The iterator with which this iterator is compared.
+    /// \return true if the pointer to this termlist is smaller than the other pointer.
+    bool operator <(const reverse_term_list_iterator& other) const
+    {
+      return m_position < other.position;
+    }
+
+    /// \brief Comparison of iterators.
+    /// \param other The iterator with which this iterator is compared.
+    /// \return true if the iterators point to the same term_list.
+    bool operator <=(const reverse_term_list_iterator& other) const
+    {
+      return m_position <= other.m_position;
+    }
+
+    /// \brief Comparison of iterators.
+    /// \param other The iterator with which this iterator is compared.
+    /// \return true if the iterators point to the same term_list.
+    bool operator >(const reverse_term_list_iterator& other) const
+    {
+      return m_position > other.m_position;
+    }
+
+    /// \brief Comparison of iterators.
+    /// \param other The iterator with which this iterator is compared.
+    /// \return true if the iterators point to the same term_list.
+    bool operator >=(const reverse_term_list_iterator& other) const
+    {
+      return m_position >= other.m_position;
+    }
+
+};
+
 } // namespace atermpp
 
 #endif // MCRL2_ATERMPP_ATERM_LIST_ITERATOR_H

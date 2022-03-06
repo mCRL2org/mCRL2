@@ -157,9 +157,13 @@ bool compute_finite_function_sorts(const function_sort& sort,
 }
 
 template <typename Rewriter>
-bool is_enumerable(const data_specification& dataspec, const Rewriter& rewr, const sort_expression& sort, std::list<sort_expression>& parents)
+bool is_enumerable(const data_specification& dataspec, 
+                   const Rewriter& rewr, 
+                   const sort_expression& sort, 
+                   std::list<sort_expression>& parents)
 {
-  if(sort_bag::is_bag(sort) || sort_fbag::is_fbag(sort))
+  assert(sort == normalize_sorts(sort,dataspec));
+  if (sort_bag::is_bag(sort) || sort_fbag::is_fbag(sort))
   {
     return false;
   }
@@ -172,7 +176,7 @@ bool is_enumerable(const data_specification& dataspec, const Rewriter& rewr, con
     return dataspec.is_certainly_finite(func) &&
       detail::compute_finite_function_sorts(func, id_gen, dataspec, rewr, expr_vec, var_list);
   }
-  else if(sort_set::is_set(sort) || sort_fset::is_fset(sort))
+  else if (sort_set::is_set(sort) || sort_fset::is_fset(sort))
   {
     enumerator_identifier_generator id_gen;
     data_expression_vector expr_vec;
@@ -182,14 +186,14 @@ bool is_enumerable(const data_specification& dataspec, const Rewriter& rewr, con
   }
   else
   {
-    const function_symbol_vector& constructors = dataspec.constructors(sort);
-    if(constructors.empty())
+    const function_symbol_vector& constructors = dataspec.constructors(sort, true);
+    if (constructors.empty())
     {
       return false;
     }
     else
     {
-      if(std::find(parents.begin(), parents.end(), sort) != parents.end())
+      if (std::find(parents.begin(), parents.end(), sort) != parents.end())
       {
         return true;
       }

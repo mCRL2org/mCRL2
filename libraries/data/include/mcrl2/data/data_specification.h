@@ -353,10 +353,15 @@ class data_specification: public sort_specification
     /// \param[in] s A sort expression.
     /// \return The constructors for sort s in this specification.
     inline
-    const function_symbol_vector& constructors(const sort_expression& s) const
+    const function_symbol_vector& constructors(const sort_expression& s, const bool do_not_normalize=false) const
     {
       normalise_data_specification_if_required();
       m_grouped_normalised_constructors.reset(constructors());
+      if (do_not_normalize)
+      {
+        assert(normalize_sorts(s,*this)==s);
+        return m_grouped_normalised_constructors.mapping()[s];
+      }
       return m_grouped_normalised_constructors.mapping()[normalize_sorts(s,*this)];
     }
 

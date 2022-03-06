@@ -27,44 +27,43 @@ namespace detail {
 /// \param finite_variables A sequence of data variables
 /// \param infinite_variables A sequence of data variables
 inline
-void split_finite_variables(data::variable_list variables, const data::data_specification& data, data::variable_list& finite_variables, data::variable_list& infinite_variables)
+void split_finite_variables(data::variable_list variables, 
+                            const data::data_specification& data, 
+                            data::variable_list& finite_variables, 
+                            data::variable_list& infinite_variables)
 {
-  std::vector<data::variable> finite;
-  std::vector<data::variable> infinite;
-  for (const data::variable& v: variables)
+  for (data::variable_list::const_reverse_iterator i = variables.rbegin(); i!=variables.rend(); i++)
   {
-    if (data.is_certainly_finite(v.sort()))
+    if (data.is_certainly_finite(i->sort()))
     {
-      finite.push_back(v);
+      finite_variables.push_front(*i);
     }
     else
     {
-      infinite.push_back(v);
+      infinite_variables.push_front(*i);
     }
   }
-  finite_variables = data::variable_list(finite.begin(), finite.end());
-  infinite_variables = data::variable_list(infinite.begin(), infinite.end());
 }
 
 template <typename Rewriter>
 inline
-void split_enumerable_variables(data::variable_list variables, const data::data_specification& data, const Rewriter& rewr, data::variable_list& enumerable_variables, data::variable_list& non_enumerable_variables)
+void split_enumerable_variables(data::variable_list variables, 
+                                const data::data_specification& data, 
+                                const Rewriter& rewr, 
+                                data::variable_list& enumerable_variables, 
+                                data::variable_list& non_enumerable_variables)
 {
-  std::vector<data::variable> enumerable;
-  std::vector<data::variable> non_enumerable;
-  for (const data::variable& v: variables)
+  for (data::variable_list::const_reverse_iterator i = variables.rbegin(); i!=variables.rend(); i++)
   {
-    if (is_enumerable(data, rewr, v.sort()))
+    if (is_enumerable(data, rewr, i->sort()))
     {
-      enumerable.push_back(v);
+      enumerable_variables.push_front(*i);
     }
     else
     {
-      non_enumerable.push_back(v);
+      non_enumerable_variables.push_front(*i);
     }
   }
-  enumerable_variables = data::variable_list(enumerable.begin(), enumerable.end());
-  non_enumerable_variables = data::variable_list(non_enumerable.begin(), non_enumerable.end());
 }
 
 } // namespace detail

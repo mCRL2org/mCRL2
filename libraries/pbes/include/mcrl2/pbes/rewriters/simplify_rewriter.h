@@ -30,7 +30,22 @@ struct add_simplify: public Builder<Derived>
   void apply(T& result, const not_& x)
   {
     apply(result, x.operand());
-    result = data::optimized_not(result);
+    if (is_false(result))
+    {
+      result = true_();
+      return;
+    }
+    if (is_false(result))
+    {
+      result = true_();
+      return;
+    }
+    if (is_not(result))
+    {
+      result = atermpp::down_cast<not_>(result).operand();
+      return;
+    }
+    make_not_(result, result);
   }
 
   template <class T>
@@ -49,7 +64,16 @@ struct add_simplify: public Builder<Derived>
     }
     pbes_expression right;
     apply(right, x.right());
-    result = data::optimized_and(result, right);
+    if (is_false(right))
+    {
+      result = false_();
+      return;
+    }
+    if (is_true(right) || result==right)
+    {
+      return;
+    }
+    make_and_(result,result, right);
   }
 
   template <class T>
@@ -68,42 +92,64 @@ struct add_simplify: public Builder<Derived>
     }
     pbes_expression right;
     apply(right, x.right());
-    result = data::optimized_or(result, right);
+    if (is_true(right))
+    {
+      result = true_();
+      return;
+    }
+    if (is_false(right) || result==right)
+    {
+      return;
+    }
+    make_or_(result,result, right);
   }
 
   template <class T>
   void apply(T& result, const imp& x)
   {
-    apply(result, x.left());
-    if (is_false(result))
-    {
+    apply(result, x.right());
+    if (is_true(result))
+    { 
       result = true_();
       return;
     }
-    if (is_true(result))
-    {
+    if (is_false(result))
+    { 
       apply(result, x.right());
+      if (is_not(result))
+      { 
+        result = atermpp::down_cast<not_>(result).operand();
+        return;
+      }
+      make_not_(result, result);
       return;
     }
-    pbes_expression right;
-    apply(right, x.right());
-    result = data::optimized_imp(result, right);
+    pbes_expression left;
+    apply(left, x.left());
+    if (is_true(left))
+    { 
+      return;
+    }
+    if (is_false(left) || result==left)
+    { 
+      result = true_();
+      return;
+    }
+    make_imp(result, left, result);
   }
 
   template <class T>
   void apply(T& result, const forall& x)
   {
-    pbes_expression body;
-    apply(body, x.body());
-    result = data::optimized_forall(x.variables(), body, true);
+    apply(result, x.body());
+    result = data::optimized_forall(x.variables(), result, true);
   }
 
   template <class T>
   void apply(T& result, const exists& x)
   {
-    pbes_expression body;
-    apply(body, x.body());
-    result = data::optimized_exists(x.variables(), body, true);
+    apply(result, x.body());
+    result = data::optimized_exists(x.variables(), result, true);
   }
 };
 
