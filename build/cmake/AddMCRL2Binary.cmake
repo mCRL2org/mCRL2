@@ -1,5 +1,9 @@
 include(CMakeParseArguments)
 
+# The Threads module provides the Threads::Threads target since 3.1
+cmake_minimum_required(VERSION 3.1)
+find_package(Threads)
+
 function(_add_library_tests TARGET_NAME)
   file(GLOB librarytest "test/*.cpp")
   file(GLOB libraryexample "example/*.cpp")
@@ -37,6 +41,8 @@ function(_add_library_tests TARGET_NAME)
       else()
         add_test(NAME ${testname} COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target ${testname})
       endif()
+
+      target_link_libraries(${testname} Threads::Threads)
 
       set_tests_properties(${testname} PROPERTIES
         LABELS ${category}

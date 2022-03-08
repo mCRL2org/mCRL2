@@ -6,8 +6,6 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file replace_test.cpp
-/// \brief Add your file description here.
 
 #define BOOST_TEST_MODULE replace_test
 #include <boost/test/included/unit_test.hpp>
@@ -15,6 +13,8 @@
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/standard_containers/vector.h"
 #include "mcrl2/atermpp/detail/global_aterm_pool.h"
+
+#include <thread>
 
 using namespace atermpp;
 
