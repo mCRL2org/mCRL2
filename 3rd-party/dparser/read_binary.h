@@ -7,9 +7,9 @@
 typedef struct BinaryTablesHead {
   int n_relocs;
   int n_strings;
-  size_t d_parser_tables_loc;
-  size_t tables_size;
-  size_t strings_size;
+  int d_parser_tables_loc;
+  int tables_size;
+  int strings_size;
 } BinaryTablesHead;
 
 typedef struct BinaryTables {
@@ -17,10 +17,9 @@ typedef struct BinaryTables {
   char *tables;
 } BinaryTables;
 
-
-BinaryTables * read_binary_tables(char *file_name, D_ReductionCode spec_code, D_ReductionCode final_code);
-BinaryTables * read_binary_tables_from_file(FILE *fp, D_ReductionCode spec_code, D_ReductionCode final_code);
-BinaryTables * read_binary_tables_from_string(unsigned char *buf, D_ReductionCode spec_code, D_ReductionCode final_code);
-void free_BinaryTables(BinaryTables * binary_tables);
+BinaryTables *read_binary_tables(char *file_name, D_ReductionCode spec_code, D_ReductionCode final_code);
+BinaryTables *read_binary_tables_from_file(FILE *fp, D_ReductionCode spec_code, D_ReductionCode final_code);
+BinaryTables *read_binary_tables_from_string(unsigned char *buf, D_ReductionCode spec_code, D_ReductionCode final_code);
+void free_BinaryTables(BinaryTables *binary_tables);
 
 #endif
