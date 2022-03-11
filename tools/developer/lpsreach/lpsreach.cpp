@@ -13,6 +13,7 @@
 #include "mcrl2/lps/lpsreach.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/symbolic/ordering.h"
 
 using namespace mcrl2;
 using data::tools::rewriter_tool;
@@ -23,7 +24,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
   typedef rewriter_tool<input_output_tool> super;
 
   protected:
-    lps::symbolic_reachability_options options;
+    symbolic::symbolic_reachability_options options;
 
     // Lace options
     std::size_t lace_n_workers = 1;
@@ -157,7 +158,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
 
       if (options.info)
       {
-        std::cout << lps::print_read_write_patterns(algorithm.read_write_group_patterns());
+        std::cout << symbolic::print_read_write_patterns(algorithm.read_write_group_patterns());
       }
       else
       {

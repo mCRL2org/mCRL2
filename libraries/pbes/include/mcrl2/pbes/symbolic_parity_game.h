@@ -10,15 +10,12 @@
 #ifndef MCRL2_PBES_SYMBOLIC_PARITY_GAME_H
 #define MCRL2_PBES_SYMBOLIC_PARITY_GAME_H
 
-#include <sylvan_ldd.hpp>
-#include <boost/dynamic_bitset.hpp>
-#include "mcrl2/data/consistency.h"
-#include "mcrl2/data/enumerator.h"
-#include "mcrl2/data/substitution_utility.h"
-#include "mcrl2/lps/symbolic_reachability.h"
-#include "mcrl2/pbes/pbesreach.h"
 #include "mcrl2/pbes/srf_pbes.h"
 #include "mcrl2/pbes/pbes_equation_index.h"
+#include "mcrl2/symbolic/alternative_relprod.h"
+#include "mcrl2/symbolic/data_index.h"
+#include "mcrl2/symbolic/print.h"
+#include "mcrl2/symbolic/symbolic_reachability.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/stopwatch.h"
 
@@ -50,7 +47,7 @@ std::string print_graph(
   const ldd& U,
   const ldd& V,
   const std::vector<SummandGroup>& R,
-  const std::vector<lps::data_expression_index>& data_index,
+  const std::vector<symbolic::data_expression_index>& data_index,
   const ldd& V0, // disjunctive nodes
   const std::map<std::size_t, ldd>& rank_map // maps rank to the corresponding set of nodes
 )
@@ -121,7 +118,7 @@ std::string print_graph(
         u_successors.push_back(index(V_values, w));
       }
     }
-    text[i] = std::to_string(u_index) + " " + print_state(data_index, U_solutions[i]) + ", decoration = " + (includes(V0, u) ? "disjunctive" : "conjunctive") + ", rank = " + std::to_string(rank(u)) + ", successors = " + core::detail::print_list(u_successors);
+    text[i] = std::to_string(u_index) + " " + symbolic::print_state(data_index, U_solutions[i]) + ", decoration = " + (includes(V0, u) ? "disjunctive" : "conjunctive") + ", rank = " + std::to_string(rank(u)) + ", successors = " + core::detail::print_list(u_successors);
   }
   return utilities::string_join(text, "\n");
 }
@@ -164,7 +161,7 @@ std::string print_nodes(const ldd& U, const ldd& V)
 }
 
 /// \brief maps proposition variable ldd values to (rank, is_disjunctive)
-std::map<std::size_t, std::pair<std::size_t, bool>> compute_equation_info(const pbes_system::srf_pbes& pbes, const std::vector<lps::data_expression_index>& data_index)
+std::map<std::size_t, std::pair<std::size_t, bool>> compute_equation_info(const pbes_system::srf_pbes& pbes, const std::vector<symbolic::data_expression_index>& data_index)
 {
   pbes_system::pbes_equation_index equation_index(pbes);
 
@@ -208,7 +205,7 @@ class symbolic_parity_game
     bool m_no_relprod = false;
     bool m_chaining = false;
 
-    const std::vector<lps::data_expression_index>& m_data_index; // for debugging only
+    const std::vector<symbolic::data_expression_index>& m_data_index; // for debugging only
     ldd m_all_nodes; // for debugging only
 
   public:
@@ -218,7 +215,7 @@ class symbolic_parity_game
     symbolic_parity_game(
       const srf_pbes& pbes,
       const std::vector<summand_group>& summand_groups,
-      const std::vector<lps::data_expression_index>& data_index,
+      const std::vector<symbolic::data_expression_index>& data_index,
       const ldd& V,
       bool no_relprod,
       bool chaining
@@ -523,7 +520,7 @@ private:
     /// \returns The set { u in U | exists v in V: u -> v }, where -> is described by the given group.
     ldd predecessors(const ldd& U, const ldd& V, const summand_group& group)
     {
-      return m_no_relprod ? lps::alternative_relprev(V, group, U) : relprev(V, group.L, group.Ir, U);
+      return m_no_relprod ? symbolic::alternative_relprev(V, group, U) : relprev(V, group.L, group.Ir, U);
     }
 
     /// \brief Compute the safe control attractor set for todo where chaining is restricted to W.

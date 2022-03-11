@@ -12,135 +12,28 @@
 #ifndef MCRL2_LPS_LPSREACH_H
 #define MCRL2_LPS_LPSREACH_H
 
-#include <chrono>
-#include <iomanip>
-#include <boost/dynamic_bitset.hpp>
-#include <sylvan_ldd.hpp>
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/utilities/detail/container_utility.h"
-#include "mcrl2/data/consistency.h"
-#include "mcrl2/data/enumerator.h"
-#include "mcrl2/data/substitution_utility.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/lps/one_point_rule_rewrite.h"
 #include "mcrl2/lps/order_summand_variables.h"
+#include "mcrl2/lps/lps_summand_group.h"
 #include "mcrl2/lps/replace_constants_by_variables.h"
 #include "mcrl2/lps/resolve_name_clashes.h"
-#include "mcrl2/lps/symbolic_reachability.h"
+#include "mcrl2/symbolic/ordering.h"
+#include "mcrl2/symbolic/print.h"
+#include "mcrl2/symbolic/symbolic_reachability.h"
 #include "mcrl2/utilities/parse_numbers.h"
 #include "mcrl2/utilities/stack_array.h"
 #include "mcrl2/utilities/stopwatch.h"
 
-namespace mcrl2 {
+#include <sylvan_ldd.hpp>
 
-namespace lps {
+#include <chrono>
+#include <iomanip>
+#include <boost/dynamic_bitset.hpp>
 
-inline
-std::pair<std::set<data::variable>, std::set<data::variable>> read_write_parameters(const lps::action_summand& summand, const std::set<data::variable>& process_parameters)
-{
-  using utilities::detail::set_union;
-  using utilities::detail::set_intersection;
-
-  std::set<data::variable> read_parameters = set_union(data::find_free_variables(summand.condition()), lps::find_free_variables(summand.multi_action()));
-  std::set<data::variable> write_parameters;
-
-  for (const auto& assignment: summand.assignments())
-  {
-    if (assignment.lhs() != assignment.rhs())
-    {
-      write_parameters.insert(assignment.lhs());
-      data::find_free_variables(assignment.rhs(), std::inserter(read_parameters, read_parameters.end()));
-    }
-  }
-
-  return { set_intersection(read_parameters, process_parameters), set_intersection(write_parameters, process_parameters) };
-}
-
-inline
-std::map<data::variable, std::size_t> process_parameter_index(const lps::specification& lpsspec)
-{
-  std::map<data::variable, std::size_t> result;
-  std::size_t i = 0;
-  for (const data::variable& v: lpsspec.process().process_parameters())
-  {
-    result[v] = i++;
-  }
-  return result;
-}
-
-inline
-std::vector<boost::dynamic_bitset<>> compute_read_write_patterns(const lps::specification& lpsspec)
-{
-  using utilities::detail::as_set;
-
-  std::vector<boost::dynamic_bitset<>> result;
-
-  auto process_parameters = as_set(lpsspec.process().process_parameters());
-  std::size_t n = process_parameters.size();
-  std::map<data::variable, std::size_t> index = process_parameter_index(lpsspec);
-
-  for (const auto& summand: lpsspec.process().action_summands())
-  {
-    auto [read_parameters, write_parameters] = read_write_parameters(summand, process_parameters);
-    auto read = lps::parameter_indices(read_parameters, index);
-    auto write = lps::parameter_indices(write_parameters, index);
-    boost::dynamic_bitset<> rw(2*n);
-    for (std::size_t j: read)
-    {
-      rw[2*j] = true;
-    }
-    for (std::size_t j: write)
-    {
-      rw[2*j + 1] = true;
-    }
-    result.push_back(rw);
-  }
-
-  return result;
-}
-
-struct lps_summand_group: public lps::summand_group
-{
-  lps_summand_group(
-    const lps::specification& lpsspec,
-    const data::variable_list& process_parameters, // the reordered process parameters
-    const std::set<std::size_t>& group_indices,
-    const boost::dynamic_bitset<>& group_pattern,
-    const std::vector<boost::dynamic_bitset<>>& read_write_patterns,
-    const std::vector<std::size_t> variable_order // a permutation of [0 .. |process_parameters| - 1]
-  )
-    : lps::summand_group(process_parameters, group_pattern)
-  {
-    using lps::project;
-    using utilities::detail::as_vector;
-    using utilities::detail::as_set;
-    using utilities::detail::set_union;
-
-    std::set<std::size_t> used;
-    for (std::size_t j: read)
-    {
-      used.insert(2*j);
-    }
-    for (std::size_t j: write)
-    {
-      used.insert(2*j + 1);
-    }
-
-    const auto& lps_summands = lpsspec.process().action_summands();
-    for (std::size_t i: group_indices)
-    {
-      std::vector<int> copy;
-      for (std::size_t j: used)
-      {
-        bool b = read_write_patterns[i][j];
-        copy.push_back(b ? 0 : 1);
-      }
-      const auto& smd = lps_summands[i];
-      summands.emplace_back(smd.condition(), smd.summation_variables(), project(as_vector(permute_copy(smd.next_state(lpsspec.process().process_parameters()), variable_order)), write), copy);
-    }
-  }
-};
+namespace mcrl2::lps {
 
 class lpsreach_algorithm
 {
@@ -148,17 +41,17 @@ class lpsreach_algorithm
     using enumerator_element = data::enumerator_list_element_with_substitution<>;
 
     template <typename Context>
-    friend void lps::learn_successors_callback(WorkerP*, Task*, std::uint32_t* v, std::size_t n, void* context);
+    friend void symbolic::learn_successors_callback(WorkerP*, Task*, std::uint32_t* v, std::size_t n, void* context);
 
   protected:
-    const lps::symbolic_reachability_options& m_options;
+    const symbolic::symbolic_reachability_options& m_options;
     data::rewriter m_rewr;
     data::mutable_indexed_substitution<> m_sigma;
     data::enumerator_identifier_generator m_id_generator;
     data::enumerator_algorithm<> m_enumerator;
     data::variable_list m_process_parameters;
     std::size_t m_n;
-    std::vector<lps::data_expression_index> m_data_index;
+    std::vector<symbolic::data_expression_index> m_data_index;
     std::vector<lps_summand_group> m_summand_groups;
     data::data_expression_list m_initial_state;
     std::vector<boost::dynamic_bitset<>> m_summand_patterns;
@@ -181,13 +74,13 @@ class lpsreach_algorithm
     }
 
     // R.L := R.L U {(x,y) in R | x in X}
-    void learn_successors(std::size_t i, summand_group& R, const ldd& X)
+    void learn_successors(std::size_t i, symbolic::summand_group& R, const ldd& X)
     {
       mCRL2log(log::debug1) << "learn successors of summand group " << i << " for X = " << print_states(m_data_index, X, R.read) << std::endl;
 
       using namespace sylvan::ldds;
-      std::pair<lpsreach_algorithm&, summand_group&> context{*this, R};
-      sat_all_nopar(X, lps::learn_successors_callback<std::pair<lpsreach_algorithm&, summand_group&>>, &context);
+      std::pair<lpsreach_algorithm&, symbolic::summand_group&> context{*this, R};
+      sat_all_nopar(X, symbolic::learn_successors_callback<std::pair<lpsreach_algorithm&, symbolic::summand_group&>>, &context);
     }
 
     template <typename Specification>
@@ -209,9 +102,9 @@ class lpsreach_algorithm
     }
 
   public:
-    lpsreach_algorithm(const lps::specification& lpsspec, const lps::symbolic_reachability_options& options_)
+    lpsreach_algorithm(const lps::specification& lpsspec, const symbolic::symbolic_reachability_options& options_)
       : m_options(options_),
-        m_rewr(lps::construct_rewriter(lpsspec.data(), m_options.rewrite_strategy, lps::find_function_symbols(lpsspec), m_options.remove_unused_rewrite_rules)),
+        m_rewr(symbolic::construct_rewriter(lpsspec.data(), m_options.rewrite_strategy, lps::find_function_symbols(lpsspec), m_options.remove_unused_rewrite_rules)),
         m_enumerator(m_rewr, lpsspec.data(), m_rewr, m_id_generator, false)
     {
       using utilities::detail::as_vector;
@@ -230,28 +123,28 @@ class lpsreach_algorithm
       m_initial_state = data::data_expression_list(initial_values.begin(), initial_values.end());
 
       m_summand_patterns = compute_read_write_patterns(lpsspec_);
-      lps::adjust_read_write_patterns(m_summand_patterns, m_options);
+      symbolic::adjust_read_write_patterns(m_summand_patterns, m_options);
 
-      m_variable_order = lps::compute_variable_order(m_options.variable_order, m_summand_patterns);
+      m_variable_order = symbolic::compute_variable_order(m_options.variable_order, m_summand_patterns);
       mCRL2log(log::debug) << "variable order = " << core::detail::print_list(m_variable_order) << std::endl;
-      m_summand_patterns = lps::reorder_read_write_patterns(m_summand_patterns, m_variable_order);
-      mCRL2log(log::debug) << lps::print_read_write_patterns(m_summand_patterns);
+      m_summand_patterns = symbolic::reorder_read_write_patterns(m_summand_patterns, m_variable_order);
+      mCRL2log(log::debug) << symbolic::print_read_write_patterns(m_summand_patterns);
 
-      m_process_parameters = permute_copy(m_process_parameters, m_variable_order);
-      m_initial_state = permute_copy(m_initial_state, m_variable_order);
+      m_process_parameters = symbolic::permute_copy(m_process_parameters, m_variable_order);
+      m_initial_state = symbolic::permute_copy(m_initial_state, m_variable_order);
       mCRL2log(log::debug) << "process parameters = " << core::detail::print_list(m_process_parameters) << std::endl;
 
       for (const data::variable& param: m_process_parameters)
       {
-        m_data_index.push_back(lps::data_expression_index(param.sort()));
+        m_data_index.push_back(symbolic::data_expression_index(param.sort()));
       }
 
-      std::vector<std::set<std::size_t>> groups = lps::compute_summand_groups(m_options.summand_groups, m_summand_patterns);
+      std::vector<std::set<std::size_t>> groups = symbolic::compute_summand_groups(m_options.summand_groups, m_summand_patterns);
       for (const auto& group: groups)
       {
         mCRL2log(log::debug) << "group " << core::detail::print_set(group) << std::endl;
       }
-      m_group_patterns = lps::compute_summand_group_patterns(m_summand_patterns, groups);
+      m_group_patterns = symbolic::compute_summand_group_patterns(m_summand_patterns, groups);
       for (std::size_t j = 0; j < m_group_patterns.size(); j++)
       {
         m_summand_groups.emplace_back(lpsspec_, m_process_parameters, groups[j], m_group_patterns[j], m_summand_patterns, m_variable_order);
@@ -268,7 +161,7 @@ class lpsreach_algorithm
     {
       if (m_options.no_relprod)
       {
-        ldd z = lps::alternative_relprod(U, group);
+        ldd z = symbolic::alternative_relprod(U, group);
         mCRL2log(log::debug1) << "relprod(" << i << ", todo) = " << print_states(m_data_index, z) << std::endl;
         return z;
       }
@@ -441,8 +334,6 @@ class lpsreach_algorithm
     }
 };
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_LPSREACH_H
