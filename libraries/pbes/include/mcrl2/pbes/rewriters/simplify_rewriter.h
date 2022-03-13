@@ -119,10 +119,20 @@ struct add_simplify: public Builder<Derived>
     }
     if (is_false(result))
     { 
-      apply(result, x.right());
+      apply(result, x.left());
       if (is_not(result))
       { 
         result = atermpp::down_cast<not_>(result).operand();
+        return;
+      }
+      if (is_true(result))
+      {
+        result = false_();
+        return;
+      }
+      if (is_false(result))
+      {
+        result = true_();
         return;
       }
       make_not_(result, result);
