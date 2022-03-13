@@ -1132,7 +1132,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
     def builder_function(self, all_classes, dependencies, modifiability_map):
         text = r'''<TEMPLATE>void <METHOD>(<RESULT><CONST><CLASS_NAME>& x)
 { 
-  static_cast<Derived&>(*this).enter(x);<VISIT_TEXT>
+  <ASSERT>static_cast<Derived&>(*this).enter(x);<VISIT_TEXT>
   static_cast<Derived&>(*this).leave(x);<RETURN_STATEMENT>
 }
 '''
@@ -1147,6 +1147,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             const = ''
             method = 'update'
             result = ''
+            assertion = ''
         else:
             const = 'const '
             template = 'template <class T>'
@@ -1162,6 +1163,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             if 'data::abstraction' in return_type:
                 return_type = 'data::data_expression'
             result = 'T& result, '
+            assertion = 'assert(&result!=&x);'
 
         if is_modifiable_type(classname, modifiability_map):
             return_statement = ''
@@ -1250,6 +1252,8 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             template = template + '\n'
         if return_statement != '':
             return_statement = '\n  ' + return_statement
+        if assertion != '':
+            assertion = return_statement +'\n  '
         if visit_text != '':
             visit_text = '\n' + indent_text(visit_text, '  ')
 
@@ -1261,6 +1265,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
         text = re.sub('<CLASS_NAME>', classname, text)
         text = re.sub('<RETURN_STATEMENT>', return_statement, text)
         text = re.sub('<METHOD>', method, text)
+        text = re.sub('<ASSERT>', assertion, text)
         if self.constructor.is_template():
             text = 'template <typename ' + ', typename '.join(f.template_parameters()) + '>\n' + text
         return text
