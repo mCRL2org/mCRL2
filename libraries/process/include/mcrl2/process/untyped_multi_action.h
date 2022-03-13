@@ -58,7 +58,7 @@ class untyped_multi_action: public atermpp::aterm_appl
 template <class... ARGUMENTS>
 inline void make_untyped_multi_action(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_UntypedMultiAction(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_UntypedMultiAction(), args...);
 }
 
 /// \brief list of untyped_multi_actions

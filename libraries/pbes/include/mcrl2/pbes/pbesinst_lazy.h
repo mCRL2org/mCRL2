@@ -266,7 +266,8 @@ class pbesinst_lazy_algorithm
       if (changed)
       {
         simplify_rewriter simplify;
-        simplify(result, result);
+        const pbes_expression result1=result;
+        simplify(result, result1);
       }
     }
 

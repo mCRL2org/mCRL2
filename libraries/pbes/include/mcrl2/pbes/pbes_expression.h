@@ -251,7 +251,7 @@ class not_: public pbes_expression
 template <class... ARGUMENTS>
 inline void make_not_(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_PBESNot(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_PBESNot(), args...);
 }
 
 /// \brief Test for a not expression
@@ -327,7 +327,7 @@ class and_: public pbes_expression
 template <class... ARGUMENTS>
 inline void make_and_(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_PBESAnd(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_PBESAnd(), args...);
 }
 
 /// \brief Test for a and expression
@@ -403,7 +403,7 @@ class or_: public pbes_expression
 template <class... ARGUMENTS>
 inline void make_or_(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_PBESOr(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_PBESOr(), args...);
 }
 
 /// \brief Test for a or expression
@@ -479,7 +479,7 @@ class imp: public pbes_expression
 template <class... ARGUMENTS>
 inline void make_imp(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_PBESImp(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_PBESImp(), args...);
 }
 
 /// \brief Test for a imp expression
@@ -555,7 +555,7 @@ class forall: public pbes_expression
 template <class... ARGUMENTS>
 inline void make_forall(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_PBESForall(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_PBESForall(), args...);
 }
 
 /// \brief Test for a forall expression
@@ -631,7 +631,7 @@ class exists: public pbes_expression
 template <class... ARGUMENTS>
 inline void make_exists(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_PBESExists(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_PBESExists(), args...);
 }
 
 /// \brief Test for a exists expression

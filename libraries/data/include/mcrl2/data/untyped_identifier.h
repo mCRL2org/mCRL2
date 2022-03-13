@@ -63,7 +63,7 @@ class untyped_identifier: public data_expression
 template <class... ARGUMENTS>
 inline void make_untyped_identifier(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_UntypedIdentifier(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_UntypedIdentifier(), args...);
 }
 
 // prototype declaration

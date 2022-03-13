@@ -52,6 +52,7 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::propositional_variable& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     pbes_system::make_propositional_variable(result, x.name(), [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.parameters()); });
     static_cast<Derived&>(*this).leave(x);
@@ -83,6 +84,7 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::propositional_variable_instantiation& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     pbes_system::make_propositional_variable_instantiation(result, x.name(), [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.parameters()); });
     static_cast<Derived&>(*this).leave(x);
@@ -91,6 +93,7 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::not_& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     pbes_system::make_not_(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -99,6 +102,7 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::and_& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     pbes_system::make_and_(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -107,6 +111,7 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::or_& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     pbes_system::make_or_(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -115,6 +120,7 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::imp& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     pbes_system::make_imp(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -123,6 +129,7 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::forall& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     pbes_system::make_forall(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -131,6 +138,7 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::exists& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     pbes_system::make_exists(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -139,6 +147,7 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::pbes_expression& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     if (data::is_data_expression(x))
     {
@@ -225,6 +234,7 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::propositional_variable_instantiation& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     pbes_system::make_propositional_variable_instantiation(result, x.name(), [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.parameters()); });
     static_cast<Derived&>(*this).leave(x);
@@ -233,6 +243,7 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::not_& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     pbes_system::make_not_(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -241,6 +252,7 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::and_& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     pbes_system::make_and_(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -249,6 +261,7 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::or_& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     pbes_system::make_or_(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -257,6 +270,7 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::imp& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     pbes_system::make_imp(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -265,6 +279,7 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::forall& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     pbes_system::make_forall(result, x.variables(), [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -273,6 +288,7 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::exists& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     pbes_system::make_exists(result, x.variables(), [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -281,6 +297,7 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::pbes_expression& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     if (data::is_data_expression(x))
     {
@@ -347,6 +364,7 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::propositional_variable& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     pbes_system::make_propositional_variable(result, x.name(), [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.parameters()); });
     static_cast<Derived&>(*this).leave(x);
@@ -378,6 +396,7 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::propositional_variable_instantiation& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     pbes_system::make_propositional_variable_instantiation(result, x.name(), [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.parameters()); });
     static_cast<Derived&>(*this).leave(x);
@@ -386,6 +405,7 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::not_& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     pbes_system::make_not_(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -394,6 +414,7 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::and_& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     pbes_system::make_and_(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -402,6 +423,7 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::or_& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     pbes_system::make_or_(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -410,6 +432,7 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::imp& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     pbes_system::make_imp(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -418,6 +441,7 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::forall& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     pbes_system::make_forall(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -426,6 +450,7 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::exists& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     pbes_system::make_exists(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -434,6 +459,7 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::pbes_expression& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     if (data::is_data_expression(x))
     {
@@ -517,6 +543,8 @@ struct add_pbes_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::propositional_variable_instantiation& x)
   { 
+    
+    result = x;
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -526,6 +554,7 @@ struct add_pbes_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::not_& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     pbes_system::make_not_(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -534,6 +563,7 @@ struct add_pbes_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::and_& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     pbes_system::make_and_(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -542,6 +572,7 @@ struct add_pbes_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::or_& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     pbes_system::make_or_(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -550,6 +581,7 @@ struct add_pbes_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::imp& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     pbes_system::make_imp(result, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -558,6 +590,7 @@ struct add_pbes_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::forall& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     pbes_system::make_forall(result, x.variables(), [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -566,6 +599,7 @@ struct add_pbes_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::exists& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     pbes_system::make_exists(result, x.variables(), [&](pbes_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -574,6 +608,7 @@ struct add_pbes_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pbes_system::pbes_expression& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     if (data::is_data_expression(x))
     {

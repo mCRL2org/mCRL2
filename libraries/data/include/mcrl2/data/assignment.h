@@ -139,7 +139,7 @@ class assignment: public assignment_expression
 template <class... ARGUMENTS>
 inline void make_assignment(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_DataVarIdInit(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_DataVarIdInit(), args...);
 }
 
 /// \brief list of assignments
@@ -235,7 +235,7 @@ class untyped_identifier_assignment: public assignment_expression
 template <class... ARGUMENTS>
 inline void make_untyped_identifier_assignment(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_UntypedIdentifierAssignment(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_UntypedIdentifierAssignment(), args...);
 }
 
 /// \brief list of untyped_identifier_assignments

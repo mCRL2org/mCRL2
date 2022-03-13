@@ -70,7 +70,7 @@ class process_equation: public atermpp::aterm_appl
 template <class... ARGUMENTS>
 inline void make_process_equation(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_ProcEqn(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_ProcEqn(), args...);
 }
 
 /// \brief list of process_equations

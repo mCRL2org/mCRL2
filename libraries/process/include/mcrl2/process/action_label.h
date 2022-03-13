@@ -70,7 +70,7 @@ class action_label: public atermpp::aterm_appl
 template <class... ARGUMENTS>
 inline void make_action_label(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_ActId(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_ActId(), args...);
 }
 
 /// \brief list of action_labels

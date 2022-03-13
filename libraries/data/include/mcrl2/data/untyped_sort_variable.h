@@ -64,7 +64,7 @@ class untyped_sort_variable: public sort_expression
 template <class... ARGUMENTS>
 inline void make_untyped_sort_variable(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_UntypedSortVariable(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_UntypedSortVariable(), args...);
 }
 
 /// \brief Test for a untyped_sort_variable expression

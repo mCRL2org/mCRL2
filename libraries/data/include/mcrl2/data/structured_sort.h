@@ -438,7 +438,7 @@ public:
 template <class... ARGUMENTS>
 inline void make_structured_sort(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_SortStruct(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_SortStruct(), args...);
 }
 
 /// \brief list of structured_sorts

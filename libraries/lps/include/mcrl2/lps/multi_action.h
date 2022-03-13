@@ -102,7 +102,7 @@ class multi_action: public atermpp::aterm_appl
 template <class... ARGUMENTS>
 inline void make_multi_action(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_TimedMultAct(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_TimedMultAct(), args...);
 }
 
 /// \brief list of multi_actions

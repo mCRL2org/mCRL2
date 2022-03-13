@@ -64,7 +64,7 @@ class untyped_possible_sorts: public sort_expression
 template <class... ARGUMENTS>
 inline void make_untyped_possible_sorts(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_UntypedSortsPossible(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_UntypedSortsPossible(), args...);
 }
 
 // prototype declaration

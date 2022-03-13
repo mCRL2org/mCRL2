@@ -192,7 +192,7 @@ class structured_sort_constructor: public atermpp::aterm_appl
 template <class... ARGUMENTS>
 inline void make_structured_sort_constructor(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_StructCons(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_StructCons(), args...);
 }
 
 /// \brief list of structured_sort_constructors

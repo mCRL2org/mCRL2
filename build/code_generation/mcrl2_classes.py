@@ -904,7 +904,7 @@ class Class:
 template <class... ARGUMENTS>
 inline void make_<CLASSNAME>(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl<HASINDEX>(t, core::detail::function_symbol_<ATERM>(), args...);
+  atermpp::make_term_appl<HASINDEX>(t, core::detail::function_symbol_<ATERM>(), args...);
 }'''
         text = re.sub('<ATERM>', self.aterm, text)
         text = re.sub('<ARGUMENTS>', ', '.join([p.type() + ' ' + p.name() for p in self.constructor.parameters()]), text)

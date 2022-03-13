@@ -180,7 +180,7 @@ class action: public process_expression
 template <class... ARGUMENTS>
 inline void make_action(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_Action(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_Action(), args...);
 }
 
 /// \brief list of actions
@@ -262,7 +262,7 @@ class process_instance: public process_expression
 template <class... ARGUMENTS>
 inline void make_process_instance(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_Process(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_Process(), args...);
 }
 
 /// \brief Test for a process_instance expression
@@ -338,7 +338,7 @@ class process_instance_assignment: public process_expression
 template <class... ARGUMENTS>
 inline void make_process_instance_assignment(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_ProcessAssignment(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_ProcessAssignment(), args...);
 }
 
 /// \brief Test for a process_instance_assignment expression
@@ -520,7 +520,7 @@ class sum: public process_expression
 template <class... ARGUMENTS>
 inline void make_sum(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_Sum(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_Sum(), args...);
 }
 
 /// \brief Test for a sum expression
@@ -596,7 +596,7 @@ class block: public process_expression
 template <class... ARGUMENTS>
 inline void make_block(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_Block(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_Block(), args...);
 }
 
 /// \brief Test for a block expression
@@ -672,7 +672,7 @@ class hide: public process_expression
 template <class... ARGUMENTS>
 inline void make_hide(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_Hide(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_Hide(), args...);
 }
 
 /// \brief Test for a hide expression
@@ -748,7 +748,7 @@ class rename: public process_expression
 template <class... ARGUMENTS>
 inline void make_rename(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_Rename(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_Rename(), args...);
 }
 
 /// \brief Test for a rename expression
@@ -824,7 +824,7 @@ class comm: public process_expression
 template <class... ARGUMENTS>
 inline void make_comm(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_Comm(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_Comm(), args...);
 }
 
 /// \brief Test for a comm expression
@@ -900,7 +900,7 @@ class allow: public process_expression
 template <class... ARGUMENTS>
 inline void make_allow(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_Allow(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_Allow(), args...);
 }
 
 /// \brief Test for a allow expression
@@ -976,7 +976,7 @@ class sync: public process_expression
 template <class... ARGUMENTS>
 inline void make_sync(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_Sync(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_Sync(), args...);
 }
 
 /// \brief Test for a sync expression
@@ -1052,7 +1052,7 @@ class at: public process_expression
 template <class... ARGUMENTS>
 inline void make_at(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_AtTime(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_AtTime(), args...);
 }
 
 /// \brief Test for a at expression
@@ -1128,7 +1128,7 @@ class seq: public process_expression
 template <class... ARGUMENTS>
 inline void make_seq(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_Seq(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_Seq(), args...);
 }
 
 /// \brief Test for a seq expression
@@ -1204,7 +1204,7 @@ class if_then: public process_expression
 template <class... ARGUMENTS>
 inline void make_if_then(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_IfThen(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_IfThen(), args...);
 }
 
 /// \brief Test for a if_then expression
@@ -1285,7 +1285,7 @@ class if_then_else: public process_expression
 template <class... ARGUMENTS>
 inline void make_if_then_else(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_IfThenElse(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_IfThenElse(), args...);
 }
 
 /// \brief Test for a if_then_else expression
@@ -1361,7 +1361,7 @@ class bounded_init: public process_expression
 template <class... ARGUMENTS>
 inline void make_bounded_init(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_BInit(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_BInit(), args...);
 }
 
 /// \brief Test for a bounded_init expression
@@ -1437,7 +1437,7 @@ class merge: public process_expression
 template <class... ARGUMENTS>
 inline void make_merge(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_Merge(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_Merge(), args...);
 }
 
 /// \brief Test for a merge expression
@@ -1513,7 +1513,7 @@ class left_merge: public process_expression
 template <class... ARGUMENTS>
 inline void make_left_merge(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_LMerge(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_LMerge(), args...);
 }
 
 /// \brief Test for a left_merge expression
@@ -1589,7 +1589,7 @@ class choice: public process_expression
 template <class... ARGUMENTS>
 inline void make_choice(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_Choice(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_Choice(), args...);
 }
 
 /// \brief Test for a choice expression
@@ -1670,7 +1670,7 @@ class stochastic_operator: public process_expression
 template <class... ARGUMENTS>
 inline void make_stochastic_operator(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_StochasticOperator(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_StochasticOperator(), args...);
 }
 
 /// \brief Test for a stochastic_operator expression
@@ -1751,7 +1751,7 @@ class untyped_process_assignment: public process_expression
 template <class... ARGUMENTS>
 inline void make_untyped_process_assignment(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_UntypedProcessAssignment(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_UntypedProcessAssignment(), args...);
 }
 
 /// \brief Test for a untyped_process_assignment expression

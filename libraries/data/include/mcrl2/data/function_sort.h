@@ -71,7 +71,7 @@ class function_sort: public sort_expression
 template <class... ARGUMENTS>
 inline void make_function_sort(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_SortArrow(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_SortArrow(), args...);
 }
 
 // prototype declaration

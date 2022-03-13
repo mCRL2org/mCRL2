@@ -71,7 +71,7 @@ class stochastic_distribution: public atermpp::aterm_appl
 template <class... ARGUMENTS>
 inline void make_stochastic_distribution(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_Distribution(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_Distribution(), args...);
 }
 
 /// \brief list of stochastic_distributions

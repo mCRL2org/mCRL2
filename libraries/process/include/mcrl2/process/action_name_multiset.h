@@ -60,7 +60,7 @@ class action_name_multiset: public atermpp::aterm_appl
 template <class... ARGUMENTS>
 inline void make_action_name_multiset(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_MultActName(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_MultActName(), args...);
 }
 
 /// \brief list of action_name_multisets

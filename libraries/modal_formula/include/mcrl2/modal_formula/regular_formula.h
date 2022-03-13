@@ -147,7 +147,7 @@ class seq: public regular_formula
 template <class... ARGUMENTS>
 inline void make_seq(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_RegSeq(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_RegSeq(), args...);
 }
 
 /// \brief Test for a seq expression
@@ -223,7 +223,7 @@ class alt: public regular_formula
 template <class... ARGUMENTS>
 inline void make_alt(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_RegAlt(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_RegAlt(), args...);
 }
 
 /// \brief Test for a alt expression
@@ -294,7 +294,7 @@ class trans: public regular_formula
 template <class... ARGUMENTS>
 inline void make_trans(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_RegTrans(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_RegTrans(), args...);
 }
 
 /// \brief Test for a trans expression
@@ -365,7 +365,7 @@ class trans_or_nil: public regular_formula
 template <class... ARGUMENTS>
 inline void make_trans_or_nil(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_RegTransOrNil(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_RegTransOrNil(), args...);
 }
 
 /// \brief Test for a trans_or_nil expression
@@ -451,7 +451,7 @@ class untyped_regular_formula: public regular_formula
 template <class... ARGUMENTS>
 inline void make_untyped_regular_formula(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_UntypedRegFrm(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_UntypedRegFrm(), args...);
 }
 
 /// \brief Test for a untyped_regular_formula expression

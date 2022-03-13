@@ -53,6 +53,8 @@ struct add_boolean_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const bes::true_& x)
   { 
+    
+    result = x;
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -62,6 +64,8 @@ struct add_boolean_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const bes::false_& x)
   { 
+    
+    result = x;
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -71,6 +75,7 @@ struct add_boolean_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const bes::not_& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     bes::make_not_(result, [&](boolean_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -79,6 +84,7 @@ struct add_boolean_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const bes::and_& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     bes::make_and_(result, [&](boolean_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](boolean_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -87,6 +93,7 @@ struct add_boolean_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const bes::or_& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     bes::make_or_(result, [&](boolean_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](boolean_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -95,6 +102,7 @@ struct add_boolean_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const bes::imp& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     bes::make_imp(result, [&](boolean_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](boolean_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -103,6 +111,8 @@ struct add_boolean_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const bes::boolean_variable& x)
   { 
+    
+    result = x;
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -112,6 +122,7 @@ struct add_boolean_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const bes::boolean_expression& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     if (bes::is_true(x))
     {
@@ -188,6 +199,8 @@ struct add_boolean_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const bes::true_& x)
   { 
+    
+    result = x;
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -197,6 +210,8 @@ struct add_boolean_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const bes::false_& x)
   { 
+    
+    result = x;
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -206,6 +221,7 @@ struct add_boolean_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const bes::not_& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     bes::make_not_(result, [&](boolean_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -214,6 +230,7 @@ struct add_boolean_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const bes::and_& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     bes::make_and_(result, [&](boolean_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](boolean_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -222,6 +239,7 @@ struct add_boolean_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const bes::or_& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     bes::make_or_(result, [&](boolean_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](boolean_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -230,6 +248,7 @@ struct add_boolean_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const bes::imp& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     bes::make_imp(result, [&](boolean_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](boolean_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -238,6 +257,8 @@ struct add_boolean_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const bes::boolean_variable& x)
   { 
+    
+    result = x;
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -247,6 +268,7 @@ struct add_boolean_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const bes::boolean_expression& x)
   { 
+    
     static_cast<Derived&>(*this).enter(x);
     if (bes::is_true(x))
     {

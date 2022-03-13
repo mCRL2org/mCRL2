@@ -71,7 +71,7 @@ class propositional_variable: public atermpp::aterm_appl
 template <class... ARGUMENTS>
 inline void make_propositional_variable(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_PropVarDecl(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_PropVarDecl(), args...);
 }
 
 /// \brief list of propositional_variables

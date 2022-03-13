@@ -247,7 +247,7 @@ class not_: public boolean_expression
 template <class... ARGUMENTS>
 inline void make_not_(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_BooleanNot(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_BooleanNot(), args...);
 }
 
 /// \brief Test for a not expression
@@ -323,7 +323,7 @@ class and_: public boolean_expression
 template <class... ARGUMENTS>
 inline void make_and_(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_BooleanAnd(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_BooleanAnd(), args...);
 }
 
 /// \brief Test for a and expression
@@ -399,7 +399,7 @@ class or_: public boolean_expression
 template <class... ARGUMENTS>
 inline void make_or_(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_BooleanOr(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_BooleanOr(), args...);
 }
 
 /// \brief Test for a or expression
@@ -475,7 +475,7 @@ class imp: public boolean_expression
 template <class... ARGUMENTS>
 inline void make_imp(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_BooleanImp(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_BooleanImp(), args...);
 }
 
 /// \brief Test for a imp expression

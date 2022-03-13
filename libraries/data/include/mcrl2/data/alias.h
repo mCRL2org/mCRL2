@@ -65,7 +65,7 @@ class alias: public atermpp::aterm_appl
 template <class... ARGUMENTS>
 inline void make_alias(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_SortRef(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_SortRef(), args...);
 }
 
 /// \brief list of aliass

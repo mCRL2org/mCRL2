@@ -265,7 +265,7 @@ class not_: public action_formula
 template <class... ARGUMENTS>
 inline void make_not_(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_ActNot(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_ActNot(), args...);
 }
 
 /// \brief Test for a not expression
@@ -341,7 +341,7 @@ class and_: public action_formula
 template <class... ARGUMENTS>
 inline void make_and_(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_ActAnd(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_ActAnd(), args...);
 }
 
 /// \brief Test for a and expression
@@ -417,7 +417,7 @@ class or_: public action_formula
 template <class... ARGUMENTS>
 inline void make_or_(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_ActOr(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_ActOr(), args...);
 }
 
 /// \brief Test for a or expression
@@ -493,7 +493,7 @@ class imp: public action_formula
 template <class... ARGUMENTS>
 inline void make_imp(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_ActImp(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_ActImp(), args...);
 }
 
 /// \brief Test for a imp expression
@@ -569,7 +569,7 @@ class forall: public action_formula
 template <class... ARGUMENTS>
 inline void make_forall(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_ActForall(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_ActForall(), args...);
 }
 
 /// \brief Test for a forall expression
@@ -645,7 +645,7 @@ class exists: public action_formula
 template <class... ARGUMENTS>
 inline void make_exists(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_ActExists(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_ActExists(), args...);
 }
 
 /// \brief Test for a exists expression
@@ -721,7 +721,7 @@ class at: public action_formula
 template <class... ARGUMENTS>
 inline void make_at(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_ActAt(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_ActAt(), args...);
 }
 
 /// \brief Test for a at expression
@@ -792,7 +792,7 @@ class multi_action: public action_formula
 template <class... ARGUMENTS>
 inline void make_multi_action(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_ActMultAct(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_ActMultAct(), args...);
 }
 
 /// \brief Test for a multi_action expression

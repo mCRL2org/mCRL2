@@ -277,7 +277,7 @@ class not_: public state_formula
 template <class... ARGUMENTS>
 inline void make_not_(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_StateNot(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_StateNot(), args...);
 }
 
 /// \brief Test for a not expression
@@ -353,7 +353,7 @@ class and_: public state_formula
 template <class... ARGUMENTS>
 inline void make_and_(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_StateAnd(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_StateAnd(), args...);
 }
 
 /// \brief Test for a and expression
@@ -429,7 +429,7 @@ class or_: public state_formula
 template <class... ARGUMENTS>
 inline void make_or_(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_StateOr(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_StateOr(), args...);
 }
 
 /// \brief Test for a or expression
@@ -505,7 +505,7 @@ class imp: public state_formula
 template <class... ARGUMENTS>
 inline void make_imp(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_StateImp(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_StateImp(), args...);
 }
 
 /// \brief Test for a imp expression
@@ -581,7 +581,7 @@ class forall: public state_formula
 template <class... ARGUMENTS>
 inline void make_forall(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_StateForall(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_StateForall(), args...);
 }
 
 /// \brief Test for a forall expression
@@ -657,7 +657,7 @@ class exists: public state_formula
 template <class... ARGUMENTS>
 inline void make_exists(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_StateExists(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_StateExists(), args...);
 }
 
 /// \brief Test for a exists expression
@@ -733,7 +733,7 @@ class must: public state_formula
 template <class... ARGUMENTS>
 inline void make_must(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_StateMust(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_StateMust(), args...);
 }
 
 /// \brief Test for a must expression
@@ -809,7 +809,7 @@ class may: public state_formula
 template <class... ARGUMENTS>
 inline void make_may(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_StateMay(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_StateMay(), args...);
 }
 
 /// \brief Test for a may expression
@@ -933,7 +933,7 @@ class yaled_timed: public state_formula
 template <class... ARGUMENTS>
 inline void make_yaled_timed(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_StateYaledTimed(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_StateYaledTimed(), args...);
 }
 
 /// \brief Test for a yaled_timed expression
@@ -1057,7 +1057,7 @@ class delay_timed: public state_formula
 template <class... ARGUMENTS>
 inline void make_delay_timed(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_StateDelayTimed(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_StateDelayTimed(), args...);
 }
 
 /// \brief Test for a delay_timed expression
@@ -1138,7 +1138,7 @@ class variable: public state_formula
 template <class... ARGUMENTS>
 inline void make_variable(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_StateVar(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_StateVar(), args...);
 }
 
 /// \brief Test for a variable expression
@@ -1224,7 +1224,7 @@ class nu: public state_formula
 template <class... ARGUMENTS>
 inline void make_nu(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_StateNu(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_StateNu(), args...);
 }
 
 /// \brief Test for a nu expression
@@ -1310,7 +1310,7 @@ class mu: public state_formula
 template <class... ARGUMENTS>
 inline void make_mu(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_StateMu(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_StateMu(), args...);
 }
 
 /// \brief Test for a mu expression

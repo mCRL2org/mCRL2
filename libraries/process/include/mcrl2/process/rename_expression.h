@@ -71,7 +71,7 @@ class rename_expression: public atermpp::aterm_appl
 template <class... ARGUMENTS>
 inline void make_rename_expression(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_RenameExpr(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_RenameExpr(), args...);
 }
 
 /// \brief list of rename_expressions

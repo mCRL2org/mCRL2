@@ -29,6 +29,7 @@ struct add_simplify: public Builder<Derived>
   template <class T>
   void apply(T& result, const not_& x)
   {
+    assert(&result!=&x);  // Result is used as temporary store and cannot match x. 
     apply(result, x.operand());
     if (is_false(result))
     {
@@ -51,6 +52,7 @@ struct add_simplify: public Builder<Derived>
   template <class T>
   void apply(T& result, const and_& x)
   {
+    assert(&result!=&x);  // Result is used as temporary store and cannot match x. 
     apply(result, x.left());
     if (is_false(result))
     {
@@ -79,6 +81,7 @@ struct add_simplify: public Builder<Derived>
   template <class T>
   void apply(T& result, const or_& x)
   {
+    assert(&result!=&x);  // Result is used as temporary store and cannot match x. 
     apply(result, x.left());
     if (is_true(result))
     {
@@ -107,6 +110,7 @@ struct add_simplify: public Builder<Derived>
   template <class T>
   void apply(T& result, const imp& x)
   {
+    assert(&result!=&x);  // Result is used as temporary store and cannot match x. 
     apply(result, x.right());
     if (is_true(result))
     { 

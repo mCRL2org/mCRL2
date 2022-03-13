@@ -246,7 +246,7 @@ class if_: public bdd_expression
 template <class... ARGUMENTS>
 inline void make_if_(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_BddIf(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_BddIf(), args...);
 }
 
 /// \brief Test for a if expression

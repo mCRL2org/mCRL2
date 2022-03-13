@@ -115,7 +115,7 @@ class data_equation: public atermpp::aterm_appl
 template <class... ARGUMENTS>
 inline void make_data_equation(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_DataEqn(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_DataEqn(), args...);
 }
 
 /// \brief list of data_equations

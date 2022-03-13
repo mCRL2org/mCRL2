@@ -70,7 +70,7 @@ class communication_expression: public atermpp::aterm_appl
 template <class... ARGUMENTS>
 inline void make_communication_expression(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_CommExpr(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_CommExpr(), args...);
 }
 
 /// \brief list of communication_expressions

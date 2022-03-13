@@ -86,7 +86,7 @@ class structured_sort_constructor_argument: public atermpp::aterm_appl
 template <class... ARGUMENTS>
 inline void make_structured_sort_constructor_argument(atermpp::aterm_appl& t, ARGUMENTS... args)
 {
-  make_term_appl(t, core::detail::function_symbol_StructProj(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_StructProj(), args...);
 }
 
 /// \brief list of structured_sort_constructor_arguments
