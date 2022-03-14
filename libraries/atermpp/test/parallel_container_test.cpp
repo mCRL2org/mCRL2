@@ -47,6 +47,7 @@ BOOST_AUTO_TEST_CASE(parallel_vector)
     if (local.joinable())
     {
       local.join();
+      break;
     }
   }
 
