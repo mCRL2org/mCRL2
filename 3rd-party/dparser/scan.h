@@ -8,11 +8,11 @@
 #include "d.h"
 
 typedef struct ShiftResult {
-  struct SNode	*snode;
-  D_Shift 	*shift;
-  d_loc_t	loc;
+  struct SNode *snode;
+  D_Shift *shift;
+  d_loc_t loc;
 } ShiftResult;
 
-uint scan_buffer(d_loc_t *loc, D_State *st, ShiftResult *result);
+int scan_buffer(d_loc_t *loc, D_State *st, ShiftResult *result);
 
 #endif

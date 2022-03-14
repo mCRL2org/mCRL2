@@ -30,29 +30,31 @@ add_definitions(
 )
 endif(MSVC AND MSVC_VERSION LESS 1900)
 
-add_library(dparser STATIC
-  arg.c
-  parse.c
-  scan.c
-  symtab.c
-  util.c
-  read_binary.c
-  dparse_tree.c
-)
-
 add_executable(make_dparser
   make_dparser.c
   version.c
+)
+
+add_library(mkdparse STATIC
   mkdparse.c
   write_tables.c
   grammar.g.c
   gram.c
   lex.c
   lr.c
+  version.c
 )
 
-target_link_libraries(make_dparser
-  dparser
+add_library(dparser STATIC
+  arg.c
+  parse.c
+  scan.c
+  dsymtab.c
+  util.c
+  read_binary.c
+  dparse_tree.c
 )
+
+target_link_libraries(make_dparser PRIVATE mkdparse dparser)
 
 set(dparser_include ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
