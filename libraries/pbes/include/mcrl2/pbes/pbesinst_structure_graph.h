@@ -121,7 +121,7 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
         m_graph_builder(G)
     {}
 
-    void on_report_equation(const std::size_t thread_index,
+    void on_report_equation(const std::size_t /* thread_index */,
                             std::shared_mutex& realloc_mutex,
                             const propositional_variable_instantiation& X,
                             const pbes_expression& psi,
