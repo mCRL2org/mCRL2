@@ -12,7 +12,7 @@
 #include <thread>
 #include <mutex>
 #include <shared_mutex>
-#include <boost/range/join.hpp>
+// #include <boost/range/join.hpp>
 
 #include "mcrl2/atermpp/standard_containers/deque.h"
 #include "mcrl2/atermpp/standard_containers/indexed_set.h"
@@ -96,13 +96,14 @@ class pbesinst_lazy_todo
       return irrelevant;
     }
 
+/*  Boost range does not seem to work. Therefore, its use is outcommented below.
     boost::range::joined_range<
         const atermpp::deque<mcrl2::pbes_system::propositional_variable_instantiation>,
         const std::unordered_set<mcrl2::pbes_system::propositional_variable_instantiation>
     > all_elements() const
     {
       return boost::range::join(todo, irrelevant);
-    }
+    } */
 
     void pop_front()
     {
@@ -144,15 +145,29 @@ class pbesinst_lazy_todo
     {
       using utilities::detail::contains;
       std::size_t size_before = todo.size() + irrelevant.size();
-
       std::unordered_set<propositional_variable_instantiation> new_irrelevant;
-      for (const propositional_variable_instantiation& x: all_elements())
+      /* for (const propositional_variable_instantiation& x: all_elements()) The range::join of boost does not seem to work with GCC. 
+ *                                                                           Therefore it is split below. 
       {
         if (!contains(new_todo, x))
         {
           new_irrelevant.insert(x);
         }
-      }
+      } */
+      for (const propositional_variable_instantiation& x: todo)
+      {
+        if (!contains(new_todo, x))
+        {
+          new_irrelevant.insert(x);
+        }
+      } 
+      for (const propositional_variable_instantiation& x: irrelevant)
+      {
+        if (!contains(new_todo, x))
+        {
+          new_irrelevant.insert(x);
+        }
+      } 
       std::swap(todo, new_todo);
       std::swap(irrelevant, new_irrelevant);
 
@@ -307,8 +322,8 @@ class pbesinst_lazy_algorithm
 
     /// \brief Reports BES equations that are produced by the algorithm.
     /// This function is called for every BES equation X = psi with rank k that is produced. By default it does nothing.
-    virtual void on_report_equation(const std::size_t thread_index,
-                                    std::shared_mutex& realloc_mutex,
+    virtual void on_report_equation(const std::size_t /* thread_index */,
+                                    std::shared_mutex& /* realloc_mutex */,
                                     const propositional_variable_instantiation& /* X */,
                                     const pbes_expression& /* psi */, std::size_t /* k */
                                    )
@@ -342,7 +357,7 @@ class pbesinst_lazy_algorithm
     }
 
     // rewrite the right hand side of the equation X = psi
-    virtual void rewrite_psi(const std::size_t thread_index,
+    virtual void rewrite_psi(const std::size_t /* thread_index */,
                              pbes_expression& result,
                              const fixpoint_symbol& symbol,
                              const propositional_variable_instantiation& X,

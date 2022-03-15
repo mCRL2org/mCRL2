@@ -355,7 +355,25 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     // Returns true if all nodes in the todo list are undefined (i.e. have not been processed yet)
     bool todo_has_only_undefined_nodes() const
     {
-      for (const propositional_variable_instantiation& X: todo.all_elements())
+      /* for (const propositional_variable_instantiation& X: todo.all_elements())  all_elements does not seem to work. Therefore split below. 
+      {
+        structure_graph::index_type u = m_graph_builder.find_vertex(X);
+        const structure_graph::vertex& u_ = m_graph_builder.vertex(u);
+        if (u_.is_defined())
+        {
+          return false;
+        }
+      } */
+      for (const propositional_variable_instantiation& X: todo.elements())
+      {
+        structure_graph::index_type u = m_graph_builder.find_vertex(X);
+        const structure_graph::vertex& u_ = m_graph_builder.vertex(u);
+        if (u_.is_defined())
+        {
+          return false;
+        }
+      }
+      for (const propositional_variable_instantiation& X: todo.irrelevant_elements())
       {
         structure_graph::index_type u = m_graph_builder.find_vertex(X);
         const structure_graph::vertex& u_ = m_graph_builder.vertex(u);
