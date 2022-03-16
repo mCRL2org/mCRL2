@@ -36,9 +36,9 @@ struct add_simplify: public Builder<Derived>
       result = true_();
       return;
     }
-    if (is_false(result))
+    if (is_true(result))
     {
-      result = true_();
+      result = false_();
       return;
     }
     if (is_not(result))
@@ -111,6 +111,11 @@ struct add_simplify: public Builder<Derived>
   void apply(T& result, const imp& x)
   {
     assert(&result!=&x);  // Result is used as temporary store and cannot match x. 
+    if (is_false(x.left()))  // This test is cheap. 
+    {
+      result = true_();
+      return;
+    }
     apply(result, x.right());
     if (is_true(result))
     { 
