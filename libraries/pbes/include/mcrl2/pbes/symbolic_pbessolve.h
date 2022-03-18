@@ -156,7 +156,7 @@ class symbolic_pbessolve_algorithm
     ///        The remaining parameters are sinks, vertices won by even and odd respectively.
     ///        Terminates early when initial_vertex has been solved.
     /// \param safe Whether to use the safe attractor variant (as opposed to computing safe vertices first).
-    std::pair<const ldd, const ldd> detect_solitair_cycles(const ldd& initial_vertex,
+    std::pair<ldd, ldd> detect_solitair_cycles(const ldd& initial_vertex,
       const ldd& V,
       const ldd& I,
       bool safe_variant,
@@ -207,7 +207,7 @@ class symbolic_pbessolve_algorithm
         {
           stopwatch timer;
           U = Unext;
-          Unext = m_G.predecessors(U, U, U); // TODO: the restriction on U is unnecessary since the predecessors are already in U.
+          Unext = m_G.predecessors(U, U);
 
           mCRL2log(log::debug) << "iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
 
@@ -236,7 +236,7 @@ class symbolic_pbessolve_algorithm
     ///        The remaining parameters are sinks, vertices won by even and odd respectively.
     ///        Terminates early when initial_vertex has been solved.
     /// \param safe Whether to use the safe attractor variant (as opposed to computing safe vertices first).
-    std::pair<const ldd, const ldd> detect_forced_cycles(const ldd& initial_vertex,
+    std::pair<ldd, ldd> detect_forced_cycles(const ldd& initial_vertex,
       const ldd& V,
       const ldd& I,
       bool safe_variant,

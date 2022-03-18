@@ -434,9 +434,39 @@ class symbolic_parity_game
       throw mcrl2::runtime_error("get_min_rank did not find any nodes");
     }
 
+    /// \brief Computes the pair of even and odd vertices.
     std::array<const ldd, 2> players(const ldd& V) const
     {
       return { intersect(V, m_V[0]), intersect(V, m_V[1]) };
+    }
+
+    /// \brief Computes the vertices with even parity priority that are not sinks and the same for odd.
+    std::array<const ldd, 2> parity(const ldd& V) const
+    {
+      std::array<ldd, 2> parity;
+      for (const auto&[rank, Vrank] : ranks())
+      {
+        parity[rank % 2] = sylvan::ldds::union_(parity[rank % 2], Vrank);
+      }
+
+      ldd Vother = minus(V, sinks(V, V));
+      return { intersect(Vother, parity[0]), intersect(Vother, parity[1]) };
+    }
+
+    /// \brief Computes all vertices above priority c.
+    ldd prio_above(const ldd& V, std::size_t c) const
+    {      
+      // Compute the set of states with at least priority c.
+      ldd Vc = sylvan::ldds::empty_set();
+      for (const auto&[rank, Vrank] : m_rank_map)
+      {
+        if (rank >= c)
+        {
+          Vc = union_(Vc, Vrank);
+        }
+      }
+
+      return intersect(V, Vc);
     }
 
     /// \brief Removes all winning states (and updates winning partition).
@@ -475,7 +505,7 @@ class symbolic_parity_game
     }
 
     /// \brief Returns the mapping from priorities (ranks) to vertex sets.
-    const std::map<std::size_t, ldd>& ranks() { return m_rank_map; }
+    const std::map<std::size_t, ldd>& ranks() const { return m_rank_map; }
 
     /// \returns The set { u in U | exists v in V: u ->* v } where with chaining ->* only visits states in V (if U subseteq V)
     ldd predecessors(const ldd& U, const ldd& V) const

@@ -12,6 +12,7 @@
 
 #include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/symbolic_parity_game.h"
+#include "mcrl2/pbes/symbolic_pbessolve.h"
 #include "mcrl2/pbes/pbes_summand_group.h"
 #include "mcrl2/symbolic/data_index.h"
 #include "mcrl2/utilities/logger.h"
@@ -148,10 +149,9 @@ std::tuple<ldd, ldd, std::vector<ldd>, std::vector<summand_group>, std::vector<d
 
 /// \returns Minimal fixpoint of the given (monotone) predicate transformer A -> A.
 template<typename F>
-ldd min_fixpoint(F pred, const ldd& U)
+ldd least_fixpoint(F pred)
 {  
-  ldd prev;
-  ldd current = pred(U);
+  ldd prev, current;
   do 
   {
     prev = current;
@@ -162,25 +162,46 @@ ldd min_fixpoint(F pred, const ldd& U)
   return current;
 }
 
+/// \returns Maximal fixpoint of the given (monotone) predicate transformer A -> A.
+template<typename F>
+ldd greatest_fixpoint(F pred, ldd V)
+{  
+  ldd prev;
+  ldd current = V;
+  do 
+  {
+    prev = current;
+    current = pred(current);
+  }
+  while (current != prev);
+
+  return current;
+}
+
+/// \returns The predecessors of U.
+ldd pre(const symbolic_parity_game& G, const ldd& V, const ldd& U)
+{
+  return G.predecessors(V, U);
+}
+
 /// \returns The control predecessors of U.
 ldd cpre(const symbolic_parity_game& G, const ldd& V, std::size_t alpha, const ldd& U)
 {
   std::array<const ldd, 2> Vplayer = G.players(V);
 
   return union_(
-    intersect(Vplayer[alpha],        G.predecessors(V, U)),
-    minus(Vplayer[1 - alpha], union_(G.predecessors(V, minus(V, U)), G.sinks(V, V)))
+    intersect(Vplayer[alpha],        pre(G, V, U)),
+    minus(Vplayer[1 - alpha], union_(pre(G, V, minus(V, U)), G.sinks(V, V)))
   );
 }
 
 /// \returns Standard attractor set computation.
 ldd attr(const symbolic_parity_game& G, const ldd& V, std::size_t alpha, const ldd& U)
 {
-  return min_fixpoint(
+  return least_fixpoint(
     [&](const ldd& Z) -> ldd {
       return union_(U, cpre(G, V, alpha, Z));
-    },
-    U);
+    });
 }
 
 /// \returns The safe control predecessors of U.
@@ -194,25 +215,128 @@ ldd spre(const symbolic_parity_game& G, const ldd& V, std::size_t alpha, const l
   );
 }
 
-
 /// \returns Safe attractor set computation.
 ldd sattr(const symbolic_parity_game& G, const ldd& V, std::size_t alpha, const ldd& U, const ldd& I)
 {
-  return min_fixpoint(
+  return least_fixpoint(
     [&](const ldd& Z) -> ldd {
       return union_(U, spre(G, V, alpha, Z, I));
-    },
-    U);
+    });
 }
 
+/// \brief Computes the monotone control predecessor.
+ldd Mcpre(const symbolic_parity_game& G, const ldd& V, std::size_t alpha, const ldd& Z, const ldd& U, std::size_t c)
+{
+  return intersect(G.prio_above(V, c), cpre(G, V, alpha, union_(Z, U)));
+}
+
+/// \brief Computes monotone attractor for priority c.
+ldd Mattr(const symbolic_parity_game& G, const ldd& V, std::size_t alpha, const ldd& U, std::size_t c)
+{
+  return least_fixpoint(
+    [&](const ldd& Z) -> ldd
+    {
+      return Mcpre(G, V, alpha, Z, U, c);
+    }
+  );
+}
+
+/// \returns Safe vertices computation.
+ldd safe(const symbolic_parity_game& G, const ldd& V, std::size_t alpha, const ldd& I)
+{
+  std::array<const ldd, 2> Vplayer = G.players(V);
+  return minus(V, attr(G, V, 1-alpha, intersect(Vplayer[1-alpha], I)));
+}
+
+/// \brief Computes fatal attractor for priority c.
+ldd fatal_attractor(const symbolic_parity_game& G, const ldd& V, std::size_t alpha, std::size_t c, const ldd& I)
+{
+  ldd Pequal = intersect(V, G.ranks().at(c));
+  const ldd Vsafe = safe(G, V, alpha, I);
+
+  return greatest_fixpoint(
+    [&](const ldd& Z) -> ldd
+    {
+      // G \cap safe(G) is here represented by restricting V to Vsafe.
+      return intersect(intersect(Pequal, Vsafe), Mattr(G, Vsafe, alpha, Z, c));
+    },
+    Vsafe
+  );
+}
+
+/// \brief Computes the safe monotone control predecessor.
+ldd sMcpre(const symbolic_parity_game& G, const ldd& V, std::size_t alpha, const ldd& Z, const ldd& U, std::size_t c, const ldd& I)
+{
+  return intersect(G.prio_above(V, c), spre(G, V, alpha, union_(Z, U), I));
+}
+
+/// \brief Computes monotone attractor for priority c.
+ldd sMattr(const symbolic_parity_game& G, const ldd& V, std::size_t alpha, const ldd& U, std::size_t c, const ldd& I)
+{
+  return least_fixpoint(
+    [&](const ldd& Z) -> ldd
+    {
+      return sMcpre(G, V, alpha, Z, U, c, I);
+    }
+  );
+}
+
+/// \brief Computes fatal attractor for priority c.
+ldd safe_fatal_attractor(const symbolic_parity_game& G, const ldd& V, std::size_t alpha, std::size_t c, const ldd& I)
+{
+  ldd Pequal = intersect(V, G.ranks().at(c));
+
+  return greatest_fixpoint(
+    [&](const ldd& Z) -> ldd
+    {
+      return intersect(Pequal, sMattr(G, V, alpha, Z, c, I));
+    },
+    V
+  );
+}
+
+/// \brief Returns the solitair cycles.
+ldd solitair_cycles(const symbolic_parity_game& G, const ldd& V, std::size_t alpha)
+{
+  std::array<const ldd, 2> Vplayer = G.players(V);
+  std::array<const ldd, 2> parity = G.parity(V);
+
+  return greatest_fixpoint(
+    [&](const ldd& Z) -> ldd {
+      return intersect(intersect(Vplayer[alpha], parity[alpha]), pre(G, V, Z));
+    },
+    V
+  );
+}
+
+/// \brief Returns the forced cycles.
+ldd forced_cycles(const symbolic_parity_game& G, const ldd& V, std::size_t alpha, const ldd& I)
+{
+  std::array<const ldd, 2> parity = G.parity(V);
+  const ldd Vsafe = safe(G, V, alpha, I);
+
+  return greatest_fixpoint(
+    [&](const ldd& Z) -> ldd {
+      return intersect(intersect(parity[alpha], Vsafe), cpre(G, V, alpha, Z));
+    },
+    V
+  );
+}
+
+/// \brief Initialise the Sylvan library once.
 void initialise_sylvan()
 {
-  mcrl2::log::logger::set_reporting_level(mcrl2::log::debug);
-  lace_init(1, 1024*1024*4);
-  lace_startup(0, nullptr, nullptr);
-  sylvan::sylvan_set_limits(1024 * 1024 * 1024, 6, 6);
-  sylvan::sylvan_init_package();
-  sylvan::sylvan_init_ldd();
+  static bool first = true;
+  if (first)
+  {
+    mcrl2::log::logger::set_reporting_level(mcrl2::log::debug);
+    lace_init(1, 1024*1024*4);
+    lace_startup(0, nullptr, nullptr);
+    sylvan::sylvan_set_limits(1024 * 1024 * 1024, 6, 6);
+    sylvan::sylvan_init_package();
+    sylvan::sylvan_init_ldd();
+    first = false;
+  }
 }
 
 BOOST_AUTO_TEST_CASE(random_test_attractor)
@@ -256,8 +380,7 @@ BOOST_AUTO_TEST_CASE(random_test_safe_attractor)
   }
 }
 
-
-BOOST_AUTO_TEST_CASE(random_test_chaining_attractor)
+BOOST_AUTO_TEST_CASE(random_test_chaining_safe_attractor)
 {
   initialise_sylvan();
 
@@ -267,12 +390,130 @@ BOOST_AUTO_TEST_CASE(random_test_chaining_attractor)
     symbolic_parity_game G(groups, index, V, Veven, prio, false, true);
 
     ldd U = random_subset(V, 250);
+    ldd I = random_subset(minus(V, U), 250);
 
     std::array<const ldd, 2> Vplayer = G.players(V);
-    ldd result = G.safe_attractor(U, 0, V, Vplayer);
-    ldd expected = attr(G, V, 0, U);
+    ldd result = G.safe_attractor(U, 0, V, Vplayer, I);
+    ldd expected = sattr(G, V, 0, U, I);
     std::cerr << satcount(result) << std::endl;
 
     BOOST_CHECK_EQUAL(result, expected);
   }
 }
+
+BOOST_AUTO_TEST_CASE(random_test_monotone_attractor)
+{
+  initialise_sylvan();
+
+  for (std::size_t i = 0; i < 100; ++i)
+  {
+    auto [V, Veven, prio, groups, index] = compute_random_game(5000, 2);
+    symbolic_parity_game G(groups, index, V, Veven, prio, false, false);
+
+    ldd U = random_subset(V, 250);
+
+    std::array<const ldd, 2> Vplayer = G.players(V);
+    ldd result = G.safe_monotone_attractor(U, 0, 0, V, Vplayer);
+    ldd expected = Mattr(G, V, 0, U, 0);
+    std::cerr << satcount(result) << std::endl;
+
+    BOOST_CHECK_EQUAL(result, expected);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(random_test_safe_monotone_attractor)
+{
+  initialise_sylvan();
+
+  for (std::size_t i = 0; i < 100; ++i)
+  {
+    auto [V, Veven, prio, groups, index] = compute_random_game(5000, 2);
+    symbolic_parity_game G(groups, index, V, Veven, prio, false, false);
+
+    ldd U = random_subset(V, 250);
+    ldd I = random_subset(minus(V, U), 250);
+
+    std::array<const ldd, 2> Vplayer = G.players(V);
+    ldd result = G.safe_monotone_attractor(U, 0, 0, V, Vplayer, I);
+    ldd expected = sMattr(G, V, 0, U, 0, I);
+    std::cerr << satcount(result) << std::endl;
+
+    BOOST_CHECK_EQUAL(result, expected);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(random_test_chaining_monotone_attractor)
+{
+  initialise_sylvan();
+
+  for (std::size_t i = 0; i < 100; ++i)
+  {
+    auto [V, Veven, prio, groups, index] = compute_random_game(5000, 2);
+    symbolic_parity_game G(groups, index, V, Veven, prio, false, true);
+
+    ldd U = random_subset(V, 250);
+    ldd I = random_subset(minus(V, U), 250);
+
+    std::array<const ldd, 2> Vplayer = G.players(V);
+    ldd result = G.safe_monotone_attractor(U, 0, 0, V, Vplayer, I);
+    ldd expected = sMattr(G, V, 0, U, 0, I);
+    std::cerr << satcount(result) << std::endl;
+
+    BOOST_CHECK_EQUAL(result, expected);
+  }
+}
+
+/*
+BOOST_AUTO_TEST_CASE(random_test_solitair_cycles)
+{
+  initialise_sylvan();
+  
+  for (std::size_t i = 0; i < 1; ++i)
+  {
+    auto [V, Veven, prio, groups, index] = compute_random_game(500, 2);
+    symbolic_parity_game G(groups, index, V, Veven, prio, false, false);
+    mcrl2::pbes_system::symbolic_pbessolve_algorithm solver(G);
+
+    ldd initial = random_subset(V, 1);
+    ldd I;
+
+    // Use V as initial vertex so it does not terminate early.
+    std::pair<ldd, ldd> Vresult = solver.detect_solitair_cycles(V, V, I, false, G.sinks(V, V));
+
+    std::array<ldd, 2> winning;
+    ldd Vtotal = G.compute_total_graph(V, sylvan::ldds::empty_set(), G.sinks(V, V), winning);
+
+    std::pair<ldd, ldd> Vexpected = { union_(winning[0], attr(G, V, 0, solitair_cycles(G, V, 0))), 
+                                      union_(winning[1], attr(G, V, 1, solitair_cycles(G, V, 1))) };
+    BOOST_CHECK_EQUAL(Vresult.first, Vexpected.first);
+    BOOST_CHECK_EQUAL(Vresult.second, Vexpected.second);
+  }
+}
+*/
+
+/*
+BOOST_AUTO_TEST_CASE(random_test_solitair_cycles)
+{
+  initialise_sylvan();
+  
+  for (std::size_t i = 0; i < 1; ++i)
+  {
+    auto [V, Veven, prio, groups, index] = compute_random_game(500, 2);
+    symbolic_parity_game G(groups, index, V, Veven, prio, false, false);
+    mcrl2::pbes_system::symbolic_pbessolve_algorithm solver(G);
+
+    ldd initial = random_subset(V, 1);
+    ldd I;
+
+    // Use V as initial vertex so it does not terminate early.
+    std::pair<ldd, ldd> Vresult = solver.detect_forced_cycles(V, V, I, false, G.sinks(V, V));
+
+    std::array<ldd, 2> winning;
+    ldd Vtotal = G.compute_total_graph(V, sylvan::ldds::empty_set(), G.sinks(V, V), winning);
+
+    std::pair<ldd, ldd> Vexpected = { union_(winning[0], attr(G, V, 0, forced_cycles(G, V, 0, I))), 
+                                      union_(winning[1], attr(G, V, 1, forced_cycles(G, V, 1, I))) };
+    BOOST_CHECK_EQUAL(Vresult.first, Vexpected.first);
+    BOOST_CHECK_EQUAL(Vresult.second, Vexpected.second);
+  }
+}*/

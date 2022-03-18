@@ -546,7 +546,7 @@ class pbesreach_algorithm
       return sylvan::ldds::empty_set();
     }
 
-    const std::vector<symbolic::summand_group>& summand_groups() const
+    std::vector<symbolic::summand_group> summand_groups() const
     {
       std::vector<symbolic::summand_group> result;
 
