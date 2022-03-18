@@ -190,7 +190,7 @@ class pbesreach_algorithm
     data::variable_list m_process_parameters;
     std::size_t m_n;
     std::vector<symbolic::data_expression_index> m_data_index;
-    std::vector<summand_group> m_summand_groups;
+    std::vector<pbes_summand_group> m_summand_groups;
     data::data_expression_list m_initial_state;
     std::vector<boost::dynamic_bitset<>> m_summand_patterns;
     std::vector<boost::dynamic_bitset<>> m_group_patterns;
@@ -217,13 +217,13 @@ class pbesreach_algorithm
     }
 
     /// \brief Updates R.L := R.L U {(x,y) in R | x in X}
-    void learn_successors(std::size_t i, summand_group& R, const ldd& X)
+    void learn_successors(std::size_t i, pbes_summand_group& R, const ldd& X)
     {
       mCRL2log(log::debug1) << "learn successors of summand group " << i << " for X = " << print_states(m_data_index, X, R.read) << std::endl;
 
       using namespace sylvan::ldds;
-      std::pair<pbesreach_algorithm&, summand_group&> context{*this, R};
-      sat_all_nopar(X, symbolic::learn_successors_callback<std::pair<pbesreach_algorithm&, summand_group&>>, &context);
+      std::pair<pbesreach_algorithm&, pbes_summand_group&> context{*this, R};
+      sat_all_nopar(X, symbolic::learn_successors_callback<std::pair<pbesreach_algorithm&, pbes_summand_group&>>, &context);
     }
 
     pbes_system::srf_pbes preprocess(pbes_system::pbes pbesspec, bool make_total)
@@ -345,7 +345,7 @@ class pbesreach_algorithm
     }
 
     /// \brief Computes relprod(U, group).
-    ldd relprod_impl(const ldd& U, const summand_group& group, std::size_t i)
+    ldd relprod_impl(const ldd& U, const pbes_summand_group& group, std::size_t i)
     {
       if (m_options.no_relprod)
       {
@@ -546,9 +546,16 @@ class pbesreach_algorithm
       return sylvan::ldds::empty_set();
     }
 
-    const std::vector<summand_group>& summand_groups() const
+    const std::vector<symbolic::summand_group>& summand_groups() const
     {
-      return m_summand_groups;
+      std::vector<symbolic::summand_group> result;
+
+      for (const auto& group : m_summand_groups)
+      {
+        result.push_back(group);
+      }
+
+      return result;
     }
 
     const srf_pbes& pbes() const

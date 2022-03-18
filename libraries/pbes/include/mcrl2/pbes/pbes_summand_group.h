@@ -112,9 +112,9 @@ data::data_expression_list make_state(const pbes_system::propositional_variable_
 }
 
 
-struct summand_group: public symbolic::summand_group
+struct pbes_summand_group: public symbolic::summand_group
 {
-  summand_group(
+  pbes_summand_group(
     const pbes_system::srf_pbes& pbesspec,
     const data::variable_list& process_parameters, // the reordered process parameters
     const std::unordered_map<core::identifier_string, data::data_expression>& propvar_map,

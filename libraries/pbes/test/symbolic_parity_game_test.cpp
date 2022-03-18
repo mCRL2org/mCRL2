@@ -12,7 +12,7 @@
 
 #include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/symbolic_parity_game.h"
-#include "mcrl2/symbolic/summand_group.h"
+#include "mcrl2/pbes/pbes_summand_group.h"
 #include "mcrl2/symbolic/data_index.h"
 #include "mcrl2/utilities/logger.h"
 
@@ -140,7 +140,6 @@ std::tuple<ldd, ldd, std::vector<ldd>, std::vector<summand_group>, std::vector<d
   groups.emplace_back(single_transition_group(parameters, 1, 3*D, D));
   groups.emplace_back(single_transition_group(parameters, 2, 3*D, D));
   groups.emplace_back(single_transition_group(parameters, 3, 3*D, D));
-
 
   std::vector<data_expression_index> index;
 
