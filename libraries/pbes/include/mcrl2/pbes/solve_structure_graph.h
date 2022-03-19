@@ -408,7 +408,9 @@ class lps_solve_structure_graph_algorithm: public solve_structure_graph_algorith
         const auto& v = G.find_vertex(vi);
         if (is_propositional_variable_instantiation(v.formula()))
         {
-          const auto& Z = atermpp::down_cast<propositional_variable_instantiation>(v.formula());
+          // The variable Z below should be a reference, but this leads to crashes with the GCC compiler (March 2022).
+          // JFG: I think this is a GCC problem, which may resolve itself in due time. 
+          const auto Z = atermpp::down_cast<propositional_variable_instantiation>(v.formula());
           std::string Zname = Z.name();
           std::smatch match;
           if (std::regex_match(Zname, match, re))
@@ -419,7 +421,6 @@ class lps_solve_structure_graph_algorithm: public solve_structure_graph_algorith
               throw mcrl2::runtime_error("Counter-example cannot be reconstructed from this LPS. Did you supply the correct file?");
             }
             lps::action_summand summand = lpsspec.process().action_summands()[summand_index];
-
             std::size_t equation_index = p_index.index(Z.name());
             const pbes_equation& eqn = p.equations()[equation_index];
             const data::variable_list& d = eqn.variable().parameters();
