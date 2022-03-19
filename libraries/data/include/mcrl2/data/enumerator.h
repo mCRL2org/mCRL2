@@ -302,8 +302,14 @@ class enumerator_list_element
     ///        called for all elements of this class in the atermpp container. 
     void mark(std::stack<std::reference_wrapper<atermpp::detail::_aterm>>& todo) const
     {
-      mark_term(*atermpp::detail::address(v), todo);
-      mark_term(*atermpp::detail::address(phi), todo);
+      if (atermpp::detail::address(v)!=nullptr)
+      {
+        mark_term(*atermpp::detail::address(v), todo);
+      }
+      if (atermpp::detail::address(phi)!=nullptr)
+      {
+        mark_term(*atermpp::detail::address(phi), todo);
+      }
     }
 
     /// \brief Set the variables and the condition explicitly.

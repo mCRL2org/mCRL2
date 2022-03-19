@@ -195,7 +195,7 @@ public:
   iterator end(std::size_t thread_index=0)
   { 
     lock_shared(thread_index);
-    const_iterator i=m_keys.end()+m_next_index-m_keys.size();
+    const_iterator i=m_keys.begin()+m_next_index;
     unlock_shared(thread_index);
     return i;
   }
@@ -214,7 +214,7 @@ public:
   const_iterator end(std::size_t thread_index=0) const
   {
     lock_shared(thread_index);
-    const_iterator i=m_keys.end()+m_next_index-m_keys.size();
+    const_iterator i=m_keys.begin()+m_next_index;
     unlock_shared(thread_index);
     return i;
   }
@@ -232,7 +232,7 @@ public:
   const_iterator cend(std::size_t thread_index=0) const 
   { 
     lock_shared(thread_index);
-    const_iterator i=m_keys.cend()+m_next_index-m_keys.size();
+    const_iterator i=m_keys.cbegin()+m_next_index;
     unlock_shared(thread_index);
     return i;
   }
@@ -241,7 +241,7 @@ public:
   reverse_iterator rbegin(std::size_t thread_index=0) 
   { 
     lock_shared(thread_index);
-    reverse_iterator i=m_keys.rbegin()+m_next_index-m_keys.size();
+    reverse_iterator i=m_keys.rend()-m_next_index;
     unlock_shared(thread_index);
     return i;
   }
@@ -250,7 +250,7 @@ public:
   reverse_iterator rend(std::size_t thread_index=0)
   { 
     lock_shared(thread_index);
-    reverse_iterator i=m_keys.cend();
+    reverse_iterator i=m_keys.rend();
     unlock_shared(thread_index);
     return i;
   }
@@ -259,7 +259,7 @@ public:
   const_reverse_iterator crbegin(std::size_t thread_index=0) const
   { 
     lock_shared(thread_index);
-    const_reverse_iterator i=m_keys.crbegin()+m_next_index-m_keys.size();
+    const_reverse_iterator i=m_keys.crend()-m_next_index;
     unlock_shared(thread_index);
     return i;
   }
