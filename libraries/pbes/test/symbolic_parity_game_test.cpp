@@ -10,6 +10,10 @@
 #define BOOST_TEST_MODULE symbolic_parity_game_test
 #include <boost/test/included/unit_test.hpp>
 
+#include "mcrl2/utilities/platform.h"
+
+#ifndef MCRL2_PLATFORM_WINDOWS
+
 #include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/symbolic_parity_game.h"
 #include "mcrl2/pbes/symbolic_pbessolve.h"
@@ -463,14 +467,13 @@ BOOST_AUTO_TEST_CASE(random_test_chaining_monotone_attractor)
   }
 }
 
-/*
-BOOST_AUTO_TEST_CASE(random_test_solitair_cycles)
+/*BOOST_AUTO_TEST_CASE(random_test_solitair_cycles)
 {
   initialise_sylvan();
   
   for (std::size_t i = 0; i < 1; ++i)
   {
-    auto [V, Veven, prio, groups, index] = compute_random_game(500, 2);
+    auto [V, Veven, prio, groups, index] = compute_random_game(250, 2);
     symbolic_parity_game G(groups, index, V, Veven, prio, false, false);
     mcrl2::pbes_system::symbolic_pbessolve_algorithm solver(G);
 
@@ -488,8 +491,7 @@ BOOST_AUTO_TEST_CASE(random_test_solitair_cycles)
     BOOST_CHECK_EQUAL(Vresult.first, Vexpected.first);
     BOOST_CHECK_EQUAL(Vresult.second, Vexpected.second);
   }
-}
-*/
+}*/
 
 /*
 BOOST_AUTO_TEST_CASE(random_test_solitair_cycles)
@@ -517,3 +519,5 @@ BOOST_AUTO_TEST_CASE(random_test_solitair_cycles)
     BOOST_CHECK_EQUAL(Vresult.second, Vexpected.second);
   }
 }*/
+
+#endif // PLATFORM_WINDOWS
