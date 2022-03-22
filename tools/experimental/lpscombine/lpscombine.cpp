@@ -47,12 +47,12 @@ public:
 
       if (output_filename().empty())
       {
-        combine_lts(left_lts, right_lts, m_action_prefix, std::cout);
+        combine_lts(left_lts, right_lts, m_action_prefix, m_introduce_tags, std::cout);
       }
       else
       {
         std::ofstream file(output_filename(), std::ios_base::binary);
-        combine_lts(left_lts, right_lts, m_action_prefix, file);
+        combine_lts(left_lts, right_lts, m_action_prefix, m_introduce_tags, file);
       }
     }
     else
@@ -91,8 +91,9 @@ protected:
   {
     super::add_options(desc);
 
-    desc.add_option("prefix", utilities::make_mandatory_argument("PREFIX"),"Add a prefix to the synchronisation action labels to ensure that do not already occur in the specification", 'f');
+    desc.add_option("prefix", utilities::make_mandatory_argument("PREFIX"), "Add a prefix to the synchronisation action labels to ensure that do not already occur in the specification", 'f');
     desc.add_option("lts", "Combine two labelled transition systems based on the composition semantics", 'l');
+    desc.add_option("introduce-tags", "Introduce tag actions for every multi-action without synchronisation actions.", 't');
   }
 
   void parse_options(const utilities::command_line_parser& parser) override
@@ -105,11 +106,18 @@ protected:
     }
 
     m_lts_mode = parser.options.count("lts") > 0;
+    m_introduce_tags = parser.options.count("introduce-tags") > 0;
+
+    if (m_introduce_tags && !m_lts_mode)
+    {
+        parser.error("The --introduce-tags option only works with --lts.");
+    }
   }
 
 private:
   std::string m_action_prefix;
   bool m_lts_mode;
+  bool m_introduce_tags;
 };
 
 } // namespace mcrl2

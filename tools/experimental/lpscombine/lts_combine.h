@@ -21,6 +21,7 @@ namespace mcrl2
 void combine_lts(lts::lts_lts_t& left_lts,
   lts::lts_lts_t& right_lts,
   const std::string& prefix,
+  bool introduce_tags,
   std::ostream& stream);
 }
 
