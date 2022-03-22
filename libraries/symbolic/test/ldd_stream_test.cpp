@@ -7,17 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#define BOOST_TEST_MODULE symbolic_parity_game_test
+#define BOOST_TEST_MODULE ldd_stream_test
 #include <boost/test/included/unit_test.hpp>
-
-BOOST_AUTO_TEST_CASE(dummy_test)
-{
-  // This is an empty test since at least one test is required.
-}
-
-#include "mcrl2/utilities/platform.h"
-
-#ifndef MCRL2_PLATFORM_WINDOWS
 
 #include "mcrl2/symbolic/test_utility.h"
 #include "mcrl2/symbolic/ldd_stream.h"
@@ -53,5 +44,3 @@ BOOST_AUTO_TEST_CASE(random_test_ldd_stream)
     BOOST_CHECK_EQUAL(input, result);
   }
 }
-
-#endif // MCRL2_PLATFORM_WINDOWS

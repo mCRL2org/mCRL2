@@ -26,7 +26,6 @@ add_mcrl2_library(pbes
     mcrl2_lps
     mcrl2_modal_formula
     mcrl2_lts
-    mcrl2_symbolic
   INCLUDE
     # TODO: Get rid of dependency on BES library
     ${CMAKE_SOURCE_DIR}/libraries/bes/include
@@ -43,7 +42,7 @@ if(${MCRL2_ENABLE_TESTS})
 endif()
 
 if (UNIX)
-  target_link_libraries(mcrl2_pbes sylvan)
+  target_link_libraries(mcrl2_pbes mcrl2_symbolic)
 endif()
 
 add_subdirectory(example)
