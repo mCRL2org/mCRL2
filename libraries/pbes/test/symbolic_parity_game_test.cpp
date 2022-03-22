@@ -10,6 +10,11 @@
 #define BOOST_TEST_MODULE symbolic_parity_game_test
 #include <boost/test/included/unit_test.hpp>
 
+BOOST_AUTO_TEST_CASE(dummy_test)
+{
+  // This is an empty test since at least one test is required.
+}
+
 #include "mcrl2/utilities/platform.h"
 
 #ifndef MCRL2_PLATFORM_WINDOWS
