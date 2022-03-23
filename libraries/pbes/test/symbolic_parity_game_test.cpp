@@ -278,6 +278,8 @@ BOOST_AUTO_TEST_CASE(random_test_attractor)
 
     BOOST_CHECK_EQUAL(result, expected);
   }
+  
+  quit_sylvan();
 }
 
 BOOST_AUTO_TEST_CASE(random_test_safe_attractor)
@@ -299,6 +301,8 @@ BOOST_AUTO_TEST_CASE(random_test_safe_attractor)
 
     BOOST_CHECK_EQUAL(result, expected);
   }
+  
+  quit_sylvan();
 }
 
 BOOST_AUTO_TEST_CASE(random_test_chaining_safe_attractor)
@@ -320,6 +324,8 @@ BOOST_AUTO_TEST_CASE(random_test_chaining_safe_attractor)
 
     BOOST_CHECK_EQUAL(result, expected);
   }
+  
+  quit_sylvan();
 }
 
 BOOST_AUTO_TEST_CASE(random_test_monotone_attractor)
@@ -340,6 +346,8 @@ BOOST_AUTO_TEST_CASE(random_test_monotone_attractor)
 
     BOOST_CHECK_EQUAL(result, expected);
   }
+  
+  quit_sylvan();
 }
 
 BOOST_AUTO_TEST_CASE(random_test_safe_monotone_attractor)
@@ -361,6 +369,8 @@ BOOST_AUTO_TEST_CASE(random_test_safe_monotone_attractor)
 
     BOOST_CHECK_EQUAL(result, expected);
   }
+
+  quit_sylvan();
 }
 
 BOOST_AUTO_TEST_CASE(random_test_chaining_monotone_attractor)
@@ -382,6 +392,8 @@ BOOST_AUTO_TEST_CASE(random_test_chaining_monotone_attractor)
 
     BOOST_CHECK_EQUAL(result, expected);
   }
+
+  quit_sylvan();
 }
 
 /*
@@ -409,6 +421,8 @@ BOOST_AUTO_TEST_CASE(random_test_solitair_cycles)
     BOOST_CHECK_EQUAL(Vresult.first, Vexpected.first);
     BOOST_CHECK_EQUAL(Vresult.second, Vexpected.second);
   }
+  
+  quit_sylvan();
 }
 
 BOOST_AUTO_TEST_CASE(random_test_solitair_cycles)
@@ -435,6 +449,8 @@ BOOST_AUTO_TEST_CASE(random_test_solitair_cycles)
     BOOST_CHECK_EQUAL(Vresult.first, Vexpected.first);
     BOOST_CHECK_EQUAL(Vresult.second, Vexpected.second);
   }
+  
+  quit_sylvan();
 }*/
 
 #endif // PLATFORM_WINDOWS
