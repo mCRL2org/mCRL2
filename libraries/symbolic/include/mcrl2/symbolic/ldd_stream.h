@@ -49,6 +49,8 @@ class binary_ldd_ostream
 {
 public:
   binary_ldd_ostream(std::ostream& os);
+  binary_ldd_ostream(std::shared_ptr<mcrl2::utilities::obitstream> stream);
+
   ~binary_ldd_ostream();
 
   void put(const sylvan::ldds::ldd& U);
@@ -56,8 +58,8 @@ public:
 private:
   /// \returns The number of bits needed to index ldds.
   unsigned int ldd_index_width();
-
-  mcrl2::utilities::obitstream m_stream;
+  
+  std::shared_ptr<mcrl2::utilities::obitstream> m_stream;
   mcrl2::utilities::indexed_set<sylvan::ldds::ldd> m_nodes; ///< An index of already written ldds.
 
 };
@@ -66,14 +68,15 @@ class binary_ldd_istream
 {
 public:
   binary_ldd_istream(std::istream& os);
+  binary_ldd_istream(std::shared_ptr<mcrl2::utilities::ibitstream> stream);
 
   sylvan::ldds::ldd get();
 
 private:
   /// \returns The number of bits needed to index ldds.
   unsigned int ldd_index_width();
-
-  mcrl2::utilities::ibitstream m_stream;
+  
+  std::shared_ptr<mcrl2::utilities::ibitstream> m_stream;
   std::deque<sylvan::ldds::ldd> m_nodes; ///< An index of read ldds.
 };
 

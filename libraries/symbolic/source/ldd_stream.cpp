@@ -95,17 +95,21 @@ private:
 static constexpr std::uint16_t BLF_MAGIC = 0x8baf;
 static constexpr std::uint16_t BLF_VERSION = 0x8306;
 
-binary_ldd_ostream::binary_ldd_ostream(std::ostream& os)
-  : m_stream(os)
+binary_ldd_ostream::binary_ldd_ostream(std::shared_ptr<mcrl2::utilities::obitstream> stream)
+  : m_stream(stream)
 {
   // Write the header of the binary LDD format.
-  m_stream.write_bits(BLF_MAGIC, 16);
-  m_stream.write_bits(BLF_VERSION, 16);
+  m_stream->write_bits(BLF_MAGIC, 16);
+  m_stream->write_bits(BLF_VERSION, 16);
 
   // Add the true and false constants.
   m_nodes.insert(false_());
   m_nodes.insert(true_());
 }
+
+binary_ldd_ostream::binary_ldd_ostream(std::ostream& is)
+  : binary_ldd_ostream(std::make_shared<mcrl2::utilities::obitstream>(is))
+{}
 
 binary_ldd_ostream::~binary_ldd_ostream()
 {
@@ -123,16 +127,16 @@ void binary_ldd_ostream::put(const ldd& U)
     if (inserted)
     {
       // New LDD that must be written to stream.
-      m_stream.write_bits(0, 1);
-      m_stream.write_integer(it->value());
-      m_stream.write_bits(m_nodes.index(it->down()), ldd_index_width());
-      m_stream.write_bits(m_nodes.index(it->right()), ldd_index_width());
+      m_stream->write_bits(0, 1);
+      m_stream->write_integer(it->value());
+      m_stream->write_bits(m_nodes.index(it->down()), ldd_index_width());
+      m_stream->write_bits(m_nodes.index(it->right()), ldd_index_width());
     }
 
     if (*it == U)
     {        
-      m_stream.write_bits(1, 1); // Is output.
-      m_stream.write_bits(index, ldd_index_width());
+      m_stream->write_bits(1, 1); // Is output.
+      m_stream->write_bits(index, ldd_index_width());
     }
 
     ++it;
@@ -144,20 +148,20 @@ unsigned int binary_ldd_ostream::ldd_index_width()
   return std::log2(m_nodes.size()) + 1;
 }
 
-binary_ldd_istream::binary_ldd_istream(std::istream& is)
-  : m_stream(is)
+binary_ldd_istream::binary_ldd_istream(std::shared_ptr<mcrl2::utilities::ibitstream> stream)
+  : m_stream(stream)
 {  
   // The term with function symbol index 0 indicates the end of the stream.
   m_nodes.emplace_back(false_());
   m_nodes.emplace_back(true_());
 
   // Read the binary aterm format header.
-  if (m_stream.read_bits(16) != BLF_MAGIC)
+  if (m_stream->read_bits(16) != BLF_MAGIC)
   {
     throw mcrl2::runtime_error("Error while reading: missing the BLF_MAGIC control sequence.");
   }
 
-  std::size_t version = m_stream.read_bits(16);
+  std::size_t version = m_stream->read_bits(16);
   if (version != BLF_VERSION)
   {
     throw mcrl2::runtime_error("The BLF version (" + std::to_string(version) + ") of the input file is incompatible with the version (" + std::to_string(BLF_VERSION) +
@@ -165,23 +169,27 @@ binary_ldd_istream::binary_ldd_istream(std::istream& is)
   }
 }
 
+binary_ldd_istream::binary_ldd_istream(std::istream& is)
+  : binary_ldd_istream(std::make_shared<mcrl2::utilities::ibitstream>(is))
+{}
+
 ldd binary_ldd_istream::get()
 {
   while (true)
   {
-    bool is_output = m_stream.read_bits(1);
+    bool is_output = m_stream->read_bits(1);
 
     if (is_output)
     {
-      std::size_t index = m_stream.read_bits(ldd_index_width());
+      std::size_t index = m_stream->read_bits(ldd_index_width());
       // The output is simply an index of the LDD.
       return m_nodes[index];
     }
     else
     {
-      std::size_t value = m_stream.read_integer();
-      std::size_t down_index = m_stream.read_bits(ldd_index_width());
-      std::size_t right_index = m_stream.read_bits(ldd_index_width());
+      std::size_t value = m_stream->read_integer();
+      std::size_t down_index = m_stream->read_bits(ldd_index_width());
+      std::size_t right_index = m_stream->read_bits(ldd_index_width());
 
       ldd down = m_nodes[down_index];
       ldd right = m_nodes[right_index];

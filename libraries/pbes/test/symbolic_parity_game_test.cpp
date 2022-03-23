@@ -42,7 +42,7 @@ summand_group single_transition_group(const mcrl2::data::variable_list& paramete
   dependencies[i] = 1;
   dependencies[i+1] = 1;
 
-  summand_group group(parameters, dependencies);
+  summand_group group(parameters, dependencies, false);
   group.L = random_set(N, 2, D);
 
   return group;
@@ -260,7 +260,6 @@ ldd forced_cycles(const symbolic_parity_game& G, const ldd& V, std::size_t alpha
   );
 }
 
-/*
 BOOST_AUTO_TEST_CASE(random_test_attractor)
 {
   initialise_sylvan();
@@ -384,8 +383,8 @@ BOOST_AUTO_TEST_CASE(random_test_chaining_monotone_attractor)
     BOOST_CHECK_EQUAL(result, expected);
   }
 }
-*/
 
+/*
 BOOST_AUTO_TEST_CASE(random_test_solitair_cycles)
 {
   initialise_sylvan();
@@ -412,7 +411,6 @@ BOOST_AUTO_TEST_CASE(random_test_solitair_cycles)
   }
 }
 
-/*
 BOOST_AUTO_TEST_CASE(random_test_solitair_cycles)
 {
   initialise_sylvan();

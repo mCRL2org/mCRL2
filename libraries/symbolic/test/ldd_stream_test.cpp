@@ -43,4 +43,6 @@ BOOST_AUTO_TEST_CASE(random_test_ldd_stream)
 
     BOOST_CHECK_EQUAL(input, result);
   }
+  
+  quit_sylvan();
 }

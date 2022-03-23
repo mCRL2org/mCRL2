@@ -17,6 +17,9 @@
 #include <random>
 #include <vector>
 
+namespace mcrl2::symbolic
+{
+
 std::mt19937& gen()
 {
   static thread_local std::random_device rd;
@@ -89,20 +92,24 @@ sylvan::ldds::ldd random_subset(const sylvan::ldds::ldd& U, std::size_t amount)
     return result;  
 }
 
-/// \brief Initialise the Sylvan library once.
+/// \brief Initialise the Sylvan library.
 void initialise_sylvan()
 {
-  static bool first = true;
-  if (first)
-  {
-    mcrl2::log::logger::set_reporting_level(mcrl2::log::debug);
-    lace_init(1, 1024*1024*4);
-    lace_startup(0, nullptr, nullptr);
-    sylvan::sylvan_set_limits(1024 * 1024 * 1024, 6, 6);
-    sylvan::sylvan_init_package();
-    sylvan::sylvan_init_ldd();
-    first = false;
-  }
+  mcrl2::log::logger::set_reporting_level(mcrl2::log::debug);
+  lace_init(1, 1024*1024*4);
+  lace_startup(0, nullptr, nullptr);
+  sylvan::sylvan_set_limits(1024 * 1024 * 1024, 6, 6);
+  sylvan::sylvan_init_package();
+  sylvan::sylvan_init_ldd();
 }
+
+/// \brief Destroy the Sylvan library.
+void quit_sylvan()
+{
+  sylvan::sylvan_quit();
+  lace_exit();
+}
+
+} // namespace mcrl2::symbolic
 
 #endif // MCRL2_SYMBOLIC_TEST_UTILITY_H

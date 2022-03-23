@@ -73,6 +73,27 @@ class lpsreach_algorithm
 
       return sylvan::ldds::cube(v.data(), x.size());
     }
+    
+    /// \brief Rewrites all arguments of the given action.
+    template<typename Rewriter, typename Substitution>
+    lps::multi_action rewrite_action(const lps::multi_action& a, const Rewriter& rewr, const Substitution& sigma)
+    {
+      const process::action_list& actions = a.actions();
+      const data::data_expression& time = a.time();
+      return
+        lps::multi_action(
+          process::action_list(
+            actions.begin(),
+            actions.end(),
+            [&](const process::action& a)
+            {
+              const auto& args = a.arguments();
+              return process::action(a.label(), data::data_expression_list(args.begin(), args.end(), [&](const data::data_expression& x) { return rewr(x, sigma); }));
+            }
+          ),
+          a.has_time() ? rewr(time, sigma) : time
+        );
+    }
 
     // R.L := R.L U {(x,y) in R | x in X}
     void learn_successors(std::size_t i, symbolic::summand_group& R, const ldd& X)

@@ -103,27 +103,6 @@ void check_enumerator_solution(const EnumeratorElement& p, const summand_group&)
   }
 }
 
-/// \brief Rewrites all arguments of the given action.
-template<typename Rewriter, typename Substitution>
-lps::multi_action rewrite_action(const lps::multi_action& a, const Rewriter& rewr, const Substitution& sigma)
-{
-  const process::action_list& actions = a.actions();
-  const data::data_expression& time = a.time();
-  return
-    lps::multi_action(
-      process::action_list(
-        actions.begin(),
-        actions.end(),
-        [&](const process::action& a)
-        {
-          const auto& args = a.arguments();
-          return process::action(a.label(), data::data_expression_list(args.begin(), args.end(), [&](const data::data_expression& x) { return rewr(x, sigma); }));
-        }
-      ),
-      a.has_time() ? rewr(time, sigma) : time
-    );
-}
-
 /// \brief If ActionLabel is true then the multi-action will be rewritten and added to the relation.
 template <typename Context, bool ActionLabel>
 void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t, void* context)
@@ -148,7 +127,6 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t, v
     // One additional space for the action label.
     xy_size += 1;
   }
-  std::size_t action_index = xy_size - 1;
 
   MCRL2_DECLARE_STACK_ARRAY(xy, std::uint32_t, xy_size);
 
@@ -180,7 +158,8 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t, v
 
                              if constexpr (ActionLabel)
                              {
-                               xy[action_index] = algorithm.m_action_index.insert(rewrite_action(group.actions[i], rewr, sigma)).first;
+                               // Action is always located on the last index of the cube.
+                               xy[xy_size - 1] = algorithm.m_action_index.insert(algorithm.rewrite_action(group.actions[i], rewr, sigma)).first;
                              }
 
                              mCRL2log(log::debug1) << "  " << print_transition(data_index, xy.data(), group.read, group.write) << std::endl;
