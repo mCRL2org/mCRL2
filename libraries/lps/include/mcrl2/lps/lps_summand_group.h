@@ -62,6 +62,8 @@ struct lps_summand_group: public symbolic::summand_group
         bool b = read_write_patterns[i][j];
         copy.push_back(b ? 0 : 1);
       }
+      copy.push_back(0); // Add one additional copy for the action label (needed by union_cube_copy).
+
       const auto& smd = lps_summands[i];
       actions.emplace_back(smd.multi_action());
       summands.emplace_back(smd.condition(), smd.summation_variables(), project(as_vector(symbolic::permute_copy(smd.next_state(lpsspec.process().process_parameters()), variable_order)), write), copy);
