@@ -40,7 +40,7 @@ class lpsreach_algorithm
     using ldd = sylvan::ldds::ldd;
     using enumerator_element = data::enumerator_list_element_with_substitution<>;
 
-    template <typename Context>
+    template <typename Context, bool ActionLabel>
     friend void symbolic::learn_successors_callback(WorkerP*, Task*, std::uint32_t* v, std::size_t n, void* context);
 
   protected:
@@ -52,6 +52,7 @@ class lpsreach_algorithm
     data::variable_list m_process_parameters;
     std::size_t m_n;
     std::vector<symbolic::data_expression_index> m_data_index;
+    utilities::indexed_set<lps::multi_action> m_action_index;
     std::vector<lps_summand_group> m_summand_groups;
     data::data_expression_list m_initial_state;
     std::vector<boost::dynamic_bitset<>> m_summand_patterns;
@@ -80,7 +81,7 @@ class lpsreach_algorithm
 
       using namespace sylvan::ldds;
       std::pair<lpsreach_algorithm&, symbolic::summand_group&> context{*this, R};
-      sat_all_nopar(X, symbolic::learn_successors_callback<std::pair<lpsreach_algorithm&, symbolic::summand_group&>>, &context);
+      sat_all_nopar(X, symbolic::learn_successors_callback<std::pair<lpsreach_algorithm&, lps_summand_group&>, true>, &context);
     }
 
     template <typename Specification>
@@ -270,7 +271,7 @@ class lpsreach_algorithm
       ldd todo = x;
       ldd deadlocks = empty_set();
 
-      while (todo != empty_set())
+      while (todo != empty_set() && (m_options.max_iterations == 0 || iteration_count < m_options.max_iterations))
       {
         stopwatch loop_start;
         iteration_count++;
@@ -299,8 +300,8 @@ class lpsreach_algorithm
       for (std::size_t i = 0; i < R.size(); i++)
       {
         mCRL2log(log::verbose) << "group " << std::setw(4) << i << " contains " << std::setw(7) << satcount(R[i].L) << " transitions (learn time = "
-                               << std::setw(5) << std::setprecision(2) << std::fixed << R[i].learn_time << "s with " << std::setw(9) << R[i].learn_calls << " calls)" << std::endl;
-        mCRL2log(log::verbose) << "cached " << satcount(R[i].Ldomain) << " values" << std::endl;
+                               << std::setw(5) << std::setprecision(2) << std::fixed << R[i].learn_time << "s with " << std::setw(9) << R[i].learn_calls 
+                               << " calls, cached " << static_cast<std::size_t>(satcount(R[i].Ldomain)) << " values" << ")" << std::endl;
 
         total_time += R[i].learn_time;
       }
@@ -318,6 +319,12 @@ class lpsreach_algorithm
         }
 
         ++i;
+      }
+
+      mCRL2log(log::verbose) << "There are " << m_action_index.size() << " action labels" << std::endl;
+      for (const auto& action : m_action_index)
+      {
+          mCRL2log(log::debug) << m_action_index.index(action) << ": " << action << std::endl;
       }
 
       return visited;

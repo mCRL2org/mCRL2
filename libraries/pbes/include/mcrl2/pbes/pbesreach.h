@@ -176,7 +176,7 @@ class pbesreach_algorithm
 {
     using enumerator_element = data::enumerator_list_element_with_substitution<>;
 
-    template <typename Context>
+    template <typename Context, bool ActionLabel>
     friend void symbolic::learn_successors_callback(WorkerP*, Task*, std::uint32_t* v, std::size_t n, void* context);
 
   protected:
@@ -223,7 +223,7 @@ class pbesreach_algorithm
 
       using namespace sylvan::ldds;
       std::pair<pbesreach_algorithm&, pbes_summand_group&> context{*this, R};
-      sat_all_nopar(X, symbolic::learn_successors_callback<std::pair<pbesreach_algorithm&, pbes_summand_group&>>, &context);
+      sat_all_nopar(X, symbolic::learn_successors_callback<std::pair<pbesreach_algorithm&, pbes_summand_group&>, false>, &context);
     }
 
     pbes_system::srf_pbes preprocess(pbes_system::pbes pbesspec, bool make_total)

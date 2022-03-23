@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_CASE(dummy_test)
 #include "mcrl2/pbes/symbolic_pbessolve.h"
 #include "mcrl2/pbes/pbes_summand_group.h"
 #include "mcrl2/symbolic/data_index.h"
-#include "mcrl2/utilities/logger.h"
+#include "mcrl2/symbolic/test_utility.h"
 
 #include <sylvan_ldd.hpp>
 
@@ -34,78 +34,6 @@ BOOST_AUTO_TEST_CASE(dummy_test)
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::symbolic;
 using sylvan::ldds::ldd;
-
-std::mt19937& gen()
-{
-  static std::random_device rd;
-  static std::mt19937 gen(rd());
-  return gen;
-}
-
-/// \brief Generate a random (state) vector.
-std::vector<std::uint32_t> random_vector(std::size_t length, std::size_t max_value)
-{    
-  std::uniform_int_distribution<> dist(0, max_value);
-
-  std::vector<std::uint32_t> result(length);
-  for (std::size_t i = 0; i < length; ++i)
-  {
-    result[i] = dist(gen());
-  }
-  
-  return result;
-}
-
-/// \brief Generate a set of random (state) vectors.
-ldd random_set(std::size_t amount, std::size_t length, std::size_t max_value)
-{
-  ldd result;
-
-  for (std::size_t i = 0; i < amount; ++i)
-  {
-    std::vector<std::uint32_t> random = random_vector(length, max_value);
-    result = union_cube(result, random);
-  }
-
-  return result;
-}
-
-/// \brief Returns a random subset of U.
-ldd random_subset(const ldd& U, std::size_t amount)
-{
-    std::uniform_int_distribution<> dist(0, satcount(U));
-
-    std::vector<std::vector<std::uint32_t>> contained = ldd_solutions(U);
-    std::vector<std::vector<std::uint32_t>> result_vector;
-
-    // Choose amount vectors.
-    std::size_t added = 0;
-    std::size_t i = 0;
-    for (const auto& vector : contained)
-    {
-      if (dist(gen()) <= amount)
-      {
-        result_vector.push_back(vector);
-        ++added;
-      }
-
-      if (added == amount)
-      {
-        break;
-      }
-
-      ++i;
-    }
-
-    // Construct the ldd.
-    ldd result;
-    for (const auto& vector : result_vector)
-    {
-      result = union_cube(result, vector);
-    }
-
-    return result;  
-}
 
 /// A single randomly generated transition group for parameter i
 summand_group single_transition_group(const mcrl2::data::variable_list& parameters, std::size_t i, std::size_t N, std::size_t D)
@@ -332,22 +260,7 @@ ldd forced_cycles(const symbolic_parity_game& G, const ldd& V, std::size_t alpha
   );
 }
 
-/// \brief Initialise the Sylvan library once.
-void initialise_sylvan()
-{
-  static bool first = true;
-  if (first)
-  {
-    mcrl2::log::logger::set_reporting_level(mcrl2::log::debug);
-    lace_init(1, 1024*1024*4);
-    lace_startup(0, nullptr, nullptr);
-    sylvan::sylvan_set_limits(1024 * 1024 * 1024, 6, 6);
-    sylvan::sylvan_init_package();
-    sylvan::sylvan_init_ldd();
-    first = false;
-  }
-}
-
+/*
 BOOST_AUTO_TEST_CASE(random_test_attractor)
 {
   initialise_sylvan();
@@ -471,14 +384,15 @@ BOOST_AUTO_TEST_CASE(random_test_chaining_monotone_attractor)
     BOOST_CHECK_EQUAL(result, expected);
   }
 }
+*/
 
-/*BOOST_AUTO_TEST_CASE(random_test_solitair_cycles)
+BOOST_AUTO_TEST_CASE(random_test_solitair_cycles)
 {
   initialise_sylvan();
   
   for (std::size_t i = 0; i < 1; ++i)
   {
-    auto [V, Veven, prio, groups, index] = compute_random_game(250, 2);
+    auto [V, Veven, prio, groups, index] = compute_random_game(100, 2);
     symbolic_parity_game G(groups, index, V, Veven, prio, false, false);
     mcrl2::pbes_system::symbolic_pbessolve_algorithm solver(G);
 
@@ -496,7 +410,7 @@ BOOST_AUTO_TEST_CASE(random_test_chaining_monotone_attractor)
     BOOST_CHECK_EQUAL(Vresult.first, Vexpected.first);
     BOOST_CHECK_EQUAL(Vresult.second, Vexpected.second);
   }
-}*/
+}
 
 /*
 BOOST_AUTO_TEST_CASE(random_test_solitair_cycles)

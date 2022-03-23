@@ -27,6 +27,7 @@ struct symbolic_reachability_options
 {
   data::rewrite_strategy rewrite_strategy = data::jitty;
   std::size_t max_workers = 0;
+  std::size_t max_iterations = 0;
   bool cached = false;
   bool chaining = false;
   bool detect_deadlocks = false;
@@ -102,7 +103,29 @@ void check_enumerator_solution(const EnumeratorElement& p, const summand_group&)
   }
 }
 
-template <typename Context>
+/// \brief Rewrites all arguments of the given action.
+template<typename Rewriter, typename Substitution>
+lps::multi_action rewrite_action(const lps::multi_action& a, const Rewriter& rewr, const Substitution& sigma)
+{
+  const process::action_list& actions = a.actions();
+  const data::data_expression& time = a.time();
+  return
+    lps::multi_action(
+      process::action_list(
+        actions.begin(),
+        actions.end(),
+        [&](const process::action& a)
+        {
+          const auto& args = a.arguments();
+          return process::action(a.label(), data::data_expression_list(args.begin(), args.end(), [&](const data::data_expression& x) { return rewr(x, sigma); }));
+        }
+      ),
+      a.has_time() ? rewr(time, sigma) : time
+    );
+}
+
+/// \brief If ActionLabel is true then the multi-action will be rewritten and added to the relation.
+template <typename Context, bool ActionLabel>
 void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t, void* context)
 {
   using namespace sylvan::ldds;
@@ -118,7 +141,14 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t, v
   const auto& enumerator = algorithm.m_enumerator;
   std::size_t x_size = group.read.size();
   std::size_t y_size = group.write.size();
-  std::size_t xy_size = x_size + y_size;
+  std::size_t xy_size = x_size + y_size; 
+  
+  if constexpr (ActionLabel)
+  {
+    // One additional space for the action label.
+    xy_size += 1;
+  }
+  std::size_t action_index = xy_size - 1;
 
   MCRL2_DECLARE_STACK_ARRAY(xy, std::uint32_t, xy_size);
 
@@ -131,6 +161,7 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t, v
     xy[group.read_pos[j]] = x[j];
   }
 
+  std::size_t i = 0;
   for (const auto& smd: group.summands)
   {
     data::data_expression condition = rewr(smd.condition, sigma);
@@ -146,12 +177,20 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t, v
                                data::data_expression value = rewr(smd.next_state[j], sigma);
                                xy[group.write_pos[j]] = data::is_variable(value) ? relprod_ignore : data_index[group.write[j]].index(value);
                              }
+
+                             if constexpr (ActionLabel)
+                             {
+                               xy[action_index] = algorithm.m_action_index.insert(rewrite_action(group.actions[i], rewr, sigma)).first;
+                             }
+
                              mCRL2log(log::debug1) << "  " << print_transition(data_index, xy.data(), group.read, group.write) << std::endl;
                              group.L = algorithm.m_options.no_relprod ? union_cube(group.L, xy.data(), xy_size) : union_cube_copy(group.L, xy.data(), smd.copy.data(), xy_size);
                              return false;
                            },
                            data::is_false
       );
+
+      ++i;
     }
     data::remove_assignments(sigma, smd.variables);
   }

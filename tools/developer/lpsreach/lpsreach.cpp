@@ -58,7 +58,8 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
                       "'random' variables are put in a random order\n"
                       "'<order>' a user defined permutation e.g. '1 3 2 0 4'"
                       );
-      desc.add_option("saturation", "reduce the amount of breadth-first iterations by applying the transition groups until fixed point");
+      desc.add_option("max-iterations", utilities::make_optional_argument("NUM", "0"), "limit number of breadth-first iterations to NUM");
+      desc.add_option("saturation", "reduce the amount of breadth-first iterations required by applying the transition groups until fixed point is reached");
       desc.add_hidden_option("no-discard", "do not discard any parameters");
       desc.add_hidden_option("no-read", "do not discard only-read parameters");
       desc.add_hidden_option("no-write", "do not discard only-write parameters");
@@ -120,6 +121,10 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
         {
           throw mcrl2::runtime_error("The table-ratio should be a power of two.");
         }
+      }
+      if (parser.has_option("max-iterations"))
+      {
+        options.max_iterations = parser.option_argument_as<std::size_t>("max-iterations");
       }
     }
 

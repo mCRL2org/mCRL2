@@ -36,7 +36,7 @@ struct lps_summand_group: public symbolic::summand_group
     const std::vector<boost::dynamic_bitset<>>& read_write_patterns,
     const std::vector<std::size_t> variable_order // a permutation of [0 .. |process_parameters| - 1]
   )
-    : summand_group(process_parameters, group_pattern)
+    : summand_group(process_parameters, group_pattern, true)
   {
     using symbolic::project;
     using utilities::detail::as_vector;
@@ -63,9 +63,12 @@ struct lps_summand_group: public symbolic::summand_group
         copy.push_back(b ? 0 : 1);
       }
       const auto& smd = lps_summands[i];
+      actions.emplace_back(smd.multi_action());
       summands.emplace_back(smd.condition(), smd.summation_variables(), project(as_vector(symbolic::permute_copy(smd.next_state(lpsspec.process().process_parameters()), variable_order)), write), copy);
     }
   }
+  
+  std::vector<lps::multi_action> actions;
 };
 
 namespace 
@@ -78,6 +81,7 @@ std::pair<std::set<data::variable>, std::set<data::variable>> read_write_paramet
   using utilities::detail::set_union;
   using utilities::detail::set_intersection;
 
+  // TODO: multi-action free variables are only necessary when actions are rewritten.
   std::set<data::variable> read_parameters = set_union(data::find_free_variables(summand.condition()), lps::find_free_variables(summand.multi_action()));
   std::set<data::variable> write_parameters;
 

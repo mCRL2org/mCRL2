@@ -60,7 +60,7 @@ struct summand_group
   double learn_time = 0.0; // The time to learn the transitions for this group.
   std::size_t learn_calls = 0; // Number of learn transition calls.
 
-  summand_group(const data::variable_list& process_parameters, const boost::dynamic_bitset<>& read_write_pattern)
+  summand_group(const data::variable_list& process_parameters, const boost::dynamic_bitset<>& read_write_pattern, bool has_action)
   {
     using namespace sylvan::ldds;
     using utilities::detail::as_vector;
@@ -106,7 +106,7 @@ struct summand_group
     write_parameters = project(as_vector(process_parameters), write);
     L = empty_set();
     Ldomain = empty_set();
-    Ir = compute_meta(read, write);
+    Ir = compute_meta(read, write, has_action); // Note, action is always added the end.
     Ip = cube(Ip_values);
 
     std::tie(read_pos, write_pos) = compute_read_write_pos(read, write);

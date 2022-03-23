@@ -123,7 +123,7 @@ struct pbes_summand_group: public symbolic::summand_group
     const std::vector<boost::dynamic_bitset<>>& read_write_patterns,
     const std::vector<std::size_t> variable_order // a permutation of [0 .. |process_parameters| - 1]
   )
-    : symbolic::summand_group(process_parameters, read_write_pattern)
+    : symbolic::summand_group(process_parameters, read_write_pattern, false)
   {
     using symbolic::project;
     using utilities::detail::as_vector;
