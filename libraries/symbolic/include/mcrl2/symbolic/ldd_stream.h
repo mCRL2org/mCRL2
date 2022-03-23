@@ -27,7 +27,8 @@ struct hash<sylvan::ldds::ldd>
 {
   std::size_t operator()(const sylvan::ldds::ldd& ldd) const
   {
-    return reinterpret_cast<std::uintptr_t>(ldd.get());
+    std::hash<std::uint64_t> hasher;
+    return hasher(ldd.get());
   }
 };
 
@@ -43,7 +44,7 @@ namespace mcrl2::symbolic
 ///          Whenever traversal encounters an LDD of which all children have
 ///          been visited it is written to the stream as 0:[value, down_index,
 ///          right_index]. An output LDD (as returned by
-///          binary_ldd_istream::get() is written as 1:index).
+///          binary_ldd_istream::get()) is written as 1:index.
 class binary_ldd_ostream
 {
 public:
