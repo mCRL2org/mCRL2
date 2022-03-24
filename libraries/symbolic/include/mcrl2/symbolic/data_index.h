@@ -17,67 +17,34 @@ namespace mcrl2::symbolic
 {
 
 /// \brief A bidirectional mapping between data expressions of a given sort and numbers
-class data_expression_index
+class data_expression_index : public mcrl2::utilities::indexed_set<data::data_expression>
 {
     friend std::ostream& operator<<(std::ostream&, const data_expression_index&);
 
   protected:
     data::sort_expression m_sort;
-    mcrl2::utilities::indexed_set<data::data_expression> m_values;
 
   public:
     data_expression_index(const data::sort_expression& sort)
       : m_sort(sort)
     {}
 
-    /// \brief Returns the index of the given value. If the value is not present yet, it will be added.
-    std::uint32_t index(const data::data_expression& value)
+    std::pair<size_type, bool> insert(const key_type& key)
     {
-      assert(value.sort() == m_sort);
-      return m_values.insert(value).first;
+      assert(key.sort() == m_sort);
+      return mcrl2::utilities::indexed_set<data::data_expression>::insert(key);
     }
-
-    /// \brief Returns the value corresponding to index
-    const data::data_expression& value(std::uint32_t i) const
-    {
-      return m_values[i];
-    }
-
+    
     const data::sort_expression& sort() const
     {
       return m_sort;
-    }
-
-    bool has_value(const data::data_expression& value) const
-    {
-      return m_values.find(value) != m_values.end();
-    }
-
-    bool has_index(std::uint32_t i) const
-    {
-      return i < m_values.size();
-    }
-
-    std::size_t size() const
-    {
-      return m_values.size();
-    }
-
-    auto begin() const
-    {
-      return m_values.begin();
-    }
-
-    auto end() const
-    {
-      return m_values.end();
     }
 };
 
 inline
 std::ostream& operator<<(std::ostream& out, const data_expression_index& x)
 {
-  out << "data index with sort = " << x.sort() << " values = " << core::detail::print_list(x.m_values);
+  out << "data index with sort = " << x.sort() << " values = " << core::detail::print_list(x);
   return out;
 }
 

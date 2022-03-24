@@ -10,22 +10,10 @@
 #ifndef MCRL2_LPS_SYMBOLIC_LTS_IO_H
 #define MCRL2_LPS_SYMBOLIC_LTS_IO_H
 
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/utilities/bitstream.h"
-
-#include <sylvan_ldd.hpp>
+#include "mcrl2/lps/symbolic_lts.h"
 
 namespace mcrl2::lps
 {
-
-class symbolic_lts
-{
-public:
-  data::data_specification data_spec;
-
-  sylvan::ldds::ldd states;
-
-};
 
 /// \brief Writes symbolic LTS to the stream.
 std::ostream& operator<<(std::ostream& stream, const symbolic_lts& lts);

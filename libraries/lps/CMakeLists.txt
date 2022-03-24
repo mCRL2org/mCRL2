@@ -7,6 +7,7 @@ add_mcrl2_library(lps
     linearise.cpp
     lpsparunfoldlib.cpp
     next_state_generator.cpp
+    symbolic_lts_io.cpp
   DEPENDS
     mcrl2_core
     mcrl2_data

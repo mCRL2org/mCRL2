@@ -35,7 +35,7 @@ std::vector<data::data_expression> ldd2state(const std::vector<data_expression_i
     }
     else
     {
-      result.push_back(data_index[i].value(x[i]));
+      result.push_back(data_index[i][x[i]]);
     }
   }
   return result;
@@ -53,7 +53,7 @@ std::vector<data::data_expression> ldd2state(const std::vector<data_expression_i
     }
     else
     {
-      result.push_back(data_index[used[i]].value(x[i]));
+      result.push_back(data_index[used[i]][x[i]]);
     }
   }
   return result;

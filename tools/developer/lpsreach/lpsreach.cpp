@@ -12,6 +12,7 @@
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/lpsreach.h"
 #include "mcrl2/lps/io.h"
+#include "mcrl2/lps/symbolic_lts_io.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/symbolic/ordering.h"
 
@@ -171,6 +172,21 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
         if (!options.dot_file.empty())
         {
           print_dot(options.dot_file, V);
+        }
+
+        if (output_filename().empty())
+        {
+          std::cout << algorithm.get_symbolic_lts();
+        }
+        else
+        {
+          std::ofstream to(output_filename(), std::ofstream::out | std::ofstream::binary);
+          if (!to.good())
+          {
+            throw mcrl2::runtime_error("Could not write to filename " + output_filename());
+          }
+
+          to << algorithm.get_symbolic_lts();
         }
       }
 

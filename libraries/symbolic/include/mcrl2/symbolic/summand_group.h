@@ -28,6 +28,9 @@ namespace mcrl2::symbolic
 /// \brief Computes for both the read and write parameters their positions in the zipped transition relation.
 std::pair<std::vector<std::size_t>, std::vector<std::size_t>> compute_read_write_pos(const std::vector<std::size_t>& read, const std::vector<std::size_t>& write);
 
+/// \brief Compact the vector to avoid repeated values at the end.
+std::vector<std::uint32_t> optimise_project(const std::vector<std::uint32_t>& Ip_values);
+
 /// \brief A transition relation over a single set of read and write parameters for a group of summands.
 struct summand_group
 {
@@ -85,25 +88,53 @@ struct summand_group
       }
     }
 
-    // The index after which all values in Ip_values are the same.
-    int i = Ip_values.size() - 1;
-    while (i > 0 && Ip_values[i] == Ip_values.back())
-    {
-      --i;
-    }
-
-    Ip_values = std::vector<std::uint32_t>(Ip_values.begin(), Ip_values.begin() + i + 2);
-    if (Ip_values.back() == 0)
-    {
-      Ip_values.back() = static_cast<std::uint32_t>(-2);
-    }
-    else
-    {
-      Ip_values.back() = static_cast<std::uint32_t>(-1);
-    }
-
+    Ip_values = optimise_project(Ip_values);
     read_parameters = project(as_vector(process_parameters), read);
     write_parameters = project(as_vector(process_parameters), write);
+    L = empty_set();
+    Ldomain = empty_set();
+    Ir = compute_meta(read, write, has_action); // Note, action is always added the end.
+    Ip = cube(Ip_values);
+
+    std::tie(read_pos, write_pos) = compute_read_write_pos(read, write);
+  }
+
+  // Construct a summand group from the given parameters, where read_parameters and write_parameters have the same order as process_parameters.
+  summand_group(const data::variable_list& process_parameters, std::vector<data::variable> _read_parameters, std::vector<data::variable> _write_parameters, bool has_action)
+  {
+    using namespace sylvan::ldds;
+    read_parameters = _read_parameters;
+    write_parameters = _write_parameters;
+    
+    std::vector<std::uint32_t> Ip_values;
+
+    std::size_t index = 0;
+    std::size_t read_index = 0;
+    std::size_t write_index = 0;
+    for (const data::variable& parameter : process_parameters)
+    {
+      if (parameter == read_parameters[read_index])
+      {
+        read_index++;
+        read.emplace_back(index);
+        Ip_values.emplace_back(1);
+      }
+      else
+      {
+        Ip_values.emplace_back(0);
+      }
+
+      if (parameter == write_parameters[write_index])
+      {
+        write_index++;
+        write.emplace_back(index);
+      }
+
+      ++index;
+    }
+
+    Ip_values = optimise_project(Ip_values);
+    
     L = empty_set();
     Ldomain = empty_set();
     Ir = compute_meta(read, write, has_action); // Note, action is always added the end.
@@ -177,6 +208,29 @@ std::pair<std::vector<std::size_t>, std::vector<std::size_t>> compute_read_write
   }
 
   return { rpos, wpos };
+}
+
+
+std::vector<std::uint32_t> optimise_project(const std::vector<std::uint32_t>& Ip_values)
+{
+  // The index after which all values in Ip_values are the same.
+  int i = Ip_values.size() - 1;
+  while (i > 0 && Ip_values[i] == Ip_values.back())
+  {
+    --i;
+  }
+
+  std::vector<std::uint32_t> result(Ip_values.begin(), Ip_values.begin() + i + 2);
+  if (result.back() == 0)
+  {
+    result.back() = static_cast<std::uint32_t>(-2);
+  }
+  else
+  {
+    result.back() = static_cast<std::uint32_t>(-1);
+  }
+
+  return result;
 }
 
 } // namespace mcrl2::symbolic

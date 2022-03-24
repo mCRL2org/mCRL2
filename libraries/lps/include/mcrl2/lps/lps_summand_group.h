@@ -69,6 +69,10 @@ struct lps_summand_group: public symbolic::summand_group
       summands.emplace_back(smd.condition(), smd.summation_variables(), project(as_vector(symbolic::permute_copy(smd.next_state(lpsspec.process().process_parameters()), variable_order)), write), copy);
     }
   }
+
+  lps_summand_group(const data::variable_list& process_parameters, std::vector<data::variable> _read_parameters, std::vector<data::variable> _write_parameters)
+    : summand_group(process_parameters, _read_parameters, _write_parameters, true)
+  {}
   
   std::vector<lps::multi_action> actions;
 };
