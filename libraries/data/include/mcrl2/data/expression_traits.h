@@ -61,6 +61,15 @@ struct term_traits<data::data_expression>
     return data::sort_bool::not_(p);
   }
 
+  /// \brief Operator not
+  /// \param result Operator not applied to p
+  /// \param p A term
+  static inline
+  void make_not_(term_type& result, const term_type& p)
+  {
+    data::sort_bool::make_not_(result, p);
+  }
+
   /// \brief Operator and
   /// \param p A term
   /// \param q A term
@@ -69,6 +78,16 @@ struct term_traits<data::data_expression>
   term_type and_(const term_type& p, const term_type& q)
   {
     return data::sort_bool::and_(p, q);
+  }
+
+  /// \brief Operator and
+  /// \param result Operator and applied to p and q
+  /// \param p A term
+  /// \param q A term
+  static inline
+  void make_and_(term_type& result, const term_type& p, const term_type& q)
+  {
+    data::sort_bool::make_and_(result, p, q);
   }
 
   /// \brief Operator or
@@ -81,6 +100,16 @@ struct term_traits<data::data_expression>
     return data::sort_bool::or_(p, q);
   }
 
+  /// \brief Operator or
+  /// \param result Operator or applied to p and q
+  /// \param p A term
+  /// \param q A term
+  static inline
+  void make_or_(term_type& result, const term_type& p, const term_type& q)
+  {
+    data::sort_bool::make_or_(result, p, q);
+  }
+
   /// \brief Operator imp
   /// \param p A term
   /// \param q A term
@@ -89,6 +118,16 @@ struct term_traits<data::data_expression>
   term_type imp(const term_type& p, const term_type& q)
   {
     return data::sort_bool::implies(p, q);
+  }
+
+  /// \brief Operator imp
+  /// \param result Operator and applied to p and q
+  /// \param p A term
+  /// \param q A term
+  static inline
+  void make_imp(term_type& result, const term_type& p, const term_type& q)
+  {
+    data::sort_bool::make_implies(result, p, q);
   }
 
   /// \brief Operator forall
@@ -101,6 +140,16 @@ struct term_traits<data::data_expression>
     return data::forall(d, p);
   }
 
+  /// \brief Construct a forall.
+  /// \param result Place where the forall is put. 
+  /// \param d A sequence of variables
+  /// \param p A term
+  static inline
+  void make_forall(term_type& result, const variable_sequence_type& d, const term_type& p)
+  {
+    return data::make_forall(result, d, p);
+  }
+
   /// \brief Operator exists
   /// \param d A sequence of variables
   /// \param p A term
@@ -109,6 +158,16 @@ struct term_traits<data::data_expression>
   term_type exists(const variable_sequence_type& d, const term_type& p)
   {
     return data::exists(d, p);
+  }
+
+  /// \brief Construct an exists.
+  /// \param result Place where the forall is put. 
+  /// \param d A sequence of variables
+  /// \param p A term
+  static inline
+  void make_exists(term_type& result, const variable_sequence_type& d, const term_type& p)
+  {
+    return data::make_exists(result, d, p);
   }
 
   /// \brief Test for value true

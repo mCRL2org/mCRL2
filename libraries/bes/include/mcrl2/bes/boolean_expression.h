@@ -656,6 +656,15 @@ struct term_traits<bes::boolean_expression>
     return bes::not_(x);
   }
 
+  /// \brief Operator not
+  /// \param result Will contain not applied to x. 
+  /// \param x A term
+  static inline
+  void make_not_(bes::boolean_expression& result, const bes::boolean_expression& x)
+  {
+    bes::make_not_(result, x);
+  }
+
   /// \brief Operator and
   /// \param p A term
   /// \param q A term
@@ -664,6 +673,16 @@ struct term_traits<bes::boolean_expression>
   bes::boolean_expression and_(const bes::boolean_expression& p, const bes::boolean_expression& q)
   {
     return bes::and_(p, q);
+  }
+
+  /// \brief Operator and
+  /// \param result Operator and applied to p and q
+  /// \param p A term
+  /// \param q A term
+  static inline
+  void make_and_(bes::boolean_expression& result, const bes::boolean_expression& p, const bes::boolean_expression& q)
+  {
+    bes::make_and_(result, p, q);
   }
 
   /// \brief Operator or
@@ -675,6 +694,16 @@ struct term_traits<bes::boolean_expression>
   {
     return bes::or_(p, q);
   }
+  //
+  /// \brief Operator or
+  /// \param result Operator or applied to p and q
+  /// \param p A term
+  /// \param q A term
+  static inline
+  void make_or_(bes::boolean_expression& result, const bes::boolean_expression& p, const bes::boolean_expression& q)
+  {
+    bes::make_or_(result, p, q);
+  }
 
   /// \brief Implication
   /// \param p A term
@@ -684,6 +713,16 @@ struct term_traits<bes::boolean_expression>
   bes::boolean_expression imp(const bes::boolean_expression& p, const bes::boolean_expression& q)
   {
     return bes::imp(p, q);
+  }
+  
+  /// \brief Implication
+  /// \param result Implication applied to p and q
+  /// \param p A term
+  /// \param q A term
+  static inline
+  void make_imp(bes::boolean_expression& result, const bes::boolean_expression& p, const bes::boolean_expression& q)
+  {
+    bes::make_imp(result, p, q);
   }
 
   /// \brief Test for value true

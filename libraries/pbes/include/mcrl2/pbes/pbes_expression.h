@@ -940,9 +940,9 @@ pbes_expression make_exists_(const data::variable_list& l, const pbes_expression
 /// \param p A PBES expression
 /// \return The value <tt>!p</tt>
 inline
-pbes_expression optimized_not(const pbes_expression& p)
+void optimized_not(pbes_expression& result, const pbes_expression& p)
 {
-  return data::optimized_not(p);
+  data::optimized_not(result, p);
 }
 
 /// \brief Make a conjunction
@@ -950,9 +950,9 @@ pbes_expression optimized_not(const pbes_expression& p)
 /// \param q A PBES expression
 /// \return The value <tt>p && q</tt>
 inline
-pbes_expression optimized_and(const pbes_expression& p, const pbes_expression& q)
+void optimized_and(pbes_expression& result, const pbes_expression& p, const pbes_expression& q)
 {
-  return data::optimized_and(p, q);
+  data::optimized_and(result, p, q);
 }
 
 /// \brief Make a disjunction
@@ -960,9 +960,9 @@ pbes_expression optimized_and(const pbes_expression& p, const pbes_expression& q
 /// \param q A PBES expression
 /// \return The value <tt>p || q</tt>
 inline
-pbes_expression optimized_or(const pbes_expression& p, const pbes_expression& q)
+void optimized_or(pbes_expression& result, const pbes_expression& p, const pbes_expression& q)
 {
-  return data::optimized_or(p, q);
+  data::optimized_or(result, p, q);
 }
 
 /// \brief Make an implication
@@ -970,9 +970,9 @@ pbes_expression optimized_or(const pbes_expression& p, const pbes_expression& q)
 /// \param q A PBES expression
 /// \return The value <tt>p => q</tt>
 inline
-pbes_expression optimized_imp(const pbes_expression& p, const pbes_expression& q)
+void optimized_imp(pbes_expression& result, const pbes_expression& p, const pbes_expression& q)
 {
-  return data::optimized_imp(p, q);
+  data::optimized_imp(result, p, q);
 }
 
 /// \brief Make a universal quantification
@@ -1113,6 +1113,15 @@ struct term_traits<pbes_system::pbes_expression>
     return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESNot(), p));
   }
 
+  /// \brief Make a negation
+  /// \param result The value <tt>!p</tt>
+  /// \param p A term
+  static inline
+  void make_not_(term_type& result, const term_type& p)
+  {
+    pbes_system::make_not_(result, p);
+  }
+
   /// \brief Make a conjunction
   /// \param p A term
   /// \param q A term
@@ -1123,6 +1132,16 @@ struct term_traits<pbes_system::pbes_expression>
     return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESAnd(), p,q));
   }
 
+  /// \brief Make a conjunction
+  /// \param result The value <tt>p && q</tt>
+  /// \param p A term
+  /// \param q A term
+  static inline
+  void make_and_(term_type& result, const term_type& p, const term_type& q)
+  {
+    pbes_system::make_and_(result, p, q);
+  }
+
   /// \brief Make a disjunction
   /// \param p A term
   /// \param q A term
@@ -1131,6 +1150,16 @@ struct term_traits<pbes_system::pbes_expression>
   term_type or_(const term_type& p, const term_type& q)
   {
     return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESOr(), p,q));
+  }
+
+  /// \brief Make a disjunction
+  /// \param result The value <tt>p || q</tt>
+  /// \param p A term
+  /// \param q A term
+  static inline
+  void make_or_(term_type& result, const term_type& p, const term_type& q)
+  {
+    pbes_system::make_or_(result, p,q);
   }
 
   template <typename FwdIt>
@@ -1155,6 +1184,16 @@ struct term_traits<pbes_system::pbes_expression>
   term_type imp(const term_type& p, const term_type& q)
   {
     return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESImp(), p, q));
+  }
+
+  /// \brief Make an implication
+  /// \param result The value <tt>p => q</tt>
+  /// \param p A term
+  /// \param q A term
+  static inline
+  void make_imp(term_type& result, const term_type& p, const term_type& q)
+  {
+    pbes_system::make_imp(result, p, q);
   }
 
   /// \brief Make a universal quantification

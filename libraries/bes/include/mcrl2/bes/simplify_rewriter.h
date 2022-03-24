@@ -32,7 +32,7 @@ struct add_simplify: public Builder<Derived>
   {
     boolean_expression op;
     apply(op, x.operand());
-    result = data::optimized_not(op);
+    data::optimized_not(result, op);
   }
 
   template <class T>
@@ -47,7 +47,7 @@ struct add_simplify: public Builder<Derived>
     }
     boolean_expression right;
     apply(right, x.right());
-    result = data::optimized_and(left, right);
+    data::optimized_and(result, left, right);
   }
 
   template <class T>
@@ -62,7 +62,7 @@ struct add_simplify: public Builder<Derived>
     }
     boolean_expression right;
     apply(right, x.right());
-    result = data::optimized_or(left, right);
+    data::optimized_or(result, left, right);
   }
 
   template <class T>
@@ -77,7 +77,7 @@ struct add_simplify: public Builder<Derived>
     }
     boolean_expression right;
     apply(right, x.right());
-    result = data::optimized_imp(left, right);
+    data::optimized_imp(result, left, right);
   }
 };
 

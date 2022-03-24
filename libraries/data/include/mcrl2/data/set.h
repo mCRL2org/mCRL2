@@ -103,6 +103,17 @@ namespace mcrl2 {
         return sort_set::constructor(s)(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol \@set.
+      /// \param result The data expression where the \@set expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_constructor(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_set::constructor(s),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of \@set.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol constructor to a
@@ -189,6 +200,16 @@ namespace mcrl2 {
         return sort_set::set_fset(s)(arg0);
       }
 
+      /// \brief Make an application of function symbol \@setfset.
+      /// \param result The data expression where the \@setfset expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      inline
+      void make_set_fset(data_expression& result, const sort_expression& s, const data_expression& arg0)
+      {
+        make_application(result, sort_set::set_fset(s),arg0);
+      }
+
       /// \brief Recogniser for application of \@setfset.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol set_fset to a
@@ -239,6 +260,16 @@ namespace mcrl2 {
       application set_comprehension(const sort_expression& s, const data_expression& arg0)
       {
         return sort_set::set_comprehension(s)(arg0);
+      }
+
+      /// \brief Make an application of function symbol \@setcomp.
+      /// \param result The data expression where the \@setcomp expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      inline
+      void make_set_comprehension(data_expression& result, const sort_expression& s, const data_expression& arg0)
+      {
+        make_application(result, sort_set::set_comprehension(s),arg0);
       }
 
       /// \brief Recogniser for application of \@setcomp.
@@ -294,6 +325,17 @@ namespace mcrl2 {
         return sort_set::in(s, arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol in.
+      /// \param result The data expression where the in expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_in(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_set::in(s, arg0.sort(), arg1.sort()),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of in.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol in to a
@@ -344,6 +386,16 @@ namespace mcrl2 {
       application complement(const sort_expression& s, const data_expression& arg0)
       {
         return sort_set::complement(s)(arg0);
+      }
+
+      /// \brief Make an application of function symbol !.
+      /// \param result The data expression where the ! expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      inline
+      void make_complement(data_expression& result, const sort_expression& s, const data_expression& arg0)
+      {
+        make_application(result, sort_set::complement(s),arg0);
       }
 
       /// \brief Recogniser for application of !.
@@ -412,6 +464,17 @@ namespace mcrl2 {
         return sort_set::union_(s, arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol +.
+      /// \param result The data expression where the + expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_union_(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_set::union_(s, arg0.sort(), arg1.sort()),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of +.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol union_ to a
@@ -476,6 +539,17 @@ namespace mcrl2 {
       application intersection(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         return sort_set::intersection(s, arg0.sort(), arg1.sort())(arg0, arg1);
+      }
+
+      /// \brief Make an application of function symbol *.
+      /// \param result The data expression where the * expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_intersection(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_set::intersection(s, arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
       /// \brief Recogniser for application of *.
@@ -544,6 +618,17 @@ namespace mcrl2 {
         return sort_set::difference(s, arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol -.
+      /// \param result The data expression where the - expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_difference(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_set::difference(s, arg0.sort(), arg1.sort()),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of -.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol difference to a
@@ -594,6 +679,16 @@ namespace mcrl2 {
       application false_function(const sort_expression& s, const data_expression& arg0)
       {
         return sort_set::false_function(s)(arg0);
+      }
+
+      /// \brief Make an application of function symbol \@false_.
+      /// \param result The data expression where the \@false_ expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      inline
+      void make_false_function(data_expression& result, const sort_expression& s, const data_expression& arg0)
+      {
+        make_application(result, sort_set::false_function(s),arg0);
       }
 
       /// \brief Recogniser for application of \@false_.
@@ -648,6 +743,16 @@ namespace mcrl2 {
         return sort_set::true_function(s)(arg0);
       }
 
+      /// \brief Make an application of function symbol \@true_.
+      /// \param result The data expression where the \@true_ expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      inline
+      void make_true_function(data_expression& result, const sort_expression& s, const data_expression& arg0)
+      {
+        make_application(result, sort_set::true_function(s),arg0);
+      }
+
       /// \brief Recogniser for application of \@true_.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol true_function to a
@@ -698,6 +803,16 @@ namespace mcrl2 {
       application not_function(const sort_expression& s, const data_expression& arg0)
       {
         return sort_set::not_function(s)(arg0);
+      }
+
+      /// \brief Make an application of function symbol \@not_.
+      /// \param result The data expression where the \@not_ expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      inline
+      void make_not_function(data_expression& result, const sort_expression& s, const data_expression& arg0)
+      {
+        make_application(result, sort_set::not_function(s),arg0);
       }
 
       /// \brief Recogniser for application of \@not_.
@@ -753,6 +868,17 @@ namespace mcrl2 {
         return sort_set::and_function(s)(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol \@and_.
+      /// \param result The data expression where the \@and_ expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_and_function(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_set::and_function(s),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of \@and_.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol and_function to a
@@ -804,6 +930,17 @@ namespace mcrl2 {
       application or_function(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         return sort_set::or_function(s)(arg0, arg1);
+      }
+
+      /// \brief Make an application of function symbol \@or_.
+      /// \param result The data expression where the \@or_ expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_or_function(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_set::or_function(s),arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@or_.
@@ -861,6 +998,19 @@ namespace mcrl2 {
         return sort_set::fset_union(s)(arg0, arg1, arg2, arg3);
       }
 
+      /// \brief Make an application of function symbol \@fset_union.
+      /// \param result The data expression where the \@fset_union expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \param arg3 A data expression.
+      inline
+      void make_fset_union(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
+      {
+        make_application(result, sort_set::fset_union(s),arg0, arg1, arg2, arg3);
+      }
+
       /// \brief Recogniser for application of \@fset_union.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol fset_union to a
@@ -914,6 +1064,19 @@ namespace mcrl2 {
       application fset_intersection(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
         return sort_set::fset_intersection(s)(arg0, arg1, arg2, arg3);
+      }
+
+      /// \brief Make an application of function symbol \@fset_inter.
+      /// \param result The data expression where the \@fset_inter expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \param arg3 A data expression.
+      inline
+      void make_fset_intersection(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
+      {
+        make_application(result, sort_set::fset_intersection(s),arg0, arg1, arg2, arg3);
       }
 
       /// \brief Recogniser for application of \@fset_inter.

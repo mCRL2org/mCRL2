@@ -30,28 +30,52 @@ struct term_traits_optimized<pbes_system::pbes_expression>: public core::term_tr
 {
   typedef core::term_traits<pbes_system::pbes_expression> super;
 
-  static inline
+  /* static inline
   term_type not_(const term_type& x)
   {
     return data::optimized_not(x);
-  }
+  } */
 
   static inline
+  void make_not_(term_type& result, const term_type& x)
+  {
+    data::optimized_not(result, x);
+  }
+
+  /* static inline
   term_type and_(const term_type& x, const term_type& y)
   {
     return data::optimized_and(x, y);
-  }
+  } */
 
   static inline
+  void make_and_(term_type& result, const term_type& x, const term_type& y)
+  {
+    data::optimized_and(result, x, y);
+  }
+
+  /* static inline
   term_type or_(const term_type& x, const term_type& y)
   {
     return data::optimized_or(x, y);
-  }
+  } */
 
   static inline
+  void make_or_(term_type& result, const term_type& x, const term_type& y)
+  {
+    data::optimized_or(result, x, y);
+  }
+
+  /* static inline
   term_type imp(const term_type& x, const term_type& y)
   {
     return data::optimized_imp(x, y);
+  } */
+
+  static inline
+  void make_imp(term_type& result, const term_type& x, const term_type& y)
+  {
+    data::optimized_imp(result, x, y);
   }
 
   static inline

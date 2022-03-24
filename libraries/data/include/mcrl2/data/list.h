@@ -135,6 +135,17 @@ namespace mcrl2 {
         return sort_list::cons_(s)(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol |>.
+      /// \param result The data expression where the |> expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_cons_(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_list::cons_(s),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of |>.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol cons_ to a
@@ -224,6 +235,17 @@ namespace mcrl2 {
         return sort_list::in(s)(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol in.
+      /// \param result The data expression where the in expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_in(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_list::in(s),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of in.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol in to a
@@ -274,6 +296,16 @@ namespace mcrl2 {
       application count(const sort_expression& s, const data_expression& arg0)
       {
         return sort_list::count(s)(arg0);
+      }
+
+      /// \brief Make an application of function symbol #.
+      /// \param result The data expression where the # expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      inline
+      void make_count(data_expression& result, const sort_expression& s, const data_expression& arg0)
+      {
+        make_application(result, sort_list::count(s),arg0);
       }
 
       /// \brief Recogniser for application of #.
@@ -329,6 +361,17 @@ namespace mcrl2 {
         return sort_list::snoc(s)(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol <|.
+      /// \param result The data expression where the <| expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_snoc(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_list::snoc(s),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of <|.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol snoc to a
@@ -380,6 +423,17 @@ namespace mcrl2 {
       application concat(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         return sort_list::concat(s)(arg0, arg1);
+      }
+
+      /// \brief Make an application of function symbol ++.
+      /// \param result The data expression where the ++ expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_concat(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_list::concat(s),arg0, arg1);
       }
 
       /// \brief Recogniser for application of ++.
@@ -435,6 +489,17 @@ namespace mcrl2 {
         return sort_list::element_at(s)(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol ..
+      /// \param result The data expression where the . expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_element_at(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_list::element_at(s),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of ..
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol element_at to a
@@ -485,6 +550,16 @@ namespace mcrl2 {
       application head(const sort_expression& s, const data_expression& arg0)
       {
         return sort_list::head(s)(arg0);
+      }
+
+      /// \brief Make an application of function symbol head.
+      /// \param result The data expression where the head expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      inline
+      void make_head(data_expression& result, const sort_expression& s, const data_expression& arg0)
+      {
+        make_application(result, sort_list::head(s),arg0);
       }
 
       /// \brief Recogniser for application of head.
@@ -539,6 +614,16 @@ namespace mcrl2 {
         return sort_list::tail(s)(arg0);
       }
 
+      /// \brief Make an application of function symbol tail.
+      /// \param result The data expression where the tail expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      inline
+      void make_tail(data_expression& result, const sort_expression& s, const data_expression& arg0)
+      {
+        make_application(result, sort_list::tail(s),arg0);
+      }
+
       /// \brief Recogniser for application of tail.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol tail to a
@@ -591,6 +676,16 @@ namespace mcrl2 {
         return sort_list::rhead(s)(arg0);
       }
 
+      /// \brief Make an application of function symbol rhead.
+      /// \param result The data expression where the rhead expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      inline
+      void make_rhead(data_expression& result, const sort_expression& s, const data_expression& arg0)
+      {
+        make_application(result, sort_list::rhead(s),arg0);
+      }
+
       /// \brief Recogniser for application of rhead.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol rhead to a
@@ -641,6 +736,16 @@ namespace mcrl2 {
       application rtail(const sort_expression& s, const data_expression& arg0)
       {
         return sort_list::rtail(s)(arg0);
+      }
+
+      /// \brief Make an application of function symbol rtail.
+      /// \param result The data expression where the rtail expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      inline
+      void make_rtail(data_expression& result, const sort_expression& s, const data_expression& arg0)
+      {
+        make_application(result, sort_list::rtail(s),arg0);
       }
 
       /// \brief Recogniser for application of rtail.

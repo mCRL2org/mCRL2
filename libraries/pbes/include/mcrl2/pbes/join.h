@@ -97,7 +97,15 @@ std::set<pbes_expression> split_and(const pbes_expression& expr, bool split_data
 template <typename FwdIt>
 inline pbes_expression optimized_join_or(FwdIt first, FwdIt last)
 {
-  return utilities::detail::join(first, last, data::optimized_or<pbes_expression>, false_());
+  return utilities::detail::join(first, 
+                                 last, 
+                                 [](const pbes_expression& arg0, const pbes_expression& arg1) -> pbes_expression
+                                 { 
+                                   pbes_expression result;
+                                   data::optimized_or(result, arg0, arg1);
+                                   return result;
+                                 }, 
+                                 false_());
 }
 
 /// \brief Returns and applied to the sequence of pbes expressions [first, last)
@@ -107,7 +115,15 @@ inline pbes_expression optimized_join_or(FwdIt first, FwdIt last)
 template <typename FwdIt>
 inline pbes_expression optimized_join_and(FwdIt first, FwdIt last)
 {
-  return utilities::detail::join(first, last, data::optimized_and<pbes_expression>, true_());
+  return utilities::detail::join(first, 
+                                 last, 
+                                 [](const pbes_expression& arg0, const pbes_expression& arg1) -> pbes_expression
+                                 { 
+                                   pbes_expression result;
+                                   data::optimized_and(result, arg0, arg1);
+                                   return result;
+                                 }, 
+                                 true_());
 }
 
 } // namespace pbes_system

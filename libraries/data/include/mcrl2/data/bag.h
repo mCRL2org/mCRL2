@@ -105,6 +105,17 @@ namespace mcrl2 {
         return sort_bag::constructor(s)(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol \@bag.
+      /// \param result The data expression where the \@bag expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_constructor(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_bag::constructor(s),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of \@bag.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol constructor to a
@@ -191,6 +202,16 @@ namespace mcrl2 {
         return sort_bag::bag_fbag(s)(arg0);
       }
 
+      /// \brief Make an application of function symbol \@bagfbag.
+      /// \param result The data expression where the \@bagfbag expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      inline
+      void make_bag_fbag(data_expression& result, const sort_expression& s, const data_expression& arg0)
+      {
+        make_application(result, sort_bag::bag_fbag(s),arg0);
+      }
+
       /// \brief Recogniser for application of \@bagfbag.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol bag_fbag to a
@@ -241,6 +262,16 @@ namespace mcrl2 {
       application bag_comprehension(const sort_expression& s, const data_expression& arg0)
       {
         return sort_bag::bag_comprehension(s)(arg0);
+      }
+
+      /// \brief Make an application of function symbol \@bagcomp.
+      /// \param result The data expression where the \@bagcomp expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      inline
+      void make_bag_comprehension(data_expression& result, const sort_expression& s, const data_expression& arg0)
+      {
+        make_application(result, sort_bag::bag_comprehension(s),arg0);
       }
 
       /// \brief Recogniser for application of \@bagcomp.
@@ -296,6 +327,17 @@ namespace mcrl2 {
         return sort_bag::count(s, arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol count.
+      /// \param result The data expression where the count expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_count(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_bag::count(s, arg0.sort(), arg1.sort()),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of count.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol count to a
@@ -347,6 +389,17 @@ namespace mcrl2 {
       application in(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         return sort_bag::in(s, arg0.sort(), arg1.sort())(arg0, arg1);
+      }
+
+      /// \brief Make an application of function symbol in.
+      /// \param result The data expression where the in expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_in(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_bag::in(s, arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
       /// \brief Recogniser for application of in.
@@ -423,6 +476,17 @@ namespace mcrl2 {
         return sort_bag::union_(s, arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol +.
+      /// \param result The data expression where the + expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_union_(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_bag::union_(s, arg0.sort(), arg1.sort()),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of +.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol union_ to a
@@ -495,6 +559,17 @@ namespace mcrl2 {
       application intersection(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         return sort_bag::intersection(s, arg0.sort(), arg1.sort())(arg0, arg1);
+      }
+
+      /// \brief Make an application of function symbol *.
+      /// \param result The data expression where the * expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_intersection(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_bag::intersection(s, arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
       /// \brief Recogniser for application of *.
@@ -571,6 +646,17 @@ namespace mcrl2 {
         return sort_bag::difference(s, arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol -.
+      /// \param result The data expression where the - expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_difference(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_bag::difference(s, arg0.sort(), arg1.sort()),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of -.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol difference to a
@@ -621,6 +707,16 @@ namespace mcrl2 {
       application bag2set(const sort_expression& s, const data_expression& arg0)
       {
         return sort_bag::bag2set(s)(arg0);
+      }
+
+      /// \brief Make an application of function symbol Bag2Set.
+      /// \param result The data expression where the Bag2Set expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      inline
+      void make_bag2set(data_expression& result, const sort_expression& s, const data_expression& arg0)
+      {
+        make_application(result, sort_bag::bag2set(s),arg0);
       }
 
       /// \brief Recogniser for application of Bag2Set.
@@ -675,6 +771,16 @@ namespace mcrl2 {
         return sort_bag::set2bag(s)(arg0);
       }
 
+      /// \brief Make an application of function symbol Set2Bag.
+      /// \param result The data expression where the Set2Bag expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      inline
+      void make_set2bag(data_expression& result, const sort_expression& s, const data_expression& arg0)
+      {
+        make_application(result, sort_bag::set2bag(s),arg0);
+      }
+
       /// \brief Recogniser for application of Set2Bag.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol set2bag to a
@@ -727,6 +833,16 @@ namespace mcrl2 {
         return sort_bag::zero_function(s)(arg0);
       }
 
+      /// \brief Make an application of function symbol \@zero_.
+      /// \param result The data expression where the \@zero_ expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      inline
+      void make_zero_function(data_expression& result, const sort_expression& s, const data_expression& arg0)
+      {
+        make_application(result, sort_bag::zero_function(s),arg0);
+      }
+
       /// \brief Recogniser for application of \@zero_.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol zero_function to a
@@ -777,6 +893,16 @@ namespace mcrl2 {
       application one_function(const sort_expression& s, const data_expression& arg0)
       {
         return sort_bag::one_function(s)(arg0);
+      }
+
+      /// \brief Make an application of function symbol \@one_.
+      /// \param result The data expression where the \@one_ expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      inline
+      void make_one_function(data_expression& result, const sort_expression& s, const data_expression& arg0)
+      {
+        make_application(result, sort_bag::one_function(s),arg0);
       }
 
       /// \brief Recogniser for application of \@one_.
@@ -832,6 +958,17 @@ namespace mcrl2 {
         return sort_bag::add_function(s)(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol \@add_.
+      /// \param result The data expression where the \@add_ expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_add_function(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_bag::add_function(s),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of \@add_.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol add_function to a
@@ -883,6 +1020,17 @@ namespace mcrl2 {
       application min_function(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         return sort_bag::min_function(s)(arg0, arg1);
+      }
+
+      /// \brief Make an application of function symbol \@min_.
+      /// \param result The data expression where the \@min_ expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_min_function(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_bag::min_function(s),arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@min_.
@@ -938,6 +1086,17 @@ namespace mcrl2 {
         return sort_bag::monus_function(s)(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol \@monus_.
+      /// \param result The data expression where the \@monus_ expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_monus_function(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_bag::monus_function(s),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of \@monus_.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol monus_function to a
@@ -990,6 +1149,16 @@ namespace mcrl2 {
         return sort_bag::nat2bool_function(s)(arg0);
       }
 
+      /// \brief Make an application of function symbol \@Nat2Bool_.
+      /// \param result The data expression where the \@Nat2Bool_ expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      inline
+      void make_nat2bool_function(data_expression& result, const sort_expression& s, const data_expression& arg0)
+      {
+        make_application(result, sort_bag::nat2bool_function(s),arg0);
+      }
+
       /// \brief Recogniser for application of \@Nat2Bool_.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol nat2bool_function to a
@@ -1040,6 +1209,16 @@ namespace mcrl2 {
       application bool2nat_function(const sort_expression& s, const data_expression& arg0)
       {
         return sort_bag::bool2nat_function(s)(arg0);
+      }
+
+      /// \brief Make an application of function symbol \@Bool2Nat_.
+      /// \param result The data expression where the \@Bool2Nat_ expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      inline
+      void make_bool2nat_function(data_expression& result, const sort_expression& s, const data_expression& arg0)
+      {
+        make_application(result, sort_bag::bool2nat_function(s),arg0);
       }
 
       /// \brief Recogniser for application of \@Bool2Nat_.
@@ -1097,6 +1276,19 @@ namespace mcrl2 {
         return sort_bag::fbag_join(s)(arg0, arg1, arg2, arg3);
       }
 
+      /// \brief Make an application of function symbol \@fbag_join.
+      /// \param result The data expression where the \@fbag_join expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \param arg3 A data expression.
+      inline
+      void make_fbag_join(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
+      {
+        make_application(result, sort_bag::fbag_join(s),arg0, arg1, arg2, arg3);
+      }
+
       /// \brief Recogniser for application of \@fbag_join.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol fbag_join to a
@@ -1150,6 +1342,19 @@ namespace mcrl2 {
       application fbag_intersect(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
         return sort_bag::fbag_intersect(s)(arg0, arg1, arg2, arg3);
+      }
+
+      /// \brief Make an application of function symbol \@fbag_inter.
+      /// \param result The data expression where the \@fbag_inter expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \param arg3 A data expression.
+      inline
+      void make_fbag_intersect(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
+      {
+        make_application(result, sort_bag::fbag_intersect(s),arg0, arg1, arg2, arg3);
       }
 
       /// \brief Recogniser for application of \@fbag_inter.
@@ -1207,6 +1412,19 @@ namespace mcrl2 {
         return sort_bag::fbag_difference(s)(arg0, arg1, arg2, arg3);
       }
 
+      /// \brief Make an application of function symbol \@fbag_diff.
+      /// \param result The data expression where the \@fbag_diff expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \param arg3 A data expression.
+      inline
+      void make_fbag_difference(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
+      {
+        make_application(result, sort_bag::fbag_difference(s),arg0, arg1, arg2, arg3);
+      }
+
       /// \brief Recogniser for application of \@fbag_diff.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol fbag_difference to a
@@ -1258,6 +1476,17 @@ namespace mcrl2 {
       application fbag2fset(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         return sort_bag::fbag2fset(s)(arg0, arg1);
+      }
+
+      /// \brief Make an application of function symbol \@fbag2fset.
+      /// \param result The data expression where the \@fbag2fset expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_fbag2fset(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_bag::fbag2fset(s),arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@fbag2fset.

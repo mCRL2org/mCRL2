@@ -285,7 +285,7 @@ inline void fourier_motzkin(const data_expression& e_in,
 
         for(const linear_inequality& l: inequalities)
         {
-          partial_result=optimized_and(partial_result,l.transform_to_data_expression());
+          optimized_and(partial_result, partial_result, l.transform_to_data_expression());
         }
         result_disjunction_set.insert(partial_result);
       }

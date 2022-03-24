@@ -26,33 +26,70 @@ namespace detail
 /// \return The value <tt>!arg</tt>
 template <typename TermTraits>
 inline
-typename TermTraits::term_type optimized_not(const typename TermTraits::term_type& arg, TermTraits)
+void optimized_not(typename TermTraits::term_type& result, 
+                   const typename TermTraits::term_type& arg, 
+                   TermTraits)
 {
   typedef TermTraits tr;
 
   if (tr::is_true(arg))
   {
-    return tr::false_();
+    result=tr::false_();
   }
   else if (tr::is_false(arg))
   {
-    return tr::true_();
+    result=tr::true_();
   }
   else if (tr::is_not(arg))
   {
-    return tr::not_arg(arg);
+    result=tr::not_arg(arg);
   }
   else
   {
-    return tr::not_(arg);
+    tr::make_not_(result, arg);
   }
 }
 
-/// \brief Make a conjunction
+/// \brief Make a conjunction and optimize it if possible.
 /// \param left A term
 /// \param right A term
 /// \return The value <tt>left && right</tt>
 template <typename TermTraits>
+inline
+void optimized_and(typename TermTraits::term_type& result, 
+                   const typename TermTraits::term_type& left, 
+                   const typename TermTraits::term_type& right, 
+                   TermTraits)
+{
+  typedef TermTraits tr;
+
+  if (tr::is_true(left))
+  {
+    result=right;
+  }
+  else if (tr::is_false(left))
+  {
+    result=tr::false_();
+  }
+  else if (tr::is_true(right))
+  {
+    result=left;
+  }
+  else if (tr::is_false(right))
+  {
+    result=tr::false_();
+  }
+  else if (left == right)
+  {
+    result=left;
+  }
+  else
+  {
+    tr::make_and_(result, left, right);
+  }
+}
+
+/* template <typename TermTraits>
 inline
 typename TermTraits::term_type optimized_and(const typename TermTraits::term_type& left, const typename TermTraits::term_type& right, TermTraits)
 {
@@ -82,7 +119,9 @@ typename TermTraits::term_type optimized_and(const typename TermTraits::term_typ
   {
     return tr::and_(left, right);
   }
-}
+} */
+
+
 
 /// \brief Make a disjunction
 /// \param left A term
@@ -90,33 +129,35 @@ typename TermTraits::term_type optimized_and(const typename TermTraits::term_typ
 /// \return The value <tt>left || right</tt>
 template <typename TermTraits>
 inline
-typename TermTraits::term_type optimized_or(const typename TermTraits::term_type& left, const typename TermTraits::term_type& right, TermTraits)
+void optimized_or(typename TermTraits::term_type& result, 
+                  const typename TermTraits::term_type& left, 
+                  const typename TermTraits::term_type& right, TermTraits)
 {
   typedef TermTraits tr;
 
   if (tr::is_true(left))
   {
-    return tr::true_();
+    result=tr::true_();
   }
   else if (tr::is_false(left))
   {
-    return right;
+    result=right;
   }
   else if (tr::is_true(right))
   {
-    return tr::true_();
+    result=tr::true_();
   }
   else if (tr::is_false(right))
   {
-    return left;
+    result=left;
   }
   else if (left == right)
   {
-    return left;
+    result=left;
   }
   else
   {
-    return tr::or_(left, right);
+    tr::make_or_(result, left, right);
   }
 }
 
@@ -126,33 +167,35 @@ typename TermTraits::term_type optimized_or(const typename TermTraits::term_type
 /// \return The value <tt>left => right</tt>
 template <typename TermTraits>
 inline
-typename TermTraits::term_type optimized_imp(const typename TermTraits::term_type& left, const typename TermTraits::term_type& right, TermTraits)
+void optimized_imp(typename TermTraits::term_type& result, 
+                   const typename TermTraits::term_type& left, 
+                   const typename TermTraits::term_type& right, TermTraits t)
 {
   typedef TermTraits tr;
 
   if (tr::is_true(left))
   {
-    return right;
+    result=right;
   }
   else if (tr::is_false(left))
   {
-    return tr::true_();
+    result=tr::true_();
   }
   else if (tr::is_true(right))
   {
-    return tr::true_();
+    result=tr::true_();
   }
   else if (tr::is_false(right))
   {
-    return tr::not_(left);
+    optimized_not(result,left, t);
   }
   else if (left == right)
   {
-    return tr::true_();
+    result=tr::true_();
   }
   else
   {
-    return tr::imp(left, right);
+    tr::make_imp(result, left, right);
   }
 }
 
@@ -472,21 +515,32 @@ T1 optimized_exists(VariableSequence v, T1 arg, Exists exists, T2 true_, UnaryPr
 /// \return The application of not to the argument.
 template <typename Term>
 inline
-Term optimized_not(const Term& arg)
+void optimized_not(Term& result, const Term& arg)
 {
-  return detail::optimized_not(arg, core::term_traits<Term>());
+  detail::optimized_not(result, arg, core::term_traits<Term>());
 }
 
-/// \brief Make a conjunction
+/// \brief Make a conjunction, and optimize if possible.
+/// \param result Contains the optimized and.
+/// \param p A term
+/// \param q A term
+template <typename Term>
+inline
+void optimized_and(Term& result, const Term& p, const Term& q)
+{
+  return detail::optimized_and(result, p, q, core::term_traits<Term>());
+}
+
+/// \brief Make a conjunction, and optimize if possible.
 /// \param p A term
 /// \param q A term
 /// \return The application of and to the arguments.
-template <typename Term>
+/* template <typename Term>
 inline
 Term optimized_and(const Term& p, const Term& q)
 {
   return detail::optimized_and(p, q, core::term_traits<Term>());
-}
+} */
 
 /// \brief Make a disjunction
 /// \param p A term
@@ -494,9 +548,9 @@ Term optimized_and(const Term& p, const Term& q)
 /// \return The application of or to the arguments.
 template <typename Term>
 inline
-Term optimized_or(const Term& p, const Term& q)
+void optimized_or(Term& result, const Term& p, const Term& q)
 {
-  return detail::optimized_or(p, q, core::term_traits<Term>());
+  detail::optimized_or(result, p, q, core::term_traits<Term>());
 }
 
 /// \brief Make an implication
@@ -505,9 +559,9 @@ Term optimized_or(const Term& p, const Term& q)
 /// \return The application of implication to the arguments.
 template <typename Term>
 inline
-Term optimized_imp(const Term& p, const Term& q)
+void optimized_imp(Term& result, const Term& p, const Term& q)
 {
-  return detail::optimized_imp(p, q, core::term_traits<Term>());
+  detail::optimized_imp(result, p, q, core::term_traits<Term>());
 }
 
 /// \brief Make a universal quantification

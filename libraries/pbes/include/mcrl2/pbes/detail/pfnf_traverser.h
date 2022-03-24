@@ -240,17 +240,23 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
 
   pbes_expression make_and(const pfnf_traverser_expression& left, const pfnf_traverser_expression& right) const
   {
-    return data::optimized_and(left.expr, right.expr);
+    pbes_expression result;
+    data::optimized_and(result, left.expr, right.expr);
+    return result;
   }
 
   pbes_expression make_or(const pfnf_traverser_expression& left, const pfnf_traverser_expression& right) const
   {
-    return data::optimized_or(left.expr, right.expr);
+    pbes_expression result;
+    data::optimized_or(result, left.expr, right.expr);
+    return result;
   }
 
   pbes_expression make_not(const pfnf_traverser_expression& x) const
   {
-    return data::optimized_not(x.expr);
+    pbes_expression result;
+    data::optimized_not(result, x.expr);
+    return result;
   }
 
   /// \brief A stack containing expressions in PFNF format.
@@ -270,8 +276,15 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
     const pbes_expression F = false_();
     for (const pfnf_traverser_implication& impl: expr.implications)
     {
-      pbes_expression x = std::accumulate(impl.rhs.begin(), impl.rhs.end(), F, &data::optimized_or<pbes_expression>);
-      result = data::optimized_and(result, data::optimized_imp(impl.g, x));
+      pbes_expression p;
+      pbes_expression x = std::accumulate(impl.rhs.begin(), impl.rhs.end(), F, 
+                                          [&p](const pbes_expression& arg1, const pbes_expression& arg2) -> const pbes_expression
+                                              {
+                                                data::optimized_or(p, arg1, arg2);
+                                                return p;
+                                              });
+      data::optimized_imp(p, impl.g, x);
+      data::optimized_and(result, result, p);
     }
     for (const pfnf_traverser_quantifier& q: expr.quantifiers)
     {

@@ -137,6 +137,17 @@ namespace mcrl2 {
         return sort_pos::cdub()(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol \@cDub.
+      /// \param result The data expression where the \@cDub expression is put.
+      
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_cdub(data_expression& result, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_pos::cdub(),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of \@cDub.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol cdub to a
@@ -222,6 +233,17 @@ namespace mcrl2 {
         return sort_pos::maximum()(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol max.
+      /// \param result The data expression where the max expression is put.
+      
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_maximum(data_expression& result, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_pos::maximum(),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of max.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol maximum to a
@@ -273,6 +295,17 @@ namespace mcrl2 {
       application minimum(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_pos::minimum()(arg0, arg1);
+      }
+
+      /// \brief Make an application of function symbol min.
+      /// \param result The data expression where the min expression is put.
+      
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_minimum(data_expression& result, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_pos::minimum(),arg0, arg1);
       }
 
       /// \brief Recogniser for application of min.
@@ -327,6 +360,16 @@ namespace mcrl2 {
         return sort_pos::succ()(arg0);
       }
 
+      /// \brief Make an application of function symbol succ.
+      /// \param result The data expression where the succ expression is put.
+      
+      /// \param arg0 A data expression.
+      inline
+      void make_succ(data_expression& result, const data_expression& arg0)
+      {
+        make_application(result, sort_pos::succ(),arg0);
+      }
+
       /// \brief Recogniser for application of succ.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol succ to a
@@ -377,6 +420,16 @@ namespace mcrl2 {
       application pos_predecessor(const data_expression& arg0)
       {
         return sort_pos::pos_predecessor()(arg0);
+      }
+
+      /// \brief Make an application of function symbol \@pospred.
+      /// \param result The data expression where the \@pospred expression is put.
+      
+      /// \param arg0 A data expression.
+      inline
+      void make_pos_predecessor(data_expression& result, const data_expression& arg0)
+      {
+        make_application(result, sort_pos::pos_predecessor(),arg0);
       }
 
       /// \brief Recogniser for application of \@pospred.
@@ -430,6 +483,17 @@ namespace mcrl2 {
       application plus(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_pos::plus()(arg0, arg1);
+      }
+
+      /// \brief Make an application of function symbol +.
+      /// \param result The data expression where the + expression is put.
+      
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_plus(data_expression& result, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_pos::plus(),arg0, arg1);
       }
 
       /// \brief Recogniser for application of +.
@@ -486,6 +550,18 @@ namespace mcrl2 {
         return sort_pos::add_with_carry()(arg0, arg1, arg2);
       }
 
+      /// \brief Make an application of function symbol \@addc.
+      /// \param result The data expression where the \@addc expression is put.
+      
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      inline
+      void make_add_with_carry(data_expression& result, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
+      {
+        make_application(result, sort_pos::add_with_carry(),arg0, arg1, arg2);
+      }
+
       /// \brief Recogniser for application of \@addc.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol add_with_carry to a
@@ -539,6 +615,17 @@ namespace mcrl2 {
         return sort_pos::times()(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol *.
+      /// \param result The data expression where the * expression is put.
+      
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_times(data_expression& result, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_pos::times(),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of *.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol times to a
@@ -589,6 +676,16 @@ namespace mcrl2 {
       application powerlog2_pos(const data_expression& arg0)
       {
         return sort_pos::powerlog2_pos()(arg0);
+      }
+
+      /// \brief Make an application of function symbol \@powerlog2.
+      /// \param result The data expression where the \@powerlog2 expression is put.
+      
+      /// \param arg0 A data expression.
+      inline
+      void make_powerlog2_pos(data_expression& result, const data_expression& arg0)
+      {
+        make_application(result, sort_pos::powerlog2_pos(),arg0);
       }
 
       /// \brief Recogniser for application of \@powerlog2.

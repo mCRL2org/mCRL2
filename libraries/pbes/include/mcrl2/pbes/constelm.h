@@ -112,7 +112,9 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
 
   void leave(const data::data_expression& x)
   {
-    push(edge_condition(x, data::optimized_not(x)));
+    data::data_expression d;
+    data::optimized_not(d, x);
+    push(edge_condition(x, d));
   }
 
   void leave(const not_&)
@@ -124,7 +126,10 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
   {
     edge_condition ec_right = pop();
     edge_condition ec_left = pop();
-    edge_condition ec(data::optimized_and(ec_left.TC, ec_right.TC), data::optimized_or(ec_left.FC, ec_right.FC));
+    data::data_expression d1, d2;
+    data::optimized_and(d1, ec_left.TC, ec_right.TC);
+    data::optimized_or(d2, ec_left.FC, ec_right.FC);
+    edge_condition ec(d1, d2);
     merge_conditions(ec_left, false, ec_right, false, ec);
     push(ec);
   }
@@ -133,7 +138,10 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
   {
     edge_condition ec_right = pop();
     edge_condition ec_left = pop();
-    edge_condition ec(data::optimized_or(ec_left.TC, ec_right.TC), data::optimized_and(ec_left.FC, ec_right.FC));
+    data::data_expression d1, d2;
+    data::optimized_or(d1, ec_left.TC, ec_right.TC);
+    data::optimized_and(d2, ec_left.FC, ec_right.FC);
+    edge_condition ec(d1, d2);
     merge_conditions(ec_left, true, ec_right, true, ec);
     push(ec);
   }
@@ -142,7 +150,10 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
   {
     edge_condition ec_right = pop();
     edge_condition ec_left = pop();
-    edge_condition ec(data::optimized_or(ec_left.FC, ec_right.TC), data::optimized_and(ec_left.TC, ec_right.FC));
+    data::data_expression d1,d2;
+    data::optimized_or(d1, ec_left.FC, ec_right.TC);
+    data::optimized_and(d2, ec_left.TC, ec_right.FC);
+    edge_condition ec(d1, d2);
     merge_conditions(ec_left, false, ec_right, true, ec);
     push(ec);
   }

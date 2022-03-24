@@ -134,6 +134,17 @@ namespace mcrl2 {
         return sort_real::creal()(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol \@cReal.
+      /// \param result The data expression where the \@cReal expression is put.
+      
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_creal(data_expression& result, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_real::creal(),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of \@cReal.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol creal to a
@@ -184,6 +195,16 @@ namespace mcrl2 {
       application pos2real(const data_expression& arg0)
       {
         return sort_real::pos2real()(arg0);
+      }
+
+      /// \brief Make an application of function symbol Pos2Real.
+      /// \param result The data expression where the Pos2Real expression is put.
+      
+      /// \param arg0 A data expression.
+      inline
+      void make_pos2real(data_expression& result, const data_expression& arg0)
+      {
+        make_application(result, sort_real::pos2real(),arg0);
       }
 
       /// \brief Recogniser for application of Pos2Real.
@@ -238,6 +259,16 @@ namespace mcrl2 {
         return sort_real::nat2real()(arg0);
       }
 
+      /// \brief Make an application of function symbol Nat2Real.
+      /// \param result The data expression where the Nat2Real expression is put.
+      
+      /// \param arg0 A data expression.
+      inline
+      void make_nat2real(data_expression& result, const data_expression& arg0)
+      {
+        make_application(result, sort_real::nat2real(),arg0);
+      }
+
       /// \brief Recogniser for application of Nat2Real.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol nat2real to a
@@ -288,6 +319,16 @@ namespace mcrl2 {
       application int2real(const data_expression& arg0)
       {
         return sort_real::int2real()(arg0);
+      }
+
+      /// \brief Make an application of function symbol Int2Real.
+      /// \param result The data expression where the Int2Real expression is put.
+      
+      /// \param arg0 A data expression.
+      inline
+      void make_int2real(data_expression& result, const data_expression& arg0)
+      {
+        make_application(result, sort_real::int2real(),arg0);
       }
 
       /// \brief Recogniser for application of Int2Real.
@@ -342,6 +383,16 @@ namespace mcrl2 {
         return sort_real::real2pos()(arg0);
       }
 
+      /// \brief Make an application of function symbol Real2Pos.
+      /// \param result The data expression where the Real2Pos expression is put.
+      
+      /// \param arg0 A data expression.
+      inline
+      void make_real2pos(data_expression& result, const data_expression& arg0)
+      {
+        make_application(result, sort_real::real2pos(),arg0);
+      }
+
       /// \brief Recogniser for application of Real2Pos.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol real2pos to a
@@ -394,6 +445,16 @@ namespace mcrl2 {
         return sort_real::real2nat()(arg0);
       }
 
+      /// \brief Make an application of function symbol Real2Nat.
+      /// \param result The data expression where the Real2Nat expression is put.
+      
+      /// \param arg0 A data expression.
+      inline
+      void make_real2nat(data_expression& result, const data_expression& arg0)
+      {
+        make_application(result, sort_real::real2nat(),arg0);
+      }
+
       /// \brief Recogniser for application of Real2Nat.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol real2nat to a
@@ -444,6 +505,16 @@ namespace mcrl2 {
       application real2int(const data_expression& arg0)
       {
         return sort_real::real2int()(arg0);
+      }
+
+      /// \brief Make an application of function symbol Real2Int.
+      /// \param result The data expression where the Real2Int expression is put.
+      
+      /// \param arg0 A data expression.
+      inline
+      void make_real2int(data_expression& result, const data_expression& arg0)
+      {
+        make_application(result, sort_real::real2int(),arg0);
       }
 
       /// \brief Recogniser for application of Real2Int.
@@ -544,6 +615,17 @@ namespace mcrl2 {
         return sort_real::maximum(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol max.
+      /// \param result The data expression where the max expression is put.
+      
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_maximum(data_expression& result, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_real::maximum(arg0.sort(), arg1.sort()),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of max.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol maximum to a
@@ -618,6 +700,17 @@ namespace mcrl2 {
         return sort_real::minimum(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol min.
+      /// \param result The data expression where the min expression is put.
+      
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_minimum(data_expression& result, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_real::minimum(arg0.sort(), arg1.sort()),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of min.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol minimum to a
@@ -681,6 +774,16 @@ namespace mcrl2 {
       application abs(const data_expression& arg0)
       {
         return sort_real::abs(arg0.sort())(arg0);
+      }
+
+      /// \brief Make an application of function symbol abs.
+      /// \param result The data expression where the abs expression is put.
+      
+      /// \param arg0 A data expression.
+      inline
+      void make_abs(data_expression& result, const data_expression& arg0)
+      {
+        make_application(result, sort_real::abs(arg0.sort()),arg0);
       }
 
       /// \brief Recogniser for application of abs.
@@ -756,6 +859,16 @@ namespace mcrl2 {
         return sort_real::negate(arg0.sort())(arg0);
       }
 
+      /// \brief Make an application of function symbol -.
+      /// \param result The data expression where the - expression is put.
+      
+      /// \param arg0 A data expression.
+      inline
+      void make_negate(data_expression& result, const data_expression& arg0)
+      {
+        make_application(result, sort_real::negate(arg0.sort()),arg0);
+      }
+
       /// \brief Recogniser for application of -.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol negate to a
@@ -829,6 +942,16 @@ namespace mcrl2 {
         return sort_real::succ(arg0.sort())(arg0);
       }
 
+      /// \brief Make an application of function symbol succ.
+      /// \param result The data expression where the succ expression is put.
+      
+      /// \param arg0 A data expression.
+      inline
+      void make_succ(data_expression& result, const data_expression& arg0)
+      {
+        make_application(result, sort_real::succ(arg0.sort()),arg0);
+      }
+
       /// \brief Recogniser for application of succ.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol succ to a
@@ -900,6 +1023,16 @@ namespace mcrl2 {
       application pred(const data_expression& arg0)
       {
         return sort_real::pred(arg0.sort())(arg0);
+      }
+
+      /// \brief Make an application of function symbol pred.
+      /// \param result The data expression where the pred expression is put.
+      
+      /// \param arg0 A data expression.
+      inline
+      void make_pred(data_expression& result, const data_expression& arg0)
+      {
+        make_application(result, sort_real::pred(arg0.sort()),arg0);
       }
 
       /// \brief Recogniser for application of pred.
@@ -984,6 +1117,17 @@ namespace mcrl2 {
         return sort_real::plus(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol +.
+      /// \param result The data expression where the + expression is put.
+      
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_plus(data_expression& result, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_real::plus(arg0.sort(), arg1.sort()),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of +.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol plus to a
@@ -1056,6 +1200,17 @@ namespace mcrl2 {
       application minus(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_real::minus(arg0.sort(), arg1.sort())(arg0, arg1);
+      }
+
+      /// \brief Make an application of function symbol -.
+      /// \param result The data expression where the - expression is put.
+      
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_minus(data_expression& result, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_real::minus(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
       /// \brief Recogniser for application of -.
@@ -1132,6 +1287,17 @@ namespace mcrl2 {
         return sort_real::times(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol *.
+      /// \param result The data expression where the * expression is put.
+      
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_times(data_expression& result, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_real::times(arg0.sort(), arg1.sort()),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of *.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol times to a
@@ -1206,6 +1372,17 @@ namespace mcrl2 {
         return sort_real::exp(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol exp.
+      /// \param result The data expression where the exp expression is put.
+      
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_exp(data_expression& result, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_real::exp(arg0.sort(), arg1.sort()),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of exp.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol exp to a
@@ -1257,6 +1434,17 @@ namespace mcrl2 {
       application divides(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_real::divides(arg0.sort(), arg1.sort())(arg0, arg1);
+      }
+
+      /// \brief Make an application of function symbol /.
+      /// \param result The data expression where the / expression is put.
+      
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_divides(data_expression& result, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_real::divides(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
       /// \brief Recogniser for application of /.
@@ -1311,6 +1499,16 @@ namespace mcrl2 {
         return sort_real::floor()(arg0);
       }
 
+      /// \brief Make an application of function symbol floor.
+      /// \param result The data expression where the floor expression is put.
+      
+      /// \param arg0 A data expression.
+      inline
+      void make_floor(data_expression& result, const data_expression& arg0)
+      {
+        make_application(result, sort_real::floor(),arg0);
+      }
+
       /// \brief Recogniser for application of floor.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol floor to a
@@ -1361,6 +1559,16 @@ namespace mcrl2 {
       application ceil(const data_expression& arg0)
       {
         return sort_real::ceil()(arg0);
+      }
+
+      /// \brief Make an application of function symbol ceil.
+      /// \param result The data expression where the ceil expression is put.
+      
+      /// \param arg0 A data expression.
+      inline
+      void make_ceil(data_expression& result, const data_expression& arg0)
+      {
+        make_application(result, sort_real::ceil(),arg0);
       }
 
       /// \brief Recogniser for application of ceil.
@@ -1415,6 +1623,16 @@ namespace mcrl2 {
         return sort_real::round()(arg0);
       }
 
+      /// \brief Make an application of function symbol round.
+      /// \param result The data expression where the round expression is put.
+      
+      /// \param arg0 A data expression.
+      inline
+      void make_round(data_expression& result, const data_expression& arg0)
+      {
+        make_application(result, sort_real::round(),arg0);
+      }
+
       /// \brief Recogniser for application of round.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol round to a
@@ -1466,6 +1684,17 @@ namespace mcrl2 {
       application reduce_fraction(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_real::reduce_fraction()(arg0, arg1);
+      }
+
+      /// \brief Make an application of function symbol \@redfrac.
+      /// \param result The data expression where the \@redfrac expression is put.
+      
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_reduce_fraction(data_expression& result, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_real::reduce_fraction(),arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@redfrac.
@@ -1522,6 +1751,18 @@ namespace mcrl2 {
         return sort_real::reduce_fraction_where()(arg0, arg1, arg2);
       }
 
+      /// \brief Make an application of function symbol \@redfracwhr.
+      /// \param result The data expression where the \@redfracwhr expression is put.
+      
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      inline
+      void make_reduce_fraction_where(data_expression& result, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
+      {
+        make_application(result, sort_real::reduce_fraction_where(),arg0, arg1, arg2);
+      }
+
       /// \brief Recogniser for application of \@redfracwhr.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol reduce_fraction_where to a
@@ -1573,6 +1814,17 @@ namespace mcrl2 {
       application reduce_fraction_helper(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_real::reduce_fraction_helper()(arg0, arg1);
+      }
+
+      /// \brief Make an application of function symbol \@redfrachlp.
+      /// \param result The data expression where the \@redfrachlp expression is put.
+      
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_reduce_fraction_helper(data_expression& result, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_real::reduce_fraction_helper(),arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@redfrachlp.

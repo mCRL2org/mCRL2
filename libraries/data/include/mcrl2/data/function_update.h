@@ -102,6 +102,19 @@ namespace mcrl2 {
         return function_update(s, t)(arg0, arg1, arg2);
       }
 
+      /// \brief Make an application of function symbol \@func_update.
+      /// \param result The data expression where the \@func_update expression is put.
+      /// \param s A sort expression.
+      /// \param t A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      inline
+      void make_function_update(data_expression& result, const sort_expression& s, const sort_expression& t, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
+      {
+        make_application(result, function_update(s, t),arg0, arg1, arg2);
+      }
+
       /// \brief Recogniser for application of \@func_update.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol function_update to a
@@ -158,6 +171,19 @@ namespace mcrl2 {
         return function_update_stable(s, t)(arg0, arg1, arg2);
       }
 
+      /// \brief Make an application of function symbol \@func_update_stable.
+      /// \param result The data expression where the \@func_update_stable expression is put.
+      /// \param s A sort expression.
+      /// \param t A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      inline
+      void make_function_update_stable(data_expression& result, const sort_expression& s, const sort_expression& t, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
+      {
+        make_application(result, function_update_stable(s, t),arg0, arg1, arg2);
+      }
+
       /// \brief Recogniser for application of \@func_update_stable.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol function_update_stable to a
@@ -210,6 +236,17 @@ namespace mcrl2 {
       application is_not_a_function_update(const sort_expression& s, const sort_expression& t, const data_expression& arg0)
       {
         return is_not_a_function_update(s, t)(arg0);
+      }
+
+      /// \brief Make an application of function symbol \@is_not_an_update.
+      /// \param result The data expression where the \@is_not_an_update expression is put.
+      /// \param s A sort expression.
+      /// \param t A sort expression.
+      /// \param arg0 A data expression.
+      inline
+      void make_is_not_a_function_update(data_expression& result, const sort_expression& s, const sort_expression& t, const data_expression& arg0)
+      {
+        make_application(result, is_not_a_function_update(s, t),arg0);
       }
 
       /// \brief Recogniser for application of \@is_not_an_update.
@@ -285,6 +322,19 @@ namespace mcrl2 {
       application if_always_else(const sort_expression& s, const sort_expression& t, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
         return if_always_else(s, t)(arg0, arg1, arg2);
+      }
+
+      /// \brief Make an application of function symbol \@if_always_else.
+      /// \param result The data expression where the \@if_always_else expression is put.
+      /// \param s A sort expression.
+      /// \param t A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      inline
+      void make_if_always_else(data_expression& result, const sort_expression& s, const sort_expression& t, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
+      {
+        make_application(result, if_always_else(s, t),arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@if_always_else.

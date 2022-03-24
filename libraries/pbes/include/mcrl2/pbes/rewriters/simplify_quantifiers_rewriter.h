@@ -39,13 +39,13 @@ struct add_simplify_quantifiers: public Builder<Derived>
     }
     else if (is_not(body))
     {
-      result = data::optimized_not(data::optimized_exists(variables, atermpp::down_cast<not_>(body).operand(), true));
+      data::optimized_not(result, data::optimized_exists(variables, atermpp::down_cast<not_>(body).operand(), true));
     }
     if (is_and(body))
     {
       auto const& left = atermpp::down_cast<and_>(body).left();
       auto const& right = atermpp::down_cast<and_>(body).right();
-      result = data::optimized_and(data::optimized_forall(variables, left, true), data::optimized_forall(variables, right, true));
+      data::optimized_and(result, data::optimized_forall(variables, left, true), data::optimized_forall(variables, right, true));
     }
     else if (is_or(body))
     {
@@ -55,11 +55,11 @@ struct add_simplify_quantifiers: public Builder<Derived>
       data::variable_list rv = data::detail::set_intersection(variables, free_variables(right));
       if (lv.empty())
       {
-        result = data::optimized_or(left, data::optimized_forall_no_empty_domain(rv, right, true));
+        data::optimized_or(result, left, data::optimized_forall_no_empty_domain(rv, right, true));
       }
       else if (rv.empty())
       {
-        result = data::optimized_or(right, data::optimized_forall_no_empty_domain(lv, left, true));
+        data::optimized_or(result, right, data::optimized_forall_no_empty_domain(lv, left, true));
       }
       else
       {
@@ -85,13 +85,13 @@ struct add_simplify_quantifiers: public Builder<Derived>
     }
     else if (is_not(body))
     {
-      result = data::optimized_not(data::optimized_forall(variables, atermpp::down_cast<not_>(body).operand(), true));
+      data::optimized_not(result, data::optimized_forall(variables, atermpp::down_cast<not_>(body).operand(), true));
     }
     if (is_or(body))
     {
       auto const& left = atermpp::down_cast<or_>(body).left();
       auto const& right = atermpp::down_cast<or_>(body).right();
-      result = data::optimized_or(data::optimized_exists(variables, left, true), data::optimized_exists(variables, right, true));
+      data::optimized_or(result, data::optimized_exists(variables, left, true), data::optimized_exists(variables, right, true));
     }
     else if (is_and(body))
     {
@@ -101,11 +101,11 @@ struct add_simplify_quantifiers: public Builder<Derived>
       data::variable_list rv = data::detail::set_intersection(variables, free_variables(right));
       if (lv.empty())
       {
-        result = data::optimized_and(left, data::optimized_exists_no_empty_domain(rv, right, true));
+        data::optimized_and(result, left, data::optimized_exists_no_empty_domain(rv, right, true));
       }
       else if (rv.empty())
       {
-        result = data::optimized_and(right, data::optimized_exists_no_empty_domain(lv, left, true));
+        data::optimized_and(result, right, data::optimized_exists_no_empty_domain(lv, left, true));
       }
       else
       {

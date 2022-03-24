@@ -199,6 +199,16 @@ namespace mcrl2 {
         return sort_bool::not_()(arg0);
       }
 
+      /// \brief Make an application of function symbol !.
+      /// \param result The data expression where the ! expression is put.
+      
+      /// \param arg0 A data expression.
+      inline
+      void make_not_(data_expression& result, const data_expression& arg0)
+      {
+        make_application(result, sort_bool::not_(),arg0);
+      }
+
       /// \brief Recogniser for application of !.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol not_ to a
@@ -250,6 +260,17 @@ namespace mcrl2 {
       application and_(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_bool::and_()(arg0, arg1);
+      }
+
+      /// \brief Make an application of function symbol &&.
+      /// \param result The data expression where the && expression is put.
+      
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_and_(data_expression& result, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_bool::and_(),arg0, arg1);
       }
 
       /// \brief Recogniser for application of &&.
@@ -305,6 +326,17 @@ namespace mcrl2 {
         return sort_bool::or_()(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol ||.
+      /// \param result The data expression where the || expression is put.
+      
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_or_(data_expression& result, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_bool::or_(),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of ||.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol or_ to a
@@ -356,6 +388,17 @@ namespace mcrl2 {
       application implies(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_bool::implies()(arg0, arg1);
+      }
+
+      /// \brief Make an application of function symbol =>.
+      /// \param result The data expression where the => expression is put.
+      
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_implies(data_expression& result, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_bool::implies(),arg0, arg1);
       }
 
       /// \brief Recogniser for application of =>.

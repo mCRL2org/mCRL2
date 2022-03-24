@@ -134,6 +134,17 @@ namespace mcrl2 {
         return sort_fset::insert(s)(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol \@fset_insert.
+      /// \param result The data expression where the \@fset_insert expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_insert(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_fset::insert(s),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of \@fset_insert.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol insert to a
@@ -223,6 +234,17 @@ namespace mcrl2 {
         return sort_fset::cons_(s)(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol \@fset_cons.
+      /// \param result The data expression where the \@fset_cons expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_cons_(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_fset::cons_(s),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of \@fset_cons.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol cons_ to a
@@ -275,6 +297,18 @@ namespace mcrl2 {
       application cinsert(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
         return sort_fset::cinsert(s)(arg0, arg1, arg2);
+      }
+
+      /// \brief Make an application of function symbol \@fset_cinsert.
+      /// \param result The data expression where the \@fset_cinsert expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      inline
+      void make_cinsert(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
+      {
+        make_application(result, sort_fset::cinsert(s),arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@fset_cinsert.
@@ -330,6 +364,17 @@ namespace mcrl2 {
         return sort_fset::in(s)(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol in.
+      /// \param result The data expression where the in expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_in(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_fset::in(s),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of in.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol in to a
@@ -381,6 +426,17 @@ namespace mcrl2 {
       application difference(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         return sort_fset::difference(s)(arg0, arg1);
+      }
+
+      /// \brief Make an application of function symbol -.
+      /// \param result The data expression where the - expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_difference(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_fset::difference(s),arg0, arg1);
       }
 
       /// \brief Recogniser for application of -.
@@ -436,6 +492,17 @@ namespace mcrl2 {
         return sort_fset::union_(s)(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol +.
+      /// \param result The data expression where the + expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_union_(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_fset::union_(s),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of +.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol union_ to a
@@ -489,6 +556,17 @@ namespace mcrl2 {
         return sort_fset::intersection(s)(arg0, arg1);
       }
 
+      /// \brief Make an application of function symbol *.
+      /// \param result The data expression where the * expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      inline
+      void make_intersection(data_expression& result, const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        make_application(result, sort_fset::intersection(s),arg0, arg1);
+      }
+
       /// \brief Recogniser for application of *.
       /// \param e A data expression.
       /// \return true iff e is an application of function symbol intersection to a
@@ -539,6 +617,16 @@ namespace mcrl2 {
       application count(const sort_expression& s, const data_expression& arg0)
       {
         return sort_fset::count(s)(arg0);
+      }
+
+      /// \brief Make an application of function symbol #.
+      /// \param result The data expression where the # expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      inline
+      void make_count(data_expression& result, const sort_expression& s, const data_expression& arg0)
+      {
+        make_application(result, sort_fset::count(s),arg0);
       }
 
       /// \brief Recogniser for application of #.

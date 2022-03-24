@@ -97,7 +97,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
                 sigma,
                 [&](const enumerator_element& p)
                 {
-                  result = data::optimized_and(result, p.expression());
+                  data::optimized_and(result, result, p.expression());
                   return is_false(result);
                 },
                 is_true,
@@ -118,7 +118,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
                 sigma,
                 [&](const enumerator_element& p)
                 {
-                  result = data::optimized_or(result, p.expression());
+                  data::optimized_or(result, result, p.expression());
                   return is_true(result);
                 },
                 is_false,

@@ -73,7 +73,7 @@ class simplify_rewrite_builder: public data_expression_builder<Derived>
       {
         data_expression y;
         derived().apply(y, *x.begin());
-        result = data::optimized_not(y);
+        data::optimized_not(result, y);
       }
       else if (is_and(x)) // x = y && z
       {
@@ -81,7 +81,7 @@ class simplify_rewrite_builder: public data_expression_builder<Derived>
         derived().apply(y, binary_left(x));
         data_expression z;
         derived().apply(z, binary_right(x));
-        result = data::optimized_and(y, z);
+        data::optimized_and(result, y, z);
       }
       else if (is_or(x)) // x = y || z
       {
@@ -89,7 +89,7 @@ class simplify_rewrite_builder: public data_expression_builder<Derived>
         derived().apply(y, binary_left(x));
         data_expression z;
         derived().apply(z, binary_right(x));
-        result = data::optimized_or(y, z);
+        data::optimized_or(result, y, z);
       }
       else if (is_imp(x)) // x = y => z
       {
@@ -97,7 +97,7 @@ class simplify_rewrite_builder: public data_expression_builder<Derived>
         derived().apply(y, binary_left(x));
         data_expression z;
         derived().apply(z, binary_right(x));
-        result = data::optimized_imp(y, z);
+        data::optimized_imp(result, y, z);
       }
       else
       {

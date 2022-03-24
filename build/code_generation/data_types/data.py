@@ -663,6 +663,16 @@ ${cases}
       {
         return ${nsfunctionname}(${actsortparameters})(${actdataparameters});
       }
+
+      /// \\brief Make an application of function symbol ${namestring}.
+      /// \\param result The data expression where the ${namestring} expression is put.
+      ${sortparameterstring}
+      ${dataparameterstring}
+      inline
+      void make_${functionname}(data_expression& result, ${parameters})
+      {
+        make_application(result, ${nsfunctionname}(${actsortparameters}),${actdataparameters});
+      }
 ''')
 
         formal_sort_params = map(lambda x: 'const sort_expression& {0}'.format(fcode(x, spec)), sort_params)

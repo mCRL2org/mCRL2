@@ -60,7 +60,7 @@ struct complement_builder: public pbes_expression_builder<Derived>
     static_cast<Derived&>(*this).apply(left, x.left());
     pbes_expression right;
     static_cast<Derived&>(*this).apply(right, x.right());
-    result = optimized_or(left, right);
+    optimized_or(result, left, right);
   }
 
   template <class T>
@@ -70,7 +70,7 @@ struct complement_builder: public pbes_expression_builder<Derived>
     static_cast<Derived&>(*this).apply(left, x.left());
     pbes_expression right;
     static_cast<Derived&>(*this).apply(right, x.right());
-    result = optimized_and(left, right);
+    optimized_and(result, left, right);
   }
 
   template <class T>
