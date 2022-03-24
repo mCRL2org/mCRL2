@@ -101,13 +101,11 @@ std::istream& operator>>(std::istream& stream, symbolic_lts& lts)
 
   aterm_stream >> lts.data_spec;
   aterm_stream >> lts.process_parameters;
-
   ldd_stream >> lts.initial_state;
   ldd_stream >> lts.states;
 
+  // For every process parameter read the data index.
   lts.data_index.clear();
-    
-  // For every process parameter read the indices.
   for (const data::variable& parameter : lts.process_parameters)
   {
     lts.data_index.push_back(parameter.sort());

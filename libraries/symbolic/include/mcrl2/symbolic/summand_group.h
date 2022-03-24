@@ -113,7 +113,7 @@ struct summand_group
     std::size_t write_index = 0;
     for (const data::variable& parameter : process_parameters)
     {
-      if (parameter == read_parameters[read_index])
+      if (read_index < read_parameters.size() && parameter == read_parameters[read_index])
       {
         read_index++;
         read.emplace_back(index);
@@ -124,7 +124,7 @@ struct summand_group
         Ip_values.emplace_back(0);
       }
 
-      if (parameter == write_parameters[write_index])
+      if (write_index < write_parameters.size() && parameter == write_parameters[write_index])
       {
         write_index++;
         write.emplace_back(index);

@@ -12,6 +12,7 @@
 #include "mcrl2/utilities/exception.h"
 
 #include <stack>
+#include <optional>
 
 using namespace sylvan::ldds;
 using namespace mcrl2::symbolic;
@@ -54,32 +55,36 @@ public:
       }
     }
 
-    m_current = false_();
+    m_current.reset();
   }
 
   ldd* operator->()
   {
-    return &m_current;
+    assert(m_current);
+    return &m_current.value();
   }
 
   const ldd* operator->() const
   {
-    return &m_current;
+    assert(m_current);
+    return &m_current.value();
   }
 
   ldd& operator*()
   {
-    return m_current;
+    assert(m_current);
+    return m_current.value();
   }
 
   const ldd& operator*() const
   {
-    return m_current;
+    assert(m_current);
+    return m_current.value();
   }
 
   operator bool() const
   {
-    return m_current != false_();
+    return m_current.has_value();
   }
 
 private:
@@ -88,7 +93,7 @@ private:
   
   mcrl2::utilities::indexed_set<sylvan::ldds::ldd>& m_nodes;
 
-  ldd m_current = false_();
+  std::optional<ldd> m_current;
 };
 
 /// \brief The magic value for a binary LDD format stream.
@@ -112,9 +117,7 @@ binary_ldd_ostream::binary_ldd_ostream(std::ostream& is)
 {}
 
 binary_ldd_ostream::~binary_ldd_ostream()
-{
-
-}
+{}
 
 void binary_ldd_ostream::put(const ldd& U)
 {
@@ -134,7 +137,7 @@ void binary_ldd_ostream::put(const ldd& U)
     }
 
     if (*it == U)
-    {        
+    {       
       m_stream->write_bits(1, 1); // Is output.
       m_stream->write_bits(index, ldd_index_width());
     }
@@ -181,8 +184,8 @@ ldd binary_ldd_istream::get()
 
     if (is_output)
     {
-      std::size_t index = m_stream->read_bits(ldd_index_width());
       // The output is simply an index of the LDD.
+      std::size_t index = m_stream->read_bits(ldd_index_width());
       return m_nodes[index];
     }
     else
