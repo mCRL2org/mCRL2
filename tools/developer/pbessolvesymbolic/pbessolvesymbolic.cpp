@@ -168,6 +168,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
                       "'<order>' a user defined permutation e.g. '1 3 2 0 4'"
       );
       desc.add_option("info", "print read/write information of the summands");
+      desc.add_option("max-iterations", utilities::make_optional_argument("NUM", "0"), "limit number of breadth-first iterations to NUM");
       desc.add_option("saturation", "reduce the amount of breadth-first iterations by applying the transition groups until fixed point");
       desc.add_option("solve-strategy",
                       utilities::make_enum_argument<int>("NUM")
@@ -272,6 +273,11 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       {
         throw mcrl2::runtime_error("Invalid strategy " + std::to_string(options.solve_strategy));
       }
+      
+      if (parser.has_option("max-iterations"))
+      {
+        options.max_iterations = parser.option_argument_as<std::size_t>("max-iterations");
+      }
     }
 
   public:
@@ -306,16 +312,24 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
         }
         else
         {
-          pbes_system::symbolic_parity_game G(reach.pbes(), reach.summand_groups(), reach.data_index(), V, options.no_relprod, options.chaining);
-          G.print_information();
-          pbes_system::symbolic_pbessolve_algorithm solver(G);
+          if (options.max_iterations == 0)
+          {
+            pbes_system::symbolic_parity_game G(reach.pbes(), reach.summand_groups(), reach.data_index(), V, options.no_relprod, options.chaining);
+            G.print_information();
+            pbes_system::symbolic_pbessolve_algorithm solver(G);
 
-          mCRL2log(log::debug) << pbes_system::detail::print_pbes_info(reach.pbes()) << std::endl;
-          timer().start("solving");
-          bool result = solver.solve(reach.initial_state(), V, reach.deadlocks(), reach.W0(), reach.W1());
-          timer().finish("solving");
+            mCRL2log(log::debug) << pbes_system::detail::print_pbes_info(reach.pbes()) << std::endl;
+            timer().start("solving");
+            bool result = solver.solve(reach.initial_state(), V, reach.deadlocks(), reach.W0(), reach.W1());
+            timer().finish("solving");
 
-          std::cout << (result ? "true" : "false") << std::endl;
+            std::cout << (result ? "true" : "false") << std::endl;
+          }
+          else
+          {
+            // TODO: We could actually try to solve the incomplete parity game.
+            std::cout << "Skipped solving since exploration was limited to max-iterations" << std::endl;
+          }
         }
 
         if (!options.dot_file.empty())

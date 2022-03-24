@@ -114,7 +114,7 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t, v
   auto& algorithm = p->first;
   auto& group = p->second;
   auto& sigma = algorithm.m_sigma;
-  auto& data_index = algorithm.m_data_index;
+  auto& data_index = algorithm.data_index();
   const auto& options = algorithm.m_options;
   const auto& rewr = algorithm.m_rewr;
   const auto& enumerator = algorithm.m_enumerator;
@@ -135,7 +135,7 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t, v
   stopwatch learn_start;
   for (std::size_t j = 0; j < x_size; j++)
   {
-    sigma[group.read_parameters[j]] = data_index[group.read[j]].value(x[j]);
+    sigma[group.read_parameters[j]] = data_index[group.read[j]][x[j]];
     xy[group.read_pos[j]] = x[j];
   }
 
@@ -153,17 +153,17 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t, v
                              for (std::size_t j = 0; j < y_size; j++)
                              {
                                data::data_expression value = rewr(smd.next_state[j], sigma);
-                               xy[group.write_pos[j]] = data::is_variable(value) ? relprod_ignore : data_index[group.write[j]].index(value);
+                               xy[group.write_pos[j]] = data::is_variable(value) ? relprod_ignore : data_index[group.write[j]].insert(value).first;
                              }
 
                              if constexpr (ActionLabel)
                              {
                                // Action is always located on the last index of the cube.
-                               xy[xy_size - 1] = algorithm.m_action_index.insert(algorithm.rewrite_action(group.actions[i], rewr, sigma)).first;
+                               xy[xy_size - 1] = algorithm.action_index().insert(algorithm.rewrite_action(group.actions[i], rewr, sigma)).first;
                              }
 
                              mCRL2log(log::debug1) << "  " << print_transition(data_index, xy.data(), group.read, group.write) << std::endl;
-                             group.L = algorithm.m_options.no_relprod ? union_cube(group.L, xy.data(), xy_size) : union_cube_copy(group.L, xy.data(), smd.copy.data(), xy_size);
+                             group.L = options.no_relprod ? union_cube(group.L, xy.data(), xy_size) : union_cube_copy(group.L, xy.data(), smd.copy.data(), xy_size);
                              return false;
                            },
                            data::is_false

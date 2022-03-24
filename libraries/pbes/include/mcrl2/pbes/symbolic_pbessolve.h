@@ -21,10 +21,10 @@ using sylvan::ldds::ldd;
 class symbolic_pbessolve_algorithm
 {
   private:
-    symbolic_parity_game m_G;
+    const symbolic_parity_game& m_G;
 
   public:
-    symbolic_pbessolve_algorithm(symbolic_parity_game G) :
+    symbolic_pbessolve_algorithm(const symbolic_parity_game& G) :
       m_G(G)
     {}
 

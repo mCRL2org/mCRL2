@@ -10,8 +10,12 @@
 #ifndef MCRL2_SYMBOLIC_UTILITY_H
 #define MCRL2_SYMBOLIC_UTILITY_H
 
+#include "mcrl2/symbolic/data_index.h"
+
 #include <vector>
 #include <stdint.h>
+
+#include <sylvan_ldd.hpp>
 
 namespace mcrl2::symbolic
 {
@@ -46,6 +50,23 @@ Container permute_copy(const Container& v, const std::vector<std::size_t>& permu
   }
   return Container(result.begin(), result.end());
 }
+
+/// \brief Converts a state vector into a singleton LDD representing that vector.
+sylvan::ldds::ldd state2ldd(const data::data_expression_list& x, std::vector<data_expression_index>& data_index)
+{
+  MCRL2_DECLARE_STACK_ARRAY(v, std::uint32_t, x.size());
+
+  auto vi = v.begin();
+  auto di = data_index.begin();
+  auto xi = x.begin();
+  for (; di != data_index.end(); ++vi, ++di, ++xi)
+  {
+    *vi = di->insert(*xi).first;
+  }
+
+  return sylvan::ldds::cube(v.data(), x.size());
+}
+
 
 } // namespace mcrl2::symbolic
 

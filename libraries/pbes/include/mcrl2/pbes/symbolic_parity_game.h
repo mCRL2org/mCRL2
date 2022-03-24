@@ -200,7 +200,7 @@ class symbolic_parity_game
 {
   protected:
     ldd m_V[2]; // m_V[0] is the set of even nodes, m_V[1] is the set of odd nodes
-    const std::vector<symbolic::summand_group>& m_summand_groups;
+    const std::vector<symbolic::summand_group> m_summand_groups;
     std::map<std::size_t, ldd> m_rank_map;
     bool m_no_relprod = false;
     bool m_chaining = false;
@@ -214,7 +214,7 @@ class symbolic_parity_game
     /// \param V the set of reachable vertices.
     symbolic_parity_game(
       const srf_pbes& pbes,
-      const std::vector<symbolic::summand_group>& summand_groups,
+      const std::vector<symbolic::summand_group> summand_groups,
       const std::vector<symbolic::data_expression_index>& data_index,
       const ldd& V,
       bool no_relprod,
@@ -302,7 +302,7 @@ class symbolic_parity_game
     }
 
     /// \returns A string representing the graph restricted to V.
-    std::string print_graph(const ldd& V)
+    std::string print_graph(const ldd& V) const
     {
       return detail::print_graph(V, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map);
     }
@@ -564,7 +564,7 @@ class symbolic_parity_game
       const ldd& V,
       const ldd& W,
       const std::array<const ldd, 2>& Vplayer,
-      const ldd& I = sylvan::ldds::empty_set())
+      const ldd& I = sylvan::ldds::empty_set()) const
     {
       ldd outside = minus(V, U);
       return safe_control_predecessors_impl(alpha, U, V, outside, W, Vplayer, I);

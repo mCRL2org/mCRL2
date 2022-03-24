@@ -201,21 +201,6 @@ class pbesreach_algorithm
     ldd m_deadlocks;
     ldd m_initial_vertex;
 
-    ldd state2ldd(const data::data_expression_list& x)
-    {
-      MCRL2_DECLARE_STACK_ARRAY(v, std::uint32_t, x.size());
-
-      auto vi = v.begin();
-      auto di = m_data_index.begin();
-      auto xi = x.begin();
-      for (; di != m_data_index.end(); ++vi, ++di, ++xi)
-      {
-        *vi = di->index(*xi);
-      }
-
-      return sylvan::ldds::cube(v.data(), x.size());
-    }
-
     /// \brief Updates R.L := R.L U {(x,y) in R | x in X}
     void learn_successors(std::size_t i, pbes_summand_group& R, const ldd& X)
     {
@@ -335,7 +320,7 @@ class pbesreach_algorithm
 
     ldd initial_state()
     {
-      return state2ldd(m_initial_state);
+      return symbolic::state2ldd(m_initial_state, m_data_index);
     }
 
     /// \returns The set of deadlock states.
@@ -452,12 +437,12 @@ class pbesreach_algorithm
       mCRL2log(log::debug1) << "initial state = " << core::detail::print_list(m_initial_state) << std::endl;
 
       stopwatch timer;
-      m_initial_vertex = state2ldd(m_initial_state);
+      m_initial_vertex = initial_state();
       m_visited = empty_set();
       m_todo = m_initial_vertex;
       m_deadlocks = empty_set();
 
-      while (m_todo != empty_set() && !solution_found())
+      while (m_todo != empty_set() && !solution_found() && (m_options.max_iterations == 0 || iteration_count < m_options.max_iterations))
       {
         stopwatch loop_start;
         iteration_count++;
@@ -501,8 +486,8 @@ class pbesreach_algorithm
       for (std::size_t i = 0; i < R.size(); i++)
       {
         mCRL2log(log::verbose) << "group " << std::setw(4) << i << " contains " << std::setw(7) << satcount(R[i].L) << " transitions (learn time = "
-                               << std::setw(5) << std::setprecision(2) << std::fixed << R[i].learn_time << "s with " << std::setw(9) << R[i].learn_calls << " calls)" << std::endl;
-        mCRL2log(log::verbose) << "cached " << satcount(R[i].Ldomain) << " values" << std::endl;
+                               << std::setw(5) << std::setprecision(2) << std::fixed << R[i].learn_time << "s with " << std::setw(9) << R[i].learn_calls 
+                               << " calls, cached " << static_cast<std::size_t>(satcount(R[i].Ldomain)) << " values" << ")" << std::endl;
 
         total_time += R[i].learn_time;
       }
@@ -569,6 +554,11 @@ class pbesreach_algorithm
     }
 
     const std::vector<symbolic::data_expression_index>& data_index() const
+    {
+      return m_data_index;
+    }
+
+    std::vector<symbolic::data_expression_index>& data_index()
     {
       return m_data_index;
     }
