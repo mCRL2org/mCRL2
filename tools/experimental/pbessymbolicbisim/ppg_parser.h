@@ -71,7 +71,7 @@ public:
       {
         if(is_simple_expression(disj))
         {
-          cond = optimized_or(cond, disj);
+          optimized_or(cond, cond, disj);
         }
         else
         {
@@ -88,7 +88,7 @@ public:
       {
         if(is_simple_expression(conj))
         {
-          cond = optimized_and(cond, conj);
+          optimized_and(cond, cond, conj);
         }
         else
         {
@@ -201,7 +201,7 @@ public:
         if(is_simple_expression(expr))
         {
           data::data_expression data_expr = atermpp::down_cast<data::data_expression>(pbes2data(expr));
-          simple_formula = optimized_and(simple_formula, data_expr);
+          optimized_and(simple_formula, simple_formula, data_expr);
         }
         else
         {
@@ -225,7 +225,7 @@ public:
         if(is_simple_expression(expr))
         {
           data::data_expression data_expr = atermpp::down_cast<data::data_expression>(pbes2data(expr));
-          simple_formula = optimized_or(simple_formula, data_expr);
+          optimized_or(simple_formula, simple_formula, data_expr);
         }
         else
         {

@@ -52,7 +52,7 @@ struct eliminate_real_if_builder: public Builder<eliminate_real_if_builder<Build
         *i = else_part;
         const data_expression right = application(f, arguments.begin(), arguments.end());
         make_if_(result, condition, [&](data_expression& r){ apply(r, left); }, 
-                                    [&](data_expression& r){ apply(right); });
+                                    [&](data_expression& r){ apply(r, right); });
         return;
       }
     }
