@@ -7,6 +7,10 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#include "mcrl2/utilities/platform.h"
+
+#ifndef MCRL2_PLATFORM_WINDOWS
+
 #include "mcrl2/lps/symbolic_lts_io.h"
 
 #include "mcrl2/atermpp/aterm_io.h"
@@ -164,3 +168,5 @@ std::istream& operator>>(std::istream& stream, symbolic_lts& lts)
 }
 
 } // namespace mcrl2::lps
+
+#endif // MCRL2_PLATFORM_WINDOWS

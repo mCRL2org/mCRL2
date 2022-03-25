@@ -74,7 +74,7 @@ public:
 
 private:
   /// \returns The number of bits needed to index ldds.
-  unsigned int ldd_index_width();
+  unsigned int ldd_index_width(bool input = false);
   
   std::shared_ptr<mcrl2::utilities::ibitstream> m_stream;
   std::deque<sylvan::ldds::ldd> m_nodes; ///< An index of read ldds.

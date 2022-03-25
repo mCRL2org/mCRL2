@@ -191,8 +191,8 @@ ldd binary_ldd_istream::get()
     else
     {
       std::size_t value = m_stream->read_integer();
-      std::size_t down_index = m_stream->read_bits(ldd_index_width());
-      std::size_t right_index = m_stream->read_bits(ldd_index_width());
+      std::size_t down_index = m_stream->read_bits(ldd_index_width(true));
+      std::size_t right_index = m_stream->read_bits(ldd_index_width(true));
 
       ldd down = m_nodes[down_index];
       ldd right = m_nodes[right_index];
@@ -203,7 +203,7 @@ ldd binary_ldd_istream::get()
   }
 }
 
-unsigned int binary_ldd_istream::ldd_index_width()
+unsigned int binary_ldd_istream::ldd_index_width(bool input)
 {
-  return std::log2(m_nodes.size() + 1) + 1; // Assume that size is one larger to contain the current ldd.
+  return std::log2(m_nodes.size() + input) + 1; // Assume that size is one larger to contain the input ldd.
 }
