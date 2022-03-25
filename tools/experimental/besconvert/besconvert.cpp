@@ -221,13 +221,13 @@ class bes_reduction_algorithm: public detail::bes_algorithm
       }
 
       // Collect block indices and operands of all equations
-      unsigned int transitioncount = occurring_variable_count;
+      // unsigned int transitioncount = occurring_variable_count;
       unsigned int statecount = m_bes.equations().size();
       unsigned int deadlock = m_bes.equations().size(); // only used in deadlock translation
       if (m_translation == to_lts_deadlock)
       {
         ++statecount;
-        transitioncount += m_bes.equations().size();
+        // transitioncount += m_bes.equations().size();  transitioncount is set but not used. 
       }
       unsigned int initial_state = indices[mcrl2::bes::boolean_variable(m_bes.initial_state())];
 
