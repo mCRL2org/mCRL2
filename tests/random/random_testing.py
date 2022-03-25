@@ -206,6 +206,10 @@ class Lts2pbesTest(ProcessTest):
         super(Lts2pbesTest, self).create_inputfiles(runpath)
         self.inputfiles.append(mcrl2file('examples/modal-formulas/nodeadlock.mcf'))
 
+class LtsconvertsymbolicTest(ProcessTest):
+    def __init__(self, name, settings):
+        super(LtsconvertsymbolicTest, self).__init__(name, ymlfile('ltsconvertsymbolic'), settings)
+
 class PbesTest(RandomTest):
     def __init__(self, name, ymlfile, settings):
         super(PbesTest, self).__init__(name, ymlfile, settings)
@@ -294,7 +298,7 @@ class PbessymbolicbisimTest(PbesTest):
 class PbessolvesymbolicTest(PbesTest):
     def __init__(self, name, settings):
         super(PbessolvesymbolicTest, self).__init__(name, ymlfile('pbessolvesymbolic'), settings)
-
+        
 class Pbes2boolTest(PbesTest):
     def __init__(self, name, settings):
         super(Pbes2boolTest, self).__init__(name, ymlfile('pbessolve'), settings)
@@ -434,6 +438,7 @@ available_tests = {
 if os.name != 'nt':
     available_tests.update({'pbessolvesymbolic' : lambda name, settings: PbessolvesymbolicTest(name, settings) })
     available_tests.update({'pbessolvesymbolic-partial' : lambda name, settings: PbessolvesymbolicTest(name, settings) })
+    available_tests.update({'ltsconvertsymbolic' : lambda name, settings: LtsconvertsymbolicTest(name, settings) })
 #    available_tests.update({ 'pbesbddsolve' : lambda name, settings: PbesbddsolveTest(name, settings) })
 
 def print_names(tests):
