@@ -117,7 +117,7 @@ std::istream& operator>>(std::istream& stream, symbolic_lts& lts)
       aterm_stream >> value;
 
       auto [result, inserted] = lts.data_index.back().insert(value);
-      assert(i == result); utilities::mcrl2_unused(index);
+      assert(i == result); utilities::mcrl2_unused(result);
       assert(inserted); utilities::mcrl2_unused(inserted);
     }
   }
@@ -131,7 +131,7 @@ std::istream& operator>>(std::istream& stream, symbolic_lts& lts)
     aterm_stream >> value;
 
     auto [result, inserted] = lts.action_index.insert(value);
-    assert(i == result); utilities::mcrl2_unused(index);
+    assert(i == result); utilities::mcrl2_unused(result);
     assert(inserted); utilities::mcrl2_unused(inserted);
   }
 
