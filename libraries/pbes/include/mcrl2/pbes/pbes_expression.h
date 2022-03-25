@@ -677,16 +677,20 @@ pbes_system::pbes_expression translate_user_notation(const pbes_system::pbes_exp
 
 /// \return Returns the value true
 inline
-pbes_expression true_()
+const pbes_expression& true_()
 {
-  return data::sort_bool::true_();
+  /* The dynamic cast is required, to prevent copying the data term true to
+     a local term on the stack. */
+  return reinterpret_cast<const pbes_expression&>(data::sort_bool::true_());
 }
 
 /// \return Returns the value false
 inline
-pbes_expression false_()
+const pbes_expression& false_()
 {
-  return data::sort_bool::false_();
+  /* The dynamic cast is required, to prevent copying the data term false to
+     a local term on the stack. */
+  return reinterpret_cast<const pbes_expression&>(data::sort_bool::false_());
 }
 
 /// \brief Test for the value true
