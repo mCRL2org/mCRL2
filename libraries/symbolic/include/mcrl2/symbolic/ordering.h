@@ -212,20 +212,19 @@ std::vector<std::size_t> parse_variable_order(std::string text, std::size_t n, b
 }
 
 inline
-std::vector<std::size_t> compute_variable_order(const std::string& text, const std::vector<boost::dynamic_bitset<>>& patterns, bool exclude_first_variable = false)
+std::vector<std::size_t> compute_variable_order(const std::string& text, std::size_t number_of_variables, bool exclude_first_variable = false)
 {
-  std::size_t n = patterns.front().size() / 2;
   if (text == "none")
   {
-    return compute_variable_order_default(n);
+    return compute_variable_order_default(number_of_variables);
   }
   else if (text == "random")
   {
-    return compute_variable_order_random(n, exclude_first_variable);
+    return compute_variable_order_random(number_of_variables, exclude_first_variable);
   }
   else
   {
-    return parse_variable_order(text, n, exclude_first_variable);
+    return parse_variable_order(text, number_of_variables, exclude_first_variable);
   }
 }
 
@@ -262,6 +261,11 @@ std::set<std::size_t> parameter_indices(const std::set<data::variable>& paramete
 inline
 std::string print_read_write_patterns(const std::vector<boost::dynamic_bitset<>>& patterns)
 {
+  if (patterns.empty())
+  {
+    return "there are no read/write patterns\n";
+  }
+
   std::size_t n = patterns.front().size() / 2;
 
   auto print_used = [n](const boost::dynamic_bitset<>& pattern)
@@ -378,21 +382,26 @@ inline
 std::vector<boost::dynamic_bitset<>> compute_summand_group_patterns(const std::vector<boost::dynamic_bitset<>>& patterns, const std::vector<std::set<std::size_t>> groups)
 {
   std::vector<boost::dynamic_bitset<>> result;
-  boost::dynamic_bitset<> empty(patterns.front().size());
 
-  for (const std::set<std::size_t>& group: groups)
+  if (!patterns.empty())
   {
-    if (group.empty())
+    boost::dynamic_bitset<> empty(patterns.front().size());
+
+    for (const std::set<std::size_t>& group: groups)
     {
-      continue;
+      if (group.empty())
+      {
+        continue;
+      }
+      boost::dynamic_bitset<> pattern = empty;
+      for (std::size_t i: group)
+      {
+        pattern |= patterns[i];
+      }
+      result.push_back(pattern);
     }
-    boost::dynamic_bitset<> pattern = empty;
-    for (std::size_t i: group)
-    {
-      pattern |= patterns[i];
-    }
-    result.push_back(pattern);
   }
+  
   return result;
 }
 
