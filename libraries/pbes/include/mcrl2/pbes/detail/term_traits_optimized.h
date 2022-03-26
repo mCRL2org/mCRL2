@@ -79,15 +79,15 @@ struct term_traits_optimized<pbes_system::pbes_expression>: public core::term_tr
   }
 
   static inline
-  term_type forall(const variable_sequence_type& d, const term_type& x)
+  void make_forall(term_type& result, const variable_sequence_type& d, const term_type& x)
   {
-    return data::optimized_forall_no_empty_domain(d, x);
+    data::optimized_forall_no_empty_domain(result, d, x);
   }
 
   static inline
-  term_type exists(const variable_sequence_type& d, const term_type& x)
+  void make_exists(term_type& result, const variable_sequence_type& d, const term_type& x)
   {
-    return data::optimized_exists_no_empty_domain(d, x);
+    data::optimized_exists_no_empty_domain(result, d, x);
   }
 
   template <typename FwdIt>

@@ -161,14 +161,14 @@ struct add_simplify: public Builder<Derived>
   void apply(T& result, const forall& x)
   {
     apply(result, x.body());
-    result = data::optimized_forall(x.variables(), result, true);
+    data::optimized_forall(result, x.variables(), result, true);
   }
 
   template <class T>
   void apply(T& result, const exists& x)
   {
     apply(result, x.body());
-    result = data::optimized_exists(x.variables(), result, true);
+    data::optimized_exists(result, x.variables(), result, true);
   }
 };
 

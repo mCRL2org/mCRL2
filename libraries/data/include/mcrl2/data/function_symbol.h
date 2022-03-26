@@ -79,7 +79,7 @@ class function_symbol: public data_expression
 /// \brief Make_function_symbol constructs a new term into a given address.
 /// \ \param t The reference into which the new function_symbol is constructed. 
 template <class... ARGUMENTS>
-inline void make_function_symbol(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_function_symbol(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl_with_index<function_symbol,std::pair<core::identifier_string, sort_expression>>(t, core::detail::function_symbol_OpId(), args...);
 }

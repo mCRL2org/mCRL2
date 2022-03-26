@@ -309,7 +309,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
     derived().enter(x);
     push_variables(x.variables());
     derived().apply(x.body());
-    top() = tr::forall(x.variables(), top());
+    tr::make_forall(top(), x.variables(), top());
     //pop_variables(x.variables());
     derived().leave(x);
   }
@@ -319,7 +319,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
     derived().enter(x);
     push_variables(x.variables());
     derived().apply(x.body());
-    top() = tr::exists(x.variables(), top());
+    tr::make_exists(top(), x.variables(), top());
     //pop_variables(x.variables());
     derived().leave(x);
   }

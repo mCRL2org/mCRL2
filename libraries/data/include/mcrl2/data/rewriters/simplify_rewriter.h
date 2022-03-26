@@ -112,7 +112,7 @@ class simplify_rewrite_builder: public data_expression_builder<Derived>
       variable_list d = forall(x).variables();
       data_expression y;
       derived().apply(y, forall(x).body());
-      result = data::optimized_forall(d, y, true);
+      data::optimized_forall(result, d, y, true);
     }
 
     template <class T>
@@ -121,7 +121,7 @@ class simplify_rewrite_builder: public data_expression_builder<Derived>
       variable_list d = exists(x).variables();
       data_expression y;
       derived().apply(y, exists(x).body());
-      result = data::optimized_exists(d, y, true);
+      data::optimized_exists(result, d, y, true);
     }
 };
 

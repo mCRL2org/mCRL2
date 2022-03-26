@@ -245,7 +245,7 @@ class not_: public boolean_expression
 /// \brief Make_not_ constructs a new term into a given address.
 /// \ \param t The reference into which the new not_ is constructed. 
 template <class... ARGUMENTS>
-inline void make_not_(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_not_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_BooleanNot(), args...);
 }
@@ -321,7 +321,7 @@ class and_: public boolean_expression
 /// \brief Make_and_ constructs a new term into a given address.
 /// \ \param t The reference into which the new and_ is constructed. 
 template <class... ARGUMENTS>
-inline void make_and_(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_and_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_BooleanAnd(), args...);
 }
@@ -397,7 +397,7 @@ class or_: public boolean_expression
 /// \brief Make_or_ constructs a new term into a given address.
 /// \ \param t The reference into which the new or_ is constructed. 
 template <class... ARGUMENTS>
-inline void make_or_(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_or_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_BooleanOr(), args...);
 }
@@ -473,7 +473,7 @@ class imp: public boolean_expression
 /// \brief Make_imp constructs a new term into a given address.
 /// \ \param t The reference into which the new imp is constructed. 
 template <class... ARGUMENTS>
-inline void make_imp(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_imp(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_BooleanImp(), args...);
 }
@@ -556,7 +556,7 @@ class boolean_variable: public boolean_expression
 /// \brief Make_boolean_variable constructs a new term into a given address.
 /// \ \param t The reference into which the new boolean_variable is constructed. 
 template <class... ARGUMENTS>
-inline void make_boolean_variable(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_boolean_variable(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl_with_index<boolean_variable,core::identifier_string>(t, core::detail::function_symbol_BooleanVariable(), args...);
 }

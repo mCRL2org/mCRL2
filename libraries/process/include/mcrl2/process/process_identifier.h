@@ -77,7 +77,7 @@ class process_identifier: public atermpp::aterm_appl
 /// \brief Make_process_identifier constructs a new term into a given address.
 /// \ \param t The reference into which the new process_identifier is constructed. 
 template <class... ARGUMENTS>
-inline void make_process_identifier(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_process_identifier(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl_with_index<process_identifier,std::pair<core::identifier_string, data::variable_list>>(t, core::detail::function_symbol_ProcVarId(), args...);
 }

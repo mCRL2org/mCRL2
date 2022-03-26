@@ -275,7 +275,7 @@ class not_: public state_formula
 /// \brief Make_not_ constructs a new term into a given address.
 /// \ \param t The reference into which the new not_ is constructed. 
 template <class... ARGUMENTS>
-inline void make_not_(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_not_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateNot(), args...);
 }
@@ -351,7 +351,7 @@ class and_: public state_formula
 /// \brief Make_and_ constructs a new term into a given address.
 /// \ \param t The reference into which the new and_ is constructed. 
 template <class... ARGUMENTS>
-inline void make_and_(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_and_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateAnd(), args...);
 }
@@ -427,7 +427,7 @@ class or_: public state_formula
 /// \brief Make_or_ constructs a new term into a given address.
 /// \ \param t The reference into which the new or_ is constructed. 
 template <class... ARGUMENTS>
-inline void make_or_(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_or_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateOr(), args...);
 }
@@ -503,7 +503,7 @@ class imp: public state_formula
 /// \brief Make_imp constructs a new term into a given address.
 /// \ \param t The reference into which the new imp is constructed. 
 template <class... ARGUMENTS>
-inline void make_imp(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_imp(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateImp(), args...);
 }
@@ -579,7 +579,7 @@ class forall: public state_formula
 /// \brief Make_forall constructs a new term into a given address.
 /// \ \param t The reference into which the new forall is constructed. 
 template <class... ARGUMENTS>
-inline void make_forall(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_forall(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateForall(), args...);
 }
@@ -655,7 +655,7 @@ class exists: public state_formula
 /// \brief Make_exists constructs a new term into a given address.
 /// \ \param t The reference into which the new exists is constructed. 
 template <class... ARGUMENTS>
-inline void make_exists(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_exists(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateExists(), args...);
 }
@@ -731,7 +731,7 @@ class must: public state_formula
 /// \brief Make_must constructs a new term into a given address.
 /// \ \param t The reference into which the new must is constructed. 
 template <class... ARGUMENTS>
-inline void make_must(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_must(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateMust(), args...);
 }
@@ -807,7 +807,7 @@ class may: public state_formula
 /// \brief Make_may constructs a new term into a given address.
 /// \ \param t The reference into which the new may is constructed. 
 template <class... ARGUMENTS>
-inline void make_may(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_may(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateMay(), args...);
 }
@@ -931,7 +931,7 @@ class yaled_timed: public state_formula
 /// \brief Make_yaled_timed constructs a new term into a given address.
 /// \ \param t The reference into which the new yaled_timed is constructed. 
 template <class... ARGUMENTS>
-inline void make_yaled_timed(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_yaled_timed(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateYaledTimed(), args...);
 }
@@ -1055,7 +1055,7 @@ class delay_timed: public state_formula
 /// \brief Make_delay_timed constructs a new term into a given address.
 /// \ \param t The reference into which the new delay_timed is constructed. 
 template <class... ARGUMENTS>
-inline void make_delay_timed(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_delay_timed(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateDelayTimed(), args...);
 }
@@ -1136,7 +1136,7 @@ class variable: public state_formula
 /// \brief Make_variable constructs a new term into a given address.
 /// \ \param t The reference into which the new variable is constructed. 
 template <class... ARGUMENTS>
-inline void make_variable(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_variable(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateVar(), args...);
 }
@@ -1222,7 +1222,7 @@ class nu: public state_formula
 /// \brief Make_nu constructs a new term into a given address.
 /// \ \param t The reference into which the new nu is constructed. 
 template <class... ARGUMENTS>
-inline void make_nu(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_nu(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateNu(), args...);
 }
@@ -1308,7 +1308,7 @@ class mu: public state_formula
 /// \brief Make_mu constructs a new term into a given address.
 /// \ \param t The reference into which the new mu is constructed. 
 template <class... ARGUMENTS>
-inline void make_mu(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_mu(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateMu(), args...);
 }

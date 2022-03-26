@@ -955,7 +955,7 @@ void check_enumerator_solution(const EnumeratorElement& p, const summand_group&)
 }
 
 template <typename Context>
-void learn_successors_callback(WorkerP* worker, Task*, std::uint32_t* x, std::size_t n, void* context)
+void learn_successors_callback(WorkerP* worker, Task*, std::uint32_t* x, std::size_t /* n */, void* context)
 {
   using namespace sylvan::ldds;
   using enumerator_element = data::enumerator_list_element_with_substitution<>;

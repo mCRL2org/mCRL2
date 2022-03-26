@@ -172,7 +172,7 @@ class propositional_variable_instantiation: public pbes_expression
 /// \brief Make_propositional_variable_instantiation constructs a new term into a given address.
 /// \ \param t The reference into which the new propositional_variable_instantiation is constructed. 
 template <class... ARGUMENTS>
-inline void make_propositional_variable_instantiation(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_propositional_variable_instantiation(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl_with_index<propositional_variable_instantiation,std::pair<core::identifier_string, data::data_expression_list>>(t, core::detail::function_symbol_PropVarInst(), args...);
 }
@@ -249,7 +249,7 @@ class not_: public pbes_expression
 /// \brief Make_not_ constructs a new term into a given address.
 /// \ \param t The reference into which the new not_ is constructed. 
 template <class... ARGUMENTS>
-inline void make_not_(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_not_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PBESNot(), args...);
 }
@@ -325,7 +325,7 @@ class and_: public pbes_expression
 /// \brief Make_and_ constructs a new term into a given address.
 /// \ \param t The reference into which the new and_ is constructed. 
 template <class... ARGUMENTS>
-inline void make_and_(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_and_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PBESAnd(), args...);
 }
@@ -401,7 +401,7 @@ class or_: public pbes_expression
 /// \brief Make_or_ constructs a new term into a given address.
 /// \ \param t The reference into which the new or_ is constructed. 
 template <class... ARGUMENTS>
-inline void make_or_(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_or_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PBESOr(), args...);
 }
@@ -477,7 +477,7 @@ class imp: public pbes_expression
 /// \brief Make_imp constructs a new term into a given address.
 /// \ \param t The reference into which the new imp is constructed. 
 template <class... ARGUMENTS>
-inline void make_imp(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_imp(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PBESImp(), args...);
 }
@@ -553,7 +553,7 @@ class forall: public pbes_expression
 /// \brief Make_forall constructs a new term into a given address.
 /// \ \param t The reference into which the new forall is constructed. 
 template <class... ARGUMENTS>
-inline void make_forall(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_forall(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PBESForall(), args...);
 }
@@ -629,7 +629,7 @@ class exists: public pbes_expression
 /// \brief Make_exists constructs a new term into a given address.
 /// \ \param t The reference into which the new exists is constructed. 
 template <class... ARGUMENTS>
-inline void make_exists(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_exists(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PBESExists(), args...);
 }
@@ -985,22 +985,26 @@ void optimized_imp(pbes_expression& result, const pbes_expression& p, const pbes
 /// \param p A PBES expression
 /// \return The value <tt>forall l.p</tt>
 inline
-pbes_expression optimized_forall(const data::variable_list& l, const pbes_expression& p)
+void optimized_forall(pbes_expression& result, const data::variable_list& l, const pbes_expression& p)
 {
   if (l.empty())
   {
-    return p;
+    result = p;
+    return;
   }
   if (is_false(p))
   {
     // N.B. Here we use the fact that mCRL2 data types are never empty.
-    return data::sort_bool::false_();
+    result = data::sort_bool::false_();
+    return;
   }
   if (is_true(p))
   {
-    return true_();
+    result = true_();
+    return;
   }
-  return forall(l, p);
+  make_forall(result, l, p);
+  return;
 }
 
 /// \brief Make an existential quantification
@@ -1009,22 +1013,26 @@ pbes_expression optimized_forall(const data::variable_list& l, const pbes_expres
 /// \param p A PBES expression
 /// \return The value <tt>exists l.p</tt>
 inline
-pbes_expression optimized_exists(const data::variable_list& l, const pbes_expression& p)
+void optimized_exists(pbes_expression& result, const data::variable_list& l, const pbes_expression& p)
 {
   if (l.empty())
   {
-    return p;
+    result = p;
+    return;
   }
   if (is_false(p))
   {
-    return data::sort_bool::false_();
+    result = data::sort_bool::false_();
+    return;
   }
   if (is_true(p))
   {
     // N.B. Here we use the fact that mCRL2 data types are never empty.
-    return data::sort_bool::true_();
+    result = data::sort_bool::true_();
+    return;
   }
-  return exists(l, p);
+  make_exists(result, l, p);
+  return;
 }
 
 inline
@@ -1214,6 +1222,21 @@ struct term_traits<pbes_system::pbes_expression>
     return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESForall(), l, p));
   }
 
+  /// \brief Make a universal quantification
+  /// \param result The value <tt>forall l.p</tt>
+  /// \param l A sequence of variables
+  /// \param p A term
+  static inline
+  void make_forall(term_type& result, const variable_sequence_type& l, const term_type& p)
+  {
+    if (l.empty())
+    {
+      result = p;
+      return;
+    }
+    pbes_system::make_forall(result, l, p);
+  }
+
   /// \brief Make an existential quantification
   /// \param l A sequence of variables
   /// \param p A term
@@ -1226,6 +1249,21 @@ struct term_traits<pbes_system::pbes_expression>
       return p;
     }
     return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESExists(), l, p));
+  }
+
+  /// \brief Make an existential quantification
+  /// \param result The value <tt>exists l.p</tt>
+  /// \param l A sequence of variables
+  /// \param p A term
+  static inline
+  void make_exists(term_type& result, const variable_sequence_type& l, const term_type& p)
+  {
+    if (l.empty())
+    {
+      result = p;
+      return;
+    }
+    pbes_system::make_exists(result, l, p);
   }
 
   /// \brief Test for the value true

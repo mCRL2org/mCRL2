@@ -902,7 +902,7 @@ class Class:
         text = r'''/// \\brief Make_<CLASSNAME> constructs a new term into a given address.
 /// \\ \param t The reference into which the new <CLASSNAME> is constructed. 
 template <class... ARGUMENTS>
-inline void make_<CLASSNAME>(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_<CLASSNAME>(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl<HASINDEX>(t, core::detail::function_symbol_<ATERM>(), args...);
 }'''

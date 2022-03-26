@@ -63,7 +63,7 @@ class basic_sort: public sort_expression
 /// \brief Make_basic_sort constructs a new term into a given address.
 /// \ \param t The reference into which the new basic_sort is constructed. 
 template <class... ARGUMENTS>
-inline void make_basic_sort(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_basic_sort(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_SortId(), args...);
 }

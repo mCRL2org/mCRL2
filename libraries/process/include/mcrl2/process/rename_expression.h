@@ -69,7 +69,7 @@ class rename_expression: public atermpp::aterm_appl
 /// \brief Make_rename_expression constructs a new term into a given address.
 /// \ \param t The reference into which the new rename_expression is constructed. 
 template <class... ARGUMENTS>
-inline void make_rename_expression(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_rename_expression(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_RenameExpr(), args...);
 }

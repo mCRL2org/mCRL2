@@ -165,7 +165,9 @@ class symbolic_exploration_algorithm
       const pbes_expression& body = x;
       if (m_optimized)
       {
-        return optimized_forall(d, body);
+        pbes_expression result;
+        optimized_forall(result, d, body);
+        return result;
       }
       else
       {
@@ -178,7 +180,9 @@ class symbolic_exploration_algorithm
       const pbes_expression& body = x;
       if (m_optimized)
       {
-        return optimized_exists(d, body);
+        pbes_expression result;
+        optimized_exists(result, d, body);
+        return result;
       }
       else
       {

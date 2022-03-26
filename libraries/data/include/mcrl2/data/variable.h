@@ -81,7 +81,7 @@ class variable: public data_expression
 /// \brief Make_variable constructs a new term into a given address.
 /// \ \param t The reference into which the new variable is constructed. 
 template <class... ARGUMENTS>
-inline void make_variable(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_variable(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl_with_index<variable,std::pair<core::identifier_string, sort_expression>>(t, core::detail::function_symbol_DataVarId(), args...);
 }

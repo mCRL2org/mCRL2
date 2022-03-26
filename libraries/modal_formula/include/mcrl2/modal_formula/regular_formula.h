@@ -145,7 +145,7 @@ class seq: public regular_formula
 /// \brief Make_seq constructs a new term into a given address.
 /// \ \param t The reference into which the new seq is constructed. 
 template <class... ARGUMENTS>
-inline void make_seq(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_seq(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_RegSeq(), args...);
 }
@@ -221,7 +221,7 @@ class alt: public regular_formula
 /// \brief Make_alt constructs a new term into a given address.
 /// \ \param t The reference into which the new alt is constructed. 
 template <class... ARGUMENTS>
-inline void make_alt(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_alt(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_RegAlt(), args...);
 }
@@ -292,7 +292,7 @@ class trans: public regular_formula
 /// \brief Make_trans constructs a new term into a given address.
 /// \ \param t The reference into which the new trans is constructed. 
 template <class... ARGUMENTS>
-inline void make_trans(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_trans(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_RegTrans(), args...);
 }
@@ -363,7 +363,7 @@ class trans_or_nil: public regular_formula
 /// \brief Make_trans_or_nil constructs a new term into a given address.
 /// \ \param t The reference into which the new trans_or_nil is constructed. 
 template <class... ARGUMENTS>
-inline void make_trans_or_nil(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_trans_or_nil(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_RegTransOrNil(), args...);
 }
@@ -449,7 +449,7 @@ class untyped_regular_formula: public regular_formula
 /// \brief Make_untyped_regular_formula constructs a new term into a given address.
 /// \ \param t The reference into which the new untyped_regular_formula is constructed. 
 template <class... ARGUMENTS>
-inline void make_untyped_regular_formula(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_untyped_regular_formula(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_UntypedRegFrm(), args...);
 }

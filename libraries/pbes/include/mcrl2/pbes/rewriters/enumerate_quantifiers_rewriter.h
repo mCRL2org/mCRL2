@@ -138,7 +138,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
       data::variable_list non_enumerable;
       data::detail::split_enumerable_variables(x.variables(), m_dataspec, super::R, enumerable, non_enumerable);
       enumerate_forall(result, enumerable, x.body());
-      result = data::optimized_forall_no_empty_domain(non_enumerable, result);
+      data::optimized_forall_no_empty_domain(result, non_enumerable, result);
     }
     else
     {
@@ -149,12 +149,12 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
       {
         pbes_expression body;
         derived().apply(body, x.body());
-        result = data::optimized_forall(infinite, body);
+        data::optimized_forall(result, infinite, body);
       }
       else
       {
         enumerate_forall(result, finite, x.body());
-        result = data::optimized_forall_no_empty_domain(infinite, result);
+        data::optimized_forall_no_empty_domain(result, infinite, result);
       }
     }
   }
@@ -168,7 +168,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
       data::variable_list non_enumerable;
       data::detail::split_enumerable_variables(x.variables(), m_dataspec, super::R, enumerable, non_enumerable);
       enumerate_exists(result, enumerable, x.body());
-      result = data::optimized_exists_no_empty_domain(non_enumerable, result);
+      data::optimized_exists_no_empty_domain(result, non_enumerable, result);
     }
     else
     {
@@ -179,12 +179,12 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
       {
         pbes_expression body;
         derived().apply(body, x.body());
-        result = data::optimized_exists(infinite, body);
+        data::optimized_exists(result, infinite, body);
       }
       else
       {
         enumerate_exists(result, finite, x.body());
-        result = data::optimized_exists_no_empty_domain(infinite, result);
+        data::optimized_exists_no_empty_domain(result, infinite, result);
       }
     }
   }

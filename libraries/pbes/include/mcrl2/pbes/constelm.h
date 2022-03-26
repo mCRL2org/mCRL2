@@ -161,15 +161,18 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
   void leave(const forall& x)
   {
     edge_condition ec = pop();
+    data::data_expression t;
     for (auto& [X_e, cond_set]: ec.condition)
     {
       std::set<data::data_expression> new_conditions;
       for(const data::data_expression& e: cond_set)
       {
-        new_conditions.insert(data::optimized_exists(x.variables(), e, true));
+        data::optimized_exists(t, x.variables(), e, true);
+        new_conditions.insert(t);
       }
       cond_set = std::move(new_conditions);
-      cond_set.insert(data::optimized_forall(x.variables(), ec.TC, true));
+      data::optimized_forall(t, x.variables(), ec.TC, true);
+      cond_set.insert(t);
     }
     push(ec);
   }
@@ -177,15 +180,18 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
   void leave(const exists& x)
   {
     edge_condition ec = pop();
+    data::data_expression t;
     for (auto& [X_e, cond_set]: ec.condition)
     {
       std::set<data::data_expression> new_conditions;
       for(const data::data_expression& e: cond_set)
       {
-        new_conditions.insert(data::optimized_exists(x.variables(), e, true));
+        data::optimized_exists(t, x.variables(), e, true);
+        new_conditions.insert(t);
       }
       cond_set = std::move(new_conditions);
-      cond_set.insert(data::optimized_forall(x.variables(), ec.FC, true));
+      data::optimized_forall(t, x.variables(), ec.FC, true);
+      cond_set.insert(t);
     }
     push(ec);
   }

@@ -68,7 +68,7 @@ class process_equation: public atermpp::aterm_appl
 /// \brief Make_process_equation constructs a new term into a given address.
 /// \ \param t The reference into which the new process_equation is constructed. 
 template <class... ARGUMENTS>
-inline void make_process_equation(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_process_equation(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_ProcEqn(), args...);
 }
