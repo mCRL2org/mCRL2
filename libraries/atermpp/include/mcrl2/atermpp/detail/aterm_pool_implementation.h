@@ -94,8 +94,9 @@ void aterm_pool::collect()
 void aterm_pool::register_thread_aterm_pool(thread_aterm_pool_interface& pool)
 {
   if constexpr (GlobalThreadSafe) { m_mutex.lock(); }
-
+#ifdef MCRL2_THREAD_SAFE
   mCRL2log(mcrl2::log::debug) << "Registered thread_local aterm pool\n";
+#endif
   m_thread_pools.insert(m_thread_pools.end(), &pool);
 
   if constexpr (GlobalThreadSafe) { m_mutex.unlock(); }
@@ -105,7 +106,9 @@ void aterm_pool::remove_thread_aterm_pool(thread_aterm_pool_interface& pool)
 {
   if constexpr (GlobalThreadSafe) { m_mutex.lock(); }
 
+#ifdef MCRL2_THREAD_SAFE
   mCRL2log(mcrl2::log::debug) << "Removed thread_local aterm pool\n";
+#endif
   auto it = std::find(m_thread_pools.begin(), m_thread_pools.end(), &pool);
   if (it != m_thread_pools.end())
   {
