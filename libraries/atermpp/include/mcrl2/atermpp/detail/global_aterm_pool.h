@@ -45,10 +45,7 @@ inline aterm_pool& g_term_pool()
 
 /* Implemented in a .cpp file. 
 inline thread_aterm_pool& g_thread_term_pool();
-{ 
-  thread_local thread_aterm_pool instance(g_aterm_pool_instance);
-  return instance;
-} */
+*/
 
 
 } // namespace detail

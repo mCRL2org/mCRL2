@@ -134,6 +134,7 @@ class pbessolve_tool
             "search-strategy");
     options.rewrite_strategy = rewrite_strategy();
     options.number_of_threads = number_of_threads();
+    
 
     if (parser.has_option("file"))
     {

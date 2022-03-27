@@ -29,7 +29,13 @@ namespace atermpp::detail
 /// \brief A reference to the thread local term pool storage
 thread_aterm_pool& g_thread_term_pool()
 {
+#ifdef MCRL2_THREAD_SAFE
+  static_assert(GlobalThreadSafe); 
   thread_local thread_aterm_pool instance(g_aterm_pool_instance);
+#else 
+  static_assert(!GlobalThreadSafe); 
+  static thread_aterm_pool instance(g_aterm_pool_instance);
+#endif
   return instance;
 }
 

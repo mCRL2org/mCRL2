@@ -10,13 +10,19 @@
 #ifndef MCRL2_ATERMPP_ATERM_CONFIGURATION_H
 #define MCRL2_ATERMPP_ATERM_CONFIGURATION_H
 
+#include "mcrl2/utilities/configuration.h"
+
 namespace atermpp
 {
 namespace detail
 {
 
-/// \brief Enables thread safety for the global term and function symbol pools.
+/// Enables thread safety for the global term and function symbol pools.
+#ifdef MCRL2_THREAD_SAFE 
 constexpr static bool GlobalThreadSafe = true;
+#else
+constexpr static bool GlobalThreadSafe = false;
+#endif 
 
 /// \brief Enable garbage collection.
 constexpr static bool EnableGarbageCollection = true;
