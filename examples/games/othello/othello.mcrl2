@@ -242,7 +242,7 @@ proc Othello(b:Board,WhiteMoves:Bool,Passed, PassedTwice:Bool)=
        (!PassedTwice && !WhiteMoves && !CanMove(Red,b)) ->
            Pass.Othello(b,true,true,Passed) +
        (PassedTwice && Count(Red,b)>Count(White,b)) ->
-           RedWins.Othello(b,false,false,true)+
+           RedWins.Othello(b,false,true,true)+
        (PassedTwice && Count(Red,b)<Count(White,b)) ->
            WhiteWins.Othello(b,false,true,true)+
        (PassedTwice && Count(Red,b)==Count(White,b)) ->
