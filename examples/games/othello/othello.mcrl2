@@ -40,9 +40,6 @@
 % It is also useful to avoid rewriting when linearising this example (flag -o), as
 % rewriting will give a huge specification.
 %
-% The formula that expresses that red has a winning strategy is the following.
-% On a 4x4 board it does not hold.
-%
 % The formula below expresses that red wins in the Othello game.
 % Either red wins right away, or red, who starts the game, can do a move, after which red wins,
 % or it is possible that white can do a move or pass, such that after each move of such a move,
@@ -60,6 +57,7 @@
 % Reijkjavik, May 16, 2006, Jan Friso Groote
 % Improvements made in Juli 2009.
 % Changes made in April 2022. As it stands a 4x4 board can easily be solved,
+% and the same holds for the 4x5 board below (where red has a winning strategy), 
 % but a 5x5 board beyond the capacity of the current tools. 
 
 eqn initial_board = [[None, None, None, None],
@@ -246,9 +244,9 @@ proc Othello(b:Board,WhiteMoves:Bool,Passed, PassedTwice:Bool)=
        (PassedTwice && Count(Red,b)>Count(White,b)) ->
            RedWins.Othello(b,false,false,true)+
        (PassedTwice && Count(Red,b)<Count(White,b)) ->
-           WhiteWins.Othello(b,false,false,true)+
+           WhiteWins.Othello(b,false,true,true)+
        (PassedTwice && Count(Red,b)==Count(White,b)) ->
-           Draw.Othello(b,false,false,true);
+           Draw.Othello(b,false,true,true);
 
 
 init Othello(initial_board,false,false,false);
