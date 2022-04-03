@@ -1,13 +1,11 @@
-% This formula is applicable to games/othello/othello.mcrl2
-%
-% See specification for an explanation.
-mu X.((<Outcome(win(red))>true) || 
-       (
-         (exists x,y:Nat.<Put(x, y, red)>X)
-       ) ||
-       (
-         (exists x,y:Nat.<Put(x, y, white)>true) &&
-         (forall x,y:Nat.[Put(x, y, white)]X)
-       )  ||
-         ((<Pass>X) && ([Pass]X))
-     )
+% The formula below expresses that red wins in the Othello game.
+% Either red wins right away, or red, who starts the game, can do a move, after which red wins,
+% or it is possible that white can do a move or pass, such that after each move of such a move,
+% red wins. As the game terminates, either a maximal or minimal fixed point can be used. 
+
+mu X.(<RedWins>true || 
+      (<Pass||exists x,y:Pos.RedMove(x,y)>
+           (<RedWins>true || 
+            (<Pass||exists x,y:Pos.WhiteMove(x,y)>true && [Pass||exists x,y:Pos.WhiteMove(x,y)]X))))
+
+
