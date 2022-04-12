@@ -103,6 +103,11 @@ class lpsreach_algorithm
       return result;
     }
 
+    std::string print_size(const sylvan::ldds::ldd& L)
+    {
+      return symbolic::print_size(L, m_options.print_nodesize);
+    }
+
   public:
     lpsreach_algorithm(const lps::specification& lpsspec, const symbolic::symbolic_reachability_options& options_)
       : m_options(options_),
@@ -280,28 +285,27 @@ class lpsreach_algorithm
 
         std::tie(visited, todo, deadlocks) = step(visited, todo, true, m_options.detect_deadlocks);
 
-        mCRL2log(log::verbose) << "explored " << std::setw(12) << satcount(visited) << " states after "
+        mCRL2log(log::verbose) << "explored " << std::setw(12) << print_size(visited) << " states after "
                                << std::setw(3) << iteration_count << " iterations (time = " << std::setprecision(2)
                                << std::fixed << loop_start.seconds() << "s)" << std::endl;
         if (m_options.detect_deadlocks)
         {
-          mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(deadlocks) << " deadlocks" << std::endl;
+          mCRL2log(log::verbose) << "found " << std::setw(12) << print_size(deadlocks) << " deadlocks" << std::endl;
         }
 
         sylvan::sylvan_stats_report(stderr);
       }
 
       elapsed_seconds = std::chrono::steady_clock::now() - start;
-      std::cout << "number of states = " << satcount(visited) << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)" << std::endl;
-      mCRL2log(log::verbose) << "visited LDD size = " << nodecount(visited) << std::endl;
+      std::cout << "number of states = " << print_size(visited) << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)" << std::endl;
       mCRL2log(log::verbose) << "used variable order = " << core::detail::print_list(m_variable_order) << std::endl;
 
       double total_time = 0.0;
       for (std::size_t i = 0; i < R.size(); i++)
       {
-        mCRL2log(log::verbose) << "group " << std::setw(4) << i << " contains " << std::setw(7) << satcount(R[i].L) << " transitions (learn time = "
+        mCRL2log(log::verbose) << "group " << std::setw(4) << i << " contains " << std::setw(10) << print_size(R[i].L) << " transitions (learn time = "
                                << std::setw(5) << std::setprecision(2) << std::fixed << R[i].learn_time << "s with " << std::setw(9) << R[i].learn_calls 
-                               << " calls, cached " << static_cast<std::size_t>(satcount(R[i].Ldomain)) << " values" << ")" << std::endl;
+                               << " calls, cached " << print_size(R[i].Ldomain) << " values" << ")" << std::endl;
 
         total_time += R[i].learn_time;
       }

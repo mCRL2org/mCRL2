@@ -183,6 +183,18 @@ std::string print_relation(const std::vector<data_expression_index>& data_index,
   return out.str();
 }
 
+/// \brief Prints the number of elements represented by the ldd L and optionally also include the number of nodes of L.
+std::string print_size(const sylvan::ldds::ldd& L, bool print_nodecount)
+{
+  std::ostringstream out;
+  out << satcount(L);
+  if (print_nodecount)
+  {
+    out << "[" << nodecount(L) << "]";
+  }
+  return out.str();
+}
+
 } // namespace mcrl2::symbolic
 
 #endif // MCRL2_LPS_SYMBOLIC_PRINT_H

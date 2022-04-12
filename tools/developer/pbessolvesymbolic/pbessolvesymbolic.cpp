@@ -169,6 +169,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       );
       desc.add_option("info", "print read/write information of the summands");
       desc.add_option("max-iterations", utilities::make_optional_argument("NUM", "0"), "limit number of breadth-first iterations to NUM");
+      desc.add_option("print-nodesize", "print the number of LDD nodes in addition to the number of elements represented as 'elements[nodes]'");
       desc.add_option("saturation", "reduce the amount of breadth-first iterations by applying the transition groups until fixed point");
       desc.add_option("solve-strategy",
                       utilities::make_enum_argument<int>("NUM")
@@ -212,6 +213,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       options.cached                                = parser.has_option("cached");
       options.chaining                              = parser.has_option("chaining");
       options.one_point_rule_rewrite                = !parser.has_option("no-one-point-rule-rewrite");
+      options.print_nodesize                        = parser.has_option("print-nodesize");
       options.remove_unused_rewrite_rules           = !parser.has_option("no-remove-unused-rewrite-rules");
       options.replace_constants_by_variables        = false; // This option doesn't work in the current implementation
       options.saturation                            = parser.has_option("saturation");

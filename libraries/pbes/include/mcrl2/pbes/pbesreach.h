@@ -249,6 +249,11 @@ class pbesreach_algorithm
       return result;
     }
 
+    std::string print_size(const sylvan::ldds::ldd& L)
+    {
+      return symbolic::print_size(L, m_options.print_nodesize);
+    }
+
   public:
     pbesreach_algorithm(const pbes_system::pbes& pbesspec, const symbolic_reachability_options& options_)
       : m_options(options_),
@@ -457,13 +462,13 @@ class pbesreach_algorithm
           m_deadlocks = union_(m_deadlocks, deadlocks);
         }
 
-        mCRL2log(log::verbose) << "generated " << std::setw(12) << satcount(m_visited) << " BES equations after "
+        mCRL2log(log::verbose) << "generated " << std::setw(12) << print_size(m_visited) << " BES equations after "
                                << std::setw(3) << iteration_count << " iterations (time = " << std::setprecision(2)
                                << std::fixed << loop_start.seconds() << "s)" << std::endl;
 
         if (m_options.detect_deadlocks)
         {
-          mCRL2log(log::verbose) << "found " << std::setw(12) << satcount(m_deadlocks) << " deadlocks" << std::endl;
+          mCRL2log(log::verbose) << "found " << std::setw(12) << print_size(m_deadlocks) << " deadlocks" << std::endl;
         }
 
         on_end_while_loop();
@@ -472,22 +477,22 @@ class pbesreach_algorithm
 
       if (report_states)
       {
-        std::cout << "number of BES equations = " << satcount(m_visited) << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)" << std::endl;
+        std::cout << "number of BES equations = " << print_size(m_visited) << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)" << std::endl;
       }
       else
       {
-        mCRL2log(log::verbose) << "number of BES equations = " << satcount(m_visited) << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)" << std::endl;
+        mCRL2log(log::verbose) << "number of BES equations = " << symbolic::print_size(m_visited, m_options.print_nodesize) << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)" << std::endl;
       }
 
-      mCRL2log(log::verbose) << "visited LDD size = " << nodecount(m_visited) << std::endl;
       mCRL2log(log::verbose) << "used variable order = " << core::detail::print_list(m_variable_order) << std::endl;
 
       double total_time = 0.0;
       for (std::size_t i = 0; i < R.size(); i++)
       {
-        mCRL2log(log::verbose) << "group " << std::setw(4) << i << " contains " << std::setw(7) << satcount(R[i].L) << " transitions (learn time = "
+        mCRL2log(log::verbose) << "group " << std::setw(4) << i << " contains " << std::setw(7) << print_size(R[i].L) << " transitions (learn time = "
                                << std::setw(5) << std::setprecision(2) << std::fixed << R[i].learn_time << "s with " << std::setw(9) << R[i].learn_calls 
-                               << " calls, cached " << static_cast<std::size_t>(satcount(R[i].Ldomain)) << " values" << ")" << std::endl;
+                               << " calls, cached " << print_size(R[i].Ldomain) << " values" 
+                               << std::endl;
 
         total_time += R[i].learn_time;
       }
