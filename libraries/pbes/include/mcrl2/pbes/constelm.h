@@ -277,10 +277,12 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
       cond_set.insert(data::optimized_forall(x.variables(), ec.Cpos, true));
 
       // Update FV
-      std::set<data::variable> bound_vars{x.variables().begin(), x.variables().end()};
       conj_FV = ec.FV;
-      ec.FV = utilities::detail::set_difference(ec.FV, bound_vars);
     }
+    ec.Cpos = data::optimized_forall(x.variables(), ec.Cpos, true);
+    ec.Cneg = data::optimized_exists(x.variables(), ec.Cneg, true);
+    std::set<data::variable> bound_vars{x.variables().begin(), x.variables().end()};
+    ec.FV = utilities::detail::set_difference(ec.FV, bound_vars);
     push(ec);
 
     // maintain quantifier scope
@@ -308,10 +310,12 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
       cond_set.insert(data::optimized_forall(x.variables(), ec.Cneg, true));
 
       // Update FV
-      std::set<data::variable> bound_vars{x.variables().begin(), x.variables().end()};
       disj_FV = ec.FV;
-      ec.FV = utilities::detail::set_difference(ec.FV, bound_vars);
     }
+    ec.Cpos = data::optimized_exists(x.variables(), ec.Cpos, true);
+    ec.Cneg = data::optimized_forall(x.variables(), ec.Cneg, true);
+    std::set<data::variable> bound_vars{x.variables().begin(), x.variables().end()};
+    ec.FV = utilities::detail::set_difference(ec.FV, bound_vars);
     push(ec);
 
     // maintain quantifier scope
