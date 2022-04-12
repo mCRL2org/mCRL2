@@ -10,148 +10,84 @@
 #include "mcrl2/utilities/input_output_tool.h"
 
 #include "mcrl2/lps/symbolic_lts_io.h"
+#include "mcrl2/lps/symbolic_lts_bisim.h"
 #include "mcrl2/lps/state.h"
 #include "mcrl2/lts/lts_builder.h"
 #include "mcrl2/lts/state_space_generator.h"
 #include "mcrl2/symbolic/print.h"
 #include "mcrl2/utilities/logger.h"
 
+#include "convert_concrete_lts.h"
+
 using namespace mcrl2;
 using namespace mcrl2::lts;
 using namespace mcrl2::lts::detail;
 using namespace mcrl2::utilities::tools;
+using namespace mcrl2::utilities;
 using namespace mcrl2::log;
 using namespace sylvan::ldds;
 
 using mcrl2::utilities::tools::input_output_tool;
 
-/// \brief Converts a state vector of indices to a vector of the corresponding data expressions. 
-lps::state array2state(const std::vector<symbolic::data_expression_index>& data_index, std::uint32_t* x, std::size_t n)
+enum class symbolic_lts_equivalence
 {
-  std::vector<data::data_expression> result;
-  for (std::size_t i = 0; i < n; i++)
-  {
-    if (x[i] == symbolic::relprod_ignore)
-    {
-      result.push_back(data::undefined_data_expression());
-    }
-    else
-    {
-      result.push_back(data_index[i][x[i]]);
-    }
-  }
-  
-  return lps::state(result.begin(), n);
-}
-
-/// \brief Explore all outgoing transitions for one state vector.
-template <typename Context>
-void explore_transitions_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t n, void* context);
-
-/// \brief Explore all outgoing transitions per state vector.
-template <typename Context>
-void explore_state_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t n, void* context);
-
-class convert_concrete_lts
-{
-  public:
-    convert_concrete_lts(const lps::symbolic_lts& lts, std::unique_ptr<lts_builder> builder)
-      : m_lts(lts), m_builder(std::move(builder)), m_progress_monitor(mcrl2::lps::exploration_strategy::es_none)
-    {
-      m_number_of_states = satcount(m_lts.states);
-    }
-
-    void run()
-    {
-      for (const auto& group : m_lts.summand_groups)
-      {
-        if (group.summands.size() > 1)
-        {
-          throw mcrl2::runtime_error("Cannot convert a symbolic LTS with non-trivial transition groups");
-        }
-      }
-
-      // Explore all states in the LDD.
-      sat_all_nopar(m_lts.states, explore_state_callback<convert_concrete_lts>, this);
-
-      m_progress_monitor.finish_exploration(m_discovered.size());
-      m_builder->finalize(m_discovered, false);
-    }
-
-    void save(const std::string& filename)
-    {
-      m_builder->save(filename);
-    }
-
-    const lps::symbolic_lts& m_lts;
-    std::unique_ptr<lts_builder> m_builder;
-    utilities::indexed_set<lps::state> m_discovered;
-    mcrl2::lts::detail::progress_monitor m_progress_monitor;
-    std::size_t m_number_of_states;
+  none,
+  bisim
 };
 
-/// \brief std::tuple is completely useless due to the cryptic compilation errors.
-struct callback_context
+// \overload
+inline
+std::istream& operator>>(std::istream& is, symbolic_lts_equivalence& eq)
 {
-  convert_concrete_lts& algorithm;
-  std::uint32_t* state;
-  std::size_t state_size;
-  std::size_t state_index;
-  const lps::lps_summand_group& group;
-};
-
-template <typename Context>
-void explore_transitions_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t n, void* context)
-{
-  auto pointer = reinterpret_cast<Context*>(context);
-  auto& p = *pointer;
-
-  // Try to match the read parameters.
-  for (std::size_t i = 0; i < p.group.read.size(); ++i)
+  try
   {
-    if (p.state[p.group.read[i]] != x[p.group.read_pos[i]])
+    std::string s;
+    is >> s;
+
+    if (s == "none") {
+      eq = symbolic_lts_equivalence::none;
+    }
+    else if (s == "bisim") {
+      eq = symbolic_lts_equivalence::bisim;
+    }
+  }
+  catch(mcrl2::runtime_error&)
+  {
+    is.setstate(std::ios_base::failbit);
+  }
+  return is;
+}
+
+// \overload
+inline
+std::ostream& operator<<(std::ostream& os, const symbolic_lts_equivalence eq)
+{
+  switch (eq)
+  {
+    case symbolic_lts_equivalence::none:
     {
-      return;
+      os << "none";
+      break;
+    }
+    case symbolic_lts_equivalence::bisim:
+    {
+      os << "bisim";
+      break;
     }
   }
 
-  // Apply the writes to the state vector.  
-  MCRL2_DECLARE_STACK_ARRAY(target, std::uint32_t, p.state_size);
-  for (std::size_t i = 0; i < p.state_size; ++i)
-  {
-    target[i] = p.state[i];
-  }
-
-  for (std::size_t i = 0; i < p.group.write.size(); ++i)
-  {
-    target[p.group.write[i]] = x[p.group.write_pos[i]];
-  }
-  
-  lps::multi_action action_label = p.algorithm.m_lts.action_index[x[n - 1]];
-  lps::state target_state(array2state(p.algorithm.m_lts.data_index, target.data(), p.state_size));
-  std::size_t target_index = p.algorithm.m_discovered.insert(target_state).first;
-
-  p.algorithm.m_progress_monitor.examine_transition();
-  p.algorithm.m_builder->add_transition(p.state_index, action_label, target_index);
+  return os;
 }
 
-template <typename Context>
-void explore_state_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t n, void* context)
+inline std::string description(const symbolic_lts_equivalence eq)
 {
-  auto p = reinterpret_cast<Context*>(context);
-  auto& algorithm = *p;
-
-  lps::state current(array2state(algorithm.m_lts.data_index, x, n));
-  auto [current_index, _] = algorithm.m_discovered.insert(current);
-
-  for (const lps::lps_summand_group& group : algorithm.m_lts.summand_groups)
+  switch(eq)
   {
-    // Find all outgoing transitions of this state.
-    callback_context context { algorithm, x, n, current_index, group };
-    sat_all_nopar(group.L, explore_transitions_callback<callback_context>, &context);
+    case symbolic_lts_equivalence::none:
+      return "identity equivalence to concrete LTS";
+    case symbolic_lts_equivalence::bisim:
+      return "naive symbolic strong bisimilarity algorithm requiring O(n^2) symbolic operations.";
   }
-
-  algorithm.m_progress_monitor.finish_state(algorithm.m_discovered.size(), algorithm.m_number_of_states - algorithm.m_discovered.size());
 }
 
 class ltsconvert_tool : public input_output_tool
@@ -179,6 +115,12 @@ class ltsconvert_tool : public input_output_tool
     {
       super::add_options(desc);
 
+      desc.add_option("equivalence", 
+        make_enum_argument<symbolic_lts_equivalence>("NAME")
+          .add_value(symbolic_lts_equivalence::none, true)
+          .add_value(symbolic_lts_equivalence::bisim),
+          "generate an equivalent LTS, preserving equivalence NAME:",
+          'e');
       desc.add_option("lace-workers", utilities::make_optional_argument("NUM", "1"), "set number of Lace workers (threads for parallelization), (0=autodetect, default 1)");
       desc.add_option("lace-dqsize", utilities::make_optional_argument("NUM", "4194304"), "set length of Lace task queue (default 1024*1024*4)");
       desc.add_option("lace-stacksize", utilities::make_optional_argument("NUM", "0"), "set size of program stack in kilobytes (0=default stack size)");
@@ -243,6 +185,8 @@ class ltsconvert_tool : public input_output_tool
       {
         parser.error("too many file arguments");
       }
+      
+      m_equivalence = parser.option_argument_as<symbolic_lts_equivalence>("equivalence");
     }
     
     bool run() override
@@ -267,22 +211,30 @@ class ltsconvert_tool : public input_output_tool
         ifs >> m_input;
       }
 
-      lps::specification lpsspec;
-      lps::explorer_options options;
-      options.save_at_end = false;
-      
-      if (outtype == lts_none)
+      if (m_equivalence == symbolic_lts_equivalence::none)
       {
-        mCRL2log(verbose) << "Trying to detect output format by extension..." << std::endl;
+        // Convert into a concrete LTS.
+        lps::specification lpsspec;
+        lps::explorer_options options;
+        options.save_at_end = false;
+        
+        if (outtype == lts_none)
+        {
+          mCRL2log(verbose) << "Trying to detect output format by extension..." << std::endl;
 
-        outtype = mcrl2::lts::detail::guess_format(output_filename(), true);
+          outtype = mcrl2::lts::detail::guess_format(output_filename(), true);
+        }
+        
+        std::unique_ptr<lts_builder> builder = create_lts_builder(lpsspec, options, outtype, output_filename());
+
+        convert_concrete_lts algorithm(m_input, std::move(builder));
+        algorithm.run();
+        algorithm.save(output_filename());
       }
-      
-      std::unique_ptr<lts_builder> builder = create_lts_builder(lpsspec, options, outtype, output_filename());
-
-      convert_concrete_lts algorithm(m_input, std::move(builder));
-      algorithm.run();
-      algorithm.save(output_filename());
+      else
+      {
+        bisim(m_input);
+      }
 
       sylvan::sylvan_quit();
       lace_exit();
@@ -291,6 +243,7 @@ class ltsconvert_tool : public input_output_tool
 
   private:
     lts_type outtype = lts_none;
+    symbolic_lts_equivalence m_equivalence = symbolic_lts_equivalence::none;
 
     lps::symbolic_lts m_input;
 };
