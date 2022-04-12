@@ -32,6 +32,7 @@ struct symbolic_reachability_options
   bool chaining = false;
   bool detect_deadlocks = false;
   bool one_point_rule_rewrite = false;
+  bool print_nodesize = false;
   bool replace_constants_by_variables = false;
   bool remove_unused_rewrite_rules = false;
   bool saturation = false;
@@ -53,6 +54,7 @@ std::ostream& operator<<(std::ostream& out, const symbolic_reachability_options&
   out << "chaining = " << std::boolalpha << options.chaining << std::endl;
   out << "detect_deadlocks = " << std::boolalpha << options.detect_deadlocks << std::endl;
   out << "one-point-rule-rewrite = " << std::boolalpha << options.one_point_rule_rewrite << std::endl;
+  out << "print_nodesize = " << std::boolalpha << options.print_nodesize << std::endl;
   out << "replace-constants-by-variables = " << std::boolalpha << options.replace_constants_by_variables << std::endl;
   out << "remove-unused-rewrite-rules = " << std::boolalpha << options.remove_unused_rewrite_rules << std::endl;
   out << "saturation = " << std::boolalpha << options.saturation << std::endl;
