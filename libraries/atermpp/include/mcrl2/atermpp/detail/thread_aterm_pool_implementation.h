@@ -74,7 +74,7 @@ void thread_aterm_pool::create_appl_index(aterm& term, const function_symbol& sy
   ++m_creation_depth;
 
   std::array<unprotected_aterm, sizeof...(arguments)> argument_array;
-  store_in_argument_array(0, argument_array, arguments...);
+  store_in_argument_array(argument_array, arguments...);
 
   bool added;
   if constexpr (sizeof...(arguments)==1)

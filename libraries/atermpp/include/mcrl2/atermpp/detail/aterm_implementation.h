@@ -150,6 +150,23 @@ inline aterm& aterm::assign(const aterm& other,
 }
 
 
+template <bool CHECK_BUSY_FLAG /* =true*/>
+inline aterm& aterm::unprotected_assign(const aterm& other) noexcept
+{
+#ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
+  // Increment first to prevent the same term from becoming reference zero temporarily.
+  other.increment_reference_count();
+  // Decrement the reference from the term that is currently referred to.
+  decrement_reference_count();
+  m_term = other.m_term;
+#else
+  if constexpr (detail::GlobalThreadSafe && CHECK_BUSY_FLAG) assert(detail::g_thread_term_pool().get_busy_flag()->load()); 
+  m_term = other.m_term;
+#endif
+  return *this;
+}
+
+
 inline aterm& aterm::operator=(aterm&& other) noexcept
 {
 #ifdef MCRL2_ATERMPP_REFERENCE_COUNTED

@@ -35,21 +35,34 @@ extern "C" {
 // A rewrite_term is a term that may or may not be in normal form. If the method"
 // normal_form is invoked, it will calculate a normal form for itself as efficiently as possible."
 template <class REWRITE_TERM>
-static data_expression& local_rewrite(const REWRITE_TERM& t, std::size_t& stack_increment)
+static data_expression& local_rewrite(const REWRITE_TERM& t)
 {
-  return t.normal_form(stack_increment);
+  return t.normal_form();
 }
 
-static const data_expression& local_rewrite(const data_expression& t, std::size_t&)
+template <class REWRITE_TERM>
+static void local_rewrite(data_expression& result, const REWRITE_TERM& t)
+{
+  t.normal_form(result);
+}
+
+static const data_expression& local_rewrite(const data_expression& t)
 {
   return t;
 } 
+
+static void local_rewrite(data_expression& result, const data_expression& t)
+{
+  result=t;
+}
 
 //
 // Forward declarations
 //
 static void set_the_precompiled_rewrite_functions_in_a_lookup_table(RewriterCompilingJitty* this_rewriter);
-static void rewrite_aux(data_expression& result, const data_expression& t, const bool arguments_in_normal_form, RewriterCompilingJitty* this_rewriter);
+
+template <bool ARGUMENTS_IN_NORMAL_FORM>
+static void rewrite_aux(data_expression& result, const data_expression& t, RewriterCompilingJitty* this_rewriter);
 static void rewrite_abstraction_aux(data_expression& result, const abstraction& a, const data_expression& t, RewriterCompilingJitty* this_rewriter);
 
 static void rewrite_with_arguments_in_normal_form(
@@ -57,20 +70,20 @@ static void rewrite_with_arguments_in_normal_form(
                         const data_expression& t, 
                         RewriterCompilingJitty* this_rewriter)
 {
-  rewrite_aux(result, t, true, this_rewriter);
+  rewrite_aux<true>(result, t, this_rewriter);
   return;
 }
 
-static data_expression rewrite_with_arguments_in_normal_form(const data_expression& t, RewriterCompilingJitty* this_rewriter)
+/* static data_expression rewrite_with_arguments_in_normal_form(const data_expression& t, RewriterCompilingJitty* this_rewriter)
 {
   data_expression result; // TODO: Optimize
-  rewrite_aux(result, t, true, this_rewriter);
+  rewrite_aux<true>(result, t, this_rewriter);
   return result;
-}
+} */
 
 static void rewrite(data_expression& result, const data_expression& t, RewriterCompilingJitty* this_rewriter)
 {
-  rewrite_aux(result, t, false, this_rewriter);
+  rewrite_aux<false>(result, t, this_rewriter);
   return;
 }
 
@@ -93,13 +106,16 @@ class term_not_in_normal_form
        : m_term(term), this_rewriter(tr)
     {}
 
-    data_expression& normal_form(size_t& stack_increment) const
+    data_expression& normal_form() const
     {
-      this_rewriter->m_rewrite_stack.increase(1);
-      stack_increment++;
-      data_expression& local_store = this_rewriter->m_rewrite_stack.top();
-      rewrite_aux(local_store, m_term, false, this_rewriter);
+      data_expression& local_store = this_rewriter->m_rewrite_stack.new_stack_position();
+      rewrite_aux<false>(local_store, m_term, this_rewriter);
       return local_store;
+    }
+
+    void normal_form(data_expression& result) const
+    {
+      rewrite_aux<false>(result, m_term, this_rewriter);
     }
 };
 
@@ -121,18 +137,20 @@ class delayed_abstraction
        : m_binding_operator(binding_operator), m_variables(variables), m_body(body), this_rewriter(tr)
     {}
 
-    data_expression& normal_form(std::size_t& stack_increment) const
+    data_expression& normal_form() const
     {
-      this_rewriter->m_rewrite_stack.increase(1);
-      stack_increment++;
-      data_expression& t = this_rewriter->m_rewrite_stack.top();
-      make_abstraction(t, m_binding_operator,m_variables,local_rewrite(m_body, stack_increment));
-      // const abstraction t(m_binding_operator,m_variables,local_rewrite(m_body));
-      this_rewriter->m_rewrite_stack.increase(1);
-      stack_increment++;
-      data_expression& result = this_rewriter->m_rewrite_stack.top();
+      data_expression& t = this_rewriter->m_rewrite_stack.new_stack_position();
+      make_abstraction(t, m_binding_operator, m_variables, local_rewrite(m_body));
+      data_expression& result = this_rewriter->m_rewrite_stack.new_stack_position();
       rewrite_abstraction_aux(result, atermpp::down_cast<abstraction>(t),t,this_rewriter);
       return result;
+    }
+
+    void normal_form(data_expression& result) const
+    {
+      local_rewrite(result, m_body);  // TODO: HERE m_body is rewritten twice, even if it is in normal form. 
+      make_abstraction(result, m_binding_operator, m_variables, result);
+      rewrite_abstraction_aux(result, atermpp::down_cast<abstraction>(result),result,this_rewriter);
     }
 };
 
@@ -148,7 +166,7 @@ struct rewrite_functor
   data_expression operator()(const data_expression& arg) const
   {
     data_expression result;
-    rewrite_aux(result, arg, false, this_rewriter);
+    rewrite_aux<false>(result, arg, this_rewriter);
     return result;
   }
 };
@@ -191,10 +209,10 @@ uintptr_t uint_address(const atermpp::aterm& t)
 // Rewriting functions
 //
 
+template <bool ARGUMENTS_IN_NORMAL_FORM>
 static inline rewriter_function get_precompiled_rewrite_function(
              const function_symbol& f, 
              const std::size_t arity, 
-             const bool arguments_in_normal_form, 
              RewriterCompilingJitty* this_rewriter)
 {
   const std::size_t index = get_index(f);
@@ -202,13 +220,16 @@ static inline rewriter_function get_precompiled_rewrite_function(
   {
     return nullptr;
   }
-  if (arguments_in_normal_form)
+  if (ARGUMENTS_IN_NORMAL_FORM)
   {
     assert(this_rewriter -> arity_bound * index + arity<this_rewriter->functions_when_arguments_are_in_normal_form.size());
     return this_rewriter->functions_when_arguments_are_in_normal_form[this_rewriter->arity_bound * index + arity]; 
   }
-  assert(this_rewriter->arity_bound * index + arity<this_rewriter->functions_when_arguments_are_not_in_normal_form.size());
-  return this_rewriter->functions_when_arguments_are_not_in_normal_form[this_rewriter->arity_bound * index + arity];
+  else
+  {
+    assert(this_rewriter->arity_bound * index + arity<this_rewriter->functions_when_arguments_are_not_in_normal_form.size());
+    return this_rewriter->functions_when_arguments_are_not_in_normal_form[this_rewriter->arity_bound * index + arity];
+  }
 }
 
 static inline 
@@ -241,7 +262,7 @@ void rewrite_appl_aux(data_expression& result, const application& t, RewriterCom
   if (is_function_symbol(thead))
   {
     const std::size_t arity=recursive_number_of_args(t);
-    const rewriter_function f = get_precompiled_rewrite_function(atermpp::down_cast<function_symbol>(thead),arity,false,this_rewriter);
+    const rewriter_function f = get_precompiled_rewrite_function<false>(atermpp::down_cast<function_symbol>(thead),arity,this_rewriter);
     if (f != nullptr)
     {
       f(result, t,this_rewriter);
@@ -289,7 +310,7 @@ void rewrite_appl_aux(data_expression& result, const application& t, RewriterCom
   {
     assert(is_function_symbol(head1));
     const std::size_t arity = recursive_number_of_args(t1);
-    const rewriter_function f = get_precompiled_rewrite_function(down_cast<function_symbol>(head1),arity,false,this_rewriter);
+    const rewriter_function f = get_precompiled_rewrite_function<false>(down_cast<function_symbol>(head1),arity,this_rewriter);
     if (f != nullptr)
     {
       f(result, t1, this_rewriter);
@@ -301,9 +322,11 @@ void rewrite_appl_aux(data_expression& result, const application& t, RewriterCom
   }
 }
 
+template <bool ARGUMENTS_IN_NORMAL_FORM>
 static inline
-void rewrite_aux(data_expression& result, const data_expression& t, const bool arguments_in_normal_form, RewriterCompilingJitty* this_rewriter)
+void rewrite_aux(data_expression& result, const data_expression& t, RewriterCompilingJitty* this_rewriter)
 {
+// std::cerr << "--- " << t << "\n";
   if (is_function_symbol(t))
   {
     const std::size_t index = get_index(down_cast<function_symbol>(t));
@@ -312,10 +335,14 @@ void rewrite_aux(data_expression& result, const data_expression& t, const bool a
       // The following line is replaced by the more efficient assign, but should be reinstalled
       // in due time, when the compiler can more efficiently handle thread local terms. 
       // result = this_rewriter->normal_forms_for_constants[index];
-      result.assign(this_rewriter->normal_forms_for_constants[index], 
+      /* result.assign(this_rewriter->normal_forms_for_constants[index], 
                     this_rewriter->m_busy_flag,
                     this_rewriter->m_forbidden_flag,
-                    *this_rewriter->m_creation_depth);
+                    *this_rewriter->m_creation_depth); */
+             
+      // In this case we can use an unprotected_assign as the normal_forms_for_constants will 
+      // not change anymore, while rewriting is going on. 
+      result.unprotected_assign<false>(this_rewriter->normal_forms_for_constants[index]);
              
       if (!result.is_default_data_expression())
       {  
@@ -334,7 +361,7 @@ void rewrite_aux(data_expression& result, const data_expression& t, const bool a
     if (is_function_symbol(head))
     {
       const std::size_t appl_size=appl.size();
-      const rewriter_function f = get_precompiled_rewrite_function(down_cast<function_symbol>(head), appl_size, arguments_in_normal_form,this_rewriter);
+      const rewriter_function f = get_precompiled_rewrite_function<ARGUMENTS_IN_NORMAL_FORM>(down_cast<function_symbol>(head), appl_size, this_rewriter);
       if (f != nullptr)
       {
         f(result, appl,this_rewriter);

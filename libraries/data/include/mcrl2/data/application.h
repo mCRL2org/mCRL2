@@ -16,8 +16,6 @@
 #ifndef MCRL2_DATA_APPLICATION_H
 #define MCRL2_DATA_APPLICATION_H
 
-// #include "mcrl2/atermpp/aterm_list.h"
-
 namespace mcrl2
 {
 
@@ -270,9 +268,33 @@ inline bool contains_untyped_sort(const sort_expression& s)
   return true;
 }
 
-template <class CONTAINER>
-inline bool check_whether_sorts_match(const data_expression& head, const CONTAINER& l)
+inline const data_expression& evaluate_lambda_data_expression(const data_expression& t)
 {
+  return t;
+}
+
+template <class TERM> 
+inline data_expression evaluate_lambda_data_expression(
+               const TERM& t,
+               typename std::enable_if<std::is_invocable_r<void, TERM, data_expression&>::value>::type* = nullptr) 
+{
+  data_expression result;
+  t(result);
+  return result;
+}
+
+template <class TERM >
+inline data_expression evaluate_lambda_data_expression(
+               const TERM& t, 
+               typename std::enable_if<std::is_invocable_r<const data_expression, TERM, void>::value>::type* = nullptr)
+{
+  return t();
+}
+
+template <class HEAD, class CONTAINER>
+inline bool check_whether_sorts_match(const HEAD& head_lambda, const CONTAINER& l)
+{
+  data_expression head = evaluate_lambda_data_expression(head_lambda);
   if (contains_untyped_sort(head.sort()))
   {
     // Most likely head is a just parsed, untyped object.
@@ -303,6 +325,27 @@ inline bool check_whether_sorts_match(const data_expression& head, const CONTAIN
   return true;
 }
 
+inline data_expression_list get_arguments()
+{
+  return data_expression_list();
+}
+
+template <class HEAD, class... ARGUMENTS>
+inline
+data_expression_list get_arguments(const HEAD& h, const ARGUMENTS&... args)
+{
+  data_expression_list result=get_arguments(args...);
+  result.push_front(evaluate_lambda_data_expression(h));
+  return result;
+}
+
+/* template <class HEAD, class... CONTAINER>
+inline bool check_whether_sorts_match(const HEAD& head_lambda, const CONTAINER&... l)
+{
+  data_expression_list arguments=get_arguments(l...);
+  return check_whether_sorts_match(head_lambda, arguments);
+} */
+
 } // namespace detail
 
 /// \brief An application of a data expression to a number of arguments
@@ -324,7 +367,7 @@ class application: public data_expression
       : data_expression(atermpp::term_appl<aterm>(
               core::detail::function_symbol_DataAppl(sizeof...(Terms)+2),head,arg1,other_arguments...))
     {
-      assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, other_arguments...}));
+      assert(detail::check_whether_sorts_match(head, detail::get_arguments(arg1, other_arguments...)));
     }
 
     /// \brief Constructor.
@@ -505,97 +548,47 @@ inline void make_application(atermpp::aterm& result)
   atermpp::make_term_appl(result,core::detail::function_symbol_DataAppl(1));
 }
 
+/* 
+// ---------------------------------------------------------------------------------
+// ---------------------------- TYPEDEF --------------------------------------------
+// ---------------------------------------------------------------------------------
+template <typename TERM, typename = void>
+struct yields_a_data_expression
+    : public std::false_type
+{
+};
+
+template <typename TERM>
+struct yields_a_data_expression<TERM,
+                                typename std::enable_if<std::is_convertible<TERM, data_expression>::type>::type >
+    : public std::true_type
+{}; */
+
 /// \brief Constructor.
 /// \param result variable into which the application is constructed.
-template<typename ...Terms,
-             typename = std::enable_if_t<std::conjunction_v<std::is_convertible<Terms, data_expression>...>> >
+template<typename HEAD, typename TERM, typename ...Terms,
+                  typename = std::enable_if_t<
+                                 std::disjunction<typename std::is_convertible<HEAD, data_expression>,
+                                                  typename std::is_invocable_r<void, HEAD, data_expression&>,
+                                                  typename std::is_invocable_r<const data_expression, HEAD, void> >::value >,
+                  typename = std::enable_if_t<std::conjunction_v<
+                                 std::disjunction<typename std::is_convertible<Terms, data_expression>,
+                                                  typename std::is_invocable_r<void, Terms, data_expression&>,
+                                                  typename std::is_invocable_r<const data_expression, Terms, void> > ...>> > 
 inline void make_application(
                 atermpp::aterm& result,
-                const data_expression& head,
-                const data_expression& arg1,
+                const HEAD& head,
+                const TERM& arg1,
                 const Terms& ...other_arguments
                )
 {
-  assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, other_arguments...}));
+  assert(detail::check_whether_sorts_match(head, detail::get_arguments(arg1, other_arguments...)));
   atermpp::make_term_appl(result,
                           core::detail::function_symbol_DataAppl(sizeof...(Terms)+2),
                           head,
                           arg1, 
                           other_arguments...);
 }
-
-/* inline void make_application(data_expression& result,
-                      const data_expression& head,
-                      const data_expression& arg1)
-{
-  assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1}));
-  atermpp::make_term_appl(result,core::detail::function_symbol_DataAppl(2),head,arg1);
-}
-
-/// \brief Constructor.
-/// \param result variable into which the application is constructed.
-inline void make_application(data_expression& result,
-                      const data_expression& head,
-                      const data_expression& arg1,
-                      const data_expression& arg2)
-{
-  assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, arg2}));
-  atermpp::make_term_appl(result,core::detail::function_symbol_DataAppl(3),head,arg1,arg2);
-}
-
-/// \brief Constructor.
-/// \param result variable into which the application is constructed.
-inline void make_application(data_expression& result,
-                      const data_expression& head,
-                      const data_expression& arg1,
-                      const data_expression& arg2,
-                      const data_expression& arg3)
-{
-  assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, arg2, arg3}));
-  atermpp::make_term_appl(result,core::detail::function_symbol_DataAppl(4),head,arg1,arg2,arg3);
-}
-
-/// \brief Constructor.
-/// \param result variable into which the application is constructed.
-inline void make_application(data_expression& result,
-                      const data_expression& head,
-                      const data_expression& arg1,
-                      const data_expression& arg2,
-                      const data_expression& arg3,
-                      const data_expression& arg4)
-{
-  assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, arg2, arg3, arg4}));
-  atermpp::make_term_appl(result,core::detail::function_symbol_DataAppl(5),head,arg1,arg2,arg3,arg4);
-}
-
-/// \brief Constructor
-/// \param result variable into which the application is constructed.
-inline void make_application(data_expression& result,
-                      const data_expression& head,
-                      const data_expression& arg1,
-                      const data_expression& arg2,
-                      const data_expression& arg3,
-                      const data_expression& arg4,
-                      const data_expression& arg5)
-{
-  assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, arg2, arg3, arg4, arg5}));
-  atermpp::make_term_appl(result,core::detail::function_symbol_DataAppl(6),head,arg1,arg2,arg3,arg4,arg5);
-}
-
-/// \brief Constructor
-/// \param result variable into which the application is constructed.
-inline void make_application(data_expression& result,
-                      const data_expression& head,
-                      const data_expression& arg1,
-                      const data_expression& arg2,
-                      const data_expression& arg3,
-                      const data_expression& arg4,
-                      const data_expression& arg5,
-                      const data_expression& arg6)
-{
-  assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, arg2, arg3, arg4, arg5, arg6}));
-  atermpp::make_term_appl(result,core::detail::function_symbol_DataAppl(7),head,arg1,arg2,arg3,arg4,arg5,arg6);
-} */
 
 /// \brief Constructor.
 /// \param result variable into which the application is constructed.

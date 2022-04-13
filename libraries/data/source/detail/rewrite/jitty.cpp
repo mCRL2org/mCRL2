@@ -803,10 +803,11 @@ void RewriterJitty::rewrite_aux_const_function_symbol(
   if (!cached_rhs.is_default_data_expression())
   {
     // result=cached_rhs;
-    result.assign(cached_rhs,
+    /* result.assign(cached_rhs,
                   this->m_busy_flag,
                   this->m_forbidden_flag,
-                  *this->m_creation_depth);
+                  *this->m_creation_depth); */
+    result.unprotected_assign<false>(cached_rhs);
     return;
   }
 

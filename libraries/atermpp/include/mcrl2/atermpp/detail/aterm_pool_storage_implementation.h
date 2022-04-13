@@ -152,14 +152,14 @@ bool ATERM_POOL_STORAGE::create_term(aterm& term, const function_symbol& symbol)
 }
 
 template <std::size_t N>
-void store_in_argument_array(std::size_t , std::array<unprotected_aterm, N>& )
+void store_in_argument_array_(std::size_t , std::array<unprotected_aterm, N>& )
 {}
 
 template <std::size_t N, class FUNCTION_OR_TERM_TYPE, typename... Args>
-void store_in_argument_array(std::size_t i, 
-                             std::array<unprotected_aterm, N>& argument_array, 
-                             FUNCTION_OR_TERM_TYPE& function_or_term, 
-                             Args ... args)
+void store_in_argument_array_(std::size_t i, 
+                              std::array<unprotected_aterm, N>& argument_array, 
+                              FUNCTION_OR_TERM_TYPE& function_or_term, 
+                              const Args&... args)
 {
   if constexpr (std::is_convertible<FUNCTION_OR_TERM_TYPE,atermpp::aterm>::value)
   {
@@ -178,8 +178,16 @@ void store_in_argument_array(std::size_t i,
     typedef mcrl2::utilities::function_traits<decltype(&FUNCTION_OR_TERM_TYPE::operator())> traits;
     function_or_term(static_cast<typename traits::template arg<0>::type&>(argument_array[i]));
   }
-  store_in_argument_array(i+1, argument_array, args...);
+  store_in_argument_array_(i+1, argument_array, args...);
 }
+
+template <std::size_t N, typename... Args>
+void store_in_argument_array(std::array<unprotected_aterm, N>& argument_array,
+                             const Args&... args)
+{
+  store_in_argument_array_(0, argument_array, args...);
+}
+
 
 
 ATERM_POOL_STORAGE_TEMPLATES
@@ -196,7 +204,7 @@ bool ATERM_POOL_STORAGE::create_appl(aterm& term, const function_symbol& symbol,
     std::array<unprotected_aterm, N> argument_array;
     
     // Evaluate the functions or terms and put the result in "argument_array".
-    store_in_argument_array(0, argument_array, arguments...);
+    store_in_argument_array(argument_array, arguments...);
 
 
     // The code below is fine, but does not compile on GCC under certain circumstances. 

@@ -210,13 +210,22 @@ public:
   aterm& operator=(const aterm& other) noexcept;
 
   /// \brief Assignment operator, to be used if busy and forbidden flags are explicitly available.
+  //  \detail This can be used as an optimisation, because it avoids getting access to thread local variables,
+  //          which is as it stands relatively expensive. The effect is equal to the assignment operator =. 
   /// \param other The aterm that will be assigned.
-  //  \brief This can be used as an optimisation, because it avoids getting access to thread local variables,
-  //         which is as it stands relatively expensive. The effect is equal to the assignment operator =. 
   aterm& assign(const aterm& other,
                 std::atomic<bool>* busy_flag,
                 std::atomic<bool>* forbidden_flag,
                 std::size_t creation_depth) noexcept;
+
+  /// \brief Assignment operator, to be used when the busy flags do not need to be set.
+  /// \details This is only safe in the parallel context when the busy flag is already
+  ///          known to be set. This is also checked by an assert. This can be used for
+  ///          instance in a lambda function that is passed in a make_.... function, as
+  ///          this unprotected assign will only be called when a term is constructed. 
+  /// \param other The aterm that will be assigned.
+  template <bool CHECK_BUSY_FLAG=true>
+  aterm& unprotected_assign(const aterm& other) noexcept;
 
   /// \brief Move assignment operator.
   /// \param other The aterm that will be assigned.
@@ -294,8 +303,8 @@ const Derived& down_cast(const Base& t,
 /// \return  A term of type Derived&.
 template <class Derived, class Base>
 Derived& reference_cast(Base& t,
-                         typename std::enable_if<is_convertible<Base, Derived>::value &&
-                                                 !std::is_base_of<Derived, Base>::value>::type* = nullptr)
+                        typename std::enable_if<is_convertible<Base, Derived>::value &&
+                                                !std::is_base_of<Derived, Base>::value>::type* = nullptr)
 {
   static_assert(sizeof(Base) == sizeof(aterm), 
                 "aterm cast can only be applied to terms directly derived from aterms");

@@ -30,6 +30,10 @@ BOOST_AUTO_TEST_CASE(test_main)
   aterm_appl long_term(f2,d,d,d,d,d,d,d,d);
   BOOST_CHECK(pp(long_term) == "f2(1,1,1,1,1,1,1,1)");
 
+  function_symbol f3("f2", 16);
+  aterm_appl very_long_term(f3,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d);
+  BOOST_CHECK(pp(very_long_term) == "f2(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1)");
+
   atermpp::aterm_string s("s"); // g++ 3.4.4 complains if atermpp:: is removed :-(
   // aterm_string s1("s1(x)"); will generate an error!
 }

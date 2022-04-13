@@ -81,6 +81,17 @@ class rewrite_stack : protected atermpp::vector<data_expression>
       m_stack_size=m_stack_size-distance;
     }
 
+    data_expression& new_stack_position()
+    { 
+      if (m_stack_size+1>=size())
+      { 
+        throw recalculate_term_as_stack_is_too_small();
+      }
+      data_expression& result=operator[](m_stack_size);
+      m_stack_size++;
+      return result;
+    }
+
     data_expression& top()
     { 
       assert(m_stack_size>0);
@@ -108,6 +119,11 @@ class rewrite_stack : protected atermpp::vector<data_expression>
     std::size_t stack_size() const
     {
       return m_stack_size;
+    }
+
+    void reset_stack_size(std::size_t n)
+    {
+      m_stack_size=n;
     }
 };
 

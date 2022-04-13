@@ -1148,7 +1148,6 @@ class RewriterCompilingJitty::ImplementTree
           }
           else 
           {
-            // s << m_padding << target_for_output << " = " << variable_name.substr(1) << ";\n";
             s << m_padding << target_for_output << ".assign(" << variable_name.substr(1) 
                            << ", this_rewriter->m_busy_flag, this_rewriter->m_forbidden_flag, *this_rewriter->m_creation_depth);\n";
           }
@@ -1157,14 +1156,11 @@ class RewriterCompilingJitty::ImplementTree
         {
           if (target_for_output.empty())
           {
-            s << "local_rewrite(" << variable_name.substr(1) << ", this_rewriter, stack_increment)";
+            s << "local_rewrite(" << variable_name.substr(1) << ")";
           }
           else
           {
-            // s << m_padding << target_for_output << " = " << 
-            //     "local_rewrite(" << variable_name.substr(1) << ", this_rewriter, stack_increment);\n";
-            s << m_padding << target_for_output << ".assign(local_rewrite(" << variable_name.substr(1) 
-                           << ", this_rewriter, stack_increment), this_rewriter->m_busy_flag, this_rewriter->m_forbidden_flag, *this_rewriter->m_creation_depth);\n";
+            s << m_padding << "local_rewrite(" << target_for_output << ", " << variable_name.substr(1) << ");\n";
           }
         }
         result_type << "data_expression";
@@ -1197,7 +1193,7 @@ class RewriterCompilingJitty::ImplementTree
         //     "static_cast<const data_expression&>(this_rewriter->bound_variable_get(" << m_rewriter.bound_variable_index(v) << "))\n";
         s << m_padding << target_for_output << ".assign(" 
           << "static_cast<const data_expression&>(this_rewriter->bound_variable_get(" << m_rewriter.bound_variable_index(v) << ")), " 
-          << "this_rewriter, stack_increment), this_rewriter->m_busy_flag, this_rewriter->m_forbidden_flag, *this_rewriter->m_creation_depth);\n";
+          << "this_rewriter), this_rewriter->m_busy_flag, this_rewriter->m_forbidden_flag, *this_rewriter->m_creation_depth);\n";
       }
       result_type << "data_expression";
       return;
@@ -1383,7 +1379,7 @@ class RewriterCompilingJitty::ImplementTree
     {
       if (target_for_output.empty())
       {
-        s << ".normal_form(stack_increment)";
+        s << ".normal_form()";
       }
       else
       {
@@ -1644,9 +1640,10 @@ class RewriterCompilingJitty::ImplementTree
       {
         RewriterCompilingJitty::substitution_type sigma;
         s << m_padding << target_for_output 
-          << ".assign("
+          << ".unprotected_assign<false>("
           << m_rewriter.m_nf_cache->insert(m_rewriter.jitty_rewriter(t,sigma)) 
-          << ", this_rewriter->m_busy_flag, this_rewriter->m_forbidden_flag, *this_rewriter->m_creation_depth);\n";
+          << ");\n";
+//        << ", this_rewriter->m_busy_flag, this_rewriter->m_forbidden_flag, *this_rewriter->m_creation_depth);\n";
       }
       result_type << "data_expression";
       return;
@@ -1743,7 +1740,7 @@ class RewriterCompilingJitty::ImplementTree
         << "(data_expression& result" 
         << brackets.current_data_parameters.top() << (brackets.current_data_parameters.top().empty()?"":", ") << "RewriterCompilingJitty* this_rewriter)\n" 
         << "  {\n"
-        << "    std::size_t stack_increment=0;\n";
+        << "    std::size_t old_stack_size=this_rewriter->m_rewrite_stack.stack_size();\n";
       
       auxiliary_method_name_index++;
 
@@ -1844,11 +1841,9 @@ class RewriterCompilingJitty::ImplementTree
         }
         else
         {
-          // m_stream << "local_rewrite(arg_not_nf" << cur_arg << ", this_rewriter); // S1b\n";
           m_stream << m_padding << "const DATA_EXPR" << cur_arg <<"& " << std::string(treeS.target_variable().name()).c_str() + 1 << " = ";
           m_stream << "arg_not_nf" << cur_arg << "; // S1b\n";
           type_of_code_variables[treeS.target_variable()]="DATA_EXPR" + std::to_string(cur_arg);
-          // m_nnfvars.push_front(treeS.target_variable());
         }
       }
       else
@@ -2078,7 +2073,7 @@ class RewriterCompilingJitty::ImplementTree
     
     std::stringstream result_type_string;
     calc_inner_term(m_stream, "result", tree.result(), cur_arg + 1, true, result_type_string, type_of_code_variables);
-    m_stream << m_padding << "this_rewriter->m_rewrite_stack.decrease(stack_increment);\n" 
+    m_stream << m_padding << "this_rewriter->m_rewrite_stack.reset_stack_size(old_stack_size);\n" 
              << m_padding << "return; // R1 " << tree.result() << "\n"; 
   }
 
@@ -2097,7 +2092,7 @@ class RewriterCompilingJitty::ImplementTree
     brackets.bracket_nesting_level++;
     calc_inner_term(m_stream, "result", match_tree_R(tree.true_tree()).result(), 0, true, result_type_string, type_of_code_variables);
     m_stream << ";\n" 
-             << m_padding << "this_rewriter->m_rewrite_stack.decrease(stack_increment);\n" 
+             << m_padding << "this_rewriter->m_rewrite_stack.reset_stack_size(old_stack_size);\n" 
              << m_padding << "return ";
     brackets.bracket_nesting_level--;
     m_stream << ";\n" << m_padding
@@ -2119,8 +2114,7 @@ class RewriterCompilingJitty::ImplementTree
     {
       calc_inner_term(m_stream, "result", tree.result(), 0, true, result_type_string, type_of_code_variables);
       m_stream << ";\n" << m_padding
-//                << "result = local_rewrite(result, this_rewriter, stack_increment);\n" 
-               << m_padding << "this_rewriter->m_rewrite_stack.decrease(stack_increment);\n" 
+               << m_padding << "this_rewriter->m_rewrite_stack.reset_stack_size(old_stack_size);\n" 
                << m_padding << "return; // R2a\n";
     }
     else
@@ -2128,7 +2122,7 @@ class RewriterCompilingJitty::ImplementTree
       // arity>0
       calc_inner_term(m_stream, "result", tree.result(), 0, true, result_type_string, type_of_code_variables);
       m_stream << ";\n" 
-               << m_padding << "this_rewriter->m_rewrite_stack.decrease(stack_increment);\n" 
+               << m_padding << "this_rewriter->m_rewrite_stack.reset_stack_size(old_stack_size);\n" 
                << m_padding << "return; // R2b\n";
     }
   }
@@ -2217,7 +2211,7 @@ public:
 
     for (std::size_t i = 0; i < domain_size; ++i)
     {
-        ss << ", local_rewrite(arg_not_nf" << used_arguments + i << ", this_rewriter, stack_increment)";
+        ss << ", [&](data_expression& r){ local_rewrite(r, arg_not_nf" << used_arguments + i << "); }";
     }
     ss << ");\n";
 
@@ -2245,9 +2239,11 @@ public:
   {
     m_stream << m_padding << "// Implement function " << opid << " by calling a user defined rewrite function.\n";
     
-    m_stream << m_padding << "stack_increment++;\n"
+    /* m_stream << m_padding << "stack_increment++;\n"
              << m_padding << "this_rewriter->m_rewrite_stack.increase(1);\n"
-             << m_padding << "data_expression& local_store=this_rewriter->m_rewrite_stack.top();\n";
+             << m_padding << "data_expression& local_store=this_rewriter->m_rewrite_stack.top();\n"; */
+
+    m_stream << m_padding << "data_expression& local_store=this_rewriter->m_rewrite_stack.new_stack_position();\n";
 
     const std::string cplusplus_function_name = data_spec.cpp_implemented_functions().find(opid)->second.second;
 
@@ -2258,7 +2254,7 @@ public:
     for(size_t i=0; i<get_direct_arity(opid); ++i)
     {
       ss << (i>0?",":"");
-      ss << "local_rewrite(arg_not_nf" << i << ", this_rewriter, stack_increment)";
+      ss << "local_rewrite(arg_not_nf" << i << ")";
     }
     ss << ")";
 
@@ -2293,11 +2289,11 @@ public:
     if (target_for_output.empty())
     {
       m_stream << m_padding << "data_expression result1; // TODO: optimize\n"
-               << m_padding << "rewrite_aux(result1, " << result << ",true,this_rewriter);\n";
+               << m_padding << "rewrite_aux<true>(result1, " << result << ",this_rewriter);\n";
     }
     else
     {
-      m_stream << m_padding << "rewrite_aux(" << target_for_output << ", " << result << ",true,this_rewriter);\n";
+      m_stream << m_padding << "rewrite_aux<true>(" << target_for_output << ", " << result << ",this_rewriter);\n";
     }
   }
 
@@ -2329,7 +2325,16 @@ public:
         std::size_t arg = match_tree_A(strat.front()).variable_index();
         if (!m_used[arg])
         {
-          m_stream << m_padding << "const data_expression& arg" << arg << " = local_rewrite(arg_not_nf" << arg << ",this_rewriter,stack_increment);\n";
+          // m_stream << m_padding << "const data_expression& arg" << arg << " = local_rewrite(arg_not_nf" << arg << ");\n"; 
+          /* m_stream << m_padding << "data_expression& arg" << arg << " = this_rewriter->m_rewrite_stack.new_stack_position();\n"
+                   << m_padding << "local_rewrite(arg" << arg << ", arg_not_nf" << arg << ");\n"; */
+       
+          m_stream << m_padding << "data_expression& arg" << arg 
+                   << "(std::is_convertible<DATA_EXPR" << arg << ", const data_expression&>::value?(const_cast<data_expression&>(reinterpret_cast<const data_expression&>(arg_not_nf" << arg << "))):this_rewriter->m_rewrite_stack.new_stack_position());\n"
+                   << m_padding << "if constexpr (!std::is_convertible<DATA_EXPR" << arg << ", const data_expression&>::value)\n"
+                   << m_padding << "{\n"
+                   << m_padding << "  local_rewrite(arg" << arg << ", arg_not_nf" << arg << ");\n"
+                   << m_padding << "}\n";
           m_used[arg] = true;
           if (!added_new_parameters_in_brackets)
           {
@@ -2439,17 +2444,19 @@ public:
       }
       ss << ", this_rewriter(tr)\n" << m_padding << "{}\n\n";
 
-      ss << m_padding << "data_expression& normal_form(size_t& stack_increment) const\n";
+      ss << m_padding << "data_expression& normal_form() const\n";
       ss << m_padding << "{\n";
       m_padding.indent();
 
-      ss << m_padding << "this_rewriter->m_rewrite_stack.increase(1);\n"
+      ss << m_padding << "data_expression& local_store=this_rewriter->m_rewrite_stack.new_stack_position();\n"
+         << m_padding << appl_function(arity) << "(local_store, [&](data_expression& r){ local_rewrite(r, m_head); }";
+      /* ss << m_padding << "this_rewriter->m_rewrite_stack.increase(1);\n"
          << m_padding << "data_expression& local_store=this_rewriter->m_rewrite_stack.top();\n"
          << m_padding << "stack_increment++;\n"
-         << m_padding << appl_function(arity) << "(local_store, local_rewrite(m_head,this_rewriter,stack_increment)";
+         << m_padding << appl_function(arity) << "(local_store, [&](data_expression& r){ local_rewrite(r, m_head); }"; */
       for (std::size_t i = 0; i < arity; ++i)
       {
-        ss << ", local_rewrite(m_arg" << i << ",this_rewriter,stack_increment)";
+        ss << ", [&](data_expression& r){ local_rewrite(r, m_arg" << i << "); }";
       }
       ss << ");\n";
       ss << m_padding << "rewrite_with_arguments_in_normal_form(local_store, local_store, this_rewriter);\n"
@@ -2458,6 +2465,20 @@ public:
       m_padding.unindent();
       ss << m_padding << "}\n\n";
 
+      ss << m_padding << "void normal_form(data_expression& result) const\n";
+      ss << m_padding << "{\n";
+      m_padding.indent();
+
+      ss << m_padding << appl_function(arity) << "(result, [&](data_expression& result){ local_rewrite(result, m_head); }";
+      for (std::size_t i = 0; i < arity; ++i)
+      {
+        ss << ", [&](data_expression& result){ local_rewrite(result, m_arg" << i << "); }";
+      }
+      ss << ");\n";
+      ss << m_padding << "rewrite_with_arguments_in_normal_form(result, result, this_rewriter);\n";
+
+      m_padding.unindent();
+      ss << m_padding << "}\n\n";
       m_padding.unindent();
       m_padding.unindent();
       ss << m_padding <<  "};\n\n";
@@ -2503,7 +2524,7 @@ public:
         }
         else
         {
-          m_stream << ", local_rewrite(arg_not_nf" << used_arguments + i << ",this_rewriter,stack_increment)";
+          m_stream << ", [&](data_expression& result){ local_rewrite(result, arg_not_nf" << used_arguments + i << "); }";
         }
       }
       m_stream << ");\n";
@@ -2518,9 +2539,9 @@ public:
     // Note that arity is the total arity, of all function symbols.
     if (arity == 0)
     {
-      m_stream << m_padding << "result = ";
+      m_stream << m_padding << "result.unprotected_assign<false>(";
       RewriterCompilingJitty::substitution_type sigma;
-      m_stream << m_rewriter.m_nf_cache->insert(m_rewriter.jitty_rewriter(opid,sigma)) << ";\n";
+      m_stream << m_rewriter.m_nf_cache->insert(m_rewriter.jitty_rewriter(opid,sigma)) << ");\n";
     }
     else
     {
@@ -2580,11 +2601,10 @@ public:
     rewr_function_signature(m_stream, index, arity, brackets);
     m_stream << m_padding << "{\n"
              << m_padding << "  mcrl2::utilities::mcrl2_unused(this_rewriter); // Suppress warning\n"
-             << m_padding << "  std::size_t stack_increment=0;\n"
-             << m_padding << "  mcrl2::utilities::mcrl2_unused(stack_increment); // Suppress warning\n";
+             << m_padding << "  std::size_t old_stack_size=this_rewriter->m_rewrite_stack.stack_size();\n";
     m_padding.indent();
     implement_strategy(m_stream, strategy, arity, func, brackets, auxiliary_code_fragments,data_spec);
-    m_stream << m_padding << "this_rewriter->m_rewrite_stack.decrease(stack_increment);\n"
+    m_stream << m_padding << "this_rewriter->m_rewrite_stack.reset_stack_size(old_stack_size);\n"
              << m_padding << "return;\n";
     m_padding.unindent();
     m_stream << m_padding << "}\n\n";
@@ -2665,11 +2685,12 @@ public:
     }
     m_stream << (arity==0?"":", ") << "this_rewriter(tr)"
              << (arity==0?"":"\n") << m_padding << "{}\n\n"
-             << m_padding << "data_expression& normal_form(std::size_t& stack_increment) const\n"
+             << m_padding << "data_expression& normal_form() const\n"
              << m_padding << "{\n"
-             << m_padding << "  this_rewriter->m_rewrite_stack.increase(1);\n"
+/*             << m_padding << "  this_rewriter->m_rewrite_stack.increase(1);\n"
              << m_padding << "  data_expression& local_store=this_rewriter->m_rewrite_stack.top();\n"
-             << m_padding << "  stack_increment++;\n"
+             << m_padding << "  stack_increment++;\n" */
+             << m_padding << "  data_expression& local_store=this_rewriter->m_rewrite_stack.new_stack_position();\n"
              << m_padding << "  rewr_" << index << "_" << arity << "(local_store";
     for(std::size_t i = 0; i < arity; ++i)
     {
@@ -2678,6 +2699,17 @@ public:
 
     m_stream << (arity==0?"":", ") << "this_rewriter);\n"
              << m_padding << "  return local_store;\n"
+             << m_padding << "}\n";
+
+    m_stream << m_padding << "void normal_form(data_expression& result) const\n"
+             << m_padding << "{\n"
+             << m_padding << "  rewr_" << index << "_" << arity << "(result";
+    for(std::size_t i = 0; i < arity; ++i)
+    {
+      m_stream << ", m_t" << i;
+    }
+
+    m_stream << (arity==0?"":", ") << "this_rewriter);\n"
              << m_padding << "}\n";
 
     m_padding.unindent();
@@ -2811,16 +2843,28 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
                "  // A rewrite_term is a term that may or may not be in normal form. If the method\n"
                "  // normal_form is invoked, it will calculate a normal form for itself as efficiently as possible.\n"
                "  template <class REWRITE_TERM>\n"
-               "  static data_expression& local_rewrite(const REWRITE_TERM& t, \n"
-               "                                        RewriterCompilingJitty* this_rewriter,\n"
-               "                                        std::size_t& stack_increment)\n"
+               "  static data_expression& local_rewrite(const REWRITE_TERM& t)\n"
                "  {\n"
-               "    return t.normal_form(stack_increment);\n"
+               "    return t.normal_form();\n"
                "  }\n"
                "\n"
-               "  static const data_expression& local_rewrite(const data_expression& t, RewriterCompilingJitty*, std::size_t&)\n"
+               "  // A rewrite_term is a term that may or may not be in normal form. If the method\n"
+               "  // normal_form is invoked, it will calculate a normal form for itself as efficiently as possible.\n"
+               "  template <class REWRITE_TERM>\n"
+               "  static void local_rewrite(data_expression& result,\n"
+               "                            const REWRITE_TERM& t) \n"
+               "  {\n"
+               "     t.normal_form(result);\n"
+               "  }\n"
+               "\n"
+               "  static const data_expression& local_rewrite(const data_expression& t)\n"
                "  {\n"
                "    return t;\n"
+               "  }\n"
+               "\n"
+               "  static void local_rewrite(data_expression& result, const data_expression& t)\n"
+               "  {\n"
+               "     result=t;\n"
                "  }\n"
                "\n";
 
@@ -3036,6 +3080,7 @@ void RewriterCompilingJitty::rewrite(
 #endif
   // Save global sigma and restore it afterwards, as rewriting might be recursive with different
   // substitutions, due to the enumerator.
+// std::cerr << "REWRITE " << term << "\n";
   substitution_type *saved_sigma=global_sigma;
   global_sigma=&sigma;
   if (rewriting_in_progress)
@@ -3056,6 +3101,7 @@ void RewriterCompilingJitty::rewrite(
                                    // resized. References to the stack loose their validity. 
       m_rewrite_stack.reserve_more_space();
       rewrite(result,term,sigma);
+// std::cerr << "REWRITE " << term << " --> " << result << "\n";
       return;
     }
     rewriting_in_progress=false;
@@ -3063,6 +3109,7 @@ void RewriterCompilingJitty::rewrite(
   }
 
   global_sigma=saved_sigma;
+// std::cerr << "REWRITE " << term << " --> " << result << "\n";
   return;
 }
 
@@ -3070,8 +3117,10 @@ data_expression RewriterCompilingJitty::rewrite(
      const data_expression& term,
      substitution_type& sigma)
 {
+// std::cerr << "REWRITE " << term << "\n";
   data_expression result;
   rewrite(result, term, sigma);
+// std::cerr << "REWRITE " << term << " --> " << result << "\n";
   return result;
 }
 

@@ -13,6 +13,7 @@
 
 #include <chrono>
 #include "aterm_pool.h"
+#include "aterm_pool_storage_implementation.h"   // For store_in_argument_array. 
 
 
 namespace atermpp
@@ -326,7 +327,8 @@ bool aterm_pool::create_appl(aterm& term, const function_symbol& sym, const Term
   }
   else
   {
-    std::array<unprotected_aterm, sizeof...(Terms)> array({arguments...});
+    std::array<unprotected_aterm, sizeof...(Terms)> array;
+    store_in_argument_array(array, arguments...);
     return m_appl_dynamic_storage.create_appl_dynamic(term, sym, array.begin(), array.end());
   }
 }
