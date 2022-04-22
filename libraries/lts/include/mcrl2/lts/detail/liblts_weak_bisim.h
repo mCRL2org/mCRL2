@@ -37,24 +37,29 @@ void weak_bisimulation_reduce(
   LTS_TYPE& l,
   const bool preserve_divergences = false)
 {
-  bisimulation_reduce_dnj(l, true, preserve_divergences);
-  //< Apply branching bisimulation to l.
+  if (1 < l.num_states())
+  {
+    bisimulation_reduce_dnj(l, true, preserve_divergences);   //< Apply branching bisimulation to l.
+  }
 
   std::size_t divergence_label;
   if (preserve_divergences)
   {
     divergence_label=mark_explicit_divergence_transitions(l);
-  } 
-  reflexive_transitive_tau_closure(l);                        // Apply transitive tau closure to l.
-  bisimulation_reduce_dnj(l, false, false);                  // Apply strong bisimulation to l.
+  }
+  if (1 < l.num_states())
+  {
+    reflexive_transitive_tau_closure(l);                      // Apply transitive tau closure to l.
+    bisimulation_reduce_dnj(l, false, false);                 // Apply strong bisimulation to l.
+  }
   scc_reduce(l);                                              // Remove tau loops.
   remove_redundant_transitions(l);                            // Remove transitions s -a-> s' if also s-a->-tau->s' or s-tau->-a->s' is present.
                                                               // Note that this is correct, because l is reduced modulo strong bisimulation and
-                                                              // does not contain tau loops. 
+                                                              // does not contain tau loops.
   if (preserve_divergences)
   {
     unmark_explicit_divergence_transitions(l,divergence_label);
-  } 
+  }
 }
 
 

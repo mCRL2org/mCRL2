@@ -5489,6 +5489,12 @@ template <class LTS_TYPE>
 void bisimulation_reduce_dnj(LTS_TYPE& l, bool const branching = false,
                                         bool const preserve_divergence = false)
 {
+    if (1 >= l.num_states())
+    {
+        mCRL2log(log::warning) << "There is only 1 state in the LTS. It is not "
+                "guaranteed that branching bisimulation minimisation runs in "
+                "time O(m log n).\n";
+    }
     // Line 2.1: Find tau-SCCs and contract each of them to a single state
     if (branching)
     {
