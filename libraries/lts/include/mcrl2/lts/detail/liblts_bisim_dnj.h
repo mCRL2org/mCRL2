@@ -5539,7 +5539,7 @@ bool destructive_bisimulation_compare_dnj(LTS_TYPE& l1, LTS_TYPE& l2,
     detail::merge(l1, std::move(l2));
     l2.clear(); // No use for l2 anymore.
 
-    // Line 2	.1: Find tau-SCCs and contract each of them to a single state
+    // Line 2.1: Find tau-SCCs and contract each of them to a single state
     if (branching)
     {
         scc_partitioner<LTS_TYPE> scc_part(l1);
