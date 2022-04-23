@@ -457,6 +457,7 @@ class action_block_entry;
           public:
             const_iterator() = default;
             const_iterator(const const_iterator& other) = default;
+            const_iterator& operator=(const const_iterator& other) = default;
             const_iterator& operator++()  {  ptr = ptr->next;  return *this;  }
             const_iterator& operator--()  {  ptr = ptr->prev;  return *this;  }
             const T& operator*() const
@@ -494,6 +495,7 @@ class action_block_entry;
           public:
             iterator() = default;
             iterator(const iterator& other) = default;
+            iterator& operator=(const iterator& other) = default;
             iterator& operator++(){const_iterator::operator++(); return *this;}
             iterator& operator--(){const_iterator::operator--(); return *this;}
             T& operator*() const

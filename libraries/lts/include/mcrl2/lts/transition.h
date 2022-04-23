@@ -63,6 +63,15 @@ class transition
     /// \brief Copy constructor.
     transition(const transition& t) = default;
 
+    /// \brief Move constructor.
+    transition(transition&& t) = default;
+
+    /// \brief Assignment.
+    transition& operator=(const transition& t) = default;
+
+    /// \brief Move assignment.
+    transition& operator=(transition&& t) = default;
+
     /// \brief The source of the transition.
     size_type
     from() const
