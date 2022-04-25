@@ -13,8 +13,9 @@
 #include <sylvan_ldd.hpp>
 #include <vector>
 
-#include "mcrl2/symbolic/print.h"
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/undefined.h"
+#include "mcrl2/symbolic/print.h"
 #include "mcrl2/symbolic/alternative_relprod.h"
 #include "mcrl2/symbolic/data_index.h"
 
