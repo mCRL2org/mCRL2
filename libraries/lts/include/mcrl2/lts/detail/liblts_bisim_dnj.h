@@ -296,7 +296,7 @@ class action_block_entry;
         }
 
 
-        /// \brief allocate and construct a new element of a  size that doesn't
+        /// \brief allocate and construct a new element of a size that doesn't
         /// fit the free list
         template <class U, class... Args>
         U* construct_othersize(Args&&... args)
@@ -5493,14 +5493,19 @@ void bisimulation_reduce_dnj(LTS_TYPE& l, bool const branching = false,
 {
     if (1 >= l.num_states())
     {
-        mCRL2log(log::warning) << "There is only 1 state in the LTS. It is not "
-                "guaranteed that branching bisimulation minimisation runs in "
-                "time O(m log n).\n";
+        // LTSs with 1 state also need to be reduced because some users call
+        // bisimulation minimisation just to remove duplicated transitions.
+        mCRL2log(log::warning) << "There is only 1 state in the LTS. It is "
+                "not guaranteed that branching bisimulation minimisation runs "
+                "in time O(m log n).\n";
     }
     // Line 2.1: Find tau-SCCs and contract each of them to a single state
     if (branching)
     {
         scc_reduce(l, preserve_divergence);
+        // If only 1 state remains after this contraction, we are already
+        // finished because scc_reduce() also removes duplicated transitions.
+        if (1 >= l.num_states())  return;
     }
 
     // Now apply the branching bisimulation reduction algorithm.  If there
@@ -5536,7 +5541,8 @@ template <class LTS_TYPE>
 bool destructive_bisimulation_compare_dnj(LTS_TYPE& l1, LTS_TYPE& l2,
         bool const branching = false, bool const preserve_divergence = false,
         bool const generate_counter_examples = false,
-        const std::string& /*counter_example_file*/ = "", bool /*structured_output*/ = false)
+        const std::string& /*counter_example_file*/ = "",
+        bool /*structured_output*/ = false)
 {
     if (generate_counter_examples)
     {
