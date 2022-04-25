@@ -192,7 +192,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
       std::map<boolean_variable, std::size_t> indices;
       std::map<unsigned int, boolean_operand_t> block_to_operand; // Stores operand assigned to equations without boolean operand.
 
-      std::size_t occurring_variable_count = 0; // count total number of occurring variables in right hand sides.
+      // std::size_t occurring_variable_count = 0; // count total number of occurring variables in right hand sides.
 
       std::size_t current_block = 0;
       std::size_t index = 0;
@@ -214,7 +214,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
         }
 
         std::set<boolean_variable> occurring_variables = bes::find_boolean_variables(i->formula());
-        occurring_variable_count += occurring_variables.size();
+        // occurring_variable_count += occurring_variables.size();
 
         statistics[i->variable()] = std::make_pair(current_block, get_operand(i->formula()));
         indices[i->variable()] = index++;

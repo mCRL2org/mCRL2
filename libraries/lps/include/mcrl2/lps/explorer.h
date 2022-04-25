@@ -949,7 +949,7 @@ class explorer: public abortable
     )
     {
       thread_rewr.thread_initialise();
-      mCRL2log(log::verbose) << "Start thread " << process_number << ".\n";
+      mCRL2log(log::debug) << "Start thread " << process_number << ".\n";
       data::enumerator_identifier_generator thread_id_generator("t_");;
       data::data_specification thread_data_specification = m_global_lpsspec.data(); /// XXXX Nodig??
       data::enumerator_algorithm<> thread_enumerator(thread_rewr, thread_data_specification, thread_rewr, thread_id_generator, false);
@@ -1071,7 +1071,7 @@ class explorer: public abortable
           number_of_active_processes++;
         }
       } 
-      mCRL2log(log::verbose) << "Stop thread " << process_number << ".\n";
+      mCRL2log(log::debug) << "Stop thread " << process_number << ".\n";
 
     }  // end generate_state_space_thread.
 
@@ -1134,27 +1134,43 @@ class explorer: public abortable
       }
 
       const std::size_t number_of_threads=m_options.number_of_threads;
-      std::vector<std::thread> threads;
       std::atomic<std::size_t> number_of_active_processes=number_of_threads;
 
-      threads.reserve(number_of_threads);
-      for(std::size_t i=0; i<number_of_threads; ++i)
+      if (number_of_threads>1)
       {
-        std::thread tr ([&, i](){ generate_state_space_thread< StateType, SummandSequence,
-                                                       DiscoverState, ExamineTransition,
-                                                       StartState, FinishState,
-                                                       DiscoverInitialState >
-                                (todo,i,number_of_active_processes,
-                                 regular_summands,confluent_summands,discovered, discover_state,
-                                 examine_transition, start_state, finish_state, 
-                                 m_global_rewr.clone(), m_global_sigma); } );  // It is essential that the rewriter is cloned as
-                                                                               // one rewriter cannot be used in parallel. 
-        threads.push_back(std::move(tr));
-      }
+        std::vector<std::thread> threads;
+        threads.reserve(number_of_threads);
+        for(std::size_t i=0; i<number_of_threads; ++i)
+        {
+          std::thread tr ([&, i](){ generate_state_space_thread< StateType, SummandSequence,
+                                                         DiscoverState, ExamineTransition,
+                                                         StartState, FinishState,
+                                                         DiscoverInitialState >
+                                  (todo,i,number_of_active_processes,
+                                   regular_summands,confluent_summands,discovered, discover_state,
+                                   examine_transition, start_state, finish_state, 
+                                   m_global_rewr.clone(), m_global_sigma); } );  // It is essential that the rewriter is cloned as
+                                                                                 // one rewriter cannot be used in parallel. 
+          threads.push_back(std::move(tr));
+        }
 
-      for(std::size_t i=0; i<number_of_threads; ++i)
+        for(std::size_t i=0; i<number_of_threads; ++i)
+        {
+          threads[i].join();
+        }
+      }
+      else
       {
-        threads[i].join();
+        // Single threaded variant. Do not start a separate thread. 
+        assert(number_of_threads==1);
+        generate_state_space_thread< StateType, SummandSequence,
+                                                DiscoverState, ExamineTransition,
+                                                StartState, FinishState,
+                                                DiscoverInitialState >
+                                  (todo,0,number_of_active_processes,
+                                   regular_summands,confluent_summands,discovered, discover_state,
+                                   examine_transition, start_state, finish_state, 
+                                   m_global_rewr, m_global_sigma);  
       }
 
       m_must_abort = false;
