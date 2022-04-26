@@ -1,1 +1,1 @@
-<true*.RedWins>true
+<true*>exists nr_red,nr_white:Nat.val(nr_red>nr_white) &&<Outcome(nr_red,nr_white)>true
