@@ -676,6 +676,7 @@ class pbes_constelm_algorithm
               {
                 changed = true;
                 deleted_constraints.push_back(fi);
+                deleted_constraints.push_back(ei);
                 m_constraints.erase(k);
               }
             }
