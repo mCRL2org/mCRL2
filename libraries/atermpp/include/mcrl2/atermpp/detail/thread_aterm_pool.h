@@ -59,6 +59,9 @@ public:
   inline function_symbol create_function_symbol(const std::string& name, const std::size_t arity, const bool check_for_registered_functions = false);
 
   /// \threadsafe
+  inline function_symbol create_function_symbol(std::string&& name, const std::size_t arity, const bool check_for_registered_functions = false);
+
+  /// \threadsafe
   inline void create_int(aterm& term, std::size_t val);
 
   /// \threadsafe

@@ -32,6 +32,7 @@ public:
   ///           as a fresh function name.
   /// \threadsafe
   function_symbol create(const std::string& name, const std::size_t arity, const bool check_for_registered_functions = false);
+  function_symbol create(std::string&& name, const std::size_t arity, const bool check_for_registered_functions = false);
 
   /// \brief Restore the index back to index before registering this prefix.
   /// \threadsafe
@@ -91,7 +92,11 @@ private:
 
   // Various performance metrics.
   mcrl2::utilities::cache_metric m_function_symbol_metrics; ///< Track the number of function symbols found in or added to the set.
+
+  // Create helper function. 
+  void create_helper(const std::string& name);
 };
+
 
 } // namespace detail
 } // namespace atermpp

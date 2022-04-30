@@ -10,6 +10,7 @@
 #ifndef MCRL2_ATERMPP_FUNCTION_SYMBOL_H
 #define MCRL2_ATERMPP_FUNCTION_SYMBOL_H
 
+#include <utility>
 #include "mcrl2/atermpp/detail/function_symbol.h"
 
 namespace atermpp
@@ -34,6 +35,11 @@ public:
   /// \brief Defines a function symbol from a name and arity combination.
   function_symbol(const std::string& name, const std::size_t arity_)
    : function_symbol(name, arity_, true)
+  {}
+
+  /// \brief Defines a function symbol from a name and arity combination.
+  function_symbol(std::string&& name, const std::size_t arity_)
+   : function_symbol(std::forward<std::string>(name), arity_, true)
   {}
 
   /// This class has non-trivial destructor so declare default copy and move operators.
@@ -127,6 +133,9 @@ private:
 
   /// \brief Constructor for internal use only
   function_symbol(const std::string& name, const std::size_t arity, const bool check_for_registered_functions);
+
+  /// \brief Constructor for internal use only
+  function_symbol(std::string&& name, const std::size_t arity, const bool check_for_registered_functions);
 
   /// \brief Calls the function symbol pool to free our used memory.
   void destroy();

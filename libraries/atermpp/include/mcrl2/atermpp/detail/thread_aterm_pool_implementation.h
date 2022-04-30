@@ -33,6 +33,14 @@ function_symbol thread_aterm_pool::create_function_symbol(const std::string& nam
   return symbol;
 }
 
+function_symbol thread_aterm_pool::create_function_symbol(std::string&& name, const std::size_t arity, const bool check_for_registered_functions)
+{
+  if constexpr (GlobalThreadSafe) lock_shared();
+  function_symbol symbol = m_pool.create_function_symbol(std::forward<std::string>(name), arity, check_for_registered_functions);
+  if constexpr (GlobalThreadSafe) unlock_shared();
+  return symbol;
+}
+
 void thread_aterm_pool::create_int(aterm& term, size_t val)
 {
   if constexpr (GlobalThreadSafe) lock_shared();

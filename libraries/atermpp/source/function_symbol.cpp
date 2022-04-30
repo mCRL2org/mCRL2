@@ -20,6 +20,10 @@ function_symbol::function_symbol(const std::string& name, const std::size_t arit
   function_symbol(g_thread_term_pool().create_function_symbol(name, arity, check_for_registered_functions))
 {}
 
+function_symbol::function_symbol(std::string&& name, const std::size_t arity, const bool check_for_registered_functions) :
+  function_symbol(g_thread_term_pool().create_function_symbol(std::forward<std::string>(name), arity, check_for_registered_functions))
+{}
+
 global_function_symbol::global_function_symbol(const std::string& name, const std::size_t arity) :
   function_symbol(g_term_pool<true>().create_function_symbol(name, arity, true))
 {}
