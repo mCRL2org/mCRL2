@@ -146,6 +146,9 @@ struct vertex_set
     vertex_set() = default;
 
     vertex_set(const vertex_set& other) = default;
+    vertex_set(vertex_set&& other) = default;
+    vertex_set& operator=(const vertex_set& other) = default;
+    vertex_set& operator=(vertex_set&& other) = default;
 
     explicit vertex_set(std::size_t N)
             : m_include(N)

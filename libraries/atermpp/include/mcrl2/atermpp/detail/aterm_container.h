@@ -17,7 +17,21 @@
 #include "mcrl2/atermpp/detail/aterm_pool_storage_implementation.h"
 
 
-namespace atermpp::detail
+namespace atermpp
+{
+
+typedef std::stack<std::reference_wrapper<detail::_aterm>> term_mark_stack;
+
+inline void mark_term(const aterm& t, term_mark_stack& todo)
+{
+  if (t.defined())
+  {
+    detail::mark_term(*atermpp::detail::address(t),todo);
+  }
+}
+
+
+namespace detail
 {
 
 /// \brief Provides safe storage of unprotected_aterm instances in a container by marking
@@ -476,7 +490,8 @@ protected:
   const Container& m_container;
 };
 
-} // namespace atermpp::detail
+} // namespace detail
+} // namespace atermpp
 
 namespace std
 {

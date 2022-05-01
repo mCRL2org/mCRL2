@@ -238,6 +238,8 @@ public:
     swap(self.m_char_func, other.m_char_func);
   }
 
+  subblock(const subblock& other) = default;
+
   subblock& operator=(subblock other)
   {
     swap(*this,other);

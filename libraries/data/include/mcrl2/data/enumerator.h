@@ -300,16 +300,10 @@ class enumerator_list_element
     ///        when elements of this class are used in an atermpp standard container.
     ///        When garbage collection of aterms is taking place this function is
     ///        called for all elements of this class in the atermpp container. 
-    void mark(std::stack<std::reference_wrapper<atermpp::detail::_aterm>>& todo) const
+    void mark(atermpp::term_mark_stack& todo) const
     {
-      if (atermpp::detail::address(v)!=nullptr)
-      {
-        mark_term(*atermpp::detail::address(v), todo);
-      }
-      if (atermpp::detail::address(phi)!=nullptr)
-      {
-        mark_term(*atermpp::detail::address(phi), todo);
-      }
+      mark_term(v,todo);
+      mark_term(phi,todo);
     }
 
     /// \brief Set the variables and the condition explicitly.

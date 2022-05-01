@@ -113,12 +113,12 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
          : b(std::move(b_)), f(std::move(f_)), g0(std::move(g0_)), g1(std::move(g1_))
         {}
 
-        void mark(std::stack<std::reference_wrapper<atermpp::detail::_aterm>>& todo) const
+        void mark(atermpp::term_mark_stack& todo) const
         {
-          mark_term(*atermpp::detail::address(b), todo);
-          mark_term(*atermpp::detail::address(f), todo);
-          mark_term(*atermpp::detail::address(g0), todo);
-          mark_term(*atermpp::detail::address(g1), todo);
+          mark_term(b, todo);
+          mark_term(f, todo);
+          mark_term(g0, todo);
+          mark_term(g1, todo);
         }
       };
 

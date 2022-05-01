@@ -32,6 +32,9 @@ struct pbespor_pbes_composer
 
     equation_info() = default;
     equation_info(const equation_info&) = default;
+    equation_info(equation_info&&) = default;
+    equation_info& operator=(const equation_info&) = default;
+    equation_info& operator=(equation_info&&) = default;
 
     explicit equation_info(propositional_variable_instantiation X_, bool is_conjunctive_ = false, std::size_t rank_ = 0, fixpoint_symbol symbol_ = fixpoint_symbol::mu())
       : X(std::move(X_)), is_conjunctive(is_conjunctive_), rank(rank_), symbol(symbol_)

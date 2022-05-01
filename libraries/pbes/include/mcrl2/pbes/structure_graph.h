@@ -125,9 +125,9 @@ class structure_graph
              && (!successors.empty() || (decoration == d_true || decoration == d_false));
       }
       
-      void inline mark(std::stack<std::reference_wrapper<atermpp::detail::_aterm>>& todo) const
+      void inline mark(atermpp::term_mark_stack& todo) const
       {
-        mark_term(*atermpp::detail::address(m_formula), todo);
+        mark_term(m_formula, todo);
       }
     };
 
