@@ -168,16 +168,16 @@ void aterm_pool::collect()
   auto mark_duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - timestamp).count();
   timestamp = std::chrono::system_clock::now();
   // Collect all terms that are not reachable or marked.
-  m_int_storage.sweep();
-  std::get<0>(m_appl_storage).sweep();
-  std::get<1>(m_appl_storage).sweep();
-  std::get<2>(m_appl_storage).sweep();
-  std::get<3>(m_appl_storage).sweep();
-  std::get<4>(m_appl_storage).sweep();
-  std::get<5>(m_appl_storage).sweep();
-  std::get<6>(m_appl_storage).sweep();
-  std::get<7>(m_appl_storage).sweep();
   m_appl_dynamic_storage.sweep();
+  std::get<7>(m_appl_storage).sweep();
+  std::get<6>(m_appl_storage).sweep();
+  std::get<5>(m_appl_storage).sweep();
+  std::get<4>(m_appl_storage).sweep();
+  std::get<3>(m_appl_storage).sweep();
+  std::get<2>(m_appl_storage).sweep();
+  std::get<1>(m_appl_storage).sweep();
+  std::get<0>(m_appl_storage).sweep();
+  m_int_storage.sweep();
 
   // Check that after sweeping the terms are consistent.
   assert(m_int_storage.verify_sweep());
