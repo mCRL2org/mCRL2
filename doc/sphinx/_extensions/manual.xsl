@@ -11,7 +11,7 @@
   <xsl:text>.. manpage-</xsl:text>
   <xsl:apply-templates select="name"/>
   <xsl:text>
-  
+
 Manual page for </xsl:text>
   <xsl:apply-templates select="name"/>
   <xsl:text>
@@ -44,7 +44,7 @@ Command line options
 
   <xsl:if test="known_issues">
     <xsl:text>
-  
+
 Known issues
 ^^^^^^^^^^^^
 
@@ -85,14 +85,14 @@ Standard options
   <xsl:if test="short">
     <xsl:text>``-</xsl:text><xsl:apply-templates select="short"/>
     <xsl:apply-templates select="option_argument">
-      <xsl:with-param name="long" value="no"/>
+      <xsl:with-param name="long">no</xsl:with-param>
     </xsl:apply-templates>
     <xsl:text>`` , </xsl:text>
   </xsl:if>
   <xsl:text>``--</xsl:text>
   <xsl:apply-templates select="long"/>
   <xsl:apply-templates select="option_argument">
-    <xsl:with-param name="long" value="yes"/>
+    <xsl:with-param name="long">yes</xsl:with-param>
   </xsl:apply-templates>
   <xsl:text>``
 
@@ -100,11 +100,11 @@ Standard options
   <xsl:text>   </xsl:text>
   <xsl:apply-templates select="description"/>
   <xsl:text>
-  
+
   </xsl:text>
   <xsl:apply-templates select="option_argument/values"/>
   <xsl:text>
-      
+
 </xsl:text>
 </xsl:template>
 
@@ -120,12 +120,12 @@ Standard options
   </xsl:if>
   <xsl:text>``</xsl:text><xsl:apply-templates select="long"/>
   <xsl:text>``
-  
+
   </xsl:text>
   <xsl:text>      </xsl:text>
   <xsl:apply-templates select="description"/>
   <xsl:text>
-  
+
   </xsl:text>
 </xsl:template>
 
