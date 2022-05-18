@@ -160,18 +160,31 @@ void ATERM_POOL_STORAGE::print_performance_stats(const char* identifier) const
   }
 }
 
-
 ATERM_POOL_STORAGE_TEMPLATES
 void ATERM_POOL_STORAGE::mark()
 {
   for (const Element& term : m_term_set)
   {
-    // If a term is marked its arguments have been marked as well.
-    if (term.is_reachable() && !term.is_marked())
+    if (term.is_reachable())
     {
       // Mark all terms (and their subterms) that are reachable, i.e the root set.
       mark_term(term);
     }
+
+    for (const auto& [symbol, callback] : m_deletion_hooks)
+    {
+      if (symbol == term.function())
+      {
+        // For terms on which deletion hooks are called, ensure that all arguments are marked.
+        const _term_appl& ta = static_cast<_term_appl&>(const_cast<Element&>(term));
+        for (std::size_t i = 0; i < ta.function().arity(); ++i)
+        {
+          _aterm& argument = *detail::address(ta.arg(i));
+          mark_term(argument);
+        }
+      }
+    }
+
   }
 }
 
@@ -183,17 +196,15 @@ void ATERM_POOL_STORAGE::sweep()
   {
     const Element& term = *it;
 
-    if (!term.is_reachable())
+    if (!term.is_reachable() && !term.is_marked())
     {
+      // For constants, i.e., arity zero and integer terms we do not mark, but use their reachability directly. 
       it = destroy(it);
     }
     else
     {
-      // Reset terms that have been marked.
-      if (term.is_marked())
-      {
-        term.reset();
-      }
+      // Remove the mark from the term (for the next garbage collection).
+      term.unmark();
       ++it;
     }
   }
@@ -211,6 +222,7 @@ void ATERM_POOL_STORAGE::call_deletion_hook(unprotected_aterm term)
   {
     if (symbol == term.function())
     {
+      verify_term(*detail::address(term));
       callback(static_cast<const aterm&>(term));
     }
   }
@@ -220,15 +232,15 @@ void ATERM_POOL_STORAGE::call_deletion_hook(unprotected_aterm term)
 ATERM_POOL_STORAGE_TEMPLATES
 bool ATERM_POOL_STORAGE::verify_mark()
 {
-  // Check for consistency that if a term is reachable its arguments are as well.
+  // Check for consistency that if a term is marked then its arguments are as well.
   for (const Element& term : m_term_set)
   {
-    if (term.is_reachable() && term.function().arity() > 0)
+    if (term.is_marked() && term.function().arity() > 0)
     {
        const _term_appl& ta = static_cast<_term_appl&>(const_cast<Element&>(term));
        for (std::size_t i = 0; i < ta.function().arity(); ++i)
        {
-         assert(detail::address(ta.arg(i))->is_reachable());
+         assert(detail::address(ta.arg(i))->is_marked());
        }
     }
   }
@@ -242,7 +254,10 @@ bool ATERM_POOL_STORAGE::verify_sweep()
   for (const Element& term : m_term_set)
   {
     (void)term;
-    assert(verify_term(term));
+    if (term.is_reachable())
+    {
+      assert(verify_term(term));
+    }
   }
   return true;
 }
@@ -254,7 +269,7 @@ typename ATERM_POOL_STORAGE::iterator ATERM_POOL_STORAGE::destroy(iterator it)
 {
   // Store the term temporarily to be able to deallocate it after removing it from the set.
   const Element& term = *it;
-  assert(!term.is_reachable());
+  assert(!term.is_reachable() && !term.is_marked());
 
   // Trigger the deletion hook before the term is actually destroyed.
   call_deletion_hook(&term);
@@ -303,28 +318,23 @@ void ATERM_POOL_STORAGE::mark_term(const _aterm& root)
     _aterm& term = todo.top();
     todo.pop();
 
+    term.mark();
+
     // (Statically) determine the arity of the function application.
     const std::size_t arity = term.function().arity();
     _term_appl& term_appl = static_cast<_term_appl&>(term);
 
     for (std::size_t i = 0; i < arity; ++i)
     {
-      // Marks all arguments that are not already (marked as) reachable, because the current
+      // Marks all arguments that are not already marked, because the current
       // term is reachable and as such its arguments are reachable as well.
       _aterm& argument = *detail::address(term_appl.arg(i));
-      if (!argument.is_reachable())
+      if (!argument.is_marked())
       {
-        // Only mark this term if it current is unreachable, because the marking is applied to
-        // the reference counter.
-        argument.mark();
-
         // Add the argument to be explored as well.
         todo.push(argument);
       }
     }
-
-    // Each argument should be reachable.
-    assert(term.is_reachable());
   }
 }
 
@@ -340,10 +350,11 @@ bool ATERM_POOL_STORAGE::verify_term(const _aterm& term)
   if (term.function().arity() > 0)
   {
     const _term_appl& ta = static_cast<const _term_appl&>(term);
+    assert(ta.function().defined());
     for (std::size_t i = 0; i < ta.function().arity(); ++i)
     {
       assert(ta.arg(i).defined());
-      verify_term<DynamicNumberOfArguments>(*detail::address(ta.arg(0)));
+      verify_term<DynamicNumberOfArguments>(*detail::address(ta.arg(i)));
     }
   }
   return true;

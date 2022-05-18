@@ -49,37 +49,27 @@ public:
   }
 
   /// \brief Mark this term to be garbage collected.
-  /// \details Changes the reference count, so only apply whenever !is_reachable().
   void mark() const
   {
-    assert(!is_reachable());
-    m_reference_count = MarkedReferenceCount;
-    increment_reference_count_changes();
+    m_function_symbol.m_function_symbol.tag();
   }
 
   /// \brief Remove the mark from a term.
-  /// \details Changes the reference count, so only apply whenever it was marked.
-  void reset() const
+  void unmark() const
   {
-    assert(is_marked());
-    m_reference_count = 0;
-    increment_reference_count_changes();
+    m_function_symbol.m_function_symbol.untag();
   }
 
-  /// \brief During garbage collection a term will be marked whenever it occurs as the argument
-  ///        of a reachable term, but is not protected itself.
-  /// \returns True whenever this term has been marked.
-  bool is_marked() const noexcept
+  /// \brief Check if the term is already marked.
+  bool is_marked() const
   {
-    return m_reference_count == MarkedReferenceCount;
+    return m_function_symbol.m_function_symbol.tagged();
   }
 
-  /// \brief A term is reachable in the garbage collection graph if it is protected or whenever it occurs
-  ///        as an argument of a reachable term. The latter will be ensured in the marking phase of garbage collection.
-  /// \returns True whenever the term is reachable ie either marked or protected.
-  bool is_reachable() const noexcept
+  /// \brief Check if the term is reachable, i.e., in the root set.
+  bool is_reachable() const
   {
-    return m_reference_count > 0;
+    return reference_count() > 0;
   }
 
 private:

@@ -14,11 +14,19 @@
 
 namespace atermpp
 {
+
+// Forward declarations.
 class aterm;
+namespace detail
+{
+  class _aterm;
+}
+
 
 class function_symbol
 {
   friend class function_symbol_generator;
+  friend class detail::_aterm;
   friend struct std::hash<function_symbol>;
 
 public:

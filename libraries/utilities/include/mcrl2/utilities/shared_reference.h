@@ -14,6 +14,8 @@
 #include <atomic>
 #include <type_traits>
 
+#include "mcrl2/utilities/tagged_pointer.h"
+
 namespace mcrl2
 {
 namespace utilities
@@ -193,13 +195,13 @@ public:
   T* operator->() const noexcept
   {
     assert(defined());
-    return m_reference;
+    return m_reference.get();
   }
 
   T* get() const noexcept
   {
     assert(defined());
-    return m_reference;
+    return m_reference.get();
   }
 
   T& operator*() const noexcept
@@ -216,8 +218,23 @@ public:
     swap(m_reference, other.m_reference);
   }
 
+  bool tagged() const noexcept
+  {
+    return m_reference.tagged();
+  }
+
+  void tag() const
+  {
+    m_reference.tag();
+  }
+
+  void untag() const
+  {
+    m_reference.untag();
+  }
+
 private:
-  T* m_reference;
+  mutable utilities::tagged_pointer<T> m_reference;
 };
 
 } // namespace utilities
