@@ -31,7 +31,7 @@ lpsparunfold::lpsparunfold(mcrl2::lps::stochastic_specification spec,
     std::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element > *cache,
     bool add_distribution_laws
 )
-  : 
+  :
     m_cache(cache),
     m_data_specification(spec.data()),
     m_representative_generator(m_data_specification),
@@ -57,7 +57,7 @@ lpsparunfold::lpsparunfold(mcrl2::lps::stochastic_specification spec,
 
   {
     std::size_t size = mapping_and_constructor_names.size();
-    for (const function_symbol& f: m_data_specification.constructors()) 
+    for (const function_symbol& f: m_data_specification.constructors())
     {
       mapping_and_constructor_names.insert(f.name());
     };
@@ -221,7 +221,7 @@ std::map<function_symbol, data_expression_vector> lpsparunfold::create_arguments
     data_expression_vector arguments;
     if (is_function_sort(f.sort()))
     {
-      const function_sort& fs = atermpp::down_cast<function_sort>(f.sort()); 
+      const function_sort& fs = atermpp::down_cast<function_sort>(f.sort());
       for (const sort_expression& sort: fs.domain())
       {
         if (sort_vars[sort].size() == sort_index[sort])
@@ -287,7 +287,7 @@ void lpsparunfold::create_data_equations(
       /* Equations for projection functions */
       for(const data_expression& arg: function_arguments)
       {
-        data_expression lhs = application(projection_functions.at(projection_function_index), 
+        data_expression lhs = application(projection_functions.at(projection_function_index),
                                           application(f, function_arguments.begin(), function_arguments.end()));
         add_new_equation(lhs,arg);
 
@@ -306,9 +306,9 @@ void lpsparunfold::create_data_equations(
             }
             else
             {
-              lhs = application(projection_functions.at(projection_function_index), 
-                                application(alternative_f, 
-                                            arguments_of_alternative_f.begin(), 
+              lhs = application(projection_functions.at(projection_function_index),
+                                application(alternative_f,
+                                            arguments_of_alternative_f.begin(),
                                             arguments_of_alternative_f.end()));
             }
             try
@@ -318,7 +318,7 @@ void lpsparunfold::create_data_equations(
             }
             catch (mcrl2::runtime_error& e)
             {
-              mCRL2log(debug) << "Failed to generate equation " << lhs << "= ... as no default term of sort " << lhs.sort() << 
+              mCRL2log(debug) << "Failed to generate equation " << lhs << "= ... as no default term of sort " << lhs.sort() <<
                                  " could be generated.\n" << e.what() << "\n";
             }
           }
@@ -526,8 +526,8 @@ mcrl2::lps::stochastic_linear_process lpsparunfold::update_linear_process(const 
 }
 
 mcrl2::lps::stochastic_process_initializer lpsparunfold::update_linear_process_initialization(
-                   const data::function_symbol& determine_function, 
-                   std::size_t parameter_at_index, 
+                   const data::function_symbol& determine_function,
+                   std::size_t parameter_at_index,
                    const function_symbol_vector& projection_functions)
 {
   //
@@ -554,7 +554,7 @@ mcrl2::lps::stochastic_process_initializer lpsparunfold::update_linear_process_i
     index++;
   }
 
-  const mcrl2::lps::stochastic_process_initializer new_init(mcrl2::data::data_expression_list(new_ass_right.begin(), new_ass_right.end()), 
+  const mcrl2::lps::stochastic_process_initializer new_init(mcrl2::data::data_expression_list(new_ass_right.begin(), new_ass_right.end()),
                                                             m_init_process.distribution());
   mCRL2log(debug) << "Expressions for the new initial state: " << lps::pp(new_init) << std::endl;
 
