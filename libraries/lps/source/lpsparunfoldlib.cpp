@@ -509,16 +509,14 @@ mcrl2::lps::stochastic_linear_process lpsparunfold::update_linear_process(const 
   // update the summands in new_lps
   unfold_summands(new_lps.action_summands(), determine_function, projection_functions);
 
-  new_lps.process_parameters() = mcrl2::data::variable_list(new_process_parameters.begin(), new_process_parameters.end());
+  // Replace occurrences of unfolded parameters by the corresponding case function
+  mutable_map_substitution< std::map< mcrl2::data::variable , mcrl2::data::data_expression > > s{parsub};
+  lps::replace_variables_capture_avoiding( new_lps, s );
 
-  for (auto i = parsub.begin()
-       ; i != parsub.end()
-       ; ++i)
-  {
-    mutable_map_substitution< std::map< mcrl2::data::variable , mcrl2::data::data_expression > > s;
-    s[ i->first ] = i->second;
-    mcrl2::lps::replace_variables( new_lps, s );
-  }
+  // NB: order is important. If we first replace the parameters, they are changed
+  // again when performing the capture avoiding substitution, most likely leading
+  // to an LPS that is not well-formed.
+  new_lps.process_parameters() = mcrl2::data::variable_list(new_process_parameters.begin(), new_process_parameters.end());
 
   mCRL2log(debug) << "\nNew LPS:\n" <<  lps::pp(new_lps) << std::endl;
 
