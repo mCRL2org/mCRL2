@@ -95,7 +95,7 @@ sylvan::ldds::ldd random_subset(const sylvan::ldds::ldd& U, std::size_t amount)
 /// \brief Initialise the Sylvan library.
 void initialise_sylvan()
 {
-  mcrl2::log::logger::set_reporting_level(mcrl2::log::debug);
+  //mcrl2::log::logger::set_reporting_level(mcrl2::log::debug);
   lace_init(1, 1024*1024*4);
   lace_startup(0, nullptr, nullptr);
   sylvan::sylvan_set_limits(1024 * 1024 * 1024, 6, 6);
