@@ -354,6 +354,7 @@ bool ATERM_POOL_STORAGE::verify_term(const _aterm& term)
     for (std::size_t i = 0; i < ta.function().arity(); ++i)
     {
       assert(ta.arg(i).defined());
+      assert(&ta!=detail::address(ta.arg(i)));
       verify_term<DynamicNumberOfArguments>(*detail::address(ta.arg(i)));
     }
   }
