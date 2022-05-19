@@ -157,11 +157,6 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       lps::load_lps(stochastic_lpsspec, input_filename());
       lps::specification lpsspec = lps::remove_stochastic_operators(stochastic_lpsspec);
 
-      if (lpsspec.process().process_parameters().empty())
-      {
-        throw mcrl2::runtime_error("Processes without parameters are not supported");
-      }
-
       lps::lpsreach_algorithm algorithm(lpsspec, options);
 
       if (options.info)
