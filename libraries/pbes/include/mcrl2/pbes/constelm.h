@@ -286,7 +286,7 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
     push(ec);
 
     // maintain quantifier scope
-    if(quantified_context.back() == x)
+    if(!quantified_context.empty() && quantified_context.back() == x)
     {
       quantified_context.pop_back();
     }
@@ -319,7 +319,7 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
     push(ec);
 
     // maintain quantifier scope
-    if(quantified_context.back() == x)
+    if(!quantified_context.empty() && quantified_context.back() == x)
     {
       quantified_context.pop_back();
     }
