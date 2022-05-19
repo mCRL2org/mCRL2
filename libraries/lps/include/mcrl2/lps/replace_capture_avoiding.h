@@ -45,46 +45,49 @@ struct add_capture_avoiding_replacement: public process::detail::add_capture_avo
     x.assignments() = apply(x.assignments());
   }
 
-  void apply(action_summand& x)
+  void update(action_summand& x)
   {
-    data::variable_list v1 = sigma.add_fresh_variable_assignments(x.summation_variables());
+    data::variable_list sumvars = x.summation_variables();
+    data::variable_list v1 = sigma.add_fresh_variable_assignments(sumvars);
     do_action_summand(x, v1);
-    sigma.remove_fresh_variable_assignments(x.summation_variables());
+    sigma.remove_fresh_variable_assignments(sumvars);
   }
 
-  void apply(stochastic_action_summand& x)
+  void update(stochastic_action_summand& x)
   {
-    data::variable_list v1 = sigma.add_fresh_variable_assignments(x.summation_variables());
+    data::variable_list sumvars = x.summation_variables();
+    data::variable_list v1 = sigma.add_fresh_variable_assignments(sumvars);
     do_action_summand(x, v1);
     x.distribution() = apply(x.distribution());
-    sigma.remove_fresh_variable_assignments(x.summation_variables());
+    sigma.remove_fresh_variable_assignments(sumvars);
   }
 
-  void apply(deadlock_summand& x)
+  void update(deadlock_summand& x)
   {
     data::variable_list v1 = sigma.add_fresh_variable_assignments(x.summation_variables());
     x.summation_variables() = v1;
     x.condition() = apply(x.condition());
-    apply(x.deadlock());
+    update(x.deadlock());
     sigma.remove_fresh_variable_assignments(x.summation_variables());
   }
 
   template <typename LinearProcess>
-  void do_linear_process(const LinearProcess& x)
+  void do_linear_process(LinearProcess& x)
   {
-    data::variable_list v1 = sigma.add_fresh_variable_assignments(x.summation_variables());
+    data::variable_list process_params = x.process_parameters();
+    data::variable_list v1 = sigma.add_fresh_variable_assignments(process_params);
     x.process_parameters() = v1;
-    apply(x.action_summands());
-    apply(x.deadlock_summands());
-    sigma.remove_fresh_variable_assignments(x.summation_variables());
+    update(x.action_summands());
+    update(x.deadlock_summands());
+    sigma.remove_fresh_variable_assignments(process_params);
   }
 
-  void apply(linear_process& x)
+  void update(linear_process& x)
   {
     do_linear_process(x);
   }
 
-  void apply(stochastic_linear_process& x)
+  void update(stochastic_linear_process& x)
   {
     do_linear_process(x);
   }
@@ -92,12 +95,13 @@ struct add_capture_avoiding_replacement: public process::detail::add_capture_avo
   template <typename Specification>
   void do_specification(Specification& x)
   {
-    data::variable_list v1 = sigma.add_fresh_variable_assignments(x.global_variables());
+    data::variable_list global_vars = x.global_variables();
+    data::variable_list v1 = sigma.add_fresh_variable_assignments(global_vars);
     x.global_variables() = std::set<data::variable>(v1.begin(), v1.end());
     apply(x.process());
     x.action_labels() = apply(x.action_labels());
     x.initial_process() = apply(x.initial_process());
-    sigma.remove_fresh_variable_assignments(x.global_variables());
+    sigma.remove_fresh_variable_assignments(global_vars);
   }
 
   void operator()(specification& x)
@@ -110,7 +114,7 @@ struct add_capture_avoiding_replacement: public process::detail::add_capture_avo
     do_specification(x);
   }
 
-  stochastic_distribution operator()(stochastic_distribution& x)
+  stochastic_distribution apply(const stochastic_distribution& x)
   {
     data::variable_list v1 = sigma.add_fresh_variable_assignments(x.variables());
     stochastic_distribution result(v1, apply(x.distribution()));
