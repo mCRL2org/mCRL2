@@ -49,14 +49,14 @@ struct add_capture_avoiding_replacement_with_an_identifier_generator
     x.assignments() = apply(x.assignments());
   }
 
-  void apply(action_summand& x)
+  void update(action_summand& x)
   {
     data::variable_list v = update_sigma.push(x.summation_variables());
     do_action_summand(x, v);
     update_sigma.pop(v);
   }
 
-  void apply(stochastic_action_summand& x)
+  void update(stochastic_action_summand& x)
   {
     data::variable_list v = update_sigma.push(x.summation_variables());
     do_action_summand(x, v);
@@ -69,26 +69,26 @@ struct add_capture_avoiding_replacement_with_an_identifier_generator
     data::variable_list v = update_sigma.push(x.summation_variables());
     x.summation_variables() = v;
     x.condition() = apply(x.condition());
-    apply(x.deadlock());
+    update(x.deadlock());
     update_sigma.pop(v);
   }
 
   template<typename LinearProcess>
-  void do_linear_process(const LinearProcess& x)
+  void do_linear_process(LinearProcess& x)
   {
     data::variable_list v = update_sigma.push(x.process_parameters());
     x.process_parameters() = v;
-    apply(x.action_summands());
-    apply(x.deadlock_summands());
+    update(x.action_summands());
+    update(x.deadlock_summands());
     update_sigma.pop(v);
   }
 
-  void apply(linear_process& x)
+  void update(linear_process& x)
   {
     do_linear_process(x);
   }
 
-  void apply(stochastic_linear_process& x)
+  void update(stochastic_linear_process& x)
   {
     do_linear_process(x);
   }
