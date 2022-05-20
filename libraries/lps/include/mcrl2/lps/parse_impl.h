@@ -108,7 +108,7 @@ struct action_rename_actions: public process::detail::action_actions
     }
     else if (symbol_name(node) == "ActSpec")
     {
-      result.action_labels() = parse_ActSpec(node);
+      result.action_labels() = result.action_labels() + parse_ActSpec(node);
       return true;
     }
     else if (symbol_name(node) == "ActionRenameRuleSpec")

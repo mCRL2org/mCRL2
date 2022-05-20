@@ -268,6 +268,27 @@ void test_regex4()
   BOOST_CHECK(std::string(new_spec.action_labels().front().name()) == "out");
 }
 
+BOOST_AUTO_TEST_CASE(multiple_action_declarations)
+{
+  const std::string SPEC =
+     "act a1,a2;\n"
+     "proc P = a1.a2.P;\n"
+     "init P;\n";
+
+  const std::string RENAME_SPEC =
+    "act b1;\n"
+    "rename a1 => b1;\n"
+    "act b2;\n"
+    "rename a2 => b2;\n";
+
+  stochastic_specification spec = lps::linearise(SPEC);
+  std::istringstream ar_spec_stream(RENAME_SPEC);
+  action_rename_specification ar_spec = parse_action_rename_specification(ar_spec_stream, spec);
+  stochastic_specification new_spec = action_rename(ar_spec,spec);
+
+  BOOST_CHECK(new_spec.action_labels().size() == 4);
+}
+
 BOOST_AUTO_TEST_CASE(test_main)
 {
   test1();
