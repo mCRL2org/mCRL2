@@ -41,7 +41,7 @@ struct add_capture_avoiding_replacement: public process::detail::add_capture_avo
   {
     x.summation_variables() = v;
     x.condition() = apply(x.condition());
-    apply(x.multi_action());
+    x.multi_action() = apply(x.multi_action());
     x.assignments() = apply(x.assignments());
   }
 
@@ -64,11 +64,12 @@ struct add_capture_avoiding_replacement: public process::detail::add_capture_avo
 
   void update(deadlock_summand& x)
   {
-    data::variable_list v1 = sigma.add_fresh_variable_assignments(x.summation_variables());
+    data::variable_list sumvars = x.summation_variables();
+    data::variable_list v1 = sigma.add_fresh_variable_assignments(sumvars);
     x.summation_variables() = v1;
     x.condition() = apply(x.condition());
     update(x.deadlock());
-    sigma.remove_fresh_variable_assignments(x.summation_variables());
+    sigma.remove_fresh_variable_assignments(sumvars);
   }
 
   template <typename LinearProcess>
