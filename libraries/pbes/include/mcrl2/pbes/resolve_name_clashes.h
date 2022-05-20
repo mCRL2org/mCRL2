@@ -52,7 +52,13 @@ void resolve_summand_variable_name_clashes(srf_pbes& pbesspec, const data::varia
   std::set<core::identifier_string> process_parameter_names = lps::detail::variable_names(process_parameters);
 
   data::set_identifier_generator generator;
-  generator.add_identifiers(pbes_system::find_identifiers(pbesspec.to_pbes()));
+
+  // Here we cannot yet convert the full  srf_pbes to pbes since it's not well typed, so instead find the identifiers separately.
+  for (const srf_equation& eq : pbesspec.equations())
+  {
+    generator.add_identifiers(pbes_system::find_identifiers(eq.to_pbes()));
+  }
+  generator.add_identifiers(pbes_system::find_identifiers(pbesspec.initial_state()));
   generator.add_identifiers(data::function_and_mapping_identifiers(pbesspec.data()));
 
   for (auto& equation: pbesspec.equations())
