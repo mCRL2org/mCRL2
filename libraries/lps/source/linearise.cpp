@@ -4130,6 +4130,7 @@ class specification_basic_type
        {}
 
        process_pid_pair& operator=(const process_pid_pair& other) = default;
+       process_pid_pair(const process_pid_pair& other) = default;
 
        const process_expression& process_body() const
        {
