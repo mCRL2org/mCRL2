@@ -128,13 +128,6 @@ void MainWindow::formatDocument(DocumentWidget *document)
 
   document->setFocus();
 
-  QFont font;
-  font.setFamily("Monospace");
-  font.setFixedPitch(true);
-  font.setWeight(QFont::Light);
-
-  document->setFont(font);
-
   connect(document->rewriter(), SIGNAL(rewritten(QString)), this, SLOT(rewritten(QString)));
   connect(document->rewriter(), SIGNAL(parseError(QString)), this, SLOT(parseError(QString)));
   connect(document->rewriter(), SIGNAL(exprError(QString)), this, SLOT(rewriteError(QString)));
