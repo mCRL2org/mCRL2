@@ -11,6 +11,7 @@
 
 #define BOOST_TEST_MODULE gauss_elimination_test
 #define MCRL2_GAUSS_ELIMINATION_DEBUG
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/bes/gauss_elimination.h"
 #include "mcrl2/lps/detail/test_input.h"
@@ -20,7 +21,6 @@
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
 
-#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

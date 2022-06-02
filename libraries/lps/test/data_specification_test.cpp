@@ -12,9 +12,9 @@
 /// data specifications.
 
 #define BOOST_TEST_MODULE data_specification_test
-#include "mcrl2/lps/linearise.h"
+#include <boost/test/included/unit_test.hpp>
 
-#include <boost/test/included/unit_test_framework.hpp>
+#include "mcrl2/lps/linearise.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;

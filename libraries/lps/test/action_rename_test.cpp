@@ -14,7 +14,7 @@
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/remove.h"
 #include "mcrl2/lps/rewrite.h"
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 using namespace mcrl2;
 using lps::stochastic_specification;

@@ -10,7 +10,7 @@
 /// \brief Test whether the class bbilistic_arbitrary_precision_fraction works properly.
 
 #define BOOST_TEST_MODULE probabilistic_arbitrary_precision_fraction_test
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 #include "mcrl2/lts/probabilistic_arbitrary_precision_fraction.h"
 
 using namespace mcrl2;

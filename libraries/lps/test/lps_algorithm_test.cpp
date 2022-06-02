@@ -10,10 +10,11 @@
 /// \brief Add your file description here.
 
 #define BOOST_TEST_MODULE lps_algorithm_test
+#include <boost/test/included/unit_test.hpp>
+
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/lps/linearise.h"
 
-#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::lps;

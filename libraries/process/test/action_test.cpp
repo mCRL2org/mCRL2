@@ -10,11 +10,10 @@
 /// \brief Add your file description here.
 
 #define BOOST_TEST_MODULE action_test
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/core/print.h"
 #include "mcrl2/process/process_expression.h"
-
-#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
 

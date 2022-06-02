@@ -10,11 +10,11 @@
 /// \brief Add your file description here.
 
 #define BOOST_TEST_MODULE sumelm_test
+#include <boost/test/included/unit_test.hpp>
+
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/sumelm.h"
-
-#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::data;

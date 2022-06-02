@@ -10,7 +10,7 @@
 /// \brief Add your file description here.
 
 #define BOOST_TEST_MODULE linearization_test3
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/data/detail/rewrite_strategies.h"
 #include "mcrl2/lps/linearise.h"

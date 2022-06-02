@@ -13,7 +13,7 @@
 
 #include "mcrl2/utilities/sequence.h"
 
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 #include <numeric>
 
 using namespace mcrl2;

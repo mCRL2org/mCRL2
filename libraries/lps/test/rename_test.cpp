@@ -10,9 +10,9 @@
 /// \brief Add your file description here.
 
 #define BOOST_TEST_MODULE rename_test
-#include "mcrl2/lps/linearise.h"
+#include <boost/test/included/unit_test.hpp>
 
-#include <boost/test/included/unit_test_framework.hpp>
+#include "mcrl2/lps/linearise.h"
 
 using namespace mcrl2;
 using namespace mcrl2::core;

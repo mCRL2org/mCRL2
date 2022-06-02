@@ -10,7 +10,7 @@
 /// \brief Template tests.
 
 #define BOOST_TEST_MODULE template_test
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 #include <iostream>
 
 template <typename Derived>

@@ -12,7 +12,7 @@
 #define BOOST_TEST_MODULE bes_test
 #include "mcrl2/bes/bdd_expression.h"
 #include "mcrl2/bes/print.h"
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::bdd;

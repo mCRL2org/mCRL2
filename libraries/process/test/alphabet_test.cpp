@@ -10,13 +10,13 @@
 /// \brief Test for alphabet reduction.
 
 #define BOOST_TEST_MODULE alphabet_test
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/test/included/unit_test.hpp>
+
 #include "mcrl2/process/alphabet_reduce.h"
 #include "mcrl2/process/detail/alphabet_intersection.h"
 #include "mcrl2/process/detail/alphabet_parse.h"
 #include "mcrl2/process/detail/alphabet_push_block.h"
-
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::process;

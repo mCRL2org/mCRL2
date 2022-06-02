@@ -10,13 +10,12 @@
 /// \brief Add your file description here.
 
 #define BOOST_TEST_MODULE process_test
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/process/balance_nesting_depth.h"
 #include "mcrl2/process/is_guarded.h"
 #include "mcrl2/process/is_linear.h"
 #include "mcrl2/process/parse.h"
-
-#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::process;

@@ -13,7 +13,7 @@
 #include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/parse.h"
 
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::state_formulas;

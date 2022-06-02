@@ -13,7 +13,7 @@
 #include "mcrl2/data/normalize_sorts.h"
 #include "mcrl2/data/parse.h"
 
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::data;

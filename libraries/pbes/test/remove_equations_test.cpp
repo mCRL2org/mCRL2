@@ -10,7 +10,7 @@
 /// \brief Add your file description here.
 
 #define BOOST_TEST_MODULE remove_equations_test
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 #include "mcrl2/pbes/detail/pbes_property_map.h"
 #include "mcrl2/pbes/remove_equations.h"
 #include "mcrl2/pbes/txt2pbes.h"

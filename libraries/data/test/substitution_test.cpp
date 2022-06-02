@@ -8,7 +8,7 @@
 
 #define BOOST_TEST_MODULE substitution_test
 
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/data/detail/concepts.h"
 #include "mcrl2/data/expression_traits.h"

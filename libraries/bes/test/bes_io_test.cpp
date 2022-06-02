@@ -10,7 +10,7 @@
 /// \brief Some io tests for boolean equation systems.
 
 #define BOOST_TEST_MODULE bes_io_test
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/bes/io.h"
 #include "mcrl2/bes/parse.h"

@@ -10,10 +10,10 @@
 /// \brief Add your file description here.
 
 #define BOOST_TEST_MODULE resolve_name_clash_test
+#include <boost/test/included/unit_test.hpp>
+
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/resolve_name_clashes.h"
-
-#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
 

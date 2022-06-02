@@ -10,7 +10,7 @@
 /// \brief Test for boolean operators.
 
 #define BOOST_TEST_MODULE boolean_operator_test
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/pbes/detail/parse.h"
 

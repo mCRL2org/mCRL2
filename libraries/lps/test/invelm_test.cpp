@@ -12,12 +12,12 @@
 //#define MCRL2_LPS_PARELM_DEBUG
 
 #define BOOST_TEST_MODULE invelm_test
+#include <boost/test/included/unit_test.hpp>
+
 #include "mcrl2/lps/invelm_algorithm.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/print.h"
 #include "test_specifications.h"
-
-#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
 

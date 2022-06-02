@@ -14,7 +14,7 @@
 #endif
 
 #define BOOST_TEST_MODULE lps2lts_test
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/data/detail/rewrite_strategies.h"
 #include "mcrl2/lts/detail/exploration.h"

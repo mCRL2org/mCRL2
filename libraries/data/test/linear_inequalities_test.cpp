@@ -10,11 +10,12 @@
 /// \brief Test the linear_inequality functionality.
 
 #define BOOST_TEST_MODULE linear_inequalities_test
+#include <boost/test/included/unit_test.hpp>
+
 #include "mcrl2/data/fourier_motzkin.h"
 #include "mcrl2/data/join.h"
 #include "mcrl2/data/parse.h"
 
-#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::core;

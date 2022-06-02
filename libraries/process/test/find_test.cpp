@@ -10,11 +10,11 @@
 /// \brief Test for find functions.
 
 #define BOOST_TEST_MODULE find_test
+#include <boost/test/included/unit_test.hpp>
+
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/process/find.h"
 #include "mcrl2/process/parse.h"
-
-#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::process;

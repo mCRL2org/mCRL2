@@ -10,7 +10,7 @@
 /// \brief Test for the pbes rewriters.
 
 #define BOOST_TEST_MODULE pbesrewr_test
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/modal_formula/detail/test_input.h"

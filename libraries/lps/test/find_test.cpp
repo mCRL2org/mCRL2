@@ -10,11 +10,11 @@
 /// \brief Test for find functions.
 
 #define BOOST_TEST_MODULE find_test
+#include <boost/test/included/unit_test.hpp>
+
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/parse.h"
-
-#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::lps;

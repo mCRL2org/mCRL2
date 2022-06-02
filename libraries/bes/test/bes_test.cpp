@@ -13,7 +13,7 @@
 #include "mcrl2/bes/find.h"
 #include "mcrl2/bes/join.h"
 #include "mcrl2/bes/print.h"
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::bes;

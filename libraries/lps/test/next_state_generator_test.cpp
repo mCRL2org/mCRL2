@@ -10,11 +10,11 @@
 /// \brief Test for next_state_generator class.
 
 #define BOOST_TEST_MODULE next_state_generator_test 
+#include <boost/test/included/unit_test.hpp>
+#include <queue>
+
 #include "mcrl2/lps/next_state_generator.h"
 #include "mcrl2/lps/parse.h"
-
-#include <boost/test/included/unit_test_framework.hpp>
-#include <queue>
 
 #include "test_specifications.h"
 
