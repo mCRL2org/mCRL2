@@ -428,26 +428,23 @@ protected:
    */
   bool refine()
   {
-    int i = 0;
     for(const data_expression& phi_k: partition)
     {
-      int j = 0;
+      // We need to make a copy since phi_k may be deleted from partition inside
+      // the function split_block.
+      data_expression phi_k_copy = phi_k;
       for(const data_expression& phi_l: partition)
       {
-        int k = 0;
+        data_expression phi_l_copy = phi_l;
         for(const lps::action_summand& as: m_spec.process().action_summands())
         {
-          // mCRL2log(log::verbose) << "Trying to split " << i << " on " << j << " wrt summand " << k << std::endl;
-          if(split_block(phi_k, phi_l, as))
+          if(split_block(phi_k_copy, phi_l_copy, as))
           {
-            mCRL2log(log::verbose) << "Split " << rewr(phi_k) << " wrt summand\n" << as << "\non block " << rewr(phi_l) << std::endl;
+            mCRL2log(log::verbose) << "Split " << phi_k_copy << " wrt summand\n" << as << "\non block " << phi_l_copy << std::endl;
             return true;
           }
-          k++;
         }
-        j++;
       }
-      i++;
     } // stop when we have investigated all blocks
     return false;
   }
