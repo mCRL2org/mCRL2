@@ -80,7 +80,7 @@ protected:
         real_condition = lazy::or_(real_condition, reduce_lineq(zone));
       }
 
-      result = lazy::or_(result, lazy::and_(simpl_discr.apply(atermpp::down_cast<lambda>(it->first)), real_condition));
+      result = lazy::or_(result, lazy::and_(simpl_discr.apply(it->first), real_condition));
     }
     return rewr(result);
   }
