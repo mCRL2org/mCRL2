@@ -26,7 +26,7 @@ class State
     void center();
 
     Cluster* getCluster() const;
-    int getID();
+    std::size_t getID();
     Transition* getInTransition(int i) const;
     Transition* getOutTransition(int i) const;
     Transition* getLoop(int i) const;
@@ -60,7 +60,7 @@ class State
     void setIncomingControl(const QVector3D& p);
     void setLoopControl1(const QVector3D& p);
     void setLoopControl2(const QVector3D& p);
-    void setID(int i);
+    void setID(std::size_t i);
     void setRank(int r);
     void increaseSimulation() { simulationCount++; }
     void decreaseSimulation() { simulationCount--; }
@@ -70,7 +70,7 @@ class State
 
   private:
     Cluster* cluster;
-    int id;
+    std::size_t id;
     int zoomLevel;
     std::vector< Transition* > inTransitions;
     std::vector< Transition* > loops;

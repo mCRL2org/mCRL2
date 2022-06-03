@@ -240,18 +240,27 @@ State_iterator LTS::getStateIterator()
 
 const std::string& LTS::getParameterName(std::size_t parindex) const
 {
+  assert(parindex < parameterNames.size());
   return parameterNames[parindex];
 }
 
 std::size_t LTS::getStateParameterValue(State* state,std::size_t param) const
 {
-  return stateLabels[state->getID()][param];
+  if (state->getID()<stateLabels.size() && param < stateLabels[state->getID()].size())
+  { 
+    return stateLabels[state->getID()][param];
+  }
+  return std::size_t(-1);
 }
 
-const std::string& LTS::getStateParameterValueStr(State* state, std::size_t param) const
+const std::string LTS::getStateParameterValueStr(State* state, std::size_t param) const
 {
   std::size_t value = getStateParameterValue(state, param);
-  return stateElementValues[param][value];
+  if (value < stateElementValues[param].size())
+  {
+    return stateElementValues[param][value];
+  }
+  return std::string();
 }
 
 std::set<std::string> LTS::getClusterParameterValues(Cluster* cluster, std::size_t param) const
