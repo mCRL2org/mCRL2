@@ -488,6 +488,7 @@ BOOST_AUTO_TEST_CASE(enumerate_expressions_test)
   data::variable v = parse_variable(variable_text, dataspec);
   rewriter r(dataspec);
   std::string result = core::detail::print_list(enumerate_expressions(v.sort(), dataspec, r));
-  std::string expected_result = "[ d1(e1), d1(e2), d2(e1), d2(e2) ]";
-  BOOST_CHECK(result == expected_result);
+  std::string expected_result1 = "[ d1(e1), d1(e2), d2(e1), d2(e2) ]";
+  std::string expected_result2 = "[ d2(e2), d2(e1), d1(e2), d1(e1) ]"; // When garbage collection is frequent, this answer occurs. 
+  BOOST_CHECK(result == expected_result1 || result == expected_result2);
 }
