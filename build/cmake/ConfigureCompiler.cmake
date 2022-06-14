@@ -40,6 +40,10 @@ if(NOT ${MCRL2_ENABLE_DEBUG_SOUNDNESS_CHECKS})
   add_definitions(-DMCRL2_NO_SOUNDNESS_CHECKS)
 endif()
 
+if(MCRL2_ENABLE_SYLVAN)
+  add_definitions(-DMCRL2_ENABLE_SYLVAN)
+endif()
+
 # Enable C++17 for all targets.
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED true)

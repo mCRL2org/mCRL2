@@ -13,12 +13,9 @@ add_mcrl2_library(lps
     mcrl2_data
     mcrl2_process
     mcrl2_smt
+    mcrl2_symbolic
   INCLUDE
     ${Boost_INCLUDE_DIRS}
 )
-
-if (UNIX)
-  target_link_libraries(mcrl2_lps mcrl2_symbolic)
-endif()
 
 add_subdirectory(example)

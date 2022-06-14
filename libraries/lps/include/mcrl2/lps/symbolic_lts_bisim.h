@@ -10,6 +10,8 @@
 #ifndef MCRL2_LPS_SYMBOLIC_LTS_BISIM_H
 #define MCRL2_LPS_SYMBOLIC_LTS_BISIM_H
 
+#ifdef MCRL2_ENABLE_SYLVAN
+
 #include "mcrl2/symbolic/ldd_stream.h"
 #include "mcrl2/symbolic/print.h"
 #include "mcrl2/lps/symbolic_lts.h"
@@ -174,5 +176,7 @@ void bisim(const symbolic_lts& lts)
 }
 
 } // namespace mcrl2::lps
+
+#endif // MCRL2_ENABLE_SYLVAN
 
 #endif // MCRL2_LPS_SYMBOLIC_LTS_BISIM_H

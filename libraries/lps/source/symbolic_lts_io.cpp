@@ -9,7 +9,7 @@
 
 #include "mcrl2/utilities/platform.h"
 
-#ifndef MCRL2_PLATFORM_WINDOWS
+#ifdef MCRL2_ENABLE_SYLVAN
 
 #include "mcrl2/lps/symbolic_lts_io.h"
 
@@ -169,4 +169,4 @@ std::istream& operator>>(std::istream& stream, symbolic_lts& lts)
 
 } // namespace mcrl2::lps
 
-#endif // MCRL2_PLATFORM_WINDOWS
+#endif // MCRL2_ENABLE_SYLVAN

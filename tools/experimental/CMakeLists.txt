@@ -12,10 +12,10 @@ set(MCRL2_TOOLS
   symbolic_exploration
 )
 
-if (UNIX)
+if(MCRL2_ENABLE_SYLVAN)
   list(APPEND MCRL2_TOOLS lpsreach)
   list(APPEND MCRL2_TOOLS pbessolvesymbolic)
-endif (UNIX)
+endif()
 
 if(MCRL2_ENABLE_EXPERIMENTAL)
   foreach(TOOL ${MCRL2_TOOLS})

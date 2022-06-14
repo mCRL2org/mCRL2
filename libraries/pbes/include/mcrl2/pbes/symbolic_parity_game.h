@@ -10,6 +10,8 @@
 #ifndef MCRL2_PBES_SYMBOLIC_PARITY_GAME_H
 #define MCRL2_PBES_SYMBOLIC_PARITY_GAME_H
 
+#ifdef MCRL2_ENABLE_SYLVAN
+
 #include "mcrl2/pbes/srf_pbes.h"
 #include "mcrl2/pbes/pbes_equation_index.h"
 #include "mcrl2/symbolic/alternative_relprod.h"
@@ -617,5 +619,7 @@ private:
 } // namespace pbes_system
 
 } // namespace mcrl2
+
+#endif // MCRL2_ENABLE_SYLVAN
 
 #endif // MCRL2_PBES_SYMBOLIC_PBESSOLVE_H
