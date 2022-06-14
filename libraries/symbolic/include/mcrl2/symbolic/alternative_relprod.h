@@ -10,6 +10,8 @@
 #ifndef MCRL2_SYMBOLIC_ALTERNATIVE_RELPROD_H
 #define MCRL2_SYMBOLIC_ALTERNATIVE_RELPROD_H
 
+#ifdef MCRL2_ENABLE_SYLVAN
+
 #include "mcrl2/symbolic/summand_group.h"
 
 #include <sylvan_ldd.hpp>
@@ -104,5 +106,7 @@ sylvan::ldds::ldd alternative_relprev(const sylvan::ldds::ldd& Y, const summand_
 }
 
 } // namespace mcrl2::symbolic
+
+#endif // MCRL2_ENABLE_SYLVAN
 
 #endif // MCRL2_SYMBOLIC_ALTERNATIVE_RELPROD_H

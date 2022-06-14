@@ -10,6 +10,8 @@
 #ifndef MCRL2_SYMBOLIC_UTILITY_H
 #define MCRL2_SYMBOLIC_UTILITY_H
 
+#ifdef MCRL2_ENABLE_SYLVAN
+
 #include "mcrl2/symbolic/data_index.h"
 
 #include <vector>
@@ -69,5 +71,7 @@ sylvan::ldds::ldd state2ldd(const data::data_expression_list& x, std::vector<dat
 
 
 } // namespace mcrl2::symbolic
+
+#endif // MCRL2_ENABLE_SYLVAN
 
 #endif // MCRL2_SYMBOLIC_UTILITY_H

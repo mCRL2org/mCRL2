@@ -10,6 +10,8 @@
 #ifndef MCRL2_SYMBOLIC_TEST_UTILITY_H
 #define MCRL2_SYMBOLIC_TEST_UTILITY_H
 
+#ifdef MCRL2_ENABLE_SYLVAN
+
 #include "mcrl2/utilities/logger.h"
 
 #include <sylvan_ldd.hpp>
@@ -111,5 +113,7 @@ void quit_sylvan()
 }
 
 } // namespace mcrl2::symbolic
+
+#endif // MCRL2_ENABLE_SYLVAN
 
 #endif // MCRL2_SYMBOLIC_TEST_UTILITY_H

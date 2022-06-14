@@ -10,6 +10,8 @@
 #ifndef MCRL2_LPS_SYMBOLIC_PRINT_H
 #define MCRL2_LPS_SYMBOLIC_PRINT_H
 
+#ifdef MCRL2_ENABLE_SYLVAN
+
 #include <sylvan_ldd.hpp>
 #include <vector>
 
@@ -198,5 +200,7 @@ std::string print_size(const sylvan::ldds::ldd& L, bool print_nodecount)
 }
 
 } // namespace mcrl2::symbolic
+
+#endif // MCRL2_ENABLE_SYLVAN
 
 #endif // MCRL2_LPS_SYMBOLIC_PRINT_H

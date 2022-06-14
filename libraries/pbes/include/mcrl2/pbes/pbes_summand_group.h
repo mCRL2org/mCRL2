@@ -7,6 +7,11 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#ifndef MCRL_PBES_PBES_SUMMAND_GROUP_H
+#define MCRL_PBES_PBES_SUMMAND_GROUP_H
+
+#ifdef MCRL2_ENABLE_SYLVAN
+
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/srf_pbes.h"
@@ -168,3 +173,7 @@ struct pbes_summand_group: public symbolic::summand_group
 };
 
 } // namespace mcrl2::pbes_system
+
+#endif // MCRL2_ENABLE_SYLVAN
+
+#endif // MCRL_PBES_PBES_SUMMAND_GROUP_H

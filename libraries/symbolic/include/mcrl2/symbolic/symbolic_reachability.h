@@ -10,6 +10,8 @@
 #ifndef MCRL2_SYMBOLIC_SYMBOLIC_REACHABILITY_H
 #define MCRL2_SYMBOLIC_SYMBOLIC_REACHABILITY_H
 
+#ifdef MCRL2_ENABLE_SYLVAN
+
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/enumerator.h"
@@ -186,5 +188,7 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t, v
 }
 
 } // namespace mcrl2::symbolic
+
+#endif // MCRL2_ENABLE_SYLVAN
 
 #endif // MCRL2_SYMBOLIC_SYMBOLIC_REACHABILITY_H

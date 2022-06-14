@@ -10,6 +10,8 @@
 #ifndef MCRL2_LPS_SYMBOLIC_LTS_IO_H
 #define MCRL2_LPS_SYMBOLIC_LTS_IO_H
 
+#ifdef MCRL2_ENABLE_SYLVAN
+
 #include "mcrl2/lps/symbolic_lts.h"
 
 namespace mcrl2::lps
@@ -22,5 +24,7 @@ std::ostream& operator<<(std::ostream& stream, const symbolic_lts& lts);
 std::istream& operator>>(std::istream& stream, symbolic_lts& lts);
 
 } // namespace mcrl2::lps
+
+#endif // MCRL2_ENABLE_SYLVAN
 
 #endif // MCRL2_LPS_SYMBOLIC_LTS_IO_H

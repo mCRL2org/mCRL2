@@ -11,10 +11,10 @@ set(MCRL2_TOOLS
   reduce_process
 )
 
-if (UNIX)
-  list(APPEND MCRL2_TOOLS pbesbddsolve)
+if(MCRL2_ENABLE_SYLVAN)
   list(APPEND MCRL2_TOOLS ltsconvertsymbolic)
-endif (UNIX)
+  list(APPEND MCRL2_TOOLS pbesbddsolve)
+endif()
 
 # N.B. Some developer tools are needed for the random tests.
 if(${MCRL2_ENABLE_DEVELOPER} OR ${MCRL2_ENABLE_TESTS})

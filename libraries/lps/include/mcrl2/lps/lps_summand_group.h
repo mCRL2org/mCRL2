@@ -10,6 +10,8 @@
 #ifndef MCRL_LPS_LPS_SUMMAND_GROUP_H
 #define MCRL_LPS_LPS_SUMMAND_GROUP_H
 
+#ifdef MCRL2_ENABLE_SYLVAN
+
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/lps/action_summand.h"
 #include "mcrl2/lps/specification.h"
@@ -149,5 +151,7 @@ std::vector<boost::dynamic_bitset<>> compute_read_write_patterns(const lps::spec
 }
 
 } // namespace mcrl2::lps
+
+#endif // MCRL2_ENABLE_SYLVAN
 
 #endif // MCRL_LPS_LPS_SUMMAND_GROUP_H

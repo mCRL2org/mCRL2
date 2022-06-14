@@ -10,6 +10,8 @@
 #ifndef MCRL2_SYMBOLIC_LDD_IOSTREAM_H
 #define MCRL2_SYMBOLIC_LDD_IOSTREAM_H
 
+#ifdef MCRL2_ENABLE_SYLVAN
+
 #include "mcrl2/utilities/indexed_set.h"
 #include "mcrl2/utilities/bitstream.h"
 
@@ -87,5 +89,7 @@ inline binary_ldd_ostream& operator<<(binary_ldd_ostream& stream, const sylvan::
 inline binary_ldd_istream& operator>>(binary_ldd_istream& stream, sylvan::ldds::ldd& term) { term = stream.get(); return stream; }
 
 } // namespace mcrl2::symbolic
+
+#endif // MCRL2_ENABLE_SYLVAN
 
 #endif // MCRL2_SYMBOLIC_LDD_IOSTREAM_H

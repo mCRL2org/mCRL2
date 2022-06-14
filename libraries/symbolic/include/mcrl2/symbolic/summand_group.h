@@ -10,6 +10,8 @@
 #ifndef MCRL2_SYMBOLIC_SUMMAND_GROUP_H
 #define MCRL2_SYMBOLIC_SUMMAND_GROUP_H
 
+#ifdef MCRL2_ENABLE_SYLVAN
+
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/data_expression.h"
@@ -238,5 +240,7 @@ std::vector<std::uint32_t> optimise_project(const std::vector<std::uint32_t>& Ip
 }
 
 } // namespace mcrl2::symbolic
+
+#endif // MCRL2_ENABLE_SYLVAN
 
 #endif // MCRL2_SYMBOLIC_SUMMAND_GROUP_H
