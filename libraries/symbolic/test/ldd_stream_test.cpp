@@ -10,6 +10,13 @@
 #define BOOST_TEST_MODULE ldd_stream_test
 #include <boost/test/included/unit_test.hpp>
 
+BOOST_AUTO_TEST_CASE(dummy_test)
+{
+  // This is an empty test since at least one test is required.
+}
+
+#ifdef MCRL2_ENABLE_SYLVAN
+
 #include "mcrl2/symbolic/test_utility.h"
 #include "mcrl2/symbolic/ldd_stream.h"
 
@@ -114,3 +121,5 @@ BOOST_AUTO_TEST_CASE(random_test_simple_cases)
 
   quit_sylvan();
 }
+
+#endif // MCRL2_ENABLE_SYLVAN
