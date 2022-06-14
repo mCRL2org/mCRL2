@@ -136,7 +136,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       : super("lpsreach",
               "Wieger Wesselink",
               "applies a symbolic reachability algorithm to an LPS",
-              "read an LPS from INFILE and write output to OUTFILE. If OUTFILE "
+              "read an LPS from INFILE and write a symbolic labelled transition system to OUTFILE. If OUTFILE "
               "is not present, stdout is used. If INFILE is not present, stdin is used."
              )
     {}

@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_CASE(dummy_test)
   // This is an empty test since at least one test is required.
 }
 
-#ifndef MCRL2_ENABLE_SYLVAN
+#ifdef MCRL2_ENABLE_SYLVAN
 
 #include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/symbolic_parity_game.h"
