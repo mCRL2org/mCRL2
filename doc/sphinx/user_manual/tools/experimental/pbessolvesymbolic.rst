@@ -5,7 +5,7 @@
 pbessolvesymbolic
 ==========
 
-This is a solving tool for parameterised boolean equation systems (.pbes
+This is a solving tool for parameterised Boolean equation systems (.pbes
 extension) that is based on a parity game exploration technique that utilises
 symbolic representations. The symbolic exploration works very similar to the one
 implemented by :ref:`tool-lpsreach`, where it is described in great detail. The
