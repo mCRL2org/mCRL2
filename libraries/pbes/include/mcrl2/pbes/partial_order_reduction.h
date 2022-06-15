@@ -695,13 +695,13 @@ class partial_order_reduction_algorithm
         return en_X_e;
       }
 
-      while (true)
+      while (!C.empty())
       {
         // The smallest element is the first element in the set
         auto p = C.extract(C.begin());
         auto& Twork = p.value().Twork;
         auto& Ts = p.value().Ts;
-        
+
         if (Twork.none())
         {
           summand_set T = Ts & en_X_e;
@@ -722,12 +722,18 @@ class partial_order_reduction_algorithm
           Ts.set(k);
           if (en_X_e.test(k))
           {
-            auto& DNS_or_DNL = DNX(k, Twork, Ts, en_X_e);
-            Twork |= (DNS_or_DNL - Ts);
             if (m_vis.test(k))
             {
-              Twork |= (m_vis - Ts);
+              // To satisfy condition P, we fully expand in case a visible
+              // transition occurs in the stubborn set.
+              // Thus, do not add this candidate set back to C.
+              // Effectively, we implement a stronger version of V:
+              // If r(s) contains an enabled visible transition,
+              // then it contains all transitions.
+              continue;
             }
+            auto& DNS_or_DNL = DNX(k, Twork, Ts, en_X_e);
+            Twork |= (DNS_or_DNL - Ts);
           }
           else
           {
@@ -738,6 +744,7 @@ class partial_order_reduction_algorithm
 
         C.insert(std::move(p));
       }
+      return en_X_e;
     }
 
     std::set<propositional_variable_instantiation> succ(const propositional_variable_instantiation& X_e, const summand_set& K)
