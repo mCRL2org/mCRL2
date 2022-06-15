@@ -157,7 +157,10 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t, v
                              for (std::size_t j = 0; j < y_size; j++)
                              {
                                data::data_expression value = rewr(smd.next_state[j], sigma);
-                               xy[group.write_pos[j]] = data::is_variable(value) ? relprod_ignore : data_index[group.write[j]].insert(value).first;
+                               assert(value != data::undefined_data_expression());
+
+                               // Determine whether this is a copy parameter, insert special value if that is the case.
+                               xy[group.write_pos[j]] = smd.copy[group.write_pos[j]] ? relprod_ignore : data_index[group.write[j]].insert(value).first;
                              }
 
                              if constexpr (ActionLabel)
