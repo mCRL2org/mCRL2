@@ -446,3 +446,15 @@ BOOST_AUTO_TEST_CASE(test_incomplete_assignments)
   );
 }
 
+// Test case induced by a problem found by Maarten Visscher
+BOOST_AUTO_TEST_CASE(test_incomplete_assignment_in_init_clause)
+{
+  test_typechecker_case(
+    "act a;\n"
+    "proc P(x:Nat)=a.P();\n"
+    "\n"
+    "init P();\n",    // here a value for x should be given. 
+    false
+  );
+}
+
