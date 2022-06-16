@@ -344,7 +344,7 @@ class symbolic_parity_game
         mCRL2log(log::debug1) << "Zoutside = " << print_nodes(Zoutside) << std::endl;
         stopwatch iter_start;
 
-        todo = minus(safe_control_predecessors_impl(alpha, todo, V, Zoutside, V, Vplayer, I), Z);
+        todo = minus(safe_control_predecessors_impl(alpha, todo, Zoutside, Zoutside, V, Vplayer, I), Z);
         Z = union_(Z, todo);
         Zoutside = minus(Zoutside, todo);
 
@@ -509,7 +509,7 @@ class symbolic_parity_game
     /// \brief Returns the mapping from priorities (ranks) to vertex sets.
     const std::map<std::size_t, ldd>& ranks() const { return m_rank_map; }
 
-    /// \returns The set { u in U | exists v in V: u ->* v } where with chaining ->* only visits states in V (if U subseteq V)
+    /// \returns The set { u in U | exists v in V: u -> v } 
     ldd predecessors(const ldd& U, const ldd& V) const
     {
       using namespace sylvan::ldds;
@@ -526,37 +526,6 @@ class symbolic_parity_game
       }
 
       return result;
-    }
-
-    /// \returns A set of vertices { u in U | exists v in V: u ->* v } where ->* only visits intermediate vertices in W (without chaining ->* = ->)
-    /// \pre U,W subseteq V.
-    ldd predecessors(const ldd& U, const ldd& V, const ldd& W) const
-    {
-      using namespace sylvan::ldds;
-
-      if (m_chaining)
-      {
-        ldd P = empty_set();
-        ldd todo = V;
-        for (int i = m_summand_groups.size() - 1; i >= 0; --i)
-        {
-          const symbolic::summand_group& group = m_summand_groups[i];
-
-          stopwatch watch;
-          ldd todo1 = predecessors(U, todo, group);
-          mCRL2log(log::debug1) << "added predecessors for group " << i << " out of " << m_summand_groups.size()
-                                 << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";
-
-          P = union_(P, todo1);
-          todo = union_(todo, intersect(todo1, W));
-        }
-
-        return P;
-      }
-      else
-      {
-        return predecessors(U, V);
-      }
     }
 
     /// \brief Compute the safe control attractor set for U w.r.t. vertices in V.
@@ -585,7 +554,31 @@ private:
       return m_no_relprod ? symbolic::alternative_relprev(V, group, U) : relprev(V, group.L, group.Ir, U);
     }
 
-    /// \brief Compute the safe control attractor set for todo where chaining is restricted to W.
+    /// \returns A set of vertices { u in U | exists v in V: u ->* v } where ->* only visits intermediate vertices in W (without chaining ->* = ->)
+    /// \pre U,W subseteq V.
+    ldd predecessors_chaining(const ldd& U, const ldd& V, const ldd& W) const
+    {
+      using namespace sylvan::ldds;
+
+      ldd P = empty_set();
+      ldd todo = V;
+      for (int i = m_summand_groups.size() - 1; i >= 0; --i)
+      {
+        const symbolic::summand_group& group = m_summand_groups[i];
+
+        stopwatch watch;
+        ldd todo1 = predecessors(U, todo, group);
+        mCRL2log(log::debug1) << "added predecessors for group " << i << " out of " << m_summand_groups.size()
+                               << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";
+
+        P = union_(P, todo1);
+        todo = union_(todo, intersect(todo1, W));
+      }
+
+      return P;
+    }
+
+    /// \brief Compute the safe control attractor set for U where chaining is restricted to W and V are vertices consider as control predecessors (can be different from outside).
     ///        The set outside should be minus(V, U)
     ldd safe_control_predecessors_impl(std::size_t alpha,
       const ldd& U,
@@ -597,11 +590,11 @@ private:
     {
       using namespace sylvan::ldds;
 
-      ldd P = predecessors(V, U, intersect(Vplayer[alpha], W));
+      ldd P = m_chaining ? predecessors_chaining(V, U, intersect(Vplayer[alpha], W)) : predecessors(V, U);
       ldd Palpha = intersect(P, Vplayer[alpha]);
       ldd Pforced = minus(intersect(P, Vplayer[1-alpha]), I);
 
-      for (std::size_t i = 0; i < m_summand_groups.size(); ++i)
+      for (int i = 0; i < m_summand_groups.size(); ++i)
       {
         const symbolic::summand_group& group = m_summand_groups[i];
 
