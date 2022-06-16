@@ -2,13 +2,13 @@
 Changes between toolset releases 202106.0 and 202206.0:
 ===============================================================================
 
-This release brings two new experimental tools and several improvements to
-existing tools. First of all, lpsreach is a new state space exploration tool
-that uses symbolic representations to effectively operate on state spaces
-consisting with billions of states. Next, pbessolvesymbolic is a tool to solve
-parameterised Boolean equation systems (PBESs) based on similar techniques. Both
-tools are unfortunately not yet available on Windows. Another major limitation
-of pbessolvesymbolic is that it can not yet produce counter examples.
+This release brings two new tools and several improvements to existing tools.
+First of all, lpsreach is a new state space exploration tool that uses symbolic
+representations to effectively operate on state spaces consisting with billions
+of states. Next, pbessolvesymbolic is a tool to solve parameterised Boolean
+equation systems (PBESs) based on similar techniques. Both tools are
+unfortunately not yet available on Windows. Another major limitation of
+pbessolvesymbolic is that it can not yet produce counter examples.
 
 The ltscompare tool has been extended with generating distinguishing formulas
 for trace and (divergence-preserving branching) bisimulation equivalences for

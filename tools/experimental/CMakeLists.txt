@@ -12,11 +12,6 @@ set(MCRL2_TOOLS
   symbolic_exploration
 )
 
-if(MCRL2_ENABLE_SYLVAN)
-  list(APPEND MCRL2_TOOLS lpsreach)
-  list(APPEND MCRL2_TOOLS pbessolvesymbolic)
-endif()
-
 if(MCRL2_ENABLE_EXPERIMENTAL)
   foreach(TOOL ${MCRL2_TOOLS})
     add_subdirectory(${TOOL})

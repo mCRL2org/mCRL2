@@ -53,6 +53,11 @@ set(MCRL2_TOOLS
   lpsbisim2pbes
 )
 
+if(MCRL2_ENABLE_SYLVAN)
+  list(APPEND MCRL2_TOOLS lpsreach)
+  list(APPEND MCRL2_TOOLS pbessolvesymbolic)
+endif()
+
 foreach(TOOL ${MCRL2_TOOLS})
   add_subdirectory(${TOOL})
 endforeach()
