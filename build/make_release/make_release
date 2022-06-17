@@ -30,8 +30,8 @@
 # do_ppa_upload. If these steps fail, it makes no sense to do an upload. After
 # every failed upload attempt the version number needs to be updated.
 
-MCRL2_RELEASE_BRANCH="release-202106"
-MCRL2_VERSION="202106.0"
+MCRL2_RELEASE_BRANCH="release-202206"
+MCRL2_VERSION="202206.0"
 UBUNTU_VERSION="1ubuntu1ppa1"
 DEBEMAIL="m.laveaux@tue.nl"
 DEBFULLNAME="Maurice Laveaux"
