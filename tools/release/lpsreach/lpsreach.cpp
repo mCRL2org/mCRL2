@@ -136,8 +136,8 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       : super("lpsreach",
               "Wieger Wesselink",
               "Applies a symbolic reachability algorithm to an LPS",
-              "Read an LPS from INFILE and write a symbolic labelled transition system to OUTFILE. If OUTFILE "
-              "is not present, stdout is used. If INFILE is not present, stdin is used."
+              "Read an LPS from INFILE and write a symbolic labelled transition system to OUTFILE. "
+              "If OUTFILE is not present, no symbolic LTS is written. If INFILE is not present, stdin is used."
              )
     {}
 
@@ -171,11 +171,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
           print_dot(options.dot_file, V);
         }
 
-        if (output_filename().empty())
-        {
-          std::cout << algorithm.get_symbolic_lts();
-        }
-        else
+        if (!output_filename().empty())
         {
           std::ofstream to(output_filename(), std::ofstream::out | std::ofstream::binary);
           if (!to.good())
