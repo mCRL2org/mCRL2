@@ -119,13 +119,13 @@ Now, the we can decompose :math:`f`` on the first argument as follows.
   \end{equation*}
 
 Such that :math:`f(x_0, x_1, \ldots, x_n) = f'_{x_0}(x_1, \ldots, x_n)` for all
-:math:`0 \leq x_0 \leq \|x_0\|`, \ldots, :math:`0 \leq x_n \leq \|x_n\|`, where
+:math:`0 \leq x_0 \leq \|x_0\|, \ldots, 0 \leq x_n \leq \|x_n\|`, where
 :math:`\|x_0\|` indicates the maximum value of :math:`x_0`.
 
 The decision diagram for this decomposed function consists of vertices and edges
 where vertices represent the functions, such as :math:`f` and :math:`f'_0`, and
 edges the decisions, for example :math:`x_0 = 0`. The vertices are maximally
-shared such that if :math:`f'_0 = f'_1`` then there is a unique vertex in memory
+shared such that if :math:`f'_0 = f'_1` then there is a unique vertex in memory
 representing this function. Furthermore, we always decompose on the first
 argument, so the decision diagram is a tree of height :math:`n+1`.
 
