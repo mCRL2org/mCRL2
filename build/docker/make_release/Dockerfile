@@ -14,12 +14,10 @@ RUN apt-get update && apt-get install -y \
  libboost-dev \
  libgl1-mesa-dev \
  qtbase5-dev \
-# Needed to create the debian package.
  ubuntu-dev-tools \
  debhelper \
-# Needed for testing
- python-psutil \
- python-yaml
+ python3-psutil \
+ python3-yaml
 
 # 2. Clone the latest version of the repository in case that the make_release script must be updated.
 RUN mkdir ~/ppa && cd ~/ppa && git clone https://github.com/mcrl2org/mcrl2.git mcrl2
