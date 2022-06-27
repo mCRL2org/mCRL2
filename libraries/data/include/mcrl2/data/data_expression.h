@@ -143,7 +143,6 @@ class data_expression: public atermpp::aterm_appl
     data_expression& operator=(const data_expression&) noexcept = default;
     data_expression& operator=(data_expression&&) noexcept = default;
 //--- start user section data_expression ---//
-
     /// \brief A function to efficiently determine whether a data expression is 
     ///        made by the default constructor.
     bool is_default_data_expression() const

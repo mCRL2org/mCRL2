@@ -24,39 +24,6 @@ using namespace mcrl2;
 using data::tools::rewriter_tool;
 using utilities::tools::input_output_tool;
 
-
-/// \brief maps proposition variable ldd values to (rank, is_disjunctive)
-std::map<std::size_t, std::pair<std::size_t, bool>> compute_equation_info(const pbes_system::srf_pbes& pbes, const std::vector<lps::data_expression_index>& data_index)
-{
-  pbes_system::pbes_equation_index equation_index(pbes);
-
-  // map propositional variable names to the corresponding ldd value
-  std::map<core::identifier_string, std::uint32_t> propvar_index;
-  for (const data::data_expression& X: data_index[0])
-  {
-    const auto& X_ = atermpp::down_cast<data::function_symbol>(X);
-    std::uint32_t i = propvar_index.size();
-    propvar_index[X_.name()] = i;
-  }
-
-  // maps ldd values to (rank, is_disjunctive)
-  std::map<std::size_t, std::pair<std::size_t, bool>> equation_info;
-  for (const auto& equation: pbes.equations())
-  {
-    const core::identifier_string& name = equation.variable().name();
-    std::size_t rank = equation_index.rank(name);
-    bool is_disjunctive = !equation.is_conjunctive();
-    auto i = propvar_index.find(name);
-    if (i != propvar_index.end())
-    {
-      std::uint32_t ldd_value = i->second;
-      equation_info[ldd_value] = { rank, is_disjunctive };
-    }
-  }
-
-  return equation_info;
-}
-
 namespace mcrl2::pbes_system {
 
 class pbesreach_algorithm_partial : public pbes_system::pbesreach_algorithm
@@ -84,19 +51,36 @@ public:
       // Store the set of won states to keep track of whether new states have been solved.
       std::array<sylvan::ldds::ldd, 2> Vwon = m_Vwon;
 
-      auto equation_info = compute_equation_info(pbes(), data_index());
       ldd V = union_(m_visited, m_todo);
-      pbes_system::symbolic_pbessolve_algorithm solver(V, summand_groups(), equation_info, m_options.no_relprod, m_options.chaining, data_index());
+      pbes_system::symbolic_parity_game G(pbes(), summand_groups(), data_index(), V, m_options.no_relprod, m_options.chaining);
+      G.print_information();
+      pbes_system::symbolic_pbessolve_algorithm solver(G);
 
       if (m_options.solve_strategy == 1)
       {
-        std::tie(m_Vwon[0], m_Vwon[1]) = solver.detect_cycles(m_initial_vertex, V, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1]);
+        std::tie(m_Vwon[0], m_Vwon[1]) = solver.detect_solitair_cycles(m_initial_vertex, V, m_todo, false, m_deadlocks, m_Vwon[0], m_Vwon[1]);
       }      
       else if (m_options.solve_strategy == 2)
       {
-        std::tie(m_Vwon[0], m_Vwon[1]) = solver.detect_fatal_attractors(m_initial_vertex, V, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1]);
-      }
+        std::tie(m_Vwon[0], m_Vwon[1]) = solver.detect_solitair_cycles(m_initial_vertex, V, m_todo, true, m_deadlocks, m_Vwon[0], m_Vwon[1]);
+      }      
       else if (m_options.solve_strategy == 3)
+      {
+        std::tie(m_Vwon[0], m_Vwon[1]) = solver.detect_forced_cycles(m_initial_vertex, V, m_todo, false, m_deadlocks, m_Vwon[0], m_Vwon[1]);
+      }
+      else if (m_options.solve_strategy == 4)
+      {
+        std::tie(m_Vwon[0], m_Vwon[1]) = solver.detect_forced_cycles(m_initial_vertex, V, m_todo, true, m_deadlocks, m_Vwon[0], m_Vwon[1]);
+      }
+      else if (m_options.solve_strategy == 5)
+      {
+        std::tie(m_Vwon[0], m_Vwon[1]) = solver.detect_fatal_attractors(m_initial_vertex, V, m_todo, false, m_deadlocks, m_Vwon[0], m_Vwon[1]);
+      }
+      else if (m_options.solve_strategy == 6)
+      {
+        std::tie(m_Vwon[0], m_Vwon[1]) = solver.detect_fatal_attractors(m_initial_vertex, V, m_todo, true, m_deadlocks, m_Vwon[0], m_Vwon[1]);
+      }
+      else if (m_options.solve_strategy == 7)
       {
         std::tie(m_Vwon[0], m_Vwon[1]) = solver.partial_solve(m_initial_vertex, V, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1]);
       }
@@ -188,9 +172,13 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       desc.add_option("solve-strategy",
                       utilities::make_enum_argument<int>("NUM")
                         .add_value_desc(0, "No on-the-fly solving is applied", true)
-                        .add_value_desc(1, "Detect winning loops.")
-                        .add_value_desc(2, "Detect fatal attractors.")
-                        .add_value_desc(3, "Solve subgames using a Zielonka solver."),
+                        .add_value_desc(1, "Detect solitair winning cycles.")
+                        .add_value_desc(2, "Detect solitair winning cycles with safe attractors.")
+                        .add_value_desc(3, "Detect forced winning cycles.")
+                        .add_value_desc(4, "Detect forced winning cycles with safe attractors.")
+                        .add_value_desc(5, "Detect fatal attractors.")
+                        .add_value_desc(6, "Detect fatal attractors with safe attractors.")
+                        .add_value_desc(7, "Solve subgames using a Zielonka solver."),
                       "Use solve strategy NUM. All strategies except 0 periodically apply on-the-fly solving, which may lead to early termination.",
                       's');
       desc.add_option("split-conditions",
@@ -280,7 +268,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       }
 
       options.solve_strategy =  parser.option_argument_as<int>("solve-strategy");
-      if (options.solve_strategy < 0 || options.solve_strategy > 3)
+      if (options.solve_strategy < 0 || options.solve_strategy > 7)
       {
         throw mcrl2::runtime_error("Invalid strategy " + std::to_string(options.solve_strategy));
       }
@@ -318,9 +306,11 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
         }
         else
         {
-          auto equation_info = compute_equation_info(reach.pbes(), reach.data_index());
-          pbes_system::symbolic_pbessolve_algorithm solver(V, reach.summand_groups(), equation_info, options.no_relprod, options.chaining, reach.data_index());
-          mCRL2log(log::debug) << pbes_system::print_pbes_info(reach.pbes()) << std::endl;
+          pbes_system::symbolic_parity_game G(reach.pbes(), reach.summand_groups(), reach.data_index(), V, options.no_relprod, options.chaining);
+          G.print_information();
+          pbes_system::symbolic_pbessolve_algorithm solver(G);
+
+          mCRL2log(log::debug) << pbes_system::detail::print_pbes_info(reach.pbes()) << std::endl;
           timer().start("solving");
           bool result = solver.solve(reach.initial_state(), V, reach.deadlocks(), reach.W0(), reach.W1());
           timer().finish("solving");

@@ -2773,7 +2773,6 @@ static std::string generate_cpp_filename(std::size_t unique)
   time_t now = time(nullptr);
   struct tm tstruct = *localtime(&now);
 
-
   // The static_cast<std::size_t> is required, as the calculation does not fit into a 32 bit int, yielding a negative number. 
   std::size_t unique_time = ((((static_cast<std::size_t>(tstruct.tm_year)*12+tstruct.tm_mon)*31+tstruct.tm_mday)*24+
                                 tstruct.tm_hour)*60+tstruct.tm_min)*60 + tstruct.tm_sec;

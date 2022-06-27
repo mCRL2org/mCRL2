@@ -142,6 +142,9 @@ class RewriterCompilingJitty: public Rewriter
     // The following vector is to store normal forms of constants, indexed by the sequence number in a constant. 
     std::vector<data_expression> normal_forms_for_constants;
 
+    // The following vector is to store normal forms of constants, indexed by the sequence number in a constant. 
+    std::vector<data_expression> normal_forms_for_constants;
+
     // Standard assignment operator.
     RewriterCompilingJitty& operator=(const RewriterCompilingJitty& other)=delete;
 

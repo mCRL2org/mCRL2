@@ -35,6 +35,7 @@ the `developers' documentation <../developer_manual/index.html>`_.
           :maxdepth: 1
 
           tools
+          external_tools
 
    * - **Build instructions**
 
