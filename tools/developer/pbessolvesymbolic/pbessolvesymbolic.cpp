@@ -30,8 +30,8 @@ class pbesreach_algorithm_partial : public pbes_system::pbesreach_algorithm
 {
 public:
 
-  pbesreach_algorithm_partial(const pbes_system::pbes& pbesspec, const symbolic_reachability_options& options_, std::size_t num_lace_workers) :
-    pbes_system::pbesreach_algorithm(pbesspec, options_, num_lace_workers)
+  pbesreach_algorithm_partial(const pbes_system::pbes& pbesspec, const symbolic_reachability_options& options_) :
+    pbes_system::pbesreach_algorithm(pbesspec, options_)
   {
     m_Vwon[0] = sylvan::ldds::empty_set();
     m_Vwon[1] = sylvan::ldds::empty_set();
@@ -168,6 +168,8 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
                       "'<order>' a user defined permutation e.g. '1 3 2 0 4'"
       );
       desc.add_option("info", "print read/write information of the summands");
+      desc.add_option("max-iterations", utilities::make_optional_argument("NUM", "0"), "limit number of breadth-first iterations to NUM");
+      desc.add_option("print-nodesize", "print the number of LDD nodes in addition to the number of elements represented as 'elements[nodes]'");
       desc.add_option("saturation", "reduce the amount of breadth-first iterations by applying the transition groups until fixed point");
       desc.add_option("solve-strategy",
                       utilities::make_enum_argument<int>("NUM")
@@ -211,6 +213,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       options.cached                                = parser.has_option("cached");
       options.chaining                              = parser.has_option("chaining");
       options.one_point_rule_rewrite                = !parser.has_option("no-one-point-rule-rewrite");
+      options.print_nodesize                        = parser.has_option("print-nodesize");
       options.remove_unused_rewrite_rules           = !parser.has_option("no-remove-unused-rewrite-rules");
       options.replace_constants_by_variables        = false; // This option doesn't work in the current implementation
       options.saturation                            = parser.has_option("saturation");
@@ -272,6 +275,11 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       {
         throw mcrl2::runtime_error("Invalid strategy " + std::to_string(options.solve_strategy));
       }
+      
+      if (parser.has_option("max-iterations"))
+      {
+        options.max_iterations = parser.option_argument_as<std::size_t>("max-iterations");
+      }
     }
 
   public:
@@ -292,7 +300,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
 
       if (options.info)
       {
-        std::cout << lps::print_read_write_patterns(reach.read_write_group_patterns());
+        std::cout << symbolic::print_read_write_patterns(reach.read_write_group_patterns());
       }
       else
       {
@@ -306,16 +314,24 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
         }
         else
         {
-          pbes_system::symbolic_parity_game G(reach.pbes(), reach.summand_groups(), reach.data_index(), V, options.no_relprod, options.chaining);
-          G.print_information();
-          pbes_system::symbolic_pbessolve_algorithm solver(G);
+          if (options.max_iterations == 0)
+          {
+            pbes_system::symbolic_parity_game G(reach.pbes(), reach.summand_groups(), reach.data_index(), V, options.no_relprod, options.chaining);
+            G.print_information();
+            pbes_system::symbolic_pbessolve_algorithm solver(G);
 
-          mCRL2log(log::debug) << pbes_system::detail::print_pbes_info(reach.pbes()) << std::endl;
-          timer().start("solving");
-          bool result = solver.solve(reach.initial_state(), V, reach.deadlocks(), reach.W0(), reach.W1());
-          timer().finish("solving");
+            mCRL2log(log::debug) << pbes_system::detail::print_pbes_info(reach.pbes()) << std::endl;
+            timer().start("solving");
+            bool result = solver.solve(reach.initial_state(), V, reach.deadlocks(), reach.W0(), reach.W1());
+            timer().finish("solving");
 
-          std::cout << (result ? "true" : "false") << std::endl;
+            std::cout << (result ? "true" : "false") << std::endl;
+          }
+          else
+          {
+            // TODO: We could actually try to solve the incomplete parity game.
+            std::cout << "Skipped solving since exploration was limited to max-iterations" << std::endl;
+          }
         }
 
         if (!options.dot_file.empty())
@@ -346,12 +362,12 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       {
         if (options.solve_strategy == 0)
         {
-          pbes_system::pbesreach_algorithm reach(pbesspec, options, lace_n_workers);
+          pbes_system::pbesreach_algorithm reach(pbesspec, options);
           solve(reach);
         }
         else
         {
-          pbes_system::pbesreach_algorithm_partial reach(pbesspec, options, lace_n_workers);
+          pbes_system::pbesreach_algorithm_partial reach(pbesspec, options);
           solve(reach);
         }
       }

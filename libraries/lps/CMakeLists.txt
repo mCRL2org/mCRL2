@@ -7,6 +7,7 @@ add_mcrl2_library(lps
     linearise.cpp
     lpsparunfoldlib.cpp
     next_state_generator.cpp
+    symbolic_lts_io.cpp
   DEPENDS
     mcrl2_core
     mcrl2_data
@@ -17,7 +18,7 @@ add_mcrl2_library(lps
 )
 
 if (UNIX)
-  target_link_libraries(mcrl2_lps sylvan)
+  target_link_libraries(mcrl2_lps mcrl2_symbolic)
 endif()
 
 add_subdirectory(example)

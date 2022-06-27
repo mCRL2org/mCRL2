@@ -20,7 +20,7 @@ using state_t = std::size_t;
 using namespace mcrl2;
 
 /// Sort the action labels such that the first action is the action labelled with 'tag' or 'syncname'.
-std::vector<std::pair<process::action, lps::multi_action>> preprocess_labels(const process::action& tag, std::string& syncname, lts::lts_lts_t& lts)
+std::vector<std::pair<process::action, lps::multi_action>> preprocess_labels(const process::action& tag, std::string& syncname, lts::lts_lts_t& lts, bool introduce_tags)
 {
   std::vector<std::pair<process::action, lps::multi_action>> labels(lts.num_action_labels());
 
@@ -47,20 +47,30 @@ std::vector<std::pair<process::action, lps::multi_action>> preprocess_labels(con
       }
     }
 
-    // Every transition label that is not tau (i.e. not empty) needs to have a tag or synchronisation action.
-    if (label.actions().size() > 0 && first == process::action())
+    // Every transition label needs to have a tag or synchronisation action.
+    if (!introduce_tags)
     {
-      mCRL2log(log::error) << "Label " << label << " does not contain a tag or synchronisation action.\n";
-      throw mcrl2::runtime_error("Unexpected transition.");
+      if (first == process::action())
+      {
+        mCRL2log(log::error) << "Label " << label << " does not contain a tag or synchronisation action.\n";
+        throw mcrl2::runtime_error("Unexpected transition.");
+      }
+    }
+    else
+    {
+      if (first == process::action())
+      {
+        first = tag; // If there was no synchronisation action, assume that we must introduce a tag.
+      }
     }
 
     if (label.has_time())
     {
       mCRL2log(log::error) << "Label " << label << " contains time and this tool does not deal properly with time.\n";
-      throw mcrl2::runtime_error("Timed transition.");
+      throw mcrl2::runtime_error("Unexpected timed transition.");
     }
 
-    assert(label.actions().size() == 0 || first != process::action()); // There should be exactly one.
+    assert(first != process::action()); // There should be exactly one.
     labels[i] = std::make_pair(first, lps::multi_action(actions, label.time()));
   }
 
@@ -71,6 +81,7 @@ std::vector<std::pair<process::action, lps::multi_action>> preprocess_labels(con
 void mcrl2::combine_lts(lts::lts_lts_t& left_lts,
   lts::lts_lts_t& right_lts,
   const std::string& prefix,
+  bool introduce_tags,
   std::ostream& stream)
 {
   // Calculate which states can be reached in a single outgoing step for both LTSs.
@@ -84,13 +95,13 @@ void mcrl2::combine_lts(lts::lts_lts_t& left_lts,
   std::string syncleft(prefix);
   syncleft += "syncleft";
 
-  std::vector<std::pair<process::action, lps::multi_action>> left_labels = preprocess_labels(tag, syncleft, left_lts);
+  std::vector<std::pair<process::action, lps::multi_action>> left_labels = preprocess_labels(tag, syncleft, left_lts, introduce_tags);
 
   // The same preprocessing for the right LTS.
   std::string syncright(prefix);
   syncright += "syncright";
 
-  std::vector<std::pair<process::action, lps::multi_action>> right_labels = preprocess_labels(tag, syncright, right_lts);
+  std::vector<std::pair<process::action, lps::multi_action>> right_labels = preprocess_labels(tag, syncright, right_lts, introduce_tags);
 
   // For every syncleft action label we can cache the corresponding syncright label. 
   std::vector<process::action_label> right_synclabel(left_lts.num_action_labels());
@@ -163,8 +174,6 @@ void mcrl2::combine_lts(lts::lts_lts_t& left_lts,
       }
       else
       {
-       
-
         // Find corresponding synchronisation in the outgoing transitions of the right state.
         for (state_t u = right_outgoing.lowerbound(right_state); u < right_outgoing.upperbound(right_state); ++u)
         {
@@ -223,6 +232,6 @@ void mcrl2::combine_lts(lts::lts_lts_t& left_lts,
 
   for (std::size_t state = 0; state < states.size(); ++state)
   {
-
+    // TODO: Write state labels.
   }
 }

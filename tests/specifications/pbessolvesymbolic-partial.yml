@@ -1,0 +1,60 @@
+nodes:
+  l1:
+    type: pbesspec
+  l2:
+    type: pbes
+
+tools:
+  t1:
+    input: [l1]
+    output: [l2]
+    args: []
+    name: txt2pbes
+  t2:
+    input: [l2]
+    output: []
+    args: []
+    name: pbes2bool
+  t3:
+    input: [l2]
+    output: []
+    args: [-s0]
+    name: pbessolvesymbolic
+  t4:
+    input: [l2]
+    output: []
+    args: [-s1 --aggressive]
+    name: pbessolvesymbolic
+  t5:
+    input: [l2]
+    output: []
+    args: [-s2 --aggressive]
+    name: pbessolvesymbolic
+  t6:
+    input: [l2]
+    output: []
+    args: [-s3 --aggressive]
+    name: pbessolvesymbolic
+  t7:
+    input: [l2]
+    output: []
+    args: [-s4 --aggressive]
+    name: pbessolvesymbolic
+  t8:
+    input: [l2]
+    output: []
+    args: [-s5 --aggressive]
+    name: pbessolvesymbolic
+  t9:
+    input: [l2]
+    output: []
+    args: [-s6 --aggressive]
+    name: pbessolvesymbolic
+  t10:
+    input: [l2]
+    output: []
+    args: [-s7 --aggressive]
+    name: pbessolvesymbolic
+
+result: |
+  result = t2.value['solution'] == t3.value['solution'] == t4.value['solution'] == t5.value['solution'] == t6.value['solution'] == t7.value['solution'] == t8.value['solution'] == t9.value['solution'] == t10.value['solution']

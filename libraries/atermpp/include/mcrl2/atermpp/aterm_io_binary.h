@@ -35,6 +35,8 @@ class binary_aterm_ostream final : public aterm_ostream
 public:
   /// \brief Provide the output stream to which the terms are written.
   binary_aterm_ostream(std::ostream& os);
+  binary_aterm_ostream(std::shared_ptr<mcrl2::utilities::obitstream> stream);
+
   ~binary_aterm_ostream() override;
 
   /// \brief Writes an aterm in a compact binary format where subterms are shared. The term that is
@@ -51,7 +53,7 @@ private:
   /// \returns The number of bits needed to index function symbols.
   unsigned int function_symbol_index_width();
 
-  mcrl2::utilities::obitstream m_stream;
+  std::shared_ptr<mcrl2::utilities::obitstream> m_stream;
 
   unsigned int m_term_index_width; ///< caches the result of term_index_width().
   unsigned int m_function_symbol_index_width; ///< caches the result of function_symbol_index_width().
@@ -66,6 +68,7 @@ class binary_aterm_istream final : public aterm_istream
 public:
   /// \brief Provide the input stream from which terms are read.
   binary_aterm_istream(std::istream& is);
+  binary_aterm_istream(std::shared_ptr<mcrl2::utilities::ibitstream> stream);
 
   aterm get() override;
 
@@ -76,7 +79,7 @@ private:
   /// \returns The number of bits needed to index function symbols.
   unsigned int function_symbol_index_width();
 
-  mcrl2::utilities::ibitstream m_stream;
+  std::shared_ptr<mcrl2::utilities::ibitstream> m_stream;
 
   unsigned int m_term_index_width; ///< caches the result of term_index_width().
   unsigned int m_function_symbol_index_width; ///< caches the result of function_symbol_index_width().

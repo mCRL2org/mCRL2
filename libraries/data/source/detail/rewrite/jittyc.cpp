@@ -1527,6 +1527,8 @@ class RewriterCompilingJitty::ImplementTree
     // the application is either application(variable,t1,..,tn) or application(application(...),t1,..,tn).
 
     const std::size_t arity = a.size();
+    nfs_array rewr_args(arity);
+    rewr_args.fill(true);
     std::stringstream code_string;
     std::stringstream result_types;
 

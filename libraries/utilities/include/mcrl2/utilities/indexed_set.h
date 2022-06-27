@@ -186,7 +186,7 @@ public:
   iterator begin(std::size_t thread_index=0) 
   { 
     lock_shared(thread_index);
-    const_iterator i=m_keys.begin();
+    iterator i=m_keys.begin();
     unlock_shared(thread_index);
     return i;
   }
@@ -195,7 +195,7 @@ public:
   iterator end(std::size_t thread_index=0)
   { 
     lock_shared(thread_index);
-    const_iterator i=m_keys.begin()+m_next_index;
+    iterator i=m_keys.begin()+m_next_index;
     unlock_shared(thread_index);
     return i;
   }

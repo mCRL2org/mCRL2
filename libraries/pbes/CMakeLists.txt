@@ -42,7 +42,7 @@ if(${MCRL2_ENABLE_TESTS})
 endif()
 
 if (UNIX)
-  target_link_libraries(mcrl2_pbes sylvan)
+  target_link_libraries(mcrl2_pbes mcrl2_symbolic)
 endif()
 
 add_subdirectory(example)

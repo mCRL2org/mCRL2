@@ -10,15 +10,12 @@
 #ifndef MCRL2_PBES_SYMBOLIC_PARITY_GAME_H
 #define MCRL2_PBES_SYMBOLIC_PARITY_GAME_H
 
-#include <sylvan_ldd.hpp>
-#include <boost/dynamic_bitset.hpp>
-#include "mcrl2/data/consistency.h"
-#include "mcrl2/data/enumerator.h"
-#include "mcrl2/data/substitution_utility.h"
-#include "mcrl2/lps/symbolic_reachability.h"
-#include "mcrl2/pbes/pbesreach.h"
 #include "mcrl2/pbes/srf_pbes.h"
 #include "mcrl2/pbes/pbes_equation_index.h"
+#include "mcrl2/symbolic/alternative_relprod.h"
+#include "mcrl2/symbolic/data_index.h"
+#include "mcrl2/symbolic/print.h"
+#include "mcrl2/symbolic/symbolic_reachability.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/stopwatch.h"
 
@@ -50,7 +47,7 @@ std::string print_graph(
   const ldd& U,
   const ldd& V,
   const std::vector<SummandGroup>& R,
-  const std::vector<lps::data_expression_index>& data_index,
+  const std::vector<symbolic::data_expression_index>& data_index,
   const ldd& V0, // disjunctive nodes
   const std::map<std::size_t, ldd>& rank_map // maps rank to the corresponding set of nodes
 )
@@ -121,7 +118,7 @@ std::string print_graph(
         u_successors.push_back(index(V_values, w));
       }
     }
-    text[i] = std::to_string(u_index) + " " + print_state(data_index, U_solutions[i]) + ", decoration = " + (includes(V0, u) ? "disjunctive" : "conjunctive") + ", rank = " + std::to_string(rank(u)) + ", successors = " + core::detail::print_list(u_successors);
+    text[i] = std::to_string(u_index) + " " + symbolic::print_state(data_index, U_solutions[i]) + ", decoration = " + (includes(V0, u) ? "disjunctive" : "conjunctive") + ", rank = " + std::to_string(rank(u)) + ", successors = " + core::detail::print_list(u_successors);
   }
   return utilities::string_join(text, "\n");
 }
@@ -164,7 +161,7 @@ std::string print_nodes(const ldd& U, const ldd& V)
 }
 
 /// \brief maps proposition variable ldd values to (rank, is_disjunctive)
-std::map<std::size_t, std::pair<std::size_t, bool>> compute_equation_info(const pbes_system::srf_pbes& pbes, const std::vector<lps::data_expression_index>& data_index)
+std::map<std::size_t, std::pair<std::size_t, bool>> compute_equation_info(const pbes_system::srf_pbes& pbes, const std::vector<symbolic::data_expression_index>& data_index)
 {
   pbes_system::pbes_equation_index equation_index(pbes);
 
@@ -203,12 +200,12 @@ class symbolic_parity_game
 {
   protected:
     ldd m_V[2]; // m_V[0] is the set of even nodes, m_V[1] is the set of odd nodes
-    const std::vector<summand_group>& m_summand_groups;
+    const std::vector<symbolic::summand_group> m_summand_groups;
     std::map<std::size_t, ldd> m_rank_map;
     bool m_no_relprod = false;
     bool m_chaining = false;
 
-    const std::vector<lps::data_expression_index>& m_data_index; // for debugging only
+    const std::vector<symbolic::data_expression_index>& m_data_index; // for debugging only
     ldd m_all_nodes; // for debugging only
 
   public:
@@ -217,8 +214,8 @@ class symbolic_parity_game
     /// \param V the set of reachable vertices.
     symbolic_parity_game(
       const srf_pbes& pbes,
-      const std::vector<summand_group>& summand_groups,
-      const std::vector<lps::data_expression_index>& data_index,
+      const std::vector<symbolic::summand_group> summand_groups,
+      const std::vector<symbolic::data_expression_index>& data_index,
       const ldd& V,
       bool no_relprod,
       bool chaining
@@ -261,6 +258,30 @@ class symbolic_parity_game
         }
       }
     }
+    
+    /// \brief Determine a symbolic parity game from the given pbes, transition groups and index.
+    /// \param V the set of reachable vertices.
+    symbolic_parity_game(
+      const std::vector<symbolic::summand_group>& summand_groups,
+      const std::vector<symbolic::data_expression_index>& data_index,
+      const ldd& V,
+      const ldd& Veven,
+      const std::vector<ldd>& prio,
+      bool no_relprod,
+      bool chaining
+    )
+      : m_summand_groups(summand_groups), m_no_relprod(no_relprod), m_chaining(chaining), m_data_index(data_index), m_all_nodes(V)
+    {
+      m_V[0] = Veven;
+      m_V[1] = minus(V, Veven);
+
+      std::size_t i = 0;
+      for (const auto& p : prio)
+      {
+        m_rank_map[i] = p;
+        ++i;
+      }
+    }
 
     /// \returns Prints basic parity game information such as number of vertices per priority and per owners.
     void print_information()
@@ -275,13 +296,13 @@ class symbolic_parity_game
     }
 
     /// \returns A string representing the given vertex set in human readable form.
-    std::string print_nodes(const ldd& V)
+    std::string print_nodes(const ldd& V) const
     {
       return detail::print_nodes(V, m_all_nodes);
     }
 
     /// \returns A string representing the graph restricted to V.
-    std::string print_graph(const ldd& V)
+    std::string print_graph(const ldd& V) const
     {
       return detail::print_graph(V, m_all_nodes, m_summand_groups, m_data_index, m_V[0], m_rank_map);
     }
@@ -297,7 +318,7 @@ class symbolic_parity_game
       const ldd& V,
       const std::array<const ldd, 2>& Vplayer,
       const ldd& I = sylvan::ldds::empty_set(),
-      const ldd& T = sylvan::ldds::empty_set())
+      const ldd& T = sylvan::ldds::empty_set()) const
     {
       stopwatch attractor_watch;
       mCRL2log(log::debug) << "start attractor set computation\n";
@@ -345,7 +366,7 @@ class symbolic_parity_game
        const ldd& V,
        const std::array<const ldd, 2>& Vplayer,
        const ldd& I = sylvan::ldds::empty_set(),
-       const ldd& T = sylvan::ldds::empty_set())
+       const ldd& T = sylvan::ldds::empty_set()) const
     {
       using namespace sylvan::ldds;
 
@@ -396,7 +417,7 @@ class symbolic_parity_game
     }
 
     /// \returns (min, Vmin) where min is the minimum rank in V and Vmin is the set of vertices with the minimum rank in V
-    std::pair<std::size_t, ldd> get_min_rank(const ldd& V)
+    std::pair<std::size_t, ldd> get_min_rank(const ldd& V) const
     {
       using namespace sylvan::ldds;
 
@@ -413,13 +434,43 @@ class symbolic_parity_game
       throw mcrl2::runtime_error("get_min_rank did not find any nodes");
     }
 
-    std::array<const ldd, 2> players(const ldd& V)
+    /// \brief Computes the pair of even and odd vertices.
+    std::array<const ldd, 2> players(const ldd& V) const
     {
       return { intersect(V, m_V[0]), intersect(V, m_V[1]) };
     }
 
+    /// \brief Computes the vertices with even parity priority that are not sinks and the same for odd.
+    std::array<const ldd, 2> parity(const ldd& V) const
+    {
+      std::array<ldd, 2> parity;
+      for (const auto&[rank, Vrank] : ranks())
+      {
+        parity[rank % 2] = sylvan::ldds::union_(parity[rank % 2], Vrank);
+      }
+
+      ldd Vother = minus(V, sinks(V, V));
+      return { intersect(Vother, parity[0]), intersect(Vother, parity[1]) };
+    }
+
+    /// \brief Computes all vertices above priority c.
+    ldd prio_above(const ldd& V, std::size_t c) const
+    {      
+      // Compute the set of states with at least priority c.
+      ldd Vc = sylvan::ldds::empty_set();
+      for (const auto&[rank, Vrank] : m_rank_map)
+      {
+        if (rank >= c)
+        {
+          Vc = union_(Vc, Vrank);
+        }
+      }
+
+      return intersect(V, Vc);
+    }
+
     /// \brief Removes all winning states (and updates winning partition).
-    ldd compute_total_graph(const ldd& V, const ldd& I, const ldd& Vsinks, std::array<ldd, 2>& winning)
+    ldd compute_total_graph(const ldd& V, const ldd& I, const ldd& Vsinks, std::array<ldd, 2>& winning) const
     {
       using namespace sylvan::ldds;
       std::array<const ldd, 2> Vplayer = players(V);
@@ -443,7 +494,7 @@ class symbolic_parity_game
     ldd compute_safe_vertices(
         std::size_t alpha,
         const ldd& V,
-        const ldd& I)
+        const ldd& I) const
     {
       using namespace sylvan::ldds;
 
@@ -454,17 +505,17 @@ class symbolic_parity_game
     }
 
     /// \brief Returns the mapping from priorities (ranks) to vertex sets.
-    const std::map<std::size_t, ldd>& ranks() { return m_rank_map; }
+    const std::map<std::size_t, ldd>& ranks() const { return m_rank_map; }
 
     /// \returns The set { u in U | exists v in V: u ->* v } where with chaining ->* only visits states in V (if U subseteq V)
-    ldd predecessors(const ldd& U, const ldd& V)
+    ldd predecessors(const ldd& U, const ldd& V) const
     {
       using namespace sylvan::ldds;
 
       ldd result;
       for (int i = m_summand_groups.size() - 1; i >= 0; --i)
       {
-        const summand_group& group = m_summand_groups[i];
+        const symbolic::summand_group& group = m_summand_groups[i];
 
         stopwatch watch;
         result = union_(result, predecessors(U, V, group));
@@ -477,7 +528,7 @@ class symbolic_parity_game
 
     /// \returns A set of vertices { u in U | exists v in V: u ->* v } where ->* only visits intermediate vertices in W (without chaining ->* = ->)
     /// \pre U,W subseteq V.
-    ldd predecessors(const ldd& U, const ldd& V, const ldd& W)
+    ldd predecessors(const ldd& U, const ldd& V, const ldd& W) const
     {
       using namespace sylvan::ldds;
 
@@ -487,7 +538,7 @@ class symbolic_parity_game
         ldd todo = V;
         for (int i = m_summand_groups.size() - 1; i >= 0; --i)
         {
-          const summand_group& group = m_summand_groups[i];
+          const symbolic::summand_group& group = m_summand_groups[i];
 
           stopwatch watch;
           ldd todo1 = predecessors(U, todo, group);
@@ -513,17 +564,23 @@ class symbolic_parity_game
       const ldd& V,
       const ldd& W,
       const std::array<const ldd, 2>& Vplayer,
-      const ldd& I = sylvan::ldds::empty_set())
+      const ldd& I = sylvan::ldds::empty_set()) const
     {
       ldd outside = minus(V, U);
       return safe_control_predecessors_impl(alpha, U, V, outside, W, Vplayer, I);
     }
 
+    /// \brief Computes the set of vertices in U subseteq V that are sinks (no outgoing edges into V).
+    ldd sinks(const ldd& U, const ldd& V) const
+    {
+      return minus(U, predecessors(U, V));
+    }   
+
 private:
     /// \returns The set { u in U | exists v in V: u -> v }, where -> is described by the given group.
-    ldd predecessors(const ldd& U, const ldd& V, const summand_group& group)
+    ldd predecessors(const ldd& U, const ldd& V, const symbolic::summand_group& group) const
     {
-      return m_no_relprod ? lps::alternative_relprev(V, group, U) : relprev(V, group.L, group.Ir, U);
+      return m_no_relprod ? symbolic::alternative_relprev(V, group, U) : relprev(V, group.L, group.Ir, U);
     }
 
     /// \brief Compute the safe control attractor set for todo where chaining is restricted to W.
@@ -534,7 +591,7 @@ private:
       const ldd& outside,
       const ldd& W,
       const std::array<const ldd, 2>& Vplayer,
-      const ldd& I = sylvan::ldds::empty_set())
+      const ldd& I = sylvan::ldds::empty_set()) const
     {
       using namespace sylvan::ldds;
 
@@ -544,7 +601,7 @@ private:
 
       for (std::size_t i = 0; i < m_summand_groups.size(); ++i)
       {
-        const summand_group& group = m_summand_groups[i];
+        const symbolic::summand_group& group = m_summand_groups[i];
 
         stopwatch watch;
         Pforced = minus(Pforced, predecessors(Pforced, outside, group));
@@ -554,13 +611,7 @@ private:
       }
 
       return union_(Palpha, Pforced);
-    }
-
-    /// \brief Computes the set of vertices in U subseteq V that are sinks (no outgoing edges into V).
-    ldd sinks(const ldd& U, const ldd& V)
-    {
-      return minus(U, predecessors(U, V));
-    }    
+    } 
 };
 
 } // namespace pbes_system

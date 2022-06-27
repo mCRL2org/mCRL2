@@ -12,7 +12,9 @@
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/lpsreach.h"
 #include "mcrl2/lps/io.h"
+#include "mcrl2/lps/symbolic_lts_io.h"
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/symbolic/ordering.h"
 
 using namespace mcrl2;
 using data::tools::rewriter_tool;
@@ -23,7 +25,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
   typedef rewriter_tool<input_output_tool> super;
 
   protected:
-    lps::symbolic_reachability_options options;
+    symbolic::symbolic_reachability_options options;
 
     // Lace options
     std::size_t lace_n_workers = 1;
@@ -57,7 +59,9 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
                       "'random' variables are put in a random order\n"
                       "'<order>' a user defined permutation e.g. '1 3 2 0 4'"
                       );
-      desc.add_option("saturation", "reduce the amount of breadth-first iterations by applying the transition groups until fixed point");
+      desc.add_option("max-iterations", utilities::make_optional_argument("NUM", "0"), "limit number of breadth-first iterations to NUM");
+      desc.add_option("print-nodesize", "print the number of LDD nodes in addition to the number of elements represented as 'elements[nodes]'");
+      desc.add_option("saturation", "reduce the amount of breadth-first iterations required by applying the transition groups until fixed point is reached");
       desc.add_hidden_option("no-discard", "do not discard any parameters");
       desc.add_hidden_option("no-read", "do not discard only-read parameters");
       desc.add_hidden_option("no-write", "do not discard only-write parameters");
@@ -76,6 +80,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
       options.chaining                              = parser.has_option("chaining");
       options.detect_deadlocks                      = parser.has_option("deadlock");
       options.one_point_rule_rewrite                = !parser.has_option("no-one-point-rule-rewrite");
+      options.print_nodesize                        = parser.has_option("print-nodesize");
       options.remove_unused_rewrite_rules           = !parser.has_option("no-remove-unused-rewrite-rules");
       options.replace_constants_by_variables        = false; // This option cannot be used in the symbolic algorithm
       options.saturation                            = parser.has_option("saturation");
@@ -120,6 +125,10 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
           throw mcrl2::runtime_error("The table-ratio should be a power of two.");
         }
       }
+      if (parser.has_option("max-iterations"))
+      {
+        options.max_iterations = parser.option_argument_as<std::size_t>("max-iterations");
+      }
     }
 
   public:
@@ -153,11 +162,11 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
         throw mcrl2::runtime_error("Processes without parameters are not supported");
       }
 
-      lps::lpsreach_algorithm algorithm(lpsspec, options, lace_n_workers);
+      lps::lpsreach_algorithm algorithm(lpsspec, options);
 
       if (options.info)
       {
-        std::cout << lps::print_read_write_patterns(algorithm.read_write_group_patterns());
+        std::cout << symbolic::print_read_write_patterns(algorithm.read_write_group_patterns());
       }
       else
       {
@@ -165,6 +174,21 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
         if (!options.dot_file.empty())
         {
           print_dot(options.dot_file, V);
+        }
+
+        if (output_filename().empty())
+        {
+          std::cout << algorithm.get_symbolic_lts();
+        }
+        else
+        {
+          std::ofstream to(output_filename(), std::ofstream::out | std::ofstream::binary);
+          if (!to.good())
+          {
+            throw mcrl2::runtime_error("Could not write to filename " + output_filename());
+          }
+
+          to << algorithm.get_symbolic_lts();
         }
       }
 

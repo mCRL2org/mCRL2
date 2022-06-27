@@ -36,8 +36,13 @@ try_add_c_flag(-Wall)
 try_add_c_flag(-Wno-inline)
 try_add_c_flag(-fno-strict-overflow)
 try_add_c_flag(-pipe)
-try_add_c_flag(-pedantic                 DEBUG)
-try_add_c_flag(-W                        DEBUG)
+#try_add_c_flag(-pedantic)
+try_add_c_flag(-W                      DEBUG)
+
+# Ignore specific warnings produced in Sylvan.
+try_add_c_flag(-Wno-c99-extensions)
+try_add_c_flag(-Wno-gnu-zero-variadic-macro-arguments)
+try_add_c_flag(-Wno-zero-length-array)
 
 # The following flags are not implemented in clang and therefore cause warnings.
 if(NOT MCRL2_CLANG)
@@ -80,6 +85,11 @@ try_add_cxx_flag(-Wno-system-headers     DEBUG)
 try_add_cxx_flag(-Woverloaded-virtual    DEBUG)
 try_add_cxx_flag(-Wwrite-strings         DEBUG)
 try_add_cxx_flag(-Wmissing-declarations  DEBUG)
+
+# Ignore specific warnings produced in Sylvan.
+try_add_cxx_flag(-Wno-c99-extensions)
+try_add_cxx_flag(-Wno-gnu-zero-variadic-macro-arguments)
+try_add_cxx_flag(-Wno-zero-length-array)
 
 # The following flags are not implemented in clang and therefore cause warnings.
 if(NOT MCRL2_CLANGPP)
