@@ -25,6 +25,7 @@
 #include <algorithm>
 #include <cassert>
 #include <set>
+#include <map>
 #include "mcrl2/lts/transition.h"
 #include "mcrl2/lts/lts_type.h"
 
@@ -482,40 +483,112 @@ class lts: public LTS_BASE
         return;
       }
 
+      std::map<labels_size_type, labels_size_type> action_rename_map;
       for (labels_size_type i=0; i< num_action_labels(); ++i)
       {
         ACTION_LABEL_T a=action_label(i);
         a.hide_actions(tau_actions);
-        if (a==ACTION_LABEL_T())  
+        if (a==ACTION_LABEL_T::tau_action())  
         {
-          m_hidden_label_set.insert(i);
+          if (i!=const_tau_label_index)
+          {
+            m_hidden_label_set.insert(i);
+          }
         }
         else if (a!=action_label(i))
         {
-          set_action_label(i,a);  
+          /* In this the action_label i is changed by the tau_actions but not renamed to tau.
+             We check whether a maps onto another action label index. If yes, it is added to 
+             the rename map, and we explicitly rename transition labels with this label afterwards.
+             If no, we rename the action label.
+          */
+          bool found=false;
+          for (labels_size_type j=0; !found && j< num_action_labels(); ++j)
+          {
+            if (a==action_label(j))
+            { 
+              if (i!=j)
+              {
+                action_rename_map[i]=j;
+              }
+              found=true;
+            }
+          }
+          if (!found) // a!=action_label(j) for any j, then rename action_label(i) to a. 
+          { 
+            set_action_label(i,a);
+          }
+        }
+      }
+
+      if (action_rename_map.size()>0)    // Check whether there are action labels that must be renamed, and
+      {
+        for(transition& t: m_transitions)
+        {
+          auto i = action_rename_map.find(t.label());
+          if (i!=action_rename_map.end())
+          { 
+            t=transition(t.from(),i->second,t.to());
+          }
         }
       }
     }
 
-    /** \brief Apply the recorded actions that are renamed to internal actions to the lts. 
-     *  \details After hiding actions, it checks whether action labels are
-     *           equal and merges actions with the same labels in the lts.
+    /** \brief Rename the hidden actions in the lts. 
+     *  \details Multiactions can be partially renamed. I.e. a|b becomes a if b is hidden.
+     *           In such a case the new action a is mapped onto an existing action a; if such
+     *           a label a does not exist, the action a|b is renamed to a. 
      *  \param[in] tau_actions Vector with strings indicating which actions must be
      *       transformed to tau's */
-    void apply_hidden_actions(void)
+    void apply_hidden_actions(const std::vector<std::string>& tau_actions)
     {
-      if (m_hidden_label_set.size()>0)    // Check whether there is something to rename.
+      if (tau_actions.size()==0)
+      { 
+        return;
+      }
+      
+      std::map<labels_size_type, labels_size_type> action_rename_map;
+      for (labels_size_type i=0; i< num_action_labels(); ++i)
+      {
+        ACTION_LABEL_T a=action_label(i);
+        a.hide_actions(tau_actions);
+#ifndef NDEBUG
+        ACTION_LABEL_T b=a;
+        b.hide_actions(tau_actions);
+        assert(a==b); // hide_actions applied twice yields the same result as applying it once.
+#endif
+        bool found=false;
+        for (labels_size_type j=0; !found && j< num_action_labels(); ++j)
+        {
+          if (a==action_label(j))
+          { 
+            if (i!=j)
+            {
+              action_rename_map[i]=j;
+            }
+            found=true;
+          }
+        }
+        if (!found) // a!=action_label(j) for any j, then rename action_label(i) to a. 
+        { 
+          set_action_label(i,a);
+        }
+      }
+    
+
+      if (action_rename_map.size()>0)    // Check whether there is something to rename.
       {
         for(transition& t: m_transitions)
         {
-          if (m_hidden_label_set.count(t.label()))
+          auto i = action_rename_map.find(t.label());
+          if (i!=action_rename_map.end())
           { 
-            t=transition(t.from(),tau_label_index(),t.to());
+            t=transition(t.from(),i->second,t.to());
           }
         }
-        m_hidden_label_set.clear();       // Empty the hidden label set. 
       }
     }
+
     /** \brief Checks whether this LTS has state values associated with its states.
      * \retval true if the LTS has state information;
      * \retval false otherwise.

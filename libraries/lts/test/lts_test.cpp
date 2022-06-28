@@ -149,7 +149,7 @@ static void reduce_lts_in_various_ways(const std::string& test_description,
   BOOST_CHECK(is_deterministic(l));
 }
 
-static void reduce_simple_loop()
+BOOST_AUTO_TEST_CASE(reduce_simple_loop)
 {
   std::string SIMPLE_AUT =
     "des (0,2,2)\n"
@@ -173,7 +173,7 @@ static void reduce_simple_loop()
   reduce_lts_in_various_ways("Simple loop", SIMPLE_AUT, expected);
 }
 
-static void reduce_simple_loop_with_tau()
+BOOST_AUTO_TEST_CASE(reduce_simple_loop_with_tau)
 {
   std::string SIMPLE_AUT =
     "des (0,2,2)\n"
@@ -200,7 +200,7 @@ static void reduce_simple_loop_with_tau()
 /* The example below was encountered by David Jansen. The problem is that
  * for branching bisimulations the tau may supersede the b, not leading to the
  * necessary splitting into two equivalence classes. */
-static void tricky_example_for_branching_bisimulation()
+BOOST_AUTO_TEST_CASE(tricky_example_for_branching_bisimulation)
 {
   std::string TRICKY_BB =
     "des (0,3,2)\n"
@@ -226,7 +226,7 @@ static void tricky_example_for_branching_bisimulation()
 }
 
 
-static void reduce_abp()
+BOOST_AUTO_TEST_CASE(reduce_abp)
 {
   std::string ABP_AUT =
     "des (0,92,74)\n"
@@ -342,7 +342,7 @@ static void reduce_abp()
 
 // Peterson's protocol has the interesting property that the number of states modulo branching bisimulation
 // differs from the number of states modulo weak bisimulation, as observed by Rob van Glabbeek.
-static void reduce_peterson()
+BOOST_AUTO_TEST_CASE(reduce_peterson)
 {
   std::string PETERSON_AUT =
     "des (0,59,35)\n"
@@ -423,7 +423,7 @@ static void reduce_peterson()
   reduce_lts_in_various_ways("Peterson protocol", PETERSON_AUT, expected);
 }
 
-static void test_reachability()
+BOOST_AUTO_TEST_CASE(test_reachability)
 {
   std::string REACH =
     "des (0,4,5)       \n"
@@ -449,7 +449,7 @@ static void test_reachability()
 
 // The example below caused failures in the GW mlogn branching bisimulation
 // algorithm when cleaning the code up.
-static void failing_test_groote_wijs_algorithm()
+BOOST_AUTO_TEST_CASE(failing_test_groote_wijs_algorithm)
 {
   std::string GWLTS =
     "des(0,29,10)\n"
@@ -511,7 +511,7 @@ static void failing_test_groote_wijs_algorithm()
 // It has not been implemented fully. The problem is that it is difficult to
 // prescribe the order in which refinements have to be done.
 
-static void counterexample_jk_1(std::size_t k)
+void counterexample_jk_1(std::size_t k)
 {
     // numbering scheme of states:
     // states 0..k-1 are the blue squares
@@ -571,7 +571,7 @@ static void counterexample_jk_1(std::size_t k)
 
 // In the meantime, the bug is corrected:  this is why the first part of the
 // algorithm now follows a much simpler line than previously.
-static void counterexample_postprocessing()
+BOOST_AUTO_TEST_CASE(counterexample_postprocessing)
 {
   std::string POSTPROCESS_AUT =
     "des(0,33,13)\n"
@@ -634,7 +634,7 @@ static void counterexample_postprocessing()
   test_lts("postprocessing problem (branching bisimulation signature [Blom/Orzan 2003])",l,expected_label_count, expected_state_count, expected_transition_count);
 }
 
-static void regression_delete_old_bb_slice()
+BOOST_AUTO_TEST_CASE(regression_delete_old_bb_slice)
 {
   std::string POSTPROCESS_AUT =
     "des(0,163,100)\n"
@@ -824,7 +824,7 @@ static void regression_delete_old_bb_slice()
   test_lts("regression test for GJKW bug (branching bisimulation signature [Blom/Orzan 2003])",l,expected_label_count, expected_state_count, expected_transition_count);
 }
 
-void is_deterministic_test1()
+BOOST_AUTO_TEST_CASE(is_deterministic_test1)
 {
   std::string automaton =
     "des(0,2,2)\n"
@@ -837,7 +837,7 @@ void is_deterministic_test1()
   BOOST_CHECK(is_deterministic(l_det));
 }
 
-void is_deterministic_test2()
+BOOST_AUTO_TEST_CASE(is_deterministic_test2)
 {
   std::string automaton =
     "des(0,2,2)\n"
@@ -850,24 +850,25 @@ void is_deterministic_test2()
   BOOST_CHECK(!is_deterministic(l_det));
 }
 
-void test_is_deterministic()
+BOOST_AUTO_TEST_CASE(hide_actions1)
 {
-  is_deterministic_test1();
-  is_deterministic_test2();
-}
+  std::string automaton =
+     "des (0,4,3)\n"
+     "(0,\"<state>\",1)\n"
+     "(1,\"return|hello\",2)\n"
+     "(1,\"return\",2)\n"
+     "(2,\"world\",1)\n";
 
-BOOST_AUTO_TEST_CASE(test_main)
-{
-  reduce_simple_loop();
-  reduce_simple_loop_with_tau();
-  tricky_example_for_branching_bisimulation();
-  reduce_abp();
-  reduce_peterson();
-  test_reachability();
-  test_is_deterministic();
-  failing_test_groote_wijs_algorithm();
-  counterexample_jk_1(3);
-  counterexample_postprocessing();
-  regression_delete_old_bb_slice();
-  // TODO: Add groote wijs branching bisimulation and add weak bisimulation tests. For the last Peterson is a good candidate.
+  std::istringstream is(automaton);
+  lts::lts_aut_t l;
+  l.load(is);
+  std::vector<std::string>hidden_actions(1,"hello");
+  l.apply_hidden_actions(hidden_actions);
+  reduce(l,lts::lts_eq_bisim);
+  std::size_t expected_label_count = 5;
+  std::size_t expected_state_count = 3;
+  std::size_t expected_transition_count = 3;
+  test_lts("regression test for GJKW bug (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",l,expected_label_count, expected_state_count, expected_transition_count);
+
+
 }
