@@ -69,6 +69,9 @@ class specification_base
     /// \brief The process type
     typedef LinearProcess process_type;
 
+    /// \brief The initial process type
+    typedef InitialProcessExpression initial_process_type;
+
     /// \brief Constructor.
     specification_base()
     { }

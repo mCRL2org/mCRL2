@@ -40,9 +40,17 @@ struct add_capture_avoiding_replacement: public process::detail::add_capture_avo
   void do_action_summand(ActionSummand& x, const data::variable_list& v)
   {
     x.summation_variables() = v;
-    apply(x.condition(), x.condition());
-    apply(x.multi_action(), x.multi_action());
-    apply(x.assignments(), x.assignments());
+    data::data_expression condition;
+    lps::multi_action multi_action;
+    data::assignment_list assignments;
+
+    apply(condition, x.condition());
+    apply(multi_action, x.multi_action());
+    apply(assignments, x.assignments());
+
+    x.condition() = condition;
+    x.multi_action() = multi_action;
+    x.assignments() = assignments;
   }
 
   void update(action_summand& x)
@@ -58,7 +66,10 @@ struct add_capture_avoiding_replacement: public process::detail::add_capture_avo
     data::variable_list sumvars = x.summation_variables();
     data::variable_list v1 = sigma.add_fresh_variable_assignments(sumvars);
     do_action_summand(x, v1);
-    apply(x.distribution(), x.distribution());
+
+    lps::stochastic_distribution dist;
+    apply(dist, x.distribution());
+    x.distribution() = dist;
     sigma.remove_fresh_variable_assignments(sumvars);
   }
 
@@ -67,7 +78,11 @@ struct add_capture_avoiding_replacement: public process::detail::add_capture_avo
     data::variable_list sumvars = x.summation_variables();
     data::variable_list v1 = sigma.add_fresh_variable_assignments(sumvars);
     x.summation_variables() = v1;
-    apply(x.condition(), x.condition());
+    
+    data::data_expression condition;
+    apply(condition, x.condition());
+    x.condition() = condition;
+
     update(x.deadlock());
     sigma.remove_fresh_variable_assignments(sumvars);
   }
@@ -99,9 +114,18 @@ struct add_capture_avoiding_replacement: public process::detail::add_capture_avo
     data::variable_list global_vars = x.global_variables();
     data::variable_list v1 = sigma.add_fresh_variable_assignments(global_vars);
     x.global_variables() = std::set<data::variable>(v1.begin(), v1.end());
-    apply(x.process(), x.process());
-    apply(x.action_labels(), x.action_labels());
-    apply(x.initial_process(), x.initial_process());
+
+    typename Specification::process_type process;
+    process::action_label_list action_labels;
+    typename Specification::initial_process_type initial_process;
+
+    apply(process, x.process());
+    apply(action_labels, x.action_labels());
+    apply(initial_process, x.initial_process());
+    x.process() = process;
+    x.action_labels() = action_labels;
+    x.initial_process() = initial_process;
+
     sigma.remove_fresh_variable_assignments(global_vars);
   }
 
