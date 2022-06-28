@@ -54,13 +54,8 @@ class term_balanced_tree : public aterm_appl
 
     static const function_symbol& tree_empty_function() { return g_empty; }
     static const function_symbol& tree_single_node_function() { return g_single_tree_node; }
-    static const function_symbol& tree_node_function() { return g_tree_node; }
-    
-    static const aterm_appl& empty_tree() 
-    { 
-      static aterm_appl g_empty_tree(g_empty);
-      return g_empty_tree; 
-    }
+    static const function_symbol& tree_node_function() { return g_tree_node; }    
+    static const aterm_appl& empty_tree() { return g_empty_tree; }
 
     template < typename ForwardTraversalIterator, class Transformer >
     static void make_tree_helper(aterm& result, ForwardTraversalIterator& p, const std::size_t size, Transformer transformer)
@@ -100,7 +95,11 @@ class term_balanced_tree : public aterm_appl
       }
       else if (size==1)
       {
-        transformer(reinterpret_cast<Term&>(result), *(p++));
+        make_term_appl(result, tree_single_node_function(),
+          [&transformer,&p](aterm& target) 
+            {
+              transformer(reinterpret_cast<Term&>(target), *(p++));
+            });
       }
       else
       {
