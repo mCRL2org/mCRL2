@@ -213,24 +213,28 @@ std::pair<std::vector<std::size_t>, std::vector<std::size_t>> compute_read_write
 
 std::vector<std::uint32_t> optimise_project(const std::vector<std::uint32_t>& Ip_values)
 {
-  // The index after which all values in Ip_values are the same.
-  int i = Ip_values.size() - 1;
-  while (i > 0 && Ip_values[i] == Ip_values.back())
+  if (Ip_values.size() > 1)
   {
-    --i;
+    // The index after which all values in Ip_values are the same (at least two entries).
+    int i = Ip_values.size() - 1;
+    while (i > 0 && Ip_values[i] == Ip_values.back())
+    {
+      --i;
+    }
+
+    std::vector<std::uint32_t> result(Ip_values.begin(), Ip_values.begin() + i + 2);
+    if (result.back() == 0)
+    {
+      result.back() = static_cast<std::uint32_t>(-2);
+    }
+    else
+    {
+      result.back() = static_cast<std::uint32_t>(-1);
+    }
+    return result;
   }
 
-  std::vector<std::uint32_t> result(Ip_values.begin(), Ip_values.begin() + i + 2);
-  if (result.back() == 0)
-  {
-    result.back() = static_cast<std::uint32_t>(-2);
-  }
-  else
-  {
-    result.back() = static_cast<std::uint32_t>(-1);
-  }
-
-  return result;
+  return Ip_values;
 }
 
 } // namespace mcrl2::symbolic

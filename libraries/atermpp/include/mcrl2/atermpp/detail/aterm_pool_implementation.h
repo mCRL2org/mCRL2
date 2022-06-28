@@ -256,8 +256,7 @@ void aterm_pool::collect_impl(thread_aterm_pool_interface* thread)
   // Keep track of the duration for marking and reset for sweep.
   auto mark_duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - timestamp).count();
   timestamp = std::chrono::system_clock::now();
-
-  // Garbage collect terms that are not reachable.
+  // Collect all terms that are not marked.
   m_appl_dynamic_storage.sweep();
   std::get<7>(m_appl_storage).sweep();
   std::get<6>(m_appl_storage).sweep();

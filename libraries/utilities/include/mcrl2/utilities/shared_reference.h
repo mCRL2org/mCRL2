@@ -16,6 +16,8 @@
 #include <atomic>
 #include <type_traits>
 
+#include "mcrl2/utilities/tagged_pointer.h"
+
 namespace mcrl2
 {
 namespace utilities
@@ -250,7 +252,7 @@ public:
     m_reference.untag();
   }
 
-protected:
+private:
   mutable utilities::tagged_pointer<T> m_reference;
 };
 

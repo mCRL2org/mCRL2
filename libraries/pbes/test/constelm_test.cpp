@@ -272,5 +272,7 @@ BOOST_AUTO_TEST_CASE(test_constelm)
   test_pbes(t15, x15, false);
   test_pbes(t16, x16, true);
   test_pbes(t17, x17, false);
+
+  data::detail::set_enumerator_iteration_limit(50); // This final test requires 50*50 enumerations and the default limit of 1000 takes too long.
   test_pbes(t18, x18, true);
 }

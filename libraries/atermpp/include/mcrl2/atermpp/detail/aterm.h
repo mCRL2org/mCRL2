@@ -64,7 +64,7 @@ public:
     return m_function_symbol;
   }
 
-  /// \brief Mark this term to be reachable.
+  /// \brief Mark this term to be garbage collected.
   void mark() const
   {
     m_function_symbol.m_function_symbol.tag();

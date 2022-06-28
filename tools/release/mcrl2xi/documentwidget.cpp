@@ -17,7 +17,6 @@ DocumentWidget::DocumentWidget(QWidget *parent, QThread *atermThread, mcrl2::dat
   m_solver(atermThread, strategy)
 {
   document()->setModified(false);
-  connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(onCursorPositionChanged()));
 }
 
 QString DocumentWidget::getFileName()

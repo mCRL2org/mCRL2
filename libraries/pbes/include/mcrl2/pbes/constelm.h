@@ -34,28 +34,97 @@ void make_constelm_substitution(const std::map<data::variable, data::data_expres
   }
 }
 
-/// \cond INTERNAL_DOCS
-/// \brief Compares two terms
-/// \param v A term
-/// \param w A term
-/// \return True if v is less than w
-inline
-bool less_term(const atermpp::aterm_appl& v, const atermpp::aterm_appl& w)
+class quantified_variable
 {
-  return v < w;
-}
+protected:
+  bool m_is_forall;
+  data::variable m_var;
 
-struct constelm_edge_condition
-{
-  typedef std::multimap<propositional_variable_instantiation, std::set<data::data_expression> > condition_map;
-
-  data::data_expression TC;
-  data::data_expression FC;
-  condition_map condition;  // condT + condF
-
-  constelm_edge_condition(const data::data_expression& tc, const data::data_expression& fc)
-    : TC(tc), FC(fc)
+public:
+  quantified_variable(bool is_forall, const data::variable& var)
+  : m_is_forall(is_forall)
+  , m_var(var)
   {}
+
+  bool is_forall() const
+  {
+    return m_is_forall;
+  }
+
+  const data::variable& variable() const
+  {
+    return m_var;
+  }
+
+  bool operator==(const quantified_variable& other) const
+  {
+    return m_is_forall == other.m_is_forall && m_var == other.m_var;
+  }
+
+  bool operator!=(const quantified_variable& other) const
+  {
+    return !(*this == other);
+  }
+
+  bool operator<(const quantified_variable& other) const
+  {
+    return m_is_forall < other.m_is_forall || (m_is_forall == other.m_is_forall && m_var < other.m_var);
+  }
+
+  pbes_expression make_expr(const pbes_expression& expr) const
+  {
+    return m_is_forall ? pbes_expression(forall(data::variable_list({m_var}), expr)) : pbes_expression(exists(data::variable_list({m_var}), expr));
+  }
+
+  std::string to_string() const
+  {
+    std::ostringstream out;
+    out << (is_forall() ? "forall " : "exists ") << variable() << ". ";
+    return out.str();
+  }
+};
+
+/// \brief A quantified predicate variable instantiation
+struct QPVI
+{
+  std::list<quantified_variable> Q;
+  propositional_variable_instantiation X_e;
+
+  bool operator<(const QPVI& other) const
+  {
+    return std::tie(Q, X_e) < std::tie(other.Q, other.X_e);
+  }
+};
+
+struct edge_details
+{
+  /// \brief Contains expressions that characterise when an edge is enabled.
+  /// The conjunction of these expressions is a guard for some PVI.
+  std::set<data::data_expression> conditions;
+  /// \brief The set of free variables that occur on the other side of the conjunctions this
+  /// PVI occurs in. Can be used to determine whether the quantifier inside rewriter
+  /// can manage to push an existential quantifier all the way to this PVI.
+  std::set<data::variable> conjunctive_context_FV;
+  /// \brief The set of free variables that occur on the other side of the conjunctions this
+  /// PVI occurs in. Can be used to determine whether the quantifier inside rewriter
+  /// can manage to push a universal quantifier all the way to this PVI.
+  std::set<data::variable> disjunctive_context_FV;
+};
+
+struct edge_traverser_stack_elem
+{
+  typedef std::multimap<QPVI, edge_details> edge_map;
+
+  data::data_expression Cpos;
+  data::data_expression Cneg;
+  std::set<data::variable> FV;
+  edge_map edges;
+
+  edge_traverser_stack_elem(const data::data_expression& cond_pos, const data::data_expression& cond_neg, std::set<data::variable>&& free_vars)
+    : Cpos(cond_pos), Cneg(cond_neg)
+  {
+    std::swap(FV, free_vars);
+  }
 };
 
 struct edge_condition_traverser: public pbes_expression_traverser<edge_condition_traverser>
@@ -65,154 +134,260 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
   using super::leave;
   using super::apply;
 
-  typedef constelm_edge_condition edge_condition;
-  typedef edge_condition::condition_map condition_map;
+  typedef edge_traverser_stack_elem stack_elem;
+  typedef stack_elem::edge_map edge_map;
+  typedef std::list<detail::quantified_variable> qvar_list;
 
-  std::vector<edge_condition> condition_stack;
+  std::vector<stack_elem> condition_fv_stack;
+  std::list<pbes_expression> quantified_context;
 
-  void push(const edge_condition& x)
+  void push(const stack_elem& x)
   {
-    condition_stack.push_back(x);
+    condition_fv_stack.push_back(x);
   }
 
-  edge_condition& top()
+  stack_elem& top()
   {
-    return condition_stack.back();
+    return condition_fv_stack.back();
   }
 
-  const edge_condition& top() const
+  const stack_elem& top() const
   {
-    return condition_stack.back();
+    return condition_fv_stack.back();
   }
 
-  edge_condition pop()
+  stack_elem pop()
   {
-    edge_condition result = top();
-    condition_stack.pop_back();
+    stack_elem result = top();
+    condition_fv_stack.pop_back();
     return result;
   }
 
   // N.B. As a side effect ec1 and ec2 are changed!!!
-  void merge_conditions(edge_condition& ec1, bool negate1,
-                        edge_condition& ec2, bool negate2,
-                        edge_condition& ec
+  void merge_conditions(stack_elem& ec1, bool negate1,
+                        stack_elem& ec2, bool negate2,
+                        stack_elem& ec, bool is_conjunctive
                        )
   {
-    for (auto& i: ec1.condition)
+    for (auto& i: ec1.edges)
     {
-      i.second.insert(negate2 ? ec2.FC : ec2.TC);
-      ec.condition.insert(i);
+      auto& [Q_X_e, details] = i;
+      details.conditions.insert(negate2 ? ec2.Cneg : ec2.Cpos);
+      (is_conjunctive ? details.conjunctive_context_FV : details.disjunctive_context_FV)
+        .insert(ec2.FV.begin(), ec2.FV.end());
+      ec.edges.insert(i);
     }
-    for (auto& i: ec2.condition)
+    for (auto& i: ec2.edges)
     {
-      i.second.insert(negate1 ? ec1.FC : ec1.TC);
-      ec.condition.insert(i);
+      auto& [Q_X_e, details] = i;
+      details.conditions.insert(negate1 ? ec1.Cneg : ec1.Cpos);
+      (is_conjunctive ? details.conjunctive_context_FV : details.disjunctive_context_FV)
+        .insert(ec1.FV.begin(), ec1.FV.end());
+      ec.edges.insert(i);
     }
   }
 
+  // enter functions related to maintaining the quantfier scope
+  void enter(const not_&)
+  {
+    quantified_context.clear();
+  }
+
+  void enter(const and_&)
+  {
+    quantified_context.clear();
+  }
+
+  void enter(const or_&)
+  {
+    quantified_context.clear();
+  }
+
+  void enter(const imp&)
+  {
+    quantified_context.clear();
+  }
+
+  void enter(const forall& x)
+  {
+    quantified_context.push_back(x);
+  }
+
+  void enter(const exists& x)
+  {
+    quantified_context.push_back(x);
+  }
+
+  // leave functions, mostly used to build conditions and gather free variables
   void leave(const data::data_expression& x)
   {
-    data::data_expression d;
-    data::optimized_not(d, x);
-    push(edge_condition(x, d));
+    data::data_expression cond_not;
+    data::optimized_not(cond_not, x);
+
+    push(stack_elem(x, cond_not, data::find_free_variables(x)));
   }
 
   void leave(const not_&)
   {
-    std::swap(top().TC, top().FC);
+    std::swap(top().Cpos, top().Cneg);
   }
 
   void leave(const and_&)
   {
-    edge_condition ec_right = pop();
-    edge_condition ec_left = pop();
-    data::data_expression d1, d2;
-    data::optimized_and(d1, ec_left.TC, ec_right.TC);
-    data::optimized_or(d2, ec_left.FC, ec_right.FC);
-    edge_condition ec(d1, d2);
-    merge_conditions(ec_left, false, ec_right, false, ec);
+    stack_elem ec_right = pop();
+    stack_elem ec_left = pop();
+    data::data_expression cond_and;
+    data::data_expression cond_or;
+    data::optimized_and(cond_and, ec_left.Cpos, ec_right.Cpos);
+    data::optimized_or(cond_or, ec_left.Cneg, ec_right.Cneg);
+
+    stack_elem ec(cond_and, cond_or,
+      utilities::detail::set_union(ec_left.FV, ec_right.FV));
+    merge_conditions(ec_left, false, ec_right, false, ec, true);
     push(ec);
   }
 
   void leave(const or_&)
   {
-    edge_condition ec_right = pop();
-    edge_condition ec_left = pop();
-    data::data_expression d1, d2;
-    data::optimized_or(d1, ec_left.TC, ec_right.TC);
-    data::optimized_and(d2, ec_left.FC, ec_right.FC);
-    edge_condition ec(d1, d2);
-    merge_conditions(ec_left, true, ec_right, true, ec);
+    stack_elem ec_right = pop();
+    stack_elem ec_left = pop();
+    data::data_expression cond_and;
+    data::data_expression cond_or;
+
+    data::optimized_and(cond_and, ec_left.Cneg, ec_right.Cneg);
+    data::optimized_or(cond_or, ec_left.Cpos, ec_right.Cpos);
+
+    stack_elem ec(cond_or, cond_and,
+      utilities::detail::set_union(ec_left.FV, ec_right.FV));
+    merge_conditions(ec_left, true, ec_right, true, ec, false);
     push(ec);
   }
 
   void leave(const imp&)
   {
-    edge_condition ec_right = pop();
-    edge_condition ec_left = pop();
-    data::data_expression d1,d2;
-    data::optimized_or(d1, ec_left.FC, ec_right.TC);
-    data::optimized_and(d2, ec_left.TC, ec_right.FC);
-    edge_condition ec(d1, d2);
-    merge_conditions(ec_left, false, ec_right, true, ec);
+    stack_elem ec_right = pop();
+    stack_elem ec_left = pop();
+    data::data_expression cond_or;
+    data::data_expression cond_and;
+
+    data::optimized_or(cond_or, ec_left.Cneg, ec_right.Cpos);
+    data::optimized_and(cond_and, ec_left.Cpos, ec_right.Cneg);
+
+    stack_elem ec(cond_or, cond_and,
+      utilities::detail::set_union(ec_left.FV, ec_right.FV));;
+    merge_conditions(ec_left, false, ec_right, true, ec, false);
     push(ec);
   }
 
   void leave(const forall& x)
   {
-    edge_condition ec = pop();
-    data::data_expression t;
-    for (auto& [X_e, cond_set]: ec.condition)
+    // build conditions and free variable sets
+    stack_elem ec = pop();
+    for (auto& [X_e, details]: ec.edges)
     {
+      auto& [cond_set, conj_FV, disj_FV] = details;
+
+      // Update the conditions
       std::set<data::data_expression> new_conditions;
       for(const data::data_expression& e: cond_set)
-      {
+      {        
+        data::data_expression t;
         data::optimized_exists(t, x.variables(), e, true);
         new_conditions.insert(t);
       }
       cond_set = std::move(new_conditions);
-      data::optimized_forall(t, x.variables(), ec.TC, true);
-      cond_set.insert(t);
+      data::data_expression forall;
+      data::optimized_forall(forall, x.variables(), ec.Cpos, true);
+
+      cond_set.insert(forall);
+
+      // Update FV
+      conj_FV = ec.FV;
     }
+    data::optimized_forall(ec.Cpos, x.variables(), ec.Cpos, true);
+    data::optimized_exists(ec.Cneg, x.variables(), ec.Cneg, true);
+    std::set<data::variable> bound_vars{x.variables().begin(), x.variables().end()};
+    ec.FV = utilities::detail::set_difference(ec.FV, bound_vars);
     push(ec);
+
+    // maintain quantifier scope
+    if(!quantified_context.empty() && quantified_context.back() == x)
+    {
+      quantified_context.pop_back();
+    }
   }
 
   void leave(const exists& x)
   {
-    edge_condition ec = pop();
-    data::data_expression t;
-    for (auto& [X_e, cond_set]: ec.condition)
+    // build conditions and free variable sets
+    stack_elem ec = pop();
+    for (auto& [X_e, details]: ec.edges)
     {
+      auto& [cond_set, conj_FV, disj_FV] = details;
+
+      // Update the conditions
       std::set<data::data_expression> new_conditions;
       for(const data::data_expression& e: cond_set)
       {
+        data::data_expression t;
         data::optimized_exists(t, x.variables(), e, true);
         new_conditions.insert(t);
       }
       cond_set = std::move(new_conditions);
-      data::optimized_forall(t, x.variables(), ec.FC, true);
-      cond_set.insert(t);
+
+      data::data_expression forall;
+      data::optimized_forall(forall, x.variables(), ec.Cneg, true);
+      cond_set.insert(forall);
+
+      // Update FV
+      disj_FV = ec.FV;
     }
+    data::optimized_exists(ec.Cpos, x.variables(), ec.Cpos, true);
+    data::optimized_forall(ec.Cneg, x.variables(), ec.Cneg, true);
+    std::set<data::variable> bound_vars{x.variables().begin(), x.variables().end()};
+    ec.FV = utilities::detail::set_difference(ec.FV, bound_vars);
     push(ec);
+
+    // maintain quantifier scope
+    if(!quantified_context.empty() && quantified_context.back() == x)
+    {
+      quantified_context.pop_back();
+    }
   }
 
   void leave(const propositional_variable_instantiation& x)
   {
-    edge_condition ec(data::sort_bool::true_(), data::sort_bool::true_());
-    ec.condition.insert(std::make_pair(x, std::set<data::data_expression>{data::sort_bool::true_()}));
+    // Build list of qvars from quantifier scope
+    qvar_list qvars;
+    for(const pbes_expression& expr: quantified_context)
+    {
+      assert(is_forall(expr) || is_exists(expr));
+      data::variable_list vars(is_forall(expr) ? atermpp::down_cast<forall>(expr).variables() : atermpp::down_cast<exists>(expr).variables());
+      for(const data::variable& v: vars)
+      {
+        qvars.emplace_back(is_forall(expr), v);
+      }
+    }
+    QPVI Q_X_e{qvars, x};
+
+    // Store the QPVI and the condition true
+    stack_elem ec(data::sort_bool::true_(), data::sort_bool::true_(), data::find_free_variables(x.parameters()));
+    ec.edges.insert(std::make_pair(Q_X_e,
+      edge_details{std::set<data::data_expression>{data::sort_bool::true_()},
+        std::set<data::variable>{}, std::set<data::variable>{}}));
     push(ec);
   }
 
-  const condition_map& result() const
+  const edge_map& result() const
   {
-    assert(condition_stack.size() == 1);
-    return top().condition;
+    assert(condition_fv_stack.size() == 1);
+    return top().edges;
   }
 };
 
-
 } // namespace detail
 /// \endcond
+
 
 /// \brief Algorithm class for the constelm algorithm
 template <typename DataRewriter, typename PbesRewriter>
@@ -221,6 +396,7 @@ class pbes_constelm_algorithm
   protected:
     /// \brief A map with constraints on the vertices of the graph
     typedef std::map<data::variable, data::data_expression> constraint_map;
+    typedef std::list<detail::quantified_variable> qvar_list;
 
     /// \brief Compares data expressions for equality.
     const DataRewriter& m_data_rewriter;
@@ -243,8 +419,14 @@ class pbes_constelm_algorithm
         /// \brief The propositional variable at the source of the edge
         const propositional_variable m_source;
 
+        /// \brief The quantifiers in whose direct context the target PVI occurs
+        const qvar_list m_qvars;
+
         /// \brief The propositional variable instantiation that determines the target of the edge
         const propositional_variable_instantiation m_target;
+
+        const std::set<data::variable> m_conj_context;
+        const std::set<data::variable> m_disj_context;
 
       public:
         /// \brief Constructor
@@ -254,8 +436,20 @@ class pbes_constelm_algorithm
         /// \param src A propositional variable declaration
         /// \param tgt A propositional variable
         /// \param c A term
-        edge(const propositional_variable& src, const propositional_variable_instantiation& tgt, data::data_expression c = data::sort_bool::true_())
-          : data::data_expression(c), m_source(src), m_target(tgt)
+        edge(
+          const propositional_variable& src,
+          const qvar_list& qvars,
+          const propositional_variable_instantiation& tgt,
+          const std::set<data::variable>& conj_context,
+          const std::set<data::variable>& disj_context,
+          data::data_expression c = data::sort_bool::true_()
+        )
+        : data::data_expression(c)
+        , m_source(src)
+        , m_qvars(qvars)
+        , m_target(tgt)
+        , m_conj_context(conj_context)
+        , m_disj_context(disj_context)
         {}
 
         /// \brief Returns a string representation of the edge.
@@ -263,7 +457,12 @@ class pbes_constelm_algorithm
         std::string to_string() const
         {
           std::ostringstream out;
-          out << "(" << m_source.name() << ", " << m_target.name() << ")  label = " << m_target << "  condition = " << condition();
+          out << "(" << m_source.name() << ", " << m_target.name() << ")  label = ";
+          for(const detail::quantified_variable& qv: m_qvars)
+          {
+            out << qv.to_string();
+          }
+          out << m_target << "  condition = " << condition();
           return out.str();
         }
 
@@ -271,6 +470,11 @@ class pbes_constelm_algorithm
         const propositional_variable& source() const
         {
           return m_source;
+        }
+
+        const qvar_list& quantified_variables() const
+        {
+          return m_qvars;
         }
 
         /// \brief The propositional variable instantiation that determines the target of the edge
@@ -284,6 +488,28 @@ class pbes_constelm_algorithm
         {
           return *this;
         }
+
+        /// \brief Try to guess which quantifiers of Q can end up directly
+        /// before target, when the quantifier inside rewriter is applied.
+        qvar_list quantifier_inside_approximation(const qvar_list& Q) const
+        {
+          qvar_list result;
+          for (auto it = Q.crbegin(); it != Q.crend(); ++it)
+          {
+            // Variable of a universal quantifier cannot occur in the disjunctive context
+            // Variable of an existential quantifier cannot occur in the conjunctive context
+            if (( it->is_forall() && m_disj_context.find(it->variable()) == m_disj_context.end()) ||
+                (!it->is_forall() && m_conj_context.find(it->variable()) == m_conj_context.end()))
+            {
+              result.push_front(*it);
+            }
+            else
+            {
+              break;
+            }
+          }
+          return result;
+        }
     };
 
     /// \brief Represents a vertex of the dependency graph.
@@ -293,28 +519,70 @@ class pbes_constelm_algorithm
         /// \brief The propositional variable that corresponds to the vertex
         propositional_variable m_variable;
 
-        /// \brief Maps data variables to data expressions. If the right hand side is a data
-        /// variable, it means that it represents NaC ("not a constant").
+        /// \brief The list of quantified variables that occur in the constraints
+        qvar_list m_qvars;
+
+        /// \brief Maps data variables to data expressions. If a parameter is not
+        // present in this map, it means that it represents NaC ("not a constant").
         constraint_map m_constraints;
 
         /// \brief Indicates whether this vertex has been visited at least once.
         bool m_visited = false;
 
-        /// \brief Returns true if the data variable v has been assigned a constant expression.
-        /// \param v A variable
-        /// \return True if the data variable v has been assigned a constant expression.
+        /// \brief Returns true if the parameter v has been assigned a constant expression.
+        /// \param v A parameter of this->variable()
+        /// \return True if the data parameter v has been assigned a constant expression.
         bool is_constant(const data::variable& v) const
         {
           auto i = m_constraints.find(v);
-          return i != m_constraints.end() && !data::is_variable(i->second);
+          return i != m_constraints.end();
         }
 
-        /// \brief Returns true if the expression x has the value undefined_data_expression or if x is a constant data expression.
-        /// \param x A
-        /// \return True if the data variable v has been assigned a constant expression.
-        bool is_constant_expression(const data::data_expression& x) const
+        /// \brief Returns true iff all free variables in e are bound in qvars
+        bool bound_in_quantifiers(const qvar_list& qvars, const data::data_expression& e)
         {
-          return x == data::undefined_data_expression() || data::is_constant(x);
+          std::set<data::variable> free_vars = data::find_free_variables(e);
+          return std::all_of(free_vars.begin(), free_vars.end(), [&](const data::variable& v)
+            {
+              return std::find_if(qvars.begin(), qvars.end(), [&](const detail::quantified_variable& qvar){ return qvar.variable() == v; }) != qvars.end();
+            });
+        }
+
+        /// \brief Weaken the constraints so they satisfy
+        /// - vars(m_constraints[d]) subset vars(m_qvars); and
+        /// - vars(deleted_constraints) intersection vars(m_qvars) = {}
+        void fix_constraints(std::vector<data::data_expression> deleted_constraints)
+        {
+          while (!deleted_constraints.empty())
+          {
+            std::set<data::variable> vars_deleted;
+            for (const data::data_expression& fi: deleted_constraints)
+            {
+              data::find_free_variables(fi, std::inserter(vars_deleted, vars_deleted.end()));
+            }
+            deleted_constraints.clear();
+
+            auto del_i = std::find_if(m_qvars.rbegin(), m_qvars.rend(), [&](const detail::quantified_variable& qv)
+            {
+              return vars_deleted.find(qv.variable()) != vars_deleted.end();
+            });
+            // Remove quantified variables up to and including del_i
+            m_qvars.erase(m_qvars.begin(), del_i.base());
+
+            for (const data::variable& par: m_variable.parameters())
+            {
+              auto k = m_constraints.find(par);
+              if(k == m_constraints.end())
+              {
+                continue;
+              }
+              if(!bound_in_quantifiers(m_qvars, k->second))
+              {
+                deleted_constraints.push_back(k->second);
+                m_constraints.erase(k);
+              }
+            }
+          }
         }
 
       public:
@@ -331,6 +599,11 @@ class pbes_constelm_algorithm
         const propositional_variable& variable() const
         {
           return m_variable;
+        }
+
+        const qvar_list& quantified_variables() const
+        {
+          return m_qvars;
         }
 
         /// \brief Maps data variables to data expressions. If the right hand side is a data
@@ -363,6 +636,10 @@ class pbes_constelm_algorithm
         {
           std::ostringstream out;
           out << m_variable << "  assertions = ";
+          for(const detail::quantified_variable& v: quantified_variables())
+          {
+            out << v.to_string();
+          }
           for (const auto& constraint: m_constraints)
           {
             out << "{" << constraint.first << " := " << constraint.second << "} ";
@@ -372,53 +649,68 @@ class pbes_constelm_algorithm
 
         /// \brief Assign new values to the parameters of this vertex, and update the constraints accordingly.
         /// The new values have a number of constraints.
-        bool update(const data::data_expression_list& e, const constraint_map& e_constraints, const DataRewriter& datar)
+        bool update(const qvar_list& qvars, const data::data_expression_list& e, const constraint_map& e_constraints, const DataRewriter& datar)
         {
           bool changed = false;
 
           data::variable_list params = m_variable.parameters();
+          data::rewriter::substitution_type sigma;
+          detail::make_constelm_substitution(e_constraints, sigma);
 
           if (!m_visited)
           {
             m_visited = true;
-            auto j = params.begin();
-            for (auto i = e.begin(); i != e.end(); ++i, ++j)
+            changed = true;
+
+            m_qvars = qvars;
+            // Partition expressions in e based on whether their free variables
+            // are bound in m_qvars.
+            std::vector<data::data_expression> deleted_constraints;
+            auto par = params.begin();
+            for (auto i = e.begin(); i != e.end(); ++i, ++par)
             {
-              data::rewriter::substitution_type sigma;
-              detail::make_constelm_substitution(e_constraints, sigma);
               data::data_expression e1 = datar(*i, sigma);
-              if (is_constant_expression(e1))
+              if (bound_in_quantifiers(m_qvars, e1))
               {
-                m_constraints[*j] = e1;
+                m_constraints[*par] = e1;
               }
               else
               {
-                m_constraints[*j] = *j;
+                deleted_constraints.push_back(e1);
               }
             }
-            changed = true;
+            fix_constraints(deleted_constraints);
           }
           else
           {
-            auto j = params.begin();
-            for (auto i = e.begin(); i != e.end(); ++i, ++j)
+            // Find longest common suffix of qvars
+            auto mismatch_it = std::mismatch(m_qvars.rbegin(), m_qvars.rend(), qvars.rbegin(), qvars.rend()).first;
+            changed |= mismatch_it != m_qvars.rend();
+            // Remove the outer quantifiers, up to and including mismatch_it
+            m_qvars.erase(m_qvars.begin(), mismatch_it.base());
+
+            // Find constraints for which f[i] = e[i] and for which all free
+            // variables are bound in m_qvars (which may have changed).
+            std::vector<data::data_expression> deleted_constraints;
+            auto i = e.begin();
+            for (auto par = params.begin(); i != e.end(); ++i, ++par)
             {
-              auto k = m_constraints.find(*j);
-              assert(k != m_constraints.end());
-              data::data_expression& ci = k->second;
-              if (ci == *j)
+              auto k = m_constraints.find(*par);
+              if(k == m_constraints.end())
               {
                 continue;
               }
-              data::rewriter::substitution_type sigma;
-              detail::make_constelm_substitution(e_constraints, sigma);
+              const data::data_expression& fi = k->second;
               data::data_expression ei = datar(*i, sigma);
-              if (ci != ei)
+              if (fi != ei || !bound_in_quantifiers(m_qvars, fi))
               {
-                ci = *j;
                 changed = true;
+                deleted_constraints.push_back(fi);
+                deleted_constraints.push_back(ei);
+                m_constraints.erase(k);
               }
             }
+            fix_constraints(deleted_constraints);
           }
           return changed;
         }
@@ -485,9 +777,9 @@ class pbes_constelm_algorithm
     std::string print_edge_update(const edge& e, const vertex& u, const vertex& v)
     {
       std::ostringstream out;
-      out << "\n<updating edge>" << e.to_string() << std::endl;
-      out << "  <source vertex       >" << u.to_string() << std::endl;
-      out << "  <target vertex before>" << v.to_string() << std::endl;
+      out << "\n<updating edge> " << e.to_string() << std::endl;
+      out << "  <source vertex       > " << u.to_string() << std::endl;
+      out << "  <target vertex before> " << v.to_string() << std::endl;
       return out.str();
     }
 
@@ -496,7 +788,7 @@ class pbes_constelm_algorithm
       std::ostringstream out;
       data::rewriter::substitution_type sigma;
       detail::make_constelm_substitution(u.constraints(), sigma);
-      out << "\nEvaluated condition " << e.condition() << sigma << " to " << value << std::endl;
+      out << "  <condition           > " << e.condition() << sigma << " to " << value << std::endl;
       return out.str();
     }
 
@@ -507,6 +799,14 @@ class pbes_constelm_algorithm
       detail::make_constelm_substitution(u.constraints(), sigma);
       out << "\nCould not evaluate condition " << e.condition() << sigma << " to true or false";
       return out.str();
+    }
+
+    template <typename E>
+    std::list<E> concat(const std::list<E> a, const std::list<E> b)
+    {
+      std::list<E> result(a);
+      result.insert(result.end(), b.begin(), b.end());
+      return result;
     }
 
   public:
@@ -541,40 +841,35 @@ class pbes_constelm_algorithm
     /// \param p A pbes
     /// \param compute_conditions If true, propagation conditions are computed. Note
     /// that the currently implementation has exponential behavior.
-    void run(pbes& p, bool compute_conditions = false)
+    void run(pbes& p, bool compute_conditions = false, bool check_quantifiers = true)
     {
       m_vertices.clear();
       m_edges.clear();
       m_redundant_parameters.clear();
 
       // compute the vertices and edges of the dependency graph
-      for (const pbes_equation& eqn: p.equations())
+      for (pbes_equation& eqn: p.equations())
       {
         core::identifier_string name = eqn.variable().name();
         m_vertices[name] = vertex(eqn.variable());
 
-        if (compute_conditions)
-        {
-          // use an edge_condition_traverser to compute the edges
-          detail::edge_condition_traverser f;
-          f.apply(eqn.formula());
+        // use an edge_condition_traverser to compute the edges
+        detail::edge_condition_traverser f;
+        f.apply(eqn.formula());
 
-          std::vector<edge>& edges = m_edges[name];
-          for (auto& [X_e, conditions]: f.result())
-          {
-            data::data_expression condition = data::lazy::join_and(conditions.begin(), conditions.end());
-            edges.emplace_back(eqn.variable(), X_e, condition);
-          }
-        }
-        else
+        std::vector<edge>& edges = m_edges[name];
+        for (const auto& [Q_X_e, details]: f.result())
         {
-          // use find function to compute the edges
-          std::set<propositional_variable_instantiation> inst = find_propositional_variable_instantiations(eqn.formula());
-          std::vector<edge>& edges = m_edges[name];
-          for (const auto & k : inst)
-          {
-            edges.emplace_back(eqn.variable(), k);
-          }
+          const auto& [Q, X_e] = Q_X_e;
+          const auto& [conditions, conj_FV, disj_FV] = details;
+
+          // check options for quantifiers and conditions.
+          qvar_list quantifier_list = check_quantifiers ? Q : qvar_list();
+          data::data_expression condition = compute_conditions
+            ? data::lazy::join_and(conditions.begin(), conditions.end())
+            : data::data_expression(data::sort_bool::true_());
+
+          edges.emplace_back(eqn.variable(), quantifier_list, X_e, conj_FV, disj_FV, condition);
         }
       }
 
@@ -583,7 +878,7 @@ class pbes_constelm_algorithm
       std::deque<propositional_variable> todo;
       const data::data_expression_list& e_init = init.parameters();
       vertex& u_init = m_vertices[init.name()];
-      u_init.update(e_init, constraint_map(), m_data_rewriter);
+      u_init.update(qvar_list(), e_init, constraint_map(), m_data_rewriter);
       todo.push_back(u_init.variable());
 
       mCRL2log(log::debug) << "\n--- initial vertices ---\n" << print_vertices();
@@ -617,13 +912,17 @@ class pbes_constelm_algorithm
           }
           if (!is_false(needs_update))
           {
-            bool changed = v.update(e.target().parameters(), u.constraints(), m_data_rewriter);
+            bool changed = v.update(
+                              concat(e.quantifier_inside_approximation(u.quantified_variables()), e.quantified_variables()),
+                              e.target().parameters(),
+                              u.constraints(),
+                              m_data_rewriter);
             if (changed)
             {
               todo.push_back(v.variable());
             }
           }
-          mCRL2log(log::debug) << "  <target vertex after >" << v.to_string() << "\n";
+          mCRL2log(log::debug) << "  <target vertex after > " << v.to_string() << "\n";
         }
       }
 
@@ -654,10 +953,15 @@ class pbes_constelm_algorithm
         {
           data::rewriter::substitution_type sigma;
           detail::make_constelm_substitution(v.constraints(), sigma);
+          pbes_expression body = pbes_system::replace_free_variables(eqn.formula(), sigma);
+          for (auto i = v.quantified_variables().crbegin(); i != v.quantified_variables().crend(); ++i)
+          {
+            body = i->make_expr(body);
+          }
           eqn = pbes_equation(
                    eqn.symbol(),
                    eqn.variable(),
-                   pbes_system::replace_free_variables(eqn.formula(), sigma)
+                   body
                  );
         }
       }
@@ -691,7 +995,8 @@ void constelm(pbes& p,
               data::rewrite_strategy rewrite_strategy,
               pbes_rewriter_type rewriter_type,
               bool compute_conditions = false,
-              bool remove_redundant_equations = true
+              bool remove_redundant_equations = true,
+              bool check_quantifiers = true
              )
 {
   // data rewriter
@@ -705,7 +1010,7 @@ void constelm(pbes& p,
       typedef simplify_data_rewriter<data::rewriter> pbes_rewriter;
       pbes_rewriter pbesr(datar);
       pbes_constelm_algorithm<data::rewriter, pbes_rewriter> algorithm(datar, pbesr);
-      algorithm.run(p, compute_conditions);
+      algorithm.run(p, compute_conditions, check_quantifiers);
       if (remove_redundant_equations)
       {
         std::vector<propositional_variable> V = algorithms::remove_unreachable_variables(p);
@@ -719,7 +1024,7 @@ void constelm(pbes& p,
       bool enumerate_infinite_sorts = (rewriter_type == quantifier_all);
       enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_infinite_sorts);
       pbes_constelm_algorithm<data::rewriter, enumerate_quantifiers_rewriter> algorithm(datar, pbesr);
-      algorithm.run(p, compute_conditions);
+      algorithm.run(p, compute_conditions, check_quantifiers);
       if (remove_redundant_equations)
       {
         std::vector<propositional_variable> V = algorithms::remove_unreachable_variables(p);

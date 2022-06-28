@@ -355,11 +355,25 @@ void ATERM_POOL_STORAGE::mark()
 {
   for (const Element& term : m_term_set)
   {
-    // Mark all terms (and their subterms) that are reachable, i.e the root set.
-    if (term.reference_count() > 0)
+    if (term.is_marked())
     {
       mark_term(term, todo);
     }
+
+    for (const auto& [symbol, callback] : m_deletion_hooks)
+    {
+      if (symbol == term.function())
+      {
+        // For terms on which deletion hooks are called, ensure that all arguments are marked.
+        const _term_appl& ta = static_cast<_term_appl&>(const_cast<Element&>(term));
+        for (std::size_t i = 0; i < ta.function().arity(); ++i)
+        {
+          _aterm& argument = *detail::address(ta.arg(i));
+          mark_term(argument);
+        }
+      }
+    }
+
   }
 }
 #endif
@@ -374,6 +388,7 @@ void ATERM_POOL_STORAGE::sweep()
 
     if (!term.is_marked())
     {
+      // For constants, i.e., arity zero and integer terms we do not mark, but use their reachability directly. 
       it = destroy(it);
     }
     else
@@ -406,6 +421,7 @@ void ATERM_POOL_STORAGE::call_deletion_hook(unprotected_aterm term)
   {
     if (symbol == term.function())
     {
+      verify_term(*detail::address(term));
       callback(static_cast<const aterm&>(term));
     }
   }
@@ -491,7 +507,6 @@ constexpr bool ATERM_POOL_STORAGE::is_dynamic_storage() const
   return N == DynamicNumberOfArguments;
 }
 
-
 ATERM_POOL_STORAGE_TEMPLATES
 template<std::size_t Arity>
 bool ATERM_POOL_STORAGE::verify_term(const _aterm& term)
@@ -504,10 +519,12 @@ bool ATERM_POOL_STORAGE::verify_term(const _aterm& term)
   if (term.function().arity() > 0)
   {
     const _term_appl& ta = static_cast<const _term_appl&>(term);
+    assert(ta.function().defined());
     for (std::size_t i = 0; i < ta.function().arity(); ++i)
     {
       assert(ta.arg(i).defined());
-      verify_term<DynamicNumberOfArguments>(*detail::address(ta.arg(0)));
+      assert(&ta!=detail::address(ta.arg(i)));
+      verify_term<DynamicNumberOfArguments>(*detail::address(ta.arg(i)));
     }
   }
   return true;
