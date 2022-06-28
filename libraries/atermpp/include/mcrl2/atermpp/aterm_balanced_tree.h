@@ -26,8 +26,8 @@ namespace
 {
   global_function_symbol g_empty("@empty@", 0);
   global_function_symbol g_tree_node("@node@", 2);
-  global_function_symbol g_dummy_left_tree("@dummy_left_tree@", 0);
-  global_function_symbol g_dummy_right_tree("@dummy_right_tree@", 0);
+  global_function_symbol g_single_tree_node("@single_node@", 1);
+  aterm_appl g_empty_tree(g_empty);
 }
 
 template <typename Term>
@@ -51,8 +51,11 @@ class term_balanced_tree : public aterm_appl
                                         const std::size_t size,
                                         Transformer transformer);
    
-    static const atermpp::function_symbol& tree_empty_function() { return g_empty; }
+
+    static const function_symbol& tree_empty_function() { return g_empty; }
+    static const function_symbol& tree_single_node_function() { return g_single_tree_node; }
     static const function_symbol& tree_node_function() { return g_tree_node; }
+    
     static const aterm_appl& empty_tree() 
     { 
       static aterm_appl g_empty_tree(g_empty);
@@ -148,8 +151,15 @@ class term_balanced_tree : public aterm_appl
 
     /// \brief Construction from aterm.
     explicit term_balanced_tree(const aterm& tree) 
-       : aterm_appl(reinterpret_cast<const aterm_appl&>(tree))
+       : aterm_appl(tree.function() == tree_empty_function() ||
+                    tree.function() == tree_single_node_function() ||
+                    tree.function() == tree_node_function()?
+                down_cast<aterm_appl>(tree):
+                aterm_appl(tree_single_node_function(),tree))
     {
+      assert(function() == tree_empty_function() ||
+             function() == tree_single_node_function() ||
+             function() == tree_node_function());
     }
 
     /// \brief Creates an term_balanced_tree with a copy of a range.
@@ -175,19 +185,19 @@ class term_balanced_tree : public aterm_appl
     /// \brief Get the left branch of the tree
     /// \details It is assumed that the tree is a node with a left branch.
     /// \return A reference t the left subtree of the current tree
-    const term_balanced_tree<Term>& left_branch() const
+    const aterm& left_branch() const
     {
       assert(is_node());
-      return down_cast<const term_balanced_tree<Term>>(aterm_appl::operator[](0));
+      return aterm_appl::operator[](0);
     }
 
     /// \brief Get the left branch of the tree
     /// \details It is assumed that the tree is a node with a left branch.
     /// \return A reference t the left subtree of the current tree
-    const term_balanced_tree<Term>& right_branch() const
+    const aterm& right_branch() const
     {
       assert(is_node());
-      return down_cast<const term_balanced_tree<Term>>(aterm_appl::operator[](1));
+      return aterm_appl::operator[](1);
     }
 
     /// \brief Element indexing operator.
@@ -216,12 +226,34 @@ class term_balanced_tree : public aterm_appl
       {
         std::size_t left_size = (size + 1) >> 1;
 
-        return (position < left_size) ?
-               left_branch().element_at(position, left_size) :
-               right_branch().element_at(position-left_size, size - left_size);
+        if (position < left_size)
+        {
+          const aterm& left(left_branch());
+          if (left.function() == tree_node_function())
+          {
+            return down_cast<term_balanced_tree<Term>>(left_branch()).element_at(position, left_size);
+          }
+          else
+          {
+            return reinterpret_cast<const Term&>(left);
+          }
+        }
+        else 
+        {
+          // down_cast<term_balanced_tree<Term>>(right_branch()).element_at(position-left_size, size - left_size);
+          const aterm& right(right_branch());
+          if (right.function() == tree_node_function())
+          {
+            return down_cast<term_balanced_tree<Term>>(right_branch()).element_at(position-left_size, size-left_size);
+          }
+          else
+          {
+            return reinterpret_cast<const Term&>(right);
+          }
+        }
       }
 
-      return vertical_cast<Term>(static_cast<const aterm&>(*this));
+      return vertical_cast<Term>((static_cast<aterm_appl>(*this))[0]);
     }
 
     /// \brief Returns the size of the term_balanced_tree.
@@ -231,7 +263,10 @@ class term_balanced_tree : public aterm_appl
     {
       if (is_node())
       {
-        return left_branch().size() + right_branch().size();
+        const aterm& left=left_branch();
+        std::size_t result = (left.function() == tree_node_function()?down_cast<term_balanced_tree<Term>>(left).size():1);
+        const aterm& right=right_branch();
+        return result + (right.function() == tree_node_function()?down_cast<term_balanced_tree<Term>>(right).size():1);
       }
       return (empty()) ? 0 : 1;
     }
@@ -325,17 +360,24 @@ class term_balanced_tree : public aterm_appl
             return;
           }
 
-          unprotected_aterm current = tree;
-    
-          while (current.function() == Tree::tree_node_function())
+          if (!tree.is_node())  // This is a singleton tree.
           {
-            assert(m_top_of_stack + 1 < maximal_size_of_stack);
-            m_stack[m_top_of_stack++] = static_cast<Tree&>(current).right_branch();
-            current = static_cast<Tree&>(current).left_branch();
+            m_stack[m_top_of_stack++] = tree[0]; 
           }
+          else
+          {
+            unprotected_aterm current = tree;
+    
+            while (current.function() == Tree::tree_node_function())
+            {
+              assert(m_top_of_stack + 1 < maximal_size_of_stack);
+              m_stack[m_top_of_stack++] = static_cast<Tree&>(current).right_branch();
+              current = static_cast<Tree&>(current).left_branch();
+            }
 
-          assert(m_top_of_stack + 1 < maximal_size_of_stack);
-          m_stack[m_top_of_stack++] = current;
+            assert(m_top_of_stack + 1 < maximal_size_of_stack);
+            m_stack[m_top_of_stack++] = current;
+          }
         }
     
       public:

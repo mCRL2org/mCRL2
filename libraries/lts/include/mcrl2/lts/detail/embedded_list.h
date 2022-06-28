@@ -98,9 +98,9 @@ class embedded_list
 
     // Copy constructor.
     embedded_list(const embedded_list& other) = default;
-    embedded_list(embedded_list&& other) = default;
+
+    // Assignment.
     embedded_list& operator=(const embedded_list& other) = default;
-    embedded_list& operator=(embedded_list&& other) = default;
 
     // get the size
     std::size_t size() const

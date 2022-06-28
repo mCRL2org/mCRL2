@@ -1217,7 +1217,7 @@ bool bisimulation_compare(
   const bool branching /* =false*/,
   const bool preserve_divergences /*=false*/,
   const bool generate_counter_examples /*= false*/,
-  const std::string& counter_example_file /*= ""*/,
+  const std::string& /* counter_example_file = ""*/,
   const bool structured_output /* = false */)
 {
   LTS_TYPE l1_copy(l1);

@@ -155,8 +155,7 @@ class scc_partitioner
      *        is preserved if either from and to state are different, or
      *        \e preserve_divergence_loops is true. All non tau transitions are
      *        always preserved. The label numbers for preserved transitions are
-     *        not changed. Note that this routine does not adapt the number of
-     *        states or the initial state of the lts.
+     *        not changed. 
      *
      * \param[in] preserve_divergence_loops If true preserve a tau loop on states that
      *     were part of a larger tau loop in the input transition system. Otherwise idle

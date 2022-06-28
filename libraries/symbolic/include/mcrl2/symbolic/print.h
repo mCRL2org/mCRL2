@@ -11,12 +11,14 @@
 #define MCRL2_LPS_SYMBOLIC_PRINT_H
 
 #include <sylvan_ldd.hpp>
+#include <vector>
 
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/undefined.h"
+#include "mcrl2/symbolic/print.h"
 #include "mcrl2/symbolic/alternative_relprod.h"
 #include "mcrl2/symbolic/data_index.h"
-#include "mcrl2/data/data_expression.h"
 
-#include <vector>
 
 namespace mcrl2::symbolic {
 

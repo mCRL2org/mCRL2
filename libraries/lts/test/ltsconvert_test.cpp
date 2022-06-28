@@ -157,7 +157,18 @@ const std::string test13=
   "(2,\"tau\",2)\n"
   "(1,\"a\",3)\n";
 
+// Test whether LTSs with one state and one essential transition are reduced
+const std::string test14=
+  "des (0,2,1)\n"
+  "(0,\"a\",0)\n"
+  "(0,\"a\",0)\n";
 
+// Test whether LTSs with one state and more than one essential transitions are reduced
+const std::string test15=
+  "des (0,3,1)\n"
+  "(0,\"a\",0)\n"
+  "(0,\"b\",0)\n"
+  "(0,\"b\",0)\n";
 
 BOOST_AUTO_TEST_CASE(test_state_space_reductions)
 {
@@ -701,6 +712,66 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   t13=parse_aut(test13);
   reduce(t13,lts_red_tau_star); //Tau star reduction
   BOOST_CHECK(t13.num_states()==2 && t13.num_transitions()==1);
+ }
+ {
+  std::cerr << "Test14\n";
+  lts_aut_t t14=parse_aut(test14);
+  reduce(t14,lts_eq_bisim_gjkw); //Strong bisimulation reduction [Groote/Jansen/Keiren/Wijs 2017]
+  BOOST_CHECK(t14.num_states()==1 && t14.num_transitions()==1);
+  t14=parse_aut(test14);
+  reduce(t14,lts_eq_bisim_gv); //Strong bisimulation reduction [Groote/Vaandrager 1990]
+  BOOST_CHECK(t14.num_states()==1 && t14.num_transitions()==1);
+  t14=parse_aut(test14);
+  reduce(t14,lts_eq_bisim); //Strong bisimulation reduction directly on LTS
+  BOOST_CHECK(t14.num_states()==1 && t14.num_transitions()==1);
+  t14=parse_aut(test14);
+  reduce(t14,lts_eq_bisim_sigref); //Strong bisimulation reduction sigref [Blom/Orzan 2003]
+  BOOST_CHECK(t14.num_states()==1 && t14.num_transitions()==1);
+  t14=parse_aut(test14);
+  reduce(t14,lts_eq_branching_bisim_gjkw); //Branching bisimulation reduction [Groote/Jansen/Keiren/Wijs 2017]
+  BOOST_CHECK(t14.num_states()==1 && t14.num_transitions()==1);
+  t14=parse_aut(test14);
+  reduce(t14,lts_eq_branching_bisim_gv); //Branching bisimulation reduction [Groote/Vaandrager 1990]
+  BOOST_CHECK(t14.num_states()==1 && t14.num_transitions()==1);
+  t14=parse_aut(test14);
+  reduce(t14,lts_eq_branching_bisim); //Branching bisimulation reduction directly on LTS
+  BOOST_CHECK(t14.num_states()==1 && t14.num_transitions()==1);
+  t14=parse_aut(test14);
+  reduce(t14,lts_eq_branching_bisim_sigref);
+  BOOST_CHECK(t14.num_states()==1 && t14.num_transitions()==1);
+  t14=parse_aut(test14);
+  reduce(t14,lts_eq_weak_bisim); //Weak bisimulation reduction
+  BOOST_CHECK(t14.num_states()==1 && t14.num_transitions()==1);
+ }
+ {
+  std::cerr << "Test15\n";
+  lts_aut_t t15=parse_aut(test15);
+  reduce(t15,lts_eq_bisim_gjkw); //Strong bisimulation reduction [Groote/Jansen/Keiren/Wijs 2017]
+  BOOST_CHECK(t15.num_states()==1 && t15.num_transitions()==2);
+  t15=parse_aut(test15);
+  reduce(t15,lts_eq_bisim_gv); //Strong bisimulation reduction [Groote/Vaandrager 1990]
+  BOOST_CHECK(t15.num_states()==1 && t15.num_transitions()==2);
+  t15=parse_aut(test15);
+  reduce(t15,lts_eq_bisim); //Strong bisimulation reduction directly on LTS
+  BOOST_CHECK(t15.num_states()==1 && t15.num_transitions()==2);
+  t15=parse_aut(test15);
+  reduce(t15,lts_eq_bisim_sigref); //Strong bisimulation reduction sigref [Blom/Orzan 2003]
+  BOOST_CHECK(t15.num_states()==1 && t15.num_transitions()==2);
+  t15=parse_aut(test15);
+  reduce(t15,lts_eq_branching_bisim_gjkw); //Branching bisimulation reduction [Groote/Jansen/Keiren/Wijs 2017]
+  BOOST_CHECK(t15.num_states()==1 && t15.num_transitions()==2);
+  t15=parse_aut(test15);
+  reduce(t15,lts_eq_branching_bisim_gv); //Branching bisimulation reduction [Groote/Vaandrager 1990]
+  BOOST_CHECK(t15.num_states()==1 && t15.num_transitions()==2);
+  t15=parse_aut(test15);
+  reduce(t15,lts_eq_branching_bisim); //Branching bisimulation reduction directly on LTS
+  BOOST_CHECK(t15.num_states()==1 && t15.num_transitions()==2);
+  t15=parse_aut(test15);
+  reduce(t15,lts_eq_branching_bisim_sigref);
+  BOOST_CHECK(t15.num_states()==1 && t15.num_transitions()==2);
+  t15=parse_aut(test15);
+  reduce(t15,lts_eq_weak_bisim); //Weak bisimulation reduction
+  BOOST_CHECK(t15.num_states()==1 && t15.num_transitions()==2);
  }
 }
 

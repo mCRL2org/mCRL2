@@ -4,7 +4,7 @@
 % white can pass or do a move, after which white will win. 
 % As the game always terminates, the fixed point has no relevance. 
 
-mu X.(<WhiteWins>true ||
-      (<Pass||exists x,y:Pos.RedMove(x,y)>true && [Pass||exists x,y:Pos.RedMove(x,y)]
-           (<WhiteWins>true ||
-            <Pass||exists x,y:Pos.WhiteMove(x,y)>X)))
+mu X.((exists nr_red,nr_white:Nat.val(nr_red<nr_white) && <Outcome(nr_red,nr_white)>true) ||
+      (<Pass(Red)||exists x,y:Pos.Move(Red,x,y)>true && [Pass(Red)||exists x,y:Pos.Move(Red,x,y)]
+           ((exists nr_red,nr_white:Nat.val(nr_red<nr_white) && <Outcome(nr_red,nr_white)>true) ||
+            <Pass(White)||exists x,y:Pos.Move(White,x,y)>X)))

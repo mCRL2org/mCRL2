@@ -48,11 +48,14 @@ class state_probability_pair
       assert(probability!=PROBABILITY::zero());
     } 
 
+    /// \brief Copy constructor;
+    /// \param p The state probability pair to be copied.
+    state_probability_pair(const state_probability_pair& p)=default; 
+    state_probability_pair(state_probability_pair&& p)=default; 
+
     /// \brief Standard assignment.
     /// \param p The state probability pair to be assigned.
     /// \return A reference to the assigned object.
-    state_probability_pair(const state_probability_pair& p)=default; 
-    state_probability_pair(state_probability_pair&& p)=default; 
     state_probability_pair& operator=(const state_probability_pair& p)=default; 
     state_probability_pair& operator=(state_probability_pair&& p)=default; 
 
