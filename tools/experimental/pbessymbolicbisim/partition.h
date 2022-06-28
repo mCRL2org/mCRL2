@@ -479,7 +479,7 @@ public:
 
     // First check whether the current proof graph is stable under optimisations.
     // This will not affect the cache.
-    if(m_early_termination && !refine_step(true, is_positive_pg))
+    if(m_early_termination && num_steps != 0 && !refine_step(true, is_positive_pg))
     {
       return true;
     }

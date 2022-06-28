@@ -10,13 +10,14 @@
 /// \brief Add your file description here.
 
 #define BOOST_TEST_MODULE specification_property_map_test
+#include <boost/algorithm/string.hpp>
+#include <boost/test/included/unit_test.hpp>
+
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
 
-#include <boost/algorithm/string.hpp>
-#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::lps;

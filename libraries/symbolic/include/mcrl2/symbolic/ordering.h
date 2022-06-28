@@ -15,7 +15,6 @@
 #include "mcrl2/utilities/parse_numbers.h"
 #include "mcrl2/utilities/text_utility.h"
 
-#include <sylvan_ldd.hpp>
 #include <boost/dynamic_bitset.hpp>
 
 #include <algorithm>

@@ -10,6 +10,8 @@
 #ifndef MCRL2_LPS_SYMBOLIC_LTS_H
 #define MCRL2_LPS_SYMBOLIC_LTS_H
 
+#ifdef MCRL2_ENABLE_SYLVAN
+
 #include "mcrl2/lps/lps_summand_group.h"
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/symbolic/data_index.h"
@@ -41,5 +43,7 @@ private:
 };
 
 } // namespace mcrl2::lps
+
+#endif // MCRL2_ENABLE_SYLVAN
 
 #endif // MCRL2_LPS_SYMBOLIC_LTS_H

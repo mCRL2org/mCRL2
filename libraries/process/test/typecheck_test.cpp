@@ -10,10 +10,9 @@
 /// \brief Add your file description here.
 
 #define BOOST_TEST_MODULE typecheck_test
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/process/parse.h"
-
-#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
 
@@ -443,6 +442,18 @@ BOOST_AUTO_TEST_CASE(test_incomplete_assignments)
     "proc P(b: Bool) = (b) -> T . Q() <> F . Q();\n"
     "     Q(res: Bool) = P(b = !res);\n"
     "init P(true);",
+    false
+  );
+}
+
+// Test case induced by a problem found by Maarten Visscher
+BOOST_AUTO_TEST_CASE(test_incomplete_assignment_in_init_clause)
+{
+  test_typechecker_case(
+    "act a;\n"
+    "proc P(x:Nat)=a.P();\n"
+    "\n"
+    "init P();\n",    // here a value for x should be given. 
     false
   );
 }

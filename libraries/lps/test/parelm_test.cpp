@@ -13,7 +13,7 @@
 
 #define BOOST_TEST_MODULE parelm_test
 #include <boost/algorithm/string.hpp>
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/lps/parelm.h"

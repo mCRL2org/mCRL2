@@ -10,7 +10,7 @@
 /// \brief Tests for the is_monotonous function for pbes expressions.
 
 #define BOOST_TEST_MODULE monotonicity_test
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/pbes/is_monotonous.h"
 #include "mcrl2/pbes/txt2pbes.h"

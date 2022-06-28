@@ -36,8 +36,8 @@ class lps2lts_tool: public rewriter_tool<input_output_tool>
               "Wieger Wesselink",
               "generates an LTS from an LPS",
               "Transforms the LPS in INFILE and writes a corresponding LTS "
-              " to OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not "
-              " present, stdin is used."
+              "to OUTFILE. If OUTFILE is not present, no LTS is written. If INFILE is equal to '-' "
+              "present, stdin is used."
              )
     {}
 

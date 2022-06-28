@@ -10,7 +10,7 @@
 /// \brief Basic regression test for data expressions.
 
 #define BOOST_TEST_MODULE int_test
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/data/standard_numbers_utility.h"
 

@@ -12,7 +12,7 @@
 #define BOOST_TEST_MODULE linear_process_conversion_test
 #include "mcrl2/lps/parse.h"
 
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::process;

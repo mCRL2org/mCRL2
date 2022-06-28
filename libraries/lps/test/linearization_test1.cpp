@@ -10,7 +10,7 @@
 /// \brief Add your file description here.
 
 #define BOOST_TEST_MODULE linearization_test1
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #ifndef MCRL2_SKIP_LONG_TESTS
 

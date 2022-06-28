@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #define BOOST_TEST_MODULE compare
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/lts/lts_algorithm.h"
 

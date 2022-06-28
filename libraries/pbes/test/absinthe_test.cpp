@@ -10,7 +10,7 @@
 /// \brief Test program for absinthe algorithm.
 
 #define BOOST_TEST_MODULE absinthe_test
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 #include "mcrl2/pbes/absinthe.h"
 #include "mcrl2/pbes/txt2pbes.h"
 

@@ -1,39 +1,36 @@
-FROM fedora:34
+FROM ubuntu:jammy
 
 # 1. Install packages needed for compiling and testing the tools
-RUN dnf install -y \
- boost-devel \
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y \
+ build-essential \
  cmake \
- gcc-c++ \
  git \
- make \
- mesa-libGL-devel \
- mesa-libGLU-devel \
- qt5-qtbase \
- qt5-qtbase-devel \
- which \
+ libboost-dev \
+ libgl1-mesa-dev \
+ qtbase5-dev \
 # Packages needed for packaging
- rpm-build \
 # Packages needed for testing
  python3-psutil \
- python3-pyyaml \
-# Packages needed for documentation
+ python3-yaml \
+# Packages needed for generating the documentation
  doxygen \
- python3-devel \
- python3-sphinx \
+ python3-pip \
+ sphinx-common \
  swig \
  texlive \
- texlive-scheme-medium \
- texlive-collection-mathextra
+ texlive-latex-extra \
+ texlive-science \
+ xsltproc
 
-# This package is not available in the fedora repository
+# This package is not available in the ubuntu repository
 RUN pip install --user dparser
 
 # 2. Clone the git repository in the home directory
-RUN cd ~/ && git clone -b release-202106 git://github.com/mcrl2org/mcrl2.git mcrl2
+RUN cd ~/ && git clone -b release-202206 https://github.com/mcrl2org/mcrl2.git mcrl2
 
 # 3. Configure out of source build
-RUN mkdir ~/mcrl2-build && cd ~/mcrl2-build && cmake \
+RUN mkdir ~/mcrl2-build && cd ~/mcrl2-build && cmake . \
  -DCMAKE_BUILD_TYPE=RELEASE \
  -DBUILD_SHARED_LIBS=ON \
  -DMCRL2_ENABLE_DOCUMENTATION=ON \
@@ -49,7 +46,7 @@ RUN mkdir ~/mcrl2-build && cd ~/mcrl2-build && cmake \
 RUN cd ~/mcrl2-build && make -j8 
 
 # 5. Package the build
-RUN cd ~/mcrl2-build && cpack -G RPM
+RUN cd ~/mcrl2-build && cpack -G DEB
 
 # 6. Test the toolset; tests require the experimental tools.
 RUN cd ~/mcrl2-build \
@@ -59,4 +56,4 @@ RUN cd ~/mcrl2-build \
     && ctest . -j8
 
 # 7. Build the documentation
-RUN cd ~/mcrl2-build && make doc
+RUN cd ~/mcrl2-build && make doc 

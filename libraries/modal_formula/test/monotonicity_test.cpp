@@ -9,7 +9,7 @@
 /// \file monotonicity_test.cpp
 /// \brief Tests for the is_monotonous function for state formulas.
 
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/lps/linearise.h"

@@ -10,7 +10,7 @@
 /// \brief Test for down casting
 
 #define BOOST_TEST_MODULE down_cast_test
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/atermpp/aterm_list.h"
 

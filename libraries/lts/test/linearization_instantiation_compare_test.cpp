@@ -11,7 +11,7 @@
 
 #define BOOST_TEST_MODULE linearization_instantiation_compare_test
 
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/data/detail/rewrite_strategies.h"
 

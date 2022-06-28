@@ -1,0 +1,11 @@
+add_mcrl2_tool(pbes2yices
+        SOURCES
+        pbes2yices.cpp
+        data.cpp
+        unrolling.cpp
+        DEPENDS
+        mcrl2_data
+        mcrl2_bes
+        mcrl2_pbes
+        mcrl2_utilities
+        )

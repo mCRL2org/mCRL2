@@ -18,20 +18,17 @@ namespace mcrl2
 using log::log_level_t;
 using mcrl2::utilities::tools::input_input_output_tool;
 
-class lpscleave_tool : public input_input_output_tool
+class lpscombine_tool : public input_input_output_tool
 {
   typedef input_input_output_tool super;
 
 public:
-  lpscleave_tool() : super(
-      "lpscleave",
+  lpscombine_tool() : super(
+      "lpscombine",
       "Maurice Laveaux",
-      "Cleaves LPSs",
+      "Combines LPSs created by lpscleave",
       "Combines two linear process specifications (LPS) obtained from lpscleave "
       "in INFILE1 and INFILE2 and writes the resulting mCRL2 specification to OUTFILE1. "
-      "This is mainly a debugging tool to ensure that lpscleave results in a strongly bisimilar "
-      "decomposition. Internally uses string replacement to rename the right process to Q, which "
-      "is not robust. "
       "If INFILE2 is not present, stdin is used.")
   {}
 
@@ -124,5 +121,5 @@ private:
 
 int main(int argc, char** argv)
 {
-  return mcrl2::lpscleave_tool().execute(argc, argv);
+  return mcrl2::lpscombine_tool().execute(argc, argv);
 }

@@ -10,6 +10,8 @@
 #ifndef MCRL2_SYMBOLIC_SYMBOLIC_REACHABILITY_H
 #define MCRL2_SYMBOLIC_SYMBOLIC_REACHABILITY_H
 
+#ifdef MCRL2_ENABLE_SYLVAN
+
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/enumerator.h"
@@ -155,7 +157,10 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t, v
                              for (std::size_t j = 0; j < y_size; j++)
                              {
                                data::data_expression value = rewr(smd.next_state[j], sigma);
-                               xy[group.write_pos[j]] = data::is_variable(value) ? relprod_ignore : data_index[group.write[j]].insert(value).first;
+                               assert(value != data::undefined_data_expression());
+
+                               // Determine whether this is a copy parameter, insert special value if that is the case.
+                               xy[group.write_pos[j]] = smd.copy[group.write_pos[j]] ? relprod_ignore : data_index[group.write[j]].insert(value).first;
                              }
 
                              if constexpr (ActionLabel)
@@ -186,5 +191,7 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t, v
 }
 
 } // namespace mcrl2::symbolic
+
+#endif // MCRL2_ENABLE_SYLVAN
 
 #endif // MCRL2_SYMBOLIC_SYMBOLIC_REACHABILITY_H

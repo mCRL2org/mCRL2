@@ -10,7 +10,7 @@
 /// \brief Some simple tests for the binary algorithm.
 
 #define BOOST_TEST_MODULE binary_test
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/lps/binary.h"
 #include "mcrl2/lps/detail/test_input.h"

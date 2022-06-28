@@ -10,11 +10,11 @@
 /// \brief Add your file description here.
 
 #define BOOST_TEST_MODULE sort_traverser_test
+#include <boost/test/included/unit_test.hpp>
+
 
 #include "mcrl2/process/find.h"
 #include "mcrl2/process/parse.h"
-
-#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::process;

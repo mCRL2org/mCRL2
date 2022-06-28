@@ -10,6 +10,8 @@
 /// \brief Test for the ppg rewriter.
 
 #define BOOST_TEST_MODULE ppg_rewriter_test
+#include <boost/test/included/unit_test.hpp>
+
 #include "mcrl2/pbes/detail/bqnf2ppg_rewriter.h"
 #include "mcrl2/pbes/detail/bqnf_traverser.h"
 #include "mcrl2/pbes/detail/ppg_rewriter.h"
@@ -18,7 +20,6 @@
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include <boost/test/included/unit_test_framework.hpp>
 
 
 using namespace mcrl2;

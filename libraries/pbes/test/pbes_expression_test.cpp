@@ -10,7 +10,7 @@
 /// \brief Add your file description here.
 
 #define BOOST_TEST_MODULE pbes_expression_test
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/join.h"

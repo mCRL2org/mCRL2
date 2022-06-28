@@ -10,7 +10,7 @@
 #include "mcrl2/utilities/reachable_nodes.h"
 
 #define BOOST_AUTO_TEST_MAIN
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 using namespace mcrl2::utilities;
 

@@ -10,7 +10,7 @@
 /// \brief Basic regression test for data specifications.
 
 #define BOOST_TEST_MODULE data_specification_test
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/data/data_io.h"
 #include "mcrl2/data/merge_data_specifications.h"

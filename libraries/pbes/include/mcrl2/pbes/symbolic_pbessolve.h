@@ -10,6 +10,8 @@
 #ifndef MCRL2_PBES_SYMBOLIC_PBESSOLVE_H
 #define MCRL2_PBES_SYMBOLIC_PBESSOLVE_H
 
+#ifdef MCRL2_ENABLE_SYLVAN
+
 #include "symbolic_parity_game.h"
 
 namespace mcrl2 {
@@ -395,5 +397,7 @@ class symbolic_pbessolve_algorithm
 } // namespace pbes_system
 
 } // namespace mcrl2
+
+#endif // MCRL2_ENABLE_SYLVAN
 
 #endif // MCRL2_PBES_SYMBOLIC_PBESSOLVE_H

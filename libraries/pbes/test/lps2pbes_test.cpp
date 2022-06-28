@@ -12,7 +12,7 @@
 // Test program for timed lps2pbes.
 
 #define BOOST_TEST_MODULE find_test
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #ifndef MCRL2_SKIP_LONG_TESTS
 

@@ -10,13 +10,13 @@
 /// \brief Add your file description here.
 
 #define BOOST_TEST_MODULE rewriter_test
+#include <boost/test/included/unit_test.hpp>
+
 #include "mcrl2/data/detail/parse_substitution.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/lps/one_point_rule_rewrite.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/rewrite.h"
-
-#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::data;

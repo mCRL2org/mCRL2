@@ -92,7 +92,7 @@ class LTS
     const std::vector<std::string>& getParameterDomain(std::size_t parindex) const { return stateElementValues[parindex]; }
     const std::string& getParameterName(std::size_t parindex) const;
     std::size_t getStateParameterValue(State* state,std::size_t param) const;
-    const std::string& getStateParameterValueStr(State* state, std::size_t param) const;
+    const std::string getStateParameterValueStr(State* state, std::size_t param) const;
     std::set<std::string> getClusterParameterValues(Cluster* c, std::size_t param) const;
 
     void positionClusters(bool fsmstyle);

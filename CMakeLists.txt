@@ -48,6 +48,7 @@ option(MCRL2_ENABLE_HEADER_TESTS    "Enable generation of headertest targets." O
 option(MCRL2_ENABLE_TESTS           "Enable generation of library, tool and random test targets." OFF)
 option(MCRL2_ENABLE_DOCUMENTATION   "Enable generation of documentation." OFF)
 option(MCRL2_ENABLE_BENCHMARKS      "Enable benchmarks. Build the 'benchmarks' target to generate the necessary files and tools. Run the benchmarks using ctest." OFF)
+option(MCRL2_ENABLE_SYLVAN          "Enable the Sylvan library required by the following symbolic tools: lpsreach, pbessolvesymbolic and ltsconvertsymbolic" ${UNIX})
 option(MCRL2_EXTRA_TOOL_TESTS       "Enable testing of tools on more mCRL2 specifications." OFF)
 option(MCRL2_TEST_JITTYC            "Also test the compiling rewriters in the library tests. This can be time consuming." OFF)
 set(MCRL2_QT_APPS "" CACHE INTERNAL "Internally keep track of Qt apps for the packaging procedure")
@@ -87,7 +88,7 @@ if(MCRL2_ENABLE_CODE_COVERAGE)
 endif()
 
 add_subdirectory(3rd-party/dparser)
-if (UNIX)
+if (MCRL2_ENABLE_SYLVAN)
   add_subdirectory(3rd-party/sylvan/src)
 endif()
 

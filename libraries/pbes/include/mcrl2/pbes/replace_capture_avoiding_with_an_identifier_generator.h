@@ -41,7 +41,7 @@ struct add_capture_avoiding_replacement_with_an_identifier_generator
     data::variable_list v = update_sigma.push(x.variables());
     pbes_expression body;
     apply(body, x.body());
-    make_forall(body, v, apply(x.body()));
+    make_forall(result, v, apply(x.body()));
     update_sigma.pop(v);
   }
 

@@ -64,12 +64,12 @@ bool State::isDeadlock() const
   return (outTransitions.size() + loops.size() == 0);
 }
 
-int State::getID()
+std::size_t State::getID()
 {
   return id;
 }
 
-void State::setID(int i)
+void State::setID(std::size_t i)
 {
   id = i;
 }

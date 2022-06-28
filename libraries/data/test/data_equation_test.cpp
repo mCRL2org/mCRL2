@@ -10,7 +10,7 @@
 /// \brief Basic regression test for data equations.
 
 #define BOOST_TEST_MODULE data_equation_test
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/data/data_equation.h"
 

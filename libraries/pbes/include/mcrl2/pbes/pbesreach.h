@@ -10,6 +10,8 @@
 #ifndef MCRL2_PBES_PBESREACH_H
 #define MCRL2_PBES_PBESREACH_H
 
+#ifdef MCRL2_ENABLE_SYLVAN
+
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/data/merge_data_specifications.h"
@@ -587,5 +589,7 @@ class pbesreach_algorithm
 };
 
 } // namespace mcrl2::pbes_system
+
+#endif // MCRL2_ENABLE_SYLVAN
 
 #endif // MCRL2_PBES_PBESREACH_H

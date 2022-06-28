@@ -38,13 +38,11 @@
 
 .. note::
 
-   The latest release, mCRL2 202106.0, is now available from the download page.
-   This version sees a number of UI improvements and the addition of 
-   coupled simulation that can now be checked using the ltscompare tool. 
-   Furthermore, this release contains a number of performance improvements 
-   and bug fixes. 
-   See the `changelog <https://github.com/mCRL2org/mCRL2/blob/master/CHANGES>`_
-   for a detailed list of changes.
+   The latest release, mCRL2 202206.0, is now available from the download page.
+   This release mainly contains two new symbolic tools called lpsreach and
+   pbessolvesymbolic and contains several bug fixes. Unfortunately, these tools
+   are not yet available on Windows. See the `changelog <https://github.com/mCRL2org/mCRL2/blob/master/CHANGES>`_ for a detailed list
+   of changes.
 
 .. note::
   .. image:: /_static/tacas-ae.*

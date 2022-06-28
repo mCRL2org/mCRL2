@@ -10,7 +10,7 @@
 /// \brief Basic regression test for quantifier expressions.
 
 #define BOOST_TEST_MODULE quantifier_test
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/data/detail/rewrite_strategies.h"
 #include "mcrl2/data/list.h"

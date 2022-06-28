@@ -10,7 +10,7 @@
 /// \brief Test whether the class big_natural_numbers works properly.
 
 #include "mcrl2/utilities/big_numbers.h"
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;

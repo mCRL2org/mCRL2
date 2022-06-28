@@ -29,8 +29,10 @@ mCRL2 has the following minimum dependencies:
  - Boost (Linux: 1.65.1, MacOS/Windows: 1.67.0)
 
 Furthermore, sphinx and xsltproc are required to build the documentation.
-Makefiles can be generated using cmake. To build the toolset in Release mode
-using 4 threads, run the following commands (preferably in an empty directory):
+Makefiles can be generated using cmake. The compiling rewriter and the symbolic
+tools (lpsreach and pbessolvesymbolic) are only available for MacOS and Linux.
+qTo build the toolset in Release mode using 4 threads, run the following
+commands (preferably in an empty directory):
 
 ```
 git clone https://github.com/mCRL2org/mCRL2 src
@@ -40,7 +42,7 @@ make -j4
 ```
 
 When compilation is finished, the binaries can be found in `stage/bin/`.
-Convenient front-ends for cmake are ccmake (macOS/Linux) and cmake-gui. Under
+Convenient front-ends for cmake are ccmake (MacOS/Linux) and cmake-gui. Under
 Windows and macOS, it is usually necessary to set the variables
 `Boost_INCLUDE_DIR` and `Qt5_DIR` manually. More build instructions can be found
 in the
@@ -58,7 +60,7 @@ If you have questions about using the mCRL2 toolset which the documentation does
 not answer, send a mail to <mcrl2-users@listserver.tue.nl> or open an issue.
 
 ## License
-Copyright (C) 2005-2019 Eindhoven University of Technology  
+Copyright (C) 2005-2022 Eindhoven University of Technology  
 mCRL2 is licensed under the [Boost
 license](https://www.boost.org/LICENSE_1_0.txt). See the file COPYING for
 detailed license information.

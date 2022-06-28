@@ -161,11 +161,11 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
                       "'none' (default) no summand groups\n"
                       "'used' summands with the same variables are joined\n"
                       "'simple' summands with the same read/write variables are joined\n"
-                      "a list of summand groups separated by semicolons, e.g. '0; 1 3 4; 2 5'");
+                      "a user defined list of summand groups separated by semicolons, e.g. '0; 1 3 4; 2 5'");
       desc.add_option("reorder", utilities::make_optional_argument("ORDER", "none"),
                       "'none' (default) no variable reordering\n"
                       "'random' variables are put in a random order\n"
-                      "'<order>' a user defined permutation e.g. '1 3 2 0 4'"
+                      "'a user defined permutation e.g. '1 3 2 0 4'"
       );
       desc.add_option("info", "print read/write information of the summands");
       desc.add_option("max-iterations", utilities::make_optional_argument("NUM", "0"), "limit number of breadth-first iterations to NUM");

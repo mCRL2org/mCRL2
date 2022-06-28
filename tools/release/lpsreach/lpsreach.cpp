@@ -53,11 +53,11 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
                       "'none' (default) no summand groups\n"
                       "'used' summands with the same variables are joined\n"
                       "'simple' summands with the same read/write variables are joined\n"
-                      "'<groups>' a user defined list of summand groups separated by semicolons, e.g. '0; 1 3 4; 2 5'");
+                      "a user defined list of summand groups separated by semicolons, e.g. '0; 1 3 4; 2 5'");
       desc.add_option("reorder", utilities::make_optional_argument("ORDER", "none"),
                       "'none' (default) no variable reordering\n"
                       "'random' variables are put in a random order\n"
-                      "'<order>' a user defined permutation e.g. '1 3 2 0 4'"
+                      "'a user defined permutation e.g. '1 3 2 0 4'"
                       );
       desc.add_option("max-iterations", utilities::make_optional_argument("NUM", "0"), "limit number of breadth-first iterations to NUM");
       desc.add_option("print-nodesize", "print the number of LDD nodes in addition to the number of elements represented as 'elements[nodes]'");
@@ -135,9 +135,9 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
     lpsreach_tool()
       : super("lpsreach",
               "Wieger Wesselink",
-              "applies a symbolic reachability algorithm to an LPS",
-              "read an LPS from INFILE and write output to OUTFILE. If OUTFILE "
-              "is not present, stdout is used. If INFILE is not present, stdin is used."
+              "Applies a symbolic reachability algorithm to an LPS",
+              "Read an LPS from INFILE and write a symbolic labelled transition system to OUTFILE. "
+              "If OUTFILE is not present, no symbolic LTS is written. If INFILE is not present, stdin is used."
              )
     {}
 
@@ -171,11 +171,7 @@ class lpsreach_tool: public rewriter_tool<input_output_tool>
           print_dot(options.dot_file, V);
         }
 
-        if (output_filename().empty())
-        {
-          std::cout << algorithm.get_symbolic_lts();
-        }
-        else
+        if (!output_filename().empty())
         {
           std::ofstream to(output_filename(), std::ofstream::out | std::ofstream::binary);
           if (!to.good())

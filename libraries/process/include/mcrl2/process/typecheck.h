@@ -309,12 +309,13 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       try
       {
         data::variable v = formal_parameter_map[a.lhs()];
+        formal_parameter_map.erase(v.name());
         data::data_expression e = m_data_type_checker.typecheck_data_expression(a.rhs(), v.sort(), m_variable_context);
         assignments.emplace_back(v, e);
       }
       catch (const mcrl2::runtime_error& e)
       {
-        throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error occurred while typechecking the process call with short-hand assignments " + process::pp(x));
+        throw mcrl2::runtime_error(std::string(e.what()) + "\nType error occurred while typechecking the process call with short-hand assignments " + process::pp(x));
       }
     }
 
@@ -324,7 +325,20 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       check_assignments(*m_current_equation, P, assignments, x);
     }
 
-    result = process_instance_assignment(P, data::assignment_list(assignments.begin(), assignments.end()));
+    // Check that for any non explicitly stated assignment x:=x, the rhs is well defined.
+    for (const auto& [name, var]: formal_parameter_map)
+    {
+      try
+      {
+        m_data_type_checker.typecheck_data_expression(var, var.sort(), m_variable_context);
+      }
+      catch (const mcrl2::runtime_error& e)
+      {
+        throw mcrl2::runtime_error(std::string(e.what()) + "\nIn implicitly stated assignment " + pp(var) + "=" + pp(var) + " in process " + pp(P) + "(" + data::pp(assignments) + ")\n");
+      }
+    }
+
+    make_process_instance_assignment(result, P, data::assignment_list(assignments.begin(), assignments.end()));
   }
 
   template <class T>

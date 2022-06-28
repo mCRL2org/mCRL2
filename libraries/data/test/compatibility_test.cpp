@@ -11,7 +11,7 @@
 ///       format.
 
 #define BOOST_TEST_MODULE compatibility_test
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/core/parse.h"
 #include "mcrl2/data/data_io.h"

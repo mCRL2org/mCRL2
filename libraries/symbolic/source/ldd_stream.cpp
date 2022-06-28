@@ -7,6 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#ifdef MCRL2_ENABLE_SYLVAN
+
 #include "mcrl2/symbolic/ldd_stream.h"
 
 #include "mcrl2/utilities/exception.h"
@@ -207,3 +209,5 @@ unsigned int binary_ldd_istream::ldd_index_width(bool input)
 {
   return std::log2(m_nodes.size() + input) + 1; // Assume that size is one larger to contain the input ldd.
 }
+
+#endif // MCRL2_ENABLE_SYLVAN

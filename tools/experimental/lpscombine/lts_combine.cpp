@@ -50,7 +50,9 @@ std::vector<std::pair<process::action, lps::multi_action>> preprocess_labels(con
     // Every transition label needs to have a tag or synchronisation action.
     if (!introduce_tags)
     {
-      if (first == process::action())
+      // We need the first clause since 'tau' is also equal to process::action(), and 'tau' is always an action label even if it
+      // does not occur in the LTS.
+      if (label.actions().size() > 0 && first == process::action())
       {
         mCRL2log(log::error) << "Label " << label << " does not contain a tag or synchronisation action.\n";
         throw mcrl2::runtime_error("Unexpected transition.");
@@ -70,7 +72,7 @@ std::vector<std::pair<process::action, lps::multi_action>> preprocess_labels(con
       throw mcrl2::runtime_error("Unexpected timed transition.");
     }
 
-    assert(first != process::action()); // There should be exactly one.
+    assert(label.actions().size() == 0 || first != process::action()); // There should be exactly one.
     labels[i] = std::make_pair(first, lps::multi_action(actions, label.time()));
   }
 

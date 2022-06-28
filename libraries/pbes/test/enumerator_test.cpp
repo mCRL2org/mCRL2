@@ -10,7 +10,7 @@
 /// \brief Add your file description here.
 
 #define BOOST_TEST_MODULE enumerator_test
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/data/enumerator_with_iterator.h"

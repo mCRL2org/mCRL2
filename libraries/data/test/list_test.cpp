@@ -10,7 +10,7 @@
 /// \brief Basic regression test for list expressions.
 
 #define BOOST_TEST_MODULE list_test
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/parse.h"

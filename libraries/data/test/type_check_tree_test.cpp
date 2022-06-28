@@ -10,10 +10,11 @@
 /// \brief Add your file description here.
 
 #define BOOST_TEST_MODULE type_check_tree_test
+#include <boost/test/included/unit_test.hpp>
+
 #include "mcrl2/data/experimental/type_check_tree.h"
 #include "mcrl2/data/print.h"
 
-#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
 

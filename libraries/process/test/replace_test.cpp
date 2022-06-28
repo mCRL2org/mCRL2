@@ -10,8 +10,7 @@
 /// \brief Regression test for replace functions
 
 #define BOOST_TEST_MODULE replace_test
-
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/process/parse.h"

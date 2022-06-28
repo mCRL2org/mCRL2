@@ -85,15 +85,15 @@ public:
   , proving_rewr(pr)
   {}
 
-  data_expression apply(const lambda& expr)
+  data_expression apply(const data_expression& expr)
   {
     const mutable_indexed_substitution<> sigma;
     return apply(expr, sigma);
   }
 
-  data_expression apply(const lambda& expr, const mutable_indexed_substitution<>& sigma)
+  data_expression apply(const data_expression& expr, const mutable_indexed_substitution<>& sigma)
   {
-    return is_lambda(expr) ? apply_lambda(expr, sigma) : apply_data_expression(expr,sigma);
+    return is_lambda(expr) ? apply_lambda(atermpp::down_cast<lambda>(expr), sigma) : apply_data_expression(expr,sigma);
   }
 };
 

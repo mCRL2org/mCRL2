@@ -12,7 +12,7 @@
 #define MCRL2_STATE_FORMULA_BUILDER_DEBUG
 
 #define BOOST_TEST_MODULE state_formula
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/modal_formula/count_fixpoints.h"

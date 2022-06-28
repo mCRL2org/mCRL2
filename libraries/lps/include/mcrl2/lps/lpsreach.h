@@ -12,6 +12,8 @@
 #ifndef MCRL2_LPS_LPSREACH_H
 #define MCRL2_LPS_LPSREACH_H
 
+#ifdef MCRL2_ENABLE_SYLVAN
+
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/lps/io.h"
@@ -363,5 +365,7 @@ class lpsreach_algorithm
 };
 
 } // namespace mcrl2::lps
+
+#endif // MCRL2_ENABLE_SYLVAN
 
 #endif // MCRL2_LPS_LPSREACH_H
