@@ -139,7 +139,7 @@ class counter_example_constructor
       if (m_structured_output)
       {
         std::cout << m_name << ": ";
-        result.save("", mcrl2::lts::trace::tfPlain);   // Write to stdout. 
+        result.save("", mcrl2::lts::trace::tfLine);   // Write to stdout.
       }
       else
       {
