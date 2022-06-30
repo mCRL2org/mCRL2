@@ -74,12 +74,12 @@ static void rewrite_with_arguments_in_normal_form(
   return;
 }
 
-/* static data_expression rewrite_with_arguments_in_normal_form(const data_expression& t, RewriterCompilingJitty* this_rewriter)
+static data_expression rewrite_with_arguments_in_normal_form(const data_expression& t, RewriterCompilingJitty* this_rewriter)
 {
   data_expression result; // TODO: Optimize
   rewrite_aux<true>(result, t, this_rewriter);
   return result;
-} */
+}
 
 static void rewrite(data_expression& result, const data_expression& t, RewriterCompilingJitty* this_rewriter)
 {
