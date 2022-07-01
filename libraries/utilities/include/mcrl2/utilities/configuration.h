@@ -21,7 +21,7 @@ namespace detail
 /// Outcomment to compile the toolset without thread safe features. 
 /// This is a define, because it is used to determine whether data structures are
 /// determined via the keyword thread_local or via static. 
-#define MCRL2_THREAD_SAFE
+//#define MCRL2_THREAD_SAFE
 
 } // namespace detail
 
@@ -30,4 +30,3 @@ namespace detail
 } // namespace mcrl2
 
 #endif // MCRL2_UTILITIES_CONFIGURATION_H
-

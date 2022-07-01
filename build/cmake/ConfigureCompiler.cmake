@@ -44,6 +44,10 @@ if(MCRL2_ENABLE_SYLVAN)
   add_definitions(-DMCRL2_ENABLE_SYLVAN)
 endif()
 
+if(MCRL2_ENABLE_THREADSAFE)
+  add_definitions(-DMCRL2_THREAD_SAFE)
+endif()
+
 # Enable C++17 for all targets.
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
