@@ -44,7 +44,7 @@ if(MCRL2_ENABLE_SYLVAN)
   add_definitions(-DMCRL2_ENABLE_SYLVAN)
 endif()
 
-if(MCRL2_ENABLE_THREADSAFE)
+if(MCRL2_ENABLE_MULTITHREADING)
   add_definitions(-DMCRL2_THREAD_SAFE)
 endif()
 
