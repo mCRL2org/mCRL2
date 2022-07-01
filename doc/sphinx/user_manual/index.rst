@@ -45,6 +45,12 @@
    of changes.
 
 .. note::
+
+   Starting from the 2th of Judy the nightly builds contain the new thread-safe
+   implementation of the ATerm library. This enables the use of multiple threads
+   by the tools `lps2lts` and `pbessolve`.
+
+.. note::
   .. image:: /_static/tacas-ae.*
           :align: right
           :width: 90px
