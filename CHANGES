@@ -1,4 +1,13 @@
 ===============================================================================
+Changes between toolset releases 202206.0 and 202206.1:
+===============================================================================
+
+This release contains two bug fixes:
+  * Write counterexample's structured output trace on a single line.
+  * Fixed that hidden actions (the --tau option) were not properly recognized in
+    ltsconvert.
+
+===============================================================================
 Changes between toolset releases 202106.0 and 202206.0:
 ===============================================================================
 
