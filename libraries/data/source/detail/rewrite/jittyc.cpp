@@ -1645,7 +1645,6 @@ class RewriterCompilingJitty::ImplementTree
           << ".unprotected_assign<false>("
           << m_rewriter.m_nf_cache->insert(m_rewriter.jitty_rewriter(t,sigma)) 
           << ");\n";
-//        << ", this_rewriter->m_busy_flag, this_rewriter->m_forbidden_flag, *this_rewriter->m_creation_depth);\n";
       }
       result_type << "data_expression";
       return;
@@ -3004,8 +3003,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   {
     try
     {
-std::cerr << "DO NOT REMOVE REWRITE .cpp FILE\n";
-//      rewriter_so->cleanup();
+      rewriter_so->cleanup();
     }
     catch (std::runtime_error& error)
     {

@@ -205,7 +205,7 @@ class RewriterCompilingJitty: public Rewriter
 
   void thread_initialise()
   {
-std::cerr << "INITIALISE BUSY/FORBIDDEN FLAGS\n";
+    mCRL2log(mcrl2::log::debug) << "Initialise busy/forbidden flags\n";
     m_busy_flag = atermpp::detail::g_thread_term_pool().get_busy_flag();
     m_forbidden_flag = atermpp::detail::g_thread_term_pool().get_forbidden_flag();
     m_creation_depth = atermpp::detail::g_thread_term_pool().get_creation_depth();
