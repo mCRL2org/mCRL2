@@ -869,6 +869,70 @@ BOOST_AUTO_TEST_CASE(hide_actions1)
   std::size_t expected_state_count = 3;
   std::size_t expected_transition_count = 3;
   test_lts("regression test for GJKW bug (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",l,expected_label_count, expected_state_count, expected_transition_count);
-
-
 }
+
+
+BOOST_AUTO_TEST_CASE(hide_actions2)
+{
+  std::string automaton =
+     "des (0,4,3)\n"
+     "(0,\"state\",1)\n"
+     "(1,\"hello\",2)\n"
+     "(0,\"return\",2)\n"
+     "(2,\"world\",1)\n";
+
+  std::istringstream is(automaton);
+  lts::lts_aut_t l;
+  l.load(is);
+  std::vector<std::string>hidden_actions(1,"hello");
+  l.apply_hidden_actions(hidden_actions);
+  reduce(l,lts::lts_eq_branching_bisim);
+  std::size_t expected_label_count = 5;
+  std::size_t expected_state_count = 2;
+  std::size_t expected_transition_count = 3;
+  test_lts("regression test for GJKW bug (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",l,expected_label_count, expected_state_count, expected_transition_count);
+}
+
+BOOST_AUTO_TEST_CASE(hide_actions3)
+{
+  std::string automaton =
+     "des (0,4,3)\n"
+     "(0,\"<state>\",1)\n"
+     "(1,\"return|hello\",2)\n"
+     "(1,\"return\",2)\n"
+     "(2,\"world\",1)\n";
+
+  std::istringstream is(automaton);
+  lts::lts_aut_t l;
+  l.load(is);
+  std::vector<std::string>hidden_actions(1,"hello");
+  l.record_hidden_actions(hidden_actions);
+  reduce(l,lts::lts_eq_bisim);
+  std::size_t expected_label_count = 5;
+  std::size_t expected_state_count = 3;
+  std::size_t expected_transition_count = 3;
+  test_lts("regression test for GJKW bug (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",l,expected_label_count, expected_state_count, expected_transition_count);
+}
+
+
+BOOST_AUTO_TEST_CASE(hide_actions4)
+{
+  std::string automaton =
+     "des (0,4,3)\n"
+     "(0,\"state\",1)\n"
+     "(1,\"hello\",2)\n"
+     "(0,\"return\",2)\n"
+     "(2,\"world\",1)\n";
+
+  std::istringstream is(automaton);
+  lts::lts_aut_t l;
+  l.load(is);
+  std::vector<std::string>hidden_actions(1,"hello");
+  l.record_hidden_actions(hidden_actions);
+  reduce(l,lts::lts_eq_branching_bisim);
+  std::size_t expected_label_count = 5;
+  std::size_t expected_state_count = 2;
+  std::size_t expected_transition_count = 3;
+  test_lts("regression test for GJKW bug (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",l,expected_label_count, expected_state_count, expected_transition_count);
+}
+
