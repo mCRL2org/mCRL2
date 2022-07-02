@@ -10,10 +10,8 @@ set(MCRL2_TOOLS
   pbesabsinthe
   pbespareqelm
   pbespor
-  pbessolve_parallel
   pbessymbolicbisim
   symbolic_exploration
-  lps2lts_parallel
 )
 
 if(MCRL2_ENABLE_EXPERIMENTAL)

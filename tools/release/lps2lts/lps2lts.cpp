@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Wieger Wesselink; Threads are added by Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -6,24 +6,28 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file lps2lts.cpp
+/// \file lps2lts_parallel.cpp
+/// \brief This tool transforms an .lps file into a labelled transition system.
+///        Optionally, it can be run with multiple treads. 
 
 #include <csignal>
 #include <memory>
+#include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/parallel_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/is_stochastic.h"
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/stochastic_lts_builder.h"
 #include "mcrl2/lts/state_space_generator.h"
-#include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
-using data::tools::rewriter_tool;
 using utilities::tools::input_output_tool;
+using utilities::tools::parallel_tool;
+using data::tools::rewriter_tool;
 
-class lps2lts_tool: public rewriter_tool<input_output_tool>
+class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
 {
-  typedef rewriter_tool<input_output_tool> super;
+  typedef parallel_tool<rewriter_tool<input_output_tool>> super;
 
   lps::explorer_options options;
   lts::lts_type output_format = lts::lts_none;
@@ -36,8 +40,8 @@ class lps2lts_tool: public rewriter_tool<input_output_tool>
               "Wieger Wesselink",
               "generates an LTS from an LPS",
               "Transforms the LPS in INFILE and writes a corresponding LTS "
-              "to OUTFILE. If OUTFILE is not present, no LTS is written. If INFILE is equal to '-' "
-              "present, stdin is used."
+              " to OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not "
+              " present, stdin is used."
              )
     {}
 
@@ -212,7 +216,7 @@ class lps2lts_tool: public rewriter_tool<input_output_tool>
       options.dfs_recursive                         = parser.has_option("dfs-recursive");
       options.discard_lts_state_labels              = parser.has_option("no-info");
       options.search_strategy = parser.option_argument_as<lps::exploration_strategy>("strategy");
-
+      options.number_of_threads = number_of_threads();
       // highway search
       if (parser.has_option("todo-max"))
       {
@@ -220,11 +224,11 @@ class lps2lts_tool: public rewriter_tool<input_output_tool>
       }
       if (options.search_strategy == lps::es_highway && !parser.has_option("todo-max"))
       {
-        parser.error("Search strategy 'highway' requires that the option todo-max is set");
+        parser.error("Search strategy 'highway' requires that the option todo-max is set.");
       }
       if (options.search_strategy != lps::es_highway && parser.has_option("todo-max"))
       {
-        parser.error("Option 'todo-max' can only be used in combination with highway search");
+        parser.error("Option 'todo-max' can only be used in combination with highway search.");
       }
 
       if (parser.has_option("out"))
@@ -241,7 +245,7 @@ class lps2lts_tool: public rewriter_tool<input_output_tool>
         output_format = lts::detail::guess_format(output_filename());
         if (output_format == lts::lts_none)
         {
-          mCRL2log(log::warning) << "no output format set or detected; using default (lts)" << std::endl;
+          mCRL2log(log::warning) << "No output format set or detected; using default (lts)." << std::endl;
           output_format = lts::lts_lts;
         }
       }
@@ -306,10 +310,30 @@ class lps2lts_tool: public rewriter_tool<input_output_tool>
       {
         parser.error("Option '--no-info' requires that the output is in .lts format.");
       }
+      if (options.number_of_threads>1)
+      { 
+         /* if (options.detect_divergence)
+         {
+           parser.error("Option 'divergence' can only be used in single thread mode.");
+         } */
+         if (options.save_error_trace)
+         {
+           parser.error("Option 'error-trace' can only be used in single thread mode.");
+         }
+         /* if (parser.has_option("multiaction"))
+         {
+           parser.error("Option 'multiaction' can only be used in single thread mode.");
+         } */
+         if (options.generate_traces)
+         {
+           parser.error("Option 'trace' can only be used in single thread mode.");
+         }
+      }
 
       options.rewrite_actions = output_format!=lts::lts_none ||
                                 options.save_error_trace ||
                                 options.generate_traces;
+
     }
 
     template <bool Stochastic, bool Timed, typename Specification, typename LTSBuilder>
