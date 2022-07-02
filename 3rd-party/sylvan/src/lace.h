@@ -325,7 +325,11 @@ void lace_yield(WorkerP *__lace_worker, Task *__lace_dq_head);
 #endif
 
 #ifndef mfence
+#ifdef __aarch64__  // compiler target is arm64
+#define mfence() { asm volatile("dmb ish" ::: "memory"); }
+#else // __x86_64__ is assumed as alternative. 
 #define mfence() { asm volatile("mfence" ::: "memory"); }
+#endif
 #endif
 
 /* Compiler specific branch prediction optimization */
