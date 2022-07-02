@@ -388,7 +388,7 @@ class pbesinst_lazy_algorithm
     {
       using utilities::detail::contains;
 
-      mCRL2log(log::verbose) << "Start thread " << thread_index << ".\n";
+      if (m_options.number_of_threads>1) mCRL2log(log::debug) << "Start thread " << thread_index << ".\n";
       R.thread_initialise();
 
       propositional_variable_instantiation X_e;
@@ -453,7 +453,7 @@ class pbesinst_lazy_algorithm
         }
       }
 
-      mCRL2log(log::verbose) << "Stop thread " << thread_index << ".\n";
+      if (m_options.number_of_threads>1) mCRL2log(log::debug) << "Stop thread " << thread_index << ".\n";
     }
 
     /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
@@ -475,25 +475,37 @@ class pbesinst_lazy_algorithm
       todo.insert(init);
       discovered.insert(init);
 
-      threads.reserve(number_of_threads);
-      for (std::size_t i = 0; i < number_of_threads; ++i)
+      if (number_of_threads>1)
       {
-        std::thread tr([&, i](){
-          run_thread(i,
-                     todo,
-                     number_of_active_processes,
-                     sigma.clone(),
-                     m_global_R.clone()
-                    );
-        });
-        threads.push_back(std::move(tr));
-      }
+        threads.reserve(number_of_threads);
+        for (std::size_t i = 0; i < number_of_threads; ++i)
+        {
+          std::thread tr([&, i](){
+            run_thread(i,
+                       todo,
+                       number_of_active_processes,
+                       sigma.clone(),
+                       m_global_R.clone()
+                      );
+          });
+          threads.push_back(std::move(tr));
+        }
 
-      for (std::size_t i = 0; i < number_of_threads; ++i)
+        for (std::size_t i = 0; i < number_of_threads; ++i)
+        {
+          threads[i].join();
+        }
+      }
+      else 
       {
-        threads[i].join();
+        // There is only one thread. Run the process in the main thread, without cloning sigma or the rewriter.
+        run_thread(0,
+                   todo,
+                   number_of_active_processes,
+                   sigma,
+                   m_global_R
+                  );
       }
-
       on_end_while_loop();
     }
 
