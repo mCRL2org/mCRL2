@@ -195,13 +195,8 @@ eqn y==1 -> Put(p,x,y,r|>b)=Put(p,x,r)|>b;
     !(0<x+dx && x+dx<=N && 0<y+dy && y+dy<=M) ->
        Swap1(p,x,y,dx,dy,b)=b;
 
-<<<<<<< HEAD
-    PutPiece(p,x,y,b)=
-       Put(p,x,y,
-=======
     x<=N -> PutPiece(p,x,y,b)=     % The condition avoids that PutPiece is expanded to a huge
        Put(p,x,y,                  % expression while linearising. It is redundant, though. 
->>>>>>> a5521d837f4675f1cc0c4d107bffd02a273faf16
        Swap(p,x,y,1,0,
        Swap(p,x,y,1,-1,
        Swap(p,x,y,0,-1,
@@ -211,52 +206,6 @@ eqn y==1 -> Put(p,x,y,r|>b)=Put(p,x,r)|>b;
        Swap(p,x,y,0,1,
        Swap(p,x,y,1,1,b)))))))));
 
-<<<<<<< HEAD
-
-    CanMove(p,b)=CanMove(p,1,1,b);
-
-    x==N && y==M ->
-      CanMove(p,x,y,b)=At(x,y,b)==None && Enclosing(p,x,y,b);
-
-    x==N && y<M ->
-      CanMove(p,x,y,b)=
-         (At(x,y,b)==None && Enclosing(p,x,y,b)) || CanMove(p,1,y+1,b);
-
-    x<N ->
-      CanMove(p,x,y,b)=
-         (At(x,y,b)==None && Enclosing(p,x,y,b)) || CanMove(p,x+1,y,b);
-
-
-act WhiteMove,RedMove:Pos#Pos;
-    WhiteWins,RedWins,Draw,Pass;
-
-proc Othello(b:Board,WhiteMoves:Bool,Passed, PassedTwice:Bool)=
-       sum x,y:Pos. (!PassedTwice && WhiteMoves &&
-                     x<=N && y<=M &&
-                     At(x,y,b)==None &&
-                     Enclosing(White,x,y,b))->
-           WhiteMove(x,y).
-             Othello(PutPiece(White,x,y,b),false, false, false) +
-       sum x,y:Pos. (!PassedTwice && !WhiteMoves &&
-                     x<=N && y<=M &&
-                     At(x,y,b)==None &&
-                     Enclosing(Red,x,y,b))->
-           RedMove(x,y).
-             Othello(PutPiece(Red,x,y,b),true, false, false) +
-       (!PassedTwice && WhiteMoves && !CanMove(White,b)) ->
-           Pass.Othello(b,false,true,Passed) +
-       (!PassedTwice && !WhiteMoves && !CanMove(Red,b)) ->
-           Pass.Othello(b,true,true,Passed) +
-       (PassedTwice && Count(Red,b)>Count(White,b)) ->
-           RedWins.Othello(b,false,true,true)+
-       (PassedTwice && Count(Red,b)<Count(White,b)) ->
-           WhiteWins.Othello(b,false,true,true)+
-       (PassedTwice && Count(Red,b)==Count(White,b)) ->
-           Draw.Othello(b,false,true,true);
-
-
-init Othello(initial_board,false,false,false);
-=======
     CanMove(p,b)=exists x,y:Pos.x<=N && y<=M && At(x,y,b)==None && Enclosing(p,x,y,b);
 
 act Move:Piece#Pos#Pos;
@@ -276,4 +225,3 @@ proc Othello(b:Board,player:Piece,Passed, PassedTwice, Stopped:Bool)=
 
 
 init Othello(initial_board,Red,false,false,false);
->>>>>>> a5521d837f4675f1cc0c4d107bffd02a273faf16
