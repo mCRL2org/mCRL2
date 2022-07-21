@@ -38,6 +38,10 @@
 
 .. note::
 
+   The 32bit nightly builds have been declared deprecated and subsequently removed.
+
+.. note::
+
    The latest release, mCRL2 202206.0, is now available from the download page.
    This release mainly contains two new symbolic tools called lpsreach and
    pbessolvesymbolic and contains several bug fixes. Unfortunately, these tools
