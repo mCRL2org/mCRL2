@@ -452,6 +452,6 @@ BOOST_AUTO_TEST_CASE(random_test_solitair_cycles)
   
   quit_sylvan();
 }
-*/
 
-#endif // PLATFORM_WINDOWS
+#endif // MCRL2_ENABLE_SYLVAN
+*/
