@@ -10,8 +10,6 @@
 #ifndef MCRL2_PBES_SYMBOLIC_PARITY_GAME_H
 #define MCRL2_PBES_SYMBOLIC_PARITY_GAME_H
 
-/*
-// Commented this test since Sylvan causes some address sanitizer failures that I cannot resolve.
 #ifdef MCRL2_ENABLE_SYLVAN
 
 #include "mcrl2/pbes/srf_pbes.h"
@@ -616,6 +614,5 @@ private:
 } // namespace mcrl2
 
 #endif // MCRL2_ENABLE_SYLVAN
-*/
 
 #endif // MCRL2_PBES_SYMBOLIC_PBESSOLVE_H
