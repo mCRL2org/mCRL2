@@ -38,7 +38,12 @@
 
 .. note::
 
-   The 32bit nightly builds have been declared deprecated and subsequently removed.
+   FORTE 2022 Best Artefact Award: Process Algebra Can Save Lives: Static Analysis of XACML Access 
+   Control Policies using mCRL2. By Arshad, Horne, Johansen, Owe and Willemse. 
+
+.. note::
+
+   The 32bit nightly builds have been declared deprecated. They are not being built anymore. 
 
 .. note::
 
@@ -50,7 +55,7 @@
 
 .. note::
 
-   Starting from the 2th of Judy the nightly builds contain the new thread-safe
+   Starting from the 2th of July the nightly builds contain the new thread-safe
    implementation of the ATerm library. This enables the use of multiple threads
    by the tools `lps2lts` and `pbessolve`.
 
