@@ -804,6 +804,10 @@ stochastic_specification action_rename(
   for(const process::action_label& act: lps_old_spec.action_labels())
   {
     process::action_label new_action_label(detail::rename_action_label(act, matching_regex, replacing_fmt));
+    if (std::string(new_action_label.name()).empty())
+    {
+      throw mcrl2::runtime_error("After renaming the action " + std::string(act.name()) + " becomes empty, which is not allowed.");
+    }
     if(std::string(new_action_label.name()) != "delta" && std::string(new_action_label.name()) != "tau" &&
         new_actions_set.find(new_action_label) == new_actions_set.end())
     {

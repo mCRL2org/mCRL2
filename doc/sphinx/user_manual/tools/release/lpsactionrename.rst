@@ -123,7 +123,9 @@ Applying sum elimination will give the following result::
 Regular Expressions
 -------------------
 
-A regular expression has to be provided in the shape ``matching pattern/replacement``.
+Many action labels can be quickly renamed at once with a regular expression.
+This regular expression has to be provided in the shape ``matching pattern/replacement``.
+Note that this does not allow modification of action parameters.
 The replacement pattern follows the standard of ECMAScript. Groups matched with
 parentheses can be substituted in the replacement string using ``$n``, where
 ``n`` is the index of the matched group. See the
@@ -149,9 +151,10 @@ We consider the following process::
            delta;
 
 We can remove the prefix of ``a_out`` and ``c_out`` using the regular expression
-``^([^b])_out$/$1``. It is generally a good idea to write regular expressions in
-the shape ``^expression$`` to ensure the whole action name is matched.
+``^([^b])_out$/$1``. To ensure the whole action name is matched, one may write
+regular expressions in the shape ``^expression$``.
 
 It is also possible to rename actions to delta or to tau. For example, when
 renaming ``a_out`` to ``delta`` using ``^a_out$/delta``, the multi action
-``a_out|c_out`` will become ``delta``.
+``a_out|c_out`` will become ``delta``. When applying the regex ``a_out/tau``,
+the same multi-action becomes ``c_out``.
