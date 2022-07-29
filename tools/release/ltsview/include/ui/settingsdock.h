@@ -35,7 +35,7 @@ class SettingsDock : public QWidget
   Q_OBJECT
 
   public:
-    SettingsDock(QWidget *parent, Settings *settings);
+    SettingsDock(QWidget *parent);
 
   private slots:
     void stateSizeChanged(int value);
@@ -50,7 +50,6 @@ class SettingsDock : public QWidget
 
   private:
     Ui::SettingsDock m_ui;
-    Settings *m_settings;
 };
 
 #endif
