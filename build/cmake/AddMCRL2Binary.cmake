@@ -4,6 +4,13 @@ include(CMakeParseArguments)
 cmake_minimum_required(VERSION 3.1)
 find_package(Threads)
 
+macro(append_unique LIST_VAR VALUE)
+  list(FIND ${LIST_VAR} ${VALUE} _index)
+  if(_index EQUAL -1)
+    list(APPEND ${LIST_VAR} "${VALUE}")
+  endif()
+endmacro()
+
 function(_add_library_tests TARGET_NAME)
   file(GLOB librarytest "test/*.cpp")
   file(GLOB libraryexample "example/*.cpp")
@@ -143,9 +150,8 @@ endfunction()
 function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
   set(OPTION_KW "NOTEST")
   set(VALUE_KW "SOURCEDIR" "INCLUDEDIR" "COMPONENT" "DESCRIPTION" "MENUNAME" "ICON")
-  set(LIST_KW "SOURCES" "DEPENDS" "INCLUDE" "RESOURCES" "NOHEADERTEST")
+  set(LIST_KW "SOURCES" "DEPENDS" "INCLUDE" "NOHEADERTEST")
   cmake_parse_arguments("ARG" "${OPTION_KW}" "${VALUE_KW}" "${LIST_KW}" ${ARGN})
-  
   if(NOT ARG_COMPONENT)
     if("${TARGET_TYPE}" STREQUAL "LIBRARY")
       set(ARG_COMPONENT "Libraries")
@@ -175,38 +181,58 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
      (IS_GUI_BINARY AND NOT MCRL2_ENABLE_GUI_TOOLS))
     return()
   endif()
+ 
+  get_filename_component(SOURCEDIR_ABS ${ARG_SOURCEDIR} ABSOLUTE)
+  get_filename_component(INCLUDEDIR_ABS ${ARG_INCLUDEDIR} ABSOLUTE)
 
-  foreach(SRC ${ARG_SOURCES})
-    get_filename_component(SRC_ABS ${SRC} ABSOLUTE)    
-    if(NOT "${SRC_ABS}" STREQUAL "${SRC}")
-      get_filename_component(SRC_ABS ${ARG_SOURCEDIR}/${SRC} ABSOLUTE)
+  foreach(_SRC ${ARG_SOURCES})
+    get_filename_component(_SRC_ABS ${_SRC} ABSOLUTE)
+
+    # if a directory is supplied as an argument in sources, we assume all files in that directory are sources
+    if (IS_DIRECTORY ${_SRC_ABS})
+      file(GLOB _SRC_ABS_LIST LIST_DIRECTORIES FALSE "${_SRC_ABS}/*")
+      list(APPEND ARG_SOURCES_ABS ${_SRC_ABS_LIST})
+    else()
+      file(GLOB _SRC_ABS "${SOURCEDIR_ABS}/${_SRC}")
+      if(NOT _SRC_ABS)
+        message(WARNING " - ${TARGET_NAME} - No SRC_ABS with GLOB for file: ${_SRC}")
+      endif()
     endif()
-    
-    get_filename_component(SRC_EXT ${SRC_ABS} EXT)    
+    list(APPEND ARG_SOURCES_ABS ${_SRC_ABS})
+  endforeach()
+
+  foreach(_SRC_ABS ${ARG_SOURCES_ABS})
+    # Check if file extension requires extra work
+    get_filename_component(SRC_EXT ${_SRC_ABS} EXT)    
     if("${SRC_EXT}" STREQUAL ".g")
       # This is a grammar file. Generate a .c file using DParser
-      get_filename_component(SRC_BASE ${SRC_ABS} NAME_WE)
+      get_filename_component(SRC_BASE ${_SRC_ABS} NAME_WE)
       file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/source)
       set(PARSER_CODE ${CMAKE_CURRENT_BINARY_DIR}/source/${SRC_BASE}.c)
       string(REGEX REPLACE "(.*)_syntax" "\\1" GRAMMAR_IDENT ${SRC_BASE})
       add_custom_command(
           OUTPUT ${PARSER_CODE}
-          COMMAND make_dparser -A -H0 -i${GRAMMAR_IDENT} -o${PARSER_CODE} ${SRC_ABS}
-          DEPENDS make_dparser ${SRC_ABS}
+          COMMAND make_dparser -A -H0 -i${GRAMMAR_IDENT} -o${PARSER_CODE} ${_SRC_ABS}
+          DEPENDS make_dparser ${_SRC_ABS}
           WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
           COMMENT "Generating ${GRAMMAR_IDENT} parser"
         )
-      add_custom_target(${LIBNAME}_${SRC_BASE} SOURCES ${SRC_ABS})
-      set(SRC_ABS ${PARSER_CODE})
-      set(DEPENDS ${DEPENDS} dparser)
-      set(ARG_INCLUDE ${ARG_INCLUDE} ${CMAKE_SOURCE_DIR}/3rd-party/dparser)
+      add_custom_target(${LIBNAME}_${SRC_BASE} SOURCES ${_SRC_ABS})
+      set(_SRC_ABS ${PARSER_CODE})
+      
+      append_unique(DEPENDS dparser)
+      append_unique(ARG_INCLUDE ${CMAKE_SOURCE_DIR}/3rd-party/dparser)
     endif()
-    set(ARG_INCLUDE ${ARG_INCLUDE} ${CMAKE_SOURCE_DIR}/3rd-party/sylvan/src)
-    set(SOURCES ${SRC_ABS} ${SOURCES})
-  endforeach()
-  
-  file(GLOB_RECURSE TARGET_INCLUDE_FILES ${ARG_INCLUDEDIR}/*.h)
 
+    append_unique(ARG_INCLUDE ${CMAKE_SOURCE_DIR}/3rd-party/sylvan/src)
+    append_unique(SOURCES ${_SRC_ABS})
+  endforeach()
+
+  # TODO: Fix finding header files to not use GLOB_RECURSE.
+  #       Potential fixes: - HEADERS list parameter
+  #                        - INCLUDE_DIR list parameter -> multiple include directories
+  file(GLOB_RECURSE TARGET_INCLUDE_FILES ${INCLUDEDIR_ABS}/*.h)
+  
   if("${TARGET_TYPE}" STREQUAL "LIBRARY")
     if(NOT SOURCES)
       # This is a header-only library. We're still going to make a static library
@@ -257,7 +283,7 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
     get_target_property(IS_BUNDLE ${TARGET_NAME} MACOSX_BUNDLE)
   endif()
   
-  target_include_directories(${TARGET_NAME} PUBLIC ${ARG_INCLUDEDIR} ${ARG_INCLUDE})
+  target_include_directories(${TARGET_NAME} PUBLIC ${ARG_INCLUDEDIR} ${ARG_INCLUDE} )
 
   if(DEPENDS)
     target_link_libraries(${TARGET_NAME} ${DEPENDS})
