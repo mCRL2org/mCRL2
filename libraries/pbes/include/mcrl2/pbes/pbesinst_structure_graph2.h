@@ -612,7 +612,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
       if (report)
       {
-        mCRL2log(log::verbose) << "found solution solution for" << std::setw(12) << S[0].size() + S[1].size() << " BES equations" << std::endl;
+        mCRL2log(log::verbose) << "found solution for" << std::setw(12) << S[0].size() + S[1].size() << " BES equations" << std::endl;
         mCRL2log(log::verbose) << "finished partial solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
       }
 
