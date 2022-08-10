@@ -79,6 +79,7 @@ bool GlobalShader::link()
 
 namespace
 {
+  
 
 /// \brief A vertex shader that produces a cubic Bezier curve.
 const char* g_arcVertexShader =
