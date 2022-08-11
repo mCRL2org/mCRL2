@@ -3,6 +3,7 @@ set(MCRL2_TOOLS
   lpsrealzone
   pbesabstract
   pbes2booldeprecated
+  ltsviewdeprecated
 )
 
 if(MCRL2_ENABLE_DEPRECATED)
