@@ -1,0 +1,54 @@
+add_mcrl2_tool(ltsviewdeprecated
+  MENUNAME "LTSViewdeprecated"
+  DESCRIPTION "Visualisation tool for large state spaces (mCRL2 toolset, deprecated version in 2022)"
+  ICON "mcrl2-green"
+  SOURCES
+    infodock.ui
+    mainwindow.ui
+    markdock.ui
+    markstateruledialog.ui
+    savepicturedialog.ui
+    settingsdialog.ui
+    settingsdock.ui
+    simdock.ui
+    ltsview.qrc
+    cluster.cpp
+    conedb.cpp
+    fsm_state_positioner.cpp
+    infodock.cpp
+    lts.cpp
+    ltscanvas.cpp
+    ltsmanager.cpp
+    main.cpp
+    mainwindow.cpp
+    markdock.cpp
+    markmanager.cpp
+    markstateruledialog.cpp
+    primitivefactory.cpp
+    primitives.cpp
+    rtree.cpp
+    savepicturedialog.cpp
+    settingsdialog.cpp
+    settingsdock.cpp
+    simdock.cpp
+    simulation.cpp
+    sp_state_positioner.cpp
+    state.cpp
+    transition.cpp
+    vectors.cpp
+    visobjectfactory.cpp
+    visualizer.cpp
+  DEPENDS
+    mcrl2_lts
+    mcrl2_gui
+    Qt5::Core
+    Qt5::Gui
+    Qt5::OpenGL
+    Qt5::Widgets
+    Qt5::Xml
+    ${OPENGL_LIBRARIES}
+    ${TR_LIBRARIES}
+  INCLUDE
+    ${OPENGL_INCLUDE_DIR}
+    ${TR_INCLUDE_DIR}
+)
