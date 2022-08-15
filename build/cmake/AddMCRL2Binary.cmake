@@ -188,11 +188,8 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
   foreach(_SRC ${ARG_SOURCES})
     get_filename_component(_SRC_ABS ${_SRC} ABSOLUTE)
 
-    # if a directory is supplied as an argument in sources, we assume all files in that directory are sources
-    if (IS_DIRECTORY ${_SRC_ABS})
-      file(GLOB _SRC_ABS_LIST LIST_DIRECTORIES FALSE "${_SRC_ABS}/*")
-      list(APPEND ARG_SOURCES_ABS ${_SRC_ABS_LIST})
-    elseif(NOT EXISTS ${_SRC_ABS})
+    # TODO: Is this necessary/wanted?
+    if(NOT EXISTS ${_SRC_ABS})
       file(GLOB_RECURSE _SRC_ABS "${SOURCEDIR_ABS}/${_SRC}")
       if(NOT _SRC_ABS)
         message(WARNING " - ${TARGET_NAME} - No SRC_ABS with GLOB_RECURSE or get_filename_component for file: ${_SRC}")
@@ -268,6 +265,7 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
     if(IS_GUI_BINARY)
       _add_resource_files(${TARGET_NAME} "${ARG_MENUNAME}" "${ARG_DESCRIPTION}" "${ARG_ICON}" SOURCES)
     endif()
+    
     
     add_executable(${TARGET_NAME} ${SOURCES} ${TARGET_INCLUDE_FILES})
     
