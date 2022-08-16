@@ -640,7 +640,7 @@ void lps2lts_algorithm::construct_trace(const lps::state& state1, mcrl2::lts::tr
         break;
       }
     }
-    if (not found)
+    if (!found)
     {
       throw mcrl2::runtime_error(std::string("Fail to save a trace. Most likely due to the use of binders (forall, exists, lambda, Set, Map) in a state vector.\n") +
                                  "Problematic state (" + pp(*i) + ")");
