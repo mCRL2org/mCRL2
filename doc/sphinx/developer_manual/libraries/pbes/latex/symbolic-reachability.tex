@@ -752,35 +752,41 @@ Alternatively, we can also consider the following equation for $Y_j$ such that $
   \nu Y_{jk}(d : D, e_j : E_j) &= f_{ijk}(d,e_j) \implies X_{g_{ij}}(h_{ij}(d, e_j))) & \text{for } k \in K_i
 \end{align*}
 
+
+\newcommand{\pre}[3][]{\ensuremath{\textsf{pre}(#2,#3)}}
+\newcommand{\cpre}[4][]{\ensuremath{\textsf{cpre}_{#2}(#3,#4)}}
+\newcommand{\spre}[4][]{\ensuremath{\textsf{spre}_{#2}(#3,#4)}}
+
 \newpage
 \section{Parity Game Solving}
-Let $V$ be the nodes of a parity game and $V_0$ and $V_1$ the vertices owned by $0$ (even) and $1$ (odd) respectively.
-Furthermore, we denote the priority of $v \in V$ by $r(v)$.
-For a non-empty set $U \subseteq V$ and a player $\alpha$, the
-$\alpha$-attractor into $U$, denoted $\attr{\alpha}{U,V}$,
-is the set of vertices for which player
-$\alpha$ can force play into $U$. We define $\attr{\alpha}{U,V}$ as
-$\bigcup\limits_{i \ge 0} \attr[i]{\alpha}{U,V}$,
-the limit of approximations\label{def:attractor} of the
-sets $\attr[n]{\alpha}{U,V}$, which are inductively defined as follows:
+
+Let $G = (V, E, r, (V_0, V_1))$ be a parity game where $V_0$ and $V_1$ are disjoint sets of vertices in $V$ owned by $0$ (even) and $1$ (odd) respectively.
+Furthermore, $E \subseteq V \times V$ is the edge relation, and we denote elements of it by $v \rightarrow u$ iff $(v, u) \in E$.
+Finally, $r(v)$ is the priority function assigning a priority to every vertex $v \in V$.
+For a non-empty set $U \subseteq V$ and a player $\alpha$, the control predecessor of set $U$ contains the vertices for which player $\alpha$ can force entering $U$ in one step.
+Let $\pre{U}{V} = \{ u \in U \mid \exists v \in V: u \rightarrow v \}$ then it is defined as follows:
+\begin{equation*}
+  \cpre{\alpha}{G}{U} = (V_{\alpha} \cap \pre{G}{U}) \cup (V_{1-\alpha} \setminus \pre{G}{V \setminus U})
+\end{equation*}
+
+The $\alpha$-attractor into $U$, denoted $\attr{\alpha}{U,V}$, is the set of vertices for which player $\alpha$ can force any play into $U$. 
+We define $\attr{\alpha}{U,V}$ as $\bigcup\limits_{i \ge 0} \attr[i]{\alpha}{U,V}$, the limit of approximations\label{def:attractor} of the sets $\attr[n]{\alpha}{U,V}$, which are inductively defined as follows:
 \[
 \begin{array}{lcl}
-\attr[0]{\alpha}{U, V} & = & U \\
-\attr[n+1]{\alpha}{U, V} & = & \attr[n]{\alpha}{U, V} \\
-      & \cup & \{u \in V_{\alpha} ~|~ \exists v \in \attr[n]{\alpha}{U,V}:~ u \to v \} \\
-      & \cup & \{u \in V_{1 - \alpha} ~|~ \forall v \in V: u \to v \Rightarrow v \in \attr[n]{\alpha}{U, V}\} \\
+\attr[0]{\alpha}{G, U} & = & U \\
+\attr[n+1]{\alpha}{G, U} & = & \attr[n]{\alpha}{G, U} \\
+      & \cup & \cpre{\alpha}{G}{\attr[n]{\alpha}{G, U}} \\
 \end{array}
 \]
 We reformulate this into
 \[
 \begin{array}{lcl}
-\attr[0]{\alpha}{U, V} & = & U \\
-\attr[n+1]{\alpha}{U, V} & = & \attr[n]{\alpha}{U, V} \\
-      & \cup & (V_{\alpha} \cap \pred(V, \attr[n]{\alpha}{U, V})) \\
-      & \cup & (V_{1 - \alpha} \cap (V \setminus \pred(V, V \setminus \attr[n]{\alpha}{U,V})) \\
+\attr[0]{\alpha}{G, U} & = & U \\
+\attr[n+1]{\alpha}{G, U} & = & \attr[n]{\alpha}{G, U} \\
+      & \cup & (V_{\alpha} \cap \pre{V}{\attr[n]{\alpha}{G, U})} \\
+      & \cup & (V_{1 - \alpha} \cap (V \setminus \pre{V}{V \setminus \attr[n]{\alpha}{G, U})} \\
 \end{array}
 \]
-where $\pred(U, V) = \{ u \in U \mid \exists v \in V: u \rightarrow v \}$.
 
 This can be further optimised by avoiding two intersections and only computing predecessors within $V_{1 - \alpha}$. 
 Furthermore, for a union of sparse relations $\rightarrow \,= \bigcup_{i=1}^{n} \rightarrow_i$ we can also apply the transition relations $\rightarrow_i$ directly instead of determining $\rightarrow$ first.
@@ -788,13 +794,34 @@ For $\pred_i(U, V) = \{ u \in U \mid \exists v \in V: u \rightarrow_i v \}$ we d
 
 \[
 \begin{array}{lcl}
-\attr[0]{\alpha}{U, V} & = & U \\
-\attr[n+1]{\alpha}{U, V} & = & \attr[n]{\alpha}{U, V} \\
-      & \cup & \bigcup_{i=1}^{n} \pred_i(V_{\alpha}, \attr[n]{\alpha}{U, V}) \\
-      & \cup & (V_{1 - \alpha} \setminus \bigcup_{i=1}^{n} \pred_i(V_{1 - \alpha}, V \setminus \attr[n]{\alpha}{U,V}) \\
+\attr[0]{\alpha}{G, U} & = & U \\
+\attr[n+1]{\alpha}{G, U} & = & \attr[n]{\alpha}{G, U} \\
+      & \cup & \bigcup_{i=1}^{n} \textsf{pre}_i(V_{\alpha}, \attr[n]{\alpha}{G, U}) \\
+      & \cup & (V_{1 - \alpha} \setminus \bigcup_{i=1}^{n} \textsf{pre}_i(V_{1 - \alpha}, V \setminus \attr[n]{\alpha}{G, U}) \\
 \end{array}
 \]
 
+First of all, we implement a variant of $\cpre{\alpha}{G}{U}$ that uses the union of sparse relations. The parameter $Z_\var{outside}$ can be used as an optimisation to reduce the amount of states considered, but can always be equal to $V$. In the attractor set computation this will be equal to $V \setminus \attr[n]{\alpha}{G, U})$.
+
+\begin{algorithm}[H]
+\caption{Control predecessor set computation for a union of sparse relations}
+\label{alg:predecessor}
+\begin{algorithmic}[1]
+\Function{CPre$_\alpha$}{$G = (V, E, r, (V_0, V_1)$, $\var{U}$, $\var{Z}_\var{outside}$}
+  \State $\var{P} := \pre{G}{U}$
+  \State $\var{P}_\alpha := P \cap V_\alpha$
+  \State $\var{P}_\var{forced} := P \cap V_{1 - \alpha}$
+  
+  \For {$1 \leq i \leq n$}
+    \State $\var{P}_\var{forced} := \var{P}_\var{forced} \setminus \textsf{pre}_i(\var{P}_\textit{forced}, \var{Z}_\var{outside})$  
+  \EndFor
+  
+  \State \Return $\var{P}_\alpha \cup \var{P}_\var{forced}$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+For the actual implementation of the attractor set scheme we make two additional observations.
 Instead of determining all predecessors for states in $V \setminus \attr[n]{\alpha}{U,V})$ in the final step we only have to determine predecessors that can actually reach $V \setminus \attr[n]{\alpha}{U,V})$ in one step.
 Furthermore, we can actually keep track of the states that have been added in the last iteration and were not yet part of the attractor set.
 We then only have to compute predecessors with respect to this todo set.
@@ -803,30 +830,22 @@ We then only have to compute predecessors with respect to this todo set.
 \caption{Attractor set computation for a union of sparse relations}
 \label{alg:attractor_set}
 \begin{algorithmic}[1]
-\Function{Attr$_\alpha$}{$U$, $V$}
+\Function{Attr$_\alpha$}{$G = (V, E, r, (V_0, V_1)$, $\var{U}$}
 \State $\var{todo} := U$
-\State $\var{X} := U$
-\State $\var{X}_\textit{outside} := V \setminus X$
+\State $\var{Z} := U$
+\State $\var{Z}_\var{outside} := V \setminus X$
 
 \While {$\var{todo} \neq \emptyset$}
-  \State $\var{P} := \textsf{pred}(\var{X}_\textit{outside}, \var{todo})$
-  \State $\var{P}_\alpha := \var{P} \cap \var{V}_\alpha$
-  \State $\var{todo} := \var{P}_\alpha$
-  \State $\var{X} := \var{X} \cup \var{P}_\alpha$
-  \State $\var{X}_\textit{outside} := \var{X}_\textit{outside} \setminus \var{P}_\alpha$
-  \State $\var{P}_\textit{forced} := \var{P} \setminus \var{P}_\alpha$
-  \For {$1 \leq i \leq n$}
-    \State $\var{P}_\textit{forced} := \var{P}_\textit{forced} \setminus \textsf{pred}_i(\var{P}_\textit{forced}, \var{X}_\textit{outside})$
-  
-  \EndFor
-  \State $\var{todo} := \var{todo} \cup \var{P}_\textit{forced}$
-  \State $\var{X} := \var{X} \cup \var{P}_\textit{forced}$
-  \State $\var{X}_\textit{outside} := \var{X}_\textit{outside} \setminus \var{P}_\textit{forced}$
+  \State $\var{todo} := \textsf{CPre}_\alpha(G, \var{Z}, \var{Z}_\var{outside})$
+  \State $\var{Z} := \var{Z} \cup \var{todo}$
+  \State $\var{Z}_\var{outside} := \var{Z}_\var{outside} \setminus \var{todo}$
 \EndWhile
-\State \Return \var{X}
+\State \Return \var{Z}
 \EndFunction
 \end{algorithmic}
 \end{algorithm}
+
+\subsection{Zielonka}
 
 The standard Zielonka solving algorithm, defined in Algorithm~\ref{alg:zielonka} requires that every vertex has an outgoing edge.
 If this is the case then the graph is called \emph{total}.
@@ -879,7 +898,38 @@ If we compute the attractors to these won vertices then the resulting graph is t
 \end{algorithm}
 
 \newpage
-\subsection{Winning Cycle Detection}
+\subsection{Partial Solving and Safe (Chaining) Attractors}
+
+We recall some of the definitions necessary for the purpose for partial solving (incomplete) parity games that is introduced in~\cite{DBLP:conf/tacas/LaveauxWW22}, and provide pseudocode for these algorithms as well.
+First of all, we introduce the notion of an incomplete parity game $\Game = (G, I)$, where $I \subseteq V$ is a set of incomplete vertices.
+
+\begin{equation*}
+  \spre{\alpha}{G}{U} = (V_{\alpha} \cap \pre{G}{U}) \cup (V_{1-\alpha} \setminus (\pre{G}{V \setminus U} \cup I))
+\end{equation*}
+
+Secondly, we extend our attractor set computation to allow chaining through the predecessors.
+For this purpose we introduce a chaining predecessor function $\textsf{chained\_pre}(G, U, W)$ that has a parameter $W$ which defines the set of vertices where chaining is allowed.
+A function is a chaining predecessor iff it returns a set $P = \textsf{chained\_pre}(G, U, W)$ such that $\pre{G}{U} \subseteq P$ and $P \subseteq \{ u \in U \mid \exists v \in V: u \rightarrow_W^* v \}$ such that $u \rightarrow_W^* v$ iff there is a sequence of vertices $s \rightarrow u_0 \rightarrow u_1 \rightarrow \ldots \rightarrow _v $ for which $u_0, u_1, \ldots \in W$.
+ 
+ \begin{algorithm}[H]
+ \caption{Safe control predecessor set computation for a union of sparse relations}
+ \label{alg:safe_control_predecessor}
+ \begin{algorithmic}[1]
+ \Function{SPre$_\alpha$}{$\var{G} = (V, E, r, (V_0, V_1)$, $\var{U}$, $\var{Z}_\var{outside}, \var{I}, \var{W}$}
+   \State $\var{P} := \textsf{chained\_pre}(\var{G}, \var{U}, V_\alpha \cap \var{W})$
+   \State $\var{P}_\alpha := P \cap V_\alpha$
+   \State $\var{P}_\var{forced} := (P \cap V_{1 - \alpha}) \setminus I$
+   
+   \For {$1 \leq i \leq n$}
+     \State $\var{P}_\var{forced} := \var{P}_\var{forced} \setminus \textsf{pre}_i(\var{P}_\textit{forced}, \var{Z}_\var{outside})$  
+   \EndFor
+   
+   \State \Return $\var{P}_\alpha \cup \var{P}_\var{forced}$
+ \EndFunction
+ \end{algorithmic}
+ \end{algorithm}
+
+\subsubsection{Winning Cycle Detection}
 
 First, we implement cycle detection for a set of vertices $V$ by determining the largest subset $U$ of $V$ such that every vertex in $U$ has a predecessor in $U$, as presented in Algorithm~\ref{alg:cycles}.
 If $U$ satisfies this condition then every vertex in $U$ is part of a cycle.
