@@ -55,6 +55,8 @@ void FindAndReplaceDialog::resetFocus()
   if (isVisible())
   {
     setFocus();
+    ui->textToFind->setFocus();
+    ui->textToFind->selectAll();
     activateWindow();
     raise(); // for MacOS
   }
