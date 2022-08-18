@@ -532,7 +532,7 @@ void MainWindow::actionVerifyAllProperties()
 
 bool MainWindow::askToSaveChanges(QString context)
 {
-  if (fileSystem->isSpecificationModified() && fileSystem->projectOpened())
+  if (fileSystem->isSpecificationModified())
   {
     QMessageBox::StandardButton result =
         executeQuestionBox(this, context,
