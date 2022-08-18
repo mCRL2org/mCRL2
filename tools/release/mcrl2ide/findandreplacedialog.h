@@ -43,6 +43,12 @@ class FindAndReplaceDialog : public QDialog
    */
   void resetFocus();
 
+  /**
+   * @brief findNext Find the next string in the editor
+   * @param down Whether the direction to find is down
+   */
+  void findNext(bool down);
+
   public slots:
   /**
    * @brief setFindEnabled Is called when the text in the find field changes
@@ -74,6 +80,13 @@ class FindAndReplaceDialog : public QDialog
    *   string in the editor
    */
   void actionReplaceAll();
+
+  protected:
+  /**
+   * @brief keyPressEvent Adds key events for find next and find previous
+   * @param event The key event
+   */
+  void keyPressEvent(QKeyEvent* event) override;
 
   private:
   Ui::FindAndReplaceDialog* ui;

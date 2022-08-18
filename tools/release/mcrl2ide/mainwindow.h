@@ -156,6 +156,12 @@ class MainWindow : public QMainWindow
 
   protected:
   /**
+   * @brief keyPressEvent Adds key events for find next and find previous
+   * @param event The key event
+   */
+  void keyPressEvent(QKeyEvent* event) override;
+
+  /**
    * @brief event Handles events
    * - On gaining focus, ask to reload the specification if it was modified
    *     outside the IDE

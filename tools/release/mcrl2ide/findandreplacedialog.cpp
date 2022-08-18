@@ -135,6 +135,26 @@ void FindAndReplaceDialog::actionFind(bool forReplaceAll)
   codeEditor->setTextCursor(originalPosition);
 }
 
+void FindAndReplaceDialog::findNext(bool down)
+{
+  if (!ui->textToFind->text().isEmpty())
+  {
+    if (!this->isVisible())
+    {
+      this->show();
+    }
+    if (down)
+    {
+      ui->downRadioButton->setChecked(true);
+    }
+    else
+    {
+      ui->upRadioButton->setChecked(true);
+    }
+    this->actionFind();
+  }
+}
+
 void FindAndReplaceDialog::actionReplace()
 {
   codeEditor->textCursor().insertText(ui->textToReplace->text());
@@ -161,6 +181,23 @@ void FindAndReplaceDialog::actionReplaceAll()
   showMessage(tr("Replaced %1 occurrence(s)").arg(i));
 
   codeEditor->setTextCursor(originalPosition);
+}
+
+void FindAndReplaceDialog::keyPressEvent(QKeyEvent* event)
+{
+  /* Do find next or find previous if the corresponding keys are pressed */
+  if (event->matches(QKeySequence::FindNext))
+  {
+    this->findNext(true);
+  }
+  else if (event->matches(QKeySequence::FindPrevious))
+  {
+    this->findNext(false);
+  }
+  else
+  {
+    QDialog::keyPressEvent(event);
+  }
 }
 
 FindAndReplaceDialog::~FindAndReplaceDialog()
