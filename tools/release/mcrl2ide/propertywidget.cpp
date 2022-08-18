@@ -163,8 +163,6 @@ void PropertyWidget::actionVerify()
     {
       lastProcessIsVerification = true;
       verificationWidgets->setCurrentIndex(1);
-      editButton->setEnabled(false);
-      deleteButton->setEnabled(false);
     }
   }
 }
@@ -203,9 +201,6 @@ void PropertyWidget::actionVerifyResult(int processid)
       propertyNameScrollArea->setStyleSheet(".QScrollArea" + styleSheet);
       propertyNameLabel->setStyleSheet(".QLabel" + styleSheet);
     }
-
-    editButton->setEnabled(true);
-    deleteButton->setEnabled(true);
   }
 }
 
@@ -232,8 +227,6 @@ void PropertyWidget::actionShowEvidence()
     {
       lastProcessIsVerification = false;
       verificationWidgets->setCurrentIndex(1);
-      editButton->setEnabled(false);
-      deleteButton->setEnabled(false);
     }
   }
 }
@@ -245,14 +238,15 @@ void PropertyWidget::actionShowEvidenceResult(int processid)
   if (processid == lastRunningProcessId && !lastProcessIsVerification)
   {
     verificationWidgets->setCurrentIndex(evidenceIsWitness ? 2 : 3);
-    editButton->setEnabled(true);
-    deleteButton->setEnabled(true);
   }
 }
 
 void PropertyWidget::actionAbortVerification()
 {
-  processSystem->abortProcess(lastRunningProcessId);
+  if (lastRunningProcessId > -1)
+  {
+    processSystem->abortProcess(lastRunningProcessId);
+  }
 }
 
 void PropertyWidget::actionEdit()
@@ -269,6 +263,7 @@ void PropertyWidget::updateProperty(const QString& oldPropertyName,
     property = newProperty;
     propertyNameLabel->setText(property.name);
     propertyNameLabel->adjustSize();
+    actionAbortVerification();
     resetWidget();
   }
 }
@@ -282,6 +277,7 @@ void PropertyWidget::actionDelete()
           "Are you sure you want to delete the property '" + property.name +
               "'?"))
   {
+    actionAbortVerification();
     fileSystem->deleteProperty(property);
     emit deleteMe(this);
   }
