@@ -120,6 +120,13 @@
        </spacer>
       </item>
       <item>
+       <widget class="QLabel" name="parseLabel">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="saveAndParseButton">
         <property name="text">
          <string> Save and Parse </string>

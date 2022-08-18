@@ -26,6 +26,7 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add,
   propertyNameValidator =
       new QRegularExpressionValidator(QRegularExpression("[A-Za-z0-9_\\s]*"));
   ui->propertyNameField->setValidator(propertyNameValidator);
+  ui->parseLabel->setStyleSheet("color:green");
 
   /* change the UI depending on whether this should be an add or edit property
    *   window */
@@ -56,13 +57,15 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add,
 
   /* connections for modification state */
   connect(ui->formulaTextField, SIGNAL(modificationChanged(bool)),
-          ui->tabWidget->widget(0), SLOT(setWindowModified(bool)));
+          ui->mucalculusTab, SLOT(setWindowModified(bool)));
   connect(ui->initTextField1, SIGNAL(textChanged()), this,
           SLOT(setEquivalenceTabToModified()));
   connect(ui->equivalenceComboBox, SIGNAL(currentIndexChanged(int)), this,
           SLOT(setEquivalenceTabToModified()));
   connect(ui->initTextField2, SIGNAL(textChanged()), this,
           SLOT(setEquivalenceTabToModified()));
+  connect(ui->formulaTextField, SIGNAL(textChanged()), this,
+          SLOT(clearParseLabel()));
 }
 
 AddEditPropertyDialog::~AddEditPropertyDialog()
@@ -93,6 +96,7 @@ void AddEditPropertyDialog::activateDialog(const Property& property)
     oldProperty = property;
   }
 
+  clearParseLabel();
   /* reset focus and modification state */
   ui->saveAndParseButton->setFocus();
   ui->propertyNameField->setFocus();
@@ -202,6 +206,7 @@ void AddEditPropertyDialog::abortPropertyParsing()
 
 void AddEditPropertyDialog::actionSaveAndParse()
 {
+  clearParseLabel();
   /* if a parsing process is running, abort it */
   if (propertyParsingProcessid >= 0)
   {
@@ -235,9 +240,7 @@ void AddEditPropertyDialog::parseResults(int processid)
 
     if (result == "valid")
     {
-      message = "The entered " + inputType +
-                (lastParsingPropertyIsMucalculus ? " is" : " are") +
-                " well-formed.";
+      ui->parseLabel->setText("Parsed successfully!");
     }
     else if (result.startsWith("invalid"))
     {
@@ -257,9 +260,17 @@ void AddEditPropertyDialog::parseResults(int processid)
                 ". See the parsing console for more information";
     }
 
-    executeInformationBox(this, windowTitle, message);
+    if (!message.isEmpty())
+    {
+      executeInformationBox(this, windowTitle, message);
+    }
     resetStateAfterParsing();
   }
+}
+
+void AddEditPropertyDialog::clearParseLabel()
+{
+  ui->parseLabel->setText("");
 }
 
 void AddEditPropertyDialog::actionSaveAndClose()
@@ -273,6 +284,7 @@ void AddEditPropertyDialog::actionSaveAndClose()
 void AddEditPropertyDialog::setEquivalenceTabToModified()
 {
   ui->equivalenceTab->setWindowModified(true);
+  clearParseLabel();
 }
 
 void AddEditPropertyDialog::resetModificationState()

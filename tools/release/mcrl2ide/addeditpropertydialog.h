@@ -65,6 +65,11 @@ class AddEditPropertyDialog : public QDialog
   void parseResults(int processid);
 
   /**
+   * @brief clearParseLabel Clears the parse label
+   */
+  void clearParseLabel();
+
+  /**
    * @brief actionSaveAndClose Saves the filled in property and then closes the
    *   dialog
    */
