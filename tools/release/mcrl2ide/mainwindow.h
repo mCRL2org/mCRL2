@@ -146,6 +146,14 @@ class MainWindow : public QMainWindow
   void changeFileButtons(bool specificationOnlyMode);
 
   /**
+   * @brief updateEditMenu Updates the Edit menu whenever the focus changes to
+   *   another widget. This is necessary to make sure that all edit actions in
+   *   this menu correspond to actions of the active widget
+   * @param widget The widget that is in focus
+   */
+  void updateEditMenu(QWidget*, QWidget* widget);
+
+  /**
    * @brief changeToolButtons Whenever a thread is running, change corresponding
    *   actions from start to abort; vice versa when a thread has stopped running
    * @param toAbort Whether actions should be changed from start to abort or
@@ -189,15 +197,6 @@ class MainWindow : public QMainWindow
   QAction* openGuiAction;
   QAction* exitAction;
 
-  QAction* undoAction;
-  QAction* redoAction;
-  QAction* findAndReplaceAction;
-  QAction* cutAction;
-  QAction* copyAction;
-  QAction* pasteAction;
-  QAction* deleteAction;
-  QAction* selectAllAction;
-
   QAction* zoomInAction;
   QAction* zoomOutAction;
 
@@ -234,6 +233,7 @@ class MainWindow : public QMainWindow
   QIcon verifyAllPropertiesAbortIcon = QIcon(":/icons/verify_all_abort.png");
 
   QMenu* viewMenu;
+  QMenu* editMenu;
   QMenu* saveIntermediateFilesMenu;
   QToolBar* toolbar;
   mcrl2::gui::qt::CodeEditor* specificationEditor;
