@@ -940,20 +940,26 @@ void ProcessSystem::killProcess(int processid)
   std::vector<QProcess*> subprocesses = processes[processid];
   int numSubprocesses = int(subprocesses.size());
 
-  /* we kill the process by simply killing its running subprocess and deleting
-   *   the subprocesses that come after it */
   int i;
+  /* first find which subprocess is running */
   for (i = numSubprocesses - 1; i >= 0; i--)
   {
     QProcess* subprocess = subprocesses[i];
     if (subprocess->state() == QProcess::Running ||
         subprocess->error() != QProcess::UnknownError)
     {
+      /* kill the running subprocess */
       subprocess->blockSignals(true);
       subprocess->kill();
+      /* remove the output file of the running process if applicable to prevent
+       *   that caching uses incomplete output files */
+      subprocess->waitForFinished();
+      QFile::remove(subprocess->property("outputFile").toString());
       break;
     }
   }
+  /* if the running subprocess was not the last subprocess, delete all following
+   *   subprocesses */
   if (i < numSubprocesses - 1)
   {
     deleteProcess(processid, i + 1);
