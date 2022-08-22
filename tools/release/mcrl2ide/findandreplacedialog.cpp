@@ -20,7 +20,7 @@ FindAndReplaceDialog::FindAndReplaceDialog(QPlainTextEdit* editor,
 
   /* update the text editor whenever the focus changes */
   connect(qApp, SIGNAL(focusChanged(QWidget*, QWidget*)), this,
-      SLOT(updateEditor(QWidget*, QWidget*)));
+          SLOT(updateEditor(QWidget*, QWidget*)));
 
   /* update the enabledness of the buttons */
   connect(ui->textToFind, SIGNAL(textChanged(QString)), this,
@@ -73,6 +73,7 @@ void FindAndReplaceDialog::resetFocus()
   }
   else
   {
+    restoreGeometry(geometry);
     show();
   }
 }
@@ -231,6 +232,15 @@ void FindAndReplaceDialog::keyPressEvent(QKeyEvent* event)
   {
     QDialog::keyPressEvent(event);
   }
+}
+
+bool FindAndReplaceDialog::event(QEvent* event)
+{
+  if (event->type() == QEvent::Close)
+  {
+    geometry = saveGeometry();
+  }
+  return QDialog::event(event);
 }
 
 FindAndReplaceDialog::~FindAndReplaceDialog()

@@ -99,6 +99,13 @@ class AddEditPropertyDialog : public QDialog
    */
   void keyPressEvent(QKeyEvent* event) override;
 
+  /**
+   * @brief event Handles events
+   * - On closing, save the location of the dialog
+   * @return Whether the event is accepted
+   */
+  bool event(QEvent* event) override;
+
   private:
   Ui::AddEditPropertyDialog* ui;
 
@@ -110,6 +117,7 @@ class AddEditPropertyDialog : public QDialog
   int propertyParsingProcessid;
   bool lastParsingPropertyIsMucalculus;
   QRegularExpressionValidator* propertyNameValidator;
+  QByteArray geometry;
 
   /**
    * @brief checkInput Checks whether the fields are non-empty and whether the

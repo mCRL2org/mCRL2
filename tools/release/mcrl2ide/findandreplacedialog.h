@@ -100,10 +100,18 @@ class FindAndReplaceDialog : public QDialog
    */
   void keyPressEvent(QKeyEvent* event) override;
 
+  /**
+   * @brief event Handles events
+   * - On closing, save the location of the dialog
+   * @return Whether the event is accepted
+   */
+  bool event(QEvent* event) override;
+
   private:
   Ui::FindAndReplaceDialog* ui;
 
   QPlainTextEdit* editor;
+  QByteArray geometry;
 
   /**
    * @brief showMessage Shows a message on the dialog

@@ -110,6 +110,7 @@ void AddEditPropertyDialog::activateDialog(const Property& property)
   }
   else
   {
+    restoreGeometry(geometry);
     show();
   }
 }
@@ -332,21 +333,30 @@ void AddEditPropertyDialog::done(int r)
 
 void AddEditPropertyDialog::keyPressEvent(QKeyEvent* event)
 {
-    /* Do find next or find previous if the corresponding keys are pressed */
-    if (event->matches(QKeySequence::Find))
-    {
-        findAndReplaceDialog->resetFocus();
-    }
-    else if (event->matches(QKeySequence::FindNext))
-    {
-        findAndReplaceDialog->findNext(true);
-    }
-    else if (event->matches(QKeySequence::FindPrevious))
-    {
-        findAndReplaceDialog->findNext(false);
-    }
-    else
-    {
-        QDialog::keyPressEvent(event);
-    }
+  /* Do find next or find previous if the corresponding keys are pressed */
+  if (event->matches(QKeySequence::Find))
+  {
+    findAndReplaceDialog->resetFocus();
+  }
+  else if (event->matches(QKeySequence::FindNext))
+  {
+    findAndReplaceDialog->findNext(true);
+  }
+  else if (event->matches(QKeySequence::FindPrevious))
+  {
+    findAndReplaceDialog->findNext(false);
+  }
+  else
+  {
+    QDialog::keyPressEvent(event);
+  }
+}
+
+bool AddEditPropertyDialog::event(QEvent* event)
+{
+  if (event->type() == QEvent::Close)
+  {
+    geometry = saveGeometry();
+  }
+  return QDialog::event(event);
 }
