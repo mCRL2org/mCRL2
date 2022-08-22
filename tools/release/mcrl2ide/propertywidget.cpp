@@ -14,12 +14,14 @@
 #include <QPainter>
 
 PropertyWidget::PropertyWidget(Property property, ProcessSystem* processSystem,
-                               FileSystem* fileSystem, QWidget* parent)
+                               FileSystem* fileSystem,
+                               FindAndReplaceDialog* findAndReplaceDialog,
+                               QWidget* parent)
     : QWidget(parent), parent(parent), processSystem(processSystem),
       fileSystem(fileSystem), property(property), lastRunningProcessId(-1)
 {
-  editPropertyDialog =
-      new AddEditPropertyDialog(false, processSystem, fileSystem, this);
+  editPropertyDialog = new AddEditPropertyDialog(
+      false, processSystem, fileSystem, findAndReplaceDialog, this);
 
   /* create the label for the property name */
   propertyNameLabel = new QLabel(property.name);

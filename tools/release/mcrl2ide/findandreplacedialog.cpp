@@ -10,19 +10,30 @@
 #include "findandreplacedialog.h"
 #include "ui_findandreplacedialog.h"
 
-FindAndReplaceDialog::FindAndReplaceDialog(
-    mcrl2::gui::qt::CodeEditor* codeEditor, QWidget* parent)
-    : QDialog(parent), ui(new Ui::FindAndReplaceDialog), codeEditor(codeEditor)
+FindAndReplaceDialog::FindAndReplaceDialog(QPlainTextEdit* editor,
+                                           QWidget* parent)
+    : QDialog(parent), ui(new Ui::FindAndReplaceDialog), editor(editor)
 {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Dialog);
 
+  /* update the text editor whenever the focus changes */
+  connect(qApp, SIGNAL(focusChanged(QWidget*, QWidget*)), this,
+      SLOT(updateEditor(QWidget*, QWidget*)));
+
+  /* update the enabledness of the buttons */
   connect(ui->textToFind, SIGNAL(textChanged(QString)), this,
           SLOT(setFindEnabled()));
-  connect(codeEditor, SIGNAL(selectionChanged()), this,
+  connect(ui->textToFind, SIGNAL(textChanged(QString)), this,
           SLOT(setReplaceEnabled()));
+  connect(editor, SIGNAL(selectionChanged()), this, SLOT(setReplaceEnabled()));
+  connect(ui->caseCheckBox, SIGNAL(stateChanged(int)), this,
+          SLOT(setReplaceEnabled()));
+  connect(ui->textToFind, SIGNAL(textChanged(QString)), this,
+          SLOT(setReplaceAllEnabled()));
 
+  /* map the functionality of the buttons */
   connect(ui->findButton, SIGNAL(clicked()), this, SLOT(actionFind()));
   connect(ui->replaceButton, SIGNAL(clicked()), this, SLOT(actionReplace()));
   connect(ui->replaceAllButton, SIGNAL(clicked()), this,
@@ -46,7 +57,7 @@ void FindAndReplaceDialog::showMessage(const QString& message, bool error)
 void FindAndReplaceDialog::resetFocus()
 {
   ui->textToFind->setFocus();
-  QString selection = codeEditor->textCursor().selectedText();
+  QString selection = editor->textCursor().selectedText();
   if (!selection.isEmpty())
   {
     ui->textToFind->setText(selection);
@@ -75,9 +86,16 @@ void FindAndReplaceDialog::setReplaceEnabled()
 {
   Qt::CaseSensitivity flag =
       ui->caseCheckBox->isChecked() ? Qt::CaseSensitive : Qt::CaseInsensitive;
-  ui->replaceButton->setEnabled(
-      QString::compare(codeEditor->textCursor().selectedText(),
-                       ui->textToFind->text(), flag) == 0);
+  bool enable = !editor->isReadOnly() && ui->textToFind->text().count() > 0 &&
+                QString::compare(editor->textCursor().selectedText(),
+                                 ui->textToFind->text(), flag) == 0;
+  ui->replaceButton->setEnabled(enable);
+}
+
+void FindAndReplaceDialog::setReplaceAllEnabled()
+{
+  bool enable = !editor->isReadOnly() && ui->textToFind->text().count() > 0;
+  ui->replaceAllButton->setEnabled(enable);
 }
 
 void FindAndReplaceDialog::actionFind(bool forReplaceAll)
@@ -85,7 +103,7 @@ void FindAndReplaceDialog::actionFind(bool forReplaceAll)
   bool back = !forReplaceAll && ui->upRadioButton->isChecked();
   QString toSearch = ui->textToFind->text();
   bool result = false;
-  QTextCursor originalPosition = codeEditor->textCursor();
+  QTextCursor originalPosition = editor->textCursor();
 
   QTextDocument::FindFlags flags;
 
@@ -102,7 +120,7 @@ void FindAndReplaceDialog::actionFind(bool forReplaceAll)
     flags |= QTextDocument::FindWholeWords;
   }
 
-  result = codeEditor->find(toSearch, flags);
+  result = editor->find(toSearch, flags);
 
   /* if found, we are done */
   if (result)
@@ -114,8 +132,8 @@ void FindAndReplaceDialog::actionFind(bool forReplaceAll)
   if (!forReplaceAll)
   {
     /* if the string was not found, try to wrap around begin/end of file */
-    codeEditor->moveCursor(back ? QTextCursor::End : QTextCursor::Start);
-    result = codeEditor->find(toSearch, flags);
+    editor->moveCursor(back ? QTextCursor::End : QTextCursor::Start);
+    result = editor->find(toSearch, flags);
 
     /* if found, we are done and tell the user that we have wrapped around */
     if (result)
@@ -134,7 +152,7 @@ void FindAndReplaceDialog::actionFind(bool forReplaceAll)
 
   /* if the string was still not found, mention it and reset the cursor */
   showMessage("No match found", true);
-  codeEditor->setTextCursor(originalPosition);
+  editor->setTextCursor(originalPosition);
 }
 
 void FindAndReplaceDialog::findNext(bool down)
@@ -159,22 +177,22 @@ void FindAndReplaceDialog::findNext(bool down)
 
 void FindAndReplaceDialog::actionReplace()
 {
-  codeEditor->textCursor().insertText(ui->textToReplace->text());
+  editor->textCursor().insertText(ui->textToReplace->text());
   actionFind();
 }
 
 void FindAndReplaceDialog::actionReplaceAll()
 {
-  QTextCursor originalPosition = codeEditor->textCursor();
+  QTextCursor originalPosition = editor->textCursor();
   originalPosition.beginEditBlock();
 
-  codeEditor->moveCursor(QTextCursor::Start);
+  editor->moveCursor(QTextCursor::Start);
   actionFind(true);
 
   int i = 0;
-  while (codeEditor->textCursor().hasSelection())
+  while (editor->textCursor().hasSelection())
   {
-    codeEditor->textCursor().insertText(ui->textToReplace->text());
+    editor->textCursor().insertText(ui->textToReplace->text());
     actionFind(true);
     i++;
   }
@@ -182,7 +200,20 @@ void FindAndReplaceDialog::actionReplaceAll()
   originalPosition.endEditBlock();
   showMessage(tr("Replaced %1 occurrence(s)").arg(i));
 
-  codeEditor->setTextCursor(originalPosition);
+  editor->setTextCursor(originalPosition);
+}
+
+void FindAndReplaceDialog::updateEditor(QWidget*, QWidget* widget)
+{
+  QPlainTextEdit* textwidget = qobject_cast<QPlainTextEdit*>(widget);
+  if (textwidget != nullptr)
+  {
+    disconnect(editor, SIGNAL(selectionChanged()), this,
+               SLOT(setReplaceEnabled()));
+    editor = textwidget;
+    connect(editor, SIGNAL(selectionChanged()), this,
+            SLOT(setReplaceEnabled()));
+  }
 }
 
 void FindAndReplaceDialog::keyPressEvent(QKeyEvent* event)

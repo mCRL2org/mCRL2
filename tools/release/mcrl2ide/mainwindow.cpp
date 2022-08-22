@@ -32,16 +32,15 @@ MainWindow::MainWindow(const QString& inputFilePath, QWidget* parent)
 
   fileSystem = new FileSystem(specificationEditor, settings, this);
   processSystem = new ProcessSystem(fileSystem);
+  findAndReplaceDialog = new FindAndReplaceDialog(specificationEditor, this);
+  addPropertyDialog = new AddEditPropertyDialog(true, processSystem, fileSystem,
+                                                findAndReplaceDialog, this);
 
   setupMenuBar();
   setupToolbar();
   setupDocks();
 
   processSystem->setConsoleDock(consoleDock);
-
-  findAndReplaceDialog = new FindAndReplaceDialog(specificationEditor, this);
-  addPropertyDialog =
-      new AddEditPropertyDialog(true, processSystem, fileSystem, this);
 
   /* change the UI whenever a new project is opened */
   connect(fileSystem, SIGNAL(newProjectOpened()), this,
@@ -254,7 +253,8 @@ void MainWindow::setDocksToDefault()
 void MainWindow::setupDocks()
 {
   /* instantiate the docks */
-  propertiesDock = new PropertiesDock(processSystem, fileSystem, this);
+  propertiesDock =
+      new PropertiesDock(processSystem, fileSystem, findAndReplaceDialog, this);
   consoleDock = new ConsoleDock(this);
 
   /* add toggleable option in the view menu for each dock */

@@ -12,14 +12,13 @@
 
 #include <QStandardItemModel>
 
-AddEditPropertyDialog::AddEditPropertyDialog(bool add,
-                                             ProcessSystem* processSystem,
-                                             FileSystem* fileSystem,
-                                             QWidget* parent)
+AddEditPropertyDialog::AddEditPropertyDialog(
+    bool add, ProcessSystem* processSystem, FileSystem* fileSystem,
+    FindAndReplaceDialog* findAndReplaceDialog, QWidget* parent)
     : QDialog(parent), ui(new Ui::AddEditPropertyDialog),
       processSystem(processSystem), fileSystem(fileSystem),
-      oldProperty(Property()), propertyParsingProcessid(-1),
-      lastParsingPropertyIsMucalculus(true)
+      findAndReplaceDialog(findAndReplaceDialog), oldProperty(Property()),
+      propertyParsingProcessid(-1), lastParsingPropertyIsMucalculus(true)
 {
   ui->setupUi(this);
 
@@ -329,4 +328,25 @@ void AddEditPropertyDialog::done(int r)
   ui->equivalenceComboBox->setCurrentIndex(0);
 
   QDialog::done(r);
+}
+
+void AddEditPropertyDialog::keyPressEvent(QKeyEvent* event)
+{
+    /* Do find next or find previous if the corresponding keys are pressed */
+    if (event->matches(QKeySequence::Find))
+    {
+        findAndReplaceDialog->resetFocus();
+    }
+    else if (event->matches(QKeySequence::FindNext))
+    {
+        findAndReplaceDialog->findNext(true);
+    }
+    else if (event->matches(QKeySequence::FindPrevious))
+    {
+        findAndReplaceDialog->findNext(false);
+    }
+    else
+    {
+        QDialog::keyPressEvent(event);
+    }
 }

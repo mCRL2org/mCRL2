@@ -11,6 +11,7 @@
 #define PROPERTIESDOCK_H
 
 #include "propertywidget.h"
+#include "findandreplacedialog.h"
 
 #include <QVBoxLayout>
 #include <QScrollBar>
@@ -29,10 +30,11 @@ class PropertiesDock : public QDockWidget
    * @brief PropertiesDock Constructor
    * @param processSystem The process system
    * @param fileSystem The file system
+   * @param findAndReplaceDialog The find and replace dialog
    * @param parent The parent of this widget
    */
   PropertiesDock(ProcessSystem* processSystem, FileSystem* fileSystem,
-                 QWidget* parent);
+                 FindAndReplaceDialog* findAndReplacDialog, QWidget* parent);
   ~PropertiesDock();
 
   /**
@@ -67,6 +69,7 @@ class PropertiesDock : public QDockWidget
   private:
   ProcessSystem* processSystem;
   FileSystem* fileSystem;
+  FindAndReplaceDialog* findAndReplaceDialog;
 
   QScrollArea* innerDockWidget;
   QVBoxLayout* propertiesLayout;

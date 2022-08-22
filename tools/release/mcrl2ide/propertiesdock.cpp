@@ -12,9 +12,11 @@
 #include <QMainWindow>
 
 PropertiesDock::PropertiesDock(ProcessSystem* processSystem,
-                               FileSystem* fileSystem, QWidget* parent)
+                               FileSystem* fileSystem,
+                               FindAndReplaceDialog* findAndReplaceDialog,
+                               QWidget* parent)
     : QDockWidget("Properties", parent), processSystem(processSystem),
-      fileSystem(fileSystem)
+      fileSystem(fileSystem), findAndReplaceDialog(findAndReplaceDialog)
 {
   /* create the properties layout */
   propertiesLayout = new QVBoxLayout();
@@ -73,8 +75,8 @@ void PropertiesDock::addProperty(const Property& property)
   }
 
   /* add the property to the rest */
-  PropertyWidget* propertyWidget =
-      new PropertyWidget(property, processSystem, fileSystem, this);
+  PropertyWidget* propertyWidget = new PropertyWidget(
+      property, processSystem, fileSystem, findAndReplaceDialog, this);
   propertiesLayout->insertWidget(propertiesLayout->count() - 1, propertyWidget);
   propertyWidgets.push_back(propertyWidget);
   connect(propertyWidget, SIGNAL(deleteMe(PropertyWidget*)), this,

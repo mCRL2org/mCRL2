@@ -29,11 +29,10 @@ class FindAndReplaceDialog : public QDialog
   public:
   /**
    * @brief FindAndReplaceDialog Constructor
-   * @param codeEditor The editor to find/replace in
+   * @param editor The editor to find/replace in
    * @param parent The parent of this widget
    */
-  explicit FindAndReplaceDialog(mcrl2::gui::qt::CodeEditor* codeEditor,
-                                QWidget* parent = 0);
+  explicit FindAndReplaceDialog(QPlainTextEdit* editor, QWidget* parent = 0);
   ~FindAndReplaceDialog();
 
   /**
@@ -51,17 +50,23 @@ class FindAndReplaceDialog : public QDialog
 
   public slots:
   /**
-   * @brief setFindEnabled Is called when the text in the find field changes
-   * Enables or disables the find button
+   * @brief setFindEnabled Enables or disables the "Find" button whenever the
+   *   text in the find field changes
    */
   void setFindEnabled();
 
   /**
-   * @brief setReplaceEnabled Is called when the selection in the text editor
-   *   has changed
-   * Enables or disables the replace button
+   * @brief setReplaceEnabled Enables or disables the "Replace" button whenever
+   *   the text in the find field changes, whenever the selection in the text
+   *   editor has changed and whenever the "Case sensitive" box is (un)ticked
    */
   void setReplaceEnabled();
+
+  /**
+   * @brief setReplaceAllEnabled Enables or disables the "Replace All" button
+   * whenever the text in the find field changes
+   */
+  void setReplaceAllEnabled();
 
   /**
    * @brief actionFind Allows the user to find a string in the editor
@@ -81,6 +86,13 @@ class FindAndReplaceDialog : public QDialog
    */
   void actionReplaceAll();
 
+  /**
+   * @brief updateEditorAndActions Update the referred to editor whenever the
+   *   focus changes to a new widget
+   * @param widget The widget that is in focus
+   */
+  void updateEditor(QWidget*, QWidget* widget);
+
   protected:
   /**
    * @brief keyPressEvent Adds key events for find next and find previous
@@ -91,7 +103,7 @@ class FindAndReplaceDialog : public QDialog
   private:
   Ui::FindAndReplaceDialog* ui;
 
-  mcrl2::gui::qt::CodeEditor* codeEditor;
+  QPlainTextEdit* editor;
 
   /**
    * @brief showMessage Shows a message on the dialog

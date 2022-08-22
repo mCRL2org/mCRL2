@@ -11,6 +11,7 @@
 #define PROPERTYWIDGET_H
 
 #include "addeditpropertydialog.h"
+#include "findandreplacedialog.h"
 
 #include <QLabel>
 #include <QHBoxLayout>
@@ -32,10 +33,12 @@ class PropertyWidget : public QWidget
    * @param property The property of this widget
    * @param processSystem The process system
    * @param fileSystem The file system
+   * @param findAndReplaceDialog The find and replace dialog
    * @param parent The parent of this widget
    */
   PropertyWidget(Property property, ProcessSystem* processSystem,
-                 FileSystem* fileSystem, QWidget* parent);
+                 FileSystem* fileSystem,
+                 FindAndReplaceDialog* findAndReplaceDialog, QWidget* parent);
   ~PropertyWidget();
 
   /**
