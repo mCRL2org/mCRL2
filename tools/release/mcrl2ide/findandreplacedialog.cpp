@@ -214,6 +214,10 @@ void FindAndReplaceDialog::updateEditor(QWidget*, QWidget* widget)
     editor = textwidget;
     connect(editor, SIGNAL(selectionChanged()), this,
             SLOT(setReplaceEnabled()));
+
+    setFindEnabled();
+    setReplaceEnabled();
+    setReplaceAllEnabled();
   }
 }
 
