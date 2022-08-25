@@ -433,7 +433,9 @@ typedef term_balanced_tree<aterm> aterm_balanced_tree;
 
 inline bool is_aterm_balanced_tree(const aterm_appl& t)
 {
-  return t.defined() && (t.function()==g_empty || t.function()==g_tree_node);
+  return t.defined() && (t.function()==g_empty || 
+                         t.function()==g_single_tree_node ||
+                         t.function()==g_tree_node);
 }
 
 template <class Term>
