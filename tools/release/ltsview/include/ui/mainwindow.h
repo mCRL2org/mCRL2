@@ -24,6 +24,7 @@
 #include "settingsdock.h"
 #include "simdock.h"
 #include "graphicsinfodialog.h"
+#include "glwidget.h"
 
 #include <iostream>
 
@@ -55,12 +56,18 @@ class MainWindow : public QMainWindow
     void computingClusterInfo() { setProgress(3, "Setting cluster info"); }
     void positioningClusters() { setProgress(4, "Positioning clusters"); }
     void positioningStates() { setProgress(5, "Positioning states"); }
-    void hideProgressDialog() { setProgress(6, ""); }
+    void hideProgressDialog() {  setProgress(6, ""); }
     void setProgress(int phase, QString message);
     void selectionChanged();
     void zoomChanged() { m_ui.zoomOut->setEnabled(m_ltsManager->lts()->getPreviousLevel() != 0); }
-    void startStructuring() { setEnabled(false); m_ltsCanvas->setUpdatesEnabled(false); }
-    void stopStructuring() { m_ltsCanvas->setUpdatesEnabled(true); setEnabled(true); }
+    /// TODO: Restore functionality
+    void startStructuring() { setEnabled(false); /* m_ltsCanvas->setUpdatesEnabled(false); */ }
+    void stopStructuring()
+    { /* m_ltsCanvas->setUpdatesEnabled(true); */
+      setEnabled(true);
+      std::cout << "stopStructuring()" << std::endl;
+      m_glwidget->update(m_ltsManager->lts()->getInitialState()->getCluster());
+    }
     void logMessage(QString level, QString hint, QDateTime /* timestamp */, QString message)
     {
       if (log_level_from_string(level.toStdString()) == mcrl2::log::error)
@@ -88,7 +95,7 @@ class MainWindow : public QMainWindow
     SimDock *m_simDock;
     SettingsDock *m_settingsDock;
     SettingsDialog *m_settingsDialog;
-    LtsCanvas *m_ltsCanvas;
+    GLWidget *m_glwidget;
     QProgressDialog *m_progressDialog;
     GraphicsInfoDialog *m_graphics_info_dialog;
     
