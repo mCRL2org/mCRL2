@@ -27,8 +27,8 @@ namespace atermpp
 
 /// \brief A vector class in which aterms can be stored. 
 template < class T, class Alloc = std::allocator<detail::reference_aterm<T> > > 
-class vector : protected detail::generic_aterm_container<std::vector<detail::reference_aterm<T>, Alloc> >, 
-               public std::vector< detail::reference_aterm<T>, Alloc >
+class vector : public std::vector< detail::reference_aterm<T>, Alloc >,
+               protected detail::generic_aterm_container<std::vector<detail::reference_aterm<T>, Alloc> >
 {
 protected:
   typedef std::vector< detail::reference_aterm<T>, Alloc > super;
@@ -57,49 +57,57 @@ public:
   explicit vector (size_type n, const allocator_type& alloc = allocator_type())
    : container_wrapper(*this, true),
      super::vector(n, alloc)
-  {}
+  {
+  }
 
   vector (size_type n, const value_type& val, const allocator_type& alloc = allocator_type())
    : container_wrapper(*this, true),
      super::vector(n, detail::reference_aterm(val), alloc)
-  {}
+  {
+  }
 
   /// \brief Constructor.
   template <class InputIterator>
   vector (InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type())
    : container_wrapper(*this, true),
      super::vector(first, last, alloc)
-  {}
+  {
+  }
     
   /// \brief Constructor.
   vector (const vector& x)
    : container_wrapper(*this, true),
      super::vector(x)
-  {}
+  {
+  }
 
   /// \brief Constructor.
   vector (const vector& x, const allocator_type& alloc)
    : container_wrapper(*this, true),
      super::vector(x, alloc)
-  {}
+  {
+  }
   
   /// \brief Constructor.
   vector (vector&& x)
    : container_wrapper(*this, true),
      super::vector(std::move(x))
-  {}
+  {
+  }
 
   /// \brief Constructor.
   vector (vector&& x, const allocator_type& alloc)
    : container_wrapper(*this, true),
      super::vector(std::move(x), alloc)
-  {}
+  {
+  }
 
   /// \brief Constructor. To be done later....
   vector (std::initializer_list<value_type> il, const allocator_type& alloc = allocator_type())
     : container_wrapper(*this, true),
       super::vector(il, alloc)
-  {}
+  {
+  }
 
   /// \brief Assignment operator.
   vector& operator= (const vector& x) = default;
@@ -108,8 +116,22 @@ public:
   vector& operator=(vector&& x) = default;
 
   /// \brief Standard destructor.
-  ~vector()=default;
+  ~vector()
+  {}
 
+  void push_back( const T& value )
+  {
+    detail::g_thread_term_pool().lock_shared();
+    super::push_back(value);
+    detail::g_thread_term_pool().unlock_shared();
+  }
+
+  void push_back( T&& value )
+  {
+    detail::g_thread_term_pool().lock_shared();
+    super::push_back(value);
+    detail::g_thread_term_pool().unlock_shared();
+  }
 };
 
 } // namespace atermpp
