@@ -21,8 +21,6 @@ using namespace atermpp;
 
 BOOST_AUTO_TEST_CASE(parallel_vector)
 {
-  // TODO: this issue should be resolved, but until then it is disabled since it can loop forever.
-  /*
 #ifdef MCRL2_THREAD_SAFE
   // One thread continuously modifies a local atermpp::vector of aterms while the main thread performs garbage collection extensively.
   std::thread local([]() 
@@ -30,10 +28,10 @@ BOOST_AUTO_TEST_CASE(parallel_vector)
     // Push a constant to avoid term creations.
     atermpp::aterm_int value(0);
 
-    for (std::size_t i = 0; i < 1000; ++i)
+    for (std::size_t i = 0; i < 10000; ++i)
     {
       atermpp::vector<atermpp::aterm> vector;
-      for (std::size_t i = 0; i < 1000; ++i)
+      for (std::size_t i = 0; i < 10000; ++i)
       {
         vector.push_back(value);
       }
@@ -45,7 +43,6 @@ BOOST_AUTO_TEST_CASE(parallel_vector)
     for (std::size_t i = 0; i < 1000; ++i)
     {
       atermpp::detail::g_term_pool().collect();
-      std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
 
     if (local.joinable())
@@ -57,6 +54,5 @@ BOOST_AUTO_TEST_CASE(parallel_vector)
 
   // If there are runtime errors during execution then test is fine.
 #endif
-  */
 }
 
