@@ -29,8 +29,6 @@ public:
   thread_aterm_pool(aterm_pool& global_pool)
     : m_pool(global_pool)
   {
-    m_pool.register_thread_aterm_pool(*this);
-
     /// Identify the first constructor call as the main thread.
     static bool is_main_thread = true;
     if (is_main_thread)
@@ -41,6 +39,8 @@ public:
 
     m_variables = new mcrl2::utilities::hashtable<aterm*>();
     m_containers = new mcrl2::utilities::hashtable<detail::_aterm_container*>();
+    
+    m_pool.register_thread_aterm_pool(*this);
   }
 
   ~thread_aterm_pool() override

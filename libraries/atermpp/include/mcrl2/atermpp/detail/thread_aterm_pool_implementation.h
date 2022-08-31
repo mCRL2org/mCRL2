@@ -154,15 +154,14 @@ void thread_aterm_pool::register_variable(aterm* variable)
 {
   if constexpr (EnableVariableRegistrationMetrics) { ++m_variable_insertions; }
 
+  if constexpr (GlobalThreadSafe) lock_shared();
+    
   /* Resizing of the protection set should not interfere with garbage collection and rehashing */
   if (m_variables->must_resize())
   {
-    if constexpr (GlobalThreadSafe) lock_shared();
     m_variables->resize();
-    if constexpr (GlobalThreadSafe) unlock_shared();
   }
 
-  if constexpr (GlobalThreadSafe) lock_shared();
   auto [it, inserted] = m_variables->insert(variable);
 
   // The variable must be inserted.
@@ -185,6 +184,11 @@ void thread_aterm_pool::register_container(_aterm_container* container)
   if constexpr (EnableVariableRegistrationMetrics) { ++m_container_insertions; }
 
   if constexpr (GlobalThreadSafe) lock_shared();
+
+  if (m_containers->must_resize())
+  {
+    m_containers->resize();
+  }
   auto [it, inserted] = m_containers->insert(container);
 
   // The container must be inserted.
@@ -220,10 +224,8 @@ void thread_aterm_pool::mark()
   }
 #endif // NOT MCRL2_ATERMPP_REFERENCE_COUNTED
 
-  for (auto it = m_containers->begin(); it != m_containers->end(); ++it)
+  for (const _aterm_container* container : *m_containers)
   {
-    const _aterm_container* container = *it;
-
     if (container != nullptr)
     {
       // The container marks the contained terms itself.
