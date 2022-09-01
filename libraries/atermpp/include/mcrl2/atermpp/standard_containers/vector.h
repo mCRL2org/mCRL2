@@ -113,6 +113,12 @@ public:
   /// \brief Standard destructor.
   ~vector()
   {}
+  
+  void shrink_to_fit()
+  {
+    detail::shared_guard _;
+    super::shrink_to_fit();
+  }
 
   void clear() noexcept
   {

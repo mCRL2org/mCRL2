@@ -28,8 +28,10 @@ template<typename Key,
 class indexed_set: public mcrl2::utilities::indexed_set<Key, Hash, Equals, Allocator, ThreadSafe, KeyTable>
 {
   typedef mcrl2::utilities::indexed_set<Key, Hash, Equals, Allocator, ThreadSafe, KeyTable> super;
-  
+
 public:
+  typedef typename super::size_type size_type;
+
   /// \brief Constructor of an empty indexed set. Starts with a hashtable of size 128.
   indexed_set()
   {}
@@ -53,10 +55,10 @@ public:
   void clear(std::size_t thread_index=0)
   {
     detail::shared_guard _;
-    super::clear();
+    super::clear(thread_index);
   }
 
-  std::pair<size_type, bool> insert(const key_type& key, std::size_t thread_index=0)
+  std::pair<size_type, bool> insert(const Key& key, std::size_t thread_index=0)
   {
     detail::shared_guard _;
     return super::insert(key, thread_index);

@@ -116,6 +116,12 @@ public:
   /// \brief Standard destructor.
   ~deque()=default;
 
+  void shrink_to_fit()
+  {
+    detail::shared_guard _;
+    super::shrink_to_fit();
+  }
+
   void clear() noexcept
   {
     detail::shared_guard _;
@@ -154,6 +160,86 @@ public:
     return super::insert(pos, ilist);
   }
   
+  template< class... Args >
+  iterator emplace( const_iterator pos, Args&&... args )
+  {    
+    detail::shared_guard _;
+    return super::emplace(pos, args...);
+  }
+
+  iterator erase( const_iterator pos )
+  {
+    detail::shared_guard _;
+    return super::erase(pos);
+  }
+
+  iterator erase( const_iterator first, const_iterator last )
+  {
+    detail::shared_guard _;
+    return super::erase(first, last);    
+  }
+
+  void push_back( const T& value )
+  {
+    detail::shared_guard _;
+    return super::push_back(value);  
+  }
+  
+  void push_back( T&& value )
+  {
+    detail::shared_guard _;
+    return super::push_back(value);
+  }
+
+  template< class... Args >
+  reference emplace_back( Args&&... args )
+  {
+    detail::shared_guard _;
+    return super::emplace_back(args...);
+  }
+
+  void pop_back()
+  {
+    detail::shared_guard _;
+    super::pop_back();
+  }
+
+  void push_front( const T& value )
+  {
+    detail::shared_guard _;
+    super::push_front(value);
+  }
+		
+  void push_front( T&& value )
+  {    
+      detail::shared_guard _;
+      super::push_front(value);
+  }
+
+  template< class... Args >
+  reference emplace_front( Args&&... args )
+  {
+    detail::shared_guard _;
+    super::emplace_front(args...);
+  }
+
+  void resize( size_type count )
+  {
+    detail::shared_guard _;
+    super::resize(count);
+  }
+  
+  void resize( size_type count, const value_type& value )
+  {
+    detail::shared_guard _;
+    super::resize(count, value);
+  }
+
+  void swap( deque& other ) noexcept
+  {
+    detail::shared_guard _;
+    super::swap(other); // Invalidates end() so must be protected.
+  }
 };
 
 } // namespace atermpp
