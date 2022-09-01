@@ -148,7 +148,7 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
       load_lps(spec, input_filename());
 
       /* lpsparunfold-cache is used to avoid the introduction of equations for already unfolded sorts */
-      std::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element  >  unfold_cache;
+      std::map< mcrl2::data::sort_expression, lps::unfold_cache_element>  unfold_cache;
 
       for (std::size_t i =0; i != m_repeat_unfold; ++i)
       {
@@ -191,7 +191,7 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
 
         while (!h_set_index.empty())
         {
-          lpsparunfold lpsparunfold(spec, &unfold_cache, m_add_distribution_laws);
+          lps::lpsparunfold lpsparunfold(spec, &unfold_cache, m_add_distribution_laws);
           std::size_t index = *(max_element(h_set_index.begin(), h_set_index.end()));
           spec = lpsparunfold.algorithm(index);
           h_set_index.erase(index);
