@@ -564,69 +564,42 @@ mcrl2::lps::stochastic_process_initializer lpsparunfold::update_linear_process_i
 std::map<mcrl2::data::variable, mcrl2::data::data_expression> lpsparunfold::parameter_substitution(std::map<mcrl2::data::variable, mcrl2::data::variable_vector > proc_par_to_proc_par_inj, mcrl2::data::function_symbol_vector affected_constructors, const mcrl2::data::function_symbol& case_function)
 {
   std::map<mcrl2::data::variable, mcrl2::data::data_expression> result;
-  data_expression_vector dev;
 
-  std::set<mcrl2::data::variable_vector::iterator> used_iters;
-
-  mcrl2::data::variable prev;
-  for (std::map<mcrl2::data::variable, mcrl2::data::variable_vector >::iterator i = proc_par_to_proc_par_inj.begin()
-       ; i != proc_par_to_proc_par_inj.end()
-       ; ++i)
+  for (auto& [old_par, new_pars]: proc_par_to_proc_par_inj)
   {
-    if (prev != i->first)
+    data_expression_vector dev;
+
+    auto new_pars_it = new_pars.cbegin();
+    dev.push_back(data_expression(*new_pars_it));
+    ++new_pars_it;
+
+    for (const data::function_symbol& constr: affected_constructors)
     {
-      dev.clear();
-    }
+      data::data_expression case_func_arg = constr;
 
-    dev.push_back(data_expression(i->second.front()));
-
-    for (mcrl2::data::function_symbol_vector::iterator m = affected_constructors.begin()
-         ; m != affected_constructors.end()
-         ; ++m)
-    {
-      if (is_basic_sort(m -> sort()))
+      if (is_function_sort(constr.sort()))
       {
-        dev.push_back(*m);
-      }
-
-      if (is_structured_sort(m -> sort()))
-      {
-        dev.push_back(*m);
-      }
-
-      if (is_function_sort(m -> sort()))
-      {
-        sort_expression_list dom = function_sort(m -> sort()). domain();
+        sort_expression_list dom = function_sort(constr.sort()).domain();
         data_expression_vector arg;
 
-        for (sort_expression_list::iterator n = dom.begin(); n != dom.end(); ++n)
+        for (const data::sort_expression& arg_sort: dom)
         {
-          for (mcrl2::data::variable_vector::iterator o = i->second.begin()
-               ; o != i->second.end()
-               ; ++o)
+          if (new_pars_it->sort() != arg_sort)
           {
-            if (o -> sort() == *n && used_iters.find(o) == used_iters.end())
-            {
-              used_iters.insert(o);
-              arg.push_back(*o);
-              break;
-            }
+            throw mcrl2::runtime_error("Unexpected new parameter encountered, maybe they were not sorted well.");
           }
+          arg.push_back(*new_pars_it++);
         }
-        dev.push_back(mcrl2::data::application(*m, arg));
+        case_func_arg = mcrl2::data::application(constr, arg);
       }
 
-      if (is_container_sort(m -> sort()))
-      {
-        dev.push_back(*m);
-      }
-
+      dev.push_back(case_func_arg);
     }
 
-    mCRL2log(verbose) << "Parameter substitution:\t" << data::pp(i->first) << "\t->\t" <<  data::pp(mcrl2::data::application(case_function, dev)) << std::endl;
-    result.insert(std::pair<mcrl2::data::variable, mcrl2::data::data_expression>(i -> first,  mcrl2::data::application(case_function, dev)));
+    mCRL2log(verbose) << "Parameter substitution:\t" << old_par << "\t->\t" <<  mcrl2::data::application(case_function, dev) << std::endl;
+    result.insert(std::make_pair(old_par, mcrl2::data::application(case_function, dev)));
   }
-  return result ;
+  return result;
 }
 
 mcrl2::data::data_expression_vector lpsparunfold::unfold_constructor(const data_expression& de, const data::function_symbol& determine_function, function_symbol_vector projection_functions)
