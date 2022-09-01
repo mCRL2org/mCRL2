@@ -31,6 +31,7 @@ namespace lspparunfold
   };
 } // namespace lspparunfold
 
+using namespace mcrl2;
 class lpsparunfold
 {
   public:
