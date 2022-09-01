@@ -216,7 +216,7 @@ public:
   aterm& assign(const aterm& other,
                 std::atomic<bool>* busy_flag,
                 std::atomic<bool>* forbidden_flag,
-                std::size_t creation_depth) noexcept;
+                std::size_t* lock_depth) noexcept;
 
   /// \brief Assignment operator, to be used when the busy flags do not need to be set.
   /// \details This is only safe in the parallel context when the busy flag is already

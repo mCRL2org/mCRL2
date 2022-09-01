@@ -22,9 +22,6 @@ namespace atermpp
 namespace detail
 {
 
-/// \brief A reference to the thread local term pool storage
-thread_aterm_pool& g_thread_term_pool();
-
 function_symbol thread_aterm_pool::create_function_symbol(const std::string& name, const std::size_t arity, const bool check_for_registered_functions)
 {
   if constexpr (GlobalThreadSafe) lock_shared();
@@ -250,7 +247,7 @@ void thread_aterm_pool::wait_for_busy() const
 
 void thread_aterm_pool::lock_shared()
 {
-  if (GlobalThreadSafe && m_creation_depth == 0)
+  if (GlobalThreadSafe && m_lock_depth == 0)
   {
     assert(!m_busy_flag);
     m_busy_flag.store(true);
@@ -263,6 +260,8 @@ void thread_aterm_pool::lock_shared()
       m_busy_flag = true;
     }
   }
+
+  ++m_lock_depth;
 }
 
 /// The function lock_shared that does not access thread local variables directly.
@@ -271,10 +270,10 @@ void thread_aterm_pool::lock_shared()
 /// local variables is sped up. 
 void inline lock_shared(std::atomic<bool>* busy_flag,
                         std::atomic<bool>* forbidden_flag,
-                        std::size_t creation_depth)
+                        std::size_t* lock_depth)
 {
   assert(busy_flag != nullptr && forbidden_flag != nullptr);
-  if (GlobalThreadSafe && creation_depth == 0)
+  if (GlobalThreadSafe && *lock_depth == 0)
   {
     assert(!*busy_flag);
     busy_flag->store(true);
@@ -286,12 +285,15 @@ void inline lock_shared(std::atomic<bool>* busy_flag,
       atermpp::detail::g_thread_term_pool().lock_shared();
     }
   }
+
+  *lock_depth = *lock_depth + 1;
 }
 
 
 void thread_aterm_pool::unlock_shared()
 {
-  if (GlobalThreadSafe && m_creation_depth == 0)
+  --m_lock_depth;
+  if (GlobalThreadSafe && m_lock_depth == 0)
   {
     assert(m_busy_flag);
     m_busy_flag.store(false, std::memory_order_release);
@@ -300,9 +302,10 @@ void thread_aterm_pool::unlock_shared()
 
 /// An alternative to unlock shared access.. 
 void inline unlock_shared(std::atomic<bool>* busy_flag,
-                   std::size_t creation_depth)
+                   std::size_t* lock_depth)
 {
-  if (GlobalThreadSafe && creation_depth == 0)
+  *lock_depth = *lock_depth - 1;
+  if (GlobalThreadSafe && *lock_depth == 0)
   {
     assert(*busy_flag);
     busy_flag->store(false, std::memory_order_release);

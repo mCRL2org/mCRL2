@@ -50,6 +50,7 @@ public:
 
     if (!m_is_main_thread)
     {
+      // We leak values for the global aterm pool since they contain global variables (for which initialisation order is undefined).
       delete m_variables;
       delete m_containers;
     }
@@ -128,6 +129,13 @@ public:
     return &m_forbidden_flag;
   }
 
+  /// \brief Deliver the forbidden flag to rewriters for faster access.
+  /// \details This is a performance optimisation to be deleted in due time. 
+  inline std::size_t* get_lock_depth()
+  {
+    return &m_lock_depth;
+  }
+
   /// \brief Deliver the creation_depth to rewriters for faster access.
   /// \details This is a performance optimisation to be deleted in due time. 
   inline std::size_t* get_creation_depth()
@@ -152,10 +160,28 @@ private:
   /// \brief A boolean flag indicating whether this thread is working inside the global aterm pool.
   std::atomic<bool> m_busy_flag = false;
   std::atomic<bool> m_forbidden_flag = false;
+  std::size_t m_lock_depth = 0;
 
   std::stack<std::reference_wrapper<_aterm>> m_todo; ///< A reusable todo stack.
 
   bool m_is_main_thread = false;
+};
+
+/// \brief A reference to the thread local term pool storage
+thread_aterm_pool& g_thread_term_pool();
+
+/// A lock guard for the shared mutex.
+class shared_guard : private mcrl2::utilities::noncopyable
+{
+public:
+  shared_guard()
+  {
+    detail::g_thread_term_pool().lock_shared();
+  }
+  ~shared_guard()
+  {    
+    detail::g_thread_term_pool().unlock_shared();
+  }
 };
 
 } // namespace detail

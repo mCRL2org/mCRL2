@@ -43,10 +43,8 @@ inline aterm_pool& g_term_pool()
   return g_aterm_pool_instance;
 }
 
-/* Implemented in a .cpp file. 
-inline thread_aterm_pool& g_thread_term_pool();
-*/
-
+// Implemented in a .cpp file. 
+//thread_aterm_pool& g_thread_term_pool();
 
 } // namespace detail
 } // namespace atermpp

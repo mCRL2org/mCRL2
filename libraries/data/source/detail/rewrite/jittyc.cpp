@@ -1149,7 +1149,7 @@ class RewriterCompilingJitty::ImplementTree
           else 
           {
             s << m_padding << target_for_output << ".assign(" << variable_name.substr(1) 
-                           << ", this_rewriter->m_busy_flag, this_rewriter->m_forbidden_flag, *this_rewriter->m_creation_depth);\n";
+                           << ", this_rewriter->m_busy_flag, this_rewriter->m_forbidden_flag, this_rewriter->m_lock_depth);\n";
           }
         }
         else 
@@ -2269,7 +2269,7 @@ public:
       {
         // m_stream << m_padding << target_for_output << " = " << ss.str() << ";\n";
         m_stream << m_padding << target_for_output << ".assign(" << ss.str() 
-                 << ", this_rewriter->m_busy_flag, this_rewriter->m_forbidden_flag, *this_rewriter->m_creation_depth);\n";
+                 << ", this_rewriter->m_busy_flag, this_rewriter->m_forbidden_flag, this_rewriter->m_lock_depth);\n";
       }
       return;
     }

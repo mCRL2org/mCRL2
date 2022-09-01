@@ -260,7 +260,7 @@ public:
              expression_type& target,
              std::atomic<bool>* busy_flag,
              std::atomic<bool>* forbidden_flag,
-             std::size_t creation_depth)
+             std::size_t* lock_depth)
 
   {
     const std::size_t i = atermpp::detail::index_traits<data::variable, data::variable_key_type, 2>::index(v);
@@ -275,7 +275,7 @@ public:
         target.assign(m_container[j].second,
                       busy_flag,
                       forbidden_flag,
-                      creation_depth);
+                      lock_depth);
         return;
       }
     }
@@ -284,7 +284,7 @@ public:
     target.assign(v,
                   busy_flag,
                   forbidden_flag,
-                  creation_depth);
+                  lock_depth);
    }
 
   /// \brief Index operator.

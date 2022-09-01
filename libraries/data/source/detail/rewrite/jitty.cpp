@@ -214,7 +214,7 @@ void RewriterJitty::subst_values(
     result.assign(t,
                   this->m_busy_flag,
                   this->m_forbidden_flag,
-                  *this->m_creation_depth);
+                  this->m_lock_depth);
     return;
   }
   else if (is_variable(t))
@@ -233,7 +233,7 @@ void RewriterJitty::subst_values(
         result.assign(assignments.assignment[i].term,
                       this->m_busy_flag,
                       this->m_forbidden_flag,
-                      *this->m_creation_depth);
+                      this->m_lock_depth);
         return;
       }
     }
@@ -241,7 +241,7 @@ void RewriterJitty::subst_values(
     result.assign(t,
                   this->m_busy_flag,
                   this->m_forbidden_flag,
-                  *this->m_creation_depth);
+                  this->m_lock_depth);
     return;
   }
   else if (is_abstraction(t))
@@ -439,7 +439,7 @@ void RewriterJitty::rewrite_aux(
       result.assign(terma[0],
                     this->m_busy_flag,
                     this->m_forbidden_flag,
-                    *this->m_creation_depth);
+                    this->m_lock_depth);
       return;
     }
 
@@ -529,7 +529,7 @@ void RewriterJitty::rewrite_aux(
     sigma.apply(atermpp::down_cast<variable>(term),result, 
                   this->m_busy_flag,                         // Adding the busy/forbidden/creation depth is an optimisation.
                   this->m_forbidden_flag,
-                  *this->m_creation_depth);
+                  this->m_lock_depth);
     return;
   }
   if (is_where_clause(term))

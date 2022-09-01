@@ -11,6 +11,7 @@
 
 #include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/utilities/indexed_set.h"
+#include "mcrl2/atermpp/detail/thread_aterm_pool.h"
 #include <mcrl2/atermpp/standard_containers/deque.h>
 
 
@@ -28,26 +29,38 @@ class indexed_set: public mcrl2::utilities::indexed_set<Key, Hash, Equals, Alloc
 {
   typedef mcrl2::utilities::indexed_set<Key, Hash, Equals, Allocator, ThreadSafe, KeyTable> super;
   
-  public:
-/// \brief Constructor of an empty indexed set. Starts with a hashtable of size 128.
-   indexed_set()
-   {}
+public:
+  /// \brief Constructor of an empty indexed set. Starts with a hashtable of size 128.
+  indexed_set()
+  {}
 
-/// \brief Constructor of an empty indexed set. Starts with a hashtable of size 128.
-   indexed_set(std::size_t number_of_threads)
-     : super(number_of_threads)
-   {}
+  /// \brief Constructor of an empty indexed set. Starts with a hashtable of size 128.
+  indexed_set(std::size_t number_of_threads)
+    : super(number_of_threads)
+  {}
 
-/// \brief Constructor of an empty index set. Starts with a hashtable of the indicated size. 
-/// \param initial_hashtable_size The initial size of the hashtable.
-/// \param hash The hash function.
-/// \param equals The comparison function for its elements.
+  /// \brief Constructor of an empty index set. Starts with a hashtable of the indicated size. 
+  /// \param initial_hashtable_size The initial size of the hashtable.
+  /// \param hash The hash function.
+  /// \param equals The comparison function for its elements.
   indexed_set(std::size_t number_of_threads,
               std::size_t initial_hashtable_size,
               const typename super::hasher& hash = typename super::hasher(),
               const typename super::key_equal& equals = typename super::key_equal()) 
     : super(number_of_threads, initial_hashtable_size, hash, equals)
   {}
+  
+  void clear(std::size_t thread_index=0)
+  {
+    detail::shared_guard _;
+    super::clear();
+  }
+
+  std::pair<size_type, bool> insert(const key_type& key, std::size_t thread_index=0)
+  {
+    detail::shared_guard _;
+    return super::insert(key, thread_index);
+  }
 };
 
 } // end namespace atermppp

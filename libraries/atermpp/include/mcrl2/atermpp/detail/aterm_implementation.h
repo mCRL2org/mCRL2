@@ -133,7 +133,7 @@ inline aterm& aterm::operator=(const aterm& other) noexcept
 inline aterm& aterm::assign(const aterm& other,
                             std::atomic<bool>* busy_flag,
                             std::atomic<bool>* forbidden_flag,
-                            std::size_t creation_depth) noexcept
+                            std::size_t* lock_depth) noexcept
 {
 #ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
   // Increment first to prevent the same term from becoming reference zero temporarily.
@@ -142,9 +142,9 @@ inline aterm& aterm::assign(const aterm& other,
   decrement_reference_count();
   m_term = other.m_term;
 #else
-  if constexpr (detail::GlobalThreadSafe) detail::lock_shared(busy_flag,forbidden_flag,creation_depth);
+  if constexpr (detail::GlobalThreadSafe) detail::lock_shared(busy_flag,forbidden_flag,lock_depth);
   m_term = other.m_term;
-  if constexpr (detail::GlobalThreadSafe) detail::unlock_shared(busy_flag,creation_depth);
+  if constexpr (detail::GlobalThreadSafe) detail::unlock_shared(busy_flag,lock_depth);
 #endif
   return *this;
 }

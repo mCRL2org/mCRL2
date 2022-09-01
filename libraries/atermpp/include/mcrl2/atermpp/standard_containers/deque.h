@@ -20,6 +20,7 @@
 
 #include <deque>
 #include "mcrl2/atermpp/detail/aterm_container.h"
+#include "mcrl2/atermpp/detail/thread_aterm_pool.h"
 
 /// \brief The main namespace for the aterm++ library.
 namespace atermpp
@@ -27,8 +28,9 @@ namespace atermpp
 
 /// \brief A deque class in which aterms can be stored. 
 template < class T, class Alloc = std::allocator<detail::reference_aterm<T> > > 
-class deque : protected detail::generic_aterm_container<std::deque<detail::reference_aterm<T>, Alloc> >, 
-              public std::deque< detail::reference_aterm<T>, Alloc >
+class deque : public std::deque< detail::reference_aterm<T>, Alloc >,
+              protected detail::generic_aterm_container<std::deque<detail::reference_aterm<T>, Alloc> > 
+              
 {
 protected:
   typedef std::deque< detail::reference_aterm<T>, Alloc > super;
@@ -37,69 +39,72 @@ protected:
 public:
   
   /// Standard typedefs.
-  typedef Alloc allocator_type;
-  typedef T value_type;
+  typedef typename super::allocator_type allocator_type;
+  typedef typename super::value_type value_type;
   typedef typename super::size_type size_type;
+  typedef typename super::reference reference;
+  typedef typename super::iterator iterator;
+  typedef typename super::const_iterator const_iterator;
   
   /// \brief Default constructor.
   deque()
-   : container_wrapper(*this, true),
-     super()
+   : super(),
+     container_wrapper(*this, true)     
   {}
 
   /// \brief Constructor.
   explicit deque (const allocator_type& alloc)
-   : container_wrapper(*this, true),
-     super::deque(alloc)
+   : super::deque(alloc),
+     container_wrapper(*this, true)     
   {}
 
   /// \brief Constructor.
   explicit deque (size_type n, const allocator_type& alloc = allocator_type())
-   : container_wrapper(*this, true),
-     super::deque(n, alloc)
+   : super::deque(n, alloc),
+     container_wrapper(*this, true)
   {}
 
   /// \brief Constructor.
   deque(size_type n, const value_type& val, const allocator_type& alloc = allocator_type())
-   : container_wrapper(*this, true),
-     super::deque(n, detail::reference_aterm(val), alloc)
+   : super::deque(n, detail::reference_aterm(val), alloc),
+     container_wrapper(*this, true)    
   {}
 
   /// \brief Constructor.
   template <class InputIterator>
   deque(InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type())
-   : container_wrapper(*this, true),
-     super::deque(first, last, alloc)
+   : super::deque(first, last, alloc),
+     container_wrapper(*this, true)     
   {}
     
   /// \brief Constructor.
   deque(const deque& x)
-   : container_wrapper(*this, true),
-     super::deque(x)
+   : super::deque(x),
+     container_wrapper(*this, true)     
   {}
 
   /// \brief Constructor.
   deque(const deque& x, const allocator_type& alloc)
-   : container_wrapper(*this, true),
-     super::deque(x, alloc)
+   : super::deque(x, alloc),
+     container_wrapper(*this, true)     
   {}
   
   /// \brief Constructor.
   deque(deque&& x)
-   : container_wrapper(*this, true),
-     super::deque(std::move(x))
+   : super::deque(std::move(x)),
+     container_wrapper(*this, true)     
   {}
 
   /// \brief Constructor.
   deque(deque&& x, const allocator_type& alloc)
-   : container_wrapper(*this, true),
-     super::deque(std::move(x), alloc)
+   : super::deque(std::move(x), alloc),
+     container_wrapper(*this, true)     
   {}
 
   /// \brief Constructor. 
   deque(std::initializer_list<value_type> il, const allocator_type& alloc = allocator_type())
-    : container_wrapper(*this, true),
-      super::deque(il.begin(), il.end(), alloc)
+    : super::deque(il.begin(), il.end(), alloc),
+      container_wrapper(*this, true)      
   {}
 
   /// \brief Copy assignment operator.
@@ -111,6 +116,44 @@ public:
   /// \brief Standard destructor.
   ~deque()=default;
 
+  void clear() noexcept
+  {
+    detail::shared_guard _;
+    super::clear();
+  }
+
+  iterator insert( const_iterator pos, const T& value )
+  {
+    detail::shared_guard _;
+    return super::insert(pos, value);
+  }
+
+  iterator insert( const_iterator pos, T&& value )
+  {
+    detail::shared_guard _;
+    return super::insert(pos, value);
+  }
+  
+  iterator insert( const_iterator pos, size_type count, const T& value )
+  {
+    detail::shared_guard _;
+    return super::insert(pos, count, value);
+  }
+    
+  template< class InputIt >
+  iterator insert( const_iterator pos,
+                  InputIt first, InputIt last )
+  {
+    detail::shared_guard _;
+    return super::insert(pos, first, last);  
+  }
+    
+  iterator insert( const_iterator pos, std::initializer_list<T> ilist )
+  {
+    detail::shared_guard _;
+    return super::insert(pos, ilist);
+  }
+  
 };
 
 } // namespace atermpp
