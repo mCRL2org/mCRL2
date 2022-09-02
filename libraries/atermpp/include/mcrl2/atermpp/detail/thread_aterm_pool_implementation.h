@@ -43,7 +43,7 @@ void thread_aterm_pool::create_int(aterm& term, size_t val)
   if constexpr (GlobalThreadSafe) lock_shared();
   bool added = m_pool.create_int(term, val);
   if constexpr (GlobalThreadSafe) unlock_shared();
-  if (added) { m_pool.created_term(m_creation_depth == 0, this); }
+  if (added) { m_pool.created_term(m_lock_depth == 0, this); }
 }
 
 void thread_aterm_pool::create_term(aterm& term, const atermpp::function_symbol& sym)
@@ -51,7 +51,7 @@ void thread_aterm_pool::create_term(aterm& term, const atermpp::function_symbol&
   if constexpr (GlobalThreadSafe) lock_shared();
   bool added = m_pool.create_term(term, sym);
   if constexpr (GlobalThreadSafe) unlock_shared();
-  if (added) { m_pool.created_term(m_creation_depth == 0, this); }
+  if (added) { m_pool.created_term(m_lock_depth == 0, this); }
 }
 
 template<class ...Terms>
@@ -69,7 +69,7 @@ void thread_aterm_pool::create_appl(aterm& term, const function_symbol& sym, con
     --m_creation_depth;
   }
   if constexpr (GlobalThreadSafe) unlock_shared();
-  if (added) { m_pool.created_term(m_creation_depth == 0, this); }
+  if (added) { m_pool.created_term(m_lock_depth == 0, this); }
 }
 
 template<class Term, class INDEX_TYPE, class ...Terms>
@@ -110,7 +110,7 @@ void thread_aterm_pool::create_appl_index(aterm& term, const function_symbol& sy
   --m_creation_depth;
   if constexpr (GlobalThreadSafe) unlock_shared();
 
-  if (added) { m_pool.created_term(m_creation_depth == 0, this); }
+  if (added) { m_pool.created_term(m_lock_depth == 0, this); }
 }
 
 template<typename InputIterator>
@@ -127,7 +127,7 @@ void thread_aterm_pool::create_appl_dynamic(aterm& term,
 
   if constexpr (GlobalThreadSafe) unlock_shared();
   
-  if (added) { m_pool.created_term(m_creation_depth == 0, this); }
+  if (added) { m_pool.created_term(m_lock_depth == 0, this); }
 }
 
 template<typename InputIterator, typename ATermConverter>
@@ -144,7 +144,7 @@ void thread_aterm_pool::create_appl_dynamic(aterm& term,
   --m_creation_depth;
   if constexpr (GlobalThreadSafe) unlock_shared();
 
-  if (added) { m_pool.created_term(m_creation_depth == 0, this); }
+  if (added) { m_pool.created_term(m_lock_depth == 0, this); }
 }
 
 void thread_aterm_pool::register_variable(aterm* variable)
