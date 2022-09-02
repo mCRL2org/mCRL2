@@ -384,7 +384,7 @@ void rewrite_aux(data_expression& result, const data_expression& t, RewriterComp
     sigma(this_rewriter).apply(down_cast<variable>(t),result,
                                this_rewriter->m_busy_flag,           // Adding the busy/forbidden/creation depth is an optimisation.
                                this_rewriter->m_forbidden_flag,
-                               *this_rewriter->m_creation_depth);
+                               this_rewriter->m_lock_depth);
     return;
   }
   else
