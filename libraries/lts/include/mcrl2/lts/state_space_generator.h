@@ -642,9 +642,9 @@ struct state_space_generator
     }
   }
 
-  bool max_states_exceeded() const
+  bool max_states_exceeded(const std::size_t thread_index)
   {
-    return explorer.state_map().size() >= options.max_states;
+    return explorer.state_map().size(thread_index) >= options.max_states;
   }
 
   // Explore the specification passed via the constructor, and put the results in builder.
@@ -660,7 +660,7 @@ struct state_space_generator
         false,
 
         // discover_state
-        [&](const lps::state& s, std::size_t s_index)
+        [&](const std::size_t thread_index, const lps::state& s, std::size_t s_index)
         {
           if (options.generate_traces && source)
           {
@@ -676,7 +676,7 @@ struct state_space_generator
           }
           // if (explorer.state_map().size() >= options.max_states)
           //--- Workaround for Visual Studio 2019 ---//
-          if (max_states_exceeded())
+          if (max_states_exceeded(thread_index))
           {
             static bool not_reported_yet=true;
             if (not_reported_yet)
@@ -691,7 +691,7 @@ struct state_space_generator
         },
 
         // examine_transition
-        [&](const lps::state& s0, std::size_t s0_index, const lps::multi_action& a, const auto& s1, const auto& s1_index, std::size_t summand_index)
+        [&](const std::size_t /* thread_index*/, const lps::state& s0, std::size_t s0_index, const lps::multi_action& a, const auto& s1, const auto& s1_index, std::size_t summand_index)
         {
           if constexpr (Stochastic)
           {
@@ -717,7 +717,7 @@ struct state_space_generator
         },
 
         // start_state
-        [&](const lps::state& s, std::size_t /* s_index */)
+        [&](const std::size_t /* thread_index */, const lps::state& s, std::size_t /* s_index */)
         {
           source = &s;
           has_outgoing_transitions = false;
@@ -728,7 +728,7 @@ struct state_space_generator
         },
 
         // finish_state
-        [&](const lps::state& s, std::size_t s_index, std::size_t todo_list_size)
+        [&](const std::size_t /* thread_index */, const lps::state& s, std::size_t s_index, std::size_t todo_list_size)
         {
           if (options.detect_deadlock && !has_outgoing_transitions)
           {

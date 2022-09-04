@@ -48,13 +48,13 @@ static_assert(minimal_hashtable_size>=8);       ///< With a max_load of 0.75 the
 
 } // namespace detail
 
-#define INDEXED_SET_TEMPLATE template <class Key, typename Hash, typename Equals, typename Allocator, bool ThreadSafe, typename KeyTable>
-#define INDEXED_SET indexed_set<Key,Hash,Equals,Allocator,ThreadSafe, KeyTable>
+#define INDEXED_SET_TEMPLATE template <class Key, bool ThreadSafe, typename Hash, typename Equals, typename Allocator, typename KeyTable>
+#define INDEXED_SET indexed_set<Key, ThreadSafe, Hash, Equals, Allocator, KeyTable>
 
 INDEXED_SET_TEMPLATE
-inline void INDEXED_SET::reserve_indices(std::size_t thread_index)
+inline void INDEXED_SET::reserve_indices(const std::size_t thread_index)
 {
-  lock_exclusive(thread_index);
+  if (thread_index>0) lock_exclusive(thread_index);
   if (m_next_index+m_thread_control.size()>=m_keys.size())   // otherwise another process already reserved entries, and nothing needs to be done. 
   {
     assert(thread_index<m_thread_control.size());
@@ -66,12 +66,12 @@ inline void INDEXED_SET::reserve_indices(std::size_t thread_index)
        resize_hashtable();
     }
   }
-  unlock_exclusive(thread_index);
+  if (thread_index>0) unlock_exclusive(thread_index);
 }
 
 
 INDEXED_SET_TEMPLATE
-inline void INDEXED_SET::lock_shared(std::size_t thread_index) const
+inline void INDEXED_SET::lock_shared(const std::size_t thread_index) const
 {
   assert(ThreadSafe || thread_index==0);
   if constexpr (ThreadSafe)
@@ -90,7 +90,7 @@ inline void INDEXED_SET::lock_shared(std::size_t thread_index) const
 }
 
 INDEXED_SET_TEMPLATE
-inline void INDEXED_SET::unlock_shared(std::size_t thread_index) const
+inline void INDEXED_SET::unlock_shared(const std::size_t thread_index) const
 {
   assert(ThreadSafe || thread_index==0);
   if constexpr (ThreadSafe)
@@ -101,7 +101,7 @@ inline void INDEXED_SET::unlock_shared(std::size_t thread_index) const
 }
 
 INDEXED_SET_TEMPLATE
-inline void INDEXED_SET::lock_exclusive(std::size_t thread_index) const
+inline void INDEXED_SET::lock_exclusive(const std::size_t thread_index) const
 {
   assert(ThreadSafe || thread_index==0);
   if constexpr (ThreadSafe)
@@ -131,7 +131,7 @@ inline void INDEXED_SET::lock_exclusive(std::size_t thread_index) const
 }
 
 INDEXED_SET_TEMPLATE
-inline void INDEXED_SET::unlock_exclusive(std::size_t thread_index) const
+inline void INDEXED_SET::unlock_exclusive(const std::size_t thread_index) const
 {
   assert(ThreadSafe || thread_index==0);
   if constexpr (ThreadSafe)
@@ -149,7 +149,10 @@ inline void INDEXED_SET::unlock_exclusive(std::size_t thread_index) const
 }
 
 INDEXED_SET_TEMPLATE
-inline typename INDEXED_SET::size_type INDEXED_SET::put_in_hashtable(const key_type& key, std::size_t value, std::size_t& new_position)
+inline typename INDEXED_SET::size_type INDEXED_SET::put_in_hashtable(
+                  const key_type& key, 
+                  std::size_t value, 
+                  std::size_t& new_position)
 {
   // Find a place to insert key and find whether key already exists.
   assert(m_hashtable.size()>0);
@@ -161,7 +164,7 @@ inline typename INDEXED_SET::size_type INDEXED_SET::put_in_hashtable(const key_t
   while (true)
   {
     std::size_t index = m_hashtable[new_position];
-    assert(index == detail::EMPTY || index < m_keys.size());
+    assert(index == detail::EMPTY || index == detail::RESERVED || index < m_keys.size());
 
     if (index == detail::EMPTY)
     {
@@ -216,10 +219,16 @@ inline void INDEXED_SET::resize_hashtable()
 }
 
 INDEXED_SET_TEMPLATE
+inline INDEXED_SET::indexed_set()
+  : indexed_set(1, detail::minimal_hashtable_size)   // Run with one main thread. 
+{} 
+
+INDEXED_SET_TEMPLATE
 inline INDEXED_SET::indexed_set(std::size_t number_of_threads)
   : indexed_set(number_of_threads, detail::minimal_hashtable_size)
 {
-} 
+  assert(number_of_threads!=0);
+}
 
 INDEXED_SET_TEMPLATE
 inline INDEXED_SET::indexed_set(
@@ -229,16 +238,18 @@ inline INDEXED_SET::indexed_set(
            const key_equal& equals)
       : m_hashtable(std::max(initial_size, detail::minimal_hashtable_size), detail::EMPTY), 
         m_mutex(new std::mutex()),
-        m_thread_control(number_of_threads),
+        m_thread_control((number_of_threads==1)?1:number_of_threads+1),
         m_hasher(hasher),
         m_equals(equals)
 {
+  assert(number_of_threads!=0);
 }
 
 INDEXED_SET_TEMPLATE
-inline typename INDEXED_SET::size_type INDEXED_SET::index(const key_type& key, std::size_t thread_index) const
+inline typename INDEXED_SET::size_type INDEXED_SET::index(const key_type& key, const std::size_t thread_index) const
 {
-  lock_shared(thread_index);
+  indexed_set_assertion(thread_index);
+  if (thread_index>0) lock_shared(thread_index);
   assert(m_hashtable.size()>0);
   std::size_t start = ((m_hasher(key) * detail::PRIME_NUMBER) >> 2) % m_hashtable.size();
   std::size_t position = start;
@@ -248,7 +259,7 @@ inline typename INDEXED_SET::size_type INDEXED_SET::index(const key_type& key, s
     std::size_t index = m_hashtable[position];
     if (index == detail::EMPTY)
     {
-      unlock_shared(thread_index);
+      if (thread_index>0) unlock_shared(thread_index);
       return npos; // Not found.
     }
     // If the index is RESERVED, go into a busy loop. Another thread will 
@@ -258,7 +269,7 @@ inline typename INDEXED_SET::size_type INDEXED_SET::index(const key_type& key, s
       assert(index < m_keys.size());
       if (m_equals(key, m_keys[index]))
       {
-        unlock_shared(thread_index);
+        if (thread_index>0) unlock_shared(thread_index);
         assert(index<m_next_index && m_next_index<=m_keys.size());
         return index;
       }
@@ -274,15 +285,16 @@ inline typename INDEXED_SET::size_type INDEXED_SET::index(const key_type& key, s
 }
 
 INDEXED_SET_TEMPLATE
-inline typename INDEXED_SET::const_iterator INDEXED_SET::find(const key_type& key, std::size_t thread_index) const
+inline typename INDEXED_SET::const_iterator INDEXED_SET::find(const key_type& key, const std::size_t thread_index) const
 {
+  indexed_set_assertion(thread_index);
   const std::size_t idx = index(key, thread_index);
   if (idx < m_keys.size())
   {
-    return begin() + idx;
+    return begin(thread_index) + idx;
   }
 
-  return end();
+  return end(thread_index);
 }
 
 
@@ -291,7 +303,7 @@ inline const Key& INDEXED_SET::at(std::size_t index) const
 {
   if (index >= m_next_index)
   {
-    throw std::out_of_range("indexed_set: index too large: " + std::to_string(index) + " > " + std::to_string(m_keys.size()) + ".");
+    throw std::out_of_range("indexed_set: index too large: " + std::to_string(index) + " > " + std::to_string(m_next_index) + ".");
   }
 
   return m_keys[index];
@@ -306,27 +318,29 @@ inline const Key& INDEXED_SET::operator[](std::size_t index) const
 }
 
 INDEXED_SET_TEMPLATE
-inline void INDEXED_SET::clear(std::size_t thread_index)
+inline void INDEXED_SET::clear(const std::size_t thread_index)
 {
-  lock_exclusive(thread_index);
+  indexed_set_assertion(thread_index);
+  if (thread_index>0) lock_exclusive(thread_index);
   m_hashtable.assign(m_hashtable.size(), detail::EMPTY);
 
   m_keys.clear();
   m_next_index.store(0);
-  unlock_exclusive(thread_index);
+  if (thread_index>0) unlock_exclusive(thread_index);
 }
 
 
 INDEXED_SET_TEMPLATE
-inline std::pair<typename INDEXED_SET::size_type, bool> INDEXED_SET::insert(const Key& key, std::size_t thread_index)
+inline std::pair<typename INDEXED_SET::size_type, bool> INDEXED_SET::insert(const Key& key, const std::size_t thread_index)
 {
-  lock_shared(thread_index);
+  indexed_set_assertion(thread_index);
+  if (thread_index>0) lock_shared(thread_index);
   assert(m_next_index<=m_keys.size());
   if (m_next_index+m_thread_control.size()>=m_keys.size())
   {
-    unlock_shared(thread_index);
+    if (thread_index>0) unlock_shared(thread_index);
     reserve_indices(thread_index);
-    lock_shared(thread_index);
+    if (thread_index>0) lock_shared(thread_index);
   }
 
   std::size_t new_position;
@@ -334,7 +348,7 @@ inline std::pair<typename INDEXED_SET::size_type, bool> INDEXED_SET::insert(cons
   
   if (index != detail::RESERVED) // Key already exists.
   {
-    unlock_shared(thread_index);
+    if (thread_index>0) unlock_shared(thread_index);
     assert(index<m_next_index && m_next_index<=m_keys.size());
     return std::make_pair(index, false);
   }
@@ -343,7 +357,7 @@ inline std::pair<typename INDEXED_SET::size_type, bool> INDEXED_SET::insert(cons
   m_keys[new_index]=key; 
   m_hashtable[new_position]=new_index;
 
-  unlock_shared(thread_index);
+  if (thread_index>0) unlock_shared(thread_index);
 
   assert(new_index<m_next_index && m_next_index<=m_keys.size());
   return std::make_pair(new_index, true);

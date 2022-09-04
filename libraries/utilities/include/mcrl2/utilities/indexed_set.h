@@ -77,10 +77,10 @@ struct atomic_size_t_wrapper: public std::atomic<std::size_t>
 
 /// \brief A set that assigns each element an unique index.
 template<typename Key,
+         bool ThreadSafe = false,
          typename Hash = std::hash<Key>,
          typename Equals = std::equal_to<Key>,
          typename Allocator = std::allocator<Key>,
-         bool ThreadSafe = false,
          typename KeyTable = std::deque< Key, Allocator > > 
 class indexed_set
 {
@@ -99,10 +99,10 @@ private:
   Hash m_hasher;
   Equals m_equals;
 
-  void lock_shared(std::size_t thread_index) const;
-  void unlock_shared(std::size_t thread_index) const;
-  void lock_exclusive(std::size_t thread_index) const;
-  void unlock_exclusive(std::size_t thread_index) const;
+  void lock_shared(const std::size_t thread_index) const;
+  void unlock_shared(const std::size_t thread_index) const;
+  void lock_exclusive(const std::size_t thread_index) const;
+  void unlock_exclusive(const std::size_t thread_index) const;
 
   /// \brief Reserve indices that can be used. Doing this 
   ///        infrequently prevents obtaining an exclusive lock for the
@@ -114,6 +114,13 @@ private:
 
   /// \brief Resizes the hash table to twice its current size.
   inline void resize_hashtable();
+
+  void indexed_set_assertion(std::size_t thread_index) const
+  {
+    assert(m_thread_control.size()==1 || thread_index>0);
+    assert(ThreadSafe || m_thread_control.size()==1);
+    assert(ThreadSafe || thread_index==0);
+  }
 
 public:
   typedef Key key_type;
@@ -140,9 +147,7 @@ public:
   static constexpr size_type npos = std::numeric_limits<std::size_t>::max();
 
   /// \brief Constructor of an empty indexed set. Starts with a hashtable of size 128 and assumes one single thread.
-  indexed_set()
-    : indexed_set(1)
-  {}
+  indexed_set();
 
   /// \brief Constructor of an empty indexed set. 
   /// \detail With a single thread it delivers contiguous values for states.
@@ -150,18 +155,22 @@ public:
   ///         reserves numbers, which it hands out. If a thread does not have
   ///         the opportunity to hand out all numbers, holes in the contiguous
   ///         numbering can occur. The holes are always of limited size. 
-  /// \param The number of threads that use this index set. 
+  /// \param number_of_threads The number of threads that use this index set. If the number is 1, it is treated
+  ///        as a sequential set. If this number is larger than 1, the threads must be numbered
+  ///        from 1 up and including number_of_threads. The number 0 cannot be used in that case. 
   indexed_set(std::size_t number_of_threads);
 
   /// \brief Constructor of an empty index set. Starts with a hashtable of the indicated size. 
   /// \details With one thread the numbering is contiguous. With multiple threads limited size holes
   ///          can occur in the numbering. 
-  /// \param The number of threads that use this index set. 
+  /// \param number_of_threads The number of threads that use this index set. This number is either 1, and then the implementation 
+  ///        assumes that the thread has number 0, or it is larger than 1, and it is assumed that threads are numbered from 1 upwards. 
   /// \param initial_hashtable_size The initial size of the hashtable.
   /// \param hash The hash function.
   /// \param equals The comparison function for its elements.
-  indexed_set(std::size_t number_of_threads,
-    std::size_t initial_hashtable_size,
+  indexed_set(
+    std::size_t number_of_threads, 
+    std::size_t initial_hashtable_size, 
     const hasher& hash = hasher(),
     const key_equal& equals = key_equal());
 
@@ -185,18 +194,20 @@ public:
   /// \details Complexity is constant per operation.
   iterator begin(std::size_t thread_index=0) 
   { 
-    lock_shared(thread_index);
+    indexed_set_assertion(thread_index);
+    if (thread_index>0) lock_shared(thread_index);
     iterator i=m_keys.begin();
-    unlock_shared(thread_index);
+    if (thread_index>0) unlock_shared(thread_index);
     return i;
   }
 
   /// \brief End of the forward iterator.
   iterator end(std::size_t thread_index=0)
   { 
-    lock_shared(thread_index);
+    indexed_set_assertion(thread_index);
+    if (thread_index>0) lock_shared(thread_index);
     iterator i=m_keys.begin()+m_next_index;
-    unlock_shared(thread_index);
+    if (thread_index>0) unlock_shared(thread_index);
     return i;
   }
 
@@ -204,72 +215,79 @@ public:
   /// \details Complexity is constant per operation.
   const_iterator begin(std::size_t thread_index=0) const
   {
-    lock_shared(thread_index);
+    indexed_set_assertion(thread_index);
+    if (thread_index>0) lock_shared(thread_index);
     const_iterator i=m_keys.begin();
-    unlock_shared(thread_index);
+    if (thread_index>0) unlock_shared(thread_index);
     return i;
   }
 
   /// \brief End of the forward iterator.
   const_iterator end(std::size_t thread_index=0) const
   {
-    lock_shared(thread_index);
+    indexed_set_assertion(thread_index);
+    if (thread_index>0) lock_shared(thread_index);
     const_iterator i=m_keys.begin()+m_next_index;
-    unlock_shared(thread_index);
+    if (thread_index>0) unlock_shared(thread_index);
     return i;
   }
 
   /// \brief const_iterator going through the elements in the set numbered from zero upwards. 
   const_iterator cbegin(std::size_t thread_index=0) const
   { 
-    lock_shared(thread_index);
+    indexed_set_assertion(thread_index);
+    if (thread_index>0) lock_shared(thread_index);
     const_iterator i=m_keys.begin();
-    unlock_shared(thread_index);
+    if (thread_index>0) unlock_shared(thread_index);
     return i;
   }
 
   /// \brief End of the forward const_iterator. 
   const_iterator cend(std::size_t thread_index=0) const 
   { 
-    lock_shared(thread_index);
+    indexed_set_assertion(thread_index);
+    if (thread_index>0) lock_shared(thread_index);
     const_iterator i=m_keys.cbegin()+m_next_index;
-    unlock_shared(thread_index);
+    if (thread_index>0) unlock_shared(thread_index);
     return i;
   }
 
   /// \brief Reverse iterator going through the elements in the set from the largest to the smallest index. 
   reverse_iterator rbegin(std::size_t thread_index=0) 
   { 
-    lock_shared(thread_index);
+    indexed_set_assertion(thread_index);
+    if (thread_index>0) lock_shared(thread_index);
     reverse_iterator i=m_keys.rend()-m_next_index;
-    unlock_shared(thread_index);
+    if (thread_index>0) unlock_shared(thread_index);
     return i;
   }
 
   /// \brief End of the reverse iterator. 
   reverse_iterator rend(std::size_t thread_index=0)
   { 
-    lock_shared(thread_index);
+    indexed_set_assertion(thread_index);
+    if (thread_index>0) lock_shared(thread_index);
     reverse_iterator i=m_keys.rend();
-    unlock_shared(thread_index);
+    if (thread_index>0) unlock_shared(thread_index);
     return i;
   }
 
   /// \brief Reverse const_iterator going through the elements from the highest to the lowest numbered element. 
   const_reverse_iterator crbegin(std::size_t thread_index=0) const
   { 
-    lock_shared(thread_index);
+    indexed_set_assertion(thread_index);
+    if (thread_index>0) lock_shared(thread_index);
     const_reverse_iterator i=m_keys.crend()-m_next_index;
-    unlock_shared(thread_index);
+    if (thread_index>0) unlock_shared(thread_index);
     return i;
   }
 
   /// \brief End of the reverse const_iterator. 
   const_reverse_iterator crend(std::size_t thread_index=0) const 
   { 
-    lock_shared(thread_index);
+    if (thread_index>0) lock_shared(thread_index);
     reverse_iterator i=m_keys.crend();
-    unlock_shared(thread_index);
+    if (thread_index>0) unlock_shared(thread_index);
     return i;
   }
 
@@ -294,9 +312,9 @@ public:
   /// \threadsafe
   size_type size(std::size_t thread_index=0) const
   { 
-    lock_shared(thread_index);
+    if (thread_index>0) lock_shared(thread_index);
     size_type result=m_next_index;
-    unlock_shared(thread_index);
+    if (thread_index>0) unlock_shared(thread_index);
     return result;
   }
 };

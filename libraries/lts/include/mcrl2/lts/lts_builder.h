@@ -29,9 +29,7 @@ lps::state remove_time_stamp(const lps::state& s)
 
 struct lts_builder
 {
-  typedef atermpp::indexed_set<lps::state, std::hash<lps::state>, 
-                               std::equal_to<lps::state>, std::allocator<lps::state>,  
-                               atermpp::detail::GlobalThreadSafe> indexed_set_for_states_type;
+  typedef atermpp::indexed_set<lps::state, atermpp::detail::GlobalThreadSafe> indexed_set_for_states_type;
   // All LTS classes use integers to represent actions in transitions. A mapping from actions to integers
   // is needed to avoid duplicates.
   utilities::unordered_map_large<lps::multi_action, std::size_t> m_actions;

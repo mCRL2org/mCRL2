@@ -127,6 +127,7 @@ namespace
 {
 
 /// \brief Print a transition vector as 'x -> y' where x is the from vector and y the to vector.
+/* This funcion is not used. 
 std::string print_transition(const std::vector<data_expression_index>& data_index, const std::vector<std::uint32_t>& xy)
 {
   std::size_t n = xy.size() / 2;
@@ -139,6 +140,7 @@ std::string print_transition(const std::vector<data_expression_index>& data_inde
   }
   return print_state(data_index, x) + " -> " + print_state(data_index, y);
 }
+*/
 
 } // internal
 

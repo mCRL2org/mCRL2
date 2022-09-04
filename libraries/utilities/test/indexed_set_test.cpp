@@ -16,7 +16,7 @@ using namespace mcrl2::utilities;
 
 BOOST_AUTO_TEST_CASE(basic_test_indexed_set)
 {
-  indexed_set<std::string> t(100);
+  indexed_set<std::string> t(1,100);
 
   std::pair<std::size_t, bool> p;
   p = t.insert("a");

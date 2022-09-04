@@ -339,7 +339,7 @@ class explorer: public abortable
     static constexpr bool is_stochastic = Stochastic;
     static constexpr bool is_timed = Timed;
 
-    typedef atermpp::indexed_set<state, std::hash<state>, std::equal_to<state>, std::allocator<state>,  atermpp::detail::GlobalThreadSafe> indexed_set_for_states_type;
+    typedef atermpp::indexed_set<state, atermpp::detail::GlobalThreadSafe> indexed_set_for_states_type;
 
   protected:
     using enumerator_element = data::enumerator_list_element_with_substitution<>;
@@ -935,7 +935,7 @@ class explorer: public abortable
     >
     void generate_state_space_thread(
       std::unique_ptr<todo_set>& todo,
-      const std::size_t process_number,
+      const std::size_t thread_index,
       std::atomic<std::size_t>& number_of_active_processes,
       const SummandSequence& regular_summands,
       const SummandSequence& confluent_summands,
@@ -949,7 +949,7 @@ class explorer: public abortable
     )
     {
       thread_rewr.thread_initialise();
-      mCRL2log(log::debug) << "Start thread " << process_number << ".\n";
+      mCRL2log(log::debug) << "Start thread " << thread_index << ".\n";
       data::enumerator_identifier_generator thread_id_generator("t_");;
       data::data_specification thread_data_specification = m_global_lpsspec.data(); /// XXXX Nodig??
       data::enumerator_algorithm<> thread_enumerator(thread_rewr, thread_data_specification, thread_rewr, thread_id_generator, false);
@@ -964,9 +964,9 @@ class explorer: public abortable
         while (!todo->empty() && !m_must_abort)
         { 
           todo->choose_element(current_state);
-          std::size_t s_index = discovered.index(current_state,process_number);
+          std::size_t s_index = discovered.index(current_state,thread_index);
           if (atermpp::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_state_access.unlock();
-          start_state(current_state, s_index);
+          start_state(thread_index, current_state, s_index);
           data::add_assignments(thread_sigma, m_process_parameters, current_state);
           for (const explorer_summand& summand: regular_summands)
           {   
@@ -998,19 +998,19 @@ class explorer: public abortable
                   // if (atermpp::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_indexed_set_access.lock();
                   for (const state& s1_: S1)
                   { 
-                    std::size_t k = discovered.index(s1_,process_number);
+                    std::size_t k = discovered.index(s1_,thread_index);
                     if (k >= discovered.size())
                     { 
                       newly_found_states.push_back(s1_);
-                      k = discovered.insert(s1_,process_number).first;
-                      discover_state(s1_, k);
+                      k = discovered.insert(s1_, thread_index).first;
+                      discover_state(thread_index, s1_, k);
                     }
                     s1_index.push_back(k);
                   }
                   // if (atermpp::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_indexed_set_access.unlock();
 
                   if (atermpp::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_transition_access.lock();
-                  examine_transition(current_state, s_index, a, s1, s1_index, summand.index);
+                  examine_transition(thread_index, current_state, s_index, a, s1, s1_index, summand.index);
                   if (atermpp::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_transition_access.unlock();
                 } 
                 else 
@@ -1019,32 +1019,32 @@ class explorer: public abortable
                   // if (atermpp::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_indexed_set_access.lock();
                   if constexpr (Timed)
                   { 
-                    s1_index = discovered.index(s1,process_number);
+                    s1_index = discovered.index(s1,thread_index);
                     if (s1_index >= discovered.size())
                     {   
                       const data::data_expression& t = current_state[m_n];
                       const data::data_expression& t1 = a.has_time() ? a.time() : t;
                       make_timed_state(state_, s1, t1);
-                      s1_index = discovered.insert(state_,process_number).first;
+                      s1_index = discovered.insert(state_, thread_index).first;
                       // if (atermpp::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_indexed_set_access.unlock();
-                      discover_state(state_, s1_index);
+                      discover_state(thread_index, state_, s1_index);
                       newly_found_states.push_back(state_);
                     } 
                   }
                   else
                   { 
-                    std::pair<std::size_t,bool> p = discovered.insert(s1,process_number);
+                    std::pair<std::size_t,bool> p = discovered.insert(s1, thread_index);
                     // if (atermpp::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_indexed_set_access.unlock();
                     s1_index=p.first;
                     if (p.second)  // Index is newly added. 
                     {
-                      discover_state(s1, s1_index);
+                      discover_state(thread_index, s1, s1_index);
                       newly_found_states.push_back(s1); 
                     }
                   }
 
                   if (atermpp::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_transition_access.lock();
-                  examine_transition(current_state, s_index, a, s1, s1_index, summand.index);
+                  examine_transition(thread_index, current_state, s_index, a, s1, s1_index, summand.index);
                   if (atermpp::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_transition_access.unlock();
                 }
               }
@@ -1056,7 +1056,7 @@ class explorer: public abortable
             todo->insert(s);
           }
           newly_found_states.clear();
-          finish_state(current_state, s_index, todo->size());
+          finish_state(thread_index, current_state, s_index, todo->size());
           todo->finish_state();
         }
         if (atermpp::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_state_access.unlock();
@@ -1071,7 +1071,7 @@ class explorer: public abortable
           number_of_active_processes++;
         }
       } 
-      mCRL2log(log::debug) << "Stop thread " << process_number << ".\n";
+      mCRL2log(log::debug) << "Stop thread " << thread_index << ".\n";
 
     }  // end generate_state_space_thread.
 
@@ -1102,9 +1102,12 @@ class explorer: public abortable
     {
       utilities::mcrl2_unused(discover_initial_state); // silence unused parameter warning
 
+      const std::size_t number_of_threads=m_options.number_of_threads;
+      assert(number_of_threads>0);
+      const std::size_t initialisation_thread_index= (number_of_threads==1?0:1);
       m_recursive = recursive;
       std::unique_ptr<todo_set> todo;
-      discovered.clear();
+      discovered.clear(initialisation_thread_index);
 
       if constexpr (Stochastic)
       {
@@ -1119,8 +1122,8 @@ class explorer: public abortable
           std::size_t s_index = discovered.index(s);
           if (s_index >= discovered.size())
           {
-            s_index = discovered.insert(s).first;
-            discover_state(s, s_index);
+            s_index = discovered.insert(s, initialisation_thread_index).first;
+            discover_state(initialisation_thread_index, s, s_index);
           }
           s0_index.push_back(s_index);
         }
@@ -1129,18 +1132,18 @@ class explorer: public abortable
       else
       {
         todo = make_todo_set(s0);
-        std::size_t s0_index = discovered.insert(s0).first;
-        discover_state(s0, s0_index);
+        std::size_t s0_index = discovered.insert(s0, initialisation_thread_index).first;
+        discover_state(initialisation_thread_index, s0, s0_index);
       }
 
-      const std::size_t number_of_threads=m_options.number_of_threads;
       std::atomic<std::size_t> number_of_active_processes=number_of_threads;
 
       if (number_of_threads>1)
       {
         std::vector<std::thread> threads;
         threads.reserve(number_of_threads);
-        for(std::size_t i=0; i<number_of_threads; ++i)
+        for(std::size_t i=1; i<=number_of_threads; ++i)  // Threads are numbered from 1 to number_of_threads. Thread number 0 is reserved as 
+                                                         // indicator for a sequential implementation. 
         {
           std::thread tr ([&, i](){ generate_state_space_thread< StateType, SummandSequence,
                                                          DiscoverState, ExamineTransition,
@@ -1154,20 +1157,21 @@ class explorer: public abortable
           threads.push_back(std::move(tr));
         }
 
-        for(std::size_t i=0; i<number_of_threads; ++i)
+        for(std::size_t i=1; i<=number_of_threads; ++i)
         {
-          threads[i].join();
+          threads[i-1].join();
         }
       }
       else
       {
         // Single threaded variant. Do not start a separate thread. 
         assert(number_of_threads==1);
+        const std::size_t single_thread_index=0;
         generate_state_space_thread< StateType, SummandSequence,
                                                 DiscoverState, ExamineTransition,
                                                 StartState, FinishState,
                                                 DiscoverInitialState >
-                                  (todo,0,number_of_active_processes,
+                                  (todo,single_thread_index,number_of_active_processes,
                                    regular_summands,confluent_summands,discovered, discover_state,
                                    examine_transition, start_state, finish_state, 
                                    m_global_rewr, m_global_sigma);  
@@ -1343,7 +1347,7 @@ std::cerr << "A GLOBAL REWRITER IS INVOKED. HOPEFULLY NOT IN A PARALLEL THREAD\n
 
       gray.insert(s0);
       discovered.insert(s0);
-      discover_state(s0);
+      discover_state(0, s0);
 
 std::cerr << "DFS EXPLORATION NOT THREAD SAFE\n";
       for (const transition& tr: out_edges(s0, regular_summands, confluent_summands, m_global_sigma, m_global_rewr, m_global_enumerator, m_global_id_generator))
@@ -1354,7 +1358,7 @@ std::cerr << "DFS EXPLORATION NOT THREAD SAFE\n";
         }
 
         const auto&[a, s1] = tr;
-        examine_transition(s0, a, s1);
+        examine_transition(0, s0, a, s1); // TODO MAKE THREAD SAFE
 
         if (discovered.find(s1) == discovered.end())
         {
@@ -1383,7 +1387,7 @@ std::cerr << "DFS EXPLORATION NOT THREAD SAFE\n";
         }
       }
       gray.erase(s0);
-      finish_state(s0);
+      finish_state(0, s0); // TODO MAKE THREAD SAFE
     }
 
     template <
@@ -1470,7 +1474,7 @@ std::cerr << "DFS EXPLORATION NOT THREAD SAFE\n";
           const auto& a = e.action;
           const auto& s1 = e.state;
           E->pop_front();
-          examine_transition(*s, a, s1);
+          examine_transition(0, *s, a, s1); // TODO: MAKE THREAD SAFE.
 
           if (discovered.find(s1) == discovered.end())
           {
@@ -1507,7 +1511,7 @@ std::cerr << "DFS EXPLORATION NOT THREAD SAFE\n";
           }
         }
         todo.pop_back();
-        finish_state(*s);
+        finish_state(0, *s);  // TODO: Make thread safe
       }
       m_must_abort = false;
     }

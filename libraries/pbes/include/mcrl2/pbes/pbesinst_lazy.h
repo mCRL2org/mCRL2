@@ -96,15 +96,6 @@ class pbesinst_lazy_todo
       return irrelevant;
     }
 
-/*  Boost range does not seem to work. Therefore, its use is outcommented below.
-    boost::range::joined_range<
-        const atermpp::deque<mcrl2::pbes_system::propositional_variable_instantiation>,
-        const std::unordered_set<mcrl2::pbes_system::propositional_variable_instantiation>
-    > all_elements() const
-    {
-      return boost::range::join(todo, irrelevant);
-    } */
-
     void pop_front()
     {
       todo.pop_front();
@@ -121,8 +112,11 @@ class pbesinst_lazy_todo
       todo.push_back(x);
     }
 
-    template <typename FwdIter>
-    void insert(FwdIter first, FwdIter last, const atermpp::indexed_set<propositional_variable_instantiation>& discovered)
+    template <typename FwdIter, bool ThreadSafe>
+    void insert(FwdIter first, 
+                FwdIter last, 
+                const atermpp::indexed_set<propositional_variable_instantiation, ThreadSafe>& discovered,
+                const std::size_t thread_index)
     {
       using utilities::detail::contains;
 
@@ -134,7 +128,7 @@ class pbesinst_lazy_todo
           todo.push_back(*j);
           irrelevant.erase(j);
         }
-        else if (!contains(discovered, *i))
+        else if (!contains(discovered, *i, thread_index))
         {
           todo.push_back(*i);
         }
@@ -206,7 +200,7 @@ class pbesinst_lazy_algorithm
     pbesinst_lazy_todo todo;
 
     /// \brief The propositional variable instantiations that have been discovered (not necessarily handled).
-    atermpp::indexed_set<propositional_variable_instantiation> discovered;
+    atermpp::indexed_set<propositional_variable_instantiation, true> discovered;
 
     /// \brief The initial value (after rewriting).
     propositional_variable_instantiation init;
@@ -315,6 +309,7 @@ class pbesinst_lazy_algorithm
        datar(construct_rewriter(p)),
        m_pbes(preprocess(p)),
        m_equation_index(p),
+       discovered(m_options.number_of_threads),
        m_global_R(datar, p.data())
     { }
 
@@ -427,7 +422,7 @@ class pbesinst_lazy_algorithm
           mCRL2log(log::debug) << "generated equation " << X_e << " = " << psi_e
                                << " with rank " << k << std::endl;
           on_report_equation(thread_index, m_graph_access, X_e, psi_e, k);
-          todo.insert(occ.begin(), occ.end(), discovered);
+          todo.insert(occ.begin(), occ.end(), discovered, thread_index);
           for (auto i = occ.begin(); i != occ.end(); ++i)
           {
             discovered.insert(*i, thread_index);
@@ -462,6 +457,7 @@ class pbesinst_lazy_algorithm
       m_iteration_count = 0;
 
       const std::size_t number_of_threads = m_options.number_of_threads;
+      const std::size_t initialisation_thread_index = (number_of_threads==1?0:1);
       std::atomic<std::size_t> number_of_active_processes = number_of_threads;
       std::vector<std::thread> threads;
 
@@ -473,12 +469,12 @@ class pbesinst_lazy_algorithm
 
       init = atermpp::down_cast<propositional_variable_instantiation>(m_global_R(m_pbes.initial_state(), sigma));
       todo.insert(init);
-      discovered.insert(init);
+      discovered.insert(init, initialisation_thread_index);
 
       if (number_of_threads>1)
       {
         threads.reserve(number_of_threads);
-        for (std::size_t i = 0; i < number_of_threads; ++i)
+        for (std::size_t i = 1; i <= number_of_threads; ++i)
         {
           std::thread tr([&, i](){
             run_thread(i,
@@ -491,15 +487,16 @@ class pbesinst_lazy_algorithm
           threads.push_back(std::move(tr));
         }
 
-        for (std::size_t i = 0; i < number_of_threads; ++i)
+        for (std::size_t i = 1; i <= number_of_threads; ++i)
         {
-          threads[i].join();
+          threads[i-1].join();
         }
       }
       else 
       {
         // There is only one thread. Run the process in the main thread, without cloning sigma or the rewriter.
-        run_thread(0,
+        const std::size_t single_thread_index=0;
+        run_thread(single_thread_index,
                    todo,
                    number_of_active_processes,
                    sigma,

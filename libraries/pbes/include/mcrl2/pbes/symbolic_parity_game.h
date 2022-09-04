@@ -594,7 +594,7 @@ private:
       ldd Palpha = intersect(P, Vplayer[alpha]);
       ldd Pforced = minus(intersect(P, Vplayer[1-alpha]), I);
 
-      for (int i = 0; i < m_summand_groups.size(); ++i)
+      for (std::size_t i = 0; i < m_summand_groups.size(); ++i)
       {
         const symbolic::summand_group& group = m_summand_groups[i];
 
