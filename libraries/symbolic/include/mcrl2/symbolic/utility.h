@@ -54,7 +54,7 @@ Container permute_copy(const Container& v, const std::vector<std::size_t>& permu
 }
 
 /// \brief Converts a state vector into a singleton LDD representing that vector.
-sylvan::ldds::ldd state2ldd(const data::data_expression_list& x, std::vector<data_expression_index>& data_index)
+inline sylvan::ldds::ldd state2ldd(const data::data_expression_list& x, std::vector<data_expression_index>& data_index)
 {
   MCRL2_DECLARE_STACK_ARRAY(v, std::uint32_t, x.size());
 

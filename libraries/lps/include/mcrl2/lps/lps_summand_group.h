@@ -26,7 +26,7 @@ namespace mcrl2::lps
 
 /// \brief Computes a vector of bitsets where every entry of the vector corresponds to a summand in the specification.
 ///        Given a list of parameters p_0, ..., p_n then for parameter p_i the bit 2*i is true iff p_i is read and bit 2*i+1 is true iff p_i is written based on syntactic occurrences.
-std::vector<boost::dynamic_bitset<>> compute_read_write_patterns(const lps::specification& lpsspec);
+inline std::vector<boost::dynamic_bitset<>> compute_read_write_patterns(const lps::specification& lpsspec);
 
 struct lps_summand_group: public symbolic::summand_group
 {

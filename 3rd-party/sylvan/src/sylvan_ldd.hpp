@@ -273,7 +273,7 @@ inline ldd extend(const ldd& A, std::uint32_t value, const ldd& B)
 // follow(node(v, x, y), w) = v = w -> x
 //                            v > w -> false
 //                            v < w -> follow(y, w)
-ldd follow(const ldd& A, std::uint32_t value)
+inline ldd follow(const ldd& A, std::uint32_t value)
 {
   return ldd(lddmc_follow(A.get(), value));
 }
