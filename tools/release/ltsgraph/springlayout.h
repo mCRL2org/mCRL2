@@ -106,6 +106,11 @@ class SpringLayout
     void randomizeZ(float z);
 
     /**
+     * @brief Pass-through whether graph is stable or not
+     */
+    const bool& isStable(){ return m_graph.stable(); };
+
+    /**
      * @brief Returns the user interface object. If no user interface is available,
      *        one is created using the provided @e parent.
      * @param The parent of the user inferface in the case none exists yet.
@@ -145,6 +150,9 @@ class SpringLayout
       m_natLength = v;
       m_repulsion *= m_natLength * m_natLength * m_natLength;
     }
+
+    /// @brief Used to invalidate graph when settings change (i.e. attraction/repulsion)
+    void rulesChanged() { m_graph.setStable(false); }
 };
 
 class SpringLayoutUi : public QDockWidget
@@ -180,6 +188,11 @@ class SpringLayoutUi : public QDockWidget
      */
     void setSettings(QByteArray state);
 
+    /**
+     * @brief Indicates that settings changed that influence the layout.
+     * 
+     */
+    void layoutRulesChanged();
   signals:
 
     /**

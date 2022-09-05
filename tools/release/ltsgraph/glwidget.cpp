@@ -20,13 +20,16 @@ constexpr float DRAG_MIN_DIST = 20.0f;
 struct MoveRecord
 {
   virtual ~MoveRecord() = default;
-
+  Graph::Graph* m_graph;
   Graph::Node* node;
   virtual void move(const QVector3D& pos)
   {
+    m_graph->setStable(false); // We moved something so it is no longer stable.
     node->pos_mutable() = pos;
   }
-  virtual void grab(Graph::Graph& graph, std::size_t index) = 0;
+  virtual void grab(Graph::Graph& graph, std::size_t index){
+    m_graph = &graph; 
+  }
   virtual void release(bool toggleLocked)
   {
     if (toggleLocked) {
@@ -43,7 +46,8 @@ struct MoveRecord
 struct LabelMoveRecord : public MoveRecord {
   void grab(Graph::Graph& graph, std::size_t index) override
   {
-    node = &graph.transitionLabel(index);
+    MoveRecord::grab(graph, index);
+    node = &m_graph->transitionLabel(index);
     node->set_anchored(true);
   }
 };
@@ -51,7 +55,8 @@ struct LabelMoveRecord : public MoveRecord {
 struct StateLabelMoveRecord : public MoveRecord {
   void grab(Graph::Graph& graph, std::size_t index) override
   {
-    node = &graph.stateLabel(index);
+    MoveRecord::grab(graph, index);
+    node = &m_graph->stateLabel(index);
     node->set_anchored(true);
   }
 };
@@ -62,11 +67,12 @@ struct HandleMoveRecord : public MoveRecord
   LabelMoveRecord label;
   void grab(Graph::Graph& graph, std::size_t index) override
   {
-    node = &graph.handle(index);
+    MoveRecord::grab(graph, index);
+    node = &m_graph->handle(index);
     node->set_anchored(true);
-    movingLabel = !graph.transitionLabel(index).anchored();
+    movingLabel = !m_graph->transitionLabel(index).anchored();
     if (movingLabel) {
-      label.grab(graph, index);
+      label.grab(*m_graph, index);
     }
   }
   void release(bool toggleLocked) override {
@@ -91,27 +97,28 @@ struct NodeMoveRecord : public MoveRecord
   std::vector<Graph::Node*> endpoints;
   void grab(Graph::Graph& graph, std::size_t index) override
   {
-    node = &graph.node(index);
+    MoveRecord::grab(graph, index);
+    node = &m_graph->node(index);
     node->set_anchored(true);
     std::size_t nlabels = 0;
-    for (std::size_t i = 0; i < graph.edgeCount(); ++i)
+    for (std::size_t i = 0; i < m_graph->edgeCount(); ++i)
     {
-      Graph::Edge e = graph.edge(i);
+      Graph::Edge e = m_graph->edge(i);
       if (e.from() != index)
       {
         std::size_t temp = e.from();
         e.from() = e.to();
         e.to() = temp;
       }
-      if (e.from() == index && !graph.handle(i).anchored())
+      if (e.from() == index && !m_graph->handle(i).anchored())
       {
         edges.resize(nlabels + 1);
         endpoints.resize(nlabels + 1);
-        endpoints[nlabels] = &graph.node(e.to());
-        edges[nlabels++].grab(graph, i);
+        endpoints[nlabels] = &m_graph->node(e.to());
+        edges[nlabels++].grab(*m_graph, i);
       }
     }
-    label.grab(graph, index);
+    label.grab(*m_graph, index);
   }
   void release(bool toggleLocked) override
   {
