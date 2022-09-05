@@ -344,11 +344,12 @@ class Graph
     friend class Exploration;
 
   private:
-    Exploration* m_exploration;     ///< The exploration of the current graph (or null).
-    mcrl2::lts::lts_type m_type;    ///< The type of the current graph.
-    QString m_empty;                ///< Empty string that is returned as label if none present.
-    mutable QReadWriteLock m_lock;          ///< Lock protecting the structure from being changed while rendering and simulating
-    bool m_stable;                  ///< When true, the graph is considered stable, spring forces should not be applied.
+    Exploration* m_exploration;                 ///< The exploration of the current graph (or null).
+    mcrl2::lts::lts_type m_type;                ///< The type of the current graph.
+    QString m_empty;                            ///< Empty string that is returned as label if none present.
+    mutable QReadWriteLock m_lock;              ///< Lock protecting the structure from being changed while rendering and simulating
+    const float m_stabilityThreshold = 0.1f;   ///< Used for checking whether the graph is stable. TODO: Allow user control 
+    bool m_stable;                              ///< When true, the graph is considered stable, spring forces should not be applied.
     QVector3D m_clip_min;
     QVector3D m_clip_max;
 
@@ -506,6 +507,10 @@ class Graph
     std::size_t explorationNode(std::size_t index) const; ///< Returns the node index for a certain node in the exploration
     std::size_t explorationEdgeCount() const;        ///< Returns the number of edges in the exploration
     std::size_t explorationNodeCount() const;        ///< Returns the number of nodes in the exploration
+
+    const float& stabilityThreshold(){ ///< @brief Gets stability threshold
+       return m_stabilityThreshold;
+    }
 
     const bool& stable() const ///< @brief Gets whether this graph is stable.
     {

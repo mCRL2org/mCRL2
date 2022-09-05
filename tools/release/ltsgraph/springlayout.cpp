@@ -191,6 +191,8 @@ void SpringLayout::apply()
 
     QVector3D clipmin = m_graph.getClipMin();
     QVector3D clipmax = m_graph.getClipMax();
+    float nodeSumForces = 0;
+    float edgeSumForces = 0;
     for (std::size_t i = 0; i < nodeCount; ++i)
     {
       std::size_t n = sel ? m_graph.explorationNode(i) : i;
@@ -198,11 +200,13 @@ void SpringLayout::apply()
       if (!m_graph.node(n).anchored())
       {
         m_graph.node(n).pos_mutable() = applyForce(m_graph.node(n).pos(), m_nforces[n], m_speed);
+        nodeSumForces += m_nforces[n].lengthSquared();
         clipVector(m_graph.node(n).pos_mutable(), clipmin, clipmax);
       }
       if (!m_graph.stateLabel(n).anchored())
       {
         m_graph.stateLabel(n).pos_mutable() = applyForce(m_graph.stateLabel(n).pos(), m_sforces[n], m_speed);
+        nodeSumForces += m_sforces[n].lengthSquared();
         clipVector(m_graph.stateLabel(n).pos_mutable(), clipmin, clipmax);
       }
     }
@@ -214,14 +218,20 @@ void SpringLayout::apply()
       if (!m_graph.handle(n).anchored())
       {
         m_graph.handle(n).pos_mutable() = applyForce(m_graph.handle(n).pos(), m_hforces[n], m_speed);
+        edgeSumForces += m_hforces[n].lengthSquared();
         clipVector(m_graph.handle(n).pos_mutable(), clipmin, clipmax);
       }
       if (!m_graph.transitionLabel(n).anchored())
       {
         m_graph.transitionLabel(n).pos_mutable() = applyForce(m_graph.transitionLabel(n).pos(), m_lforces[n], m_speed);
+        edgeSumForces += m_lforces[n].lengthSquared();
         clipVector(m_graph.transitionLabel(n).pos_mutable(), clipmin, clipmax);
       }
     }
+    
+    // we already own the lock so we can directly set stable
+    m_graph.stable() = std::sqrt(edgeSumForces) < m_graph.stabilityThreshold()*edgeCount && std::sqrt(nodeSumForces) < m_graph.stabilityThreshold()*nodeCount; 
+    if (m_graph.stable()) mCRL2log(mcrl2::log::verbose) << "Graph is now stable." << std::endl;
   }
 
   m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
@@ -254,7 +264,9 @@ class WorkerThread : public QThread
   public:
     WorkerThread(SpringLayout& layout, int period, QObject* parent=nullptr)
       : QThread(parent), m_stopped(false), m_layout(layout), m_period(period)
-    {}
+    {
+      mCRL2log(mcrl2::log::verbose) << "Created worker thread with a period of " << period << "ms." << std::endl;
+    }
 
     void stop()
     {
@@ -277,13 +289,15 @@ class WorkerThread : public QThread
       int elapsed;
       while (!m_stopped)
       {
-        m_layout.apply();
         elapsed = m_time.elapsed();
-        m_time.restart();
-        if (m_period > elapsed)
-        {
-          msleep(m_period - elapsed);
+        while(elapsed < m_period && !m_layout.isStable()){
+          m_layout.apply();
+          elapsed = m_time.elapsed();
         }
+        if (elapsed < m_period){
+          msleep(m_period-elapsed);
+        }
+        m_time.restart();
       }
       m_layout.m_glwidget.update();
     }
@@ -310,6 +324,10 @@ SpringLayoutUi::~SpringLayoutUi()
     m_thread->wait();
   }
 }
+/// @brief Notifies layout that rules have changed
+void SpringLayoutUi::layoutRulesChanged(){
+  m_layout.rulesChanged();
+}
 
 QByteArray SpringLayoutUi::settings()
 {
@@ -322,7 +340,7 @@ QByteArray SpringLayoutUi::settings()
       quint32(m_ui.sldHandleWeight->value()) <<
       quint32(m_ui.sldNatLength->value()) <<
       quint32(m_ui.cmbForceCalculation->currentIndex());
-
+  layoutRulesChanged();
   return result;
 }
 
@@ -346,17 +364,19 @@ void SpringLayoutUi::setSettings(QByteArray state)
     m_ui.sldNatLength->setValue(NatLength);
     m_ui.cmbForceCalculation->setCurrentIndex(ForceCalculation);
   }
-
+  layoutRulesChanged();
 }
 
 void SpringLayoutUi::onAttractionChanged(int value)
 {
   m_layout.setAttraction(value);
+  layoutRulesChanged();
 }
 
 void SpringLayoutUi::onRepulsionChanged(int value)
 {
   m_layout.setRepulsion(value);
+  layoutRulesChanged();
 }
 
 void SpringLayoutUi::onSpeedChanged(int value)
@@ -369,11 +389,13 @@ void SpringLayoutUi::onSpeedChanged(int value)
 void SpringLayoutUi::onHandleWeightChanged(int value)
 {
   m_layout.setControlPointWeight(value);
+  layoutRulesChanged();
 }
 
 void SpringLayoutUi::onNatLengthChanged(int value)
 {
   m_layout.setNaturalTransitionLength(value);
+  layoutRulesChanged();
 }
 
 void SpringLayoutUi::onForceCalculationChanged(int value)
@@ -387,6 +409,7 @@ void SpringLayoutUi::onForceCalculationChanged(int value)
       m_layout.setForceCalculation(SpringLayout::linearsprings);
       break;
   }
+  layoutRulesChanged();
 }
 
 void SpringLayoutUi::onStarted()
@@ -399,7 +422,7 @@ void SpringLayoutUi::onStopped()
 {
   m_ui.btnStartStop->setText("Start");
   m_ui.btnStartStop->setEnabled(true);
-  emit runningChanged(false);
+  runningChanged(false);
 }
 
 void SpringLayoutUi::onStartStop()
@@ -409,6 +432,7 @@ void SpringLayoutUi::onStartStop()
   {
     emit runningChanged(true);
     m_updateTimer.start(40);
+    layoutRulesChanged(); // force update
     m_thread = new WorkerThread(m_layout, 100 - m_ui.sldSpeed->value(), this);
     m_thread->connect(m_thread, SIGNAL(started()), this, SLOT(onStarted()));
     m_thread->connect(m_thread, SIGNAL(finished()), this, SLOT(onStopped()));
