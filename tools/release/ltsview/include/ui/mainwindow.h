@@ -66,7 +66,8 @@ class MainWindow : public QMainWindow
     { /* m_ltsCanvas->setUpdatesEnabled(true); */
       setEnabled(true);
       std::cout << "stopStructuring()" << std::endl;
-      m_glwidget->update(m_ltsManager->lts()->getInitialState()->getCluster());
+      m_glwidget->setRoot(m_ltsManager->lts()->getInitialState()->getCluster());
+      m_glwidget->update();
     }
     void logMessage(QString level, QString hint, QDateTime /* timestamp */, QString message)
     {
