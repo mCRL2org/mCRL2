@@ -153,13 +153,14 @@ private:
   std::size_t m_variable_insertions = 0;
   std::size_t m_container_insertions = 0;
 
-  /// \brief It can happen that during create_appl with converter the converter generates new terms.
-  ///        As such these terms might only be protected after the term_appl was actually created.
   std::size_t m_creation_depth = 0;
 
   /// \brief A boolean flag indicating whether this thread is working inside the global aterm pool.
   std::atomic<bool> m_busy_flag = false;
   std::atomic<bool> m_forbidden_flag = false;
+
+  /// \brief It can happen that un/lock_shared calls are nested, so keep track of the nesting depth and only
+  ///        actually perform un/locking at the root.
   std::size_t m_lock_depth = 0;
 
   std::stack<std::reference_wrapper<_aterm>> m_todo; ///< A reusable todo stack.
@@ -169,21 +170,6 @@ private:
 
 /// \brief A reference to the thread local term pool storage
 thread_aterm_pool& g_thread_term_pool();
-
-/// A lock guard for the shared mutex.
-class shared_guard : private mcrl2::utilities::noncopyable
-{
-public:
-  shared_guard()
-  {
-    detail::g_thread_term_pool().lock_shared();
-  }
-  ~shared_guard()
-  {    
-    detail::g_thread_term_pool().unlock_shared();
-  }
-};
-
 } // namespace detail
 } // namespace atermpp
 
