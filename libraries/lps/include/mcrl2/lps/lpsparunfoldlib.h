@@ -48,7 +48,8 @@ class lpsparunfold
       **/
     lpsparunfold(mcrl2::lps::stochastic_specification spec,
         std::map< mcrl2::data::sort_expression , unfold_cache_element > *cache,
-        bool add_distribution_laws=false
+        bool add_distribution_laws=false,
+        bool alt_case_placement=false
     );
 
 
@@ -107,6 +108,8 @@ class lpsparunfold
 
     /// \brief Boolean to indicate if additional distribution laws need to be generated.
     bool m_add_distribution_laws;
+
+    bool m_alt_case_placement;
 
     data::data_expression apply_case_function(const data::data_expression& expr, const case_func_vector& case_funcs);
     case_func_vector parameter_case_function(const std::map<data::variable, data::variable_vector >& proc_par_to_proc_par_inj, const data::function_symbol_vector& affected_constructors, const data::function_symbol& case_function);
