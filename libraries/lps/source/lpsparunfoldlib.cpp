@@ -30,7 +30,7 @@ using mcrl2::lps::lpsparunfold;
 
 lpsparunfold::lpsparunfold(lps::stochastic_specification spec,
     std::map< data::sort_expression , unfold_cache_element > *cache,
-    bool add_distribution_laws
+    bool add_distribution_laws, bool alt_case_placement
 )
   :
     m_cache(cache),
@@ -40,7 +40,8 @@ lpsparunfold::lpsparunfold(lps::stochastic_specification spec,
     m_glob_vars(spec.global_variables()),
     m_init_process(spec.initial_process()),
     m_action_label_list(spec.action_labels()),
-    m_add_distribution_laws(add_distribution_laws)
+    m_add_distribution_laws(add_distribution_laws),
+    m_alt_case_placement(alt_case_placement)
 {
   mCRL2log(debug) << "Processing" << std::endl;
 
@@ -538,8 +539,6 @@ lps::stochastic_linear_process lpsparunfold::update_linear_process(const functio
   }
   mCRL2log(debug) << "- New LPS process parameters: " <<  data::pp(new_process_parameters) << std::endl;
 
-  //Prepare parameter substitution
-  std::map<data::variable, data::data_expression> parsub = parameter_substitution(proc_par_to_proc_par_inj, affected_constructors, case_function);
 
   // TODO: avoid unnecessary copies of the LPS
   lps::stochastic_linear_process new_lps;
@@ -550,8 +549,17 @@ lps::stochastic_linear_process lpsparunfold::update_linear_process(const functio
   unfold_summands(new_lps.action_summands(), determine_function, projection_functions);
 
   // Replace occurrences of unfolded parameters by the corresponding case function
-  mutable_map_substitution< std::map< data::variable , data::data_expression > > s{parsub};
-  lps::replace_variables_capture_avoiding( new_lps, s );
+  if (m_alt_case_placement)
+  {
+    insert_case_functions(new_lps, parameter_case_function(proc_par_to_proc_par_inj, affected_constructors, case_function));
+  }
+  else
+  {
+    //Prepare parameter substitution
+    std::map<data::variable, data::data_expression> parsub = parameter_substitution(proc_par_to_proc_par_inj, affected_constructors, case_function);
+    mutable_map_substitution< std::map< data::variable , data::data_expression > > s{parsub};
+    lps::replace_variables_capture_avoiding( new_lps, s );
+  }
 
   // NB: order is important. If we first replace the parameters, they are changed
   // again when performing the capture avoiding substitution, most likely leading
