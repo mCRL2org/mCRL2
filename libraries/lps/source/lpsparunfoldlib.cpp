@@ -415,6 +415,45 @@ void lpsparunfold::unfold_summands(lps::stochastic_action_summand_vector& summan
   }
 }
 
+lpsparunfold::case_func_vector lpsparunfold::parameter_case_function(const std::map<data::variable, data::variable_vector >& proc_par_to_proc_par_inj, const data::function_symbol_vector& affected_constructors, const data::function_symbol& case_function)
+{
+  lpsparunfold::case_func_vector result;
+
+  for (auto& [old_par, new_pars]: proc_par_to_proc_par_inj)
+  {
+    data_expression_vector dev;
+
+    auto new_pars_it = new_pars.cbegin();
+    ++new_pars_it;
+
+    for (const data::function_symbol& constr: affected_constructors)
+    {
+      data::data_expression case_func_arg = constr;
+
+      if (is_function_sort(constr.sort()))
+      {
+        sort_expression_list dom = function_sort(constr.sort()).domain();
+        data_expression_vector arg;
+
+        for (const data::sort_expression& arg_sort: dom)
+        {
+          if (new_pars_it->sort() != arg_sort)
+          {
+            throw runtime_error("Unexpected new parameter encountered, maybe they were not sorted well.");
+          }
+          arg.push_back(*new_pars_it++);
+        }
+        case_func_arg = data::application(constr, arg);
+      }
+
+      dev.push_back(case_func_arg);
+    }
+
+    result.push_back(std::make_tuple(old_par, case_function, new_pars[0], dev));
+  }
+  return result;
+}
+
 lps::stochastic_linear_process lpsparunfold::update_linear_process(const function_symbol& case_function , function_symbol_vector affected_constructors, const function_symbol& determine_function, std::size_t parameter_at_index, const function_symbol_vector& projection_functions)
 {
   /* Get process parameters from lps */
