@@ -625,7 +625,7 @@ void Graph::makeExploration()
   lockForWrite(m_lock, GRAPH_LOCK_TRACE);
   delete m_exploration;
   m_exploration = new Exploration(*this);
-
+  m_stable = false;
   unlockForWrite(m_lock, GRAPH_LOCK_TRACE);
 }
 

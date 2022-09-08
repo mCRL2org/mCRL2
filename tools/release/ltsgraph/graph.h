@@ -348,7 +348,7 @@ class Graph
     mcrl2::lts::lts_type m_type;                ///< The type of the current graph.
     QString m_empty;                            ///< Empty string that is returned as label if none present.
     mutable QReadWriteLock m_lock;              ///< Lock protecting the structure from being changed while rendering and simulating
-    const float m_stabilityThreshold = 0.1f;   ///< Used for checking whether the graph is stable. TODO: Allow user control 
+    const float m_stabilityThreshold = 0.001f;  ///< Used for checking whether the graph is stable. TODO: Allow user control 
     bool m_stable;                              ///< When true, the graph is considered stable, spring forces should not be applied.
     QVector3D m_clip_min;
     QVector3D m_clip_max;

@@ -250,7 +250,7 @@ void GLScene::render(QPainter& painter)
   glClearColor(clear.red(), clear.green(), clear.blue(), 1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  m_graph.lock(GRAPH_LOCK_TRACE); // enter critical section
+  // m_graph.lock(GRAPH_LOCK_TRACE); // enter critical section
 
   bool exploration_active = m_graph.hasExploration();
   std::size_t nodeCount = exploration_active ? m_graph.explorationNodeCount() : m_graph.nodeCount();
@@ -316,7 +316,7 @@ void GLScene::render(QPainter& painter)
     }
   }
 
-  m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
+  // m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
 
   // Make sure that glGetError() is not an error.
   glCheckError();
