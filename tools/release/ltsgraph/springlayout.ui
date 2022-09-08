@@ -12,17 +12,15 @@
   </property>
   <property name="font">
    <font>
-    <weight>75</weight>
     <bold>true</bold>
    </font>
   </property>
   <property name="windowTitle">
-   <string>Automatic layout</string>
+   <string>Layout control</string>
   </property>
   <widget class="QWidget" name="dockWidgetContents">
    <property name="font">
     <font>
-     <weight>50</weight>
      <bold>false</bold>
     </font>
    </property>
@@ -110,14 +108,31 @@
      </widget>
     </item>
     <item>
-     <widget class="QLabel" name="lblForceCalculation">
+     <widget class="QLabel" name="lblAccuracy">
       <property name="text">
-       <string>Force calculation</string>
+       <string>Accuracy</string>
       </property>
      </widget>
     </item>
     <item>
-     <widget class="QComboBox" name="cmbForceCalculation">
+     <widget class="QSlider" name="sldAccuracy">
+      <property name="maximum">
+       <number>100</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="lblAttractionCalculation">
+      <property name="text">
+       <string>Attraction calculation</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QComboBox" name="cmbAttractionCalculation">
       <property name="currentIndex">
        <number>0</number>
       </property>
@@ -129,6 +144,37 @@
       <item>
        <property name="text">
         <string>Linear spring forces</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Electrical spring model</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="lblRepulsionCalculation">
+      <property name="text">
+       <string>Repulsion calculation</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QComboBox" name="cmbRepulsionCalculation">
+      <item>
+       <property name="text">
+        <string>LTSGraph</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Electrical Spring model</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>None</string>
        </property>
       </item>
      </widget>
@@ -169,7 +215,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>120</x>
-     <y>257</y>
+     <y>227</y>
     </hint>
     <hint type="destinationlabel">
      <x>120</x>
@@ -185,7 +231,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>120</x>
-     <y>196</y>
+     <y>173</y>
     </hint>
     <hint type="destinationlabel">
      <x>120</x>
@@ -201,7 +247,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>120</x>
-     <y>135</y>
+     <y>120</y>
     </hint>
     <hint type="destinationlabel">
      <x>120</x>
@@ -217,7 +263,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>120</x>
-     <y>318</y>
+     <y>280</y>
     </hint>
     <hint type="destinationlabel">
      <x>120</x>
@@ -226,14 +272,14 @@
    </hints>
   </connection>
   <connection>
-   <sender>cmbForceCalculation</sender>
+   <sender>cmbAttractionCalculation</sender>
    <signal>currentIndexChanged(int)</signal>
    <receiver>DockWidgetLayout</receiver>
    <slot>onForceCalculationChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>120</x>
-     <y>378</y>
+     <y>386</y>
     </hint>
     <hint type="destinationlabel">
      <x>120</x>
@@ -257,6 +303,54 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>cmbRepulsionCalculation</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>DockWidgetLayout</receiver>
+   <slot>onRepulsionCalculationChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>184</x>
+     <y>455</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>236</x>
+     <y>430</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cmbAttractionCalculation</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>DockWidgetLayout</receiver>
+   <slot>onAttractionCalculationChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>179</x>
+     <y>381</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>235</x>
+     <y>357</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sldAccuracy</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>DockWidgetLayout</receiver>
+   <slot>onAccuracyChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>84</x>
+     <y>332</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>237</x>
+     <y>311</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onAttractionChanged(int)</slot>
@@ -264,8 +358,10 @@
   <slot>onNatLengthChanged(int)</slot>
   <slot>onHandleWeightChanged(int)</slot>
   <slot>onSpeedChanged(int)</slot>
-  <slot>onForceCalculationChanged(int)</slot>
   <slot>onStartStop()</slot>
   <slot>onTimeout()</slot>
+  <slot>onRepulsionCalculationChanged(int)</slot>
+  <slot>onAttractionCalculationChanged(int)</slot>
+  <slot>onAccuracyChanged(int)</slot>
  </slots>
 </ui>

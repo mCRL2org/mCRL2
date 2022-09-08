@@ -129,6 +129,7 @@ MainWindow::~MainWindow()
 void MainWindow::on3DChanged(bool enabled)
 {
   m_glwidget->set3D(enabled);
+  
 
   // For 3D mode there is no limit and otherwise the z-dimension is limited to 0.
   QVector3D limit{INFINITY, INFINITY, INFINITY};
@@ -137,6 +138,7 @@ void MainWindow::on3DChanged(bool enabled)
     limit.setZ(0.0);
   }
   m_graph.clip(-limit, limit);
+  m_graph.setStable(false); // Probably no longer stable
 
   if(enabled)
   {
@@ -202,7 +204,7 @@ void MainWindow::openFile(const QString& fileName)
       m_graph.load(fileName == "-" ? "" : fileName, -limit, limit);
 
       m_glwidget->rebuild();
-      on3DChanged(false);
+      on3DChanged(m_ui.act3D->isChecked());
 
       if (m_graph.nodeCount() > MAX_NODE_COUNT && !hadExploration)
       {

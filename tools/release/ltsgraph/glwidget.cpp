@@ -24,8 +24,10 @@ struct MoveRecord
   Graph::Node* node;
   virtual void move(const QVector3D& pos)
   {
+    m_graph->lock(GRAPH_LOCK_TRACE);
     m_graph->setStable(false); // We moved something so it is no longer stable.
     node->pos_mutable() = pos;
+    m_graph->unlock(GRAPH_LOCK_TRACE);
   }
   virtual void grab(Graph::Graph& graph, std::size_t index){
     m_graph = &graph; 
