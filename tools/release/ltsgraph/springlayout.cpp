@@ -169,18 +169,24 @@ QVector3D SpringLayout::repulsionForceElectricalModel(const QVector3D& a, const 
   return repulsionConstant(repulsion, natlength) * diff / std::max(diff.lengthSquared(), 0.001f);
 }
 
-std::size_t max_num_nodes = 0;
-std::size_t total_num_nodes = 0;
-inline
+
 QVector3D SpringLayout::approxRepulsionForce(const QVector3D& a, Octree& tree, float repulsion, float natlength){
-  /// TODO: Make this an iterator so we don't need to create a new vector every time
-  auto values = tree.getSuperNodes(a);
-  max_num_nodes = std::max(max_num_nodes, values.size());
-  total_num_nodes += values.size();
   QVector3D force(0, 0, 0);
-  for (auto& val : values){
-    force += (this->*m_repulsionCalculation)(a, val.second, repulsion*val.first, natlength);
+  std::size_t num_nodes = 0;
+  /*
+  for(auto it = tree.begin(a), end = tree.end(a); it != end; ++it){
+    int K = ((it->children == 0) ? 1 : it->children);
+    force += (this->*m_repulsionCalculation)(a, it->pos, repulsion*it->children, natlength);
+    num_nodes += 1;
   }
+  */
+  auto super_nodes = tree.getSuperNodes(a);
+  for (auto super_node : super_nodes){
+    force += (this->*m_repulsionCalculation)(a, super_node.second, super_node.first * repulsion, natlength);
+  }
+  num_nodes = super_nodes.size();
+  m_max_num_nodes = std::max(m_max_num_nodes, num_nodes);
+  m_total_num_nodes += num_nodes;
   return force;
 }
 
@@ -377,8 +383,8 @@ void SpringLayout::apply()
   // mCRL2log(mcrl2::log::debug) << "\t- handles: " << m_handle_tree.m_data.size() << std::endl;
   // mCRL2log(mcrl2::log::debug) << "\t- lables : " << m_trans_tree.m_data.size() << std::endl;
   
-  max_num_nodes = 0;
-  total_num_nodes = 0;
+  m_max_num_nodes = 0;
+  m_total_num_nodes = 0;
 }
 
 void SpringLayout::randomizeZ(float z)
