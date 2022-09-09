@@ -18,6 +18,10 @@
 
 #include "layoututility.h"
 
+#ifndef FLT_EPSILON
+#define FLT_EPSILON 1.192092896e-07F
+#endif
+
 template< class T >
 TreeNode<T> emptyTreeNode(){
     TreeNode<T> node;
@@ -58,19 +62,7 @@ void Octree::reset(){
     m_data[0].children = -1;
 }
 
-template<>
-void Octree::insert(const QVector3D& node_pos){
-    // Tree has to exist
-    assert(m_nodes >= 1);
-    // Attempting to insert node outside of bounds should never happen
-    assert(node_pos.x() > m_minbounds.x() && node_pos.y() > m_minbounds.y() && node_pos.z() > m_minbounds.z());
-    assert(node_pos.x() < m_maxbounds.x() && node_pos.y() < m_maxbounds.y() && node_pos.z() < m_maxbounds.z());
 
-    // call recursive function
-    QVector3D node_extents = m_maxbounds - m_minbounds;
-    QVector3D node_minbounds(m_minbounds);
-    sub_insert(node_pos, 0, node_minbounds, node_extents);
-}
 
 template<>
 void Octree::sub_insert(const QVector3D& node_pos, int i, QVector3D& node_minbound, QVector3D& node_extents){
@@ -126,6 +118,20 @@ void Octree::sub_insert(const QVector3D& node_pos, int i, QVector3D& node_minbou
     node_minbound += QVector3D(dx, dy, dz)*node_extents;
     // recurse
     sub_insert(node_pos, child_index, node_minbound, node_extents);
+}
+
+template<>
+void Octree::insert(const QVector3D& node_pos){
+    // Tree has to exist
+    assert(m_nodes >= 1);
+    // Attempting to insert node outside of bounds should never happen
+    assert(node_pos.x() > m_minbounds.x() && node_pos.y() > m_minbounds.y() && node_pos.z() > m_minbounds.z());
+    assert(node_pos.x() < m_maxbounds.x() && node_pos.y() < m_maxbounds.y() && node_pos.z() < m_maxbounds.z());
+
+    // call recursive function
+    QVector3D node_extents = m_maxbounds - m_minbounds;
+    QVector3D node_minbounds(m_minbounds);
+    sub_insert(node_pos, 0, node_minbounds, node_extents);
 }
 
 template<>
