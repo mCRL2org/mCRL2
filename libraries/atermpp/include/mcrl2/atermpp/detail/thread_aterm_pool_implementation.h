@@ -24,59 +24,49 @@ namespace detail
 
 function_symbol thread_aterm_pool::create_function_symbol(const std::string& name, const std::size_t arity, const bool check_for_registered_functions)
 {
-  if constexpr (GlobalThreadSafe) lock_shared();
+  lock_shared();
   function_symbol symbol = m_pool.create_function_symbol(name, arity, check_for_registered_functions);
-  if constexpr (GlobalThreadSafe) unlock_shared();
+  unlock_shared();
   return symbol;
 }
 
 function_symbol thread_aterm_pool::create_function_symbol(std::string&& name, const std::size_t arity, const bool check_for_registered_functions)
 {
-  if constexpr (GlobalThreadSafe) lock_shared();
+  lock_shared();
   function_symbol symbol = m_pool.create_function_symbol(std::forward<std::string>(name), arity, check_for_registered_functions);
-  if constexpr (GlobalThreadSafe) unlock_shared();
+  unlock_shared();
   return symbol;
 }
 
 void thread_aterm_pool::create_int(aterm& term, size_t val)
 {
-  if constexpr (GlobalThreadSafe) lock_shared();
+  lock_shared();
   bool added = m_pool.create_int(term, val);
-  if constexpr (GlobalThreadSafe) unlock_shared();
+  unlock_shared();
   if (added) { m_pool.created_term(m_lock_depth == 0, this); }
 }
 
 void thread_aterm_pool::create_term(aterm& term, const atermpp::function_symbol& sym)
 {
-  if constexpr (GlobalThreadSafe) lock_shared();
+  lock_shared();
   bool added = m_pool.create_term(term, sym);
-  if constexpr (GlobalThreadSafe) unlock_shared();
+  unlock_shared();
   if (added) { m_pool.created_term(m_lock_depth == 0, this); }
 }
 
 template<class ...Terms>
 void thread_aterm_pool::create_appl(aterm& term, const function_symbol& sym, const Terms&... arguments)
 {
-  using are_terms = mcrl2::utilities::forall<std::is_convertible<Terms, unprotected_aterm>...>;
-  if constexpr (GlobalThreadSafe) lock_shared();
-  if constexpr (!are_terms::value)
-  {
-    ++m_creation_depth;
-  }
+  lock_shared();
   bool added = m_pool.create_appl(term, sym, arguments...);
-  if constexpr (!are_terms::value)
-  {
-    --m_creation_depth;
-  }
-  if constexpr (GlobalThreadSafe) unlock_shared();
+  unlock_shared();
   if (added) { m_pool.created_term(m_lock_depth == 0, this); }
 }
 
 template<class Term, class INDEX_TYPE, class ...Terms>
 void thread_aterm_pool::create_appl_index(aterm& term, const function_symbol& sym, const Terms&... arguments)
 {
-  if constexpr (GlobalThreadSafe) lock_shared();
-  ++m_creation_depth;
+  lock_shared();
 
   std::array<unprotected_aterm, sizeof...(arguments)> argument_array;
   store_in_argument_array(argument_array, arguments...);
@@ -106,9 +96,7 @@ void thread_aterm_pool::create_appl_index(aterm& term, const function_symbol& sy
     added = m_pool.create_appl(term, sym, argument_array[0], argument_array[1], term);
   }
 
-
-  --m_creation_depth;
-  if constexpr (GlobalThreadSafe) unlock_shared();
+  unlock_shared();
 
   if (added) { m_pool.created_term(m_lock_depth == 0, this); }
 }
@@ -119,13 +107,9 @@ void thread_aterm_pool::create_appl_dynamic(aterm& term,
                             InputIterator begin,
                             InputIterator end)
 {
-  if constexpr (GlobalThreadSafe) lock_shared();
-  ++m_creation_depth;
-  
+  lock_shared();  
   bool added = m_pool.create_appl_dynamic(term, sym, begin, end);
-  --m_creation_depth;
-
-  if constexpr (GlobalThreadSafe) unlock_shared();
+  unlock_shared();
   
   if (added) { m_pool.created_term(m_lock_depth == 0, this); }
 }
@@ -137,12 +121,9 @@ void thread_aterm_pool::create_appl_dynamic(aterm& term,
                             InputIterator begin,
                             InputIterator end)
 {
-  if constexpr (GlobalThreadSafe) lock_shared();
-  ++m_creation_depth;
-
+  lock_shared();
   bool added = m_pool.create_appl_dynamic(term, sym, convert_to_aterm, begin, end);
-  --m_creation_depth;
-  if constexpr (GlobalThreadSafe) unlock_shared();
+  unlock_shared();
 
   if (added) { m_pool.created_term(m_lock_depth == 0, this); }
 }
@@ -151,7 +132,7 @@ void thread_aterm_pool::register_variable(aterm* variable)
 {
   if constexpr (EnableVariableRegistrationMetrics) { ++m_variable_insertions; }
 
-  if constexpr (GlobalThreadSafe) lock_shared();
+  lock_shared();
     
   /* Resizing of the protection set should not interfere with garbage collection and rehashing */
   if (m_variables->must_resize())
@@ -166,21 +147,21 @@ void thread_aterm_pool::register_variable(aterm* variable)
   mcrl2::utilities::mcrl2_unused(it);
   mcrl2::utilities::mcrl2_unused(inserted);
 
-  if constexpr (GlobalThreadSafe) unlock_shared();
+  unlock_shared();
 }
 
 void thread_aterm_pool::deregister_variable(aterm* variable)
 {
-  if constexpr (GlobalThreadSafe) lock_shared();
+  lock_shared();
   m_variables->erase(variable);
-  if constexpr (GlobalThreadSafe) unlock_shared();
+  unlock_shared();
 }
 
 void thread_aterm_pool::register_container(_aterm_container* container)
 {
   if constexpr (EnableVariableRegistrationMetrics) { ++m_container_insertions; }
 
-  if constexpr (GlobalThreadSafe) lock_shared();
+  lock_shared();
 
   if (m_containers->must_resize())
   {
@@ -192,14 +173,14 @@ void thread_aterm_pool::register_container(_aterm_container* container)
   assert(inserted);
   mcrl2::utilities::mcrl2_unused(it);
   mcrl2::utilities::mcrl2_unused(inserted);
-  if constexpr (GlobalThreadSafe) unlock_shared();
+  unlock_shared();
 }
 
 void thread_aterm_pool::deregister_container(_aterm_container* container)
 {
-  if constexpr (GlobalThreadSafe) lock_shared();
+  lock_shared();
   m_containers->erase(container);
-  if constexpr (GlobalThreadSafe) unlock_shared();
+  unlock_shared();
 }
 
 void thread_aterm_pool::mark()
@@ -243,6 +224,16 @@ void thread_aterm_pool::print_local_performance_statistics() const
 void thread_aterm_pool::wait_for_busy() const
 {
   while (m_busy_flag.load());
+}
+
+bool thread_aterm_pool::is_busy() const
+{
+  return m_busy_flag.load();
+}
+
+bool thread_aterm_pool::is_forbidden() const
+{
+  return m_forbidden_flag.load();
 }
 
 void thread_aterm_pool::lock_shared()
@@ -292,6 +283,8 @@ void inline lock_shared(std::atomic<bool>* busy_flag,
 
 void thread_aterm_pool::unlock_shared()
 {
+  assert(m_lock_depth > 0);
+
   --m_lock_depth;
   if (GlobalThreadSafe && m_lock_depth == 0)
   {

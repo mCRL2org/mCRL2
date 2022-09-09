@@ -107,7 +107,9 @@ public:
   inline void mark() override;
   inline void print_local_performance_statistics() const override;
   inline void wait_for_busy() const override;
+  inline bool is_busy() const override;
   inline void set_forbidden(bool value) override;
+  inline bool is_forbidden() const override;
 
   /// \brief Called before entering the global term pool.
   inline void lock_shared();
@@ -136,13 +138,6 @@ public:
     return &m_lock_depth;
   }
 
-  /// \brief Deliver the creation_depth to rewriters for faster access.
-  /// \details This is a performance optimisation to be deleted in due time. 
-  inline std::size_t* get_creation_depth()
-  {
-    return &m_creation_depth;
-  }
-
 private:
   aterm_pool& m_pool;
 
@@ -152,8 +147,6 @@ private:
 
   std::size_t m_variable_insertions = 0;
   std::size_t m_container_insertions = 0;
-
-  std::size_t m_creation_depth = 0;
 
   /// \brief A boolean flag indicating whether this thread is working inside the global aterm pool.
   std::atomic<bool> m_busy_flag = false;

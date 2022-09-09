@@ -449,9 +449,15 @@ void aterm_pool::wait()
 void aterm_pool::lock(thread_aterm_pool_interface* thread)
 {
   if constexpr (!GlobalThreadSafe) { return; }
+  assert(thread == nullptr || !thread->is_busy()); // Cannot lock when in a shared_lock section.
 
   // Only one thread can halt everything.
   m_mutex.lock();
+  for (auto& pool : m_thread_pools)
+  {
+    // No other locks should happen simultaneously.
+    assert(!pool->is_forbidden());
+  }
 
   // Indicate that threads must wait.
   for (auto& pool : m_thread_pools)
