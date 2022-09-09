@@ -23,6 +23,8 @@
 #include <QVector3D>
 #include <vector>
 #include <mcrl2/utilities/logger.h>
+#include <stack>
+#include <iterator>
 
 template< class T >
 struct TreeNode{
@@ -40,7 +42,84 @@ namespace TreeNodeTypes{
     const int LEAF_NODE = 0;
 }
 
-template< class T, int num_children >
+template< class T, int num_children, float(*norm)(const T&), float(*width)(const T&) >
+struct TreeIterator{
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = TreeNode<T>;
+    using pointer = TreeNode<T>*;
+    using reference = TreeNode<T>&; 
+    using _Iterator_t = TreeIterator<T, num_children, norm, width>; 
+
+    _Iterator_t::TreeIterator(pointer ptr, const T& pos, T node_extents, float theta) 
+      : m_ptr(ptr), m_pos(pos), m_node_extents(node_extents), m_theta(theta)
+    {
+      traverse_stack = std::stack<int>({0});
+      child_index_stack = std::stack<char>({0});
+      if(m_ptr) ++(*this);
+    }
+
+    reference operator*() const {return *m_ptr; }
+    pointer operator->() {return m_ptr; }
+    
+    /// @brief Prefix increment
+    _Iterator_t& _Iterator_t::operator++() 
+    {
+      while (!traverse_stack.empty()){
+          while (!child_index_stack.empty() && child_index_stack.top() == num_children){
+              // move up the tree
+              m_ptr -= traverse_stack.top();
+              traverse_stack.pop();
+              child_index_stack.pop();
+              m_node_extents *= 2;
+          }
+          if (traverse_stack.empty())
+            break;
+          int n = traverse_stack.size();
+          assert(m_ptr->children > -1);
+          if (m_ptr->children == 0){
+              child_index_stack.top() = num_children; // marked for going back up next time
+              return *this; // found leaf node, cant go further down so it must be a super node
+          }else{
+              T xS = m_ptr->pos / m_ptr->children;
+
+              //Barnes-Hut criterion
+              if (width(m_node_extents) <= m_theta*m_theta*norm(m_pos - xS)){
+                child_index_stack.top() = num_children; // mark for going back up next time
+                return *this; // this is a supernode since the Barnes Hut citerion holds
+              }else{
+                  // iterate over all children
+                  m_node_extents *= 0.5f;
+                  while(child_index_stack.top() < num_children){
+                      int child_offset = m_ptr->offset + child_index_stack.top();
+                      child_index_stack.top()++;
+                      if ((m_ptr + child_offset)->children >= 0){
+                        // move down the tree
+                        traverse_stack.push(child_offset);
+                        child_index_stack.push(0);
+                        m_ptr += child_offset;
+                        return ++(*this); // recursion is not done yet
+                      }
+                  } // if this loop finishes; child_index_stack.top() == num_children is true and we are marked to move back up
+              }
+          }
+      }
+      m_ptr = nullptr;
+      return *this;
+    }
+    friend bool operator== (const TreeIterator& a, const TreeIterator& b) { return a.m_ptr == b.m_ptr; };
+    friend bool operator!= (const TreeIterator& a, const TreeIterator& b) { return a.m_ptr != b.m_ptr; };
+
+    private:
+        pointer m_ptr;
+        T dvec;
+        const T& m_pos;
+        T m_node_extents;
+        float m_theta;
+        std::stack<int> traverse_stack;
+        std::stack<char> child_index_stack;
+};
+
+template< class T, int num_children, class _Iterator >
 class GeometricTree{
   public:
     GeometricTree(float theta, T minbounds, T maxbounds);
@@ -55,6 +134,9 @@ class GeometricTree{
     void setMaxBounds(const T& bounds){ m_maxbounds = bounds; }
     void setTheta(const float theta){ m_theta = theta; }
     void reset();
+
+    _Iterator begin(const T& node_pos) { T extents = m_maxbounds - m_minbounds; return _Iterator(&m_data[0],node_pos, extents, m_theta); }
+    _Iterator end(const T& node_pos) {  T extents = m_maxbounds - m_minbounds; return _Iterator(nullptr, node_pos, extents, m_theta); }
   private:
     void sub_insert(const T& node_pos, int i, T& node_minbound, T& node_extents);
     void sub_supnodes(const T& node_pos, int i, T& node_minbound, T& node_extents, std::vector<std::pair<int, T>>& super_nodes);
@@ -66,7 +148,15 @@ class GeometricTree{
     int m_nodes;   ///< Number of leaf nodes currently in tree
 };
 
-using Octree = GeometricTree<QVector3D, 8>;
-using Quadtree = GeometricTree<QVector2D, 4>;
+float octreeNorm(const QVector3D&);
+float octreeWidth(const QVector3D&);
+using OctreeIterator = TreeIterator<QVector3D, 8, octreeNorm, octreeWidth>;
+using Octree = GeometricTree<QVector3D, 8, OctreeIterator>;
+
+
+float quadtreeNorm(const QVector2D&);
+float quadtreeWidth(const QVector2D&);
+using QuadtreeIterator = TreeIterator<QVector2D, 4, quadtreeNorm, quadtreeWidth> ;
+using Quadtree = GeometricTree<QVector2D, 4, QuadtreeIterator>;
 
 #endif

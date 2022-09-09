@@ -25,8 +25,8 @@ TreeNode<T> emptyTreeNode(){
     return node;
 }
 
-template < class T, int num_children >
-GeometricTree<T, num_children>::GeometricTree(float theta, T minbounds, T maxbounds) : m_theta(theta), m_minbounds(minbounds), m_maxbounds(maxbounds), m_nodes(1)
+template < class T, int num_children, class _Iterator >
+GeometricTree<T, num_children, _Iterator>::GeometricTree(float theta, T minbounds, T maxbounds) : m_theta(theta), m_minbounds(minbounds), m_maxbounds(maxbounds), m_nodes(1)
 {
     m_data = {emptyTreeNode<T>()};
 };
@@ -36,8 +36,8 @@ Octree::GeometricTree(float theta, QVector3D minbounds, QVector3D maxbounds) : m
     m_data = {emptyTreeNode<QVector3D>()};
 }
 
-template < class T, int num_children >
-void GeometricTree<T, num_children>::add_children(){
+template < class T, int num_children, class _Iterator >
+void GeometricTree<T, num_children, _Iterator>::add_children(){
     if (m_data.size() < m_nodes + num_children){
         for (int i = 0; i < num_children; i++) m_data.emplace_back(emptyTreeNode<T>());
     }else{
@@ -46,8 +46,8 @@ void GeometricTree<T, num_children>::add_children(){
     m_nodes += num_children;
 }
 
-template < class T, int num_children >
-void GeometricTree<T, num_children>::reset(){
+template < class T, int num_children, typename _Iterator >
+void GeometricTree<T, num_children, _Iterator>::reset(){
     m_nodes = 1;
     m_data[0].children = -1;
 }
@@ -144,7 +144,7 @@ void Octree::sub_supnodes(const QVector3D& node_pos, int i, QVector3D& node_minb
             super_nodes.push_back({m_data[i].children, xS});
         }else{
             // iterate over all children and recurse if necessary
-            QVector3D new_extents = node_extents * 0.5f;
+            node_extents *= 0.5f;
             for (int j = 0; j < 8; j++){
                 int child_index = i+m_data[i].offset+j; 
                 if (m_data[child_index].children >= 0){
@@ -152,10 +152,11 @@ void Octree::sub_supnodes(const QVector3D& node_pos, int i, QVector3D& node_minb
                     int dy = (j>>1) & 1;
                     int dz = (j>>2) & 1;
                     QVector3D dvec(dx, dy, dz);
-                    QVector3D new_bounds = node_minbound + dvec*new_extents;
-                    sub_supnodes(node_pos, child_index, new_bounds, new_extents, super_nodes);
+                    node_minbound += dvec*node_extents;
+                    sub_supnodes(node_pos, child_index, node_minbound, node_extents, super_nodes);
                 }
             }
+            node_extents *= 2;
         }
     }
 }
@@ -168,3 +169,8 @@ std::vector<std::pair<int, QVector3D>> Octree::getSuperNodes(const QVector3D& no
     return super_nodes;
 }
 
+
+float octreeNorm(const QVector3D& vec) { return vec.lengthSquared(); }
+float octreeWidth(const QVector3D& vec) { return vec.lengthSquared()*0.333333333333333; }
+float quadtreeNorm(const QVector2D& vec) { return vec.lengthSquared(); }
+float quadtreeWidth(const QVector2D& vec) { return vec.lengthSquared() * 0.5f; }

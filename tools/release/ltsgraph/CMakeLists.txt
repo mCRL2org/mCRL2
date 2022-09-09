@@ -19,9 +19,9 @@ add_mcrl2_tool(ltsgraph
     mainwindow.cpp
     mainwindow.ui
     shaders.cpp
+    layoututility.cpp
     springlayout.cpp
     springlayout.ui
-    layoututility.cpp
   DEPENDS
     Qt5::Core
     Qt5::Gui

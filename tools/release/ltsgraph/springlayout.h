@@ -51,6 +51,9 @@ class SpringLayout
       no_repulsion
     };
   private:
+    std::size_t m_max_num_nodes = 0;
+    std::size_t m_total_num_nodes = 0;
+
     Octree m_node_tree;
     Octree m_handle_tree;
     Octree m_trans_tree;
