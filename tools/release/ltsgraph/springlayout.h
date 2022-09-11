@@ -73,8 +73,8 @@ class SpringLayout
     const float m_min_controlPointWeight = 0;
     const float m_max_controlPointWeight = 0.1;
     float m_controlPointWeight;      ///< The handle repulsion wight factor.
-    const float m_min_accuracy = 0.1;
-    const float m_max_accuracy = 10;
+    const float m_min_accuracy = 5;
+    const float m_max_accuracy = 0;
     float m_accuracy;                ///< Controls the Barnes-Hut criterion in the approximation of repulsive forces
     std::vector<QVector3D> m_nforces, m_hforces, m_lforces, m_sforces;  ///< Vector of the calculated forces..
 
@@ -243,7 +243,7 @@ class SpringLayout
     }
 
     void setAccuracy(int v){
-      m_accuracy = 1/lerp(v, m_min_accuracy, m_max_accuracy);
+      m_accuracy = lerp(v, m_min_accuracy, m_max_accuracy);
       mCRL2log(mcrl2::log::verbose) << "Set theta to: " << m_accuracy << std::endl;
     }
 

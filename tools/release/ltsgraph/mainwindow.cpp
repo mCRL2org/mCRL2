@@ -16,7 +16,8 @@
 #include "dimensionsdialog.h"
 
 /// \brief The number of vertices before the user is prompted to enable exploration mode.
-constexpr std::size_t MAX_NODE_COUNT  = 400;
+constexpr std::size_t MAX_NODE_COUNT    = 400;
+
 
 MainWindow::MainWindow(QWidget* parent) :
   QMainWindow(parent),
@@ -82,6 +83,8 @@ MainWindow::MainWindow(QWidget* parent) :
   m_ui.actFullscreen->setShortcut(QString("F11"));
 #endif
   updateStatusBar();
+
+
 }
 
 void MainWindow::onFullscreen()
@@ -197,7 +200,7 @@ void MainWindow::openFile(const QString& fileName)
       m_glwidget->resetViewpoint(0);
 
       // We limit the initial positions of the nodes.
-      QVector3D limit = QVector3D(1000.0, 1000.0f, 0.0f) / 4.0f;
+      QVector3D limit = QVector3D(2500.0, 2500.0f, (m_glwidget->get3D() ? 2500.0f : 0.0f));
 
       // The argument '-' means we should read from stdin, the lts library
       // does that when supplied an empty string as the input file name
