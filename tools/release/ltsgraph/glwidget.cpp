@@ -17,6 +17,10 @@
 /// \brief Minimum distance for a drag to be registered (pixels)
 constexpr float DRAG_MIN_DIST = 20.0f;
 
+/// \brief Refreshing of OpenGL canvas properties
+constexpr int         TARGET_FRAME_RATE = 60;
+constexpr int         TARGET_FRAME_TIME = 1000/TARGET_FRAME_RATE; // We round down. 
+
 struct MoveRecord
 {
   virtual ~MoveRecord() = default;
@@ -151,6 +155,13 @@ GLWidget::GLWidget(Graph::Graph& graph, QWidget* parent)
   setMouseTracking(true);
 
   m_scene.setDevicePixelRatio(devicePixelRatio());
+
+  
+  /// TODO: Move draw_timer to member variables so that drawing can be disabled when graph stable and user does not interact with screen
+  // Set GLWidget to continuously update
+  QTimer* draw_timer = new QTimer(this);
+  connect(draw_timer, SIGNAL(timeout()), this, SLOT(update()));
+  draw_timer->start(TARGET_FRAME_TIME);
 }
 
 GLWidget::~GLWidget()
@@ -525,6 +536,10 @@ void GLWidget::set3D(bool enabled)
   }
   m_is_threedimensional = enabled;
   update();
+}
+
+bool GLWidget::get3D(){
+  return m_is_threedimensional;
 }
 
 void GLWidget::resetViewpoint(std::size_t)

@@ -17,6 +17,7 @@
 */
 
 #include "layoututility.h"
+#include <cmath>
 
 #ifndef FLT_EPSILON
 #define FLT_EPSILON 1.192092896e-07F
@@ -49,20 +50,6 @@ void GeometricTree<T, num_children, _Iterator>::add_children(){
     }
     m_nodes += num_children;
 }
-
-template < class T, int num_children, typename _Iterator >
-void GeometricTree<T, num_children, _Iterator>::reset(){
-    m_nodes = 1;
-    m_data[0].children = -1;
-}
-
-template <>
-void Octree::reset(){
-    m_nodes = 1;
-    m_data[0].children = -1;
-}
-
-
 
 template<>
 void Octree::sub_insert(const QVector3D& node_pos, int i, QVector3D& node_minbound, QVector3D& node_extents){
@@ -135,7 +122,7 @@ void Octree::insert(const QVector3D& node_pos){
 }
 
 template<>
-void Octree::sub_supnodes(const QVector3D& node_pos, int i, QVector3D& node_minbound, QVector3D& node_extents, std::vector<std::pair<int, QVector3D>>& super_nodes){
+void Octree::sub_supnodes(const QVector3D& node_pos, int i, QVector3D& node_extents, std::vector<std::pair<int, QVector3D>>& super_nodes){
     // we should never recurse on an empty subtree
     assert(m_data[i].children != -1);
 
@@ -154,12 +141,7 @@ void Octree::sub_supnodes(const QVector3D& node_pos, int i, QVector3D& node_minb
             for (int j = 0; j < 8; j++){
                 int child_index = i+m_data[i].offset+j; 
                 if (m_data[child_index].children >= 0){
-                    int dx = j & 1;
-                    int dy = (j>>1) & 1;
-                    int dz = (j>>2) & 1;
-                    QVector3D dvec(dx, dy, dz);
-                    node_minbound += dvec*node_extents;
-                    sub_supnodes(node_pos, child_index, node_minbound, node_extents, super_nodes);
+                    sub_supnodes(node_pos, child_index, node_extents, super_nodes);
                 }
             }
             node_extents *= 2;
@@ -171,7 +153,7 @@ template<>
 std::vector<std::pair<int, QVector3D>> Octree::getSuperNodes(const QVector3D& node_pos){
     std::vector<std::pair<int, QVector3D>> super_nodes;
     QVector3D extents = m_maxbounds - m_minbounds;
-    sub_supnodes(node_pos, 0, m_minbounds, extents, super_nodes);
+    sub_supnodes(node_pos, 0, extents, super_nodes);
     return super_nodes;
 }
 

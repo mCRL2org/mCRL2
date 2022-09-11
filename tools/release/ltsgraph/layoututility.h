@@ -50,7 +50,7 @@ struct TreeIterator{
     using reference = TreeNode<T>&; 
     using _Iterator_t = TreeIterator<T, num_children, norm, width>; 
 
-    _Iterator_t::TreeIterator(pointer ptr, const T& pos, T node_extents, float theta) 
+    TreeIterator(pointer ptr, const T& pos, T node_extents, float theta) 
       : m_ptr(ptr), m_pos(pos), m_node_extents(node_extents), m_theta(theta)
     {
       traverse_stack = std::stack<int>({0});
@@ -62,7 +62,7 @@ struct TreeIterator{
     pointer operator->() {return m_ptr; }
     
     /// @brief Prefix increment
-    _Iterator_t& _Iterator_t::operator++() 
+    _Iterator_t& operator++() 
     {
       while (!traverse_stack.empty()){
           while (!child_index_stack.empty() && child_index_stack.top() == num_children){
@@ -133,26 +133,30 @@ class GeometricTree{
     void setMinBounds(const T& bounds){ m_minbounds = bounds; }
     void setMaxBounds(const T& bounds){ m_maxbounds = bounds; }
     void setTheta(const float theta){ m_theta = theta; }
-    void reset();
+    void reset(){
+      m_nodes = 1;
+      m_data[0].children = -1;
+    }
+
+    std::size_t size(){ return m_nodes; };
 
     _Iterator begin(const T& node_pos) { T extents = m_maxbounds - m_minbounds; return _Iterator(&m_data[0],node_pos, extents, m_theta); }
     _Iterator end(const T& node_pos) {  T extents = m_maxbounds - m_minbounds; return _Iterator(nullptr, node_pos, extents, m_theta); }
   private:
     void sub_insert(const T& node_pos, int i, T& node_minbound, T& node_extents);
-    void sub_supnodes(const T& node_pos, int i, T& node_minbound, T& node_extents, std::vector<std::pair<int, T>>& super_nodes);
+    void sub_supnodes(const T& node_pos, int i, T& node_extents, std::vector<std::pair<int, T>>& super_nodes);
     void calc_subpos(int i);
     void add_children();
     T m_minbounds;
     T m_maxbounds;
     float m_theta; ///< Barnes-Hut opening criterion
-    int m_nodes;   ///< Number of leaf nodes currently in tree
+    std::size_t m_nodes;   ///< Number of leaf nodes currently in tree
 };
 
 float octreeNorm(const QVector3D&);
 float octreeWidth(const QVector3D&);
 using OctreeIterator = TreeIterator<QVector3D, 8, octreeNorm, octreeWidth>;
 using Octree = GeometricTree<QVector3D, 8, OctreeIterator>;
-
 
 float quadtreeNorm(const QVector2D&);
 float quadtreeWidth(const QVector2D&);

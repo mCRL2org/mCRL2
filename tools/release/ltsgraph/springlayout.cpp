@@ -13,6 +13,8 @@
 #include <QThread>
 #include <cstdlib>
 
+#define DEV_DEBUG
+
 namespace Graph
 {
 
@@ -260,6 +262,35 @@ void SpringLayout::apply()
     trans_min -= QVector3D(1, 1, 1);
     trans_max += QVector3D(1, 1, 1);
 
+    QVector3D _extents, cubic_extents;
+    float _width;
+
+    _extents = node_max - node_min;
+    _width = std::max({_extents.x(), _extents.y(), _extents.z()});
+    cubic_extents = QVector3D(_width, _width, _width);
+    node_min -= (cubic_extents - _extents)*0.5f;
+    // node_min.setX(node_min.x() - (node_width - node_extents.x())*0.5f);
+    // node_min.setY(node_min.y() - (node_width - node_extents.y())*0.5f);
+    // node_min.setZ(node_min.z() - (node_width - node_extents.z())*0.5f);
+
+    node_max = node_min + cubic_extents;
+    // node_max.setX(node_min.x() + node_width);
+    // node_max.setY(node_min.y() + node_width);
+    // node_max.setZ(node_min.z() + node_width);
+
+    _extents = handle_max - handle_min;
+    _width = std::max({_extents.x(), _extents.y(), _extents.z()});
+    cubic_extents = QVector3D(_width, _width, _width);
+    handle_min -= (cubic_extents - _extents)*0.5f;
+    handle_max = handle_min + cubic_extents;
+
+    _extents = trans_max - trans_min;
+    _width = std::max({_extents.x(), _extents.y(), _extents.z()});
+    cubic_extents = QVector3D(_width, _width, _width);
+    trans_min -= (cubic_extents - _extents)*0.5f;
+    trans_max = trans_min + cubic_extents;
+
+
     m_node_tree.setMinBounds(node_min);
     m_node_tree.setMaxBounds(node_max);
     m_handle_tree.setMinBounds(handle_min);
@@ -377,11 +408,11 @@ void SpringLayout::apply()
     m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
   }
 
-  // mCRL2log(mcrl2::log::debug) << "Max number of super nodes: " << max_num_nodes << " and average number of super nodes: " << ((double)total_num_nodes)/(nodeCount + 2*edgeCount) << std::endl;
+  // mCRL2log(mcrl2::log::debug) << "Max number of super nodes: " << m_max_num_nodes << " and average number of super nodes: " << ((double)m_total_num_nodes)/(nodeCount + 2*edgeCount) << std::endl;
   // mCRL2log(mcrl2::log::debug) << "Tree sizes: " << std::endl;
-  // mCRL2log(mcrl2::log::debug) << "\t- nodes  : " << m_node_tree.m_data.size()  << std::endl;
-  // mCRL2log(mcrl2::log::debug) << "\t- handles: " << m_handle_tree.m_data.size() << std::endl;
-  // mCRL2log(mcrl2::log::debug) << "\t- lables : " << m_trans_tree.m_data.size() << std::endl;
+  // mCRL2log(mcrl2::log::debug) << "\t- nodes  : " << m_node_tree.size()  << std::endl;
+  // mCRL2log(mcrl2::log::debug) << "\t- handles: " << m_handle_tree.size() << std::endl;
+  // mCRL2log(mcrl2::log::debug) << "\t- lables : " << m_trans_tree.size() << std::endl;
   
   m_max_num_nodes = 0;
   m_total_num_nodes = 0;
@@ -408,14 +439,23 @@ class WorkerThread : public QThread
 {
   private:
     bool m_stopped;
-    QElapsedTimer m_time;
     SpringLayout& m_layout;
-    int m_period;
+    int m_counter;
+#ifdef DEV_DEBUG
+    // By default log ever second
+    const int m_debug_log_interval = 1000;
+    // if we have a cycle time longer than 100ms we want an extra message
+    const int m_debug_max_cycle_time = 100;
+    QElapsedTimer m_debug_log_timer;
+#endif
   public:
-    WorkerThread(SpringLayout& layout, int period, QObject* parent=nullptr)
-      : QThread(parent), m_stopped(false), m_layout(layout), m_period(period)
+    WorkerThread(SpringLayout& layout, QObject* parent=nullptr)
+      : QThread(parent), m_stopped(false), m_layout(layout)
     {
-      mCRL2log(mcrl2::log::verbose) << "Created worker thread with a period of " << period << "ms." << std::endl;
+#ifdef DEV_DEBUG
+      mCRL2log(mcrl2::log::debug) << "Workerthread will output debug messages to this stream." << std::endl;
+      m_debug_log_timer.start();
+#endif
     }
 
     void stop()
@@ -423,37 +463,36 @@ class WorkerThread : public QThread
       m_stopped = true;
     }
 
-    void setPeriod(int period)
-    {
-      mCRL2log(mcrl2::log::verbose) << "Worker thread period adjusted to " << period << "ms." << std::endl;
-      m_period = period;
-    }
-
-    int period() const
-    {
-      return m_period;
-    }
-
     void run() override
     {
-      m_time.start();
-      int elapsed;
-      while (!m_stopped)
+      if (m_layout.isStable()) msleep(50);// We don't want to keep looping if the layout is stable
+      while (!m_stopped && !m_layout.isStable())
       {
-        elapsed = m_time.elapsed();
-        int counter = 0;
-        while(elapsed < m_period && !m_layout.isStable()){
-          m_layout.apply();
-          elapsed = m_time.elapsed();
-          counter ++;
-        }
-        if (m_layout.isStable() && elapsed < 2) msleep(40);
-        else mCRL2log(mcrl2::log::debug5) << "Worker thread performed " << counter << " cycles in " << elapsed << "ms. " << std::endl;
-        if (elapsed > 200) mCRL2log(mcrl2::log::verbose) << "Worker thread took longer than expected; performed " << counter << " cycles in " << elapsed << "ms. " << std::endl;
-        m_layout.m_glwidget.update();
-        m_time.restart();
+        m_layout.apply();
+        m_counter ++;
+        debugLogging();
       }
     }
+
+#ifdef DEV_DEBUG
+    /// @brief Only called when a debug configuration is ran. 
+    void debugLogging(){
+      int elapsed = m_debug_log_timer.elapsed();
+      if (elapsed > m_debug_log_interval){
+        mCRL2log(mcrl2::log::debug) << "Worker thread performed " << m_counter << " cycles in " << elapsed << "ms. ";
+        if (m_counter/(float)elapsed > 50) mCRL2log(mcrl2::log::debug) << " - NB: This is longer than the set expected maximum " << m_debug_max_cycle_time << "ms per cycle. ";
+        mCRL2log(mcrl2::log::debug) << std::endl;
+        // reset debugging
+        m_debug_log_timer.restart();
+        m_counter = 0;
+      }
+    }
+#else
+    // This structure is required to be optimised out by every "Release" flagged compiler at least, and most compilers will optimise always
+    void debugLogging(){
+      do {} while(0);
+    }
+#endif
 };
 
 SpringLayoutUi::SpringLayoutUi(SpringLayout& layout, QWidget* parent)
@@ -539,9 +578,6 @@ void SpringLayoutUi::onRepulsionChanged(int value)
 
 void SpringLayoutUi::onSpeedChanged(int value)
 {
-  if (m_thread != nullptr) {
-    dynamic_cast<WorkerThread*>(m_thread)->setPeriod(value);
-  }
   m_layout.setSpeed(value);
 }
 
@@ -597,7 +633,7 @@ void SpringLayoutUi::onStartStop()
   {
     emit runningChanged(true);
     layoutRulesChanged(); // force update
-    m_thread = new WorkerThread(m_layout, m_ui.sldSpeed->value(), this);
+    m_thread = new WorkerThread(m_layout, this);
     m_thread->connect(m_thread, SIGNAL(started()), this, SLOT(onStarted()));
     m_thread->connect(m_thread, SIGNAL(finished()), this, SLOT(onStopped()));
     m_thread->start();

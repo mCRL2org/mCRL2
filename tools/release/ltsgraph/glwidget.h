@@ -108,11 +108,15 @@ public:
   void wheelEvent(QWheelEvent* e) override;
 
   /**
-   * @brief Sets the depth of the scene using an optional animation.
-   * @param depth The new depth.
+   * @brief sets 3D mode
    */
   void set3D(bool enabled);
 
+  /**
+   * @brief Gets 3D mode
+   */
+  bool get3D();
+  
   /**
    * @brief Should be called whenever the graph changes.
    */
@@ -204,6 +208,8 @@ private:
   bool m_is_threedimensional = false; ///< Indicates that the scene should be viewed in 3D, as opposed to 2D.
 
   std::list<GLScene::Selection> m_selections; ///< A list of the objects under the cursor.
+
+
 
   /**
    * @brief Updates the selected value for all nodes.
