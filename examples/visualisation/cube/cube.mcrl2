@@ -1,0 +1,20 @@
+% This example draws a cube of size (x_max,y_max,z_max).
+% Its main purpose is to test visualisation in the tool 
+% ltsgraph.
+%
+% Jan Friso Groote, September 2022
+
+map x_max, y_max, z_max: Pos;
+
+eqn x_max=10;
+    y_max=10;
+    z_max=10;
+
+act right, up, forward;
+
+proc Cube(x,y,z:Pos)=
+       (x<x_max) -> right.Cube(x+1,y,z) +
+       (y<y_max) -> up.Cube(x,y+1,z) +
+       (z<z_max) -> forward.Cube(x,y,z+1);
+
+init Cube(1,1,1);
