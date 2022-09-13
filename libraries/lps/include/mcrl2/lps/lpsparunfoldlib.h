@@ -15,7 +15,7 @@
 
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/representative_generator.h"
-#include "mcrl2/lps/stochastic_specification.h"
+#include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/lps/replace_capture_avoiding.h"
 
 namespace mcrl2::lps
@@ -33,8 +33,10 @@ struct unfold_cache_element
   //mcrl2::data::data_equation_vector data_equations;
 };
 
-class lpsparunfold
+class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
 {
+  typedef typename detail::lps_algorithm<lps::stochastic_specification> super;
+
   public:
 
     // old parameter, case function, determinizing parameter, replacement expressions
@@ -46,23 +48,19 @@ class lpsparunfold
       * \param[in] add_distribution_laws If true, additional rewrite rules are introduced.
       * \post   The content of mCRL2 process specification analysed for useful information and class variables are set.
       **/
-    lpsparunfold(mcrl2::lps::stochastic_specification spec,
-        std::map< mcrl2::data::sort_expression , unfold_cache_element > *cache,
-        bool add_distribution_laws=false,
-        bool alt_case_placement=false
-    );
-
+    lpsparunfold(lps::stochastic_specification& spec,
+                 std::map< data::sort_expression , unfold_cache_element > *cache,
+                 bool add_distribution_laws = false, bool alt_case_placement = false);
 
     /** \brief  Destructor for lpsparunfold algorithm.
       **/
     ~lpsparunfold() {};
 
-    /** \brief  Applies lpsparunfold algorithm on a process parameter an mCRL2 process specification .
+    /** \brief  Applies lpsparunfold algorithm on a process parameter of an mCRL2 process specification .
       * \param[in] parameter_at_index An integer value that represents the index value of an process parameter.
-      * \post   The process parameter at index parameter_at_index is unfolded in the mCRL process specification.
-      * \return The process specification in which the process parameter at parameter_at_index is unfolded.
+      * \post   The process parameter at index parameter_at_index is unfolded in the mCRL2 process specification.
     **/
-    mcrl2::lps::stochastic_specification algorithm(std::size_t parameter_at_index);
+    void algorithm(std::size_t parameter_at_index);
 
   private:
     /// set of identifiers to use during fresh variable generation
@@ -76,23 +74,8 @@ class lpsparunfold
     /// \brief The name of the process parameter that needs to be unfold.
     std::string unfold_parameter_name;
 
-    /// \brief The data_specification used for manipulation
-    mcrl2::data::data_specification m_data_specification;
-
     /// a generator for default data expressions of a give sort;
     mcrl2::data::representative_generator m_representative_generator;
-
-    /// \brief The linear process used for manipulation
-    mcrl2::lps::stochastic_linear_process m_lps;
-
-    /// \brief The global variables of the specification
-    std::set< mcrl2::data::variable > m_glob_vars;
-
-    /// \brief The initialization of a linear process used for manipulation
-    mcrl2::lps::stochastic_process_initializer m_init_process;
-
-    /// \brief The initialization of a linear process
-    mcrl2::process::action_label_list m_action_label_list;
 
     /// \brief The fresh sort of the unfolded process parameter used the case function.
     mcrl2::data::basic_sort fresh_basic_sort;

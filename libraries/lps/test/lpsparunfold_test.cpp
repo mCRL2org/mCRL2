@@ -69,8 +69,8 @@ BOOST_AUTO_TEST_CASE(test_main)
 
     std::map< mcrl2::data::sort_expression , lps::unfold_cache_element > unfold_cache;
     lpsparunfold lpsparunfold(s0, &unfold_cache);
-    stochastic_specification s1 = lpsparunfold.algorithm(0);
-    variable_list p1 = s1.process().process_parameters();
+    lpsparunfold.algorithm(0);
+    variable_list p1 = s0.process().process_parameters();
     if (p1.size() != 3)
     {
       std::clog << "--- failed test ---" << std::endl;
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(test_main)
       if (std::distance(p1.begin(), i) == 1 && data::pp(i->sort()).compare("Bool") != 0)
       {
         std::clog << "--- failed test ---" << std::endl;
-        std::clog << lps::pp(s1) << std::endl;
+        std::clog << lps::pp(s0) << std::endl;
         std::clog << "expected 2nd process parameter to be of type Bool" << std::endl;
         std::clog << "computed process parameter of type "  << data::pp(i->sort()) << std::endl;
       }
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(test_main)
       if (std::distance(p1.begin(), i) == 2 && data::pp(i->sort()).compare("Pos") != 0)
       {
         std::clog << "--- failed test ---" << std::endl;
-        std::clog << lps::pp(s1) << std::endl;
+        std::clog << lps::pp(s0) << std::endl;
         std::clog << "expected 3th process parameter to be of type Pos " << std::endl;
         std::clog << "computed process parameter of type "  << data::pp(i->sort()) << std::endl;
       }
