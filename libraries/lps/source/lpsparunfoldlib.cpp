@@ -46,36 +46,7 @@ lpsparunfold::lpsparunfold(lps::stochastic_specification spec,
   mCRL2log(debug) << "Processing" << std::endl;
 
   m_identifier_generator.add_identifiers(lps::find_identifiers(spec));
-
-  for (const sort_expression& s:  m_data_specification.sorts())
-  {
-    if (is_basic_sort(s))
-    {
-      sort_names.insert((basic_sort(s)).name());
-    }
-  };
-
-  m_identifier_generator.add_identifiers(sort_names);
-
-  {
-    std::size_t size = mapping_and_constructor_names.size();
-    for (const function_symbol& f: m_data_specification.constructors())
-    {
-      mapping_and_constructor_names.insert(f.name());
-    };
-    mCRL2log(debug) << "- Specification has " <<   mapping_and_constructor_names.size() - size << " constructors" << std::endl;
-  }
-
-  {
-    std::size_t size = mapping_and_constructor_names.size();
-    for (const function_symbol& f: m_data_specification.mappings())
-    {
-      mapping_and_constructor_names.insert(f.name());
-    };
-    mCRL2log(debug) << "- Specification has " <<  mapping_and_constructor_names.size() - size << " mappings " << std::endl;
-  }
-
-  m_identifier_generator.add_identifiers(mapping_and_constructor_names);
+  m_identifier_generator.add_identifiers(data::find_identifiers(m_data_specification));
 }
 
 data::basic_sort lpsparunfold::generate_fresh_basic_sort(const std::string& str)
@@ -83,7 +54,6 @@ data::basic_sort lpsparunfold::generate_fresh_basic_sort(const std::string& str)
   //Generate a fresh Basic Sort
   core::identifier_string nstr = m_identifier_generator(str);
   mCRL2log(verbose) << "Generated fresh sort \"" <<  std::string(nstr) << "\" for \"" <<  str << "\"" << std::endl;
-  sort_names.insert(nstr);
   return basic_sort(std::string(nstr));
 }
 
@@ -95,7 +65,6 @@ core::identifier_string lpsparunfold::generate_fresh_constructor_and_mapping_nam
 
   core::identifier_string nstr = m_identifier_generator(str);
   mCRL2log(debug) << "Generated a fresh mapping: " <<  std::string(nstr) << std::endl;
-  mapping_and_constructor_names.insert(nstr);
   return nstr;
 }
 
@@ -130,8 +99,6 @@ function_symbol_vector lpsparunfold::new_constructors(data::function_symbol_vect
     elements_of_new_sorts.push_back(f);
     m_data_specification.add_constructor(f);
     mCRL2log(debug) << "\t" << data::function_symbol(fresh_name , fresh_basic_sort) << std::endl;
-    mapping_and_constructor_names.insert(fresh_name);
-
   }
   mCRL2log(debug) << "- Created " <<  elements_of_new_sorts.size() << " fresh \" c_ \" constructor(s)" << std::endl;
   return elements_of_new_sorts;
@@ -692,7 +659,6 @@ data::sort_expression lpsparunfold::sort_at_process_parameter_index(std::size_t 
   {
     core::identifier_string nstr;
     nstr = m_identifier_generator("S");
-    sort_names.insert(nstr);
     unfold_parameter_name = nstr;
   }
 
@@ -700,7 +666,6 @@ data::sort_expression lpsparunfold::sort_at_process_parameter_index(std::size_t 
   {
     core::identifier_string nstr;
     nstr = m_identifier_generator("S");
-    sort_names.insert(nstr);
     unfold_parameter_name = nstr;
   }
 
