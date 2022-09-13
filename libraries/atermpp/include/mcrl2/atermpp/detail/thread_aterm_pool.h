@@ -106,10 +106,9 @@ public:
   // Implementation of thread_aterm_pool_interface
   inline void mark() override;
   inline void print_local_performance_statistics() const override;
-  inline bool is_busy() const;
+  inline bool is_busy() const override;
   inline void wait_for_busy() const override;
   inline void set_forbidden(bool value) override;
-  inline bool is_forbidden() const;
 
   /// \brief Called before entering the global term pool.
   inline void lock_shared();

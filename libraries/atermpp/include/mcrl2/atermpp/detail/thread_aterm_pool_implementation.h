@@ -231,11 +231,6 @@ bool thread_aterm_pool::is_busy() const
   return m_busy_flag.load();
 }
 
-bool thread_aterm_pool::is_forbidden() const
-{
-  return m_forbidden_flag.load();
-}
-
 void thread_aterm_pool::lock_shared()
 {
   if (GlobalThreadSafe && m_lock_depth == 0)
