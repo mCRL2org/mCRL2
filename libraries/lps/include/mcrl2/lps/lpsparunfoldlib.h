@@ -97,12 +97,6 @@ class lpsparunfold
     /// \brief The fresh sort of the unfolded process parameter used the case function.
     mcrl2::data::basic_sort fresh_basic_sort;
 
-    /// \brief The set of sort names occurring in the process specification.
-    std::set<mcrl2::core::identifier_string> sort_names;
-
-    /// \brief The set of constructor and mapping names occurring in the process specification.
-    std::set<mcrl2::core::identifier_string> mapping_and_constructor_names;
-
     /// \brief Mapping of the unfold process parameter to a vector process parameters.
     std::map<mcrl2::data::variable, mcrl2::data::variable_vector > proc_par_to_proc_par_inj;
 
@@ -117,8 +111,7 @@ class lpsparunfold
     /** \brief  Generates a fresh basic sort given an string.
       * \param  str a string value. The value is used to generate a fresh
       *         basic sort.
-      * \post   A fresh basic sort is generated, for which the name is unique
-      *         with respect to the set of sort names (sort_names).
+      * \post   A fresh basic sort is generated.
       * \return A fresh basic sort.
     **/
     mcrl2::data::basic_sort generate_fresh_basic_sort(const std::string& str);
@@ -126,9 +119,7 @@ class lpsparunfold
     /** \brief  Generates a fresh name for a constructor or mapping.
       * \param  str a string value. The value is used to generate a fresh
       *         name for a constructor or mapping.
-      * \post   A fresh name for a constructor or mapping is generated, for
-      *         which the name is unique with respect to the set of mapping
-      *         and constructors  (mapping_and_constructor_names).
+      * \post   A fresh name for a constructor or mapping is generated.
       * \return A fresh name for a constructor or mapping.
     **/
     mcrl2::core::identifier_string generate_fresh_constructor_and_mapping_name(std::string str);
