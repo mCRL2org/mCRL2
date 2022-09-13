@@ -270,10 +270,11 @@ void inline lock_shared(std::atomic<bool>* busy_flag,
     busy_flag->store(true);
 
     // Wait for the forbidden flag to become false.
-    if (forbidden_flag->load())
+    while (forbidden_flag->load())
     {
       *busy_flag = false;
-      atermpp::detail::g_thread_term_pool().lock_shared();
+      atermpp::detail::g_thread_term_pool().wait();
+      *busy_flag = true;
     }
   }
 
@@ -305,6 +306,11 @@ void inline unlock_shared(std::atomic<bool>* busy_flag,
   }
 }
 
+
+void thread_aterm_pool::wait()
+{
+  m_pool.wait();
+}
 
 void thread_aterm_pool::set_forbidden(bool value)
 {

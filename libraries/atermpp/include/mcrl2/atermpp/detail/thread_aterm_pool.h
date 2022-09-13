@@ -106,16 +106,19 @@ public:
   // Implementation of thread_aterm_pool_interface
   inline void mark() override;
   inline void print_local_performance_statistics() const override;
+  inline bool is_busy() const;
   inline void wait_for_busy() const override;
-  inline bool is_busy() const override;
   inline void set_forbidden(bool value) override;
-  inline bool is_forbidden() const override;
+  inline bool is_forbidden() const;
 
   /// \brief Called before entering the global term pool.
   inline void lock_shared();
 
   /// \brief Called after leaving the global term pool.
   inline void unlock_shared();
+
+  /// \brief Waits for the global term pool.
+  inline void wait();
 
   /// \brief Deliver the busy flag to rewriters for faster access.
   /// \details This is a performance optimisation to be deleted in due time. 
@@ -163,6 +166,7 @@ private:
 
 /// \brief A reference to the thread local term pool storage
 thread_aterm_pool& g_thread_term_pool();
+
 } // namespace detail
 } // namespace atermpp
 

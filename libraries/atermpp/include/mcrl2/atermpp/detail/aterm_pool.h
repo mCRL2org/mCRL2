@@ -45,14 +45,8 @@ public:
   /// \brief Blocks until the thread pool is not busy.
   virtual void wait_for_busy() const = 0;
 
-  /// \brief Returns the value of the busy flag.
-  virtual bool is_busy() const = 0;
-
-  /// \brief Blocks until the thread pool is not busy.
+  /// \brief Sets the forbidden flag.
   virtual void set_forbidden(bool value) = 0;
-
-  /// \brief Returns the value of the busy flag.
-  virtual bool is_forbidden() const = 0;
 };
 
 class thread_aterm_pool;
