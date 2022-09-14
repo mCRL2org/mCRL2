@@ -76,6 +76,8 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
     /// \brief The sort of the process parameter that needs to be unfold.
     mcrl2::data::sort_expression m_unfold_process_parameter;
 
+    data::function_symbol_vector m_affected_constructors;
+
     /// \brief The name of the process parameter that needs to be unfold.
     std::string unfold_parameter_name;
 
@@ -94,7 +96,7 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
     bool m_alt_case_placement;
 
     data::data_expression apply_case_function(const data::data_expression& expr, const case_func_vector& case_funcs);
-    case_func_vector parameter_case_function(const std::map<data::variable, data::variable_vector >& proc_par_to_proc_par_inj, const data::function_symbol_vector& affected_constructors, const data::function_symbol& case_function);
+    case_func_vector parameter_case_function(const std::map<data::variable, data::variable_vector >& proc_par_to_proc_par_inj, const data::function_symbol& case_function);
 
     /** \brief  Generates a fresh basic sort given an string.
       * \param  str a string value. The value is used to generate a fresh
@@ -140,13 +142,12 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
       * \return A function that returns the projection functions for the
       *         constructor of the unfolded process parameter.
     **/
-    mcrl2::data::function_symbol_vector create_projection_functions(mcrl2::data::function_symbol_vector k);
+    mcrl2::data::function_symbol_vector create_projection_functions();
 
     /** \brief  Creates the needed equations for the unfolded process parameter. The equations are added to m_data_specification.
       * \param  projection_functions a vector with projection functions.
       * \param  case_function the case function.
       * \param  elements_of_new_sorts set of fresh sorts.
-      * \param  affected_constructors vector of affected constructors.
       * \param  determine_function the determine function.
       * \return A set of equations for the unfolded process parameter.
     **/
@@ -154,20 +155,19 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
       const mcrl2::data::function_symbol_vector& projection_functions,
       const mcrl2::data::function_symbol& case_function,
       mcrl2::data::function_symbol_vector elements_of_new_sorts,
-      const mcrl2::data::function_symbol_vector& affected_constructors,
       const mcrl2::data::function_symbol& determine_function);
 
     /** \brief  Determines the constructors that are affected with the unfold
       *         process parameter.
-      * \return The constructors that are affected with the unfold
-      *         process parameter
+      * \post The constructors that are affected with the unfold
+      *         process parameter are stored in m_affected_constructors
     **/
-    mcrl2::data::function_symbol_vector determine_affected_constructors();
+    void determine_affected_constructors();
 
     /** \brief  Creates a set of constructors for the fresh basic sort
       * \return The constructors that are created for the fresh basic sort
     **/
-    mcrl2::data::function_symbol_vector new_constructors(mcrl2::data::function_symbol_vector k);
+    mcrl2::data::function_symbol_vector new_constructors();
 
     /** \brief  Get the sort of the process parameter at given index
       * \param  parameter_at_index The index of the parameter for which the sort must be obtained.
@@ -180,7 +180,6 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
     **/
     std::map<mcrl2::data::variable, mcrl2::data::data_expression> parameter_substitution(
       std::map<mcrl2::data::variable, mcrl2::data::variable_vector > proc_par_to_proc_par_inj,
-      mcrl2::data::function_symbol_vector k,
       const mcrl2::data::function_symbol& case_function);
 
     /** \brief unfolds a data expression into a vector of process parameters
@@ -196,7 +195,6 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
 
     /** \brief substitute unfold process parameter in the linear process
       * \param  case_function the case function
-      * \param  affected_constructors vector of affected constructors
       * \param  determine_function the determine function
       * \param  parameter_at_index the parameter index
       * \param  pi the projection functions
@@ -204,7 +202,6 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
     **/
     mcrl2::lps::stochastic_linear_process update_linear_process(
       const mcrl2::data::function_symbol& case_function,
-      mcrl2::data::function_symbol_vector affected_constructors,
       const mcrl2::data::function_symbol& determine_function,
       std::size_t parameter_at_index,
       const mcrl2::data::function_symbol_vector& pi);
@@ -247,7 +244,7 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
     /** \brief Create a mapping from function symbols to a list of fresh variables that can act as its arguments
     **/
     std::map<mcrl2::data::function_symbol, mcrl2::data::data_expression_vector>
-              create_arguments_map(const mcrl2::data::function_symbol_vector& functions);
+              create_arguments_map();
 
     // Applies 'process unfolding' to a sequence of summands.
     void unfold_summands(mcrl2::lps::stochastic_action_summand_vector& summands, const mcrl2::data::function_symbol& determine_function, const mcrl2::data::function_symbol_vector& pi);

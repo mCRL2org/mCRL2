@@ -69,29 +69,27 @@ data::variable lpsparunfold::generate_fresh_variable(std::string str, const sort
   return data::variable(idstr, sort);
 }
 
-function_symbol_vector lpsparunfold::determine_affected_constructors()
+void lpsparunfold::determine_affected_constructors()
 {
-  function_symbol_vector t = m_spec.data().constructors(m_unfold_process_parameter);
-  function_symbol_vector k = function_symbol_vector(t.begin(), t.end());
+  m_affected_constructors = m_spec.data().constructors(m_unfold_process_parameter);
 
   mCRL2log(debug) << "k:\t";
-  mCRL2log(log::verbose) << "" <<  unfold_parameter_name  << " has " <<  k.size() << " constructor function(s)" << std::endl;
+  mCRL2log(log::verbose) << "" <<  unfold_parameter_name  << " has " <<  m_affected_constructors.size() << " constructor function(s)" << std::endl;
 
-  for (const function_symbol& f: k)
+  for (const function_symbol& f: m_affected_constructors)
   {
     mCRL2log(debug) << "\t" <<  f << std::endl;
   }
-  return k;
 }
 
 
-function_symbol_vector lpsparunfold::new_constructors(data::function_symbol_vector affected_constructors)
+function_symbol_vector lpsparunfold::new_constructors()
 {
   using namespace data;
 
   function_symbol_vector elements_of_new_sorts;
 
-  for (const function_symbol& func: affected_constructors)
+  for (const function_symbol& func: m_affected_constructors)
   {
 
     std::string prefix = "c_";
@@ -133,14 +131,14 @@ data::function_symbol lpsparunfold::create_determine_function()
   return fs;
 }
 
-data::function_symbol_vector lpsparunfold::create_projection_functions(function_symbol_vector affected_constructors)
+data::function_symbol_vector lpsparunfold::create_projection_functions()
 {
   data::function_symbol_vector sfs;
   std::string str = "pi_";
   str.append(std::string(fresh_basic_sort.name()).append("_"));
 
   std::set<data::sort_expression> processed;
-  for (const function_symbol& f: affected_constructors)
+  for (const function_symbol& f: m_affected_constructors)
   {
     if (is_function_sort(f.sort()))
     {
@@ -171,7 +169,7 @@ void lpsparunfold::add_new_equation(const data_expression& lhs, const data_expre
   m_spec.data().add_equation(data_equation(variable_list(svars.begin(), svars.end()), lhs, rhs));
 }
 
-std::map<function_symbol, data_expression_vector> lpsparunfold::create_arguments_map(const function_symbol_vector& affected_constructors)
+std::map<function_symbol, data_expression_vector> lpsparunfold::create_arguments_map()
 {
   std::string dstr = "d";
   std::map<function_symbol, data_expression_vector> result;
@@ -180,7 +178,7 @@ std::map<function_symbol, data_expression_vector> lpsparunfold::create_arguments
   std::map< sort_expression, variable_vector > sort_vars;  /* Mapping for Sort |-> [Variable] */
   std::map< sort_expression, std::size_t > sort_index;          /* Mapping for counting the number of unique Sorts of an equation */
 
-  for (const function_symbol& f: affected_constructors)
+  for (const function_symbol& f: m_affected_constructors)
   {
     data_expression_vector arguments;
     if (is_function_sort(f.sort()))
@@ -207,7 +205,6 @@ void lpsparunfold::create_data_equations(
                 const function_symbol_vector& projection_functions,
                 const data::function_symbol& case_function,
                 function_symbol_vector elements_of_new_sorts,
-                const function_symbol_vector& affected_constructors,
                 const data::function_symbol& determine_function)
 {
   variable_vector vars;        /* Equation variables  */
@@ -232,11 +229,11 @@ void lpsparunfold::create_data_equations(
 
   generate_case_functions(elements_of_new_sorts, case_function);
 
-  const std::map<function_symbol, data_expression_vector> constructors_argument_map=create_arguments_map(affected_constructors);
+  const std::map<function_symbol, data_expression_vector> constructors_argument_map=create_arguments_map();
 
   std::size_t element_of_new_sort_index = 0;
   std::size_t projection_function_index = 0;
-  for (const function_symbol& f: affected_constructors)
+  for (const function_symbol& f: m_affected_constructors)
   {
     /* Creating an equation for the detector function */
     data_expression_vector function_arguments=constructors_argument_map.at(f);
@@ -258,7 +255,7 @@ void lpsparunfold::create_data_equations(
         // Add default values if the projection functions are applied to constructors they are not intended for.
         // The advantage of this is that this simplifies expressions, and it allows to sometimes remove more variables
         // using constant elimination.
-        for(const function_symbol& alternative_f: affected_constructors)
+        for(const function_symbol& alternative_f: m_affected_constructors)
         {
           if (alternative_f!=f && f.sort().target_sort()==alternative_f.sort().target_sort())
           {
@@ -372,7 +369,7 @@ void lpsparunfold::unfold_summands(lps::stochastic_action_summand_vector& summan
   }
 }
 
-lpsparunfold::case_func_vector lpsparunfold::parameter_case_function(const std::map<data::variable, data::variable_vector >& proc_par_to_proc_par_inj, const data::function_symbol_vector& affected_constructors, const data::function_symbol& case_function)
+lpsparunfold::case_func_vector lpsparunfold::parameter_case_function(const std::map<data::variable, data::variable_vector >& proc_par_to_proc_par_inj, const data::function_symbol& case_function)
 {
   lpsparunfold::case_func_vector result;
 
@@ -383,7 +380,7 @@ lpsparunfold::case_func_vector lpsparunfold::parameter_case_function(const std::
     auto new_pars_it = new_pars.cbegin();
     ++new_pars_it;
 
-    for (const data::function_symbol& constr: affected_constructors)
+    for (const data::function_symbol& constr: m_affected_constructors)
     {
       data::data_expression case_func_arg = constr;
 
@@ -412,7 +409,7 @@ lpsparunfold::case_func_vector lpsparunfold::parameter_case_function(const std::
 }
 
 // TODO: Modify such that update happens in-place
-lps::stochastic_linear_process lpsparunfold::update_linear_process(const function_symbol& case_function , function_symbol_vector affected_constructors, const function_symbol& determine_function, std::size_t parameter_at_index, const function_symbol_vector& projection_functions)
+lps::stochastic_linear_process lpsparunfold::update_linear_process(const function_symbol& case_function , const function_symbol& determine_function, std::size_t parameter_at_index, const function_symbol_vector& projection_functions)
 {
   /* Get process parameters from lps */
   const data::variable_list& lps_proc_pars =  m_spec.process().process_parameters();
@@ -441,8 +438,8 @@ lps::stochastic_linear_process lpsparunfold::update_linear_process(const functio
 
   mCRL2log(log::verbose) << "- Created process parameter " <<  data::pp(injected_process_parameters.back()) << " of type " <<  data::pp(fresh_basic_sort) << "" << std::endl;
 
-  for (data::function_symbol_vector::iterator j = affected_constructors.begin()
-           ; j != affected_constructors.end()
+  for (data::function_symbol_vector::iterator j = m_affected_constructors.begin()
+           ; j != m_affected_constructors.end()
            ; ++j)
   {
     if (is_function_sort(j -> sort()))
@@ -494,12 +491,12 @@ lps::stochastic_linear_process lpsparunfold::update_linear_process(const functio
   // Replace occurrences of unfolded parameters by the corresponding case function
   if (m_alt_case_placement)
   {
-    insert_case_functions(new_lps, parameter_case_function(proc_par_to_proc_par_inj, affected_constructors, case_function));
+    insert_case_functions(new_lps, parameter_case_function(proc_par_to_proc_par_inj, case_function));
   }
   else
   {
     //Prepare parameter substitution
-    std::map<data::variable, data::data_expression> parsub = parameter_substitution(proc_par_to_proc_par_inj, affected_constructors, case_function);
+    std::map<data::variable, data::data_expression> parsub = parameter_substitution(proc_par_to_proc_par_inj, case_function);
     mutable_map_substitution< std::map< data::variable , data::data_expression > > s{parsub};
     lps::replace_variables_capture_avoiding( new_lps, s );
   }
@@ -553,7 +550,7 @@ lps::stochastic_process_initializer lpsparunfold::update_linear_process_initiali
   return new_init;
 }
 
-std::map<data::variable, data::data_expression> lpsparunfold::parameter_substitution(std::map<data::variable, data::variable_vector > proc_par_to_proc_par_inj, data::function_symbol_vector affected_constructors, const data::function_symbol& case_function)
+std::map<data::variable, data::data_expression> lpsparunfold::parameter_substitution(std::map<data::variable, data::variable_vector > proc_par_to_proc_par_inj, const data::function_symbol& case_function)
 {
   std::map<data::variable, data::data_expression> result;
 
@@ -565,7 +562,7 @@ std::map<data::variable, data::data_expression> lpsparunfold::parameter_substitu
     dev.push_back(data_expression(*new_pars_it));
     ++new_pars_it;
 
-    for (const data::function_symbol& constr: affected_constructors)
+    for (const data::function_symbol& constr: m_affected_constructors)
     {
       data::data_expression case_func_arg = constr;
 
@@ -760,7 +757,6 @@ void lpsparunfold::algorithm(std::size_t parameter_at_index)
   /* Var Dec */
   lps::stochastic_linear_process new_lps;
   lps::stochastic_process_initializer new_init;
-  function_symbol_vector affected_constructors;
   function_symbol_vector elements_of_new_sorts;
   function_symbol_vector projection_functions;
   data::function_symbol case_function;
@@ -776,8 +772,8 @@ void lpsparunfold::algorithm(std::size_t parameter_at_index)
     /*     1 */
     fresh_basic_sort = generate_fresh_basic_sort(unfold_parameter_name);
     /*     2 */
-    affected_constructors = determine_affected_constructors();
-    if (affected_constructors.empty())
+    determine_affected_constructors();
+    if (m_affected_constructors.empty())
     {
       mCRL2log(log::verbose) << "The selected process parameter " <<  unfold_parameter_name << " has no constructors." << std::endl;
       mCRL2log(log::verbose) << "No need to unfold." << std::endl;
@@ -785,15 +781,15 @@ void lpsparunfold::algorithm(std::size_t parameter_at_index)
     else
     {
       /*     4 */
-      elements_of_new_sorts = new_constructors(affected_constructors);
+      elements_of_new_sorts = new_constructors();
       /*     6 */
-      case_function = create_case_function(affected_constructors.size());
+      case_function = create_case_function(m_affected_constructors.size());
       /*     7 */
       determine_function = create_determine_function();
       /*  8-12 */
-      projection_functions = create_projection_functions(affected_constructors);
+      projection_functions = create_projection_functions();
       /* 13-xx */
-      create_data_equations(projection_functions, case_function, elements_of_new_sorts, affected_constructors, determine_function);
+      create_data_equations(projection_functions, case_function, elements_of_new_sorts, determine_function);
 
       //Reconstruct data specification, where already quite a number of mappings, constructors and functions have been added.
       m_spec.data().add_sort(fresh_basic_sort);
@@ -801,13 +797,13 @@ void lpsparunfold::algorithm(std::size_t parameter_at_index)
       m_spec.data().add_mapping(case_function);
 
       /*----------------*/
-      m_spec.process() = update_linear_process(case_function, affected_constructors, determine_function, parameter_at_index, projection_functions);
+      m_spec.process() = update_linear_process(case_function, determine_function, parameter_at_index, projection_functions);
       m_spec.initial_process() = update_linear_process_initialization(determine_function, parameter_at_index, projection_functions);
 
       /* Updating cache*/
       unfold_cache_element e;
       e.cached_case_function = case_function;
-      e.cached_k = affected_constructors;
+      e.cached_k = m_affected_constructors;
       e.cached_determine_function = determine_function;
       e.cached_projection_functions = projection_functions;
       e.cached_fresh_basic_sort = fresh_basic_sort;
@@ -823,8 +819,8 @@ void lpsparunfold::algorithm(std::size_t parameter_at_index)
     std::map< data::sort_expression , unfold_cache_element >::iterator ce = m_cache->find(m_unfold_process_parameter);
 
     fresh_basic_sort = ce->second.cached_fresh_basic_sort;
-    affected_constructors = ce->second.cached_k;
-    if (affected_constructors.empty())
+    m_affected_constructors = ce->second.cached_k;
+    if (m_affected_constructors.empty())
     {
       mCRL2log(log::verbose) << "The selected process parameter " <<  unfold_parameter_name << " has no constructors." << std::endl;
       mCRL2log(log::verbose) << "No need to unfold." << std::endl;
@@ -834,7 +830,7 @@ void lpsparunfold::algorithm(std::size_t parameter_at_index)
     determine_function = ce->second.cached_determine_function;
     projection_functions = ce->second.cached_projection_functions;
 
-    m_spec.process() = update_linear_process(case_function, affected_constructors, determine_function, parameter_at_index, projection_functions);
+    m_spec.process() = update_linear_process(case_function, determine_function, parameter_at_index, projection_functions);
     m_spec.initial_process() = update_linear_process_initialization(determine_function, parameter_at_index, projection_functions);
   }
 
