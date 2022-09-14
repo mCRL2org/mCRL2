@@ -329,10 +329,9 @@ void lpsparunfold::create_data_equations(
   }
 }
 
-core::identifier_string lpsparunfold::generate_fresh_process_parameter_name(std::string str, std::set<core::identifier_string>& process_parameter_names)
+core::identifier_string lpsparunfold::generate_fresh_process_parameter_name(std::string str)
 {
   core::identifier_string idstr = m_identifier_generator(str.append("_pp"));
-  process_parameter_names.insert(idstr);
   return idstr;
 }
 
@@ -421,16 +420,11 @@ lps::stochastic_linear_process lpsparunfold::update_linear_process(const functio
   /* Get process parameters from lps */
   data::variable_list lps_proc_pars =  m_spec.process().process_parameters();
 
-  /* Get process_parameters names from lps */
-  std::set<core::identifier_string> process_parameter_names;
-  for (const data::variable& v: lps_proc_pars)
-  {
-    process_parameter_names.insert(v.name());
-  }
-
   mCRL2log(log::verbose) << "Updating LPS..." << std::endl;
   /* Create new process parameters */
   data::variable_vector new_process_parameters;
+
+
   for (data::variable_list::iterator i = lps_proc_pars.begin();
        i != lps_proc_pars.end();
        ++i)
@@ -441,7 +435,7 @@ lps::stochastic_linear_process lpsparunfold::update_linear_process(const functio
       data::variable_vector process_parameters_injection;
 
       /* Generate fresh process parameter for new Sort */
-      core::identifier_string idstr = generate_fresh_process_parameter_name(unfold_parameter_name, process_parameter_names);
+      core::identifier_string idstr = generate_fresh_process_parameter_name(unfold_parameter_name);
       process_parameters_injection.push_back(data::variable(idstr , fresh_basic_sort));
 
       mCRL2log(log::verbose) << "- Created process parameter " <<  data::pp(process_parameters_injection.back()) << " of type " <<  data::pp(fresh_basic_sort) << "" << std::endl;
@@ -450,39 +444,27 @@ lps::stochastic_linear_process lpsparunfold::update_linear_process(const functio
            ; j != affected_constructors.end()
            ; ++j)
       {
-        bool processed = false;
         if (is_function_sort(j -> sort()))
         {
           sort_expression_list dom = function_sort(j -> sort()).domain();
           for (sort_expression_list::iterator k = dom.begin(); k != dom.end(); ++k)
           {
-            core::identifier_string idstr = generate_fresh_process_parameter_name(unfold_parameter_name, process_parameter_names);
+            core::identifier_string idstr = generate_fresh_process_parameter_name(unfold_parameter_name);
             process_parameters_injection.push_back(data::variable(idstr ,  *k));
             mCRL2log(log::verbose) << "- Injecting process parameter: " <<  idstr << "::" <<  *k << std::endl;
           }
-          processed = true;
         }
-
-        if (is_basic_sort(j -> sort()))
+        else if (is_basic_sort(j -> sort()))
         {
           mCRL2log(debug) << "- No processed parameter are injected for basic sort: " <<  *j << std::endl;
-          processed = true;
         }
-
-        if (is_structured_sort(j -> sort()))
+        else if (is_structured_sort(j -> sort()) || is_container_sort(j->sort()))
         {
-          processed = true;
+          /* skip */
         }
-
-        if (is_container_sort(j -> sort()))
+        else
         {
-          processed = true;
-        }
-        if (!processed)
-        {
-          mCRL2log(log::debug) << *j << " is not processed" << std::endl;
-          mCRL2log(log::debug) << *j << std::endl;
-          abort();
+          throw mcrl2::runtime_error("Parameter " + pp(*j) + " is not processed");
         }
       }
       new_process_parameters.insert(new_process_parameters.end(), process_parameters_injection.begin(), process_parameters_injection.end());

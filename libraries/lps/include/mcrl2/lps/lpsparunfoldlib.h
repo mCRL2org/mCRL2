@@ -163,7 +163,7 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
       *         with respect to the set of process parameters (process_parameter_names).
       * \return A fresh process parameter name.
     **/
-    mcrl2::core::identifier_string generate_fresh_process_parameter_name(std::string str, std::set<mcrl2::core::identifier_string>& process_parameter_names);
+    mcrl2::core::identifier_string generate_fresh_process_parameter_name(std::string str);
 
     /** \brief  Get the sort of the process parameter at given index
       * \param  parameter_at_index The index of the parameter for which the sort must be obtained.
