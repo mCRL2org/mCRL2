@@ -34,6 +34,7 @@ lpsparunfold::lpsparunfold(lps::stochastic_specification& spec,
                            std::map< data::sort_expression , unfold_cache_element > *cache,
                            bool add_distribution_laws, bool alt_case_placement)
     : lps::detail::lps_algorithm<lps::stochastic_specification>(spec),
+      m_run_before(false),
       m_cache(cache),
       m_representative_generator(spec.data()),
       m_add_distribution_laws(add_distribution_laws),
@@ -46,20 +47,26 @@ lpsparunfold::lpsparunfold(lps::stochastic_specification& spec,
 data::basic_sort lpsparunfold::generate_fresh_basic_sort(const std::string& str)
 {
   //Generate a fresh Basic Sort
-  core::identifier_string nstr = m_identifier_generator(str);
+  const core::identifier_string nstr = m_identifier_generator(str);
   mCRL2log(log::verbose) << "Generated fresh sort \"" <<  std::string(nstr) << "\" for \"" <<  str << "\"" << std::endl;
-  return basic_sort(std::string(nstr));
+  return basic_sort(nstr);
 }
 
-core::identifier_string lpsparunfold::generate_fresh_constructor_and_mapping_name(std::string str)
+data::function_symbol lpsparunfold::generate_fresh_function_symbol(std::string str, const sort_expression& sort)
 {
   //Generate a fresh name for a constructor of mapping
 
   str.resize(std::remove_if(str.begin(), str.end(), &char_filter) - str.begin());
 
-  core::identifier_string nstr = m_identifier_generator(str);
-  mCRL2log(debug) << "Generated a fresh mapping: " <<  std::string(nstr) << std::endl;
-  return nstr;
+  const core::identifier_string nstr = m_identifier_generator(str);
+  mCRL2log(debug) << "Generated a fresh function symbol name: " <<  std::string(nstr) << std::endl;
+  return data::function_symbol(nstr, sort);
+}
+
+data::variable lpsparunfold::generate_fresh_variable(std::string str, const sort_expression& sort)
+{
+  const core::identifier_string idstr = m_identifier_generator(str.append("_pp"));
+  return data::variable(idstr, sort);
 }
 
 function_symbol_vector lpsparunfold::determine_affected_constructors()
@@ -88,11 +95,10 @@ function_symbol_vector lpsparunfold::new_constructors(data::function_symbol_vect
   {
 
     std::string prefix = "c_";
-    core::identifier_string fresh_name = generate_fresh_constructor_and_mapping_name(prefix.append(func.name()));
-    const data::function_symbol f(fresh_name , fresh_basic_sort);
+    const data::function_symbol f = generate_fresh_function_symbol(prefix.append(func.name()) , fresh_basic_sort);
     elements_of_new_sorts.push_back(f);
     m_spec.data().add_constructor(f);
-    mCRL2log(debug) << "\t" << data::function_symbol(fresh_name , fresh_basic_sort) << std::endl;
+    mCRL2log(debug) << "\t" << f << std::endl;
   }
   mCRL2log(debug) << "- Created " <<  elements_of_new_sorts.size() << " fresh \" c_ \" constructor(s)" << std::endl;
   return elements_of_new_sorts;
@@ -100,10 +106,9 @@ function_symbol_vector lpsparunfold::new_constructors(data::function_symbol_vect
 
 data::function_symbol lpsparunfold::create_case_function(std::size_t k)
 {
-  data::function_symbol fs;
   std::string str = "C_";
   str.append(fresh_basic_sort.name()).append("_");
-  core::identifier_string idstr = generate_fresh_constructor_and_mapping_name(str);
+
   data::sort_expression_vector fsl;
   fsl.push_back(fresh_basic_sort);
   for (std::size_t i = 0; i < k; ++i)
@@ -111,7 +116,7 @@ data::function_symbol lpsparunfold::create_case_function(std::size_t k)
     fsl.push_back(m_unfold_process_parameter);
   }
 
-  fs = data::function_symbol(idstr , data::function_sort(fsl, m_unfold_process_parameter));
+  data::function_symbol fs = generate_fresh_function_symbol(str, data::function_sort(fsl, m_unfold_process_parameter));
 
   mCRL2log(debug) << "- Created C map: " << fs << std::endl;
 
@@ -120,12 +125,9 @@ data::function_symbol lpsparunfold::create_case_function(std::size_t k)
 
 data::function_symbol lpsparunfold::create_determine_function()
 {
-  data::function_symbol fs;
   std::string str = "Det_";
   str.append(std::string(fresh_basic_sort.name()).append("_"));
-  core::identifier_string idstr = generate_fresh_constructor_and_mapping_name(str);
-  data::sort_expression_list fsl;
-  fs = data::function_symbol(idstr , data::make_function_sort_(m_unfold_process_parameter , fresh_basic_sort));
+  data::function_symbol fs = generate_fresh_function_symbol(str, data::make_function_sort_(m_unfold_process_parameter , fresh_basic_sort));
   mCRL2log(debug) << "\t" <<  fs << std::endl;
 
   return fs;
@@ -146,8 +148,7 @@ data::function_symbol_vector lpsparunfold::create_projection_functions(function_
       const sort_expression_list& sel  = fs.domain();
       for (sort_expression_list::const_iterator j = sel.begin(); j != sel.end(); j++)
       {
-        core::identifier_string idstr = generate_fresh_constructor_and_mapping_name(str);
-        data::function_symbol map(idstr , data::make_function_sort_(m_unfold_process_parameter , *j));
+        data::function_symbol map = generate_fresh_function_symbol(str, data::make_function_sort_(m_unfold_process_parameter , *j));
         m_spec.data().add_mapping(map);
         sfs.push_back(map);
         processed.insert(*j);
@@ -330,11 +331,6 @@ void lpsparunfold::create_data_equations(
   }
 }
 
-core::identifier_string lpsparunfold::generate_fresh_process_parameter_name(std::string str)
-{
-  core::identifier_string idstr = m_identifier_generator(str.append("_pp"));
-  return idstr;
-}
 
 void lpsparunfold::unfold_summands(lps::stochastic_action_summand_vector& summands, const data::function_symbol& determine_function, const data::function_symbol_vector& projection_functions)
 {
@@ -440,8 +436,8 @@ lps::stochastic_linear_process lpsparunfold::update_linear_process(const functio
   /* Generate fresh process parameter for new Sort */
   data::variable_vector injected_process_parameters;
 
-  core::identifier_string idstr = generate_fresh_process_parameter_name(unfold_parameter_name);
-  injected_process_parameters.push_back(data::variable(idstr , fresh_basic_sort));
+  const data::variable param = generate_fresh_variable(unfold_parameter_name, fresh_basic_sort);
+  injected_process_parameters.push_back(param);
 
   mCRL2log(log::verbose) << "- Created process parameter " <<  data::pp(injected_process_parameters.back()) << " of type " <<  data::pp(fresh_basic_sort) << "" << std::endl;
 
@@ -454,9 +450,9 @@ lps::stochastic_linear_process lpsparunfold::update_linear_process(const functio
       const sort_expression_list dom = function_sort(j -> sort()).domain();
       for (sort_expression_list::const_iterator k = dom.begin(); k != dom.end(); ++k)
       {
-        core::identifier_string idstr = generate_fresh_process_parameter_name(unfold_parameter_name);
-        injected_process_parameters.push_back(data::variable(idstr ,  *k));
-        mCRL2log(log::verbose) << "- Injecting process parameter: " <<  idstr << "::" <<  *k << std::endl;
+        const data::variable param = generate_fresh_variable(unfold_parameter_name, *k);
+        injected_process_parameters.push_back(param);
+        mCRL2log(log::verbose) << "- Injecting process parameter: " <<  param << "::" <<  *k << std::endl;
       }
     }
     else if (is_basic_sort(j -> sort()) || is_structured_sort(j->sort()) || is_container_sort(j -> sort()))
@@ -755,6 +751,10 @@ void lpsparunfold::generate_case_functions(function_symbol_vector elements_of_ne
 
 void lpsparunfold::algorithm(std::size_t parameter_at_index)
 {
+  // Can only be run once as local data structures are not cleared
+  assert(!m_run_before);
+  m_run_before = true;
+
   m_unfold_process_parameter = sort_at_process_parameter_index(parameter_at_index);
 
   /* Var Dec */
