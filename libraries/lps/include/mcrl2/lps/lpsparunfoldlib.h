@@ -63,6 +63,11 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
     void algorithm(std::size_t parameter_at_index);
 
   private:
+
+    /// set to true when the algorithm has been run once; as the algorithm should
+    /// run only once...
+    bool m_run_before;
+
     /// set of identifiers to use during fresh variable generation
     mcrl2::data::set_identifier_generator m_identifier_generator;
 
@@ -105,7 +110,16 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
       * \post   A fresh name for a constructor or mapping is generated.
       * \return A fresh name for a constructor or mapping.
     **/
-    mcrl2::core::identifier_string generate_fresh_constructor_and_mapping_name(std::string str);
+    mcrl2::data::function_symbol generate_fresh_function_symbol(std::string str, const data::sort_expression& sort);
+
+    /** \brief  Generates variable of type sort based on a given string str.
+      * \param str a string value. The value is used to generate a fresh
+      *         variable name.
+      * \param sort The sort of the variable to generate.
+      * \post   A fresh variable is generated, which has an unique name.
+      * \return A fresh variable.
+    **/
+    mcrl2::data::variable generate_fresh_variable(std::string str, const data::sort_expression& sort);
 
     /** \brief  Creates the case function.
       * \param  k a integer value. The value represents the number of
@@ -154,16 +168,6 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
       * \return The constructors that are created for the fresh basic sort
     **/
     mcrl2::data::function_symbol_vector new_constructors(mcrl2::data::function_symbol_vector k);
-
-    /** \brief  Generates a process parameter name given an string.
-      * \param str a string value. The value is used to generate a fresh
-      *         process parameter name.
-      * \param process_parameter_names The context to use for generating fresh names.
-      * \post   A fresh process parameter name is generated, which has an unique name
-      *         with respect to the set of process parameters (process_parameter_names).
-      * \return A fresh process parameter name.
-    **/
-    mcrl2::core::identifier_string generate_fresh_process_parameter_name(std::string str);
 
     /** \brief  Get the sort of the process parameter at given index
       * \param  parameter_at_index The index of the parameter for which the sort must be obtained.
