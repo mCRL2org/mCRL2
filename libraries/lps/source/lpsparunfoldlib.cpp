@@ -13,6 +13,7 @@
 *        complex data types by simpler ones.
 */
 
+#include <iterator>
 #include "mcrl2/lps/lpsparunfoldlib.h"
 #include "mcrl2/lps/replace.h"
 
@@ -418,68 +419,71 @@ lpsparunfold::case_func_vector lpsparunfold::parameter_case_function(const std::
 lps::stochastic_linear_process lpsparunfold::update_linear_process(const function_symbol& case_function , function_symbol_vector affected_constructors, const function_symbol& determine_function, std::size_t parameter_at_index, const function_symbol_vector& projection_functions)
 {
   /* Get process parameters from lps */
-  data::variable_list lps_proc_pars =  m_spec.process().process_parameters();
+  const data::variable_list& lps_proc_pars =  m_spec.process().process_parameters();
+
+  /* Iterator pointing to the parameter that needs to be unfolded */
+  data::variable_list::const_iterator unfold_parameter_it = lps_proc_pars.begin();
+  std::advance(unfold_parameter_it, parameter_at_index);
 
   mCRL2log(log::verbose) << "Updating LPS..." << std::endl;
   /* Create new process parameters */
   data::variable_vector new_process_parameters;
 
+  /* First copy the initial part of the parameters */
+  new_process_parameters.insert(new_process_parameters.end(),
+                                lps_proc_pars.begin(),
+                                unfold_parameter_it);
 
-  for (data::variable_list::iterator i = lps_proc_pars.begin();
-       i != lps_proc_pars.end();
-       ++i)
-  {
-    if (static_cast<std::size_t>(std::distance(lps_proc_pars.begin(), i)) == parameter_at_index)
-    {
-      mCRL2log(log::verbose) << "Unfolding parameter " << i->name() << " at index " << std::distance(lps_proc_pars.begin(), i) << "..." << std::endl;
-      data::variable_vector process_parameters_injection;
+  /* Expand unfold_parameter */
+  mCRL2log(log::verbose) << "Unfolding parameter " << unfold_parameter_it->name() << " at index " << parameter_at_index << "..." << std::endl;
 
-      /* Generate fresh process parameter for new Sort */
-      core::identifier_string idstr = generate_fresh_process_parameter_name(unfold_parameter_name);
-      process_parameters_injection.push_back(data::variable(idstr , fresh_basic_sort));
+  /* Generate fresh process parameter for new Sort */
+  data::variable_vector injected_process_parameters;
 
-      mCRL2log(log::verbose) << "- Created process parameter " <<  data::pp(process_parameters_injection.back()) << " of type " <<  data::pp(fresh_basic_sort) << "" << std::endl;
+  core::identifier_string idstr = generate_fresh_process_parameter_name(unfold_parameter_name);
+  injected_process_parameters.push_back(data::variable(idstr , fresh_basic_sort));
 
-      for (data::function_symbol_vector::iterator j = affected_constructors.begin()
+  mCRL2log(log::verbose) << "- Created process parameter " <<  data::pp(injected_process_parameters.back()) << " of type " <<  data::pp(fresh_basic_sort) << "" << std::endl;
+
+  for (data::function_symbol_vector::iterator j = affected_constructors.begin()
            ; j != affected_constructors.end()
            ; ++j)
+  {
+    if (is_function_sort(j -> sort()))
+    {
+      const sort_expression_list dom = function_sort(j -> sort()).domain();
+      for (sort_expression_list::const_iterator k = dom.begin(); k != dom.end(); ++k)
       {
-        if (is_function_sort(j -> sort()))
-        {
-          sort_expression_list dom = function_sort(j -> sort()).domain();
-          for (sort_expression_list::iterator k = dom.begin(); k != dom.end(); ++k)
-          {
-            core::identifier_string idstr = generate_fresh_process_parameter_name(unfold_parameter_name);
-            process_parameters_injection.push_back(data::variable(idstr ,  *k));
-            mCRL2log(log::verbose) << "- Injecting process parameter: " <<  idstr << "::" <<  *k << std::endl;
-          }
-        }
-        else if (is_basic_sort(j -> sort()))
-        {
-          mCRL2log(debug) << "- No processed parameter are injected for basic sort: " <<  *j << std::endl;
-        }
-        else if (is_structured_sort(j -> sort()) || is_container_sort(j->sort()))
-        {
-          /* skip */
-        }
-        else
-        {
-          throw mcrl2::runtime_error("Parameter " + pp(*j) + " is not processed");
-        }
+        core::identifier_string idstr = generate_fresh_process_parameter_name(unfold_parameter_name);
+        injected_process_parameters.push_back(data::variable(idstr ,  *k));
+        mCRL2log(log::verbose) << "- Injecting process parameter: " <<  idstr << "::" <<  *k << std::endl;
       }
-      new_process_parameters.insert(new_process_parameters.end(), process_parameters_injection.begin(), process_parameters_injection.end());
-
-      /* store mapping: process parameter -> process parameter injection:
-         Required for process parameter replacement in summands
-      */
-      proc_par_to_proc_par_inj[*i] = process_parameters_injection;
-
+    }
+    else if (is_basic_sort(j -> sort()) || is_structured_sort(j->sort()) || is_container_sort(j -> sort()))
+    {
+      mCRL2log(debug) << "- No process parameters are injected for constant: " <<  *j << std::endl;
     }
     else
     {
-      new_process_parameters.push_back(*i);
+      throw mcrl2::runtime_error("Parameter " + pp(*j) + " has an unsupported type " + pp(j->sort()));
     }
   }
+
+  /* store mapping: process parameter -> process parameter injection:
+     Required for process parameter replacement in summands
+  */
+  proc_par_to_proc_par_inj[*unfold_parameter_it] = injected_process_parameters;
+  new_process_parameters.insert(new_process_parameters.end(),
+                                injected_process_parameters.begin(),
+                                injected_process_parameters.end());
+
+
+  ++unfold_parameter_it;
+  /* Copy the remainder of the parameters */
+  new_process_parameters.insert(new_process_parameters.end(),
+                              unfold_parameter_it,
+                              lps_proc_pars.end());
+
   mCRL2log(debug) << "- New LPS process parameters: " <<  data::pp(new_process_parameters) << std::endl;
 
 
