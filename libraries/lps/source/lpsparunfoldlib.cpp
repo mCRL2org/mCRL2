@@ -44,12 +44,18 @@ lpsparunfold::lpsparunfold(lps::stochastic_specification& spec,
   m_identifier_generator.add_identifiers(data::find_identifiers(spec.data()));
 }
 
-data::basic_sort lpsparunfold::generate_fresh_basic_sort(const std::string& str)
+data::basic_sort lpsparunfold::generate_fresh_basic_sort(const data::sort_expression& sort)
 {
   //Generate a fresh Basic Sort
-  const core::identifier_string nstr = m_identifier_generator(str);
-  mCRL2log(log::verbose) << "Generated fresh sort \"" <<  std::string(nstr) << "\" for \"" <<  str << "\"" << std::endl;
-  return basic_sort(nstr);
+  std::string hint("S");
+  if(data::is_basic_sort(sort))
+  {
+    hint = data::basic_sort(sort).name();
+  }
+
+  const data::basic_sort result(m_identifier_generator(hint));
+  mCRL2log(log::verbose) << "Generated fresh sort \"" <<  data::pp(result) << "\" for \"" <<  data::pp(sort) << "\"" << std::endl;
+  return result;
 }
 
 data::function_symbol lpsparunfold::generate_fresh_function_symbol(std::string str, const sort_expression& sort)
@@ -71,10 +77,10 @@ data::variable lpsparunfold::generate_fresh_variable(std::string str, const sort
 
 void lpsparunfold::determine_affected_constructors()
 {
-  m_affected_constructors = m_spec.data().constructors(m_unfold_process_parameter);
+  m_affected_constructors = m_spec.data().constructors(m_unfold_parameter.sort());
 
   mCRL2log(debug) << "k:\t";
-  mCRL2log(log::verbose) << "" <<  unfold_parameter_name  << " has " <<  m_affected_constructors.size() << " constructor function(s)" << std::endl;
+  mCRL2log(log::verbose) << "" <<  m_unfold_parameter.name()  << " has " <<  m_affected_constructors.size() << " constructor function(s)" << std::endl;
 
   for (const function_symbol& f: m_affected_constructors)
   {
@@ -93,7 +99,7 @@ function_symbol_vector lpsparunfold::new_constructors()
   {
 
     std::string prefix = "c_";
-    const data::function_symbol f = generate_fresh_function_symbol(prefix.append(func.name()) , fresh_basic_sort);
+    const data::function_symbol f = generate_fresh_function_symbol(prefix.append(func.name()) , m_fresh_basic_sort);
     elements_of_new_sorts.push_back(f);
     m_spec.data().add_constructor(f);
     mCRL2log(debug) << "\t" << f << std::endl;
@@ -102,19 +108,16 @@ function_symbol_vector lpsparunfold::new_constructors()
   return elements_of_new_sorts;
 }
 
-data::function_symbol lpsparunfold::create_case_function(std::size_t k)
+data::function_symbol lpsparunfold::create_case_function(const sort_expression& sort)
 {
   std::string str = "C_";
-  str.append(fresh_basic_sort.name()).append("_");
+  str.append(m_fresh_basic_sort.name()).append("_");
 
-  data::sort_expression_vector fsl;
-  fsl.push_back(fresh_basic_sort);
-  for (std::size_t i = 0; i < k; ++i)
-  {
-    fsl.push_back(m_unfold_process_parameter);
-  }
+  // all except first argument are the sort of the unfolded type.
+  data::sort_expression_vector fsl(m_affected_constructors.size() + 1, sort);
+  fsl[0] = m_fresh_basic_sort;
 
-  data::function_symbol fs = generate_fresh_function_symbol(str, data::function_sort(fsl, m_unfold_process_parameter));
+  data::function_symbol fs = generate_fresh_function_symbol(str, data::function_sort(fsl, sort));
 
   mCRL2log(debug) << "- Created C map: " << fs << std::endl;
 
@@ -124,8 +127,9 @@ data::function_symbol lpsparunfold::create_case_function(std::size_t k)
 data::function_symbol lpsparunfold::create_determine_function()
 {
   std::string str = "Det_";
-  str.append(std::string(fresh_basic_sort.name()).append("_"));
-  data::function_symbol fs = generate_fresh_function_symbol(str, data::make_function_sort_(m_unfold_process_parameter , fresh_basic_sort));
+  str.append(std::string(m_fresh_basic_sort.name()).append("_"));
+  data::function_symbol fs = generate_fresh_function_symbol(str, data::make_function_sort_(m_unfold_parameter.sort(),
+                                     m_fresh_basic_sort));
   mCRL2log(debug) << "\t" <<  fs << std::endl;
 
   return fs;
@@ -135,7 +139,7 @@ data::function_symbol_vector lpsparunfold::create_projection_functions()
 {
   data::function_symbol_vector sfs;
   std::string str = "pi_";
-  str.append(std::string(fresh_basic_sort.name()).append("_"));
+  str.append(std::string(m_fresh_basic_sort.name()).append("_"));
 
   std::set<data::sort_expression> processed;
   for (const function_symbol& f: m_affected_constructors)
@@ -146,7 +150,7 @@ data::function_symbol_vector lpsparunfold::create_projection_functions()
       const sort_expression_list& sel  = fs.domain();
       for (sort_expression_list::const_iterator j = sel.begin(); j != sel.end(); j++)
       {
-        data::function_symbol map = generate_fresh_function_symbol(str, data::make_function_sort_(m_unfold_process_parameter , *j));
+        data::function_symbol map = generate_fresh_function_symbol(str, data::make_function_sort_(m_unfold_parameter.sort(), *j));
         m_spec.data().add_mapping(map);
         sfs.push_back(map);
         processed.insert(*j);
@@ -214,7 +218,7 @@ void lpsparunfold::create_data_equations(
 
   /* Creating variable for detector function */
   core::identifier_string istr = m_identifier_generator(cstr);
-  variable v = variable(istr, fresh_basic_sort);
+  variable v = variable(istr, m_fresh_basic_sort);
   vars.push_back(v);
 
   /* Create Equations */
@@ -433,10 +437,10 @@ lps::stochastic_linear_process lpsparunfold::update_linear_process(const functio
   /* Generate fresh process parameter for new Sort */
   data::variable_vector injected_process_parameters;
 
-  const data::variable param = generate_fresh_variable(unfold_parameter_name, fresh_basic_sort);
+  const data::variable param = generate_fresh_variable(m_fresh_basic_sort.name(), m_fresh_basic_sort);
   injected_process_parameters.push_back(param);
 
-  mCRL2log(log::verbose) << "- Created process parameter " <<  data::pp(injected_process_parameters.back()) << " of type " <<  data::pp(fresh_basic_sort) << "" << std::endl;
+  mCRL2log(log::verbose) << "- Created process parameter " <<  data::pp(injected_process_parameters.back()) << " of type " <<  data::pp(m_fresh_basic_sort) << "" << std::endl;
 
   for (data::function_symbol_vector::iterator j = m_affected_constructors.begin()
            ; j != m_affected_constructors.end()
@@ -447,7 +451,7 @@ lps::stochastic_linear_process lpsparunfold::update_linear_process(const functio
       const sort_expression_list dom = function_sort(j -> sort()).domain();
       for (sort_expression_list::const_iterator k = dom.begin(); k != dom.end(); ++k)
       {
-        const data::variable param = generate_fresh_variable(unfold_parameter_name, *k);
+        const data::variable param = generate_fresh_variable(m_fresh_basic_sort.name(), *k);
         injected_process_parameters.push_back(param);
         mCRL2log(log::verbose) << "- Injecting process parameter: " <<  param << "::" <<  *k << std::endl;
       }
@@ -612,38 +616,18 @@ data::data_expression_vector lpsparunfold::unfold_constructor(const data_express
   return result;
 }
 
-data::sort_expression lpsparunfold::sort_at_process_parameter_index(std::size_t parameter_at_index)
+data::variable lpsparunfold::process_parameter_at(const std::size_t index)
 {
-  data::variable_list lps_proc_pars_list =  m_spec.process().process_parameters();
-  data::variable_vector lps_proc_pars = data::variable_vector(lps_proc_pars_list.begin(), lps_proc_pars_list.end());
-  mCRL2log(debug) << "- Number of parameters in LPS: " <<  lps_proc_pars.size() << "" << std::endl;
-  mCRL2log(log::verbose) << "Unfolding process parameter at index: " <<  parameter_at_index << "" << std::endl;
-  if (lps_proc_pars.size() <= parameter_at_index)
+  mCRL2log(debug) << "- Number of parameters in LPS: " <<   m_spec.process().process_parameters().size() << "" << std::endl;
+  mCRL2log(log::verbose) << "Unfolding process parameter at index: " <<  index << "" << std::endl;
+  if ( m_spec.process().process_parameters().size() <= index)
   {
-    mCRL2log(log::error) << "Given index out of bounds. Index value needs to be in the range [0," << lps_proc_pars.size() <<")." << std::endl;
-    abort();
+    throw mcrl2::runtime_error("Given index out of bounds. Index value needs to be in the range [0," + std::to_string(m_spec.process().process_parameters().size()) + ").");
   }
 
-  if (is_basic_sort(lps_proc_pars[parameter_at_index].sort()))
-  {
-    unfold_parameter_name = basic_sort(lps_proc_pars[parameter_at_index].sort()).name();
-  }
-
-  if (is_structured_sort(lps_proc_pars[parameter_at_index].sort()))
-  {
-    core::identifier_string nstr;
-    nstr = m_identifier_generator("S");
-    unfold_parameter_name = nstr;
-  }
-
-  if (is_container_sort(lps_proc_pars[parameter_at_index].sort()))
-  {
-    core::identifier_string nstr;
-    nstr = m_identifier_generator("S");
-    unfold_parameter_name = nstr;
-  }
-
-  return lps_proc_pars[parameter_at_index].sort();
+  data::variable_list::const_iterator parameter_it = m_spec.process().process_parameters().begin();
+  std::advance(parameter_it, index);
+  return *parameter_it;
 }
 
 data::data_equation lpsparunfold::create_distribution_law_over_case(
@@ -752,7 +736,7 @@ void lpsparunfold::algorithm(std::size_t parameter_at_index)
   assert(!m_run_before);
   m_run_before = true;
 
-  m_unfold_process_parameter = sort_at_process_parameter_index(parameter_at_index);
+  m_unfold_parameter = process_parameter_at(parameter_at_index);
 
   /* Var Dec */
   lps::stochastic_linear_process new_lps;
@@ -764,18 +748,18 @@ void lpsparunfold::algorithm(std::size_t parameter_at_index)
   // data_equation_vector data_equations;
 
   /* Updating cache*/
-  if( m_cache->find(m_unfold_process_parameter) == m_cache->end() )
+  if( m_cache->find(m_unfold_parameter.sort()) == m_cache->end() )
   {
     /* Not using cache */
 
     /*   Alg */
     /*     1 */
-    fresh_basic_sort = generate_fresh_basic_sort(unfold_parameter_name);
+    m_fresh_basic_sort = generate_fresh_basic_sort(m_unfold_parameter.sort());
     /*     2 */
     determine_affected_constructors();
     if (m_affected_constructors.empty())
     {
-      mCRL2log(log::verbose) << "The selected process parameter " <<  unfold_parameter_name << " has no constructors." << std::endl;
+      mCRL2log(log::verbose) << "The selected process parameter " <<  m_unfold_parameter.name() << " has no constructors." << std::endl;
       mCRL2log(log::verbose) << "No need to unfold." << std::endl;
     }
     else
@@ -783,7 +767,7 @@ void lpsparunfold::algorithm(std::size_t parameter_at_index)
       /*     4 */
       elements_of_new_sorts = new_constructors();
       /*     6 */
-      case_function = create_case_function(m_affected_constructors.size());
+      case_function = create_case_function(m_unfold_parameter.sort());
       /*     7 */
       determine_function = create_determine_function();
       /*  8-12 */
@@ -792,7 +776,7 @@ void lpsparunfold::algorithm(std::size_t parameter_at_index)
       create_data_equations(projection_functions, case_function, elements_of_new_sorts, determine_function);
 
       //Reconstruct data specification, where already quite a number of mappings, constructors and functions have been added.
-      m_spec.data().add_sort(fresh_basic_sort);
+      m_spec.data().add_sort(m_fresh_basic_sort);
       m_spec.data().add_mapping(determine_function);
       m_spec.data().add_mapping(case_function);
 
@@ -806,23 +790,24 @@ void lpsparunfold::algorithm(std::size_t parameter_at_index)
       e.cached_k = m_affected_constructors;
       e.cached_determine_function = determine_function;
       e.cached_projection_functions = projection_functions;
-      e.cached_fresh_basic_sort = fresh_basic_sort;
+      e.cached_fresh_basic_sort = m_fresh_basic_sort;
 
-      m_cache->insert( std::pair<data::sort_expression , unfold_cache_element>( m_unfold_process_parameter , e ));
+      m_cache->insert( std::pair<data::sort_expression , unfold_cache_element>(
+          m_unfold_parameter.sort(), e ));
     }
   }
   else
   {
     /* Using cache */
-    mCRL2log(log::verbose) << "Update using cache for sort: \"" <<  data::pp(m_unfold_process_parameter)  << "\"..." << std::endl;
+    mCRL2log(log::verbose) << "Update using cache for sort: \"" <<  data::pp(m_unfold_parameter.sort())  << "\"..." << std::endl;
 
-    std::map< data::sort_expression , unfold_cache_element >::iterator ce = m_cache->find(m_unfold_process_parameter);
+    std::map< data::sort_expression, unfold_cache_element >::iterator ce = m_cache->find(m_unfold_parameter.sort());
 
-    fresh_basic_sort = ce->second.cached_fresh_basic_sort;
+    m_fresh_basic_sort = ce->second.cached_fresh_basic_sort;
     m_affected_constructors = ce->second.cached_k;
     if (m_affected_constructors.empty())
     {
-      mCRL2log(log::verbose) << "The selected process parameter " <<  unfold_parameter_name << " has no constructors." << std::endl;
+      mCRL2log(log::verbose) << "The selected process parameter " <<  m_unfold_parameter.name() << " has no constructors." << std::endl;
       mCRL2log(log::verbose) << "No need to unfold." << std::endl;
     }
 
