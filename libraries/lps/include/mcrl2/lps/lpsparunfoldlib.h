@@ -73,19 +73,16 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
 
     std::map< mcrl2::data::sort_expression , unfold_cache_element >* m_cache;
 
-    /// \brief The sort of the process parameter that needs to be unfold.
-    mcrl2::data::sort_expression m_unfold_process_parameter;
+    /// \brief The process parameter that needs to be unfold.
+    mcrl2::data::variable m_unfold_parameter;
 
     data::function_symbol_vector m_affected_constructors;
-
-    /// \brief The name of the process parameter that needs to be unfold.
-    std::string unfold_parameter_name;
 
     /// a generator for default data expressions of a give sort;
     mcrl2::data::representative_generator m_representative_generator;
 
     /// \brief The fresh sort of the unfolded process parameter used the case function.
-    mcrl2::data::basic_sort fresh_basic_sort;
+    mcrl2::data::basic_sort m_fresh_basic_sort;
 
     /// \brief Mapping of the unfold process parameter to a vector process parameters.
     std::map<mcrl2::data::variable, mcrl2::data::variable_vector > proc_par_to_proc_par_inj;
@@ -98,13 +95,15 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
     data::data_expression apply_case_function(const data::data_expression& expr, const case_func_vector& case_funcs);
     case_func_vector parameter_case_function(const std::map<data::variable, data::variable_vector >& proc_par_to_proc_par_inj, const data::function_symbol& case_function);
 
+    std::string sort_expression_to_basic_sort_hint(const data::sort_expression& sort);
+
     /** \brief  Generates a fresh basic sort given an string.
       * \param  str a string value. The value is used to generate a fresh
       *         basic sort.
       * \post   A fresh basic sort is generated.
       * \return A fresh basic sort.
     **/
-    mcrl2::data::basic_sort generate_fresh_basic_sort(const std::string& str);
+    mcrl2::data::basic_sort generate_fresh_basic_sort(const data::sort_expression& sort);
 
     /** \brief  Generates a fresh name for a constructor or mapping.
       * \param  str a string value. The value is used to generate a fresh
@@ -123,13 +122,13 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
     **/
     mcrl2::data::variable generate_fresh_variable(std::string str, const data::sort_expression& sort);
 
-    /** \brief  Creates the case function.
-      * \param  k a integer value. The value represents the number of
-      *         constructors of the unfolded process parameter.
+    /** \brief  Creates the case function with number of arguments determined by
+     *          the number of affected constructors.
+     *  \param  sort The sort of the arguments and return sort of the case function
       * \return A function that returns the corresponding constructor given the
       *         case selector and constructors.
     **/
-    mcrl2::data::function_symbol create_case_function(std::size_t k);
+    mcrl2::data::function_symbol create_case_function(const data::sort_expression& sort);
 
     /** \brief  Creates the determine function.
       * \return A function that maps a constructor to the fresh basic sort
@@ -169,11 +168,11 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
     **/
     mcrl2::data::function_symbol_vector new_constructors();
 
-    /** \brief  Get the sort of the process parameter at given index
-      * \param  parameter_at_index The index of the parameter for which the sort must be obtained.
-      * \return the sort of the process parameter at given index.
+    /** \brief  Get the process parameter at given index
+      * \param  index The index of the parameter which must be obtained.
+      * \return the process parameter at given index.
     **/
-    mcrl2::data::sort_expression sort_at_process_parameter_index(std::size_t parameter_at_index);
+    mcrl2::data::variable process_parameter_at(const std::size_t index);
 
     /** \brief  substitute function for replacing process parameters with unfolded process parameters functions.
       * \return substitute function for replacing process parameters with unfolded process parameters functions.
