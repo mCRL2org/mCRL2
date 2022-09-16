@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>241</width>
-    <height>506</height>
+    <height>595</height>
    </rect>
   </property>
   <property name="font">
@@ -26,10 +26,38 @@
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QLabel" name="lblAttraction">
-      <property name="text">
-       <string>Attraction</string>
+     <widget class="QFrame" name="frame">
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
       </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <property name="topMargin">
+        <number>1</number>
+       </property>
+       <property name="bottomMargin">
+        <number>1</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="lblAttraction">
+         <property name="text">
+          <string>Attraction</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="dispAttraction">
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </item>
     <item>
@@ -46,10 +74,38 @@
      </widget>
     </item>
     <item>
-     <widget class="QLabel" name="lblRepulsion">
-      <property name="text">
-       <string>Repulsion</string>
+     <widget class="QFrame" name="frame_2">
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
       </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <property name="topMargin">
+        <number>1</number>
+       </property>
+       <property name="bottomMargin">
+        <number>1</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="lblRepulsion">
+         <property name="text">
+          <string>Repulsion</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="dispRepulsion">
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </item>
     <item>
@@ -60,10 +116,80 @@
      </widget>
     </item>
     <item>
-     <widget class="QLabel" name="lblNatLength">
-      <property name="text">
-       <string>Natural transition length</string>
+     <widget class="QFrame" name="frame_4">
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
       </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <property name="topMargin">
+        <number>1</number>
+       </property>
+       <property name="bottomMargin">
+        <number>1</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="lblHandleWeight">
+         <property name="text">
+          <string>Handle weight</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="dispHandleWeight">
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QSlider" name="sldHandleWeight">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QFrame" name="frame_3">
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <property name="topMargin">
+        <number>1</number>
+       </property>
+       <property name="bottomMargin">
+        <number>1</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="lblNatLength">
+         <property name="text">
+          <string>Natural transition length</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="dispNatLength">
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </item>
     <item>
@@ -80,24 +206,41 @@
      </widget>
     </item>
     <item>
-     <widget class="QLabel" name="lblHandleWeight">
-      <property name="text">
-       <string>Handle weight</string>
+     <widget class="QFrame" name="frame_5">
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
       </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QSlider" name="sldHandleWeight">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
       </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLabel" name="lblSpeed">
-      <property name="text">
-       <string>Speed</string>
-      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_5">
+       <property name="topMargin">
+        <number>1</number>
+       </property>
+       <property name="rightMargin">
+        <number>9</number>
+       </property>
+       <property name="bottomMargin">
+        <number>1</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="lblSpeed">
+         <property name="text">
+          <string>Speed</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="dispSpeed">
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </item>
     <item>
@@ -108,10 +251,38 @@
      </widget>
     </item>
     <item>
-     <widget class="QLabel" name="lblAccuracy">
-      <property name="text">
-       <string>Accuracy</string>
+     <widget class="QFrame" name="frame_6">
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
       </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_6">
+       <property name="topMargin">
+        <number>1</number>
+       </property>
+       <property name="bottomMargin">
+        <number>1</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="lblAccuracy">
+         <property name="text">
+          <string>Accuracy</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="dispAccuracy">
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </item>
     <item>
@@ -122,6 +293,41 @@
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QFrame" name="frame_7">
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_7">
+       <property name="topMargin">
+        <number>1</number>
+       </property>
+       <property name="bottomMargin">
+        <number>1</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="lblEnableTree">
+         <property name="text">
+          <string>Enable tree acceleration:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="chkEnableTree">
+         <property name="layoutDirection">
+          <enum>Qt::RightToLeft</enum>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </item>
     <item>
@@ -143,12 +349,12 @@
       </item>
       <item>
        <property name="text">
-        <string>Linear spring forces</string>
+        <string>Linear spring forces (experimental)</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>Electrical spring model</string>
+        <string>Electrical spring model (experimental)</string>
        </property>
       </item>
      </widget>
@@ -169,12 +375,38 @@
       </item>
       <item>
        <property name="text">
-        <string>Electrical Spring model</string>
+        <string>Electrical Spring model (experimental)</string>
        </property>
       </item>
       <item>
        <property name="text">
         <string>None</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="lblForceApplication">
+      <property name="text">
+       <string>Force application (experimental)</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QComboBox" name="cmbForceApplication">
+      <item>
+       <property name="text">
+        <string>LTSGraph</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Force directed (experimental)</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Force accumulation (experimental)</string>
        </property>
       </item>
      </widget>
@@ -279,7 +511,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>120</x>
-     <y>386</y>
+     <y>431</y>
     </hint>
     <hint type="destinationlabel">
      <x>120</x>
@@ -295,7 +527,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>120</x>
-     <y>483</y>
+     <y>585</y>
     </hint>
     <hint type="destinationlabel">
      <x>120</x>
@@ -311,7 +543,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>184</x>
-     <y>455</y>
+     <y>493</y>
     </hint>
     <hint type="destinationlabel">
      <x>236</x>
@@ -327,7 +559,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>179</x>
-     <y>381</y>
+     <y>431</y>
     </hint>
     <hint type="destinationlabel">
      <x>235</x>
@@ -351,6 +583,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>chkEnableTree</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>DockWidgetLayout</receiver>
+   <slot>onTreeToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>217</x>
+     <y>357</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>236</x>
+     <y>399</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onAttractionChanged(int)</slot>
@@ -363,5 +611,6 @@
   <slot>onRepulsionCalculationChanged(int)</slot>
   <slot>onAttractionCalculationChanged(int)</slot>
   <slot>onAccuracyChanged(int)</slot>
+  <slot>onTreeToggled(bool)</slot>
  </slots>
 </ui>
