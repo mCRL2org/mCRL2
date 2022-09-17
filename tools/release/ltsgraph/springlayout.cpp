@@ -63,6 +63,7 @@ SpringLayoutUi* SpringLayout::ui(QWidget* parent)
 
 void SpringLayout::setAttractionCalculation(AttractionCalculation c)
 {
+
   switch (c)
   {
     case ltsgraph:
@@ -74,18 +75,17 @@ void SpringLayout::setAttractionCalculation(AttractionCalculation c)
     case electricalsprings:
       m_attractionCalculation = &SpringLayout::forceSpringElectricalModel;
       break;
+    default:
+      m_attractionCalculation = &SpringLayout::forceLTSGraph;
+      mCRL2log(mcrl2::log::warning) << "Attempting to set unknown attraction calculation. Default set (LTSGraph)." << std::endl;
+      c = ltsgraph;
   }
+  m_option_attractionCalculation = c;
 }
 
 SpringLayout::AttractionCalculation SpringLayout::attractionCalculation()
 {
-  if (m_attractionCalculation == &SpringLayout::forceLTSGraph) {
-    return ltsgraph;
-  }
-  if (m_attractionCalculation == &SpringLayout::forceSpringElectricalModel){
-    return electricalsprings;
-  }
-  return linearsprings;
+  return m_option_attractionCalculation;
 }
 
 void SpringLayout::setRepulsionCalculation(RepulsionCalculation c)
@@ -101,23 +101,43 @@ void SpringLayout::setRepulsionCalculation(RepulsionCalculation c)
     case no_repulsion:
       m_repulsionCalculation = &SpringLayout::noRepulsionForce;
       break;
+    default:
+      c = ltsgraph_repulsion;
+      m_repulsionCalculation = &SpringLayout::repulsionForceLTSGraph;
+      mCRL2log(mcrl2::log::warning) << "Attemption to set unknown repulsion calculation. Default set (LTSGraph)." << std::endl;
   }
+  m_option_repulsionCalculation = c;
 }
 
 SpringLayout::RepulsionCalculation SpringLayout::repulsionCalculation()
 {
-  if (m_repulsionCalculation == &SpringLayout::repulsionForceLTSGraph) {
-    return ltsgraph_repulsion;
-  }
-  if (m_repulsionCalculation == &SpringLayout::repulsionForceElectricalModel){
-    return electricalsprings_repulsion;
-  }
+  return m_option_repulsionCalculation;
+}
 
-  if (m_repulsionCalculation == &SpringLayout::noRepulsionForce){
-    return no_repulsion;
-  }
 
-  return ltsgraph_repulsion;
+void SpringLayout::setForceApplication(SpringLayout::ForceApplication c){
+  switch (c){
+    case ltsgraph_application:
+      m_forceApplication = &SpringLayout::applyForceLTSGraph;
+      break;
+    case force_directed_application:
+      m_forceApplication = &SpringLayout::applyForceDirected;
+      m_anneal_speed = 1.0f;
+      break;
+    case force_directed_annealing_application:
+      m_forceApplication = &SpringLayout::applyForceDirected;
+      m_anneal_speed = 100.0f;
+      break;
+    default:
+      m_forceApplication = &SpringLayout::applyForceLTSGraph;
+      mCRL2log(mcrl2::log::warning) << "Attempting to set unknown force application. Default set (LTSGraph)." << std::endl;
+      c = ltsgraph_application;
+  }
+  m_option_forceApplication = c;
+}
+
+SpringLayout::ForceApplication SpringLayout::forceApplication(){
+  return m_option_forceApplication;
 }
 
 QVector3D SpringLayout::forceLTSGraph(const QVector3D& a, const QVector3D& b, float ideal)
@@ -186,16 +206,23 @@ QVector3D SpringLayout::approxRepulsionForce(const QVector3D& a, Octree& tree, f
   return force;
 }
 
-constexpr float consolidation_constant = 0.01f;
+constexpr float ltsgraph_application_constant = 0.01f;
 void SpringLayout::applyForceLTSGraph(QVector3D& pos, const QVector3D& force, float speed)
 {
-  pos += force * (speed * consolidation_constant);
+  pos += force * (speed * ltsgraph_application_constant);
 }
 
-const std::size_t max_slice = 100;
+constexpr float force_directed_constant = 2.0f;
+void SpringLayout::applyForceDirected(QVector3D& pos, const QVector3D& force, float speed){
+  pos += force.normalized() * (m_anneal_speed * speed * force_directed_constant);
+}
+
+const std::size_t max_slice = 50;
 /// @brief Takes average of at most @c max_slice values, or recursively computes average by splitting
 /// @param i Start index
 /// @param j End index (exclusive)
+/// This method avoids precision loss due to adding up too much before division
+///  Downside: more divisions. Upside: more accuracy.
 static QVector3D slicedAverage(Graph& graph, std::size_t i, std::size_t j){
   std::size_t n = j-i;
   if (n > max_slice){
@@ -214,6 +241,7 @@ static QVector3D slicedAverage(Graph& graph, std::size_t i, std::size_t j){
   }
 }
 
+int iterations = 0;
 void SpringLayout::apply()
 {
   bool sel = m_graph.hasExploration();
@@ -468,7 +496,7 @@ void SpringLayout::apply()
     if (m_graph.stable()) mCRL2log(mcrl2::log::verbose) << "Graph is now stable." << std::endl;
     m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
   }
-
+  
   // mCRL2log(mcrl2::log::debug) << "Max number of super nodes: " << m_max_num_nodes << " and average number of super nodes: " << ((double)m_total_num_nodes)/(nodeCount + 2*edgeCount) << std::endl;
   // mCRL2log(mcrl2::log::debug) << "Tree sizes: " << std::endl;
   // mCRL2log(mcrl2::log::debug) << "\t- nodes  : " << m_node_tree.size()  << std::endl;
@@ -477,6 +505,11 @@ void SpringLayout::apply()
   
   m_max_num_nodes = 0;
   m_total_num_nodes = 0;
+
+  if (m_option_forceApplication == force_directed_annealing_application && ++iterations > anneal_iterations) {
+    m_anneal_speed *= anneal_multiplier;
+    iterations = 0;
+  }
 }
 
 void SpringLayout::randomizeZ(float z)
@@ -538,6 +571,11 @@ void SpringLayout::setNaturalTransitionLength(int v) {
     m_ui->m_ui.dispNatLength->setText(QString::number(m_natLength, 'g', 3));
     m_ui->m_ui.dispRepulsion->setText(QString::number(m_repulsion, 'g', 3));
   }
+}
+
+void SpringLayout::rulesChanged(){
+   m_graph.setStable(false);
+   setForceApplication(m_option_forceApplication);
 }
 
 //
@@ -616,6 +654,8 @@ SpringLayoutUi::SpringLayoutUi(SpringLayout& layout, QWidget* parent)
   m_ui.cmbAttractionCalculation->setCurrentIndex(m_layout.attractionCalculation());
   m_ui.cmbRepulsionCalculation->setCurrentIndex(m_layout.repulsionCalculation());
   m_layout.setTreeEnabled(m_ui.chkEnableTree->isChecked());
+  m_ui.chkEnableTree->setChecked(false);
+  onTreeToggled(false);
 }
 
 SpringLayoutUi::~SpringLayoutUi()
@@ -722,6 +762,12 @@ void SpringLayoutUi::onRepulsionCalculationChanged(int value)
   layoutRulesChanged();
 }
 
+void SpringLayoutUi::onForceApplicationChanged(int value){
+  m_layout.setForceApplication(static_cast<SpringLayout::ForceApplication>(value));
+  mCRL2log(mcrl2::log::debug) << "Force application changed to: " << value << std::endl;
+  layoutRulesChanged();
+}
+
 void SpringLayoutUi::onStarted()
 {
   m_ui.btnStartStop->setText("Stop");
@@ -737,6 +783,9 @@ void SpringLayoutUi::onStopped()
 
 void SpringLayoutUi::onTreeToggled(bool b){
   m_layout.setTreeEnabled(b);
+  m_ui.sldAccuracy->setVisible(b);
+  m_ui.dispAccuracy->setVisible(b);
+  m_ui.lblAccuracy->setVisible(b);
 }
 
 void SpringLayoutUi::onStartStop()
