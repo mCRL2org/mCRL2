@@ -73,7 +73,7 @@ private:
   /// \brief Distance to the center.
   float m_zoom = 700.0f;
 
-  float m_viewdistance = 10000.0f;
+  float m_viewdistance = 100000.0f;
   float m_vert_fieldofview = 55.0f;
 
   /// The resulting matrices and viewports, are updated when calling update().
