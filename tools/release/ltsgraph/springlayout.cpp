@@ -122,11 +122,11 @@ void SpringLayout::setForceApplication(SpringLayout::ForceApplication c){
       break;
     case force_directed_application:
       m_forceApplication = &SpringLayout::applyForceDirected;
-      m_anneal_speed = 1.0f;
+      m_anneal_temperature = 1.0f;
       break;
     case force_directed_annealing_application:
       m_forceApplication = &SpringLayout::applyForceDirected;
-      m_anneal_speed = 100.0f;
+      m_anneal_temperature = anneal_start_temperature;
       break;
     default:
       m_forceApplication = &SpringLayout::applyForceLTSGraph;
@@ -214,7 +214,7 @@ void SpringLayout::applyForceLTSGraph(QVector3D& pos, const QVector3D& force, fl
 
 constexpr float force_directed_constant = 2.0f;
 void SpringLayout::applyForceDirected(QVector3D& pos, const QVector3D& force, float speed){
-  pos += force.normalized() * (m_anneal_speed * speed * force_directed_constant);
+  pos += force.normalized() * (m_anneal_temperature * speed * force_directed_constant);
 }
 
 const std::size_t max_slice = 50;
@@ -507,7 +507,7 @@ void SpringLayout::apply()
   m_total_num_nodes = 0;
 
   if (m_option_forceApplication == force_directed_annealing_application && ++iterations > anneal_iterations) {
-    m_anneal_speed *= anneal_multiplier;
+    m_anneal_temperature *= anneal_cooling_factor;
     iterations = 0;
   }
 }
@@ -683,7 +683,9 @@ QByteArray SpringLayoutUi::settings()
       quint32(m_ui.sldNatLength->value()) <<
       quint32(m_ui.sldAccuracy->value()) <<
       quint32(m_ui.cmbAttractionCalculation->currentIndex()) <<
-      quint32(m_ui.cmbRepulsionCalculation->currentIndex());
+      quint32(m_ui.cmbRepulsionCalculation->currentIndex()) <<
+      quint32(m_ui.cmbForceApplication->currentIndex()) <<
+      quint32(m_ui.chkEnableTree->isChecked());
   layoutRulesChanged();
   return result;
 }
@@ -696,8 +698,8 @@ void SpringLayoutUi::setSettings(QByteArray state)
 
   QDataStream in(&state, QIODevice::ReadOnly);
 
-  quint32 attraction, repulsion, speed, handleWeight, NatLength, accuracy, attractionCalculation, repulsionCalculation;
-  in >> attraction >> repulsion >> speed >> handleWeight >> NatLength >> accuracy >> attractionCalculation >> repulsionCalculation;
+  quint32 attraction, repulsion, speed, handleWeight, NatLength, accuracy, attractionCalculation, repulsionCalculation, forceCalculation, treeEnabled;
+  in >> attraction >> repulsion >> speed >> handleWeight >> NatLength >> accuracy >> attractionCalculation >> repulsionCalculation >> forceCalculation >> treeEnabled;
 
   if (in.status() == QDataStream::Ok)
   {
@@ -709,6 +711,8 @@ void SpringLayoutUi::setSettings(QByteArray state)
     m_ui.sldAccuracy->setValue(accuracy);
     m_ui.cmbAttractionCalculation->setCurrentIndex(attractionCalculation);
     m_ui.cmbRepulsionCalculation->setCurrentIndex(repulsionCalculation);
+    m_ui.cmbForceApplication->setCurrentIndex(forceCalculation);
+    m_ui.chkEnableTree->setChecked((bool)treeEnabled);
   }
   layoutRulesChanged();
 }
