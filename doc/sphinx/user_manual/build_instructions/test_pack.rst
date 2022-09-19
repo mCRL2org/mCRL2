@@ -5,7 +5,7 @@ Testing
 
 For tests can be run the python packages yaml and psutil need to be installed. 
 
-* This can be done on a mac and Linx using the commands:
+* This can be done on a mac and Linx using the commands::
 
    sudo python3 -m easy_install pyyaml
    sudo python3 -m easy_install psutil
