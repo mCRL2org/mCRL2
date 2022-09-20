@@ -77,6 +77,9 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
+      <property name="maximum">
+       <number>100</number>
+      </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
@@ -122,6 +125,9 @@
     </item>
     <item>
      <widget class="QSlider" name="sldRepulsion">
+      <property name="maximum">
+       <number>100</number>
+      </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
@@ -167,6 +173,9 @@
     </item>
     <item>
      <widget class="QSlider" name="sldHandleWeight">
+      <property name="maximum">
+       <number>100</number>
+      </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
@@ -266,6 +275,9 @@
     </item>
     <item>
      <widget class="QSlider" name="sldSpeed">
+      <property name="maximum">
+       <number>100</number>
+      </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
@@ -418,6 +430,11 @@
          <item>
           <property name="text">
            <string>EXP: Electrical springs</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>EXP: Simple spring</string>
           </property>
          </item>
         </widget>
