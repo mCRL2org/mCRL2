@@ -16,6 +16,7 @@
 #define DEV_DEBUG
 #ifdef DEV_DEBUG
 // #define LOG_FORCE_MAGNITUDE
+// #define LOG_FUNCTION_SETTER
 #endif
 
 
@@ -278,6 +279,7 @@ SpringLayout::SpringLayout(Graph& graph, GLWidget& glwidget)
 
 {
   srand(time(nullptr));
+  
 }
 
 SpringLayout::~SpringLayout()
@@ -289,6 +291,12 @@ SpringLayoutUi* SpringLayout::ui(QWidget* parent)
 {
   if (m_ui == nullptr) {
     m_ui = new SpringLayoutUi(*this, parent);
+    m_ui->m_ui.dispSpeed->setText(QString::number(m_speed, 'g', 3));
+    m_ui->m_ui.dispAttraction->setText(QString::number(m_attraction, 'g', 3));
+    m_ui->m_ui.dispRepulsion->setText(QString::number(m_repulsion, 'g', 3));
+    m_ui->m_ui.dispAccuracy->setText(QString::number(m_accuracy, 'g', 3));
+    m_ui->m_ui.dispHandleWeight->setText(QString::number(m_controlPointWeight, 'g', 3));
+    m_ui->m_ui.dispNatLength->setText(QString::number(m_natLength, 'g', 3));
   }
   return m_ui;
 }
@@ -298,7 +306,7 @@ void SpringLayout::setAttractionCalculation(AttractionCalculation c)
   m_option_attractionCalculation = c;
   m_attrFunc = attrFuncMap[c];
   m_attrFunc->reset();
-  #ifdef DEV_DEBUG
+  #ifdef LOG_FUNCTION_SETTER
     mCRL2log(mcrl2::log::debug) << "Attraction set to: " << getName(c) << std::endl;
     mCRL2log(mcrl2::log::debug) << "Attr func: " << typeid(*m_attrFunc).name() << std::endl;
   #endif
@@ -314,7 +322,7 @@ void SpringLayout::setRepulsionCalculation(RepulsionCalculation c)
   m_option_repulsionCalculation = c;
   m_repFunc = repFuncMap[c];
   m_repFunc->reset();
-  #ifdef DEV_DEBUG
+  #ifdef LOG_FUNCTION_SETTER
     mCRL2log(mcrl2::log::debug) << "Repulsion set to: " << getName(c) << std::endl;
     mCRL2log(mcrl2::log::debug) << "Rep func: " <<  typeid(*m_repFunc) .name() << std::endl;
   #endif
@@ -329,7 +337,7 @@ void SpringLayout::setForceApplication(SpringLayout::ForceApplication c){
   m_option_forceApplication = c;
   m_applFunc = applFuncMap[c];
   m_applFunc->reset();
-  #ifdef DEV_DEBUG
+  #ifdef LOG_FUNCTION_SETTER
     mCRL2log(mcrl2::log::debug) << "Application set to: " << getName(c) << std::endl;
     mCRL2log(mcrl2::log::debug) << "Appl func: " << typeid(*m_applFunc).name() << std::endl;
   #endif
@@ -401,7 +409,7 @@ int iterations = 0;
 
 
 template<>
-void SpringLayout::attractionAccumulation<SpringLayout::ThreadingMode::normal>(bool sel, int nodeCount, int edgeCount){
+void SpringLayout::attractionAccumulation<SpringLayout::ThreadingMode::normal>(bool sel, std::size_t nodeCount, std::size_t edgeCount){
   
   for (std::size_t i = 0; i < nodeCount; ++i)
   {
@@ -440,7 +448,7 @@ void SpringLayout::attractionAccumulation<SpringLayout::ThreadingMode::normal>(b
 }
 
 template<>
-void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::quadtree>(bool sel, int nodeCount, int edgeCount){
+void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::quadtree>(bool sel, std::size_t nodeCount, std::size_t edgeCount){
   /// TODO: Fix blatant code duplication
   QVector2D node_min   = { INFINITY,  INFINITY}, 
             node_max   = {-INFINITY, -INFINITY}, 
@@ -565,7 +573,7 @@ void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::quadtree>(bool 
 }
 
 template<>
-void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::octree>(bool sel, int nodeCount, int edgeCount){
+void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::octree>(bool sel, std::size_t nodeCount, std::size_t edgeCount){
   /// TODO: Fix blatant code duplication
   QVector3D node_min   = { INFINITY,  INFINITY,  INFINITY}, 
             node_max   = {-INFINITY, -INFINITY, -INFINITY}, 
@@ -698,7 +706,7 @@ void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::octree>(bool se
 }
 
 template<>
-void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::none>(bool sel, int nodeCount, int edgeCount){
+void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::none>(bool sel, std::size_t nodeCount, std::size_t edgeCount){
   // used for storing intermediate results
   QVector3D f;
   // repulsive forces for nodes
@@ -730,7 +738,7 @@ void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::none>(bool sel,
   }
 }
 
-void SpringLayout::forceAccumulation(bool sel, int nodeCount, int edgeCount, TreeMode treeMode, ThreadingMode threadingMode){
+void SpringLayout::forceAccumulation(bool sel, std::size_t nodeCount, std::size_t edgeCount, TreeMode treeMode, ThreadingMode threadingMode){
   switch(threadingMode){
     case ThreadingMode::normal:
       attractionAccumulation<ThreadingMode::normal>(sel, nodeCount, edgeCount);
@@ -853,6 +861,8 @@ void SpringLayout::apply()
     m_repFunc->update();
     m_attrFunc->update();
 
+    notifyNewFrame();
+
     #ifdef LOG_FORCE_MAGNITUDE
     float maxForce = 0.0f;
     for (int i = 0; i < nodeCount; i++){
@@ -879,6 +889,11 @@ void SpringLayout::randomizeZ(float z)
     }
   }
   m_graph.unlock(GRAPH_LOCK_TRACE);
+}
+
+void SpringLayout::notifyNewFrame(){
+  m_has_new_frame = true;
+  m_graph.hasNewFrame(true);
 }
 
 void SpringLayout::setTreeEnabled(bool b){
@@ -1016,6 +1031,7 @@ SpringLayoutUi::SpringLayoutUi(SpringLayout& layout, QWidget* parent)
   m_layout.setTreeEnabled(m_ui.chkEnableTree->isChecked());
   m_ui.chkEnableTree->setChecked(false);
   onTreeToggled(false);
+
 }
 
 SpringLayoutUi::~SpringLayoutUi()
@@ -1058,8 +1074,8 @@ void SpringLayoutUi::setSettings(QByteArray state)
 
   QDataStream in(&state, QIODevice::ReadOnly);
 
-  quint32 attraction, repulsion, speed, handleWeight, NatLength, accuracy, attractionCalculation, repulsionCalculation, forceCalculation, treeEnabled;
-  in >> attraction >> repulsion >> speed >> handleWeight >> NatLength >> accuracy >> attractionCalculation >> repulsionCalculation >> forceCalculation >> treeEnabled;
+  quint32 attraction, repulsion, speed, handleWeight, natLength, accuracy, attractionCalculation, repulsionCalculation, forceCalculation, treeEnabled;
+  in >> attraction >> repulsion >> speed >> handleWeight >> natLength >> accuracy >> attractionCalculation >> repulsionCalculation >> forceCalculation >> treeEnabled;
 
   if (in.status() == QDataStream::Ok)
   {
@@ -1067,7 +1083,7 @@ void SpringLayoutUi::setSettings(QByteArray state)
     m_ui.sldRepulsion->setValue(repulsion);
     m_ui.sldSpeed->setValue(speed);
     m_ui.sldHandleWeight->setValue(handleWeight);
-    m_ui.sldNatLength->setValue(NatLength);
+    m_ui.sldNatLength->setValue(natLength);
     m_ui.sldAccuracy->setValue(accuracy);
     m_ui.cmbAttractionCalculation->setCurrentIndex(attractionCalculation);
     m_ui.cmbRepulsionCalculation->setCurrentIndex(repulsionCalculation);
@@ -1081,58 +1097,68 @@ void SpringLayoutUi::onAttractionChanged(int value)
 {
   m_layout.setAttraction(value);
   layoutRulesChanged();
+  update();
 }
 
 void SpringLayoutUi::onRepulsionChanged(int value)
 {
   m_layout.setRepulsion(value);
   layoutRulesChanged();
+  update();
 }
 
 void SpringLayoutUi::onSpeedChanged(int value)
 {
   m_layout.setSpeed(value);
+  update();
 }
 
 void SpringLayoutUi::onAccuracyChanged(int value)
 {
   m_layout.setAccuracy(value);
   layoutRulesChanged();
+  update();
 }
 
 void SpringLayoutUi::onHandleWeightChanged(int value)
 {
   m_layout.setControlPointWeight(value);
   layoutRulesChanged();
+  update();
 }
 
 void SpringLayoutUi::onNatLengthChanged(int value)
 {
   m_layout.setNaturalTransitionLength(value);
   layoutRulesChanged();
+  update();
 }
 
 void SpringLayoutUi::onAttractionCalculationChanged(int value)
 {
   m_layout.setAttractionCalculation(static_cast<SpringLayout::AttractionCalculation>(value));
   layoutRulesChanged();
+  update();
 }
 
 void SpringLayoutUi::onRepulsionCalculationChanged(int value)
 {
   m_layout.setRepulsionCalculation(static_cast<SpringLayout::RepulsionCalculation>(value));
   layoutRulesChanged();
+  update();
 }
 
 void SpringLayoutUi::onForceApplicationChanged(int value){
   m_layout.setForceApplication(static_cast<SpringLayout::ForceApplication>(value));
   layoutRulesChanged();
+  update();
 }
 
 void SpringLayoutUi::onStarted()
 {
   m_ui.btnStartStop->setText("Stop");
   m_ui.btnStartStop->setEnabled(true);
+  update();
 }
 
 void SpringLayoutUi::onStopped()
@@ -1140,6 +1166,7 @@ void SpringLayoutUi::onStopped()
   m_ui.btnStartStop->setText("Start");
   m_ui.btnStartStop->setEnabled(true);
   runningChanged(false);
+  update();
 }
 
 void SpringLayoutUi::onTreeToggled(bool b){
@@ -1147,6 +1174,7 @@ void SpringLayoutUi::onTreeToggled(bool b){
   m_ui.sldAccuracy->setVisible(b);
   m_ui.dispAccuracy->setVisible(b);
   m_ui.lblAccuracy->setVisible(b);
+  update();
 }
 
 void SpringLayoutUi::onStartStop()
@@ -1167,6 +1195,7 @@ void SpringLayoutUi::onStartStop()
     m_thread->wait();
     m_thread = nullptr;
   }
+  update();
 }
 
 void SpringLayoutUi::setActive(bool active)
@@ -1177,6 +1206,7 @@ void SpringLayoutUi::setActive(bool active)
   else if (!active && m_thread != nullptr) {
     onStartStop();
   }
+  update();
 }
 
 }  // namespace Graph

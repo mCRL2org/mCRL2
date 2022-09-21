@@ -162,7 +162,7 @@ void Graph::load(const QString& filename, const QVector3D& min,
     m_exploration = nullptr;
   }
   m_stable = true;
-
+  m_hasNewFrame = true;
   unlockForWrite(m_lock, GRAPH_LOCK_TRACE);
 }
 
@@ -627,6 +627,7 @@ void Graph::makeExploration()
   m_exploration = new Exploration(*this);
   m_stable = false;
   unlockForWrite(m_lock, GRAPH_LOCK_TRACE);
+  m_hasNewFrame = true;
 }
 
 void Graph::discardExploration()
@@ -668,6 +669,8 @@ void Graph::toggleOpen(std::size_t index)
   }
 
   unlockForWrite(m_lock, GRAPH_LOCK_TRACE);
+  
+  m_hasNewFrame = true;
 }
 
 bool Graph::isClosable(std::size_t index)

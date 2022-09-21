@@ -27,14 +27,14 @@ float quadtreeSqWidth(const QVector2D& vec) { return vec.x()*vec.x(); }
 bool quadtreeEqual(const QVector2D& u, const QVector2D& v) { return (u-v).lengthSquared() < FLT_EPSILON ;}
 
 /// @brief Encode x, y, z in least significant bits in order from least to most 
-int octreeChildIndex(const QVector3D& rel_pos){
+std::size_t octreeChildIndex(const QVector3D& rel_pos){
     return ((rel_pos.z() > 0.5f) << 2) |
            ((rel_pos.y() > 0.5f) << 1) |
             (rel_pos.x() > 0.5f);
 }
 
 /// @brief Encode x, y in least significant bits in order from least to most
-int quadtreeChildIndex(const QVector2D& rel_pos){
+std::size_t quadtreeChildIndex(const QVector2D& rel_pos){
     return ((rel_pos.y() > 0.5f) << 1) |
             (rel_pos.x() > 0.5f);
 }
