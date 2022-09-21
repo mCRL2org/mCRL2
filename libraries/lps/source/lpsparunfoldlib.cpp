@@ -51,7 +51,11 @@ data::basic_sort lpsparunfold::generate_fresh_basic_sort(const data::sort_expres
   std::string hint("S");
   if(data::is_basic_sort(sort))
   {
-    hint = data::basic_sort(sort).name();
+    hint = atermpp::down_cast<basic_sort>(sort).name();
+  }
+  else if(data::is_container_sort(sort))
+  {
+    hint = filter_illegal_characters(data::pp(sort));
   }
 
   const data::basic_sort result(m_identifier_generator(hint));
@@ -62,7 +66,7 @@ data::basic_sort lpsparunfold::generate_fresh_basic_sort(const data::sort_expres
 core::identifier_string lpsparunfold::generate_fresh_function_symbol_name(const std::string& str)
 {
   //Generate a fresh name for a constructor of mapping
-  const core::identifier_string result(filter_illegal_characters(str));
+  const core::identifier_string result(m_identifier_generator(filter_illegal_characters(str)));
   mCRL2log(debug) << "Generated a fresh function symbol name: " <<  result << std::endl;
   return result;
 }
@@ -95,7 +99,8 @@ void lpsparunfold::create_new_constructors()
   for (const function_symbol& func: m_new_cache_element.affected_constructors)
   {
     std::string prefix = "c_";
-    const data::function_symbol f(generate_fresh_function_symbol_name(prefix.append(func.name())),
+    prefix.append(func.name());
+    const data::function_symbol f(generate_fresh_function_symbol_name(prefix),
                                   m_new_cache_element.fresh_basic_sort);
     m_new_cache_element.new_constructors.push_back(f);
     m_spec.data().add_constructor(f);
@@ -111,7 +116,7 @@ data::function_symbol lpsparunfold::create_case_function(const sort_expression& 
   if (m_new_cache_element.case_function_name == core::identifier_string())
   {
     std::string str = "C_";
-    str.append(m_new_cache_element.fresh_basic_sort.name()).append("_");
+    str.append(m_new_cache_element.fresh_basic_sort.name());
     m_new_cache_element.case_function_name =
         generate_fresh_function_symbol_name(str);
   }
@@ -142,7 +147,7 @@ data::function_symbol lpsparunfold::create_case_function(const sort_expression& 
 void lpsparunfold::create_determine_function()
 {
   std::string str = "Det_";
-  str.append(std::string(m_new_cache_element.fresh_basic_sort.name()).append("_"));
+  str.append(std::string(m_new_cache_element.fresh_basic_sort.name()));
   m_new_cache_element.determine_function = data::function_symbol(generate_fresh_function_symbol_name(str),
                            data::make_function_sort_(m_unfold_parameter.sort(),
                                      m_new_cache_element.fresh_basic_sort ));
@@ -156,7 +161,6 @@ void lpsparunfold::create_projection_functions()
 {
   std::string str = "pi_";
   str.append(std::string(m_new_cache_element.fresh_basic_sort.name()));
-  str.append("_");
 
   for (const function_symbol& f: m_new_cache_element.affected_constructors)
   {
@@ -238,7 +242,8 @@ void lpsparunfold::generate_projection_function_equations()
       if(m_add_distribution_laws)
       {
         create_distribution_law_over_case(*pi_it, data::if_(m_unfold_parameter.sort()));
-        create_distribution_law_over_case(*pi_it, m_new_cache_element.case_functions.front());
+        const function_symbol case_function = m_new_cache_element.case_functions.front();
+        create_distribution_law_over_case(*pi_it, case_function);
       }
 
       ++pi_it;
@@ -313,7 +318,6 @@ lpsparunfold::case_func_vector lpsparunfold::parameter_case_function()
   return result;
 }
 
-// TODO: Modify such that update happens in-place
 void lpsparunfold::update_linear_process(std::size_t parameter_at_index)
 {
   /* Get process parameters from lps */
@@ -337,7 +341,7 @@ void lpsparunfold::update_linear_process(std::size_t parameter_at_index)
   /* Expand unfold_parameter */
   mCRL2log(log::verbose) << "Unfolding parameter " << unfold_parameter_it->name() << " at index " << parameter_at_index << "..." << std::endl;
 
-  const data::variable param = generate_fresh_variable(m_new_cache_element.fresh_basic_sort.name(), m_new_cache_element.fresh_basic_sort );
+  const data::variable param = generate_fresh_variable(m_unfold_parameter.name(), m_new_cache_element.fresh_basic_sort );
   m_injected_parameters.push_back(param);
 
   mCRL2log(log::verbose) << "- Created process parameter " <<  data::pp(m_injected_parameters.back()) << " of type " <<  data::pp(m_new_cache_element.fresh_basic_sort ) << "" << std::endl;
@@ -349,7 +353,7 @@ void lpsparunfold::update_linear_process(std::size_t parameter_at_index)
       const sort_expression_list domain = function_sort(constructor.sort()).domain();
       for (const sort_expression& s: domain)
       {
-        const data::variable param = generate_fresh_variable(m_new_cache_element.fresh_basic_sort.name(), s);
+        const data::variable param = generate_fresh_variable(m_unfold_parameter.name(), s);
         m_injected_parameters.push_back(param);
         mCRL2log(log::verbose) << "- Injecting process parameter: " <<  param
                                << "::" <<  pp(s) << std::endl;
@@ -540,7 +544,7 @@ void lpsparunfold::create_distribution_law_over_case(
 
   // Determine the new case function or if function symbol.
   data::function_symbol new_case_function;
-  if(data::is_if_function_symbol(f))
+  if(data::is_if_function_symbol(case_function))
   {
     new_case_function = data::if_(f.sort().target_sort());
   }
@@ -549,8 +553,8 @@ void lpsparunfold::create_distribution_law_over_case(
     new_case_function = create_case_function(f.sort().target_sort());
   }
 
-  application rhs(new_case_function , rhs_args);
-  data_equation result(lhs_args, lhs, rhs);
+  data::application rhs(new_case_function , rhs_args);
+  data::data_equation result(lhs_args, lhs, rhs);
   m_spec.data().add_equation(result);
 
   mCRL2log(log::verbose) << "- Added distribution law for \"" << data::pp(f) << "\" over \"" << data::pp(case_function) << "\": " << data::pp(result) << std::endl;
@@ -615,7 +619,8 @@ void lpsparunfold::generate_determine_function_equations()
     Det(C(e,x1,x2,...))=C(e,Det(x1),Det(x2),...);
     */
     create_distribution_law_over_case(m_new_cache_element.determine_function, data::if_(m_unfold_parameter.sort()));
-    create_distribution_law_over_case(m_new_cache_element.determine_function, m_new_cache_element.case_functions.front());
+    const function_symbol case_function = m_new_cache_element.case_functions.front();
+    create_distribution_law_over_case(m_new_cache_element.determine_function, case_function);
   }
 }
 
