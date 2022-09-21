@@ -256,114 +256,91 @@ void lpsparunfold::add_new_equation(const data_expression& lhs, const data_expre
   m_spec.data().add_equation(data_equation(variable_list(svars.begin(), svars.end()), lhs, rhs));
 }
 
-void lpsparunfold::unfold_summands(lps::stochastic_action_summand_vector& summands, const data::function_symbol& determine_function, const data::function_symbol_vector& projection_functions)
+void lpsparunfold::unfold_summands(lps::stochastic_action_summand_vector& summands)
 {
   for (lps::stochastic_action_summand& summand: summands)
   {
-    data::assignment_list ass = summand.assignments();
-    //Create new left-hand assignment_list & right-hand assignment_list
-    data::variable_vector new_ass_left;
-    data::data_expression_vector new_ass_right;
-    for (const data::assignment& k: ass)
+    data::assignment_vector new_assignments;
+    for (const data::assignment& k: summand.assignments())
     {
-      if (proc_par_to_proc_par_inj.find(k.lhs()) != proc_par_to_proc_par_inj.end())
+      if (k.lhs() == m_unfold_parameter)
       {
-        for (const data::variable& v: proc_par_to_proc_par_inj[ k.lhs() ])
-        {
-          new_ass_left.push_back(v);
-        }
-
-        data::data_expression_vector ins = unfold_constructor(k.rhs(), determine_function, projection_functions);
-        //Replace unfold parameters in affected assignments
-        new_ass_right.insert(new_ass_right.end(), ins.begin(), ins.end());
+        data::data_expression_vector new_rhs = unfold_constructor(k.rhs());
+        data::assignment_vector injected_assignments = data::make_assignment_vector(m_injected_parameters, new_rhs);
+        new_assignments.insert(new_assignments.end(), injected_assignments.begin(), injected_assignments.end());
       }
       else
       {
-        new_ass_left.push_back(k.lhs());
-        new_ass_right.push_back(k.rhs());
+        new_assignments.push_back(k);
       }
     }
-
-    assert(new_ass_left.size() == new_ass_right.size());
-    data::assignment_vector new_ass;
-    while (!new_ass_left.empty())
-    {
-      new_ass.push_back(data::assignment(new_ass_left.front(), new_ass_right.front()));
-      new_ass_left.erase(new_ass_left.begin());
-      new_ass_right.erase(new_ass_right.begin());
-    }
-    summand.assignments() = data::assignment_list(new_ass.begin(), new_ass.end());
+    summand.assignments() = data::assignment_list(new_assignments.begin(), new_assignments.end());
   }
 }
 
-lpsparunfold::case_func_vector lpsparunfold::parameter_case_function(const std::map<data::variable, data::variable_vector >& proc_par_to_proc_par_inj, const data::function_symbol& case_function)
+lpsparunfold::case_func_vector lpsparunfold::parameter_case_function()
 {
   lpsparunfold::case_func_vector result;
+  data_expression_vector dev;
 
-  for (auto& [old_par, new_pars]: proc_par_to_proc_par_inj)
+  auto new_pars_it = m_injected_parameters.cbegin();
+  ++new_pars_it;
+
+  for (const data::function_symbol& constr: m_new_cache_element.affected_constructors )
   {
-    data_expression_vector dev;
+    data::data_expression case_func_arg = constr;
 
-    auto new_pars_it = new_pars.cbegin();
-    ++new_pars_it;
-
-    for (const data::function_symbol& constr: m_new_cache_element.affected_constructors )
+    if (is_function_sort(constr.sort()))
     {
-      data::data_expression case_func_arg = constr;
+      sort_expression_list dom = function_sort(constr.sort()).domain();
+      data_expression_vector arg;
 
-      if (is_function_sort(constr.sort()))
+      for (const data::sort_expression& arg_sort: dom)
       {
-        sort_expression_list dom = function_sort(constr.sort()).domain();
-        data_expression_vector arg;
-
-        for (const data::sort_expression& arg_sort: dom)
+        if (new_pars_it->sort() != arg_sort)
         {
-          if (new_pars_it->sort() != arg_sort)
-          {
-            throw runtime_error("Unexpected new parameter encountered, maybe they were not sorted well.");
-          }
-          arg.push_back(*new_pars_it++);
+          throw runtime_error("Unexpected new parameter encountered, maybe they were not sorted well.");
         }
-        case_func_arg = data::application(constr, arg);
+        arg.push_back(*new_pars_it++);
       }
-
-      dev.push_back(case_func_arg);
+      case_func_arg = data::application(constr, arg);
     }
 
-    result.push_back(std::make_tuple(old_par, case_function, new_pars[0], dev));
+    dev.push_back(case_func_arg);
+
+    result.push_back(std::make_tuple(m_unfold_parameter, m_new_cache_element.case_functions.front(), m_injected_parameters[0], dev));
   }
   return result;
 }
 
 // TODO: Modify such that update happens in-place
-lps::stochastic_linear_process lpsparunfold::update_linear_process(const function_symbol& case_function , const function_symbol& determine_function, std::size_t parameter_at_index, const function_symbol_vector& projection_functions)
+void lpsparunfold::update_linear_process(std::size_t parameter_at_index)
 {
   /* Get process parameters from lps */
-  const data::variable_list& lps_proc_pars =  m_spec.process().process_parameters();
+  const data::variable_list& process_parameters =  m_spec.process().process_parameters();
 
   /* Iterator pointing to the parameter that needs to be unfolded */
-  data::variable_list::const_iterator unfold_parameter_it = lps_proc_pars.begin();
+  data::variable_list::const_iterator unfold_parameter_it =
+      process_parameters.begin();
   std::advance(unfold_parameter_it, parameter_at_index);
 
   mCRL2log(log::verbose) << "Updating LPS..." << std::endl;
+
   /* Create new process parameters */
   data::variable_vector new_process_parameters;
 
   /* First copy the initial part of the parameters */
   new_process_parameters.insert(new_process_parameters.end(),
-                                lps_proc_pars.begin(),
+                                process_parameters.begin(),
                                 unfold_parameter_it);
 
   /* Expand unfold_parameter */
   mCRL2log(log::verbose) << "Unfolding parameter " << unfold_parameter_it->name() << " at index " << parameter_at_index << "..." << std::endl;
 
-  /* Generate fresh process parameter for new Sort */
-  data::variable_vector injected_process_parameters;
-
   const data::variable param = generate_fresh_variable(m_new_cache_element.fresh_basic_sort.name(), m_new_cache_element.fresh_basic_sort );
-  injected_process_parameters.push_back(param);
+  m_injected_parameters.push_back(param);
 
-  mCRL2log(log::verbose) << "- Created process parameter " <<  data::pp(injected_process_parameters.back()) << " of type " <<  data::pp(m_new_cache_element.fresh_basic_sort ) << "" << std::endl;
+  mCRL2log(log::verbose) << "- Created process parameter " <<  data::pp(m_injected_parameters.back()) << " of type " <<  data::pp(m_new_cache_element.fresh_basic_sort ) << "" << std::endl;
 
   for (const data::function_symbol& constructor: m_new_cache_element.affected_constructors)
   {
@@ -373,7 +350,7 @@ lps::stochastic_linear_process lpsparunfold::update_linear_process(const functio
       for (const sort_expression& s: domain)
       {
         const data::variable param = generate_fresh_variable(m_new_cache_element.fresh_basic_sort.name(), s);
-        injected_process_parameters.push_back(param);
+        m_injected_parameters.push_back(param);
         mCRL2log(log::verbose) << "- Injecting process parameter: " <<  param
                                << "::" <<  pp(s) << std::endl;
       }
@@ -391,20 +368,15 @@ lps::stochastic_linear_process lpsparunfold::update_linear_process(const functio
     }
   }
 
-  /* store mapping: process parameter -> process parameter injection:
-     Required for process parameter replacement in summands
-  */
-  proc_par_to_proc_par_inj[*unfold_parameter_it] = injected_process_parameters;
   new_process_parameters.insert(new_process_parameters.end(),
-                                injected_process_parameters.begin(),
-                                injected_process_parameters.end());
+                                m_injected_parameters.begin(),
+                                m_injected_parameters.end());
 
 
   ++unfold_parameter_it;
   /* Copy the remainder of the parameters */
   new_process_parameters.insert(new_process_parameters.end(),
-                              unfold_parameter_it,
-                              lps_proc_pars.end());
+                              unfold_parameter_it, process_parameters.end());
 
   mCRL2log(debug) << "- New LPS process parameters: " <<  data::pp(new_process_parameters) << std::endl;
 
@@ -415,18 +387,17 @@ lps::stochastic_linear_process lpsparunfold::update_linear_process(const functio
   new_lps.deadlock_summands() = m_spec.process().deadlock_summands();
 
   // update the summands in new_lps
-  unfold_summands(new_lps.action_summands(), determine_function, projection_functions);
+  unfold_summands(new_lps.action_summands());
 
   // Replace occurrences of unfolded parameters by the corresponding case function
   if (m_alt_case_placement)
   {
-    insert_case_functions(new_lps, parameter_case_function(proc_par_to_proc_par_inj, case_function));
+    insert_case_functions(new_lps, parameter_case_function());
   }
   else
   {
     //Prepare parameter substitution
-    std::map<data::variable, data::data_expression> parsub = parameter_substitution(proc_par_to_proc_par_inj, case_function);
-    mutable_map_substitution< std::map< data::variable , data::data_expression > > s{parsub};
+    mutable_map_substitution< std::map< data::variable , data::data_expression > > s{parameter_substitution()};
     lps::replace_variables_capture_avoiding( new_lps, s );
   }
 
@@ -438,106 +409,92 @@ lps::stochastic_linear_process lpsparunfold::update_linear_process(const functio
   mCRL2log(debug) << "\nNew LPS:\n" <<  lps::pp(new_lps) << std::endl;
 
   assert(check_well_typedness(new_lps));
-
-  return new_lps;
+  m_spec.process() = new_lps;
 }
 
-// TODO: Modify such that update happens in-place
-lps::stochastic_process_initializer lpsparunfold::update_linear_process_initialization(
-                   const data::function_symbol& determine_function,
-                   std::size_t parameter_at_index,
-                   const function_symbol_vector& projection_functions)
+void lpsparunfold::update_linear_process_initialization(
+                   std::size_t parameter_at_index)
 {
   //
   //update inital process
   //
   mCRL2log(log::verbose) << "Updating initialization...\n" << std::endl;
 
-  const data::data_expression_list ass = m_spec.initial_process().expressions();
   //Unfold parameters
-  data::data_expression_vector new_ass_right;
+  data::data_expression_vector new_init;
   size_t index=0;
-  for (const data::data_expression& k: ass)
+  for (const data::data_expression& k: m_spec.initial_process().expressions())
   {
     if (index == parameter_at_index)
     {
-      data::data_expression_vector ins = unfold_constructor(k, determine_function, projection_functions);
+      const data::data_expression_vector ins = unfold_constructor(k);
       //Replace unfold parameters in affected assignments
-      new_ass_right.insert(new_ass_right.end(), ins.begin(), ins.end());
+      new_init.insert(new_init.end(), ins.begin(), ins.end());
     }
     else
     {
-      new_ass_right.push_back(k);
+      new_init.push_back(k);
     }
-    index++;
+    ++index;
   }
 
-  const lps::stochastic_process_initializer new_init(data::data_expression_list(new_ass_right.begin(), new_ass_right.end()),
-                                                            m_spec.initial_process().distribution());
-  mCRL2log(debug) << "Expressions for the new initial state: " << lps::pp(new_init) << std::endl;
+  m_spec.initial_process() = stochastic_process_initializer(
+      data_expression_list(new_init.begin(), new_init.end()),
+      m_spec.initial_process().distribution());
 
-  return new_init;
+  mCRL2log(debug) << "Expressions for the new initial state: " << data::pp(m_spec.initial_process().expressions()) << std::endl;
 }
 
-std::map<data::variable, data::data_expression> lpsparunfold::parameter_substitution(std::map<data::variable, data::variable_vector > proc_par_to_proc_par_inj, const data::function_symbol& case_function)
+std::map<data::variable, data::data_expression> lpsparunfold::parameter_substitution()
 {
   std::map<data::variable, data::data_expression> result;
 
-  for (auto& [old_par, new_pars]: proc_par_to_proc_par_inj)
+  data_expression_vector dev;
+
+  auto new_pars_it = m_injected_parameters.cbegin();
+  dev.push_back(data_expression(*new_pars_it));
+  ++new_pars_it;
+
+  for (const data::function_symbol& constr: m_new_cache_element.affected_constructors)
   {
-    data_expression_vector dev;
+    data::data_expression case_func_arg = constr;
 
-    auto new_pars_it = new_pars.cbegin();
-    dev.push_back(data_expression(*new_pars_it));
-    ++new_pars_it;
-
-    for (const data::function_symbol& constr: m_new_cache_element.affected_constructors )
+    if (is_function_sort(constr.sort()))
     {
-      data::data_expression case_func_arg = constr;
+      sort_expression_list dom = function_sort(constr.sort()).domain();
+      data_expression_vector arg;
 
-      if (is_function_sort(constr.sort()))
+      for (const data::sort_expression& arg_sort: dom)
       {
-        sort_expression_list dom = function_sort(constr.sort()).domain();
-        data_expression_vector arg;
-
-        for (const data::sort_expression& arg_sort: dom)
+        if (new_pars_it->sort() != arg_sort)
         {
-          if (new_pars_it->sort() != arg_sort)
-          {
-            throw runtime_error("Unexpected new parameter encountered, maybe they were not sorted well.");
-          }
-          arg.push_back(*new_pars_it++);
+          throw runtime_error("Unexpected new parameter encountered, maybe they were not sorted well.");
         }
-        case_func_arg = data::application(constr, arg);
+        arg.push_back(*new_pars_it++);
       }
-
-      dev.push_back(case_func_arg);
+      case_func_arg = data::application(constr, arg);
     }
 
-    mCRL2log(log::verbose) << "Parameter substitution:\t" << old_par << "\t->\t" <<  data::application(case_function, dev) << std::endl;
-    result.insert(std::make_pair(old_par, data::application(case_function, dev)));
+    dev.push_back(case_func_arg);
   }
+  mCRL2log(log::verbose) << "Parameter substitution:\t" << m_unfold_parameter << "\t->\t" <<  data::application(m_new_cache_element.case_functions.front(), dev) << std::endl;
+  result.insert(std::make_pair(m_unfold_parameter, data::application(m_new_cache_element.case_functions.front(), dev)));
   return result;
 }
 
-data::data_expression_vector lpsparunfold::unfold_constructor(const data_expression& de, const data::function_symbol& determine_function, function_symbol_vector projection_functions)
+data::data_expression_vector lpsparunfold::unfold_constructor(const data_expression& de)
 {
+  assert(de.sort() == m_unfold_parameter.sort());
   data::data_expression_vector result;
+
+  /* Det function */
+  result.emplace_back(application(m_new_cache_element.determine_function, de)) ;
+
+  for (const function_symbol& f: m_new_cache_element.projection_functions)
   {
-    /* Unfold parameter if function symbol occurs  */
-    /* size of unfold parameter must be equal to 1 */
-    data_expression_vector new_ass;
-
-    /* Det function */
-    new_ass.push_back(application(determine_function, de)) ;
-
-    for (const function_symbol& f: projection_functions)
-    {
-      new_ass.push_back(application(f, de)) ;
-    }
-
-    result = new_ass;
+    result.emplace_back(application(f, de)) ;
   }
+
   return result;
 }
 
@@ -715,13 +672,8 @@ void lpsparunfold::algorithm(std::size_t parameter_at_index)
   }
   else
   {
-    m_spec.process() = update_linear_process(
-        m_new_cache_element.case_functions.back(),
-        m_new_cache_element.determine_function, parameter_at_index,
-        m_new_cache_element.projection_functions);
-    m_spec.initial_process() = update_linear_process_initialization(
-        m_new_cache_element.determine_function, parameter_at_index,
-        m_new_cache_element.projection_functions);
+    update_linear_process(parameter_at_index);
+    update_linear_process_initialization(parameter_at_index);
   }
 
   assert(check_well_typedness(m_spec));
