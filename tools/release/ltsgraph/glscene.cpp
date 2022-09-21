@@ -48,7 +48,7 @@ constexpr int OFFSET_ARROWHEAD  = OFFSET_HANDLE_OUTLINE + VERTICES_HANDLE_OUTLIN
 constexpr int OFFSET_ARROWHEAD_BASE = OFFSET_ARROWHEAD + VERTICES_ARROWHEAD;
 constexpr int OFFSET_ARC        = OFFSET_ARROWHEAD_BASE + VERTICES_ARROWHEAD_BASE;
 
-GLScene::GLScene(QOpenGLWidget& glwidget, const Graph::Graph& g)
+GLScene::GLScene(QOpenGLWidget& glwidget, Graph::Graph& g)
   :  m_glwidget(glwidget),
      m_graph(g)
 {
@@ -186,6 +186,8 @@ void GLScene::initialize()
   vertices.insert(vertices.end(), arrowhead_base.begin(), arrowhead_base.end());
   vertices.insert(vertices.end(), arc.begin(), arc.end());
 
+  m_fbo = new QOpenGLFramebufferObject(m_glwidget.size(), QOpenGLFramebufferObject::CombinedDepthStencil);
+
   m_vertexbuffer.create();
   m_vertexbuffer.bind();
   m_vertexbuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
@@ -199,6 +201,13 @@ void GLScene::initialize()
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
   }
+}
+
+void GLScene::resize(std::size_t width, std::size_t height){
+  m_camera.viewport(width, height);
+  if (m_fbo) delete m_fbo;
+  m_fbo = new QOpenGLFramebufferObject(width, height, QOpenGLFramebufferObject::CombinedDepthStencil);
+  m_graph.hasNewFrame(true);
 }
 
 void GLScene::update()
@@ -231,6 +240,8 @@ void GLScene::render(QPainter& painter)
 {
   // Qt: Direct OpenGL commands can still be issued. However, you must make sure these are enclosed by a call to the painter's beginNativePainting() and endNativePainting().
   painter.beginNativePainting();
+
+  m_fbo->bind();
 
   // Cull polygons that are facing away (back) from the camera, where their front is defined as counter clockwise by default, see glFrontFace, meaning that the
   // vertices that make up a triangle should be oriented counter clockwise to show the triangle.
@@ -315,9 +326,9 @@ void GLScene::render(QPainter& painter)
       renderTransitionLabel(painter, exploration_active ? m_graph.explorationEdge(i) : i);
     }
   }
-
+  m_graph.hasNewFrame(false);
   // m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
-
+  m_fbo->release();
   // Make sure that glGetError() is not an error.
   glCheckError();
 }

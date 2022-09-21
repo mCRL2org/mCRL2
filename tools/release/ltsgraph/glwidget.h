@@ -206,6 +206,7 @@ private:
   bool m_painting = false;    ///< Indicates wheter painting node by the used is enabled.
   bool m_paused = false;      ///< Indicates whether rendering of the scene is paused (for example while updating the graph).
   bool m_is_threedimensional = false; ///< Indicates that the scene should be viewed in 3D, as opposed to 2D.
+  bool m_has_new_frame = false;
 
   std::list<GLScene::Selection> m_selections; ///< A list of the objects under the cursor.
 

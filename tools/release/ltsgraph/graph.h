@@ -350,6 +350,7 @@ class Graph
     mutable QReadWriteLock m_lock;              ///< Lock protecting the structure from being changed while rendering and simulating
     const float m_stabilityThreshold = 0.000f;  ///< Used for checking whether the graph is stable. TODO: Allow user control 
     bool m_stable;                              ///< When true, the graph is considered stable, spring forces should not be applied.
+    bool m_hasNewFrame = true;                  ///< Set to false when frame is rendered. Whenever new layout is applied set to true.
     QVector3D m_clip_min;
     QVector3D m_clip_max;
 
@@ -508,11 +509,11 @@ class Graph
     std::size_t explorationEdgeCount() const;        ///< Returns the number of edges in the exploration
     std::size_t explorationNodeCount() const;        ///< Returns the number of nodes in the exploration
 
-    const float& stabilityThreshold(){ ///< @brief Gets stability threshold
+    const float stabilityThreshold(){ ///< @brief Gets stability threshold
        return m_stabilityThreshold;
     }
 
-    const bool& stable() const ///< @brief Gets whether this graph is stable.
+    const bool stable() const ///< @brief Gets whether this graph is stable.
     {
       return m_stable;
     }
@@ -520,6 +521,9 @@ class Graph
     {
       return m_stable;
     }
+
+    void hasNewFrame(bool b) { m_hasNewFrame = b; }
+    bool& hasNewFrame(){ return m_hasNewFrame; }
 };
 }  // namespace Graph
 

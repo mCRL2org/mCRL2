@@ -269,6 +269,7 @@ void GLWidget::updateSelection()
 
   if (needupdate)
   {
+    m_graph.hasNewFrame(true);
     update();
   }
 }
@@ -323,21 +324,26 @@ void GLWidget::initializeGL()
 
 void GLWidget::resizeGL(int width, int height)
 {
-  m_scene.camera().viewport(width, height);
+  m_scene.resize(width, height);
 }
 
 void GLWidget::paintGL()
 {
-  QPainter painter(this);
   if (!m_paused)
   {
-    m_scene.setDevicePixelRatio(devicePixelRatio());
-    m_scene.update();
-    m_scene.render(painter);
-
-    // Updates the selection percentage (and checks for new selections under the cursor).
-    updateSelection();
+    QPainter painter(this); 
+    if (m_graph.hasNewFrame()){
+      m_scene.setDevicePixelRatio(devicePixelRatio());
+      m_scene.update();
+      m_scene.render(painter);
+    }
+    painter.beginNativePainting();
+    QOpenGLFramebufferObject::bindDefault();
+    QOpenGLFramebufferObject::blitFramebuffer(0, m_scene.m_fbo);
+    painter.endNativePainting();
   }
+  // Updates the selection percentage (and checks for new selections under the cursor).
+  updateSelection();
 }
 
 void GLWidget::mousePressEvent(QMouseEvent* e)
@@ -424,6 +430,7 @@ void GLWidget::mousePressEvent(QMouseEvent* e)
     }
   }
   update();
+  m_graph.hasNewFrame(true);
 }
 
 void GLWidget::mouseReleaseEvent(QMouseEvent* e)
@@ -455,6 +462,7 @@ void GLWidget::wheelEvent(QWheelEvent* e)
   ArcballCameraView& camera = m_scene.camera();
   camera.zoom(camera.zoom() * pow(1.0005f, -e->angleDelta().y()));
   update();
+  m_graph.hasNewFrame(true);
 }
 
 void GLWidget::mouseMoveEvent(QMouseEvent* e)
@@ -517,6 +525,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
 
     m_dragstart = e->pos();
     update();
+    m_graph.hasNewFrame(true);
   }
 }
 
@@ -525,6 +534,7 @@ void GLWidget::rebuild()
   m_scene.rebuild();
   makeCurrent();
   update();
+  m_graph.hasNewFrame(true);
 }
 
 void GLWidget::set3D(bool enabled)
@@ -535,6 +545,7 @@ void GLWidget::set3D(bool enabled)
   }
   m_is_threedimensional = enabled;
   update();
+  m_graph.hasNewFrame(true);
 }
 
 bool GLWidget::get3D(){
@@ -545,6 +556,7 @@ void GLWidget::resetViewpoint(std::size_t)
 {
   m_scene.camera().reset();
   update();
+  m_graph.hasNewFrame(true);
 }
 
 void GLWidget::setPaint(const QColor& color)

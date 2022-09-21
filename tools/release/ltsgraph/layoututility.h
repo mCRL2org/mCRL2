@@ -35,7 +35,7 @@ template <class T> struct TreeNode
 {
   T pos; // if the node has children, pos contains the sum of all inserted
          // subnode positions
-  int offset;
+  std::size_t offset;
   // children also encodes information about the node
   //    0       : empty node
   //  otherwise : number of children in subtrees
@@ -56,7 +56,7 @@ const int LEAF_NODE = 1;
 } // namespace TreeNodeTypes
 
 template <typename T, int num_children, bool (*equal)(const T&, const T&),
-          int (*get_child_index)(const T&),
+          std::size_t (*get_child_index)(const T&),
           bool (*criterion)(const TreeNode<T>&, const T&, const T&,
                             const float&),
           void (*update_minbound)(const T&, const T&, T&)>
@@ -187,7 +187,7 @@ class GeometricTree
    * @param node_extents Extents of bounding area/volume
    */
   /// TODO: Iterative instead of recursive
-  void sub_insert(const T& node_pos, int i, T& node_minbound, T& node_extents)
+  void sub_insert(const T& node_pos, std::size_t i, T& node_minbound, T& node_extents)
   {
     // Index has to be within m_data range
     assert(i >= 0 && i < this->m_nodes);
@@ -213,7 +213,7 @@ class GeometricTree
       // now we have subdivided we need to move the current point down
       T relative_pos = (m_data[i].pos - node_minbound) / node_extents;
 
-      int child_index = i + m_data[i].offset + get_child_index(relative_pos);
+      std::size_t child_index = i + m_data[i].offset + get_child_index(relative_pos);
 
       // Move node information down
       m_data[child_index].pos = m_data[i].pos;
@@ -230,7 +230,7 @@ class GeometricTree
 
     // then we find what child the to-be-inserted node has to go in
     T relative_pos = (node_pos - node_minbound) / node_extents;
-    int child_index = i + m_data[i].offset + get_child_index(relative_pos);
+    std::size_t child_index = i + m_data[i].offset + get_child_index(relative_pos);
     node_extents *= 0.5;
     update_minbound(relative_pos, node_extents, node_minbound);
     // recurse
@@ -247,7 +247,7 @@ class GeometricTree
    * opening \property criterion.
    */
   /// TODO: Iterative instead of recursive.
-  void sub_supnodes(const T& node_pos, int i, T& node_extents)
+  void sub_supnodes(const T& node_pos, std::size_t i, T& node_extents)
   {
     // we should never recurse on an empty subtree
     assert(this->m_data[i].children != TreeNodeTypes::EMPTY_NODE);
@@ -269,9 +269,9 @@ class GeometricTree
       {
         // iterate over all children and recurse if necessary
         node_extents *= 0.5f;
-        for (int j = 0; j < num_children; j++)
+        for (std::size_t j = 0; j < num_children; j++)
         {
-          int child_index = i + m_data[i].offset + j;
+          std::size_t child_index = i + m_data[i].offset + j;
           if (m_data[child_index].children > 0)
           {
             sub_supnodes(node_pos, child_index, node_extents);
@@ -289,14 +289,14 @@ class GeometricTree
    */
   /// TODO: Explore accurate options for computing during insert.
   /// TODO: Iterative instead of recursive.
-  void calc_subpos(int i)
+  void calc_subpos(std::size_t i)
   {
     if (m_data[i].children <= 1)
       return;
-    int base = i + m_data[i].offset;
+    std::size_t base = i + m_data[i].offset;
     double recip = 1.0 / m_data[i].children;
     m_data[i].pos = T();
-    for (int child = 0; child < num_children; child++)
+    for (std::size_t child = 0; child < num_children; child++)
     {
       calc_subpos(base + child);
       m_data[i].pos +=
@@ -313,12 +313,12 @@ class GeometricTree
   {
     if (m_data.size() < m_nodes + num_children)
     {
-      for (int i = 0; i < num_children; i++)
+      for (std::size_t i = 0; i < num_children; i++)
         m_data.emplace_back(emptyTreeNode<T>());
     }
     else
     {
-      for (int i = 0; i < num_children; i++)
+      for (std::size_t i = 0; i < num_children; i++)
         m_data[m_nodes + i].children = 0;
     }
     m_nodes += num_children;
@@ -337,7 +337,7 @@ bool BarnesHutCriterion(const TreeNode<T>& node, const T& extents, const T& pos,
 float octreeNorm(const QVector3D&);
 float octreeSqWidth(const QVector3D&);
 bool octreeEqual(const QVector3D&, const QVector3D&);
-int octreeChildIndex(const QVector3D&);
+std::size_t octreeChildIndex(const QVector3D&);
 void octreeUpdateMinbound(const QVector3D&, const QVector3D&, QVector3D&);
 using Octree =
     GeometricTree<QVector3D, 8, octreeEqual, octreeChildIndex,
@@ -347,7 +347,7 @@ using Octree =
 float quadtreeNorm(const QVector2D&);
 float quadtreeSqWidth(const QVector2D&);
 bool quadtreeEqual(const QVector2D&, const QVector2D&);
-int quadtreeChildIndex(const QVector2D&);
+std::size_t quadtreeChildIndex(const QVector2D&);
 void quadtreeUpdateMinbound(const QVector2D&, const QVector2D&, QVector2D&);
 using Quadtree =
     GeometricTree<QVector2D, 4, quadtreeEqual, quadtreeChildIndex,

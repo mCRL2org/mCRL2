@@ -96,7 +96,7 @@ class SpringLayout
 
     // UI parameters
     const float m_min_speed = 0.00001f;
-    const float m_max_speed = 5.0f;
+    const float m_max_speed = 10.0f;
     float m_speed;                   ///< The rate of change each step.
     const float m_min_attraction = 0.0f;
     const float m_max_attraction = 1.0f;
@@ -114,6 +114,7 @@ class SpringLayout
     const float m_max_accuracy = 0.0f;
     float m_accuracy;                ///< Controls the Barnes-Hut criterion in the approximation of repulsive forces
     bool m_tree_enabled;
+    bool m_has_new_frame;
     std::vector<QVector3D> m_nforces, m_hforces, m_lforces, m_sforces;  ///< Vector of the calculated forces..
 
 
@@ -139,13 +140,13 @@ class SpringLayout
     template< typename TreeType >
     QVector3D approxRepulsionForce(const QVector3D& a, TreeType& tree);
 
-    void forceAccumulation(bool sel, int nodeCount, int edgeCount, TreeMode treeMode, ThreadingMode threadingMode); 
+    void forceAccumulation(bool sel, std::size_t nodeCount, std::size_t edgeCount, TreeMode treeMode, ThreadingMode threadingMode); 
 
     template< TreeMode mode >
-    void repulsionAccumulation(bool sel, int nodeCount, int edgeCount);
+    void repulsionAccumulation(bool sel, std::size_t nodeCount, std::size_t edgeCount);
 
     template< ThreadingMode mode >
-    void attractionAccumulation(bool sel, int nodeCount, int edgeCount); 
+    void attractionAccumulation(bool sel, std::size_t nodeCount, std::size_t edgeCount); 
   public:
     GLWidget& m_glwidget;
 
@@ -249,6 +250,11 @@ class SpringLayout
       return m_tree_enabled;
     }
 
+    bool hasNewFrame() const {
+      return m_has_new_frame;
+    }
+
+    void notifyNewFrame();
     void setTreeEnabled(bool b);
     void setSpeed(int v);
     void setAccuracy(int v);

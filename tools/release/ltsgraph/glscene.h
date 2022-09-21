@@ -20,6 +20,7 @@
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLWidget>
 #include <QPainter>
+#include <QOpenGLFramebufferObject>
 
 /// \brief The scene contains the graph that is shown and the camera from which the graph is viewed. It performs
 ///        all the necessary OpenGL calls to render this graph as if shown from the camera. It assumes
@@ -62,7 +63,7 @@ public:
   /// \brief Constructor.
   /// \param glwidget The widget where this scene is drawn
   /// \param g The graph that is to be visualised by this object.
-  GLScene(QOpenGLWidget& glwidget, const Graph::Graph& g);
+  GLScene(QOpenGLWidget& glwidget, Graph::Graph& g);
 
   /// \brief Initializes all state and data required for rendering.
   void initialize();
@@ -127,6 +128,7 @@ public:
   void setFogDistance(int value) { m_fogdensity = 1.0f / (value + 1); }
   void setDevicePixelRatio(float device_pixel_ratio) { m_device_pixel_ratio = device_pixel_ratio; }
 
+  QOpenGLFramebufferObject* m_fbo;
 private:
   /// \returns The color of an object receiving fogAmount amount of fog.
   QVector3D applyFog(const QVector3D& color, float fogAmount);
@@ -174,7 +176,7 @@ private:
   QQuaternion sphericalBillboard(const QVector3D& position) const;
 
   QOpenGLWidget& m_glwidget; /// The widget where this scene is drawn
-  const Graph::Graph& m_graph;     /// The graph that is being visualised.
+  Graph::Graph& m_graph;     /// The graph that is being visualised.
 
   ArcballCameraView m_camera;
   float m_device_pixel_ratio;
