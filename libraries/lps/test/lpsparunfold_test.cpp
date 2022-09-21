@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(test_main)
     /* Return */
 
     std::map< mcrl2::data::sort_expression , lps::unfold_cache_element > unfold_cache;
-    lpsparunfold lpsparunfold(s0, &unfold_cache);
+    lpsparunfold lpsparunfold(s0, unfold_cache);
     lpsparunfold.algorithm(0);
     variable_list p1 = s0.process().process_parameters();
     if (p1.size() != 3)
