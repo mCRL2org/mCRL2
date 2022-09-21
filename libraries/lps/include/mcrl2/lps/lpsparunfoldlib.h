@@ -100,24 +100,21 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
       * \param[in] spec which is a valid mCRL2 process specification.
       * \param[in,out] cache Cache to store information for reuse.
       * \param[in] add_distribution_laws If true, additional rewrite rules are introduced.
+      * \param[in] alt_case_placement If true, case functions are placed at a higher level.
       * \post   The content of mCRL2 process specification analysed for useful information and class variables are set.
       **/
     lpsparunfold(lps::stochastic_specification& spec,
                  std::map< data::sort_expression , unfold_cache_element >& cache,
                  bool add_distribution_laws = false, bool alt_case_placement = false);
 
-    /** \brief  Destructor for lpsparunfold algorithm.
-      **/
-    ~lpsparunfold() {};
-
     /** \brief  Applies lpsparunfold algorithm on a process parameter of an mCRL2 process specification .
-      * \param[in] parameter_at_index An integer value that represents the index value of an process parameter.
-      * \post   The process parameter at index parameter_at_index is unfolded in the mCRL2 process specification.
+     *  \pre algorithm has not been called before.
+     * \param[in] parameter_at_index An integer value that represents the index value of an process parameter.
+     * \post   The process parameter at index parameter_at_index is unfolded in the mCRL2 process specification.
     **/
     void algorithm(std::size_t parameter_at_index);
 
   private:
-
     /// set to true when the algorithm has been run once; as the algorithm should
     /// run only once...
     bool m_run_before;
@@ -125,10 +122,10 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
     /// set of identifiers to use during fresh variable generation
     mcrl2::data::set_identifier_generator m_identifier_generator;
 
-    /// generator for arguments in left hand side of data equations
+    /// \brief generator for arguments in left hand side of data equations
     detail::data_equation_argument_generator m_data_equation_argument_generator;
 
-    /// cache for previously unfolded sorts.
+    /// \brief cache for previously unfolded sorts.
     /// facilitates reuse of previously introduced sorts and function symbols.
     std::map< mcrl2::data::sort_expression , unfold_cache_element >& m_cache;
 
@@ -142,21 +139,19 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
     /// \brief The process parameters that are inserted.
     mcrl2::data::variable_vector m_injected_parameters;
 
-    /// a generator for default data expressions of a give sort;
+    /// \brief a generator for default data expressions of a give sort;
     mcrl2::data::representative_generator m_representative_generator;
-
-    /// \brief Mapping of the unfold process parameter to a vector process parameters.
-    std::map<mcrl2::data::variable, mcrl2::data::variable_vector > proc_par_to_proc_par_inj;
 
     /// \brief Boolean to indicate if additional distribution laws need to be generated.
     bool m_add_distribution_laws;
 
+    /// \brief Boolean to indicate if alternative placement of case functions should be used.
     bool m_alt_case_placement;
 
     //data::data_expression apply_case_function(const data::data_expression& expr, const case_func_vector& case_funcs);
     case_func_vector parameter_case_function();
 
-    /** \brief  Generates a fresh basic sort given an string.
+    /** \brief  Generates a fresh basic sort given a sort expression.
       * \param  str a string value. The value is used to generate a fresh
       *         basic sort.
       * \post   A fresh basic sort is generated.
@@ -270,6 +265,7 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
              || c=='>' || c=='[' || c==']' || c=='@'
              || c=='.' || c=='{' || c=='}' || c=='#'
              || c=='%' || c=='&' || c=='*' || c=='!'
+             || c=='(' || c==')'
              ;
     }
 
