@@ -245,11 +245,15 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
       const mcrl2::data::function_symbol& function_for_distribution,
       const mcrl2::data::function_symbol case_function);
 
+
+    /** \brief Create the data equations for case functions */
     void generate_case_function_equations(
       const mcrl2::data::function_symbol& case_function);
 
+    /** \brief Create the data equations for the determine function */
     void generate_determine_function_equations();
 
+    /** \brief Create the data equations for the projection functions */
     void generate_projection_function_equations();
 
     static bool char_filter(char c)
