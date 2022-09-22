@@ -267,8 +267,8 @@ void lpsparunfold::unfold_summands(lps::stochastic_action_summand_vector& summan
     {
       if (k.lhs() == m_unfold_parameter)
       {
-        data::data_expression_vector new_rhs = unfold_constructor(k.rhs());
-        data::assignment_vector injected_assignments = data::make_assignment_vector(m_injected_parameters, new_rhs);
+        const data::data_expression_vector new_rhs = unfold_constructor(k.rhs());
+        const data::assignment_vector injected_assignments = data::make_assignment_vector(m_injected_parameters, new_rhs);
         new_assignments.insert(new_assignments.end(), injected_assignments.begin(), injected_assignments.end());
       }
       else
@@ -381,36 +381,32 @@ void lpsparunfold::update_linear_process(std::size_t parameter_at_index)
 
   mCRL2log(debug) << "- New LPS process parameters: " <<  data::pp(new_process_parameters) << std::endl;
 
-
-  // TODO: avoid unnecessary copies of the LPS
-  lps::stochastic_linear_process new_lps;
-  new_lps.action_summands() = m_spec.process().action_summands();
-  new_lps.deadlock_summands() = m_spec.process().deadlock_summands();
-
   // update the summands in new_lps
-  unfold_summands(new_lps.action_summands());
+  unfold_summands(m_spec.process().action_summands());
 
   // Replace occurrences of unfolded parameters by the corresponding case function
+  // Clear process parameters first, to ensure capture avoiding substitution
+  // ignores the process parameters.
+  m_spec.process().process_parameters() = data::variable_list();
   if (m_alt_case_placement)
   {
-    insert_case_functions(new_lps, parameter_case_function());
+    insert_case_functions(m_spec.process(), parameter_case_function());
   }
   else
   {
     //Prepare parameter substitution
-    mutable_map_substitution< std::map< data::variable , data::data_expression > > s{parameter_substitution()};
-    lps::replace_variables_capture_avoiding( new_lps, s );
+    const mutable_map_substitution< std::map< data::variable , data::data_expression > > s{parameter_substitution()};
+    lps::replace_variables_capture_avoiding(m_spec.process(), s);
   }
 
   // NB: order is important. If we first replace the parameters, they are changed
   // again when performing the capture avoiding substitution, most likely leading
   // to an LPS that is not well-formed.
-  new_lps.process_parameters() = data::variable_list(new_process_parameters.begin(), new_process_parameters.end());
+  m_spec.process().process_parameters() = data::variable_list(new_process_parameters.begin(), new_process_parameters.end());
 
-  mCRL2log(debug) << "\nNew LPS:\n" <<  lps::pp(new_lps) << std::endl;
+  mCRL2log(debug) << "\nNew LPS:\n" <<  lps::pp(m_spec.process()) << std::endl;
 
-  assert(check_well_typedness(new_lps));
-  m_spec.process() = new_lps;
+  assert(check_well_typedness(m_spec.process()));
 }
 
 void lpsparunfold::update_linear_process_initialization(
