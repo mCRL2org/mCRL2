@@ -269,10 +269,6 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
       return in;
     }
 
-    /** \brief Add a new equation to m_data_specification.
-    **/
-    void add_new_equation(const mcrl2::data::data_expression& lhs, const mcrl2::data::data_expression& rhs);
-
     // Applies 'process unfolding' to a sequence of summands.
     void unfold_summands(mcrl2::lps::stochastic_action_summand_vector& summands);
 };

@@ -78,9 +78,11 @@ data::variable lpsparunfold::generate_fresh_variable(std::string str, const sort
 
 void lpsparunfold::determine_affected_constructors()
 {
+  assert(m_new_cache_element.affected_constructors.empty());
+
   m_new_cache_element.affected_constructors = m_spec.data().constructors(m_unfold_parameter.sort());
 
-  mCRL2log(debug) << "k:\t";
+  mCRL2log(debug) << "constructors of unfolded sort:\t";
   mCRL2log(log::verbose) << "" <<  m_unfold_parameter.name()  << " has " <<  m_new_cache_element.affected_constructors.size() << " constructor function(s)" << std::endl;
 
   if(log::mCRL2logEnabled(debug))
@@ -133,7 +135,6 @@ data::function_symbol lpsparunfold::create_case_function(const sort_expression& 
     data::function_symbol fs(m_new_cache_element.case_function_name,
                              data::function_sort(fsl, sort));
 
-
     mCRL2log(debug) << "- Created C map: " << fs << std::endl;
     m_new_cache_element.case_functions[sort] = fs;
     m_spec.data().add_mapping(fs);
@@ -146,16 +147,14 @@ data::function_symbol lpsparunfold::create_case_function(const sort_expression& 
   {
     return case_function_it->second;
   }
-
-
-
 }
 
 void lpsparunfold::create_determine_function()
 {
   std::string str = "Det_";
   str.append(std::string(m_new_cache_element.fresh_basic_sort.name()));
-  m_new_cache_element.determine_function = data::function_symbol(generate_fresh_function_symbol_name(str),
+  m_new_cache_element.determine_function =
+      data::function_symbol(generate_fresh_function_symbol_name(str),
                            data::make_function_sort_(m_unfold_parameter.sort(),
                                      m_new_cache_element.fresh_basic_sort ));
   mCRL2log(debug) << "\t" <<  m_new_cache_element.determine_function << std::endl;
@@ -202,12 +201,13 @@ void lpsparunfold::generate_projection_function_equations()
   function_symbol_vector::const_iterator pi_it = m_new_cache_element.projection_functions.begin();
   for (const function_symbol& f : m_new_cache_element.affected_constructors)
   {
-    variable_vector f_arguments(m_data_equation_argument_generator.arguments(f));
+    const variable_vector f_arguments(m_data_equation_argument_generator.arguments(f));
+    const variable_list f_arguments_list(f_arguments.begin(), f_arguments.end());
 
     for(const variable& arg: f_arguments)
     {
-      application lhs(*pi_it, application(f, f_arguments.begin(), f_arguments.end()));
-      add_new_equation(lhs, arg);
+      const application lhs(*pi_it, application(f, f_arguments_list));
+      m_spec.data().add_equation(data_equation(f_arguments_list, lhs, arg));
 
       // For the same projection function, generate right hand sides with default
       // values if the projection function is applied to an expression with a
@@ -216,8 +216,9 @@ void lpsparunfold::generate_projection_function_equations()
       {
         if (f != g)
         {
-          variable_vector g_arguments(
+          const variable_vector g_arguments(
               m_data_equation_argument_generator.arguments(g));
+          const variable_list g_arguments_list(g_arguments.begin(), g_arguments.end());
           application lhs;
           if (g_arguments.empty())
           {
@@ -226,12 +227,12 @@ void lpsparunfold::generate_projection_function_equations()
           else
           {
             lhs = application(
-                *pi_it, application(g, g_arguments.begin(), g_arguments.end()));
+                *pi_it, application(g, g_arguments_list));
           }
           try
           {
             const data_expression rhs = m_representative_generator(lhs.sort());
-            add_new_equation(lhs, rhs);
+            m_spec.data().add_equation(data_equation(g_arguments_list, lhs, rhs));
           }
           catch (runtime_error& e)
           {
@@ -255,16 +256,6 @@ void lpsparunfold::generate_projection_function_equations()
       ++pi_it;
     }
   }
-}
-
-
-void lpsparunfold::add_new_equation(const data_expression& lhs, const data_expression& rhs)
-{
-  mCRL2log(log::verbose) << "- Added equation " <<  data::pp(data_equation(lhs, rhs)) << std::endl;
-  std::set< variable > svars = find_all_variables(lhs);
-  std::set< variable > tmp_var = find_all_variables(rhs);
-  svars.insert(tmp_var.begin(), tmp_var.end());
-  m_spec.data().add_equation(data_equation(variable_list(svars.begin(), svars.end()), lhs, rhs));
 }
 
 void lpsparunfold::unfold_summands(lps::stochastic_action_summand_vector& summands)
@@ -575,7 +566,8 @@ void lpsparunfold::generate_case_function_equations(const data::function_symbol&
 
   assert(atermpp::down_cast<function_sort>(case_function.sort()).domain().size() == m_new_cache_element.new_constructors.size() + 1);
   /* Generate variable identifier string for projection */
-  variable_vector vars = m_data_equation_argument_generator.arguments(case_function);
+  const variable_vector vars = m_data_equation_argument_generator.arguments(case_function);
+  const variable_list used_vars(++vars.begin(), vars.end()); // all but the first parameter are used in the data equation.
 
   // We generate one equation for each of the constructors of the new sort,
   // projecting out the corresponding argument.
@@ -584,11 +576,12 @@ void lpsparunfold::generate_case_function_equations(const data::function_symbol&
   // vars_it represents d_i above.
   variable_vector::const_iterator vars_it = vars.begin();
   ++vars_it; // first variable to be skipped.
+
   for(data::function_symbol new_constructor: m_new_cache_element.new_constructors)
   {
     sub_args[0] = new_constructor; // set c_i
     const application lhs(case_function , sub_args);
-    add_new_equation(lhs,*vars_it);
+    m_spec.data().add_equation(data_equation(used_vars, lhs, *vars_it));
     ++vars_it;
   }
 
@@ -598,7 +591,7 @@ void lpsparunfold::generate_case_function_equations(const data::function_symbol&
   data_expression_vector eq_args(m_new_cache_element.new_constructors.size() + 1, vars.back());
   eq_args[0] = vars.front();
   const application lhs(case_function , eq_args);
-  add_new_equation(lhs, vars.back());
+  m_spec.data().add_equation(data_equation(data::variable_list({vars.front(), vars.back()}), lhs, vars.back()));
 }
 
 void lpsparunfold::generate_determine_function_equations()
@@ -607,17 +600,21 @@ void lpsparunfold::generate_determine_function_equations()
   for (const function_symbol& f: m_new_cache_element.affected_constructors)
   {
     /* Creating an equation for the detector function */
-    variable_vector function_arguments = m_data_equation_argument_generator.arguments(f);
+    const variable_vector function_arguments = m_data_equation_argument_generator.arguments(f);
     if(function_arguments.empty())
     {
-      add_new_equation(application(m_new_cache_element.determine_function, f),
-                       *constructor_it);
+      m_spec.data().add_equation(data_equation(
+          application(m_new_cache_element.determine_function, f),
+                       *constructor_it));
     }
     else
     {
-      add_new_equation(application(m_new_cache_element.determine_function,
-                                   application(f, function_arguments.begin(), function_arguments.end())),
-                       *constructor_it);
+      const variable_list args(function_arguments.begin(), function_arguments.end());
+      m_spec.data().add_equation(data_equation(
+          args,
+          application(m_new_cache_element.determine_function,
+                      application(f,args)),
+          *constructor_it));
     }
   }
 
