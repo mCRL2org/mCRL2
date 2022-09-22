@@ -32,7 +32,7 @@ struct unfold_cache_element
   // case functions for sort s. Note this may be more due to, e.g., adding distribution rules.
   // invariant: case_functions.front() is the case function
   // C: fresh_basic_sort # s # ... # s -> s
-  mcrl2::data::function_symbol_vector case_functions;
+  std::map<mcrl2::data::sort_expression, mcrl2::data::function_symbol> case_functions;
   mcrl2::data::function_symbol determine_function;  // Det function for s
   mcrl2::data::function_symbol_vector projection_functions; // pi functions for s
 };
@@ -109,17 +109,17 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
 
     /** \brief  Applies lpsparunfold algorithm on a process parameter of an mCRL2 process specification .
      *  \pre algorithm has not been called before.
-     * \param[in] parameter_at_index An integer value that represents the index value of an process parameter.
-     * \post   The process parameter at index parameter_at_index is unfolded in the mCRL2 process specification.
+     *  \param[in] parameter_at_index An integer value that represents the index value of an process parameter.
+     *  \post   The process parameter at index parameter_at_index is unfolded in the mCRL2 process specification.
     **/
-    void algorithm(std::size_t parameter_at_index);
+    void algorithm(const std::size_t parameter_at_index);
 
   private:
-    /// set to true when the algorithm has been run once; as the algorithm should
+    /// \brief set to true when the algorithm has been run once; as the algorithm should
     /// run only once...
     bool m_run_before;
 
-    /// set of identifiers to use during fresh variable generation
+    /// \brief set of identifiers to use during fresh variable generation
     mcrl2::data::set_identifier_generator m_identifier_generator;
 
     /// \brief generator for arguments in left hand side of data equations
@@ -167,7 +167,7 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
     **/
     mcrl2::core::identifier_string generate_fresh_function_symbol_name(const std::string& str);
 
-    /** \brief  Generates variable of type sort based on a given string str.
+    /** \brief Generates variable of type sort based on a given string str.
       * \param str a string value. The value is used to generate a fresh
       *         variable name.
       * \param sort The sort of the variable to generate.
@@ -177,7 +177,8 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
     mcrl2::data::variable generate_fresh_variable(std::string str, const data::sort_expression& sort);
 
     /** \brief  Creates the case function with number of arguments determined by
-     *          the number of affected constructors.
+     *          the number of affected constructors, the sort of the arguments and
+     *          result are determined by sort..
      *  \param  sort The sort of the arguments and return sort of the case function
       * \return A function that returns the corresponding constructor given the
       *         case selector and constructors.
@@ -185,15 +186,13 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
     data::function_symbol create_case_function(const data::sort_expression& sort);
 
     /** \brief  Creates the determine function.
-      * \return A function that maps a constructor to the fresh basic sort
+      * \return A function that maps constructors to the fresh basic sort
     **/
     void create_determine_function();
 
     /** \brief  Creates projection functions for the unfolded process parameter.
-      * \param  k a integer value. The value represents the number of
-      *         constructors of the unfolded process parameter.
       * \return A function that returns the projection functions for the
-      *         constructor of the unfolded process parameter.
+      *         constructors of the unfolded process parameter.
     **/
     void create_projection_functions();
 
@@ -228,19 +227,14 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
       const mcrl2::data::data_expression& de);
 
     /** \brief substitute unfold process parameter in the linear process
-      * \param  case_function the case function
-      * \param  determine_function the determine function
       * \param  parameter_at_index the parameter index
-      * \param  pi the projection functions
-      * \return a new linear process in which the process parameter at given index is unfolded
+      * \post the process parameter at given index is unfolded in the the linear process
     **/
     void update_linear_process(std::size_t parameter_at_index);
 
     /** \brief substitute unfold process parameter in the initialization of the linear process
-      * \param  determine_function the determine function
       * \param  parameter_at_index the parameter index
-      * \param  pi the projection functions
-      * \return a new initialization for the linear process in which the process parameter at given index is unfolded
+      * \post the initialization for the linear process is updated by unfolding the parameter at given index is unfolded
     **/
    void update_linear_process_initialization(
       std::size_t parameter_at_index);
@@ -249,7 +243,7 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
     **/
     void create_distribution_law_over_case(
       const mcrl2::data::function_symbol& function_for_distribution,
-      const mcrl2::data::function_symbol& case_function);
+      const mcrl2::data::function_symbol case_function);
 
     void generate_case_function_equations(
       const mcrl2::data::function_symbol& case_function);
