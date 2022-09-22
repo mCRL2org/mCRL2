@@ -121,27 +121,34 @@ data::function_symbol lpsparunfold::create_case_function(const sort_expression& 
         generate_fresh_function_symbol_name(str);
   }
 
-  // all except first argument are the sort of the unfolded type.
-  data::sort_expression_vector fsl(m_new_cache_element.affected_constructors.size() + 1, sort);
-  fsl[0] = m_new_cache_element.fresh_basic_sort ;
-
-  data::function_symbol fs(m_new_cache_element.case_function_name,
-                           data::function_sort(fsl, sort));
-
-  // Check if the function symbol was already in the list; if not, add it.
-  if(std::find(m_new_cache_element.case_functions.begin(),
-                m_new_cache_element.case_functions.end(),
-                fs) == m_new_cache_element.case_functions.end())
+  // Check if the function symbol was already in the cache; if not, create and add it
+  std::map<mcrl2::data::sort_expression, mcrl2::data::function_symbol>::const_iterator
+      case_function_it = m_new_cache_element.case_functions.find(sort);
+  if(case_function_it == m_new_cache_element.case_functions.end())
   {
+    // all except first argument are the sort of the unfolded type.
+    data::sort_expression_vector fsl(m_new_cache_element.affected_constructors.size() + 1, sort);
+    fsl[0] = m_new_cache_element.fresh_basic_sort ;
+
+    data::function_symbol fs(m_new_cache_element.case_function_name,
+                             data::function_sort(fsl, sort));
+
+
     mCRL2log(debug) << "- Created C map: " << fs << std::endl;
-    m_new_cache_element.case_functions.push_back(fs);
+    m_new_cache_element.case_functions[sort] = fs;
     m_spec.data().add_mapping(fs);
 
     // generate and add equations.
     generate_case_function_equations(fs);
+    return fs;
+  }
+  else
+  {
+    return case_function_it->second;
   }
 
-  return fs;
+
+
 }
 
 void lpsparunfold::create_determine_function()
@@ -242,8 +249,7 @@ void lpsparunfold::generate_projection_function_equations()
       if(m_add_distribution_laws)
       {
         create_distribution_law_over_case(*pi_it, data::if_(m_unfold_parameter.sort()));
-        const function_symbol case_function = m_new_cache_element.case_functions.front();
-        create_distribution_law_over_case(*pi_it, case_function);
+        create_distribution_law_over_case(*pi_it, m_new_cache_element.case_functions[m_unfold_parameter.sort()]);
       }
 
       ++pi_it;
@@ -313,7 +319,7 @@ lpsparunfold::case_func_vector lpsparunfold::parameter_case_function()
 
     dev.push_back(case_func_arg);
 
-    result.push_back(std::make_tuple(m_unfold_parameter, m_new_cache_element.case_functions.front(), m_injected_parameters[0], dev));
+    result.push_back(std::make_tuple(m_unfold_parameter, m_new_cache_element.case_functions[m_unfold_parameter.sort()], m_injected_parameters[0], dev));
   }
   return result;
 }
@@ -481,8 +487,8 @@ std::map<data::variable, data::data_expression> lpsparunfold::parameter_substitu
 
     dev.push_back(case_func_arg);
   }
-  mCRL2log(log::verbose) << "Parameter substitution:\t" << m_unfold_parameter << "\t->\t" <<  data::application(m_new_cache_element.case_functions.front(), dev) << std::endl;
-  result.insert(std::make_pair(m_unfold_parameter, data::application(m_new_cache_element.case_functions.front(), dev)));
+  mCRL2log(log::verbose) << "Parameter substitution:\t" << m_unfold_parameter << "\t->\t" <<  data::application(m_new_cache_element.case_functions[m_unfold_parameter.sort()], dev) << std::endl;
+  result.insert(std::make_pair(m_unfold_parameter, data::application(m_new_cache_element.case_functions[m_unfold_parameter.sort()], dev)));
   return result;
 }
 
@@ -517,9 +523,12 @@ data::variable lpsparunfold::process_parameter_at(const std::size_t index)
 }
 
 // Add equation for f(C(e, d_1, ..., d_n)) = C(e, f(d_1), ..., f(d_n))
+// note: the case_function parameter must be copied; passing by reference
+// may lead to crashes if the argument is an element of
+// m_new_cache_element.case_functions if a new case function is introduced.
 void lpsparunfold::create_distribution_law_over_case(
   const data::function_symbol& f,
-  const data::function_symbol& case_function)
+  const data::function_symbol case_function)
 {
   assert(case_function.sort().target_sort() == atermpp::down_cast<function_sort>(f.sort()).domain().front());
 
@@ -619,12 +628,11 @@ void lpsparunfold::generate_determine_function_equations()
     Det(C(e,x1,x2,...))=C(e,Det(x1),Det(x2),...);
     */
     create_distribution_law_over_case(m_new_cache_element.determine_function, data::if_(m_unfold_parameter.sort()));
-    const function_symbol case_function = m_new_cache_element.case_functions.front();
-    create_distribution_law_over_case(m_new_cache_element.determine_function, case_function);
+    create_distribution_law_over_case(m_new_cache_element.determine_function, m_new_cache_element.case_functions[m_unfold_parameter.sort()]);
   }
 }
 
-void lpsparunfold::algorithm(std::size_t parameter_at_index)
+void lpsparunfold::algorithm(const std::size_t parameter_at_index)
 {
   // Can only be run once as local data structures are not cleared
   assert(!m_run_before);
