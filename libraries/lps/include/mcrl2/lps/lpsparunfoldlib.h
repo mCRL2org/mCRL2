@@ -105,7 +105,8 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
       **/
     lpsparunfold(lps::stochastic_specification& spec,
                  std::map< data::sort_expression , unfold_cache_element >& cache,
-                 bool add_distribution_laws = false, bool alt_case_placement = false);
+                 bool add_distribution_laws = false, bool alt_case_placement = false,
+                 bool possibly_inconsistent = false);
 
     /** \brief  Applies lpsparunfold algorithm on a process parameter of an mCRL2 process specification .
      *  \pre algorithm has not been called before.
@@ -147,6 +148,10 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
 
     /// \brief Boolean to indicate if alternative placement of case functions should be used.
     bool m_alt_case_placement;
+
+    /// \brief Boolean indicated whether rewrite rules may be added that could make
+    ///        the data specification inconsistent.
+    bool m_possibly_inconsistent;
 
     //data::data_expression apply_case_function(const data::data_expression& expr, const case_func_replacement& case_funcs);
     case_func_replacement parameter_case_function();
