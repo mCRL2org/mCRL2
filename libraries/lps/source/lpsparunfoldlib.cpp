@@ -280,9 +280,9 @@ void lpsparunfold::unfold_summands(lps::stochastic_action_summand_vector& summan
   }
 }
 
-lpsparunfold::case_func_vector lpsparunfold::parameter_case_function()
+lpsparunfold::case_func_replacement lpsparunfold::parameter_case_function()
 {
-  lpsparunfold::case_func_vector result;
+  lpsparunfold::case_func_replacement result;
   data_expression_vector dev;
 
   auto new_pars_it = m_injected_parameters.cbegin();
@@ -309,10 +309,10 @@ lpsparunfold::case_func_vector lpsparunfold::parameter_case_function()
     }
 
     dev.push_back(case_func_arg);
-
-    result.push_back(std::make_tuple(m_unfold_parameter, m_new_cache_element.case_functions[m_unfold_parameter.sort()], m_injected_parameters[0], dev));
   }
-  return result;
+
+  return std::make_tuple(m_unfold_parameter, m_new_cache_element.case_functions, m_injected_parameters[0], dev);
+
 }
 
 void lpsparunfold::update_linear_process(std::size_t parameter_at_index)
@@ -390,6 +390,11 @@ void lpsparunfold::update_linear_process(std::size_t parameter_at_index)
   m_spec.process().process_parameters() = data::variable_list();
   if (m_alt_case_placement)
   {
+    create_case_function(data::sort_bool::bool_());
+    for(const data::variable& param: new_process_parameters)
+    {
+      create_case_function(param.sort());
+    }
     insert_case_functions(m_spec.process(), parameter_case_function());
   }
   else

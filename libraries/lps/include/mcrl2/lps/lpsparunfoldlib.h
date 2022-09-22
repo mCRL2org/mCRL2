@@ -94,7 +94,7 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
   public:
 
     // old parameter, case function, determinizing parameter, replacement expressions
-    typedef std::vector<std::tuple<data::variable, data::function_symbol, data::variable, data::data_expression_vector>> case_func_vector;
+    typedef std::tuple<data::variable, std::map<data::sort_expression, data::function_symbol>, data::variable, data::data_expression_vector> case_func_replacement;
 
     /** \brief  Constructor for lpsparunfold algorithm.
       * \param[in] spec which is a valid mCRL2 process specification.
@@ -148,8 +148,8 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
     /// \brief Boolean to indicate if alternative placement of case functions should be used.
     bool m_alt_case_placement;
 
-    //data::data_expression apply_case_function(const data::data_expression& expr, const case_func_vector& case_funcs);
-    case_func_vector parameter_case_function();
+    //data::data_expression apply_case_function(const data::data_expression& expr, const case_func_replacement& case_funcs);
+    case_func_replacement parameter_case_function();
 
     /** \brief  Generates a fresh basic sort given a sort expression.
       * \param  str a string value. The value is used to generate a fresh
@@ -289,19 +289,15 @@ Binder<Builder, parunfold_replacement<Builder, Binder>, parunfold_replacement<Bu
   using super::update;
 
   data::detail::capture_avoiding_substitution_updater<parunfold_replacement<Builder, Binder>> sigma1;
-  lpsparunfold::case_func_vector case_funcs;
+  lpsparunfold::case_func_replacement case_funcs;
   data::data_expression current_replacement;
 
-  parunfold_replacement(const lpsparunfold::case_func_vector& case_funcs,
+  parunfold_replacement(const lpsparunfold::case_func_replacement& case_funcs,
                         data::set_identifier_generator& id_generator)
   : super(sigma1)
   , sigma1(*this, id_generator)
   {
     this->case_funcs = case_funcs;
-    if (case_funcs.size() != 1)
-    {
-      mCRL2log(log::verbose) << "Unfolding more than one parameter somehow" << std::endl;
-    }
   }
 
   template <class T>
@@ -322,22 +318,26 @@ Binder<Builder, parunfold_replacement<Builder, Binder>, parunfold_replacement<Bu
   data::data_expression apply_case_function(const data::data_expression& expr)
   {
     data::data_expression result = expr;
-    for (auto& [par, case_f, det_f, replacements]: case_funcs)
+    auto& [par, case_f, det_f, replacements] = case_funcs;
+
+    data::data_expression_vector args;
+    args.push_back(det_f);
+
+    for (const data::data_expression& r: replacements)
     {
-      data::data_expression_vector args;
-      args.push_back(det_f);
-
-      for (const data::data_expression& r: replacements)
-      {
-        current_replacement = r;
-        data::data_expression arg;
-        super::apply(arg, result);
-        args.push_back(arg);
-      }
-      current_replacement = data::data_expression();
-
-      result = data::application(case_f, args);
+      current_replacement = r;
+      data::data_expression arg;
+      super::apply(arg, result);
+      args.push_back(arg);
     }
+    current_replacement = data::data_expression();
+
+    if(case_f.find(expr.sort()) == case_f.end())
+    {
+      throw mcrl2::runtime_error("Case function with target sort " + data::pp(expr.sort()) + " not declared.");
+    }
+    result = data::application(case_f[expr.sort()], args);
+
     return result;
   }
 
@@ -348,7 +348,7 @@ Binder<Builder, parunfold_replacement<Builder, Binder>, parunfold_replacement<Bu
     {
       return x;
     }
-    if (std::get<0>(*case_funcs.begin()) != x)
+    if (std::get<0>(case_funcs) != x)
     {
       throw mcrl2::runtime_error("Unexpected variable at this point");
     }
@@ -358,7 +358,7 @@ Binder<Builder, parunfold_replacement<Builder, Binder>, parunfold_replacement<Bu
 
 template <template <class> class Builder, template <template <class> class, class, class> class Binder>
 parunfold_replacement<Builder, Binder>
-apply_parunfold_replacement_builder(const lpsparunfold::case_func_vector& case_funcs,
+apply_parunfold_replacement_builder(const lpsparunfold::case_func_replacement& case_funcs,
                                     data::set_identifier_generator& id_generator)
 {
   return parunfold_replacement<Builder, Binder>(case_funcs, id_generator);
@@ -366,7 +366,7 @@ apply_parunfold_replacement_builder(const lpsparunfold::case_func_vector& case_f
 
 template <typename T>
 void insert_case_functions(T& x,
-                           const lpsparunfold::case_func_vector& cfv,
+                           const lpsparunfold::case_func_replacement& cfv,
                            data::set_identifier_generator& id_generator,
                            typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
 )
@@ -376,21 +376,22 @@ void insert_case_functions(T& x,
 
 template <typename T>
 void insert_case_functions(T& x,
-                           const lpsparunfold::case_func_vector& cfv,
+                           const lpsparunfold::case_func_replacement& cfv,
                            typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
 )
 {
   data::set_identifier_generator id_generator;
   id_generator.add_identifiers(lps::find_identifiers(x));
-  for (auto& [par, case_f, det_f, replacements]: cfv)
+  auto& [par, case_f, det_f, replacements] = cfv;
+
+  // assumes all case functions have the same name and that par.sort() is in the map of case functions
+  id_generator.add_identifier(case_f.find(par.sort())->second.name());
+  id_generator.add_identifier(det_f.name());
+  for (const data::data_expression& r: replacements)
   {
-    id_generator.add_identifier(case_f.name());
-    id_generator.add_identifier(det_f.name());
-    for (const data::data_expression& r: replacements)
-    {
-      id_generator.add_identifiers(data::find_identifiers(r));
-    }
+    id_generator.add_identifiers(data::find_identifiers(r));
   }
+
   insert_case_functions(x, cfv, id_generator);
 }
 
