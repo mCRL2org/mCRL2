@@ -623,9 +623,10 @@ void lpsparunfold::generate_case_function_equations(const data::function_symbol&
 
 void lpsparunfold::generate_determine_function_equations()
 {
-  const function_symbol_vector::const_iterator constructor_it = m_new_cache_element.new_constructors.begin();
+  function_symbol_vector::const_iterator constructor_it = m_new_cache_element.new_constructors.begin();
   for (const function_symbol& f: m_new_cache_element.affected_constructors)
   {
+    assert(constructor_it != m_new_cache_element.new_constructors.end());
     /* Creating an equation for the detector function */
     const variable_vector function_arguments = m_data_equation_argument_generator.arguments(f);
     if(function_arguments.empty())
@@ -643,6 +644,7 @@ void lpsparunfold::generate_determine_function_equations()
                       application(f,args)),
           *constructor_it));
     }
+    ++constructor_it;
   }
 
   if (m_add_distribution_laws)
