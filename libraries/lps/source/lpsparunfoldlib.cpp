@@ -32,14 +32,16 @@ using mcrl2::lps::lpsparunfold;
 /// \brief Constructor
 lpsparunfold::lpsparunfold(lps::stochastic_specification& spec,
                            std::map< data::sort_expression , unfold_cache_element >& cache,
-                           bool add_distribution_laws, bool alt_case_placement)
+                           bool add_distribution_laws, bool alt_case_placement,
+                           bool possibly_inconsistent)
     : lps::detail::lps_algorithm<lps::stochastic_specification>(spec),
       m_run_before(false),
       m_data_equation_argument_generator(m_identifier_generator),
       m_cache(cache),
       m_representative_generator(spec.data()),
       m_add_distribution_laws(add_distribution_laws),
-      m_alt_case_placement(alt_case_placement)
+      m_alt_case_placement(alt_case_placement),
+      m_possibly_inconsistent(possibly_inconsistent)
 {
   m_identifier_generator.add_identifiers(lps::find_identifiers(spec));
   m_identifier_generator.add_identifiers(data::find_identifiers(spec.data()));
@@ -593,6 +595,30 @@ void lpsparunfold::generate_case_function_equations(const data::function_symbol&
   eq_args[0] = vars.front();
   const application lhs(case_function , eq_args);
   m_spec.data().add_equation(data_equation(data::variable_list({vars.front(), vars.back()}), lhs, vars.back()));
+
+  // If the case function maps to the Booleans, we can replace it by a disjunction.
+  // Note: this may make the data specification inconsistent.
+  if(m_possibly_inconsistent && sort_bool::is_bool(case_function.sort().target_sort()))
+  {
+    // C(x, d_1, ..., d_n) = (d_1 && x == c_1) || (c_2 && x == c_2) || .... (d_n && x == c_n)
+    const data::variable_list args(vars.begin(), vars.end());
+    const application lhs(case_function, args);
+
+    data_expression_vector disjuncts;
+    vars_it = vars.begin();
+    const variable det_var = *vars_it++;
+    for(const function_symbol& constructor: m_new_cache_element.new_constructors)
+    {
+      if(vars_it == vars.end())
+      {
+        throw mcrl2::runtime_error("The number of variables and the number of constructors differs.");
+      }
+      disjuncts.push_back(
+          sort_bool::and_(*vars_it++, equal_to(det_var, constructor)));
+    }
+
+    m_spec.data().add_equation(data_equation(args, lhs, lazy::join_or(disjuncts.begin(), disjuncts.end())));
+  }
 }
 
 void lpsparunfold::generate_determine_function_equations()
