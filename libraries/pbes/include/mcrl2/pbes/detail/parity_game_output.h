@@ -143,20 +143,11 @@ class parity_game_output: public parity_game_generator
     std::string python_graph()
     {
       std::string result;
-#ifdef _MSC_VER
       result = result + python_set(apply(V, [&](std::size_t i) { return vertex(i); })) + "\n";
       result = result + python_set(apply(E, [&](std::pair<std::size_t, std::size_t> e) { return edge(e); })) + "\n";
       result = result + "{" + join(apply(priorities, [&](std::pair<std::size_t, std::size_t> p) { return priority(p); }), ", ") + "}\n";
       result = result + python_set(apply(even_vertices, [&](std::size_t i) { return vertex(i); })) + "\n";
       result = result + python_set(apply(odd_vertices, [&](std::size_t i) { return vertex(i); }));
-#else      
-      // std::ref is needed to prevent copying of *this
-      result = result + python_set(apply(V, std::bind(&parity_game_output::vertex, std::ref(*this), std::placeholders::_1))) + "\n";
-      result = result + python_set(apply(E, std::bind(&parity_game_output::edge, std::ref(*this), std::placeholders::_1))) + "\n";
-      result = result + "{" + join(apply(priorities, std::bind(&parity_game_output::priority, std::ref(*this), std::placeholders::_1)), ", ") + "}\n";
-      result = result + python_set(apply(even_vertices, std::bind(&parity_game_output::vertex, std::ref(*this), std::placeholders::_1))) + "\n";
-      result = result + python_set(apply(odd_vertices, std::bind(&parity_game_output::vertex, std::ref(*this), std::placeholders::_1)));
-#endif      
       return result;
     }
 
