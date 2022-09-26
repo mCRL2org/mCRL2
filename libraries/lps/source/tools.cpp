@@ -20,6 +20,7 @@
 #include "mcrl2/lps/tools.h"
 #include "mcrl2/lps/untime.h"
 #include "mcrl2/lps/one_point_rule_rewrite.h"
+#include "mcrl2/lps/rewriters/one_point_condition_rewrite.h"
 
 namespace mcrl2
 {
@@ -228,6 +229,12 @@ void lpsrewr(const std::string& input_filename,
     case quantifier_one_point:
     {
       one_point_rule_rewrite(spec);
+      break;
+    }
+    case condition_one_point:
+    {
+      mcrl2::data::rewriter R(spec.data(), rewrite_strategy);
+      lps::one_point_condition_rewrite(spec, R);
       break;
     }
   }
