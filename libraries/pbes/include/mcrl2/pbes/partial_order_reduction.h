@@ -480,22 +480,22 @@ class partial_order_reduction_algorithm
       tribool left_accords_data(bool affect_set, bool needs_yes)
       {
         return accords_data(affect_set, needs_yes,
-                            std::bind(&summand_relations_data::left_accords_antecedent, *this),
-                            std::bind(&summand_relations_data::left_accords_consequent, *this));
+                            [this](){ return left_accords_antecedent(); },
+                            [this](){ return left_accords_consequent(); });
       }
 
       tribool square_accords_data(bool affect_set, bool needs_yes)
       {
         return accords_data(affect_set, needs_yes,
-                            std::bind(&summand_relations_data::coenabled_antecedent, *this),
-                            std::bind(&summand_relations_data::square_accords_consequent, *this));
+                            [this](){ return coenabled_antecedent(); },
+                            [this](){ return square_accords_consequent(); });
       }
 
       tribool triangle_accords_data(bool affect_set, bool needs_yes)
       {
         return accords_data(affect_set, needs_yes,
-                            std::bind(&summand_relations_data::coenabled_antecedent, *this),
-                            std::bind(&summand_relations_data::triangle_accords_consequent, *this));
+                            [this](){ return coenabled_antecedent(); },
+                            [this](){ return triangle_accords_consequent(); });
       }
     };
 
