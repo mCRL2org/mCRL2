@@ -355,7 +355,7 @@ Binder<Builder, parunfold_replacement<Builder, Binder>, parunfold_replacement<Bu
     }
     if (std::get<0>(case_funcs) != x)
     {
-      throw mcrl2::runtime_error("Unexpected variable at this point");
+      return x;
     }
     return current_replacement;
   }
