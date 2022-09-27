@@ -392,11 +392,25 @@ void lpsparunfold::update_linear_process(std::size_t parameter_at_index)
   m_spec.process().process_parameters() = data::variable_list();
   if (m_alt_case_placement)
   {
-    create_case_function(data::sort_bool::bool_());
-    for(const data::variable& param: new_process_parameters)
+    create_case_function(data::sort_bool::bool_()); // conditions
+    create_case_function(data::sort_real::real_()); // time/distributions
+
+    // process parameters
+    for (const data::variable& param : new_process_parameters)
     {
       create_case_function(param.sort());
     }
+
+    // parameters of actions
+    for (const process::action_label& action_label : m_spec.action_labels())
+    {
+      for (const sort_expression& s : action_label.sorts())
+      {
+        create_case_function(s);
+      }
+    }
+
+    // place the case functions
     insert_case_functions(m_spec.process(), parameter_case_function());
   }
   else
