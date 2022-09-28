@@ -47,6 +47,7 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
     bool m_add_distribution_laws;
     bool m_alt_case_placement;
     bool m_possibly_inconsistent;
+    bool m_globvars;
 
     void add_options(interface_description& desc)
     {
@@ -63,6 +64,9 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
                       "use an alternative placement method for case functions", 'a');
       desc.add_option("possibly-inconsistent",
                       "add rewrite rules that can make a data specification inconsistent", 'p');
+      desc.add_option("preserve-global-variables",
+                      "unfold global variables into a list of global variables, instead of applications of determiniser"
+                      " and projection functions to a single global variable", 'g');
     }
 
     void parse_options(const command_line_parser& parser)
@@ -126,6 +130,7 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
 
       m_alt_case_placement = parser.options.count("alt-case") > 0;
       m_possibly_inconsistent = parser.options.count("possibly-inconsistent") > 0;
+      m_globvars = parser.options.count("preserve-global-variables") > 0;
 
     }
 
@@ -201,7 +206,7 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
 
         while (!h_set_index.empty())
         {
-          lps::lpsparunfold lpsparunfold(spec, unfold_cache, m_add_distribution_laws, m_alt_case_placement, m_possibly_inconsistent);
+          lps::lpsparunfold lpsparunfold(spec, unfold_cache, m_add_distribution_laws, m_alt_case_placement, m_possibly_inconsistent, m_globvars);
           std::size_t index = *(max_element(h_set_index.begin(), h_set_index.end()));
           lpsparunfold.algorithm(index);
           h_set_index.erase(index);
