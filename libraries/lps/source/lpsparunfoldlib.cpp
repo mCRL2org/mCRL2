@@ -638,9 +638,12 @@ void lpsparunfold::generate_case_function_equations(const data::function_symbol&
     {
       for(const function_symbol& right: m_new_cache_element.new_constructors)
       {
-        const application lhs = data::equal_to(left, right);
-        const data_expression rhs = (left == right) ? data::true_() : data::false_();
-        m_spec.data().add_equation(data_equation(lhs, rhs));
+        if (left != right)
+        {
+          const application lhs = data::equal_to(left, right);
+          const data_expression rhs = data::false_();
+          m_spec.data().add_equation(data_equation(lhs, rhs));
+        }
       }
     }
   }
