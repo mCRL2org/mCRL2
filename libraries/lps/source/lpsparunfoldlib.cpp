@@ -632,6 +632,17 @@ void lpsparunfold::generate_case_function_equations(const data::function_symbol&
     }
 
     m_spec.data().add_equation(data_equation(args, lhs, lazy::join_or(disjuncts.begin(), disjuncts.end())));
+
+    // We also need to add rules for equality on the new sort.
+    for(const function_symbol& left: m_new_cache_element.new_constructors)
+    {
+      for(const function_symbol& right: m_new_cache_element.new_constructors)
+      {
+        const application lhs = data::equal_to(left, right);
+        const data_expression rhs = (left == right) ? data::true_() : data::false_();
+        m_spec.data().add_equation(data_equation(lhs, rhs));
+      }
+    }
   }
 }
 
