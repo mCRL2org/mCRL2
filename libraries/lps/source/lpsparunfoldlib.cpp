@@ -33,7 +33,7 @@ using mcrl2::lps::lpsparunfold;
 lpsparunfold::lpsparunfold(lps::stochastic_specification& spec,
                            std::map< data::sort_expression , unfold_cache_element >& cache,
                            bool add_distribution_laws, bool alt_case_placement,
-                           bool possibly_inconsistent)
+                           bool possibly_inconsistent, bool globvars)
     : lps::detail::lps_algorithm<lps::stochastic_specification>(spec),
       m_run_before(false),
       m_data_equation_argument_generator(m_identifier_generator),
@@ -41,7 +41,8 @@ lpsparunfold::lpsparunfold(lps::stochastic_specification& spec,
       m_representative_generator(spec.data()),
       m_add_distribution_laws(add_distribution_laws),
       m_alt_case_placement(alt_case_placement),
-      m_possibly_inconsistent(possibly_inconsistent)
+      m_possibly_inconsistent(possibly_inconsistent),
+      m_globvars(globvars)
 {
   m_identifier_generator.add_identifiers(lps::find_identifiers(spec));
   m_identifier_generator.add_identifiers(data::find_identifiers(spec.data()));
@@ -505,12 +506,33 @@ data::data_expression_vector lpsparunfold::unfold_constructor(const data_express
   assert(de.sort() == m_unfold_parameter.sort());
   data::data_expression_vector result;
 
-  /* Det function */
-  result.emplace_back(application(m_new_cache_element.determine_function, de)) ;
-
-  for (const function_symbol& f: m_new_cache_element.projection_functions)
+  // Replace global variables with fresh global variables, if the corresponding option is set.
+  if(m_globvars &&
+      data::is_variable(de) &&
+      m_spec.global_variables().find(atermpp::down_cast<variable>(de)) != m_spec.global_variables().end())
   {
-    result.emplace_back(application(f, de)) ;
+    // don't care for det position
+    variable v = generate_fresh_variable("dc", m_new_cache_element.determine_function.sort().target_sort());
+    result.push_back(v);
+    m_spec.global_variables().insert(v);
+
+    // don't cares for each of the arguments
+    for (const function_symbol& f: m_new_cache_element.projection_functions)
+    {
+      v = generate_fresh_variable("dc", f.sort().target_sort());
+      result.push_back(v);
+      m_spec.global_variables().insert(v);
+    }
+  }
+  else
+  {
+    /* Det function */
+    result.emplace_back(application(m_new_cache_element.determine_function, de)) ;
+
+    for (const function_symbol& f: m_new_cache_element.projection_functions)
+    {
+      result.emplace_back(application(f, de)) ;
+    }
   }
 
   return result;

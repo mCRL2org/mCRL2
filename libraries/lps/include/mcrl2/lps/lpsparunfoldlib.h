@@ -101,12 +101,13 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
       * \param[in,out] cache Cache to store information for reuse.
       * \param[in] add_distribution_laws If true, additional rewrite rules are introduced.
       * \param[in] alt_case_placement If true, case functions are placed at a higher level.
+      * \param[in] globvars If true, global variables are unfolded into a list of global variables.
       * \post   The content of mCRL2 process specification analysed for useful information and class variables are set.
       **/
     lpsparunfold(lps::stochastic_specification& spec,
                  std::map< data::sort_expression , unfold_cache_element >& cache,
                  bool add_distribution_laws = false, bool alt_case_placement = false,
-                 bool possibly_inconsistent = false);
+                 bool possibly_inconsistent = false, bool globvars = false);
 
     /** \brief  Applies lpsparunfold algorithm on a process parameter of an mCRL2 process specification .
      *  \pre algorithm has not been called before.
@@ -149,9 +150,16 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
     /// \brief Boolean to indicate if alternative placement of case functions should be used.
     bool m_alt_case_placement;
 
-    /// \brief Boolean indicated whether rewrite rules may be added that could make
+    /// \brief Boolean indicating whether rewrite rules may be added that could make
     ///        the data specification inconsistent.
     bool m_possibly_inconsistent;
+
+    /// \brief Boolean indicating how global variables should be unfolded.
+    ///        if true, global variables are unfolded into a vector of global variables,
+    ///        if false, global variable dc is unfolded into Det(dc), pi_0(dc), ..., pi_n(dc)
+    bool m_globvars;
+
+
 
     //data::data_expression apply_case_function(const data::data_expression& expr, const case_func_replacement& case_funcs);
     case_func_replacement parameter_case_function();
