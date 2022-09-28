@@ -9,12 +9,11 @@
 /// \file mcrl2/utilities/text_utility.h
 /// \brief String manipulation functions.
 
+#include <fstream>
+#include <regex>
+#include <boost/algorithm/string.hpp>  // for the functions trim, split, trim_copy, is_any_of, trim_right, trim_right_copy. 
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
-
-#include <boost/algorithm/string.hpp>
-#include <boost/xpressive/xpressive.hpp>
-#include <fstream>
 
 namespace mcrl2
 {
@@ -30,12 +29,12 @@ std::vector<std::string> split_paragraphs(const std::string& text)
   std::vector<std::string> result;
 
   // find multiple line endings
-  boost::xpressive::sregex paragraph_split = boost::xpressive::sregex::compile("\\n\\s*\\n");
+  std::regex paragraph_split {"\\n\\s*\\n"};
 
   // the -1 below directs the token iterator to display the parts of
   // the string that did NOT match the regular expression.
-  boost::xpressive::sregex_token_iterator cur(text.begin(), text.end(), paragraph_split, -1);
-  boost::xpressive::sregex_token_iterator end;
+  std::regex_token_iterator cur(text.begin(), text.end(), paragraph_split, -1);
+  std::regex_token_iterator<std::string::const_iterator> end;
 
   for (; cur != end; ++cur)
   {
@@ -97,10 +96,10 @@ std::string read_text(const std::string& filename, bool warn)
 std::string remove_comments(const std::string& text)
 {
   // matches everything from '%' until end of line
-  boost::xpressive::sregex src = boost::xpressive::sregex::compile("%[^\\n]*\\n");
+  std::regex src {"%[^\\n]*\\n"};
 
   std::string dest("\n");
-  return boost::xpressive::regex_replace(text, src, dest);
+  return std::regex_replace(text, src, dest);
 }
 
 /// \brief Removes whitespace from a string.
@@ -108,9 +107,9 @@ std::string remove_comments(const std::string& text)
 /// \return The removal result
 std::string remove_whitespace(const std::string& text)
 {
-  boost::xpressive::sregex src = boost::xpressive::sregex::compile("\\s");
+  std::regex src {"\\s"};
   std::string dest("");
-  return boost::xpressive::regex_replace(text, src, dest);
+  return std::regex_replace(text, src, dest);
 }
 
 /// \brief Regular expression replacement in a string.
@@ -120,7 +119,7 @@ std::string remove_whitespace(const std::string& text)
 /// \return The transformed string
 std::string regex_replace(const std::string& src, const std::string& dest, const std::string& text)
 {
-  return boost::xpressive::regex_replace(text, boost::xpressive::sregex::compile(src), dest);
+  return std::regex_replace(text, std::regex(src), dest);
 }
 
 /// \brief Split a string using a regular expression separator.
@@ -131,11 +130,11 @@ std::vector<std::string> regex_split(const std::string& text, const std::string&
 {
   std::vector<std::string> result;
   // find multiple line endings
-  boost::xpressive::sregex paragraph_split = boost::xpressive::sregex::compile(sep);
+  std::regex paragraph_split { sep };
   // the -1 below directs the token iterator to display the parts of
   // the string that did NOT match the regular expression.
-  boost::xpressive::sregex_token_iterator cur(text.begin(), text.end(), paragraph_split, -1);
-  boost::xpressive::sregex_token_iterator end;
+  std::sregex_token_iterator cur(text.begin(), text.end(), paragraph_split, -1);
+  std::sregex_token_iterator end;
   for (; cur != end; ++cur)
   {
     std::string word = *cur;
@@ -212,8 +211,8 @@ bool is_numeric_string(const std::string& s)
 {
   // The static below prevents the regular expression recognizer to be compiled
   // each time a string is matched, which is far too time consuming.
-  static boost::xpressive::sregex re = boost::xpressive::sregex::compile("0|(-?[1-9][0-9]*)");
-  return boost::xpressive::regex_match(s, re);
+  static std::regex re {"0|(-?[1-9][0-9]*)"};
+  return std::regex_match(s, re);
 }
 
 std::string trim_copy(const std::string& text)

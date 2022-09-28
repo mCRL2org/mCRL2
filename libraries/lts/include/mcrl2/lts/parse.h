@@ -12,8 +12,7 @@
 #ifndef MCRL2_LTS_PARSE_H
 #define MCRL2_LTS_PARSE_H
 
-#include <boost/xpressive/xpressive.hpp>
-
+#include <regex>
 #include "mcrl2/lts/detail/fsm_builder.h"
 
 namespace mcrl2::lts {
@@ -28,19 +27,19 @@ class simple_fsm_parser
     // Used for constructing an FSM
     detail::fsm_builder builder;
 
-    boost::xpressive::sregex regex_parameter = boost::xpressive::sregex::compile(R"(\s*([a-zA-Z_][a-zA-Z0-9_'@]*)\((\d+)\)\s*([a-zA-Z_][a-zA-Z0-9_'@#\-> \t=,\\(\\):]*)?\s*((\"[^\"]*\"\s*)*))");
+    const std::regex regex_parameter {"\\s*([a-zA-Z_][a-zA-Z0-9_'@]*)\\((\\d+)\\)\\s*([a-zA-Z_][a-zA-Z0-9_'@#\\-> \t=,\\(\\):]*)?\\s*((\"[^\"]*\"\\s*)*)"};
 
     // Probabilistic transitions can have one of the following two forms.
     //        in out "label"
     //        in [out1 prob1 ... out_n prob_n] "label"
     // where out is a state number of a state that can be reached with probability 1 in the first format, whereas
     // it is precisely indicated what the probabilities of the reachable states are in the second form.
-    boost::xpressive::sregex regex_transition = boost::xpressive::sregex::compile(R"((0|([1-9][0-9]*))+\s+(0|([1-9][0-9]*|\[[^\]]*\]))+\s+"([^"]*)\")");
+    const std::regex regex_transition {"(0|([1-9][0-9]*))+\\s+(0|([1-9][0-9]*|\\[[^\\]]*\\]))+\\s+\"([^\"]*)\""};
 
-    boost::xpressive::sregex regex_quoted_string = boost::xpressive::sregex::compile(R"(\"([^\"]*)\")");
+    const std::regex regex_quoted_string {"\"([^\"]*)\""};
 
     // The initial state, is either a number or it has the shape [num1 prob1 ... num_n prob_n].
-    boost::xpressive::sregex regex_probabilistic_initial_distribution = boost::xpressive::sregex::compile(R"(0|([1-9][0-9]*)|\[[^\]]*\])");
+    const std::regex regex_probabilistic_initial_distribution {"0|([1-9][0-9]*)|\\[[^\\]]*\\]"};
 
     states next_state(states state)
     {
@@ -61,11 +60,11 @@ class simple_fsm_parser
     {
       std::vector<std::string> result;
 
-      boost::xpressive::sregex_token_iterator cur(text.begin(), text.end(), regex_quoted_string);
-      boost::xpressive::sregex_token_iterator end;
+      std::regex_token_iterator cur{text.begin(), text.end(), regex_quoted_string};
+      std::regex_token_iterator<std::string::const_iterator> end;
       for (; cur != end; ++cur)
       {
-        std::string value = *cur;
+        std::string value = cur->str();
         if (!value.empty())
         {
           result.push_back(value.substr(1, value.size() - 2));
@@ -78,8 +77,8 @@ class simple_fsm_parser
     void parse_parameter(const std::string& line)
     {
       std::string text = utilities::trim_copy(line);
-      boost::xpressive::smatch what;
-      if (!boost::xpressive::regex_match(line, what, regex_parameter))
+      std::smatch what;
+      if (!std::regex_match(line, what, regex_parameter))
       {
         throw mcrl2::runtime_error("could not parse the following line as an FSM parameter: " + text);
       }
@@ -106,8 +105,8 @@ class simple_fsm_parser
     void parse_transition(const std::string& line)
     {
       std::string text = utilities::trim_copy(line);
-      boost::xpressive::smatch what;
-      if (!boost::xpressive::regex_match(line, what, regex_transition))
+      std::smatch what;
+      if (!std::regex_match(line, what, regex_transition))
       {
         throw mcrl2::runtime_error("could not parse the following line as an FSM transition: " + text);
       }
@@ -120,8 +119,8 @@ class simple_fsm_parser
     void parse_initial_distribution(const std::string& line)
     {
       std::string text = utilities::trim_copy(line);
-      boost::xpressive::smatch what;
-      if (!boost::xpressive::regex_match(line, what, regex_probabilistic_initial_distribution))
+      std::smatch what;
+      if (!std::regex_match(line, what, regex_probabilistic_initial_distribution))
       {
         throw mcrl2::runtime_error("Could not parse the following line as an initial distribution: " + line + ".");
       }

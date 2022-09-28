@@ -6,18 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#define __COMMAND_LINE_INTERFACE__
 #include <locale>
-
-#include <boost/algorithm/string/replace.hpp>
-#include <boost/xpressive/xpressive_static.hpp>
+#include <regex>
 
 #include "mcrl2/utilities/platform.h"
-
-/// \cond DUMMY
-// dummy necessary for compiling
-#define __COMMAND_LINE_INTERFACE__
-/// \endcond
-
 #include "mcrl2/utilities/command_line_interface.h"
 
 namespace mcrl2
@@ -47,7 +40,7 @@ std::string substring(const std::string& s, Iter first, Iter last)
  * \return string with newlines inserted such that the number of characters
  * between any two consecutive newlines is smaller than width
  **/
-static std::string word_wrap(std::string const& input, const std::size_t width, std::string const& indent = "")
+static std::string word_wrap(const std::string& input, const std::size_t width, const std::string& indent = "")
 {
   std::ostringstream out;
 
@@ -220,11 +213,12 @@ std::string interface_description::option_descriptor::man_page_description() con
   }
 
   s << std::endl
-    << boost::xpressive::regex_replace(
-         boost::xpressive::regex_replace(word_wrap(m_description, 80),
-                                               boost::xpressive::sregex(boost::xpressive::as_xpr('\'')), std::string("\\&'")),
-         boost::xpressive::sregex(boost::xpressive::as_xpr('.')), std::string("\\&.")
-       )
+    << std::regex_replace(
+         std::regex_replace(word_wrap(m_description, 80),
+                            std::regex("\'"), 
+                            std::string("\\&'")),
+         std::regex("."), 
+         "\\&.")
     << std::endl;
 
   if (m_argument.get() != nullptr && m_argument->has_description())
@@ -244,11 +238,12 @@ std::string interface_description::option_descriptor::man_page_description() con
         arg += " (default)";
       }
 
-      s << boost::xpressive::regex_replace(
-            boost::xpressive::regex_replace(word_wrap(arg, 80),
-                                                  boost::xpressive::sregex(boost::xpressive::as_xpr('\'')), std::string("\\&'")),
-            boost::xpressive::sregex(boost::xpressive::as_xpr('.')), std::string("\\&.")
-          )
+      s << std::regex_replace(
+            std::regex_replace(word_wrap(arg, 80),
+                               std::regex("\'"), 
+                               std::string("\\&'")),
+            std::regex("."), 
+            std::string("\\&."))
        << std::endl;
     }
   }
