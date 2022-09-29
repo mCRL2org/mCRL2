@@ -236,11 +236,8 @@ void GLScene::rebuild()
   }
 }
 
-void GLScene::render(QPainter& painter)
+void GLScene::render()
 {
-  // Qt: Direct OpenGL commands can still be issued. However, you must make sure these are enclosed by a call to the painter's beginNativePainting() and endNativePainting().
-  painter.beginNativePainting();
-
   m_fbo->bind();
 
   // Cull polygons that are facing away (back) from the camera, where their front is defined as counter clockwise by default, see glFrontFace, meaning that the
@@ -297,11 +294,20 @@ void GLScene::render(QPainter& painter)
       renderNode(exploration_active ? m_graph.explorationNode(i) : i, viewProjMatrix, true);
     }
   }
-
-  painter.endNativePainting();
-
   // Use the painter to render the remaining text.
   glDisable(GL_DEPTH_TEST);
+  m_graph.hasNewFrame(false);
+  // m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
+  m_fbo->release();
+  // Make sure that glGetError() is not an error.
+  glCheckError();
+}
+
+void GLScene::renderText(QPainter& painter){
+  
+  bool exploration_active = m_graph.hasExploration();
+  std::size_t nodeCount = exploration_active ? m_graph.explorationNodeCount() : m_graph.nodeCount();
+  std::size_t edgeCount = exploration_active ? m_graph.explorationEdgeCount() : m_graph.edgeCount();
 
   painter.setFont(m_font);
   painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
@@ -326,11 +332,6 @@ void GLScene::render(QPainter& painter)
       renderTransitionLabel(painter, exploration_active ? m_graph.explorationEdge(i) : i);
     }
   }
-  m_graph.hasNewFrame(false);
-  // m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
-  m_fbo->release();
-  // Make sure that glGetError() is not an error.
-  glCheckError();
 }
 
 GLScene::Selection GLScene::select(int x, int y)

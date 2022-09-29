@@ -308,15 +308,16 @@ void GLWidget::initializeGL()
   }
 
   // Enable real-time logging of OpenGL errors when the GL_KHR_debug extension is available.
+  // Ruben: Disabled because this makes the UI unusable with -d flag
   m_logger = new QOpenGLDebugLogger(this);
-  if (m_logger->initialize())
+  if (false && m_logger->initialize())
   {
     connect(m_logger, &QOpenGLDebugLogger::messageLogged, this, &GLWidget::logMessage);
     m_logger->startLogging();
   }
   else
   {
-    mCRL2log(mcrl2::log::debug) << "QOpenGLDebugLogger initialisation failed.\n";
+    mCRL2log(mcrl2::log::debug) << "QOpenGLDebugLogger initialisation failed (Disabled manually in glwidget.cpp)\n";
   }
 
   m_scene.initialize();
@@ -335,12 +336,13 @@ void GLWidget::paintGL()
     if (m_graph.hasNewFrame()){
       m_scene.setDevicePixelRatio(devicePixelRatio());
       m_scene.update();
-      m_scene.render(painter);
+      m_scene.render();
     }
     painter.beginNativePainting();
     QOpenGLFramebufferObject::bindDefault();
     QOpenGLFramebufferObject::blitFramebuffer(0, m_scene.m_fbo);
     painter.endNativePainting();
+    m_scene.renderText(painter);
   }
   // Updates the selection percentage (and checks for new selections under the cursor).
   updateSelection();
