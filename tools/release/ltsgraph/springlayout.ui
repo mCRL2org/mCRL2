@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>229</width>
-    <height>595</height>
+    <height>509</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -40,9 +40,6 @@
        <enum>QFrame::Raised</enum>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout">
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
        <property name="topMargin">
         <number>1</number>
        </property>
@@ -50,19 +47,22 @@
         <number>1</number>
        </property>
        <item>
-        <widget class="QLabel" name="lblAttraction">
+        <widget class="QLabel" name="lblAttract">
          <property name="text">
-          <string>Attraction:</string>
+          <string>Attract</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="dispAttraction">
+        <widget class="QLabel" name="lblRepulse">
          <property name="text">
-          <string>0</string>
+          <string>Repulse</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="margin">
+          <number>0</number>
          </property>
         </widget>
        </item>
@@ -70,67 +70,13 @@
      </widget>
     </item>
     <item>
-     <widget class="QSlider" name="sldAttraction">
+     <widget class="QSlider" name="sldBalance">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
-      <property name="maximum">
-       <number>100</number>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="tickPosition">
-       <enum>QSlider::TicksBelow</enum>
-      </property>
-      <property name="tickInterval">
-       <number>25</number>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QFrame" name="frame_2">
-      <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Raised</enum>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>1</number>
-       </property>
-       <property name="bottomMargin">
-        <number>1</number>
-       </property>
-       <item>
-        <widget class="QLabel" name="lblRepulsion">
-         <property name="text">
-          <string>Repulsion:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="dispRepulsion">
-         <property name="text">
-          <string>0</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item>
-     <widget class="QSlider" name="sldRepulsion">
       <property name="maximum">
        <number>100</number>
       </property>
@@ -620,14 +566,14 @@
  <resources/>
  <connections>
   <connection>
-   <sender>sldAttraction</sender>
+   <sender>sldBalance</sender>
    <signal>valueChanged(int)</signal>
    <receiver>DockWidgetLayout</receiver>
    <slot>onAttractionChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>120</x>
-     <y>74</y>
+     <y>73</y>
     </hint>
     <hint type="destinationlabel">
      <x>120</x>
@@ -643,7 +589,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>120</x>
-     <y>189</y>
+     <y>125</y>
     </hint>
     <hint type="destinationlabel">
      <x>120</x>
@@ -659,23 +605,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>120</x>
-     <y>246</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>120</x>
-     <y>216</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>sldRepulsion</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>DockWidgetLayout</receiver>
-   <slot>onRepulsionChanged(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>120</x>
-     <y>120</y>
+     <y>177</y>
     </hint>
     <hint type="destinationlabel">
      <x>120</x>
@@ -691,7 +621,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>120</x>
-     <y>302</y>
+     <y>229</y>
     </hint>
     <hint type="destinationlabel">
      <x>120</x>
@@ -706,8 +636,8 @@
    <slot>onForceCalculationChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>120</x>
-     <y>431</y>
+     <x>121</x>
+     <y>360</y>
     </hint>
     <hint type="destinationlabel">
      <x>120</x>
@@ -723,7 +653,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>120</x>
-     <y>585</y>
+     <y>499</y>
     </hint>
     <hint type="destinationlabel">
      <x>120</x>
@@ -738,8 +668,8 @@
    <slot>onRepulsionCalculationChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>184</x>
-     <y>493</y>
+     <x>185</x>
+     <y>414</y>
     </hint>
     <hint type="destinationlabel">
      <x>228</x>
@@ -754,8 +684,8 @@
    <slot>onAttractionCalculationChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>179</x>
-     <y>431</y>
+     <x>180</x>
+     <y>360</y>
     </hint>
     <hint type="destinationlabel">
      <x>228</x>
@@ -771,7 +701,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>84</x>
-     <y>358</y>
+     <y>281</y>
     </hint>
     <hint type="destinationlabel">
      <x>228</x>
@@ -787,7 +717,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>209</x>
-     <y>386</y>
+     <y>304</y>
     </hint>
     <hint type="destinationlabel">
      <x>228</x>
@@ -802,12 +732,28 @@
    <slot>onForceApplicationChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>156</x>
-     <y>547</y>
+     <x>157</x>
+     <y>468</y>
     </hint>
     <hint type="destinationlabel">
      <x>225</x>
      <y>493</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sldBalance</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>DockWidgetLayout</receiver>
+   <slot>onRepulsionChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>165</x>
+     <y>62</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>225</x>
+     <y>156</y>
     </hint>
    </hints>
   </connection>

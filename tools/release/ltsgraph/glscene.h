@@ -74,8 +74,10 @@ public:
   /// \brief Builds static data based on the current graph.
   void rebuild();
 
-  /// \brief Render the scene.
-  void render(QPainter& painter);
+  /// \brief Render the scene, no text.
+  void render();
+  /// \brief Render just the text, no OpenGL.
+  void renderText(QPainter& painter);
 
   /// \brief Resize the OpenGL viewport.
   void resize(std::size_t width, std::size_t height);

@@ -40,7 +40,8 @@ class ltsgraph_tool : public ltsgraph_base
       surfaceFormat.setSamples(4);
 
       // We use the GL_KHR_debug extension to provide realtime logging of OpenGL errors.
-      surfaceFormat.setOption(QSurfaceFormat::DebugContext);
+      // Ruben: Disabled because debug logging became unusable and every text draw call produced 3 lines of output per node/label
+      surfaceFormat.setOption(QSurfaceFormat::DebugContext, false);
 
       // Qt: Calling QSurfaceFormat::setDefaultFormat() before constructing the QApplication instance
       //     is mandatory on some platforms (for example, macOS) when an OpenGL core profile context is requested.

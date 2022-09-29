@@ -73,6 +73,18 @@ inline float cube(float x)
   return x * x * x;
 }
 
+
+inline float smoothstep(float l, float r, float x){
+  if (x < l)
+    return 0;
+  if (x > r)
+    return 1;
+  
+  x = (x-l)/(r-l);
+  
+  return x * x * (3 - 2*x);
+}
+
 inline void clip(float& f, float min, float max)
 {
   if (f < min) {
@@ -195,8 +207,19 @@ namespace ApplicationFunctions{
 
   struct ForceDirected : ApplicationFunction{
     const float scaling = 2.0f;
+    const float stability_param = 0.01f;
+    //precompute
+    const float scaling_2 = scaling * scaling;
+    const float stab_2 = stability_param * stability_param;
+    const float thres_2 = scaling_2 * stab_2;
     void operator() (QVector3D& pos, const QVector3D& f, const float speed) override {
-      pos += (speed * scaling) * f.normalized();
+      float amplitude = speed * scaling;
+      float threshold = speed * speed * thres_2;
+      if (f.lengthSquared() < 1.25f*threshold){
+        // smoothstep the amplitude, but aggressively (pow)
+        amplitude *= smoothstep(threshold*0.75f, threshold*1.25f, f.lengthSquared());
+      }
+      pos += amplitude * f.normalized();
     }
   };
 
@@ -279,7 +302,7 @@ SpringLayout::SpringLayout(Graph& graph, GLWidget& glwidget)
 
 {
   srand(time(nullptr));
-  
+  drift_timer.restart();
 }
 
 SpringLayout::~SpringLayout()
@@ -292,8 +315,6 @@ SpringLayoutUi* SpringLayout::ui(QWidget* parent)
   if (m_ui == nullptr) {
     m_ui = new SpringLayoutUi(*this, parent);
     m_ui->m_ui.dispSpeed->setText(QString::number(m_speed, 'g', 3));
-    m_ui->m_ui.dispAttraction->setText(QString::number(m_attraction, 'g', 3));
-    m_ui->m_ui.dispRepulsion->setText(QString::number(m_repulsion, 'g', 3));
     m_ui->m_ui.dispAccuracy->setText(QString::number(m_accuracy, 'g', 3));
     m_ui->m_ui.dispHandleWeight->setText(QString::number(m_controlPointWeight, 'g', 3));
     m_ui->m_ui.dispNatLength->setText(QString::number(m_natLength, 'g', 3));
@@ -794,6 +815,7 @@ void SpringLayout::apply()
     QVector3D clipmax = m_graph.getClipMax();
     float nodeSumForces = 0;
     float edgeSumForces = 0;
+    bool new_anchored = false;
     for (std::size_t i = 0; i < nodeCount; ++i)
     {
       std::size_t n = sel ? m_graph.explorationNode(i) : i;
@@ -803,11 +825,27 @@ void SpringLayout::apply()
         (*m_applFunc)(m_graph.node(n).pos_mutable(), m_nforces[n], m_speed);
         nodeSumForces += m_nforces[n].lengthSquared();
         clipVector(m_graph.node(n).pos_mutable(), clipmin, clipmax);
+      }else{
+        new_anchored = true;
       }
     }
-
+    
+    float drift_secs = drift_timer.elapsed() * 0.001f; // seconds
     QVector3D center_of_mass = slicedAverage(m_graph, 0, m_graph.nodeCount());
-
+    if (new_anchored ^ any_anchored){
+      // changed
+      center_of_mass_offset = center_of_mass;
+      any_anchored = new_anchored;
+      mCRL2log(mcrl2::log::debug) << "Setting new center of mass offset: " << center_of_mass_offset.x() << ", " << center_of_mass_offset.y() << ", " << center_of_mass_offset.z() << std::endl;
+      drift_timer.restart();
+      drift_secs = 0;
+    }
+    if (!any_anchored){
+      center_of_mass -= smoothstep(0, time_to_center, time_to_center-drift_secs)*center_of_mass_offset;
+    }else{
+      center_of_mass = QVector3D(0, 0, 0);
+    }
+    
     for (std::size_t i = 0; i < nodeCount; ++i)
     {
       std::size_t n = sel ? m_graph.explorationNode(i) : i;
@@ -902,7 +940,7 @@ void SpringLayout::setTreeEnabled(bool b){
 }
 
 void SpringLayout::setSpeed(int v){
-  m_speed = lerp(v, m_min_speed, m_max_speed);
+  m_speed = m_speed_scale_func(lerp(v, m_speed_inverse_scale_func(m_min_speed), m_speed_inverse_scale_func(m_max_speed)));
   mCRL2log(mcrl2::log::verbose) << "Set speed to: " << v << " corresponding to: " <<  m_speed << std::endl;
   if (this->m_ui) m_ui->m_ui.dispSpeed->setText(QString::number(m_speed, 'g', 3));
 }
@@ -915,17 +953,13 @@ void SpringLayout::setAccuracy(int v){
 }
 
 void SpringLayout::setAttraction(int v) {
-  m_attraction = lerp(v, m_min_attraction, m_max_attraction);
+  m_attraction = lerp(v, 1, 0);
   mCRL2log(mcrl2::log::verbose) << "Set attraction scale to: " << v << " corresponding to: " << m_attraction << std::endl;
-  if (this->m_ui)
-    m_ui->m_ui.dispAttraction->setText(QString::number(m_attraction, 'g', 3));
 }
 
 void SpringLayout::setRepulsion(int v) {
-  m_repulsion = lerp(v, m_min_repulsion, m_max_repulsion);
+  m_repulsion = lerp(v, 0, 1);
   mCRL2log(mcrl2::log::verbose) << "Set repulsion scale to: " << v << " corresponding to: " <<  m_repulsion << std::endl;
-  if (this->m_ui)
-    m_ui->m_ui.dispRepulsion->setText(QString::number(m_repulsion, 'g', 3));
 }
 
 void SpringLayout::setControlPointWeight(int v) {
@@ -1020,8 +1054,7 @@ SpringLayoutUi::SpringLayoutUi(SpringLayout& layout, QWidget* parent)
   : QDockWidget(parent), m_layout(layout), m_thread(nullptr)
 {
   m_ui.setupUi(this);
-  m_ui.sldAttraction->setValue(m_layout.attraction());
-  m_ui.sldRepulsion->setValue(m_layout.repulsion());
+  m_ui.sldBalance->setValue(m_layout.repulsion());
   m_ui.sldSpeed->setValue(m_layout.speed());
   m_ui.sldHandleWeight->setValue(m_layout.controlPointWeight());
   m_ui.sldNatLength->setValue(m_layout.naturalTransitionLength());
@@ -1052,8 +1085,8 @@ QByteArray SpringLayoutUi::settings()
   QByteArray result;
   QDataStream out(&result, QIODevice::WriteOnly);
 
-  out << quint32(m_ui.sldAttraction->value()) <<
-      quint32(m_ui.sldRepulsion->value()) <<
+  out << 
+      quint32(m_ui.sldBalance->value()) <<
       quint32(m_ui.sldSpeed->value()) <<
       quint32(m_ui.sldHandleWeight->value()) <<
       quint32(m_ui.sldNatLength->value()) <<
@@ -1074,13 +1107,12 @@ void SpringLayoutUi::setSettings(QByteArray state)
 
   QDataStream in(&state, QIODevice::ReadOnly);
 
-  quint32 attraction, repulsion, speed, handleWeight, natLength, accuracy, attractionCalculation, repulsionCalculation, forceCalculation, treeEnabled;
-  in >> attraction >> repulsion >> speed >> handleWeight >> natLength >> accuracy >> attractionCalculation >> repulsionCalculation >> forceCalculation >> treeEnabled;
+  quint32 balance, speed, handleWeight, natLength, accuracy, attractionCalculation, repulsionCalculation, forceCalculation, treeEnabled;
+  in >> balance >> speed >> handleWeight >> natLength >> accuracy >> attractionCalculation >> repulsionCalculation >> forceCalculation >> treeEnabled;
 
   if (in.status() == QDataStream::Ok)
   {
-    m_ui.sldAttraction->setValue(attraction);
-    m_ui.sldRepulsion->setValue(repulsion);
+    m_ui.sldBalance->setValue(balance);
     m_ui.sldSpeed->setValue(speed);
     m_ui.sldHandleWeight->setValue(handleWeight);
     m_ui.sldNatLength->setValue(natLength);
