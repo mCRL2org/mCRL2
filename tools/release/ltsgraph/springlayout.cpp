@@ -207,19 +207,24 @@ namespace ApplicationFunctions{
 
   struct ForceDirected : ApplicationFunction{
     const float scaling = 2.0f;
-    const float stability_param = 0.01f;
-    //precompute
-    const float scaling_2 = scaling * scaling;
-    const float stab_2 = stability_param * stability_param;
-    const float thres_2 = scaling_2 * stab_2;
+    const float stability_param = 0.1f;
+    // precompute
+    const float thres = scaling * stability_param;
+    // easing such that at threshold translation is 50% of stepsize
+    const float ease_width = .1f;
+    const float ease_floor = 0.0001f; // Always keep ease_floor force applied. May cause jitter
+    // precompute
+    const float one_minus_ease_floor = 1-ease_floor;
     void operator() (QVector3D& pos, const QVector3D& f, const float speed) override {
       float amplitude = speed * scaling;
-      float threshold = speed * speed * thres_2;
-      if (f.lengthSquared() < 1.25f*threshold){
-        // smoothstep the amplitude, but aggressively (pow)
-        amplitude *= smoothstep(threshold*0.75f, threshold*1.25f, f.lengthSquared());
+      float threshold = speed * thres;
+      float L = f.length();
+      if (L < (1+ease_width)*threshold){
+        // smoothstep the amplitude
+        amplitude *= ease_floor + one_minus_ease_floor * smoothstep(threshold*(1-ease_width), threshold*(1+ease_width), L);
       }
-      pos += amplitude * f.normalized();
+      if (L == 0) return;
+      pos += (amplitude/L) * f;
     }
   };
 
