@@ -324,6 +324,12 @@ SpringLayoutUi* SpringLayout::ui(QWidget* parent)
 
 void SpringLayout::setAttractionCalculation(AttractionCalculation c)
 {
+  if (repFuncMap.find(c) == repFuncMap.end()){
+    mCRL2log(mcrl2::log::debug) << "Unkown attraction calculation selected \"" << getName(c) << "\". Cause may be invalid settings were loaded or selected function is not implemented." << std::endl;
+    c = SpringLayout::AttractionCalculation::force_directed_appl;
+    mCRL2log(mcrl2::log::debug) << "Setting default attraction calculation \"" << getName(c) << "\"." << std::endl;
+  }
+
   m_option_attractionCalculation = c;
   m_attrFunc = attrFuncMap[c];
   m_attrFunc->reset();
@@ -340,6 +346,12 @@ SpringLayout::AttractionCalculation SpringLayout::attractionCalculation()
 
 void SpringLayout::setRepulsionCalculation(RepulsionCalculation c)
 {
+  if (repFuncMap.find(c) == repFuncMap.end()){
+    mCRL2log(mcrl2::log::debug) << "Unkown repulsion calculation selected \"" << getName(c) << "\". Cause may be invalid settings were loaded or selected function is not implemented." << std::endl;
+    c = SpringLayout::RepulsionCalculation::force_directed_appl;
+    mCRL2log(mcrl2::log::debug) << "Setting default repulsion calculation \"" << getName(c) << "\"." << std::endl;
+  }
+
   m_option_repulsionCalculation = c;
   m_repFunc = repFuncMap[c];
   m_repFunc->reset();
@@ -355,6 +367,12 @@ SpringLayout::RepulsionCalculation SpringLayout::repulsionCalculation()
 }
 
 void SpringLayout::setForceApplication(SpringLayout::ForceApplication c){
+  if (applFuncMap.find(c) == applFuncMap.end()){
+    mCRL2log(mcrl2::log::debug) << "Unkown force application selected \"" << getName(c) << "\". Cause may be invalid settings were loaded or selected function is not implemented." << std::endl;
+    c = SpringLayout::ForceApplication::force_directed_appl;
+    mCRL2log(mcrl2::log::debug) << "Setting default force application \"" << getName(c) << "\"." << std::endl;
+  }
+  
   m_option_forceApplication = c;
   m_applFunc = applFuncMap[c];
   m_applFunc->reset();
@@ -399,8 +417,6 @@ QVector3D SpringLayout::approxRepulsionForce<Quadtree>(const QVector3D& a, Quadt
   m_total_num_nodes += num_nodes;
   return force;
 }
-
-
 
 const std::size_t max_slice = 50;
 /// @brief Takes average of at most @c max_slice values, or recursively computes average by splitting
@@ -1169,6 +1185,7 @@ void SpringLayoutUi::onNatLengthChanged(int value)
 void SpringLayoutUi::onAttractionCalculationChanged(int value)
 {
   m_layout.setAttractionCalculation(static_cast<SpringLayout::AttractionCalculation>(value));
+  m_ui.cmbAttractionCalculation->setCurrentIndex((int)m_layout.getAttractionCalculation());
   layoutRulesChanged();
   update();
 }
@@ -1176,12 +1193,14 @@ void SpringLayoutUi::onAttractionCalculationChanged(int value)
 void SpringLayoutUi::onRepulsionCalculationChanged(int value)
 {
   m_layout.setRepulsionCalculation(static_cast<SpringLayout::RepulsionCalculation>(value));
+  m_ui.cmbRepulsionCalculation->setCurrentIndex((int)m_layout.getRepulsionCalculation())
   layoutRulesChanged();
   update();
 }
 
 void SpringLayoutUi::onForceApplicationChanged(int value){
   m_layout.setForceApplication(static_cast<SpringLayout::ForceApplication>(value));
+  m_ui.cmbForceApplication->setCurrentindex((int)m_layout.getForceApplication());
   layoutRulesChanged();
   update();
 }
