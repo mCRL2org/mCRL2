@@ -324,9 +324,9 @@ SpringLayoutUi* SpringLayout::ui(QWidget* parent)
 
 void SpringLayout::setAttractionCalculation(AttractionCalculation c)
 {
-  if (repFuncMap.find(c) == repFuncMap.end()){
+  if (attrFuncMap.find(c) == attrFuncMap.end()){
     mCRL2log(mcrl2::log::debug) << "Unkown attraction calculation selected \"" << getName(c) << "\". Cause may be invalid settings were loaded or selected function is not implemented." << std::endl;
-    c = SpringLayout::AttractionCalculation::force_directed_appl;
+    c = SpringLayout::AttractionCalculation::electricalsprings_attr;
     mCRL2log(mcrl2::log::debug) << "Setting default attraction calculation \"" << getName(c) << "\"." << std::endl;
   }
 
@@ -348,7 +348,7 @@ void SpringLayout::setRepulsionCalculation(RepulsionCalculation c)
 {
   if (repFuncMap.find(c) == repFuncMap.end()){
     mCRL2log(mcrl2::log::debug) << "Unkown repulsion calculation selected \"" << getName(c) << "\". Cause may be invalid settings were loaded or selected function is not implemented." << std::endl;
-    c = SpringLayout::RepulsionCalculation::force_directed_appl;
+    c = SpringLayout::RepulsionCalculation::electricalsprings_rep;
     mCRL2log(mcrl2::log::debug) << "Setting default repulsion calculation \"" << getName(c) << "\"." << std::endl;
   }
 
@@ -1185,7 +1185,7 @@ void SpringLayoutUi::onNatLengthChanged(int value)
 void SpringLayoutUi::onAttractionCalculationChanged(int value)
 {
   m_layout.setAttractionCalculation(static_cast<SpringLayout::AttractionCalculation>(value));
-  m_ui.cmbAttractionCalculation->setCurrentIndex((int)m_layout.getAttractionCalculation());
+  m_ui.cmbAttractionCalculation->setCurrentIndex((int)m_layout.attractionCalculation());
   layoutRulesChanged();
   update();
 }
@@ -1193,14 +1193,14 @@ void SpringLayoutUi::onAttractionCalculationChanged(int value)
 void SpringLayoutUi::onRepulsionCalculationChanged(int value)
 {
   m_layout.setRepulsionCalculation(static_cast<SpringLayout::RepulsionCalculation>(value));
-  m_ui.cmbRepulsionCalculation->setCurrentIndex((int)m_layout.getRepulsionCalculation())
+  m_ui.cmbRepulsionCalculation->setCurrentIndex((int)m_layout.repulsionCalculation());
   layoutRulesChanged();
   update();
 }
 
 void SpringLayoutUi::onForceApplicationChanged(int value){
   m_layout.setForceApplication(static_cast<SpringLayout::ForceApplication>(value));
-  m_ui.cmbForceApplication->setCurrentindex((int)m_layout.getForceApplication());
+  m_ui.cmbForceApplication->setCurrentIndex((int)m_layout.forceApplication());
   layoutRulesChanged();
   update();
 }
