@@ -19,29 +19,29 @@ namespace mcrl2 {
 namespace data {
 
 //--- start generated class untyped_identifier ---//
-/// \brief An untyped identifier
+/// \\brief An untyped identifier
 class untyped_identifier: public data_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     untyped_identifier()
       : data_expression(core::detail::default_values::UntypedIdentifier)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit untyped_identifier(const atermpp::aterm& term)
       : data_expression(term)
     {
       assert(core::detail::check_term_UntypedIdentifier(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     explicit untyped_identifier(const core::identifier_string& name)
       : data_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedIdentifier(), name))
     {}
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     untyped_identifier(const std::string& name)
       : data_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedIdentifier(), core::identifier_string(name)))
     {}
@@ -58,8 +58,8 @@ class untyped_identifier: public data_expression
     }
 };
 
-/// \brief Make_untyped_identifier constructs a new term into a given address.
-/// \ \param t The reference into which the new untyped_identifier is constructed. 
+/// \\brief Make_untyped_identifier constructs a new term into a given address.
+/// \\ \param t The reference into which the new untyped_identifier is constructed. 
 template <class... ARGUMENTS>
 inline void make_untyped_identifier(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
@@ -69,17 +69,17 @@ inline void make_untyped_identifier(atermpp::aterm_appl& t, const ARGUMENTS&... 
 // prototype declaration
 std::string pp(const untyped_identifier& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const untyped_identifier& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(untyped_identifier& t1, untyped_identifier& t2)
 {
   t1.swap(t2);

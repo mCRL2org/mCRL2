@@ -71,17 +71,17 @@ void make_exists(atermpp::aterm& result, ARGUMENTS... arguments)
 // prototype declaration
 std::string pp(const exists& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const exists& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(exists& t1, exists& t2)
 {
   t1.swap(t2);

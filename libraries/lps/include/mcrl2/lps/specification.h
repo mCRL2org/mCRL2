@@ -201,10 +201,10 @@ class specification: public specification_base<linear_process, process_initializ
 // prototype declaration
 std::string pp(const specification& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const specification& x)
 {

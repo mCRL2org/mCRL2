@@ -21,29 +21,29 @@ namespace data
 {
 
 //--- start generated class basic_sort ---//
-/// \brief A basic sort
+/// \\brief A basic sort
 class basic_sort: public sort_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     basic_sort()
       : sort_expression(core::detail::default_values::SortId)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit basic_sort(const atermpp::aterm& term)
       : sort_expression(term)
     {
       assert(core::detail::check_term_SortId(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     explicit basic_sort(const core::identifier_string& name)
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortId(), name))
     {}
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     basic_sort(const std::string& name)
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortId(), core::identifier_string(name)))
     {}
@@ -60,8 +60,8 @@ class basic_sort: public sort_expression
     }
 };
 
-/// \brief Make_basic_sort constructs a new term into a given address.
-/// \ \param t The reference into which the new basic_sort is constructed. 
+/// \\brief Make_basic_sort constructs a new term into a given address.
+/// \\ \param t The reference into which the new basic_sort is constructed. 
 template <class... ARGUMENTS>
 inline void make_basic_sort(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
@@ -71,17 +71,17 @@ inline void make_basic_sort(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 // prototype declaration
 std::string pp(const basic_sort& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const basic_sort& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(basic_sort& t1, basic_sort& t2)
 {
   t1.swap(t2);

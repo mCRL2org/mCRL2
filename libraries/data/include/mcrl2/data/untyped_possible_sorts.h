@@ -19,29 +19,29 @@ namespace mcrl2 {
 namespace data {
 
 //--- start generated class untyped_possible_sorts ---//
-/// \brief Multiple possible sorts
+/// \\brief Multiple possible sorts
 class untyped_possible_sorts: public sort_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     untyped_possible_sorts()
       : sort_expression(core::detail::default_values::UntypedSortsPossible)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit untyped_possible_sorts(const atermpp::aterm& term)
       : sort_expression(term)
     {
       assert(core::detail::check_term_UntypedSortsPossible(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     explicit untyped_possible_sorts(const sort_expression_list& sorts)
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedSortsPossible(), sorts))
     {}
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     template <typename Container>
     untyped_possible_sorts(const Container& sorts, typename atermpp::enable_if_container<Container, sort_expression>::type* = nullptr)
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedSortsPossible(), sort_expression_list(sorts.begin(), sorts.end())))
@@ -59,8 +59,8 @@ class untyped_possible_sorts: public sort_expression
     }
 };
 
-/// \brief Make_untyped_possible_sorts constructs a new term into a given address.
-/// \ \param t The reference into which the new untyped_possible_sorts is constructed. 
+/// \\brief Make_untyped_possible_sorts constructs a new term into a given address.
+/// \\ \param t The reference into which the new untyped_possible_sorts is constructed. 
 template <class... ARGUMENTS>
 inline void make_untyped_possible_sorts(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
@@ -70,17 +70,17 @@ inline void make_untyped_possible_sorts(atermpp::aterm_appl& t, const ARGUMENTS&
 // prototype declaration
 std::string pp(const untyped_possible_sorts& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const untyped_possible_sorts& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(untyped_possible_sorts& t1, untyped_possible_sorts& t2)
 {
   t1.swap(t2);

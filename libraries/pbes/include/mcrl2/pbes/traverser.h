@@ -132,6 +132,14 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
+    else if (data::is_variable(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
     else if (pbes_system::is_propositional_variable_instantiation(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::propositional_variable_instantiation>(x));
@@ -160,20 +168,12 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::exists>(x));
     }
-    else if (data::is_variable(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
-    }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
   }
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct sort_expression_traverser: public add_traverser_sort_expressions<data::sort_expression_traverser, Derived>
 {
@@ -263,6 +263,14 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
+    else if (data::is_variable(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
     else if (pbes_system::is_propositional_variable_instantiation(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::propositional_variable_instantiation>(x));
@@ -291,20 +299,12 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::exists>(x));
     }
-    else if (data::is_variable(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
-    }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
   }
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct data_expression_traverser: public add_traverser_data_expressions<data::data_expression_traverser, Derived>
 {
@@ -393,6 +393,14 @@ struct add_traverser_pbes_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
+    else if (data::is_variable(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
     else if (pbes_system::is_propositional_variable_instantiation(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::propositional_variable_instantiation>(x));
@@ -421,20 +429,12 @@ struct add_traverser_pbes_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::exists>(x));
     }
-    else if (data::is_variable(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
-    }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
   }
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct pbes_expression_traverser: public add_traverser_pbes_expressions<pbes_system::pbes_expression_traverser_base, Derived>
 {
@@ -535,6 +535,14 @@ struct add_traverser_variables: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
+    else if (data::is_variable(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
     else if (pbes_system::is_propositional_variable_instantiation(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::propositional_variable_instantiation>(x));
@@ -563,20 +571,12 @@ struct add_traverser_variables: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::exists>(x));
     }
-    else if (data::is_variable(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
-    }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
   }
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct variable_traverser: public add_traverser_variables<data::variable_traverser, Derived>
 {
@@ -679,6 +679,14 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
+    else if (data::is_variable(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
     else if (pbes_system::is_propositional_variable_instantiation(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::propositional_variable_instantiation>(x));
@@ -707,20 +715,12 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::exists>(x));
     }
-    else if (data::is_variable(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
-    }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
   }
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct identifier_string_traverser: public add_traverser_identifier_strings<data::identifier_string_traverser, Derived>
 {

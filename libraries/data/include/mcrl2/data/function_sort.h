@@ -21,29 +21,29 @@ namespace data
 {
 
 //--- start generated class function_sort ---//
-/// \brief A function sort
+/// \\brief A function sort
 class function_sort: public sort_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     function_sort()
       : sort_expression(core::detail::default_values::SortArrow)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit function_sort(const atermpp::aterm& term)
       : sort_expression(term)
     {
       assert(core::detail::check_term_SortArrow(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     function_sort(const sort_expression_list& domain, const sort_expression& codomain)
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortArrow(), domain, codomain))
     {}
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     template <typename Container>
     function_sort(const Container& domain, const sort_expression& codomain, typename atermpp::enable_if_container<Container, sort_expression>::type* = nullptr)
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortArrow(), sort_expression_list(domain.begin(), domain.end()), codomain))
@@ -66,8 +66,8 @@ class function_sort: public sort_expression
     }
 };
 
-/// \brief Make_function_sort constructs a new term into a given address.
-/// \ \param t The reference into which the new function_sort is constructed. 
+/// \\brief Make_function_sort constructs a new term into a given address.
+/// \\ \param t The reference into which the new function_sort is constructed. 
 template <class... ARGUMENTS>
 inline void make_function_sort(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
@@ -77,17 +77,17 @@ inline void make_function_sort(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 // prototype declaration
 std::string pp(const function_sort& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const function_sort& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(function_sort& t1, function_sort& t2)
 {
   t1.swap(t2);

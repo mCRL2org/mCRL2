@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright 2009, 2010 Wieger Wesselink.
 #~ Distributed under the Boost Software License, Version 1.0.
@@ -53,23 +53,23 @@ def insert_text_in_file(filename, text, label, handle_user_sections = False):
     dest = ('//--- start %s ---//' + text + '//--- end %s ---//') % (label, label)
     try:
         old_text = read_text(filename)
-        new_text = re.compile(src, re.S).sub(dest, old_text)
+        new_text = re.compile(src, re.S).sub(lambda m: dest, old_text)   # lambda prevents interpretation of Escapes (e.g. \p) in dest.
         if handle_user_sections:
-            labels = extract_user_sections(new_text).keys()
+            labels = list(extract_user_sections(new_text).keys())
             user_sections = extract_user_sections(old_text)
             new_text = insert_user_sections(new_text, labels, user_sections)
         if old_text == new_text:
             if re.search(src, old_text, re.S) == None:
-                print("Error: label '//--- start %s ---//' not found in file %s" % (label, filename))
+                print(("Error: label '//--- start %s ---//' not found in file %s" % (label, filename)))
                 return False
             else:
-                print('Warning: nothing has changed in file %s' % filename)
+                print(('Warning: nothing has changed in file %s' % filename))
         else:
             write_text(filename, new_text)
-            print('Updated file %s' % filename)
+            print(('Updated file %s' % filename))
         return True
     except IOError as e:
-        print('Error: unable to open file ' + filename + ' ', e)
+        print(('Error: unable to open file ' + filename + ' ', e))
         return False
 
 def indent_text(text, indent):
@@ -92,6 +92,6 @@ if __name__ == "__main__":
 };
 '''
     user_sections = { 'propositional_variable_instantiation': 'abc' }
-    labels = user_sections.keys()
-    print(extract_user_sections(text))
-    print(insert_user_sections(text, labels, user_sections))
+    labels = list(user_sections.keys())
+    print((extract_user_sections(text)))
+    print((insert_user_sections(text, labels, user_sections)))

@@ -28,17 +28,17 @@ typedef core::identifier_string boolean_variable_key_type;
 template <typename T> std::string pp(const T& x);
 
 //--- start generated classes ---//
-/// \brief A boolean expression
+/// \\brief A boolean expression
 class boolean_expression: public atermpp::aterm_appl
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     boolean_expression()
       : atermpp::aterm_appl(core::detail::default_values::BooleanExpression)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit boolean_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
@@ -52,10 +52,10 @@ class boolean_expression: public atermpp::aterm_appl
     boolean_expression& operator=(boolean_expression&&) noexcept = default;
 };
 
-/// \brief list of boolean_expressions
+/// \\brief list of boolean_expressions
 typedef atermpp::term_list<boolean_expression> boolean_expression_list;
 
-/// \brief vector of boolean_expressions
+/// \\brief vector of boolean_expressions
 typedef std::vector<boolean_expression>    boolean_expression_vector;
 
 // prototypes
@@ -67,9 +67,9 @@ inline bool is_or(const atermpp::aterm_appl& x);
 inline bool is_imp(const atermpp::aterm_appl& x);
 inline bool is_boolean_variable(const atermpp::aterm_appl& x);
 
-/// \brief Test for a boolean_expression expression
-/// \param x A term
-/// \return True if \a x is a boolean_expression expression
+/// \\brief Test for a boolean_expression expression
+/// \\param x A term
+/// \\return True if \\a x is a boolean_expression expression
 inline
 bool is_boolean_expression(const atermpp::aterm_appl& x)
 {
@@ -85,34 +85,34 @@ bool is_boolean_expression(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const boolean_expression& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const boolean_expression& x)
 {
   return out << bes::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(boolean_expression& t1, boolean_expression& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The value true for boolean expressions
+/// \\brief The value true for boolean expressions
 class true_: public boolean_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     true_()
       : boolean_expression(core::detail::default_values::BooleanTrue)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit true_(const atermpp::aterm& term)
       : boolean_expression(term)
     {
@@ -126,9 +126,9 @@ class true_: public boolean_expression
     true_& operator=(true_&&) noexcept = default;
 };
 
-/// \brief Test for a true expression
-/// \param x A term
-/// \return True if \a x is a true expression
+/// \\brief Test for a true expression
+/// \\param x A term
+/// \\return True if \\a x is a true expression
 inline
 bool is_true(const atermpp::aterm_appl& x)
 {
@@ -138,34 +138,34 @@ bool is_true(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const true_& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const true_& x)
 {
   return out << bes::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(true_& t1, true_& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The value false for boolean expressions
+/// \\brief The value false for boolean expressions
 class false_: public boolean_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     false_()
       : boolean_expression(core::detail::default_values::BooleanFalse)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit false_(const atermpp::aterm& term)
       : boolean_expression(term)
     {
@@ -179,9 +179,9 @@ class false_: public boolean_expression
     false_& operator=(false_&&) noexcept = default;
 };
 
-/// \brief Test for a false expression
-/// \param x A term
-/// \return True if \a x is a false expression
+/// \\brief Test for a false expression
+/// \\param x A term
+/// \\return True if \\a x is a false expression
 inline
 bool is_false(const atermpp::aterm_appl& x)
 {
@@ -191,41 +191,41 @@ bool is_false(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const false_& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const false_& x)
 {
   return out << bes::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(false_& t1, false_& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The not operator for boolean expressions
+/// \\brief The not operator for boolean expressions
 class not_: public boolean_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     not_()
       : boolean_expression(core::detail::default_values::BooleanNot)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit not_(const atermpp::aterm& term)
       : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanNot(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     explicit not_(const boolean_expression& operand)
       : boolean_expression(atermpp::aterm_appl(core::detail::function_symbol_BooleanNot(), operand))
     {}
@@ -242,17 +242,17 @@ class not_: public boolean_expression
     }
 };
 
-/// \brief Make_not_ constructs a new term into a given address.
-/// \ \param t The reference into which the new not_ is constructed. 
+/// \\brief Make_not_ constructs a new term into a given address.
+/// \\ \param t The reference into which the new not_ is constructed. 
 template <class... ARGUMENTS>
 inline void make_not_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_BooleanNot(), args...);
 }
 
-/// \brief Test for a not expression
-/// \param x A term
-/// \return True if \a x is a not expression
+/// \\brief Test for a not expression
+/// \\param x A term
+/// \\return True if \\a x is a not expression
 inline
 bool is_not(const atermpp::aterm_appl& x)
 {
@@ -262,41 +262,41 @@ bool is_not(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const not_& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const not_& x)
 {
   return out << bes::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(not_& t1, not_& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The and operator for boolean expressions
+/// \\brief The and operator for boolean expressions
 class and_: public boolean_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     and_()
       : boolean_expression(core::detail::default_values::BooleanAnd)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit and_(const atermpp::aterm& term)
       : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanAnd(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     and_(const boolean_expression& left, const boolean_expression& right)
       : boolean_expression(atermpp::aterm_appl(core::detail::function_symbol_BooleanAnd(), left, right))
     {}
@@ -318,17 +318,17 @@ class and_: public boolean_expression
     }
 };
 
-/// \brief Make_and_ constructs a new term into a given address.
-/// \ \param t The reference into which the new and_ is constructed. 
+/// \\brief Make_and_ constructs a new term into a given address.
+/// \\ \param t The reference into which the new and_ is constructed. 
 template <class... ARGUMENTS>
 inline void make_and_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_BooleanAnd(), args...);
 }
 
-/// \brief Test for a and expression
-/// \param x A term
-/// \return True if \a x is a and expression
+/// \\brief Test for a and expression
+/// \\param x A term
+/// \\return True if \\a x is a and expression
 inline
 bool is_and(const atermpp::aterm_appl& x)
 {
@@ -338,41 +338,41 @@ bool is_and(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const and_& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const and_& x)
 {
   return out << bes::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(and_& t1, and_& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The or operator for boolean expressions
+/// \\brief The or operator for boolean expressions
 class or_: public boolean_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     or_()
       : boolean_expression(core::detail::default_values::BooleanOr)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit or_(const atermpp::aterm& term)
       : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanOr(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     or_(const boolean_expression& left, const boolean_expression& right)
       : boolean_expression(atermpp::aterm_appl(core::detail::function_symbol_BooleanOr(), left, right))
     {}
@@ -394,17 +394,17 @@ class or_: public boolean_expression
     }
 };
 
-/// \brief Make_or_ constructs a new term into a given address.
-/// \ \param t The reference into which the new or_ is constructed. 
+/// \\brief Make_or_ constructs a new term into a given address.
+/// \\ \param t The reference into which the new or_ is constructed. 
 template <class... ARGUMENTS>
 inline void make_or_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_BooleanOr(), args...);
 }
 
-/// \brief Test for a or expression
-/// \param x A term
-/// \return True if \a x is a or expression
+/// \\brief Test for a or expression
+/// \\param x A term
+/// \\return True if \\a x is a or expression
 inline
 bool is_or(const atermpp::aterm_appl& x)
 {
@@ -414,41 +414,41 @@ bool is_or(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const or_& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const or_& x)
 {
   return out << bes::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(or_& t1, or_& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The implication operator for boolean expressions
+/// \\brief The implication operator for boolean expressions
 class imp: public boolean_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     imp()
       : boolean_expression(core::detail::default_values::BooleanImp)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit imp(const atermpp::aterm& term)
       : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanImp(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     imp(const boolean_expression& left, const boolean_expression& right)
       : boolean_expression(atermpp::aterm_appl(core::detail::function_symbol_BooleanImp(), left, right))
     {}
@@ -470,17 +470,17 @@ class imp: public boolean_expression
     }
 };
 
-/// \brief Make_imp constructs a new term into a given address.
-/// \ \param t The reference into which the new imp is constructed. 
+/// \\brief Make_imp constructs a new term into a given address.
+/// \\ \param t The reference into which the new imp is constructed. 
 template <class... ARGUMENTS>
 inline void make_imp(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_BooleanImp(), args...);
 }
 
-/// \brief Test for a imp expression
-/// \param x A term
-/// \return True if \a x is a imp expression
+/// \\brief Test for a imp expression
+/// \\param x A term
+/// \\return True if \\a x is a imp expression
 inline
 bool is_imp(const atermpp::aterm_appl& x)
 {
@@ -490,24 +490,24 @@ bool is_imp(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const imp& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const imp& x)
 {
   return out << bes::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(imp& t1, imp& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief A boolean variable
+/// \\brief A boolean variable
 class boolean_variable: public boolean_expression
 {
   public:
@@ -553,17 +553,17 @@ class boolean_variable: public boolean_expression
 //--- end user section boolean_variable ---//
 };
 
-/// \brief Make_boolean_variable constructs a new term into a given address.
-/// \ \param t The reference into which the new boolean_variable is constructed. 
+/// \\brief Make_boolean_variable constructs a new term into a given address.
+/// \\ \param t The reference into which the new boolean_variable is constructed. 
 template <class... ARGUMENTS>
 inline void make_boolean_variable(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl_with_index<boolean_variable,core::identifier_string>(t, core::detail::function_symbol_BooleanVariable(), args...);
 }
 
-/// \brief Test for a boolean_variable expression
-/// \param x A term
-/// \return True if \a x is a boolean_variable expression
+/// \\brief Test for a boolean_variable expression
+/// \\param x A term
+/// \\return True if \\a x is a boolean_variable expression
 inline
 bool is_boolean_variable(const atermpp::aterm_appl& x)
 {
@@ -573,17 +573,17 @@ bool is_boolean_variable(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const boolean_variable& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const boolean_variable& x)
 {
   return out << bes::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(boolean_variable& t1, boolean_variable& t2)
 {
   t1.swap(t2);

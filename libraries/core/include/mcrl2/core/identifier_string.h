@@ -26,26 +26,26 @@ namespace core
 typedef atermpp::aterm_string identifier_string;
 
 //--- start generated class identifier_string ---//
-/// \brief list of identifier_strings
+/// \\brief list of identifier_strings
 typedef atermpp::term_list<identifier_string> identifier_string_list;
 
-/// \brief vector of identifier_strings
+/// \\brief vector of identifier_strings
 typedef std::vector<identifier_string>    identifier_string_vector;
 
 // prototype declaration
 std::string pp(const identifier_string& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const identifier_string& x)
 {
   return out << core::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(identifier_string& t1, identifier_string& t2)
 {
   t1.swap(t2);

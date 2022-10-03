@@ -291,7 +291,11 @@ struct add_sort_expressions: public Builder<Derived>
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    if (process::is_action(x))
+    if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
+    else if (process::is_action(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::action>(x));
     }
@@ -379,16 +383,12 @@ struct add_sort_expressions: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::untyped_process_assignment>(x));
     }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
   }
 
 };
 
-/// \brief Builder class
+/// \\brief Builder class
 template <typename Derived>
 struct sort_expression_builder: public add_sort_expressions<data::sort_expression_builder, Derived>
 {
@@ -641,7 +641,11 @@ struct add_data_expressions: public Builder<Derived>
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    if (process::is_action(x))
+    if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
+    else if (process::is_action(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::action>(x));
     }
@@ -729,16 +733,12 @@ struct add_data_expressions: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::untyped_process_assignment>(x));
     }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
   }
 
 };
 
-/// \brief Builder class
+/// \\brief Builder class
 template <typename Derived>
 struct data_expression_builder: public add_data_expressions<data::data_expression_builder, Derived>
 {
@@ -1000,7 +1000,11 @@ struct add_variables: public Builder<Derived>
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    if (process::is_action(x))
+    if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
+    else if (process::is_action(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::action>(x));
     }
@@ -1088,16 +1092,12 @@ struct add_variables: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::untyped_process_assignment>(x));
     }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
   }
 
 };
 
-/// \brief Builder class
+/// \\brief Builder class
 template <typename Derived>
 struct variable_builder: public add_variables<data::data_expression_builder, Derived>
 {
@@ -1349,7 +1349,11 @@ struct add_process_expressions: public Builder<Derived>
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    if (process::is_action(x))
+    if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
+    else if (process::is_action(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::action>(x));
     }
@@ -1437,16 +1441,12 @@ struct add_process_expressions: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::untyped_process_assignment>(x));
     }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
   }
 
 };
 
-/// \brief Builder class
+/// \\brief Builder class
 template <typename Derived>
 struct process_expression_builder: public add_process_expressions<core::builder, Derived>
 {
@@ -1704,7 +1704,11 @@ struct add_process_identifiers: public Builder<Derived>
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    if (process::is_action(x))
+    if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
+    else if (process::is_action(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::action>(x));
     }
@@ -1792,16 +1796,12 @@ struct add_process_identifiers: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::untyped_process_assignment>(x));
     }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
   }
 
 };
 
-/// \brief Builder class
+/// \\brief Builder class
 template <typename Derived>
 struct process_identifier_builder: public add_process_identifiers<core::builder, Derived>
 {

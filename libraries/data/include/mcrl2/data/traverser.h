@@ -340,7 +340,7 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct sort_expression_traverser: public add_traverser_sort_expressions<core::traverser, Derived>
 {
@@ -541,7 +541,7 @@ struct add_traverser_data_expressions: public Traverser<Derived>
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct data_expression_traverser: public add_traverser_data_expressions<core::traverser, Derived>
 {
@@ -750,7 +750,7 @@ struct add_traverser_variables: public Traverser<Derived>
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct variable_traverser: public add_traverser_variables<core::traverser, Derived>
 {
@@ -1072,7 +1072,7 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct identifier_string_traverser: public add_traverser_identifier_strings<core::traverser, Derived>
 {

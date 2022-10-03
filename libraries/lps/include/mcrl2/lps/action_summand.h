@@ -112,26 +112,26 @@ class action_summand: public summand_base
 };
 
 //--- start generated class action_summand ---//
-/// \brief list of action_summands
+/// \\brief list of action_summands
 typedef atermpp::term_list<action_summand> action_summand_list;
 
-/// \brief vector of action_summands
+/// \\brief vector of action_summands
 typedef std::vector<action_summand>    action_summand_vector;
 
 // prototype declaration
 std::string pp(const action_summand& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const action_summand& x)
 {
   return out << lps::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(action_summand& t1, action_summand& t2)
 {
   t1.swap(t2);

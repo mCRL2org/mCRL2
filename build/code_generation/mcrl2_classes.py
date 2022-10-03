@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 #~ Copyright 2009, 2010 Wieger Wesselink.
 #~ Distributed under the Boost Software License, Version 1.0.
@@ -823,7 +823,8 @@ class Class:
     # Returns a specialization of the swap function for the std namespace
     # TODO: deal with template classes
     def swap_overload(self):
-        text = r'''/// \\brief swap overload\ninline void swap(<CLASSNAME>& t1, <CLASSNAME>& t2)
+        text = r'''/// \\brief swap overload
+inline void swap(<CLASSNAME>& t1, <CLASSNAME>& t2)
 {
   t1.swap(t2);
 }
@@ -1184,7 +1185,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                         local_type = re.sub('const ','',re.sub('&','',p.type()))
                         if classname == 'lps::stochastic_specification' and local_type == 'process_initializer':
                             local_type = 'stochastic_process_initializer'   # Unclear why this needs to be done. Appears to be a bug. 
-                            print 'ADAPTED', local_type
+                            print('ADAPTED', local_type)
                         local_variable = 'result_%s' % p.name()
                         updates.append('%s %s;\nstatic_cast<Derived&>(*this).apply(%s, x.%s());\nx.%s() = %s;' \
                                          % (local_type, local_variable, local_variable, p.name(), p.name(), local_variable))
@@ -1325,7 +1326,7 @@ def parse_classes(text, namespace = None):
 def print_dependencies(dependencies, message):
     print(message)
     for type in sorted(dependencies):
-        print(type, dependencies[type])
+        print((type, dependencies[type]))
 
 def is_dependent_type(dependencies, type):
     if type in dependencies:
@@ -1423,7 +1424,7 @@ def parse_class_map(class_map):
             result[classname] = c
 
     # set expression class dependencies
-    for classname in result.keys():
+    for classname in list(result.keys()):
         c = result[classname]
         if 'E' in c.modifiers():
             superclass = c.superclass(include_namespace = True)

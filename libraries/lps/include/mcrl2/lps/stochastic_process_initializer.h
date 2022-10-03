@@ -56,15 +56,15 @@ inline void make_stochastic_process_initializer(atermpp::aterm_appl& t, ARGUMENT
 
 
 //--- start generated class stochastic_process_initializer ---//
-/// \brief list of stochastic_process_initializers
+/// \\brief list of stochastic_process_initializers
 typedef atermpp::term_list<stochastic_process_initializer> stochastic_process_initializer_list;
 
-/// \brief vector of stochastic_process_initializers
+/// \\brief vector of stochastic_process_initializers
 typedef std::vector<stochastic_process_initializer>    stochastic_process_initializer_vector;
 
-/// \brief Test for a stochastic_process_initializer expression
-/// \param x A term
-/// \return True if \a x is a stochastic_process_initializer expression
+/// \\brief Test for a stochastic_process_initializer expression
+/// \\param x A term
+/// \\return True if \\a x is a stochastic_process_initializer expression
 inline
 bool is_stochastic_process_initializer(const atermpp::aterm_appl& x)
 {
@@ -74,17 +74,17 @@ bool is_stochastic_process_initializer(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const stochastic_process_initializer& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const stochastic_process_initializer& x)
 {
   return out << lps::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(stochastic_process_initializer& t1, stochastic_process_initializer& t2)
 {
   t1.swap(t2);

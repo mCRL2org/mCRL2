@@ -21,24 +21,24 @@ namespace data
 {
 
 //--- start generated class alias ---//
-/// \brief A sort alias
+/// \\brief A sort alias
 class alias: public atermpp::aterm_appl
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     alias()
       : atermpp::aterm_appl(core::detail::default_values::SortRef)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit alias(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_SortRef(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     alias(const basic_sort& name, const sort_expression& reference)
       : atermpp::aterm_appl(core::detail::function_symbol_SortRef(), name, reference)
     {}
@@ -60,23 +60,23 @@ class alias: public atermpp::aterm_appl
     }
 };
 
-/// \brief Make_alias constructs a new term into a given address.
-/// \ \param t The reference into which the new alias is constructed. 
+/// \\brief Make_alias constructs a new term into a given address.
+/// \\ \param t The reference into which the new alias is constructed. 
 template <class... ARGUMENTS>
 inline void make_alias(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_SortRef(), args...);
 }
 
-/// \brief list of aliass
+/// \\brief list of aliass
 typedef atermpp::term_list<alias> alias_list;
 
-/// \brief vector of aliass
+/// \\brief vector of aliass
 typedef std::vector<alias>    alias_vector;
 
-/// \brief Test for a alias expression
-/// \param x A term
-/// \return True if \a x is a alias expression
+/// \\brief Test for a alias expression
+/// \\param x A term
+/// \\return True if \\a x is a alias expression
 inline
 bool is_alias(const atermpp::aterm_appl& x)
 {
@@ -86,17 +86,17 @@ bool is_alias(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const alias& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const alias& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(alias& t1, alias& t2)
 {
   t1.swap(t2);

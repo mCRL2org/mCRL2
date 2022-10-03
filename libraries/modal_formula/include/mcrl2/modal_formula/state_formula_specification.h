@@ -89,10 +89,10 @@ class state_formula_specification
 // prototype declaration
 std::string pp(const state_formula_specification& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const state_formula_specification& x)
 {

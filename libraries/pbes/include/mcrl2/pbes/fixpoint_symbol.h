@@ -21,17 +21,17 @@ namespace pbes_system
 {
 
 //--- start generated class fixpoint_symbol ---//
-/// \brief A fixpoint symbol
+/// \\brief A fixpoint symbol
 class fixpoint_symbol: public atermpp::aterm_appl
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     fixpoint_symbol()
       : atermpp::aterm_appl(core::detail::default_values::FixPoint)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit fixpoint_symbol(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
@@ -74,26 +74,26 @@ class fixpoint_symbol: public atermpp::aterm_appl
 //--- end user section fixpoint_symbol ---//
 };
 
-/// \brief list of fixpoint_symbols
+/// \\brief list of fixpoint_symbols
 typedef atermpp::term_list<fixpoint_symbol> fixpoint_symbol_list;
 
-/// \brief vector of fixpoint_symbols
+/// \\brief vector of fixpoint_symbols
 typedef std::vector<fixpoint_symbol>    fixpoint_symbol_vector;
 
 // prototype declaration
 std::string pp(const fixpoint_symbol& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const fixpoint_symbol& x)
 {
   return out << pbes_system::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(fixpoint_symbol& t1, fixpoint_symbol& t2)
 {
   t1.swap(t2);

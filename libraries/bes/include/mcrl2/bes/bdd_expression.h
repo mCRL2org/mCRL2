@@ -20,17 +20,17 @@ namespace mcrl2 {
 namespace bdd {
 
 //--- start generated classes ---//
-/// \brief A bdd expression
+/// \\brief A bdd expression
 class bdd_expression: public atermpp::aterm_appl
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     bdd_expression()
       : atermpp::aterm_appl(core::detail::default_values::BddExpression)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit bdd_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
@@ -44,10 +44,10 @@ class bdd_expression: public atermpp::aterm_appl
     bdd_expression& operator=(bdd_expression&&) noexcept = default;
 };
 
-/// \brief list of bdd_expressions
+/// \\brief list of bdd_expressions
 typedef atermpp::term_list<bdd_expression> bdd_expression_list;
 
-/// \brief vector of bdd_expressions
+/// \\brief vector of bdd_expressions
 typedef std::vector<bdd_expression>    bdd_expression_vector;
 
 // prototypes
@@ -55,9 +55,9 @@ inline bool is_true(const atermpp::aterm_appl& x);
 inline bool is_false(const atermpp::aterm_appl& x);
 inline bool is_if(const atermpp::aterm_appl& x);
 
-/// \brief Test for a bdd_expression expression
-/// \param x A term
-/// \return True if \a x is a bdd_expression expression
+/// \\brief Test for a bdd_expression expression
+/// \\param x A term
+/// \\return True if \\a x is a bdd_expression expression
 inline
 bool is_bdd_expression(const atermpp::aterm_appl& x)
 {
@@ -69,34 +69,34 @@ bool is_bdd_expression(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const bdd_expression& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const bdd_expression& x)
 {
   return out << bdd::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(bdd_expression& t1, bdd_expression& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The value true for bdd expressions
+/// \\brief The value true for bdd expressions
 class true_: public bdd_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     true_()
       : bdd_expression(core::detail::default_values::BddTrue)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit true_(const atermpp::aterm& term)
       : bdd_expression(term)
     {
@@ -110,9 +110,9 @@ class true_: public bdd_expression
     true_& operator=(true_&&) noexcept = default;
 };
 
-/// \brief Test for a true expression
-/// \param x A term
-/// \return True if \a x is a true expression
+/// \\brief Test for a true expression
+/// \\param x A term
+/// \\return True if \\a x is a true expression
 inline
 bool is_true(const atermpp::aterm_appl& x)
 {
@@ -122,34 +122,34 @@ bool is_true(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const true_& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const true_& x)
 {
   return out << bdd::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(true_& t1, true_& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The value false for bdd expressions
+/// \\brief The value false for bdd expressions
 class false_: public bdd_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     false_()
       : bdd_expression(core::detail::default_values::BddFalse)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit false_(const atermpp::aterm& term)
       : bdd_expression(term)
     {
@@ -163,9 +163,9 @@ class false_: public bdd_expression
     false_& operator=(false_&&) noexcept = default;
 };
 
-/// \brief Test for a false expression
-/// \param x A term
-/// \return True if \a x is a false expression
+/// \\brief Test for a false expression
+/// \\param x A term
+/// \\return True if \\a x is a false expression
 inline
 bool is_false(const atermpp::aterm_appl& x)
 {
@@ -175,46 +175,46 @@ bool is_false(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const false_& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const false_& x)
 {
   return out << bdd::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(false_& t1, false_& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The if operator for bdd expressions
+/// \\brief The if operator for bdd expressions
 class if_: public bdd_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     if_()
       : bdd_expression(core::detail::default_values::BddIf)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit if_(const atermpp::aterm& term)
       : bdd_expression(term)
     {
       assert(core::detail::check_term_BddIf(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     if_(const core::identifier_string& name, const bdd_expression& left, const bdd_expression& right)
       : bdd_expression(atermpp::aterm_appl(core::detail::function_symbol_BddIf(), name, left, right))
     {}
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     if_(const std::string& name, const bdd_expression& left, const bdd_expression& right)
       : bdd_expression(atermpp::aterm_appl(core::detail::function_symbol_BddIf(), core::identifier_string(name), left, right))
     {}
@@ -241,17 +241,17 @@ class if_: public bdd_expression
     }
 };
 
-/// \brief Make_if_ constructs a new term into a given address.
-/// \ \param t The reference into which the new if_ is constructed. 
+/// \\brief Make_if_ constructs a new term into a given address.
+/// \\ \param t The reference into which the new if_ is constructed. 
 template <class... ARGUMENTS>
 inline void make_if_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_BddIf(), args...);
 }
 
-/// \brief Test for a if expression
-/// \param x A term
-/// \return True if \a x is a if expression
+/// \\brief Test for a if expression
+/// \\param x A term
+/// \\return True if \\a x is a if expression
 inline
 bool is_if(const atermpp::aterm_appl& x)
 {
@@ -261,17 +261,17 @@ bool is_if(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const if_& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const if_& x)
 {
   return out << bdd::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(if_& t1, if_& t2)
 {
   t1.swap(t2);

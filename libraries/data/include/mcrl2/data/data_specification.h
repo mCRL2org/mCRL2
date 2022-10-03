@@ -679,10 +679,10 @@ class data_specification: public sort_specification
 // prototype declaration
 std::string pp(const data_specification& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const data_specification& x)
 {

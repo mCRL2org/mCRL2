@@ -69,17 +69,17 @@ void make_set_comprehension(atermpp::aterm& result, ARGUMENTS... arguments)
 // prototype declaration
 std::string pp(const set_comprehension& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const set_comprehension& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(set_comprehension& t1, set_comprehension& t2)
 {
   t1.swap(t2);

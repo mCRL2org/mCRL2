@@ -19,24 +19,24 @@ namespace mcrl2 {
 namespace data {
 
 //--- start generated class untyped_sort_variable ---//
-/// \brief Untyped sort variable
+/// \\brief Untyped sort variable
 class untyped_sort_variable: public sort_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     untyped_sort_variable()
       : sort_expression(core::detail::default_values::UntypedSortVariable)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit untyped_sort_variable(const atermpp::aterm& term)
       : sort_expression(term)
     {
       assert(core::detail::check_term_UntypedSortVariable(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     explicit untyped_sort_variable(const atermpp::aterm_int& value)
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedSortVariable(), value))
     {}
@@ -59,17 +59,17 @@ class untyped_sort_variable: public sort_expression
 //--- end user section untyped_sort_variable ---//
 };
 
-/// \brief Make_untyped_sort_variable constructs a new term into a given address.
-/// \ \param t The reference into which the new untyped_sort_variable is constructed. 
+/// \\brief Make_untyped_sort_variable constructs a new term into a given address.
+/// \\ \param t The reference into which the new untyped_sort_variable is constructed. 
 template <class... ARGUMENTS>
 inline void make_untyped_sort_variable(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_UntypedSortVariable(), args...);
 }
 
-/// \brief Test for a untyped_sort_variable expression
-/// \param x A term
-/// \return True if \a x is a untyped_sort_variable expression
+/// \\brief Test for a untyped_sort_variable expression
+/// \\param x A term
+/// \\return True if \\a x is a untyped_sort_variable expression
 inline
 bool is_untyped_sort_variable(const atermpp::aterm_appl& x)
 {
@@ -79,17 +79,17 @@ bool is_untyped_sort_variable(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const untyped_sort_variable& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const untyped_sort_variable& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(untyped_sort_variable& t1, untyped_sort_variable& t2)
 {
   t1.swap(t2);

@@ -21,24 +21,24 @@ namespace process
 {
 
 //--- start generated class action_name_multiset ---//
-/// \brief A multiset of action names
+/// \\brief A multiset of action names
 class action_name_multiset: public atermpp::aterm_appl
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     action_name_multiset()
       : atermpp::aterm_appl(core::detail::default_values::MultActName)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit action_name_multiset(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_MultActName(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     explicit action_name_multiset(const core::identifier_string_list& names)
       : atermpp::aterm_appl(core::detail::function_symbol_MultActName(), names)
     {}
@@ -55,23 +55,23 @@ class action_name_multiset: public atermpp::aterm_appl
     }
 };
 
-/// \brief Make_action_name_multiset constructs a new term into a given address.
-/// \ \param t The reference into which the new action_name_multiset is constructed. 
+/// \\brief Make_action_name_multiset constructs a new term into a given address.
+/// \\ \param t The reference into which the new action_name_multiset is constructed. 
 template <class... ARGUMENTS>
 inline void make_action_name_multiset(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_MultActName(), args...);
 }
 
-/// \brief list of action_name_multisets
+/// \\brief list of action_name_multisets
 typedef atermpp::term_list<action_name_multiset> action_name_multiset_list;
 
-/// \brief vector of action_name_multisets
+/// \\brief vector of action_name_multisets
 typedef std::vector<action_name_multiset>    action_name_multiset_vector;
 
-/// \brief Test for a action_name_multiset expression
-/// \param x A term
-/// \return True if \a x is a action_name_multiset expression
+/// \\brief Test for a action_name_multiset expression
+/// \\param x A term
+/// \\return True if \\a x is a action_name_multiset expression
 inline
 bool is_action_name_multiset(const atermpp::aterm_appl& x)
 {
@@ -81,17 +81,17 @@ bool is_action_name_multiset(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const action_name_multiset& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const action_name_multiset& x)
 {
   return out << process::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(action_name_multiset& t1, action_name_multiset& t2)
 {
   t1.swap(t2);

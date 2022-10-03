@@ -21,29 +21,29 @@ namespace regular_formulas
 {
 
 //--- start generated classes ---//
-/// \brief A regular formula
+/// \\brief A regular formula
 class regular_formula: public atermpp::aterm_appl
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     regular_formula()
       : atermpp::aterm_appl(core::detail::default_values::RegFrm)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit regular_formula(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_RegFrm(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     regular_formula(const action_formulas::action_formula& x)
       : atermpp::aterm_appl(x)
     {}
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     regular_formula(const data::data_expression& x)
       : atermpp::aterm_appl(x)
     {}
@@ -55,10 +55,10 @@ class regular_formula: public atermpp::aterm_appl
     regular_formula& operator=(regular_formula&&) noexcept = default;
 };
 
-/// \brief list of regular_formulas
+/// \\brief list of regular_formulas
 typedef atermpp::term_list<regular_formula> regular_formula_list;
 
-/// \brief vector of regular_formulas
+/// \\brief vector of regular_formulas
 typedef std::vector<regular_formula>    regular_formula_vector;
 
 // prototypes
@@ -68,14 +68,14 @@ inline bool is_trans(const atermpp::aterm_appl& x);
 inline bool is_trans_or_nil(const atermpp::aterm_appl& x);
 inline bool is_untyped_regular_formula(const atermpp::aterm_appl& x);
 
-/// \brief Test for a regular_formula expression
-/// \param x A term
-/// \return True if \a x is a regular_formula expression
+/// \\brief Test for a regular_formula expression
+/// \\param x A term
+/// \\return True if \\a x is a regular_formula expression
 inline
 bool is_regular_formula(const atermpp::aterm_appl& x)
 {
-  return action_formulas::is_action_formula(x) ||
-         data::is_data_expression(x) ||
+  return data::is_data_expression(x) ||
+         action_formulas::is_action_formula(x) ||
          regular_formulas::is_seq(x) ||
          regular_formulas::is_alt(x) ||
          regular_formulas::is_trans(x) ||
@@ -86,41 +86,41 @@ bool is_regular_formula(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const regular_formula& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const regular_formula& x)
 {
   return out << regular_formulas::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(regular_formula& t1, regular_formula& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The seq operator for regular formulas
+/// \\brief The seq operator for regular formulas
 class seq: public regular_formula
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     seq()
       : regular_formula(core::detail::default_values::RegSeq)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit seq(const atermpp::aterm& term)
       : regular_formula(term)
     {
       assert(core::detail::check_term_RegSeq(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     seq(const regular_formula& left, const regular_formula& right)
       : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_RegSeq(), left, right))
     {}
@@ -142,17 +142,17 @@ class seq: public regular_formula
     }
 };
 
-/// \brief Make_seq constructs a new term into a given address.
-/// \ \param t The reference into which the new seq is constructed. 
+/// \\brief Make_seq constructs a new term into a given address.
+/// \\ \param t The reference into which the new seq is constructed. 
 template <class... ARGUMENTS>
 inline void make_seq(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_RegSeq(), args...);
 }
 
-/// \brief Test for a seq expression
-/// \param x A term
-/// \return True if \a x is a seq expression
+/// \\brief Test for a seq expression
+/// \\param x A term
+/// \\return True if \\a x is a seq expression
 inline
 bool is_seq(const atermpp::aterm_appl& x)
 {
@@ -162,41 +162,41 @@ bool is_seq(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const seq& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const seq& x)
 {
   return out << regular_formulas::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(seq& t1, seq& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The alt operator for regular formulas
+/// \\brief The alt operator for regular formulas
 class alt: public regular_formula
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     alt()
       : regular_formula(core::detail::default_values::RegAlt)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit alt(const atermpp::aterm& term)
       : regular_formula(term)
     {
       assert(core::detail::check_term_RegAlt(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     alt(const regular_formula& left, const regular_formula& right)
       : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_RegAlt(), left, right))
     {}
@@ -218,17 +218,17 @@ class alt: public regular_formula
     }
 };
 
-/// \brief Make_alt constructs a new term into a given address.
-/// \ \param t The reference into which the new alt is constructed. 
+/// \\brief Make_alt constructs a new term into a given address.
+/// \\ \param t The reference into which the new alt is constructed. 
 template <class... ARGUMENTS>
 inline void make_alt(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_RegAlt(), args...);
 }
 
-/// \brief Test for a alt expression
-/// \param x A term
-/// \return True if \a x is a alt expression
+/// \\brief Test for a alt expression
+/// \\param x A term
+/// \\return True if \\a x is a alt expression
 inline
 bool is_alt(const atermpp::aterm_appl& x)
 {
@@ -238,41 +238,41 @@ bool is_alt(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const alt& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const alt& x)
 {
   return out << regular_formulas::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(alt& t1, alt& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The trans operator for regular formulas
+/// \\brief The trans operator for regular formulas
 class trans: public regular_formula
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     trans()
       : regular_formula(core::detail::default_values::RegTrans)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit trans(const atermpp::aterm& term)
       : regular_formula(term)
     {
       assert(core::detail::check_term_RegTrans(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     explicit trans(const regular_formula& operand)
       : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_RegTrans(), operand))
     {}
@@ -289,17 +289,17 @@ class trans: public regular_formula
     }
 };
 
-/// \brief Make_trans constructs a new term into a given address.
-/// \ \param t The reference into which the new trans is constructed. 
+/// \\brief Make_trans constructs a new term into a given address.
+/// \\ \param t The reference into which the new trans is constructed. 
 template <class... ARGUMENTS>
 inline void make_trans(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_RegTrans(), args...);
 }
 
-/// \brief Test for a trans expression
-/// \param x A term
-/// \return True if \a x is a trans expression
+/// \\brief Test for a trans expression
+/// \\param x A term
+/// \\return True if \\a x is a trans expression
 inline
 bool is_trans(const atermpp::aterm_appl& x)
 {
@@ -309,41 +309,41 @@ bool is_trans(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const trans& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const trans& x)
 {
   return out << regular_formulas::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(trans& t1, trans& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The 'trans or nil' operator for regular formulas
+/// \\brief The 'trans or nil' operator for regular formulas
 class trans_or_nil: public regular_formula
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     trans_or_nil()
       : regular_formula(core::detail::default_values::RegTransOrNil)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit trans_or_nil(const atermpp::aterm& term)
       : regular_formula(term)
     {
       assert(core::detail::check_term_RegTransOrNil(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     explicit trans_or_nil(const regular_formula& operand)
       : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_RegTransOrNil(), operand))
     {}
@@ -360,17 +360,17 @@ class trans_or_nil: public regular_formula
     }
 };
 
-/// \brief Make_trans_or_nil constructs a new term into a given address.
-/// \ \param t The reference into which the new trans_or_nil is constructed. 
+/// \\brief Make_trans_or_nil constructs a new term into a given address.
+/// \\ \param t The reference into which the new trans_or_nil is constructed. 
 template <class... ARGUMENTS>
 inline void make_trans_or_nil(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_RegTransOrNil(), args...);
 }
 
-/// \brief Test for a trans_or_nil expression
-/// \param x A term
-/// \return True if \a x is a trans_or_nil expression
+/// \\brief Test for a trans_or_nil expression
+/// \\param x A term
+/// \\return True if \\a x is a trans_or_nil expression
 inline
 bool is_trans_or_nil(const atermpp::aterm_appl& x)
 {
@@ -380,46 +380,46 @@ bool is_trans_or_nil(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const trans_or_nil& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const trans_or_nil& x)
 {
   return out << regular_formulas::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(trans_or_nil& t1, trans_or_nil& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief An untyped regular formula or action formula
+/// \\brief An untyped regular formula or action formula
 class untyped_regular_formula: public regular_formula
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     untyped_regular_formula()
       : regular_formula(core::detail::default_values::UntypedRegFrm)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit untyped_regular_formula(const atermpp::aterm& term)
       : regular_formula(term)
     {
       assert(core::detail::check_term_UntypedRegFrm(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     untyped_regular_formula(const core::identifier_string& name, const regular_formula& left, const regular_formula& right)
       : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_UntypedRegFrm(), name, left, right))
     {}
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     untyped_regular_formula(const std::string& name, const regular_formula& left, const regular_formula& right)
       : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_UntypedRegFrm(), core::identifier_string(name), left, right))
     {}
@@ -446,17 +446,17 @@ class untyped_regular_formula: public regular_formula
     }
 };
 
-/// \brief Make_untyped_regular_formula constructs a new term into a given address.
-/// \ \param t The reference into which the new untyped_regular_formula is constructed. 
+/// \\brief Make_untyped_regular_formula constructs a new term into a given address.
+/// \\ \param t The reference into which the new untyped_regular_formula is constructed. 
 template <class... ARGUMENTS>
 inline void make_untyped_regular_formula(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_UntypedRegFrm(), args...);
 }
 
-/// \brief Test for a untyped_regular_formula expression
-/// \param x A term
-/// \return True if \a x is a untyped_regular_formula expression
+/// \\brief Test for a untyped_regular_formula expression
+/// \\param x A term
+/// \\return True if \\a x is a untyped_regular_formula expression
 inline
 bool is_untyped_regular_formula(const atermpp::aterm_appl& x)
 {
@@ -466,17 +466,17 @@ bool is_untyped_regular_formula(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const untyped_regular_formula& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const untyped_regular_formula& x)
 {
   return out << regular_formulas::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(untyped_regular_formula& t1, untyped_regular_formula& t2)
 {
   t1.swap(t2);

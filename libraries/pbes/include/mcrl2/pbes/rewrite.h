@@ -90,9 +90,9 @@ make_rewrite_pbes_expressions_with_substitution_builder(const Rewriter& R, Subst
 } // namespace detail
 
 //--- start generated pbes_system rewrite code ---//
-/// \brief Rewrites all embedded expressions in an object x
-/// \param x an object containing expressions
-/// \param R a rewriter
+/// \\brief Rewrites all embedded expressions in an object x
+/// \\param x an object containing expressions
+/// \\param R a rewriter
 template <typename T, typename Rewriter>
 void rewrite(T& x,
              Rewriter R,
@@ -102,10 +102,10 @@ void rewrite(T& x,
   data::detail::make_rewrite_data_expressions_builder<pbes_system::data_expression_builder>(R).update(x);
 }
 
-/// \brief Rewrites all embedded expressions in an object x
-/// \param x an object containing expressions
-/// \param R a rewriter
-/// \return the rewrite result
+/// \\brief Rewrites all embedded expressions in an object x
+/// \\param x an object containing expressions
+/// \\param R a rewriter
+/// \\return the rewrite result
 template <typename T, typename Rewriter>
 T rewrite(const T& x,
           Rewriter R,
@@ -117,10 +117,10 @@ T rewrite(const T& x,
   return result;
 }
 
-/// \brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
-/// \param x an object containing expressions
-/// \param R a rewriter
-/// \param sigma a substitution
+/// \\brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
+/// \\param x an object containing expressions
+/// \\param R a rewriter
+/// \\param sigma a substitution
 template <typename T, typename Rewriter, typename Substitution>
 void rewrite(T& x,
              Rewriter R,
@@ -131,11 +131,11 @@ void rewrite(T& x,
   data::detail::make_rewrite_data_expressions_with_substitution_builder<pbes_system::data_expression_builder>(R, sigma).update(x);
 }
 
-/// \brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
-/// \param x an object containing expressions
-/// \param R a rewriter
-/// \param sigma a substitution
-/// \return the rewrite result
+/// \\brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
+/// \\param x an object containing expressions
+/// \\param R a rewriter
+/// \\param sigma a substitution
+/// \\return the rewrite result
 template <typename T, typename Rewriter, typename Substitution>
 T rewrite(const T& x,
           Rewriter R,

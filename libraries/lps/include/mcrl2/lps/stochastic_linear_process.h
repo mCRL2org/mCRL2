@@ -80,10 +80,10 @@ class stochastic_linear_process: public linear_process_base<stochastic_action_su
 // prototype declaration
 std::string pp(const stochastic_linear_process& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const stochastic_linear_process& x)
 {

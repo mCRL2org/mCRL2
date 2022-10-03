@@ -21,29 +21,29 @@ namespace data
 {
 
 //--- start generated class structured_sort_constructor_argument ---//
-/// \brief An argument of a constructor of a structured sort
+/// \\brief An argument of a constructor of a structured sort
 class structured_sort_constructor_argument: public atermpp::aterm_appl
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     structured_sort_constructor_argument()
       : atermpp::aterm_appl(core::detail::default_values::StructProj)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit structured_sort_constructor_argument(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_StructProj(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     structured_sort_constructor_argument(const core::identifier_string& name, const sort_expression& sort)
       : atermpp::aterm_appl(core::detail::function_symbol_StructProj(), name, sort)
     {}
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     structured_sort_constructor_argument(const std::string& name, const sort_expression& sort)
       : atermpp::aterm_appl(core::detail::function_symbol_StructProj(), core::identifier_string(name), sort)
     {}
@@ -81,23 +81,23 @@ class structured_sort_constructor_argument: public atermpp::aterm_appl
 //--- end user section structured_sort_constructor_argument ---//
 };
 
-/// \brief Make_structured_sort_constructor_argument constructs a new term into a given address.
-/// \ \param t The reference into which the new structured_sort_constructor_argument is constructed. 
+/// \\brief Make_structured_sort_constructor_argument constructs a new term into a given address.
+/// \\ \param t The reference into which the new structured_sort_constructor_argument is constructed. 
 template <class... ARGUMENTS>
 inline void make_structured_sort_constructor_argument(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StructProj(), args...);
 }
 
-/// \brief list of structured_sort_constructor_arguments
+/// \\brief list of structured_sort_constructor_arguments
 typedef atermpp::term_list<structured_sort_constructor_argument> structured_sort_constructor_argument_list;
 
-/// \brief vector of structured_sort_constructor_arguments
+/// \\brief vector of structured_sort_constructor_arguments
 typedef std::vector<structured_sort_constructor_argument>    structured_sort_constructor_argument_vector;
 
-/// \brief Test for a structured_sort_constructor_argument expression
-/// \param x A term
-/// \return True if \a x is a structured_sort_constructor_argument expression
+/// \\brief Test for a structured_sort_constructor_argument expression
+/// \\param x A term
+/// \\return True if \\a x is a structured_sort_constructor_argument expression
 inline
 bool is_structured_sort_constructor_argument(const atermpp::aterm_appl& x)
 {
@@ -107,17 +107,17 @@ bool is_structured_sort_constructor_argument(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const structured_sort_constructor_argument& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const structured_sort_constructor_argument& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(structured_sort_constructor_argument& t1, structured_sort_constructor_argument& t2)
 {
   t1.swap(t2);

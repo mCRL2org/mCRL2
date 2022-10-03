@@ -23,7 +23,7 @@ namespace process
 typedef std::pair<core::identifier_string, data::variable_list> process_identifier_key_type;
 
 //--- start generated class process_identifier ---//
-/// \brief A process identifier
+/// \\brief A process identifier
 class process_identifier: public atermpp::aterm_appl
 {
   public:
@@ -74,23 +74,23 @@ class process_identifier: public atermpp::aterm_appl
 //--- end user section process_identifier ---//
 };
 
-/// \brief Make_process_identifier constructs a new term into a given address.
-/// \ \param t The reference into which the new process_identifier is constructed. 
+/// \\brief Make_process_identifier constructs a new term into a given address.
+/// \\ \param t The reference into which the new process_identifier is constructed. 
 template <class... ARGUMENTS>
 inline void make_process_identifier(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl_with_index<process_identifier,std::pair<core::identifier_string, data::variable_list>>(t, core::detail::function_symbol_ProcVarId(), args...);
 }
 
-/// \brief list of process_identifiers
+/// \\brief list of process_identifiers
 typedef atermpp::term_list<process_identifier> process_identifier_list;
 
-/// \brief vector of process_identifiers
+/// \\brief vector of process_identifiers
 typedef std::vector<process_identifier>    process_identifier_vector;
 
-/// \brief Test for a process_identifier expression
-/// \param x A term
-/// \return True if \a x is a process_identifier expression
+/// \\brief Test for a process_identifier expression
+/// \\param x A term
+/// \\return True if \\a x is a process_identifier expression
 inline
 bool is_process_identifier(const atermpp::aterm_appl& x)
 {
@@ -100,17 +100,17 @@ bool is_process_identifier(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const process_identifier& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const process_identifier& x)
 {
   return out << process::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(process_identifier& t1, process_identifier& t2)
 {
   t1.swap(t2);

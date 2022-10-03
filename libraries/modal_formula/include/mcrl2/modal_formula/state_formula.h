@@ -21,29 +21,29 @@ namespace state_formulas
 {
 
 //--- start generated classes ---//
-/// \brief A state formula
+/// \\brief A state formula
 class state_formula: public atermpp::aterm_appl
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     state_formula()
       : atermpp::aterm_appl(core::detail::default_values::StateFrm)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit state_formula(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_StateFrm(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     state_formula(const data::data_expression& x)
       : atermpp::aterm_appl(x)
     {}
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     state_formula(const data::untyped_data_parameter& x)
       : atermpp::aterm_appl(x)
     {}
@@ -60,10 +60,10 @@ class state_formula: public atermpp::aterm_appl
 //--- end user section state_formula ---//
 };
 
-/// \brief list of state_formulas
+/// \\brief list of state_formulas
 typedef atermpp::term_list<state_formula> state_formula_list;
 
-/// \brief vector of state_formulas
+/// \\brief vector of state_formulas
 typedef std::vector<state_formula>    state_formula_vector;
 
 // prototypes
@@ -85,9 +85,9 @@ inline bool is_variable(const atermpp::aterm_appl& x);
 inline bool is_nu(const atermpp::aterm_appl& x);
 inline bool is_mu(const atermpp::aterm_appl& x);
 
-/// \brief Test for a state_formula expression
-/// \param x A term
-/// \return True if \a x is a state_formula expression
+/// \\brief Test for a state_formula expression
+/// \\param x A term
+/// \\return True if \\a x is a state_formula expression
 inline
 bool is_state_formula(const atermpp::aterm_appl& x)
 {
@@ -115,34 +115,34 @@ bool is_state_formula(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const state_formula& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const state_formula& x)
 {
   return out << state_formulas::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(state_formula& t1, state_formula& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The value true for state formulas
+/// \\brief The value true for state formulas
 class true_: public state_formula
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     true_()
       : state_formula(core::detail::default_values::StateTrue)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit true_(const atermpp::aterm& term)
       : state_formula(term)
     {
@@ -156,9 +156,9 @@ class true_: public state_formula
     true_& operator=(true_&&) noexcept = default;
 };
 
-/// \brief Test for a true expression
-/// \param x A term
-/// \return True if \a x is a true expression
+/// \\brief Test for a true expression
+/// \\param x A term
+/// \\return True if \\a x is a true expression
 inline
 bool is_true(const atermpp::aterm_appl& x)
 {
@@ -168,34 +168,34 @@ bool is_true(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const true_& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const true_& x)
 {
   return out << state_formulas::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(true_& t1, true_& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The value false for state formulas
+/// \\brief The value false for state formulas
 class false_: public state_formula
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     false_()
       : state_formula(core::detail::default_values::StateFalse)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit false_(const atermpp::aterm& term)
       : state_formula(term)
     {
@@ -209,9 +209,9 @@ class false_: public state_formula
     false_& operator=(false_&&) noexcept = default;
 };
 
-/// \brief Test for a false expression
-/// \param x A term
-/// \return True if \a x is a false expression
+/// \\brief Test for a false expression
+/// \\param x A term
+/// \\return True if \\a x is a false expression
 inline
 bool is_false(const atermpp::aterm_appl& x)
 {
@@ -221,41 +221,41 @@ bool is_false(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const false_& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const false_& x)
 {
   return out << state_formulas::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(false_& t1, false_& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The not operator for state formulas
+/// \\brief The not operator for state formulas
 class not_: public state_formula
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     not_()
       : state_formula(core::detail::default_values::StateNot)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit not_(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateNot(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     explicit not_(const state_formula& operand)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateNot(), operand))
     {}
@@ -272,17 +272,17 @@ class not_: public state_formula
     }
 };
 
-/// \brief Make_not_ constructs a new term into a given address.
-/// \ \param t The reference into which the new not_ is constructed. 
+/// \\brief Make_not_ constructs a new term into a given address.
+/// \\ \param t The reference into which the new not_ is constructed. 
 template <class... ARGUMENTS>
 inline void make_not_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateNot(), args...);
 }
 
-/// \brief Test for a not expression
-/// \param x A term
-/// \return True if \a x is a not expression
+/// \\brief Test for a not expression
+/// \\param x A term
+/// \\return True if \\a x is a not expression
 inline
 bool is_not(const atermpp::aterm_appl& x)
 {
@@ -292,41 +292,41 @@ bool is_not(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const not_& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const not_& x)
 {
   return out << state_formulas::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(not_& t1, not_& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The and operator for state formulas
+/// \\brief The and operator for state formulas
 class and_: public state_formula
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     and_()
       : state_formula(core::detail::default_values::StateAnd)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit and_(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateAnd(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     and_(const state_formula& left, const state_formula& right)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateAnd(), left, right))
     {}
@@ -348,17 +348,17 @@ class and_: public state_formula
     }
 };
 
-/// \brief Make_and_ constructs a new term into a given address.
-/// \ \param t The reference into which the new and_ is constructed. 
+/// \\brief Make_and_ constructs a new term into a given address.
+/// \\ \param t The reference into which the new and_ is constructed. 
 template <class... ARGUMENTS>
 inline void make_and_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateAnd(), args...);
 }
 
-/// \brief Test for a and expression
-/// \param x A term
-/// \return True if \a x is a and expression
+/// \\brief Test for a and expression
+/// \\param x A term
+/// \\return True if \\a x is a and expression
 inline
 bool is_and(const atermpp::aterm_appl& x)
 {
@@ -368,41 +368,41 @@ bool is_and(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const and_& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const and_& x)
 {
   return out << state_formulas::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(and_& t1, and_& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The or operator for state formulas
+/// \\brief The or operator for state formulas
 class or_: public state_formula
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     or_()
       : state_formula(core::detail::default_values::StateOr)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit or_(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateOr(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     or_(const state_formula& left, const state_formula& right)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateOr(), left, right))
     {}
@@ -424,17 +424,17 @@ class or_: public state_formula
     }
 };
 
-/// \brief Make_or_ constructs a new term into a given address.
-/// \ \param t The reference into which the new or_ is constructed. 
+/// \\brief Make_or_ constructs a new term into a given address.
+/// \\ \param t The reference into which the new or_ is constructed. 
 template <class... ARGUMENTS>
 inline void make_or_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateOr(), args...);
 }
 
-/// \brief Test for a or expression
-/// \param x A term
-/// \return True if \a x is a or expression
+/// \\brief Test for a or expression
+/// \\param x A term
+/// \\return True if \\a x is a or expression
 inline
 bool is_or(const atermpp::aterm_appl& x)
 {
@@ -444,41 +444,41 @@ bool is_or(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const or_& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const or_& x)
 {
   return out << state_formulas::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(or_& t1, or_& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The implication operator for state formulas
+/// \\brief The implication operator for state formulas
 class imp: public state_formula
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     imp()
       : state_formula(core::detail::default_values::StateImp)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit imp(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateImp(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     imp(const state_formula& left, const state_formula& right)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateImp(), left, right))
     {}
@@ -500,17 +500,17 @@ class imp: public state_formula
     }
 };
 
-/// \brief Make_imp constructs a new term into a given address.
-/// \ \param t The reference into which the new imp is constructed. 
+/// \\brief Make_imp constructs a new term into a given address.
+/// \\ \param t The reference into which the new imp is constructed. 
 template <class... ARGUMENTS>
 inline void make_imp(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateImp(), args...);
 }
 
-/// \brief Test for a imp expression
-/// \param x A term
-/// \return True if \a x is a imp expression
+/// \\brief Test for a imp expression
+/// \\param x A term
+/// \\return True if \\a x is a imp expression
 inline
 bool is_imp(const atermpp::aterm_appl& x)
 {
@@ -520,41 +520,41 @@ bool is_imp(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const imp& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const imp& x)
 {
   return out << state_formulas::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(imp& t1, imp& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The universal quantification operator for state formulas
+/// \\brief The universal quantification operator for state formulas
 class forall: public state_formula
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     forall()
       : state_formula(core::detail::default_values::StateForall)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit forall(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateForall(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     forall(const data::variable_list& variables, const state_formula& body)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateForall(), variables, body))
     {}
@@ -576,17 +576,17 @@ class forall: public state_formula
     }
 };
 
-/// \brief Make_forall constructs a new term into a given address.
-/// \ \param t The reference into which the new forall is constructed. 
+/// \\brief Make_forall constructs a new term into a given address.
+/// \\ \param t The reference into which the new forall is constructed. 
 template <class... ARGUMENTS>
 inline void make_forall(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateForall(), args...);
 }
 
-/// \brief Test for a forall expression
-/// \param x A term
-/// \return True if \a x is a forall expression
+/// \\brief Test for a forall expression
+/// \\param x A term
+/// \\return True if \\a x is a forall expression
 inline
 bool is_forall(const atermpp::aterm_appl& x)
 {
@@ -596,41 +596,41 @@ bool is_forall(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const forall& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const forall& x)
 {
   return out << state_formulas::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(forall& t1, forall& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The existential quantification operator for state formulas
+/// \\brief The existential quantification operator for state formulas
 class exists: public state_formula
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     exists()
       : state_formula(core::detail::default_values::StateExists)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit exists(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateExists(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     exists(const data::variable_list& variables, const state_formula& body)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateExists(), variables, body))
     {}
@@ -652,17 +652,17 @@ class exists: public state_formula
     }
 };
 
-/// \brief Make_exists constructs a new term into a given address.
-/// \ \param t The reference into which the new exists is constructed. 
+/// \\brief Make_exists constructs a new term into a given address.
+/// \\ \param t The reference into which the new exists is constructed. 
 template <class... ARGUMENTS>
 inline void make_exists(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateExists(), args...);
 }
 
-/// \brief Test for a exists expression
-/// \param x A term
-/// \return True if \a x is a exists expression
+/// \\brief Test for a exists expression
+/// \\param x A term
+/// \\return True if \\a x is a exists expression
 inline
 bool is_exists(const atermpp::aterm_appl& x)
 {
@@ -672,41 +672,41 @@ bool is_exists(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const exists& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const exists& x)
 {
   return out << state_formulas::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(exists& t1, exists& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The must operator for state formulas
+/// \\brief The must operator for state formulas
 class must: public state_formula
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     must()
       : state_formula(core::detail::default_values::StateMust)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit must(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateMust(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     must(const regular_formulas::regular_formula& formula, const state_formula& operand)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateMust(), formula, operand))
     {}
@@ -728,17 +728,17 @@ class must: public state_formula
     }
 };
 
-/// \brief Make_must constructs a new term into a given address.
-/// \ \param t The reference into which the new must is constructed. 
+/// \\brief Make_must constructs a new term into a given address.
+/// \\ \param t The reference into which the new must is constructed. 
 template <class... ARGUMENTS>
 inline void make_must(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateMust(), args...);
 }
 
-/// \brief Test for a must expression
-/// \param x A term
-/// \return True if \a x is a must expression
+/// \\brief Test for a must expression
+/// \\param x A term
+/// \\return True if \\a x is a must expression
 inline
 bool is_must(const atermpp::aterm_appl& x)
 {
@@ -748,41 +748,41 @@ bool is_must(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const must& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const must& x)
 {
   return out << state_formulas::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(must& t1, must& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The may operator for state formulas
+/// \\brief The may operator for state formulas
 class may: public state_formula
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     may()
       : state_formula(core::detail::default_values::StateMay)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit may(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateMay(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     may(const regular_formulas::regular_formula& formula, const state_formula& operand)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateMay(), formula, operand))
     {}
@@ -804,17 +804,17 @@ class may: public state_formula
     }
 };
 
-/// \brief Make_may constructs a new term into a given address.
-/// \ \param t The reference into which the new may is constructed. 
+/// \\brief Make_may constructs a new term into a given address.
+/// \\ \param t The reference into which the new may is constructed. 
 template <class... ARGUMENTS>
 inline void make_may(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateMay(), args...);
 }
 
-/// \brief Test for a may expression
-/// \param x A term
-/// \return True if \a x is a may expression
+/// \\brief Test for a may expression
+/// \\param x A term
+/// \\return True if \\a x is a may expression
 inline
 bool is_may(const atermpp::aterm_appl& x)
 {
@@ -824,34 +824,34 @@ bool is_may(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const may& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const may& x)
 {
   return out << state_formulas::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(may& t1, may& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The yaled operator for state formulas
+/// \\brief The yaled operator for state formulas
 class yaled: public state_formula
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     yaled()
       : state_formula(core::detail::default_values::StateYaled)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit yaled(const atermpp::aterm& term)
       : state_formula(term)
     {
@@ -865,9 +865,9 @@ class yaled: public state_formula
     yaled& operator=(yaled&&) noexcept = default;
 };
 
-/// \brief Test for a yaled expression
-/// \param x A term
-/// \return True if \a x is a yaled expression
+/// \\brief Test for a yaled expression
+/// \\param x A term
+/// \\return True if \\a x is a yaled expression
 inline
 bool is_yaled(const atermpp::aterm_appl& x)
 {
@@ -877,41 +877,41 @@ bool is_yaled(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const yaled& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const yaled& x)
 {
   return out << state_formulas::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(yaled& t1, yaled& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The timed yaled operator for state formulas
+/// \\brief The timed yaled operator for state formulas
 class yaled_timed: public state_formula
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     yaled_timed()
       : state_formula(core::detail::default_values::StateYaledTimed)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit yaled_timed(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateYaledTimed(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     explicit yaled_timed(const data::data_expression& time_stamp)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateYaledTimed(), time_stamp))
     {}
@@ -928,17 +928,17 @@ class yaled_timed: public state_formula
     }
 };
 
-/// \brief Make_yaled_timed constructs a new term into a given address.
-/// \ \param t The reference into which the new yaled_timed is constructed. 
+/// \\brief Make_yaled_timed constructs a new term into a given address.
+/// \\ \param t The reference into which the new yaled_timed is constructed. 
 template <class... ARGUMENTS>
 inline void make_yaled_timed(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateYaledTimed(), args...);
 }
 
-/// \brief Test for a yaled_timed expression
-/// \param x A term
-/// \return True if \a x is a yaled_timed expression
+/// \\brief Test for a yaled_timed expression
+/// \\param x A term
+/// \\return True if \\a x is a yaled_timed expression
 inline
 bool is_yaled_timed(const atermpp::aterm_appl& x)
 {
@@ -948,34 +948,34 @@ bool is_yaled_timed(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const yaled_timed& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const yaled_timed& x)
 {
   return out << state_formulas::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(yaled_timed& t1, yaled_timed& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The delay operator for state formulas
+/// \\brief The delay operator for state formulas
 class delay: public state_formula
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     delay()
       : state_formula(core::detail::default_values::StateDelay)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit delay(const atermpp::aterm& term)
       : state_formula(term)
     {
@@ -989,9 +989,9 @@ class delay: public state_formula
     delay& operator=(delay&&) noexcept = default;
 };
 
-/// \brief Test for a delay expression
-/// \param x A term
-/// \return True if \a x is a delay expression
+/// \\brief Test for a delay expression
+/// \\param x A term
+/// \\return True if \\a x is a delay expression
 inline
 bool is_delay(const atermpp::aterm_appl& x)
 {
@@ -1001,41 +1001,41 @@ bool is_delay(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const delay& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const delay& x)
 {
   return out << state_formulas::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(delay& t1, delay& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The timed delay operator for state formulas
+/// \\brief The timed delay operator for state formulas
 class delay_timed: public state_formula
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     delay_timed()
       : state_formula(core::detail::default_values::StateDelayTimed)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit delay_timed(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateDelayTimed(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     explicit delay_timed(const data::data_expression& time_stamp)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateDelayTimed(), time_stamp))
     {}
@@ -1052,17 +1052,17 @@ class delay_timed: public state_formula
     }
 };
 
-/// \brief Make_delay_timed constructs a new term into a given address.
-/// \ \param t The reference into which the new delay_timed is constructed. 
+/// \\brief Make_delay_timed constructs a new term into a given address.
+/// \\ \param t The reference into which the new delay_timed is constructed. 
 template <class... ARGUMENTS>
 inline void make_delay_timed(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateDelayTimed(), args...);
 }
 
-/// \brief Test for a delay_timed expression
-/// \param x A term
-/// \return True if \a x is a delay_timed expression
+/// \\brief Test for a delay_timed expression
+/// \\param x A term
+/// \\return True if \\a x is a delay_timed expression
 inline
 bool is_delay_timed(const atermpp::aterm_appl& x)
 {
@@ -1072,46 +1072,46 @@ bool is_delay_timed(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const delay_timed& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const delay_timed& x)
 {
   return out << state_formulas::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(delay_timed& t1, delay_timed& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The state formula variable
+/// \\brief The state formula variable
 class variable: public state_formula
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     variable()
       : state_formula(core::detail::default_values::StateVar)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit variable(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateVar(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     variable(const core::identifier_string& name, const data::data_expression_list& arguments)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateVar(), name, arguments))
     {}
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     variable(const std::string& name, const data::data_expression_list& arguments)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateVar(), core::identifier_string(name), arguments))
     {}
@@ -1133,17 +1133,17 @@ class variable: public state_formula
     }
 };
 
-/// \brief Make_variable constructs a new term into a given address.
-/// \ \param t The reference into which the new variable is constructed. 
+/// \\brief Make_variable constructs a new term into a given address.
+/// \\ \param t The reference into which the new variable is constructed. 
 template <class... ARGUMENTS>
 inline void make_variable(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateVar(), args...);
 }
 
-/// \brief Test for a variable expression
-/// \param x A term
-/// \return True if \a x is a variable expression
+/// \\brief Test for a variable expression
+/// \\param x A term
+/// \\return True if \\a x is a variable expression
 inline
 bool is_variable(const atermpp::aterm_appl& x)
 {
@@ -1153,46 +1153,46 @@ bool is_variable(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const variable& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const variable& x)
 {
   return out << state_formulas::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(variable& t1, variable& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The nu operator for state formulas
+/// \\brief The nu operator for state formulas
 class nu: public state_formula
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     nu()
       : state_formula(core::detail::default_values::StateNu)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit nu(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateNu(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     nu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateNu(), name, assignments, operand))
     {}
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     nu(const std::string& name, const data::assignment_list& assignments, const state_formula& operand)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateNu(), core::identifier_string(name), assignments, operand))
     {}
@@ -1219,17 +1219,17 @@ class nu: public state_formula
     }
 };
 
-/// \brief Make_nu constructs a new term into a given address.
-/// \ \param t The reference into which the new nu is constructed. 
+/// \\brief Make_nu constructs a new term into a given address.
+/// \\ \param t The reference into which the new nu is constructed. 
 template <class... ARGUMENTS>
 inline void make_nu(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateNu(), args...);
 }
 
-/// \brief Test for a nu expression
-/// \param x A term
-/// \return True if \a x is a nu expression
+/// \\brief Test for a nu expression
+/// \\param x A term
+/// \\return True if \\a x is a nu expression
 inline
 bool is_nu(const atermpp::aterm_appl& x)
 {
@@ -1239,46 +1239,46 @@ bool is_nu(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const nu& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const nu& x)
 {
   return out << state_formulas::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(nu& t1, nu& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The mu operator for state formulas
+/// \\brief The mu operator for state formulas
 class mu: public state_formula
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     mu()
       : state_formula(core::detail::default_values::StateMu)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit mu(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateMu(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     mu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateMu(), name, assignments, operand))
     {}
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     mu(const std::string& name, const data::assignment_list& assignments, const state_formula& operand)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateMu(), core::identifier_string(name), assignments, operand))
     {}
@@ -1305,17 +1305,17 @@ class mu: public state_formula
     }
 };
 
-/// \brief Make_mu constructs a new term into a given address.
-/// \ \param t The reference into which the new mu is constructed. 
+/// \\brief Make_mu constructs a new term into a given address.
+/// \\ \param t The reference into which the new mu is constructed. 
 template <class... ARGUMENTS>
 inline void make_mu(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateMu(), args...);
 }
 
-/// \brief Test for a mu expression
-/// \param x A term
-/// \return True if \a x is a mu expression
+/// \\brief Test for a mu expression
+/// \\param x A term
+/// \\return True if \\a x is a mu expression
 inline
 bool is_mu(const atermpp::aterm_appl& x)
 {
@@ -1325,17 +1325,17 @@ bool is_mu(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const mu& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const mu& x)
 {
   return out << state_formulas::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(mu& t1, mu& t2)
 {
   t1.swap(t2);

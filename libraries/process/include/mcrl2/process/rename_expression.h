@@ -22,29 +22,29 @@ namespace process
 {
 
 //--- start generated class rename_expression ---//
-/// \brief A rename expression
+/// \\brief A rename expression
 class rename_expression: public atermpp::aterm_appl
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     rename_expression()
       : atermpp::aterm_appl(core::detail::default_values::RenameExpr)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit rename_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_RenameExpr(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     rename_expression(core::identifier_string& source, core::identifier_string& target)
       : atermpp::aterm_appl(core::detail::function_symbol_RenameExpr(), source, target)
     {}
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     rename_expression(const std::string& source, const std::string& target)
       : atermpp::aterm_appl(core::detail::function_symbol_RenameExpr(), core::identifier_string(source), core::identifier_string(target))
     {}
@@ -66,23 +66,23 @@ class rename_expression: public atermpp::aterm_appl
     }
 };
 
-/// \brief Make_rename_expression constructs a new term into a given address.
-/// \ \param t The reference into which the new rename_expression is constructed. 
+/// \\brief Make_rename_expression constructs a new term into a given address.
+/// \\ \param t The reference into which the new rename_expression is constructed. 
 template <class... ARGUMENTS>
 inline void make_rename_expression(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_RenameExpr(), args...);
 }
 
-/// \brief list of rename_expressions
+/// \\brief list of rename_expressions
 typedef atermpp::term_list<rename_expression> rename_expression_list;
 
-/// \brief vector of rename_expressions
+/// \\brief vector of rename_expressions
 typedef std::vector<rename_expression>    rename_expression_vector;
 
-/// \brief Test for a rename_expression expression
-/// \param x A term
-/// \return True if \a x is a rename_expression expression
+/// \\brief Test for a rename_expression expression
+/// \\param x A term
+/// \\return True if \\a x is a rename_expression expression
 inline
 bool is_rename_expression(const atermpp::aterm_appl& x)
 {
@@ -92,17 +92,17 @@ bool is_rename_expression(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const rename_expression& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const rename_expression& x)
 {
   return out << process::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(rename_expression& t1, rename_expression& t2)
 {
   t1.swap(t2);

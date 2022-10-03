@@ -58,17 +58,17 @@ inline bool is_untyped_possible_sorts(const atermpp::aterm_appl& x)
 }
 
 //--- start generated class sort_expression ---//
-/// \brief A sort expression
+/// \\brief A sort expression
 class sort_expression: public atermpp::aterm_appl
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     sort_expression()
       : atermpp::aterm_appl(core::detail::default_values::SortExpr)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit sort_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
@@ -98,26 +98,26 @@ class sort_expression: public atermpp::aterm_appl
 //--- end user section sort_expression ---//
 };
 
-/// \brief list of sort_expressions
+/// \\brief list of sort_expressions
 typedef atermpp::term_list<sort_expression> sort_expression_list;
 
-/// \brief vector of sort_expressions
+/// \\brief vector of sort_expressions
 typedef std::vector<sort_expression>    sort_expression_vector;
 
 // prototype declaration
 std::string pp(const sort_expression& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const sort_expression& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(sort_expression& t1, sort_expression& t2)
 {
   t1.swap(t2);

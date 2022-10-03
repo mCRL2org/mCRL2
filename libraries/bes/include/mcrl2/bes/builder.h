@@ -157,7 +157,7 @@ struct add_boolean_expressions: public Builder<Derived>
 
 };
 
-/// \brief Builder class
+/// \\brief Builder class
 template <typename Derived>
 struct boolean_expression_builder: public add_boolean_expressions<core::builder, Derived>
 {
@@ -303,7 +303,7 @@ struct add_boolean_variables: public Builder<Derived>
 
 };
 
-/// \brief Builder class
+/// \\brief Builder class
 template <typename Derived>
 struct boolean_variable_builder: public add_boolean_variables<core::builder, Derived>
 {

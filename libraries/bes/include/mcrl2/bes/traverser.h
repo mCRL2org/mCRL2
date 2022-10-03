@@ -135,7 +135,7 @@ struct add_traverser_boolean_expressions: public Traverser<Derived>
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct boolean_expression_traverser: public add_traverser_boolean_expressions<core::traverser, Derived>
 {
@@ -255,7 +255,7 @@ struct add_traverser_boolean_variables: public Traverser<Derived>
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct boolean_variable_traverser: public add_traverser_boolean_variables<core::traverser, Derived>
 {

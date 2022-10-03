@@ -25,7 +25,7 @@ namespace lps
 bool is_multi_action(const atermpp::aterm_appl& x);
 
 //--- start generated class multi_action ---//
-/// \brief A timed multi-action
+/// \\brief A timed multi-action
 class multi_action: public atermpp::aterm_appl
 {
   public:
@@ -97,23 +97,23 @@ class multi_action: public atermpp::aterm_appl
    //--- end user section multi_action ---//
 };
 
-/// \brief Make_multi_action constructs a new term into a given address.
-/// \ \param t The reference into which the new multi_action is constructed. 
+/// \\brief Make_multi_action constructs a new term into a given address.
+/// \\ \param t The reference into which the new multi_action is constructed. 
 template <class... ARGUMENTS>
 inline void make_multi_action(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_TimedMultAct(), args...);
 }
 
-/// \brief list of multi_actions
+/// \\brief list of multi_actions
 typedef atermpp::term_list<multi_action> multi_action_list;
 
-/// \brief vector of multi_actions
+/// \\brief vector of multi_actions
 typedef std::vector<multi_action>    multi_action_vector;
 
-/// \brief Test for a multi_action expression
-/// \param x A term
-/// \return True if \a x is a multi_action expression
+/// \\brief Test for a multi_action expression
+/// \\param x A term
+/// \\return True if \\a x is a multi_action expression
 inline
 bool is_multi_action(const atermpp::aterm_appl& x)
 {
@@ -123,17 +123,17 @@ bool is_multi_action(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const multi_action& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const multi_action& x)
 {
   return out << lps::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(multi_action& t1, multi_action& t2)
 {
   t1.swap(t2);

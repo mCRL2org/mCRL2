@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 #~ Copyright 2007 Wieger Wesselink.
 #~ Distributed under the Boost Software License, Version 1.0.
@@ -46,7 +46,7 @@ const atermpp::function_symbol& function_symbol_%(name)s()
         dtext = dtext + '  const atermpp::function_symbol core::detail::function_symbols::%s = core::detail::function_symbol_%s();\n' % (name, name)
         vtext = vtext + '  static const atermpp::function_symbol %s;\n' % name
 
-    name_keys = names.keys()
+    name_keys = list(names.keys())
     name_keys = sorted(name_keys)
     for name in name_keys:
         if name in skip_list:
@@ -122,7 +122,7 @@ const atermpp::aterm_appl& default_value_%(name)s()
         dtext = dtext + '  const atermpp::aterm_appl core::detail::default_values::%s = core::detail::default_value_%s();\n' % (name, name)
         vtext = vtext + '  static const atermpp::aterm_appl %s;\n' % name
 
-    function_names = map(lambda x: x.name(), functions)
+    function_names = [x.name() for x in functions]
     for rule in rules:
         if not rule.name() in function_names:
             name = rule.name()
@@ -158,14 +158,14 @@ def find_functions(rules):
                 function_map[f.name()] = f
 
     # do a recursion step to find additional functions (no longer necessary?)
-    functions = map(lambda x: function_map[x], function_map.keys())
+    functions = [function_map[x] for x in list(function_map.keys())]
     for f in functions:
         for arg in f.arguments:
             for e in arg.expressions:
                 if not e.is_rule():
                     function_map[e.name()] = e
 
-    return map(lambda x: function_map[x], function_map.keys())
+    return [function_map[x] for x in list(function_map.keys())]
 
 #---------------------------------------------------------------#
 #                      generate_soundness_check_functions
@@ -229,7 +229,7 @@ bool %(check_name)s(const Term& t)
         if name in skip_list:
             continue
         rhs_functions = rule.functions()
-        body = '  return ' + '\n         || '.join(map(lambda x: x.check_name() + '(t)', rhs_functions)) + ';'
+        body = '  return ' + '\n         || '.join([x.check_name() + '(t)' for x in rhs_functions]) + ';'
         text = text + CHECK_RULE % {
             'name'      : name,
             'body'      : body
@@ -240,7 +240,7 @@ bool %(check_name)s(const Term& t)
         name = f.name()
         if name in skip_list:
             continue
-        arguments = ', '.join(map(lambda x: x.full_name(), f.arguments))
+        arguments = ', '.join([x.full_name() for x in f.arguments])
         arity = len(f.arguments)
 
         body = CHECK_TERM_TYPE % {
@@ -312,11 +312,11 @@ def parse_ebnf(filename):
             rules = rules + newrules
         except tpg.SyntacticError as e:
             print("------------------------------------------------------")
-            print('grammar: ', '\n'.join(glines))
+            print(('grammar: ', '\n'.join(glines)))
             print(e)
         except tpg.LexicalError as e:
             print("------------------------------------------------------")
-            print('grammar: ', '\n'.join(glines))
+            print(('grammar: ', '\n'.join(glines)))
             print(e)
     return rules
 

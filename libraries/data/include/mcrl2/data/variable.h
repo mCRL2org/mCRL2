@@ -25,7 +25,7 @@ namespace data
 typedef std::pair<core::identifier_string, sort_expression> variable_key_type;
 
 //--- start generated class variable ---//
-/// \brief A data variable
+/// \\brief A data variable
 class variable: public data_expression
 {
   public:
@@ -78,34 +78,34 @@ class variable: public data_expression
 //--- end user section variable ---//
 };
 
-/// \brief Make_variable constructs a new term into a given address.
-/// \ \param t The reference into which the new variable is constructed. 
+/// \\brief Make_variable constructs a new term into a given address.
+/// \\ \param t The reference into which the new variable is constructed. 
 template <class... ARGUMENTS>
 inline void make_variable(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl_with_index<variable,std::pair<core::identifier_string, sort_expression>>(t, core::detail::function_symbol_DataVarId(), args...);
 }
 
-/// \brief list of variables
+/// \\brief list of variables
 typedef atermpp::term_list<variable> variable_list;
 
-/// \brief vector of variables
+/// \\brief vector of variables
 typedef std::vector<variable>    variable_vector;
 
 // prototype declaration
 std::string pp(const variable& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const variable& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(variable& t1, variable& t2)
 {
   t1.swap(t2);
