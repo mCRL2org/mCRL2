@@ -461,6 +461,18 @@ namespace mcrl2 {
         return result;
       }
       ///\brief Function for projecting out argument.
+      ///        arg from an application.
+      /// \param e A data expression.
+      /// \pre arg is defined for e.
+      /// \return The argument of e that corresponds to arg.
+      inline
+      const data_expression& arg(const data_expression& e)
+      {
+        assert(is_not_application(e));
+        return atermpp::down_cast<application>(e)[0];
+      }
+
+      ///\brief Function for projecting out argument.
       ///        left from an application.
       /// \param e A data expression.
       /// \pre left is defined for e.
@@ -482,18 +494,6 @@ namespace mcrl2 {
       {
         assert(is_and_application(e) || is_or_application(e) || is_implies_application(e));
         return atermpp::down_cast<application>(e)[1];
-      }
-
-      ///\brief Function for projecting out argument.
-      ///        arg from an application.
-      /// \param e A data expression.
-      /// \pre arg is defined for e.
-      /// \return The argument of e that corresponds to arg.
-      inline
-      const data_expression& arg(const data_expression& e)
-      {
-        assert(is_not_application(e));
-        return atermpp::down_cast<application>(e)[0];
       }
 
       /// \brief Give all system defined equations for bool_

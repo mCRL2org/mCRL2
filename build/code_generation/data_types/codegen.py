@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Author(s): Jeroen Keiren
 # Copyright: see the accompanying file COPYING or copy at
 # https://github.com/mCRL2org/mCRL2/blob/master/COPYING
@@ -53,7 +53,7 @@ current_file = ""
 # Verbose printing of message
 def printVerbose(string, object):
   if verbose:
-    print("%s: %s" % (string, str(object)))
+    print(("%s: %s" % (string, str(object))))
 
 #===============================================================================
 # Tokens/precedences. 
@@ -765,7 +765,7 @@ class Label(Parsing.Nonterm):
 # verbosity enabled.
 class Parser(Parsing.Lr):
     def __init__(self, spec):
-	Parsing.Lr.__init__(self, spec)
+      Parsing.Lr.__init__(self, spec)
 
     # Brain-dead scanner.  The scanner does not have to be a method of this
     # class, so for more complex parsers it is no problem to separate the
@@ -815,18 +815,18 @@ class Parser(Parsing.Lr):
         # Split the input at whitespace, producing the tokens
         p=re.compile(r'\s+')
         if verbose:
-          print "split input: %s" % (p.split(input))
+          print("split input: %s" % (p.split(input)))
 
         for word in p.split(input):
-            if word != '':
-    	        if word in syms:
-		    token = syms[word](self)
-	        else:
-		    token = TokenID(parser, word)
-                    # Feed token to parser.
-	        self.token(token)
-	# Tell the parser that the end of input has been reached.
-	self.eoi()
+          if word != '':
+             if word in syms:
+                token = syms[word](self)
+             else:
+                token = TokenID(parser, word)
+             # Feed token to parser.
+             self.token(token)
+        # Tell the parser that the end of input has been reached.
+        self.eoi()
 
 #--------------------------------------------------------#
 #                  read_text
@@ -835,8 +835,8 @@ class Parser(Parsing.Lr):
 def read_text(filename):
     try:
         f = open(filename, 'r')
-    except IOError, e:
-        print 'Unable to open file ' + filename + ' ', e
+    except IOError as e:
+        print('Unable to open file ' + filename + ' ', e)
         sys.exit(0)
 
     text = f.read()
@@ -861,14 +861,14 @@ def filter_comments(filename):
     glines = [] # grammar lines
 
     for paragraph in paragraphs:
-        lines = string.split(paragraph, '\n')
+        lines = paragraph.split('\n')
         for line in lines:
             if re.match('%.*', line):
                 clines.append(line)
             else:
                 glines.append(line)
-    comment = string.join(clines, '\n')
-    spec = string.join(glines, '\n')
+    comment = '\n'.join(clines)
+    spec = '\n'.join(glines)
     return spec
 
 #
@@ -876,7 +876,7 @@ def filter_comments(filename):
 # Find the includes that are at the beginning of the input
 #
 def get_includes(input):
-    lines = string.split(input, '\n')
+    lines = input.split('\n')
     includes = []
     for line in lines:
         line = line.strip()
@@ -901,7 +901,7 @@ def parse_spec(infilename):
     parser.reset()
     # Now first process the includes:
     for include in includes:
-        if not includes_table.has_key(include):
+        if include not in includes_table:
           parse_spec(include)
 
     current_file = infilename
@@ -937,8 +937,8 @@ def main():
         try:
             infile = open(infilename)
             outfile = open(outfilename, "w")
-        except IOError, e:
-            print "Unable to open file ", infilename, "or", outfilename, " ", e
+        except IOError as e:
+            print("Unable to open file ", infilename, "or", outfilename, " ", e)
             return
 
         # Parse specification in infilename and write the code to outfile

@@ -1164,6 +1164,18 @@ namespace mcrl2 {
         return result;
       }
       ///\brief Function for projecting out argument.
+      ///        left from an application.
+      /// \param e A data expression.
+      /// \pre left is defined for e.
+      /// \return The argument of e that corresponds to left.
+      inline
+      const data_expression& left(const data_expression& e)
+      {
+        assert(is_constructor_application(e) || is_in_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e) || is_and_function_application(e) || is_or_function_application(e));
+        return atermpp::down_cast<application>(e)[0];
+      }
+
+      ///\brief Function for projecting out argument.
       ///        right from an application.
       /// \param e A data expression.
       /// \pre right is defined for e.
@@ -1173,6 +1185,18 @@ namespace mcrl2 {
       {
         assert(is_constructor_application(e) || is_in_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e) || is_and_function_application(e) || is_or_function_application(e));
         return atermpp::down_cast<application>(e)[1];
+      }
+
+      ///\brief Function for projecting out argument.
+      ///        arg from an application.
+      /// \param e A data expression.
+      /// \pre arg is defined for e.
+      /// \return The argument of e that corresponds to arg.
+      inline
+      const data_expression& arg(const data_expression& e)
+      {
+        assert(is_set_fset_application(e) || is_set_comprehension_application(e) || is_complement_application(e) || is_false_function_application(e) || is_true_function_application(e) || is_not_function_application(e));
+        return atermpp::down_cast<application>(e)[0];
       }
 
       ///\brief Function for projecting out argument.
@@ -1221,30 +1245,6 @@ namespace mcrl2 {
       {
         assert(is_fset_union_application(e) || is_fset_intersection_application(e));
         return atermpp::down_cast<application>(e)[3];
-      }
-
-      ///\brief Function for projecting out argument.
-      ///        arg from an application.
-      /// \param e A data expression.
-      /// \pre arg is defined for e.
-      /// \return The argument of e that corresponds to arg.
-      inline
-      const data_expression& arg(const data_expression& e)
-      {
-        assert(is_set_fset_application(e) || is_set_comprehension_application(e) || is_complement_application(e) || is_false_function_application(e) || is_true_function_application(e) || is_not_function_application(e));
-        return atermpp::down_cast<application>(e)[0];
-      }
-
-      ///\brief Function for projecting out argument.
-      ///        left from an application.
-      /// \param e A data expression.
-      /// \pre left is defined for e.
-      /// \return The argument of e that corresponds to left.
-      inline
-      const data_expression& left(const data_expression& e)
-      {
-        assert(is_constructor_application(e) || is_in_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e) || is_and_function_application(e) || is_or_function_application(e));
-        return atermpp::down_cast<application>(e)[0];
       }
 
       /// \brief Give all system defined equations for set_

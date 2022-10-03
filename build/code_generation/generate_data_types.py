@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Author(s): Jeroen Keiren
 # Copyright: see the accompanying file COPYING or copy at
 # https://github.com/mCRL2org/mCRL2/blob/master/COPYING
@@ -43,8 +43,8 @@ def main():
   os.chdir('data_types')
   specs = get_specifications()
   for spec in specs:
-    print("Generating code for %s" % (spec))
-    cmd = "python ./codegen.py %s %s.spec ../../../libraries/data/include/mcrl2/data/%s.h" % (arguments, spec, spec)
+    print(("Generating code for %s" % (spec)))
+    cmd = "python3 ./codegen.py %s %s.spec ../../../libraries/data/include/mcrl2/data/%s.h" % (arguments, spec, spec)
     retcode = call(cmd, shell=True)
     if retcode != 0:
       raise Exception("Failed to generate code for %s. Aborting... (while executing command %s)" % (spec, cmd))

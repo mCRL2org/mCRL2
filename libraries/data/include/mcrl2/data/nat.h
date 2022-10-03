@@ -2201,15 +2201,15 @@ namespace mcrl2 {
         return result;
       }
       ///\brief Function for projecting out argument.
-      ///        right from an application.
+      ///        arg from an application.
       /// \param e A data expression.
-      /// \pre right is defined for e.
-      /// \return The argument of e that corresponds to right.
+      /// \pre arg is defined for e.
+      /// \return The argument of e that corresponds to arg.
       inline
-      const data_expression& right(const data_expression& e)
+      const data_expression& arg(const data_expression& e)
       {
-        assert(is_maximum_application(e) || is_minimum_application(e) || is_dub_application(e) || is_plus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_monus_application(e) || is_swap_zero_application(e) || is_divmod_application(e));
-        return atermpp::down_cast<application>(e)[1];
+        assert(is_cnat_application(e) || is_pos2nat_application(e) || is_nat2pos_application(e) || is_succ_application(e) || is_pred_application(e) || is_dubsucc_application(e) || is_even_application(e) || is_sqrt_application(e) || is_first_application(e) || is_last_application(e));
+        return atermpp::down_cast<application>(e)[0];
       }
 
       ///\brief Function for projecting out argument.
@@ -2237,6 +2237,30 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument.
+      ///        left from an application.
+      /// \param e A data expression.
+      /// \pre left is defined for e.
+      /// \return The argument of e that corresponds to left.
+      inline
+      const data_expression& left(const data_expression& e)
+      {
+        assert(is_maximum_application(e) || is_minimum_application(e) || is_dub_application(e) || is_plus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_monus_application(e) || is_swap_zero_application(e) || is_divmod_application(e));
+        return atermpp::down_cast<application>(e)[0];
+      }
+
+      ///\brief Function for projecting out argument.
+      ///        right from an application.
+      /// \param e A data expression.
+      /// \pre right is defined for e.
+      /// \return The argument of e that corresponds to right.
+      inline
+      const data_expression& right(const data_expression& e)
+      {
+        assert(is_maximum_application(e) || is_minimum_application(e) || is_dub_application(e) || is_plus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_monus_application(e) || is_swap_zero_application(e) || is_divmod_application(e));
+        return atermpp::down_cast<application>(e)[1];
+      }
+
+      ///\brief Function for projecting out argument.
       ///        arg3 from an application.
       /// \param e A data expression.
       /// \pre arg3 is defined for e.
@@ -2258,30 +2282,6 @@ namespace mcrl2 {
       {
         assert(is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e));
         return atermpp::down_cast<application>(e)[3];
-      }
-
-      ///\brief Function for projecting out argument.
-      ///        arg from an application.
-      /// \param e A data expression.
-      /// \pre arg is defined for e.
-      /// \return The argument of e that corresponds to arg.
-      inline
-      const data_expression& arg(const data_expression& e)
-      {
-        assert(is_cnat_application(e) || is_pos2nat_application(e) || is_nat2pos_application(e) || is_succ_application(e) || is_pred_application(e) || is_dubsucc_application(e) || is_even_application(e) || is_sqrt_application(e) || is_first_application(e) || is_last_application(e));
-        return atermpp::down_cast<application>(e)[0];
-      }
-
-      ///\brief Function for projecting out argument.
-      ///        left from an application.
-      /// \param e A data expression.
-      /// \pre left is defined for e.
-      /// \return The argument of e that corresponds to left.
-      inline
-      const data_expression& left(const data_expression& e)
-      {
-        assert(is_maximum_application(e) || is_minimum_application(e) || is_dub_application(e) || is_plus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_monus_application(e) || is_swap_zero_application(e) || is_divmod_application(e));
-        return atermpp::down_cast<application>(e)[0];
       }
 
       /// \brief Give all system defined equations for nat
