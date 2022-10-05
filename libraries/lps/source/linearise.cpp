@@ -906,7 +906,7 @@ class specification_basic_type
       {
         if (status!=mCRL)
         {
-          throw mcrl2::runtime_error("The parallel operator occurs in the scope of recursion, or the condition, sequential or choice operatar in " +
+          throw mcrl2::runtime_error("The parallel operator occurs in the scope of recursion, or the condition, sequential or choice operator in " +
                                       process::pp(body) + ". The lineariser cannot handle such processes. ");
         }
         determine_process_statusterm(process::merge(body).left(),mCRL);
