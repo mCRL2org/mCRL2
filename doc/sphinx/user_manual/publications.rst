@@ -95,7 +95,7 @@ Course material
 .. rst-class:: citation
 
 [GM14]
-  J.F. Groote, M.R. Mousavi. `Modeling and analysis of communicating systems <https://mitpress.mit.edu/books/modeling-and-analysis-communicating-systems>`__. The MIT press. 2014.
+  J.F. Groote, M.R. Mousavi. `Modeling and analysis of communicating systems <https://mitpress.mit.edu/9780262027717/>`__. The MIT press. 2014.
 [GMPR06]
   J.F. Groote, A. Mathijssen, B. Ploeger, M.A. Reniers, M.J. van Weerdenburg, J. van der Wulp. Process Algebra and mCRL2 , IPA Basic Course on Formal Methods 2006.
 
