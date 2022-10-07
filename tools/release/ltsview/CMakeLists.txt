@@ -9,6 +9,7 @@ add_mcrl2_tool(ltsview
   DESCRIPTION "Visualisation tool for large state spaces (mCRL2 toolset)"
   ICON "mcrl2-green"
   SOURCES
+    ./deprecated/source/scene.cpp
     ./source/cluster.cpp
     ./source/fsm_state_positioner.cpp
     ./source/generic_visualizer/cameras/arcballcamera.cpp
@@ -38,7 +39,6 @@ add_mcrl2_tool(ltsview
     ./source/visualizer/conedb.cpp
     ./source/visualizer/glwidget.cpp
     ./source/visualizer/ltscanvas.cpp
-    ./source/visualizer/ltsview_visualizer/scene.cpp
     ./source/visualizer/ltsview_visualizer/testscene.cpp
     ./source/visualizer/ltsview_visualizer/vistreegenerator.cpp
     ./source/visualizer/primitivefactory.cpp
@@ -69,5 +69,5 @@ add_mcrl2_tool(ltsview
     ${OPENGL_INCLUDE_DIR}
     ${TR_INCLUDE_DIR}
     ${Boost_INCLUDE_DIRS}
-    "./include/ui/;./include/visualizer/ltsview_visualizer/;./include/generic_visualizer/;./include/visualizer/;./include/generic_visualizer/cameras/;./include/generic_visualizer/glutil/;./include/"
+    "./include/generic_visualizer/;./include/generic_visualizer/glutil/;./include/ui/;./deprecated/include/;./include/visualizer/;./include/;./include/visualizer/ltsview_visualizer/;./include/generic_visualizer/cameras/"
 )
