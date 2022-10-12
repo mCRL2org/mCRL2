@@ -209,6 +209,8 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
           lps::lpsparunfold lpsparunfold(spec, unfold_cache, m_add_distribution_laws, m_alt_case_placement, m_possibly_inconsistent, m_globvars);
           std::size_t index = *(max_element(h_set_index.begin(), h_set_index.end()));
           lpsparunfold.algorithm(index);
+          rewriter R = create_rewriter(spec.data());
+          lps::rewrite(spec, R);
           h_set_index.erase(index);
         }
       }
