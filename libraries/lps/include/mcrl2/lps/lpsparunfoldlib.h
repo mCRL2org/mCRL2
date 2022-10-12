@@ -232,6 +232,8 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
     **/
     std::map<mcrl2::data::variable, mcrl2::data::data_expression> parameter_substitution();
 
+    data::data_expression apply_function(const data::function_symbol& f, const data::data_expression& de) const;
+
     /** \brief unfolds a data expression into a vector of process parameters
       * \param  de the data expression
       * \return The following vector: < det(de), pi_0(de), ... ,pi_n(de) >
@@ -316,7 +318,7 @@ Binder<Builder, parunfold_replacement<Builder, Binder>, parunfold_replacement<Bu
   template <class T>
   void apply(T& result, const data::application& x)
   {
-    if (current_replacement != data::data_expression() || data::is_and(x) || data::is_or(x) || data::is_not(x))
+    if (current_replacement != data::data_expression() || data::is_and(x) || data::is_or(x) || data::is_not(x) || data::is_imp(x) || data::is_if_application(x))
     {
       // if no placement of case functions is underway, or we are still traversing the regular boolean operators, we continue as usual
       super::apply(result, x);

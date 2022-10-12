@@ -501,6 +501,20 @@ std::map<data::variable, data::data_expression> lpsparunfold::parameter_substitu
   return result;
 }
 
+data::data_expression lpsparunfold::apply_function(const function_symbol& f, const data_expression& de) const
+{
+  if(m_alt_case_placement && is_if_application(de))
+  {
+    return data::if_(arg1(de),
+                     apply_function(f, arg2(de)),
+                     apply_function(f, arg3(de)));
+  }
+  else
+  {
+    return application(f, de);
+  }
+}
+
 data::data_expression_vector lpsparunfold::unfold_constructor(const data_expression& de)
 {
   assert(de.sort() == m_unfold_parameter.sort());
@@ -527,11 +541,11 @@ data::data_expression_vector lpsparunfold::unfold_constructor(const data_express
   else
   {
     /* Det function */
-    result.emplace_back(application(m_new_cache_element.determine_function, de)) ;
+    result.emplace_back(apply_function(m_new_cache_element.determine_function, de));
 
     for (const function_symbol& f: m_new_cache_element.projection_functions)
     {
-      result.emplace_back(application(f, de)) ;
+      result.emplace_back(apply_function(f, de)) ;
     }
   }
 
