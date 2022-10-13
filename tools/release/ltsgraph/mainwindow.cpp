@@ -48,6 +48,7 @@ MainWindow::MainWindow(QWidget* parent) :
   addDockWidget(Qt::RightDockWidgetArea, informationui);
   informationui->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
 
+
   // Connect signals & slots
   connect(m_ui.actExit, SIGNAL(triggered()), this, SLOT(close()));
   connect(m_ui.actLayoutControl, SIGNAL(toggled(bool)), springlayoutui, SLOT(setVisible(bool)));

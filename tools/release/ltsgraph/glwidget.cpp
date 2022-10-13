@@ -471,7 +471,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
 {
   updateSelection();
   ArcballCameraView& camera = m_scene.camera();
-
+  m_graph.userIsDragging = m_dragmode == dm_dragnode;
   if (m_dragmode != dm_none)
   {
     QPoint vec = e->pos() - m_dragstart;

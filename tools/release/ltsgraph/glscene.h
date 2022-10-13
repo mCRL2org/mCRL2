@@ -22,6 +22,29 @@
 #include <QPainter>
 #include <QOpenGLFramebufferObject>
 
+#include "mcrl2/utilities/logger.h"
+
+struct DrawInstances{
+  std::vector<QMatrix4x4> matrices;
+  std::vector<QVector4D> colors;
+  int offset;
+  int vertices;
+  GLenum draw_mode;
+  std::string identifier;
+  DrawInstances(int offset = -1, int vertices = -1, GLenum draw_mode = 0, std::string identifier = "") : offset(offset), vertices(vertices), draw_mode(draw_mode), identifier(identifier){}
+  void push_back(QMatrix4x4 matrix, QVector4D color){
+    assert(offset >= 0);
+    assert(vertices > 0);
+    matrices.emplace_back(matrix);
+    colors.emplace_back(color);
+  }
+  void resize(std::size_t size){
+    matrices.resize(size);
+    colors.resize(size);
+  }
+  std::size_t size(){ return matrices.size(); }
+
+};
 /// \brief The scene contains the graph that is shown and the camera from which the graph is viewed. It performs
 ///        all the necessary OpenGL calls to render this graph as if shown from the camera. It assumes
 ///        to be the only place where OpenGL calls are performed as it does not keep track or reset the internal OpenGL
@@ -129,7 +152,6 @@ public:
   void setFontSize(int size) { m_fontsize = size; m_font.setPixelSize(m_fontsize); }
   void setFogDistance(int value) { m_fogdensity = 1.0f / (value + 1); }
   void setDevicePixelRatio(float device_pixel_ratio) { m_device_pixel_ratio = device_pixel_ratio; }
-
   QOpenGLFramebufferObject* m_fbo;
 private:
   /// \returns The color of an object receiving fogAmount amount of fog.
@@ -158,6 +180,11 @@ private:
   /// \param transparent Allow nodes to be rendered with transparency, required for the two passes (opaque first, followed by transparent items).
   void renderNode(std::size_t i, const QMatrix4x4& viewProjMatrix, bool transparent);
 
+  /// \brief Renders all nodes
+  /// \param viewProjMatrix View projection matrix
+  /// \param transparent Allow nodes to be transparent
+  void renderNodes(const QMatrix4x4& viewProjMatrix, bool transparent);
+
   /// \brief Renders a single edge label.
   /// \param i The index of the edge of the label to render.
   void renderTransitionLabel(QPainter& painter, std::size_t i);
@@ -185,10 +212,10 @@ private:
   QFont m_font;
 
   /// \brief The shader to draw uniformly filled three dimensional objects.
-  GlobalShader m_global_shader;
+  GlobalShaderInstanced m_global_shader;
 
   /// \brief The shader to draw arcs, uses control points to position the vertices.
-  ArcShader m_arc_shader;
+  ArcShaderInstanced m_arc_shader;
 
   bool m_drawtransitionlabels = true;   ///< Transition labels are only drawn if this field is true.
   bool m_drawstatelabels      = false;  ///< State labels are only drawn if this field is true.
@@ -202,8 +229,27 @@ private:
   float m_fogdensity = 0.0005f; ///< The density of the fog.
 
   /// The vertex layout and vertex buffer object for all objects with the 3 float per vertex layout.
-  QOpenGLVertexArrayObject m_vertexarray;
+  QOpenGLVertexArrayObject m_vaoGlobal;
+  QOpenGLVertexArrayObject m_vaoArc;
   QOpenGLBuffer m_vertexbuffer = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+  QOpenGLBuffer m_colorBuffer = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+  QOpenGLBuffer m_matrixBuffer = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+  QOpenGLBuffer m_controlpointbuffer = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+  QOpenGLBuffer m_arccolorbuffer = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+  int m_current_buffer_size = 0;
+  DrawInstances m_drawNodeBorder;
+  DrawInstances m_drawHalfSphere;
+  DrawInstances m_drawSphere;
+  DrawInstances m_drawMinusHint;
+  DrawInstances m_drawPlusHint;
+  DrawInstances m_drawHandleBody;
+  DrawInstances m_drawHandleOutline;
+  DrawInstances m_drawArrowHead;
+  DrawInstances m_drawArrowBase;
+  std::vector<DrawInstances*> m_drawInstances;
+  std::vector<std::array<QVector3D, 4>> m_drawArc;
+  std::vector<QVector3D> m_drawArcColors;
+
 
   /// \brief The background color of the scene.
   QVector3D m_clearColor = QVector3D(1.0f, 1.0f, 1.0f);
