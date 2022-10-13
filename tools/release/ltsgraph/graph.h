@@ -481,6 +481,8 @@ class Graph
      */
     const QString& stateLabelstring(std::size_t labelindex) const;
 
+    bool userIsDragging = false;
+
     /// Accessors
 
     Node& handle(std::size_t edge);

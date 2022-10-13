@@ -77,6 +77,54 @@ bool GlobalShader::link()
   return true;
 }
 
+namespace{
+  const char* g_vertexShaderInstanced = 
+  "#version 330\n"
+  "layout(location = 0) in vec3 vertex;\n"
+  "layout(location = 2) in vec4 color;\n"
+  "layout(location = 3) in mat4 MVP;\n"
+  "out vec4 vColor;"
+
+  "void main(void)\n"
+  "{\n"
+  "   gl_Position = MVP * vec4(vertex, 1.0f);\n"
+  "   vColor = color;\n"
+  "}";
+
+  const char* g_fragmentShaderInstanced = 
+  "#version 330\n "
+  "in vec4 vColor;"
+  "out vec4 fragColor;\n"
+  "void main(void)\n"
+  "{\n"
+  "   fragColor = vColor;\n"
+  "}";
+}
+
+bool GlobalShaderInstanced::link(){
+  if (!addShaderFromSourceCode(QOpenGLShader::Vertex, g_vertexShaderInstanced))
+  {
+    mCRL2log(mcrl2::log::error) << log().toStdString();
+    std::abort();
+  }
+
+  if (!addShaderFromSourceCode(QOpenGLShader::Fragment, g_fragmentShaderInstanced))
+  {
+    mCRL2log(mcrl2::log::error) << log().toStdString();
+    std::abort();
+  }
+
+  if (!QOpenGLShaderProgram::link())
+  {
+    mCRL2log(mcrl2::log::error) << "Could not link shader program:" << log().toStdString();
+    std::abort();
+  }
+
+  return true;
+}
+
+
+
 namespace
 {
 
@@ -176,6 +224,107 @@ bool ArcShader::link()
   if (m_color_location == -1)
   {
     mCRL2log(mcrl2::log::warning) << "The arc shader has no uniform named g_color.\n";
+  }
+
+  m_fogdensity_location = uniformLocation("g_density");
+  if (m_fogdensity_location == -1)
+  {
+    mCRL2log(mcrl2::log::warning) << "The arc shader has no uniform named g_density.\n";
+  }
+
+  return true;
+}
+
+namespace
+{
+/// \brief A vertex shader that produces a cubic Bezier curve.
+const char* g_arcVertexShaderInstanced =
+  "#version 330\n"
+
+  "uniform mat4 g_viewProjMatrix;\n"
+  "uniform mat4 g_viewMatrix;\n"
+
+  "uniform float g_density = 0.0001f;"
+
+  "layout(location = 0) in vec3 vertex;\n"
+  "layout(location = 1) in vec3 ctrl1;\n"
+  "layout(location = 2) in vec3 ctrl2;\n"
+  "layout(location = 3) in vec3 ctrl3;\n"
+  "layout(location = 4) in vec3 ctrl4;\n"
+  "layout(location = 5) in vec3 color;\n"
+
+  "out vec4 vColor;\n"
+
+  "out float fogAmount;\n"
+
+  "// Calculates the position on a cubic Bezier curve with 0 <= t <= 1.\n"
+  "vec3 cubicBezier(float t)\n"
+  "{"
+  "   return pow(1 - t, 3) * ctrl1"
+  "        + 3 * pow(1 - t, 2) * t * ctrl2"
+  "        + 3 * (1 - t) * pow(t, 2) * ctrl3"
+  "        + pow(t, 3) * ctrl4;"
+  "}\n"
+
+  "void main(void)\n"
+  "{\n"
+  "   // Calculate the actual position of the vertex.\n"
+  "   vec4 position = vec4(cubicBezier(vertex.x), 1.0f);\n"
+
+  "   // Apply the fog calculation to the resulting position.\n"
+  "   float distance = length(g_viewMatrix * position);\n"
+  "   fogAmount = (1.0f - exp(-1.0f * pow(distance * g_density, 2)));\n"
+
+  "   // Calculate the actual vertex position in clip space.\n"
+  "   gl_Position = g_viewProjMatrix * position;\n"
+  "   vColor = vec4(color, 1);\n"
+  "}";
+
+/// \brief A fragment shader that uses g_color as a fill color for the polygons and applies per vertex fogging.
+const char* g_arcFragmentShaderInstanced =
+  "#version 330\n "
+
+  "in float fogAmount;\n"
+  "in vec4 vColor;\n"
+  "out vec4 fragColor;\n"
+
+  "void main(void)\n"
+  "{\n"
+  "   fragColor = mix(vColor, vec4(1), fogAmount);\n"
+  "}";
+} // unnamed namespace
+
+bool ArcShaderInstanced::link()
+{
+  // Here we compile the vertex and fragment shaders and combine the results.
+  if (!addShaderFromSourceCode(QOpenGLShader::Vertex, g_arcVertexShaderInstanced))
+  {
+    mCRL2log(mcrl2::log::error) << log().toStdString();
+    std::abort();
+  }
+
+  if (!addShaderFromSourceCode(QOpenGLShader::Fragment, g_arcFragmentShaderInstanced))
+  {
+    mCRL2log(mcrl2::log::error) << log().toStdString();
+    std::abort();
+  }
+
+  if (!QOpenGLShaderProgram::link())
+  {
+    mCRL2log(mcrl2::log::error) << "Could not link shader program:" << log().toStdString();
+    std::abort();
+  }
+
+  m_viewProjMatrix_location = uniformLocation("g_viewProjMatrix");
+  if (m_viewProjMatrix_location == -1)
+  {
+    mCRL2log(mcrl2::log::warning) << "The arc shader has no uniform named g_viewProjMatrix.\n";
+  }
+
+  m_viewMatrix_location = uniformLocation("g_viewMatrix");
+  if (m_viewMatrix_location == -1)
+  {
+    mCRL2log(mcrl2::log::warning) << "The arc shader has no uniform named g_viewMatrix.\n";
   }
 
   m_fogdensity_location = uniformLocation("g_density");

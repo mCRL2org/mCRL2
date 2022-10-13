@@ -68,6 +68,7 @@ std::string getName(SpringLayout::ForceApplication c){
 // Utility functions
 //
 
+
 inline float cube(float x)
 {
   return x * x * x;
@@ -96,7 +97,79 @@ inline void clip(float& f, float min, float max)
 }
 
 const float electricalSpringScaling = 1e-2f;
+ 
+float AdaptiveSimulatedAnnealing::getTemperature() { return T; }
 
+AdaptiveSimulatedAnnealing::AdaptiveSimulatedAnnealing(){
+  m_timer.restart();
+  m_stable_timer.restart();
+}
+
+void AdaptiveSimulatedAnnealing::reset(){
+  if (m_reset_timer.elapsed() * 0.001f < m_reset_duration){
+    // still resetting
+    return;
+  }
+  m_reset_temperature_floor = m_temperature;
+  T = m_temperature + m_minimum_temperature;
+  m_previous_energy = -1;
+  m_progress_energy = -1;
+  m_timer.restart();
+  m_stable_timer.restart();
+  m_reset_timer.restart();
+  // mCRL2log(mcrl2::log::debug) << "Reset ASA."<< std::endl;
+}
+
+bool AdaptiveSimulatedAnnealing::calculateTemperature(float new_energy){
+  // check if we are still resetting
+  if (m_reset_timer.elapsed() * 0.001f < m_reset_duration){
+    m_temperature = m_reset_temperature_floor + (m_reset_temperature - m_reset_temperature_floor)*smoothstep(0, m_reset_duration, m_reset_timer.elapsed()*0.001f);
+    T = m_temperature + m_minimum_temperature;
+    m_timer.restart();
+    return false;
+  }
+
+
+  float seconds = m_timer.elapsed()*0.001f;
+  if (seconds < 1/m_progress_target_per_second){
+    return false; ///TODO: Should return last returned value
+  }
+  if (m_previous_energy < 0){
+    m_previous_energy = new_energy;
+    m_progress_energy = m_previous_energy;
+    return false; ///< not yet stable
+  }
+
+  float rel_energy_delta = std::abs(new_energy - m_previous_energy)/m_previous_energy; 
+
+  // if (rel_energy_delta < m_stability_energy_threshold*T){
+  //   m_previous_energy = new_energy;
+  //   // don't change anything, we're stable
+  //   return m_stable_timer.elapsed()*0.001f > m_stability_time_threshold;
+  // }
+
+  m_stable_timer.restart();
+  m_timer.restart();
+
+
+  if (new_energy < m_previous_energy && rel_energy_delta > m_relative_change_threshold*T){
+    m_progress += seconds*m_progress_target_per_second*rel_energy_delta;
+    if (m_progress >= m_progress_threshold){
+      m_progress -= m_progress_threshold;
+      m_temperature /= m_annealing_factor;
+      m_temperature += m_annealing_term * std::abs((new_energy - m_progress_energy)/(T*m_progress_energy));
+    }
+  }else{
+    m_progress = 0;
+    m_progress_energy = new_energy;
+    m_temperature *= m_annealing_factor;
+  }
+  // if (m_temperature < 0) m_temperature = 0;
+  // mCRL2log(mcrl2::log::debug) << "Prev E: " << m_previous_energy << " new E: " << new_energy << " m_temperature: " << m_temperature << std::endl;
+  m_previous_energy = m_energy_smoothing * new_energy + (1-m_energy_smoothing) * m_previous_energy;
+  T = m_temperature + m_minimum_temperature;
+  return false; ///< not yet stable
+}
 
 struct AttractionFunction{
   virtual QVector3D operator ()(const QVector3D& a, const QVector3D& b, const float ideal) = 0;
@@ -190,6 +263,7 @@ namespace RepulsionFunctions{
 };
 
 struct ApplicationFunction{
+  float* temperature = nullptr;
   virtual void operator() (QVector3D& pos, const QVector3D& f, const float speed) = 0;
   virtual void update(){};
   virtual void reset(){};
@@ -212,12 +286,13 @@ namespace ApplicationFunctions{
     const float thres = scaling * stability_param;
     // easing such that at threshold translation is 50% of stepsize
     const float ease_width = .1f;
-    const float ease_floor = 0.0001f; // Always keep ease_floor force applied. May cause jitter
+    const float ease_floor = 1e-06; // Always keep ease_floor force applied. May cause jitter
     // precompute
     const float one_minus_ease_floor = 1-ease_floor;
     void operator() (QVector3D& pos, const QVector3D& f, const float speed) override {
       float amplitude = speed * scaling;
       float threshold = speed * thres;
+      if (temperature) threshold /= *temperature;
       float L = f.length();
       if (L < (1+ease_width)*threshold){
         // smoothstep the amplitude
@@ -308,6 +383,7 @@ SpringLayout::SpringLayout(Graph& graph, GLWidget& glwidget)
 {
   srand(time(nullptr));
   drift_timer.restart();
+  applFuncMap[ForceApplication::force_directed_appl]->temperature = &m_asa.T;
 }
 
 SpringLayout::~SpringLayout()
@@ -444,6 +520,20 @@ static QVector3D slicedAverage(Graph& graph, std::size_t i, std::size_t j){
       z += graph.node(k).pos().z();
     }
     return QVector3D(x/n, y/n, z/n);
+  }
+}
+
+static float slicedAverageSqrMagnitude(std::vector<QVector3D>& forces, std::size_t i, std::size_t j){
+  std::size_t n = j-i;
+  if (n > max_slice){
+    // split
+    std::size_t m = i + n/2;
+    double recip = 1.0/n;
+    return (m-i)*recip*slicedAverageSqrMagnitude(forces, i, m) + (j-m)*recip*slicedAverageSqrMagnitude(forces, m, j);
+  }else{
+    double sum = 0;
+    for (std::size_t k = i; k < j; ++k) sum += forces[k].lengthSquared();
+    return sum/n;
   }
 }
 
@@ -843,7 +933,7 @@ void SpringLayout::apply()
 
       if (!m_graph.node(n).anchored())
       {
-        (*m_applFunc)(m_graph.node(n).pos_mutable(), m_nforces[n], m_speed);
+        (*m_applFunc)(m_graph.node(n).pos_mutable(), m_nforces[n], m_asa.getTemperature() * m_speed);
         nodeSumForces += m_nforces[n].lengthSquared();
         clipVector(m_graph.node(n).pos_mutable(), clipmin, clipmax);
       }else{
@@ -879,7 +969,7 @@ void SpringLayout::apply()
 
       if (!m_graph.stateLabel(n).anchored())
       {
-        (*m_applFunc)(m_graph.stateLabel(n).pos_mutable(), m_sforces[n], m_speed);
+        (*m_applFunc)(m_graph.stateLabel(n).pos_mutable(), m_sforces[n], m_speed*m_asa.getTemperature());
         m_graph.stateLabel(n).pos_mutable() -= center_of_mass;
         nodeSumForces += m_sforces[n].lengthSquared();
         clipVector(m_graph.stateLabel(n).pos_mutable(), clipmin, clipmax);
@@ -892,14 +982,14 @@ void SpringLayout::apply()
 
       if (!m_graph.handle(n).anchored())
       {
-        (*m_applFunc)(m_graph.handle(n).pos_mutable(), m_hforces[n], m_speed);
+        (*m_applFunc)(m_graph.handle(n).pos_mutable(), m_hforces[n], m_speed*m_asa.getTemperature());
         m_graph.handle(n).pos_mutable() -= center_of_mass;
         edgeSumForces += m_hforces[n].lengthSquared();
         clipVector(m_graph.handle(n).pos_mutable(), clipmin, clipmax);
       }
       if (!m_graph.transitionLabel(n).anchored())
       {
-        (*m_applFunc)(m_graph.transitionLabel(n).pos_mutable(), m_lforces[n], m_speed);
+        (*m_applFunc)(m_graph.transitionLabel(n).pos_mutable(), m_lforces[n], m_speed*m_asa.getTemperature());
         m_graph.transitionLabel(n).pos_mutable() -= center_of_mass;
         edgeSumForces += m_lforces[n].lengthSquared();
         clipVector(m_graph.transitionLabel(n).pos_mutable(), clipmin, clipmax);
@@ -909,8 +999,11 @@ void SpringLayout::apply()
     // we already own the lock so we can directly set stable
     m_graph.stable() = std::sqrt(edgeSumForces) < m_graph.stabilityThreshold()*edgeCount && std::sqrt(nodeSumForces) < m_graph.stabilityThreshold()*nodeCount; 
     if (m_graph.stable()) mCRL2log(mcrl2::log::verbose) << "Graph is now stable." << std::endl;
-
-
+    m_asa.calculateTemperature(slicedAverageSqrMagnitude(m_nforces, 0, m_nforces.size()));
+    
+    if (m_graph.userIsDragging){
+      m_asa.reset();
+    }
     m_graph.unlock(GRAPH_LOCK_TRACE);
 
     m_max_num_nodes = 0;
@@ -1005,6 +1098,7 @@ void SpringLayout::rulesChanged(){
    m_applFunc->reset();
    m_repFunc->reset();
    m_attrFunc->reset();
+   m_asa.reset();
 }
 
 //
@@ -1055,7 +1149,7 @@ class WorkerThread : public QThread
     void debugLogging(){
       int elapsed = m_debug_log_timer.elapsed();
       if (elapsed > m_debug_log_interval){
-        mCRL2log(mcrl2::log::debug) << "Worker thread performed " << m_counter << " cycles in " << elapsed << "ms. ";
+        mCRL2log(mcrl2::log::debug) << "Worker thread performed " << m_counter << " cycles in " << elapsed << "ms. ASA temperature: " << m_layout.m_asa.getTemperature();
         if (m_counter/(float)elapsed > 50) mCRL2log(mcrl2::log::debug) << " - NB: This is longer than the set expected maximum " << m_debug_max_cycle_time << "ms per cycle. ";
         mCRL2log(mcrl2::log::debug) << std::endl;
         // reset debugging
