@@ -50,9 +50,9 @@ class SimpleAdaptiveSimulatedAnnealing {
     int m_progress = 0;
     
     // Adaptive variables
-    const int m_progress_threshold = 10;
+    const int m_progress_threshold = 5;
     const float m_cooling_factor = 0.99f;
-    const float m_heating_factor = 1 / 0.99f;
+    const float m_heating_factor = 1 / 0.9f;
     
     // Interactive quality variables
     const float m_minimum_temperature = 1e-6;
