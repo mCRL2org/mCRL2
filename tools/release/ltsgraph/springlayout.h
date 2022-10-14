@@ -38,6 +38,28 @@ struct AttractionFunction;
 struct RepulsionFunction;
 struct ApplicationFunction;
 
+class SimpleAdaptiveSimulatedAnnealing {
+  public:
+    float T;
+    bool calculateTemperature(float new_energy);
+    void reset();
+  private:
+    // Storage variables
+    float m_prev_energy = -1; 
+    float m_temperature = m_reset_temperature;
+    int m_progress = 0;
+    
+    // Adaptive variables
+    const int m_progress_threshold = 10;
+    const float m_cooling_factor = 0.99f;
+    const float m_heating_factor = 1 / 0.99f;
+    
+    // Interactive quality variables
+    const float m_minimum_temperature = 1e-6;
+    const float m_reset_temperature = 1;
+
+};
+
 class AdaptiveSimulatedAnnealing{
   float m_annealing_factor = 0.995;   ///< Adaptive cooling per progress cycle (multiplicative)
   float m_annealing_term = 0.1;    ///< If the system ever cools completely we need to be able to get out
@@ -47,7 +69,7 @@ class AdaptiveSimulatedAnnealing{
 
   float m_progress = 0; ///< current amount of 'cycles' spent progressing towards a goal
   float m_progress_threshold = 0.5; ///< threshold of 'cycles' spent before heating
-  float m_progress_target_per_second = 500; ///< number of 'cycles' per second
+  float m_progress_target_per_second = 50; ///< number of 'cycles' per second
 
   float m_progress_energy = -1;
   
@@ -173,7 +195,7 @@ class SpringLayout
     RepulsionFunction* m_repFunc;
     ApplicationFunction* m_applFunc;
 public:
-    AdaptiveSimulatedAnnealing m_asa;
+    SimpleAdaptiveSimulatedAnnealing m_asa;
 private:
     /**
      * @brief Returns approximate accumulation of all repulsive forces from other particles exerted on @e a

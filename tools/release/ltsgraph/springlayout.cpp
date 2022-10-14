@@ -97,6 +97,36 @@ inline void clip(float& f, float min, float max)
 }
 
 const float electricalSpringScaling = 1e-2f;
+
+void SimpleAdaptiveSimulatedAnnealing::reset()
+{
+  m_temperature = m_reset_temperature;
+  m_progress = 0;
+  m_prev_energy = -1;
+  T = m_temperature;
+}
+
+bool SimpleAdaptiveSimulatedAnnealing::calculateTemperature(float new_energy)
+{
+  if (new_energy < m_prev_energy)
+  {
+    m_progress++;
+    if (m_progress >= m_progress_threshold)
+    {
+      m_temperature = std::max(m_temperature, m_minimum_temperature);
+      m_temperature *= m_heating_factor;
+      m_progress = 0;
+    }
+  }
+  else
+  {
+    m_progress = 0;
+    m_temperature *= m_cooling_factor;
+  }
+  T = std::max(m_minimum_temperature, m_temperature);
+  m_prev_energy = new_energy;
+  return false; //Simple => no checking for stable configuration
+}
  
 float AdaptiveSimulatedAnnealing::getTemperature() { return T; }
 
@@ -933,7 +963,7 @@ void SpringLayout::apply()
 
       if (!m_graph.node(n).anchored())
       {
-        (*m_applFunc)(m_graph.node(n).pos_mutable(), m_nforces[n], m_asa.getTemperature() * m_speed);
+        (*m_applFunc)(m_graph.node(n).pos_mutable(), m_nforces[n], m_speed);
         nodeSumForces += m_nforces[n].lengthSquared();
         clipVector(m_graph.node(n).pos_mutable(), clipmin, clipmax);
       }else{
@@ -969,7 +999,7 @@ void SpringLayout::apply()
 
       if (!m_graph.stateLabel(n).anchored())
       {
-        (*m_applFunc)(m_graph.stateLabel(n).pos_mutable(), m_sforces[n], m_speed*m_asa.getTemperature());
+        (*m_applFunc)(m_graph.stateLabel(n).pos_mutable(), m_sforces[n], m_speed);
         m_graph.stateLabel(n).pos_mutable() -= center_of_mass;
         nodeSumForces += m_sforces[n].lengthSquared();
         clipVector(m_graph.stateLabel(n).pos_mutable(), clipmin, clipmax);
@@ -982,14 +1012,14 @@ void SpringLayout::apply()
 
       if (!m_graph.handle(n).anchored())
       {
-        (*m_applFunc)(m_graph.handle(n).pos_mutable(), m_hforces[n], m_speed*m_asa.getTemperature());
+        (*m_applFunc)(m_graph.handle(n).pos_mutable(), m_hforces[n], m_speed);
         m_graph.handle(n).pos_mutable() -= center_of_mass;
         edgeSumForces += m_hforces[n].lengthSquared();
         clipVector(m_graph.handle(n).pos_mutable(), clipmin, clipmax);
       }
       if (!m_graph.transitionLabel(n).anchored())
       {
-        (*m_applFunc)(m_graph.transitionLabel(n).pos_mutable(), m_lforces[n], m_speed*m_asa.getTemperature());
+        (*m_applFunc)(m_graph.transitionLabel(n).pos_mutable(), m_lforces[n], m_speed);
         m_graph.transitionLabel(n).pos_mutable() -= center_of_mass;
         edgeSumForces += m_lforces[n].lengthSquared();
         clipVector(m_graph.transitionLabel(n).pos_mutable(), clipmin, clipmax);
@@ -1149,7 +1179,7 @@ class WorkerThread : public QThread
     void debugLogging(){
       int elapsed = m_debug_log_timer.elapsed();
       if (elapsed > m_debug_log_interval){
-        mCRL2log(mcrl2::log::debug) << "Worker thread performed " << m_counter << " cycles in " << elapsed << "ms. ASA temperature: " << m_layout.m_asa.getTemperature();
+        mCRL2log(mcrl2::log::debug) << "Worker thread performed " << m_counter << " cycles in " << elapsed << "ms. ASA temperature: " << m_layout.m_asa.T;
         if (m_counter/(float)elapsed > 50) mCRL2log(mcrl2::log::debug) << " - NB: This is longer than the set expected maximum " << m_debug_max_cycle_time << "ms per cycle. ";
         mCRL2log(mcrl2::log::debug) << std::endl;
         // reset debugging
