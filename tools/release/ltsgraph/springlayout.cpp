@@ -320,7 +320,8 @@ namespace ApplicationFunctions{
     // precompute
     const float one_minus_ease_floor = 1-ease_floor;
     void operator() (QVector3D& pos, const QVector3D& f, const float speed) override {
-      float amplitude = speed * scaling;
+      
+      float amplitude = speed * scaling * (*temperature);
       float threshold = speed * thres;
       if (temperature) threshold /= *temperature;
       float L = f.length();
@@ -660,23 +661,23 @@ void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::quadtree>(bool 
   QVector2D _extents, cubic_extents;
   float _width;
 
-  _extents = node_max - node_min;
-  _width = std::max({_extents.x(), _extents.y()});
-  cubic_extents = QVector2D(_width, _width);
-  node_min -= (cubic_extents - _extents)*0.5f;
-  node_max = node_min + cubic_extents;
+  // _extents = node_max - node_min;
+  // _width = std::max({_extents.x(), _extents.y()});
+  // cubic_extents = QVector2D(_width, _width);
+  // node_min -= (cubic_extents - _extents)*0.5f;
+  // node_max = node_min + cubic_extents;
 
-  _extents = handle_max - handle_min;
-  _width = std::max({_extents.x(), _extents.y()});
-  cubic_extents = QVector2D(_width, _width);
-  handle_min -= (cubic_extents - _extents)*0.5f;
-  handle_max = handle_min + cubic_extents;
+  // _extents = handle_max - handle_min;
+  // _width = std::max({_extents.x(), _extents.y()});
+  // cubic_extents = QVector2D(_width, _width);
+  // handle_min -= (cubic_extents - _extents)*0.5f;
+  // handle_max = handle_min + cubic_extents;
 
-  _extents = trans_max - trans_min;
-  _width = std::max({_extents.x(), _extents.y()});
-  cubic_extents = QVector2D(_width, _width);
-  trans_min -= (cubic_extents - _extents)*0.5f;
-  trans_max = trans_min + cubic_extents;
+  // _extents = trans_max - trans_min;
+  // _width = std::max({_extents.x(), _extents.y()});
+  // cubic_extents = QVector2D(_width, _width);
+  // trans_min -= (cubic_extents - _extents)*0.5f;
+  // trans_max = trans_min + cubic_extents;
   
   m_node_tree2D.setMinBounds(node_min);
   m_node_tree2D.setMaxBounds(node_max);
@@ -791,23 +792,23 @@ void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::octree>(bool se
   QVector3D _extents, cubic_extents;
   float _width;
 
-  _extents = node_max - node_min;
-  _width = std::max({_extents.x(), _extents.y(), _extents.z()});
-  cubic_extents = QVector3D(_width, _width, _width);
-  node_min -= (cubic_extents - _extents)*0.5f;
-  node_max = node_min + cubic_extents;
+  // _extents = node_max - node_min;
+  // _width = std::max({_extents.x(), _extents.y(), _extents.z()});
+  // cubic_extents = QVector3D(_width, _width, _width);
+  // node_min -= (cubic_extents - _extents)*0.5f;
+  // node_max = node_min + cubic_extents;
 
-  _extents = handle_max - handle_min;
-  _width = std::max({_extents.x(), _extents.y(), _extents.z()});
-  cubic_extents = QVector3D(_width, _width, _width);
-  handle_min -= (cubic_extents - _extents)*0.5f;
-  handle_max = handle_min + cubic_extents;
+  // _extents = handle_max - handle_min;
+  // _width = std::max({_extents.x(), _extents.y(), _extents.z()});
+  // cubic_extents = QVector3D(_width, _width, _width);
+  // handle_min -= (cubic_extents - _extents)*0.5f;
+  // handle_max = handle_min + cubic_extents;
 
-  _extents = trans_max - trans_min;
-  _width = std::max({_extents.x(), _extents.y(), _extents.z()});
-  cubic_extents = QVector3D(_width, _width, _width);
-  trans_min -= (cubic_extents - _extents)*0.5f;
-  trans_max = trans_min + cubic_extents;
+  // _extents = trans_max - trans_min;
+  // _width = std::max({_extents.x(), _extents.y(), _extents.z()});
+  // cubic_extents = QVector3D(_width, _width, _width);
+  // trans_min -= (cubic_extents - _extents)*0.5f;
+  // trans_max = trans_min + cubic_extents;
   
   m_node_tree.setMinBounds(node_min);
   m_node_tree.setMaxBounds(node_max);
