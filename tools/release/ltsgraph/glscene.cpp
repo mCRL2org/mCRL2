@@ -462,6 +462,7 @@ void GLScene::render()
       //mCRL2log(mcrl2::log::debug) << "Skipping \"" << di_ptr->identifier << "\" because it is empty." << std::endl; 
     }
   }
+  delete[] matValues;
   m_vaoGlobal.release();
   m_global_shader.release();
   m_arc_shader.bind();
