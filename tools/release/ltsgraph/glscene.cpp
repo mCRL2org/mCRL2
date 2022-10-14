@@ -234,7 +234,7 @@ void GLScene::initialize()
   m_global_shader.enableAttributeArray(vertex_attrib_location);
 
   m_current_buffer_size =
-      std::max((const unsigned long long)100000,
+      std::max(static_cast<std::size_t>(100000),
                std::max(m_graph.nodeCount(), m_graph.edgeCount()));
 
   m_colorBuffer.create();
