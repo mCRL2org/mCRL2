@@ -221,6 +221,17 @@ void GLScene::initialize()
   int matrix_attrib_location = m_global_shader.attributeLocation("MVP");
   int color_attrib_location = m_global_shader.attributeLocation("color");
 
+  int recommended_max_buffer_size;
+  glGetIntegerv(GL_MAX_ELEMENTS_VERTICES, &recommended_max_buffer_size);
+  mCRL2log(mcrl2::log::verbose)
+      << "The recommended maximum vertices per buffer on this machine is "
+      << recommended_max_buffer_size << std::endl;
+  mCRL2log(mcrl2::log::verbose)
+      << "Based on maximum recommended, setting batch rendering size to "
+      << recommended_max_buffer_size / 4 << std::endl;
+  // To be safe we divide by 4 since a mat4 is technically 4 vec4s stacked together 
+  m_batch_size = static_cast<std::size_t>(recommended_max_buffer_size / 4); 
+
   m_vaoGlobal.create();
   m_vaoGlobal.bind();
 
@@ -233,14 +244,15 @@ void GLScene::initialize()
   m_global_shader.setAttributeBuffer(vertex_attrib_location, GL_FLOAT, 0, 3);
   m_global_shader.enableAttributeArray(vertex_attrib_location);
 
-  m_current_buffer_size =
-      std::max(static_cast<std::size_t>(100000),
+  m_current_scene_size =
+      std::max(m_batch_size,
                std::max(m_graph.nodeCount(), m_graph.edgeCount()));
+  m_drawInstances.resize(m_batch_size);
 
   m_colorBuffer.create();
   m_colorBuffer.setUsagePattern(QOpenGLBuffer::StreamDraw);
   m_colorBuffer.bind();
-  m_colorBuffer.allocate(m_current_buffer_size * sizeof(QVector4D));
+  m_colorBuffer.allocate(m_batch_size * sizeof(QVector4D));
   m_global_shader.setAttributeBuffer(color_attrib_location, GL_FLOAT, 0, 4);
   m_global_shader.enableAttributeArray(color_attrib_location);
   glVertexAttribDivisor(color_attrib_location, 1);
@@ -249,7 +261,7 @@ void GLScene::initialize()
   m_matrixBuffer.create();
   m_matrixBuffer.setUsagePattern(QOpenGLBuffer::StreamDraw);
   m_matrixBuffer.bind();
-  m_matrixBuffer.allocate(m_current_buffer_size * sizeof(QVector4D) * 4);
+  m_matrixBuffer.allocate(m_batch_size * sizeof(QVector4D) * 4);
   for (int i = 0; i < 4; i++)
   {
     m_global_shader.setAttributeBuffer(matrix_attrib_location + i, GL_FLOAT,
@@ -286,7 +298,7 @@ void GLScene::initialize()
   m_controlpointbuffer.create();
   m_controlpointbuffer.setUsagePattern(QOpenGLBuffer::StreamDraw);
   m_controlpointbuffer.bind();
-  m_controlpointbuffer.allocate(m_current_buffer_size * sizeof(QVector3D) * 4);
+  m_controlpointbuffer.allocate(m_batch_size * sizeof(QVector3D) * 4);
   /// TODO: Loop just like the matrix buffer from global shader
   m_arc_shader.setAttributeBuffer(arc_ctrl_1_attrib_location, GL_FLOAT, 0, 3, 4 * sizeof(QVector3D));
   m_arc_shader.enableAttributeArray(arc_ctrl_1_attrib_location);
@@ -307,7 +319,7 @@ void GLScene::initialize()
   m_arccolorbuffer.create();
   m_arccolorbuffer.setUsagePattern(QOpenGLBuffer::StreamDraw);
   m_arccolorbuffer.bind();
-  m_arccolorbuffer.allocate(m_current_buffer_size * sizeof(QVector3D));
+  m_arccolorbuffer.allocate(m_current_scene_size * sizeof(QVector3D));
   m_arc_shader.setAttributeBuffer(arc_color_attrib_location, GL_FLOAT, 0, 3);
   m_arc_shader.enableAttributeArray(arc_color_attrib_location);
   glVertexAttribDivisor(arc_color_attrib_location, 1);
@@ -360,7 +372,7 @@ void GLScene::render()
   m_fbo->bind();
 
   // reset the draw instance vectors
-  for (auto ptr : m_drawInstances) ptr->resize(0);
+  for (auto ptr : m_drawInstances) if (ptr) ptr->resize(0);
   m_drawArc.resize(0);
   m_drawArcColors.resize(0);
 
@@ -428,41 +440,49 @@ void GLScene::render()
                  viewProjMatrix, true);
     }
   }
-
   QElapsedTimer openglTimer;
   openglTimer.restart();
+
   // All data has been accumulated in the associated vectors
-  float* matValues = new float[m_current_buffer_size * 16];
+  // float* matValues = new float[m_current_buffer_size * 16];
   for (DrawInstances* di_ptr : m_drawInstances){
-    if (di_ptr->size() > 0)
-    {
-      //mCRL2log(mcrl2::log::debug) << "Drawing " << di_ptr->size() << " \"" << di_ptr->identifier << "\"." << std::endl;
-      int index = 0;
-      for (const QMatrix4x4& mat : di_ptr->matrices)
+    if (di_ptr && di_ptr->size() > 0)
+    { 
+      std::size_t amount_to_render = di_ptr->size();
+      std::size_t index = 0;
+      while (amount_to_render > 0)
       {
-        std::memcpy(&matValues[index], mat.data(), 16 * sizeof(float));
-        index += 16;
+        std::size_t n = std::min(m_batch_size, amount_to_render);
+        // NB: sizeof(QMatrix4x4) is NOT the same as 16 * sizeof(float)
+        m_matrixBuffer.bind();
+        void* buff_ptr1 =
+            m_matrixBuffer.mapRange(0, n * 16 * sizeof(float),
+                                    QOpenGLBuffer::RangeAccessFlag::RangeWrite);
+        
+        // void* buff_ptr =
+        // m_matrixBuffer.map(QOpenGLBuffer::Access::WriteOnly);
+        std::memcpy(buff_ptr1, &di_ptr->matrices[index*16],
+                    n * 16 * sizeof(float));
+        m_matrixBuffer.unmap();
+
+        m_matrixBuffer.release();
+
+        m_colorBuffer.bind();
+        m_colorBuffer.write(0, &di_ptr->colors[index*4],
+                            n * sizeof(QVector4D));
+        m_colorBuffer.release();
+
+        glDrawArraysInstanced(di_ptr->draw_mode, di_ptr->offset,
+                              di_ptr->vertices, n);
+        index += n;
+        amount_to_render -= n;
+        glCheckError();
       }
-      m_matrixBuffer.bind();
-      void* buff_ptr = m_matrixBuffer.map(QOpenGLBuffer::Access::WriteOnly);
-      std::memcpy(buff_ptr, matValues, index*sizeof(float));
-      m_matrixBuffer.unmap();
-      
-      m_matrixBuffer.release();
-
-      m_colorBuffer.bind();
-      m_colorBuffer.write(0, &di_ptr->colors[0],
-                          di_ptr->size() * sizeof(QVector4D));
-      m_colorBuffer.release();
-
-      glDrawArraysInstanced(di_ptr->draw_mode, di_ptr->offset,
-                            di_ptr->vertices, di_ptr->size());
-      glCheckError();
     }else{
       //mCRL2log(mcrl2::log::debug) << "Skipping \"" << di_ptr->identifier << "\" because it is empty." << std::endl; 
     }
   }
-  delete[] matValues;
+  // delete[] matValues;
   m_vaoGlobal.release();
   m_global_shader.release();
   m_arc_shader.bind();
@@ -472,12 +492,23 @@ void GLScene::render()
   m_arc_shader.setViewProjMatrix(viewProjMatrix);
   m_arc_shader.setFogDensity(m_drawfog * m_fogdensity);
   if (m_drawArc.size() > 0){
-    m_controlpointbuffer.bind();
-    m_controlpointbuffer.write(0, &m_drawArc[0], m_drawArc.size() * 12 * sizeof(float));
-    m_arccolorbuffer.bind();
-    m_arccolorbuffer.write(0, &m_drawArcColors[0], m_drawArc.size() * 3 * sizeof(float));
-    glDrawArraysInstanced(GL_LINE_STRIP, OFFSET_ARC, VERTICES_ARC, m_drawArc.size());
-    glCheckError();
+    std::size_t amount_to_render = m_drawArc.size();
+    std::size_t index = 0;
+    while (amount_to_render > 0)
+    {
+      std::size_t n = std::min(m_batch_size, amount_to_render);
+      m_controlpointbuffer.bind();
+      m_controlpointbuffer.write(0, &m_drawArc[index],
+                                 n * 12 * sizeof(float));
+      m_arccolorbuffer.bind();
+      m_arccolorbuffer.write(0, &m_drawArcColors[0],
+                             n * 3 * sizeof(float));
+      glDrawArraysInstanced(GL_LINE_STRIP, OFFSET_ARC, VERTICES_ARC,
+                            n);
+      glCheckError();
+      index += n;
+      amount_to_render -= n;
+    }
   }
 
   m_vaoArc.release();
@@ -489,7 +520,7 @@ void GLScene::render()
   // m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
   // Make sure that glGetError() is not an error.
   glCheckError();
-  //mCRL2log(mcrl2::log::debug) << "Frame time: " << render_timer.elapsed() << " OpenGL: " << openglTimer.elapsed() << std::endl;
+  mCRL2log(mcrl2::log::debug) << "Frame time: " << render_timer.elapsed() << " OpenGL: " << openglTimer.elapsed() << std::endl;
 }
 
 void GLScene::renderText(QPainter& painter)
