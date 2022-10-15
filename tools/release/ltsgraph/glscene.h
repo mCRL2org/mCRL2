@@ -25,24 +25,44 @@
 #include "mcrl2/utilities/logger.h"
 
 struct DrawInstances{
-  std::vector<QMatrix4x4> matrices;
-  std::vector<QVector4D> colors;
+  std::vector<float> matrices;
+  std::vector<float> colors;
   int offset;
   int vertices;
   GLenum draw_mode;
   std::string identifier;
-  DrawInstances(int offset = -1, int vertices = -1, GLenum draw_mode = 0, std::string identifier = "") : offset(offset), vertices(vertices), draw_mode(draw_mode), identifier(identifier){}
-  void push_back(QMatrix4x4 matrix, QVector4D color){
+  DrawInstances(int offset = -1, int vertices = -1, GLenum draw_mode = 0, std::string identifier = "") : offset(offset), vertices(vertices), draw_mode(draw_mode), identifier(identifier){
+    matrices = std::vector<float>(0);
+    colors = std::vector<float>(0);
+  }
+  void push_back(const QMatrix4x4& matrix, const QVector4D& color){
     assert(offset >= 0);
     assert(vertices > 0);
-    matrices.emplace_back(matrix);
-    colors.emplace_back(color);
+    if (index >= capacity)
+    {
+      resize(capacity + 1024); // if capacity too low, grow by 64kB for matrices, and 16kB for colors
+    }
+    std::memcpy(&matrices[index*16], matrix.constData(), 16*sizeof(float));
+    std::memcpy(&colors[index*4], &color, 4*sizeof(float));
+    index++;
   }
+  std::size_t capacity = 0;
+  std::size_t index = 0;
   void resize(std::size_t size){
-    matrices.resize(size);
-    colors.resize(size);
+    std::size_t kB_aligned_size = (size / 1024) * 1024;
+    if (kB_aligned_size < size)
+      kB_aligned_size += 1024;
+    
+    if (capacity < kB_aligned_size)
+    {
+      matrices.resize(kB_aligned_size * 16);
+      colors.resize(kB_aligned_size * 4);
+      capacity = kB_aligned_size;
+    }else{
+      index = kB_aligned_size;
+    }
   }
-  std::size_t size(){ return matrices.size(); }
+  std::size_t size(){ return index; }
 
 };
 /// \brief The scene contains the graph that is shown and the camera from which the graph is viewed. It performs
@@ -236,7 +256,8 @@ private:
   QOpenGLBuffer m_matrixBuffer = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
   QOpenGLBuffer m_controlpointbuffer = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
   QOpenGLBuffer m_arccolorbuffer = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-  int m_current_buffer_size = 0;
+  std::size_t m_current_scene_size = 0;
+  std::size_t m_batch_size = 0;
   DrawInstances m_drawNodeBorder;
   DrawInstances m_drawHalfSphere;
   DrawInstances m_drawSphere;
