@@ -26,6 +26,7 @@
 #include <QReadWriteLock>
 #include <QVector3D>
 #include <QString>
+#include <QElapsedTimer>
 
 #include <utility>
 #include <cmath>
@@ -379,6 +380,18 @@ class Graph
   protected:
 
   public:
+
+    #undef DEBUG_LOG_TEMPERATURE
+    #ifdef DEBUG_LOG_TEMPERATURE
+    std::list<std::pair<qint64, double>> temp_debug_list = std::list<std::pair<qint64, double>>();
+    QElapsedTimer temp_debug_timer = QElapsedTimer();
+    const qint64 temp_debug_log_duration = static_cast<qint64>(10000); // log for 10000 mseconds
+    const int temp_debug_width = 200;
+    const int temp_debug_height = 100;
+    const int temp_debug_pad_height = 20;
+    const int temp_debug_pad_width = 20;
+    const double temp_debug_max_temp = 30;
+    #endif
     Graph();
     ~Graph();
 

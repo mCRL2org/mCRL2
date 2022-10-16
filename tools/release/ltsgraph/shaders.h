@@ -48,10 +48,40 @@ class GlobalShader : public QOpenGLShaderProgram
   int m_color_location = -1;
 };
 
-class GlobalShaderInstanced : public QOpenGLShaderProgram
+class NodeShaderInstanced : public QOpenGLShaderProgram
 {
+  int u_eye_loc = -1;
+  int u_VP_loc = -1;
+  int u_scale_loc = -1;
+  int u_V_loc = -1;
   public:
   bool link();
+  void setEye(const QVector3D& eye){
+    setUniformValue(u_eye_loc, eye);
+  }
+  void setVP(const QMatrix4x4& VP){
+    setUniformValue(u_VP_loc, VP);
+  }
+  void setV(const QMatrix4x4& V){
+    setUniformValue(u_V_loc, V);
+  }
+  void setScale(const float c){
+    setUniformValue(u_scale_loc, c);
+  }
+};
+
+class ArrowShaderInstanced : public QOpenGLShaderProgram
+{
+  int u_VP_loc = -1;
+  int u_scale_loc = -1;
+  public:
+  bool link();
+  void setVP(const QMatrix4x4& VP){
+    setUniformValue(u_VP_loc, VP);
+  }
+  void setScale(const float c){
+    setUniformValue(u_scale_loc, c);
+  }
 };
 
 /// \brief A shader that generates a cubic bezier curve from given control

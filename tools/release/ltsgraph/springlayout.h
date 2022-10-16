@@ -28,6 +28,8 @@
 #include <map>
 #include <QElapsedTimer>
 
+
+
 namespace Graph
 {
 
@@ -173,7 +175,7 @@ class SpringLayout
     const float m_min_controlPointWeight = 0.0f;
     const float m_max_controlPointWeight = 0.1f;
     float m_controlPointWeight;      ///< The handle repulsion wight factor.
-    const float m_min_accuracy = 3.0f;
+    const float m_min_accuracy = 5.0f;
     const float m_max_accuracy = 0.0f;
     float m_accuracy;                ///< Controls the Barnes-Hut criterion in the approximation of repulsive forces
     bool m_tree_enabled;

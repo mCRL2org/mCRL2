@@ -25,24 +25,26 @@
 #include "mcrl2/utilities/logger.h"
 
 struct DrawInstances{
-  std::vector<float> matrices;
+  std::vector<float> offsets;
   std::vector<float> colors;
+  float scale = 1.0f;
   int offset;
   int vertices;
   GLenum draw_mode;
   std::string identifier;
-  DrawInstances(int offset = -1, int vertices = -1, GLenum draw_mode = 0, std::string identifier = "") : offset(offset), vertices(vertices), draw_mode(draw_mode), identifier(identifier){
-    matrices = std::vector<float>(0);
+  DrawInstances(int offset = -1, int vertices = -1, float scale = 1.0f, GLenum draw_mode = 0, std::string identifier = "") : offset(offset), vertices(vertices), draw_mode(draw_mode), identifier(identifier), scale(scale){
+    mCRL2log(mcrl2::log::debug) << "Setting scale to: " << scale << " for: " << identifier << std::endl;
+    offsets = std::vector<float>(0);
     colors = std::vector<float>(0);
   }
-  void push_back(const QMatrix4x4& matrix, const QVector4D& color){
+  void push_back(const QVector3D& offs, const QVector4D& color){
     assert(offset >= 0);
     assert(vertices > 0);
     if (index >= capacity)
     {
-      resize(capacity + 1024); // if capacity too low, grow by 64kB for matrices, and 16kB for colors
+      resize(capacity + 1024); // if capacity too low, grow by 12kB for offsets, and 16kB for colors
     }
-    std::memcpy(&matrices[index*16], matrix.constData(), 16*sizeof(float));
+    std::memcpy(&offsets[index*3], &offs, 3*sizeof(float));
     std::memcpy(&colors[index*4], &color, 4*sizeof(float));
     index++;
   }
@@ -55,7 +57,7 @@ struct DrawInstances{
     
     if (capacity < kB_aligned_size)
     {
-      matrices.resize(kB_aligned_size * 16);
+      offsets.resize(kB_aligned_size * 3);
       colors.resize(kB_aligned_size * 4);
       capacity = kB_aligned_size;
     }else{
@@ -168,10 +170,19 @@ public:
   void setDrawInitialMarking(bool drawMark) { m_drawinitialmarking = drawMark; }
   void setDrawFog(bool enabled) { m_drawfog = enabled; }
 
-  void setNodeSize(std::size_t size) { m_size_node = size; }
+  void setNodeSize(std::size_t size) { m_size_node = size; updateDrawInstructions(); }
   void setFontSize(int size) { m_fontsize = size; m_font.setPixelSize(m_fontsize); }
   void setFogDistance(int value) { m_fogdensity = 1.0f / (value + 1); }
   void setDevicePixelRatio(float device_pixel_ratio) { m_device_pixel_ratio = device_pixel_ratio; }
+  void updateDrawInstructions(){
+      m_drawNodeBorder.scale    = 0.5f * (nodeSizeScaled() * 1.1f);
+      m_drawHalfSphere.scale    = 0.5f * nodeSizeScaled();
+      m_drawSphere.scale        = 0.5f * nodeSizeScaled();
+      m_drawMinusHint.scale     = 0.5f * nodeSizeScaled();
+      m_drawPlusHint.scale      = 0.5f * nodeSizeScaled();
+      m_drawHandleBody.scale    = 0.5f * handleSizeScaled();
+      m_drawHandleOutline.scale = 0.5f * handleSizeScaled();
+  }
   QOpenGLFramebufferObject* m_fbo;
 private:
   /// \returns The color of an object receiving fogAmount amount of fog.
@@ -228,11 +239,14 @@ private:
   Graph::Graph& m_graph;     /// The graph that is being visualised.
 
   ArcballCameraView m_camera;
-  float m_device_pixel_ratio;
+  float m_device_pixel_ratio = 1;
   QFont m_font;
 
-  /// \brief The shader to draw uniformly filled three dimensional objects.
-  GlobalShaderInstanced m_global_shader;
+  /// \brief The shader to draw the node objects.
+  NodeShaderInstanced m_node_shader;
+
+  /// \brief The shader used to draw the arrows.
+  ArrowShaderInstanced m_arrow_shader;
 
   /// \brief The shader to draw arcs, uses control points to position the vertices.
   ArcShaderInstanced m_arc_shader;
@@ -249,13 +263,14 @@ private:
   float m_fogdensity = 0.0005f; ///< The density of the fog.
 
   /// The vertex layout and vertex buffer object for all objects with the 3 float per vertex layout.
-  QOpenGLVertexArrayObject m_vaoGlobal;
+  QOpenGLVertexArrayObject m_vaoNode;
   QOpenGLVertexArrayObject m_vaoArc;
+  QOpenGLVertexArrayObject m_vaoArrow;
   QOpenGLBuffer m_vertexbuffer = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
   QOpenGLBuffer m_colorBuffer = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-  QOpenGLBuffer m_matrixBuffer = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+  QOpenGLBuffer m_offsetBuffer = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+  QOpenGLBuffer m_directionBuffer = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
   QOpenGLBuffer m_controlpointbuffer = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-  QOpenGLBuffer m_arccolorbuffer = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
   std::size_t m_current_scene_size = 0;
   std::size_t m_batch_size = 0;
   DrawInstances m_drawNodeBorder;
@@ -265,11 +280,12 @@ private:
   DrawInstances m_drawPlusHint;
   DrawInstances m_drawHandleBody;
   DrawInstances m_drawHandleOutline;
-  DrawInstances m_drawArrowHead;
-  DrawInstances m_drawArrowBase;
   std::vector<DrawInstances*> m_drawInstances;
   std::vector<std::array<QVector3D, 4>> m_drawArc;
   std::vector<QVector3D> m_drawArcColors;
+  std::vector<QVector3D> m_drawArrowOffsets;
+  std::vector<QVector4D> m_drawArrowColors;
+  std::vector<QVector3D> m_drawArrowDirections;
 
 
   /// \brief The background color of the scene.

@@ -77,6 +77,9 @@ Graph::Graph()
     : m_exploration(nullptr), m_type(mcrl2::lts::lts_lts), m_empty(""),
       m_stable(true)
 {
+  #ifdef DEBUG_LOG_TEMPERATURE
+  temp_debug_timer.restart();
+  #endif
 }
 
 Graph::~Graph()
