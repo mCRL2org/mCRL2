@@ -46,6 +46,7 @@ public:
 
   /// \brief Set the dimensions of the viewport.
   void viewport(int width, int height) { m_viewport = QRect(0, 0, width, height); }
+  const QRect& viewport() const { return m_viewport; };
 
   /// \returns The actual position in world coordinates of this camera.
   QVector3D position() const;

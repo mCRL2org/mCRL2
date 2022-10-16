@@ -19,6 +19,8 @@
 #include <QImage>
 #include <QStaticText>
 
+#include <list>
+
 /// \brief Number of orthogonal slices from which a circle representing a node
 /// is constructed.
 constexpr int RES_NODE_SLICE = 32;
@@ -58,15 +60,14 @@ GLScene::GLScene(QOpenGLWidget& glwidget, Graph::Graph& g)
 {
   setFontSize(m_fontsize);
   rebuild();
-  m_drawNodeBorder = DrawInstances(OFFSET_NODE_BORDER, VERTICES_NODE_BORDER, GL_TRIANGLE_FAN, "node border");
-  m_drawHalfSphere = DrawInstances(OFFSET_NODE_SPHERE, VERTICES_NODE_SPHERE/2, GL_TRIANGLE_STRIP, "half-sphere");
-  m_drawSphere = DrawInstances(OFFSET_NODE_SPHERE, VERTICES_NODE_SPHERE, GL_TRIANGLE_STRIP, "sphere");
-  m_drawArrowBase = DrawInstances(OFFSET_ARROWHEAD_BASE, VERTICES_ARROWHEAD_BASE, GL_TRIANGLE_FAN, "arrow base");
-  m_drawArrowHead = DrawInstances(OFFSET_ARROWHEAD, VERTICES_ARROWHEAD, GL_TRIANGLE_FAN, "arrow base");
-  m_drawMinusHint = DrawInstances(OFFSET_HINT, VERTICES_HINT/2, GL_TRIANGLES, "minus hint");
-  m_drawPlusHint = DrawInstances(OFFSET_HINT, VERTICES_HINT, GL_TRIANGLES, "plus hint");
-  m_drawHandleBody = DrawInstances(OFFSET_HANDLE_BODY, VERTICES_HANDLE_BODY, GL_TRIANGLE_STRIP, "handle body");
-  m_drawHandleOutline = DrawInstances(OFFSET_HANDLE_OUTLINE, VERTICES_HANDLE_OUTLINE, GL_LINE_LOOP, "handle outline");
+  m_drawNodeBorder = DrawInstances(OFFSET_NODE_BORDER, VERTICES_NODE_BORDER, 0, GL_TRIANGLE_FAN, "node border");
+  m_drawHalfSphere = DrawInstances(OFFSET_NODE_SPHERE, VERTICES_NODE_SPHERE/2, 0, GL_TRIANGLE_STRIP, "half-sphere");
+  m_drawSphere = DrawInstances(OFFSET_NODE_SPHERE, VERTICES_NODE_SPHERE, 0, GL_TRIANGLE_STRIP, "sphere");
+  m_drawMinusHint = DrawInstances(OFFSET_HINT, VERTICES_HINT/2, 0, GL_TRIANGLES, "minus hint");
+  m_drawPlusHint = DrawInstances(OFFSET_HINT, VERTICES_HINT, 0, GL_TRIANGLES, "plus hint");
+  m_drawHandleBody = DrawInstances(OFFSET_HANDLE_BODY, VERTICES_HANDLE_BODY, 0, GL_TRIANGLE_STRIP, "handle body");
+  m_drawHandleOutline = DrawInstances(OFFSET_HANDLE_OUTLINE, VERTICES_HANDLE_OUTLINE, 0, GL_LINE_LOOP, "handle outline");
+  updateDrawInstructions();
 
   m_drawInstances = std::vector<DrawInstances*>({
     &m_drawNodeBorder, 
@@ -76,8 +77,6 @@ GLScene::GLScene(QOpenGLWidget& glwidget, Graph::Graph& g)
     &m_drawPlusHint, 
     &m_drawHandleBody, 
     &m_drawHandleOutline, 
-    &m_drawArrowHead, 
-    &m_drawArrowBase
   });
 }
 
@@ -211,15 +210,17 @@ void GLScene::initialize()
   m_fbo = new QOpenGLFramebufferObject(
       m_glwidget.size(), QOpenGLFramebufferObject::CombinedDepthStencil);
   // Initialize the global shader.
-  m_global_shader.link();
+  m_node_shader.link();
   // Initialize the arc shader.
   m_arc_shader.link();
+  // Initialize the arrow shader.
+  m_arrow_shader.link();
 
-  m_global_shader.bind();
+  m_node_shader.bind();
 
-  int vertex_attrib_location = m_global_shader.attributeLocation("vertex");
-  int matrix_attrib_location = m_global_shader.attributeLocation("MVP");
-  int color_attrib_location = m_global_shader.attributeLocation("color");
+  int vertex_attrib_location = m_node_shader.attributeLocation("vertex");
+  int offset_attrib_location = m_node_shader.attributeLocation("offset");
+  int color_attrib_location = m_node_shader.attributeLocation("color");
 
   int recommended_max_buffer_size;
   glGetIntegerv(GL_MAX_ELEMENTS_VERTICES, &recommended_max_buffer_size);
@@ -232,8 +233,8 @@ void GLScene::initialize()
   // To be safe we divide by 4 since a mat4 is technically 4 vec4s stacked together 
   m_batch_size = static_cast<std::size_t>(recommended_max_buffer_size / 4); 
 
-  m_vaoGlobal.create();
-  m_vaoGlobal.bind();
+  m_vaoNode.create();
+  m_vaoNode.bind();
 
   m_vertexbuffer.create();
   m_vertexbuffer.bind();
@@ -241,8 +242,8 @@ void GLScene::initialize()
   m_vertexbuffer.allocate(
       vertices.data(), static_cast<int>(vertices.size() * sizeof(QVector3D)));
 
-  m_global_shader.setAttributeBuffer(vertex_attrib_location, GL_FLOAT, 0, 3);
-  m_global_shader.enableAttributeArray(vertex_attrib_location);
+  m_node_shader.setAttributeBuffer(vertex_attrib_location, GL_FLOAT, 0, 3);
+  m_node_shader.enableAttributeArray(vertex_attrib_location);
 
   m_current_scene_size =
       std::max(m_batch_size,
@@ -253,26 +254,22 @@ void GLScene::initialize()
   m_colorBuffer.setUsagePattern(QOpenGLBuffer::StreamDraw);
   m_colorBuffer.bind();
   m_colorBuffer.allocate(m_batch_size * sizeof(QVector4D));
-  m_global_shader.setAttributeBuffer(color_attrib_location, GL_FLOAT, 0, 4);
-  m_global_shader.enableAttributeArray(color_attrib_location);
+  m_node_shader.setAttributeBuffer(color_attrib_location, GL_FLOAT, 0, 4);
+  m_node_shader.enableAttributeArray(color_attrib_location);
   glVertexAttribDivisor(color_attrib_location, 1);
   m_colorBuffer.release();
 
-  m_matrixBuffer.create();
-  m_matrixBuffer.setUsagePattern(QOpenGLBuffer::StreamDraw);
-  m_matrixBuffer.bind();
-  m_matrixBuffer.allocate(m_batch_size * sizeof(QVector4D) * 4);
-  for (int i = 0; i < 4; i++)
-  {
-    m_global_shader.setAttributeBuffer(matrix_attrib_location + i, GL_FLOAT,
-                                       i * sizeof(QVector4D), 4,
-                                       4 * sizeof(QVector4D));
-    m_global_shader.enableAttributeArray(matrix_attrib_location + i);
-    glVertexAttribDivisor(matrix_attrib_location + i, 1);
-  }
-  m_matrixBuffer.release();
-  m_vaoGlobal.release();
-  m_global_shader.release();
+  m_offsetBuffer.create();
+  m_offsetBuffer.setUsagePattern(QOpenGLBuffer::StreamDraw);
+  m_offsetBuffer.bind();
+  m_offsetBuffer.allocate(m_batch_size * sizeof(QVector3D));
+  m_node_shader.setAttributeBuffer(offset_attrib_location, GL_FLOAT, 0, 3);
+  m_node_shader.enableAttributeArray(offset_attrib_location);
+  glVertexAttribDivisor(offset_attrib_location, 1);
+  
+  m_offsetBuffer.release();
+  m_vaoNode.release();
+  m_node_shader.release();
 
   m_arc_shader.bind();
   int arc_vertex_attrib_location = m_arc_shader.attributeLocation("vertex");
@@ -298,8 +295,8 @@ void GLScene::initialize()
   m_controlpointbuffer.create();
   m_controlpointbuffer.setUsagePattern(QOpenGLBuffer::StreamDraw);
   m_controlpointbuffer.bind();
-  m_controlpointbuffer.allocate(m_batch_size * sizeof(QVector3D) * 4);
-  /// TODO: Loop just like the matrix buffer from global shader
+  m_controlpointbuffer.allocate(m_batch_size * sizeof(QVector3D) * 4); 
+  // TODO: Duplicate code removal with loop
   m_arc_shader.setAttributeBuffer(arc_ctrl_1_attrib_location, GL_FLOAT, 0, 3, 4 * sizeof(QVector3D));
   m_arc_shader.enableAttributeArray(arc_ctrl_1_attrib_location);
   glVertexAttribDivisor(arc_ctrl_1_attrib_location, 1);
@@ -316,16 +313,48 @@ void GLScene::initialize()
   m_arc_shader.enableAttributeArray(arc_ctrl_4_attrib_location);
   glVertexAttribDivisor(arc_ctrl_4_attrib_location, 1);
   
-  m_arccolorbuffer.create();
-  m_arccolorbuffer.setUsagePattern(QOpenGLBuffer::StreamDraw);
-  m_arccolorbuffer.bind();
-  m_arccolorbuffer.allocate(m_current_scene_size * sizeof(QVector3D));
+  m_colorBuffer.bind();
   m_arc_shader.setAttributeBuffer(arc_color_attrib_location, GL_FLOAT, 0, 3);
   m_arc_shader.enableAttributeArray(arc_color_attrib_location);
   glVertexAttribDivisor(arc_color_attrib_location, 1);
 
   m_vaoArc.release();
   m_arc_shader.release();
+
+  m_arrow_shader.bind();
+
+  m_vaoArrow.create();
+  m_vaoArrow.bind();
+
+  int arrow_vertex_attrib_location = m_arrow_shader.attributeLocation("vertex");
+  int arrow_offset_attrib_location = m_arrow_shader.attributeLocation("offset");
+  int arrow_color_attrib_location = m_arrow_shader.attributeLocation("color");
+  int arrow_dir_attrib_location = m_arrow_shader.attributeLocation("direction");
+
+  m_vertexbuffer.bind();
+  m_arrow_shader.setAttributeBuffer(arrow_vertex_attrib_location, GL_FLOAT, 0, 3);
+  m_arrow_shader.enableAttributeArray(arrow_vertex_attrib_location);
+  
+  m_offsetBuffer.bind();
+  m_arrow_shader.setAttributeArray(arrow_offset_attrib_location, GL_FLOAT, 0, 3);
+  m_arrow_shader.enableAttributeArray(arrow_offset_attrib_location);
+  glVertexAttribDivisor(arrow_offset_attrib_location, 1);
+
+  m_colorBuffer.bind();
+  m_arrow_shader.setAttributeArray(arrow_color_attrib_location, GL_FLOAT, 0, 4);
+  m_arrow_shader.enableAttributeArray(arrow_color_attrib_location);
+  glVertexAttribDivisor(arrow_color_attrib_location, 1);
+
+  m_directionBuffer.create();
+  m_directionBuffer.setUsagePattern(QOpenGLBuffer::UsagePattern::StreamDraw);
+  m_directionBuffer.bind();
+  m_directionBuffer.allocate(m_current_scene_size * sizeof(QVector3D));
+  m_arrow_shader.setAttributeArray(arrow_dir_attrib_location, GL_FLOAT, 0, 3);
+  m_arrow_shader.enableAttributeArray(arrow_dir_attrib_location);
+  glVertexAttribDivisor(arrow_dir_attrib_location, 1);
+
+  m_vaoArrow.release();
+  m_arrow_shader.release();
 }
 
 void GLScene::resize(std::size_t width, std::size_t height)
@@ -367,36 +396,19 @@ void GLScene::rebuild()
 
 void GLScene::render()
 {
+
+  m_fbo->bind();
   QElapsedTimer render_timer;
   render_timer.restart();
-  m_fbo->bind();
 
   // reset the draw instance vectors
   for (auto ptr : m_drawInstances) if (ptr) ptr->resize(0);
   m_drawArc.resize(0);
   m_drawArcColors.resize(0);
+  m_drawArrowColors.resize(0);
+  m_drawArrowOffsets.resize(0);
+  m_drawArrowDirections.resize(0);
 
-  // Cull polygons that are facing away (back) from the camera, where their
-  // front is defined as counter clockwise by default, see glFrontFace, meaning
-  // that the vertices that make up a triangle should be oriented counter
-  // clockwise to show the triangle.
-  glEnable(GL_CULL_FACE);
-
-  // Enable depth testing, so that we don't have to care too much about
-  // rendering in the right order.
-  glEnable(GL_DEPTH_TEST);
-
-  // Change the alpha blending function to make an alpha of 1 opaque and 0 fully
-  // transparent.
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glEnable(GL_BLEND);
-
-  // Enable multisample antialiasing.
-  glEnable(GL_MULTISAMPLE);
-
-  QColor clear(Qt::white);
-  glClearColor(clear.red(), clear.green(), clear.blue(), 1.0);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // m_graph.lock(GRAPH_LOCK_TRACE); // enter critical section
 
@@ -406,14 +418,9 @@ void GLScene::render()
   std::size_t edgeCount =
       exploration_active ? m_graph.explorationEdgeCount() : m_graph.edgeCount();
 
-  // All other objects share the same shader and vertex layout.
-  m_global_shader.bind();
-  m_vaoGlobal.bind();
 
   QMatrix4x4 viewProjMatrix =
       m_camera.projectionMatrix() * m_camera.viewMatrix();
-
-
   for (std::size_t i = 0; i < nodeCount; ++i)
   {
     renderNode(exploration_active ? m_graph.explorationNode(i) : i,
@@ -442,30 +449,58 @@ void GLScene::render()
   }
   QElapsedTimer openglTimer;
   openglTimer.restart();
+  // All other objects share the same shader and vertex layout.
+  m_node_shader.bind();
+  m_vaoNode.bind();
 
+  m_node_shader.setEye(m_camera.position());
+  m_node_shader.setVP(viewProjMatrix);
+  m_node_shader.setV(m_camera.viewMatrix());
+  // Cull polygons that are facing away (back) from the camera, where their
+  // front is defined as counter clockwise by default, see glFrontFace, meaning
+  // that the vertices that make up a triangle should be oriented counter
+  // clockwise to show the triangle.
+  glEnable(GL_CULL_FACE);
+
+  // Enable depth testing, so that we don't have to care too much about
+  // rendering in the right order.
+  glEnable(GL_DEPTH_TEST);
+
+  // Change the alpha blending function to make an alpha of 1 opaque and 0 fully
+  // transparent.
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glEnable(GL_BLEND);
+
+  // Enable multisample antialiasing.
+  glEnable(GL_MULTISAMPLE);
+
+  QColor clear(Qt::white);
+  glClearColor(clear.red(), clear.green(), clear.blue(), 1.0);
+  glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
   // All data has been accumulated in the associated vectors
   // float* matValues = new float[m_current_buffer_size * 16];
   for (DrawInstances* di_ptr : m_drawInstances){
     if (di_ptr && di_ptr->size() > 0)
     { 
+      m_node_shader.setScale(di_ptr->scale);
       std::size_t amount_to_render = di_ptr->size();
       std::size_t index = 0;
       while (amount_to_render > 0)
       {
         std::size_t n = std::min(m_batch_size, amount_to_render);
         // NB: sizeof(QMatrix4x4) is NOT the same as 16 * sizeof(float)
-        m_matrixBuffer.bind();
+        m_offsetBuffer.bind();
         void* buff_ptr1 =
-            m_matrixBuffer.mapRange(0, n * 16 * sizeof(float),
+            m_offsetBuffer.mapRange(0, n * 3 * sizeof(float),
                                     QOpenGLBuffer::RangeAccessFlag::RangeWrite);
         
         // void* buff_ptr =
         // m_matrixBuffer.map(QOpenGLBuffer::Access::WriteOnly);
-        std::memcpy(buff_ptr1, &di_ptr->matrices[index*16],
-                    n * 16 * sizeof(float));
-        m_matrixBuffer.unmap();
+        std::memcpy(buff_ptr1, &di_ptr->offsets[index*3],
+                    n * 3 * sizeof(float));
+        m_offsetBuffer.unmap();
 
-        m_matrixBuffer.release();
+        m_offsetBuffer.release();
 
         m_colorBuffer.bind();
         m_colorBuffer.write(0, &di_ptr->colors[index*4],
@@ -483,8 +518,8 @@ void GLScene::render()
     }
   }
   // delete[] matValues;
-  m_vaoGlobal.release();
-  m_global_shader.release();
+  m_vaoNode.release();
+  m_node_shader.release();
   m_arc_shader.bind();
   m_vaoArc.bind();
 
@@ -500,8 +535,8 @@ void GLScene::render()
       m_controlpointbuffer.bind();
       m_controlpointbuffer.write(0, &m_drawArc[index],
                                  n * 12 * sizeof(float));
-      m_arccolorbuffer.bind();
-      m_arccolorbuffer.write(0, &m_drawArcColors[0],
+      m_colorBuffer.bind();
+      m_colorBuffer.write(0, &m_drawArcColors[index],
                              n * 3 * sizeof(float));
       glDrawArraysInstanced(GL_LINE_STRIP, OFFSET_ARC, VERTICES_ARC,
                             n);
@@ -513,6 +548,39 @@ void GLScene::render()
 
   m_vaoArc.release();
   m_arc_shader.release();
+  
+  m_arrow_shader.bind();
+  m_vaoArrow.bind();
+
+  m_arrow_shader.setVP(viewProjMatrix);
+  m_arrow_shader.setScale(arrowheadSizeScaled());
+  if (m_drawArrowOffsets.size() > 0){
+    std::size_t amount_to_render = m_drawArc.size();
+    std::size_t index = 0;
+    while (amount_to_render > 0){
+      std::size_t n = std::min(m_batch_size, amount_to_render);
+
+      m_colorBuffer.bind();
+      m_colorBuffer.write(0, &m_drawArrowColors[index], n * 4 * sizeof(float));
+
+      m_offsetBuffer.bind();
+      m_offsetBuffer.write(0, &m_drawArrowOffsets[index], n * 3 * sizeof(float));
+
+      m_directionBuffer.bind();
+      m_directionBuffer.write(0, &m_drawArrowDirections[index], n * 3 * sizeof(float));
+
+      glDrawArraysInstanced(GL_TRIANGLE_FAN, OFFSET_ARROWHEAD, VERTICES_ARROWHEAD, n);
+      glDrawArraysInstanced(GL_TRIANGLE_FAN, OFFSET_ARROWHEAD_BASE, VERTICES_ARROWHEAD_BASE, n);
+
+      index += n;
+      amount_to_render -= n;
+    }
+
+  }
+
+  m_vaoArrow.release();
+  m_arrow_shader.release();
+  
   m_fbo->release();
   // Use the painter to render the remaining text.
   glDisable(GL_DEPTH_TEST);
@@ -520,7 +588,7 @@ void GLScene::render()
   // m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
   // Make sure that glGetError() is not an error.
   glCheckError();
-  mCRL2log(mcrl2::log::debug) << "Frame time: " << render_timer.elapsed() << " OpenGL: " << openglTimer.elapsed() << std::endl;
+  // mCRL2log(mcrl2::log::debug) << "Frame time: " << render_timer.elapsed() << " OpenGL: " << openglTimer.elapsed() << std::endl;
 }
 
 void GLScene::renderText(QPainter& painter)
@@ -558,6 +626,8 @@ void GLScene::renderText(QPainter& painter)
           painter, exploration_active ? m_graph.explorationEdge(i) : i);
     }
   }
+
+
 }
 
 GLScene::Selection GLScene::select(int x, int y)
@@ -628,7 +698,6 @@ void GLScene::drawCenteredStaticText3D(QPainter& painter,
 
 bool GLScene::isVisible(const QVector3D& position, float& fogamount)
 {
-  return true; /// TODO: Properly dispose of this function
   // Should match the vertex shader: fogAmount = (1.0f - exp(-1.0f *
   // pow(distance * g_density, 2)));
   float distance = (m_camera.position() - position).length();
@@ -662,9 +731,6 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
   m_drawArc.emplace_back(control);
   m_drawArcColors.emplace_back(arcColor);
 
-  /// TODO: Make instanced call, use m_drawArc
-  // glDrawArrays(GL_LINE_STRIP, OFFSET_ARC, VERTICES_ARC);
-
   // Calculate the position of the tip of the arrow, and the orientation of the
   // arc
   QVector3D tip;
@@ -696,29 +762,10 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
       QVector4D color = applyFog(arcColor, fog);
       color.setW(1);
 
-      QMatrix4x4 worldMatrix;
-
-      // Go to arrowhead position
-      worldMatrix.translate(tip.x(), tip.y(), tip.z());
-
-      // Rotate the arrowhead to orient it to the end of the arc.
-      QVector3D axis = QVector3D::crossProduct(QVector3D(1, 0, 0), vec);
-      worldMatrix.rotate(radiansToDegrees(std::acos(vec.x())), axis);
-
-      // Scale it according to its size.
-      worldMatrix.scale(arrowheadSizeScaled());
-
-      QMatrix4x4 MVP_arrow = viewProjMatrix * worldMatrix;
-
-      // Draw the arrow head
-      // m_global_shader.setWorldViewProjMatrix(worldViewProjMatrix);
-      m_drawArrowHead.push_back(MVP_arrow, color);
-      // glDrawArrays(GL_TRIANGLE_FAN, OFFSET_ARROWHEAD, VERTICES_ARROWHEAD);
-
-      // Draw a circle to enclose the arrowhead.
-      m_drawArrowBase.push_back(MVP_arrow, color);
-      // glDrawArrays(GL_TRIANGLE_FAN, OFFSET_ARROWHEAD_BASE,
-      // VERTICES_ARROWHEAD_BASE);
+     
+      m_drawArrowColors.push_back(color);
+      m_drawArrowOffsets.push_back(tip);
+      m_drawArrowDirections.push_back(vec);
     }
   }
 }
@@ -741,26 +788,9 @@ void GLScene::renderHandle(std::size_t i, const QMatrix4x4& viewProjMatrix)
       fill = QVector3D(0.7f, 0.7f, 0.7f);
     }
 
-    // Move the handle to the correct position and with the correct scale.
-    QMatrix4x4 worldMatrix;
-    worldMatrix.translate(handle.pos());
-    worldMatrix.rotate(sphericalBillboard(handle.pos()));
-    worldMatrix.scale(handleSizeScaled());
 
-    // Update the shader parameters.
-    QMatrix4x4 worldViewProjMatrix = viewProjMatrix * worldMatrix;
-    /// TODO: m_drawHandle fill
-    // m_global_shader.setWorldViewProjMatrix(worldViewProjMatrix);
-
-    // First draw the inner quad.
-    // m_global_shader.setColor(fill);
-    // glDrawArrays(GL_TRIANGLE_STRIP, OFFSET_HANDLE_BODY,
-    // VERTICES_HANDLE_BODY);
-
-    // Draw the outer lines.
-    // m_global_shader.setColor(line);
-    // glDrawArrays(GL_LINE_LOOP, OFFSET_HANDLE_OUTLINE,
-    // VERTICES_HANDLE_OUTLINE);
+    m_drawHandleBody.push_back(handle.pos(), fill);
+    m_drawHandleOutline.push_back(handle.pos(), line);
   }
 }
 
@@ -799,52 +829,26 @@ void GLScene::renderNode(std::size_t i, const QMatrix4x4& viewProjMatrix,
                     ? 1.0f
                     : 1.0f; // Disabled for now until the transparent window
                             // issue can be resolved.
-  if (isVisible(node.pos(), fog) &&
-      (transparent || alpha > 0.99f)) // Check if these elements are visible and
+  if (transparent || alpha > 0.99f) // Check if these elements are visible and
                                       // opaque if transparency is disallowed.
   {
-    QMatrix4x4 worldMatrix;
-    QMatrix4x4 worldMatrixBorder;
-    worldMatrix.translate(node.pos());
-    worldMatrixBorder.translate(node.pos());
-    // worldMatrixBorder.translate((m_camera.position() - node.pos()) * 0.000000001);
-    QQuaternion rotation = sphericalBillboard(node.pos());
-    worldMatrix.rotate(rotation);
-    worldMatrixBorder.rotate(rotation);
-
     // Node stroke color: red when selected, black otherwise. Apply fogging
     // afterwards.
     QVector3D line(0.6f * node.selected(), 0.0f, 0.0f);
     QVector4D color = QVector4D(applyFog(line, fog), alpha);
+    m_drawNodeBorder.push_back(node.pos(), color);
 
-    // Scale the border such that they are of constant width.
-    QMatrix4x4 borderMatrix(worldMatrixBorder);
-    float width = 3.0f;
-    borderMatrix.scale(0.5f * (nodeSizeScaled() + width));
-    QMatrix4x4 MVP_border = viewProjMatrix * borderMatrix;
-    
-    m_drawNodeBorder.push_back(MVP_border, color);
-
-    // glDrawArrays(GL_TRIANGLE_FAN, OFFSET_NODE_BORDER, VERTICES_NODE_BORDER);
-
-    QMatrix4x4 nodeMatrix(worldMatrix);
-    nodeMatrix.scale(0.5f * nodeSizeScaled());
-    QMatrix4x4 MVP_node = viewProjMatrix * nodeMatrix;
     color = QVector4D(applyFog(fill, fog), alpha);
     if (node.is_probabilistic())
     {
       // Draw only the top section of the half sphere
       // This gives the appearance of a thicker border
-      m_drawHalfSphere.push_back(MVP_node, color);
-      // glDrawArrays(GL_TRIANGLE_STRIP, OFFSET_NODE_SPHERE,
-      // VERTICES_NODE_SPHERE / 2);
+      m_drawHalfSphere.push_back(node.pos(), color);
     }
     else
     {
       // Draw the sphere
-      m_drawSphere.push_back(MVP_node, color);
-      // glDrawArrays(GL_TRIANGLE_STRIP, OFFSET_NODE_SPHERE,
-      // VERTICES_NODE_SPHERE);
+      m_drawSphere.push_back(node.pos(), color);
     }
 
     if (m_graph.hasExploration() && !m_graph.isBridge(i) &&
@@ -854,21 +858,17 @@ void GLScene::renderNode(std::size_t i, const QMatrix4x4& viewProjMatrix,
                                                                         : -0.2f;
       QVector4D hint = QVector4D(fill.x() + s, fill.y() + s, fill.z() + s, 1);
 
-      // m_global_shader.setColor(hint);
-
       // When the node is active, which means that its successors are shown in
       // exploration mode, only the "minus" is drawn by omitting the vertical
       // rectangle of the whole "plus" shape.
       if (node.active())
       {
-        m_drawMinusHint.push_back(MVP_node, hint);
+        m_drawMinusHint.push_back(node.pos(), hint);
       }
       else
       {
-        m_drawPlusHint.push_back(MVP_node, hint);
+        m_drawPlusHint.push_back(node.pos(), hint);
       }
-      // glDrawArrays(GL_TRIANGLES, OFFSET_HINT, node.active() ? VERTICES_HINT /
-      // 2 : VERTICES_HINT);
     }
   }
 }

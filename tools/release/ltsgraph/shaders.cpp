@@ -82,12 +82,30 @@ namespace{
   "#version 330\n"
   "layout(location = 0) in vec3 vertex;\n"
   "layout(location = 2) in vec4 color;\n"
-  "layout(location = 3) in mat4 MVP;\n"
-  "out vec4 vColor;"
+  // "layout(location = 3) in mat4 MVP;\n"
+  "layout(location = 3) in vec3 offset;\n"
+
+  "out vec4 vColor;\n"
+
+  "uniform mat4 V;\n"
+  "uniform mat4 VP;\n"
+  "uniform vec3 eye;\n"
+  "uniform float scale;\n"
 
   "void main(void)\n"
   "{\n"
-  "   gl_Position = MVP * vec4(vertex, 1.0f);\n"
+  "   mat3 Vt  = transpose(mat3(V));\n"
+  "   vec3 localPos = (mat3(scale) * vertex);\n"
+  "   vec3 pos = (Vt*localPos + offset);\n"
+  "   vec3 cam = normalize(mat3(V)*vec3(0, 0, 1));\n"
+  "   vec3 p2c = normalize(eye - pos);\n"
+  "   float c = dot(cam, p2c);\n"
+  "   float theta = acos(c);\n"
+  "   float s = sin(theta);\n"
+  "   vec3 r  = normalize(cross(cam, p2c));\n"
+  "   localPos = mat3(V) * localPos;\n"
+  "   pos = ((1-c)*dot(localPos, r)*r + c*localPos + s*cross(r, localPos)) + offset;\n"
+  "   gl_Position = VP * vec4(pos, 1);\n"
   "   vColor = color;\n"
   "}";
 
@@ -101,7 +119,7 @@ namespace{
   "}";
 }
 
-bool GlobalShaderInstanced::link(){
+bool NodeShaderInstanced::link(){
   if (!addShaderFromSourceCode(QOpenGLShader::Vertex, g_vertexShaderInstanced))
   {
     mCRL2log(mcrl2::log::error) << log().toStdString();
@@ -118,6 +136,92 @@ bool GlobalShaderInstanced::link(){
   {
     mCRL2log(mcrl2::log::error) << "Could not link shader program:" << log().toStdString();
     std::abort();
+  }
+
+  u_eye_loc = uniformLocation("eye");
+  if (u_eye_loc == -1)
+  {
+    mCRL2log(mcrl2::log::warning) << "The instanced node shader has no uniform named \"eye\".\n";
+  }
+
+  u_VP_loc = uniformLocation("VP");
+  if (u_VP_loc == -1){
+    mCRL2log(mcrl2::log::warning) << "The instanced node shader has no uniform named \"VP\".\n";
+  }
+
+  u_V_loc = uniformLocation("V");
+  if (u_V_loc == -1){
+    mCRL2log(mcrl2::log::warning) << "The instanced node shader has no uniform named \"V\".\n";
+  }
+
+  u_scale_loc = uniformLocation("scale");
+  if (u_scale_loc == -1){
+    mCRL2log(mcrl2::log::warning) << "The instanced node shader has no uniform named \"scale\".\n";
+  }
+
+  return true;
+}
+
+namespace{
+  const char* g_vertexShaderInstancedArrow = 
+  "#version 330\n"
+  "layout(location = 0) in vec3 vertex;\n"
+  "layout(location = 1) in vec3 offset;\n"
+  "layout(location = 2) in vec4 color;\n"
+  "layout(location = 3) in vec3 direction;\n"
+
+  "out vec4 vColor;\n"
+
+  "uniform mat4 VP;\n"
+  "uniform float scale;\n"
+
+  "void main(void)\n"
+  "{\n"
+  "   vec3 p = scale * vertex;\n"
+  "   float theta = acos(direction.x);\n"
+  "   vec3 axis = normalize(cross(vec3(1, 0, 0), direction));\n"
+  "   p = (1-direction.x)*dot(p, axis)*axis + direction.x*p + sin(theta)*cross(axis, p);\n"
+  "   gl_Position = VP * vec4(p+offset, 1);\n"
+  "   vColor = color;\n"
+  "}";
+
+  const char* g_fragmentShaderInstancedArrow = 
+  "#version 330\n "
+  "in vec4 vColor;"
+  "out vec4 fragColor;\n"
+  "void main(void)\n"
+  "{\n"
+  "   fragColor = vColor;\n"
+  "}";
+}
+
+bool ArrowShaderInstanced::link(){
+  if (!addShaderFromSourceCode(QOpenGLShader::Vertex, g_vertexShaderInstancedArrow))
+  {
+    mCRL2log(mcrl2::log::error) << log().toStdString();
+    std::abort();
+  }
+
+  if (!addShaderFromSourceCode(QOpenGLShader::Fragment, g_fragmentShaderInstancedArrow))
+  {
+    mCRL2log(mcrl2::log::error) << log().toStdString();
+    std::abort();
+  }
+
+  if (!QOpenGLShaderProgram::link())
+  {
+    mCRL2log(mcrl2::log::error) << "Could not link shader program:" << log().toStdString();
+    std::abort();
+  }
+
+  u_VP_loc = uniformLocation("VP");
+  if (u_VP_loc == -1){
+    mCRL2log(mcrl2::log::warning) << "The instanced arrow shader has no uniform named \"VP\".\n";
+  }
+
+  u_scale_loc = uniformLocation("scale");
+  if (u_scale_loc == -1){
+    mCRL2log(mcrl2::log::warning) << "The instanced arrow shader has no uniform named \"scale\".\n";
   }
 
   return true;

@@ -1032,11 +1032,14 @@ void SpringLayout::apply()
     if (m_graph.stable()) mCRL2log(mcrl2::log::verbose) << "Graph is now stable." << std::endl;
     m_asa.calculateTemperature(slicedAverageSqrMagnitude(m_nforces, 0, m_nforces.size()));
     
+
     if (m_graph.userIsDragging){
       m_asa.reset();
     }
     m_graph.unlock(GRAPH_LOCK_TRACE);
-
+    #ifdef DEBUG_LOG_TEMPERATURE
+      m_graph.temp_debug_list.push_back({m_graph.temp_debug_timer.elapsed(), m_asa.T});
+    #endif
     m_max_num_nodes = 0;
     m_total_num_nodes = 0;
 

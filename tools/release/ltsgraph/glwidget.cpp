@@ -18,8 +18,8 @@
 constexpr float DRAG_MIN_DIST = 20.0f;
 
 /// \brief Refreshing of OpenGL canvas properties
-constexpr int         TARGET_FRAME_RATE = 60;
-constexpr int         TARGET_FRAME_TIME = 1000/TARGET_FRAME_RATE; // We round down. 
+constexpr int TARGET_FRAME_RATE = 60;
+constexpr int TARGET_FRAME_TIME = 1000 / TARGET_FRAME_RATE; // We round down.
 
 struct MoveRecord
 {
@@ -33,12 +33,14 @@ struct MoveRecord
     node->pos_mutable() = pos;
     m_graph->unlock(GRAPH_LOCK_TRACE);
   }
-  virtual void grab(Graph::Graph& graph, std::size_t index){
-    m_graph = &graph; 
+  virtual void grab(Graph::Graph& graph, std::size_t index)
+  {
+    m_graph = &graph;
   }
   virtual void release(bool toggleLocked)
   {
-    if (toggleLocked) {
+    if (toggleLocked)
+    {
       node->set_locked(!node->locked());
     }
     node->set_anchored(node->locked());
@@ -49,7 +51,8 @@ struct MoveRecord
   }
 };
 
-struct LabelMoveRecord : public MoveRecord {
+struct LabelMoveRecord : public MoveRecord
+{
   void grab(Graph::Graph& graph, std::size_t index) override
   {
     MoveRecord::grab(graph, index);
@@ -58,7 +61,8 @@ struct LabelMoveRecord : public MoveRecord {
   }
 };
 
-struct StateLabelMoveRecord : public MoveRecord {
+struct StateLabelMoveRecord : public MoveRecord
+{
   void grab(Graph::Graph& graph, std::size_t index) override
   {
     MoveRecord::grab(graph, index);
@@ -77,20 +81,24 @@ struct HandleMoveRecord : public MoveRecord
     node = &m_graph->handle(index);
     node->set_anchored(true);
     movingLabel = !m_graph->transitionLabel(index).anchored();
-    if (movingLabel) {
+    if (movingLabel)
+    {
       label.grab(*m_graph, index);
     }
   }
-  void release(bool toggleLocked) override {
+  void release(bool toggleLocked) override
+  {
     MoveRecord::release(toggleLocked);
-    if (movingLabel) {
+    if (movingLabel)
+    {
       label.release(false);
     }
   }
   void move(const QVector3D& pos) override
   {
     MoveRecord::move(pos);
-    if (movingLabel) {
+    if (movingLabel)
+    {
       label.move(pos);
     }
   }
@@ -146,18 +154,19 @@ struct NodeMoveRecord : public MoveRecord
   }
 };
 
-
 GLWidget::GLWidget(Graph::Graph& graph, QWidget* parent)
-  : QOpenGLWidget(parent),
-    m_graph(graph),
-    m_scene(*this, m_graph)
+    : QOpenGLWidget(parent), m_graph(graph), m_scene(*this, m_graph)
 {
   setMouseTracking(true);
+  
+  setAutoFillBackground(false);
+  setAttribute(Qt::WA_OpaquePaintEvent, true);
+  setAttribute(Qt::WA_NoSystemBackground, true);
 
   m_scene.setDevicePixelRatio(devicePixelRatio());
 
-  
-  /// TODO: Move draw_timer to member variables so that drawing can be disabled when graph stable and user does not interact with screen
+  /// TODO: Move draw_timer to member variables so that drawing can be disabled
+  /// when graph stable and user does not interact with screen
   // Set GLWidget to continuously update
   QTimer* draw_timer = new QTimer(this);
   connect(draw_timer, SIGNAL(timeout()), this, SLOT(update()));
@@ -187,16 +196,16 @@ inline Graph::Node* select_object(const GLScene::Selection& s, Graph::Graph& g)
 {
   switch (s.selectionType)
   {
-    case GLScene::SelectableObject::label:
-      return &g.transitionLabel(s.index);
-    case GLScene::SelectableObject::slabel:
-      return &g.stateLabel(s.index);
-    case GLScene::SelectableObject::handle:
-      return &g.handle(s.index);
-    case GLScene::SelectableObject::node:
-      return &g.node(s.index);
-    default:
-      return nullptr;
+  case GLScene::SelectableObject::label:
+    return &g.transitionLabel(s.index);
+  case GLScene::SelectableObject::slabel:
+    return &g.stateLabel(s.index);
+  case GLScene::SelectableObject::handle:
+    return &g.handle(s.index);
+  case GLScene::SelectableObject::node:
+    return &g.node(s.index);
+  default:
+    return nullptr;
   }
 }
 
@@ -210,12 +219,16 @@ void GLWidget::updateSelection()
   GLScene::Selection prev = m_hover;
   m_hover = m_scene.select(pos.x(), pos.y());
 
-  // Indicates that the rendering should be updated because the selection has changed.
-  bool needupdate = prev.selectionType != m_hover.selectionType || prev.index != m_hover.index;
+  // Indicates that the rendering should be updated because the selection has
+  // changed.
+  bool needupdate = prev.selectionType != m_hover.selectionType ||
+                    prev.index != m_hover.index;
 
-  // Reduce the selection percentage for all (no longer) selected items by 5 percent and remove them from the selection when it goes below 5 percent.
+  // Reduce the selection percentage for all (no longer) selected items by 5
+  // percent and remove them from the selection when it goes below 5 percent.
   bool contains_hover = false;
-  for (std::list<GLScene::Selection>::iterator it = m_selections.begin(); it != m_selections.end();)
+  for (std::list<GLScene::Selection>::iterator it = m_selections.begin();
+       it != m_selections.end();)
   {
     if (*it != m_hover)
     {
@@ -252,8 +265,10 @@ void GLWidget::updateSelection()
     }
   }
 
-  /// If the selected item was a label or edge we also mark the edge handle to be selected for 50 percent.
-  if (m_hover.selectionType == GLScene::SelectableObject::label || m_hover.selectionType == GLScene::SelectableObject::edge)
+  /// If the selected item was a label or edge we also mark the edge handle to
+  /// be selected for 50 percent.
+  if (m_hover.selectionType == GLScene::SelectableObject::label ||
+      m_hover.selectionType == GLScene::SelectableObject::edge)
   {
     GLScene::Selection s = m_hover;
     s.selectionType = GLScene::SelectableObject::handle;
@@ -270,17 +285,19 @@ void GLWidget::updateSelection()
   if (needupdate)
   {
     m_graph.hasNewFrame(true);
-    update();
+    // update();
   }
 }
 
 void GLWidget::initializeGL()
 {
-  // Check whether context creation succeeded and print the OpenGL major.minor version.
+  // Check whether context creation succeeded and print the OpenGL major.minor
+  // version.
   if (isValid())
   {
 
-    // Check the minimum run-time requirement; the pair ordering is lexicographical.
+    // Check the minimum run-time requirement; the pair ordering is
+    // lexicographical.
     QPair<int, int> version = format().version();
     QPair<int, int> required(3, 3);
     if (version < required)
@@ -288,18 +305,22 @@ void GLWidget::initializeGL()
       // Print a message to the console and show a message box.
       std::stringstream message;
 
-      message << "The runtime version of OpenGL (" << version.first << "." << version.second << ") is below the least supported version of OpenGL ("
-        << required.first << "." << required.second << ").";
+      message << "The runtime version of OpenGL (" << version.first << "."
+              << version.second
+              << ") is below the least supported version of OpenGL ("
+              << required.first << "." << required.second << ").";
       mCRL2log(mcrl2::log::error) << message.str().c_str() << "\n";
 
-      QMessageBox box(QMessageBox::Warning, "Unsupported OpenGL Version", message.str().c_str(), QMessageBox::Ok);
+      QMessageBox box(QMessageBox::Warning, "Unsupported OpenGL Version",
+                      message.str().c_str(), QMessageBox::Ok);
       box.exec();
 
       throw mcrl2::runtime_error("Unsupported OpenGL version.");
     }
     else
     {
-      mCRL2log(mcrl2::log::verbose) << "Created an OpenGL " << version.first << "." << version.second << " context.\n";
+      mCRL2log(mcrl2::log::verbose) << "Created an OpenGL " << version.first
+                                    << "." << version.second << " context.\n";
     }
   }
   else
@@ -307,17 +328,20 @@ void GLWidget::initializeGL()
     mcrl2::runtime_error("Context creation failed.");
   }
 
-  // Enable real-time logging of OpenGL errors when the GL_KHR_debug extension is available.
-  // Ruben: Disabled because this makes the UI unusable with -d flag
+  // Enable real-time logging of OpenGL errors when the GL_KHR_debug extension
+  // is available. Ruben: Disabled because this makes the UI unusable with -d
+  // flag
   m_logger = new QOpenGLDebugLogger(this);
   if (false && m_logger->initialize())
   {
-    connect(m_logger, &QOpenGLDebugLogger::messageLogged, this, &GLWidget::logMessage);
+    connect(m_logger, &QOpenGLDebugLogger::messageLogged, this,
+            &GLWidget::logMessage);
     m_logger->startLogging();
   }
   else
   {
-    mCRL2log(mcrl2::log::debug) << "QOpenGLDebugLogger initialisation failed (Disabled manually in glwidget.cpp)\n";
+    mCRL2log(mcrl2::log::debug) << "QOpenGLDebugLogger initialisation failed "
+                                   "(Disabled manually in glwidget.cpp)\n";
   }
 
   m_scene.initialize();
@@ -330,22 +354,93 @@ void GLWidget::resizeGL(int width, int height)
 
 void GLWidget::paintGL()
 {
+  setUpdatesEnabled(false);
   if (!m_paused)
   {
-    QPainter painter(this); 
-    if (m_graph.hasNewFrame()){
+    m_scene.update();
+    if (m_graph.hasNewFrame())
+    {
       m_scene.setDevicePixelRatio(devicePixelRatio());
-      m_scene.update();
       m_scene.render();
     }
-    painter.beginNativePainting();
+
+
+    QPainter painter(this);
+    painter.fillRect(m_scene.camera().viewport(), Qt::transparent);
+    #ifndef DEBUG_LOG_TEMPERATURE
     QOpenGLFramebufferObject::bindDefault();
     QOpenGLFramebufferObject::blitFramebuffer(0, m_scene.m_fbo);
-    painter.endNativePainting();
-    m_scene.renderText(painter);
+    #else
+    QOpenGLFramebufferObject::bindDefault();
+    QRect partial = QRect(m_graph.temp_debug_width + m_graph.temp_debug_pad_width, 
+                                                       0,
+                                                       m_scene.camera().viewport().width() - m_graph.temp_debug_width + m_graph.temp_debug_pad_width, m_scene.camera().viewport().height());
+    QOpenGLFramebufferObject::blitFramebuffer(0, partial, m_scene.m_fbo, partial);
+    #endif
+    //m_scene.renderText(painter);
+#ifdef DEBUG_LOG_TEMPERATURE
+    if (m_graph.temp_debug_list.size() > 2)
+    {
+      while (m_graph.temp_debug_list.back().first -
+                 m_graph.temp_debug_list.front().first >
+             m_graph.temp_debug_log_duration)
+        m_graph.temp_debug_list.pop_front();
+      qint64 t0 = m_graph.temp_debug_list.back().first -
+                  m_graph.temp_debug_log_duration;
+      double prev_t = 0;
+      double prev_T = -1;
+      QPainterPath path;
+      double gap = 0.0;
+      auto createPoint = [&](double x, double y)
+        {
+          return QPointF(
+              m_graph.temp_debug_pad_width + x * m_graph.temp_debug_width,
+              m_graph.temp_debug_pad_height + y * m_graph.temp_debug_height);
+        };
+      for (auto it = m_graph.temp_debug_list.begin();
+           it != m_graph.temp_debug_list.end(); ++it)
+      {
+        double t =
+            prev_T < 0
+                ? 0
+                : ((*it).first - t0) /
+                      static_cast<double>(m_graph.temp_debug_log_duration);
+        while (t - prev_t < gap && it != m_graph.temp_debug_list.end())
+        {
+          t = ((*it).first - t0) /
+              static_cast<double>(m_graph.temp_debug_log_duration);
+          ++it;
+        }
+        if (it == m_graph.temp_debug_list.end())
+          break;
+        double T = 1 - (*it).second / m_graph.temp_debug_max_temp;
+        auto p = createPoint(t, T);
+        if (prev_T >= 0)
+        {
+          // we plot a line between prev and current
+          path.lineTo(createPoint(t, T));
+        }
+        else
+        {
+          path.moveTo(createPoint(t, T));
+        }
+        prev_t = t;
+        prev_T = T;
+      }
+      assert(m_graph.temp_debug_list.size() == 0 || path.length() > 0);
+      painter.strokePath(path, QPen(Qt::red, 2.5));
+    }
+// painter.end();
+// painter.begin(this);
+// painter.setCompositionMode(QPainter::CompositionMode::CompositionMode_SourceAtop);
+// painter.drawImage(QRectF(QPointF(m_graph.temp_debug_pad_width,
+// m_graph.temp_debug_pad_height), debug_image.size()), debug_image);
+#endif
   }
-  // Updates the selection percentage (and checks for new selections under the cursor).
+  // Updates the selection percentage (and checks for new selections under the
+  // cursor).
   updateSelection();
+  setUpdatesEnabled(true);
 }
 
 void GLWidget::mousePressEvent(QMouseEvent* e)
@@ -376,19 +471,22 @@ void GLWidget::mousePressEvent(QMouseEvent* e)
     m_dragstart = e->pos();
     if (e->modifiers() == Qt::ControlModifier)
     {
-      if (e->button() == Qt::LeftButton) {
+      if (e->button() == Qt::LeftButton)
+      {
         m_dragmode = dm_translate;
       }
     }
     else if (e->modifiers() == Qt::ShiftModifier)
     {
-      if (e->button() == Qt::LeftButton && m_is_threedimensional) {
+      if (e->button() == Qt::LeftButton && m_is_threedimensional)
+      {
         m_dragmode = dm_rotate;
       }
     }
     else if (e->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier))
     {
-      if (e->button() == Qt::LeftButton) {
+      if (e->button() == Qt::LeftButton)
+      {
         m_dragmode = dm_translate;
       }
     }
@@ -396,10 +494,14 @@ void GLWidget::mousePressEvent(QMouseEvent* e)
     {
       if (m_hover.selectionType == GLScene::SelectableObject::none)
       {
-        if (e->button() == Qt::RightButton && m_is_threedimensional) {
+        if (e->button() == Qt::RightButton && m_is_threedimensional)
+        {
           m_dragmode = dm_rotate;
         }
-        else if (e->button() == Qt::MiddleButton || ((e->buttons() & (Qt::LeftButton | Qt::RightButton)) == (Qt::LeftButton | Qt::RightButton))) {
+        else if (e->button() == Qt::MiddleButton ||
+                 ((e->buttons() & (Qt::LeftButton | Qt::RightButton)) ==
+                  (Qt::LeftButton | Qt::RightButton)))
+        {
           m_dragmode = dm_zoom;
         }
       }
@@ -408,24 +510,25 @@ void GLWidget::mousePressEvent(QMouseEvent* e)
         m_dragmode = dm_dragnode;
         switch (m_hover.selectionType)
         {
-          case GLScene::SelectableObject::node:
-            m_dragnode = new NodeMoveRecord;
-            break;
-          case GLScene::SelectableObject::handle:
-            m_dragnode = new HandleMoveRecord;
-            break;
-          case GLScene::SelectableObject::label:
-            m_dragnode = new LabelMoveRecord;
-            break;
-          case GLScene::SelectableObject::slabel:
-            m_dragnode = new StateLabelMoveRecord;
-            break;
-          default:
-            m_dragnode = nullptr;
-            m_dragmode = dm_none;
-            break;
+        case GLScene::SelectableObject::node:
+          m_dragnode = new NodeMoveRecord;
+          break;
+        case GLScene::SelectableObject::handle:
+          m_dragnode = new HandleMoveRecord;
+          break;
+        case GLScene::SelectableObject::label:
+          m_dragnode = new LabelMoveRecord;
+          break;
+        case GLScene::SelectableObject::slabel:
+          m_dragnode = new StateLabelMoveRecord;
+          break;
+        default:
+          m_dragnode = nullptr;
+          m_dragmode = dm_none;
+          break;
         }
-        if (m_dragnode != nullptr) {
+        if (m_dragnode != nullptr)
+        {
           m_dragnode->grab(m_graph, m_hover.index);
         }
       }
@@ -442,11 +545,13 @@ void GLWidget::mouseReleaseEvent(QMouseEvent* e)
   if (m_dragmode == dm_dragnode)
   {
     NodeMoveRecord* noderec = dynamic_cast<NodeMoveRecord*>(m_dragnode);
-    if (m_hover.selectionType == GLScene::SelectableObject::node && e->button() == Qt::LeftButton
-        && (noderec != nullptr) && m_draglength.length() < DRAG_MIN_DIST)
+    if (m_hover.selectionType == GLScene::SelectableObject::node &&
+        e->button() == Qt::LeftButton && (noderec != nullptr) &&
+        m_draglength.length() < DRAG_MIN_DIST)
     {
       // A node has been clicked (not dragged):
-      if (m_graph.isClosable(m_hover.index)) {
+      if (m_graph.isClosable(m_hover.index))
+      {
         m_graph.toggleOpen(m_hover.index);
       }
     }
@@ -475,54 +580,57 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
   if (m_dragmode != dm_none)
   {
     QPoint vec = e->pos() - m_dragstart;
-    m_draglength += (QVector2D) vec;
+    m_draglength += (QVector2D)vec;
 
     switch (m_dragmode)
     {
-      case dm_paint:
-        if (m_hover.selectionType == GLScene::SelectableObject::node)
-        {
-          Graph::NodeNode& node = m_graph.node(m_hover.index);
-          node.color() = m_paintcolor;
-        }
-        if (m_hover.selectionType == GLScene::SelectableObject::label)
-        {
-          Graph::LabelNode& node = m_graph.transitionLabel(m_hover.index);
-          node.color() = m_paintcolor;
-        }
-        if (m_hover.selectionType == GLScene::SelectableObject::slabel)
-        {
-          Graph::LabelNode& node = m_graph.stateLabel(m_hover.index);
-          node.color() = m_paintcolor;
-        }
-        break;
-      case dm_rotate:
-      case dm_rotate_2d:
-        {
-          QQuaternion rotation = mcrl2::gui::arcballRotation(m_dragstart, e->pos());
-          camera.rotation(rotation * camera.rotation());
-          break;
-        }
-      case dm_translate:
-        {
-          int new_x = e->pos().x();
-          int new_y = e->pos().y();
-          float z = camera.worldToWindow(camera.center()).z();
-          QVector3D translation(camera.windowToWorld(QVector3D(new_x, new_y, z)) - camera.windowToWorld(QVector3D(m_dragstart.x(), m_dragstart.y(), z)));
-          camera.center(camera.center() + translation);
-          break;
-        }
-      case dm_dragnode:
-        {
-          QVector3D position(e->pos().x(), e->pos().y(), camera.worldToWindow(m_dragnode->pos()).z());
-          m_dragnode->move(camera.windowToWorld(position));
-          break;
-        }
-      case dm_zoom:
-        camera.zoom(camera.zoom() * pow(1.0005f, vec.y()));
-        break;
-      default:
-        break;
+    case dm_paint:
+      if (m_hover.selectionType == GLScene::SelectableObject::node)
+      {
+        Graph::NodeNode& node = m_graph.node(m_hover.index);
+        node.color() = m_paintcolor;
+      }
+      if (m_hover.selectionType == GLScene::SelectableObject::label)
+      {
+        Graph::LabelNode& node = m_graph.transitionLabel(m_hover.index);
+        node.color() = m_paintcolor;
+      }
+      if (m_hover.selectionType == GLScene::SelectableObject::slabel)
+      {
+        Graph::LabelNode& node = m_graph.stateLabel(m_hover.index);
+        node.color() = m_paintcolor;
+      }
+      break;
+    case dm_rotate:
+    case dm_rotate_2d:
+    {
+      QQuaternion rotation = mcrl2::gui::arcballRotation(m_dragstart, e->pos());
+      camera.rotation(rotation * camera.rotation());
+      break;
+    }
+    case dm_translate:
+    {
+      int new_x = e->pos().x();
+      int new_y = e->pos().y();
+      float z = camera.worldToWindow(camera.center()).z();
+      QVector3D translation(
+          camera.windowToWorld(QVector3D(new_x, new_y, z)) -
+          camera.windowToWorld(QVector3D(m_dragstart.x(), m_dragstart.y(), z)));
+      camera.center(camera.center() + translation);
+      break;
+    }
+    case dm_dragnode:
+    {
+      QVector3D position(e->pos().x(), e->pos().y(),
+                         camera.worldToWindow(m_dragnode->pos()).z());
+      m_dragnode->move(camera.windowToWorld(position));
+      break;
+    }
+    case dm_zoom:
+      camera.zoom(camera.zoom() * pow(1.0005f, vec.y()));
+      break;
+    default:
+      break;
     }
 
     m_dragstart = e->pos();
@@ -550,7 +658,8 @@ void GLWidget::set3D(bool enabled)
   m_graph.hasNewFrame(true);
 }
 
-bool GLWidget::get3D(){
+bool GLWidget::get3D()
+{
   return m_is_threedimensional;
 }
 
@@ -588,40 +697,52 @@ void GLWidget::saveBitmap(const QString& filename)
 
 void GLWidget::logMessage(const QOpenGLDebugMessage& debugMessage)
 {
-  mCRL2log(mcrl2::log::debug) << "OpenGL: " << debugMessage.message().toStdString() << "\n";
+  mCRL2log(mcrl2::log::debug)
+      << "OpenGL: " << debugMessage.message().toStdString() << "\n";
 }
 
 /// Source code for the GLWidgetUI
 
 GLWidgetUi* GLWidget::ui(QWidget* parent)
 {
-  if (m_ui == nullptr) {
+  if (m_ui == nullptr)
+  {
     m_ui = new GLWidgetUi(*this, parent);
   }
   return m_ui;
 }
 
 GLWidgetUi::GLWidgetUi(GLWidget& widget, QWidget* parent)
-  : QDockWidget(parent), m_widget(widget)
+    : QDockWidget(parent), m_widget(widget)
 {
   QColor initialcolor(255, 0, 0);
   m_ui.setupUi(this);
   m_colordialog = new QColorDialog(initialcolor, this);
   selectColor(initialcolor);
 
-  connect(m_colordialog, SIGNAL(colorSelected(QColor)), this, SLOT(selectColor(QColor)));
+  connect(m_colordialog, SIGNAL(colorSelected(QColor)), this,
+          SLOT(selectColor(QColor)));
   connect(m_ui.btnPaint, SIGNAL(toggled(bool)), this, SLOT(setPaintMode(bool)));
-  connect(m_ui.btnPaint, SIGNAL(toggled(bool)), parentWidget(), SLOT(updateStatusBar()));
+  connect(m_ui.btnPaint, SIGNAL(toggled(bool)), parentWidget(),
+          SLOT(updateStatusBar()));
   connect(m_ui.btnSelectColor, SIGNAL(clicked()), m_colordialog, SLOT(exec()));
-  connect(m_ui.cbTransitionLabels, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleTransitionLabels(bool)));
-  connect(m_ui.cbStateLabels, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleStateLabels(bool)));
-  connect(m_ui.cbStateNumbers, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleStateNumbers(bool)));
-  connect(m_ui.cbSelfLoops, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleSelfLoops(bool)));
-  connect(m_ui.cbInitial, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleInitialMarking(bool)));
+  connect(m_ui.cbTransitionLabels, SIGNAL(toggled(bool)), &m_widget,
+          SLOT(toggleTransitionLabels(bool)));
+  connect(m_ui.cbStateLabels, SIGNAL(toggled(bool)), &m_widget,
+          SLOT(toggleStateLabels(bool)));
+  connect(m_ui.cbStateNumbers, SIGNAL(toggled(bool)), &m_widget,
+          SLOT(toggleStateNumbers(bool)));
+  connect(m_ui.cbSelfLoops, SIGNAL(toggled(bool)), &m_widget,
+          SLOT(toggleSelfLoops(bool)));
+  connect(m_ui.cbInitial, SIGNAL(toggled(bool)), &m_widget,
+          SLOT(toggleInitialMarking(bool)));
   connect(m_ui.cbFog, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleFog(bool)));
-  connect(m_ui.spinRadius, SIGNAL(valueChanged(int)), &m_widget, SLOT(setNodeSize(int)));
-  connect(m_ui.spinFontSize, SIGNAL(valueChanged(int)), &m_widget, SLOT(setFontSize(int)));
-  connect(m_ui.spinFog, SIGNAL(valueChanged(int)), &m_widget, SLOT(setFogDensity(int)));
+  connect(m_ui.spinRadius, SIGNAL(valueChanged(int)), &m_widget,
+          SLOT(setNodeSize(int)));
+  connect(m_ui.spinFontSize, SIGNAL(valueChanged(int)), &m_widget,
+          SLOT(setFontSize(int)));
+  connect(m_ui.spinFog, SIGNAL(valueChanged(int)), &m_widget,
+          SLOT(setFogDensity(int)));
 }
 
 GLWidgetUi::~GLWidgetUi()
@@ -659,12 +780,11 @@ void GLWidgetUi::setSettings(QByteArray state)
   QDataStream in(&state, QIODevice::ReadOnly);
 
   quint32 nodeSize, fogDistance, fontSize;
-  bool paint, transitionLabels, stateLabels, stateNumbers, selfLoops, initial, fog;
+  bool paint, transitionLabels, stateLabels, stateNumbers, selfLoops, initial,
+      fog;
   QVector3D colorVec;
-  in >> nodeSize >> fogDistance >> fontSize
-     >> paint >> transitionLabels >> stateLabels >> stateNumbers >> selfLoops >> initial >> fog
-     >> colorVec
-    ;
+  in >> nodeSize >> fogDistance >> fontSize >> paint >> transitionLabels >>
+      stateLabels >> stateNumbers >> selfLoops >> initial >> fog >> colorVec;
 
   if (in.status() == QDataStream::Ok)
   {
@@ -673,8 +793,8 @@ void GLWidgetUi::setSettings(QByteArray state)
     m_ui.spinFontSize->setValue(fontSize);
     // Do not restore the setting of btnPaint, since that can be very confusing.
     // We still read and store it for compatibility with old config files
-    // When the format of the config file is changed, the setting for btnPaint can
-    // be removed.
+    // When the format of the config file is changed, the setting for btnPaint
+    // can be removed.
     m_ui.cbTransitionLabels->setChecked(transitionLabels);
     m_ui.cbStateLabels->setChecked(stateLabels);
     m_ui.cbStateNumbers->setChecked(stateNumbers);
@@ -693,18 +813,14 @@ QByteArray GLWidgetUi::settings()
   QByteArray result;
   QDataStream out(&result, QIODevice::WriteOnly);
 
-  out << quint32(m_ui.spinRadius->value())
-      << quint32(m_ui.spinFog->value())
-      << quint32(m_ui.spinFontSize->value())
-      << bool(m_ui.btnPaint->isChecked())
+  out << quint32(m_ui.spinRadius->value()) << quint32(m_ui.spinFog->value())
+      << quint32(m_ui.spinFontSize->value()) << bool(m_ui.btnPaint->isChecked())
       << bool(m_ui.cbTransitionLabels->isChecked())
       << bool(m_ui.cbStateLabels->isChecked())
       << bool(m_ui.cbStateNumbers->isChecked())
       << bool(m_ui.cbSelfLoops->isChecked())
-      << bool(m_ui.cbInitial->isChecked())
-      << bool(m_ui.cbFog->isChecked())
-      << QVector3D(m_widget.getPaint())
-      ;
+      << bool(m_ui.cbInitial->isChecked()) << bool(m_ui.cbFog->isChecked())
+      << QVector3D(m_widget.getPaint());
 
   return result;
 }
