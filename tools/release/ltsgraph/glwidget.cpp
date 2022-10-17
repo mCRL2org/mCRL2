@@ -354,30 +354,22 @@ void GLWidget::resizeGL(int width, int height)
 
 void GLWidget::paintGL()
 {
-  setUpdatesEnabled(false);
   if (!m_paused)
   {
+    QPainter painter(this);
+    painter.save();
     m_scene.update();
     if (m_graph.hasNewFrame())
     {
       m_scene.setDevicePixelRatio(devicePixelRatio());
       m_scene.render();
     }
+    painter.restore();
 
-
-    QPainter painter(this);
-    painter.fillRect(m_scene.camera().viewport(), Qt::transparent);
-    #ifndef DEBUG_LOG_TEMPERATURE
     QOpenGLFramebufferObject::bindDefault();
-    QOpenGLFramebufferObject::blitFramebuffer(0, m_scene.m_fbo);
-    #else
-    QOpenGLFramebufferObject::bindDefault();
-    QRect partial = QRect(m_graph.temp_debug_width + m_graph.temp_debug_pad_width, 
-                                                       0,
-                                                       m_scene.camera().viewport().width() - m_graph.temp_debug_width + m_graph.temp_debug_pad_width, m_scene.camera().viewport().height());
-    QOpenGLFramebufferObject::blitFramebuffer(0, partial, m_scene.m_fbo, partial);
-    #endif
-    //m_scene.renderText(painter);
+    QOpenGLFramebufferObject::blitFramebuffer(0, m_scene.m_fbo, GL_COLOR_BUFFER_BIT);
+    m_scene.renderText(painter);
+    painter.end();
 #ifdef DEBUG_LOG_TEMPERATURE
     if (m_graph.temp_debug_list.size() > 2)
     {
@@ -389,8 +381,19 @@ void GLWidget::paintGL()
                   m_graph.temp_debug_log_duration;
       double prev_t = 0;
       double prev_T = -1;
-      QPainterPath path;
-      double gap = 0.0;
+      std::vector<QPointF> path_points;
+      double gap = 0.001; // at least a ms between measurements please
+      double max_temp = 0;
+      for (auto p : m_graph.temp_debug_list)
+      {
+        max_temp = std::max(max_temp, p.second);
+      }
+
+      if (max_temp < 0.005 * m_graph.temp_debug_max_temp)
+        m_graph.temp_debug_max_temp *= 0.9;
+      while (max_temp > m_graph.temp_debug_max_temp)
+        m_graph.temp_debug_max_temp *= 1.1;
+
       auto createPoint = [&](double x, double y)
         {
           return QPointF(
@@ -400,10 +403,7 @@ void GLWidget::paintGL()
       for (auto it = m_graph.temp_debug_list.begin();
            it != m_graph.temp_debug_list.end(); ++it)
       {
-        double t =
-            prev_T < 0
-                ? 0
-                : ((*it).first - t0) /
+        double t = ((*it).first - t0) /
                       static_cast<double>(m_graph.temp_debug_log_duration);
         while (t - prev_t < gap && it != m_graph.temp_debug_list.end())
         {
@@ -415,20 +415,17 @@ void GLWidget::paintGL()
           break;
         double T = 1 - (*it).second / m_graph.temp_debug_max_temp;
         auto p = createPoint(t, T);
-        if (prev_T >= 0)
-        {
-          // we plot a line between prev and current
-          path.lineTo(createPoint(t, T));
-        }
-        else
-        {
-          path.moveTo(createPoint(t, T));
-        }
+        path_points.push_back(p);
         prev_t = t;
         prev_T = T;
       }
-      assert(m_graph.temp_debug_list.size() == 0 || path.length() > 0);
-      painter.strokePath(path, QPen(Qt::red, 2.5));
+      painter.begin(this);
+      painter.setBrush(QBrush(Qt::red, Qt::SolidPattern));
+      painter.setPen(QPen(Qt::red, 1, Qt::SolidLine, Qt::FlatCap));
+      painter.setRenderHint(QPainter::RenderHint::Antialiasing, true);
+      painter.drawPolyline(&path_points[0], path_points.size());
+      painter.drawText(path_points.back(), QString::number(m_graph.temp_debug_list.back().second));
+      painter.end();
     }
 // painter.end();
 // painter.begin(this);
@@ -440,7 +437,6 @@ void GLWidget::paintGL()
   // Updates the selection percentage (and checks for new selections under the
   // cursor).
   updateSelection();
-  setUpdatesEnabled(true);
 }
 
 void GLWidget::mousePressEvent(QMouseEvent* e)

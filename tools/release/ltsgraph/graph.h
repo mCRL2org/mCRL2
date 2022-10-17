@@ -381,7 +381,7 @@ class Graph
 
   public:
 
-    #undef DEBUG_LOG_TEMPERATURE
+    #define DEBUG_LOG_TEMPERATURE
     #ifdef DEBUG_LOG_TEMPERATURE
     std::list<std::pair<qint64, double>> temp_debug_list = std::list<std::pair<qint64, double>>();
     QElapsedTimer temp_debug_timer = QElapsedTimer();
@@ -390,7 +390,7 @@ class Graph
     const int temp_debug_height = 100;
     const int temp_debug_pad_height = 20;
     const int temp_debug_pad_width = 20;
-    const double temp_debug_max_temp = 30;
+    double temp_debug_max_temp = 50;
     #endif
     Graph();
     ~Graph();

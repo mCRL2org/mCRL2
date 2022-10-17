@@ -466,11 +466,6 @@ void GLScene::render()
   // rendering in the right order.
   glEnable(GL_DEPTH_TEST);
 
-  // Change the alpha blending function to make an alpha of 1 opaque and 0 fully
-  // transparent.
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glEnable(GL_BLEND);
-
   // Enable multisample antialiasing.
   glEnable(GL_MULTISAMPLE);
 
@@ -588,6 +583,10 @@ void GLScene::render()
   // m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
   // Make sure that glGetError() is not an error.
   glCheckError();
+
+  // Very important. If this is not disabled the QPainter WILL draw unpredictably.
+  glDisable(GL_CULL_FACE);
+
   // mCRL2log(mcrl2::log::debug) << "Frame time: " << render_timer.elapsed() << " OpenGL: " << openglTimer.elapsed() << std::endl;
 }
 
