@@ -38,6 +38,8 @@ public:
   utilities::indexed_set<lps::multi_action> action_index;
 
   std::vector<lps_summand_group> summand_groups;
+
+  std::uint32_t state_vector_size() const { return data_index.size(); }
   
 private:
 };

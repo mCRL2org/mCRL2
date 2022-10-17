@@ -12,13 +12,12 @@
 
 #ifdef MCRL2_ENABLE_SYLVAN
 
-
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/undefined.h"
-#include "mcrl2/symbolic/print.h"
 #include "mcrl2/symbolic/alternative_relprod.h"
 #include "mcrl2/symbolic/data_index.h"
 
+#include <sylvan_bdd.hpp>
 #include <sylvan_ldd.hpp>
 
 #include <vector>
@@ -31,6 +30,7 @@ namespace
 {
 
 /// \brief Converts a state vector of indices to a vector of the corresponding data expressions. 
+inline 
 std::vector<data::data_expression> ldd2state(const std::vector<data_expression_index>& data_index, const std::vector<std::uint32_t>& x)
 {
   std::vector<data::data_expression> result;
@@ -49,6 +49,7 @@ std::vector<data::data_expression> ldd2state(const std::vector<data_expression_i
 }
 
 /// \brief Converts a state vector of indices projected on used to a vector of the corresponding data expressions. 
+inline 
 std::vector<data::data_expression> ldd2state(const std::vector<data_expression_index>& data_index, const std::vector<std::uint32_t>& x, const std::vector<std::size_t>& used)
 {
   std::vector<data::data_expression> result;
@@ -148,6 +149,7 @@ std::string print_transition(const std::vector<data_expression_index>& data_inde
 } // internal
 
 /// \brief Print a transition vector as 'x -> y' where x is the from vector and y the to vector based on the read and write indices.
+inline 
 std::string print_transition(const std::vector<data_expression_index>& data_index, const std::uint32_t* xy, const std::vector<std::size_t>& read, const std::vector<std::size_t>& write)
 {
   std::vector<std::uint32_t> x;
@@ -182,6 +184,7 @@ std::string print_transition(const std::vector<data_expression_index>& data_inde
 }
 
 /// \brief Prints a short vector transition relation R explicitly as 'x -> y' for every transition  where x is the from vector and y the to vector based on the read and write indices.
+inline 
 std::string print_relation(const std::vector<data_expression_index>& data_index, const sylvan::ldds::ldd& R, const std::vector<std::size_t>& read, const std::vector<std::size_t>& write)
 {
   std::ostringstream out;
@@ -224,6 +227,42 @@ std::string print_size(const sylvan::ldds::ldd& L, bool print_exact, bool print_
   if (print_nodecount)
   {
     out << "[" << nodecount(L) << "]";
+  }
+  return out.str();
+}
+
+// BDD related printing functionality.
+inline
+std::string print_vectors(const sylvan::bdds::bdd& L, const sylvan::bdds::bdd& variables)
+{  
+  std::ostringstream out;
+  auto solutions = bdd_solutions(L, variables);
+  bool multiline = solutions.size() > 1;
+  std::string sep = multiline ? ",\n" : ", ";
+
+  out << "{" << (multiline ? "\n" : " ");
+  for (std::size_t i = 0; i < solutions.size(); i++)
+  {
+    if (i > 0)
+    {
+      out << sep;
+    }
+
+    out << core::detail::print_list(solutions[i]);
+  }
+  out << (multiline ? "\n" : " ") << "}";
+  return out.str();
+}
+
+/// \brief Prints the number of elements represented by the BDD L and optionally also include the number of nodes of L.
+inline 
+std::string print_size(const sylvan::bdds::bdd& L, const sylvan::bdds::bdd& variables, bool print_nodecount)
+{
+  std::ostringstream out;
+  out << sylvan::bdds::satcount(L, variables);
+  if (print_nodecount)
+  {
+    out << "[" << L.node_count() << "]";
   }
   return out.str();
 }
