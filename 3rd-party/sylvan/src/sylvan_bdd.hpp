@@ -20,7 +20,6 @@
 // Copyright 2020 Wieger Wesselink
 //
 /// \file mcrl2/3rdparty/sylvan/sylvan_bdd.hpp
-/// \brief add your file description here.
 
 #ifndef SYLVAN_BDD_HPP
 #define SYLVAN_BDD_HPP
@@ -394,6 +393,7 @@ inline bdd relnext(const bdd& relation, const bdd& x, const bdd& variables)
 }
 
 // Applies relation R to x
+inline 
 bdd relation_forward(const bdd& R, const bdd& x, const bdd& variables, const bdd_substitution& prev_substitution, bool optimized = false)
 {
   if (optimized)
@@ -405,6 +405,7 @@ bdd relation_forward(const bdd& R, const bdd& x, const bdd& variables, const bdd
 };
 
 // Applies the inverse of the relation R to x
+inline 
 bdd relation_backward(const bdd& R, const bdd& x, const bdd& next_variables, const bdd_substitution& next_substitution, bool optimized = false)
 {
   if (optimized)
@@ -442,6 +443,42 @@ inline bdd any(const std::vector<bdd>& v)
   }
   return result;
 }
+
+inline 
+bdd cube(const std::vector<std::uint32_t>& variables)
+{
+  // Create bottom up, therefore inverting the variable list.
+  bdd result = true_();
+  for (auto it = variables.rbegin(); it != variables.rend(); ++it) {
+      result = bdd(sylvan_makenode(*it, false_().get(), result.get()));
+  }
+
+  return bdd(result);
+}
+
+inline
+void bdd_solutions_callback(WorkerP*, Task*, void* context, unsigned int* vars, unsigned char* v, int n)
+{
+  std::vector<std::vector<int>>& V = *reinterpret_cast<std::vector<std::vector<int>>*>(context);
+  V.push_back(std::vector<int>(v, v + n));
+}
+
+inline
+void enumerate(const bdd& x, const bdd& vars, enum_cb cb, void* context = nullptr)
+{
+  LACE_ME;
+  sylvan_enum(x.get(), vars.get(), cb, context);
+}
+
+/// \brief Returns int instead of std::uint8_t since the latter is not treated as a number for all intents and purposes, for example when printing.
+inline
+std::vector<std::vector<int>> bdd_solutions(const bdd& x, const bdd& vars)
+{
+  std::vector<std::vector<int>> result;
+  enumerate(x, vars, &bdd_solutions_callback, &result);
+  return result;
+}
+
 
 } // namespace sylvan::bdds
 

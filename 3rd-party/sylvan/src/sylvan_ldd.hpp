@@ -55,9 +55,11 @@
 
 #include <boost/iterator/iterator_facade.hpp>
 
-extern llmsset_t nodes;
+namespace sylvan
+{
+extern "C" llmsset_t nodes;
 
-namespace sylvan::ldds
+namespace ldds
 {
 
 namespace detail
@@ -204,7 +206,6 @@ class ldd
     {
       return lddmc_getvalue(mdd);
     }
-
     // the down edge
     ldd down() const
     {
@@ -216,6 +217,12 @@ class ldd
     ldd right() const
     {
       return ldd(lddmc_getright(mdd));
+    }
+    
+    // whether it is a copy node.
+    bool is_copy() const
+    {
+      return lddmc_iscopy(mdd);
     }
 
     bool operator==(const ldd& other) const
@@ -534,7 +541,7 @@ void ldd_solutions_callback(WorkerP*, Task*, std::uint32_t* v, std::size_t n, vo
 }
 
 inline
-std::vector<std::vector<std::uint32_t>> ldd_solutions(const sylvan::ldds::ldd& x)
+std::vector<std::vector<std::uint32_t>> ldd_solutions(const ldd& x)
 {
   std::vector<std::vector<std::uint32_t>> result;
   sat_all_nopar(x, ldd_solutions_callback, &result);
@@ -542,7 +549,7 @@ std::vector<std::vector<std::uint32_t>> ldd_solutions(const sylvan::ldds::ldd& x
 }
 
 inline
-std::string print_ldd(const sylvan::ldds::ldd& x)
+std::string print_ldd(const ldd& x)
 {
   std::ostringstream out;
   auto solutions = ldd_solutions(x);
@@ -574,9 +581,9 @@ std::string print_ldd(const sylvan::ldds::ldd& x)
 }
 
 inline
-std::ostream& operator<<(std::ostream& out, const sylvan::ldds::ldd& x)
+std::ostream& operator<<(std::ostream& out, const ldd& x)
 {
-  return out << sylvan::ldds::print_ldd(x);
+  return out << print_ldd(x);
 }
 
 // Returns { x in X | x[0] = value }
@@ -646,13 +653,13 @@ ldd compute_meta(const std::vector<std::size_t>& read, const std::vector<std::si
 
 // Returns true if V is a subset of U
 inline
-bool includes(const sylvan::ldds::ldd& U, const sylvan::ldds::ldd& V)
+bool includes(const ldd& U, const ldd& V)
 {
-  using namespace sylvan::ldds;
   return union_(U, V) == U;
 }
 
-} // namespace sylvan::ldds
+} // namespace ldds
+} // namespace sylvan
 
 #ifdef MCRL2_COMPILER_GCC
   #pragma GCC diagnostic pop
