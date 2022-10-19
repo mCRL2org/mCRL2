@@ -10,6 +10,8 @@
 
 #include "bdd_util.h"
 
+#include "mcrl2/utilities/stack_array.h"
+
 namespace sylvan::ldds
 {
 
@@ -58,40 +60,6 @@ TASK_IMPL_3(MTBDD, lddmc_bdd_from_ldd, MDD, dd, MDD, bits_dd, uint32_t, firstvar
   return result;
 }
 
-
-/**
- * Extend a transition relation to a larger domain (using s=s')
- */
-TASK_IMPL_3(BDD, extend_relation, BDD, relation, BDD, variables, int, state_length)
-{
-    /* first determine which state BDD variables are in rel */
-    int has[state_length];
-    for (int i=0; i<state_length; i++) has[i] = 0;
-    BDDSET s = variables;
-    while (s != sylvan_true) {
-        BDDVAR v = sylvan_var(s);
-        if (v/2 >= (unsigned)state_length) break; // action labels
-        has[v/2] = 1;
-        s = sylvan_high(s);
-    }
-    /* create "s=s'" for all variables not in rel */
-    BDD eq = sylvan_true;
-    for (int i=state_length-1; i>=0; i--) {
-        if (has[i]) continue;
-        BDD low = sylvan_makenode(2*i+1, eq, sylvan_false);
-        bdd_refs_push(low);
-        BDD high = sylvan_makenode(2*i+1, sylvan_false, eq);
-        bdd_refs_pop(1);
-        eq = sylvan_makenode(2*i, low, high);
-    }
-
-    bdd_refs_push(eq);
-    BDD result = sylvan_and(relation, eq);
-    bdd_refs_pop(1);
-
-    return result;
-}
-
 MTBDD
 meta_to_bdd_impl(MDD meta, MDD bits_dd, uint32_t firstvar)
 {
@@ -138,4 +106,53 @@ bdds::bdd meta_to_bdd(ldd meta, const std::vector<std::uint32_t>& bits, uint32_t
   return bdds::bdd(meta_to_bdd_impl(meta.get(), union_cube(false_(), bits.data(), bits.size()).get(), firstvar));
 }
 
+} // namespace sylvan::ldds
+
+namespace sylvan::bdds
+{
+
+/**
+ * Extend a transition relation to a larger domain (using s=s')
+ */
+TASK_IMPL_3(BDD, extend_relation, BDD, relation, BDD, variables, int, state_length)
+{
+    /* first determine which state BDD variables are in rel */
+    MCRL2_DECLARE_STACK_ARRAY(has, int, state_length);
+    for (int i=0; i<state_length; i++) has[i] = 0;
+    BDDSET s = variables;
+    while (s != sylvan_true) {
+        BDDVAR v = sylvan_var(s);
+        if (v/2 >= (unsigned)state_length) break; // action labels
+        has[v/2] = 1;
+        s = sylvan_high(s);
+    }
+    /* create "s=s'" for all variables not in rel */
+    BDD eq = sylvan_true;
+    for (int i=state_length-1; i>=0; i--) {
+        if (has[i]) continue;
+        BDD low = sylvan_makenode(2*i+1, eq, sylvan_false);
+        bdd_refs_push(low);
+        BDD high = sylvan_makenode(2*i+1, sylvan_false, eq);
+        bdd_refs_pop(1);
+        eq = sylvan_makenode(2*i, low, high);
+    }
+
+    bdd_refs_push(eq);
+    BDD result = sylvan_and(relation, eq);
+    bdd_refs_pop(1);
+
+    return result;
 }
+
+TASK_IMPL_2(MTBDD, big_union, MTBDD*, sets, size_t, count)
+{
+    if (count == 1) return *sets;
+    mtbdd_refs_spawn(SPAWN(big_union, sets, count/2));
+    MTBDD right = mtbdd_refs_push(CALL(big_union, sets+count/2, count-count/2));
+    MTBDD left = mtbdd_refs_push(mtbdd_refs_sync(SYNC(big_union)));
+    MTBDD result = mtbdd_plus(left, right);
+    mtbdd_refs_pop(2);
+    return result;
+}
+
+} // namespace sylvan::bdds

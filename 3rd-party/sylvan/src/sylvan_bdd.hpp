@@ -363,6 +363,20 @@ inline bdd let(const bdd_substitution& sigma, const bdd& x)
   return bdd(sylvan_compose(x.get(), sigma.get()));
 }
 
+/// \brief Takes the conjunction of two bdds
+inline bdd bdd_and(const bdd& x, const bdd& y)
+{
+  LACE_ME;
+  return bdd(sylvan_and(x.get(), y.get()));
+}
+
+/// \brief exists variables . set ^ other  
+inline bdd and_exists(const bdd& set, const bdd& other, const bdd& variables)
+{
+    LACE_ME;
+    return bdds::bdd(sylvan_and_exists(set.get(), other.get(), variables.get()));
+}
+
 /// \brief  Computes the reverse application of a transition relation to this set.
 /// @param relation the transition relation to apply
 /// @param v the variables that are in the transition relation
@@ -457,10 +471,19 @@ bdd cube(const std::vector<std::uint32_t>& variables)
 }
 
 inline
-void bdd_solutions_callback(WorkerP*, Task*, void* context, unsigned int* vars, unsigned char* v, int n)
+void bdd_solutions_callback(WorkerP*, Task*, void* context, unsigned int* vars, unsigned char* values, int n)
 {
   std::vector<std::vector<int>>& V = *reinterpret_cast<std::vector<std::vector<int>>*>(context);
-  V.push_back(std::vector<int>(v, v + n));
+  std::vector<int> result(n);
+  for (int i = 0; i < n; ++i)
+  {
+    if (values[i])
+    {
+      result[i] = vars[i];
+    }
+  }
+
+  V.push_back(result);
 }
 
 inline

@@ -45,15 +45,14 @@ public:
 
   bdd states;
   bdd initial_state;
-  bdd state_variables;
-
+  bdd state_variables; // Even numbers are used as variables to encode the states (to allow interleaving).
 
   std::vector<transition_group> transitions;
 
-  std::size_t state_vector_length() { return state_variables_length; }
+  std::size_t state_variables_length() const { return m_state_variables_length; }
   
 private:
-  std::size_t state_variables_length = 0;
+  std::size_t m_state_variables_length = 0;
 };
 
 } // namespace mcrl2::lps

@@ -19,6 +19,7 @@
 
 #include "bdd_util.h"
 #include "convert_concrete_lts.h"
+#include "sigref.h"
 #include "symbolic_lts_bdd.h"
 
 #include <sylvan_int.h>
@@ -263,7 +264,12 @@ class ltsconvert_tool : public input_output_tool
         mCRL2log(verbose) << "Converting LDD representation to a BDD representation..." << std::endl;
         mcrl2::lps::symbolic_lts_bdd bdd_lts(m_input);
 
-        
+        sylvan::bdds::CACHE_ENCODE_BLOCK = sylvan::cache_next_opid();
+        sylvan::bdds::CACHE_DECODE_BLOCK = sylvan::cache_next_opid();
+        sylvan::bdds::CACHE_SWAPPRIME = sylvan::cache_next_opid();
+
+        sigref_algorithm algorithm;
+        algorithm.run(bdd_lts);
       }
       else
       {

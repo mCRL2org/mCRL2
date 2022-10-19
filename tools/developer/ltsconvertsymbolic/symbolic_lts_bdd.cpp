@@ -148,8 +148,6 @@ symbolic_lts_bdd::symbolic_lts_bdd(const symbolic_lts& lts)
   // All of the state variables.
   state_variables = sylvan::bdds::cube(variables);
 
-  std::cerr << core::detail::print_list(variables) << std::endl;
-
   mCRL2log(log_level_t::debug) << symbolic::print_vectors(state_variables, state_variables) << std::endl;
   mCRL2log(log_level_t::debug) << "Convert states from LDD to BDD..." << std::endl;
   states = bdd_from_ldd(lts.states, bits, 0); 
@@ -166,5 +164,5 @@ symbolic_lts_bdd::symbolic_lts_bdd(const symbolic_lts& lts)
     transitions.emplace_back(relation, variables);
   }
 
-  state_variables_length = variables.size();
+  m_state_variables_length = variables.size();
 }
