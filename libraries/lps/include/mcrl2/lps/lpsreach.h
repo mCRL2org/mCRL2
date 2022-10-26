@@ -31,7 +31,6 @@
 
 #include <sylvan_ldd.hpp>
 
-#include <chrono>
 #include <iomanip>
 #include <boost/dynamic_bitset.hpp>
 
@@ -272,9 +271,8 @@ class lpsreach_algorithm
 
       mCRL2log(log::trace) << "initial state = " << core::detail::print_list(m_lts.initial_state) << std::endl;
 
-      auto start = std::chrono::steady_clock::now();
+      stopwatch reachability_start;
       ldd x = m_lts.initial_state;
-      std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - start;
       ldd visited = empty_set();
       ldd todo = x;
       ldd deadlocks = empty_set();
@@ -299,8 +297,7 @@ class lpsreach_algorithm
         sylvan::sylvan_stats_report(stderr);
       }
 
-      elapsed_seconds = std::chrono::steady_clock::now() - start;
-      std::cout << "number of states = " << print_size(visited) << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)" << std::endl;
+      std::cout << "number of states = " << print_size(visited) << " (time = " << std::setprecision(2) << std::fixed << reachability_start.seconds() << "s)" << std::endl;
       mCRL2log(log::verbose) << "used variable order = " << core::detail::print_list(m_variable_order) << std::endl;
 
       double total_time = 0.0;
