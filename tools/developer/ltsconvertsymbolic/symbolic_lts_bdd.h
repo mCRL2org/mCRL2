@@ -46,6 +46,7 @@ public:
   bdd states;
   bdd initial_state;
   bdd state_variables; // Even numbers are used as variables to encode the states (to allow interleaving).
+  bdd action_label_variables; // Used to encode the action labels.
 
   std::vector<transition_group> transitions;
 

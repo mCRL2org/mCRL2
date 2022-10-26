@@ -20,11 +20,14 @@ namespace sylvan::bdds
 {
     
 // The cache ids for the encode and decode block operations.
-static uint64_t CACHE_ENCODE_BLOCK;
-static uint64_t CACHE_DECODE_BLOCK;
-static uint64_t CACHE_SWAPPRIME;
+static uint64_t cache_encode_block_id;
+static uint64_t cache_decode_block_id;
+static uint64_t cache_swap_prime_id;
+static uint64_t cache_refine_id;
 
-/// Encode a block number (max 64bit) as a BDD cube where the bits represent the number in base 2.
+const std::size_t block_variable_first_var = 2000000; // Must be higher than action_first_var + maximum bits required to encode the action.
+
+/// Encode a block number (max 64bit) as a BDD singleton set where the bits represent the block number in base 2.
 TASK_DECL_3(BDD, sylvan_encode_block, BDDSET, std::uint64_t, std::uint64_t);
 #define sylvan_encode_block(vars, block_length, block_number) CALL(sylvan_encode_block, vars, block_length, block_number)
 
@@ -32,7 +35,8 @@ TASK_DECL_3(BDD, sylvan_encode_block, BDDSET, std::uint64_t, std::uint64_t);
 TASK_DECL_1(std::uint64_t, sylvan_decode_block, BDD);
 #define sylvan_decode_block(block) CALL(sylvan_decode_block, block)
 
-/// Substitute each s by s' and vice versa
+/// \brief Substitute each s by s' and vice versa.
+/// \details Assumes that s and s' are all variables less than 99999 (in sylvan variables have natural numbers as names)
 TASK_DECL_1(BDD, sylvan_swap_prime, BDD);
 #define sylvan_swap_prime(set) CALL(sylvan_swap_prime, set)
 
@@ -59,7 +63,8 @@ bdd swap_prime(bdd set)
 
 } // namespace sylvan::bdds
 
-
+/// \brief Implements the partition refinement algorithm described in "Multi-core symbolic bisimulation minimisation" by Tom van Dijk and
+///        Jaco van de Pol.
 class sigref_algorithm
 {
 public:
@@ -70,7 +75,9 @@ private:
 
     std::size_t m_next_block = 0;
     int         m_block_length = 0; // number of block variables
-    bdd m_block_variables;
+    bdd         m_block_variables;
+
+    mcrl2::utilities::unordered_map<std::uint64_t, bdd> m_block_signature;
 
     /// \brief Returns the next free block number.
     size_t
@@ -89,11 +96,10 @@ private:
         //}
 
         m_block_length = block_length;
-        uint32_t block_base = 2000000; // base for block variables (this is some magic value)
         std::vector<uint32_t> variables(block_length);
         for (int i=0; i<block_length; i++) 
         {
-            variables[i] = block_base+2*i;
+            variables[i] = sylvan::bdds::block_variable_first_var+2*i;
         }
 
         m_block_variables = sylvan::bdds::cube(variables);
@@ -102,7 +108,7 @@ private:
     size_t
     count_blocks()
     {
-        return m_next_block - 1;
+        return m_next_block;
     }
 
     bdd refine(bdd signature, bdd variables, bdd partition);

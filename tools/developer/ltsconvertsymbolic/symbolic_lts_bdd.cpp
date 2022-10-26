@@ -116,6 +116,7 @@ symbolic_lts_bdd::symbolic_lts_bdd(const symbolic_lts& lts)
   }
   
   mCRL2log(log_level_t::debug) << "Number of action label indices: " << highest_action << std::endl;
+  mCRL2log(log_level_t::debug) << "Bits per level:" << std::endl;
 
   // Compute number of bits for each level
   std::vector<uint32_t> bits(highest.size());
@@ -123,17 +124,24 @@ symbolic_lts_bdd::symbolic_lts_bdd(const symbolic_lts& lts)
     std::size_t i = 0;
     for (uint32_t& value: highest)
     {
-        bits[i] = std::log(value) + 1;
+        bits[i] = std::log2(value) + 1;
+        mCRL2log(log_level_t::debug) << i << ": " << bits[i] << std::endl; 
         ++i;
     }
   }
+
+  // Includes the number of bits required to store the action label.
+  std::vector<std::uint32_t> bits_with_action_label = bits;
+  bits_with_action_label.emplace_back(std::log2(highest_action) + 1);
+
+  mCRL2log(log_level_t::debug) << "Bits for action label:" << bits_with_action_label.back() << std::endl;
   
   // Compute the variable names for each level.
   std::vector<uint32_t> variables;
 
   /// bdd_from_ldd assumes that even bits are the current state variables, this
   /// is necessary for interleaving with the next state variables since variable
-  /// indices must be increasing.
+  /// must be increasing (and variables are natural numbers).
   /// Furthermore, it is assumed that the first variable is zero, indicated by the zero passed below.
   int i = 0;
   for (uint32_t val: bits)
@@ -144,24 +152,34 @@ symbolic_lts_bdd::symbolic_lts_bdd(const symbolic_lts& lts)
       ++i;
     }
   }
-
+  
   // All of the state variables.
   state_variables = sylvan::bdds::cube(variables);
 
   mCRL2log(log_level_t::debug) << symbolic::print_vectors(state_variables, state_variables) << std::endl;
   mCRL2log(log_level_t::debug) << "Convert states from LDD to BDD..." << std::endl;
   states = bdd_from_ldd(lts.states, bits, 0); 
-
-  mCRL2log(log_level_t::debug) << "LDD size " << symbolic::print_size(lts.states, true) << std::endl;
-  mCRL2log(log_level_t::debug) << "BDD size " << symbolic::print_size(states, state_variables, true) << std::endl;
+  
+  mCRL2log(log_level_t::debug) << symbolic::print_vectors(states, state_variables) << std::endl;
+  mCRL2log(log_level_t::debug) << "state space LDD size " << symbolic::print_size(lts.states, true) << " to BDD size " << symbolic::print_size(states, state_variables, true) << std::endl;
+  
+  std::vector<uint32_t> action_variables;
+  for (std::size_t i = 0; i < bits_with_action_label.back(); ++i)
+  {
+    action_variables.emplace_back(action_first_var + i);
+  }
+  
+  action_label_variables = sylvan::bdds::cube(action_variables);
 
   // Convert the transition relation from LDD to BDD.
   for (const auto& group: lts.summand_groups)
   {
     sylvan::bdds::bdd variables = meta_to_bdd(group.Ir, bits, 0);
-    sylvan::bdds::bdd relation = bdd_from_ldd(group.L, bits, 0);
+    sylvan::bdds::bdd relation = bdd_from_ldd_rel(group.L, bits_with_action_label, 0, group.Ir);
     
     transitions.emplace_back(relation, variables);
+    mCRL2log(log_level_t::debug) << "transition relation LLD size " << symbolic::print_size(group.L, true) 
+      << " to BDD size " << symbolic::print_size(relation, sylvan::bdds::bdd_and(variables, action_label_variables), true) << std::endl;
   }
 
   m_state_variables_length = variables.size();

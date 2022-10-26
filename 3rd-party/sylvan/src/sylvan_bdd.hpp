@@ -66,6 +66,13 @@ class bdd
       sylvan_protect(&m_bdd);
     }
 
+    bdd(const std::uint32_t var, bdd low, bdd high)
+     : m_bdd(sylvan_makenode(var, low.get(), high.get()))
+    {
+      sylvan_protect(&m_bdd);
+    }
+
+
     bdd& operator=(const bdd& other) = default;
 
     ~bdd()
@@ -79,6 +86,11 @@ class bdd
     }
     
     int is_true() const
+    {
+      return m_bdd == sylvan_true;
+    }
+
+    int is_empty() const
     {
       return m_bdd == sylvan_true;
     }
@@ -471,7 +483,23 @@ bdd cube(const std::vector<std::uint32_t>& variables)
 }
 
 inline
-void bdd_solutions_callback(WorkerP*, Task*, void* context, unsigned int* vars, unsigned char* values, int n)
+void bdd_solutions_callback(WorkerP*, Task*, void* context, unsigned int*, unsigned char* values, int n)
+{
+  std::vector<std::vector<int>>& V = *reinterpret_cast<std::vector<std::vector<int>>*>(context);
+  std::vector<int> result(n);
+  for (int i = 0; i < n; ++i)
+  {
+    if (values[i])
+    {
+      result[i] = values[i];
+    }
+  }
+
+  V.push_back(result);
+}
+
+inline
+void bdd_variables_callback(WorkerP*, Task*, void* context, unsigned int* vars, unsigned char* values, int n)
 {
   std::vector<std::vector<int>>& V = *reinterpret_cast<std::vector<std::vector<int>>*>(context);
   std::vector<int> result(n);
@@ -499,6 +527,15 @@ std::vector<std::vector<int>> bdd_solutions(const bdd& x, const bdd& vars)
 {
   std::vector<std::vector<int>> result;
   enumerate(x, vars, &bdd_solutions_callback, &result);
+  return result;
+}
+
+/// \brief Returns the variable vectors contained in the bdd
+inline
+std::vector<std::vector<int>> bdd_variables(const bdd& x, const bdd& vars)
+{
+  std::vector<std::vector<int>> result;
+  enumerate(x, vars, &bdd_variables_callback, &result);
   return result;
 }
 

@@ -218,7 +218,8 @@ class ltsconvert_tool : public input_output_tool
       sylvan::sylvan_init_ldd();
       sylvan::sylvan_init_mtbdd();
       
-      sylvan::ldds::bdd_from_ldd_id = sylvan::cache_next_opid();
+      sylvan::ldds::cache_bdd_from_ldd_id = sylvan::cache_next_opid();
+      sylvan::ldds::cache_bdd_from_ldd_rel_id = sylvan::cache_next_opid();
 
       if (input_filename().empty() || input_filename() == "-")
       {
@@ -264,9 +265,10 @@ class ltsconvert_tool : public input_output_tool
         mCRL2log(verbose) << "Converting LDD representation to a BDD representation..." << std::endl;
         mcrl2::lps::symbolic_lts_bdd bdd_lts(m_input);
 
-        sylvan::bdds::CACHE_ENCODE_BLOCK = sylvan::cache_next_opid();
-        sylvan::bdds::CACHE_DECODE_BLOCK = sylvan::cache_next_opid();
-        sylvan::bdds::CACHE_SWAPPRIME = sylvan::cache_next_opid();
+        sylvan::bdds::cache_encode_block_id = sylvan::cache_next_opid();
+        sylvan::bdds::cache_decode_block_id = sylvan::cache_next_opid();
+        sylvan::bdds::cache_swap_prime_id = sylvan::cache_next_opid();
+        sylvan::bdds::cache_refine_id = sylvan::cache_next_opid();
 
         sigref_algorithm algorithm;
         algorithm.run(bdd_lts);

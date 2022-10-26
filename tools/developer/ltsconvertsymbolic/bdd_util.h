@@ -20,18 +20,32 @@
 namespace sylvan::ldds
 {
 
-/**
- * Compute the BDD equivalent of the LDD of a set of states.
- */
-static uint64_t bdd_from_ldd_id;
+static uint64_t cache_bdd_from_ldd_id;
+static uint64_t cache_bdd_from_ldd_rel_id;
+
+const uint64_t action_first_var = 1000000;
+
+/// Compute the BDD equivalent of the LDD of a set of states.
 TASK_DECL_3(MTBDD, lddmc_bdd_from_ldd, MDD, MDD, uint32_t)
 #define lddmc_bdd_from_ldd(dd, bits, firstvar) CALL(lddmc_bdd_from_ldd, dd, bits, firstvar)
+
+/// \brief Compute the BDD equivalent of an LDD transition relation 
+/// \details Assumes that the last bits encode the action_label, and only meta.last() can be five.
+TASK_DECL_4(MTBDD, lddmc_bdd_from_ldd_rel, MDD, MDD, uint32_t, MDD)
+#define lddmc_bdd_from_ldd_rel(dd, bits, firstvar, meta) CALL(lddmc_bdd_from_ldd_rel, dd, bits, firstvar, meta)
 
 inline 
 bdds::bdd bdd_from_ldd(const ldd& set, const std::vector<std::uint32_t>& bits, std::uint32_t firstvar)
 {
   LACE_ME;
-  return bdds::bdd(lddmc_bdd_from_ldd(set.get(), union_cube(false_(), bits.data(), bits.size()).get(), firstvar));
+  return bdds::bdd(lddmc_bdd_from_ldd(set.get(), cube(bits).get(), firstvar));
+}
+
+inline 
+bdds::bdd bdd_from_ldd_rel(const ldd& set, const std::vector<std::uint32_t>& bits, std::uint32_t firstvar, const ldd& meta)
+{
+  LACE_ME;
+  return bdds::bdd(lddmc_bdd_from_ldd_rel(set.get(), cube(bits).get(), firstvar, meta.get()));
 }
 
 /// Compute the BDD equivalent of the meta variable (to a variables cube). The variables become firstvar + 2*i, where i is the index in meta.

@@ -13,6 +13,7 @@
 #include "mcrl2/symbolic/print.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/stack_array.h"
+#include "mcrl2/utilities/stopwatch.h"
 
 #include <sylvan_int.h>
 
@@ -26,24 +27,27 @@ namespace sylvan::bdds
 TASK_IMPL_3(BDD, sylvan_encode_block, BDDSET, block_variables, std::uint64_t, block_length, uint64_t, block_number)
 {
     BDD result;
-    if (cache_get3(CACHE_ENCODE_BLOCK, block_variables, block_length, block_number, &result)) return result;
+    if (cache_get3(cache_encode_block_id, block_variables, block_length, block_number, &result)) return result;
 
-    // for now, assume max 64 bits for a block....
     MCRL2_DECLARE_STACK_ARRAY(bl, std::uint8_t, block_length);
     for (std::uint64_t i=0; i<block_length; i++) {
         bl[i] = block_number & 1 ? 1 : 0;
         block_number>>=1;
     }
 
+    assert(block_number == 0); // block_length must be enough to encode the block_number.
+
     result = sylvan_cube(block_variables, bl.data());
-    cache_put3(CACHE_ENCODE_BLOCK, block_variables, block_length, block_number, result);
+    cache_put3(cache_encode_block_id, block_variables, block_length, block_number, result);
     return result;
 } 
 
 TASK_IMPL_1(uint64_t, sylvan_decode_block, BDD, block)
 {
     std::uint64_t result = 0;
-    if (cache_get3(CACHE_DECODE_BLOCK, block, 0, 0, &result)) return result;
+    if (cache_get3(cache_decode_block_id, block, 0, 0, &result)) return result;
+
+    assert(block != sylvan_false);
 
     std::uint64_t mask = 1;
     while (block != sylvan_true) {
@@ -57,7 +61,7 @@ TASK_IMPL_1(uint64_t, sylvan_decode_block, BDD, block)
         mask <<= 1;
     }
 
-    cache_put3(CACHE_DECODE_BLOCK, block, 0, 0, result);
+    cache_put3(cache_decode_block_id, block, 0, 0, result);
     return result;
 }
 
@@ -65,21 +69,21 @@ TASK_IMPL_1(MTBDD, sylvan_swap_prime, MTBDD, set)
 {
     if (mtbdd_isleaf(set)) return set;
 
-    // TODO: properly ignore action/block variables
+    // TODO: properly ignore action/block variables (blocks are >= 100000 and action labels >= 500000)
     if (mtbdd_getvar(set) >= 99999) return set;
 
     MTBDD result;
-    if (cache_get3(CACHE_SWAPPRIME, set, 0, 0, &result)) return result;
+    if (cache_get3(cache_swap_prime_id, set, 0, 0, &result)) return result;
 
     sylvan_gc_test();
 
     mtbdd_refs_spawn(SPAWN(sylvan_swap_prime, mtbdd_getlow(set)));
     MTBDD high = mtbdd_refs_push(CALL(sylvan_swap_prime, mtbdd_gethigh(set)));
     MTBDD low = mtbdd_refs_sync(SYNC(sylvan_swap_prime));
-    result = mtbdd_makenode(sylvan_var(set)^1, low, high);
+    result = mtbdd_makenode(sylvan_var(set)^1, low, high); // x^1 is a hacky way to convert even x in to x+1 and odd x into x-1.
     mtbdd_refs_pop(1);
 
-    cache_put3(CACHE_SWAPPRIME, set, 0, 0, result);
+    cache_put3(cache_swap_prime_id, set, 0, 0, result);
     return result;
 }
 
@@ -103,14 +107,8 @@ void sigref_algorithm::run(const mcrl2::lps::symbolic_lts_bdd& lts)
       new_transition_relations.emplace_back(extend_relation(group.relation, group.variables, lts.state_variables_length()));
   }
 
-  // extend_relation uses odd variables to encode the target state.
-  std::vector<std::uint32_t> prime_variables_vector(lts.state_variables_length());
-  for (std::size_t i = 0; i < lts.state_variables_length(); ++i)
-  {
-    prime_variables_vector[i] = 2*i + 1;
-  }
-
-  bdd prime_variables = cube(prime_variables_vector);
+  // Compute the target state variables (also used by extend_relation implicitly)
+  bdd prime_variables = swap_prime(lts.state_variables);
 
   // merge all transition relations into a single monolithic transition relation.
   mCRL2log(verbose) << "Merging transition relations..." << std::endl;
@@ -119,39 +117,141 @@ void sigref_algorithm::run(const mcrl2::lps::symbolic_lts_bdd& lts)
   merged_transition_relation[0] = big_union(new_transition_relations);
   new_transition_relations = merged_transition_relation;
 
-  mCRL2log(log_level_t::debug) << "transition relation size " << print_size(new_transition_relations[0], bdd_and(lts.state_variables, prime_variables), true) << std::endl;
+  mCRL2log(log_level_t::debug) << "transition relation size " << print_size(new_transition_relations[0], bdd_and(bdd_and(lts.state_variables, prime_variables), lts.action_label_variables), true) << std::endl;
 
-  // There are at most 2^|state_vector| + 1 blocks since every state can be in a unique block.
-  prepare_blocks(lts.state_variables_length()+1);
+  // mCRL2log(log_level_t::debug) << "transition relation = " << std::endl;     
+  //mCRL2log(log_level_t::debug) << print_vectors(new_transition_relations[0], bdd_and(bdd_and(lts.state_variables, prime_variables), lts.action_label_variables)) << std::endl;
 
+  // There are at most |states| blocks since every state can be in a unique block.
+  prepare_blocks(std::log2(satcount(lts.states, lts.state_variables)) + 1);
+  mCRL2log(log_level_t::debug) << "using " << m_block_length << " bits to encode bits" << std::endl;     
+  
   // Assign the initial partition, assigns block to prime variables.
   bdd block = encode_block(m_block_variables, m_block_length, get_next_block());
   bdd prime_states = swap_prime(lts.states);
   bdd partition = bdd_and(prime_states, block);
-
+  
   // The actual signature refinement algorithm for strong bisimulation
   std::size_t old_num_of_blocks = count_blocks();
   std::size_t num_of_blocks = -1;
   std::size_t iteration = 0;
 
+  // Computes nu Z. refine(signature_strong, Z), where Z is the partition. Uses number of blocks of the partition to determine stability.
   while(num_of_blocks != old_num_of_blocks)
   {    
+    ++iteration;
+
+    stopwatch loop_start;
     old_num_of_blocks = num_of_blocks;
 
     // compute signature
-    bdd signature = signature_strong(new_transition_relations, partition, prime_variables);
+    mCRL2log(log_level_t::debug) << "partition = " << std::endl;     
+    mCRL2log(log_level_t::debug) << print_vectors(partition, bdd_and(prime_variables, m_block_variables)) << std::endl;
 
-    partition = refine(signature, lts.state_variables, partition);
+    bdd signature = signature_strong(new_transition_relations, partition, prime_variables);
+    
+    mCRL2log(log_level_t::debug) << "signature = " << std::endl;  
+    mCRL2log(log_level_t::debug) << print_vectors(signature, bdd_and(bdd_and(lts.state_variables, lts.action_label_variables), m_block_variables)) << std::endl;
+
+    partition = refine(signature, prime_variables, partition);
 
     num_of_blocks = count_blocks();
 
-    mCRL2log(log_level_t::verbose) << "iteration " << iteration << " blocks " << num_of_blocks << std::endl;
-    ++iteration;
+    mCRL2log(log_level_t::verbose) << "found " << std::setw(12) << num_of_blocks << " potential equivalence classes after " 
+                               << std::setw(3) << iteration << " iterations (time = " << std::setprecision(2)
+                               << std::fixed << loop_start.seconds() << "s)" << std::endl;
+
+    sylvan::cache_clear(); // Clear the cache between iterations.
+    m_block_signature.clear(); // Clear the block table.
   }
-  
+
+  mCRL2log(log_level_t::verbose) << "There are " << num_of_blocks << " equivalence classes." << std::endl;  
 }
 
+/// \brief The refine procedure defined in the paper.
+/// \details Expecting signature \sigma to encode <s, a, b>
+///          Expecting vars to be conjunction of variables in s' 
+///          Expecting partition P to encode <s', B>
 bdd sigref_algorithm::refine(bdd signature, bdd variables, bdd partition)
 {
-    return bdd();
+    // This is not in the algorithm described in the paper, why?
+    if (partition.is_false())
+    {
+        return false_();
+    }
+
+    sylvan::BDD bdd_result;
+    if (sylvan::cache_get3(cache_refine_id, signature.get(), variables.get(), partition.get(), &bdd_result)) return bdd(bdd_result);
+
+    LACE_ME;
+    sylvan_gc_test();
+
+    bdd result;
+    // std::cerr << "variables = " << variables.top() << ", signature = " << signature.top() << ", partition = " << partition.top() << std::endl;
+
+    // 2. if result := cache[(\sigma, P, iter)]: return result
+    // 3. v := topVar(\sigma , P)                               # interpret s′ in P as s
+    // 4. if v equals s_i for some i                            # We know that variables are increasing, so if it's empty it's outside of s_i. 
+    if (!variables.is_empty()) 
+    {
+        // # match state in \sigma and P
+        // 5. do in parallel: 
+        // 6.   low := refine(\sigma_(s_i = 0), P_(s'_i = 0) 
+        // 7.   high := refine(\sigma_(s_i = 1), P_(s'_i = 1)
+        // 8.   result := lookupBDDnode(s'_i, low, high)
+
+        // In reality BDDs can 'skip' variables so we need to stay for cofactors where this has happened.
+        bdd signature_low = (signature.top()+1 == variables.top()) ? signature.else_() : signature;
+        bdd signature_high = (signature.top()+1 == variables.top()) ? signature.then() : signature;
+
+        bdd partition_low = (partition.top() == variables.top()) ? partition.else_() : partition;
+        bdd partition_high = (partition.top() == variables.top()) ? partition.then() : partition;
+
+        bdd low = refine(signature_low, variables.then(), partition_low);
+        bdd high = refine(signature_high, variables.then(), partition_high);
+        result = bdd(variables.top(), low, high);
+    }
+    else
+    {
+        // 9. else:
+        // # \sigma now encodes the state signature
+        // # P now encodes the previous block (the block that was currently assigned)
+
+        // 10. B := decodeBlock(P)
+        std::uint64_t B = decode_block(partition);
+
+        // # try to claim block B if still free
+        // 11. if blocks[B].sig = \bottom: 
+        // 12.   cas(blocks[B].sig, \bottom, \sigma)
+        // 13. if blocks[B].sig = \sigma:
+        // 14.  result := P;
+        auto it = m_block_signature.find(B);
+        if (it == m_block_signature.end())
+        {
+            //std::cerr << "inserted partition " << B << std::endl;
+            m_block_signature[B] = signature;
+            result = partition;
+        }
+        else
+        {
+            // 15. else: 
+            // 16.   B := search_or_insert(\sigma, B) 
+            // 17.   result := encodeBlock(B)
+            if (it->second == signature)
+            {
+                //std::cerr << "reused partition " << B << std::endl;
+                result = partition;
+            }
+            else
+            {
+                std::uint64_t B = get_next_block();
+                //std::cerr << "new block " << B << std::endl;
+                m_block_signature[B] = signature;
+                result = encode_block(m_block_variables, m_block_length, B);
+            }
+        }
+    }
+
+    sylvan::cache_put3(cache_refine_id, signature.get(), variables.get(), partition.get(), result.get());
+    return bdd(result);
 }

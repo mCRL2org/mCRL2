@@ -127,27 +127,6 @@ std::string print_states(const std::vector<data_expression_index>& data_index, c
   return out.str();
 }
 
-namespace 
-{
-
-/// \brief Print a transition vector as 'x -> y' where x is the from vector and y the to vector.
-/* This funcion is not used. 
-std::string print_transition(const std::vector<data_expression_index>& data_index, const std::vector<std::uint32_t>& xy)
-{
-  std::size_t n = xy.size() / 2;
-  std::vector<std::uint32_t> x(n);
-  std::vector<std::uint32_t> y(n);
-  for (std::size_t i = 0; i < n; i++)
-  {
-    x[i] = xy[2*i];
-    y[i] = xy[2*i+1];
-  }
-  return print_state(data_index, x) + " -> " + print_state(data_index, y);
-}
-*/
-
-} // internal
-
 /// \brief Print a transition vector as 'x -> y' where x is the from vector and y the to vector based on the read and write indices.
 inline 
 std::string print_transition(const std::vector<data_expression_index>& data_index, const std::uint32_t* xy, const std::vector<std::size_t>& read, const std::vector<std::size_t>& write)
@@ -231,11 +210,37 @@ std::string print_size(const sylvan::ldds::ldd& L, bool print_exact, bool print_
   return out.str();
 }
 
+inline
+std::string print_vectors(const sylvan::ldds::ldd& L)
+{    
+  std::ostringstream out;
+  auto solutions = ldd_solutions(L);
+  bool multiline = solutions.size() > 1;
+  std::string sep = multiline ? ",\n" : ", ";
+
+  out << "{" << (multiline ? "\n" : " ");
+  for (std::size_t i = 0; i < solutions.size(); i++)
+  {
+    if (i > 0)
+    {
+      out << sep;
+    }
+
+    out << core::detail::print_list(solutions[i]);
+  }
+  out << (multiline ? "\n" : " ") << "}";
+  return out.str();
+}
+
 // BDD related printing functionality.
 inline
 std::string print_vectors(const sylvan::bdds::bdd& L, const sylvan::bdds::bdd& variables)
-{  
+{    
   std::ostringstream out;
+  auto variables_vector = bdd_variables(variables, variables);
+  assert(variables_vector.size() == 1); // Should be a singleton
+  out << "variables: " << core::detail::print_list(variables_vector[0]);
+
   auto solutions = bdd_solutions(L, variables);
   bool multiline = solutions.size() > 1;
   std::string sep = multiline ? ",\n" : ", ";

@@ -120,7 +120,7 @@ void bisim(const symbolic_lts& lts)
   bool refined_any_block = false;
   std::size_t iterations = 0;
 
-  mCRL2log(log::verbose) << "Starting signature refinement..." << std::endl;
+  mCRL2log(log::verbose) << "Starting refinement..." << std::endl;
   do
   {
     refined_any_block = false;
@@ -162,7 +162,7 @@ void bisim(const symbolic_lts& lts)
     new_partition.clear();
 
     ++iterations;
-    mCRL2log(log::verbose) << "found " << std::setw(12) << partition.size() << " equivalence classes after " << std::setw(4) << iterations << " iterations." << std::endl;
+    mCRL2log(log::verbose) << "found " << std::setw(12) << partition.size() << " potential equivalence classes after " << std::setw(4) << iterations << " iterations." << std::endl;
   }
   while (refined_any_block);
 
