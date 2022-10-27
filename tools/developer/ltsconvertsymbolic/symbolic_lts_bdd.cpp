@@ -51,14 +51,14 @@ void compute_highest_rec(ldd set, mcrl2::utilities::unordered_set<ldd>& cache, s
     compute_highest_rec(set.down(), cache, array, index+1);
 
     if (!set.is_copy()) {
-        array[index] = std::max(array[index], set.value());
+        array[index] = std::max(array[index], set.value() + 1); // Count zero as additional value 
     }
 }
 
 /// Compute the highest value for each variable level.
 std::vector<std::uint32_t> compute_highest(ldd set)
 {
-    std::vector<std::uint32_t> array(compute_height(set));
+    std::vector<std::uint32_t> array(compute_height(set) - 1); // The last level are only terminal nodes.
     mcrl2::utilities::unordered_set<ldd> cache;
     compute_highest_rec(set, cache, array, 0);
     return array;
@@ -71,19 +71,26 @@ std::uint32_t compute_highest_action_rec(ldd set, ldd meta, mcrl2::utilities::un
     if (cache.count(set) != 0) {
         return 0; // Can return zero since this value will be returned somewhere else, and we are interested in the max.
     }
-    cache.emplace(set);
 
     std::uint32_t highest = 0;
     highest = std::max(highest, compute_highest_action_rec(set.right(), meta, cache));
 
     if (meta.value() == 5)
     {
-        return std::max(highest, set.value());
+        highest = std::max(highest, set.value() + 1); // Count zero as additional value 
+    }
+    else if (meta.value() == 0)
+    {
+        // Not in the relation, so don't move down in set.
+        highest = std::max(highest, compute_highest_action_rec(set, meta.down(), cache));
     }
     else
     {
-        return std::max(highest, compute_highest_action_rec(set.down(), meta.down(), cache));
+        highest = std::max(highest, compute_highest_action_rec(set.down(), meta.down(), cache));
     }
+
+    cache.emplace(set);
+    return highest;
 }
 
 /// Compute the highest value for the action label (meta = 5)
@@ -111,9 +118,12 @@ symbolic_lts_bdd::symbolic_lts_bdd(const symbolic_lts& lts)
 
   // Compute highest action label value (from transition relations)
   uint32_t highest_action = 0;
-  for (const auto& group: lts.summand_groups) {
-      highest_action = std::max(highest_action, compute_highest_action(group.L, group.Ir));
+  for (const auto& group: lts.summand_groups) 
+  {
+    highest_action = std::max(highest_action, compute_highest_action(group.L, group.Ir));
   }
+
+  assert(highest_action == lts.action_index.size()); // Should match.
   
   mCRL2log(log_level_t::debug) << "Number of action label indices: " << highest_action << std::endl;
   mCRL2log(log_level_t::debug) << "Bits per level:" << std::endl;
@@ -160,7 +170,7 @@ symbolic_lts_bdd::symbolic_lts_bdd(const symbolic_lts& lts)
   mCRL2log(log_level_t::debug) << "Convert states from LDD to BDD..." << std::endl;
   states = bdd_from_ldd(lts.states, bits, 0); 
   
-  mCRL2log(log_level_t::debug) << symbolic::print_vectors(states, state_variables) << std::endl;
+  mCRL2log(log_level_t::debug) << symbolic::print_states(states, state_variables, bits) << std::endl;
   mCRL2log(log_level_t::debug) << "state space LDD size " << symbolic::print_size(lts.states, true) << " to BDD size " << symbolic::print_size(states, state_variables, true) << std::endl;
   
   std::vector<uint32_t> action_variables;
