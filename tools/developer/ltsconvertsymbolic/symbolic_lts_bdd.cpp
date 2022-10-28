@@ -23,6 +23,7 @@ using namespace sylvan::ldds;
 using namespace sylvan::bdds;
 using mcrl2::log::log_level_t;
 
+
 /// Compute the height of the LDD.
 std::uint32_t compute_height(ldd set)
 {
@@ -100,8 +101,33 @@ std::uint32_t compute_highest_action(ldd set, ldd meta)
     return compute_highest_action_rec(set, meta, cache);
 }
 
+std::vector<std::uint32_t> project_bits(const std::vector<std::uint32_t>& bits, const std::vector<std::size_t>& read, const std::vector<std::size_t>& write)
+{
+  std::vector<std::uint32_t> result;
+
+  std::uint32_t max_value = 0;
+  for (std::uint32_t value: read)
+  {
+    max_value = std::max(max_value, value);
+  }
+  for (std::uint32_t value: write)
+  {
+    max_value= std::max(max_value, value);
+  }
+
+  for (std::uint32_t i = 0; i <= max_value; ++i)
+  {
+    result.emplace_back(bits[i]);
+  }
+
+  return result;
+}
+
 symbolic_lts_bdd::symbolic_lts_bdd(const symbolic_lts& lts)
 {  
+  data_index = lts.data_index;
+  action_index = lts.action_index;
+
   mCRL2log(log_level_t::debug) << "Height:" << compute_height(lts.states) <<  std::endl;
 
   // Compute highest value at each level (from reachable states)
@@ -129,22 +155,20 @@ symbolic_lts_bdd::symbolic_lts_bdd(const symbolic_lts& lts)
   mCRL2log(log_level_t::debug) << "Bits per level:" << std::endl;
 
   // Compute number of bits for each level
-  std::vector<uint32_t> bits(highest.size());
+  bits = std::vector<uint32_t>(highest.size());
   {
     std::size_t i = 0;
     for (uint32_t& value: highest)
     {
-        bits[i] = std::log2(value) + 1;
+        bits[i] = base_two_bits(value);
         mCRL2log(log_level_t::debug) << i << ": " << bits[i] << std::endl; 
         ++i;
     }
   }
 
   // Includes the number of bits required to store the action label.
-  std::vector<std::uint32_t> bits_with_action_label = bits;
-  bits_with_action_label.emplace_back(std::log2(highest_action) + 1);
-
-  mCRL2log(log_level_t::debug) << "Bits for action label:" << bits_with_action_label.back() << std::endl;
+  bits_action_label = base_two_bits(highest_action);
+  mCRL2log(log_level_t::debug) << "Bits for action label:" << bits_action_label << std::endl;
   
   // Compute the variable names for each level.
   std::vector<uint32_t> variables;
@@ -170,22 +194,31 @@ symbolic_lts_bdd::symbolic_lts_bdd(const symbolic_lts& lts)
   mCRL2log(log_level_t::debug) << "Convert states from LDD to BDD..." << std::endl;
   states = bdd_from_ldd(lts.states, bits, 0); 
   
-  mCRL2log(log_level_t::debug) << symbolic::print_states(states, state_variables, bits) << std::endl;
+  mCRL2log(log_level_t::debug) << symbolic::print_states(lts.data_index, states, state_variables, bits) << std::endl;
   mCRL2log(log_level_t::debug) << "state space LDD size " << symbolic::print_size(lts.states, true) << " to BDD size " << symbolic::print_size(states, state_variables, true) << std::endl;
   
   std::vector<uint32_t> action_variables;
-  for (std::size_t i = 0; i < bits_with_action_label.back(); ++i)
+  for (std::size_t i = 0; i < bits_action_label; ++i)
   {
     action_variables.emplace_back(action_first_var + i);
   }
   
   action_label_variables = sylvan::bdds::cube(action_variables);
 
+  auto variables_vector = bdd_variables(action_label_variables, action_label_variables);
+  assert(variables_vector.size() == 1); // Should be a singleton
+
   // Convert the transition relation from LDD to BDD.
   for (const auto& group: lts.summand_groups)
   {
+    std::vector<std::uint32_t> bits_with_action_label = project_bits(bits, group.read, group.write);
+    bits_with_action_label.emplace_back(bits_action_label);
+
     sylvan::bdds::bdd variables = meta_to_bdd(group.Ir, bits, 0);
-    sylvan::bdds::bdd relation = bdd_from_ldd_rel(group.L, bits_with_action_label, 0, group.Ir);
+    sylvan::bdds::bdd relation = bdd_from_ldd_rel(group.L, bits_with_action_label, 0, group.Ir);   
+
+    //mCRL2log(log_level_t::debug) << symbolic::print_relation(lts.data_index, lts.action_index, group.L, group.read, group.write) << std::endl;
+    //mCRL2log(log_level_t::debug) << symbolic::print_relation(lts.data_index, lts.action_index, relation, sylvan::bdds::bdd_and(variables, action_label_variables), bits, bits_action_label, group.read, group.write) << std::endl;    
     
     transitions.emplace_back(relation, variables);
     mCRL2log(log_level_t::debug) << "transition relation LLD size " << symbolic::print_size(group.L, true) 

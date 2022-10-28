@@ -523,18 +523,18 @@ void enumerate(const bdd& x, const bdd& vars, enum_cb cb, void* context = nullpt
 
 /// \brief Returns int instead of std::uint8_t since the latter is not treated as a number for all intents and purposes, for example when printing.
 inline
-std::vector<std::vector<int>> bdd_solutions(const bdd& x, const bdd& vars)
+std::vector<std::vector<std::uint32_t>> bdd_solutions(const bdd& x, const bdd& vars)
 {
-  std::vector<std::vector<int>> result;
+  std::vector<std::vector<std::uint32_t>> result;
   enumerate(x, vars, &bdd_solutions_callback, &result);
   return result;
 }
 
 /// \brief Returns the variable vectors contained in the bdd
 inline
-std::vector<std::vector<int>> bdd_variables(const bdd& x, const bdd& vars)
+std::vector<std::vector<std::uint32_t>> bdd_variables(const bdd& x, const bdd& vars)
 {
-  std::vector<std::vector<int>> result;
+  std::vector<std::vector<std::uint32_t>> result;
   enumerate(x, vars, &bdd_variables_callback, &result);
   return result;
 }

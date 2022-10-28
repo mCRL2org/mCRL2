@@ -12,6 +12,8 @@
 
 #include "mcrl2/utilities/stack_array.h"
 
+#include <iostream>
+
 namespace sylvan::ldds
 {
 

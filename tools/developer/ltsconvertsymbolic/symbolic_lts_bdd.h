@@ -14,6 +14,8 @@
 #ifdef MCRL2_ENABLE_SYLVAN
 
 #include "mcrl2/lps/symbolic_lts.h"
+#include "mcrl2/symbolic/data_index.h"
+#include "mcrl2/utilities/indexed_set.h"
 
 #include <sylvan_bdd.hpp>
 
@@ -47,6 +49,12 @@ public:
   bdd initial_state;
   bdd state_variables; // Even numbers are used as variables to encode the states (to allow interleaving).
   bdd action_label_variables; // Used to encode the action labels.
+
+  std::vector<std::uint32_t> bits; // The number of bits at every level of the bdd.
+  std::uint32_t bits_action_label; // The number of bits for the action label (stored at the end of relation).
+
+  std::vector<symbolic::data_expression_index> data_index;
+  utilities::indexed_set<lps::multi_action> action_index;
 
   std::vector<transition_group> transitions;
 

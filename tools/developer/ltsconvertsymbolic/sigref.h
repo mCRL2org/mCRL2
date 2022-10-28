@@ -83,6 +83,11 @@ private:
     size_t
     get_next_block()
     {
+        if (m_next_block + 1 % 10000 == 0)
+        {
+            std::cerr << "Created " << m_next_block + 1 << " blocks" << std::endl;
+        }
+
         return m_next_block++;
     }
 

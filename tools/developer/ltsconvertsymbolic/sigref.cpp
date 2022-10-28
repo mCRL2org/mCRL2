@@ -10,6 +10,7 @@
 #include "sigref.h"
 
 #include "bdd_util.h"
+#include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/symbolic/print.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/stack_array.h"
@@ -19,6 +20,8 @@
 
 using namespace mcrl2::log;
 using namespace mcrl2::symbolic;
+using namespace mcrl2::utilities;
+using namespace mcrl2::lps;
 using namespace sylvan::bdds;
 
 namespace sylvan::bdds
@@ -26,6 +29,8 @@ namespace sylvan::bdds
 
 TASK_IMPL_3(BDD, sylvan_encode_block, BDDSET, block_variables, std::uint64_t, block_length, uint64_t, block_number)
 {
+    assert(block_number < std::pow(2, block_length)); // We can only encode it using block_length bits.
+
     BDD result;
     if (cache_get3(cache_encode_block_id, block_variables, block_length, block_number, &result)) return result;
 
@@ -90,6 +95,63 @@ TASK_IMPL_1(MTBDD, sylvan_swap_prime, MTBDD, set)
 
 } // namespace sylvan::bdds
 
+// Print a partition encoded by <s', b>
+inline
+std::string print_partition(const std::vector<data_expression_index>& data_index, const sylvan::bdds::bdd& L, const sylvan::bdds::bdd& variables, const std::vector<std::uint32_t>& bits, std::uint32_t bits_for_block)
+{    
+  std::ostringstream out;
+  auto solutions = bdd_solutions(L, variables);
+  std::vector<std::string> vectors;
+
+  for (const auto& solution : solutions)
+  {
+    std::vector<std::uint32_t> result;
+
+    // First convert the states.
+    int offset = 0;
+    for (std::uint32_t number_of_bits : bits)
+    {
+      result.emplace_back(bits_to_value(solution, number_of_bits, offset));
+      offset += number_of_bits;
+    }
+
+    std::uint32_t block_number = bits_to_value_lsb(solution, bits_for_block, offset);
+
+    vectors.emplace_back(mcrl2::core::detail::print_list(ldd2state(data_index, result)) + " -> " + std::to_string(block_number));
+  }
+
+  return print_container_multiline(vectors, [](const auto& container) { return container; });
+}
+
+// Print a signature encoded by <s, a, b>
+inline
+std::string print_signature(const std::vector<data_expression_index>& data_index, indexed_set<multi_action> action_index, const sylvan::bdds::bdd& L, const sylvan::bdds::bdd& variables, const std::vector<std::uint32_t>& bits, std::uint32_t bits_for_action, std::uint32_t bits_for_block)
+{    
+  std::ostringstream out;
+  auto solutions = bdd_solutions(L, variables);
+  std::vector<std::string> vectors;
+
+  for (const auto& solution : solutions)
+  {
+    std::vector<std::uint32_t> result;
+
+    // First convert the states.
+    int offset = 0;
+    for (std::uint32_t number_of_bits : bits)
+    {
+      result.emplace_back(bits_to_value(solution, number_of_bits, offset));
+      offset += number_of_bits;
+    }
+
+    std::uint32_t action_number = bits_to_value(solution, bits_for_action, offset);
+    std::uint32_t block_number = bits_to_value_lsb(solution, bits_for_block, offset + bits_for_action);
+
+    vectors.emplace_back(mcrl2::core::detail::print_list(ldd2state(data_index, result)) + " -> (" + pp(action_index[action_number]) + ", " + std::to_string(block_number) + ")");
+  }
+
+  return print_container_multiline(vectors, [](const auto& container) { return container; });
+}
+
 /// \brief 
 /// Assumes that the relation is extended to the full domain, and for now only a single relation.
 bdd signature_strong(const std::vector<bdd>& relations, const bdd& partition, const bdd& prime_variables)
@@ -123,8 +185,9 @@ void sigref_algorithm::run(const mcrl2::lps::symbolic_lts_bdd& lts)
   //mCRL2log(log_level_t::debug) << print_vectors(new_transition_relations[0], bdd_and(bdd_and(lts.state_variables, prime_variables), lts.action_label_variables)) << std::endl;
 
   // There are at most |states| blocks since every state can be in a unique block.
-  prepare_blocks(std::log2(satcount(lts.states, lts.state_variables)) + 1);
-  mCRL2log(log_level_t::debug) << "using " << m_block_length << " bits to encode bits" << std::endl;     
+  double number_of_states = satcount(lts.states, lts.state_variables);
+  prepare_blocks(base_two_bits(number_of_states));
+  mCRL2log(log_level_t::debug) << "using " << m_block_length << " bits to encode blocks for " << number_of_states << " states" << std::endl;     
   
   // Assign the initial partition, assigns block to prime variables.
   bdd block = encode_block(m_block_variables, m_block_length, get_next_block());
@@ -146,12 +209,13 @@ void sigref_algorithm::run(const mcrl2::lps::symbolic_lts_bdd& lts)
 
     // compute signature
     mCRL2log(log_level_t::debug) << "partition = " << std::endl;     
-    mCRL2log(log_level_t::debug) << print_vectors(partition, bdd_and(prime_variables, m_block_variables)) << std::endl;
+    mCRL2log(log_level_t::debug) << print_partition(lts.data_index, partition, bdd_and(prime_variables, m_block_variables), lts.bits, m_block_length) << std::endl;
 
     bdd signature = signature_strong(new_transition_relations, partition, prime_variables);
     
     mCRL2log(log_level_t::debug) << "signature = " << std::endl;  
-    mCRL2log(log_level_t::debug) << print_vectors(signature, bdd_and(bdd_and(lts.state_variables, lts.action_label_variables), m_block_variables)) << std::endl;
+    mCRL2log(log_level_t::debug) << print_signature(lts.data_index, lts.action_index, signature, 
+        bdd_and(bdd_and(lts.state_variables, lts.action_label_variables), m_block_variables), lts.bits, lts.bits_action_label, m_block_length) << std::endl;
 
     partition = refine(signature, prime_variables, partition);
 
@@ -168,10 +232,10 @@ void sigref_algorithm::run(const mcrl2::lps::symbolic_lts_bdd& lts)
   mCRL2log(log_level_t::verbose) << "There are " << num_of_blocks << " equivalence classes." << std::endl;  
 }
 
-/// \brief The refine procedure defined in the paper.
+/// \brief The refine procedure defined in the paper, where s and s' are the current and next states, 'a' the action and 'b' the block.
 /// \details Expecting signature \sigma to encode <s, a, b>
 ///          Expecting vars to be conjunction of variables in s' 
-///          Expecting partition P to encode <s', B>
+///          Expecting partition P to encode <s', b>
 bdd sigref_algorithm::refine(bdd signature, bdd variables, bdd partition)
 {
     // This is not in the algorithm described in the paper, why?

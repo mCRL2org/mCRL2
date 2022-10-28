@@ -262,7 +262,15 @@ class ltsconvert_tool : public input_output_tool
         bisim(m_input);
       }
       else if (m_equivalence == symbolic_lts_equivalence::bisim_sigref)
-      {
+      {        
+        for (const auto& group : m_input.summand_groups)
+        {
+          if (group.summands.size() > 1)
+          {
+            throw mcrl2::runtime_error("Cannot use bisim-sigref on a symbolic LTS with non-trivial transition groups");
+          }
+        }
+
         // Convert the LDD symbolic LTS to a BDD representation.
         mCRL2log(verbose) << "Converting LDD representation to a BDD representation..." << std::endl;
         mcrl2::lps::symbolic_lts_bdd bdd_lts(m_input);

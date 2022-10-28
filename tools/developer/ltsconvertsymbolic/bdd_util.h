@@ -15,6 +15,7 @@
 #include <sylvan_bdd.hpp>
 
 #include <functional>
+#include <cmath>
 #include <vector>
 
 namespace sylvan::ldds
@@ -84,5 +85,12 @@ bdds::bdd big_union(const std::vector<bdds::bdd>& sets)
 
 
 } // namespace sylvan::bdds
+
+/// \brief Returns the number of bits required to encode using base 2 encoding.
+inline
+std::size_t base_two_bits(std::size_t max_value)
+{
+  return std::ceil(std::log2(max_value));
+}
 
 #endif // MCRL2_BDD_UTIL_H
