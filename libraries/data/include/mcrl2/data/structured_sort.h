@@ -51,29 +51,29 @@ data_equation_vector fbag_generate_equations_code(const sort_expression&);
 /// * pri,j are the projection functions (or constructor arguments).
 /// * is_ci are the recognisers.
 //--- start generated class structured_sort ---//
-/// \brief A structured sort
+/// \\brief A structured sort
 class structured_sort: public sort_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     structured_sort()
       : sort_expression(core::detail::default_values::SortStruct)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit structured_sort(const atermpp::aterm& term)
       : sort_expression(term)
     {
       assert(core::detail::check_term_SortStruct(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     explicit structured_sort(const structured_sort_constructor_list& constructors)
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortStruct(), constructors))
     {}
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     template <typename Container>
     structured_sort(const Container& constructors, typename atermpp::enable_if_container<Container, structured_sort_constructor>::type* = nullptr)
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortStruct(), structured_sort_constructor_list(constructors.begin(), constructors.end())))
@@ -433,34 +433,34 @@ public:
 //--- end user section structured_sort ---//
 };
 
-/// \brief Make_structured_sort constructs a new term into a given address.
-/// \ \param t The reference into which the new structured_sort is constructed. 
+/// \\brief Make_structured_sort constructs a new term into a given address.
+/// \\ \param t The reference into which the new structured_sort is constructed. 
 template <class... ARGUMENTS>
 inline void make_structured_sort(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_SortStruct(), args...);
 }
 
-/// \brief list of structured_sorts
+/// \\brief list of structured_sorts
 typedef atermpp::term_list<structured_sort> structured_sort_list;
 
-/// \brief vector of structured_sorts
+/// \\brief vector of structured_sorts
 typedef std::vector<structured_sort>    structured_sort_vector;
 
 // prototype declaration
 std::string pp(const structured_sort& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const structured_sort& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(structured_sort& t1, structured_sort& t2)
 {
   t1.swap(t2);

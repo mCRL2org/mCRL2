@@ -77,26 +77,26 @@ class deadlock_summand: public summand_base
 };
 
 //--- start generated class deadlock_summand ---//
-/// \brief list of deadlock_summands
+/// \\brief list of deadlock_summands
 typedef atermpp::term_list<deadlock_summand> deadlock_summand_list;
 
-/// \brief vector of deadlock_summands
+/// \\brief vector of deadlock_summands
 typedef std::vector<deadlock_summand>    deadlock_summand_vector;
 
 // prototype declaration
 std::string pp(const deadlock_summand& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const deadlock_summand& x)
 {
   return out << lps::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(deadlock_summand& t1, deadlock_summand& t2)
 {
   t1.swap(t2);

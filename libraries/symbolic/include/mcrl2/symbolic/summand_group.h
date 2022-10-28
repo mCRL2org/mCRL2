@@ -28,10 +28,10 @@ namespace mcrl2::symbolic
 {
 
 /// \brief Computes for both the read and write parameters their positions in the zipped transition relation.
-std::pair<std::vector<std::size_t>, std::vector<std::size_t>> compute_read_write_pos(const std::vector<std::size_t>& read, const std::vector<std::size_t>& write);
+inline std::pair<std::vector<std::size_t>, std::vector<std::size_t>> compute_read_write_pos(const std::vector<std::size_t>& read, const std::vector<std::size_t>& write);
 
 /// \brief Compact the vector to avoid repeated values at the end.
-std::vector<std::uint32_t> optimise_project(const std::vector<std::uint32_t>& Ip_values);
+inline std::vector<std::uint32_t> optimise_project(const std::vector<std::uint32_t>& Ip_values);
 
 /// \brief A transition relation over a single set of read and write parameters for a group of summands.
 struct summand_group

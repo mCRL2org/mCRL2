@@ -69,17 +69,17 @@ void make_untyped_set_or_bag_comprehension(atermpp::aterm& result, ARGUMENTS... 
 // prototype declaration
 std::string pp(const untyped_set_or_bag_comprehension& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const untyped_set_or_bag_comprehension& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(untyped_set_or_bag_comprehension& t1, untyped_set_or_bag_comprehension& t2)
 {
   t1.swap(t2);

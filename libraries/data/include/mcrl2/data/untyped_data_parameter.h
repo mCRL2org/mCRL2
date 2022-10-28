@@ -19,29 +19,29 @@ namespace mcrl2 {
 namespace data {
 
 //--- start generated class untyped_data_parameter ---//
-/// \brief An untyped parameter
+/// \\brief An untyped parameter
 class untyped_data_parameter: public atermpp::aterm_appl
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     untyped_data_parameter()
       : atermpp::aterm_appl(core::detail::default_values::UntypedDataParameter)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit untyped_data_parameter(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_UntypedDataParameter(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     untyped_data_parameter(const core::identifier_string& name, const data_expression_list& arguments)
       : atermpp::aterm_appl(core::detail::function_symbol_UntypedDataParameter(), name, arguments)
     {}
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     untyped_data_parameter(const std::string& name, const data_expression_list& arguments)
       : atermpp::aterm_appl(core::detail::function_symbol_UntypedDataParameter(), core::identifier_string(name), arguments)
     {}
@@ -63,23 +63,23 @@ class untyped_data_parameter: public atermpp::aterm_appl
     }
 };
 
-/// \brief Make_untyped_data_parameter constructs a new term into a given address.
-/// \ \param t The reference into which the new untyped_data_parameter is constructed. 
+/// \\brief Make_untyped_data_parameter constructs a new term into a given address.
+/// \\ \param t The reference into which the new untyped_data_parameter is constructed. 
 template <class... ARGUMENTS>
 inline void make_untyped_data_parameter(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_UntypedDataParameter(), args...);
 }
 
-/// \brief list of untyped_data_parameters
+/// \\brief list of untyped_data_parameters
 typedef atermpp::term_list<untyped_data_parameter> untyped_data_parameter_list;
 
-/// \brief vector of untyped_data_parameters
+/// \\brief vector of untyped_data_parameters
 typedef std::vector<untyped_data_parameter>    untyped_data_parameter_vector;
 
-/// \brief Test for a untyped_data_parameter expression
-/// \param x A term
-/// \return True if \a x is a untyped_data_parameter expression
+/// \\brief Test for a untyped_data_parameter expression
+/// \\param x A term
+/// \\return True if \\a x is a untyped_data_parameter expression
 inline
 bool is_untyped_data_parameter(const atermpp::aterm_appl& x)
 {
@@ -89,17 +89,17 @@ bool is_untyped_data_parameter(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const untyped_data_parameter& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const untyped_data_parameter& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(untyped_data_parameter& t1, untyped_data_parameter& t2)
 {
   t1.swap(t2);

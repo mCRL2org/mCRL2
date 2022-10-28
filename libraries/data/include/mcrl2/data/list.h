@@ -823,6 +823,18 @@ namespace mcrl2 {
         return result;
       }
       ///\brief Function for projecting out argument.
+      ///        left from an application.
+      /// \param e A data expression.
+      /// \pre left is defined for e.
+      /// \return The argument of e that corresponds to left.
+      inline
+      const data_expression& left(const data_expression& e)
+      {
+        assert(is_cons_application(e) || is_in_application(e) || is_snoc_application(e) || is_concat_application(e) || is_element_at_application(e));
+        return atermpp::down_cast<application>(e)[0];
+      }
+
+      ///\brief Function for projecting out argument.
       ///        right from an application.
       /// \param e A data expression.
       /// \pre right is defined for e.
@@ -843,18 +855,6 @@ namespace mcrl2 {
       const data_expression& arg(const data_expression& e)
       {
         assert(is_count_application(e) || is_head_application(e) || is_tail_application(e) || is_rhead_application(e) || is_rtail_application(e));
-        return atermpp::down_cast<application>(e)[0];
-      }
-
-      ///\brief Function for projecting out argument.
-      ///        left from an application.
-      /// \param e A data expression.
-      /// \pre left is defined for e.
-      /// \return The argument of e that corresponds to left.
-      inline
-      const data_expression& left(const data_expression& e)
-      {
-        assert(is_cons_application(e) || is_in_application(e) || is_snoc_application(e) || is_concat_application(e) || is_element_at_application(e));
         return atermpp::down_cast<application>(e)[0];
       }
 

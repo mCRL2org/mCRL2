@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """Toy Parser Generator is a lexical and syntactic parser generator
 for Python. This generator was born from a simple statement: YACC
@@ -65,7 +65,7 @@ if __python__ == 3:
     exc = lambda: sys.exc_info()[1]
 
 if __python__ == 2:
-    exc = lambda: sys.exc_value
+    exc = lambda: sys.exc_info()[1]
 
 _id = lambda x: x
 tab = " "*4
@@ -875,7 +875,7 @@ class ParserMetaClass(type):
 if __python__ == 3:
     exec("class _Parser(metaclass=ParserMetaClass): pass")
 else:
-    class _Parser: __metaclass__ = ParserMetaClass
+    class _Parser(metaclass=ParserMetaClass): pass
 
 class Parser(_Parser):
     # Parser is the base class for parsers.
@@ -952,7 +952,7 @@ class Parser(_Parser):
         """
         try:
             self.lexer.start(input)
-            if __python__ == 2 and isinstance(input, unicode):
+            if __python__ == 2 and isinstance(input, str):
                 self.string_prefix = 'ur'
             else:
                 self.string_prefix = 'r'
@@ -1758,18 +1758,18 @@ class TPGParser(tpg.Parser):
         }
         def __init__(self, parser):
             self.parser = parser
-            for name, (values, default) in TPGParser.Options.option_dict.items():
+            for name, (values, default) in list(TPGParser.Options.option_dict.items()):
                 self.set(name, default)
         def set(self, name, value):
             try:
                 options, default = TPGParser.Options.option_dict[name]
             except KeyError:
-                opts = TPGParser.Options.option_dict.keys()
+                opts = list(TPGParser.Options.option_dict.keys())
                 self.parser.error("Unknown option (%s). Valid options are %s"%(name, ', '.join(sorted(opts))))
             try:
                 value = options[value]
             except KeyError:
-                values = options.keys()
+                values = list(options.keys())
                 self.parser.error("Unknown value (%s). Valid values for %s are %s"%(value, name, ', '.join(sorted(values))))
             setattr(self, name, value)
         def lexer_compile_options(self):

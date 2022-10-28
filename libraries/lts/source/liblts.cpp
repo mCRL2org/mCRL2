@@ -68,9 +68,9 @@ lts_type guess_format(std::string const& s, const bool be_verbose/*=true*/)
   return lts_none;
 }
 
-static std::string type_strings[] = { "unknown", "lts", "aut", "fsm", "dot" };
+static const std::string type_strings[] = { "unknown", "lts", "aut", "fsm", "dot" };
 
-static std::string extension_strings[] = { "", "lts", "aut", "fsm", "dot" };
+static const std::string extension_strings[] = { "", "lts", "aut", "fsm", "dot" };
 
 static std::string type_desc_strings[] = {
     "unknown LTS format",
@@ -145,7 +145,7 @@ const std::set<lts_type>& supported_lts_formats()
 
 /* Auxiliary function, used below */
 template<typename T>
-bool lts_named_cmp(std::string N[], T a, T b)
+bool lts_named_cmp(const std::string N[], T a, T b)
 {
   return N[a] < N[b];
 } 
@@ -153,8 +153,9 @@ bool lts_named_cmp(std::string N[], T a, T b)
 std::string supported_lts_formats_text(lts_type default_format, const std::set<lts_type>& supported)
 {
   std::vector<lts_type> types(supported.begin(), supported.end());
-  std::sort(types.begin(), types.end(),
-            std::bind(lts_named_cmp<lts_type>, type_strings, std::placeholders::_1, std::placeholders::_2));
+  std::sort(types.begin(), 
+            types.end(),
+            [](const lts_type& t1, const lts_type& t2){ return lts_named_cmp<lts_type>(type_strings, t1, t2); });
 
   std::string r;
   for (std::vector<lts_type>::iterator i=types.begin(); i!=types.end(); ++i)
@@ -189,8 +190,9 @@ std::string supported_lts_formats_text(const std::set<lts_type>& supported)
 std::string lts_extensions_as_string(const std::string& sep, const std::set<lts_type>& supported)
 {
   std::vector<lts_type> types(supported.begin(), supported.end());
-  std::sort(types.begin(), types.end(),
-            std::bind(lts_named_cmp<lts_type>, extension_strings, std::placeholders::_1, std::placeholders::_2));
+  std::sort(types.begin(), 
+            types.end(),
+            [](const lts_type& t1, const lts_type& t2){ return lts_named_cmp<lts_type>(extension_strings, t1, t2); });
 
   std::string r, prev;
   bool first = true;

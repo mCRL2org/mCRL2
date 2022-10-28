@@ -131,7 +131,7 @@ void test_sorts()
   spec1.add_context_sorts(s2l);
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
-  std::for_each(s2l.begin(), s2l.end(), std::bind(&data_specification::remove_sort, &spec, std::placeholders::_1));
+  std::for_each(s2l.begin(), s2l.end(), [&spec](const sort_expression& s){ spec.remove_sort(s); });
   spec1.remove_sort(s2);
   compare_for_equality(spec, spec1);
 }
@@ -150,7 +150,7 @@ void test_aliases()
   // BOOST_CHECK(spec.aliases().size()) == 0);
 
   std::set<basic_sort> sorts = { s, t };
-  std::for_each(sorts.begin(), sorts.end(), std::bind(&data_specification::add_sort, &spec, std::placeholders::_1));
+  std::for_each(sorts.begin(), sorts.end(), [&spec](const basic_sort& s){ spec.add_sort(s); });
 
   /* std::set< sort_expression > aliases;
   aliases.insert(s1);
@@ -185,7 +185,7 @@ void test_constructors()
   spec.add_constructor(h);
 
   data_specification spec1(spec);
-  std::for_each(fghl.begin(), fghl.end(), std::bind(&data_specification::add_constructor, &spec1, std::placeholders::_1));
+  std::for_each(fghl.begin(), fghl.end(), [&spec1](const function_symbol& f){ spec1.add_constructor(f); });
 
   function_symbol_vector constructors(spec.constructors());
   BOOST_CHECK(spec.constructors(s) == fgl);
@@ -207,11 +207,13 @@ void test_constructors()
 
   spec.add_constructor(i);
   function_symbol_vector il {i};
-  std::for_each(il.begin(), il.end(), std::bind(&data_specification::add_constructor, &spec1, std::placeholders::_1));
+  std::for_each(il.begin(), il.end(), [&spec1](const function_symbol& f){ spec1.add_constructor(f); });
+
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
   spec.remove_constructor(i);
-  std::for_each(il.begin(), il.end(), std::bind(&data_specification::remove_constructor, &spec1, std::placeholders::_1));
+  std::for_each(il.begin(), il.end(), [&spec1](const function_symbol& f){ spec1.remove_constructor(f); });
+  
   BOOST_CHECK(compare_for_equality(spec, spec1));
 }
 
@@ -238,7 +240,7 @@ void test_functions()
   spec.add_mapping(h);
 
   data_specification spec1(spec);
-  std::for_each(fghl.begin(), fghl.end(), std::bind(&data_specification::add_mapping, &spec1, std::placeholders::_1));
+  std::for_each(fghl.begin(), fghl.end(), [&spec1](const function_symbol& f){ spec1.add_mapping(f); } );
 
 std::cerr << "#mappings " << spec.mappings().size() << "\n";
   BOOST_CHECK(spec.mappings().size() == 54);
@@ -261,10 +263,10 @@ std::cerr << "#mappings " << spec.mappings().size() << "\n";
   data::function_symbol i("i", s0);
   spec.add_mapping(i);
   function_symbol_vector il {i}; 
-  std::for_each(il.begin(), il.end(), std::bind(&data_specification::add_mapping, &spec1, std::placeholders::_1));
+  std::for_each(il.begin(), il.end(), [&spec1](const function_symbol& f){ spec1.add_mapping(f); }); 
   compare_for_equality(spec, spec1);
 
-  std::for_each(il.begin(), il.end(), std::bind(&data_specification::remove_mapping, &spec, std::placeholders::_1));
+  std::for_each(il.begin(), il.end(), [&spec](const function_symbol& f){ spec.remove_mapping(f); });
   spec1.remove_mapping(i);
   compare_for_equality(spec, spec1);
 }
@@ -291,14 +293,14 @@ void test_equations()
   BOOST_CHECK(compare_for_equality(spec, spec1));
   spec.add_equation(fxx);
   data_equation_vector fxxl {fxx};
-  std::for_each(fxxl.begin(), fxxl.end(), std::bind(&data_specification::add_equation, &spec1, std::placeholders::_1));
+  std::for_each(fxxl.begin(), fxxl.end(), [&spec1](const data_equation& eqn){ spec1.add_equation(eqn); }); 
 
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
   data_equation fxf(xl, x, fx, f);
   data_equation_vector fxfl {fxf};
   spec.add_equation(fxf);
-  std::for_each(fxfl.begin(), fxfl.end(), std::bind(&data_specification::add_equation, &spec1, std::placeholders::_1));
+  std::for_each(fxfl.begin(), fxfl.end(), [&spec1](const data_equation& eqn){ spec1.add_equation(eqn); }); 
 
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
@@ -306,7 +308,7 @@ void test_equations()
   BOOST_CHECK(result.size() == 2);
   BOOST_CHECK(std::find(result.begin(), result.end(), fxf) != result.end());
   BOOST_CHECK(std::find(result.begin(), result.end(), fxx) != result.end());
-  std::for_each(fxfl.begin(), fxfl.end(), std::bind(&data_specification::remove_equation, &spec, std::placeholders::_1));
+  std::for_each(fxfl.begin(), fxfl.end(), [&spec](const data_equation& eqn){ spec.remove_equation(eqn); }); 
   spec1.remove_equation(fxf);
   BOOST_CHECK(compare_for_equality(spec, spec1));
 }

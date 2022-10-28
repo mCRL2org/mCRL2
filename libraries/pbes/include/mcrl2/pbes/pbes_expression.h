@@ -25,34 +25,34 @@ namespace pbes_system
 typedef std::pair<core::identifier_string, data::data_expression_list> propositional_variable_key_type;
 
 //--- start generated classes ---//
-/// \brief A pbes expression
+/// \\brief A pbes expression
 class pbes_expression: public atermpp::aterm_appl
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     pbes_expression()
       : atermpp::aterm_appl(core::detail::default_values::PBExpr)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit pbes_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_PBExpr(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     pbes_expression(const data::data_expression& x)
       : atermpp::aterm_appl(x)
     {}
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     pbes_expression(const data::variable& x)
       : atermpp::aterm_appl(x)
     {}
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     pbes_expression(const data::untyped_data_parameter& x)
       : atermpp::aterm_appl(x)
     {}
@@ -64,10 +64,10 @@ class pbes_expression: public atermpp::aterm_appl
     pbes_expression& operator=(pbes_expression&&) noexcept = default;
 };
 
-/// \brief list of pbes_expressions
+/// \\brief list of pbes_expressions
 typedef atermpp::term_list<pbes_expression> pbes_expression_list;
 
-/// \brief vector of pbes_expressions
+/// \\brief vector of pbes_expressions
 typedef std::vector<pbes_expression>    pbes_expression_vector;
 
 // prototypes
@@ -79,45 +79,45 @@ inline bool is_imp(const atermpp::aterm_appl& x);
 inline bool is_forall(const atermpp::aterm_appl& x);
 inline bool is_exists(const atermpp::aterm_appl& x);
 
-/// \brief Test for a pbes_expression expression
-/// \param x A term
-/// \return True if \a x is a pbes_expression expression
+/// \\brief Test for a pbes_expression expression
+/// \\param x A term
+/// \\return True if \\a x is a pbes_expression expression
 inline
 bool is_pbes_expression(const atermpp::aterm_appl& x)
 {
   return data::is_data_expression(x) ||
+         data::is_variable(x) ||
+         data::is_untyped_data_parameter(x) ||
          pbes_system::is_propositional_variable_instantiation(x) ||
          pbes_system::is_not(x) ||
          pbes_system::is_and(x) ||
          pbes_system::is_or(x) ||
          pbes_system::is_imp(x) ||
          pbes_system::is_forall(x) ||
-         pbes_system::is_exists(x) ||
-         data::is_variable(x) ||
-         data::is_untyped_data_parameter(x);
+         pbes_system::is_exists(x);
 }
 
 // prototype declaration
 std::string pp(const pbes_expression& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const pbes_expression& x)
 {
   return out << pbes_system::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(pbes_expression& t1, pbes_expression& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief A propositional variable instantiation
+/// \\brief A propositional variable instantiation
 class propositional_variable_instantiation: public pbes_expression
 {
   public:
@@ -169,23 +169,23 @@ class propositional_variable_instantiation: public pbes_expression
 //--- end user section propositional_variable_instantiation ---//
 };
 
-/// \brief Make_propositional_variable_instantiation constructs a new term into a given address.
-/// \ \param t The reference into which the new propositional_variable_instantiation is constructed. 
+/// \\brief Make_propositional_variable_instantiation constructs a new term into a given address.
+/// \\ \param t The reference into which the new propositional_variable_instantiation is constructed. 
 template <class... ARGUMENTS>
 inline void make_propositional_variable_instantiation(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl_with_index<propositional_variable_instantiation,std::pair<core::identifier_string, data::data_expression_list>>(t, core::detail::function_symbol_PropVarInst(), args...);
 }
 
-/// \brief list of propositional_variable_instantiations
+/// \\brief list of propositional_variable_instantiations
 typedef atermpp::term_list<propositional_variable_instantiation> propositional_variable_instantiation_list;
 
-/// \brief vector of propositional_variable_instantiations
+/// \\brief vector of propositional_variable_instantiations
 typedef std::vector<propositional_variable_instantiation>    propositional_variable_instantiation_vector;
 
-/// \brief Test for a propositional_variable_instantiation expression
-/// \param x A term
-/// \return True if \a x is a propositional_variable_instantiation expression
+/// \\brief Test for a propositional_variable_instantiation expression
+/// \\param x A term
+/// \\return True if \\a x is a propositional_variable_instantiation expression
 inline
 bool is_propositional_variable_instantiation(const atermpp::aterm_appl& x)
 {
@@ -195,41 +195,41 @@ bool is_propositional_variable_instantiation(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const propositional_variable_instantiation& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const propositional_variable_instantiation& x)
 {
   return out << pbes_system::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(propositional_variable_instantiation& t1, propositional_variable_instantiation& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The not operator for pbes expressions
+/// \\brief The not operator for pbes expressions
 class not_: public pbes_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     not_()
       : pbes_expression(core::detail::default_values::PBESNot)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit not_(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESNot(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     explicit not_(const pbes_expression& operand)
       : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESNot(), operand))
     {}
@@ -246,17 +246,17 @@ class not_: public pbes_expression
     }
 };
 
-/// \brief Make_not_ constructs a new term into a given address.
-/// \ \param t The reference into which the new not_ is constructed. 
+/// \\brief Make_not_ constructs a new term into a given address.
+/// \\ \param t The reference into which the new not_ is constructed. 
 template <class... ARGUMENTS>
 inline void make_not_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PBESNot(), args...);
 }
 
-/// \brief Test for a not expression
-/// \param x A term
-/// \return True if \a x is a not expression
+/// \\brief Test for a not expression
+/// \\param x A term
+/// \\return True if \\a x is a not expression
 inline
 bool is_not(const atermpp::aterm_appl& x)
 {
@@ -266,41 +266,41 @@ bool is_not(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const not_& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const not_& x)
 {
   return out << pbes_system::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(not_& t1, not_& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The and operator for pbes expressions
+/// \\brief The and operator for pbes expressions
 class and_: public pbes_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     and_()
       : pbes_expression(core::detail::default_values::PBESAnd)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit and_(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESAnd(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     and_(const pbes_expression& left, const pbes_expression& right)
       : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESAnd(), left, right))
     {}
@@ -322,17 +322,17 @@ class and_: public pbes_expression
     }
 };
 
-/// \brief Make_and_ constructs a new term into a given address.
-/// \ \param t The reference into which the new and_ is constructed. 
+/// \\brief Make_and_ constructs a new term into a given address.
+/// \\ \param t The reference into which the new and_ is constructed. 
 template <class... ARGUMENTS>
 inline void make_and_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PBESAnd(), args...);
 }
 
-/// \brief Test for a and expression
-/// \param x A term
-/// \return True if \a x is a and expression
+/// \\brief Test for a and expression
+/// \\param x A term
+/// \\return True if \\a x is a and expression
 inline
 bool is_and(const atermpp::aterm_appl& x)
 {
@@ -342,41 +342,41 @@ bool is_and(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const and_& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const and_& x)
 {
   return out << pbes_system::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(and_& t1, and_& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The or operator for pbes expressions
+/// \\brief The or operator for pbes expressions
 class or_: public pbes_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     or_()
       : pbes_expression(core::detail::default_values::PBESOr)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit or_(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESOr(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     or_(const pbes_expression& left, const pbes_expression& right)
       : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESOr(), left, right))
     {}
@@ -398,17 +398,17 @@ class or_: public pbes_expression
     }
 };
 
-/// \brief Make_or_ constructs a new term into a given address.
-/// \ \param t The reference into which the new or_ is constructed. 
+/// \\brief Make_or_ constructs a new term into a given address.
+/// \\ \param t The reference into which the new or_ is constructed. 
 template <class... ARGUMENTS>
 inline void make_or_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PBESOr(), args...);
 }
 
-/// \brief Test for a or expression
-/// \param x A term
-/// \return True if \a x is a or expression
+/// \\brief Test for a or expression
+/// \\param x A term
+/// \\return True if \\a x is a or expression
 inline
 bool is_or(const atermpp::aterm_appl& x)
 {
@@ -418,41 +418,41 @@ bool is_or(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const or_& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const or_& x)
 {
   return out << pbes_system::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(or_& t1, or_& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The implication operator for pbes expressions
+/// \\brief The implication operator for pbes expressions
 class imp: public pbes_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     imp()
       : pbes_expression(core::detail::default_values::PBESImp)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit imp(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESImp(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     imp(const pbes_expression& left, const pbes_expression& right)
       : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESImp(), left, right))
     {}
@@ -474,17 +474,17 @@ class imp: public pbes_expression
     }
 };
 
-/// \brief Make_imp constructs a new term into a given address.
-/// \ \param t The reference into which the new imp is constructed. 
+/// \\brief Make_imp constructs a new term into a given address.
+/// \\ \param t The reference into which the new imp is constructed. 
 template <class... ARGUMENTS>
 inline void make_imp(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PBESImp(), args...);
 }
 
-/// \brief Test for a imp expression
-/// \param x A term
-/// \return True if \a x is a imp expression
+/// \\brief Test for a imp expression
+/// \\param x A term
+/// \\return True if \\a x is a imp expression
 inline
 bool is_imp(const atermpp::aterm_appl& x)
 {
@@ -494,41 +494,41 @@ bool is_imp(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const imp& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const imp& x)
 {
   return out << pbes_system::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(imp& t1, imp& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The universal quantification operator for pbes expressions
+/// \\brief The universal quantification operator for pbes expressions
 class forall: public pbes_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     forall()
       : pbes_expression(core::detail::default_values::PBESForall)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit forall(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESForall(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     forall(const data::variable_list& variables, const pbes_expression& body)
       : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESForall(), variables, body))
     {}
@@ -550,17 +550,17 @@ class forall: public pbes_expression
     }
 };
 
-/// \brief Make_forall constructs a new term into a given address.
-/// \ \param t The reference into which the new forall is constructed. 
+/// \\brief Make_forall constructs a new term into a given address.
+/// \\ \param t The reference into which the new forall is constructed. 
 template <class... ARGUMENTS>
 inline void make_forall(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PBESForall(), args...);
 }
 
-/// \brief Test for a forall expression
-/// \param x A term
-/// \return True if \a x is a forall expression
+/// \\brief Test for a forall expression
+/// \\param x A term
+/// \\return True if \\a x is a forall expression
 inline
 bool is_forall(const atermpp::aterm_appl& x)
 {
@@ -570,41 +570,41 @@ bool is_forall(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const forall& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const forall& x)
 {
   return out << pbes_system::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(forall& t1, forall& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The existential quantification operator for pbes expressions
+/// \\brief The existential quantification operator for pbes expressions
 class exists: public pbes_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     exists()
       : pbes_expression(core::detail::default_values::PBESExists)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit exists(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESExists(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     exists(const data::variable_list& variables, const pbes_expression& body)
       : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESExists(), variables, body))
     {}
@@ -626,17 +626,17 @@ class exists: public pbes_expression
     }
 };
 
-/// \brief Make_exists constructs a new term into a given address.
-/// \ \param t The reference into which the new exists is constructed. 
+/// \\brief Make_exists constructs a new term into a given address.
+/// \\ \param t The reference into which the new exists is constructed. 
 template <class... ARGUMENTS>
 inline void make_exists(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PBESExists(), args...);
 }
 
-/// \brief Test for a exists expression
-/// \param x A term
-/// \return True if \a x is a exists expression
+/// \\brief Test for a exists expression
+/// \\param x A term
+/// \\return True if \\a x is a exists expression
 inline
 bool is_exists(const atermpp::aterm_appl& x)
 {
@@ -646,17 +646,17 @@ bool is_exists(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const exists& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const exists& x)
 {
   return out << pbes_system::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(exists& t1, exists& t2)
 {
   t1.swap(t2);

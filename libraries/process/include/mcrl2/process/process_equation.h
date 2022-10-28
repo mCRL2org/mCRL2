@@ -21,24 +21,24 @@ namespace process
 {
 
 //--- start generated class process_equation ---//
-/// \brief A process equation
+/// \\brief A process equation
 class process_equation: public atermpp::aterm_appl
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     process_equation()
       : atermpp::aterm_appl(core::detail::default_values::ProcEqn)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit process_equation(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_ProcEqn(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)
       : atermpp::aterm_appl(core::detail::function_symbol_ProcEqn(), identifier, formal_parameters, expression)
     {}
@@ -65,23 +65,23 @@ class process_equation: public atermpp::aterm_appl
     }
 };
 
-/// \brief Make_process_equation constructs a new term into a given address.
-/// \ \param t The reference into which the new process_equation is constructed. 
+/// \\brief Make_process_equation constructs a new term into a given address.
+/// \\ \param t The reference into which the new process_equation is constructed. 
 template <class... ARGUMENTS>
 inline void make_process_equation(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_ProcEqn(), args...);
 }
 
-/// \brief list of process_equations
+/// \\brief list of process_equations
 typedef atermpp::term_list<process_equation> process_equation_list;
 
-/// \brief vector of process_equations
+/// \\brief vector of process_equations
 typedef std::vector<process_equation>    process_equation_vector;
 
-/// \brief Test for a process_equation expression
-/// \param x A term
-/// \return True if \a x is a process_equation expression
+/// \\brief Test for a process_equation expression
+/// \\param x A term
+/// \\return True if \\a x is a process_equation expression
 inline
 bool is_process_equation(const atermpp::aterm_appl& x)
 {
@@ -91,17 +91,17 @@ bool is_process_equation(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const process_equation& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const process_equation& x)
 {
   return out << process::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(process_equation& t1, process_equation& t2)
 {
   t1.swap(t2);

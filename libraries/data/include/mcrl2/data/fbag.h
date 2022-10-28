@@ -836,18 +836,6 @@ namespace mcrl2 {
         return result;
       }
       ///\brief Function for projecting out argument.
-      ///        right from an application.
-      /// \param e A data expression.
-      /// \pre right is defined for e.
-      /// \return The argument of e that corresponds to right.
-      inline
-      const data_expression& right(const data_expression& e)
-      {
-        assert(is_count_application(e) || is_in_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e));
-        return atermpp::down_cast<application>(e)[1];
-      }
-
-      ///\brief Function for projecting out argument.
       ///        arg1 from an application.
       /// \param e A data expression.
       /// \pre arg1 is defined for e.
@@ -884,18 +872,6 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument.
-      ///        arg from an application.
-      /// \param e A data expression.
-      /// \pre arg is defined for e.
-      /// \return The argument of e that corresponds to arg.
-      inline
-      const data_expression& arg(const data_expression& e)
-      {
-        assert(is_fset2fbag_application(e) || is_count_all_application(e));
-        return atermpp::down_cast<application>(e)[0];
-      }
-
-      ///\brief Function for projecting out argument.
       ///        left from an application.
       /// \param e A data expression.
       /// \pre left is defined for e.
@@ -904,6 +880,30 @@ namespace mcrl2 {
       const data_expression& left(const data_expression& e)
       {
         assert(is_count_application(e) || is_in_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e));
+        return atermpp::down_cast<application>(e)[0];
+      }
+
+      ///\brief Function for projecting out argument.
+      ///        right from an application.
+      /// \param e A data expression.
+      /// \pre right is defined for e.
+      /// \return The argument of e that corresponds to right.
+      inline
+      const data_expression& right(const data_expression& e)
+      {
+        assert(is_count_application(e) || is_in_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e));
+        return atermpp::down_cast<application>(e)[1];
+      }
+
+      ///\brief Function for projecting out argument.
+      ///        arg from an application.
+      /// \param e A data expression.
+      /// \pre arg is defined for e.
+      /// \return The argument of e that corresponds to arg.
+      inline
+      const data_expression& arg(const data_expression& e)
+      {
+        assert(is_fset2fbag_application(e) || is_count_all_application(e));
         return atermpp::down_cast<application>(e)[0];
       }
 

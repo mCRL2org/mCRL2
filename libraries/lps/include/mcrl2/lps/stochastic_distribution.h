@@ -19,24 +19,24 @@ namespace mcrl2 {
 namespace lps {
 
 //--- start generated class stochastic_distribution ---//
-/// \brief A stochastic distribution
+/// \\brief A stochastic distribution
 class stochastic_distribution: public atermpp::aterm_appl
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     stochastic_distribution()
       : atermpp::aterm_appl(core::detail::default_values::Distribution)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit stochastic_distribution(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_Distribution(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     stochastic_distribution(const data::variable_list& variables, const data::data_expression& distribution)
       : atermpp::aterm_appl(core::detail::function_symbol_Distribution(), variables, distribution)
     {}
@@ -66,23 +66,23 @@ class stochastic_distribution: public atermpp::aterm_appl
 //--- end user section stochastic_distribution ---//
 };
 
-/// \brief Make_stochastic_distribution constructs a new term into a given address.
-/// \ \param t The reference into which the new stochastic_distribution is constructed. 
+/// \\brief Make_stochastic_distribution constructs a new term into a given address.
+/// \\ \param t The reference into which the new stochastic_distribution is constructed. 
 template <class... ARGUMENTS>
 inline void make_stochastic_distribution(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_Distribution(), args...);
 }
 
-/// \brief list of stochastic_distributions
+/// \\brief list of stochastic_distributions
 typedef atermpp::term_list<stochastic_distribution> stochastic_distribution_list;
 
-/// \brief vector of stochastic_distributions
+/// \\brief vector of stochastic_distributions
 typedef std::vector<stochastic_distribution>    stochastic_distribution_vector;
 
-/// \brief Test for a stochastic_distribution expression
-/// \param x A term
-/// \return True if \a x is a stochastic_distribution expression
+/// \\brief Test for a stochastic_distribution expression
+/// \\param x A term
+/// \\return True if \\a x is a stochastic_distribution expression
 inline
 bool is_stochastic_distribution(const atermpp::aterm_appl& x)
 {
@@ -92,17 +92,17 @@ bool is_stochastic_distribution(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const stochastic_distribution& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const stochastic_distribution& x)
 {
   return out << lps::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(stochastic_distribution& t1, stochastic_distribution& t2)
 {
   t1.swap(t2);

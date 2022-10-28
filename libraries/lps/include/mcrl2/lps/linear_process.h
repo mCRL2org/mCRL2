@@ -248,10 +248,10 @@ atermpp::aterm_appl linear_process_to_aterm(const linear_process_base<ActionSumm
 // prototype declaration
 std::string pp(const linear_process& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const linear_process& x)
 {

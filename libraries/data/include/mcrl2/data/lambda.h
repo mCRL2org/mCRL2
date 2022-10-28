@@ -85,17 +85,17 @@ void make_lambda(atermpp::aterm& result, ARGUMENTS... arguments)
 // prototype declaration
 std::string pp(const lambda& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const lambda& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(lambda& t1, lambda& t2)
 {
   t1.swap(t2);

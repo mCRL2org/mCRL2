@@ -151,6 +151,10 @@ struct add_sort_expressions: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::data_expression>(x));
     }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
     else if (action_formulas::is_true(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::true_>(x));
@@ -195,16 +199,12 @@ struct add_sort_expressions: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::untyped_multi_action>(x));
     }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
   }
 
 };
 
-/// \brief Builder class
+/// \\brief Builder class
 template <typename Derived>
 struct sort_expression_builder: public add_sort_expressions<lps::sort_expression_builder, Derived>
 {
@@ -324,6 +324,10 @@ struct add_data_expressions: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::data_expression>(x));
     }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
     else if (action_formulas::is_true(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::true_>(x));
@@ -368,16 +372,12 @@ struct add_data_expressions: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::untyped_multi_action>(x));
     }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
   }
 
 };
 
-/// \brief Builder class
+/// \\brief Builder class
 template <typename Derived>
 struct data_expression_builder: public add_data_expressions<lps::data_expression_builder, Derived>
 {
@@ -497,6 +497,10 @@ struct add_variables: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::data_expression>(x));
     }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
     else if (action_formulas::is_true(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::true_>(x));
@@ -541,16 +545,12 @@ struct add_variables: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::untyped_multi_action>(x));
     }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
   }
 
 };
 
-/// \brief Builder class
+/// \\brief Builder class
 template <typename Derived>
 struct variable_builder: public add_variables<lps::data_expression_builder, Derived>
 {
@@ -672,6 +672,10 @@ struct add_action_formula_expressions: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::data_expression>(x));
     }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
     else if (action_formulas::is_true(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::true_>(x));
@@ -716,16 +720,12 @@ struct add_action_formula_expressions: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<process::untyped_multi_action>(x));
     }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
   }
 
 };
 
-/// \brief Builder class
+/// \\brief Builder class
 template <typename Derived>
 struct action_formula_builder: public add_action_formula_expressions<action_formulas::action_formula_builder_base, Derived>
 {
@@ -825,13 +825,13 @@ struct add_sort_expressions: public Builder<Derived>
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    if (action_formulas::is_action_formula(x))
-    {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::action_formula>(x));
-    }
-    else if (data::is_data_expression(x))
+    if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::data_expression>(x));
+    }
+    else if (action_formulas::is_action_formula(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::action_formula>(x));
     }
     else if (regular_formulas::is_seq(x))
     {
@@ -858,7 +858,7 @@ struct add_sort_expressions: public Builder<Derived>
 
 };
 
-/// \brief Builder class
+/// \\brief Builder class
 template <typename Derived>
 struct sort_expression_builder: public add_sort_expressions<action_formulas::sort_expression_builder, Derived>
 {
@@ -925,13 +925,13 @@ struct add_data_expressions: public Builder<Derived>
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    if (action_formulas::is_action_formula(x))
-    {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::action_formula>(x));
-    }
-    else if (data::is_data_expression(x))
+    if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::data_expression>(x));
+    }
+    else if (action_formulas::is_action_formula(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::action_formula>(x));
     }
     else if (regular_formulas::is_seq(x))
     {
@@ -958,7 +958,7 @@ struct add_data_expressions: public Builder<Derived>
 
 };
 
-/// \brief Builder class
+/// \\brief Builder class
 template <typename Derived>
 struct data_expression_builder: public add_data_expressions<action_formulas::data_expression_builder, Derived>
 {
@@ -1025,13 +1025,13 @@ struct add_variables: public Builder<Derived>
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    if (action_formulas::is_action_formula(x))
-    {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::action_formula>(x));
-    }
-    else if (data::is_data_expression(x))
+    if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::data_expression>(x));
+    }
+    else if (action_formulas::is_action_formula(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::action_formula>(x));
     }
     else if (regular_formulas::is_seq(x))
     {
@@ -1058,7 +1058,7 @@ struct add_variables: public Builder<Derived>
 
 };
 
-/// \brief Builder class
+/// \\brief Builder class
 template <typename Derived>
 struct variable_builder: public add_variables<action_formulas::data_expression_builder, Derived>
 {
@@ -1125,13 +1125,13 @@ struct add_regular_formula_expressions: public Builder<Derived>
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    if (action_formulas::is_action_formula(x))
-    {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::action_formula>(x));
-    }
-    else if (data::is_data_expression(x))
+    if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::data_expression>(x));
+    }
+    else if (action_formulas::is_action_formula(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<action_formulas::action_formula>(x));
     }
     else if (regular_formulas::is_seq(x))
     {
@@ -1158,7 +1158,7 @@ struct add_regular_formula_expressions: public Builder<Derived>
 
 };
 
-/// \brief Builder class
+/// \\brief Builder class
 template <typename Derived>
 struct regular_formula_builder: public add_regular_formula_expressions<regular_formulas::regular_formula_builder_base, Derived>
 {
@@ -1457,7 +1457,7 @@ struct add_sort_expressions: public Builder<Derived>
 
 };
 
-/// \brief Builder class
+/// \\brief Builder class
 template <typename Derived>
 struct sort_expression_builder: public add_sort_expressions<regular_formulas::sort_expression_builder, Derived>
 {
@@ -1730,7 +1730,7 @@ struct add_data_expressions: public Builder<Derived>
 
 };
 
-/// \brief Builder class
+/// \\brief Builder class
 template <typename Derived>
 struct data_expression_builder: public add_data_expressions<regular_formulas::data_expression_builder, Derived>
 {
@@ -2003,7 +2003,7 @@ struct add_variables: public Builder<Derived>
 
 };
 
-/// \brief Builder class
+/// \\brief Builder class
 template <typename Derived>
 struct variable_builder: public add_variables<regular_formulas::data_expression_builder, Derived>
 {
@@ -2282,7 +2282,7 @@ struct add_state_formula_expressions: public Builder<Derived>
 
 };
 
-/// \brief Builder class
+/// \\brief Builder class
 template <typename Derived>
 struct state_formula_builder: public add_state_formula_expressions<state_formulas::state_formula_builder_base, Derived>
 {

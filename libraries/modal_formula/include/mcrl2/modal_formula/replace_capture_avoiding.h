@@ -60,10 +60,10 @@ struct add_capture_avoiding_replacement: public lps::detail::add_capture_avoidin
 } // namespace detail
 
 //--- start generated action_formulas replace_capture_avoiding code ---//
-/// \brief Applies sigma as a capture avoiding substitution to x.
-/// \param x The object to which the subsitution is applied.
-/// \param sigma A substitution.
-/// \param id_generator An identifier generator that generates names that do not appear in x and sigma
+/// \\brief Applies sigma as a capture avoiding substitution to x.
+/// \\param x The object to which the subsitution is applied.
+/// \\param sigma A substitution.
+/// \\param id_generator An identifier generator that generates names that do not appear in x and sigma
 template <typename T, typename Substitution>
 void replace_variables_capture_avoiding(T& x,
                                         Substitution& sigma,
@@ -75,10 +75,10 @@ void replace_variables_capture_avoiding(T& x,
   data::detail::apply_replace_capture_avoiding_variables_builder<action_formulas::data_expression_builder, action_formulas::detail::add_capture_avoiding_replacement>(sigma1).update(x);
 }
 
-/// \brief Applies sigma as a capture avoiding substitution to x.
-/// \param x The object to which the substiution is applied.
-/// \param sigma A substitution.
-/// \param id_generator An identifier generator that generates names that do not appear in x and sigma
+/// \\brief Applies sigma as a capture avoiding substitution to x.
+/// \\param x The object to which the substiution is applied.
+/// \\param sigma A substitution.
+/// \\param id_generator An identifier generator that generates names that do not appear in x and sigma
 template <typename T, typename Substitution>
 T replace_variables_capture_avoiding(const T& x,
                                      Substitution& sigma,
@@ -92,9 +92,9 @@ T replace_variables_capture_avoiding(const T& x,
   return result;
 }
 
-/// \brief Applies sigma as a capture avoiding substitution to x.
-/// \param x The object to which the subsitution is applied.
-/// \param sigma A substitution.
+/// \\brief Applies sigma as a capture avoiding substitution to x.
+/// \\param x The object to which the subsitution is applied.
+/// \\param sigma A substitution.
 template <typename T, typename Substitution>
 void replace_variables_capture_avoiding(T& x,
                                         Substitution& sigma,
@@ -110,9 +110,9 @@ void replace_variables_capture_avoiding(T& x,
   action_formulas::replace_variables_capture_avoiding(x, sigma, id_generator);
 }
 
-/// \brief Applies sigma as a capture avoiding substitution to x.
-/// \param x The object to which the substiution is applied.
-/// \param sigma A substitution.
+/// \\brief Applies sigma as a capture avoiding substitution to x.
+/// \\param x The object to which the substiution is applied.
+/// \\param sigma A substitution.
 template <typename T, typename Substitution>
 T replace_variables_capture_avoiding(const T& x,
                                      Substitution& sigma,
@@ -157,10 +157,10 @@ struct add_capture_avoiding_replacement: public action_formulas::detail::add_cap
 } // namespace detail
 
 //--- start generated regular_formulas replace_capture_avoiding code ---//
-/// \brief Applies sigma as a capture avoiding substitution to x.
-/// \param x The object to which the subsitution is applied.
-/// \param sigma A substitution.
-/// \param id_generator An identifier generator that generates names that do not appear in x and sigma
+/// \\brief Applies sigma as a capture avoiding substitution to x.
+/// \\param x The object to which the subsitution is applied.
+/// \\param sigma A substitution.
+/// \\param id_generator An identifier generator that generates names that do not appear in x and sigma
 template <typename T, typename Substitution>
 void replace_variables_capture_avoiding(T& x,
                                         Substitution& sigma,
@@ -172,10 +172,10 @@ void replace_variables_capture_avoiding(T& x,
   data::detail::apply_replace_capture_avoiding_variables_builder<regular_formulas::data_expression_builder, regular_formulas::detail::add_capture_avoiding_replacement>(sigma1).update(x);
 }
 
-/// \brief Applies sigma as a capture avoiding substitution to x.
-/// \param x The object to which the substiution is applied.
-/// \param sigma A substitution.
-/// \param id_generator An identifier generator that generates names that do not appear in x and sigma
+/// \\brief Applies sigma as a capture avoiding substitution to x.
+/// \\param x The object to which the substiution is applied.
+/// \\param sigma A substitution.
+/// \\param id_generator An identifier generator that generates names that do not appear in x and sigma
 template <typename T, typename Substitution>
 T replace_variables_capture_avoiding(const T& x,
                                      Substitution& sigma,
@@ -189,9 +189,9 @@ T replace_variables_capture_avoiding(const T& x,
   return result;
 }
 
-/// \brief Applies sigma as a capture avoiding substitution to x.
-/// \param x The object to which the subsitution is applied.
-/// \param sigma A substitution.
+/// \\brief Applies sigma as a capture avoiding substitution to x.
+/// \\param x The object to which the subsitution is applied.
+/// \\param sigma A substitution.
 template <typename T, typename Substitution>
 void replace_variables_capture_avoiding(T& x,
                                         Substitution& sigma,
@@ -207,9 +207,9 @@ void replace_variables_capture_avoiding(T& x,
   regular_formulas::replace_variables_capture_avoiding(x, sigma, id_generator);
 }
 
-/// \brief Applies sigma as a capture avoiding substitution to x.
-/// \param x The object to which the substiution is applied.
-/// \param sigma A substitution.
+/// \\brief Applies sigma as a capture avoiding substitution to x.
+/// \\param x The object to which the substiution is applied.
+/// \\param sigma A substitution.
 template <typename T, typename Substitution>
 T replace_variables_capture_avoiding(const T& x,
                                      Substitution& sigma,
@@ -270,10 +270,10 @@ struct add_capture_avoiding_replacement: public data::detail::add_capture_avoidi
 } // namespace detail
 
 //--- start generated state_formulas replace_capture_avoiding code ---//
-/// \brief Applies sigma as a capture avoiding substitution to x.
-/// \param x The object to which the subsitution is applied.
-/// \param sigma A substitution.
-/// \param id_generator An identifier generator that generates names that do not appear in x and sigma
+/// \\brief Applies sigma as a capture avoiding substitution to x.
+/// \\param x The object to which the subsitution is applied.
+/// \\param sigma A substitution.
+/// \\param id_generator An identifier generator that generates names that do not appear in x and sigma
 template <typename T, typename Substitution>
 void replace_variables_capture_avoiding(T& x,
                                         Substitution& sigma,
@@ -285,10 +285,10 @@ void replace_variables_capture_avoiding(T& x,
   data::detail::apply_replace_capture_avoiding_variables_builder<state_formulas::data_expression_builder, state_formulas::detail::add_capture_avoiding_replacement>(sigma1).update(x);
 }
 
-/// \brief Applies sigma as a capture avoiding substitution to x.
-/// \param x The object to which the substiution is applied.
-/// \param sigma A substitution.
-/// \param id_generator An identifier generator that generates names that do not appear in x and sigma
+/// \\brief Applies sigma as a capture avoiding substitution to x.
+/// \\param x The object to which the substiution is applied.
+/// \\param sigma A substitution.
+/// \\param id_generator An identifier generator that generates names that do not appear in x and sigma
 template <typename T, typename Substitution>
 T replace_variables_capture_avoiding(const T& x,
                                      Substitution& sigma,
@@ -302,9 +302,9 @@ T replace_variables_capture_avoiding(const T& x,
   return result;
 }
 
-/// \brief Applies sigma as a capture avoiding substitution to x.
-/// \param x The object to which the subsitution is applied.
-/// \param sigma A substitution.
+/// \\brief Applies sigma as a capture avoiding substitution to x.
+/// \\param x The object to which the subsitution is applied.
+/// \\param sigma A substitution.
 template <typename T, typename Substitution>
 void replace_variables_capture_avoiding(T& x,
                                         Substitution& sigma,
@@ -320,9 +320,9 @@ void replace_variables_capture_avoiding(T& x,
   state_formulas::replace_variables_capture_avoiding(x, sigma, id_generator);
 }
 
-/// \brief Applies sigma as a capture avoiding substitution to x.
-/// \param x The object to which the substiution is applied.
-/// \param sigma A substitution.
+/// \\brief Applies sigma as a capture avoiding substitution to x.
+/// \\param x The object to which the substiution is applied.
+/// \\param sigma A substitution.
 template <typename T, typename Substitution>
 T replace_variables_capture_avoiding(const T& x,
                                      Substitution& sigma,

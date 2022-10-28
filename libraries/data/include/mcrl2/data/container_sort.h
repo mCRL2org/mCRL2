@@ -22,24 +22,24 @@ namespace data
 {
 
 //--- start generated class container_sort ---//
-/// \brief A container sort
+/// \\brief A container sort
 class container_sort: public sort_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     container_sort()
       : sort_expression(core::detail::default_values::SortCons)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit container_sort(const atermpp::aterm& term)
       : sort_expression(term)
     {
       assert(core::detail::check_term_SortCons(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     container_sort(const container_type& container_name, const sort_expression& element_sort)
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortCons(), container_name, element_sort))
     {}
@@ -61,8 +61,8 @@ class container_sort: public sort_expression
     }
 };
 
-/// \brief Make_container_sort constructs a new term into a given address.
-/// \ \param t The reference into which the new container_sort is constructed. 
+/// \\brief Make_container_sort constructs a new term into a given address.
+/// \\ \param t The reference into which the new container_sort is constructed. 
 template <class... ARGUMENTS>
 inline void make_container_sort(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
@@ -72,17 +72,17 @@ inline void make_container_sort(atermpp::aterm_appl& t, const ARGUMENTS&... args
 // prototype declaration
 std::string pp(const container_sort& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const container_sort& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(container_sort& t1, container_sort& t2)
 {
   t1.swap(t2);

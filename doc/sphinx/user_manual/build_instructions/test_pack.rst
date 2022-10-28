@@ -5,6 +5,11 @@ Testing
 
 For tests can be run the python packages yaml and psutil need to be installed. 
 
+* This can be done on a mac and Linx using the commands::
+
+   sudo python3 -m easy_install pyyaml
+   sudo python3 -m easy_install psutil
+
 Before executing tests, make sure that your build has been configured
 with the value of ``MCRL2_ENABLE_TESTS`` set to ``YES`` and that
 the toolset has been compiled.

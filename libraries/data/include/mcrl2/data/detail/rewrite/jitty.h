@@ -95,7 +95,6 @@ class RewriterJitty: public Rewriter
 
     std::atomic<bool>* m_busy_flag = nullptr;
     std::atomic<bool>* m_forbidden_flag = nullptr;
-    std::size_t* m_creation_depth = nullptr;
     std::size_t* m_lock_depth = nullptr;
 
 
@@ -142,7 +141,6 @@ class RewriterJitty: public Rewriter
     {
       m_busy_flag = atermpp::detail::g_thread_term_pool().get_busy_flag();
       m_forbidden_flag = atermpp::detail::g_thread_term_pool().get_forbidden_flag();
-      m_creation_depth = atermpp::detail::g_thread_term_pool().get_creation_depth();
       m_lock_depth = atermpp::detail::g_thread_term_pool().get_lock_depth();
     }
 };

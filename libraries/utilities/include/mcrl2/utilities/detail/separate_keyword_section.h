@@ -12,10 +12,10 @@
 #ifndef MCRL2_UTILITIES_DETAIL_SEPARATE_KEYWORD_SECTION_H
 #define MCRL2_UTILITIES_DETAIL_SEPARATE_KEYWORD_SECTION_H
 
-#include "mcrl2/utilities/text_utility.h"
+#include <utility>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <utility>
+#include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2 {
 

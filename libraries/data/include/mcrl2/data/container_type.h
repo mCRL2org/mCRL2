@@ -22,17 +22,17 @@ namespace data
 {
 
 //--- start generated classes ---//
-/// \brief Container type
+/// \\brief Container type
 class container_type: public atermpp::aterm_appl
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     container_type()
       : atermpp::aterm_appl(core::detail::default_values::SortConsType)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit container_type(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
@@ -46,43 +46,43 @@ class container_type: public atermpp::aterm_appl
     container_type& operator=(container_type&&) noexcept = default;
 };
 
-/// \brief list of container_types
+/// \\brief list of container_types
 typedef atermpp::term_list<container_type> container_type_list;
 
-/// \brief vector of container_types
+/// \\brief vector of container_types
 typedef std::vector<container_type>    container_type_vector;
 
 // prototype declaration
 std::string pp(const container_type& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const container_type& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(container_type& t1, container_type& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief Container type for lists
+/// \\brief Container type for lists
 class list_container: public container_type
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     list_container()
       : container_type(core::detail::default_values::SortList)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit list_container(const atermpp::aterm& term)
       : container_type(term)
     {
@@ -96,9 +96,9 @@ class list_container: public container_type
     list_container& operator=(list_container&&) noexcept = default;
 };
 
-/// \brief Test for a list_container expression
-/// \param x A term
-/// \return True if \a x is a list_container expression
+/// \\brief Test for a list_container expression
+/// \\param x A term
+/// \\return True if \\a x is a list_container expression
 inline
 bool is_list_container(const atermpp::aterm_appl& x)
 {
@@ -108,34 +108,34 @@ bool is_list_container(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const list_container& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const list_container& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(list_container& t1, list_container& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief Container type for sets
+/// \\brief Container type for sets
 class set_container: public container_type
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     set_container()
       : container_type(core::detail::default_values::SortSet)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit set_container(const atermpp::aterm& term)
       : container_type(term)
     {
@@ -149,9 +149,9 @@ class set_container: public container_type
     set_container& operator=(set_container&&) noexcept = default;
 };
 
-/// \brief Test for a set_container expression
-/// \param x A term
-/// \return True if \a x is a set_container expression
+/// \\brief Test for a set_container expression
+/// \\param x A term
+/// \\return True if \\a x is a set_container expression
 inline
 bool is_set_container(const atermpp::aterm_appl& x)
 {
@@ -161,34 +161,34 @@ bool is_set_container(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const set_container& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const set_container& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(set_container& t1, set_container& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief Container type for bags
+/// \\brief Container type for bags
 class bag_container: public container_type
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     bag_container()
       : container_type(core::detail::default_values::SortBag)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit bag_container(const atermpp::aterm& term)
       : container_type(term)
     {
@@ -202,9 +202,9 @@ class bag_container: public container_type
     bag_container& operator=(bag_container&&) noexcept = default;
 };
 
-/// \brief Test for a bag_container expression
-/// \param x A term
-/// \return True if \a x is a bag_container expression
+/// \\brief Test for a bag_container expression
+/// \\param x A term
+/// \\return True if \\a x is a bag_container expression
 inline
 bool is_bag_container(const atermpp::aterm_appl& x)
 {
@@ -214,34 +214,34 @@ bool is_bag_container(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const bag_container& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const bag_container& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(bag_container& t1, bag_container& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief Container type for finite sets
+/// \\brief Container type for finite sets
 class fset_container: public container_type
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     fset_container()
       : container_type(core::detail::default_values::SortFSet)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit fset_container(const atermpp::aterm& term)
       : container_type(term)
     {
@@ -255,9 +255,9 @@ class fset_container: public container_type
     fset_container& operator=(fset_container&&) noexcept = default;
 };
 
-/// \brief Test for a fset_container expression
-/// \param x A term
-/// \return True if \a x is a fset_container expression
+/// \\brief Test for a fset_container expression
+/// \\param x A term
+/// \\return True if \\a x is a fset_container expression
 inline
 bool is_fset_container(const atermpp::aterm_appl& x)
 {
@@ -267,34 +267,34 @@ bool is_fset_container(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const fset_container& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const fset_container& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(fset_container& t1, fset_container& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief Container type for finite bags
+/// \\brief Container type for finite bags
 class fbag_container: public container_type
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     fbag_container()
       : container_type(core::detail::default_values::SortFBag)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit fbag_container(const atermpp::aterm& term)
       : container_type(term)
     {
@@ -308,9 +308,9 @@ class fbag_container: public container_type
     fbag_container& operator=(fbag_container&&) noexcept = default;
 };
 
-/// \brief Test for a fbag_container expression
-/// \param x A term
-/// \return True if \a x is a fbag_container expression
+/// \\brief Test for a fbag_container expression
+/// \\param x A term
+/// \\return True if \\a x is a fbag_container expression
 inline
 bool is_fbag_container(const atermpp::aterm_appl& x)
 {
@@ -320,17 +320,17 @@ bool is_fbag_container(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const fbag_container& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const fbag_container& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(fbag_container& t1, fbag_container& t2)
 {
   t1.swap(t2);

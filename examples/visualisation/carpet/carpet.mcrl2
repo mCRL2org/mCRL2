@@ -1,0 +1,25 @@
+% This example describes a "carpet", i.e., a behavioural
+% square of size (x_max,y_max). At its right upper corner
+% there is a loop back to coordinate (1,1) of length loop_max.
+% The purpose of this behaviour is to test the tool lts_graph.
+%
+% Jan Friso Groote, September 2022.
+
+map x_max, y_max, loop_max: Pos;
+
+eqn x_max=10;
+    y_max=10;
+    loop_max=4;
+
+act right, up, loop;
+
+proc Carpet(x,y:Pos)=
+       (x<x_max) -> right.Carpet(x+1,y) +
+       (y<y_max) -> up.Carpet(x,y+1) +
+       (x==x_max && y==y_max) -> Loop(loop_max);
+
+     Loop(l:Pos)=
+       (l>1) -> loop.Loop(max(l-1,1)) 
+             <> loop.Carpet(1,1);
+
+init Carpet(1,1);

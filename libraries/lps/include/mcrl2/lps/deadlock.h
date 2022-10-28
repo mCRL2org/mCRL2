@@ -85,26 +85,26 @@ class deadlock
 };
 
 //--- start generated class deadlock ---//
-/// \brief list of deadlocks
+/// \\brief list of deadlocks
 typedef atermpp::term_list<deadlock> deadlock_list;
 
-/// \brief vector of deadlocks
+/// \\brief vector of deadlocks
 typedef std::vector<deadlock>    deadlock_vector;
 
 // prototype declaration
 std::string pp(const deadlock& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const deadlock& x)
 {
   return out << lps::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(deadlock& t1, deadlock& t2)
 {
   t1.swap(t2);

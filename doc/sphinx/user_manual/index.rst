@@ -20,7 +20,7 @@
    * - .. image:: /_static/book.*
           :align: left
           :alt: Modeling and analysis of communicating systems (book)
-          :target: http://mitpress.mit.edu/books/modeling-and-analysis-communicating-systems
+          :target: https://mitpress.mit.edu/9780262027717/
      - mCRL2 is a formal specification language with an associated toolset. The
        toolset can be used for modelling, validation and verification of
        concurrent systems and protocols. It can be run on Windows, Linux, Apple
@@ -82,7 +82,7 @@
    - `Modelling software, protocols, and other behaviour <https://www.coursera.org/learn/system-validation-software-protocols>`_.
 
    The slides used to make these courses are available by contacting J.F.Groote@tue.nl. They can also
-   be downloaded from `MIT Press <http://mitpress.mit.edu/books/modeling-and-analysis-communicating-systems>`_.
+   be downloaded from `MIT Press <https://mitpress.mit.edu/9780262027717/>`_.
 
 .. note::
    .. image:: /_static/Verum-2-Logo-Vert-Colour.*

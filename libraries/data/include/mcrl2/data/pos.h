@@ -756,6 +756,18 @@ namespace mcrl2 {
         return result;
       }
       ///\brief Function for projecting out argument.
+      ///        left from an application.
+      /// \param e A data expression.
+      /// \pre left is defined for e.
+      /// \return The argument of e that corresponds to left.
+      inline
+      const data_expression& left(const data_expression& e)
+      {
+        assert(is_cdub_application(e) || is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_times_application(e));
+        return atermpp::down_cast<application>(e)[0];
+      }
+
+      ///\brief Function for projecting out argument.
       ///        right from an application.
       /// \param e A data expression.
       /// \pre right is defined for e.
@@ -765,6 +777,18 @@ namespace mcrl2 {
       {
         assert(is_cdub_application(e) || is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_times_application(e));
         return atermpp::down_cast<application>(e)[1];
+      }
+
+      ///\brief Function for projecting out argument.
+      ///        arg from an application.
+      /// \param e A data expression.
+      /// \pre arg is defined for e.
+      /// \return The argument of e that corresponds to arg.
+      inline
+      const data_expression& arg(const data_expression& e)
+      {
+        assert(is_succ_application(e) || is_pos_predecessor_application(e) || is_powerlog2_pos_application(e));
+        return atermpp::down_cast<application>(e)[0];
       }
 
       ///\brief Function for projecting out argument.
@@ -801,30 +825,6 @@ namespace mcrl2 {
       {
         assert(is_add_with_carry_application(e));
         return atermpp::down_cast<application>(e)[2];
-      }
-
-      ///\brief Function for projecting out argument.
-      ///        arg from an application.
-      /// \param e A data expression.
-      /// \pre arg is defined for e.
-      /// \return The argument of e that corresponds to arg.
-      inline
-      const data_expression& arg(const data_expression& e)
-      {
-        assert(is_succ_application(e) || is_pos_predecessor_application(e) || is_powerlog2_pos_application(e));
-        return atermpp::down_cast<application>(e)[0];
-      }
-
-      ///\brief Function for projecting out argument.
-      ///        left from an application.
-      /// \param e A data expression.
-      /// \pre left is defined for e.
-      /// \return The argument of e that corresponds to left.
-      inline
-      const data_expression& left(const data_expression& e)
-      {
-        assert(is_cdub_application(e) || is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_times_application(e));
-        return atermpp::down_cast<application>(e)[0];
       }
 
       /// \brief Give all system defined equations for pos

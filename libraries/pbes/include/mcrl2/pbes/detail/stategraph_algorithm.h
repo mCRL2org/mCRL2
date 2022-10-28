@@ -590,8 +590,7 @@ class stategraph_algorithm
     void remove_invalid_connected_components()
     {
       auto i = std::remove_if(m_connected_components.begin(), m_connected_components.end(),
-                              std::bind(std::logical_not<bool>(),
-                                        std::bind(&stategraph_algorithm::is_valid_connected_component, this, std::placeholders::_1)));
+                              [this](const std::set<std::size_t>& component){ return !is_valid_connected_component(component); });
       m_connected_components.erase(i, m_connected_components.end());
     }
 
@@ -646,7 +645,9 @@ class stategraph_algorithm
     // Removes the connected components V that consist of CFPs that are only copied.
     void remove_only_copy_components()
     {
-      auto i = std::remove_if(m_connected_components.begin(), m_connected_components.end(), std::bind(&stategraph_algorithm::has_only_copied_CFPs, this, std::placeholders::_1));
+      auto i = std::remove_if(m_connected_components.begin(), 
+                              m_connected_components.end(), 
+                              [this](const std::set<std::size_t>& component){ return has_only_copied_CFPs(component); });
       m_connected_components.erase(i, m_connected_components.end());
       mCRL2log(log::debug, "stategraph") << "--- connected components after removing 'only copy' ones ---" << std::endl;
       print_connected_components();

@@ -22,17 +22,17 @@ namespace data
 {
 
 //--- start generated classes ---//
-/// \brief Assignment expression
+/// \\brief Assignment expression
 class assignment_expression: public atermpp::aterm_appl
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     assignment_expression()
       : atermpp::aterm_appl(core::detail::default_values::WhrDecl)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit assignment_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
@@ -46,19 +46,19 @@ class assignment_expression: public atermpp::aterm_appl
     assignment_expression& operator=(assignment_expression&&) noexcept = default;
 };
 
-/// \brief list of assignment_expressions
+/// \\brief list of assignment_expressions
 typedef atermpp::term_list<assignment_expression> assignment_expression_list;
 
-/// \brief vector of assignment_expressions
+/// \\brief vector of assignment_expressions
 typedef std::vector<assignment_expression>    assignment_expression_vector;
 
 // prototypes
 inline bool is_assignment(const atermpp::aterm_appl& x);
 inline bool is_untyped_identifier_assignment(const atermpp::aterm_appl& x);
 
-/// \brief Test for a assignment_expression expression
-/// \param x A term
-/// \return True if \a x is a assignment_expression expression
+/// \\brief Test for a assignment_expression expression
+/// \\param x A term
+/// \\return True if \\a x is a assignment_expression expression
 inline
 bool is_assignment_expression(const atermpp::aterm_appl& x)
 {
@@ -69,41 +69,41 @@ bool is_assignment_expression(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const assignment_expression& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const assignment_expression& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(assignment_expression& t1, assignment_expression& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief Assignment of a data expression to a variable
+/// \\brief Assignment of a data expression to a variable
 class assignment: public assignment_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     assignment()
       : assignment_expression(core::detail::default_values::DataVarIdInit)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit assignment(const atermpp::aterm& term)
       : assignment_expression(term)
     {
       assert(core::detail::check_term_DataVarIdInit(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     assignment(const variable& lhs, const data_expression& rhs)
       : assignment_expression(atermpp::aterm_appl(core::detail::function_symbol_DataVarIdInit(), lhs, rhs))
     {}
@@ -134,23 +134,23 @@ class assignment: public assignment_expression
 //--- end user section assignment ---//
 };
 
-/// \brief Make_assignment constructs a new term into a given address.
-/// \ \param t The reference into which the new assignment is constructed. 
+/// \\brief Make_assignment constructs a new term into a given address.
+/// \\ \param t The reference into which the new assignment is constructed. 
 template <class... ARGUMENTS>
 inline void make_assignment(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_DataVarIdInit(), args...);
 }
 
-/// \brief list of assignments
+/// \\brief list of assignments
 typedef atermpp::term_list<assignment> assignment_list;
 
-/// \brief vector of assignments
+/// \\brief vector of assignments
 typedef std::vector<assignment>    assignment_vector;
 
-/// \brief Test for a assignment expression
-/// \param x A term
-/// \return True if \a x is a assignment expression
+/// \\brief Test for a assignment expression
+/// \\param x A term
+/// \\return True if \\a x is a assignment expression
 inline
 bool is_assignment(const atermpp::aterm_appl& x)
 {
@@ -160,46 +160,46 @@ bool is_assignment(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const assignment& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const assignment& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(assignment& t1, assignment& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief Assignment of a data expression to a string
+/// \\brief Assignment of a data expression to a string
 class untyped_identifier_assignment: public assignment_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     untyped_identifier_assignment()
       : assignment_expression(core::detail::default_values::UntypedIdentifierAssignment)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit untyped_identifier_assignment(const atermpp::aterm& term)
       : assignment_expression(term)
     {
       assert(core::detail::check_term_UntypedIdentifierAssignment(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     untyped_identifier_assignment(const core::identifier_string& lhs, const data_expression& rhs)
       : assignment_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedIdentifierAssignment(), lhs, rhs))
     {}
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     untyped_identifier_assignment(const std::string& lhs, const data_expression& rhs)
       : assignment_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedIdentifierAssignment(), core::identifier_string(lhs), rhs))
     {}
@@ -230,23 +230,23 @@ class untyped_identifier_assignment: public assignment_expression
 //--- end user section untyped_identifier_assignment ---//
 };
 
-/// \brief Make_untyped_identifier_assignment constructs a new term into a given address.
-/// \ \param t The reference into which the new untyped_identifier_assignment is constructed. 
+/// \\brief Make_untyped_identifier_assignment constructs a new term into a given address.
+/// \\ \param t The reference into which the new untyped_identifier_assignment is constructed. 
 template <class... ARGUMENTS>
 inline void make_untyped_identifier_assignment(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_UntypedIdentifierAssignment(), args...);
 }
 
-/// \brief list of untyped_identifier_assignments
+/// \\brief list of untyped_identifier_assignments
 typedef atermpp::term_list<untyped_identifier_assignment> untyped_identifier_assignment_list;
 
-/// \brief vector of untyped_identifier_assignments
+/// \\brief vector of untyped_identifier_assignments
 typedef std::vector<untyped_identifier_assignment>    untyped_identifier_assignment_vector;
 
-/// \brief Test for a untyped_identifier_assignment expression
-/// \param x A term
-/// \return True if \a x is a untyped_identifier_assignment expression
+/// \\brief Test for a untyped_identifier_assignment expression
+/// \\param x A term
+/// \\return True if \\a x is a untyped_identifier_assignment expression
 inline
 bool is_untyped_identifier_assignment(const atermpp::aterm_appl& x)
 {
@@ -256,17 +256,17 @@ bool is_untyped_identifier_assignment(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const untyped_identifier_assignment& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const untyped_identifier_assignment& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(untyped_identifier_assignment& t1, untyped_identifier_assignment& t2)
 {
   t1.swap(t2);

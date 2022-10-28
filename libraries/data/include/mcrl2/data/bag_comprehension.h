@@ -69,17 +69,17 @@ void make_bag_comprehension(atermpp::aterm& result, ARGUMENTS... arguments)
 // prototype declaration
 std::string pp(const bag_comprehension& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const bag_comprehension& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(bag_comprehension& t1, bag_comprehension& t2)
 {
   t1.swap(t2);

@@ -123,26 +123,26 @@ class pbes_equation
 };
 
 //--- start generated class pbes_equation ---//
-/// \brief list of pbes_equations
+/// \\brief list of pbes_equations
 typedef atermpp::term_list<pbes_equation> pbes_equation_list;
 
-/// \brief vector of pbes_equations
+/// \\brief vector of pbes_equations
 typedef std::vector<pbes_equation>    pbes_equation_vector;
 
 // prototype declaration
 std::string pp(const pbes_equation& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const pbes_equation& x)
 {
   return out << pbes_system::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(pbes_equation& t1, pbes_equation& t2)
 {
   t1.swap(t2);

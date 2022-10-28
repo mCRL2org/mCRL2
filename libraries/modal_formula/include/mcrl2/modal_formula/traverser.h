@@ -130,6 +130,10 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
     else if (action_formulas::is_true(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::true_>(x));
@@ -174,16 +178,12 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_multi_action>(x));
     }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
   }
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct sort_expression_traverser: public add_traverser_sort_expressions<lps::sort_expression_traverser, Derived>
 {
@@ -280,6 +280,10 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
     else if (action_formulas::is_true(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::true_>(x));
@@ -324,16 +328,12 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_multi_action>(x));
     }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
   }
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct data_expression_traverser: public add_traverser_data_expressions<lps::data_expression_traverser, Derived>
 {
@@ -429,6 +429,10 @@ struct add_traverser_action_formula_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
     else if (action_formulas::is_true(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::true_>(x));
@@ -473,16 +477,12 @@ struct add_traverser_action_formula_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_multi_action>(x));
     }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
   }
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct action_formula_traverser: public add_traverser_action_formula_expressions<action_formulas::action_formula_traverser_base, Derived>
 {
@@ -581,6 +581,10 @@ struct add_traverser_variables: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
     else if (action_formulas::is_true(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::true_>(x));
@@ -625,16 +629,12 @@ struct add_traverser_variables: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_multi_action>(x));
     }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
   }
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct variable_traverser: public add_traverser_variables<lps::variable_traverser, Derived>
 {
@@ -733,6 +733,10 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
     else if (action_formulas::is_true(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::true_>(x));
@@ -777,16 +781,12 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_multi_action>(x));
     }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
   }
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct identifier_string_traverser: public add_traverser_identifier_strings<lps::identifier_string_traverser, Derived>
 {
@@ -882,6 +882,10 @@ struct add_traverser_action_labels: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
     else if (action_formulas::is_true(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::true_>(x));
@@ -926,16 +930,12 @@ struct add_traverser_action_labels: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_multi_action>(x));
     }
-    else if (data::is_untyped_data_parameter(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
   }
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct action_label_traverser: public add_traverser_action_labels<lps::action_label_traverser, Derived>
 {
@@ -1021,13 +1021,13 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   void apply(const regular_formulas::regular_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    if (action_formulas::is_action_formula(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::action_formula>(x));
-    }
-    else if (data::is_data_expression(x))
+    if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
+    }
+    else if (action_formulas::is_action_formula(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::action_formula>(x));
     }
     else if (regular_formulas::is_seq(x))
     {
@@ -1054,7 +1054,7 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct sort_expression_traverser: public add_traverser_sort_expressions<action_formulas::sort_expression_traverser, Derived>
 {
@@ -1111,13 +1111,13 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   void apply(const regular_formulas::regular_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    if (action_formulas::is_action_formula(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::action_formula>(x));
-    }
-    else if (data::is_data_expression(x))
+    if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
+    }
+    else if (action_formulas::is_action_formula(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::action_formula>(x));
     }
     else if (regular_formulas::is_seq(x))
     {
@@ -1144,7 +1144,7 @@ struct add_traverser_data_expressions: public Traverser<Derived>
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct data_expression_traverser: public add_traverser_data_expressions<action_formulas::data_expression_traverser, Derived>
 {
@@ -1201,13 +1201,13 @@ struct add_traverser_regular_formula_expressions: public Traverser<Derived>
   void apply(const regular_formulas::regular_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    if (action_formulas::is_action_formula(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::action_formula>(x));
-    }
-    else if (data::is_data_expression(x))
+    if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
+    }
+    else if (action_formulas::is_action_formula(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::action_formula>(x));
     }
     else if (regular_formulas::is_seq(x))
     {
@@ -1234,7 +1234,7 @@ struct add_traverser_regular_formula_expressions: public Traverser<Derived>
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct regular_formula_traverser: public add_traverser_regular_formula_expressions<regular_formulas::regular_formula_traverser_base, Derived>
 {
@@ -1291,13 +1291,13 @@ struct add_traverser_variables: public Traverser<Derived>
   void apply(const regular_formulas::regular_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    if (action_formulas::is_action_formula(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::action_formula>(x));
-    }
-    else if (data::is_data_expression(x))
+    if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
+    }
+    else if (action_formulas::is_action_formula(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::action_formula>(x));
     }
     else if (regular_formulas::is_seq(x))
     {
@@ -1324,7 +1324,7 @@ struct add_traverser_variables: public Traverser<Derived>
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct variable_traverser: public add_traverser_variables<action_formulas::variable_traverser, Derived>
 {
@@ -1382,13 +1382,13 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   void apply(const regular_formulas::regular_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    if (action_formulas::is_action_formula(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::action_formula>(x));
-    }
-    else if (data::is_data_expression(x))
+    if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
+    }
+    else if (action_formulas::is_action_formula(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::action_formula>(x));
     }
     else if (regular_formulas::is_seq(x))
     {
@@ -1415,7 +1415,7 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct identifier_string_traverser: public add_traverser_identifier_strings<action_formulas::identifier_string_traverser, Derived>
 {
@@ -1472,13 +1472,13 @@ struct add_traverser_action_labels: public Traverser<Derived>
   void apply(const regular_formulas::regular_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    if (action_formulas::is_action_formula(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::action_formula>(x));
-    }
-    else if (data::is_data_expression(x))
+    if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
+    }
+    else if (action_formulas::is_action_formula(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::action_formula>(x));
     }
     else if (regular_formulas::is_seq(x))
     {
@@ -1505,7 +1505,7 @@ struct add_traverser_action_labels: public Traverser<Derived>
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct action_label_traverser: public add_traverser_action_labels<action_formulas::action_label_traverser, Derived>
 {
@@ -1763,7 +1763,7 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct sort_expression_traverser: public add_traverser_sort_expressions<regular_formulas::sort_expression_traverser, Derived>
 {
@@ -1996,7 +1996,7 @@ struct add_traverser_data_expressions: public Traverser<Derived>
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct data_expression_traverser: public add_traverser_data_expressions<regular_formulas::data_expression_traverser, Derived>
 {
@@ -2225,7 +2225,7 @@ struct add_traverser_state_formula_expressions: public Traverser<Derived>
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct state_formula_traverser: public add_traverser_state_formula_expressions<state_formulas::state_formula_traverser_base, Derived>
 {
@@ -2460,7 +2460,7 @@ struct add_traverser_variables: public Traverser<Derived>
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct variable_traverser: public add_traverser_variables<regular_formulas::variable_traverser, Derived>
 {
@@ -2689,7 +2689,7 @@ struct add_traverser_state_variables: public Traverser<Derived>
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct state_variable_traverser: public add_traverser_state_variables<state_formulas::state_formula_traverser_base, Derived>
 {
@@ -2928,7 +2928,7 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct identifier_string_traverser: public add_traverser_identifier_strings<regular_formulas::identifier_string_traverser, Derived>
 {
@@ -3159,7 +3159,7 @@ struct add_traverser_regular_formula_expressions: public Traverser<Derived>
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct regular_formula_traverser: public add_traverser_regular_formula_expressions<regular_formulas::regular_formula_traverser, Derived>
 {
@@ -3391,7 +3391,7 @@ struct add_traverser_action_labels: public Traverser<Derived>
 
 };
 
-/// \brief Traverser class
+/// \\brief Traverser class
 template <typename Derived>
 struct action_label_traverser: public add_traverser_action_labels<regular_formulas::action_label_traverser, Derived>
 {

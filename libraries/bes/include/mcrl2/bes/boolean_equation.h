@@ -132,17 +132,17 @@ class boolean_equation
 // prototype declaration
 std::string pp(const boolean_equation& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const boolean_equation& x)
 {
   return out << bes::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(boolean_equation& t1, boolean_equation& t2)
 {
   t1.swap(t2);

@@ -69,26 +69,26 @@ class stochastic_action_summand: public action_summand
 };
 
 //--- start generated class stochastic_action_summand ---//
-/// \brief list of stochastic_action_summands
+/// \\brief list of stochastic_action_summands
 typedef atermpp::term_list<stochastic_action_summand> stochastic_action_summand_list;
 
-/// \brief vector of stochastic_action_summands
+/// \\brief vector of stochastic_action_summands
 typedef std::vector<stochastic_action_summand>    stochastic_action_summand_vector;
 
 // prototype declaration
 std::string pp(const stochastic_action_summand& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const stochastic_action_summand& x)
 {
   return out << lps::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(stochastic_action_summand& t1, stochastic_action_summand& t2)
 {
   t1.swap(t2);

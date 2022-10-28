@@ -21,29 +21,29 @@ namespace data
 {
 
 //--- start generated class where_clause ---//
-/// \brief A where expression
+/// \\brief A where expression
 class where_clause: public data_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     where_clause()
       : data_expression(core::detail::default_values::Whr)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit where_clause(const atermpp::aterm& term)
       : data_expression(term)
     {
       assert(core::detail::check_term_Whr(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     where_clause(const data_expression& body, const assignment_expression_list& declarations)
       : data_expression(atermpp::aterm_appl(core::detail::function_symbol_Whr(), body, declarations))
     {}
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     template <typename Container>
     where_clause(const data_expression& body, const Container& declarations, typename atermpp::enable_if_container<Container, assignment_expression>::type* = nullptr)
       : data_expression(atermpp::aterm_appl(core::detail::function_symbol_Whr(), body, assignment_expression_list(declarations.begin(), declarations.end())))
@@ -72,8 +72,8 @@ class where_clause: public data_expression
 //--- end user section where_clause ---//
 };
 
-/// \brief Make_where_clause constructs a new term into a given address.
-/// \ \param t The reference into which the new where_clause is constructed. 
+/// \\brief Make_where_clause constructs a new term into a given address.
+/// \\ \param t The reference into which the new where_clause is constructed. 
 template <class... ARGUMENTS>
 inline void make_where_clause(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
@@ -83,17 +83,17 @@ inline void make_where_clause(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 // prototype declaration
 std::string pp(const where_clause& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const where_clause& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(where_clause& t1, where_clause& t2)
 {
   t1.swap(t2);

@@ -73,15 +73,15 @@ inline void make_process_initializer(atermpp::aterm_appl& t, EXPRESSION_LIST arg
 
 
 //--- start generated class process_initializer ---//
-/// \brief list of process_initializers
+/// \\brief list of process_initializers
 typedef atermpp::term_list<process_initializer> process_initializer_list;
 
-/// \brief vector of process_initializers
+/// \\brief vector of process_initializers
 typedef std::vector<process_initializer>    process_initializer_vector;
 
-/// \brief Test for a process_initializer expression
-/// \param x A term
-/// \return True if \a x is a process_initializer expression
+/// \\brief Test for a process_initializer expression
+/// \\param x A term
+/// \\return True if \\a x is a process_initializer expression
 inline
 bool is_process_initializer(const atermpp::aterm_appl& x)
 {
@@ -91,17 +91,17 @@ bool is_process_initializer(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const process_initializer& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const process_initializer& x)
 {
   return out << lps::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(process_initializer& t1, process_initializer& t2)
 {
   t1.swap(t2);

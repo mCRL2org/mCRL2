@@ -753,16 +753,16 @@ void unfold_pattern_matching(const data::data_specification& dataspec, native_tr
   std::set<data::function_symbol> recog_and_proj = complete_recognisers_projections(dataspec, nt, ssf);
 
   data::representative_generator rep_gen(dataspec);
-  using std::placeholders::_1;
-  std::function<bool(data::data_equation)> is_valid = std::bind(is_pattern_matching_rule, ssf, _1);
   for(const auto& map_eqn: rewrite_rules)
   {
     // Only unfold equations with parameters
     // Do not unfold recognisers and projection functions
     // Only unfold equations that satisfy the function 'is_pattern_matching_rule'
-    if(data::is_function_sort(map_eqn.first.sort()) &&
-       recog_and_proj.find(map_eqn.first) == recog_and_proj.end() &&
-       std::all_of(map_eqn.second.begin(), map_eqn.second.end(), is_valid))
+    if (data::is_function_sort(map_eqn.first.sort()) &&
+        recog_and_proj.find(map_eqn.first) == recog_and_proj.end() &&
+        std::all_of(map_eqn.second.begin(), 
+                    map_eqn.second.end(), 
+                    [&ssf](const data::data_equation& eqn){ return is_pattern_matching_rule(ssf, eqn); }))
     {
       data::set_identifier_generator id_gen;
       data::data_equation unfolded_eqn = unfold_pattern_matching(map_eqn.first, map_eqn.second, ssf, rep_gen, id_gen);

@@ -449,6 +449,7 @@ void aterm_pool::wait()
 void aterm_pool::lock(thread_aterm_pool_interface* thread)
 {
   if constexpr (!GlobalThreadSafe) { return; }
+  assert(thread == nullptr || !thread->is_busy()); // Cannot lock when in a shared_lock section.
 
   // Only one thread can halt everything.
   m_mutex.lock();

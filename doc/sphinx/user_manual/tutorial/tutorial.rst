@@ -40,7 +40,7 @@ References
 ----------
 
 .. [GM14a] J.F. Groote and M.R. Mousavi. `Modelling and Analysis of Communicating
-   Systems <https://mitpress.mit.edu/books/modeling-and-analysis-communicating-systems>`__. The MIT Press. 2014.
+   Systems <https://mitpress.mit.edu/9780262027717/>`__. The MIT Press. 2014.
    
 .. [GMRUW09] J.F. Groote, A.H.J. Mathijssen, M.A. Reniers, Y.S. Usenko and
    M.J. van Weerdenburg. Analysis of distributed systems with mCRL2. In

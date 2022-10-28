@@ -130,10 +130,14 @@ class lps_algorithm
     void remove_unused_summand_variables()
     {
       auto& v = m_spec.process().action_summands();
-      std::for_each(v.begin(), v.end(), std::bind(&lps_algorithm::summand_remove_unused_summand_variables<typename Specification::process_type::action_summand_type>, this, std::placeholders::_1));
+      std::for_each(v.begin(), 
+                    v.end(), 
+                    [this](action_summand& s){lps_algorithm::summand_remove_unused_summand_variables<typename Specification::process_type::action_summand_type>(s); }); 
 
       auto& w = m_spec.process().deadlock_summands();
-      std::for_each(w.begin(), w.end(), std::bind(&lps_algorithm::summand_remove_unused_summand_variables<deadlock_summand>, this, std::placeholders::_1));
+      std::for_each(w.begin(), 
+                    w.end(), 
+                    [this](deadlock_summand& s){lps_algorithm::summand_remove_unused_summand_variables<deadlock_summand>(s); }); 
     }
 };
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 #~ Copyright 2007 Wieger Wesselink.
 #~ Distributed under the Boost Software License, Version 1.0.
@@ -18,7 +18,7 @@ def read_text(filename):
     try:
         f = open(filename, 'r')
     except IOError as e:
-        print('Unable to open file ' + filename + ' ', e)
+        print(('Unable to open file ' + filename + ' ', e))
         sys.exit(0)
 
     text = f.read()

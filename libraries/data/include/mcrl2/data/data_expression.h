@@ -120,17 +120,17 @@ class application; // prototype
 /// - bag enumeration
 
 //--- start generated class data_expression ---//
-/// \brief A data expression
+/// \\brief A data expression
 class data_expression: public atermpp::aterm_appl
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     data_expression()
       : atermpp::aterm_appl(core::detail::default_values::DataExpr)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit data_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
@@ -177,26 +177,26 @@ class data_expression: public atermpp::aterm_appl
 //--- end user section data_expression ---//
 };
 
-/// \brief list of data_expressions
+/// \\brief list of data_expressions
 typedef atermpp::term_list<data_expression> data_expression_list;
 
-/// \brief vector of data_expressions
+/// \\brief vector of data_expressions
 typedef std::vector<data_expression>    data_expression_vector;
 
 // prototype declaration
 std::string pp(const data_expression& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const data_expression& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(data_expression& t1, data_expression& t2)
 {
   t1.swap(t2);

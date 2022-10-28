@@ -28,29 +28,29 @@ function_symbol const& true_();
 } // namespace sort_bool
 
 //--- start generated class data_equation ---//
-/// \brief A data equation
+/// \\brief A data equation
 class data_equation: public atermpp::aterm_appl
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     data_equation()
       : atermpp::aterm_appl(core::detail::default_values::DataEqn)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit data_equation(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_DataEqn(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     data_equation(const variable_list& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs)
       : atermpp::aterm_appl(core::detail::function_symbol_DataEqn(), variables, condition, lhs, rhs)
     {}
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     template <typename Container>
     data_equation(const Container& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs, typename atermpp::enable_if_container<Container, variable>::type* = nullptr)
       : atermpp::aterm_appl(core::detail::function_symbol_DataEqn(), variable_list(variables.begin(), variables.end()), condition, lhs, rhs)
@@ -110,34 +110,34 @@ class data_equation: public atermpp::aterm_appl
 //--- end user section data_equation ---//
 };
 
-/// \brief Make_data_equation constructs a new term into a given address.
-/// \ \param t The reference into which the new data_equation is constructed. 
+/// \\brief Make_data_equation constructs a new term into a given address.
+/// \\ \param t The reference into which the new data_equation is constructed. 
 template <class... ARGUMENTS>
 inline void make_data_equation(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_DataEqn(), args...);
 }
 
-/// \brief list of data_equations
+/// \\brief list of data_equations
 typedef atermpp::term_list<data_equation> data_equation_list;
 
-/// \brief vector of data_equations
+/// \\brief vector of data_equations
 typedef std::vector<data_equation>    data_equation_vector;
 
 // prototype declaration
 std::string pp(const data_equation& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const data_equation& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(data_equation& t1, data_equation& t2)
 {
   t1.swap(t2);

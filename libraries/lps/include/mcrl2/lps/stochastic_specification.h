@@ -71,10 +71,10 @@ class stochastic_specification: public specification_base<stochastic_linear_proc
 // prototype declaration
 std::string pp(const stochastic_specification& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const stochastic_specification& x)
 {

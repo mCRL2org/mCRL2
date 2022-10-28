@@ -61,14 +61,14 @@ struct add_capture_avoiding_replacement_with_an_identifier_generator: public lps
 } // namespace detail
 
 //--- start generated action_formulas replace_capture_avoiding_with_identifier_generator code ---//
-/// \brief Applies sigma as a capture avoiding substitution to x using an identifier generator.
-/// \details This substitution function is much faster than replace_variables_capture_avoiding, but
+/// \\brief Applies sigma as a capture avoiding substitution to x using an identifier generator.
+/// \\details This substitution function is much faster than replace_variables_capture_avoiding, but
 ///          it requires an identifier generator that generates strings for fresh variables. These
 ///          strings must be unique in the sense that they have not been used for other variables.
-/// \param x The object to which the subsitution is applied.
-/// \param sigma A mutable substitution of which it can efficiently be checked whether a variable occurs in its
+/// \\param x The object to which the subsitution is applied.
+/// \\param sigma A mutable substitution of which it can efficiently be checked whether a variable occurs in its
 ///              right hand side. The class maintain_variables_in_rhs is useful for this purpose.
-/// \param id_generator A generator that generates unique strings, not yet used as variable names.
+/// \\param id_generator A generator that generates unique strings, not yet used as variable names.
 
 template <typename T, typename Substitution, typename IdentifierGenerator>
 void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
@@ -80,15 +80,15 @@ void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
   data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<action_formulas::data_expression_builder, action_formulas::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).update(x);
 }
 
-/// \brief Applies sigma as a capture avoiding substitution to x using an identifier generator..
-/// \details This substitution function is much faster than replace_variables_capture_avoiding, but
+/// \\brief Applies sigma as a capture avoiding substitution to x using an identifier generator..
+/// \\details This substitution function is much faster than replace_variables_capture_avoiding, but
 ///          it requires an identifier generator that generates strings for fresh variables. These
 ///          strings must be unique in the sense that they have not been used for other variables.
-/// \param x The object to which the substiution is applied.
-/// \param sigma A mutable substitution of which it can efficiently be checked whether a variable occurs in its
+/// \\param x The object to which the substiution is applied.
+/// \\param sigma A mutable substitution of which it can efficiently be checked whether a variable occurs in its
 ///              right hand side. The class maintain_variables_in_rhs is useful for this purpose.
-/// \param id_generator A generator that generates unique strings, not yet used as variable names.
-/// \return The result is the term x to which sigma has been applied.
+/// \\param id_generator A generator that generates unique strings, not yet used as variable names.
+/// \\return The result is the term x to which sigma has been applied.
 template <typename T, typename Substitution, typename IdentifierGenerator>
 T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
                     Substitution& sigma,
@@ -138,14 +138,14 @@ make_add_capture_avoiding_replacement_with_an_identifier_generator(Substitution&
 } // namespace detail
 
 //--- start generated regular_formulas replace_capture_avoiding_with_identifier_generator code ---//
-/// \brief Applies sigma as a capture avoiding substitution to x using an identifier generator.
-/// \details This substitution function is much faster than replace_variables_capture_avoiding, but
+/// \\brief Applies sigma as a capture avoiding substitution to x using an identifier generator.
+/// \\details This substitution function is much faster than replace_variables_capture_avoiding, but
 ///          it requires an identifier generator that generates strings for fresh variables. These
 ///          strings must be unique in the sense that they have not been used for other variables.
-/// \param x The object to which the subsitution is applied.
-/// \param sigma A mutable substitution of which it can efficiently be checked whether a variable occurs in its
+/// \\param x The object to which the subsitution is applied.
+/// \\param sigma A mutable substitution of which it can efficiently be checked whether a variable occurs in its
 ///              right hand side. The class maintain_variables_in_rhs is useful for this purpose.
-/// \param id_generator A generator that generates unique strings, not yet used as variable names.
+/// \\param id_generator A generator that generates unique strings, not yet used as variable names.
 
 template <typename T, typename Substitution, typename IdentifierGenerator>
 void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
@@ -157,15 +157,15 @@ void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
   data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<regular_formulas::data_expression_builder, regular_formulas::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).update(x);
 }
 
-/// \brief Applies sigma as a capture avoiding substitution to x using an identifier generator..
-/// \details This substitution function is much faster than replace_variables_capture_avoiding, but
+/// \\brief Applies sigma as a capture avoiding substitution to x using an identifier generator..
+/// \\details This substitution function is much faster than replace_variables_capture_avoiding, but
 ///          it requires an identifier generator that generates strings for fresh variables. These
 ///          strings must be unique in the sense that they have not been used for other variables.
-/// \param x The object to which the substiution is applied.
-/// \param sigma A mutable substitution of which it can efficiently be checked whether a variable occurs in its
+/// \\param x The object to which the substiution is applied.
+/// \\param sigma A mutable substitution of which it can efficiently be checked whether a variable occurs in its
 ///              right hand side. The class maintain_variables_in_rhs is useful for this purpose.
-/// \param id_generator A generator that generates unique strings, not yet used as variable names.
-/// \return The result is the term x to which sigma has been applied.
+/// \\param id_generator A generator that generates unique strings, not yet used as variable names.
+/// \\return The result is the term x to which sigma has been applied.
 template <typename T, typename Substitution, typename IdentifierGenerator>
 T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
                     Substitution& sigma,
@@ -233,14 +233,14 @@ make_add_capture_avoiding_replacement_with_an_identifier_generator(Substitution&
 } // namespace detail
 
 //--- start generated state_formulas replace_capture_avoiding_with_identifier_generator code ---//
-/// \brief Applies sigma as a capture avoiding substitution to x using an identifier generator.
-/// \details This substitution function is much faster than replace_variables_capture_avoiding, but
+/// \\brief Applies sigma as a capture avoiding substitution to x using an identifier generator.
+/// \\details This substitution function is much faster than replace_variables_capture_avoiding, but
 ///          it requires an identifier generator that generates strings for fresh variables. These
 ///          strings must be unique in the sense that they have not been used for other variables.
-/// \param x The object to which the subsitution is applied.
-/// \param sigma A mutable substitution of which it can efficiently be checked whether a variable occurs in its
+/// \\param x The object to which the subsitution is applied.
+/// \\param sigma A mutable substitution of which it can efficiently be checked whether a variable occurs in its
 ///              right hand side. The class maintain_variables_in_rhs is useful for this purpose.
-/// \param id_generator A generator that generates unique strings, not yet used as variable names.
+/// \\param id_generator A generator that generates unique strings, not yet used as variable names.
 
 template <typename T, typename Substitution, typename IdentifierGenerator>
 void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
@@ -252,15 +252,15 @@ void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
   data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<state_formulas::data_expression_builder, state_formulas::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).update(x);
 }
 
-/// \brief Applies sigma as a capture avoiding substitution to x using an identifier generator..
-/// \details This substitution function is much faster than replace_variables_capture_avoiding, but
+/// \\brief Applies sigma as a capture avoiding substitution to x using an identifier generator..
+/// \\details This substitution function is much faster than replace_variables_capture_avoiding, but
 ///          it requires an identifier generator that generates strings for fresh variables. These
 ///          strings must be unique in the sense that they have not been used for other variables.
-/// \param x The object to which the substiution is applied.
-/// \param sigma A mutable substitution of which it can efficiently be checked whether a variable occurs in its
+/// \\param x The object to which the substiution is applied.
+/// \\param sigma A mutable substitution of which it can efficiently be checked whether a variable occurs in its
 ///              right hand side. The class maintain_variables_in_rhs is useful for this purpose.
-/// \param id_generator A generator that generates unique strings, not yet used as variable names.
-/// \return The result is the term x to which sigma has been applied.
+/// \\param id_generator A generator that generates unique strings, not yet used as variable names.
+/// \\return The result is the term x to which sigma has been applied.
 template <typename T, typename Substitution, typename IdentifierGenerator>
 T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
                     Substitution& sigma,

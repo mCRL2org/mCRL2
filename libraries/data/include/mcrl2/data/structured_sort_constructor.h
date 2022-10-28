@@ -24,29 +24,29 @@ namespace data
 class structured_sort;
 
 //--- start generated class structured_sort_constructor ---//
-/// \brief A constructor for a structured sort
+/// \\brief A constructor for a structured sort
 class structured_sort_constructor: public atermpp::aterm_appl
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     structured_sort_constructor()
       : atermpp::aterm_appl(core::detail::default_values::StructCons)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit structured_sort_constructor(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_StructCons(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     structured_sort_constructor(const core::identifier_string& name, const structured_sort_constructor_argument_list& arguments, core::identifier_string& recogniser)
       : atermpp::aterm_appl(core::detail::function_symbol_StructCons(), name, arguments, recogniser)
     {}
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     template <typename Container>
     structured_sort_constructor(const std::string& name, const Container& arguments, const std::string& recogniser, typename atermpp::enable_if_container<Container, structured_sort_constructor_argument>::type* = nullptr)
       : atermpp::aterm_appl(core::detail::function_symbol_StructCons(), core::identifier_string(name), structured_sort_constructor_argument_list(arguments.begin(), arguments.end()), core::identifier_string(recogniser))
@@ -187,23 +187,23 @@ class structured_sort_constructor: public atermpp::aterm_appl
 //--- end user section structured_sort_constructor ---//
 };
 
-/// \brief Make_structured_sort_constructor constructs a new term into a given address.
-/// \ \param t The reference into which the new structured_sort_constructor is constructed. 
+/// \\brief Make_structured_sort_constructor constructs a new term into a given address.
+/// \\ \param t The reference into which the new structured_sort_constructor is constructed. 
 template <class... ARGUMENTS>
 inline void make_structured_sort_constructor(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StructCons(), args...);
 }
 
-/// \brief list of structured_sort_constructors
+/// \\brief list of structured_sort_constructors
 typedef atermpp::term_list<structured_sort_constructor> structured_sort_constructor_list;
 
-/// \brief vector of structured_sort_constructors
+/// \\brief vector of structured_sort_constructors
 typedef std::vector<structured_sort_constructor>    structured_sort_constructor_vector;
 
-/// \brief Test for a structured_sort_constructor expression
-/// \param x A term
-/// \return True if \a x is a structured_sort_constructor expression
+/// \\brief Test for a structured_sort_constructor expression
+/// \\param x A term
+/// \\return True if \\a x is a structured_sort_constructor expression
 inline
 bool is_structured_sort_constructor(const atermpp::aterm_appl& x)
 {
@@ -213,17 +213,17 @@ bool is_structured_sort_constructor(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const structured_sort_constructor& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const structured_sort_constructor& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(structured_sort_constructor& t1, structured_sort_constructor& t2)
 {
   t1.swap(t2);

@@ -23,7 +23,7 @@ namespace data
 typedef std::pair<core::identifier_string, sort_expression> function_symbol_key_type;
 
 //--- start generated class function_symbol ---//
-/// \brief A function symbol
+/// \\brief A function symbol
 class function_symbol: public data_expression
 {
   public:
@@ -76,34 +76,34 @@ class function_symbol: public data_expression
 //--- end user section function_symbol ---//
 };
 
-/// \brief Make_function_symbol constructs a new term into a given address.
-/// \ \param t The reference into which the new function_symbol is constructed. 
+/// \\brief Make_function_symbol constructs a new term into a given address.
+/// \\ \param t The reference into which the new function_symbol is constructed. 
 template <class... ARGUMENTS>
 inline void make_function_symbol(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl_with_index<function_symbol,std::pair<core::identifier_string, sort_expression>>(t, core::detail::function_symbol_OpId(), args...);
 }
 
-/// \brief list of function_symbols
+/// \\brief list of function_symbols
 typedef atermpp::term_list<function_symbol> function_symbol_list;
 
-/// \brief vector of function_symbols
+/// \\brief vector of function_symbols
 typedef std::vector<function_symbol>    function_symbol_vector;
 
 // prototype declaration
 std::string pp(const function_symbol& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const function_symbol& x)
 {
   return out << data::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(function_symbol& t1, function_symbol& t2)
 {
   t1.swap(t2);

@@ -26,24 +26,24 @@ namespace process
 {
 
 //--- start generated classes ---//
-/// \brief A process expression
+/// \\brief A process expression
 class process_expression: public atermpp::aterm_appl
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     process_expression()
       : atermpp::aterm_appl(core::detail::default_values::ProcExpr)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit process_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_ProcExpr(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     process_expression(const data::untyped_data_parameter& x)
       : atermpp::aterm_appl(x)
     {}
@@ -55,10 +55,10 @@ class process_expression: public atermpp::aterm_appl
     process_expression& operator=(process_expression&&) noexcept = default;
 };
 
-/// \brief list of process_expressions
+/// \\brief list of process_expressions
 typedef atermpp::term_list<process_expression> process_expression_list;
 
-/// \brief vector of process_expressions
+/// \\brief vector of process_expressions
 typedef std::vector<process_expression>    process_expression_vector;
 
 // prototypes
@@ -85,13 +85,14 @@ inline bool is_choice(const atermpp::aterm_appl& x);
 inline bool is_stochastic_operator(const atermpp::aterm_appl& x);
 inline bool is_untyped_process_assignment(const atermpp::aterm_appl& x);
 
-/// \brief Test for a process_expression expression
-/// \param x A term
-/// \return True if \a x is a process_expression expression
+/// \\brief Test for a process_expression expression
+/// \\param x A term
+/// \\return True if \\a x is a process_expression expression
 inline
 bool is_process_expression(const atermpp::aterm_appl& x)
 {
-  return process::is_action(x) ||
+  return data::is_untyped_data_parameter(x) ||
+         process::is_action(x) ||
          process::is_process_instance(x) ||
          process::is_process_instance_assignment(x) ||
          process::is_delta(x) ||
@@ -112,48 +113,47 @@ bool is_process_expression(const atermpp::aterm_appl& x)
          process::is_left_merge(x) ||
          process::is_choice(x) ||
          process::is_stochastic_operator(x) ||
-         process::is_untyped_process_assignment(x) ||
-         data::is_untyped_data_parameter(x);
+         process::is_untyped_process_assignment(x);
 }
 
 // prototype declaration
 std::string pp(const process_expression& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const process_expression& x)
 {
   return out << process::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(process_expression& t1, process_expression& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief An action
+/// \\brief An action
 class action: public process_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     action()
       : process_expression(core::detail::default_values::Action)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit action(const atermpp::aterm& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Action(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     action(const action_label& label, const data::data_expression_list& arguments)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Action(), label, arguments))
     {}
@@ -175,23 +175,23 @@ class action: public process_expression
     }
 };
 
-/// \brief Make_action constructs a new term into a given address.
-/// \ \param t The reference into which the new action is constructed. 
+/// \\brief Make_action constructs a new term into a given address.
+/// \\ \param t The reference into which the new action is constructed. 
 template <class... ARGUMENTS>
 inline void make_action(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_Action(), args...);
 }
 
-/// \brief list of actions
+/// \\brief list of actions
 typedef atermpp::term_list<action> action_list;
 
-/// \brief vector of actions
+/// \\brief vector of actions
 typedef std::vector<action>    action_vector;
 
-/// \brief Test for a action expression
-/// \param x A term
-/// \return True if \a x is a action expression
+/// \\brief Test for a action expression
+/// \\param x A term
+/// \\return True if \\a x is a action expression
 inline
 bool is_action(const atermpp::aterm_appl& x)
 {
@@ -201,41 +201,41 @@ bool is_action(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const action& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const action& x)
 {
   return out << process::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(action& t1, action& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief A process
+/// \\brief A process
 class process_instance: public process_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     process_instance()
       : process_expression(core::detail::default_values::Process)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit process_instance(const atermpp::aterm& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Process(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     process_instance(const process_identifier& identifier, const data::data_expression_list& actual_parameters)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Process(), identifier, actual_parameters))
     {}
@@ -257,17 +257,17 @@ class process_instance: public process_expression
     }
 };
 
-/// \brief Make_process_instance constructs a new term into a given address.
-/// \ \param t The reference into which the new process_instance is constructed. 
+/// \\brief Make_process_instance constructs a new term into a given address.
+/// \\ \param t The reference into which the new process_instance is constructed. 
 template <class... ARGUMENTS>
 inline void make_process_instance(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_Process(), args...);
 }
 
-/// \brief Test for a process_instance expression
-/// \param x A term
-/// \return True if \a x is a process_instance expression
+/// \\brief Test for a process_instance expression
+/// \\param x A term
+/// \\return True if \\a x is a process_instance expression
 inline
 bool is_process_instance(const atermpp::aterm_appl& x)
 {
@@ -277,41 +277,41 @@ bool is_process_instance(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const process_instance& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const process_instance& x)
 {
   return out << process::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(process_instance& t1, process_instance& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief A process assignment
+/// \\brief A process assignment
 class process_instance_assignment: public process_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     process_instance_assignment()
       : process_expression(core::detail::default_values::ProcessAssignment)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit process_instance_assignment(const atermpp::aterm& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_ProcessAssignment(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     process_instance_assignment(const process_identifier& identifier, const data::assignment_list& assignments)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_ProcessAssignment(), identifier, assignments))
     {}
@@ -333,17 +333,17 @@ class process_instance_assignment: public process_expression
     }
 };
 
-/// \brief Make_process_instance_assignment constructs a new term into a given address.
-/// \ \param t The reference into which the new process_instance_assignment is constructed. 
+/// \\brief Make_process_instance_assignment constructs a new term into a given address.
+/// \\ \param t The reference into which the new process_instance_assignment is constructed. 
 template <class... ARGUMENTS>
 inline void make_process_instance_assignment(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_ProcessAssignment(), args...);
 }
 
-/// \brief Test for a process_instance_assignment expression
-/// \param x A term
-/// \return True if \a x is a process_instance_assignment expression
+/// \\brief Test for a process_instance_assignment expression
+/// \\param x A term
+/// \\return True if \\a x is a process_instance_assignment expression
 inline
 bool is_process_instance_assignment(const atermpp::aterm_appl& x)
 {
@@ -353,34 +353,34 @@ bool is_process_instance_assignment(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const process_instance_assignment& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const process_instance_assignment& x)
 {
   return out << process::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(process_instance_assignment& t1, process_instance_assignment& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The value delta
+/// \\brief The value delta
 class delta: public process_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     delta()
       : process_expression(core::detail::default_values::Delta)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit delta(const atermpp::aterm& term)
       : process_expression(term)
     {
@@ -394,9 +394,9 @@ class delta: public process_expression
     delta& operator=(delta&&) noexcept = default;
 };
 
-/// \brief Test for a delta expression
-/// \param x A term
-/// \return True if \a x is a delta expression
+/// \\brief Test for a delta expression
+/// \\param x A term
+/// \\return True if \\a x is a delta expression
 inline
 bool is_delta(const atermpp::aterm_appl& x)
 {
@@ -406,34 +406,34 @@ bool is_delta(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const delta& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const delta& x)
 {
   return out << process::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(delta& t1, delta& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The value tau
+/// \\brief The value tau
 class tau: public process_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     tau()
       : process_expression(core::detail::default_values::Tau)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit tau(const atermpp::aterm& term)
       : process_expression(term)
     {
@@ -447,9 +447,9 @@ class tau: public process_expression
     tau& operator=(tau&&) noexcept = default;
 };
 
-/// \brief Test for a tau expression
-/// \param x A term
-/// \return True if \a x is a tau expression
+/// \\brief Test for a tau expression
+/// \\param x A term
+/// \\return True if \\a x is a tau expression
 inline
 bool is_tau(const atermpp::aterm_appl& x)
 {
@@ -459,41 +459,41 @@ bool is_tau(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const tau& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const tau& x)
 {
   return out << process::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(tau& t1, tau& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The sum operator
+/// \\brief The sum operator
 class sum: public process_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     sum()
       : process_expression(core::detail::default_values::Sum)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit sum(const atermpp::aterm& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Sum(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     sum(const data::variable_list& variables, const process_expression& operand)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Sum(), variables, operand))
     {}
@@ -515,17 +515,17 @@ class sum: public process_expression
     }
 };
 
-/// \brief Make_sum constructs a new term into a given address.
-/// \ \param t The reference into which the new sum is constructed. 
+/// \\brief Make_sum constructs a new term into a given address.
+/// \\ \param t The reference into which the new sum is constructed. 
 template <class... ARGUMENTS>
 inline void make_sum(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_Sum(), args...);
 }
 
-/// \brief Test for a sum expression
-/// \param x A term
-/// \return True if \a x is a sum expression
+/// \\brief Test for a sum expression
+/// \\param x A term
+/// \\return True if \\a x is a sum expression
 inline
 bool is_sum(const atermpp::aterm_appl& x)
 {
@@ -535,41 +535,41 @@ bool is_sum(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const sum& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const sum& x)
 {
   return out << process::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(sum& t1, sum& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The block operator
+/// \\brief The block operator
 class block: public process_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     block()
       : process_expression(core::detail::default_values::Block)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit block(const atermpp::aterm& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Block(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     block(const core::identifier_string_list& block_set, const process_expression& operand)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Block(), block_set, operand))
     {}
@@ -591,17 +591,17 @@ class block: public process_expression
     }
 };
 
-/// \brief Make_block constructs a new term into a given address.
-/// \ \param t The reference into which the new block is constructed. 
+/// \\brief Make_block constructs a new term into a given address.
+/// \\ \param t The reference into which the new block is constructed. 
 template <class... ARGUMENTS>
 inline void make_block(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_Block(), args...);
 }
 
-/// \brief Test for a block expression
-/// \param x A term
-/// \return True if \a x is a block expression
+/// \\brief Test for a block expression
+/// \\param x A term
+/// \\return True if \\a x is a block expression
 inline
 bool is_block(const atermpp::aterm_appl& x)
 {
@@ -611,41 +611,41 @@ bool is_block(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const block& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const block& x)
 {
   return out << process::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(block& t1, block& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The hide operator
+/// \\brief The hide operator
 class hide: public process_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     hide()
       : process_expression(core::detail::default_values::Hide)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit hide(const atermpp::aterm& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Hide(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     hide(const core::identifier_string_list& hide_set, const process_expression& operand)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Hide(), hide_set, operand))
     {}
@@ -667,17 +667,17 @@ class hide: public process_expression
     }
 };
 
-/// \brief Make_hide constructs a new term into a given address.
-/// \ \param t The reference into which the new hide is constructed. 
+/// \\brief Make_hide constructs a new term into a given address.
+/// \\ \param t The reference into which the new hide is constructed. 
 template <class... ARGUMENTS>
 inline void make_hide(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_Hide(), args...);
 }
 
-/// \brief Test for a hide expression
-/// \param x A term
-/// \return True if \a x is a hide expression
+/// \\brief Test for a hide expression
+/// \\param x A term
+/// \\return True if \\a x is a hide expression
 inline
 bool is_hide(const atermpp::aterm_appl& x)
 {
@@ -687,41 +687,41 @@ bool is_hide(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const hide& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const hide& x)
 {
   return out << process::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(hide& t1, hide& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The rename operator
+/// \\brief The rename operator
 class rename: public process_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     rename()
       : process_expression(core::detail::default_values::Rename)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit rename(const atermpp::aterm& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Rename(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     rename(const rename_expression_list& rename_set, const process_expression& operand)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Rename(), rename_set, operand))
     {}
@@ -743,17 +743,17 @@ class rename: public process_expression
     }
 };
 
-/// \brief Make_rename constructs a new term into a given address.
-/// \ \param t The reference into which the new rename is constructed. 
+/// \\brief Make_rename constructs a new term into a given address.
+/// \\ \param t The reference into which the new rename is constructed. 
 template <class... ARGUMENTS>
 inline void make_rename(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_Rename(), args...);
 }
 
-/// \brief Test for a rename expression
-/// \param x A term
-/// \return True if \a x is a rename expression
+/// \\brief Test for a rename expression
+/// \\param x A term
+/// \\return True if \\a x is a rename expression
 inline
 bool is_rename(const atermpp::aterm_appl& x)
 {
@@ -763,41 +763,41 @@ bool is_rename(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const rename& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const rename& x)
 {
   return out << process::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(rename& t1, rename& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The communication operator
+/// \\brief The communication operator
 class comm: public process_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     comm()
       : process_expression(core::detail::default_values::Comm)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit comm(const atermpp::aterm& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Comm(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     comm(const communication_expression_list& comm_set, const process_expression& operand)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Comm(), comm_set, operand))
     {}
@@ -819,17 +819,17 @@ class comm: public process_expression
     }
 };
 
-/// \brief Make_comm constructs a new term into a given address.
-/// \ \param t The reference into which the new comm is constructed. 
+/// \\brief Make_comm constructs a new term into a given address.
+/// \\ \param t The reference into which the new comm is constructed. 
 template <class... ARGUMENTS>
 inline void make_comm(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_Comm(), args...);
 }
 
-/// \brief Test for a comm expression
-/// \param x A term
-/// \return True if \a x is a comm expression
+/// \\brief Test for a comm expression
+/// \\param x A term
+/// \\return True if \\a x is a comm expression
 inline
 bool is_comm(const atermpp::aterm_appl& x)
 {
@@ -839,41 +839,41 @@ bool is_comm(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const comm& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const comm& x)
 {
   return out << process::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(comm& t1, comm& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The allow operator
+/// \\brief The allow operator
 class allow: public process_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     allow()
       : process_expression(core::detail::default_values::Allow)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit allow(const atermpp::aterm& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Allow(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     allow(const action_name_multiset_list& allow_set, const process_expression& operand)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Allow(), allow_set, operand))
     {}
@@ -895,17 +895,17 @@ class allow: public process_expression
     }
 };
 
-/// \brief Make_allow constructs a new term into a given address.
-/// \ \param t The reference into which the new allow is constructed. 
+/// \\brief Make_allow constructs a new term into a given address.
+/// \\ \param t The reference into which the new allow is constructed. 
 template <class... ARGUMENTS>
 inline void make_allow(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_Allow(), args...);
 }
 
-/// \brief Test for a allow expression
-/// \param x A term
-/// \return True if \a x is a allow expression
+/// \\brief Test for a allow expression
+/// \\param x A term
+/// \\return True if \\a x is a allow expression
 inline
 bool is_allow(const atermpp::aterm_appl& x)
 {
@@ -915,41 +915,41 @@ bool is_allow(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const allow& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const allow& x)
 {
   return out << process::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(allow& t1, allow& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The synchronization operator
+/// \\brief The synchronization operator
 class sync: public process_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     sync()
       : process_expression(core::detail::default_values::Sync)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit sync(const atermpp::aterm& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Sync(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     sync(const process_expression& left, const process_expression& right)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Sync(), left, right))
     {}
@@ -971,17 +971,17 @@ class sync: public process_expression
     }
 };
 
-/// \brief Make_sync constructs a new term into a given address.
-/// \ \param t The reference into which the new sync is constructed. 
+/// \\brief Make_sync constructs a new term into a given address.
+/// \\ \param t The reference into which the new sync is constructed. 
 template <class... ARGUMENTS>
 inline void make_sync(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_Sync(), args...);
 }
 
-/// \brief Test for a sync expression
-/// \param x A term
-/// \return True if \a x is a sync expression
+/// \\brief Test for a sync expression
+/// \\param x A term
+/// \\return True if \\a x is a sync expression
 inline
 bool is_sync(const atermpp::aterm_appl& x)
 {
@@ -991,41 +991,41 @@ bool is_sync(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const sync& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const sync& x)
 {
   return out << process::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(sync& t1, sync& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The at operator
+/// \\brief The at operator
 class at: public process_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     at()
       : process_expression(core::detail::default_values::AtTime)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit at(const atermpp::aterm& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_AtTime(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     at(const process_expression& operand, const data::data_expression& time_stamp)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_AtTime(), operand, time_stamp))
     {}
@@ -1047,17 +1047,17 @@ class at: public process_expression
     }
 };
 
-/// \brief Make_at constructs a new term into a given address.
-/// \ \param t The reference into which the new at is constructed. 
+/// \\brief Make_at constructs a new term into a given address.
+/// \\ \param t The reference into which the new at is constructed. 
 template <class... ARGUMENTS>
 inline void make_at(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_AtTime(), args...);
 }
 
-/// \brief Test for a at expression
-/// \param x A term
-/// \return True if \a x is a at expression
+/// \\brief Test for a at expression
+/// \\param x A term
+/// \\return True if \\a x is a at expression
 inline
 bool is_at(const atermpp::aterm_appl& x)
 {
@@ -1067,41 +1067,41 @@ bool is_at(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const at& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const at& x)
 {
   return out << process::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(at& t1, at& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The sequential composition
+/// \\brief The sequential composition
 class seq: public process_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     seq()
       : process_expression(core::detail::default_values::Seq)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit seq(const atermpp::aterm& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Seq(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     seq(const process_expression& left, const process_expression& right)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Seq(), left, right))
     {}
@@ -1123,17 +1123,17 @@ class seq: public process_expression
     }
 };
 
-/// \brief Make_seq constructs a new term into a given address.
-/// \ \param t The reference into which the new seq is constructed. 
+/// \\brief Make_seq constructs a new term into a given address.
+/// \\ \param t The reference into which the new seq is constructed. 
 template <class... ARGUMENTS>
 inline void make_seq(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_Seq(), args...);
 }
 
-/// \brief Test for a seq expression
-/// \param x A term
-/// \return True if \a x is a seq expression
+/// \\brief Test for a seq expression
+/// \\param x A term
+/// \\return True if \\a x is a seq expression
 inline
 bool is_seq(const atermpp::aterm_appl& x)
 {
@@ -1143,41 +1143,41 @@ bool is_seq(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const seq& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const seq& x)
 {
   return out << process::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(seq& t1, seq& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The if-then operator
+/// \\brief The if-then operator
 class if_then: public process_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     if_then()
       : process_expression(core::detail::default_values::IfThen)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit if_then(const atermpp::aterm& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_IfThen(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     if_then(const data::data_expression& condition, const process_expression& then_case)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_IfThen(), condition, then_case))
     {}
@@ -1199,17 +1199,17 @@ class if_then: public process_expression
     }
 };
 
-/// \brief Make_if_then constructs a new term into a given address.
-/// \ \param t The reference into which the new if_then is constructed. 
+/// \\brief Make_if_then constructs a new term into a given address.
+/// \\ \param t The reference into which the new if_then is constructed. 
 template <class... ARGUMENTS>
 inline void make_if_then(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_IfThen(), args...);
 }
 
-/// \brief Test for a if_then expression
-/// \param x A term
-/// \return True if \a x is a if_then expression
+/// \\brief Test for a if_then expression
+/// \\param x A term
+/// \\return True if \\a x is a if_then expression
 inline
 bool is_if_then(const atermpp::aterm_appl& x)
 {
@@ -1219,41 +1219,41 @@ bool is_if_then(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const if_then& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const if_then& x)
 {
   return out << process::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(if_then& t1, if_then& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The if-then-else operator
+/// \\brief The if-then-else operator
 class if_then_else: public process_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     if_then_else()
       : process_expression(core::detail::default_values::IfThenElse)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit if_then_else(const atermpp::aterm& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_IfThenElse(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     if_then_else(const data::data_expression& condition, const process_expression& then_case, const process_expression& else_case)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_IfThenElse(), condition, then_case, else_case))
     {}
@@ -1280,17 +1280,17 @@ class if_then_else: public process_expression
     }
 };
 
-/// \brief Make_if_then_else constructs a new term into a given address.
-/// \ \param t The reference into which the new if_then_else is constructed. 
+/// \\brief Make_if_then_else constructs a new term into a given address.
+/// \\ \param t The reference into which the new if_then_else is constructed. 
 template <class... ARGUMENTS>
 inline void make_if_then_else(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_IfThenElse(), args...);
 }
 
-/// \brief Test for a if_then_else expression
-/// \param x A term
-/// \return True if \a x is a if_then_else expression
+/// \\brief Test for a if_then_else expression
+/// \\param x A term
+/// \\return True if \\a x is a if_then_else expression
 inline
 bool is_if_then_else(const atermpp::aterm_appl& x)
 {
@@ -1300,41 +1300,41 @@ bool is_if_then_else(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const if_then_else& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const if_then_else& x)
 {
   return out << process::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(if_then_else& t1, if_then_else& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The bounded initialization
+/// \\brief The bounded initialization
 class bounded_init: public process_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     bounded_init()
       : process_expression(core::detail::default_values::BInit)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit bounded_init(const atermpp::aterm& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_BInit(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     bounded_init(const process_expression& left, const process_expression& right)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_BInit(), left, right))
     {}
@@ -1356,17 +1356,17 @@ class bounded_init: public process_expression
     }
 };
 
-/// \brief Make_bounded_init constructs a new term into a given address.
-/// \ \param t The reference into which the new bounded_init is constructed. 
+/// \\brief Make_bounded_init constructs a new term into a given address.
+/// \\ \param t The reference into which the new bounded_init is constructed. 
 template <class... ARGUMENTS>
 inline void make_bounded_init(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_BInit(), args...);
 }
 
-/// \brief Test for a bounded_init expression
-/// \param x A term
-/// \return True if \a x is a bounded_init expression
+/// \\brief Test for a bounded_init expression
+/// \\param x A term
+/// \\return True if \\a x is a bounded_init expression
 inline
 bool is_bounded_init(const atermpp::aterm_appl& x)
 {
@@ -1376,41 +1376,41 @@ bool is_bounded_init(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const bounded_init& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const bounded_init& x)
 {
   return out << process::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(bounded_init& t1, bounded_init& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The merge operator
+/// \\brief The merge operator
 class merge: public process_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     merge()
       : process_expression(core::detail::default_values::Merge)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit merge(const atermpp::aterm& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Merge(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     merge(const process_expression& left, const process_expression& right)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Merge(), left, right))
     {}
@@ -1432,17 +1432,17 @@ class merge: public process_expression
     }
 };
 
-/// \brief Make_merge constructs a new term into a given address.
-/// \ \param t The reference into which the new merge is constructed. 
+/// \\brief Make_merge constructs a new term into a given address.
+/// \\ \param t The reference into which the new merge is constructed. 
 template <class... ARGUMENTS>
 inline void make_merge(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_Merge(), args...);
 }
 
-/// \brief Test for a merge expression
-/// \param x A term
-/// \return True if \a x is a merge expression
+/// \\brief Test for a merge expression
+/// \\param x A term
+/// \\return True if \\a x is a merge expression
 inline
 bool is_merge(const atermpp::aterm_appl& x)
 {
@@ -1452,41 +1452,41 @@ bool is_merge(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const merge& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const merge& x)
 {
   return out << process::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(merge& t1, merge& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The left merge operator
+/// \\brief The left merge operator
 class left_merge: public process_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     left_merge()
       : process_expression(core::detail::default_values::LMerge)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit left_merge(const atermpp::aterm& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_LMerge(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     left_merge(const process_expression& left, const process_expression& right)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_LMerge(), left, right))
     {}
@@ -1508,17 +1508,17 @@ class left_merge: public process_expression
     }
 };
 
-/// \brief Make_left_merge constructs a new term into a given address.
-/// \ \param t The reference into which the new left_merge is constructed. 
+/// \\brief Make_left_merge constructs a new term into a given address.
+/// \\ \param t The reference into which the new left_merge is constructed. 
 template <class... ARGUMENTS>
 inline void make_left_merge(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_LMerge(), args...);
 }
 
-/// \brief Test for a left_merge expression
-/// \param x A term
-/// \return True if \a x is a left_merge expression
+/// \\brief Test for a left_merge expression
+/// \\param x A term
+/// \\return True if \\a x is a left_merge expression
 inline
 bool is_left_merge(const atermpp::aterm_appl& x)
 {
@@ -1528,41 +1528,41 @@ bool is_left_merge(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const left_merge& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const left_merge& x)
 {
   return out << process::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(left_merge& t1, left_merge& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The choice operator
+/// \\brief The choice operator
 class choice: public process_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     choice()
       : process_expression(core::detail::default_values::Choice)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit choice(const atermpp::aterm& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Choice(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     choice(const process_expression& left, const process_expression& right)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Choice(), left, right))
     {}
@@ -1584,17 +1584,17 @@ class choice: public process_expression
     }
 };
 
-/// \brief Make_choice constructs a new term into a given address.
-/// \ \param t The reference into which the new choice is constructed. 
+/// \\brief Make_choice constructs a new term into a given address.
+/// \\ \param t The reference into which the new choice is constructed. 
 template <class... ARGUMENTS>
 inline void make_choice(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_Choice(), args...);
 }
 
-/// \brief Test for a choice expression
-/// \param x A term
-/// \return True if \a x is a choice expression
+/// \\brief Test for a choice expression
+/// \\param x A term
+/// \\return True if \\a x is a choice expression
 inline
 bool is_choice(const atermpp::aterm_appl& x)
 {
@@ -1604,41 +1604,41 @@ bool is_choice(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const choice& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const choice& x)
 {
   return out << process::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(choice& t1, choice& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief The distribution operator
+/// \\brief The distribution operator
 class stochastic_operator: public process_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     stochastic_operator()
       : process_expression(core::detail::default_values::StochasticOperator)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit stochastic_operator(const atermpp::aterm& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_StochasticOperator(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     stochastic_operator(const data::variable_list& variables, const data::data_expression& distribution, const process_expression& operand)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_StochasticOperator(), variables, distribution, operand))
     {}
@@ -1665,17 +1665,17 @@ class stochastic_operator: public process_expression
     }
 };
 
-/// \brief Make_stochastic_operator constructs a new term into a given address.
-/// \ \param t The reference into which the new stochastic_operator is constructed. 
+/// \\brief Make_stochastic_operator constructs a new term into a given address.
+/// \\ \param t The reference into which the new stochastic_operator is constructed. 
 template <class... ARGUMENTS>
 inline void make_stochastic_operator(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StochasticOperator(), args...);
 }
 
-/// \brief Test for a stochastic_operator expression
-/// \param x A term
-/// \return True if \a x is a stochastic_operator expression
+/// \\brief Test for a stochastic_operator expression
+/// \\param x A term
+/// \\return True if \\a x is a stochastic_operator expression
 inline
 bool is_stochastic_operator(const atermpp::aterm_appl& x)
 {
@@ -1685,46 +1685,46 @@ bool is_stochastic_operator(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const stochastic_operator& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const stochastic_operator& x)
 {
   return out << process::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(stochastic_operator& t1, stochastic_operator& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \brief An untyped process assginment
+/// \\brief An untyped process assginment
 class untyped_process_assignment: public process_expression
 {
   public:
-    /// \brief Default constructor.
+    /// \\brief Default constructor.
     untyped_process_assignment()
       : process_expression(core::detail::default_values::UntypedProcessAssignment)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
+    /// \\brief Constructor.
+    /// \\param term A term
     explicit untyped_process_assignment(const atermpp::aterm& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_UntypedProcessAssignment(*this));
     }
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     untyped_process_assignment(const core::identifier_string& name, const data::untyped_identifier_assignment_list& assignments)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedProcessAssignment(), name, assignments))
     {}
 
-    /// \brief Constructor.
+    /// \\brief Constructor.
     untyped_process_assignment(const std::string& name, const data::untyped_identifier_assignment_list& assignments)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedProcessAssignment(), core::identifier_string(name), assignments))
     {}
@@ -1746,17 +1746,17 @@ class untyped_process_assignment: public process_expression
     }
 };
 
-/// \brief Make_untyped_process_assignment constructs a new term into a given address.
-/// \ \param t The reference into which the new untyped_process_assignment is constructed. 
+/// \\brief Make_untyped_process_assignment constructs a new term into a given address.
+/// \\ \param t The reference into which the new untyped_process_assignment is constructed. 
 template <class... ARGUMENTS>
 inline void make_untyped_process_assignment(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_UntypedProcessAssignment(), args...);
 }
 
-/// \brief Test for a untyped_process_assignment expression
-/// \param x A term
-/// \return True if \a x is a untyped_process_assignment expression
+/// \\brief Test for a untyped_process_assignment expression
+/// \\param x A term
+/// \\return True if \\a x is a untyped_process_assignment expression
 inline
 bool is_untyped_process_assignment(const atermpp::aterm_appl& x)
 {
@@ -1766,17 +1766,17 @@ bool is_untyped_process_assignment(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const untyped_process_assignment& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \param x Object x
-/// \return The output stream
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const untyped_process_assignment& x)
 {
   return out << process::pp(x);
 }
 
-/// \brief swap overload
+/// \\brief swap overload
 inline void swap(untyped_process_assignment& t1, untyped_process_assignment& t2)
 {
   t1.swap(t2);

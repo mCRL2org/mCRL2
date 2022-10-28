@@ -169,7 +169,7 @@ next_state_generator::summand_subset_t::summand_subset_t(
   if (m_use_summand_pruning)
   {
     atermpp::detail::shared_subset<summand_t> full_set(generator->m_summands);
-    m_pruning_tree.summand_subset =  atermpp::detail::shared_subset<summand_t>(full_set, std::bind(next_state_generator::summand_subset_t::summand_set_contains, summand_set, std::placeholders::_1));
+    m_pruning_tree.summand_subset =  atermpp::detail::shared_subset<summand_t>(full_set, [&summand_set](const next_state_generator::summand_t& summand){ return next_state_generator::summand_subset_t::summand_set_contains(summand_set, summand); });
     build_pruning_parameters(summands);
   }
   else
@@ -305,7 +305,7 @@ atermpp::detail::shared_subset<next_state_generator::summand_t>::iterator next_s
     if (position == node->children.end())
     {
       pruning_tree_node_t child;
-      child.summand_subset = atermpp::detail::shared_subset<summand_t>(node->summand_subset, std::bind(&next_state_generator::summand_subset_t::is_not_false, this, std::placeholders::_1));
+      child.summand_subset = atermpp::detail::shared_subset<summand_t>(node->summand_subset, [this](const next_state_generator::summand_t& summand){ return next_state_generator::summand_subset_t::is_not_false(summand); });
       node->children[argument] = child;
       node = &node->children[argument];
     }
