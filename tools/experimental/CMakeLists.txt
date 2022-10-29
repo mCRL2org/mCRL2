@@ -12,6 +12,7 @@ set(MCRL2_TOOLS
   pbespor
   pbessymbolicbisim
   symbolic_exploration
+  lps2jani
 )
 
 if(MCRL2_ENABLE_EXPERIMENTAL)

@@ -459,7 +459,8 @@ class explorer: public abortable
                     distribution.variables(), 
                     distribution.distribution(),
                     sigma,
-                    [&](const enumerator_element& p) {
+                    [&](const enumerator_element& p) 
+                    {
                       p.add_assignments(distribution.variables(), sigma, rewr);
                       result.probabilities.push_back(p.expression());
                       result.states.emplace_back();

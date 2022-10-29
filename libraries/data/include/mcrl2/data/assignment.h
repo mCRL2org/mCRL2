@@ -127,7 +127,7 @@ class assignment: public assignment_expression
     /// \brief Applies the assignment to a variable
     /// \param[in] x A variable
     /// \return The value <tt>x[lhs() := rhs()]</tt>.
-    const data_expression &operator()(const variable& x) const
+    const data_expression& operator()(const variable& x) const
     {
       return x == lhs() ? rhs() : x;
     }
