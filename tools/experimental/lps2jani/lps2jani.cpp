@@ -13,7 +13,7 @@
 ///        works for .lps specs using simple data. 
 
 #include <fstream>
-#include <boost/property_tree/json_parser.hpp>
+// #include <boost/property_tree/json_parser.hpp>
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/enumerator.h"
@@ -498,7 +498,8 @@ class lps2jani_tool: public rewriter_tool<input_output_tool>
       lps::stochastic_specification stochastic_lpsspec;
       lps::load_lps(stochastic_lpsspec, input_filename());
       data_structures d(stochastic_lpsspec);
-      boost::property_tree::ptree p; // Todo: must contain the Jani tree. 
+      // boost::property_tree::ptree p; Boost property tree does not work. 
+      // Use BOOST.json, but it is only available in Boost 1.79.
 
       if (output_filename().empty())
       {
