@@ -13,6 +13,7 @@
 ///        works for .lps specs using simple data. 
 
 #include <fstream>
+#include <boost/property_tree/json_parser.hpp>
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/enumerator.h"
@@ -109,90 +110,90 @@ class lps2jani_tool: public rewriter_tool<input_output_tool>
       {
         // out << pp(e);  
         const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "{ \"exp\": { \"left\": ";
+        out << "{ \"left\": ";
         export_data_expression_to_jani(appl[0], out, sigma, d);
         out << ", \"op\": \"/\", \"right\": ";
         export_data_expression_to_jani(appl[1], out, sigma, d);
-        out << " } }";
+        out << " }";
       }
       else if (data::sort_bool::is_and_application(e))
       {
         const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "{ \"exp\": { \"left\": ";
+        out << "{ \"left\": ";
         export_data_expression_to_jani(appl[0], out, sigma, d);
         out << ", \"op\": \"∧\", \"right\": ";
         export_data_expression_to_jani(appl[1], out, sigma, d);
-        out << " } }";
+        out << " }";
       }
       else if (data::sort_bool::is_or_application(e))
       {
         const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "{ \"exp\": { \"left\": ";
+        out << "{ \"left\": ";
         export_data_expression_to_jani(appl[0], out, sigma, d);
         out << ", \"op\": \"∨\", \"right\": ";
         export_data_expression_to_jani(appl[1], out, sigma, d);
-        out << " } }";
+        out << " }";
       }
       else if (data::sort_bool::is_not_application(e))
       {
         const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "{ \"exp\": { \"op\": \"¬\", \"right\": ";
+        out << "{ \"op\": \"¬\", \"exp\": ";
         export_data_expression_to_jani(appl[0], out, sigma, d);
-        out << " } }";
+        out << " }";
       }
       else if (is_equal_to_application(e))
       {
         const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "{ \"exp\": { \"left\": ";
+        out << "{ \"left\": ";
         export_data_expression_to_jani(appl[0], out, sigma, d);
         out << ", \"op\": \"=\", \"right\": ";
         export_data_expression_to_jani(appl[1], out, sigma, d);
-        out << " } }";
+        out << " }";
       }
       else if (is_not_equal_to_application(e))
       {
         const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "{ \"exp\": { \"left\": ";
+        out << "{ \"left\": ";
         export_data_expression_to_jani(appl[0], out, sigma, d);
         out << ", \"op\": \"≠\", \"right\": ";
         export_data_expression_to_jani(appl[1], out, sigma, d);
-        out << " } }";
+        out << " }";
       }
       else if (is_less_application(e))
       {
         const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "{ \"exp\": { \"left\": ";
+        out << "{ \"left\": ";
         export_data_expression_to_jani(appl[0], out, sigma, d);
         out << ", \"op\": \"<\", \"right\": ";
         export_data_expression_to_jani(appl[1], out, sigma, d);
-        out << " } }";
+        out << " }";
       }
       else if (is_less_equal_application(e))
       {
         const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "{ \"exp\": { \"left\": ";
+        out << "{ \"left\": ";
         export_data_expression_to_jani(appl[0], out, sigma, d);
         out << ", \"op\": \"≤\", \"right\": ";
         export_data_expression_to_jani(appl[1], out, sigma, d);
-        out << " } }";
+        out << " }";
       }
       else if (is_greater_application(e))
       {
         const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "{ \"exp\": { \"left\": ";
+        out << "{ \"left\": ";
         export_data_expression_to_jani(appl[1], out, sigma, d);
         out << ", \"op\": \"<\", \"right\": ";
         export_data_expression_to_jani(appl[0], out, sigma, d);
-        out << " } }";
+        out << " }";
       }
       else if (is_greater_equal_application(e))
       {
         const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "{ \"exp\": { \"left\": ";
+        out << "{ \"left\": ";
         export_data_expression_to_jani(appl[1], out, sigma, d);
         out << ", \"op\": \"≤\", \"right\": ";
         export_data_expression_to_jani(appl[0], out, sigma, d);
-        out << " } }";
+        out << " }";
       }
       else if (data::sort_pos::is_plus_application(e) ||
                data::sort_nat::is_plus_application(e) ||
@@ -200,21 +201,21 @@ class lps2jani_tool: public rewriter_tool<input_output_tool>
                data::sort_real::is_plus_application(e))
       {
         const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "} \"exp\": { \"left\": ";
+        out << "{ \"left\": ";
         export_data_expression_to_jani(appl[0], out, sigma, d);
         out << ", \"op\": \"+\", \"right\": ";
         export_data_expression_to_jani(appl[1], out, sigma, d);
-        out << " } }";
+        out << " }";
       }
       else if (data::sort_int::is_minus_application(e) ||
                data::sort_real::is_minus_application(e))
       {
         const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "{ \"exp\": { \"left\": ";
+        out << "{ \"left\": ";
         export_data_expression_to_jani(appl[0], out, sigma, d);
         out << ", \"op\": \"-\", \"right\": ";
         export_data_expression_to_jani(appl[1], out, sigma, d);
-        out << " } }";
+        out << " }";
       }
       else if (data::sort_pos::is_times_application(e) ||
                data::sort_nat::is_times_application(e) ||
@@ -222,30 +223,30 @@ class lps2jani_tool: public rewriter_tool<input_output_tool>
                data::sort_real::is_times_application(e))
       {
         const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "{ \"exp\": { \"left\": ";
+        out << "{ \"left\": ";
         export_data_expression_to_jani(appl[0], out, sigma, d);
         out << ", \"op\": \"*\", \"right\": ";
         export_data_expression_to_jani(appl[1], out, sigma, d);
-        out << " } }";
+        out << " }";
       }
       else if (data::sort_nat::is_mod_application(e) ||
                data::sort_nat::is_mod_application(e))
       {
         const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "{ \"exp\": { \"left\": ";
+        out << "{ \"left\": ";
         export_data_expression_to_jani(appl[0], out, sigma, d);
         out << ", \"op\": \"%\", \"right\": ";
         export_data_expression_to_jani(appl[1], out, sigma, d);
-        out << " } }";
+        out << " }";
       }
       else if (data::sort_real::is_divides_application(e))
       {
         const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "{ \"exp\": { \"left\": ";
+        out << "{ \"left\": ";
         export_data_expression_to_jani(appl[0], out, sigma, d);
         out << ", \"op\": \"/\", \"right\": ";
         export_data_expression_to_jani(appl[1], out, sigma, d);
-        out << " } }";
+        out << " }";
       }
       else if (data::sort_int::is_int(e.sort()) ||
                data::sort_nat::is_nat(e.sort()) ||
@@ -346,9 +347,9 @@ class lps2jani_tool: public rewriter_tool<input_output_tool>
       out << separator 
           << indent << "{\n"
           << indent << "  \"location\": \"l\",\n"
-          << indent << "  \"probability\": ";
+          << indent << "  \"probability\": { \"exp\": ";
       export_data_expression_to_jani(p.expression(), out, sigma, d);
-      out << ",\n";
+      out << "},\n";
       export_assignments_to_jani(assignments, parameters, out, indent + "  ", sigma, d);
       out << indent << "}";
       separator = ",\n";
@@ -409,9 +410,9 @@ class lps2jani_tool: public rewriter_tool<input_output_tool>
             << indent << "{"
             // << indent << "\"action\": \"" << s.multi_action() << "\",\n" TO BE INSERTED MAYBE, NOW TAU. 
             << indent << "\"location\": \"l\",\n"
-            << indent << "\"guard\": ";
+            << indent << "\"guard\": { \"exp\": ";
         export_data_expression_to_jani(s.condition(), out, sigma, d);
-        out << " ,\n"
+        out << " },\n"
             << indent << "\"destinations\":\n"
             << indent << "[\n";
         export_distribution_to_jani(s.distribution(), s.assignments(), parameters, out, sigma, indent + "  ", d);
@@ -494,13 +495,10 @@ class lps2jani_tool: public rewriter_tool<input_output_tool>
 
     bool run() override
     {
-      // mCRL2log(log::verbose) << options << std::endl;
-
       lps::stochastic_specification stochastic_lpsspec;
       lps::load_lps(stochastic_lpsspec, input_filename());
       data_structures d(stochastic_lpsspec);
-      // m_rewr=data::rewriter(stochastic_lpsspec.data(), false);
-      // m_enumerator=std::move(data::enumerator_algorithm<>(m_rewr, stochastic_lpsspec.data(), m_rewr, m_id_generator, false));
+      boost::property_tree::ptree p; // Todo: must contain the Jani tree. 
 
       if (output_filename().empty())
       {
