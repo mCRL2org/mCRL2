@@ -11,6 +11,10 @@
 ///        that tools like Modest or Storm can be used to analyse probabilistic
 ///        aspects. As Jani hardly support data types, the translation only
 ///        works for .lps specs using simple data. 
+///
+//  TODO: This tool should be rewritten using the boost json library.
+//        But this is only available in Boost 1.75. Currently, we
+//        support Boost 1.66. 
 
 #include <fstream>
 // #include <boost/property_tree/json_parser.hpp>
@@ -35,6 +39,7 @@ class data_structures
   data::rewriter m_rewr;
   data::enumerator_identifier_generator m_id_generator;
   data::enumerator_algorithm<> m_enumerator;
+  data::mutable_indexed_substitution<> m_sigma;
 
   public:
     data_structures(const lps::stochastic_specification& stochastic_lpsspec)
@@ -43,14 +48,19 @@ class data_structures
     {
     }
 
-    const data::data_expression rewriter(const data::data_expression& e, data::mutable_indexed_substitution<>& sigma) const
+    const data::data_expression rewriter(const data::data_expression& e) const
     {
-      return m_rewr(e, sigma);;
+      return m_rewr(e, m_sigma);;
     }
 
     data::enumerator_algorithm<>& enumerator()
     {
       return m_enumerator;
+    }
+
+    data::mutable_indexed_substitution<>& sigma()
+    {
+      return m_sigma;
     }
 };
 
@@ -98,10 +108,9 @@ class lps2jani_tool: public rewriter_tool<input_output_tool>
 
     void export_data_expression_to_jani(const data::data_expression& e_in,
                                         std::ostream& out,
-                                        data::mutable_indexed_substitution<>& sigma,
                                         data_structures& d)
     {
-      const data::data_expression e = d.rewriter(e_in, sigma);
+      const data::data_expression e = d.rewriter(e_in);
       if (is_variable(e))
       {
         out << " \"" << atermpp::down_cast<data::variable>(e).name() << "\" ";
@@ -111,88 +120,88 @@ class lps2jani_tool: public rewriter_tool<input_output_tool>
         // out << pp(e);  
         const data::application& appl = atermpp::down_cast<data::application>(e);
         out << "{ \"left\": ";
-        export_data_expression_to_jani(appl[0], out, sigma, d);
+        export_data_expression_to_jani(appl[0], out, d);
         out << ", \"op\": \"/\", \"right\": ";
-        export_data_expression_to_jani(appl[1], out, sigma, d);
+        export_data_expression_to_jani(appl[1], out, d);
         out << " }";
       }
       else if (data::sort_bool::is_and_application(e))
       {
         const data::application& appl = atermpp::down_cast<data::application>(e);
         out << "{ \"left\": ";
-        export_data_expression_to_jani(appl[0], out, sigma, d);
+        export_data_expression_to_jani(appl[0], out, d);
         out << ", \"op\": \"∧\", \"right\": ";
-        export_data_expression_to_jani(appl[1], out, sigma, d);
+        export_data_expression_to_jani(appl[1], out, d);
         out << " }";
       }
       else if (data::sort_bool::is_or_application(e))
       {
         const data::application& appl = atermpp::down_cast<data::application>(e);
         out << "{ \"left\": ";
-        export_data_expression_to_jani(appl[0], out, sigma, d);
+        export_data_expression_to_jani(appl[0], out, d);
         out << ", \"op\": \"∨\", \"right\": ";
-        export_data_expression_to_jani(appl[1], out, sigma, d);
+        export_data_expression_to_jani(appl[1], out, d);
         out << " }";
       }
       else if (data::sort_bool::is_not_application(e))
       {
         const data::application& appl = atermpp::down_cast<data::application>(e);
         out << "{ \"op\": \"¬\", \"exp\": ";
-        export_data_expression_to_jani(appl[0], out, sigma, d);
+        export_data_expression_to_jani(appl[0], out, d);
         out << " }";
       }
       else if (is_equal_to_application(e))
       {
         const data::application& appl = atermpp::down_cast<data::application>(e);
         out << "{ \"left\": ";
-        export_data_expression_to_jani(appl[0], out, sigma, d);
+        export_data_expression_to_jani(appl[0], out, d);
         out << ", \"op\": \"=\", \"right\": ";
-        export_data_expression_to_jani(appl[1], out, sigma, d);
+        export_data_expression_to_jani(appl[1], out, d);
         out << " }";
       }
       else if (is_not_equal_to_application(e))
       {
         const data::application& appl = atermpp::down_cast<data::application>(e);
         out << "{ \"left\": ";
-        export_data_expression_to_jani(appl[0], out, sigma, d);
+        export_data_expression_to_jani(appl[0], out, d);
         out << ", \"op\": \"≠\", \"right\": ";
-        export_data_expression_to_jani(appl[1], out, sigma, d);
+        export_data_expression_to_jani(appl[1], out, d);
         out << " }";
       }
       else if (is_less_application(e))
       {
         const data::application& appl = atermpp::down_cast<data::application>(e);
         out << "{ \"left\": ";
-        export_data_expression_to_jani(appl[0], out, sigma, d);
+        export_data_expression_to_jani(appl[0], out, d);
         out << ", \"op\": \"<\", \"right\": ";
-        export_data_expression_to_jani(appl[1], out, sigma, d);
+        export_data_expression_to_jani(appl[1], out, d);
         out << " }";
       }
       else if (is_less_equal_application(e))
       {
         const data::application& appl = atermpp::down_cast<data::application>(e);
         out << "{ \"left\": ";
-        export_data_expression_to_jani(appl[0], out, sigma, d);
+        export_data_expression_to_jani(appl[0], out, d);
         out << ", \"op\": \"≤\", \"right\": ";
-        export_data_expression_to_jani(appl[1], out, sigma, d);
+        export_data_expression_to_jani(appl[1], out, d);
         out << " }";
       }
       else if (is_greater_application(e))
       {
         const data::application& appl = atermpp::down_cast<data::application>(e);
         out << "{ \"left\": ";
-        export_data_expression_to_jani(appl[1], out, sigma, d);
+        export_data_expression_to_jani(appl[1], out, d);
         out << ", \"op\": \"<\", \"right\": ";
-        export_data_expression_to_jani(appl[0], out, sigma, d);
+        export_data_expression_to_jani(appl[0], out, d);
         out << " }";
       }
       else if (is_greater_equal_application(e))
       {
         const data::application& appl = atermpp::down_cast<data::application>(e);
         out << "{ \"left\": ";
-        export_data_expression_to_jani(appl[1], out, sigma, d);
+        export_data_expression_to_jani(appl[1], out, d);
         out << ", \"op\": \"≤\", \"right\": ";
-        export_data_expression_to_jani(appl[0], out, sigma, d);
+        export_data_expression_to_jani(appl[0], out, d);
         out << " }";
       }
       else if (data::sort_pos::is_plus_application(e) ||
@@ -202,9 +211,9 @@ class lps2jani_tool: public rewriter_tool<input_output_tool>
       {
         const data::application& appl = atermpp::down_cast<data::application>(e);
         out << "{ \"left\": ";
-        export_data_expression_to_jani(appl[0], out, sigma, d);
+        export_data_expression_to_jani(appl[0], out, d);
         out << ", \"op\": \"+\", \"right\": ";
-        export_data_expression_to_jani(appl[1], out, sigma, d);
+        export_data_expression_to_jani(appl[1], out, d);
         out << " }";
       }
       else if (data::sort_int::is_minus_application(e) ||
@@ -212,9 +221,9 @@ class lps2jani_tool: public rewriter_tool<input_output_tool>
       {
         const data::application& appl = atermpp::down_cast<data::application>(e);
         out << "{ \"left\": ";
-        export_data_expression_to_jani(appl[0], out, sigma, d);
+        export_data_expression_to_jani(appl[0], out, d);
         out << ", \"op\": \"-\", \"right\": ";
-        export_data_expression_to_jani(appl[1], out, sigma, d);
+        export_data_expression_to_jani(appl[1], out, d);
         out << " }";
       }
       else if (data::sort_pos::is_times_application(e) ||
@@ -224,9 +233,9 @@ class lps2jani_tool: public rewriter_tool<input_output_tool>
       {
         const data::application& appl = atermpp::down_cast<data::application>(e);
         out << "{ \"left\": ";
-        export_data_expression_to_jani(appl[0], out, sigma, d);
+        export_data_expression_to_jani(appl[0], out, d);
         out << ", \"op\": \"*\", \"right\": ";
-        export_data_expression_to_jani(appl[1], out, sigma, d);
+        export_data_expression_to_jani(appl[1], out, d);
         out << " }";
       }
       else if (data::sort_nat::is_mod_application(e) ||
@@ -234,18 +243,18 @@ class lps2jani_tool: public rewriter_tool<input_output_tool>
       {
         const data::application& appl = atermpp::down_cast<data::application>(e);
         out << "{ \"left\": ";
-        export_data_expression_to_jani(appl[0], out, sigma, d);
+        export_data_expression_to_jani(appl[0], out, d);
         out << ", \"op\": \"%\", \"right\": ";
-        export_data_expression_to_jani(appl[1], out, sigma, d);
+        export_data_expression_to_jani(appl[1], out, d);
         out << " }";
       }
       else if (data::sort_real::is_divides_application(e))
       {
         const data::application& appl = atermpp::down_cast<data::application>(e);
         out << "{ \"left\": ";
-        export_data_expression_to_jani(appl[0], out, sigma, d);
+        export_data_expression_to_jani(appl[0], out, d);
         out << ", \"op\": \"/\", \"right\": ";
-        export_data_expression_to_jani(appl[1], out, sigma, d);
+        export_data_expression_to_jani(appl[1], out, d);
         out << " }";
       }
       else if (data::sort_int::is_int(e.sort()) ||
@@ -266,11 +275,10 @@ class lps2jani_tool: public rewriter_tool<input_output_tool>
     void export_initial_value_to_jani(const data::data_expression& init,
                                       std::ostream& out,
                                       const std::string& indent,
-                                      data::mutable_indexed_substitution<>& sigma,
                                       data_structures& d)
     {
       out << indent << "  \"initial-value\": ";
-      export_data_expression_to_jani(init, out, sigma, d);
+      export_data_expression_to_jani(init, out, d);
       out << indent << "\n";
     }
 
@@ -313,7 +321,6 @@ class lps2jani_tool: public rewriter_tool<input_output_tool>
                                     const data::variable_list& parameters,
                                     std::ostream& out,
                                     const std::string& indent,
-                                    data::mutable_indexed_substitution<>& sigma,
                                     data_structures& d)
     {
       if (!parameters.empty())
@@ -327,7 +334,7 @@ class lps2jani_tool: public rewriter_tool<input_output_tool>
               << indent << "    \"ref\": \"" << ass.lhs().name() << "\",\n"
               << indent << "    \"value\": ";
           
-          export_data_expression_to_jani(ass.rhs(), out, sigma, d);
+          export_data_expression_to_jani(ass.rhs(), out, d);
           out << "\n" << indent << "  }";
           separator = ",";
         }
@@ -338,7 +345,6 @@ class lps2jani_tool: public rewriter_tool<input_output_tool>
     void export_distribution_instance_to_jani(const enumerator_element& p,
                                               const data::assignment_list& assignments,
                                               const data::variable_list& parameters,
-                                              data::mutable_indexed_substitution<>& sigma,
                                               std::ostream& out,
                                               const std::string& indent,
                                               std::string& separator,
@@ -348,9 +354,9 @@ class lps2jani_tool: public rewriter_tool<input_output_tool>
           << indent << "{\n"
           << indent << "  \"location\": \"l\",\n"
           << indent << "  \"probability\": { \"exp\": ";
-      export_data_expression_to_jani(p.expression(), out, sigma, d);
+      export_data_expression_to_jani(p.expression(), out, d);
       out << "},\n";
-      export_assignments_to_jani(assignments, parameters, out, indent + "  ", sigma, d);
+      export_assignments_to_jani(assignments, parameters, out, indent + "  ", d);
       out << indent << "}";
       separator = ",\n";
     }
@@ -359,7 +365,6 @@ class lps2jani_tool: public rewriter_tool<input_output_tool>
                                      const data::assignment_list& assignments,
                                      const data::variable_list& parameters,
                                      std::ostream& out,
-                                     data::mutable_indexed_substitution<>& sigma,
                                      const std::string& indent,
                                      data_structures& d)
     {
@@ -369,10 +374,10 @@ class lps2jani_tool: public rewriter_tool<input_output_tool>
         d.enumerator().enumerate<enumerator_element>(
                     dist.variables(),
                     dist.distribution(),
-                    sigma,
+                    d.sigma(),
                     [&](const enumerator_element& p) 
                     {
-                      export_distribution_instance_to_jani(p, assignments, parameters, sigma, out, indent, separator, d);
+                      export_distribution_instance_to_jani(p, assignments, parameters, out, indent, separator, d);
                       return false;
                     },
                     [](const data::data_expression& e) 
@@ -387,7 +392,7 @@ class lps2jani_tool: public rewriter_tool<input_output_tool>
         out << indent << "{\n"
             << indent << "  \"location\": \"l\",\n"
             << indent << "  \"probability\": { \"exp\": 1 },\n";
-            export_assignments_to_jani(assignments, parameters, out, indent + "  ", sigma, d);
+            export_assignments_to_jani(assignments, parameters, out, indent + "  ", d);
         out << indent << "}\n";
       }
     }
@@ -396,7 +401,6 @@ class lps2jani_tool: public rewriter_tool<input_output_tool>
                                         const data::variable_list& parameters,
                                         std::ostream& out,
                                         const std::string& indent,
-                                        data::mutable_indexed_substitution<>& sigma,
                                         data_structures& d)
     {
       std::string separator;
@@ -411,11 +415,11 @@ class lps2jani_tool: public rewriter_tool<input_output_tool>
             // << indent << "\"action\": \"" << s.multi_action() << "\",\n" TO BE INSERTED MAYBE, NOW TAU. 
             << indent << "\"location\": \"l\",\n"
             << indent << "\"guard\": { \"exp\": ";
-        export_data_expression_to_jani(s.condition(), out, sigma, d);
+        export_data_expression_to_jani(s.condition(), out, d);
         out << " },\n"
             << indent << "\"destinations\":\n"
             << indent << "[\n";
-        export_distribution_to_jani(s.distribution(), s.assignments(), parameters, out, sigma, indent + "  ", d);
+        export_distribution_to_jani(s.distribution(), s.assignments(), parameters, out, indent + "  ", d);
         out << "\n" << indent << "]\n"
             << indent << "}";;
         separator = ","; // TODO
@@ -425,7 +429,6 @@ class lps2jani_tool: public rewriter_tool<input_output_tool>
     void export_parameter_declarations_to_jani(const data::variable_list& parameters, 
                                                const lps::stochastic_process_initializer& initial_values,
                                                std::ostream& out,
-                                               data::mutable_indexed_substitution<>& sigma,
                                                data_structures& d)
     {
       if (!parameters.empty())
@@ -446,7 +449,7 @@ class lps2jani_tool: public rewriter_tool<input_output_tool>
               << "                   \"type\": ";
           export_sort_to_jani(v.sort(), out, "                           ");
           out << ",\n";
-          export_initial_value_to_jani(*initial_value_iterator, out, "                 ", sigma, d);
+          export_initial_value_to_jani(*initial_value_iterator, out, "                 ", d);
 
           out << "                    }";
           separator = ",\n                 ";
@@ -461,13 +464,12 @@ class lps2jani_tool: public rewriter_tool<input_output_tool>
                                       const std::string& input_file_name,
                                       data_structures& d)
     {
-      data::mutable_indexed_substitution<> sigma;
       out << "{ \"jani-version\": 1,\n"
           << "  \"name\": \"" << input_file_name << ".jani\",\n"
           << "  \"type\": \"dtmc\",\n";
       export_action_declarations_to_jani(spec.action_labels(), out);
       out << "  \"features\": [ \"derived-operators\" ],\n";
-      export_parameter_declarations_to_jani(spec.process().process_parameters(), spec.initial_process(), out, sigma, d);
+      export_parameter_declarations_to_jani(spec.process().process_parameters(), spec.initial_process(), out, d);
 
       out << "  \"properties\": [],\n"
           << "  \"automata\":\n"
@@ -481,7 +483,6 @@ class lps2jani_tool: public rewriter_tool<input_output_tool>
                                      spec.process().process_parameters(),
                                      out,
                                      "       ",
-                                     sigma,
                                      d);
       out << "      ]\n"
           << "    }\n"
