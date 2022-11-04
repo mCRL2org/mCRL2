@@ -27,6 +27,7 @@
 #include <QVector3D>
 #include <QString>
 #include <QElapsedTimer>
+#include <QPainter>
 
 #include <utility>
 #include <cmath>
@@ -330,6 +331,104 @@ class NodeNode : public NodeWithColor
 class Exploration;
 class Information;
 
+#define DEBUG_GRAPHS
+#ifdef DEBUG_GRAPHS
+
+
+
+struct DataView{
+  double min, max, average, std;
+  std::size_t n;
+  DataView(std::list<double>& input_list);
+};
+class DebugView{
+
+  public:
+    DebugView(int log_duration = 0, std::size_t min_interval = 0);
+
+    void push(double value);
+
+    /// @brief if more than 1 sample is compiled into 1 point on the line
+    ///        we can draw either of the following statistics
+    bool m_drawStd = false;
+
+    bool m_drawAvg = true;
+
+    bool m_drawMin = false;
+
+    bool m_drawMax = false;
+
+    void draw(QPainter& painter, QBrush& brush, QPen& pen);
+    
+    void setDrawingArea(int width, int height, int offsetX, int offsetY);
+    double getMax(){ return m_max_value; }
+    double recalcMax();
+    void setMax(double max)
+    {
+      m_max_value = max;
+    }
+    QPointF getOffset() { return QPointF(m_pad_width, m_pad_height); }
+
+    void determineScale(double max = -1);
+  private:
+    void drawLine(QPainter& painter, std::vector<QPointF>& line,
+                  double current_value, QBrush& brush,
+                  QPen& pen);
+    
+  private:
+      std::list<std::pair<std::size_t, DataView>> m_values = std::list<std::pair<std::size_t, DataView>>();
+
+      std::list<double> m_current_interval = std::list<double>();
+      std::size_t m_current_interval_start;
+
+      QElapsedTimer m_timer = QElapsedTimer();
+
+      std::size_t m_log_duration; // The amount of time represented by a line
+      std::size_t m_min_interval; // The amount of time represented by a single point
+
+      int m_width = 200;
+      int m_height = 100;
+      int m_pad_height = 20;
+      int m_pad_width = 20;
+      double m_max_value = 50;
+
+      const double m_scale_tolerance = 0.7; // If the max value in m_values is less than m_scale_tolerance * m_max_value, we rescale m_max_value
+};
+
+struct PlotEntry
+{
+  std::string var;
+  QBrush brush;
+  QPen pen;
+};
+class GraphView
+{
+  public:
+  GraphView(int rows, int cols, QRect bounds, std::size_t log_duration, std::size_t min_interval);
+
+  void logVar(std::string name, double value);
+
+  void addVar(std::string name);
+
+  void addToPlot(int row, int col, PlotEntry entry);
+
+  void draw(QPainter& painter);
+
+  private:
+  int m_rows = 2;
+  int m_cols = 2;
+  int m_padx = 20;
+  int m_pady = 10;
+  std::size_t m_log_duration;
+  std::size_t m_min_interval;
+  QRect m_bounds;
+
+  std::vector<std::vector<PlotEntry>> m_plots;
+
+  std::unordered_map<std::string, DebugView> m_vars;
+};
+#endif
+
 /**
 @brief: This is the internal data structure that LTSGraph operates on.
 
@@ -383,14 +482,7 @@ class Graph
 
     #define DEBUG_LOG_TEMPERATURE
     #ifdef DEBUG_LOG_TEMPERATURE
-    std::list<std::pair<qint64, double>> temp_debug_list = std::list<std::pair<qint64, double>>();
-    QElapsedTimer temp_debug_timer = QElapsedTimer();
-    const qint64 temp_debug_log_duration = static_cast<qint64>(10000); // log for 10000 mseconds
-    const int temp_debug_width = 200;
-    const int temp_debug_height = 100;
-    const int temp_debug_pad_height = 20;
-    const int temp_debug_pad_width = 20;
-    double temp_debug_max_temp = 50;
+      GraphView gv_debug = GraphView(4, 1, {20, 20, 200, 600}, 1000, 1);
     #endif
     Graph();
     ~Graph();

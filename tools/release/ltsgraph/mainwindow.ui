@@ -236,6 +236,9 @@
    </property>
   </action>
   <action name="actionAdvancedSpringlayout">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Advanced Springlayout</string>
    </property>

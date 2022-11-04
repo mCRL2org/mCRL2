@@ -175,8 +175,8 @@ public:
   void setFogDistance(int value) { m_fogdensity = 1.0f / (value + 1); }
   void setDevicePixelRatio(float device_pixel_ratio) { m_device_pixel_ratio = device_pixel_ratio; }
   void updateDrawInstructions(){
-      m_drawNodeBorder.scale    = 0.5f * (nodeSizeScaled() * 1.1f);
-      m_drawHalfSphere.scale    = 0.5f * nodeSizeScaled();
+      m_drawNodeBorder.scale    = 0.5f * (nodeSizeScaled() * 1.5f);
+      m_drawHalfSphere.scale    = 0.5f * (nodeSizeScaled() * 0.5f);
       m_drawSphere.scale        = 0.5f * nodeSizeScaled();
       m_drawMinusHint.scale     = 0.5f * nodeSizeScaled();
       m_drawPlusHint.scale      = 0.5f * nodeSizeScaled();

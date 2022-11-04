@@ -77,9 +77,6 @@ Graph::Graph()
     : m_exploration(nullptr), m_type(mcrl2::lts::lts_lts), m_empty(""),
       m_stable(true)
 {
-  #ifdef DEBUG_LOG_TEMPERATURE
-  temp_debug_timer.restart();
-  #endif
 }
 
 Graph::~Graph()
@@ -752,4 +749,237 @@ std::size_t Graph::explorationNodeCount() const
   }
   return m_exploration->nodes.size();
 }
-}  // namespace Graph
+
+
+DataView::DataView(std::list<double>& input_list){
+  min = 1e12;
+  max = -1e12;
+  average = 0;
+  std = 0;
+  n = input_list.size();
+  for (double d : input_list){
+    min = std::min(d, min);
+    min = std::max(d, max);
+    average += d/n;
+  }
+  for (double d : input_list){
+    std += (d-average)*(d-average)/n;
+  }
+}
+
+DebugView::DebugView(int log_duration, std::size_t min_interval)
+ : m_log_duration(log_duration), m_min_interval(min_interval){
+    m_timer.restart();
+  m_current_interval_start = m_timer.elapsed();
+}
+
+void DebugView::push(double value){
+  std::size_t current_time = m_timer.elapsed();
+  //mCRL2log(mcrl2::log::debug) << "current_time: " << current_time << " current interval time: " << m_current_interval_start << " min interval time: " << m_min_interval << std::endl;
+
+  bool changed = false;
+  // first we remove all from the front that are no longer relevant
+  while (m_values.size() > 0 && current_time - m_values.front().first > m_log_duration){
+    m_values.pop_front();
+    changed = true;
+  } 
+
+  // Then we check whether the last interval has passed
+  if (current_time - m_current_interval_start > m_min_interval){
+    m_values.push_back({current_time, DataView(m_current_interval)});
+    m_current_interval.clear();
+    m_current_interval_start = current_time;
+    changed = true;
+  }
+  
+  // Add current log value to the current interval
+  m_current_interval.push_back(value);
+
+  if (changed) recalcMax();
+}
+
+double DebugView::recalcMax()
+{
+  double current_max = 0;
+
+  for (auto& pair : m_values)
+  {
+    if (m_drawStd)
+      current_max =
+          std::max(pair.second.average + pair.second.std * 3, current_max);
+    if (m_drawAvg)
+      current_max = std::max(pair.second.average, current_max);
+    if (m_drawMax)
+      current_max = std::max(pair.second.max, current_max);
+    if (m_drawMin)
+      current_max = std::max(pair.second.min, current_max);
+  }
+
+  // over time lower the max value
+  if (current_max < m_scale_tolerance * m_max_value)
+    m_max_value *= 0.99;
+
+  // we cant raise the max slowly, because we lose information
+  // we use *= 1.01 to slighly overshoot
+  while (current_max > m_max_value)
+    m_max_value *= 1.01; /// TODO: Solve m_max_value * x^n >= current_max
+                         /// for given x, integer n
+
+  return m_max_value;
+}
+
+void DebugView::drawLine(QPainter& painter, std::vector<QPointF>& line, double current_value, QBrush& brush, QPen& pen){
+  painter.setBrush(brush);
+  painter.setPen(pen);
+  painter.drawPolyline(&line[0], line.size());
+  if (current_value >= 0)
+    painter.drawText(line.back(), QString::number(current_value));
+}
+
+void DebugView::draw(QPainter& painter, QBrush& brush, QPen& pen){
+  if (m_values.size() <= 1)
+  {
+    //mCRL2log(mcrl2::log::debug) << "Not enough values to draw: " << m_values.size() << std::endl;
+      return;
+  }
+  //mCRL2log(mcrl2::log::debug) << "Drawing." << std::endl;
+  std::vector<QPointF> pointsMin;
+  std::vector<QPointF> pointsMax;
+  std::vector<QPointF> pointsAvg;
+  std::vector<QPointF> pointsStd;
+
+  double t0 = static_cast<double>(m_values.front().first);
+  auto getX = [&](std::size_t t) { return (t - t0) / m_log_duration; };
+  auto getY = [&](double val) { return 1 - val / m_max_value; };
+  auto createPoint = [&](std::size_t t, double val)
+  {
+    return QPointF(
+        m_pad_width + getX(t) * m_width,
+        m_pad_height + getY(val) * m_height);
+  };
+  for (auto& pair : m_values){
+    pointsMin.push_back(createPoint(pair.first, pair.second.min));
+    pointsMax.push_back(createPoint(pair.first, pair.second.max));
+    pointsAvg.push_back(createPoint(pair.first, pair.second.average));
+    pointsStd.push_back(createPoint(pair.first, pair.second.std));
+  }
+
+  painter.setRenderHint(QPainter::RenderHint::Antialiasing, true);
+  std::vector<QPointF> bounding_box = {
+    QPointF(m_pad_width, m_pad_height),
+    QPointF(m_pad_width + m_width, m_pad_height),
+    QPointF(m_pad_width + m_width, m_pad_height + m_height),
+    QPointF(m_pad_width, m_pad_height + m_height),
+    QPointF(m_pad_width, m_pad_height),
+  };
+  drawLine(painter, bounding_box, -1e12, QBrush(Qt::black, Qt::SolidPattern), QPen(Qt::black, 1, Qt::SolidLine, Qt::FlatCap));
+  if (m_drawMin) drawLine(painter, pointsMin, m_values.back().second.min, brush, pen);
+  if (m_drawMax) drawLine(painter, pointsMax, m_values.back().second.max, brush, pen);
+  if (m_drawAvg) drawLine(painter, pointsAvg, m_values.back().second.average, brush, pen);
+  if (m_drawStd) drawLine(painter, pointsStd, m_values.back().second.std, brush, pen);
+}
+
+void DebugView::setDrawingArea(int width, int height, int offsetX, int offsetY)
+{
+  m_width = width;
+  m_height = height;
+  m_pad_width = offsetX;
+  m_pad_height = offsetY;
+}
+
+GraphView::GraphView(int rows, int cols, QRect bounds, std::size_t log_duration, std::size_t min_interval)
+: m_rows(rows), m_cols(cols), m_bounds(bounds), m_log_duration(log_duration), m_min_interval(min_interval)
+{
+    m_plots = std::vector<std::vector<PlotEntry>>(rows*cols);
+}
+
+void GraphView::addVar(std::string name)
+{
+  assert(m_vars.find(name) == m_vars.end()); // not yet inserted
+  std::pair<std::string, DebugView> var = {name, DebugView(m_log_duration,m_min_interval)};
+  m_vars.emplace(var);
+}
+
+void GraphView::draw(QPainter& painter)
+{
+    
+    for (int j = 0; j < m_plots.size(); j++)
+    {
+      auto& vec = m_plots[j];
+      if (vec.size() < 1) continue;
+      int row = j / m_cols;
+      int col = j % m_cols;
+      std::string graph_title;
+      for (int i = 0; i < vec.size(); i++) {
+        graph_title += vec[i].var;
+        if (i < vec.size() - 1)
+        {
+          graph_title += ", ";
+        }
+        else
+        {
+          graph_title += ":";
+        }
+      }
+      painter.setBrush(QBrush(Qt::black, Qt::SolidPattern));
+      painter.setPen(QPen(Qt::black, 1, Qt::SolidLine, Qt::FlatCap));
+
+      double w = (m_bounds.width() - (m_cols - 1) * m_padx) /
+                 static_cast<double>(m_cols);
+      double h = (m_bounds.height() - (m_rows - 1) * m_pady) /
+                 static_cast<double>(m_rows);
+      double offsetX = m_bounds.left() + col * (w + m_padx);
+      double offsetY = m_bounds.top() + row * (h + m_pady) - m_pady;
+      painter.drawText(QPointF(offsetX, offsetY), QString::fromStdString(graph_title));
+      double max = 0;
+      for (auto& entry : vec)
+      {
+        max = std::max(max, m_vars[entry.var].recalcMax());
+      }
+      for (auto& entry : vec) {
+        m_vars[entry.var].setMax(max);
+        m_vars[entry.var].setDrawingArea(w, h, offsetX, offsetY);
+        m_vars[entry.var].draw(painter, entry.brush, entry.pen);
+      }
+    }
+}
+
+void GraphView::addToPlot(int row, int col, PlotEntry entry){
+  if (row >= m_rows || col >= m_cols)
+  {
+    mCRL2log(mcrl2::log::warning)
+        << "Adding entry to graph of size (" << m_rows << ", " << m_cols
+        << ") at position (" << row << ", " << col
+        << "). Expanding number of plots to facilitate." << std::endl;
+    int old_rows = m_rows;
+    int old_cols = m_cols;
+    m_rows = std::max(row + 1, m_rows);
+    m_cols = std::max(col + 1, m_cols);
+    std::vector<std::vector<PlotEntry>> new_plots(m_rows*m_cols);
+    for (int r = 0; r < old_rows; r++)
+    {
+      for (int c = 0; c < old_cols; c++)
+      {
+        new_plots[r * m_cols + c] = m_plots[r * old_cols + c];
+      }
+    }
+    m_plots = new_plots;
+  }
+  m_plots[row * m_cols + col].emplace_back(entry);
+}
+
+void GraphView::logVar(std::string name, double value)
+{
+  try
+  {
+    m_vars[name].push(value);
+  }
+  catch (int error)
+  {
+    mCRL2log(mcrl2::log::error)
+        << "Failed to log variable: " << name << std::endl;
+    std::abort();
+  }
+}
+
+} // namespace Graph
