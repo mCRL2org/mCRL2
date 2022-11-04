@@ -33,7 +33,7 @@ MainWindow::MainWindow(QWidget* parent) :
 
   // Create springlayout algorithm + UI
   m_layout = new Graph::SpringLayout(m_graph, *m_glwidget);
-  Graph::SpringLayoutUi* springlayoutui = m_layout->ui(this);
+  Graph::SpringLayoutUi* springlayoutui = m_layout->ui(m_ui.actionAdvancedSpringlayout, this);
   addDockWidget(Qt::RightDockWidgetArea, springlayoutui);
   springlayoutui->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
 
@@ -54,6 +54,8 @@ MainWindow::MainWindow(QWidget* parent) :
   connect(m_ui.actLayoutControl, SIGNAL(toggled(bool)), springlayoutui, SLOT(setVisible(bool)));
   connect(m_ui.actVisualization, SIGNAL(toggled(bool)), glwidgetui, SLOT(setVisible(bool)));
   connect(m_ui.actInformation, SIGNAL(toggled(bool)), informationui, SLOT(setVisible(bool)));
+  connect(m_ui.actionAdvancedSpringlayout, SIGNAL(toggled(bool)),
+          springlayoutui, SLOT(onAdvancedDialogShow(bool)));
   connect(m_ui.actOutput, SIGNAL(toggled(bool)), m_ui.dockOutput, SLOT(setVisible(bool)));
   connect(m_ui.act3D, SIGNAL(toggled(bool)), this, SLOT(on3DChanged(bool)));
   connect(m_ui.act3D, SIGNAL(toggled(bool)), this, SLOT(updateStatusBar()));

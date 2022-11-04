@@ -370,69 +370,11 @@ void GLWidget::paintGL()
     QOpenGLFramebufferObject::blitFramebuffer(0, m_scene.m_fbo, GL_COLOR_BUFFER_BIT);
     m_scene.renderText(painter);
     painter.end();
-#ifdef DEBUG_LOG_TEMPERATURE
-    if (m_graph.temp_debug_list.size() > 2)
-    {
-      while (m_graph.temp_debug_list.back().first -
-                 m_graph.temp_debug_list.front().first >
-             m_graph.temp_debug_log_duration)
-        m_graph.temp_debug_list.pop_front();
-      qint64 t0 = m_graph.temp_debug_list.back().first -
-                  m_graph.temp_debug_log_duration;
-      double prev_t = 0;
-      double prev_T = -1;
-      std::vector<QPointF> path_points;
-      double gap = 0.001; // at least a ms between measurements please
-      double max_temp = 0;
-      for (auto p : m_graph.temp_debug_list)
-      {
-        max_temp = std::max(max_temp, p.second);
-      }
-
-      if (max_temp < 0.005 * m_graph.temp_debug_max_temp)
-        m_graph.temp_debug_max_temp *= 0.9;
-      while (max_temp > m_graph.temp_debug_max_temp)
-        m_graph.temp_debug_max_temp *= 1.1;
-
-      auto createPoint = [&](double x, double y)
-        {
-          return QPointF(
-              m_graph.temp_debug_pad_width + x * m_graph.temp_debug_width,
-              m_graph.temp_debug_pad_height + y * m_graph.temp_debug_height);
-        };
-      for (auto it = m_graph.temp_debug_list.begin();
-           it != m_graph.temp_debug_list.end(); ++it)
-      {
-        double t = ((*it).first - t0) /
-                      static_cast<double>(m_graph.temp_debug_log_duration);
-        while (t - prev_t < gap && it != m_graph.temp_debug_list.end())
-        {
-          t = ((*it).first - t0) /
-              static_cast<double>(m_graph.temp_debug_log_duration);
-          ++it;
-        }
-        if (it == m_graph.temp_debug_list.end())
-          break;
-        double T = 1 - (*it).second / m_graph.temp_debug_max_temp;
-        auto p = createPoint(t, T);
-        path_points.push_back(p);
-        prev_t = t;
-        prev_T = T;
-      }
+    if (m_drawDebugGraphs){
       painter.begin(this);
-      painter.setBrush(QBrush(Qt::red, Qt::SolidPattern));
-      painter.setPen(QPen(Qt::red, 1, Qt::SolidLine, Qt::FlatCap));
-      painter.setRenderHint(QPainter::RenderHint::Antialiasing, true);
-      painter.drawPolyline(&path_points[0], path_points.size());
-      painter.drawText(path_points.back(), QString::number(m_graph.temp_debug_list.back().second));
+      m_graph.gv_debug.draw(painter);
       painter.end();
     }
-// painter.end();
-// painter.begin(this);
-// painter.setCompositionMode(QPainter::CompositionMode::CompositionMode_SourceAtop);
-// painter.drawImage(QRectF(QPointF(m_graph.temp_debug_pad_width,
-// m_graph.temp_debug_pad_height), debug_image.size()), debug_image);
-#endif
   }
   // Updates the selection percentage (and checks for new selections under the
   // cursor).

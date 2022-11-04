@@ -22,7 +22,6 @@ add_mcrl2_tool(ltsgraph
     layoututility.cpp
     springlayout.cpp
     springlayout.ui
-    advancedspringlayoutdialog.cpp
     advancedspringlayoutdialog.ui
   DEPENDS
     Qt5::Core
