@@ -20,6 +20,7 @@
 #include <QStaticText>
 
 #include <list>
+#include <algorithm>
 
 /// \brief Number of orthogonal slices from which a circle representing a node
 /// is constructed.
@@ -60,23 +61,31 @@ GLScene::GLScene(QOpenGLWidget& glwidget, Graph::Graph& g)
 {
   setFontSize(m_fontsize);
   rebuild();
-  m_drawNodeBorder = DrawInstances(OFFSET_NODE_BORDER, VERTICES_NODE_BORDER, 0, GL_TRIANGLE_FAN, "node border");
-  m_drawHalfSphere = DrawInstances(OFFSET_NODE_SPHERE, VERTICES_NODE_SPHERE/2, 0, GL_TRIANGLE_STRIP, "half-sphere");
-  m_drawSphere = DrawInstances(OFFSET_NODE_SPHERE, VERTICES_NODE_SPHERE, 0, GL_TRIANGLE_STRIP, "sphere");
-  m_drawMinusHint = DrawInstances(OFFSET_HINT, VERTICES_HINT/2, 0, GL_TRIANGLES, "minus hint");
-  m_drawPlusHint = DrawInstances(OFFSET_HINT, VERTICES_HINT, 0, GL_TRIANGLES, "plus hint");
-  m_drawHandleBody = DrawInstances(OFFSET_HANDLE_BODY, VERTICES_HANDLE_BODY, 0, GL_TRIANGLE_STRIP, "handle body");
-  m_drawHandleOutline = DrawInstances(OFFSET_HANDLE_OUTLINE, VERTICES_HANDLE_OUTLINE, 0, GL_LINE_LOOP, "handle outline");
+  m_drawNodeBorder = DrawInstances(OFFSET_NODE_BORDER, VERTICES_NODE_BORDER, 0,
+                                   GL_TRIANGLE_FAN, "node border");
+  m_drawHalfSphere = DrawInstances(OFFSET_NODE_SPHERE, VERTICES_NODE_SPHERE / 2,
+                                   0, GL_TRIANGLE_STRIP, "half-sphere");
+  m_drawSphere = DrawInstances(OFFSET_NODE_SPHERE, VERTICES_NODE_SPHERE, 0,
+                               GL_TRIANGLE_STRIP, "sphere");
+  m_drawMinusHint = DrawInstances(OFFSET_HINT, VERTICES_HINT / 2, 0,
+                                  GL_TRIANGLES, "minus hint");
+  m_drawPlusHint =
+      DrawInstances(OFFSET_HINT, VERTICES_HINT, 0, GL_TRIANGLES, "plus hint");
+  m_drawHandleBody = DrawInstances(OFFSET_HANDLE_BODY, VERTICES_HANDLE_BODY, 0,
+                                   GL_TRIANGLE_STRIP, "handle body");
+  m_drawHandleOutline =
+      DrawInstances(OFFSET_HANDLE_OUTLINE, VERTICES_HANDLE_OUTLINE, 0,
+                    GL_LINE_LOOP, "handle outline");
   updateDrawInstructions();
 
   m_drawInstances = std::vector<DrawInstances*>({
-    &m_drawNodeBorder, 
-    &m_drawHalfSphere, 
-    &m_drawSphere, 
-    &m_drawMinusHint, 
-    &m_drawPlusHint, 
-    &m_drawHandleBody, 
-    &m_drawHandleOutline, 
+      &m_drawNodeBorder,
+      &m_drawHalfSphere,
+      &m_drawSphere,
+      &m_drawMinusHint,
+      &m_drawPlusHint,
+      &m_drawHandleBody,
+      &m_drawHandleOutline,
   });
 }
 
@@ -230,8 +239,9 @@ void GLScene::initialize()
   mCRL2log(mcrl2::log::verbose)
       << "Based on maximum recommended, setting batch rendering size to "
       << recommended_max_buffer_size / 4 << std::endl;
-  // To be safe we divide by 4 since a mat4 is technically 4 vec4s stacked together 
-  m_batch_size = static_cast<std::size_t>(recommended_max_buffer_size / 4); 
+  // To be safe we divide by 4 since a mat4 is technically 4 vec4s stacked
+  // together
+  m_batch_size = static_cast<std::size_t>(recommended_max_buffer_size / 4);
 
   m_vaoNode.create();
   m_vaoNode.bind();
@@ -245,9 +255,8 @@ void GLScene::initialize()
   m_node_shader.setAttributeBuffer(vertex_attrib_location, GL_FLOAT, 0, 3);
   m_node_shader.enableAttributeArray(vertex_attrib_location);
 
-  m_current_scene_size =
-      std::max(m_batch_size,
-               std::max(m_graph.nodeCount(), m_graph.edgeCount()));
+  m_current_scene_size = std::max(
+      m_batch_size, std::max(m_graph.nodeCount(), m_graph.edgeCount()));
   m_drawInstances.resize(m_batch_size);
 
   m_colorBuffer.create();
@@ -266,7 +275,7 @@ void GLScene::initialize()
   m_node_shader.setAttributeBuffer(offset_attrib_location, GL_FLOAT, 0, 3);
   m_node_shader.enableAttributeArray(offset_attrib_location);
   glVertexAttribDivisor(offset_attrib_location, 1);
-  
+
   m_offsetBuffer.release();
   m_vaoNode.release();
   m_node_shader.release();
@@ -279,40 +288,46 @@ void GLScene::initialize()
   int arc_ctrl_4_attrib_location = m_arc_shader.attributeLocation("ctrl4");
   int arc_color_attrib_location = m_arc_shader.attributeLocation("color");
 
-  mCRL2log(mcrl2::log::debug) << "vertex: " << arc_vertex_attrib_location <<
-   " ctrl1 " << arc_ctrl_1_attrib_location <<
-   " ctrl2 " << arc_ctrl_2_attrib_location <<
-   " ctrl3 " << arc_ctrl_3_attrib_location <<
-   " ctrl4 " << arc_ctrl_4_attrib_location << 
-   " color " << arc_color_attrib_location  <<  std::endl;
+  mCRL2log(mcrl2::log::debug)
+      << "vertex: " << arc_vertex_attrib_location << " ctrl1 "
+      << arc_ctrl_1_attrib_location << " ctrl2 " << arc_ctrl_2_attrib_location
+      << " ctrl3 " << arc_ctrl_3_attrib_location << " ctrl4 "
+      << arc_ctrl_4_attrib_location << " color " << arc_color_attrib_location
+      << std::endl;
 
   m_vaoArc.create();
   m_vaoArc.bind();
   m_vertexbuffer.bind();
   m_arc_shader.setAttributeBuffer(arc_vertex_attrib_location, GL_FLOAT, 0, 3);
   m_arc_shader.enableAttributeArray(arc_vertex_attrib_location);
-  
+
   m_controlpointbuffer.create();
   m_controlpointbuffer.setUsagePattern(QOpenGLBuffer::StreamDraw);
   m_controlpointbuffer.bind();
-  m_controlpointbuffer.allocate(m_batch_size * sizeof(QVector3D) * 4); 
+  m_controlpointbuffer.allocate(m_batch_size * sizeof(QVector3D) * 4);
   // TODO: Duplicate code removal with loop
-  m_arc_shader.setAttributeBuffer(arc_ctrl_1_attrib_location, GL_FLOAT, 0, 3, 4 * sizeof(QVector3D));
+  m_arc_shader.setAttributeBuffer(arc_ctrl_1_attrib_location, GL_FLOAT, 0, 3,
+                                  4 * sizeof(QVector3D));
   m_arc_shader.enableAttributeArray(arc_ctrl_1_attrib_location);
   glVertexAttribDivisor(arc_ctrl_1_attrib_location, 1);
 
-  m_arc_shader.setAttributeBuffer(arc_ctrl_2_attrib_location, GL_FLOAT, sizeof(QVector3D), 3, 4 * sizeof(QVector3D));
+  m_arc_shader.setAttributeBuffer(arc_ctrl_2_attrib_location, GL_FLOAT,
+                                  sizeof(QVector3D), 3, 4 * sizeof(QVector3D));
   m_arc_shader.enableAttributeArray(arc_ctrl_2_attrib_location);
   glVertexAttribDivisor(arc_ctrl_2_attrib_location, 1);
 
-  m_arc_shader.setAttributeBuffer(arc_ctrl_3_attrib_location, GL_FLOAT, 2*sizeof(QVector3D), 3, 4 * sizeof(QVector3D));
+  m_arc_shader.setAttributeBuffer(arc_ctrl_3_attrib_location, GL_FLOAT,
+                                  2 * sizeof(QVector3D), 3,
+                                  4 * sizeof(QVector3D));
   m_arc_shader.enableAttributeArray(arc_ctrl_3_attrib_location);
   glVertexAttribDivisor(arc_ctrl_3_attrib_location, 1);
 
-  m_arc_shader.setAttributeBuffer(arc_ctrl_4_attrib_location, GL_FLOAT, 3*sizeof(QVector3D), 3, 4 * sizeof(QVector3D));
+  m_arc_shader.setAttributeBuffer(arc_ctrl_4_attrib_location, GL_FLOAT,
+                                  3 * sizeof(QVector3D), 3,
+                                  4 * sizeof(QVector3D));
   m_arc_shader.enableAttributeArray(arc_ctrl_4_attrib_location);
   glVertexAttribDivisor(arc_ctrl_4_attrib_location, 1);
-  
+
   m_colorBuffer.bind();
   m_arc_shader.setAttributeBuffer(arc_color_attrib_location, GL_FLOAT, 0, 3);
   m_arc_shader.enableAttributeArray(arc_color_attrib_location);
@@ -332,11 +347,13 @@ void GLScene::initialize()
   int arrow_dir_attrib_location = m_arrow_shader.attributeLocation("direction");
 
   m_vertexbuffer.bind();
-  m_arrow_shader.setAttributeBuffer(arrow_vertex_attrib_location, GL_FLOAT, 0, 3);
+  m_arrow_shader.setAttributeBuffer(arrow_vertex_attrib_location, GL_FLOAT, 0,
+                                    3);
   m_arrow_shader.enableAttributeArray(arrow_vertex_attrib_location);
-  
+
   m_offsetBuffer.bind();
-  m_arrow_shader.setAttributeArray(arrow_offset_attrib_location, GL_FLOAT, 0, 3);
+  m_arrow_shader.setAttributeArray(arrow_offset_attrib_location, GL_FLOAT, 0,
+                                   3);
   m_arrow_shader.enableAttributeArray(arrow_offset_attrib_location);
   glVertexAttribDivisor(arrow_offset_attrib_location, 1);
 
@@ -402,13 +419,14 @@ void GLScene::render()
   render_timer.restart();
 
   // reset the draw instance vectors
-  for (auto ptr : m_drawInstances) if (ptr) ptr->resize(0);
+  for (auto ptr : m_drawInstances)
+    if (ptr)
+      ptr->resize(0);
   m_drawArc.resize(0);
   m_drawArcColors.resize(0);
   m_drawArrowColors.resize(0);
   m_drawArrowOffsets.resize(0);
   m_drawArrowDirections.resize(0);
-
 
   // m_graph.lock(GRAPH_LOCK_TRACE); // enter critical section
 
@@ -418,7 +436,6 @@ void GLScene::render()
   std::size_t edgeCount =
       exploration_active ? m_graph.explorationEdgeCount() : m_graph.edgeCount();
 
-
   QMatrix4x4 viewProjMatrix =
       m_camera.projectionMatrix() * m_camera.viewMatrix();
   for (std::size_t i = 0; i < nodeCount; ++i)
@@ -427,17 +444,13 @@ void GLScene::render()
                viewProjMatrix, false);
   }
 
-
-  
-
   for (std::size_t i = 0; i < edgeCount; ++i)
   {
     renderEdge(exploration_active ? m_graph.explorationEdge(i) : i,
-              viewProjMatrix);
+               viewProjMatrix);
     renderHandle(exploration_active ? m_graph.explorationEdge(i) : i,
                  viewProjMatrix);
   }
-
 
   if (m_graph.hasExploration())
   {
@@ -474,9 +487,10 @@ void GLScene::render()
   glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
   // All data has been accumulated in the associated vectors
   // float* matValues = new float[m_current_buffer_size * 16];
-  for (DrawInstances* di_ptr : m_drawInstances){
+  for (DrawInstances* di_ptr : m_drawInstances)
+  {
     if (di_ptr && di_ptr->size() > 0)
-    { 
+    {
       m_node_shader.setScale(di_ptr->scale);
       std::size_t amount_to_render = di_ptr->size();
       std::size_t index = 0;
@@ -488,17 +502,17 @@ void GLScene::render()
         void* buff_ptr1 =
             m_offsetBuffer.mapRange(0, n * 3 * sizeof(float),
                                     QOpenGLBuffer::RangeAccessFlag::RangeWrite);
-        
+
         // void* buff_ptr =
         // m_matrixBuffer.map(QOpenGLBuffer::Access::WriteOnly);
-        std::memcpy(buff_ptr1, &di_ptr->offsets[index*3],
+        std::memcpy(buff_ptr1, &di_ptr->offsets[index * 3],
                     n * 3 * sizeof(float));
         m_offsetBuffer.unmap();
 
         m_offsetBuffer.release();
 
         m_colorBuffer.bind();
-        m_colorBuffer.write(0, &di_ptr->colors[index*4],
+        m_colorBuffer.write(0, &di_ptr->colors[index * 4],
                             n * sizeof(QVector4D));
         m_colorBuffer.release();
 
@@ -508,8 +522,11 @@ void GLScene::render()
         amount_to_render -= n;
         glCheckError();
       }
-    }else{
-      //mCRL2log(mcrl2::log::debug) << "Skipping \"" << di_ptr->identifier << "\" because it is empty." << std::endl; 
+    }
+    else
+    {
+      // mCRL2log(mcrl2::log::debug) << "Skipping \"" << di_ptr->identifier <<
+      // "\" because it is empty." << std::endl;
     }
   }
   // delete[] matValues;
@@ -521,20 +538,18 @@ void GLScene::render()
   m_arc_shader.setViewMatrix(m_camera.viewMatrix());
   m_arc_shader.setViewProjMatrix(viewProjMatrix);
   m_arc_shader.setFogDensity(m_drawfog * m_fogdensity);
-  if (m_drawArc.size() > 0){
+  if (m_drawArc.size() > 0)
+  {
     std::size_t amount_to_render = m_drawArc.size();
     std::size_t index = 0;
     while (amount_to_render > 0)
     {
       std::size_t n = std::min(m_batch_size, amount_to_render);
       m_controlpointbuffer.bind();
-      m_controlpointbuffer.write(0, &m_drawArc[index],
-                                 n * 12 * sizeof(float));
+      m_controlpointbuffer.write(0, &m_drawArc[index], n * 12 * sizeof(float));
       m_colorBuffer.bind();
-      m_colorBuffer.write(0, &m_drawArcColors[index],
-                             n * 3 * sizeof(float));
-      glDrawArraysInstanced(GL_LINE_STRIP, OFFSET_ARC, VERTICES_ARC,
-                            n);
+      m_colorBuffer.write(0, &m_drawArcColors[index], n * 3 * sizeof(float));
+      glDrawArraysInstanced(GL_LINE_STRIP, OFFSET_ARC, VERTICES_ARC, n);
       glCheckError();
       index += n;
       amount_to_render -= n;
@@ -543,39 +558,44 @@ void GLScene::render()
 
   m_vaoArc.release();
   m_arc_shader.release();
-  
+
   m_arrow_shader.bind();
   m_vaoArrow.bind();
 
   m_arrow_shader.setVP(viewProjMatrix);
   m_arrow_shader.setScale(arrowheadSizeScaled());
-  if (m_drawArrowOffsets.size() > 0){
+  if (m_drawArrowOffsets.size() > 0)
+  {
     std::size_t amount_to_render = m_drawArc.size();
     std::size_t index = 0;
-    while (amount_to_render > 0){
+    while (amount_to_render > 0)
+    {
       std::size_t n = std::min(m_batch_size, amount_to_render);
 
       m_colorBuffer.bind();
       m_colorBuffer.write(0, &m_drawArrowColors[index], n * 4 * sizeof(float));
 
       m_offsetBuffer.bind();
-      m_offsetBuffer.write(0, &m_drawArrowOffsets[index], n * 3 * sizeof(float));
+      m_offsetBuffer.write(0, &m_drawArrowOffsets[index],
+                           n * 3 * sizeof(float));
 
       m_directionBuffer.bind();
-      m_directionBuffer.write(0, &m_drawArrowDirections[index], n * 3 * sizeof(float));
+      m_directionBuffer.write(0, &m_drawArrowDirections[index],
+                              n * 3 * sizeof(float));
 
-      glDrawArraysInstanced(GL_TRIANGLE_FAN, OFFSET_ARROWHEAD, VERTICES_ARROWHEAD, n);
-      glDrawArraysInstanced(GL_TRIANGLE_FAN, OFFSET_ARROWHEAD_BASE, VERTICES_ARROWHEAD_BASE, n);
+      glDrawArraysInstanced(GL_TRIANGLE_FAN, OFFSET_ARROWHEAD,
+                            VERTICES_ARROWHEAD, n);
+      glDrawArraysInstanced(GL_TRIANGLE_FAN, OFFSET_ARROWHEAD_BASE,
+                            VERTICES_ARROWHEAD_BASE, n);
 
       index += n;
       amount_to_render -= n;
     }
-
   }
 
   m_vaoArrow.release();
   m_arrow_shader.release();
-  
+
   m_fbo->release();
   // Use the painter to render the remaining text.
   glDisable(GL_DEPTH_TEST);
@@ -584,13 +604,15 @@ void GLScene::render()
   // Make sure that glGetError() is not an error.
   glCheckError();
 
-  // Very important. If this is not disabled the QPainter WILL draw unpredictably.
+  // Very important. If this is not disabled the QPainter WILL draw
+  // unpredictably.
   glDisable(GL_CULL_FACE);
 
-  // mCRL2log(mcrl2::log::debug) << "Frame time: " << render_timer.elapsed() << " OpenGL: " << openglTimer.elapsed() << std::endl;
+  // mCRL2log(mcrl2::log::debug) << "Frame time: " << render_timer.elapsed() <<
+  // " OpenGL: " << openglTimer.elapsed() << std::endl;
 }
 
-void GLScene::renderText(QPainter& painter)
+void GLScene::renderText(QPainter& painter, int text_limit)
 {
 
   bool exploration_active = m_graph.hasExploration();
@@ -598,22 +620,52 @@ void GLScene::renderText(QPainter& painter)
       exploration_active ? m_graph.explorationNodeCount() : m_graph.nodeCount();
   std::size_t edgeCount =
       exploration_active ? m_graph.explorationEdgeCount() : m_graph.edgeCount();
-
-  painter.setFont(m_font);
+  if (nodeCount < 1 || edgeCount < 1)
+    return;
+  QFont font = m_font;
+  painter.setFont(font);
   painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
 
+  std::vector<double> distances(nodeCount);
+  std::vector<int> indices(nodeCount);
   for (std::size_t i = 0; i < nodeCount; ++i)
   {
+    std::size_t n = exploration_active ? m_graph.explorationNode(i) : i;
+    distances[i] =
+        (m_graph.node(n).pos() - m_camera.position()).lengthSquared();
+    indices[i] = i;
+  }
+
+  auto compare = [&](int i, int j) { return distances[i] < distances[j]; };
+
+  std::sort(indices.begin(), indices.end(), compare);
+  double closest = std::sqrt(distances[0]);
+  double furthest = std::sqrt(
+      distances[(nodeCount > text_limit) ? text_limit - 1 : nodeCount - 1]);
+  const double furthest_scale = 1.0;
+  const double closest_scale = 1.0;
+  auto getScale = [&](double dist)
+  {
+    return closest_scale - (closest_scale - furthest_scale) *
+                               (std::sqrt(dist) - closest) /
+                               (furthest - closest);
+  };
+  for (std::size_t i = 0; i < std::min(nodeCount, static_cast<std::size_t>(text_limit)); ++i)
+  {
+    font.setPixelSize(getScale(distances[i]) * m_fontsize);
+    painter.setFont(font);
     if (m_drawstatenumbers)
     {
-      renderStateNumber(painter,
-                        exploration_active ? m_graph.explorationNode(i) : i);
+      renderStateNumber(painter, exploration_active
+                                     ? m_graph.explorationNode(indices[i])
+                                     : indices[i]);
     }
 
     if (m_drawstatelabels)
     {
-      renderStateLabel(painter,
-                       exploration_active ? m_graph.explorationNode(i) : i);
+      renderStateLabel(painter, exploration_active
+                                    ? m_graph.explorationNode(indices[i])
+                                    : indices[i]);
     }
   }
 
@@ -625,8 +677,6 @@ void GLScene::renderText(QPainter& painter)
           painter, exploration_active ? m_graph.explorationEdge(i) : i);
     }
   }
-
-
 }
 
 GLScene::Selection GLScene::select(int x, int y)
@@ -721,10 +771,8 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
   const std::array<QVector3D, 4> control =
       calculateArc(from, via, to, edge.is_selfloop());
 
-
-
   QVector3D arcColor(m_graph.handle(i).selected(), 0.0f, 0.0f);
-  
+
   // m_arc_shader.setControlPoints(control);
   // Use the arc shader to draw the arcs.
   m_drawArc.emplace_back(control);
@@ -761,7 +809,6 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
       QVector4D color = applyFog(arcColor, fog);
       color.setW(1);
 
-     
       m_drawArrowColors.push_back(color);
       m_drawArrowOffsets.push_back(tip);
       m_drawArrowDirections.push_back(vec);
@@ -786,7 +833,6 @@ void GLScene::renderHandle(std::size_t i, const QMatrix4x4& viewProjMatrix)
     {
       fill = QVector3D(0.7f, 0.7f, 0.7f);
     }
-
 
     m_drawHandleBody.push_back(handle.pos(), fill);
     m_drawHandleOutline.push_back(handle.pos(), line);
@@ -829,7 +875,7 @@ void GLScene::renderNode(std::size_t i, const QMatrix4x4& viewProjMatrix,
                     : 1.0f; // Disabled for now until the transparent window
                             // issue can be resolved.
   if (transparent || alpha > 0.99f) // Check if these elements are visible and
-                                      // opaque if transparency is disallowed.
+                                    // opaque if transparency is disallowed.
   {
     // Node stroke color: red when selected, black otherwise. Apply fogging
     // afterwards.

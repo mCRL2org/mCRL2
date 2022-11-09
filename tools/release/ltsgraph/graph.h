@@ -31,6 +31,7 @@
 
 #include <utility>
 #include <cmath>
+#include <unordered_map>
 
 namespace Graph
 {

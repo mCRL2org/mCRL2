@@ -21,6 +21,7 @@
 #include <QOpenGLWidget>
 #include <QPainter>
 #include <QOpenGLFramebufferObject>
+#include <cstring>
 
 #include "mcrl2/utilities/logger.h"
 
@@ -122,7 +123,7 @@ public:
   /// \brief Render the scene, no text.
   void render();
   /// \brief Render just the text, no OpenGL.
-  void renderText(QPainter& painter);
+  void renderText(QPainter& painter, int text_limit = 20);
 
   /// \brief Resize the OpenGL viewport.
   void resize(std::size_t width, std::size_t height);
@@ -142,7 +143,10 @@ public:
   float nodeSizeScaled() const { return nodeSize() * m_device_pixel_ratio; }
   float fontSizeScaled() const { return fontSize() * m_device_pixel_ratio; }
   float handleSizeScaled() const { return handleSize * m_device_pixel_ratio; }
-  float arrowheadSizeScaled() const { return arrowheadSize * m_device_pixel_ratio; }
+  float arrowheadSizeScaled() const
+  {
+    return 0.1f * nodeSize() * arrowheadSize * m_device_pixel_ratio;
+  }
 
   /// \brief Computes how long the world vector (length, 0, 0) at pos is when drawn on the screen
   float sizeOnScreen(const QVector3D& pos, float length) const;
@@ -175,8 +179,8 @@ public:
   void setFogDistance(int value) { m_fogdensity = 1.0f / (value + 1); }
   void setDevicePixelRatio(float device_pixel_ratio) { m_device_pixel_ratio = device_pixel_ratio; }
   void updateDrawInstructions(){
-      m_drawNodeBorder.scale    = 0.5f * (nodeSizeScaled() * 1.5f);
-      m_drawHalfSphere.scale    = 0.5f * (nodeSizeScaled() * 0.5f);
+      m_drawNodeBorder.scale    = 0.5f * (nodeSizeScaled() * 1.35f);
+      m_drawHalfSphere.scale    = 0.5f * (nodeSizeScaled() * 0.65f);
       m_drawSphere.scale        = 0.5f * nodeSizeScaled();
       m_drawMinusHint.scale     = 0.5f * nodeSizeScaled();
       m_drawPlusHint.scale      = 0.5f * nodeSizeScaled();

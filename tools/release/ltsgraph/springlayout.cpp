@@ -1323,6 +1323,7 @@ void SpringLayout::randomizeZ(float z)
                                          fast_frand(-z, z));
     }
   }
+  m_asa.reset();
   m_graph.unlock(GRAPH_LOCK_TRACE);
 }
 
