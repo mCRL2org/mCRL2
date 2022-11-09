@@ -346,19 +346,24 @@ private:
 
 struct Data
 {
-  void* m_data = nullptr;
   Data(){};
-  Data(void* data)
-      : m_data(data){};
   virtual QString toQString() = 0;
 };
 
 template < class T > struct TypedData : public Data
 {
-  TypedData(void* data) : Data(data){};
+  T* m_data = nullptr;
+  explicit TypedData(T* data) : Data(), m_data(data){};
   QString toQString() override
   {
-    return QStringLiteral("%1").arg(*static_cast<T*>(m_data));
+    if (m_data)
+    {
+        return QStringLiteral("%1").arg(*m_data);
+    }
+    else
+    {
+      return "NaN";
+    }
   }
 };
 

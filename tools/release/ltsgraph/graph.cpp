@@ -872,7 +872,9 @@ void DebugView::draw(QPainter& painter, QBrush& brush, QPen& pen){
     QPointF(m_pad_width, m_pad_height + m_height),
     QPointF(m_pad_width, m_pad_height),
   };
-  drawLine(painter, bounding_box, -1e12, QBrush(Qt::black, Qt::SolidPattern), QPen(Qt::black, 1, Qt::SolidLine, Qt::FlatCap));
+  QBrush qbrush{Qt::black, Qt::SolidPattern};
+  QPen qpen{Qt::black, 1, Qt::SolidLine, Qt::FlatCap};
+  drawLine(painter, bounding_box, -1e12, qbrush, qpen);
   if (m_drawMin) drawLine(painter, pointsMin, m_values.back().second.min, brush, pen);
   if (m_drawMax) drawLine(painter, pointsMax, m_values.back().second.max, brush, pen);
   if (m_drawAvg) drawLine(painter, pointsAvg, m_values.back().second.average, brush, pen);
