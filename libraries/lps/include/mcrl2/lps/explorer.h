@@ -244,6 +244,7 @@ struct explorer_summand
   std::vector<data::variable> gamma;
   atermpp::function_symbol f_gamma;
   mutable utilities::unordered_map<atermpp::term_appl<data::data_expression>, std::list<data::data_expression_list>> local_cache;
+  mutable std::shared_ptr<std::mutex> cache_mutex;
 
   template <typename ActionSummand>
   explorer_summand(const ActionSummand& summand, std::size_t summand_index, const data::variable_list& process_parameters, caching cache_strategy_)
@@ -253,7 +254,8 @@ struct explorer_summand
       distribution(summand_distribution(summand)),
       next_state(make_data_expression_vector(summand.next_state(process_parameters))),
       index(summand_index),
-      cache_strategy(cache_strategy_)
+      cache_strategy(cache_strategy_),
+      cache_mutex(new std::mutex)
   {
     gamma = free_variables(summand.condition(), process_parameters);
     if (cache_strategy_ == caching::global)
@@ -286,8 +288,7 @@ struct explorer_summand
     {
       bool is_first_element = true;
       atermpp::make_term_appl(key, f_gamma, gamma.begin(), gamma.end(),
-    //                                    [&](data::data_expression& result, const data::variable& x)
-                                        [&](atermpp::unprotected_aterm& result, const data::variable& x)
+                                        [&](data::data_expression& result, const data::variable& x)
                                         {
                                           if (is_first_element)
                                           {
@@ -303,8 +304,7 @@ struct explorer_summand
     else
     {
       atermpp::make_term_appl(key, f_gamma, gamma.begin(), gamma.end(),
-    //                                    [&](data::data_expression& result, const data::variable& x)
-                                        [&](atermpp::unprotected_aterm& result, const data::variable& x)
+                                        [&](data::data_expression& result, const data::variable& x)
                                         {
                                           sigma.apply(x, result);
                                         }
@@ -511,6 +511,36 @@ class explorer: public abortable
         );
     }
 
+    void cache_lock(const explorer_summand& summand, std::mutex& global_cache_mutex)
+    {
+      if (atermpp::detail::GlobalThreadSafe && m_options.number_of_threads>1) 
+      {
+        if (summand.cache_strategy == caching::global) 
+        { 
+          global_cache_mutex.lock();
+        }
+        else
+        {
+          summand.cache_mutex->lock();
+        }
+      }
+    }
+
+    void cache_unlock(const explorer_summand& summand, std::mutex& global_cache_mutex)
+    {
+      if (atermpp::detail::GlobalThreadSafe && m_options.number_of_threads>1) 
+      {
+        if (summand.cache_strategy == caching::global) 
+        { 
+          global_cache_mutex.unlock();
+        }
+        else
+        {
+          summand.cache_mutex->unlock();
+        }
+      }
+    }
+
     void check_enumerator_solution(const data::data_expression& p_expression, // WAS: const enumerator_element& p, 
                                    const explorer_summand& summand,
                                    data::mutable_indexed_substitution<>& sigma,
@@ -641,14 +671,14 @@ class explorer: public abortable
       }
       else
       {
-        static std::mutex cache_mutex; // This mutex could be created per summand. This may allow for more parallel behaviour if required. 
+        static std::mutex global_cache_mutex;
         summand.compute_key(key, sigma);
         auto& cache = summand.cache_strategy == caching::global ? global_cache : summand.local_cache;
-        if (atermpp::detail::GlobalThreadSafe && m_options.number_of_threads>1) cache_mutex.lock();
+        cache_lock(summand, global_cache_mutex);
         auto q = cache.find(key);
         if (q == cache.end())
         {
-          if (atermpp::detail::GlobalThreadSafe && m_options.number_of_threads>1) cache_mutex.unlock();
+          cache_unlock(summand, global_cache_mutex);
           rewr(condition, summand.condition, sigma);
           std::list<data::data_expression_list> solutions;
           if (!data::is_false(condition))
@@ -665,10 +695,10 @@ class explorer: public abortable
                         data::is_false
                       );
           }
-          if (atermpp::detail::GlobalThreadSafe && m_options.number_of_threads>1) cache_mutex.lock();
+          cache_lock(summand, global_cache_mutex);
           q = cache.insert({key, solutions}).first;
         }
-        if (atermpp::detail::GlobalThreadSafe && m_options.number_of_threads>1) cache_mutex.unlock();
+        cache_unlock(summand, global_cache_mutex);
 
         // state_type s1;
         for (const data::data_expression_list& e: q->second)
