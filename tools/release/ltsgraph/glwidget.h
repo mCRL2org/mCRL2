@@ -190,7 +190,12 @@ class GLWidget : public QOpenGLWidget
   /// \brief Logs the given message to the mCRL2 output.
   void logMessage(const QOpenGLDebugMessage& debugMessage);
 
-  /// Signals for various UI interactions.
+  /// Slots for various UI interactions.
+  void toggleTextLimiting(bool b)
+  {
+    m_doTextLimiting = b;
+  }
+  
   void toggleDebugDrawGraphs(bool show)
   {
     m_drawDebugGraphs = show;
@@ -247,7 +252,7 @@ class GLWidget : public QOpenGLWidget
   Graph::Graph& m_graph;      ///< The current graph.
   GLScene m_scene; ///< The GLScene which is used to render the contents.
   QOpenGLDebugLogger* m_logger; ///< Logs OpenGL debug messages.
-
+  qreal m_current_device_pixel_ratio;
   GLScene::Selection
       m_hover;         ///< The current object (if any) which is pointed at.
   public:              /// TODO: Expose nicely
@@ -268,6 +273,8 @@ class GLWidget : public QOpenGLWidget
   bool m_drawDebugGraphs = false; ///< Drawing debug graphs can be turned on/off
                                   ///< in advanced layout dialog
 
+  int m_textLimit = 20;
+  bool m_doTextLimiting = false;
   std::list<GLScene::Selection>
       m_selections; ///< A list of the objects under the cursor.
 

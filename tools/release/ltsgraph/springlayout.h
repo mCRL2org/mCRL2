@@ -173,7 +173,7 @@ class SpringLayout
     const float m_max_natLength = 100.0f;
     float m_natLength;               ///< The natural length of springs.
     const float m_min_controlPointWeight = 0.0f;
-    const float m_max_controlPointWeight = 0.1f;
+    const float m_max_controlPointWeight = 0.8f;
     float m_controlPointWeight;      ///< The handle repulsion wight factor.
     const float m_min_accuracy = 5.0f;
     const float m_max_accuracy = 0.0f;
@@ -385,12 +385,12 @@ class CustomQDialog : public QDialog
   CustomQDialog(QAction* act, QWidget* parent = nullptr)
       : QDialog(parent), m_act(act){};
 
-  protected:
   void closeEvent(QCloseEvent* e) override
   {
     m_act->setChecked(false);
     QDialog::closeEvent(e);
   }
+
 
   private:
   QAction* m_act;
@@ -414,6 +414,8 @@ class SpringLayoutUi : public QDockWidget
      */
     SpringLayoutUi(SpringLayout& layout, QAction* advancedLayoutAction,
                    QWidget* parent = nullptr);
+
+    void redrawTable();
 
     /**
      * @brief Destructor.
@@ -536,6 +538,7 @@ class SpringLayoutUi : public QDockWidget
      * @brief Shows/hides the advanced dialog window
     */
    void onAdvancedDialogShow(bool);
+
 
     friend class SpringLayout;
 };

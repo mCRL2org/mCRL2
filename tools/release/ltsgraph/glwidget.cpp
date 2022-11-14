@@ -162,7 +162,7 @@ GLWidget::GLWidget(Graph::Graph& graph, QWidget* parent)
   setAutoFillBackground(false);
   setAttribute(Qt::WA_OpaquePaintEvent, true);
   setAttribute(Qt::WA_NoSystemBackground, true);
-
+  m_current_device_pixel_ratio = devicePixelRatio();
   m_scene.setDevicePixelRatio(devicePixelRatio());
 
   /// TODO: Move draw_timer to member variables so that drawing can be disabled
@@ -349,32 +349,44 @@ void GLWidget::initializeGL()
 
 void GLWidget::resizeGL(int width, int height)
 {
-  m_scene.resize(width, height);
+  m_scene.resize(devicePixelRatio() * width, devicePixelRatio() * height);
 }
 
 void GLWidget::paintGL()
 {
-  if (!m_paused)
+  if (devicePixelRatio() != m_current_device_pixel_ratio)
   {
-    QPainter painter(this);
-    painter.save();
-    m_scene.update();
-    if (m_graph.hasNewFrame())
-    {
-      m_scene.setDevicePixelRatio(devicePixelRatio());
-      m_scene.render();
-    }
-    painter.restore();
+    m_current_device_pixel_ratio = devicePixelRatio();
+    m_scene.resize(size().width() * m_current_device_pixel_ratio,
+                   size().height() * m_current_device_pixel_ratio);
+    m_scene.setDevicePixelRatio(devicePixelRatio());
+  }
+  QPainter painter(this);
+  painter.save();
+  m_scene.update();
+  if (m_graph.hasNewFrame())
+  {
+    m_scene.render();
+  }
+  painter.restore();
 
-    QOpenGLFramebufferObject::bindDefault();
-    QOpenGLFramebufferObject::blitFramebuffer(0, m_scene.m_fbo, GL_COLOR_BUFFER_BIT);
+  QOpenGLFramebufferObject::bindDefault();
+  QOpenGLFramebufferObject::blitFramebuffer(0, m_scene.m_fbo,
+                                            GL_COLOR_BUFFER_BIT);
+  if (m_doTextLimiting)
+  {
+    m_scene.renderText(painter, m_textLimit);
+  }
+  else
+  {
     m_scene.renderText(painter);
+  }
+  painter.end();
+  if (m_drawDebugGraphs)
+  {
+    painter.begin(this);
+    m_graph.gv_debug.draw(painter);
     painter.end();
-    if (m_drawDebugGraphs){
-      painter.begin(this);
-      m_graph.gv_debug.draw(painter);
-      painter.end();
-    }
   }
   // Updates the selection percentage (and checks for new selections under the
   // cursor).
