@@ -31,13 +31,13 @@ class ltsgraph_tool : public ltsgraph_base
       QSurfaceFormat surfaceFormat = QSurfaceFormat::defaultFormat();
       surfaceFormat.setVersion(3, 3);
       surfaceFormat.setProfile(QSurfaceFormat::CoreProfile);
-      // surfaceFormat.setAlphaBufferSize(1);
-      // surfaceFormat.setStencilBufferSize(1);
-      // surfaceFormat.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
-      // surfaceFormat.setSwapInterval(1);
+      surfaceFormat.setAlphaBufferSize(1);
+      surfaceFormat.setStencilBufferSize(1);
+      surfaceFormat.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+      surfaceFormat.setSwapInterval(1);
 
       // Enable a surface with multisampling.
-      // surfaceFormat.setSamples(4);
+      surfaceFormat.setSamples(4);
 
       // We use the GL_KHR_debug extension to provide realtime logging of OpenGL errors.
       // Ruben: Disabled because debug logging became unusable and every text draw call produced 3 lines of output per node/label
