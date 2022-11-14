@@ -123,7 +123,7 @@ public:
   /// \brief Render the scene, no text.
   void render();
   /// \brief Render just the text, no OpenGL.
-  void renderText(QPainter& painter, int text_limit = 20);
+  void renderText(QPainter& painter, int text_limit = 9999999);
 
   /// \brief Resize the OpenGL viewport.
   void resize(std::size_t width, std::size_t height);
@@ -145,7 +145,7 @@ public:
   float handleSizeScaled() const { return handleSize * m_device_pixel_ratio; }
   float arrowheadSizeScaled() const
   {
-    return 0.1f * nodeSize() * arrowheadSize * m_device_pixel_ratio;
+    return 0.1f * nodeSizeScaled() * arrowheadSize;
   }
 
   /// \brief Computes how long the world vector (length, 0, 0) at pos is when drawn on the screen

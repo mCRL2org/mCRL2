@@ -28,6 +28,7 @@
 #include <QString>
 #include <QElapsedTimer>
 #include <QPainter>
+#include <QMutex>
 
 #include <utility>
 #include <cmath>
@@ -372,6 +373,7 @@ class DebugView{
 
     void determineScale(double max = -1);
   private:
+    QMutex* m_lock;
     void drawLine(QPainter& painter, std::vector<QPointF>& line,
                   double current_value, QBrush& brush,
                   QPen& pen);

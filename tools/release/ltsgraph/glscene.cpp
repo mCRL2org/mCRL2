@@ -428,7 +428,7 @@ void GLScene::render()
   m_drawArrowOffsets.resize(0);
   m_drawArrowDirections.resize(0);
 
-  // m_graph.lock(GRAPH_LOCK_TRACE); // enter critical section
+  m_graph.lock(GRAPH_LOCK_TRACE); // enter critical section
 
   bool exploration_active = m_graph.hasExploration();
   std::size_t nodeCount =
@@ -460,6 +460,10 @@ void GLScene::render()
                  viewProjMatrix, true);
     }
   }
+  m_graph.unlock(GRAPH_LOCK_TRACE);
+
+
+
   QElapsedTimer openglTimer;
   openglTimer.restart();
   // All other objects share the same shader and vertex layout.
@@ -614,7 +618,10 @@ void GLScene::render()
 
 void GLScene::renderText(QPainter& painter, int text_limit)
 {
-
+  if (!(m_drawstatelabels || m_drawstatenumbers || m_drawtransitionlabels))
+  {
+    return;
+  }
   bool exploration_active = m_graph.hasExploration();
   std::size_t nodeCount =
       exploration_active ? m_graph.explorationNodeCount() : m_graph.nodeCount();
@@ -626,55 +633,164 @@ void GLScene::renderText(QPainter& painter, int text_limit)
   painter.setFont(font);
   painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
 
-  std::vector<double> distances(nodeCount);
-  std::vector<int> indices(nodeCount);
-  for (std::size_t i = 0; i < nodeCount; ++i)
+  // Draw node labels
   {
-    std::size_t n = exploration_active ? m_graph.explorationNode(i) : i;
-    distances[i] =
-        (m_graph.node(n).pos() - m_camera.position()).lengthSquared();
-    indices[i] = i;
-  }
-
-  auto compare = [&](int i, int j) { return distances[i] < distances[j]; };
-
-  std::sort(indices.begin(), indices.end(), compare);
-  double closest = std::sqrt(distances[0]);
-  double furthest = std::sqrt(
-      distances[(nodeCount > text_limit) ? text_limit - 1 : nodeCount - 1]);
-  const double furthest_scale = 1.0;
-  const double closest_scale = 1.0;
-  auto getScale = [&](double dist)
-  {
-    return closest_scale - (closest_scale - furthest_scale) *
-                               (std::sqrt(dist) - closest) /
-                               (furthest - closest);
-  };
-  for (std::size_t i = 0; i < std::min(nodeCount, static_cast<std::size_t>(text_limit)); ++i)
-  {
-    font.setPixelSize(getScale(distances[i]) * m_fontsize);
-    painter.setFont(font);
-    if (m_drawstatenumbers)
+    std::vector<double> distances(nodeCount);
+    std::vector<int> indices(nodeCount);
+    QVector3D closest_node;
+    QVector3D cam_pos = m_camera.position();
+    QVector3D center_of_screen = m_camera.windowToWorld(
+        QVector3D(m_camera.viewport().width() * 0.5,
+                  m_camera.viewport().height() * 0.5, 0));
+    double distance_to_closest_node = 1e15;
+    for (std::size_t i = 0; i < nodeCount; i++)
     {
-      renderStateNumber(painter, exploration_active
-                                     ? m_graph.explorationNode(indices[i])
-                                     : indices[i]);
+      std::size_t n = exploration_active ? m_graph.explorationNode(i) : i;
+
+      double dist = (m_graph.node(n).pos() - cam_pos).lengthSquared();
+
+      if (dist < distance_to_closest_node)
+      {
+        distance_to_closest_node = dist;
+        closest_node = m_graph.node(n).pos();
+      }
+    }
+    // project onto plane
+    QVector3D focus_point =
+        center_of_screen +
+        QVector3D::dotProduct(closest_node - center_of_screen,
+                              cam_pos - center_of_screen) /
+            (cam_pos - center_of_screen).lengthSquared() *
+            (cam_pos - center_of_screen);
+    for (std::size_t i = 0; i < nodeCount; ++i)
+    {
+      std::size_t n = exploration_active ? m_graph.explorationNode(i) : i;
+
+      distances[i] = (m_graph.node(n).pos() - focus_point).lengthSquared();
+      indices[i] = i;
+    }
+    auto compare = [&](int i, int j) { return distances[i] < distances[j]; };
+
+    std::sort(indices.begin(), indices.end(), compare);
+
+    double closest = 10000000000000;
+    double furthest = 0;
+    for (std::size_t i = 0;
+         i < std::min(nodeCount, static_cast<std::size_t>(text_limit)); ++i)
+    {
+      std::size_t n =
+          exploration_active ? m_graph.explorationNode(indices[i]) : indices[i];
+      double dist = (m_graph.node(n).pos() - cam_pos).lengthSquared();
+      distances[indices[i]] = dist;
+      dist = std::sqrt(dist);
+      closest = std::min(dist, closest);
+      furthest = std::max(dist, furthest);
     }
 
-    if (m_drawstatelabels)
+    const double furthest_scale = 0.8;
+    const double closest_scale = 1.0;
+    auto getScale = [&](int i)
     {
-      renderStateLabel(painter, exploration_active
-                                    ? m_graph.explorationNode(indices[i])
-                                    : indices[i]);
+      return (closest_scale - (closest_scale - furthest_scale) *
+                                  (std::sqrt(distances[i]) - closest) /
+                                  (furthest - closest));
+    };
+    for (std::size_t i = 0;
+         i < std::min(nodeCount, static_cast<std::size_t>(text_limit)); ++i)
+    {
+      font.setPixelSize(getScale(indices[i]) * m_fontsize);
+      painter.setFont(font);
+      if (m_drawstatenumbers)
+      {
+        renderStateNumber(painter, exploration_active
+                                       ? m_graph.explorationNode(indices[i])
+                                       : indices[i]);
+      }
+
+      if (m_drawstatelabels)
+      {
+        renderStateLabel(painter, exploration_active
+                                      ? m_graph.explorationNode(indices[i])
+                                      : indices[i]);
+      }
     }
   }
 
-  if (m_drawtransitionlabels)
+  // Draw transition labels
   {
+    std::vector<double> distances(edgeCount);
+    std::vector<int> indices(edgeCount);
+    QVector3D closest_node;
+    QVector3D cam_pos = m_camera.position();
+    QVector3D center_of_screen = m_camera.windowToWorld(
+        QVector3D(m_camera.viewport().width() * 0.5,
+                  m_camera.viewport().height() * 0.5, 0));
+    double distance_to_closest_node = 1e15;
+    for (std::size_t i = 0; i < edgeCount; i++)
+    {
+      std::size_t n = exploration_active ? m_graph.explorationEdge(i) : i;
+
+      double dist = (m_graph.transitionLabel(n).pos() - cam_pos).lengthSquared();
+
+      if (dist < distance_to_closest_node)
+      {
+        distance_to_closest_node = dist;
+        closest_node = m_graph.transitionLabel(n).pos();
+      }
+    }
+    // project onto plane
+    QVector3D focus_point =
+        center_of_screen +
+        QVector3D::dotProduct(closest_node - center_of_screen,
+                              cam_pos - center_of_screen) /
+            (cam_pos - center_of_screen).lengthSquared() *
+            (cam_pos - center_of_screen);
     for (std::size_t i = 0; i < edgeCount; ++i)
     {
-      renderTransitionLabel(
-          painter, exploration_active ? m_graph.explorationEdge(i) : i);
+      std::size_t n = exploration_active ? m_graph.explorationEdge(i) : i;
+
+      distances[i] =
+          (m_graph.transitionLabel(n).pos() - focus_point).lengthSquared();
+      indices[i] = i;
+    }
+    auto compare = [&](int i, int j) { return distances[i] < distances[j]; };
+
+    std::sort(indices.begin(), indices.end(), compare);
+
+    double closest = 10000000000000;
+    double furthest = 0;
+    for (std::size_t i = 0;
+         i < std::min(edgeCount, static_cast<std::size_t>(text_limit)); ++i)
+    {
+      std::size_t n =
+          exploration_active ? m_graph.explorationEdge(indices[i]) : indices[i];
+      double dist =
+          (m_graph.transitionLabel(n).pos() - cam_pos).lengthSquared();
+      distances[indices[i]] = dist;
+      dist = std::sqrt(dist);
+      closest = std::min(dist, closest);
+      furthest = std::max(dist, furthest);
+    }
+
+    const double furthest_scale = 0.8;
+    const double closest_scale = 1.0;
+    auto getScale = [&](int i)
+    {
+      return (closest_scale - (closest_scale - furthest_scale) *
+                                  (std::sqrt(distances[i]) - closest) /
+                                  (furthest - closest));
+    };
+    if (m_drawtransitionlabels)
+    {
+    for (std::size_t i = 0;
+            i < std::min(edgeCount, static_cast<std::size_t>(text_limit)); ++i)
+    {
+        font.setPixelSize(getScale(indices[i]) * m_fontsize);
+        painter.setFont(font);
+        renderTransitionLabel(painter, exploration_active
+                                           ? m_graph.explorationEdge(indices[i])
+                                           : indices[i]);
+    }
     }
   }
 }

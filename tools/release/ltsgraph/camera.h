@@ -71,11 +71,13 @@ private:
   /// \brief Rotation around the center.
   QQuaternion m_rotation = QQuaternion(1.0f, 0.0f, 0.0f, 0.0f);
 
+  public:
   /// \brief Distance to the center.
   float m_zoom = 700.0f;
 
+  private:
   float m_viewdistance = 100000.0f;
-  float m_vert_fieldofview = 55.0f;
+  float m_vert_fieldofview = 70.0f;
 
   /// The resulting matrices and viewports, are updated when calling update().
   QMatrix4x4 m_projectionMatrix;

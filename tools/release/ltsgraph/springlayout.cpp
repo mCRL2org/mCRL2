@@ -1272,8 +1272,23 @@ void SpringLayout::apply()
         clipVector(m_graph.transitionLabel(n).pos_mutable(), clipmin, clipmax);
       }
     }
-
     double energy = slicedAverageSqrMagnitude(m_nforces, 0, m_nforces.size());
+    double min = 1e15;
+    double max = -1e15;
+    for (auto f : m_nforces)
+    {
+      double mag = f.lengthSquared();
+      min = std::min(min, mag);
+      max = std::max(max, mag);
+    }
+    if (m_glwidget.getDebugDrawGraphs())
+    {
+      m_graph.gv_debug.logVar("Temperature", m_asa.T);
+      m_graph.gv_debug.logVar("Energy", energy);
+
+      m_graph.gv_debug.logVar("min energy", min);
+      m_graph.gv_debug.logVar("max energy", max);
+    }
     if (m_useAnnealing)
     {
       m_asa.calculateTemperature(energy);
@@ -1283,22 +1298,7 @@ void SpringLayout::apply()
     {
       m_asa.reset();
     }
-    m_graph.unlock(GRAPH_LOCK_TRACE);
-    if (m_glwidget.getDebugDrawGraphs())
-    {
-      m_graph.gv_debug.logVar("Temperature", m_asa.T);
-      m_graph.gv_debug.logVar("Energy", energy);
-      double min = 1e15;
-      double max = -1e15;
-      for (auto f : m_nforces)
-      {
-        double mag = f.lengthSquared();
-        min = std::min(min, mag);
-        max = std::max(max, mag);
-      }
-      m_graph.gv_debug.logVar("min energy", min);
-      m_graph.gv_debug.logVar("max energy", max);
-    }
+    
     m_max_num_nodes = 0;
     m_total_num_nodes = 0;
 
@@ -1308,7 +1308,8 @@ void SpringLayout::apply()
 
     notifyNewFrame();
 
-    m_ui->m_table_view.fillTable(*m_ui->m_ui_advanced.tbl_data);
+    m_ui->redrawTable();
+    m_graph.unlock(GRAPH_LOCK_TRACE);
   }
 }
 
@@ -1540,6 +1541,11 @@ SpringLayoutUi::SpringLayoutUi(SpringLayout& layout,
   connect(m_ui_advanced.chk_annealing, SIGNAL(toggled(bool)), this,
           SLOT(onAnnealingToggled(bool)));
 
+  connect(m_ui_advanced.chk_limit_text, SIGNAL(toggled(bool)),
+          &m_layout.m_glwidget, SLOT(toggleTextLimiting(bool)));
+  m_layout.m_glwidget.toggleTextLimiting(
+      m_ui_advanced.chk_limit_text->isChecked());
+
   connect(m_ui_advanced_dialog, SIGNAL(finished(int)), this,
           SLOT(onAdvancedDialogShow(false)));
   connect(m_ui_advanced_dialog, SIGNAL(accepted()), this,
@@ -1547,19 +1553,24 @@ SpringLayoutUi::SpringLayoutUi(SpringLayout& layout,
   connect(m_ui_advanced_dialog, SIGNAL(rejected()), this,
           SLOT(onAdvancedDialogShow(false)));
 
-  m_table_view.add("speed", new TypedData<float>(&m_layout.m_speed));
-  m_table_view.add("accuracy", new TypedData<float>(&m_layout.m_accuracy));
-  m_table_view.add("attraction", new TypedData<float>(&m_layout.m_attraction));
-  m_table_view.add("repulsion", new TypedData<float>(&m_layout.m_repulsion));
-  m_table_view.add("nat length", new TypedData<float>(&m_layout.m_natLength));
-  m_table_view.add("handle weight", new TypedData<float>(&m_layout.m_controlPointWeight));
-  m_table_view.add("temperature",
-                   new TypedData<float>(&m_layout.m_annealing_temperature));
-  m_table_view.fillTable(*m_ui_advanced.tbl_data);
-  m_ui_advanced_dialog->update();
+  //m_table_view.add("speed", new TypedData<float>(&m_layout.m_speed));
+  //m_table_view.add("accuracy", new TypedData<float>(&m_layout.m_accuracy));
+  //m_table_view.add("attraction", new TypedData<float>(&m_layout.m_attraction));
+  //m_table_view.add("repulsion", new TypedData<float>(&m_layout.m_repulsion));
+  //m_table_view.add("nat length", new TypedData<float>(&m_layout.m_natLength));
+  //m_table_view.add("handle weight", new TypedData<float>(&m_layout.m_controlPointWeight));
+  //m_table_view.add("temperature",
+  //                 new TypedData<float>(&m_layout.m_annealing_temperature));
+  //redrawTable();
 
 
   onTreeToggled(false);
+}
+
+void SpringLayoutUi::redrawTable()
+{
+  m_table_view.fillTable(*m_ui_advanced.tbl_data);
+  m_ui_advanced_dialog->update();
 }
 
 SpringLayoutUi::~SpringLayoutUi()

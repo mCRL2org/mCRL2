@@ -771,6 +771,7 @@ DebugView::DebugView(int log_duration, std::size_t min_interval)
  : m_log_duration(log_duration), m_min_interval(min_interval){
     m_timer.restart();
   m_current_interval_start = m_timer.elapsed();
+    m_lock = new QMutex();
 }
 
 void DebugView::push(double value){
@@ -778,11 +779,15 @@ void DebugView::push(double value){
   //mCRL2log(mcrl2::log::debug) << "current_time: " << current_time << " current interval time: " << m_current_interval_start << " min interval time: " << m_min_interval << std::endl;
 
   bool changed = false;
-  // first we remove all from the front that are no longer relevant
-  while (m_values.size() > 0 && current_time - m_values.front().first > m_log_duration){
-    m_values.pop_front();
-    changed = true;
-  } 
+  if (m_lock->tryLock(0))
+  {
+      // first we remove all from the front that are no longer relevant
+      while (m_values.size() > 0 && current_time - m_values.front().first > m_log_duration){
+        m_values.pop_front();
+        changed = true;
+      } 
+      m_lock->unlock();
+  }
 
   // Then we check whether the last interval has passed
   if (current_time - m_current_interval_start > m_min_interval){
@@ -802,6 +807,7 @@ double DebugView::recalcMax()
 {
   double current_max = 0;
 
+  m_lock->lock();
   for (auto& pair : m_values)
   {
     if (m_drawStd)
@@ -814,6 +820,7 @@ double DebugView::recalcMax()
     if (m_drawMin)
       current_max = std::max(pair.second.min, current_max);
   }
+  m_lock->unlock();
 
   // over time lower the max value
   if (current_max < m_scale_tolerance * m_max_value)
@@ -857,12 +864,14 @@ void DebugView::draw(QPainter& painter, QBrush& brush, QPen& pen){
         m_pad_width + getX(t) * m_width,
         m_pad_height + getY(val) * m_height);
   };
+  m_lock->lock();
   for (auto& pair : m_values){
     pointsMin.push_back(createPoint(pair.first, pair.second.min));
     pointsMax.push_back(createPoint(pair.first, pair.second.max));
     pointsAvg.push_back(createPoint(pair.first, pair.second.average));
     pointsStd.push_back(createPoint(pair.first, pair.second.std));
   }
+  m_lock->unlock();
 
   painter.setRenderHint(QPainter::RenderHint::Antialiasing, true);
   std::vector<QPointF> bounding_box = {
@@ -898,7 +907,7 @@ GraphView::GraphView(int rows, int cols, QRect bounds, std::size_t log_duration,
 void GraphView::addVar(std::string name)
 {
   assert(m_vars.find(name) == m_vars.end()); // not yet inserted
-  std::pair<std::string, DebugView> var = {name, DebugView(m_log_duration,m_min_interval)};
+  std::pair<std::string, DebugView> var = std::make_pair(name, DebugView(m_log_duration,m_min_interval));
   m_vars.emplace(var);
 }
 
