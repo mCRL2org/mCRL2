@@ -567,7 +567,7 @@ void GLScene::render()
   m_vaoArrow.bind();
 
   m_arrow_shader.setVP(viewProjMatrix);
-  m_arrow_shader.setScale(arrowheadSizeScaled());
+  m_arrow_shader.setScale(arrowheadSizeScaled() / m_device_pixel_ratio);
   if (m_drawArrowOffsets.size() > 0)
   {
     std::size_t amount_to_render = m_drawArc.size();
@@ -839,7 +839,8 @@ void GLScene::drawCenteredText3D(QPainter& painter, const QString& text,
     QColor qcolor = vectorToColor(color);
     qcolor.setAlpha(static_cast<int>(255 * (1.0f - fog)));
 
-    drawCenteredText(painter, window.x(), window.y(), text, qcolor);
+    drawCenteredText(painter, window.x() / m_device_pixel_ratio,
+                     window.y() / m_device_pixel_ratio, text, qcolor);
   }
 }
 
@@ -857,7 +858,8 @@ void GLScene::drawCenteredStaticText3D(QPainter& painter,
     QColor qcolor = vectorToColor(color);
     qcolor.setAlpha(static_cast<int>(255 * (1.0f - fog)));
 
-    drawCenteredStaticText(painter, window.x(), window.y(), text, qcolor);
+    drawCenteredStaticText(painter, window.x() / m_device_pixel_ratio,
+                           window.y() / m_device_pixel_ratio, text, qcolor);
   }
 }
 
