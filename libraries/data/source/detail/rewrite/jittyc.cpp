@@ -405,11 +405,9 @@ static void add_to_build_pars(build_pars& pars, const match_tree_list_list& seqs
   pars.stack = add_to_stack(pars.stack,l,r,cr);
 }
 
-static char tree_var_str[20];
 static variable createFreshVar(const sort_expression& sort, std::size_t* i)
 {
-  sprintf(tree_var_str,"@var_%lu",(*i)++);
-  return data::variable(tree_var_str, sort);
+  return data::variable("@var_" + std::to_string((*i)++), sort);
 }
 
 match_tree_list RewriterCompilingJitty::subst_var(const match_tree_list& l,
