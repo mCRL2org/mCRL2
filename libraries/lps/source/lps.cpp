@@ -122,7 +122,7 @@ process::untyped_multi_action parse_multi_action_new(const std::string& text)
 multi_action complete_multi_action(process::untyped_multi_action& x, multi_action_type_checker& typechecker, const data::data_specification& data_spec = data::detail::default_specification())
 {
   multi_action result = lps::typecheck_multi_action(x, typechecker);
-  lps::translate_user_notation(result);
+  result = lps::translate_user_notation(result);
   lps::normalize_sorts(result, data_spec);
   return result;
 }
@@ -130,7 +130,7 @@ multi_action complete_multi_action(process::untyped_multi_action& x, multi_actio
 multi_action complete_multi_action(process::untyped_multi_action& x, const process::action_label_list& action_decls, const data::data_specification& data_spec = data::detail::default_specification())
 {
   multi_action result = lps::typecheck_multi_action(x, data_spec, action_decls);
-  lps::translate_user_notation(result);
+  result = lps::translate_user_notation(result);
   lps::normalize_sorts(result, data_spec);
   return result;
 }
