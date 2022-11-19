@@ -65,6 +65,7 @@ data_specification parse_data_specification(std::istream& in)
   std::string text = utilities::read_text(in);
   data_specification result = detail::parse_data_specification_new(text);
   typecheck_data_specification(result);
+  result.translate_user_notation();
   return result;
 }
 

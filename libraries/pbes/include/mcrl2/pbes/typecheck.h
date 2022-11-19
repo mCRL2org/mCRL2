@@ -238,6 +238,7 @@ class pbes_type_checker
 
       // typecheck the data specification
       pbesspec.data() = m_data_type_checker.typechecked_data_specification();
+      pbesspec.data().translate_user_notation();
     }
 
      /** \brief     Type check a process expression.

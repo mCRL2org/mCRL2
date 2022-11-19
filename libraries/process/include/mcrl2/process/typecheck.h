@@ -662,6 +662,8 @@ class process_type_checker
 
       // typecheck the data specification
       procspec.data() = m_data_type_checker.typechecked_data_specification();
+      procspec.data().translate_user_notation();
+      
 
       mCRL2log(log::debug) << "type checking process specification finished" << std::endl;
     }

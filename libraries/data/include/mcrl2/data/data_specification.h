@@ -481,6 +481,18 @@ class data_specification: public sort_specification
       }
     }
 
+    /// \brief Translate user notation within the equations of the data specification.
+    /// \details This function replaces explicit numbers, lists, sets and bags by their counterpart
+    ///          in the data types. This function is to be invoked after type checking. 
+    void translate_user_notation()
+    {
+       for(data_equation& e: m_user_defined_equations)
+       {
+         e = data::translate_user_notation(e);
+       }
+       data_is_not_necessarily_normalised_anymore();
+    }
+
   private:
 
     ///\brief Puts the constructors, functions and equations in normalised form in
@@ -521,7 +533,7 @@ class data_specification: public sort_specification
       // Normalise the sorts of the expressions and variables in equations.
       for (const data_equation& eq: m_user_defined_equations)
       {
-        add_normalised_equation(data::translate_user_notation(eq));
+        add_normalised_equation(data::translate_user_notation(eq));     // in due time (after 2025) this translate user notation can be removed. 
       }
     }
 
@@ -618,8 +630,8 @@ class data_specification: public sort_specification
     /// only if they point to the element that is removed
     void remove_equation(const data_equation& e)
     {
-      const data_equation e1=data::translate_user_notation(e);
-
+      const data_equation e1=data::translate_user_notation(e);              // in due time (after 2025) this translate user notation could possibly be removed.
+                                                                            // as it stands this function is not used. 
       detail::remove(m_normalised_equations, normalize_sorts(e1,*this));
       detail::remove(m_user_defined_equations, e);
     }

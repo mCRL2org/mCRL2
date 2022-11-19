@@ -631,6 +631,7 @@ void typecheck_state_formula_specification(state_formula_specification& formspec
     state_formula_type_checker type_checker(dataspec, formspec.action_labels(), std::vector<data::variable>());
     formspec.formula() = type_checker.typecheck_state_formula(formspec.formula());
     formspec.data() = checker.typechecked_data_specification();
+    formspec.data().translate_user_notation();
   }
   catch (mcrl2::runtime_error& e)
   {
@@ -651,6 +652,7 @@ void typecheck_state_formula_specification(state_formula_specification& formspec
     state_formula_type_checker type_checker(dataspec, lpsspec.action_labels() + formspec.action_labels(), lpsspec.global_variables());
     formspec.formula() = type_checker.typecheck_state_formula(formspec.formula());
     formspec.data() = checker.typechecked_data_specification();
+    formspec.data().translate_user_notation();
   }
   catch (mcrl2::runtime_error& e)
   {

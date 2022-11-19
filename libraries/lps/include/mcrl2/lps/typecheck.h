@@ -103,6 +103,7 @@ class action_rename_type_checker
       m_data_type_checker = data::data_type_checker(lpsspec.data() + arspec.data());
       action_rename_specification result = arspec;
       result.data() = m_data_type_checker.typechecked_data_specification();
+      result.data().translate_user_notation();
       lps::detail::normalize_sorts(result);
       m_action_context.clear();
       process::action_label_list action_labels = lpsspec.action_labels() + arspec.action_labels();
