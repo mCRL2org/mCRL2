@@ -46,6 +46,14 @@ lpsparunfold::lpsparunfold(lps::stochastic_specification& spec,
 {
   m_identifier_generator.add_identifiers(lps::find_identifiers(spec));
   m_identifier_generator.add_identifiers(data::find_identifiers(spec.data()));
+  for (const function_symbol& f : spec.data().constructors())
+  {
+    m_identifier_generator.add_identifier(f.name());
+  }
+  for (const function_symbol& f : spec.data().mappings())
+  {
+    m_identifier_generator.add_identifier(f.name());
+  }
 }
 
 data::basic_sort lpsparunfold::generate_fresh_basic_sort(const data::sort_expression& sort)
