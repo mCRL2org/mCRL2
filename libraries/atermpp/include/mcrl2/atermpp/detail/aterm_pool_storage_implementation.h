@@ -421,7 +421,7 @@ void ATERM_POOL_STORAGE::call_deletion_hook(unprotected_aterm term)
   {
     if (symbol == term.function())
     {
-      verify_term(*detail::address(term));
+      assert(verify_term(*detail::address(term)));
       callback(static_cast<const aterm&>(term));
     }
   }
