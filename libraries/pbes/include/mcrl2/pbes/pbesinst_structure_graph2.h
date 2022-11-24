@@ -499,7 +499,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       structure_graph& G
     )
       : pbesinst_structure_graph_algorithm(options, p, G),
-        b(options.number_of_threads), find_loops_guard(2), fatal_attractors_guard(2)
+        b(options.number_of_threads+1), find_loops_guard(2), fatal_attractors_guard(2)
     {}
 
     // Optimization 2 is implemented by overriding the function rewrite_psi.
