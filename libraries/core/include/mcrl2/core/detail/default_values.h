@@ -1241,7 +1241,7 @@ const atermpp::aterm_appl& default_value_PBESExists()
 inline
 const atermpp::aterm_appl& default_value_PropVarInst()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_PropVarInst(), default_value_String(), default_value_List(), default_value_Number());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_PropVarInst(), default_value_String(), default_value_List());
   return t;
 }
 
@@ -1265,7 +1265,7 @@ const atermpp::aterm_appl& default_value_BooleanEquation()
 inline
 const atermpp::aterm_appl& default_value_BooleanVariable()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_BooleanVariable(), default_value_String(), default_value_Number());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_BooleanVariable(), default_value_String());
   return t;
 }
 

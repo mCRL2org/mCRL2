@@ -261,18 +261,8 @@ void save_pbes(const pbes_system::pbes& pbes,
   }
 }
 
-// transforms BooleanVariable to BooleanVariableNoIndex
-static atermpp::aterm_appl remove_index_impl(const atermpp::aterm_appl& x)
-{
-  if (x.function() == core::detail::function_symbol_BooleanVariable())
-  {
-    return atermpp::aterm_appl(core::detail::function_symbol_BooleanVariableNoIndex(), x.begin(), --x.end());
-  }
-  return x;
-}
-
 // transforms BooleanVariableNoIndex to BooleanVariable
-static atermpp::aterm_appl add_index_impl(const atermpp::aterm_appl& x)
+static atermpp::aterm_appl add_index_impl(const atermpp::aterm_appl& x)    // This function can be removed in due time, say in the year 2025.
 {
   if (x.function() == core::detail::function_symbol_BooleanVariableNoIndex())
   {
@@ -290,7 +280,6 @@ atermpp::aterm boolean_equation_system_marker()
 atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const boolean_equation& equation)
 {
   atermpp::aterm_stream_state state(stream);
-  stream << remove_index_impl;
 
   stream << equation.symbol();
   stream << equation.variable();
@@ -320,7 +309,6 @@ atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, boolean_equat
 atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const boolean_equation_system& bes)
 {
   atermpp::aterm_stream_state state(stream);
-  stream << remove_index_impl;
 
   stream << boolean_equation_system_marker();
   stream << bes.initial_state();

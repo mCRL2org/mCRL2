@@ -329,7 +329,7 @@
                  | <UntypedDataParameter>
 
 //propositional variable instantiation
-<PropVarInst>  ::= PropVarInst(<String>, <DataExpr>*, <Number>)
+<PropVarInst>  ::= PropVarInst(<String>, <DataExpr>*)
 
 //Boolean expressions
 //-------------------
@@ -341,7 +341,7 @@
 <BooleanEquation>   ::= BooleanEquation(<FixPoint>, <BooleanVariable>, <BooleanExpression>)
 
 // boolean variable
-<BooleanVariable>   ::= BooleanVariable(<String>, <Number>)
+<BooleanVariable>   ::= BooleanVariable(<String>)
 
 // boolean expression
 <BooleanExpression> ::= BooleanTrue

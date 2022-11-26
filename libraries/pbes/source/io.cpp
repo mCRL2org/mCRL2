@@ -172,10 +172,6 @@ static atermpp::aterm_appl remove_index_impl(const atermpp::aterm_appl& x)
   {
     return atermpp::aterm_appl(core::detail::function_symbol_OpIdNoIndex(), x.begin(), --x.end());
   }
-  else if (x.function() == core::detail::function_symbol_PropVarInst())
-  {
-    return atermpp::aterm_appl(core::detail::function_symbol_PropVarInstNoIndex(), x.begin(), --x.end());
-  }
   return x;
 }
 
@@ -194,7 +190,7 @@ static atermpp::aterm_appl add_index_impl(const atermpp::aterm_appl& x)
     const data::function_symbol& y = reinterpret_cast<const data::function_symbol&>(x);
     return data::function_symbol(y.name(), y.sort());
   }
-  else if (x.function() == core::detail::function_symbol_PropVarInstNoIndex())
+  else if (x.function() == core::detail::function_symbol_PropVarInstNoIndex())    // This should be removed in due time. Say 2025. 
   {
     const pbes_system::propositional_variable_instantiation& y = reinterpret_cast<const pbes_system::propositional_variable_instantiation&>(x);
     return pbes_system::propositional_variable_instantiation(y.name(), y.parameters());

@@ -5937,7 +5937,7 @@ bool check_term_PBESExists(const Term& t)
   return true;
 }
 
-// PropVarInst(String, DataExpr*, Number)
+// PropVarInst(String, DataExpr*)
 template <typename Term>
 bool check_term_PropVarInst(const Term& t)
 {
@@ -5956,7 +5956,7 @@ bool check_term_PropVarInst(const Term& t)
   }
 
   // check the children
-  if (a.size() != 3)
+  if (a.size() != 2)
   {
     return false;
   }
@@ -5969,11 +5969,6 @@ bool check_term_PropVarInst(const Term& t)
   if (!check_list_argument(a[1], check_rule_DataExpr<atermpp::aterm>, 0))
   {
     mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[2], check_rule_Number<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_Number" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -6067,7 +6062,7 @@ bool check_term_BooleanEquation(const Term& t)
   return true;
 }
 
-// BooleanVariable(String, Number)
+// BooleanVariable(String)
 template <typename Term>
 bool check_term_BooleanVariable(const Term& t)
 {
@@ -6086,7 +6081,7 @@ bool check_term_BooleanVariable(const Term& t)
   }
 
   // check the children
-  if (a.size() != 2)
+  if (a.size() != 1)
   {
     return false;
   }
@@ -6094,11 +6089,6 @@ bool check_term_BooleanVariable(const Term& t)
   if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
   {
     mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
-    return false;
-  }
-  if (!check_term_argument(a[1], check_rule_Number<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_Number" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS

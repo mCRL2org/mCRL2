@@ -93,7 +93,7 @@ const atermpp::function_symbol& function_symbol_ProcVarIdNoIndex()
 
 // BooleanVariableNoIndex
 inline
-const atermpp::function_symbol& function_symbol_BooleanVariableNoIndex()
+const atermpp::function_symbol& function_symbol_BooleanVariableNoIndex()     // This function is deprecated and can be removed in the year 2025.
 {
   static atermpp::function_symbol f = atermpp::function_symbol("BooleanVariableNoIndex", 1);
   return f;
@@ -101,11 +101,11 @@ const atermpp::function_symbol& function_symbol_BooleanVariableNoIndex()
 
 // PropVarInstNoIndex
 inline
-const atermpp::function_symbol& function_symbol_PropVarInstNoIndex()
+const atermpp::function_symbol& function_symbol_PropVarInstNoIndex()         // This function is deprecated and can be removed in the year 2025.
 {
   static atermpp::function_symbol f = atermpp::function_symbol("PropVarInstNoIndex", 2);
   return f;
-}
+}  
 
 //--- start generated constructors ---//
 // ActAnd
@@ -376,7 +376,7 @@ const atermpp::function_symbol& function_symbol_BooleanTrue()
 inline
 const atermpp::function_symbol& function_symbol_BooleanVariable()
 {
-  static const atermpp::global_function_symbol function_symbol_BooleanVariable("BooleanVariable", 2);
+  static const atermpp::global_function_symbol function_symbol_BooleanVariable("BooleanVariable", 1);
   return function_symbol_BooleanVariable;
 }
 
@@ -784,7 +784,7 @@ const atermpp::function_symbol& function_symbol_PropVarDecl()
 inline
 const atermpp::function_symbol& function_symbol_PropVarInst()
 {
-  static const atermpp::global_function_symbol function_symbol_PropVarInst("PropVarInst", 3);
+  static const atermpp::global_function_symbol function_symbol_PropVarInst("PropVarInst", 2);
   return function_symbol_PropVarInst;
 }
 

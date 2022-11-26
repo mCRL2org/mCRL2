@@ -208,7 +208,7 @@ pbes(const data::data_specification& data, const std::vector<pbes_system::pbes_e
 
 PBES_EXPRESSION_CLASSES = r'''
 pbes_expression()                                                                                                       : public atermpp::aterm_appl          | XCI   | PBExpr            | A pbes expression
-propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters) : public pbes_system::pbes_expression | ECIUsN| PropVarInst       | A propositional variable instantiation
+propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters) : public pbes_system::pbes_expression | ECIUs | PropVarInst       | A propositional variable instantiation
 not_(const pbes_expression& operand)                                                                                    : public pbes_system::pbes_expression | EI    | PBESNot           | The not operator for pbes expressions
 and_(const pbes_expression& left, const pbes_expression& right)                                                         : public pbes_system::pbes_expression | EI    | PBESAnd           | The and operator for pbes expressions
 or_(const pbes_expression& left, const pbes_expression& right)                                                          : public pbes_system::pbes_expression | EI    | PBESOr            | The or operator for pbes expressions
@@ -230,7 +230,7 @@ not_(const boolean_expression& operand)                               : public b
 and_(const boolean_expression& left, const boolean_expression& right) : public bes::boolean_expression | EI   | BooleanAnd           | The and operator for boolean expressions
 or_(const boolean_expression& left, const boolean_expression& right)  : public bes::boolean_expression | EI   | BooleanOr            | The or operator for boolean expressions
 imp(const boolean_expression& left, const boolean_expression& right)  : public bes::boolean_expression | EI   | BooleanImp           | The implication operator for boolean expressions
-boolean_variable(const core::identifier_string& name)                 : public bes::boolean_expression | EIUsN| BooleanVariable      | A boolean variable
+boolean_variable(const core::identifier_string& name)                 : public bes::boolean_expression | EIUs | BooleanVariable      | A boolean variable
 '''
 
 BDD_EXPRESSION_CLASSES = r'''

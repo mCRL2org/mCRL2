@@ -13,7 +13,6 @@
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/pbes/detail/is_well_typed.h"
 #include "mcrl2/pbes/detail/occurring_variable_visitor.h"
-#include "mcrl2/pbes/index_traits.h"
 #include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/parse_impl.h"
 #include "mcrl2/pbes/print.h"
@@ -117,13 +116,6 @@ std::set<propositional_variable_instantiation> pbes::occurring_variable_instanti
   }
   return result;
 }
-
-static bool register_hooks()
-{
-  register_propositional_variable_instantiation_hooks();
-  return true;
-}
-static bool mcrl2_register_pbes(register_hooks());
 
 namespace detail {
 

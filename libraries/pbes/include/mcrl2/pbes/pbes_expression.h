@@ -155,15 +155,13 @@ class propositional_variable_instantiation: public pbes_expression
     /// \brief Constructor.
     propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters)
     {
-      atermpp::make_term_appl_with_index<propositional_variable_instantiation, std::pair<core::identifier_string, data::data_expression_list> >
-                   (*this,core::detail::function_symbol_PropVarInst(), name, parameters);
+      atermpp::make_term_appl(*this,core::detail::function_symbol_PropVarInst(), name, parameters);
     }
 
     /// \brief Constructor.
     propositional_variable_instantiation(const std::string& name, const data::data_expression_list& parameters)
     {
-      atermpp::make_term_appl_with_index<propositional_variable_instantiation, std::pair<core::identifier_string, data::data_expression_list> >
-                   (*this,core::detail::function_symbol_PropVarInst(), core::identifier_string(name), parameters);
+      atermpp::make_term_appl(*this,core::detail::function_symbol_PropVarInst(), core::identifier_string(name), parameters);
     }
 
 //--- end user section propositional_variable_instantiation ---//
@@ -174,7 +172,7 @@ class propositional_variable_instantiation: public pbes_expression
 template <class... ARGUMENTS>
 inline void make_propositional_variable_instantiation(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
-  atermpp::make_term_appl_with_index<propositional_variable_instantiation,std::pair<core::identifier_string, data::data_expression_list>>(t, core::detail::function_symbol_PropVarInst(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_PropVarInst(), args...);
 }
 
 /// \\brief list of propositional_variable_instantiations
@@ -1471,7 +1469,5 @@ namespace std
   };
 
 } // namespace std
-
-#include "mcrl2/pbes/index_traits.h"
 
 #endif // MCRL2_PBES_PBES_EXPRESSION_H

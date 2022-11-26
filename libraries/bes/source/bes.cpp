@@ -11,7 +11,6 @@
 
 #include "mcrl2/bes/find.h"
 #include "mcrl2/bes/print.h"
-#include "mcrl2/bes/index_traits.h"
 
 namespace mcrl2
 {
@@ -31,13 +30,6 @@ std::string pp(const bes::not_& x) { return bes::pp< bes::not_ >(x); }
 std::string pp(const bes::or_& x) { return bes::pp< bes::or_ >(x); }
 std::string pp(const bes::true_& x) { return bes::pp< bes::true_ >(x); }
 //--- end generated bes overloads ---//
-
-static bool register_hooks()
-{
-  register_boolean_variable_hooks();
-  return true;
-}
-static bool mcrl2_register_bes(register_hooks());
 
 std::set<boolean_variable> boolean_equation_system::occurring_variables() const
 {

@@ -540,14 +540,14 @@ class boolean_variable: public boolean_expression
     /// \brief Constructor.
     boolean_variable(const core::identifier_string& name)
     {
-      atermpp::make_term_appl_with_index<boolean_variable,core::identifier_string>
+      atermpp::make_term_appl<boolean_variable,core::identifier_string>
                       (*this,core::detail::function_symbol_BooleanVariable(), name);
     }
 
     /// \brief Constructor.
     boolean_variable(const std::string& name)
     {
-      atermpp::make_term_appl_with_index<boolean_variable,core::identifier_string>
+      atermpp::make_term_appl<boolean_variable,core::identifier_string>
                       (*this,core::detail::function_symbol_BooleanVariable(), core::identifier_string(name));
     }
 //--- end user section boolean_variable ---//
@@ -558,7 +558,7 @@ class boolean_variable: public boolean_expression
 template <class... ARGUMENTS>
 inline void make_boolean_variable(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
-  atermpp::make_term_appl_with_index<boolean_variable,core::identifier_string>(t, core::detail::function_symbol_BooleanVariable(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_BooleanVariable(), args...);
 }
 
 /// \\brief Test for a boolean_variable expression
