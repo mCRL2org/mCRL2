@@ -125,7 +125,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       std::array<vertex_set, 2>& S;
 
       detail::structure_graph_builder& graph_builder;
-      // TODO: repalce with aterm container
+      // TODO: replace with aterm container
       atermpp::vector<stack_element> stack;
 
       Rplus_traverser(std::array<vertex_set, 2>& S_, detail::structure_graph_builder& graph_builder_)
