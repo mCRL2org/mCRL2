@@ -330,10 +330,19 @@ Binder<Builder, parunfold_replacement<Builder, Binder>, parunfold_replacement<Bu
     }
   }
 
-  data::data_expression apply_case_function(const data::data_expression& expr)
+  data::data_expression apply_case_function(const data::application& expr)
   {
     data::data_expression result = expr;
     auto& [par, case_f, det_f, replacements] = case_funcs;
+
+    if (find_free_variables(result).count(par) == 0)
+    {
+      // variable to be replaced does not occur here
+      // make sure to still apply the substitutions necessary for the capture avoiding tricks
+      // NB: stack overflow happens if type of second argument is 'data::data_expression'.
+      super::apply(result, expr);
+      return result;
+    }
 
     data::data_expression_vector args;
     args.push_back(det_f);
