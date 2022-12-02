@@ -260,7 +260,8 @@ private:
         return std::hash<std::size_t>()(e.u) ^ (std::hash<std::size_t>()(e.v) << 1);
       }
     };
-    std::unordered_map<std::size_t, NodeInfo> nodes;
+    
+    std::unordered_map<std::size_t, NodeInfo> _nodes;
     std::vector<std::size_t> order;
     std::unordered_set<EdgeInfo, EdgeInfoHash> chains;
 
@@ -272,13 +273,13 @@ private:
       {
         std::size_t nodeId = progress.top();
         progress.pop();
-        if (nodes.count(nodeId) != 0u)
+        if (_nodes.count(nodeId) != 0u)
         {
           continue;
         }
 
-        nodes[nodeId] = NodeInfo(nodeId);
-        NodeInfo& nodeinfo = nodes[nodeId];
+        _nodes[nodeId] = NodeInfo(nodeId);
+        NodeInfo& nodeinfo = _nodes[nodeId];
         ExplorationNode& node = m_explorationNodes[nodeId];
         for (std::size_t outEdge : node.outEdges)
         {
@@ -319,7 +320,7 @@ private:
       {
         std::size_t nodeId = progress.top();
         progress.pop();
-        NodeInfo& node = nodes[nodeId];
+        NodeInfo& node = _nodes[nodeId];
 
         if (node.searched)
         {
@@ -330,14 +331,14 @@ private:
 
         for (std::size_t otherId : node.neighbors)
         {
-          if (!nodes[otherId].searched) // node was not yet processed:
+          if (!_nodes[otherId].searched) // node was not yet processed:
           {
-            nodes[otherId].parent = nodeId;
+            _nodes[otherId].parent = nodeId;
             progress.push(otherId);
           }
           else if (node.parent != otherId) // node was processed, backedge
           {
-            nodes[otherId].backEdges.insert(nodeId);
+            _nodes[otherId].backEdges.insert(nodeId);
           }
         }
       }
@@ -347,16 +348,16 @@ private:
     {
       for (std::size_t nodeId : order)
       {
-        NodeInfo& node = nodes[nodeId];
+        NodeInfo& node = _nodes[nodeId];
         for (std::size_t id : node.backEdges)
         {
           node.visited = true;
           chains.insert(EdgeInfo(nodeId, id));
-          while (!nodes[id].visited)
+          while (!_nodes[id].visited)
           {
-            nodes[id].visited = true;
-            chains.insert(EdgeInfo(id, nodes[id].parent));
-            id = nodes[id].parent;
+            _nodes[id].visited = true;
+            chains.insert(EdgeInfo(id, _nodes[id].parent));
+            id = _nodes[id].parent;
           }
         }
       }
@@ -367,7 +368,7 @@ private:
       for (std::size_t nodeId : order)
       {
         ExplorationNode& node = m_explorationNodes[nodeId];
-        NodeInfo& nodeinfo = nodes[nodeId];
+        NodeInfo& nodeinfo = _nodes[nodeId];
         if (m_graph.m_nodes[nodeId].active())
         {
           nodeinfo.leaf = false;
@@ -391,7 +392,7 @@ private:
       for (std::size_t nodeId : order)
       {
         ExplorationNode& node = m_explorationNodes[nodeId];
-        NodeInfo& nodeinfo = nodes[nodeId];
+        NodeInfo& nodeinfo = _nodes[nodeId];
         node.bridge = false;
 
         std::unordered_set<std::size_t> connected;
@@ -413,7 +414,7 @@ private:
 
         for (std::size_t otherId : nodeinfo.neighbors)
         {
-          bool isLeaf = nodes[otherId].leaf;
+          bool isLeaf = _nodes[otherId].leaf;
           bool isConnected = connected.count(otherId) != 0u;
           bool isChain = chains.count(EdgeInfo(nodeId, otherId)) != 0u;
           if (!isLeaf)
@@ -476,29 +477,29 @@ private:
     progress.push(*neighbors.begin());
     while (!progress.empty())
     {
-      std::size_t nodeId = progress.top();
+      std::size_t _nodeId = progress.top();
       progress.pop();
-      if (status.count(nodeId) != 0u)
+      if (status.count(_nodeId) != 0u)
       {
         continue;
       }
-      status.insert(nodeId);
+      status.insert(_nodeId);
 
-      neighbors.erase(nodeId);
+      neighbors.erase(_nodeId);
       if (neighbors.empty())
       {
         return true;
       }
 
-      ExplorationNode& node = m_explorationNodes[nodeId];
-      for (std::size_t edgeId : node.inEdges)
+      ExplorationNode& _node = m_explorationNodes[_nodeId];
+      for (std::size_t edgeId : _node.inEdges)
       {
         if ((m_edges.count(edgeId) != 0u) && (nedges.count(edgeId) == 0u))
         {
           progress.push(m_graph.m_edges[edgeId].from());
         }
       }
-      for (std::size_t edgeId : node.outEdges)
+      for (std::size_t edgeId : _node.outEdges)
       {
         if ((m_edges.count(edgeId) != 0u) && (nedges.count(edgeId) == 0u))
         {

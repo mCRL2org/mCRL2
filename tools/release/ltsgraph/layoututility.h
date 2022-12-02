@@ -77,7 +77,6 @@ class GeometricTree
    * @param node_pos Position to be inserted
    */
   /// TODO: Consider returning boolean on success/fail
-  /// TODO: Complete asserts i.e. bounds checking
   void insert(const T& node_pos)
   {
     // Tree has to exist
@@ -169,9 +168,9 @@ class GeometricTree
 
   std::vector<TreeNode<T>> m_data; ///< Contains raw tree data
 
+  float m_theta;       ///< Barnes-Hut opening criterion
   T m_minbounds;       ///< Bounding volume of entire tree base
   T m_maxbounds;       ///< Bounding volume of entire tree other extreme
-  float m_theta;       ///< Barnes-Hut opening criterion
   std::size_t m_nodes; ///< Number of leaf nodes currently in tree
 
   std::vector<TreeNode<T>*>
@@ -287,7 +286,6 @@ class GeometricTree
    *
    * @param i Index of current node in tree.
    */
-  /// TODO: Explore accurate options for computing during insert.
   /// TODO: Iterative instead of recursive.
   void calc_subpos(std::size_t i)
   {

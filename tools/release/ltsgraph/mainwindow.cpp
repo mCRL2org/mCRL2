@@ -14,6 +14,7 @@
 #include <QSettings>
 
 #include "dimensionsdialog.h"
+#include "springlayout.h"
 
 /// \brief The number of vertices before the user is prompted to enable exploration mode.
 constexpr std::size_t MAX_NODE_COUNT    = 400;
@@ -33,7 +34,9 @@ MainWindow::MainWindow(QWidget* parent) :
 
   // Create springlayout algorithm + UI
   m_layout = new Graph::SpringLayout(m_graph, *m_glwidget);
-  Graph::SpringLayoutUi* springlayoutui = m_layout->ui(m_ui.actionAdvancedSpringlayout, this);
+  m_advancedwidget = new Graph::CustomQWidget(m_ui.actionAdvancedSpringlayout, nullptr); // nullptr so it is treated as a separate window
+  m_advancedwidget->setWindowFlags(Qt::WindowStaysOnTopHint);
+  Graph::SpringLayoutUi* springlayoutui = m_layout->ui(m_ui.actionAdvancedSpringlayout, m_advancedwidget, this);
   addDockWidget(Qt::RightDockWidgetArea, springlayoutui);
   springlayoutui->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
 
@@ -113,6 +116,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
   settings.setValue("windowState", saveState());
   settings.setValue("settings", m_layout->ui()->settings());
   settings.setValue("visualisation", m_glwidget->ui()->settings());
+  m_advancedwidget->close();
   QMainWindow::closeEvent(event);
 }
 
@@ -136,7 +140,7 @@ void MainWindow::on3DChanged(bool enabled)
 {
   m_glwidget->set3D(enabled);
   
-
+  m_layout->m_asa.reset();
   // For 3D mode there is no limit and otherwise the z-dimension is limited to 0.
   QVector3D limit{INFINITY, INFINITY, INFINITY};
   if (!enabled)

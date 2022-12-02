@@ -195,6 +195,23 @@ class GLWidget : public QOpenGLWidget
   {
     m_doTextLimiting = b;
   }
+
+  void textLimitChanged(const QString& text)
+  {
+    bool isNumber;
+    int num = text.toInt(&isNumber);
+    if (isNumber && num > 0)
+    {
+      m_textLimit = num;
+      mCRL2log(mcrl2::log::debug)
+          << "Text limit changed to: " << num << std::endl;
+    }
+    else
+    {
+      mCRL2log(mcrl2::log::debug) << "Text limit was not changed to: \""
+                                  << text.toStdString() << "\"" << std::endl;
+    }
+  }
   
   void toggleDebugDrawGraphs(bool show)
   {
