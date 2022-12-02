@@ -767,7 +767,7 @@ DataView::DataView(std::list<double>& input_list){
   }
 }
 
-DebugView::DebugView(int log_duration, std::size_t min_interval)
+DebugView::DebugView(std::size_t log_duration, std::size_t min_interval)
  : m_log_duration(log_duration), m_min_interval(min_interval){
     m_timer.restart();
   m_current_interval_start = m_timer.elapsed();
@@ -838,7 +838,7 @@ double DebugView::recalcMax()
 void DebugView::drawLine(QPainter& painter, std::vector<QPointF>& line, double current_value, QBrush& brush, QPen& pen){
   painter.setBrush(brush);
   painter.setPen(pen);
-  painter.drawPolyline(&line[0], line.size());
+  painter.drawPolyline(&line[0], static_cast<int>(line.size()));
   if (current_value >= 0)
     painter.drawText(line.back(), QString::number(current_value));
 }
@@ -985,7 +985,7 @@ void GraphView::logVar(std::string name, double value)
   {
     m_vars[name].push(value);
   }
-  catch (int error)
+  catch (int)
   {
     mCRL2log(mcrl2::log::error)
         << "Failed to log variable: " << name << std::endl;

@@ -12,7 +12,8 @@
   @file springlayout.h
   @author S. Cranen, R. Boudewijns
 
-  This file contains an implementation and user interface which enables automatic positioning for a graph.
+  This file contains an implementation and user interface which enables
+  automatic positioning for a graph.
 
 */
 
@@ -29,70 +30,124 @@
 #include <map>
 #include <QElapsedTimer>
 
-
-
 namespace Graph
 {
 
-
 class SpringLayoutUi;
+class CustomQWidget;
 
 struct AttractionFunction;
 struct RepulsionFunction;
 struct ApplicationFunction;
 
-class SimpleAdaptiveSimulatedAnnealing {
+class SimpleAdaptiveSimulatedAnnealing
+{
   public:
-    float T;
-    bool calculateTemperature(float new_energy);
-    void reset();
-  private:
-    // Storage variables
-    float m_prev_energy = -1; 
-    float m_temperature = m_reset_temperature;
-    int m_progress = 0;
+  float T;
+  bool calculateTemperature(float new_energy);
+  void reset();
     
-    // Adaptive variables
-    const int m_progress_threshold = 5;
-    const float m_cooling_factor = 0.95f;
-    const float m_heating_factor = 1 / 0.9f;
-    
-    // Interactive quality variables
-    const float m_minimum_temperature = 1e-6;
-    const float m_reset_temperature = 1;
+  int getProgressThreshold()
+  {
+    return m_progress_threshold;
+  }
 
+  void setProgressThreshold(int progress_threshold)
+  {
+    m_progress_threshold = progress_threshold;
+    mCRL2log(mcrl2::log::debug)
+        << "[ASA] Progress threshold: " << m_progress_threshold << std::endl;
+  }
+
+  float getCoolingFactor()
+  {
+    return m_cooling_factor;
+  }
+
+  void setCoolingFactor(float cooling_factor)
+  {
+    m_cooling_factor = cooling_factor;
+    mCRL2log(mcrl2::log::debug)
+        << "[ASA] Cooling factor: " << m_cooling_factor << std::endl;
+  }
+
+    float getHeatingFactor()
+  {
+      return m_heating_factor;
+  }
+
+   void setHeatingFactor(float heating_factor)
+  {
+     m_heating_factor = heating_factor;
+     mCRL2log(mcrl2::log::debug)
+         << "[ASA] Heating factor: " << m_heating_factor << std::endl;
+  }
+
+
+
+  private:
+  // Interactive quality variables
+  const float m_minimum_temperature = 1e-6f;
+  const float m_reset_temperature = 1.0f;
+
+  // Adaptive variables
+  int m_progress_threshold = 5;
+  float m_cooling_factor = 0.95f;
+  float m_heating_factor = 1 / 0.9f;
+
+  // Storage variables
+  float m_prev_energy = -1;
+  float m_temperature = m_reset_temperature;
+  int m_progress = 0;
 };
 
-class AdaptiveSimulatedAnnealing{
-  float m_annealing_factor = 0.995;   ///< Adaptive cooling per progress cycle (multiplicative)
-  float m_annealing_term = 0.1;    ///< If the system ever cools completely we need to be able to get out
-  float m_energy_smoothing = 0.8; ///< smooths out energy
+class AdaptiveSimulatedAnnealing
+{
+  float m_annealing_factor =
+      0.995f; ///< Adaptive cooling per progress cycle (multiplicative)
+  float m_annealing_term = 0.1f;   ///< If the system ever cools completely we
+                                   ///< need to be able to get out
+  float m_energy_smoothing = 0.8f; ///< smooths out energy
 
-  float m_relative_change_threshold = 0.001f; ///< We count 'improvement' if it is more than m_relative_change_threshold
+  float m_relative_change_threshold =
+      0.001f; ///< We count 'improvement' if it is more than
+              ///< m_relative_change_threshold
 
-  float m_progress = 0; ///< current amount of 'cycles' spent progressing towards a goal
-  float m_progress_threshold = 0.5; ///< threshold of 'cycles' spent before heating
+  float m_progress =
+      0; ///< current amount of 'cycles' spent progressing towards a goal
+  float m_progress_threshold =
+      0.5; ///< threshold of 'cycles' spent before heating
   float m_progress_target_per_second = 50; ///< number of 'cycles' per second
 
   float m_progress_energy = -1;
-  
+
   QElapsedTimer m_reset_timer;
-  const float m_reset_duration = 0.4;       ///< in m_reset_duration seconds the temperature is interpolated to m_reset_temperature
-  const float m_reset_temperature = 10;      ///< Temperature to reset to
-  float m_reset_temperature_floor = 0;      ///< Used to interpolate from current temperature to m_reset_temperature during reset duration
-  const float m_minimum_temperature = 1e-4; ///< Always have minimum movement to resolve forces that are left
+  const float m_reset_duration =
+      0.4f; ///< in m_reset_duration seconds the temperature is interpolated to
+            ///< m_reset_temperature
+  const float m_reset_temperature = 10.0f; ///< Temperature to reset to
+  float m_reset_temperature_floor =
+      0.0f; ///< Used to interpolate from current temperature to
+            ///< m_reset_temperature during reset duration
+  const float m_minimum_temperature =
+      1e-4f; ///< Always have minimum movement to resolve forces that are left
 
   QElapsedTimer m_stable_timer; ///< currently disabled
-  const float m_stability_energy_threshold = 1e-6; ///< if new_energy \in [prev_energy - energy_threshold, prev_energy + energy_threshold] we say it is stable
-  const float m_stability_time_threshold = 2;        ///< how long do we require stability
+  const float m_stability_energy_threshold =
+      1e-6f; ///< if new_energy \in [prev_energy - energy_threshold, prev_energy
+             ///< + energy_threshold] we say it is stable
+  const float m_stability_time_threshold =
+      2.0f; ///< how long do we require stability
 
-  float m_previous_energy = -1; ///< Energy of the system, calculation is determined outside of class
+  float m_previous_energy = -1.0f; ///< Energy of the system, calculation is
+                                   ///< determined outside of class
 
-  QElapsedTimer m_timer;        
+  QElapsedTimer m_timer;
+
   public:
   AdaptiveSimulatedAnnealing();
   float T;
-  float m_temperature = 1; ///< The temperature is a step size multiplier
+  float m_temperature = 1.0f; ///< The temperature is a step size multiplier
   /// @brief Calculates temperature for next layout cycle
   /// @param new_energy Energy of the system
   /// @return Boolean value indicating if stabilised
@@ -104,244 +159,279 @@ class AdaptiveSimulatedAnnealing{
 class SpringLayout
 {
   friend class SpringLayoutUi;
+
   public:
+  /**
+   * @brief An enumeration that identifies the types of spring types which can
+   * be selected.
+   */
+  enum AttractionCalculation
+  {
+    ltsgraph_attr,          ///< LTSGraph implementation.
+    electricalsprings_attr, ///< LTSGraph implementation using approximated
+                            ///< repulsion forces.
+    linearsprings_attr,     ///< Linear spring implementation.
+    // simplespring_attr,
+  };
 
-    /**
-     * @brief An enumeration that identifies the types of spring types which can be selected.
-     */
-    enum AttractionCalculation
-    {
-      ltsgraph_attr,                   ///< LTSGraph implementation.
-      electricalsprings_attr,          ///< LTSGraph implementation using approximated repulsion forces.
-      linearsprings_attr,              ///< Linear spring implementation.
-      //simplespring_attr,
-    };
+  enum RepulsionCalculation
+  {
+    ltsgraph_rep,
+    electricalsprings_rep,
+    none_rep,
+  };
 
-    enum RepulsionCalculation
-    {
-      ltsgraph_rep,
-      electricalsprings_rep,
-      none_rep,
-    };
+  enum ForceApplication
+  {
+    ltsgraph_appl,       ///< Treat forces as speed
+    force_directed_appl, ///< Treat forces as suggested direction
+    force_cumulative_appl,
+  };
 
-    enum ForceApplication
-    {
-      ltsgraph_appl, ///< Treat forces as speed
-      force_directed_appl, ///< Treat forces as suggested direction
-      force_cumulative_appl,
-    };
+  enum TreeMode
+  {
+    octree,
+    quadtree,
+    none
+  };
 
-    enum TreeMode
-    {
-      octree,
-      quadtree,
-      none
-    };
-
-    enum ThreadingMode{
-      normal,
-    };
+  enum ThreadingMode
+  {
+    normal,
+  };
 
   private:
-    AttractionCalculation m_option_attractionCalculation;
-    RepulsionCalculation m_option_repulsionCalculation;
-    ForceApplication m_option_forceApplication;
+  AttractionCalculation m_option_attractionCalculation;
+  RepulsionCalculation m_option_repulsionCalculation;
+  ForceApplication m_option_forceApplication;
 
-    std::size_t m_max_num_nodes = 0;
-    std::size_t m_total_num_nodes = 0;
+  std::size_t m_max_num_nodes = 0;
+  std::size_t m_total_num_nodes = 0;
 
-    Octree m_node_tree;
-    Octree m_handle_tree;
-    Octree m_trans_tree;
-    Quadtree m_node_tree2D;
-    Quadtree m_handle_tree2D;
-    Quadtree m_trans_tree2D;
+  Octree m_node_tree;
+  Octree m_handle_tree;
+  Octree m_trans_tree;
+  Quadtree m_node_tree2D;
+  Quadtree m_handle_tree2D;
+  Quadtree m_trans_tree2D;
 
-    // UI parameters
-    const float m_min_speed = 0.00001f;
-    const float m_max_speed = 10.0f;
-    float m_speed;                   ///< The rate of change each step.
-    float m_speed_scale_func(float s) const { return s*s; }
-    float m_speed_inverse_scale_func(float s) const { return std::sqrt(s); }
-    const float m_min_attraction = 0.0f;
-    const float m_max_attraction = 1.0f;
-    float m_attraction;              ///< The weight of the attraction of the edges.
-    const float m_min_repulsion = 0.0f;
-    const float m_max_repulsion = 1.0f;
-    float m_repulsion;               ///< The weight of the repulsion of other nodes.
-    const float m_min_natLength = 0.0f;   
-    const float m_max_natLength = 100.0f;
-    float m_natLength;               ///< The natural length of springs.
-    const float m_min_controlPointWeight = 0.0f;
-    const float m_max_controlPointWeight = 0.8f;
-    float m_controlPointWeight;      ///< The handle repulsion wight factor.
-    const float m_min_accuracy = 5.0f;
-    const float m_max_accuracy = 0.0f;
-    float m_no_annealing_temperature = 1.0f;
-    float m_annealing_temperature = m_no_annealing_temperature;
-    float m_accuracy;                ///< Controls the Barnes-Hut criterion in the approximation of repulsive forces
-    bool m_tree_enabled;
-    bool m_has_new_frame;
-    std::vector<QVector3D> m_nforces, m_hforces, m_lforces, m_sforces;  ///< Vector of the calculated forces..
-   
-    QVector3D center_of_mass_offset; ///< When un-anchoring offset should be kept in mind
-    bool any_anchored = false;
-    QElapsedTimer drift_timer = QElapsedTimer();        ///< Timing since last anchoring
-    float time_to_center = 3; ///< After 1s of nothing anchored we want the center of mass to be back at (0, 0, 0)
+  // UI parameters
+  const float m_min_speed = 0.00001f;
+  const float m_max_speed = 10.0f;
+  float m_speed; ///< The rate of change each step.
+  float m_speed_scale_func(float s) const
+  {
+    return s * s;
+  }
+  float m_speed_inverse_scale_func(float s) const
+  {
+    return std::sqrt(s);
+  }
+  const float m_min_attraction = 0.0f;
+  const float m_max_attraction = 1.0f;
+  float m_attraction; ///< The weight of the attraction of the edges.
+  const float m_min_repulsion = 0.0f;
+  const float m_max_repulsion = 1.0f;
+  float m_repulsion; ///< The weight of the repulsion of other nodes.
+  const float m_min_natLength = 0.0f;
+  const float m_max_natLength = 100.0f;
+  float m_natLength; ///< The natural length of springs.
+  const float m_min_controlPointWeight = 0.0f;
+  const float m_max_controlPointWeight = 0.8f;
+  float m_controlPointWeight; ///< The handle repulsion wight factor.
+  const float m_min_accuracy = 5.0f;
+  const float m_max_accuracy = 0.0f;
+  float m_no_annealing_temperature = 1.0f;
+  float m_annealing_temperature = m_no_annealing_temperature;
+  float m_accuracy; ///< Controls the Barnes-Hut criterion in the approximation
+                    ///< of repulsive forces
+  bool m_tree_enabled;
+  bool m_has_new_frame;
+  std::vector<QVector3D> m_nforces, m_hforces, m_lforces,
+      m_sforces; ///< Vector of the calculated forces..
 
-    Graph& m_graph;               ///< The graph on which the algorithm is applied.
-    SpringLayoutUi* m_ui;         ///< The user interface generated by Qt.
+  QVector3D center_of_mass_offset; ///< When un-anchoring offset should be kept
+                                   ///< in mind
+  bool any_anchored = false;
+  QElapsedTimer drift_timer = QElapsedTimer(); ///< Timing since last anchoring
+  float time_to_center = 3; ///< After 1s of nothing anchored we want the center
+                            ///< of mass to be back at (0, 0, 0)
 
-    std::map<AttractionCalculation, AttractionFunction*> attrFuncMap;
-    std::map<RepulsionCalculation, RepulsionFunction*> repFuncMap;
-    std::map<ForceApplication, ApplicationFunction*> applFuncMap;
-    AttractionFunction* m_attrFunc;
-    RepulsionFunction* m_repFunc;
-    ApplicationFunction* m_applFunc;
+  Graph& m_graph;       ///< The graph on which the algorithm is applied.
+  SpringLayoutUi* m_ui; ///< The user interface generated by Qt.
 
-    bool m_useAnnealing = true;
+  std::map<AttractionCalculation, AttractionFunction*> attrFuncMap;
+  std::map<RepulsionCalculation, RepulsionFunction*> repFuncMap;
+  std::map<ForceApplication, ApplicationFunction*> applFuncMap;
+  AttractionFunction* m_attrFunc;
+  RepulsionFunction* m_repFunc;
+  ApplicationFunction* m_applFunc;
 
-public:
-    SimpleAdaptiveSimulatedAnnealing m_asa;
-private:
-    /**
-     * @brief Returns approximate accumulation of all repulsive forces from other particles exerted on @e a
-     * 
-     * @param a Particle
-     * @param tree Octree containing all particles
-     * @param repulsion Scaling constant
-     * @param natlength Other scaling constant
-     * @return QVector3D Force exerted by all particles on particle @e a
-     */
-    template< typename TreeType >
-    QVector3D approxRepulsionForce(const QVector3D& a, TreeType& tree);
+  bool m_useAnnealing = true;
 
-    void forceAccumulation(bool sel, std::size_t nodeCount, std::size_t edgeCount, TreeMode treeMode, ThreadingMode threadingMode); 
-
-    template< TreeMode mode >
-    void repulsionAccumulation(bool sel, std::size_t nodeCount, std::size_t edgeCount);
-
-    template< ThreadingMode mode >
-    void attractionAccumulation(bool sel, std::size_t nodeCount, std::size_t edgeCount); 
   public:
-    GLWidget& m_glwidget;
+  SimpleAdaptiveSimulatedAnnealing m_asa;
 
-    /**
-     * @brief Constructor of the algorithm for the given @e graph.
-     * @param graph The graph on which the algorithm should be applied.
-     */
-    SpringLayout(Graph& graph, GLWidget& glwidget);
+  private:
+  /**
+   * @brief Returns approximate accumulation of all repulsive forces from other
+   * particles exerted on @e a
+   *
+   * @param a Particle
+   * @param tree Octree containing all particles
+   * @param repulsion Scaling constant
+   * @param natlength Other scaling constant
+   * @return QVector3D Force exerted by all particles on particle @e a
+   */
+  template <typename TreeType>
+  QVector3D approxRepulsionForce(const QVector3D& a, TreeType& tree);
 
-    /**
-     * @brief Destructor.
-     */
-    virtual ~SpringLayout();
+  void forceAccumulation(bool sel, std::size_t nodeCount, std::size_t edgeCount,
+                         TreeMode treeMode, ThreadingMode threadingMode);
 
-    /**
-     * @brief Calculate the forces and update the positions.
-     */
-    void apply();
+  template <TreeMode mode>
+  void repulsionAccumulation(bool sel, std::size_t nodeCount,
+                             std::size_t edgeCount);
 
-    /**
-     * @brief Set the type of the force calculation.
-     * @param c The desired calculaten 
-     */
-    void setAttractionCalculation(AttractionCalculation c);
+  template <ThreadingMode mode>
+  void attractionAccumulation(bool sel, std::size_t nodeCount,
+                              std::size_t edgeCount);
 
-    /**
-     * @brief Returns the current force calculation used.
-     */
-    AttractionCalculation attractionCalculation();
+  public:
+  GLWidget& m_glwidget;
 
-    /**
-     * @brief Set the type of the force calculation.
-     * @param c The desired calculaten 
-     */
-    void setRepulsionCalculation(RepulsionCalculation c);
+  /**
+   * @brief Constructor of the algorithm for the given @e graph.
+   * @param graph The graph on which the algorithm should be applied.
+   */
+  SpringLayout(Graph& graph, GLWidget& glwidget);
 
-    /**
-     * @brief Returns the current repulsion calculation used.
-     */
-    RepulsionCalculation repulsionCalculation();
+  /**
+   * @brief Destructor.
+   */
+  virtual ~SpringLayout();
 
-    /**
-     * @brief Set the type of force application.
-     * @param c The desired way force will be applied to the graphs elements
-     */
-    void setForceApplication(ForceApplication c);
+  /**
+   * @brief Calculate the forces and update the positions.
+   */
+  void apply();
 
-    /**
-     * @brief Returns the current force application method.
-     */
-    ForceApplication forceApplication();
+  /**
+   * @brief Set the type of the force calculation.
+   * @param c The desired calculaten
+   */
+  void setAttractionCalculation(AttractionCalculation c);
 
-    /**
-     * @brief Randomly moves nodes along the Z axis, at most [z] units
-     * @param z The maximum distance that nodes are moved
-     */
-    void randomizeZ(float z);
+  /**
+   * @brief Returns the current force calculation used.
+   */
+  AttractionCalculation attractionCalculation();
 
-    /**
-     * @brief Pass-through whether graph is stable or not
-     */
-    const bool& isStable(){ return m_graph.stable(); };
+  /**
+   * @brief Set the type of the force calculation.
+   * @param c The desired calculaten
+   */
+  void setRepulsionCalculation(RepulsionCalculation c);
 
-    /**
-     * @brief Returns the user interface object. If no user interface is available,
-     *        one is created using the provided @e parent.
-     * @param The parent of the user inferface in the case none exists yet.
-     */
-    SpringLayoutUi* ui(QAction* advancedDialogAction = nullptr, QWidget* parent = nullptr);
+  /**
+   * @brief Returns the current repulsion calculation used.
+   */
+  RepulsionCalculation repulsionCalculation();
 
-    //Getters and setters
-    float lerp(int value, float targ_min, float targ_max, int _min = 0,
-               int _max = 100)
-    {
-      return targ_min +
-             (targ_max - targ_min) * (value - _min) / (float)(_max - _min);
-    }
-    int unlerp(float value, float val_min, float val_max, int targ_min = 0,
-               int targ_max = 100) const
-    {
-      return targ_min +
-             (targ_max - targ_min) * (value - val_min) / (val_max - val_min);
-    }
-    int speed() const {
-      return unlerp(m_speed_inverse_scale_func(m_speed), m_speed_inverse_scale_func(m_min_speed), m_speed_inverse_scale_func(m_max_speed));
-    }
-    int attraction() const {
-      return unlerp(m_attraction, m_min_attraction, m_max_attraction);
-    }
-    int repulsion() const {
-      return unlerp(m_repulsion, m_min_repulsion, m_max_repulsion);
-    }
-    int controlPointWeight() const {
-      return unlerp(m_controlPointWeight, m_min_controlPointWeight, m_max_controlPointWeight);
-    }
-    int naturalTransitionLength() const {
-      return unlerp(m_natLength, m_min_natLength, m_max_natLength);
-    }
+  /**
+   * @brief Set the type of force application.
+   * @param c The desired way force will be applied to the graphs elements
+   */
+  void setForceApplication(ForceApplication c);
 
-    bool treeEnabled() const {
-      return m_tree_enabled;
-    }
+  /**
+   * @brief Returns the current force application method.
+   */
+  ForceApplication forceApplication();
 
-    bool hasNewFrame() const {
-      return m_has_new_frame;
-    }
+  /**
+   * @brief Randomly moves nodes along the Z axis, at most [z] units
+   * @param z The maximum distance that nodes are moved
+   */
+  void randomizeZ(float z);
 
-    void notifyNewFrame();
-    void setTreeEnabled(bool b);
-    void setAnnealingEnabled(bool b);
-    void setSpeed(int v);
-    void setAccuracy(int v);
-    void setAttraction(int v);
-    void setRepulsion(int v);
-    void setControlPointWeight(int v);
-    void setNaturalTransitionLength(int v);
+  /**
+   * @brief Pass-through whether graph is stable or not
+   */
+  const bool& isStable()
+  {
+    return m_graph.stable();
+  };
 
-    /// @brief Used to invalidate graph when settings change (i.e. attraction/repulsion)
-    void rulesChanged();
+  /**
+   * @brief Returns the user interface object. If no user interface is
+   * available, one is created using the provided @e parent.
+   * @param The parent of the user inferface in the case none exists yet.
+   */
+  SpringLayoutUi* ui(QAction* advancedDialogAction = nullptr,
+                     CustomQWidget* advancedWidget = nullptr,
+                     QWidget* parent = nullptr);
+
+  // Getters and setters
+  float lerp(int value, float targ_min, float targ_max, int _min = 0,
+             int _max = 100)
+  {
+    return targ_min +
+           (targ_max - targ_min) * (value - _min) / (float)(_max - _min);
+  }
+  int unlerp(float value, float val_min, float val_max, int targ_min = 0,
+             int targ_max = 100) const
+  {
+    return targ_min +
+           (targ_max - targ_min) * (value - val_min) / (val_max - val_min);
+  }
+  int speed() const
+  {
+    return unlerp(m_speed_inverse_scale_func(m_speed),
+                  m_speed_inverse_scale_func(m_min_speed),
+                  m_speed_inverse_scale_func(m_max_speed));
+  }
+  int attraction() const
+  {
+    return unlerp(m_attraction, m_min_attraction, m_max_attraction);
+  }
+  int repulsion() const
+  {
+    return unlerp(m_repulsion, m_min_repulsion, m_max_repulsion);
+  }
+  int controlPointWeight() const
+  {
+    return unlerp(m_controlPointWeight, m_min_controlPointWeight,
+                  m_max_controlPointWeight);
+  }
+  int naturalTransitionLength() const
+  {
+    return unlerp(m_natLength, m_min_natLength, m_max_natLength);
+  }
+
+  bool treeEnabled() const
+  {
+    return m_tree_enabled;
+  }
+
+  bool hasNewFrame() const
+  {
+    return m_has_new_frame;
+  }
+
+  void notifyNewFrame();
+  void setTreeEnabled(bool b);
+  void setAnnealingEnabled(bool b);
+  void setSpeed(int v);
+  void setAccuracy(int v);
+  void setAttraction(int v);
+  void setRepulsion(int v);
+  void setControlPointWeight(int v);
+  void setNaturalTransitionLength(int v);
+
+  /// @brief Used to invalidate graph when settings change (i.e.
+  /// attraction/repulsion)
+  void rulesChanged();
 };
 
 struct Data
@@ -350,7 +440,7 @@ struct Data
   virtual QString toQString() = 0;
 };
 
-template < class T > struct TypedData : public Data
+template <class T> struct TypedData : public Data
 {
   T* m_data = nullptr;
   explicit TypedData(T* data) : Data(), m_data(data){};
@@ -358,7 +448,7 @@ template < class T > struct TypedData : public Data
   {
     if (m_data)
     {
-        return QStringLiteral("%1").arg(*m_data);
+      return QStringLiteral("%1").arg(*m_data);
     }
     else
     {
@@ -368,29 +458,19 @@ template < class T > struct TypedData : public Data
 };
 
 
-class TableView
-{
-  public:
-    void add(std::string var, Data* data);
-    void fillTable(QTableWidget& widget);
-  private: 
-    std::size_t m_rows = 0;
-    std::unordered_map<std::string, Data*> vars;
-};
-class CustomQDialog : public QDialog
+class CustomQWidget : public QWidget
 {
   Q_OBJECT
 
   public:
-  CustomQDialog(QAction* act, QWidget* parent = nullptr)
-      : QDialog(parent), m_act(act){};
+  CustomQWidget(QAction* act, QWidget* parent = nullptr)
+      : QWidget(parent), m_act(act){};
 
   void closeEvent(QCloseEvent* e) override
   {
     m_act->setChecked(false);
-    QDialog::closeEvent(e);
+    QWidget::closeEvent(e);
   }
-
 
   private:
   QAction* m_act;
@@ -399,150 +479,153 @@ class SpringLayoutUi : public QDockWidget
 {
   Q_OBJECT
   private:
-    TableView m_table_view;
-    SpringLayout& m_layout;     ///< The layout algorithm that corresponds to this user interface.
-    QThread* m_thread;          ///< The thread that is used to calculate the new positions.
-    CustomQDialog* m_ui_advanced_dialog; ///< The QDialog object used to instantiate the advanced Ui.
+  SpringLayout& m_layout; ///< The layout algorithm that corresponds to this
+                          ///< user interface.
+  QThread*
+      m_thread; ///< The thread that is used to calculate the new positions.
+  CustomQWidget* m_ui_advanced_dialog; ///< The QWidget object used to
+                                       ///< instantiate the advanced Ui.
   public:
-    Ui::DockWidgetLayout m_ui;  ///< The user interface generated by Qt.
-    Ui::AdvancedSpringLayoutDialog m_ui_advanced;
+  Ui::DockWidgetLayout m_ui; ///< The user interface generated by Qt.
+  Ui::AdvancedSpringLayoutDialog m_ui_advanced;
 
-    /**
-     * @brief Constructor.
-     * @param layout The layout object this user interface corresponds to.
-     * @param parent The parent widget for this user interface.
-     */
-    SpringLayoutUi(SpringLayout& layout, QAction* advancedLayoutAction,
-                   QWidget* parent = nullptr);
+  /**
+   * @brief Constructor.
+   * @param layout The layout object this user interface corresponds to.
+   * @param parent The parent widget for this user interface.
+   */
+  SpringLayoutUi(SpringLayout& layout, CustomQWidget* advancedWidget,
+                 QWidget* parent = nullptr);
 
-    void redrawTable();
+  /**
+   * @brief Destructor.
+   */
+  ~SpringLayoutUi() override;
 
-    /**
-     * @brief Destructor.
-     */
-    ~SpringLayoutUi() override;
+  /**
+   * @brief Get the current state of the settings.
+   */
+  QByteArray settings();
 
-    /**
-     * @brief Get the current state of the settings.
-     */
-    QByteArray settings();
+  /**
+   * @brief Restore the settings of the given state.
+   * @param state The original state
+   */
+  void setSettings(QByteArray state);
 
-    /**
-     * @brief Restore the settings of the given state.
-     * @param state The original state
-     */
-    void setSettings(QByteArray state);
-
-    /**
-     * @brief Indicates that settings changed that influence the layout.
-     * 
-     */
-    void layoutRulesChanged();
+  /**
+   * @brief Indicates that settings changed that influence the layout.
+   *
+   */
+  void layoutRulesChanged();
 
   signals:
 
-    /**
-     * @brief Indicates that the thread is started or stopped.
-     */
-    void runningChanged(bool);
+  /**
+   * @brief Indicates that the thread is started or stopped.
+   */
+  void runningChanged(bool);
 
   public slots:
-
-    /**
-     * @brief Updates the attraction value.
-     * @param value The new value.
-     */
-    void onAttractionChanged(int value);
-
-    /**
-     * @brief Updates the repulsion value.
-     * @param value The new value.
-     */
-    void onRepulsionChanged(int value);
-
-    /**
-     * @brief Updates the speed value.
-     * @param value The new value.
-     */
-    void onSpeedChanged(int value);
-
-    /**
-     * @brief Updates accuracy value.
-     * @param value New value.
-     */
-    void onAccuracyChanged(int value);
-
-    /**
-     * @brief Updates the handle weight.
-     * @param value The new weight.
-     */
-    void onHandleWeightChanged(int value);
-
-    /**
-     * @brief Updates the natural length value.
-     * @param value The new value.
-     */
-    void onNatLengthChanged(int value);
-
-    /**
-     * @brief Updates the attraction force calculation.
-     * @param value The new index selected.
-     */
-    void onAttractionCalculationChanged(int value);
-
-    /**
-     * @brief Updates the repulsion force calculation.
-     * @param value The new index selected.
-     */
-    void onRepulsionCalculationChanged(int value);
-
-    /**
-     * @brief Updates the force application.
-     * @param value The new index selected.
-     * 
-     */
-    void onForceApplicationChanged(int value);
-
-    /**
-     * @brief Starts or stops the force calculation depending on the current state.
-     */
-    void onStartStop();
-
-    /**
-     * @brief Starts the force calculation.
-     */
-    void onStarted();
-
-    /**
-     * @brief Stops the force calculation.
-     */
-    void onStopped();
-
-    /**
-     * @brief Enables/disables tree for acceleration
-     */
-    void onTreeToggled(bool);
-
-    /**
-     *@brief Enables/disables the use of annealing in the layout algorithm.
-     */
-    void onAnnealingToggled(bool);
-
-    /**
-     * @brief Starts or stops the force calculation.
-     * @param active The calculation is started if this argument is true.
-     */
-    void setActive(bool active);
-
-    /**
-     * @brief Shows/hides the advanced dialog window
-    */
-   void onAdvancedDialogShow(bool);
+  void onProgressThresholdChanged(const QString&);
+  void onHeatingFactorChanged(const QString&);
+  void onCoolingFactorChanged(const QString&);
 
 
-    friend class SpringLayout;
+  /**
+   * @brief Updates the attraction value.
+   * @param value The new value.
+   */
+  void onAttractionChanged(int value);
+
+  /**
+   * @brief Updates the repulsion value.
+   * @param value The new value.
+   */
+  void onRepulsionChanged(int value);
+
+  /**
+   * @brief Updates the speed value.
+   * @param value The new value.
+   */
+  void onSpeedChanged(int value);
+
+  /**
+   * @brief Updates accuracy value.
+   * @param value New value.
+   */
+  void onAccuracyChanged(int value);
+
+  /**
+   * @brief Updates the handle weight.
+   * @param value The new weight.
+   */
+  void onHandleWeightChanged(int value);
+
+  /**
+   * @brief Updates the natural length value.
+   * @param value The new value.
+   */
+  void onNatLengthChanged(int value);
+
+  /**
+   * @brief Updates the attraction force calculation.
+   * @param value The new index selected.
+   */
+  void onAttractionCalculationChanged(int value);
+
+  /**
+   * @brief Updates the repulsion force calculation.
+   * @param value The new index selected.
+   */
+  void onRepulsionCalculationChanged(int value);
+
+  /**
+   * @brief Updates the force application.
+   * @param value The new index selected.
+   *
+   */
+  void onForceApplicationChanged(int value);
+
+  /**
+   * @brief Starts or stops the force calculation depending on the current
+   * state.
+   */
+  void onStartStop();
+
+  /**
+   * @brief Starts the force calculation.
+   */
+  void onStarted();
+
+  /**
+   * @brief Stops the force calculation.
+   */
+  void onStopped();
+
+  /**
+   * @brief Enables/disables tree for acceleration
+   */
+  void onTreeToggled(bool);
+
+  /**
+   *@brief Enables/disables the use of annealing in the layout algorithm.
+   */
+  void onAnnealingToggled(bool);
+
+  /**
+   * @brief Starts or stops the force calculation.
+   * @param active The calculation is started if this argument is true.
+   */
+  void setActive(bool active);
+
+  /**
+   * @brief Shows/hides the advanced dialog window
+   */
+  void onAdvancedDialogShow(bool);
+
+  friend class SpringLayout;
 };
-
 
 } // namespace Graph
 

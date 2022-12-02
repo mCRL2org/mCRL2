@@ -119,6 +119,7 @@ class MainWindow : public QMainWindow
     Graph::Graph m_graph;               ///< The current Graph.
     Graph::SpringLayout* m_layout;      ///< The SpringLayout algorithm which is applied to the graph.
     Graph::Information* m_information;  ///< The Information display which calculates the statistics of the graph.
+    Graph::CustomQWidget* m_advancedwidget; ///< New window with advanced spring layout details.
     QString m_delayedOpen;              ///< The file that should be opened when the program is ready
 
     mcrl2::gui::qt::PersistentFileDialog m_fileDialog;

@@ -6,6 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
+#define ENABLE_OPENGL_DEBUG_LOG false
 
 #include "glwidget.h"
 
@@ -33,7 +34,7 @@ struct MoveRecord
     node->pos_mutable() = pos;
     m_graph->unlock(GRAPH_LOCK_TRACE);
   }
-  virtual void grab(Graph::Graph& graph, std::size_t index)
+  virtual void grab(Graph::Graph& graph, std::size_t)
   {
     m_graph = &graph;
   }
@@ -331,8 +332,9 @@ void GLWidget::initializeGL()
   // Enable real-time logging of OpenGL errors when the GL_KHR_debug extension
   // is available. Ruben: Disabled because this makes the UI unusable with -d
   // flag
+#if ENABLE_OPENGL_DEBUG_LOG
   m_logger = new QOpenGLDebugLogger(this);
-  if (false && m_logger->initialize())
+  if (m_logger->initialize())
   {
     connect(m_logger, &QOpenGLDebugLogger::messageLogged, this,
             &GLWidget::logMessage);
@@ -340,10 +342,13 @@ void GLWidget::initializeGL()
   }
   else
   {
-    mCRL2log(mcrl2::log::debug) << "QOpenGLDebugLogger initialisation failed "
-                                   "(Disabled manually in glwidget.cpp)\n";
+    mCRL2log(mcrl2::log::debug) << "QOpenGLDebugLogger initialisation failed\n";
   }
-
+#else
+  mCRL2log(mcrl2::log::debug)
+      << "QOpenGLDebugLogger is disabled manually in \"glwidget.cpp\". Change "
+         "\"#define ENABLE_OPENGL_DEBUG_LOG false\" to \"true\" if needed.\n";
+#endif
   m_scene.initialize();
 }
 

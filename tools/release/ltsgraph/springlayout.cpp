@@ -10,7 +10,7 @@
 #include "springlayout.h"
 #include "utility.h"
 
-#include <QDialog>
+#include <QWidget>
 #include <QThread>
 #include <cstdlib>
 
@@ -289,7 +289,7 @@ struct ElectricalSprings : AttractionFunction
   QVector3D operator()(const QVector3D& a, const QVector3D& b,
                        const float ideal) override
   {
-    QVector3D diff = (a - b);
+    diff = (a - b);
     return (electricalSpringScaling * diff.length() / std::max(0.01f, ideal)) *
            diff;
   }
@@ -351,8 +351,8 @@ struct ElectricalSpring : RepulsionFunction
 struct None : RepulsionFunction
 {
   QVector3D ZERO = {0, 0, 0};
-  QVector3D operator()(const QVector3D& a, const QVector3D& b,
-                       const float natlength) override
+  QVector3D operator()(const QVector3D&, const QVector3D&,
+                       const float) override
   {
     return ZERO;
   }
@@ -394,7 +394,7 @@ struct ForceDirected : ApplicationFunction
   // easing such that at threshold translation is 50% of stepsize
   const float ease_width = .1f;
   const float ease_floor =
-      1e-06; // Always keep ease_floor force applied. May cause jitter
+      1e-06f; // Always keep ease_floor force applied. May cause jitter
   // precompute
   const float one_minus_ease_floor = 1 - ease_floor;
   void operator()(QVector3D& pos, const QVector3D& f,
@@ -466,12 +466,15 @@ struct ForceCumulative : ApplicationFunction
 //
 
 SpringLayout::SpringLayout(Graph& graph, GLWidget& glwidget)
-    : m_speed(0.001f), m_attraction(0.13f), m_repulsion(50.0f),
-      m_natLength(50.0f), m_controlPointWeight(0.001f), m_graph(graph),
-      m_ui(nullptr), m_glwidget(glwidget), m_node_tree(0, {0, 0, 0}, {0, 0, 0}),
+    : m_node_tree(0, {0, 0, 0}, {0, 0, 0}),
+      m_handle_tree(0, {0, 0, 0}, {0, 0, 0}), 
       m_trans_tree(0, {0, 0, 0}, {0, 0, 0}),
-      m_handle_tree(0, {0, 0, 0}, {0, 0, 0}), m_node_tree2D(0, {0, 0}, {0, 0}),
-      m_trans_tree2D(0, {0, 0}, {0, 0}), m_handle_tree2D(0, {0, 0}, {0, 0}),
+      m_node_tree2D(0, {0, 0}, {0, 0}),
+      m_handle_tree2D(0, {0, 0}, {0, 0}),
+      m_trans_tree2D(0, {0, 0}, {0, 0}),
+      m_speed(0.001f), m_attraction(0.13f), m_repulsion(50.0f),
+      m_natLength(50.0f), m_controlPointWeight(0.001f), m_graph(graph),
+      m_ui(nullptr), m_glwidget(glwidget), 
       attrFuncMap({
           {AttractionCalculation::ltsgraph_attr,
            new AttractionFunctions::LTSGraph()},
@@ -541,11 +544,11 @@ SpringLayout::~SpringLayout()
   delete m_ui;
 }
 
-SpringLayoutUi* SpringLayout::ui(QAction* advancedDialogAction, QWidget* parent)
+SpringLayoutUi* SpringLayout::ui(QAction* advancedDialogAction, CustomQWidget* advancedWidget, QWidget* parent)
 {
   if (m_ui == nullptr)
   {
-    m_ui = new SpringLayoutUi(*this, advancedDialogAction, parent);
+    m_ui = new SpringLayoutUi(*this, advancedWidget, parent);
     // m_ui->m_ui.dispSpeed->setText(QString::number(m_speed, 'g', 3));
     // m_ui->m_ui.dispAccuracy->setText(QString::number(m_accuracy, 'g', 3));
     m_ui->m_ui.dispHandleWeight->setText(
@@ -845,8 +848,10 @@ void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::quadtree>(
   trans_min -= QVector2D(1, 1);
   trans_max += QVector2D(1, 1);
 
-  QVector2D _extents, cubic_extents;
-  float _width;
+  // The code commented out below calculates a cube around all points to have a 'perfect' octree
+
+  //QVector2D _extents, cubic_extents;
+  //float _width;
 
   // _extents = node_max - node_min;
   // _width = std::max({_extents.x(), _extents.y()});
@@ -988,8 +993,8 @@ void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::octree>(
   trans_min -= QVector3D(1, 1, 1);
   trans_max += QVector3D(1, 1, 1);
 
-  QVector3D _extents, cubic_extents;
-  float _width;
+  //QVector3D _extents, cubic_extents;
+  //float _width;
 
   // _extents = node_max - node_min;
   // _width = std::max({_extents.x(), _extents.y(), _extents.z()});
@@ -1307,8 +1312,6 @@ void SpringLayout::apply()
     m_attrFunc->update();
 
     notifyNewFrame();
-
-    m_ui->redrawTable();
     m_graph.unlock(GRAPH_LOCK_TRACE);
   }
 }
@@ -1502,11 +1505,10 @@ class WorkerThread : public QThread
 };
 
 SpringLayoutUi::SpringLayoutUi(SpringLayout& layout,
-                               QAction* advancedLayoutAction, QWidget* parent)
-    : QDockWidget(parent), m_layout(layout), m_thread(nullptr)
+                               CustomQWidget* advancedDialogWidget, QWidget* parent)
+    : QDockWidget(parent), m_layout(layout), m_ui_advanced_dialog(advancedDialogWidget), m_thread(nullptr)
 {
   m_ui.setupUi(this);
-  m_ui_advanced_dialog = new CustomQDialog(advancedLayoutAction, this);
   m_ui_advanced.setupUi(m_ui_advanced_dialog);
   m_ui_advanced_dialog->hide();
 
@@ -1546,6 +1548,23 @@ SpringLayoutUi::SpringLayoutUi(SpringLayout& layout,
   m_layout.m_glwidget.toggleTextLimiting(
       m_ui_advanced.chk_limit_text->isChecked());
 
+  connect(m_ui_advanced.txt_limit_text,&QLineEdit::textChanged, &m_layout.m_glwidget,
+          &GLWidget::textLimitChanged);
+
+  connect(m_ui_advanced.txt_progress_threshold, &QLineEdit::textChanged, this,
+          &SpringLayoutUi::onProgressThresholdChanged);
+  m_ui_advanced.txt_progress_threshold->setText(
+      QString::number(m_layout.m_asa.getProgressThreshold()));
+  connect(m_ui_advanced.txt_heating_factor, &QLineEdit::textChanged, this,
+          &SpringLayoutUi::onHeatingFactorChanged);
+  m_ui_advanced.txt_heating_factor->setText(
+      QString::number(m_layout.m_asa.getHeatingFactor()));
+  connect(m_ui_advanced.txt_cooling_factor, &QLineEdit::textChanged, this,
+          &SpringLayoutUi::onCoolingFactorChanged);
+  m_ui_advanced.txt_cooling_factor->setText(
+      QString::number(m_layout.m_asa.getCoolingFactor()));
+
+
   connect(m_ui_advanced_dialog, SIGNAL(finished(int)), this,
           SLOT(onAdvancedDialogShow(false)));
   connect(m_ui_advanced_dialog, SIGNAL(accepted()), this,
@@ -1553,24 +1572,8 @@ SpringLayoutUi::SpringLayoutUi(SpringLayout& layout,
   connect(m_ui_advanced_dialog, SIGNAL(rejected()), this,
           SLOT(onAdvancedDialogShow(false)));
 
-  //m_table_view.add("speed", new TypedData<float>(&m_layout.m_speed));
-  //m_table_view.add("accuracy", new TypedData<float>(&m_layout.m_accuracy));
-  //m_table_view.add("attraction", new TypedData<float>(&m_layout.m_attraction));
-  //m_table_view.add("repulsion", new TypedData<float>(&m_layout.m_repulsion));
-  //m_table_view.add("nat length", new TypedData<float>(&m_layout.m_natLength));
-  //m_table_view.add("handle weight", new TypedData<float>(&m_layout.m_controlPointWeight));
-  //m_table_view.add("temperature",
-  //                 new TypedData<float>(&m_layout.m_annealing_temperature));
-  //redrawTable();
-
 
   onTreeToggled(false);
-}
-
-void SpringLayoutUi::redrawTable()
-{
-  m_table_view.fillTable(*m_ui_advanced.tbl_data);
-  m_ui_advanced_dialog->update();
 }
 
 SpringLayoutUi::~SpringLayoutUi()
@@ -1634,6 +1637,43 @@ void SpringLayoutUi::setSettings(QByteArray state)
     m_ui_advanced.cmb_appl->setCurrentIndex(forceCalculation);
   }
   layoutRulesChanged();
+}
+
+// TODO: Add logging
+void SpringLayoutUi::onProgressThresholdChanged(const QString& text)
+{
+  bool success;
+  int num = text.toInt(&success);
+  if (success && num > 0)
+  {
+    m_layout.m_asa.setProgressThreshold(num);
+    mCRL2log(mcrl2::log::debug)
+        << "Setting progress threshold to: " << num << std::endl;
+  }
+}
+
+void SpringLayoutUi::onHeatingFactorChanged(const QString& text)
+{
+  bool success;
+  float num = text.toFloat(&success);
+  if (success && num > 0)
+  {
+    m_layout.m_asa.setHeatingFactor(num);
+    mCRL2log(mcrl2::log::debug)
+        << "Setting heating factor to: " << num << std::endl;
+  }
+}
+
+void SpringLayoutUi::onCoolingFactorChanged(const QString& text)
+{
+  bool success;
+  float num = text.toFloat(&success);
+  if (success && num > 0)
+  {
+    m_layout.m_asa.setCoolingFactor(num);
+    mCRL2log(mcrl2::log::debug)
+        << "Setting cooling factor to: " << num << std::endl;
+  }
 }
 
 void SpringLayoutUi::onAttractionChanged(int value)
@@ -1778,39 +1818,6 @@ void SpringLayoutUi::onAdvancedDialogShow(bool b)
     mCRL2log(mcrl2::log::debug) << "Closing advanced dialog." << std::endl;
     m_ui_advanced_dialog->hide();
   }
-}
-
-void TableView::add(std::string var, Data* data)
-{
-  assert(vars.find(var) == vars.end());// not already inserted
-  vars[var] = data;
-  if (vars.size() > m_rows)
-  {
-    m_rows = vars.size();
-  }
-}
-
-void TableView::fillTable(QTableWidget& widget)
-{
-  int row = 0;
-  for (int i = widget.rowCount(); i < m_rows; i++)
-  {
-    widget.insertRow(i);
-  }
-  for (auto& pair : vars)
-  {
-    QString name = QString::fromStdString(pair.first);
-    QTableWidgetItem* name_item = new QTableWidgetItem();
-    name_item->setData(Qt::DisplayRole, name);
-    widget.setItem(row, 0, name_item);
-
-    QString value = pair.second->toQString();
-    QTableWidgetItem* value_item = new QTableWidgetItem();
-    value_item->setData(Qt::DisplayRole, value);
-    widget.setItem(row, 1, value_item);
-    row++;
-  }
-  widget.update();
 }
 
 } // namespace Graph

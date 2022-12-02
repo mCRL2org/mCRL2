@@ -346,7 +346,7 @@ struct DataView{
 class DebugView{
 
   public:
-    DebugView(int log_duration = 0, std::size_t min_interval = 0);
+    DebugView(std::size_t log_duration = 0, std::size_t min_interval = 0);
 
     void push(double value);
 
@@ -619,14 +619,10 @@ class Graph
     std::size_t explorationEdgeCount() const;        ///< Returns the number of edges in the exploration
     std::size_t explorationNodeCount() const;        ///< Returns the number of nodes in the exploration
 
-    const float stabilityThreshold(){ ///< @brief Gets stability threshold
+    float stabilityThreshold(){ ///< @brief Gets stability threshold
        return m_stabilityThreshold;
     }
 
-    const bool stable() const ///< @brief Gets whether this graph is stable.
-    {
-      return m_stable;
-    }
     bool& stable() ///< @brief Sets whether this graph is stable.
     {
       return m_stable;

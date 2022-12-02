@@ -262,7 +262,7 @@ void GLScene::initialize()
   m_colorBuffer.create();
   m_colorBuffer.setUsagePattern(QOpenGLBuffer::StreamDraw);
   m_colorBuffer.bind();
-  m_colorBuffer.allocate(m_batch_size * sizeof(QVector4D));
+  m_colorBuffer.allocate(static_cast<int>(m_batch_size * sizeof(QVector4D)));
   m_node_shader.setAttributeBuffer(color_attrib_location, GL_FLOAT, 0, 4);
   m_node_shader.enableAttributeArray(color_attrib_location);
   glVertexAttribDivisor(color_attrib_location, 1);
@@ -271,7 +271,7 @@ void GLScene::initialize()
   m_offsetBuffer.create();
   m_offsetBuffer.setUsagePattern(QOpenGLBuffer::StreamDraw);
   m_offsetBuffer.bind();
-  m_offsetBuffer.allocate(m_batch_size * sizeof(QVector3D));
+  m_offsetBuffer.allocate(static_cast<int>(m_batch_size * sizeof(QVector3D)));
   m_node_shader.setAttributeBuffer(offset_attrib_location, GL_FLOAT, 0, 3);
   m_node_shader.enableAttributeArray(offset_attrib_location);
   glVertexAttribDivisor(offset_attrib_location, 1);
@@ -304,7 +304,7 @@ void GLScene::initialize()
   m_controlpointbuffer.create();
   m_controlpointbuffer.setUsagePattern(QOpenGLBuffer::StreamDraw);
   m_controlpointbuffer.bind();
-  m_controlpointbuffer.allocate(m_batch_size * sizeof(QVector3D) * 4);
+  m_controlpointbuffer.allocate(static_cast<int>(m_batch_size * sizeof(QVector3D) * 4));
   // TODO: Duplicate code removal with loop
   m_arc_shader.setAttributeBuffer(arc_ctrl_1_attrib_location, GL_FLOAT, 0, 3,
                                   4 * sizeof(QVector3D));
@@ -365,7 +365,7 @@ void GLScene::initialize()
   m_directionBuffer.create();
   m_directionBuffer.setUsagePattern(QOpenGLBuffer::UsagePattern::StreamDraw);
   m_directionBuffer.bind();
-  m_directionBuffer.allocate(m_current_scene_size * sizeof(QVector3D));
+  m_directionBuffer.allocate(static_cast<int>(m_current_scene_size * sizeof(QVector3D)));
   m_arrow_shader.setAttributeArray(arrow_dir_attrib_location, GL_FLOAT, 0, 3);
   m_arrow_shader.enableAttributeArray(arrow_dir_attrib_location);
   glVertexAttribDivisor(arrow_dir_attrib_location, 1);
@@ -380,7 +380,7 @@ void GLScene::resize(std::size_t width, std::size_t height)
   if (m_fbo)
     delete m_fbo;
   m_fbo = new QOpenGLFramebufferObject(
-      width, height, QOpenGLFramebufferObject::CombinedDepthStencil);
+      static_cast<int>(width), static_cast<int>(height), QOpenGLFramebufferObject::CombinedDepthStencil);
   m_graph.hasNewFrame(true);
 }
 
@@ -441,15 +441,15 @@ void GLScene::render()
   for (std::size_t i = 0; i < nodeCount; ++i)
   {
     renderNode(exploration_active ? m_graph.explorationNode(i) : i,
-               viewProjMatrix, false);
+               false);
   }
 
   for (std::size_t i = 0; i < edgeCount; ++i)
   {
-    renderEdge(exploration_active ? m_graph.explorationEdge(i) : i,
-               viewProjMatrix);
-    renderHandle(exploration_active ? m_graph.explorationEdge(i) : i,
-                 viewProjMatrix);
+    renderEdge(exploration_active ? m_graph.explorationEdge(i) : i
+               );
+    renderHandle(exploration_active ? m_graph.explorationEdge(i) : i
+                 );
   }
 
   if (m_graph.hasExploration())
@@ -457,7 +457,7 @@ void GLScene::render()
     for (std::size_t i = 0; i < nodeCount; ++i)
     {
       renderNode(exploration_active ? m_graph.explorationNode(i) : i,
-                 viewProjMatrix, true);
+                 true);
     }
   }
   m_graph.unlock(GRAPH_LOCK_TRACE);
@@ -504,7 +504,7 @@ void GLScene::render()
         // NB: sizeof(QMatrix4x4) is NOT the same as 16 * sizeof(float)
         m_offsetBuffer.bind();
         void* buff_ptr1 =
-            m_offsetBuffer.mapRange(0, n * 3 * sizeof(float),
+            m_offsetBuffer.mapRange(0, static_cast<int>(n * 3 * sizeof(float)),
                                     QOpenGLBuffer::RangeAccessFlag::RangeWrite);
 
         // void* buff_ptr =
@@ -517,11 +517,11 @@ void GLScene::render()
 
         m_colorBuffer.bind();
         m_colorBuffer.write(0, &di_ptr->colors[index * 4],
-                            n * sizeof(QVector4D));
+                            static_cast<int>(n * sizeof(QVector4D)));
         m_colorBuffer.release();
 
         glDrawArraysInstanced(di_ptr->draw_mode, di_ptr->offset,
-                              di_ptr->vertices, n);
+                              di_ptr->vertices, static_cast<int>(n));
         index += n;
         amount_to_render -= n;
         glCheckError();
@@ -550,10 +550,10 @@ void GLScene::render()
     {
       std::size_t n = std::min(m_batch_size, amount_to_render);
       m_controlpointbuffer.bind();
-      m_controlpointbuffer.write(0, &m_drawArc[index], n * 12 * sizeof(float));
+      m_controlpointbuffer.write(0, &m_drawArc[index], static_cast<int>(n * 12 * sizeof(float)));
       m_colorBuffer.bind();
-      m_colorBuffer.write(0, &m_drawArcColors[index], n * 3 * sizeof(float));
-      glDrawArraysInstanced(GL_LINE_STRIP, OFFSET_ARC, VERTICES_ARC, n);
+      m_colorBuffer.write(0, &m_drawArcColors[index], static_cast<int>(n * 3 * sizeof(float)));
+      glDrawArraysInstanced(GL_LINE_STRIP, OFFSET_ARC, VERTICES_ARC, static_cast<GLsizei>(n));
       glCheckError();
       index += n;
       amount_to_render -= n;
@@ -577,20 +577,20 @@ void GLScene::render()
       std::size_t n = std::min(m_batch_size, amount_to_render);
 
       m_colorBuffer.bind();
-      m_colorBuffer.write(0, &m_drawArrowColors[index], n * 4 * sizeof(float));
+      m_colorBuffer.write(0, &m_drawArrowColors[index], static_cast<int>(n * 4 * sizeof(float)));
 
       m_offsetBuffer.bind();
       m_offsetBuffer.write(0, &m_drawArrowOffsets[index],
-                           n * 3 * sizeof(float));
+                           static_cast<int>(n * 3 * sizeof(float)));
 
       m_directionBuffer.bind();
       m_directionBuffer.write(0, &m_drawArrowDirections[index],
-                              n * 3 * sizeof(float));
+                              static_cast<int>(n * 3 * sizeof(float)));
 
       glDrawArraysInstanced(GL_TRIANGLE_FAN, OFFSET_ARROWHEAD,
-                            VERTICES_ARROWHEAD, n);
+                            VERTICES_ARROWHEAD, static_cast<int>(n));
       glDrawArraysInstanced(GL_TRIANGLE_FAN, OFFSET_ARROWHEAD_BASE,
-                            VERTICES_ARROWHEAD_BASE, n);
+                            VERTICES_ARROWHEAD_BASE, static_cast<int>(n));
 
       index += n;
       amount_to_render -= n;
@@ -636,7 +636,7 @@ void GLScene::renderText(QPainter& painter, int text_limit)
   // Draw node labels
   {
     std::vector<double> distances(nodeCount);
-    std::vector<int> indices(nodeCount);
+    std::vector<std::size_t> indices(nodeCount);
     QVector3D closest_node;
     QVector3D cam_pos = m_camera.position();
     QVector3D center_of_screen = m_camera.windowToWorld(
@@ -669,7 +669,7 @@ void GLScene::renderText(QPainter& painter, int text_limit)
       distances[i] = (m_graph.node(n).pos() - focus_point).lengthSquared();
       indices[i] = i;
     }
-    auto compare = [&](int i, int j) { return distances[i] < distances[j]; };
+    auto compare = [&](std::size_t i, std::size_t j) { return distances[i] < distances[j]; };
 
     std::sort(indices.begin(), indices.end(), compare);
 
@@ -689,7 +689,7 @@ void GLScene::renderText(QPainter& painter, int text_limit)
 
     const double furthest_scale = 0.8;
     const double closest_scale = 1.0;
-    auto getScale = [&](int i)
+    auto getScale = [&](std::size_t i)
     {
       return (closest_scale - (closest_scale - furthest_scale) *
                                   (std::sqrt(distances[i]) - closest) /
@@ -719,7 +719,7 @@ void GLScene::renderText(QPainter& painter, int text_limit)
   // Draw transition labels
   {
     std::vector<double> distances(edgeCount);
-    std::vector<int> indices(edgeCount);
+    std::vector<std::size_t> indices(edgeCount);
     QVector3D closest_node;
     QVector3D cam_pos = m_camera.position();
     QVector3D center_of_screen = m_camera.windowToWorld(
@@ -753,7 +753,7 @@ void GLScene::renderText(QPainter& painter, int text_limit)
           (m_graph.transitionLabel(n).pos() - focus_point).lengthSquared();
       indices[i] = i;
     }
-    auto compare = [&](int i, int j) { return distances[i] < distances[j]; };
+    auto compare = [&](std::size_t i, std::size_t j) { return distances[i] < distances[j]; };
 
     std::sort(indices.begin(), indices.end(), compare);
 
@@ -774,7 +774,7 @@ void GLScene::renderText(QPainter& painter, int text_limit)
 
     const double furthest_scale = 0.8;
     const double closest_scale = 1.0;
-    auto getScale = [&](int i)
+    auto getScale = [&](std::size_t i)
     {
       return (closest_scale - (closest_scale - furthest_scale) *
                                   (std::sqrt(distances[i]) - closest) /
@@ -874,7 +874,7 @@ bool GLScene::isVisible(const QVector3D& position, float& fogamount)
   return (distance < m_camera.viewdistance() && fogamount < 0.99f);
 }
 
-void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
+void GLScene::renderEdge(std::size_t i)
 {
   const Graph::Edge& edge = m_graph.edge(i);
   if (!m_drawselfloops && edge.is_selfloop())
@@ -934,7 +934,7 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
   }
 }
 
-void GLScene::renderHandle(std::size_t i, const QMatrix4x4& viewProjMatrix)
+void GLScene::renderHandle(std::size_t i)
 {
   if (!m_drawselfloops && m_graph.edge(i).is_selfloop())
   {
@@ -957,7 +957,7 @@ void GLScene::renderHandle(std::size_t i, const QMatrix4x4& viewProjMatrix)
   }
 }
 
-void GLScene::renderNode(std::size_t i, const QMatrix4x4& viewProjMatrix,
+void GLScene::renderNode(std::size_t i,
                          bool transparent)
 {
   const Graph::NodeNode& node = m_graph.node(i);
