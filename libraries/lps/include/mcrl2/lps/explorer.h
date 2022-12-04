@@ -575,6 +575,7 @@ class explorer: public abortable
       ReportTransition report_transition = ReportTransition()
     )
     {
+      bool variables_are_assigned_to_sigma=false;
       if (!m_recursive)
       {
         id_generator.clear();
@@ -628,6 +629,7 @@ class explorer: public abortable
                         [&](const enumerator_element& p) {
                           check_enumerator_solution(p.expression(), summand, sigma, rewr);
                           p.add_assignments(summand.variables, sigma, rewr);
+                          variables_are_assigned_to_sigma=true;
                           state_type s1;
                           if constexpr (Stochastic)
                           {
@@ -641,9 +643,10 @@ class explorer: public abortable
                               s1 = find_representative(s1, confluent_summands, sigma, rewr, enumerator, id_generator);
                             }
                           }
-                          if (m_recursive)
+                          if (m_recursive && variables_are_assigned_to_sigma)
                           {
                             data::remove_assignments(sigma, summand.variables);
+                            variables_are_assigned_to_sigma=false;
                           }
                           // Check whether report transition only needs a state, and no action.
                           if constexpr (utilities::is_applicable<ReportTransition,state_type,void>::value)
@@ -704,6 +707,7 @@ class explorer: public abortable
         for (const data::data_expression_list& e: q->second)
         {
           data::add_assignments(sigma, summand.variables, e);
+          variables_are_assigned_to_sigma=true;
           if constexpr (Stochastic)
           {
             compute_stochastic_state(s1, summand.distribution, summand.next_state, sigma, rewr, enumerator);
@@ -716,9 +720,10 @@ class explorer: public abortable
               s1 = find_representative(s1, confluent_summands, sigma, rewr, enumerator, id_generator);
             }
           }
-          if (m_recursive)
+          if (m_recursive && variables_are_assigned_to_sigma)
           {
             data::remove_assignments(sigma, summand.variables);
+            variables_are_assigned_to_sigma=false;
           }
           // If report transition does not require a transition, do not calculate it. 
           if constexpr (utilities::is_applicable<ReportTransition,state_type,void>::value)
@@ -740,7 +745,7 @@ class explorer: public abortable
         }
         
       }
-      if (!m_recursive)
+      if (!m_recursive && variables_are_assigned_to_sigma)
       {
         data::remove_assignments(sigma, summand.variables);
       }
