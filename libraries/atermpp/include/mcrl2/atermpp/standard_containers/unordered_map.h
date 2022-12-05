@@ -115,6 +115,12 @@ public:
       container_wrapper(*this, true)      
   {}
 
+  /// \brief Standard assignment.
+  unordered_map& operator=(const unordered_map& other)=default;
+
+  /// \brief Standard move assignment.
+  unordered_map& operator=(unordered_map&& other)=default;
+
   /// \brief Standard destructor.
   ~unordered_map()=default;
 
