@@ -209,6 +209,13 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QPushButton" name="cmd_reset_positions">
+       <property name="text">
+        <string>Reset layout</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>

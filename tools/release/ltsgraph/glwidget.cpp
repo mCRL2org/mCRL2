@@ -165,6 +165,8 @@ GLWidget::GLWidget(Graph::Graph& graph, QWidget* parent)
   setAttribute(Qt::WA_NoSystemBackground, true);
   m_current_device_pixel_ratio = devicePixelRatio();
   m_scene.setDevicePixelRatio(devicePixelRatio());
+  mCRL2log(mcrl2::log::debug)
+      << "Devicepixelratio: " << devicePixelRatio() << std::endl;
 
   /// TODO: Move draw_timer to member variables so that drawing can be disabled
   /// when graph stable and user does not interact with screen

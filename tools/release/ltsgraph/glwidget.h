@@ -179,6 +179,11 @@ class GLWidget : public QOpenGLWidget
     return m_drawDebugGraphs;
   }
 
+  int getTextLimit()
+  {
+    return m_textLimit;
+  }
+
   public slots:
 
   /**

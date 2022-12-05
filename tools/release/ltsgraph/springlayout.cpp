@@ -123,7 +123,7 @@ void SimpleAdaptiveSimulatedAnnealing::reset()
 
 bool SimpleAdaptiveSimulatedAnnealing::calculateTemperature(float new_energy)
 {
-  if (new_energy < m_prev_energy)
+  if (new_energy < m_prev_energy*0.995)
   {
     m_progress++;
     if (m_progress >= m_progress_threshold)
@@ -132,6 +132,10 @@ bool SimpleAdaptiveSimulatedAnnealing::calculateTemperature(float new_energy)
       m_temperature *= m_heating_factor;
       m_progress = 0;
     }
+  }
+  else if (new_energy < m_prev_energy)
+  {
+      // still made some progress possibly, but we do nothing
   }
   else
   {
@@ -290,7 +294,7 @@ struct ElectricalSprings : AttractionFunction
                        const float ideal) override
   {
     diff = (a - b);
-    return (electricalSpringScaling * diff.length() / std::max(0.01f, ideal)) *
+    return (electricalSpringScaling * diff.length() / std::max(0.0001f, ideal)) *
            diff;
   }
 };
@@ -343,7 +347,7 @@ struct ElectricalSpring : RepulsionFunction
   {
     diff = a - b;
     return ((electricalSpringScaling * K * K) /
-            std::max(diff.lengthSquared(), 1.0f)) *
+            std::max(diff.lengthSquared(), 0.00001f)) *
            diff;
   }
 };
@@ -1191,13 +1195,14 @@ void SpringLayout::apply()
     float nodeSumForces = 0;
     float edgeSumForces = 0;
     bool new_anchored = false;
+    float use_speed = m_speed * std::log2f(nodeCount) * 0.25f;
     for (std::size_t i = 0; i < nodeCount; ++i)
     {
       std::size_t n = sel ? m_graph.explorationNode(i) : i;
 
       if (!m_graph.node(n).anchored())
       {
-        (*m_applFunc)(m_graph.node(n).pos_mutable(), m_nforces[n], m_speed);
+        (*m_applFunc)(m_graph.node(n).pos_mutable(), m_nforces[n], use_speed);
         nodeSumForces += m_nforces[n].lengthSquared();
         clipVector(m_graph.node(n).pos_mutable(), clipmin, clipmax);
       }
@@ -1246,7 +1251,7 @@ void SpringLayout::apply()
       if (!m_graph.stateLabel(n).anchored())
       {
         (*m_applFunc)(m_graph.stateLabel(n).pos_mutable(), m_sforces[n],
-                      m_speed);
+                      use_speed);
         m_graph.stateLabel(n).pos_mutable() -= center_of_mass;
         nodeSumForces += m_sforces[n].lengthSquared();
         clipVector(m_graph.stateLabel(n).pos_mutable(), clipmin, clipmax);
@@ -1263,7 +1268,7 @@ void SpringLayout::apply()
 
       if (!m_graph.handle(n).anchored())
       {
-        (*m_applFunc)(m_graph.handle(n).pos_mutable(), m_hforces[n], m_speed);
+        (*m_applFunc)(m_graph.handle(n).pos_mutable(), m_hforces[n], use_speed);
         m_graph.handle(n).pos_mutable() -= center_of_mass;
         edgeSumForces += m_hforces[n].lengthSquared();
         clipVector(m_graph.handle(n).pos_mutable(), clipmin, clipmax);
@@ -1271,7 +1276,7 @@ void SpringLayout::apply()
       if (!m_graph.transitionLabel(n).anchored())
       {
         (*m_applFunc)(m_graph.transitionLabel(n).pos_mutable(), m_lforces[n],
-                      m_speed);
+                      use_speed);
         m_graph.transitionLabel(n).pos_mutable() -= center_of_mass;
         edgeSumForces += m_lforces[n].lengthSquared();
         clipVector(m_graph.transitionLabel(n).pos_mutable(), clipmin, clipmax);
@@ -1323,8 +1328,21 @@ void SpringLayout::randomizeZ(float z)
   {
     if (!m_graph.node(n).anchored())
     {
+      float z_offset = fast_frand(-z, z);
       m_graph.node(n).pos_mutable().setZ(m_graph.node(n).pos().z() +
-                                         fast_frand(-z, z));
+                                         z_offset);
+      m_graph.stateLabel(n).pos_mutable().setZ(m_graph.stateLabel(n).pos().z() +
+                                               z_offset);
+    }
+  }
+  for (std::size_t i = 0; i < m_graph.edgeCount(); ++i)
+  {
+    if (!m_graph.transitionLabel(i).anchored())
+    {
+      m_graph.transitionLabel(i).pos_mutable() =
+          0.5 * (m_graph.node(m_graph.edge(i).from()).pos() +
+                 m_graph.node(m_graph.edge(i).to()).pos());
+      m_graph.handle(i).pos_mutable() = m_graph.transitionLabel(i).pos();
     }
   }
   m_asa.reset();
@@ -1424,6 +1442,34 @@ void SpringLayout::rulesChanged()
   m_repFunc->reset();
   m_attrFunc->reset();
   m_asa.reset();
+}
+
+void SpringLayout::resetPositions()
+{
+  mCRL2log(mcrl2::log::debug) << "Resetting positions" << std::endl;
+  m_graph.lock(GRAPH_LOCK_TRACE);
+  std::size_t n_nodes = m_graph.nodeCount();
+  std::size_t n_edges = m_graph.edgeCount();
+  bool is3D = m_glwidget.get3D();
+  float hwidth = 5*std::powf(m_natLength*n_nodes, 1.0f / (is3D ? 3 : 2));
+  for (std::size_t i = 0; i < n_nodes; i++)
+  {
+    m_graph.node(i).set_anchored(false);
+    m_graph.node(i).pos_mutable().setX(frand(-hwidth, hwidth));
+    m_graph.node(i).pos_mutable().setY(frand(-hwidth, hwidth));
+    m_graph.node(i).pos_mutable().setZ(is3D ? frand(-hwidth, hwidth) : 0);
+    m_graph.stateLabel(i).pos_mutable() = m_graph.node(i).pos();
+  }
+  for (std::size_t i = 0; i < n_edges; i++)
+  {
+    m_graph.transitionLabel(i).set_anchored(false);
+    m_graph.transitionLabel(i).pos_mutable() = 0.5 * (m_graph.node(m_graph.edge(i).from()).pos() + m_graph.node(m_graph.edge(i).to()).pos());
+    m_graph.handle(i).pos_mutable() = m_graph.transitionLabel(i).pos();
+  }
+  m_graph.hasNewFrame(true);
+  m_graph.setStable(false);
+  m_asa.reset();
+  m_graph.unlock(GRAPH_LOCK_TRACE);
 }
 
 //
@@ -1550,6 +1596,8 @@ SpringLayoutUi::SpringLayoutUi(SpringLayout& layout,
 
   connect(m_ui_advanced.txt_limit_text,&QLineEdit::textChanged, &m_layout.m_glwidget,
           &GLWidget::textLimitChanged);
+  m_ui_advanced.txt_limit_text->setText(
+      QString::number(m_layout.m_glwidget.getTextLimit()));
 
   connect(m_ui_advanced.txt_progress_threshold, &QLineEdit::textChanged, this,
           &SpringLayoutUi::onProgressThresholdChanged);
@@ -1564,6 +1612,8 @@ SpringLayoutUi::SpringLayoutUi(SpringLayout& layout,
   m_ui_advanced.txt_cooling_factor->setText(
       QString::number(m_layout.m_asa.getCoolingFactor()));
 
+  connect(m_ui_advanced.cmd_reset_positions, &QPushButton::pressed, this,
+          &SpringLayoutUi::onResetPositionsPressed);
 
   connect(m_ui_advanced_dialog, SIGNAL(finished(int)), this,
           SLOT(onAdvancedDialogShow(false)));
@@ -1674,6 +1724,11 @@ void SpringLayoutUi::onCoolingFactorChanged(const QString& text)
     mCRL2log(mcrl2::log::debug)
         << "Setting cooling factor to: " << num << std::endl;
   }
+}
+
+void SpringLayoutUi::onResetPositionsPressed()
+{
+  m_layout.resetPositions();
 }
 
 void SpringLayoutUi::onAttractionChanged(int value)

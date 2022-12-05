@@ -251,6 +251,7 @@ class GLScene : private QOpenGLFunctions_3_3_Core
   {
     m_size_node = size;
     updateDrawInstructions();
+    m_graph.hasNewFrame(true);
   }
   void setFontSize(int size)
   {
