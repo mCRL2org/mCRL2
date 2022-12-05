@@ -1615,12 +1615,12 @@ SpringLayoutUi::SpringLayoutUi(SpringLayout& layout,
   connect(m_ui_advanced.cmd_reset_positions, &QPushButton::pressed, this,
           &SpringLayoutUi::onResetPositionsPressed);
 
-  connect(m_ui_advanced_dialog, SIGNAL(finished(int)), this,
-          SLOT(onAdvancedDialogShow(false)));
-  connect(m_ui_advanced_dialog, SIGNAL(accepted()), this,
-          SLOT(onAdvancedDialogShow(false)));
-  connect(m_ui_advanced_dialog, SIGNAL(rejected()), this,
-          SLOT(onAdvancedDialogShow(false)));
+  //connect(m_ui_advanced_dialog, SIGNAL(finished(int)), this,
+  //        SLOT(onAdvancedDialogShow(false)));
+  //connect(m_ui_advanced_dialog, SIGNAL(accepted()), this,
+  //        SLOT(onAdvancedDialogShow(false)));
+  //connect(m_ui_advanced_dialog, SIGNAL(rejected()), this,
+  //        SLOT(onAdvancedDialogShow(false)));
 
 
   onTreeToggled(false);
