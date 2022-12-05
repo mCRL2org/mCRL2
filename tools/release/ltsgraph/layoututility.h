@@ -27,6 +27,8 @@
 
 #include <cmath>
 
+#define MAX_DEPTH 20
+
 #ifndef FLT_EPSILON
 #define FLT_EPSILON 1.192092896e-07F
 #endif
@@ -83,7 +85,7 @@ class GeometricTree
     assert(this->m_nodes >= 1);
     assert(!this->m_sub_positions_calculated);
 
-    // call recursive function
+    // call 'recursive' function (implemented iteratively)
     T node_extents = m_maxbounds - m_minbounds;
     T node_minbounds(m_minbounds);
     sub_insert(node_pos, 0, node_minbounds, node_extents);
@@ -185,55 +187,61 @@ class GeometricTree
    * @param node_minbound Bounding area/volume origin
    * @param node_extents Extents of bounding area/volume
    */
-  /// TODO: Iterative instead of recursive
-  void sub_insert(const T& node_pos, std::size_t i, T& node_minbound, T& node_extents)
+  void sub_insert(const T& node_pos, std::size_t i, T& node_minbound,
+                  T& node_extents)
   {
     // Index has to be within m_data range
     assert(i >= 0 && i < this->m_nodes);
-
-    if (m_data[i].children == TreeNodeTypes::EMPTY_NODE)
+    std::size_t depth = 0;
+    while (depth++ < MAX_DEPTH)
     {
-      // we can insert here
-      m_data[i].pos = node_pos;
-      m_data[i].children = 1;
-      return; // node has been inserted
-    }
-    else if (m_data[i].children == TreeNodeTypes::LEAF_NODE)
-    {
-      if (equal(node_pos, m_data[i].pos))
+      assert(depth < 100);
+      if (m_data[i].children == TreeNodeTypes::EMPTY_NODE)
       {
-        // trying to insert position that is already in tree
-        return;
+        // we can insert here
+        m_data[i].pos = node_pos;
+        m_data[i].children = 1;
+        return; // node has been inserted
       }
-      // we need to subdivide the current node
-      m_data[i].offset = m_nodes - i;
-      add_children();
+      else if (m_data[i].children == TreeNodeTypes::LEAF_NODE)
+      {
+        if (equal(node_pos, m_data[i].pos))
+        {
+          // trying to insert position that is already in tree
+          return;
+        }
+        // we need to subdivide the current node
+        m_data[i].offset = m_nodes - i;
+        add_children();
 
-      // now we have subdivided we need to move the current point down
-      T relative_pos = (m_data[i].pos - node_minbound) / node_extents;
+        // now we have subdivided we need to move the current point down
+        T relative_pos = (m_data[i].pos - node_minbound) / node_extents;
 
-      std::size_t child_index = i + m_data[i].offset + get_child_index(relative_pos);
+        std::size_t child_index =
+            i + m_data[i].offset + get_child_index(relative_pos);
 
-      // Move node information down
-      m_data[child_index].pos = m_data[i].pos;
-      m_data[child_index].children = TreeNodeTypes::LEAF_NODE;
+        // Move node information down
+        m_data[child_index].pos = m_data[i].pos;
+        m_data[child_index].children = TreeNodeTypes::LEAF_NODE;
+      }
+
+      // if we make it this far we know for sure that the node has not been
+      // inserted so we need to recurse
+
+      // first we add the node to-be-inserted to the cumulative position and
+      // increment the number of children
+      m_data[i].pos += node_pos;
+      m_data[i].children += 1;
+
+      // then we find what child the to-be-inserted node has to go in
+      T relative_pos = (node_pos - node_minbound) / node_extents;
+      std::size_t child_index =
+          i + m_data[i].offset + get_child_index(relative_pos);
+      node_extents *= 0.5;
+      update_minbound(relative_pos, node_extents, node_minbound);
+
+      i = child_index;
     }
-
-    // if we make it this far we know for sure that the node has not been
-    // inserted so we need to recurse
-
-    // first we add the node to-be-inserted to the cumulative position and
-    // increment the number of children
-    m_data[i].pos += node_pos;
-    m_data[i].children += 1;
-
-    // then we find what child the to-be-inserted node has to go in
-    T relative_pos = (node_pos - node_minbound) / node_extents;
-    std::size_t child_index = i + m_data[i].offset + get_child_index(relative_pos);
-    node_extents *= 0.5;
-    update_minbound(relative_pos, node_extents, node_minbound);
-    // recurse
-    sub_insert(node_pos, child_index, node_minbound, node_extents);
   }
 
   /**
@@ -282,7 +290,7 @@ class GeometricTree
   }
 
   /**
-   * @brief Subroutine for recursively calculation average position of node
+   * @brief Subroutine for recursively calculating average position of node
    *
    * @param i Index of current node in tree.
    */
