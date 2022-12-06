@@ -9,6 +9,8 @@
 
 #include "mcrl2/atermpp/aterm_io_binary.h"
 
+#include "mcrl2/atermpp/standard_containers/stack.h"
+
 namespace atermpp
 {
 using namespace mcrl2::utilities;
@@ -74,18 +76,23 @@ binary_aterm_ostream::~binary_aterm_ostream()
 /// \brief Keep track of whether the term can be written to the stream.
 struct write_todo
 {
-  aterm_appl term;
+  detail::reference_aterm<aterm_appl> term;
   bool write = false;
 
   write_todo(const aterm_appl& term)
    : term(term)
   {}
+
+  void mark(std::stack<std::reference_wrapper<detail::_aterm>>& todo) const
+  {
+    term.mark(todo);
+  }
 };
 
 void binary_aterm_ostream::put(const aterm& term)
 {
   // Traverse the term bottom up and store the subterms (and function symbol) before the actual term.
-  std::stack<write_todo> stack;
+  atermpp::stack<write_todo> stack;
   stack.emplace(static_cast<const aterm_appl&>(term));
 
   do

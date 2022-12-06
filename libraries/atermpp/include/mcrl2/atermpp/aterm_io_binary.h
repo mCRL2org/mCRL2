@@ -13,7 +13,8 @@
 #include "mcrl2/atermpp/aterm_io.h"
 
 #include "mcrl2/utilities/bitstream.h"
-#include "mcrl2/utilities/indexed_set.h"
+#include "mcrl2/atermpp/standard_containers/deque.h"
+#include "mcrl2/atermpp/standard_containers/indexed_set.h"
 
 namespace atermpp
 {
@@ -58,7 +59,7 @@ private:
   unsigned int m_term_index_width; ///< caches the result of term_index_width().
   unsigned int m_function_symbol_index_width; ///< caches the result of function_symbol_index_width().
 
-  mcrl2::utilities::indexed_set<aterm> m_terms; ///< An index of already written terms.
+  atermpp::indexed_set<aterm> m_terms; ///< An index of already written terms.
   mcrl2::utilities::indexed_set<function_symbol> m_function_symbols; ///< An index of already written function symbols.
 };
 
@@ -84,7 +85,7 @@ private:
   unsigned int m_term_index_width; ///< caches the result of term_index_width().
   unsigned int m_function_symbol_index_width; ///< caches the result of function_symbol_index_width().
 
-  std::deque<aterm> m_terms; ///< An index of read terms.
+  atermpp::deque<aterm> m_terms; ///< An index of read terms.
   std::deque<function_symbol> m_function_symbols; ///< An index of read function symbols.
 };
 

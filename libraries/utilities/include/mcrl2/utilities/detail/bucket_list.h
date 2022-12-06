@@ -54,7 +54,7 @@ public:
   {
   public:
     node_base() = default;
-    node_base(node_base&& other)
+    node_base(node_base&& other) noexcept
     {
       m_next.store(other.m_next.load());
       other.m_next = nullptr;
