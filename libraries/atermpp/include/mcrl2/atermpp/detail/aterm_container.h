@@ -62,7 +62,7 @@ public:
   }
 
   /// \brief Move assignment
-  _aterm_container& operator=(_aterm_container&& )
+  _aterm_container& operator=(_aterm_container&& ) noexcept
   {
     return *this;
   } 
