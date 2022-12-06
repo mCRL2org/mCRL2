@@ -188,3 +188,13 @@ BOOST_AUTO_TEST_CASE(test_try_emplace)
 
   BOOST_CHECK(mapping.try_emplace(5, 1000).second == false);
 }
+
+BOOST_AUTO_TEST_CASE(test_emplace)
+{
+  unordered_map<int, std::vector<int>> mapping;
+
+  // Move it into the unordered_set.
+  mapping.emplace(5, 1000);
+
+  BOOST_CHECK(mapping.emplace(5, 1000).second == false);
+}

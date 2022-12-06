@@ -91,8 +91,8 @@ auto MCRL2_UNORDERED_SET_CLASS::emplace(Args&&... args) -> std::pair<iterator, b
   if constexpr (allow_transparent)
   {
     // Compute the hash and corresponding bucket.
-    bucket_index = find_bucket_index(args...);
-    it = find_impl(bucket_index, args...);
+    bucket_index = find_bucket_index(std::forward<Args>(args)...);
+    it = find_impl(bucket_index, std::forward<Args>(args)...);
   }
   else
   {
