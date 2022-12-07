@@ -11,6 +11,8 @@
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/lts_io.h"
 
+#include "mcrl2/atermpp/standard_containers/indexed_set.h"
+
 #include <fstream>
 #include <optional>
 
@@ -100,6 +102,27 @@ static void set_initial_state(probabilistic_lts_lts_t& lts, const probabilistic_
   lts.set_initial_probabilistic_state(initial_state);
 }
 
+// The default equality checks uses a rewriter to check if probabilities are semantically equivalent, but this is unnecessary for reading LTSs.
+struct probabilistic_state_t_equals_cheap
+{
+  bool operator()(const probabilistic_lts_lts_t::probabilistic_state_t& first, const probabilistic_lts_lts_t::probabilistic_state_t& second) const
+  {
+    for (auto it = first.begin(); it != first.end(); ++it)
+    {
+      if (std::find_if(second.begin(), second.end(), 
+        [&](const auto& element)
+        {
+          return it->state() == element.state() && static_cast<data::data_expression>(it->probability()) == static_cast<data::data_expression>(element.probability());
+        }) == second.end())
+      {
+        return false;
+      }
+    }
+
+    return true;
+  } 
+};
+
 template <class LTS>
 static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
 {
@@ -139,7 +162,11 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
   std::optional<probabilistic_lts_lts_t::probabilistic_state_t> initial_state;
 
   // Ensure unique indices for the probabilistic states.
-  mcrl2::utilities::indexed_set<probabilistic_lts_lts_t::probabilistic_state_t> probabilistic_states;
+  mcrl2::utilities::indexed_set<
+    probabilistic_lts_lts_t::probabilistic_state_t,
+    false,
+    std::hash<probabilistic_lts_lts_t::probabilistic_state_t>,
+    probabilistic_state_t_equals_cheap> probabilistic_states;
 
   // Keep track of the number of states (derived from the transitions).
   std::size_t number_of_states = 1;
