@@ -136,7 +136,7 @@ struct structure_graph_builder
   index_type insert_variable(const pbes_expression& x, const pbes_expression& psi, std::size_t k, std::shared_mutex& realloc_mutex)
   {
     auto i = m_vertex_map.find(x);
-    index_type ui = i == m_vertex_map.end() ? create_vertex(x, realloc_mutex) : i->second;
+    index_type ui = i == m_vertex_map.end() ? create_vertex(x, realloc_mutex) : static_cast<unsigned int>(i->second);
     auto& u = vertex(ui);
     u.decoration = decoration(psi);
     u.rank = k;

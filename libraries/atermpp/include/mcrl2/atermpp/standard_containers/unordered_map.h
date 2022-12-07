@@ -31,16 +31,16 @@ template < class Key,
            class T,
            class Hash = std::hash<detail::reference_aterm<Key> >,
            class Pred = std::equal_to<detail::reference_aterm<Key> >,
-           class Alloc = std::allocator< std::pair<const detail::reference_aterm<Key>, T > > >
+           class Alloc = std::allocator< std::pair<const detail::reference_aterm<Key>, detail::reference_aterm<T> > > >
 
-class unordered_map : public std::unordered_map< detail::reference_aterm<Key>, T, Hash, Pred, Alloc >,
+class unordered_map : public std::unordered_map< detail::reference_aterm<Key>, detail::reference_aterm<T>, Hash, Pred, Alloc >,
                         protected detail::generic_aterm_container<
                                      std::unordered_map<detail::reference_aterm<Key>, 
-                                     T, Hash, Pred, Alloc> >
+                                     detail::reference_aterm<T>, Hash, Pred, Alloc> >
 {
 protected:
-  typedef std::unordered_map< detail::reference_aterm<Key>, T, Hash, Pred, Alloc > super;
-  typedef detail::generic_aterm_container<std::unordered_map< detail::reference_aterm<Key>, T, Hash, Pred, Alloc > > container_wrapper;
+  typedef std::unordered_map< detail::reference_aterm<Key>, detail::reference_aterm<T>, Hash, Pred, Alloc > super;
+  typedef detail::generic_aterm_container<std::unordered_map< detail::reference_aterm<Key>, detail::reference_aterm<T>, Hash, Pred, Alloc > > container_wrapper;
 
 public:
   

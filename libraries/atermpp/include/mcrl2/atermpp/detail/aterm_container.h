@@ -188,14 +188,12 @@ public:
   
   const T& operator=(const T& other) noexcept
   {
-    static_assert(std::is_base_of<aterm, T>::value);
     m_t=other;
     return m_t;
   }
 
   const T& operator=(T&& other) noexcept
   {
-    static_assert(std::is_base_of<aterm, T>::value);
     m_t = std::move(other);
     return m_t;
   }
