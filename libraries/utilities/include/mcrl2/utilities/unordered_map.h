@@ -62,8 +62,8 @@ private:
       return hash(pair.first);
     }
         
-    template<typename ...T>
-    std::size_t operator()(const key_type& key, const T&... args) const
+    template<typename ...U>
+    std::size_t operator()(const key_type& key, const U&... args) const
     {
       return hash(key);
     }
@@ -87,8 +87,8 @@ private:
       return equals(first.first, second.first);
     }
 
-    template <typename ...T>
-    bool operator()(const value_type& first, const key_type& key, const T&... args) const
+    template <typename ...U>
+    bool operator()(const value_type& first, const key_type& key, const U&... args) const
     {
       return equals(first.first, key);
     }
