@@ -87,13 +87,13 @@ public:
   {}
 
   template< class Alloc >
-  stack( const stack& other, const Alloc& /* alloc */)
-    : m_container(other.m_container)
+  stack( const stack& other, const Alloc& alloc)
+    : m_container(other.m_container, alloc)
   {}
 
   template< class Alloc >
-  stack( stack&& other, const Alloc& /* alloc */)
-    : m_container(std::move(other.m_container))
+  stack( stack&& other, const Alloc& alloc)
+    : m_container(std::move(other.m_container), alloc)
   {}
 
   template< class InputIt, class Alloc >
