@@ -19,9 +19,10 @@
 #ifndef MCRL2_LPS_STATE_PROBABILITY_PAIR_H
 #define MCRL2_LPS_STATE_PROBABILITY_PAIR_H
 
-#include "mcrl2/utilities/hash_utility.h"
 #include <cassert>
 #include <iostream>
+#include "mcrl2/utilities/hash_utility.h"
+#include "mcrl2/atermpp/aterm_appl.h"
 
 namespace mcrl2
 {
@@ -64,7 +65,18 @@ class state_probability_pair
      */
     bool operator==(const state_probability_pair& other) const
     {
-      return m_state==other.m_state && m_probability==other.m_probability;
+      if constexpr(std::is_convertible<PROBABILITY,atermpp::aterm_appl>::value)
+      {
+        // The probabilities are compared as aterms, and not based on their value, as comparing
+        // probabilities using their value is expensive as it requires an application of the rewriter. 
+        return m_state==other.m_state && 
+               static_cast<atermpp::aterm_appl>(m_probability)==static_cast<atermpp::aterm_appl>(other.m_probability);
+      }
+      else
+      {
+        static_assert(!std::is_convertible<PROBABILITY,atermpp::aterm>::value);
+        return m_state==other.m_state && m_probability==other.m_probability;
+      }
     }
 
     /// \brief Get the state from a state probability pair.
