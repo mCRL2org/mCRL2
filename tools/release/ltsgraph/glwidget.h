@@ -179,11 +179,6 @@ class GLWidget : public QOpenGLWidget
     return m_drawDebugGraphs;
   }
 
-  int getTextLimit()
-  {
-    return m_textLimit;
-  }
-
   public slots:
 
   /**
@@ -196,52 +191,53 @@ class GLWidget : public QOpenGLWidget
   void logMessage(const QOpenGLDebugMessage& debugMessage);
 
   /// Slots for various UI interactions.
-  void toggleTextLimiting(bool b)
+  void setLimitTransLabels(int a)
   {
-    m_doTextLimiting = b;
+    m_textLimitTransLabels = a;
+    m_scene.m_textLimitTransLabels = a;
   }
 
-  void textLimitChanged(const QString& text)
+  void setLimitStateLabels(int a)
   {
-    bool isNumber;
-    int num = text.toInt(&isNumber);
-    if (isNumber && num > 0)
-    {
-      m_textLimit = num;
-      mCRL2log(mcrl2::log::debug)
-          << "Text limit changed to: " << num << std::endl;
-    }
-    else
-    {
-      mCRL2log(mcrl2::log::debug) << "Text limit was not changed to: \""
-                                  << text.toStdString() << "\"" << std::endl;
-    }
+    m_textLimitStateLabels = a;
+    m_scene.m_textLimitStateLabels = a;
   }
-  
+
+  void setLimitStateNumbers(int a)
+  {
+    m_textLimitStateNumbers = a;
+    m_scene.m_textLimitStateNumbers = a;
+  }
+
   void toggleDebugDrawGraphs(bool show)
   {
     m_drawDebugGraphs = show;
   }
+
   void toggleTransitionLabels(bool show)
   {
     m_scene.setDrawTransitionLabels(show);
     update();
   }
+
   void toggleStateLabels(bool show)
   {
     m_scene.setDrawStateLabels(show);
     update();
   }
+
   void toggleStateNumbers(bool show)
   {
     m_scene.setDrawStateNumbers(show);
     update();
   }
+
   void toggleSelfLoops(bool show)
   {
     m_scene.setDrawSelfLoops(show);
     update();
   }
+
   void toggleInitialMarking(bool show)
   {
     m_scene.setDrawInitialMarking(show);
@@ -295,8 +291,9 @@ class GLWidget : public QOpenGLWidget
   bool m_drawDebugGraphs = false; ///< Drawing debug graphs can be turned on/off
                                   ///< in advanced layout dialog
 
-  int m_textLimit = 200;
-  bool m_doTextLimiting = false;
+  int m_textLimitTransLabels = 200;
+  int m_textLimitStateLabels = 200;
+  int m_textLimitStateNumbers = 200;
   std::list<GLScene::Selection>
       m_selections; ///< A list of the objects under the cursor.
 

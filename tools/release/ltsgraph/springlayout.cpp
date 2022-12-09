@@ -1596,13 +1596,6 @@ SpringLayoutUi::SpringLayoutUi(SpringLayout& layout,
 
   connect(m_ui_advanced.chk_limit_text, SIGNAL(toggled(bool)),
           &m_layout.m_glwidget, SLOT(toggleTextLimiting(bool)));
-  m_layout.m_glwidget.toggleTextLimiting(
-      m_ui_advanced.chk_limit_text->isChecked());
-
-  connect(m_ui_advanced.txt_limit_text,&QLineEdit::textChanged, &m_layout.m_glwidget,
-          &GLWidget::textLimitChanged);
-  m_ui_advanced.txt_limit_text->setText(
-      QString::number(m_layout.m_glwidget.getTextLimit()));
 
   connect(m_ui_advanced.txt_progress_threshold, &QLineEdit::textChanged, this,
           &SpringLayoutUi::onProgressThresholdChanged);

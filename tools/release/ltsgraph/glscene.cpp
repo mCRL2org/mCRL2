@@ -618,7 +618,7 @@ void GLScene::render()
   // " OpenGL: " << openglTimer.elapsed() << std::endl;
 }
 
-void GLScene::renderText(QPainter& painter, int text_limit)
+void GLScene::renderText(QPainter& painter)
 {
   if (!(m_drawstatelabels || m_drawstatenumbers || m_drawtransitionlabels))
   {
@@ -678,7 +678,12 @@ void GLScene::renderText(QPainter& painter, int text_limit)
     double closest = 10000000000000;
     double furthest = 0;
     for (std::size_t i = 0;
-         i < std::min(nodeCount, static_cast<std::size_t>(text_limit)); ++i)
+         i <
+         std::min(nodeCount, std::max(static_cast<std::size_t>(
+                                          m_textLimitStateLabels),
+                                      static_cast<std::size_t>(
+                                          m_textLimitStateNumbers)));
+         ++i)
     {
       std::size_t n =
           exploration_active ? m_graph.explorationNode(indices[i]) : indices[i];
@@ -698,18 +703,23 @@ void GLScene::renderText(QPainter& painter, int text_limit)
                                   (furthest - closest));
     };
     for (std::size_t i = 0;
-         i < std::min(nodeCount, static_cast<std::size_t>(text_limit)); ++i)
+         i <
+         std::min(nodeCount, std::max(static_cast<std::size_t>(
+                                          m_textLimitStateLabels),
+                                      static_cast<std::size_t>(
+                                         m_textLimitStateNumbers)));
+         ++i)
     {
       font.setPixelSize(getScale(indices[i]) * m_fontsize);
       painter.setFont(font);
-      if (m_drawstatenumbers)
+      if (m_drawstatenumbers && i < m_textLimitStateNumbers)
       {
         renderStateNumber(painter, exploration_active
                                        ? m_graph.explorationNode(indices[i])
                                        : indices[i]);
       }
 
-      if (m_drawstatelabels)
+      if (m_drawstatelabels && i < m_textLimitStateLabels)
       {
         renderStateLabel(painter, exploration_active
                                       ? m_graph.explorationNode(indices[i])
@@ -762,7 +772,9 @@ void GLScene::renderText(QPainter& painter, int text_limit)
     double closest = 10000000000000;
     double furthest = 0;
     for (std::size_t i = 0;
-         i < std::min(edgeCount, static_cast<std::size_t>(text_limit)); ++i)
+         i < std::min(edgeCount, static_cast<std::size_t>(
+                                     m_textLimitTransLabels));
+         ++i)
     {
       std::size_t n =
           exploration_active ? m_graph.explorationEdge(indices[i]) : indices[i];
@@ -785,7 +797,9 @@ void GLScene::renderText(QPainter& painter, int text_limit)
     if (m_drawtransitionlabels)
     {
     for (std::size_t i = 0;
-            i < std::min(edgeCount, static_cast<std::size_t>(text_limit)); ++i)
+           i < std::min(edgeCount, static_cast<std::size_t>(
+                                       m_textLimitTransLabels));
+           ++i)
     {
         font.setPixelSize(getScale(indices[i]) * m_fontsize);
         painter.setFont(font);

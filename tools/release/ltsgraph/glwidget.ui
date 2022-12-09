@@ -7,12 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>229</width>
-    <height>236</height>
+    <height>317</height>
    </rect>
   </property>
   <property name="font">
    <font>
-    <weight>75</weight>
     <bold>true</bold>
    </font>
   </property>
@@ -22,7 +21,6 @@
   <widget class="QWidget" name="dockWidgetContents">
    <property name="font">
     <font>
-     <weight>50</weight>
      <bold>false</bold>
     </font>
    </property>
@@ -71,6 +69,18 @@
       </item>
       <item>
        <widget class="QSpinBox" name="spinRadius">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>80</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="minimum">
          <number>1</number>
         </property>
@@ -95,6 +105,18 @@
       </item>
       <item>
        <widget class="QSpinBox" name="spinFontSize">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>80</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="minimum">
          <number>1</number>
         </property>
@@ -122,6 +144,18 @@
       </item>
       <item>
        <widget class="QSpinBox" name="spinFog">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>80</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="maximum">
          <number>10000</number>
         </property>
@@ -136,31 +170,91 @@
      </layout>
     </item>
     <item>
-     <widget class="QCheckBox" name="cbTransitionLabels">
-      <property name="text">
-       <string>Show transition labels</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-     </widget>
+     <layout class="QHBoxLayout" name="horizontalLayout_5">
+      <item>
+       <widget class="QCheckBox" name="cbTransitionLabels">
+        <property name="text">
+         <string>Transition labels:</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="sb_transLabels">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>80</width>
+          <height>0</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item>
-     <widget class="QCheckBox" name="cbStateLabels">
-      <property name="text">
-       <string>Show state labels</string>
-      </property>
-      <property name="checked">
-       <bool>false</bool>
-      </property>
-     </widget>
+     <layout class="QHBoxLayout" name="horizontalLayout_6">
+      <item>
+       <widget class="QCheckBox" name="cbStateLabels">
+        <property name="text">
+         <string>State labels:</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="sb_stateLabels">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>80</width>
+          <height>0</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item>
-     <widget class="QCheckBox" name="cbStateNumbers">
-      <property name="text">
-       <string>Show state numbers</string>
-      </property>
-     </widget>
+     <layout class="QHBoxLayout" name="horizontalLayout_7">
+      <item>
+       <widget class="QCheckBox" name="cbStateNumbers">
+        <property name="text">
+         <string>State numbers:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="sb_stateNumbers">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>80</width>
+          <height>0</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item>
      <widget class="QCheckBox" name="cbSelfLoops">

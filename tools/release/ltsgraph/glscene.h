@@ -142,7 +142,7 @@ class GLScene : private QOpenGLFunctions_3_3_Core
   /// \brief Render the scene, no text.
   void render();
   /// \brief Render just the text, no OpenGL.
-  void renderText(QPainter& painter, int text_limit = 9999999);
+  void renderText(QPainter& painter);
 
   /// \brief Resize the OpenGL viewport.
   void resize(std::size_t width, std::size_t height);
@@ -405,6 +405,10 @@ class GLScene : private QOpenGLFunctions_3_3_Core
   /// for text that rarely changes its layout.
   std::vector<QStaticText> m_state_labels;
   std::vector<QStaticText> m_transition_labels;
+  int m_textLimitTransLabels = 200;
+  int m_textLimitStateLabels = 200;
+  int m_textLimitStateNumbers = 200;
+  friend class GLWidget;
 };
 
 constexpr std::array<QVector3D, 4> GLScene::calculateArc(const QVector3D& from,
