@@ -138,7 +138,7 @@ class lts_aut_disk_builder: public lts_builder
       if (atermpp::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.lock();
       m_transition_count++;
       out << "(" << from << ",\"" << lps::pp(a) << "\"," << to << ")\n";
-      if (atermpp::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.lock();
+      if (atermpp::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.unlock();
     }
 
     // Add actions and states to the LTS
@@ -180,7 +180,7 @@ class lts_lts_builder: public lts_builder
       if (atermpp::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.lock();
       std::size_t label = add_action(a);
       m_lts.add_transition(transition(from, label, to));
-      if (atermpp::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.lock();
+      if (atermpp::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.unlock();
     }
 
     // Add actions and states to the LTS
@@ -256,7 +256,7 @@ class lts_lts_disk_builder: public lts_builder
     {
       if (atermpp::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.lock();
       write_transition(*stream, from, a, to);
-      if (atermpp::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.lock();
+      if (atermpp::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.unlock();
     }
 
     // Add actions and states to the LTS
