@@ -691,15 +691,17 @@ struct state_space_generator
         },
 
         // examine_transition
-        [&](const std::size_t /* thread_index*/, const lps::state& s0, std::size_t s0_index, const lps::multi_action& a, const auto& s1, const auto& s1_index, std::size_t summand_index)
+        [&](const std::size_t /* thread_index*/, const std::size_t number_of_threads, 
+            const lps::state& s0, std::size_t s0_index, const lps::multi_action& a, 
+            const auto& s1, const auto& s1_index, std::size_t summand_index)
         {
           if constexpr (Stochastic)
           {
-            builder.add_transition(s0_index, a, s1_index, s1.probabilities);
+            builder.add_transition(s0_index, a, s1_index, s1.probabilities, number_of_threads);
           }
           else
           {
-            builder.add_transition(s0_index, a, s1_index);
+            builder.add_transition(s0_index, a, s1_index, number_of_threads);
           }
           has_outgoing_transitions = true;
           if (options.detect_action)

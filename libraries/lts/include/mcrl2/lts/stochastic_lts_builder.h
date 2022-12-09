@@ -45,7 +45,7 @@ struct stochastic_lts_builder
   virtual void set_initial_state(const std::list<std::size_t>& targets, const std::vector<data::data_expression>& probabilities) = 0;
 
   // Add a transition to the LTS
-  virtual void add_transition(std::size_t from, const lps::multi_action& a, const std::list<std::size_t>& targets, const std::vector<data::data_expression>& probabilities) = 0;
+  virtual void add_transition(std::size_t from, const lps::multi_action& a, const std::list<std::size_t>& targets, const std::vector<data::data_expression>& probabilities, const std::size_t number_of_threads = 1) = 0;
 
   // Add actions and states to the LTS
   virtual void finalize(const indexed_set_for_states_type& state_map, bool timed) = 0;
@@ -62,7 +62,7 @@ class stochastic_lts_none_builder: public stochastic_lts_builder
     void set_initial_state(const std::list<std::size_t>& /* to */, const std::vector<data::data_expression>& /* probabilities */) override
     {}
 
-    void add_transition(std::size_t /* from */, const lps::multi_action& /* a */, const std::list<std::size_t>& /* targets */, const std::vector<data::data_expression>& /* probabilities */) override
+    void add_transition(std::size_t /* from */, const lps::multi_action& /* a */, const std::list<std::size_t>& /* targets */, const std::vector<data::data_expression>& /* probabilities */, const std::size_t /* number_of_threads */) override
     {}
 
     void finalize(const indexed_set_for_states_type& /* state_map */, bool /* timed */) override
@@ -119,6 +119,7 @@ class stochastic_lts_aut_builder: public stochastic_lts_builder
     std::vector<stochastic_state> m_stochastic_states;
     std::vector<transition> m_transitions;
     std::size_t m_number_of_states = 0;
+    std::mutex m_exclusive_transition_access;
 
   public:
     stochastic_lts_aut_builder() = default;
@@ -130,12 +131,14 @@ class stochastic_lts_aut_builder: public stochastic_lts_builder
     }
 
     // Add a transition to the LTS
-    void add_transition(std::size_t from, const lps::multi_action& a, const std::list<std::size_t>& targets, const std::vector<data::data_expression>& probabilities) override
+    void add_transition(std::size_t from, const lps::multi_action& a, const std::list<std::size_t>& targets, const std::vector<data::data_expression>& probabilities, const std::size_t number_of_threads) override
     {
+      if (atermpp::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.lock();
       std::size_t to = m_stochastic_states.size();
       std::size_t label = add_action(a);
       m_stochastic_states.emplace_back(targets, probabilities);
       m_transitions.emplace_back(from, label, to);
+      if (atermpp::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.unlock();
     }
 
     // Add actions and states to the LTS
@@ -190,6 +193,7 @@ class stochastic_lts_lts_builder: public stochastic_lts_builder
     probabilistic_lts_lts_t m_lts;
     bool m_discard_state_labels = false;
     probabilistic_state<std::size_t, lps::probabilistic_data_expression> m_initial_state;
+    std::mutex m_exclusive_transition_access;
 
   public:
     stochastic_lts_lts_builder(
@@ -224,12 +228,15 @@ class stochastic_lts_lts_builder: public stochastic_lts_builder
     }
 
     // Add a transition to the LTS
-    void add_transition(std::size_t from, const lps::multi_action& a, const std::list<std::size_t>& targets, const std::vector<data::data_expression>& probabilities) override
+    void add_transition(std::size_t from, const lps::multi_action& a, const std::list<std::size_t>& targets, const std::vector<data::data_expression>& probabilities, const std::size_t number_of_threads) override
     {
+      if (atermpp::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.lock();
       auto s1 = make_probabilistic_state(targets, probabilities);
       std::size_t label = add_action(a);
       std::size_t to = m_lts.add_probabilistic_state(s1);
       m_lts.add_transition(transition(from, label, to));
+      if (atermpp::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.unlock();
+
     }
 
     // Add actions and states to the LTS
