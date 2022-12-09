@@ -92,8 +92,8 @@ class SimpleAdaptiveSimulatedAnnealing
 
   // Adaptive variables
   int m_progress_threshold = 5;
-  float m_cooling_factor = 0.95f;
-  float m_heating_factor = 1 / 0.9f;
+  float m_cooling_factor = 0.98f;
+  float m_heating_factor = 1.2f;
 
   // Storage variables
   float m_prev_energy = -1;

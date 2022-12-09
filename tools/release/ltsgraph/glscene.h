@@ -179,7 +179,7 @@ class GLScene : private QOpenGLFunctions_3_3_Core
   }
   float nodeSizeScaled() const
   {
-    return nodeSize() * m_device_pixel_ratio;
+    return nodeSize();
   }
   float fontSizeScaled() const
   {
@@ -187,7 +187,7 @@ class GLScene : private QOpenGLFunctions_3_3_Core
   }
   float handleSizeScaled() const
   {
-    return handleSize * m_device_pixel_ratio;
+    return handleSize;
   }
   float arrowheadSizeScaled() const
   {

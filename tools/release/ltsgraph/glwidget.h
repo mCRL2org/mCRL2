@@ -295,7 +295,7 @@ class GLWidget : public QOpenGLWidget
   bool m_drawDebugGraphs = false; ///< Drawing debug graphs can be turned on/off
                                   ///< in advanced layout dialog
 
-  int m_textLimit = 20;
+  int m_textLimit = 200;
   bool m_doTextLimiting = false;
   std::list<GLScene::Selection>
       m_selections; ///< A list of the objects under the cursor.
