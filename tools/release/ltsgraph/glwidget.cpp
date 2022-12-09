@@ -43,6 +43,7 @@ struct MoveRecord
     if (toggleLocked)
     {
       node->set_locked(!node->locked());
+      m_graph->hasNewFrame() = true;
     }
     node->set_anchored(node->locked());
   }
@@ -217,7 +218,7 @@ void GLWidget::updateSelection()
   m_scene.setDevicePixelRatio(devicePixelRatio());
 
   // Determine the mouse position relative for the GLWidget.
-  QPoint pos = mapFromGlobal(QCursor::pos());
+  QPoint pos = mapFromGlobal(QCursor::pos()) * m_current_device_pixel_ratio;
 
   GLScene::Selection prev = m_hover;
   m_hover = m_scene.select(pos.x(), pos.y());
@@ -322,6 +323,16 @@ void GLWidget::initializeGL()
     }
     else
     {
+
+      QOpenGLContext::currentContext()->setFormat(
+          QSurfaceFormat::defaultFormat());
+      glEnable(GL_MULTISAMPLE);
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+      glEnable(GL_LINE_SMOOTH);
+      glLineWidth(2);
+      glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
       mCRL2log(mcrl2::log::verbose) << "Created an OpenGL " << version.first
                                     << "." << version.second << " context.\n";
     }
@@ -403,6 +414,7 @@ void GLWidget::paintGL()
 void GLWidget::mousePressEvent(QMouseEvent* e)
 {
   updateSelection();
+  QPoint pos = e->pos() * m_current_device_pixel_ratio;
   if (m_painting)
   {
     if (m_hover.selectionType == GLScene::SelectableObject::node)
@@ -425,7 +437,7 @@ void GLWidget::mousePressEvent(QMouseEvent* e)
   else
   {
     m_draglength = QVector2D(0.0, 0.0);
-    m_dragstart = e->pos();
+    m_dragstart = pos;
     if (e->modifiers() == Qt::ControlModifier)
     {
       if (e->button() == Qt::LeftButton)
@@ -534,9 +546,10 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
   updateSelection();
   ArcballCameraView& camera = m_scene.camera();
   m_graph.userIsDragging = m_dragmode == dm_dragnode;
+  QPoint pos = e->pos() * m_current_device_pixel_ratio;
   if (m_dragmode != dm_none)
   {
-    QPoint vec = e->pos() - m_dragstart;
+    QPoint vec = pos - m_dragstart;
     m_draglength += (QVector2D)vec;
 
     switch (m_dragmode)
@@ -561,14 +574,14 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
     case dm_rotate:
     case dm_rotate_2d:
     {
-      QQuaternion rotation = mcrl2::gui::arcballRotation(m_dragstart, e->pos());
+      QQuaternion rotation = mcrl2::gui::arcballRotation(m_dragstart, pos);
       camera.rotation(rotation * camera.rotation());
       break;
     }
     case dm_translate:
     {
-      int new_x = e->pos().x();
-      int new_y = e->pos().y();
+      int new_x = pos.x();
+      int new_y = pos.y();
       float z = camera.worldToWindow(camera.center()).z();
       QVector3D translation(
           camera.windowToWorld(QVector3D(new_x, new_y, z)) -
@@ -578,7 +591,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
     }
     case dm_dragnode:
     {
-      QVector3D position(e->pos().x(), e->pos().y(),
+      QVector3D position(pos.x(), pos.y(),
                          camera.worldToWindow(m_dragnode->pos()).z());
       m_dragnode->move(camera.windowToWorld(position));
       break;
@@ -590,7 +603,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
       break;
     }
 
-    m_dragstart = e->pos();
+    m_dragstart = pos;
     update();
     m_graph.hasNewFrame(true);
   }

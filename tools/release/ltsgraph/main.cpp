@@ -31,7 +31,6 @@ class ltsgraph_tool : public ltsgraph_base
       QSurfaceFormat surfaceFormat = QSurfaceFormat::defaultFormat();
       surfaceFormat.setVersion(3, 3);
       surfaceFormat.setProfile(QSurfaceFormat::CoreProfile);
-      surfaceFormat.setAlphaBufferSize(1);
       surfaceFormat.setStencilBufferSize(1);
       surfaceFormat.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
       surfaceFormat.setSwapInterval(1);

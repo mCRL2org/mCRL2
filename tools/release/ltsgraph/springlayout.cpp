@@ -1398,6 +1398,8 @@ void SpringLayout::setAccuracy(int v)
 void SpringLayout::setAttraction(int v)
 {
   m_attraction = lerp(v, 1, 0);
+  if (this->m_ui)
+      m_ui->m_ui.lbl_attractRepulse->setText(QString::number(1-m_attraction, 'g', 2));
   mCRL2log(mcrl2::log::verbose)
       << "Set attraction scale to: " << v
       << " corresponding to: " << m_attraction << std::endl;
@@ -1561,8 +1563,8 @@ SpringLayoutUi::SpringLayoutUi(SpringLayout& layout,
   m_ui.sldBalance->setValue(m_layout.repulsion());
   m_ui.sldHandleWeight->setValue(m_layout.controlPointWeight());
   m_ui.sldNatLength->setValue(m_layout.naturalTransitionLength());
-  m_layout.setTreeEnabled(m_ui.chkEnableTree->isChecked());
-  m_ui.chkEnableTree->setChecked(false);
+  m_layout.setTreeEnabled(m_ui_advanced.chk_enableTree->isChecked());
+  m_ui_advanced.chk_enableTree->setChecked(false);
 
   m_ui_advanced.sld_spd->setValue(m_layout.speed());
   connect(m_ui_advanced.sld_spd, SIGNAL(valueChanged(int)), this,
@@ -1588,6 +1590,9 @@ SpringLayoutUi::SpringLayoutUi(SpringLayout& layout,
           &m_layout.m_glwidget, SLOT(toggleDebugDrawGraphs(bool)));
   connect(m_ui_advanced.chk_annealing, SIGNAL(toggled(bool)), this,
           SLOT(onAnnealingToggled(bool)));
+
+  connect(m_ui_advanced.chk_enableTree, SIGNAL(toggled(bool)), this,
+          SLOT(onTreeToggled(bool)));
 
   connect(m_ui_advanced.chk_limit_text, SIGNAL(toggled(bool)),
           &m_layout.m_glwidget, SLOT(toggleTextLimiting(bool)));
@@ -1653,7 +1658,7 @@ QByteArray SpringLayoutUi::settings()
       << quint32(m_ui_advanced.cmb_attr->currentIndex())
       << quint32(m_ui_advanced.cmb_rep->currentIndex())
       << quint32(m_ui_advanced.cmb_appl->currentIndex())
-      << quint32(m_ui.chkEnableTree->isChecked());
+      << quint32(m_ui_advanced.chk_enableTree->isChecked());
   layoutRulesChanged();
   return result;
 }
@@ -1679,7 +1684,7 @@ void SpringLayoutUi::setSettings(QByteArray state)
     m_ui.sldBalance->setValue(balance);
     m_ui.sldHandleWeight->setValue(handleWeight);
     m_ui.sldNatLength->setValue(natLength);
-    m_ui.chkEnableTree->setChecked((bool)treeEnabled);
+    m_ui_advanced.chk_enableTree->setChecked((bool)treeEnabled);
     m_ui_advanced.sld_spd->setValue(speed);
     m_ui_advanced.sld_acc->setValue(accuracy);
     m_ui_advanced.cmb_attr->setCurrentIndex(attractionCalculation);

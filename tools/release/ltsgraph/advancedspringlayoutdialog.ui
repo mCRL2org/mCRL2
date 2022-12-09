@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>570</width>
-    <height>214</height>
+    <height>236</height>
    </rect>
   </property>
   <property name="contextMenuPolicy">
@@ -210,6 +210,16 @@
       </widget>
      </item>
      <item>
+      <widget class="QCheckBox" name="chk_enableTree">
+       <property name="text">
+        <string>Enable tree acceleration</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="cmd_reset_positions">
        <property name="text">
         <string>Reset layout</string>
@@ -327,6 +337,9 @@
         </widget>
        </item>
       </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_11"/>
      </item>
     </layout>
    </item>
