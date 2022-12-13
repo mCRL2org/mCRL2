@@ -35,7 +35,8 @@ template<typename Key,
          typename Hash = std::hash<Key>,
          typename KeyEqual = std::equal_to<Key>,
          typename Allocator = std::allocator<Key>,
-         bool ThreadSafe = false>
+         bool ThreadSafe = false,
+         bool Resize = true>
 class unordered_map;
 
 /// \brief A unordered_set with a subset of the interface of std::unordered_set that only stores a single pointer for each element.
@@ -66,7 +67,7 @@ private:
   using const_bucket_iterator = typename std::vector<bucket_type>::const_iterator;
   using mutex_type = std::mutex;
 
-  template<typename Key_, typename T, typename Hash_, typename KeyEqual, typename Allocator_, bool ThreadSafe_>
+  template<typename Key_, typename T, typename Hash_, typename KeyEqual, typename Allocator_, bool ThreadSafe_, bool Resize_>
   friend class unordered_map;
 
 public:
@@ -77,7 +78,7 @@ public:
   private:
     friend class unordered_set;
 
-    template<typename Key_, typename T, typename Hash_, typename KeyEqual, typename Allocator_, bool ThreadSafe_>
+    template<typename Key_, typename T, typename Hash_, typename KeyEqual, typename Allocator_, bool ThreadSafe_, bool Resize_>
     friend class unordered_map;
 
     using bucket_it = typename std::vector<Bucket>::const_iterator;
@@ -329,7 +330,7 @@ public:
   void rehash_if_needed();
 
 private:
-  template<typename Key_, typename T, typename Hash_, typename KeyEqual, typename Allocator_, bool ThreadSafe_>
+  template<typename Key_, typename T, typename Hash_, typename KeyEqual, typename Allocator_, bool ThreadSafe_, bool Resize_>
   friend class unordered_map;
 
   // Check for the existence of the is_transparent type.

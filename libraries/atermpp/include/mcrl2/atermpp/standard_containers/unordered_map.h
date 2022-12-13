@@ -143,7 +143,7 @@ public:
     return super::insert(value); 
   }
 
-  iterator insert( const_iterator hint, value_type&& value )
+  iterator insert( const_iterator hint, const value_type& value )
   {
     detail::shared_guard _;
     return super::insert(hint, value);
@@ -468,7 +468,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
       super::insert(ilist);
     }
 
-    insert_return_type insert(node_type&& nh)
+    /*insert_return_type insert(node_type&& nh)
     {
       detail::shared_guard _;
       return super::insert(nh);
@@ -478,8 +478,8 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     {
       detail::shared_guard _;
       return super::insert(hint, nh);
-    }
-
+    }*/
+    
     template <class M>
     std::pair<iterator, bool> insert_or_assign(const Key& k, M&& obj)
     {

@@ -23,7 +23,8 @@ template<typename Key,
          typename Hash,
          typename KeyEqual,
          typename Allocator,
-         bool ThreadSafe>
+         bool ThreadSafe,
+         bool Resize>
 class unordered_map
 {
 public:
@@ -94,7 +95,7 @@ private:
     }
   };
 
-  using Set = unordered_set<value_type, PairHash, PairEquals, allocator_type, ThreadSafe>;
+  using Set = unordered_set<value_type, PairHash, PairEquals, allocator_type, ThreadSafe, Resize>;
   using bucket_type = typename Set::bucket_type;
 
   Set m_set; ///< The underlying set storing <key, value> pairs.
@@ -141,12 +142,46 @@ public:
 
   /// \brief Inserts elements.
   std::pair<iterator, bool> insert(const value_type& pair) { auto[x, y] = m_set.emplace(pair); return std::make_pair(iterator(x), y); }
+  std::pair<iterator, bool> insert(const_iterator hint, const value_type& pair) { return insert(pair);  }
 
   template<typename ...Args>
   std::pair<iterator, bool> emplace(Args&&... args) { auto[x, y] = m_set.emplace(std::forward<Args>(args)...); return std::make_pair(iterator(x), y); }
 
   template<typename ...Args>
+  iterator emplace_hint(const_iterator /*hint*/, Args&&... args) { return emplace(std::forward<Args>(args)...); }
+
+  template<typename ...Args>
   std::pair<iterator, bool> try_emplace(const key_type& key, Args&&... args);
+
+  template< class... Args >
+  iterator try_emplace(const_iterator /*hint*/, const Key& k, Args&&... args) { return try_emplace(k, std::forward<Args>(args)...); }
+
+  template< class... Args >
+  iterator try_emplace(const_iterator /*hint*/, Key&& k, Args&&... args) { return try_emplace(std::forward<Key>(k), std::forward<Args>(args)...); }
+
+  template <typename M>
+  std::pair<iterator, bool> insert_or_assign(Key&& k, M&& obj)
+  {
+    auto it = find(k);
+    if (it != end())
+    {
+      *it = obj;
+      return std::make_pair(it, true);
+    }
+    else
+    {
+      return emplace(std::forward<Key>(obj), std::forward<M>(obj));
+    }
+  }
+
+  template <typename M>
+  std::pair<iterator, bool> insert_or_assign(const Key& k, M&& obj) { return insert_or_emplace(k, std::forward<M>(obj)); }
+
+  template <typename M>
+  std::pair<iterator, bool> insert_or_assign(const_iterator /* hint */, const Key& k, M&& obj) { return insert_or_emplace(k, std::forward<M>(obj)); }
+
+  template <typename M>
+  std::pair<iterator, bool> insert_or_assign(const_iterator /* hint */, Key&& k, M&& obj) { return insert_or_emplace(k, std::forward<M>(obj)); }
 
   /// \brief Erases elements.
   void erase(const key_type& key) { const_iterator it = m_set.find(key); m_set.erase(it); }
@@ -210,8 +245,9 @@ template<typename Key,
          typename Hash = std::hash<Key>,
          typename Equals = std::equal_to<Key>,
          typename Allocator = mcrl2::utilities::block_allocator<Key>,
-         bool ThreadSafe = false>
-using unordered_map_large = unordered_map<Key, T, Hash, Equals, Allocator, ThreadSafe>;
+         bool ThreadSafe = false,
+         bool Resize = true>
+using unordered_map_large = unordered_map<Key, T, Hash, Equals, Allocator, ThreadSafe, Resize>;
 
 } // namespace mcrl2::utilities
 
