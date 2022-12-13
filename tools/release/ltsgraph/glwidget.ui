@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>229</width>
-    <height>317</height>
+    <width>248</width>
+    <height>355</height>
    </rect>
   </property>
   <property name="font">
@@ -195,6 +195,9 @@
           <height>0</height>
          </size>
         </property>
+        <property name="maximum">
+         <number>9999999</number>
+        </property>
        </widget>
       </item>
      </layout>
@@ -225,6 +228,9 @@
           <height>0</height>
          </size>
         </property>
+        <property name="maximum">
+         <number>9999999</number>
+        </property>
        </widget>
       </item>
      </layout>
@@ -251,6 +257,9 @@
           <width>80</width>
           <height>0</height>
          </size>
+        </property>
+        <property name="maximum">
+         <number>9999999</number>
         </property>
        </widget>
       </item>

@@ -411,6 +411,79 @@ void GLScene::rebuild()
   }
 }
 
+void GLScene::project2D()
+{
+  m_graph.lock(GRAPH_LOCK_TRACE);
+  
+  std::vector<QVector3D> positions;
+
+  for (std::size_t i = 0; i < m_graph.nodeCount(); i++)
+  {
+    std::size_t n =
+        m_graph.hasExploration() ? m_graph.explorationNode(i) : i;
+    positions.push_back(m_graph.node(n).pos());
+  }
+  for (std::size_t i = 0; i < m_graph.edgeCount(); i++)
+  {
+    std::size_t n = m_graph.hasExploration() ? m_graph.explorationEdge(i) : i;
+    positions.push_back(m_graph.transitionLabel(n).pos());
+  }
+
+  QVector3D eye = m_camera.position();
+
+  QVector3D forward = m_camera.rotation() * QVector3D(0, 0, 1);
+
+  auto perp_distance = [&](const QVector3D& u)
+  { return QVector3D::dotProduct(u, forward); };
+  auto compare = [&](const QVector3D& u, const QVector3D& v)
+  { return perp_distance(u-eye) < perp_distance(v-eye); };
+
+  std::sort(positions.begin(), positions.end(), compare);
+
+  QVector3D relative_reference_point =
+      forward * perp_distance(positions[positions.size() / 2]); 
+  QVector3D reference_point = eye + relative_reference_point;
+  QQuaternion rotation = m_camera.rotation();
+
+  auto project = [&](const QVector3D& u)
+  {
+    QVector3D dir = (u - eye).normalized();
+    float denom = QVector3D::dotProduct(dir, forward);
+    if (std::abs(denom) < 0.0001f)
+      return u;
+    else
+    {
+      float t =
+          (QVector3D::dotProduct(relative_reference_point, forward) - QVector3D::dotProduct(forward, eye)) / denom;
+      return eye + t * dir;
+    }
+  };
+  for (std::size_t i = 0; i < m_graph.nodeCount(); i++)
+  {
+    std::size_t n = m_graph.hasExploration() ? m_graph.explorationNode(i) : i;
+    m_graph.node(n).pos_mutable() =
+        (rotation * (project(m_graph.node(n).pos())));
+    m_graph.node(n).pos_mutable().setZ(0);
+    m_graph.stateLabel(n).pos_mutable() =
+        (rotation * (project(m_graph.stateLabel(n).pos())));
+    m_graph.stateLabel(n).pos_mutable().setZ(0);
+  }
+  for (std::size_t i = 0; i < m_graph.edgeCount(); i++)
+  {
+    std::size_t n = m_graph.hasExploration() ? m_graph.explorationEdge(i) : i;
+    positions.push_back(m_graph.transitionLabel(n).pos());
+    m_graph.transitionLabel(n).pos_mutable() =
+        (rotation * (project(m_graph.node(n).pos())));
+    m_graph.transitionLabel(n).pos_mutable().setZ(0);
+    m_graph.handle(n).pos_mutable() =
+        (rotation * (project(m_graph.handle(n).pos())));
+    m_graph.handle(n).pos_mutable().setZ(0);
+  }
+
+  m_graph.unlock(GRAPH_LOCK_TRACE);
+  m_camera.reset();
+}
+
 void GLScene::render()
 {
 

@@ -616,7 +616,7 @@ void GLWidget::set3D(bool enabled)
 {
   if (!enabled)
   {
-    m_scene.camera().resetRotation();
+    m_scene.project2D();
   }
   m_is_threedimensional = enabled;
   update();
