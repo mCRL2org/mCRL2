@@ -1594,22 +1594,13 @@ SpringLayoutUi::SpringLayoutUi(SpringLayout& layout,
   connect(m_ui_advanced.chk_enableTree, SIGNAL(toggled(bool)), this,
           SLOT(onTreeToggled(bool)));
 
-  connect(m_ui_advanced.chk_limit_text, SIGNAL(toggled(bool)),
-          &m_layout.m_glwidget, SLOT(toggleTextLimiting(bool)));
-
   connect(m_ui_advanced.txt_progress_threshold, &QLineEdit::textChanged, this,
           &SpringLayoutUi::onProgressThresholdChanged);
-  m_ui_advanced.txt_progress_threshold->setText(
-      QString::number(m_layout.m_asa.getProgressThreshold()));
   connect(m_ui_advanced.txt_heating_factor, &QLineEdit::textChanged, this,
           &SpringLayoutUi::onHeatingFactorChanged);
-  m_ui_advanced.txt_heating_factor->setText(
-      QString::number(m_layout.m_asa.getHeatingFactor()));
   connect(m_ui_advanced.txt_cooling_factor, &QLineEdit::textChanged, this,
           &SpringLayoutUi::onCoolingFactorChanged);
-  m_ui_advanced.txt_cooling_factor->setText(
-      QString::number(m_layout.m_asa.getCoolingFactor()));
-
+ 
   connect(m_ui_advanced.cmd_reset_positions, &QPushButton::pressed, this,
           &SpringLayoutUi::onResetPositionsPressed);
 
@@ -1621,7 +1612,6 @@ SpringLayoutUi::SpringLayoutUi(SpringLayout& layout,
   //        SLOT(onAdvancedDialogShow(false)));
 
 
-  onTreeToggled(false);
 }
 
 SpringLayoutUi::~SpringLayoutUi()
@@ -1651,7 +1641,11 @@ QByteArray SpringLayoutUi::settings()
       << quint32(m_ui_advanced.cmb_attr->currentIndex())
       << quint32(m_ui_advanced.cmb_rep->currentIndex())
       << quint32(m_ui_advanced.cmb_appl->currentIndex())
-      << quint32(m_ui_advanced.chk_enableTree->isChecked());
+      << quint32(m_ui_advanced.chk_enableTree->isChecked())
+      << quint32(m_ui_advanced.chk_annealing->isChecked())
+      << quint32(m_layout.m_asa.getProgressThreshold())
+      << qreal(m_layout.m_asa.getCoolingFactor())
+      << qreal(m_layout.m_asa.getHeatingFactor());
   layoutRulesChanged();
   return result;
 }
@@ -1667,10 +1661,11 @@ void SpringLayoutUi::setSettings(QByteArray state)
 
   quint32 balance, speed, handleWeight, natLength, accuracy,
       attractionCalculation, repulsionCalculation, forceCalculation,
-      treeEnabled;
+      treeEnabled, annealingEnabled, progressThreshold;
+  qreal heatingFactor, coolingFactor;
   in >> balance >> speed >> handleWeight >> natLength >> accuracy >>
       attractionCalculation >> repulsionCalculation >> forceCalculation >>
-      treeEnabled;
+      treeEnabled >> annealingEnabled >> progressThreshold >> heatingFactor >> coolingFactor;
 
   if (in.status() == QDataStream::Ok)
   {
@@ -1683,6 +1678,11 @@ void SpringLayoutUi::setSettings(QByteArray state)
     m_ui_advanced.cmb_attr->setCurrentIndex(attractionCalculation);
     m_ui_advanced.cmb_rep->setCurrentIndex(repulsionCalculation);
     m_ui_advanced.cmb_appl->setCurrentIndex(forceCalculation);
+    m_ui_advanced.chk_annealing->setChecked((bool)annealingEnabled);
+    m_ui_advanced.txt_progress_threshold->setText(QString::number(progressThreshold));
+    m_ui_advanced.txt_cooling_factor->setText(
+        QString::number(coolingFactor));
+    m_ui_advanced.txt_heating_factor->setText(QString::number(heatingFactor));
   }
   layoutRulesChanged();
 }

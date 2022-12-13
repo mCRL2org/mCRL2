@@ -338,6 +338,8 @@ class GLScene : private QOpenGLFunctions_3_3_Core
   /// camera.
   QQuaternion sphericalBillboard(const QVector3D& position) const;
 
+  void project2D();
+
   QOpenGLWidget& m_glwidget; /// The widget where this scene is drawn
   Graph::Graph& m_graph;     /// The graph that is being visualised.
 
