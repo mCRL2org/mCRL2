@@ -76,10 +76,10 @@ binary_aterm_ostream::~binary_aterm_ostream()
 /// \brief Keep track of whether the term can be written to the stream.
 struct write_todo
 {
-  detail::reference_aterm<aterm_appl> term;
+  detail::reference_aterm<aterm> term;
   bool write = false;
 
-  write_todo(const aterm_appl& term)
+  write_todo(const aterm& term)
    : term(term)
   {}
 
@@ -98,7 +98,7 @@ void binary_aterm_ostream::put(const aterm& term)
   do
   {
     write_todo& current = stack.top();
-    aterm_appl transformed = m_transformer(current.term);
+    aterm_appl transformed = m_transformer(static_cast<const aterm_appl&>(static_cast<const aterm&>(current.term)));
 
     // Indicates that this term is output and not a subterm, these should always be written.
     bool is_output = stack.size() == 1;
@@ -112,7 +112,7 @@ void binary_aterm_ostream::put(const aterm& term)
           {
             // If the integer is output, write the header and just an integer
             m_stream->write_bits(static_cast<std::size_t>(packet_type::aterm_int_output), packet_bits);
-            m_stream->write_integer(reinterpret_cast<const aterm_int&>(current.term).value());
+            m_stream->write_integer(static_cast<const aterm_int&>(static_cast<const aterm&>(current.term)).value());
           }
           else
           {
@@ -121,7 +121,7 @@ void binary_aterm_ostream::put(const aterm& term)
             // Write the packet identifier of an aterm_int followed by its value.
             m_stream->write_bits(static_cast<std::size_t>(packet_type::aterm), packet_bits);
             m_stream->write_bits(symbol_index, function_symbol_index_width());
-            m_stream->write_integer(reinterpret_cast<const aterm_int&>(current.term).value());
+            m_stream->write_integer(static_cast<const aterm_int&>(static_cast<const aterm&>(current.term)).value());
           }
         }
         else
