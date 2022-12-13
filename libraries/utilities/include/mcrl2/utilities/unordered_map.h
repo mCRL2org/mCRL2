@@ -142,7 +142,8 @@ public:
 
   /// \brief Inserts elements.
   std::pair<iterator, bool> insert(const value_type& pair) { auto[x, y] = m_set.emplace(pair); return std::make_pair(iterator(x), y); }
-  std::pair<iterator, bool> insert(const_iterator /*hint*/, const value_type& pair) { return insert(pair);  }
+
+  std::pair<iterator, bool> insert(const_iterator hint, const value_type& pair) { return insert(hint, pair);  }
 
   template<typename ...Args>
   std::pair<iterator, bool> emplace(Args&&... args) { auto[x, y] = m_set.emplace(std::forward<Args>(args)...); return std::make_pair(iterator(x), y); }
