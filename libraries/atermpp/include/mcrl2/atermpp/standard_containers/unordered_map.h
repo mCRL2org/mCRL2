@@ -445,14 +445,14 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     iterator insert(const_iterator hint, value_type&& value)
     {
       detail::shared_guard _;
-      return super::insert(value);
+      return super::insert(hint, value);
     }
 
     template< class P >
     iterator insert(const_iterator hint, P&& value)
     {
       detail::shared_guard _;
-      return super::insert(value);
+      return super::insert(hint, value);
     }
 
     template< class InputIt >
@@ -498,14 +498,14 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     iterator insert_or_assign(const_iterator hint, const Key& k, M&& obj)
     {
       detail::shared_guard _;
-      return super::insert_or_assign(k, obj);
+      return super::insert_or_assign(hint, k, obj);
     }
 
     template <class M>
     iterator insert_or_assign(const_iterator hint, Key&& k, M&& obj)
     {
       detail::shared_guard _;
-      return super::insert_or_assign(k, obj);
+      return super::insert_or_assign(hint, k, obj);
     }
 
     template< class... Args >
@@ -519,7 +519,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     iterator emplace_hint(const_iterator hint, Args&&... args)
     {
       detail::shared_guard _;
-      return super::emplace(args...);
+      return super::emplace(hint, args...);
     }
 
     template< class... Args >
