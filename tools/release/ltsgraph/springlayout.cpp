@@ -13,6 +13,7 @@
 #include <QWidget>
 #include <QThread>
 #include <cstdlib>
+#include <cmath>
 
 #define DEV_DEBUG
 #ifdef DEV_DEBUG

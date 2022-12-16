@@ -87,6 +87,7 @@
     <addaction name="actOutput"/>
     <addaction name="separator"/>
     <addaction name="actFullscreen"/>
+    <addaction name="actReset"/>
    </widget>
    <widget class="QMenu" name="menu_Tools">
     <property name="title">
@@ -94,7 +95,6 @@
     </property>
     <addaction name="actExplorationMode"/>
     <addaction name="actLayout"/>
-    <addaction name="actReset"/>
     <addaction name="actionAdvancedSpringlayout"/>
    </widget>
    <addaction name="mnuFile"/>
