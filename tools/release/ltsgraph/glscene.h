@@ -268,14 +268,15 @@ class GLScene : private QOpenGLFunctions_3_3_Core
   }
   void updateDrawInstructions()
   {
-    m_drawNodeBorder.scale = 0.5f * (nodeSizeScaled() * 1.35f);
-    m_drawHalfSphere.scale = 0.5f * (nodeSizeScaled() * 0.65f);
+    m_drawNodeBorder.scale = 0.5f * (nodeSizeScaled() * 1.2f);
+    m_drawHalfSphere.scale = 0.5f * (nodeSizeScaled() * 0.8f);
     m_drawSphere.scale = 0.5f * nodeSizeScaled();
     m_drawMinusHint.scale = 0.5f * nodeSizeScaled();
     m_drawPlusHint.scale = 0.5f * nodeSizeScaled();
     m_drawHandleBody.scale = 0.5f * handleSizeScaled();
     m_drawHandleOutline.scale = 0.5f * handleSizeScaled();
   }
+  QOpenGLFramebufferObjectFormat m_fbo_format;
   QOpenGLFramebufferObject* m_fbo;
 
   private:
