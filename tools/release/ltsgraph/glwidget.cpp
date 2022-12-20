@@ -614,7 +614,7 @@ void GLWidget::rebuild()
 
 void GLWidget::set3D(bool enabled)
 {
-  if (!enabled)
+  if (!enabled && m_is_threedimensional)
   {
     m_scene.project2D();
   }

@@ -1666,7 +1666,7 @@ void SpringLayoutUi::setSettings(QByteArray state)
   qreal heatingFactor, coolingFactor;
   in >> balance >> speed >> handleWeight >> natLength >> accuracy >>
       attractionCalculation >> repulsionCalculation >> forceCalculation >>
-      treeEnabled >> annealingEnabled >> progressThreshold >> heatingFactor >> coolingFactor;
+      treeEnabled >> annealingEnabled >> progressThreshold >> coolingFactor >> heatingFactor;
 
   if (in.status() == QDataStream::Ok)
   {
