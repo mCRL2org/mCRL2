@@ -666,6 +666,7 @@ void Graph::toggleOpen(std::size_t index)
     {
       m_exploration->expand(index);
     }
+    m_forceUpdate = true;
   }
 
   unlockForWrite(m_lock, GRAPH_LOCK_TRACE);

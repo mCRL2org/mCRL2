@@ -454,6 +454,7 @@ class Graph
     const float m_stabilityThreshold = 0.000f;  ///< Used for checking whether the graph is stable. TODO: Allow user control 
     bool m_stable;                              ///< When true, the graph is considered stable, spring forces should not be applied.
     bool m_hasNewFrame = true;                  ///< Set to false when frame is rendered. Whenever new layout is applied set to true.
+    bool m_forceUpdate = false;                 ///< Some actions require forcing update -> toggleOpen for instance
     QVector3D m_clip_min;
     QVector3D m_clip_max;
 
@@ -630,6 +631,11 @@ class Graph
 
     void hasNewFrame(bool b) { m_hasNewFrame = b; }
     bool& hasNewFrame(){ return m_hasNewFrame; }
+
+    bool& hasForcedUpdate()
+    {
+      return m_forceUpdate;
+    }
 };
 }  // namespace Graph
 

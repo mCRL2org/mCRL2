@@ -788,13 +788,13 @@ template <>
 void SpringLayout::attractionAccumulation<SpringLayout::ThreadingMode::normal>(
     bool sel, std::size_t nodeCount, std::size_t edgeCount)
 {
-
+  std::vector<std::size_t> nodeLocations(m_graph.nodeCount());
   for (std::size_t i = 0; i < nodeCount; ++i)
   {
     std::size_t n = sel ? m_graph.explorationNode(i) : i;
-
-    m_nforces[n] = {0, 0, 0};
-    m_sforces[n] =
+    nodeLocations[n] = i;
+    m_nforces[i] = {0, 0, 0};
+    m_sforces[i] =
         (*m_attrFunc)(m_graph.node(n).pos(), m_graph.stateLabel(n).pos(), 0.0) *
         m_attraction;
   }
@@ -806,33 +806,35 @@ void SpringLayout::attractionAccumulation<SpringLayout::ThreadingMode::normal>(
 
     Edge e = m_graph.edge(n);
     // Variables for repulsion calculations
+    std::size_t from = e.from();
+    std::size_t to = e.to();
 
-    m_hforces[n] = QVector3D(0, 0, 0);
-    m_lforces[n] = QVector3D(0, 0, 0);
+    m_hforces[i] = QVector3D(0, 0, 0);
+    m_lforces[i] = QVector3D(0, 0, 0);
 
     if (e.is_selfloop())
     {
-      m_hforces[n] += (*m_repFunc)(m_graph.handle(n).pos(),
-                                   m_graph.node(e.from()).pos(), m_natLength) *
+      m_hforces[i] += (*m_repFunc)(m_graph.handle(n).pos(),
+                                   m_graph.node(from).pos(), m_natLength) *
                       m_repulsion;
     }
 
-    f = (*m_attrFunc)(m_graph.node(e.to()).pos(), m_graph.node(e.from()).pos(),
+    f = (*m_attrFunc)(m_graph.node(to).pos(), m_graph.node(from).pos(),
                       m_natLength) *
         m_attraction;
-    m_nforces[e.from()] += f;
-    m_nforces[e.to()] -= f;
+    m_nforces[nodeLocations[from]] += f;
+    m_nforces[nodeLocations[to]] -= f;
 
     f = (*m_attrFunc)(
-            (m_graph.node(e.to()).pos() + m_graph.node(e.from()).pos()) / 2.0,
+            (m_graph.node(to).pos() + m_graph.node(from).pos()) / 2.0,
             m_graph.handle(n).pos(), 0.0) *
         m_attraction;
-    m_hforces[n] += f;
+    m_hforces[i] += f;
 
     f = (*m_attrFunc)(m_graph.handle(n).pos(), m_graph.transitionLabel(n).pos(),
                       0.0) *
         m_attraction;
-    m_lforces[n] += f;
+    m_lforces[i] += f;
   }
 }
 
@@ -942,7 +944,7 @@ void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::quadtree>(
   for (std::size_t i = 0; i < nodeCount; ++i)
   {
     std::size_t n = sel ? m_graph.explorationNode(i) : i;
-    m_nforces[n] +=
+    m_nforces[i] +=
         approxRepulsionForce<Quadtree>(m_graph.node(n).pos(), m_node_tree2D);
   }
 
@@ -964,9 +966,9 @@ void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::quadtree>(
   for (std::size_t i = 0; i < edgeCount; ++i)
   {
     std::size_t n = sel ? m_graph.explorationEdge(i) : i;
-    m_hforces[n] += approxRepulsionForce<Quadtree>(m_graph.handle(n).pos(),
+    m_hforces[i] += approxRepulsionForce<Quadtree>(m_graph.handle(n).pos(),
                                                    m_handle_tree2D);
-    m_lforces[n] += approxRepulsionForce<Quadtree>(
+    m_lforces[i] += approxRepulsionForce<Quadtree>(
         m_graph.transitionLabel(n).pos(), m_trans_tree2D);
   }
   m_repulsion = temp;
@@ -1085,14 +1087,13 @@ void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::octree>(
   for (std::size_t i = 0; i < nodeCount; ++i)
   {
     std::size_t n = sel ? m_graph.explorationNode(i) : i;
-    m_nforces[n] +=
+    m_nforces[i] +=
         approxRepulsionForce<Octree>(m_graph.node(n).pos(), m_node_tree);
   }
 
   for (std::size_t i = 0; i < edgeCount; ++i)
   {
     std::size_t n = sel ? m_graph.explorationEdge(i) : i;
-    Edge e = m_graph.edge(n);
     m_handle_tree.insert(m_graph.handle(n).pos());
     m_trans_tree.insert(m_graph.transitionLabel(n).pos());
   }
@@ -1106,9 +1107,9 @@ void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::octree>(
   for (std::size_t i = 0; i < edgeCount; ++i)
   {
     std::size_t n = sel ? m_graph.explorationEdge(i) : i;
-    m_hforces[n] +=
+    m_hforces[i] +=
         approxRepulsionForce<Octree>(m_graph.handle(n).pos(), m_handle_tree);
-    m_lforces[n] += approxRepulsionForce<Octree>(
+    m_lforces[i] += approxRepulsionForce<Octree>(
         m_graph.transitionLabel(n).pos(), m_trans_tree);
   }
   m_repulsion = temp;
@@ -1130,8 +1131,8 @@ void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::none>(
       f = (*m_repFunc)(m_graph.node(n).pos(), m_graph.node(m).pos(),
                        m_natLength) *
           m_repulsion;
-      m_nforces[n] += f;
-      m_nforces[m] -= f;
+      m_nforces[i] += f;
+      m_nforces[j] -= f;
     }
   }
 
@@ -1147,14 +1148,14 @@ void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::none>(
       f = (*m_repFunc)(m_graph.handle(n).pos(), m_graph.handle(m).pos(),
                        m_natLength) *
           repulsion_force_control_point;
-      m_hforces[n] += f;
-      m_hforces[m] -= f;
+      m_hforces[i] += f;
+      m_hforces[j] -= f;
 
       f = (*m_repFunc)(m_graph.transitionLabel(n).pos(),
                        m_graph.transitionLabel(m).pos(), m_natLength) *
           repulsion_force_control_point;
-      m_lforces[n] += f;
-      m_lforces[m] -= f;
+      m_lforces[i] += f;
+      m_lforces[j] -= f;
     }
   }
 }
@@ -1193,19 +1194,23 @@ void SpringLayout::apply()
   assert(m_attrFunc);
   if (!m_graph.stable())
   {
-
+    m_graph.lock(GRAPH_LOCK_TRACE); // enter critical section
+    if (m_graph.hasForcedUpdate())
+    {
+      m_graph.hasForcedUpdate() = false;
+      m_asa.reset();
+    }
     bool sel = m_graph.hasExploration();
     std::size_t nodeCount =
         sel ? m_graph.explorationNodeCount() : m_graph.nodeCount();
     std::size_t edgeCount =
         sel ? m_graph.explorationEdgeCount() : m_graph.edgeCount();
 
-    m_graph.lock(GRAPH_LOCK_TRACE); // enter critical section
 
-    m_nforces.resize(m_graph.nodeCount()); // Todo: compact this
-    m_hforces.resize(m_graph.edgeCount());
-    m_lforces.resize(m_graph.edgeCount());
-    m_sforces.resize(m_graph.nodeCount());
+    m_nforces.resize(nodeCount); // Todo: compact this
+    m_sforces.resize(nodeCount);
+    m_hforces.resize(edgeCount);
+    m_lforces.resize(edgeCount);
     if (m_tree_enabled)
     {
       bool is_2D =
@@ -1239,8 +1244,8 @@ void SpringLayout::apply()
 
       if (!m_graph.node(n).anchored())
       {
-        (*m_applFunc)(m_graph.node(n).pos_mutable(), m_nforces[n], use_speed);
-        nodeSumForces += m_nforces[n].lengthSquared();
+        (*m_applFunc)(m_graph.node(n).pos_mutable(), m_nforces[i], use_speed);
+        nodeSumForces += m_nforces[i].lengthSquared();
         clipVector(m_graph.node(n).pos_mutable(), clipmin, clipmax);
       }
       else
@@ -1287,10 +1292,10 @@ void SpringLayout::apply()
 
       if (!m_graph.stateLabel(n).anchored())
       {
-        (*m_applFunc)(m_graph.stateLabel(n).pos_mutable(), m_sforces[n],
+        (*m_applFunc)(m_graph.stateLabel(n).pos_mutable(), m_sforces[i],
                       use_speed);
         m_graph.stateLabel(n).pos_mutable() -= center_of_mass;
-        nodeSumForces += m_sforces[n].lengthSquared();
+        nodeSumForces += m_sforces[i].lengthSquared();
         clipVector(m_graph.stateLabel(n).pos_mutable(), clipmin, clipmax);
       }
     }
@@ -1299,23 +1304,19 @@ void SpringLayout::apply()
     {
       std::size_t n = sel ? m_graph.explorationEdge(i) : i;
 
-      // only use exploration edges once
-      if (n != i)
-        continue;
-
       if (!m_graph.handle(n).anchored())
       {
-        (*m_applFunc)(m_graph.handle(n).pos_mutable(), m_hforces[n], use_speed);
+        (*m_applFunc)(m_graph.handle(n).pos_mutable(), m_hforces[i], use_speed);
         m_graph.handle(n).pos_mutable() -= center_of_mass;
-        edgeSumForces += m_hforces[n].lengthSquared();
+        edgeSumForces += m_hforces[i].lengthSquared();
         clipVector(m_graph.handle(n).pos_mutable(), clipmin, clipmax);
       }
       if (!m_graph.transitionLabel(n).anchored())
       {
-        (*m_applFunc)(m_graph.transitionLabel(n).pos_mutable(), m_lforces[n],
+        (*m_applFunc)(m_graph.transitionLabel(n).pos_mutable(), m_lforces[i],
                       use_speed);
         m_graph.transitionLabel(n).pos_mutable() -= center_of_mass;
-        edgeSumForces += m_lforces[n].lengthSquared();
+        edgeSumForces += m_lforces[i].lengthSquared();
         clipVector(m_graph.transitionLabel(n).pos_mutable(), clipmin, clipmax);
       }
     }
@@ -1361,8 +1362,16 @@ void SpringLayout::apply()
 void SpringLayout::randomizeZ(float z)
 {
   m_graph.lock(GRAPH_LOCK_TRACE);
-  for (std::size_t n = 0; n < m_graph.nodeCount(); ++n)
+  bool exploration = m_graph.hasExploration();
+  std::size_t nodeCount = exploration
+                              ? m_graph.explorationNodeCount()
+                              : m_graph.nodeCount();
+  std::size_t edgeCount = exploration
+                              ? m_graph.explorationEdgeCount()
+                              : m_graph.edgeCount();
+  for (std::size_t i = 0; i < nodeCount; ++i)
   {
+    std::size_t n = exploration ? m_graph.explorationNode(i) : i;
     if (!m_graph.node(n).anchored())
     {
       float z_offset = fast_frand(-z, z);
@@ -1374,12 +1383,13 @@ void SpringLayout::randomizeZ(float z)
   }
   for (std::size_t i = 0; i < m_graph.edgeCount(); ++i)
   {
-    if (!m_graph.transitionLabel(i).anchored())
+    std::size_t n = exploration ? m_graph.explorationEdge(i) : i;
+    if (!m_graph.transitionLabel(n).anchored())
     {
-      m_graph.transitionLabel(i).pos_mutable() =
-          0.5 * (m_graph.node(m_graph.edge(i).from()).pos() +
-                 m_graph.node(m_graph.edge(i).to()).pos());
-      m_graph.handle(i).pos_mutable() = m_graph.transitionLabel(i).pos();
+      m_graph.transitionLabel(n).pos_mutable() =
+          0.5 * (m_graph.node(m_graph.edge(n).from()).pos() +
+                 m_graph.node(m_graph.edge(n).to()).pos());
+      m_graph.handle(n).pos_mutable() = m_graph.transitionLabel(n).pos();
     }
   }
   m_asa.reset();
