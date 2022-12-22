@@ -21,6 +21,7 @@ add_mcrl2_tool(ltsgraph
     shaders.cpp
     layoututility.cpp
     springlayout.cpp
+    settingsmanager.cpp
     springlayout.ui
     advancedspringlayoutdialog.ui
   DEPENDS

@@ -347,6 +347,8 @@ class GLWidgetUi : public QDockWidget
    * @brief Restore the settings of the given state.
    */
   void setSettings(QByteArray state);
+
+  friend class GLWidget;
 };
 
 #endif // MCRL2_LTSGRAPH_GLWIDGET_H

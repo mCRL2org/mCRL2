@@ -623,7 +623,7 @@ void GLScene::render()
   m_vaoArrow.bind();
 
   m_arrow_shader.setVP(viewProjMatrix);
-  m_arrow_shader.setScale(arrowheadSizeScaled() / m_device_pixel_ratio);
+  m_arrow_shader.setScale(arrowheadSizeScaled());
   if (m_drawArrowOffsets.size() > 0)
   {
     std::size_t amount_to_render = m_drawArc.size();

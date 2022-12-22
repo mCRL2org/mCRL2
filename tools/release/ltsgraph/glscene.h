@@ -191,7 +191,7 @@ class GLScene : private QOpenGLFunctions_3_3_Core
   }
   float arrowheadSizeScaled() const
   {
-    return 0.1f * nodeSizeScaled() * arrowheadSize;
+    return 0.05f * nodeSizeScaled() * arrowheadSize;
   }
 
   /// \brief Computes how long the world vector (length, 0, 0) at pos is when
