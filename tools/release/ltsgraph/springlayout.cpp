@@ -9,6 +9,7 @@
 
 #include "springlayout.h"
 #include "utility.h"
+#include "settingsmanager.h"
 
 #include <QWidget>
 #include <QThread>
@@ -542,6 +543,9 @@ SpringLayout::SpringLayout(Graph& graph, GLWidget& glwidget)
       &m_annealing_temperature;
   applFuncMap[ForceApplication::force_cumulative_appl]->temperature =
       &m_annealing_temperature;
+
+
+
 }
 
 SpringLayout::~SpringLayout()
@@ -554,8 +558,40 @@ SpringLayoutUi* SpringLayout::ui(QAction* advancedDialogAction, CustomQWidget* a
   if (m_ui == nullptr)
   {
     m_ui = new SpringLayoutUi(*this, advancedWidget, parent);
-    // m_ui->m_ui.dispSpeed->setText(QString::number(m_speed, 'g', 3));
-    // m_ui->m_ui.dispAccuracy->setText(QString::number(m_accuracy, 'g', 3));
+
+    SettingsManager::addSettings("SpringLayoutUi");
+    Settings* settings = SettingsManager::getSettings("SpringLayoutUi");
+    Ui::AdvancedSpringLayoutDialog& advanced_ui = m_ui->m_ui_advanced;
+    Ui::DockWidgetLayout& ui = m_ui->m_ui;
+    settings->registerVar(ui.sldBalance, unlerp(0.5f, 0, 1));
+    settings->registerVar(ui.sldHandleWeight, unlerp(0.1, m_min_controlPointWeight, m_max_controlPointWeight));
+    settings->registerVar(ui.sldNatLength, unlerp(20, m_min_natLength, m_max_natLength));
+
+    settings->registerVar(advanced_ui.sld_acc,
+                          unlerp(1.2f, m_min_accuracy, m_max_accuracy), true);
+    settings->registerVar(advanced_ui.sld_spd,
+                          unlerp(m_speed_inverse_scale_func(1.0f),
+                                 m_speed_inverse_scale_func(m_min_speed),
+                                 m_speed_inverse_scale_func(m_max_speed)),
+                          true);
+
+    settings->registerVar(advanced_ui.chk_annealing, true, true);
+    settings->registerVar(advanced_ui.chk_debugDraw, false, true);
+    settings->registerVar(advanced_ui.chk_enableTree, true, true);
+
+    settings->registerVar(advanced_ui.cmb_appl, (int)ForceApplication::force_directed_appl,
+                          true);
+    settings->registerVar(advanced_ui.cmb_attr,
+                          (int)AttractionCalculation::ltsgraph_attr, true);
+    settings->registerVar(advanced_ui.cmb_rep,
+                          (int)RepulsionCalculation::ltsgraph_rep, true);
+
+    settings->registerVar(advanced_ui.txt_cooling_factor, QString::number(0.98),
+                          true);
+    settings->registerVar(advanced_ui.txt_heating_factor, QString::number(1.2), true);
+    settings->registerVar(advanced_ui.txt_progress_threshold, QString::number(5),
+                          true);
+
     m_ui->m_ui.dispHandleWeight->setText(
         QString::number(m_controlPointWeight, 'g', 3));
     m_ui->m_ui.dispNatLength->setText(QString::number(m_natLength, 'g', 3));
@@ -1631,60 +1667,13 @@ void SpringLayoutUi::layoutRulesChanged()
 
 QByteArray SpringLayoutUi::settings()
 {
-  QByteArray result;
-  QDataStream out(&result, QIODevice::WriteOnly);
-
-  out << quint32(m_ui.sldBalance->value())
-      << quint32(m_ui_advanced.sld_spd->value())
-      << quint32(m_ui.sldHandleWeight->value())
-      << quint32(m_ui.sldNatLength->value())
-      << quint32(m_ui_advanced.sld_acc->value())
-      << quint32(m_ui_advanced.cmb_attr->currentIndex())
-      << quint32(m_ui_advanced.cmb_rep->currentIndex())
-      << quint32(m_ui_advanced.cmb_appl->currentIndex())
-      << quint32(m_ui_advanced.chk_enableTree->isChecked())
-      << quint32(m_ui_advanced.chk_annealing->isChecked())
-      << quint32(m_layout.m_asa.getProgressThreshold())
-      << qreal(m_layout.m_asa.getCoolingFactor())
-      << qreal(m_layout.m_asa.getHeatingFactor());
-  layoutRulesChanged();
-  return result;
+  return SettingsManager::getSettings("SpringLayoutUi")->save();
 }
+
 
 void SpringLayoutUi::setSettings(QByteArray state)
 {
-  if (state.isEmpty())
-  {
-    return;
-  }
-
-  QDataStream in(&state, QIODevice::ReadOnly);
-
-  quint32 balance, speed, handleWeight, natLength, accuracy,
-      attractionCalculation, repulsionCalculation, forceCalculation,
-      treeEnabled, annealingEnabled, progressThreshold;
-  qreal heatingFactor, coolingFactor;
-  in >> balance >> speed >> handleWeight >> natLength >> accuracy >>
-      attractionCalculation >> repulsionCalculation >> forceCalculation >>
-      treeEnabled >> annealingEnabled >> progressThreshold >> coolingFactor >> heatingFactor;
-
-  if (in.status() == QDataStream::Ok)
-  {
-    m_ui.sldBalance->setValue(balance);
-    m_ui.sldHandleWeight->setValue(handleWeight);
-    m_ui.sldNatLength->setValue(natLength);
-    m_ui_advanced.chk_enableTree->setChecked((bool)treeEnabled);
-    m_ui_advanced.sld_spd->setValue(speed);
-    m_ui_advanced.sld_acc->setValue(accuracy);
-    m_ui_advanced.cmb_attr->setCurrentIndex(attractionCalculation);
-    m_ui_advanced.cmb_rep->setCurrentIndex(repulsionCalculation);
-    m_ui_advanced.cmb_appl->setCurrentIndex(forceCalculation);
-    m_ui_advanced.chk_annealing->setChecked((bool)annealingEnabled);
-    m_ui_advanced.txt_progress_threshold->setText(QString::number(progressThreshold));
-    m_ui_advanced.txt_cooling_factor->setText(
-        QString::number(coolingFactor));
-    m_ui_advanced.txt_heating_factor->setText(QString::number(heatingFactor));
-  }
+  SettingsManager::getSettings("SpringLayoutUi")->load(state);
   layoutRulesChanged();
 }
 

@@ -14,6 +14,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/gui/arcball.h"
+#include "settingsmanager.h"
 
 /// \brief Minimum distance for a drag to be registered (pixels)
 constexpr float DRAG_MIN_DIST = 20.0f;
@@ -673,6 +674,22 @@ GLWidgetUi* GLWidget::ui(QWidget* parent)
   if (m_ui == nullptr)
   {
     m_ui = new GLWidgetUi(*this, parent);
+    SettingsManager::addSettings("GLWidgetUi");
+    Settings* settings = SettingsManager::getSettings("GLWidgetUi");
+    Ui::GLWidget& ui_ref = m_ui->m_ui;
+    settings->registerVar(ui_ref.spinRadius, 10);
+    settings->registerVar(ui_ref.spinFog, 10000);
+    settings->registerVar(ui_ref.spinFontSize, 10);
+    settings->registerVar(ui_ref.sb_transLabels, 100);
+    settings->registerVar(ui_ref.sb_stateLabels, 100);
+    settings->registerVar(ui_ref.sb_stateNumbers, 100);
+    settings->registerVar(ui_ref.cbFog, true);
+    settings->registerVar(ui_ref.cbInitial, true);
+    settings->registerVar(ui_ref.cbSelfLoops, true);
+    settings->registerVar(ui_ref.cbStateLabels, true);
+    settings->registerVar(ui_ref.cbStateNumbers, true);
+    settings->registerVar(ui_ref.cbTransitionLabels, true);
+    settings->registerVar(ui_ref.cbSelfLoops, true);
   }
   return m_ui;
 }
@@ -713,7 +730,7 @@ GLWidgetUi::GLWidgetUi(GLWidget& widget, QWidget* parent)
           SLOT(setLimitTransLabels(int)));
   connect(m_ui.sb_stateLabels, SIGNAL(valueChanged(int)), &m_widget,
           SLOT(setLimitStateLabels(int)));
-  connect(m_ui.cbStateNumbers, SIGNAL(valueChanged(int)), &m_widget,
+  connect(m_ui.sb_stateNumbers, SIGNAL(valueChanged(int)), &m_widget,
           SLOT(setLimitStateNumbers(int)));
 }
 
@@ -745,60 +762,10 @@ void GLWidgetUi::setPaintMode(bool paint)
 
 void GLWidgetUi::setSettings(QByteArray state)
 {
-  if (state.isEmpty())
-  {
-    return;
-  }
-  QDataStream in(&state, QIODevice::ReadOnly);
-
-  quint32 nodeSize, fogDistance, fontSize, textLimTrans, textLimStateLabel, textLimStateNum;
-  bool paint, transitionLabels, stateLabels, stateNumbers, selfLoops, initial,
-      fog;
-  QVector3D colorVec;
-  in >> nodeSize >> fogDistance >> fontSize >> paint >> transitionLabels >>
-      stateLabels >> stateNumbers >> selfLoops >> initial >> fog >> colorVec >> 
-      textLimTrans >> textLimStateLabel >> textLimStateNum;
-
-  if (in.status() == QDataStream::Ok)
-  {
-    m_ui.spinRadius->setValue(nodeSize);
-    m_ui.spinFog->setValue(fogDistance);
-    m_ui.spinFontSize->setValue(fontSize);
-    m_ui.sb_transLabels->setValue(textLimTrans);
-    m_ui.sb_stateLabels->setValue(textLimStateLabel);
-    m_ui.sb_stateNumbers->setValue(textLimStateNum);
-    // Do not restore the setting of btnPaint, since that can be very confusing.
-    // We still read and store it for compatibility with old config files
-    // When the format of the config file is changed, the setting for btnPaint
-    // can be removed.
-    m_ui.cbTransitionLabels->setChecked(transitionLabels);
-    m_ui.cbStateLabels->setChecked(stateLabels);
-    m_ui.cbStateNumbers->setChecked(stateNumbers);
-    m_ui.cbSelfLoops->setChecked(selfLoops);
-    m_ui.cbInitial->setChecked(initial);
-    m_ui.cbFog->setChecked(fog);
-    QColor color;
-    color.setRgbF(colorVec.x(), colorVec.y(), colorVec.z());
-    m_colordialog->setCurrentColor(color);
-    selectColor(color);
-  }
+  SettingsManager::getSettings("GLWidgetUi")->load(state);
 }
 
 QByteArray GLWidgetUi::settings()
 {
-  QByteArray result;
-  QDataStream out(&result, QIODevice::WriteOnly);
-
-  out << quint32(m_ui.spinRadius->value()) << quint32(m_ui.spinFog->value())
-      << quint32(m_ui.spinFontSize->value()) << bool(m_ui.btnPaint->isChecked())
-      << bool(m_ui.cbTransitionLabels->isChecked())
-      << bool(m_ui.cbStateLabels->isChecked())
-      << bool(m_ui.cbStateNumbers->isChecked())
-      << bool(m_ui.cbSelfLoops->isChecked())
-      << bool(m_ui.cbInitial->isChecked()) << bool(m_ui.cbFog->isChecked())
-      << QVector3D(m_widget.getPaint()) << quint32(m_ui.sb_transLabels->value())
-      << quint32(m_ui.sb_stateLabels->value())
-      << quint32(m_ui.sb_stateNumbers->value());
-
-  return result;
+  return SettingsManager::getSettings("GLWidgetUi")->save();
 }
