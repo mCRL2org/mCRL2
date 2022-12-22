@@ -152,25 +152,7 @@ void MainWindow::on3DChanged(bool enabled)
 
   if(enabled)
   {
-    bool all_z_zero = true;
-    float min_x = INFINITY;
-    float max_x = -INFINITY;
-    float min_y = INFINITY;
-    float max_y = -INFINITY;
-    for (std::size_t i = 0; all_z_zero && i < m_graph.nodeCount(); i++)
-    {
-      all_z_zero &= std::abs(m_graph.node(i).pos().z()) < 1.0f;
-      min_x = std::min(min_x, m_graph.node(i).pos().x());
-      max_x = std::max(max_x, m_graph.node(i).pos().x());
-      min_y = std::min(min_y, m_graph.node(i).pos().y());
-      max_y = std::max(max_y, m_graph.node(i).pos().y());
-    }
-    if (all_z_zero)
-    {
-      // If all nodes are in the same plane, slightly shift them to speed-up
-      // automatic layouting
-      m_layout->randomizeZ(0.1f*std::sqrt((max_x-min_x)*(max_x-min_x)+(max_y-min_y)*(max_y-min_y)));
-    }
+    m_graph.scrambleZ() = true;
   }
 }
 

@@ -455,6 +455,8 @@ class Graph
     bool m_stable;                              ///< When true, the graph is considered stable, spring forces should not be applied.
     bool m_hasNewFrame = true;                  ///< Set to false when frame is rendered. Whenever new layout is applied set to true.
     bool m_forceUpdate = false;                 ///< Some actions require forcing update -> toggleOpen for instance
+    bool m_resetPositions = false;              ///< Resets all positions on the next worker iteration
+    bool m_scrambleZPositions = false;          ///< Scrambles Z-positions on the next worker iteration
     QVector3D m_clip_min;
     QVector3D m_clip_max;
 
@@ -635,6 +637,16 @@ class Graph
     bool& hasForcedUpdate()
     {
       return m_forceUpdate;
+    }
+
+    bool& resetPositions()
+    {
+      return m_resetPositions;
+    }
+
+    bool& scrambleZ()
+    {
+      return m_scrambleZPositions;
     }
 };
 }  // namespace Graph

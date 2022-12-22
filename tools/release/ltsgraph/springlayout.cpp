@@ -1200,6 +1200,29 @@ void SpringLayout::apply()
       m_graph.hasForcedUpdate() = false;
       m_asa.reset();
     }
+    if (m_graph.scrambleZ())
+    {
+      m_graph.scrambleZ() = false;
+      float min_x = INFINITY;
+      float max_x = -INFINITY;
+      float min_y = INFINITY;
+      float max_y = -INFINITY;
+      for (std::size_t i = 0; i < m_graph.nodeCount(); i++)
+      {
+        min_x = std::min(min_x, m_graph.node(i).pos().x());
+        max_x = std::max(max_x, m_graph.node(i).pos().x());
+        min_y = std::min(min_y, m_graph.node(i).pos().y());
+        max_y = std::max(max_y, m_graph.node(i).pos().y());
+      }
+      randomizeZ(0.1f * std::sqrt((max_x - min_x) * (max_x - min_x) +
+                                  (max_y - min_y) * (max_y - min_y)));
+      
+    }
+    if (m_graph.resetPositions())
+    {
+      m_graph.resetPositions() = false;
+      resetPositions();
+    }
     bool sel = m_graph.hasExploration();
     std::size_t nodeCount =
         sel ? m_graph.explorationNodeCount() : m_graph.nodeCount();
@@ -1207,10 +1230,14 @@ void SpringLayout::apply()
         sel ? m_graph.explorationEdgeCount() : m_graph.edgeCount();
 
 
-    m_nforces.resize(nodeCount); // Todo: compact this
+    m_nforces.resize(nodeCount);
     m_sforces.resize(nodeCount);
     m_hforces.resize(edgeCount);
     m_lforces.resize(edgeCount);
+    std::fill(m_nforces.begin(), m_nforces.end(), QVector3D(0, 0, 0));
+    std::fill(m_sforces.begin(), m_sforces.end(), QVector3D(0, 0, 0));
+    std::fill(m_hforces.begin(), m_hforces.end(), QVector3D(0, 0, 0));
+    std::fill(m_lforces.begin(), m_lforces.end(), QVector3D(0, 0, 0));
     if (m_tree_enabled)
     {
       bool is_2D =
@@ -1497,23 +1524,32 @@ void SpringLayout::resetPositions()
 {
   mCRL2log(mcrl2::log::debug) << "Resetting positions" << std::endl;
   m_graph.lock(GRAPH_LOCK_TRACE);
-  std::size_t n_nodes = m_graph.nodeCount();
-  std::size_t n_edges = m_graph.edgeCount();
+  bool exploration = m_graph.hasExploration();
+  std::size_t n_nodes = exploration ? m_graph.explorationNodeCount() : m_graph.nodeCount();
+  std::size_t n_edges = exploration ? m_graph.explorationEdgeCount() : m_graph.edgeCount();
   bool is3D = m_glwidget.get3D();
   float hwidth = 5*std::powf(m_natLength*n_nodes, 1.0f / (is3D ? 3 : 2));
   for (std::size_t i = 0; i < n_nodes; i++)
   {
-    m_graph.node(i).set_anchored(false);
-    m_graph.node(i).pos_mutable().setX(frand(-hwidth, hwidth));
-    m_graph.node(i).pos_mutable().setY(frand(-hwidth, hwidth));
-    m_graph.node(i).pos_mutable().setZ(is3D ? frand(-hwidth, hwidth) : 0);
-    m_graph.stateLabel(i).pos_mutable() = m_graph.node(i).pos();
+    std::size_t n = exploration ? m_graph.explorationNode(i) : i;
+    if (!m_graph.node(n).anchored())
+    {
+      m_graph.node(n).pos_mutable().setX(frand(-hwidth, hwidth));
+      m_graph.node(n).pos_mutable().setY(frand(-hwidth, hwidth));
+      m_graph.node(n).pos_mutable().setZ(is3D ? frand(-hwidth, hwidth) : 0);
+      m_graph.stateLabel(n).pos_mutable() = m_graph.node(n).pos();
+    }
   }
   for (std::size_t i = 0; i < n_edges; i++)
   {
-    m_graph.transitionLabel(i).set_anchored(false);
-    m_graph.transitionLabel(i).pos_mutable() = 0.5 * (m_graph.node(m_graph.edge(i).from()).pos() + m_graph.node(m_graph.edge(i).to()).pos());
-    m_graph.handle(i).pos_mutable() = m_graph.transitionLabel(i).pos();
+    std::size_t n = exploration ? m_graph.explorationEdge(i) : i;
+    if (!m_graph.transitionLabel(n).anchored())
+    {
+      m_graph.transitionLabel(n).pos_mutable() =
+          0.5 * (m_graph.node(m_graph.edge(n).from()).pos() +
+                 m_graph.node(m_graph.edge(n).to()).pos());
+      m_graph.handle(n).pos_mutable() = m_graph.transitionLabel(n).pos();
+    }
   }
   m_graph.hasNewFrame(true);
   m_graph.setStable(false);
@@ -1530,7 +1566,7 @@ class WorkerThread : public QThread
   private:
   bool m_stopped;
   SpringLayout& m_layout;
-  int m_counter;
+  int m_counter = 0;
 #ifdef DEV_DEBUG
   // By default log ever second
   const int m_debug_log_interval = 1000;
@@ -1577,7 +1613,7 @@ class WorkerThread : public QThread
       mCRL2log(mcrl2::log::debug)
           << "Worker thread performed " << m_counter << " cycles in " << elapsed
           << "ms. ASA temperature: " << m_layout.m_asa.T;
-      if (m_counter / (float)elapsed > 50)
+      if ((float)elapsed / m_counter > m_debug_max_cycle_time)
         mCRL2log(mcrl2::log::debug)
             << " - NB: This is longer than the set expected maximum "
             << m_debug_max_cycle_time << "ms per cycle. ";

@@ -43,7 +43,7 @@ struct ApplicationFunction;
 class SimpleAdaptiveSimulatedAnnealing
 {
   public:
-  float T;
+  float T = 1.0f;
   bool calculateTemperature(float new_energy);
   void reset();
     

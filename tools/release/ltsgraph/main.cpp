@@ -30,9 +30,9 @@ class ltsgraph_tool : public ltsgraph_base
       // Create an OpenGL 3.3 surface without depth, alpha and stencil buffers and with vsync enabled.
       QSurfaceFormat surfaceFormat = QSurfaceFormat::defaultFormat();
       surfaceFormat.setVersion(3, 3);
-      surfaceFormat.setProfile(QSurfaceFormat::CoreProfile);
+      //surfaceFormat.setProfile(QSurfaceFormat::CoreProfile);
       surfaceFormat.setStencilBufferSize(1);
-      surfaceFormat.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+      //surfaceFormat.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
       surfaceFormat.setSwapInterval(1);
 
       // Enable a surface with multisampling.
