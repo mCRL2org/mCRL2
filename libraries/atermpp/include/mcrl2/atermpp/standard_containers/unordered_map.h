@@ -130,6 +130,25 @@ public:
     super::clear();
   }
 
+  /// \brief Standard find function in a map.
+  /// \returns Element with the specified key.
+  template<typename ...Args>
+  iterator find(const Args&... args)
+  { 
+    detail::shared_guard _;
+    return super::find(args...); 
+  }
+
+  /// \brief Standard find function in a map.
+  /// \returns Element with the specified key.
+  template<typename ...Args>
+  const_iterator find(const Args&... args) const 
+  { 
+    detail::shared_guard _;
+    return super::find(args...); 
+  }
+
+  /// \brief Inserts an element referring to a default value in the map. 
   std::pair<iterator,bool> insert( const value_type& value )
   {
     detail::shared_guard _;
@@ -330,16 +349,17 @@ template < class Key,
   class Hash = std::hash<detail::reference_aterm<Key> >,
   class Pred = std::equal_to<detail::reference_aterm<Key> >,
   class Alloc = std::allocator< std::pair<const detail::reference_aterm<Key>, detail::reference_aterm<T> > >,
-  bool ThreadSafe = false>
+  bool ThreadSafe = false >
 
-class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_aterm<Key>, detail::reference_aterm<T>, Hash, Pred, Alloc, ThreadSafe >,
-    protected detail::generic_aterm_container<
-    mcrl2::utilities::unordered_map<detail::reference_aterm<Key>,
-    detail::reference_aterm<T>, Hash, Pred, Alloc> >
-  {
+class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_aterm<Key>, 
+                                                              detail::reference_aterm<T>, Hash, Pred, Alloc, ThreadSafe, false >,
+                      protected detail::generic_aterm_container< mcrl2::utilities::unordered_map<detail::reference_aterm<Key>,
+                                                                                                 detail::reference_aterm<T>, 
+                                                                                                 Hash, Pred, Alloc, ThreadSafe, false > >
+{
   protected:
-    typedef mcrl2::utilities::unordered_map< detail::reference_aterm<Key>, detail::reference_aterm<T>, Hash, Pred, Alloc, ThreadSafe > super;
-    typedef detail::generic_aterm_container<mcrl2::utilities::unordered_map< detail::reference_aterm<Key>, detail::reference_aterm<T>, Hash, Pred, Alloc, ThreadSafe> > container_wrapper;
+    typedef mcrl2::utilities::unordered_map< detail::reference_aterm<Key>, detail::reference_aterm<T>, Hash, Pred, Alloc, ThreadSafe, false > super;
+    typedef detail::generic_aterm_container<mcrl2::utilities::unordered_map< detail::reference_aterm<Key>, detail::reference_aterm<T>, Hash, Pred, Alloc, ThreadSafe, false > > container_wrapper;
 
   public:
 
@@ -347,11 +367,9 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     typedef typename super::allocator_type allocator_type;
     typedef typename super::value_type value_type;
     typedef typename super::size_type size_type;
-    typedef typename super::node_type node_type;
     typedef typename super::reference reference;
     typedef typename super::iterator iterator;
     typedef typename super::const_iterator const_iterator;
-    typedef typename super::insert_return_type insert_return_type;
 
     /// \brief Default constructor.
     unordered_map()
@@ -431,6 +449,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
 
     std::pair<iterator, bool> insert(const value_type& value)
     {
+      rehash_if_needed();
       detail::shared_guard _;
       return super::insert(value);
     }
@@ -438,12 +457,14 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     template< class P >
     std::pair<iterator, bool> insert(P&& value)
     {
+      rehash_if_needed();
       detail::shared_guard _;
       return super::insert(value);
     }
 
     iterator insert(const_iterator hint, value_type&& value)
     {
+      rehash_if_needed();
       detail::shared_guard _;
       return super::insert(hint, value);
     }
@@ -451,6 +472,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     template< class P >
     iterator insert(const_iterator hint, P&& value)
     {
+      rehash_if_needed();
       detail::shared_guard _;
       return super::insert(hint, value);
     }
@@ -458,12 +480,14 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     template< class InputIt >
     void insert(InputIt first, InputIt last)
     {
+      rehash_if_needed();
       detail::shared_guard _;
       super::insert(first, last);
     }
 
     void insert(std::initializer_list<value_type> ilist)
     {
+      rehash_if_needed();
       detail::shared_guard _;
       super::insert(ilist);
     }
@@ -483,6 +507,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     template <class M>
     std::pair<iterator, bool> insert_or_assign(const Key& k, M&& obj)
     {
+      rehash_if_needed();
       detail::shared_guard _;
       return super::insert_or_assign(k, obj);
     }
@@ -490,6 +515,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     template <class M>
     std::pair<iterator, bool> insert_or_assign(Key&& k, M&& obj)
     {
+      rehash_if_needed();
       detail::shared_guard _;
       return super::insert_or_assign(k, obj);
     }
@@ -497,6 +523,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     template <class M>
     iterator insert_or_assign(const_iterator hint, const Key& k, M&& obj)
     {
+      rehash_if_needed();
       detail::shared_guard _;
       return super::insert_or_assign(hint, k, obj);
     }
@@ -504,6 +531,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     template <class M>
     iterator insert_or_assign(const_iterator hint, Key&& k, M&& obj)
     {
+      rehash_if_needed();
       detail::shared_guard _;
       return super::insert_or_assign(hint, k, obj);
     }
@@ -511,6 +539,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     template< class... Args >
     std::pair<iterator, bool> emplace(Args&&... args)
     {
+      rehash_if_needed();
       detail::shared_guard _;
       return super::emplace(args...);
     }
@@ -518,6 +547,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     template <class... Args>
     iterator emplace_hint(const_iterator hint, Args&&... args)
     {
+      rehash_if_needed();
       detail::shared_guard _;
       return super::emplace(hint, args...);
     }
@@ -525,6 +555,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     template< class... Args >
     std::pair<iterator, bool> try_emplace(const Key& k, Args&&... args)
     {
+      rehash_if_needed();
       detail::shared_guard _;
       return super::try_emplace(k, args...);
     }
@@ -532,6 +563,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     template< class... Args >
     std::pair<iterator, bool> try_emplace(Key&& k, Args&&... args)
     {
+      rehash_if_needed();
       detail::shared_guard _;
       return super::try_emplace(k, args...);
     }
@@ -539,6 +571,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     template< class... Args >
     iterator try_emplace(const_iterator hint, const Key& k, Args&&... args)
     {
+      rehash_if_needed();
       detail::shared_guard _;
       return super::try_emplace(hint, k, args...);
     }
@@ -546,6 +579,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     template< class... Args >
     iterator try_emplace(const_iterator hint, Key&& k, Args&&... args)
     {
+      rehash_if_needed();
       detail::shared_guard _;
       return super::try_emplace(hint, k, args...);
     }
@@ -621,7 +655,21 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
       return merge(source);
     }
     */
-  };
+
+  protected:
+
+    /// Function below is implemented in a .cpp file. 
+    void rehash(std::size_t /* new_size */);
+  
+    void rehash_if_needed()
+    {
+      if (super::load_factor() >= super::max_load_factor())
+      {
+        super::rehash(super::bucket_count() * 2);
+      }
+    }
+
+};
 };
 
 } // namespace atermpp

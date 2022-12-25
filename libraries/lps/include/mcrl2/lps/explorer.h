@@ -230,6 +230,14 @@ const stochastic_distribution& initial_distribution(const lps::stochastic_specif
   return lpsspec.initial_process().distribution();
 }
 
+typedef atermpp::utilities::unordered_map<atermpp::term_appl<data::data_expression>,
+                                          atermpp::term_list<data::data_expression_list>,
+                                          std::hash<atermpp::term_appl<data::data_expression> >,
+                                          std::equal_to<atermpp::term_appl<data::data_expression> >,
+                                          std::allocator< std::pair<atermpp::term_appl<data::data_expression>, atermpp::term_list<data::data_expression_list>> >,
+                                          true  // Thread_safe.
+                                        > summand_cache_map;
+
 struct explorer_summand
 {
   data::variable_list variables;
@@ -243,8 +251,7 @@ struct explorer_summand
   caching cache_strategy;
   std::vector<data::variable> gamma;
   atermpp::function_symbol f_gamma;
-  mutable atermpp::unordered_map<atermpp::term_appl<data::data_expression>, atermpp::term_list<data::data_expression_list>> local_cache;
-  mutable std::shared_ptr<std::mutex> cache_mutex;
+  mutable summand_cache_map local_cache;
 
   template <typename ActionSummand>
   explorer_summand(const ActionSummand& summand, std::size_t summand_index, const data::variable_list& process_parameters, caching cache_strategy_)
@@ -254,8 +261,7 @@ struct explorer_summand
       distribution(summand_distribution(summand)),
       next_state(make_data_expression_vector(summand.next_state(process_parameters))),
       index(summand_index),
-      cache_strategy(cache_strategy_),
-      cache_mutex(new std::mutex)
+      cache_strategy(cache_strategy_)
   {
     gamma = free_variables(summand.condition(), process_parameters);
     if (cache_strategy_ == caching::global)
@@ -377,7 +383,7 @@ class explorer: public abortable
     volatile bool m_must_abort = false;
 
     // N.B. The keys are stored in term_appl instead of data_expression_list for performance reasons.
-    atermpp::unordered_map<atermpp::term_appl<data::data_expression>, atermpp::term_list<data::data_expression_list>> global_cache;
+    summand_cache_map global_cache;
 
     indexed_set_for_states_type m_discovered;
 
@@ -507,36 +513,6 @@ class explorer: public abortable
           ),
           a.has_time() ? rewr(time, sigma) : time
         );
-    }
-
-    void cache_lock(const explorer_summand& summand, std::mutex& global_cache_mutex)
-    {
-      if (atermpp::detail::GlobalThreadSafe && m_options.number_of_threads>1) 
-      {
-        if (summand.cache_strategy == caching::global) 
-        { 
-          global_cache_mutex.lock();
-        }
-        else
-        {
-          summand.cache_mutex->lock();
-        }
-      }
-    }
-
-    void cache_unlock(const explorer_summand& summand, std::mutex& global_cache_mutex)
-    {
-      if (atermpp::detail::GlobalThreadSafe && m_options.number_of_threads>1) 
-      {
-        if (summand.cache_strategy == caching::global) 
-        { 
-          global_cache_mutex.unlock();
-        }
-        else
-        {
-          summand.cache_mutex->unlock();
-        }
-      }
     }
 
     void check_enumerator_solution(const data::data_expression& p_expression, // WAS: const enumerator_element& p, 
@@ -672,14 +648,11 @@ class explorer: public abortable
       }
       else
       {
-        static std::mutex global_cache_mutex;
         summand.compute_key(key, sigma);
         auto& cache = summand.cache_strategy == caching::global ? global_cache : summand.local_cache;
-        cache_lock(summand, global_cache_mutex);
-        atermpp::unordered_map<atermpp::term_appl<data::data_expression>, atermpp::term_list<data::data_expression_list>>::iterator q = cache.find(key);
+        summand_cache_map::iterator q = cache.find(key);
         if (q == cache.end())
         {
-          cache_unlock(summand, global_cache_mutex);
           rewr(condition, summand.condition, sigma);
           atermpp::term_list<data::data_expression_list> solutions;
           if (!data::is_false(condition))
@@ -696,16 +669,9 @@ class explorer: public abortable
                         data::is_false
                       );
           }
-          cache_lock(summand, global_cache_mutex);
           q = cache.insert({key, solutions}).first;
-          cache_unlock(summand, global_cache_mutex);
-        }
-        else
-        { 
-          cache_unlock(summand, global_cache_mutex);
         }
 
-        // state_type s1;
         for (const data::data_expression_list& e: static_cast<atermpp::term_list<data::data_expression_list>&>(q->second))
         {
           data::add_assignments(sigma, summand.variables, e);
@@ -999,7 +965,6 @@ class explorer: public abortable
       std::unique_ptr<todo_set> thread_todo=make_todo_set(dummy.begin(),dummy.end()); // The new states for each process are temporarily stored in this vector for each thread. 
       atermpp::term_appl<data::data_expression> key;  
       if (atermpp::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_state_access.lock();
-// std::cerr << "HAVE LOCK " << thread_index << "     " << number_of_active_processes << "\n";
       while (number_of_active_processes>0 || !todo->empty())
       {
         assert(thread_todo->empty());
@@ -1008,7 +973,6 @@ class explorer: public abortable
         {
           todo->choose_element(current_state);
           thread_todo->insert(current_state);
-// std::cerr << "\nTTTTTT " << todo->size() << "    " << thread_todo->size() << "    " <<  thread_index << "   " << number_of_active_processes << "\n";
           if (atermpp::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_state_access.unlock();
 
           while (!thread_todo->empty() && !m_must_abort)
@@ -1096,7 +1060,6 @@ class explorer: public abortable
               // if (todo->size()<=number_of_idle_processes)  // Not thread_safe, but number is not so important.
               {
                 if (atermpp::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_state_access.lock();
-// std::cerr << "\nSHARE STATE " << todo->size() << "    " << thread_todo->size() << "    " <<  thread_index << "   " << number_of_active_processes << "\n";
                 // move 25% of the states of this thread to the global todo buffer.
                 for(std::size_t i=0; i<std::min(thread_todo->size()-1,1+(thread_todo->size()/4)); ++i)  
                 {
@@ -1125,18 +1088,15 @@ class explorer: public abortable
         if (todo->empty())
         {
           if (atermpp::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_state_access.unlock();
-// std::cerr << "\nSLEEP " << thread_index << "\n";
           std::this_thread::sleep_for(std::chrono::milliseconds(100));
           if (atermpp::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_state_access.lock();
         }
-// std::cerr << "\nIDLE PROCESS " << todo->size() << "    " << thread_todo->size() << "    " <<  thread_index << "   " << number_of_active_processes << "\n";
         if (number_of_active_processes>0 || !todo->empty())
         {
           number_of_active_processes++;
         }
         number_of_idle_processes--;
       } 
-// std::cerr << "\nFINALE " << todo->size() << "    " << thread_todo->size() << "    " <<  thread_index << "\n";
       mCRL2log(log::debug) << "Stop thread " << thread_index << ".\n";
       if (atermpp::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_state_access.unlock();
 

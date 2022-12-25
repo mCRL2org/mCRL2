@@ -291,7 +291,7 @@ void thread_aterm_pool::unlock_shared()
 
 /// An alternative to unlock shared access.. 
 void inline unlock_shared(std::atomic<bool>* busy_flag,
-                   std::size_t* lock_depth)
+                          std::size_t* lock_depth)
 {
   *lock_depth = *lock_depth - 1;
   if (GlobalThreadSafe && *lock_depth == 0)
@@ -299,6 +299,18 @@ void inline unlock_shared(std::atomic<bool>* busy_flag,
     assert(*busy_flag);
     busy_flag->store(false, std::memory_order_release);
   }
+}
+
+// Obtain exclusive access to the busy-forbidden lock.
+void inline thread_aterm_pool::lock()
+{
+  m_pool.lock(this);
+}
+
+// Release exclusive access to the busy-forbidden lock.
+void inline thread_aterm_pool::unlock()
+{
+  m_pool.unlock();
 }
 
 
