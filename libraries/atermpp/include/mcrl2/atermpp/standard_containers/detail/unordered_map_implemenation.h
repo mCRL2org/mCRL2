@@ -24,9 +24,9 @@ namespace utilities
 template< class Key, class T, class Hash, class Pred, class Alloc, bool ThreadSafe >
   inline void unordered_map<Key,T,Hash,Pred,Alloc,ThreadSafe>::rehash(std::size_t new_size )
   { 
-    detail::g_thread_term_pool().lock();
+    if constexpr (ThreadSafe) detail::g_thread_term_pool().lock();
     super::rehash(new_size);
-    detail::g_thread_term_pool().unlock();
+    if constexpr (ThreadSafe) detail::g_thread_term_pool().unlock();
   }
 
 } // namespace utilities

@@ -434,7 +434,11 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     template<typename ...Args>
     iterator find(const Args&... args)
     { 
-      detail::shared_guard _;
+      if constexpr (ThreadSafe)
+      {
+        detail::shared_guard _;
+        return super::find(args...); 
+      }
       return super::find(args...); 
     }
 
@@ -443,7 +447,11 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     template<typename ...Args>
     const_iterator find(const Args&... args) const 
     { 
-      detail::shared_guard _;
+      if (ThreadSafe)
+      {
+        detail::shared_guard _;
+        return super::find(args...); 
+      }
       return super::find(args...); 
     }
 
