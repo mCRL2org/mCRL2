@@ -39,6 +39,20 @@ template<typename Key,
          bool Resize = true>
 class unordered_map;
 
+namespace detail
+{
+  // Check for the existence of the is_transparent type.
+  template <typename...> using void_t = void;
+
+  template <typename X, typename = void> struct is_transparent : std::false_type
+  {};
+
+  template <typename X>
+  struct is_transparent<X, void_t<typename X::is_transparent>> : std::true_type
+  {};
+} // namespace detail
+
+
 /// \brief A unordered_set with a subset of the interface of std::unordered_set that only stores a single pointer for each element.
 /// \details Only supports input iterators (not bidirectional) compared to std::unordered_set. Furthermore, iterating over all elements
 ///          in the set is O(n + m), where n is the number of elements in the set and m the number of empty buckets. Also incrementing the
@@ -333,17 +347,6 @@ private:
   template<typename Key_, typename T, typename Hash_, typename KeyEqual, typename Allocator_, bool ThreadSafe_, bool Resize_>
   friend class unordered_map;
 
-  // Check for the existence of the is_transparent type.
-  template <typename... >
-  using void_t = void;
-
-  template <typename X, typename = void>
-  struct is_transparent : std::false_type { };
-
-  template <typename X>
-  struct is_transparent<X, void_t<typename X::is_transparent>>
-  : std::true_type { };
-
   /// \brief Inserts T(args...) into the given bucket, assumes that it did not exists before.
   /// \threadsafe
   template<typename ...Args>
@@ -362,7 +365,7 @@ private:
   const_iterator find_impl(size_type bucket_index, const Args&... args) const;
 
   /// \brief True iff the hash and equals functions allow transparent lookup,
-  static constexpr bool allow_transparent = is_transparent<Hash>() && is_transparent<Equals>();
+  static constexpr bool allow_transparent = detail::is_transparent<Hash>() && detail::is_transparent<Equals>();
 
   /// \brief The number of elements stored in this set.
   std::conditional_t<ThreadSafe, std::atomic<size_type>, size_type> m_number_of_elements = 0;

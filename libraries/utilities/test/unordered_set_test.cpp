@@ -7,13 +7,16 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "mcrl2/utilities/unordered_map.h"
 
 #define BOOST_AUTO_TEST_MAIN
 #include <boost/test/included/unit_test.hpp>
 
 #include <random>
 #include <unordered_set>
+
+#include "mcrl2/utilities/hash_utility.h"
+#include "mcrl2/utilities/unordered_map.h"
+
 
 using namespace mcrl2::utilities;
 

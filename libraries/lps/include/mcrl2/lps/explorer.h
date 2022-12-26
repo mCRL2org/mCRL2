@@ -33,6 +33,8 @@
 #include "mcrl2/lps/resolve_name_clashes.h"
 #include "mcrl2/lps/stochastic_state.h"
 
+// #define OLDCODE
+
 namespace mcrl2::lps {
 
 enum class caching { none, local, global };
@@ -231,6 +233,77 @@ const stochastic_distribution& initial_distribution(const lps::stochastic_specif
   return lpsspec.initial_process().distribution();
 }
 
+namespace detail
+{
+// The functions below are used to support the key type in caches. 
+//
+struct cheap_cache_key
+{
+  data::mutable_indexed_substitution<>& m_sigma;
+  const std::vector<data::variable>& m_gamma;
+
+  cheap_cache_key(data::mutable_indexed_substitution<>& sigma, const std::vector<data::variable>& gamma)
+    : m_sigma(sigma),
+      m_gamma(gamma)
+  {}
+  
+};
+
+struct cache_equality
+{
+  bool operator()(const atermpp::term_appl<data::data_expression>& key1, const atermpp::term_appl<data::data_expression>& key2) const
+  {
+    return key1==key2;
+  }
+
+  bool operator()(const atermpp::term_appl<data::data_expression>& key1, const cheap_cache_key& key2) const
+  {
+    std::vector<data::variable>::const_iterator i=key2.m_gamma.begin();
+    for(const data::data_expression& d: key1)
+    {
+      if (d!=key2.m_sigma.get_ref(*i))
+      {
+        return false;
+      }
+      ++i;
+    }
+    return true;
+  }
+};
+
+struct cache_hash
+{
+  std::size_t operator()(const std::pair<const atermpp::term_appl<mcrl2::data::data_expression>, 
+                                         std::list<atermpp::term_list<mcrl2::data::data_expression>>>& pair) const
+  {
+    return operator()(pair.first);
+  }
+
+  std::size_t operator()(const atermpp::term_appl<data::data_expression>& key) const
+  {
+    std::size_t hash=0;
+    for(const data::data_expression& d: key)
+    {
+      hash=atermpp::detail::combine(hash,d);
+    }
+    return hash;
+  }
+
+  std::size_t operator()(const cheap_cache_key& key) const
+  {
+    std::size_t hash=0;
+    for(const data::variable& v: key.m_gamma)
+    {
+      hash=atermpp::detail::combine(hash,key.m_sigma.get_ref(v));
+    }
+    return hash;
+  }
+};
+
+} // end namespace detail
+
+
+#ifdef OLDCODE 
 typedef atermpp::utilities::unordered_map<atermpp::term_appl<data::data_expression>,
                                           atermpp::term_list<data::data_expression_list>,
                                           std::hash<atermpp::term_appl<data::data_expression> >,
@@ -238,6 +311,16 @@ typedef atermpp::utilities::unordered_map<atermpp::term_appl<data::data_expressi
                                           std::allocator< std::pair<atermpp::term_appl<data::data_expression>, atermpp::term_list<data::data_expression_list>> >,
                                           true  // Thread_safe.
                                         > summand_cache_map;
+#else
+typedef atermpp::utilities::unordered_map<atermpp::term_appl<data::data_expression>,
+                                          atermpp::term_list<data::data_expression_list>,
+                                          detail::cache_hash,
+                                          detail::cache_equality,
+                                          std::allocator< std::pair<atermpp::term_appl<data::data_expression>, atermpp::term_list<data::data_expression_list>> >,
+                                          true  // Thread_safe.
+                                        > summand_cache_map;
+#endif
+
 
 struct explorer_summand
 {
@@ -649,9 +732,15 @@ class explorer: public abortable
       }
       else
       {
+#ifdef OLDCODE
         summand.compute_key(key, sigma);
+#endif
         auto& cache = summand.cache_strategy == caching::global ? global_cache : summand.local_cache;
+#ifdef OLDCODE
         summand_cache_map::iterator q = cache.find(key);
+#else
+        summand_cache_map::iterator q = cache.find(detail::cheap_cache_key(sigma, summand.gamma));
+#endif
         if (q == cache.end())
         {
           rewr(condition, summand.condition, sigma);
@@ -670,6 +759,9 @@ class explorer: public abortable
                         data::is_false
                       );
           }
+#ifndef OLDCODE
+          summand.compute_key(key, sigma);
+#endif
           q = cache.insert({key, solutions}).first;
         }
 
@@ -1639,5 +1731,7 @@ class explorer: public abortable
 };
 
 } // namespace mcrl2::lps
+
+#undef OLDCODE
 
 #endif // MCRL2_LPS_EXPLORER_H

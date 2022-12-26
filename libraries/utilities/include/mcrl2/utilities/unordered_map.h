@@ -45,6 +45,8 @@ public:
   using const_pointer = typename std::allocator_traits<Allocator>::const_pointer;
 
 private:
+  /// \brief True iff the hash and equals functions allow transparent lookup,
+  static constexpr bool allow_transparent = detail::is_transparent<Hash>() && detail::is_transparent<KeyEqual>();
 
   // Hashes only the keys of each pair.
   struct PairHash
@@ -64,8 +66,8 @@ private:
       return hash(pair.first);
     }
         
-    template<typename ...U>
-    std::size_t operator()(const key_type& key, const U&... /* args */) const
+    template<typename U, typename ...V, typename = std::enable_if_t<!std::is_same_v<U, std::pair<Key, T>>>>
+    std::size_t operator()(const U& key, const V&... args) const 
     {
       return hash(key);
     }
@@ -89,8 +91,8 @@ private:
       return equals(first.first, second.first);
     }
 
-    template <typename ...U>
-    bool operator()(const value_type& first, const key_type& key, const U&... /* args */) const
+    template <typename U, typename...V, typename = std::enable_if_t<!std::is_same_v<U, std::pair<Key, T>>>>
+    bool operator()(const value_type& first, const U& key, const V&... args) const
     {
       return equals(first.first, key);
     }
