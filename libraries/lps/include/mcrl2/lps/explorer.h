@@ -20,6 +20,7 @@
 #include "mcrl2/atermpp/standard_containers/deque.h"
 #include "mcrl2/atermpp/standard_containers/vector.h"
 #include "mcrl2/atermpp/standard_containers/indexed_set.h"
+#include "mcrl2/atermpp/standard_containers/detail/unordered_map_implemenation.h"
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/substitution_utility.h"
@@ -1070,7 +1071,7 @@ class explorer: public abortable
               }
             }
 
-            finish_state(thread_index, current_state, s_index, thread_todo->size());
+            finish_state(thread_index, m_options.number_of_threads, current_state, s_index, thread_todo->size());
             thread_todo->finish_state();
           }
         }
@@ -1294,7 +1295,7 @@ class explorer: public abortable
     std::vector<std::pair<lps::multi_action, state_type>> generate_transitions(
                    const state& d0)
     {
-std::cerr << "A GLOBAL REWRITER IS INVOKED. HOPEFULLY NOT IN A PARALLEL THREAD\n";
+      assert(m_options.number_of_threads==1); // A global rewriter is invoked, and this can only happen in a single threaded setting. 
       return generate_transitions(d0, m_global_sigma, m_global_rewr, m_global_enumerator, m_global_id_generator);
     }
 
@@ -1493,7 +1494,10 @@ std::cerr << "A GLOBAL REWRITER IS INVOKED. HOPEFULLY NOT IN A PARALLEL THREAD\n
 
       std::vector<std::pair<state, std::list<transition>>> todo;
 
-std::cerr << "DFS EXPLORATION NOT THREAD SAFE\n";
+      if (m_options.number_of_threads>0)
+      {
+        mcrl2::runtime_error("DFS exploration cannot be performend with multiple threads.");
+      }
       todo.emplace_back(s0, out_edges(s0, regular_summands, confluent_summands, m_global_sigma, m_global_rewr, m_global_enumerator, m_global_id_generator));
       discovered.insert(s0);
       discover_state(s0);
@@ -1527,7 +1531,6 @@ std::cerr << "DFS EXPLORATION NOT THREAD SAFE\n";
               discovered.insert(s1);
               discover_state(s1);
             }
-std::cerr << "DFS EXPLORATION NOT THREAD SAFE\n";
             todo.emplace_back(s1, out_edges(s1, regular_summands, confluent_summands, m_global_sigma, m_global_rewr, m_global_enumerator, m_global_id_generator));
             s = &todo.back().first;
             E = &todo.back().second;
@@ -1620,7 +1623,7 @@ std::cerr << "DFS EXPLORATION NOT THREAD SAFE\n";
     /// \brief Process parameter values for use in a single thread. 
     data::data_expression_list process_parameter_values() const
     {
-std::cerr << "GLOBAL PROCESS PARAMETER VALUES SHOULD NOT BE IN A SEPARATE THREAD\n";
+      assert(m_options.number_of_threads==1); // Using a global sigma is not thread safe. 
       return process_parameter_values(m_global_sigma);
     }
     void set_process_parameter_values(const data::data_expression_list& values, data::mutable_indexed_substitution<>& sigma)
@@ -1630,7 +1633,7 @@ std::cerr << "GLOBAL PROCESS PARAMETER VALUES SHOULD NOT BE IN A SEPARATE THREAD
 
     void set_process_parameter_values(const data::data_expression_list& values)
     {
-std::cerr << "GLOBAL SET PROCESS PARAMETER VALUES. NOT TO BE USED IN A SEPARATE THREAD\n";
+       assert(m_options.number_of_threads==1); // Using a global sigma is not thread safe. 
        set_process_parameter_values(values, m_global_sigma);
     }
 };

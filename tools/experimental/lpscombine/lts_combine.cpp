@@ -224,10 +224,10 @@ void mcrl2::combine_lts(lts::lts_lts_t& left_lts,
       }
     }
 
-    progress_monitor.finish_state(states.size(), queue.size());
+    progress_monitor.finish_state(states.size(), queue.size(), 1);
   }
 
-  progress_monitor.finish_exploration(states.size());
+  progress_monitor.finish_exploration(states.size(), 1);
     
   // Write the initial state and the state labels.
   lts::write_initial_state(output, 0);

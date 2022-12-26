@@ -130,24 +130,6 @@ public:
     super::clear();
   }
 
-  /// \brief Standard find function in a map.
-  /// \returns Element with the specified key.
-  template<typename ...Args>
-  iterator find(const Args&... args)
-  { 
-    detail::shared_guard _;
-    return super::find(args...); 
-  }
-
-  /// \brief Standard find function in a map.
-  /// \returns Element with the specified key.
-  template<typename ...Args>
-  const_iterator find(const Args&... args) const 
-  { 
-    detail::shared_guard _;
-    return super::find(args...); 
-  }
-
   /// \brief Inserts an element referring to a default value in the map. 
   std::pair<iterator,bool> insert( const value_type& value )
   {
@@ -447,6 +429,24 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
       super::clear();
     }
 
+    /// \brief Standard find function in a map.
+    /// \returns Element with the specified key.
+    template<typename ...Args>
+    iterator find(const Args&... args)
+    { 
+      detail::shared_guard _;
+      return super::find(args...); 
+    }
+
+    /// \brief Standard find function in a map.
+    /// \returns Element with the specified key.
+    template<typename ...Args>
+    const_iterator find(const Args&... args) const 
+    { 
+      detail::shared_guard _;
+      return super::find(args...); 
+    }
+
     std::pair<iterator, bool> insert(const value_type& value)
     {
       rehash_if_needed();
@@ -665,7 +665,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     {
       if (super::load_factor() >= super::max_load_factor())
       {
-        super::rehash(super::bucket_count() * 2);
+        rehash(super::bucket_count() * 2);
       }
     }
 
@@ -674,3 +674,5 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
 
 } // namespace atermpp
 #endif // MCRL2_ATERMPP_STANDARD_CONTAINER_UNORDERED_MAP_H
+
+

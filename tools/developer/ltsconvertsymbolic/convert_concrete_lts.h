@@ -69,7 +69,7 @@ class convert_concrete_lts
       // Explore all states in the LDD.
       sat_all_nopar(m_lts.states, explore_state_callback<convert_concrete_lts>, this);
 
-      m_progress_monitor.finish_exploration(m_discovered.size());
+      m_progress_monitor.finish_exploration(m_discovered.size(), 1);
       m_builder->finalize(m_discovered, false);
     }
 
@@ -146,7 +146,7 @@ void explore_state_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t n, vo
     sat_all_nopar(group.L, explore_transitions_callback<callback_context>, &context);
   }
 
-  algorithm.m_progress_monitor.finish_state(algorithm.m_discovered.size(), algorithm.m_number_of_states - algorithm.m_discovered.size());
+  algorithm.m_progress_monitor.finish_state(algorithm.m_discovered.size(), algorithm.m_number_of_states - algorithm.m_discovered.size(), 1);
 }
 
 } // namespace mcrl2

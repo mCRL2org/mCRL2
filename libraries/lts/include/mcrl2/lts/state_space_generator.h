@@ -554,11 +554,11 @@ class progress_monitor
       transition_count++;
     }
 
-    void finish_state(std::size_t state_count, std::size_t todo_list_size)
+    void finish_state(std::size_t state_count, std::size_t todo_list_size, std::size_t number_of_threads)
     {
       if (search_strategy == lps::es_breadth)
       {
-        if (++count == level_up)
+        if (++count == level_up) 
         {
           mCRL2log(log::debug) << "Number of states at level " << level << " is " << state_count - last_state_count << "\n";
           level++;
@@ -572,11 +572,21 @@ class progress_monitor
           last_log_time = new_log_time;
           std::size_t lvl_states = state_count - last_state_count;
           std::size_t lvl_transitions = transition_count - last_transition_count;
-          mCRL2log(log::status) << std::fixed << std::setprecision(2)
-                                << state_count << "st, " << transition_count << "tr"
-                                << ", explored " << 100.0 * ((float) count / state_count)
-                                << "%. Last level: " << level << ", " << lvl_states << "st, " << lvl_transitions
-                                << "tr.\n";
+          if (number_of_threads>1) // Levels have no meaning with multiple threads. 
+          {
+            mCRL2log(log::status) << std::fixed << std::setprecision(2)
+                                  << state_count << "st, " << transition_count << "tr"
+                                  << ", explored " << 100.0 * ((float) count / state_count)
+                                  << "%.\n";
+          }
+          else
+          {
+            mCRL2log(log::status) << std::fixed << std::setprecision(2)
+                                  << state_count << "st, " << transition_count << "tr"
+                                  << ", explored " << 100.0 * ((float) count / state_count)
+                                  << "%. Last level: " << level << ", " << lvl_states << "st, " 
+                                  << lvl_transitions << "tr.\n";
+          }
         }
       }
       else
@@ -591,18 +601,21 @@ class progress_monitor
       }
     }
 
-    void finish_exploration(std::size_t state_count)
+    void finish_exploration(std::size_t state_count, std::size_t number_of_threads)
     {
       if (search_strategy == lps::es_breadth)
       {
-        mCRL2log(log::verbose) << "done with state space generation ("
-                               << level-1 << " level" << ((level==2)?"":"s") << ", "
-                               << state_count << " state" << ((state_count == 1)?"":"s")
+        mCRL2log(log::verbose) << "Done with state space generation (";
+        if (number_of_threads==1)
+        {
+          mCRL2log(log::verbose) << level-1 << " level" << ((level==2)?"":"s") << ", ";
+        }
+        mCRL2log(log::verbose) << state_count << " state" << ((state_count == 1)?"":"s")
                                << " and " << transition_count << " transition" << ((transition_count==1)?"":"s") << ")" << std::endl;
       }
       else
       {
-        mCRL2log(log::verbose) << "done with state space generation ("
+        mCRL2log(log::verbose) << "Done with state space generation ("
                           << state_count << " state" << ((state_count == 1)?"":"s")
                           << " and " << transition_count << " transition" << ((transition_count==1)?"":"s") << ")" << std::endl;
       }
@@ -730,7 +743,8 @@ struct state_space_generator
         },
 
         // finish_state
-        [&](const std::size_t /* thread_index */, const lps::state& s, std::size_t s_index, std::size_t todo_list_size)
+        [&](const std::size_t /* thread_index */, const std::size_t number_of_threads, 
+            const lps::state& s, std::size_t s_index, std::size_t todo_list_size)
         {
           if (options.detect_deadlock && !has_outgoing_transitions)
           {
@@ -738,7 +752,7 @@ struct state_space_generator
           }
           if (!options.suppress_progress_messages)
           {
-            m_progress_monitor.finish_state(explorer.state_map().size(), todo_list_size);
+            m_progress_monitor.finish_state(explorer.state_map().size(), todo_list_size, number_of_threads);
           }
         },
 
@@ -751,7 +765,7 @@ struct state_space_generator
           }
         }
       );
-      m_progress_monitor.finish_exploration(explorer.state_map().size());
+      m_progress_monitor.finish_exploration(explorer.state_map().size(), options.number_of_threads);
       builder.finalize(explorer.state_map(), Timed);
     }
     catch (const data::enumerator_error& e)
