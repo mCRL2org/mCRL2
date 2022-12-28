@@ -678,7 +678,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     }
 
 };
-};
+}
 
 } // namespace atermpp
 #endif // MCRL2_ATERMPP_STANDARD_CONTAINER_UNORDERED_MAP_H
