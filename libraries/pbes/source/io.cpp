@@ -164,20 +164,16 @@ void load_pbes(pbes& pbes,
 // transforms PropVarInst to PropVarInstNoIndex
 static atermpp::aterm_appl remove_index_impl(const atermpp::aterm_appl& x)
 {
-  if (x.function() == core::detail::function_symbol_DataVarId())
-  {
-    return atermpp::aterm_appl(core::detail::function_symbol_DataVarIdNoIndex(), x.begin(), --x.end());
-  }
-  else if (x.function() == core::detail::function_symbol_OpId())
+  if (x.function() == core::detail::function_symbol_OpId())
   {
     return atermpp::aterm_appl(core::detail::function_symbol_OpIdNoIndex(), x.begin(), --x.end());
   }
   return x;
 }
 
-// transforms DataVarIdNoIndex to DataVarId
+// transforms DataVarIdNoIndex to DataVarId (obsolete)
 // transforms OpIdNoIndex to OpId
-// transforms PropVarInstNoIndex to PropVarInst
+// transforms PropVarInstNoIndex to PropVarInst (obsolete)
 static atermpp::aterm_appl add_index_impl(const atermpp::aterm_appl& x)
 {
   if (x.function() == core::detail::function_symbol_DataVarIdNoIndex())
@@ -185,7 +181,7 @@ static atermpp::aterm_appl add_index_impl(const atermpp::aterm_appl& x)
     const data::variable& y = reinterpret_cast<const data::variable&>(x);
     return data::variable(y.name(), y.sort());
   }
-  else if (x.function() == core::detail::function_symbol_OpIdNoIndex())
+  else if (x.function() == core::detail::function_symbol_OpIdNoIndex())    // This should be removed in due time. Say 2025.
   {
     const data::function_symbol& y = reinterpret_cast<const data::function_symbol&>(x);
     return data::function_symbol(y.name(), y.sort());

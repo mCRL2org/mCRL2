@@ -9,7 +9,6 @@
 /// \file data.cpp
 /// \brief
 
-#include "mcrl2/data/index_traits.h"
 #include "mcrl2/data/normalize_sorts.h"
 #include "mcrl2/data/parse_impl.h"
 #include "mcrl2/data/print.h"
@@ -104,16 +103,6 @@ bool search_variable(const data::data_expression& x, const data::variable& v) { 
 //--- end generated data overloads ---//
 
 std::string pp(const std::set<variable>& x) { return data::pp< std::set<variable> >(x); }
-
-static bool register_hooks()
-{
-  register_function_symbol_hooks();
-  register_variable_hooks();
-  return true;
-}
-
-static bool initialised=register_hooks();
-
 
 sort_expression data_expression::sort() const
 {

@@ -18,11 +18,7 @@ using namespace mcrl2::data;
 static
 atermpp::aterm_appl remove_index_impl(const atermpp::aterm_appl& x)
 {
-  if (x.function() == core::detail::function_symbol_DataVarId())
-  {
-    return atermpp::aterm_appl(core::detail::function_symbol_DataVarIdNoIndex(), x.begin(), --x.end());
-  }
-  else if (x.function() == core::detail::function_symbol_OpId())
+  if (x.function() == core::detail::function_symbol_OpId())
   {
     return atermpp::aterm_appl(core::detail::function_symbol_OpIdNoIndex(), x.begin(), --x.end());
   }
@@ -32,7 +28,7 @@ atermpp::aterm_appl remove_index_impl(const atermpp::aterm_appl& x)
 static
 atermpp::aterm_appl add_index_impl(const atermpp::aterm_appl& x)
 {
-  if (x.function() == core::detail::function_symbol_DataVarIdNoIndex())
+  if (x.function() == core::detail::function_symbol_DataVarIdNoIndex())  // Obsolete. Remove in say 2025. 
   {
     const data::variable& y = reinterpret_cast<const data::variable&>(x);
     return variable(y.name(), y.sort()); 

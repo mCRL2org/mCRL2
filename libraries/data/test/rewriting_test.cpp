@@ -860,7 +860,7 @@ BOOST_AUTO_TEST_CASE(test_othello_condition)
     data::data_expression e(parse_data_expression("At(1, 2, [[None, None, None, None], [None, Red, White, None], [None, White, Red, None], [None, None, None, None]]) == None", specification));
     data_rewrite_test(R, e, sort_bool::true_());
   }
-}
+} 
 
 BOOST_AUTO_TEST_CASE(test_lambda_expression)
 {

@@ -440,7 +440,7 @@ const atermpp::function_symbol& function_symbol_DataSpec()
 inline
 const atermpp::function_symbol& function_symbol_DataVarId()
 {
-  static const atermpp::global_function_symbol function_symbol_DataVarId("DataVarId", 3);
+  static const atermpp::global_function_symbol function_symbol_DataVarId("DataVarId", 2);
   return function_symbol_DataVarId;
 }
 
@@ -744,7 +744,7 @@ const atermpp::function_symbol& function_symbol_ProcSpec()
 inline
 const atermpp::function_symbol& function_symbol_ProcVarId()
 {
-  static const atermpp::global_function_symbol function_symbol_ProcVarId("ProcVarId", 3);
+  static const atermpp::global_function_symbol function_symbol_ProcVarId("ProcVarId", 2);
   return function_symbol_ProcVarId;
 }
 

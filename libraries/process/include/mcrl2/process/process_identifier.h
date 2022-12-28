@@ -61,15 +61,13 @@ class process_identifier: public atermpp::aterm_appl
     /// \brief Constructor.
     process_identifier(const core::identifier_string& name, const data::variable_list& variables)
     {
-      atermpp::make_term_appl_with_index<process_identifier, std::pair<core::identifier_string, data::variable_list> >
-                 (*this, core::detail::function_symbol_ProcVarId(), name, variables);
+      atermpp::make_term_appl(*this, core::detail::function_symbol_ProcVarId(), name, variables);
     }
 
     /// \brief Constructor.
     process_identifier(const std::string& name, const data::variable_list& variables)
     {
-      atermpp::make_term_appl_with_index<process_identifier, std::pair<core::identifier_string, data::variable_list> >
-                 (*this, core::detail::function_symbol_ProcVarId(), core::identifier_string(name), variables);
+      atermpp::make_term_appl(*this, core::detail::function_symbol_ProcVarId(), core::identifier_string(name), variables);
     }
 //--- end user section process_identifier ---//
 };
@@ -79,7 +77,7 @@ class process_identifier: public atermpp::aterm_appl
 template <class... ARGUMENTS>
 inline void make_process_identifier(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
-  atermpp::make_term_appl_with_index<process_identifier,std::pair<core::identifier_string, data::variable_list>>(t, core::detail::function_symbol_ProcVarId(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_ProcVarId(), args...);
 }
 
 /// \\brief list of process_identifiers
@@ -125,7 +123,5 @@ void normalize_sorts(process_identifier_vector& x, const data::sort_specificatio
 } // namespace process
 
 } // namespace mcrl2
-
-#include "mcrl2/process/index_traits.h"
 
 #endif // MCRL2_PROCESS_PROCESS_IDENTIFIER_H

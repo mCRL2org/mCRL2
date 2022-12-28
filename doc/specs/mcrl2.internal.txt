@@ -59,7 +59,7 @@
                  | UntypedIdentifier(<String>)
 
 //data variable identifier
-<DataVarId>    ::= DataVarId(<String>, <SortExpr>, <Number>)
+<DataVarId>    ::= DataVarId(<String>, <SortExpr>)
 
 //operation identifier
 <OpId>         ::= OpId(<String>, <SortExpr>, <Number>)
@@ -157,7 +157,7 @@
                  | <UntypedDataParameter>
 
 //process identifier
-<ProcVarId>    ::= ProcVarId(<String>, <DataVarId>*, <Number>)
+<ProcVarId>    ::= ProcVarId(<String>, <DataVarId>*)
 
 //multiaction name
 <MultActName>  ::= MultActName(<String>+)

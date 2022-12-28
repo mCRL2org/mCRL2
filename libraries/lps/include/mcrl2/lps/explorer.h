@@ -20,7 +20,7 @@
 #include "mcrl2/atermpp/standard_containers/deque.h"
 #include "mcrl2/atermpp/standard_containers/vector.h"
 #include "mcrl2/atermpp/standard_containers/indexed_set.h"
-#include "mcrl2/atermpp/standard_containers/detail/unordered_map_implemenation.h"
+#include "mcrl2/atermpp/standard_containers/detail/unordered_map_implementation.h"
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/substitution_utility.h"

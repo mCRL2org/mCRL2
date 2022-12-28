@@ -21,8 +21,9 @@
 #ifndef MCRL2_DATA_SUBSTITUTIONS_MUTABLE_INDEXED_SUBSTITUTION_H
 #define MCRL2_DATA_SUBSTITUTIONS_MUTABLE_INDEXED_SUBSTITUTION_H
 
-#include "mcrl2/data/is_simple_substitution.h"
-#include "mcrl2/data/undefined.h"
+#include "mcrl2/atermpp/standard_containers/unordered_map.h"
+#include "mcrl2/atermpp/standard_containers/detail/unordered_map_implementation.h"
+#include "mcrl2/data/data_expression.h"
 
 namespace mcrl2 {
 
@@ -43,16 +44,15 @@ template <typename VariableType = data::variable, typename ExpressionType = data
 class mutable_indexed_substitution
 {
 protected:
-  typedef std::pair <VariableType, ExpressionType> substitution_type;
+  typedef atermpp::utilities::unordered_map < VariableType, ExpressionType > substitution_type;
+  
   /// \brief Internal storage for substitutions.
   /// Required to be a container with random access through [] operator.
   /// It is essential to store the variable also in the container, as it might be that
   /// this variable is not used anywhere although it has a valid assignment. This happens
   /// for instance when the assignment is already parsed, while the expression to which it
   /// needs to be applied must still be parsed. 
-  std::vector < substitution_type > m_container;
-  std::vector <std::size_t> m_index_table;
-  std::stack<std::size_t> m_free_positions;
+  substitution_type m_substitution;
   mutable bool m_variables_in_rhs_set_is_defined;
   mutable std::multiset<variable> m_variables_in_rhs;
 
@@ -73,13 +73,10 @@ public:
   {
   }
 
-  mutable_indexed_substitution(std::vector<substitution_type> container,
-                               std::vector<std::size_t> index_table,
-                               std::stack<std::size_t> free_positions,
-                               bool variables_in_rhs_set_is_defined,
-                               std::multiset<variable> variables_in_rhs)
-      : m_container(container), m_index_table(index_table),
-        m_free_positions(free_positions),
+  mutable_indexed_substitution(const substitution_type& substitution,
+                               const bool variables_in_rhs_set_is_defined,
+                               const std::multiset<variable_type>& variables_in_rhs)
+      : m_substitution(substitution), 
         m_variables_in_rhs_set_is_defined(variables_in_rhs_set_is_defined),
         m_variables_in_rhs(variables_in_rhs)
   {
@@ -104,100 +101,50 @@ public:
     void operator=(const expression_type& e)
     {
       assert(e.defined());
-
-      std::size_t i = atermpp::detail::index_traits<data::variable, data::variable_key_type, 2>::index(m_variable);
-
-      if (e != m_variable)
+      const typename substitution_type::iterator i = m_super.m_substitution.find(m_variable);
+      if (i!=m_super.m_substitution.end())
       {
-        // Set a new variable;
+        // Found.
+        assert(i->first==m_variable);
+        if (e==i->second)  // No change in the substitution is required. 
+        {
+          return;
+        }
         if (m_super.m_variables_in_rhs_set_is_defined)
         {
-          std::set<variable_type> s=find_free_variables(e);
-          m_super.m_variables_in_rhs.insert(s.begin(),s.end());
-        }
-
-        // Resize container if needed
-        if (i >= m_super.m_index_table.size())
-        {
-          m_super.m_index_table.resize(i+1, std::size_t(-1));
-        }
-
-        std::size_t j=m_super.m_index_table[i];
-        assert(j==std::size_t(-1) || j<m_super.m_container.size());
-        if (j==std::size_t(-1))
-        {
-          // The variable was not assigned.
-          if (m_super.m_free_positions.empty())
-          {
-            m_super.m_index_table[i]=m_super.m_container.size();
-            m_super.m_container.emplace_back(m_variable,e);
+          std::set<variable_type> s=find_free_variables(i->second);
+          for(const variable& v: s) 
+          { 
+            // Remove one occurrence of v. 
+            const typename std::multiset<variable_type>::const_iterator j=m_super.m_variables_in_rhs.find(v);
+            if (j!=m_super.m_variables_in_rhs.end())
+            { 
+              m_super.m_variables_in_rhs.erase(j);
+            }
           }
-          else
-          {
-            j=m_super.m_free_positions.top();
-            m_super.m_index_table[i]=j;
-            // m_super.m_container[j]=substitution_type(m_variable,e);
-            substitution_type& t=m_super.m_container[j]; 
-            t.first=m_variable; 
-            t.second=e;
-            m_super.m_free_positions.pop();
-          }
+        }
+        if (e != m_variable)
+        {
+            i->second=e;
         }
         else
         {
-          // The variable was already assigned. Replace the assignment.
-          // Clear the variables of the removed variable. 
-          if (m_super.m_variables_in_rhs_set_is_defined)
-          {
-            std::set<variable_type> s=find_free_variables(m_super.m_container[j].second);
-            for(const variable& v:s) 
-            { 
-              // Remove one occurrence of v. 
-              const std::multiset<variable>::const_iterator i=m_super.m_variables_in_rhs.find(v);
-              m_super.m_variables_in_rhs.erase(i);
-            }
-          }
-
-          // m_super.m_container[j]=substitution_type(m_variable,e);
-          substitution_type& t=m_super.m_container[j]; 
-          t.first=m_variable; 
-          t.second=e;
+          m_super.m_substitution.erase(i);
         }
       }
       else
       {
-        // Indicate that the current variable is free; postpone deleting the
-        // actual value assigned to the variable, except if m_variables_in_rhs_set_is_defined is set.
-        // Note that we do not remove variables in variables_in_rhs;
-        if (i<m_super.m_index_table.size())
+        // Not found.
+        if (e!=m_variable)
         {
-          std::size_t j=m_super.m_index_table[i];
-          if (j!=std::size_t(-1))
-          {
-            m_super.m_free_positions.push(j);
-            m_super.m_index_table[i]=std::size_t(-1);
-
-            if (m_super.m_variables_in_rhs_set_is_defined)
-            {
-              // remove the variables from the rhs. 
-              std::set<variable_type> s=find_free_variables(m_super.m_container[j].second);
-              for(const variable& v:s) 
-              { 
-                // Remove one occurrence of v. 
-                const std::multiset<variable>::const_iterator i=m_super.m_variables_in_rhs.find(v);
-                m_super.m_variables_in_rhs.erase(i);
-              }
-              if (m_super.m_free_positions.size()==m_super.m_container.size())
-              {
-                // The substitution is empty; no variables are assigned. 
-                // Check that the administration of variables in the rhs is proper. 
-                // Postpone maintaining variables in the rhs until needed again. 
-                assert(m_super.m_variables_in_rhs.empty());
-                m_super.m_variables_in_rhs_set_is_defined=false;
-              }
-            }
-          }
+          m_super.m_substitution.emplace(m_variable,e);
         }
+      }
+     
+      if (e != m_variable && m_super.m_variables_in_rhs_set_is_defined)
+      {
+        std::set<variable_type> s1=find_free_variables(e);
+        m_super.m_variables_in_rhs.insert(s1.begin(),s1.end());
       }
     }
   };
@@ -208,26 +155,21 @@ public:
   ///          and must be used instantly. 
   const expression_type& get_ref(const variable_type& v) const
   {
-    const std::size_t i = atermpp::detail::index_traits<data::variable, data::variable_key_type, 2>::index(v);
-    if (i < m_index_table.size())
+    typename substitution_type::const_iterator i=m_substitution.find(v);
+    if (i==m_substitution.end())  // not found.
     {
-      const std::size_t j = m_index_table[i];
-      if (j!=std::size_t(-1))
-      {
-        // the variable has an assigned value.
-        assert(j<m_container.size());
-        return m_container[j].second;
-      }
+    return v;
     }
     // no value assigned to v;
-    return v;
+    assert(i->first==v); 
+    return i->second; 
   }
 
   /// \brief Application operator; applies substitution to v.
   /// \details This must deliver an expression, and not a reference
   ///          to an expression, as the expressions are stored in 
   ///          a vector that can be resized and moved. 
-  const expression_type operator()(const variable_type& v) const
+  const expression_type& operator()(const variable_type& v) const
   {
     return get_ref(v);
   }
@@ -243,20 +185,13 @@ public:
   {
     static_assert(std::is_same<ResultType&,expression_type&>::value ||
                   std::is_same<ResultType&,atermpp::unprotected_aterm&>::value);
-    const std::size_t i = atermpp::detail::index_traits<data::variable, data::variable_key_type, 2>::index(v);
-    if (i < m_index_table.size())
+    const typename substitution_type::const_iterator i=m_substitution.find(v);
+    if (i==m_substitution.end()) // not found.
     {
-      const std::size_t j = m_index_table[i];
-      if (j!=std::size_t(-1))
-      {
-        // the variable has an assigned value.
-        assert(j<m_container.size());
-        target=m_container[j].second;
-        return;
-      }
+      target=v;
+      return;
     }
-    // no value assigned to v;
-    target=v;
+    target=i->second;
   }
 
   /// \brief Application operator; applies substitution to v.
@@ -270,31 +205,21 @@ public:
              std::atomic<bool>* busy_flag,
              std::atomic<bool>* forbidden_flag,
              std::size_t* lock_depth)
-
   {
-    const std::size_t i = atermpp::detail::index_traits<data::variable, data::variable_key_type, 2>::index(v);
-    if (i < m_index_table.size())
+    typename substitution_type::const_iterator i=m_substitution.find(v);
+    if (i==m_substitution.end()) // not found.
     {
-      const std::size_t j = m_index_table[i];
-      if (j!=std::size_t(-1))
-      {
-        // the variable has an assigned value.
-        assert(j<m_container.size());
-        // target=m_container[j].second;
-        target.assign(m_container[j].second,
-                      busy_flag,
-                      forbidden_flag,
-                      lock_depth);
-        return;
-      }
+      target.assign(v,
+                    busy_flag,
+                    forbidden_flag,
+                    lock_depth);
+      return;
     }
-    // no value assigned to v;
-    // target=v; Code below is more efficient, but ugly. 
-    target.assign(v,
+    target.assign(i->second,
                   busy_flag,
                   forbidden_flag,
                   lock_depth);
-   }
+  }
 
   /// \brief Index operator.
   assignment operator[](variable_type const& v)
@@ -305,9 +230,7 @@ public:
   /// \brief Clear substitutions.
   void clear()
   {
-    m_index_table.clear();
-    m_container.clear();
-    m_free_positions=std::stack<std::size_t>();
+    m_substitution.clear();
     m_variables_in_rhs_set_is_defined=false;
     m_variables_in_rhs.clear();
   }
@@ -320,8 +243,7 @@ public:
   mutable_indexed_substitution<VariableType, ExpressionType> clone()
   {
     return mutable_indexed_substitution<VariableType, ExpressionType>(
-        m_container, m_index_table, m_free_positions,
-        m_variables_in_rhs_set_is_defined, m_variables_in_rhs);
+                       m_substitution, m_variables_in_rhs_set_is_defined, m_variables_in_rhs);
   }
 
   /// \brief Compare substitutions
@@ -333,17 +255,14 @@ public:
 
   /// \brief Provides a multiset containing the variables in the rhs.
   /// \return A multiset with variables in the right hand side. 
-  const std::multiset<variable>& variables_occurring_in_right_hand_sides() const
+  const std::multiset<variable_type>& variables_occurring_in_right_hand_sides() const
   {
     if (!m_variables_in_rhs_set_is_defined)
     {
-      for(const std::size_t i: m_index_table)
+      for(const auto& p: m_substitution)
       {
-        if (i != std::size_t(-1))
-        {
-          std::set<variable_type> s=find_free_variables(m_container[i].second);
-          m_variables_in_rhs.insert(s.begin(),s.end());
-        }
+        std::set<variable_type> s=find_free_variables(p.second);
+        m_variables_in_rhs.insert(s.begin(),s.end());
       }
       m_variables_in_rhs_set_is_defined=true;
     }
@@ -361,15 +280,13 @@ public:
   /// \brief Returns the number of assigned variables in the substitution.
   bool size()
   {
-    assert(m_container.size()>=m_free_positions.size());
-    return m_container.size()-m_free_positions.size();
+    return m_substitution.size();
   }
 
   /// \brief Returns true if the substitution is empty.
   bool empty()
   {
-    assert(m_container.size()>=m_free_positions.size());
-    return m_container.size()==m_free_positions.size();
+    return m_substitution.empty();
   }
 
 public:
@@ -379,22 +296,18 @@ public:
     std::stringstream result;
     bool first = true;
     result << "[";
-    for (std::size_t i = 0; i < m_index_table.size(); ++i)
+    for (const auto& p: m_substitution)
     {
-      const std::size_t j=m_index_table[i];
-      if (j != std::size_t(-1))
+      if (first)
       {
-        if (first)
-        {
-          first = false;
-        }
-        else
-        {
-          result << "; ";
-        }
-        
-        result << m_container.at(j).first << " := " << m_container.at(j).second;
+        first = false;
       }
+      else
+      {
+        result << "; ";
+      }
+        
+      result << p.first << " := " << p.second;
     }
     result << "]";
     return result.str();

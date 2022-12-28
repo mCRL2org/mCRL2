@@ -73,7 +73,7 @@ untyped_identifier_assignment(const core::identifier_string& lhs, const data_exp
 
 DATA_EXPRESSION_CLASSES = r'''
 data_expression()                                                                                             : public atermpp::aterm_appl   | XCU    | DataExpr          | A data expression
-variable(const core::identifier_string& name, const sort_expression& sort)                                    : public data::data_expression | EOCUsN | DataVarId         | A data variable
+variable(const core::identifier_string& name, const sort_expression& sort)                                    : public data::data_expression | EOCUs  | DataVarId         | A data variable
 function_symbol(const core::identifier_string& name, const sort_expression& sort)                             : public data::data_expression | EOCUsN | OpId              | A function symbol
 application(const data_expression& head, data_expression_list const& arguments)                               : public data::data_expression | EOUSW  | DataAppl          | An application of a data expression to a number of arguments
 where_clause(const data_expression& body, const assignment_expression_list& declarations)                     : public data::data_expression | EOU    | Whr               | A where expression
@@ -165,7 +165,7 @@ stochastic_process_initializer(const data::data_expression_list& expressions, co
 PROCESS_CLASSES = r'''
 action_label(const core::identifier_string& name, const data::sort_expression_list& sorts)                                                                                       : public atermpp::aterm_appl | CI   | ActId              | An action label
 process_specification(const data::data_specification& data, const process::action_label_list& action_labels, const std::set<data::variable>& global_variables, const std::vector<process::process_equation>& equations, const process_expression& init)           | SMW | ProcSpec    | A process specification
-process_identifier(const core::identifier_string& name, const data::variable_list& variables)                                                                                    : public atermpp::aterm_appl | CIUsN| ProcVarId          | A process identifier
+process_identifier(const core::identifier_string& name, const data::variable_list& variables)                                                                                    : public atermpp::aterm_appl | CIUs | ProcVarId          | A process identifier
 process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)                                       : public atermpp::aterm_appl | CI   | ProcEqn            | A process equation
 rename_expression(core::identifier_string& source, core::identifier_string& target)                                                                                              : public atermpp::aterm_appl | CI   | RenameExpr         | A rename expression
 communication_expression(const action_name_multiset& action_name, const core::identifier_string& name)                                                                           : public atermpp::aterm_appl | CI   | CommExpr           | A communication expression

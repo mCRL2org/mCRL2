@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_SUBSTITUTION_UTILITY_H
 #define MCRL2_DATA_SUBSTITUTION_UTILITY_H
 
+#include "mcrl2/data/variable.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 
 namespace mcrl2 {

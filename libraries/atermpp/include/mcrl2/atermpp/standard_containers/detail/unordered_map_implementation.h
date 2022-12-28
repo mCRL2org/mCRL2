@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 //
-/// \file mcrl2/atermpp/standard_containers/detail/unordered_map_implemenation.h
+/// \file mcrl2/atermpp/standard_containers/detail/unordered_map_implementation.h
 /// \brief This file contains an implementation of the hash function 
 ///        to break circular header dependencies. 
 

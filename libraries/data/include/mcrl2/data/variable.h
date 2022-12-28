@@ -63,16 +63,14 @@ class variable: public data_expression
     /// \brief Constructor.
     variable(const core::identifier_string& name, const sort_expression& sort)
     {
-      atermpp::make_term_appl_with_index<variable, std::pair<core::identifier_string, sort_expression> >
-                (*this, core::detail::function_symbol_DataVarId(), name, sort);
+      atermpp::make_term_appl(*this, core::detail::function_symbol_DataVarId(), name, sort);
     }
 
 
     /// \brief Constructor.
     variable(const std::string& name, const sort_expression& sort)
     {
-      atermpp::make_term_appl_with_index<variable, std::pair<core::identifier_string, sort_expression> >
-                (*this, core::detail::function_symbol_DataVarId(), core::identifier_string(name), sort);
+      atermpp::make_term_appl(*this, core::detail::function_symbol_DataVarId(), core::identifier_string(name), sort);
     }
 
 //--- end user section variable ---//
@@ -83,7 +81,7 @@ class variable: public data_expression
 template <class... ARGUMENTS>
 inline void make_variable(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
-  atermpp::make_term_appl_with_index<variable,std::pair<core::identifier_string, sort_expression>>(t, core::detail::function_symbol_DataVarId(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_DataVarId(), args...);
 }
 
 /// \\brief list of variables

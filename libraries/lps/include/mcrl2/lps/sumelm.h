@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file sumelm.h
-/// \brief Provides an implemenation of the sum elimination lemma,
+/// \brief Provides an implementation of the sum elimination lemma,
 ///        as well as the removal of unused summation variables.
 ///        The sum elimination lemma is the following:
 ///          sum d:D . d == e -> X(d) = X(e).

@@ -10,7 +10,6 @@
 /// \brief
 
 #include "mcrl2/process/detail/alphabet_push_block.h"
-#include "mcrl2/process/index_traits.h"
 #include "mcrl2/process/parse_impl.h"
 #include "mcrl2/process/translate_user_notation.h"
 #include "mcrl2/process/remove_equations.h"
@@ -80,13 +79,6 @@ std::set<data::variable> find_free_variables(const process::action& x) { return 
 std::set<data::variable> find_free_variables(const process::process_specification& x) { return process::find_free_variables< process::process_specification >(x); }
 std::set<core::identifier_string> find_identifiers(const process::process_specification& x) { return process::find_identifiers< process::process_specification >(x); }
 //--- end generated process overloads ---//
-
-static bool register_hooks()
-{
-  register_process_identifier_hooks();
-  return true;
-}
-static bool mcrl2_register_process(register_hooks());
 
 void alphabet_reduce(process_specification& procspec, std::size_t duplicate_equation_limit)
 {
