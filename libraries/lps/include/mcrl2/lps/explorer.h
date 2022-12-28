@@ -261,7 +261,7 @@ struct cache_equality
     std::vector<data::variable>::const_iterator i=key2.m_gamma.begin();
     for(const data::data_expression& d: key1)
     {
-      if (d!=key2.m_sigma.get_ref(*i))
+      if (d!=key2.m_sigma(*i))
       {
         return false;
       }
@@ -294,7 +294,7 @@ struct cache_hash
     std::size_t hash=0;
     for(const data::variable& v: key.m_gamma)
     {
-      hash=atermpp::detail::combine(hash,key.m_sigma.get_ref(v));
+      hash=atermpp::detail::combine(hash,key.m_sigma(v));
     }
     return hash;
   }

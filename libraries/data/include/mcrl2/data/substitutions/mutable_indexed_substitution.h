@@ -149,11 +149,11 @@ public:
     }
   };
 
-  /// \brief Application operator; applies substitution to v, yielding an unstable reference.
-  /// \details The resulting expression is stored in 
-  ///          a vector that can be resized and moved. Therefore, the reference is not stable
-  ///          and must be used instantly. 
-  const expression_type& get_ref(const variable_type& v) const
+  /// \brief Application operator; applies substitution to v.
+  /// \param   v The variable to which the subsitution is applied.
+  /// \result  The value to which v is mapped, or v itself if v is not
+  ///          mapped to a value. 
+  const expression_type& operator()(const variable_type& v) const
   {
     typename substitution_type::const_iterator i=m_substitution.find(v);
     if (i==m_substitution.end())  // not found.
@@ -163,15 +163,6 @@ public:
     // no value assigned to v;
     assert(i->first==v); 
     return i->second; 
-  }
-
-  /// \brief Application operator; applies substitution to v.
-  /// \details This must deliver an expression, and not a reference
-  ///          to an expression, as the expressions are stored in 
-  ///          a vector that can be resized and moved. 
-  const expression_type& operator()(const variable_type& v) const
-  {
-    return get_ref(v);
   }
 
   /// \brief Application operator; applies substitution to v.
