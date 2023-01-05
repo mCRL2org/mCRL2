@@ -423,15 +423,20 @@ void GLScene::rebuild()
 void GLScene::project2D()
 {
   m_graph.lock(GRAPH_LOCK_TRACE);
-
+  std::size_t nodeCount = m_graph.hasExploration()
+                              ? m_graph.explorationNodeCount()
+                              : m_graph.nodeCount();
+  std::size_t edgeCount = m_graph.hasExploration()
+                              ? m_graph.explorationEdgeCount()
+                              : m_graph.edgeCount();
   std::vector<QVector3D> positions;
 
-  for (std::size_t i = 0; i < m_graph.nodeCount(); i++)
+  for (std::size_t i = 0; i < nodeCount; i++)
   {
     std::size_t n = m_graph.hasExploration() ? m_graph.explorationNode(i) : i;
     positions.push_back(m_graph.node(n).pos());
   }
-  for (std::size_t i = 0; i < m_graph.edgeCount(); i++)
+  for (std::size_t i = 0; i < edgeCount; i++)
   {
     std::size_t n = m_graph.hasExploration() ? m_graph.explorationEdge(i) : i;
     positions.push_back(m_graph.transitionLabel(n).pos());
@@ -490,7 +495,7 @@ void GLScene::project2D()
   };
   auto transform = [&](const QVector3D& x)
   { return cam_rotate(project(x) - reference_point) - m_camera.center(); };
-  for (std::size_t i = 0; i < m_graph.nodeCount(); i++)
+  for (std::size_t i = 0; i < nodeCount; i++)
   {
     std::size_t n = m_graph.hasExploration() ? m_graph.explorationNode(i) : i;
     m_graph.node(n).pos_mutable() = transform(m_graph.node(n).pos());
@@ -500,7 +505,7 @@ void GLScene::project2D()
         transform(m_graph.stateLabel(n).pos());
     m_graph.stateLabel(n).pos_mutable().setZ(0);
   }
-  for (std::size_t i = 0; i < m_graph.edgeCount(); i++)
+  for (std::size_t i = 0; i < edgeCount; i++)
   {
     std::size_t n = m_graph.hasExploration() ? m_graph.explorationEdge(i) : i;
     m_graph.transitionLabel(n).pos_mutable() =

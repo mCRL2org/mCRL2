@@ -1408,7 +1408,7 @@ void SpringLayout::randomizeZ(float z)
                                                z_offset);
     }
   }
-  for (std::size_t i = 0; i < m_graph.edgeCount(); ++i)
+  for (std::size_t i = 0; i < edgeCount; ++i)
   {
     std::size_t n = exploration ? m_graph.explorationEdge(i) : i;
     if (!m_graph.transitionLabel(n).anchored())
