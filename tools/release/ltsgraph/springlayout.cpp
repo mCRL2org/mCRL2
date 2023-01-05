@@ -751,11 +751,14 @@ static QVector3D slicedAverage(Graph& graph, std::size_t i, std::size_t j)
   else
   {
     double x = 0, y = 0, z = 0;
+    auto node = [&graph](std::size_t k) {
+      return graph.node(graph.hasExploration() ? graph.explorationNode(k) : k);
+    };
     for (std::size_t k = i; k < j; ++k)
     {
-      x += graph.node(k).pos().x();
-      y += graph.node(k).pos().y();
-      z += graph.node(k).pos().z();
+      x += node(k).pos().x();
+      y += node(k).pos().y();
+      z += node(k).pos().z();
     }
     return QVector3D(x / n, y / n, z / n);
   }
@@ -1282,7 +1285,7 @@ void SpringLayout::apply()
     }
 
     float drift_secs = drift_timer.elapsed() * 0.001f; // seconds
-    QVector3D center_of_mass = slicedAverage(m_graph, 0, m_graph.nodeCount());
+    QVector3D center_of_mass = slicedAverage(m_graph, 0, m_graph.hasExploration() ? m_graph.explorationNodeCount() : m_graph.nodeCount());
     if (new_anchored ^ any_anchored)
     {
       // changed
