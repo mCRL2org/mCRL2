@@ -89,8 +89,6 @@ MainWindow::MainWindow(QWidget* parent) :
   m_ui.actFullscreen->setShortcut(QString("F11"));
 #endif
   updateStatusBar();
-
-
 }
 
 void MainWindow::onFullscreen()
@@ -199,9 +197,9 @@ void MainWindow::openFile(const QString& fileName)
       // Disable layouting and reset viewport.
       m_ui.actLayout->setChecked(false);
 
-      m_glwidget->pause();
+      //m_glwidget->pause();
       m_glwidget->resetViewpoint(0);
-
+      
       // We limit the initial positions of the nodes.
       QVector3D limit = QVector3D(2500.0, 2500.0f, (m_glwidget->get3D() ? 2500.0f : 0.0f));
 
@@ -209,6 +207,7 @@ void MainWindow::openFile(const QString& fileName)
       // does that when supplied an empty string as the input file name
       m_graph.load(fileName == "-" ? "" : fileName, -limit, limit);
 
+      m_layout->resetPositions();
       m_glwidget->rebuild();
       on3DChanged(m_ui.act3D->isChecked());
 
@@ -228,7 +227,7 @@ void MainWindow::openFile(const QString& fileName)
         onExplore(hadExploration);
       }
 
-      m_glwidget->resume();
+      //m_glwidget->resume();
 
       m_information->update();
       setWindowTitle(QString("LTSGraph - ") + fileName);

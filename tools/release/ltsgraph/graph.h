@@ -453,7 +453,7 @@ class Graph
     mutable QReadWriteLock m_lock;              ///< Lock protecting the structure from being changed while rendering and simulating
     const float m_stabilityThreshold = 0.000f;  ///< Used for checking whether the graph is stable. TODO: Allow user control 
     bool m_stable;                              ///< When true, the graph is considered stable, spring forces should not be applied.
-    bool m_hasNewFrame = true;                  ///< Set to false when frame is rendered. Whenever new layout is applied set to true.
+    bool m_hasNewFrame = false;                 ///< Set to false when frame is rendered. Whenever new layout is applied set to true.
     bool m_forceUpdate = false;                 ///< Some actions require forcing update -> toggleOpen for instance
     bool m_resetPositions = false;              ///< Resets all positions on the next worker iteration
     bool m_scrambleZPositions = false;          ///< Scrambles Z-positions on the next worker iteration
