@@ -34,7 +34,7 @@ class ltsgraph_tool : public ltsgraph_base
       //   properly use OpenGL 3.x functionality. Removing this line will cause issues with MacOS eventually.
       surfaceFormat.setProfile(QSurfaceFormat::CoreProfile);
       surfaceFormat.setStencilBufferSize(1);
-      //surfaceFormat.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+      surfaceFormat.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
       surfaceFormat.setSwapInterval(1);
 
       // Enable a surface with multisampling.
@@ -42,7 +42,7 @@ class ltsgraph_tool : public ltsgraph_base
 
       // We use the GL_KHR_debug extension to provide realtime logging of OpenGL errors.
       // Ruben: Disabled because debug logging became unusable and every text draw call produced 3 lines of output per node/label
-      surfaceFormat.setOption(QSurfaceFormat::DebugContext, false);
+      surfaceFormat.setOption(QSurfaceFormat::DebugContext, true);
 
       // Qt: Calling QSurfaceFormat::setDefaultFormat() before constructing the QApplication instance
       //     is mandatory on some platforms (for example, macOS) when an OpenGL core profile context is requested.
@@ -74,7 +74,6 @@ class ltsgraph_tool : public ltsgraph_base
       {
         window.delayedOpenFile(QString::fromStdString(m_input_filename));
       }
-
       return show_main_window(window);
     }
 };
