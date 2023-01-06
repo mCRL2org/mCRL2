@@ -219,6 +219,11 @@ public:
     detail::shared_guard _;
     super::swap(other); // Invalidates end() so must be protected.
   }
+
+  std::size_t size() const override
+  {
+    return super::size();
+  }
 };
 
 } // namespace atermpp

@@ -109,6 +109,7 @@ public:
   inline bool is_busy() const override;
   inline void wait_for_busy() const override;
   inline void set_forbidden(bool value) override;
+  inline std::size_t protection_set_size() const override;
 
   /// \brief Called before entering the global term pool.
   inline void lock_shared();

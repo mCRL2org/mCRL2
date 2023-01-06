@@ -235,6 +235,11 @@ public:
     super::resize(count, value);
   }
 
+  std::size_t size() const override
+  {
+    return super::size();
+  }
+
   void swap( deque& other ) noexcept
   {
     detail::shared_guard _;

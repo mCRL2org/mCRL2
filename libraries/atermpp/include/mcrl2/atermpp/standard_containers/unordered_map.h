@@ -321,6 +321,11 @@ public:
     detail::shared_guard _;
     return merge(source);
   }
+
+  std::size_t size() const override
+  {
+    return super::size();
+  }
 };
 
 namespace utilities
@@ -663,6 +668,11 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
       return merge(source);
     }
     */
+
+    std::size_t size() const override
+    {
+      return super::size();
+    }
 
   protected:
 

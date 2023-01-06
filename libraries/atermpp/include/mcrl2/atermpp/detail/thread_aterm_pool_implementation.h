@@ -324,6 +324,21 @@ void thread_aterm_pool::set_forbidden(bool value)
   m_forbidden_flag.store(value);
 }
 
+std::size_t thread_aterm_pool::protection_set_size() const
+{
+  std::size_t result = m_variables->size();
+
+  for (const auto& container : *m_containers)
+  {
+    if (container != nullptr)
+    {
+      result += container->size();
+    }
+  }
+
+  return result;
+}
+
 } // namespace detail
 } // namespace atermpp
 

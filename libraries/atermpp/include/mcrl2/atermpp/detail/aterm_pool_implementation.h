@@ -297,7 +297,7 @@ void aterm_pool::collect_impl(thread_aterm_pool_interface* thread)
   print_performance_statistics();
 
   // Use some heuristics to determine when the next collect should be called automatically.
-  m_count_until_collection = size();
+  m_count_until_collection = size() + protection_set_size();
 
   unlock();
 }
@@ -483,6 +483,18 @@ void aterm_pool::unlock()
   }
 
   m_mutex.unlock();
+}
+
+std::size_t aterm_pool::protection_set_size() const
+{
+  std::size_t result = 0;
+
+  for (const auto& pool : m_thread_pools)
+  {
+    result += pool->protection_set_size();
+  }
+
+  return result;
 }
 
 } // namespace detail

@@ -50,6 +50,9 @@ public:
 
   /// \brief Sets the forbidden flag.
   virtual void set_forbidden(bool value) = 0;
+
+  /// \returns The total number of terms residing in the pool.
+  virtual std::size_t protection_set_size() const = 0;
 };
 
 class thread_aterm_pool;
@@ -161,6 +164,9 @@ private:
   /// \brief Resizes all storages if necessary.
   /// \threadsafe.
   inline void resize_if_needed(thread_aterm_pool_interface* thread);
+
+  /// \returns The total number of term variables residing in the protection sets.
+  inline std::size_t protection_set_size() const;
 
   /// \returns Wait for the mutex to unlock.
   inline void wait();

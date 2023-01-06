@@ -49,6 +49,8 @@ public:
     // as otherwise an override would be called. 
   }
 
+  virtual inline std::size_t size() const = 0;
+
   /// \brief Copy constructor
   inline _aterm_container(const _aterm_container& c);
 
