@@ -30,7 +30,9 @@ class ltsgraph_tool : public ltsgraph_base
       // Create an OpenGL 3.3 surface without depth, alpha and stencil buffers and with vsync enabled.
       QSurfaceFormat surfaceFormat = QSurfaceFormat::defaultFormat();
       surfaceFormat.setVersion(3, 3);
-      //surfaceFormat.setProfile(QSurfaceFormat::CoreProfile);
+      // There are no Core profile features explicitly used, but some MacOS versions require Core profile as a 'hint' to 
+      //   properly use OpenGL 3.x functionality. Removing this line will cause issues with MacOS eventually.
+      surfaceFormat.setProfile(QSurfaceFormat::CoreProfile);
       surfaceFormat.setStencilBufferSize(1);
       //surfaceFormat.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
       surfaceFormat.setSwapInterval(1);
