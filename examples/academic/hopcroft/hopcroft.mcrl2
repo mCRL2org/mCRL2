@@ -1,0 +1,24 @@
+% This is a representation of the automaton B(n) described in the last paragraph of
+% John Hopcroft, An n log n algorithm for minimizing states in a finite automaton, 
+% technical report STAN-CS-71-190, Stanford, 1971.
+%
+% As the description of B(n) is not completely clear, -- it obviously contains some errors, 
+% or at least unclarities -- it might be that this is not completely the intended automaton.
+% The claim of Hopcroft is that this automaton requires n log n steps to be reduced modulo
+% bisimulation. This seem to be incorrect, as the bisimulation equivalence classes seem to 
+% be determinable in linear time. 
+%
+% January 2023, Jan Friso Groote
+
+map n: Pos; % Number of states. Must be a multiple of 4. 
+ 
+eqn n=16;
+ 
+act IO, F, S;
+ 
+proc B(i:Pos) = (1<= i && i <= n div 2) -> F. B(i) +
+                (1<=i && i<=n div 4) -> IO.B(max(1,(n div 2)+2*i-1)) +
+                (1+n div 4 <= i && i<= n div 4+n div 4) -> IO.B(max(1,2*(i-n div 4)-1)) +
+                (1+n div 2 < i && i<= n) -> IO.B(max(1,2*(i-n div 2)-1));
+ 
+init sum i:Pos.(i<=n && i mod 2==0) -> S. B(i);
