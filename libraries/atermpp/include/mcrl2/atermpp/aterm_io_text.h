@@ -40,7 +40,7 @@ class text_aterm_istream final : public aterm_istream
 public:
   text_aterm_istream(std::istream& os);
 
-  aterm get() override;
+  void get(aterm& t) override;
 
 private:
   /// \brief Parse a term from the input stream and return it.

@@ -43,7 +43,8 @@ void test_aterm_io(const std::string& input_string)
   std::ostringstream out;
   write_term_to_text_stream(input, out);
   std::istringstream in(out.str());
-  const aterm text_output = read_term_from_text_stream(in);
+  aterm text_output;
+  read_term_from_text_stream(in, text_output);
   if (input!=text_output)
   {
     std::cerr << "Expected the following terms to be the same (aterm textual save and load):\n";
@@ -56,7 +57,8 @@ void test_aterm_io(const std::string& input_string)
   std::stringbuf buf;
   std::iostream binary_stream(&buf);
   write_term_to_binary_stream(input, binary_stream);
-  const aterm binary_output = read_term_from_binary_stream(binary_stream);
+  aterm binary_output;
+  read_term_from_binary_stream(binary_stream, binary_output);
   if (input!=binary_output)
   {
     std::cerr << "Expected the following terms to be the same (aterm binary save and load):\n";

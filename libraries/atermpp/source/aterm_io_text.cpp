@@ -92,10 +92,8 @@ text_aterm_istream::text_aterm_istream(std::istream& is)
   character = next_char();
 }
 
-aterm text_aterm_istream::get()
+void text_aterm_istream::get(aterm& term)
 {
-  aterm term;
-
   try
   {
     if (character != EOF)
@@ -112,7 +110,7 @@ aterm text_aterm_istream::get()
   m_column = 0;
   m_history.clear();
 
-  return term;
+  return;
 }
 
 // Private functions
@@ -382,12 +380,14 @@ void write_term_to_text_stream(const aterm& term, std::ostream& os)
 aterm read_term_from_string(const std::string& s)
 {
   std::stringstream ss(s);
-  return  read_term_from_text_stream(ss);
+  aterm t;
+  read_term_from_text_stream(ss, t);
+  return t;
 }
 
-aterm read_term_from_text_stream(std::istream& is)
+void read_term_from_text_stream(std::istream& is, aterm& t)
 {
-  return text_aterm_istream(is).get();
+  text_aterm_istream(is).get(t);
 }
 
 

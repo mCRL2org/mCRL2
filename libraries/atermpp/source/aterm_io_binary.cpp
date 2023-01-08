@@ -8,8 +8,8 @@
 //
 
 #include "mcrl2/atermpp/aterm_io_binary.h"
-
 #include "mcrl2/atermpp/standard_containers/stack.h"
+
 
 namespace atermpp
 {
@@ -234,7 +234,7 @@ std::size_t binary_aterm_ostream::write_function_symbol(const function_symbol& s
   }
 }
 
-aterm binary_aterm_istream::get()
+void binary_aterm_istream::get(aterm& t)
 {
   while(true)
   {
@@ -254,7 +254,8 @@ aterm binary_aterm_istream::get()
     {
       // Read the integer from the stream and construct an aterm_int.
       std::size_t value = m_stream->read_integer();
-      return aterm_int(value);
+      make_aterm_int(static_cast<aterm_int&>(t), value);
+      return;
     }
     else if (packet == packet_type::aterm || packet == packet_type::aterm_output)
     {
@@ -264,7 +265,8 @@ aterm binary_aterm_istream::get()
       if (!symbol.defined())
       {
         // The term with function symbol zero marks the end of the stream.
-        return aterm();
+        t=aterm();
+        return;
       }
       else if (symbol == detail::g_as_int)
       {
@@ -288,7 +290,8 @@ aterm binary_aterm_istream::get()
         if (packet == packet_type::aterm_output)
         {
           // This aterm was marked as output in the file so return it.
-          return transformed;
+          t=transformed;
+          return;
         }
         else
         {
@@ -318,9 +321,9 @@ void write_term_to_binary_stream(const aterm& t, std::ostream& os)
   binary_aterm_ostream(os) << t;
 }
 
-aterm read_term_from_binary_stream(std::istream& is)
+void read_term_from_binary_stream(std::istream& is, aterm& t)
 {
-  return binary_aterm_istream(is).get();
+  binary_aterm_istream(is).get(t);
 }
 
 } // namespace atermpp

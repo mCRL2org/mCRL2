@@ -61,7 +61,7 @@ public:
   virtual ~aterm_istream();
 
   /// \brief Reads an aterm from this stream.
-  virtual aterm get() = 0;
+  virtual void get(aterm& t) = 0;
 };
 
 // These free functions provide input/output operators for these streams.
@@ -74,7 +74,7 @@ inline aterm_ostream& operator<<(aterm_ostream& stream, aterm_transformer transf
 inline aterm_ostream& operator<<(aterm_ostream& stream, const aterm& term) { stream.put(term); return stream; }
 
 /// \brief Read the given term from the stream, but for aterm_list we want to use a specific one that performs validation (defined below).
-inline aterm_istream& operator>>(aterm_istream& stream, aterm& term) { term = stream.get(); return stream; }
+inline aterm_istream& operator>>(aterm_istream& stream, aterm& term) { stream.get(term); return stream; }
 
 // Utility functions
 
@@ -165,13 +165,13 @@ inline const std::string& pp(const function_symbol& f)
 void write_term_to_binary_stream(const aterm& t, std::ostream& os);
 
 /// \brief Reads a term from a stream in binary aterm format.
-aterm read_term_from_binary_stream(std::istream& is);
+void read_term_from_binary_stream(std::istream& is, aterm& t);
 
 /// \brief Writes term t to a stream in textual format.
 void write_term_to_text_stream(const aterm& t, std::ostream& os);
 
 /// \brief Reads a term from a stream which contains the term in textual format.
-aterm read_term_from_text_stream(std::istream& is);
+void read_term_from_text_stream(std::istream& is, aterm& t);
 
 /// \brief Reads an aterm from a string. The string can be in either binary or text format.
 aterm read_term_from_string(const std::string& s);

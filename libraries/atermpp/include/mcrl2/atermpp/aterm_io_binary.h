@@ -71,7 +71,7 @@ public:
   binary_aterm_istream(std::istream& is);
   binary_aterm_istream(std::shared_ptr<mcrl2::utilities::ibitstream> stream);
 
-  aterm get() override;
+  void get(aterm& t) override;
 
 private:
   /// \returns The number of bits needed to index terms.

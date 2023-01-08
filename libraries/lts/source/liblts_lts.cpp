@@ -148,9 +148,14 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
   // Keep track of the number of states (derived from the transitions).
   std::size_t number_of_states = 1;
 
+  aterm term;
+  aterm_int from;
+  action_label_lts action;
+  aterm_int to;
+
   while (true)
   {
-    aterm term = stream.get();
+    stream.get(term);
     if (!term.defined())
     {
       // The default constructed term indicates the end of the stream.
@@ -159,10 +164,6 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
 
     if (term == transition_mark())
     {
-      aterm_int from;
-      action_label_lts action;
-      aterm_int to;
-
       stream >> from;
       stream >> action;
       stream >> to;
@@ -202,8 +203,6 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
     {
       if constexpr (std::is_same<LTS, probabilistic_lts_lts_t>::value)
       {
-        aterm_int from;
-        action_label_lts action;
         probabilistic_lts_lts_t::probabilistic_state_t to;
 
         stream >> from;
