@@ -8,7 +8,7 @@
 //
 
 
-#include "bdd_util.h"
+#include "mcrl2/symbolic/bdd_util.h"
 
 #include "mcrl2/utilities/stack_array.h"
 

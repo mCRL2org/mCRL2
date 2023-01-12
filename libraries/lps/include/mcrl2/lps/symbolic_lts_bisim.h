@@ -94,15 +94,15 @@ void bisim(const symbolic_lts& lts)
   mCRL2log(log::verbose) << "Preprocessing the transition groups..." << std::endl;
   std::vector<lps_summand_group> new_groups;
 
-  for (const auto& group : lts.summand_groups)
+  for (const auto& group : lts.summand_groups())
   {
-    for (const auto& action : lts.action_index)
+    for (const auto& action : lts.action_index())
     {
       // Explore all transitions in the LDD.
       result res;
       //res.action_index = lts.action_index.index(action);
       //sat_all_nopar(group.L, project_transitions<result>, &res);
-      res.projected = project_transitions(group.L, height(group.L), lts.action_index.index(action));
+      res.projected = project_transitions(group.L, height(group.L), lts.action_index().index(action));
 
       if (res.projected != sylvan::ldds::empty_set())
       {
@@ -114,7 +114,7 @@ void bisim(const symbolic_lts& lts)
 
   mcrl2::utilities::unordered_set<ldd> partition; // The set of sets of states, where each set of states is an LDD.
   mcrl2::utilities::unordered_set<ldd> new_partition;
-  partition.emplace(lts.states);
+  partition.emplace(lts.states());
 
   bool refined_block = false;
   bool refined_any_block = false;
@@ -171,7 +171,7 @@ void bisim(const symbolic_lts& lts)
   for (const ldd& C : partition)
   {
     mCRL2log(log::debug) << symbolic::print_size(C, true, true) << std::endl;
-    mCRL2log(log::debug) << symbolic::print_states(lts.data_index, C) << std::endl;
+    mCRL2log(log::debug) << symbolic::print_states(lts.data_index(), C) << std::endl;
   }
 }
 

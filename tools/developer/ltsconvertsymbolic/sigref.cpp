@@ -9,8 +9,8 @@
 
 #include "sigref.h"
 
-#include "bdd_util.h"
 #include "mcrl2/atermpp/aterm_int.h"
+#include "mcrl2/symbolic/bdd_util.h"
 #include "mcrl2/symbolic/print.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/stack_array.h"
@@ -18,8 +18,10 @@
 
 #include <sylvan_int.h>
 
+using namespace mcrl2;
 using namespace mcrl2::log;
 using namespace mcrl2::symbolic;
+using namespace mcrl2::data;
 using namespace mcrl2::utilities;
 using namespace mcrl2::lps;
 using namespace sylvan::bdds;
@@ -159,18 +161,18 @@ bdd signature_strong(const std::vector<bdd>& relations, const bdd& partition, co
     return and_exists(relations[0], partition, prime_variables);
 }
 
-void sigref_algorithm::run(const mcrl2::lps::symbolic_lts_bdd& lts)
+mcrl2::lps::symbolic_lts_bdd sigref_algorithm::run(const mcrl2::lps::symbolic_lts_bdd& lts)
 {
   mCRL2log(verbose) << "Extending transition relation to full domain..." << std::endl;
 
   // extend transition relations to the full domain.
   std::vector<sylvan::bdds::bdd> new_transition_relations;
-  for (const auto& group: lts.transitions) {
+  for (const auto& group: lts.transition_groups()) {
       new_transition_relations.emplace_back(extend_relation(group.relation, group.variables, lts.state_variables_length()));
   }
 
   // Compute the target state variables (also used by extend_relation implicitly)
-  bdd prime_variables = swap_prime(lts.state_variables);
+  bdd prime_variables = swap_prime(lts.state_variables());
 
   // merge all transition relations into a single monolithic transition relation.
   mCRL2log(verbose) << "Merging transition relations..." << std::endl;
@@ -179,19 +181,19 @@ void sigref_algorithm::run(const mcrl2::lps::symbolic_lts_bdd& lts)
   merged_transition_relation[0] = big_union(new_transition_relations);
   new_transition_relations = merged_transition_relation;
 
-  mCRL2log(log_level_t::debug) << "transition relation size " << print_size(new_transition_relations[0], bdd_and(bdd_and(lts.state_variables, prime_variables), lts.action_label_variables), true) << std::endl;
+  mCRL2log(log_level_t::debug) << "transition relation size " << print_size(new_transition_relations[0], bdd_and(bdd_and(lts.state_variables(), prime_variables), lts.action_label_variables()), true) << std::endl;
 
   // mCRL2log(log_level_t::debug) << "transition relation = " << std::endl;     
   //mCRL2log(log_level_t::debug) << print_vectors(new_transition_relations[0], bdd_and(bdd_and(lts.state_variables, prime_variables), lts.action_label_variables)) << std::endl;
 
   // There are at most |states| blocks since every state can be in a unique block.
-  double number_of_states = satcount(lts.states, lts.state_variables);
+  double number_of_states = satcount(lts.states(), lts.state_variables());
   prepare_blocks(base_two_bits(number_of_states));
   mCRL2log(log_level_t::debug) << "using " << m_block_length << " bits to encode blocks for " << number_of_states << " states" << std::endl;     
   
   // Assign the initial partition, assigns block to prime variables.
   bdd block = encode_block(m_block_variables, m_block_length, get_next_block());
-  bdd prime_states = swap_prime(lts.states);
+  bdd prime_states = swap_prime(lts.states());
   bdd partition = bdd_and(prime_states, block);
   
   // The actual signature refinement algorithm for strong bisimulation
@@ -209,13 +211,13 @@ void sigref_algorithm::run(const mcrl2::lps::symbolic_lts_bdd& lts)
 
     // compute signature
     mCRL2log(log_level_t::debug) << "partition = " << std::endl;     
-    mCRL2log(log_level_t::debug) << print_partition(lts.data_index, partition, bdd_and(prime_variables, m_block_variables), lts.bits, m_block_length) << std::endl;
+    mCRL2log(log_level_t::debug) << print_partition(lts.data_index(), partition, bdd_and(prime_variables, m_block_variables), lts.state_variable_bits(), m_block_length) << std::endl;
 
     bdd signature = signature_strong(new_transition_relations, partition, prime_variables);
     
     mCRL2log(log_level_t::debug) << "signature = " << std::endl;  
-    mCRL2log(log_level_t::debug) << print_signature(lts.data_index, lts.action_index, signature, 
-        bdd_and(bdd_and(lts.state_variables, lts.action_label_variables), m_block_variables), lts.bits, lts.bits_action_label, m_block_length) << std::endl;
+    mCRL2log(log_level_t::debug) << print_signature(lts.data_index(), lts.action_index(), signature, 
+        bdd_and(bdd_and(lts.state_variables(), lts.action_label_variables()), m_block_variables), lts.state_variable_bits(), lts.action_label_bits(), m_block_length) << std::endl;
 
     partition = refine(signature, prime_variables, partition);
 
@@ -230,6 +232,59 @@ void sigref_algorithm::run(const mcrl2::lps::symbolic_lts_bdd& lts)
   }
 
   mCRL2log(log_level_t::verbose) << "There are " << num_of_blocks << " equivalence classes." << std::endl;  
+
+  // Compute a new transition relation for the blocks, rename 'to' states to their block number
+  std::vector<mcrl2::lps::transition_group> quotient_transition_relation;
+  bdd relation = and_exists(new_transition_relations[0], partition, prime_variables);
+
+  // Rename b to new b' variables relation[B -> s'].
+  bdd_substitution subst;
+  for (int i=0; i < m_block_length; i++) 
+  {
+    subst.put(sylvan::bdds::block_variable_first_var + 2*i, sylvan::bdds::block_variable_first_var + 2*i + 1);
+  }
+
+  relation = let(subst, relation);
+  relation = and_exists(relation, partition, lts.state_variables());
+  quotient_transition_relation.emplace_back(relation, m_block_variables);
+
+  //mcrl2::lps::symbolic_lts_bdd quotient_lts(lts);
+  bdd new_states = and_exists(lts.states(), partition, lts.state_variables());
+  bdd new_initial_state = and_exists(lts.initial_state(), partition, lts.state_variables());
+
+  // New process has a single parameter encoding the block number
+  data::variable block_parameter(mcrl2::core::identifier_string("block"), data::sort_nat::nat());
+  data::variable_list process_parameters;
+  process_parameters.emplace_front(block_parameter);
+
+  // This single parameter has block_length 
+  std::vector<std::uint32_t> new_bits;
+  new_bits.emplace_back(m_block_length);
+
+  // Map indices to the actual blocks
+  data_expression_index block_expressions(data::sort_nat::nat());
+  for (std::size_t i = 0; i < count_blocks(); ++i)
+  {
+    block_expressions.insert(data::data_expression());
+  }
+  
+  std::vector<symbolic::data_expression_index> data_index;
+  data_index.emplace_back(block_expressions);
+
+  return mcrl2::lps::symbolic_lts_bdd(
+    lts.data_specification(),
+    process_parameters,
+    new_states,
+    new_initial_state,
+    m_block_variables,
+    lts.action_label_variables(),
+    new_bits,
+    lts.action_label_bits(),
+    data_index,
+    lts.action_index(),
+    quotient_transition_relation,
+    m_block_length
+  );
 }
 
 /// \brief The refine procedure defined in the paper, where s and s' are the current and next states, 'a' the action and 'b' the block.

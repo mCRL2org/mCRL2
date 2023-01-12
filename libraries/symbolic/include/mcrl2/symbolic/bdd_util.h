@@ -7,8 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifndef MCRL2_BDD_UTIL_H
-#define MCRL2_BDD_UTIL_H
+#ifndef MCRL2_SYMBOLIC_BDD_UTIL_H
+#define MCRL2_SYMBOLIC_BDD_UTIL_H
 
 #include <sylvan_int.h>
 #include <sylvan_ldd.hpp>
@@ -93,4 +93,4 @@ std::size_t base_two_bits(std::size_t max_value)
   return std::ceil(std::log2(max_value));
 }
 
-#endif // MCRL2_BDD_UTIL_H
+#endif // MCRL2_SYMBOLIC_BDD_UTIL_H

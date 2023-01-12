@@ -174,6 +174,20 @@ std::string print_transition(const std::vector<data_expression_index>& data_inde
   }
 }
 
+inline 
+std::string print_transition(const std::vector<data_expression_index>& data_index, 
+  const std::uint32_t* xy, 
+  const std::vector<std::size_t>& read, 
+  const std::vector<std::size_t>& write)
+{
+  const utilities::indexed_set<lps::multi_action> action_index;
+
+  std::ostringstream out;
+  out << print_transition(data_index, action_index, xy, read, write, false) << std::endl;
+  return out.str();  
+}
+
+
 /// \brief Prints a short vector transition relation R explicitly as 'x -> y' for every transition  where x is the from vector and y the to vector based on the read and write indices.
 inline 
 std::string print_relation(const std::vector<data_expression_index>& data_index, const sylvan::ldds::ldd& R, const std::vector<std::size_t>& read, const std::vector<std::size_t>& write)

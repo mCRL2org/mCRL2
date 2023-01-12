@@ -40,14 +40,14 @@ std::ostream& operator<<(std::ostream& stream, const symbolic_lts& lts)
   aterm_stream << data::detail::remove_index_impl;
 
   aterm_stream << symbolic_labelled_transition_system_mark();
-  aterm_stream << lts.data_spec;
-  aterm_stream << lts.process_parameters;
+  aterm_stream << lts.data_spec();
+  aterm_stream << lts.process_parameters();
 
-  ldd_stream << lts.initial_state;
-  ldd_stream << lts.states;
+  ldd_stream << lts.initial_state();
+  ldd_stream << lts.states();
 
   // Write the mapping from indices to terms.
-  for (const auto& index : lts.data_index)
+  for (const auto& index : lts.data_index())
   {
     bitstream->write_integer(index.size());
 
@@ -58,15 +58,15 @@ std::ostream& operator<<(std::ostream& stream, const symbolic_lts& lts)
   }
 
   // Write the action label indices.
-  bitstream->write_integer(lts.action_index.size());
-  for (const auto& term : lts.action_index)
+  bitstream->write_integer(lts.action_index().size());
+  for (const auto& term : lts.action_index())
   {
     aterm_stream << term;
   }
 
   // Write the transition group information: read and write dependencies and the local transition relation.
-  bitstream->write_integer(lts.summand_groups.size());
-  for (const auto& group : lts.summand_groups)
+  bitstream->write_integer(lts.summand_groups().size());
+  for (const auto& group : lts.summand_groups())
   {
     bitstream->write_integer(group.read_parameters.size());
     for (const auto& parameter : group.read_parameters)
@@ -103,16 +103,23 @@ std::istream& operator>>(std::istream& stream, symbolic_lts& lts)
     throw mcrl2::runtime_error("Stream does not contain a symbolic labelled transition system (SLTS).");
   }
 
-  aterm_stream >> lts.data_spec;
-  aterm_stream >> lts.process_parameters;
-  ldd_stream >> lts.initial_state;
-  ldd_stream >> lts.states;
+  mcrl2::data::data_specification data_spec;
+  mcrl2::data::variable_list process_parameters;
+  sylvan::ldds::ldd states;
+  sylvan::ldds::ldd initial_state;
+  std::vector<symbolic::data_expression_index> data_index;
+  utilities::indexed_set<lps::multi_action> action_index;
+  std::vector<lps_summand_group> summand_groups;
+
+  aterm_stream >> data_spec;
+  aterm_stream >> process_parameters;
+  ldd_stream >> initial_state;
+  ldd_stream >> states;
 
   // For every process parameter read the data index.
-  lts.data_index.clear();
-  for (const data::variable& parameter : lts.process_parameters)
+  for (const data::variable& parameter : process_parameters)
   {
-    lts.data_index.push_back(parameter.sort());
+    data_index.push_back(parameter.sort());
 
     std::size_t number_of_entries = bitstream->read_integer();
     for (std::size_t i = 0; i < number_of_entries; ++i)
@@ -120,28 +127,26 @@ std::istream& operator>>(std::istream& stream, symbolic_lts& lts)
       data::data_expression value;
       aterm_stream >> value;
 
-      auto [result, inserted] = lts.data_index.back().insert(value);
+      auto [result, inserted] = data_index.back().insert(value);
       assert(i == result); utilities::mcrl2_unused(result);
       assert(inserted); utilities::mcrl2_unused(inserted);
     }
   }
 
   std::size_t number_of_action_labels = bitstream->read_integer();
-  lts.action_index.clear();
+  action_index.clear();
 
   for (std::size_t i = 0; i < number_of_action_labels; ++i)
   {
     lps::multi_action value;
     aterm_stream >> value;
 
-    auto [result, inserted] = lts.action_index.insert(value);
+    auto [result, inserted] = action_index.insert(value);
     assert(i == result); utilities::mcrl2_unused(result);
     assert(inserted); utilities::mcrl2_unused(inserted);
   }
 
   std::size_t number_of_groups = bitstream->read_integer();
-  lts.summand_groups.clear();
-
   for (std::size_t i = 0; i < number_of_groups; ++i)
   {
     std::size_t number_of_read = bitstream->read_integer();
@@ -160,10 +165,11 @@ std::istream& operator>>(std::istream& stream, symbolic_lts& lts)
       aterm_stream >> parameter;
     }
 
-    lts.summand_groups.emplace_back(lts.process_parameters, read_parameters, write_parameters);
-    ldd_stream >> lts.summand_groups.back().L;
+    summand_groups.emplace_back(process_parameters, read_parameters, write_parameters);
+    ldd_stream >> summand_groups.back().L;
   }
 
+  lts = symbolic_lts(data_spec, process_parameters, states, initial_state, data_index, action_index, summand_groups);
   return stream;
 }
 

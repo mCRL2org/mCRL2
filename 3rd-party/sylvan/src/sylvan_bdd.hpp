@@ -366,6 +366,14 @@ class bdd_substitution
     {
       m_bdd = sylvan_map_add(m_bdd, index, value.get());
     }
+
+    // \brief Adds a key-value pair to the substitution
+    /// \param index The index of a bdd variable
+    /// \param value The value to replace the index by.
+    void put(std::uint32_t index, std::uint32_t value)
+    {
+      m_bdd = sylvan_map_add(m_bdd, index, sylvan_ithvar(value));
+    }
 };
 
 /// \brief Applies the substitution sigma to x.
@@ -538,7 +546,6 @@ std::vector<std::vector<std::uint32_t>> bdd_variables(const bdd& x, const bdd& v
   enumerate(x, vars, &bdd_variables_callback, &result);
   return result;
 }
-
 
 } // namespace sylvan::bdds
 

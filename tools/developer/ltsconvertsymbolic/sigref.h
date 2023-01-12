@@ -10,7 +10,7 @@
 #ifndef MCRL2_LPS_SIGREF_H
 #define MCRL2_LPS_SIGREF_H
 
-#include "symbolic_lts_bdd.h"
+#include "mcrl2/lps/symbolic_lts_bdd.h"
 #include "mcrl2/utilities/exception.h"
 
 #include <sylvan.h>
@@ -64,11 +64,11 @@ bdd swap_prime(bdd set)
 } // namespace sylvan::bdds
 
 /// \brief Implements the partition refinement algorithm described in "Multi-core symbolic bisimulation minimisation" by Tom van Dijk and
-///        Jaco van de Pol.
+///        Jaco van de Pol. Returns a minimised symbolic LTS.
 class sigref_algorithm
 {
 public:
-    void run(const mcrl2::lps::symbolic_lts_bdd& lts);
+    mcrl2::lps::symbolic_lts_bdd run(const mcrl2::lps::symbolic_lts_bdd& lts);
 
 private:
     using bdd = sylvan::bdds::bdd;

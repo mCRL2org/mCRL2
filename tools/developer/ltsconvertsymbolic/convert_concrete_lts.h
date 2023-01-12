@@ -53,12 +53,12 @@ class convert_concrete_lts
     convert_concrete_lts(const lps::symbolic_lts& lts, std::unique_ptr<lts::lts_builder> builder)
       : m_lts(lts), m_builder(std::move(builder)), m_progress_monitor(mcrl2::lps::exploration_strategy::es_none)
     {
-      m_number_of_states = satcount(m_lts.states);
+      m_number_of_states = satcount(m_lts.states());
     }
 
     void run()
     {
-      for (const auto& group : m_lts.summand_groups)
+      for (const auto& group : m_lts.summand_groups())
       {
         if (group.summands.size() > 1)
         {
@@ -67,7 +67,7 @@ class convert_concrete_lts
       }
 
       // Explore all states in the LDD.
-      sat_all_nopar(m_lts.states, explore_state_callback<convert_concrete_lts>, this);
+      sat_all_nopar(m_lts.states(), explore_state_callback<convert_concrete_lts>, this);
 
       m_progress_monitor.finish_exploration(m_discovered.size(), 1);
       m_builder->finalize(m_discovered, false);
@@ -122,8 +122,8 @@ void explore_transitions_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t
     target[p.group.write[i]] = x[p.group.write_pos[i]];
   }
   
-  lps::multi_action action_label = p.algorithm.m_lts.action_index[x[n - 1]];
-  lps::state target_state(array2state(p.algorithm.m_lts.data_index, target.data(), p.state_size));
+  lps::multi_action action_label = p.algorithm.m_lts.action_index()[x[n - 1]];
+  lps::state target_state(array2state(p.algorithm.m_lts.data_index(), target.data(), p.state_size));
   std::size_t target_index = p.algorithm.m_discovered.insert(target_state).first;
 
   p.algorithm.m_progress_monitor.examine_transition();
@@ -136,10 +136,10 @@ void explore_state_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t n, vo
   auto p = reinterpret_cast<Context*>(context);
   auto& algorithm = *p;
 
-  lps::state current(array2state(algorithm.m_lts.data_index, x, n));
+  lps::state current(array2state(algorithm.m_lts.data_index(), x, n));
   auto [current_index, _] = algorithm.m_discovered.insert(current);
 
-  for (const lps::lps_summand_group& group : algorithm.m_lts.summand_groups)
+  for (const lps::lps_summand_group& group : algorithm.m_lts.summand_groups())
   {
     // Find all outgoing transitions of this state.
     callback_context context { algorithm, x, n, current_index, group };

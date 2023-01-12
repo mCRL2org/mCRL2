@@ -9,18 +9,18 @@
 
 #include "mcrl2/utilities/input_output_tool.h"
 
-#include "mcrl2/lps/symbolic_lts_io.h"
+#include "mcrl2/lps/symbolic_lts_bdd.h"
 #include "mcrl2/lps/symbolic_lts_bisim.h"
+#include "mcrl2/lps/symbolic_lts_io.h"
 #include "mcrl2/lps/state.h"
 #include "mcrl2/lts/lts_builder.h"
 #include "mcrl2/lts/state_space_generator.h"
+#include "mcrl2/symbolic/bdd_util.h"
 #include "mcrl2/symbolic/print.h"
 #include "mcrl2/utilities/logger.h"
 
-#include "bdd_util.h"
 #include "convert_concrete_lts.h"
 #include "sigref.h"
-#include "symbolic_lts_bdd.h"
 
 #include <sylvan_int.h>
 
@@ -263,7 +263,7 @@ class ltsconvert_tool : public input_output_tool
       }
       else if (m_equivalence == symbolic_lts_equivalence::bisim_sigref)
       {        
-        for (const auto& group : m_input.summand_groups)
+        for (const auto& group : m_input.summand_groups())
         {
           if (group.summands.size() > 1)
           {
@@ -281,7 +281,21 @@ class ltsconvert_tool : public input_output_tool
         sylvan::bdds::cache_refine_id = sylvan::cache_next_opid();
 
         sigref_algorithm algorithm;
-        algorithm.run(bdd_lts);
+        mcrl2::lps::symbolic_lts_bdd quotient = algorithm.run(bdd_lts);
+
+        // Save the resulting bdd as an LDD.
+        mcrl2::lps::symbolic_lts quotient_ldd(quotient);
+
+        if (!output_filename().empty())
+        {
+          std::ofstream to(output_filename(), std::ofstream::out | std::ofstream::binary);
+          if (!to.good())
+          {
+            throw mcrl2::runtime_error("Could not write to filename " + output_filename());
+          }
+
+          to << quotient_ldd;
+        }
       }
       else
       {
