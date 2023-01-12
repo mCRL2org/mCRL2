@@ -420,7 +420,7 @@ void lpsparunfold::update_linear_process(std::size_t parameter_at_index)
     }
 
     // place the case functions
-    insert_case_functions(m_spec.process(), parameter_case_function());
+    insert_case_functions(m_spec.process(), parameter_case_function(), m_identifier_generator);
   }
   else
   {
@@ -786,6 +786,9 @@ void lpsparunfold::algorithm(const std::size_t parameter_at_index)
     update_linear_process(parameter_at_index);
     update_linear_process_initialization(parameter_at_index);
   }
+
+  /* Updating cache*/
+  m_cache[m_unfold_parameter.sort()] = m_new_cache_element;
 
   assert(check_well_typedness(m_spec));
 }
