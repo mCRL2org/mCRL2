@@ -341,13 +341,13 @@ void lpsparunfold::update_linear_process(std::size_t parameter_at_index)
   /* Create new process parameters */
   data::variable_vector new_process_parameters;
 
+  /* Expand unfold_parameter */
+  mCRL2log(log::verbose) << "  Unfolding parameter " << unfold_parameter_it->name() << " at index " << parameter_at_index << "..." << std::endl;
+
   /* First copy the initial part of the parameters */
   new_process_parameters.insert(new_process_parameters.end(),
                                 process_parameters.begin(),
                                 unfold_parameter_it);
-
-  /* Expand unfold_parameter */
-  mCRL2log(log::verbose) << "Unfolding parameter " << unfold_parameter_it->name() << " at index " << parameter_at_index << "..." << std::endl;
 
   const data::variable param = generate_fresh_variable(m_unfold_parameter.name(), m_new_cache_element.fresh_basic_sort );
   m_injected_parameters.push_back(param);
@@ -419,11 +419,13 @@ void lpsparunfold::update_linear_process(std::size_t parameter_at_index)
       }
     }
 
+    mCRL2log(log::verbose) << "- Inserting case functions into the process using alternative case placement";
     // place the case functions
     insert_case_functions(m_spec.process(), parameter_case_function(), m_identifier_generator);
   }
   else
   {
+    mCRL2log(log::verbose) << "- Inserting case functions into the process using default case placement" << std::endl;
     //Prepare parameter substitution
     const mutable_map_substitution< std::map< data::variable , data::data_expression > > s{parameter_substitution()};
     lps::replace_variables_capture_avoiding(m_spec.process(), s);

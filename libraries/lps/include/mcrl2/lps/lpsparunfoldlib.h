@@ -326,13 +326,12 @@ Binder<Builder, parunfold_replacement<Builder, Binder>, parunfold_replacement<Bu
     else
     {
       // place the case functions here
-      result = apply_case_function(x);
+      apply_case_function(result, x);
     }
   }
 
-  data::data_expression apply_case_function(const data::application& expr)
+  void apply_case_function(data::data_expression& result, const data::data_expression& expr)
   {
-    data::data_expression result = expr;
     auto& [par, case_f, det_f, replacements] = case_funcs;
 
     if (find_free_variables(result).count(par) == 0)
@@ -341,28 +340,28 @@ Binder<Builder, parunfold_replacement<Builder, Binder>, parunfold_replacement<Bu
       // make sure to still apply the substitutions necessary for the capture avoiding tricks
       // NB: stack overflow happens if type of second argument is 'data::data_expression'.
       super::apply(result, expr);
-      return result;
     }
-
-    data::data_expression_vector args;
-    args.push_back(det_f);
-
-    for (const data::data_expression& r: replacements)
+    else
     {
-      current_replacement = r;
-      data::data_expression arg;
-      super::apply(arg, result);
-      args.push_back(arg);
-    }
-    current_replacement = data::data_expression();
+      data::data_expression_vector args;
+      args.push_back(det_f);
 
-    if(case_f.find(expr.sort()) == case_f.end())
-    {
-      throw mcrl2::runtime_error("Case function with target sort " + data::pp(expr.sort()) + " not declared.");
-    }
-    result = data::application(case_f[expr.sort()], args);
+      for (const data::data_expression& r : replacements)
+      {
+        current_replacement = r;
+        data::data_expression arg;
+        super::apply(arg, expr);
+        args.push_back(arg);
+      }
+      current_replacement = data::data_expression();
 
-    return result;
+      if (case_f.find(expr.sort()) == case_f.end())
+      {
+        throw mcrl2::runtime_error("Case function with target sort " +
+                                   data::pp(expr.sort()) + " not declared.");
+      }
+      result = data::application(case_f[expr.sort()], args);
+    }
   }
 
   // Substitution application
