@@ -32,17 +32,15 @@ using mcrl2::lps::lpsparunfold;
 /// \brief Constructor
 lpsparunfold::lpsparunfold(lps::stochastic_specification& spec,
                            std::map< data::sort_expression , unfold_cache_element >& cache,
-                           bool add_distribution_laws, bool alt_case_placement,
-                           bool possibly_inconsistent, bool globvars)
+                           bool alt_case_placement,
+                           bool possibly_inconsistent)
     : lps::detail::lps_algorithm<lps::stochastic_specification>(spec),
       m_run_before(false),
       m_data_equation_argument_generator(m_identifier_generator),
       m_cache(cache),
       m_representative_generator(spec.data()),
-      m_add_distribution_laws(add_distribution_laws),
       m_alt_case_placement(alt_case_placement),
-      m_possibly_inconsistent(possibly_inconsistent),
-      m_globvars(globvars)
+      m_possibly_inconsistent(possibly_inconsistent)
 {
   m_identifier_generator.add_identifiers(lps::find_identifiers(spec));
   m_identifier_generator.add_identifiers(data::find_identifiers(spec.data()));
@@ -258,11 +256,8 @@ void lpsparunfold::generate_projection_function_equations()
       // If so desired, add distribution of pi over if and case functions
       // pi(if(b,x,y))=if(b,pi(x),pi(y));
       // pi(C(e,x1,x2,...))=C(e,pi(x1),pi(x2),...);
-      if(m_add_distribution_laws)
-      {
-        create_distribution_law_over_case(*pi_it, data::if_(m_unfold_parameter.sort()));
-        create_distribution_law_over_case(*pi_it, m_new_cache_element.case_functions[m_unfold_parameter.sort()]);
-      }
+      create_distribution_law_over_case(*pi_it, data::if_(m_unfold_parameter.sort()));
+      create_distribution_law_over_case(*pi_it, m_new_cache_element.case_functions[m_unfold_parameter.sort()]);
 
       ++pi_it;
     }
@@ -530,9 +525,8 @@ data::data_expression_vector lpsparunfold::unfold_constructor(const data_express
   assert(de.sort() == m_unfold_parameter.sort());
   data::data_expression_vector result;
 
-  // Replace global variables with fresh global variables, if the corresponding option is set.
-  if(m_globvars &&
-      data::is_variable(de) &&
+  // Replace global variables with fresh global variables.
+  if(data::is_variable(de) &&
       m_spec.global_variables().find(atermpp::down_cast<variable>(de)) != m_spec.global_variables().end())
   {
     // don't care for det position
@@ -721,15 +715,12 @@ void lpsparunfold::generate_determine_function_equations()
     ++constructor_it;
   }
 
-  if (m_add_distribution_laws)
-  {
-    /*  Add additional distribution laws for Det over if and case functions
-    Det(if(b,x,y))=if(b,Det(x),Det(y));
-    Det(C(e,x1,x2,...))=C(e,Det(x1),Det(x2),...);
-    */
-    create_distribution_law_over_case(m_new_cache_element.determine_function, data::if_(m_unfold_parameter.sort()));
-    create_distribution_law_over_case(m_new_cache_element.determine_function, m_new_cache_element.case_functions[m_unfold_parameter.sort()]);
-  }
+  /*  Add additional distribution laws for Det over if and case functions
+  Det(if(b,x,y))=if(b,Det(x),Det(y));
+  Det(C(e,x1,x2,...))=C(e,Det(x1),Det(x2),...);
+  */
+  create_distribution_law_over_case(m_new_cache_element.determine_function, data::if_(m_unfold_parameter.sort()));
+  create_distribution_law_over_case(m_new_cache_element.determine_function, m_new_cache_element.case_functions[m_unfold_parameter.sort()]);
 }
 
 void lpsparunfold::algorithm(const std::size_t parameter_at_index)

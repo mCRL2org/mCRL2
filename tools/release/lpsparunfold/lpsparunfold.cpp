@@ -44,10 +44,8 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
     std::set< std::size_t > m_set_index; ///< Options of the algorithm
     std::string m_unfoldsort;
     std::size_t m_repeat_unfold;
-    bool m_add_distribution_laws;
     bool m_alt_case_placement;
     bool m_possibly_inconsistent;
-    bool m_globvars;
 
     void add_options(interface_description& desc)
     {
@@ -58,15 +56,10 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
                       "unfolds all process parameters of sort NAME", 's');
       desc.add_option("repeat", make_mandatory_argument("NUM"),
                       "repeat unfold NUM times", 'n');
-      desc.add_option("laws",
-                      "generates additional distribution laws for projection and determine functions", 'l');
       desc.add_option("alt-case",
                       "use an alternative placement method for case functions", 'a');
       desc.add_option("possibly-inconsistent",
                       "add rewrite rules that can make a data specification inconsistent", 'p');
-      desc.add_option("preserve-global-variables",
-                      "unfold global variables into a list of global variables, instead of applications of determiniser"
-                      " and projection functions to a single global variable", 'g');
     }
 
     void parse_options(const command_line_parser& parser)
@@ -122,15 +115,8 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
         m_repeat_unfold = parser.option_argument_as< std::size_t  >("repeat");
       }
 
-      m_add_distribution_laws = false;
-      if (0 < parser.options.count("laws"))
-      {
-        m_add_distribution_laws = true;
-      }
-
       m_alt_case_placement = parser.options.count("alt-case") > 0;
       m_possibly_inconsistent = parser.options.count("possibly-inconsistent") > 0;
-      m_globvars = parser.options.count("preserve-global-variables") > 0;
 
     }
 
@@ -206,9 +192,10 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
 
         while (!h_set_index.empty())
         {
-          lps::lpsparunfold lpsparunfold(spec, unfold_cache, m_add_distribution_laws, m_alt_case_placement, m_possibly_inconsistent, m_globvars);
+          lps::lpsparunfold lpsparunfold(spec, unfold_cache, m_alt_case_placement, m_possibly_inconsistent);
           std::size_t index = *(max_element(h_set_index.begin(), h_set_index.end()));
           lpsparunfold.algorithm(index);
+          // Rewriting intermediate results helps counteract blowup of the intermediate results
           rewriter R = create_rewriter(spec.data());
           lps::rewrite(spec, R);
           h_set_index.erase(index);
