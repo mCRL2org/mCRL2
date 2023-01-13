@@ -99,15 +99,15 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
     /** \brief  Constructor for lpsparunfold algorithm.
       * \param[in] spec which is a valid mCRL2 process specification.
       * \param[in,out] cache Cache to store information for reuse.
-      * \param[in] add_distribution_laws If true, additional rewrite rules are introduced.
       * \param[in] alt_case_placement If true, case functions are placed at a higher level.
-      * \param[in] globvars If true, global variables are unfolded into a list of global variables.
+      * \param[in] possibly_inconsistent If true, case functions over Booleans are replaced by a disjunction of conjunctions.
+      *                 For this to be correct, the unfolded sort needs to satisfy some restrictions.
       * \post   The content of mCRL2 process specification analysed for useful information and class variables are set.
       **/
     lpsparunfold(lps::stochastic_specification& spec,
                  std::map< data::sort_expression , unfold_cache_element >& cache,
-                 bool add_distribution_laws = false, bool alt_case_placement = false,
-                 bool possibly_inconsistent = false, bool globvars = false);
+                 bool alt_case_placement = false,
+                 bool possibly_inconsistent = false);
 
     /** \brief  Applies lpsparunfold algorithm on a process parameter of an mCRL2 process specification .
      *  \pre algorithm has not been called before.
