@@ -197,7 +197,7 @@ public:
              std::atomic<bool>* forbidden_flag,
              std::size_t* lock_depth)
   {
-    typename substitution_type::const_iterator i=m_substitution.find(v);
+    const typename substitution_type::iterator i=m_substitution.find(v);
     if (i==m_substitution.end()) // not found.
     {
       target.assign(v,
