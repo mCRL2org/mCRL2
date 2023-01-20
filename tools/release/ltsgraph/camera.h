@@ -83,9 +83,4 @@ private:
   QRect m_viewport;
 };
 
-class ArcballCameraController
-{
-
-};
-
 #endif // MCRL2_LTSGRAPH_CAMERA_H
