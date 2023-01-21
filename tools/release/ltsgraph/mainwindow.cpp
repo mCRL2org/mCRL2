@@ -235,6 +235,16 @@ void MainWindow::openFile(const QString& fileName)
     }
     catch (const mcrl2::runtime_error& e)
     {
+      m_layout->resetPositions();
+
+      m_glwidget->rebuild();
+      on3DChanged(m_ui.act3D->isChecked());
+
+      onExplore(false);
+
+      m_information->update();
+      m_graph.setStable(false);
+
       QMessageBox::critical(this, "Error opening file", e.what());
       mCRL2log(mcrl2::log::error) << "Error opening file: " << e.what() << std::endl;
       setWindowTitle(QString("LTSGraph"));
