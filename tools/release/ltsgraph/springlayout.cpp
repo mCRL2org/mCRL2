@@ -1531,7 +1531,7 @@ void SpringLayout::resetPositions()
   std::size_t n_nodes = exploration ? m_graph.explorationNodeCount() : m_graph.nodeCount();
   std::size_t n_edges = exploration ? m_graph.explorationEdgeCount() : m_graph.edgeCount();
   bool is3D = m_glwidget.get3D();
-  float hwidth = 5*std::powf(m_natLength*n_nodes, 1.0f / (is3D ? 3 : 2));
+  float hwidth = 5*std::pow(m_natLength*n_nodes, 1.0f / (is3D ? 3 : 2));
   for (std::size_t i = 0; i < n_nodes; i++)
   {
     std::size_t n = exploration ? m_graph.explorationNode(i) : i;

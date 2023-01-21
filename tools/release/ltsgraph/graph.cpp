@@ -153,6 +153,10 @@ void Graph::load(const QString& filename, const QVector3D& min,
   }
   catch (mcrl2::runtime_error& e)
   {
+    m_stable = true;
+    m_hasNewFrame = true;
+    m_forceUpdate = true;
+    m_resetPositions = true;
     unlockForWrite(m_lock, GRAPH_LOCK_TRACE);
     throw e;
   }

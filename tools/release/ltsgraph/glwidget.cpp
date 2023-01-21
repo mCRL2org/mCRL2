@@ -305,6 +305,7 @@ void GLWidget::initializeGL()
     // lexicographical.
     QPair<int, int> version = format().version();
     QPair<int, int> required(3, 3);
+ #ifndef __APPLE__
     if (version < required)
     {
       // Print a message to the console and show a message box.
@@ -323,6 +324,7 @@ void GLWidget::initializeGL()
       throw mcrl2::runtime_error("Unsupported OpenGL version.");
     }
     else
+#endif
     {
 
       QOpenGLContext::currentContext()->setFormat(
