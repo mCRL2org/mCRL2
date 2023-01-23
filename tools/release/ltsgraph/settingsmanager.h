@@ -1,7 +1,7 @@
 #pragma once
 
 #include <mcrl2/utilities/logger.h>
-#include <unordered_map>
+#include <QHash>
 #include <string>
 #include <functional>
 
@@ -67,7 +67,7 @@ template <typename T> struct GetterSetter
 };
 
 template <typename T>
-using varmap = std::unordered_map<QString, GetterSetter<T>*>;
+using varmap = QHash<QString, GetterSetter<T>*>;
 
 class Settings
 {
@@ -165,23 +165,23 @@ class Settings
     {
       if constexpr (std::is_same_v<bool, T>)
       {
-        it->second->setter(
-            json_obj[it->first].toBool(it->second->default_value));
+        it.value()->setter(
+            json_obj[it.key()].toBool(it.value()->default_value));
       }
       else if constexpr (std::is_same_v<int, T>)
       {
-        it->second->setter(
-            json_obj[it->first].toInt(it->second->default_value));
+        it.value()->setter(
+            json_obj[it.key()].toInt(it.value()->default_value));
       }
       else if constexpr (std::is_same_v<float, T>)
       {
-        it->second->setter(
-            json_obj[it->first].toDouble(it->second->default_value));
+        it.value()->setter(
+            json_obj[it.key()].toDouble(it.value()->default_value));
       }
       else if constexpr (std::is_same_v<QString, T>)
       {
-        it->second->setter(
-            json_obj[it->first].toString(it->second->default_value));
+        it.value()->setter(
+            json_obj[it.key()].toString(it.value()->default_value));
       }
       else
       {
@@ -196,9 +196,9 @@ class Settings
   {
     for (auto it = vars.begin(); it != vars.end(); ++it)
     {
-      std::string name = it->first.toStdString();
-      T value = it->second->getter();
-      json_obj.insert(it->first, value);
+      std::string name = it.key().toStdString();
+      T value = it.value()->getter();
+      json_obj.insert(it.key(), value);
       mCRL2log(mcrl2::log::debug) << "[SettingsManager] "
           << "Saving: " << name << std::endl;
     }
