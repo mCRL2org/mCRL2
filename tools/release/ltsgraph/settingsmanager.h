@@ -226,7 +226,7 @@ class SettingsManager
   static void addSettings(QString class_name);
 
   private:
-  std::unordered_map<QString, Settings*> m_settings_map;
+  QHash<QString, Settings*> m_settings_map;
   Settings* _getSettings(QString class_name);
   void _addSettings(QString class_name);
 };
