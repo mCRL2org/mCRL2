@@ -22,6 +22,7 @@
 
 #include <QVector2D>
 #include <QVector3D>
+#include <assert.h>
 #include <vector>
 #include <mcrl2/utilities/logger.h>
 
