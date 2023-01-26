@@ -535,7 +535,7 @@ class progress_monitor
     std::size_t level = 1;    // the current exploration level
     std::size_t level_up = 1; // when count reaches level_up, the level is increased
     std::size_t count = 0;
-    std::size_t transition_count = 0;
+    std::atomic<std::size_t> transition_count = 0;
 
     std::size_t last_state_count = 0;
     std::size_t last_transition_count = 0;
@@ -660,11 +660,16 @@ struct state_space_generator
     return explorer.state_map().size(thread_index) >= options.max_states;
   }
 
+  struct aligned_bool 
+  {
+    alignas(64) size_t m_bool;
+  };
+
   // Explore the specification passed via the constructor, and put the results in builder.
   template <typename LTSBuilder>
   void explore(LTSBuilder& builder)
   {
-    bool has_outgoing_transitions;
+    std::vector<aligned_bool> has_outgoing_transitions(options.number_of_threads+1); // thread indices start at 1. 
     const lps::state* source = nullptr;
 
     try
@@ -704,7 +709,7 @@ struct state_space_generator
         },
 
         // examine_transition
-        [&](const std::size_t /* thread_index*/, const std::size_t number_of_threads, 
+        [&](const std::size_t thread_index, const std::size_t number_of_threads, 
             const lps::state& s0, std::size_t s0_index, const lps::multi_action& a, 
             const auto& s1, const auto& s1_index, std::size_t summand_index)
         {
@@ -716,7 +721,8 @@ struct state_space_generator
           {
             builder.add_transition(s0_index, a, s1_index, number_of_threads);
           }
-          has_outgoing_transitions = true;
+          assert(thread_index<has_outgoing_transitions.size());
+          has_outgoing_transitions[thread_index].m_bool = true;
           if (options.detect_action)
           {
             m_action_detector.detect_action(s0, s0_index, a, first_state(s1), summand_index);
@@ -732,10 +738,11 @@ struct state_space_generator
         },
 
         // start_state
-        [&](const std::size_t /* thread_index */, const lps::state& s, std::size_t /* s_index */)
+        [&](const std::size_t thread_index, const lps::state& s, std::size_t /* s_index */)
         {
           source = &s;
-          has_outgoing_transitions = false;
+          assert(thread_index<has_outgoing_transitions.size());
+          has_outgoing_transitions[thread_index].m_bool = false;
           if (options.detect_nondeterminism)
           {
             m_nondeterminism_detector.start_state();
@@ -743,10 +750,11 @@ struct state_space_generator
         },
 
         // finish_state
-        [&](const std::size_t /* thread_index */, const std::size_t number_of_threads, 
+        [&](const std::size_t thread_index, const std::size_t number_of_threads, 
             const lps::state& s, std::size_t s_index, std::size_t todo_list_size)
         {
-          if (options.detect_deadlock && !has_outgoing_transitions)
+          assert(thread_index<has_outgoing_transitions.size());
+          if (options.detect_deadlock && !has_outgoing_transitions[thread_index].m_bool)
           {
             m_deadlock_detector.detect_deadlock(s, s_index);
           }
