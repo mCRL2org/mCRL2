@@ -78,45 +78,45 @@ VarsDeclList: VarsDecl ( ',' VarsDecl )* ;                       // Individually
 DataExpr
   : Id                                                           // Identifier
   | Number                                                       // Number
-  | 'true'                                   $left        20     // True
-  | 'false'                                  $left        20     // False
-  | '[' ']'                                  $left        20     // Empty list
-  | '{' '}'                                  $left        20     // Empty set
-  | '{'':''}'                                $left        20     // Empty bag
-  | '[' DataExprList ']'                     $left        20     // List enumeration
-  | '{' BagEnumEltList '}'                   $left        20     // Bag enumeration
-  | '{' VarDecl '|' DataExpr '}'             $left        20     // Set/bag comprehension
-  | '{' DataExprList '}'                     $left        20     // Set enumeration
-  | '(' DataExpr ')'                         $left        50     // Brackets
-  | DataExpr '[' DataExpr '->' DataExpr ']'  $unary_left  13     // Function update
-  | DataExpr '(' DataExprList ')'            $unary_left  13     // Function application
-  | '!' DataExpr                             $unary_right 12     // Negation, set complement
-  | '-' DataExpr                             $unary_right 12     // Unary minus
-  | '#' DataExpr                             $unary_right 12     // Size of a list
-  | 'forall' VarsDeclList '.' DataExpr       $unary_right  1     // Universal quantifier
-  | 'exists' VarsDeclList '.' DataExpr       $unary_right  1     // Existential quantifier
-  | 'lambda' VarsDeclList '.' DataExpr       $unary_right  1     // Lambda abstraction
-  | DataExpr ('=>' $binary_op_right 2) DataExpr                  // Implication
-  | DataExpr ('||' $binary_op_right 3) DataExpr                  // Disjunction
-  | DataExpr ('&&' $binary_op_right 4) DataExpr                  // Conjunction
-  | DataExpr ('==' $binary_op_left 5) DataExpr                   // Equality
-  | DataExpr ('!=' $binary_op_left 5) DataExpr                   // Inequality
-  | DataExpr ('<' $binary_op_left 6) DataExpr                    // Smaller
-  | DataExpr ('<=' $binary_op_left 6) DataExpr                   // Smaller equal
-  | DataExpr ('>=' $binary_op_left 6) DataExpr                   // Larger equal
-  | DataExpr ('>' $binary_op_left 6) DataExpr                    // Larger
-  | DataExpr ('in' $binary_op_left 6) DataExpr                   // Set, bag, list membership
-  | DataExpr ('|>' $binary_op_right 7) DataExpr                  // List cons
-  | DataExpr ('<|' $binary_op_left 8) DataExpr                   // List snoc
-  | DataExpr ('++' $binary_op_left 9) DataExpr                   // List concatenation
-  | DataExpr ('+' $binary_op_left 10) DataExpr                   // Addition, set/bag union
-  | DataExpr ('-' $binary_op_left 10) DataExpr                   // Subtraction, set/bag difference
-  | DataExpr ('/' $binary_op_left 11) DataExpr                   // Division
-  | DataExpr ('div' $binary_op_left 11) DataExpr                 // Integer div
-  | DataExpr ('mod' $binary_op_left 11) DataExpr                 // Integer mod
-  | DataExpr ('*' $binary_op_left 12) DataExpr                   // Multiplication, set/bag intersection
-  | DataExpr ('.' $binary_op_left 12) DataExpr                   // List element at position
-  | DataExpr 'whr' AssignmentList 'end'      $unary_left 0       // Where clause
+  | 'true'                                                       // True
+  | 'false'                                                      // False
+  | '[' ']'                                                      // Empty list
+  | '{' '}'                                                      // Empty set
+  | '{'':''}'                                                    // Empty bag
+  | '[' DataExprList ']'                                         // List enumeration
+  | '{' BagEnumEltList '}'                                       // Bag enumeration
+  | '{' VarDecl '|' DataExpr '}'                                 // Set/bag comprehension
+  | '{' DataExprList '}'                                         // Set enumeration
+  | '(' DataExpr ')'                                             // Brackets
+  | DataExpr '[' DataExpr '->' DataExpr ']'    $left         13  // Function update
+  | DataExpr '(' DataExprList ')'              $left         13  // Function application
+  | '!' DataExpr                               $unary_right  12  // Negation, set complement
+  | '-' DataExpr                               $unary_right  12  // Unary minus
+  | '#' DataExpr                               $unary_right  12  // Size of a list
+  | 'forall' VarsDeclList '.' DataExpr         $right         1  // Universal quantifier
+  | 'exists' VarsDeclList '.' DataExpr         $right         1  // Existential quantifier
+  | 'lambda' VarsDeclList '.' DataExpr         $right         1  // Lambda abstraction
+  | DataExpr '=>'  DataExpr                    $binary_right  2  // Implication
+  | DataExpr '||'  DataExpr                    $binary_right  3  // Disjunction
+  | DataExpr '&&'  DataExpr                    $binary_right  4  // Conjunction
+  | DataExpr '==' DataExpr                     $binary_left   5  // Equality
+  | DataExpr '!=' DataExpr                     $binary_left   5  // Inequality
+  | DataExpr '<' DataExpr                      $binary_left   6  // Smaller
+  | DataExpr '<='  DataExpr                    $binary_left   6  // Smaller equal
+  | DataExpr '>='  DataExpr                    $binary_left   6  // Larger equal
+  | DataExpr '>'  DataExpr                     $binary_left   6  // Larger
+  | DataExpr 'in'  DataExpr                    $binary_left   6  // Set, bag, list membership
+  | DataExpr '|>'  DataExpr                    $binary_right  7  // List cons
+  | DataExpr '<|'  DataExpr                    $binary_left   8  // List snoc
+  | DataExpr '++' DataExpr                     $binary_left   9  // List concatenation
+  | DataExpr '+' DataExpr                      $binary_left  10  // Addition, set/bag union
+  | DataExpr '-' DataExpr                      $binary_left  10  // Subtraction, set/bag difference
+  | DataExpr '/' DataExpr                      $binary_left  11  // Division
+  | DataExpr 'div' DataExpr                    $binary_left  11  // Integer div
+  | DataExpr 'mod' DataExpr                    $binary_left  11  // Integer mod
+  | DataExpr '*' DataExpr                      $binary_left  12  // Multiplication, set/bag intersection
+  | DataExpr '.' DataExpr                      $binary_left  12  // List element at position
+  | DataExpr 'whr' AssignmentList 'end'        $unary_left    0  // Where clause
   ;
 
 DataExprUnit

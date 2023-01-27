@@ -94,7 +94,7 @@ data::data_expression parse_data_expression(const std::string& de_in)
     }
 #endif
   }
-  catch (...)
+  catch (mcrl2::runtime_error& e)
   {
     BOOST_CHECK(false);
   }
@@ -132,10 +132,10 @@ void test_data_expression(const std::string& de_in,
                           const std::string& expected_sort = "",
                           bool test_type_checker = true)
 {
-  data::data_expression x(parse_data_expression(de_in));
   std::clog << std::endl
-            << "==========================================" << std::endl
-            << "Testing type checking of data expression: " << std::endl
+            << "==========================================" << std::endl;
+  data::data_expression x(parse_data_expression(de_in));
+  std::clog << "Testing type checking of data expression: " << std::endl
             << "  de_in:  " << de_in << std::endl
             << "  de_out: " << pp(x) << std::endl
             << "  expect success: " << (expect_success?("yes"):("no")) << std::endl
