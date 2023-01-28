@@ -105,9 +105,7 @@ class prob_bisim_partitioner_bem
       // get the equivalent probabilistic state of each probabilistic block and add it to aut
       for (step_class_type& sc : equivalent_step_classes)
       {
-        typename LTS_TYPE::probabilistic_state_t equivalent_ps;
-
-        equivalent_ps = calculate_equivalent_probabilistic_state(sc);
+        typename LTS_TYPE::probabilistic_state_t equivalent_ps = calculate_equivalent_probabilistic_state(sc);
         new_probabilistic_states.push_back(equivalent_ps);
       }
 
@@ -393,12 +391,23 @@ class prob_bisim_partitioner_bem
     const typename LTS_TYPE::probabilistic_state_t& prob_state = aut.probabilistic_state(d.key);
 
     /* Check whether the state is in the distribution d and add up the probability*/
-    for (const typename LTS_TYPE::probabilistic_state_t::state_probability_pair& prob_pair : prob_state)
+    if (prob_state.size()>1)   // The state is stored as a vector of states/probabilities.
     {
-      const state_type& s = prob_pair.state();
+      for (const typename LTS_TYPE::probabilistic_state_t::state_probability_pair& prob_pair : prob_state)
+      {
+        const state_type s = prob_pair.state();
+        if (block_index_of_a_state[s] == b.key)
+        {
+          prob_to_block = prob_to_block + prob_pair.probability();
+        }
+      }
+    }
+    else // The state consists of a number with implicit probability 1.
+    {
+      const state_type s = prob_state.get();
       if (block_index_of_a_state[s] == b.key)
       {
-        prob_to_block = prob_to_block + prob_pair.probability();
+        prob_to_block = prob_to_block + LTS_TYPE::probabilistic_state_t::probability_t::one();
       }
     }
 
@@ -408,31 +417,37 @@ class prob_bisim_partitioner_bem
   typename LTS_TYPE::probabilistic_state_t calculate_new_probabilistic_state(typename LTS_TYPE::probabilistic_state_t ps)
   {
     typename LTS_TYPE::probabilistic_state_t new_prob_state;
-    static std::map<state_type, probability_fraction_type> prob_state_map;
-    prob_state_map.clear();
 
     /* Iterate over all state probability pairs in the selected probabilistic state*/
-    for (const typename LTS_TYPE::probabilistic_state_t::state_probability_pair& sp_pair : ps)
+    if (ps.size()>1)   // The state is stored as a vector of states/probabilities.
     {
-      /* Check the resulting action state in the final State partition */
-      state_type new_state = get_eq_class(sp_pair.state());
+      std::map<state_type, probability_fraction_type> prob_state_map;
+      for (const typename LTS_TYPE::probabilistic_state_t::state_probability_pair& sp_pair : ps)
+      {
+        /* Check the resulting action state in the final State partition */
+        state_type new_state = get_eq_class(sp_pair.state());
 
-      if (prob_state_map.count(new_state) == 0)
-      {
-        /* The state is not yet in the mapping. Add the state with its probability*/
-        prob_state_map[new_state] = sp_pair.probability();
+        if (prob_state_map.count(new_state) == 0)
+        {
+          /* The state is not yet in the mapping. Add the state with its probability*/
+          prob_state_map[new_state] = sp_pair.probability();
+        }
+        else
+        {
+          /* The state is already in the mapping. Sum up probabilities */
+          prob_state_map[new_state] = prob_state_map[new_state] + sp_pair.probability();
+        }
       }
-      else
+      /* Add all the state probabilities pairs in the mapping to its actual data type*/
+      for (const std::pair<const state_type, probability_fraction_type>& i: prob_state_map)
       {
-        /* The state is already in the mapping. Sum up probabilities */
-        prob_state_map[new_state] = prob_state_map[new_state] + sp_pair.probability();
+        new_prob_state.add(i.first, i.second);
       }
     }
-
-    /* Add all the state probabilities pairs in the mapping to its actual data type*/
-    for (const std::pair<const state_type, probability_fraction_type>& i: prob_state_map)
+    else // The state consists of a number with implicit probability 1.
     {
-      new_prob_state.add(i.first, i.second);
+      /* Check the resulting action state in the final State partition */
+      new_prob_state.set(get_eq_class(ps.get()));
     }
 
     return new_prob_state;

@@ -593,15 +593,26 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
       {
         const typename LTS_TYPE::probabilistic_state_t& ps = aut.probabilistic_state(i);
 
-        // for (const lts_aut_base::state_probability_pair& sp_pair : ps)
-        for (const typename LTS_TYPE::probabilistic_state_t::state_probability_pair& sp_pair : ps)
+        probabilistic_transition_type pt;
+        if (ps.size()>1) // The probabilistic state is stored as a vector. 
         {
-          probabilistic_transition_type pt;
-          pt.from = i;
-          pt.label = sp_pair.probability();
-          pt.to = sp_pair.state();
-          probabilistic_transitions.push_back(pt);
+          for (const typename LTS_TYPE::probabilistic_state_t::state_probability_pair& sp_pair : ps)
+          {
+            pt.from = i;
+            pt.label = sp_pair.probability();
+            pt.to = sp_pair.state();
+            probabilistic_transitions.push_back(pt);
 
+            // save incoming transition in state
+            action_states[pt.to].incoming_transitions.push_back(&probabilistic_transitions.back());
+          }
+        }
+        else // The probabilistic state is stored as a single state number with implicit probability 1. 
+        { 
+          pt.from = i;
+          pt.label = LTS_TYPE::probabilistic_state_t::probability_t::one();
+          pt.to = ps.get();
+          probabilistic_transitions.push_back(pt);
           // save incoming transition in state
           action_states[pt.to].incoming_transitions.push_back(&probabilistic_transitions.back());
         }
@@ -1247,30 +1258,37 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
     typename LTS_TYPE::probabilistic_state_t calculate_new_probabilistic_state(typename LTS_TYPE::probabilistic_state_t ps)
     {
       typename LTS_TYPE::probabilistic_state_t new_prob_state;
-      std::map <state_key_type, probability_fraction_type> prob_state_map;
 
       /* Iterate over all state probability pairs in the selected probabilistic state*/
-      for (const typename LTS_TYPE::probabilistic_state_t::state_probability_pair& sp_pair : ps)
+      if (ps.size()>1)  // The state is stored as a vector of states and probabilities.
       {
-        /* Check the resulting action state in the final State partition */
-        state_key_type new_state = get_eq_class(sp_pair.state());
+        std::map <state_key_type, probability_fraction_type> prob_state_map;
+        for (const typename LTS_TYPE::probabilistic_state_t::state_probability_pair& sp_pair : ps)
+        {
+          /* Check the resulting action state in the final State partition */
+          state_key_type new_state = get_eq_class(sp_pair.state());
 
-        if (prob_state_map.count(new_state) == 0)
-        {
-          /* The state is not yet in the mapping. Add the state with its probability*/
-          prob_state_map[new_state] = sp_pair.probability();
+          if (prob_state_map.count(new_state) == 0)
+          {
+            /* The state is not yet in the mapping. Add the state with its probability*/
+            prob_state_map[new_state] = sp_pair.probability();
+          }
+          else
+          {
+            /* The state is already in the mapping. Sum up probabilities */
+            prob_state_map[new_state] = prob_state_map[new_state] + sp_pair.probability();
+          }
         }
-        else
+        /* Add all the state probabilities pairs in the mapping to its actual data type*/
+        for (typename std::map<state_key_type, probability_fraction_type>::iterator i = prob_state_map.begin(); i != prob_state_map.end(); i++)
         {
-          /* The state is already in the mapping. Sum up probabilities */
-          prob_state_map[new_state] = prob_state_map[new_state] + sp_pair.probability();
+          new_prob_state.add(i->first, i->second);
         }
       }
-
-      /* Add all the state probabilities pairs in the mapping to its actual data type*/
-      for (typename std::map<state_key_type, probability_fraction_type>::iterator i = prob_state_map.begin(); i != prob_state_map.end(); i++)
+      else // The state is stored as a number with implicit probability 1. 
       {
-        new_prob_state.add(i->first, i->second);
+        /* Check the resulting action state in the final State partition */
+        new_prob_state.set(get_eq_class(ps.get()));
       }
 
       return new_prob_state;

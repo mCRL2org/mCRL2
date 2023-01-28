@@ -122,6 +122,11 @@ lts_convert_probabilistic_state<probabilistic_state<std::size_t, mcrl2::lts::pro
                                 probabilistic_state<std::size_t, lps::probabilistic_data_expression> >(
             const probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>& state_in) 
 {
+  if (state_in.size()<=1)  // There is only one state with probability 1.
+  {
+    return probabilistic_state<std::size_t, lps::probabilistic_data_expression>(state_in.get());
+  }
+  // There are more than one target states all with their own probabilities. 
   std::vector<lps::state_probability_pair<std::size_t, lps::probabilistic_data_expression> > result;
   for(const lps::state_probability_pair<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>& p: state_in)
   {
@@ -151,6 +156,11 @@ lts_convert_probabilistic_state<probabilistic_state<std::size_t, lps::probabilis
                                 probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> >(
             const probabilistic_state<std::size_t, lps::probabilistic_data_expression>& state_in) 
 {
+  if (state_in.size()<=1) // There is only one state with probability 1.
+  {
+    return probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>(state_in.get());
+  }
+  // There are more than one target states all with their own probabilities. 
   std::vector<lps::state_probability_pair<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> > result;
   for(const lps::state_probability_pair<std::size_t, mcrl2::lps::probabilistic_data_expression>& p: state_in)
   {
@@ -889,9 +899,9 @@ void remove_probabilities(const probabilistic_lts<STATE_LABEL1, ACTION_LABEL1, P
                           lts<STATE_LABEL2, ACTION_LABEL2, LTS_BASE2>& lts_out)
 {
   assert(lts_in.initial_probabilistic_state().size()!=0);
-  if (lts_in.initial_probabilistic_state().size()==1)
+  if (lts_in.initial_probabilistic_state().size()<=1)
   {
-    lts_out.set_initial_state(lts_in.initial_probabilistic_state().begin()->state());
+    lts_out.set_initial_state(lts_in.initial_probabilistic_state().get());
   }
   else
   {
@@ -910,7 +920,7 @@ void remove_probabilities(const probabilistic_lts<STATE_LABEL1, ACTION_LABEL1, P
     }
     else
     {
-      t=transition(t.from(), t.label(), lts_in.probabilistic_state(probabilistic_target_state_number).begin()->state());
+      t=transition(t.from(), t.label(), lts_in.probabilistic_state(probabilistic_target_state_number).get());
     }
     transition_number++;
   }

@@ -23,9 +23,19 @@ struct fsm_writer
   const probabilistic_lts_fsm_t& fsm;
 
   fsm_writer(std::ostream& out_, const probabilistic_lts_fsm_t& fsm_)
-    : out(out_), number_of_initial_state(fsm_.initial_probabilistic_state().begin()->state()), fsm(fsm_)
+    : out(out_), 
+      number_of_initial_state(fsm_.initial_probabilistic_state().size()<=1?
+                         fsm_.initial_probabilistic_state().get():
+                         fsm_.initial_probabilistic_state().begin()->state()), 
+      fsm(fsm_)
   {
-    assert(fsm_.initial_probabilistic_state().size()>0);
+    if (fsm_.initial_probabilistic_state().size()>1)
+    {
+      mCRL2log(log::warning) << "This transition system has a probabilistic initial state. "
+                             << "The FSM format only supports a deterministic state. The initial state " 
+                             << fsm_.initial_probabilistic_state() << " is transformed into " 
+                             << fsm_.initial_probabilistic_state().begin()->state() << " with probability 1.\n";
+    }
   }
 
   // This functions swaps 0 with the number number_of_initial_state of the initial state.
@@ -61,7 +71,6 @@ struct fsm_writer
   void write_states()
   {
     mCRL2log(log::verbose) << "writing states..." << std::endl;
-    assert(fsm.initial_probabilistic_state().size()>0);
     for (std::size_t i = 0; i < fsm.num_states(); i++)
     {
       if (fsm.has_state_info())
@@ -84,12 +93,13 @@ struct fsm_writer
   // write "[state1 probability1, state2 probability2, ..., state_n probability_n]".
   void write_probabilistic_state(const detail::lts_fsm_base::probabilistic_state& probabilistic_state)
   {
-    if (probabilistic_state.size()==1)
+    if (probabilistic_state.size()<=1)
     {
-      out << swap_initial_state(probabilistic_state.begin()->state())+1;
+      out << swap_initial_state(probabilistic_state.get())+1;
     }
     else
     {
+      assert(probabilistic_state.size()>1);
       out << "[";
       bool first=true;
       for(const lps::state_probability_pair< std::size_t, probabilistic_arbitrary_precision_fraction>& p: probabilistic_state)

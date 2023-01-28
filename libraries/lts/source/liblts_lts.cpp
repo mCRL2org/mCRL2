@@ -22,13 +22,29 @@ namespace mcrl2::lts
 /// \brief Converts a probabilistic state into an aterm that encodes it.
 atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const probabilistic_lts_lts_t::probabilistic_state_t& state)
 {
-  stream << atermpp::aterm_int(state.size());
-
-  for(const auto& state : state)
+  if (state.size()==0)
   {
-    // Push a (index, probability) pair into the list.
-    stream << state.probability();
-    stream << atermpp::aterm_int(state.state());
+    // The probabilistic state is represented as a singular state and is stored without probability;
+    stream << atermpp::aterm_int(1);
+    stream << atermpp::aterm_int(state.get());
+  }
+  else if (state.size()<=1)
+  {
+    // The probabilistic state is the single element in a vector and is stored without probability;
+    stream << atermpp::aterm_int(1);
+    stream << atermpp::aterm_int(state.get());
+  }
+  else
+  {
+    // The probabilistic state is stored as a sequence of state probability pairs. 
+    stream << atermpp::aterm_int(state.size());
+
+    for(const auto& p : state)
+    {
+      // Push a (index, probability) pair into the list.
+      stream << atermpp::aterm_int(p.state());
+      stream << p.probability();
+    }
   }
 
   return stream;
@@ -36,22 +52,31 @@ atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const probabi
 
 atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, probabilistic_lts_lts_t::probabilistic_state_t& state)
 {
-  atermpp::aterm_int size;
-  stream >> size;
+  atermpp::aterm_int index;
+  stream >> index;  // Read the number of states.
 
-  state = {};
-  for (std::size_t i = 0; i < size.value(); ++i)
+  const std::size_t value=index.value();
+  assert(value>0);
+  if (value==1)
   {
-    lps::probabilistic_data_expression probability;
-    atermpp::aterm_int index;
-
-    stream >> probability;
     stream >> index;
-
-    state.add(index.value(), probability);
+    state.set(index.value());
   }
+  else
+  {
+    state = {};
+    lps::probabilistic_data_expression probability;
 
-  state.shrink_to_fit();
+    for (std::size_t i = 0; i < value; ++i)
+    {
+      stream >> index;
+      stream >> probability;
+
+      state.add(index.value(), probability);
+    }
+
+    state.shrink_to_fit();
+  }
   return stream;
 }
 
@@ -95,7 +120,7 @@ static void set_initial_state(lts_lts_t& lts, const probabilistic_lts_lts_t::pro
     throw mcrl2::runtime_error("The initial state of the non probabilistic input lts is probabilistic.");
   }
 
-  lts.set_initial_state(initial_state.begin()->state());
+  lts.set_initial_state(initial_state.get());
 }
 
 static void set_initial_state(probabilistic_lts_lts_t& lts, const probabilistic_lts_lts_t::probabilistic_state_t& initial_state)
@@ -447,10 +472,10 @@ void write_transition(atermpp::aterm_ostream& stream, std::size_t from, const lp
 
 void write_transition(atermpp::aterm_ostream& stream, std::size_t from, const lps::multi_action& label, const probabilistic_lts_lts_t::probabilistic_state_t& to)
 {
-  if (to.size() == 1)
+  if (to.size() <= 1)
   {
     // Actually a non probabilistic transition.
-    write_transition(stream, from, label, to.begin()->state());
+    write_transition(stream, from, label, to.get());
   }
   else
   {

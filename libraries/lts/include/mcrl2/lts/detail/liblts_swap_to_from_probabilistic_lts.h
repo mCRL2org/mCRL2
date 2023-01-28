@@ -31,10 +31,9 @@ void swap_to_non_probabilistic_lts(
 {
   static_cast<lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE>& >(l_probabilistic).swap(l_plain);
   
-  assert(l_probabilistic.initial_probabilistic_state().size()!=0);
-  if (l_probabilistic.initial_probabilistic_state().size()==1)
+  if (l_probabilistic.initial_probabilistic_state().size()<=1)
   { 
-    l_plain.set_initial_state(l_probabilistic.initial_probabilistic_state().begin()->state());
+    l_plain.set_initial_state(l_probabilistic.initial_probabilistic_state().get());
   }
   else
   {
@@ -46,14 +45,13 @@ void swap_to_non_probabilistic_lts(
   for(transition& t: l_plain.get_transitions())
   {
     std::size_t probabilistic_target_state_number=t.to();
-    assert(l_probabilistic.probabilistic_state(probabilistic_target_state_number).size()!=0);
     if (l_probabilistic.probabilistic_state(probabilistic_target_state_number).size()>1)
     {
       throw mcrl2::runtime_error("Transition " + std::to_string(transition_number) + " is probabilistic.");
     }
     else
     {
-      t=transition(t.from(), t.label(), l_probabilistic.probabilistic_state(probabilistic_target_state_number).begin()->state());
+      t=transition(t.from(), t.label(), l_probabilistic.probabilistic_state(probabilistic_target_state_number).get());
     }
     transition_number++;
   }

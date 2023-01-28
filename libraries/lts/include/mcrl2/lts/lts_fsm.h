@@ -99,6 +99,12 @@ class lts_fsm_base
 
   public:
 
+    bool operator==(const lts_fsm_base& other) const
+    {
+      return m_state_element_values==other.m_state_element_values &&
+             m_parameters==other.m_parameters;
+    }
+
     /** \brief The lts_type of this labelled transition system. In this case lts_fsm.
         \return Returns lts_fsm as type of this transition system.
     */

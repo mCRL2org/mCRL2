@@ -279,6 +279,14 @@ class lts_lts_base
     lts_lts_base()
     {}
 
+    /// \brief Standard equality function;
+    bool operator==(const lts_lts_base& other) const
+    {
+      return m_data_spec==other.m_data_spec &&
+             m_parameters==other.m_parameters &&
+             m_action_decls==other.m_action_decls;
+    }
+
     void swap(lts_lts_base& l)
     {
       const data::data_specification auxd=m_data_spec;

@@ -49,6 +49,13 @@ class lts_aut_base
     {
       // Does intentionally not provide any action.
     }
+
+    /** \brief Standard equality function.
+     *  \param[in] other Value to compare with. */
+    bool operator==(const lts_aut_base&) const
+    {
+      return true;
+    }
 };
 
 } // end namespace detail

@@ -30,9 +30,9 @@ void probabilistic_lts_dot_t::save(std::ostream& os) const
   os << "node [ width=0.25, height=0.25, label=\"\" ];" << std::endl;
   if (num_states() > 0)
   {
-    if (initial_probabilistic_state().size()==1)
+    if (initial_probabilistic_state().size()<=1)
     { 
-      const std::size_t initial_state=initial_probabilistic_state().begin()->state();
+      const std::size_t initial_state=initial_probabilistic_state().get();
       if (has_state_info())
       {
         os << state_label(initial_state).name();
@@ -73,7 +73,7 @@ void probabilistic_lts_dot_t::save(std::ostream& os) const
       {
         throw mcrl2::runtime_error("Cannot save probabilistic states in .dot format.");
       }
-      os << state_label(t.from()).name() << "->" << state_label(probabilistic_state(t.to()).begin()->state()).name() << "[label=\"" <<
+      os << state_label(t.from()).name() << "->" << state_label(probabilistic_state(t.to()).get()).name() << "[label=\"" <<
          mcrl2::lts::pp(action_label(t.label())) << "\"];" << std::endl;
     }
     else

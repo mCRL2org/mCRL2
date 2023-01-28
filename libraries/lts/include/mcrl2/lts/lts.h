@@ -161,7 +161,9 @@ class lts: public LTS_BASE
       assert(m_action_labels.size()>0 && m_action_labels[const_tau_label_index]==ACTION_LABEL_T::tau_action());
     }
 
-    lts& operator=(const lts& l)
+    /** \brief Standard assignment operator.
+     *  \param[in] l The lts to be assigned. */
+    lts& operator=(const lts& l) 
     {
       static_cast<LTS_BASE&>(*this)=l;
       m_nstates = l.m_nstates;
@@ -172,6 +174,19 @@ class lts: public LTS_BASE
       m_hidden_label_set = l.m_hidden_label_set;
       assert(m_action_labels.size()>0 && m_action_labels[const_tau_label_index]==ACTION_LABEL_T::tau_action());
       return *this;
+    }
+
+    /** \brief Standard equality operator.
+     ** \param[in] other The lts to compare with. */
+    bool operator==(const lts& other) const
+    {
+      return static_cast<const LTS_BASE&>(*this)==static_cast<const LTS_BASE&>(other) &&
+             m_nstates == other.m_nstates &&
+             m_init_state == other.m_init_state &&
+             m_transitions == other.m_transitions &&
+             m_state_labels == other.m_state_labels &&
+             m_action_labels == other.m_action_labels &&
+             m_hidden_label_set == other.m_hidden_label_set;
     }
 
     /** \brief Swap this lts with the supplied supplied LTS.

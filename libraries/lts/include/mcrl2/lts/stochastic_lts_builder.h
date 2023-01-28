@@ -209,14 +209,23 @@ class stochastic_lts_lts_builder: public stochastic_lts_builder
       m_lts.set_action_label_declarations(action_labels);
     }
 
-    static probabilistic_state<std::size_t, lps::probabilistic_data_expression> make_probabilistic_state(const std::list<std::size_t>& targets, const std::vector<data::data_expression>& probabilities)
+    static probabilistic_state<std::size_t, lps::probabilistic_data_expression> 
+             make_probabilistic_state(const std::list<std::size_t>& targets, const std::vector<data::data_expression>& probabilities)
     {
       probabilistic_state<std::size_t, lps::probabilistic_data_expression> result;
-      auto ti = targets.begin();
-      auto pi = probabilities.begin();
-      for (; ti != targets.end(); ++pi, ++ti)
+      assert(targets.size()>0);
+      if (targets.size()==1)
       {
-        result.add(*ti, *pi);
+        result.set(targets.front());
+      }
+      else 
+      {
+        std::list<std::size_t>::const_iterator ti = targets.begin();
+        std::vector<data::data_expression>::const_iterator pi = probabilities.begin();
+        for (; ti != targets.end(); ++pi, ++ti)
+        {
+          result.add(*ti, *pi);
+        }
       }
       return result;
     }

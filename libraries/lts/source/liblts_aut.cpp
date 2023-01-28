@@ -387,14 +387,14 @@ static void read_from_aut(probabilistic_lts_aut_t& l, std::istream& is)
 
     check_state(from, nstate, line_no);
     check_states(probabilistic_target_state, nstate, line_no);
-    // Check whether probabilistic state exists. 
+    // Check whether probabilistic states exists. 
     std::size_t fresh_index = indices_of_single_probabilistic_states.size()+indices_of_multiple_probabilistic_states.size();
     std::size_t index;
-    if (probabilistic_target_state.size()==1)
+    if (probabilistic_target_state.size()<=1)
     {
       index = indices_of_single_probabilistic_states.insert(
                        std::pair< std::size_t, std::size_t>
-                       (probabilistic_target_state.begin()->state(),fresh_index)).first->second;
+                       (probabilistic_target_state.get(),fresh_index)).first->second;
     }
     else
     {
@@ -446,7 +446,7 @@ static void read_from_aut(lts_aut_t& l, std::istream& is)
   
   mcrl2::utilities::unordered_map < action_label_string, std::size_t > action_labels;
   action_labels[action_label_string::tau_action()]=0; // A tau action is always stored at position 0.
-  l.set_initial_state(initial_probabilistic_state.begin()->state()); 
+  l.set_initial_state(initial_probabilistic_state.get()); 
 
   std::size_t from, to;
   std::string s;
@@ -476,18 +476,25 @@ static void write_probabilistic_state(const mcrl2::lts::probabilistic_lts_aut_t:
 {
   mcrl2::lts::probabilistic_arbitrary_precision_fraction previous_probability;
   bool first_element=true;
-  for (const mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t::state_probability_pair& p: prob_state)
+  if (prob_state.size()<=1) // This is a simple probabilistic state. 
   {
-    if (first_element)
+    os << prob_state.get();
+  }
+  else // The state consists of a vector of states and probability pairs. 
+  {
+    for (const mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t::state_probability_pair& p: prob_state)
     {
-      os << p.state();
-      previous_probability=p.probability();
-      first_element=false;
-    }
-    else
-    {
-      os << " " << pp(previous_probability) << " " << p.state();
-      previous_probability=p.probability();
+      if (first_element)
+      {
+        os << p.state();
+        previous_probability=p.probability();
+        first_element=false;
+      }
+      else
+      {
+        os << " " << pp(previous_probability) << " " << p.state();
+        previous_probability=p.probability();
+      }
     }
   }
 }

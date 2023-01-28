@@ -426,10 +426,19 @@ bool reachability_check(probabilistic_lts < SL, AL, PROBABILISTIC_STATE, BASE>& 
   std::vector < bool > visited(l.num_states(),false);
   std::stack<std::size_t> todo;
 
-  for(const typename PROBABILISTIC_STATE::state_probability_pair& s: l.initial_probabilistic_state())
+  if (l.initial_probabilistic_state().size()>1) // Target states are in a probabilistic vector.
   {
-    visited[s.state()]=true;
-    todo.push(s.state());
+    for(const typename PROBABILISTIC_STATE::state_probability_pair& s: l.initial_probabilistic_state())
+    {
+      visited[s.state()]=true;
+      todo.push(s.state());
+    }
+  }
+  else // it is a singular state;
+  {
+    const typename PROBABILISTIC_STATE::state_t sn=l.initial_probabilistic_state().get();
+    visited[sn]=true;
+    todo.push(sn);
   }
 
   while (!todo.empty())
@@ -442,12 +451,24 @@ bool reachability_check(probabilistic_lts < SL, AL, PROBABILISTIC_STATE, BASE>& 
       const outgoing_pair_t& p=out_trans.get_transitions()[i];
       assert(visited[state_to_consider] && state_to_consider<l.num_states() && to(p)<l.num_probabilistic_states());
       // Walk through the the states in this probabilistic state.
-      for(const typename PROBABILISTIC_STATE::state_probability_pair& pr: l.probabilistic_state(to(p)))
+      if (l.probabilistic_state(to(p)).size()>1)  // Target states are in a probabilistic vector.
       {
-        if (!visited[pr.state()])
+        for(const typename PROBABILISTIC_STATE::state_probability_pair& pr: l.probabilistic_state(to(p)))
         {
-          visited[pr.state()]=true;
-          todo.push(pr.state());
+          if (!visited[pr.state()])
+          {
+            visited[pr.state()]=true;
+            todo.push(pr.state());
+          }
+        }
+      }
+      else // it is a singular state;
+      {
+        const typename PROBABILISTIC_STATE::state_t sn=l.probabilistic_state(to(p)).get();
+        if (!visited[sn])
+        {
+          visited[sn]=true;
+          todo.push(sn);
         }
       }
     }

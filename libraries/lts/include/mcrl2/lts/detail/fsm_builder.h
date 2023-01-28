@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lts/detail/fsm_builder.h
-/// \brief add your file description here.
+/// \brief The code in this file is used to construct an lts in fsm format. 
 
 #ifndef MCRL2_LTS_DETAIL_FSM_BUILDER_H
 #define MCRL2_LTS_DETAIL_FSM_BUILDER_H
@@ -231,9 +231,16 @@ struct fsm_builder
   {
     fsm_transition t(source, target, label);
     std::size_t max = t.source();
-    for (const detail::lts_fsm_base::state_probability_pair& p: t.target())
+    if (t.target().size()>1)
     {
-      max = std::max(max, p.state());
+      for (const detail::lts_fsm_base::state_probability_pair& p: t.target())
+      {
+        max = std::max(max, p.state());
+      }
+    }
+    else 
+    {
+      max=std::max(max, t.target().get());
     }
     max += 1; // Apply a correction for the mismatch between numbering in lts_fsm and the fsm file format
     if (fsm.num_states() <= max)

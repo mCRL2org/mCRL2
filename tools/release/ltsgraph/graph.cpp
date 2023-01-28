@@ -237,9 +237,9 @@ std::size_t Graph::add_probabilistic_state(
     const typename lts_t::probabilistic_state_t& probabilistic_state,
     const QVector3D& min, const QVector3D& max)
 {
-  if (probabilistic_state.size() == 1)
+  if (probabilistic_state.size() <= 1)
   {
-    return probabilistic_state.begin()->state();
+    return probabilistic_state.get();
   }
   else
   {

@@ -13,6 +13,7 @@
 #define BOOST_TEST_MODULE lts_pbisim_test
 #include <boost/test/included/unit_test.hpp>
 
+#include "mcrl2/lts/probabilistic_arbitrary_precision_fraction.h"
 #include "mcrl2/lts/detail/liblts_pbisim_bem.h"
 #include "mcrl2/lts/detail/liblts_pbisim_grv.h"
 
@@ -35,6 +36,7 @@ void execute_test(const std::string test_name,
   mcrl2::utilities::execution_timer timer;
   probabilistic_lts_aut_t t1 = parse_aut(input_lts);
   probabilistic_lts_aut_t t2=t1;
+  BOOST_CHECK(t1==t2);
   detail::probabilistic_bisimulation_reduce_grv(t1,timer);
   if (t1.num_states()!=expected_number_of_states || t1.num_transitions() != expected_number_of_transitions || t1.num_probabilistic_states()!=expected_number_of_probabilistic_states)
   {
@@ -100,7 +102,7 @@ const std::string test4 =
 "(15,\"c\",17)\n"
 "(16,\"b\",18)\n";
 
-// Ariplane ticket example test
+// Airplane ticket example test
 const std::string test5 =
 "des (1 1/3 0,14,15)\n"
 "(0,\"enter\",3 1/4 4 1/4 5 1/4 2)\n"
@@ -374,14 +376,36 @@ std::string test7 =
 "(0,\"tau\",2 3/4 2)\n"
 ;
 
+
 BOOST_AUTO_TEST_CASE(test_state_space_reductions)
 {
   execute_test("Test1",test1,3,2,1);
   execute_test("Test2",test1,3,2,1);
   execute_test("Test3",test3,3,2,2);
-  execute_test("Test4",test4,6,6,4);
+  execute_test("Test4",test4,6,6,4); 
   execute_test("Test5",test5,11,10,9);
-  execute_test("Test6",test6,13,13,11);
+  execute_test("Test6",test6,13,13,11); 
   execute_test("Test7",test7,3,5,3);
 }
 
+// Test whether a probabilistic state of length 1,
+// stored as a single number, and stored as a vector of length 1
+// are considered the same object for equality and the hash function.
+BOOST_AUTO_TEST_CASE(hash_and_equality_test)
+{
+  typedef probabilistic_state<std::size_t, mcrl2::lps::probabilistic_data_expression> prob_state;
+  prob_state s1(1);
+  prob_state s2;
+  s2.add(1,mcrl2::lps::probabilistic_data_expression::one());
+  BOOST_CHECK(s1==s2);
+  std::hash<prob_state> hasher;
+  BOOST_CHECK(hasher(s1)==hasher(s2));
+
+  typedef probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> prob_state_alt;
+  prob_state_alt s3(1);
+  prob_state_alt s4;
+  s4.add(1,mcrl2::lts::probabilistic_arbitrary_precision_fraction::one());
+  BOOST_CHECK(s3==s4);
+  std::hash<prob_state_alt> hasher_alt;
+  BOOST_CHECK(hasher_alt(s3)==hasher_alt(s4));
+}
