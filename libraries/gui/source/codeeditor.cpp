@@ -395,16 +395,22 @@ void CodeEditor::paintEvent(QPaintEvent* event)
 
 void CodeEditor::keyPressEvent(QKeyEvent* event)
 {
-  /* zoom in in case of Ctrl++ or Ctrl+=, zoom out in case of Ctrl +- */
   if (event->matches(QKeySequence::ZoomIn) ||
       (event->modifiers() == Qt::ControlModifier &&
        event->key() == Qt::Key_Equal))
   {
+    /* zoom in in case of Ctrl++ or Ctrl+= */
     zoomIn();
   }
   else if (event->matches(QKeySequence::ZoomOut))
   {
+    /* zoom out in case of Ctrl+- */
     zoomOut();
+  }
+  else if (event->matches(QKeySequence::InsertLineSeparator))
+  {
+    /* ignore Shift+Enter because it messes with the editor formatting */
+    event->ignore();
   }
   else
   {

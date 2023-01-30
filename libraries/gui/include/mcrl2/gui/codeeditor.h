@@ -186,7 +186,7 @@ class CodeEditor : public QPlainTextEdit
   void paintEvent(QPaintEvent* event) override;
 
   /**
-   * @brief keyPressEvent Adds key events for zooming
+   * @brief keyPressEvent Add or remove key events
    * @param event The key event
    */
   void keyPressEvent(QKeyEvent* event) override;
