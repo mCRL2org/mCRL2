@@ -510,9 +510,9 @@ data::data_expression lpsparunfold::apply_function(const function_symbol& f, con
 {
   if(m_alt_case_placement && is_if_application(de))
   {
-    return data::if_(arg1(de),
-                     apply_function(f, arg2(de)),
-                     apply_function(f, arg3(de)));
+    return data::if_(atermpp::down_cast<data::application>(de)[0],
+                     apply_function(f, atermpp::down_cast<data::application>(de)[1]),
+                     apply_function(f, atermpp::down_cast<data::application>(de)[2]));
   }
   else
   {
