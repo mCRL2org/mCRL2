@@ -21,9 +21,9 @@ namespace mcrl2
 namespace smt
 {
 
-/*
- * A rule describes a partially pattern-matched rewrite rule.
- * match_criteria is a set of data_expression pairs (A, B)
+/**
+ * \brief A rule describes a partially pattern-matched rewrite rule.
+ * \details match_criteria is a set of data_expression pairs (A, B)
  * where A is a data_expression over variables in the left hand
  * side of a function definition, and B is a pattern consisting of
  * constructor applications over free variables.
@@ -78,6 +78,11 @@ std::ostream& operator<<(std::ostream& out, const rule& r)
   return out << core::detail::print_list(r.variables) << ". " << r.condition << " -> " << core::detail::print_map(r.match_criteria) << " = " << r.rhs;
 }
 
+/**
+ * \brief Contains information on sorts that behave similar to a structured sort in a data specification.
+ * \details That is, there is a number of constructors, and for some constructors we have a recogniser function
+ * and several projection functions.
+ */
 struct structured_sort_functions
 {
   std::map< data::sort_expression, std::set<data::function_symbol> > constructors;
@@ -106,19 +111,19 @@ data::data_expression lazyif(const data::data_expression& cond, const data::data
   return data::if_(cond, then, else_);
 }
 
-/*
- * For a list of rules with equal left hand sides of match_criteria and only variables in
+/**
+ * \brief For a list of rules with equal left hand sides of match_criteria and only variables in
  * the right hand sides of match_criteria, construct a right hand side based on the
  * conditions and right hand sides of the rules.
  */
 static data::data_expression construct_condition_rhs(const std::vector<rule>& rules, const data::data_expression& representative)
 {
-  data::data_expression_vector negated_conditions;
-  for (const rule& r: rules)
-  {
-    negated_conditions.push_back(data::sort_bool::not_(r.condition));
-  }
-  data::data_expression else_clause = data::join_and(negated_conditions.begin(), negated_conditions.end());
+  // data::data_expression_vector negated_conditions;
+  // for (const rule& r: rules)
+  // {
+  //   negated_conditions.push_back(data::sort_bool::not_(r.condition));
+  // }
+  // data::data_expression else_clause = data::join_and(negated_conditions.begin(), negated_conditions.end());
 
   // TODO: Check whether else_clause is equivalent to false. Can we use the enumerator for this?
   bool conditions_are_complete = false;
@@ -135,10 +140,10 @@ static data::data_expression construct_condition_rhs(const std::vector<rule>& ru
   for (const rule& r: rules)
   {
     std::map<data::variable, data::data_expression> substitution_map;
-    for (const auto& p: r.match_criteria)
+    for (const auto& [var_expr, pattern]: r.match_criteria)
     {
-      assert(data::is_variable(p.second));
-      substitution_map[data::variable(p.second)] = p.first;
+      assert(data::is_variable(pattern));
+      substitution_map[atermpp::down_cast<data::variable>(pattern)] = var_expr;
     }
     data::map_substitution<std::map<data::variable, data::data_expression> > substitution(substitution_map);
 
@@ -158,10 +163,15 @@ static data::data_expression construct_condition_rhs(const std::vector<rule>& ru
   return result;
 }
 
-/*
- * For a list of rules with equal left hand sides of match_criteria, construct a right hand side.
+/**
+ * \brief For a list of rules with equal left hand sides of match_criteria, construct a right hand side.
  */
-static data::data_expression construct_rhs(const structured_sort_functions& ssf, data::representative_generator& gen, const std::vector<rule>& rules, const data::sort_expression& sort)
+static data::data_expression construct_rhs(
+  const structured_sort_functions& ssf,
+  data::representative_generator& gen,
+  const std::vector<rule>& rules,
+  const data::sort_expression& sort
+)
 {
   if (rules.empty())
   {
@@ -187,13 +197,14 @@ static data::data_expression construct_rhs(const structured_sort_functions& ssf,
   data::data_expression matching_target;
   enum matching_type_t { MATCHING_NONE, MATCHING_INCOMPLETE, MATCHING_PARTIAL, MATCHING_FULL };
   matching_type_t matching_type = MATCHING_NONE;
-  for (const auto& p: rules[0].match_criteria)
+  // iterate over newly-created variable names
+  for (const auto& [var_expr, _]: rules[0].match_criteria)
   {
     bool variable_seen = false;
     std::set<data::function_symbol> constructors_seen;
     for (const rule& r: rules)
     {
-      data::data_expression pattern = r.match_criteria.at(p.first);
+      data::data_expression pattern = r.match_criteria.at(var_expr);
       if (data::is_variable(pattern))
       {
         variable_seen = true;
@@ -227,18 +238,18 @@ static data::data_expression construct_rhs(const structured_sort_functions& ssf,
       // That's better than an incomplete matching but worse than a full matching.
       if (matching_type == MATCHING_NONE || matching_type == MATCHING_INCOMPLETE)
       {
-        matching_target = p.first;
+        matching_target = var_expr;
         matching_type = MATCHING_PARTIAL;
       }
     }
-    else if (constructors_seen.size() != ssf.constructors.at(p.first.sort()).size())
+    else if (constructors_seen.size() != ssf.constructors.at(var_expr.sort()).size())
     {
       // There are constructors for which there are no rules.
       // Thus, we have an incomplete function definition, that needs to be completed artificially.
       // A partial matching would be a better choice.
       if (matching_type == MATCHING_NONE)
       {
-        matching_target = p.first;
+        matching_target = var_expr;
         matching_type = MATCHING_INCOMPLETE;
       }
     }
@@ -246,7 +257,7 @@ static data::data_expression construct_rhs(const structured_sort_functions& ssf,
     {
       // There is a matching rule for each constructor, and no rule with a plain variable.
       // This variable is a perfect pattern matching candidate.
-      matching_target = p.first;
+      matching_target = var_expr;
       matching_type = MATCHING_FULL;
       break;
     }
@@ -313,8 +324,7 @@ static data::data_expression construct_rhs(const structured_sort_functions& ssf,
       data::data_expression condition = data::replace_free_variables(r.condition, sigma);
       data::data_expression rhs = data::replace_free_variables(r.rhs, sigma);
 
-      const std::set<data::function_symbol>& constructors = match_constructors;
-      for (const data::function_symbol& f: constructors)
+      for (const data::function_symbol& f: match_constructors)
       {
         rule rule(r.match_criteria, rhs, condition, r.variables);
         rule.match_criteria.erase(matching_target);
@@ -359,6 +369,11 @@ static data::data_expression construct_rhs(const structured_sort_functions& ssf,
   return result;
 }
 
+/**
+ * \brief Check whether the given rewrite rule can be classified as a pattern matching rule.
+ * \details That is, its arguments are constructed only out of unique variable occurrences and
+ * constructor function symbols and constructor function applications.
+ */
 bool is_pattern_matching_rule(const structured_sort_functions& ssf, const data::data_equation& rewrite_rule)
 {
   // For this rewrite rule to be usable in pattern matching, its lhs must only contain
@@ -371,35 +386,16 @@ bool is_pattern_matching_rule(const structured_sort_functions& ssf, const data::
     subexpressions.erase(data::application(rewrite_rule.lhs()).head());
   }
 
-  for (const data::data_expression& expr: subexpressions)
+  bool all_pattern = std::all_of(subexpressions.begin(), subexpressions.end(), [&ssf](const data::data_expression& expr) {
+    return
+      data::is_variable(expr) ||
+      (data::is_function_symbol(expr) && ssf.is_constructor(atermpp::down_cast<data::function_symbol>(expr))) ||
+      (data::is_application(expr) && data::is_function_symbol(atermpp::down_cast<data::application>(expr).head()) &&
+                          ssf.is_constructor(data::function_symbol(atermpp::down_cast<data::application>(expr).head())));
+  });
+  if (!all_pattern)
   {
-    if (data::is_variable(expr))
-    {
-      // Fine.
-    }
-    else if (data::is_function_symbol(expr))
-    {
-      if (!ssf.is_constructor(data::function_symbol(expr)))
-      {
-        return false;
-      }
-    }
-    else if (data::is_application(expr))
-    {
-      data::application application(expr);
-      if (!data::is_function_symbol(application.head()))
-      {
-        return false;
-      }
-      if (!ssf.is_constructor(data::function_symbol(application.head())))
-      {
-        return false;
-      }
-    }
-    else
-    {
-      return false;
-    }
+    return false;
   }
 
   // Check whether each variable occurs at most once
@@ -410,46 +406,50 @@ bool is_pattern_matching_rule(const structured_sort_functions& ssf, const data::
   return variable_set.size() == variable_multiset.size();
 }
 
-data::data_equation unfold_pattern_matching(const data::function_symbol& mapping, const data::data_equation_vector& rewrite_rules, const structured_sort_functions& ssf, data::representative_generator& gen, data::set_identifier_generator& id_gen)
+/**
+ * \brief This converts a collection of rewrite rules for a give function symbol into a
+ * one-rule specification of the function, using recogniser and projection functions
+ * to implement pattern matching.
+ * \details For example, the collection of rewrite rules below:
+ *
+ *   sign_of_list_sum([]) = false;
+ *   is_even(n) -> sign_of_list_sum(n |> l) = sign_of_list_sum(l);
+ *   !is_even(n) -> sign_of_list_sum(n |> l) = !sign_of_list_sum(l);
+ *
+ * gets translated into the following function specification:
+ *
+ *   sign_of_list_sum(l) = if(is_emptylist(l), false,
+ *                            if(is_even(head(l)), sign_of_list_sum(tail(l)),
+ *                               !sign_of_list_sum(tail(l))))
+ *
+ * Two complications can arise. The rewrite rule set may contain rules that do not
+ * pattern-match on the function parameters, such as 'not(not(b)) = b`; rules like
+ * these are discarded.
+ * More problematically, the set of rewrite rules may not be complete, or may not
+ * easily be proven complete; in the example above, if the rewriter cannot rewrite
+ * 'is_even(n) || !is_even(n)' to 'true', the translation cannot tell that the
+ * rewrite rule set is complete.
+ * In cases where a (non-constructor )function invocation can genuinely not be
+ * rewritten any further, the MCRL2 semantics are unspecified (TODO check this);
+ * the translation resolves this situation by returning an arbitrary value in this
+ * case. Thus, in practice, the function definion above might well be translated
+ * into the following:
+ *
+ *   sign_of_list_sum(l) = if(is_emptylist(l), false,
+ *                            if(is_even(head(l)), sign_of_list_sum(tail(l)),
+ *                               if(!is_even(head(l)), !sign_of_list_sum(tail(l)),
+ *                                  false)))
+ *
+ * Where 'false' is a representative of sort_bool.
+ */
+data::data_equation unfold_pattern_matching(
+  const data::function_symbol& mapping,
+  const data::data_equation_vector& rewrite_rules,
+  const structured_sort_functions& ssf,
+  data::representative_generator& gen,
+  data::set_identifier_generator& id_gen
+)
 {
-  /*
-   * This converts a collection of rewrite rules for a give function symbol into a
-   * one-rule specification of the function, using recogniser and projection functions
-   * to implement pattern matching.
-   *
-   * For example, the collection of rewrite rules below:
-   *
-   *   sign_of_list_sum([]) = false;
-   *   is_even(n) -> sign_of_list_sum(n |> l) = sign_of_list_sum(l);
-   *   !is_even(n) -> sign_of_list_sum(n |> l) = !sign_of_list_sum(l);
-   *
-   * gets translated into the following function specification:
-   *
-   *   sign_of_list_sum(l) = if(is_emptylist(l), false,
-   *                            if(is_even(head(l)), sign_of_list_sum(tail(l)),
-   *                               !sign_of_list_sum(tail(l))))
-   *
-   * Two complications can arise. The rewrite rule set may contain rules that do not
-   * pattern-match on the function parameters, such as 'not(not(b)) = b`; rules like
-   * these are discarded.
-   * More problematically, the set of rewrite rules may not be complete, or may not
-   * easily be proven complete; in the example above, if the rewriter cannot rewrite
-   * 'is_even(n) || !is_even(n)' to 'true', the translation cannot tell that the
-   * rewrite rule set is complete.
-   * In cases where a (non-constructor )function invocation can genuinely not be
-   * rewritten any further, the MCRL2 semantics are unspecified (TODO check this);
-   * the translation resolves this situation by returning an arbitrary value in this
-   * case. Thus, in practice, the function definion above might well be translated
-   * into the following:
-   *
-   *   sign_of_list_sum(l) = if(is_emptylist(l), false,
-   *                            if(is_even(head(l)), sign_of_list_sum(tail(l)),
-   *                               if(!is_even(head(l)), !sign_of_list_sum(tail(l)),
-   *                                  false)))
-   *
-   * Where 'false' is a representative of sort_bool.
-   */
-
   data::sort_expression codomain = mapping.sort().target_sort();
   data::variable_vector temp_par;
   if (data::is_function_sort(mapping.sort()))
@@ -499,6 +499,9 @@ data::data_equation unfold_pattern_matching(const data::function_symbol& mapping
   return data::data_equation(new_parameters, new_lhs, new_rhs);
 }
 
+/**
+ * \brief Find sorts that behave like a structured sort and the associated rewrite rules
+ */
 std::pair<structured_sort_functions, std::map< data::function_symbol, data::data_equation_vector >> find_structured_sort_functions(const data::data_specification& dataspec, const native_translations& nt)
 {
   structured_sort_functions ssf;
@@ -753,20 +756,21 @@ void unfold_pattern_matching(const data::data_specification& dataspec, native_tr
   std::set<data::function_symbol> recog_and_proj = complete_recognisers_projections(dataspec, nt, ssf);
 
   data::representative_generator rep_gen(dataspec);
-  for(const auto& map_eqn: rewrite_rules)
+  for(const auto& [function, rewr_equations]: rewrite_rules)
   {
     // Only unfold equations with parameters
     // Do not unfold recognisers and projection functions
     // Only unfold equations that satisfy the function 'is_pattern_matching_rule'
-    if (data::is_function_sort(map_eqn.first.sort()) &&
-        recog_and_proj.find(map_eqn.first) == recog_and_proj.end() &&
-        std::all_of(map_eqn.second.begin(), 
-                    map_eqn.second.end(), 
+    if (data::is_function_sort(function.sort()) &&
+        recog_and_proj.find(function) == recog_and_proj.end() &&
+        std::all_of(rewr_equations.begin(),
+                    rewr_equations.end(),
                     [&ssf](const data::data_equation& eqn){ return is_pattern_matching_rule(ssf, eqn); }))
     {
       data::set_identifier_generator id_gen;
-      data::data_equation unfolded_eqn = unfold_pattern_matching(map_eqn.first, map_eqn.second, ssf, rep_gen, id_gen);
-      nt.set_native_definition(map_eqn.first, unfolded_eqn);
+      data::data_equation unfolded_eqn = unfold_pattern_matching(function, rewr_equations, ssf, rep_gen, id_gen);
+      mCRL2log(log::debug) << function << " unfolded to " << unfolded_eqn;
+      nt.set_native_definition(function, unfolded_eqn);
     }
   }
 }
