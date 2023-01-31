@@ -144,21 +144,12 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
     /// \brief a generator for default data expressions of a give sort;
     mcrl2::data::representative_generator m_representative_generator;
 
-    /// \brief Boolean to indicate if additional distribution laws need to be generated.
-    bool m_add_distribution_laws;
-
     /// \brief Boolean to indicate if alternative placement of case functions should be used.
     bool m_alt_case_placement;
 
     /// \brief Boolean indicating whether rewrite rules may be added that could make
     ///        the data specification inconsistent.
     bool m_possibly_inconsistent;
-
-    /// \brief Boolean indicating how global variables should be unfolded.
-    ///        if true, global variables are unfolded into a vector of global variables,
-    ///        if false, global variable dc is unfolded into Det(dc), pi_0(dc), ..., pi_n(dc)
-    bool m_globvars;
-
 
 
     //data::data_expression apply_case_function(const data::data_expression& expr, const case_func_replacement& case_funcs);
