@@ -321,7 +321,7 @@ Binder<Builder, parunfold_replacement<Builder, Binder>, parunfold_replacement<Bu
     }
   }
 
-  void apply_case_function(data::data_expression& result, const data::data_expression& expr)
+  void apply_case_function(data::data_expression& result, const data::application& expr)
   {
     auto& [par, case_f, det_f, replacements] = case_funcs;
 
