@@ -325,7 +325,7 @@ Binder<Builder, parunfold_replacement<Builder, Binder>, parunfold_replacement<Bu
   {
     auto& [par, case_f, det_f, replacements] = case_funcs;
 
-    if (find_free_variables(result).count(par) == 0)
+    if (data::find_free_variables(expr).count(par) == 0)
     {
       // variable to be replaced does not occur here
       // make sure to still apply the substitutions necessary for the capture avoiding tricks
