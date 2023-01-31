@@ -19,7 +19,7 @@ class ltsgraph_tool : public ltsgraph_base
 {
   public:
     ltsgraph_tool():
-      ltsgraph_base("LTSGraph (Old)",
+      ltsgraph_base("LTSGraph (Deprecated)",
                     "Rimco Boudewijns and Sjoerd Cranen",
                     "visualise an LTS as a graph and manipulate its layout in 2D and 3D",
                     "Tool for visualizing a labelled transition systems as a graph, and optimizing graph layout. "

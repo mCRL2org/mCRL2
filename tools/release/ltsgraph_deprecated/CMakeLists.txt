@@ -1,5 +1,5 @@
-add_mcrl2_tool(ltsgraph_old
-  MENUNAME "LTSGraph (Old)"
+add_mcrl2_tool(ltsgraph_deprecated
+  MENUNAME "LTSGraph (Deprecated)"
   DESCRIPTION "Visualisation tool for small state spaces (mCRL2 toolset)"
   ICON "mcrl2-green"
   SOURCES

@@ -25,7 +25,7 @@ set(MCRL2_TOOLS
   ltscompare
   ltsconvert
   ltsgraph
-  ltsgraph_old
+  ltsgraph_deprecated
   ltsinfo
   ltspbisim
   ltspcompare
