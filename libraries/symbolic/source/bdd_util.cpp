@@ -7,10 +7,11 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-
 #include "mcrl2/symbolic/bdd_util.h"
 
+#include "mcrl2/symbolic/utility.h"
 #include "mcrl2/utilities/stack_array.h"
+#include "mcrl2/utilities/unordered_set.h"
 
 #include <iostream>
 
@@ -260,10 +261,99 @@ meta_to_bdd_impl(MDD meta, MDD bits_dd, uint32_t firstvar)
     return res;
 }
 
-
 bdds::bdd meta_to_bdd(ldd meta, const std::vector<std::uint32_t>& bits, uint32_t firstvar)
 {
   return bdds::bdd(meta_to_bdd_impl(meta.get(), union_cube(false_(), bits.data(), bits.size()).get(), firstvar));
+}
+
+TASK_IMPL_4(MDD, lddmc_ldd_from_bdd, MTBDD, dd, MDD, bits_dd, uint32_t, bit, uint32_t, value)
+{
+    if (dd == mtbdd_true) { return lddmc_makenode(value, lddmc_true, lddmc_false); }
+    else if (dd == mtbdd_false) { return lddmc_false; }
+    else if (bits_dd == lddmc_true) { return lddmc_true; }
+
+    MDD result;
+    if (cache_get4(cache_ldd_from_bdd_id, dd, bits_dd, bit, value, &result)) return result;
+
+    const mddnode_t nbits_dd = LDD_GETNODE(bits_dd);
+    std::uint32_t num_bits = mddnode_getvalue(nbits_dd); // The number of bits on this level.
+
+    std::cerr << bit << " of " << num_bits << ", value is " << value << std::endl;
+
+    if (num_bits == bit + 1)
+    {
+        // Go to the next level
+        MDD down = lddmc_ldd_from_bdd(dd, mddnode_getdown(nbits_dd), 0, 0);
+        result = lddmc_makenode(value, down, lddmc_false);
+    }
+    else
+    {
+        const mtbddnode_t ndd = MTBDD_GETNODE(dd);
+
+        MDD first = lddmc_ldd_from_bdd(mtbddnode_gethigh(ndd), bits_dd, bit+1, value + (1 << (num_bits - bit - 1)));
+        MDD second = lddmc_ldd_from_bdd(mtbddnode_getlow(ndd), bits_dd, bit+1, value); 
+        
+        // The second value is always less than the first.
+        result = lddmc_makenode(lddmc_getvalue(second), lddmc_getdown(second), first);
+    }
+
+    cache_put4(cache_ldd_from_bdd_id, dd, bits_dd, bit, value, result);
+    return result;
+}
+
+/// Compute the height of the LDD.
+std::uint32_t compute_height(ldd set)
+{
+    std::uint32_t height = 0;
+
+    ldd current = set;
+    while (current != empty_set())
+    {
+        ++height;
+        current = current.down();
+    }
+
+    return height;
+}
+
+void compute_highest_rec(ldd set, mcrl2::utilities::unordered_set<ldd>& cache, std::vector<uint32_t>& array, std::size_t index)
+{   
+    if (set == empty_set() || set == empty_list()) return;
+
+    if (cache.count(set) != 0) {
+        return;
+    }
+    cache.emplace(set);
+
+    compute_highest_rec(set.right(), cache, array, index);
+    compute_highest_rec(set.down(), cache, array, index+1);
+
+    if (!set.is_copy()) {
+        array[index] = std::max(array[index], set.value() + 1); // Count zero as additional value 
+    }
+}
+
+std::vector<std::uint32_t> compute_highest(ldd set)
+{
+    std::vector<std::uint32_t> array(compute_height(set) - 1); // The last level are only terminal nodes.
+    mcrl2::utilities::unordered_set<ldd> cache;
+    compute_highest_rec(set, cache, array, 0);
+    return array;
+}
+
+std::vector<std::uint32_t> compute_bits(const std::vector<std::uint32_t>& highest)
+{    
+  // Compute number of bits for each level
+  std::vector<uint32_t> bits (highest.size());
+  {
+    std::size_t i = 0;
+    for (uint32_t value: highest)
+    {
+        bits[i] = base_two_bits(value);
+        ++i;
+    }
+  }
+  return bits;
 }
 
 } // namespace sylvan::ldds

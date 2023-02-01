@@ -5,6 +5,7 @@ mcrl2_add_library(mcrl2_symbolic
     source/bdd_util.cpp
     source/ldd_stream.cpp
   DEPENDS
+    mcrl2_core
     mcrl2_data
     Boost::boost
 )

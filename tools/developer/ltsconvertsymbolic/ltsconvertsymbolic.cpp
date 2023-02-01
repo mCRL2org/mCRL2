@@ -22,8 +22,6 @@
 #include "convert_concrete_lts.h"
 #include "sigref.h"
 
-#include <sylvan_int.h>
-
 using namespace mcrl2;
 using namespace mcrl2::lts;
 using namespace mcrl2::lts::detail;
@@ -219,9 +217,7 @@ class ltsconvert_tool : public input_output_tool
       sylvan::sylvan_init_package();
       sylvan::sylvan_init_ldd();
       sylvan::sylvan_init_mtbdd();
-      
-      sylvan::ldds::cache_bdd_from_ldd_id = sylvan::cache_next_opid();
-      sylvan::ldds::cache_bdd_from_ldd_rel_id = sylvan::cache_next_opid();
+      sylvan::ldds::init_bdd_util();
 
       if (input_filename().empty() || input_filename() == "-")
       {

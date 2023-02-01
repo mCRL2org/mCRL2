@@ -19,7 +19,7 @@
 using namespace sylvan::ldds;
 using namespace mcrl2::symbolic;
 
-/// Iterates over all nodes in the given LDD. The LDDs in nodes will not be traversed.
+/// Iterates over all nodes in the given LDD.
 struct node_iterator
 {
 public:

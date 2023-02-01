@@ -12,6 +12,7 @@
 
 #ifdef MCRL2_ENABLE_SYLVAN
 
+#include "mcrl2/symbolic/bdd_util.h"
 #include "mcrl2/utilities/logger.h"
 
 #include <sylvan_ldd.hpp>
@@ -100,6 +101,8 @@ void initialise_sylvan()
   sylvan::sylvan_set_limits(1024 * 1024 * 1024, 6, 6);
   sylvan::sylvan_init_package();
   sylvan::sylvan_init_ldd();
+  sylvan::sylvan_init_mtbdd();
+  sylvan::ldds::init_bdd_util();
 }
 
 /// \brief Destroy the Sylvan library.

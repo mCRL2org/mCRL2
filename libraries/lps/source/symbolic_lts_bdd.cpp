@@ -22,48 +22,6 @@ using namespace sylvan::ldds;
 using namespace sylvan::bdds;
 using mcrl2::log::log_level_t;
 
-
-/// Compute the height of the LDD.
-std::uint32_t compute_height(ldd set)
-{
-    std::uint32_t height = 0;
-
-    ldd current = set;
-    while (current != empty_set())
-    {
-        ++height;
-        current = current.down();
-    }
-
-    return height;
-}
-
-void compute_highest_rec(ldd set, mcrl2::utilities::unordered_set<ldd>& cache, std::vector<uint32_t>& array, std::size_t index)
-{   
-    if (set == empty_set() || set == empty_list()) return;
-
-    if (cache.count(set) != 0) {
-        return;
-    }
-    cache.emplace(set);
-
-    compute_highest_rec(set.right(), cache, array, index);
-    compute_highest_rec(set.down(), cache, array, index+1);
-
-    if (!set.is_copy()) {
-        array[index] = std::max(array[index], set.value() + 1); // Count zero as additional value 
-    }
-}
-
-/// Compute the highest value for each variable level.
-std::vector<std::uint32_t> compute_highest(ldd set)
-{
-    std::vector<std::uint32_t> array(compute_height(set) - 1); // The last level are only terminal nodes.
-    mcrl2::utilities::unordered_set<ldd> cache;
-    compute_highest_rec(set, cache, array, 0);
-    return array;
-}
-
 std::uint32_t compute_highest_action_rec(ldd set, ldd meta, mcrl2::utilities::unordered_set<ldd>& cache)
 {
     if (set == empty_set() || set == empty_list()) return 0;
@@ -127,10 +85,10 @@ symbolic_lts_bdd::symbolic_lts_bdd(const symbolic_lts& lts)
   m_data_index = lts.data_index();
   m_action_index = lts.action_index();
 
-  mCRL2log(log_level_t::debug) << "Height:" << compute_height(lts.states()) <<  std::endl;
+  mCRL2log(log_level_t::debug) << "Height:" << sylvan::ldds::compute_height(lts.states()) <<  std::endl;
 
   // Compute highest value at each level (from reachable states)
-  std::vector<uint32_t> highest = compute_highest(lts.states());
+  std::vector<uint32_t> highest = sylvan::ldds::compute_highest(lts.states());
   {
     mCRL2log(log_level_t::debug) << "State values per level:" << std::endl;
     std::size_t i = 0;
@@ -148,21 +106,16 @@ symbolic_lts_bdd::symbolic_lts_bdd(const symbolic_lts& lts)
     highest_action = std::max(highest_action, compute_highest_action(group.L, group.Ir));
   }
 
-  assert(highest_action == lts.action_index.size()); // Should match.
+  assert(highest_action == lts.action_index().size()); // Should match.
   
   mCRL2log(log_level_t::debug) << "Number of action label indices: " << highest_action << std::endl;
   mCRL2log(log_level_t::debug) << "Bits per level:" << std::endl;
 
   // Compute number of bits for each level
-  m_bits = std::vector<uint32_t>(highest.size());
-  {
-    std::size_t i = 0;
-    for (uint32_t& value: highest)
-    {
-        m_bits[i] = base_two_bits(value);
-        mCRL2log(log_level_t::debug) << i << ": " << m_bits[i] << std::endl; 
-        ++i;
-    }
+  m_bits = compute_bits(highest);
+  for (int i = 0; i < m_bits.size(); ++i)
+  {    
+    mCRL2log(log_level_t::debug) << i << ": " << m_bits[i] << std::endl; 
   }
 
   // Includes the number of bits required to store the action label.
