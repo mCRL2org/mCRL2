@@ -451,7 +451,6 @@ class Graph
     mcrl2::lts::lts_type m_type;                ///< The type of the current graph.
     QString m_empty;                            ///< Empty string that is returned as label if none present.
     mutable QReadWriteLock m_lock;              ///< Lock protecting the structure from being changed while rendering and simulating
-    const float m_stabilityThreshold = 0.000f;  ///< Used for checking whether the graph is stable. TODO: Allow user control 
     bool m_stable;                              ///< When true, the graph is considered stable, spring forces should not be applied.
     bool m_hasNewFrame = false;                 ///< Set to false when frame is rendered. Whenever new layout is applied set to true.
     bool m_forceUpdate = false;                 ///< Some actions require forcing update -> toggleOpen for instance
@@ -481,7 +480,7 @@ class Graph
     template <class ltsclass>
     std::size_t add_probabilistic_state(const typename ltsclass::probabilistic_state_t& probabilistic_state,
                                    const QVector3D& min, const QVector3D& max);
-    std::size_t m_initialState;                          ///< Index of the initial state.
+    std::size_t m_initialState = 0;                          ///< Index of the initial state.
   protected:
 
   public:
@@ -621,10 +620,6 @@ class Graph
     std::size_t explorationNode(std::size_t index) const; ///< Returns the node index for a certain node in the exploration
     std::size_t explorationEdgeCount() const;        ///< Returns the number of edges in the exploration
     std::size_t explorationNodeCount() const;        ///< Returns the number of nodes in the exploration
-
-    float stabilityThreshold(){ ///< @brief Gets stability threshold
-       return m_stabilityThreshold;
-    }
 
     bool& stable() ///< @brief Sets whether this graph is stable.
     {

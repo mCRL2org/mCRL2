@@ -183,19 +183,6 @@ GLWidget::~GLWidget()
   delete m_ui;
 }
 
-void GLWidget::pause()
-{
-  m_paused = true;
-  m_selections.clear();
-  m_dragmode = dm_none;
-  m_dragnode = nullptr;
-}
-
-void GLWidget::resume()
-{
-  m_paused = false;
-  update();
-}
 
 inline Graph::Node* select_object(const GLScene::Selection& s, Graph::Graph& g)
 {
@@ -592,6 +579,8 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
       QVector3D position(pos.x(), pos.y(),
                          camera.worldToWindow(m_dragnode->pos()).z());
       m_dragnode->move(camera.windowToWorld(position));
+      m_graph.hasForcedUpdate() = true;
+      m_graph.setStable(false);
       break;
     }
     case dm_zoom:
@@ -604,6 +593,10 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
     m_dragstart = pos;
     update();
     m_graph.hasNewFrame(true);
+    if (m_dragmode == DragMode::dm_dragnode)
+    {
+      m_graph.setStable(false);
+    }
   }
 }
 
@@ -613,6 +606,7 @@ void GLWidget::rebuild()
   makeCurrent();
   update();
   m_graph.hasNewFrame(true);
+  m_graph.setStable(false);
 }
 
 void GLWidget::set3D(bool enabled)
@@ -621,9 +615,11 @@ void GLWidget::set3D(bool enabled)
   {
     m_scene.project2D();
   }
+  m_ui->m_ui.cbThreeDimensional->setChecked(enabled);
   m_is_threedimensional = enabled;
   update();
   m_graph.hasNewFrame(true);
+  m_graph.setStable(false);
 }
 
 bool GLWidget::get3D()
@@ -692,6 +688,7 @@ GLWidgetUi* GLWidget::ui(QWidget* parent)
     settings->registerVar(ui_ref.cbStateNumbers, true);
     settings->registerVar(ui_ref.cbTransitionLabels, true);
     settings->registerVar(ui_ref.cbSelfLoops, true);
+    settings->registerVar(ui_ref.cbThreeDimensional, false);
   }
   return m_ui;
 }
@@ -721,6 +718,8 @@ GLWidgetUi::GLWidgetUi(GLWidget& widget, QWidget* parent)
   connect(m_ui.cbInitial, SIGNAL(toggled(bool)), &m_widget,
           SLOT(toggleInitialMarking(bool)));
   connect(m_ui.cbFog, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleFog(bool)));
+  connect(m_ui.cbThreeDimensional, SIGNAL(toggled(bool)), &m_widget,
+          SLOT(set3D(bool)));
   connect(m_ui.spinRadius, SIGNAL(valueChanged(int)), &m_widget,
           SLOT(setNodeSize(int)));
   connect(m_ui.spinFontSize, SIGNAL(valueChanged(int)), &m_widget,

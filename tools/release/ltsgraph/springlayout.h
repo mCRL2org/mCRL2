@@ -87,7 +87,7 @@ class SimpleAdaptiveSimulatedAnnealing
 
   private:
   // Interactive quality variables
-  const float m_minimum_temperature = 1e-6f;
+  const float m_minimum_temperature = 1e-4f;
   const float m_reset_temperature = 1.0f;
 
   // Adaptive variables
@@ -99,61 +99,6 @@ class SimpleAdaptiveSimulatedAnnealing
   float m_prev_energy = -1;
   float m_temperature = m_reset_temperature;
   int m_progress = 0;
-};
-
-class AdaptiveSimulatedAnnealing
-{
-  float m_annealing_factor =
-      0.995f; ///< Adaptive cooling per progress cycle (multiplicative)
-  float m_annealing_term = 0.1f;   ///< If the system ever cools completely we
-                                   ///< need to be able to get out
-  float m_energy_smoothing = 0.8f; ///< smooths out energy
-
-  float m_relative_change_threshold =
-      0.001f; ///< We count 'improvement' if it is more than
-              ///< m_relative_change_threshold
-
-  float m_progress =
-      0; ///< current amount of 'cycles' spent progressing towards a goal
-  float m_progress_threshold =
-      0.5; ///< threshold of 'cycles' spent before heating
-  float m_progress_target_per_second = 50; ///< number of 'cycles' per second
-
-  float m_progress_energy = -1;
-
-  QElapsedTimer m_reset_timer;
-  const float m_reset_duration =
-      0.4f; ///< in m_reset_duration seconds the temperature is interpolated to
-            ///< m_reset_temperature
-  const float m_reset_temperature = 10.0f; ///< Temperature to reset to
-  float m_reset_temperature_floor =
-      0.0f; ///< Used to interpolate from current temperature to
-            ///< m_reset_temperature during reset duration
-  const float m_minimum_temperature =
-      1e-4f; ///< Always have minimum movement to resolve forces that are left
-
-  QElapsedTimer m_stable_timer; ///< currently disabled
-  const float m_stability_energy_threshold =
-      1e-6f; ///< if new_energy \in [prev_energy - energy_threshold, prev_energy
-             ///< + energy_threshold] we say it is stable
-  const float m_stability_time_threshold =
-      2.0f; ///< how long do we require stability
-
-  float m_previous_energy = -1.0f; ///< Energy of the system, calculation is
-                                   ///< determined outside of class
-
-  QElapsedTimer m_timer;
-
-  public:
-  AdaptiveSimulatedAnnealing();
-  float T;
-  float m_temperature = 1.0f; ///< The temperature is a step size multiplier
-  /// @brief Calculates temperature for next layout cycle
-  /// @param new_energy Energy of the system
-  /// @return Boolean value indicating if stabilised
-  bool calculateTemperature(float new_energy);
-  float getTemperature();
-  void reset();
 };
 
 class SpringLayout
@@ -244,7 +189,10 @@ class SpringLayout
   float m_accuracy; ///< Controls the Barnes-Hut criterion in the approximation
                     ///< of repulsive forces
   bool m_tree_enabled;
-  bool m_has_new_frame;
+  float m_stabilityThreshold = 1e-3;
+  int m_stabilityMaxCount = 3; // Number of iterations in which change has to be within threshold before 'stable'
+  int m_stabilityCounter = 0;
+  float m_previous_energy = 1e25;
   std::vector<QVector3D> m_nforces, m_hforces, m_lforces,
       m_sforces; ///< Vector of the calculated forces..
 
@@ -417,11 +365,6 @@ class SpringLayout
     return m_tree_enabled;
   }
 
-  bool hasNewFrame() const
-  {
-    return m_has_new_frame;
-  }
-
   void notifyNewFrame();
   void setTreeEnabled(bool b);
   void setAnnealingEnabled(bool b);
@@ -535,98 +478,27 @@ class SpringLayoutUi : public QDockWidget
   void onProgressThresholdChanged(const QString&);
   void onHeatingFactorChanged(const QString&);
   void onCoolingFactorChanged(const QString&);
+  void onStabilityThresholdChanged(const QString&);
+  void onStabilityIterationsChanged(const QString&);
   void onResetPositionsPressed();
 
-  /**
-   * @brief Updates the attraction value.
-   * @param value The new value.
-   */
   void onAttractionChanged(int value);
-
-  /**
-   * @brief Updates the repulsion value.
-   * @param value The new value.
-   */
   void onRepulsionChanged(int value);
-
-  /**
-   * @brief Updates the speed value.
-   * @param value The new value.
-   */
   void onSpeedChanged(int value);
-
-  /**
-   * @brief Updates accuracy value.
-   * @param value New value.
-   */
   void onAccuracyChanged(int value);
-
-  /**
-   * @brief Updates the handle weight.
-   * @param value The new weight.
-   */
   void onHandleWeightChanged(int value);
-
-  /**
-   * @brief Updates the natural length value.
-   * @param value The new value.
-   */
   void onNatLengthChanged(int value);
-
-  /**
-   * @brief Updates the attraction force calculation.
-   * @param value The new index selected.
-   */
   void onAttractionCalculationChanged(int value);
-
-  /**
-   * @brief Updates the repulsion force calculation.
-   * @param value The new index selected.
-   */
   void onRepulsionCalculationChanged(int value);
-
-  /**
-   * @brief Updates the force application.
-   * @param value The new index selected.
-   *
-   */
   void onForceApplicationChanged(int value);
 
-  /**
-   * @brief Starts or stops the force calculation depending on the current
-   * state.
-   */
   void onStartStop();
-
-  /**
-   * @brief Starts the force calculation.
-   */
   void onStarted();
-
-  /**
-   * @brief Stops the force calculation.
-   */
   void onStopped();
 
-  /**
-   * @brief Enables/disables tree for acceleration
-   */
   void onTreeToggled(bool);
-
-  /**
-   *@brief Enables/disables the use of annealing in the layout algorithm.
-   */
   void onAnnealingToggled(bool);
-
-  /**
-   * @brief Starts or stops the force calculation.
-   * @param active The calculation is started if this argument is true.
-   */
   void setActive(bool active);
-
-  /**
-   * @brief Shows/hides the advanced dialog window
-   */
   void onAdvancedDialogShow(bool);
 
   friend class SpringLayout;

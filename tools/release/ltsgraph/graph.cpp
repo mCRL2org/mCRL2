@@ -110,7 +110,7 @@ std::size_t Graph::stateLabelCount() const
 
 std::size_t Graph::initialState() const
 {
-  return m_initialState;
+  return nodeCount() > 0 ? m_initialState : -1;
 }
 
 void Graph::clear()
@@ -157,6 +157,7 @@ void Graph::load(const QString& filename, const QVector3D& min,
     m_hasNewFrame = true;
     m_forceUpdate = true;
     m_resetPositions = true;
+
     unlockForWrite(m_lock, GRAPH_LOCK_TRACE);
     throw e;
   }
@@ -712,11 +713,10 @@ bool Graph::isClosable(std::size_t index)
 
 void Graph::setStable(bool stable)
 {
-  lockForRead(m_lock, GRAPH_LOCK_TRACE);
-
+  mCRL2log(mcrl2::log::debug) << "Graph is now " << (stable
+      ? "stable"
+      : "unstable") << std::endl;
   m_stable = stable;
-
-  unlockForRead(m_lock, GRAPH_LOCK_TRACE);
 }
 
 bool Graph::isBridge(std::size_t index) const

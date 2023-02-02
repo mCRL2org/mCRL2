@@ -149,100 +149,6 @@ bool SimpleAdaptiveSimulatedAnnealing::calculateTemperature(float new_energy)
   return false; // Simple => no checking for stable configuration
 }
 
-float AdaptiveSimulatedAnnealing::getTemperature()
-{
-  return T;
-}
-
-AdaptiveSimulatedAnnealing::AdaptiveSimulatedAnnealing()
-{
-  m_timer.restart();
-  m_stable_timer.restart();
-}
-
-void AdaptiveSimulatedAnnealing::reset()
-{
-  if (m_reset_timer.elapsed() * 0.001f < m_reset_duration)
-  {
-    // still resetting
-    return;
-  }
-  m_reset_temperature_floor = m_temperature;
-  T = m_temperature + m_minimum_temperature;
-  m_previous_energy = -1;
-  m_progress_energy = -1;
-  m_timer.restart();
-  m_stable_timer.restart();
-  m_reset_timer.restart();
-  // mCRL2log(mcrl2::log::debug) << "Reset ASA."<< std::endl;
-}
-
-bool AdaptiveSimulatedAnnealing::calculateTemperature(float new_energy)
-{
-  // check if we are still resetting
-  if (m_reset_timer.elapsed() * 0.001f < m_reset_duration)
-  {
-    m_temperature =
-        m_reset_temperature_floor +
-        (m_reset_temperature - m_reset_temperature_floor) *
-            smoothstep(0, m_reset_duration, m_reset_timer.elapsed() * 0.001f);
-    T = m_temperature + m_minimum_temperature;
-    m_timer.restart();
-    return false;
-  }
-
-  float seconds = m_timer.elapsed() * 0.001f;
-  if (seconds < 1 / m_progress_target_per_second)
-  {
-    return false; /// TODO: Should return last returned value
-  }
-  if (m_previous_energy < 0)
-  {
-    m_previous_energy = new_energy;
-    m_progress_energy = m_previous_energy;
-    return false; ///< not yet stable
-  }
-
-  float rel_energy_delta =
-      std::abs(new_energy - m_previous_energy) / m_previous_energy;
-
-  // if (rel_energy_delta < m_stability_energy_threshold*T){
-  //   m_previous_energy = new_energy;
-  //   // don't change anything, we're stable
-  //   return m_stable_timer.elapsed()*0.001f > m_stability_time_threshold;
-  // }
-
-  m_stable_timer.restart();
-  m_timer.restart();
-
-  if (new_energy < m_previous_energy &&
-      rel_energy_delta > m_relative_change_threshold * T)
-  {
-    m_progress += seconds * m_progress_target_per_second * rel_energy_delta;
-    if (m_progress >= m_progress_threshold)
-    {
-      m_progress -= m_progress_threshold;
-      m_temperature /= m_annealing_factor;
-      m_temperature +=
-          m_annealing_term *
-          std::abs((new_energy - m_progress_energy) / (T * m_progress_energy));
-    }
-  }
-  else
-  {
-    m_progress = 0;
-    m_progress_energy = new_energy;
-    m_temperature *= m_annealing_factor;
-  }
-  // if (m_temperature < 0) m_temperature = 0;
-  // mCRL2log(mcrl2::log::debug) << "Prev E: " << m_previous_energy << " new E:
-  // " << new_energy << " m_temperature: " << m_temperature << std::endl;
-  m_previous_energy = m_energy_smoothing * new_energy +
-                      (1 - m_energy_smoothing) * m_previous_energy;
-  T = m_temperature + m_minimum_temperature;
-  return false; ///< not yet stable
-}
-
 struct AttractionFunction
 {
   virtual QVector3D operator()(const QVector3D& a, const QVector3D& b,
@@ -394,7 +300,7 @@ struct LTSGraph : ApplicationFunction
 struct ForceDirected : ApplicationFunction
 {
   const float scaling = 2.0f;
-  const float stability_param = 0.1f;
+  const float stability_param = 0.01f;
   // precompute
   const float thres = scaling * stability_param;
   // easing such that at threshold translation is 50% of stepsize
@@ -543,9 +449,6 @@ SpringLayout::SpringLayout(Graph& graph, GLWidget& glwidget)
       &m_annealing_temperature;
   applFuncMap[ForceApplication::force_cumulative_appl]->temperature =
       &m_annealing_temperature;
-
-
-
 }
 
 SpringLayout::~SpringLayout()
@@ -586,11 +489,14 @@ SpringLayoutUi* SpringLayout::ui(QAction* advancedDialogAction, CustomQWidget* a
     settings->registerVar(advanced_ui.cmb_rep,
                           (int)RepulsionCalculation::ltsgraph_rep, true);
 
-    settings->registerVar(advanced_ui.txt_cooling_factor, QString::number(0.98),
+    settings->registerVar(advanced_ui.txt_cooling_factor, QString::number(m_asa.getCoolingFactor()),
                           true);
-    settings->registerVar(advanced_ui.txt_heating_factor, QString::number(1.2), true);
-    settings->registerVar(advanced_ui.txt_progress_threshold, QString::number(5),
+    settings->registerVar(advanced_ui.txt_heating_factor, QString::number(m_asa.getHeatingFactor()), true);
+    settings->registerVar(advanced_ui.txt_progress_threshold, QString::number(m_asa.getProgressThreshold()),
                           true);
+
+    settings->registerVar(advanced_ui.txt_stab_thres, QString::number(m_stabilityThreshold), true);
+    settings->registerVar(advanced_ui.txt_stab_iters, QString::number(m_stabilityMaxCount), true);
 
     m_ui->m_ui.dispHandleWeight->setText(
         QString::number(m_controlPointWeight, 'g', 3));
@@ -1195,7 +1101,7 @@ void SpringLayout::apply()
   assert(m_attrFunc);
   assert(m_repFunc);
   assert(m_attrFunc);
-  if (!m_graph.stable())
+  if (!m_graph.stable() || m_graph.hasForcedUpdate())
   {
     m_graph.lock(GRAPH_LOCK_TRACE); // enter critical section
     if (m_graph.hasForcedUpdate())
@@ -1384,6 +1290,25 @@ void SpringLayout::apply()
     m_repFunc->update();
     m_attrFunc->update();
 
+    float stability =
+        std::abs((m_previous_energy - energy) / m_previous_energy);
+    if (stability <= m_stabilityThreshold && (center_of_mass == QVector3D(0, 0, 0) || any_anchored))
+    {
+      m_stabilityCounter++;
+      if (m_stabilityCounter >= m_stabilityMaxCount)
+      {
+          m_graph.setStable(true);
+          mCRL2log(mcrl2::log::debug) << "The graph is now stable." << std::endl;
+          m_ui->m_ui.lblStable->setText("Stable");
+      }
+    }
+    else
+    {
+      m_stabilityCounter = 0;
+      m_ui->m_ui.lblStable->setText("");
+    }
+    m_previous_energy = energy;
+
     notifyNewFrame();
     m_graph.unlock(GRAPH_LOCK_TRACE);
   }
@@ -1428,7 +1353,6 @@ void SpringLayout::randomizeZ(float z)
 
 void SpringLayout::notifyNewFrame()
 {
-  m_has_new_frame = true;
   m_graph.hasNewFrame(true);
 }
 
@@ -1596,13 +1520,18 @@ class WorkerThread : public QThread
 
   void run() override
   {
-    if (m_layout.isStable())
-      msleep(50); // We don't want to keep looping if the layout is stable
-    while (!m_stopped && !m_layout.isStable())
+    while (!m_stopped)
     {
-      m_layout.apply();
-      m_counter++;
-      debugLogging();
+      if (m_layout.isStable())
+      {
+        msleep(50); // We don't want to keep computing if the layout is stable
+      }
+      else
+      {
+          m_layout.apply();
+          m_counter++;
+          debugLogging();
+      }
     }
   }
 
@@ -1686,6 +1615,11 @@ SpringLayoutUi::SpringLayoutUi(SpringLayout& layout,
           &SpringLayoutUi::onHeatingFactorChanged);
   connect(m_ui_advanced.txt_cooling_factor, &QLineEdit::textChanged, this,
           &SpringLayoutUi::onCoolingFactorChanged);
+
+  connect(m_ui_advanced.txt_stab_thres, &QLineEdit::textChanged, this,
+          &SpringLayoutUi::onStabilityThresholdChanged);
+  connect(m_ui_advanced.txt_stab_iters, &QLineEdit::textChanged, this,
+          &SpringLayoutUi::onStabilityIterationsChanged);
  
   connect(m_ui_advanced.cmd_reset_positions, &QPushButton::pressed, this,
           &SpringLayoutUi::onResetPositionsPressed);
@@ -1726,7 +1660,8 @@ void SpringLayoutUi::setSettings(QByteArray state)
   layoutRulesChanged();
 }
 
-// TODO: Add logging
+
+
 void SpringLayoutUi::onProgressThresholdChanged(const QString& text)
 {
   bool success;
@@ -1760,6 +1695,31 @@ void SpringLayoutUi::onCoolingFactorChanged(const QString& text)
     m_layout.m_asa.setCoolingFactor(num);
     mCRL2log(mcrl2::log::debug)
         << "Setting cooling factor to: " << num << std::endl;
+  }
+}
+
+void SpringLayoutUi::onStabilityThresholdChanged(const QString& text)
+{
+  bool success;
+  float num = text.toFloat(&success);
+  if (success && num > 0)
+  {
+    m_layout.m_stabilityThreshold = num;
+    mCRL2log(mcrl2::log::debug)
+        << "Setting stability threshold to: " << num << std::endl;
+  }
+}
+
+void SpringLayoutUi::onStabilityIterationsChanged(const QString& text)
+{
+  bool success;
+  float num = text.toInt(&success);
+  if (success && num > 0)
+  {
+    m_layout.m_stabilityMaxCount = num;
+    mCRL2log(mcrl2::log::debug)
+        << "Setting stability iterations to: " << num << std::endl;
+
   }
 }
 

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>229</width>
-    <height>217</height>
+    <height>219</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -213,11 +213,22 @@
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="btnStartStop">
-      <property name="text">
-       <string>Start</string>
-      </property>
-     </widget>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QPushButton" name="btnStartStop">
+        <property name="text">
+         <string>Start</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="lblStable">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>

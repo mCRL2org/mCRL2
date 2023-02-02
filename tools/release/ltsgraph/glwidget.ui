@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>248</width>
-    <height>355</height>
+    <height>345</height>
    </rect>
   </property>
   <property name="font">
@@ -282,6 +282,13 @@
       </property>
       <property name="checked">
        <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="cbThreeDimensional">
+      <property name="text">
+       <string>3D</string>
       </property>
      </widget>
     </item>

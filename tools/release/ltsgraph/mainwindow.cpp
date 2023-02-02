@@ -50,7 +50,7 @@ MainWindow::MainWindow(QWidget* parent) :
   Graph::InformationUi* informationui = m_information->ui(this);
   addDockWidget(Qt::RightDockWidgetArea, informationui);
   informationui->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-
+ 
 
   // Connect signals & slots
   connect(m_ui.actExit, SIGNAL(triggered()), this, SLOT(close()));
@@ -61,6 +61,10 @@ MainWindow::MainWindow(QWidget* parent) :
           springlayoutui, SLOT(onAdvancedDialogShow(bool)));
   connect(m_ui.actOutput, SIGNAL(toggled(bool)), m_ui.dockOutput, SLOT(setVisible(bool)));
   connect(m_ui.act3D, SIGNAL(toggled(bool)), this, SLOT(on3DChanged(bool)));
+  connect(m_ui.act3D, SIGNAL(toggled(bool)),
+          glwidgetui->m_ui.cbThreeDimensional, SLOT(setChecked(bool)));
+  connect(glwidgetui->m_ui.cbThreeDimensional, SIGNAL(toggled(bool)), m_ui.act3D, SLOT(setChecked(bool)));
+
   connect(m_ui.act3D, SIGNAL(toggled(bool)), this, SLOT(updateStatusBar()));
   connect(m_ui.actExplorationMode, SIGNAL(toggled(bool)), this, SLOT(onExplore(bool)));
   connect(m_ui.actLayout, SIGNAL(toggled(bool)), springlayoutui, SLOT(setActive(bool)));
@@ -197,7 +201,6 @@ void MainWindow::openFile(const QString& fileName)
       // Disable layouting and reset viewport.
       m_ui.actLayout->setChecked(false);
 
-      //m_glwidget->pause();
       m_glwidget->resetViewpoint(0);
       
       // We limit the initial positions of the nodes.
