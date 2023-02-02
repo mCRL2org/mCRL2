@@ -4333,30 +4333,10 @@ void mcrl2::data::data_type_checker::operator()(const variable_list& l,
 // ------------------------------  Here ends the new class based data expression checker -----------------------
 // ------------------------------  Here starts the new class based data specification checker -----------------------
 
-// Type check and replace user defined equations.
-void mcrl2::data::data_type_checker::TransformVarConsTypeData(data_specification& data_spec)
+void mcrl2::data::data_type_checker::operator()(data_equation_vector& eqns)
 {
-
-  //Create a new specification; admittedly, this is somewhat clumsy.
-  data_specification new_specification;
-  for(const basic_sort& s: data_spec.user_defined_sorts())
-  {
-    new_specification.add_sort(s);
-  }
-  for(const alias& a: data_spec.user_defined_aliases())
-  {
-    new_specification.add_alias(a);
-  }
-  for(const function_symbol& f: data_spec.user_defined_constructors())
-  {
-    new_specification.add_constructor(f);
-  }
-  for(const function_symbol& f: data_spec.user_defined_mappings())
-  {
-    new_specification.add_mapping(f);
-  }
-
-  for (const data_equation& eqn: data_spec.user_defined_equations())
+  data_equation_vector resulting_equations;
+  for (const data_equation& eqn: eqns)
   {
     const variable_list& vars=eqn.variables();
     try
@@ -4459,8 +4439,41 @@ void mcrl2::data::data_type_checker::TransformVarConsTypeData(data_specification
         throw mcrl2::runtime_error("The variable " + data::pp(culprit) + " in the condition is not included in the left hand side of the equation " + data::pp(eqn) + ".");
       }
     }
-    new_specification.add_equation(data_equation(vars,cond,left,right));
+    resulting_equations.push_back(data_equation(vars,cond,left,right));
   }
+  eqns = resulting_equations;
+}
+
+// Type check and replace user defined equations.
+void mcrl2::data::data_type_checker::TransformVarConsTypeData(data_specification& data_spec)
+{
+
+  //Create a new specification; admittedly, this is somewhat clumsy.
+  data_specification new_specification;
+  for(const basic_sort& s: data_spec.user_defined_sorts())
+  {
+    new_specification.add_sort(s);
+  }
+  for(const alias& a: data_spec.user_defined_aliases())
+  {
+    new_specification.add_alias(a);
+  }
+  for(const function_symbol& f: data_spec.user_defined_constructors())
+  {
+    new_specification.add_constructor(f);
+  }
+  for(const function_symbol& f: data_spec.user_defined_mappings())
+  {
+    new_specification.add_mapping(f);
+  }
+
+  data_equation_vector eqns=data_spec.user_defined_equations();
+  operator ()(eqns);  // Type check the equations.
+  for(const data_equation& eqn: eqns)
+  {
+    new_specification.add_equation(eqn);
+  }
+
   std::map<std::pair<data_expression, data_expression>, data_equation> lhs_map;
   for (const data_equation& eqn: new_specification.user_defined_equations())
   {

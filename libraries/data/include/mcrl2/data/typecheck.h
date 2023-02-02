@@ -66,6 +66,87 @@ class data_type_checker: public sort_type_checker
      **/
     const data_specification operator()() const;
 
+    /** \brief     Yields a type checked equation list, and sets the types in the equations right.
+     *             If not successful an exception is thrown.
+     *  \param[in] eqns The list of equations that is type checked and updated. 
+     **/
+    void operator()(data_equation_vector& eqns);
+
+    data_expression typecheck_data_expression(const data_expression& x,
+                                              const sort_expression& expected_sort,
+                                              const detail::variable_context& variable_context
+                                             )
+    {
+      data_expression x1 = x;
+      TraverseVarConsTypeD(variable_context, x1, expected_sort);
+      x1 = data::normalize_sorts(x1, get_sort_specification());
+      if (x1.sort() != expected_sort)
+      {
+        x1 = upcast_numeric_type(x1, expected_sort, variable_context);
+      }
+      return x1;
+    }
+
+    assignment typecheck_assignment(const assignment& x, const detail::variable_context& variable_context)
+    {
+      sort_type_checker::check_sort_is_declared(x.lhs().sort());
+      data_expression rhs = typecheck_data_expression(x.rhs(), x.lhs().sort(), variable_context);
+      return assignment(x.lhs(), rhs);
+    }
+
+    assignment_list typecheck_assignment_list(const assignment_list& assignments, const detail::variable_context& variable_context)
+    {
+      // check for name clashes
+      std::set<core::identifier_string> names;
+      for (const assignment& a: assignments)
+      {
+        const core::identifier_string& name = a.lhs().name();
+        if (names.find(name) != names.end())
+        {
+          throw mcrl2::runtime_error("duplicate variable names in assignments: " + data::pp(assignments) + ")");
+        }
+        names.insert(name);
+      }
+
+      // typecheck the assignments
+      assignment_vector result;
+      for (const assignment& a: assignments)
+      {
+        result.push_back(typecheck_assignment(a, variable_context));
+      }
+      return assignment_list(result.begin(), result.end());
+    }
+
+    const data_specification& typechecked_data_specification() const
+    {
+      return type_checked_data_spec;
+    }
+
+    void print_context() const
+    {
+      auto const& sortspec = get_sort_specification();
+      std::cout << "--- basic sorts ---" << std::endl;
+      for (auto const& x: sortspec.user_defined_sorts())
+      {
+        std::cout << x << std::endl;
+      }
+      std::cout << "--- aliases ---" << std::endl;
+      for (auto const& x: sortspec.user_defined_aliases())
+      {
+        std::cout << x << std::endl;
+      }
+      std::cout << "--- user constants ---" << std::endl;
+      for (const auto& user_constant: user_constants)
+      {
+        std::cout << user_constant.first << " -> " << user_constant.second << std::endl;
+      }
+      std::cout << "--- user functions ---" << std::endl;
+      for (const auto& user_function: user_functions)
+      {
+        std::cout << user_function.first << " -> " << user_function.second << std::endl;
+      }
+    }
+
   protected:
     /** \brief     Type check a data expression.
      *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
@@ -193,81 +274,6 @@ class data_type_checker: public sort_type_checker
       }
     }
 
-  public:
-    data_expression typecheck_data_expression(const data_expression& x,
-                                              const sort_expression& expected_sort,
-                                              const detail::variable_context& variable_context
-                                             )
-    {
-      data_expression x1 = x;
-      TraverseVarConsTypeD(variable_context, x1, expected_sort);
-      x1 = data::normalize_sorts(x1, get_sort_specification());
-      if (x1.sort() != expected_sort)
-      {
-        x1 = upcast_numeric_type(x1, expected_sort, variable_context);
-      }
-      return x1;
-    }
-
-    assignment typecheck_assignment(const assignment& x, const detail::variable_context& variable_context)
-    {
-      sort_type_checker::check_sort_is_declared(x.lhs().sort());
-      data_expression rhs = typecheck_data_expression(x.rhs(), x.lhs().sort(), variable_context);
-      return assignment(x.lhs(), rhs);
-    }
-
-    assignment_list typecheck_assignment_list(const assignment_list& assignments, const detail::variable_context& variable_context)
-    {
-      // check for name clashes
-      std::set<core::identifier_string> names;
-      for (const assignment& a: assignments)
-      {
-        const core::identifier_string& name = a.lhs().name();
-        if (names.find(name) != names.end())
-        {
-          throw mcrl2::runtime_error("duplicate variable names in assignments: " + data::pp(assignments) + ")");
-        }
-        names.insert(name);
-      }
-
-      // typecheck the assignments
-      assignment_vector result;
-      for (const assignment& a: assignments)
-      {
-        result.push_back(typecheck_assignment(a, variable_context));
-      }
-      return assignment_list(result.begin(), result.end());
-    }
-
-    const data_specification& typechecked_data_specification() const
-    {
-      return type_checked_data_spec;
-    }
-
-    void print_context() const
-    {
-      auto const& sortspec = get_sort_specification();
-      std::cout << "--- basic sorts ---" << std::endl;
-      for (auto const& x: sortspec.user_defined_sorts())
-      {
-        std::cout << x << std::endl;
-      }
-      std::cout << "--- aliases ---" << std::endl;
-      for (auto const& x: sortspec.user_defined_aliases())
-      {
-        std::cout << x << std::endl;
-      }
-      std::cout << "--- user constants ---" << std::endl;
-      for (const auto& user_constant: user_constants)
-      {
-        std::cout << user_constant.first << " -> " << user_constant.second << std::endl;
-      }
-      std::cout << "--- user functions ---" << std::endl;
-      for (const auto& user_function: user_functions)
-      {
-        std::cout << user_function.first << " -> " << user_function.second << std::endl;
-      }
-    }
 };
 
 /** \brief     Type check a sort expression.

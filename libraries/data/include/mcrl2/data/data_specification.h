@@ -436,6 +436,14 @@ class data_specification: public sort_specification
       return m_user_defined_equations;
     }
 
+    // A variant that allows to replace the user defined equations. 
+    inline
+    data_equation_vector& user_defined_equations()
+    {
+      data_is_not_necessarily_normalised_anymore();
+      return m_user_defined_equations;
+    }
+
     /// \brief Adds a constructor to this specification
     ///
     /// \param[in] f A function symbol.

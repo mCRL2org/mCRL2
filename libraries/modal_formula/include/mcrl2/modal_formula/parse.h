@@ -217,11 +217,17 @@ state_formula_specification parse_state_formula_specification(const std::string&
   // Merge data specification checks whether the combined datatypes are well typed. 
   data::data_specification dataspec = data::merge_data_specifications(lpsspec.data(), result.data());
   process::action_label_list actspec = process::merge_action_specifications(lpsspec.action_labels(), result.action_labels());
+
   if (options.type_check)
   {
+    data::data_type_checker type_checker(dataspec);
     // The type checker below checks whether the combined action list is well typed. 
+    type_checker(result.data().user_defined_equations()); // This changes the data equations in result.data() to become well typed.
+    // Note that while type checking the formula below the non type checked equations are used. This is not an issue
+    // as the shape of equations do not influence well typedness of a modal formula.  
     result.formula() = state_formulas::typecheck_state_formula(result.formula(), dataspec, actspec, lpsspec.global_variables());
   }
+
   result.formula() = post_process_state_formula(result.formula(), options);
   return result;
 } 
