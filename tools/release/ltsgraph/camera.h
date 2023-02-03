@@ -105,6 +105,11 @@ class ArcballCameraView
     m_viewdistance = viewdistance;
   }
 
+  void translate(const QVector3D& v)
+  {
+    m_center += v;
+  }
+
   private:
   /// \brief Center of the arcball.
   QVector3D m_center = QVector3D(0.0f, 0.0f, 0.0f);

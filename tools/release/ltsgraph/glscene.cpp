@@ -9,7 +9,7 @@
 
 #include "glscene.h"
 
-#include "utility.h"
+#include "layoututility.h"
 #include "bezier.h"
 
 #include <QElapsedTimer>
@@ -515,6 +515,23 @@ void GLScene::project2D()
     m_graph.handle(n).pos_mutable() = transform(m_graph.handle(n).pos());
     m_graph.handle(n).pos_mutable().setZ(0);
   }
+
+  QVector3D center_of_mass = slicedAverage(m_graph);
+  for (std::size_t i = 0; i < nodeCount; i++)
+  {
+    std::size_t n = m_graph.hasExploration() ? m_graph.explorationNode(i) : i;
+    m_graph.node(n).pos_mutable() -= center_of_mass;
+
+    m_graph.stateLabel(n).pos_mutable() -= center_of_mass;
+  }
+  for (std::size_t i = 0; i < edgeCount; i++)
+  {
+    std::size_t n = m_graph.hasExploration() ? m_graph.explorationEdge(i) : i;
+    m_graph.transitionLabel(n).pos_mutable() -= center_of_mass;
+
+    m_graph.handle(n).pos_mutable() -= center_of_mass;
+  }
+
   QVector3D new_cam_pos = cam_rotate(eye - reference_point);
   m_graph.unlock(GRAPH_LOCK_TRACE);
   //m_camera.reset();

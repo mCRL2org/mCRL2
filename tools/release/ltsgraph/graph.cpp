@@ -713,9 +713,6 @@ bool Graph::isClosable(std::size_t index)
 
 void Graph::setStable(bool stable)
 {
-  mCRL2log(mcrl2::log::debug) << "Graph is now " << (stable
-      ? "stable"
-      : "unstable") << std::endl;
   m_stable = stable;
 }
 

@@ -295,11 +295,6 @@
            <string>Force Directed</string>
           </property>
          </item>
-         <item>
-          <property name="text">
-           <string>Cumulative Force</string>
-          </property>
-         </item>
         </widget>
        </item>
       </layout>

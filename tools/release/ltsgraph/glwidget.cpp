@@ -688,7 +688,7 @@ GLWidgetUi* GLWidget::ui(QWidget* parent)
     settings->registerVar(ui_ref.cbStateNumbers, true);
     settings->registerVar(ui_ref.cbTransitionLabels, true);
     settings->registerVar(ui_ref.cbSelfLoops, true);
-    settings->registerVar(ui_ref.cbThreeDimensional, false);
+    settings->registerVar(ui_ref.cbThreeDimensional, false, true); // Reset 3D every time
   }
   return m_ui;
 }

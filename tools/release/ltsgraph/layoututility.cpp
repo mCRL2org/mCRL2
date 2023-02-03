@@ -50,3 +50,22 @@ void quadtreeUpdateMinbound(const QVector2D& rel_pos, const QVector2D& extents, 
     if (rel_pos.x() > 0.5) minbound.setX(minbound.x() + extents.x());
     if (rel_pos.y() > 0.5) minbound.setY(minbound.y() + extents.y());
 }
+
+// Returns the average position of all nodes in the graph
+QVector3D slicedAverage(Graph::Graph& graph)
+{
+  std::function<QVector3D(std::size_t)> func = [&graph](std::size_t i)
+  {
+    return graph.node(graph.hasExploration() ? graph.explorationNode(i) : i)
+        .pos();
+  };
+  return _slicedAverage(0, graph.hasExploration() ? graph.explorationNodeCount() : graph.nodeCount(), func, QVector3D(0, 0, 0));
+}
+
+// Returns the average square magnitude of all vector3s in the vector
+float slicedAverageSqrMagnitude(std::vector<QVector3D>& forces)
+{
+  std::function<float(std::size_t)> func = [&forces](std::size_t i)
+  { return forces[i].lengthSquared(); };
+  return _slicedAverage(0, forces.size(), func, 0.0f);
+}

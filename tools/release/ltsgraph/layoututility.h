@@ -20,11 +20,14 @@
 #ifndef LAYOUTUTILITY_H
 #define LAYOUTUTILITY_H
 
+#include "utility.h"
+
 #include <QVector2D>
 #include <QVector3D>
 #include <assert.h>
 #include <vector>
 #include <mcrl2/utilities/logger.h>
+#include <graph.h>
 
 #include <cmath>
 
@@ -33,6 +36,93 @@
 #ifndef FLT_EPSILON
 #define FLT_EPSILON 1.192092896e-07F
 #endif
+
+
+//
+// Utility functions
+//
+
+inline float cube(float x)
+{
+  return x * x * x;
+}
+
+inline float smoothstep(float l, float r, float x)
+{
+  if (x < l)
+    return 0;
+  if (x > r)
+    return 1;
+
+  x = (x - l) / (r - l);
+
+  return x * x * (3 - 2 * x);
+}
+
+inline void clip(float& f, float min, float max)
+{
+  if (f < min)
+  {
+    f = min;
+  }
+  else if (f > max)
+  {
+    f = max;
+  }
+}
+
+inline float lerp(int value, float targ_min, float targ_max, int _min = 0,
+           int _max = 100)
+{
+  return targ_min +
+         (targ_max - targ_min) * (value - _min) / (float)(_max - _min);
+}
+
+inline int unlerp(float value, float val_min, float val_max, int targ_min = 0,
+           int targ_max = 100)
+{
+  return targ_min +
+         (targ_max - targ_min) * (value - val_min) / (val_max - val_min);
+}
+
+
+const std::size_t max_slice = 50;
+/// @brief Takes average of at most @c max_slice values, or recursively computes
+/// average by splitting
+/// @param i Start index
+/// @param j End index (exclusive)
+/// This method avoids precision loss due to adding up too much before division
+///  Downside: more divisions. Upside: more accuracy.
+template < typename ReturnType >
+ReturnType _slicedAverage(std::size_t i, std::size_t j,
+                          std::function<ReturnType(std::size_t)> f, ReturnType zero)
+{
+  std::size_t n = j - i;
+  if (n > max_slice)
+  {
+    // split
+    std::size_t m = i + n / 2;
+    double recip = 1.0 / n;
+    return (m - i) * recip * _slicedAverage(i, m, f, zero) +
+           (j - m) * recip * _slicedAverage(m, j, f, zero);
+  }
+  else
+  {
+    ReturnType accum = zero;
+    for (std::size_t k = i; k < j; ++k)
+    {
+      accum += f(k);
+    }
+    return accum / (j-i);
+  }
+}
+
+QVector3D slicedAverage(Graph::Graph& graph);
+float slicedAverageSqrMagnitude(std::vector<QVector3D>& forces);
+
+///
+/// Tree specifications below
+///
 
 template <class T> struct TreeNode
 {
@@ -332,7 +422,7 @@ class GeometricTree
   }
 };
 
-// This template assumes that node.pos = xS, aka the center of mass of all
+// This template assumes that node.pos = xS, in other words the center of mass of all
 // contained nodes
 template <class T, float (*norm)(const T&), float (*sqwidth)(const T&)>
 bool BarnesHutCriterion(const TreeNode<T>& node, const T& extents, const T& pos,
@@ -360,5 +450,6 @@ using Quadtree =
     GeometricTree<QVector2D, 4, quadtreeEqual, quadtreeChildIndex,
                   BarnesHutCriterion<QVector2D, quadtreeNorm, quadtreeSqWidth>,
                   quadtreeUpdateMinbound>;
+
 
 #endif
