@@ -154,6 +154,7 @@ class ltscompare_tool : public ltscompare_base
       switch (tool_options.format_for_first)
       {
         case lts_lts:
+        case lts_lts_probabilistic:
         {
           return lts_compare<lts_lts_t>();
         }
@@ -161,10 +162,12 @@ class ltscompare_tool : public ltscompare_base
           mCRL2log(mcrl2::log::warning) << "No input format is specified. Assuming .aut format.\n";
           [[fallthrough]];
         case lts_aut:
+        case lts_aut_probabilistic:
         {
           return lts_compare<lts_aut_t>();
         }
         case lts_fsm:
+        case lts_fsm_probabilistic:
         {
           return lts_compare<lts_fsm_t>();
         }
