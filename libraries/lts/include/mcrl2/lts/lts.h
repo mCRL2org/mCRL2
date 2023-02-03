@@ -83,6 +83,10 @@ class lts: public LTS_BASE
     */
     typedef typename std::vector<transition>::size_type transitions_size_type;
 
+    /** \brief An indicator that this is not a probabilistic lts. 
+    */
+    static constexpr bool is_probabilistic_lts=false;
+
   protected:
 
     states_size_type m_nstates;

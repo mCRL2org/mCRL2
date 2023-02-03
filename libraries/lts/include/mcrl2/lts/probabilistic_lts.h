@@ -60,6 +60,10 @@ class probabilistic_lts: public lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE>
     typedef typename super::labels_size_type      labels_size_type     ;
     typedef typename super::transitions_size_type transitions_size_type;
 
+    /** \brief An indicator that this is a probabilistic lts. 
+    */
+    static constexpr bool is_probabilistic_lts=true;
+
   protected:
 
     std::vector<PROBABILISTIC_STATE_T> m_probabilistic_states;

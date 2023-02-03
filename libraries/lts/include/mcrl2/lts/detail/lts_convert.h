@@ -957,10 +957,10 @@ template < class STATE_LABEL1, class ACTION_LABEL1, class LTS_BASE1,
 inline void add_probabilities(const lts<STATE_LABEL1, ACTION_LABEL1, LTS_BASE1>& lts_in, 
                               probabilistic_lts<STATE_LABEL2, ACTION_LABEL2, PROBABILISTIC_STATE2, LTS_BASE2>& lts_out)
 { 
-  lts_out.set_initial_probabilistic_state(PROBABILISTIC_STATE_T(lts_in.initial_state()));
+  lts_out.set_initial_probabilistic_state(PROBABILISTIC_STATE2(lts_in.initial_state()));
   for(std::size_t i=0; i<lts_out.num_states(); ++i)
   {
-    lts_out.add_probabilistic_state(PROBABILISTIC_STATE2::PROBABILISTIC_STATE_T(i));
+    lts_out.add_probabilistic_state(PROBABILISTIC_STATE2(i));
   }
 }
 

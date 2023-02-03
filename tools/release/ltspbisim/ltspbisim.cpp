@@ -179,6 +179,7 @@ class ltsconvert_tool : public input_output_tool
           mCRL2log(warning) << "Cannot determine type of output. Assuming .aut.\n";
         }
         case lts_aut:
+        case lts_aut_probabilistic:
         {
           probabilistic_lts_aut_t l_out;
           lts_convert(l,l_out,spec.data(),spec.action_labels(),spec.process().process_parameters(),!tool_options.lpsfile.empty());
@@ -186,6 +187,7 @@ class ltsconvert_tool : public input_output_tool
           return true;
         }
         case lts_lts:
+        case lts_lts_probabilistic:
         {
           probabilistic_lts_lts_t l_out;
           lts_convert(l,l_out,spec.data(),spec.action_labels(),spec.process().process_parameters(),!tool_options.lpsfile.empty());
@@ -193,6 +195,7 @@ class ltsconvert_tool : public input_output_tool
           break;
         }
         case lts_fsm:
+        case lts_fsm_probabilistic:
         {
           probabilistic_lts_fsm_t l_out;
           lts_convert(l,l_out,spec.data(),spec.action_labels(),spec.process().process_parameters(),!tool_options.lpsfile.empty());
@@ -224,15 +227,18 @@ class ltsconvert_tool : public input_output_tool
           mCRL2log(warning) << "Cannot determine type of input. Assuming .aut.\n";
           [[fallthrough]];
         case lts_aut:
+        case lts_aut_probabilistic:
         {
           return load_convert_and_save<probabilistic_lts_aut_t>();
         }
         case lts_lts:
+        case lts_lts_probabilistic:
         {
           load_convert_and_save<probabilistic_lts_lts_t>();
           break;
         }
         case lts_fsm:
+        case lts_fsm_probabilistic:
         {
           load_convert_and_save<probabilistic_lts_fsm_t>();
           break;

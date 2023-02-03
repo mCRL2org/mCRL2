@@ -61,6 +61,33 @@ class t_tool_options
     void set_source(std::string const& filename)
     {
       infilename = filename;
+
+      if (intype==lts_none)
+      {
+        intype = mcrl2::lts::detail::guess_format(infilename,false);
+      }
+
+      if (intype == lts_none)
+      {
+        intype = lts_aut;
+        mCRL2log(warning) << "Cannot determine type of input. Assuming .aut.\n";
+      }
+      // When there is no equivalence and determinisation is not applied, the input lts can be probabilistic. 
+      if (equivalence == lts_eq_none && !determinise)
+      {
+        if (intype == lts_lts)
+        {
+          intype = lts_lts_probabilistic;
+        }
+        else if (intype == lts_aut)
+        {
+          intype = lts_aut_probabilistic;
+        }
+        else if (intype == lts_fsm)
+        {
+          intype = lts_fsm_probabilistic;
+        }
+      }
     }
 
     void set_target(std::string const& filename)
@@ -84,6 +111,22 @@ class t_tool_options
           {
             mCRL2log(warning) << "no output format set or detected; using default (mcrl2)" << std::endl;
             outtype = lts_lts;
+          }
+        }
+        // When there is no equivalence and determinisation is not applied, the output lts can be probabilistic. 
+        if (equivalence == lts_eq_none && !determinise)
+        {
+          if (outtype == lts_lts)
+          {
+            outtype = lts_lts_probabilistic;
+          }
+          else if (outtype == lts_aut)
+          {
+            outtype = lts_aut_probabilistic;
+          }
+          else if (outtype == lts_fsm)
+          {
+            outtype = lts_fsm_probabilistic;
           }
         }
       }
@@ -139,25 +182,39 @@ class ltsconvert_tool : public input_output_tool
 
       if (tool_options.equivalence != lts_eq_none)
       {
-        mCRL2log(verbose) << "reducing LTS (modulo " <<  description(tool_options.equivalence) << ")..." << std::endl;
-        mCRL2log(verbose) << "before reduction: " << l.num_states() << " states and " << l.num_transitions() << " transitions " << std::endl;
-        timer().start("reduction");
-        reduce(l,tool_options.equivalence);
-        timer().finish("reduction");
-        mCRL2log(verbose) << "after reduction: " << l.num_states() << " states and " << l.num_transitions() << " transitions" << std::endl;
+        if constexpr (LTS_TYPE::is_probabilistic_lts)
+        {
+           throw mcrl2::runtime_error("The LTS is probabilistic. The reduction cannot be applied. Consider the tool ltspbisim instead.");
+        }
+        else 
+        {
+          mCRL2log(verbose) << "Reducing LTS (modulo " <<  description(tool_options.equivalence) << ")..." << std::endl;
+          mCRL2log(verbose) << "Before reduction: " << l.num_states() << " states and " << l.num_transitions() << " transitions." << std::endl;
+          timer().start("reduction");
+          reduce(l,tool_options.equivalence);
+          timer().finish("reduction");
+          mCRL2log(verbose) << "After reduction: " << l.num_states() << " states and " << l.num_transitions() << " transitions." << std::endl;
+        }
       }
 
       if (tool_options.determinise)
       {
-        mCRL2log(verbose) << "determinising LTS..." << std::endl;
-        mCRL2log(verbose) << "before determinisation: " << l.num_states() << " states and " << l.num_transitions() << " transitions" << std::endl;
-        timer().start("determinisation");
-        determinise(l);
-        timer().finish("determinisation");
-        mCRL2log(verbose) << "after determinisation: " << l.num_states() << " states and " << l.num_transitions() << " transitions" << std::endl;
+        if constexpr (LTS_TYPE::is_probabilistic_lts)
+        {
+           throw mcrl2::runtime_error("The LTS is probabilistic. It cannot be determinised.");
+        }
+        else 
+        {
+          mCRL2log(verbose) << "determinising LTS..." << std::endl;
+          mCRL2log(verbose) << "before determinisation: " << l.num_states() << " states and " << l.num_transitions() << " transitions" << std::endl;
+          timer().start("determinisation");
+          determinise(l);
+          timer().finish("determinisation");
+          mCRL2log(verbose) << "after determinisation: " << l.num_states() << " states and " << l.num_transitions() << " transitions" << std::endl;
+        }
       }
 
-      mcrl2::lps::specification spec;
+      mcrl2::lps::stochastic_specification spec;
 
       if (!tool_options.lpsfile.empty())
       {
@@ -174,6 +231,13 @@ class ltsconvert_tool : public input_output_tool
           l_out.save(tool_options.outfilename);
           return true;
         }
+        case lts_lts_probabilistic:
+        {
+          probabilistic_lts_lts_t l_out;
+          lts_convert(l,l_out,spec.data(),spec.action_labels(),spec.process().process_parameters(),!tool_options.lpsfile.empty());
+          l_out.save(tool_options.outfilename);
+          return true;
+        }
         case lts_none:
           mCRL2log(warning) << "Cannot determine type of output. Assuming .aut.\n";
           [[fallthrough]];
@@ -184,9 +248,23 @@ class ltsconvert_tool : public input_output_tool
           l_out.save(tool_options.outfilename);
           return true;
         }
+        case lts_aut_probabilistic:
+        {
+          probabilistic_lts_aut_t l_out;
+          lts_convert(l,l_out,spec.data(),spec.action_labels(),spec.process().process_parameters(),!tool_options.lpsfile.empty());
+          l_out.save(tool_options.outfilename);
+          return true;
+        }
         case lts_fsm:
         {
           lts_fsm_t l_out;
+          lts_convert(l,l_out,spec.data(),spec.action_labels(),spec.process().process_parameters(),!tool_options.lpsfile.empty());
+          l_out.save(tool_options.outfilename);
+          return true;
+        }
+        case lts_fsm_probabilistic:
+        {
+          probabilistic_lts_fsm_t l_out;
           lts_convert(l,l_out,spec.data(),spec.action_labels(),spec.process().process_parameters(),!tool_options.lpsfile.empty());
           l_out.save(tool_options.outfilename);
           return true;
@@ -202,30 +280,35 @@ class ltsconvert_tool : public input_output_tool
       return true;
     }
 
-
   public:
     bool run()
     {
-
-      if (tool_options.intype==lts_none)
-      {
-        tool_options.intype = mcrl2::lts::detail::guess_format(tool_options.infilename,false);
-      }
       switch (tool_options.intype)
       {
         case lts_lts:
         {
           return load_convert_and_save<lts_lts_t>();
         }
+        case lts_lts_probabilistic:
+        {
+          return load_convert_and_save<probabilistic_lts_lts_t>();
+        }
         case lts_none:
-          mCRL2log(warning) << "Cannot determine type of input. Assuming .aut.\n";
         case lts_aut:
         {
           return load_convert_and_save<lts_aut_t>();
         }
+        case lts_aut_probabilistic:
+        {
+          return load_convert_and_save<probabilistic_lts_aut_t>();
+        }
         case lts_fsm:
         {
           return load_convert_and_save<lts_fsm_t>();
+        }
+        case lts_fsm_probabilistic:
+        {
+          return load_convert_and_save<probabilistic_lts_fsm_t>();
         }
         case lts_dot:
         {

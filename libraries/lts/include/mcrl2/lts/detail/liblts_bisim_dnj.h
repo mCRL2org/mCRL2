@@ -3698,13 +3698,13 @@ class bisim_partitioner_dnj
     /// same slice.)
     void create_initial_partition()
     {
-        mCRL2log(log::verbose, "bisim_gjkw") << "Strictly O(m log n) "
+        mCRL2log(log::verbose, "bisim_gjkw") << "An O(m log n) "
              << (branching ? (preserve_divergence
                                            ? "divergence-preserving branching "
                                            : "branching ")
                            : "")
              << "bisimulation partitioner created for " << part_st.state_size()
-             << " states and " << aut.num_transitions() << " transitions\n";
+             << " states and " << aut.num_transitions() << " transitions.\n";
 
         if (part_st.state_size() > 2 * aut.num_transitions() + 1)
         {

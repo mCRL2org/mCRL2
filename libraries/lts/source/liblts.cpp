@@ -35,7 +35,7 @@ lts_type guess_format(std::string const& s, const bool be_verbose/*=true*/)
     {
       if (be_verbose)
       {
-        mCRL2log(verbose) << "Detected Aldebaran extension.\n";
+        mCRL2log(verbose) << "Detected .aut extension.\n";
       }
       return lts_aut;
     }
@@ -43,7 +43,7 @@ lts_type guess_format(std::string const& s, const bool be_verbose/*=true*/)
     {
       if (be_verbose)
       {
-        mCRL2log(verbose) << "Detected mCRL2 extension.\n";
+        mCRL2log(verbose) << "Detected .lts extension.\n";
       }
       return lts_lts;
     }
@@ -51,7 +51,7 @@ lts_type guess_format(std::string const& s, const bool be_verbose/*=true*/)
     {
       if (be_verbose)
       {
-        mCRL2log(verbose) << "Detected Finite State Machine extension.\n";
+        mCRL2log(verbose) << "Detected .fsm extension.\n";
       }
       return lts_fsm;
     }
@@ -59,7 +59,7 @@ lts_type guess_format(std::string const& s, const bool be_verbose/*=true*/)
     {
       if (be_verbose)
       {
-        mCRL2log(verbose) << "Detected GraphViz extension.\n";
+        mCRL2log(verbose) << "Detected .dot extension.\n";
       }
       return lts_dot;
     }

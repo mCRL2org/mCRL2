@@ -207,6 +207,7 @@ inline void load_lts(lts_lts_t& result,
   switch (type)
   {
     case lts_lts:
+    case lts_lts_probabilistic:
     {
       if (extra_data_file_type != none_e)
       {
@@ -219,6 +220,7 @@ inline void load_lts(lts_lts_t& result,
       mCRL2log(log::warning) << "Cannot determine type of input. Assuming .aut.\n";
       [[fallthrough]]; // For the default (lts_none) load as aut file.
     case lts_aut:
+    case lts_aut_probabilistic:
     {
       lts_aut_t l;
       l.load(infilename);
@@ -226,6 +228,7 @@ inline void load_lts(lts_lts_t& result,
       break;
     }
     case lts_fsm:
+    case lts_fsm_probabilistic:
     {
       lts_fsm_t l;
       l.load(infilename);
@@ -252,6 +255,7 @@ inline void load_lts_as_fsm_file(const std::string& path, lts_fsm_t& l)
   switch (intype)
   {
     case lts_lts:
+    case lts_lts_probabilistic:
     {
       lts_lts_t l1;
       l1.load(path);
@@ -262,6 +266,7 @@ inline void load_lts_as_fsm_file(const std::string& path, lts_fsm_t& l)
       mCRL2log(log::warning) << "Cannot determine type of input. Assuming .aut.\n";
       [[fallthrough]]; // For the default (lts_none) load as aut file.
     case lts_aut:
+    case lts_aut_probabilistic:
     {
       lts_aut_t l1;
       l1.load(path);
@@ -269,6 +274,7 @@ inline void load_lts_as_fsm_file(const std::string& path, lts_fsm_t& l)
       return;
     }
     case lts_fsm:
+    case lts_fsm_probabilistic:
     {
       l.load(path);
       return;

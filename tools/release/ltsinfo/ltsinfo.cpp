@@ -318,6 +318,7 @@ class ltsinfo_tool : public ltsinfo_base
       switch (intype)
       {
         case lts_lts:
+        case lts_lts_probabilistic:
         {
           return provide_information<probabilistic_lts_lts_t>();
         }
@@ -325,10 +326,12 @@ class ltsinfo_tool : public ltsinfo_base
           mCRL2log(warning) << "No input format is specified. Assuming .aut format.\n";
           [[fallthrough]];
         case lts_aut:
+        case lts_aut_probabilistic:
         {
           return provide_information<probabilistic_lts_aut_t>();
         }
         case lts_fsm:
+        case lts_fsm_probabilistic:
         {
           return provide_information<probabilistic_lts_fsm_t>();
         }

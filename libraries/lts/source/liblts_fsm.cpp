@@ -32,7 +32,7 @@ struct fsm_writer
     if (fsm_.initial_probabilistic_state().size()>1)
     {
       mCRL2log(log::warning) << "This transition system has a probabilistic initial state. "
-                             << "The FSM format only supports a deterministic state. The initial state " 
+                             << "The FSM format only supports a deterministic initial state. The initial state " 
                              << fsm_.initial_probabilistic_state() << " is transformed into " 
                              << fsm_.initial_probabilistic_state().begin()->state() << " with probability 1.\n";
     }
