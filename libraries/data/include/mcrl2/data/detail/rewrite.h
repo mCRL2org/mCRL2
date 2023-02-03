@@ -223,7 +223,6 @@ class Rewriter
 
     virtual void thread_initialise()
     {
-      std::cerr << "REWRITER DOES NOT INITIALISE THREAD\n";
     }
 
   protected:
