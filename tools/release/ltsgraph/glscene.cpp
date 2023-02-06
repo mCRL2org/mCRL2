@@ -532,9 +532,7 @@ void GLScene::project2D()
     m_graph.handle(n).pos_mutable() -= center_of_mass;
   }
 
-  QVector3D new_cam_pos = cam_rotate(eye - reference_point);
   m_graph.unlock(GRAPH_LOCK_TRACE);
-  //m_camera.reset();
   m_camera.reset();
   m_camera.m_zoom *= std::abs(plane_dist)/m_camera.m_zoom;
 }

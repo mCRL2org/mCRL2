@@ -126,9 +126,12 @@ SpringLayout::SpringLayout(Graph& graph, GLWidget& glwidget)
       m_node_tree2D(0, {0, 0}, {0, 0}),
       m_handle_tree2D(0, {0, 0}, {0, 0}),
       m_trans_tree2D(0, {0, 0}, {0, 0}),
-      m_speed(0.001f), m_attraction(0.13f), m_repulsion(50.0f),
-      m_natLength(50.0f), m_controlPointWeight(0.001f), m_graph(graph),
-      m_ui(nullptr), m_glwidget(glwidget), 
+      m_speed(0.001f), m_attraction(0.13f), 
+      m_repulsion(50.0f),
+      m_natLength(50.0f), 
+      m_controlPointWeight(0.001f), 
+      m_graph(graph),
+      m_ui(nullptr), 
       attrFuncMap({
           {AttractionFunctionID::ltsgraph_attr,
            new AttractionFunctions::LTSGraph()},
@@ -154,7 +157,8 @@ SpringLayout::SpringLayout(Graph& graph, GLWidget& glwidget)
            new ApplicationFunctions::ForceDirected()}
       }),
       m_applFunc(applFuncMap[ApplicationFunctionID::ltsgraph_appl]),
-      m_option_forceApplication(ApplicationFunctionID::ltsgraph_appl)
+      m_option_forceApplication(ApplicationFunctionID::ltsgraph_appl),
+      m_glwidget(glwidget) 
 {
   m_graph.gv_debug.addVar("Temperature");
   m_graph.gv_debug.addVar("Energy");
@@ -545,7 +549,6 @@ void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::quadtree>(
   {
     std::size_t n = sel ? m_graph.explorationEdge(i) : i;
 
-    Edge e = m_graph.edge(n);
     m_handle_tree2D.insert((QVector2D)m_graph.handle(n).pos());
     m_trans_tree2D.insert((QVector2D)m_graph.transitionLabel(n).pos());
   }
@@ -854,8 +857,6 @@ void SpringLayout::apply()
 
     QVector3D clipmin = m_graph.getClipMin();
     QVector3D clipmax = m_graph.getClipMax();
-    float nodeSumForces = 0;
-    float edgeSumForces = 0;
     bool new_anchored = false;
     float use_speed = m_speed * std::log2f(nodeCount) * 0.25f;
     for (std::size_t i = 0; i < nodeCount; ++i)
@@ -865,7 +866,6 @@ void SpringLayout::apply()
       if (!m_graph.node(n).anchored())
       {
         (*m_applFunc)(m_graph.node(n).pos_mutable(), m_nforces[i], use_speed);
-        nodeSumForces += m_nforces[i].lengthSquared();
         clipVector(m_graph.node(n).pos_mutable(), clipmin, clipmax);
       }
       else
@@ -915,7 +915,6 @@ void SpringLayout::apply()
         (*m_applFunc)(m_graph.stateLabel(n).pos_mutable(), m_sforces[i],
                       use_speed);
         m_graph.stateLabel(n).pos_mutable() -= center_of_mass;
-        nodeSumForces += m_sforces[i].lengthSquared();
         clipVector(m_graph.stateLabel(n).pos_mutable(), clipmin, clipmax);
       }
     }
@@ -928,7 +927,6 @@ void SpringLayout::apply()
       {
         (*m_applFunc)(m_graph.handle(n).pos_mutable(), m_hforces[i], use_speed);
         m_graph.handle(n).pos_mutable() -= center_of_mass;
-        edgeSumForces += m_hforces[i].lengthSquared();
         clipVector(m_graph.handle(n).pos_mutable(), clipmin, clipmax);
       }
       if (!m_graph.transitionLabel(n).anchored())
@@ -936,7 +934,6 @@ void SpringLayout::apply()
         (*m_applFunc)(m_graph.transitionLabel(n).pos_mutable(), m_lforces[i],
                       use_speed);
         m_graph.transitionLabel(n).pos_mutable() -= center_of_mass;
-        edgeSumForces += m_lforces[i].lengthSquared();
         clipVector(m_graph.transitionLabel(n).pos_mutable(), clipmin, clipmax);
       }
     }
@@ -1253,7 +1250,10 @@ class WorkerThread : public QThread
 
 SpringLayoutUi::SpringLayoutUi(SpringLayout& layout,
                                CustomQWidget* advancedDialogWidget, QWidget* parent)
-    : QDockWidget(parent), m_layout(layout), m_ui_advanced_dialog(advancedDialogWidget), m_thread(nullptr)
+    : QDockWidget(parent), 
+      m_layout(layout), 
+      m_thread(nullptr),
+      m_ui_advanced_dialog(advancedDialogWidget) 
 {
   m_ui.setupUi(this);
   m_ui_advanced.setupUi(m_ui_advanced_dialog);

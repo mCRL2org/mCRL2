@@ -903,7 +903,11 @@ void DebugView::setDrawingArea(int width, int height, int offsetX, int offsetY)
 }
 
 GraphView::GraphView(int rows, int cols, QRect bounds, std::size_t log_duration, std::size_t min_interval)
-: m_rows(rows), m_cols(cols), m_bounds(bounds), m_log_duration(log_duration), m_min_interval(min_interval)
+   : m_rows(rows), 
+     m_cols(cols), 
+     m_log_duration(log_duration), 
+     m_min_interval(min_interval),
+     m_bounds(bounds)
 {
     m_plots = std::vector<std::vector<PlotEntry>>(rows*cols);
 }

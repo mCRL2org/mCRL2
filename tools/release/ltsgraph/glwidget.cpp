@@ -291,8 +291,8 @@ void GLWidget::initializeGL()
     // Check the minimum run-time requirement; the pair ordering is
     // lexicographical.
     QPair<int, int> version = format().version();
-    QPair<int, int> required(3, 3);
  #ifndef __APPLE__
+    QPair<int, int> required(3, 3);
     if (version < required)
     {
       // Print a message to the console and show a message box.
