@@ -247,7 +247,7 @@ void GLScene::initialize()
       << recommended_max_buffer_size / 4 << std::endl;
   // To be safe we divide by 4 since a mat4 is technically 4 vec4s stacked
   // together
-  m_batch_size = static_cast<std::size_t>(recommended_max_buffer_size / 4);
+  m_batch_size = static_cast<std::size_t>(recommended_max_buffer_size / 16);
 
   m_vaoNode.create();
   m_vaoNode.bind();
@@ -541,7 +541,6 @@ void GLScene::project2D()
 
 void GLScene::render()
 {
-
   m_fbo->bind();
   QElapsedTimer render_timer;
   render_timer.restart();

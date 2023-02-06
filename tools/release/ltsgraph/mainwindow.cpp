@@ -230,8 +230,6 @@ void MainWindow::openFile(const QString& fileName)
         onExplore(hadExploration);
       }
 
-      //m_glwidget->resume();
-
       m_information->update();
       setWindowTitle(QString("LTSGraph - ") + fileName);
       m_graph.setStable(false);

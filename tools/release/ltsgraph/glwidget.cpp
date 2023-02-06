@@ -378,10 +378,13 @@ void GLWidget::paintGL()
   }
   painter.restore();
 
-  QOpenGLFramebufferObject::bindDefault();
-  QOpenGLFramebufferObject::blitFramebuffer(0, m_scene.m_fbo,
-                                            GL_COLOR_BUFFER_BIT);
-  
+  // If a blitFramebuffer happens on a non existing/empty graph, then some computers,
+  // in particular a macbook x86, start to hang. 
+  if (m_graph.nodeCount()>0) 
+  {
+    QOpenGLFramebufferObject::bindDefault();
+    QOpenGLFramebufferObject::blitFramebuffer(0, m_scene.m_fbo, GL_COLOR_BUFFER_BIT); 
+  }
   m_scene.renderText(painter);
   
   painter.end();
