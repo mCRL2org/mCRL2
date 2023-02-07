@@ -18,47 +18,62 @@ tools:
   t3:
     input: [l2]
     output: []
-    args: [-l1]
+    args: [-l1, --check-strategy]
     name: pbes2bool
   t4:
     input: [l2]
     output: []
-    args: [-l2]
+    args: [-l2, --check-strategy]
     name: pbes2bool
   t5:
     input: [l2]
     output: []
-    args: [-l3]
+    args: [-l3, --check-strategy]
     name: pbes2bool
   t6:
     input: [l2]
     output: []
-    args: [-l4, --aggressive, --prune-todo-list]
+    args: [-l4, --check-strategy, --aggressive, --prune-todo-list]
     name: pbes2bool
   t7:
     input: [l2]
     output: []
-    args: [-l5, --aggressive, --prune-todo-list]
+    args: [-l5, --check-strategy, --aggressive, --prune-todo-list]
     name: pbes2bool
   t8:
     input: [l2]
     output: []
-    args: [-l6, --aggressive, --prune-todo-list]
+    args: [-l6, --check-strategy, --aggressive, --prune-todo-list]
     name: pbes2bool
   t9:
     input: [l2]
     output: []
-    args: [-l7, --aggressive, --prune-todo-list]
+    args: [-l7, --check-strategy, --aggressive, --prune-todo-list]
     name: pbes2bool
   t10:
     input: [l2]
     output: []
-    args: [-l2, --aggressive, --prune-todo-list]
+    args: [-l8, --check-strategy, --aggressive, --prune-todo-list]
     name: pbes2bool
   t11:
+    input: [l2]
+    output: []
+    args: [--threads=8, --check-strategy]
+    name: pbes2bool
+  t12:
+    input: [l2]
+    output: []
+    args: [-l3, --threads=8, --check-strategy]
+    name: pbes2bool
+  t13:
+    input: [l2]
+    output: []
+    args: [-l8, --aggressive, --prune-todo-list, --threads=8, --check-strategy]
+    name: pbes2bool
+  t14:
     input: [l2]
     output: []
     args: []
     name: pbespgsolve
 result: |
-  result = t2.value['solution'] == t3.value['solution'] == t4.value['solution'] == t5.value['solution'] == t6.value['solution'] == t7.value['solution'] == t8.value['solution'] == t9.value['solution'] == t10.value['solution'] == t11.value['solution']
+  result = t2.value['solution'] == t3.value['solution'] == t4.value['solution'] == t5.value['solution'] == t6.value['solution'] == t7.value['solution'] == t8.value['solution'] == t9.value['solution'] == t10.value['solution'] == t11.value['solution'] == t12.value['solution'] == t13.value['solution'] == t11.value['solution']
