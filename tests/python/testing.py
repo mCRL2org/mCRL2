@@ -47,7 +47,7 @@ class YmlTest(object):
         self.toolpath = settings.get('toolpath', '')
         self.cleanup_files = settings.get('cleanup_files', False)
         self.timeout = 5
-        self.memlimit = 500000000
+        self.memlimit = 1000000000
         self.allow_non_zero_return_values = settings.get('allow-non-zero-return-values', False)
 
         # Reads a test from a YAML file

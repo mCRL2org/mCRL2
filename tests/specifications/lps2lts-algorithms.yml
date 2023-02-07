@@ -24,6 +24,11 @@ tools:
     output: [l4]
     args: []
     name: lps2lts
+  t4:
+    input: [l2]
+    output: [l5]
+    args: [--threads=8]
+    name: lps2lts
 
 result: |
     result = True
@@ -31,3 +36,7 @@ result: |
     result = result and t2.value['has-nondeterminism'] == t3.value['has-nondeterminism']
     result = result and t2.value['has-divergence'] == t3.value['has-divergence']
     result = result and t2.value['actions'] == t3.value['actions']
+    result = result and t2.value['has-deadlock'] == t4.value['has-deadlock']
+    result = result and t2.value['has-nondeterminism'] == t4.value['has-nondeterminism']
+    result = result and t2.value['has-divergence'] == t4.value['has-divergence']
+    result = result and t2.value['actions'] == t4.value['actions']

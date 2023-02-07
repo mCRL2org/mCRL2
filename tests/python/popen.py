@@ -92,7 +92,7 @@ class Popen(subprocess.Popen):
                 virt, res = process.get_memory_info()
                 self.__maxVirt = max(self.__maxVirt, virt)
                 self.__maxResident = max(self.__maxResident, res)
-                if self.__maxVirt > self.__maxVirtLimit:
+                if self.__maxResident > self.__maxVirtLimit:
                     self.kill()
                     # raise MemoryExceededError(self.__maxVirt)
                 if self.__usrTime > self.__usrTimeLimit:
@@ -112,7 +112,7 @@ class Popen(subprocess.Popen):
                 self.__usrTime, self.__sysTime = t.user, t.system
                 self.__maxVirt = max(self.__maxVirt, m.vms)
                 self.__maxResident = max(self.__maxResident, m.rss)
-                if self.__maxVirt > self.__maxVirtLimit:
+                if self.__maxResident > self.__maxVirtLimit:
                     self.kill()
                     # raise MemoryExceededError(self.__maxVirt)
                 if self.__usrTime > self.__usrTimeLimit:
