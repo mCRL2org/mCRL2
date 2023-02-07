@@ -56,10 +56,7 @@ public:
   // processor, it causes so now and then a "libc++abi: Pure virtual function called"
   // problem. Hence, it is given a trivial default implementation. 
   // The returned value must at least be 1. 
-  virtual std::size_t protection_set_size() const
-  {
-    return 1;
-  }
+  virtual std::size_t protection_set_size() const = 0;
 };
 
 class thread_aterm_pool;
