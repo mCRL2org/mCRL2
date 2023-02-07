@@ -1,4 +1,4 @@
-// Author(s): Frank Stappers
+// Author(s): Frank Stappers, Thomas Neele
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -85,6 +85,153 @@ namespace detail
       data::set_identifier_generator& m_identifier_generator;
       std::map<data::sort_expression, data::variable_vector> m_variables;
   };
+
+  class unfold_data_manager
+  {
+    private:
+    /// \brief cache for previously unfolded sorts.
+    /// facilitates reuse of previously introduced sorts and function symbols.
+    std::map< mcrl2::data::sort_expression , unfold_cache_element >& m_cache;
+
+    data::data_specification& m_dataspec;
+
+    /// \brief set of identifiers to use during fresh variable generation
+    mcrl2::data::set_identifier_generator m_identifier_generator;
+
+    /// \brief generator for arguments in left hand side of data equations
+    detail::data_equation_argument_generator m_data_equation_argument_generator;
+
+    /// \brief a generator for default data expressions of a given sort;
+    mcrl2::data::representative_generator m_representative_generator;
+
+    /// \brief Boolean indicating whether rewrite rules may be added that could make
+    ///        the data specification inconsistent.
+    bool m_possibly_inconsistent;
+
+    public:
+    unfold_data_manager(std::map< mcrl2::data::sort_expression , unfold_cache_element >& cache, data::data_specification& dataspec, bool possibly_inconsistent)
+    : m_cache(cache)
+    , m_dataspec(dataspec)
+    , m_identifier_generator()
+    , m_data_equation_argument_generator(m_identifier_generator)
+    , m_representative_generator(dataspec)
+    , m_possibly_inconsistent(possibly_inconsistent)
+    {}
+
+    void add_used_identifier(const core::identifier_string& id)
+    {
+      m_identifier_generator.add_identifier(id);
+    }
+
+    void add_used_identifiers(const std::set<core::identifier_string>& ids)
+    {
+      m_identifier_generator.add_identifiers(ids);
+    }
+
+    data::set_identifier_generator& id_gen()
+    {
+      return m_identifier_generator;
+    }
+
+    unfold_cache_element& get_cache_element(const data::sort_expression& sort);
+
+    /** \brief  Generates a fresh basic sort given a sort expression.
+      * \param  sort This sort's name will be used to derive a name for the new sort
+      * \return A fresh basic sort.
+    **/
+    mcrl2::data::basic_sort generate_fresh_basic_sort(const data::sort_expression& sort);
+
+    /** \brief  Generates a fresh name for a constructor or mapping.
+      * \param  str a string value. The value is used to generate a fresh
+      *         name for a constructor or mapping.
+      * \post   A fresh name for a constructor or mapping is generated.
+      * \return A fresh name for a constructor or mapping.
+    **/
+    mcrl2::core::identifier_string generate_fresh_function_symbol_name(const std::string& str);
+
+    /** \brief Generates variable of type sort based on a given string str.
+      * \param str a string value. The value is used to generate a fresh
+      *         variable name.
+      * \param sort The sort of the variable to generate.
+      * \post   A fresh variable is generated, which has an unique name.
+      * \return A fresh variable.
+    **/
+    mcrl2::data::variable generate_fresh_variable(std::string str, const data::sort_expression& sort);
+
+
+    /** \brief  Creates the determine function.
+      * \param sort The sort on which this function operates
+      * \return A function that maps constructors to the fresh basic sort
+    **/
+    void create_determine_function(const data::sort_expression& sort);
+
+    /** \brief  Creates projection functions for the unfolded process parameter.
+      * \param sort The sort on which these functions operate
+      * \return A function that returns the projection functions for the
+      *         constructors of the unfolded process parameter.
+    **/
+    void create_projection_functions(const data::sort_expression& sort);
+
+    /** \brief  Determines the constructors that are affected with the unfold
+      *         process parameter.
+      * \param sort The sort for which to find constructors
+      * \post The constructors that are affected with the unfold
+      *         process parameter are stored in m_affected_constructors
+    **/
+    void determine_affected_constructors(const data::sort_expression& sort);
+
+    /** \brief  Creates a set of constructors for the fresh basic sort
+      * \param sort The sort for which to create analogous constructors
+      * \return The constructors that are created for the fresh basic sort
+    **/
+    void create_new_constructors(const data::sort_expression& sort);
+
+    /** \brief  Creates the case function with number of arguments determined by
+     *          the number of affected constructors, the sort of the arguments and
+     *          result are determined by sort..
+     *  \param  det_sort The sort whose constructor is determined in the first argument
+     *  \param  output_sort The sort of the arguments and return sort of the case function
+      * \return A function that returns the corresponding constructor given the
+      *         case selector and constructors.
+    **/
+    data::function_symbol create_case_function(const data::sort_expression& det_sort, const data::sort_expression& output_sort);
+
+    /** \brief Create distribution rules for distribution_functions over case_functions
+    **/
+    void create_distribution_law_over_case(
+      const data::sort_expression& sort,
+      const data::function_symbol& function_for_distribution,
+      const data::function_symbol case_function);
+
+
+    /** \brief Create the data equations for case functions */
+    void generate_case_function_equations(
+      const data::sort_expression& sort,
+      const data::function_symbol& case_function);
+
+    /** \brief Create the data equations for the determine function */
+    void generate_determine_function_equations(const data::sort_expression& sort);
+
+    /** \brief Create the data equations for the projection functions */
+    void generate_projection_function_equations(const data::sort_expression& sort);
+
+    static bool char_filter(char c)
+    {
+      // Put unwanted characters here
+      return c==' ' || c==':' || c==',' || c=='|'
+             || c=='>' || c=='[' || c==']' || c=='@'
+             || c=='.' || c=='{' || c=='}' || c=='#'
+             || c=='%' || c=='&' || c=='*' || c=='!'
+             || c=='(' || c==')'
+             ;
+    }
+
+    std::string filter_illegal_characters(std::string in) const
+    {
+      in.resize(std::remove_if(in.begin(), in.end(), &char_filter) - in.begin());
+      return in;
+    }
+  };
 }
 
 class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
@@ -121,19 +268,8 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
     /// run only once...
     bool m_run_before;
 
-    /// \brief set of identifiers to use during fresh variable generation
-    mcrl2::data::set_identifier_generator m_identifier_generator;
-
-    /// \brief generator for arguments in left hand side of data equations
-    detail::data_equation_argument_generator m_data_equation_argument_generator;
-
-    /// \brief cache for previously unfolded sorts.
-    /// facilitates reuse of previously introduced sorts and function symbols.
-    std::map< mcrl2::data::sort_expression , unfold_cache_element >& m_cache;
-
-    /// \brief Cache element for the newly introduced sort.
-    /// used in case the unfolded sort is not yet in the cache.
-    unfold_cache_element m_new_cache_element;
+    /// @brief Bookkeeper for recogniser and projection functions.
+    detail::unfold_data_manager m_datamgr;
 
     /// \brief The process parameter that needs to be unfold.
     mcrl2::data::variable m_unfold_parameter;
@@ -141,76 +277,12 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
     /// \brief The process parameters that are inserted.
     mcrl2::data::variable_vector m_injected_parameters;
 
-    /// \brief a generator for default data expressions of a give sort;
-    mcrl2::data::representative_generator m_representative_generator;
-
     /// \brief Boolean to indicate if alternative placement of case functions should be used.
     bool m_alt_case_placement;
-
-    /// \brief Boolean indicating whether rewrite rules may be added that could make
-    ///        the data specification inconsistent.
-    bool m_possibly_inconsistent;
 
 
     //data::data_expression apply_case_function(const data::data_expression& expr, const case_func_replacement& case_funcs);
     case_func_replacement parameter_case_function();
-
-    /** \brief  Generates a fresh basic sort given a sort expression.
-      * \param  str a string value. The value is used to generate a fresh
-      *         basic sort.
-      * \post   A fresh basic sort is generated.
-      * \return A fresh basic sort.
-    **/
-    mcrl2::data::basic_sort generate_fresh_basic_sort(const data::sort_expression& sort);
-
-    /** \brief  Generates a fresh name for a constructor or mapping.
-      * \param  str a string value. The value is used to generate a fresh
-      *         name for a constructor or mapping.
-      * \post   A fresh name for a constructor or mapping is generated.
-      * \return A fresh name for a constructor or mapping.
-    **/
-    mcrl2::core::identifier_string generate_fresh_function_symbol_name(const std::string& str);
-
-    /** \brief Generates variable of type sort based on a given string str.
-      * \param str a string value. The value is used to generate a fresh
-      *         variable name.
-      * \param sort The sort of the variable to generate.
-      * \post   A fresh variable is generated, which has an unique name.
-      * \return A fresh variable.
-    **/
-    mcrl2::data::variable generate_fresh_variable(std::string str, const data::sort_expression& sort);
-
-    /** \brief  Creates the case function with number of arguments determined by
-     *          the number of affected constructors, the sort of the arguments and
-     *          result are determined by sort..
-     *  \param  sort The sort of the arguments and return sort of the case function
-      * \return A function that returns the corresponding constructor given the
-      *         case selector and constructors.
-    **/
-    data::function_symbol create_case_function(const data::sort_expression& sort);
-
-    /** \brief  Creates the determine function.
-      * \return A function that maps constructors to the fresh basic sort
-    **/
-    void create_determine_function();
-
-    /** \brief  Creates projection functions for the unfolded process parameter.
-      * \return A function that returns the projection functions for the
-      *         constructors of the unfolded process parameter.
-    **/
-    void create_projection_functions();
-
-    /** \brief  Determines the constructors that are affected with the unfold
-      *         process parameter.
-      * \post The constructors that are affected with the unfold
-      *         process parameter are stored in m_affected_constructors
-    **/
-    void determine_affected_constructors();
-
-    /** \brief  Creates a set of constructors for the fresh basic sort
-      * \return The constructors that are created for the fresh basic sort
-    **/
-    void create_new_constructors();
 
     /** \brief  Get the process parameter at given index
       * \param  index The index of the parameter which must be obtained.
@@ -244,40 +316,6 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
     **/
    void update_linear_process_initialization(
       std::size_t parameter_at_index);
-
-    /** \brief Create distribution rules for distribution_functions over case_functions
-    **/
-    void create_distribution_law_over_case(
-      const mcrl2::data::function_symbol& function_for_distribution,
-      const mcrl2::data::function_symbol case_function);
-
-
-    /** \brief Create the data equations for case functions */
-    void generate_case_function_equations(
-      const mcrl2::data::function_symbol& case_function);
-
-    /** \brief Create the data equations for the determine function */
-    void generate_determine_function_equations();
-
-    /** \brief Create the data equations for the projection functions */
-    void generate_projection_function_equations();
-
-    static bool char_filter(char c)
-    {
-      // Put unwanted characters here
-      return c==' ' || c==':' || c==',' || c=='|'
-             || c=='>' || c=='[' || c==']' || c=='@'
-             || c=='.' || c=='{' || c=='}' || c=='#'
-             || c=='%' || c=='&' || c=='*' || c=='!'
-             || c=='(' || c==')'
-             ;
-    }
-
-    std::string filter_illegal_characters(std::string in) const
-    {
-      in.resize(std::remove_if(in.begin(), in.end(), &char_filter) - in.begin());
-      return in;
-    }
 
     // Applies 'process unfolding' to a sequence of summands.
     void unfold_summands(mcrl2::lps::stochastic_action_summand_vector& summands);
