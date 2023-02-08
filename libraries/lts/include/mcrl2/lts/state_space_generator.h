@@ -312,7 +312,7 @@ class nondeterminism_detector
   protected:
     trace_constructor<Explorer>& m_trace_constructor;
     const std::string& filename_prefix;
-    std::map<lps::multi_action, lps::state> transitions;
+    std::vector<std::map<lps::multi_action, lps::state> > m_transitions_vec;
     std::size_t m_trace_count = 0;
     std::size_t m_max_trace_count;
 
@@ -320,25 +320,31 @@ class nondeterminism_detector
     nondeterminism_detector(
       trace_constructor<Explorer>& trace_constructor_,
       const std::string& filename_prefix_,
+      const std::size_t number_of_threads,
       std::size_t max_trace_count = 0
     )
       : m_trace_constructor(trace_constructor_),
         filename_prefix(filename_prefix_),
+        m_transitions_vec(number_of_threads+1),  //Threads are number from 1 to n. 
         m_max_trace_count(max_trace_count)
-    {}
-
-    void start_state()
     {
-      transitions.clear();
+      assert(number_of_threads>0);
     }
 
-    bool detect_nondeterminism(const lps::state& s0, std::size_t s0_index, const lps::multi_action& a, const lps::state& s1)
+    void start_state(std::size_t thread_index)
+    {
+      assert(thread_index<m_transitions_vec.size());
+      m_transitions_vec[thread_index].clear();
+    }
+
+    bool detect_nondeterminism(const lps::state& s0, std::size_t s0_index, const lps::multi_action& a, const lps::state& s1, std::size_t thread_index)
     {
       bool result = false;
-      auto i = transitions.find(a);
-      if (i == transitions.end())
+      assert(thread_index<m_transitions_vec.size());
+      auto i = m_transitions_vec[thread_index].find(a);
+      if (i == m_transitions_vec[thread_index].end())
       {
-        transitions.insert(std::make_pair(a, s1));
+        m_transitions_vec[thread_index].insert(std::make_pair(a, s1));
       }
       else if (i->second != s1) // nondeterminism detected
       {
@@ -381,6 +387,7 @@ class divergence_detector
     std::vector<lps::explorer_summand> m_confluent_summands;
     std::size_t m_trace_count = 0;
     std::size_t m_max_trace_count;
+    std::mutex divergence_detector_mutex;  // As it stands the divergence detector is sequential. 
 
   public:
     divergence_detector(
@@ -431,6 +438,7 @@ class divergence_detector
       using utilities::detail::contains;
 
       bool result = false;
+      divergence_detector_mutex.lock();
       m_local_trace_constructor.clear();
 
       auto q = m_divergent_states.find(s);
@@ -440,6 +448,7 @@ class divergence_detector
                               "), reachable from divergent state with index " + std::to_string(q->second);
         mCRL2log(log::info) << message << ".\n";
         m_divergent_states.erase(q);
+        divergence_detector_mutex.unlock();
         return false;
       }
 
@@ -525,6 +534,7 @@ class divergence_detector
       {
         explorer.abort();
       }
+      divergence_detector_mutex.unlock();
       return result;
     }
 };
@@ -646,12 +656,17 @@ struct state_space_generator
       m_trace_constructor(explorer),
       m_action_detector(lpsspec, m_trace_constructor, options.trace_actions, options.trace_multiactions, options.trace_prefix, options.max_traces),
       m_deadlock_detector(m_trace_constructor, options.trace_prefix, options.max_traces),
-      m_nondeterminism_detector(m_trace_constructor, options.trace_prefix, options.max_traces),
+      m_nondeterminism_detector(m_trace_constructor, options.trace_prefix, options.number_of_threads, options.max_traces),
       m_progress_monitor(options.search_strategy)
   {
     if (options.detect_divergence)
     {
-      m_divergence_detector = std::unique_ptr<detail::divergence_detector<explorer_type>>(new detail::divergence_detector<explorer_type>(explorer, options.actions_internal_for_divergencies, options.trace_prefix, options.max_traces));
+      m_divergence_detector = 
+               std::unique_ptr<detail::divergence_detector<explorer_type>>(
+                        new detail::divergence_detector<explorer_type>(explorer, 
+                                                                       options.actions_internal_for_divergencies, 
+                                                                       options.trace_prefix, 
+                                                                       options.max_traces));
     }
   }
 
@@ -729,7 +744,7 @@ struct state_space_generator
           }
           if (options.detect_nondeterminism)
           {
-            m_nondeterminism_detector.detect_nondeterminism(s0, s0_index, a, first_state(s1));
+            m_nondeterminism_detector.detect_nondeterminism(s0, s0_index, a, first_state(s1), thread_index);
           }
           if (!options.suppress_progress_messages)
           {
@@ -745,7 +760,7 @@ struct state_space_generator
           has_outgoing_transitions[thread_index].m_bool = false;
           if (options.detect_nondeterminism)
           {
-            m_nondeterminism_detector.start_state();
+            m_nondeterminism_detector.start_state(thread_index);
           }
         },
 

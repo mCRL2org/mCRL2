@@ -1474,7 +1474,7 @@ class explorer: public abortable
 
       if (m_options.number_of_threads>1) 
       {
-        throw mcrl2::runtime_error("DFS EXPLORATION NOT THREAD SAFE");
+        throw mcrl2::runtime_error("Dfs exploration is not thread safe.");
       }
       for (const transition& tr: out_edges(s0, regular_summands, confluent_summands, m_global_sigma, m_global_rewr, m_global_enumerator, m_global_id_generator))
       {
