@@ -452,7 +452,11 @@ void GLScene::project2D()
   mCRL2log(mcrl2::log::debug)
       << "Rot^-1 Rot (e_z): " << _debug_e_z.x() << "," << _debug_e_z.y() << ","
       << _debug_e_z.z() << std::endl;
-  QVector3D forward = (m_camera.center() - eye).normalized();
+  QVector3D forward = (-m_camera.center() - eye).normalized();
+
+  mCRL2log(mcrl2::log::debug)
+      << "Forward: " << forward.x() << ", " << forward.y() << ", "
+      << forward.z() << std::endl;
 
   auto perp_distance = [&](const QVector3D& u)
   { return QVector3D::dotProduct(u, forward); };
@@ -494,7 +498,7 @@ void GLScene::project2D()
     }
   };
   auto transform = [&](const QVector3D& x)
-  { return cam_rotate(project(x) - reference_point) - m_camera.center(); };
+  { return cam_rotate(project(x) - reference_point); };
   for (std::size_t i = 0; i < nodeCount; i++)
   {
     std::size_t n = m_graph.hasExploration() ? m_graph.explorationNode(i) : i;
@@ -534,6 +538,7 @@ void GLScene::project2D()
 
   m_graph.unlock(GRAPH_LOCK_TRACE);
   m_camera.reset();
+  m_camera.translate(center_of_mass);
   m_camera.m_zoom *= std::abs(plane_dist)/m_camera.m_zoom;
 }
 
