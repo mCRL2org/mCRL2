@@ -202,6 +202,10 @@ class pbessolve_tool
                                 "strategies less than 2."
                              << std::endl;
     }
+    if (options.optimization == 8 && options.number_of_threads > 1)
+    {
+      throw mcrl2::runtime_error("Strategy " + std::to_string(options.optimization) + " can only be used in single thread mode.");
+    }
   }
 
   std::set<utilities::file_format> available_input_formats() const override
