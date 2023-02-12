@@ -33,8 +33,6 @@
 #include "mcrl2/lps/resolve_name_clashes.h"
 #include "mcrl2/lps/stochastic_state.h"
 
-// #define OLDCODE
-
 namespace mcrl2::lps {
 
 enum class caching { none, local, global };
@@ -303,15 +301,6 @@ struct cache_hash
 } // end namespace detail
 
 
-#ifdef OLDCODE 
-typedef atermpp::utilities::unordered_map<atermpp::term_appl<data::data_expression>,
-                                          atermpp::term_list<data::data_expression_list>,
-                                          std::hash<atermpp::term_appl<data::data_expression> >,
-                                          std::equal_to<atermpp::term_appl<data::data_expression> >,
-                                          std::allocator< std::pair<atermpp::term_appl<data::data_expression>, atermpp::term_list<data::data_expression_list>> >,
-                                          true  // Thread_safe.
-                                        > summand_cache_map;
-#else
 typedef atermpp::utilities::unordered_map<atermpp::term_appl<data::data_expression>,
                                           atermpp::term_list<data::data_expression_list>,
                                           detail::cache_hash,
@@ -319,7 +308,6 @@ typedef atermpp::utilities::unordered_map<atermpp::term_appl<data::data_expressi
                                           std::allocator< std::pair<atermpp::term_appl<data::data_expression>, atermpp::term_list<data::data_expression_list>> >,
                                           true  // Thread_safe.
                                         > summand_cache_map;
-#endif
 
 
 struct explorer_summand
@@ -625,9 +613,9 @@ class explorer: public abortable
       const SummandSequence& confluent_summands,
       data::mutable_indexed_substitution<>& sigma,
       data::rewriter& rewr,
-      data::data_expression& condition,                // These variables are passed on such
+      data::data_expression& condition,                // These three variables are passed on such
       state_type& s1,                                  // that they don't have to be declared often.
-      atermpp::term_appl<data::data_expression>& key,  
+      atermpp::term_appl<data::data_expression>& key,  //
       data::enumerator_algorithm<>& enumerator,
       data::enumerator_identifier_generator& id_generator,
       ReportTransition report_transition = ReportTransition()
@@ -732,15 +720,8 @@ class explorer: public abortable
       }
       else
       {
-#ifdef OLDCODE
-        summand.compute_key(key, sigma);
-#endif
         auto& cache = summand.cache_strategy == caching::global ? global_cache : summand.local_cache;
-#ifdef OLDCODE
-        summand_cache_map::iterator q = cache.find(key);
-#else
         summand_cache_map::iterator q = cache.find(detail::cheap_cache_key(sigma, summand.gamma));
-#endif
         if (q == cache.end())
         {
           rewr(condition, summand.condition, sigma);
@@ -759,9 +740,6 @@ class explorer: public abortable
                         data::is_false
                       );
           }
-#ifndef OLDCODE
-          summand.compute_key(key, sigma);
-#endif
           q = cache.insert({key, solutions}).first;
         }
 
@@ -1731,7 +1709,5 @@ class explorer: public abortable
 };
 
 } // namespace mcrl2::lps
-
-#undef OLDCODE
 
 #endif // MCRL2_LPS_EXPLORER_H
