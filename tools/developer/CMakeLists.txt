@@ -1,6 +1,5 @@
 set(MCRL2_TOOLS
   confcheck
-  lps2ltsdeprecated
   lpstransform
   mcrl2rewrite
   mcrl2transform

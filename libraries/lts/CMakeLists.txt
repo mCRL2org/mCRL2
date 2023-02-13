@@ -10,7 +10,6 @@ add_mcrl2_library(lts
     liblts.cpp
     tree_set.cpp
     sim_hashtable.cpp
-    exploration.cpp
     simulation.cpp
   DEPENDS
     mcrl2_data

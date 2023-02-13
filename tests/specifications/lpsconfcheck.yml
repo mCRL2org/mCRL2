@@ -9,10 +9,6 @@ nodes:
     type: aut
   l5:
     type: aut
-  l6:
-    type: aut
-  l7:
-    type: aut
 
 tools:
   t1:
@@ -29,37 +25,17 @@ tools:
     input: [l2]
     output: [l4]
     args: []
-    name: lps2ltsdeprecated
+    name: lps2lts
   t4:
     input: [l3]
     output: [l5]
     args: [-c]
-    name: lps2ltsdeprecated
+    name: lps2lts
   t5:
     input: [l4, l5]
     output: []
     args: [-ebranching-bisim]
     name: ltscompare
-  t6:
-    input: [l2]
-    output: [l6]
-    args: []
-    name: lps2lts
-  t7:
-    input: [l3]
-    output: [l7]
-    args: [-c]
-    name: lps2lts
-  t8:
-    input: [l6, l7]
-    output: []
-    args: [-ebranching-bisim]
-    name: ltscompare
-  t9:
-    input: [l4, l7]
-    output: []
-    args: [-ebranching-bisim]
-    name: ltscompare
 
 result: |
-  result = t5.value['result'] and t8.value['result'] and t9.value['result']
+  result = t5.value['result']

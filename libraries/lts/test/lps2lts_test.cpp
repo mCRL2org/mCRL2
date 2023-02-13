@@ -17,7 +17,6 @@
 #include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/data/detail/rewrite_strategies.h"
-#include "mcrl2/lts/detail/exploration.h"
 #include "mcrl2/lps/is_stochastic.h"
 #include "mcrl2/lts/state_space_generator.h"
 #include "mcrl2/lts/stochastic_lts_builder.h"
@@ -44,27 +43,6 @@ std::string file_extension(lts::lts_type output_format)
     case lts::lts_dot: return ".dot";
     default: throw mcrl2::runtime_error("unsupported format");
   }
-}
-
-void run_lps2lts(
-  const lps::stochastic_specification& stochastic_lpsspec,
-  data::rewrite_strategy rstrategy,
-  lps::exploration_strategy estrategy,
-  lts::lts_type output_format,
-  const std::string& outputfile,
-  const std::string& priority_action
-)
-{
-  lts::lts_generation_options options;
-  options.trace_prefix = "lps2lts_test";
-  options.priority_action = priority_action;
-  options.strat = rstrategy;
-  options.specification = stochastic_lpsspec;
-  options.expl_strat = estrategy;
-  options.lts = outputfile;
-  options.outformat = output_format;
-  lts::lps2lts_algorithm lps2lts;
-  lps2lts.generate_lts(options);
 }
 
 void run_generatelts(
@@ -126,25 +104,17 @@ void check_lts(
 {
   std::cerr << "Translating LPS to LTS with exploration strategy " << estrategy << ", rewrite strategy " << rstrategy << "." << std::endl;
   std::cerr << format << " FORMAT\n";
-  LTSType result1;
-  LTSType result2;
-  lts::lts_type output_format = result1.type();
-  std::string outputfile1 = static_cast<std::string>(boost::unit_test::framework::current_test_case().p_name) + ".lps2lts" + file_extension(output_format);
-  std::string outputfile2 = static_cast<std::string>(boost::unit_test::framework::current_test_case().p_name) + ".generatelts" + file_extension(output_format);
-  run_lps2lts(stochastic_lpsspec, rstrategy, estrategy, output_format, outputfile1, priority_action);
-  run_generatelts(stochastic_lpsspec, rstrategy, estrategy, output_format, outputfile2, priority_action);
-  result1.load(outputfile1);
-  result2.load(outputfile2);
+  LTSType result;
+  lts::lts_type output_format = result.type();
+  std::string outputfile = static_cast<std::string>(boost::unit_test::framework::current_test_case().p_name) + ".generatelts" + file_extension(output_format);
+  run_generatelts(stochastic_lpsspec, rstrategy, estrategy, output_format, outputfile, priority_action);
+  result.load(outputfile);
 
-  BOOST_CHECK_EQUAL(result1.num_states(), expected_states);
-  BOOST_CHECK_EQUAL(result1.num_transitions(), expected_transitions);
-  BOOST_CHECK_EQUAL(result1.num_action_labels(), expected_labels);
-  BOOST_CHECK_EQUAL(result2.num_states(), expected_states);
-  BOOST_CHECK_EQUAL(result2.num_transitions(), expected_transitions);
-  BOOST_CHECK_EQUAL(result2.num_action_labels(), expected_labels);
+  BOOST_CHECK_EQUAL(result.num_states(), expected_states);
+  BOOST_CHECK_EQUAL(result.num_transitions(), expected_transitions);
+  BOOST_CHECK_EQUAL(result.num_action_labels(), expected_labels);
 
-  std::remove(outputfile1.c_str());
-  std::remove(outputfile2.c_str());
+  std::remove(outputfile.c_str());
 }
 
 static void check_lps2lts_specification(const std::string& specification,
@@ -441,33 +411,6 @@ BOOST_AUTO_TEST_CASE(test_deep_stack)
 }
 #endif // false
 
-
-BOOST_AUTO_TEST_CASE(test_max_states)
-{
-  std::string spec(
-  "act a;\n"
-  "proc P(s: Pos) =\n"
-  "  (s <= 10) -> a . P(s+1);\n"
-  "init P(1);\n");
-
-  lps::stochastic_specification specification;
-  parse_lps(spec,specification);
-
-  lts::lts_generation_options options;
-  options.trace_prefix = "lps2lts_test";
-  options.specification = specification;
-  options.lts = utilities::temporary_filename("lps2lts_test_file");
-  options.max_states = 5;
-
-  lts::lts_aut_t result;
-  options.outformat = result.type();
-  lts::lps2lts_algorithm lps2lts;
-  lps2lts.generate_lts(options);
-  result.load(options.lts);
-  remove(options.lts.c_str()); // Clean up after ourselves
-
-  BOOST_CHECK_LT(result.num_states(), 10u);
-}
 
 BOOST_AUTO_TEST_CASE(test_interaction_sum_and_assignment_notation1)
 {

@@ -176,9 +176,9 @@ class Lps2ltsAlgorithmsTest(ProcessTauTest):
             tau_actions = random.choice(['', '', 'b', 'b,c'])
             if tau_actions:
                 options.append('--tau={}'.format(tau_actions))
+        self.add_command_line_options('t1', options)
         self.add_command_line_options('t2', options)
         self.add_command_line_options('t3', options)
-        self.add_command_line_options('t4', options)
 
 
 class LpsConstelmTest(ProcessTest):

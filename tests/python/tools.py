@@ -276,17 +276,6 @@ class Lts2LpsTool(Tool):
         args.insert(1, '-l')
         return args
 
-class Lps2LtsDeprecatedTool(Tool):
-    def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
-        super(Lps2LtsDeprecatedTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
-
-    def assign_outputs(self):
-        self.value['has-deadlock'] = None
-        self.value['has-nondeterminism'] = None
-        self.value['has-divergence'] = None
-        self.value['actions'] = set([])
-        super(Lps2LtsDeprecatedTool, self).assign_outputs()
-
 class Lps2LtsTool(Tool):
     def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
         super(Lps2LtsTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
@@ -335,8 +324,6 @@ class ToolFactory(object):
             return Lts2PbesTool(label, name, toolpath, input_nodes, output_nodes, args)
         elif name in ['generatelts', 'lps2lts']:
             return Lps2LtsTool(label, name, toolpath, input_nodes, output_nodes, args)
-        elif name == 'lps2ltsdeprecated':
-            return Lps2LtsDeprecatedTool(label, name, toolpath, input_nodes, output_nodes, args)
         elif name == 'lts2lps':
             return Lts2LpsTool(label, name, toolpath, input_nodes, output_nodes, args)
         elif name in ['pbespgsolve', 'bessolve']:

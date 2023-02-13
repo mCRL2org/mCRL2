@@ -18,7 +18,7 @@ tools:
     input: [l2]
     output: [l3]
     args: [-Q0]
-    name: lps2ltsdeprecated
+    name: lps2lts
   t3:
     input: [l2]
     output: [l4]
@@ -29,6 +29,11 @@ tools:
     output: []
     args: [-epbisim]
     name: ltspcompare
+  t5:
+    input: [l3, l4]
+    output: []
+    args: [-epbisim-bem]
+    name: ltspcompare
 
 result: |
-  result = t4.value['result']
+  result = t4.value['result'] and t5.value['result']

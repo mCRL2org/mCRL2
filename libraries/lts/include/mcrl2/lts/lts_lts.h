@@ -297,7 +297,7 @@ class lts_lts_base
     }
 
     /** \brief Yields the type of this lts, in this case lts_lts. */
-    lts_type type() const
+    static lts_type type()
     {
       return lts_lts;
     }

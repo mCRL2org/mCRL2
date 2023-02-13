@@ -7,19 +7,20 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file linearization_test.cpp
-/// \brief Add your file description here.
+/// \brief A test of the linearizer, comparing the result with the expected state space modulo strong bisimulation. 
 
 #define BOOST_TEST_MODULE linearization_instantiation_compare_test
 
 #include <boost/test/included/unit_test.hpp>
 
+#include "mcrl2/utilities/test_utilities.h"
+
 #include "mcrl2/data/detail/rewrite_strategies.h"
 
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/lts/detail/exploration.h"
 #include "mcrl2/lts/lts_algorithm.h"
-
-#include "mcrl2/utilities/test_utilities.h"
+#include "mcrl2/lts/state_space_generator.h"
+#include "mcrl2/lts/stochastic_lts_builder.h"
 
 using namespace mcrl2;
 using namespace mcrl2::lps;
@@ -31,17 +32,20 @@ template <class LTS_TYPE>
 inline
 LTS_TYPE translate_lps_to_lts(const lps::stochastic_specification& specification)
 {
-  lts::lts_generation_options options;
+  lps::explorer_options options;
   options.trace_prefix = "linearization_instantiation_compare_test";
-  options.specification = specification;
-  options.lts = utilities::temporary_filename("linearization_instantiation_compare_test_file");
+  options.search_strategy = lps::es_breadth;
+  options.save_at_end = true;
+  const std::string& output_filename = utilities::temporary_filename("linearization_instantiation_compare_test_file");
 
   LTS_TYPE result;
-  options.outformat = result.type();
-  lts::lps2lts_algorithm lps2lts;
-  lps2lts.generate_lts(options);
-  result.load(options.lts);
-  remove(options.lts.c_str()); // Clean up after ourselves
+  lts::state_space_generator<false, false, lps::stochastic_specification> generator(specification, options);
+  lps::specification lpsspec = lps::remove_stochastic_operators(specification);
+  auto builder = create_lts_builder(lpsspec, options, result.type());
+  generator.explore(*builder);
+  builder->save(output_filename);
+
+  result.load(output_filename); 
   return result;
 }
 
