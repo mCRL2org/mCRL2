@@ -41,7 +41,7 @@ jobs:
     # Configure and install (s)ccache
     - uses: hendrikmuhs/ccache-action@v1.2
       with:
-        key: ${{ github.job }}
+        key: ${{github.workflow}}-${{github.job}}-${{matrix.suite}}
 
     # Configure CMake in a 'build' subdirectory        
     - name: Configure CMake MacOS

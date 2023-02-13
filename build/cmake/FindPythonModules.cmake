@@ -1,3 +1,6 @@
+# This will prioritise python interpreters in PATH over the registry. Introduced in CMake 3.13.
+set(Python3_FIND_REGISTRY "LAST")
+
 find_package(PythonInterp 3.6.0)
 
 if(PYTHONINTERP_FOUND)
