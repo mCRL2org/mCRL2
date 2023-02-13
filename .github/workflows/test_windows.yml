@@ -32,6 +32,10 @@ jobs:
       uses: SimenB/github-actions-cpu-cores@v1
       id: cpu-cores
             
+    - name: Install Python dependencies for Windows
+      run: |
+        pip3 install psutil pyyaml
+
     - name: Set up conda environment
       uses: conda-incubator/setup-miniconda@v2
       with:
@@ -41,9 +45,8 @@ jobs:
 
     - name: Install dependencies for Windows
       run: |
-        conda install -c conda-forge qt boost
-        pip install psutil pyyaml
-                
+        conda install -c conda-forge qt boost                
+
     # Performs the git checkout in the github.workspace/src directory
     - uses: actions/checkout@v3 
       with:
