@@ -24,7 +24,7 @@ namespace data {
 
 namespace detail {
 
-struct one_point_rule_subtitution_algorithm
+struct one_point_rule_substitution_algorithm
 {
   const data::variable_list& quantifier_variables;
   std::map<data::variable, std::vector<data::data_expression> > equalities;
@@ -35,9 +35,9 @@ struct one_point_rule_subtitution_algorithm
   // applies the substitution sigma to all right hand sides of equalities
   void apply_sigma()
   {
-    for (auto& p: equalities)
+    for (auto& [_, exprs]: equalities)
     {
-      for (data::data_expression& e: p.second)
+      for (data::data_expression& e: exprs)
       {
         e = data::replace_variables_capture_avoiding(e, sigma, id_generator);
       }
@@ -49,16 +49,15 @@ struct one_point_rule_subtitution_algorithm
   bool find_constant_assignments()
   {
     std::vector<data::variable> to_be_removed;
-    for (const auto& p: equalities)
+    for (const auto& [lhs, exprs]: equalities)
     {
-      const data::variable& v = p.first;
-      for (const data::data_expression& e: p.second)
+      for (const data::data_expression& e: exprs)
       {
         if (data::is_constant(e))
         {
-          sigma[v] = e;
-          sigma_lhs_variables.insert(v);
-          to_be_removed.push_back(v);
+          sigma[lhs] = e;
+          sigma_lhs_variables.insert(lhs);
+          to_be_removed.push_back(lhs);
         }
       }
     }
@@ -80,21 +79,20 @@ struct one_point_rule_subtitution_algorithm
   bool find_assignment()
   {
     std::set<data::variable> to_be_removed;
-    for (const auto& p: equalities)
+    for (const auto& [lhs,exprs]: equalities)
     {
-      const data::variable& v = p.first;
-      for (const data::data_expression& e: p.second)
+      for (const data::data_expression& e: exprs)
       {
-        if (e != v)
+        if (e != lhs)
         {
-          sigma[v] = e;
-          sigma_lhs_variables.insert(v);
+          sigma[lhs] = e;
+          sigma_lhs_variables.insert(lhs);
           std::set<data::variable> FV = data::find_free_variables(e);
           for (const data::variable& v: FV)
           {
             id_generator.add_identifier(v.name());
           }
-          to_be_removed.insert(v);
+          to_be_removed.insert(lhs);
           to_be_removed.insert(FV.begin(), FV.end());
           break;
         }
@@ -117,28 +115,27 @@ struct one_point_rule_subtitution_algorithm
     return !to_be_removed.empty();
   }
 
-  one_point_rule_subtitution_algorithm(const std::map<data::variable, std::set<data::data_expression> >& equalities_, const data::variable_list& quantifier_variables_)
+  one_point_rule_substitution_algorithm(const std::map<data::variable, std::set<data::data_expression> >& equalities_, const data::variable_list& quantifier_variables_)
     : quantifier_variables(quantifier_variables_)
   {
     using utilities::detail::contains;
-    for (const auto& p: equalities_)
+    for (const auto& [lhs,exprs]: equalities_)
     {
-      const data::variable& v = p.first;
-      if (!contains(quantifier_variables, v))
+      if (!contains(quantifier_variables, lhs))
       {
         continue;
       }
       std::vector<data::data_expression> E;
-      for (const data::data_expression& e: p.second)
+      for (const data::data_expression& e: exprs)
       {
-        if (!contains(data::find_free_variables(e), v))
+        if (!contains(data::find_free_variables(e), lhs))
         {
           E.push_back(e);
         }
       }
       if (!E.empty())
       {
-        equalities[v] = E;
+        equalities[lhs] = E;
       }
     }
   }
@@ -175,7 +172,7 @@ struct one_point_rule_subtitution_algorithm
 inline
 std::pair<data::mutable_map_substitution<>, std::vector<data::variable> > make_one_point_rule_substitution(const std::map<data::variable, std::set<data::data_expression> >& equalities, const data::variable_list& quantifier_variables)
 {
-  one_point_rule_subtitution_algorithm algorithm(equalities, quantifier_variables);
+  one_point_rule_substitution_algorithm algorithm(equalities, quantifier_variables);
   return algorithm.run();
 }
 
@@ -202,9 +199,7 @@ class one_point_rule_rewrite_builder: public data_expression_builder<Derived>
       std::map<variable, std::set<data_expression> > inequalities = find_inequalities(body);
       if (!inequalities.empty())
       {
-        auto p = make_one_point_rule_substitution(inequalities, x.variables());
-        data::mutable_map_substitution<>& sigma = p.first;
-        const std::vector<data::variable>& remaining_variables = p.second;
+        auto [sigma, remaining_variables] = make_one_point_rule_substitution(inequalities, x.variables());
         if (remaining_variables.size() != x.variables().size()) // one or more substitutions were found
         {
           mCRL2log(log::debug) << "Apply substitution sigma = " << sigma << " to x = " << body << std::endl;
@@ -235,9 +230,7 @@ class one_point_rule_rewrite_builder: public data_expression_builder<Derived>
       std::map<variable, std::set<data_expression> > equalities = find_equalities(body);
       if (!equalities.empty())
       {
-        auto p = make_one_point_rule_substitution(equalities, x.variables());
-        data::mutable_map_substitution<>& sigma = p.first;
-        const std::vector<data::variable>& remaining_variables = p.second;
+        auto [sigma, remaining_variables] = make_one_point_rule_substitution(equalities, x.variables());
         if (remaining_variables.size() != x.variables().size()) // one or more substitutions were found
         {
           mCRL2log(log::debug) << "Apply substitution sigma = " << sigma << " to x = " << body << std::endl;
