@@ -265,6 +265,8 @@ BOOST_AUTO_TEST_CASE(three_sums_remove_two)
  */
 BOOST_AUTO_TEST_CASE(twice_lhs)
 {
+  using utilities::detail::contains;
+
   std::clog << "Test case 8" << std::endl;
   const std::string text(
     "sort D = struct d1 | d2 | d3;\n"
@@ -278,12 +280,13 @@ BOOST_AUTO_TEST_CASE(twice_lhs)
   sumelm_algorithm<>(s1).run();
   int sumvar_count = 0;
   const action_summand_vector& summands1 = s1.process().action_summands();
-  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (const action_summand& summand: summands1)
   {
-    if (!i->summation_variables().empty())
+    if (!summand.summation_variables().empty())
     {
       ++sumvar_count;
-      BOOST_CHECK(data::find_all_variables(i->condition()).empty());
+      auto vars = data::find_all_variables(summand.condition());
+      BOOST_CHECK(vars.size() == 1 && contains(summand.summation_variables(), *vars.begin()));
     }
   }
   BOOST_CHECK(sumvar_count == 1);
