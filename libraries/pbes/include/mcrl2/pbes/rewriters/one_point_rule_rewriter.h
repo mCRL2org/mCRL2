@@ -53,7 +53,7 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
     mCRL2log(log::debug) << "\ninequalities(body) = " << data::print_inequalities(inequalities) << std::endl;
     if (!inequalities.empty())
     {
-      auto p = data::detail::make_one_point_rule_substitution(inequalities, x.variables());
+      auto p = data::make_one_point_rule_substitution(inequalities, x.variables());
       data::mutable_map_substitution<>& sigma = p.first;
       const std::vector<data::variable>& remaining_variables = p.second;
       if (remaining_variables.size() != x.variables().size()) // one or more substitutions were found
@@ -86,7 +86,7 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
     mCRL2log(log::debug) << "x = " << body << "\nequalities(x) = " << data::print_inequalities(equalities) << std::endl;
     if (!equalities.empty())
     {
-      auto p = data::detail::make_one_point_rule_substitution(equalities, x.variables());
+      auto p = data::make_one_point_rule_substitution(equalities, x.variables());
       data::mutable_map_substitution<>& sigma = p.first;
       const std::vector<data::variable>& remaining_variables = p.second;
       if (remaining_variables.size() != x.variables().size()) // one or more substitutions were found

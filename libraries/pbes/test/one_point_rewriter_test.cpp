@@ -101,6 +101,9 @@ BOOST_AUTO_TEST_CASE(one_point_rule_rewriter_test)
   test_one_point_rule_rewriter("exists m:Nat. forall n:Nat. val(m != n) || Y(n)", "exists m: Nat. Y(m)");
   test_one_point_rule_rewriter("exists m:Nat. forall n:Nat. val(n != m) || Y(n)", "exists m: Nat. Y(m)");
   test_one_point_rule_rewriter("forall p: Bool, q: Bool. val(!(p == q)) || val(!q) || val(!(p == true))", "val(false)");
+  test_one_point_rule_rewriter("exists m:Nat. (val(m == 3) || val(false)) && Y(m)", "Y(3)");
+  test_one_point_rule_rewriter("forall m:Nat. val(m != 3) && val(true)", "val(false)");
+  test_one_point_rule_rewriter("exists k,l,m:Nat. val(k == l && k == m) && val(l == m)", "val(true)");
 }
 
 BOOST_AUTO_TEST_CASE(ticket_1388)

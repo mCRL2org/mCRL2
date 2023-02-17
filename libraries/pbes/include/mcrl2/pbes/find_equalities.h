@@ -107,7 +107,7 @@ std::map<data::variable, std::set<data::data_expression> > find_equalities(const
   f.apply(x);
   assert(f.expression_stack.size() == 1);
   f.top().close();
-  return f.top().equalities;
+  return f.top().equalities.assignments;
 }
 
 inline
@@ -117,7 +117,7 @@ std::map<data::variable, std::set<data::data_expression> > find_inequalities(con
   f.apply(x);
   assert(f.expression_stack.size() == 1);
   f.top().close();
-  return f.top().inequalities;
+  return f.top().inequalities.assignments;
 }
 
 } // namespace pbes_system
