@@ -111,32 +111,12 @@ struct one_point_rule_substitution_algorithm
     return !to_be_removed.empty();
   }
 
-  one_point_rule_substitution_algorithm(const std::map<data::variable, std::set<data::data_expression> >& equalities_)
+  void build_equality_map(const std::map<data::variable, std::set<data::data_expression> >& equalities_, bool check_vars, const data::variable_list& vars = data::variable_list())
   {
     using utilities::detail::contains;
     for (const auto& [lhs,exprs]: equalities_)
     {
-      std::vector<data::data_expression> E;
-      for (const data::data_expression& e: exprs)
-      {
-        if (!contains(data::find_free_variables(e), lhs))
-        {
-          E.push_back(e);
-        }
-      }
-      if (!E.empty())
-      {
-        equalities[lhs] = E;
-      }
-    }
-  }
-
-  one_point_rule_substitution_algorithm(const std::map<data::variable, std::set<data::data_expression> >& equalities_, const data::variable_list& quantifier_variables)
-  {
-    using utilities::detail::contains;
-    for (const auto& [lhs,exprs]: equalities_)
-    {
-      if (!contains(quantifier_variables, lhs))
+      if (check_vars && !contains(vars, lhs))
       {
         continue;
       }
@@ -155,10 +135,20 @@ struct one_point_rule_substitution_algorithm
     }
   }
 
-  data::mutable_map_substitution<> run()
+  one_point_rule_substitution_algorithm(const std::map<data::variable, std::set<data::data_expression> >& equalities_)
+  {
+    build_equality_map(equalities_, false);
+  }
+
+  one_point_rule_substitution_algorithm(const std::map<data::variable, std::set<data::data_expression> >& equalities_, const data::variable_list& quantifier_variables)
+  {
+    build_equality_map(equalities_, true, quantifier_variables);
+  }
+
+  data::mutable_map_substitution<> run(bool find_all_assignments = true)
   {
     find_constant_assignments();
-    for (;;)
+    while (find_all_assignments)
     {
       if (!find_assignment())
       {
@@ -170,11 +160,11 @@ struct one_point_rule_substitution_algorithm
 
   // creates a substitution from a set of (in-)equalities for a given list of quantifier variables
   // returns the substitution, and the subset of quantifier variables that are not used in the substitution
-  std::pair<data::mutable_map_substitution<>, std::vector<data::variable> > run(const data::variable_list& quantifier_variables)
+  std::pair<data::mutable_map_substitution<>, std::vector<data::variable> > run(const data::variable_list& quantifier_variables, bool find_all_assignments = true)
   {
     using utilities::detail::contains;
 
-    run();
+    run(find_all_assignments);
 
     std::vector<data::variable> remaining_variables;
     for (const data::variable& v: quantifier_variables)
@@ -192,15 +182,30 @@ struct one_point_rule_substitution_algorithm
 } // namespace detail
 
 
-// creates a substitution from a set of (in-)equalities for a given list of quantifier variables
-// returns the substitution, and the subset of quantifier variables that are not used in the substitution
+/// @brief creates a substitution from a set of (in-)equalities for a given list of quantifier variables
+/// @param quantifier_variables Consider only these variables
+/// @param find_all_assignments True to find all assignments, false to find only constant assignments
+/// @return the substitution, and the subset of quantifier variables that are not used in the substitution
 inline
 std::pair<data::mutable_map_substitution<>, std::vector<data::variable> > make_one_point_rule_substitution(
   const std::map<data::variable, std::set<data::data_expression> >& equalities,
-  const data::variable_list& quantifier_variables)
+  const data::variable_list& quantifier_variables,
+  bool find_all_assignments = true)
 {
   detail::one_point_rule_substitution_algorithm algorithm(equalities, quantifier_variables);
-  return algorithm.run(quantifier_variables);
+  return algorithm.run(quantifier_variables, find_all_assignments);
+}
+
+/// @brief creates a substitution from a set of (in-)equalities
+/// @param find_all_assignments True to find all assignments, false to find only constant assignments
+/// @return the substitution
+inline
+data::mutable_map_substitution<> make_one_point_rule_substitution(
+  const std::map<data::variable, std::set<data::data_expression> >& equalities,
+  bool find_all_assignments = true)
+{
+  detail::one_point_rule_substitution_algorithm algorithm(equalities);
+  return algorithm.run(find_all_assignments);
 }
 
 } // namespace mcrl2::data
