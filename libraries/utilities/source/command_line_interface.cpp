@@ -360,7 +360,7 @@ interface_description::interface_description(std::string const& path,
 
   // Add mandatory options
   add_hidden_option("help", "display help information", 'h');
-  add_hidden_option("help-all", "display help information, including hidden options");
+  add_hidden_option("help-all", "display help information, including hidden and experimental options");
   add_hidden_option("version", "display version information");
   add_hidden_option("quiet", "do not display warning messages", 'q');
   add_hidden_option("verbose", "display short intermediate messages", 'v');
@@ -460,6 +460,7 @@ std::string interface_description::textual_description(bool show_hidden) const
     << m_options.find("log-level")->second.textual_description(27, 53)
     << m_options.find("help")->second.textual_description(27, 53)
     << m_options.find("version")->second.textual_description(27, 53)
+    << m_options.find("help-all")->second.textual_description(27, 53)
     << std::endl;
 
   if (!m_known_issues.empty())
@@ -575,6 +576,7 @@ std::string interface_description::man_page() const
     << m_options.find("log-level")->second.man_page_description()
     << m_options.find("help")->second.man_page_description()
     << m_options.find("version")->second.man_page_description()
+    << m_options.find("help-all")->second.man_page_description()
     << std::endl;
 
   if (!m_known_issues.empty())
@@ -650,6 +652,7 @@ std::ostream& interface_description::xml_page(std::ostream& s) const
   m_options.find("log-level")->second.xml_page_description(s, true, indentation);
   m_options.find("help")->second.xml_page_description(s, true, indentation);
   m_options.find("version")->second.xml_page_description(s, true, indentation);
+  m_options.find("help-all")->second.xml_page_description(s, true, indentation);
 
   s << std::string(--indentation, ' ') << "</options>" << std::endl;
 
