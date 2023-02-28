@@ -172,6 +172,22 @@ inline data_expression not_equal_to(data_expression const& p, data_expression co
   return data::not_equal_to(p, q);
 }
 
+/// @brief Returns an expression equivalent to if(cond,then,else_)
+/// @return The value if(cond,then,else_)
+inline data_expression if_(const data_expression& cond, const data_expression& then, const data_expression& else_)
+{
+  if (cond == sort_bool::true_() || then == else_)
+  {
+    return then;
+  }
+  else if (cond == sort_bool::false_())
+  {
+    return else_;
+  }
+
+  return data::if_(cond, then, else_);
+}
+
 /// \brief Returns or applied to the sequence of data expressions [first, last)
 /// \param first Start of a sequence of data expressions
 /// \param last End of a sequence of data expressions
