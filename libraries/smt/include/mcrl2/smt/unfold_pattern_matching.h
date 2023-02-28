@@ -96,19 +96,25 @@ struct structured_sort_functions
   }
 };
 
+/// @brief Get the top level function symbol f if expr is of the shape f or f(t1,...,tn)
+/// @param expr The expression from which to extract the top function symbol
+/// @return The top function symbol, or data::function_symbol() if it has none
 inline
-data::data_expression lazyif(const data::data_expression& cond, const data::data_expression& then, const data::data_expression& else_)
+data::function_symbol get_top_fs(const data::data_expression& expr)
 {
-  if (cond == data::sort_bool::true_() || then == else_)
+  if (data::is_function_symbol(expr))
   {
-    return then;
+    return atermpp::down_cast<data::function_symbol>(expr);
   }
-  else if (cond == data::sort_bool::false_())
+  if (data::is_application(expr))
   {
-    return else_;
+    const data::application& expr_appl = atermpp::down_cast<data::application>(expr);
+    if (data::is_function_symbol(expr_appl.head()))
+    {
+      return atermpp::down_cast<data::function_symbol>(expr_appl.head());
+    }
   }
-
-  return data::if_(cond, then, else_);
+  return data::function_symbol();
 }
 
 /**
@@ -156,7 +162,7 @@ static data::data_expression construct_condition_rhs(const std::vector<rule>& ru
     }
     else
     {
-      result = lazyif(condition, rhs, result);
+      result = data::lazy::if_(condition, rhs, result);
     }
   }
 
@@ -195,8 +201,11 @@ static data::data_expression construct_rhs(
    * constructors -- suboptimal.
    */
   data::data_expression matching_target;
-  enum matching_type_t { MATCHING_NONE, MATCHING_INCOMPLETE, MATCHING_PARTIAL, MATCHING_FULL };
-  matching_type_t matching_type = MATCHING_NONE;
+  enum class MatchType
+  {
+    NONE, INCOMPLETE, PARTIAL, FULL
+  };
+  MatchType matching_type = MatchType::NONE;
   // iterate over newly-created variable names
   for (const auto& [var_expr, _]: rules[0].match_criteria)
   {
@@ -209,61 +218,53 @@ static data::data_expression construct_rhs(
       {
         variable_seen = true;
       }
-      else if (data::is_function_symbol(pattern))
-      {
-        assert(ssf.is_constructor(data::function_symbol(pattern)));
-        constructors_seen.insert(data::function_symbol(pattern));
-      }
-      else if (data::is_application(pattern))
-      {
-        data::application application(pattern);
-        assert(data::is_function_symbol(application.head()));
-        assert(ssf.is_constructor(data::function_symbol(application.head())));
-        constructors_seen.insert(data::function_symbol(application.head()));
-      }
       else
       {
-        assert(false);
+        // either function symbol or application of function symbol
+        data::function_symbol fs = get_top_fs(pattern);
+        // this also means fs != function_symbol()
+        assert(ssf.is_constructor(fs));
+        constructors_seen.insert(fs);
       }
     }
 
+    MatchType new_matching_type;
     if (constructors_seen.empty())
     {
       // No pattern matching is possible on this variable.
-      continue;
+      new_matching_type = MatchType::NONE;
     }
     else if (variable_seen)
     {
       // There are both rules that match on this variable and rules that do not.
       // That's better than an incomplete matching but worse than a full matching.
-      if (matching_type == MATCHING_NONE || matching_type == MATCHING_INCOMPLETE)
-      {
-        matching_target = var_expr;
-        matching_type = MATCHING_PARTIAL;
-      }
+      new_matching_type = MatchType::PARTIAL;
     }
     else if (constructors_seen.size() != ssf.constructors.at(var_expr.sort()).size())
     {
       // There are constructors for which there are no rules.
       // Thus, we have an incomplete function definition, that needs to be completed artificially.
       // A partial matching would be a better choice.
-      if (matching_type == MATCHING_NONE)
-      {
-        matching_target = var_expr;
-        matching_type = MATCHING_INCOMPLETE;
-      }
+      new_matching_type = MatchType::INCOMPLETE;
     }
     else
     {
       // There is a matching rule for each constructor, and no rule with a plain variable.
       // This variable is a perfect pattern matching candidate.
+      new_matching_type = MatchType::FULL;
+    }
+    if (new_matching_type > matching_type)
+    {
       matching_target = var_expr;
-      matching_type = MATCHING_FULL;
+      matching_type = new_matching_type;
+    }
+    if (matching_type == MatchType::FULL)
+    {
       break;
     }
   }
 
-  if (matching_type == MATCHING_NONE)
+  if (matching_type == MatchType::NONE)
   {
     // No constructor-based matching needs to happen.
     // All that needs to happen is incorporating the rule conditions.
@@ -284,20 +285,13 @@ static data::data_expression construct_rhs(
        * For a rule with a constructor pattern, strip the constructor and
        * introduce patterns for the constructor parameters.
        */
-      data::function_symbol constructor;
+      data::function_symbol constructor = get_top_fs(pattern);
+      assert(constructor != data::function_symbol());
       data::data_expression_vector parameters;
-
-      if (data::is_function_symbol(pattern))
+      if (data::is_application(pattern))
       {
-        constructor = data::function_symbol(pattern);
-      }
-      else
-      {
-        assert(data::is_application(pattern));
-        data::application application(pattern);
-        assert(data::is_function_symbol(application.head()));
-        constructor = data::function_symbol(application.head());
-        parameters.insert(parameters.end(), application.begin(), application.end());
+        const data::application& pattern_appl = atermpp::down_cast<data::application>(pattern);
+        parameters.insert(parameters.end(), pattern_appl.begin(), pattern_appl.end());
       }
 
       assert(match_constructors.count(constructor) != 0);
@@ -364,7 +358,7 @@ static data::data_expression construct_rhs(
     data::data_expression term = construct_rhs(ssf, gen, constructor_rules[*i], sort);
     data::function_symbol recogniser_function = ssf.recogniser_func.at(*i);
     data::data_expression condition = data::application(recogniser_function, matching_target);
-    result = lazyif(condition, term, result);
+    result = data::lazy::if_(condition, term, result);
   }
   return result;
 }
@@ -501,6 +495,8 @@ data::data_equation unfold_pattern_matching(
 
 /**
  * \brief Find sorts that behave like a structured sort and the associated rewrite rules
+ * \return A pair containing: (1) recogniser and projection function symbols for each structured sort and
+ * (2) a map that gives a list of equations for each function symbol.
  */
 std::pair<structured_sort_functions, std::map< data::function_symbol, data::data_equation_vector >> find_structured_sort_functions(const data::data_specification& dataspec, const native_translations& nt)
 {
@@ -514,24 +510,8 @@ std::pair<structured_sort_functions, std::map< data::function_symbol, data::data
   for (const data::data_equation& eqn: dataspec.equations())
   {
     data::data_expression lhs = eqn.lhs();
-    data::function_symbol function;
-    if (data::is_application(lhs))
-    {
-      data::application application(lhs);
-      if (data::is_function_symbol(application.head()))
-      {
-        function = data::function_symbol(application.head());
-      }
-      else
-      {
-        continue;
-      }
-    }
-    else if (data::is_function_symbol(lhs))
-    {
-      function = data::function_symbol(lhs);
-    }
-    else
+    data::function_symbol function = get_top_fs(lhs);
+    if (function == data::function_symbol())
     {
       continue;
     }
@@ -550,11 +530,8 @@ std::pair<structured_sort_functions, std::map< data::function_symbol, data::data
   }
 
   // For each mapping, find out whether it is a recogniser or projection function.
-  for (const auto& p: rewrite_rules)
+  for (const auto& [mapping, equations]: rewrite_rules)
   {
-    const data::function_symbol& mapping = p.first;
-    const data::data_equation_vector& equations = p.second;
-
     if (!data::is_function_sort(mapping.sort()))
     {
       continue;
@@ -591,19 +568,15 @@ std::pair<structured_sort_functions, std::map< data::function_symbol, data::data
         assert(application.head() == mapping);
         assert(application.size() == 1);
         data::data_expression argument(application[0]);
-        data::function_symbol constructor;
+        data::function_symbol constructor = get_top_fs(argument);
+        if (constructor == data::function_symbol())
+        {
+          invalid_equations_seen = true;
+          break;
+        }
         if (data::is_application(argument))
         {
-          data::application constructor_application(argument);
-          if (data::is_function_symbol(constructor_application.head()))
-          {
-            constructor = data::function_symbol(constructor_application.head());
-          }
-          else
-          {
-            invalid_equations_seen = true;
-            break;
-          }
+          const data::application& constructor_application = atermpp::down_cast<data::application>(argument);
           bool all_args_are_vars = std::all_of(constructor_application.begin(), constructor_application.end(), &data::is_variable);
           bool all_vars_are_unique = data::find_all_variables(constructor_application).size() == constructor_application.size();
           if(!all_args_are_vars || !all_vars_are_unique)
@@ -611,15 +584,6 @@ std::pair<structured_sort_functions, std::map< data::function_symbol, data::data
             invalid_equations_seen = true;
             break;
           }
-        }
-        else if (data::is_function_symbol(argument))
-        {
-          constructor = data::function_symbol(argument);
-        }
-        else
-        {
-          invalid_equations_seen = true;
-          break;
         }
         // Check if the function symbol we found is really a constructor
         if (ssf.constructors[domain].count(constructor) == 0)
@@ -769,7 +733,6 @@ void unfold_pattern_matching(const data::data_specification& dataspec, native_tr
     {
       data::set_identifier_generator id_gen;
       data::data_equation unfolded_eqn = unfold_pattern_matching(function, rewr_equations, ssf, rep_gen, id_gen);
-      mCRL2log(log::debug) << function << " unfolded to " << unfolded_eqn;
       nt.set_native_definition(function, unfolded_eqn);
     }
   }
