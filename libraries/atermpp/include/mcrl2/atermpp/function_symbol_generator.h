@@ -44,8 +44,10 @@ protected:
   std::string m_string_buffer;
 
   /// \brief A reference to the index as present in the function symbol generator.
-  // std::shared_ptr<std::size_t> m_index;
   std::size_t m_index;
+
+  /// \brief The address of the central index for this prefix.
+  std::shared_ptr<std::size_t> m_central_index;
 
 public:
   /// \brief Constructor
@@ -61,7 +63,8 @@ public:
     assert(!prefix.empty() && !(std::isdigit(*prefix.rbegin())));
 
     // Obtain a reference to the first index possible.
-    m_index = *detail::g_term_pool().get_symbol_pool().register_prefix(m_prefix);
+    m_central_index = detail::g_term_pool().get_symbol_pool().register_prefix(m_prefix);
+    m_index = *m_central_index;
 
     m_initial_index = m_index;
 
@@ -86,9 +89,11 @@ public:
   function_symbol operator()(std::size_t arity = 0)
   {
     // Check whether in the meantime other variables have been used with the same prefix. 
-    if (m_index<=*detail::g_term_pool().get_symbol_pool().register_prefix(m_prefix))
+    // if (m_index<=*detail::g_term_pool().get_symbol_pool().register_prefix(m_prefix))
+    if (m_index<=*m_central_index)
     {
-      m_index=*detail::g_term_pool().get_symbol_pool().register_prefix(m_prefix);
+      // m_index=*detail::g_term_pool().get_symbol_pool().register_prefix(m_prefix);
+      m_index=*m_central_index;
       m_initial_index=m_index;
     } 
     // Put the number m_index after the prefix in the string buffer.
