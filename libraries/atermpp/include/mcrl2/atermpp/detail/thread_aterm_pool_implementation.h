@@ -279,7 +279,7 @@ void inline lock_shared(std::atomic<bool>* busy_flag,
 
 void thread_aterm_pool::unlock_shared()
 {
-  assert(m_lock_depth > 0);
+  assert(!GlobalThreadSafe || m_lock_depth > 0);
 
   --m_lock_depth;
   if (GlobalThreadSafe && m_lock_depth == 0)
