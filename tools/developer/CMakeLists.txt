@@ -15,6 +15,10 @@ if(MCRL2_ENABLE_SYLVAN)
   list(APPEND MCRL2_TOOLS pbesbddsolve)
 endif()
 
+if(MCRL2_ENABLE_BOOST_JSON_SUPPORT)
+  list(APPEND MCRL2_TOOLS lps2jani)
+endif()
+
 # N.B. Some developer tools are needed for the random tests.
 if(${MCRL2_ENABLE_DEVELOPER} OR ${MCRL2_ENABLE_TESTS})
   foreach(TOOL ${MCRL2_TOOLS})
