@@ -41,6 +41,7 @@ else()
 endif()
 
 option(MCRL2_ENABLE_GUI_TOOLS       "Enable compilation of tools with a graphical user interface." ON)
+option(MCRL2_ENABLE_BOOST_JSON_SUPPORT "Enable compilation of tools and libraries that require boost::json. This raises the minimal boost version requirement to 1.71.0." OFF)
 option(MCRL2_ENABLE_EXPERIMENTAL    "Enable compilation of experimental tools." OFF)
 option(MCRL2_ENABLE_DEPRECATED      "Enable compilation of deprecated tools." OFF)
 option(MCRL2_ENABLE_DEVELOPER       "Enable compilation of developer tools." OFF)
@@ -66,6 +67,11 @@ mark_as_advanced(
   MCRL2_ENABLE_DEBUG_SOUNDNESS_CHECKS 
   MCRL2_ENABLE_STABLE
 )
+
+if(MCRL2_ENABLE_BOOST_JSON_SUPPORT)
+  set(MCRL2_MIN_BOOST_VERSION 1.71.0)
+endif()
+
 
 if(MCRL2_ENABLE_GUI_TOOLS)
   find_package(OpenGL     QUIET REQUIRED)
