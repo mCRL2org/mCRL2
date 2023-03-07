@@ -9,17 +9,14 @@
 /// \file lps2lts_parallel.cpp
 /// \brief This tool transforms an .lps file into a file in Jani format such
 ///        that tools like Modest or Storm can be used to analyse probabilistic
-///        aspects. As Jani hardly support data types, the translation only
+///        aspects. As Jani hardly supports data types, the translation only
 ///        works for .lps specs using simple data. 
 ///
-//  TODO: This tool should be rewritten using the boost json library.
-//        But this is only available in Boost 1.75. Currently, we
-//        support Boost 1.66. 
 
 #include <fstream>
-// #include <boost/property_tree/json_parser.hpp>
-#include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/data/rewriter_tool.h"
+
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/pos.h"
 #include "mcrl2/data/nat.h"
@@ -29,10 +26,13 @@
 #include "mcrl2/lps/is_stochastic.h"
 #include "mcrl2/lps/untime.h" // For real_zero. Should be moved to another file. TODO.
 
+#include <boost/json/src.hpp>
+
 using namespace mcrl2;
-using utilities::tools::input_output_tool;
-using data::tools::rewriter_tool;
+using namespace boost::json;
+
 using enumerator_element = data::enumerator_list_element_with_substitution<>;
+using super = mcrl2::data::tools::rewriter_tool<mcrl2::utilities::tools::input_output_tool>;
 
 class data_structures
 {
@@ -41,485 +41,412 @@ class data_structures
   data::enumerator_algorithm<> m_enumerator;
   data::mutable_indexed_substitution<> m_sigma;
 
-  public:
-    data_structures(const lps::stochastic_specification& stochastic_lpsspec)
-      : m_rewr(stochastic_lpsspec.data()),
-        m_enumerator(m_rewr, stochastic_lpsspec.data(), m_rewr, m_id_generator, false)
-    {
-    }
+public:
+  explicit data_structures(const lps::stochastic_specification& stochastic_lpsspec)
+    : m_rewr(stochastic_lpsspec.data()),
+    m_enumerator(m_rewr, stochastic_lpsspec.data(), m_rewr, m_id_generator, false)
+  {
+  }
 
-    const data::data_expression rewriter(const data::data_expression& e) const
-    {
-      return m_rewr(e, m_sigma);;
-    }
+  data::data_expression rewriter(const data::data_expression& e) const
+  {
+    return m_rewr(e, m_sigma);
+  }
 
-    data::enumerator_algorithm<>& enumerator()
-    {
-      return m_enumerator;
-    }
+  data::enumerator_algorithm<>& enumerator()
+  {
+    return m_enumerator;
+  }
 
-    data::mutable_indexed_substitution<>& sigma()
-    {
-      return m_sigma;
-    }
+  data::mutable_indexed_substitution<>& sigma()
+  {
+    return m_sigma;
+  }
 };
 
-class lps2jani_tool: public rewriter_tool<input_output_tool>
+class lps2jani_tool : public super
 {
-  typedef rewriter_tool<input_output_tool> super;
-       
-  public:
-    lps2jani_tool()
-      : super("lps2jani",
-              "Jan Friso Groote",
-              "generates a Jani file from a (stochastic) LPS",
-              "Reads the LPS in INFILE and writes a corresponding file in Jani format "
-              "to OUTFILE. The LPS must only contain simple data types (Numbers, Booleans) that the "
-              "Jani format supports. See http://jani-spec.org for more information about the Jani format. "
-              "If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is used."
-             )
-    {}
+  std::unique_ptr<data_structures> m_data_structures;
+public:
+  lps2jani_tool()
+    : super("lps2jani",
+      "Jan Friso Groote, PHM van Spaendonck",
+      "generates a Jani file from a (stochastic) LPS",
+      "Reads the LPS in INFILE and writes a corresponding file in Jani format "
+      "to OUTFILE. The LPS must only contain simple data types (Numbers, Booleans) that the "
+      "Jani format supports. See http://jani-spec.org/#Model for more information about the Jani format. "
+      "If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is used."
+    )
+  {}
 
-    void add_options(utilities::interface_description& desc) override
+private:
+  /**
+   * \brief Converts the given action label list to a JSON array of actions.
+   * Actions use the schema:
+   *  {"name": Identifier}
+   *
+   * \param act_decls the to-be converted action declaration list.
+   * \return A JSON array corresponding to \ref act_decls.
+   */
+  array convert_action_declarations(const process::action_label_list& act_decls) const
+  {
+    array actions;
+    for (const process::action_label& d : act_decls)
     {
-      super::add_options(desc);
+      actions.push_back(object{ {"name", (std::string)d.name()} });
     }
+    return actions;
+  }
 
-    void parse_options(const utilities::command_line_parser& parser) override
-    {
-      super::parse_options(parser);
+  /**
+   * \brief Converts the given OpId into the JSON string that corresponds to it according to the JANI schema.
+   *
+   * \param opid the to-be converted OpId.
+   * \return A JSON string corresponding to the operator.
+   */
+  string convert_operator_to_jani(const data::data_expression& opid) const {
+    if (std::string op = mcrl2::data::pp(opid);
+      "!=" == op) {
+      return "≠";
     }
-
-    void export_action_declarations_to_jani(const process::action_label_list& act_decls, 
-                                            std::ostream& out)
-    {
-      if (!act_decls.empty())
-      {
-        out << "  \"actions\": [ ";
-        std::string separator="";
-        for(const process::action_label& d: act_decls)
-        {
-          out << separator << "{ \"name\": \"" << d.name() << "\"}";
-          separator = ", ";
-        }
-        out << "],\n";
-      }
+    else if ("==" == op) {
+      return "=";
     }
-
-    void export_data_expression_to_jani(const data::data_expression& e_in,
-                                        std::ostream& out,
-                                        data_structures& d)
-    {
-      const data::data_expression e = d.rewriter(e_in);
-      if (is_variable(e))
-      {
-        out << " \"" << atermpp::down_cast<data::variable>(e).name() << "\" ";
-      }
-      else if (data::sort_real::is_creal_application(e))
-      {
-        // out << pp(e);  
-        const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "{ \"left\": ";
-        export_data_expression_to_jani(appl[0], out, d);
-        out << ", \"op\": \"/\", \"right\": ";
-        export_data_expression_to_jani(appl[1], out, d);
-        out << " }";
-      }
-      else if (data::sort_bool::is_and_application(e))
-      {
-        const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "{ \"left\": ";
-        export_data_expression_to_jani(appl[0], out, d);
-        out << ", \"op\": \"∧\", \"right\": ";
-        export_data_expression_to_jani(appl[1], out, d);
-        out << " }";
-      }
-      else if (data::sort_bool::is_or_application(e))
-      {
-        const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "{ \"left\": ";
-        export_data_expression_to_jani(appl[0], out, d);
-        out << ", \"op\": \"∨\", \"right\": ";
-        export_data_expression_to_jani(appl[1], out, d);
-        out << " }";
-      }
-      else if (data::sort_bool::is_not_application(e))
-      {
-        const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "{ \"op\": \"¬\", \"exp\": ";
-        export_data_expression_to_jani(appl[0], out, d);
-        out << " }";
-      }
-      else if (is_equal_to_application(e))
-      {
-        const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "{ \"left\": ";
-        export_data_expression_to_jani(appl[0], out, d);
-        out << ", \"op\": \"=\", \"right\": ";
-        export_data_expression_to_jani(appl[1], out, d);
-        out << " }";
-      }
-      else if (is_not_equal_to_application(e))
-      {
-        const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "{ \"left\": ";
-        export_data_expression_to_jani(appl[0], out, d);
-        out << ", \"op\": \"≠\", \"right\": ";
-        export_data_expression_to_jani(appl[1], out, d);
-        out << " }";
-      }
-      else if (is_less_application(e))
-      {
-        const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "{ \"left\": ";
-        export_data_expression_to_jani(appl[0], out, d);
-        out << ", \"op\": \"<\", \"right\": ";
-        export_data_expression_to_jani(appl[1], out, d);
-        out << " }";
-      }
-      else if (is_less_equal_application(e))
-      {
-        const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "{ \"left\": ";
-        export_data_expression_to_jani(appl[0], out, d);
-        out << ", \"op\": \"≤\", \"right\": ";
-        export_data_expression_to_jani(appl[1], out, d);
-        out << " }";
-      }
-      else if (is_greater_application(e))
-      {
-        const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "{ \"left\": ";
-        export_data_expression_to_jani(appl[1], out, d);
-        out << ", \"op\": \"<\", \"right\": ";
-        export_data_expression_to_jani(appl[0], out, d);
-        out << " }";
-      }
-      else if (is_greater_equal_application(e))
-      {
-        const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "{ \"left\": ";
-        export_data_expression_to_jani(appl[1], out, d);
-        out << ", \"op\": \"≤\", \"right\": ";
-        export_data_expression_to_jani(appl[0], out, d);
-        out << " }";
-      }
-      else if (data::sort_pos::is_plus_application(e) ||
-               data::sort_nat::is_plus_application(e) ||
-               data::sort_int::is_plus_application(e) ||
-               data::sort_real::is_plus_application(e))
-      {
-        const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "{ \"left\": ";
-        export_data_expression_to_jani(appl[0], out, d);
-        out << ", \"op\": \"+\", \"right\": ";
-        export_data_expression_to_jani(appl[1], out, d);
-        out << " }";
-      }
-      else if (data::sort_int::is_minus_application(e) ||
-               data::sort_real::is_minus_application(e))
-      {
-        const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "{ \"left\": ";
-        export_data_expression_to_jani(appl[0], out, d);
-        out << ", \"op\": \"-\", \"right\": ";
-        export_data_expression_to_jani(appl[1], out, d);
-        out << " }";
-      }
-      else if (data::sort_pos::is_times_application(e) ||
-               data::sort_nat::is_times_application(e) ||
-               data::sort_int::is_times_application(e) ||
-               data::sort_real::is_times_application(e))
-      {
-        const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "{ \"left\": ";
-        export_data_expression_to_jani(appl[0], out, d);
-        out << ", \"op\": \"*\", \"right\": ";
-        export_data_expression_to_jani(appl[1], out, d);
-        out << " }";
-      }
-      else if (data::sort_nat::is_mod_application(e) ||
-               data::sort_nat::is_mod_application(e))
-      {
-        const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "{ \"left\": ";
-        export_data_expression_to_jani(appl[0], out, d);
-        out << ", \"op\": \"%\", \"right\": ";
-        export_data_expression_to_jani(appl[1], out, d);
-        out << " }";
-      }
-      else if (data::sort_real::is_divides_application(e))
-      {
-        const data::application& appl = atermpp::down_cast<data::application>(e);
-        out << "{ \"left\": ";
-        export_data_expression_to_jani(appl[0], out, d);
-        out << ", \"op\": \"/\", \"right\": ";
-        export_data_expression_to_jani(appl[1], out, d);
-        out << " }";
-      }
-      else if (data::sort_int::is_int(e.sort()) ||
-               data::sort_nat::is_nat(e.sort()) ||
-               data::sort_pos::is_pos(e.sort()) ||
-               e == mcrl2::data::sort_bool::true_() ||
-               e == mcrl2::data::sort_bool::false_())
-      {
-        out << pp(e);
-      }
-      else 
-      {
-        throw mcrl2::runtime_error("Jani only supports expressions true, false and numbers. "
-                                   "It does not support the main operator in the expression " + pp(e) +".");
-      }
+    else if ("<=" == op) {
+      return "≤";
     }
-
-    void export_initial_value_to_jani(const data::data_expression& init,
-                                      std::ostream& out,
-                                      const std::string& indent,
-                                      data_structures& d)
-    {
-      out << indent << "  \"initial-value\": ";
-      export_data_expression_to_jani(init, out, d);
-      out << indent << "\n";
+    else if ("&&" == op) {
+      return "∧";
     }
-
-    void export_sort_to_jani(const data::sort_expression& sort,
-                             std::ostream& out,
-                             const std::string& indent)
-    {
-      if (data::sort_bool::is_bool(sort))
-      {
-        out << "\"bool\"";
-      }
-      else if (data::sort_int::is_int(sort))
-      {
-        out << "\"int\"";
-      }
-      else if (data::sort_nat::is_nat(sort))
-      {
-        out << "{\n" 
-            << indent << "  \"base\": \"int\",\n"
-            << indent << "  \"kind\": \"bounded\",\n"
-            << indent << "  \"lower-bound\": 0\n"
-            << indent << "}\n";
-      }
-      else if (data::sort_pos::is_pos(sort))
-      {
-        out << "{\n" 
-            << indent << "  \"base\": \"int\",\n"
-            << indent << "  \"kind\": \"bounded\",\n"
-            << indent << "  \"lower-bound\": 1\n"
-            << indent << "}\n";
-      }
-      else 
-      {
-        throw mcrl2::runtime_error("Jani only supports sorts bool, int, nat and pos. "
-                                   "It does not support sort " + pp(sort) +".");
-      }
+    else if ("||" == op) {
+      return "∨";
     }
-
-    void export_assignments_to_jani(const data::assignment_list& assignments,
-                                    const data::variable_list& parameters,
-                                    std::ostream& out,
-                                    const std::string& indent,
-                                    data_structures& d)
-    {
-      if (!parameters.empty())
-      {
-        out << indent << "\"assignments\":\n"
-            << indent << "[ \n";
-        std::string separator="";
-        for(const data::assignment& ass: assignments)
-        {
-          out << separator << "\n" << indent << "  {\n" 
-              << indent << "    \"ref\": \"" << ass.lhs().name() << "\",\n"
-              << indent << "    \"value\": ";
-          
-          export_data_expression_to_jani(ass.rhs(), out, d);
-          out << "\n" << indent << "  }";
-          separator = ",";
-        }
-        out << "\n" << indent << "]\n";
-      }
+    else if ("@cReal" == op) { // threat real numbers as a division operator
+      return "/";
     }
-
-    void export_distribution_instance_to_jani(const enumerator_element& p,
-                                              const data::assignment_list& assignments,
-                                              const data::variable_list& parameters,
-                                              std::ostream& out,
-                                              const std::string& indent,
-                                              std::string& separator,
-                                              data_structures& d)
-    {
-      out << separator 
-          << indent << "{\n"
-          << indent << "  \"location\": \"l\",\n"
-          << indent << "  \"probability\": { \"exp\": ";
-      export_data_expression_to_jani(p.expression(), out, d);
-      out << "},\n";
-      export_assignments_to_jani(assignments, parameters, out, indent + "  ", d);
-      out << indent << "}";
-      separator = ",\n";
+    else {
+      return op;
     }
+  }
 
-    void export_distribution_to_jani(const lps::stochastic_distribution& dist,
-                                     const data::assignment_list& assignments,
-                                     const data::variable_list& parameters,
-                                     std::ostream& out,
-                                     const std::string& indent,
-                                     data_structures& d)
+  /**
+   * Converts the given data expression into a corresponding JSON value in line with the JANI Expression schema.
+   *
+   * \param e_in the to-be converted expression.
+   * \return A JSON value corresponding to the expression.
+   */
+  value convert_data_expression(const data::data_expression& e_in) const
+  {
+    const data::data_expression e = m_data_structures->rewriter(e_in);
+    if (is_variable(e))
     {
-      if (dist.is_defined())
-      {
-        std::string separator="";
-        d.enumerator().enumerate<enumerator_element>(
-                    dist.variables(),
-                    dist.distribution(),
-                    d.sigma(),
-                    [&](const enumerator_element& p) 
-                    {
-                      export_distribution_instance_to_jani(p, assignments, parameters, out, indent, separator, d);
-                      return false;
-                    },
-                    [](const data::data_expression& e) 
-                    { 
-                      return e == data::real_zero(); 
-                    }
-        );
-        out << "\n";
-      }
-      else
-      {
-        out << indent << "{\n"
-            << indent << "  \"location\": \"l\",\n"
-            << indent << "  \"probability\": { \"exp\": 1 },\n";
-            export_assignments_to_jani(assignments, parameters, out, indent + "  ", d);
-        out << indent << "}\n";
-      }
+      return (std::string)atermpp::down_cast<data::variable>(e).name();
     }
-
-    void export_action_summands_to_jani(const lps::stochastic_action_summand_vector& action_summands,
-                                        const data::variable_list& parameters,
-                                        std::ostream& out,
-                                        const std::string& indent,
-                                        data_structures& d)
-    {
-      std::string separator;
-      for(const lps::stochastic_action_summand& s: action_summands)
-      {
-        if (!s.summation_variables().empty())
-        {
-          throw mcrl2::runtime_error("There is a summand with a non-empty sum operator. Jani does not support this. Remove the sum operator using the command lpssuminst. The problemantic summand is " + pp(s) + ".");
-        }
-        out << separator 
-            << indent << "{"
-            // << indent << "\"action\": \"" << s.multi_action() << "\",\n" TO BE INSERTED MAYBE, NOW TAU. 
-            << indent << "\"location\": \"l\",\n"
-            << indent << "\"guard\": { \"exp\": ";
-        export_data_expression_to_jani(s.condition(), out, d);
-        out << " },\n"
-            << indent << "\"destinations\":\n"
-            << indent << "[\n";
-        export_distribution_to_jani(s.distribution(), s.assignments(), parameters, out, indent + "  ", d);
-        out << "\n" << indent << "]\n"
-            << indent << "}";;
-        separator = ","; // TODO
-      }
+    else if (data::sort_pos::is_positive_constant(e) ||
+      data::sort_nat::is_natural_constant(e) ||
+      data::sort_int::is_integer_constant(e)) {
+      return std::stoi(pp(e));
     }
-
-    void export_parameter_declarations_to_jani(const data::variable_list& parameters, 
-                                               const lps::stochastic_process_initializer& initial_values,
-                                               std::ostream& out,
-                                               data_structures& d)
-    {
-      if (!parameters.empty())
-      {
-        const lps::stochastic_distribution& dist=initial_values.distribution();
-        if (!dist.variables().empty())
-        {
-          throw mcrl2::runtime_error("The initial state has a distribution. This is not allowed in Jani. "
-                                     "A solution is to add an extra action at the start. The problematic disttribution is " + pp(dist) + ".");
-        }
-        out << "  \"variables\": [ ";
-        std::string separator="";
-        data::data_expression_list::const_iterator initial_value_iterator = initial_values.expressions().begin();
-        for(const data::variable& v: parameters)
-        {
-          out << separator 
-              << "{ \"name\": \"" << v.name() << "\",\n"
-              << "                   \"type\": ";
-          export_sort_to_jani(v.sort(), out, "                           ");
-          out << ",\n";
-          export_initial_value_to_jani(*initial_value_iterator, out, "                 ", d);
-
-          out << "                    }";
-          separator = ",\n                 ";
-          initial_value_iterator++;
-        }
-        out << "\n               ],\n";
-      }
-    }
-
-    void export_specification_to_jani(const lps::stochastic_specification& spec, 
-                                      std::ostream& out,
-                                      const std::string& input_file_name,
-                                      data_structures& d)
-    {
-      out << "{ \"jani-version\": 1,\n"
-          << "  \"name\": \"" << input_file_name << ".jani\",\n"
-          << "  \"type\": \"dtmc\",\n";
-      export_action_declarations_to_jani(spec.action_labels(), out);
-      out << "  \"features\": [ \"derived-operators\" ],\n";
-      export_parameter_declarations_to_jani(spec.process().process_parameters(), spec.initial_process(), out, d);
-
-      out << "  \"properties\": [],\n"
-          << "  \"automata\":\n"
-          << "  [ {\n"
-          << "      \"name\": \"" << input_file_name << "\",\n"
-          << "      \"locations\": [ { \"name\": \"l\" }],\n"
-          << "      \"initial-locations\": [\"l\"],\n"
-          << "      \"edges\":\n"
-          << "      [\n";
-      export_action_summands_to_jani(spec.process().action_summands(),
-                                     spec.process().process_parameters(),
-                                     out,
-                                     "       ",
-                                     d);
-      out << "      ]\n"
-          << "    }\n"
-          << "  ],\n"
-          << "  \"system\":\n"
-          << "  {\n"
-          << "    \"elements\": [ { \"automaton\": \"" << input_file_name << "\" } ]\n"
-          << "  }\n" 
-          << "}\n";
-    }
-
-    bool run() override
-    {
-      lps::stochastic_specification stochastic_lpsspec;
-      lps::load_lps(stochastic_lpsspec, input_filename());
-      data_structures d(stochastic_lpsspec);
-      // boost::property_tree::ptree p; Boost property tree does not work. 
-      // Use BOOST.json, but it is only available in Boost 1.79.
-
-      if (output_filename().empty())
-      {
-        export_specification_to_jani(stochastic_lpsspec, std::cout, input_filename(),d);
-      }
-      else
-      {
-        std::ofstream output_file(output_filename(), std::ofstream::out);
-        export_specification_to_jani(stochastic_lpsspec, output_file, input_filename(), d);
-      }
+    else if (data::sort_bool::is_true_function_symbol(e)) {
       return true;
     }
+    else if (data::sort_bool::is_false_function_symbol(e)) {
+      return false;
+    }
+    else if (data::sort_bool::is_not_application(e))
+    {
+      const data::application& appl = atermpp::down_cast<data::application>(e);
+      return object{
+        {"op", "¬"},
+        {"exp", convert_data_expression(appl[0])}
+      };
+    }
+    else if (is_greater_application(e)) // > is not supported within jani, and thus should be flipped
+    {
+      const data::application& appl = atermpp::down_cast<data::application>(e);
+      return object{
+        {"left", convert_data_expression(appl[1])},
+        {"op", "<"},
+        {"right", convert_data_expression(appl[0])}
+      };
+    }
+    else if (is_greater_equal_application(e)) // >= is not supported within jani, and thus should be flipped
+    {
+      const data::application& appl = atermpp::down_cast<data::application>(e);
+      return object{
+        {"left", convert_data_expression(appl[1])},
+        {"op", "≤"},
+        {"right", convert_data_expression(appl[0])}
+      };
+    }
+    else if (data::sort_bool::is_implies_application(e)) {
+      const data::application& appl = atermpp::down_cast<data::application>(e);
+      return object{
+        {"op", "ite"},
+        {"if", convert_data_expression(appl[0])},
+        {"then", convert_data_expression(appl[1])},
+        {"else", "true"}
+      };
+    }
+    else if (data::sort_real::is_floor_application(e) ||
+      data::sort_real::is_ceil_application(e))
+    {
+      const data::application& appl = atermpp::down_cast<data::application>(e);
+      return object{
+        {"op", pp(appl.head())},
+        {"exp", convert_data_expression(appl[0])}
+      };
+    }
+    else if (data::is_application(e) && e.size() == 3) {
+      const data::application& appl = atermpp::down_cast<data::application>(e);
+      return object{
+        {"left", convert_data_expression(appl[0])},
+        {"op", convert_operator_to_jani(appl.head())},
+        {"right", convert_data_expression(appl[1])}
+      };
+    }
+    else
+    {
+      throw mcrl2::runtime_error("Jani only supports expressions true, false and numbers. "
+        "It does not support the main operator in the expression " + pp(e) + ".");
+    }
+  }
+
+  /**
+   * \brief Converts the given sort expression into a corresponding JSON value in line with the JANI Type schema.
+   *
+   * \param sort to-be converted sort.
+   * \return A JSON value corresponding to the sort.
+   */
+  value convert_sort_expression(const data::sort_expression& sort) const
+  {
+    if (data::sort_bool::is_bool(sort))
+    {
+      return "bool";
+    }
+    else if (data::sort_int::is_int(sort))
+    {
+      return "int";
+    }
+    else if (data::sort_nat::is_nat(sort))
+    {
+      return object{
+        { "base", "int" },
+        {"kind", "bounded"},
+        {"lower-bound", 0}
+      };
+    }
+    else if (data::sort_pos::is_pos(sort))
+    {
+      return object{
+        {"base", "int"},
+        {"kind", "bounded"},
+        {"lower-bound", 1}
+      };
+    }
+    else
+    {
+      throw mcrl2::runtime_error("Jani only supports sorts bool, int, nat and pos. "
+        "It does not support sort " + pp(sort) + ".");
+    }
+  }
+
+  /**
+   * \brief Converts the given assignment list into a sorresponding JSON array of assignments.
+   * Assignments use the following schema:
+   *  {"ref": LValue,
+   *   "value": Expression
+   *  }
+   *
+   * \param assignments the to-be converted assignments list.
+   * \return A json array corresponding to \ref assignements.
+   */
+  array convert_assignments(const data::assignment_list& assignments) const
+  {
+    array assignments_as_array;
+    for (const data::assignment& ass : assignments)
+    {
+      assignments_as_array.push_back(object{
+        {"ref", (std::string)ass.lhs().name()},
+        {"value", convert_data_expression(ass.rhs())}
+        });
+    }
+    return assignments_as_array;
+  }
+
+  /**
+   * \brief Converts the given enumerator element and combines it with the given assingnments into a corresponding JSON object.
+   *
+   * \param p the to-be converted enumerator element.
+   * \param assignments a converted list of assignments.
+   * \return The corresponding JSON object.
+   */
+  object export_distribution_instance_to_jani(const enumerator_element& p,
+    const array& assignments) const
+  {
+    return object{
+      {"location", "l"},
+      {"probability", object{{"exp", convert_data_expression(p.expression())}} },
+      {"assignments", assignments}
+    };
+  }
+
+  /**
+   * \brief Converts the given stochastic distribution and assignments into a corresponding JSON array of destinations.
+   * The array contains only a single elements if the distribution is not defined.
+   *
+   * \param dist the to-be converted distribution.
+   * \param assignments the to-be converted assignments.
+   * \return The corresponding JSON array.
+   */
+  array export_distribution_to_jani(const lps::stochastic_distribution& dist,
+    const data::assignment_list& assignments) const
+  {
+    const array assignments_JANI = convert_assignments(assignments);
+    if (dist.is_defined())
+    {
+      array destinations;
+      m_data_structures->enumerator().enumerate<enumerator_element>(
+        dist.variables(),
+        dist.distribution(),
+        m_data_structures->sigma(),
+        [&](const enumerator_element& p)
+        {
+          destinations.push_back(export_distribution_instance_to_jani(p, assignments_JANI));
+      return false;
+        },
+        [](const data::data_expression& e)
+        {
+          return e == data::real_zero();
+        });
+      return destinations;
+    }
+    else
+    {
+      return array{ object{
+        {"location", "l"},
+        {"probability", object{ {"exp", 1} }},
+        {"assignments", assignments_JANI}
+        } };
+    }
+  }
+
+  /**
+   * \brief Converts the given action summands to a JSON array of corresponding edges.
+   * Edges use the following schema:
+   *  {"location": "l",
+   *   "guard": {"exp": Expression},
+   *   "destinations": Destination (see \ref export_distribution_to_jani)
+   *  }
+   *
+   * \param action_summands the to-be converted action summands.
+   * \return A JSON array corresponding to \ref action_summands.
+   */
+  array convert_action_summands(const lps::stochastic_action_summand_vector& action_summands) const
+  {
+    array edges;
+    for (const lps::stochastic_action_summand& s : action_summands)
+    {
+      if (!s.summation_variables().empty())
+      {
+        throw mcrl2::runtime_error("There is a summand with a non-empty sum operator. Jani does not support this. Remove the sum operator using the command lpssuminst. The problemantic summand is " + pp(s) + ".");
+      }
+      edges.push_back(object{
+        {"location", "l"},
+        {"guard", object({{"exp", convert_data_expression(s.condition())}})},
+        {"destinations", export_distribution_to_jani(s.distribution(), s.assignments())}
+        });
+    }
+    return edges;
+  }
+
+  /**
+   * \brief Converts the given process parameters to a JSON array of variable declaration in line with the JANI VariableDeclaration schema.
+   *
+   * \param parameters the to-be converted list of process parameters.
+   * \param initial_values the initial values of the process parameters.
+   * \return A JSON array corresponding to \ref parameters and \ref initial_values.
+   *
+   * \throw mcrl2::runtime_error if the initial state has a distribution, as this is not allowed in JANI.
+   */
+  array convert_parameters(const data::variable_list& parameters,
+    const lps::stochastic_process_initializer& initial_values) const
+  {
+    if (const lps::stochastic_distribution& dist = initial_values.distribution();
+      !dist.variables().empty())
+    {
+      throw mcrl2::runtime_error("The initial state has a distribution. This is not allowed in Jani. "
+        "A solution is to add an extra action at the start. The problematic distribution is " + pp(dist) + ".");
+    }
+    array variables;
+    auto initial_value_iterator = initial_values.expressions().begin();
+    for (const data::variable& v : parameters)
+    {
+      variables.push_back(object{
+        {"name", (std::string)v.name()},
+        {"type", convert_sort_expression(v.sort())},
+        {"initial-value", convert_data_expression(*initial_value_iterator) }
+        });
+      initial_value_iterator++;
+    }
+    return variables;
+  }
+
+  /**
+   * \brief Converts the given stochastic specification into a JSON object corresponding to the JANI schema.
+   *
+   * \param spec the to-be converted stochastic specification.
+   * \param input_file_name the file name of the specification.
+   * \return A JSON object corresponding to \ref spec.
+   */
+  object export_specification_to_jani(const lps::stochastic_specification& spec,
+    const std::string& input_file_name) const
+  {
+    return object({
+      {"jani-version", 1},
+      {"name", input_file_name + ".jani"},
+      {"type", "dtmc"},
+      {"actions", convert_action_declarations(spec.action_labels())},
+      {"features", array{ "derived-operators" }},
+      {"variables", convert_parameters(spec.process().process_parameters(), spec.initial_process())},
+      {"properties", array{}},
+      {"automata", array{object{
+        {"name", input_file_name},
+        {"locations", array{ object{{"name", "l"}} } },
+        {"initial-locations", array{"l"}},
+        {"edges", convert_action_summands(spec.process().action_summands()) }
+        }}},
+      {"system", object{
+        {"elements", array{
+          object{ {"automaton", input_file_name} }
+          }}
+        }}
+      });
+  }
+
+public:
+  bool run() override
+  {
+    lps::stochastic_specification stochastic_lpsspec;
+    lps::load_lps(stochastic_lpsspec, input_filename());
+    m_data_structures = std::make_unique<data_structures>(stochastic_lpsspec);
+    object jani = export_specification_to_jani(stochastic_lpsspec, input_filename());
+    if (output_filename().empty())
+    {
+      std::cout << jani;
+    }
+    else
+    {
+      std::ofstream output_file(output_filename(), std::ofstream::out);
+      output_file << jani;
+    }
+    return true;
+  }
 
 };
 
-std::unique_ptr<lps2jani_tool> tool_instance;
 
 int main(int argc, char** argv)
 {
-  tool_instance = std::make_unique<lps2jani_tool>();
-  return tool_instance->execute(argc, argv);
+  return lps2jani_tool().execute(argc, argv);
 }
