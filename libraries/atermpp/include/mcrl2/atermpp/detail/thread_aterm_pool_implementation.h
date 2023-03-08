@@ -22,83 +22,121 @@ namespace atermpp
 namespace detail
 {
 
-function_symbol thread_aterm_pool::create_function_symbol(const std::string& name, const std::size_t arity, const bool check_for_registered_functions)
-{
-  lock_shared();
-  function_symbol symbol = m_pool.create_function_symbol(name, arity, check_for_registered_functions);
-  unlock_shared();
-  return symbol;
-}
-
 function_symbol thread_aterm_pool::create_function_symbol(std::string&& name, const std::size_t arity, const bool check_for_registered_functions)
 {
-  lock_shared();
-  function_symbol symbol = m_pool.create_function_symbol(std::forward<std::string>(name), arity, check_for_registered_functions);
-  unlock_shared();
-  return symbol;
+  try
+  {
+    lock_shared();
+    function_symbol symbol = m_pool.create_function_symbol(std::move(name), arity, check_for_registered_functions);
+    unlock_shared();
+    return symbol;
+  }
+  catch (...)
+  {
+    unlock_shared();
+    throw;
+  }
+}
+
+function_symbol thread_aterm_pool::create_function_symbol(const std::string& name, const std::size_t arity, const bool check_for_registered_functions)
+{
+  std::string name_copy = name;
+  return create_function_symbol(std::move(name_copy), arity, check_for_registered_functions);
 }
 
 void thread_aterm_pool::create_int(aterm& term, size_t val)
 {
   lock_shared();
-  bool added = m_pool.create_int(term, val);
-  unlock_shared();
-  if (added) { m_pool.created_term(m_lock_depth == 0, this); }
+  try
+  {
+    bool added = m_pool.create_int(term, val);
+    unlock_shared();
+    if (added) { m_pool.created_term(m_lock_depth == 0, this); }
+  }
+  catch (...)
+  {
+    unlock_shared();
+    throw;
+  }
 }
 
 void thread_aterm_pool::create_term(aterm& term, const atermpp::function_symbol& sym)
 {
   lock_shared();
-  bool added = m_pool.create_term(term, sym);
-  unlock_shared();
-  if (added) { m_pool.created_term(m_lock_depth == 0, this); }
+  try
+  {
+    bool added = m_pool.create_term(term, sym);
+    unlock_shared();
+    if (added) { m_pool.created_term(m_lock_depth == 0, this); }
+  }
+  catch (...)
+  {
+    unlock_shared();
+    throw;
+  }
 }
 
 template<class ...Terms>
 void thread_aterm_pool::create_appl(aterm& term, const function_symbol& sym, const Terms&... arguments)
 {
   lock_shared();
-  bool added = m_pool.create_appl(term, sym, arguments...);
-  unlock_shared();
-  if (added) { m_pool.created_term(m_lock_depth == 0, this); }
+  try
+  {
+    bool added = m_pool.create_appl(term, sym, arguments...);
+    unlock_shared();
+    if (added) { m_pool.created_term(m_lock_depth == 0, this); }
+  }
+  catch (...)
+  {
+    unlock_shared();
+    throw;
+  }
 }
 
 template<class Term, class INDEX_TYPE, class ...Terms>
 void thread_aterm_pool::create_appl_index(aterm& term, const function_symbol& sym, const Terms&... arguments)
 {
   lock_shared();
-
-  std::array<unprotected_aterm, sizeof...(arguments)> argument_array;
-  store_in_argument_array(argument_array, arguments...);
-
-  bool added;
-  if constexpr (sizeof...(arguments)==1)
+  try
   {
-    /* Code below is more elegant than succeeding code, but it unnecessarily copies and protects a term.
-       m_pool.create_int(term, atermpp::detail::index_traits<Term, INDEX_TYPE, 1>::
-           insert(static_cast<INDEX_TYPE>(static_cast<aterm>(address(argument_array[0]))))); */
-    m_pool.create_int(term, 
-                      atermpp::detail::index_traits<Term, INDEX_TYPE, 1>::
-                               insert(*reinterpret_cast<INDEX_TYPE*>(&(argument_array[0]))));
-    added = m_pool.create_appl(term, sym, argument_array[0], term);
+
+    std::array<unprotected_aterm, sizeof...(arguments)> argument_array;
+    store_in_argument_array(argument_array, arguments...);
+
+    bool added;
+    if constexpr (sizeof...(arguments)==1)
+    {
+      /* Code below is more elegant than succeeding code, but it unnecessarily copies and protects a term.
+         m_pool.create_int(term, atermpp::detail::index_traits<Term, INDEX_TYPE, 1>::
+             insert(static_cast<INDEX_TYPE>(static_cast<aterm>(address(argument_array[0]))))); */
+      m_pool.create_int(term, 
+                        atermpp::detail::index_traits<Term, INDEX_TYPE, 1>::
+                                 insert(*reinterpret_cast<INDEX_TYPE*>(&(argument_array[0]))));
+      added = m_pool.create_appl(term, sym, argument_array[0], term);
+    }
+    else
+    {
+      /* Code below is more elegant than the actual succeeding code, but it unnecessarily creates an extra pair, which is costly. 
+         m_pool.create_int(
+           term,
+           atermpp::detail::index_traits<Term, INDEX_TYPE, 2>::
+             insert(std::make_pair(static_cast<typename INDEX_TYPE::first_type>(static_cast<aterm>(address(argument_array[0]))),
+                                   static_cast<typename INDEX_TYPE::second_type>(static_cast<aterm>(address(argument_array[1])))))); */
+      m_pool.create_int(term,
+                        atermpp::detail::index_traits<Term, INDEX_TYPE, 2>::
+                                 insert(*reinterpret_cast<INDEX_TYPE*>(&argument_array[0])));
+      added = m_pool.create_appl(term, sym, argument_array[0], argument_array[1], term);
+    }
+
+    unlock_shared();
+
+    if (added) { m_pool.created_term(m_lock_depth == 0, this); }
   }
-  else
+  catch (...)
   {
-    /* Code below is more elegant than the actual succeeding code, but it unnecessarily creates an extra pair, which is costly. 
-       m_pool.create_int(
-         term,
-         atermpp::detail::index_traits<Term, INDEX_TYPE, 2>::
-           insert(std::make_pair(static_cast<typename INDEX_TYPE::first_type>(static_cast<aterm>(address(argument_array[0]))),
-                                 static_cast<typename INDEX_TYPE::second_type>(static_cast<aterm>(address(argument_array[1])))))); */
-    m_pool.create_int(term,
-                      atermpp::detail::index_traits<Term, INDEX_TYPE, 2>::
-                               insert(*reinterpret_cast<INDEX_TYPE*>(&argument_array[0])));
-    added = m_pool.create_appl(term, sym, argument_array[0], argument_array[1], term);
+    unlock_shared();
+    throw;
   }
-
-  unlock_shared();
-
-  if (added) { m_pool.created_term(m_lock_depth == 0, this); }
 }
 
 template<typename InputIterator>
@@ -108,10 +146,18 @@ void thread_aterm_pool::create_appl_dynamic(aterm& term,
                             InputIterator end)
 {
   lock_shared();  
-  bool added = m_pool.create_appl_dynamic(term, sym, begin, end);
-  unlock_shared();
-  
-  if (added) { m_pool.created_term(m_lock_depth == 0, this); }
+  try
+  {
+    bool added = m_pool.create_appl_dynamic(term, sym, begin, end);
+    unlock_shared();
+    
+    if (added) { m_pool.created_term(m_lock_depth == 0, this); }
+  }
+  catch (...)
+  {
+    unlock_shared();
+    throw;
+  }
 }
 
 template<typename InputIterator, typename ATermConverter>
@@ -122,10 +168,18 @@ void thread_aterm_pool::create_appl_dynamic(aterm& term,
                             InputIterator end)
 {
   lock_shared();
-  bool added = m_pool.create_appl_dynamic(term, sym, convert_to_aterm, begin, end);
-  unlock_shared();
+  try
+  {
+    bool added = m_pool.create_appl_dynamic(term, sym, convert_to_aterm, begin, end);
+    unlock_shared();
 
-  if (added) { m_pool.created_term(m_lock_depth == 0, this); }
+    if (added) { m_pool.created_term(m_lock_depth == 0, this); }
+  }
+  catch (...)
+  {
+    unlock_shared();
+    throw;
+  }
 }
 
 void thread_aterm_pool::register_variable(aterm* variable)
@@ -133,28 +187,44 @@ void thread_aterm_pool::register_variable(aterm* variable)
   if constexpr (EnableVariableRegistrationMetrics) { ++m_variable_insertions; }
 
   lock_shared();
-    
-  /* Resizing of the protection set should not interfere with garbage collection and rehashing */
-  if (m_variables->must_resize())
+  try
   {
-    m_variables->resize();
+      
+    /* Resizing of the protection set should not interfere with garbage collection and rehashing */
+    if (m_variables->must_resize())
+    {
+      m_variables->resize();
+    }
+
+    auto [it, inserted] = m_variables->insert(variable);
+
+    // The variable must be inserted.
+    assert(inserted);
+    mcrl2::utilities::mcrl2_unused(it);
+    mcrl2::utilities::mcrl2_unused(inserted);
+
+    unlock_shared();
   }
-
-  auto [it, inserted] = m_variables->insert(variable);
-
-  // The variable must be inserted.
-  assert(inserted);
-  mcrl2::utilities::mcrl2_unused(it);
-  mcrl2::utilities::mcrl2_unused(inserted);
-
-  unlock_shared();
+  catch (...)
+  {
+    unlock_shared();
+    throw;
+  }
 }
 
 void thread_aterm_pool::deregister_variable(aterm* variable)
 {
   lock_shared();
-  m_variables->erase(variable);
-  unlock_shared();
+  try
+  {
+    m_variables->erase(variable);
+    unlock_shared();
+  }
+  catch (...)
+  {
+    unlock_shared();
+    throw;
+  }
 }
 
 void thread_aterm_pool::register_container(_aterm_container* container)
@@ -162,25 +232,41 @@ void thread_aterm_pool::register_container(_aterm_container* container)
   if constexpr (EnableVariableRegistrationMetrics) { ++m_container_insertions; }
 
   lock_shared();
-
-  if (m_containers->must_resize())
+  try
   {
-    m_containers->resize();
+  
+    if (m_containers->must_resize())
+    {
+      m_containers->resize();
+    }
+    auto [it, inserted] = m_containers->insert(container);
+  
+    // The container must be inserted.
+    assert(inserted);
+    mcrl2::utilities::mcrl2_unused(it);
+    mcrl2::utilities::mcrl2_unused(inserted);
+    unlock_shared();
   }
-  auto [it, inserted] = m_containers->insert(container);
-
-  // The container must be inserted.
-  assert(inserted);
-  mcrl2::utilities::mcrl2_unused(it);
-  mcrl2::utilities::mcrl2_unused(inserted);
-  unlock_shared();
+  catch (...)
+  {
+    unlock_shared();
+    throw;
+  }
 }
 
 void thread_aterm_pool::deregister_container(_aterm_container* container)
 {
   lock_shared();
-  m_containers->erase(container);
-  unlock_shared();
+  try
+  {
+    m_containers->erase(container);
+    unlock_shared();
+  }
+  catch (...)
+  {
+    unlock_shared();
+    throw;
+  }
 }
 
 void thread_aterm_pool::mark()
