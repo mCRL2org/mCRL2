@@ -740,6 +740,7 @@ class explorer: public abortable
                         data::is_false
                       );
           }
+          summand.compute_key(key, sigma);
           q = cache.insert({key, solutions}).first;
         }
 
