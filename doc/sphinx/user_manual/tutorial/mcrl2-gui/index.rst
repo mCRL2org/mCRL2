@@ -91,7 +91,7 @@ the curvature of transitions.
 Another tool that works on labelled transition systems, is :ref:`tool-ltsconvert`.
 This is a very versatile tool to translate various
 representations of labelled transitions systems to each other (e.g. the
-``.aut``, ``.svc`` and ``.fsm`` formats). Moreover, it can apply strong,
+``.aut``, ``.lts`` and ``.fsm`` formats). Moreover, it can apply strong,
 branching and trace equivalence reductions on the transition systems. Let's
 apply *ltsconvert* to ``abp.lps2lts00.lts``. Set the branching bisimulation
 reduction option, and generate the reduced transition system (``abp.aut``). Note

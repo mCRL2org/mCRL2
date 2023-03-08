@@ -212,11 +212,11 @@ all adventurers to cross the bridge.
   Generate the state space of your model by executing the
   following command::
 
-  $ lps2lts bridge.lps bridge.svc
+  $ lps2lts bridge.lps bridge.lts
 
   The state space can be viewed using the LTSGraph tool::
 
-  $ ltsgraph bridge.svc
+  $ ltsgraph bridge.lts
 
   An alternative, 3D view of the state space can be given by LTSView::
 

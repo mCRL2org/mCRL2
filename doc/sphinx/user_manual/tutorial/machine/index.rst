@@ -234,12 +234,12 @@ A visualization of the specified system can be obtained by first
 converting the linear process into a labeled transition system (in
 so-called SVC-format) by::
 
-  $  lps2lts vm02.lps vm02.svc
+  $  lps2lts vm02.lps vm02.lts
 
-and next loading the SVC file :file:`vm02.svc` into the ltsgraph tool
+and next loading the SVC file :file:`vm02.lts` into the ltsgraph tool
 by::
 
-  $  ltsgraph vm02.svc
+  $  ltsgraph vm02.lts
 
 The LTS can be beautified (a bit) using the ``start`` button in the
 optimization panel of the user interface. Manual manipulation by
@@ -283,7 +283,7 @@ compare your model under branching bisimilarity with the LTS of the system
 :file:`vm02-taus`, after hiding the actions ``readyA``, ``readyC``, ``out10``,
 ``out20``, ``prod`` using the following command::
 
-  $ ltscompare -ebranching-bisim --tau=out10,out20,readyA,readyC,prod vm02.svc vm02-taus.svc
+  $ ltscompare -ebranching-bisim --tau=out10,out20,readyA,readyC,prod vm02.lts vm02-taus.lts
 
 .. note::
 
@@ -293,11 +293,11 @@ compare your model under branching bisimilarity with the LTS of the system
 Using :ref:`tool-ltsconvert`, the LTS for :file:`vm02.mcrl2` can be minimized
 with respect to branching bisimulation after hiding the readies and returns::
 
-  $ ltsconvert -ebranching-bisim --tau=out10,out20,readyA,readyC,prod vm02.svc vm02min.svc
+  $ ltsconvert -ebranching-bisim --tau=out10,out20,readyA,readyC,prod vm02.lts vm02min.lts
 
 .. admonition:: Exercise
 
-   Compare the LTSs :file:`vm02min.svc` and `vm02-taus.svc` visually using
+   Compare the LTSs :file:`vm02min.lts` and `vm02-taus.lts` visually using
    :ref:`tool-ltsgraph`.
 
 Third variation

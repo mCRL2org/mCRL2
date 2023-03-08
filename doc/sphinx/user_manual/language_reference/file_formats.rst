@@ -15,10 +15,8 @@ This page lists all file formats supported by the mCRL2 toolset.
   LPS          .lps        binary   :ref:`language-lps`
   PBES	       .pbes       binary   :ref:`language-pbes`
   BES          .bes        binary   :ref:`language-bes`
-  CWI          .cwi        textual  boolean equation system in the CWI format
   GM           .gm         textual  parity game in the PGSolver format
   LTS          .lts        binary   labelled transition system in the :ref:`language-mcrl2-lts`
-  SVC          .svc        binary   labelled transition system in the `SVC file format <http://db.cwi.nl/rapporten/abstract.php?abstractnr=1060>`_
   AUT          .aut        textual  labelled transition system in the :ref:`language-aut-lts`
   FSM          .fsm        textual  labelled transition system in the :ref:`language-fsm-lts`
   trace        .trc        binary   trace for simulation
