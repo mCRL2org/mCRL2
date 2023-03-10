@@ -20,7 +20,7 @@
 
 #include <unordered_map>
 #include "mcrl2/atermpp/detail/aterm_container.h"
-#include "mcrl2/atermpp/detail/shared_guard.h"
+#include "mcrl2/utilities/shared_mutex.h"
 
 /// \brief The main namespace for the aterm++ library.
 namespace atermpp
@@ -126,199 +126,199 @@ public:
 
   void clear() noexcept
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     super::clear();
   }
 
   /// \brief Inserts an element referring to a default value in the map. 
   std::pair<iterator,bool> insert( const value_type& value )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::insert(value);
   }
 
   template< class P >
   std::pair<iterator,bool> insert( P&& value )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::insert(value); 
   }
 
   iterator insert( const_iterator hint, const value_type& value )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::insert(hint, value);
   }
 
   template< class P >
   iterator insert( const_iterator hint, P&& value )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::insert(hint, value);
   }
 
   template< class InputIt >
   void insert( InputIt first, InputIt last )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     super::insert(first, last);
   }
 
   void insert( std::initializer_list<value_type> ilist )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     super::insert(ilist);
   }
 
   insert_return_type insert( node_type&& nh )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::insert(nh);
   }
 
   iterator insert( const_iterator hint, node_type&& nh )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::insert(hint, nh);
   }
 
   template <class M>
   std::pair<iterator, bool> insert_or_assign( const Key& k, M&& obj )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::insert_or_assign(k, obj);
   }
 
   template <class M>
   std::pair<iterator, bool> insert_or_assign( Key&& k, M&& obj )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::insert_or_assign(k, obj);
   }
 
   template <class M>
   iterator insert_or_assign( const_iterator hint, const Key& k, M&& obj )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::insert_or_assign(hint, k, obj); 
   }
 
   template <class M>
   iterator insert_or_assign( const_iterator hint, Key&& k, M&& obj )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::insert_or_assign(hint, k, obj);   
   }
 
   template< class... Args >
   std::pair<iterator,bool> emplace( Args&&... args )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::emplace(args...);
   }
 
   template <class... Args>
   iterator emplace_hint( const_iterator hint, Args&&... args )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::emplace_hint(hint, args...);
   }
 
   template< class... Args >
   std::pair<iterator, bool> try_emplace( const Key& k, Args&&... args )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::try_emplace(k, args...);
   }
 
   template< class... Args >
   std::pair<iterator, bool> try_emplace( Key&& k, Args&&... args )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::try_emplace(k, args...);
   }
 
   template< class... Args >
   iterator try_emplace( const_iterator hint, const Key& k, Args&&... args )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::try_emplace(hint, k, args...);
   }
 
   template< class... Args >
   iterator try_emplace( const_iterator hint, Key&& k, Args&&... args )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::try_emplace(hint, k, args...);
   }
 
   iterator erase( iterator pos )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::erase(pos);
   }
 
   iterator erase( const_iterator pos )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::erase(pos);   
   }	
   
   iterator erase( const_iterator first, const_iterator last )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::erase(first, last);
   }
 
   size_type erase( const Key& key )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::erase(key);
   }
 
   void swap( unordered_map& other )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     super::swap(other);
   }
 
   node_type extract( const_iterator position )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return extract(position);
   }
   
   node_type extract( const Key& k )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return extract(k);
   }
 
   template<class H2, class P2>
   void merge( std::unordered_map<Key, T, H2, P2, allocator_type>& source )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return merge(source);
   }
 
   template<class H2, class P2>
   void merge( std::unordered_map<Key, T, H2, P2, allocator_type>&& source )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return merge(source);
   }
 
   template<class H2, class P2>
   void merge( std::unordered_multimap<Key, T, H2, P2, allocator_type>& source )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return merge(source);
   }
 
   template<class H2, class P2>
   void merge( std::unordered_multimap<Key, T, H2, P2, allocator_type>&& source )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return merge(source);
   }
 
@@ -430,7 +430,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
 
     void clear() noexcept
     {
-      detail::shared_guard _;
+      mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       super::clear();
     }
 
@@ -441,7 +441,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     { 
       if constexpr (ThreadSafe)
       {
-        detail::shared_guard _;
+        mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
         return super::find(args...); 
       }
       return super::find(args...); 
@@ -454,7 +454,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     { 
       if (ThreadSafe)
       {
-        detail::shared_guard _;
+        mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
         return super::find(args...); 
       }
       return super::find(args...); 
@@ -463,7 +463,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     std::pair<iterator, bool> insert(const value_type& value)
     {
       rehash_if_needed();
-      detail::shared_guard _;
+      mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       return super::insert(value);
     }
 
@@ -471,14 +471,14 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     std::pair<iterator, bool> insert(P&& value)
     {
       rehash_if_needed();
-      detail::shared_guard _;
+      mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       return super::insert(value);
     }
 
     iterator insert(const_iterator hint, value_type&& value)
     {
       rehash_if_needed();
-      detail::shared_guard _;
+      mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       return super::insert(hint, value);
     }
 
@@ -486,7 +486,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     iterator insert(const_iterator hint, P&& value)
     {
       rehash_if_needed();
-      detail::shared_guard _;
+      mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       return super::insert(hint, value);
     }
 
@@ -494,26 +494,26 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     void insert(InputIt first, InputIt last)
     {
       rehash_if_needed();
-      detail::shared_guard _;
+      mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       super::insert(first, last);
     }
 
     void insert(std::initializer_list<value_type> ilist)
     {
       rehash_if_needed();
-      detail::shared_guard _;
+      mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       super::insert(ilist);
     }
 
     /*insert_return_type insert(node_type&& nh)
     {
-      detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       return super::insert(nh);
     }
 
     iterator insert(const_iterator hint, node_type&& nh)
     {
-      detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       return super::insert(hint, nh);
     }*/
     
@@ -521,7 +521,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     std::pair<iterator, bool> insert_or_assign(const Key& k, M&& obj)
     {
       rehash_if_needed();
-      detail::shared_guard _;
+      mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       return super::insert_or_assign(k, obj);
     }
 
@@ -529,7 +529,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     std::pair<iterator, bool> insert_or_assign(Key&& k, M&& obj)
     {
       rehash_if_needed();
-      detail::shared_guard _;
+      mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       return super::insert_or_assign(k, obj);
     }
 
@@ -537,7 +537,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     iterator insert_or_assign(const_iterator hint, const Key& k, M&& obj)
     {
       rehash_if_needed();
-      detail::shared_guard _;
+      mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       return super::insert_or_assign(hint, k, obj);
     }
 
@@ -545,7 +545,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     iterator insert_or_assign(const_iterator hint, Key&& k, M&& obj)
     {
       rehash_if_needed();
-      detail::shared_guard _;
+      mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       return super::insert_or_assign(hint, k, obj);
     }
 
@@ -553,7 +553,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     std::pair<iterator, bool> emplace(Args&&... args)
     {
       rehash_if_needed();
-      detail::shared_guard _;
+      mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       return super::emplace(args...);
     }
 
@@ -561,7 +561,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     iterator emplace_hint(const_iterator hint, Args&&... args)
     {
       rehash_if_needed();
-      detail::shared_guard _;
+      mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       return super::emplace(hint, args...);
     }
 
@@ -569,7 +569,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     std::pair<iterator, bool> try_emplace(const Key& k, Args&&... args)
     {
       rehash_if_needed();
-      detail::shared_guard _;
+      mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       return super::try_emplace(k, args...);
     }
 
@@ -577,7 +577,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     std::pair<iterator, bool> try_emplace(Key&& k, Args&&... args)
     {
       rehash_if_needed();
-      detail::shared_guard _;
+      mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       return super::try_emplace(k, args...);
     }
 
@@ -585,7 +585,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     iterator try_emplace(const_iterator hint, const Key& k, Args&&... args)
     {
       rehash_if_needed();
-      detail::shared_guard _;
+      mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       return super::try_emplace(hint, k, args...);
     }
 
@@ -593,49 +593,49 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     iterator try_emplace(const_iterator hint, Key&& k, Args&&... args)
     {
       rehash_if_needed();
-      detail::shared_guard _;
+      mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       return super::try_emplace(hint, k, args...);
     }
 
     iterator erase(iterator pos)
     {
-      detail::shared_guard _;
+      mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       return super::erase(pos);
     }
 
     iterator erase(const_iterator pos)
     {
-      detail::shared_guard _;
+      mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       return super::erase(pos);
     }
 
     iterator erase(const_iterator first, const_iterator last)
     {
-      detail::shared_guard _;
+      mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       return super::erase(first, last);
     }
 
     size_type erase(const Key& key)
     {
-      detail::shared_guard _;
+      mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       return super::erase(key);
     }
 
     void swap(unordered_map& other)
     {
-      detail::shared_guard _;
+      mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       super::swap(other);
     }
 
     /*node_type extract(const_iterator position)
     {
-      detail::shared_guard _;
+      mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       return extract(position);
     }
 
     node_type extract(const Key& k)
     {
-      detail::shared_guard _;
+      mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       return extract(k);
     }*/
 
@@ -643,28 +643,28 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     template<class H2, class P2>
     void merge(std::unordered_map<Key, T, H2, P2, allocator_type>& source)
     {
-      detail::shared_guard _;
+      mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       return merge(source);
     }
 
     template<class H2, class P2>
     void merge(std::unordered_map<Key, T, H2, P2, allocator_type>&& source)
     {
-      detail::shared_guard _;
+      mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       return merge(source);
     }
 
     template<class H2, class P2>
     void merge(std::unordered_multimap<Key, T, H2, P2, allocator_type>& source)
     {
-      detail::shared_guard _;
+      mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       return merge(source);
     }
 
     template<class H2, class P2>
     void merge(std::unordered_multimap<Key, T, H2, P2, allocator_type>&& source)
     {
-      detail::shared_guard _;
+      mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       return merge(source);
     }
     */

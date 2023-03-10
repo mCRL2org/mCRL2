@@ -10,23 +10,16 @@
 #ifndef MCRL2_UTILITIES_CONFIGURATION_H
 #define MCRL2_UTILITIES_CONFIGURATION_H
 
-namespace mcrl2
-{
-namespace utilities
-{
-namespace detail
+namespace mcrl2::utilities::detail
 {
 
-/// \brief Enables thread safety for the global term and function symbol pools.
-/// Outcomment to compile the toolset without thread safe features. 
-/// This is a define, because it is used to determine whether data structures are
-/// determined via the keyword thread_local or via static. 
-//#define MCRL2_THREAD_SAFE
+/// Enables thread safety for the whole toolset.
+#ifdef MCRL2_THREAD_SAFE 
+  constexpr static bool GlobalThreadSafe = true;
+#else
+  constexpr static bool GlobalThreadSafe = false;
+#endif 
 
-} // namespace detail
-
-} // namespace utilities
-
-} // namespace mcrl2
+}
 
 #endif // MCRL2_UTILITIES_CONFIGURATION_H
