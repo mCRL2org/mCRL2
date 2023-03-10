@@ -7,6 +7,8 @@ nodes:
     type: lts
   l4:
     type: lts
+  l5:
+    type: lts
 
 tools:
   t1:
@@ -23,13 +25,23 @@ tools:
     input: [l2]
     output: [l4]
     args: ['--threads=8']
-    name: lps2lts
+    name: lps2lts  
   t4:
+    input: [l2]
+    output: [l5]
+    args: ['--threads=8', '--cached']
+    name: lps2lts
+  t5:
     input: [l3, l4]
+    output: []
+    args: ['-ebisim']
+    name: ltscompare 
+  t6:
+    input: [l3, l5]
     output: []
     args: ['-ebisim']
     name: ltscompare 
 
 result: |
-  result = t4.value['result']
+  result = t5.value['result'] == t6.value['result']
 
