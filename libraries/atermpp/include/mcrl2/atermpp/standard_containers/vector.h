@@ -20,7 +20,7 @@
 
 #include <vector>
 #include "mcrl2/atermpp/detail/aterm_container.h"
-#include "mcrl2/atermpp/detail/shared_guard.h"
+#include "mcrl2/utilities/shared_mutex.h"
 
 /// \brief The main namespace for the aterm++ library.
 namespace atermpp
@@ -116,31 +116,31 @@ public:
   
   void shrink_to_fit()
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     super::shrink_to_fit();
   }
 
   void clear() noexcept
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     super::clear();
   }
 
   iterator insert( const_iterator pos, const T& value )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::insert(pos, value);
   }
 
   iterator insert( const_iterator pos, T&& value )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::insert(pos, value);
   }
   
   iterator insert( const_iterator pos, size_type count, const T& value )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::insert(pos, count, value);
   }
     
@@ -148,75 +148,75 @@ public:
   iterator insert( const_iterator pos,
                   InputIt first, InputIt last )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::insert(pos, first, last);  
   }
     
   iterator insert( const_iterator pos, std::initializer_list<T> ilist )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::insert(pos, ilist);
   }
   
   template< class... Args >
   iterator emplace( const_iterator pos, Args&&... args )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::emplace(pos, args...);   
   }
 
   iterator erase( const_iterator pos )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::erase(pos);
   }
 
   iterator erase( const_iterator first, const_iterator last )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::erase(first, last);
   }
 
   void push_back( const T& value )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     super::push_back(value);
   }
 
   void push_back( T&& value )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     super::push_back(value);
   }
 
   template< class... Args >
   reference emplace_back( Args&&... args )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::emplace_back(args...);  
   }
 
   void pop_back()
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     super::pop_back();
   }
 
   void resize( size_type count )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     super::resize(count);
   }
 
   void resize( size_type count, const value_type& value )
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     super::resize(count, value);
   }
 
   void swap( vector& other ) noexcept
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     super::swap(other); // Invalidates end() so must be protected.
   }
 

@@ -80,7 +80,7 @@ public:
   static inline
   std::size_t insert(const KeyType& x)
   {
-    if constexpr (atermpp::detail::GlobalThreadSafe) { variable_mutex<Variable, KeyType>().lock(); }
+    if constexpr (mcrl2::utilities::detail::GlobalThreadSafe) { variable_mutex<Variable, KeyType>().lock(); }
 
     auto& m = variable_index_map<Variable, KeyType>();
     auto i = m.find(x);
@@ -104,7 +104,7 @@ public:
     {
       value = i->second;
     }
-    if constexpr (atermpp::detail::GlobalThreadSafe) { variable_mutex<Variable, KeyType>().unlock(); }
+    if constexpr (mcrl2::utilities::detail::GlobalThreadSafe) { variable_mutex<Variable, KeyType>().unlock(); }
     return value;
   }
 
@@ -113,7 +113,7 @@ public:
   static inline
   void erase(const KeyType& x)
   {
-    if constexpr (atermpp::detail::GlobalThreadSafe) { variable_mutex<Variable, KeyType>().lock(); }
+    if constexpr (mcrl2::utilities::detail::GlobalThreadSafe) { variable_mutex<Variable, KeyType>().lock(); }
 
     auto& m = variable_index_map<Variable, KeyType>();
     auto& s = variable_map_free_numbers<Variable, KeyType>();
@@ -122,7 +122,7 @@ public:
     s.push(i->second);
     m.erase(i);
 
-    if constexpr (atermpp::detail::GlobalThreadSafe) { variable_mutex<Variable, KeyType>().unlock(); }
+    if constexpr (mcrl2::utilities::detail::GlobalThreadSafe) { variable_mutex<Variable, KeyType>().unlock(); }
   }
 
   /// \brief Note: intended for internal use only!

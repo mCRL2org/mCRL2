@@ -93,9 +93,7 @@ class RewriterJitty: public Rewriter
     std::map< function_symbol, data_equation_list > jitty_eqns;
     std::vector<strategy> jitty_strat;
 
-    std::atomic<bool>* m_busy_flag = nullptr;
-    std::atomic<bool>* m_forbidden_flag = nullptr;
-    std::size_t* m_lock_depth = nullptr;
+    atermpp::detail::thread_aterm_pool* m_thread_aterm_pool; // Store an explicit reference to the thread aterm pool.
 
 
     template <class ITERATOR>
@@ -139,9 +137,7 @@ class RewriterJitty: public Rewriter
      
     void thread_initialise()
     {
-      m_busy_flag = atermpp::detail::g_thread_term_pool().get_busy_flag();
-      m_forbidden_flag = atermpp::detail::g_thread_term_pool().get_forbidden_flag();
-      m_lock_depth = atermpp::detail::g_thread_term_pool().get_lock_depth();
+      m_thread_aterm_pool = &atermpp::detail::g_thread_term_pool();
     }
 };
 

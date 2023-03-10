@@ -24,6 +24,12 @@ typedef void(*term_callback)(const aterm&);
 
 extern void add_deletion_hook(const function_symbol&, term_callback);
 
+// Forward declaration
+namespace detail
+{
+  class thread_aterm_pool;
+}
+
 /// \brief An unprotected term does not change the reference count of the
 ///        shared term when it is copied or moved.
 class unprotected_aterm
@@ -214,9 +220,7 @@ public:
   //          which is as it stands relatively expensive. The effect is equal to the assignment operator =. 
   /// \param other The aterm that will be assigned.
   aterm& assign(const aterm& other,
-                std::atomic<bool>* busy_flag,
-                std::atomic<bool>* forbidden_flag,
-                std::size_t* lock_depth) noexcept;
+                detail::thread_aterm_pool& pool) noexcept;
 
   /// \brief Assignment operator, to be used when the busy flags do not need to be set.
   /// \details This is only safe in the parallel context when the busy flag is already

@@ -86,39 +86,35 @@ void aterm_pool::add_deletion_hook(function_symbol sym, term_callback callback)
   }
 }
 
-void aterm_pool::collect()
+void aterm_pool::collect(mcrl2::utilities::shared_mutex& mutex)
 {
   m_count_until_collection = 0;
-  collect_impl(nullptr);   // TODO: This code looks incorrect. The collect function is only used in tests. 
+  collect_impl(mutex);
 } 
 
 void aterm_pool::register_thread_aterm_pool(thread_aterm_pool_interface& pool)
 {
-  if constexpr (GlobalThreadSafe) { m_mutex.lock(); }
 #ifdef MCRL2_THREAD_SAFE
+  std::lock_guard guard(m_mutex);
   mCRL2log(mcrl2::log::debug) << "Registered thread_local aterm pool\n";
 #endif
-  m_thread_pools.insert(m_thread_pools.end(), &pool);
 
-  if constexpr (GlobalThreadSafe) { m_mutex.unlock(); }
+  m_thread_pools.insert(m_thread_pools.end(), &pool);
 }
 
 void aterm_pool::remove_thread_aterm_pool(thread_aterm_pool_interface& pool)
 {
-  if constexpr (GlobalThreadSafe) { m_mutex.lock(); }
-
 #ifdef MCRL2_THREAD_SAFE
+  std::lock_guard guard(m_mutex);
   mCRL2log(mcrl2::log::debug) << "Removed thread_local aterm pool\n";
 #endif
+
   auto it = std::find(m_thread_pools.begin(), m_thread_pools.end(), &pool);
   if (it != m_thread_pools.end())
   {
     m_thread_pools.erase(it);  // This only removes the pointer, not the underlying data
                                // structure, which only disappears when the thread is removed. 
   }
-
-
-  if constexpr (GlobalThreadSafe) { m_mutex.unlock(); }
 }
 
 void aterm_pool::print_performance_statistics() const
@@ -135,12 +131,6 @@ void aterm_pool::print_performance_statistics() const
 
   m_appl_dynamic_storage.print_performance_stats("arbitrary_function_application_storage");
 
-#ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
-  if (mcrl2::utilities::EnableReferenceCountMetrics)
-  {
-    mCRL2log(mcrl2::log::info, "Performance") << "aterm_pool: all reference counts changed " << _aterm::reference_count_changes() << " times.\n";
-  }
-#endif
   // Print information for the local aterm pools.
   for (const thread_aterm_pool_interface* local : m_thread_pools)
   {
@@ -180,14 +170,14 @@ std::size_t aterm_pool::size() const
 
 // private
 
-void aterm_pool::created_term(bool allow_collect, thread_aterm_pool_interface* thread)
+void aterm_pool::created_term(bool allow_collect, mcrl2::utilities::shared_mutex& shared_mutex)
 {
   // Defer garbage collection when it happens too often.
   if (m_count_until_collection.load(std::memory_order_relaxed) <= 0)
   {
     if (allow_collect)
     {
-      collect_impl(thread);
+      collect_impl(shared_mutex);
     }
   }
   else
@@ -199,7 +189,7 @@ void aterm_pool::created_term(bool allow_collect, thread_aterm_pool_interface* t
   {
     if (allow_collect)
     {
-      resize_if_needed(thread);
+      resize_if_needed(shared_mutex);
     }
   }
   else
@@ -208,34 +198,19 @@ void aterm_pool::created_term(bool allow_collect, thread_aterm_pool_interface* t
   }
 }
 
-void aterm_pool::collect_impl(thread_aterm_pool_interface* thread)
+void aterm_pool::collect_impl(mcrl2::utilities::shared_mutex& shared_mutex)
 {
   if (!m_enable_garbage_collection) { return; }
 
-  lock(thread);
+  mcrl2::utilities::lock_guard guard = shared_mutex.lock();
   if (m_count_until_collection > 0)
   {
     // Another thread has performed garbage collection, so we can ignore it.
-    unlock();
     return;
   }
+
   auto timestamp = std::chrono::system_clock::now();
   std::size_t old_size = size();
-
-#ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
-  // Marks all terms that are reachable via any reachable term to
-  // not be garbage collected.
-  m_int_storage.mark();
-  std::get<0>(m_appl_storage).mark();
-  std::get<1>(m_appl_storage).mark();
-  std::get<2>(m_appl_storage).mark();
-  std::get<3>(m_appl_storage).mark();
-  std::get<4>(m_appl_storage).mark();
-  std::get<5>(m_appl_storage).mark();
-  std::get<6>(m_appl_storage).mark();
-  std::get<7>(m_appl_storage).mark();
-  m_appl_dynamic_storage.mark();
-#endif // MCRL2_ATERMPP_REFERENCE_COUNTED
 
   // Mark the terms referenced by all thread pools.
   for (const auto& pool : m_thread_pools)
@@ -298,8 +273,6 @@ void aterm_pool::collect_impl(thread_aterm_pool_interface* thread)
 
   // Use some heuristics to determine when the next collect should be called automatically.
   m_count_until_collection = size() + protection_set_size();
-
-  unlock();
 }
 
 function_symbol aterm_pool::create_function_symbol(const std::string& name, const std::size_t arity, const bool check_for_registered_functions)
@@ -399,13 +372,12 @@ bool aterm_pool::create_appl_dynamic(aterm& term,
   }
 }
 
-void aterm_pool::resize_if_needed(thread_aterm_pool_interface* thread)
+void aterm_pool::resize_if_needed(mcrl2::utilities::shared_mutex& mutex)
 {
-  lock(thread);
+  mcrl2::utilities::lock_guard guard = mutex.lock();
   if (m_count_until_resize > 0)
   {
     // Another thread has resized the tables, so we can ignore it.
-    unlock();
     return;
   }
 
@@ -437,52 +409,6 @@ void aterm_pool::resize_if_needed(thread_aterm_pool_interface* thread)
     mCRL2log(mcrl2::log::info, "Performance") << "aterm_pool: Resized hash tables from " << old_capacity << " to " << capacity() << " capacity in "
                                               << duration << " ms.\n";
   }
-
-  unlock();
-}
-
-void aterm_pool::wait()
-{
-  std::unique_lock lock(m_mutex);
-}
-
-void aterm_pool::lock(thread_aterm_pool_interface* thread)
-{
-  if constexpr (!GlobalThreadSafe) { return; }
-  assert(thread == nullptr || !thread->is_busy()); // Cannot lock when in a shared_lock section.
-
-  // Only one thread can halt everything.
-  m_mutex.lock();
-
-  // Indicate that threads must wait.
-  for (auto& pool : m_thread_pools)
-  {
-    if (pool != thread)
-    {
-      pool->set_forbidden(true);
-    }
-  }
-
-  // Wait for all pools to indicate that they are not busy.
-  for (const auto& pool : m_thread_pools)
-  {
-    if (pool != thread)
-    {
-      pool->wait_for_busy();
-    }
-  }
-}
-
-void aterm_pool::unlock()
-{
-  if constexpr (!GlobalThreadSafe) { return; }
-
-  for (auto& pool : m_thread_pools)
-  {
-    pool->set_forbidden(false);
-  }
-
-  m_mutex.unlock();
 }
 
 std::size_t aterm_pool::protection_set_size() const

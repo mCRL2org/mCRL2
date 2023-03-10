@@ -14,6 +14,7 @@
 using namespace atermpp;
 using namespace atermpp::detail;
 using namespace mcrl2::utilities;
+using namespace mcrl2::utilities::detail;
 
 function_symbol_pool::function_symbol_pool()
 {

@@ -206,31 +206,6 @@ bool ATERM_POOL_STORAGE::create_appl(aterm& term, const function_symbol& symbol,
     // Evaluate the functions or terms and put the result in "argument_array".
     store_in_argument_array(argument_array, arguments...);
 
-
-    // The code below is fine, but does not compile on GCC under certain circumstances. 
-    // Therefore it is replaced by the template function store_in_argument_array above.
-    /* 
-    int i = 0;
-    ([&] (auto& function_or_term)
-    {
-      typedef decltype(function_or_term) FUNCTION_TERM_TYPE;
-      if constexpr (std::is_convertible<FUNCTION_TERM_TYPE,atermpp::aterm>::value)
-      {
-        argument_array[i]=function_or_term;
-      }
-      // check whether the function_or_term invoked on an empty argument yields an aterm.
-      else if constexpr (mcrl2::utilities::is_applicable< FUNCTION_TERM_TYPE, void>::value)
-      {
-        argument_array[i]=function_or_term();
-      }
-      // Otherwise function_or_term is supposed to  have type void(term& result), putting the term in result. 
-      else 
-      {
-        function_or_term(static_cast<aterm&>(argument_array[i]));
-      }
-      ++i;
-    } (arguments), ...); */
-
     return emplace(term, symbol, argument_array.begin(), argument_array.end());
   }
 }
@@ -316,16 +291,9 @@ bool ATERM_POOL_STORAGE::create_appl_dynamic(aterm& term,
   for (std::size_t i = 0; i < symbol.arity(); ++i)
   {
     assert(it != end);
-#ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
-    typename InputIterator::value_type t;
-    converter(t,*it);
-    arguments[i]=t;
-#else
     // The construction below is possible as with protection sets the new term simply
-    // overwrites the object at arguments[i]. Note that with reference counts this leads
-    // to problems. 
-    converter(reinterpret_cast<typename InputIterator::value_type&>(arguments[i]),*it);
-#endif
+    // overwrites the object at arguments[i].
+    converter(reinterpret_cast<typename InputIterator::value_type&>(arguments[i]), *it);
     ++it;
   }
   assert(it == end);
@@ -354,36 +322,6 @@ void ATERM_POOL_STORAGE::print_performance_stats(const char* identifier) const
     mCRL2log(mcrl2::log::info, "Performance") << "g_term_pool(" << identifier << "): emplace() " << m_term_metric.message() << ".\n";
   }
 }
-
-#ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
-
-ATERM_POOL_STORAGE_TEMPLATES
-void ATERM_POOL_STORAGE::mark()
-{
-  for (const Element& term : m_term_set)
-  {
-    if (term.is_marked())
-    {
-      mark_term(term, todo);
-    }
-
-    for (const auto& [symbol, callback] : m_deletion_hooks)
-    {
-      if (symbol == term.function())
-      {
-        // For terms on which deletion hooks are called, ensure that all arguments are marked.
-        const _term_appl& ta = static_cast<_term_appl&>(const_cast<Element&>(term));
-        for (std::size_t i = 0; i < ta.function().arity(); ++i)
-        {
-          _aterm& argument = *detail::address(ta.arg(i));
-          mark_term(argument);
-        }
-      }
-    }
-
-  }
-}
-#endif
 
 ATERM_POOL_STORAGE_TEMPLATES
 void ATERM_POOL_STORAGE::sweep()
