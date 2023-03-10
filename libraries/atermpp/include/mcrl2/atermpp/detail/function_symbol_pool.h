@@ -71,8 +71,8 @@ private:
     _function_symbol,
     function_symbol_hasher,
     function_symbol_equals,
-    mcrl2::utilities::block_allocator<_function_symbol, 1024, GlobalThreadSafe>,
-    GlobalThreadSafe,
+    mcrl2::utilities::block_allocator<_function_symbol, 1024, mcrl2::utilities::detail::GlobalThreadSafe>,
+    mcrl2::utilities::detail::GlobalThreadSafe,
     false>;
 
   /// \brief Stores the underlying function symbols.

@@ -193,23 +193,15 @@ public:
   /// \param   target The target into which the substitution is stored. 
   void apply(const variable_type& v, 
              expression_type& target,
-             std::atomic<bool>* busy_flag,
-             std::atomic<bool>* forbidden_flag,
-             std::size_t* lock_depth)
+             atermpp::detail::thread_aterm_pool& thread_aterm_pool)
   {
     const typename substitution_type::iterator i=m_substitution.find(v);
     if (i==m_substitution.end()) // not found.
     {
-      target.assign(v,
-                    busy_flag,
-                    forbidden_flag,
-                    lock_depth);
+      target.assign(v, thread_aterm_pool);
       return;
     }
-    target.assign(i->second,
-                  busy_flag,
-                  forbidden_flag,
-                  lock_depth);
+    target.assign(i->second, thread_aterm_pool);
   }
 
   /// \brief Index operator.

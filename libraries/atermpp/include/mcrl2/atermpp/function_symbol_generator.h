@@ -55,7 +55,7 @@ public:
   /// \pre The prefix may not be empty, and it may not have trailing digits
   function_symbol_generator(const std::string& prefix)
   {
-    if constexpr (atermpp::detail::GlobalThreadSafe) function_symbol_generator_mutex().lock();
+    if constexpr (mcrl2::utilities::detail::GlobalThreadSafe) function_symbol_generator_mutex().lock();
 
     m_prefix=prefix + (generator_sequence_number()>0?std::to_string(generator_sequence_number()) + "_":"");
     generator_sequence_number()++;
@@ -68,7 +68,7 @@ public:
 
     m_initial_index = m_index;
 
-    if constexpr (atermpp::detail::GlobalThreadSafe) function_symbol_generator_mutex().unlock();
+    if constexpr (mcrl2::utilities::detail::GlobalThreadSafe) function_symbol_generator_mutex().unlock();
   }
 
   /// \brief Restores the index back to the value that was initially assigned in the constructor.
@@ -80,9 +80,9 @@ public:
 
   ~function_symbol_generator()
   {
-    if constexpr (atermpp::detail::GlobalThreadSafe) function_symbol_generator_mutex().lock();
+    if constexpr (mcrl2::utilities::detail::GlobalThreadSafe) function_symbol_generator_mutex().lock();
     detail::g_term_pool().get_symbol_pool().deregister(m_prefix);
-    if constexpr (atermpp::detail::GlobalThreadSafe) function_symbol_generator_mutex().unlock();
+    if constexpr (mcrl2::utilities::detail::GlobalThreadSafe) function_symbol_generator_mutex().unlock();
   }
 
   /// \brief Generates a unique function symbol with the given prefix followed by a number.

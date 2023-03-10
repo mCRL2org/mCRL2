@@ -26,7 +26,7 @@ namespace detail
 {
 
 /// \brief Stores the data for a function symbol (name, arity) pair.
-class _function_symbol : public mcrl2::utilities::shared_reference_counted<_function_symbol, GlobalThreadSafe>, private mcrl2::utilities::noncopyable
+class _function_symbol : public mcrl2::utilities::shared_reference_counted<_function_symbol, mcrl2::utilities::detail::GlobalThreadSafe>, private mcrl2::utilities::noncopyable
 {
 public:
   /// \brief A shared reference for this object.

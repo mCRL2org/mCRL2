@@ -9,7 +9,7 @@
 
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/detail/global_aterm_pool.h"
-#include "mcrl2/atermpp/detail/shared_guard.h"
+#include "mcrl2/utilities/shared_mutex.h"
 
 using namespace atermpp;
 using namespace atermpp::detail;
@@ -31,23 +31,13 @@ namespace atermpp::detail
 thread_aterm_pool& g_thread_term_pool()
 {
 #ifdef MCRL2_THREAD_SAFE
-  static_assert(GlobalThreadSafe); 
+  static_assert(mcrl2::utilities::detail::GlobalThreadSafe);
   thread_local thread_aterm_pool instance(g_aterm_pool_instance);
 #else 
-  static_assert(!GlobalThreadSafe); 
+  static_assert(!mcrl2::utilities::detail::GlobalThreadSafe);
   static thread_aterm_pool instance(g_aterm_pool_instance);
 #endif
   return instance;
-}
-
-shared_guard::shared_guard()
-{
-  detail::g_thread_term_pool().lock_shared();
-}
-
-shared_guard::~shared_guard()
-{    
-  detail::g_thread_term_pool().unlock_shared();
 }
 
 } // end namespace atermpp::detail
