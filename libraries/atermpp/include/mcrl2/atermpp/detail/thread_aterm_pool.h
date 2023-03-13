@@ -110,11 +110,17 @@ public:
   inline void print_local_performance_statistics() const override;
   inline std::size_t protection_set_size() const override;
 
-  // Acquire a shared lock on this thread aterm pool.
+  /// Acquire a shared lock on this thread aterm pool.
   inline mcrl2::utilities::shared_guard lock_shared() { return m_shared_mutex.lock_shared(); }
 
-  // Acquire an exclusive lock
+  /// Acquire an exclusive lock
   inline mcrl2::utilities::lock_guard lock() { return m_shared_mutex.lock(); }
+
+  /// Returns true iff we are in a shared section.
+  inline bool is_shared_locked() { return m_shared_mutex.is_shared_locked(); }
+
+  /// Triggers a global garbage collection
+  inline void collect() { m_pool.collect(m_shared_mutex); }
 
 private:
   aterm_pool& m_pool;

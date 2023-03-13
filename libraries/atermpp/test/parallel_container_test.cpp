@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(parallel_vector)
   {
     for (std::size_t i = 0; i < 1000; ++i)
     {
-      atermpp::detail::g_term_pool().collect();
+      atermpp::detail::g_thread_term_pool().collect();
     }
 
     if (local.joinable())

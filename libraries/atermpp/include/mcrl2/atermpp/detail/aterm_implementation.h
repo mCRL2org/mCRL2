@@ -112,7 +112,7 @@ inline aterm& aterm::assign(const aterm& other,
 template <bool CHECK_BUSY_FLAG /* =true*/>
 inline aterm& aterm::unprotected_assign(const aterm& other) noexcept
 {
-  if constexpr (mcrl2::utilities::detail::GlobalThreadSafe && CHECK_BUSY_FLAG) assert(detail::g_thread_term_pool().get_busy_flag()->load());
+  if constexpr (mcrl2::utilities::detail::GlobalThreadSafe && CHECK_BUSY_FLAG) assert(detail::g_thread_term_pool().is_shared_locked());
   m_term = other.m_term;
   return *this;
 }

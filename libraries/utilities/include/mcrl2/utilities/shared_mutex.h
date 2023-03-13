@@ -59,7 +59,10 @@ public:
 
   ~shared_guard()
   {
-    unlock_shared();
+    if (is_locked)
+    {
+      unlock_shared();
+    }
   }
 
 private:
@@ -70,6 +73,7 @@ private:
   {}
 
   shared_mutex& m_mutex;
+  bool is_locked = true;
 };
 
 /// An exclusive lock guard for the shared_mutex.
@@ -81,7 +85,10 @@ public:
 
   ~lock_guard()
   {
-    unlock();
+    if (is_locked)
+    {
+      unlock();
+    }
   }
 
 private:
@@ -92,6 +99,7 @@ private:
   {}
 
   shared_mutex& m_mutex;
+  bool is_locked = true;
 };
 
 
@@ -253,12 +261,14 @@ inline
 void shared_guard::unlock_shared()
 {
   m_mutex.unlock_shared();
+  is_locked = false;
 }
 
 inline
 void lock_guard::unlock()
 {
   m_mutex.unlock();
+  is_locked = false;
 }
 
 } // namespace mcrl2::utilities
