@@ -62,17 +62,17 @@ aterm_appl g()
 BOOST_AUTO_TEST_CASE(test_hooks)
 {
   add_deletion_hook(function_symbol_DataVarId(), on_delete_variable);
-  BOOST_CHECK(variable_count == 0);
+  BOOST_CHECK_EQ(variable_count, 0);
   variable v("v");
   variable_count++;
-  BOOST_CHECK(variable_count == 1);
+  BOOST_CHECK_EQ(variable_count, 1);
   f();
-  BOOST_CHECK(variable_count == 2);
-  detail::g_term_pool().collect();
-  BOOST_CHECK(variable_count == 1);
+  BOOST_CHECK_EQ(variable_count, 2);
+  detail::g_thread_term_pool().collect();
+  BOOST_CHECK_EQ(variable_count, 1);
   aterm_appl a = g();
   variable_count++;
-  BOOST_CHECK(variable_count == 2);
-  detail::g_term_pool().collect();
-  BOOST_CHECK(variable_count == 2);
+  BOOST_CHECK_EQ(variable_count, 2);
+  detail::g_thread_term_pool().collect();
+  BOOST_CHECK_EQ(variable_count, 2);
 }
