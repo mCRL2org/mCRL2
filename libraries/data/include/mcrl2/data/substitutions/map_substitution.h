@@ -26,6 +26,8 @@ struct map_substitution
 {
   typedef typename AssociativeContainer::key_type variable_type;
   typedef typename AssociativeContainer::mapped_type expression_type;
+  using argument_type = variable_type;
+  using result_type = expression_type;
 
   const AssociativeContainer& m_map;
 
