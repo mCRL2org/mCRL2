@@ -19,15 +19,24 @@ int main(int /*argc*/, char** /*argv*/)
 {
   // note that the newline characters are significant
   data::data_specification data_spec = data::parse_data_specification(
-                                   "sort                      \n"
-                                   "  Bit   = struct b0 | b1; \n"
-                                   "                          \n"
-                                   "map                       \n"
-                                   "  invert: Bit -> Bit;     \n"
-                                   "                          \n"
-                                   "eqn                       \n"
-                                   "  invert(b1)= b0;         \n"
-                                   "  invert(b0)= b1;         \n"
+                                   "sort                                                              \n"
+                                   "  Bit   = struct b0 | b1;                                         \n"
+                                   "                                                                  \n"
+                                   "map                                                               \n"
+                                   "  invert: Bit -> Bit;                                             \n"
+                                   "                                                                  \n"
+                                   "eqn                                                               \n"
+                                   "  invert(b1)= b0;                                                 \n"
+                                   "  invert(b0)= b1;                                                 \n"
+                                   "                                                                  \n"
+                                   "map                                                               \n"
+                                   "  insertB: Bool # Nat # List(Bool) -> List(Bool);                 \n"
+                                   "var                                                               \n"
+                                   "  d,d': Bool; i: Nat; q: List(Bool);                              \n"
+                                   "eqn                                                               \n"
+                                   "  i == 0 -> insertB(d,i,q)     = d  |> tail(q);                   \n"
+                                   "  i > 0  -> insertB(d,i,d'|>q) = d' |> insertB(d,Int2Nat(i-1),q); \n"
+                                   "                                                                  \n"
                                  );
   smt::native_translations ntm = smt::initialise_native_translation(data_spec);
 
