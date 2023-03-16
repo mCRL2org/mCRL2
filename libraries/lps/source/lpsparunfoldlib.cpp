@@ -454,6 +454,7 @@ lpsparunfold::lpsparunfold(lps::stochastic_specification& spec,
     : lps::detail::lps_algorithm<lps::stochastic_specification>(spec),
       m_run_before(false),
       m_datamgr(cache, spec.data(), possibly_inconsistent),
+      m_pattern_unfolder(m_datamgr),
       m_alt_case_placement(alt_case_placement)
 {
   m_datamgr.add_used_identifiers(lps::find_identifiers(spec));
@@ -757,11 +758,11 @@ data::data_expression_vector lpsparunfold::unfold_constructor(const data_express
   else
   {
     /* Det function */
-    result.emplace_back(apply_function(new_cache_element.determine_function, de));
+    result.emplace_back(unfold_pattern_matching(apply_function(new_cache_element.determine_function, de), m_pattern_unfolder));
 
     for (const function_symbol& f: new_cache_element.projection_functions)
     {
-      result.emplace_back(apply_function(f, de)) ;
+      result.emplace_back(unfold_pattern_matching(apply_function(f, de), m_pattern_unfolder));
     }
   }
 
