@@ -112,19 +112,14 @@ data_expression construct_condition_rhs(const std::vector<rule>& rules, const da
   //   negated_conditions.push_back(sort_bool::not_(r.condition));
   // }
   // data_expression else_clause = join_and(negated_conditions.begin(), negated_conditions.end());
-
   // TODO: Check whether else_clause is equivalent to false. Can we use the enumerator for this?
-  bool conditions_are_complete = false;
-  if (rules.size() == 1 && rules[0].condition == sort_bool::true_())
+
+  if (rules.size() == 0)
   {
-    conditions_are_complete = true;
-  }
-  data_expression result;
-  if (!conditions_are_complete)
-  {
-    result = representative;
+    return representative;
   }
 
+  data_expression result;
   for (const rule& r: rules)
   {
     std::map<variable, data_expression> substitution_map;
@@ -156,7 +151,7 @@ data_expression construct_condition_rhs(const std::vector<rule>& rules, const da
  */
 template <typename StructInfo>
 data_expression construct_rhs(
-  const StructInfo& ssf,
+  StructInfo& ssf,
   representative_generator& gen,
   const std::vector<rule>& rules,
   const sort_expression& sort
@@ -189,7 +184,8 @@ data_expression construct_rhs(
     NONE, INCOMPLETE, PARTIAL, FULL
   };
   MatchType matching_type = MatchType::NONE;
-  // iterate over newly-created variable names
+  // iterate over matches, this is the same for all rules, so just use rules[0]
+  // More formally, we have rules[i].match_criteria->first is equivalent for all i.
   for (const auto& [var_expr, _]: rules[0].match_criteria)
   {
     bool variable_seen = false;
@@ -236,6 +232,7 @@ data_expression construct_rhs(
       // This variable is a perfect pattern matching candidate.
       new_matching_type = MatchType::FULL;
     }
+
     if (new_matching_type > matching_type)
     {
       matching_target = var_expr;
@@ -257,7 +254,8 @@ data_expression construct_rhs(
   /*
    * For each constructor, find the set of rules that apply to it, rewritten to match the constructor.
    */
-  std::set<function_symbol> match_constructors(ssf.get_constructors(matching_target.sort()));
+  auto constructors = ssf.get_constructors(matching_target.sort());
+  std::set<function_symbol> match_constructors(constructors.begin(), constructors.end());
   std::map<function_symbol, std::vector<rule> > constructor_rules;
   for (const rule& r: rules)
   {
@@ -353,7 +351,7 @@ data_expression construct_rhs(
  * constructor function symbols and constructor function applications.
  */
 template <typename StructInfo>
-bool is_pattern_matching_rule(const StructInfo& ssf, const data_equation& rewrite_rule)
+bool is_pattern_matching_rule(StructInfo& ssf, const data_equation& rewrite_rule)
 {
   // For this rewrite rule to be usable in pattern matching, its lhs must only contain
   // constructor functions and variables that occur at most once.
@@ -425,7 +423,7 @@ template <typename StructInfo>
 data_equation unfold_pattern_matching(
   const function_symbol& mapping,
   const data_equation_vector& rewrite_rules,
-  const StructInfo& ssf,
+  StructInfo& ssf,
   representative_generator& gen,
   set_identifier_generator& id_gen
 )
