@@ -15,6 +15,7 @@
 
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/representative_generator.h"
+#include "mcrl2/data/unfold_pattern_matching.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/lps/replace_capture_avoiding.h"
 
@@ -118,6 +119,8 @@ namespace detail
     , m_possibly_inconsistent(possibly_inconsistent)
     {}
 
+    const data::data_specification& dataspec() const { return m_dataspec; }
+
     void add_used_identifier(const core::identifier_string& id)
     {
       m_identifier_generator.add_identifier(id);
@@ -134,6 +137,39 @@ namespace detail
     }
 
     unfold_cache_element& get_cache_element(const data::sort_expression& sort);
+
+    bool is_cached(const data::sort_expression& sort)
+    {
+      return m_cache.find(sort) != m_cache.end();
+    }
+
+    bool is_constructor(const data::function_symbol& f)
+    {
+      unfold_cache_element& cache_elem = get_cache_element(f.sort().target_sort());
+      return utilities::detail::contains(cache_elem.affected_constructors, f);
+    }
+
+    const std::vector<data::function_symbol>& get_constructors(const data::sort_expression& sort)
+    {
+      return get_cache_element(sort).affected_constructors;
+    }
+
+    data::data_expression create_recogniser_expr(const data::function_symbol& f, const data::data_expression& expr)
+    {
+      unfold_cache_element& cache_elem = get_cache_element(f.sort().target_sort());
+      auto it1 = cache_elem.affected_constructors.begin();
+      auto it2 = cache_elem.new_constructors.begin();
+      while (*it1 != f)
+      {
+        ++it1; ++it2;
+      }
+      return equal_to(data::application(cache_elem.determine_function, expr), *it2);
+    }
+
+    const data::function_symbol_vector& get_projection_funcs(const data::function_symbol& f)
+    {
+      return get_cache_element(f.sort().target_sort()).projection_functions;
+    }
 
     /** \brief  Generates a fresh basic sort given a sort expression.
       * \param  sort This sort's name will be used to derive a name for the new sort
@@ -232,7 +268,144 @@ namespace detail
       return in;
     }
   };
-}
+
+  /// @brief Class for unfolding expressions f(a1,...,an) based on the pattern-matching
+  /// rewrite rules that define f.
+  class pattern_match_unfolder
+  {
+    private:
+    unfold_data_manager& m_datamgr;
+    data::representative_generator m_repgen;
+    std::map<data::function_symbol, bool> m_is_pattern_matching;
+    std::map<data::function_symbol, data::data_equation> m_new_eqns;
+
+    const data::data_equation_vector find_equations(const data::function_symbol& f)
+    {
+      data::data_equation_vector result;
+      for (const data::data_equation& eqn: m_datamgr.dataspec().equations())
+      {
+        if (data::detail::get_top_fs(eqn.lhs()) == f)
+        {
+          result.push_back(eqn);
+        }
+      }
+      return result;
+    }
+
+    bool is_pattern_matching(const data::function_symbol& f)
+    {
+      auto find_result = m_is_pattern_matching.find(f);
+      if (find_result != m_is_pattern_matching.end())
+      {
+        return find_result->second;
+      }
+      data::data_equation_vector eqns = find_equations(f);
+      bool result = std::all_of(eqns.begin(), eqns.end(),
+        [&](auto& eqn) { return data::is_pattern_matching_rule(m_datamgr, eqn); });
+      m_is_pattern_matching.insert_or_assign(f, result);
+      return result;
+    }
+
+    data::data_expression unfolded_expr(const data::function_symbol& f, const data::data_expression_vector& args)
+    {
+      data::data_equation new_eqn;
+      auto find_result = m_new_eqns.find(f);
+      if (find_result != m_new_eqns.end())
+      {
+        new_eqn = find_result->second;
+      }
+      else
+      {
+        new_eqn = data::unfold_pattern_matching(f, find_equations(f), m_datamgr, m_repgen, m_datamgr.id_gen());
+        m_new_eqns.emplace(f, new_eqn);
+      }
+
+      std::map<data::variable, data::data_expression> sigma;
+      auto it1 = atermpp::down_cast<data::application>(new_eqn.lhs()).begin();
+      auto it2 = args.begin();
+      while (it2 != args.end())
+      {
+        sigma[atermpp::down_cast<data::variable>(*it1++)] = *it2++;
+      }
+      data::map_substitution sigma1(sigma);
+
+
+      return data::replace_all_variables(new_eqn.rhs(), sigma1);
+    }
+
+    public:
+    pattern_match_unfolder(unfold_data_manager& datamgr)
+    : m_datamgr(datamgr)
+    , m_repgen(datamgr.dataspec())
+    {}
+
+    data::data_expression operator()(const data::data_expression& expr)
+    {
+      using utilities::detail::contains;
+
+      if (!data::is_application(expr))
+      {
+        return expr;
+      }
+      
+      const data::application& expr_appl = atermpp::down_cast<data::application>(expr);
+      const data::function_symbol f = data::detail::get_top_fs(expr_appl);
+      if (f == data::function_symbol() || expr_appl.size() != 1)
+      {
+        return expr;
+      }
+      const data::sort_expression& arg_sort = *atermpp::down_cast<data::function_sort>(f.sort()).domain().begin();
+      if (!m_datamgr.is_cached(arg_sort))
+      {
+        return expr;
+      }
+      const unfold_cache_element& cache_elem = m_datamgr.get_cache_element(arg_sort);
+      if (f != cache_elem.determine_function && !contains(cache_elem.projection_functions, f))
+      {
+        return expr;
+      }
+
+      return data::application(f, apply_to(expr_appl[0]));
+    }
+
+    data::data_expression apply_to(const data::data_expression& expr)
+    {
+      if (!data::is_application(expr))
+      {
+        return expr;
+      }
+      
+      const data::application& expr_appl = atermpp::down_cast<data::application>(expr);
+      const data::function_symbol f = data::detail::get_top_fs(expr_appl);
+      //TODO: Remove match for insert
+      if (f == data::function_symbol() || std::string(f.name()) != "insert" || !is_pattern_matching(f))
+      {
+        return expr;
+      }
+
+      const data::data_expression_vector args(expr_appl.begin(), expr_appl.end());
+      data::data_expression result = unfolded_expr(f, args);
+      mCRL2log(log::debug) << "Unfolded " << expr << " into " << result << std::endl;
+      return result;
+    }
+  };
+
+  void unfold_pattern_matching(data::data_expression& x,
+                               const pattern_match_unfolder& unfolder
+                              )
+  {
+    data::detail::make_replace_data_expressions_builder<data::data_expression_builder>(unfolder, true).update(x);
+  }
+
+  data::data_expression unfold_pattern_matching(const data::data_expression& x,
+                               const pattern_match_unfolder& unfolder
+                              )
+  {
+    data::data_expression result;
+    data::detail::make_replace_data_expressions_builder<data::data_expression_builder>(unfolder, true).apply(result, x);
+    return result;
+  }
+} // namespace detail
 
 class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
 {
@@ -270,6 +443,7 @@ class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
 
     /// @brief Bookkeeper for recogniser and projection functions.
     detail::unfold_data_manager m_datamgr;
+    detail::pattern_match_unfolder m_pattern_unfolder;
 
     /// \brief The process parameter that needs to be unfold.
     mcrl2::data::variable m_unfold_parameter;
