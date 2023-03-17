@@ -31,7 +31,7 @@ mCRL2 has the following minimum dependencies:
 Furthermore, sphinx and xsltproc are required to build the documentation.
 Makefiles can be generated using cmake. The compiling rewriter and the symbolic
 tools (lpsreach and pbessolvesymbolic) are only available for MacOS and Linux.
-qTo build the toolset in Release mode using 4 threads, run the following
+To build the toolset with `make` in Release mode using 4 threads, run the following
 commands (preferably in an empty directory):
 
 ```
