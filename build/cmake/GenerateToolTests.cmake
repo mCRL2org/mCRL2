@@ -218,7 +218,7 @@ endfunction()
 
 # lpsparunfold
 function(gen_lpsparunfold_release_tests LPSFILE)
-  set(ARGUMENTS "-l" "-n10" "-rjitty" "-rjittyp" ${_JITTYC})
+  set(ARGUMENTS "-a" "-p" "-n10" "-rjitty" "-rjittyp" ${_JITTYC})
   foreach(arglist ${ARGUMENTS})
     add_tool_test(lpsparunfold -sNat ${arglist} ${tagIN} ${LPSFILE})
   endforeach()
