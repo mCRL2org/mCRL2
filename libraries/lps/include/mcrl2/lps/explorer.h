@@ -62,6 +62,9 @@ class todo_set
     atermpp::deque<state> todo;
 
   public:
+    explicit todo_set()
+    {}
+
     explicit todo_set(const state& init)
       : todo{init}
     {}
@@ -73,19 +76,26 @@ class todo_set
 
     virtual ~todo_set() = default;
 
-    virtual void choose_element(state& result) = 0;
+    virtual void choose_element(state& result)
+    {
+      result = todo.front();
+      todo.pop_front();
+    }
 
-    virtual void insert(const state& s) = 0;
+    virtual void insert(const state& s)
+    {
+      todo.push_back(s);
+    }
 
     virtual void finish_state()
     { }
 
-    bool empty() const
+    virtual bool empty() const
     {
       return todo.empty();
     }
 
-    std::size_t size() const
+    virtual std::size_t size() const
     {
       return todo.size();
     }
@@ -94,6 +104,10 @@ class todo_set
 class breadth_first_todo_set : public todo_set
 {
   public:
+    explicit breadth_first_todo_set()
+      : todo_set()
+    {}
+
     explicit breadth_first_todo_set(const state& init)
       : todo_set(init)
     {}
@@ -112,6 +126,16 @@ class breadth_first_todo_set : public todo_set
     void insert(const state& s) override
     {
       todo.push_back(s);
+    }
+
+    atermpp::deque<state>& todo_buffer()
+    {
+      return todo;
+    }
+
+    void swap(breadth_first_todo_set& other)
+    {
+      todo.swap(other.todo);
     }
 };
 
@@ -143,17 +167,16 @@ class highway_todo_set : public todo_set
 {
   protected:
     std::size_t N;
-    std::size_t n;
-    std::size_t L;
+    breadth_first_todo_set new_states;
+    std::size_t n=0;    // This is the number of new_states that are seen, of which at most N are stored in new_states.
     std::random_device device;
     std::mt19937 generator;
 
   public:
     explicit highway_todo_set(const state& init, std::size_t N_)
-      : todo_set(init),
-        N(N_),
-        n(0),
-        L(1),
+      : N(N_),
+        new_states(init),
+        n(1),
         device(),
         generator(device())
     {
@@ -161,47 +184,58 @@ class highway_todo_set : public todo_set
 
     template<typename ForwardIterator>
     highway_todo_set(ForwardIterator first, ForwardIterator last, std::size_t N_)
-      : todo_set(first, last),
-        N(N_),
-        n(0),
-        L(todo.size()),
+      : N(N_),
         device(),
         generator(device())
     {
+      for(ForwardIterator i=first; i!=last; ++i)
+      {
+        insert(*i);
+      }
     }
 
     void choose_element(state& result) override
     {
+      if (todo.empty()) 
+      {
+        assert(new_states.size()>0);
+        todo.swap(new_states.todo_buffer());
+      }
       result = todo.front();
       todo.pop_front();
     }
 
     void insert(const state& s) override
     {
-      n++;
-      if (n <= N)
+      if (new_states.size() < N-1)
       {
-        todo.push_back(s);
+        new_states.insert(s);
       }
       else
       {
-        std::uniform_int_distribution<> distribution(1, n);
+        std::uniform_int_distribution<> distribution(0, n-1);
         std::size_t k = distribution(generator);
-        if (k <= N)
+        if (k < N)
         {
-          todo[todo.size() - k] = s;
+          assert(N==new_states.size());
+          (new_states.todo_buffer())[k] = s;
         }
       }
+      n++;
+    }
+
+    std::size_t size() const override
+    {
+      return todo.size() + new_states.size();
+    }
+
+    bool empty() const override
+    {
+      return todo.empty() && new_states.empty();
     }
 
     void finish_state() override
     {
-      L--;
-      if (L == 0)
-      {
-        L = todo.size();
-        n = 0;
-      }
     }
 };
 

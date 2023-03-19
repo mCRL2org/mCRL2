@@ -57,7 +57,7 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
       desc.add_option("cached", "use enumeration caching techniques to speed up state space generation. ");
       desc.add_option("todo-max", utilities::make_mandatory_argument("NUM"),
                  "keep at most NUM states in the todo list; this option is only relevant for "
-                 "highway search, where NUM is the maximum number of states per level. ");
+                 "highway search, where NUM is the maximum number of states per level per thread. ");
       desc.add_option("nondeterminism", "report nondeterministic states, i.e. states with outgoing transitions"
                  " with the same label to different states. The flag --trace can be used to generate traces to these nondeterministic states.", 'n');
       desc.add_option("deadlock", "report deadlocks (i.e. states with no outgoing transitions). "

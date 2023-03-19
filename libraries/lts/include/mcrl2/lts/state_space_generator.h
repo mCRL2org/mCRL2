@@ -544,7 +544,7 @@ class progress_monitor
   protected:
     std::size_t level = 1;    // the current exploration level
     std::size_t level_up = 1; // when count reaches level_up, the level is increased
-    std::size_t count = 0;
+    std::atomic<std::size_t> count = 0;
     std::atomic<std::size_t> transition_count = 0;
 
     std::size_t last_state_count = 0;
@@ -601,11 +601,13 @@ class progress_monitor
       }
       else
       {
-        if (++count % 1000 == 0)
+        count++;
+        if (time(&new_log_time) > last_log_time)
         {
-          mCRL2log(log::verbose) << "monitor: currently explored "
+          last_log_time = new_log_time;
+          mCRL2log(log::status) << "monitor: currently explored "
                             << count << " state" << ((count==1)?"":"s")
-                            << " and " << transition_count << " transition" << ((transition_count==1)?"":"s")
+                            << " and " << transition_count << " transition" << ((transition_count==1)?".":"s.")
                             << std::endl;
         }
       }
