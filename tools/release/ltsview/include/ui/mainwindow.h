@@ -36,6 +36,8 @@ class MainWindow : public QMainWindow
     MainWindow(QThread *atermThread);
     ~MainWindow();
 
+signals:
+    void clusterChanged(Cluster* root);
   public slots:
     void open(QString filename);
 
@@ -67,7 +69,6 @@ class MainWindow : public QMainWindow
       setEnabled(true);
       std::cout << "stopStructuring()" << std::endl;
       m_glwidget->setRoot(m_ltsManager->lts()->getInitialState()->getCluster());
-      m_glwidget->update();
     }
     void logMessage(QString level, QString hint, QDateTime /* timestamp */, QString message)
     {
