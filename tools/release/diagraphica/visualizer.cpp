@@ -1,4 +1,4 @@
-// Author(s): A.J. (Hannes) pretorius
+// Author(s): A.J. (Hannes) Pretorius
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -15,7 +15,7 @@
 Visualizer::Visualizer(
   QWidget *parent,
   Graph *graph_)
-  : QGLWidget(parent),
+  : QOpenGLWidget(parent),
     m_lastMouseEvent(QEvent::None, QPoint(0,0), Qt::NoButton, Qt::NoButton, Qt::NoModifier),
     m_graph(graph_)
 {
@@ -39,7 +39,8 @@ Visualizer::Visualizer(
 void Visualizer::updateGL(bool inSelectMode)
 {
   m_inSelectMode = inSelectMode;
-  QGLWidget::updateGL();
+  paintGL();
+  update();
 }
 
 void Visualizer::paintGL()

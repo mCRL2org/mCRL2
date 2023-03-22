@@ -53,13 +53,8 @@ class Diagram : public QObject
       const bool& inSelectMode,
       double pixelSize,
       const std::vector< Attribute* > attrs,
-      const std::vector< double > attrValIdcs);
-    void visualize(
-      const bool& inSelectMode,
-      double pixelSize,
-      const std::vector< Attribute* > attrs,
       const std::vector< double > attrValIdcs,
-      double opacity);
+      double opacity = 1.0);
 
   protected:
     // -- private utility functions ---------------------------------

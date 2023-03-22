@@ -136,18 +136,6 @@ void Diagram::visualize(
   drawShapes(inSelectMode, pixelSize);
 }
 
-
-void Diagram::visualize(
-  const bool& inSelectMode,
-  double pixelSize,
-  const std::vector< Attribute* > attrs,
-  const std::vector< double > attrValIdcs)
-// Used by visualizers.
-{
-  visualize(inSelectMode, pixelSize, attrs, attrValIdcs, 1.0);
-}
-
-
 void Diagram::visualize(
   const bool& inSelectMode,
   double pixelSize,
