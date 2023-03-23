@@ -22,8 +22,7 @@
 
 enum RenderMode
 {
-  HQRender,
-  LQRender,
+  NormalRender,
   HitRender
 };
 
@@ -205,8 +204,7 @@ class ArcDiagram : public Visualizer
 
     static int MIN_RAD_HINT_PX; // radius cannot be smaller than this
     static int MAX_RAD_HINT_PX; // radius cannot be larger than this
-    static int SEGM_HINT_HQ;
-    static int SEGM_HINT_LQ;
+    static int SEGM_HINT;
 };
 
 #endif

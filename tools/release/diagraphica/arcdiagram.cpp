@@ -16,8 +16,7 @@
 
 int ArcDiagram::MIN_RAD_HINT_PX =  3;
 int ArcDiagram::MAX_RAD_HINT_PX = 30;
-int ArcDiagram::SEGM_HINT_HQ    = 24;
-int ArcDiagram::SEGM_HINT_LQ    = 12;
+int ArcDiagram::SEGM_HINT       = 24;
 
 
 // -- constructors and destructor -----------------------------------
@@ -248,17 +247,13 @@ void ArcDiagram::visualizeParts(const bool& inSelectMode)
 
 void ArcDiagram::drawBundles(const bool& inSelectMode)
 {
-  RenderMode render = ( inSelectMode ? HitRender : ( m_mouseDrag ? LQRender : HQRender ) );
-  int segs = (render == LQRender ? SEGM_HINT_LQ : SEGM_HINT_HQ);
+  RenderMode render = ( inSelectMode ? HitRender : NormalRender );
+  int segs = SEGM_HINT;
 
-  if (render == HQRender)
+  if (render == NormalRender)
   {
     VisUtils::enableLineAntiAlias();
     VisUtils::enableBlending();
-  }
-  else if (render == LQRender)
-  {
-    VisUtils::setColor(VisUtils::lightGray);
   }
 
   QColor colFill = QColor();
@@ -270,7 +265,7 @@ void ArcDiagram::drawBundles(const bool& inSelectMode)
   for (std::size_t i = 0; i < posBundles.size(); ++i)
   {
 
-    if (render == HQRender)
+    if (render == NormalRender)
     {
       colFill = markBundles[i] ? VisUtils::darkCoolBlue : alpha(settings->bundleColor.value(), settings->arcTransparency.value());
       colFade = alpha(settings->backgroundColor.value(), colFill.alphaF());
@@ -285,44 +280,26 @@ void ArcDiagram::drawBundles(const bool& inSelectMode)
     double wth    = widthBundles[i];
 
     glPushName((GLuint) i);
-    if (render == LQRender)
+    if (orient < 0)
     {
-      if (orient < 0)
-      {
-        VisUtils::drawArc(x, y, 180.0, 0.0, rad, segs);
-      }
-      else if (orient > 0)
-      {
-        VisUtils::drawArc(x, y, 0.0, 180.0, rad, segs);
-      }
-      else
-      {
-        VisUtils::drawArc(x, y, 180.0, 540.0, rad, 2*segs);
-      }
+      VisUtils::fillArc(x, y, 180.0, 0.0, wth, 0.0, rad, segs, colFill,     colFade);
+      VisUtils::drawArc(x, y, 180.0, 0.0, wth, 0.0, rad, segs, colBrdrFill, colBrdrFade);
+    }
+    else if (orient > 0)
+    {
+      VisUtils::fillArc(x, y, 0.0, 180.0, wth, 0.0, rad, segs, colFill,     colFade);
+      VisUtils::drawArc(x, y, 0.0, 180.0, wth, 0.0, rad, segs, colBrdrFill, colBrdrFade);
     }
     else
     {
-      if (orient < 0)
-      {
-        VisUtils::fillArc(x, y, 180.0, 0.0, wth, 0.0, rad, segs, colFill,     colFade);
-        VisUtils::drawArc(x, y, 180.0, 0.0, wth, 0.0, rad, segs, colBrdrFill, colBrdrFade);
-      }
-      else if (orient > 0)
-      {
-        VisUtils::fillArc(x, y, 0.0, 180.0, wth, 0.0, rad, segs, colFill,     colFade);
-        VisUtils::drawArc(x, y, 0.0, 180.0, wth, 0.0, rad, segs, colBrdrFill, colBrdrFade);
-      }
-      else
-      {
-        VisUtils::fillArc(x, y, 180.0, 540.0, wth, 0.0, rad, 2*segs, colFill,     colFade);
-        VisUtils::drawArc(x, y, 180.0, 540.0, wth, 0.0, rad, 2*segs, colBrdrFill, colBrdrFade);
-      }
+      VisUtils::fillArc(x, y, 180.0, 540.0, wth, 0.0, rad, 2*segs, colFill,     colFade);
+      VisUtils::drawArc(x, y, 180.0, 540.0, wth, 0.0, rad, 2*segs, colBrdrFill, colBrdrFade);
     }
     glPopName();
   }
   glPopName();
 
-  if (render == HQRender)
+  if (render == NormalRender)
   {
     VisUtils::disableLineAntiAlias();
     VisUtils::disableBlending();
@@ -332,11 +309,11 @@ void ArcDiagram::drawBundles(const bool& inSelectMode)
 
 void ArcDiagram::drawLeaves(const bool& inSelectMode)
 {
-  RenderMode render = ( inSelectMode ? HitRender : ( m_mouseDrag ? LQRender : HQRender ) );
-  int segs = (render == LQRender ? SEGM_HINT_LQ : SEGM_HINT_HQ);
+  RenderMode render = ( inSelectMode ? HitRender : NormalRender );
+  int segs = SEGM_HINT;
   Cluster* clust = 0;
 
-  if (render == HQRender)
+  if (render == NormalRender)
   {
     VisUtils::enableLineAntiAlias();
   }
@@ -349,7 +326,7 @@ void ArcDiagram::drawLeaves(const bool& inSelectMode)
     double x = posLeaves[i].x;
     double y = posLeaves[i].y;
 
-    if (render == HQRender)
+    if (render == NormalRender)
     {
       clust = m_graph->getLeaf(i);
 
@@ -372,7 +349,7 @@ void ArcDiagram::drawLeaves(const bool& inSelectMode)
   }
   glPopName();
 
-  if (render == HQRender)
+  if (render == NormalRender)
   {
     // mark cluster with initial state
     if (idxInitStLeaves != NON_EXISTING)
@@ -394,12 +371,12 @@ void ArcDiagram::drawLeaves(const bool& inSelectMode)
 
 void ArcDiagram::drawTree(const bool& inSelectMode)
 {
-  RenderMode render = ( inSelectMode ? HitRender : ( m_mouseDrag ? LQRender : HQRender ) );
-  int segs = (render == LQRender ? SEGM_HINT_LQ : SEGM_HINT_HQ);
+  RenderMode render = ( inSelectMode ? HitRender : NormalRender );
+  int segs = SEGM_HINT;
   Cluster* clust = 0;
   QColor colFill = Qt::white;
 
-  if (render == HQRender)
+  if (render == NormalRender)
   {
     VisUtils::enableLineAntiAlias();
     VisUtils::enableBlending();
@@ -418,7 +395,7 @@ void ArcDiagram::drawTree(const bool& inSelectMode)
       double yTop = posTreeTopLft[i][j].y;
       double yBot = posTreeBotRgt[i][j].y;
 
-      if (render == HQRender)
+      if (render == NormalRender)
       {
         // color
         clust   = mapPosToClust[i][j];
@@ -432,20 +409,11 @@ void ArcDiagram::drawTree(const bool& inSelectMode)
         VisUtils::fillTriangle(0.5*(xLft+xRgt), yTop, xLft, yBot, xRgt, yBot, colFill, VisUtils::lightLightGray, VisUtils::lightLightGray);
       }
 
-      if (render == LQRender)
-      {
-        VisUtils::setColor(VisUtils::lightLightGray);
-        VisUtils::fillTriangle(0.5*(xLft+xRgt), yTop, xLft, yBot, xRgt, yBot);
-      }
-
-      if (render != HitRender)
+      if (render == NormalRender)
       {
         VisUtils::setColor(VisUtils::lightGray);
         VisUtils::drawTriangle(0.5*(xLft+xRgt), yTop, xLft, yBot, xRgt, yBot);
-      }
 
-      if (render == HQRender)
-      {
         // drop shadow
         VisUtils::setColor(VisUtils::mediumGray);
         VisUtils::drawEllipse(0.5*(xLft+xRgt)+0.1*radLeaves, yTop-0.1*radLeaves, 0.75*radLeaves, 0.75*radLeaves, segs);
@@ -473,7 +441,7 @@ void ArcDiagram::drawTree(const bool& inSelectMode)
   }
   glPopName();
 
-  if (render == HQRender)
+  if (render == NormalRender)
   {
     VisUtils::disableBlending();
     VisUtils::disableLineAntiAlias();
@@ -483,9 +451,9 @@ void ArcDiagram::drawTree(const bool& inSelectMode)
 
 void ArcDiagram::drawTreeLvls(const bool& inSelectMode)
 {
-  RenderMode render = ( inSelectMode ? HitRender : ( m_mouseDrag ? LQRender : HQRender ) );
+  RenderMode render = ( inSelectMode ? HitRender : NormalRender );
 
-  if (render == HQRender)
+  if (render == NormalRender)
   {
     double wth = worldSize().width();
     double pix = pixelSize();
@@ -529,11 +497,11 @@ void ArcDiagram::drawBarTree(const bool& inSelectMode)
   if (posBarTreeTopLft.size() > 1)
   {
 
-    RenderMode render = ( inSelectMode ? HitRender : ( m_mouseDrag ? LQRender : HQRender ) );
+    RenderMode render = ( inSelectMode ? HitRender : NormalRender );
     Cluster* clust = 0;
     QColor colFill = Qt::lightGray;
 
-    if (render == HQRender)
+    if (render == NormalRender)
     {
       VisUtils::enableLineAntiAlias();
       VisUtils::enableBlending();
@@ -552,7 +520,7 @@ void ArcDiagram::drawBarTree(const bool& inSelectMode)
         double yTop = posBarTreeTopLft[i][j].y;
         double yBot = posBarTreeBotRgt[i][j].y;
 
-        if (render == HQRender)
+        if (render == NormalRender)
         {
           // fill color
           clust   = mapPosToClust[i][j];
@@ -577,14 +545,6 @@ void ArcDiagram::drawBarTree(const bool& inSelectMode)
           VisUtils::drawRect(xLft, xRgt, yTop, yBot);
         }
 
-        if (render == LQRender)
-        {
-          VisUtils::setColor(VisUtils::lightLightGray);
-          VisUtils::fillRect(xLft, xRgt, yTop, yBot);
-          VisUtils::setColor(VisUtils::lightGray);
-          VisUtils::drawRect(xLft, xRgt, yTop, yBot);
-        }
-
         if (render == HitRender)
         {
           VisUtils::fillRect(xLft, xRgt, yTop, yBot);
@@ -596,7 +556,7 @@ void ArcDiagram::drawBarTree(const bool& inSelectMode)
     }
     glPopName();
 
-    if (render == HQRender)
+    if (render == NormalRender)
     {
       VisUtils::disableBlending();
       VisUtils::disableLineAntiAlias();
@@ -608,7 +568,7 @@ void ArcDiagram::drawBarTree(const bool& inSelectMode)
 
 void ArcDiagram::drawDiagrams(const bool& inSelectMode)
 {
-  RenderMode render = ( inSelectMode ? HitRender : ( m_mouseDrag ? LQRender : HQRender ) );
+  RenderMode render = ( inSelectMode ? HitRender : NormalRender );
 
   // selection mode
   if (render == HitRender)
@@ -937,10 +897,10 @@ void ArcDiagram::drawMarkedLeaves(const bool& inSelectMode)
 {
   if (markLeaves.size() > 0)
   {
-    RenderMode render = ( inSelectMode ? HitRender : ( m_mouseDrag ? LQRender : HQRender ) );
-    int segs = (render == LQRender ? SEGM_HINT_LQ : SEGM_HINT_HQ);
+    RenderMode render = ( inSelectMode ? HitRender : NormalRender );
+    int segs = SEGM_HINT;
 
-    if (render == HQRender)
+    if (render == NormalRender)
     {
       VisUtils::enableLineAntiAlias();
       double pix  = pixelSize();
