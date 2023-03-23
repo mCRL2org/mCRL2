@@ -102,25 +102,32 @@ private:
   /// \return A JSON string corresponding to the operator.
   string convert_operator_to_jani(const data::data_expression& opid) const {
 	if (std::string op = mcrl2::data::pp(opid);
-	  "!=" == op) {
-	  return "≠";
+	  "!=" == op) 
+	{
+	  return u8"≠";
 	}
-	else if ("==" == op) {
+	else if ("==" == op) 
+	{
 	  return "=";
 	}
-	else if ("<=" == op) {
-	  return "≤";
+	else if ("<=" == op) 
+	{
+	  return u8"≤";
 	}
-	else if ("&&" == op) {
-	  return "∧";
+	else if ("&&" == op) 
+	{
+	  return u8"∧";
 	}
-	else if ("||" == op) {
-	  return "∨";
+	else if ("||" == op) 
+	{
+	  return u8"∨";
 	}
-	else if ("@cReal" == op) { // threat real numbers as a division operator
-	  return "/";
+	else if ("@cReal" == op) 
+	{ 
+	  return "/"; // threat real numbers as a division operator
 	}
-	else {
+	else 
+	{
 	  return op;
 	}
   }
@@ -151,7 +158,7 @@ private:
 	{
 	  const data::application& appl = atermpp::down_cast<data::application>(e);
 	  return object{
-		{"op", "¬"},
+		{"op", u8"¬"},
 		{"exp", convert_data_expression(appl[0])}
 	  };
 	}
@@ -169,7 +176,7 @@ private:
 	  const data::application& appl = atermpp::down_cast<data::application>(e);
 	  return object{
 		{"left", convert_data_expression(appl[1])},
-		{"op", "≤"},
+		{"op", u8"≤"},
 		{"right", convert_data_expression(appl[0])}
 	  };
 	}
