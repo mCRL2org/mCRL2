@@ -303,7 +303,7 @@ void DiagramEditor::editTextSize()
     if (ok)
     {
       s->setTextSize(size);
-      updateGL();
+      update();
     }
   }
 }
@@ -318,7 +318,7 @@ void DiagramEditor::editNote()
     if (ok)
     {
       s->setNote(note);
-      updateGL();
+      update();
     }
   }
 }
@@ -337,7 +337,7 @@ void DiagramEditor::cutShapes()
       m_diagram->removeShape(shapes[i]->index());
     }
   }
-  updateGL();
+  update();
 }
 
 
@@ -409,7 +409,7 @@ void DiagramEditor::pasteShapes()
       m_clipBoardList[i] = new Shape(*m_clipBoardList[i]);
     }
   }
-  updateGL();
+  update();
 }
 
 void DiagramEditor::selectAllShapes()
@@ -418,7 +418,7 @@ void DiagramEditor::selectAllShapes()
   {
     m_diagram->shape(i)->setDrawMode(Shape::MODE_EDIT);
   }
-  updateGL();
+  update();
 }
 
 void DiagramEditor::deleteShapes()
@@ -430,7 +430,7 @@ void DiagramEditor::deleteShapes()
       m_diagram->removeShape(i);
     }
   }
-  updateGL();
+  update();
 }
 
 void DiagramEditor::bringToFront()
@@ -442,7 +442,7 @@ void DiagramEditor::bringToFront()
       m_diagram->moveShapeToFront(i);
     }
   }
-  updateGL();
+  update();
 }
 
 void DiagramEditor::sendToBack()
@@ -454,7 +454,7 @@ void DiagramEditor::sendToBack()
       m_diagram->moveShapeToBack(i);
     }
   }
-  updateGL();
+  update();
 }
 
 void DiagramEditor::bringForward()
@@ -466,7 +466,7 @@ void DiagramEditor::bringForward()
       m_diagram->moveShapeForward(i);
     }
   }
-  updateGL();
+  update();
 }
 
 void DiagramEditor::sendBackward()
@@ -478,7 +478,7 @@ void DiagramEditor::sendBackward()
       m_diagram->moveShapeBackward(i);
     }
   }
-  updateGL();
+  update();
 }
 
 double DiagramEditor::snapIfNeeded(double input)
@@ -608,7 +608,7 @@ void DiagramEditor::createShape()
   }
 
   m_diagram->addShape(s);
-  updateGL();
+  update();
 
   if (m_editMode == EDIT_MODE_NOTE)
   {
@@ -679,9 +679,9 @@ void DiagramEditor::handleMouseEvent(QMouseEvent* e)
   if (e->type() != QEvent::MouseMove || e->buttons() != Qt::NoButton)
   {
     // redraw in select mode
-    updateGL(true);
+    updateSelection();
     // redraw in render mode
-    updateGL();
+    update();
   }
 
   m_lastMousePos = e->pos();
@@ -717,7 +717,7 @@ void DiagramEditor::handleKeyEvent(QKeyEvent* e)
     }
   }
   // redraw in render mode
-  updateGL();
+  update();
 }
 
 void DiagramEditor::handleHits(const std::vector< int > &ids)

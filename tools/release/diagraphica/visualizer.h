@@ -27,6 +27,7 @@ class Visualizer : public QOpenGLWidget
       Graph *m_graph);
     virtual ~Visualizer() {}
 
+    virtual void initializeGL();
     virtual void paintGL();
 
     QSizeF worldSize();
@@ -65,7 +66,7 @@ class Visualizer : public QOpenGLWidget
 
     QSize sizeHint() const { return QSize(200,200); } // Reimplement to change preferred size
   public slots:
-    void updateGL(bool inSelectMode = false);
+    void updateSelection();
 
   protected:
     // -- protected utility functions -------------------------------
@@ -85,6 +86,8 @@ class Visualizer : public QOpenGLWidget
     void genCushTex();
 
     // -- hit detection ---------------------------------------------
+    bool m_gl_initialized = false;
+    QOpenGLFramebufferObject* m_hit_FBO;
     virtual void processHits(
       GLint hits,
       GLuint buffer[]) = 0;

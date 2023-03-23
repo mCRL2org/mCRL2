@@ -343,9 +343,9 @@ void TimeSeries::handleMouseEvent(QMouseEvent* e)
   Visualizer::handleMouseEvent(e);
 
   // redraw in select mode
-  updateGL(true);
+  updateSelection();
   // redraw in render mode
-  updateGL();
+  update();
 
   if (e->type() == QEvent::MouseMove)
   {
@@ -412,7 +412,7 @@ void TimeSeries::handleWheelEvent(QWheelEvent *e)
     geomChanged = true;
 
     // redraw in render mode
-    updateGL();
+    update();
   }
 }
 
@@ -428,7 +428,7 @@ void TimeSeries::handleMouseLeaveEvent()
   mouseOverIdx = -1;
 
   // redraw in render mode
-  updateGL();
+  update();
 }
 
 
@@ -510,7 +510,7 @@ void TimeSeries::handleKeyEvent(QKeyEvent *e)
     }
 
     // redraw in render mode
-    updateGL();
+    update();
   }
   else
   {
@@ -740,8 +740,7 @@ void TimeSeries::animate()
 
   emit animationChanged();
 
-  updateGL();
-  repaint();
+  update();
 }
 
 
@@ -763,7 +762,6 @@ void TimeSeries::handleRwndDiagram(const int& dgrmIdx)
 
   emit animationChanged();
 
-  updateGL();
   update();
 }
 

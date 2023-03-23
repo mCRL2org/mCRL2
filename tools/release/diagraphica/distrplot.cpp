@@ -255,9 +255,9 @@ void DistrPlot::handleMouseEvent(QMouseEvent* e)
   Visualizer::handleMouseEvent(e);
 
   // redraw in select mode
-  updateGL(true);
+  updateSelection();
   // redraw in render mode
-  updateGL();
+  update();
 }
 
 // -- utility data functions ------------------------------------

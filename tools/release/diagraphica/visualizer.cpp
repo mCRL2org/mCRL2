@@ -9,7 +9,7 @@
 /// \file ./visualizer.cpp
 
 #include <iostream> // only temporary for std::clog
-
+#include <QMessageBox>
 #include "visualizer.h"
 
 Visualizer::Visualizer(
@@ -36,11 +36,20 @@ Visualizer::Visualizer(
   showMenu = false;
 }
 
-void Visualizer::updateGL(bool inSelectMode)
-{
-  m_inSelectMode = inSelectMode;
-  paintGL();
-  update();
+void Visualizer::updateSelection() {
+    if (!m_hit_FBO || m_hit_FBO->width() != width() || m_hit_FBO->height() != height()) {
+        delete m_hit_FBO; // make sure FBO is cleaned up
+        m_hit_FBO = new QOpenGLFramebufferObject(width(), height());
+    }
+    m_hit_FBO->bind();
+    m_inSelectMode = true;
+    paintGL();
+    m_inSelectMode = false;
+    m_hit_FBO->bindDefault();
+}
+void Visualizer::initializeGL() {
+    m_hit_FBO = new QOpenGLFramebufferObject(width(), height());
+    m_gl_initialized = true;
 }
 
 void Visualizer::paintGL()

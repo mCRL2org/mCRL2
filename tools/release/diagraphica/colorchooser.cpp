@@ -57,14 +57,14 @@ void ColorChooser::handleMouseEnterEvent()
 {
   emit activated();
   // normal mode
-  updateGL();
+  update();
 }
 
 void ColorChooser::handleMouseLeaveEvent()
 {
   emit deactivated();
   // normal mode
-  updateGL();
+  update();
 }
 
 
@@ -74,7 +74,7 @@ void ColorChooser::handleMouseEvent(QMouseEvent* e)
   if (e->type() != QEvent::MouseMove || e->buttons() != Qt::NoButton)
   {
     // selection mode
-    updateGL(true);
+    updateSelection();
 
     if (e->button() == Qt::LeftButton)
     {
@@ -103,7 +103,7 @@ void ColorChooser::handleMouseEvent(QMouseEvent* e)
     }
 
     // normal mode
-    updateGL();
+    update();
   }
 }
 
@@ -381,8 +381,8 @@ void ColorChooser::handleDrag()
 
     m_dof->setValue(m_dragIdx, (xCur + 1.0) / 2.0);
     (*m_yCoordinates)[m_dragIdx] = yCur;
-    updateGL(true);
-    updateGL();
+    updateSelection();
+    update();
   }
 }
 

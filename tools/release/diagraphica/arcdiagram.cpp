@@ -996,9 +996,9 @@ void ArcDiagram::handleMouseEvent(QMouseEvent* e)
   Visualizer::handleMouseEvent(e);
 
   // redraw in select mode
-  updateGL(true);
+  updateSelection();
   // redraw in render mode
-  updateGL();
+  update();
 
   if (e->type() == QEvent::MouseButtonRelease && e->button() == Qt::LeftButton)
   {
@@ -1569,7 +1569,6 @@ void ArcDiagram::animate()
   }
   updateMarkBundles();
 
-  updateGL();
   repaint();
 }
 
