@@ -18,11 +18,13 @@
 #include "mcrl2/pbes/symbolic_pbessolve.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/detail/container_utility.h"
+#include "mcrl2/utilities/parallel_tool.h"
 #include "mcrl2/utilities/power_of_two.h"
 
 using namespace mcrl2;
 using data::tools::rewriter_tool;
 using utilities::tools::input_output_tool;
+using utilities::tools::parallel_tool;
 
 namespace mcrl2::pbes_system {
 
@@ -130,9 +132,9 @@ private:
 
 } // namespace mcrl2::pbes_system
 
-class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
+class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_tool>>
 {
-  typedef rewriter_tool<input_output_tool> super;
+  using super = parallel_tool<rewriter_tool<input_output_tool>>;
 
   protected:
     pbes_system::symbolic_reachability_options options;
@@ -150,7 +152,6 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
     void add_options(utilities::interface_description& desc) override
     {
       super::add_options(desc);
-      desc.add_option("lace-workers", utilities::make_optional_argument("NUM", "1"), "set number of Lace workers (threads for parallelization), (0=autodetect, default 1)");
       desc.add_option("lace-dqsize", utilities::make_optional_argument("NUM", "4194304"), "set length of Lace task queue (default 1024*1024*4)");
       desc.add_option("lace-stacksize", utilities::make_optional_argument("NUM", "0"), "set size of program stack in kilobytes (0=default stack size)");
       desc.add_option("memory-limit", utilities::make_optional_argument("NUM", "3"), "Sylvan memory limit in gigabytes (default 3)", 'm');
@@ -233,10 +234,7 @@ class pbessolvesymbolic_tool: public rewriter_tool<input_output_tool>
       options.srf                                   = parser.option_argument("srf");
       options.rewrite_strategy                      = rewrite_strategy();
       options.dot_file                              = parser.option_argument("dot");
-      if (parser.has_option("lace-workers"))
-      {
-        lace_n_workers = parser.option_argument_as<int>("lace-workers");
-      }
+      lace_n_workers = number_of_threads();
       if (parser.has_option("lace-dqsize"))
       {
         lace_dqsize = parser.option_argument_as<int>("lace-dqsize");
