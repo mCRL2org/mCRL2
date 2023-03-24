@@ -622,7 +622,7 @@ void lpsparunfold::update_linear_process(std::size_t parameter_at_index)
       }
     }
 
-    mCRL2log(log::verbose) << "- Inserting case functions into the process using alternative case placement";
+    mCRL2log(log::verbose) << "- Inserting case functions into the process using alternative case placement" << std::endl;
     // place the case functions
     insert_case_functions(m_spec.process(), parameter_case_function(), m_datamgr.id_gen());
   }
@@ -632,6 +632,17 @@ void lpsparunfold::update_linear_process(std::size_t parameter_at_index)
     //Prepare parameter substitution
     const mutable_map_substitution< std::map< data::variable , data::data_expression > > s{parameter_substitution()};
     lps::replace_variables_capture_avoiding(m_spec.process(), s);
+  }
+
+  data::rewriter rewr(m_spec.data());
+  for (action_summand& sum: m_spec.process().action_summands())
+  {
+    data::assignment_vector new_assignments;
+    for (const assignment& as: sum.assignments())
+    {
+      new_assignments.emplace_back(as.lhs(), unfold_pattern_matching(rewr(as.rhs()), m_pattern_unfolder));
+    }
+    sum.assignments() = data::assignment_list(new_assignments.begin(), new_assignments.end());
   }
 
   // NB: order is important. If we first replace the parameters, they are changed
@@ -758,11 +769,11 @@ data::data_expression_vector lpsparunfold::unfold_constructor(const data_express
   else
   {
     /* Det function */
-    result.emplace_back(unfold_pattern_matching(apply_function(new_cache_element.determine_function, de), m_pattern_unfolder));
+    result.emplace_back(apply_function(new_cache_element.determine_function, de));
 
     for (const function_symbol& f: new_cache_element.projection_functions)
     {
-      result.emplace_back(unfold_pattern_matching(apply_function(f, de), m_pattern_unfolder));
+      result.emplace_back(apply_function(f, de));
     }
   }
 
