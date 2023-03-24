@@ -634,6 +634,7 @@ void lpsparunfold::update_linear_process(std::size_t parameter_at_index)
     lps::replace_variables_capture_avoiding(m_spec.process(), s);
   }
 
+  // Unfold pattern matching mappings in parameter updates, requires intermediate rewriting
   data::rewriter rewr(m_spec.data());
   for (action_summand& sum: m_spec.process().action_summands())
   {
