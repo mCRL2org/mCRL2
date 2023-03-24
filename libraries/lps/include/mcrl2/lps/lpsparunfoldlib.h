@@ -384,12 +384,63 @@ namespace detail
       {
         return false;
       }
-      auto udm = m_datamgr.dataspec().user_defined_mappings();
+      auto udm = m_datamgr.dataspec().mappings();
       const data::data_specification& dataspec = m_datamgr.dataspec();
       if (std::find_if(udm.begin(), udm.end(), 
           [&](const auto& f2){ return f.name() == f2.name() && dataspec.equal_sorts(f.sort(), f2.sort()); }) == udm.end())
       {
+        // f is not a mapping, but likely a constructor
         return false;
+      }
+      if (!matches_only_known_sorts(f))
+      {
+        return false;
+      }
+      return true;
+    }
+
+    std::vector<std::size_t> pattern_matching_args(const data::function_symbol& f)
+    {
+      std::vector<std::size_t> result;
+      if (!data::is_function_sort(f.sort()))
+      {
+        return result;
+      }
+      data::data_equation_vector eqns = find_equations(f);
+
+      std::size_t f_num_args = atermpp::down_cast<data::function_sort>(f.sort()).domain().size();
+      for (std::size_t arg = 0; arg < f_num_args; arg++)
+      {
+        for (const data::data_equation& eq: eqns)
+        {
+          const data::application& lhs_appl = atermpp::down_cast<data::application>(eq.lhs());
+          if (!data::is_variable(lhs_appl[arg]))
+          {
+            result.push_back(arg);
+            break;
+          }
+        }
+      }
+      return result;
+    }
+
+    /// @brief Determines whether f pattern matches on argument arg
+    /// @pre this->can_unfold(f)
+    bool matches_only_known_sorts(const data::function_symbol& f)
+    {
+      if (!data::is_function_sort(f.sort()))
+      {
+        return true;
+      }
+
+      const data::sort_expression_list& domain = atermpp::down_cast<data::function_sort>(f.sort()).domain();
+      const data::sort_expression_vector domain_vec{domain.begin(), domain.end()};
+      for (const std::size_t i: pattern_matching_args(f))
+      {
+        if (!m_datamgr.is_cached(domain_vec[i]))
+        {
+          return false;
+        }
       }
       return true;
     }
@@ -424,9 +475,10 @@ namespace detail
     bool is_applied_to_constructor(const data::application& x)
     {
       using utilities::detail::contains;
-      for(const data::data_expression& arg: x)
+      const std::vector<std::size_t> pattern_matching_args = m_unfolder.pattern_matching_args(data::detail::get_top_fs(x));
+      for(const std::size_t i: pattern_matching_args)
       {
-        if (data::is_application(arg) && m_unfolder.is_constructor(data::detail::get_top_fs(arg)))
+        if (m_unfolder.is_constructor(data::detail::get_top_fs(x[i])))
         {
           return true;
         }

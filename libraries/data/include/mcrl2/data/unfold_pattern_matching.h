@@ -374,6 +374,11 @@ bool is_pattern_matching_rule(StructInfo& ssf, const data_equation& rewrite_rule
   {
     return false;
   }
+  if (std::all_of(subexpressions.begin(), subexpressions.end(), [](const data_expression& x){ return is_variable(x); }))
+  {
+    // Each argument is a variable, this is just an ordinarily defined function
+    return false;
+  }
 
   // Check whether each variable occurs at most once
   std::set<variable> variable_set;
