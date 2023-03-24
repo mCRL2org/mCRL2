@@ -138,15 +138,14 @@ namespace detail
 
     unfold_cache_element& get_cache_element(const data::sort_expression& sort);
 
-    bool is_cached(const data::sort_expression& sort)
+    bool is_cached(const data::sort_expression& sort) const
     {
       return m_cache.find(sort) != m_cache.end();
     }
 
-    bool is_constructor(const data::function_symbol& f)
+    bool is_constructor(const data::function_symbol& f) const
     {
-      unfold_cache_element& cache_elem = get_cache_element(f.sort().target_sort());
-      return utilities::detail::contains(cache_elem.affected_constructors, f);
+      return utilities::detail::contains(m_dataspec.constructors(), f);
     }
 
     const std::vector<data::function_symbol>& get_constructors(const data::sort_expression& sort)
@@ -279,6 +278,7 @@ namespace detail
     std::map<data::function_symbol, bool> m_is_pattern_matching;
     std::map<data::function_symbol, data::data_equation> m_new_eqns;
 
+    /// @brief Finds all rewriting equations for f
     const data::data_equation_vector find_equations(const data::function_symbol& f)
     {
       data::data_equation_vector result;
@@ -292,6 +292,7 @@ namespace detail
       return result;
     }
 
+    /// @brief Checks whether f is defined by pattern matching
     bool is_pattern_matching(const data::function_symbol& f)
     {
       auto find_result = m_is_pattern_matching.find(f);
@@ -339,70 +340,168 @@ namespace detail
     , m_repgen(datamgr.dataspec())
     {}
 
-    data::data_expression operator()(const data::data_expression& expr)
+    bool is_constructor(const data::function_symbol& f)
+    {
+      return m_datamgr.is_constructor(f);
+    }
+
+    /// @brief Checks whether expr is of the shape Det(h(a1,...,an)) or pi(h(a1,...,an)),
+    /// where h is defined by patter matching, and, if so, unfolds h(a1,...,an).
+    bool is_det_or_pi(const data::application& expr) const
     {
       using utilities::detail::contains;
-
-      if (!data::is_application(expr))
-      {
-        return expr;
-      }
       
-      const data::application& expr_appl = atermpp::down_cast<data::application>(expr);
-      const data::function_symbol f = data::detail::get_top_fs(expr_appl);
-      if (f == data::function_symbol() || expr_appl.size() != 1)
+      const data::function_symbol f = data::detail::get_top_fs(expr);
+      // If f is not unary, then it is certainly unequal to Det or pi
+      if (f == data::function_symbol() || expr.size() != 1)
       {
-        return expr;
+        return false;
       }
       const data::sort_expression& arg_sort = *atermpp::down_cast<data::function_sort>(f.sort()).domain().begin();
+      // The argument of f must be of an unfolded sort
       if (!m_datamgr.is_cached(arg_sort))
       {
-        return expr;
+        return false;
       }
       const unfold_cache_element& cache_elem = m_datamgr.get_cache_element(arg_sort);
       if (f != cache_elem.determine_function && !contains(cache_elem.projection_functions, f))
       {
-        return expr;
+        return false;
       }
 
-      return data::application(f, apply_to(expr_appl[0]));
+      return true;
     }
 
-    data::data_expression apply_to(const data::data_expression& expr)
+    bool can_unfold(const data::data_expression& x)
     {
-      if (!data::is_application(expr))
+      if (!data::is_application(x))
       {
-        return expr;
-      }
-      
-      const data::application& expr_appl = atermpp::down_cast<data::application>(expr);
-      const data::function_symbol f = data::detail::get_top_fs(expr_appl);
-      //TODO: Remove match for insert
-      if (f == data::function_symbol() || std::string(f.name()) != "insert" || !is_pattern_matching(f))
-      {
-        return expr;
+        return false;
       }
 
-      const data::data_expression_vector args(expr_appl.begin(), expr_appl.end());
-      data::data_expression result = unfolded_expr(f, args);
-      mCRL2log(log::debug) << "Unfolded " << expr << " into " << result << std::endl;
-      return result;
+      const data::function_symbol f = data::detail::get_top_fs(atermpp::down_cast<data::application>(x));
+      if (f == data::function_symbol() || !is_pattern_matching(f))
+      {
+        return false;
+      }
+      auto udm = m_datamgr.dataspec().user_defined_mappings();
+      const data::data_specification& dataspec = m_datamgr.dataspec();
+      if (std::find_if(udm.begin(), udm.end(), 
+          [&](const auto& f2){ return f.name() == f2.name() && dataspec.equal_sorts(f.sort(), f2.sort()); }) == udm.end())
+      {
+        return false;
+      }
+      return true;
+    }
+
+    /// @brief Unfolds expr if it is of the shape h(a1,...,an) and h is defined by pattern matching
+    /// @pre this->can_unfold(x)
+    template <class T>
+    void operator()(T& result, const data::application& x)
+    {
+      const data::data_expression_vector args(x.begin(), x.end());
+      result = unfolded_expr(data::detail::get_top_fs(x), args);
+    }
+  };
+
+
+  template <template <class> class Builder>
+  struct replace_pattern_match_builder: public Builder<replace_pattern_match_builder<Builder> >
+  {
+    typedef Builder<replace_pattern_match_builder<Builder> > super;
+    using super::enter;
+    using super::leave;
+    using super::apply;
+    using super::update;
+
+    pattern_match_unfolder& m_unfolder;
+    bool m_currently_recursing = false;
+
+    replace_pattern_match_builder(pattern_match_unfolder& unfolder)
+      : m_unfolder(unfolder)
+    {}
+
+    bool is_applied_to_constructor(const data::application& x)
+    {
+      using utilities::detail::contains;
+      for(const data::data_expression& arg: x)
+      {
+        if (data::is_application(arg) && m_unfolder.is_constructor(data::detail::get_top_fs(arg)))
+        {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    template <class T>
+    void apply(T& result, const data::application& x)
+    {
+      if (m_currently_recursing)
+      {
+        // In if-statements, do not traverse the condition
+        if (data::is_if_application(x))
+        {
+          data::data_expression branch1;
+          super::apply(branch1, x[1]);
+          data::data_expression branch2;
+          super::apply(branch2, x[2]);
+          
+          data::make_application(result,
+            data::if_(x.sort()),
+            x[0],
+            branch1,
+            branch2
+          );
+        }
+        else if (m_unfolder.can_unfold(x) && is_applied_to_constructor(x))
+        {
+          data::data_expression intermediate_result;
+          m_unfolder(intermediate_result, x);
+          // Recursively apply unfolding
+          super::apply(result, intermediate_result);
+        }
+        else
+        {
+          super::apply(result, x);
+        }
+      }
+      else
+      {
+        // Determine whether we see Det(f(..)) or pi(f(..))
+        // If so, unfold and start recursing
+        if (m_unfolder.is_det_or_pi(x) && m_unfolder.can_unfold(x[0]))
+        {
+          data::data_expression intermediate_result1, intermediate_result2;
+          m_unfolder(intermediate_result1, atermpp::down_cast<data::application>(x[0]));
+
+          m_currently_recursing = true;
+          super::apply(intermediate_result2, intermediate_result1);
+          mCRL2log(log::debug) << "Unfolded " << x[0] << " into " << intermediate_result2 << std::endl;
+          data::make_application(result, x.head(), intermediate_result2);
+          m_currently_recursing = false;
+        }
+        else
+        {
+          super::apply(result, x);
+        }
+      }
     }
   };
 
   void unfold_pattern_matching(data::data_expression& x,
-                               const pattern_match_unfolder& unfolder
+                               pattern_match_unfolder& unfolder
                               )
   {
-    data::detail::make_replace_data_expressions_builder<data::data_expression_builder>(unfolder, true).update(x);
+    replace_pattern_match_builder<data::data_expression_builder>(unfolder).update(x);
   }
 
   data::data_expression unfold_pattern_matching(const data::data_expression& x,
-                               const pattern_match_unfolder& unfolder
+                               pattern_match_unfolder& unfolder
                               )
   {
     data::data_expression result;
-    data::detail::make_replace_data_expressions_builder<data::data_expression_builder>(unfolder, true).apply(result, x);
+    replace_pattern_match_builder<data::data_expression_builder>(unfolder).apply(result, x);
     return result;
   }
 } // namespace detail
