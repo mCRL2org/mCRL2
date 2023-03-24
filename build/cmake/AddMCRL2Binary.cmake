@@ -18,7 +18,7 @@ function(_add_library_tests TARGET_NAME)
       get_filename_component(base ${test} NAME_WE)
       set(testname ${category}_${TARGET_NAME}_${base})
 
-      add_executable(${testname} EXCLUDE_FROM_ALL ${test})
+      add_executable(${testname} ${test})
       set_target_properties(${testname} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${category})
       target_link_libraries(${testname} ${TARGET_NAME})
 
