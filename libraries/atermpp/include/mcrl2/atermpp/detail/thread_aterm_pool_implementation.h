@@ -177,6 +177,20 @@ void thread_aterm_pool::deregister_container(_aterm_container* container)
 
 void thread_aterm_pool::mark()
 {
+  for (const aterm* variable : *m_variables) 
+  {
+    if (variable != nullptr)
+    {
+      // Mark all terms (and their subterms) that are reachable, i.e the root set.
+      _aterm* term = detail::address(*variable);
+      if (term != nullptr && !term->is_marked()) 
+      {
+        // This variable is not a default term and that term has not been marked.
+        mark_term(*term, m_todo);
+      }
+    }
+  }
+
   for (const _aterm_container* container : *m_containers)
   {
     if (container != nullptr)
