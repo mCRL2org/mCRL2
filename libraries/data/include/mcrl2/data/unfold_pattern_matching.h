@@ -104,6 +104,7 @@ function_symbol get_top_fs(const data_expression& expr)
  * the right hand sides of match_criteria, construct a right hand side based on the
  * conditions and right hand sides of the rules.
  */
+static
 data_expression construct_condition_rhs(const std::vector<rule>& rules, const data_expression& representative)
 {
   // data_expression_vector negated_conditions;

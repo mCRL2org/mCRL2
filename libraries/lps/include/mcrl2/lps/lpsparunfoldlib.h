@@ -541,13 +541,7 @@ namespace detail
     }
   };
 
-  void unfold_pattern_matching(data::data_expression& x,
-                               pattern_match_unfolder& unfolder
-                              )
-  {
-    replace_pattern_match_builder<data::data_expression_builder>(unfolder).update(x);
-  }
-
+  inline
   data::data_expression unfold_pattern_matching(const data::data_expression& x,
                                pattern_match_unfolder& unfolder
                               )
