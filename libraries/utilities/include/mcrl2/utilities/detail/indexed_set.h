@@ -37,13 +37,14 @@ static constexpr std::size_t PRIME_NUMBER = 999953;
 
 #ifndef NDEBUG  // Numbers are small in debug mode for more intensive checks. 
 static constexpr std::size_t minimal_hashtable_size = 16; 
-static constexpr std::size_t RESERVATION_SIZE = 8;
 #else
 static constexpr std::size_t minimal_hashtable_size = 2048;
-static constexpr std::size_t RESERVATION_SIZE = 1024;
 #endif
+static constexpr std::size_t RESERVATION_FRACTION = 8;        // If the reserved keys entries are exploited, 1/RESERVATION_FRACTION new
+                                                              // keys are reserved. This is an expensive operation, as it is executed
+                                                              // using a lock_exclusive. 
 
-static_assert(RESERVATION_SIZE <= minimal_hashtable_size);
+static_assert(minimal_hashtable_size/RESERVATION_FRACTION != 0);
 static_assert(minimal_hashtable_size>=8);       ///< With a max_load of 0.75 the minimal size of the hashtable must be 8.
 
 } // namespace detail
@@ -59,7 +60,7 @@ inline void INDEXED_SET::reserve_indices(const std::size_t thread_index)
   {
     assert(thread_index<m_thread_control.size());
     assert(m_next_index<=m_keys.size());
-    m_keys.resize(m_keys.size()+detail::RESERVATION_SIZE);
+    m_keys.resize(m_keys.size()+std::max(m_keys.size() / detail::RESERVATION_FRACTION, m_thread_control.size()));  // Increase with at least the number of threads. 
 
     while ((detail::max_load_factor * m_hashtable.size()) < m_keys.size())
     {

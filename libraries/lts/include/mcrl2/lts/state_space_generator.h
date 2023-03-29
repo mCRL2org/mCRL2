@@ -566,19 +566,23 @@ class progress_monitor
 
     void finish_state(std::size_t state_count, std::size_t todo_list_size, std::size_t number_of_threads)
     {
+      static std::mutex exclusive_print_mutex;
       if (search_strategy == lps::es_breadth)
       {
         if (++count == level_up) 
         {
+          exclusive_print_mutex.lock();
           mCRL2log(log::debug) << "Number of states at level " << level << " is " << state_count - last_state_count << "\n";
           level++;
           level_up = count + todo_list_size;
           last_state_count = state_count;
           last_transition_count = transition_count;
+          exclusive_print_mutex.unlock();
         }
 
         if (time(&new_log_time) > last_log_time)
         {
+          exclusive_print_mutex.lock();
           last_log_time = new_log_time;
           std::size_t lvl_states = state_count - last_state_count;
           std::size_t lvl_transitions = transition_count - last_transition_count;
@@ -597,6 +601,7 @@ class progress_monitor
                                   << "%. Last level: " << level << ", " << lvl_states << "st, " 
                                   << lvl_transitions << "tr.\n";
           }
+          exclusive_print_mutex.unlock();
         }
       }
       else
@@ -604,11 +609,13 @@ class progress_monitor
         count++;
         if (time(&new_log_time) > last_log_time)
         {
+          exclusive_print_mutex.lock();
           last_log_time = new_log_time;
           mCRL2log(log::status) << "monitor: currently explored "
                             << count << " state" << ((count==1)?"":"s")
                             << " and " << transition_count << " transition" << ((transition_count==1)?".":"s.")
                             << std::endl;
+          exclusive_print_mutex.unlock();
         }
       }
     }
