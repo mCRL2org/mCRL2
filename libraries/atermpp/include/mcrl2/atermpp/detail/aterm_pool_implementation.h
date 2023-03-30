@@ -37,7 +37,12 @@ aterm_pool::aterm_pool() :
 {
   m_count_until_collection = capacity();
   m_count_until_resize = m_int_storage.capacity();
-  
+
+  if constexpr (EnableAggressiveGarbageCollection) 
+  {
+    m_count_until_collection = 1;
+  }
+
   // Initialize the empty list.
   create_appl(m_empty_list, m_function_symbol_pool.as_empty_list());
 }
@@ -273,6 +278,11 @@ void aterm_pool::collect_impl(mcrl2::utilities::shared_mutex& shared_mutex)
 
   // Use some heuristics to determine when the next collect should be called automatically.
   m_count_until_collection = size() + protection_set_size();
+
+  if constexpr (EnableAggressiveGarbageCollection) 
+  {
+    m_count_until_collection = 1;
+  }
 }
 
 function_symbol aterm_pool::create_function_symbol(const std::string& name, const std::size_t arity, const bool check_for_registered_functions)

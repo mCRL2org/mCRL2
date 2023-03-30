@@ -37,7 +37,7 @@ inline std::array<unprotected_aterm, N> construct_arguments(InputIterator it, In
   // The end is only used for debugging to ensure that the arity and std::distance(it, end) match.
   mcrl2::utilities::mcrl2_unused(end);
  
-  // Copy the arguments into this array. Doesn't change any reference count, because they are unprotected terms.
+  // Copy the arguments into this array.
   std::array<unprotected_aterm, N> arguments;
   for (size_t i = 0; i < N; ++i)
   {
@@ -423,15 +423,7 @@ template<typename ...Args>
 bool ATERM_POOL_STORAGE::emplace(aterm& term, Args&&... args)
 {
   auto [it, added] = m_term_set.emplace(std::forward<Args>(args)...);
-
-  // Assign the inserted term.
-#ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
-  term = atermpp::aterm(&(*it));
-#else
-  // atermpp::unprotected_aterm result(&(*it));
-  // term.swap(result);
-  new (&term) atermpp::unprotected_aterm(&*it); // Seems somewhat faster than the previous two lines. 
-#endif
+  new (&term) atermpp::unprotected_aterm(&*it); 
 
   if (added)
   {
