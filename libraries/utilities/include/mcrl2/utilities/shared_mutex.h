@@ -109,8 +109,10 @@ class shared_mutex : private mcrl2::utilities::noncopyable
 {
 public:
   shared_mutex(shared_mutex_pool& pool)
-    : m_pool(pool)
-  {}
+    : m_pool(pool) 
+  { 
+    m_pool.register_mutex(this);
+  }
 
   // Obtain exclusive access to the busy-forbidden lock.
   inline

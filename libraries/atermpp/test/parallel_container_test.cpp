@@ -19,7 +19,7 @@
 
 using namespace atermpp;
 
-BOOST_AUTO_TEST_CASE(parallel_vector)
+BOOST_AUTO_TEST_CASE(parallel_vector, *boost::unit_test::timeout(240))
 {
 #ifdef MCRL2_THREAD_SAFE
   // One thread continuously modifies a local atermpp::vector of aterms while the main thread performs garbage collection extensively.
