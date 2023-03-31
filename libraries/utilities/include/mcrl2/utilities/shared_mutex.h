@@ -43,6 +43,9 @@ private:
   /// Adds a shared mutex to the pool.
   void register_mutex(shared_mutex* mutex);
   
+  // Removes a shared mutex from the pool
+  void unregister_mutex(shared_mutex* mutex);
+
   std::vector<shared_mutex*> m_shared_mutexes;
 
   /// \brief Mutex for adding/removing shared_guards.
@@ -114,6 +117,11 @@ public:
     m_pool.register_mutex(this);
   }
 
+  ~shared_mutex() 
+  { 
+    m_pool.unregister_mutex(this);
+  }
+
   // Obtain exclusive access to the busy-forbidden lock.
   inline
   lock_guard lock()
@@ -149,7 +157,7 @@ public:
   /// \returns True iff the shared mutex is in the shared section
   bool is_shared_locked() const
   {
-    return m_lock_depth == 0;
+    return m_lock_depth != 0;
   }
 
 private:
@@ -215,6 +223,8 @@ void shared_mutex_pool::lock_impl(shared_mutex* shared_mutex)
 {
   if constexpr (mcrl2::utilities::detail::GlobalThreadSafe)
   {
+    assert(std::find(m_shared_mutexes.begin(), m_shared_mutexes.end(), shared_mutex) != m_shared_mutexes.end());
+
     // Only one thread can halt everything.
     m_mutex.lock();
 
@@ -256,7 +266,16 @@ inline
 void shared_mutex_pool::register_mutex(shared_mutex* mutex)
 {
   std::lock_guard guard(m_mutex);
-  m_shared_mutexes.push_back(mutex);
+  m_shared_mutexes.emplace_back(mutex);
+}
+
+inline void shared_mutex_pool::unregister_mutex(shared_mutex* mutex) 
+{
+  std::lock_guard guard(m_mutex);
+  auto it = std::find(m_shared_mutexes.begin(), m_shared_mutexes.end(), mutex);
+  assert(it != m_shared_mutexes.end());
+
+  m_shared_mutexes.erase(it);
 }
 
 inline
