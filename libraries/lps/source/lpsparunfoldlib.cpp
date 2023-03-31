@@ -450,12 +450,14 @@ void unfold_data_manager::generate_determine_function_equations(const data::sort
 lpsparunfold::lpsparunfold(lps::stochastic_specification& spec,
                            std::map< data::sort_expression , unfold_cache_element >& cache,
                            bool alt_case_placement,
-                           bool possibly_inconsistent)
+                           bool possibly_inconsistent,
+                           bool unfold_pattern_matching)
     : lps::detail::lps_algorithm<lps::stochastic_specification>(spec),
       m_run_before(false),
       m_datamgr(cache, spec.data(), possibly_inconsistent),
       m_pattern_unfolder(m_datamgr),
-      m_alt_case_placement(alt_case_placement)
+      m_alt_case_placement(alt_case_placement),
+      m_unfold_pattern_matching(unfold_pattern_matching)
 {
   m_datamgr.add_used_identifiers(lps::find_identifiers(spec));
   m_datamgr.add_used_identifiers(data::find_identifiers(spec.data()));
@@ -634,16 +636,19 @@ void lpsparunfold::update_linear_process(std::size_t parameter_at_index)
     lps::replace_variables_capture_avoiding(m_spec.process(), s);
   }
 
-  // Unfold pattern matching mappings in parameter updates, requires intermediate rewriting
-  data::rewriter rewr(m_spec.data());
-  for (action_summand& sum: m_spec.process().action_summands())
+  if (m_unfold_pattern_matching)
   {
-    data::assignment_vector new_assignments;
-    for (const assignment& as: sum.assignments())
+    // Unfold pattern matching mappings in parameter updates, requires intermediate rewriting
+    data::rewriter rewr(m_spec.data());
+    for (action_summand& sum: m_spec.process().action_summands())
     {
-      new_assignments.emplace_back(as.lhs(), unfold_pattern_matching(rewr(as.rhs()), m_pattern_unfolder));
+      data::assignment_vector new_assignments;
+      for (const assignment& as: sum.assignments())
+      {
+        new_assignments.emplace_back(as.lhs(), unfold_pattern_matching(rewr(as.rhs()), m_pattern_unfolder));
+      }
+      sum.assignments() = data::assignment_list(new_assignments.begin(), new_assignments.end());
     }
-    sum.assignments() = data::assignment_list(new_assignments.begin(), new_assignments.end());
   }
 
   // NB: order is important. If we first replace the parameters, they are changed
