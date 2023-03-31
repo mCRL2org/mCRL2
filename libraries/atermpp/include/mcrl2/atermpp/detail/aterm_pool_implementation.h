@@ -205,83 +205,84 @@ void aterm_pool::created_term(bool allow_collect, mcrl2::utilities::shared_mutex
 
 void aterm_pool::collect_impl(mcrl2::utilities::shared_mutex& shared_mutex)
 {
-  if (!m_enable_garbage_collection) { return; }
-
-  mcrl2::utilities::lock_guard guard = shared_mutex.lock();
-  if (m_count_until_collection > 0)
+  if (m_enable_garbage_collection) 
   {
-    // Another thread has performed garbage collection, so we can ignore it.
-    return;
-  }
+    mcrl2::utilities::lock_guard guard = shared_mutex.lock();
+    if (m_count_until_collection > 0)
+    {
+      // Another thread has performed garbage collection, so we can ignore it.
+      return;
+    }
 
-  auto timestamp = std::chrono::system_clock::now();
-  std::size_t old_size = size();
+    auto timestamp = std::chrono::system_clock::now();
+    std::size_t old_size = size();
 
-  // Mark the terms referenced by all thread pools.
-  for (const auto& pool : m_thread_pools)
-  {
-    pool->mark();
-  }
+    // Mark the terms referenced by all thread pools.
+    for (const auto& pool : m_thread_pools)
+    {
+      pool->mark();
+    }
 
-  assert(std::get<0>(m_appl_storage).verify_mark());
-  assert(std::get<1>(m_appl_storage).verify_mark());
-  assert(std::get<2>(m_appl_storage).verify_mark());
-  assert(std::get<3>(m_appl_storage).verify_mark());
-  assert(std::get<4>(m_appl_storage).verify_mark());
-  assert(std::get<5>(m_appl_storage).verify_mark());
-  assert(std::get<6>(m_appl_storage).verify_mark());
-  assert(std::get<7>(m_appl_storage).verify_mark());
-  assert(m_appl_dynamic_storage.verify_mark());
+    assert(std::get<0>(m_appl_storage).verify_mark());
+    assert(std::get<1>(m_appl_storage).verify_mark());
+    assert(std::get<2>(m_appl_storage).verify_mark());
+    assert(std::get<3>(m_appl_storage).verify_mark());
+    assert(std::get<4>(m_appl_storage).verify_mark());
+    assert(std::get<5>(m_appl_storage).verify_mark());
+    assert(std::get<6>(m_appl_storage).verify_mark());
+    assert(std::get<7>(m_appl_storage).verify_mark());
+    assert(m_appl_dynamic_storage.verify_mark());
 
-  // Keep track of the duration for marking and reset for sweep.
-  auto mark_duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - timestamp).count();
-  timestamp = std::chrono::system_clock::now();
-  // Collect all terms that are not marked.
-  m_appl_dynamic_storage.sweep();
-  std::get<7>(m_appl_storage).sweep();
-  std::get<6>(m_appl_storage).sweep();
-  std::get<5>(m_appl_storage).sweep();
-  std::get<4>(m_appl_storage).sweep();
-  std::get<3>(m_appl_storage).sweep();
-  std::get<2>(m_appl_storage).sweep();
-  std::get<1>(m_appl_storage).sweep();
-  std::get<0>(m_appl_storage).sweep();
-  m_int_storage.sweep();
+    // Keep track of the duration for marking and reset for sweep.
+    auto mark_duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - timestamp).count();
+    timestamp = std::chrono::system_clock::now();
+    // Collect all terms that are not marked.
+    m_appl_dynamic_storage.sweep();
+    std::get<7>(m_appl_storage).sweep();
+    std::get<6>(m_appl_storage).sweep();
+    std::get<5>(m_appl_storage).sweep();
+    std::get<4>(m_appl_storage).sweep();
+    std::get<3>(m_appl_storage).sweep();
+    std::get<2>(m_appl_storage).sweep();
+    std::get<1>(m_appl_storage).sweep();
+    std::get<0>(m_appl_storage).sweep();
+    m_int_storage.sweep();
 
-  // Check that after sweeping the terms are consistent.
-  assert(m_int_storage.verify_sweep());
-  assert(std::get<0>(m_appl_storage).verify_sweep());
-  assert(std::get<1>(m_appl_storage).verify_sweep());
-  assert(std::get<2>(m_appl_storage).verify_sweep());
-  assert(std::get<3>(m_appl_storage).verify_sweep());
-  assert(std::get<4>(m_appl_storage).verify_sweep());
-  assert(std::get<5>(m_appl_storage).verify_sweep());
-  assert(std::get<6>(m_appl_storage).verify_sweep());
-  assert(std::get<7>(m_appl_storage).verify_sweep());
-  assert(m_appl_dynamic_storage.verify_sweep());
+    // Check that after sweeping the terms are consistent.
+    assert(m_int_storage.verify_sweep());
+    assert(std::get<0>(m_appl_storage).verify_sweep());
+    assert(std::get<1>(m_appl_storage).verify_sweep());
+    assert(std::get<2>(m_appl_storage).verify_sweep());
+    assert(std::get<3>(m_appl_storage).verify_sweep());
+    assert(std::get<4>(m_appl_storage).verify_sweep());
+    assert(std::get<5>(m_appl_storage).verify_sweep());
+    assert(std::get<6>(m_appl_storage).verify_sweep());
+    assert(std::get<7>(m_appl_storage).verify_sweep());
+    assert(m_appl_dynamic_storage.verify_sweep());
 
-  // Print some statistics.
-  if (EnableGarbageCollectionMetrics)
-  {
-    // Update the times
-    auto sweep_duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - timestamp).count();
+    // Print some statistics.
+    if (EnableGarbageCollectionMetrics)
+    {
+      // Update the times
+      auto sweep_duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - timestamp).count();
 
-    // Print the relevant information.
-    mCRL2log(mcrl2::log::info, "Performance") << "g_term_pool(): Garbage collected " << old_size - size() << " terms, " << size() << " terms remaining in "
-      << mark_duration + sweep_duration << " ms (marking " << mark_duration << " ms + sweep " << sweep_duration << " ms).\n";
-  }
+      // Print the relevant information.
+      mCRL2log(mcrl2::log::info, "Performance") << "g_term_pool(): Garbage collected " << old_size - size() << " terms, " << size() << " terms remaining in "
+        << mark_duration + sweep_duration << " ms (marking " << mark_duration << " ms + sweep " << sweep_duration << " ms).\n";
+    }
 
-  // Garbage collect function symbols.
-  m_function_symbol_pool.sweep();
+    // Garbage collect function symbols.
+    m_function_symbol_pool.sweep();
 
-  print_performance_statistics();
+    print_performance_statistics();
 
-  // Use some heuristics to determine when the next collect should be called automatically.
-  m_count_until_collection = size() + protection_set_size();
+    // Use some heuristics to determine when the next collect should be called automatically.
+    m_count_until_collection = size() + protection_set_size();
 
-  if constexpr (EnableAggressiveGarbageCollection) 
-  {
-    m_count_until_collection = 1;
+    if constexpr (EnableAggressiveGarbageCollection) 
+    {
+      m_count_until_collection = 1;
+    }
   }
 }
 
