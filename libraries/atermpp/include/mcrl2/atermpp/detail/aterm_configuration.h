@@ -27,7 +27,7 @@ constexpr static bool EnableBlockAllocator = false;
 constexpr static bool EnableGarbageCollectionMetrics = true;
 
 /// Performs garbage collection intensively for testing purposes.
-constexpr static bool EnableAggressiveGarbageCollection = true;
+constexpr static bool EnableAggressiveGarbageCollection = false;
 
 /// \brief Enable to print hashtable collision, size and number of buckets.
 constexpr static bool EnableHashtableMetrics = false;
