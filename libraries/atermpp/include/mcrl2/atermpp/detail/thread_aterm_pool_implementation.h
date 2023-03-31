@@ -210,8 +210,6 @@ void thread_aterm_pool::print_local_performance_statistics() const
   }
 }
 
-
-
 std::size_t thread_aterm_pool::protection_set_size() const
 {
   std::size_t result = m_variables->size();
