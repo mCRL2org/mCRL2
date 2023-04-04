@@ -223,11 +223,10 @@ void shared_mutex_pool::lock_impl(shared_mutex* shared_mutex)
 {
   if constexpr (mcrl2::utilities::detail::GlobalThreadSafe)
   {
-    assert(std::find(m_shared_mutexes.begin(), m_shared_mutexes.end(), shared_mutex) != m_shared_mutexes.end());
-
     // Only one thread can halt everything.
     m_mutex.lock();
 
+    assert(std::find(m_shared_mutexes.begin(), m_shared_mutexes.end(), shared_mutex) != m_shared_mutexes.end());
     // Indicate that threads must wait.
     for (auto& mutex : m_shared_mutexes)
     {
