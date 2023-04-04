@@ -255,8 +255,8 @@ data_expression construct_rhs(
   /*
    * For each constructor, find the set of rules that apply to it, rewritten to match the constructor.
    */
-  auto constructors = ssf.get_constructors(matching_target.sort());
-  std::set<function_symbol> match_constructors(constructors.begin(), constructors.end());
+  // type below depends on the type of ssf
+  const auto& match_constructors = ssf.get_constructors(matching_target.sort());
   std::map<function_symbol, std::vector<rule> > constructor_rules;
   for (const rule& r: rules)
   {
@@ -276,7 +276,7 @@ data_expression construct_rhs(
         parameters.insert(parameters.end(), pattern_appl.begin(), pattern_appl.end());
       }
 
-      assert(match_constructors.count(constructor) != 0);
+      assert(utilities::detail::contains(match_constructors, constructor));
       rule rule = r;
       rule.match_criteria.erase(matching_target);
       for (std::size_t j = 0; j < parameters.size(); j++)
@@ -333,7 +333,7 @@ data_expression construct_rhs(
   /*
    * Construct an rhs of the form if(is_cons1, rhs_cons1, if(is_cons2, rhs_cons2, ...))
    */
-  std::set<function_symbol>::const_iterator i = match_constructors.begin();
+  auto i = match_constructors.begin();
   data_expression result = construct_rhs(ssf, gen, constructor_rules[*i], sort);
   for (i++; i != match_constructors.end(); i++)
   {
