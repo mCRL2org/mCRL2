@@ -131,8 +131,8 @@ data_expression construct_condition_rhs(const std::vector<rule>& rules, const da
     }
     map_substitution<std::map<variable, data_expression> > substitution(substitution_map);
 
-    data_expression condition = replace_free_variables(r.condition, substitution);
-    data_expression rhs = replace_free_variables(r.rhs, substitution);
+    data_expression condition = replace_variables_capture_avoiding(r.condition, substitution);
+    data_expression rhs = replace_variables_capture_avoiding(r.rhs, substitution);
 
     if (result == data_expression())
     {
@@ -193,7 +193,7 @@ data_expression construct_rhs(
     std::set<function_symbol> constructors_seen;
     for (const rule& r: rules)
     {
-      data_expression pattern = r.match_criteria.at(var_expr);
+      const data_expression& pattern = r.match_criteria.at(var_expr);
       if (is_variable(pattern))
       {
         variable_seen = true;
@@ -255,12 +255,12 @@ data_expression construct_rhs(
   /*
    * For each constructor, find the set of rules that apply to it, rewritten to match the constructor.
    */
-  // type below depends on the type of ssf
+  // auto type below depends on the type of ssf
   const auto& match_constructors = ssf.get_constructors(matching_target.sort());
   std::map<function_symbol, std::vector<rule> > constructor_rules;
   for (const rule& r: rules)
   {
-    data_expression pattern = r.match_criteria.at(matching_target);
+    const data_expression& pattern = r.match_criteria.at(matching_target);
     if (is_function_symbol(pattern) || is_application(pattern))
     {
       /*
@@ -269,6 +269,8 @@ data_expression construct_rhs(
        */
       function_symbol constructor = get_top_fs(pattern);
       assert(constructor != function_symbol());
+      assert(utilities::detail::contains(match_constructors, constructor));
+
       data_expression_vector parameters;
       if (is_application(pattern))
       {
@@ -276,7 +278,6 @@ data_expression construct_rhs(
         parameters.insert(parameters.end(), pattern_appl.begin(), pattern_appl.end());
       }
 
-      assert(utilities::detail::contains(match_constructors, constructor));
       rule rule = r;
       rule.match_criteria.erase(matching_target);
       // To prevent creating expressions of the shape head(l) |> tail(l), we perform a substitution here
@@ -306,8 +307,8 @@ data_expression construct_rhs(
        */
       assert(is_variable(pattern));
       variable_substitution sigma(atermpp::down_cast<variable>(pattern), matching_target);
-      data_expression condition = replace_free_variables(r.condition, sigma);
-      data_expression rhs = replace_free_variables(r.rhs, sigma);
+      data_expression condition = replace_variables_capture_avoiding(r.condition, sigma);
+      data_expression rhs = replace_variables_capture_avoiding(r.rhs, sigma);
 
       for (const function_symbol& f: match_constructors)
       {
