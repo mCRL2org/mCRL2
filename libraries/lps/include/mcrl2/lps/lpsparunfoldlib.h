@@ -467,6 +467,7 @@ namespace detail
 
     pattern_match_unfolder& m_unfolder;
     bool m_currently_recursing = false;
+    std::size_t m_current_depth = 0;
 
     replace_pattern_match_builder(pattern_match_unfolder& unfolder)
       : m_unfolder(unfolder)
@@ -491,9 +492,16 @@ namespace detail
     {
       if (m_currently_recursing)
       {
-        // In if-statements, do not traverse the condition
-        if (data::is_if_application(x))
+        if (m_current_depth >= 3 || m_unfolder.is_constructor(data::detail::get_top_fs(x)))
         {
+          // Stop recursing after unfolding three times or when meeting a constructor
+          // In the latter case, we have done enough to rewrite Det() and pi()
+          result = x;
+          return;
+        }
+        else if (data::is_if_application(x))
+        {
+          // In if-statements, do not traverse the condition
           data::data_expression branch1;
           super::apply(branch1, x[1]);
           data::data_expression branch2;
@@ -511,7 +519,9 @@ namespace detail
           data::data_expression intermediate_result;
           m_unfolder(intermediate_result, x);
           // Recursively apply unfolding
+          m_current_depth++;
           super::apply(result, intermediate_result);
+          m_current_depth--;
         }
         else
         {
@@ -528,7 +538,10 @@ namespace detail
           m_unfolder(intermediate_result1, atermpp::down_cast<data::application>(x[0]));
 
           m_currently_recursing = true;
+          m_current_depth++;
           super::apply(intermediate_result2, intermediate_result1);
+          m_current_depth--;
+
           mCRL2log(log::debug) << "Unfolded " << x[0] << " into " << intermediate_result2 << std::endl;
           data::make_application(result, x.head(), intermediate_result2);
           m_currently_recursing = false;
