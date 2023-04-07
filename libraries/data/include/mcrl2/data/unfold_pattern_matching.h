@@ -279,6 +279,15 @@ data_expression construct_rhs(
       assert(utilities::detail::contains(match_constructors, constructor));
       rule rule = r;
       rule.match_criteria.erase(matching_target);
+      // To prevent creating expressions of the shape head(l) |> tail(l), we perform a substitution here
+      // This is only safe if there are no binders in the right-hand side
+      std::set<data_expression> subexpr = find_data_expressions(rule.rhs);
+      if (!parameters.empty() && std::none_of(subexpr.begin(), subexpr.end(), [](const data_expression& e) { return is_abstraction(e); }))
+      {
+        auto sigma = [&](const data_expression& x) { return x == pattern ? matching_target : x; };
+        rule.rhs = replace_data_expressions(rule.rhs, sigma, true);
+        rule.condition = replace_data_expressions(rule.condition, sigma, true);
+      }
       for (std::size_t j = 0; j < parameters.size(); j++)
       {
         function_symbol projection_function = ssf.get_projection_funcs(constructor)[j];
