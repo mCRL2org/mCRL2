@@ -79,13 +79,13 @@ public:
      */
     static Bdd bddCube(const BddSet &variables, std::vector<uint8_t> values);
 
-    int operator==(const Bdd& other) const;
-    int operator!=(const Bdd& other) const;
+    bool operator==(const Bdd& other) const;
+    bool operator!=(const Bdd& other) const;
     Bdd& operator=(const Bdd& right);
-    int operator<=(const Bdd& other) const;
-    int operator>=(const Bdd& other) const;
-    int operator<(const Bdd& other) const;
-    int operator>(const Bdd& other) const;
+    bool operator<=(const Bdd& other) const;
+    bool operator>=(const Bdd& other) const;
+    bool operator<(const Bdd& other) const;
+    bool operator>(const Bdd& other) const;
     Bdd operator!() const;
     Bdd operator~() const;
     Bdd operator*(const Bdd& other) const;
@@ -104,22 +104,22 @@ public:
     /**
      * @brief Returns non-zero if this Bdd is bddOne() or bddZero()
      */
-    int isConstant() const;
+    bool isConstant() const;
 
     /**
      * @brief Returns non-zero if this Bdd is bddOne() or bddZero()
      */
-    int isTerminal() const;
+    bool isTerminal() const;
 
     /**
      * @brief Returns non-zero if this Bdd is bddOne()
      */
-    int isOne() const;
+    bool isOne() const;
 
     /**
      * @brief Returns non-zero if this Bdd is bddZero()
      */
-    int isZero() const;
+    bool isZero() const;
 
     /**
      * @brief Returns the top variable index of this Bdd (the variable in the root node)
@@ -189,7 +189,7 @@ public:
     /**
      * @brief Returns whether all elements in f are also in g
      */
-    int Leq(const Bdd& g) const;
+    bool Leq(const Bdd& g) const;
 
     /**
      * @brief Computes the reverse application of a transition relation to this set.
@@ -485,9 +485,9 @@ class BddMap
     BddMap(const BDD from) : bdd(from) { sylvan_protect(&bdd); }
     BddMap(const Bdd &from) : bdd(from.bdd) { sylvan_protect(&bdd); }
 public:
+    BddMap(const BddMap& from) : bdd(from.bdd) { sylvan_protect(&bdd); }
     BddMap() : bdd(sylvan_map_empty()) { sylvan_protect(&bdd); }
     ~BddMap() { sylvan_unprotect(&bdd); }
-    BddMap(const BddMap& other) : bdd(other.bdd) { sylvan_protect(&bdd); }
 
     BddMap(uint32_t key_variable, const Bdd value);
 
@@ -514,7 +514,7 @@ public:
     /**
      * @brief Returns non-zero when this map is empty
      */
-    int isEmpty() const;
+    bool isEmpty() const;
 };
 
 class MtbddMap;
@@ -592,8 +592,8 @@ public:
      */
     static Mtbdd mtbddCube(const BddSet &variables, std::vector<uint8_t> values, const Mtbdd &terminal);
 
-    int operator==(const Mtbdd& other) const;
-    int operator!=(const Mtbdd& other) const;
+    bool operator==(const Mtbdd& other) const;
+    bool operator!=(const Mtbdd& other) const;
     Mtbdd& operator=(const Mtbdd& right);
     Mtbdd operator!() const;
     Mtbdd operator~() const;
@@ -609,22 +609,22 @@ public:
     /**
      * @brief Returns non-zero if this Mtbdd is a leaf
      */
-    int isTerminal() const;
+    bool isTerminal() const;
 
     /**
      * @brief Returns non-zero if this Mtbdd is a leaf
      */
-    int isLeaf() const;
+    bool isLeaf() const;
 
     /**
      * @brief Returns non-zero if this Mtbdd is mtbddOne()
      */
-    int isOne() const;
+    bool isOne() const;
 
     /**
      * @brief Returns non-zero if this Mtbdd is mtbddZero()
      */
-    int isZero() const;
+    bool isZero() const;
 
     /**
      * @brief Returns the top variable index of this Mtbdd (the variable in the root node)
@@ -786,7 +786,6 @@ class MtbddMap
 public:
     MtbddMap() : mtbdd(mtbdd_map_empty()) { mtbdd_protect(&mtbdd); }
     ~MtbddMap() { mtbdd_unprotect(&mtbdd); }
-    MtbddMap(const MtbddMap& other) : mtbdd(other.mtbdd) { mtbdd_protect(&mtbdd); }
 
     MtbddMap(uint32_t key_variable, Mtbdd value);
 
@@ -813,7 +812,7 @@ public:
     /**
      * @brief Returns non-zero when this map is empty
      */
-    int isEmpty();
+    bool isEmpty();
 };
 
 class Sylvan {

@@ -89,7 +89,8 @@ endif()
 
 add_subdirectory(3rd-party/dparser)
 if (MCRL2_ENABLE_SYLVAN)
-  add_subdirectory(3rd-party/sylvan/src)
+  add_subdirectory(3rd-party/lace)
+  add_subdirectory(3rd-party/sylvan)
 endif()
 
 if (MCRL2_ENABLE_BENCHMARKS)
