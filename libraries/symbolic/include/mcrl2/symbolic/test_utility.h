@@ -98,8 +98,8 @@ sylvan::ldds::ldd random_subset(const sylvan::ldds::ldd& U, std::size_t amount)
 void initialise_sylvan()
 {
   //mcrl2::log::logger::set_reporting_level(mcrl2::log::debug);
-  lace_init(1, 1024*1024*4);
-  lace_startup(0, nullptr, nullptr);
+  lace_start(1, 1024*1024*4);
+  lace_set_stacksize(0);
   sylvan::sylvan_set_limits(1024 * 1024 * 1024, 6, 6);
   sylvan::sylvan_init_package();
   sylvan::sylvan_init_ldd();
@@ -109,7 +109,7 @@ void initialise_sylvan()
 void quit_sylvan()
 {
   sylvan::sylvan_quit();
-  lace_exit();
+  lace_stop();
 }
 
 } // namespace mcrl2::symbolic
