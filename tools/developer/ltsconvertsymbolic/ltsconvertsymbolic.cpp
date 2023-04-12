@@ -191,8 +191,8 @@ class ltsconvert_tool : public input_output_tool
     
     bool run() override
     {      
-      lace_init(lace_n_workers, lace_dqsize);
-      lace_startup(lace_stacksize, nullptr, nullptr);
+      lace_start(lace_n_workers, lace_dqsize);
+      lace_set_stacksize(lace_stacksize);
       sylvan::sylvan_set_limits(memory_limit * 1024 * 1024 * 1024, std::log2(table_ratio), std::log2(initial_ratio));
       sylvan::sylvan_init_package();
       sylvan::sylvan_init_ldd();
@@ -237,7 +237,7 @@ class ltsconvert_tool : public input_output_tool
       }
 
       sylvan::sylvan_quit();
-      lace_exit();
+      lace_stop();
       return true;
     }
 
