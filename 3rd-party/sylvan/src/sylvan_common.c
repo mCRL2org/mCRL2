@@ -17,10 +17,6 @@
 
 #include <sylvan_int.h>
 
-#ifndef cas
-#define cas(ptr, old, new) (__sync_bool_compare_and_swap((ptr),(old),(new)))
-#endif
-
 /**
  * Implementation of garbage collection
  */
@@ -51,7 +47,7 @@ sylvan_gc_disable()
 /**
  * This variable is used for a cas flag so only one gc runs at one time
  */
-static volatile int gc;
+static _Atomic(int) gc;
 
 /**
  * Structures for the marking mechanisms
@@ -254,12 +250,13 @@ VOID_TASK_0(sylvan_gc_go)
 VOID_TASK_IMPL_0(sylvan_gc)
 {
     if (gc_enabled) {
-        if (cas(&gc, 0, 1)) {
+        int zero = 0;
+        if (atomic_compare_exchange_strong(&gc, &zero, 1)) {
             NEWFRAME(sylvan_gc_go);
             gc = 0;
         } else {
             /* wait for new frame to appear */
-            while (*(Task* volatile*)&(lace_newframe.t) == 0) {}
+            while (atomic_load_explicit(&lace_newframe.t, memory_order_relaxed) == 0) {}
             lace_yield(__lace_worker, __lace_dq_head);
         }
     }
@@ -276,7 +273,7 @@ static size_t table_min = 0, table_max = 0, cache_min = 0, cache_max = 0;
 static int
 is_power_of_two(size_t size)
 {
-    return __builtin_popcountll(size) == 1 ? 1 : 0;
+    return (size != 0) && ((size & (size-1)) == 0);
 }
 
 void
@@ -306,8 +303,16 @@ sylvan_set_sizes(size_t min_tablesize, size_t max_tablesize, size_t min_cachesiz
 void
 sylvan_set_limits(size_t memorycap, int table_ratio, int initial_ratio)
 {
+    /* This method ONLY limits the "unique nodes table" and the "operation cache" which are the main
+     * datastructures of Sylvan.
+     *
+     * Suggested limits:
+     * - memorycap to whatever you want at most, in bytes.
+     * - table_ratio to a number between -3 (8x bigger cache) and 3 (8x bigger nodes table)
+     * - inital_ratio to something like 10 (start with 1024x smaller tables initially)
+     */
     if (table_ratio < -10 || table_ratio > 10) {
-        fprintf(stderr, "sylvan_set_limits: table_ratio unreasonable (should be between -10 and 10)\n");
+        fprintf(stderr, "sylvan_set_limits: table_ratio unreasonable (between -10 and 10)\n");
         exit(1);
     }
 
@@ -371,7 +376,6 @@ sylvan_init_package(void)
     main_hook = TASK(sylvan_gc_normal_resize);
 #endif
 
-    LACE_ME;
     sylvan_stats_init();
 }
 
