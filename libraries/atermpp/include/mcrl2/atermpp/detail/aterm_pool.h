@@ -52,10 +52,6 @@ public:
   virtual void set_forbidden(bool value) = 0;
 
   /// \returns The total number of terms residing in the pool.
-  // This function should be a pure virtual function, but on a Mac with an arm
-  // processor, it causes so now and then a "libc++abi: Pure virtual function called"
-  // problem. Hence, it is given a trivial default implementation. 
-  // The returned value must at least be 1. 
   virtual std::size_t protection_set_size() const = 0;
 };
 
