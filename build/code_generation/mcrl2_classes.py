@@ -233,6 +233,40 @@ imp(const boolean_expression& left, const boolean_expression& right)  : public b
 boolean_variable(const core::identifier_string& name)                 : public bes::boolean_expression | EIUs | BooleanVariable      | A boolean variable
 '''
 
+# ---------
+PRES_CLASSES = r'''
+propositional_variable(const core::identifier_string& name, const data::variable_list& parameters)                                                                                                                           : public atermpp::aterm_appl | CI  | PropVarDecl | A propositional variable declaration
+pres_equation(const fixpoint_symbol& symbol, const propositional_variable& variable, const pres_expression& formula)                                                                                                                                      | SMC | PREqn       | A PRES equation
+pres(const data::data_specification& data, const std::vector<pres_system::pres_equation>& equations, const std::set<data::variable>& global_variables, const propositional_variable_instantiation& initial_state)                                         | SMW | PRES        | A PRES
+'''
+
+PRES_EXPRESSION_CLASSES = r'''
+pres_expression()                                                                                                       : public atermpp::aterm_appl          | XCI   | PRExpr            | A pres expression
+propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters) : public pres_system::pres_expression | ECIUs | PropVarInst       | A propositional variable instantiation
+not_(const pres_expression& operand)                                                                                    : public pres_system::pres_expression | EI    | PRESNot           | The not operator for pres expressions
+and_(const pres_expression& left, const pres_expression& right)                                                         : public pres_system::pres_expression | EI    | PRESAnd           | The and operator for pres expressions
+or_(const pres_expression& left, const pres_expression& right)                                                          : public pres_system::pres_expression | EI    | PRESOr            | The or operator for pres expressions
+imp(const pres_expression& left, const pres_expression& right)                                                          : public pres_system::pres_expression | EI    | PRESImp           | The implication operator for pres expressions
+forall(const data::variable_list& variables, const pres_expression& body)                                               : public pres_system::pres_expression | EI    | PRESForall        | The universal quantification operator for pres expressions
+exists(const data::variable_list& variables, const pres_expression& body)                                               : public pres_system::pres_expression | EI    | PRESExists        | The existential quantification operator for pres expressions
+'''
+
+REAL_EQUATION_CLASSES = r'''
+real_equation(const fixpoint_symbol& symbol, const real_variable& variable, const real_expression& formula) : public atermpp::aterm_appl | MS  | RealEquation    | real equation
+real_equation_system(const std::vector<res::real_equation>& equations, const real_expression& initial_state)                             | MSW | RES             | A real equation system
+'''
+
+REAL_EXPRESSION_CLASSES = r'''
+real_expression()                                                     : public atermpp::aterm_appl  | XCI  | RealExpression    | A real expression
+true_()                                                               : public res::real_expression | EI   | RealTrue          | The value true for real expressions
+false_()                                                              : public res::real_expression | EI   | RealFalse         | The value false for real expressions
+not_(const real_expression& operand)                                  : public res::real_expression | EI   | RealNot           | The not operator for real expressions
+and_(const real_expression& left, const real_expression& right)       : public res::real_expression | EI   | RealAnd           | The and operator for real expressions
+or_(const real_expression& left, const real_expression& right)        : public res::real_expression | EI   | RealOr            | The or operator for real expressions
+imp(const real_expression& left, const real_expression& right)        : public res::real_expression | EI   | RealImp           | The implication operator for real expressions
+real_variable(const core::identifier_string& name)                    : public res::real_expression | EIUs | RealVariable      | A real variable
+'''
+
 BDD_EXPRESSION_CLASSES = r'''
 bdd_expression()                                                                                  : public atermpp::aterm_appl | XCI  | BddExpression | A bdd expression
 true_()                                                                                           : public bdd::bdd_expression | EI   | BddTrue       | The value true for bdd expressions
@@ -1466,5 +1500,7 @@ def mcrl2_class_map():
           'process'          : PROCESS_CLASSES + PROCESS_EXPRESSION_CLASSES,
           'pbes_system'      : PBES_CLASSES + PBES_EXPRESSION_CLASSES,
           'bes'              : BOOLEAN_CLASSES + BOOLEAN_EXPRESSION_CLASSES,
+          'pres_system'      : PRES_CLASSES + PRES_EXPRESSION_CLASSES,
+          'res'              : REAL_EQUATION_CLASSES + REAL_EXPRESSION_CLASSES,
           'bdd'              : BDD_EXPRESSION_CLASSES
         }

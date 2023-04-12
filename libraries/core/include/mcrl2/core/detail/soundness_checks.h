@@ -198,6 +198,15 @@ template <typename Term> bool check_rule_BES(const Term& t);
 template <typename Term> bool check_rule_BooleanEquation(const Term& t);
 template <typename Term> bool check_rule_BooleanVariable(const Term& t);
 template <typename Term> bool check_rule_BooleanExpression(const Term& t);
+template <typename Term> bool check_rule_PRES(const Term& t);
+template <typename Term> bool check_rule_PREqnSpec(const Term& t);
+template <typename Term> bool check_rule_PRInit(const Term& t);
+template <typename Term> bool check_rule_PREqn(const Term& t);
+template <typename Term> bool check_rule_PRExpr(const Term& t);
+template <typename Term> bool check_rule_RES(const Term& t);
+template <typename Term> bool check_rule_RealEquation(const Term& t);
+template <typename Term> bool check_rule_RealVariable(const Term& t);
+template <typename Term> bool check_rule_RealExpression(const Term& t);
 template <typename Term> bool check_rule_BddExpression(const Term& t);
 template <typename Term> bool check_term_SortCons(const Term& t);
 template <typename Term> bool check_term_SortStruct(const Term& t);
@@ -281,6 +290,8 @@ template <typename Term> bool check_term_StateNot(const Term& t);
 template <typename Term> bool check_term_StateAnd(const Term& t);
 template <typename Term> bool check_term_StateOr(const Term& t);
 template <typename Term> bool check_term_StateImp(const Term& t);
+template <typename Term> bool check_term_StatePlus(const Term& t);
+template <typename Term> bool check_term_StateConstantMultiply(const Term& t);
 template <typename Term> bool check_term_StateForall(const Term& t);
 template <typename Term> bool check_term_StateExists(const Term& t);
 template <typename Term> bool check_term_StateMust(const Term& t);
@@ -336,6 +347,34 @@ template <typename Term> bool check_term_BooleanNot(const Term& t);
 template <typename Term> bool check_term_BooleanAnd(const Term& t);
 template <typename Term> bool check_term_BooleanOr(const Term& t);
 template <typename Term> bool check_term_BooleanImp(const Term& t);
+template <typename Term> bool check_term_PRES(const Term& t);
+template <typename Term> bool check_term_PREqnSpec(const Term& t);
+template <typename Term> bool check_term_PRInit(const Term& t);
+template <typename Term> bool check_term_PREqn(const Term& t);
+template <typename Term> bool check_term_PRESTrue(const Term& t);
+template <typename Term> bool check_term_PRESFalse(const Term& t);
+template <typename Term> bool check_term_PRESMinus(const Term& t);
+template <typename Term> bool check_term_PRESAnd(const Term& t);
+template <typename Term> bool check_term_PRESOr(const Term& t);
+template <typename Term> bool check_term_PRESImp(const Term& t);
+template <typename Term> bool check_term_PRESPlus(const Term& t);
+template <typename Term> bool check_term_PRESConstantMultiply(const Term& t);
+template <typename Term> bool check_term_PRESMin(const Term& t);
+template <typename Term> bool check_term_PRESMax(const Term& t);
+template <typename Term> bool check_term_PRESSum(const Term& t);
+template <typename Term> bool check_term_RES(const Term& t);
+template <typename Term> bool check_term_RealEquation(const Term& t);
+template <typename Term> bool check_term_RealVariable(const Term& t);
+template <typename Term> bool check_term_RealNot(const Term& t);
+template <typename Term> bool check_term_RealAnd(const Term& t);
+template <typename Term> bool check_term_RealOr(const Term& t);
+template <typename Term> bool check_term_RealImp(const Term& t);
+template <typename Term> bool check_term_RealPlus(const Term& t);
+template <typename Term> bool check_term_RealConstantMultiply(const Term& t);
+template <typename Term> bool check_term_RealCondAnd(const Term& t);
+template <typename Term> bool check_term_RealCondOr(const Term& t);
+template <typename Term> bool check_term_RealEqInf(const Term& t);
+template <typename Term> bool check_term_RealEqNInf(const Term& t);
 template <typename Term> bool check_term_BddTrue(const Term& t);
 template <typename Term> bool check_term_BddFalse(const Term& t);
 template <typename Term> bool check_term_BddIf(const Term& t);
@@ -859,6 +898,8 @@ bool check_rule_StateFrm(const Term& t)
          || check_term_StateAnd(t)
          || check_term_StateOr(t)
          || check_term_StateImp(t)
+         || check_term_StatePlus(t)
+         || check_term_StateConstantMultiply(t)
          || check_term_StateForall(t)
          || check_term_StateExists(t)
          || check_term_StateMust(t)
@@ -1119,6 +1160,131 @@ bool check_rule_BooleanExpression(const Term& t)
          || check_term_BooleanAnd(t)
          || check_term_BooleanOr(t)
          || check_term_BooleanImp(t);
+#else
+  return true;
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+}
+
+template <typename Term>
+bool check_rule_PRES(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  return check_term_PRES(t);
+#else
+  return true;
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+}
+
+template <typename Term>
+bool check_rule_PREqnSpec(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  return check_term_PREqnSpec(t);
+#else
+  return true;
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+}
+
+template <typename Term>
+bool check_rule_PRInit(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  return check_term_PRInit(t);
+#else
+  return true;
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+}
+
+template <typename Term>
+bool check_rule_PREqn(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  return check_term_PREqn(t);
+#else
+  return true;
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+}
+
+template <typename Term>
+bool check_rule_PRExpr(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  return check_rule_DataExpr(t)
+         || check_term_PRESTrue(t)
+         || check_term_PRESFalse(t)
+         || check_term_PRESMinus(t)
+         || check_term_PRESAnd(t)
+         || check_term_PRESOr(t)
+         || check_term_PRESImp(t)
+         || check_term_PRESPlus(t)
+         || check_term_PRESConstantMultiply(t)
+         || check_term_PRESMin(t)
+         || check_term_PRESMax(t)
+         || check_term_PRESSum(t)
+         || check_rule_PropVarInst(t)
+         || check_rule_UntypedDataParameter(t);
+#else
+  return true;
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+}
+
+template <typename Term>
+bool check_rule_RES(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  return check_term_RES(t);
+#else
+  return true;
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+}
+
+template <typename Term>
+bool check_rule_RealEquation(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  return check_term_RealEquation(t);
+#else
+  return true;
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+}
+
+template <typename Term>
+bool check_rule_RealVariable(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  return check_term_RealVariable(t);
+#else
+  return true;
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+}
+
+template <typename Term>
+bool check_rule_RealExpression(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  return check_term_BooleanTrue(t)
+         || check_term_BooleanFalse(t)
+         || check_rule_RealVariable(t)
+         || check_term_RealNot(t)
+         || check_term_RealAnd(t)
+         || check_term_RealOr(t)
+         || check_term_RealImp(t)
+         || check_term_RealPlus(t)
+         || check_term_RealConstantMultiply(t)
+         || check_rule_DataExpr(t)
+         || check_term_RealCondAnd(t)
+         || check_term_RealCondOr(t)
+         || check_term_RealEqInf(t)
+         || check_term_RealEqNInf(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -4240,6 +4406,86 @@ bool check_term_StateImp(const Term& t)
   return true;
 }
 
+// StatePlus(StateFrm, StateFrm)
+template <typename Term>
+bool check_term_StatePlus(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StatePlus)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_StateFrm<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_StateFrm" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_StateFrm<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_StateFrm" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// StateConstantMultiply(DataExpr, StateFrm)
+template <typename Term>
+bool check_term_StateConstantMultiply(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateConstantMultiply)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_DataExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_StateFrm<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_StateFrm" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
 // StateForall(DataVarId+, StateFrm)
 template <typename Term>
 bool check_term_StateForall(const Term& t)
@@ -6290,6 +6536,1097 @@ bool check_term_BooleanImp(const Term& t)
   if (!check_term_argument(a[1], check_rule_BooleanExpression<atermpp::aterm>))
   {
     mCRL2log(log::debug, "soundness_checks") << "check_rule_BooleanExpression" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// PRES(DataSpec, GlobVarSpec, PREqnSpec, PRInit)
+template <typename Term>
+bool check_term_PRES(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PRES)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 4)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_DataSpec<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataSpec" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_GlobVarSpec<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_GlobVarSpec" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[2], check_rule_PREqnSpec<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PREqnSpec" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[3], check_rule_PRInit<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PRInit" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// PREqnSpec(PREqn*)
+template <typename Term>
+bool check_term_PREqnSpec(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PREqnSpec)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_PREqn<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PREqn" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// PRInit(PropVarInst)
+template <typename Term>
+bool check_term_PRInit(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PRInit)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_PropVarInst<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PropVarInst" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// PREqn(FixPoint, PropVarDecl, PRExpr)
+template <typename Term>
+bool check_term_PREqn(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PREqn)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 3)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_FixPoint<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_FixPoint" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_PropVarDecl<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PropVarDecl" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[2], check_rule_PRExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PRExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// PRESTrue()
+template <typename Term>
+bool check_term_PRESTrue(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PRESTrue)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 0)
+  {
+    return false;
+  }
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// PRESFalse()
+template <typename Term>
+bool check_term_PRESFalse(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PRESFalse)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 0)
+  {
+    return false;
+  }
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// PRESMinus(PRExpr)
+template <typename Term>
+bool check_term_PRESMinus(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PRESMinus)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_PRExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PRExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// PRESAnd(PRExpr, PBExpr)
+template <typename Term>
+bool check_term_PRESAnd(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PRESAnd)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_PRExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PRExpr" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_PBExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PBExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// PRESOr(PRExpr, PRExpr)
+template <typename Term>
+bool check_term_PRESOr(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PRESOr)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_PRExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PRExpr" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_PRExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PRExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// PRESImp(PRExpr, PRExpr)
+template <typename Term>
+bool check_term_PRESImp(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PRESImp)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_PRExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PRExpr" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_PRExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PRExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// PRESPlus(PRExpr, PRExpr)
+template <typename Term>
+bool check_term_PRESPlus(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PRESPlus)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_PRExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PRExpr" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_PRExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PRExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// PRESConstantMultiply(DataExpr, PRExpr)
+template <typename Term>
+bool check_term_PRESConstantMultiply(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PRESConstantMultiply)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_DataExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_PRExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PRExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// PRESMin(DataVarId+, PRExpr)
+template <typename Term>
+bool check_term_PRESMin(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PRESMin)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 1))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_PRExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PRExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// PRESMax(DataVarId+, PRExpr)
+template <typename Term>
+bool check_term_PRESMax(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PRESMax)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 1))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_PRExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PRExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// PRESSum(DataVarId+, PRExpr)
+template <typename Term>
+bool check_term_PRESSum(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PRESSum)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 1))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_PRExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PRExpr" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// RES(RealEquation*, RealExpression)
+template <typename Term>
+bool check_term_RES(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::RES)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_RealEquation<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealEquation" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_RealExpression<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// RealEquation(FixPoint, RealVariable, RealExpression)
+template <typename Term>
+bool check_term_RealEquation(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::RealEquation)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 3)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_FixPoint<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_FixPoint" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_RealVariable<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealVariable" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[2], check_rule_RealExpression<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// RealVariable(String)
+template <typename Term>
+bool check_term_RealVariable(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::RealVariable)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// RealNot(RealExpression)
+template <typename Term>
+bool check_term_RealNot(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::RealNot)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_RealExpression<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// RealAnd(RealExpression, RealExpression)
+template <typename Term>
+bool check_term_RealAnd(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::RealAnd)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_RealExpression<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_RealExpression<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// RealOr(RealExpression, RealExpression)
+template <typename Term>
+bool check_term_RealOr(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::RealOr)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_RealExpression<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_RealExpression<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// RealImp(RealExpression, RealExpression)
+template <typename Term>
+bool check_term_RealImp(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::RealImp)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_RealExpression<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_RealExpression<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// RealPlus(RealExpression, RealExpression)
+template <typename Term>
+bool check_term_RealPlus(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::RealPlus)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_RealExpression<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_RealExpression<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// RealConstantMultiply(DataExpr, RealExpression)
+template <typename Term>
+bool check_term_RealConstantMultiply(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::RealConstantMultiply)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_DataExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_RealExpression<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// RealCondAnd(RealExpression, RealExpression, RealExpression)
+template <typename Term>
+bool check_term_RealCondAnd(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::RealCondAnd)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 3)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_RealExpression<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_RealExpression<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[2], check_rule_RealExpression<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// RealCondOr(RealExpression, RealExpression, RealExpression)
+template <typename Term>
+bool check_term_RealCondOr(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::RealCondOr)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 3)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_RealExpression<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_RealExpression<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[2], check_rule_RealExpression<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// RealEqInf(RealExpression)
+template <typename Term>
+bool check_term_RealEqInf(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::RealEqInf)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_RealExpression<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// RealEqNInf(RealExpression)
+template <typename Term>
+bool check_term_RealEqNInf(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::RealEqNInf)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_RealExpression<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS

@@ -219,7 +219,7 @@
                 ::= LinearProcessInit(<DataExpr>*, <Distribution>)
 
 
-//Mu-calculus formulas
+//Mu-calculus formulas (including the plus and multiplication with constants)
 //--------------------
 
 //state formula
@@ -230,6 +230,8 @@
                  | StateAnd(<StateFrm>, <StateFrm>)
                  | StateOr(<StateFrm>, <StateFrm>)
                  | StateImp(<StateFrm>, <StateFrm>)
+                 | StatePlus(<StateFrm>, <StateFrm>)
+                 | StateConstantMultiply(<DataExpr>, <StateFrm>)
                  | StateForall(<DataVarId>+, <StateFrm>)
                  | StateExists(<DataVarId>+, <StateFrm>)
                  | StateMust(<RegFrm>, <StateFrm>)
@@ -351,6 +353,66 @@
                       | BooleanAnd(<BooleanExpression>, <BooleanExpression>)
                       | BooleanOr(<BooleanExpression>, <BooleanExpression>)
                       | BooleanImp(<BooleanExpression>, <BooleanExpression>)
+
+//PRES's
+//------
+
+//PRES specification
+<PRES>         ::= PRES(<DataSpec>, <GlobVarSpec>, <PREqnSpec>, <PRInit>)
+
+//parameterized real equation specification
+<PREqnSpec>    ::= PREqnSpec(<PREqn>*)
+
+//parameterized real initialization
+<PRInit>       ::= PRInit(<PropVarInst>)
+
+//parameterized boolean equation
+<PREqn>        ::= PREqn(<FixPoint>, <PropVarDecl>, <PRExpr>)
+
+//parameterized real expression
+<PRExpr>       ::= <DataExpr>
+                 | PRESTrue
+                 | PRESFalse
+                 | PRESMinus(<PRExpr>)
+                 | PRESAnd(<PRExpr>, <PBExpr>)
+                 | PRESOr(<PRExpr>, <PRExpr>)
+                 | PRESImp(<PRExpr>, <PRExpr>)
+                 | PRESPlus(<PRExpr>, <PRExpr>)
+                 | PRESConstantMultiply(<DataExpr>, <PRExpr>)
+                 | PRESMin(<DataVarId>+, <PRExpr>)
+                 | PRESMax(<DataVarId>+, <PRExpr>)
+                 | PRESSum(<DataVarId>+, <PRExpr>)
+                 | <PropVarInst>
+                 | <UntypedDataParameter>
+
+
+//Real equation systems
+//---------------------
+
+// RES specification (equations + initialization)
+<RES>          ::= RES(<RealEquation>*, <RealExpression>)
+
+// real equation
+<RealEquation>   ::= RealEquation(<FixPoint>, <RealVariable>, <RealExpression>)
+
+// real variable
+<RealVariable>   ::= RealVariable(<String>)
+
+// real expression
+<RealExpression> ::= BooleanTrue
+                      | BooleanFalse
+                      | <RealVariable>
+                      | RealNot(<RealExpression>)
+                      | RealAnd(<RealExpression>, <RealExpression>)
+                      | RealOr(<RealExpression>, <RealExpression>)
+                      | RealImp(<RealExpression>, <RealExpression>)
+                      | RealPlus(<RealExpression>, <RealExpression>)
+                      | RealConstantMultiply(<DataExpr>, <RealExpression>)
+                      | <DataExpr>
+                      | RealCondAnd(<RealExpression>, <RealExpression>, <RealExpression>)
+                      | RealCondOr(<RealExpression>, <RealExpression>, <RealExpression>)
+                      | RealEqInf(<RealExpression>)
+                      | RealEqNInf(<RealExpression>)
 
 //BDDs
 //-------------------

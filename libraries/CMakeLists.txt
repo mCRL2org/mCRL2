@@ -12,8 +12,10 @@ set(MCRL2_LIBRARIES
   lts
   modal_formula
   pbes
+  pres
   pg
   process
+  res
   smt
   symbolic
   utilities

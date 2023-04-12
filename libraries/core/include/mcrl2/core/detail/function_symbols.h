@@ -716,6 +716,126 @@ const atermpp::function_symbol& function_symbol_PBInit()
   return function_symbol_PBInit;
 }
 
+// PRES
+inline
+const atermpp::function_symbol& function_symbol_PRES()
+{
+  static const atermpp::global_function_symbol function_symbol_PRES("PRES", 4);
+  return function_symbol_PRES;
+}
+
+// PRESAnd
+inline
+const atermpp::function_symbol& function_symbol_PRESAnd()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESAnd("PRESAnd", 2);
+  return function_symbol_PRESAnd;
+}
+
+// PRESConstantMultiply
+inline
+const atermpp::function_symbol& function_symbol_PRESConstantMultiply()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESConstantMultiply("PRESConstantMultiply", 2);
+  return function_symbol_PRESConstantMultiply;
+}
+
+// PRESFalse
+inline
+const atermpp::function_symbol& function_symbol_PRESFalse()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESFalse("PRESFalse", 0);
+  return function_symbol_PRESFalse;
+}
+
+// PRESImp
+inline
+const atermpp::function_symbol& function_symbol_PRESImp()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESImp("PRESImp", 2);
+  return function_symbol_PRESImp;
+}
+
+// PRESMax
+inline
+const atermpp::function_symbol& function_symbol_PRESMax()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESMax("PRESMax", 2);
+  return function_symbol_PRESMax;
+}
+
+// PRESMin
+inline
+const atermpp::function_symbol& function_symbol_PRESMin()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESMin("PRESMin", 2);
+  return function_symbol_PRESMin;
+}
+
+// PRESMinus
+inline
+const atermpp::function_symbol& function_symbol_PRESMinus()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESMinus("PRESMinus", 1);
+  return function_symbol_PRESMinus;
+}
+
+// PRESOr
+inline
+const atermpp::function_symbol& function_symbol_PRESOr()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESOr("PRESOr", 2);
+  return function_symbol_PRESOr;
+}
+
+// PRESPlus
+inline
+const atermpp::function_symbol& function_symbol_PRESPlus()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESPlus("PRESPlus", 2);
+  return function_symbol_PRESPlus;
+}
+
+// PRESSum
+inline
+const atermpp::function_symbol& function_symbol_PRESSum()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESSum("PRESSum", 2);
+  return function_symbol_PRESSum;
+}
+
+// PRESTrue
+inline
+const atermpp::function_symbol& function_symbol_PRESTrue()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESTrue("PRESTrue", 0);
+  return function_symbol_PRESTrue;
+}
+
+// PREqn
+inline
+const atermpp::function_symbol& function_symbol_PREqn()
+{
+  static const atermpp::global_function_symbol function_symbol_PREqn("PREqn", 3);
+  return function_symbol_PREqn;
+}
+
+// PREqnSpec
+inline
+const atermpp::function_symbol& function_symbol_PREqnSpec()
+{
+  static const atermpp::global_function_symbol function_symbol_PREqnSpec("PREqnSpec", 1);
+  return function_symbol_PREqnSpec;
+}
+
+// PRInit
+inline
+const atermpp::function_symbol& function_symbol_PRInit()
+{
+  static const atermpp::global_function_symbol function_symbol_PRInit("PRInit", 1);
+  return function_symbol_PRInit;
+}
+
 // ProcEqn
 inline
 const atermpp::function_symbol& function_symbol_ProcEqn()
@@ -786,6 +906,110 @@ const atermpp::function_symbol& function_symbol_PropVarInst()
 {
   static const atermpp::global_function_symbol function_symbol_PropVarInst("PropVarInst", 2);
   return function_symbol_PropVarInst;
+}
+
+// RES
+inline
+const atermpp::function_symbol& function_symbol_RES()
+{
+  static const atermpp::global_function_symbol function_symbol_RES("RES", 2);
+  return function_symbol_RES;
+}
+
+// RealAnd
+inline
+const atermpp::function_symbol& function_symbol_RealAnd()
+{
+  static const atermpp::global_function_symbol function_symbol_RealAnd("RealAnd", 2);
+  return function_symbol_RealAnd;
+}
+
+// RealCondAnd
+inline
+const atermpp::function_symbol& function_symbol_RealCondAnd()
+{
+  static const atermpp::global_function_symbol function_symbol_RealCondAnd("RealCondAnd", 3);
+  return function_symbol_RealCondAnd;
+}
+
+// RealCondOr
+inline
+const atermpp::function_symbol& function_symbol_RealCondOr()
+{
+  static const atermpp::global_function_symbol function_symbol_RealCondOr("RealCondOr", 3);
+  return function_symbol_RealCondOr;
+}
+
+// RealConstantMultiply
+inline
+const atermpp::function_symbol& function_symbol_RealConstantMultiply()
+{
+  static const atermpp::global_function_symbol function_symbol_RealConstantMultiply("RealConstantMultiply", 2);
+  return function_symbol_RealConstantMultiply;
+}
+
+// RealEqInf
+inline
+const atermpp::function_symbol& function_symbol_RealEqInf()
+{
+  static const atermpp::global_function_symbol function_symbol_RealEqInf("RealEqInf", 1);
+  return function_symbol_RealEqInf;
+}
+
+// RealEqNInf
+inline
+const atermpp::function_symbol& function_symbol_RealEqNInf()
+{
+  static const atermpp::global_function_symbol function_symbol_RealEqNInf("RealEqNInf", 1);
+  return function_symbol_RealEqNInf;
+}
+
+// RealEquation
+inline
+const atermpp::function_symbol& function_symbol_RealEquation()
+{
+  static const atermpp::global_function_symbol function_symbol_RealEquation("RealEquation", 3);
+  return function_symbol_RealEquation;
+}
+
+// RealImp
+inline
+const atermpp::function_symbol& function_symbol_RealImp()
+{
+  static const atermpp::global_function_symbol function_symbol_RealImp("RealImp", 2);
+  return function_symbol_RealImp;
+}
+
+// RealNot
+inline
+const atermpp::function_symbol& function_symbol_RealNot()
+{
+  static const atermpp::global_function_symbol function_symbol_RealNot("RealNot", 1);
+  return function_symbol_RealNot;
+}
+
+// RealOr
+inline
+const atermpp::function_symbol& function_symbol_RealOr()
+{
+  static const atermpp::global_function_symbol function_symbol_RealOr("RealOr", 2);
+  return function_symbol_RealOr;
+}
+
+// RealPlus
+inline
+const atermpp::function_symbol& function_symbol_RealPlus()
+{
+  static const atermpp::global_function_symbol function_symbol_RealPlus("RealPlus", 2);
+  return function_symbol_RealPlus;
+}
+
+// RealVariable
+inline
+const atermpp::function_symbol& function_symbol_RealVariable()
+{
+  static const atermpp::global_function_symbol function_symbol_RealVariable("RealVariable", 1);
+  return function_symbol_RealVariable;
 }
 
 // RegAlt
@@ -956,6 +1180,14 @@ const atermpp::function_symbol& function_symbol_StateAnd()
   return function_symbol_StateAnd;
 }
 
+// StateConstantMultiply
+inline
+const atermpp::function_symbol& function_symbol_StateConstantMultiply()
+{
+  static const atermpp::global_function_symbol function_symbol_StateConstantMultiply("StateConstantMultiply", 2);
+  return function_symbol_StateConstantMultiply;
+}
+
 // StateDelay
 inline
 const atermpp::function_symbol& function_symbol_StateDelay()
@@ -1050,6 +1282,14 @@ const atermpp::function_symbol& function_symbol_StateOr()
 {
   static const atermpp::global_function_symbol function_symbol_StateOr("StateOr", 2);
   return function_symbol_StateOr;
+}
+
+// StatePlus
+inline
+const atermpp::function_symbol& function_symbol_StatePlus()
+{
+  static const atermpp::global_function_symbol function_symbol_StatePlus("StatePlus", 2);
+  return function_symbol_StatePlus;
 }
 
 // StateTrue
@@ -1318,6 +1558,8 @@ static const atermpp::function_symbol SortCons;
   static const atermpp::function_symbol StateAnd;
   static const atermpp::function_symbol StateOr;
   static const atermpp::function_symbol StateImp;
+  static const atermpp::function_symbol StatePlus;
+  static const atermpp::function_symbol StateConstantMultiply;
   static const atermpp::function_symbol StateForall;
   static const atermpp::function_symbol StateExists;
   static const atermpp::function_symbol StateMust;
@@ -1373,6 +1615,34 @@ static const atermpp::function_symbol SortCons;
   static const atermpp::function_symbol BooleanAnd;
   static const atermpp::function_symbol BooleanOr;
   static const atermpp::function_symbol BooleanImp;
+  static const atermpp::function_symbol PRES;
+  static const atermpp::function_symbol PREqnSpec;
+  static const atermpp::function_symbol PRInit;
+  static const atermpp::function_symbol PREqn;
+  static const atermpp::function_symbol PRESTrue;
+  static const atermpp::function_symbol PRESFalse;
+  static const atermpp::function_symbol PRESMinus;
+  static const atermpp::function_symbol PRESAnd;
+  static const atermpp::function_symbol PRESOr;
+  static const atermpp::function_symbol PRESImp;
+  static const atermpp::function_symbol PRESPlus;
+  static const atermpp::function_symbol PRESConstantMultiply;
+  static const atermpp::function_symbol PRESMin;
+  static const atermpp::function_symbol PRESMax;
+  static const atermpp::function_symbol PRESSum;
+  static const atermpp::function_symbol RES;
+  static const atermpp::function_symbol RealEquation;
+  static const atermpp::function_symbol RealVariable;
+  static const atermpp::function_symbol RealNot;
+  static const atermpp::function_symbol RealAnd;
+  static const atermpp::function_symbol RealOr;
+  static const atermpp::function_symbol RealImp;
+  static const atermpp::function_symbol RealPlus;
+  static const atermpp::function_symbol RealConstantMultiply;
+  static const atermpp::function_symbol RealCondAnd;
+  static const atermpp::function_symbol RealCondOr;
+  static const atermpp::function_symbol RealEqInf;
+  static const atermpp::function_symbol RealEqNInf;
   static const atermpp::function_symbol BddTrue;
   static const atermpp::function_symbol BddFalse;
   static const atermpp::function_symbol BddIf;
