@@ -63,9 +63,8 @@ struct atomic_size_t_wrapper: public std::atomic<std::size_t>
   {}
 
   atomic_size_t_wrapper(const atomic_size_t_wrapper& other)
-  {
-    store(other.load());
-  }
+    : std::atomic<std::size_t>(other.load())
+  {}
 
   atomic_size_t_wrapper& operator=(const atomic_size_t_wrapper& other)
   {
