@@ -9,6 +9,7 @@
 /// \file ./corrlplot.cpp
 
 #include "corrlplot.h"
+#include <QToolTip>
 
 // -- constructors and destructor -----------------------------------
 
@@ -373,7 +374,7 @@ void CorrlPlot::displTooltip(
 
   if (diagram == 0)
   {
-    setToolTip(QString::fromStdString(msgDgrm));
+    QToolTip::showText(QCursor::pos(),QString::fromStdString(msgDgrm));
   }
   else
   {
@@ -516,7 +517,7 @@ void CorrlPlot::processHits(
   }
   else
   {
-    setToolTip(QString());
+    QToolTip::hideText();
     showDgrm = false;
   }
 

@@ -1146,7 +1146,6 @@ void Graph::clustNodesOnAttr(const std::vector< std::size_t > &attrIdcs)
   }
 
   // cluster nodes
-  emit startedClusteringNodes(calcMaxNumCombns(attrIdcs));
   clustNodesOnAttr(root, idcs, progress);
 
   // update leaves
@@ -1154,7 +1153,6 @@ void Graph::clustNodesOnAttr(const std::vector< std::size_t > &attrIdcs)
 
   // update bundles
   progress     = 0;
-  emit startedClusteringEdges(edges.size());
   updateBundles(progress);
 
   idcs.clear();
@@ -1367,7 +1365,6 @@ void Graph::clustNodesOnAttr(
     if (attrIdcs.size() == 1)
     {
       progress += getAttribute(attrIdcs[0])->getSizeCurValues();
-      emit progressedClustering(progress);
     }
 
     // remove first attribute
@@ -1650,7 +1647,6 @@ void Graph::updateBundles(std::size_t& progress)
 
       // update progress
       ++progress;
-      emit progressedClustering(progress);
     }
   }
 

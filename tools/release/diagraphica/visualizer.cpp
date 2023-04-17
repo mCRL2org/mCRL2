@@ -37,9 +37,9 @@ Visualizer::Visualizer(
 }
 
 void Visualizer::updateSelection() {
-    if (!m_hit_FBO || m_hit_FBO->width() != width() || m_hit_FBO->height() != height()) {
+    if (!m_hit_FBO || m_hit_FBO->width() != width()*devicePixelRatio() || m_hit_FBO->height() != height()*devicePixelRatio()) {
         delete m_hit_FBO; // make sure FBO is cleaned up
-        m_hit_FBO = new QOpenGLFramebufferObject(width(), height());
+        m_hit_FBO = new QOpenGLFramebufferObject(width()*devicePixelRatio(), height()*devicePixelRatio());
     }
     m_hit_FBO->bind();
     m_inSelectMode = true;
@@ -48,7 +48,7 @@ void Visualizer::updateSelection() {
     m_hit_FBO->bindDefault();
 }
 void Visualizer::initializeGL() {
-    m_hit_FBO = new QOpenGLFramebufferObject(width(), height());
+    m_hit_FBO = new QOpenGLFramebufferObject(width()*devicePixelRatio(), height()*devicePixelRatio());
     m_gl_initialized = true;
 }
 
@@ -69,7 +69,7 @@ void Visualizer::paintGL()
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  glViewport(0, 0, width(), height());
+  glViewport(0, 0, width()*devicePixelRatio(), height()*devicePixelRatio());
 
   visualize(m_inSelectMode);
   m_inSelectMode = false;
@@ -95,7 +95,7 @@ QSizeF Visualizer::worldSize()
 double Visualizer::pixelSize()
 // Return distance in WORLD coordinates of 1 pixel.
 {
-  return worldSize().width() / (double)width();
+  return worldSize().width() / (double)(width()*devicePixelRatio());
 }
 
 
@@ -207,8 +207,8 @@ void Visualizer::startSelectMode(
   glPushMatrix();
   glLoadIdentity();
 
-  gluPickMatrix(m_lastMouseEvent.x(), // center x
-          viewport[3] - m_lastMouseEvent.y(), // center y
+  gluPickMatrix(m_lastMouseEvent.x()*devicePixelRatio(), // center x
+          viewport[3] - m_lastMouseEvent.y()*devicePixelRatio(), // center y
           pickWth,    // picking width
           pickHgt,    // picking height
           viewport);
