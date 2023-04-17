@@ -396,7 +396,6 @@ BOOST_AUTO_TEST_CASE(random_test_chaining_monotone_attractor)
   quit_sylvan();
 }
 
-/*
 BOOST_AUTO_TEST_CASE(random_test_solitair_cycles)
 {
   initialise_sylvan();
