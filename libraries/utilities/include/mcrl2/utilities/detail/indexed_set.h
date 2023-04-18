@@ -343,7 +343,6 @@ inline std::pair<typename INDEXED_SET::size_type, bool> INDEXED_SET::insert(cons
     reserve_indices(thread_index);
     if (thread_index>0) lock_shared(thread_index);
   }
-
   std::size_t new_position;
   const std::size_t index = put_in_hashtable(key, detail::RESERVED, new_position);
   
@@ -356,6 +355,8 @@ inline std::pair<typename INDEXED_SET::size_type, bool> INDEXED_SET::insert(cons
   const std::size_t new_index=m_next_index.fetch_add(1);
   assert(new_index<m_keys.size());
   m_keys[new_index]=key; 
+  std::atomic_thread_fence(std::memory_order_seq_cst);   // Necessary for ARM. std::memory_order_acquire and 
+                                                         // std::memory_order_release appear to work, too.
   m_hashtable[new_position]=new_index;
 
   if (thread_index>0) unlock_shared(thread_index);
