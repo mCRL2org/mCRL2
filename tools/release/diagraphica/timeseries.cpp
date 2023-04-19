@@ -12,6 +12,7 @@
 #include <iostream>
 
 #include "timeseries.h"
+#include <QToolTip>
 
 
 // -- static variables ----------------------------------------------
@@ -1097,7 +1098,7 @@ void TimeSeries::processHits(
   }
   else
   {
-    setToolTip(QString());
+    QToolTip::hideText();
   }
 
   ptr = 0;

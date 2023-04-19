@@ -38,6 +38,18 @@
 
 .. note::
 
+   * - .. image:: /_templates/mcrl2/static/understanding.*
+          :align: right
+          :alt: Understanding Behaviour of Distributed Systems using mCRL2 (book)
+          :target: https://link.springer.com/book/10.1007/978-3-031-23008-0
+
+   A new introductory book appeared, describing the mCRL2 specification language, the
+   modal mu-calculus and the extensive toolset around these. The book is full of examples, varying from 
+   games to distributed algorithms. It is shown how such games can be solved,
+   and how the (in)correctness of such algorithms can be understood. 
+
+.. note::
+
    FORTE 2022 Best Artefact Award: Process Algebra Can Save Lives: Static Analysis of XACML Access 
    Control Policies using mCRL2. By Arshad, Horne, Johansen, Owe and Willemse. 
 

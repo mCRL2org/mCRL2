@@ -13,6 +13,7 @@
 #include <mutex>
 
 #include "mcrl2/utilities/unordered_map.h"
+#include "mcrl2/utilities/unused.h"
 
 namespace mcrl2
 {
@@ -62,9 +63,8 @@ struct atomic_size_t_wrapper: public std::atomic<std::size_t>
   {}
 
   atomic_size_t_wrapper(const atomic_size_t_wrapper& other)
-  {
-    store(other.load());
-  }
+    : std::atomic<std::size_t>(other.load())
+  {}
 
   atomic_size_t_wrapper& operator=(const atomic_size_t_wrapper& other)
   {
@@ -120,6 +120,7 @@ private:
     assert(m_thread_control.size()==1 || thread_index>0);
     assert(ThreadSafe || m_thread_control.size()==1);
     assert(ThreadSafe || thread_index==0);
+    mcrl2_unused(thread_index);
   }
 
 public:

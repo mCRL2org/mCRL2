@@ -31,12 +31,13 @@ endif(MCRL2_ENABLE_PROFILING)
 ## Set C compile flags
 ##---------------------------------------------------
 
-#try_add_c_flag(-std=c99)
+#try_add_c_flag(-std=c11)
 try_add_c_flag(-Wall)
 try_add_c_flag(-Wno-inline)
 try_add_c_flag(-fno-strict-overflow)
 try_add_c_flag(-pipe)
-#try_add_c_flag(-pedantic)
+# The amount of warnings produced in third party library makes this useless.
+# try_add_c_flag(-pedantic)
 try_add_c_flag(-W                      DEBUG)
 
 # Ignore specific warnings produced in Sylvan.

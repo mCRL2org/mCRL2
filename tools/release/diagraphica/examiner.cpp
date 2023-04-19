@@ -8,11 +8,12 @@
 //
 /// \file ./examiner.cpp
 
+#include <iostream>
 #include "examiner.h"
 
 #include <QMessageBox>
 #include <QMenu>
-#include <iostream>
+#include <QToolTip>
 
 
 static const int hgtHstPix = 80;
@@ -653,7 +654,7 @@ void Examiner::processHits(
   }
   else
   {
-    setToolTip(QString());
+    QToolTip::hideText();
   }
 
   ptr = 0;

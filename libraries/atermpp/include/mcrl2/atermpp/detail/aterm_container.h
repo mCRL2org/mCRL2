@@ -49,7 +49,15 @@ public:
     // as otherwise an override would be called. 
   }
 
-  virtual inline std::size_t size() const = 0;
+  virtual inline std::size_t size() const 
+  {
+    // When _aterm_container the size() might immediately be called, before the inheriting container
+    // actually finishes construction. At this point the vtable still points to _aterm_container. Under
+    // platforms where pointer assignments are essentially atomic (no half writes) this might work fine.
+    // It is also not clear how to resolve this. All container initialisations must be done within the 
+    // aterm_pool shared mutex otherwise.
+    return 0;
+  }
 
   /// \brief Copy constructor
   inline _aterm_container(const _aterm_container& c);

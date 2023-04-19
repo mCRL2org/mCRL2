@@ -41,6 +41,7 @@ void test_replace()
   variable d("d", sort_bool::bool_());
   assignment a(c, d);
   const action_summand& t = s;
+  BOOST_CHECK(t==s);
 }
 
 std::string SPEC1a =

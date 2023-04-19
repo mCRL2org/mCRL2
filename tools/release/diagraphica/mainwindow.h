@@ -104,7 +104,6 @@ class MainWindow : public QMainWindow
     SettingsDialog *m_settingsDialog;
 
     Graph *m_graph;
-    QProgressDialog m_clusteringProgress;
 
     Examiner *m_examiner;
     ArcDiagram *m_arcDiagram;

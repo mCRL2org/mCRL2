@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
   aterm_appl f = create_nested_function<2>("f", "c", size);
 
   // Define a function that repeatedly creates nested function applications.
-  auto nested_function = [&](int id) -> void
+  auto nested_function = [&](std::size_t) -> void
     {
       aterm_appl f;
       for (std::size_t i = 0; i < iterations / number_of_threads; ++i)

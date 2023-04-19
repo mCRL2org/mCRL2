@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
   std::size_t iterations = 1000;
 
   std::vector<aterm_appl> terms;
-  for (int id = 0; id < number_of_threads; ++id)
+  for (std::size_t id = 0; id < number_of_threads; ++id)
   {
     terms.push_back(create_nested_function<2>("f", std::to_string(id), size));
   }

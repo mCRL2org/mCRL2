@@ -9,6 +9,7 @@
 /// \file ./distrplot.cpp
 
 #include "distrplot.h"
+#include <QToolTip>
 
 // -- constructors and destructor -----------------------------------
 
@@ -322,7 +323,7 @@ void DistrPlot::displTooltip(const std::size_t& posIdx)
 
     if (diagram == 0)
     {
-      setToolTip(QString::fromStdString(msgDgrm));
+      QToolTip::showText(QCursor::pos(),QString::fromStdString(msgDgrm));
     }
     else
     {
@@ -446,7 +447,7 @@ void DistrPlot::processHits(
   }
   else
   {
-    setToolTip(QString());
+    QToolTip::hideText();
     showDgrm = false;
   }
 

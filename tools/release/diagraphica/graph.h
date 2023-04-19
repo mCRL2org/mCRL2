@@ -138,9 +138,6 @@ class Graph : public QObject
     void recluster();
 
   signals:
-    void startedClusteringNodes(int steps);
-    void startedClusteringEdges(int steps);
-    void progressedClustering(int steps);
     void clusteringChanged();
     void deletedAttribute();
 

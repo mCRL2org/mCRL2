@@ -19,7 +19,6 @@
 MainWindow::MainWindow():
   m_settingsDialog(new SettingsDialog(this, &m_settings)),
   m_graph(0),
-  m_clusteringProgress("Clustering...", QString(), 0, 1, this),
   m_examiner(0),
   m_arcDiagram(0),
   m_simulator(0),
@@ -137,12 +136,6 @@ void MainWindow::open(QString filename)
   }
 
   m_graph = graph;
-
-  connect(m_graph, SIGNAL(startedClusteringNodes(int)), &m_clusteringProgress, SLOT(setMaximum(int)));
-  connect(m_graph, SIGNAL(startedClusteringNodes(int)), &m_clusteringProgress, SLOT(show()));
-  connect(m_graph, SIGNAL(startedClusteringEdges(int)), &m_clusteringProgress, SLOT(setMaximum(int)));
-  connect(m_graph, SIGNAL(startedClusteringEdges(int)), &m_clusteringProgress, SLOT(show()));
-  connect(m_graph, SIGNAL(progressedClustering(int)), &m_clusteringProgress, SLOT(setValue(int)));
 
   m_ui.numberOfStates->setText(QString::number(m_graph->getSizeNodes()));
   m_ui.numberOfTransitions->setText(QString::number(m_graph->getSizeEdges()));

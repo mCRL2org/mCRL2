@@ -278,7 +278,7 @@ void tutorial2()
     ;
   pbes p = txt2pbes(txt);
   int solution = gauss_elimination(p);
-  assert(solution == 0); // 0 indicates false
+  BOOST_CHECK(solution == 0); // 0 indicates false
 }
 
 BOOST_AUTO_TEST_CASE(test_main)

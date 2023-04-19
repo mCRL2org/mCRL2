@@ -11,6 +11,7 @@
 #include "simulator.h"
 
 #include <QMessageBox>
+#include <QToolTip>
 
 static const int labelHeight = 40;
 static const int timerInterval = 10;
@@ -1370,7 +1371,7 @@ void Simulator::processHits(
   }
   else
   {
-    setToolTip(QString());
+    QToolTip::hideText();
   }
 
   ptr = 0;

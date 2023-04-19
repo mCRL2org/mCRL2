@@ -67,7 +67,6 @@ void test_case_2()
   specification s1 = s0;
   rewriter r;
   lps::untime_algorithm<specification>(s1, true, false, r).run();
-  const action_summand_vector& summands0 = s0.process().action_summands();
   const action_summand_vector& summands1 = s1.process().action_summands();
   BOOST_CHECK(s0.process().process_parameters().size() == s1.process().process_parameters().size() - 1);
   for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
@@ -97,7 +96,6 @@ void test_case_3()
   specification s1 = s0;
   rewriter r;
   lps::untime_algorithm<specification>(s1, true, false, r).run();
-  const action_summand_vector& summands0 = s0.process().action_summands();
   const action_summand_vector& summands1 = s1.process().action_summands();
   BOOST_CHECK(s0.process().process_parameters().size() == s1.process().process_parameters().size() - 1);
   int sumvar_count = 0;
@@ -130,7 +128,6 @@ void test_case_4()
   specification s1 = s0;
   rewriter r;
   lps::untime_algorithm<specification>(s1, true, false, r).run();
-  const action_summand_vector& summands0 = s0.process().action_summands();
   const action_summand_vector& summands1 = s1.process().action_summands();
   BOOST_CHECK(s0.process().process_parameters().size() == s1.process().process_parameters().size() - 1);
   int sumvar_count = 0;

@@ -8,8 +8,9 @@
 //
 /// \file ./arcdiagram.cpp
 
-#include "arcdiagram.h"
 #include <iostream>
+#include "arcdiagram.h"
+#include <QToolTip>
 
 // -- init constants ------------------------------------------------
 
@@ -954,7 +955,6 @@ void ArcDiagram::drawMarkedLeaves(const bool& inSelectMode)
 void ArcDiagram::handleMouseEvent(QMouseEvent* e)
 {
   Visualizer::handleMouseEvent(e);
-
   // redraw in select mode
   updateSelection();
   // redraw in render mode
@@ -1635,7 +1635,7 @@ void ArcDiagram::handleHits(const std::vector< int >& ids)
         }
         else
         {
-          setToolTip(QString());
+          QToolTip::hideText();
           currIdxDgrm = ids[2];
           updateMarkBundles();
 
@@ -1656,7 +1656,7 @@ void ArcDiagram::handleHits(const std::vector< int >& ids)
       updateMarkBundles();
       emit hoverCluster(0);
     }
-    setToolTip(QString());
+    QToolTip::hideText(); 
   }
 }
 
@@ -1665,6 +1665,7 @@ void ArcDiagram::handleHoverCluster(
     const std::size_t& i,
     const std::size_t& j)
 {
+
   if ((i < mapPosToClust.size()) &&
       (j < mapPosToClust[i].size()))
   {
@@ -1693,7 +1694,7 @@ void ArcDiagram::handleHoverCluster(
       val = 0;
       */
     }
-    setToolTip(QString::fromStdString(msg));
+    QToolTip::showText(QCursor::pos(),QString::fromStdString(msg));
   }
 }
 
@@ -1706,7 +1707,7 @@ void ArcDiagram::handleHoverBundle(const std::size_t& bndlIdx)
     std::string  lbls = "";
     Bundle* bndl = m_graph->getBundle(bndlIdx);
     bndl->getLabels(sepr, lbls);
-    setToolTip(QString::fromStdString(lbls));
+    QToolTip::showText(QCursor::pos(),QString::fromStdString(lbls));
   }
 }
 
@@ -1723,7 +1724,7 @@ void ArcDiagram::handleHoverBarTree(
 
     clust = mapPosToClust[i][j];
     msg = Utils::size_tToStr(clust->getSizeDescNodes());
-    setToolTip(QString::fromStdString(msg));
+    QToolTip::showText(QCursor::pos(),QString::fromStdString(msg));
   }
 }
 

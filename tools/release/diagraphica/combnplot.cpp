@@ -9,6 +9,7 @@
 /// \file ./combnplot.cpp
 
 #include "combnplot.h"
+#include <QToolTip>
 
 // -- constructors and destructor -----------------------------------
 
@@ -571,7 +572,7 @@ void CombnPlot::displTooltip(const std::size_t& posIdx)
     if (diagram == 0)
     {
       // show tooltip
-      setToolTip(QString::fromStdString(msgDgrm));
+      QToolTip::showText(QCursor::pos(),QString::fromStdString(msgDgrm));
     }
     else
     {
@@ -791,7 +792,7 @@ void CombnPlot::processHits(
   else
   {
     mouseCombnIdx = NON_EXISTING;
-    setToolTip(QString());
+    QToolTip::hideText();
     showDgrm = false;
   }
 
