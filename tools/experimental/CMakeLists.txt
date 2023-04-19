@@ -1,6 +1,7 @@
 set(MCRL2_TOOLS
   besconvert  
   lps2torx
+  lps2pres
   lpscleave
   lpscombine
   lpsrealelm

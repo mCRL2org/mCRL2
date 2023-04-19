@@ -292,11 +292,73 @@ PbesExpr
   | '!' PbesExpr                               $unary_right 25   // Negation
   ;
 
+//--- Real equation system
+
+ResSpec: ResEqnSpec ResInit ;                                    // Real equation system
+
+ResEqnSpec: 'res' ResEqnDecl+ ;                                  // Real equation declaration
+
+ResEqnDecl: FixedPointOperator ResVar '=' ResExpr ';' ;          // Real fixed point equation
+
+ResVar: Id ;                                                     // RES variable
+
+ResExpr
+  : ResVar                                                       // RES variable
+  | DataValExpr                                                  // Real value
+  | 'true'                                                       // True, representing infinity
+  | 'false'                                                      // False, also representing minus infinity
+  | BesExpr ('=>' $binary_op_right 2) BesExpr                    // Implication
+  | BesExpr ('||' $binary_op_right 3) BesExpr                    // Disjunction
+  | BesExpr ('&&' $binary_op_right 4) BesExpr                    // Conjunction
+  | BesExpr ('+' $binary_op_right 4) BesExpr                     // Conjunction
+  | '!' BesExpr              $unary_right  5                     // Negation
+  | '-' BesExpr              $unary_right  5                     // Unary minus
+  | DataValExpr '*' BesExpr                                      // Multiplication with a positive constant
+  | 'eqinf' '(' BesExpr ')'                                      // Equal infinity
+  | 'eqninf' '(' BesExpr ')'                                     // Equal to infinity
+  | 'condsm' '(' BesExpr ',' BesExpr ',' BesExpr ')'             // Conditional smaller than 0 with or 
+  | 'condeq' '(' BesExpr ',' BesExpr ',' BesExpr ')'             // Conditional smaller equal 0 with and 
+  | '(' BesExpr ')'                                              // Brackets
+  ;
+
+ResInit: 'init' ResVar ';' ;                                     // Initial BES variable
+
+//--- Parameterized real equation systems
+
+PresSpec: DataSpec? GlobVarSpec? PresEqnSpec PresInit ;          // PRES specification
+
+PresEqnSpec: 'pres' PresEqnDecl+ ;                               // Declaration of PRES equations
+
+PresEqnDecl: FixedPointOperator PropVarDecl '=' PresExpr ';' ;   // PRES equation
+
+PresInit: 'init' PropVarInst ';' ;                               // Initial PRES variable
+
+PresExpr
+  : DataValExpr                                                  // Real data expression
+  | '(' PresExpr ')'                           $left        50   // Brackets
+  | 'true'                                     $left        30   // True, representing infinity
+  | 'false'                                    $left        30   // False, representing minus infinity
+  | Id ( '(' DataExprList ')' )?               $left        30   // Instantiated PRES variable or data application
+  | 'forall' VarsDeclList '.' PresExpr      $unary_right 21      // Universal quantifier
+  | 'exists' VarsDeclList '.' PresExpr      $unary_right 21      // Existential quantifier
+  | 'sum' VarsDeclList '.' PresExpr         $unary_right 21      // Sum operator
+  | PresExpr ('+' $binary_op_right 22) PresExpr                  // Addition
+  | PresExpr ('=>' $binary_op_right 23) PresExpr                 // Implication
+  | PresExpr ('||' $binary_op_right 24) PresExpr                 // Disjunction
+  | PresExpr ('&&' $binary_op_right 25) PresExpr                 // Conjunction
+  | DataValExpr '*' PresExpr                                     // Multiplication with a positive constant
+  | 'eqinf' '(' PresExpr ')'                                     // Equal infinity
+  | 'eqninf' '(' PresExpr ')'                                    // Equal to infinity
+  | 'condsm' '(' PresExpr ',' PresExpr ',' PresExpr ')'          // Conditional smaller than 0 with or. 
+  | 'condeq' '(' PresExpr ',' PresExpr ',' PresExpr ')'          // Conditional smaller equal 0 with and. 
+  | '!' PresExpr                               $unary_right 25   // Negation
+  | '-' PresExpr                               $unary_right 25   // Unary minus
+  ;
+
 //--- Action formulas
 
 ActFrm
-  : DataValExpr                                                  // Boolean data expression
-//| DataExpr                                                     // Boolean data expression
+  : DataValExpr                                                  // Boolean/real data expression
   | MultAct                                                      // Multi-action
   | '(' ActFrm ')'                             $left        50   // Brackets
   | 'true'                                     $left        30   // True
@@ -339,24 +401,25 @@ StateFrmSpecElt
   ;
 
 StateFrm
-  : DataValExpr                                                  // Boolean data expression
-//| DataExpr                                                     // Boolean data expression
+  : DataValExpr                                                  // Boolean or real data expression
   | '(' StateFrm ')'                           $left        50   // Brackets
-  | 'true'                                     $left        50   // True
-  | 'false'                                    $left        50   // False
+  | 'true'                                     $left        50   // True, can also be infinity
+  | 'false'                                    $left        50   // False, can also be minus infinity
   | Id ( '(' DataExprList ')' )?               $left        50   // Instantiated PBES variable
   | 'delay' ( '@' DataExpr )?                  $left        50   // Delay
   | 'yaled' ( '@' DataExpr )?                  $left        50   // Yaled
   | 'mu' StateVarDecl '.' StateFrm             $unary_right 41   // Minimal fixed point
   | 'nu' StateVarDecl '.' StateFrm             $unary_right 41   // Maximal fixed point
-  | 'forall' VarsDeclList '.' StateFrm         $unary_right 42   // Universal quantification
-  | 'exists' VarsDeclList '.' StateFrm         $unary_right 42   // Existential quantification
+  | 'forall' VarsDeclList '.' StateFrm         $unary_right 42   // Universal quantification, also minimum
+  | 'exists' VarsDeclList '.' StateFrm         $unary_right 42   // Existential quantification, also maximum
+  | 'sum' VarsDeclList '.' StateFrm            $unary_right 42   // Sum operator
   | StateFrm ('=>' $binary_op_right 43) StateFrm                 // Implication
-  | StateFrm ('||' $binary_op_right 44) StateFrm                 // Disjunction
-  | StateFrm ('&&' $binary_op_right 45) StateFrm                 // Conjunction
+  | StateFrm ('||' $binary_op_right 44) StateFrm                 // Disjunction, and max
+  | StateFrm ('&&' $binary_op_right 45) StateFrm                 // Conjunction, and min
   | '[' RegFrm ']' StateFrm                    $unary_right 46   // Box modality
   | '<' RegFrm '>' StateFrm                    $unary_right 46   // Diamond modality
   | '!' StateFrm                               $unary_right 47   // Negation
+  | DataValExpr '*' StateFrm                   $unary_right 48   // Multiplication with a positive constant
   ;
 
 StateVarDecl: Id ( '(' StateVarAssignmentList ')' )? ;           // PBES variable declaration
