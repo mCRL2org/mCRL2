@@ -260,7 +260,7 @@ atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, pbes& pbes)
     stream >> equations;
     stream >> initial_state;
 
-    pbes = pbes_system::pbes(data, equations, global_variables, initial_state);
+    pbes = pbes_system::pbes(data, global_variables, equations, initial_state);
 
     // Add all the sorts that are used in the specification
     // to the data specification. This is important for those

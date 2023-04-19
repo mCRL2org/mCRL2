@@ -132,7 +132,7 @@ class lps2pbes_algorithm
       }
       propositional_variable_instantiation init(Xe, e);
 
-      pbes result(lpsspec.data(), equations, lpsspec.global_variables(), init);
+      pbes result(lpsspec.data(), lpsspec.global_variables(), equations, init);
       assert(is_monotonous(result));
       pbes_system::algorithms::normalize(result);
       assert(pbes_system::algorithms::is_normalized(result));

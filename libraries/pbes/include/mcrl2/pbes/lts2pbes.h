@@ -86,7 +86,7 @@ class lts2pbes_algorithm
       data::data_expression_list e = detail::mu_expressions(f);
       propositional_variable_instantiation init(Xs0, e);
 
-      return pbes(lts0.data(), equations, std::set<data::variable>(), init);
+      return pbes(lts0.data(), equations, init);
     }
 };
 

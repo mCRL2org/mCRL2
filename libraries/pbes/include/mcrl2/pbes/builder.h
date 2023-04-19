@@ -73,8 +73,8 @@ struct add_sort_expressions: public Builder<Derived>
   void update(pbes_system::pbes& x)
   { 
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this).update(x.equations());
     static_cast<Derived&>(*this).update(x.global_variables());
+    static_cast<Derived&>(*this).update(x.equations());
     propositional_variable_instantiation result_initial_state;
     static_cast<Derived&>(*this).apply(result_initial_state, x.initial_state());
     x.initial_state() = result_initial_state;
@@ -385,8 +385,8 @@ struct add_variables: public Builder<Derived>
   void update(pbes_system::pbes& x)
   { 
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this).update(x.equations());
     static_cast<Derived&>(*this).update(x.global_variables());
+    static_cast<Derived&>(*this).update(x.equations());
     propositional_variable_instantiation result_initial_state;
     static_cast<Derived&>(*this).apply(result_initial_state, x.initial_state());
     x.initial_state() = result_initial_state;

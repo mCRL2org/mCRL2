@@ -65,8 +65,8 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   void apply(const pbes_system::pbes& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this).apply(x.equations());
     static_cast<Derived&>(*this).apply(x.global_variables());
+    static_cast<Derived&>(*this).apply(x.equations());
     static_cast<Derived&>(*this).apply(x.initial_state());
     static_cast<Derived&>(*this).leave(x);
   }
@@ -468,8 +468,8 @@ struct add_traverser_variables: public Traverser<Derived>
   void apply(const pbes_system::pbes& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this).apply(x.equations());
     static_cast<Derived&>(*this).apply(x.global_variables());
+    static_cast<Derived&>(*this).apply(x.equations());
     static_cast<Derived&>(*this).apply(x.initial_state());
     static_cast<Derived&>(*this).leave(x);
   }
@@ -611,8 +611,8 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   void apply(const pbes_system::pbes& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this).apply(x.equations());
     static_cast<Derived&>(*this).apply(x.global_variables());
+    static_cast<Derived&>(*this).apply(x.equations());
     static_cast<Derived&>(*this).apply(x.initial_state());
     static_cast<Derived&>(*this).leave(x);
   }
