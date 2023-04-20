@@ -40,7 +40,7 @@
 
    .. image:: /_templates/mcrl2/static/understanding.*
       :align: right
-      :width: 4cm
+      :width: 90px
       :alt: Understanding Behaviour of Distributed Systems using mCRL2 (book)
       :target: https://link.springer.com/book/10.1007/978-3-031-23008-0
 
