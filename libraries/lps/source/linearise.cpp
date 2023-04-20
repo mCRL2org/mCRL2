@@ -6661,7 +6661,6 @@ class specification_basic_type
       }
       /* now we construct the arguments of the invoked -----------------------------------------------------
          process, i.e. the new function g */
-      std::size_t fcnt=0;
       data_expression_list resultnextstate;
 
       for (const variable& var: parameters)
@@ -6765,7 +6764,6 @@ class specification_basic_type
             resultnextstate.push_front(temp);
           }
         }
-        fcnt++;
       }
       /* Now turn *resultg around */
       resultnextstate=reverse(resultnextstate);
