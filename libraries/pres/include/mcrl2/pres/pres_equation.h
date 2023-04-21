@@ -174,10 +174,7 @@ atermpp::aterm_appl pres_equation_to_aterm(const pres_equation& eqn)
 }
 
 // Overload for pp for propositional variables.
-std::string pp(const propositional_variable& v)
-{
-  return pbes_system::pp(v);
-}
+std::string pp(const propositional_variable& v);
 
 // template function overloads
 std::string pp(const pres_equation_vector& x);

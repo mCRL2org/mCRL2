@@ -1308,6 +1308,11 @@ inline void make_propositional_variable(atermpp::aterm_appl& t, const ARGUMENTS&
   mcrl2::pbes_system::make_propositional_variable(t, args...);
 }
 
+/// \\brief list of propositional_variables
+typedef atermpp::term_list<pbes_system::propositional_variable> propositional_variable_list;
+
+/// \\brief vector of propositional_variables
+typedef std::vector<pbes_system::propositional_variable>    propositional_variable_vector;
 
 } // namespace pres_system
 
