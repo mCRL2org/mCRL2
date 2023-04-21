@@ -204,9 +204,9 @@ template <typename Term> bool check_rule_PRInit(const Term& t);
 template <typename Term> bool check_rule_PREqn(const Term& t);
 template <typename Term> bool check_rule_PRExpr(const Term& t);
 template <typename Term> bool check_rule_RES(const Term& t);
-template <typename Term> bool check_rule_RealEquation(const Term& t);
-template <typename Term> bool check_rule_RealVariable(const Term& t);
-template <typename Term> bool check_rule_RealExpression(const Term& t);
+template <typename Term> bool check_rule_ResEquation(const Term& t);
+template <typename Term> bool check_rule_ResVariable(const Term& t);
+template <typename Term> bool check_rule_ResExpression(const Term& t);
 template <typename Term> bool check_rule_BddExpression(const Term& t);
 template <typename Term> bool check_term_SortCons(const Term& t);
 template <typename Term> bool check_term_SortStruct(const Term& t);
@@ -359,22 +359,22 @@ template <typename Term> bool check_term_PRESOr(const Term& t);
 template <typename Term> bool check_term_PRESImp(const Term& t);
 template <typename Term> bool check_term_PRESPlus(const Term& t);
 template <typename Term> bool check_term_PRESConstantMultiply(const Term& t);
-template <typename Term> bool check_term_PRESMin(const Term& t);
-template <typename Term> bool check_term_PRESMax(const Term& t);
+template <typename Term> bool check_term_PRESMinall(const Term& t);
+template <typename Term> bool check_term_PRESMaxall(const Term& t);
 template <typename Term> bool check_term_PRESSum(const Term& t);
 template <typename Term> bool check_term_RES(const Term& t);
-template <typename Term> bool check_term_RealEquation(const Term& t);
-template <typename Term> bool check_term_RealVariable(const Term& t);
-template <typename Term> bool check_term_RealNot(const Term& t);
-template <typename Term> bool check_term_RealAnd(const Term& t);
-template <typename Term> bool check_term_RealOr(const Term& t);
-template <typename Term> bool check_term_RealImp(const Term& t);
-template <typename Term> bool check_term_RealPlus(const Term& t);
-template <typename Term> bool check_term_RealConstantMultiply(const Term& t);
-template <typename Term> bool check_term_RealCondAnd(const Term& t);
-template <typename Term> bool check_term_RealCondOr(const Term& t);
-template <typename Term> bool check_term_RealEqInf(const Term& t);
-template <typename Term> bool check_term_RealEqNInf(const Term& t);
+template <typename Term> bool check_term_ResEquation(const Term& t);
+template <typename Term> bool check_term_ResVariable(const Term& t);
+template <typename Term> bool check_term_ResNot(const Term& t);
+template <typename Term> bool check_term_ResAnd(const Term& t);
+template <typename Term> bool check_term_ResOr(const Term& t);
+template <typename Term> bool check_term_ResImp(const Term& t);
+template <typename Term> bool check_term_ResPlus(const Term& t);
+template <typename Term> bool check_term_ResConstantMultiply(const Term& t);
+template <typename Term> bool check_term_ResCondAnd(const Term& t);
+template <typename Term> bool check_term_ResCondOr(const Term& t);
+template <typename Term> bool check_term_ResEqInf(const Term& t);
+template <typename Term> bool check_term_ResEqNInf(const Term& t);
 template <typename Term> bool check_term_BddTrue(const Term& t);
 template <typename Term> bool check_term_BddFalse(const Term& t);
 template <typename Term> bool check_term_BddIf(const Term& t);
@@ -1223,8 +1223,8 @@ bool check_rule_PRExpr(const Term& t)
          || check_term_PRESImp(t)
          || check_term_PRESPlus(t)
          || check_term_PRESConstantMultiply(t)
-         || check_term_PRESMin(t)
-         || check_term_PRESMax(t)
+         || check_term_PRESMinall(t)
+         || check_term_PRESMaxall(t)
          || check_term_PRESSum(t)
          || check_rule_PropVarInst(t)
          || check_rule_UntypedDataParameter(t);
@@ -1245,46 +1245,46 @@ bool check_rule_RES(const Term& t)
 }
 
 template <typename Term>
-bool check_rule_RealEquation(const Term& t)
+bool check_rule_ResEquation(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return check_term_RealEquation(t);
+  return check_term_ResEquation(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
 }
 
 template <typename Term>
-bool check_rule_RealVariable(const Term& t)
+bool check_rule_ResVariable(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return check_term_RealVariable(t);
+  return check_term_ResVariable(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
 }
 
 template <typename Term>
-bool check_rule_RealExpression(const Term& t)
+bool check_rule_ResExpression(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   return check_term_BooleanTrue(t)
          || check_term_BooleanFalse(t)
-         || check_rule_RealVariable(t)
-         || check_term_RealNot(t)
-         || check_term_RealAnd(t)
-         || check_term_RealOr(t)
-         || check_term_RealImp(t)
-         || check_term_RealPlus(t)
-         || check_term_RealConstantMultiply(t)
+         || check_rule_ResVariable(t)
+         || check_term_ResNot(t)
+         || check_term_ResAnd(t)
+         || check_term_ResOr(t)
+         || check_term_ResImp(t)
+         || check_term_ResPlus(t)
+         || check_term_ResConstantMultiply(t)
          || check_rule_DataExpr(t)
-         || check_term_RealCondAnd(t)
-         || check_term_RealCondOr(t)
-         || check_term_RealEqInf(t)
-         || check_term_RealEqNInf(t);
+         || check_term_ResCondAnd(t)
+         || check_term_ResCondOr(t)
+         || check_term_ResEqInf(t)
+         || check_term_ResEqNInf(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -7000,9 +7000,9 @@ bool check_term_PRESConstantMultiply(const Term& t)
   return true;
 }
 
-// PRESMin(DataVarId+, PRExpr)
+// PRESMinall(DataVarId+, PRExpr)
 template <typename Term>
-bool check_term_PRESMin(const Term& t)
+bool check_term_PRESMinall(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -7013,7 +7013,7 @@ bool check_term_PRESMin(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::PRESMin)
+  if (a.function() != core::detail::function_symbols::PRESMinall)
   {
     return false;
   }
@@ -7040,9 +7040,9 @@ bool check_term_PRESMin(const Term& t)
   return true;
 }
 
-// PRESMax(DataVarId+, PRExpr)
+// PRESMaxall(DataVarId+, PRExpr)
 template <typename Term>
-bool check_term_PRESMax(const Term& t)
+bool check_term_PRESMaxall(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -7053,7 +7053,7 @@ bool check_term_PRESMax(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::PRESMax)
+  if (a.function() != core::detail::function_symbols::PRESMaxall)
   {
     return false;
   }
@@ -7120,7 +7120,7 @@ bool check_term_PRESSum(const Term& t)
   return true;
 }
 
-// RES(RealEquation*, RealExpression)
+// RES(ResEquation*, ResExpression)
 template <typename Term>
 bool check_term_RES(const Term& t)
 {
@@ -7144,14 +7144,14 @@ bool check_term_RES(const Term& t)
     return false;
   }
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_RealEquation<atermpp::aterm>, 0))
+  if (!check_list_argument(a[0], check_rule_ResEquation<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealEquation" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ResEquation" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[1], check_rule_RealExpression<atermpp::aterm>))
+  if (!check_term_argument(a[1], check_rule_ResExpression<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ResExpression" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -7160,9 +7160,9 @@ bool check_term_RES(const Term& t)
   return true;
 }
 
-// RealEquation(FixPoint, RealVariable, RealExpression)
+// ResEquation(FixPoint, ResVariable, ResExpression)
 template <typename Term>
-bool check_term_RealEquation(const Term& t)
+bool check_term_ResEquation(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -7173,7 +7173,7 @@ bool check_term_RealEquation(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::RealEquation)
+  if (a.function() != core::detail::function_symbols::ResEquation)
   {
     return false;
   }
@@ -7189,14 +7189,14 @@ bool check_term_RealEquation(const Term& t)
     mCRL2log(log::debug, "soundness_checks") << "check_rule_FixPoint" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[1], check_rule_RealVariable<atermpp::aterm>))
+  if (!check_term_argument(a[1], check_rule_ResVariable<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealVariable" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ResVariable" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[2], check_rule_RealExpression<atermpp::aterm>))
+  if (!check_term_argument(a[2], check_rule_ResExpression<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ResExpression" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -7205,9 +7205,9 @@ bool check_term_RealEquation(const Term& t)
   return true;
 }
 
-// RealVariable(String)
+// ResVariable(String)
 template <typename Term>
-bool check_term_RealVariable(const Term& t)
+bool check_term_ResVariable(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -7218,7 +7218,7 @@ bool check_term_RealVariable(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::RealVariable)
+  if (a.function() != core::detail::function_symbols::ResVariable)
   {
     return false;
   }
@@ -7240,9 +7240,9 @@ bool check_term_RealVariable(const Term& t)
   return true;
 }
 
-// RealNot(RealExpression)
+// ResNot(ResExpression)
 template <typename Term>
-bool check_term_RealNot(const Term& t)
+bool check_term_ResNot(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -7253,7 +7253,7 @@ bool check_term_RealNot(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::RealNot)
+  if (a.function() != core::detail::function_symbols::ResNot)
   {
     return false;
   }
@@ -7264,9 +7264,9 @@ bool check_term_RealNot(const Term& t)
     return false;
   }
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_RealExpression<atermpp::aterm>))
+  if (!check_term_argument(a[0], check_rule_ResExpression<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ResExpression" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -7275,9 +7275,9 @@ bool check_term_RealNot(const Term& t)
   return true;
 }
 
-// RealAnd(RealExpression, RealExpression)
+// ResAnd(ResExpression, ResExpression)
 template <typename Term>
-bool check_term_RealAnd(const Term& t)
+bool check_term_ResAnd(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -7288,7 +7288,7 @@ bool check_term_RealAnd(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::RealAnd)
+  if (a.function() != core::detail::function_symbols::ResAnd)
   {
     return false;
   }
@@ -7299,14 +7299,14 @@ bool check_term_RealAnd(const Term& t)
     return false;
   }
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_RealExpression<atermpp::aterm>))
+  if (!check_term_argument(a[0], check_rule_ResExpression<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ResExpression" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[1], check_rule_RealExpression<atermpp::aterm>))
+  if (!check_term_argument(a[1], check_rule_ResExpression<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ResExpression" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -7315,9 +7315,9 @@ bool check_term_RealAnd(const Term& t)
   return true;
 }
 
-// RealOr(RealExpression, RealExpression)
+// ResOr(ResExpression, ResExpression)
 template <typename Term>
-bool check_term_RealOr(const Term& t)
+bool check_term_ResOr(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -7328,7 +7328,7 @@ bool check_term_RealOr(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::RealOr)
+  if (a.function() != core::detail::function_symbols::ResOr)
   {
     return false;
   }
@@ -7339,14 +7339,14 @@ bool check_term_RealOr(const Term& t)
     return false;
   }
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_RealExpression<atermpp::aterm>))
+  if (!check_term_argument(a[0], check_rule_ResExpression<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ResExpression" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[1], check_rule_RealExpression<atermpp::aterm>))
+  if (!check_term_argument(a[1], check_rule_ResExpression<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ResExpression" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -7355,9 +7355,9 @@ bool check_term_RealOr(const Term& t)
   return true;
 }
 
-// RealImp(RealExpression, RealExpression)
+// ResImp(ResExpression, ResExpression)
 template <typename Term>
-bool check_term_RealImp(const Term& t)
+bool check_term_ResImp(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -7368,7 +7368,7 @@ bool check_term_RealImp(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::RealImp)
+  if (a.function() != core::detail::function_symbols::ResImp)
   {
     return false;
   }
@@ -7379,14 +7379,14 @@ bool check_term_RealImp(const Term& t)
     return false;
   }
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_RealExpression<atermpp::aterm>))
+  if (!check_term_argument(a[0], check_rule_ResExpression<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ResExpression" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[1], check_rule_RealExpression<atermpp::aterm>))
+  if (!check_term_argument(a[1], check_rule_ResExpression<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ResExpression" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -7395,9 +7395,9 @@ bool check_term_RealImp(const Term& t)
   return true;
 }
 
-// RealPlus(RealExpression, RealExpression)
+// ResPlus(ResExpression, ResExpression)
 template <typename Term>
-bool check_term_RealPlus(const Term& t)
+bool check_term_ResPlus(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -7408,7 +7408,7 @@ bool check_term_RealPlus(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::RealPlus)
+  if (a.function() != core::detail::function_symbols::ResPlus)
   {
     return false;
   }
@@ -7419,14 +7419,14 @@ bool check_term_RealPlus(const Term& t)
     return false;
   }
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_RealExpression<atermpp::aterm>))
+  if (!check_term_argument(a[0], check_rule_ResExpression<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ResExpression" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[1], check_rule_RealExpression<atermpp::aterm>))
+  if (!check_term_argument(a[1], check_rule_ResExpression<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ResExpression" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -7435,9 +7435,9 @@ bool check_term_RealPlus(const Term& t)
   return true;
 }
 
-// RealConstantMultiply(DataExpr, RealExpression)
+// ResConstantMultiply(DataExpr, ResExpression)
 template <typename Term>
-bool check_term_RealConstantMultiply(const Term& t)
+bool check_term_ResConstantMultiply(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -7448,7 +7448,7 @@ bool check_term_RealConstantMultiply(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::RealConstantMultiply)
+  if (a.function() != core::detail::function_symbols::ResConstantMultiply)
   {
     return false;
   }
@@ -7464,9 +7464,9 @@ bool check_term_RealConstantMultiply(const Term& t)
     mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[1], check_rule_RealExpression<atermpp::aterm>))
+  if (!check_term_argument(a[1], check_rule_ResExpression<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ResExpression" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -7475,9 +7475,9 @@ bool check_term_RealConstantMultiply(const Term& t)
   return true;
 }
 
-// RealCondAnd(RealExpression, RealExpression, RealExpression)
+// ResCondAnd(ResExpression, ResExpression, ResExpression)
 template <typename Term>
-bool check_term_RealCondAnd(const Term& t)
+bool check_term_ResCondAnd(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -7488,7 +7488,7 @@ bool check_term_RealCondAnd(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::RealCondAnd)
+  if (a.function() != core::detail::function_symbols::ResCondAnd)
   {
     return false;
   }
@@ -7499,19 +7499,19 @@ bool check_term_RealCondAnd(const Term& t)
     return false;
   }
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_RealExpression<atermpp::aterm>))
+  if (!check_term_argument(a[0], check_rule_ResExpression<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ResExpression" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[1], check_rule_RealExpression<atermpp::aterm>))
+  if (!check_term_argument(a[1], check_rule_ResExpression<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ResExpression" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[2], check_rule_RealExpression<atermpp::aterm>))
+  if (!check_term_argument(a[2], check_rule_ResExpression<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ResExpression" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -7520,9 +7520,9 @@ bool check_term_RealCondAnd(const Term& t)
   return true;
 }
 
-// RealCondOr(RealExpression, RealExpression, RealExpression)
+// ResCondOr(ResExpression, ResExpression, ResExpression)
 template <typename Term>
-bool check_term_RealCondOr(const Term& t)
+bool check_term_ResCondOr(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -7533,7 +7533,7 @@ bool check_term_RealCondOr(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::RealCondOr)
+  if (a.function() != core::detail::function_symbols::ResCondOr)
   {
     return false;
   }
@@ -7544,19 +7544,19 @@ bool check_term_RealCondOr(const Term& t)
     return false;
   }
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_RealExpression<atermpp::aterm>))
+  if (!check_term_argument(a[0], check_rule_ResExpression<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ResExpression" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[1], check_rule_RealExpression<atermpp::aterm>))
+  if (!check_term_argument(a[1], check_rule_ResExpression<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ResExpression" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[2], check_rule_RealExpression<atermpp::aterm>))
+  if (!check_term_argument(a[2], check_rule_ResExpression<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ResExpression" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -7565,9 +7565,9 @@ bool check_term_RealCondOr(const Term& t)
   return true;
 }
 
-// RealEqInf(RealExpression)
+// ResEqInf(ResExpression)
 template <typename Term>
-bool check_term_RealEqInf(const Term& t)
+bool check_term_ResEqInf(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -7578,7 +7578,7 @@ bool check_term_RealEqInf(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::RealEqInf)
+  if (a.function() != core::detail::function_symbols::ResEqInf)
   {
     return false;
   }
@@ -7589,9 +7589,9 @@ bool check_term_RealEqInf(const Term& t)
     return false;
   }
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_RealExpression<atermpp::aterm>))
+  if (!check_term_argument(a[0], check_rule_ResExpression<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ResExpression" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -7600,9 +7600,9 @@ bool check_term_RealEqInf(const Term& t)
   return true;
 }
 
-// RealEqNInf(RealExpression)
+// ResEqNInf(ResExpression)
 template <typename Term>
-bool check_term_RealEqNInf(const Term& t)
+bool check_term_ResEqNInf(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -7613,7 +7613,7 @@ bool check_term_RealEqNInf(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::RealEqNInf)
+  if (a.function() != core::detail::function_symbols::ResEqNInf)
   {
     return false;
   }
@@ -7624,9 +7624,9 @@ bool check_term_RealEqNInf(const Term& t)
     return false;
   }
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_RealExpression<atermpp::aterm>))
+  if (!check_term_argument(a[0], check_rule_ResExpression<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_RealExpression" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_ResExpression" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS

@@ -19,10 +19,14 @@
 namespace mcrl2
 {
 
+
 namespace pres_system
 {
 
-typedef std::pair<core::identifier_string, data::data_expression_list> propositional_variable_key_type;
+/// \brief The propositional variable is taken from a pbes_system. 
+typedef pbes_system::propositional_variable propositional_variable;
+
+// typedef std::pair<core::identifier_string, data::data_expression_list> propositional_variable_key_type;
 
 //--- start generated classes ---//
 /// \\brief A pres expression
@@ -42,6 +46,21 @@ class pres_expression: public atermpp::aterm_appl
       assert(core::detail::check_rule_PRExpr(*this));
     }
 
+    /// \\brief Constructor.
+    pres_expression(const data::data_expression& x)
+      : atermpp::aterm_appl(x)
+    {}
+
+    /// \\brief Constructor.
+    pres_expression(const data::variable& x)
+      : atermpp::aterm_appl(x)
+    {}
+
+    /// \\brief Constructor.
+    pres_expression(const data::untyped_data_parameter& x)
+      : atermpp::aterm_appl(x)
+    {}
+
     /// Move semantics
     pres_expression(const pres_expression&) noexcept = default;
     pres_expression(pres_expression&&) noexcept = default;
@@ -57,12 +76,15 @@ typedef std::vector<pres_expression>    pres_expression_vector;
 
 // prototypes
 inline bool is_propositional_variable_instantiation(const atermpp::aterm_appl& x);
-inline bool is_not(const atermpp::aterm_appl& x);
+inline bool is_minus(const atermpp::aterm_appl& x);
 inline bool is_and(const atermpp::aterm_appl& x);
 inline bool is_or(const atermpp::aterm_appl& x);
 inline bool is_imp(const atermpp::aterm_appl& x);
-inline bool is_forall(const atermpp::aterm_appl& x);
-inline bool is_exists(const atermpp::aterm_appl& x);
+inline bool is_plus(const atermpp::aterm_appl& x);
+inline bool is_multiply(const atermpp::aterm_appl& x);
+inline bool is_minall(const atermpp::aterm_appl& x);
+inline bool is_maxall(const atermpp::aterm_appl& x);
+inline bool is_sum(const atermpp::aterm_appl& x);
 
 /// \\brief Test for a pres_expression expression
 /// \\param x A term
@@ -70,13 +92,19 @@ inline bool is_exists(const atermpp::aterm_appl& x);
 inline
 bool is_pres_expression(const atermpp::aterm_appl& x)
 {
-  return pres_system::is_propositional_variable_instantiation(x) ||
-         pres_system::is_not(x) ||
+  return data::is_data_expression(x) ||
+         data::is_variable(x) ||
+         data::is_untyped_data_parameter(x) ||
+         pres_system::is_propositional_variable_instantiation(x) ||
+         pres_system::is_minus(x) ||
          pres_system::is_and(x) ||
          pres_system::is_or(x) ||
          pres_system::is_imp(x) ||
-         pres_system::is_forall(x) ||
-         pres_system::is_exists(x);
+         pres_system::is_plus(x) ||
+         pres_system::is_multiply(x) ||
+         pres_system::is_minall(x) ||
+         pres_system::is_maxall(x) ||
+         pres_system::is_sum(x);
 }
 
 // prototype declaration
@@ -193,32 +221,32 @@ inline void swap(propositional_variable_instantiation& t1, propositional_variabl
 
 
 /// \\brief The not operator for pres expressions
-class not_: public pres_expression
+class minus: public pres_expression
 {
   public:
     /// \\brief Default constructor.
-    not_()
-      : pres_expression(core::detail::default_values::PRESNot)
+    minus()
+      : pres_expression(core::detail::default_values::PRESMinus)
     {}
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit not_(const atermpp::aterm& term)
+    explicit minus(const atermpp::aterm& term)
       : pres_expression(term)
     {
-      assert(core::detail::check_term_PRESNot(*this));
+      assert(core::detail::check_term_PRESMinus(*this));
     }
 
     /// \\brief Constructor.
-    explicit not_(const pres_expression& operand)
-      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESNot(), operand))
+    explicit minus(const pres_expression& operand)
+      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESMinus(), operand))
     {}
 
     /// Move semantics
-    not_(const not_&) noexcept = default;
-    not_(not_&&) noexcept = default;
-    not_& operator=(const not_&) noexcept = default;
-    not_& operator=(not_&&) noexcept = default;
+    minus(const minus&) noexcept = default;
+    minus(minus&&) noexcept = default;
+    minus& operator=(const minus&) noexcept = default;
+    minus& operator=(minus&&) noexcept = default;
 
     const pres_expression& operand() const
     {
@@ -226,38 +254,38 @@ class not_: public pres_expression
     }
 };
 
-/// \\brief Make_not_ constructs a new term into a given address.
-/// \\ \param t The reference into which the new not_ is constructed. 
+/// \\brief Make_minus constructs a new term into a given address.
+/// \\ \param t The reference into which the new minus is constructed. 
 template <class... ARGUMENTS>
-inline void make_not_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_minus(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
-  atermpp::make_term_appl(t, core::detail::function_symbol_PRESNot(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_PRESMinus(), args...);
 }
 
-/// \\brief Test for a not expression
+/// \\brief Test for a minus expression
 /// \\param x A term
-/// \\return True if \\a x is a not expression
+/// \\return True if \\a x is a minus expression
 inline
-bool is_not(const atermpp::aterm_appl& x)
+bool is_minus(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::detail::function_symbols::PRESNot;
+  return x.function() == core::detail::function_symbols::PRESMinus;
 }
 
 // prototype declaration
-std::string pp(const not_& x);
+std::string pp(const minus& x);
 
 /// \\brief Outputs the object to a stream
 /// \\param out An output stream
 /// \\param x Object x
 /// \\return The output stream
 inline
-std::ostream& operator<<(std::ostream& out, const not_& x)
+std::ostream& operator<<(std::ostream& out, const minus& x)
 {
   return out << pres_system::pp(x);
 }
 
 /// \\brief swap overload
-inline void swap(not_& t1, not_& t2)
+inline void swap(minus& t1, minus& t2)
 {
   t1.swap(t2);
 }
@@ -491,109 +519,185 @@ inline void swap(imp& t1, imp& t2)
 }
 
 
-/// \\brief The universal quantification operator for pres expressions
-class forall: public pres_expression
+/// \\brief The addition operator for pres expressions
+class plus: public pres_expression
 {
   public:
     /// \\brief Default constructor.
-    forall()
-      : pres_expression(core::detail::default_values::PRESForall)
+    plus()
+      : pres_expression(core::detail::default_values::PRESPlus)
     {}
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit forall(const atermpp::aterm& term)
+    explicit plus(const atermpp::aterm& term)
       : pres_expression(term)
     {
-      assert(core::detail::check_term_PRESForall(*this));
+      assert(core::detail::check_term_PRESPlus(*this));
     }
 
     /// \\brief Constructor.
-    forall(const data::variable_list& variables, const pres_expression& body)
-      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESForall(), variables, body))
+    plus(const pres_expression& left, const pres_expression& right)
+      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESPlus(), left, right))
     {}
 
     /// Move semantics
-    forall(const forall&) noexcept = default;
-    forall(forall&&) noexcept = default;
-    forall& operator=(const forall&) noexcept = default;
-    forall& operator=(forall&&) noexcept = default;
+    plus(const plus&) noexcept = default;
+    plus(plus&&) noexcept = default;
+    plus& operator=(const plus&) noexcept = default;
+    plus& operator=(plus&&) noexcept = default;
 
-    const data::variable_list& variables() const
+    const pres_expression& left() const
     {
-      return atermpp::down_cast<data::variable_list>((*this)[0]);
+      return atermpp::down_cast<pres_expression>((*this)[0]);
     }
 
-    const pres_expression& body() const
+    const pres_expression& right() const
     {
       return atermpp::down_cast<pres_expression>((*this)[1]);
     }
 };
 
-/// \\brief Make_forall constructs a new term into a given address.
-/// \\ \param t The reference into which the new forall is constructed. 
+/// \\brief Make_plus constructs a new term into a given address.
+/// \\ \param t The reference into which the new plus is constructed. 
 template <class... ARGUMENTS>
-inline void make_forall(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_plus(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
-  atermpp::make_term_appl(t, core::detail::function_symbol_PRESForall(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_PRESPlus(), args...);
 }
 
-/// \\brief Test for a forall expression
+/// \\brief Test for a plus expression
 /// \\param x A term
-/// \\return True if \\a x is a forall expression
+/// \\return True if \\a x is a plus expression
 inline
-bool is_forall(const atermpp::aterm_appl& x)
+bool is_plus(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::detail::function_symbols::PRESForall;
+  return x.function() == core::detail::function_symbols::PRESPlus;
 }
 
 // prototype declaration
-std::string pp(const forall& x);
+std::string pp(const plus& x);
 
 /// \\brief Outputs the object to a stream
 /// \\param out An output stream
 /// \\param x Object x
 /// \\return The output stream
 inline
-std::ostream& operator<<(std::ostream& out, const forall& x)
+std::ostream& operator<<(std::ostream& out, const plus& x)
 {
   return out << pres_system::pp(x);
 }
 
 /// \\brief swap overload
-inline void swap(forall& t1, forall& t2)
+inline void swap(plus& t1, plus& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \\brief The existential quantification operator for pres expressions
-class exists: public pres_expression
+/// \\brief The multiplication with a positive constant
+class multiply: public pres_expression
 {
   public:
     /// \\brief Default constructor.
-    exists()
-      : pres_expression(core::detail::default_values::PRESExists)
+    multiply()
+      : pres_expression(core::detail::default_values::PRESConstantMultiply)
     {}
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit exists(const atermpp::aterm& term)
+    explicit multiply(const atermpp::aterm& term)
       : pres_expression(term)
     {
-      assert(core::detail::check_term_PRESExists(*this));
+      assert(core::detail::check_term_PRESConstantMultiply(*this));
     }
 
     /// \\brief Constructor.
-    exists(const data::variable_list& variables, const pres_expression& body)
-      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESExists(), variables, body))
+    multiply(const data::data_expression& left, const pres_expression& right)
+      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESConstantMultiply(), left, right))
     {}
 
     /// Move semantics
-    exists(const exists&) noexcept = default;
-    exists(exists&&) noexcept = default;
-    exists& operator=(const exists&) noexcept = default;
-    exists& operator=(exists&&) noexcept = default;
+    multiply(const multiply&) noexcept = default;
+    multiply(multiply&&) noexcept = default;
+    multiply& operator=(const multiply&) noexcept = default;
+    multiply& operator=(multiply&&) noexcept = default;
+
+    const data::data_expression& left() const
+    {
+      return atermpp::down_cast<data::data_expression>((*this)[0]);
+    }
+
+    const pres_expression& right() const
+    {
+      return atermpp::down_cast<pres_expression>((*this)[1]);
+    }
+};
+
+/// \\brief Make_multiply constructs a new term into a given address.
+/// \\ \param t The reference into which the new multiply is constructed. 
+template <class... ARGUMENTS>
+inline void make_multiply(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_PRESConstantMultiply(), args...);
+}
+
+/// \\brief Test for a multiply expression
+/// \\param x A term
+/// \\return True if \\a x is a multiply expression
+inline
+bool is_multiply(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::PRESConstantMultiply;
+}
+
+// prototype declaration
+std::string pp(const multiply& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const multiply& x)
+{
+  return out << pres_system::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(multiply& t1, multiply& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \\brief The minimum operator for pres expressions
+class minall: public pres_expression
+{
+  public:
+    /// \\brief Default constructor.
+    minall()
+      : pres_expression(core::detail::default_values::PRESMinall)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit minall(const atermpp::aterm& term)
+      : pres_expression(term)
+    {
+      assert(core::detail::check_term_PRESMinall(*this));
+    }
+
+    /// \\brief Constructor.
+    minall(const data::variable_list& variables, const pres_expression& body)
+      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESMinall(), variables, body))
+    {}
+
+    /// Move semantics
+    minall(const minall&) noexcept = default;
+    minall(minall&&) noexcept = default;
+    minall& operator=(const minall&) noexcept = default;
+    minall& operator=(minall&&) noexcept = default;
 
     const data::variable_list& variables() const
     {
@@ -606,38 +710,190 @@ class exists: public pres_expression
     }
 };
 
-/// \\brief Make_exists constructs a new term into a given address.
-/// \\ \param t The reference into which the new exists is constructed. 
+/// \\brief Make_minall constructs a new term into a given address.
+/// \\ \param t The reference into which the new minall is constructed. 
 template <class... ARGUMENTS>
-inline void make_exists(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_minall(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
-  atermpp::make_term_appl(t, core::detail::function_symbol_PRESExists(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_PRESMinall(), args...);
 }
 
-/// \\brief Test for a exists expression
+/// \\brief Test for a minall expression
 /// \\param x A term
-/// \\return True if \\a x is a exists expression
+/// \\return True if \\a x is a minall expression
 inline
-bool is_exists(const atermpp::aterm_appl& x)
+bool is_minall(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::detail::function_symbols::PRESExists;
+  return x.function() == core::detail::function_symbols::PRESMinall;
 }
 
 // prototype declaration
-std::string pp(const exists& x);
+std::string pp(const minall& x);
 
 /// \\brief Outputs the object to a stream
 /// \\param out An output stream
 /// \\param x Object x
 /// \\return The output stream
 inline
-std::ostream& operator<<(std::ostream& out, const exists& x)
+std::ostream& operator<<(std::ostream& out, const minall& x)
 {
   return out << pres_system::pp(x);
 }
 
 /// \\brief swap overload
-inline void swap(exists& t1, exists& t2)
+inline void swap(minall& t1, minall& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \\brief The maximum operator for pres expressions
+class maxall: public pres_expression
+{
+  public:
+    /// \\brief Default constructor.
+    maxall()
+      : pres_expression(core::detail::default_values::PRESMaxall)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit maxall(const atermpp::aterm& term)
+      : pres_expression(term)
+    {
+      assert(core::detail::check_term_PRESMaxall(*this));
+    }
+
+    /// \\brief Constructor.
+    maxall(const data::variable_list& variables, const pres_expression& body)
+      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESMaxall(), variables, body))
+    {}
+
+    /// Move semantics
+    maxall(const maxall&) noexcept = default;
+    maxall(maxall&&) noexcept = default;
+    maxall& operator=(const maxall&) noexcept = default;
+    maxall& operator=(maxall&&) noexcept = default;
+
+    const data::variable_list& variables() const
+    {
+      return atermpp::down_cast<data::variable_list>((*this)[0]);
+    }
+
+    const pres_expression& body() const
+    {
+      return atermpp::down_cast<pres_expression>((*this)[1]);
+    }
+};
+
+/// \\brief Make_maxall constructs a new term into a given address.
+/// \\ \param t The reference into which the new maxall is constructed. 
+template <class... ARGUMENTS>
+inline void make_maxall(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_PRESMaxall(), args...);
+}
+
+/// \\brief Test for a maxall expression
+/// \\param x A term
+/// \\return True if \\a x is a maxall expression
+inline
+bool is_maxall(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::PRESMaxall;
+}
+
+// prototype declaration
+std::string pp(const maxall& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const maxall& x)
+{
+  return out << pres_system::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(maxall& t1, maxall& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \\brief The generic sum operator for pres expressions
+class sum: public pres_expression
+{
+  public:
+    /// \\brief Default constructor.
+    sum()
+      : pres_expression(core::detail::default_values::PRESSum)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit sum(const atermpp::aterm& term)
+      : pres_expression(term)
+    {
+      assert(core::detail::check_term_PRESSum(*this));
+    }
+
+    /// \\brief Constructor.
+    sum(const data::variable_list& variables, const pres_expression& body)
+      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESSum(), variables, body))
+    {}
+
+    /// Move semantics
+    sum(const sum&) noexcept = default;
+    sum(sum&&) noexcept = default;
+    sum& operator=(const sum&) noexcept = default;
+    sum& operator=(sum&&) noexcept = default;
+
+    const data::variable_list& variables() const
+    {
+      return atermpp::down_cast<data::variable_list>((*this)[0]);
+    }
+
+    const pres_expression& body() const
+    {
+      return atermpp::down_cast<pres_expression>((*this)[1]);
+    }
+};
+
+/// \\brief Make_sum constructs a new term into a given address.
+/// \\ \param t The reference into which the new sum is constructed. 
+template <class... ARGUMENTS>
+inline void make_sum(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_PRESSum(), args...);
+}
+
+/// \\brief Test for a sum expression
+/// \\param x A term
+/// \\return True if \\a x is a sum expression
+inline
+bool is_sum(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::PRESSum;
+}
+
+// prototype declaration
+std::string pp(const sum& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const sum& x)
+{
+  return out << pres_system::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(sum& t1, sum& t2)
 {
   t1.swap(t2);
 }
@@ -689,12 +945,12 @@ inline bool is_false(const pres_expression& t)
   return data::sort_bool::is_false_function_symbol(t);
 }
 
-/// \brief Returns true if the term t is a not expression
+/// \brief Returns true if the term t is a minus expression
 /// \param t A PRES expression
-/// \return True if the term t is a not expression
-inline bool is_pres_not(const pres_expression& t)
+/// \return True if the term t is a minus expression
+inline bool is_pres_minus(const pres_expression& t)
 {
-  return pres_system::is_not(t);
+  return pres_system::is_minus(t);
 }
 
 /// \brief Returns true if the term t is an and expression
@@ -721,23 +977,23 @@ inline bool is_pres_imp(const pres_expression& t)
   return pres_system::is_imp(t);
 }
 
-/// \brief Returns true if the term t is a universal quantification
+/// \brief Returns true if the term t is a generalized minus expression
 /// \param t A PRES expression
-/// \return True if the term t is a universal quantification
-inline bool is_pres_forall(const pres_expression& t)
+/// \return True if the term t is a generalized minus expression
+inline bool is_pres_minall(const pres_expression& t)
 {
-  return pres_system::is_forall(t);
+  return pres_system::is_minall(t);
 }
 
-/// \brief Returns true if the term t is an existential quantification
+/// \brief Returns true if the term t is a generalized maximum expression
 /// \param t A PRES expression
-/// \return True if the term t is an existential quantification
-inline bool is_pres_exists(const pres_expression& t)
+/// \return True if the term t is a generalized maximum expression
+inline bool is_pres_maxall(const pres_expression& t)
 {
-  return pres_system::is_exists(t);
+  return pres_system::is_maxall(t);
 }
 
-/// \brief Test for a conjunction
+/* /// \brief Test for a conjunction
 /// \param t A PRES expression or a data expression
 /// \return True if it is a conjunction
 inline bool is_universal_not(const pres_expression& t)
@@ -759,7 +1015,7 @@ inline bool is_universal_and(const pres_expression& t)
 inline bool is_universal_or(const pres_expression& t)
 {
   return is_pres_or(t) || data::sort_bool::is_or_application(t);
-}
+} */
 
 /// \brief Returns true if the term t is a data expression
 /// \param t A PRES expression
@@ -779,13 +1035,13 @@ namespace accessors
 inline
 const pres_expression& arg(const pres_expression& t)
 {
-  if (is_pres_not(t))
+  if (is_pres_minus(t))
   {
     return atermpp::down_cast<const pres_expression>(t[0]);
   }
   else
   {
-    assert(is_forall(t) || is_exists(t));
+    assert(is_minall(t) || is_maxall(t) || is_sum(t));
     return atermpp::down_cast<const pres_expression>(t[1]);
   }
 }
@@ -865,7 +1121,7 @@ pres_expression data_right(const pres_expression& x)
 inline
 const data::variable_list& var(const pres_expression& t)
 {
-  assert(is_forall(t) || is_exists(t));
+  assert(is_minall(t) || is_maxall(t) || is_sum(t));
   return atermpp::down_cast<data::variable_list>(t[0]);
 }
 
@@ -890,43 +1146,44 @@ const data::data_expression_list& param(const pres_expression& t)
 }
 } // namespace accessors
 
-/// \brief Make a universal quantification. It checks for an empty variable list,
+/// \brief Make a generalized minimum. It checks for an empty variable list,
 /// which is not allowed.
 /// \param l A sequence of data variables
 /// \param p A PRES expression
-/// \return The value <tt>forall l.p</tt>
+/// \return The value <tt>minall l.p</tt>
 inline
-pres_expression make_forall_(const data::variable_list& l, const pres_expression& p)
+pres_expression make_minall(const data::variable_list& l, const pres_expression& p)
 {
   if (l.empty())
   {
     return p;
   }
-  return pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESForall(), l, p));
+  return pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESMinall(), l, p));
 }
 
-/// \brief Make an existential quantification. It checks for an empty variable list,
+/// \brief Make an generalized maximum. It checks for an empty variable list,
 /// which is not allowed.
 /// \param l A sequence of data variables
 /// \param p A PRES expression
 /// \return The value <tt>exists l.p</tt>
 inline
-pres_expression make_exists_(const data::variable_list& l, const pres_expression& p)
+pres_expression make_maxall(const data::variable_list& l, const pres_expression& p)
 {
   if (l.empty())
   {
     return p;
   }
-  return pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESExists(), l, p));
+  return pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESMaxall(), l, p));
 }
 
 /// \brief Make a negation
 /// \param p A PRES expression
 /// \return The value <tt>!p</tt>
 inline
-void optimized_not(pres_expression& result, const pres_expression& p)
+void optimized_minus(pres_expression& result, const pres_expression& p)
 {
-  data::optimized_not(result, p);
+  // Should be optimized. 
+  make_minus(result, p);
 }
 
 /// \brief Make a conjunction
@@ -953,12 +1210,13 @@ void optimized_or(pres_expression& result, const pres_expression& p, const pres_
 /// \param p A PRES expression
 /// \param q A PRES expression
 /// \return The value <tt>p => q</tt>
-inline
+/* inline
 void optimized_imp(pres_expression& result, const pres_expression& p, const pres_expression& q)
 {
   data::optimized_imp(result, p, q);
-}
+} */
 
+/*
 /// \brief Make a universal quantification
 /// If l is empty, p is returned.
 /// \param l A sequence of data variables
@@ -1013,7 +1271,7 @@ void optimized_exists(pres_expression& result, const data::variable_list& l, con
   }
   make_exists(result, l, p);
   return;
-}
+} */
 
 inline
 bool is_constant(const pres_expression& x)
@@ -1021,7 +1279,7 @@ bool is_constant(const pres_expression& x)
   return find_free_variables(x).empty();
 }
 
-inline
+/* inline
 const data::variable_list& quantifier_variables(const pres_expression& x)
 {
   assert(is_exists(x) || is_forall(x));
@@ -1033,7 +1291,7 @@ const data::variable_list& quantifier_variables(const pres_expression& x)
   {
     return atermpp::down_cast<forall>(x).variables();
   }
-}
+} */
 
 inline
 data::variable_list free_variables(const pres_expression& x)
@@ -1041,6 +1299,15 @@ data::variable_list free_variables(const pres_expression& x)
   std::set<data::variable> v = find_free_variables(x);
   return data::variable_list(v.begin(), v.end());
 }
+
+/// \\brief Make_propositional_variable constructs a new term into a given address.
+/// \\ \param t The reference into which the new propositional_variable is constructed. 
+template <class... ARGUMENTS>
+inline void make_propositional_variable(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  mcrl2::pbes_system::make_propositional_variable(t, args...);
+}
+
 
 } // namespace pres_system
 
@@ -1100,18 +1367,18 @@ struct term_traits<pres_system::pres_expression>
   /// \param p A term
   /// \return The value <tt>!p</tt>
   static inline
-  term_type not_(const term_type& p)
+  term_type minus(const term_type& p)
   {
-    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PRESNot(), p));
+    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PRESMinus(), p));
   }
 
   /// \brief Make a negation
   /// \param result The value <tt>!p</tt>
   /// \param p A term
   static inline
-  void make_not_(term_type& result, const term_type& p)
+  void make_minus(term_type& result, const term_type& p)
   {
-    pres_system::make_not_(result, p);
+    pres_system::make_minus(result, p);
   }
 
   /// \brief Make a conjunction
@@ -1188,62 +1455,62 @@ struct term_traits<pres_system::pres_expression>
     pres_system::make_imp(result, p, q);
   }
 
-  /// \brief Make a universal quantification
+  /// \brief Make a generalized minimum
   /// \param l A sequence of variables
   /// \param p A term
-  /// \return The value <tt>forall l.p</tt>
+  /// \return The value <tt>minall l.p</tt>
   static inline
-  term_type forall(const variable_sequence_type& l, const term_type& p)
+  term_type minall(const variable_sequence_type& l, const term_type& p)
   {
     if (l.empty())
     {
       return p;
     }
-    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PRESForall(), l, p));
+    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PRESMinall(), l, p));
   }
 
-  /// \brief Make a universal quantification
-  /// \param result The value <tt>forall l.p</tt>
+  /// \brief Make a generalized maximum
+  /// \param result The value <tt>minall l.p</tt>
   /// \param l A sequence of variables
   /// \param p A term
   static inline
-  void make_forall(term_type& result, const variable_sequence_type& l, const term_type& p)
+  void make_minall(term_type& result, const variable_sequence_type& l, const term_type& p)
   {
     if (l.empty())
     {
       result = p;
       return;
     }
-    pres_system::make_forall(result, l, p);
+    pres_system::make_minall(result, l, p);
   }
 
-  /// \brief Make an existential quantification
+  /// \brief Make a generalized maximum
   /// \param l A sequence of variables
   /// \param p A term
-  /// \return The value <tt>exists l.p</tt>
+  /// \return The value <tt>maxall l.p</tt>
   static inline
-  term_type exists(const variable_sequence_type& l, const term_type& p)
+  term_type maxall(const variable_sequence_type& l, const term_type& p)
   {
     if (l.empty())
     {
       return p;
     }
-    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PRESExists(), l, p));
+    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PRESMaxall(), l, p));
   }
 
-  /// \brief Make an existential quantification
-  /// \param result The value <tt>exists l.p</tt>
+  /// \brief Make a generalized maximum
+  /// \param result The value <tt>maxall l.p</tt>
   /// \param l A sequence of variables
   /// \param p A term
   static inline
-  void make_exists(term_type& result, const variable_sequence_type& l, const term_type& p)
+  void make_maxall(term_type& result, const variable_sequence_type& l, const term_type& p)
   {
     if (l.empty())
     {
       result = p;
       return;
     }
-    pres_system::make_exists(result, l, p);
+    pres_system::make_maxall(result, l, p);
   }
 
   /// \brief Test for the value true
@@ -1264,13 +1531,13 @@ struct term_traits<pres_system::pres_expression>
     return data::sort_bool::is_false_function_symbol(t);
   }
 
-  /// \brief Test for a negation
+  /// \brief Test for a minus
   /// \param t A term
-  /// \return True if it is a negation
+  /// \return True if the argument is a minus
   static inline
-  bool is_not(const term_type& t)
+  bool is_minus(const term_type& t)
   {
-    return pres_system::is_not(t);
+    return pres_system::is_minus(t);
   }
 
   /// \brief Test for a conjunction
@@ -1300,22 +1567,22 @@ struct term_traits<pres_system::pres_expression>
     return pres_system::is_imp(t);
   }
 
-  /// \brief Test for an universal quantification
+  /// \brief Test for a minall quantification
   /// \param t A term
-  /// \return True if it is a universal quantification
+  /// \return True if the argument is a minall
   static inline
-  bool is_forall(const term_type& t)
+  bool is_minall(const term_type& t)
   {
-    return pres_system::is_forall(t);
+    return pres_system::is_minall(t);
   }
 
-  /// \brief Test for an existential quantification
+  /// \brief Test for a max quantification
   /// \param t A term
-  /// \return True if it is an existential quantification
+  /// \return True if t is an maximum  quantification
   static inline
-  bool is_exists(const term_type& t)
+  bool is_maxall(const term_type& t)
   {
-    return pres_system::is_exists(t);
+    return pres_system::is_maxall(t);
   }
 
   /// \brief Test for data term
@@ -1357,9 +1624,9 @@ struct term_traits<pres_system::pres_expression>
   /// \brief Returns the argument of a term of type not
   /// \param t A term
   static inline
-  const term_type& not_arg(const term_type& t)
+  const term_type& minus_arg(const term_type& t)
   {
-    assert(is_pres_not(t));
+    assert(is_pres_minus(t));
     return atermpp::down_cast<term_type>(t[0]);
   }
 
@@ -1371,8 +1638,8 @@ struct term_traits<pres_system::pres_expression>
   {
     // Forall and exists are not fully supported by the data library
     assert(!data::is_data_expression(t) || (!data::is_abstraction(t)
-                                            || (!data::is_forall(data::abstraction(t)) && !data::is_exists(data::abstraction(t)))));
-    assert(is_exists(t) || is_forall(t));
+                                        || (!data::is_forall(data::abstraction(t)) && !data::is_exists(data::abstraction(t)))));
+    assert(data::is_exists(t) || data::is_forall(t));
 
     return atermpp::down_cast<variable_sequence_type>(t[0]);
   }

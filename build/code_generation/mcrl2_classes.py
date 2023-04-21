@@ -234,38 +234,48 @@ boolean_variable(const core::identifier_string& name)                 : public b
 '''
 
 # ---------
+# propositional_variable(const core::identifier_string& name, const data::variable_list& parameters)                                                                                                                           : public atermpp::aterm_appl | CI  | PropVarDecl | A propositional variable declaration
 PRES_CLASSES = r'''
-propositional_variable(const core::identifier_string& name, const data::variable_list& parameters)                                                                                                                           : public atermpp::aterm_appl | CI  | PropVarDecl | A propositional variable declaration
 pres_equation(const fixpoint_symbol& symbol, const propositional_variable& variable, const pres_expression& formula)                                                                                                                                      | SMC | PREqn       | A PRES equation
-pres(const data::data_specification& data, const std::vector<pres_system::pres_equation>& equations, const std::set<data::variable>& global_variables, const propositional_variable_instantiation& initial_state)                                         | SMW | PRES        | A PRES
+pres(const data::data_specification& data, const std::set<data::variable>& global_variables, const std::vector<pres_system::pres_equation>& equations, const propositional_variable_instantiation& initial_state)                                         | SMW | PRES        | A PRES
 '''
 
 PRES_EXPRESSION_CLASSES = r'''
-pres_expression()                                                                                                       : public atermpp::aterm_appl          | XCI   | PRExpr            | A pres expression
-propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters) : public pres_system::pres_expression | ECIUs | PropVarInst       | A propositional variable instantiation
-not_(const pres_expression& operand)                                                                                    : public pres_system::pres_expression | EI    | PRESNot           | The not operator for pres expressions
-and_(const pres_expression& left, const pres_expression& right)                                                         : public pres_system::pres_expression | EI    | PRESAnd           | The and operator for pres expressions
-or_(const pres_expression& left, const pres_expression& right)                                                          : public pres_system::pres_expression | EI    | PRESOr            | The or operator for pres expressions
-imp(const pres_expression& left, const pres_expression& right)                                                          : public pres_system::pres_expression | EI    | PRESImp           | The implication operator for pres expressions
-forall(const data::variable_list& variables, const pres_expression& body)                                               : public pres_system::pres_expression | EI    | PRESForall        | The universal quantification operator for pres expressions
-exists(const data::variable_list& variables, const pres_expression& body)                                               : public pres_system::pres_expression | EI    | PRESExists        | The existential quantification operator for pres expressions
+pres_expression()                                                                                                       : public atermpp::aterm_appl          | XCI   | PRExpr               | A pres expression
+propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters) : public pres_system::pres_expression | ECIUs | PropVarInst          | A propositional variable instantiation
+minus(const pres_expression& operand)                                                                                   : public pres_system::pres_expression | EI    | PRESMinus            | The not operator for pres expressions
+and_(const pres_expression& left, const pres_expression& right)                                                         : public pres_system::pres_expression | EI    | PRESAnd              | The and operator for pres expressions
+or_(const pres_expression& left, const pres_expression& right)                                                          : public pres_system::pres_expression | EI    | PRESOr               | The or operator for pres expressions
+imp(const pres_expression& left, const pres_expression& right)                                                          : public pres_system::pres_expression | EI    | PRESImp              | The implication operator for pres expressions
+plus(const pres_expression& left, const pres_expression& right)                                                         : public pres_system::pres_expression | EI    | PRESPlus             | The addition operator for pres expressions
+multiply(const data::data_expression& left, const pres_expression& right)                                               : public pres_system::pres_expression | EI    | PRESConstantMultiply | The multiplication with a positive constant
+minall(const data::variable_list& variables, const pres_expression& body)                                               : public pres_system::pres_expression | EI    | PRESMinall           | The minimum operator for pres expressions
+maxall(const data::variable_list& variables, const pres_expression& body)                                               : public pres_system::pres_expression | EI    | PRESMaxall           | The maximum operator for pres expressions
+sum(const data::variable_list& variables, const pres_expression& body)                                                  : public pres_system::pres_expression | EI    | PRESSum              | The generic sum operator for pres expressions
 '''
 
-REAL_EQUATION_CLASSES = r'''
-real_equation(const fixpoint_symbol& symbol, const real_variable& variable, const real_expression& formula) : public atermpp::aterm_appl | MS  | RealEquation    | real equation
-real_equation_system(const std::vector<res::real_equation>& equations, const real_expression& initial_state)                             | MSW | RES             | A real equation system
+RES_CLASSES = r'''
+res_equation(const fixpoint_symbol& symbol, const res_variable& variable, const res_expression& formula) : public atermpp::aterm_appl | MS  | RESEquation    | real equation
+res_equation_system(const std::vector<res::res_equation>& equations, const res_expression& initial_state)                             | MSW | RES             | A real equation system
 '''
 
-REAL_EXPRESSION_CLASSES = r'''
-real_expression()                                                     : public atermpp::aterm_appl  | XCI  | RealExpression    | A real expression
-true_()                                                               : public res::real_expression | EI   | RealTrue          | The value true for real expressions
-false_()                                                              : public res::real_expression | EI   | RealFalse         | The value false for real expressions
-not_(const real_expression& operand)                                  : public res::real_expression | EI   | RealNot           | The not operator for real expressions
-and_(const real_expression& left, const real_expression& right)       : public res::real_expression | EI   | RealAnd           | The and operator for real expressions
-or_(const real_expression& left, const real_expression& right)        : public res::real_expression | EI   | RealOr            | The or operator for real expressions
-imp(const real_expression& left, const real_expression& right)        : public res::real_expression | EI   | RealImp           | The implication operator for real expressions
-real_variable(const core::identifier_string& name)                    : public res::real_expression | EIUs | RealVariable      | A real variable
+RES_EXPRESSION_CLASSES = r'''
+res_expression()                                                         : public atermpp::aterm_appl                       | XCI  | RESExpression       | A res expression
+true_()                                                                  : public res::res_expression                       | EI   | RESTrue             | The value true for res expressions
+false_()                                                                 : public res::res_expression                       | EI   | RESFalse            | The value false for res expressions
+res_variable(const core::identifier_string& name)                        : public res::res_expression                       | EIUs | RESVariable         | A res variable
+not_(const res_expression& operand)                                      : public res::res_expression                       | EI   | RESNot              | The not operator for res expressions
+and_(const res_expression& left, const res_expression& right)            : public res::res_expression                       | EI   | RESAnd              | The and operator for res expressions
+or_(const res_expression& left, const res_expression& right)             : public res::res_expression                       | EI   | RESOr               | The or operator for res expressions
+imp(const res_expression& left, const res_expression& right)             : public res::res_expression                       | EI   | RESImp              | The implication operator for res expressions
+plus(const res_expression& left, const res_expression& right)            : public res::res_expression                       | EI   | RESPlus             | The plus operator for res expressions
+multiply(const data::data_expression& left, const res_expression& right) : public res::res_expression                       | EI   | RESConstantMultiply | Multiplication with a positive constant for res expressions
+rescondand(const res_expression& arg1, const res_expression& arg2, const res_expression& arg3) : public res::res_expression | EI   | RESCondAnd          | The conditional and expression for res expressions
+rescondor(const res_expression& arg1, const res_expression& arg2, const res_expression& arg3) : public res::res_expression  | EI   | RESCondOr           | The conditional or expression for res expressions
+reseqinf(const res_expression& operand) : public res::res_expression                                                        | EI   | RESEqInf            | The operator to check for infinity
+reseqninf(const res_expression& operand) : public res::res_expression                                                       | EI   | RESEqInf            | The operator to check for negative infinity
 '''
+# ---------
 
 BDD_EXPRESSION_CLASSES = r'''
 bdd_expression()                                                                                  : public atermpp::aterm_appl | XCI  | BddExpression | A bdd expression
@@ -279,6 +289,7 @@ ADDITIONAL_EXPRESSION_CLASS_DEPENDENCIES = {
   'action_formulas::action_formula'   : [ 'data::data_expression', 'data::untyped_data_parameter', 'process::untyped_multi_action' ],
   'regular_formulas::regular_formula' : [ 'action_formulas::action_formula', 'data::data_expression' ],
   'pbes_system::pbes_expression'      : [ 'data::data_expression', 'data::variable', 'data::untyped_data_parameter' ],
+  'pres_system::pres_expression'      : [ 'data::data_expression', 'data::variable', 'data::untyped_data_parameter' ],
   'process::process_expression'       : [ 'data::untyped_data_parameter' ],
 }
 
@@ -1219,7 +1230,6 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                         local_type = re.sub('const ','',re.sub('&','',p.type()))
                         if classname == 'lps::stochastic_specification' and local_type == 'process_initializer':
                             local_type = 'stochastic_process_initializer'   # Unclear why this needs to be done. Appears to be a bug. 
-                            print('ADAPTED', local_type)
                         local_variable = 'result_%s' % p.name()
                         updates.append('%s %s;\nstatic_cast<Derived&>(*this).apply(%s, x.%s());\nx.%s() = %s;' \
                                          % (local_type, local_variable, local_variable, p.name(), p.name(), local_variable))
@@ -1501,6 +1511,6 @@ def mcrl2_class_map():
           'pbes_system'      : PBES_CLASSES + PBES_EXPRESSION_CLASSES,
           'bes'              : BOOLEAN_CLASSES + BOOLEAN_EXPRESSION_CLASSES,
           'pres_system'      : PRES_CLASSES + PRES_EXPRESSION_CLASSES,
-          'res'              : REAL_EQUATION_CLASSES + REAL_EXPRESSION_CLASSES,
+          'res'              : RES_CLASSES + RES_EXPRESSION_CLASSES,
           'bdd'              : BDD_EXPRESSION_CLASSES
         }

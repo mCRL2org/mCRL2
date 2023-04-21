@@ -756,20 +756,20 @@ const atermpp::function_symbol& function_symbol_PRESImp()
   return function_symbol_PRESImp;
 }
 
-// PRESMax
+// PRESMaxall
 inline
-const atermpp::function_symbol& function_symbol_PRESMax()
+const atermpp::function_symbol& function_symbol_PRESMaxall()
 {
-  static const atermpp::global_function_symbol function_symbol_PRESMax("PRESMax", 2);
-  return function_symbol_PRESMax;
+  static const atermpp::global_function_symbol function_symbol_PRESMaxall("PRESMaxall", 2);
+  return function_symbol_PRESMaxall;
 }
 
-// PRESMin
+// PRESMinall
 inline
-const atermpp::function_symbol& function_symbol_PRESMin()
+const atermpp::function_symbol& function_symbol_PRESMinall()
 {
-  static const atermpp::global_function_symbol function_symbol_PRESMin("PRESMin", 2);
-  return function_symbol_PRESMin;
+  static const atermpp::global_function_symbol function_symbol_PRESMinall("PRESMinall", 2);
+  return function_symbol_PRESMinall;
 }
 
 // PRESMinus
@@ -916,102 +916,6 @@ const atermpp::function_symbol& function_symbol_RES()
   return function_symbol_RES;
 }
 
-// RealAnd
-inline
-const atermpp::function_symbol& function_symbol_RealAnd()
-{
-  static const atermpp::global_function_symbol function_symbol_RealAnd("RealAnd", 2);
-  return function_symbol_RealAnd;
-}
-
-// RealCondAnd
-inline
-const atermpp::function_symbol& function_symbol_RealCondAnd()
-{
-  static const atermpp::global_function_symbol function_symbol_RealCondAnd("RealCondAnd", 3);
-  return function_symbol_RealCondAnd;
-}
-
-// RealCondOr
-inline
-const atermpp::function_symbol& function_symbol_RealCondOr()
-{
-  static const atermpp::global_function_symbol function_symbol_RealCondOr("RealCondOr", 3);
-  return function_symbol_RealCondOr;
-}
-
-// RealConstantMultiply
-inline
-const atermpp::function_symbol& function_symbol_RealConstantMultiply()
-{
-  static const atermpp::global_function_symbol function_symbol_RealConstantMultiply("RealConstantMultiply", 2);
-  return function_symbol_RealConstantMultiply;
-}
-
-// RealEqInf
-inline
-const atermpp::function_symbol& function_symbol_RealEqInf()
-{
-  static const atermpp::global_function_symbol function_symbol_RealEqInf("RealEqInf", 1);
-  return function_symbol_RealEqInf;
-}
-
-// RealEqNInf
-inline
-const atermpp::function_symbol& function_symbol_RealEqNInf()
-{
-  static const atermpp::global_function_symbol function_symbol_RealEqNInf("RealEqNInf", 1);
-  return function_symbol_RealEqNInf;
-}
-
-// RealEquation
-inline
-const atermpp::function_symbol& function_symbol_RealEquation()
-{
-  static const atermpp::global_function_symbol function_symbol_RealEquation("RealEquation", 3);
-  return function_symbol_RealEquation;
-}
-
-// RealImp
-inline
-const atermpp::function_symbol& function_symbol_RealImp()
-{
-  static const atermpp::global_function_symbol function_symbol_RealImp("RealImp", 2);
-  return function_symbol_RealImp;
-}
-
-// RealNot
-inline
-const atermpp::function_symbol& function_symbol_RealNot()
-{
-  static const atermpp::global_function_symbol function_symbol_RealNot("RealNot", 1);
-  return function_symbol_RealNot;
-}
-
-// RealOr
-inline
-const atermpp::function_symbol& function_symbol_RealOr()
-{
-  static const atermpp::global_function_symbol function_symbol_RealOr("RealOr", 2);
-  return function_symbol_RealOr;
-}
-
-// RealPlus
-inline
-const atermpp::function_symbol& function_symbol_RealPlus()
-{
-  static const atermpp::global_function_symbol function_symbol_RealPlus("RealPlus", 2);
-  return function_symbol_RealPlus;
-}
-
-// RealVariable
-inline
-const atermpp::function_symbol& function_symbol_RealVariable()
-{
-  static const atermpp::global_function_symbol function_symbol_RealVariable("RealVariable", 1);
-  return function_symbol_RealVariable;
-}
-
 // RegAlt
 inline
 const atermpp::function_symbol& function_symbol_RegAlt()
@@ -1066,6 +970,102 @@ const atermpp::function_symbol& function_symbol_RenameExpr()
 {
   static const atermpp::global_function_symbol function_symbol_RenameExpr("RenameExpr", 2);
   return function_symbol_RenameExpr;
+}
+
+// ResAnd
+inline
+const atermpp::function_symbol& function_symbol_ResAnd()
+{
+  static const atermpp::global_function_symbol function_symbol_ResAnd("ResAnd", 2);
+  return function_symbol_ResAnd;
+}
+
+// ResCondAnd
+inline
+const atermpp::function_symbol& function_symbol_ResCondAnd()
+{
+  static const atermpp::global_function_symbol function_symbol_ResCondAnd("ResCondAnd", 3);
+  return function_symbol_ResCondAnd;
+}
+
+// ResCondOr
+inline
+const atermpp::function_symbol& function_symbol_ResCondOr()
+{
+  static const atermpp::global_function_symbol function_symbol_ResCondOr("ResCondOr", 3);
+  return function_symbol_ResCondOr;
+}
+
+// ResConstantMultiply
+inline
+const atermpp::function_symbol& function_symbol_ResConstantMultiply()
+{
+  static const atermpp::global_function_symbol function_symbol_ResConstantMultiply("ResConstantMultiply", 2);
+  return function_symbol_ResConstantMultiply;
+}
+
+// ResEqInf
+inline
+const atermpp::function_symbol& function_symbol_ResEqInf()
+{
+  static const atermpp::global_function_symbol function_symbol_ResEqInf("ResEqInf", 1);
+  return function_symbol_ResEqInf;
+}
+
+// ResEqNInf
+inline
+const atermpp::function_symbol& function_symbol_ResEqNInf()
+{
+  static const atermpp::global_function_symbol function_symbol_ResEqNInf("ResEqNInf", 1);
+  return function_symbol_ResEqNInf;
+}
+
+// ResEquation
+inline
+const atermpp::function_symbol& function_symbol_ResEquation()
+{
+  static const atermpp::global_function_symbol function_symbol_ResEquation("ResEquation", 3);
+  return function_symbol_ResEquation;
+}
+
+// ResImp
+inline
+const atermpp::function_symbol& function_symbol_ResImp()
+{
+  static const atermpp::global_function_symbol function_symbol_ResImp("ResImp", 2);
+  return function_symbol_ResImp;
+}
+
+// ResNot
+inline
+const atermpp::function_symbol& function_symbol_ResNot()
+{
+  static const atermpp::global_function_symbol function_symbol_ResNot("ResNot", 1);
+  return function_symbol_ResNot;
+}
+
+// ResOr
+inline
+const atermpp::function_symbol& function_symbol_ResOr()
+{
+  static const atermpp::global_function_symbol function_symbol_ResOr("ResOr", 2);
+  return function_symbol_ResOr;
+}
+
+// ResPlus
+inline
+const atermpp::function_symbol& function_symbol_ResPlus()
+{
+  static const atermpp::global_function_symbol function_symbol_ResPlus("ResPlus", 2);
+  return function_symbol_ResPlus;
+}
+
+// ResVariable
+inline
+const atermpp::function_symbol& function_symbol_ResVariable()
+{
+  static const atermpp::global_function_symbol function_symbol_ResVariable("ResVariable", 1);
+  return function_symbol_ResVariable;
 }
 
 // Seq
@@ -1627,22 +1627,22 @@ static const atermpp::function_symbol SortCons;
   static const atermpp::function_symbol PRESImp;
   static const atermpp::function_symbol PRESPlus;
   static const atermpp::function_symbol PRESConstantMultiply;
-  static const atermpp::function_symbol PRESMin;
-  static const atermpp::function_symbol PRESMax;
+  static const atermpp::function_symbol PRESMinall;
+  static const atermpp::function_symbol PRESMaxall;
   static const atermpp::function_symbol PRESSum;
   static const atermpp::function_symbol RES;
-  static const atermpp::function_symbol RealEquation;
-  static const atermpp::function_symbol RealVariable;
-  static const atermpp::function_symbol RealNot;
-  static const atermpp::function_symbol RealAnd;
-  static const atermpp::function_symbol RealOr;
-  static const atermpp::function_symbol RealImp;
-  static const atermpp::function_symbol RealPlus;
-  static const atermpp::function_symbol RealConstantMultiply;
-  static const atermpp::function_symbol RealCondAnd;
-  static const atermpp::function_symbol RealCondOr;
-  static const atermpp::function_symbol RealEqInf;
-  static const atermpp::function_symbol RealEqNInf;
+  static const atermpp::function_symbol ResEquation;
+  static const atermpp::function_symbol ResVariable;
+  static const atermpp::function_symbol ResNot;
+  static const atermpp::function_symbol ResAnd;
+  static const atermpp::function_symbol ResOr;
+  static const atermpp::function_symbol ResImp;
+  static const atermpp::function_symbol ResPlus;
+  static const atermpp::function_symbol ResConstantMultiply;
+  static const atermpp::function_symbol ResCondAnd;
+  static const atermpp::function_symbol ResCondOr;
+  static const atermpp::function_symbol ResEqInf;
+  static const atermpp::function_symbol ResEqNInf;
   static const atermpp::function_symbol BddTrue;
   static const atermpp::function_symbol BddFalse;
   static const atermpp::function_symbol BddIf;

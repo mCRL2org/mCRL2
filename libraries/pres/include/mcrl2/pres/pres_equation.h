@@ -22,6 +22,8 @@ namespace mcrl2
 namespace pres_system
 {
 
+typedef pbes_system::fixpoint_symbol fixpoint_symbol;
+
 class pres_equation;
 atermpp::aterm_appl pres_equation_to_aterm(const pres_equation& eqn);
 bool is_well_typed(const pres_equation& eqn);
@@ -169,6 +171,12 @@ inline
 atermpp::aterm_appl pres_equation_to_aterm(const pres_equation& eqn)
 {
   return atermpp::aterm_appl(core::detail::function_symbol_PBEqn(), eqn.symbol(), eqn.variable(), eqn.formula());
+}
+
+// Overload for pp for propositional variables.
+std::string pp(const propositional_variable& v)
+{
+  return pbes_system::pp(v);
 }
 
 // template function overloads

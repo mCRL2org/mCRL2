@@ -11,8 +11,9 @@
 
 #include "mcrl2/pres/tools.h"
 
-// #include "mcrl2/pbes/tools/pbesconstelm.h"
-// #include "mcrl2/pbes/tools/pbesinfo.h"
-// #include "mcrl2/pbes/tools/pbespp.h"
-// #include "mcrl2/pbes/tools/pbesrewr.h"
-// #include "mcrl2/pbes/tools/txt2pbes.h"
+// #include "mcrl2/pres/tools/presconstelm.h"
+#include "mcrl2/pres/tools/presinfo.h"
+#include "mcrl2/pres/tools/prespp.h"
+#include "mcrl2/pres/tools/presrewr.h"
+#include "mcrl2/pres/tools/txt2pres.h"
+

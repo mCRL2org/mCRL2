@@ -28,7 +28,7 @@ typedef core::identifier_string res_variable_key_type;
 template <typename T> std::string pp(const T& x);
 
 //--- start generated classes ---//
-/// \\brief A real expression
+/// \\brief A res expression
 class res_expression: public atermpp::aterm_appl
 {
   public:
@@ -61,11 +61,17 @@ typedef std::vector<res_expression>    res_expression_vector;
 // prototypes
 inline bool is_true(const atermpp::aterm_appl& x);
 inline bool is_false(const atermpp::aterm_appl& x);
+inline bool is_res_variable(const atermpp::aterm_appl& x);
 inline bool is_not(const atermpp::aterm_appl& x);
 inline bool is_and(const atermpp::aterm_appl& x);
 inline bool is_or(const atermpp::aterm_appl& x);
 inline bool is_imp(const atermpp::aterm_appl& x);
-inline bool is_res_variable(const atermpp::aterm_appl& x);
+inline bool is_plus(const atermpp::aterm_appl& x);
+inline bool is_multiply(const atermpp::aterm_appl& x);
+inline bool is_rescondand(const atermpp::aterm_appl& x);
+inline bool is_rescondor(const atermpp::aterm_appl& x);
+inline bool is_reseqinf(const atermpp::aterm_appl& x);
+inline bool is_reseqninf(const atermpp::aterm_appl& x);
 
 /// \\brief Test for a res_expression expression
 /// \\param x A term
@@ -75,11 +81,17 @@ bool is_res_expression(const atermpp::aterm_appl& x)
 {
   return res::is_true(x) ||
          res::is_false(x) ||
+         res::is_res_variable(x) ||
          res::is_not(x) ||
          res::is_and(x) ||
          res::is_or(x) ||
          res::is_imp(x) ||
-         res::is_res_variable(x);
+         res::is_plus(x) ||
+         res::is_multiply(x) ||
+         res::is_rescondand(x) ||
+         res::is_rescondor(x) ||
+         res::is_reseqinf(x) ||
+         res::is_reseqninf(x);
 }
 
 // prototype declaration
@@ -102,7 +114,7 @@ inline void swap(res_expression& t1, res_expression& t2)
 }
 
 
-/// \\brief The value true for real expressions
+/// \\brief The value true for res expressions
 class true_: public res_expression
 {
   public:
@@ -155,7 +167,7 @@ inline void swap(true_& t1, true_& t2)
 }
 
 
-/// \\brief The value false for real expressions
+/// \\brief The value false for res expressions
 class false_: public res_expression
 {
   public:
@@ -208,306 +220,7 @@ inline void swap(false_& t1, false_& t2)
 }
 
 
-/// \\brief The not operator for real expressions
-class not_: public res_expression
-{
-  public:
-    /// \\brief Default constructor.
-    not_()
-      : res_expression(core::detail::default_values::RESNot)
-    {}
-
-    /// \\brief Constructor.
-    /// \\param term A term
-    explicit not_(const atermpp::aterm& term)
-      : res_expression(term)
-    {
-      assert(core::detail::check_term_RESNot(*this));
-    }
-
-    /// \\brief Constructor.
-    explicit not_(const res_expression& operand)
-      : res_expression(atermpp::aterm_appl(core::detail::function_symbol_RESNot(), operand))
-    {}
-
-    /// Move semantics
-    not_(const not_&) noexcept = default;
-    not_(not_&&) noexcept = default;
-    not_& operator=(const not_&) noexcept = default;
-    not_& operator=(not_&&) noexcept = default;
-
-    const res_expression& operand() const
-    {
-      return atermpp::down_cast<res_expression>((*this)[0]);
-    }
-};
-
-/// \\brief Make_not_ constructs a new term into a given address.
-/// \\ \param t The reference into which the new not_ is constructed. 
-template <class... ARGUMENTS>
-inline void make_not_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
-{
-  atermpp::make_term_appl(t, core::detail::function_symbol_RESNot(), args...);
-}
-
-/// \\brief Test for a not expression
-/// \\param x A term
-/// \\return True if \\a x is a not expression
-inline
-bool is_not(const atermpp::aterm_appl& x)
-{
-  return x.function() == core::detail::function_symbols::RESNot;
-}
-
-// prototype declaration
-std::string pp(const not_& x);
-
-/// \\brief Outputs the object to a stream
-/// \\param out An output stream
-/// \\param x Object x
-/// \\return The output stream
-inline
-std::ostream& operator<<(std::ostream& out, const not_& x)
-{
-  return out << res::pp(x);
-}
-
-/// \\brief swap overload
-inline void swap(not_& t1, not_& t2)
-{
-  t1.swap(t2);
-}
-
-
-/// \\brief The and operator for real expressions
-class and_: public res_expression
-{
-  public:
-    /// \\brief Default constructor.
-    and_()
-      : res_expression(core::detail::default_values::RESAnd)
-    {}
-
-    /// \\brief Constructor.
-    /// \\param term A term
-    explicit and_(const atermpp::aterm& term)
-      : res_expression(term)
-    {
-      assert(core::detail::check_term_RESAnd(*this));
-    }
-
-    /// \\brief Constructor.
-    and_(const res_expression& left, const res_expression& right)
-      : res_expression(atermpp::aterm_appl(core::detail::function_symbol_RESAnd(), left, right))
-    {}
-
-    /// Move semantics
-    and_(const and_&) noexcept = default;
-    and_(and_&&) noexcept = default;
-    and_& operator=(const and_&) noexcept = default;
-    and_& operator=(and_&&) noexcept = default;
-
-    const res_expression& left() const
-    {
-      return atermpp::down_cast<res_expression>((*this)[0]);
-    }
-
-    const res_expression& right() const
-    {
-      return atermpp::down_cast<res_expression>((*this)[1]);
-    }
-};
-
-/// \\brief Make_and_ constructs a new term into a given address.
-/// \\ \param t The reference into which the new and_ is constructed. 
-template <class... ARGUMENTS>
-inline void make_and_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
-{
-  atermpp::make_term_appl(t, core::detail::function_symbol_RESAnd(), args...);
-}
-
-/// \\brief Test for a and expression
-/// \\param x A term
-/// \\return True if \\a x is a and expression
-inline
-bool is_and(const atermpp::aterm_appl& x)
-{
-  return x.function() == core::detail::function_symbols::RESAnd;
-}
-
-// prototype declaration
-std::string pp(const and_& x);
-
-/// \\brief Outputs the object to a stream
-/// \\param out An output stream
-/// \\param x Object x
-/// \\return The output stream
-inline
-std::ostream& operator<<(std::ostream& out, const and_& x)
-{
-  return out << res::pp(x);
-}
-
-/// \\brief swap overload
-inline void swap(and_& t1, and_& t2)
-{
-  t1.swap(t2);
-}
-
-
-/// \\brief The or operator for real expressions
-class or_: public res_expression
-{
-  public:
-    /// \\brief Default constructor.
-    or_()
-      : res_expression(core::detail::default_values::RESOr)
-    {}
-
-    /// \\brief Constructor.
-    /// \\param term A term
-    explicit or_(const atermpp::aterm& term)
-      : res_expression(term)
-    {
-      assert(core::detail::check_term_RESOr(*this));
-    }
-
-    /// \\brief Constructor.
-    or_(const res_expression& left, const res_expression& right)
-      : res_expression(atermpp::aterm_appl(core::detail::function_symbol_RESOr(), left, right))
-    {}
-
-    /// Move semantics
-    or_(const or_&) noexcept = default;
-    or_(or_&&) noexcept = default;
-    or_& operator=(const or_&) noexcept = default;
-    or_& operator=(or_&&) noexcept = default;
-
-    const res_expression& left() const
-    {
-      return atermpp::down_cast<res_expression>((*this)[0]);
-    }
-
-    const res_expression& right() const
-    {
-      return atermpp::down_cast<res_expression>((*this)[1]);
-    }
-};
-
-/// \\brief Make_or_ constructs a new term into a given address.
-/// \\ \param t The reference into which the new or_ is constructed. 
-template <class... ARGUMENTS>
-inline void make_or_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
-{
-  atermpp::make_term_appl(t, core::detail::function_symbol_RESOr(), args...);
-}
-
-/// \\brief Test for a or expression
-/// \\param x A term
-/// \\return True if \\a x is a or expression
-inline
-bool is_or(const atermpp::aterm_appl& x)
-{
-  return x.function() == core::detail::function_symbols::RESOr;
-}
-
-// prototype declaration
-std::string pp(const or_& x);
-
-/// \\brief Outputs the object to a stream
-/// \\param out An output stream
-/// \\param x Object x
-/// \\return The output stream
-inline
-std::ostream& operator<<(std::ostream& out, const or_& x)
-{
-  return out << res::pp(x);
-}
-
-/// \\brief swap overload
-inline void swap(or_& t1, or_& t2)
-{
-  t1.swap(t2);
-}
-
-
-/// \\brief The implication operator for real expressions
-class imp: public res_expression
-{
-  public:
-    /// \\brief Default constructor.
-    imp()
-      : res_expression(core::detail::default_values::RESImp)
-    {}
-
-    /// \\brief Constructor.
-    /// \\param term A term
-    explicit imp(const atermpp::aterm& term)
-      : res_expression(term)
-    {
-      assert(core::detail::check_term_RESImp(*this));
-    }
-
-    /// \\brief Constructor.
-    imp(const res_expression& left, const res_expression& right)
-      : res_expression(atermpp::aterm_appl(core::detail::function_symbol_RESImp(), left, right))
-    {}
-
-    /// Move semantics
-    imp(const imp&) noexcept = default;
-    imp(imp&&) noexcept = default;
-    imp& operator=(const imp&) noexcept = default;
-    imp& operator=(imp&&) noexcept = default;
-
-    const res_expression& left() const
-    {
-      return atermpp::down_cast<res_expression>((*this)[0]);
-    }
-
-    const res_expression& right() const
-    {
-      return atermpp::down_cast<res_expression>((*this)[1]);
-    }
-};
-
-/// \\brief Make_imp constructs a new term into a given address.
-/// \\ \param t The reference into which the new imp is constructed. 
-template <class... ARGUMENTS>
-inline void make_imp(atermpp::aterm_appl& t, const ARGUMENTS&... args)
-{
-  atermpp::make_term_appl(t, core::detail::function_symbol_RESImp(), args...);
-}
-
-/// \\brief Test for a imp expression
-/// \\param x A term
-/// \\return True if \\a x is a imp expression
-inline
-bool is_imp(const atermpp::aterm_appl& x)
-{
-  return x.function() == core::detail::function_symbols::RESImp;
-}
-
-// prototype declaration
-std::string pp(const imp& x);
-
-/// \\brief Outputs the object to a stream
-/// \\param out An output stream
-/// \\param x Object x
-/// \\return The output stream
-inline
-std::ostream& operator<<(std::ostream& out, const imp& x)
-{
-  return out << res::pp(x);
-}
-
-/// \\brief swap overload
-inline void swap(imp& t1, imp& t2)
-{
-  t1.swap(t2);
-}
-
-
-/// \\brief A real variable
+/// \\brief A res variable
 class res_variable: public res_expression
 {
   public:
@@ -585,6 +298,761 @@ std::ostream& operator<<(std::ostream& out, const res_variable& x)
 
 /// \\brief swap overload
 inline void swap(res_variable& t1, res_variable& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \\brief The not operator for res expressions
+class not_: public res_expression
+{
+  public:
+    /// \\brief Default constructor.
+    not_()
+      : res_expression(core::detail::default_values::RESNot)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit not_(const atermpp::aterm& term)
+      : res_expression(term)
+    {
+      assert(core::detail::check_term_RESNot(*this));
+    }
+
+    /// \\brief Constructor.
+    explicit not_(const res_expression& operand)
+      : res_expression(atermpp::aterm_appl(core::detail::function_symbol_RESNot(), operand))
+    {}
+
+    /// Move semantics
+    not_(const not_&) noexcept = default;
+    not_(not_&&) noexcept = default;
+    not_& operator=(const not_&) noexcept = default;
+    not_& operator=(not_&&) noexcept = default;
+
+    const res_expression& operand() const
+    {
+      return atermpp::down_cast<res_expression>((*this)[0]);
+    }
+};
+
+/// \\brief Make_not_ constructs a new term into a given address.
+/// \\ \param t The reference into which the new not_ is constructed. 
+template <class... ARGUMENTS>
+inline void make_not_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_RESNot(), args...);
+}
+
+/// \\brief Test for a not expression
+/// \\param x A term
+/// \\return True if \\a x is a not expression
+inline
+bool is_not(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::RESNot;
+}
+
+// prototype declaration
+std::string pp(const not_& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const not_& x)
+{
+  return out << res::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(not_& t1, not_& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \\brief The and operator for res expressions
+class and_: public res_expression
+{
+  public:
+    /// \\brief Default constructor.
+    and_()
+      : res_expression(core::detail::default_values::RESAnd)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit and_(const atermpp::aterm& term)
+      : res_expression(term)
+    {
+      assert(core::detail::check_term_RESAnd(*this));
+    }
+
+    /// \\brief Constructor.
+    and_(const res_expression& left, const res_expression& right)
+      : res_expression(atermpp::aterm_appl(core::detail::function_symbol_RESAnd(), left, right))
+    {}
+
+    /// Move semantics
+    and_(const and_&) noexcept = default;
+    and_(and_&&) noexcept = default;
+    and_& operator=(const and_&) noexcept = default;
+    and_& operator=(and_&&) noexcept = default;
+
+    const res_expression& left() const
+    {
+      return atermpp::down_cast<res_expression>((*this)[0]);
+    }
+
+    const res_expression& right() const
+    {
+      return atermpp::down_cast<res_expression>((*this)[1]);
+    }
+};
+
+/// \\brief Make_and_ constructs a new term into a given address.
+/// \\ \param t The reference into which the new and_ is constructed. 
+template <class... ARGUMENTS>
+inline void make_and_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_RESAnd(), args...);
+}
+
+/// \\brief Test for a and expression
+/// \\param x A term
+/// \\return True if \\a x is a and expression
+inline
+bool is_and(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::RESAnd;
+}
+
+// prototype declaration
+std::string pp(const and_& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const and_& x)
+{
+  return out << res::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(and_& t1, and_& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \\brief The or operator for res expressions
+class or_: public res_expression
+{
+  public:
+    /// \\brief Default constructor.
+    or_()
+      : res_expression(core::detail::default_values::RESOr)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit or_(const atermpp::aterm& term)
+      : res_expression(term)
+    {
+      assert(core::detail::check_term_RESOr(*this));
+    }
+
+    /// \\brief Constructor.
+    or_(const res_expression& left, const res_expression& right)
+      : res_expression(atermpp::aterm_appl(core::detail::function_symbol_RESOr(), left, right))
+    {}
+
+    /// Move semantics
+    or_(const or_&) noexcept = default;
+    or_(or_&&) noexcept = default;
+    or_& operator=(const or_&) noexcept = default;
+    or_& operator=(or_&&) noexcept = default;
+
+    const res_expression& left() const
+    {
+      return atermpp::down_cast<res_expression>((*this)[0]);
+    }
+
+    const res_expression& right() const
+    {
+      return atermpp::down_cast<res_expression>((*this)[1]);
+    }
+};
+
+/// \\brief Make_or_ constructs a new term into a given address.
+/// \\ \param t The reference into which the new or_ is constructed. 
+template <class... ARGUMENTS>
+inline void make_or_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_RESOr(), args...);
+}
+
+/// \\brief Test for a or expression
+/// \\param x A term
+/// \\return True if \\a x is a or expression
+inline
+bool is_or(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::RESOr;
+}
+
+// prototype declaration
+std::string pp(const or_& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const or_& x)
+{
+  return out << res::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(or_& t1, or_& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \\brief The implication operator for res expressions
+class imp: public res_expression
+{
+  public:
+    /// \\brief Default constructor.
+    imp()
+      : res_expression(core::detail::default_values::RESImp)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit imp(const atermpp::aterm& term)
+      : res_expression(term)
+    {
+      assert(core::detail::check_term_RESImp(*this));
+    }
+
+    /// \\brief Constructor.
+    imp(const res_expression& left, const res_expression& right)
+      : res_expression(atermpp::aterm_appl(core::detail::function_symbol_RESImp(), left, right))
+    {}
+
+    /// Move semantics
+    imp(const imp&) noexcept = default;
+    imp(imp&&) noexcept = default;
+    imp& operator=(const imp&) noexcept = default;
+    imp& operator=(imp&&) noexcept = default;
+
+    const res_expression& left() const
+    {
+      return atermpp::down_cast<res_expression>((*this)[0]);
+    }
+
+    const res_expression& right() const
+    {
+      return atermpp::down_cast<res_expression>((*this)[1]);
+    }
+};
+
+/// \\brief Make_imp constructs a new term into a given address.
+/// \\ \param t The reference into which the new imp is constructed. 
+template <class... ARGUMENTS>
+inline void make_imp(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_RESImp(), args...);
+}
+
+/// \\brief Test for a imp expression
+/// \\param x A term
+/// \\return True if \\a x is a imp expression
+inline
+bool is_imp(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::RESImp;
+}
+
+// prototype declaration
+std::string pp(const imp& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const imp& x)
+{
+  return out << res::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(imp& t1, imp& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \\brief The plus operator for res expressions
+class plus: public res_expression
+{
+  public:
+    /// \\brief Default constructor.
+    plus()
+      : res_expression(core::detail::default_values::RESPlus)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit plus(const atermpp::aterm& term)
+      : res_expression(term)
+    {
+      assert(core::detail::check_term_RESPlus(*this));
+    }
+
+    /// \\brief Constructor.
+    plus(const res_expression& left, const res_expression& right)
+      : res_expression(atermpp::aterm_appl(core::detail::function_symbol_RESPlus(), left, right))
+    {}
+
+    /// Move semantics
+    plus(const plus&) noexcept = default;
+    plus(plus&&) noexcept = default;
+    plus& operator=(const plus&) noexcept = default;
+    plus& operator=(plus&&) noexcept = default;
+
+    const res_expression& left() const
+    {
+      return atermpp::down_cast<res_expression>((*this)[0]);
+    }
+
+    const res_expression& right() const
+    {
+      return atermpp::down_cast<res_expression>((*this)[1]);
+    }
+};
+
+/// \\brief Make_plus constructs a new term into a given address.
+/// \\ \param t The reference into which the new plus is constructed. 
+template <class... ARGUMENTS>
+inline void make_plus(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_RESPlus(), args...);
+}
+
+/// \\brief Test for a plus expression
+/// \\param x A term
+/// \\return True if \\a x is a plus expression
+inline
+bool is_plus(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::RESPlus;
+}
+
+// prototype declaration
+std::string pp(const plus& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const plus& x)
+{
+  return out << res::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(plus& t1, plus& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \\brief Multiplication with a positive constant for res expressions
+class multiply: public res_expression
+{
+  public:
+    /// \\brief Default constructor.
+    multiply()
+      : res_expression(core::detail::default_values::RESConstantMultiply)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit multiply(const atermpp::aterm& term)
+      : res_expression(term)
+    {
+      assert(core::detail::check_term_RESConstantMultiply(*this));
+    }
+
+    /// \\brief Constructor.
+    multiply(const data::data_expression& left, const res_expression& right)
+      : res_expression(atermpp::aterm_appl(core::detail::function_symbol_RESConstantMultiply(), left, right))
+    {}
+
+    /// Move semantics
+    multiply(const multiply&) noexcept = default;
+    multiply(multiply&&) noexcept = default;
+    multiply& operator=(const multiply&) noexcept = default;
+    multiply& operator=(multiply&&) noexcept = default;
+
+    const data::data_expression& left() const
+    {
+      return atermpp::down_cast<data::data_expression>((*this)[0]);
+    }
+
+    const res_expression& right() const
+    {
+      return atermpp::down_cast<res_expression>((*this)[1]);
+    }
+};
+
+/// \\brief Make_multiply constructs a new term into a given address.
+/// \\ \param t The reference into which the new multiply is constructed. 
+template <class... ARGUMENTS>
+inline void make_multiply(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_RESConstantMultiply(), args...);
+}
+
+/// \\brief Test for a multiply expression
+/// \\param x A term
+/// \\return True if \\a x is a multiply expression
+inline
+bool is_multiply(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::RESConstantMultiply;
+}
+
+// prototype declaration
+std::string pp(const multiply& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const multiply& x)
+{
+  return out << res::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(multiply& t1, multiply& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \\brief The conditional and expression for res expressions
+class rescondand: public res_expression
+{
+  public:
+    /// \\brief Default constructor.
+    rescondand()
+      : res_expression(core::detail::default_values::RESCondAnd)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit rescondand(const atermpp::aterm& term)
+      : res_expression(term)
+    {
+      assert(core::detail::check_term_RESCondAnd(*this));
+    }
+
+    /// \\brief Constructor.
+    rescondand(const res_expression& arg1, const res_expression& arg2, const res_expression& arg3)
+      : res_expression(atermpp::aterm_appl(core::detail::function_symbol_RESCondAnd(), arg1, arg2, arg3))
+    {}
+
+    /// Move semantics
+    rescondand(const rescondand&) noexcept = default;
+    rescondand(rescondand&&) noexcept = default;
+    rescondand& operator=(const rescondand&) noexcept = default;
+    rescondand& operator=(rescondand&&) noexcept = default;
+
+    const res_expression& arg1() const
+    {
+      return atermpp::down_cast<res_expression>((*this)[0]);
+    }
+
+    const res_expression& arg2() const
+    {
+      return atermpp::down_cast<res_expression>((*this)[1]);
+    }
+
+    const res_expression& arg3() const
+    {
+      return atermpp::down_cast<res_expression>((*this)[2]);
+    }
+};
+
+/// \\brief Make_rescondand constructs a new term into a given address.
+/// \\ \param t The reference into which the new rescondand is constructed. 
+template <class... ARGUMENTS>
+inline void make_rescondand(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_RESCondAnd(), args...);
+}
+
+/// \\brief Test for a rescondand expression
+/// \\param x A term
+/// \\return True if \\a x is a rescondand expression
+inline
+bool is_rescondand(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::RESCondAnd;
+}
+
+// prototype declaration
+std::string pp(const rescondand& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const rescondand& x)
+{
+  return out << res::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(rescondand& t1, rescondand& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \\brief The conditional or expression for res expressions
+class rescondor: public res_expression
+{
+  public:
+    /// \\brief Default constructor.
+    rescondor()
+      : res_expression(core::detail::default_values::RESCondOr)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit rescondor(const atermpp::aterm& term)
+      : res_expression(term)
+    {
+      assert(core::detail::check_term_RESCondOr(*this));
+    }
+
+    /// \\brief Constructor.
+    rescondor(const res_expression& arg1, const res_expression& arg2, const res_expression& arg3)
+      : res_expression(atermpp::aterm_appl(core::detail::function_symbol_RESCondOr(), arg1, arg2, arg3))
+    {}
+
+    /// Move semantics
+    rescondor(const rescondor&) noexcept = default;
+    rescondor(rescondor&&) noexcept = default;
+    rescondor& operator=(const rescondor&) noexcept = default;
+    rescondor& operator=(rescondor&&) noexcept = default;
+
+    const res_expression& arg1() const
+    {
+      return atermpp::down_cast<res_expression>((*this)[0]);
+    }
+
+    const res_expression& arg2() const
+    {
+      return atermpp::down_cast<res_expression>((*this)[1]);
+    }
+
+    const res_expression& arg3() const
+    {
+      return atermpp::down_cast<res_expression>((*this)[2]);
+    }
+};
+
+/// \\brief Make_rescondor constructs a new term into a given address.
+/// \\ \param t The reference into which the new rescondor is constructed. 
+template <class... ARGUMENTS>
+inline void make_rescondor(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_RESCondOr(), args...);
+}
+
+/// \\brief Test for a rescondor expression
+/// \\param x A term
+/// \\return True if \\a x is a rescondor expression
+inline
+bool is_rescondor(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::RESCondOr;
+}
+
+// prototype declaration
+std::string pp(const rescondor& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const rescondor& x)
+{
+  return out << res::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(rescondor& t1, rescondor& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \\brief The operator to check for infinity
+class reseqinf: public res_expression
+{
+  public:
+    /// \\brief Default constructor.
+    reseqinf()
+      : res_expression(core::detail::default_values::RESEqInf)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit reseqinf(const atermpp::aterm& term)
+      : res_expression(term)
+    {
+      assert(core::detail::check_term_RESEqInf(*this));
+    }
+
+    /// \\brief Constructor.
+    explicit reseqinf(const res_expression& operand)
+      : res_expression(atermpp::aterm_appl(core::detail::function_symbol_RESEqInf(), operand))
+    {}
+
+    /// Move semantics
+    reseqinf(const reseqinf&) noexcept = default;
+    reseqinf(reseqinf&&) noexcept = default;
+    reseqinf& operator=(const reseqinf&) noexcept = default;
+    reseqinf& operator=(reseqinf&&) noexcept = default;
+
+    const res_expression& operand() const
+    {
+      return atermpp::down_cast<res_expression>((*this)[0]);
+    }
+};
+
+/// \\brief Make_reseqinf constructs a new term into a given address.
+/// \\ \param t The reference into which the new reseqinf is constructed. 
+template <class... ARGUMENTS>
+inline void make_reseqinf(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_RESEqInf(), args...);
+}
+
+/// \\brief Test for a reseqinf expression
+/// \\param x A term
+/// \\return True if \\a x is a reseqinf expression
+inline
+bool is_reseqinf(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::RESEqInf;
+}
+
+// prototype declaration
+std::string pp(const reseqinf& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const reseqinf& x)
+{
+  return out << res::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(reseqinf& t1, reseqinf& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \\brief The operator to check for negative infinity
+class reseqninf: public res_expression
+{
+  public:
+    /// \\brief Default constructor.
+    reseqninf()
+      : res_expression(core::detail::default_values::RESEqInf)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit reseqninf(const atermpp::aterm& term)
+      : res_expression(term)
+    {
+      assert(core::detail::check_term_RESEqInf(*this));
+    }
+
+    /// \\brief Constructor.
+    explicit reseqninf(const res_expression& operand)
+      : res_expression(atermpp::aterm_appl(core::detail::function_symbol_RESEqInf(), operand))
+    {}
+
+    /// Move semantics
+    reseqninf(const reseqninf&) noexcept = default;
+    reseqninf(reseqninf&&) noexcept = default;
+    reseqninf& operator=(const reseqninf&) noexcept = default;
+    reseqninf& operator=(reseqninf&&) noexcept = default;
+
+    const res_expression& operand() const
+    {
+      return atermpp::down_cast<res_expression>((*this)[0]);
+    }
+};
+
+/// \\brief Make_reseqninf constructs a new term into a given address.
+/// \\ \param t The reference into which the new reseqninf is constructed. 
+template <class... ARGUMENTS>
+inline void make_reseqninf(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_RESEqInf(), args...);
+}
+
+/// \\brief Test for a reseqninf expression
+/// \\param x A term
+/// \\return True if \\a x is a reseqninf expression
+inline
+bool is_reseqninf(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::RESEqInf;
+}
+
+// prototype declaration
+std::string pp(const reseqninf& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const reseqninf& x)
+{
+  return out << res::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(reseqninf& t1, reseqninf& t2)
 {
   t1.swap(t2);
 }

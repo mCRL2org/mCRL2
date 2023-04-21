@@ -213,22 +213,22 @@ const atermpp::aterm_appl& default_value_PRESOr();
 const atermpp::aterm_appl& default_value_PRESImp();
 const atermpp::aterm_appl& default_value_PRESPlus();
 const atermpp::aterm_appl& default_value_PRESConstantMultiply();
-const atermpp::aterm_appl& default_value_PRESMin();
-const atermpp::aterm_appl& default_value_PRESMax();
+const atermpp::aterm_appl& default_value_PRESMinall();
+const atermpp::aterm_appl& default_value_PRESMaxall();
 const atermpp::aterm_appl& default_value_PRESSum();
 const atermpp::aterm_appl& default_value_RES();
-const atermpp::aterm_appl& default_value_RealEquation();
-const atermpp::aterm_appl& default_value_RealVariable();
-const atermpp::aterm_appl& default_value_RealNot();
-const atermpp::aterm_appl& default_value_RealAnd();
-const atermpp::aterm_appl& default_value_RealOr();
-const atermpp::aterm_appl& default_value_RealImp();
-const atermpp::aterm_appl& default_value_RealPlus();
-const atermpp::aterm_appl& default_value_RealConstantMultiply();
-const atermpp::aterm_appl& default_value_RealCondAnd();
-const atermpp::aterm_appl& default_value_RealCondOr();
-const atermpp::aterm_appl& default_value_RealEqInf();
-const atermpp::aterm_appl& default_value_RealEqNInf();
+const atermpp::aterm_appl& default_value_ResEquation();
+const atermpp::aterm_appl& default_value_ResVariable();
+const atermpp::aterm_appl& default_value_ResNot();
+const atermpp::aterm_appl& default_value_ResAnd();
+const atermpp::aterm_appl& default_value_ResOr();
+const atermpp::aterm_appl& default_value_ResImp();
+const atermpp::aterm_appl& default_value_ResPlus();
+const atermpp::aterm_appl& default_value_ResConstantMultiply();
+const atermpp::aterm_appl& default_value_ResCondAnd();
+const atermpp::aterm_appl& default_value_ResCondOr();
+const atermpp::aterm_appl& default_value_ResEqInf();
+const atermpp::aterm_appl& default_value_ResEqNInf();
 const atermpp::aterm_appl& default_value_BddTrue();
 const atermpp::aterm_appl& default_value_BddFalse();
 const atermpp::aterm_appl& default_value_BddIf();
@@ -250,7 +250,7 @@ const atermpp::aterm_appl& default_value_FixPoint();
 const atermpp::aterm_appl& default_value_PBExpr();
 const atermpp::aterm_appl& default_value_BooleanExpression();
 const atermpp::aterm_appl& default_value_PRExpr();
-const atermpp::aterm_appl& default_value_RealExpression();
+const atermpp::aterm_appl& default_value_ResExpression();
 const atermpp::aterm_appl& default_value_BddExpression();
 
 // SortCons
@@ -1461,19 +1461,19 @@ const atermpp::aterm_appl& default_value_PRESConstantMultiply()
   return t;
 }
 
-// PRESMin
+// PRESMinall
 inline
-const atermpp::aterm_appl& default_value_PRESMin()
+const atermpp::aterm_appl& default_value_PRESMinall()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_PRESMin(), default_value_List(default_value_DataVarId()), default_value_PRExpr());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_PRESMinall(), default_value_List(default_value_DataVarId()), default_value_PRExpr());
   return t;
 }
 
-// PRESMax
+// PRESMaxall
 inline
-const atermpp::aterm_appl& default_value_PRESMax()
+const atermpp::aterm_appl& default_value_PRESMaxall()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_PRESMax(), default_value_List(default_value_DataVarId()), default_value_PRExpr());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_PRESMaxall(), default_value_List(default_value_DataVarId()), default_value_PRExpr());
   return t;
 }
 
@@ -1489,103 +1489,103 @@ const atermpp::aterm_appl& default_value_PRESSum()
 inline
 const atermpp::aterm_appl& default_value_RES()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_RES(), default_value_List(), default_value_RealExpression());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_RES(), default_value_List(), default_value_ResExpression());
   return t;
 }
 
-// RealEquation
+// ResEquation
 inline
-const atermpp::aterm_appl& default_value_RealEquation()
+const atermpp::aterm_appl& default_value_ResEquation()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_RealEquation(), default_value_FixPoint(), default_value_RealVariable(), default_value_RealExpression());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_ResEquation(), default_value_FixPoint(), default_value_ResVariable(), default_value_ResExpression());
   return t;
 }
 
-// RealVariable
+// ResVariable
 inline
-const atermpp::aterm_appl& default_value_RealVariable()
+const atermpp::aterm_appl& default_value_ResVariable()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_RealVariable(), default_value_String());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_ResVariable(), default_value_String());
   return t;
 }
 
-// RealNot
+// ResNot
 inline
-const atermpp::aterm_appl& default_value_RealNot()
+const atermpp::aterm_appl& default_value_ResNot()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_RealNot(), default_value_RealExpression());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_ResNot(), default_value_ResExpression());
   return t;
 }
 
-// RealAnd
+// ResAnd
 inline
-const atermpp::aterm_appl& default_value_RealAnd()
+const atermpp::aterm_appl& default_value_ResAnd()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_RealAnd(), default_value_RealExpression(), default_value_RealExpression());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_ResAnd(), default_value_ResExpression(), default_value_ResExpression());
   return t;
 }
 
-// RealOr
+// ResOr
 inline
-const atermpp::aterm_appl& default_value_RealOr()
+const atermpp::aterm_appl& default_value_ResOr()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_RealOr(), default_value_RealExpression(), default_value_RealExpression());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_ResOr(), default_value_ResExpression(), default_value_ResExpression());
   return t;
 }
 
-// RealImp
+// ResImp
 inline
-const atermpp::aterm_appl& default_value_RealImp()
+const atermpp::aterm_appl& default_value_ResImp()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_RealImp(), default_value_RealExpression(), default_value_RealExpression());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_ResImp(), default_value_ResExpression(), default_value_ResExpression());
   return t;
 }
 
-// RealPlus
+// ResPlus
 inline
-const atermpp::aterm_appl& default_value_RealPlus()
+const atermpp::aterm_appl& default_value_ResPlus()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_RealPlus(), default_value_RealExpression(), default_value_RealExpression());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_ResPlus(), default_value_ResExpression(), default_value_ResExpression());
   return t;
 }
 
-// RealConstantMultiply
+// ResConstantMultiply
 inline
-const atermpp::aterm_appl& default_value_RealConstantMultiply()
+const atermpp::aterm_appl& default_value_ResConstantMultiply()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_RealConstantMultiply(), default_value_DataExpr(), default_value_RealExpression());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_ResConstantMultiply(), default_value_DataExpr(), default_value_ResExpression());
   return t;
 }
 
-// RealCondAnd
+// ResCondAnd
 inline
-const atermpp::aterm_appl& default_value_RealCondAnd()
+const atermpp::aterm_appl& default_value_ResCondAnd()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_RealCondAnd(), default_value_RealExpression(), default_value_RealExpression(), default_value_RealExpression());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_ResCondAnd(), default_value_ResExpression(), default_value_ResExpression(), default_value_ResExpression());
   return t;
 }
 
-// RealCondOr
+// ResCondOr
 inline
-const atermpp::aterm_appl& default_value_RealCondOr()
+const atermpp::aterm_appl& default_value_ResCondOr()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_RealCondOr(), default_value_RealExpression(), default_value_RealExpression(), default_value_RealExpression());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_ResCondOr(), default_value_ResExpression(), default_value_ResExpression(), default_value_ResExpression());
   return t;
 }
 
-// RealEqInf
+// ResEqInf
 inline
-const atermpp::aterm_appl& default_value_RealEqInf()
+const atermpp::aterm_appl& default_value_ResEqInf()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_RealEqInf(), default_value_RealExpression());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_ResEqInf(), default_value_ResExpression());
   return t;
 }
 
-// RealEqNInf
+// ResEqNInf
 inline
-const atermpp::aterm_appl& default_value_RealEqNInf()
+const atermpp::aterm_appl& default_value_ResEqNInf()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_RealEqNInf(), default_value_RealExpression());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_ResEqNInf(), default_value_ResExpression());
   return t;
 }
 
@@ -1739,9 +1739,9 @@ const atermpp::aterm_appl& default_value_PRExpr()
   return default_value_DataExpr();
 }
 
-// RealExpression
+// ResExpression
 inline
-const atermpp::aterm_appl& default_value_RealExpression()
+const atermpp::aterm_appl& default_value_ResExpression()
 {
   return default_value_BooleanTrue();
 }
@@ -1912,22 +1912,22 @@ static const atermpp::aterm_appl SortCons;
   static const atermpp::aterm_appl PRESImp;
   static const atermpp::aterm_appl PRESPlus;
   static const atermpp::aterm_appl PRESConstantMultiply;
-  static const atermpp::aterm_appl PRESMin;
-  static const atermpp::aterm_appl PRESMax;
+  static const atermpp::aterm_appl PRESMinall;
+  static const atermpp::aterm_appl PRESMaxall;
   static const atermpp::aterm_appl PRESSum;
   static const atermpp::aterm_appl RES;
-  static const atermpp::aterm_appl RealEquation;
-  static const atermpp::aterm_appl RealVariable;
-  static const atermpp::aterm_appl RealNot;
-  static const atermpp::aterm_appl RealAnd;
-  static const atermpp::aterm_appl RealOr;
-  static const atermpp::aterm_appl RealImp;
-  static const atermpp::aterm_appl RealPlus;
-  static const atermpp::aterm_appl RealConstantMultiply;
-  static const atermpp::aterm_appl RealCondAnd;
-  static const atermpp::aterm_appl RealCondOr;
-  static const atermpp::aterm_appl RealEqInf;
-  static const atermpp::aterm_appl RealEqNInf;
+  static const atermpp::aterm_appl ResEquation;
+  static const atermpp::aterm_appl ResVariable;
+  static const atermpp::aterm_appl ResNot;
+  static const atermpp::aterm_appl ResAnd;
+  static const atermpp::aterm_appl ResOr;
+  static const atermpp::aterm_appl ResImp;
+  static const atermpp::aterm_appl ResPlus;
+  static const atermpp::aterm_appl ResConstantMultiply;
+  static const atermpp::aterm_appl ResCondAnd;
+  static const atermpp::aterm_appl ResCondOr;
+  static const atermpp::aterm_appl ResEqInf;
+  static const atermpp::aterm_appl ResEqNInf;
   static const atermpp::aterm_appl BddTrue;
   static const atermpp::aterm_appl BddFalse;
   static const atermpp::aterm_appl BddIf;
@@ -1949,7 +1949,7 @@ static const atermpp::aterm_appl SortCons;
   static const atermpp::aterm_appl PBExpr;
   static const atermpp::aterm_appl BooleanExpression;
   static const atermpp::aterm_appl PRExpr;
-  static const atermpp::aterm_appl RealExpression;
+  static const atermpp::aterm_appl ResExpression;
   static const atermpp::aterm_appl BddExpression;
 //--- end generated variables ---//
 };

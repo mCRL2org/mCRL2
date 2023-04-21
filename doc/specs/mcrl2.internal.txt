@@ -379,8 +379,8 @@
                  | PRESImp(<PRExpr>, <PRExpr>)
                  | PRESPlus(<PRExpr>, <PRExpr>)
                  | PRESConstantMultiply(<DataExpr>, <PRExpr>)
-                 | PRESMin(<DataVarId>+, <PRExpr>)
-                 | PRESMax(<DataVarId>+, <PRExpr>)
+                 | PRESMinall(<DataVarId>+, <PRExpr>)
+                 | PRESMaxall(<DataVarId>+, <PRExpr>)
                  | PRESSum(<DataVarId>+, <PRExpr>)
                  | <PropVarInst>
                  | <UntypedDataParameter>
@@ -390,29 +390,29 @@
 //---------------------
 
 // RES specification (equations + initialization)
-<RES>          ::= RES(<RealEquation>*, <RealExpression>)
+<RES>          ::= RES(<ResEquation>*, <ResExpression>)
 
 // real equation
-<RealEquation>   ::= RealEquation(<FixPoint>, <RealVariable>, <RealExpression>)
+<ResEquation>   ::= ResEquation(<FixPoint>, <ResVariable>, <ResExpression>)
 
 // real variable
-<RealVariable>   ::= RealVariable(<String>)
+<ResVariable>   ::= ResVariable(<String>)
 
 // real expression
-<RealExpression> ::= BooleanTrue
-                      | BooleanFalse
-                      | <RealVariable>
-                      | RealNot(<RealExpression>)
-                      | RealAnd(<RealExpression>, <RealExpression>)
-                      | RealOr(<RealExpression>, <RealExpression>)
-                      | RealImp(<RealExpression>, <RealExpression>)
-                      | RealPlus(<RealExpression>, <RealExpression>)
-                      | RealConstantMultiply(<DataExpr>, <RealExpression>)
-                      | <DataExpr>
-                      | RealCondAnd(<RealExpression>, <RealExpression>, <RealExpression>)
-                      | RealCondOr(<RealExpression>, <RealExpression>, <RealExpression>)
-                      | RealEqInf(<RealExpression>)
-                      | RealEqNInf(<RealExpression>)
+<ResExpression> ::= BooleanTrue
+                  | BooleanFalse
+                  | <ResVariable>
+                  | ResNot(<ResExpression>)
+                  | ResAnd(<ResExpression>, <ResExpression>)
+                  | ResOr(<ResExpression>, <ResExpression>)
+                  | ResImp(<ResExpression>, <ResExpression>)
+                  | ResPlus(<ResExpression>, <ResExpression>)
+                  | ResConstantMultiply(<DataExpr>, <ResExpression>)
+                  | <DataExpr>
+                  | ResCondAnd(<ResExpression>, <ResExpression>, <ResExpression>)
+                  | ResCondOr(<ResExpression>, <ResExpression>, <ResExpression>)
+                  | ResEqInf(<ResExpression>)
+                  | ResEqNInf(<ResExpression>)
 
 //BDDs
 //-------------------

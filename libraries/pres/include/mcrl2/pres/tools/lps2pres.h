@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Jan Friso Groote. Based on pbes/lps2pbes.h by Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -6,25 +6,25 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/tools/lps2pbes.h
+/// \file mcrl2/pres/tools/lps2pres.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_PBES_TOOLS_LPS2PBES_H
-#define MCRL2_PBES_TOOLS_LPS2PBES_H
+#ifndef MCRL2_PRES_TOOLS_LPS2PRES_H
+#define MCRL2_PRES_TOOLS_LPS2PRES_H
 
 #include "mcrl2/lps/io.h"
 #include "mcrl2/modal_formula/parse.h"
-#include "mcrl2/pbes/io.h"
-#include "mcrl2/pbes/lps2pbes.h"
+#include "mcrl2/pres/io.h"
+#include "mcrl2/pres/lps2pres.h"
 
 namespace mcrl2 {
 
-namespace pbes_system {
+namespace pres_system {
 
 namespace detail
 {
 /// \brief Prints a warning if formula contains an action that is not used in lpsspec.
-inline void check_lps2pbes_actions(const state_formulas::state_formula& formula, const lps::specification& lpsspec)
+inline void check_lps2pres_actions(const state_formulas::state_formula& formula, const lps::specification& lpsspec)
 {
   std::set<process::action_label> used_lps_actions = lps::find_action_labels(lpsspec.process());
   std::set<process::action_label> used_state_formula_actions = state_formulas::find_action_labels(formula);
@@ -39,7 +39,7 @@ inline void check_lps2pbes_actions(const state_formulas::state_formula& formula,
 
 } // namespace detail
 
-void lps2pbes(const std::string& input_filename,
+void lps2pres(const std::string& input_filename,
               const std::string& output_filename,
               const utilities::file_format& output_format,
               const std::string& formula_filename,
@@ -73,9 +73,9 @@ void lps2pbes(const std::string& input_filename,
   }
   std::string text = utilities::read_text(from);
   state_formulas::state_formula_specification formspec = state_formulas::algorithms::parse_state_formula_specification(text, lpsspec);
-  detail::check_lps2pbes_actions(formspec.formula(), lpsspec);
-  mCRL2log(log::verbose) << "converting state formula and LPS to a PBES..." << std::endl;
-  pbes_system::pbes result = pbes_system::lps2pbes(lpsspec, formspec, timed, structured, unoptimized, preprocess_modal_operators, generate_counter_example, check_only);
+  detail::check_lps2pres_actions(formspec.formula(), lpsspec);
+  mCRL2log(log::verbose) << "converting state formula and LPS to a PRES..." << std::endl;
+  pres_system::pres result = pres_system::lps2pres(lpsspec, formspec, timed, structured, unoptimized, preprocess_modal_operators, generate_counter_example, check_only);
 
   if (check_only)
   {
@@ -87,17 +87,17 @@ void lps2pbes(const std::string& input_filename,
 
   if (output_filename.empty())
   {
-    mCRL2log(log::verbose) << "writing PBES to stdout..." << std::endl;
+    mCRL2log(log::verbose) << "writing PRES to stdout..." << std::endl;
   }
   else
   {
-    mCRL2log(log::verbose) << "writing PBES to file '" <<  output_filename << "'..." << std::endl;
+    mCRL2log(log::verbose) << "writing PRES to file '" <<  output_filename << "'..." << std::endl;
   }
-  save_pbes(result, output_filename, output_format);
+  save_pres(result, output_filename, output_format);
 }
 
-} // namespace pbes_system
+} // namespace pres_system
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_TOOLS_LPS2PBES_H
+#endif // MCRL2_PRES_TOOLS_LPS2PRES_H
