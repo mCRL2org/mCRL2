@@ -38,10 +38,11 @@
 
 .. note::
 
-   * - .. image:: /_templates/mcrl2/static/understanding.*
-          :align: right
-          :alt: Understanding Behaviour of Distributed Systems using mCRL2 (book)
-          :target: https://link.springer.com/book/10.1007/978-3-031-23008-0
+   .. image:: /_templates/mcrl2/static/understanding.*
+      :align: right
+      :width: 90px
+      :alt: Understanding Behaviour of Distributed Systems using mCRL2 (book)
+      :target: https://link.springer.com/book/10.1007/978-3-031-23008-0
 
    A new introductory book appeared, describing the mCRL2 specification language, the
    modal mu-calculus and the extensive toolset around these. The book is full of examples, varying from 

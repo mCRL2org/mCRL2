@@ -203,7 +203,7 @@ PBES_CLASSES = r'''
 fixpoint_symbol()                                                                                                                                                                                                            : public atermpp::aterm_appl | XCU | FixPoint    | A fixpoint symbol
 propositional_variable(const core::identifier_string& name, const data::variable_list& parameters)                                                                                                                           : public atermpp::aterm_appl | CI  | PropVarDecl | A propositional variable declaration
 pbes_equation(const fixpoint_symbol& symbol, const propositional_variable& variable, const pbes_expression& formula)                                                                                                                                      | SMC | PBEqn       | A PBES equation
-pbes(const data::data_specification& data, const std::vector<pbes_system::pbes_equation>& equations, const std::set<data::variable>& global_variables, const propositional_variable_instantiation& initial_state)                                         | SMW | PBES        | A PBES
+pbes(const data::data_specification& data, const std::set<data::variable>& global_variables, const std::vector<pbes_system::pbes_equation>& equations, const propositional_variable_instantiation& initial_state)                                         | SMW | PBES        | A PBES
 '''
 
 PBES_EXPRESSION_CLASSES = r'''
