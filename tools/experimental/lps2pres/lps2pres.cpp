@@ -15,7 +15,7 @@
 #include "mcrl2/bes/pbes_output_tool.h"
 
 using namespace mcrl2;
-using namespace mcrl2::pbes_system;
+using namespace mcrl2::pres_system;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::log;
