@@ -390,29 +390,29 @@
 //---------------------
 
 // RES specification (equations + initialization)
-<RES>          ::= RES(<ResEquation>*, <ResExpression>)
+<RES>          ::= RES(<RESEquation>*, <RESExpression>)
 
 // real equation
-<ResEquation>   ::= ResEquation(<FixPoint>, <ResVariable>, <ResExpression>)
+<RESEquation>   ::= RESEquation(<FixPoint>, <RESVariable>, <RESExpression>)
 
 // real variable
-<ResVariable>   ::= ResVariable(<String>)
+<RESVariable>   ::= RESVariable(<String>)
 
 // real expression
-<ResExpression> ::= BooleanTrue
-                  | BooleanFalse
-                  | <ResVariable>
-                  | ResNot(<ResExpression>)
-                  | ResAnd(<ResExpression>, <ResExpression>)
-                  | ResOr(<ResExpression>, <ResExpression>)
-                  | ResImp(<ResExpression>, <ResExpression>)
-                  | ResPlus(<ResExpression>, <ResExpression>)
-                  | ResConstantMultiply(<DataExpr>, <ResExpression>)
+<RESExpression> ::= RESTrue
+                  | RESFalse
+                  | <RESVariable>
+                  | RESMinus(<RESExpression>)
+                  | RESAnd(<RESExpression>, <RESExpression>)
+                  | RESOr(<RESExpression>, <RESExpression>)
+                  | RESImp(<RESExpression>, <RESExpression>)
+                  | RESPlus(<RESExpression>, <RESExpression>)
+                  | RESConstantMultiply(<DataExpr>, <RESExpression>)
                   | <DataExpr>
-                  | ResCondAnd(<ResExpression>, <ResExpression>, <ResExpression>)
-                  | ResCondOr(<ResExpression>, <ResExpression>, <ResExpression>)
-                  | ResEqInf(<ResExpression>)
-                  | ResEqNInf(<ResExpression>)
+                  | RESCondAnd(<RESExpression>, <RESExpression>, <RESExpression>)
+                  | RESCondOr(<RESExpression>, <RESExpression>, <RESExpression>)
+                  | RESEqInf(<RESExpression>)
+                  | RESEqNInf(<RESExpression>)
 
 //BDDs
 //-------------------

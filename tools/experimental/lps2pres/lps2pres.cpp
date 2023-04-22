@@ -12,18 +12,18 @@
 
 #include "mcrl2/pres/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/bes/pbes_output_tool.h"
+#include "mcrl2/res/pres_output_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pres_system;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::log;
-using bes::tools::pbes_output_tool;
+using res::tools::pres_output_tool;
 
-class lps2pres_tool : public pbes_output_tool<input_output_tool>
+class lps2pres_tool : public pres_output_tool<input_output_tool>
 {
-    typedef pbes_output_tool<input_output_tool> super;
+    typedef pres_output_tool<input_output_tool> super;
 
   protected:
     std::string formula_filename;
@@ -88,7 +88,7 @@ class lps2pres_tool : public pbes_output_tool<input_output_tool>
     {
       lps2pres(input_filename(),
                output_filename(),
-               pbes_output_format(),
+               pres_output_format(),
                formula_filename,
                timed,
                structured,

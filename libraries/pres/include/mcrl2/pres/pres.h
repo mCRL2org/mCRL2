@@ -132,8 +132,8 @@ class pres
     /// \param global_variables A sequence of free variables
     /// \param initial_state A propositional variable instantiation
     pres(data::data_specification const& data,
-         const std::vector<pres_equation>& equations,
          const std::set<data::variable>& global_variables,
+         const std::vector<pres_equation>& equations,
          propositional_variable_instantiation initial_state)
       :
       m_data(data),

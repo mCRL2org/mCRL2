@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file pres/include/mcrl2/pres/is_bes.h
+/// \file pres/include/mcrl2/pres/is_res.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_PRES_IS_BES_H
@@ -21,16 +21,16 @@ namespace pres_system {
 
 /// \cond INTERNAL_DOCS
 /// \brief Visitor for checking if a pres object is in BES form.
-struct is_bes_traverser: public pres_expression_traverser<is_bes_traverser>
+struct is_res_traverser: public pres_expression_traverser<is_res_traverser>
 {
-  typedef pres_expression_traverser<is_bes_traverser> super;
+  typedef pres_expression_traverser<is_res_traverser> super;
   using super::enter;
   using super::leave;
   using super::apply;
 
   bool result;
 
-  is_bes_traverser()
+  is_res_traverser()
     : result(true)
   {}
 
@@ -73,9 +73,9 @@ struct is_bes_traverser: public pres_expression_traverser<is_bes_traverser>
 /// \brief Returns true if a PRES object is in BES form.
 /// \param x a PRES object
 template <typename T>
-bool is_bes(const T& x)
+bool is_res(const T& x)
 {
-  is_bes_traverser f;
+  is_res_traverser f;
   f.apply(x);
   return f.result;
 }

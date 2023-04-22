@@ -188,7 +188,7 @@ if __name__ == "__main__":
     result = make_builder(MCRL2_ROOT + 'libraries/bes/include/mcrl2/bes/builder.h', 'boolean_variable_builder', 'add_boolean_variables', 'core::builder', class_map, all_classes, 'bes', 'bes::boolean_expression', boolean_variable_dependencies, modifiability_map) and result
 
     # real variable_builder
-    result = make_builder(MCRL2_ROOT + 'libraries/res/include/mcrl2/res/builder.h', 'boolean_variable_builder', 'add_boolean_variables', 'core::builder', class_map, all_classes, 'res', 'res::boolean_expression', res_variable_dependencies, modifiability_map) and result
+    result = make_builder(MCRL2_ROOT + 'libraries/res/include/mcrl2/res/builder.h', 'res_variable_builder', 'add_res_variables', 'core::builder', class_map, all_classes, 'res', 'res::res_expression', res_variable_dependencies, modifiability_map) and result
 
     # pbes_expression_builder
     result = make_builder(MCRL2_ROOT + 'libraries/pbes/include/mcrl2/pbes/builder.h', 'pbes_expression_builder', 'add_pbes_expressions', 'pbes_system::pbes_expression_builder_base', class_map, all_classes, 'pbes_system', 'pbes_system::pbes_expression', pbes_expression_dependencies, modifiability_map) and result
@@ -200,13 +200,13 @@ if __name__ == "__main__":
     result = make_builder(MCRL2_ROOT + 'libraries/bes/include/mcrl2/bes/builder.h', 'boolean_expression_builder', 'add_boolean_expressions', 'core::builder', class_map, all_classes, 'bes', 'bes::boolean_expression', boolean_expression_dependencies, modifiability_map) and result
 
     # res_expression_builder
-    result = make_builder(MCRL2_ROOT + 'libraries/res/include/mcrl2/res/builder.h', 'boolean_expression_builder', 'add_boolean_expressions', 'core::builder', class_map, all_classes, 'res', 'res::boolean_expression', res_expression_dependencies, modifiability_map) and result
+    result = make_builder(MCRL2_ROOT + 'libraries/res/include/mcrl2/res/builder.h', 'res_expression_builder', 'add_res_expressions', 'core::builder', class_map, all_classes, 'res', 'res::res_expression', res_expression_dependencies, modifiability_map) and result
 
     # pres_expression_builder
     result = make_builder(MCRL2_ROOT + 'libraries/pres/include/mcrl2/pres/builder.h', 'pres_expression_builder', 'add_pres_expressions', 'pres_system::pres_expression_builder_base', class_map, all_classes, 'pres_system', 'pres_system::pres_expression', pres_expression_dependencies, modifiability_map) and result
 
     # res_expression_builder
-    result = make_builder(MCRL2_ROOT + 'libraries/res/include/mcrl2/res/builder.h', 'boolean_expression_builder', 'add_boolean_expressions', 'core::builder', class_map, all_classes, 'res', 'res::boolean_expression', boolean_expression_dependencies, modifiability_map) and result
+    result = make_builder(MCRL2_ROOT + 'libraries/res/include/mcrl2/res/builder.h', 'res_expression_builder', 'add_res_expressions', 'core::builder', class_map, all_classes, 'res', 'res::res_expression', res_expression_dependencies, modifiability_map) and result
 
     # process_expression_builder
     result = make_builder(MCRL2_ROOT + 'libraries/process/include/mcrl2/process/builder.h', 'process_expression_builder', 'add_process_expressions', 'core::builder', class_map, all_classes, 'process', 'process::process_expression', process_expression_dependencies, modifiability_map) and result
@@ -268,7 +268,7 @@ if __name__ == "__main__":
     result = make_traverser(MCRL2_ROOT + 'libraries/bes/include/mcrl2/bes/traverser.h', 'boolean_variable_traverser', 'add_traverser_boolean_variables', 'core::traverser', class_map, all_classes, 'bes', 'bes::boolean_variable', boolean_variable_dependencies) and result
 
     # res_variable_traverser
-    result = make_traverser(MCRL2_ROOT + 'libraries/res/include/mcrl2/res/traverser.h', 'boolean_variable_traverser', 'add_traverser_boolean_variables', 'core::traverser', class_map, all_classes, 'res', 'res::boolean_variable', res_variable_dependencies) and result
+    result = make_traverser(MCRL2_ROOT + 'libraries/res/include/mcrl2/res/traverser.h', 'res_variable_traverser', 'add_traverser_res_variables', 'core::traverser', class_map, all_classes, 'res', 'res::res_variable', res_variable_dependencies) and result
 
     # identifier_string_traverser
     result = make_traverser(MCRL2_ROOT + 'libraries/data/include/mcrl2/data/traverser.h'        , 'identifier_string_traverser', 'add_traverser_identifier_strings', 'core::traverser'                              , class_map, all_classes, 'data'            , 'core::identifier_string', identifier_string_dependencies) and result
@@ -290,7 +290,7 @@ if __name__ == "__main__":
     result = make_traverser(MCRL2_ROOT + 'libraries/bes/include/mcrl2/bes/traverser.h', 'boolean_expression_traverser', 'add_traverser_boolean_expressions', 'core::traverser', class_map, all_classes, 'bes', 'bes::boolean_expression', boolean_expression_dependencies) and result
 
     # res_expression_traverser
-    result = make_traverser(MCRL2_ROOT + 'libraries/res/include/mcrl2/res/traverser.h', 'boolean_expression_traverser', 'add_traverser_boolean_expressions', 'core::traverser', class_map, all_classes, 'res', 'res::boolean_expression', boolean_expression_dependencies) and result
+    result = make_traverser(MCRL2_ROOT + 'libraries/res/include/mcrl2/res/traverser.h', 'res_expression_traverser', 'add_traverser_res_expressions', 'core::traverser', class_map, all_classes, 'res', 'res::res_expression', res_expression_dependencies) and result
 
     # process_expression_traverser
     result = make_traverser(MCRL2_ROOT + 'libraries/process/include/mcrl2/process/traverser.h', 'process_expression_traverser', 'add_traverser_process_expressions', 'core::traverser', class_map, all_classes, 'process', 'process::process_expression', process_expression_dependencies) and result

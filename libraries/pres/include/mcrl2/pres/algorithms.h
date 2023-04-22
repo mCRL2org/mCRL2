@@ -51,11 +51,13 @@ void instantiate_global_variables(pres& p);
 
 /// \brief Apply finite instantiation to the given PRES.
 void presinst_finite(pres& p, data::rewrite_strategy rewrite_strategy, const std::string& finite_parameter_selection);
+*/
 
 /// \brief Returns true if a PRES is in RES form.
 /// \param x a PRES
-bool is_bes(const pres& x);
+bool is_res(const pres& x);
 
+/*
 /// \brief Print removed equations.
 std::string print_removed_equations(const std::vector<propositional_variable>& removed);
 

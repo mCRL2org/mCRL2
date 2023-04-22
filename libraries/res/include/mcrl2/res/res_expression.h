@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/bes/res_expression.h
+/// \file mcrl2/res/res_expression.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_RES_RES_EXPRESSION_H
@@ -16,11 +16,12 @@
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/term_traits.h"
+#include "mcrl2/data/data_expression.h"
 
 namespace mcrl2
 {
 
-namespace bes
+namespace res
 {
 
 typedef core::identifier_string res_variable_key_type;
@@ -62,7 +63,7 @@ typedef std::vector<res_expression>    res_expression_vector;
 inline bool is_true(const atermpp::aterm_appl& x);
 inline bool is_false(const atermpp::aterm_appl& x);
 inline bool is_res_variable(const atermpp::aterm_appl& x);
-inline bool is_not(const atermpp::aterm_appl& x);
+inline bool is_minus(const atermpp::aterm_appl& x);
 inline bool is_and(const atermpp::aterm_appl& x);
 inline bool is_or(const atermpp::aterm_appl& x);
 inline bool is_imp(const atermpp::aterm_appl& x);
@@ -82,7 +83,7 @@ bool is_res_expression(const atermpp::aterm_appl& x)
   return res::is_true(x) ||
          res::is_false(x) ||
          res::is_res_variable(x) ||
-         res::is_not(x) ||
+         res::is_minus(x) ||
          res::is_and(x) ||
          res::is_or(x) ||
          res::is_imp(x) ||
@@ -303,33 +304,33 @@ inline void swap(res_variable& t1, res_variable& t2)
 }
 
 
-/// \\brief The not operator for res expressions
-class not_: public res_expression
+/// \\brief The minus operator for res expressions
+class minus: public res_expression
 {
   public:
     /// \\brief Default constructor.
-    not_()
-      : res_expression(core::detail::default_values::RESNot)
+    minus()
+      : res_expression(core::detail::default_values::RESMinus)
     {}
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit not_(const atermpp::aterm& term)
+    explicit minus(const atermpp::aterm& term)
       : res_expression(term)
     {
-      assert(core::detail::check_term_RESNot(*this));
+      assert(core::detail::check_term_RESMinus(*this));
     }
 
     /// \\brief Constructor.
-    explicit not_(const res_expression& operand)
-      : res_expression(atermpp::aterm_appl(core::detail::function_symbol_RESNot(), operand))
+    explicit minus(const res_expression& operand)
+      : res_expression(atermpp::aterm_appl(core::detail::function_symbol_RESMinus(), operand))
     {}
 
     /// Move semantics
-    not_(const not_&) noexcept = default;
-    not_(not_&&) noexcept = default;
-    not_& operator=(const not_&) noexcept = default;
-    not_& operator=(not_&&) noexcept = default;
+    minus(const minus&) noexcept = default;
+    minus(minus&&) noexcept = default;
+    minus& operator=(const minus&) noexcept = default;
+    minus& operator=(minus&&) noexcept = default;
 
     const res_expression& operand() const
     {
@@ -337,38 +338,38 @@ class not_: public res_expression
     }
 };
 
-/// \\brief Make_not_ constructs a new term into a given address.
-/// \\ \param t The reference into which the new not_ is constructed. 
+/// \\brief Make_minus constructs a new term into a given address.
+/// \\ \param t The reference into which the new minus is constructed. 
 template <class... ARGUMENTS>
-inline void make_not_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_minus(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
-  atermpp::make_term_appl(t, core::detail::function_symbol_RESNot(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_RESMinus(), args...);
 }
 
-/// \\brief Test for a not expression
+/// \\brief Test for a minus expression
 /// \\param x A term
-/// \\return True if \\a x is a not expression
+/// \\return True if \\a x is a minus expression
 inline
-bool is_not(const atermpp::aterm_appl& x)
+bool is_minus(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::detail::function_symbols::RESNot;
+  return x.function() == core::detail::function_symbols::RESMinus;
 }
 
 // prototype declaration
-std::string pp(const not_& x);
+std::string pp(const minus& x);
 
 /// \\brief Outputs the object to a stream
 /// \\param out An output stream
 /// \\param x Object x
 /// \\return The output stream
 inline
-std::ostream& operator<<(std::ostream& out, const not_& x)
+std::ostream& operator<<(std::ostream& out, const minus& x)
 {
   return out << res::pp(x);
 }
 
 /// \\brief swap overload
-inline void swap(not_& t1, not_& t2)
+inline void swap(minus& t1, minus& t2)
 {
   t1.swap(t2);
 }
@@ -1076,7 +1077,7 @@ const res_expression& right(res_expression const& e)
 
 } // namespace accessors
 
-} // namespace bes
+} // namespace res
 
 } // namespace mcrl2
 
@@ -1088,13 +1089,13 @@ namespace core
 
 /// \brief Contains type information for res expressions
 template <>
-struct term_traits<bes::res_expression>
+struct term_traits<res::res_expression>
 {
   /// The term type
-  typedef bes::res_expression term_type;
+  typedef res::res_expression term_type;
 
   /// \brief The variable type
-  typedef bes::res_variable variable_type;
+  typedef res::res_variable variable_type;
 
   /// \brief The string type
   typedef core::identifier_string string_type;
@@ -1102,35 +1103,35 @@ struct term_traits<bes::res_expression>
   /// \brief The value true
   /// \return The value true
   static inline
-  bes::res_expression true_()
+  res::res_expression true_()
   {
-    return bes::true_();
+    return res::true_();
   }
 
   /// \brief The value false
   /// \return The value false
   static inline
-  bes::res_expression false_()
+  res::res_expression false_()
   {
-    return bes::false_();
+    return res::false_();
   }
 
   /// \brief Operator not
   /// \param x A term
   /// \return Operator not applied to
   static inline
-  bes::res_expression not_(const bes::res_expression& x)
+  res::res_expression minus(const res::res_expression& x)
   {
-    return bes::not_(x);
+    return res::minus(x);
   }
 
   /// \brief Operator not
   /// \param result Will contain not applied to x. 
   /// \param x A term
   static inline
-  void make_not_(bes::res_expression& result, const bes::res_expression& x)
+  void make_minus(res::res_expression& result, const res::res_expression& x)
   {
-    bes::make_not_(result, x);
+    res::make_minus(result, x);
   }
 
   /// \brief Operator and
@@ -1138,9 +1139,9 @@ struct term_traits<bes::res_expression>
   /// \param q A term
   /// \return Operator and applied to p and q
   static inline
-  bes::res_expression and_(const bes::res_expression& p, const bes::res_expression& q)
+  res::res_expression and_(const res::res_expression& p, const res::res_expression& q)
   {
-    return bes::and_(p, q);
+    return res::and_(p, q);
   }
 
   /// \brief Operator and
@@ -1148,9 +1149,9 @@ struct term_traits<bes::res_expression>
   /// \param p A term
   /// \param q A term
   static inline
-  void make_and_(bes::res_expression& result, const bes::res_expression& p, const bes::res_expression& q)
+  void make_and_(res::res_expression& result, const res::res_expression& p, const res::res_expression& q)
   {
-    bes::make_and_(result, p, q);
+    res::make_and_(result, p, q);
   }
 
   /// \brief Operator or
@@ -1158,9 +1159,9 @@ struct term_traits<bes::res_expression>
   /// \param q A term
   /// \return Operator or applied to p and q
   static inline
-  bes::res_expression or_(const bes::res_expression& p, const bes::res_expression& q)
+  res::res_expression or_(const res::res_expression& p, const res::res_expression& q)
   {
-    return bes::or_(p, q);
+    return res::or_(p, q);
   }
   //
   /// \brief Operator or
@@ -1168,9 +1169,9 @@ struct term_traits<bes::res_expression>
   /// \param p A term
   /// \param q A term
   static inline
-  void make_or_(bes::res_expression& result, const bes::res_expression& p, const bes::res_expression& q)
+  void make_or_(res::res_expression& result, const res::res_expression& p, const res::res_expression& q)
   {
-    bes::make_or_(result, p, q);
+    res::make_or_(result, p, q);
   }
 
   /// \brief Implication
@@ -1178,9 +1179,9 @@ struct term_traits<bes::res_expression>
   /// \param q A term
   /// \return Implication applied to p and q
   static inline
-  bes::res_expression imp(const bes::res_expression& p, const bes::res_expression& q)
+  res::res_expression imp(const res::res_expression& p, const res::res_expression& q)
   {
-    return bes::imp(p, q);
+    return res::imp(p, q);
   }
   
   /// \brief Implication
@@ -1188,118 +1189,118 @@ struct term_traits<bes::res_expression>
   /// \param p A term
   /// \param q A term
   static inline
-  void make_imp(bes::res_expression& result, const bes::res_expression& p, const bes::res_expression& q)
+  void make_imp(res::res_expression& result, const res::res_expression& p, const res::res_expression& q)
   {
-    bes::make_imp(result, p, q);
+    res::make_imp(result, p, q);
   }
 
   /// \brief Test for value true
   /// \param t A term
   /// \return True if the term has the value true
   static inline
-  bool is_true(const bes::res_expression& t)
+  bool is_true(const res::res_expression& t)
   {
-    return bes::is_true(t);
+    return res::is_true(t);
   }
 
   /// \brief Test for value false
   /// \param t A term
   /// \return True if the term has the value false
   static inline
-  bool is_false(const bes::res_expression& t)
+  bool is_false(const res::res_expression& t)
   {
-    return bes::is_false(t);
+    return res::is_false(t);
   }
 
   /// \brief Test for operator not
   /// \param t A term
   /// \return True if the term is of type and
   static inline
-  bool is_not(const bes::res_expression& t)
+  bool is_minus(const res::res_expression& t)
   {
-    return bes::is_not(t);
+    return res::is_minus(t);
   }
 
   /// \brief Test for operator and
   /// \param t A term
   /// \return True if the term is of type and
   static inline
-  bool is_and(const bes::res_expression& t)
+  bool is_and(const res::res_expression& t)
   {
-    return bes::is_and(t);
+    return res::is_and(t);
   }
 
   /// \brief Test for operator or
   /// \param t A term
   /// \return True if the term is of type or
   static inline
-  bool is_or(const bes::res_expression& t)
+  bool is_or(const res::res_expression& t)
   {
-    return bes::is_or(t);
+    return res::is_or(t);
   }
 
   /// \brief Test for implication
   /// \param t A term
   /// \return True if the term is an implication
   static inline
-  bool is_imp(const bes::res_expression& t)
+  bool is_imp(const res::res_expression& t)
   {
-    return bes::is_imp(t);
+    return res::is_imp(t);
   }
 
   /// \brief Test for propositional variable
   /// \param t A term
   /// \return True if the term is a propositional variable
   static inline
-  bool is_prop_var(const bes::res_expression& t)
+  bool is_prop_var(const res::res_expression& t)
   {
-    return bes::is_res_variable(t);
+    return res::is_res_variable(t);
   }
 
   /// \brief Returns the left argument of a term of type and, or or imp
   /// \param t A term
   /// \return The left argument of the term
   static inline
-  const bes::res_expression& left(const bes::res_expression& t)
+  const res::res_expression& left(const res::res_expression& t)
   {
     assert(is_and(t) || is_or(t) || is_imp(t));
-    return atermpp::down_cast<const bes::res_expression>(t[0]);
+    return atermpp::down_cast<const res::res_expression>(t[0]);
   }
 
   /// \brief Returns the right argument of a term of type and, or or imp
   /// \param t A term
   /// \return The right argument of the term
   static inline
-  const bes::res_expression& right(const bes::res_expression& t)
+  const res::res_expression& right(const res::res_expression& t)
   {
     assert(is_and(t) || is_or(t) || is_imp(t));
-    return atermpp::down_cast<const bes::res_expression>(t[1]);
+    return atermpp::down_cast<const res::res_expression>(t[1]);
   }
 
   /// \brief Returns the argument of a term of type not
   /// \param t A term
   static inline
-  const bes::res_expression& not_arg(const bes::res_expression& t)
+  const res::res_expression& minus_arg(const res::res_expression& t)
   {
-    assert(is_not(t));
-    return atermpp::down_cast<bes::not_>(t).operand();
+    assert(is_minus(t));
+    return atermpp::down_cast<res::minus>(t).operand();
   }
 
   /// \brief Returns the name of a res variable
   /// \param t A term
   /// \return The name of the res variable
   static inline
-  const core::identifier_string& name(const bes::res_expression& t)
+  const core::identifier_string& name(const res::res_expression& t)
   {
-    assert(bes::is_res_variable(t));
-    return atermpp::down_cast<bes::res_variable>(t).name();
+    assert(res::is_res_variable(t));
+    return atermpp::down_cast<res::res_variable>(t).name();
   }
 
   /// \brief Conversion from variable to term
   /// \param v A variable
   /// \returns The converted variable
   static inline
-  const bes::res_expression& variable2term(const bes::res_variable& v)
+  const res::res_expression& variable2term(const res::res_variable& v)
   {
     return v;
   }
@@ -1308,18 +1309,18 @@ struct term_traits<bes::res_expression>
   /// \param t a term
   /// \returns The converted term
   static inline
-  const bes::res_variable& term2variable(const bes::res_expression& t)
+  const res::res_variable& term2variable(const res::res_expression& t)
   {
-    return atermpp::down_cast<bes::res_variable>(t);
+    return atermpp::down_cast<res::res_variable>(t);
   }
 
   /// \brief Pretty print function
   /// \param t A term
   /// \return Returns a pretty print representation of the term
   static inline
-  std::string pp(const bes::res_expression& t)
+  std::string pp(const res::res_expression& t)
   {
-    return bes::pp(t);
+    return res::pp(t);
   }
 };
 

@@ -21,7 +21,7 @@ namespace res
 {
 
 // forward declarations
-class boolean_equation_system;
+class res_equation_system;
 
 atermpp::aterm_appl res_equation_system_to_aterm(const res_equation_system& p);
 

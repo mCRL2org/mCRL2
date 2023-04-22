@@ -67,9 +67,9 @@ void instantiate_global_variables(pres& p)
   pres_system::detail::instantiate_global_variables(p);
 }
 
-bool is_bes(const pres& x)
+bool is_res(const pres& x)
 {
-  return pres_system::is_bes(x);
+  return pres_system::is_res(x);
 }
 
 } // namespace algorithms

@@ -132,7 +132,7 @@ class lps2pres_algorithm
       }
       propositional_variable_instantiation init(Xe, e);
 
-      pres result(lpsspec.data(), equations, lpsspec.global_variables(), init);
+      pres result(lpsspec.data(), lpsspec.global_variables(), equations, init);
       assert(is_monotonous(result));
       pres_system::algorithms::normalize(result);
       assert(pres_system::algorithms::is_normalized(result));

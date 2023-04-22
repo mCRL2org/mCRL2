@@ -264,7 +264,7 @@ res_expression()                                                         : publi
 true_()                                                                  : public res::res_expression                       | EI   | RESTrue             | The value true for res expressions
 false_()                                                                 : public res::res_expression                       | EI   | RESFalse            | The value false for res expressions
 res_variable(const core::identifier_string& name)                        : public res::res_expression                       | EIUs | RESVariable         | A res variable
-not_(const res_expression& operand)                                      : public res::res_expression                       | EI   | RESNot              | The not operator for res expressions
+minus(const res_expression& operand)                                     : public res::res_expression                       | EI   | RESMinus            | The minus operator for res expressions
 and_(const res_expression& left, const res_expression& right)            : public res::res_expression                       | EI   | RESAnd              | The and operator for res expressions
 or_(const res_expression& left, const res_expression& right)             : public res::res_expression                       | EI   | RESOr               | The or operator for res expressions
 imp(const res_expression& left, const res_expression& right)             : public res::res_expression                       | EI   | RESImp              | The implication operator for res expressions

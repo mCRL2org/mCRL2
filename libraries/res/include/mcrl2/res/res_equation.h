@@ -9,8 +9,8 @@
 /// \file mcrl2/res/res_equation.h
 /// \brief This file define res equations. 
 
-#ifndef MCRL2_RES_BOOLEAN_EQUATION_H
-#define MCRL2_RES_BOOLEAN_EQUATION_H
+#ifndef MCRL2_RES_RES_EQUATION_H
+#define MCRL2_RES_RES_EQUATION_H
 
 #include "mcrl2/res/res_expression.h"
 #include "mcrl2/pbes/fixpoint_symbol.h"
@@ -18,7 +18,7 @@
 namespace mcrl2
 {
 
-namespace bes
+namespace res
 {
 
 /// \brief The fixpoint symbol type
@@ -172,8 +172,8 @@ operator<(const res_equation& x, const res_equation& y)
   return x.variable() < y.variable();
 }
 
-} // namespace bes
+} // namespace res
 
 } // namespace mcrl2
 
-#endif // MCRL2_RES_BOOLEAN_EQUATION_H
+#endif // MCRL2_RES_RES_EQUATION_H
