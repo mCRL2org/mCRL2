@@ -1564,6 +1564,13 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const state_formulas::minus& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const state_formulas::and_& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1581,6 +1588,22 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   }
 
   void apply(const state_formulas::imp& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::plus& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::const_multiply& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.left());
@@ -1702,6 +1725,10 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::not_>(x));
     }
+    else if (state_formulas::is_minus(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::minus>(x));
+    }
     else if (state_formulas::is_and(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::and_>(x));
@@ -1713,6 +1740,14 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     else if (state_formulas::is_imp(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::imp>(x));
+    }
+    else if (state_formulas::is_plus(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::plus>(x));
+    }
+    else if (state_formulas::is_const_multiply(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::const_multiply>(x));
     }
     else if (state_formulas::is_forall(x))
     {
@@ -1800,6 +1835,13 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const state_formulas::minus& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const state_formulas::and_& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1817,6 +1859,22 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   }
 
   void apply(const state_formulas::imp& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::plus& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::const_multiply& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.left());
@@ -1935,6 +1993,10 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::not_>(x));
     }
+    else if (state_formulas::is_minus(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::minus>(x));
+    }
     else if (state_formulas::is_and(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::and_>(x));
@@ -1946,6 +2008,14 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     else if (state_formulas::is_imp(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::imp>(x));
+    }
+    else if (state_formulas::is_plus(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::plus>(x));
+    }
+    else if (state_formulas::is_const_multiply(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::const_multiply>(x));
     }
     else if (state_formulas::is_forall(x))
     {
@@ -2033,6 +2103,13 @@ struct add_traverser_state_formula_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const state_formulas::minus& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const state_formulas::and_& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -2053,6 +2130,21 @@ struct add_traverser_state_formula_expressions: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::plus& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::const_multiply& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.right());
     static_cast<Derived&>(*this).leave(x);
   }
@@ -2164,6 +2256,10 @@ struct add_traverser_state_formula_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::not_>(x));
     }
+    else if (state_formulas::is_minus(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::minus>(x));
+    }
     else if (state_formulas::is_and(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::and_>(x));
@@ -2175,6 +2271,14 @@ struct add_traverser_state_formula_expressions: public Traverser<Derived>
     else if (state_formulas::is_imp(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::imp>(x));
+    }
+    else if (state_formulas::is_plus(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::plus>(x));
+    }
+    else if (state_formulas::is_const_multiply(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::const_multiply>(x));
     }
     else if (state_formulas::is_forall(x))
     {
@@ -2262,6 +2366,13 @@ struct add_traverser_variables: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const state_formulas::minus& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const state_formulas::and_& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -2279,6 +2390,22 @@ struct add_traverser_variables: public Traverser<Derived>
   }
 
   void apply(const state_formulas::imp& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::plus& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::const_multiply& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.left());
@@ -2399,6 +2526,10 @@ struct add_traverser_variables: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::not_>(x));
     }
+    else if (state_formulas::is_minus(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::minus>(x));
+    }
     else if (state_formulas::is_and(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::and_>(x));
@@ -2410,6 +2541,14 @@ struct add_traverser_variables: public Traverser<Derived>
     else if (state_formulas::is_imp(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::imp>(x));
+    }
+    else if (state_formulas::is_plus(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::plus>(x));
+    }
+    else if (state_formulas::is_const_multiply(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::const_multiply>(x));
     }
     else if (state_formulas::is_forall(x))
     {
@@ -2497,6 +2636,13 @@ struct add_traverser_state_variables: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const state_formulas::minus& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const state_formulas::and_& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -2517,6 +2663,21 @@ struct add_traverser_state_variables: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::plus& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::const_multiply& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.right());
     static_cast<Derived&>(*this).leave(x);
   }
@@ -2628,6 +2789,10 @@ struct add_traverser_state_variables: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::not_>(x));
     }
+    else if (state_formulas::is_minus(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::minus>(x));
+    }
     else if (state_formulas::is_and(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::and_>(x));
@@ -2639,6 +2804,14 @@ struct add_traverser_state_variables: public Traverser<Derived>
     else if (state_formulas::is_imp(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::imp>(x));
+    }
+    else if (state_formulas::is_plus(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::plus>(x));
+    }
+    else if (state_formulas::is_const_multiply(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::const_multiply>(x));
     }
     else if (state_formulas::is_forall(x))
     {
@@ -2726,6 +2899,13 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const state_formulas::minus& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const state_formulas::and_& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -2743,6 +2923,22 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   }
 
   void apply(const state_formulas::imp& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::plus& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::const_multiply& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.left());
@@ -2867,6 +3063,10 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::not_>(x));
     }
+    else if (state_formulas::is_minus(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::minus>(x));
+    }
     else if (state_formulas::is_and(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::and_>(x));
@@ -2878,6 +3078,14 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     else if (state_formulas::is_imp(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::imp>(x));
+    }
+    else if (state_formulas::is_plus(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::plus>(x));
+    }
+    else if (state_formulas::is_const_multiply(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::const_multiply>(x));
     }
     else if (state_formulas::is_forall(x))
     {
@@ -2965,6 +3173,13 @@ struct add_traverser_regular_formula_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const state_formulas::minus& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const state_formulas::and_& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -2985,6 +3200,21 @@ struct add_traverser_regular_formula_expressions: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::plus& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::const_multiply& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.right());
     static_cast<Derived&>(*this).leave(x);
   }
@@ -3098,6 +3328,10 @@ struct add_traverser_regular_formula_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::not_>(x));
     }
+    else if (state_formulas::is_minus(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::minus>(x));
+    }
     else if (state_formulas::is_and(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::and_>(x));
@@ -3109,6 +3343,14 @@ struct add_traverser_regular_formula_expressions: public Traverser<Derived>
     else if (state_formulas::is_imp(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::imp>(x));
+    }
+    else if (state_formulas::is_plus(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::plus>(x));
+    }
+    else if (state_formulas::is_const_multiply(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::const_multiply>(x));
     }
     else if (state_formulas::is_forall(x))
     {
@@ -3196,6 +3438,13 @@ struct add_traverser_action_labels: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const state_formulas::minus& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const state_formulas::and_& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -3216,6 +3465,21 @@ struct add_traverser_action_labels: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::plus& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::const_multiply& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.right());
     static_cast<Derived&>(*this).leave(x);
   }
@@ -3330,6 +3594,10 @@ struct add_traverser_action_labels: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::not_>(x));
     }
+    else if (state_formulas::is_minus(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::minus>(x));
+    }
     else if (state_formulas::is_and(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::and_>(x));
@@ -3341,6 +3609,14 @@ struct add_traverser_action_labels: public Traverser<Derived>
     else if (state_formulas::is_imp(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::imp>(x));
+    }
+    else if (state_formulas::is_plus(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::plus>(x));
+    }
+    else if (state_formulas::is_const_multiply(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::const_multiply>(x));
     }
     else if (state_formulas::is_forall(x))
     {

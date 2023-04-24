@@ -83,10 +83,8 @@ void lps2pres(const std::string& input_filename,
               const utilities::file_format& output_format,
               const std::string& formula_filename,
               bool timed,
-              bool structured,
               bool unoptimized,
               bool preprocess_modal_operators,
-              bool generate_counter_example,
               bool check_only
              );
 

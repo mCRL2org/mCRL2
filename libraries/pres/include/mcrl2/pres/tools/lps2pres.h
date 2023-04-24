@@ -44,10 +44,8 @@ void lps2pres(const std::string& input_filename,
               const utilities::file_format& output_format,
               const std::string& formula_filename,
               bool timed,
-              bool structured,
               bool unoptimized,
               bool preprocess_modal_operators,
-              bool generate_counter_example,
               bool check_only
              )
 {
@@ -75,7 +73,7 @@ void lps2pres(const std::string& input_filename,
   state_formulas::state_formula_specification formspec = state_formulas::algorithms::parse_state_formula_specification(text, lpsspec);
   detail::check_lps2pres_actions(formspec.formula(), lpsspec);
   mCRL2log(log::verbose) << "converting state formula and LPS to a PRES..." << std::endl;
-  pres_system::pres result = pres_system::lps2pres(lpsspec, formspec, timed, structured, unoptimized, preprocess_modal_operators, generate_counter_example, check_only);
+  pres_system::pres result = pres_system::lps2pres(lpsspec, formspec, timed, unoptimized, preprocess_modal_operators, check_only);
 
   if (check_only)
   {

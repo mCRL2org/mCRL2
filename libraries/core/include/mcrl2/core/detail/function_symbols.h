@@ -1260,6 +1260,14 @@ const atermpp::function_symbol& function_symbol_StateMay()
   return function_symbol_StateMay;
 }
 
+// StateMinus
+inline
+const atermpp::function_symbol& function_symbol_StateMinus()
+{
+  static const atermpp::global_function_symbol function_symbol_StateMinus("StateMinus", 1);
+  return function_symbol_StateMinus;
+}
+
 // StateMu
 inline
 const atermpp::function_symbol& function_symbol_StateMu()
@@ -1571,6 +1579,7 @@ static const atermpp::function_symbol SortCons;
   static const atermpp::function_symbol StateTrue;
   static const atermpp::function_symbol StateFalse;
   static const atermpp::function_symbol StateNot;
+  static const atermpp::function_symbol StateMinus;
   static const atermpp::function_symbol StateAnd;
   static const atermpp::function_symbol StateOr;
   static const atermpp::function_symbol StateImp;

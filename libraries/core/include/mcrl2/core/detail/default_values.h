@@ -141,6 +141,7 @@ const atermpp::aterm_appl& default_value_LinearProcessInit();
 const atermpp::aterm_appl& default_value_StateTrue();
 const atermpp::aterm_appl& default_value_StateFalse();
 const atermpp::aterm_appl& default_value_StateNot();
+const atermpp::aterm_appl& default_value_StateMinus();
 const atermpp::aterm_appl& default_value_StateAnd();
 const atermpp::aterm_appl& default_value_StateOr();
 const atermpp::aterm_appl& default_value_StateImp();
@@ -884,6 +885,14 @@ inline
 const atermpp::aterm_appl& default_value_StateNot()
 {
   static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_StateNot(), default_value_StateFrm());
+  return t;
+}
+
+// StateMinus
+inline
+const atermpp::aterm_appl& default_value_StateMinus()
+{
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_StateMinus(), default_value_StateFrm());
   return t;
 }
 
@@ -1858,6 +1867,7 @@ static const atermpp::aterm_appl SortCons;
   static const atermpp::aterm_appl StateTrue;
   static const atermpp::aterm_appl StateFalse;
   static const atermpp::aterm_appl StateNot;
+  static const atermpp::aterm_appl StateMinus;
   static const atermpp::aterm_appl StateAnd;
   static const atermpp::aterm_appl StateOr;
   static const atermpp::aterm_appl StateImp;

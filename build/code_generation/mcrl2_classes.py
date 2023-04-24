@@ -99,24 +99,27 @@ untyped_data_parameter(const core::identifier_string& name, const data_expressio
 '''
 
 STATE_FORMULA_CLASSES = r'''
-state_formula()                                                                                                 : public atermpp::aterm_appl           | XICU | StateFrm        | A state formula
-true_()                                                                                                         : public state_formulas::state_formula | EI   | StateTrue       | The value true for state formulas
-false_()                                                                                                        : public state_formulas::state_formula | EI   | StateFalse      | The value false for state formulas
-not_(const state_formula& operand)                                                                              : public state_formulas::state_formula | EI   | StateNot        | The not operator for state formulas
-and_(const state_formula& left, const state_formula& right)                                                     : public state_formulas::state_formula | EI   | StateAnd        | The and operator for state formulas
-or_(const state_formula& left, const state_formula& right)                                                      : public state_formulas::state_formula | EI   | StateOr         | The or operator for state formulas
-imp(const state_formula& left, const state_formula& right)                                                      : public state_formulas::state_formula | EI   | StateImp        | The implication operator for state formulas
-forall(const data::variable_list& variables, const state_formula& body)                                         : public state_formulas::state_formula | EI   | StateForall     | The universal quantification operator for state formulas
-exists(const data::variable_list& variables, const state_formula& body)                                         : public state_formulas::state_formula | EI   | StateExists     | The existential quantification operator for state formulas
-must(const regular_formulas::regular_formula& formula, const state_formula& operand)                            : public state_formulas::state_formula | EI   | StateMust       | The must operator for state formulas
-may(const regular_formulas::regular_formula& formula, const state_formula& operand)                             : public state_formulas::state_formula | EI   | StateMay        | The may operator for state formulas
-yaled()                                                                                                         : public state_formulas::state_formula | EI   | StateYaled      | The yaled operator for state formulas
-yaled_timed(const data::data_expression& time_stamp)                                                            : public state_formulas::state_formula | EI   | StateYaledTimed | The timed yaled operator for state formulas
-delay()                                                                                                         : public state_formulas::state_formula | EI   | StateDelay      | The delay operator for state formulas
-delay_timed(const data::data_expression& time_stamp)                                                            : public state_formulas::state_formula | EI   | StateDelayTimed | The timed delay operator for state formulas
-variable(const core::identifier_string& name, const data::data_expression_list& arguments)                      : public state_formulas::state_formula | EI   | StateVar        | The state formula variable
-nu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand) : public state_formulas::state_formula | EI   | StateNu         | The nu operator for state formulas
-mu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand) : public state_formulas::state_formula | EI   | StateMu         | The mu operator for state formulas
+state_formula()                                                                                                 : public atermpp::aterm_appl           | XICU | StateFrm              | A state formula
+true_()                                                                                                         : public state_formulas::state_formula | EI   | StateTrue             | The value true for state formulas
+false_()                                                                                                        : public state_formulas::state_formula | EI   | StateFalse            | The value false for state formulas
+not_(const state_formula& operand)                                                                              : public state_formulas::state_formula | EI   | StateNot              | The not operator for state formulas
+minus(const state_formula& operand)                                                                             : public state_formulas::state_formula | EI   | StateMinus            | The minus operator for state formulas
+and_(const state_formula& left, const state_formula& right)                                                     : public state_formulas::state_formula | EI   | StateAnd              | The and operator for state formulas
+or_(const state_formula& left, const state_formula& right)                                                      : public state_formulas::state_formula | EI   | StateOr               | The or operator for state formulas
+imp(const state_formula& left, const state_formula& right)                                                      : public state_formulas::state_formula | EI   | StateImp              | The implication operator for state formulas
+plus(const state_formula& left, const state_formula& right)                                                     : public state_formulas::state_formula | EI   | StatePlus             | The plus operator for state formulas with values
+const_multiply(const data::data_expression& left, const state_formula& right)                                   : public state_formulas::state_formula | EI   | StateConstantMultiply | The multiply operator for state formulas with values
+forall(const data::variable_list& variables, const state_formula& body)                                         : public state_formulas::state_formula | EI   | StateForall           | The universal quantification operator for state formulas
+exists(const data::variable_list& variables, const state_formula& body)                                         : public state_formulas::state_formula | EI   | StateExists           | The existential quantification operator for state formulas
+must(const regular_formulas::regular_formula& formula, const state_formula& operand)                            : public state_formulas::state_formula | EI   | StateMust             | The must operator for state formulas
+may(const regular_formulas::regular_formula& formula, const state_formula& operand)                             : public state_formulas::state_formula | EI   | StateMay              | The may operator for state formulas
+yaled()                                                                                                         : public state_formulas::state_formula | EI   | StateYaled            | The yaled operator for state formulas
+yaled_timed(const data::data_expression& time_stamp)                                                            : public state_formulas::state_formula | EI   | StateYaledTimed       | The timed yaled operator for state formulas
+delay()                                                                                                         : public state_formulas::state_formula | EI   | StateDelay            | The delay operator for state formulas
+delay_timed(const data::data_expression& time_stamp)                                                            : public state_formulas::state_formula | EI   | StateDelayTimed       | The timed delay operator for state formulas
+variable(const core::identifier_string& name, const data::data_expression_list& arguments)                      : public state_formulas::state_formula | EI   | StateVar              | The state formula variable
+nu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand) : public state_formulas::state_formula | EI   | StateNu               | The nu operator for state formulas
+mu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand) : public state_formulas::state_formula | EI   | StateMu               | The mu operator for state formulas
 '''
 
 REGULAR_FORMULA_CLASSES = r'''

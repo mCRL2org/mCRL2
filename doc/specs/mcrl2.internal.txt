@@ -227,6 +227,7 @@
                  | StateTrue
                  | StateFalse
                  | StateNot(<StateFrm>)
+                 | StateMinus(<StateFrm>)
                  | StateAnd(<StateFrm>, <StateFrm>)
                  | StateOr(<StateFrm>, <StateFrm>)
                  | StateImp(<StateFrm>, <StateFrm>)

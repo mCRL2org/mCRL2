@@ -287,6 +287,7 @@ template <typename Term> bool check_term_LinearProcessInit(const Term& t);
 template <typename Term> bool check_term_StateTrue(const Term& t);
 template <typename Term> bool check_term_StateFalse(const Term& t);
 template <typename Term> bool check_term_StateNot(const Term& t);
+template <typename Term> bool check_term_StateMinus(const Term& t);
 template <typename Term> bool check_term_StateAnd(const Term& t);
 template <typename Term> bool check_term_StateOr(const Term& t);
 template <typename Term> bool check_term_StateImp(const Term& t);
@@ -897,6 +898,7 @@ bool check_rule_StateFrm(const Term& t)
          || check_term_StateTrue(t)
          || check_term_StateFalse(t)
          || check_term_StateNot(t)
+         || check_term_StateMinus(t)
          || check_term_StateAnd(t)
          || check_term_StateOr(t)
          || check_term_StateImp(t)
@@ -4267,6 +4269,41 @@ bool check_term_StateNot(const Term& t)
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
   if (a.function() != core::detail::function_symbols::StateNot)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_StateFrm<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_StateFrm" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// StateMinus(StateFrm)
+template <typename Term>
+bool check_term_StateMinus(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateMinus)
   {
     return false;
   }

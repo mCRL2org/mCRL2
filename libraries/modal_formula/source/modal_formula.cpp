@@ -89,6 +89,7 @@ namespace state_formulas
 
 //--- start generated state_formulas overloads ---//
 std::string pp(const state_formulas::and_& x) { return state_formulas::pp< state_formulas::and_ >(x); }
+std::string pp(const state_formulas::const_multiply& x) { return state_formulas::pp< state_formulas::const_multiply >(x); }
 std::string pp(const state_formulas::delay& x) { return state_formulas::pp< state_formulas::delay >(x); }
 std::string pp(const state_formulas::delay_timed& x) { return state_formulas::pp< state_formulas::delay_timed >(x); }
 std::string pp(const state_formulas::exists& x) { return state_formulas::pp< state_formulas::exists >(x); }
@@ -96,11 +97,13 @@ std::string pp(const state_formulas::false_& x) { return state_formulas::pp< sta
 std::string pp(const state_formulas::forall& x) { return state_formulas::pp< state_formulas::forall >(x); }
 std::string pp(const state_formulas::imp& x) { return state_formulas::pp< state_formulas::imp >(x); }
 std::string pp(const state_formulas::may& x) { return state_formulas::pp< state_formulas::may >(x); }
+std::string pp(const state_formulas::minus& x) { return state_formulas::pp< state_formulas::minus >(x); }
 std::string pp(const state_formulas::mu& x) { return state_formulas::pp< state_formulas::mu >(x); }
 std::string pp(const state_formulas::must& x) { return state_formulas::pp< state_formulas::must >(x); }
 std::string pp(const state_formulas::not_& x) { return state_formulas::pp< state_formulas::not_ >(x); }
 std::string pp(const state_formulas::nu& x) { return state_formulas::pp< state_formulas::nu >(x); }
 std::string pp(const state_formulas::or_& x) { return state_formulas::pp< state_formulas::or_ >(x); }
+std::string pp(const state_formulas::plus& x) { return state_formulas::pp< state_formulas::plus >(x); }
 std::string pp(const state_formulas::state_formula& x) { return state_formulas::pp< state_formulas::state_formula >(x); }
 std::string pp(const state_formulas::state_formula_specification& x) { return state_formulas::pp< state_formulas::state_formula_specification >(x); }
 std::string pp(const state_formulas::true_& x) { return state_formulas::pp< state_formulas::true_ >(x); }

@@ -1230,6 +1230,15 @@ struct add_sort_expressions: public Builder<Derived>
   }
 
   template <class T>
+  void apply(T& result, const state_formulas::minus& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_minus(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
   void apply(T& result, const state_formulas::and_& x)
   { 
     
@@ -1253,6 +1262,24 @@ struct add_sort_expressions: public Builder<Derived>
     
     static_cast<Derived&>(*this).enter(x);
     state_formulas::make_imp(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const state_formulas::plus& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_plus(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const state_formulas::const_multiply& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_const_multiply(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -1396,6 +1423,10 @@ struct add_sort_expressions: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::not_>(x));
     }
+    else if (state_formulas::is_minus(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::minus>(x));
+    }
     else if (state_formulas::is_and(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::and_>(x));
@@ -1407,6 +1438,14 @@ struct add_sort_expressions: public Builder<Derived>
     else if (state_formulas::is_imp(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::imp>(x));
+    }
+    else if (state_formulas::is_plus(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::plus>(x));
+    }
+    else if (state_formulas::is_const_multiply(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::const_multiply>(x));
     }
     else if (state_formulas::is_forall(x))
     {
@@ -1506,6 +1545,15 @@ struct add_data_expressions: public Builder<Derived>
   }
 
   template <class T>
+  void apply(T& result, const state_formulas::minus& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_minus(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
   void apply(T& result, const state_formulas::and_& x)
   { 
     
@@ -1529,6 +1577,24 @@ struct add_data_expressions: public Builder<Derived>
     
     static_cast<Derived&>(*this).enter(x);
     state_formulas::make_imp(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const state_formulas::plus& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_plus(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const state_formulas::const_multiply& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_const_multiply(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -1669,6 +1735,10 @@ struct add_data_expressions: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::not_>(x));
     }
+    else if (state_formulas::is_minus(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::minus>(x));
+    }
     else if (state_formulas::is_and(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::and_>(x));
@@ -1680,6 +1750,14 @@ struct add_data_expressions: public Builder<Derived>
     else if (state_formulas::is_imp(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::imp>(x));
+    }
+    else if (state_formulas::is_plus(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::plus>(x));
+    }
+    else if (state_formulas::is_const_multiply(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::const_multiply>(x));
     }
     else if (state_formulas::is_forall(x))
     {
@@ -1779,6 +1857,15 @@ struct add_variables: public Builder<Derived>
   }
 
   template <class T>
+  void apply(T& result, const state_formulas::minus& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_minus(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
   void apply(T& result, const state_formulas::and_& x)
   { 
     
@@ -1802,6 +1889,24 @@ struct add_variables: public Builder<Derived>
     
     static_cast<Derived&>(*this).enter(x);
     state_formulas::make_imp(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const state_formulas::plus& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_plus(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const state_formulas::const_multiply& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_const_multiply(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -1942,6 +2047,10 @@ struct add_variables: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::not_>(x));
     }
+    else if (state_formulas::is_minus(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::minus>(x));
+    }
     else if (state_formulas::is_and(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::and_>(x));
@@ -1953,6 +2062,14 @@ struct add_variables: public Builder<Derived>
     else if (state_formulas::is_imp(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::imp>(x));
+    }
+    else if (state_formulas::is_plus(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::plus>(x));
+    }
+    else if (state_formulas::is_const_multiply(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::const_multiply>(x));
     }
     else if (state_formulas::is_forall(x))
     {
@@ -2052,6 +2169,15 @@ struct add_state_formula_expressions: public Builder<Derived>
   }
 
   template <class T>
+  void apply(T& result, const state_formulas::minus& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_minus(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
   void apply(T& result, const state_formulas::and_& x)
   { 
     
@@ -2075,6 +2201,24 @@ struct add_state_formula_expressions: public Builder<Derived>
     
     static_cast<Derived&>(*this).enter(x);
     state_formulas::make_imp(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const state_formulas::plus& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_plus(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const state_formulas::const_multiply& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_const_multiply(result, x.left(), [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -2221,6 +2365,10 @@ struct add_state_formula_expressions: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::not_>(x));
     }
+    else if (state_formulas::is_minus(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::minus>(x));
+    }
     else if (state_formulas::is_and(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::and_>(x));
@@ -2232,6 +2380,14 @@ struct add_state_formula_expressions: public Builder<Derived>
     else if (state_formulas::is_imp(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::imp>(x));
+    }
+    else if (state_formulas::is_plus(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::plus>(x));
+    }
+    else if (state_formulas::is_const_multiply(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::const_multiply>(x));
     }
     else if (state_formulas::is_forall(x))
     {

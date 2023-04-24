@@ -413,13 +413,16 @@ StateFrm
   | 'forall' VarsDeclList '.' StateFrm         $unary_right 42   // Universal quantification, also minimum
   | 'exists' VarsDeclList '.' StateFrm         $unary_right 42   // Existential quantification, also maximum
   | 'sum' VarsDeclList '.' StateFrm            $unary_right 42   // Sum operator
-  | StateFrm ('=>' $binary_op_right 43) StateFrm                 // Implication
-  | StateFrm ('||' $binary_op_right 44) StateFrm                 // Disjunction, and max
-  | StateFrm ('&&' $binary_op_right 45) StateFrm                 // Conjunction, and min
-  | '[' RegFrm ']' StateFrm                    $unary_right 46   // Box modality
-  | '<' RegFrm '>' StateFrm                    $unary_right 46   // Diamond modality
-  | '!' StateFrm                               $unary_right 47   // Negation
-  | DataValExpr '*' StateFrm                   $unary_right 48   // Multiplication with a positive constant
+  | StateFrm ('+' $binary_op_right 43) StateFrm                  // Addition
+  | DataValExpr ('*' $binary_op_right 44) StateFrm               // Addition
+  | StateFrm ('=>' $binary_op_right 45) StateFrm                 // Implication
+  | StateFrm ('||' $binary_op_right 46) StateFrm                 // Disjunction, and max
+  | StateFrm ('&&' $binary_op_right 47) StateFrm                 // Conjunction, and min
+  | '[' RegFrm ']' StateFrm                    $unary_right 48   // Box modality
+  | '<' RegFrm '>' StateFrm                    $unary_right 48   // Diamond modality
+  | '-' StateFrm                               $unary_right 48   // Unary minus. 
+  | '!' StateFrm                               $unary_right 48   // Negation
+  | DataValExpr '*' StateFrm                   $unary_right 49   // Multiplication with a positive constant
   ;
 
 StateVarDecl: Id ( '(' StateVarAssignmentList ')' )? ;           // PBES variable declaration
