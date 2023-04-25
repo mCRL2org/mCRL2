@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 """Toy Parser Generator is a lexical and syntactic parser generator
 for Python. This generator was born from a simple statement: YACC
@@ -18,7 +18,7 @@ trees while parsing.
 """
 
 # Toy Parser Generator: A Python parser generator
-# Copyright (C) 2001-2013 Christophe Delord
+# Copyright (C) 2001-2022 Christophe Delord
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -35,23 +35,22 @@ trees while parsing.
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # For further information about TPG you can visit
-# http://cdsoft.fr/tpg
+# http://cdelord.fr/tpg
 
 # TODO:
 #   - indent and dedent preprocessor
 #
 
 __tpgname__ = 'TPG'
-__version__ = '3.2.2'
-__date__ = '2013-12-29'
+__version__ = '3.2.4'
+__date__ = '2022-01-28'
 __description__ = "A Python parser generator"
 __long_description__ = __doc__
 __license__ = 'LGPL'
 __author__ = 'Christophe Delord'
-__email__ = 'cdsoft.fr'
-__url__ = 'http://cdsoft.fr/tpg/'
+__email__ = 'cdelord.fr'
+__url__ = 'http://cdelord.fr/tpg/'
 
-import parser
 import re
 import sre_parse
 import sys
@@ -61,11 +60,12 @@ __python__ = sys.version_info[0]
 
 if __python__ == 3:
     import collections
-    callable = lambda value: isinstance(value, collections.Callable)
+    if callable is None:
+        callable = lambda value: isinstance(value, collections.Callable)
     exc = lambda: sys.exc_info()[1]
 
 if __python__ == 2:
-    exc = lambda: sys.exc_info()[1]
+    exc = lambda: sys.exc_value
 
 _id = lambda x: x
 tab = " "*4
@@ -875,7 +875,7 @@ class ParserMetaClass(type):
 if __python__ == 3:
     exec("class _Parser(metaclass=ParserMetaClass): pass")
 else:
-    class _Parser(metaclass=ParserMetaClass): pass
+    class _Parser: __metaclass__ = ParserMetaClass
 
 class Parser(_Parser):
     # Parser is the base class for parsers.
@@ -952,7 +952,7 @@ class Parser(_Parser):
         """
         try:
             self.lexer.start(input)
-            if __python__ == 2 and isinstance(input, str):
+            if __python__ == 2 and isinstance(input, unicode):
                 self.string_prefix = 'ur'
             else:
                 self.string_prefix = 'r'
@@ -1733,7 +1733,7 @@ class TPGParser(tpg.Parser):
 
     def code_check(self, code, tok):
         try:
-            parser.suite(code.code)
+            compile(code.code, "-", 'exec')
         except Exception:
             erroneous_code = "\n".join([ "%2d: %s"%(i+1, l) for (i, l) in enumerate(code.code.splitlines()) ])
             raise LexicalError((tok.line, tok.column), "Invalid Python code (%s): \n%s"%(exc, erroneous_code))
@@ -1758,18 +1758,18 @@ class TPGParser(tpg.Parser):
         }
         def __init__(self, parser):
             self.parser = parser
-            for name, (values, default) in list(TPGParser.Options.option_dict.items()):
+            for name, (values, default) in TPGParser.Options.option_dict.items():
                 self.set(name, default)
         def set(self, name, value):
             try:
                 options, default = TPGParser.Options.option_dict[name]
             except KeyError:
-                opts = list(TPGParser.Options.option_dict.keys())
+                opts = TPGParser.Options.option_dict.keys()
                 self.parser.error("Unknown option (%s). Valid options are %s"%(name, ', '.join(sorted(opts))))
             try:
                 value = options[value]
             except KeyError:
-                values = list(options.keys())
+                values = options.keys()
                 self.parser.error("Unknown value (%s). Valid values for %s are %s"%(value, name, ', '.join(sorted(values))))
             setattr(self, name, value)
         def lexer_compile_options(self):
