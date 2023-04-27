@@ -28,10 +28,8 @@ class lps2pres_tool : public pres_output_tool<input_output_tool>
   protected:
     std::string formula_filename;
     bool timed = false;
-    bool structured = false;
     bool unoptimized = false;
     bool preprocess_modal_operators = false;
-    bool generate_counter_example = false;
     bool check_only = false;
 
     std::string synopsis() const override
@@ -45,17 +43,13 @@ class lps2pres_tool : public pres_output_tool<input_output_tool>
       desc.add_option("formula", make_file_argument("FILE"),
                       "use the state formula from FILE", 'f');
       desc.add_option("preprocess-modal-operators",
-                      "insert dummy fixpoints in modal operators, which may lead to smaller PBESs", 'm');
+                      "insert dummy fixpoints in modal operators, which may lead to smaller PRESs", 'm');
       desc.add_option("timed",
                       "use the timed version of the algorithm, even for untimed LPS's", 't');
-      desc.add_option("structured",
-                      "generate equations such that no mixed conjunctions and disjunctions occur", 's');
       desc.add_option("unoptimized",
                       "do not simplify boolean expressions", 'u');
-      desc.add_option("counter-example",
-                      "add counter example equations to the generated PBES", 'c');
       desc.add_hidden_option("check-only",
-                             "check syntax and semantics of state formula; do not generate PBES", 'e');
+                             "check syntax and semantics of state formula; do not generate PRES", 'e');
     }
 
     void parse_options(const command_line_parser& parser) override
@@ -66,10 +60,8 @@ class lps2pres_tool : public pres_output_tool<input_output_tool>
         formula_filename = parser.option_argument("formula");
       }
       preprocess_modal_operators = parser.options.count("preprocess-modal-operators") > 0;
-      structured  = parser.options.count("structured") > 0;
       timed       = parser.options.count("timed") > 0;
       unoptimized = parser.options.count("unoptimized") > 0;
-      generate_counter_example = parser.options.count("counter-example") > 0;
       check_only = parser.options.count("check-only") > 0;
     }
 
@@ -91,10 +83,8 @@ class lps2pres_tool : public pres_output_tool<input_output_tool>
                pres_output_format(),
                formula_filename,
                timed,
-               structured,
                unoptimized,
                preprocess_modal_operators,
-               generate_counter_example,
                check_only
              );
       return true;
