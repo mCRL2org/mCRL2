@@ -1,0 +1,8 @@
+<root>
+ <spec>Aravind_BLRU_spec.mcrl2</spec>
+ <properties>
+  <property>No deadlock</property>
+  <property>Mutual Exclusion</property>
+  <property>Reachability of the Critical Section</property>
+ </properties>
+</root>
