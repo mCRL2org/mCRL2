@@ -128,7 +128,7 @@ private:
 	}
 	else 
 	{
-	  return op;
+	  return op.c_str();
 	}
   }
 
@@ -141,7 +141,7 @@ private:
 	const data::data_expression e = m_data_structures->rewriter(e_in);
 	if (is_variable(e))
 	{
-	  return (std::string)atermpp::down_cast<data::variable>(e).name();
+	  return static_cast<std::string>(atermpp::down_cast<data::variable>(e).name()).c_str();;
 	}
 	else if (data::sort_pos::is_positive_constant(e) ||
 	  data::sort_nat::is_natural_constant(e) ||
