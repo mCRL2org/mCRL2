@@ -28,11 +28,7 @@ void run_monotonicity_test_case(const std::string& formula, const specification&
   parse_state_formula_options options;
   options.check_monotonicity = false;
   options.resolve_name_clashes = false;
-<<<<<<< HEAD
   state_formula f = parse_state_formula(formula, lpscopy, false, options);
-=======
-  state_formula f = parse_state_formula(formula, lpscopy, options);
->>>>>>> 019538832 (Apparently linearing ABP about 40 times takes several hours for these tests)
   if (state_formulas::has_state_variable_name_clashes(f))
   {
     std::cerr << "Error: " << state_formulas::pp(f) << " has name clashes" << std::endl;
@@ -117,24 +113,6 @@ BOOST_AUTO_TEST_CASE(test_elevator)
     "init Elevator(1, open, [], false);                                                                                             \n"
     ;    
   specification lpsspec = remove_stochastic_operators(linearise(lpstext));
-<<<<<<< HEAD
-=======
-
-  run_monotonicity_test_case("nu U. [true] U && ((mu V . nu W. !([!request(maxFloor)]!W && [request(maxFloor)]!V)) || (nu X . mu Y. [!isAt(maxFloor)] Y &&  [isAt(maxFloor)]X))", lpsspec, true);
-  run_monotonicity_test_case("nu U. [true] U && ((nu V . mu W. ([!request(maxFloor)]W && [request(maxFloor)]V)) => (nu X . mu Y. [!isAt(maxFloor)] Y &&  [isAt(maxFloor)]X))", lpsspec, true);
-  run_monotonicity_test_case("nu U. [true] U && (!(nu V . mu W. ([!request(maxFloor)]W && [request(maxFloor)]V)) || (nu X . mu Y. [!isAt(maxFloor)] Y &&  [isAt(maxFloor)]X))", lpsspec, true);
-  run_monotonicity_test_case("(nu X . mu Y. X) => true", lpsspec, true);
-  run_monotonicity_test_case("!(nu X . mu Y. X)", lpsspec, true);
-  run_monotonicity_test_case("mu X . X", lpsspec, true);
-  run_monotonicity_test_case("nu X . X", lpsspec, true);
-  run_monotonicity_test_case("mu X . !X", lpsspec, false);
-  run_monotonicity_test_case("nu X . !X", lpsspec, false);
-  run_monotonicity_test_case("!(mu X . X)", lpsspec, true);
-  run_monotonicity_test_case("!(nu X . X)", lpsspec, true);
-  run_monotonicity_test_case("(mu X . X) => true", lpsspec, true);
-  run_monotonicity_test_case("(nu X . X) => true", lpsspec, true);
-  run_monotonicity_test_case("!(mu X. (mu X. X))", lpsspec, true);
->>>>>>> 019538832 (Apparently linearing ABP about 40 times takes several hours for these tests)
 
   run_monotonicity_test_case("nu U. [true] U && ((mu V . nu W. !([!request(maxFloor)]!W && [request(maxFloor)]!V)) || (nu X . mu Y. [!isAt(maxFloor)] Y &&  [isAt(maxFloor)]X))", lpsspec, true);
   run_monotonicity_test_case("nu U. [true] U && ((nu V . mu W. ([!request(maxFloor)]W && [request(maxFloor)]V)) => (nu X . mu Y. [!isAt(maxFloor)] Y &&  [isAt(maxFloor)]X))", lpsspec, true);
@@ -152,8 +130,4 @@ BOOST_AUTO_TEST_CASE(test_elevator)
   run_monotonicity_test_case("!(mu X. (mu X. X))", lpsspec, true);
   // trac ticket #1320
   run_monotonicity_test_case("!mu X. [true]X && mu X. [true]X", lpsspec, true);
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 019538832 (Apparently linearing ABP about 40 times takes several hours for these tests)
