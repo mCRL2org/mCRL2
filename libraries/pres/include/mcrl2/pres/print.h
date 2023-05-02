@@ -163,6 +163,14 @@ struct printer: public pres_system::add_traverser_sort_expressions<data::detail:
     derived().leave(x);
   }
 
+  /* void apply(const pres_system::constant_mult& x)
+  {
+    derived().enter(x);
+    derived().apply(x.name());
+    print_variables(x.parameters());
+    derived().leave(x);
+  } */
+
   void apply(const pres_system::fixpoint_symbol& x)
   {
     derived().enter(x);

@@ -134,10 +134,6 @@ class data_expression: public atermpp::aterm_appl
     explicit data_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
-      if (!core::detail::check_rule_DataExpr(*this))
-      {
-std::cerr << "CULPRIT " << atermpp::aterm(term) << "\n";
-      }
       assert(core::detail::check_rule_DataExpr(*this));
     }
 

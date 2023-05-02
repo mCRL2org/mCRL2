@@ -32,7 +32,6 @@ void run_test_case(const std::string& formula, const specification& lpsspec)
 
   state_formula f = parse_state_formula(formula, lpscopy, false, options);
 
-  // state_formula f = parse_state_formula(formula, lpscopy, options);
   std::string pp_formula = state_formulas::pp(f);
   if (formula != pp_formula)
   {

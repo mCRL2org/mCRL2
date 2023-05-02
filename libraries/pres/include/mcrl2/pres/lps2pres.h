@@ -65,6 +65,7 @@ std::cerr << "RUN4\n";
           detail::E(f, parameters, equations, core::term_traits_optimized<pres_expression>());
         }
       }
+std::cerr << "OBTAINED EQUATIONS\n "; for(auto e: equations){ std::cerr << "EQ " << e << "\n"; } std::cerr << "\ni----------------------------------\n";
     }
 
   public:
