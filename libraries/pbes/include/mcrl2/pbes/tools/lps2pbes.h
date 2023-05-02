@@ -72,7 +72,8 @@ void lps2pbes(const std::string& input_filename,
     throw mcrl2::runtime_error("cannot open state formula file: " + formula_filename);
   }
   std::string text = utilities::read_text(from);
-  state_formulas::state_formula_specification formspec = state_formulas::algorithms::parse_state_formula_specification(text, lpsspec);
+  const bool formula_is_quantitative = false;
+  state_formulas::state_formula_specification formspec = state_formulas::algorithms::parse_state_formula_specification(text, lpsspec, formula_is_quantitative);
   detail::check_lps2pbes_actions(formspec.formula(), lpsspec);
   mCRL2log(log::verbose) << "converting state formula and LPS to a PBES..." << std::endl;
   pbes_system::pbes result = pbes_system::lps2pbes(lpsspec, formspec, timed, structured, unoptimized, preprocess_modal_operators, generate_counter_example, check_only);

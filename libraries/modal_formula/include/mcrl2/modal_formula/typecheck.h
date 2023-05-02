@@ -352,57 +352,81 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
   data::detail::variable_context m_variable_context;
   const process::detail::action_context& m_action_context;
   detail::state_variable_context m_state_variable_context;
+  const bool m_formula_is_quantitative;        // If true, allow real values, otherwise restrict to a boolean formula.  
 
   typecheck_builder(data::data_type_checker& data_typechecker,
                     const data::detail::variable_context& variable_context,
                     const process::detail::action_context& action_context,
-                    const detail::state_variable_context& state_variable_context
+                    const detail::state_variable_context& state_variable_context,
+                    const bool formula_is_quantitative
                    )
     : m_data_type_checker(data_typechecker),
       m_variable_context(variable_context),
       m_action_context(action_context),
-      m_state_variable_context(state_variable_context)
+      m_state_variable_context(state_variable_context),
+      m_formula_is_quantitative(formula_is_quantitative)
   {}
 
   template <class T>
   void apply(T& result, const data::data_expression& x)
   {
-    result = m_data_type_checker.typecheck_data_expression(x, data::sort_bool::bool_(), m_variable_context);
+    if (m_formula_is_quantitative)
+    {
+      result = m_data_type_checker.typecheck_data_expression(x, data::sort_real::real_(), m_variable_context);
+    }
+    else
+    {
+      result = m_data_type_checker.typecheck_data_expression(x, data::sort_bool::bool_(), m_variable_context);
+    }
   }
 
   template <class T>
   void apply(T& result, const state_formulas::forall& x)
   {
-    try
+    if (m_formula_is_quantitative)
     {
-      auto m_variable_context_copy = m_variable_context;
-      m_variable_context.add_context_variables(x.variables(), m_data_type_checker);
-      state_formula body;
-      (*this).apply(body, x.body());
-      m_variable_context = m_variable_context_copy;
-      result = forall(x.variables(), body);
+      throw mcrl2::runtime_error("No forall allowed in a quantitative modal formula " + state_formulas::pp(x) + ".");
     }
-    catch (mcrl2::runtime_error& e)
+    else 
     {
-      throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + state_formulas::pp(x));
+      try
+      {
+        auto m_variable_context_copy = m_variable_context;
+        m_variable_context.add_context_variables(x.variables(), m_data_type_checker);
+        state_formula body;
+        (*this).apply(body, x.body());
+        m_variable_context = m_variable_context_copy;
+        result = forall(x.variables(), body);
+      }
+      catch (mcrl2::runtime_error& e)
+      {
+        throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + state_formulas::pp(x));
+      }
     }
   }
 
   template <class T>
   void apply(T& result, const state_formulas::exists& x)
   {
-    try
+    if (m_formula_is_quantitative)
     {
-      auto m_variable_context_copy = m_variable_context;
-      m_variable_context.add_context_variables(x.variables(), m_data_type_checker);
-      state_formula body;
-      (*this).apply(body, x.body());
-      m_variable_context = m_variable_context_copy;
-      result = exists(x.variables(), body);
+      throw mcrl2::runtime_error("No exists allowed in a quantitative modal formula " + state_formulas::pp(x) + ".");
     }
-    catch (mcrl2::runtime_error& e)
+    else 
     {
-      throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + state_formulas::pp(x));
+      try
+      {
+        auto m_variable_context_copy = m_variable_context;
+        m_variable_context.add_context_variables(x.variables(), m_data_type_checker);
+        state_formula body;
+        (*this).apply(body, x.body());
+        m_variable_context = m_variable_context_copy;
+        result = exists(x.variables(), body);
+      }
+      catch (mcrl2::runtime_error& e)
+      {
+        throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + state_formulas::pp(x));
+      }
     }
   }
 
@@ -519,6 +543,82 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
   {
     result = apply_mu_nu(x, true);
   }
+
+  template <class T>
+  void apply(T& result, const state_formulas::not_& x)
+  {
+    if (m_formula_is_quantitative)
+    {
+      throw mcrl2::runtime_error("No ! allowed in a quantitative modal formula " + state_formulas::pp(x) + ".");
+    }
+    else
+    {
+      apply(result, static_cast<not_>(x).operand());
+      make_not_(result, result);
+    }
+  }
+
+  template <class T>
+  void apply(T& result, const state_formulas::minus& x)
+  {
+    if (!m_formula_is_quantitative)
+    {
+      throw mcrl2::runtime_error("No unary minus (-) allowed in a boolean modal formula " + state_formulas::pp(x) + ".");
+    }
+    else
+    {
+      apply(result, static_cast<minus>(x).operand());
+      make_minus(result, result);
+    }
+  }
+
+  template <class T>
+  void apply(T& result, const state_formulas::plus& x)
+  {
+    if (!m_formula_is_quantitative)
+    {
+      throw mcrl2::runtime_error("No addition (+) allowed in a boolean modal formula " + state_formulas::pp(x) + ".");
+    }
+    else
+    {
+      apply(result, static_cast<plus>(x).left());
+      state_formula rhs;
+      apply(rhs, static_cast<plus>(x).left());
+      make_plus(result, result, rhs);
+    }
+  }
+
+  template <class T>
+  void apply(T& result, const state_formulas::const_multiply& x)
+  {
+    if (!m_formula_is_quantitative)
+    {
+      throw mcrl2::runtime_error("No multiplication with a constant allowed in a boolean modal formula " + state_formulas::pp(x) + ".");
+    }
+    else
+    {
+      data::data_expression constant = m_data_type_checker.typecheck_data_expression(static_cast<const_multiply>(x).left(), data::sort_real::real_(), m_variable_context);
+      state_formula rhs;
+      apply(rhs, static_cast<plus>(x).left());
+      make_const_multiply(result, constant, rhs);
+    }
+  }
+
+  template <class T>
+  void apply(T& result, const state_formulas::const_multiply_alt& x)
+  {
+    if (!m_formula_is_quantitative)
+    {
+      throw mcrl2::runtime_error("No multiplication with a constant allowed in a boolean modal formula " + state_formulas::pp(x) + ".");
+    }
+    else
+    {
+      state_formula lhs;
+      apply(lhs, static_cast<plus>(x).right());
+      data::data_expression constant = m_data_type_checker.typecheck_data_expression(static_cast<const_multiply_alt>(x).right(), data::sort_real::real_(), m_variable_context);
+      make_const_multiply_alt(result, lhs, constant);
+    }
+  }
 };
 
 inline
@@ -526,10 +626,11 @@ typecheck_builder make_typecheck_builder(
                     data::data_type_checker& data_typechecker,
                     const data::detail::variable_context& variable_context,
                     const process::detail::action_context& action_context,
-                    const detail::state_variable_context& state_variable_context
+                    const detail::state_variable_context& state_variable_context,
+                    const bool formula_is_quantitative
                    )
 {
-  return typecheck_builder(data_typechecker, variable_context, action_context, state_variable_context);
+  return typecheck_builder(data_typechecker, variable_context, action_context, state_variable_context, formula_is_quantitative);
 }
 
 } // namespace detail
@@ -541,6 +642,7 @@ class state_formula_type_checker
     data::detail::variable_context m_variable_context;
     process::detail::action_context m_action_context;
     detail::state_variable_context m_state_variable_context;
+    const bool m_formula_is_quantitative;
 
   public:
     /** \brief     Constructor for a state_formula type checker.
@@ -550,10 +652,12 @@ class state_formula_type_checker
      **/
     template <typename ActionLabelContainer = std::vector<state_formulas::variable>, typename VariableContainer = std::vector<data::variable> >
     state_formula_type_checker(const data::data_specification& dataspec,
+                               const bool formula_is_quantitative,
                                const ActionLabelContainer& action_labels = ActionLabelContainer(),
                                const VariableContainer& variables = VariableContainer()
                               )
-      : m_data_type_checker(dataspec)
+      : m_data_type_checker(dataspec),
+        m_formula_is_quantitative(formula_is_quantitative)
     {
       m_variable_context.add_context_variables(variables, m_data_type_checker);
       m_action_context.add_context_action_labels(action_labels, m_data_type_checker);
@@ -571,7 +675,7 @@ class state_formula_type_checker
     {
       mCRL2log(log::verbose) << "type checking state formula..." << std::endl;
       state_formula result;
-      detail::make_typecheck_builder(m_data_type_checker, m_variable_context, m_action_context, m_state_variable_context).
+      detail::make_typecheck_builder(m_data_type_checker, m_variable_context, m_action_context, m_state_variable_context, m_formula_is_quantitative).
                apply(result, state_formulas::normalize_sorts(x, m_data_type_checker.typechecked_data_specification()));
       return result;
     }
@@ -587,6 +691,7 @@ class state_formula_type_checker
  **/
 template <typename VariableContainer, typename ActionLabelContainer>
 state_formula typecheck_state_formula(const state_formula& x,
+                                      const bool formula_is_quantitative,
                                       const data::data_specification& dataspec = data::data_specification(),
                                       const ActionLabelContainer& action_labels = ActionLabelContainer(),
                                       const VariableContainer& variables = VariableContainer()
@@ -594,7 +699,7 @@ state_formula typecheck_state_formula(const state_formula& x,
 {
   try
   {
-    state_formula_type_checker type_checker(dataspec, action_labels, variables);
+    state_formula_type_checker type_checker(dataspec, formula_is_quantitative, action_labels, variables);
     return type_checker.typecheck_state_formula(x);
   }
   catch (mcrl2::runtime_error& e)
@@ -612,23 +717,24 @@ state_formula typecheck_state_formula(const state_formula& x,
  **/
 inline
 state_formula typecheck_state_formula(const state_formula& x,
-                                      const lps::specification& lpsspec
+                                      const lps::specification& lpsspec,
+                                      const bool formula_is_quantitative
                                      )
 {
-  return typecheck_state_formula(x, lpsspec.data(), lpsspec.action_labels(), lpsspec.global_variables());
+  return typecheck_state_formula(x, formula_is_quantitative, lpsspec.data(), lpsspec.action_labels(), lpsspec.global_variables());
 }
 
 /// \brief Typecheck the state formula specification formspec. It is assumed that the formula is self contained,
 /// i.e. all actions and sorts must be declared.
 inline
-void typecheck_state_formula_specification(state_formula_specification& formspec)
+void typecheck_state_formula_specification(state_formula_specification& formspec, const bool formula_is_quantitative)
 {
   try
   {
     data::data_type_checker checker(formspec.data());
     data::data_specification dataspec = checker.typechecked_data_specification();
     state_formulas::normalize_sorts(formspec, dataspec);
-    state_formula_type_checker type_checker(dataspec, formspec.action_labels(), std::vector<data::variable>());
+    state_formula_type_checker type_checker(dataspec, formula_is_quantitative, formspec.action_labels(), std::vector<data::variable>());
     formspec.formula() = type_checker.typecheck_state_formula(formspec.formula());
     formspec.data() = checker.typechecked_data_specification();
     formspec.data().translate_user_notation();
@@ -642,14 +748,14 @@ void typecheck_state_formula_specification(state_formula_specification& formspec
 /// \brief Typecheck the state formula specification formspec. It is assumed that the formula is not self contained,
 /// i.e. some of the actions and sorts may be declared in lpsspec.
 inline
-void typecheck_state_formula_specification(state_formula_specification& formspec, const lps::specification& lpsspec)
+void typecheck_state_formula_specification(state_formula_specification& formspec, const lps::specification& lpsspec, const bool formula_is_quantitative)
 {
   try
   {
     data::data_type_checker checker(formspec.data());
     data::data_specification dataspec = checker.typechecked_data_specification();
     state_formulas::normalize_sorts(formspec, dataspec);
-    state_formula_type_checker type_checker(dataspec, lpsspec.action_labels() + formspec.action_labels(), lpsspec.global_variables());
+    state_formula_type_checker type_checker(dataspec, formula_is_quantitative, lpsspec.action_labels() + formspec.action_labels(), lpsspec.global_variables());
     formspec.formula() = type_checker.typecheck_state_formula(formspec.formula());
     formspec.data() = checker.typechecked_data_specification();
     formspec.data().translate_user_notation();

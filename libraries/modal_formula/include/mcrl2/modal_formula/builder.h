@@ -1284,6 +1284,15 @@ struct add_sort_expressions: public Builder<Derived>
   }
 
   template <class T>
+  void apply(T& result, const state_formulas::const_multiply_alt& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_const_multiply_alt(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
   void apply(T& result, const state_formulas::forall& x)
   { 
     
@@ -1447,6 +1456,10 @@ struct add_sort_expressions: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::const_multiply>(x));
     }
+    else if (state_formulas::is_const_multiply_alt(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::const_multiply_alt>(x));
+    }
     else if (state_formulas::is_forall(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::forall>(x));
@@ -1595,6 +1608,15 @@ struct add_data_expressions: public Builder<Derived>
     
     static_cast<Derived&>(*this).enter(x);
     state_formulas::make_const_multiply(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const state_formulas::const_multiply_alt& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_const_multiply_alt(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -1759,6 +1781,10 @@ struct add_data_expressions: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::const_multiply>(x));
     }
+    else if (state_formulas::is_const_multiply_alt(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::const_multiply_alt>(x));
+    }
     else if (state_formulas::is_forall(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::forall>(x));
@@ -1907,6 +1933,15 @@ struct add_variables: public Builder<Derived>
     
     static_cast<Derived&>(*this).enter(x);
     state_formulas::make_const_multiply(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const state_formulas::const_multiply_alt& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_const_multiply_alt(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -2071,6 +2106,10 @@ struct add_variables: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::const_multiply>(x));
     }
+    else if (state_formulas::is_const_multiply_alt(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::const_multiply_alt>(x));
+    }
     else if (state_formulas::is_forall(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::forall>(x));
@@ -2219,6 +2258,15 @@ struct add_state_formula_expressions: public Builder<Derived>
     
     static_cast<Derived&>(*this).enter(x);
     state_formulas::make_const_multiply(result, x.left(), [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const state_formulas::const_multiply_alt& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_const_multiply_alt(result, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, x.right());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -2388,6 +2436,10 @@ struct add_state_formula_expressions: public Builder<Derived>
     else if (state_formulas::is_const_multiply(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::const_multiply>(x));
+    }
+    else if (state_formulas::is_const_multiply_alt(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::const_multiply_alt>(x));
     }
     else if (state_formulas::is_forall(x))
     {

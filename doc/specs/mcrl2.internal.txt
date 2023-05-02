@@ -233,6 +233,7 @@
                  | StateImp(<StateFrm>, <StateFrm>)
                  | StatePlus(<StateFrm>, <StateFrm>)
                  | StateConstantMultiply(<DataExpr>, <StateFrm>)
+                 | StateConstantMultiplyAlt(<StateFrm>, <DataExpr>)
                  | StateForall(<DataVarId>+, <StateFrm>)
                  | StateExists(<DataVarId>+, <StateFrm>)
                  | StateMust(<RegFrm>, <StateFrm>)

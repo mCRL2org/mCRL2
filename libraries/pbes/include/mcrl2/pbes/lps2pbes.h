@@ -247,7 +247,8 @@ pbes lps2pbes(const std::string& spec_text,
   pbes result;
   lps::specification lpsspec = remove_stochastic_operators(lps::linearise(spec_text));
 
-  state_formulas::state_formula f = state_formulas::algorithms::parse_state_formula(formula_text, lpsspec);
+  const bool formula_is_quantitative = false;
+  state_formulas::state_formula f = state_formulas::algorithms::parse_state_formula(formula_text, lpsspec, formula_is_quantitative);
   return lps2pbes(lpsspec, f, timed, structured, unoptimized, preprocess_modal_operators, generate_counter_example, check_only);
 }
 

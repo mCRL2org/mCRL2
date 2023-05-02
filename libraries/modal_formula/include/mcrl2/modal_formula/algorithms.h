@@ -26,28 +26,30 @@ namespace algorithms {
 // may cause internal names to change.
 /// \param in A stream from which can be read
 /// \param spec A linear process specification
+/// \param formula_is_quantitative True if the formula is interpreted as a quantitative formula, instead of a classic boolean modal formula.
 /// \return The converted modal formula
-state_formula parse_state_formula(std::istream& in, lps::specification& spec);
+state_formula parse_state_formula(std::istream& in, lps::specification& spec, const bool formula_is_quantitative);
 
 /// \brief Parses a state formula from text
 // spec may be updated as the data implementation of the state formula
 // may cause internal names to change.
 /// \param formula_text A string
 /// \param spec A linear process specification
+/// \param formula_is_quantitative True if the formula is interpreted as a quantitative formula, instead of a classic boolean modal formula.
 /// \return The converted modal formula
-state_formula parse_state_formula(const std::string& formula_text, lps::specification& spec);
+state_formula parse_state_formula(const std::string& formula_text, lps::specification& spec, const bool formula_is_quantitative);
 
 /// \brief Parses a state formula specification from an input stream
-state_formula_specification parse_state_formula_specification(std::istream& in);
+state_formula_specification parse_state_formula_specification(std::istream& in, const bool formula_is_quantitative);
 
 /// \brief Parses a state formula specification from text
-state_formula_specification parse_state_formula_specification(const std::string& text);
+state_formula_specification parse_state_formula_specification(const std::string& text, const bool formula_is_quantitative);
 
 /// \brief Parses a state formula specification from an input stream
-state_formula_specification parse_state_formula_specification(std::istream& in, lps::specification& lpsspec);
+state_formula_specification parse_state_formula_specification(std::istream& in, lps::specification& lpsspec, const bool formula_is_quantitative);
 
 /// \brief Parses a state formula specification from text
-state_formula_specification parse_state_formula_specification(const std::string& text, lps::specification& lpsspec);
+state_formula_specification parse_state_formula_specification(const std::string& text, lps::specification& lpsspec, const bool formula_is_quantitative);
 
 /// \brief Returns true if the state formula is monotonous.
 /// \param f A modal formula

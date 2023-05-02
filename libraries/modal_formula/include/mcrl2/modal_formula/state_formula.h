@@ -76,6 +76,7 @@ inline bool is_or(const atermpp::aterm_appl& x);
 inline bool is_imp(const atermpp::aterm_appl& x);
 inline bool is_plus(const atermpp::aterm_appl& x);
 inline bool is_const_multiply(const atermpp::aterm_appl& x);
+inline bool is_const_multiply_alt(const atermpp::aterm_appl& x);
 inline bool is_forall(const atermpp::aterm_appl& x);
 inline bool is_exists(const atermpp::aterm_appl& x);
 inline bool is_must(const atermpp::aterm_appl& x);
@@ -105,6 +106,7 @@ bool is_state_formula(const atermpp::aterm_appl& x)
          state_formulas::is_imp(x) ||
          state_formulas::is_plus(x) ||
          state_formulas::is_const_multiply(x) ||
+         state_formulas::is_const_multiply_alt(x) ||
          state_formulas::is_forall(x) ||
          state_formulas::is_exists(x) ||
          state_formulas::is_must(x) ||
@@ -761,6 +763,82 @@ std::ostream& operator<<(std::ostream& out, const const_multiply& x)
 
 /// \\brief swap overload
 inline void swap(const_multiply& t1, const_multiply& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \\brief The multiply operator for state formulas with values
+class const_multiply_alt: public state_formula
+{
+  public:
+    /// \\brief Default constructor.
+    const_multiply_alt()
+      : state_formula(core::detail::default_values::StateConstantMultiplyAlt)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit const_multiply_alt(const atermpp::aterm& term)
+      : state_formula(term)
+    {
+      assert(core::detail::check_term_StateConstantMultiplyAlt(*this));
+    }
+
+    /// \\brief Constructor.
+    const_multiply_alt(const state_formula& left, const data::data_expression& right)
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateConstantMultiplyAlt(), left, right))
+    {}
+
+    /// Move semantics
+    const_multiply_alt(const const_multiply_alt&) noexcept = default;
+    const_multiply_alt(const_multiply_alt&&) noexcept = default;
+    const_multiply_alt& operator=(const const_multiply_alt&) noexcept = default;
+    const_multiply_alt& operator=(const_multiply_alt&&) noexcept = default;
+
+    const state_formula& left() const
+    {
+      return atermpp::down_cast<state_formula>((*this)[0]);
+    }
+
+    const data::data_expression& right() const
+    {
+      return atermpp::down_cast<data::data_expression>((*this)[1]);
+    }
+};
+
+/// \\brief Make_const_multiply_alt constructs a new term into a given address.
+/// \\ \param t The reference into which the new const_multiply_alt is constructed. 
+template <class... ARGUMENTS>
+inline void make_const_multiply_alt(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_StateConstantMultiplyAlt(), args...);
+}
+
+/// \\brief Test for a const_multiply_alt expression
+/// \\param x A term
+/// \\return True if \\a x is a const_multiply_alt expression
+inline
+bool is_const_multiply_alt(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::StateConstantMultiplyAlt;
+}
+
+// prototype declaration
+std::string pp(const const_multiply_alt& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const const_multiply_alt& x)
+{
+  return out << state_formulas::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(const_multiply_alt& t1, const_multiply_alt& t2)
 {
   t1.swap(t2);
 }

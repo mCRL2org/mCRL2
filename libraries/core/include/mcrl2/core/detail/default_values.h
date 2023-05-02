@@ -147,6 +147,7 @@ const atermpp::aterm_appl& default_value_StateOr();
 const atermpp::aterm_appl& default_value_StateImp();
 const atermpp::aterm_appl& default_value_StatePlus();
 const atermpp::aterm_appl& default_value_StateConstantMultiply();
+const atermpp::aterm_appl& default_value_StateConstantMultiplyAlt();
 const atermpp::aterm_appl& default_value_StateForall();
 const atermpp::aterm_appl& default_value_StateExists();
 const atermpp::aterm_appl& default_value_StateMust();
@@ -933,6 +934,14 @@ inline
 const atermpp::aterm_appl& default_value_StateConstantMultiply()
 {
   static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_StateConstantMultiply(), default_value_DataExpr(), default_value_StateFrm());
+  return t;
+}
+
+// StateConstantMultiplyAlt
+inline
+const atermpp::aterm_appl& default_value_StateConstantMultiplyAlt()
+{
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_StateConstantMultiplyAlt(), default_value_StateFrm(), default_value_DataExpr());
   return t;
 }
 
@@ -1873,6 +1882,7 @@ static const atermpp::aterm_appl SortCons;
   static const atermpp::aterm_appl StateImp;
   static const atermpp::aterm_appl StatePlus;
   static const atermpp::aterm_appl StateConstantMultiply;
+  static const atermpp::aterm_appl StateConstantMultiplyAlt;
   static const atermpp::aterm_appl StateForall;
   static const atermpp::aterm_appl StateExists;
   static const atermpp::aterm_appl StateMust;

@@ -70,7 +70,8 @@ void lps2pres(const std::string& input_filename,
     throw mcrl2::runtime_error("cannot open state formula file: " + formula_filename);
   }
   std::string text = utilities::read_text(from);
-  state_formulas::state_formula_specification formspec = state_formulas::algorithms::parse_state_formula_specification(text, lpsspec);
+  const bool formula_is_quantitative = true;
+  state_formulas::state_formula_specification formspec = state_formulas::algorithms::parse_state_formula_specification(text, lpsspec, formula_is_quantitative);
   detail::check_lps2pres_actions(formspec.formula(), lpsspec);
   mCRL2log(log::verbose) << "converting state formula and LPS to a PRES..." << std::endl;
   pres_system::pres result = pres_system::lps2pres(lpsspec, formspec, timed, unoptimized, preprocess_modal_operators, check_only);

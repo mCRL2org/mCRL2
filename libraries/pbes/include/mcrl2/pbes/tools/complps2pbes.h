@@ -56,7 +56,8 @@ void complps2pbes(const std::string& input_filename,
   {
     throw mcrl2::runtime_error("cannot open state formula file: " + formula_filename);
   }
-  state_formulas::state_formula formula = state_formulas::algorithms::parse_state_formula(instream, spec);
+  const bool formula_is_quantitative = false;
+  state_formulas::state_formula formula = state_formulas::algorithms::parse_state_formula(instream, spec, formula_is_quantitative);
   instream.close();
 
   pbes result = complps2pbes(procspec, formula);

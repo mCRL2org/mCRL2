@@ -1204,6 +1204,14 @@ const atermpp::function_symbol& function_symbol_StateConstantMultiply()
   return function_symbol_StateConstantMultiply;
 }
 
+// StateConstantMultiplyAlt
+inline
+const atermpp::function_symbol& function_symbol_StateConstantMultiplyAlt()
+{
+  static const atermpp::global_function_symbol function_symbol_StateConstantMultiplyAlt("StateConstantMultiplyAlt", 2);
+  return function_symbol_StateConstantMultiplyAlt;
+}
+
 // StateDelay
 inline
 const atermpp::function_symbol& function_symbol_StateDelay()
@@ -1585,6 +1593,7 @@ static const atermpp::function_symbol SortCons;
   static const atermpp::function_symbol StateImp;
   static const atermpp::function_symbol StatePlus;
   static const atermpp::function_symbol StateConstantMultiply;
+  static const atermpp::function_symbol StateConstantMultiplyAlt;
   static const atermpp::function_symbol StateForall;
   static const atermpp::function_symbol StateExists;
   static const atermpp::function_symbol StateMust;
