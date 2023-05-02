@@ -109,7 +109,15 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void apply(const pres_system::multiply& x)
+  void apply(const pres_system::const_multiply& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const pres_system::const_multiply_alt& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.left());
@@ -180,9 +188,13 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::plus>(x));
     }
-    else if (pres_system::is_multiply(x))
+    else if (pres_system::is_const_multiply(x))
     {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::multiply>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::const_multiply>(x));
+    }
+    else if (pres_system::is_const_multiply_alt(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::const_multiply_alt>(x));
     }
     else if (pres_system::is_minall(x))
     {
@@ -278,7 +290,15 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void apply(const pres_system::multiply& x)
+  void apply(const pres_system::const_multiply& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const pres_system::const_multiply_alt& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.left());
@@ -346,9 +366,13 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::plus>(x));
     }
-    else if (pres_system::is_multiply(x))
+    else if (pres_system::is_const_multiply(x))
     {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::multiply>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::const_multiply>(x));
+    }
+    else if (pres_system::is_const_multiply_alt(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::const_multiply_alt>(x));
     }
     else if (pres_system::is_minall(x))
     {
@@ -443,10 +467,17 @@ struct add_traverser_pres_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void apply(const pres_system::multiply& x)
+  void apply(const pres_system::const_multiply& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const pres_system::const_multiply_alt& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -510,9 +541,13 @@ struct add_traverser_pres_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::plus>(x));
     }
-    else if (pres_system::is_multiply(x))
+    else if (pres_system::is_const_multiply(x))
     {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::multiply>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::const_multiply>(x));
+    }
+    else if (pres_system::is_const_multiply_alt(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::const_multiply_alt>(x));
     }
     else if (pres_system::is_minall(x))
     {
@@ -609,7 +644,15 @@ struct add_traverser_variables: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void apply(const pres_system::multiply& x)
+  void apply(const pres_system::const_multiply& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const pres_system::const_multiply_alt& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.left());
@@ -680,9 +723,13 @@ struct add_traverser_variables: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::plus>(x));
     }
-    else if (pres_system::is_multiply(x))
+    else if (pres_system::is_const_multiply(x))
     {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::multiply>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::const_multiply>(x));
+    }
+    else if (pres_system::is_const_multiply_alt(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::const_multiply_alt>(x));
     }
     else if (pres_system::is_minall(x))
     {
@@ -780,7 +827,15 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void apply(const pres_system::multiply& x)
+  void apply(const pres_system::const_multiply& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const pres_system::const_multiply_alt& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.left());
@@ -851,9 +906,13 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::plus>(x));
     }
-    else if (pres_system::is_multiply(x))
+    else if (pres_system::is_const_multiply(x))
     {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::multiply>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::const_multiply>(x));
+    }
+    else if (pres_system::is_const_multiply_alt(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::const_multiply_alt>(x));
     }
     else if (pres_system::is_minall(x))
     {

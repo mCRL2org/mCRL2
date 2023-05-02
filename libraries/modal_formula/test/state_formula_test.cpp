@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(test_rename)
   using mcrl2::state_formulas::pp;
   specification lpsspec = remove_stochastic_operators(linearise(SPECIFICATION));
 
-  state_formula formula = parse_state_formula("(mu X. X) && (mu X. X)", lpsspec);
+  state_formula formula = parse_state_formula("(mu X. X) && (mu X. X)", lpsspec, false);
 
   data::set_identifier_generator generator;
   generator.add_identifiers(lps::find_identifiers(lpsspec));
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(test_rename)
   parse_state_formula_options options;
   options.check_monotonicity = false;
   options.resolve_name_clashes = false;
-  formula = parse_state_formula("mu X. mu X. X", lpsspec, options);
+  formula = parse_state_formula("mu X. mu X. X", lpsspec, false, options);
   std::cout << "formula: " << pp(formula) << std::endl;
   formula = rename_predicate_variables(formula, generator);
   std::cout << "formula: " << pp(formula) << std::endl;
@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(test_type_checking)
                             "sort CPUs = Set(CPU);"
                             "init delta;"));
 
-  state_formula formula = parse_state_formula("nu X (P : CPUs = {p1}) . val(P != {})", lpsspec);
+  state_formula formula = parse_state_formula("nu X (P : CPUs = {p1}) . val(P != {})", lpsspec, false);
 }
 
 BOOST_AUTO_TEST_CASE(test_type_checking_conversion_of_arguments)
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(test_type_checking_conversion_of_arguments)
                             "init a([d]);"
                           ));
 
-  state_formula formula = parse_state_formula("<a([d])>true", lpsspec);
+  state_formula formula = parse_state_formula("<a([d])>true", lpsspec, false);
 
   BOOST_CHECK(is_may(formula));
   const state_formulas::may& f = atermpp::down_cast<state_formulas::may>(formula);
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(test_parse)
   std::string formula_text = "<a(1)>true";
 
   lps::specification lpsspec = remove_stochastic_operators(lps::linearise(spec_text));
-  state_formulas::state_formula f = state_formulas::parse_state_formula(formula_text, lpsspec);
+  state_formulas::state_formula f = state_formulas::parse_state_formula(formula_text, lpsspec, false);
 
   std::cerr << "--- f ---\n" << state_formulas::pp(f) << std::endl;
   std::set<core::identifier_string> ids = state_formulas::find_identifiers(f);
@@ -162,10 +162,10 @@ BOOST_AUTO_TEST_CASE(test_count_fixpoints)
   state_formula formula;
   specification lpsspec;
 
-  formula = parse_state_formula("(mu X. X) && (mu X. X)", lpsspec);
+  formula = parse_state_formula("(mu X. X) && (mu X. X)", lpsspec, false);
   BOOST_CHECK_EQUAL(count_fixpoints(formula), 2u);
 
-  formula = parse_state_formula("exists b:Bool. (mu X. X) || forall b:Bool. (nu X. mu Y. (X || Y))", lpsspec);
+  formula = parse_state_formula("exists b:Bool. (mu X. X) || forall b:Bool. (nu X. mu Y. (X || Y))", lpsspec, false);
   BOOST_CHECK_EQUAL(count_fixpoints(formula), 3u);
 }
 
@@ -204,7 +204,7 @@ BOOST_AUTO_TEST_CASE(test_1094)
 
   const std::string FORMULA = "[true*]([b] nu X. mu X.( [!c]X && [!c]Y))";
 
-  BOOST_CHECK_THROW(parse_state_formula(FORMULA, s), mcrl2::runtime_error);
+  BOOST_CHECK_THROW(parse_state_formula(FORMULA, s, false), mcrl2::runtime_error);
 }
 
 inline
@@ -217,9 +217,9 @@ state_formula sigma(const state_formula& x)
 BOOST_AUTO_TEST_CASE(test_replace_state_formulas)
 {
   specification lpsspec;
-  state_formula f = parse_state_formula("(mu X. X) && (mu X. X)", lpsspec);
+  state_formula f = parse_state_formula("(mu X. X) && (mu X. X)", lpsspec, false);
   state_formula result = replace_state_formulas(f, sigma);
-  state_formula expected_result = parse_state_formula("(mu X. false) && (mu X. false)", lpsspec);
+  state_formula expected_result = parse_state_formula("(mu X. false) && (mu X. false)", lpsspec, false);
   if (!(result == expected_result))
   {
     std::cout << "error: " << state_formulas::pp(result) << " != " << state_formulas::pp(expected_result) << std::endl;
@@ -231,11 +231,11 @@ BOOST_AUTO_TEST_CASE(test_find_state_variables)
 {
   specification lpsspec;
 
-  state_formula f = parse_state_formula("(mu X. nu Y. true && mu Z. X && Z)", lpsspec);
+  state_formula f = parse_state_formula("(mu X. nu Y. true && mu Z. X && Z)", lpsspec, false);
   std::set<state_formulas::variable> v = state_formulas::find_state_variables(f);
   BOOST_CHECK(v.size() == 2);
 
-  f = parse_state_formula("mu X. nu Y. (true && mu Z. (X && Y || Z))", lpsspec);
+  f = parse_state_formula("mu X. nu Y. (true && mu Z. (X && Y || Z))", lpsspec, false);
   v = find_state_variables(f);
   BOOST_CHECK(v.size() == 3);
 
@@ -272,11 +272,11 @@ BOOST_AUTO_TEST_CASE(test_maximal_closed_subformulas)
   mcrl2::log::mcrl2_logger::set_reporting_level(mcrl2::log::debug, "state_formulas");
 
   specification lpsspec;
-  state_formula f = parse_state_formula("(mu X. nu Y. true && mu Z. X && Z)", lpsspec);
+  state_formula f = parse_state_formula("(mu X. nu Y. true && mu Z. X && Z)", lpsspec, false);
   std::set<state_formulas::state_formula> v = maximal_closed_subformulas(f);
   BOOST_CHECK(v.size() == 1);
 
-  f = parse_state_formula("exists b: Bool. forall c: Bool. val(b) && (val(c) || true) && false", lpsspec);
+  f = parse_state_formula("exists b: Bool. forall c: Bool. val(b) && (val(c) || true) && false", lpsspec, false);
   v = maximal_closed_subformulas(f);
   BOOST_CHECK(v.size() == 1);
 
@@ -305,7 +305,7 @@ BOOST_AUTO_TEST_CASE(test_maximal_closed_subformulas)
 
 void test_has_unscoped_modal_formulas(const std::string& text, lps::specification& lpsspec, bool expected_result)
 {
-  state_formula x = parse_state_formula(text, lpsspec);
+  state_formula x = parse_state_formula(text, lpsspec, false);
   bool result = state_formulas::detail::has_unscoped_modal_formulas(x);
   if (result != expected_result)
   {
@@ -335,8 +335,8 @@ BOOST_AUTO_TEST_CASE(has_unscoped_modal_formulas_test)
 
 void test_preprocess_nested_modal_operators(const std::string& text, lps::specification& lpsspec, const std::string& expected_result_text)
 {
-  state_formula x = parse_state_formula(text, lpsspec);
-  state_formula expected_result = parse_state_formula(expected_result_text, lpsspec);
+  state_formula x = parse_state_formula(text, lpsspec, false);
+  state_formula expected_result = parse_state_formula(expected_result_text, lpsspec, false);
   state_formula result = state_formulas::preprocess_nested_modal_operators(x);
   if (result != expected_result)
   {
@@ -377,7 +377,7 @@ BOOST_AUTO_TEST_CASE(parse_modal_formula_test)
   lps::specification lpsspec = lps::parse_linear_process_specification(text);
 
   const std::string formula_text = "nu X(n: Nat = 0, b: Bool = false). X(n, b)";
-  state_formula x = parse_state_formula(formula_text, lpsspec);
+  state_formula x = parse_state_formula(formula_text, lpsspec, false);
   std::string s = state_formulas::pp(x);
   BOOST_CHECK_EQUAL(s, formula_text);
 }
@@ -393,8 +393,8 @@ BOOST_AUTO_TEST_CASE(check_parameter_name_clashes_test)
     ;
   lps::specification lpsspec = lps::parse_linear_process_specification(text);
 
-  BOOST_CHECK(has_data_variable_name_clashes(parse_state_formula("nu X(n: Nat = 0). mu Y(n: Nat = 1). val(n == 0)", lpsspec)));
-  BOOST_CHECK(!has_data_variable_name_clashes(parse_state_formula("nu X(n: Nat = 0). mu Y(m: Nat = 1). val(n == 0)", lpsspec)));
+  BOOST_CHECK(has_data_variable_name_clashes(parse_state_formula("nu X(n: Nat = 0). mu Y(n: Nat = 1). val(n == 0)", lpsspec, false)));
+  BOOST_CHECK(!has_data_variable_name_clashes(parse_state_formula("nu X(n: Nat = 0). mu Y(m: Nat = 1). val(n == 0)", lpsspec, false)));
 }
 
 BOOST_AUTO_TEST_CASE(parse_state_formula_specification_test)
@@ -405,7 +405,7 @@ BOOST_AUTO_TEST_CASE(parse_state_formula_specification_test)
     "act a: S;                     \n"
     "form forall s: S. [a(s)]true; \n"
     ;
-  state_formula_specification x = parse_state_formula_specification(text);
+  state_formula_specification x = parse_state_formula_specification(text, false);
   std::string text1 = state_formulas::pp(x);
   std::cout << text1 << std::endl;
   BOOST_CHECK_EQUAL(utilities::remove_whitespace(text), utilities::remove_whitespace(text1));

@@ -61,6 +61,7 @@ class lps2pres_algorithm
           detail::E(f, parameters, equations, core::term_traits_optimized<pres_expression>());
         }
       }
+std::cerr << "OBTAINED EQUATIONS\n "; for(auto e: equations){ std::cerr << "EQ " << e << "\n"; } std::cerr << "\ni----------------------------------\n";
     }
 
   public:
@@ -75,7 +76,6 @@ class lps2pres_algorithm
     /// \param structured use the 'structured' approach of generating equations
     /// \param unoptimized do not optimize the resulting PRES.
     /// \param preprocess_modal_operators insert dummy fixpoints in modal operators, which may lead to smaller PRESs
-    /// \param generate_counter_example If true, then the PRES is enhanced with additional equations that are used to extract a counter example.
     /// \param T The time parameter. If T == data::variable() the untimed version of lps2pres is applied.
     /// \return A PRES that encodes the property applied to the given specification
     pres run(const state_formulas::state_formula& formula,
@@ -83,7 +83,6 @@ class lps2pres_algorithm
              bool structured = false,
              bool unoptimized = false,
              bool preprocess_modal_operators = false,
-             bool generate_counter_example = false,
              const data::variable& T = data::undefined_real_variable()
             )
     {
@@ -105,17 +104,8 @@ class lps2pres_algorithm
       m_generator.add_identifiers(state_formulas::find_identifiers(f));
 
       std::vector<pres_equation> equations;
-      if (generate_counter_example)
-      {
-        detail::lps2pres_counter_example_parameters parameters(f, lpsspec.process(), m_generator, T);
-        run(f, structured, unoptimized, equations, parameters);
-        equations = equations + parameters.equations();
-      }
-      else
-      {
-        detail::lps2pres_parameters parameters(f, lpsspec.process(), m_generator, T);
-        run(f, structured, unoptimized, equations, parameters);
-      }
+      detail::lps2pres_parameters parameters(f, lpsspec.process(), m_generator, T);
+      run(f, structured, unoptimized, equations, parameters);
 
       // compute the initial state
       assert(!equations.empty());
@@ -152,7 +142,6 @@ class lps2pres_algorithm
 ///        the PRES is simplified.
 /// \param preprocess_modal_operators A boolean indicating that the modal operators can be preprocessed to
 ///                                   obtain a more compact PRES.
-/// \param generate_counter_example A boolean indicating that a counter example must be generated.
 /// \return The resulting pres.
 inline
 pres lps2pres(const lps::specification& lpsspec,
@@ -161,7 +150,6 @@ pres lps2pres(const lps::specification& lpsspec,
               bool structured = false,
               bool unoptimized = false,
               bool preprocess_modal_operators = false,
-              bool generate_counter_example = false,
               bool check_only = false
              )
 {
@@ -182,11 +170,11 @@ pres lps2pres(const lps::specification& lpsspec,
     generator.add_identifiers(data::function_and_mapping_identifiers(lpsspec.data()));
     data::variable T(generator("T"), data::sort_real::real_());
     lps::detail::make_timed_lps(lpsspec_timed.process(), generator.context());
-    return lps2pres_algorithm(check_only).run(formula, lpsspec_timed, structured, unoptimized, preprocess_modal_operators, generate_counter_example, T);
+    return lps2pres_algorithm(check_only).run(formula, lpsspec_timed, structured, unoptimized, preprocess_modal_operators, T);
   }
   else
   {
-    return lps2pres_algorithm(check_only).run(formula, lpsspec, structured, unoptimized, preprocess_modal_operators, generate_counter_example);
+    return lps2pres_algorithm(check_only).run(formula, lpsspec, structured, unoptimized, preprocess_modal_operators);
   }
 }
 
@@ -200,7 +188,6 @@ pres lps2pres(const lps::specification& lpsspec,
 ///        the PRES is simplified.
 /// \param preprocess_modal_operators A boolean indicating that the modal operators can be preprocessed to
 ///                                   obtain a more compact PRES.
-/// \param generate_counter_example A boolean indicating that a counter example must be generated.
 /// \param check_only If check_only is true, only the formula will be checked, but no PRES is generated
 /// \return The resulting pres.
 inline
@@ -210,7 +197,6 @@ pres lps2pres(const lps::specification& lpsspec,
               bool structured = false,
               bool unoptimized = false,
               bool preprocess_modal_operators = false,
-              bool generate_counter_example = false,
               bool check_only = false
              )
 {
@@ -218,7 +204,7 @@ pres lps2pres(const lps::specification& lpsspec,
   lpsspec1.data() = data::merge_data_specifications(lpsspec1.data(), formspec.data());
   lps::normalize_sorts(lpsspec1, lpsspec1.data());
   lpsspec1.action_labels() = process::merge_action_specifications(lpsspec1.action_labels(), formspec.action_labels());
-  return lps2pres(lpsspec1, formspec.formula(), timed, structured, unoptimized, preprocess_modal_operators, generate_counter_example, check_only);
+  return lps2pres(lpsspec1, formspec.formula(), timed, structured, unoptimized, preprocess_modal_operators, check_only);
 }
 
 /// \brief Applies the lps2pres algorithm.
@@ -230,7 +216,6 @@ pres lps2pres(const lps::specification& lpsspec,
 ///        the PRES is simplified.
 /// \param preprocess_modal_operators A boolean indicating that the modal operators can be preprocessed to
 ///                                   obtain a more compact PRES.
-/// \param generate_counter_example A boolean indicating that a counter example must be generated.
 /// \param check_only If check_only is true, only the formula will be checked, but no PRES is generated
 /// \return The result of the algorithm
 inline
@@ -240,7 +225,6 @@ pres lps2pres(const std::string& spec_text,
               bool structured = false,
               bool unoptimized = false,
               bool preprocess_modal_operators = false,
-              bool generate_counter_example = false,
               bool check_only = false
              )
 {
@@ -249,7 +233,7 @@ pres lps2pres(const std::string& spec_text,
 
   const bool formula_is_quantitative = true;
   state_formulas::state_formula f = state_formulas::algorithms::parse_state_formula(formula_text, lpsspec, formula_is_quantitative);
-  return lps2pres(lpsspec, f, timed, structured, unoptimized, preprocess_modal_operators, generate_counter_example, check_only);
+  return lps2pres(lpsspec, f, timed, structured, unoptimized, preprocess_modal_operators, check_only);
 }
 
 } // namespace pres_system

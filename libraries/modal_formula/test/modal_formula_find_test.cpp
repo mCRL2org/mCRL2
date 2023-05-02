@@ -52,7 +52,7 @@ data::variable bool_(const std::string& name)
 void test_find()
 {
   lps::specification spec = lps::parse_linear_process_specification(SPEC);
-  state_formula f = parse_state_formula("(mu X. X) && (forall b:Bool. true)", spec);
+  state_formula f = parse_state_formula("(mu X. X) && (forall b:Bool. true)", spec, false);
 
   //--- find_all_variables ---//
   data::variable b = bool_("b");
@@ -64,6 +64,8 @@ void test_find()
   std::cout << "e.size() = " << e.size() << std::endl;
   BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_bool::bool_()) != e.end());
 }
+
+
 
 void test_free_variables()
 {

@@ -339,14 +339,15 @@ PresExpr
   | 'true'                                     $left        30   // True, representing infinity
   | 'false'                                    $left        30   // False, representing minus infinity
   | Id ( '(' DataExprList ')' )?               $left        30   // Instantiated PRES variable or data application
-  | 'forall' VarsDeclList '.' PresExpr      $unary_right 21      // Universal quantifier
-  | 'exists' VarsDeclList '.' PresExpr      $unary_right 21      // Existential quantifier
+  | 'minall' VarsDeclList '.' PresExpr      $unary_right 21      // Universal quantifier
+  | 'maxall' VarsDeclList '.' PresExpr      $unary_right 21      // Existential quantifier
   | 'sum' VarsDeclList '.' PresExpr         $unary_right 21      // Sum operator
   | PresExpr ('+' $binary_op_right 22) PresExpr                  // Addition
   | PresExpr ('=>' $binary_op_right 23) PresExpr                 // Implication
   | PresExpr ('||' $binary_op_right 24) PresExpr                 // Disjunction
   | PresExpr ('&&' $binary_op_right 25) PresExpr                 // Conjunction
   | DataValExpr '*' PresExpr                                     // Multiplication with a positive constant
+  | PresExpr '*' DataValExpr                                     // Multiplication with a positive constant
   | 'eqinf' '(' PresExpr ')'                                     // Equal infinity
   | 'eqninf' '(' PresExpr ')'                                    // Equal to infinity
   | 'condsm' '(' PresExpr ',' PresExpr ',' PresExpr ')'          // Conditional smaller than 0 with or. 

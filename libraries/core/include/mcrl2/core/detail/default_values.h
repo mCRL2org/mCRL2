@@ -215,6 +215,7 @@ const atermpp::aterm_appl& default_value_PRESOr();
 const atermpp::aterm_appl& default_value_PRESImp();
 const atermpp::aterm_appl& default_value_PRESPlus();
 const atermpp::aterm_appl& default_value_PRESConstantMultiply();
+const atermpp::aterm_appl& default_value_PRESConstantMultiplyAlt();
 const atermpp::aterm_appl& default_value_PRESMinall();
 const atermpp::aterm_appl& default_value_PRESMaxall();
 const atermpp::aterm_appl& default_value_PRESSum();
@@ -229,6 +230,7 @@ const atermpp::aterm_appl& default_value_RESOr();
 const atermpp::aterm_appl& default_value_RESImp();
 const atermpp::aterm_appl& default_value_RESPlus();
 const atermpp::aterm_appl& default_value_RESConstantMultiply();
+const atermpp::aterm_appl& default_value_RESConstantMultiplyAlt();
 const atermpp::aterm_appl& default_value_RESCondAnd();
 const atermpp::aterm_appl& default_value_RESCondOr();
 const atermpp::aterm_appl& default_value_RESEqInf();
@@ -1481,6 +1483,14 @@ const atermpp::aterm_appl& default_value_PRESConstantMultiply()
   return t;
 }
 
+// PRESConstantMultiplyAlt
+inline
+const atermpp::aterm_appl& default_value_PRESConstantMultiplyAlt()
+{
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_PRESConstantMultiplyAlt(), default_value_PRExpr(), default_value_DataExpr());
+  return t;
+}
+
 // PRESMinall
 inline
 const atermpp::aterm_appl& default_value_PRESMinall()
@@ -1590,6 +1600,14 @@ inline
 const atermpp::aterm_appl& default_value_RESConstantMultiply()
 {
   static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_RESConstantMultiply(), default_value_DataExpr(), default_value_RESExpression());
+  return t;
+}
+
+// RESConstantMultiplyAlt
+inline
+const atermpp::aterm_appl& default_value_RESConstantMultiplyAlt()
+{
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_RESConstantMultiplyAlt(), default_value_RESExpression(), default_value_DataExpr());
   return t;
 }
 
@@ -1950,6 +1968,7 @@ static const atermpp::aterm_appl SortCons;
   static const atermpp::aterm_appl PRESImp;
   static const atermpp::aterm_appl PRESPlus;
   static const atermpp::aterm_appl PRESConstantMultiply;
+  static const atermpp::aterm_appl PRESConstantMultiplyAlt;
   static const atermpp::aterm_appl PRESMinall;
   static const atermpp::aterm_appl PRESMaxall;
   static const atermpp::aterm_appl PRESSum;
@@ -1964,6 +1983,7 @@ static const atermpp::aterm_appl SortCons;
   static const atermpp::aterm_appl RESImp;
   static const atermpp::aterm_appl RESPlus;
   static const atermpp::aterm_appl RESConstantMultiply;
+  static const atermpp::aterm_appl RESConstantMultiplyAlt;
   static const atermpp::aterm_appl RESCondAnd;
   static const atermpp::aterm_appl RESCondOr;
   static const atermpp::aterm_appl RESEqInf;

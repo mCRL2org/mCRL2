@@ -21,18 +21,22 @@ namespace pres_system {
 
 constexpr inline int precedence(const minall&) { return 21; }
 constexpr inline int precedence(const maxall&) { return 21; }
-constexpr inline int precedence(const imp&)    { return 22; }
-constexpr inline int precedence(const or_&)    { return 23; }
-constexpr inline int precedence(const and_&)   { return 24; }
-constexpr inline int precedence(const minus&)   { return 25; }
+constexpr inline int precedence(const plus&)   { return 22; }
+constexpr inline int precedence(const imp&)    { return 23; }
+constexpr inline int precedence(const or_&)    { return 24; }
+constexpr inline int precedence(const and_&)   { return 25; }
+constexpr inline int precedence(const minus&)  { return 25; }
 inline int precedence(const pres_expression& x)
 {
-  if      (is_minall(x)) { return precedence(atermpp::down_cast<minall>(x)); }
-  else if (is_maxall(x)) { return precedence(atermpp::down_cast<maxall>(x)); }
-  else if (is_imp(x))    { return precedence(atermpp::down_cast<imp>(x)); }
-  else if (is_or(x))     { return precedence(atermpp::down_cast<or_>(x)); }
-  else if (is_and(x))    { return precedence(atermpp::down_cast<and_>(x)); }
-  else if (is_minus(x))    { return precedence(atermpp::down_cast<minus>(x)); }
+  if      (is_minall(x))            { return precedence(atermpp::down_cast<minall>(x)); }
+  else if (is_maxall(x))            { return precedence(atermpp::down_cast<maxall>(x)); }
+  else if (is_imp(x))               { return precedence(atermpp::down_cast<imp>(x)); }
+  else if (is_or(x))                { return precedence(atermpp::down_cast<or_>(x)); }
+  else if (is_and(x))               { return precedence(atermpp::down_cast<and_>(x)); }
+  else if (is_and(x))               { return precedence(atermpp::down_cast<plus>(x)); }
+  else if (is_const_multiply(x))    { return precedence(atermpp::down_cast<const_multiply>(x)); }
+  else if (is_const_multiply_alt(x)){ return precedence(atermpp::down_cast<const_multiply_alt>(x)); }
+  else if (is_minus(x))             { return precedence(atermpp::down_cast<minus>(x)); }
   return core::detail::max_precedence;
 }
 
@@ -40,22 +44,34 @@ inline int precedence(const pres_expression& x)
 inline bool is_left_associative(const imp&)  { return false; }
 inline bool is_left_associative(const or_&)  { return true; }
 inline bool is_left_associative(const and_&) { return true; }
+inline bool is_left_associative(const plus&) { return true; }
+inline bool is_left_associative(const const_multiply&) { return true; }
+inline bool is_left_associative(const const_multiply_alt&) { return true; }
 inline bool is_left_associative(const pres_expression& x)
 {
-  if (is_imp(x))      { return is_left_associative(atermpp::down_cast<imp>(x)); }
-  else if (is_or(x))  { return is_left_associative(atermpp::down_cast<or_>(x)); }
-  else if (is_and(x)) { return is_left_associative(atermpp::down_cast<and_>(x)); }
+  if (is_imp(x))       { return is_left_associative(atermpp::down_cast<imp>(x)); }
+  else if (is_or(x))   { return is_left_associative(atermpp::down_cast<or_>(x)); }
+  else if (is_and(x))  { return is_left_associative(atermpp::down_cast<and_>(x)); }
+  else if (is_plus(x)) { return is_left_associative(atermpp::down_cast<plus>(x)); }
+  else if (is_const_multiply(x)) { return is_left_associative(atermpp::down_cast<const_multiply>(x)); }
+  else if (is_const_multiply_alt(x)) { return is_left_associative(atermpp::down_cast<const_multiply_alt>(x)); }
   return false;
 }
 
 inline bool is_right_associative(const imp&)  { return true; }
 inline bool is_right_associative(const or_&)  { return true; }
 inline bool is_right_associative(const and_&) { return true; }
+inline bool is_right_associative(const plus&) { return true; }
+inline bool is_right_associative(const const_multiply&) { return true; }
+inline bool is_right_associative(const const_multiply_alt&) { return true; }
 inline bool is_right_associative(const pres_expression& x)
 {
-  if (is_imp(x))      { return is_right_associative(atermpp::down_cast<imp>(x)); }
-  else if (is_or(x))  { return is_right_associative(atermpp::down_cast<or_>(x)); }
-  else if (is_and(x)) { return is_right_associative(atermpp::down_cast<and_>(x)); }
+  if (is_imp(x))       { return is_right_associative(atermpp::down_cast<imp>(x)); }
+  else if (is_or(x))   { return is_right_associative(atermpp::down_cast<or_>(x)); }
+  else if (is_and(x))  { return is_right_associative(atermpp::down_cast<and_>(x)); }
+  else if (is_plus(x)) { return is_right_associative(atermpp::down_cast<plus>(x)); }
+  else if (is_const_multiply(x)) { return is_right_associative(atermpp::down_cast<const_multiply>(x)); }
+  else if (is_const_multiply_alt(x)) { return is_right_associative(atermpp::down_cast<const_multiply_alt>(x)); }
   return false;
 }
 
@@ -144,6 +160,14 @@ struct printer: public pres_system::add_traverser_sort_expressions<data::detail:
     print_variables(x.parameters());
     derived().leave(x);
   }
+
+  /* void apply(const pres_system::constant_mult& x)
+  {
+    derived().enter(x);
+    derived().apply(x.name());
+    print_variables(x.parameters());
+    derived().leave(x);
+  } */
 
   void apply(const pres_system::fixpoint_symbol& x)
   {

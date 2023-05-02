@@ -381,6 +381,7 @@
                  | PRESImp(<PRExpr>, <PRExpr>)
                  | PRESPlus(<PRExpr>, <PRExpr>)
                  | PRESConstantMultiply(<DataExpr>, <PRExpr>)
+                 | PRESConstantMultiplyAlt(<PRExpr>, <DataExpr>)
                  | PRESMinall(<DataVarId>+, <PRExpr>)
                  | PRESMaxall(<DataVarId>+, <PRExpr>)
                  | PRESSum(<DataVarId>+, <PRExpr>)
@@ -410,6 +411,7 @@
                   | RESImp(<RESExpression>, <RESExpression>)
                   | RESPlus(<RESExpression>, <RESExpression>)
                   | RESConstantMultiply(<DataExpr>, <RESExpression>)
+                  | RESConstantMultiplyAlt(<RESExpression>, <DataExpr>)
                   | <DataExpr>
                   | RESCondAnd(<RESExpression>, <RESExpression>, <RESExpression>)
                   | RESCondOr(<RESExpression>, <RESExpression>, <RESExpression>)

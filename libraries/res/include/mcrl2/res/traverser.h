@@ -107,10 +107,17 @@ struct add_traverser_res_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void apply(const res::multiply& x)
+  void apply(const res::const_multiply& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const res::const_multiply_alt& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -181,9 +188,13 @@ struct add_traverser_res_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<res::plus>(x));
     }
-    else if (res::is_multiply(x))
+    else if (res::is_const_multiply(x))
     {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<res::multiply>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<res::const_multiply>(x));
+    }
+    else if (res::is_const_multiply_alt(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<res::const_multiply_alt>(x));
     }
     else if (res::is_rescondand(x))
     {
@@ -298,10 +309,17 @@ struct add_traverser_res_variables: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void apply(const res::multiply& x)
+  void apply(const res::const_multiply& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const res::const_multiply_alt& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -372,9 +390,13 @@ struct add_traverser_res_variables: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<res::plus>(x));
     }
-    else if (res::is_multiply(x))
+    else if (res::is_const_multiply(x))
     {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<res::multiply>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<res::const_multiply>(x));
+    }
+    else if (res::is_const_multiply_alt(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<res::const_multiply_alt>(x));
     }
     else if (res::is_rescondand(x))
     {

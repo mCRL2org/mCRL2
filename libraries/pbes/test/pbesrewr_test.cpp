@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(test_pbesrewr1)
 BOOST_AUTO_TEST_CASE(test_pbesrewr2)
 {
   lps::specification spec = remove_stochastic_operators(lps::linearise(lps::detail::ABP_SPECIFICATION()));
-  state_formulas::state_formula formula = state_formulas::parse_state_formula(lps::detail::NO_DEADLOCK(), spec);
+  state_formulas::state_formula formula = state_formulas::parse_state_formula(lps::detail::NO_DEADLOCK(), spec, false);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);
   BOOST_CHECK(p.is_well_typed());

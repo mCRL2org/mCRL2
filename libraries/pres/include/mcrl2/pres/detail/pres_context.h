@@ -24,7 +24,7 @@ namespace detail {
 class pres_context
 {
   private:
-    std::map<core::identifier_string, propositional_variable> m_propositional_variables;
+    std::map<core::identifier_string, pbes_system::propositional_variable> m_propositional_variables;
 
   public:
     bool is_declared(const core::identifier_string& name) const
@@ -42,7 +42,7 @@ class pres_context
     template <typename PropositionalVariableContainer>
     void add_propositional_variables(const PropositionalVariableContainer& propositional_variables, const data::sort_type_checker& sort_typechecker)
     {
-      for (const propositional_variable& p: propositional_variables)
+      for (const pbes_system::propositional_variable& p: propositional_variables)
       {
         for (const data::variable& v: p.parameters())
         {

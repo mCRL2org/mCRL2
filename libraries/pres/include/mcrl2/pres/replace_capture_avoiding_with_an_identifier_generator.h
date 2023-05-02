@@ -36,22 +36,22 @@ struct add_capture_avoiding_replacement_with_an_identifier_generator
   using super::update_sigma;
 
   template <class T>
-  void apply(T& result, const forall& x)
+  void apply(T& result, const minall& x)
   {
     data::variable_list v = update_sigma.push(x.variables());
     pres_expression body;
     apply(body, x.body());
-    make_forall(result, v, apply(x.body()));
+    make_minall(result, v, apply(x.body()));
     update_sigma.pop(v);
   }
 
   template <class T>
-  void apply(T& result, const exists& x)
+  void apply(T& result, const maxall& x)
   {
     data::variable_list v = update_sigma.push(x.variables());
     pres_expression body;
     apply(body, x.body());
-    make_exists(result, v, apply(x.body()));
+    make_maxall(result, v, apply(x.body()));
     update_sigma.pop(v);
   }
 

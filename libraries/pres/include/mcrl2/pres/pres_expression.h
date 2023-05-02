@@ -81,7 +81,8 @@ inline bool is_and(const atermpp::aterm_appl& x);
 inline bool is_or(const atermpp::aterm_appl& x);
 inline bool is_imp(const atermpp::aterm_appl& x);
 inline bool is_plus(const atermpp::aterm_appl& x);
-inline bool is_multiply(const atermpp::aterm_appl& x);
+inline bool is_const_multiply(const atermpp::aterm_appl& x);
+inline bool is_const_multiply_alt(const atermpp::aterm_appl& x);
 inline bool is_minall(const atermpp::aterm_appl& x);
 inline bool is_maxall(const atermpp::aterm_appl& x);
 inline bool is_sum(const atermpp::aterm_appl& x);
@@ -101,7 +102,8 @@ bool is_pres_expression(const atermpp::aterm_appl& x)
          pres_system::is_or(x) ||
          pres_system::is_imp(x) ||
          pres_system::is_plus(x) ||
-         pres_system::is_multiply(x) ||
+         pres_system::is_const_multiply(x) ||
+         pres_system::is_const_multiply_alt(x) ||
          pres_system::is_minall(x) ||
          pres_system::is_maxall(x) ||
          pres_system::is_sum(x);
@@ -595,33 +597,33 @@ inline void swap(plus& t1, plus& t2)
 }
 
 
-/// \\brief The multiplication with a positive constant
-class multiply: public pres_expression
+/// \\brief The multiplication with a positive constant with the constant at the left.
+class const_multiply: public pres_expression
 {
   public:
     /// \\brief Default constructor.
-    multiply()
+    const_multiply()
       : pres_expression(core::detail::default_values::PRESConstantMultiply)
     {}
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit multiply(const atermpp::aterm& term)
+    explicit const_multiply(const atermpp::aterm& term)
       : pres_expression(term)
     {
       assert(core::detail::check_term_PRESConstantMultiply(*this));
     }
 
     /// \\brief Constructor.
-    multiply(const data::data_expression& left, const pres_expression& right)
+    const_multiply(const data::data_expression& left, const pres_expression& right)
       : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESConstantMultiply(), left, right))
     {}
 
     /// Move semantics
-    multiply(const multiply&) noexcept = default;
-    multiply(multiply&&) noexcept = default;
-    multiply& operator=(const multiply&) noexcept = default;
-    multiply& operator=(multiply&&) noexcept = default;
+    const_multiply(const const_multiply&) noexcept = default;
+    const_multiply(const_multiply&&) noexcept = default;
+    const_multiply& operator=(const const_multiply&) noexcept = default;
+    const_multiply& operator=(const_multiply&&) noexcept = default;
 
     const data::data_expression& left() const
     {
@@ -634,38 +636,114 @@ class multiply: public pres_expression
     }
 };
 
-/// \\brief Make_multiply constructs a new term into a given address.
-/// \\ \param t The reference into which the new multiply is constructed. 
+/// \\brief Make_const_multiply constructs a new term into a given address.
+/// \\ \param t The reference into which the new const_multiply is constructed. 
 template <class... ARGUMENTS>
-inline void make_multiply(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_const_multiply(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PRESConstantMultiply(), args...);
 }
 
-/// \\brief Test for a multiply expression
+/// \\brief Test for a const_multiply expression
 /// \\param x A term
-/// \\return True if \\a x is a multiply expression
+/// \\return True if \\a x is a const_multiply expression
 inline
-bool is_multiply(const atermpp::aterm_appl& x)
+bool is_const_multiply(const atermpp::aterm_appl& x)
 {
   return x.function() == core::detail::function_symbols::PRESConstantMultiply;
 }
 
 // prototype declaration
-std::string pp(const multiply& x);
+std::string pp(const const_multiply& x);
 
 /// \\brief Outputs the object to a stream
 /// \\param out An output stream
 /// \\param x Object x
 /// \\return The output stream
 inline
-std::ostream& operator<<(std::ostream& out, const multiply& x)
+std::ostream& operator<<(std::ostream& out, const const_multiply& x)
 {
   return out << pres_system::pp(x);
 }
 
 /// \\brief swap overload
-inline void swap(multiply& t1, multiply& t2)
+inline void swap(const_multiply& t1, const_multiply& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \\brief The multiplication with a positive constant with the constant at the right.
+class const_multiply_alt: public pres_expression
+{
+  public:
+    /// \\brief Default constructor.
+    const_multiply_alt()
+      : pres_expression(core::detail::default_values::PRESConstantMultiplyAlt)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit const_multiply_alt(const atermpp::aterm& term)
+      : pres_expression(term)
+    {
+      assert(core::detail::check_term_PRESConstantMultiplyAlt(*this));
+    }
+
+    /// \\brief Constructor.
+    const_multiply_alt(const pres_expression& left, const data::data_expression& right)
+      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESConstantMultiplyAlt(), left, right))
+    {}
+
+    /// Move semantics
+    const_multiply_alt(const const_multiply_alt&) noexcept = default;
+    const_multiply_alt(const_multiply_alt&&) noexcept = default;
+    const_multiply_alt& operator=(const const_multiply_alt&) noexcept = default;
+    const_multiply_alt& operator=(const_multiply_alt&&) noexcept = default;
+
+    const pres_expression& left() const
+    {
+      return atermpp::down_cast<pres_expression>((*this)[0]);
+    }
+
+    const data::data_expression& right() const
+    {
+      return atermpp::down_cast<data::data_expression>((*this)[1]);
+    }
+};
+
+/// \\brief Make_const_multiply_alt constructs a new term into a given address.
+/// \\ \param t The reference into which the new const_multiply_alt is constructed. 
+template <class... ARGUMENTS>
+inline void make_const_multiply_alt(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_PRESConstantMultiplyAlt(), args...);
+}
+
+/// \\brief Test for a const_multiply_alt expression
+/// \\param x A term
+/// \\return True if \\a x is a const_multiply_alt expression
+inline
+bool is_const_multiply_alt(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::PRESConstantMultiplyAlt;
+}
+
+// prototype declaration
+std::string pp(const const_multiply_alt& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const const_multiply_alt& x)
+{
+  return out << pres_system::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(const_multiply_alt& t1, const_multiply_alt& t2)
 {
   t1.swap(t2);
 }

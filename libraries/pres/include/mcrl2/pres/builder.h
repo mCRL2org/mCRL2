@@ -124,11 +124,20 @@ struct add_sort_expressions: public Builder<Derived>
   }
 
   template <class T>
-  void apply(T& result, const pres_system::multiply& x)
+  void apply(T& result, const pres_system::const_multiply& x)
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    pres_system::make_multiply(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    pres_system::make_const_multiply(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const pres_system::const_multiply_alt& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    pres_system::make_const_multiply_alt(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -200,9 +209,13 @@ struct add_sort_expressions: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::plus>(x));
     }
-    else if (pres_system::is_multiply(x))
+    else if (pres_system::is_const_multiply(x))
     {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::multiply>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::const_multiply>(x));
+    }
+    else if (pres_system::is_const_multiply_alt(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::const_multiply_alt>(x));
     }
     else if (pres_system::is_minall(x))
     {
@@ -313,11 +326,20 @@ struct add_data_expressions: public Builder<Derived>
   }
 
   template <class T>
-  void apply(T& result, const pres_system::multiply& x)
+  void apply(T& result, const pres_system::const_multiply& x)
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    pres_system::make_multiply(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    pres_system::make_const_multiply(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const pres_system::const_multiply_alt& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    pres_system::make_const_multiply_alt(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -389,9 +411,13 @@ struct add_data_expressions: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::plus>(x));
     }
-    else if (pres_system::is_multiply(x))
+    else if (pres_system::is_const_multiply(x))
     {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::multiply>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::const_multiply>(x));
+    }
+    else if (pres_system::is_const_multiply_alt(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::const_multiply_alt>(x));
     }
     else if (pres_system::is_minall(x))
     {
@@ -502,11 +528,20 @@ struct add_variables: public Builder<Derived>
   }
 
   template <class T>
-  void apply(T& result, const pres_system::multiply& x)
+  void apply(T& result, const pres_system::const_multiply& x)
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    pres_system::make_multiply(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    pres_system::make_const_multiply(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const pres_system::const_multiply_alt& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    pres_system::make_const_multiply_alt(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -578,9 +613,13 @@ struct add_variables: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::plus>(x));
     }
-    else if (pres_system::is_multiply(x))
+    else if (pres_system::is_const_multiply(x))
     {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::multiply>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::const_multiply>(x));
+    }
+    else if (pres_system::is_const_multiply_alt(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::const_multiply_alt>(x));
     }
     else if (pres_system::is_minall(x))
     {
@@ -690,11 +729,20 @@ struct add_pres_expressions: public Builder<Derived>
   }
 
   template <class T>
-  void apply(T& result, const pres_system::multiply& x)
+  void apply(T& result, const pres_system::const_multiply& x)
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    pres_system::make_multiply(result, x.left(), [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    pres_system::make_const_multiply(result, x.left(), [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const pres_system::const_multiply_alt& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    pres_system::make_const_multiply_alt(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, x.right());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -766,9 +814,13 @@ struct add_pres_expressions: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::plus>(x));
     }
-    else if (pres_system::is_multiply(x))
+    else if (pres_system::is_const_multiply(x))
     {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::multiply>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::const_multiply>(x));
+    }
+    else if (pres_system::is_const_multiply_alt(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::const_multiply_alt>(x));
     }
     else if (pres_system::is_minall(x))
     {

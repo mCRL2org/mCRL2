@@ -25,7 +25,7 @@ void run_monotonicity_test_case(const std::string& formula, const std::string& l
   parse_state_formula_options options;
   options.check_monotonicity = false;
   options.resolve_name_clashes = false;
-  state_formula f = parse_state_formula(formula, lpsspec, options);
+  state_formula f = parse_state_formula(formula, lpsspec, false, options);
   if (state_formulas::has_state_variable_name_clashes(f))
   {
     std::cerr << "Error: " << state_formulas::pp(f) << " has name clashes" << std::endl;
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(test_elevator)
   run_monotonicity_test_case("!mu X. [true]X && mu X. [true]X", lpstext, true);
 }
 
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
+boost::unit_test::test_suite* init_unit_test_suite(int, char* [])
 {
   return nullptr;
 }

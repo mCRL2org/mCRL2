@@ -129,11 +129,20 @@ struct add_res_expressions: public Builder<Derived>
   }
 
   template <class T>
-  void apply(T& result, const res::multiply& x)
+  void apply(T& result, const res::const_multiply& x)
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    res::make_multiply(result, x.left(), [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    res::make_const_multiply(result, x.left(), [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const res::const_multiply_alt& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    res::make_const_multiply_alt(result, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, x.right());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -210,9 +219,13 @@ struct add_res_expressions: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<res::plus>(x));
     }
-    else if (res::is_multiply(x))
+    else if (res::is_const_multiply(x))
     {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<res::multiply>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<res::const_multiply>(x));
+    }
+    else if (res::is_const_multiply_alt(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<res::const_multiply_alt>(x));
     }
     else if (res::is_rescondand(x))
     {
@@ -353,11 +366,20 @@ struct add_res_variables: public Builder<Derived>
   }
 
   template <class T>
-  void apply(T& result, const res::multiply& x)
+  void apply(T& result, const res::const_multiply& x)
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    res::make_multiply(result, x.left(), [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    res::make_const_multiply(result, x.left(), [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const res::const_multiply_alt& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    res::make_const_multiply_alt(result, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, x.right());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -434,9 +456,13 @@ struct add_res_variables: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<res::plus>(x));
     }
-    else if (res::is_multiply(x))
+    else if (res::is_const_multiply(x))
     {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<res::multiply>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<res::const_multiply>(x));
+    }
+    else if (res::is_const_multiply_alt(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<res::const_multiply_alt>(x));
     }
     else if (res::is_rescondand(x))
     {

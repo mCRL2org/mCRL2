@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(test_pbes)
   const std::string FORMULA2 = "forall m:Nat. [a(m)]false";
 
   lps::specification spec = lps::remove_stochastic_operators(lps::linearise(SPECIFICATION));
-  state_formulas::state_formula formula = state_formulas::parse_state_formula(FORMULA2, spec);
+  state_formulas::state_formula formula = state_formulas::parse_state_formula(FORMULA2, spec, false);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);
 
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(test_trivial)
 {
   const std::string TRIVIAL_FORMULA  = "[true*]<true*>true";
   lps::specification spec = lps::remove_stochastic_operators(lps::linearise(lps::detail::ABP_SPECIFICATION()));
-  state_formulas::state_formula formula = state_formulas::parse_state_formula(TRIVIAL_FORMULA, spec);
+  state_formulas::state_formula formula = state_formulas::parse_state_formula(TRIVIAL_FORMULA, spec, false);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);
   BOOST_CHECK(p.is_well_typed());
@@ -143,7 +143,7 @@ BOOST_AUTO_TEST_CASE(test_instantiate_global_variables)
     ;
   std::string formula_text = "([true*.a(1)]  (mu X.([!a(1)]X && <true> true)))";
   lps::specification spec = lps::remove_stochastic_operators(lps::linearise(spec_text));
-  state_formulas::state_formula formula = state_formulas::parse_state_formula(formula_text, spec);
+  state_formulas::state_formula formula = state_formulas::parse_state_formula(formula_text, spec, false);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);
   std::cout << "<before>" << mcrl2::pbes_system::pp(p) << std::endl;
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE(test_find_sort_expressions)
 {
   const std::string TRIVIAL_FORMULA  = "[true*]<true*>true";
   lps::specification spec = lps::remove_stochastic_operators(lps::linearise(lps::detail::ABP_SPECIFICATION()));
-  state_formulas::state_formula formula = state_formulas::parse_state_formula(TRIVIAL_FORMULA, spec);
+  state_formulas::state_formula formula = state_formulas::parse_state_formula(TRIVIAL_FORMULA, spec, false);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);
   std::set<data::sort_expression> s;

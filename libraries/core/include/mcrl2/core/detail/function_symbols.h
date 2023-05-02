@@ -740,6 +740,14 @@ const atermpp::function_symbol& function_symbol_PRESConstantMultiply()
   return function_symbol_PRESConstantMultiply;
 }
 
+// PRESConstantMultiplyAlt
+inline
+const atermpp::function_symbol& function_symbol_PRESConstantMultiplyAlt()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESConstantMultiplyAlt("PRESConstantMultiplyAlt", 2);
+  return function_symbol_PRESConstantMultiplyAlt;
+}
+
 // PRESFalse
 inline
 const atermpp::function_symbol& function_symbol_PRESFalse()
@@ -946,6 +954,14 @@ const atermpp::function_symbol& function_symbol_RESConstantMultiply()
 {
   static const atermpp::global_function_symbol function_symbol_RESConstantMultiply("RESConstantMultiply", 2);
   return function_symbol_RESConstantMultiply;
+}
+
+// RESConstantMultiplyAlt
+inline
+const atermpp::function_symbol& function_symbol_RESConstantMultiplyAlt()
+{
+  static const atermpp::global_function_symbol function_symbol_RESConstantMultiplyAlt("RESConstantMultiplyAlt", 2);
+  return function_symbol_RESConstantMultiplyAlt;
 }
 
 // RESEqInf
@@ -1661,6 +1677,7 @@ static const atermpp::function_symbol SortCons;
   static const atermpp::function_symbol PRESImp;
   static const atermpp::function_symbol PRESPlus;
   static const atermpp::function_symbol PRESConstantMultiply;
+  static const atermpp::function_symbol PRESConstantMultiplyAlt;
   static const atermpp::function_symbol PRESMinall;
   static const atermpp::function_symbol PRESMaxall;
   static const atermpp::function_symbol PRESSum;
@@ -1675,6 +1692,7 @@ static const atermpp::function_symbol SortCons;
   static const atermpp::function_symbol RESImp;
   static const atermpp::function_symbol RESPlus;
   static const atermpp::function_symbol RESConstantMultiply;
+  static const atermpp::function_symbol RESConstantMultiplyAlt;
   static const atermpp::function_symbol RESCondAnd;
   static const atermpp::function_symbol RESCondOr;
   static const atermpp::function_symbol RESEqInf;
