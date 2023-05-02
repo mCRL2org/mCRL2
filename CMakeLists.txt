@@ -69,7 +69,7 @@ mark_as_advanced(
 )
 
 if(MCRL2_ENABLE_BOOST_JSON_SUPPORT)
-  set(MCRL2_MIN_BOOST_VERSION 1.71.0)
+  set(MCRL2_MIN_BOOST_VERSION 1.75.0)
 endif()
 
 
