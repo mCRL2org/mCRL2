@@ -126,6 +126,7 @@ bool is_monotonous(const state_formula& f,
   else if (is_variable(f))
   {
     const variable& g = atermpp::down_cast<variable>(f);
+    assert(contains(non_negated_variables, g.name()));
     return !contains(negated_variables, g.name());
   }
   else if (is_mu(f))
