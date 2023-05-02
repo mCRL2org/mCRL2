@@ -12,8 +12,6 @@
 #ifndef MCRL2_DATA_DETAIL_DATA_PROPERTY_MAP_H
 #define MCRL2_DATA_DETAIL_DATA_PROPERTY_MAP_H
 
-#include <boost/lexical_cast.hpp>
-
 #include "mcrl2/data/variable.h"
 
 namespace mcrl2
@@ -102,7 +100,7 @@ class data_property_map
     //--------------------------------------------//
     unsigned int parse_unsigned_int(std::string const& text) const
     {
-      return boost::lexical_cast<unsigned int>(utilities::remove_whitespace(text));
+      return std::stoul(utilities::remove_whitespace(text)); // Transform string to an unsigned integer. 
     }
 
     std::set<std::string> parse_set_string(std::string const& text) const
