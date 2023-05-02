@@ -65,6 +65,7 @@ std::cerr << "RUN4\n";
           detail::E(f, parameters, equations, core::term_traits_optimized<pres_expression>());
         }
       }
+std::cerr << "OBTAINED EQUATIONS\n "; for(auto e: equations){ std::cerr << "EQ " << e << "\n"; } std::cerr << "\ni----------------------------------\n";
     }
 
   public:
@@ -109,7 +110,6 @@ std::cerr << "RUN4\n";
       std::vector<pres_equation> equations;
       detail::lps2pres_parameters parameters(f, lpsspec.process(), m_generator, T);
       run(f, structured, unoptimized, equations, parameters);
-std::cerr << "OBTAINED EQUATIONS AAAAA\n "; for(auto e: equations){ std::cerr << "EQ " << e << "\n"; } std::cerr << "\ni----------------------------------\n";
 
       // compute the initial state
       assert(!equations.empty());
