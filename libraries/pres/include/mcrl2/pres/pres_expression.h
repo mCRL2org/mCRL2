@@ -1538,6 +1538,66 @@ struct term_traits<pres_system::pres_expression>
     pres_system::make_imp(result, p, q);
   }
 
+  /// \brief Make a plus
+  /// \param p A term
+  /// \param q A term
+  /// \return The value <tt>p + q</tt>
+  static inline
+  term_type plus(const term_type& p, const term_type& q)
+  {
+    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PRESPlus(), p, q));
+  }
+
+  /// \brief Make a plus
+  /// \param result The value <tt>p + q</tt>
+  /// \param p A term
+  /// \param q A term
+  static inline
+  void make_plus(term_type& result, const term_type& p, const term_type& q)
+  {
+    pres_system::make_plus(result, p, q);
+  }
+
+  /// \brief Make a const_multiply
+  /// \param p A term
+  /// \param q A term
+  /// \return The value <tt>p * q</tt>
+  static inline
+  term_type const_multiply(const term_type& p, const term_type& q)
+  {
+    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PRESConstantMultiply(), p, q));
+  }
+
+  /// \brief Make a const multiply
+  /// \param result The value <tt>p * q</tt>
+  /// \param p A term
+  /// \param q A term
+  static inline
+  void make_const_multiply(term_type& result, const term_type& p, const term_type& q)
+  {
+    pres_system::make_const_multiply(result, p, q);
+  }
+
+  /// \brief Make a const multiply alt
+  /// \param p A term
+  /// \param q A term
+  /// \return The value <tt>p * q</tt>
+  static inline
+  term_type const_multiply_alt(const term_type& p, const term_type& q)
+  {
+    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PRESConstantMultiplyAlt(), p, q));
+  }
+
+  /// \brief Make a const multiply alt
+  /// \param result The value <tt>p * q</tt>
+  /// \param p A term
+  /// \param q A term
+  static inline
+  void make_const_multiply_alt(term_type& result, const term_type& p, const term_type& q)
+  {
+    pres_system::make_const_multiply_alt(result, p, q);
+  }
+
   /// \brief Make a generalized minimum
   /// \param l A sequence of variables
   /// \param p A term

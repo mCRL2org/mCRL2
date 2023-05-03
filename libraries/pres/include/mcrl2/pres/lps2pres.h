@@ -43,10 +43,12 @@ class lps2pres_algorithm
       {
         if (unoptimized)
         {
+std::cerr << "RUN1\n";
           detail::E_structured(f, parameters, equations, core::term_traits<pres_expression>());
         }
         else
         {
+std::cerr << "RUN2\n";
           detail::E_structured(f, parameters, equations, core::term_traits_optimized<pres_expression>());
         }
       }
@@ -54,14 +56,15 @@ class lps2pres_algorithm
       {
         if (unoptimized)
         {
+std::cerr << "RUN3\n";
           detail::E(f, parameters, equations, core::term_traits<pres_expression>());
         }
         else
         {
+std::cerr << "RUN4\n";
           detail::E(f, parameters, equations, core::term_traits_optimized<pres_expression>());
         }
       }
-std::cerr << "OBTAINED EQUATIONS\n "; for(auto e: equations){ std::cerr << "EQ " << e << "\n"; } std::cerr << "\ni----------------------------------\n";
     }
 
   public:
@@ -106,6 +109,7 @@ std::cerr << "OBTAINED EQUATIONS\n "; for(auto e: equations){ std::cerr << "EQ "
       std::vector<pres_equation> equations;
       detail::lps2pres_parameters parameters(f, lpsspec.process(), m_generator, T);
       run(f, structured, unoptimized, equations, parameters);
+std::cerr << "OBTAINED EQUATIONS AAAAA\n "; for(auto e: equations){ std::cerr << "EQ " << e << "\n"; } std::cerr << "\ni----------------------------------\n";
 
       // compute the initial state
       assert(!equations.empty());
@@ -121,7 +125,8 @@ std::cerr << "OBTAINED EQUATIONS\n "; for(auto e: equations){ std::cerr << "EQ "
         e.push_front(data::sort_real::real_(0));
       }
       propositional_variable_instantiation init(Xe, e);
-
+std::cerr << "OBTAINED EQUATIONS\n "; for(auto e: equations){ std::cerr << "EQ " << e << "\n"; } std::cerr << "\ni----------------------------------\n";
+std::cerr << "INIT " << init << "\n";
       pres result(lpsspec.data(), lpsspec.global_variables(), equations, init);
       assert(is_monotonous(result));
       pres_system::algorithms::normalize(result);

@@ -170,7 +170,7 @@ operator!=(const pres_equation& x, const pres_equation& y)
 inline
 atermpp::aterm_appl pres_equation_to_aterm(const pres_equation& eqn)
 {
-  return atermpp::aterm_appl(core::detail::function_symbol_PBEqn(), eqn.symbol(), eqn.variable(), eqn.formula());
+  return atermpp::aterm_appl(core::detail::function_symbol_PREqn(), eqn.symbol(), eqn.variable(), eqn.formula());
 }
 
 // Overload for pp for propositional variables.

@@ -338,7 +338,6 @@ atermpp::aterm_appl pres_to_aterm(const pres& p)
              global_variables,
              equations,
              initial_state);
-
   return result;
 }
 

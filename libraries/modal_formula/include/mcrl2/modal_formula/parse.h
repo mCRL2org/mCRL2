@@ -148,6 +148,7 @@ state_formula parse_state_formula(const std::string& text,
                                  )
 {
   state_formula x = detail::parse_state_formula(text);
+std::cerr << "PARSED " << atermpp::aterm(x) << "\n";
   if (options.type_check)
   {
     x = state_formulas::typecheck_state_formula(x, lpsspec, formula_is_quantitative);
@@ -186,6 +187,7 @@ state_formula_specification parse_state_formula_specification(
 )
 {
   state_formula_specification result = detail::parse_state_formula_specification(text);
+std::cerr << "PARSEDA " << atermpp::aterm(result.formula()) << "\n";
   if (options.type_check)
   {
     result.formula() = state_formulas::typecheck_state_formula(result.formula(), formula_is_quantitative, result.data(), result.action_labels(), data::variable_list());

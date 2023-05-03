@@ -295,28 +295,34 @@ std::string pp(const T& t)
 
 namespace state_formulas {
 
-constexpr inline int precedence(const mu&)     { return 41; }
-constexpr inline int precedence(const nu&)     { return 41; }
-constexpr inline int precedence(const forall&) { return 42; }
-constexpr inline int precedence(const exists&) { return 42; }
-constexpr inline int precedence(const imp&)    { return 43; }
-constexpr inline int precedence(const or_&)    { return 44; }
-constexpr inline int precedence(const and_&)   { return 45; }
-constexpr inline int precedence(const must&)   { return 46; }
-constexpr inline int precedence(const may&)    { return 46; }
-constexpr inline int precedence(const not_&)   { return 47; }
+constexpr inline int precedence(const mu&)                 { return 41; }
+constexpr inline int precedence(const nu&)                 { return 41; }
+constexpr inline int precedence(const forall&)             { return 42; }
+constexpr inline int precedence(const exists&)             { return 42; }
+constexpr inline int precedence(const imp&)                { return 45; }
+constexpr inline int precedence(const or_&)                { return 46; }
+constexpr inline int precedence(const and_&)               { return 47; }
+constexpr inline int precedence(const plus&)               { return 43; }
+constexpr inline int precedence(const const_multiply&)     { return 44; }
+constexpr inline int precedence(const const_multiply_alt&) { return 44; }
+constexpr inline int precedence(const must&)               { return 48; }
+constexpr inline int precedence(const may&)                { return 48; }
+constexpr inline int precedence(const not_&)               { return 50; }
 inline int precedence(const state_formula& x)
 {
-  if      (is_mu(x))     { return precedence(atermpp::down_cast<mu>(x)); }
-  else if (is_nu(x))     { return precedence(atermpp::down_cast<nu>(x)); }
-  else if (is_forall(x)) { return precedence(atermpp::down_cast<forall>(x)); }
-  else if (is_exists(x)) { return precedence(atermpp::down_cast<exists>(x)); }
-  else if (is_imp(x))    { return precedence(atermpp::down_cast<imp>(x)); }
-  else if (is_or(x))     { return precedence(atermpp::down_cast<or_>(x)); }
-  else if (is_and(x))    { return precedence(atermpp::down_cast<and_>(x)); }
-  else if (is_must(x))   { return precedence(atermpp::down_cast<must>(x)); }
-  else if (is_may(x))    { return precedence(atermpp::down_cast<may>(x)); }
-  else if (is_not(x))    { return precedence(atermpp::down_cast<not_>(x)); }
+  if      (is_mu(x))                 { return precedence(atermpp::down_cast<mu>(x)); }
+  else if (is_nu(x))                 { return precedence(atermpp::down_cast<nu>(x)); }
+  else if (is_forall(x))             { return precedence(atermpp::down_cast<forall>(x)); }
+  else if (is_exists(x))             { return precedence(atermpp::down_cast<exists>(x)); }
+  else if (is_imp(x))                { return precedence(atermpp::down_cast<imp>(x)); }
+  else if (is_or(x))                 { return precedence(atermpp::down_cast<or_>(x)); }
+  else if (is_and(x))                { return precedence(atermpp::down_cast<and_>(x)); }
+  else if (is_plus(x))               { return precedence(atermpp::down_cast<plus>(x)); }
+  else if (is_const_multiply(x))     { return precedence(atermpp::down_cast<const_multiply>(x)); }
+  else if (is_const_multiply_alt(x)) { return precedence(atermpp::down_cast<const_multiply_alt>(x)); }
+  else if (is_must(x))               { return precedence(atermpp::down_cast<must>(x)); }
+  else if (is_may(x))                { return precedence(atermpp::down_cast<may>(x)); }
+  else if (is_not(x))                { return precedence(atermpp::down_cast<not_>(x)); }
   return core::detail::max_precedence;
 }
 
@@ -324,22 +330,34 @@ inline int precedence(const state_formula& x)
 inline bool is_left_associative(const imp&)  { return false; }
 inline bool is_left_associative(const or_&)  { return true; }
 inline bool is_left_associative(const and_&) { return true; }
+inline bool is_left_associative(const plus&) { return true; }
+inline bool is_left_associative(const const_multiply&) { return true; }
+inline bool is_left_associative(const const_multiply_alt&) { return true; }
 inline bool is_left_associative(const state_formula& x)
 {
   if (is_imp(x))      { return is_left_associative(atermpp::down_cast<imp>(x)); }
   else if (is_or(x))  { return is_left_associative(atermpp::down_cast<or_>(x)); }
   else if (is_and(x)) { return is_left_associative(atermpp::down_cast<and_>(x)); }
+  else if (is_plus(x)) { return is_left_associative(atermpp::down_cast<plus>(x)); }
+  else if (is_const_multiply(x)) { return is_left_associative(atermpp::down_cast<const_multiply>(x)); }
+  else if (is_const_multiply_alt(x)) { return is_left_associative(atermpp::down_cast<const_multiply_alt>(x)); }
   return false;
 }
 
 inline bool is_right_associative(const imp&)  { return true; }
 inline bool is_right_associative(const or_&)  { return true; }
 inline bool is_right_associative(const and_&) { return true; }
+inline bool is_right_associative(const plus&) { return true; }
+inline bool is_right_associative(const const_multiply&) { return true; }
+inline bool is_right_associative(const const_multiply_alt&) { return true; }
 inline bool is_right_associative(const state_formula& x)
 {
   if (is_imp(x))      { return is_right_associative(atermpp::down_cast<imp>(x)); }
   else if (is_or(x))  { return is_right_associative(atermpp::down_cast<or_>(x)); }
   else if (is_and(x)) { return is_right_associative(atermpp::down_cast<and_>(x)); }
+  else if (is_plus(x)) { return is_right_associative(atermpp::down_cast<plus>(x)); }
+  else if (is_const_multiply(x)) { return is_right_associative(atermpp::down_cast<const_multiply>(x)); }
+  else if (is_const_multiply_alt(x)) { return is_right_associative(atermpp::down_cast<const_multiply_alt>(x)); }
   return false;
 }
 
@@ -418,6 +436,13 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
     derived().leave(x);
   }
 
+  void apply(const state_formulas::minus& x)
+  {
+    derived().enter(x);
+    print_unary_left_operation(x, "-");
+    derived().leave(x);
+  }
+
   void apply(const state_formulas::and_& x)
   {
     derived().enter(x);
@@ -436,6 +461,30 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
   {
     derived().enter(x);
     print_binary_operation(x, " => ");
+    derived().leave(x);
+  }
+
+  void apply(const state_formulas::plus& x)
+  {
+    derived().enter(x);
+    print_binary_operation(x, " + ");
+    derived().leave(x);
+  }
+
+  void apply(const state_formulas::const_multiply& x)
+  {
+    derived().enter(x);
+    print_binary_operation(x, " * ");
+    derived().leave(x);
+  }
+
+  void apply(const state_formulas::const_multiply_alt& x)
+  {
+    derived().enter(x);
+    derived().apply(x.left());
+    derived().print("*"); 
+    derived().apply(x.right());
+    // print_expression(x.right(), false);
     derived().leave(x);
   }
 
@@ -526,11 +575,11 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
   // TODO: merge this function with the version in data/print.h (?)
   void print_assignments(const data::assignment_list& assignments)
   {
-    disable_val();
     if (assignments.empty())
     {
       return;
     }
+    disable_val();
     derived().print("(");
     for (auto i = assignments.begin(); i != assignments.end(); ++i)
     {

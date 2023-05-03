@@ -64,6 +64,22 @@ bool is_monotonous(pres_expression f)
       const auto& right = atermpp::down_cast<imp>(f).right();
       return is_monotonous(left) && is_monotonous(minus(right));
     }
+    else if (is_plus(f))
+    {
+      const auto& left = atermpp::down_cast<plus>(f).left();
+      const auto& right = atermpp::down_cast<plus>(f).right();
+      return is_monotonous(minus(left)) && is_monotonous(minus(right));
+    }
+    else if (is_const_multiply(f))
+    {
+      const auto& right = atermpp::down_cast<const_multiply>(f).right();
+      return is_monotonous(minus(right));
+    }
+    else if (is_const_multiply_alt(f))
+    {
+      const auto& left = atermpp::down_cast<const_multiply_alt>(f).left();
+      return is_monotonous(minus(left));
+    }
     else if (is_minall(f))
     {
       const auto& body = atermpp::down_cast<minall>(f).body();
@@ -115,6 +131,22 @@ bool is_monotonous(pres_expression f)
     const auto& left = atermpp::down_cast<imp>(f).left();
     const auto& right = atermpp::down_cast<imp>(f).right();
     return is_monotonous(minus(left)) && is_monotonous(right);
+  }
+  else if (is_plus(f))
+  {
+    const auto& left = atermpp::down_cast<plus>(f).left();
+    const auto& right = atermpp::down_cast<plus>(f).right();
+    return is_monotonous(left) && is_monotonous(right);
+  }
+  else if (is_const_multiply(f))
+  {
+    const auto& right = atermpp::down_cast<const_multiply>(f).right();
+    return is_monotonous(right);
+  }
+  else if (is_const_multiply_alt(f))
+  {
+    const auto& left = atermpp::down_cast<const_multiply_alt>(f).left();
+    return is_monotonous(left);
   }
   else if (is_minall(f))
   {

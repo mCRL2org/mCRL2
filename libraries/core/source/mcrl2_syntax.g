@@ -413,9 +413,9 @@ StateFrm
   | 'nu' StateVarDecl '.' StateFrm             $unary_right 41   // Maximal fixed point
   | 'forall' VarsDeclList '.' StateFrm         $unary_right 42   // Universal quantification, also minimum
   | 'exists' VarsDeclList '.' StateFrm         $unary_right 42   // Existential quantification, also maximum
-  | 'sum' VarsDeclList '.' StateFrm            $unary_right 42   // Sum operator
   | StateFrm ('+' $binary_op_right 43) StateFrm                  // Addition
-  | DataValExpr ('*' $binary_op_right 44) StateFrm               // Addition
+  | DataValExpr ('*' $binary_op_right 44) StateFrm               // Left constant multiply
+  | StateFrm ('*' $binary_op_right 44) DataValExpr               // Right constant multiply
   | StateFrm ('=>' $binary_op_right 45) StateFrm                 // Implication
   | StateFrm ('||' $binary_op_right 46) StateFrm                 // Disjunction, and max
   | StateFrm ('&&' $binary_op_right 47) StateFrm                 // Conjunction, and min

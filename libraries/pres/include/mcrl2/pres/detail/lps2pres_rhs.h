@@ -285,6 +285,11 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
     throw mcrl2::runtime_error("rhs_traverser: negation is not supported!");
   }
 
+  void apply(const state_formulas::minus&)
+  {
+    throw mcrl2::runtime_error("rhs_traverser: minus is not supported!");
+  }
+
   void leave(const state_formulas::and_&)
   {
     pres_expression right = pop();
@@ -297,6 +302,32 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
     pres_expression right = pop();
     pres_expression left = pop();
     push(tr::or_(left, right));
+  }
+
+  void leave(const state_formulas::plus&)
+  {
+    pres_expression right = pop();
+    pres_expression left = pop();
+    push(tr::plus(left, right));
+  }
+
+  void apply(const state_formulas::const_multiply& x)
+  {
+    derived().enter(x);
+    // push_variables(x.variables());
+    derived().apply(x.right());
+    make_const_multiply(top(), x.left(), top());
+    derived().leave(x);
+    /* pres_expression right = pop();
+    pres_expression left = pop();
+    push(tr::const_multiply(left, right)); */
+  }
+
+  void leave(const state_formulas::const_multiply_alt&)
+  {
+    pres_expression right = pop();
+    pres_expression left = pop();
+    push(tr::const_multiply_alt(left, right));
   }
 
   void apply(const state_formulas::imp&)

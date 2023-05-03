@@ -97,7 +97,7 @@ struct e_traverser: public state_formulas::state_formula_traverser<Derived>
     push(epsilon());
   }
 
-  void apply(const state_formulas::not_&)
+  void apply(const state_formulas::minus&)
   {
     throw mcrl2::runtime_error("e_traverser: negation is not supported!");
   }
@@ -110,6 +110,13 @@ struct e_traverser: public state_formulas::state_formula_traverser<Derived>
   }
 
   void leave(const state_formulas::or_&)
+  {
+    std::vector<pres_equation> right = pop();
+    std::vector<pres_equation> left = pop();
+    push(left + right);
+  }
+
+  void leave(const state_formulas::plus&)
   {
     std::vector<pres_equation> right = pop();
     std::vector<pres_equation> left = pop();

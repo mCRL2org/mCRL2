@@ -583,7 +583,7 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
     {
       apply(result, static_cast<plus>(x).left());
       state_formula rhs;
-      apply(rhs, static_cast<plus>(x).left());
+      apply(rhs, static_cast<plus>(x).right());
       make_plus(result, result, rhs);
     }
   }
@@ -599,7 +599,7 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
     {
       data::data_expression constant = m_data_type_checker.typecheck_data_expression(static_cast<const_multiply>(x).left(), data::sort_real::real_(), m_variable_context);
       state_formula rhs;
-      apply(rhs, static_cast<const_multiply>(x).left());
+      apply(rhs, static_cast<const_multiply>(x).right());
       make_const_multiply(result, constant, rhs);
     }
   }
@@ -614,7 +614,7 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
     else
     {
       state_formula lhs;
-      apply(lhs, static_cast<const_multiply_alt>(x).right());
+      apply(lhs, static_cast<const_multiply_alt>(x).left());
       data::data_expression constant = m_data_type_checker.typecheck_data_expression(static_cast<const_multiply_alt>(x).right(), data::sort_real::real_(), m_variable_context);
       make_const_multiply_alt(result, lhs, constant);
     }

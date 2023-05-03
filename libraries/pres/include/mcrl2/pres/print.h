@@ -26,6 +26,8 @@ constexpr inline int precedence(const imp&)    { return 23; }
 constexpr inline int precedence(const or_&)    { return 24; }
 constexpr inline int precedence(const and_&)   { return 25; }
 constexpr inline int precedence(const minus&)  { return 25; }
+constexpr inline int precedence(const const_multiply&) { return 26; }
+constexpr inline int precedence(const const_multiply_alt&) { return 26; }
 inline int precedence(const pres_expression& x)
 {
   if      (is_minall(x))            { return precedence(atermpp::down_cast<minall>(x)); }
@@ -221,7 +223,7 @@ struct printer: public pres_system::add_traverser_sort_expressions<data::detail:
   void apply(const pres_system::minus& x)
   {
     derived().enter(x);
-    print_pres_unary_left_operation(x, "!");
+    print_pres_unary_left_operation(x, " -");
     derived().leave(x);
   }
 
@@ -243,6 +245,27 @@ struct printer: public pres_system::add_traverser_sort_expressions<data::detail:
   {
     derived().enter(x);
     print_pres_binary_operation(x, " => ");
+    derived().leave(x);
+  }
+
+  void apply(const pres_system::plus& x)
+  {
+    derived().enter(x);
+    print_pres_binary_operation(x, " + ");
+    derived().leave(x);
+  }
+
+  void apply(const pres_system::const_multiply& x)
+  {
+    derived().enter(x);
+    print_pres_binary_operation(x, "*");
+    derived().leave(x);
+  }
+
+  void apply(const pres_system::const_multiply_alt& x)
+  {
+    derived().enter(x);
+    print_pres_binary_operation(x, "*");
     derived().leave(x);
   }
 
