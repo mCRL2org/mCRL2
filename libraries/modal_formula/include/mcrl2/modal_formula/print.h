@@ -526,11 +526,11 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
   // TODO: merge this function with the version in data/print.h (?)
   void print_assignments(const data::assignment_list& assignments)
   {
-    disable_val();
     if (assignments.empty())
     {
       return;
     }
+    disable_val();
     derived().print("(");
     for (auto i = assignments.begin(); i != assignments.end(); ++i)
     {
