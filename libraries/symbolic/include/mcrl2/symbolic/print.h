@@ -12,8 +12,6 @@
 
 #ifdef MCRL2_ENABLE_SYLVAN
 
-#include <sylvan_ldd.hpp>
-#include <vector>
 
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/undefined.h"
@@ -21,6 +19,11 @@
 #include "mcrl2/symbolic/alternative_relprod.h"
 #include "mcrl2/symbolic/data_index.h"
 
+#include <sylvan_ldd.hpp>
+
+#include <vector>
+#include <cmath>
+#include <cfenv>
 
 namespace mcrl2::symbolic {
 
@@ -190,10 +193,34 @@ std::string print_relation(const std::vector<data_expression_index>& data_index,
 }
 
 /// \brief Prints the number of elements represented by the ldd L and optionally also include the number of nodes of L.
-std::string print_size(const sylvan::ldds::ldd& L, bool print_nodecount)
+std::string print_size(const sylvan::ldds::ldd& L, bool print_exact, bool print_nodecount)
 {
   std::ostringstream out;
-  out << satcount(L);
+  if (print_exact)
+  {
+    // Use this ugly construct to figure out if the conversion succeeded, should have been an exception or sum type.
+    std::fenv_t save_env;
+    std::feholdexcept(&save_env);
+
+    std::feclearexcept(FE_ALL_EXCEPT);
+    long long exact = std::llround(satcount(L));
+    if (std::fetestexcept(FE_INVALID))
+    {
+      //  the result of the rounding is outside the range of the return type.
+      out << satcount(L);
+    }
+    else
+    {
+      out << exact;
+    }
+    
+    std::feupdateenv(&save_env);
+  }
+  else
+  {
+    out << satcount(L);
+  }
+
   if (print_nodecount)
   {
     out << "[" << nodecount(L) << "]";

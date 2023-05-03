@@ -170,7 +170,7 @@ void bisim(const symbolic_lts& lts)
   mCRL2log(log::verbose) << "There are " << partition.size() << " equivalence classes." << std::endl;
   for (const ldd& C : partition)
   {
-    mCRL2log(log::debug) << symbolic::print_size(C, true) << std::endl;
+    mCRL2log(log::debug) << symbolic::print_size(C, true, true) << std::endl;
     mCRL2log(log::debug) << symbolic::print_states(lts.data_index, C) << std::endl;
   }
 }

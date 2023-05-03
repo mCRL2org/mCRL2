@@ -108,7 +108,7 @@ class lpsreach_algorithm
 
     std::string print_size(const sylvan::ldds::ldd& L)
     {
-      return symbolic::print_size(L, m_options.print_nodesize);
+      return symbolic::print_size(L, m_options.print_exact, m_options.print_nodesize);
     }
 
   public:

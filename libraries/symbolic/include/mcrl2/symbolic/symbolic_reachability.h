@@ -34,6 +34,7 @@ struct symbolic_reachability_options
   bool chaining = false;
   bool detect_deadlocks = false;
   bool one_point_rule_rewrite = false;
+  bool print_exact = false;
   bool print_nodesize = false;
   bool replace_constants_by_variables = false;
   bool remove_unused_rewrite_rules = false;
