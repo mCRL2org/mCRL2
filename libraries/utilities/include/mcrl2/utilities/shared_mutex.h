@@ -122,6 +122,13 @@ public:
     m_pool.unregister_mutex(this);
   }
 
+  shared_mutex(shared_mutex&& other)
+    : m_pool(other.m_pool)
+  {
+    m_pool.register_mutex(this);
+    m_pool.unregister_mutex(&other);
+  }
+  
   // Obtain exclusive access to the busy-forbidden lock.
   inline
   lock_guard lock()
@@ -135,22 +142,7 @@ public:
   inline
   shared_guard lock_shared()
   {
-    if (mcrl2::utilities::detail::GlobalThreadSafe && m_lock_depth == 0)
-    {
-      assert(!m_busy_flag);
-      m_busy_flag.store(true);
-
-      // Wait for the forbidden flag to become false.
-      while (m_forbidden_flag.load())
-      {
-        m_busy_flag = false;
-        m_pool.wait();
-        m_busy_flag = true;
-      }
-    }
-
-    ++m_lock_depth;
-
+    lock_shared_impl();
     return shared_guard(*this);
   }
 
@@ -170,6 +162,26 @@ private:
   void unlock()
   {
     m_pool.unlock_impl();
+  }
+    
+  inline
+  void lock_shared_impl()
+  {
+    if (mcrl2::utilities::detail::GlobalThreadSafe && m_lock_depth == 0)
+    {
+      assert(!m_busy_flag);
+      m_busy_flag.store(true);
+
+      // Wait for the forbidden flag to become false.
+      while (m_forbidden_flag.load())
+      {
+        m_busy_flag = false;
+        m_pool.wait();
+        m_busy_flag = true;
+      }
+    }
+
+    ++m_lock_depth;
   }
 
   // Release shared access to the busy-forbidden lock.
@@ -282,6 +294,13 @@ void shared_guard::unlock_shared()
 {
   m_mutex.unlock_shared();
   is_locked = false;
+}
+
+inline void shared_guard::lock_shared()
+{
+  // Uses the internal implementation since we don't need a shared_guard.
+  m_mutex.lock_shared_impl();
+  is_locked = true;
 }
 
 inline
