@@ -61,6 +61,7 @@ class lpsreach_tool: public parallel_tool<rewriter_tool<input_output_tool>>
                       "'a user defined permutation e.g. '1 3 2 0 4'"
                       );
       desc.add_option("max-iterations", utilities::make_optional_argument("NUM", "0"), "limit number of breadth-first iterations to NUM");
+      desc.add_option("print-exact", "prints the sizes of LDDs exactly when within the representable range, and in scientific notation otherwise");
       desc.add_option("print-nodesize", "print the number of LDD nodes in addition to the number of elements represented as 'elements[nodes]'");
       desc.add_option("saturation", "reduce the amount of breadth-first iterations required by applying the transition groups until fixed point is reached");
       desc.add_hidden_option("no-discard", "do not discard any parameters");
@@ -81,6 +82,7 @@ class lpsreach_tool: public parallel_tool<rewriter_tool<input_output_tool>>
       options.chaining                              = parser.has_option("chaining");
       options.detect_deadlocks                      = parser.has_option("deadlock");
       options.one_point_rule_rewrite                = !parser.has_option("no-one-point-rule-rewrite");
+      options.print_exact                           = parser.has_option("print-exact");
       options.print_nodesize                        = parser.has_option("print-nodesize");
       options.remove_unused_rewrite_rules           = !parser.has_option("no-remove-unused-rewrite-rules");
       options.replace_constants_by_variables        = false; // This option cannot be used in the symbolic algorithm
