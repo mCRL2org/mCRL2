@@ -141,7 +141,7 @@ private:
 	const data::data_expression e = m_data_structures->rewriter(e_in);
 	if (is_variable(e))
 	{
-	  return static_cast<std::string>(atermpp::down_cast<data::variable>(e).name()).c_str();;
+	  return static_cast<std::string>(atermpp::down_cast<data::variable>(e).name()).c_str();
 	}
 	else if (data::sort_pos::is_positive_constant(e) ||
 	  data::sort_nat::is_natural_constant(e) ||
@@ -277,12 +277,12 @@ private:
   /// \param assignments a converted list of assignments.
   /// \return The corresponding JSON object.
   object export_distribution_instance_to_jani(const enumerator_element& p,
-	const array& assignments) const
+	const data::assignment_list& assignments) const
   {
 	return object{
 	  {"location", "l"},
 	  {"probability", object{{"exp", convert_data_expression(p.expression())}} },
-	  {"assignments", assignments}
+	  {"assignments", convert_assignments(assignments)}
 	};
   }
 
@@ -295,7 +295,6 @@ private:
   array export_distribution_to_jani(const lps::stochastic_distribution& dist,
 	const data::assignment_list& assignments) const
   {
-	const array assignments_JANI = convert_assignments(assignments);
 	if (dist.is_defined())
 	{
 	  array destinations;
@@ -305,7 +304,7 @@ private:
 		m_data_structures->sigma(),
 		[&](const enumerator_element& p)
 		{
-		  destinations.push_back(export_distribution_instance_to_jani(p, assignments_JANI));
+		  destinations.push_back(export_distribution_instance_to_jani(p, assignments));
 	  return false;
 		},
 		[](const data::data_expression& e)
@@ -319,7 +318,7 @@ private:
 	  return array{ object{
 		{"location", "l"},
 		{"probability", object{ {"exp", 1} }},
-		{"assignments", assignments_JANI}
+		{"assignments", convert_assignments(assignments)}
 		} };
 	}
   }
