@@ -346,8 +346,8 @@ PresExpr
   | PresExpr ('=>' $binary_op_right 23) PresExpr                 // Implication
   | PresExpr ('||' $binary_op_right 24) PresExpr                 // Disjunction
   | PresExpr ('&&' $binary_op_right 25) PresExpr                 // Conjunction
-  | DataValExpr '*' PresExpr                                     // Multiplication with a positive constant
-  | PresExpr '*' DataValExpr                                     // Multiplication with a positive constant
+  | DataValExpr ('*' $binary_op_right 26) PresExpr               // Multiplication with a positive constant
+  | PresExpr ('*' $binary_op_right 26) DataValExpr               // Multiplication with a positive constant
   | 'eqinf' '(' PresExpr ')'                                     // Equal infinity
   | 'eqninf' '(' PresExpr ')'                                    // Equal to infinity
   | 'condsm' '(' PresExpr ',' PresExpr ',' PresExpr ')'          // Conditional smaller than 0 with or. 
