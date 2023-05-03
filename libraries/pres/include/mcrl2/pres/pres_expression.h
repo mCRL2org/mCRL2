@@ -1875,6 +1875,7 @@ struct term_traits<pres_system::pres_expression>
   /// \param q A term
   /// \return The value <tt>p * q</tt>
   static inline
+
   term_type const_multiply(const data::data_expression& p, const term_type& q)
   {
     return pres_system::const_multiply(p, q);
@@ -1885,6 +1886,7 @@ struct term_traits<pres_system::pres_expression>
   /// \param p A term
   /// \param q A term
   static inline
+
   void make_const_multiply(term_type& result, const data::data_expression& p, const term_type& q)
   {
     pres_system::make_const_multiply(result, p, q);
