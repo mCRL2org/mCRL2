@@ -490,7 +490,7 @@ class pbesreach_algorithm
       }
       else
       {
-        mCRL2log(log::verbose) << "number of BES equations = " << symbolic::print_size(m_visited, m_options.print_nodesize) << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)" << std::endl;
+        mCRL2log(log::verbose) << "number of BES equations = " << print_size(m_visited) << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)" << std::endl;
       }
 
       mCRL2log(log::verbose) << "used variable order = " << core::detail::print_list(m_variable_order) << std::endl;
