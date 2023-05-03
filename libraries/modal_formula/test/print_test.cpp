@@ -61,6 +61,7 @@ BOOST_AUTO_TEST_CASE(test_abp)
   run_test_case("[true]val(true)", lpstext);
   run_test_case("exists d: Nat. val(d < 0)", lpstext);
   run_test_case("exists d: Nat. val(d < 0) || val(d + 1 == 5)", lpstext);
+  run_test_case("mu X. X || val(3 > 2)", lpstext);  // Check whether val is printed properly after a fixed point without parameters. 
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
