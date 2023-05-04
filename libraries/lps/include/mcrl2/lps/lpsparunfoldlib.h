@@ -153,16 +153,19 @@ namespace detail
       return get_cache_element(sort).affected_constructors;
     }
 
-    data::data_expression create_recogniser_expr(const data::function_symbol& f, const data::data_expression& expr)
+    data::data_expression create_cases(const data::data_expression& target, const data::data_expression_vector& rhss)
     {
-      unfold_cache_element& cache_elem = get_cache_element(f.sort().target_sort());
-      auto it1 = cache_elem.affected_constructors.begin();
-      auto it2 = cache_elem.new_constructors.begin();
-      while (*it1 != f)
+      unfold_cache_element& cache_elem = get_cache_element(target.sort());
+      data::application first_arg(cache_elem.determine_function, target);
+
+      data::data_expression_vector args;
+      args.push_back(first_arg);
+      for (const data::data_expression& rhs: rhss)
       {
-        ++it1; ++it2;
+        args.push_back(rhs);
       }
-      return equal_to(data::application(cache_elem.determine_function, expr), *it2);
+
+      return data::application(cache_elem.case_functions.at(rhss.front().sort()), args);
     }
 
     const data::function_symbol_vector& get_projection_funcs(const data::function_symbol& f)

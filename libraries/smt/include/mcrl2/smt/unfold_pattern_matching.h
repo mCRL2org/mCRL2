@@ -49,6 +49,21 @@ struct structured_sort_functions
     return data::application(recogniser_func.at(f), expr);
   }
 
+  data::data_expression create_cases(const data::data_expression& target, const data::data_expression_vector& rhss)
+  {
+    std::set<data::function_symbol> constr = get_constructors(target.sort());
+    auto const_it = constr.begin();
+    auto rhs_it = rhss.begin();
+    data::data_expression result = *rhs_it++;
+    for (const_it++; const_it != constr.end(); ++const_it, ++rhs_it)
+    {
+      data::data_expression term = *rhs_it;
+      data::data_expression condition = create_recogniser_expr(*const_it, target);
+      result = data::lazy::if_(condition, term, result);
+    }
+    return result;
+  }
+
   const data::function_symbol_vector& get_projection_funcs(const data::function_symbol& f) const
   {
     return projection_func.at(f);
