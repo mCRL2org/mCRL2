@@ -361,13 +361,25 @@ void unfold_data_manager::generate_case_function_equations(const data::sort_expr
     ++vars_it;
   }
 
-  // Finally add an equation that removes a case function if all (except the first)
+  // Add an equation that removes a case function if all (except the first)
   // argument are the same.
   // C(x, d_n, ...., d_n) = d_n
   data_expression_vector eq_args(new_cache_element.new_constructors.size() + 1, vars.back());
   eq_args[0] = vars.front();
   const application lhs(case_function , eq_args);
   m_dataspec.add_equation(data_equation(data::variable_list({vars.front(), vars.back()}), lhs, vars.back()));
+
+  if (m_dataspec.equal_sorts(case_function.sort().target_sort(), vars.front().sort()))
+  {
+    // Add an equation that rewrites to the first argument if the remainder are the corresponding constructors
+    // C(x, c_1, ..., c_n) = x
+    data_expression_vector cs_args{vars.front()};
+    for (const function_symbol& cs: new_cache_element.new_constructors)
+    {
+      cs_args.push_back(cs);
+    }
+    m_dataspec.add_equation(data_equation(data::variable_list({vars.front()}), application(case_function, cs_args), vars.front()));
+  }
 
   // If the case function maps to the Booleans, we can replace it by a disjunction.
   // Note: this may make the data specification inconsistent.
