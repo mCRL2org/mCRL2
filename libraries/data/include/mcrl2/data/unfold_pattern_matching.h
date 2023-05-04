@@ -341,17 +341,15 @@ data_expression construct_rhs(
   }
 
   /*
-   * Construct an rhs of the form if(is_cons1, rhs_cons1, if(is_cons2, rhs_cons2, ...))
+   * Construct an rhs of the form if(is_cons1, rhs_cons1, if(is_cons2, rhs_cons2, ...)) or equivalent
+   * The exact form depends on the implementation in ssf
    */
-  auto i = match_constructors.begin();
-  data_expression result = construct_rhs(ssf, gen, constructor_rules[*i], sort);
-  for (i++; i != match_constructors.end(); i++)
+  data_expression_vector rhs;
+  for (const auto& f: match_constructors)
   {
-    data_expression term = construct_rhs(ssf, gen, constructor_rules[*i], sort);
-    data_expression condition = ssf.create_recogniser_expr(*i, matching_target);
-    result = lazy::if_(condition, term, result);
+    rhs.push_back(construct_rhs(ssf, gen, constructor_rules[f], sort));
   }
-  return result;
+  return ssf.create_cases(matching_target, rhs);
 }
 
 } // namespace detail
