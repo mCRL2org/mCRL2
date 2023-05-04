@@ -1,5 +1,5 @@
 <root>
- <spec>Szymanski_3bit_linear_wait_spec.mcrl2</spec>
+ <spec>Szymanski_3bitlw_sem_spec.mcrl2</spec>
  <properties>
   <property>No deadlock</property>
   <property>Mutual Exclusion</property>

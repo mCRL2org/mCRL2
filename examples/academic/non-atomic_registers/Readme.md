@@ -25,6 +25,6 @@ The basic register model is combined with several mutual exclusion algorithms. W
 In addition there are three more mCRL2 models, not described in Algorithms_pseudocode.pdf:
 
 * Lamport_3bit_incorrect_z gives an interpretation of Lamport's 3bit algorithm that appears to be reasonable at first sight, but turns out to be incorrect. This models illustrates that one must be very careful when implementing pseudocode.
-* Szymanski_3bit_linear_wait_with_semaphore was used to produce a counterexample showing that Szymanski_3bit_linear_wait does not guarantee mutual exclusion for three threads and atomic registers.
-* Szymanski_flag_with_bits_protected_exit does guarantee mutual exclusion for three threads and atomic registers, but does not guarantee mutual exclusion for three threads with regular or safe registers.
+* Szymanski_3bit_linear_wait_with_semaphore, abbreviated as Szymanski_3bitlw_sem, was used to produce a counterexample showing that Szymanski_3bit_linear_wait does not guarantee mutual exclusion for three threads and atomic registers.
+* Szymanski_flag_with_bits_protected_exit, abbreviated as Szymanski_fwb_pe, does guarantee mutual exclusion for three threads and atomic registers, but does not guarantee mutual exclusion for three threads with regular or safe registers.
 
