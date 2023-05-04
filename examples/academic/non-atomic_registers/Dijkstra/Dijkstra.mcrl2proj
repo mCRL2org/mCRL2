@@ -3,6 +3,6 @@
  <properties>
   <property>No deadlock</property>
   <property>Mutual Exclusion</property>
-  <property>Reachability of the Critical Section</property>
+  <property>Reachable</property>
  </properties>
 </root>
