@@ -45,6 +45,13 @@ struct variable_substitution
   }
 };
 
+std::set<data::variable> substitution_variables(const variable_substitution& sigma)
+{
+  std::set<data::variable> result;
+  data::find_free_variables(sigma.rhs, std::inserter(result, result.end()));
+  return result;
+}
+
 } // namespace data
 
 } // namespace mcrl2
