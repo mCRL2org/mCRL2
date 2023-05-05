@@ -70,10 +70,10 @@ inline bool is_imp(const atermpp::aterm_appl& x);
 inline bool is_plus(const atermpp::aterm_appl& x);
 inline bool is_const_multiply(const atermpp::aterm_appl& x);
 inline bool is_const_multiply_alt(const atermpp::aterm_appl& x);
-inline bool is_rescondand(const atermpp::aterm_appl& x);
-inline bool is_rescondor(const atermpp::aterm_appl& x);
-inline bool is_reseqinf(const atermpp::aterm_appl& x);
-inline bool is_reseqninf(const atermpp::aterm_appl& x);
+inline bool is_eqinf(const atermpp::aterm_appl& x);
+inline bool is_eqninf(const atermpp::aterm_appl& x);
+inline bool is_condsm(const atermpp::aterm_appl& x);
+inline bool is_condeq(const atermpp::aterm_appl& x);
 
 /// \\brief Test for a res_expression expression
 /// \\param x A term
@@ -91,10 +91,10 @@ bool is_res_expression(const atermpp::aterm_appl& x)
          res::is_plus(x) ||
          res::is_const_multiply(x) ||
          res::is_const_multiply_alt(x) ||
-         res::is_rescondand(x) ||
-         res::is_rescondor(x) ||
-         res::is_reseqinf(x) ||
-         res::is_reseqninf(x);
+         res::is_eqinf(x) ||
+         res::is_eqninf(x) ||
+         res::is_condsm(x) ||
+         res::is_condeq(x);
 }
 
 // prototype declaration
@@ -833,195 +833,33 @@ inline void swap(const_multiply_alt& t1, const_multiply_alt& t2)
 }
 
 
-/// \\brief The conditional and expression for res expressions
-class rescondand: public res_expression
-{
-  public:
-    /// \\brief Default constructor.
-    rescondand()
-      : res_expression(core::detail::default_values::RESCondAnd)
-    {}
-
-    /// \\brief Constructor.
-    /// \\param term A term
-    explicit rescondand(const atermpp::aterm& term)
-      : res_expression(term)
-    {
-      assert(core::detail::check_term_RESCondAnd(*this));
-    }
-
-    /// \\brief Constructor.
-    rescondand(const res_expression& arg1, const res_expression& arg2, const res_expression& arg3)
-      : res_expression(atermpp::aterm_appl(core::detail::function_symbol_RESCondAnd(), arg1, arg2, arg3))
-    {}
-
-    /// Move semantics
-    rescondand(const rescondand&) noexcept = default;
-    rescondand(rescondand&&) noexcept = default;
-    rescondand& operator=(const rescondand&) noexcept = default;
-    rescondand& operator=(rescondand&&) noexcept = default;
-
-    const res_expression& arg1() const
-    {
-      return atermpp::down_cast<res_expression>((*this)[0]);
-    }
-
-    const res_expression& arg2() const
-    {
-      return atermpp::down_cast<res_expression>((*this)[1]);
-    }
-
-    const res_expression& arg3() const
-    {
-      return atermpp::down_cast<res_expression>((*this)[2]);
-    }
-};
-
-/// \\brief Make_rescondand constructs a new term into a given address.
-/// \\ \param t The reference into which the new rescondand is constructed. 
-template <class... ARGUMENTS>
-inline void make_rescondand(atermpp::aterm_appl& t, const ARGUMENTS&... args)
-{
-  atermpp::make_term_appl(t, core::detail::function_symbol_RESCondAnd(), args...);
-}
-
-/// \\brief Test for a rescondand expression
-/// \\param x A term
-/// \\return True if \\a x is a rescondand expression
-inline
-bool is_rescondand(const atermpp::aterm_appl& x)
-{
-  return x.function() == core::detail::function_symbols::RESCondAnd;
-}
-
-// prototype declaration
-std::string pp(const rescondand& x);
-
-/// \\brief Outputs the object to a stream
-/// \\param out An output stream
-/// \\param x Object x
-/// \\return The output stream
-inline
-std::ostream& operator<<(std::ostream& out, const rescondand& x)
-{
-  return out << res::pp(x);
-}
-
-/// \\brief swap overload
-inline void swap(rescondand& t1, rescondand& t2)
-{
-  t1.swap(t2);
-}
-
-
-/// \\brief The conditional or expression for res expressions
-class rescondor: public res_expression
-{
-  public:
-    /// \\brief Default constructor.
-    rescondor()
-      : res_expression(core::detail::default_values::RESCondOr)
-    {}
-
-    /// \\brief Constructor.
-    /// \\param term A term
-    explicit rescondor(const atermpp::aterm& term)
-      : res_expression(term)
-    {
-      assert(core::detail::check_term_RESCondOr(*this));
-    }
-
-    /// \\brief Constructor.
-    rescondor(const res_expression& arg1, const res_expression& arg2, const res_expression& arg3)
-      : res_expression(atermpp::aterm_appl(core::detail::function_symbol_RESCondOr(), arg1, arg2, arg3))
-    {}
-
-    /// Move semantics
-    rescondor(const rescondor&) noexcept = default;
-    rescondor(rescondor&&) noexcept = default;
-    rescondor& operator=(const rescondor&) noexcept = default;
-    rescondor& operator=(rescondor&&) noexcept = default;
-
-    const res_expression& arg1() const
-    {
-      return atermpp::down_cast<res_expression>((*this)[0]);
-    }
-
-    const res_expression& arg2() const
-    {
-      return atermpp::down_cast<res_expression>((*this)[1]);
-    }
-
-    const res_expression& arg3() const
-    {
-      return atermpp::down_cast<res_expression>((*this)[2]);
-    }
-};
-
-/// \\brief Make_rescondor constructs a new term into a given address.
-/// \\ \param t The reference into which the new rescondor is constructed. 
-template <class... ARGUMENTS>
-inline void make_rescondor(atermpp::aterm_appl& t, const ARGUMENTS&... args)
-{
-  atermpp::make_term_appl(t, core::detail::function_symbol_RESCondOr(), args...);
-}
-
-/// \\brief Test for a rescondor expression
-/// \\param x A term
-/// \\return True if \\a x is a rescondor expression
-inline
-bool is_rescondor(const atermpp::aterm_appl& x)
-{
-  return x.function() == core::detail::function_symbols::RESCondOr;
-}
-
-// prototype declaration
-std::string pp(const rescondor& x);
-
-/// \\brief Outputs the object to a stream
-/// \\param out An output stream
-/// \\param x Object x
-/// \\return The output stream
-inline
-std::ostream& operator<<(std::ostream& out, const rescondor& x)
-{
-  return out << res::pp(x);
-}
-
-/// \\brief swap overload
-inline void swap(rescondor& t1, rescondor& t2)
-{
-  t1.swap(t2);
-}
-
-
 /// \\brief The operator to check for infinity
-class reseqinf: public res_expression
+class eqinf: public res_expression
 {
   public:
     /// \\brief Default constructor.
-    reseqinf()
+    eqinf()
       : res_expression(core::detail::default_values::RESEqInf)
     {}
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit reseqinf(const atermpp::aterm& term)
+    explicit eqinf(const atermpp::aterm& term)
       : res_expression(term)
     {
       assert(core::detail::check_term_RESEqInf(*this));
     }
 
     /// \\brief Constructor.
-    explicit reseqinf(const res_expression& operand)
+    explicit eqinf(const res_expression& operand)
       : res_expression(atermpp::aterm_appl(core::detail::function_symbol_RESEqInf(), operand))
     {}
 
     /// Move semantics
-    reseqinf(const reseqinf&) noexcept = default;
-    reseqinf(reseqinf&&) noexcept = default;
-    reseqinf& operator=(const reseqinf&) noexcept = default;
-    reseqinf& operator=(reseqinf&&) noexcept = default;
+    eqinf(const eqinf&) noexcept = default;
+    eqinf(eqinf&&) noexcept = default;
+    eqinf& operator=(const eqinf&) noexcept = default;
+    eqinf& operator=(eqinf&&) noexcept = default;
 
     const res_expression& operand() const
     {
@@ -1029,70 +867,70 @@ class reseqinf: public res_expression
     }
 };
 
-/// \\brief Make_reseqinf constructs a new term into a given address.
-/// \\ \param t The reference into which the new reseqinf is constructed. 
+/// \\brief Make_eqinf constructs a new term into a given address.
+/// \\ \param t The reference into which the new eqinf is constructed. 
 template <class... ARGUMENTS>
-inline void make_reseqinf(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_eqinf(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_RESEqInf(), args...);
 }
 
-/// \\brief Test for a reseqinf expression
+/// \\brief Test for a eqinf expression
 /// \\param x A term
-/// \\return True if \\a x is a reseqinf expression
+/// \\return True if \\a x is a eqinf expression
 inline
-bool is_reseqinf(const atermpp::aterm_appl& x)
+bool is_eqinf(const atermpp::aterm_appl& x)
 {
   return x.function() == core::detail::function_symbols::RESEqInf;
 }
 
 // prototype declaration
-std::string pp(const reseqinf& x);
+std::string pp(const eqinf& x);
 
 /// \\brief Outputs the object to a stream
 /// \\param out An output stream
 /// \\param x Object x
 /// \\return The output stream
 inline
-std::ostream& operator<<(std::ostream& out, const reseqinf& x)
+std::ostream& operator<<(std::ostream& out, const eqinf& x)
 {
   return out << res::pp(x);
 }
 
 /// \\brief swap overload
-inline void swap(reseqinf& t1, reseqinf& t2)
+inline void swap(eqinf& t1, eqinf& t2)
 {
   t1.swap(t2);
 }
 
 
 /// \\brief The operator to check for negative infinity
-class reseqninf: public res_expression
+class eqninf: public res_expression
 {
   public:
     /// \\brief Default constructor.
-    reseqninf()
+    eqninf()
       : res_expression(core::detail::default_values::RESEqInf)
     {}
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit reseqninf(const atermpp::aterm& term)
+    explicit eqninf(const atermpp::aterm& term)
       : res_expression(term)
     {
       assert(core::detail::check_term_RESEqInf(*this));
     }
 
     /// \\brief Constructor.
-    explicit reseqninf(const res_expression& operand)
+    explicit eqninf(const res_expression& operand)
       : res_expression(atermpp::aterm_appl(core::detail::function_symbol_RESEqInf(), operand))
     {}
 
     /// Move semantics
-    reseqninf(const reseqninf&) noexcept = default;
-    reseqninf(reseqninf&&) noexcept = default;
-    reseqninf& operator=(const reseqninf&) noexcept = default;
-    reseqninf& operator=(reseqninf&&) noexcept = default;
+    eqninf(const eqninf&) noexcept = default;
+    eqninf(eqninf&&) noexcept = default;
+    eqninf& operator=(const eqninf&) noexcept = default;
+    eqninf& operator=(eqninf&&) noexcept = default;
 
     const res_expression& operand() const
     {
@@ -1100,38 +938,200 @@ class reseqninf: public res_expression
     }
 };
 
-/// \\brief Make_reseqninf constructs a new term into a given address.
-/// \\ \param t The reference into which the new reseqninf is constructed. 
+/// \\brief Make_eqninf constructs a new term into a given address.
+/// \\ \param t The reference into which the new eqninf is constructed. 
 template <class... ARGUMENTS>
-inline void make_reseqninf(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_eqninf(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_RESEqInf(), args...);
 }
 
-/// \\brief Test for a reseqninf expression
+/// \\brief Test for a eqninf expression
 /// \\param x A term
-/// \\return True if \\a x is a reseqninf expression
+/// \\return True if \\a x is a eqninf expression
 inline
-bool is_reseqninf(const atermpp::aterm_appl& x)
+bool is_eqninf(const atermpp::aterm_appl& x)
 {
   return x.function() == core::detail::function_symbols::RESEqInf;
 }
 
 // prototype declaration
-std::string pp(const reseqninf& x);
+std::string pp(const eqninf& x);
 
 /// \\brief Outputs the object to a stream
 /// \\param out An output stream
 /// \\param x Object x
 /// \\return The output stream
 inline
-std::ostream& operator<<(std::ostream& out, const reseqninf& x)
+std::ostream& operator<<(std::ostream& out, const eqninf& x)
 {
   return out << res::pp(x);
 }
 
 /// \\brief swap overload
-inline void swap(reseqninf& t1, reseqninf& t2)
+inline void swap(eqninf& t1, eqninf& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \\brief The conditional and expression for res expressions
+class condsm: public res_expression
+{
+  public:
+    /// \\brief Default constructor.
+    condsm()
+      : res_expression(core::detail::default_values::RESCondSm)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit condsm(const atermpp::aterm& term)
+      : res_expression(term)
+    {
+      assert(core::detail::check_term_RESCondSm(*this));
+    }
+
+    /// \\brief Constructor.
+    condsm(const res_expression& arg1, const res_expression& arg2, const res_expression& arg3)
+      : res_expression(atermpp::aterm_appl(core::detail::function_symbol_RESCondSm(), arg1, arg2, arg3))
+    {}
+
+    /// Move semantics
+    condsm(const condsm&) noexcept = default;
+    condsm(condsm&&) noexcept = default;
+    condsm& operator=(const condsm&) noexcept = default;
+    condsm& operator=(condsm&&) noexcept = default;
+
+    const res_expression& arg1() const
+    {
+      return atermpp::down_cast<res_expression>((*this)[0]);
+    }
+
+    const res_expression& arg2() const
+    {
+      return atermpp::down_cast<res_expression>((*this)[1]);
+    }
+
+    const res_expression& arg3() const
+    {
+      return atermpp::down_cast<res_expression>((*this)[2]);
+    }
+};
+
+/// \\brief Make_condsm constructs a new term into a given address.
+/// \\ \param t The reference into which the new condsm is constructed. 
+template <class... ARGUMENTS>
+inline void make_condsm(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_RESCondSm(), args...);
+}
+
+/// \\brief Test for a condsm expression
+/// \\param x A term
+/// \\return True if \\a x is a condsm expression
+inline
+bool is_condsm(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::RESCondSm;
+}
+
+// prototype declaration
+std::string pp(const condsm& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const condsm& x)
+{
+  return out << res::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(condsm& t1, condsm& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \\brief The conditional or expression for res expressions
+class condeq: public res_expression
+{
+  public:
+    /// \\brief Default constructor.
+    condeq()
+      : res_expression(core::detail::default_values::RESCondEq)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit condeq(const atermpp::aterm& term)
+      : res_expression(term)
+    {
+      assert(core::detail::check_term_RESCondEq(*this));
+    }
+
+    /// \\brief Constructor.
+    condeq(const res_expression& arg1, const res_expression& arg2, const res_expression& arg3)
+      : res_expression(atermpp::aterm_appl(core::detail::function_symbol_RESCondEq(), arg1, arg2, arg3))
+    {}
+
+    /// Move semantics
+    condeq(const condeq&) noexcept = default;
+    condeq(condeq&&) noexcept = default;
+    condeq& operator=(const condeq&) noexcept = default;
+    condeq& operator=(condeq&&) noexcept = default;
+
+    const res_expression& arg1() const
+    {
+      return atermpp::down_cast<res_expression>((*this)[0]);
+    }
+
+    const res_expression& arg2() const
+    {
+      return atermpp::down_cast<res_expression>((*this)[1]);
+    }
+
+    const res_expression& arg3() const
+    {
+      return atermpp::down_cast<res_expression>((*this)[2]);
+    }
+};
+
+/// \\brief Make_condeq constructs a new term into a given address.
+/// \\ \param t The reference into which the new condeq is constructed. 
+template <class... ARGUMENTS>
+inline void make_condeq(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_RESCondEq(), args...);
+}
+
+/// \\brief Test for a condeq expression
+/// \\param x A term
+/// \\return True if \\a x is a condeq expression
+inline
+bool is_condeq(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::RESCondEq;
+}
+
+// prototype declaration
+std::string pp(const condeq& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const condeq& x)
+{
+  return out << res::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(condeq& t1, condeq& t2)
 {
   t1.swap(t2);
 }

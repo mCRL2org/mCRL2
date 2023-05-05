@@ -385,6 +385,10 @@
                  | PRESMinall(<DataVarId>+, <PRExpr>)
                  | PRESMaxall(<DataVarId>+, <PRExpr>)
                  | PRESSum(<DataVarId>+, <PRExpr>)
+                 | PRESEqInf(<PRExpr>)
+                 | PRESEqNInf(<PRExpr>)
+                 | PRESCondSm(<PRExpr>,<PRExpr>,<PRExpr>)
+                 | PRESCondEq(<PRExpr>,<PRExpr>,<PRExpr>)
                  | <PropVarInst>
                  | <UntypedDataParameter>
 
@@ -413,10 +417,10 @@
                   | RESConstantMultiply(<DataExpr>, <RESExpression>)
                   | RESConstantMultiplyAlt(<RESExpression>, <DataExpr>)
                   | <DataExpr>
-                  | RESCondAnd(<RESExpression>, <RESExpression>, <RESExpression>)
-                  | RESCondOr(<RESExpression>, <RESExpression>, <RESExpression>)
                   | RESEqInf(<RESExpression>)
                   | RESEqNInf(<RESExpression>)
+                  | RESCondSm(<RESExpression>, <RESExpression>, <RESExpression>)
+                  | RESCondEq(<RESExpression>, <RESExpression>, <RESExpression>)
 
 //BDDs
 //-------------------

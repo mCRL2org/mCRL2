@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/tools.h
+/// \file mcrl2/pres/tools.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_PRES_TOOLS_H
@@ -14,69 +14,69 @@
 
 #include <string>
 
-// #include "mcrl2/core/print_format.h"
-// #include "mcrl2/pbes/absinthe_strategy.h"
-// #include "mcrl2/pbes/bisimulation_type.h"
-// #include "mcrl2/pbes/pbes_rewriter_type.h"
-// #include "mcrl2/pbes/pbesinst_strategy.h"
-// #include "mcrl2/pbes/tools/pbesstategraph_options.h"
+#include "mcrl2/core/print_format.h"
+// #include "mcrl2/pres/absinthe_strategy.h"
+// #include "mcrl2/pres/bisimulation_type.h"
+// #include "mcrl2/pres/pres_rewriter_type.h"
+// #include "mcrl2/pres/presinst_strategy.h"
+// #include "mcrl2/pres/tools/presstategraph_options.h"
 #include "mcrl2/utilities/file_utility.h"
 
 namespace mcrl2 {
 
 namespace pres_system {
 
-/* void pbesrewr(const std::string& input_filename,
+/* void presrewr(const std::string& input_filename,
               const std::string& output_filename,
               const utilities::file_format& input_format,
               const utilities::file_format& output_format,
               data::rewrite_strategy rewrite_strategy,
-              pbes_rewriter_type rewriter_type);
+              pres_rewriter_type rewriter_type);
 
-void pbesconstelm(const std::string& input_filename,
+void presconstelm(const std::string& input_filename,
                   const std::string& output_filename,
                   const utilities::file_format& input_format,
                   const utilities::file_format& output_format,
                   data::rewrite_strategy rewrite_strategy,
-                  pbes_rewriter_type rewriter_type,
+                  pres_rewriter_type rewriter_type,
                   bool compute_conditions,
                   bool remove_redundant_equations,
                   bool check_quantifiers
-                 );
+                 ); */
 
-void pbesinfo(const std::string& input_filename,
+void presinfo(const std::string& input_filename,
               const std::string& input_file_message,
               const utilities::file_format& file_format,
               bool opt_full
              );
 
-void pbesparelm(const std::string& input_filename,
+/* void presparelm(const std::string& input_filename,
                 const std::string& output_filename,
                 const utilities::file_format& input_format,
                 const utilities::file_format& output_format
                );
 
-void pbespareqelm(const std::string& input_filename,
+void prespareqelm(const std::string& input_filename,
                   const std::string& output_filename,
                   const utilities::file_format& input_format,
                   const utilities::file_format& output_format,
                   data::rewrite_strategy rewrite_strategy,
-                  pbes_rewriter_type rewriter_type,
+                  pres_rewriter_type rewriter_type,
                   bool ignore_initial_state
-                 );
+                 ); */
 
-void pbespp(const std::string& input_filename,
+void prespp(const std::string& input_filename,
             const std::string& output_filename,
             const utilities::file_format& input_format,
             core::print_format_type format,
             bool use_pfnf_printer
            );
 
-void txt2pbes(const std::string& input_filename,
+void txt2pres(const std::string& input_filename,
               const std::string& output_filename,
               const utilities::file_format& output_format,
               bool normalize
-             ); */
+             ); 
 
 void lps2pres(const std::string& input_filename,
               const std::string& output_filename,
@@ -88,13 +88,13 @@ void lps2pres(const std::string& input_filename,
               bool check_only
              );
 
-/* void complps2pbes(const std::string& input_filename,
+/* void complps2pres(const std::string& input_filename,
                   const std::string& output_filename,
                   const utilities::file_format& output_format,
                   const std::string& formula_filename
                  );
 
-void lpsbisim2pbes(const std::string& input_filename1,
+void lpsbisim2pres(const std::string& input_filename1,
                    const std::string& input_filename2,
                    const std::string& output_filename,
                    const utilities::file_format& output_format,
@@ -102,7 +102,7 @@ void lpsbisim2pbes(const std::string& input_filename1,
                    bool normalize
                   );
 
-void pbesabstract(const std::string& input_filename,
+void presabstract(const std::string& input_filename,
                   const std::string& output_filename,
                   const utilities::file_format& input_format,
                   const utilities::file_format& output_format,
@@ -110,7 +110,7 @@ void pbesabstract(const std::string& input_filename,
                   bool value_true
                  );
 
-void pbesabsinthe(const std::string& input_filename,
+void presabsinthe(const std::string& input_filename,
                   const std::string& output_filename,
                   const utilities::file_format& input_format,
                   const utilities::file_format& output_format,
@@ -120,14 +120,14 @@ void pbesabsinthe(const std::string& input_filename,
                   bool enable_logging
                  );
 
-void pbesstategraph(const std::string& input_filename,
+void presstategraph(const std::string& input_filename,
                     const std::string& output_filename,
                     const utilities::file_format& input_format,
                     const utilities::file_format& output_format,
-                    const pbesstategraph_options& options
+                    const presstategraph_options& options
                    ); */
 
-} // namespace rbes_system
+} // namespace rres_system
 
 } // namespace mcrl2
 

@@ -149,6 +149,38 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const pres_system::eqinf& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const pres_system::eqninf& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const pres_system::condsm& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.arg1());
+    static_cast<Derived&>(*this).apply(x.arg2());
+    static_cast<Derived&>(*this).apply(x.arg3());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const pres_system::condeq& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.arg1());
+    static_cast<Derived&>(*this).apply(x.arg2());
+    static_cast<Derived&>(*this).apply(x.arg3());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const pres_system::pres_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -207,6 +239,22 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     else if (pres_system::is_sum(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::sum>(x));
+    }
+    else if (pres_system::is_eqinf(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::eqinf>(x));
+    }
+    else if (pres_system::is_eqninf(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::eqninf>(x));
+    }
+    else if (pres_system::is_condsm(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::condsm>(x));
+    }
+    else if (pres_system::is_condeq(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::condeq>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -327,6 +375,38 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const pres_system::eqinf& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const pres_system::eqninf& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const pres_system::condsm& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.arg1());
+    static_cast<Derived&>(*this).apply(x.arg2());
+    static_cast<Derived&>(*this).apply(x.arg3());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const pres_system::condeq& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.arg1());
+    static_cast<Derived&>(*this).apply(x.arg2());
+    static_cast<Derived&>(*this).apply(x.arg3());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const pres_system::pres_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -385,6 +465,22 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     else if (pres_system::is_sum(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::sum>(x));
+    }
+    else if (pres_system::is_eqinf(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::eqinf>(x));
+    }
+    else if (pres_system::is_eqninf(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::eqninf>(x));
+    }
+    else if (pres_system::is_condsm(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::condsm>(x));
+    }
+    else if (pres_system::is_condeq(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::condeq>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -502,6 +598,38 @@ struct add_traverser_pres_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const pres_system::eqinf& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const pres_system::eqninf& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const pres_system::condsm& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.arg1());
+    static_cast<Derived&>(*this).apply(x.arg2());
+    static_cast<Derived&>(*this).apply(x.arg3());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const pres_system::condeq& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.arg1());
+    static_cast<Derived&>(*this).apply(x.arg2());
+    static_cast<Derived&>(*this).apply(x.arg3());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const pres_system::pres_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -560,6 +688,22 @@ struct add_traverser_pres_expressions: public Traverser<Derived>
     else if (pres_system::is_sum(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::sum>(x));
+    }
+    else if (pres_system::is_eqinf(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::eqinf>(x));
+    }
+    else if (pres_system::is_eqninf(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::eqninf>(x));
+    }
+    else if (pres_system::is_condsm(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::condsm>(x));
+    }
+    else if (pres_system::is_condeq(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::condeq>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -684,6 +828,38 @@ struct add_traverser_variables: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const pres_system::eqinf& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const pres_system::eqninf& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const pres_system::condsm& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.arg1());
+    static_cast<Derived&>(*this).apply(x.arg2());
+    static_cast<Derived&>(*this).apply(x.arg3());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const pres_system::condeq& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.arg1());
+    static_cast<Derived&>(*this).apply(x.arg2());
+    static_cast<Derived&>(*this).apply(x.arg3());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const pres_system::pres_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -742,6 +918,22 @@ struct add_traverser_variables: public Traverser<Derived>
     else if (pres_system::is_sum(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::sum>(x));
+    }
+    else if (pres_system::is_eqinf(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::eqinf>(x));
+    }
+    else if (pres_system::is_eqninf(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::eqninf>(x));
+    }
+    else if (pres_system::is_condsm(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::condsm>(x));
+    }
+    else if (pres_system::is_condeq(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::condeq>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -867,6 +1059,38 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const pres_system::eqinf& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const pres_system::eqninf& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const pres_system::condsm& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.arg1());
+    static_cast<Derived&>(*this).apply(x.arg2());
+    static_cast<Derived&>(*this).apply(x.arg3());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const pres_system::condeq& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.arg1());
+    static_cast<Derived&>(*this).apply(x.arg2());
+    static_cast<Derived&>(*this).apply(x.arg3());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const pres_system::pres_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -925,6 +1149,22 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     else if (pres_system::is_sum(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::sum>(x));
+    }
+    else if (pres_system::is_eqinf(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::eqinf>(x));
+    }
+    else if (pres_system::is_eqninf(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::eqninf>(x));
+    }
+    else if (pres_system::is_condsm(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::condsm>(x));
+    }
+    else if (pres_system::is_condeq(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::condeq>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }

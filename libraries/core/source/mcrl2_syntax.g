@@ -311,9 +311,9 @@ ResExpr
   | BesExpr ('||' $binary_op_right 3) BesExpr                    // Disjunction
   | BesExpr ('&&' $binary_op_right 4) BesExpr                    // Conjunction
   | BesExpr ('+' $binary_op_right 4) BesExpr                     // Conjunction
-  | '!' BesExpr              $unary_right  5                     // Negation
   | '-' BesExpr              $unary_right  5                     // Unary minus
-  | DataValExpr '*' BesExpr                                      // Multiplication with a positive constant
+  | DataValExpr ('*' $unary_op_right 6) BesExpr                  // Left multiplication with a positive constant
+  | BesExpr ('*' $unary_op_left 6) DataValExpr                   // Right multiplication with a positive constant
   | 'eqinf' '(' BesExpr ')'                                      // Equal infinity
   | 'eqninf' '(' BesExpr ')'                                     // Equal to infinity
   | 'condsm' '(' BesExpr ',' BesExpr ',' BesExpr ')'             // Conditional smaller than 0 with or 
@@ -346,13 +346,12 @@ PresExpr
   | PresExpr ('=>' $binary_op_right 23) PresExpr                 // Implication
   | PresExpr ('||' $binary_op_right 24) PresExpr                 // Disjunction
   | PresExpr ('&&' $binary_op_right 25) PresExpr                 // Conjunction
-  | DataValExpr ('*' $binary_op_right 26) PresExpr               // Multiplication with a positive constant
-  | PresExpr ('*' $binary_op_right 26) DataValExpr               // Multiplication with a positive constant
+  | DataValExpr ('*' $unary_op_right 26) PresExpr                // Left multiplication with a positive constant
+  | PresExpr ('*' $unary_op_left 26) DataValExpr                 // Right multiplication with a positive constant
   | 'eqinf' '(' PresExpr ')'                                     // Equal infinity
   | 'eqninf' '(' PresExpr ')'                                    // Equal to infinity
   | 'condsm' '(' PresExpr ',' PresExpr ',' PresExpr ')'          // Conditional smaller than 0 with or. 
   | 'condeq' '(' PresExpr ',' PresExpr ',' PresExpr ')'          // Conditional smaller equal 0 with and. 
-  | '!' PresExpr                               $unary_right 25   // Negation
   | '-' PresExpr                               $unary_right 25   // Unary minus
   ;
 

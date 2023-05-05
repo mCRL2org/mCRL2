@@ -147,38 +147,38 @@ struct add_res_expressions: public Builder<Derived>
   }
 
   template <class T>
-  void apply(T& result, const res::rescondand& x)
+  void apply(T& result, const res::eqinf& x)
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    res::make_rescondand(result, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg1()); }, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg2()); }, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg3()); });
+    res::make_eqinf(result, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
   }
 
   template <class T>
-  void apply(T& result, const res::rescondor& x)
+  void apply(T& result, const res::eqninf& x)
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    res::make_rescondor(result, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg1()); }, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg2()); }, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg3()); });
+    res::make_eqninf(result, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
   }
 
   template <class T>
-  void apply(T& result, const res::reseqinf& x)
+  void apply(T& result, const res::condsm& x)
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    res::make_reseqinf(result, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    res::make_condsm(result, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg1()); }, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg2()); }, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg3()); });
     static_cast<Derived&>(*this).leave(x);
   }
 
   template <class T>
-  void apply(T& result, const res::reseqninf& x)
+  void apply(T& result, const res::condeq& x)
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    res::make_reseqninf(result, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    res::make_condeq(result, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg1()); }, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg2()); }, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg3()); });
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -227,21 +227,21 @@ struct add_res_expressions: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<res::const_multiply_alt>(x));
     }
-    else if (res::is_rescondand(x))
+    else if (res::is_eqinf(x))
     {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<res::rescondand>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<res::eqinf>(x));
     }
-    else if (res::is_rescondor(x))
+    else if (res::is_eqninf(x))
     {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<res::rescondor>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<res::eqninf>(x));
     }
-    else if (res::is_reseqinf(x))
+    else if (res::is_condsm(x))
     {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<res::reseqinf>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<res::condsm>(x));
     }
-    else if (res::is_reseqninf(x))
+    else if (res::is_condeq(x))
     {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<res::reseqninf>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<res::condeq>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -384,38 +384,38 @@ struct add_res_variables: public Builder<Derived>
   }
 
   template <class T>
-  void apply(T& result, const res::rescondand& x)
+  void apply(T& result, const res::eqinf& x)
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    res::make_rescondand(result, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg1()); }, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg2()); }, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg3()); });
+    res::make_eqinf(result, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
   }
 
   template <class T>
-  void apply(T& result, const res::rescondor& x)
+  void apply(T& result, const res::eqninf& x)
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    res::make_rescondor(result, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg1()); }, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg2()); }, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg3()); });
+    res::make_eqninf(result, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
   }
 
   template <class T>
-  void apply(T& result, const res::reseqinf& x)
+  void apply(T& result, const res::condsm& x)
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    res::make_reseqinf(result, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    res::make_condsm(result, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg1()); }, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg2()); }, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg3()); });
     static_cast<Derived&>(*this).leave(x);
   }
 
   template <class T>
-  void apply(T& result, const res::reseqninf& x)
+  void apply(T& result, const res::condeq& x)
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    res::make_reseqninf(result, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    res::make_condeq(result, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg1()); }, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg2()); }, [&](res_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg3()); });
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -464,21 +464,21 @@ struct add_res_variables: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<res::const_multiply_alt>(x));
     }
-    else if (res::is_rescondand(x))
+    else if (res::is_eqinf(x))
     {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<res::rescondand>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<res::eqinf>(x));
     }
-    else if (res::is_rescondor(x))
+    else if (res::is_eqninf(x))
     {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<res::rescondor>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<res::eqninf>(x));
     }
-    else if (res::is_reseqinf(x))
+    else if (res::is_condsm(x))
     {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<res::reseqinf>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<res::condsm>(x));
     }
-    else if (res::is_reseqninf(x))
+    else if (res::is_condeq(x))
     {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<res::reseqninf>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<res::condeq>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }

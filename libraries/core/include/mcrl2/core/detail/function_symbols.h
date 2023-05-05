@@ -732,6 +732,22 @@ const atermpp::function_symbol& function_symbol_PRESAnd()
   return function_symbol_PRESAnd;
 }
 
+// PRESCondEq
+inline
+const atermpp::function_symbol& function_symbol_PRESCondEq()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESCondEq("PRESCondEq", 3);
+  return function_symbol_PRESCondEq;
+}
+
+// PRESCondSm
+inline
+const atermpp::function_symbol& function_symbol_PRESCondSm()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESCondSm("PRESCondSm", 3);
+  return function_symbol_PRESCondSm;
+}
+
 // PRESConstantMultiply
 inline
 const atermpp::function_symbol& function_symbol_PRESConstantMultiply()
@@ -746,6 +762,22 @@ const atermpp::function_symbol& function_symbol_PRESConstantMultiplyAlt()
 {
   static const atermpp::global_function_symbol function_symbol_PRESConstantMultiplyAlt("PRESConstantMultiplyAlt", 2);
   return function_symbol_PRESConstantMultiplyAlt;
+}
+
+// PRESEqInf
+inline
+const atermpp::function_symbol& function_symbol_PRESEqInf()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESEqInf("PRESEqInf", 1);
+  return function_symbol_PRESEqInf;
+}
+
+// PRESEqNInf
+inline
+const atermpp::function_symbol& function_symbol_PRESEqNInf()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESEqNInf("PRESEqNInf", 1);
+  return function_symbol_PRESEqNInf;
 }
 
 // PRESFalse
@@ -932,20 +964,20 @@ const atermpp::function_symbol& function_symbol_RESAnd()
   return function_symbol_RESAnd;
 }
 
-// RESCondAnd
+// RESCondEq
 inline
-const atermpp::function_symbol& function_symbol_RESCondAnd()
+const atermpp::function_symbol& function_symbol_RESCondEq()
 {
-  static const atermpp::global_function_symbol function_symbol_RESCondAnd("RESCondAnd", 3);
-  return function_symbol_RESCondAnd;
+  static const atermpp::global_function_symbol function_symbol_RESCondEq("RESCondEq", 3);
+  return function_symbol_RESCondEq;
 }
 
-// RESCondOr
+// RESCondSm
 inline
-const atermpp::function_symbol& function_symbol_RESCondOr()
+const atermpp::function_symbol& function_symbol_RESCondSm()
 {
-  static const atermpp::global_function_symbol function_symbol_RESCondOr("RESCondOr", 3);
-  return function_symbol_RESCondOr;
+  static const atermpp::global_function_symbol function_symbol_RESCondSm("RESCondSm", 3);
+  return function_symbol_RESCondSm;
 }
 
 // RESConstantMultiply
@@ -1681,6 +1713,10 @@ static const atermpp::function_symbol SortCons;
   static const atermpp::function_symbol PRESMinall;
   static const atermpp::function_symbol PRESMaxall;
   static const atermpp::function_symbol PRESSum;
+  static const atermpp::function_symbol PRESEqInf;
+  static const atermpp::function_symbol PRESEqNInf;
+  static const atermpp::function_symbol PRESCondSm;
+  static const atermpp::function_symbol PRESCondEq;
   static const atermpp::function_symbol RES;
   static const atermpp::function_symbol RESEquation;
   static const atermpp::function_symbol RESVariable;
@@ -1693,10 +1729,10 @@ static const atermpp::function_symbol SortCons;
   static const atermpp::function_symbol RESPlus;
   static const atermpp::function_symbol RESConstantMultiply;
   static const atermpp::function_symbol RESConstantMultiplyAlt;
-  static const atermpp::function_symbol RESCondAnd;
-  static const atermpp::function_symbol RESCondOr;
   static const atermpp::function_symbol RESEqInf;
   static const atermpp::function_symbol RESEqNInf;
+  static const atermpp::function_symbol RESCondSm;
+  static const atermpp::function_symbol RESCondEq;
   static const atermpp::function_symbol BddTrue;
   static const atermpp::function_symbol BddFalse;
   static const atermpp::function_symbol BddIf;

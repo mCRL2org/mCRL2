@@ -257,6 +257,10 @@ const_multiply_alt(const pres_expression& left, const data::data_expression& rig
 minall(const data::variable_list& variables, const pres_expression& body)                                               : public pres_system::pres_expression | EI    | PRESMinall              | The minimum operator for pres expressions
 maxall(const data::variable_list& variables, const pres_expression& body)                                               : public pres_system::pres_expression | EI    | PRESMaxall              | The maximum operator for pres expressions
 sum(const data::variable_list& variables, const pres_expression& body)                                                  : public pres_system::pres_expression | EI    | PRESSum                 | The generic sum operator for pres expressions
+eqinf(const pres_expression& operand)                                                                                   : public pres_system::pres_expression | EI    | PRESEqInf               | The indicator whether the argument is infinite
+eqninf(const pres_expression& operand)                                                                                  : public pres_system::pres_expression | EI    | PRESEqNInf              | The indicator whether the argument is -infinite
+condsm(const pres_expression& arg1, const pres_expression& arg2, const pres_expression& arg3)                           : public pres_system::pres_expression | EI    | PRESCondSm              | Conditional operator with condition smaller than 0
+condeq(const pres_expression& arg1, const pres_expression& arg2, const pres_expression& arg3)                           : public pres_system::pres_expression | EI    | PRESCondEq              | Conditional operator with condition smaller than or equal to 0
 '''
 
 RES_CLASSES = r'''
@@ -265,21 +269,21 @@ res_equation_system(const std::vector<res::res_equation>& equations, const res_e
 '''
 
 RES_EXPRESSION_CLASSES = r'''
-res_expression()                                                         : public atermpp::aterm_appl                       | XCI  | RESExpression          | A res expression
-true_()                                                                  : public res::res_expression                       | EI   | RESTrue                | The value true for res expressions
-false_()                                                                 : public res::res_expression                       | EI   | RESFalse               | The value false for res expressions
-res_variable(const core::identifier_string& name)                        : public res::res_expression                       | EIUs | RESVariable            | A res variable
-minus(const res_expression& operand)                                     : public res::res_expression                       | EI   | RESMinus               | The minus operator for res expressions
-and_(const res_expression& left, const res_expression& right)            : public res::res_expression                       | EI   | RESAnd                 | The and operator for res expressions
-or_(const res_expression& left, const res_expression& right)             : public res::res_expression                       | EI   | RESOr                  | The or operator for res expressions
-imp(const res_expression& left, const res_expression& right)             : public res::res_expression                       | EI   | RESImp                 | The implication operator for res expressions
-plus(const res_expression& left, const res_expression& right)            : public res::res_expression                       | EI   | RESPlus                | The plus operator for res expressions
-const_multiply(const data::data_expression& left, const res_expression& right) : public res::res_expression                 | EI   | RESConstantMultiply    | Left multiplication with a positive constant for res expressions
+res_expression()                                                                   : public atermpp::aterm_appl             | XCI  | RESExpression          | A res expression
+true_()                                                                            : public res::res_expression             | EI   | RESTrue                | The value true for res expressions
+false_()                                                                           : public res::res_expression             | EI   | RESFalse               | The value false for res expressions
+res_variable(const core::identifier_string& name)                                  : public res::res_expression             | EIUs | RESVariable            | A res variable
+minus(const res_expression& operand)                                               : public res::res_expression             | EI   | RESMinus               | The minus operator for res expressions
+and_(const res_expression& left, const res_expression& right)                      : public res::res_expression             | EI   | RESAnd                 | The and operator for res expressions
+or_(const res_expression& left, const res_expression& right)                       : public res::res_expression             | EI   | RESOr                  | The or operator for res expressions
+imp(const res_expression& left, const res_expression& right)                       : public res::res_expression             | EI   | RESImp                 | The implication operator for res expressions
+plus(const res_expression& left, const res_expression& right)                      : public res::res_expression             | EI   | RESPlus                | The plus operator for res expressions
+const_multiply(const data::data_expression& left, const res_expression& right)     : public res::res_expression             | EI   | RESConstantMultiply    | Left multiplication with a positive constant for res expressions
 const_multiply_alt(const res_expression& left, const data::data_expression& right) : public res::res_expression             | EI   | RESConstantMultiplyAlt | Right multiplication with a positive constant for res expressions
-rescondand(const res_expression& arg1, const res_expression& arg2, const res_expression& arg3) : public res::res_expression | EI   | RESCondAnd             | The conditional and expression for res expressions
-rescondor(const res_expression& arg1, const res_expression& arg2, const res_expression& arg3) : public res::res_expression  | EI   | RESCondOr           | The conditional or expression for res expressions
-reseqinf(const res_expression& operand) : public res::res_expression                                                        | EI   | RESEqInf            | The operator to check for infinity
-reseqninf(const res_expression& operand) : public res::res_expression                                                       | EI   | RESEqInf            | The operator to check for negative infinity
+eqinf(const res_expression& operand)                                               : public res::res_expression             | EI   | RESEqInf            | The operator to check for infinity
+eqninf(const res_expression& operand)                                              : public res::res_expression             | EI   | RESEqInf            | The operator to check for negative infinity
+condsm(const res_expression& arg1, const res_expression& arg2, const res_expression& arg3) : public res::res_expression  | EI   | RESCondSm             | The conditional and expression for res expressions
+condeq(const res_expression& arg1, const res_expression& arg2, const res_expression& arg3) : public res::res_expression  | EI   | RESCondEq           | The conditional or expression for res expressions
 '''
 # ---------
 

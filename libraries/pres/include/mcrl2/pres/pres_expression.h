@@ -86,6 +86,10 @@ inline bool is_const_multiply_alt(const atermpp::aterm_appl& x);
 inline bool is_minall(const atermpp::aterm_appl& x);
 inline bool is_maxall(const atermpp::aterm_appl& x);
 inline bool is_sum(const atermpp::aterm_appl& x);
+inline bool is_eqinf(const atermpp::aterm_appl& x);
+inline bool is_eqninf(const atermpp::aterm_appl& x);
+inline bool is_condsm(const atermpp::aterm_appl& x);
+inline bool is_condeq(const atermpp::aterm_appl& x);
 
 /// \\brief Test for a pres_expression expression
 /// \\param x A term
@@ -106,7 +110,11 @@ bool is_pres_expression(const atermpp::aterm_appl& x)
          pres_system::is_const_multiply_alt(x) ||
          pres_system::is_minall(x) ||
          pres_system::is_maxall(x) ||
-         pres_system::is_sum(x);
+         pres_system::is_sum(x) ||
+         pres_system::is_eqinf(x) ||
+         pres_system::is_eqninf(x) ||
+         pres_system::is_condsm(x) ||
+         pres_system::is_condeq(x);
 }
 
 // prototype declaration
@@ -972,6 +980,310 @@ std::ostream& operator<<(std::ostream& out, const sum& x)
 
 /// \\brief swap overload
 inline void swap(sum& t1, sum& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \\brief The indicator whether the argument is infinite
+class eqinf: public pres_expression
+{
+  public:
+    /// \\brief Default constructor.
+    eqinf()
+      : pres_expression(core::detail::default_values::PRESEqInf)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit eqinf(const atermpp::aterm& term)
+      : pres_expression(term)
+    {
+      assert(core::detail::check_term_PRESEqInf(*this));
+    }
+
+    /// \\brief Constructor.
+    explicit eqinf(const pres_expression& operand)
+      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESEqInf(), operand))
+    {}
+
+    /// Move semantics
+    eqinf(const eqinf&) noexcept = default;
+    eqinf(eqinf&&) noexcept = default;
+    eqinf& operator=(const eqinf&) noexcept = default;
+    eqinf& operator=(eqinf&&) noexcept = default;
+
+    const pres_expression& operand() const
+    {
+      return atermpp::down_cast<pres_expression>((*this)[0]);
+    }
+};
+
+/// \\brief Make_eqinf constructs a new term into a given address.
+/// \\ \param t The reference into which the new eqinf is constructed. 
+template <class... ARGUMENTS>
+inline void make_eqinf(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_PRESEqInf(), args...);
+}
+
+/// \\brief Test for a eqinf expression
+/// \\param x A term
+/// \\return True if \\a x is a eqinf expression
+inline
+bool is_eqinf(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::PRESEqInf;
+}
+
+// prototype declaration
+std::string pp(const eqinf& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const eqinf& x)
+{
+  return out << pres_system::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(eqinf& t1, eqinf& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \\brief The indicator whether the argument is -infinite
+class eqninf: public pres_expression
+{
+  public:
+    /// \\brief Default constructor.
+    eqninf()
+      : pres_expression(core::detail::default_values::PRESEqNInf)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit eqninf(const atermpp::aterm& term)
+      : pres_expression(term)
+    {
+      assert(core::detail::check_term_PRESEqNInf(*this));
+    }
+
+    /// \\brief Constructor.
+    explicit eqninf(const pres_expression& operand)
+      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESEqNInf(), operand))
+    {}
+
+    /// Move semantics
+    eqninf(const eqninf&) noexcept = default;
+    eqninf(eqninf&&) noexcept = default;
+    eqninf& operator=(const eqninf&) noexcept = default;
+    eqninf& operator=(eqninf&&) noexcept = default;
+
+    const pres_expression& operand() const
+    {
+      return atermpp::down_cast<pres_expression>((*this)[0]);
+    }
+};
+
+/// \\brief Make_eqninf constructs a new term into a given address.
+/// \\ \param t The reference into which the new eqninf is constructed. 
+template <class... ARGUMENTS>
+inline void make_eqninf(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_PRESEqNInf(), args...);
+}
+
+/// \\brief Test for a eqninf expression
+/// \\param x A term
+/// \\return True if \\a x is a eqninf expression
+inline
+bool is_eqninf(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::PRESEqNInf;
+}
+
+// prototype declaration
+std::string pp(const eqninf& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const eqninf& x)
+{
+  return out << pres_system::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(eqninf& t1, eqninf& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \\brief Conditional operator with condition smaller than 0
+class condsm: public pres_expression
+{
+  public:
+    /// \\brief Default constructor.
+    condsm()
+      : pres_expression(core::detail::default_values::PRESCondSm)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit condsm(const atermpp::aterm& term)
+      : pres_expression(term)
+    {
+      assert(core::detail::check_term_PRESCondSm(*this));
+    }
+
+    /// \\brief Constructor.
+    condsm(const pres_expression& arg1, const pres_expression& arg2, const pres_expression& arg3)
+      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESCondSm(), arg1, arg2, arg3))
+    {}
+
+    /// Move semantics
+    condsm(const condsm&) noexcept = default;
+    condsm(condsm&&) noexcept = default;
+    condsm& operator=(const condsm&) noexcept = default;
+    condsm& operator=(condsm&&) noexcept = default;
+
+    const pres_expression& arg1() const
+    {
+      return atermpp::down_cast<pres_expression>((*this)[0]);
+    }
+
+    const pres_expression& arg2() const
+    {
+      return atermpp::down_cast<pres_expression>((*this)[1]);
+    }
+
+    const pres_expression& arg3() const
+    {
+      return atermpp::down_cast<pres_expression>((*this)[2]);
+    }
+};
+
+/// \\brief Make_condsm constructs a new term into a given address.
+/// \\ \param t The reference into which the new condsm is constructed. 
+template <class... ARGUMENTS>
+inline void make_condsm(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_PRESCondSm(), args...);
+}
+
+/// \\brief Test for a condsm expression
+/// \\param x A term
+/// \\return True if \\a x is a condsm expression
+inline
+bool is_condsm(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::PRESCondSm;
+}
+
+// prototype declaration
+std::string pp(const condsm& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const condsm& x)
+{
+  return out << pres_system::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(condsm& t1, condsm& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \\brief Conditional operator with condition smaller than or equal to 0
+class condeq: public pres_expression
+{
+  public:
+    /// \\brief Default constructor.
+    condeq()
+      : pres_expression(core::detail::default_values::PRESCondEq)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit condeq(const atermpp::aterm& term)
+      : pres_expression(term)
+    {
+      assert(core::detail::check_term_PRESCondEq(*this));
+    }
+
+    /// \\brief Constructor.
+    condeq(const pres_expression& arg1, const pres_expression& arg2, const pres_expression& arg3)
+      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESCondEq(), arg1, arg2, arg3))
+    {}
+
+    /// Move semantics
+    condeq(const condeq&) noexcept = default;
+    condeq(condeq&&) noexcept = default;
+    condeq& operator=(const condeq&) noexcept = default;
+    condeq& operator=(condeq&&) noexcept = default;
+
+    const pres_expression& arg1() const
+    {
+      return atermpp::down_cast<pres_expression>((*this)[0]);
+    }
+
+    const pres_expression& arg2() const
+    {
+      return atermpp::down_cast<pres_expression>((*this)[1]);
+    }
+
+    const pres_expression& arg3() const
+    {
+      return atermpp::down_cast<pres_expression>((*this)[2]);
+    }
+};
+
+/// \\brief Make_condeq constructs a new term into a given address.
+/// \\ \param t The reference into which the new condeq is constructed. 
+template <class... ARGUMENTS>
+inline void make_condeq(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_PRESCondEq(), args...);
+}
+
+/// \\brief Test for a condeq expression
+/// \\param x A term
+/// \\return True if \\a x is a condeq expression
+inline
+bool is_condeq(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::PRESCondEq;
+}
+
+// prototype declaration
+std::string pp(const condeq& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const condeq& x)
+{
+  return out << pres_system::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(condeq& t1, condeq& t2)
 {
   t1.swap(t2);
 }

@@ -122,22 +122,22 @@ namespace detail {
 pres_expression parse_pres_expression_new(const std::string& text)
 {
   core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
-  unsigned int start_symbol_index = p.start_symbol_index("PbesExpr");
+  unsigned int start_symbol_index = p.start_symbol_index("PresExpr");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   core::warn_and_or(node);
-  pres_expression result = pres_actions(p).parse_PbesExpr(node);
+  pres_expression result = pres_actions(p).parse_PresExpr(node);
   return result;
 }
 
 untyped_pres parse_pres_new(const std::string& text)
 {
   core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
-  unsigned int start_symbol_index = p.start_symbol_index("PbesSpec");
+  unsigned int start_symbol_index = p.start_symbol_index("PresSpec");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   core::warn_and_or(node);
-  untyped_pres result = pres_actions(p).parse_PbesSpec(node);
+  untyped_pres result = pres_actions(p).parse_PresSpec(node);
   return result;
 }
 
@@ -160,11 +160,11 @@ propositional_variable parse_propositional_variable(const std::string& text)
 pres_expression parse_pres_expression(const std::string& text)
 {
   core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
-  unsigned int start_symbol_index = p.start_symbol_index("PbesExpr");
+  unsigned int start_symbol_index = p.start_symbol_index("PresExpr");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   core::warn_and_or(node);
-  return detail::pres_actions(p).parse_PbesExpr(node);
+  return detail::pres_actions(p).parse_PresExpr(node);
 }
 
 } // namespace detail

@@ -169,6 +169,42 @@ struct add_sort_expressions: public Builder<Derived>
   }
 
   template <class T>
+  void apply(T& result, const pres_system::eqinf& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    pres_system::make_eqinf(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const pres_system::eqninf& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    pres_system::make_eqninf(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const pres_system::condsm& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    pres_system::make_condsm(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg1()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg2()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg3()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const pres_system::condeq& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    pres_system::make_condeq(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg1()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg2()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg3()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
   void apply(T& result, const pres_system::pres_expression& x)
   { 
     
@@ -228,6 +264,22 @@ struct add_sort_expressions: public Builder<Derived>
     else if (pres_system::is_sum(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::sum>(x));
+    }
+    else if (pres_system::is_eqinf(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::eqinf>(x));
+    }
+    else if (pres_system::is_eqninf(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::eqninf>(x));
+    }
+    else if (pres_system::is_condsm(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::condsm>(x));
+    }
+    else if (pres_system::is_condeq(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::condeq>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -371,6 +423,42 @@ struct add_data_expressions: public Builder<Derived>
   }
 
   template <class T>
+  void apply(T& result, const pres_system::eqinf& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    pres_system::make_eqinf(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const pres_system::eqninf& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    pres_system::make_eqninf(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const pres_system::condsm& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    pres_system::make_condsm(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg1()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg2()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg3()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const pres_system::condeq& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    pres_system::make_condeq(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg1()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg2()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg3()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
   void apply(T& result, const pres_system::pres_expression& x)
   { 
     
@@ -430,6 +518,22 @@ struct add_data_expressions: public Builder<Derived>
     else if (pres_system::is_sum(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::sum>(x));
+    }
+    else if (pres_system::is_eqinf(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::eqinf>(x));
+    }
+    else if (pres_system::is_eqninf(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::eqninf>(x));
+    }
+    else if (pres_system::is_condsm(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::condsm>(x));
+    }
+    else if (pres_system::is_condeq(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::condeq>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -573,6 +677,42 @@ struct add_variables: public Builder<Derived>
   }
 
   template <class T>
+  void apply(T& result, const pres_system::eqinf& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    pres_system::make_eqinf(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const pres_system::eqninf& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    pres_system::make_eqninf(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const pres_system::condsm& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    pres_system::make_condsm(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg1()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg2()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg3()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const pres_system::condeq& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    pres_system::make_condeq(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg1()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg2()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg3()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
   void apply(T& result, const pres_system::pres_expression& x)
   { 
     
@@ -632,6 +772,22 @@ struct add_variables: public Builder<Derived>
     else if (pres_system::is_sum(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::sum>(x));
+    }
+    else if (pres_system::is_eqinf(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::eqinf>(x));
+    }
+    else if (pres_system::is_eqninf(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::eqninf>(x));
+    }
+    else if (pres_system::is_condsm(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::condsm>(x));
+    }
+    else if (pres_system::is_condeq(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::condeq>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -774,6 +930,42 @@ struct add_pres_expressions: public Builder<Derived>
   }
 
   template <class T>
+  void apply(T& result, const pres_system::eqinf& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    pres_system::make_eqinf(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const pres_system::eqninf& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    pres_system::make_eqninf(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const pres_system::condsm& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    pres_system::make_condsm(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg1()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg2()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg3()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const pres_system::condeq& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    pres_system::make_condeq(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg1()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg2()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg3()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
   void apply(T& result, const pres_system::pres_expression& x)
   { 
     
@@ -833,6 +1025,22 @@ struct add_pres_expressions: public Builder<Derived>
     else if (pres_system::is_sum(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::sum>(x));
+    }
+    else if (pres_system::is_eqinf(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::eqinf>(x));
+    }
+    else if (pres_system::is_eqninf(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::eqninf>(x));
+    }
+    else if (pres_system::is_condsm(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::condsm>(x));
+    }
+    else if (pres_system::is_condeq(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::condeq>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }

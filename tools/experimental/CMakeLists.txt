@@ -12,7 +12,13 @@ set(MCRL2_TOOLS
   pbespareqelm
   pbespor
   pbessymbolicbisim
+  prespp
+  presinfo
   symbolic_exploration
+  respp
+  resinfo
+  txt2pres
+  txt2res
 )
 
 if(MCRL2_ENABLE_EXPERIMENTAL)

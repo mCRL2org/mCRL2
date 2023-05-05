@@ -121,7 +121,21 @@ struct add_traverser_res_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void apply(const res::rescondand& x)
+  void apply(const res::eqinf& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const res::eqninf& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const res::condsm& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.arg1());
@@ -130,26 +144,12 @@ struct add_traverser_res_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void apply(const res::rescondor& x)
+  void apply(const res::condeq& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.arg1());
     static_cast<Derived&>(*this).apply(x.arg2());
     static_cast<Derived&>(*this).apply(x.arg3());
-    static_cast<Derived&>(*this).leave(x);
-  }
-
-  void apply(const res::reseqinf& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this).apply(x.operand());
-    static_cast<Derived&>(*this).leave(x);
-  }
-
-  void apply(const res::reseqninf& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this).apply(x.operand());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -196,21 +196,21 @@ struct add_traverser_res_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<res::const_multiply_alt>(x));
     }
-    else if (res::is_rescondand(x))
+    else if (res::is_eqinf(x))
     {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<res::rescondand>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<res::eqinf>(x));
     }
-    else if (res::is_rescondor(x))
+    else if (res::is_eqninf(x))
     {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<res::rescondor>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<res::eqninf>(x));
     }
-    else if (res::is_reseqinf(x))
+    else if (res::is_condsm(x))
     {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<res::reseqinf>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<res::condsm>(x));
     }
-    else if (res::is_reseqninf(x))
+    else if (res::is_condeq(x))
     {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<res::reseqninf>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<res::condeq>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -323,7 +323,21 @@ struct add_traverser_res_variables: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void apply(const res::rescondand& x)
+  void apply(const res::eqinf& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const res::eqninf& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const res::condsm& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.arg1());
@@ -332,26 +346,12 @@ struct add_traverser_res_variables: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void apply(const res::rescondor& x)
+  void apply(const res::condeq& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.arg1());
     static_cast<Derived&>(*this).apply(x.arg2());
     static_cast<Derived&>(*this).apply(x.arg3());
-    static_cast<Derived&>(*this).leave(x);
-  }
-
-  void apply(const res::reseqinf& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this).apply(x.operand());
-    static_cast<Derived&>(*this).leave(x);
-  }
-
-  void apply(const res::reseqninf& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this).apply(x.operand());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -398,21 +398,21 @@ struct add_traverser_res_variables: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<res::const_multiply_alt>(x));
     }
-    else if (res::is_rescondand(x))
+    else if (res::is_eqinf(x))
     {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<res::rescondand>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<res::eqinf>(x));
     }
-    else if (res::is_rescondor(x))
+    else if (res::is_eqninf(x))
     {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<res::rescondor>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<res::eqninf>(x));
     }
-    else if (res::is_reseqinf(x))
+    else if (res::is_condsm(x))
     {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<res::reseqinf>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<res::condsm>(x));
     }
-    else if (res::is_reseqninf(x))
+    else if (res::is_condeq(x))
     {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<res::reseqninf>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<res::condeq>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
