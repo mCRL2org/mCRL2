@@ -1120,7 +1120,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   term_type not_(const term_type& p)
   {
-    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESNot(), p));
+    return pbes_system::not_(p);
   }
 
   /// \brief Make a negation
@@ -1139,7 +1139,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   term_type and_(const term_type& p, const term_type& q)
   {
-    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESAnd(), p,q));
+    return pbes_system::and_(p, q);
   }
 
   /// \brief Make a conjunction
@@ -1159,7 +1159,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   term_type or_(const term_type& p, const term_type& q)
   {
-    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESOr(), p,q));
+    return pbes_system::or_(p, q);
   }
 
   /// \brief Make a disjunction
@@ -1193,7 +1193,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   term_type imp(const term_type& p, const term_type& q)
   {
-    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESImp(), p, q));
+    return pbes_system::imp(p, q);
   }
 
   /// \brief Make an implication
@@ -1217,7 +1217,7 @@ struct term_traits<pbes_system::pbes_expression>
     {
       return p;
     }
-    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESForall(), l, p));
+    return pbes_system::forall(l, p);
   }
 
   /// \brief Make a universal quantification
@@ -1246,7 +1246,7 @@ struct term_traits<pbes_system::pbes_expression>
     {
       return p;
     }
-    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESExists(), l, p));
+    return pbes_system::exists(l, p);
   }
 
   /// \brief Make an existential quantification
