@@ -69,7 +69,7 @@ class lps2pres_tool : public pres_output_tool<input_output_tool>
     lps2pres_tool() : super(
         "lps2pres",
         "Jan Friso Groote. Based on the tool lps2pbes",
-        "generate a PRES from an LPS and a modal formula over reals",
+        "generate a PRES from a stochastic LPS and a modal formula over reals",
         "Convert the state formula in FILE and the LPS in INFILE to a parameterised "
         "real equation system (PRES) and save it to OUTFILE. If OUTFILE is not "
         "present, stdout is used. If INFILE is not present, stdin is used."

@@ -83,17 +83,17 @@ void load_lts(const utilities::command_line_parser& parser, const std::string& l
 
 // extracts a specification from an LTS
 inline
-lps::specification extract_specification(const lts_lts_t& l)
+lps::stochastic_specification extract_specification(const lts_lts_t& l)
 {
-  lps::action_summand_vector action_summands;
+  lps::stochastic_action_summand_vector action_summands;
   data::variable process_parameter("x", data::sort_pos::pos());
   data::variable_list process_parameters({ process_parameter });
   std::set<data::variable> global_variables;
   // Add a single delta.
   lps::deadlock_summand_vector deadlock_summands(1, lps::deadlock_summand(data::variable_list(), data::sort_bool::true_(), lps::deadlock()));
-  lps::linear_process lps(process_parameters, deadlock_summands, lps::action_summand_vector());
-  lps::process_initializer initial_process(data::data_expression_list{data::sort_pos::pos(l.initial_state() + 1)});
-  return lps::specification(l.data(), l.action_label_declarations(), global_variables, lps, initial_process);
+  lps::stochastic_linear_process lps(process_parameters, deadlock_summands, lps::stochastic_action_summand_vector());
+  lps::stochastic_process_initializer initial_process(data::data_expression_list{data::sort_pos::pos(l.initial_state() + 1)});
+  return lps::stochastic_specification(l.data(), l.action_label_declarations(), global_variables, lps, initial_process);
 }
 
 } // namespace detail

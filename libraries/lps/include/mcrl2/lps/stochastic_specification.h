@@ -29,6 +29,7 @@ std::set<core::identifier_string> find_identifiers(const lps::stochastic_specifi
 
 // template function overloads
 bool check_well_typedness(const stochastic_specification& x);
+void normalize_sorts(stochastic_specification& x, const data::sort_specification& sortspec);
 
 /// \brief Linear process specification.
 class stochastic_specification: public specification_base<stochastic_linear_process, stochastic_process_initializer>

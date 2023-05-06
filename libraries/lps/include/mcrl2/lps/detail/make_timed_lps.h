@@ -39,9 +39,10 @@ struct make_timed_lps_summand
     {
       data::variable t(m_generator("T"), data::sort_real::real_());
       s.deadlock().time() = t;
-      data::variable_vector v = data::variable_vector(s.summation_variables().begin(),s.summation_variables().end());
+      push_back(s.summation_variables(), t);
+      /* data::variable_vector v = data::variable_vector(s.summation_variables().begin(),s.summation_variables().end());
       v.push_back(t);
-      s.summation_variables() = data::variable_list(v.begin(),v.end());
+      s.summation_variables() = data::variable_list(v.begin(),v.end()); */
     }
   }
 
@@ -53,9 +54,11 @@ struct make_timed_lps_summand
     {
       data::variable t(m_generator("T"), data::sort_real::real_());
       s.multi_action() = multi_action(s.multi_action().actions(), t);
-      data::variable_vector v = data::variable_vector(s.summation_variables().begin(),s.summation_variables().end());
+      push_back(s.summation_variables(), t);
+      /* data::variable_vector v = data::variable_vector(s.summation_variables().begin(),s.summation_variables().end());
       v.push_back(t);
       s.summation_variables() = data::variable_list(v.begin(),v.end());
+      */
     }
   }
 };
@@ -65,8 +68,11 @@ struct make_timed_lps_summand
 /// \param lps A linear process
 /// \param context A term
 /// \return A timed linear process
-inline
-void make_timed_lps(linear_process& lps, const std::set<core::identifier_string>& context)
+template <class LINEAR_PROCESS>
+void make_timed_lps(LINEAR_PROCESS& lps, 
+                    const std::set<core::identifier_string>& context,
+                     typename std::enable_if<std::is_same<LINEAR_PROCESS, linear_process>::value ||
+                                             std::is_same<LINEAR_PROCESS, stochastic_linear_process>::value>::type* = nullptr)
 {
   data::set_identifier_generator generator;
   generator.add_identifiers(context);

@@ -17,7 +17,7 @@
 #include "mcrl2/core/print_format.h"
 // #include "mcrl2/pres/absinthe_strategy.h"
 // #include "mcrl2/pres/bisimulation_type.h"
-// #include "mcrl2/pres/pres_rewriter_type.h"
+#include "mcrl2/pres/pres_rewriter_type.h"
 // #include "mcrl2/pres/presinst_strategy.h"
 // #include "mcrl2/pres/tools/presstategraph_options.h"
 #include "mcrl2/utilities/file_utility.h"
@@ -68,8 +68,7 @@ void prespareqelm(const std::string& input_filename,
 void prespp(const std::string& input_filename,
             const std::string& output_filename,
             const utilities::file_format& input_format,
-            core::print_format_type format,
-            bool use_pfnf_printer
+            core::print_format_type format
            );
 
 void txt2pres(const std::string& input_filename,

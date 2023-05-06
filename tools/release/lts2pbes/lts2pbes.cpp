@@ -126,7 +126,7 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
   public:
     bool run() override
     {
-      lps::specification lpsspec = lts::detail::extract_specification(ltsspec);
+      lps::stochastic_specification lpsspec = lts::detail::extract_specification(ltsspec);
       std::ifstream from(formfilename.c_str());
       if (!from)
       {

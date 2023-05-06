@@ -41,15 +41,13 @@ class prespp_tool: public pres_input_tool<input_output_tool>
       pres_system::prespp(input_filename(),
                           output_filename(),
                           pres_input_format(),
-                          format,
-                          use_pfnf_printer
+                          format
                          );
       return true;
     }
 
   protected:
     core::print_format_type  format;
-    bool use_pfnf_printer = false;
 
     void add_options(interface_description& desc) override
     {
@@ -58,19 +56,12 @@ class prespp_tool: public pres_input_tool<input_output_tool>
                       .add_value_desc(core::print_default, "a PRES specification", true)
                       .add_value_desc(core::print_internal, "a textual ATerm representation of the internal format"),
                       "print the PRES in the specified FORMAT:", 'f');
-      desc.add_option("pfnf-printer",
-                      "format the output according to the structure of PFNF (only has an effect when printing a PRES in PFNF to text)", 
-                      'p');
     }
 
     void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
       format = parser.option_argument_as<core::print_format_type>("format");
-      if (parser.options.count("pfnf-printer")>0)
-      {
-        use_pfnf_printer = true;
-      }
     }
 };
 

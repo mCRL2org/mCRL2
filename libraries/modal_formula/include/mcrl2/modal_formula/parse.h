@@ -47,7 +47,7 @@ action_formula parse_action_formula(const std::string& text,
 }
 
 inline
-action_formula parse_action_formula(const std::string& text, const lps::specification& lpsspec)
+action_formula parse_action_formula(const std::string& text, const lps::stochastic_specification& lpsspec)
 {
   return parse_action_formula(text, lpsspec.data(), lpsspec.global_variables(), lpsspec.action_labels());
 }
@@ -78,7 +78,7 @@ regular_formula parse_regular_formula(const std::string& text,
 }
 
 inline
-regular_formula parse_regular_formula(const std::string& text, const lps::specification& lpsspec)
+regular_formula parse_regular_formula(const std::string& text, const lps::stochastic_specification& lpsspec)
 {
   return parse_regular_formula(text, lpsspec.data(), lpsspec.global_variables(), lpsspec.action_labels());
 }
@@ -142,7 +142,7 @@ state_formula post_process_state_formula(
 /// \return The parse result.
 inline
 state_formula parse_state_formula(const std::string& text,
-                                  lps::specification& lpsspec,
+                                  lps::stochastic_specification& lpsspec,
                                   const bool formula_is_quantitative,
                                   parse_state_formula_options options = parse_state_formula_options()
                                  )
@@ -165,7 +165,7 @@ std::cerr << "PARSED " << atermpp::aterm(x) << "\n";
 /// \return The parse result.
 inline
 state_formula parse_state_formula(std::istream& in,
-                                  lps::specification& lpsspec,
+                                  lps::stochastic_specification& lpsspec,
                                   const bool formula_is_quantitative,
                                   parse_state_formula_options options = parse_state_formula_options()
                                  )
@@ -220,7 +220,7 @@ state_formula_specification parse_state_formula_specification(
 /// \return The parse result
 inline
 state_formula_specification parse_state_formula_specification(const std::string& text,
-                                  lps::specification& lpsspec,
+                                  lps::stochastic_specification& lpsspec,
                                   const bool formula_is_quantitative,
                                   parse_state_formula_options options = parse_state_formula_options()
                                  )
@@ -253,7 +253,7 @@ state_formula_specification parse_state_formula_specification(const std::string&
 /// \return The parse result.
 inline
 state_formula_specification parse_state_formula_specification(std::istream& in,
-                                  lps::specification& lpsspec,
+                                  lps::stochastic_specification& lpsspec,
                                   const bool formula_is_quantitative,
                                   parse_state_formula_options options = parse_state_formula_options()
                                  )

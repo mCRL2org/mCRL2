@@ -79,7 +79,7 @@ class lps2pbes_algorithm
     /// \param T The time parameter. If T == data::variable() the untimed version of lps2pbes is applied.
     /// \return A PBES that encodes the property applied to the given specification
     pbes run(const state_formulas::state_formula& formula,
-             const lps::specification& lpsspec,
+             const lps::stochastic_specification& lpsspec,
              bool structured = false,
              bool unoptimized = false,
              bool preprocess_modal_operators = false,
@@ -155,7 +155,7 @@ class lps2pbes_algorithm
 /// \param generate_counter_example A boolean indicating that a counter example must be generated.
 /// \return The resulting pbes.
 inline
-pbes lps2pbes(const lps::specification& lpsspec,
+pbes lps2pbes(const lps::stochastic_specification& lpsspec,
               const state_formulas::state_formula& formula,
               bool timed = false,
               bool structured = false,
@@ -175,7 +175,7 @@ pbes lps2pbes(const lps::specification& lpsspec,
 
   if (timed)
   {
-    lps::specification lpsspec_timed = lpsspec;
+    lps::stochastic_specification lpsspec_timed = lpsspec;
     data::set_identifier_generator generator;
     generator.add_identifiers(lps::find_identifiers(lpsspec));
     generator.add_identifiers(state_formulas::find_identifiers(formula));
@@ -204,7 +204,7 @@ pbes lps2pbes(const lps::specification& lpsspec,
 /// \param check_only If check_only is true, only the formula will be checked, but no PBES is generated
 /// \return The resulting pbes.
 inline
-pbes lps2pbes(const lps::specification& lpsspec,
+pbes lps2pbes(const lps::stochastic_specification& lpsspec,
               const state_formulas::state_formula_specification& formspec,
               bool timed = false,
               bool structured = false,
@@ -214,7 +214,7 @@ pbes lps2pbes(const lps::specification& lpsspec,
               bool check_only = false
              )
 {
-  lps::specification lpsspec1 = lpsspec;
+  lps::stochastic_specification lpsspec1 = lpsspec;
   lpsspec1.data() = data::merge_data_specifications(lpsspec1.data(), formspec.data());
   lps::normalize_sorts(lpsspec1, lpsspec1.data());
   lpsspec1.action_labels() = process::merge_action_specifications(lpsspec1.action_labels(), formspec.action_labels());
@@ -245,7 +245,8 @@ pbes lps2pbes(const std::string& spec_text,
              )
 {
   pbes result;
-  lps::specification lpsspec = remove_stochastic_operators(lps::linearise(spec_text));
+  lps::stochastic_specification lpsspec = lps::linearise(spec_text);
+  lps::specification temp_lpsspec = remove_stochastic_operators(lpsspec); // Just to check that there are no stochastic operators. 
 
   const bool formula_is_quantitative = false;
   state_formulas::state_formula f = state_formulas::algorithms::parse_state_formula(formula_text, lpsspec, formula_is_quantitative);

@@ -47,7 +47,8 @@ void complps2pbes(const std::string& input_filename,
   }
   // TODO: check if alpha reduction should be applied
   process::process_specification procspec = process::parse_process_specification(text);
-  lps::specification spec = remove_stochastic_operators(lps::linearise(procspec));
+  lps::stochastic_specification spec = lps::linearise(procspec);
+  lps::specification temp_spec = remove_stochastic_operators(lps::linearise(procspec)); // Just to check that there are no stochastic operators. 
 
   // load state formula
   mCRL2log(log::verbose) << "reading formula from file '" <<  formula_filename << "'..." << std::endl;

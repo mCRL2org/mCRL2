@@ -376,7 +376,7 @@
                  | PRESTrue
                  | PRESFalse
                  | PRESMinus(<PRExpr>)
-                 | PRESAnd(<PRExpr>, <PBExpr>)
+                 | PRESAnd(<PRExpr>, <PRExpr>)
                  | PRESOr(<PRExpr>, <PRExpr>)
                  | PRESImp(<PRExpr>, <PRExpr>)
                  | PRESPlus(<PRExpr>, <PRExpr>)

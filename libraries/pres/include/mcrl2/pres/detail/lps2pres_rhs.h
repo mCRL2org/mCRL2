@@ -26,12 +26,12 @@ namespace detail {
 struct lps2pres_parameters
 {
   const state_formulas::state_formula& phi0; // the original formula
-  const lps::linear_process& lps;
+  const lps::stochastic_linear_process& lps;
   data::set_identifier_generator& id_generator;
   const data::variable& T;
 
   lps2pres_parameters(const state_formulas::state_formula& phi0_,
-                      const lps::linear_process& lps_,
+                      const lps::stochastic_linear_process& lps_,
                       data::set_identifier_generator& id_generator_,
                       const data::variable& T_
                      )
@@ -50,146 +50,18 @@ struct lps2pres_parameters
                                const pres_expression& right, // RHS(phi)[T, x := ti(x,y), gi(x,y)]
                                const lps::multi_action& /* ai */,
                                const data::assignment_list& /* gi */,
+                               const lps::stochastic_distribution& dist,
                                TermTraits
                               )
   {
     typedef TermTraits tr;
     if (is_must)
     {
-      return tr::minall(y, tr::imp(left, right));
+      return tr::minall(y, tr::imp(left, tr::sum(dist.variables(), tr::const_multiply(dist.distribution(), right))));
     }
     else
     {
-      return tr::maxall(y, tr::and_(left, right));
-    }
-  }
-};
-
-struct lps2pres_counter_example_parameters: public lps2pres_parameters
-{
-  data::variable_list d1;                                   // d'
-  data::mutable_map_substitution<> sigma;                   // the substitution [d := d'], where d is the sequence of process parameters of lps
-  std::map<lps::multi_action, propositional_variable> Zpos; // represents the additional equations { nu Zpos_ai(d, fi(x,y), d') = true }
-  std::map<lps::multi_action, propositional_variable> Zneg; // represents the additional equations { nu Zneg_ai(d, fi(x,y), d') = false }
-
-  // creates variables corresponding to the action label sorts in actions
-  data::variable_list action_variables(const process::action_list& actions) const
-  {
-    std::vector<data::variable> result;
-    for (const process::action& a: actions)
-    {
-      for (const data::sort_expression& s: a.label().sorts())
-      {
-        data::variable v(id_generator("v"), s);
-        result.push_back(v);
-      }
-    }
-    return data::variable_list(result.begin(), result.end());
-  }
-
-  // returns the concatenation of the arguments of the list of actions
-  data::data_expression_list action_expressions(const process::action_list& actions) const
-  {
-    std::vector<data::data_expression> result;
-    for (const process::action& a: actions)
-    {
-      auto const& args = a.arguments();
-      result.insert(result.end(), args.begin(), args.end());
-    }
-    return data::data_expression_list(result.begin(), result.end());
-  }
-
-  // returns the equations needed for counter example generation
-  std::vector<pres_equation> equations() const
-  {
-    std::vector<pres_equation> result;
-    for (auto const& p: Zneg)
-    {
-      pres_equation eqn(fixpoint_symbol::nu(), p.second, false_());
-      result.push_back(eqn);
-    }
-    for (auto const& p: Zpos)
-    {
-      pres_equation eqn(fixpoint_symbol::nu(), p.second, true_());
-      result.push_back(eqn);
-    }
-    return result;
-  }
-
-  std::string multi_action_name(const lps::multi_action& a) const
-  {
-    std::vector<std::string> v;
-    for (const process::action& ai: a.actions())
-    {
-      v.emplace_back(ai.label().name());
-    }
-    return utilities::string_join(v, "_");
-  }
-
-  lps2pres_counter_example_parameters(const state_formulas::state_formula& phi0,
-                                      const lps::linear_process& lps,
-                                      data::set_identifier_generator& id_generator,
-                                      const data::variable& T
-                                     )
-    : lps2pres_parameters(phi0, lps, id_generator, T)
-  {
-    const data::variable_list& d = lps.process_parameters();
-    sigma = detail::make_fresh_variable_substitution(d, id_generator);
-    d1 = data::replace_variables(d, sigma);
-
-    std::size_t index = 0;
-    for (const lps::action_summand& summand: lps.action_summands())
-    {
-      const lps::multi_action& ai = summand.multi_action();
-      data::variable_list actvars = action_variables(ai.actions());
-      core::identifier_string pos = id_generator("Zpos_" + utilities::number2string(index) + "_" + multi_action_name(ai));
-      core::identifier_string neg = id_generator("Zneg_" + utilities::number2string(index) + "_" + multi_action_name(ai));
-      Zpos[ai] = propositional_variable(pos, d + actvars + d1);
-      Zneg[ai] = propositional_variable(neg, d + actvars + d1);
-      index++;
-    }
-  }
-
-  data::data_expression equal_to(const data::variable_list& d, const data::data_expression_list& e) const
-  {
-    std::vector<data::data_expression> v;
-    auto i = d.begin();
-    auto j = e.begin();
-    for (; i != d.end(); ++i, ++j)
-    {
-      v.push_back(data::equal_to(*i, *j));
-    }
-    return data::lazy::join_and(v.begin(), v.end());
-  }
-
-  template <typename TermTraits>
-  pres_expression rhs_may_must(bool is_must,
-                               const data::variable_list& y,
-                               const pres_expression& left,  // Sat(ai(fi(x,y)) && ci(x,y) && (ti(x,y) > T)
-                               const pres_expression& right, // RHS(phi)[T, x := ti(x,y), gi(x,y)]
-                               const lps::multi_action& ai,
-                               const data::assignment_list& gi,
-                               TermTraits
-                              )
-  {
-    typedef TermTraits tr;
-    const data::variable_list& d = lps.process_parameters();
-    data::data_expression_list gi1 = data::replace_variables(atermpp::container_cast<data::data_expression_list>(d), data::assignment_sequence_substitution(gi));
-    auto fi = action_expressions(ai.actions());
-    data::data_expression_list da = atermpp::container_cast<data::data_expression_list>(d) + fi + gi1;
-    propositional_variable_instantiation Pos(Zpos.at(ai).name(), da);
-    propositional_variable_instantiation Neg(Zneg.at(ai).name(), da);
-    auto right1 = right;
-
-    if (is_must)
-    {
-      right1 = tr::or_(tr::and_(right, Pos), Neg);
-      return tr::minall(y, tr::imp(left, right1));
-    }
-    else
-    {
-      right1 = tr::and_(tr::or_(right, Neg), Pos);
-      return tr::maxall(y, tr::and_(left, right1));
+      return tr::maxall(y, tr::and_(left,  tr::sum(dist.variables(), tr::const_multiply(dist.distribution(), right))));
     }
   }
 };
@@ -314,20 +186,27 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
   void apply(const state_formulas::const_multiply& x)
   {
     derived().enter(x);
-    // push_variables(x.variables());
     derived().apply(x.right());
     make_const_multiply(top(), x.left(), top());
     derived().leave(x);
-    /* pres_expression right = pop();
-    pres_expression left = pop();
-    push(tr::const_multiply(left, right)); */
+  }
+
+  void leave(const state_formulas::const_multiply&)
+  {
+    /* Do nothing */
+  }
+
+  void apply(const state_formulas::const_multiply_alt& x)
+  {
+    derived().enter(x);
+    derived().apply(x.left());
+    make_const_multiply_alt(top(), top(), x.right());
+    derived().leave(x);
   }
 
   void leave(const state_formulas::const_multiply_alt&)
   {
-    pres_expression right = pop();
-    pres_expression left = pop();
-    push(tr::const_multiply_alt(left, right));
+    /* Do nothing */
   }
 
   void apply(const state_formulas::imp&)
@@ -376,12 +255,13 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
     assert(action_formulas::is_action_formula(x.formula()));
     const action_formulas::action_formula& alpha = atermpp::down_cast<const action_formulas::action_formula>(x.formula());
 
-    for (const lps::action_summand& summand: parameters.lps.action_summands())
+    for (const lps::stochastic_action_summand& summand: parameters.lps.action_summands())
     {
-      const data::data_expression& ci = summand.condition();
-      const lps::multi_action& ai     = summand.multi_action();
-      const data::assignment_list& gi = summand.assignments();
-      const data::variable_list& yi   = summand.summation_variables();
+      const data::variable_list& yi            = summand.summation_variables();
+      const data::data_expression& ci          = summand.condition();
+      const lps::multi_action& ai              = summand.multi_action();
+      const data::assignment_list& gi          = summand.assignments();
+      const lps::stochastic_distribution& dist = summand.distribution();
 
       pres_expression right = rhs_phi;
       const data::data_expression& ti = ai.time();
@@ -401,7 +281,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
 
       right = pres_system::replace_variables_capture_avoiding(right, sigma);
 
-      pres_expression p = parameters.rhs_may_must(is_must, yi, left, right, ai, gi, TermTraits());
+      pres_expression p = parameters.rhs_may_must(is_must, yi, left, right, ai, gi, dist, TermTraits());
       v.push_back(derived().apply_may_must_result(p));
     }
 

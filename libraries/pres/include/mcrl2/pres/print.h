@@ -35,7 +35,7 @@ inline int precedence(const pres_expression& x)
   else if (is_imp(x))               { return precedence(atermpp::down_cast<imp>(x)); }
   else if (is_or(x))                { return precedence(atermpp::down_cast<or_>(x)); }
   else if (is_and(x))               { return precedence(atermpp::down_cast<and_>(x)); }
-  else if (is_and(x))               { return precedence(atermpp::down_cast<plus>(x)); }
+  else if (is_plus(x))               { return precedence(atermpp::down_cast<plus>(x)); }
   else if (is_const_multiply(x))    { return precedence(atermpp::down_cast<const_multiply>(x)); }
   else if (is_const_multiply_alt(x)){ return precedence(atermpp::down_cast<const_multiply_alt>(x)); }
   else if (is_minus(x))             { return precedence(atermpp::down_cast<minus>(x)); }
@@ -280,6 +280,13 @@ struct printer: public pres_system::add_traverser_sort_expressions<data::detail:
   {
     derived().enter(x);
     print_pres_abstraction(x, "maxall");
+    derived().leave(x);
+  }
+
+  void apply(const pres_system::sum& x)
+  {
+    derived().enter(x);
+    print_pres_abstraction(x, "sum");
     derived().leave(x);
   }
 };

@@ -21,8 +21,7 @@ namespace pres_system {
 void prespp(const std::string& input_filename,
             const std::string& output_filename,
             const utilities::file_format& input_format,
-            core::print_format_type format,
-            bool use_pfnf_printer
+            core::print_format_type format
            )
 {
   pres p;

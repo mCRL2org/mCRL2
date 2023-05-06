@@ -6893,7 +6893,7 @@ bool check_term_PRESMinus(const Term& t)
   return true;
 }
 
-// PRESAnd(PRExpr, PBExpr)
+// PRESAnd(PRExpr, PRExpr)
 template <typename Term>
 bool check_term_PRESAnd(const Term& t)
 {
@@ -6922,9 +6922,9 @@ bool check_term_PRESAnd(const Term& t)
     mCRL2log(log::debug, "soundness_checks") << "check_rule_PRExpr" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[1], check_rule_PBExpr<atermpp::aterm>))
+  if (!check_term_argument(a[1], check_rule_PRExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_PBExpr" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_PRExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS

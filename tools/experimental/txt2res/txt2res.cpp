@@ -6,30 +6,28 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file txt2pbes.cpp
+/// \file txt2pres.cpp
 /// \brief Parse a textual description of a BES.
-
-#define NAME "txt2bes"
-#define AUTHOR "Wieger Wesselink"
 
 //mCRL2 specific
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/bes/pbes_output_tool.h"
-#include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/bes/pbesinst_conversion.h"
+#include "mcrl2/res/pres_output_tool.h"
+#include "mcrl2/pres/txt2pres.h"
+#include "mcrl2/res/presinst_conversion.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
-using bes::tools::bes_output_tool;
+using res::tools::res_output_tool;
 
-class txt2bes_tool: public bes_output_tool<input_output_tool>
+class txt2res_tool: public res_output_tool<input_output_tool>
 {
-    typedef bes_output_tool<input_output_tool> super;
+    typedef res_output_tool<input_output_tool> super;
 
   public:
-    txt2bes_tool()
-      : super(NAME, AUTHOR,
+    txt2res_tool()
+      : super("lps2res",
+              "Jan Friso Groote", 
               "parse a textual description of a BES",
               "Parse the textual description of a BES from INFILE and write it to OUTFILE. "
               "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used."
@@ -38,23 +36,23 @@ class txt2bes_tool: public bes_output_tool<input_output_tool>
 
     bool run()
     {
-      pbes_system::pbes p;
+      pres_system::pres p;
       if (input_filename().empty())
       {
-        p = pbes_system::txt2pbes(std::cin);
+        p = pres_system::txt2pres(std::cin);
       }
       else
       {
         std::ifstream from(input_filename().c_str());
-        p = pbes_system::txt2pbes(from);
+        p = pres_system::txt2pres(from);
       }
-      bes::boolean_equation_system b = bes::pbesinst_conversion(p);
-      bes::save_bes(b, output_filename(), bes_output_format());
+      res::res_equation_system b = res::presinst_conversion(p);
+      res::save_res(b, output_filename(), res_output_format());
       return true;
     }
 };
 
 int main(int argc, char** argv)
 {
-  return txt2bes_tool().execute(argc, argv);
+  return txt2res_tool().execute(argc, argv);
 }

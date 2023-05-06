@@ -157,7 +157,7 @@ action_formula typecheck_action_formula(const action_formula& x,
 }
 
 inline
-action_formula typecheck_action_formula(const action_formula& x, const lps::specification& lpsspec)
+action_formula typecheck_action_formula(const action_formula& x, const lps::stochastic_specification& lpsspec)
 {
   return typecheck_action_formula(x, lpsspec.data(), lpsspec.global_variables(), lpsspec.action_labels());
 }
@@ -330,7 +330,7 @@ regular_formula typecheck_regular_formula(const regular_formula& x,
 }
 
 inline
-regular_formula typecheck_regular_formula(const regular_formula& x, const lps::specification& lpsspec)
+regular_formula typecheck_regular_formula(const regular_formula& x, const lps::stochastic_specification& lpsspec)
 {
   return typecheck_regular_formula(x, lpsspec.data(), lpsspec.global_variables(), lpsspec.action_labels());
 }
@@ -717,7 +717,7 @@ state_formula typecheck_state_formula(const state_formula& x,
  **/
 inline
 state_formula typecheck_state_formula(const state_formula& x,
-                                      const lps::specification& lpsspec,
+                                      const lps::stochastic_specification& lpsspec,
                                       const bool formula_is_quantitative
                                      )
 {
@@ -748,7 +748,7 @@ void typecheck_state_formula_specification(state_formula_specification& formspec
 /// \brief Typecheck the state formula specification formspec. It is assumed that the formula is not self contained,
 /// i.e. some of the actions and sorts may be declared in lpsspec.
 inline
-void typecheck_state_formula_specification(state_formula_specification& formspec, const lps::specification& lpsspec, const bool formula_is_quantitative)
+void typecheck_state_formula_specification(state_formula_specification& formspec, const lps::stochastic_specification& lpsspec, const bool formula_is_quantitative)
 {
   try
   {

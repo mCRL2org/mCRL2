@@ -151,12 +151,12 @@ state_formula_specification parse_state_formula_specification(const std::string&
 
 namespace algorithms {
 
-state_formula parse_state_formula(std::istream& in, lps::specification& lpsspec, const bool formula_is_quantitative)
+state_formula parse_state_formula(std::istream& in, lps::stochastic_specification& lpsspec, const bool formula_is_quantitative)
 {
   return state_formulas::parse_state_formula(in, lpsspec, formula_is_quantitative);
 }
 
-state_formula parse_state_formula(const std::string& text, lps::specification& lpsspec, const bool formula_is_quantitative)
+state_formula parse_state_formula(const std::string& text, lps::stochastic_specification& lpsspec, const bool formula_is_quantitative)
 {
   return state_formulas::parse_state_formula(text, lpsspec, formula_is_quantitative);
 }
@@ -171,12 +171,12 @@ state_formula_specification parse_state_formula_specification(const std::string&
   return state_formulas::parse_state_formula_specification(text, formula_is_quantitative);
 }
 
-state_formula_specification parse_state_formula_specification(std::istream& in, lps::specification& lpsspec, const bool formula_is_quantitative)
+state_formula_specification parse_state_formula_specification(std::istream& in, lps::stochastic_specification& lpsspec, const bool formula_is_quantitative)
 {
   return state_formulas::parse_state_formula_specification(in, lpsspec, formula_is_quantitative);
 }
 
-state_formula_specification parse_state_formula_specification(const std::string& text, lps::specification& lpsspec, const bool formula_is_quantitative)
+state_formula_specification parse_state_formula_specification(const std::string& text, lps::stochastic_specification& lpsspec, const bool formula_is_quantitative)
 {
   return state_formulas::parse_state_formula_specification(text, lpsspec, formula_is_quantitative);
 }

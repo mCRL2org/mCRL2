@@ -12,7 +12,7 @@
 #ifndef MCRL2_MODAL_FORMULA_ALGORITHMS_H
 #define MCRL2_MODAL_FORMULA_ALGORITHMS_H
 
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/modal_formula/state_formula_specification.h"
 
 namespace mcrl2 {
@@ -28,7 +28,7 @@ namespace algorithms {
 /// \param spec A linear process specification
 /// \param formula_is_quantitative True if the formula is interpreted as a quantitative formula, instead of a classic boolean modal formula.
 /// \return The converted modal formula
-state_formula parse_state_formula(std::istream& in, lps::specification& spec, const bool formula_is_quantitative);
+state_formula parse_state_formula(std::istream& in, lps::stochastic_specification& spec, const bool formula_is_quantitative);
 
 /// \brief Parses a state formula from text
 // spec may be updated as the data implementation of the state formula
@@ -37,7 +37,7 @@ state_formula parse_state_formula(std::istream& in, lps::specification& spec, co
 /// \param spec A linear process specification
 /// \param formula_is_quantitative True if the formula is interpreted as a quantitative formula, instead of a classic boolean modal formula.
 /// \return The converted modal formula
-state_formula parse_state_formula(const std::string& formula_text, lps::specification& spec, const bool formula_is_quantitative);
+state_formula parse_state_formula(const std::string& formula_text, lps::stochastic_specification& spec, const bool formula_is_quantitative);
 
 /// \brief Parses a state formula specification from an input stream
 state_formula_specification parse_state_formula_specification(std::istream& in, const bool formula_is_quantitative);
@@ -46,10 +46,10 @@ state_formula_specification parse_state_formula_specification(std::istream& in, 
 state_formula_specification parse_state_formula_specification(const std::string& text, const bool formula_is_quantitative);
 
 /// \brief Parses a state formula specification from an input stream
-state_formula_specification parse_state_formula_specification(std::istream& in, lps::specification& lpsspec, const bool formula_is_quantitative);
+state_formula_specification parse_state_formula_specification(std::istream& in, lps::stochastic_specification& lpsspec, const bool formula_is_quantitative);
 
 /// \brief Parses a state formula specification from text
-state_formula_specification parse_state_formula_specification(const std::string& text, lps::specification& lpsspec, const bool formula_is_quantitative);
+state_formula_specification parse_state_formula_specification(const std::string& text, lps::stochastic_specification& lpsspec, const bool formula_is_quantitative);
 
 /// \brief Returns true if the state formula is monotonous.
 /// \param f A modal formula

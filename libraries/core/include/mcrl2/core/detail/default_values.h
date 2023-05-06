@@ -1451,7 +1451,7 @@ const atermpp::aterm_appl& default_value_PRESMinus()
 inline
 const atermpp::aterm_appl& default_value_PRESAnd()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_PRESAnd(), default_value_PRExpr(), default_value_PBExpr());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_PRESAnd(), default_value_PRExpr(), default_value_PRExpr());
   return t;
 }
 

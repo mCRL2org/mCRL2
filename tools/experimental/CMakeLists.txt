@@ -12,8 +12,9 @@ set(MCRL2_TOOLS
   pbespareqelm
   pbespor
   pbessymbolicbisim
-  prespp
   presinfo
+  prespp
+  presrewr
   symbolic_exploration
   respp
   resinfo

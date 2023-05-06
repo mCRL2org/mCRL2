@@ -29,7 +29,7 @@ namespace mcrl2
 namespace pres_system
 {
 
-/// \brief Algorithm for translating a state formula and a timed specification to a pres.
+/// \brief Algorithm for translating a state formula and a timed stochastic specification to a pres.
 class lps2pres_algorithm
 {
   protected:
@@ -43,12 +43,10 @@ class lps2pres_algorithm
       {
         if (unoptimized)
         {
-std::cerr << "RUN1\n";
           detail::E_structured(f, parameters, equations, core::term_traits<pres_expression>());
         }
         else
         {
-std::cerr << "RUN2\n";
           detail::E_structured(f, parameters, equations, core::term_traits_optimized<pres_expression>());
         }
       }
@@ -56,12 +54,10 @@ std::cerr << "RUN2\n";
       {
         if (unoptimized)
         {
-std::cerr << "RUN3\n";
           detail::E(f, parameters, equations, core::term_traits<pres_expression>());
         }
         else
         {
-std::cerr << "RUN4\n";
           detail::E(f, parameters, equations, core::term_traits_optimized<pres_expression>());
         }
       }
@@ -74,15 +70,15 @@ std::cerr << "RUN4\n";
     {}
 
     /// \brief Runs the translation algorithm
-    /// \param formula A modal formula that represents a property about the system modeled by the given specification
-    /// \param lpsspec A linear process specification
+    /// \param formula A modal formula that represents a property about the system modeled by the given stochastic specification
+    /// \param lpsspec A linear stochastic process specification
     /// \param structured use the 'structured' approach of generating equations
     /// \param unoptimized do not optimize the resulting PRES.
     /// \param preprocess_modal_operators insert dummy fixpoints in modal operators, which may lead to smaller PRESs
     /// \param T The time parameter. If T == data::variable() the untimed version of lps2pres is applied.
-    /// \return A PRES that encodes the property applied to the given specification
+    /// \return A PRES that encodes the property applied to the given stochastic specification
     pres run(const state_formulas::state_formula& formula,
-             const lps::specification& lpsspec,
+             const lps::stochastic_specification& lpsspec,
              bool structured = false,
              bool unoptimized = false,
              bool preprocess_modal_operators = false,
@@ -109,7 +105,6 @@ std::cerr << "RUN4\n";
       std::vector<pres_equation> equations;
       detail::lps2pres_parameters parameters(f, lpsspec.process(), m_generator, T);
       run(f, structured, unoptimized, equations, parameters);
-std::cerr << "OBTAINED EQUATIONS AAAAA\n "; for(auto e: equations){ std::cerr << "EQ " << e << "\n"; } std::cerr << "\ni----------------------------------\n";
 
       // compute the initial state
       assert(!equations.empty());
@@ -125,8 +120,6 @@ std::cerr << "OBTAINED EQUATIONS AAAAA\n "; for(auto e: equations){ std::cerr <<
         e.push_front(data::sort_real::real_(0));
       }
       propositional_variable_instantiation init(Xe, e);
-std::cerr << "OBTAINED EQUATIONS\n "; for(auto e: equations){ std::cerr << "EQ " << e << "\n"; } std::cerr << "\ni----------------------------------\n";
-std::cerr << "INIT " << init << "\n";
       pres result(lpsspec.data(), lpsspec.global_variables(), equations, init);
       assert(is_monotonous(result));
       pres_system::algorithms::normalize(result);
@@ -137,9 +130,9 @@ std::cerr << "INIT " << init << "\n";
     }
 };
 
-/// \brief Translates a linear process specification and a state formula to a PRES. If the solution of the PRES
+/// \brief Translates a linear stochastic process specification and a state formula to a PRES. If the solution of the PRES
 ///        is true, the formula holds for the specification.
-/// \param lpsspec A linear process specification.
+/// \param lpsspec A linear stochastic process specification.
 /// \param formula A modal formula.
 /// \param timed determines whether the timed or untimed variant of the algorithm is chosen.
 /// \param structured use the 'structured' approach of generating equations.
@@ -149,7 +142,7 @@ std::cerr << "INIT " << init << "\n";
 ///                                   obtain a more compact PRES.
 /// \return The resulting pres.
 inline
-pres lps2pres(const lps::specification& lpsspec,
+pres lps2pres(const lps::stochastic_specification& lpsspec,
               const state_formulas::state_formula& formula,
               bool timed = false,
               bool structured = false,
@@ -168,7 +161,7 @@ pres lps2pres(const lps::specification& lpsspec,
 
   if (timed)
   {
-    lps::specification lpsspec_timed = lpsspec;
+    lps::stochastic_specification lpsspec_timed = lpsspec;
     data::set_identifier_generator generator;
     generator.add_identifiers(lps::find_identifiers(lpsspec));
     generator.add_identifiers(state_formulas::find_identifiers(formula));
@@ -183,9 +176,9 @@ pres lps2pres(const lps::specification& lpsspec,
   }
 }
 
-/// \brief Translates a linear process specification and a state formula to a PRES. If the solution of the PRES
-///        is true, the formula holds for the specification.
-/// \param lpsspec A linear process specification.
+/// \brief Translates a linear process stochastic_specification and a state formula to a PRES. If the solution of the PRES
+///        is true, the formula holds for the stochastic_specification.
+/// \param lpsspec A linear stochastic process specification.
 /// \param formspec A modal formula specification.
 /// \param timed determines whether the timed or untimed variant of the algorithm is chosen.
 /// \param structured use the 'structured' approach of generating equations.
@@ -196,7 +189,7 @@ pres lps2pres(const lps::specification& lpsspec,
 /// \param check_only If check_only is true, only the formula will be checked, but no PRES is generated
 /// \return The resulting pres.
 inline
-pres lps2pres(const lps::specification& lpsspec,
+pres lps2pres(const lps::stochastic_specification& lpsspec,
               const state_formulas::state_formula_specification& formspec,
               bool timed = false,
               bool structured = false,
@@ -205,7 +198,7 @@ pres lps2pres(const lps::specification& lpsspec,
               bool check_only = false
              )
 {
-  lps::specification lpsspec1 = lpsspec;
+  lps::stochastic_specification lpsspec1 = lpsspec;
   lpsspec1.data() = data::merge_data_specifications(lpsspec1.data(), formspec.data());
   lps::normalize_sorts(lpsspec1, lpsspec1.data());
   lpsspec1.action_labels() = process::merge_action_specifications(lpsspec1.action_labels(), formspec.action_labels());
@@ -234,7 +227,7 @@ pres lps2pres(const std::string& spec_text,
              )
 {
   pres result;
-  lps::specification lpsspec = remove_stochastic_operators(lps::linearise(spec_text));
+  lps::stochastic_specification lpsspec = lps::linearise(spec_text);
 
   const bool formula_is_quantitative = true;
   state_formulas::state_formula f = state_formulas::algorithms::parse_state_formula(formula_text, lpsspec, formula_is_quantitative);

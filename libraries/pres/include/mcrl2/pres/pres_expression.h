@@ -1764,7 +1764,7 @@ struct term_traits<pres_system::pres_expression>
   static inline
   term_type minus(const term_type& p)
   {
-    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PRESMinus(), p));
+    return pres_system::minus(p);
   }
 
   /// \brief Make a negation
@@ -1783,7 +1783,7 @@ struct term_traits<pres_system::pres_expression>
   static inline
   term_type and_(const term_type& p, const term_type& q)
   {
-    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PRESAnd(), p,q));
+    return pres_system::and_(p,q);
   }
 
   /// \brief Make a conjunction
@@ -1803,7 +1803,7 @@ struct term_traits<pres_system::pres_expression>
   static inline
   term_type or_(const term_type& p, const term_type& q)
   {
-    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PRESOr(), p,q));
+    return pres_system::or_(p,q);
   }
 
   /// \brief Make a disjunction
@@ -1837,7 +1837,7 @@ struct term_traits<pres_system::pres_expression>
   static inline
   term_type imp(const term_type& p, const term_type& q)
   {
-    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PRESImp(), p, q));
+    return pres_system::imp(p,q);
   }
 
   /// \brief Make an implication
@@ -1857,7 +1857,7 @@ struct term_traits<pres_system::pres_expression>
   static inline
   term_type plus(const term_type& p, const term_type& q)
   {
-    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PRESPlus(), p, q));
+    return pres_system::plus(p,q);
   }
 
   /// \brief Make a plus
@@ -1875,9 +1875,9 @@ struct term_traits<pres_system::pres_expression>
   /// \param q A term
   /// \return The value <tt>p * q</tt>
   static inline
-  term_type const_multiply(const term_type& p, const term_type& q)
+  term_type const_multiply(const data::data_expression& p, const term_type& q)
   {
-    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PRESConstantMultiply(), p, q));
+    return pres_system::const_multiply(p, q);
   }
 
   /// \brief Make a const multiply
@@ -1885,7 +1885,7 @@ struct term_traits<pres_system::pres_expression>
   /// \param p A term
   /// \param q A term
   static inline
-  void make_const_multiply(term_type& result, const term_type& p, const term_type& q)
+  void make_const_multiply(term_type& result, const data::data_expression& p, const term_type& q)
   {
     pres_system::make_const_multiply(result, p, q);
   }
@@ -1895,9 +1895,9 @@ struct term_traits<pres_system::pres_expression>
   /// \param q A term
   /// \return The value <tt>p * q</tt>
   static inline
-  term_type const_multiply_alt(const term_type& p, const term_type& q)
+  term_type const_multiply_alt(const term_type& p, const data::data_expression& q)
   {
-    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PRESConstantMultiplyAlt(), p, q));
+    return pres_system::const_multiply_alt(p,q);
   }
 
   /// \brief Make a const multiply alt
@@ -1905,7 +1905,7 @@ struct term_traits<pres_system::pres_expression>
   /// \param p A term
   /// \param q A term
   static inline
-  void make_const_multiply_alt(term_type& result, const term_type& p, const term_type& q)
+  void make_const_multiply_alt(term_type& result, const term_type& p, const data::data_expression& q)
   {
     pres_system::make_const_multiply_alt(result, p, q);
   }
@@ -1921,7 +1921,7 @@ struct term_traits<pres_system::pres_expression>
     {
       return p;
     }
-    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PRESMinall(), l, p));
+    return pres_system::minall(l, p);
   }
 
   /// \brief Make a generalized maximum
@@ -1950,7 +1950,7 @@ struct term_traits<pres_system::pres_expression>
     {
       return p;
     }
-    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PRESMaxall(), l, p));
+    return pres_system::maxall(l, p);
   }
 
   /// \brief Make a generalized maximum
@@ -1966,6 +1966,35 @@ struct term_traits<pres_system::pres_expression>
       return;
     }
     pres_system::make_maxall(result, l, p);
+  }
+
+  /// \brief Make a generalized sum operator
+  /// \param l A sequence of variables
+  /// \param p A term
+  /// \return The value <tt>sum l.p</tt>
+  static inline
+  term_type sum(const variable_sequence_type& l, const term_type& p)
+  {
+    if (l.empty())
+    {
+      return p;
+    }
+    return pres_system::sum(l, p);
+  }
+
+  /// \brief Make a generalized sum operator
+  /// \param result The value <tt>sum l.p</tt>
+  /// \param l A sequence of variables
+  /// \param p A term
+  static inline
+  void make_sum(term_type& result, const variable_sequence_type& l, const term_type& p)
+  {
+    if (l.empty())
+    {
+      result = p;
+      return;
+    }
+    pres_system::make_sum(result, l, p);
   }
 
   /// \brief Test for the value true
