@@ -43,10 +43,12 @@ class lps2pres_algorithm
       {
         if (unoptimized)
         {
+std::cerr << "RUN1\n";
           detail::E_structured(f, parameters, equations, core::term_traits<pres_expression>());
         }
         else
         {
+std::cerr << "RUN2\n";
           detail::E_structured(f, parameters, equations, core::term_traits_optimized<pres_expression>());
         }
       }
@@ -54,10 +56,12 @@ class lps2pres_algorithm
       {
         if (unoptimized)
         {
+std::cerr << "RUN3\n";
           detail::E(f, parameters, equations, core::term_traits<pres_expression>());
         }
         else
         {
+std::cerr << "RUN4\n";
           detail::E(f, parameters, equations, core::term_traits_optimized<pres_expression>());
         }
       }
@@ -105,6 +109,7 @@ class lps2pres_algorithm
       std::vector<pres_equation> equations;
       detail::lps2pres_parameters parameters(f, lpsspec.process(), m_generator, T);
       run(f, structured, unoptimized, equations, parameters);
+std::cerr << "OBTAINED EQUATIONS AAAAA\n "; for(auto e: equations){ std::cerr << "EQ " << e << "\n"; } std::cerr << "\ni----------------------------------\n";
 
       // compute the initial state
       assert(!equations.empty());
