@@ -15,6 +15,7 @@ set(MCRL2_TOOLS
   presinfo
   prespp
   presrewr
+  pressolve
   symbolic_exploration
   respp
   resinfo
