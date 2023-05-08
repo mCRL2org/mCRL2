@@ -13,6 +13,7 @@
 #define MCRL2_DATA_SUBSTITUTIONS_VARIABLE_SUBSTITUTION_H
 
 #include "mcrl2/data/is_simple_substitution.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/data/undefined.h"
 
 namespace mcrl2 {
@@ -45,6 +46,7 @@ struct variable_substitution
   }
 };
 
+inline
 std::set<data::variable> substitution_variables(const variable_substitution& sigma)
 {
   std::set<data::variable> result;
