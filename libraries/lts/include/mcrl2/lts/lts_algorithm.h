@@ -79,8 +79,8 @@ bool destructive_compare(LTS_TYPE& l1,
     {
       if (generate_counter_examples)
       {
-        mCRL2log(mcrl2::log::warning) << "The default bisimulation comparison algorithm cannot generate counter examples. Therefore the slower gv algorithm is used instead.\n";
-        return detail::destructive_bisimulation_compare(l1,l2, false,false,generate_counter_examples,counter_example_file,structured_output);
+        mCRL2log(mcrl2::log::warning) << "Warning, experimental area from here.\n";
+        return detail::destructive_bisimulation_compare_minimal_depth(l1,l2, false,false,true,counter_example_file,structured_output);
       }
       return detail::destructive_bisimulation_compare_dnj(l1,l2, false,false,generate_counter_examples,counter_example_file,structured_output);
     }
