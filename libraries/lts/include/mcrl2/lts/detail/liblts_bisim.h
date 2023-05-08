@@ -18,6 +18,7 @@
 #include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_dot.h"
+#include "mcrl2/lts/detail/liblts_bisim_m.h"
 
 namespace mcrl2
 {
@@ -1148,6 +1149,28 @@ bool destructive_bisimulation_compare(
   const bool generate_counter_examples = false,
   const std::string& counter_example_file = "",
   const bool structured_output = false);
+
+template < class LTS_TYPE>
+bool destructive_bisimulation_compare_minimal_depth(
+    LTS_TYPE & l1,
+    LTS_TYPE & l2,
+    const bool branching /* =false*/,
+    const bool preserve_divergences /*=false*/,
+    const bool generate_counter_examples /* = false */,
+    const std::string & counter_example_file /*= ""*/,
+    const bool /*structured_output = false */)
+    {
+    assert(branching == false && preserve_divergences == false && generate_counter_examples == true);
+    std::size_t init_l2 = l2.initial_state() + l1.num_states();
+    mcrl2::lts::detail::merge(l1, l2);
+    l2.clear(); // No use for l2 anymore.
+    std::string filename = "Counterexample.mcf";
+    if (!counter_example_file.empty()) {
+        filename = counter_example_file;
+    }
+    detail::bisim_partitioner_counter_example<LTS_TYPE> bisim_partitioner_counter_example(l1, init_l2);
+    return true;
+}
 
 
 /** \brief Checks whether the two initial states of two lts's are strong or branching bisimilar.
