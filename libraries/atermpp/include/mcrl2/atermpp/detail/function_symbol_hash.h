@@ -12,6 +12,8 @@
 
 #include "mcrl2/atermpp/function_symbol.h"
 
+#include <cstdint>
+
 namespace std
 {
  

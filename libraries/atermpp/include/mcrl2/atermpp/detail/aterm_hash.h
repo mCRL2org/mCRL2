@@ -16,6 +16,7 @@
 #include "mcrl2/utilities/hash_utility.h"
 #include "mcrl2/utilities/detail/memory_utility.h"
 
+#include <cstdint>
 #include <functional>
 
 namespace std

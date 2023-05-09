@@ -25,6 +25,7 @@
 #ifndef SYLVAN_LDD_HPP
 #define SYLVAN_LDD_HPP
 
+#include <cstdint>
 #include <sstream>
 #include <string>
 #include <vector>

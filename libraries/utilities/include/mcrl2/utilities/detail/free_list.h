@@ -12,6 +12,7 @@
 #include <cassert>
 #include <atomic>
 #include <cstddef>
+#include <cstdint>
 #include <limits>
 #include <iterator>
 
