@@ -10,8 +10,9 @@
 #ifndef MCRL2_UTILITIES_BITSTREAM_H
 #define MCRL2_UTILITIES_BITSTREAM_H
 
-#include <vector>
 #include <bitset>
+#include <stdint.h>
+#include <vector>
 
 namespace mcrl2
 {
