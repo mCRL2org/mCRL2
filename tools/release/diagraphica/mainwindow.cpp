@@ -73,6 +73,7 @@ MainWindow::MainWindow():
   connect(m_ui.actionUngroup, SIGNAL(triggered()), this, SLOT(ungroupValues()));
   connect(m_ui.actionRenameValue, SIGNAL(triggered()), this, SLOT(renameValue()));
   connect(m_ui.domain, SIGNAL(itemMoved(int, int)), this, SLOT(moveValue(int, int)));
+  connect(m_ui.domain, SIGNAL(itemSelectionChanged()), this, SLOT(updateValue()));
 
 
   QSettings settings("mCRL2", "DiaGraphica");
@@ -295,7 +296,6 @@ void MainWindow::updateValueOperations()
 {
   QList<int> values = selectedValues();
   int items = values.size();
-
   m_ui.actionGroup->setEnabled(items > 1);
   m_ui.actionUngroup->setEnabled(items > 0);
   m_ui.actionRenameValue->setEnabled(items == 1);
@@ -608,8 +608,10 @@ void MainWindow::moveValue(int index, int newPosition)
   updateValues();
 }
 
-
-
+void MainWindow::updateValue()
+{
+  MainWindow::updateValueOperations();
+}
 
 void MainWindow::routeCluster(Cluster *cluster, QList<Cluster *> clusterSet, QList<Attribute *> attributes)
 {
