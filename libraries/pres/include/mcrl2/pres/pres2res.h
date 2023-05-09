@@ -26,21 +26,18 @@ class pres2res_algorithm
 {
   protected:
     atermpp::indexed_set<propositional_variable_instantiation> stored_variables;
+    atermpp::vector<bes_expression> stored_rhs;
     std::size_t next_res_variable_index=0;
 
   public:
-    presinst_structure_graph_algorithm(
+    pres2res(
       const pressolve_options& options,
-      const pres& p,
-      structure_graph& G
+      const pres& input_pres,
+      const res& output_res
     )
-      : presinst_lazy_algorithm(options, p),
-        m_graph_builder(G)
     {}
 
-    void on_report_equation(
-                            std::shared_mutex& realloc_mutex,
-                            const propositional_variable_instantiation& X,
+    void on_report_equation(const propositional_variable_instantiation& X,
                             const pres_expression& psi,
                             std::size_t k
                            ) override
