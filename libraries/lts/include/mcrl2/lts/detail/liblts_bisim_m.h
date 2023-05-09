@@ -43,7 +43,6 @@ public:
         initial_l2(init_l2)
     {
         create_initial_partition();
-        mCRL2log(mcrl2::log::info) << "Created initial partition.\n";
         bool splitted = true; 
         level_type lvl = 1;
         while (splitted && block_index_of_a_state[initial_l2] == block_index_of_a_state[aut.initial_state()]) {
@@ -55,7 +54,6 @@ public:
             }
         }
 
-        mCRL2log(mcrl2::log::info) << "Refining done blocks, doing some post-processing.\n";
         for (state_type i = 0; i < aut.num_states(); i++) {
             block_index_type bid = block_index_of_a_state[i];
             if (!block_flags[bid]) {
@@ -63,9 +61,12 @@ public:
                 partition.insert(bid);
             }
         }
-        mCRL2log(mcrl2::log::info) << "Partition refinement done, partition contains: " << partition.size() << " blocks, the history contains "<< lvl-1 << " levels.\n";
-        transId(aut.initial_state());
+        mCRL2log(mcrl2::log::info) << "Partition refinement done, partition contains: " << partition.size() << " blocks, the history contains "<< lvl-1 << " levels." <<std::endl;
+        save_transitions();
+        print_formula(distinguish(block_index_of_a_state[l.initial_state()], block_index_of_a_state[initial_l2]));
+        mCRL2log(mcrl2::log::info) << std::endl;
     }
+
     /** \brief Destroys this partitioner. */
     ~bisim_partitioner_counter_example() = default;
 
@@ -90,6 +91,7 @@ private:
 
     state_type max_state_index;
     LTS_TYPE& aut;
+    std::set <block_index_type> partition;
 
     struct block
     {
@@ -102,7 +104,8 @@ private:
         // If there is no parent block, this refers to the block itself.
         std::vector < state_type > states;
         std::vector < transition > transitions;
-        std::set<std::pair < label_type, block_index_type >> outgoing_transitions;
+        std::set<std::pair < label_type, block_index_type >> outgoing_observations;
+
         void swap(block& b)
         {
             state_type state_index1 = b.state_index;
@@ -132,6 +135,7 @@ private:
         label_type label;
         bool negated;
         std::vector <formula> conjunctions;
+        std::set <block_index_type > truths;
 
         int depth() {
             int max_depth = 0;
@@ -142,42 +146,9 @@ private:
             }
             return max_depth; 
         }
-
-        void set_truths() {
-            std::set <block_index_type> image_truths;
-            std::set <block_index_type> pre_image_truths;
-            std::set<block_index_type> intersection;
-
-            image_truths = partition.copy();
-            for (formula f : conjunctions) {
-                std::set_intersection(image_truths.begin(), image_truths.end(), truths[f].begin(), truths[f].end(),
-                        std::inserter(intersection, intersection.begin()));
-                image_truths.swap(intersection);
-                intersection.clear();
-            }
-
-            //Now compute preimage according to label
-            for (block_index_type B : image_truths) {
-                for (transition t : blocks[B].transitions) {
-                    if (t.label() == label && !pre_image_truths.contains(block_index_of_a_state[t.from()])) {
-                        pre_image_truths.insert(block_index_of_a_state[t.from()]);
-                    }
-                }
-            }
-           
-            if (negated) {
-                image_truths.swap(pre_image_truths);
-                pre_image_truths.clear();
-                std::set_difference(partition.begin(), partition.end(), image_truths.begin(), image_truths.end(),
-                    std::inserter(pre_image_truths.begin(), pre_image_truths.end()));
-            }
-            truths[f] = pre_image_truths;
-        }
     };
 
     std::vector < block > blocks;
-    std::set <block_index_type> partition;
-    std::map < formula, std::set <block>> truths;
     // Blocks that are split become inactive.
     std::vector < state_type > block_index_of_a_state;
     std::vector < bool > block_flags;
@@ -185,19 +156,58 @@ private:
 
     std::vector< block_index_type > to_be_processed;
     std::vector< block_index_type > BL;
+    typedef std::pair<label_type, block_index_type> observation_t;
+    typedef std::set <observation_t> derivatives_t;
 
-    // map from source state and action to target state, makes generating counterexample info easier
-    mcrl2::lts::outgoing_transitions_per_state_action_t transitions_outgoing;
 
-    void transId(state_type s) {
-        return; 
+
+    /* Post processes the partition structure to save outgoing transitions per block */
+    void save_transitions() {
+        for (transition t : aut.get_transitions()) {
+            
+            block_index_type sourceBlock = block_index_of_a_state[t.from()];
+            block_index_type targetBlock = block_index_of_a_state[t.to()];
+    
+            blocks[sourceBlock].outgoing_observations.insert(std::make_pair(t.label(), targetBlock));
+        }
+    }
+
+    void set_truths(formula& f) {
+        std::set <block_index_type> image_truths;
+        std::set <block_index_type> pre_image_truths;
+        std::set<block_index_type> intersection;
+
+        
+        image_truths = std::set(partition);
+
+        for (formula df : f.conjunctions) {
+            std::set_intersection(image_truths.begin(), image_truths.end(), df.truths.begin(), df.truths.end(),
+                std::inserter(intersection, intersection.begin())
+            );
+            image_truths.swap(intersection);
+            intersection.clear();
+        }
+
+        //Now compute preimage according to label
+        for (block_index_type B : image_truths) {
+            for (transition t : blocks[B].transitions) {
+                if (t.label() == f.label && (pre_image_truths.find(block_index_of_a_state[t.from()]) == pre_image_truths.end()) ) {
+                    pre_image_truths.insert(block_index_of_a_state[t.from()]);
+                }
+            }
+        }
+
+        if (f.negated) {
+            image_truths.swap(pre_image_truths);
+            pre_image_truths.clear();
+            std::set_difference(partition.begin(), partition.end(), image_truths.begin(), image_truths.end(),
+                std::inserter(pre_image_truths, pre_image_truths.begin()));
+        }
+        f.truths.swap(pre_image_truths);
     }
 
     void create_initial_partition() {
         to_be_processed.clear();
-        // First store the bottom and non bottom states.
-        transitions_outgoing = mcrl2::lts::transitions_per_outgoing_state_action_pair(aut.get_transitions());
-
         block initial_block;
 
         state_type last_non_stored_state_number = 0;
@@ -382,7 +392,115 @@ private:
             }
             BL.clear();
         };
+    }
+
+    label_type label(observation_t obs) {
+        return obs.first; 
+    }
+
+    block_index_type target(observation_t obs) {
+        return obs.second;
+    }
+
+    formula distinguish(block_index_type b1, block_index_type b2) {
+        block_index_type bParent1 = b1, bParent2 = b2;
+        level_type lvl1, lvl2;
+        while (bParent1 != bParent2) {
+            lvl1 = blocks[bParent1].level, lvl2 = blocks[bParent2].level;
+            if (lvl1 <= lvl2) {
+                bParent2 = blocks[bParent2].parent_block_index;
+            }
+            if (lvl2 <= lvl1) {
+                bParent1 = blocks[bParent1].parent_block_index;
+            }
+        }
+        assert(lvl1 == lvl2);
+        derivatives_t b2_delta;
+        observation_t dist_obs;
+
+
+        for(observation_t obs: blocks[b2].outgoing_observations) {
+            b2_delta.insert(std::make_pair(label(obs), lift_block(target(obs), lvl1)));
+        }
+
+        bool found_dist_obs = false;
+        for (observation_t obs : blocks[b1].outgoing_observations) {
+            if (b2_delta.find(std::make_pair(label(obs), lift_block(target(obs), lvl1))) == b2_delta.end()) {
+                found_dist_obs = true;
+                dist_obs = obs; 
+                break;
+            }
+        }
+
+        if (!found_dist_obs) {
+            //Greedy strategy did not find negation free formula;
+            formula neg_phi = distinguish(b2, b1);
+            neg_phi.negated = true;
+            set_truths(neg_phi);
+            return neg_phi;
+        } 
+
+        // Set of t derivates we need to take care of. 
+        std::set<block_index_type> dT; 
+        bParent1 = target(dist_obs);
+        for (observation_t obs : blocks[b2].outgoing_observations) {
+            if (label(obs) == label(dist_obs)) {
+                dT.insert(target(obs));
+            }
+        }
+        std::vector<formula> conjunctions;
+        
+        while (!dT.empty()) {
+            //TODO: Pick the highest intersecting one; 
+            block_index_type bid = *(dT.begin());
+
+            formula f = distinguish(target(dist_obs), bid);
+            conjunctions.push_back(f);
+            std::set<block_index_type> dTleft;
+            std::set_intersection(dT.begin(), dT.end(), f.truths.begin(), f.truths.end(),
+                std::inserter(dTleft, dTleft.begin())
+            );
+            dT.swap(dTleft);
+        }
+        formula returnf;
+        returnf.conjunctions.swap(conjunctions);
+        returnf.label = label(dist_obs);
+        returnf.negated = false;
+        set_truths(returnf);
+        return returnf;
+    }
+
+    block_index_type lift_block(const block_index_type B1, level_type goal) {
+        block_index_type B = B1;
+        while (blocks[B].level > goal) {
+            B = blocks[B].parent_block_index;
+        }
+        return B;
     };
+
+    //Temporary for debug and develop purpose. 
+    void print_formula(formula f) {
+        if (f.negated) {
+            mCRL2log(mcrl2::log::info) << "!";
+        }
+        mCRL2log(mcrl2::log::info) << "<" << aut.action_label(f.label) << ">";
+        if (f.conjunctions.size() > 1) {
+            mCRL2log(mcrl2::log::info) << "(";
+            for (auto df = f.conjunctions.begin(); df != f.conjunctions.end(); df++) {
+                print_formula(*df);
+                if (df != f.conjunctions.end() - 1) {
+                    mCRL2log(mcrl2::log::info) << " && ";
+                }
+            }
+            mCRL2log(mcrl2::log::info) << ")";
+        }
+        else if (f.conjunctions.size() == 1) {
+            print_formula(*f.conjunctions.begin());
+        }
+        else {
+            mCRL2log(mcrl2::log::info) << "true";
+        }
+    }
 };
 }
 }
