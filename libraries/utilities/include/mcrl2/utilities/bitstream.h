@@ -11,7 +11,7 @@
 #define MCRL2_UTILITIES_BITSTREAM_H
 
 #include <bitset>
-#include <stdint.h>
+#include <cstdint>
 #include <vector>
 
 namespace mcrl2
