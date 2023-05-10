@@ -63,22 +63,24 @@ public:
         }
         mCRL2log(mcrl2::log::info) << "Partition refinement done, partition contains: " << partition.size() << " blocks, the history contains "<< lvl-1 << " levels." <<std::endl;
         save_transitions();
-        print_formula(distinguish(block_index_of_a_state[l.initial_state()], block_index_of_a_state[initial_l2]));
-        mCRL2log(mcrl2::log::info) << std::endl;
     }
 
     /** \brief Destroys this partitioner. */
     ~bisim_partitioner_counter_example() = default;
 
     /** \brief Creates a state formula that distinguishes state s from state t.
-     *  \details The states s and t are non bisimilar states. If they are
-     *           bisimilar an exception is raised. A counter state formula phi is
-     *           returned, which has the property that s |= phi and not t |= phi.
-     *           Based on "Computing Distinguishing Formulas for Branching Bisimulation", 1991 by Henri Korver
+     *  \details The states s and t are non bisimilar states. A distinguishign state formula phi is
+     *           returned, which has the property that s \in \sem{phi} and  t \not\in\sem{phi}.
+     *           Based on the preprint "Computing minimal distinguishing Hennessey-Milner formulas is NP-hard
+     *           . But variants are tractable", 2023 by Jan Martens and Jan Friso Groote
      *  \param[in] s The state number for which the resulting formula should be true
      *  \param[in] t The state number for which the resulting formula should be false
-     *  \return A distinguishing state formula. */
-    mcrl2::state_formulas::state_formula counter_formula_mindepth();
+     *  \return A minimal observation depth distinguishing state formula, that is often also minimum negation-depth and irreducible. */
+    mcrl2::state_formulas::state_formula dist_formula_mindepth(const std::size_t s, const std::size_t t) {
+        formula f = distinguish(block_index_of_a_state[s], block_index_of_a_state[t]);
+        mCRL2log(mcrl2::log::info) << "done with formula \n";
+        return convertFormula(f);
+    };
 
 
 private:
@@ -158,7 +160,7 @@ private:
     std::vector< block_index_type > BL;
     typedef std::pair<label_type, block_index_type> observation_t;
     typedef std::set <observation_t> derivatives_t;
-
+    std::map < std::pair<block_index_type, block_index_type>, level_type> greatest_common_ancestor;
 
 
     /* Post processes the partition structure to save outgoing transitions per block */
@@ -402,30 +404,19 @@ private:
         return obs.second;
     }
 
-    formula distinguish(block_index_type b1, block_index_type b2) {
-        block_index_type bParent1 = b1, bParent2 = b2;
-        level_type lvl1, lvl2;
-        while (bParent1 != bParent2) {
-            lvl1 = blocks[bParent1].level, lvl2 = blocks[bParent2].level;
-            if (lvl1 <= lvl2) {
-                bParent2 = blocks[bParent2].parent_block_index;
-            }
-            if (lvl2 <= lvl1) {
-                bParent1 = blocks[bParent1].parent_block_index;
-            }
-        }
-        assert(lvl1 == lvl2);
+    formula distinguish(const block_index_type b1, const block_index_type b2) {
         derivatives_t b2_delta;
         observation_t dist_obs;
 
+        level_type lvl = gca_level(b1, b2);
 
         for(observation_t obs: blocks[b2].outgoing_observations) {
-            b2_delta.insert(std::make_pair(label(obs), lift_block(target(obs), lvl1)));
+            b2_delta.insert(std::make_pair(label(obs), lift_block(target(obs), lvl-1)));
         }
 
         bool found_dist_obs = false;
         for (observation_t obs : blocks[b1].outgoing_observations) {
-            if (b2_delta.find(std::make_pair(label(obs), lift_block(target(obs), lvl1))) == b2_delta.end()) {
+            if (b2_delta.find(std::make_pair(label(obs), lift_block(target(obs), lvl-1))) == b2_delta.end()) {
                 found_dist_obs = true;
                 dist_obs = obs; 
                 break;
@@ -442,24 +433,30 @@ private:
 
         // Set of t derivates we need to take care of. 
         std::set<block_index_type> dT; 
-        bParent1 = target(dist_obs);
         for (observation_t obs : blocks[b2].outgoing_observations) {
             if (label(obs) == label(dist_obs)) {
                 dT.insert(target(obs));
             }
         }
         std::vector<formula> conjunctions;
-        
-        while (!dT.empty()) {
-            //TODO: Pick the highest intersecting one; 
-            block_index_type bid = *(dT.begin());
 
-            formula f = distinguish(target(dist_obs), bid);
+        while (!dT.empty()) {
+            level_type max_intersect = 0; 
+            block_index_type splitBlock = *dT.begin();
+            for (block_index_type bid : dT ) {
+                if (gca_level(target(dist_obs), bid) > max_intersect) {
+                    splitBlock = bid;
+                    max_intersect = gca_level(target(dist_obs), bid);
+                }
+            }
+            formula f = distinguish(target(dist_obs), splitBlock);
             conjunctions.push_back(f);
+
             std::set<block_index_type> dTleft;
             std::set_intersection(dT.begin(), dT.end(), f.truths.begin(), f.truths.end(),
                 std::inserter(dTleft, dTleft.begin())
             );
+            assert(dT.size() > dTleft.size()); 
             dT.swap(dTleft);
         }
         formula returnf;
@@ -470,37 +467,105 @@ private:
         return returnf;
     }
 
+    level_type gca_level(const block_index_type B1, const block_index_type B2) {
+        block_index_type b1 = B1, b2 = B2;
+        if (B1 < B2) {
+            b1 = B2;
+            b2 = B1;
+        }
+        std::pair<block_index_type, block_index_type> bpair(b1, b2);
+        if (greatest_common_ancestor.find(bpair) != greatest_common_ancestor.end()) {
+            return greatest_common_ancestor[bpair];
+        }
+        level_type lvl1 = blocks[b1].level, lvl2 = blocks[b2].level;
+        if (b1 == b2) {
+            greatest_common_ancestor.emplace(bpair, lvl1);
+            return lvl1;
+        }
+        block_index_type B1parent = b1, B2parent = b2;
+
+        if (lvl1 <= lvl2) {
+            B2parent = blocks[b2].parent_block_index;
+        }
+        if (lvl2 <= lvl1) {
+            B1parent = blocks[b1].parent_block_index;
+        }
+        if (B1parent == B2parent) {
+            lvl1 = blocks[b1].level;            
+        } else {
+            lvl1 = gca_level(B1parent, B2parent);
+        }
+        greatest_common_ancestor.emplace(bpair, lvl1);
+        return lvl1;
+    }
+
     block_index_type lift_block(const block_index_type B1, level_type goal) {
         block_index_type B = B1;
         while (blocks[B].level > goal) {
             B = blocks[B].parent_block_index;
         }
         return B;
-    };
-
-    //Temporary for debug and develop purpose. 
-    void print_formula(formula f) {
-        if (f.negated) {
-            mCRL2log(mcrl2::log::info) << "!";
-        }
-        mCRL2log(mcrl2::log::info) << "<" << aut.action_label(f.label) << ">";
-        if (f.conjunctions.size() > 1) {
-            mCRL2log(mcrl2::log::info) << "(";
-            for (auto df = f.conjunctions.begin(); df != f.conjunctions.end(); df++) {
-                print_formula(*df);
-                if (df != f.conjunctions.end() - 1) {
-                    mCRL2log(mcrl2::log::info) << " && ";
-                }
-            }
-            mCRL2log(mcrl2::log::info) << ")";
-        }
-        else if (f.conjunctions.size() == 1) {
-            print_formula(*f.conjunctions.begin());
-        }
-        else {
-            mCRL2log(mcrl2::log::info) << "true";
-        }
     }
+
+    /*
+    * \brief Converts the private formula data type to the proper mCRL2 state_formula objects
+    * \param[in] a formula f
+    * \retval a state_formula equivalent to f
+    */ 
+    mcrl2::state_formulas::state_formula convertFormula(formula& f) {
+        mcrl2::state_formulas::state_formula returnPhi = mcrl2::state_formulas::may(
+            create_regular_formula(aut.action_label(f.label)), 
+            conjunction(f.conjunctions)
+        );
+
+        if (f.negated) {
+            return mcrl2::state_formulas::not_(returnPhi);
+        }
+        return returnPhi;
+    }
+
+    /**
+     * \brief conjunction Creates a conjunction of state formulas
+     * \param[in] terms The terms of the conjunction
+     * \return The conjunctive state formula
+     */
+    mcrl2::state_formulas::state_formula conjunction(std::vector<formula>& conjunctions)
+    {
+        std::vector<mcrl2::state_formulas::state_formula> terms;
+        for (formula& f : conjunctions) {
+            terms.push_back(convertFormula(f));
+        }
+        return utilities::detail::join<mcrl2::state_formulas::state_formula>(
+            terms.begin(), terms.end(),
+            [](mcrl2::state_formulas::state_formula a, mcrl2::state_formulas::state_formula b)
+                { return mcrl2::state_formulas::and_(a, b); },
+            mcrl2::state_formulas::true_()
+        );
+    }
+
+    /**
+    * \brief create_regular_formula Creates a regular formula that represents action a
+    * \details In case the action comes from an LTS in the aut or fsm format.
+    * \param[in] a The action for which to create a regular formula
+    * \return The created regular formula
+    */
+    regular_formulas::regular_formula create_regular_formula(const mcrl2::lts::action_label_string& a) const
+    {
+        return mcrl2::regular_formulas::regular_formula(mcrl2::action_formulas::multi_action(
+            process::action_list({ process::action(process::action_label(a, {}), {}) })));
+    }
+
+    /**
+    * \brief create_regular_formula Creates a regular formula that represents action a
+    * \details In case the action comes from an LTS in the lts format.
+    * \param[in] a The action for which to create a regular formula
+    * \return The created regular formula
+    */
+    regular_formulas::regular_formula create_regular_formula(const mcrl2::lps::multi_action& a) const
+    {
+        return regular_formulas::regular_formula(action_formulas::multi_action(a.actions()));
+    }
+
 };
 }
 }
