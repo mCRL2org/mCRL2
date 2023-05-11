@@ -57,6 +57,8 @@ MainWindow::MainWindow():
   connect(m_ui.attributes, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(showAttributeContextMenu(const QPoint &)));
   m_ui.attributes->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(m_ui.attributes, SIGNAL(itemSelectionChanged()), this, SLOT(updateAttributeOperations()));
+  connect(m_ui.domain, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showDomainContextMenu(const QPoint&)));
+  m_ui.domain->setContextMenuPolicy(Qt::CustomContextMenu);
   updateAttributeOperations();
 
   connect(m_ui.actionClusterNodes, SIGNAL(triggered()), this, SLOT(clusterNodes()));
@@ -301,6 +303,21 @@ void MainWindow::updateValueOperations()
   m_ui.actionRenameValue->setEnabled(items == 1);
 }
 
+void MainWindow::updateValueSelection(int count)
+{
+  QList<QTableWidgetSelectionRange> ranges = m_ui.domain->selectedRanges();
+  m_ui.domain->clearSelection();
+  if (ranges.size() == 0 || count < 1)
+    return;
+  int index = ranges[0].topRow();
+  for (const QTableWidgetSelectionRange range : ranges)
+  {
+    index = qMin(index, range.topRow());
+  }
+  QTableWidgetSelectionRange range(index, ranges[0].leftColumn(), index + count - 1, ranges[0].rightColumn());
+  m_ui.domain->setRangeSelected(range, true);
+}
+
 void MainWindow::openFile()
 {
   QString filter = QString("All supported files (") + QString::fromStdString(mcrl2::lts::detail::lts_extensions_as_string(" ")) + ");;All files (*.*)";
@@ -461,6 +478,11 @@ void MainWindow::showAttributeContextMenu(const QPoint &position)
   m_ui.menuAttributes->popup(m_ui.attributes->viewport()->mapToGlobal(position));
 }
 
+void MainWindow::showDomainContextMenu(const QPoint& position)
+{
+    m_ui.menuDomain->popup(m_ui.domain->viewport()->mapToGlobal(position));
+}
+
 void MainWindow::clusterNodes()
 {
   QList<int> attributes = selectedAttributes();
@@ -580,6 +602,7 @@ void MainWindow::groupValues()
                 clusterValues(std::vector<int>(temp_selected_values.begin(),
                                                temp_selected_values.end()), name.toStdString());
     updateValues();
+    updateValueSelection(1);
   }
 }
 
@@ -587,6 +610,7 @@ void MainWindow::ungroupValues()
 {
   m_graph->getAttribute(selectedAttributes().first())->clearClusters();
   updateValues();
+  updateValueSelection(0);
 }
 
 void MainWindow::renameValue()
