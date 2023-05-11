@@ -340,6 +340,7 @@ public:
   reference_aterm() = default;
 
   reference_aterm(const reference_aterm& other)
+    : super()
   {
     *this = other;
   }
