@@ -1175,7 +1175,7 @@ bool destructive_bisimulation_compare_minimal_depth(
     counter_file.close();
     mCRL2log(mcrl2::log::info) << "Saved counterexample to: \"" << filename << "\"" << std::endl;
 
-    return true;
+    return false;
 }
 
 
