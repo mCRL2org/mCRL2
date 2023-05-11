@@ -42,6 +42,7 @@ class MainWindow : public QMainWindow
     void updateAttributeOperations();
     void updateValues();
     void updateValueOperations();
+    void updateValueSelection(int count);
     void openFile();
     void saveFile();
     void saveFileAs();
@@ -55,6 +56,7 @@ class MainWindow : public QMainWindow
     void modeSelected(QAction* action);
 
     void showAttributeContextMenu(const QPoint &position);
+    void showDomainContextMenu(const QPoint& position);
 
     void clusterNodes();
     void viewTrace();
