@@ -1058,7 +1058,8 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
     else if (is_function_sort(sort_set::arg1(x).sort()))
     {
-      const sort_expression& s = atermpp::down_cast<function_sort>(sort_set::arg1(x).sort()).domain().front();
+      const sort_expression sort = sort_set::arg1(x).sort();
+      const sort_expression& s = atermpp::down_cast<function_sort>(sort).domain().front();
       core::identifier_string name = generate_identifier("x", x);
       variable var(name, s);
       data_expression body = sort_bool::and_(sort_bool::not_(g(var)), sort_set::in(s, var, sort_set::arg3(x)));
