@@ -78,7 +78,7 @@ struct normalize_sorts_function
     {
       // Rewrite the argument sorts to normal form.
       std::vector< structured_sort_constructor > new_constructors;
-      const structured_sort_constructor_list& e_constructors(structured_sort(e).constructors());
+      const structured_sort_constructor_list& e_constructors(static_cast<const structured_sort&>(e).constructors());
       for (const structured_sort_constructor& e_constructor: e_constructors)
       {
         std::vector<structured_sort_constructor_argument> new_arguments;

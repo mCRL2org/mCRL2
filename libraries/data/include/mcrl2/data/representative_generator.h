@@ -87,7 +87,7 @@ class representative_generator
 
       data_expression_vector arguments;
 
-      for (const sort_expression& s: function_sort(symbol.sort()).domain())
+      for (const sort_expression& s: static_cast<const function_sort&>(symbol.sort()).domain())
       {
         data_expression representative;
         if (find_representative(s, visited_sorts, representative))

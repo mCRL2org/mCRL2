@@ -1587,7 +1587,7 @@ class specification_basic_type
       {
         find_free_variables_process(sum(p).operand(),free_variables_in_p);
 
-        for(const variable& v: sum(p).variables())
+        for(const variable& v: static_cast<const sum&>(p).variables())
         {
           free_variables_in_p.erase(v);
         }
@@ -3722,7 +3722,7 @@ class specification_basic_type
         procstorealGNFrec(t,first,todo,regular);
 
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-        for(const assignment& a: process_instance_assignment(body).assignments())
+        for(const assignment& a: static_cast<const process_instance_assignment&>(body).assignments())
         {
           sigma[a.lhs()]=a.rhs();
         }
@@ -10859,7 +10859,7 @@ class specification_basic_type
         // Also rename bound variables in a sum, such that there are no two variables with
         // the same name, but different types. We do the renaming globally, i.e. all occurrences of variables
         // x:D that require renaming are renamed to x':D.
-        for(const variable& v: sum(t).variables())
+        for(const variable& v: static_cast<const sum&>(t).variables())
         {
           if (used_variable_names.count(v.name())==0)
           {

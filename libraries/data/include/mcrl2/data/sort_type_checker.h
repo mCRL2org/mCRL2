@@ -325,7 +325,7 @@ class sort_type_checker
           else
           {
             bool has_a_domain_sort_possibly_empty_sorts=false;
-            for(const sort_expression& sort: function_sort(s).domain())
+            for(const sort_expression& sort: static_cast<const function_sort&>(s).domain())
             {
               if (possibly_empty_constructor_sorts.find(normalize_sorts(sort, get_sort_specification()))!=possibly_empty_constructor_sorts.end())
               {
@@ -337,7 +337,7 @@ class sort_type_checker
             if (!has_a_domain_sort_possibly_empty_sorts)
             {
               // Condition below is true if one element has been removed.
-              if (possibly_empty_constructor_sorts.erase(normalize_sorts(function_sort(s).codomain(),get_sort_specification()))==1)
+              if (possibly_empty_constructor_sorts.erase(normalize_sorts(static_cast<const function_sort&>(s).codomain(),get_sort_specification()))==1)
               {
                 stable=false;
               }
