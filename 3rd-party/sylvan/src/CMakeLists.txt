@@ -28,6 +28,7 @@ add_library(sylvan STATIC
 )
 
 target_include_directories(sylvan PUBLIC .)
+target_compile_options(sylvan PRIVATE -Wno-pedantic)
 
 target_link_libraries(sylvan pthread)
 
