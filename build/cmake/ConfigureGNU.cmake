@@ -47,12 +47,6 @@ if(MCRL2_CLANG)
   try_add_c_flag(-Wno-zero-length-array)
 endif()
 
-# The following flags are not implemented in clang and therefore cause warnings.
-if(NOT MCRL2_CLANG)
-  try_add_c_flag(-fprofile-arcs            DEBUG)
-  try_add_c_flag(-ftest-coverage           DEBUG)
-endif()
-
 if(MCRL2_ENABLE_ADDRESSSANITIZER)
   # We need to add the proper flag to the linker before we try:
   set(CMAKE_REQUIRED_LIBRARIES "-fsanitize=address")
@@ -96,12 +90,6 @@ if(MCRL2_CLANG)
   try_add_cxx_flag(-Wno-zero-length-array)
 endif()
 
-# The following flags are not implemented in clang and therefore cause warnings.
-if(NOT MCRL2_CLANGPP)
-  try_add_cxx_flag(-fprofile-arcs            DEBUG)
-  try_add_cxx_flag(-ftest-coverage           DEBUG)
-endif()
-
 if(MCRL2_ENABLE_ADDRESSSANITIZER)
   # We need to add the proper flag to the linker before we try:
   set(CMAKE_REQUIRED_LIBRARIES "-fsanitize=address")
@@ -142,15 +130,6 @@ if(APPLE)
 else()
   set(CMAKE_EXE_LINKER_FLAGS "-Wl,--as-needed")
   set(CMAKE_EXE_LINKER_FLAGS_DEBUG "-Wl,--warn-unresolved-symbols,--warn-once")
-endif()
-
-if(CXX_ACCEPTS_FPROFILE_ARCS)
-  set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fprofile-arcs")
-  set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} -fprofile-arcs")
-endif()
-
-if(CXX_ACCEPTS_FTEST_COVERAGE)
-  set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} -ftest-coverage")
 endif()
 
 if(MCRL2_ENABLE_ADDRESSSANITIZER)
