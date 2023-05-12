@@ -20,6 +20,11 @@ if(POLICY CMP0072)
   cmake_policy(SET CMP0072 NEW)
 endif()
 
+if(POLICY CMP0110)
+  # add_test() supports arbitrary characters in test names.
+  cmake_policy(SET CMP0110 NEW)
+endif()
+
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/build/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 enable_testing()
