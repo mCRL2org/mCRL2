@@ -29,9 +29,7 @@ void run_test_case(const std::string& formula, const specification& lpsspec)
   options.check_monotonicity = false;
   options.translate_regular_formulas = false;
   options.resolve_name_clashes = false;
-
   state_formula f = parse_state_formula(formula, lpscopy, false, options);
-
   std::string pp_formula = state_formulas::pp(f);
   if (formula != pp_formula)
   {
