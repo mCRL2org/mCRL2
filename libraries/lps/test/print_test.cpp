@@ -9,7 +9,7 @@
 /// \file print_test.cpp
 /// \brief Test for parser + pretty printer
 
-#define BOOST_TEST_MODULE print_test
+#define BOOST_TEST_MODULE lps_print_test
 #include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/lps/linearise.h"
