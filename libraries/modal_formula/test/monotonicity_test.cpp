@@ -129,5 +129,6 @@ BOOST_AUTO_TEST_CASE(test_elevator)
   run_monotonicity_test_case("(nu X . X) => true", lpsspec, true);
   run_monotonicity_test_case("!(mu X. (mu X. X))", lpsspec, true);
 
+  // trac ticket #1320
   run_monotonicity_test_case("!mu X. [true]X && mu X. [true]X", lpsspec, true);
 }
