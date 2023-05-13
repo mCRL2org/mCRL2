@@ -183,6 +183,12 @@ class ltspcompare_tool : public ltscompare_base
         {
           throw mcrl2::runtime_error("Reading the .dot format is not supported anymore.");
         }
+        case lts_lts_probabilistic:
+        case lts_aut_probabilistic:
+        case lts_fsm_probabilistic:
+        {
+          throw mcrl2::runtime_error("The tool ltscompare cannot be used for probabilistic transition systems. Use ltspcompare instead. ");
+        }
       }
 
       return true;
