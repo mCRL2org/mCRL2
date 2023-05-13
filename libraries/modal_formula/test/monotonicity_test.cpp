@@ -9,6 +9,7 @@
 /// \file monotonicity_test.cpp
 /// \brief Tests for the is_monotonous function for state formulas.
 
+#define BOOST_TEST_MODULE
 #include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/lps/detail/test_input.h"
@@ -19,13 +20,14 @@ using namespace mcrl2;
 using namespace mcrl2::lps;
 using namespace mcrl2::state_formulas;
 
-void run_monotonicity_test_case(const std::string& formula, const std::string& lpstext, const bool expect_success = true)
+void run_monotonicity_test_case(const std::string& formula, const specification& lpsspec, const bool expect_success = true)
 {
-  specification lpsspec = remove_stochastic_operators(linearise(lpstext));
+  specification lpscopy(lpsspec);
+
   parse_state_formula_options options;
   options.check_monotonicity = false;
   options.resolve_name_clashes = false;
-  state_formula f = parse_state_formula(formula, lpsspec, options);
+  state_formula f = parse_state_formula(formula, lpscopy, options);
   if (state_formulas::has_state_variable_name_clashes(f))
   {
     std::cerr << "Error: " << state_formulas::pp(f) << " has name clashes" << std::endl;
@@ -38,22 +40,23 @@ void run_monotonicity_test_case(const std::string& formula, const std::string& l
 BOOST_AUTO_TEST_CASE(test_abp)
 {
   std::string lpstext = lps::detail::ABP_SPECIFICATION();
+  specification lpsspec = remove_stochastic_operators(linearise(lpstext));
 
-  run_monotonicity_test_case("true", lpstext, true);
-  run_monotonicity_test_case("[true*]<true*>true", lpstext, true);
-  run_monotonicity_test_case("mu X. !!X", lpstext, true);
-  run_monotonicity_test_case("nu X. ([true]X && <true>true)", lpstext, true);
-  run_monotonicity_test_case("nu X. ([true]X && forall d:D. [r1(d)] mu Y. (<true>Y || <s4(d)>true))", lpstext, true);
-  run_monotonicity_test_case("forall d:D. nu X. (([!r1(d)]X && [s4(d)]false))", lpstext, true);
-  run_monotonicity_test_case("nu X. ([true]X && forall d:D. [r1(d)]nu Y. ([!r1(d) && !s4(d)]Y && [r1(d)]false))", lpstext, true);
-  run_monotonicity_test_case("mu X. !X", lpstext, false);
-  run_monotonicity_test_case("mu X. nu Y. (X => Y)", lpstext, false);
-  run_monotonicity_test_case("mu X. X || mu X. X", lpstext, true);
-  run_monotonicity_test_case("mu X. (X || mu X. X)", lpstext, true);
-  run_monotonicity_test_case("mu X. (X || mu Y. Y)", lpstext, true);
-  run_monotonicity_test_case("!(mu X. X || mu X. X)", lpstext, true);
-  run_monotonicity_test_case("!(mu X. (X || mu X. X))", lpstext, true);
-  run_monotonicity_test_case("!(mu X. (X || mu Y. Y))", lpstext, true);
+  run_monotonicity_test_case("true", lpsspec, true);
+  run_monotonicity_test_case("[true*]<true*>true", lpsspec, true);
+  run_monotonicity_test_case("mu X. !!X", lpsspec, true);
+  run_monotonicity_test_case("nu X. ([true]X && <true>true)", lpsspec, true);
+  run_monotonicity_test_case("nu X. ([true]X && forall d:D. [r1(d)] mu Y. (<true>Y || <s4(d)>true))", lpsspec, true);
+  run_monotonicity_test_case("forall d:D. nu X. (([!r1(d)]X && [s4(d)]false))", lpsspec, true);
+  run_monotonicity_test_case("nu X. ([true]X && forall d:D. [r1(d)]nu Y. ([!r1(d) && !s4(d)]Y && [r1(d)]false))", lpsspec, true);
+  run_monotonicity_test_case("mu X. !X", lpsspec, false);
+  run_monotonicity_test_case("mu X. nu Y. (X => Y)", lpsspec, false);
+  run_monotonicity_test_case("mu X. X || mu X. X", lpsspec, true);
+  run_monotonicity_test_case("mu X. (X || mu X. X)", lpsspec, true);
+  run_monotonicity_test_case("mu X. (X || mu Y. Y)", lpsspec, true);
+  run_monotonicity_test_case("!(mu X. X || mu X. X)", lpsspec, true);
+  run_monotonicity_test_case("!(mu X. (X || mu X. X))", lpsspec, true);
+  run_monotonicity_test_case("!(mu X. (X || mu Y. Y))", lpsspec, true);
 }
 
 // Test case provided by Jeroen Keiren, 10-9-2010
@@ -106,28 +109,24 @@ BOOST_AUTO_TEST_CASE(test_elevator)
     "     + (status == closed && getNext(reqs) == at) -> open. Elevator(status = open, reqs = removeRequest(reqs), moving = false); \n"
     "                                                                                                                               \n"
     "init Elevator(1, open, [], false);                                                                                             \n"
-    ;
+    ;    
+  specification lpsspec = remove_stochastic_operators(linearise(lpstext));
 
-  run_monotonicity_test_case("nu U. [true] U && ((mu V . nu W. !([!request(maxFloor)]!W && [request(maxFloor)]!V)) || (nu X . mu Y. [!isAt(maxFloor)] Y &&  [isAt(maxFloor)]X))", lpstext, true);
-  run_monotonicity_test_case("nu U. [true] U && ((nu V . mu W. ([!request(maxFloor)]W && [request(maxFloor)]V)) => (nu X . mu Y. [!isAt(maxFloor)] Y &&  [isAt(maxFloor)]X))", lpstext, true);
-  run_monotonicity_test_case("nu U. [true] U && (!(nu V . mu W. ([!request(maxFloor)]W && [request(maxFloor)]V)) || (nu X . mu Y. [!isAt(maxFloor)] Y &&  [isAt(maxFloor)]X))", lpstext, true);
-  run_monotonicity_test_case("(nu X . mu Y. X) => true", lpstext, true);
-  run_monotonicity_test_case("!(nu X . mu Y. X)", lpstext, true);
-  run_monotonicity_test_case("mu X . X", lpstext, true);
-  run_monotonicity_test_case("nu X . X", lpstext, true);
-  run_monotonicity_test_case("mu X . !X", lpstext, false);
-  run_monotonicity_test_case("nu X . !X", lpstext, false);
-  run_monotonicity_test_case("!(mu X . X)", lpstext, true);
-  run_monotonicity_test_case("!(nu X . X)", lpstext, true);
-  run_monotonicity_test_case("(mu X . X) => true", lpstext, true);
-  run_monotonicity_test_case("(nu X . X) => true", lpstext, true);
-  run_monotonicity_test_case("!(mu X. (mu X. X))", lpstext, true);
+  run_monotonicity_test_case("nu U. [true] U && ((mu V . nu W. !([!request(maxFloor)]!W && [request(maxFloor)]!V)) || (nu X . mu Y. [!isAt(maxFloor)] Y &&  [isAt(maxFloor)]X))", lpsspec, true);
+  run_monotonicity_test_case("nu U. [true] U && ((nu V . mu W. ([!request(maxFloor)]W && [request(maxFloor)]V)) => (nu X . mu Y. [!isAt(maxFloor)] Y &&  [isAt(maxFloor)]X))", lpsspec, true);
+  run_monotonicity_test_case("nu U. [true] U && (!(nu V . mu W. ([!request(maxFloor)]W && [request(maxFloor)]V)) || (nu X . mu Y. [!isAt(maxFloor)] Y &&  [isAt(maxFloor)]X))", lpsspec, true);
+  run_monotonicity_test_case("(nu X . mu Y. X) => true", lpsspec, true);
+  run_monotonicity_test_case("!(nu X . mu Y. X)", lpsspec, true);
+  run_monotonicity_test_case("mu X . X", lpsspec, true);
+  run_monotonicity_test_case("nu X . X", lpsspec, true);
+  run_monotonicity_test_case("mu X . !X", lpsspec, false);
+  run_monotonicity_test_case("nu X . !X", lpsspec, false);
+  run_monotonicity_test_case("!(mu X . X)", lpsspec, true);
+  run_monotonicity_test_case("!(nu X . X)", lpsspec, true);
+  run_monotonicity_test_case("(mu X . X) => true", lpsspec, true);
+  run_monotonicity_test_case("(nu X . X) => true", lpsspec, true);
+  run_monotonicity_test_case("!(mu X. (mu X. X))", lpsspec, true);
 
   // trac ticket #1320
-  run_monotonicity_test_case("!mu X. [true]X && mu X. [true]X", lpstext, true);
-}
-
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
+  run_monotonicity_test_case("!mu X. [true]X && mu X. [true]X", lpsspec, true);
 }

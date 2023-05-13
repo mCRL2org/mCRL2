@@ -10,10 +10,10 @@
 /// \brief Test for find functions.
 
 #define BOOST_TEST_MODULE modal_formula_find_test
+#include <boost/test/included/unit_test.hpp>
+
 #include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/parse.h"
-
-#include <boost/test/included/unit_test.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::state_formulas;
@@ -49,7 +49,7 @@ data::variable bool_(const std::string& name)
   return data::variable(core::identifier_string(name), data::sort_bool::bool_());
 }
 
-void test_find()
+BOOST_AUTO_TEST_CASE(test_find)
 {
   lps::specification spec = lps::parse_linear_process_specification(SPEC);
   state_formula f = parse_state_formula("(mu X. X) && (forall b:Bool. true)", spec);
@@ -65,7 +65,7 @@ void test_find()
   BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_bool::bool_()) != e.end());
 }
 
-void test_free_variables()
+BOOST_AUTO_TEST_CASE(test_free_variables)
 {
   variable X("X", data::data_expression_list());
   data::variable b = bool_("b");
@@ -77,10 +77,4 @@ void test_free_variables()
   std::cout << "free variables: " << core::detail::print_set(free_variables) << std::endl;
   BOOST_CHECK(free_variables.find(b) == free_variables.end());
   BOOST_CHECK(free_variables.find(c) != free_variables.end());
-}
-
-BOOST_AUTO_TEST_CASE(test_main)
-{
-  test_find();
-  test_free_variables();
 }
