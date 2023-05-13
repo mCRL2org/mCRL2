@@ -9,7 +9,7 @@
 /// \file monotonicity_test.cpp
 /// \brief Tests for the is_monotonous function for state formulas.
 
-#define BOOST_TEST_MODULE
+#define BOOST_TEST_MODULE modal_formula_monotonicity_test
 #include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/lps/detail/test_input.h"
@@ -34,7 +34,8 @@ void run_monotonicity_test_case(const std::string& formula, const specification&
     f = state_formulas::resolve_state_variable_name_clashes(f);
     std::cerr << "resolved to " << state_formulas::pp(f) << std::endl;
   }
-  BOOST_CHECK(is_monotonous(f) == expect_success);
+
+  BOOST_TEST(is_monotonous(f) == expect_success);
 }
 
 BOOST_AUTO_TEST_CASE(test_abp)
