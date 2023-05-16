@@ -47,7 +47,7 @@ pbes test_lps2pbes(const std::string& lps_spec,
             << "using the " << (timed?"timed":"untimed") << " transformation"
             << std::endl;
 
-  lps::specification spec = lps::parse_linear_process_specification(lps_spec);
+  lps::stochastic_specification spec = static_cast<lps::stochastic_specification>(lps::parse_linear_process_specification(lps_spec));
   state_formulas::state_formula formula = state_formulas::parse_state_formula(mcf_formula, spec, false);
 
   if(expect_success)

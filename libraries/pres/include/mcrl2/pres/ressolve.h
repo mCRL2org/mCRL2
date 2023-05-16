@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pres/pres2res.h
-/// \brief A straightforward algorithm that gets pres, and instantiates it to a res. 
+/// \file mcrl2/pres/ressolve.h
+/// \brief This contains a gauss-elimination like algorithm to solve a res
 
-#ifndef MCRL2_PRES_PRES2RES_H
-#define MCRL2_PRES_PRES2RES_H
+#ifndef MCRL2_PRES_RESSOLVE_H
+#define MCRL2_PRES_RESSOLVE_H
 
 #include "mcrl2/atermpp/standard_containers/vector.h"
 #include "mcrl2/atermpp/function_symbol_generator.h"
@@ -22,7 +22,7 @@ namespace mcrl2 {
 
 namespace pres_system {
 
-class variable_replace_builder: public pres_expression_builder <variable_replace_builder>
+/* class variable_replace_builder: public pres_expression_builder <variable_replace_builder>
 {
     const atermpp::indexed_set<propositional_variable_instantiation>& m_stored_variables;
     const std::vector<propositional_variable_instantiation>& m_new_pres_variables;
@@ -44,25 +44,17 @@ class variable_replace_builder: public pres_expression_builder <variable_replace
       assert(m_new_pres_variables.size()>index);
       result = propositional_variable_instantiation(m_new_pres_variables.at(index));
     }
-};
+}; */
 
-/// \brief A simple algorithm that takes a pres, instantiates it into a res, without parameterized 
-///        variables, and sum, minall and maxall operators.
-/// \details It does not attempt to optimize the solution, by partially solving it. It only applies some
-///          simple rewriting, and small ad hoc optimisations. 
-/// The result will be put in the structure graph that is passed in the constructor.
-class pres2res_algorithm
+/// \brief An algorithm that takes a res, i.e. a pres with propositional variables without parameters
+///        and solves it by Gauss elimination.
+
+class ressolve_by_gauss_elimination_algorithm
 {
   protected:
     pressolve_options m_options;
     data::rewriter m_datar;    // data_rewriter
     pres m_input_pres;
-    atermpp::indexed_set<propositional_variable_instantiation> m_stored_variables;
-    pbes_system::pbes_equation_index m_equation_index;
-    std::size_t m_next_res_variable_index=0;
-    data::mutable_indexed_substitution<> m_sigma;
-    atermpp::function_symbol_generator fresh_identifier_generator;
-
     enumerate_quantifiers_rewriter m_R;   // The rewriter.
 
     data::rewriter construct_rewriter(const pres& presspec)
@@ -80,23 +72,18 @@ class pres2res_algorithm
     }
 
   public:
-    pres2res_algorithm(
+    ressolve_by_gauss_elimination_algorithm(
       const pressolve_options& options,
       const pres& input_pres
     ) 
      : m_options(options),
        m_datar(construct_rewriter(input_pres)),
        m_input_pres(input_pres),
-       m_equation_index(input_pres),
-       fresh_identifier_generator("X"),
        m_R(m_datar,input_pres.data())
     {}
 
-    const pres run()
+    const pres_expression run()
     {
-      std::size_t max_rank=m_equation_index.max_rank();
-      std::vector<atermpp::vector<pres_equation>> generated_equations(max_rank+1);
-
       m_stored_variables.insert(m_input_pres.initial_state());
       assert(m_stored_variables.index(m_input_pres.initial_state())==0);
       std::vector<propositional_variable_instantiation> new_pres_variables;
@@ -158,4 +145,4 @@ class pres2res_algorithm
 
 } // namespace mcrl2
 
-#endif // MCRL2_PRES_PRES2RES_H
+#endif // MCRL2_PRES_RESSOLVE_H

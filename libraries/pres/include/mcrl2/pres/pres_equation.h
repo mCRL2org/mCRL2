@@ -122,6 +122,11 @@ class pres_equation
       swap(m_variable, other.m_variable);
       swap(m_formula, other.m_formula);
     }
+   
+    void mark(std::stack<std::reference_wrapper<atermpp::detail::_aterm>>& todo) const
+    {
+      mark_term(m_symbol, todo);
+    }
 };
 
 //--- start generated class pres_equation ---//

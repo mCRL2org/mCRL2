@@ -51,7 +51,7 @@ data::variable bool_(const std::string& name)
 
 BOOST_AUTO_TEST_CASE(test_find)
 {
-  lps::specification spec = lps::parse_linear_process_specification(SPEC);
+  lps::stochastic_specification spec = lps::stochastic_specification(lps::parse_linear_process_specification(SPEC));
   state_formula f = parse_state_formula("(mu X. X) && (forall b:Bool. true)", spec, false);
 
   //--- find_all_variables ---//
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(test_find)
   BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_bool::bool_()) != e.end());
 }
 
-void test_free_variables()
+BOOST_AUTO_TEST_CASE(test_free_variables)
 {
   variable X("X", data::data_expression_list());
   data::variable b = bool_("b");

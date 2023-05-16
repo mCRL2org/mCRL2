@@ -14,6 +14,7 @@
 
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/optimized_boolean_operators.h"
+#include "mcrl2/data/real_utilities.h"
 #include "mcrl2/pbes/propositional_variable.h"
 
 namespace mcrl2
@@ -1596,6 +1597,40 @@ void optimized_or(pres_expression& result, const pres_expression& p, const pres_
   data::optimized_or(result, p, q);
 }
 
+/// \brief Make a disjunction
+/// \param p A PRES expression
+/// \param q A PRES expression
+/// \return The value <tt>p || q</tt>
+inline
+void optimized_plus(pres_expression& result, const pres_expression& p, const pres_expression& q)
+{
+  if (is_true(p))
+  {
+    result=p;
+  }
+  else if (is_true(q))
+  {
+    result=q;
+  }
+  else if (is_false(p))
+  {
+    result=p;
+  }
+  else if (is_false(q))
+  {
+    result=q;
+  }
+  else if (data::sort_real::is_zero(p))
+  {
+    result=q;
+  }
+  else if (data::sort_real::is_zero(q))
+  {
+    result=p;
+  }
+  else optimized_plus(result, p, q);
+}
+
 /// \brief Make an implication
 /// \param p A PRES expression
 /// \param q A PRES expression
@@ -1606,62 +1641,59 @@ void optimized_imp(pres_expression& result, const pres_expression& p, const pres
   data::optimized_imp(result, p, q);
 } */
 
-/*
-/// \brief Make a universal quantification
+/// \brief Make a minall quantification
 /// If l is empty, p is returned.
 /// \param l A sequence of data variables
 /// \param p A PRES expression
-/// \return The value <tt>forall l.p</tt>
+/// \return The value <tt>minall l.p</tt>
 inline
-void optimized_forall(pres_expression& result, const data::variable_list& l, const pres_expression& p)
+void optimized_minall(pres_expression& result, const data::variable_list& l, const pres_expression& p)
 {
-  if (l.empty())
+  if (l.empty() || is_false(p) || is_true(p))
   {
+    // N.B. Here we use the fact that mCRL2 data types are never empty.
     result = p;
     return;
   }
-  if (is_false(p))
-  {
-    // N.B. Here we use the fact that mCRL2 data types are never empty.
-    result = data::sort_bool::false_();
-    return;
-  }
-  if (is_true(p))
-  {
-    result = true_();
-    return;
-  }
-  make_forall(result, l, p);
+  make_minall(result, l, p);
   return;
 }
 
-/// \brief Make an existential quantification
+/// \brief Make an maxall quantification
 /// If l is empty, p is returned.
 /// \param l A sequence of data variables
 /// \param p A PRES expression
-/// \return The value <tt>exists l.p</tt>
+/// \return The value <tt>maxall l.p</tt>
 inline
-void optimized_exists(pres_expression& result, const data::variable_list& l, const pres_expression& p)
+void optimized_maxall(pres_expression& result, const data::variable_list& l, const pres_expression& p)
 {
-  if (l.empty())
+  if (l.empty() || is_false(p) || is_true(p))
   {
+    // N.B. Here we use the fact that mCRL2 data types are never empty.
     result = p;
     return;
   }
-  if (is_false(p))
-  {
-    result = data::sort_bool::false_();
-    return;
-  }
-  if (is_true(p))
+  make_maxall(result, l, p);
+  return;
+} 
+
+/// \brief Make an sum quantification
+/// If l is empty, p is returned.
+/// \param l A sequence of data variables
+/// \param p A PRES expression
+/// \return The value <tt>sum l.p</tt>
+inline
+void optimized_sum(pres_expression& result, const data::variable_list& l, const pres_expression& p)
+{
+  if (l.empty() || data::sort_real::is_zero(p) || data::sort_real::is_one(p))
   {
     // N.B. Here we use the fact that mCRL2 data types are never empty.
-    result = data::sort_bool::true_();
+    result = p;
     return;
   }
-  make_exists(result, l, p);
+  make_sum(result, l, p);
   return;
-} */
+} 
 
 inline
 bool is_constant(const pres_expression& x)

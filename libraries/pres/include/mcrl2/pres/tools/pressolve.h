@@ -21,6 +21,7 @@
 #include "mcrl2/pres/pressolve_options.h"
 #include "mcrl2/pres/normalize.h"
 #include "mcrl2/pres/pres2res.h"
+#include "mcrl2/pres/ressolve.h"
 #include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
@@ -116,31 +117,26 @@ class pressolve_tool
   {
   }
 
-  template <typename PresInstAlgorithm>
-  void run_algorithm(PresInstAlgorithm& algorithm, pres_system::pres& presspec,
-                     const data::mutable_map_substitution<>& sigma)
+  bool run() override
   {
+    pres_system::pres presspec = pres_system::detail::load_pres(input_filename());
+    pres_system::normalize(presspec);
+    
     mCRL2log(log::verbose) << "Generating RES..." << std::endl;
     timer().start("instantiation");
-    algorithm.run();
+    pres2res_algorithm pres2res(options,presspec);
+    pres resulting_res = pres2res.run();
     timer().finish("instantiation");
 
+std::cerr << "RESULTING RES\n" << resulting_res << "\n";
     timer().start("solving");
     data::data_expression result = mcrl2::data::sort_bool::true_(); // solve_structure_graph(G, options.check_strategy);
     timer().finish("solving");
     std::cout << "Solution: " << result << std::endl;
-  }
 
-  bool run() override
-  {
-    pres_system::pres presspec =
-        pres_system::detail::load_pres(input_filename());
-    pres_system::normalize(presspec);
-    data::mutable_map_substitution<> sigma;
-
-    presinst_structure_graph_algorithm algorithm(options, presspec, G);
+    /* presinst_structure_graph_algorithm algorithm(options, presspec, G);
     run_algorithm<presinst_structure_graph_algorithm>(algorithm, presspec, G,
-                                                        sigma);
+                                                        sigma); */
     return true;
   }
 };

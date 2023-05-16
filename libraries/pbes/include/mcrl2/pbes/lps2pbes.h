@@ -144,7 +144,7 @@ class lps2pbes_algorithm
 
 /// \brief Translates a linear process specification and a state formula to a PBES. If the solution of the PBES
 ///        is true, the formula holds for the specification.
-/// \param lpsspec A linear process specification.
+/// \param lpsspec A stochastic linear process specification.
 /// \param formula A modal formula.
 /// \param timed determines whether the timed or untimed variant of the algorithm is chosen.
 /// \param structured use the 'structured' approach of generating equations.
@@ -188,6 +188,40 @@ pbes lps2pbes(const lps::stochastic_specification& lpsspec,
   {
     return lps2pbes_algorithm(check_only).run(formula, lpsspec, structured, unoptimized, preprocess_modal_operators, generate_counter_example);
   }
+}
+
+/// \brief Translates a linear process specification and a state formula to a PBES. If the solution of the PBES
+///        is true, the formula holds for the specification.
+/// \param lpsspec A linear process specification.
+/// \param formula A modal formula.
+/// \param timed determines whether the timed or untimed variant of the algorithm is chosen.
+/// \param structured use the 'structured' approach of generating equations.
+/// \param unoptimized if true, the resulting PBES is not simplified, if false (default),
+///        the PBES is simplified.
+/// \param preprocess_modal_operators A boolean indicating that the modal operators can be preprocessed to
+///                                   obtain a more compact PBES.
+/// \param generate_counter_example A boolean indicating that a counter example must be generated.
+/// \return The resulting pbes.
+inline
+pbes lps2pbes(const lps::specification& lpsspec,
+              const state_formulas::state_formula& formula,
+              bool timed = false,
+              bool structured = false,
+              bool unoptimized = false,
+              bool preprocess_modal_operators = false,
+              bool generate_counter_example = false,
+              bool check_only = false
+             )
+{
+  return lps2pbes(lps::stochastic_specification(lpsspec),
+                  formula,
+                  timed,
+                  structured,
+                  unoptimized,
+                  preprocess_modal_operators,
+                  generate_counter_example,
+                  check_only);
+
 }
 
 /// \brief Translates a linear process specification and a state formula to a PBES. If the solution of the PBES

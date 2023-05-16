@@ -12,7 +12,6 @@
 #include <thread>
 #include <mutex>
 #include <shared_mutex>
-// #include <boost/range/join.hpp>
 
 #include "mcrl2/atermpp/standard_containers/deque.h"
 #include "mcrl2/atermpp/standard_containers/indexed_set.h"

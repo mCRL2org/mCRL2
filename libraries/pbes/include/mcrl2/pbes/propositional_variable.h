@@ -117,4 +117,19 @@ std::string pp(const propositional_variable_vector& x);
 
 } // namespace mcrl2
 
+namespace std
+{
+
+template<>
+struct hash<mcrl2::pbes_system::propositional_variable>
+{
+    std::size_t operator()(const mcrl2::pbes_system::propositional_variable& v) const
+    {
+      const hash<atermpp::aterm> hasher;
+      return hasher(v);
+    }
+};
+
+} // namespace std
+
 #endif // MCRL2_PBES_PROPOSITIONAL_VARIABLE_H

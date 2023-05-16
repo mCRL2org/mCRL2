@@ -84,18 +84,24 @@ struct term_traits_optimized<pres_system::pres_expression>: public core::term_tr
   void make_imp(term_type& result, const term_type& x, const term_type& y)
   {
     data::optimized_imp(result, x, y);
+  } 
+
+  static inline
+  void make_minall(term_type& result, const variable_sequence_type& d, const term_type& x)
+  {
+    data::optimized_minall_no_empty_domain(result, d, x);
   }
 
   static inline
-  void make_forall(term_type& result, const variable_sequence_type& d, const term_type& x)
+  void make_maxall(term_type& result, const variable_sequence_type& d, const term_type& x)
   {
-    data::optimized_forall_no_empty_domain(result, d, x);
+    data::optimized_maxall_no_empty_domain(result, d, x);
   }
 
   static inline
-  void make_exists(term_type& result, const variable_sequence_type& d, const term_type& x)
+  void make_sum(term_type& result, const variable_sequence_type& d, const term_type& x)
   {
-    data::optimized_exists_no_empty_domain(result, d, x);
+    data::optimized_sum_no_empty_domain(result, d, x);
   }
 
   template <typename FwdIt>

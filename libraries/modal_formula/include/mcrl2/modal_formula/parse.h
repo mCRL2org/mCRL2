@@ -136,7 +136,7 @@ state_formula post_process_state_formula(
 
 /// \brief Parses a state formula from an input stream
 /// \param text A string.
-/// \param lpsspec A linear process specification used as context. The data specification of lpsspec is extended with sorts appearing in the formula.
+/// \param lpsspec A stochastic linear process specification used as context. The data specification of lpsspec is extended with sorts appearing in the formula.
 /// \param formula_is_quantitative If true the formula is interpreted as a quantitative modal formula, instead of a classical boolean modal formula.
 /// \param options A set of options guiding parsing.
 /// \return The parse result.
@@ -148,7 +148,6 @@ state_formula parse_state_formula(const std::string& text,
                                  )
 {
   state_formula x = detail::parse_state_formula(text);
-std::cerr << "PARSED " << atermpp::aterm(x) << "\n";
   if (options.type_check)
   {
     x = state_formulas::typecheck_state_formula(x, lpsspec, formula_is_quantitative);
@@ -158,8 +157,27 @@ std::cerr << "PARSED " << atermpp::aterm(x) << "\n";
 }
 
 /// \brief Parses a state formula from an input stream
-/// \param in A stream.
+/// \param text A string.
 /// \param lpsspec A linear process specification used as context. The data specification of lpsspec is extended with sorts appearing in the formula.
+/// \param formula_is_quantitative If true the formula is interpreted as a quantitative modal formula, instead of a classical boolean modal formula.
+/// \param options A set of options guiding parsing.
+/// \return The parse result.
+inline
+state_formula parse_state_formula(const std::string& text,
+                                  lps::specification& lpsspec,
+                                  const bool formula_is_quantitative,
+                                  parse_state_formula_options options = parse_state_formula_options()
+                                 )
+{
+  lps::stochastic_specification stoch_lps_spec=lps::stochastic_specification(lpsspec);
+  state_formula phi = parse_state_formula(text, stoch_lps_spec, formula_is_quantitative, options);
+  lpsspec = remove_stochastic_operators(stoch_lps_spec);
+  return phi;
+}
+
+/// \brief Parses a state formula from an input stream
+/// \param in A stream.
+/// \param lpsspec A stochastic linear process specification used as context. The data specification of lpsspec is extended with sorts appearing in the formula.
 /// \param formula_is_quantitative If true the formula is interpreted as a quantitative modal formula, instead of a classical boolean modal formula.
 /// \param options A set of options guiding parsing.
 /// \return The parse result.
@@ -172,6 +190,25 @@ state_formula parse_state_formula(std::istream& in,
 {
   std::string text = utilities::read_text(in);
   return parse_state_formula(text, lpsspec, formula_is_quantitative, options);
+}
+
+/// \brief Parses a state formula from an input stream
+/// \param in A stream.
+/// \param lpsspec A linear process specification used as context. The data specification of lpsspec is extended with sorts appearing in the formula.
+/// \param formula_is_quantitative If true the formula is interpreted as a quantitative modal formula, instead of a classical boolean modal formula.
+/// \param options A set of options guiding parsing.
+/// \return The parse result.
+inline
+state_formula parse_state_formula(std::istream& in,
+                                  lps::specification& lpsspec,
+                                  const bool formula_is_quantitative,
+                                  parse_state_formula_options options = parse_state_formula_options()
+                                 )
+{
+  lps::stochastic_specification stoch_lps_spec=lps::stochastic_specification(lpsspec);
+  state_formula phi = parse_state_formula(in, stoch_lps_spec, formula_is_quantitative, options);
+  lpsspec = remove_stochastic_operators(stoch_lps_spec);
+  return phi;
 }
 
 /// \brief Parses a state formula specification from a string.
@@ -187,7 +224,6 @@ state_formula_specification parse_state_formula_specification(
 )
 {
   state_formula_specification result = detail::parse_state_formula_specification(text);
-std::cerr << "PARSEDA " << atermpp::aterm(result.formula()) << "\n";
   if (options.type_check)
   {
     result.formula() = state_formulas::typecheck_state_formula(result.formula(), formula_is_quantitative, result.data(), result.action_labels(), data::variable_list());
@@ -245,9 +281,28 @@ state_formula_specification parse_state_formula_specification(const std::string&
 } 
 
 
+/// \brief Parses a state formula specification from a string
+/// \param text A string
+/// \param lpsspec A linear process containing data and action declarations necessary to type check the state formula.
+/// \param formula_is_quantitative If true the formula is interpreted as a quantitative modal formula, instead of a classical boolean modal formula.
+/// \param options A set of options guiding parsing.
+/// \return The parse result
+inline
+state_formula_specification parse_state_formula_specification(const std::string& text,
+                                  lps::specification& lpsspec,
+                                  const bool formula_is_quantitative,
+                                  parse_state_formula_options options = parse_state_formula_options()
+                                 )
+{
+  lps::stochastic_specification stoch_lps_spec=lps::stochastic_specification(lpsspec);
+  state_formula_specification sfs = parse_state_formula_specification(text, stoch_lps_spec, formula_is_quantitative, options);
+  lpsspec = remove_stochastic_operators(stoch_lps_spec);
+  return sfs;
+}
+
 /// \brief Parses a state formula specification from an input stream.
 /// \param in An input stream.
-/// \param lpsspec A linear process containing data and action declarations necessary to type check the state formula.
+/// \param lpsspec A stochastic linear process containing data and action declarations necessary to type check the state formula.
 /// \param formula_is_quantitative If true the formula is interpreted as a quantitative modal formula, instead of a classical boolean modal formula.
 /// \param options A set of options guiding parsing.
 /// \return The parse result.
@@ -261,6 +316,25 @@ state_formula_specification parse_state_formula_specification(std::istream& in,
   return parse_state_formula_specification(utilities::read_text(in), lpsspec, formula_is_quantitative, options);
 }
 
+/// \brief Parses a state formula specification from an input stream.
+/// \param in An input stream.
+/// \param lpsspec A linear process containing data and action declarations necessary to type check the state formula.
+/// \param formula_is_quantitative If true the formula is interpreted as a quantitative modal formula, instead of a classical boolean modal formula.
+/// \param options A set of options guiding parsing.
+/// \return The parse result.
+inline
+state_formula_specification parse_state_formula_specification
+                                 (std::istream& in,
+                                  lps::specification& lpsspec,
+                                  const bool formula_is_quantitative,
+                                  parse_state_formula_options options = parse_state_formula_options()
+                                 )
+{
+  lps::stochastic_specification stoch_lps_spec=lps::stochastic_specification(lpsspec);
+  state_formula_specification sfs = parse_state_formula_specification(in, stoch_lps_spec, formula_is_quantitative, options);
+  lpsspec = remove_stochastic_operators(stoch_lps_spec);
+  return sfs;
+}
 } // namespace state_formulas
 
 } // namespace mcrl2

@@ -108,6 +108,40 @@ struct add_simplify: public Builder<Derived>
   }
 
   template <class T>
+  void apply(T& result, const plus& x)
+  {
+    assert(&result!=&x);  // Result is used as temporary store and cannot match x. 
+    apply(result, x.left());
+    if (is_true(result))
+    {
+      result = true_();
+      return;
+    }
+    if (data::sort_real::is_zero(result))
+    {
+      apply(result, x.right());
+      return;
+    }
+    pres_expression right;
+    apply(right, x.right());
+    if (is_true(right))
+    {
+      result = true_();
+      return;
+    }
+    if (is_false(right))
+    {
+      result=right;
+      return;
+    }
+    if (is_false(result) || data::sort_real::is_zero(right))
+    {
+      return;
+    }
+    make_plus(result,result, right);
+  }
+
+  template <class T>
   void apply(T& result, const imp& x)
   {
     assert(&result!=&x);  // Result is used as temporary store and cannot match x. 
@@ -169,6 +203,49 @@ struct add_simplify: public Builder<Derived>
   {
     apply(result, x.body());
     make_maxall(result, x.variables(), result);
+  }
+
+  template <class T>
+  void apply(T& result, const const_multiply& x)
+  {
+    apply(result, x.left());
+    if (data::sort_real::is_zero(result))
+    {
+      return;
+    }
+    if (data::sort_real::is_one(result))
+    {
+      apply(result, x.right());
+      return;
+    }
+    pres_expression result_right;
+    apply(result_right, x.right());
+    make_const_multiply(result, result, result_right);
+  }
+
+  template <class T>
+  void apply(T& result, const const_multiply_alt& x)
+  {
+    apply(result, x.right());
+    if (data::sort_real::is_zero(result))
+    {
+      return;
+    }
+    if (data::sort_real::is_one(result))
+    {
+      apply(result, x.left());
+      return;
+    }
+    pres_expression result_left;
+    apply(result_left, x.left());
+    make_const_multiply(result, result, result_left);
+  }
+
+  template <class T>
+  void apply(T& result, const sum& x)
+  {
+    apply(result, x.body());
+    make_sum(result, x.variables(), result);
   }
 };
 
