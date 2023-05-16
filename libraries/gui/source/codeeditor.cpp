@@ -251,7 +251,7 @@ void CodeEditor::setFontSize(int pixelSize)
 
   /* set the tab width to 4 characters */
   QFontMetrics codeFontMetrics = QFontMetrics(codeFont);
-  this->setTabStopWidth(codeFontMetrics.width("1234"));
+  this->setTabStopDistance(codeFontMetrics.averageCharWidth() * 4);
 }
 
 void CodeEditor::changeHighlightingRules()
@@ -474,8 +474,7 @@ int CodeEditor::lineNumberAreaWidth()
     max /= 10;
     ++digits;
   }
-
-  return 3 + QFontMetrics(lineNumberFont).width("9") * digits;
+  return 3 + QFontMetrics(lineNumberFont).horizontalAdvance('9') * digits;
 }
 
 void CodeEditor::updateLineNumberAreaWidth(int)
