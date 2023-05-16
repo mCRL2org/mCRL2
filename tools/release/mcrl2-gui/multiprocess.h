@@ -36,8 +36,8 @@ class QMultiProcess : public QProcess
 
     Process* start(QIODevice::OpenMode mode = ReadWrite);
 
-    QByteArray readAllStandardError();
-    QByteArray readAllStandardOutput();
+    QString readAllStandardError();
+    QString readAllStandardOutput();
 
   private:
 

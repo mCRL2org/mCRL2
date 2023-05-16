@@ -130,7 +130,6 @@ class qt_tool: public Tool
       // impossible to view the help text in an environment
       // without display server
       m_application = std::unique_ptr<QApplication>(new QApplication(argc, argv));
-      qsrand(QDateTime::currentDateTime().toTime_t());
       return true;
     }
 
