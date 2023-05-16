@@ -1746,6 +1746,7 @@ void optimized_eqinf(pres_expression& result, const pres_expression& p)
 {
   if (p==false_())
   {
+    // N.B. Here we use the fact that mCRL2 data types are never empty.
     result = p;
     return;
   }
@@ -1831,7 +1832,6 @@ void optimized_const_multiply_alt(pres_expression& result, const data::data_expr
   }
   make_const_multiply_alt(result, d, p);
 }
-
 
 inline
 bool is_constant(const pres_expression& x)
