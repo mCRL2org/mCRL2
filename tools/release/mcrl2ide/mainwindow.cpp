@@ -136,8 +136,7 @@ void MainWindow::setupMenuBar()
   importPropertiesAction->setEnabled(false);
 
 // workaround for QTBUG-57687
-#if QT_VERSION > QT_VERSION_CHECK(5, 10, 0) ||                                 \
-    not defined MCRL2_PLATFORM_WINDOWS
+#if QT_VERSION > QT_VERSION_CHECK(5, 10, 0) || !defined MCRL2_PLATFORM_WINDOWS
   fileMenu->addSeparator();
 
   openGuiAction =
