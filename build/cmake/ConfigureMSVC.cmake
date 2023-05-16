@@ -11,12 +11,14 @@ try_add_cxx_flag(/EHs)                # From MSDN:  Although Windows and Visual 
                                       #     it makes code more portable and flexible.
 try_add_cxx_flag(/bigobj)             # Increases object addressable sections capacity to 4,294,967,296 (2^32), possibly required for template heavy code.
 try_add_cxx_flag(/std:c++17)          # Enable for conformance checking in Visual Studio 2017 for the C++17 standard.
+try_add_cxx_flag(/std:c17)
 try_add_cxx_flag(/W3      DEBUG)      # Increase the warning level.
 try_add_cxx_flag(/MP)                 # Enable multicore compilation.
 try_add_cxx_flag(/permissive-)		  # This option disables permissive behaviors, and sets the /Zc compiler options for strict conformance.
 
 try_add_c_flag(/EHs)
 try_add_c_flag(/bigobj)
+try_add_c_flag(/std:c++17)
 try_add_c_flag(/std:c17)
 try_add_c_flag(/W3         DEBUG)
 try_add_c_flag(/MP)
@@ -29,6 +31,11 @@ add_definitions(-D_CRT_SECURE_NO_WARNINGS)                 # Prevents many CRT d
 add_definitions(-DBOOST_ALL_NO_LIB=1)       # Tells the config system not to automatically select which libraries to link against. Normally if a compiler supports #pragma lib, 
                                             # then the correct library build variant will be automatically selected and linked against, simply by the act of including one of 
                                             # that library's headers. This macro turns that feature off. 
+
+
+if(MCRL2_ENABLE_ADDRESSSANITIZER)
+    try_add_cxx_flag(/fsanitize=address)
+endif()
 
 # increase the stack size
 set(CMAKE_EXE_LINKER_FLAGS "/STACK:32000000000 ${CMAKE_EXE_LINKER_FLAGS}")
