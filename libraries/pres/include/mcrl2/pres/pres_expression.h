@@ -1770,6 +1770,7 @@ void optimized_eqinf(pres_expression& result, const pres_expression& p)
   }
   else if (p==true_())
   {
+    // N.B. Here we use the fact that mCRL2 data types are never empty.
     result = p;
     return;
   }
