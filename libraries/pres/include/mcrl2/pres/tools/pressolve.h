@@ -134,8 +134,6 @@ std::cerr << "RESULTING RES\n" << resulting_res << "\n";
     pres_expression result = solver.run();
     timer().finish("solving");
     std::cout << "Solution: " << result << std::endl;
-
-
     /* presinst_structure_graph_algorithm algorithm(options, presspec, G);
     run_algorithm<presinst_structure_graph_algorithm>(algorithm, presspec, G,
                                                         sigma); */
