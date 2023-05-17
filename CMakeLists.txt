@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.14)
 project(mCRL2)
 
 if(POLICY CMP0054)
@@ -29,22 +29,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/build/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 enable_testing()
 
-if(APPLE)
-  # Lower versions of Qt do not support native menu's correctly on Apple.
-  # To use a lower version replace set window->menuBar()->setNativeMenuBar(true)
-  # by window->menuBar()->setNativeMenuBar(false) in line 138 of libraries/gui/include/mcrl2/gui/qt_tool.h.
-  set(MCRL2_MIN_QT_VERSION 5.10.0)
-else()
-  set(MCRL2_MIN_QT_VERSION 5.9.0)
-endif()
-
-if (UNIX)
-  # On Ubuntu bionic the available libboost version is the following:
-  set(MCRL2_MIN_BOOST_VERSION 1.65.1)
-else()
-  set(MCRL2_MIN_BOOST_VERSION 1.66.0)
-endif()
-
 option(MCRL2_ENABLE_GUI_TOOLS       "Enable compilation of tools with a graphical user interface." ON)
 option(MCRL2_ENABLE_BOOST_JSON_SUPPORT "Enable compilation of tools and libraries that require boost::json. This raises the minimal boost version requirement to 1.71.0." OFF)
 option(MCRL2_ENABLE_EXPERIMENTAL    "Enable compilation of experimental tools." OFF)
@@ -61,8 +45,9 @@ option(MCRL2_TEST_JITTYC            "Also test the compiling rewriters in the li
 set(MCRL2_QT_APPS "" CACHE INTERNAL "Internally keep track of Qt apps for the packaging procedure")
 
 option(MCRL2_ENABLE_ADDRESSSANITIZER "Enable additional memory run-time checks implemented by the AddressSanitizer." OFF)
-option(MCRL2_ENABLE_CODE_COVERAGE   "Enable generation of code coverage statistics." OFF)
+option(MCRL2_ENABLE_CODE_COVERAGE    "Enable generation of code coverage statistics." OFF)
 option(MCRL2_ENABLE_DEBUG_SOUNDNESS_CHECKS "Enable extensive soundness check in the Debug build type." ON)
+option(MCRL2_ENABLE_MSVC_CCACHE     "Enable MSVC specific flags to enable building with ccache" OFF)
 option(MCRL2_ENABLE_STABLE          "Enable compilation of stable tools." ON)
 option(MCRL2_SKIP_LONG_TESTS        "Do not execute tests that take a long time to run." OFF)
 
@@ -70,11 +55,14 @@ mark_as_advanced(
   MCRL2_ENABLE_ADDRESSSANITIZER
   MCRL2_ENABLE_CODE_COVERAGE
   MCRL2_ENABLE_DEBUG_SOUNDNESS_CHECKS 
+  MCRL2_ENABLE_MSVC_CCACHE
   MCRL2_ENABLE_STABLE
 )
 
 if(MCRL2_ENABLE_BOOST_JSON_SUPPORT)
   set(MCRL2_MIN_BOOST_VERSION 1.75.0)
+else()
+  set(MCRL2_MIN_BOOST_VERSION 1.71.0)
 endif()
 
 
@@ -82,7 +70,7 @@ if(MCRL2_ENABLE_GUI_TOOLS)
   find_package(OpenGL     QUIET REQUIRED)
   find_package(TR         QUIET REQUIRED)
   find_package(CVC3       QUIET)
-  find_package(Qt5 ${MCRL2_MIN_QT_VERSION} COMPONENTS Core OpenGL Widgets Xml Gui QUIET REQUIRED)
+  find_package(Qt5 5.12.0 COMPONENTS Core OpenGL Widgets Xml Gui QUIET REQUIRED)
 	
   # The directories for components are derived from Qt5_DIR, as such they can be marked as advanced.
   mark_as_advanced(Qt5_DIR Qt5Core_DIR Qt5OpenGL_DIR Qt5Widgets_DIR Qt5Xml_DIR Qt5Gui_DIR)
