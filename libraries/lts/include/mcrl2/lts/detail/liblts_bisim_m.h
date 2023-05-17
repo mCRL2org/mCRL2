@@ -39,13 +39,14 @@ public:
     *  \param[in] l Reference to the LTS. */
     bisim_partitioner_counter_example(LTS_TYPE& l, const std::size_t init_l2)
         : max_state_index(0),
-        aut(l),
-        initial_l2(init_l2)
+        initial_l2(init_l2),
+        aut(l)
     {
         create_initial_partition();
-        bool splitted = true; 
+        bool splitted = true;
         level_type lvl = 1;
-        while (splitted && block_index_of_a_state[initial_l2] == block_index_of_a_state[aut.initial_state()]) {
+        while (splitted && block_index_of_a_state[initial_l2] == block_index_of_a_state[aut.initial_state()])
+        {
             splitted = refine_partition(lvl);
             lvl++; 
             for (std::vector<block>::reverse_iterator i = blocks.rbegin();
@@ -54,7 +55,8 @@ public:
             }
         }
 
-        for (state_type i = 0; i < aut.num_states(); i++) {
+        for (state_type i = 0; i < aut.num_states(); i++) 
+        {
             block_index_type bid = block_index_of_a_state[i];
             if (!block_flags[bid]) {
                 block_flags[bid] = true; 
@@ -81,6 +83,11 @@ public:
         mCRL2log(mcrl2::log::info) << "done with formula \n";
         return convertFormula(f);
     };
+
+    bool in_same_class(const std::size_t s, const std::size_t t) 
+    {
+        return block_index_of_a_state[s] == block_index_of_a_state[t]; 
+    }
 
 
 private:
