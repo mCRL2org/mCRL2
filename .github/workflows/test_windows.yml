@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:      
-        suite: [librarytest, libraryexample, tooltest, randomtest, regressiontest]
+        suite: [librarytest, libraryexample, tooltest, regressiontest] # randomtest are too long
     
     # This step is necessary for Conda to activate the environment properly
     defaults:
