@@ -49,7 +49,7 @@ public:
         {
             splitted = refine_partition(lvl);
             lvl++; 
-            for (std::vector<block>::reverse_iterator i = blocks.rbegin();
+            for (typename std::vector<block>::reverse_iterator i = blocks.rbegin();
                 i != blocks.rend() && (*i).level == lvl - 1; ++i) {
                 to_be_processed.push_back((*i).block_index);
             }
