@@ -12,6 +12,7 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Debug
+  SCCACHE_GHA_ENABLED: "true"
 
 jobs:
   test:
@@ -35,15 +36,12 @@ jobs:
     - name: Install dependencies for Ubuntu
       run: sudo apt install -y build-essential libboost-dev libgl1-mesa-dev qtbase5-dev python3-psutil python3-yaml ccache
       
+    - uses: mozilla-actions/sccache-action@v0.0.3
+      
     # Performs the git checkout in the github.workspace/src directory
     - uses: actions/checkout@v3 
       with:
         path: src
-    
-    # Configure and install (s)ccache
-    - uses: hendrikmuhs/ccache-action@v1.2
-      with:
-        key: ${{github.workflow}}-${{github.job}}-${{matrix.suite}}
 
     # Configure CMake in a 'build' subdirectory        
     - name: Configure CMake Linux
@@ -53,8 +51,8 @@ jobs:
         -DMCRL2_ENABLE_EXPERIMENTAL=ON
         -DMCRL2_ENABLE_DEPRECATED=ON
         -DMCRL2_ENABLE_TESTS=ON
-        -DCMAKE_C_COMPILER_LAUNCHER=ccache
-        -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+        -DCMAKE_C_COMPILER_LAUNCHER=sccache
+        -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
         -B ${{github.workspace}}/build
         -S ${{github.workspace}}/src
         
