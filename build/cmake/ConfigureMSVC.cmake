@@ -32,6 +32,12 @@ add_definitions(-DBOOST_ALL_NO_LIB=1)       # Tells the config system not to aut
                                             # then the correct library build variant will be automatically selected and linked against, simply by the act of including one of 
                                             # that library's headers. This macro turns that feature off. 
 
+if(MCRL2_ENABLE_MSVC_CCACHE)
+  string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+  string(REPLACE "/Zi" "/Z7" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
+  string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+  string(REPLACE "/Zi" "/Z7" CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO}")
+endif()
 
 if(MCRL2_ENABLE_ADDRESSSANITIZER)
     try_add_cxx_flag(/fsanitize=address)
