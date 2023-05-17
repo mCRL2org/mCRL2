@@ -38,9 +38,9 @@ public:
     *  \warning Might be less efficient than other implementations, focussed on generating minimal depth counter-examples.
     *  \param[in] l Reference to the LTS. */
     bisim_partitioner_counter_example(LTS_TYPE& l, const std::size_t init_l2)
-        : max_state_index(0),
+        : aut(l),
         initial_l2(init_l2),
-        aut(l)
+        max_state_index(0)
     {
         create_initial_partition();
         bool splitted = true;
@@ -218,8 +218,7 @@ private:
     void create_initial_partition() {
         to_be_processed.clear();
         block initial_block;
-
-        state_type last_non_stored_state_number = 0;
+        
         initial_block = block();
         for (state_type i = 0; i < aut.num_states(); i++) {
             initial_block.states.push_back(i);
