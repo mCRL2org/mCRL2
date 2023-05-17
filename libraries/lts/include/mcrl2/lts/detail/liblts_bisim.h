@@ -1164,17 +1164,23 @@ bool destructive_bisimulation_compare_minimal_depth(
     std::size_t init_l2 = l2.initial_state() + l1.num_states();
     mcrl2::lts::detail::merge(l1, l2);
     l2.clear(); // No use for l2 anymore.
+    detail::bisim_partitioner_counter_example<LTS_TYPE> bisim_partitioner_counter_example(l1, init_l2);
+    if (bisim_partitioner_counter_example.in_same_class(l1.initial_state(), init_l2))
+    {
+        return true; 
+    }
+    //LTSs are not bisimilar, we can create a counter example. 
     std::string filename = "Counterexample.mcf";
     if (!counter_example_file.empty()) {
         filename = counter_example_file;
     }
-    detail::bisim_partitioner_counter_example<LTS_TYPE> bisim_partitioner_counter_example(l1, init_l2);
+
     mcrl2::state_formulas::state_formula counter_example_formula = bisim_partitioner_counter_example.dist_formula_mindepth(l1.initial_state(), init_l2);
+    
     std::ofstream counter_file(filename);
     counter_file << mcrl2::state_formulas::pp(counter_example_formula);
     counter_file.close();
     mCRL2log(mcrl2::log::info) << "Saved counterexample to: \"" << filename << "\"" << std::endl;
-
     return false;
 }
 
