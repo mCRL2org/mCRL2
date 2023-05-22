@@ -163,14 +163,6 @@ struct printer: public pres_system::add_traverser_sort_expressions<data::detail:
     derived().leave(x);
   }
 
-  /* void apply(const pres_system::constant_mult& x)
-  {
-    derived().enter(x);
-    derived().apply(x.name());
-    print_variables(x.parameters());
-    derived().leave(x);
-  } */
-
   void apply(const pres_system::fixpoint_symbol& x)
   {
     derived().enter(x);
@@ -287,6 +279,50 @@ struct printer: public pres_system::add_traverser_sort_expressions<data::detail:
   {
     derived().enter(x);
     print_pres_abstraction(x, "sum");
+    derived().leave(x);
+  }
+
+  void apply(const pres_system::condsm& x)
+  {
+    derived().enter(x);
+    derived().print("(");
+    apply(x.arg1());
+    derived().print(" -> ");
+    apply(x.arg2());
+    derived().print(" <> ");
+    apply(x.arg3());
+    derived().print(")");
+    derived().leave(x);
+  }
+
+  void apply(const pres_system::condeq& x)
+  {
+    derived().enter(x);
+    derived().print("(");
+    apply(x.arg1());
+    derived().print(" => ");
+    apply(x.arg2());
+    derived().print(" <> ");
+    apply(x.arg3());
+    derived().print(")");
+    derived().leave(x);
+  }
+
+  void apply(const pres_system::eqinf& x)
+  {
+    derived().enter(x);
+    derived().print("eqinf(");
+    apply(x.operand());
+    derived().print(")");
+    derived().leave(x);
+  }
+
+  void apply(const pres_system::eqninf& x)
+  {
+    derived().enter(x);
+    derived().print("eqninf(");
+    apply(x.operand());
+    derived().print(")");
     derived().leave(x);
   }
 };

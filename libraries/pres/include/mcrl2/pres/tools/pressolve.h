@@ -130,9 +130,11 @@ class pressolve_tool
 
 std::cerr << "RESULTING RES\n" << resulting_res << "\n";
     timer().start("solving");
-    data::data_expression result = mcrl2::data::sort_bool::true_(); // solve_structure_graph(G, options.check_strategy);
+    ressolve_by_gauss_elimination_algorithm solver(options, resulting_res);
+    pres_expression result = solver.run();
     timer().finish("solving");
     std::cout << "Solution: " << result << std::endl;
+
 
     /* presinst_structure_graph_algorithm algorithm(options, presspec, G);
     run_algorithm<presinst_structure_graph_algorithm>(algorithm, presspec, G,
