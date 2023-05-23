@@ -23,64 +23,6 @@ void f()
   data::variable x("x", data::sort_bool::bool_());
 }
 
-data::variable_key_type key(const data::variable& v)
-{
-  return data::variable_key_type(v.name(), v.sort());
-}
-
-data::function_symbol_key_type key(const data::function_symbol& f)
-{
-  return data::function_symbol_key_type(f.name(), f.sort());
-}
-
-BOOST_AUTO_TEST_CASE(test_index)
-{
-/*
-  data::register_function_symbol_hooks();
-  data::register_variable_hooks();
-
-  std::size_t value;
-
-  // data::variable
-  data::variable b("b", data::sort_bool::bool_());
-  value = atermpp::detail::index_traits<data::variable, data::variable_key_type, 2>::index(b);
-  BOOST_CHECK(value == 0);
-  value = atermpp::detail::index_traits<data::variable, data::variable_key_type, 2>::max_index();
-  BOOST_CHECK(value == 0);
-
-  data::variable c("c", data::sort_bool::bool_());
-  value = atermpp::detail::index_traits<data::variable, data::variable_key_type, 2>::index(c);
-  BOOST_CHECK(value == 1);
-  value = atermpp::detail::index_traits<data::variable, data::variable_key_type, 2>::max_index();
-  BOOST_CHECK(value == 1);
-
-  data::variable d = b;
-  value = atermpp::detail::index_traits<data::variable, data::variable_key_type, 2>::index(d);
-  BOOST_CHECK(value == 0);
-  value = atermpp::detail::index_traits<data::variable, data::variable_key_type, 2>::max_index();
-  BOOST_CHECK(value == 1);
-
-  // data::function_symbol
-  data::function_symbol f("f", data::sort_bool::bool_());
-  value = atermpp::detail::index_traits<data::function_symbol, data::function_symbol_key_type, 2>::index(f);
-  BOOST_CHECK(value == 0);
-  value = atermpp::detail::index_traits<data::function_symbol, data::function_symbol_key_type, 2>::max_index();
-  BOOST_CHECK(value == 0);
-
-  data::function_symbol g("g", data::sort_bool::bool_());
-  value = atermpp::detail::index_traits<data::function_symbol, data::function_symbol_key_type, 2>::index(g);
-  BOOST_CHECK(value == 1);
-  value = atermpp::detail::index_traits<data::function_symbol, data::function_symbol_key_type, 2>::max_index();
-  BOOST_CHECK(value == 1);
-
-  data::function_symbol h = f;
-  value = atermpp::detail::index_traits<data::function_symbol, data::function_symbol_key_type, 2>::index(h);
-  BOOST_CHECK(value == 0);
-  value = atermpp::detail::index_traits<data::function_symbol, data::function_symbol_key_type, 2>::max_index();
-  BOOST_CHECK(value == 1);
-*/
-}
-
 BOOST_AUTO_TEST_CASE(test_io)
 {
 /*

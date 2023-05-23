@@ -22,8 +22,6 @@ namespace mcrl2
 namespace data
 {
 
-typedef std::pair<core::identifier_string, sort_expression> variable_key_type;
-
 //--- start generated class variable ---//
 /// \\brief A data variable
 class variable: public data_expression

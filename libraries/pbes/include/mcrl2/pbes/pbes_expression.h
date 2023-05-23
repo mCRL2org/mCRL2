@@ -22,8 +22,6 @@ namespace mcrl2
 namespace pbes_system
 {
 
-typedef std::pair<core::identifier_string, data::data_expression_list> propositional_variable_key_type;
-
 //--- start generated classes ---//
 /// \\brief A pbes expression
 class pbes_expression: public atermpp::aterm_appl
