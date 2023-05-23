@@ -61,39 +61,39 @@ void push_and_inside(pres_expression& result, const pres_expression t1, const pr
   {
     push_and_inside(aux, atermpp::down_cast<condsm>(t1).arg2(), t2, conjunctive_normal_form);
     push_and_inside(result, atermpp::down_cast<condsm>(t1).arg3(), t2, conjunctive_normal_form);
-    make_condsm(result, atermpp::down_cast<condsm>(t1).arg1(), aux, result);
+    optimized_condsm(result, atermpp::down_cast<condsm>(t1).arg1(), aux, result);
   }
   else if (is_condsm(t2))
   {
     push_and_inside(aux, t1, atermpp::down_cast<condsm>(t2).arg2(), conjunctive_normal_form);
     push_and_inside(result, t1, atermpp::down_cast<condsm>(t2).arg3(), conjunctive_normal_form);
-    make_or_(result, atermpp::down_cast<condsm>(t2).arg1(), aux, result);
+    optimized_condsm(result, atermpp::down_cast<condsm>(t2).arg1(), aux, result);
   }
   else if (is_condeq(t1))
   {
     push_and_inside(aux, atermpp::down_cast<condeq>(t1).arg2(), t2, conjunctive_normal_form);
     push_and_inside(result, atermpp::down_cast<condeq>(t1).arg3(), t2, conjunctive_normal_form);
-    make_condeq(result, atermpp::down_cast<condeq>(t1).arg1(), aux, result);
+    optimized_condeq(result, atermpp::down_cast<condeq>(t1).arg1(), aux, result);
   }
   else if (is_condeq(t2))
   {
     push_and_inside(aux, t1, atermpp::down_cast<condeq>(t2).arg2(), conjunctive_normal_form);
     push_and_inside(result, t1, atermpp::down_cast<condeq>(t2).arg3(), conjunctive_normal_form);
-    make_or_(result, atermpp::down_cast<condeq>(t2).arg1(), aux, result);
+    optimized_condeq(result, atermpp::down_cast<condeq>(t2).arg1(), aux, result);
   }
   else if (!conjunctive_normal_form && is_or(t1))
   {
     push_and_inside(aux, atermpp::down_cast<or_>(t1).left(), t2, conjunctive_normal_form);
     push_and_inside(result, atermpp::down_cast<or_>(t1).right(), t2, conjunctive_normal_form);
-    make_or_(result, aux, result);
+    optimized_or(result, aux, result);
   }
   else if (!conjunctive_normal_form && is_or(t2))
   {
     push_and_inside(aux, t1, atermpp::down_cast<or_>(t2).left(), conjunctive_normal_form);
     push_and_inside(result, t1, atermpp::down_cast<or_>(t2).right(), conjunctive_normal_form);
-    make_or_(result, aux, result);
+    optimized_or(result, aux, result);
   }
-  else make_and_(result, t1, t2);
+  else optimized_and(result, t1, t2);
 }
 
 void push_or_inside(pres_expression& result, const pres_expression t1, const pres_expression& t2, const bool conjunctive_normal_form)
@@ -103,39 +103,39 @@ void push_or_inside(pres_expression& result, const pres_expression t1, const pre
   { 
     push_or_inside(aux, atermpp::down_cast<condsm>(t1).arg2(), t2, conjunctive_normal_form);
     push_or_inside(result, atermpp::down_cast<condsm>(t1).arg3(), t2, conjunctive_normal_form);
-    make_condsm(result, atermpp::down_cast<condsm>(t1).arg1(), aux, result);
+    optimized_condsm(result, atermpp::down_cast<condsm>(t1).arg1(), aux, result);
   }
   else if (is_condsm(t2))
   { 
     push_or_inside(aux, t1, atermpp::down_cast<condsm>(t2).arg2(), conjunctive_normal_form);
     push_or_inside(result, t1, atermpp::down_cast<condsm>(t2).arg3(), conjunctive_normal_form);
-    make_or_(result, atermpp::down_cast<condsm>(t2).arg1(), aux, result);
+    optimized_condsm(result, atermpp::down_cast<condsm>(t2).arg1(), aux, result);
   }
   else if (is_condeq(t1))
   { 
     push_or_inside(aux, atermpp::down_cast<condeq>(t1).arg2(), t2, conjunctive_normal_form);
     push_or_inside(result, atermpp::down_cast<condeq>(t1).arg3(), t2, conjunctive_normal_form);
-    make_condeq(result, atermpp::down_cast<condeq>(t1).arg1(), aux, result);
+    optimized_condeq(result, atermpp::down_cast<condeq>(t1).arg1(), aux, result);
   }
   else if (is_condeq(t2))
   { 
     push_or_inside(aux, t1, atermpp::down_cast<condeq>(t2).arg2(), conjunctive_normal_form);
     push_or_inside(result, t1, atermpp::down_cast<condeq>(t2).arg3(), conjunctive_normal_form);
-    make_or_(result, atermpp::down_cast<condeq>(t2).arg1(), aux, result);
+    optimized_condeq(result, atermpp::down_cast<condeq>(t2).arg1(), aux, result);
   }
   else if (conjunctive_normal_form && is_and(t1))
   { 
     push_or_inside(aux, atermpp::down_cast<and_>(t1).left(), t2, conjunctive_normal_form);
     push_or_inside(result, atermpp::down_cast<and_>(t1).right(), t2, conjunctive_normal_form);
-    make_or_(result, aux, result);
+    optimized_or(result, aux, result);
   }
   else if (conjunctive_normal_form && is_and(t2))
   { 
     push_or_inside(aux, t1, atermpp::down_cast<and_>(t2).left(), conjunctive_normal_form);
     push_or_inside(result, t1, atermpp::down_cast<and_>(t2).right(), conjunctive_normal_form);
-    make_or_(result, aux, result);
+    optimized_or(result, aux, result);
   }
-  else make_or_(result, t1, t2);
+  else optimized_or(result, t1, t2);
 } 
 
 void push_plus_inside(pres_expression& result, const pres_expression t1, const pres_expression& t2, const bool conjunctive_normal_form)
@@ -145,63 +145,63 @@ void push_plus_inside(pres_expression& result, const pres_expression t1, const p
   {
     push_plus_inside(aux, atermpp::down_cast<condsm>(t1).arg2(), t2, conjunctive_normal_form);
     push_plus_inside(result, atermpp::down_cast<condsm>(t1).arg3(), t2, conjunctive_normal_form);
-    make_condsm(result, atermpp::down_cast<condsm>(t1).arg1(), aux, result);
+    optimized_condsm(result, atermpp::down_cast<condsm>(t1).arg1(), aux, result);
   }
   else if (is_condsm(t2))
   {
     push_plus_inside(aux, t1, atermpp::down_cast<condsm>(t2).arg2(), conjunctive_normal_form);
     push_plus_inside(result, t1, atermpp::down_cast<condsm>(t2).arg3(), conjunctive_normal_form);
-    make_or_(result, atermpp::down_cast<condsm>(t2).arg1(), aux, result);
+    optimized_condsm(result, atermpp::down_cast<condsm>(t2).arg1(), aux, result);
   }
   else if (is_condeq(t1))
   {
     push_plus_inside(aux, atermpp::down_cast<condeq>(t1).arg2(), t2, conjunctive_normal_form);
     push_plus_inside(result, atermpp::down_cast<condeq>(t1).arg3(), t2, conjunctive_normal_form);
-    make_condeq(result, atermpp::down_cast<condeq>(t1).arg1(), aux, result);
+    optimized_condeq(result, atermpp::down_cast<condeq>(t1).arg1(), aux, result);
   }
   else if (is_condeq(t2))
   {
     push_plus_inside(aux, t1, atermpp::down_cast<condeq>(t2).arg2(), conjunctive_normal_form);
     push_plus_inside(result, t1, atermpp::down_cast<condeq>(t2).arg3(), conjunctive_normal_form);
-    make_or_(result, atermpp::down_cast<condeq>(t2).arg1(), aux, result);
+    optimized_condeq(result, atermpp::down_cast<condeq>(t2).arg1(), aux, result);
   }
   else if (conjunctive_normal_form && is_and(t1))  // CNF: first move || upwards.
   {
     push_plus_inside(aux, atermpp::down_cast<and_>(t1).left(), t2, conjunctive_normal_form);
     push_plus_inside(result, atermpp::down_cast<and_>(t1).right(), t2, conjunctive_normal_form);
-    make_and_(result, aux, result);
+    optimized_and(result, aux, result);
   }
   else if (conjunctive_normal_form && is_and(t2))
   {
     push_plus_inside(aux, t1, atermpp::down_cast<and_>(t2).left(), conjunctive_normal_form);
     push_plus_inside(result, t1, atermpp::down_cast<and_>(t2).right(), conjunctive_normal_form);
-    make_and_(result, aux, result);
+    optimized_and(result, aux, result);
   }
   else if (is_or(t1))
   {
     push_plus_inside(aux, atermpp::down_cast<or_>(t1).left(), t2, conjunctive_normal_form);
     push_plus_inside(result, atermpp::down_cast<or_>(t1).right(), t2, conjunctive_normal_form);
-    make_or_(result, aux, result);
+    optimized_or(result, aux, result);
   }
   else if (is_or(t2))
   {
     push_plus_inside(aux, t1, atermpp::down_cast<or_>(t2).left(), conjunctive_normal_form);
     push_plus_inside(result, t1, atermpp::down_cast<or_>(t2).right(), conjunctive_normal_form);
-    make_or_(result, aux, result);
+    optimized_or(result, aux, result);
   }
   else if (!conjunctive_normal_form && is_and(t1))  // DNF: first more || upwards. 
   {
     push_plus_inside(aux, atermpp::down_cast<and_>(t1).left(), t2, conjunctive_normal_form);
     push_plus_inside(result, atermpp::down_cast<and_>(t1).right(), t2, conjunctive_normal_form);
-    make_and_(result, aux, result);
+    optimized_and(result, aux, result);
   }
   else if (!conjunctive_normal_form && is_and(t2))
   {
     push_plus_inside(aux, t1, atermpp::down_cast<and_>(t2).left(), conjunctive_normal_form);
     push_plus_inside(result, t1, atermpp::down_cast<and_>(t2).right(), conjunctive_normal_form);
-    make_and_(result, aux, result);
+    optimized_and(result, aux, result);
   }
-  else make_plus(result, t1, t2);
+  else optimized_plus(result, t1, t2);
 }
 
 void push_constant_inside(pres_expression& result, const data::data_expression& constant, const pres_expression& t)
@@ -211,51 +211,51 @@ void push_constant_inside(pres_expression& result, const data::data_expression& 
   { 
     push_constant_inside(aux, constant, atermpp::down_cast<condsm>(t).arg2());
     push_constant_inside(result, constant, atermpp::down_cast<condsm>(t).arg3());
-    make_condsm(result, atermpp::down_cast<condsm>(t).arg1(), aux, result);
+    optimized_condsm(result, atermpp::down_cast<condsm>(t).arg1(), aux, result);
   }
   else if (is_condeq(t))
   {
     push_constant_inside(aux, constant, atermpp::down_cast<condsm>(t).arg2());
     push_constant_inside(result, constant, atermpp::down_cast<condsm>(t).arg3());
-    make_condeq(result, atermpp::down_cast<condsm>(t).arg1(), aux, result);
+    optimized_condeq(result, atermpp::down_cast<condsm>(t).arg1(), aux, result);
   }
   else if (is_and(t))
   {
     push_constant_inside(aux, constant, atermpp::down_cast<and_>(t).left());
     push_constant_inside(result, constant, atermpp::down_cast<and_>(t).right());
-    make_and_(result, aux, result);
+    optimized_and(result, aux, result);
   }
   else if (is_or(t))
   {
     pres_expression aux;
     push_constant_inside(aux, constant, atermpp::down_cast<or_>(t).left());
     push_constant_inside(result, constant, atermpp::down_cast<or_>(t).right());
-    make_or_(result, aux, result);
+    optimized_or(result, aux, result);
   }
   else if (is_plus(t))
   {
     pres_expression aux;
     push_constant_inside(aux, constant, atermpp::down_cast<plus>(t).left());
     push_constant_inside(result, constant, atermpp::down_cast<plus>(t).right());
-    make_plus(result, aux, result);
+    optimized_plus(result, aux, result);
   }
   else if (is_const_multiply(t))
   {
     const const_multiply& tcm = atermpp::down_cast<const_multiply>(t);
     data::data_expression result_term;
     data::sort_real::make_times(result_term, tcm.left(), constant);
-    make_const_multiply(result, result_term, tcm.right());
+    optimized_const_multiply(result, result_term, tcm.right());
   }
   else if (is_const_multiply_alt(t))
   {
     const const_multiply_alt& tcm = atermpp::down_cast<const_multiply_alt>(t);
     data::data_expression result_term;
     data::sort_real::make_times(result_term, tcm.right(), constant);
-    make_const_multiply(result, result_term, tcm.left());
+    optimized_const_multiply(result, result_term, tcm.left());
   }
   else
   {
-    make_const_multiply(result, constant, t);
+    optimized_const_multiply(result, constant, t);
   }
 }
 
@@ -267,18 +267,11 @@ struct linear_fixed_point_equation
   bool f_j_term_present=false;
   bool eqninf_term_present=false;      // is true if c_j' = 1.
 
-  void update_f_j(const pres_expression& t,  const bool minimal_fixed_point)
+  void update_f_j(const pres_expression& t)
   {
     if (f_j_term_present)
     {
-      if (minimal_fixed_point)             
-      {
-        f_j=or_(f_j, t);
-      }
-      else
-      {
-        f_j=and_(f_j, t);
-      }
+      f_j=plus(f_j, t);
     }
     else
     {
@@ -286,33 +279,42 @@ struct linear_fixed_point_equation
       f_j = t;
     }
   }
+
+  void update_c_j(const data::data_expression& t)
+  {
+    if (linear_term_present)
+    {
+      c_j=data::sort_real::plus(c_j, t);
+    }
+    else
+    {
+      linear_term_present=true;
+      c_j = t;
+    }
+  }
 };
 
 // Collect the linear equations for variable v in the current conjunct/disjunct. 
 void collect_line(linear_fixed_point_equation& line, const  propositional_variable& v, const pres_expression& t, const bool minimal_fixed_point)
 {
+std::cerr << "COLLECT LINE " << t << "   " << v <<"\n";
   if (is_plus(t))
   {
+std::cerr << "HIER1\n";
     collect_line(line, v, atermpp::down_cast<plus>(t).left(), minimal_fixed_point);
     collect_line(line, v, atermpp::down_cast<plus>(t).right(), minimal_fixed_point);
   }
   else if (is_propositional_variable_instantiation(t))
   {
-    if (v==t)
+    if (v.name()==atermpp::down_cast<propositional_variable_instantiation>(t).name())
     {
-      if (line.linear_term_present)
-      {
-        line.c_j=data::sort_real::plus(line.c_j, data::sort_real::real_one());  // Add this inclination for v to all inclinations. 
-      }
-      else
-      {
-        line.linear_term_present=true;
-        line.c_j=data::sort_real::real_one();  // Set this inclination for v 
-      }
+std::cerr << "HIER2\n";
+      line.update_c_j(data::sort_real::real_one());  // Add this inclination for v to all inclinations. 
     }
     else
     {
-      line.update_f_j(t, minimal_fixed_point);
+std::cerr << "HIER3\n";
+      line.update_f_j(t);
     }
   }
   else if (is_const_multiply(t))
@@ -321,19 +323,13 @@ void collect_line(linear_fixed_point_equation& line, const  propositional_variab
     const propositional_variable_instantiation& w = atermpp::down_cast<propositional_variable_instantiation>(tcm.right());
     if (v==w)
     {
-      if (line.linear_term_present)
-      {
-        line.c_j=data::sort_real::plus(line.c_j, tcm.left());  // Add this inclination for v to all inclinations. 
-      }
-      else
-      {
-        line.linear_term_present=true;
-        line.c_j=tcm.left();  // Set this inclination for v 
-      }
+std::cerr << "HIER4\n";
+      line.update_c_j(tcm.left());
     }
     else 
     {
-      line.update_f_j(t, minimal_fixed_point);
+std::cerr << "HIER6\n";
+      line.update_f_j(t);
     }
   }
   else if (is_eqninf(t))
@@ -342,16 +338,19 @@ void collect_line(linear_fixed_point_equation& line, const  propositional_variab
     const propositional_variable_instantiation& w = atermpp::down_cast<propositional_variable_instantiation>(te.operand());
     if (v==w)
     {
+std::cerr << "HIER7\n";
       line.eqninf_term_present=true;
     }
     else
     {
-      line.update_f_j(t, minimal_fixed_point);
+std::cerr << "HIER8\n";
+      line.update_f_j(t);
     }
   }
   else if (data::is_data_expression(t))
   {
-    line.update_f_j(t, minimal_fixed_point);
+std::cerr << "HIER9\n";
+    line.update_f_j(t);
   }
   else 
   {
@@ -383,19 +382,21 @@ void collect_lines(std::vector< linear_fixed_point_equation >& found_lines,
   }
 }
 
-void collect_m_j_and_split_lines(const std::vector< linear_fixed_point_equation >& lines, 
-                                 pres_expression& m_j, 
-                                 std::vector< linear_fixed_point_equation >& shallow_lines, 
-                                 std::vector< linear_fixed_point_equation >& steep_lines,
-                                 std::vector< linear_fixed_point_equation >& flat_lines,
-                                 const data::rewriter& rewriter,
-                                 const bool minimal_fixed_point)
+void collect_m_and_split_lines(const std::vector< linear_fixed_point_equation >& lines, 
+                               pres_expression& m, 
+                               std::vector< linear_fixed_point_equation >& shallow_lines, 
+                               std::vector< linear_fixed_point_equation >& steep_lines,
+                               std::vector< linear_fixed_point_equation >& flat_lines,
+                               const data::rewriter& rewriter,
+                               const bool minimal_fixed_point)
 {
-  bool m_j_defined=false;
+  bool m_defined=false;
+  m = minimal_fixed_point?data::false_():data::true_();
   for(const linear_fixed_point_equation& eq: lines)
   {
     if (eq.linear_term_present)
     {
+std::cerr << "C_J " << eq.c_j << "\n";
       data::data_expression is_shallow=rewriter(data::less(eq.c_j,data::sort_real::real_one()));
       if (data::is_true(is_shallow))
       {
@@ -407,30 +408,32 @@ void collect_m_j_and_split_lines(const std::vector< linear_fixed_point_equation 
       }
       else
       {
-        throw runtime_error("It is not possible to determine steepness of the line in a pres: " + pp(is_shallow) +", gradient is " + pp(eq.c_j) + ". ");
+std::cerr << "SSSSSS " << (atermpp::aterm)is_shallow << "\n";
+        throw runtime_error("It is not possible to determine the steepness of the line in a pres: " + pp(is_shallow) +". Gradient is " + pp(eq.c_j) + ". ");
       }
     }
     else if (eq.eqninf_term_present)
     {
       flat_lines.push_back(eq);
     }
-    else 
+
+    if (eq.f_j_term_present)
     {
-      if (m_j_defined)
+      if (m_defined)
       {
         if (minimal_fixed_point)
         {
-           m_j = or_(m_j, eq.f_j);
+           m = or_(m, eq.f_j);
         }
         else
         {
-           m_j = and_(m_j, eq.f_j);
+           m = and_(m, eq.f_j);
         }
       }
       else
       {
-        m_j_defined=true;
-        m_j = eq.f_j;
+        m_defined=true;
+        m = eq.f_j;
       }
     }
   }
@@ -443,21 +446,24 @@ void conjunction_disjunction_f_j(pres_expression& result,
 {
   for(const linear_fixed_point_equation& eq: l)
   {
-    if (result_defined)
+    if (eq.f_j_term_present)
     {
-      if (is_conjunction)
+      if (result_defined)
       {
-        result = and_(result, eq.f_j);
+        if (is_conjunction)
+        {
+          result = and_(result, eq.f_j);
+        }
+        else
+        {
+          result = or_(result, eq.f_j);
+        }
       }
-      else
+      else 
       {
-        result = or_(result, eq.f_j);
+        result = eq.f_j;
+        result_defined=true;
       }
-    }
-    else 
-    {
-      result = eq.f_j;
-      result_defined=true;
     }
   }
 }
@@ -578,7 +584,11 @@ pres_expression conjunction_fj_cj(std::vector< linear_fixed_point_equation >& l,
   {
     if (!eq.eqninf_term_present)
     {
-      pres_expression disjunct = plus(eq.f_j, const_multiply(data::sort_real::minus(eq.c_j,data::sort_real::real_one()),U));
+      pres_expression disjunct = const_multiply(data::sort_real::minus(eq.c_j,data::sort_real::real_one()),U);
+      if (eq.f_j_term_present)
+      {
+        disjunct = plus(eq.f_j, disjunct);
+      }
       if (result_defined)
       {
         result = and_(result, disjunct);
@@ -607,37 +617,53 @@ std::cerr << "MAKE SOLUTION " << v << " ---> " << t << "\n";
   std::vector< linear_fixed_point_equation > shallow_lines;     // lines with gradient between 0 and 1. 
   std::vector< linear_fixed_point_equation > steep_lines;       // lines with gradient >=1.
   std::vector< linear_fixed_point_equation > flat_lines;        // lines with gradient 0. eqninf(v) term is present. 
-  collect_m_j_and_split_lines(lines, m, shallow_lines, steep_lines, flat_lines, rewriter, minimal_fixed_point);
+  collect_m_and_split_lines(lines, m, shallow_lines, steep_lines, flat_lines, rewriter, minimal_fixed_point);
 
   /* XXXXXX FINISH SOLVING ****/
 
   if (minimal_fixed_point)
   {
-    pres_expression U= or_(m, disjunction_cj_fj(shallow_lines));
+    pres_expression U;
+    optimized_or(U, m, disjunction_cj_fj(shallow_lines));
+std::cerr << "U MIN " << U << "    " << m << "\n";
     pres_expression cond1 = disjunction_fj_cj(steep_lines, U);
     pres_expression cond2 = disjunction_infinity_cj_prime(shallow_lines, steep_lines, flat_lines);
 
-    pres_expression solution = condeq(eqinf(conjunction_disjunction_f_j(shallow_lines, steep_lines, flat_lines, false)),
-                                      condeq(eqninf(m),
-                                             false_(),
-                                             condeq(or_(cond1,cond2),
-                                                    U,
-                                                    true_())),
-                                      true_());
+    pres_expression eqinf_cond;
+    optimized_eqinf(eqinf_cond, conjunction_disjunction_f_j(shallow_lines, steep_lines, flat_lines, false));
+    pres_expression cond0;
+    optimized_eqinf(cond0, eqinf_cond);
+    pres_expression eqninf_m;
+    optimized_eqninf(eqninf_m, m);
+    pres_expression cond4;
+    optimized_or(cond4, cond1, cond2);
+    pres_expression exp1;
+    optimized_condeq(exp1, cond4, U, true_());
+std::cerr << "INNER EXP " << exp1 << "\n";
+    pres_expression exp2;
+    optimized_condeq(exp2, eqninf_m, false_(), exp1);
+std::cerr << "INNER EXP " << exp2 << "\n";
+    pres_expression solution;
+    optimized_condeq(solution, cond0, exp2, true_());
+
 std::cerr << "MINIMAL SOLUTION " << solution << "\n";
     return solution;
   }
   else // Maximal fixed point
   {
-    pres_expression U = and_(m, conjunction_cj_fj(shallow_lines));
+    pres_expression U; 
+    optimized_and(U, m, conjunction_cj_fj(shallow_lines));
+std::cerr << "U MAX " << U << "    " << m << "\n";
 
     pres_expression cond1 = conjunction_fj_cj(steep_lines, U);
+std::cerr << "COND1 " << cond1 << "\n";
 
-    pres_expression solution = condeq(eqinf(conjunction_disjunction_f_j(shallow_lines,steep_lines,flat_lines, true)),
-                                      condsm(cond1,
-                                             false_(),
-                                             U),
-                                      true_());
+    pres_expression eqinf_m;
+    optimized_eqinf(eqinf_m, m);
+    pres_expression cond1_;
+    optimized_condsm(cond1_, cond1, false_(), U);
+    pres_expression solution;
+    optimized_condeq(solution, eqinf_m, cond1_, true_());
 std::cerr << "MAXIMAL SOLUTION " << solution << "\n";
     return solution;
   }
@@ -756,7 +782,7 @@ public:
     pres_system::make_propositional_variable_instantiation(result, x.name(), [&](data::data_expression_list& result){ apply(result, x.parameters()); });
     if (m_negate)
     {
-      pres_system::make_minus(result, result);
+      pres_system::optimized_minus(result, result);
     }
   }
 
@@ -786,8 +812,8 @@ std::cerr << "PUSH AND INSIDE " << result << "\n";
   void apply(T& result, const pres_system::imp& x)
   {
     pres_expression aux;
-    make_minus(aux, x.left());
-    make_or_(aux, aux, x.right());
+    optimized_minus(aux, x.left());
+    optimized_or(aux, aux, x.right());
     apply(result,aux);
   }
 
@@ -849,20 +875,6 @@ std::cerr << "TODO: " << pp(static_cast<pres_expression>(x)) << "\n";
 std::cerr << "TODO: " << pp(static_cast<pres_expression>(x)) << "\n";
     pres_system::make_eqninf(result, [&](pres_expression& result){ apply(result, x.operand()); });
   }
-
-/*  template <class T>
-  void apply(T& result, const pres_system::condsm& x)
-  {
-std::cerr << "TODO: " << x << "\n";
-    pres_system::make_condsm(result, [&](pres_expression& result){ apply(result, x.arg1()); }, [&](pres_expression& result){ apply(result, x.arg2()); }, [&](pres_expression& result){ apply(result, x.arg3()); });
-  }
-
-  template <class T>
-  void apply(T& result, const pres_system::condeq& x)
-  {
-std::cerr << "TODO: " << x << "\n";
-    pres_system::make_condeq(result, [&](pres_expression& result){ apply(result, x.arg1()); }, [&](pres_expression& result){ apply(result, x.arg2()); }, [&](pres_expression& result){ apply(result, x.arg3()); });
-  } */
 }; 
 
 /// \brief An algorithm that takes a res, i.e. a pres with propositional variables without parameters
@@ -880,8 +892,16 @@ class ressolve_by_gauss_elimination_algorithm
     {
       if (m_options.remove_unused_rewrite_rules)
       {
+        std::set<data::function_symbol> used_functions = pres_system::find_function_symbols(presspec);
+        used_functions.insert(data::less(data::sort_real::real_()));
+        used_functions.insert(data::sort_real::divides(data::sort_real::real_(),data::sort_real::real_()));
+        used_functions.insert(data::sort_real::times(data::sort_real::real_(),data::sort_real::real_()));
+        used_functions.insert(data::sort_real::plus(data::sort_real::real_(),data::sort_real::real_()));
+        used_functions.insert(data::sort_real::minus(data::sort_real::real_(),data::sort_real::real_()));
+        used_functions.insert(data::sort_real::minimum(data::sort_real::real_(),data::sort_real::real_()));
+        used_functions.insert(data::sort_real::maximum(data::sort_real::real_(),data::sort_real::real_()));
         return data::rewriter(presspec.data(),
-                              data::used_data_equation_selector(presspec.data(), pres_system::find_function_symbols(presspec), presspec.global_variables()),
+                              data::used_data_equation_selector(presspec.data(), used_functions, presspec.global_variables()),
                               m_options.rewrite_strategy);
       }
       else
@@ -931,11 +951,11 @@ std::cerr << "------------------------------------------------------------------
 std::cerr << "NORMALFORM IN " << *equation_it << "\n";
         if (equation_it->symbol().is_mu())
         {
-          conjunctive_normal_form_builder.apply(result, equation_it->formula());
+          conjunctive_normal_form_builder.apply(result, m_R(equation_it->formula()));
         }
         else
         {
-          disjunctive_normal_form_builder.apply(result, equation_it->formula());
+          disjunctive_normal_form_builder.apply(result, m_R(equation_it->formula()));
         }
 std::cerr << "NORMALFORM " << result << "\n";
 
@@ -955,7 +975,7 @@ std::cerr << "NORMALFORM " << result << "\n";
           substitution_equation_it->formula() = result;
         }
       }
-      return res_equations.front().formula();
+      return m_R(res_equations.front().formula());
     } 
 };
 

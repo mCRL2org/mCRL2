@@ -27,8 +27,6 @@ namespace pres_system
 /// \brief The propositional variable is taken from a pbes_system. 
 typedef pbes_system::propositional_variable propositional_variable;
 
-// typedef std::pair<core::identifier_string, data::data_expression_list> propositional_variable_key_type;
-
 //--- start generated classes ---//
 /// \\brief A pres expression
 class pres_expression: public atermpp::aterm_appl
@@ -1628,7 +1626,7 @@ void optimized_plus(pres_expression& result, const pres_expression& p, const pre
   {
     result=p;
   }
-  else optimized_plus(result, p, q);
+  else make_plus(result, p, q);
 }
 
 /// \brief Make an implication
@@ -1694,6 +1692,146 @@ void optimized_sum(pres_expression& result, const data::variable_list& l, const 
   make_sum(result, l, p);
   return;
 } 
+
+/// \brief Make an optimized condsm expression
+/// \param p1 A pres expression
+/// \param p2 A pres expression
+/// \param p3 A pres expression
+/// \return An optimized representation of condsm(p1, p2, p3)
+inline
+void optimized_condsm(pres_expression& result, const pres_expression& p1, const pres_expression& p2, const pres_expression& p3)
+{
+  if (p1==false_())
+  {
+    result = p2;
+    return;
+  }
+  else if (p1==true_())
+  {
+    optimized_or(result, p2, p3);
+    return;
+  }
+  make_condsm(result, p1, p2, p3);
+  return;
+}
+
+/// \brief Make an optimized condsm expression
+/// \param p1 A pres expression
+/// \param p2 A pres expression
+/// \param p3 A pres expression
+/// \return An optimized representation of condsm(p1, p2, p3)
+inline
+void optimized_condeq(pres_expression& result, const pres_expression& p1, const pres_expression& p2, const pres_expression& p3)
+{
+  if (p1==false_())
+  {
+    // N.B. Here we use the fact that mCRL2 data types are never empty.
+    optimized_and(result, p2, p3);
+    return;
+  }
+  else if (p1==true_())
+  {
+    result = p3;
+    return;
+  }
+  make_condeq(result, p1, p2, p3);
+  return;
+}
+
+/// \brief Make an optimized eqinf expression
+/// \param p A pres expression
+/// \return An optimized representation of eqinf(p)
+inline
+void optimized_eqinf(pres_expression& result, const pres_expression& p)
+{
+  if (p==false_())
+  {
+    result = p;
+    return;
+  }
+  else if (p==true_())
+  {
+    result = p;
+    return;
+  }
+  else if (data::is_data_expression(p) && atermpp::down_cast<data::data_expression>(p).sort()==data::sort_real::real_())
+  {
+    result = false_();
+    return;
+  }
+  make_eqinf(result, p);
+}
+
+/// \brief Make an optimized eqinf expression
+/// \param p A pres expression
+/// \return An optimized representation of eqinf(p)
+inline
+void optimized_eqninf(pres_expression& result, const pres_expression& p)
+{
+  if (p==false_())
+  {
+    // N.B. Here we use the fact that mCRL2 data types are never empty.
+    result = p;
+    return;
+  }
+  else if (p==true_())
+  {
+    // N.B. Here we use the fact that mCRL2 data types are never empty.
+    result = p;
+    return;
+  }
+  else if (data::is_data_expression(p) && atermpp::down_cast<data::data_expression>(p).sort()==data::sort_real::real_())
+  {
+    result = true_();
+    return;
+  }
+  make_eqninf(result, p);
+}
+
+/// \brief Make an optimized const_multiply expression
+/// \param d A real data expression, which should be positive. 
+/// \param p A pres expression
+/// \return An optimized representation of eqinf(p)
+inline
+void optimized_const_multiply(pres_expression& result, const data::data_expression, const pres_expression& p)
+{
+  if (p==false_())
+  {
+    // N.B. Here we use the fact that mCRL2 data types are never empty.
+    result = p;
+    return;
+  }
+  else if (p==true_())
+  {
+    // N.B. Here we use the fact that mCRL2 data types are never empty.
+    result = p;
+    return;
+  }
+  make_const_multiply(result, p);
+}
+
+/// \brief Make an optimized const_multiply_alt expression
+/// \param d A real data expression, which should be positive. 
+/// \param p A pres expression
+/// \return An optimized representation of eqinf(p)
+inline
+void optimized_const_multiply_alt(pres_expression& result, const data::data_expression, const pres_expression& p)
+{
+  if (p==false_())
+  {
+    // N.B. Here we use the fact that mCRL2 data types are never empty.
+    result = p;
+    return;
+  }
+  else if (p==true_())
+  {
+    // N.B. Here we use the fact that mCRL2 data types are never empty.
+    result = p;
+    return;
+  }
+  make_const_multiply_alt(result, p);
+}
+
 
 inline
 bool is_constant(const pres_expression& x)

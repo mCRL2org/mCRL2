@@ -12,6 +12,7 @@
 #ifndef MCRL2_PRES_REWRITERS_SIMPLIFY_REWRITER_H
 #define MCRL2_PRES_REWRITERS_SIMPLIFY_REWRITER_H
 
+#include "mcrl2/data/standard.h"
 #include "mcrl2/pres/rewriters/data_rewriter.h"
 
 namespace mcrl2 {
@@ -75,6 +76,13 @@ struct add_simplify: public Builder<Derived>
     {
       return;
     }
+    if (data::is_data_expression(result) && data::is_data_expression(right))
+    {
+      right = data::sort_real::minimum(atermpp::down_cast<data::data_expression>(result),
+                                       atermpp::down_cast<data::data_expression>(right));
+      apply(result, right);
+      return;
+    }
     make_and_(result,result, right);
   }
 
@@ -102,6 +110,13 @@ struct add_simplify: public Builder<Derived>
     }
     if (is_false(right) || result==right)
     {
+      return;
+    }
+    if (data::is_data_expression(result) && data::is_data_expression(right))
+    {
+      right = data::sort_real::maximum(atermpp::down_cast<data::data_expression>(result),
+                                       atermpp::down_cast<data::data_expression>(right));
+      apply(result, right);
       return;
     }
     make_or_(result,result, right);
@@ -138,7 +153,15 @@ struct add_simplify: public Builder<Derived>
     {
       return;
     }
-    make_plus(result,result, right);
+    if (data::is_data_expression(result) && data::is_data_expression(right))
+    {
+      right = data::sort_real::plus(atermpp::down_cast<data::data_expression>(result), 
+                                    atermpp::down_cast<data::data_expression>(right));
+      apply(result, right);
+      return;
+    }
+    make_plus(result, result, right);
+    
   }
 
   template <class T>
@@ -247,6 +270,162 @@ struct add_simplify: public Builder<Derived>
     apply(result, x.body());
     make_sum(result, x.variables(), result);
   }
+
+  template <class T>
+  void apply(T& result, const condeq& x)
+  {
+    apply(result, x.arg1());  
+    if (is_true(result))
+    {
+      apply(result, x.arg3());
+      return;
+    }
+    if (is_false(result)) 
+    {
+      apply(result, and_(x.arg2(), x.arg3()));
+      return;
+    }
+    if (data::is_application(result))
+    {
+      const data::application& d=atermpp::down_cast<data::application>(result);
+      if (d.sort()==data::sort_real::real_())
+      {
+        apply(result, data::less(d, data::sort_real::real_zero()));   // NOTE: arg1() is sometimes ewritten twice.
+     
+        if (is_true(result))
+        {
+          apply(result, x.arg3());
+          return;
+        }
+        if (is_false(result))
+        {
+          apply(result, and_(x.arg2(), x.arg3()));
+          return;
+        }
+      }
+    }
+
+    pres_expression result1;
+    pres_expression result2;
+    apply(result1, x.arg2());
+    apply(result2, x.arg3());
+    make_condeq(result, result, result1, result2);
+  }
+
+  template <class T>
+  void apply(T& result, const condsm& x)
+  {
+
+    apply(result, x.arg1());   
+    if (is_true(result))
+    {
+      apply(result, or_(x.arg2(), x.arg3()));
+      return;
+    }
+    if (is_false(result))
+    {
+      apply(result, x.arg2());
+      return;
+    }
+    if (data::is_application(result))
+    { 
+      const data::application& d=atermpp::down_cast<data::application>(result);
+      if (d.sort()==data::sort_real::real_())
+      { 
+        apply(result, less(data::sort_real::real_zero(), d));   // NOTE: arg1() is sometimes rewritten twice.
+        
+        if (is_true(result))
+        { 
+          apply(result, x.arg2());
+          return;
+        }
+        if (is_false(result))
+        { 
+          apply(result, or_(x.arg2(), x.arg3()));
+          return;
+        }
+      }
+    }
+
+
+    if (is_true(result))
+    {
+      apply(result, or_(x.arg2(), x.arg3()));
+      return;
+    }
+    if (is_false(result)) 
+    {
+      apply(result, x.arg2());
+      return;
+    }
+    pres_expression result1;
+    pres_expression result2;
+    apply(result, x.arg1());
+    apply(result1, x.arg2());
+    apply(result2, x.arg3());
+    make_condsm(result, result, result1, result2);
+  }
+
+  template <class T>
+  void apply(T& result, const eqinf& x)
+  {
+    apply(result, x.operand());
+    if (is_true(result))
+    {
+      result = true_();
+      return;
+    }
+    if (is_false(result))
+    {
+      result = true_();
+      return;
+    }
+    if (is_eqinf(result))
+    {
+      return;
+    }
+    if (is_eqninf(result))
+    {
+      return;
+    }
+    if (data::is_application(result) && atermpp::down_cast<data::application>(result).sort()==data::sort_real::real_())
+    {
+      result = false_();
+      return;
+    }
+    make_eqinf(result, result);
+  }
+
+  template <class T>
+  void apply(T& result, const eqninf& x)
+  {
+    apply(result, x.operand());
+    if (is_true(result))
+    {
+      result = true_();
+      return;
+    }
+    if (is_false(result))
+    {
+      result = true_();
+      return;
+    }
+    if (is_eqinf(result))
+    {
+      return;
+    }
+    if (is_eqninf(result))
+    {
+      return;
+    }
+    if (data::is_application(result) && atermpp::down_cast<data::application>(result).sort()==data::sort_real::real_())
+    {
+      result = true_();
+      return;
+    }
+    make_eqinf(result, result);
+  }
+
 };
 
 template <typename Derived>
