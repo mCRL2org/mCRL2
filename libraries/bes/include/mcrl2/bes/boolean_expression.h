@@ -23,8 +23,6 @@ namespace mcrl2
 namespace bes
 {
 
-typedef core::identifier_string boolean_variable_key_type;
-
 template <typename T> std::string pp(const T& x);
 
 //--- start generated classes ---//

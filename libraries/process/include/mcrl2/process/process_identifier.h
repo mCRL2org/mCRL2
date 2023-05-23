@@ -20,8 +20,6 @@ namespace mcrl2
 namespace process
 {
 
-typedef std::pair<core::identifier_string, data::variable_list> process_identifier_key_type;
-
 //--- start generated class process_identifier ---//
 /// \\brief A process identifier
 class process_identifier: public atermpp::aterm_appl
