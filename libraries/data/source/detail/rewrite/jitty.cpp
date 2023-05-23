@@ -881,7 +881,6 @@ void RewriterJitty::rewrite(
     }
     catch (recalculate_term_as_stack_is_too_small&)
     {
-      assert(*atermpp::detail::g_thread_term_pool().get_lock_depth()==0); 
       rewriting_in_progress=false; // Restart rewriting, due to a stack overflow.
                                    // The stack is a vector, and it may be relocated in memory when
                                    // resized. References to the stack loose their validity. 
