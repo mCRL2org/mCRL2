@@ -133,6 +133,7 @@ macro(_add_man_page TARGET_NAME)
       TARGET ${TARGET_NAME} POST_BUILD
       COMMAND ${TARGET_NAME} --generate-man-page | gzip --best > ${TARGET_NAME}.1.gz
       COMMENT "Generating man page for ${TARGET_NAME}"
+      USES_TERMINAL
     )
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.1.gz DESTINATION share/man/man1 COMPONENT Documentation)
   endif(MCRL2_MAN_PAGES)
