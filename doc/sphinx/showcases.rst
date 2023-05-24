@@ -1,4 +1,4 @@
-.. include:: ../_includes/toplevel.inc
+.. include:: /_includes/toplevel.inc
 
 .. _showcases:
 

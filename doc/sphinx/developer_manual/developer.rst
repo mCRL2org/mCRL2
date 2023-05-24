@@ -17,7 +17,7 @@ mCRL2 library documentation
           libraries/atermpp/aterm_library
           libraries/atermpp/reference
 
-       .. include:: libraries/atermpp/articles.txt
+       .. include:: libraries/atermpp/articles.rst
 
      - **BES**
 
@@ -26,7 +26,7 @@ mCRL2 library documentation
 
           libraries/bes/reference
 
-       .. include:: libraries/bes/articles.txt
+       .. include:: libraries/bes/articles.rst
 
    * - **Core**
 
@@ -45,7 +45,7 @@ mCRL2 library documentation
           libraries/data/data_library
           libraries/data/reference
 
-       .. include:: libraries/data/articles.txt
+       .. include:: libraries/data/articles.rst
 
    * - **GUI**
 
@@ -63,7 +63,7 @@ mCRL2 library documentation
           libraries/lps/lps_library
           libraries/lps/reference
 
-       .. include:: libraries/lps/articles.txt
+       .. include:: libraries/lps/articles.rst
 
    * - **LTS**
 
@@ -73,7 +73,7 @@ mCRL2 library documentation
           libraries/lts/lts_library
           libraries/lts/reference
 
-       .. include:: libraries/lts/articles.txt
+       .. include:: libraries/lts/articles.rst
 
      - **Modal formula**
 
@@ -91,7 +91,7 @@ mCRL2 library documentation
           libraries/pbes/pbes_library
           libraries/pbes/reference
 
-       .. include:: libraries/pbes/articles.txt
+       .. include:: libraries/pbes/articles.rst
 
      - **Process**
 
@@ -101,7 +101,7 @@ mCRL2 library documentation
           libraries/process/process_library
           libraries/process/reference
 
-       .. include:: libraries/process/articles.txt
+       .. include:: libraries/process/articles.rst
 
    * - **SMT**
 
