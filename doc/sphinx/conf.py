@@ -6,11 +6,15 @@
 
 import datetime
 import os
+import re
+import sys
+import textwrap
+
 # used to parse mCRL2 version information from CMake file
 from pathlib import Path
-import re
-# used to add paths for extensions
-import sys
+
+import sphinx.errors
+
 # The ReadTheDocs theme.
 import sphinx_rtd_theme
 
@@ -19,8 +23,6 @@ import sphinx_rtd_theme
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here.
 sys.path.insert(0, (Path(__file__).parent / '_extensions').as_posix())
-import exhale_multiproject_monkeypatch
-import libraries
 
 # -- Project information -----------------------------------------------------
 
@@ -61,7 +63,6 @@ master_doc = 'index'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'dparser_grammar',
     'mcrl2_pygment',
     'sphinx.ext.graphviz',
     'sphinx.ext.ifconfig',
@@ -76,10 +77,9 @@ extensions = [
 
 # First initialize the data structures for breathe and exhale. They are
 # populated below.
-breathe_projects = {}
+breathe_projects = {"mCRL2": "./_doxygen/xml"}
 breathe_projects_source = {}
-breathe_default_projects = list(libraries.get_libraries().keys())[0]
-exhale_projects_args = {}
+breathe_default_project = "mCRL2"
 
 # Common arguments for Exhale
 exhale_args = {
@@ -88,22 +88,21 @@ exhale_args = {
     "rootFileName": "library_root.rst",
     "createTreeView": True,
     "exhaleExecutesDoxygen": True,
-    "exhaleDoxygenStdin": '''
+    "exhaleDoxygenStdin": textwrap.dedent('''
 BUILTIN_STL_SUPPORT = YES
-EXCLUDE_PATTERNS = */detail/*
-''',
+INPUT = {}/libraries/
+EXCLUDE_PATTERNS = */test/*
+EXTRACT_ALL=YES
+WARN_IF_INCOMPLETE_DOC=NO
+'''.format(src_path)),
     "doxygenStripFromPath":  f'{src_path}',
 }
 
-# Populate exhale and breathe variables for all libraries
-for lib, name in libraries.get_libraries().items():
-    breathe_projects[lib] = "./_doxygen/{}/xml".format(lib)
-    breathe_projects_source[lib] = f'{src_path}/libraries/' + lib
-    exhale_projects_args[lib] = {
-        "rootFileTitle":        "{} Library API".format(name),
-        "exhaleDoxygenStdin":   exhale_args["exhaleDoxygenStdin"] + "INPUT = {}/libraries/{}/include".format(f'{src_path}', lib),
-        "containmentFolder":    "./sphinx/source/api-{}".format(lib)
-    }
+# Tell sphinx what the primary language being documented is.
+primary_domain = 'cpp'
+
+# Tell sphinx what the pygments highlight language should be.
+highlight_language = 'cpp'
 
 # Extension configuration for using Tikz pictures in Sphinx documentation
 tikz_latex_preamble = r'''
@@ -119,8 +118,7 @@ tikz_latex_preamble = r'''
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['.svn', '.git', 'Thumbs.db', '.DS_Store']
-
+exclude_patterns = ['.git']
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -163,13 +161,16 @@ suppress_warnings = ['ref.citation']
 def setup(app):
     # Generate rst files from man pages
     import man
+    import pdflatex
 
     temppath = f'{app.outdir}/../temp'
     os.makedirs(temppath, mode = 0o755, exist_ok = True)
     olddir = os.getcwd()
     try:
         os.chdir(temppath)
-        libraries.generate_rst(temppath)
+        #pdflatex.generate_pdfs(temppath)
         man.generate_rst(temppath, f'{app.outdir}/../../stage/bin/')
+    except Exception as e:
+        raise sphinx.errors.SphinxError('Aborting build due to raised exceptions')
     finally:
         os.chdir(olddir)
