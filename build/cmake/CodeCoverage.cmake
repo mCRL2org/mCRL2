@@ -130,6 +130,7 @@ add_custom_target(${coverage_target}
   WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
   DEPENDS ${Coverage_DEPENDENCIES}
   COMMENT "Generating code coverage statistics..."
+  USES_TERMINAL
 )
 
 # Show info where to find the report
