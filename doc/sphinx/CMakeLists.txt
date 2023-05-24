@@ -40,6 +40,7 @@ function(add_build_doc_target NAME DESC INCLUDE_CLEAN)
       ${SPHINX_BUILD_SRC_DIR} ${SPHINX_BUILD_OUT_DIR}
       2> ${SPHINX_BUILD_ROOT_DIR}/build-warnings.log
     VERBATIM
+    USES_TERMINAL
   )
 
   add_custom_command(
@@ -55,5 +56,4 @@ endfunction()
 
 add_build_doc_target(fastdoc "Generating mCRL2 documentation (does not \
 regenerate cached PDF, manual pages and Doxygen documentation)" FALSE)
-add_build_doc_target(doc "(Re)-generating mCRL2 documentation (regenerates \
-all cached documentation)" TRUE)
+add_build_doc_target(doc "Generating mCRL2 documentation" TRUE)
