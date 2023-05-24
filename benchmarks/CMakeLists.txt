@@ -58,11 +58,13 @@ foreach(benchmark ${STATESPACE_BENCHMARKS} ${GAME_BENCHMARKS})
   # Generate the lps for this benchmark.
   add_custom_command(TARGET benchmarks 
     COMMAND mcrl22lps "${CMAKE_SOURCE_DIR}/${benchmark}" "${LPS_FILENAME}"
+    USES_TERMINAL
     )
 
   # Generate a pbes for the nodeadlock property for this benchmark
   add_custom_command(TARGET benchmarks
     COMMAND lps2pbes -f "${CMAKE_SOURCE_DIR}/examples/modal-formulas/nodeadlock.mcf" "${LPS_FILENAME}" "${NODEADLOCK_PBES_FILENAME}"
+    USES_TERMINAL
     )
 
   # Benchmark linearisation.
