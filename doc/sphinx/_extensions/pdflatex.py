@@ -69,7 +69,7 @@ def generate_library_pdf(lib_dir, lib_name):
     finally:
       os.chdir(olddir)
 
-def generate_pdfs(temppath): 
+def generate_pdfs(): 
   for dirname, name in _LIBRARIES.items():
     generate_library_pdf(dirname, name)
 

@@ -18,6 +18,9 @@ import sphinx.errors
 # The ReadTheDocs theme.
 import sphinx_rtd_theme
 
+_MCRL2_SRC_DIR = os.environ['MCRL2_SRC_DIR']
+_MCRL2_BIN_DIR = os.environ['MCRL2_BIN_DIR']
+
 # -- Path setup --------------------------------------------------------------
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -25,7 +28,6 @@ import sphinx_rtd_theme
 sys.path.insert(0, (Path(__file__).parent / '_extensions').as_posix())
 
 # -- Project information -----------------------------------------------------
-
 project = 'mCRL2'
 author = 'Technische Universiteit Eindhoven'
 release = '' # populated below
@@ -164,9 +166,9 @@ def setup(app):
         os.chdir(temppath)
 
         if tags.has('build_pdflatex'):
-            pdflatex.generate_pdfs(temppath)
+            pdflatex.generate_pdfs()
 
         if tags.has('build_manual'):
-            manual.generate_rst(temppath, f'{app.outdir}/../../stage/bin/')
+            manual.generate_rst(_MCRL2_SRC_DIR, _MCRL2_BIN_DIR)
     finally:
         os.chdir(olddir)
