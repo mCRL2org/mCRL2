@@ -2,7 +2,7 @@ import string
 import os
 import re
 
-from man import call
+from manual import call
 from sphinx.util import logging
 from sphinx.util.console import colorize, term_width_line
 
@@ -40,11 +40,9 @@ def makepdf(src):
   
   # Only apply bibtex if a "source.bib" file exists in the directory.
   if os.path.isfile(src + '.bib'):
-    try:
-      call('bibtex', ['bibtex', src])
-      call('pdflatex', ['pdflatex', src])
-    except RuntimeError:
-      pass
+    call('bibtex', ['bibtex', src])
+    call('pdflatex', ['pdflatex', src])
+
   call('pdflatex', ['pdflatex', src])
   return title
 
@@ -70,7 +68,6 @@ def generate_library_pdf(lib_dir, lib_name):
       )
     finally:
       os.chdir(olddir)
-
 
 def generate_pdfs(temppath): 
   for dirname, name in _LIBRARIES.items():

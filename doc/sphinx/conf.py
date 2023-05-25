@@ -32,7 +32,7 @@ release = '' # populated below
 version = ''
 
 # run CMake on the version file to obtain the current version of mCRL2
-from man import call
+from manual import call
 src_path = os.environ['MCRL2_SRC_DIR']
 olddir = os.getcwd()
 try:
@@ -71,38 +71,34 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinxcontrib.tikz',
     'sphinx_rtd_theme',
-    'breathe',
-    'exhale'
 ]
 
-# First initialize the data structures for breathe and exhale. They are
-# populated below.
-breathe_projects = {"mCRL2": "./_doxygen/xml"}
-breathe_projects_source = {}
-breathe_default_project = "mCRL2"
+if tags.has('build_doxygen'):
+    extensions.append('breathe')
+    extensions.append('exhale')
+    
+    # First initialize the data structures for breathe and exhale. They are
+    # populated below.
+    breathe_projects = {"mCRL2": "./_doxygen/xml"}
+    breathe_projects_source = {}
+    breathe_default_project = "mCRL2"
 
-# Common arguments for Exhale
-exhale_args = {
-    "rootFileTitle": "Unknown",
-    "containmentFolder": "unknown",
-    "rootFileName": "library_root.rst",
-    "createTreeView": True,
-    "exhaleExecutesDoxygen": True,
-    "exhaleDoxygenStdin": textwrap.dedent('''
-BUILTIN_STL_SUPPORT = YES
-INPUT = {}/libraries/
-EXCLUDE_PATTERNS = */test/*
-EXTRACT_ALL=YES
-WARN_IF_INCOMPLETE_DOC=NO
-'''.format(src_path)),
-    "doxygenStripFromPath":  f'{src_path}',
-}
-
-# Tell sphinx what the primary language being documented is.
-primary_domain = 'cpp'
-
-# Tell sphinx what the pygments highlight language should be.
-highlight_language = 'cpp'
+    # Common arguments for Exhale
+    exhale_args = {
+        "rootFileTitle": "Unknown",
+        "containmentFolder": "unknown",
+        "rootFileName": "library_root.rst",
+        "createTreeView": True,
+        "exhaleExecutesDoxygen": True,
+        "exhaleDoxygenStdin": textwrap.dedent('''
+    BUILTIN_STL_SUPPORT = YES
+    INPUT = {}/libraries/
+    EXCLUDE_PATTERNS = */test/*
+    EXTRACT_ALL=YES
+    WARN_IF_INCOMPLETE_DOC=NO
+    '''.format(src_path)),
+        "doxygenStripFromPath":  f'{src_path}',
+    }
 
 # Extension configuration for using Tikz pictures in Sphinx documentation
 tikz_latex_preamble = r'''
@@ -157,10 +153,8 @@ suppress_warnings = ['ref.citation']
 
 
 # -- App setup - executed before the build process starts --------------------
-
 def setup(app):
-    # Generate rst files from man pages
-    import man
+    import manual
     import pdflatex
 
     temppath = f'{app.outdir}/../temp'
@@ -168,9 +162,11 @@ def setup(app):
     olddir = os.getcwd()
     try:
         os.chdir(temppath)
-        #pdflatex.generate_pdfs(temppath)
-        man.generate_rst(temppath, f'{app.outdir}/../../stage/bin/')
-    except Exception as e:
-        raise sphinx.errors.SphinxError('Aborting build due to raised exceptions')
+
+        if tags.has('build_pdflatex'):
+            pdflatex.generate_pdfs(temppath)
+
+        if tags.has('build_manual'):
+            manual.generate_rst(temppath, f'{app.outdir}/../../stage/bin/')
     finally:
         os.chdir(olddir)
