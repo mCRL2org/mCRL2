@@ -44,7 +44,7 @@ function(add_build_doc_target NAME DESC INCLUDE_CLEAN)
       -DCOPY_DEST=${SPHINX_BUILD_SRC_DIR}
       -P "${CMAKE_SOURCE_DIR}/build/cmake/CopyIfDifferent.cmake"
     # run the Sphinx build command
-    COMMAND ${CMAKE_COMMAND} -E env MCRL2_SRC_DIR=${CMAKE_SOURCE_DIR}
+    COMMAND ${CMAKE_COMMAND} -E env MCRL2_SRC_DIR=${CMAKE_SOURCE_DIR} MCRL2_BIN_DIR=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/
       ${SPHINX_BUILD_CMD}
       -b html 
       -d "${SPHINX_BUILD_TEMP_DIR}/doctrees"
@@ -62,8 +62,7 @@ function(add_build_doc_target NAME DESC INCLUDE_CLEAN)
   endif()
 endfunction()
 
-add_build_doc_target(fastdoc "Generating mCRL2 documentation (does not \
-regenerate cached PDF, manual pages and Doxygen documentation)" FALSE)
+add_build_doc_target(fastdoc "Generating mCRL2 documentation (does not clean up old files)" FALSE)
 add_build_doc_target(doc "Generating mCRL2 documentation" TRUE)
 
 if(MCRL2_ENABLE_DOCUMENTATION_MANUAL)

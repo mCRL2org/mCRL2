@@ -7,7 +7,6 @@ from sphinx.util.console import colorize, term_width_line
 
 _LOG = logging.getLogger(__name__)
 _PWD = os.path.dirname(__file__)
-_TRUNK = os.environ['MCRL2_SRC_DIR']
 
 def log_nonl(msg):
   _LOG.info(term_width_line(msg), nonl = True)
@@ -41,7 +40,7 @@ def call(name, cmdline, stdin=None, return_err=False):
 def generate_manpage(tool, rstfile, binpath):
   ''' Execute the given binary with --generate-xml  '''
 
-  exe = os.path.join(binpath, tool)  
+  exe = os.path.join(binpath, tool)
   xml = call(tool, [exe, '--generate-xml'])
 
   dom = ET.fromstring(xml)
@@ -52,10 +51,12 @@ def generate_manpage(tool, rstfile, binpath):
   with open(rstfile, 'w') as file:
     file.write(str(result))
 
-def generate_tool_documentation(temppath, binpath, tool_directory_path, tool_sub_directory_path):
+def generate_tool_documentation(srcpath, binpath, tool_directory_path, tool_sub_directory_path):
   _TOOLS=os.path.join(_PWD, '..', 'user_manual', 'tools')
 
-  for tool in os.listdir(os.path.join(_TRUNK, tool_directory_path, tool_sub_directory_path)):
+  for tool in os.listdir(os.path.join(srcpath, tool_directory_path, tool_sub_directory_path)):
+
+    # Ignore the subdirectories and the CMakeLists.txt file
     if tool.startswith('.'):
       continue
     if tool=='CMakeLists.txt':
@@ -80,9 +81,9 @@ def generate_tool_documentation(temppath, binpath, tool_directory_path, tool_sub
       _LOG.warning('No documentation generated for {0}'.format(tool))
 
 
-def generate_rst(temppath, binpath):
+def generate_rst(srcpath, binpath):
 
   log_nonl('generating user documentation...')
-  generate_tool_documentation(temppath, binpath, 'tools', 'release')
-  generate_tool_documentation(temppath, binpath, 'tools', 'experimental')
+  generate_tool_documentation(srcpath, binpath, 'tools', 'release')
+  generate_tool_documentation(srcpath, binpath, 'tools', 'experimental')
   log_nonl('generated user documentation for all tools')
