@@ -115,5 +115,5 @@ class mCRL2Lexer(RegexLexer):
 def setup(app):
   from sphinx.highlighting import lexers
   lexers['mcrl2'] = mCRL2Lexer()
-
-
+  
+  return {'parallel_read_safe': True, 'parallel_write_safe': True}
