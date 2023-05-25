@@ -10,7 +10,6 @@ if(CMAKE_BUILD_PARALLEL_LEVEL)
   set(SPHINX_PARALLEL "-j${CMAKE_BUILD_PARALLEL_LEVEL}")
 endif()
 
-
 add_custom_target(cleandoc
   COMMENT "Delete all cached documentation"
   COMMAND ${CMAKE_COMMAND} -E remove_directory ${SPHINX_BUILD_SRC_DIR}
@@ -21,6 +20,17 @@ add_custom_target(cleandoc
 )
 
 function(add_build_doc_target NAME DESC INCLUDE_CLEAN)
+  set(SPHINX_TAGS "")
+  if(MCRL2_ENABLE_DOC_DOXYGEN)
+    list(APPEND SPHINX_TAGS -t build_doxygen)
+  endif()
+  if(MCRL2_ENABLE_DOC_PDFLATEX)
+    list(APPEND SPHINX_TAGS -t build_pdflatex)
+  endif()
+  if(MCRL2_ENABLE_DOC_MANUAL)
+    list(APPEND SPHINX_TAGS -t build_manual)
+  endif()
+
   add_custom_target(${NAME}
     COMMENT ${DESC}
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
@@ -36,17 +46,15 @@ function(add_build_doc_target NAME DESC INCLUDE_CLEAN)
     # run the Sphinx build command
     COMMAND ${CMAKE_COMMAND} -E env MCRL2_SRC_DIR=${CMAKE_SOURCE_DIR}
       ${SPHINX_BUILD_CMD}
-      -b html -d "${SPHINX_BUILD_TEMP_DIR}/doctrees" ${SPHINX_PARALLEL}
-      ${SPHINX_BUILD_SRC_DIR} ${SPHINX_BUILD_OUT_DIR}
-      2> ${SPHINX_BUILD_ROOT_DIR}/build-warnings.log
+      -b html 
+      -d "${SPHINX_BUILD_TEMP_DIR}/doctrees"
+      -T
+      ${SPHINX_TAGS}
+      ${SPHINX_PARALLEL}
+      ${SPHINX_BUILD_SRC_DIR} 
+      ${SPHINX_BUILD_OUT_DIR}
     VERBATIM
     USES_TERMINAL
-  )
-
-  add_custom_command(
-    TARGET ${NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold
-      "-- Please check ${SPHINX_BUILD_ROOT_DIR}/build-warnings.log for warnings and errors"
   )
 
   if (INCLUDE_CLEAN)
@@ -57,3 +65,9 @@ endfunction()
 add_build_doc_target(fastdoc "Generating mCRL2 documentation (does not \
 regenerate cached PDF, manual pages and Doxygen documentation)" FALSE)
 add_build_doc_target(doc "Generating mCRL2 documentation" TRUE)
+
+if(MCRL2_ENABLE_DOCUMENTATION_MANUAL)
+  if(NOT MCRL2_ENABLE_EXPERIMENTAL or NOT MCRL2_ENABLE_STABLE)
+    message(FATAL_ERROR "The option MCRL2_ENABLE_DOCUMENTATION_MANUAL requires both the stable and experimental tools to be built")
+  endif()
+endif()

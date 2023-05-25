@@ -41,22 +41,16 @@ def call(name, cmdline, stdin=None, return_err=False):
 def generate_manpage(tool, rstfile, binpath):
   ''' Execute the given binary with --generate-xml  '''
 
-  exe = os.path.join(binpath, tool)
-  if os.path.exists(exe):      
-    try:
-      xml = call(tool, [exe, '--generate-xml'])
+  exe = os.path.join(binpath, tool)  
+  xml = call(tool, [exe, '--generate-xml'])
 
-      dom = ET.fromstring(xml)
-      xslt = ET.parse(os.path.join(_PWD, 'manual.xsl'))
-      transform = ET.XSLT(xslt)
-      result = transform(dom)
-      
-      with open(rstfile, 'w') as file:
-        file.write(str(result))
-    except Exception as e:
-      _LOG.error('Could not generate man page for {0} in reStructuredText. Caught exception {1} with arguments {2}'.format(exe, type(e), e))
-      raise e
-
+  dom = ET.fromstring(xml)
+  xslt = ET.parse(os.path.join(_PWD, 'manual.xsl'))
+  transform = ET.XSLT(xslt)
+  result = transform(dom)
+  
+  with open(rstfile, 'w') as file:
+    file.write(str(result))
 
 def generate_tool_documentation(temppath, binpath, tool_directory_path, tool_sub_directory_path):
   _TOOLS=os.path.join(_PWD, '..', 'user_manual', 'tools')
