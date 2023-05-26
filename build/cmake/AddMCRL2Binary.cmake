@@ -318,4 +318,7 @@ function(add_mcrl2_tool TOOLNAME)
     SOURCEDIR "."
     INCLUDEDIR "."
     ${ARGN})
+
+  get_property(MCRL2_TOOLS GLOBAL PROPERTY MCRL2_TOOLS)
+  set_property(GLOBAL PROPERTY MCRL2_TOOLS "${MCRL2_TOOLS},${TOOLNAME}")
 endfunction()
