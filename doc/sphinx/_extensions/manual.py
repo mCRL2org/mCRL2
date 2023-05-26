@@ -51,39 +51,33 @@ def generate_manpage(tool, rstfile, binpath):
   with open(rstfile, 'w') as file:
     file.write(str(result))
 
-def generate_tool_documentation(srcpath, binpath, tool_directory_path, tool_sub_directory_path):
-  _TOOLS=os.path.join(_PWD, '..', 'user_manual', 'tools')
+def generate_tool_documentation(srcpath, dstpath, binpath, tools):
+  for tool in os.listdir(srcpath):
+    if tool in tools:
+      log_nonl('generating user documentation... ' + colorize('darkgreen', tool))
+      usr_rst = os.path.join(dstpath, tool + '.rst')
+      man_rst = os.path.join(dstpath, 'man', tool + '.rst')
 
-  for tool in os.listdir(os.path.join(srcpath, tool_directory_path, tool_sub_directory_path)):
+      # Writing RST fails if the target path does not exist
+      if not os.path.exists(os.path.join(dstpath, 'man')):
+        os.makedirs(os.path.join(dstpath, 'man'))
 
-    # Ignore the subdirectories and the CMakeLists.txt file
-    if tool.startswith('.'):
-      continue
-    if tool=='CMakeLists.txt':
-      continue
+      generate_manpage(tool, man_rst, binpath)
+      if os.path.exists(usr_rst):
+        with open(usr_rst, 'a') as usr_rst_handle:
+          usr_rst_handle.write(f'\n\n.. include:: man/{tool}.rst\n')
+      elif os.path.exists(man_rst):
+        _LOG.warning('No help available for {0}. Only man page will be available.'.format(tool))
+        open(usr_rst, 'w+').write('.. index:: {0}\n\n.. _tool-{0}:\n\n{0}\n{1}\n\n.. include:: man/{0}.rst\n'.format(tool, '='*len(tool)))
 
-    log_nonl('generating user documentation... ' + colorize('darkgreen', tool))
-    usr_rst = os.path.join(_TOOLS, tool_sub_directory_path, tool + '.rst')
-    man_rst = os.path.join(_TOOLS, tool_sub_directory_path, 'man', tool + '.rst')
-
-    # Writing RST fails if the target path does not exist
-    if not os.path.exists(os.path.join(_TOOLS, tool_sub_directory_path, 'man')):
-      os.makedirs(os.path.join(_TOOLS, tool_sub_directory_path, 'man'))
-
-    generate_manpage(tool, man_rst, binpath)
-    if os.path.exists(usr_rst):
-      with open(usr_rst, 'r+') as usr_rst_handle:
-        usr_rst_handle.write(f'\n\n.. include:: man/{tool}.rst\n')
-    elif os.path.exists(man_rst):
-      _LOG.warning('No help available for {0}. Only man page will be available.'.format(tool))
-      open(usr_rst, 'w+').write('.. index:: {0}\n\n.. _tool-{0}:\n\n{0}\n{1}\n\n.. include:: man/{0}.rst\n'.format(tool, '='*len(tool)))
     else:
       _LOG.warning('No documentation generated for {0}'.format(tool))
 
 
-def generate_rst(srcpath, binpath):
+def generate_rst(srcpath, binpath, tools):
+  dstdir=os.path.join(_PWD, '..', 'user_manual', 'tools')
 
   log_nonl('generating user documentation...')
-  generate_tool_documentation(srcpath, binpath, 'tools', 'release')
-  generate_tool_documentation(srcpath, binpath, 'tools', 'experimental')
+  generate_tool_documentation(os.path.join(srcpath, 'tools', 'release'), os.path.join(dstdir, 'release'), binpath, tools)
+  generate_tool_documentation(os.path.join(srcpath, 'tools', 'experimental'), os.path.join(dstdir, 'experimental'), binpath, tools)
   log_nonl('generated user documentation for all tools')

@@ -19,6 +19,9 @@ add_custom_target(cleandoc
   VERBATIM
 )
 
+# Get the list of tools that are built by the current configuration
+get_property(MCRL2_TOOLS GLOBAL PROPERTY MCRL2_TOOLS)
+
 function(add_build_doc_target NAME DESC INCLUDE_CLEAN)
   set(SPHINX_TAGS "")
   if(MCRL2_ENABLE_DOC_DOXYGEN)
@@ -44,7 +47,7 @@ function(add_build_doc_target NAME DESC INCLUDE_CLEAN)
       -DCOPY_DEST=${SPHINX_BUILD_SRC_DIR}
       -P "${CMAKE_SOURCE_DIR}/build/cmake/CopyIfDifferent.cmake"
     # run the Sphinx build command
-    COMMAND ${CMAKE_COMMAND} -E env MCRL2_SRC_DIR=${CMAKE_SOURCE_DIR} MCRL2_BIN_DIR=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/
+    COMMAND ${CMAKE_COMMAND} -E env CMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR} MCRL2_TOOL_PATH=${MCRL2_TOOL_PATH} MCRL2_TOOLS=${MCRL2_TOOLS} DOXYGEN_EXECUTABLE=${DOXYGEN_EXECUTABLE}
       ${SPHINX_BUILD_CMD}
       -b html 
       -d "${SPHINX_BUILD_TEMP_DIR}/doctrees"
