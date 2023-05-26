@@ -27,7 +27,7 @@ def makepdf(src):
   os.chdir(os.path.dirname(src))
 
   try:
-    title = re.search(r'\\title{(.*?)}', open(src + '.tex').read(), re.DOTALL)
+    title = re.search(r'\\title{(.*?)}', open(src).read(), re.DOTALL)
     title = title.group(1) if title else os.path.basename(src)
     title = ' '.join(title.splitlines())
     if '{' in title or '\\' in title:
@@ -44,30 +44,33 @@ def makepdf(src):
     os.chdir(olddir)
   return title
 
-def generate_library_pdf(texdir: str, rootdir):
+def generate_library_pdf(srcdir: str, dstdir: str):
   '''Search for LaTeX files in texdir, compile them and generate
   an index file called articles.rst.'''  
 
-  log_generating_pdf(texdir)
+  log_generating_pdf(srcdir)
   titles = []
 
-  for f in os.listdir('.'):
-    if f.endswith('.tex'):
-      fn = os.path.splitext(f)[0]
-      
-      # Turns out that sphinx only likes forward slashes
-      titles.append(':download:`{0} <{2}/{1}.pdf>`'.format(makepdf(fn), fn, subdir.replace('\\','/')))
+  # If there is no latex directory then skip
+  if os.path.exists(srcdir):
+    for f in os.listdir(srcdir):
+      texdir = os.path.join(srcdir, f)
 
-  # Write all the titles into the articles
-  open(os.path.join('..', 'articles.rst'), 'w+').write(
-    _ARTICLEINDEXTEMPLATE.substitute(ARTICLES='* ' + '\n* '.join(titles))
-  )
+      if f.endswith('.tex'):      
+        # Turns out that sphinx only likes forward slashes
+        log_nonl('Compiling pdf {}'.format(texdir))
+        titles.append(':download:`{0} <latex/{1}.pdf>`'.format(makepdf(texdir), f))
+
+    # Write all the titles into the articles
+    open(os.path.join(dstdir, 'articles.rst'), 'w+').write(
+      _ARTICLEINDEXTEMPLATE.substitute(ARTICLES='* ' + '\n* '.join(titles))
+    )
 
 def generate_pdfs(): 
-  docdir = os.path.join(_PWD, '..', 'developer_manual')
+  docdir = os.path.join(_PWD, '..', 'developer_manual', 'libraries')
 
   for f in os.listdir(docdir):
-    subdir = os.path.join('libraries', f, 'latex')
-    generate_library_pdf(subdir, docdir)
+    subdir = os.path.join(docdir, f, 'latex')
+    generate_library_pdf(subdir, os.path.join(docdir, f))
 
   log_nonl('compiled LaTeX documents for all libraries')
