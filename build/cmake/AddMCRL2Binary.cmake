@@ -280,6 +280,9 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
             RUNTIME DESTINATION ${MCRL2_RUNTIME_PATH}
             BUNDLE DESTINATION ${MCRL2_BUNDLE_PATH})
     get_target_property(IS_BUNDLE ${TARGET_NAME} MACOSX_BUNDLE)
+    
+    get_property(MCRL2_TOOLS GLOBAL PROPERTY MCRL2_TOOLS)
+    set_property(GLOBAL PROPERTY MCRL2_TOOLS "${MCRL2_TOOLS},${TARGET_NAME}")
   endif()
   
   target_include_directories(${TARGET_NAME} PUBLIC ${ARG_INCLUDEDIR} ${ARG_INCLUDE} )
@@ -318,7 +321,4 @@ function(add_mcrl2_tool TOOLNAME)
     SOURCEDIR "."
     INCLUDEDIR "."
     ${ARGN})
-
-  get_property(MCRL2_TOOLS GLOBAL PROPERTY MCRL2_TOOLS)
-  set_property(GLOBAL PROPERTY MCRL2_TOOLS "${MCRL2_TOOLS},${TOOLNAME}")
 endfunction()
