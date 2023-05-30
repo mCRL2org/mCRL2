@@ -133,8 +133,8 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   void enumerate_sum(pres_expression& result, const data::variable_list& v, const pres_expression& phi)
   {
     assert(&result!=&phi);
-    auto undo = undo_substitution(v);
-    result = false_();
+    atermpp::vector<data::data_expression> undo = undo_substitution(v);
+    result = data::sort_real::real_zero();
     pres_expression phi_;
     derived().apply(phi_, phi);
     E.enumerate(enumerator_element(v, phi_),
@@ -244,7 +244,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
 
 
   // N.B. This function has been added to make this class operate well with the enumerator.
-  pres_expression operator()(const pres_expression& x, MutableSubstitution&)
+  pres_expression operator()(const pres_expression& x, MutableSubstitution& sigma)
   {
     pres_expression result;
     derived().apply(result, x);
@@ -253,7 +253,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
 
   // N.B. This function has been added to make this class operate well with the enumerator.
   //      that employs the "make_rewrite" variant with an explicit result. 
-  void operator()(pres_expression& result, const pres_expression& x, MutableSubstitution&)
+  void operator()(pres_expression& result, const pres_expression& x, MutableSubstitution& )
   {
     derived().apply(result, x);
   }
@@ -269,7 +269,7 @@ struct apply_enumerate_builder: public Builder<apply_enumerate_builder<Builder, 
   apply_enumerate_builder(const DataRewriter& R, MutableSubstitution& sigma, const data::data_specification& dataspec, data::enumerator_identifier_generator& id_generator, bool enumerate_infinite_sorts)
     : super(R, sigma, dataspec, id_generator, enumerate_infinite_sorts)
   {}
-};
+}; 
 
 template <template <class, class, class> class Builder, class DataRewriter, class MutableSubstitution>
 apply_enumerate_builder<Builder, DataRewriter, MutableSubstitution>
@@ -286,6 +286,7 @@ struct enumerate_quantifiers_rewriter
   protected:
     /// \brief A data rewriter
     data::rewriter m_rewriter;
+    // pres_system::data_rewriter m_rewriter;
 
     /// \brief A data specification
     data::data_specification m_dataspec;

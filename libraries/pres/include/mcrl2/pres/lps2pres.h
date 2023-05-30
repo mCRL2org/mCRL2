@@ -43,12 +43,10 @@ class lps2pres_algorithm
       {
         if (unoptimized)
         {
-std::cerr << "RUN1\n";
           detail::E_structured(f, parameters, equations, core::term_traits<pres_expression>());
         }
         else
         {
-std::cerr << "RUN2\n";
           detail::E_structured(f, parameters, equations, core::term_traits_optimized<pres_expression>());
         }
       }
@@ -56,12 +54,10 @@ std::cerr << "RUN2\n";
       {
         if (unoptimized)
         {
-std::cerr << "RUN3\n";
           detail::E(f, parameters, equations, core::term_traits<pres_expression>());
         }
         else
         {
-std::cerr << "RUN4\n";
           detail::E(f, parameters, equations, core::term_traits_optimized<pres_expression>());
         }
       }
@@ -119,12 +115,21 @@ std::cerr << "OBTAINED EQUATIONS AAAAA\n "; for(auto e: equations){ std::cerr <<
       const core::identifier_string& Xf = detail::mu_name(f);
       data::data_expression_list fi = detail::mu_expressions(f);
       data::data_expression_list pi = lpsspec.initial_process().expressions();
+      lps::stochastic_distribution initial_distribution = lpsspec.initial_process().distribution();
       data::data_expression_list e = fi + pi + detail::Par(Xf, data::variable_list(), f);
       if (T != data::undefined_real_variable())
       {
         e.push_front(data::sort_real::real_(0));
       }
       propositional_variable_instantiation init(Xe, e);
+      if (!initial_distribution.variables().empty())
+      {
+        core::identifier_string initial_variable_name("Xinit");
+        equations.push_back(pres_equation(pbes_system::fixpoint_symbol::mu(),
+                                          propositional_variable(initial_variable_name, data::variable_list()),
+                                          sum(initial_distribution.variables(), const_multiply(initial_distribution.distribution(), init))));
+        init = propositional_variable_instantiation(initial_variable_name, data::data_expression_list());
+      }
       pres result(lpsspec.data(), lpsspec.global_variables(), equations, init);
       assert(is_monotonous(result));
       pres_system::algorithms::normalize(result);

@@ -25,6 +25,7 @@ template <typename DataRewriter, typename SubstitutionFunction>
 data::data_expression data_rewrite(const data::data_expression& x, const DataRewriter& R, SubstitutionFunction& sigma)
 {
   mCRL2log(log::debug2) << "data_rewrite " << x << sigma << " -> " << R(x, sigma) << std::endl;
+std::cerr << "data_rewrite " << x << sigma << " -> " << R(x, sigma) << std::endl;
   return R(x, sigma);
 }
 
@@ -32,6 +33,7 @@ template <typename DataRewriter>
 data::data_expression data_rewrite(const data::data_expression& x, const DataRewriter& R, data::no_substitution&)
 {
   mCRL2log(log::debug2) << "data_rewrite " << x << "[]" << " -> " << R(x) << std::endl;
+std::cerr << "data_rewrite " << x << "[]" << " -> " << R(x) << std::endl;
   return R(x);
 }
 
@@ -55,6 +57,14 @@ struct add_data_rewriter: public Builder<Derived>
   {
     return data_rewrite(x, R, sigma);
   }
+
+  template <class T>
+  void apply(T& result, const data::data_expression& x)
+  {
+std::cerr << "IS THIS REWRITER FOUND????  << x << "\n";
+    result = data_rewrite(x, R, sigma);
+  }
+
 };
 
 template <typename Derived, typename DataRewriter, typename SubstitutionFunction>

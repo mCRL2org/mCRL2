@@ -158,7 +158,7 @@ public:
     typename substitution_type::const_iterator i=m_substitution.find(v);
     if (i==m_substitution.end())  // not found.
     {
-    return v;
+      return v;
     }
     // no value assigned to v;
     assert(i->first==v); 

@@ -35,7 +35,7 @@ struct pres_expression_builder_base: public core::builder<Derived>
   void apply(T& result, const data::data_expression& x)
   {
     result = x;
-  }
+  } 
 };
 
 // Adds sort expression traversal to a builder
@@ -968,7 +968,6 @@ struct add_pres_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::pres_expression& x)
   { 
-    
     static_cast<Derived&>(*this).enter(x);
     if (data::is_data_expression(x))
     {

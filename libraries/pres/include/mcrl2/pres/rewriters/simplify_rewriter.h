@@ -231,9 +231,10 @@ struct add_simplify: public Builder<Derived>
   template <class T>
   void apply(T& result, const const_multiply& x)
   {
-    apply(result, x.left());
+    apply(result, static_cast<pres_expression>(x.left()));
     if (data::sort_real::is_zero(result))
     {
+      throw mcrl2::runtime_error("Constant in const_multiply cannot be zero: " + pp(static_cast<pres_expression>(x)) +".");
       return;
     }
     if (data::sort_real::is_one(result))
@@ -243,6 +244,34 @@ struct add_simplify: public Builder<Derived>
     }
     pres_expression result_right;
     apply(result_right, x.right());
+    if (is_true(result_right) || is_false(result_right) || is_eqinf(result_right) || is_eqninf(result_right))
+    {
+      result = result_right;
+      return;
+    }
+    if (is_const_multiply(result_right))
+    {
+      optimized_const_multiply(result, 
+                               data::sort_real::times(atermpp::down_cast<data::data_expression>(result), 
+                                                      atermpp::down_cast<const_multiply>(result_right).left()),
+                               atermpp::down_cast<const_multiply>(result_right).right());
+      return;
+    }
+    if (is_const_multiply_alt(result_right))
+    {
+      optimized_const_multiply(result, 
+                               data::sort_real::times(atermpp::down_cast<data::data_expression>(result), 
+                                                      atermpp::down_cast<const_multiply_alt>(result_right).right()),
+                               atermpp::down_cast<const_multiply_alt>(result_right).left());
+      return;
+    }
+    if (data::is_data_expression(result_right) && atermpp::down_cast<data::data_expression>(result_right).sort()==data::sort_real::real_())
+    {
+      data::sort_real::make_times(atermpp::reference_cast<data::data_expression>(result), 
+                                  atermpp::down_cast<data::data_expression>(result), 
+                                  atermpp::down_cast<data::data_expression>(result_right));
+      return;
+    }
     make_const_multiply(result, result, result_right);
   }
 
@@ -285,25 +314,26 @@ struct add_simplify: public Builder<Derived>
       apply(result, and_(x.arg2(), x.arg3()));
       return;
     }
-    if (data::is_application(result))
+    /* if (data::is_data_application(result))
     {
       const data::application& d=atermpp::down_cast<data::application>(result);
       if (d.sort()==data::sort_real::real_())
       {
-        apply(result, data::less(d, data::sort_real::real_zero()));   // NOTE: arg1() is sometimes ewritten twice.
+        pres_expression aux;
+        apply(aux, static_cast<pres_expression>(data::less(d, data::sort_real::real_zero())));   // NOTE: arg1() is sometimes ewritten twice.
      
-        if (is_true(result))
+        if (is_true(aux))
         {
           apply(result, x.arg3());
           return;
         }
-        if (is_false(result))
+        if (is_false(aux))
         {
           apply(result, and_(x.arg2(), x.arg3()));
           return;
         }
       }
-    }
+    } */
 
     pres_expression result1;
     pres_expression result2;
@@ -327,40 +357,29 @@ struct add_simplify: public Builder<Derived>
       apply(result, x.arg2());
       return;
     }
-    if (data::is_application(result))
+    /* if (data::is_application(result))
     { 
       const data::application& d=atermpp::down_cast<data::application>(result);
       if (d.sort()==data::sort_real::real_())
       { 
-        apply(result, less(data::sort_real::real_zero(), d));   // NOTE: arg1() is sometimes rewritten twice.
+        data::data_expression aux;
+        apply(aux, static_cast<pres_expression>(less(data::sort_real::real_zero(), d)));   // NOTE: arg1() is sometimes rewritten twice.
         
-        if (is_true(result))
+        if (is_true(aux))
         { 
           apply(result, x.arg2());
           return;
         }
-        if (is_false(result))
+        if (is_false(aux))
         { 
           apply(result, or_(x.arg2(), x.arg3()));
           return;
         }
       }
-    }
+    } */
 
-
-    if (is_true(result))
-    {
-      apply(result, or_(x.arg2(), x.arg3()));
-      return;
-    }
-    if (is_false(result)) 
-    {
-      apply(result, x.arg2());
-      return;
-    }
     pres_expression result1;
     pres_expression result2;
-    apply(result, x.arg1());
     apply(result1, x.arg2());
     apply(result2, x.arg3());
     make_condsm(result, result, result1, result2);
@@ -379,6 +398,58 @@ struct add_simplify: public Builder<Derived>
     {
       result = true_();
       return;
+    }
+    if (is_and(result))
+    {  
+       const and_& resulta = atermpp::down_cast<and_>(result);
+       pres_expression t1, t2;
+       make_eqinf(t1, resulta.left());
+       apply(t2, t1);
+       make_eqinf(t1, resulta.right());
+       apply(result, t1);
+       optimized_and(t1, t2, result);
+       result = t1;
+       return;
+    }
+    if (is_or(result))
+    {  
+       const or_& resulta = atermpp::down_cast<or_>(result);
+       pres_expression t1, t2;
+       make_eqinf(t1, resulta.left());
+       apply(t2, t1);
+       make_eqinf(t1, resulta.right());
+       apply(result, t1);
+       optimized_or(t1, t2, result);
+       result = t1;
+       return;
+    }
+    if (is_plus(result))
+    {  
+       const plus& resulta = atermpp::down_cast<plus>(result);
+       pres_expression t1, t2;
+       make_eqinf(t1, resulta.left());
+       apply(t2, t1);
+       make_eqinf(t1, resulta.right());
+       apply(result, t1);
+       optimized_plus(t1, t2, result);
+       result = t1;
+       return;
+    }
+    if (is_const_multiply(result))
+    {  
+       const const_multiply& resulta = atermpp::down_cast<const_multiply>(result);
+       pres_expression t1;
+       make_eqinf(t1, resulta.right());
+       apply(result, t1);
+       return;
+    }
+    if (is_const_multiply_alt(result))
+    {  
+       const const_multiply_alt& resulta = atermpp::down_cast<const_multiply_alt>(result);
+       pres_expression t1;
+       make_eqinf(t1, resulta.left());
+       apply(result, t1);
+       return;
     }
     if (is_eqinf(result))
     {
@@ -410,6 +481,64 @@ struct add_simplify: public Builder<Derived>
       result = true_();
       return;
     }
+    if (is_and(result))
+    {
+       const and_& resulta = atermpp::down_cast<and_>(result);
+       pres_expression t1, t2;
+       make_eqninf(t1, resulta.left());
+       apply(t2, t1);
+       make_eqninf(t1, resulta.right());
+       apply(result, t1);
+       optimized_and(t1, t2, result);
+       result = t1;
+       return;
+    }
+    if (is_or(result))
+    {
+       const or_& resulta = atermpp::down_cast<or_>(result);
+       pres_expression t1, t2;
+       make_eqninf(t1, resulta.left());
+       apply(t2, t1);
+       make_eqninf(t1, resulta.right());
+       apply(result, t1);
+       optimized_or(t1, t2, result);
+       result = t1;
+       return;
+    }
+    if (is_plus(result))
+    {
+       const plus& resulta = atermpp::down_cast<plus>(result);
+       pres_expression t, t1, t2, t3, t4;
+       make_eqninf(t, resulta.left());
+       apply(t1, t);
+       make_eqinf(t, resulta.right());
+       apply(t2, t);
+       make_eqinf(t, resulta.left());
+       apply(t3, t);
+       make_eqninf(t, resulta.right());
+       apply(t4, t);
+       optimized_or(t, t1, t2);
+       optimized_or(t1, t3, t4);
+       optimized_and(result, t, t1);
+       return;
+    }
+    if (is_const_multiply(result))
+    {
+       const const_multiply& resulta = atermpp::down_cast<const_multiply>(result);
+       pres_expression t1;
+       make_eqninf(t1, resulta.right());
+       apply(result, t1);
+       return;
+    }
+    if (is_const_multiply_alt(result))
+    {
+       const const_multiply_alt& resulta = atermpp::down_cast<const_multiply_alt>(result);
+       pres_expression t1;
+       make_eqninf(t1, resulta.left());
+       apply(result, t1);
+       return;
+    }
+
     if (is_eqinf(result))
     {
       return;
@@ -433,12 +562,95 @@ struct simplify_builder: public add_simplify<pres_system::pres_expression_builde
 { };
 
 template <typename Derived, typename DataRewriter, typename SubstitutionFunction>
-struct simplify_data_rewriter_builder : public add_data_rewriter < pres_system::detail::simplify_builder, Derived, DataRewriter, SubstitutionFunction >
+struct simplify_data_rewriter_builder : public mcrl2::pres_system::detail::add_data_rewriter < pres_system::detail::simplify_builder, Derived, DataRewriter, SubstitutionFunction >
 {
   typedef add_data_rewriter < pres_system::detail::simplify_builder, Derived, DataRewriter, SubstitutionFunction > super;
+
+  using super::apply;
+
   simplify_data_rewriter_builder(const DataRewriter& R, SubstitutionFunction& sigma)
     : super(R, sigma)
   {}
+
+  template <class T>
+  void apply(T& result, const condeq& x)
+  {
+    apply(result, x.arg1());  
+    if (is_true(result))
+    {
+      apply(result, x.arg3());
+      return;
+    }
+    if (is_false(result)) 
+    {
+      apply(result, and_(x.arg2(), x.arg3()));
+      return;
+    }
+    if (data::is_data_expression(result))
+    {
+      const data::data_expression& d=atermpp::down_cast<data::data_expression>(result);
+      if (d.sort()==data::sort_real::real_())
+      {
+        pres_expression aux;
+        apply(aux, static_cast<pres_expression>(data::less(d, data::sort_real::real_zero())));   // NOTE: arg1() is sometimes ewritten twice.
+     
+        if (is_true(aux))
+        {
+          apply(result, x.arg3());
+          return;
+        }
+        if (is_false(aux))
+        {
+          apply(result, and_(x.arg2(), x.arg3()));
+          return;
+        }
+      }
+    } 
+
+    pres_expression result1;
+    pres_expression result2;
+    apply(result1, x.arg2());
+    apply(result2, x.arg3());
+    make_condeq(result, result, result1, result2);
+  }
+
+  template <class T>
+  void apply(T& result, const condsm& x)
+  {
+
+    apply(result, x.arg1());   
+    if (is_true(result))
+    {
+      apply(result, or_(x.arg2(), x.arg3()));
+      return;
+    }
+    if (is_false(result))
+    {
+      apply(result, x.arg2());
+      return;
+    }
+    if (data::is_data_expression(result))
+    { 
+      const data::data_expression& d=atermpp::down_cast<data::data_expression>(result);
+      if (d.sort()==data::sort_real::real_())
+      { 
+        pres_expression aux;
+        apply(aux, static_cast<pres_expression>(less(data::sort_real::real_zero(), d)));   // NOTE: arg1() is sometimes rewritten twice.
+        
+        if (is_true(aux))
+        { 
+          apply(result, x.arg2());
+          return;
+        }
+        if (is_false(aux))
+        { 
+          apply(result, or_(x.arg2(), x.arg3()));
+          return;
+        }
+      }
+    } 
+  }
+
 };
 
 } // namespace detail

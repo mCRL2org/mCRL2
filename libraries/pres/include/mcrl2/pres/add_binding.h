@@ -61,6 +61,16 @@ struct add_data_variable_binding: public data::add_data_variable_binding<Builder
     decrease_bind_count(x.variables());
   }
 
+  void enter(sum const& x)
+  {
+    increase_bind_count(x.variables());
+  }
+
+  void leave(sum const& x)
+  {
+    decrease_bind_count(x.variables());
+  }
+
   void enter(const pres& x)
   {
     increase_bind_count(x.global_variables());

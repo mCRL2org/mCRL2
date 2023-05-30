@@ -1793,7 +1793,7 @@ void optimized_eqninf(pres_expression& result, const pres_expression& p)
 /// \param p A pres expression
 /// \return An optimized representation of eqinf(p)
 inline
-void optimized_const_multiply(pres_expression& result, const data::data_expression, const pres_expression& p)
+void optimized_const_multiply(pres_expression& result, const data::data_expression& d, const pres_expression& p)
 {
   if (p==false_())
   {
@@ -1807,7 +1807,7 @@ void optimized_const_multiply(pres_expression& result, const data::data_expressi
     result = p;
     return;
   }
-  make_const_multiply(result, p);
+  make_const_multiply(result, d, p);
 }
 
 /// \brief Make an optimized const_multiply_alt expression
@@ -1815,7 +1815,7 @@ void optimized_const_multiply(pres_expression& result, const data::data_expressi
 /// \param p A pres expression
 /// \return An optimized representation of eqinf(p)
 inline
-void optimized_const_multiply_alt(pres_expression& result, const data::data_expression, const pres_expression& p)
+void optimized_const_multiply_alt(pres_expression& result, const data::data_expression& d, const pres_expression& p)
 {
   if (p==false_())
   {
@@ -1829,7 +1829,7 @@ void optimized_const_multiply_alt(pres_expression& result, const data::data_expr
     result = p;
     return;
   }
-  make_const_multiply_alt(result, p);
+  make_const_multiply_alt(result, d, p);
 }
 
 

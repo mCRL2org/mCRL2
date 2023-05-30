@@ -207,7 +207,21 @@ void push_plus_inside(pres_expression& result, const pres_expression t1, const p
 void push_constant_inside(pres_expression& result, const data::data_expression& constant, const pres_expression& t)
 {
   pres_expression aux;
-  if (is_condsm(t))
+  if (is_true(t))
+  {
+    result=true_();
+  }
+  else if (is_false(t))
+  {
+    result=false_();
+  }
+  else if (data::is_data_expression(t))
+  {
+    data::sort_real::make_times(atermpp::reference_cast<data::data_expression>(result),
+                                constant,
+                                atermpp::down_cast<data::data_expression>(t));
+  }
+  else if (is_condsm(t))
   { 
     push_constant_inside(aux, constant, atermpp::down_cast<condsm>(t).arg2());
     push_constant_inside(result, constant, atermpp::down_cast<condsm>(t).arg3());
@@ -215,9 +229,9 @@ void push_constant_inside(pres_expression& result, const data::data_expression& 
   }
   else if (is_condeq(t))
   {
-    push_constant_inside(aux, constant, atermpp::down_cast<condsm>(t).arg2());
-    push_constant_inside(result, constant, atermpp::down_cast<condsm>(t).arg3());
-    optimized_condeq(result, atermpp::down_cast<condsm>(t).arg1(), aux, result);
+    push_constant_inside(aux, constant, atermpp::down_cast<condeq>(t).arg2());
+    push_constant_inside(result, constant, atermpp::down_cast<condeq>(t).arg3());
+    optimized_condeq(result, atermpp::down_cast<condeq>(t).arg1(), aux, result);
   }
   else if (is_and(t))
   {
@@ -263,7 +277,7 @@ struct linear_fixed_point_equation
 {
   data::data_expression c_j;
   pres_expression f_j;
-  bool linear_term_present=false;    // is true if c_j > 0.
+  bool c_j_term_present=false;    // is true if c_j > 0.
   bool f_j_term_present=false;
   bool eqninf_term_present=false;      // is true if c_j' = 1.
 
@@ -282,13 +296,13 @@ struct linear_fixed_point_equation
 
   void update_c_j(const data::data_expression& t)
   {
-    if (linear_term_present)
+    if (c_j_term_present)
     {
       c_j=data::sort_real::plus(c_j, t);
     }
     else
     {
-      linear_term_present=true;
+      c_j_term_present=true;
       c_j = t;
     }
   }
@@ -297,10 +311,8 @@ struct linear_fixed_point_equation
 // Collect the linear equations for variable v in the current conjunct/disjunct. 
 void collect_line(linear_fixed_point_equation& line, const  propositional_variable& v, const pres_expression& t, const bool minimal_fixed_point)
 {
-std::cerr << "COLLECT LINE " << t << "   " << v <<"\n";
   if (is_plus(t))
   {
-std::cerr << "HIER1\n";
     collect_line(line, v, atermpp::down_cast<plus>(t).left(), minimal_fixed_point);
     collect_line(line, v, atermpp::down_cast<plus>(t).right(), minimal_fixed_point);
   }
@@ -308,12 +320,10 @@ std::cerr << "HIER1\n";
   {
     if (v.name()==atermpp::down_cast<propositional_variable_instantiation>(t).name())
     {
-std::cerr << "HIER2\n";
       line.update_c_j(data::sort_real::real_one());  // Add this inclination for v to all inclinations. 
     }
     else
     {
-std::cerr << "HIER3\n";
       line.update_f_j(t);
     }
   }
@@ -321,14 +331,12 @@ std::cerr << "HIER3\n";
   {
     const const_multiply& tcm = atermpp::down_cast<const_multiply>(t);
     const propositional_variable_instantiation& w = atermpp::down_cast<propositional_variable_instantiation>(tcm.right());
-    if (v==w)
+    if (v.name()==w.name())
     {
-std::cerr << "HIER4\n";
       line.update_c_j(tcm.left());
     }
     else 
     {
-std::cerr << "HIER6\n";
       line.update_f_j(t);
     }
   }
@@ -336,20 +344,17 @@ std::cerr << "HIER6\n";
   {
     const eqninf& te = atermpp::down_cast<eqninf>(t);
     const propositional_variable_instantiation& w = atermpp::down_cast<propositional_variable_instantiation>(te.operand());
-    if (v==w)
+    if (v.name()==w.name())
     {
-std::cerr << "HIER7\n";
       line.eqninf_term_present=true;
     }
     else
     {
-std::cerr << "HIER8\n";
       line.update_f_j(t);
     }
   }
   else if (data::is_data_expression(t))
   {
-std::cerr << "HIER9\n";
     line.update_f_j(t);
   }
   else 
@@ -394,9 +399,8 @@ void collect_m_and_split_lines(const std::vector< linear_fixed_point_equation >&
   m = minimal_fixed_point?data::false_():data::true_();
   for(const linear_fixed_point_equation& eq: lines)
   {
-    if (eq.linear_term_present)
+    if (eq.c_j_term_present)
     {
-std::cerr << "C_J " << eq.c_j << "\n";
       data::data_expression is_shallow=rewriter(data::less(eq.c_j,data::sort_real::real_one()));
       if (data::is_true(is_shallow))
       {
@@ -408,7 +412,6 @@ std::cerr << "C_J " << eq.c_j << "\n";
       }
       else
       {
-std::cerr << "SSSSSS " << (atermpp::aterm)is_shallow << "\n";
         throw runtime_error("It is not possible to determine the steepness of the line in a pres: " + pp(is_shallow) +". Gradient is " + pp(eq.c_j) + ". ");
       }
     }
@@ -417,7 +420,7 @@ std::cerr << "SSSSSS " << (atermpp::aterm)is_shallow << "\n";
       flat_lines.push_back(eq);
     }
 
-    if (eq.f_j_term_present)
+    if (!eq.c_j_term_present)
     {
       if (m_defined)
       {
@@ -533,7 +536,7 @@ pres_expression disjunction_cj_fj(std::vector< linear_fixed_point_equation >& l)
 
 pres_expression conjunction_cj_fj(std::vector< linear_fixed_point_equation >& l)
 {
-  pres_expression result=false_();
+  pres_expression result=true_();
   bool result_defined=false;
   for(const linear_fixed_point_equation& eq: l)
   {
@@ -556,13 +559,33 @@ pres_expression conjunction_cj_fj(std::vector< linear_fixed_point_equation >& l)
 }
 
 
-pres_expression disjunction_fj_cj(std::vector< linear_fixed_point_equation >& l, const pres_expression& U)
+pres_expression disjunction_fj_cj(std::vector< linear_fixed_point_equation >& l, const pres_expression& U, const data::rewriter& rewriter)
 {
   pres_expression result=false_();
   bool result_defined=false;
   for(const linear_fixed_point_equation& eq: l)
   {
-    pres_expression disjunct = plus(eq.f_j, const_multiply(data::sort_real::minus(eq.c_j,data::sort_real::real_one()),U));
+    pres_expression disjunct = false_();
+    assert(eq.c_j_term_present);
+    data::data_expression is_c_j_equal_one = rewriter(data::equal_to(eq.c_j, data::sort_real::real_one()));
+    if (is_true(is_c_j_equal_one))
+    {
+      disjunct = data::sort_real::real_zero();        
+    }
+    else if (is_false(is_c_j_equal_one))
+    {
+      optimized_const_multiply(disjunct, rewriter(data::sort_real::minus(eq.c_j,data::sort_real::real_one())), U);
+    }
+    else
+    {
+      throw runtime_error("Fail to determine whether inclination equals 1 of " + pp(eq.c_j) + "(reason: " + pp(is_c_j_equal_one) + ").");
+    }
+
+    if (eq.f_j_term_present)
+    {
+      optimized_plus(disjunct, eq.f_j, disjunct);
+    } 
+
     if (result_defined)
     {
       result = or_(result, disjunct);
@@ -576,7 +599,7 @@ pres_expression disjunction_fj_cj(std::vector< linear_fixed_point_equation >& l,
   return result;
 }
 
-pres_expression conjunction_fj_cj(std::vector< linear_fixed_point_equation >& l, const pres_expression& U)
+pres_expression conjunction_fj_cj(std::vector< linear_fixed_point_equation >& l, const pres_expression& U, const data::rewriter& rewriter)
 {
   pres_expression result=true_();
   bool result_defined=false;
@@ -584,18 +607,34 @@ pres_expression conjunction_fj_cj(std::vector< linear_fixed_point_equation >& l,
   {
     if (!eq.eqninf_term_present)
     {
-      pres_expression disjunct = const_multiply(data::sort_real::minus(eq.c_j,data::sort_real::real_one()),U);
-      if (eq.f_j_term_present)
-      {
-        disjunct = plus(eq.f_j, disjunct);
+      assert(eq.c_j_term_present);
+      pres_expression conjunct;
+      data::data_expression is_c_j_equal_one = rewriter(data::equal_to(eq.c_j, data::sort_real::real_one()));
+      if (is_true(is_c_j_equal_one))
+      {   
+        conjunct = data::sort_real::real_zero();
       }
-      if (result_defined)
-      {
-        result = and_(result, disjunct);
+      else if (is_false(is_c_j_equal_one))
+      { 
+        optimized_const_multiply(conjunct, rewriter(data::sort_real::minus(eq.c_j,data::sort_real::real_one())), U);
       }
       else
       {
-        result = disjunct;
+        throw runtime_error("Fail to determine whether inclination equals 1 of " + pp(eq.c_j) + "(reason: " + pp(is_c_j_equal_one) + ").");
+      }
+
+
+      if (eq.f_j_term_present)
+      {
+        conjunct = plus(eq.f_j, conjunct);
+      }
+      if (result_defined)
+      {
+        result = and_(result, conjunct);
+      }
+      else
+      {
+        result = conjunct;
         result_defined=true;
       }
     }
@@ -609,7 +648,6 @@ pres_expression solve_fixed_point_inner(const propositional_variable& v,
                                         const bool minimal_fixed_point)
 {
   std::vector< linear_fixed_point_equation > lines; // equations c_j X + c'_j*eqninf(X) + f_j  with 0<c_j<1
-std::cerr << "MAKE SOLUTION " << v << " ---> " << t << "\n";
   /* Here is is assumed that t is a disjunction of terms */
   collect_lines(lines, v, t, minimal_fixed_point);
  
@@ -625,38 +663,30 @@ std::cerr << "MAKE SOLUTION " << v << " ---> " << t << "\n";
   {
     pres_expression U;
     optimized_or(U, m, disjunction_cj_fj(shallow_lines));
-std::cerr << "U MIN " << U << "    " << m << "\n";
-    pres_expression cond1 = disjunction_fj_cj(steep_lines, U);
+    pres_expression cond1 = disjunction_fj_cj(steep_lines, U, rewriter);
     pres_expression cond2 = disjunction_infinity_cj_prime(shallow_lines, steep_lines, flat_lines);
 
     pres_expression eqinf_cond;
     optimized_eqinf(eqinf_cond, conjunction_disjunction_f_j(shallow_lines, steep_lines, flat_lines, false));
-    pres_expression cond0;
-    optimized_eqinf(cond0, eqinf_cond);
     pres_expression eqninf_m;
     optimized_eqninf(eqninf_m, m);
     pres_expression cond4;
     optimized_or(cond4, cond1, cond2);
     pres_expression exp1;
     optimized_condeq(exp1, cond4, U, true_());
-std::cerr << "INNER EXP " << exp1 << "\n";
     pres_expression exp2;
     optimized_condeq(exp2, eqninf_m, false_(), exp1);
-std::cerr << "INNER EXP " << exp2 << "\n";
     pres_expression solution;
-    optimized_condeq(solution, cond0, exp2, true_());
-
-std::cerr << "MINIMAL SOLUTION " << solution << "\n";
-    return solution;
+    optimized_condeq(solution, eqinf_cond, exp2, true_());
+    pres_expression rewritten_solution=simplify_data_rewriter(rewriter)(solution);
+    return rewritten_solution;
   }
   else // Maximal fixed point
   {
     pres_expression U; 
     optimized_and(U, m, conjunction_cj_fj(shallow_lines));
-std::cerr << "U MAX " << U << "    " << m << "\n";
 
-    pres_expression cond1 = conjunction_fj_cj(steep_lines, U);
-std::cerr << "COND1 " << cond1 << "\n";
+    pres_expression cond1 = conjunction_fj_cj(steep_lines, U, rewriter);
 
     pres_expression eqinf_m;
     optimized_eqinf(eqinf_m, m);
@@ -664,14 +694,13 @@ std::cerr << "COND1 " << cond1 << "\n";
     optimized_condsm(cond1_, cond1, false_(), U);
     pres_expression solution;
     optimized_condeq(solution, eqinf_m, cond1_, true_());
-std::cerr << "MAXIMAL SOLUTION " << solution << "\n";
-    return solution;
+    pres_expression rewritten_solution=simplify_data_rewriter(rewriter)(solution);
+    return rewritten_solution;
   }
 }
 
 const pres_expression solve_single_equation(const fixpoint_symbol& f, const propositional_variable& v, const pres_expression& t, const data::rewriter& rewriter)
 {
-  std::cerr << "SOLVE " << f << "   " << v << " = " << t << "\n";
   pres_expression aux;
   if (is_condsm(t) && f==pbes_system::fixpoint_symbol::mu())
   { 
@@ -794,8 +823,6 @@ public:
     apply(aux1, x.left());
     apply(aux2, x.right());
     detail::push_and_inside(result, aux1, aux2, m_conjunctive_normal_form);
-std::cerr << "PUSH AND INSIDE " << result << "\n";
-    
   }
 
   template <class T>
@@ -865,14 +892,12 @@ std::cerr << "PUSH AND INSIDE " << result << "\n";
   template <class T>
   void apply(T& result, const pres_system::eqinf& x)
   {
-std::cerr << "TODO: " << pp(static_cast<pres_expression>(x)) << "\n";
     pres_system::make_eqinf(result, [&](pres_expression& result){ apply(result, x.operand()); });
   }
 
   template <class T>
   void apply(T& result, const pres_system::eqninf& x)
   {
-std::cerr << "TODO: " << pp(static_cast<pres_expression>(x)) << "\n";
     pres_system::make_eqninf(result, [&](pres_expression& result){ apply(result, x.operand()); });
   }
 }; 
@@ -947,8 +972,6 @@ class ressolve_by_gauss_elimination_algorithm
 
       for(std::vector<pres_equation>::reverse_iterator equation_it=res_equations.rbegin(); equation_it!=res_equations.rend(); equation_it++)
       {
-std::cerr << "-------------------------------------------------------------------------------------------------\n";
-std::cerr << "NORMALFORM IN " << *equation_it << "\n";
         if (equation_it->symbol().is_mu())
         {
           conjunctive_normal_form_builder.apply(result, m_R(equation_it->formula()));
@@ -957,7 +980,6 @@ std::cerr << "NORMALFORM IN " << *equation_it << "\n";
         {
           disjunctive_normal_form_builder.apply(result, m_R(equation_it->formula()));
         }
-std::cerr << "NORMALFORM " << result << "\n";
 
         pres_expression solution = detail::solve_single_equation(equation_it->symbol(),
                                                                  equation_it->variable(),
