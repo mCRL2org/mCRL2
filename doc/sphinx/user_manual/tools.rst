@@ -21,12 +21,6 @@ List of the common tools
       tools/release/*
 
 
-.. The non-breaking space below is the only way I manage to let the next header start on a new line.
-.. raw:: html
-
-   &nbsp;
-
-
 List of the experimental tools
 ------------------------------
 
@@ -38,11 +32,6 @@ List of the experimental tools
       :glob:
 
       tools/experimental/*
-
-
-.. raw:: html
-
-   &nbsp;
 
 
 In the source distribution there are more tools such as the deprecated and developer tools.
