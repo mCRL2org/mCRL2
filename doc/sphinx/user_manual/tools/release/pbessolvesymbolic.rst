@@ -3,7 +3,7 @@
 .. _tool-pbessolvesymbolic:
 
 pbessolvesymbolic
-==========
+====================
 
 This is a solving tool for parameterised Boolean equation systems (.pbes
 extension) that is based on a parity game exploration technique that utilises

@@ -46,33 +46,6 @@ div.tool-docs li { float: left; display: inline; width: 20%; }
 div.dparser .admonition-title {
   font-family: monospace;
 }
-/*
-div.mainmenu {
-  background-color: white;
-}
-div.mainmenu ul {
-  display: table;
-  width: 100%;
-  margin: 0 6px;
-  padding: 0;
-  font-family: sans-serif;
-}
-div.mainmenu ul li {
-  float: left;
-  display: inline;
-  padding: 4px;
-  padding-right: 8px;
-}
-div.mainmenu ul li a {
-  color: #104020;
-}
-
-div.mainmenu ul li.search {
-  float: right;
-  padding-top: 0px;
-  padding-bottom: 0px;
-}
-*/
 
 .admonition.platform-specific {
   background-position: top left;
@@ -132,30 +105,6 @@ div.platform-buttons {
 
 .smallcaps {
     font-variant: small-caps;
-}
-
-table.libdoc strong {
-    display: block;
-    background-color: #f0f0f0;
-    padding: 4px;
-    font-family: Trebuchet MS, sans-serif;
-    font-size: x-large;
-    font-weight: normal;
-    border-bottom: 1px solid #406756;
-}
-
-table.libdoc td {
-    border: none;
-    vertical-align: top;
-}
-
-table.libdoc td p {
-    margin: 0px;
-    margin-bottom: -10px;
-}
-
-table.libdoc td p em {
-    padding-left: 20px;
 }
 
 /* -- custom layout ----------------------------------------------------------- */
