@@ -39,7 +39,7 @@ To further guide the effectiveness of the exploration we need some additional
 background information.
 
 Symbolic Exploration
----------------
+-------------------------
 
 The effectiveness of the symbolic representation is mostly determined by the
 size (in the number of nodes shown by `--print-nodesize`) of the symbolic data
