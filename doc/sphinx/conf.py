@@ -18,8 +18,10 @@ import sphinx.errors
 # The ReadTheDocs theme.
 import sphinx_rtd_theme
 
-_MCRL2_SRC_DIR = os.environ['MCRL2_SRC_DIR']
-_MCRL2_BIN_DIR = os.environ['MCRL2_BIN_DIR']
+_CMAKE_SOURCE_DIR = os.environ['CMAKE_SOURCE_DIR']
+_MCRL2_TOOL_PATH = os.environ['MCRL2_TOOL_PATH']
+_MCRL2_TOOLS = os.environ['MCRL2_TOOLS']
+_DOXYGEN_EXECUTABLE = os.environ['DOXYGEN_EXECUTABLE']
 
 # -- Path setup --------------------------------------------------------------
 
@@ -35,12 +37,11 @@ version = ''
 
 # run CMake on the version file to obtain the current version of mCRL2
 from manual import call
-src_path = os.environ['MCRL2_SRC_DIR']
 olddir = os.getcwd()
 try:
-    os.chdir(src_path)
+    os.chdir(_CMAKE_SOURCE_DIR)
     out = call('CMake', ['cmake', '-P',
-        f'{src_path}/build/cmake/MCRL2Version.cmake']).decode('utf-8')
+        f'{_CMAKE_SOURCE_DIR}/build/cmake/MCRL2Version.cmake']).decode('utf-8')
     for line in iter(out.splitlines()):
         matches = re.findall(r'MCRL2_MAJOR_VERSION ([\S]+)', line)
         if matches:
@@ -74,33 +75,6 @@ extensions = [
     'sphinxcontrib.tikz',
     'sphinx_rtd_theme',
 ]
-
-if tags.has('build_doxygen'):
-    extensions.append('breathe')
-    extensions.append('exhale')
-    
-    # First initialize the data structures for breathe and exhale. They are
-    # populated below.
-    breathe_projects = {"mCRL2": "./_doxygen/xml"}
-    breathe_projects_source = {}
-    breathe_default_project = "mCRL2"
-
-    # Common arguments for Exhale
-    exhale_args = {
-        "rootFileTitle": "Unknown",
-        "containmentFolder": "unknown",
-        "rootFileName": "library_root.rst",
-        "createTreeView": True,
-        "exhaleExecutesDoxygen": True,
-        "exhaleDoxygenStdin": textwrap.dedent('''
-    BUILTIN_STL_SUPPORT = YES
-    INPUT = {}/libraries/
-    EXCLUDE_PATTERNS = */test/*
-    EXTRACT_ALL=YES
-    WARN_IF_INCOMPLETE_DOC=NO
-    '''.format(src_path)),
-        "doxygenStripFromPath":  f'{src_path}',
-    }
 
 # Extension configuration for using Tikz pictures in Sphinx documentation
 tikz_latex_preamble = r'''
@@ -153,6 +127,10 @@ today_fmt = '%d-%m-%Y'
 # Suppress warnings about unreferenced citations (there are many on the publications page).
 suppress_warnings = ['ref.citation']
 
+# This should be illegal, but apparently you cannot pass a custom path for the
+# doxygen executable to exhale (which is required for Windows where cmake can
+# find Doxygen without it being in PATH)
+os.environ["PATH"] += os.pathsep + os.path.dirname(_DOXYGEN_EXECUTABLE)
 
 # -- App setup - executed before the build process starts --------------------
 def setup(app):
@@ -165,10 +143,37 @@ def setup(app):
     try:
         os.chdir(temppath)
 
+        if tags.has('build_doxygen'):
+            extensions.append('breathe')
+            extensions.append('exhale')
+            
+            # First initialize the data structures for breathe and exhale. They are
+            # populated below.
+            breathe_projects = {"mCRL2": "./_doxygen/xml"}
+            breathe_projects_source = {}
+            breathe_default_project = "mCRL2"
+
+            # Common arguments for Exhale
+            exhale_args = {
+                "rootFileTitle": "Unknown",
+                "containmentFolder": "unknown",
+                "rootFileName": "library_root.rst",
+                "createTreeView": True,
+                "exhaleExecutesDoxygen": True,
+                "exhaleDoxygenStdin": textwrap.dedent('''
+            BUILTIN_STL_SUPPORT = YES
+            INPUT = {}/libraries/
+            EXCLUDE_PATTERNS = */test/*
+            EXTRACT_ALL=YES
+            WARN_IF_INCOMPLETE_DOC=NO
+            '''.format(_CMAKE_SOURCE_DIR)),
+                "doxygenStripFromPath":  f'{_CMAKE_SOURCE_DIR}',
+            }
+
         if tags.has('build_pdflatex'):
             pdflatex.generate_pdfs()
 
         if tags.has('build_manual'):
-            manual.generate_rst(_MCRL2_SRC_DIR, _MCRL2_BIN_DIR)
+            manual.generate_rst(_CMAKE_SOURCE_DIR, _MCRL2_TOOL_PATH, _MCRL2_TOOLS)
     finally:
         os.chdir(olddir)
