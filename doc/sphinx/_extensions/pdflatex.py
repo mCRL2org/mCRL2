@@ -56,10 +56,12 @@ def generate_library_pdf(srcdir: str, dstdir: str):
     for f in os.listdir(srcdir):
       texdir = os.path.join(srcdir, f)
 
-      if f.endswith('.tex'):      
+      if f.endswith('.tex'):
+        basename = os.path.splitext(f)[0]
+
         # Turns out that sphinx only likes forward slashes
         log_nonl('Compiling pdf {}'.format(texdir))
-        titles.append(':download:`{0} <latex/{1}.pdf>`'.format(makepdf(texdir), f))
+        titles.append(':download:`{0} <latex/{1}.pdf>`'.format(makepdf(texdir), basename))
 
     # Write all the titles into the articles
     open(os.path.join(dstdir, 'articles.rst'), 'w+').write(

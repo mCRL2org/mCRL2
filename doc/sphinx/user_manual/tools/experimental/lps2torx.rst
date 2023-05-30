@@ -1,6 +1,6 @@
 .. index:: lps2torx
 
-.. _tool-besconvert:
+.. _tool-lps2torx:
 
 lps2torx
 ==========
