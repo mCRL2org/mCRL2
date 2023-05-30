@@ -39,10 +39,10 @@ latest release of the toolset.
 Stable releases for Arch Linux are available via the `Arch User Repository <https://aur.archlinux.org/packages/mcrl2/>`_.
 This package is currently maintained by Jorai Rijsdijk.
 
-Download a nightly build of mCRL2
-=================================
+Nightly build
+--------------
 
-Directly installable packages of the mCRL2 toolset are constructed every night.
+Directly installable packages of the mCRL2 toolset are built every night.
 They are available here.
 
    +------------------------+-------------------------+

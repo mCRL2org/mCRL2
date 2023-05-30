@@ -17,11 +17,12 @@ The mCRL2 toolset
           :align: left
           :alt: Modeling and analysis of communicating systems (book)
           :target: https://mitpress.mit.edu/9780262027717/
-     - mCRL2 is a formal specification language with an associated toolset. The
-       toolset can be used for modelling, validation and verification of
-       concurrent systems and protocols. It can be run on Windows, Linux, Apple
-       Mac OS X and FreeBSD.
 
+mCRL2 is a formal specification language with an associated toolset. The
+toolset can be used for modelling, validation and verification of
+concurrent systems and protocols. It can be run on Windows, Linux, Apple
+Mac OS X and FreeBSD.
+       
 The toolset supports a collection of tools for linearisation, simulation,
 state-space exploration and generation and tools to optimise and analyse
 specifications. Moreover, state spaces can be manipulated, visualised and
@@ -98,7 +99,6 @@ the `University of Twente <http://fmt.cs.utwente.nl>`_.
           :align: right
           :width: 75px
           :alt: Verum is the industry leader in reliable software design.
-          :target: https://www.verum.com
 
    mCRL2 is used by the company `Verum <https://www.verum.com>`_ as their verification engine.
    Verum provides model based software development environments for the languages ASD and Dezyne that
