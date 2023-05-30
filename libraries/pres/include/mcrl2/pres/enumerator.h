@@ -1,3 +1,6 @@
+THIS FILE DOES NOT APPEAR TO BE USED AND CAN BE REMOVED. 
+
+
 // Author(s): Jan Friso Groote. Based on pbes/enumerator.h by Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
@@ -19,7 +22,7 @@ namespace mcrl2 {
 
 namespace pres_system {
 
-struct is_not_false
+/* struct is_not_false
 {
   bool operator()(const pres_expression& x) const
   {
@@ -33,7 +36,7 @@ struct is_not_true
   {
     return !is_true(x);
   }
-};
+}; */
 
 } // namespace pres_system
 

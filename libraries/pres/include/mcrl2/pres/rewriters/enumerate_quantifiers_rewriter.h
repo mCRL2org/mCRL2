@@ -16,7 +16,8 @@
 #include "mcrl2/atermpp/standard_containers/vector.h"
 #include "mcrl2/data/detail/split_finite_variables.h"
 #include "mcrl2/data/real_utilities.h"
-#include "mcrl2/pres/enumerator.h"
+#include "mcrl2/data/enumerator.h"
+// #include "mcrl2/pres/enumerator.h"
 #include "mcrl2/pres/rewriters/simplify_rewriter.h"
 
 namespace mcrl2 {

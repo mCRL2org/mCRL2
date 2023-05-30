@@ -670,6 +670,7 @@ pres_expression solve_fixed_point_inner(const propositional_variable& v,
     optimized_eqinf(eqinf_cond, conjunction_disjunction_f_j(shallow_lines, steep_lines, flat_lines, false));
     pres_expression eqninf_m;
     optimized_eqninf(eqninf_m, m);
+// std::cerr << "OPTIMIZED EQNINF " << eqninf_m << "      " << m << "\n";
     pres_expression cond4;
     optimized_or(cond4, cond1, cond2);
     pres_expression exp1;
@@ -715,7 +716,6 @@ const pres_expression solve_single_equation(const fixpoint_symbol& f, const prop
     pres_expression new_condition;
     substitute_pres_equation_builder variable_substituter(v, solution_arg2);
     variable_substituter.apply(new_condition, tc.arg1());
-    
     return condsm(new_condition, solution_arg2, solution_arg2_or_arg3);
   }
   else if (is_condsm(t) && f==pbes_system::fixpoint_symbol::nu())
@@ -847,10 +847,12 @@ public:
   template <class T>
   void apply(T& result, const pres_system::plus& x)
   {
+// std::cerr << "NF PLUS " << static_cast<pres_expression>(x) << "\n";
     pres_expression aux1, aux2;
     apply(aux1, x.left());
     apply(aux2, x.right());
     detail::push_plus_inside(result, aux1, aux2, m_conjunctive_normal_form);
+// std::cerr << "NF PLUS " << static_cast<pres_expression>(x) << " ---> " << result << "\n";
   }
 
   template <class T>
@@ -974,7 +976,10 @@ class ressolve_by_gauss_elimination_algorithm
       {
         if (equation_it->symbol().is_mu())
         {
+// std::cerr << "IN1 " << equation_it->formula() << "\n";
+// std::cerr << "IN2 " << m_R(equation_it->formula()) << "\n";
           conjunctive_normal_form_builder.apply(result, m_R(equation_it->formula()));
+// std::cerr << "OUT " << result << "\n";
         }
         else
         {
@@ -985,7 +990,10 @@ class ressolve_by_gauss_elimination_algorithm
                                                                  equation_it->variable(),
                                                                  result,
                                                                  m_datar);
+        mCRL2log(log::debug) << "Solving    " << equation_it->symbol() << " " << equation_it->variable() << " = " << equation_it->formula() << "\n";
+        mCRL2log(log::debug) << "Norm. Form " << equation_it->symbol() << " " << equation_it->variable() << " = " << result << "\n";  
         equation_it->formula() = solution;
+        mCRL2log(log::debug) << "Solution   " << equation_it->symbol() << " " << equation_it->variable() << " = " << equation_it->formula() << "\n";
 
         substitute_pres_equation_builder substitute_pres_equation(equation_it->variable(), solution);
        
