@@ -153,4 +153,3 @@ the `University of Twente <http://fmt.cs.utwente.nl>`_.
    /developer_manual/code_generation
    /developer_manual/performance
    /developer_manual/packaging
-   /developer_manual/cronjobs

@@ -3,7 +3,7 @@
 .. _tool-pbes2booldeprecated:
 
 pbes2booldeprecated
-=========
+=====================
 
 Generation of a BES
 -------------------

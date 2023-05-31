@@ -1,3 +1,5 @@
+.. _build-testing:
+
 ================================
 Toolset tests
 ================================
@@ -20,9 +22,9 @@ the :file:`tests/regression/` directory and use a similar setup as random
 testing.
 
 All tests are set up such that they can be executed locally by using ctest. For
-example, by executing :option:`ctest -j8` in the build directory we can run all
+example, by executing `ctest -j8` in the build directory we can run all
 test on eight cores. This can take more than an hour to complete. Furthermore,
-using the :option:`-R` option we can only execute tests that contain
+using the `-R` option we can only execute tests that contain
 the given string in their name.
 
 Random Testing

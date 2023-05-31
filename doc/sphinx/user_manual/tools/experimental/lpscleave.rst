@@ -32,7 +32,7 @@ conditions into individual clauses. The `--merge-heuristic` option is useful,
 but generally quite expensive to compute.
 
 Compositional Minimisation
------------
+----------------------------
 
 The general approach for `compositional minimisation` is the following. First ,we
 generate both state spaces::
