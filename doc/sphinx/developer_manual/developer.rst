@@ -48,6 +48,9 @@ Data
 GUI
 =====
 
+.. toctree::
+   :maxdepth: 1
+   
    libraries/gui/gui_library
 
 .. include:: libraries/gui/articles.rst
