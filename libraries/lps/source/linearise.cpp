@@ -980,12 +980,12 @@ class specification_basic_type
         {
           throw mcrl2::runtime_error("Stochastic operator occurs within a multi-action in " + process::pp(body) +".");
         }
-        const processstatustype s1=determine_process_statusterm(sto.operand(),mCRL);
-        /*if (s1==mCRL)
+        const processstatustype s1=determine_process_statusterm(sto.operand(),pCRL);
+        if (s1==mCRL)
         {
           throw mcrl2::runtime_error("An operator ||, allow, hide, rename, or comm occurs in the scope of the stochastic operator in " + process::pp(body) + ". "
                                      + "The lineariser cannot handle such processes. ");
-        }*/
+        }
         return s1;
       }
 
