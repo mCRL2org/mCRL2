@@ -71,7 +71,7 @@ def generate_tool_documentation(srcpath, dstpath, binpath, tools):
         open(usr_rst, 'w+').write('.. index:: {0}\n\n.. _tool-{0}:\n\n{0}\n{1}\n\n.. include:: man/{0}.rst\n'.format(tool, '='*len(tool)))
 
     else:
-      _LOG.warning('No documentation generated for {0}'.format(tool))
+      _LOG.warning('No documentation generated for {0} since it is not part of the build configuration'.format(tool))
 
 
 def generate_rst(srcpath, binpath, tools):
