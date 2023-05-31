@@ -142,7 +142,7 @@ breathe_default_project = "mCRL2"
 exhale_args = {
     "rootFileTitle": "mCRL2",
     "containmentFolder": "mcrl2",
-    "rootFileName": "mcrl2_root.rst",
+    "rootFileName": "mCRL2.rst",
     "verboseBuild": False,
     "createTreeView": True,
     "exhaleExecutesDoxygen": True,

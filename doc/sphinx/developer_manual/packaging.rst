@@ -12,9 +12,9 @@ bugfix number. ``B = 0`` for the planned (initial) release of a version.
 For an official release, the tools will show the version ``YYYYMM.B``,
 development versions will show all three fields. This enables quick
 identification of the version you are dealing with by inspecting the output of
-:option:`--version`. When the toolset is built from a Git clone with
+`--version`. When the toolset is built from a Git clone with
 modified sources, the commit hash is appended with ``M``, such that the
-:option:`--version` output shows that the checkout was not clean.
+`--version` output shows that the checkout was not clean.
 
 Version numbers are computed in :file:`scripts/MCRL2Version.cmake`. This is the
 *only* place where the main version (``YYYYMM.B``) can be defined. The rest of
