@@ -1,6 +1,7 @@
 import string
 import os
 import re
+import posixpath
 
 from manual import call
 from sphinx.util import logging
@@ -45,8 +46,8 @@ def makepdf(src):
   return title
 
 def generate_library_pdf(srcdir: str, dstdir: str):
-  '''Search for LaTeX files in texdir, compile them and generate
-  an index file called articles.rst.'''  
+  '''Search for LaTeX files in srcdir, compile them and generate
+  an index file called articles.rst in dstdir.'''  
 
   log_generating_pdf(srcdir)
   titles = []
@@ -59,11 +60,15 @@ def generate_library_pdf(srcdir: str, dstdir: str):
       if f.endswith('.tex'):
         basename = os.path.splitext(f)[0]
 
+        # Here we have to do some stupid path processing since sphinx take relatives paths from where the file is included (nice compositionality).
+        # Also paths should be forward slashes (backward slashes get removed)
+        path = os.path.relpath(os.path.join(srcdir, basename), os.path.join(_PWD, '..'))
+
         # Turns out that sphinx only likes forward slashes
         log_nonl('Compiling pdf {}'.format(texdir))
-        titles.append(':download:`{0} <latex/{1}.pdf>`'.format(makepdf(texdir), basename))
+        titles.append(':download:`{0} </{1}.pdf>`'.format(makepdf(texdir), path.replace('\\', '/')))
 
-    # Write all the titles into the articles
+    # Write all the titles into the articles.rst
     open(os.path.join(dstdir, 'articles.rst'), 'w+').write(
       _ARTICLEINDEXTEMPLATE.substitute(ARTICLES='* ' + '\n* '.join(titles))
     )
