@@ -76,12 +76,18 @@ struct add_simplify: public Builder<Derived>
     {
       return;
     }
-    if (data::is_data_expression(result) && data::is_data_expression(right))
+    if (data::is_data_expression(result) && 
+        data::is_data_expression(right))
     {
-      right = data::sort_real::minimum(atermpp::down_cast<data::data_expression>(result),
-                                       atermpp::down_cast<data::data_expression>(right));
-      apply(result, right);
-      return;
+      const data::data_expression& resulta = atermpp::down_cast<data::data_expression>(result);
+      const data::data_expression& righta = atermpp::down_cast<data::data_expression>(right);
+      if (resulta.sort() == data::sort_real::real_() &&
+          righta.sort() == data::sort_real::real_())
+      {
+        right = data::sort_real::minimum(resulta, righta);
+        apply(result, right);
+        return;
+      }
     }
     make_and_(result,result, right);
   }
@@ -114,10 +120,15 @@ struct add_simplify: public Builder<Derived>
     }
     if (data::is_data_expression(result) && data::is_data_expression(right))
     {
-      right = data::sort_real::maximum(atermpp::down_cast<data::data_expression>(result),
-                                       atermpp::down_cast<data::data_expression>(right));
-      apply(result, right);
-      return;
+      const data::data_expression& resulta = atermpp::down_cast<data::data_expression>(result);
+      const data::data_expression& righta = atermpp::down_cast<data::data_expression>(right);
+      if (resulta.sort() == data::sort_real::real_() &&
+          righta.sort() == data::sort_real::real_())
+      {
+        right = data::sort_real::maximum(resulta, righta);
+        apply(result, right);
+        return;
+      }
     }
     make_or_(result,result, right);
   }
@@ -125,19 +136,16 @@ struct add_simplify: public Builder<Derived>
   template <class T>
   void apply(T& result, const plus& x)
   {
-// std::cerr << "SIMPLIFY REWR PLUS " << static_cast<pres_expression>(x) << "\n";
     assert(&result!=&x);  // Result is used as temporary store and cannot match x. 
     apply(result, x.left());
     if (is_true(result))
     {
       result = true_();
-// std::cerr << "SIMPLIFY REWR PLUS3 " << static_cast<pres_expression>(x) << " --> " << result << "\n";
       return;
     }
     if (data::sort_real::is_zero(result))
     {
       apply(result, x.right());
-// std::cerr << "SIMPLIFY REWR PLUS4 " << static_cast<pres_expression>(x) << " --> " << result << "\n";
       return;
     }
     pres_expression right;
@@ -145,30 +153,31 @@ struct add_simplify: public Builder<Derived>
     if (is_true(right))
     {
       result = true_();
-// std::cerr << "SIMPLIFY REWR PLUS5 " << static_cast<pres_expression>(x) << " --> " << result << "\n";
       return;
     }
     if (is_false(right))
     {
       result=right;
-// std::cerr << "SIMPLIFY REWR PLUS6 " << static_cast<pres_expression>(x) << " --> " << result << "\n";
       return;
     }
     if (is_false(result) || data::sort_real::is_zero(right))
     {
-// std::cerr << "SIMPLIFY REWR PLUS7 " << static_cast<pres_expression>(x) << " --> " << result << "\n";
       return;
     }
     if (data::is_data_expression(result) && data::is_data_expression(right))
     {
-      right = data::sort_real::plus(atermpp::down_cast<data::data_expression>(result), 
-                                    atermpp::down_cast<data::data_expression>(right));
-      apply(result, right);
-// std::cerr << "SIMPLIFY REWR PLUS8 " << static_cast<pres_expression>(x) << " --> " << result << "\n";
-      return;
+      const data::data_expression& resulta = atermpp::down_cast<data::data_expression>(result);
+      const data::data_expression& righta = atermpp::down_cast<data::data_expression>(right);
+      if (resulta.sort() == data::sort_real::real_() &&
+          righta.sort() == data::sort_real::real_())
+
+      {
+        right = data::sort_real::plus(resulta, righta);
+        apply(result, right);
+        return;
+      }
     }
     make_plus(result, result, right);
-// std::cerr << "SIMPLIFY REWR PLUS9 " << static_cast<pres_expression>(x) << " --> " << result << "\n";
     
   }
 
@@ -245,7 +254,6 @@ struct add_simplify: public Builder<Derived>
       apply(result, const_multiply(data::sort_real::times(x.left(),
                                                           atermpp::down_cast<const_multiply>(result).left()),
                                    atermpp::down_cast<const_multiply>(result).right()));
-// std::cerr << "CONST MULTIPLY1  " << pres_expression(x) << " --->    " << result << "\n";
       return;
     }
     if (is_const_multiply_alt(result))
@@ -253,29 +261,24 @@ struct add_simplify: public Builder<Derived>
       apply(result, const_multiply(data::sort_real::times(x.left(),
                                                           atermpp::down_cast<const_multiply_alt>(result).right()),
                                atermpp::down_cast<const_multiply_alt>(result).left()));
-// std::cerr << "CONST MULTIPLY2  " << pres_expression(x) << " --->    " << result << "\n";
       return;
     }
     if (data::is_data_expression(result) && atermpp::down_cast<data::data_expression>(result).sort()==data::sort_real::real_())
     {
       apply(result, data::sort_real::times(x.left(),
                                            atermpp::down_cast<data::data_expression>(result)));
-// std::cerr << "CONST MULTIPLY3  " << pres_expression(x) << " --->    " << result << "\n";
       return;
     }
     pres_expression result_lhs;
     apply(result_lhs, static_cast<pres_expression>(x.left()));
-// std::cerr << "RESULT LHS " << result_lhs << "\n";
     if (data::sort_real::is_one(result_lhs))
     {
       apply(result, x.right());
-// std::cerr << "CONST MULTIPLY4  " << pres_expression(x) << " --->    " << result << "\n";
       return;
     }
     if (data::sort_real::is_zero(result_lhs))
     {
       result = result_lhs;
-// std::cerr << "CONST MULTIPLY4A  " << pres_expression(x) << " --->    " << result << "\n";
       return;
     }
     data::data_expression inequality;
@@ -285,12 +288,10 @@ struct add_simplify: public Builder<Derived>
       if (is_true(result) || is_false(result) || is_eqinf(result) || is_eqninf(result))
       {
         // return result.
-// std::cerr << "CONST MULTIPLY5  " << pres_expression(x) << " --->    " << result << "\n";
         return;
       }
     }
     make_const_multiply(result, result_lhs, result);
-// std::cerr << "CONST MULTIPLY6  " << pres_expression(x) << " --->    " << result << "\n";
   }
 
   template <class T>
@@ -488,18 +489,15 @@ struct add_simplify: public Builder<Derived>
   template <class T>
   void apply(T& result, const eqninf& x)
   {
-// std::cerr << "SIMPLIFY REWRITE EQNINF " <<  static_cast<pres_expression>(x) << "\n";
     apply(result, x.operand());
     if (is_true(result))
     {
       result = true_();
-// std::cerr << "SIMPLIFY REWRITE EQNINFA " <<  static_cast<pres_expression>(x) << "  ----> " << result << "\n";
       return;
     }
     if (is_false(result))
     {
       result = true_();
-// std::cerr << "SIMPLIFY REWRITE EQNINF9 " <<  static_cast<pres_expression>(x) << "  ----> " << result << "\n";
       return;
     }
     if (is_and(result))
@@ -512,7 +510,6 @@ struct add_simplify: public Builder<Derived>
        apply(result, t1);
        optimized_and(t1, t2, result);
        result = t1;
-// std::cerr << "SIMPLIFY REWRITE EQNINF8 " <<  static_cast<pres_expression>(x) << "  ----> " << result << "\n";
        return;
     }
     if (is_or(result))
@@ -525,7 +522,6 @@ struct add_simplify: public Builder<Derived>
        apply(result, t1);
        optimized_or(t1, t2, result);
        result = t1;
-// std::cerr << "SIMPLIFY REWRITE EQNINF7 " <<  static_cast<pres_expression>(x) << "  ----> " << result << "\n";
        return;
     }
     if (is_plus(result))
@@ -543,7 +539,6 @@ struct add_simplify: public Builder<Derived>
        optimized_or(t, t1, t2);
        optimized_or(t1, t3, t4);
        optimized_and(result, t, t1);
-// std::cerr << "SIMPLIFY REWRITE EQNINF6 " <<  static_cast<pres_expression>(x) << "  ----> " << result << "\n";
        return;
     }
     if (is_const_multiply(result))
@@ -552,7 +547,6 @@ struct add_simplify: public Builder<Derived>
        pres_expression t1;
        make_eqninf(t1, resulta.right());
        apply(result, t1);
-// std::cerr << "SIMPLIFY REWRITE EQNINF5 " <<  static_cast<pres_expression>(x) << "  ----> " << result << "\n";
        return;
     }
     if (is_const_multiply_alt(result))
@@ -561,28 +555,23 @@ struct add_simplify: public Builder<Derived>
        pres_expression t1;
        make_eqninf(t1, resulta.left());
        apply(result, t1);
-// std::cerr << "SIMPLIFY REWRITE EQNINF4 " <<  static_cast<pres_expression>(x) << "  ----> " << result << "\n";
        return;
     }
 
     if (is_eqinf(result))
     {
-// std::cerr << "SIMPLIFY REWRITE EQNINF3 " <<  static_cast<pres_expression>(x) << "  ----> " << result << "\n";
       return;
     }
     if (is_eqninf(result))
     {
-// std::cerr << "SIMPLIFY REWRITE EQNINF2 " <<  static_cast<pres_expression>(x) << "  ----> " << result << "\n";
       return;
     }
     if (data::is_application(result) && atermpp::down_cast<data::application>(result).sort()==data::sort_real::real_())
     {
       result = true_();
-// std::cerr << "SIMPLIFY REWRITE EQNINF1 " <<  static_cast<pres_expression>(x) << "  ----> " << result << "\n";
       return;
     }
     make_eqninf(result, result);
-// std::cerr << "SIMPLIFY REWRITE EQNINF0 " <<  static_cast<pres_expression>(x) << "  ----> " << result << "\n";
   }
 
 };
