@@ -61,7 +61,6 @@ struct add_data_rewriter: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::data_expression& x)
   {
-std::cerr << "IS THIS REWRITER FOUND????  << x << "\n";
     result = data_rewrite(x, R, sigma);
   }
 
