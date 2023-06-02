@@ -146,7 +146,8 @@ the `University of Twente <http://fmt.cs.utwente.nl>`_.
    /developer_manual/contributing
    /developer_manual/build_instructions/index
    /developer_manual/guidelines
-   /developer_manual/code_reference
+   /developer_manual/library_documentation
+   /exhale/mcrl2_reference
 
    /developer_manual/testing
    /developer_manual/performance
