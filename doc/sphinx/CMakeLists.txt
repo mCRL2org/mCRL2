@@ -33,15 +33,6 @@ if(MCRL2_ENABLE_DOC_DOXYGEN)
     COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/doc/Doxyfile
     VERBATIM
     USES_TERMINAL)
-
-  # Configure the breathe.apidoc command
-  add_custom_target(apidoc
-    COMMENT "Extracting source code documentation using Doxygen"
-    COMMAND ${PYTHON_EXECUTABLE} -m breathe.apidoc -o ${CMAKE_BINARY_DIR}/sphinx/source/_doxygen/apidoc/ ${CMAKE_BINARY_DIR}/sphinx/source/_doxygen/xml/
-    VERBATIM
-    USES_TERMINAL)
-
-  add_dependencies(apidoc doxygen)
 endif()
 
 # Get the list of tools that are built by the current configuration
@@ -86,7 +77,7 @@ function(add_build_doc_target NAME DESC INCLUDE_CLEAN)
   )
 
   if (MCRL2_ENABLE_DOC_DOXYGEN)
-    add_dependencies(${NAME} apidoc)
+    add_dependencies(${NAME} doxygen)
   endif()
 
   if (INCLUDE_CLEAN)

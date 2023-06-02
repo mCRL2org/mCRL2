@@ -184,7 +184,8 @@ When committing changes, the following guidelines should be adhered to:
     
 
 Documentation guidelines
-========================
+------------------------
+
 This page describes the documentation guidelines for tools and libraries.
 
 Tools
