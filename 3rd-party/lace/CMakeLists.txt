@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.16)
-
 project(lace
     VERSION 1.3.1
     DESCRIPTION "Lace, a work-stealing framework for multi-core fork-join parallelism"
@@ -26,23 +24,16 @@ if(LACE_USE_MMAP)
 endif()
 
 add_library(lace STATIC)
-add_library(lace14 STATIC)
 add_library(lace::lace ALIAS lace)
-add_library(lace::lace14 ALIAS lace14)
 
 target_sources(lace PRIVATE src/lace.c PUBLIC src/lace.h)
-target_sources(lace14 PRIVATE src/lace14.c PUBLIC src/lace14.h)
 target_include_directories(lace PUBLIC ${CMAKE_CURRENT_LIST_DIR}/src ${CMAKE_CURRENT_BINARY_DIR})
-target_include_directories(lace14 PUBLIC ${CMAKE_CURRENT_LIST_DIR}/src ${CMAKE_CURRENT_BINARY_DIR})
 target_compile_features(lace PRIVATE c_std_11)
-target_compile_features(lace14 PRIVATE c_std_11)
 target_link_libraries(lace PUBLIC pthread)
-target_link_libraries(lace14 PUBLIC pthread)
 
 if(LACE_USE_HWLOC)
     find_package(Hwloc REQUIRED)
     target_link_libraries(lace PUBLIC ${HWLOC_LIBRARIES})
-    target_link_libraries(lace14 PUBLIC ${HWLOC_LIBRARIES})
 endif()
 
 configure_file(src/lace_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/lace_config.h)
