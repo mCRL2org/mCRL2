@@ -121,11 +121,11 @@ the `University of Twente <http://fmt.cs.utwente.nl>`_.
    :maxdepth: 2
    :hidden:
 
-   /introduction
-   /download
-   /support
-   /publications
-   /showcases
+   /home/introduction
+   /home/download
+   /home/support
+   /home/publications
+   /home/showcases
 
 .. toctree::
    :caption: Using mCRL2
