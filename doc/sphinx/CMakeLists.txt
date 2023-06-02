@@ -22,7 +22,7 @@ add_custom_target(cleandoc
 if(MCRL2_ENABLE_DOC_DOXYGEN)
   # Replace variables inside @@ with the current values
   set(DOXYGEN_OUTPUT_PATH ${CMAKE_BINARY_DIR}/sphinx/source/_doxygen/)
-  set(DOXYGEN_INPUT_PATH ${CMAKE_SOURCE_DIR}/libraries/atermpp/)
+  set(DOXYGEN_INPUT_PATH ${CMAKE_SOURCE_DIR}/libraries/)
 
   configure_file(${CMAKE_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_BINARY_DIR}/doc/Doxyfile @ONLY)
 
@@ -30,6 +30,9 @@ if(MCRL2_ENABLE_DOC_DOXYGEN)
   add_custom_target(doxygen
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/libraries/
     COMMENT "Extracting source code documentation using Doxygen"
+    # ensure the build directory exists, because Doxygen does not create it
+    # automatically
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${DOXYGEN_OUTPUT_PATH}
     COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/doc/Doxyfile
     VERBATIM
     USES_TERMINAL)
@@ -82,6 +85,8 @@ function(add_build_doc_target NAME DESC INCLUDE_CLEAN)
 
   if (INCLUDE_CLEAN)
     add_dependencies(${NAME} cleandoc)
+    # Ensure that cleandoc is executed before doxygen is ran
+    add_dependencies(doxygen cleandoc)
   endif()
 endfunction()
 
