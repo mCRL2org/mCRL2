@@ -146,13 +146,16 @@ the `University of Twente <http://fmt.cs.utwente.nl>`_.
    /developer_manual/contributing
    /developer_manual/build_instructions/index
    /developer_manual/guidelines
-   /developer_manual/library_documentation
    /developer_manual/code_reference
-   /developer_manual/code_generation
 
    /developer_manual/testing
    /developer_manual/performance
 
-   /developer_manual/teamcity_testing
+.. toctree::
+   :caption: Maintainers
+   :maxdepth: 2
+   :hidden:
+
    /developer_manual/git_workflow
+   /developer_manual/teamcity_testing
    /developer_manual/packaging
