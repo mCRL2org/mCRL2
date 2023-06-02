@@ -19,6 +19,31 @@ add_custom_target(cleandoc
   VERBATIM
 )
 
+if(MCRL2_ENABLE_DOC_DOXYGEN)
+  # Replace variables inside @@ with the current values
+  set(DOXYGEN_OUTPUT_PATH ${CMAKE_BINARY_DIR}/sphinx/source/_doxygen/)
+  set(DOXYGEN_INPUT_PATH ${CMAKE_SOURCE_DIR}/libraries/atermpp/)
+
+  configure_file(${CMAKE_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_BINARY_DIR}/doc/Doxyfile @ONLY)
+
+  # Configure the doxygen command
+  add_custom_target(doxygen
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/libraries/
+    COMMENT "Extracting source code documentation using Doxygen"
+    COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/doc/Doxyfile
+    VERBATIM
+    USES_TERMINAL)
+
+  # Configure the breathe.apidoc command
+  add_custom_target(apidoc
+    COMMENT "Extracting source code documentation using Doxygen"
+    COMMAND ${PYTHON_EXECUTABLE} -m breathe.apidoc -o ${CMAKE_BINARY_DIR}/sphinx/source/_doxygen/apidoc/ ${CMAKE_BINARY_DIR}/sphinx/source/_doxygen/xml/
+    VERBATIM
+    USES_TERMINAL)
+
+  add_dependencies(apidoc doxygen)
+endif()
+
 # Get the list of tools that are built by the current configuration
 get_property(MCRL2_TOOLS GLOBAL PROPERTY MCRL2_TOOLS)
 
@@ -59,6 +84,10 @@ function(add_build_doc_target NAME DESC INCLUDE_CLEAN)
     VERBATIM
     USES_TERMINAL
   )
+
+  if (MCRL2_ENABLE_DOC_DOXYGEN)
+    add_dependencies(${NAME} apidoc)
+  endif()
 
   if (INCLUDE_CLEAN)
     add_dependencies(${NAME} cleandoc)
