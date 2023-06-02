@@ -132,7 +132,7 @@ exhale_args = {
     "rootFileName":          "mcrl2_reference.rst",
     "doxygenStripFromPath":  "..",
     # Heavily encouraged optional argument (see docs)
-    "rootFileTitle":         "mCRL2 Library",
+    "rootFileTitle":         "Source code reference",
     # Suggested optional arguments
     "createTreeView":        True,
     "exhaleExecutesDoxygen": False,
