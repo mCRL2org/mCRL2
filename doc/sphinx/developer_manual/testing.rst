@@ -1,8 +1,42 @@
 .. _build-testing:
 
-================================
-Toolset tests
-================================
+Testing
+=======
+
+For tests can be run the python packages yaml and psutil need to be installed. 
+
+* This can be done using pip as follows:
+
+   pip install pyyaml psutil
+
+Before executing tests, make sure that your build has been configured
+with the value of ``MCRL2_ENABLE_TESTS`` set to ``YES`` and that
+the toolset has been compiled.
+
+To conduct the tests specified in the build tree execute::
+
+  ctest
+
+Specific tests can be run by using ``ctest``. Below some examples are given. 
+
+* To displays the list of tests, without running them, execute::
+
+    ctest -N .
+
+* To execute the 2nd up until the 5th test targets, execute::
+
+    ctest -I2,5 .
+
+* To execute tests targets that match the description "FOO", execute::
+
+    ctest -R FOO .
+
+For additional help, run::
+
+  ctest --help
+
+Regression tests
+------------------
 
 The toolset contains several types of regression tests. These tests are
 automatically executed on a continuous integration service to maintain the

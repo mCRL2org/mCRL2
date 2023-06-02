@@ -26,7 +26,7 @@ The TeamCity build system runs on 4 different machines:
 - ``mcrl2build1`` (Ubuntu Linux)
 - ``mcrl2build2`` (Ubuntu Linux)
 - ``mcrl2build3`` (Mac OS X, Mac Mini)
-- ``mcrl2build4`` (Ubuntu Linux)
+- ``mcrl2build5`` (Ubuntu Linux)
   
 On ``mcrl2build3``, we only run MacOSX and the corresponding builds.
 On each of the other machines, a number of virtual machines is run
@@ -39,9 +39,8 @@ here (http://www.howtogeek.com/howto/40702/how-to-manage-and-use-lvm-logical-vol
 The main system running the TeamCity server is ``mcrl2build1``.
 On all systems and virtual machines a TeamCity agent is run.
 
-==============================
 TeamCity project configuration
-==============================
+------------------------------
 
 In TeamCity, build configurations are contained in projects. Projects can contain other projects in a tree-like structure.
 Projects and build configurations inherit configuration from their parent projects.

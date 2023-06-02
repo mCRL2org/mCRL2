@@ -135,9 +135,8 @@ the `University of Twente <http://fmt.cs.utwente.nl>`_.
 
    /user_manual/tutorial/tutorial
    /user_manual/language_reference/index
-   /user_manual/tools
-   /user_manual/build_instructions/index
-   /user_manual/articles/*
+   /user_manual/tools/tools
+   /user_manual/fundamentals/index
 
 .. toctree::
    :caption: Development
@@ -145,11 +144,15 @@ the `University of Twente <http://fmt.cs.utwente.nl>`_.
    :hidden:
 
    /developer_manual/contributing
-   /developer_manual/developer
-   /developer_manual/repository
-   /developer_manual/teamcity_testing
-   /developer_manual/testing
+   /developer_manual/build_instructions/index
    /developer_manual/guidelines
+   /developer_manual/library_documentation
+   /developer_manual/code_reference
    /developer_manual/code_generation
+
+   /developer_manual/testing
    /developer_manual/performance
+
+   /developer_manual/teamcity_testing
+   /developer_manual/git_workflow
    /developer_manual/packaging
