@@ -72,20 +72,8 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
-    'sphinxcontrib.tikz',
     'sphinx_rtd_theme',
 ]
-
-# Extension configuration for using Tikz pictures in Sphinx documentation
-tikz_latex_preamble = r'''
-  \tikzstyle{every state}=[
-    draw,
-    shape=circle,
-    inner sep=1pt,
-    minimum size=5pt,
-    final/.style={double,minimum size=6pt},
-    initial text=]
-'''
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -128,37 +116,16 @@ today_fmt = '%d-%m-%Y'
 suppress_warnings = ['ref.citation']
 
 # This should be illegal, but apparently you cannot pass a custom path for the
-# doxygen executable to exhale (which is required for Windows where cmake can
+# doxygen executable to breathe (which is required for Windows where cmake can
 # find Doxygen without it being in PATH)
 os.environ["PATH"] += os.pathsep + os.path.dirname(_DOXYGEN_EXECUTABLE)
 
 # First initialize the data structures for breathe and exhale. They are
 # populated below.
 breathe_projects = {"mCRL2": "./_doxygen/xml"}
-breathe_projects_source = {}
-breathe_default_project = "mCRL2"
-
-# Common arguments for Exhale
-exhale_args = {
-    "rootFileTitle": "mCRL2",
-    "containmentFolder": "mcrl2",
-    "rootFileName": "mCRL2.rst",
-    "verboseBuild": False,
-    "createTreeView": True,
-    "exhaleExecutesDoxygen": True,
-    "exhaleDoxygenStdin": textwrap.dedent('''
-BUILTIN_STL_SUPPORT = YES
-INPUT = {}/libraries/
-EXCLUDE_PATTERNS = */test/*
-EXTRACT_ALL=YES
-WARN_IF_INCOMPLETE_DOC=NO
-'''.format(_CMAKE_SOURCE_DIR)),
-    "doxygenStripFromPath":  f'{_CMAKE_SOURCE_DIR}',
-}
 
 if tags.has('build_doxygen'):
     extensions.append('breathe')
-    extensions.append('exhale')
     
 # -- App setup - executed before the build process starts --------------------
 def setup(app):
