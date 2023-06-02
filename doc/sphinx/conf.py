@@ -123,9 +123,24 @@ os.environ["PATH"] += os.pathsep + os.path.dirname(_DOXYGEN_EXECUTABLE)
 # First initialize the data structures for breathe and exhale. They are
 # populated below.
 breathe_projects = {"mCRL2": "./_doxygen/xml"}
+breathe_default_project = "mCRL2"
+
+# Setup the exhale extension
+exhale_args = {
+    # These arguments are required
+    "containmentFolder":     "./exhale/",
+    "rootFileName":          "mcrl2_reference.rst",
+    "doxygenStripFromPath":  "..",
+    # Heavily encouraged optional argument (see docs)
+    "rootFileTitle":         "mCRL2 Library",
+    # Suggested optional arguments
+    "createTreeView":        True,
+    "exhaleExecutesDoxygen": False,
+}
 
 if tags.has('build_doxygen'):
     extensions.append('breathe')
+    extensions.append('exhale')
     
 # -- App setup - executed before the build process starts --------------------
 def setup(app):
