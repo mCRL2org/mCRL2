@@ -1612,11 +1612,29 @@ void optimized_plus(pres_expression& result, const pres_expression& p, const pre
   }
   else if (is_false(p))
   {
-    result=p;
+    if (data::is_data_expression(q))
+    {
+      const data::data_expression& qa = atermpp::down_cast<data::data_expression>(q);
+      if (qa.sort() == data::sort_real::real_())
+      {
+        result=p;
+        return;
+      }
+    }
+    make_plus(result, p, q);  
   }
   else if (is_false(q))
   {
-    result=q;
+    if (data::is_data_expression(p))
+    {
+      const data::data_expression& pa = atermpp::down_cast<data::data_expression>(p);
+      if (pa.sort() == data::sort_real::real_())
+      {
+        result=q;
+        return;
+      }
+    }
+    make_plus(result, p, q);  
   }
   else if (data::sort_real::is_zero(p))
   {

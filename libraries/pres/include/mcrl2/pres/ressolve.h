@@ -54,6 +54,218 @@ public:
 
 namespace detail {
 
+pres_expression group_sums_conjuncts_disjuncts(const pres_expression& conjunctive_disjunctive_nf, const data::rewriter& rewrite);
+
+void collect_grouped_ands_ors(const pres_expression& conjunctive_disjunctive_nf, 
+                              const data::rewriter& rewrite, 
+                              std::set <pres_expression>& collected_terms, 
+                              const bool collect_ands)
+{
+  if (is_propositional_variable_instantiation(conjunctive_disjunctive_nf) ||
+      is_eqninf(conjunctive_disjunctive_nf))
+  {
+    collected_terms.insert(conjunctive_disjunctive_nf);
+    return;
+  }
+  if (is_and(conjunctive_disjunctive_nf))
+  {
+    if (collect_ands)
+    {
+      const and_& t = atermpp::down_cast<and_>(conjunctive_disjunctive_nf);
+      collect_grouped_ands_ors(t.left(), rewrite, collected_terms, collect_ands);
+      collect_grouped_ands_ors(t.right(), rewrite, collected_terms, collect_ands);
+      return;
+    }
+    collected_terms.insert(group_sums_conjuncts_disjuncts(conjunctive_disjunctive_nf, rewrite));
+    return;
+  }
+  if (is_or(conjunctive_disjunctive_nf))
+  {
+    if (collect_ands)
+    {
+      collected_terms.insert(group_sums_conjuncts_disjuncts(conjunctive_disjunctive_nf, rewrite));
+      return;
+    }
+    const or_& t = atermpp::down_cast<or_>(conjunctive_disjunctive_nf);
+    collect_grouped_ands_ors(t.left(), rewrite, collected_terms, collect_ands);
+    collect_grouped_ands_ors(t.right(), rewrite, collected_terms, collect_ands);
+    return;
+    
+  }
+  if (is_plus(conjunctive_disjunctive_nf) ||
+      is_const_multiply(conjunctive_disjunctive_nf) || 
+      is_eqninf(conjunctive_disjunctive_nf) || 
+      data::is_data_expression(conjunctive_disjunctive_nf))
+  {
+    collected_terms.insert(group_sums_conjuncts_disjuncts(conjunctive_disjunctive_nf, rewrite));
+    return;
+  }
+  throw runtime_error("Expect a simple conjunctive/disjunctive normal form when collecting terms: " + pp(conjunctive_disjunctive_nf) + ".");
+}
+
+void collect_grouped_constant_multiplies_mininf_terms_and_constant(
+              const pres_expression& conjunctive_disjunctive_nf,  
+              std::map <pres_expression, data::data_expression>& constant_multiply_terms, 
+              std::set <pres_expression>& mininf_terms, 
+              pres_expression& constant,
+              const data::rewriter& rewrite)
+{
+// std::cerr << "collect_grouped_constant_multiplies_mininf_terms_and_constant " << conjunctive_disjunctive_nf << "\n";
+  if (is_propositional_variable_instantiation(conjunctive_disjunctive_nf))
+  {
+    constant_multiply_terms[conjunctive_disjunctive_nf]=data::sort_real::real_one(); 
+    return;
+  } 
+
+  if (is_plus(conjunctive_disjunctive_nf))
+  {
+    const plus& t = atermpp::down_cast<plus>(conjunctive_disjunctive_nf);
+    collect_grouped_constant_multiplies_mininf_terms_and_constant(t.left(), constant_multiply_terms, mininf_terms, constant, rewrite);
+    collect_grouped_constant_multiplies_mininf_terms_and_constant(t.right(), constant_multiply_terms, mininf_terms, constant, rewrite);
+    return;
+  }
+  if (is_const_multiply(conjunctive_disjunctive_nf))
+  {
+    const const_multiply& t = atermpp::down_cast<const_multiply>(conjunctive_disjunctive_nf);
+    if (constant_multiply_terms.count(t.right())==0)
+    {
+// std::cerr << "CREATE ADDED TERM " << t.right() << "    " << t.left() << "\n";
+      constant_multiply_terms[t.right()]=t.left();
+    }
+    else 
+    {
+// std::cerr << "ADD SCONTTERM ADDED TERM " << t.right() << "    " << t.left() << "    " << constant_multiply_terms[t.right()] << "\n";
+      data::sort_real::make_plus(constant_multiply_terms[t.right()], constant_multiply_terms[t.right()], t.left());
+// std::cerr << "ADD SCONTTERM2 ADDED TERM " << t.right() << "    " << t.left() << "    " << constant_multiply_terms[t.right()] << "\n";
+    }
+    return;
+  }
+  if (is_eqninf(conjunctive_disjunctive_nf))
+  {
+    mininf_terms.insert(conjunctive_disjunctive_nf); 
+    return;
+  } 
+  if (data::is_data_expression(conjunctive_disjunctive_nf))
+  {
+    if (is_true(conjunctive_disjunctive_nf))
+    {
+      constant = true_();
+      return;
+    }
+    if (is_false(conjunctive_disjunctive_nf))
+    {
+      if (!is_true(constant))
+      {
+        constant = false_();
+        return;
+      }
+    }
+    const data::data_expression& t = atermpp::down_cast<data::data_expression>(conjunctive_disjunctive_nf);
+    if (t.sort()==data::sort_real::real_())
+    {
+      if (!is_true(constant) && !is_false(constant))
+      {
+        constant = rewrite(data::sort_real::plus(t, atermpp::down_cast<data::data_expression>(constant)));
+      }
+      return;
+    }
+  }
+  throw runtime_error("Expect a conjunctive/disjunctive normal form when collecting const multiplies, eqninfs and constants " + pp(conjunctive_disjunctive_nf) + ".");
+}
+
+
+pres_expression group_sums_conjuncts_disjuncts(const pres_expression& conjunctive_disjunctive_nf, const data::rewriter& rewrite)
+{
+// std::cerr << "GROUP CONJ DISJ " << conjunctive_disjunctive_nf << "\n";
+  if (is_propositional_variable_instantiation(conjunctive_disjunctive_nf) ||
+      is_eqninf(conjunctive_disjunctive_nf))
+  {
+// std::cerr << "CONJDISJ1 " << conjunctive_disjunctive_nf << "\n";
+    return conjunctive_disjunctive_nf;
+  }
+  if (is_condsm(conjunctive_disjunctive_nf))
+  {
+    const condsm& t = atermpp::down_cast<condsm>(conjunctive_disjunctive_nf);
+    if (is_true(conjunctive_disjunctive_nf))
+    {
+      return group_sums_conjuncts_disjuncts(and_(t.arg2(), t.arg3()), rewrite);
+    }
+    if (is_false(conjunctive_disjunctive_nf))
+    {
+      return group_sums_conjuncts_disjuncts(t.arg2(), rewrite);
+    }
+    return condsm(group_sums_conjuncts_disjuncts(t.arg1(), rewrite),
+                  group_sums_conjuncts_disjuncts(t.arg2(), rewrite),
+                  group_sums_conjuncts_disjuncts(t.arg3(), rewrite));
+  }
+  if (is_condeq(conjunctive_disjunctive_nf))
+  {
+    const condeq& t = atermpp::down_cast<condeq>(conjunctive_disjunctive_nf);
+    if (is_true(conjunctive_disjunctive_nf))
+    {
+      return group_sums_conjuncts_disjuncts(t.arg2(), rewrite);
+    }
+    if (is_false(conjunctive_disjunctive_nf))
+    {
+      return group_sums_conjuncts_disjuncts(or_(t.arg2(), t.arg3()), rewrite);
+    }
+    return condeq(group_sums_conjuncts_disjuncts(t.arg1(), rewrite),
+                  group_sums_conjuncts_disjuncts(t.arg2(), rewrite),
+                  group_sums_conjuncts_disjuncts(t.arg3(), rewrite));
+  }
+  if (is_and(conjunctive_disjunctive_nf))
+  {
+    std::set <pres_expression> and_terms;
+    collect_grouped_ands_ors(conjunctive_disjunctive_nf, rewrite, and_terms, true);
+    pres_expression result = true_();
+    for(const pres_expression& t: and_terms)
+    {
+      optimized_and(result, result, t);
+    }
+// std::cerr << "CONJDISJ2 " << conjunctive_disjunctive_nf << "    " << result << "\n";
+    return result;
+  }
+  if (is_or(conjunctive_disjunctive_nf))
+  {
+    std::set <pres_expression> or_terms;
+    collect_grouped_ands_ors(conjunctive_disjunctive_nf, rewrite, or_terms, false);
+    pres_expression result = false_();
+    for(const pres_expression& t: or_terms)
+    {
+      optimized_or(result, result, t);
+    }
+// std::cerr << "CONJDISJ3 " << conjunctive_disjunctive_nf << "    " << result << "\n";
+    return result;
+  }
+  if (is_plus(conjunctive_disjunctive_nf))
+  {
+    std::map <pres_expression, data::data_expression> constant_multiply_terms;
+    std::set <pres_expression> mininf_terms;
+    pres_expression constant=data::sort_real::real_zero();
+    collect_grouped_constant_multiplies_mininf_terms_and_constant(conjunctive_disjunctive_nf,  constant_multiply_terms, mininf_terms, constant, rewrite);
+    pres_expression result = constant;
+    pres_expression aux;
+    for(const std::pair<pres_expression, data::data_expression> p: constant_multiply_terms)
+    {
+// std::cerr << "CONST MULTIPLY CREATE " << p.first << "    " << p.second << "\n";
+      optimized_const_multiply(aux, rewrite(p.second), p.first);
+      optimized_plus(result, result, aux);
+    }
+    for(const pres_expression& t: mininf_terms)
+    {
+      optimized_plus(result, result, t);
+    }
+// std::cerr << "CONJDISJ7 " << conjunctive_disjunctive_nf << "    " << result << "\n";
+    return result;
+  }
+  if (is_const_multiply(conjunctive_disjunctive_nf) || is_eqninf(conjunctive_disjunctive_nf) || data::is_data_expression(conjunctive_disjunctive_nf))
+  {
+// std::cerr << "CONJDISJ7 " << conjunctive_disjunctive_nf << "\n";
+    return conjunctive_disjunctive_nf;
+  }
+  throw runtime_error("Expect a conjunctive/disjunctive normal form when grouping equal terms: " + pp(conjunctive_disjunctive_nf) + ".");
+}
+
 void push_and_inside(pres_expression& result, const pres_expression t1, const pres_expression& t2, const bool conjunctive_normal_form)
 {
   pres_expression aux;
@@ -127,13 +339,13 @@ void push_or_inside(pres_expression& result, const pres_expression t1, const pre
   { 
     push_or_inside(aux, atermpp::down_cast<and_>(t1).left(), t2, conjunctive_normal_form);
     push_or_inside(result, atermpp::down_cast<and_>(t1).right(), t2, conjunctive_normal_form);
-    optimized_or(result, aux, result);
+    optimized_and(result, aux, result);
   }
   else if (conjunctive_normal_form && is_and(t2))
   { 
     push_or_inside(aux, t1, atermpp::down_cast<and_>(t2).left(), conjunctive_normal_form);
     push_or_inside(result, t1, atermpp::down_cast<and_>(t2).right(), conjunctive_normal_form);
-    optimized_or(result, aux, result);
+    optimized_and(result, aux, result);
   }
   else optimized_or(result, t1, t2);
 } 
@@ -143,9 +355,13 @@ void push_plus_inside(pres_expression& result, const pres_expression t1, const p
   pres_expression aux;
   if (is_condsm(t1))
   {
+// std::cerr << "PUSH PLUS1 " << t1 <<"\n";
     push_plus_inside(aux, atermpp::down_cast<condsm>(t1).arg2(), t2, conjunctive_normal_form);
+// std::cerr << "PUSH PLUS2 " << aux <<"\n";
     push_plus_inside(result, atermpp::down_cast<condsm>(t1).arg3(), t2, conjunctive_normal_form);
+// std::cerr << "PUSH PLUS3 " << result <<"\n";
     optimized_condsm(result, atermpp::down_cast<condsm>(t1).arg1(), aux, result);
+// std::cerr << "PUSH PLUS4 " << result <<"\n";
   }
   else if (is_condsm(t2))
   {
@@ -155,15 +371,23 @@ void push_plus_inside(pres_expression& result, const pres_expression t1, const p
   }
   else if (is_condeq(t1))
   {
+// std::cerr << "PUSHR PLUS1 " << t1 <<"\n";
     push_plus_inside(aux, atermpp::down_cast<condeq>(t1).arg2(), t2, conjunctive_normal_form);
+// std::cerr << "PUSH PLUS2 " << aux <<"\n";
     push_plus_inside(result, atermpp::down_cast<condeq>(t1).arg3(), t2, conjunctive_normal_form);
+// std::cerr << "PUSH PLUS3 " << result <<"\n";
     optimized_condeq(result, atermpp::down_cast<condeq>(t1).arg1(), aux, result);
+// std::cerr << "PUSH PLUS4 " << result <<"\n";
   }
   else if (is_condeq(t2))
   {
+// std::cerr << "PUSH PLUS1 " << t1 <<"\n";
     push_plus_inside(aux, t1, atermpp::down_cast<condeq>(t2).arg2(), conjunctive_normal_form);
+// std::cerr << "PUSH PLUS2 " << aux <<"\n";
     push_plus_inside(result, t1, atermpp::down_cast<condeq>(t2).arg3(), conjunctive_normal_form);
+// std::cerr << "PUSH PLUS3 " << result <<"\n";
     optimized_condeq(result, atermpp::down_cast<condeq>(t2).arg1(), aux, result);
+// std::cerr << "PUSH PLUS4 " << result <<"\n";
   }
   else if (conjunctive_normal_form && is_and(t1))  // CNF: first move || upwards.
   {
@@ -229,9 +453,13 @@ void push_constant_inside(pres_expression& result, const data::data_expression& 
   }
   else if (is_condeq(t))
   {
+// std::cerr << "PUSH const1 " << t <<"\n";
     push_constant_inside(aux, constant, atermpp::down_cast<condeq>(t).arg2());
+// std::cerr << "PUSH const2 " << aux <<"\n";
     push_constant_inside(result, constant, atermpp::down_cast<condeq>(t).arg3());
+// std::cerr << "PUSH const3 " << result <<"\n";
     optimized_condeq(result, atermpp::down_cast<condeq>(t).arg1(), aux, result);
+// std::cerr << "PUSH const4 " << result <<"\n";
   }
   else if (is_and(t))
   {
@@ -248,10 +476,12 @@ void push_constant_inside(pres_expression& result, const data::data_expression& 
   }
   else if (is_plus(t))
   {
+// std::cerr << "PUSH CONSTANT INSIDE " << constant << "    " << t << "\n";
     pres_expression aux;
     push_constant_inside(aux, constant, atermpp::down_cast<plus>(t).left());
     push_constant_inside(result, constant, atermpp::down_cast<plus>(t).right());
     optimized_plus(result, aux, result);
+// std::cerr << "PUSH CONSTANT INSIDE RESULT" << result << "\n";
   }
   else if (is_const_multiply(t))
   {
@@ -519,16 +749,20 @@ pres_expression disjunction_cj_fj(std::vector< linear_fixed_point_equation >& l)
   bool result_defined=false;
   for(const linear_fixed_point_equation& eq: l)
   {
-    data::data_expression constant = data::sort_real::divides(data::sort_real::real_one(),
-                                                              data::sort_real::minus(data::sort_real::real_one(), eq.c_j));
-    if (result_defined)
+    if (eq.f_j_term_present)
     {
-      result = or_(result, const_multiply(constant, eq.f_j));
-    }
-    else 
-    {
-      result = const_multiply(constant, eq.f_j);
-      result_defined=true;
+// std::cerr << "SHALLOW LINE " << eq.c_j << "     " << eq.f_j << "\n";
+      data::data_expression constant = data::sort_real::divides(data::sort_real::real_one(),
+                                                                data::sort_real::minus(data::sort_real::real_one(), eq.c_j));
+      if (result_defined)
+      {
+        result = or_(result, const_multiply(constant, eq.f_j));
+      }
+      else 
+      {
+        result = const_multiply(constant, eq.f_j);
+        result_defined=true;
+      }
     }
   }
   return result;
@@ -647,6 +881,7 @@ pres_expression solve_fixed_point_inner(const propositional_variable& v,
                                         const data::rewriter& rewriter, 
                                         const bool minimal_fixed_point)
 {
+// std::cerr << "SOLVE EQUATION " << v << "   " << t << "\n";
   std::vector< linear_fixed_point_equation > lines; // equations c_j X + c'_j*eqninf(X) + f_j  with 0<c_j<1
   /* Here is is assumed that t is a disjunction of terms */
   collect_lines(lines, v, t, minimal_fixed_point);
@@ -663,6 +898,7 @@ pres_expression solve_fixed_point_inner(const propositional_variable& v,
   {
     pres_expression U;
     optimized_or(U, m, disjunction_cj_fj(shallow_lines));
+// std::cerr << "U MIN " << U << "\n";
     pres_expression cond1 = disjunction_fj_cj(steep_lines, U, rewriter);
     pres_expression cond2 = disjunction_infinity_cj_prime(shallow_lines, steep_lines, flat_lines);
 
@@ -680,6 +916,7 @@ pres_expression solve_fixed_point_inner(const propositional_variable& v,
     pres_expression solution;
     optimized_condeq(solution, eqinf_cond, exp2, true_());
     pres_expression rewritten_solution=simplify_data_rewriter(rewriter)(solution);
+// std::cerr << "SOLVEDXXXX " << rewritten_solution << "\n";
     return rewritten_solution;
   }
   else // Maximal fixed point
@@ -860,6 +1097,7 @@ public:
   {
     pres_expression aux;
     apply(aux, x.right());
+// std::cerr << "CNF CONST MUL " << aux << "     " << x.right() << "\n";
     const data::data_expression& constant=x.left();
     detail::push_constant_inside(result, constant, aux);
   }
@@ -894,7 +1132,11 @@ public:
   template <class T>
   void apply(T& result, const pres_system::eqinf& x)
   {
-    pres_system::make_eqinf(result, [&](pres_expression& result){ apply(result, x.operand()); });
+    // Calculate the normalform of -infinity + nf(x.operand())
+    pres_expression aux;
+    apply(aux, x.operand());
+    detail::push_plus_inside(result, false_(), aux, m_conjunctive_normal_form);
+// std::cerr << "XXXX " << aux << "     " << result << "\n";
   }
 
   template <class T>
@@ -974,24 +1216,31 @@ class ressolve_by_gauss_elimination_algorithm
 
       for(std::vector<pres_equation>::reverse_iterator equation_it=res_equations.rbegin(); equation_it!=res_equations.rend(); equation_it++)
       {
+        mCRL2log(log::debug) << "Solving    " << equation_it->symbol() << " " << equation_it->variable() << " = " << equation_it->formula() << "\n";
         if (equation_it->symbol().is_mu())
         {
 // std::cerr << "IN1 " << equation_it->formula() << "\n";
 // std::cerr << "IN2 " << m_R(equation_it->formula()) << "\n";
           conjunctive_normal_form_builder.apply(result, m_R(equation_it->formula()));
+// std::cerr << "IN3 " << result << "\n";
+          result=detail::group_sums_conjuncts_disjuncts(result, m_datar);
 // std::cerr << "OUT " << result << "\n";
         }
         else
         {
+// std::cerr << "INX1 " << equation_it->formula() << "\n";
+// std::cerr << "INX2 " << m_R(equation_it->formula()) << "\n";
           disjunctive_normal_form_builder.apply(result, m_R(equation_it->formula()));
+// std::cerr << "INX3 " << result << "\n";
+          result=detail::group_sums_conjuncts_disjuncts(result, m_datar);
+// std::cerr << "OUTX " << result << "\n";
         }
+        mCRL2log(log::debug) << "Norm. Form " << equation_it->symbol() << " " << equation_it->variable() << " = " << result << "\n";  
 
         pres_expression solution = detail::solve_single_equation(equation_it->symbol(),
                                                                  equation_it->variable(),
                                                                  result,
                                                                  m_datar);
-        mCRL2log(log::debug) << "Solving    " << equation_it->symbol() << " " << equation_it->variable() << " = " << equation_it->formula() << "\n";
-        mCRL2log(log::debug) << "Norm. Form " << equation_it->symbol() << " " << equation_it->variable() << " = " << result << "\n";  
         equation_it->formula() = solution;
         mCRL2log(log::debug) << "Solution   " << equation_it->symbol() << " " << equation_it->variable() << " = " << equation_it->formula() << "\n";
 
@@ -1001,9 +1250,25 @@ class ressolve_by_gauss_elimination_algorithm
                                                  substitution_equation_it!=equation_it.base(); 
                                                  substitution_equation_it++)
         {
+std::cerr << ".";
           substitute_pres_equation.apply(result, substitution_equation_it->formula());
-          substitution_equation_it->formula() = result;
+          if (substitution_equation_it->formula() != result)
+          {
+// std::cerr << "ZZZZZIN  " << equation_it->symbol() << "   " << substitution_equation_it->formula() << "     " << result << "\n";
+            if (equation_it->symbol().is_mu())
+            {
+              conjunctive_normal_form_builder.apply(substitution_equation_it->formula(), result);
+            }
+            else
+            {
+              disjunctive_normal_form_builder.apply(substitution_equation_it->formula(), result);
+            }
+// std::cerr << "ZZZZZMID " << substitution_equation_it->formula() << "\n";
+            substitution_equation_it->formula() = detail::group_sums_conjuncts_disjuncts(substitution_equation_it->formula(), m_datar);
+// std::cerr << "ZZZZZOUT " << substitution_equation_it->formula() << "\n";
+          }
         }
+        mCRL2log(log::debug) << "Substituted the solution backwards.\n";
       }
       return m_R(res_equations.front().formula());
     } 
