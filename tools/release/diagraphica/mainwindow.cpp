@@ -310,7 +310,7 @@ void MainWindow::updateValueSelection(int count)
   if (ranges.size() == 0 || count < 1)
     return;
   int index = ranges[0].topRow();
-  for (const QTableWidgetSelectionRange range : ranges)
+  for (const QTableWidgetSelectionRange& range : ranges)
   {
     index = qMin(index, range.topRow());
   }

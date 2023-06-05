@@ -470,7 +470,7 @@ LtsCanvas::Selection LtsCanvas::parseSelection(GLuint* selectionBuffer, GLint it
     GLuint size = *buffer++;
     assert (size <= 3);
 
-    float minimalDepth = ((float)(*buffer++)) / 0x7fffffff;
+    float minimalDepth = ((float)(*buffer++)) / (float)0x7fffffff;
     buffer++;
 
     if (!size)

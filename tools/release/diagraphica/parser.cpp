@@ -555,7 +555,7 @@ void Parser::parseAttribute(
 
     std::vector< std::string > domain;
     QDomElement valueElement = listPropertyElements["CurrentDomain"].firstChildElement("Value");
-    for (int i = 0; !valueElement.isNull(); ++i, valueElement = valueElement.nextSiblingElement("Value"))
+    while (!valueElement.isNull())
     {
       QString value = valueElement.text();
       if (value.isEmpty())
@@ -563,6 +563,7 @@ void Parser::parseAttribute(
         throw mcrl2::runtime_error("Domain value is empty.");
       }
       domain.push_back(value.toStdString());
+      valueElement = valueElement.nextSiblingElement("Value");
     }
 
     // update domain
