@@ -20,7 +20,7 @@
 
     Implementation of the priority promotion algorithm introduced in:
 
-    Massimo Benerecetti, Daniele Dell’Erba, and Fabio Mogavero. Solving
+    Massimo Benerecetti, Daniele Dell'Erba, and Fabio Mogavero. Solving
     Parity Games via Priority Promotion, pages 270-290. Springer International
     Publishing, Cham, 2016.
 
