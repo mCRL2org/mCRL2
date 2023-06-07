@@ -21,7 +21,8 @@
 #include "mcrl2/pres/pressolve_options.h"
 #include "mcrl2/pres/normalize.h"
 #include "mcrl2/pres/pres2res.h"
-#include "mcrl2/pres/ressolve.h"
+#include "mcrl2/pres/ressolve_gauss_elimination.h"
+#include "mcrl2/pres/ressolve_numerical.h"
 #include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
@@ -34,7 +35,7 @@ using mcrl2::utilities::tools::input_tool;
 // TODO: put this code in the utilities library?
 inline std::string file_extension(const std::string& filename)
 {
-  auto pos = filename.find_last_of('.');
+  std::size_t pos = filename.find_last_of('.');
   if (pos == std::string::npos)
   {
     return "";
@@ -50,8 +51,6 @@ class pressolve_tool
 
   pressolve_options options;
   std::string lpsfile;
-  std::string ltsfile;
-  std::string evidence_file;
 
   void add_options(utilities::interface_description& desc) override
   {
@@ -61,6 +60,10 @@ class pressolve_tool
     desc.add_hidden_option(
         "no-replace-constants-by-variables",
         "Do not move constant expressions to a substitution.");
+    desc.add_option("algorithm", utilities::make_enum_argument<pres_system::solution_algorithm>("NAME")
+                                 .add_value_short(pres_system::solution_algorithm::gauss_elimination, "g", true)
+                                 .add_value_short(pres_system::solution_algorithm::numerical, "n"),
+                    "select the algorithm NAME to solve the res after it is generated.",'a');
   }
 
   void parse_options(const utilities::command_line_parser& parser) override
@@ -81,20 +84,11 @@ class pressolve_tool
       {
         lpsfile = filename;
       }
-      else
-      {
-        ltsfile = filename;
-      }
     }
 
-    if (parser.has_option("evidence-file"))
+    if (parser.has_option("algorithm"))
     {
-      if (!parser.has_option("file"))
-      {
-        throw mcrl2::runtime_error(
-            "Option --evidence-file cannot be used without option --file");
-      }
-      evidence_file = parser.option_argument("evidence-file");
+      options.algorithm = parse_algorithm(parser.option_argument("algorithm"));
     }
   }
 
@@ -130,10 +124,19 @@ class pressolve_tool
 
 std::cerr << "RESULTING RES\n" << resulting_res << "\n";
     timer().start("solving");
-    ressolve_by_gauss_elimination_algorithm solver(options, resulting_res);
-    pres_expression result = solver.run();
+    if (options.algorithm==gauss_elimination)
+    {
+      ressolve_by_gauss_elimination_algorithm solver(options, resulting_res);
+      pres_expression result = solver.run();
+      std::cout << "Solution: " << result << std::endl;
+    }
+    else 
+    {
+      ressolve_by_numerical_iteration solver(options, resulting_res);
+      float result = solver.run();
+      std::cout << "Solution: " << result << std::endl;
+    }  
     timer().finish("solving");
-    std::cout << "Solution: " << result << std::endl;
     /* presinst_structure_graph_algorithm algorithm(options, presspec, G);
     run_algorithm<presinst_structure_graph_algorithm>(algorithm, presspec, G,
                                                         sigma); */

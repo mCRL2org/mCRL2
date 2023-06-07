@@ -408,6 +408,20 @@ inline data_expression real_(const std::string& n)
 {
   return sort_real::creal(sort_int::int_(n), sort_pos::c1());
 }
+
+/// \brief Yields the real value of a data expression.
+/// \param r A data expression of sort real in normal form.
+inline double value(const data_expression& r)
+{
+  if (is_creal_application(r))
+  {
+    const application& a = atermpp::down_cast<application>(r);
+    return static_cast<double>(std::stoi(sort_int::integer_constant_as_string(a[0]))) / 
+           static_cast<double>(std::stoi(sort_pos::positive_constant_as_string(a[1])));
+  }
+  throw runtime_error("Expected a term of the shape @cReal(r1, r2) " + pp(r) + ".");
+}
+
 } // namespace sort_real
 
 /// \brief Construct numeric expression from a string representing a number in decimal notation

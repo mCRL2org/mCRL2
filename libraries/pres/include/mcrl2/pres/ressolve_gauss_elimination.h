@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pres/ressolve.h
+/// \file mcrl2/pres/ressolve_gauss_elimination.h
 /// \brief This contains a gauss-elimination like algorithm to solve a res
 
-#ifndef MCRL2_PRES_RESSOLVE_H
-#define MCRL2_PRES_RESSOLVE_H
+#ifndef MCRL2_PRES_RESSOLVE_GAUSS_ELIMINATION_H
+#define MCRL2_PRES_RESSOLVE_GAUSS_ELIMINATION_H
 
 #include "mcrl2/data/real_utilities.h"
 #include "mcrl2/pres/builder.h" 
@@ -1136,7 +1136,7 @@ public:
     pres_expression aux;
     apply(aux, x.operand());
     detail::push_plus_inside(result, false_(), aux, m_conjunctive_normal_form);
-// std::cerr << "XXXX " << aux << "     " << result << "\n";
+ std::cerr << "XXXX " << aux << "     " << result << "\n";
   }
 
   template <class T>
@@ -1278,4 +1278,4 @@ std::cerr << ".";
 
 } // namespace mcrl2
 
-#endif // MCRL2_PRES_RESSOLVE_H
+#endif // MCRL2_PRES_RESSOLVE_GAUSS_ELIMINATION_H
