@@ -611,7 +611,7 @@ struct simplify_data_rewriter_builder : public mcrl2::pres_system::detail::add_d
       if (d.sort()==data::sort_real::real_())
       {
         pres_expression aux;
-        apply(aux, static_cast<pres_expression>(data::less(d, data::sort_real::real_zero())));   // NOTE: arg1() is sometimes ewritten twice.
+        apply(aux, static_cast<pres_expression>(data::less(data::sort_real::real_zero(),d)));   // NOTE: arg1() is sometimes rewritten twice.
      
         if (is_true(aux))
         {
@@ -654,7 +654,7 @@ struct simplify_data_rewriter_builder : public mcrl2::pres_system::detail::add_d
       if (d.sort()==data::sort_real::real_())
       { 
         pres_expression aux;
-        apply(aux, static_cast<pres_expression>(less(data::sort_real::real_zero(), d)));   // NOTE: arg1() is sometimes rewritten twice.
+        apply(aux, static_cast<pres_expression>(less(d,data::sort_real::real_zero())));   // NOTE: arg1() is sometimes rewritten twice.
         
         if (is_true(aux))
         { 

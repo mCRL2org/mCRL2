@@ -901,6 +901,8 @@ pres_expression solve_fixed_point_inner(const propositional_variable& v,
 // std::cerr << "U MIN " << U << "\n";
     pres_expression cond1 = disjunction_fj_cj(steep_lines, U, rewriter);
     pres_expression cond2 = disjunction_infinity_cj_prime(shallow_lines, steep_lines, flat_lines);
+// std::cerr << "cond1 " << cond1 << "\n";
+// std::cerr << "cond2 " << cond2 << "\n";
 
     pres_expression eqinf_cond;
     optimized_eqinf(eqinf_cond, conjunction_disjunction_f_j(shallow_lines, steep_lines, flat_lines, false));
@@ -909,12 +911,16 @@ pres_expression solve_fixed_point_inner(const propositional_variable& v,
 // std::cerr << "OPTIMIZED EQNINF " << eqninf_m << "      " << m << "\n";
     pres_expression cond4;
     optimized_or(cond4, cond1, cond2);
+// std::cerr << "cond4 " << cond4 << "\n";
     pres_expression exp1;
     optimized_condeq(exp1, cond4, U, true_());
+// std::cerr << "exp1 " << exp1 << "\n";
     pres_expression exp2;
     optimized_condeq(exp2, eqninf_m, false_(), exp1);
+// std::cerr << "exp2 " << exp2 << "\n";
     pres_expression solution;
     optimized_condeq(solution, eqinf_cond, exp2, true_());
+// std::cerr << "solution " << solution << "\n";
     pres_expression rewritten_solution=simplify_data_rewriter(rewriter)(solution);
 // std::cerr << "SOLVEDXXXX " << rewritten_solution << "\n";
     return rewritten_solution;

@@ -23,7 +23,7 @@ namespace pres_system {
 namespace detail {
 
 
-float evaluate(const pres_expression& p, const std::unordered_map<core::identifier_string, float>& solution)
+double evaluate(const pres_expression& p, const std::unordered_map<core::identifier_string, double>& solution)
 {
   if (is_propositional_variable_instantiation(p))
   {
@@ -39,11 +39,11 @@ float evaluate(const pres_expression& p, const std::unordered_map<core::identifi
   }
   else if (is_true(p))
   {
-    return std::numeric_limits<float>::infinity();
+    return std::numeric_limits<double>::infinity();
   }
   else if (is_false(p))
   {
-    return -std::numeric_limits<float>::infinity();
+    return -std::numeric_limits<double>::infinity();
   }
   else if (data::is_data_expression(p))
   {
@@ -82,50 +82,64 @@ class ressolve_by_numerical_iteration
     enumerate_quantifiers_rewriter m_R;   // The rewriter.
     
     std::vector<pres_equation> m_equations;
-    std::unordered_map<core::identifier_string, float> m_new_solution, m_previous_solution;
+    std::unordered_map<core::identifier_string, double> m_new_solution, m_previous_solution;
 
     bool stable_solution_found(std::size_t from, std::size_t to)
     {
-      float error=0;
+      double error=0;
       for(std::size_t i=from; i!=to; ++i)
       {
         error = std::max(error,std::abs(m_new_solution[m_equations[i].variable().name()]-m_previous_solution[m_equations[i].variable().name()]));
       }
-std::cerr << " ERROR " << error << "\n";     
+// std::cerr << " ERROR " << error << "\n";     
       return error<0.0000001;
     }
 
+    void calculate_new_solution(std::size_t base_equation_index, std::size_t to)
+    {
+      for(std::size_t j=base_equation_index ; j<to; ++j)
+      {
+        m_previous_solution[m_equations[j].variable().name()]= m_new_solution[m_equations[j].variable().name()];
+      }
+      for(std::size_t j=base_equation_index ; j<to; ++j)
+      { 
+        m_new_solution[m_equations[j].variable().name()] = detail::evaluate(m_equations[j].formula(), m_previous_solution);
+// std::cerr << "INTERMEDIATE SOLUTION " << m_equations[j].variable().name() << " := " << m_new_solution[m_equations[j].variable().name()] << "\n";
+      }
+    }
 
     void apply_numerical_recursive_algorithm(std::size_t base_equation_index)
     {
       if (base_equation_index<m_equations.size())
       {
+// std::cerr << "RECURSIVE ALGORITHM " << base_equation_index << "---------------------------\n";
         std::size_t i=base_equation_index;
         for( ; i<m_equations.size() && m_equations[i].symbol()==m_equations[base_equation_index].symbol() ; ++i)
         {
           m_new_solution[m_equations[i].variable().name()] = (m_equations[i].symbol().is_mu()?
-                                                                    -1*std::numeric_limits<float>::infinity():
-                                                                    std::numeric_limits<float>::infinity());
+                                                                    -1*std::numeric_limits<double>::infinity():
+                                                                    std::numeric_limits<double>::infinity());
+// std::cerr << "INITIAL SOLUTION " << m_equations[i].variable().name() << " := " << m_new_solution[m_equations[i].variable().name()] << "\n";
         }
 
         apply_numerical_recursive_algorithm(i);
-  
-        while (!stable_solution_found(0, m_equations.size()))
+        calculate_new_solution(base_equation_index, i);
+ 
+        if (stable_solution_found(base_equation_index, i))
+        {
+          return;
+        }
+        do
         {
           do
           {
-            for(std::size_t j=base_equation_index ; j<i; ++j)
-            {
-              m_previous_solution[m_equations[j].variable().name()]= m_new_solution[m_equations[j].variable().name()];
-            }
-            for(std::size_t j=base_equation_index ; j<i; ++j)
-            { 
-              m_new_solution[m_equations[j].variable().name()] = detail::evaluate(m_equations[j].formula(), m_previous_solution);
-            }
+            calculate_new_solution(base_equation_index, i);
           } while (!stable_solution_found(base_equation_index, i));
-
+// std::cerr << "HIJERERE\n";
           apply_numerical_recursive_algorithm(i);
-        }
+          calculate_new_solution(base_equation_index, i);
+        } while (!stable_solution_found(base_equation_index, i));
+// std::cerr << "RECURSIVE ALGORITHM TERMINATE " << base_equation_index << "---------------------------\n";
       }
     };
 
@@ -163,7 +177,7 @@ std::cerr << " ERROR " << error << "\n";
        m_R(m_datar,input_pres.data())
     {}
 
-    float run()
+    double run()
     {
       for(const pres_equation& eq: m_input_pres.equations())
       {
@@ -171,7 +185,7 @@ std::cerr << " ERROR " << error << "\n";
       }
       apply_numerical_recursive_algorithm(0);
 
-      float solution = detail::evaluate(m_input_pres.initial_state(),m_new_solution);
+      double solution = detail::evaluate(m_input_pres.initial_state(),m_new_solution);
       mCRL2log(log::info) << "Solution " << solution << "\n";
       return solution;
     }

@@ -133,7 +133,7 @@ std::cerr << "RESULTING RES\n" << resulting_res << "\n";
     else 
     {
       ressolve_by_numerical_iteration solver(options, resulting_res);
-      float result = solver.run();
+      double result = solver.run();
       std::cout << "Solution: " << result << std::endl;
     }  
     timer().finish("solving");
