@@ -287,11 +287,12 @@ void GLWidget::initializeGL()
   // version.
   if (isValid())
   {
-
     // Check the minimum run-time requirement; the pair ordering is
     // lexicographical.
     QPair<int, int> version = format().version();
- #ifndef __APPLE__
+    mCRL2log(mcrl2::log::verbose) << "Created an OpenGL " << version.first
+                                  << "." << version.second << " context.\n";
+
     QPair<int, int> required(3, 3);
     if (version < required)
     {
@@ -310,32 +311,26 @@ void GLWidget::initializeGL()
 
       throw mcrl2::runtime_error("Unsupported OpenGL version.");
     }
-    else
-#endif
-    {
 
-      QOpenGLContext::currentContext()->setFormat(
-          QSurfaceFormat::defaultFormat());
-      glEnable(GL_MULTISAMPLE);
-      glEnable(GL_BLEND);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // Sets some sensible defaults.
+    QOpenGLContext::currentContext()->setFormat(
+        QSurfaceFormat::defaultFormat());
+    glEnable(GL_MULTISAMPLE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-      glEnable(GL_LINE_SMOOTH);
-      glLineWidth(2);
-      glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-      mCRL2log(mcrl2::log::verbose) << "Created an OpenGL " << version.first
-                                    << "." << version.second << " context.\n";
-    }
+    glEnable(GL_LINE_SMOOTH);
+    glLineWidth(2);
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
   }
   else
   {
-    mcrl2::runtime_error("Context creation failed.");
+    throw mcrl2::runtime_error("OpenGL context creation failed.");
   }
 
   // Enable real-time logging of OpenGL errors when the GL_KHR_debug extension
   // is available. Ruben: Disabled because this makes the UI unusable with -d
   // flag
-#if ENABLE_OPENGL_DEBUG_LOG
   m_logger = new QOpenGLDebugLogger(this);
   if (m_logger->initialize())
   {
@@ -345,13 +340,8 @@ void GLWidget::initializeGL()
   }
   else
   {
-    mCRL2log(mcrl2::log::debug) << "QOpenGLDebugLogger initialisation failed\n";
+    mCRL2log(mcrl2::log::debug) << "QOpenGLDebugLogger initialisation failed" << std::endl;
   }
-#else
-  mCRL2log(mcrl2::log::debug)
-      << "QOpenGLDebugLogger is disabled manually in \"glwidget.cpp\". Change "
-         "\"#define ENABLE_OPENGL_DEBUG_LOG false\" to \"true\" if needed.\n";
-#endif
   m_scene.initialize();
 }
 
@@ -369,6 +359,7 @@ void GLWidget::paintGL()
                    size().height() * m_current_device_pixel_ratio);
     m_scene.setDevicePixelRatio(devicePixelRatio());
   }
+
   QPainter painter(this);
   painter.save();
   m_scene.update();
@@ -394,6 +385,7 @@ void GLWidget::paintGL()
     m_graph.gv_debug.draw(painter);
     painter.end();
   }
+
   // Updates the selection percentage (and checks for new selections under the
   // cursor).
   updateSelection();
