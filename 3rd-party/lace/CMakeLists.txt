@@ -15,6 +15,13 @@ option(LACE_COUNT_SPLITS "Let Lace count #splits" OFF)
 option(LACE_USE_HWLOC "Let Lace pin threads/memory using libhwloc" OFF)
 option(LACE_USE_MMAP "Let Lace use mmap to allocate memory" ON)
 
+mark_as_advanced(LACE_PIE_TIMES
+    LACE_COUNT_TASKS 
+    LACE_COUNT_STEALS 
+    LACE_COUNT_SPLITS
+    LACE_USE_HWLOC
+    LACE_USE_MMAP)
+
 if(LACE_USE_MMAP)
     check_symbol_exists(mmap "sys/mman.h" HAVE_MMAP)
     if(NOT HAVE_MMAP)
