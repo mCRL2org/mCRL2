@@ -217,6 +217,14 @@ void DiagramEditor::setDiagram(Diagram* dgrm)
 void DiagramEditor::setEditMode(int mode)
 {
   m_editMode = mode;
+  if (mode == EDIT_MODE_SELECT || mode == EDIT_MODE_DOF)
+  {
+    setCursor(Qt::ArrowCursor);
+  }
+  else
+  {
+    setCursor(Qt::CrossCursor);
+  }
   deselectAll();
   update();
 }
@@ -379,8 +387,8 @@ void DiagramEditor::pasteShapes()
 
   // Calculate the offset of the shapes, so that the combined center of the shapes matches the mouse position
   QPointF mouse = worldCoordinate(m_lastMouseEvent.localPos());
-  double x = snapIfNeeded(mouse.x() - x1) - (x2 - x1) / 2.0;
-  double y = snapIfNeeded(mouse.y() - y1) - (y2 - y1) / 2.0;
+  double x = snapIfNeeded(mouse.x() - x1 - (x2 - x1) / 2.0);
+  double y = snapIfNeeded(mouse.y() - y1 - (y2 - y1) / 2.0);
 
   // Copy the shapes in the clipboard to the diagram
   for (Shape* cb_shape : m_clipBoardList)
