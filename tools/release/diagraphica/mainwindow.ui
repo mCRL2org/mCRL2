@@ -917,6 +917,9 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>&amp;Trace Mode</string>
    </property>
@@ -930,6 +933,9 @@
    <property name="text">
     <string>View Trace</string>
    </property>
+  <property name="visible">
+   <bool>false</bool>
+  </property>
   </action>
   <action name="actionDistributionPlot">
    <property name="text">

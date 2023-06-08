@@ -657,7 +657,7 @@ void MainWindow::routeCluster(Cluster *cluster, QList<Cluster *> clusterSet, QLi
   connect(toSimulator, SIGNAL(triggered()), this, SLOT(toSimulator()));
   toSimulator->setEnabled(cluster != 0 && sender != m_simulator);
 
-  menu->addSeparator();
+  /*menu->addSeparator();
 
   QAction *toTrace = menu->addAction("Mark this in trace");
   connect(toTrace, SIGNAL(triggered()), this, SLOT(toTrace()));
@@ -665,7 +665,7 @@ void MainWindow::routeCluster(Cluster *cluster, QList<Cluster *> clusterSet, QLi
 
   QAction *allToTrace = menu->addAction("Mark all in trace");
   connect(allToTrace, SIGNAL(triggered()), this, SLOT(allToTrace()));
-  allToTrace->setEnabled(!clusterSet.isEmpty() && sender != m_timeSeries);
+  allToTrace->setEnabled(!clusterSet.isEmpty() && sender != m_timeSeries);*/
 
   menu->addSeparator();
 
