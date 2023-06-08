@@ -18,7 +18,7 @@ List of the common tools
       :maxdepth: 1
       :glob:
 
-      tools/release/*
+      release/*
 
 
 List of the experimental tools
@@ -31,7 +31,7 @@ List of the experimental tools
       :maxdepth: 1
       :glob:
 
-      tools/experimental/*
+      experimental/*
 
 
 In the source distribution there are more tools such as the deprecated and developer tools.

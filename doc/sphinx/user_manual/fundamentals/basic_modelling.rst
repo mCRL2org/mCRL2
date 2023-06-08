@@ -89,11 +89,6 @@ is marked by an incoming arrow that has no source state. For `s,s'\in S` and
         n0 -> n1 [label=coin,labelangle=90];
         n1 -> n2 [label=coffee,labelangle=90];
       }
-   
-   .. \begin{tikzpicture}[->,auto,node distance=1.5cm]
-      \node[state,initial] (n0) {}; \node[state, right of=n0] (n1) {}; \node[state,final,right of=n1] (n2) {};
-      \path (n0) edge node{`\a{coin}`} (n1) (n1) edge node{`\a{coffee}`} (n2);
-      \end{tikzpicture}
 
 Sequences and choices
 ---------------------
@@ -117,15 +112,17 @@ the left the semantics of the specification.
 
 .. list-table:: A simple coffee machine.
 
-   * - .. tikz::
-          :libs: automata
+   * - .. graphviz:: 
 
-          [auto,->]
-          \renewcommand{\a}[1]{\textit{#1}}
-          \node[state,initial] (n0) {}; 
-          \node[state, right of=n0] (n1) {}; 
-          \node[state,final,right of=n1] (n2) {};
-          \path (n0) edge node[above]{\a{coin}} (n1) (n1) edge node[above]{\a{coffee}} (n2);
+          digraph coffee1 {
+          graph [rankdir=LR];
+          node [shape=circle, label="", width=0.1];
+          edge [arrowhead=vee,arrowsize=0.4];
+          ns[style=invisible];
+          ns -> n0;
+          n0 -> n1 [label=coin,labelangle=90];
+          n1 -> n2 [label=coffee,labelangle=90];
+          }
      - ::
 
           act coin, coffee;
@@ -143,17 +140,19 @@ be expressed as follows:
 .. _coffee2:
 .. list-table:: Another coffee machine.
 
-   * - .. tikz::
-          :libs: automata
+   * - .. graphviz:: 
 
-          [auto,->]
-          \renewcommand{\a}[1]{\textit{#1}}
-          \node[state,initial] (n0) {}; 
-          \node[state, right of=n0] (n1) {}; 
-          \node[state, right of=n1, below of=n1] (n2) {};
-          \node[state,final,right of=n2,above of=n2] (n3) {};
-          \path (n0) edge node{\a{coin}} (n1) (n1) edge node{\a{bad}} (n3)
-                (n1) edge node[left]{\a{coin}} (n2) (n2) edge node[right]{\a{good}} (n3);
+          digraph coffee1 {
+          graph [rankdir=LR];
+          node [shape=circle, label="", width=0.1];
+          edge [arrowhead=vee,arrowsize=0.4];
+          ns[style=invisible];
+          ns -> n0;
+          n0 -> n1 [label=coin,labelangle=90];
+          n1 -> n2 [label=bad,labelangle=90];
+          n1 -> n3 [label=coin,labelangle=-45];
+          n3 -> n2 [label=good,labelangle=45];
+          }
      - ::
 
           act coin, good, bad;
@@ -307,37 +306,8 @@ LTSs are strongly bisimilar iff their initial states are bisimilar.
    In the following diagram, the dotted lines indicate the pairs of nodes that
    are related by a relation `R`.
 
-   .. tikz::
-      :libs: automata
+   .. image:: /_static/tikz/coffee_bisim.svg
 
-        [auto,->]
-        \renewcommand{\a}[1]{\textit{#1}}
-        \begin{scope}
-        \node[state,initial] (l1) {};
-        \node[state,below of=l1] (l2) {};
-        \node[state,below of=l2] (l3) {};
-        \path[->] (l1) edge node[left]{\a{coin}} (l2)
-                  (l2) edge node[left]{\a{coffee}} (l3);
-        \end{scope}
-        \begin{scope}[xshift=3cm]
-        \node[state,initial] (r1) {};
-        \node[state,below of=r1,left of=r1] (r2) {};
-        \node[state,below of=r2,right of=r1] (r3) {};
-        \node[state,below of=r2,left of=r2,xshift=0.5cm] (r4) {};
-        \node[state,right of=r4] (r5) {};
-        \node[state,right of=r5] (r6) {};
-        \node[state,right of=r6] (r7) {};
-        \path[->] (r1) edge node[left] {\a{coin}} (r2) 
-                       edge node[right]{\a{coin}} (r3)
-                  (r2) edge node[above,rotate=60]{\a{coffee}} (r4) 
-                       edge node[above,rotate=-60]{\a{coffee}} (r5)
-                  (r3) edge node[above,rotate=60]{\a{coffee}} (r6) 
-                       edge node[above,rotate=-60]{\a{coffee}} (r7);
-        \end{scope}
-        \path[dotted,bend right]
-          (l1) edge (r1)
-          (l2) edge (r2) edge (r3)
-          (l3) edge (r4) edge (r5) edge (r6) edge (r7);
 
    `R` is a bisimulation relation that relates the initial states of the two
    transition systems, hence they are bisimilar.
@@ -355,31 +325,8 @@ bisimilar to `T`.
    In the following diagram, the dotted lines indicate the pairs of states that
    are related by a relation `R`.
 
-   .. tikz::
-      :libs: automata
+   .. image:: /_static/tikz/coffee_bisim2.svg
 
-      [auto,->]
-      \renewcommand{\a}[1]{\textit{#1}}
-      \node[state,initial] (r1) {};
-      \node[state,below of=r1,left of=r1] (r2) {};
-      \node[state,below of=r2,right of=r1] (r3) {};
-      \node[state,below of=r2,left of=r2,xshift=0.5cm] (r4) {};
-      \node[state,right of=r4] (r5) {};
-      \node[state,right of=r5] (r6) {};
-      \node[state,right of=r6] (r7) {};
-      \path[->] (r1) edge node[left] {\a{coin}} (r2) 
-                     edge node[right]{\a{coin}} (r3)
-                (r2) edge node[above,rotate=60]{\a{coffee}} (r4) 
-                     edge node[above,rotate=-60]{\a{coffee}} (r5)
-                (r3) edge node[above,rotate=60]{\a{coffee}} (r6) 
-                     edge node[above,rotate=-60]{\a{coffee}} (r7);
-
-      \path[dotted,bend right]
-        (r2) edge (r3)
-        (r4) edge (r5) edge (r6) edge (r7) 
-        (r5) edge (r6) edge (r7)
-        (r6) edge (r7);
- 
    `R` is a bisimulation relation, so merging all related states will yield a
    smaller, bisimilar transition system (namely the left transition system of
    the :ref:`previous bisimulation example <exercise-bisim>`).
