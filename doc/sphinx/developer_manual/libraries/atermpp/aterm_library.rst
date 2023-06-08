@@ -315,7 +315,7 @@ For this purpose the functions :cpp:func:`begin() <atermpp::term_appl::begin>` a
      }
 
 There are a number of functions to manipulate with term_lists.
-The function :cpp:func:`front() <atermpp::term_list::front>` provides the first element of a list and
+The function :mcrl2:`front() <atermpp::term_list::front>` provides the first element of a list and
 the function :cpp:func:`tail() <atermpp::term_list::tail>` give the tail of the list.
 The function :cpp:func:`pop_front() <atermpp::term_list::pop_front>` removes the first element from
 a list and :cpp:func:`push_front() <atermpp::term_list::push_front>` is used to add an element to the front

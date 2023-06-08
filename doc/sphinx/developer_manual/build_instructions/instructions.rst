@@ -1,12 +1,90 @@
-.. _build-configuration:
+.. _build-instructions:
+
+Build instructions
+==================
+
+The mCRL2 source code can be obtained in two ways. The source code for releases
+of the toolset are available as a source tarball, see :ref:`download`. The source
+code for the development version of the toolset is available in our `Git <https://git-scm.com/>`_
+repository hosted at `Github <https://github.com/mCRL2org/mCRL2>`_. It can be
+obtained using:
+
+  git clone https://github.com/mCRL2org/mCRL2.git
+
+In the remainder of this manual, we assume that you have the source code on your
+system in a folder called ``mcrl2/src``. We will set up an out-of-source build
+in ``mcrl2/build``. To acquire the various dependencies we will list the
+official websites. However, they can also be acquired from the system package manager
+or alternatives like `brew <https://brew.sh/>` for MacOS or `Conda
+<https://docs.conda.io>` for Windows provided that they have sufficient versions.
+
+To compile the mCRL2 toolset we require any of the following compilers:
+
+    GCC: 7.0
+    Clang: 5.0
+    AppleClang: 11.0
+    MSVC: 2019 v16.0
+
+
+Qt
+--
+
+The mCRL2 toolset requires Qt for compilation of the graphical tools
+(:ref:`tool-diagraphica`, :ref:`tool-ltsgraph`, :ref:`tool-ltsview`,
+:ref:`tool-lpsxsim`, :ref:`tool-mcrl2-gui`, :ref:`tool-mcrl2xi`).
+Qt version 5.12.0 does not work properly and results in non functioning graphical
+tools. Qt version 5.12.1 appears to work fine. Qt 5.13.0 appears to support dark mode on MacOs Mojave
+properly, whereas earlier versions of Qt do not properly adapt the color schemes
+leading to unreadable (white on white) text in some tools.
+
+Windows
+--------
+
+For Windows the minimum Qt version supported is 5.12.
+Download and install Qt from https://www.qt.io/download-qt-installer.
+
+MacOS
+------
+
+For MacOS the minimum Qt version supported is 5.12.
+However, due to MacOS updates changing the APIs used by applications,
+a newer version of MacOS may require a newer version of Qt for some
+features to work properly.
+Qt can be installed using MacPorts by doing the following:
+
+- First go to http://www.macports.org/.
+- In the left menu bar select "Available Downloads" and download the
+  appropriate version.
+- Install the downloaded image.
+- After installing open a terminal and execute the following to test and
+  update MacPort::
+
+    sudo port selfupdate
+
+  Note that ``port`` is usually installed in ``/opt/local/bin``.
+- To install Qt, execute::
+
+    sudo port install qt5-mac
+
+Linux
+-----
+
+For Linux the minimum Qt version supported is 5.12.
+Binary development versions are available in the package manager in most
+distributions (for instance the ``qtbase5-dev`` package in Ubuntu).
+
+On Linux it is also required to install OpenGL related development packages.
+The exact package to be installed depends on your distribution. For Ubuntu
+these are e.g. ``libgl1-mesa-dev`` and ``libglu1-mesa-dev``.
+
 
 Configuration
 =============
 
-To configure CMake to build in ``<mcrl2>/build``, and assuming that
-the sources are in ``<mcrl2>/src``, make sure ``<mcrl2>/build``
-exists before continuing with the following steps. There are three ways to
-configure CMake:
+First of all, we need to install `CMake 3.14.0`
+<http://www.cmake.org/cmake/resources/software.html>`. To configure CMake to
+build in ``<mcrl2>/build``, make sure ``<mcrl2>/build`` exists before continuing
+with the following steps. There are three ways to configure CMake:
 
 *Graphically*
   A graphical user interface ``cmake-gui`` is available on all platforms 
@@ -39,15 +117,6 @@ configure CMake:
 
     cmake <mcrl2>/src -DCMAKE_INSTALL_PREFIX=<installdir>
 	
-.. admonition:: Windows
-   :class: platform-specific win
-
-   When configuring on Windows, the 64-bit generator of Visual Studio 2017 is 
-   needed. In case of CMake version 3.13 or lower, in cmake-gui select the 
-   generator ``Visual Studio 15 2017 Win64``. In case of CMake version 3.14 or
-   higher, in cmake-gui select the generator ``Visual Studio 15 2017`` and 
-   select ``x64`` as the "Optional platform for generator".
-
 All three methods allow you to change the value of CMake configuration
 variables. Below, we describe the meaning of these variables. Note that in the
 graphical user interfaces, some advanced settings are initially hidden.
