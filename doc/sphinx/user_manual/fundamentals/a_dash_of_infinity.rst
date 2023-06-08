@@ -17,17 +17,20 @@ operate the machine forever.
 .. _coffee-inf1:
 .. list-table:: An ever-lasting coffee machine.
 
-   * - .. tikz::
-           :libs: automata
+   * - .. graphviz:: 
 
-           [auto,->]
-           \renewcommand{\a}[1]{\textit{#1}}
-           \node[state,initial] (n0) {P}; 
-           \node[state, right of=n0] (n1) {}; 
-           \node[state, right of=n1] (n2) {};
-           \path (n0) edge[bend left] node[above]{\a{coin}} (n1) (n1) edge[bend left] node[below]{\a{bad}} (n0)
-                 (n1) edge node{\a{coin}} (n2) (n2) edge[bend left=90] node{\a{good}} (n0);
-
+          digraph infinite_coffee {
+          graph [rankdir=LR];
+          node [shape=circle, label="", width=0.1];
+          edge [arrowhead=vee,arrowsize=0.4];
+          ns[style=invisible];
+          ns -> n0;
+          n0 -> n1 [label=coin,labelangle=90];
+          n1 -> n0 [label=bad,labelangle=-90];
+          n1 -> n3 [label=coin,labelangle=90];
+          n3 -> n0 [label=good,labelangle=-90];
+          }
+   
      - ::
 
           act coin, good, bad;
@@ -46,21 +49,24 @@ repetition once and obtain a bisimilar system, as shown in
 .. _coffee-inf2:
 .. list-table:: The ever-lasting coffee machine, unfolded once.
 
-   * - .. tikz::
-           :libs: automata
+   * - .. graphviz:: 
 
-           [auto,->]
-           \renewcommand{\a}[1]{\textit{#1}}
-           \node[state,initial,initial where=right] (n3) {};
-           \node[state, left of=n3] (n4) {};
-           \node[state, left of=n4] (n5) {};
-           \node[state, below of=n5,yshift=-0.5cm] (n0) {P}; 
-           \node[state, right of=n0] (n1) {}; 
-           \node[state, right of=n1] (n2) {};
-           \path (n3) edge node[above]{\a{coin}} (n4) (n4) edge node[above]{\a{coin}} (n5)
-                 (n4) edge[bend right] node[right]{\a{bad}} (n0) (n5) edge node[left]{\a{good}} (n0)
-                 (n0) edge[bend left] node[above]{\a{coin}} (n1) (n1) edge[bend left] node[below]{\a{bad}} (n0)
-                 (n1) edge node{\a{coin}} (n2) (n2) edge[bend left=90] node{\a{good}} (n0);
+          digraph unfolded_coffee {
+          graph [rankdir=LR];
+          node [shape=circle, label="", width=0.1];
+          edge [arrowhead=vee,arrowsize=0.4];
+          ns[style=invisible];
+          ns -> n4;
+          n4 -> n5 [label=coin,labelangle=90];
+          n5 -> n6 [label=coin,labelangle=90];
+          n5 -> n0 [label=bad,labelangle=90];
+          n6 -> n0 [label=good,labelangle=90];
+          n0 -> n1 [label=coin,labelangle=90];
+          n1 -> n0 [label=bad,labelangle=-90];
+          n1 -> n3 [label=coin,labelangle=90];
+          n3 -> n0 [label=good,labelangle=-90];
+          }
+   
      - ::
 
           act coin, good, bad;

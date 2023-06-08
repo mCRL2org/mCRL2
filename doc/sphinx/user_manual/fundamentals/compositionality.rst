@@ -34,12 +34,15 @@ The **deadlock process** (``delta``)
 
   .. list-table:: The deadlock process.
 
-     * - .. tikz::
-            :libs: automata
+     * - .. graphviz:: 
 
-            [auto,->]
-            \renewcommand{\a}[1]{\textit{#1}}
-            \node[state,initial] (a0) {}; 
+            digraph deadlock {
+            graph [rankdir=LR];
+            node [shape=circle, label="", width=0.1];
+            edge [arrowhead=vee,arrowsize=0.4];
+            ns[style=invisible];
+            ns;
+            }
        - ::
 
             init delta;

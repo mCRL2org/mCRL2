@@ -2,6 +2,7 @@
 
 .. math::
    :nowrap:
+   
     \renewcommand{\implies}{\mathop{\Rightarrow}}
 
 .. _tool-lpsinvelm:
