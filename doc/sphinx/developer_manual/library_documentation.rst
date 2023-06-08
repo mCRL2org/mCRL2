@@ -8,18 +8,12 @@ Atermpp
    :maxdepth: 1
    
    libraries/atermpp/aterm_library
-   libraries/atermpp/reference
 
 .. include:: libraries/atermpp/articles.rst
 
 BES
 ====
      
-.. toctree::
-   :maxdepth: 1
-   
-   libraries/bes/reference
-
 .. include:: libraries/bes/articles.rst
 
 Core
@@ -30,7 +24,6 @@ Core
    
    libraries/core/core_library
    libraries/core/common_functionality
-   libraries/core/reference
 
 .. include:: libraries/core/articles.rst
 
@@ -41,7 +34,6 @@ Data
    :maxdepth: 1
    
    libraries/data/data_library
-   libraries/data/reference
 
 .. include:: libraries/data/articles.rst
 
@@ -82,7 +74,6 @@ Modal formula
    :maxdepth: 1
    
    libraries/modal_formula/modal_formulas_library
-   libraries/modal_formula/reference
 
 PBES
 ======
@@ -91,7 +82,6 @@ PBES
    :maxdepth: 1
    
    libraries/pbes/pbes_library
-   libraries/pbes/reference
 
 .. include:: libraries/pbes/articles.rst
 
@@ -102,7 +92,6 @@ Process
    :maxdepth: 1
    
    libraries/process/process_library
-   libraries/process/reference
 
 .. include:: libraries/process/articles.rst
 
@@ -113,7 +102,6 @@ SMT
    :maxdepth: 1
 
    libraries/smt/smt_library
-   libraries/smt/reference
 
 Utilities
 ===========
@@ -122,7 +110,11 @@ Utilities
    :maxdepth: 1
 
    libraries/utilities/utilities_library
-   libraries/utilities/reference
+
+Source code reference
+=====================
+
+We generate the complete source code reference using Doxygen, which can be viewed `here <doxygen/index.html>`
    
 Code generation
 ===============
