@@ -92,9 +92,9 @@ explicitly terminates the process.
    
 .. admonition:: Hint
 
-   If you think verification takes a long time add the :option:`-v` flag
+   If you think verification takes a long time add the ``-v`` flag
    to :ref:`tool-lps2lts`, this will show you progress messages. If you are on a
-   platform other that Windows, you can also pass the :option:`-rjittyc` flag
+   platform other that Windows, you can also pass the ``-rjittyc`` flag
    to :ref:`tool-lps2lts` to use the compiling rewriter. This is more efficient
    than the default jitty rewriter.
    
@@ -144,9 +144,9 @@ Next we are going to investigate some properties of the gossiping girls.
    three of them.
    
    #. The first approach instructs lps2lts to report deadlocks; if no deadlock
-      is reported, the system is deadlock free, using the :option:`-D` option.
+      is reported, the system is deadlock free, using the ``-D`` option.
       We also instruct the tool to save a trace to the deadlock,
-      and terminate once a deadlock has been found using the option:`-t1`::
+      and terminate once a deadlock has been found using the option ``-t1``::
       
         $ lps2lts -rjittyc -D -t1 gossip.lps
         

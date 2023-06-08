@@ -11,5 +11,3 @@ mCRL2 language reference
    mucalc
    bes
    pbes
-   file_formats
-
