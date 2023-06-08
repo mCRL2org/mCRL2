@@ -1,5 +1,6 @@
 .. math::
    :nowrap:
+   
     \renewcommand{\implies}{\mathop{\Rightarrow}}
 
 Parameterised Boolean Equation Systems
