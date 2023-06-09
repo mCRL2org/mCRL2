@@ -15,19 +15,14 @@ add_custom_target(cleandoc
   COMMAND ${CMAKE_COMMAND} -E remove_directory ${SPHINX_BUILD_SRC_DIR}
   COMMAND ${CMAKE_COMMAND} -E remove_directory ${SPHINX_BUILD_OUT_DIR}
   COMMAND ${CMAKE_COMMAND} -E remove_directory ${SPHINX_BUILD_TEMP_DIR}
-  # copy the Sphinx source to the build directory, because some of the
-  # extensions modify the source and we don't want to pollute the source dir
-  COMMAND ${CMAKE_COMMAND}
-    -DCOPY_SRC=${SPHINX_SOURCE_DIR}
-    -DCOPY_DEST=${SPHINX_BUILD_SRC_DIR}
-    -P "${CMAKE_SOURCE_DIR}/build/cmake/CopyIfDifferent.cmake"
   VERBATIM
 )
 
 if(MCRL2_ENABLE_DOC_DOXYGEN)
   # Replace variables @@ with the current values
-  set(DOXYGEN_OUTPUT_PATH ${CMAKE_BINARY_DIR}/sphinx/source/_doxygen/)
-  set(DOXYGEN_TAG_PATH ${DOXYGEN_OUTPUT_PATH}/mcrl2.tag)
+  set(DOXYGEN_BASE ${CMAKE_BINARY_DIR}/sphinx/source/_doxygen/)
+  set(DOXYGEN_OUTPUT_PATH ${DOXYGEN_BASE}/output/)
+  set(DOXYGEN_TAG_PATH ${DOXYGEN_BASE}/mcrl2.tag)
   set(DOXYGEN_INPUT_PATH ${CMAKE_SOURCE_DIR}/libraries/)
 
   configure_file(${CMAKE_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_BINARY_DIR}/doc/Doxyfile @ONLY)
@@ -61,20 +56,22 @@ function(add_build_doc_target NAME DESC)
     list(APPEND SPHINX_TAGS -t build_manual)
   endif()
   
-  configure_file(${CMAKE_SOURCE_DIR}/doc/sphinx/conf.py.in ${SPHINX_BUILD_SRC_DIR}/conf.py @ONLY)
-
   add_custom_target(${NAME}
     COMMENT ${DESC}
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    # copy the Sphinx source to the build directory, because some of the
+    # extensions modify the source and we don't want to pollute the source dir
+    COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different ${SPHINX_SOURCE_DIR} ${SPHINX_BUILD_SRC_DIR}
     # run the Sphinx build command
-    COMMAND ${SPHINX_BUILD_CMD}
+    COMMAND ${CMAKE_COMMAND} -E env CMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR} SPHINX_BUILD_OUT_DIR=${SPHINX_BUILD_OUT_DIR} SPHINX_BUILD_TEMP_DIR=${SPHINX_BUILD_TEMP_DIR} MCRL2_TOOL_PATH=${MCRL2_TOOL_PATH} MCRL2_TOOLS=${MCRL2_TOOLS}
+      ${SPHINX_BUILD_CMD}
       -b html 
       -d "${SPHINX_BUILD_TEMP_DIR}/doctrees"
       -T
       ${SPHINX_TAGS}
       ${SPHINX_PARALLEL}
       ${SPHINX_BUILD_SRC_DIR} 
-      ${SPHINX_BUILD_OUT_DIR}
+      ${SPHINX_BUILD_OUT_DIR}      
     VERBATIM
     USES_TERMINAL
   )

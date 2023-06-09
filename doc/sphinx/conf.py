@@ -18,9 +18,11 @@ import sphinx.errors
 # The ReadTheDocs theme.
 import sphinx_rtd_theme
 
-_CMAKE_SOURCE_DIR = '@CMAKE_SOURCE_DIR@'
-_MCRL2_TOOL_PATH = '@MCRL2_TOOL_PATH@'
-_MCRL2_TOOLS = '@MCRL2_TOOLS@'
+_CMAKE_SOURCE_DIR = os.environ['CMAKE_SOURCE_DIR']
+_MCRL2_TOOL_PATH = os.environ['MCRL2_TOOL_PATH']
+_MCRL2_TOOLS = os.environ['MCRL2_TOOLS']
+_SPHINX_BUILD_TEMP_DIR = os.environ['SPHINX_BUILD_TEMP_DIR']
+_SPHINX_BUILD_OUT_DIR = os.environ['SPHINX_BUILD_OUT_DIR']
 
 # -- Path setup --------------------------------------------------------------
 
@@ -99,7 +101,7 @@ html_sidebars = {
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-html_extra_path = ['_doxygen/html/']
+html_extra_path = ['_doxygen/output/']
 
 html_css_files = [
     'css/mcrl2.css'
@@ -127,11 +129,12 @@ def setup(app):
     import manual
     import pdflatex
 
-    os.makedirs('@SPHINX_BUILD_TEMP_DIR@', mode = 0o755, exist_ok = True)
-    os.makedirs('@SPHINX_BUILD_OUT_DIR@', mode = 0o755, exist_ok = True)
+    os.makedirs(_SPHINX_BUILD_TEMP_DIR, mode = 0o755, exist_ok = True)
+    os.makedirs(_SPHINX_BUILD_OUT_DIR, mode = 0o755, exist_ok = True)
+
     olddir = os.getcwd()
     try:
-        os.chdir(temppath)
+        os.chdir(_SPHINX_BUILD_TEMP_DIR)
 
         if tags.has('build_pdflatex'):
             pdflatex.generate_pdfs()
