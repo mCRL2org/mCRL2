@@ -114,7 +114,7 @@ Utilities
 Source code reference
 =====================
 
-We generate the complete source code reference using Doxygen, which can be viewed `here <doxygen/index.html>`
+We generate the complete source code reference using Doxygen, which can be viewed `here <../doxygen/index.html>`_
    
 Code generation
 ===============
