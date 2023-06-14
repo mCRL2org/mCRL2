@@ -41,11 +41,12 @@ add_mcrl2_tool(ltsview
   DEPENDS
     mcrl2_lts
     mcrl2_gui
-    Qt5::Core
-    Qt5::Gui
-    Qt5::OpenGL
-    Qt5::Widgets
-    Qt5::Xml
+    Qt6::Core
+    Qt6::Gui
+    Qt6::OpenGL
+    Qt6::OpenGLWidgets
+    Qt6::Widgets
+    Qt6::Xml
     ${OPENGL_LIBRARIES}
     ${TR_LIBRARIES}
   INCLUDE

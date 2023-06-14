@@ -12,7 +12,7 @@ add_mcrl2_tool(lpsxsim
     mcrl2_lps
     mcrl2_lts
     mcrl2_gui
-    Qt5::Core
-    Qt5::Gui
-    Qt5::Widgets
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Widgets
 )

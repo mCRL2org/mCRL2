@@ -137,7 +137,7 @@ bool AddEditPropertyDialog::checkInput()
 
   /* both input fields may not be empty and the property name may not exist
    *   already */
-  if (propertyName.count() == 0)
+  if (propertyName.size() == 0)
   {
     executeInformationBox(this, windowTitle,
                           "The property name may not be empty");

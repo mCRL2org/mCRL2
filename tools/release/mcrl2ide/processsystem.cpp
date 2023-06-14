@@ -134,7 +134,7 @@ void ProcessSystem::testExecutableExistence()
       /* if found, check if the tool gives expected output */
       process.waitForFinished();
       QString output = process.readAllStandardOutput();
-      QStringList splittedOutput = output.split(QRegExp("[ \r\n]"));
+      QStringList splittedOutput = output.split(QRegularExpression("[ \r\n]"));
 
       if (!(splittedOutput.length() > 2 && splittedOutput[1] == "mCRL2" &&
             splittedOutput[2] == "toolset"))
@@ -812,13 +812,14 @@ void ProcessSystem::mcrl2ParsingResult(int previousExitCode)
         ProcessType::Parsing,
         "The given specification is not a valid mCRL2 specification\n");
     QString parsingOutput = consoleDock->getConsoleOutput(ProcessType::Parsing);
-    QRegExp parsingError = QRegExp("Line (\\d+), column (\\d+): syntax error");
+    QRegularExpression parsingError = QRegularExpression("Line (\\d+), column (\\d+): syntax error");
+    QRegularExpressionMatch match;
     int parsingErrorIndex =
-        parsingOutput.indexOf(parsingError, parsingOutput.lastIndexOf("#####"));
+        parsingOutput.indexOf(parsingError, parsingOutput.lastIndexOf("#####"), &match);
     if (parsingErrorIndex >= 0)
     {
-      fileSystem->setSpecificationEditorCursor(parsingError.cap(1).toInt(),
-                                               parsingError.cap(2).toInt());
+      fileSystem->setSpecificationEditorCursor(match.capturedTexts()[0].toInt(),
+        match.capturedTexts()[1].toInt());
     }
   }
 }

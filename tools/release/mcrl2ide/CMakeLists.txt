@@ -19,10 +19,10 @@ add_mcrl2_tool(mcrl2ide
   DEPENDS
     mcrl2_gui
     mcrl2_lts
-    Qt5::Core
-    Qt5::Gui
-    Qt5::Widgets
-    Qt5::Xml
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Widgets
+    Qt6::Xml
 )
 
 if(TARGET mcrl2ide)

@@ -12,6 +12,8 @@
 
 #include <QPlainTextEdit>
 #include <QSyntaxHighlighter>
+#include <QRegularExpression>
+
 #include "mcrl2/gui/utilities.h"
 
 namespace mcrl2
@@ -29,8 +31,8 @@ namespace qt
  */
 class HighlightingRule
 {
-  public:
-  QRegExp pattern;
+public:
+  QRegularExpression pattern;
   QTextCharFormat format;
 
   /**
@@ -38,7 +40,7 @@ class HighlightingRule
    * @param pattern The pattern of syntactic elements to highlight
    * @param format The highlighting format for this pattern
    */
-  HighlightingRule(QRegExp pattern, QTextCharFormat format);
+  HighlightingRule(QRegularExpression pattern, QTextCharFormat format);
 };
 
 /**
