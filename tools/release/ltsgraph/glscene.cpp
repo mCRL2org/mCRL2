@@ -1045,12 +1045,12 @@ void GLScene::renderHandle(std::size_t i)
   const Graph::Node& handle = m_graph.handle(i);
   if (handle.selected() > 0.1f || handle.locked())
   {
-    QVector3D line(2 * handle.selected() - 1.0f, 0.0f, 0.0f);
-    QVector3D fill(1.0f, 1.0f, 1.0f);
+    QVector4D line(2 * handle.selected() - 1.0f, 0.0f, 0.0f, 1.0f);
+    QVector4D fill(1.0f, 1.0f, 1.0f, 1.0f);
 
     if (handle.locked())
     {
-      fill = QVector3D(0.7f, 0.7f, 0.7f);
+      fill = QVector4D(0.7f, 0.7f, 0.7f, 1.0f);
     }
 
     m_drawHandleBody.push_back(handle.pos(), fill);

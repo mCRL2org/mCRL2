@@ -38,11 +38,11 @@ add_mcrl2_tool(diagraphica
     mcrl2_lts
     mcrl2_utilities
     mcrl2_gui
-    Qt5::Widgets
-    Qt5::Core
-    Qt5::OpenGL
-    Qt5::Xml
-    Qt5::Gui
+    Qt6::Widgets
+    Qt6::Core
+    Qt6::OpenGL
+    Qt6::Xml
+    Qt6::Gui
     ${OPENGL_LIBRARIES}
   INCLUDE
     ${OPENGL_INCLUDE_DIR}

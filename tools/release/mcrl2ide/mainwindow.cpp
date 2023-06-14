@@ -16,7 +16,6 @@
 #include <QMenuBar>
 #include <QToolBar>
 #include <QInputDialog>
-#include <QDesktopWidget>
 #include <QDialogButtonBox>
 #include <QStandardItemModel>
 
@@ -74,11 +73,6 @@ MainWindow::MainWindow(const QString& inputFilePath, QWidget* parent)
   {
     restoreGeometry(settings->value("geometry").toByteArray());
   }
-  else
-  {
-    resize(QSize(QDesktopWidget().availableGeometry(this).width() * 0.5,
-                 QDesktopWidget().availableGeometry(this).height() * 0.75));
-  }
   if (settings->contains("windowstate"))
   {
     restoreState(settings->value("windowstate").toByteArray());
@@ -119,7 +113,7 @@ void MainWindow::setupMenuBar()
 
   saveAsAction =
       fileMenu->addAction(saveProjectAsText, this, SLOT(actionSaveAs()),
-                          QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_S));
+                          QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_S));
 
   fileMenu->addSeparator();
 
@@ -132,7 +126,7 @@ void MainWindow::setupMenuBar()
 
   importPropertiesAction = fileMenu->addAction(
       "Import Properties", this, SLOT(actionImportProperties()),
-      QKeySequence(Qt::ALT + Qt::Key_I));
+      QKeySequence(Qt::ALT | Qt::Key_I));
   importPropertiesAction->setEnabled(false);
 
 // workaround for QTBUG-57687
@@ -146,7 +140,7 @@ void MainWindow::setupMenuBar()
   fileMenu->addSeparator();
 
   exitAction = fileMenu->addAction("Exit", this, SLOT(close()),
-                                   QKeySequence(Qt::CTRL + Qt::Key_Q));
+                                   QKeySequence(Qt::CTRL | Qt::Key_Q));
 
   /* Create the Edit menu (actions are added in updateEditMenu()) */
   editMenu = menuBar()->addMenu("Edit");
@@ -160,31 +154,31 @@ void MainWindow::setupMenuBar()
 
   parseAction = toolsMenu->addAction(parseStartIcon, parseStartText, this,
                                      SLOT(actionParse()),
-                                     QKeySequence(Qt::ALT + Qt::Key_P));
+                                     QKeySequence(Qt::ALT | Qt::Key_P));
 
   simulateAction = toolsMenu->addAction(simulateStartIcon, simulateStartText,
                                         this, SLOT(actionSimulate()),
-                                        QKeySequence(Qt::ALT + Qt::Key_S));
+                                        QKeySequence(Qt::ALT | Qt::Key_S));
 
   toolsMenu->addSeparator();
 
   showLtsAction = toolsMenu->addAction(showLtsStartIcon, showLtsStartText, this,
                                        SLOT(actionShowLts()),
-                                       QKeySequence(Qt::ALT + Qt::Key_T));
+                                       QKeySequence(Qt::ALT | Qt::Key_T));
 
   showReducedLtsAction = toolsMenu->addAction(
       showReducedLtsStartIcon, showReducedLtsStartText, this,
-      SLOT(actionShowReducedLts()), QKeySequence(Qt::ALT + Qt::Key_R));
+      SLOT(actionShowReducedLts()), QKeySequence(Qt::ALT | Qt::Key_R));
 
   toolsMenu->addSeparator();
 
   addPropertyAction = toolsMenu->addAction(
       QIcon(":/icons/add_property.png"), "Add Property", this,
-      SLOT(actionAddProperty()), QKeySequence(Qt::ALT + Qt::Key_A));
+      SLOT(actionAddProperty()), QKeySequence(Qt::ALT | Qt::Key_A));
 
   verifyAllPropertiesAction = toolsMenu->addAction(
       verifyAllPropertiesStartIcon, verifyAllPropertiesStartText, this,
-      SLOT(actionVerifyAllProperties()), QKeySequence(Qt::ALT + Qt::Key_V));
+      SLOT(actionVerifyAllProperties()), QKeySequence(Qt::ALT | Qt::Key_V));
 
   /* create the options menu */
   QMenu* optionsMenu = menuBar()->addMenu("Options");

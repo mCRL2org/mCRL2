@@ -11,6 +11,8 @@
 #include "glwidget.h"
 
 #include <QtOpenGL>
+#include <QMessageBox>
+
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/gui/arcball.h"

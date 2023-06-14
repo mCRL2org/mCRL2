@@ -167,8 +167,8 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
       set(HAS_QT_DEPENDENCY TRUE)
     endif()
 
-    if("${DEP}" STREQUAL "Qt5::Widgets")
-      # This mCRL2 binary depends on Qt5::Widgets, so it is a gui binary.
+    if("${DEP}" STREQUAL "Qt6::Widgets")
+      # This mCRL2 binary depends on Qt6::Widgets, so it is a gui binary.
       set(IS_GUI_BINARY TRUE)
     endif()
   endforeach()
