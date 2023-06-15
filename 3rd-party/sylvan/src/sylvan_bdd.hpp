@@ -138,6 +138,7 @@ class bdd
     bool operator<=(const bdd& other) const
     {
       // TODO: better implementation, since we are not interested in the BDD result
+      LACE_ME;
       return sylvan_ite(m_bdd, sylvan_not(other.m_bdd), sylvan_false) == sylvan_false;
     }
 
@@ -169,66 +170,78 @@ class bdd
 
     bdd operator*(const bdd& other) const
     {
+      LACE_ME;
       return bdd(sylvan_and(m_bdd, other.m_bdd));
     }
 
     bdd& operator*=(const bdd& other)
     {
+      LACE_ME;
       m_bdd = sylvan_and(m_bdd, other.m_bdd);
       return *this;
     }
 
     bdd operator&(const bdd& other) const
     {
+      LACE_ME;
       return bdd(sylvan_and(m_bdd, other.m_bdd));
     }
 
     bdd& operator&=(const bdd& other)
     {
+      LACE_ME;
       m_bdd = sylvan_and(m_bdd, other.m_bdd);
       return *this;
     }
 
     bdd operator+(const bdd& other) const
     {
+      LACE_ME;
       return bdd(sylvan_or(m_bdd, other.m_bdd));
     }
 
     bdd& operator+=(const bdd& other)
     {
+      LACE_ME;
       m_bdd = sylvan_or(m_bdd, other.m_bdd);
       return *this;
     }
 
     bdd operator|(const bdd& other) const
     {
+      LACE_ME;
       return bdd(sylvan_or(m_bdd, other.m_bdd));
     }
 
     bdd& operator|=(const bdd& other)
     {
+      LACE_ME;
       m_bdd = sylvan_or(m_bdd, other.m_bdd);
       return *this;
     }
 
     bdd operator^(const bdd& other) const
     {
+      LACE_ME;
       return bdd(sylvan_xor(m_bdd, other.m_bdd));
     }
 
     bdd& operator^=(const bdd& other)
     {
+      LACE_ME;
       m_bdd = sylvan_xor(m_bdd, other.m_bdd);
       return *this;
     }
 
     bdd operator-(const bdd& other) const
     {
+      LACE_ME;
       return bdd(sylvan_and(m_bdd, sylvan_not(other.m_bdd)));
     }
 
     bdd& operator-=(const bdd& other)
     {
+      LACE_ME;
       m_bdd = sylvan_and(m_bdd, sylvan_not(other.m_bdd));
       return *this;
     }
@@ -238,6 +251,7 @@ class bdd
 /// The variable index must be a 0<=index<=2^23 (we use 24 bits internally)
 inline bdd make_variable(std::uint32_t index)
 {
+  LACE_ME;
   return bdd(sylvan_ithvar(index));
 }
 
@@ -257,6 +271,7 @@ inline bdd false_()
 /// The set of variables v is represented by a conjunction of variables
 inline bdd exists(const bdd& v, const bdd& x)
 {
+  LACE_ME;
   return bdd(sylvan_exists(x.get(), v.get()));
 }
 
@@ -264,12 +279,14 @@ inline bdd exists(const bdd& v, const bdd& x)
 /// The set of variables v is represented by a conjunction of variables
 inline bdd forall(const bdd& v, const bdd& x)
 {
+  LACE_ME;
   return bdd(sylvan_forall(x.get(), v.get()));
 }
 
 /// \brief  Computes if b then x else y
 inline bdd ite(const bdd& b, const bdd& x, const bdd& y)
 {
+  LACE_ME;
   return bdd(sylvan_ite(b.get(), x.get(), y.get()));
 }
 
@@ -277,6 +294,7 @@ inline bdd ite(const bdd& b, const bdd& x, const bdd& y)
 inline
 bdd equiv(const bdd& x, const bdd& y)
 {
+  LACE_ME;
   return bdd(sylvan_equiv(x.get(), y.get()));
 }
 
@@ -289,6 +307,7 @@ bdd implies(const bdd& x, const bdd& y)
 
 inline double satcount(const bdd& x, const bdd &variables)
 {
+  LACE_ME;
   return sylvan_satcount(x.get(), variables.get());
 }
 
@@ -341,6 +360,7 @@ class bdd_substitution
 /// \brief Applies the substitution sigma to x.
 inline bdd let(const bdd_substitution& sigma, const bdd& x)
 {
+  LACE_ME;
   return bdd(sylvan_compose(x.get(), sigma.get()));
 }
 
@@ -355,6 +375,7 @@ inline bdd let(const bdd_substitution& sigma, const bdd& x)
 /// or to take the 'previous' of a set               -->  S
 inline bdd relprev(const bdd& relation, const bdd& x, const bdd& variables)
 {
+  LACE_ME;
   return bdd(sylvan_relprev(relation.get(), x.get(), variables.get()));
 }
 
@@ -368,6 +389,7 @@ inline bdd relprev(const bdd& relation, const bdd& x, const bdd& variables)
 /// Use this function to take the 'next' of a set     S  -->
 inline bdd relnext(const bdd& relation, const bdd& x, const bdd& variables)
 {
+  LACE_ME;
   return bdd(sylvan_relnext(relation.get(), x.get(), variables.get()));
 }
 

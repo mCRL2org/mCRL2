@@ -16,13 +16,25 @@
  */
 
 #include <sylvan_int.h>
-#include <sylvan_align.h>
 
 #include <errno.h>  // for errno
 #include <string.h> // for strerror
+#include <sys/mman.h> // for mmap
+
+#ifndef MAP_ANONYMOUS
+#define MAP_ANONYMOUS MAP_ANON
+#endif
+
+#ifndef CACHE_MASK
+#define CACHE_MASK 1
+#endif
 
 #ifndef compiler_barrier
-#define compiler_barrier() atomic_signal_fence(memory_order_seq_cst)
+#define compiler_barrier() { asm volatile("" ::: "memory"); }
+#endif
+
+#ifndef cas
+#define cas(ptr, old, new) (__sync_bool_compare_and_swap((ptr),(old),(new)))
 #endif
 
 /**
@@ -60,12 +72,12 @@ static size_t             cache_mask;         // cache_size-1
 static cache_entry_t      cache_table;
 static uint32_t*          cache_status;
 
-static _Atomic(uint64_t)  next_opid;
+static uint64_t           next_opid;
 
 uint64_t
 cache_next_opid()
 {
-    return atomic_fetch_add(&next_opid, 1LL<<40);
+    return __sync_fetch_and_add(&next_opid, 1LL<<40);
 }
 
 // status: 0x80000000 - bitlock
@@ -105,14 +117,14 @@ cache_get6(uint64_t a, uint64_t b, uint64_t c, uint64_t d, uint64_t e, uint64_t 
 {
     const uint64_t hash = cache_hash6(a, b, c, d, e, f);
 #if CACHE_MASK
-    _Atomic(uint64_t) *s_bucket = (_Atomic(uint64_t)*)cache_status + (hash & cache_mask)/2;
+    volatile uint64_t *s_bucket = (uint64_t*)cache_status + (hash & cache_mask)/2;
     cache6_entry_t bucket = (cache6_entry_t)cache_table + (hash & cache_mask)/2;
 #else
-    _Atomic(uint64_t) *s_bucket = (_Atomic(uint64_t)*)cache_status + (hash % cache_size)/2;
+    volatile uint64_t *s_bucket = (uint64_t*)cache_status + (hash % cache_size)/2;
     cache6_entry_t bucket = (cache6_entry_t)cache_table + (hash % cache_size)/2;
 #endif
-    // can be relaxed, we check again afterwards
-    const uint64_t s = atomic_load_explicit(s_bucket, memory_order_relaxed);
+    const uint64_t s = *s_bucket;
+    compiler_barrier();
     // abort if locked or second part of 2-part entry or if different hash
     uint64_t x = ((hash>>32) & 0x7fff0000) | 0x04000000;
     x = x | (x<<32);
@@ -122,8 +134,9 @@ cache_get6(uint64_t a, uint64_t b, uint64_t c, uint64_t d, uint64_t e, uint64_t 
     if (bucket->d != d || bucket->e != e || bucket->f != f) return 0;
     *res1 = bucket->res;
     if (res2) *res2 = bucket->res2;
+    compiler_barrier();
     // abort if status field changed after compiler_barrier()
-    return atomic_load_explicit(s_bucket, memory_order_acquire) == s ? 1 : 0;
+    return *s_bucket == s ? 1 : 0;
 }
 
 int
@@ -131,14 +144,13 @@ cache_put6(uint64_t a, uint64_t b, uint64_t c, uint64_t d, uint64_t e, uint64_t 
 {
     const uint64_t hash = cache_hash6(a, b, c, d, e, f);
 #if CACHE_MASK
-    _Atomic(uint64_t) *s_bucket = (_Atomic(uint64_t)*)cache_status + (hash & cache_mask)/2;
+    volatile uint64_t *s_bucket = (uint64_t*)cache_status + (hash & cache_mask)/2;
     cache6_entry_t bucket = (cache6_entry_t)cache_table + (hash & cache_mask)/2;
 #else
-    _Atomic(uint64_t) *s_bucket = (_Atomic(uint64_t)*)cache_status + (hash % cache_size)/2;
+    volatile uint64_t *s_bucket = (uint64_t*)cache_status + (hash % cache_size)/2;
     cache6_entry_t bucket = (cache6_entry_t)cache_table + (hash % cache_size)/2;
 #endif
-    // can be relaxed, we use cas afterwards to claim it
-    uint64_t s = atomic_load_explicit(s_bucket, memory_order_relaxed);
+    const uint64_t s = *s_bucket;
     // abort if locked
     if (s & 0x8000000080000000LL) return 0;
     // create new
@@ -147,7 +159,7 @@ cache_put6(uint64_t a, uint64_t b, uint64_t c, uint64_t d, uint64_t e, uint64_t 
     new_s |= (((s>>32)+1)&0xffff)<<32;
     new_s |= (s+1)&0xffff;
     // use cas to claim bucket
-    if (!atomic_compare_exchange_weak(s_bucket, &s, new_s | 0x8000000080000000LL)) return 0;
+    if (!cas(s_bucket, s, new_s | 0x8000000080000000LL)) return 0;
     // cas succesful: write data
     bucket->a = a;
     bucket->b = b;
@@ -157,8 +169,9 @@ cache_put6(uint64_t a, uint64_t b, uint64_t c, uint64_t d, uint64_t e, uint64_t 
     bucket->f = f;
     bucket->res = res1;
     bucket->res2 = res2;
-    // unlock status field
-    atomic_store_explicit(s_bucket, new_s, memory_order_release);
+    compiler_barrier();
+    // after compiler_barrier(), unlock status field
+    *s_bucket = new_s;
     return 1;
 }
 
@@ -167,13 +180,14 @@ cache_get(uint64_t a, uint64_t b, uint64_t c, uint64_t *res)
 {
     const uint64_t hash = cache_hash(a, b, c);
 #if CACHE_MASK
-    _Atomic(uint32_t) *s_bucket = (_Atomic(uint32_t)*)cache_status + (hash & cache_mask);
+    volatile uint32_t *s_bucket = cache_status + (hash & cache_mask);
     cache_entry_t bucket = cache_table + (hash & cache_mask);
 #else
-    _Atomic(uint32_t) *s_bucket = (_Atomic(uint32_t)*)cache_status + (hash % cache_size);
+    volatile uint32_t *s_bucket = cache_status + (hash % cache_size);
     cache_entry_t bucket = cache_table + (hash % cache_size);
 #endif
-    const uint32_t s = atomic_load_explicit(s_bucket, memory_order_relaxed);
+    const uint32_t s = *s_bucket;
+    compiler_barrier();
     // abort if locked or if part of a 2-part cache entry
     if (s & 0xc0000000) return 0;
     // abort if different hash
@@ -181,8 +195,9 @@ cache_get(uint64_t a, uint64_t b, uint64_t c, uint64_t *res)
     // abort if key different
     if (bucket->a != a || bucket->b != b || bucket->c != c) return 0;
     *res = bucket->res;
+    compiler_barrier();
     // abort if status field changed after compiler_barrier()
-    return atomic_load_explicit(s_bucket, memory_order_acquire) == s ? 1 : 0;
+    return *s_bucket == s ? 1 : 0;
 }
 
 int
@@ -190,13 +205,13 @@ cache_put(uint64_t a, uint64_t b, uint64_t c, uint64_t res)
 {
     const uint64_t hash = cache_hash(a, b, c);
 #if CACHE_MASK
-    _Atomic(uint32_t) *s_bucket = (_Atomic(uint32_t)*)cache_status + (hash & cache_mask);
+    volatile uint32_t *s_bucket = cache_status + (hash & cache_mask);
     cache_entry_t bucket = cache_table + (hash & cache_mask);
 #else
-    _Atomic(uint32_t) *s_bucket = (_Atomic(uint32_t)*)cache_status + (hash % cache_size);
+    volatile uint32_t *s_bucket = cache_status + (hash % cache_size);
     cache_entry_t bucket = cache_table + (hash % cache_size);
 #endif
-    uint32_t s = atomic_load_explicit(s_bucket, memory_order_relaxed);
+    const uint32_t s = *s_bucket;
     // abort if locked
     if (s & 0x80000000) return 0;
     // abort if hash identical -> no: in iscasmc this occasionally causes timeouts?!
@@ -204,14 +219,15 @@ cache_put(uint64_t a, uint64_t b, uint64_t c, uint64_t res)
     // if ((s & 0x7fff0000) == hash_mask) return 0;
     // use cas to claim bucket
     const uint32_t new_s = ((s+1) & 0x0000ffff) | hash_mask;
-    if (!atomic_compare_exchange_weak(s_bucket, &s, new_s | 0x80000000)) return 0;
+    if (!cas(s_bucket, s, new_s | 0x80000000)) return 0;
     // cas succesful: write data
     bucket->a = a;
     bucket->b = b;
     bucket->c = c;
     bucket->res = res;
+    compiler_barrier();
     // after compiler_barrier(), unlock status field
-    atomic_store_explicit(s_bucket, new_s, memory_order_release);
+    *s_bucket = new_s;
     return 1;
 }
 
@@ -237,9 +253,10 @@ cache_create(size_t _cache_size, size_t _max_size)
         exit(1);
     }
 
-    cache_table = (cache_entry_t)alloc_aligned(cache_max * sizeof(struct cache_entry));
-    cache_status = (uint32_t*)alloc_aligned(cache_max * sizeof(uint32_t));
-    if (cache_table == 0 || cache_status == 0) {
+    cache_table = (cache_entry_t)mmap(0, cache_max * sizeof(struct cache_entry), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    cache_status = (uint32_t*)mmap(0, cache_max * sizeof(uint32_t), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+
+    if (cache_table == (cache_entry_t)-1 || cache_status == (uint32_t*)-1) {
         fprintf(stderr, "cache_create: Unable to allocate memory: %s!\n", strerror(errno));
         exit(1);
     }
@@ -250,8 +267,8 @@ cache_create(size_t _cache_size, size_t _max_size)
 void
 cache_free()
 {
-    free_aligned(cache_table, cache_max * sizeof(struct cache_entry));
-    free_aligned(cache_status, cache_max * sizeof(uint32_t));
+    munmap(cache_table, cache_max * sizeof(struct cache_entry));
+    munmap(cache_status, cache_max * sizeof(uint32_t));
 }
 
 void

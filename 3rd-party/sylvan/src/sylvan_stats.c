@@ -16,10 +16,10 @@
  */
 
 #include <sylvan_int.h>
-#include <sylvan_align.h>
 
 #include <errno.h>  // for errno
 #include <string.h> // memset
+#include <sys/mman.h>
 #include <inttypes.h>
 
 #if SYLVAN_STATS
@@ -99,22 +99,6 @@ struct
     {2, LDD_RELPROD_UNION, "LDD relprod_union"},
     {2, LDD_PROJECT_MINUS, "LDD project_minus"},
 
-    {2, ZDD_FROM_MTBDD, "ZDD from_mtbdd"},
-    {2, ZDD_TO_MTBDD, "ZDD to_mtbdd"},
-    {2, ZDD_UNION_CUBE, "ZDD union_cube"},
-    {2, ZDD_EXTEND_DOMAIN, "ZDD ext_domain"},
-    {2, ZDD_SUPPORT, "ZDD support" },
-    {2, ZDD_PATHCOUNT, "ZDD pathcount" },
-    {2, ZDD_AND, "ZDD and" },
-    {2, ZDD_OR, "ZDD or" },
-    {2, ZDD_ITE, "ZDD ite" },
-    {2, ZDD_NOT, "ZDD not" },
-    {2, ZDD_DIFF, "ZDD diff" },
-    {2, ZDD_EXISTS, "ZDD exists" },
-    {2, ZDD_PROJECT, "ZDD project" },
-    {2, ZDD_ISOP, "zdd isop"},
-    {2, ZDD_COVER_TO_BDD, "zdd cover_to_bdd"},
-
     {0, 0, "Garbage collection"},
     {1, SYLVAN_GC_COUNT, "GC executions"},
     {3, SYLVAN_GC, "Total time spent"},
@@ -134,8 +118,8 @@ VOID_TASK_0(sylvan_stats_reset_perthread)
 #else
     sylvan_stats_t *sylvan_stats = pthread_getspecific(sylvan_stats_key);
     if (sylvan_stats == NULL) {
-        sylvan_stats = alloc_aligned(sizeof(sylvan_stats_t));
-        if (sylvan_stats == 0) {
+        sylvan_stats = mmap(0, sizeof(sylvan_stats_t), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
+        if (sylvan_stats == (sylvan_stats_t *)-1) {
             fprintf(stderr, "sylvan_stats: Unable to allocate memory: %s!\n", strerror(errno));
             exit(1);
         }
@@ -170,19 +154,19 @@ VOID_TASK_1(sylvan_stats_sum, sylvan_stats_t*, target)
 {
 #ifdef __ELF__
     for (int i=0; i<SYLVAN_COUNTER_COUNTER; i++) {
-        atomic_fetch_add((_Atomic(uint64_t)*)target->counters + i, sylvan_stats.counters[i]);
+        __sync_fetch_and_add(&target->counters[i], sylvan_stats.counters[i]);
     }
     for (int i=0; i<SYLVAN_TIMER_COUNTER; i++) {
-        atomic_fetch_add((_Atomic(uint64_t)*)target->timers + i, sylvan_stats.timers[i]);
+        __sync_fetch_and_add(&target->timers[i], sylvan_stats.timers[i]);
     }
 #else
     sylvan_stats_t *sylvan_stats = pthread_getspecific(sylvan_stats_key);
     if (sylvan_stats != NULL) {
         for (int i=0; i<SYLVAN_COUNTER_COUNTER; i++) {
-            atomic_fetch_add((_Atomic(uint64_t)*)target->counters + i, sylvan_stats->counters[i]);
+            __sync_fetch_and_add(&target->counters[i], sylvan_stats->counters[i]);
         }
         for (int i=0; i<SYLVAN_TIMER_COUNTER; i++) {
-            atomic_fetch_add((_Atomic(uint64_t)*)target->timers + i, sylvan_stats->timers[i]);
+            __sync_fetch_and_add(&target->timers[i], sylvan_stats->timers[i]);
         }
     }
 #endif
@@ -228,6 +212,7 @@ to_h(double size, char *buf)
 void
 sylvan_stats_report(FILE *target)
 {
+    LACE_ME;
     sylvan_stats_t totals;
     sylvan_stats_snapshot(&totals);
 

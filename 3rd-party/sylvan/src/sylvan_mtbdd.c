@@ -262,10 +262,8 @@ VOID_TASK_0(mtbdd_refs_mark)
     TOGETHER(mtbdd_refs_mark_task);
 }
 
-void
-mtbdd_refs_init_key(void)
+VOID_TASK_0(mtbdd_refs_init_task)
 {
-    assert(lace_is_worker()); // only use inside Lace workers
     mtbdd_refs_internal_t s = (mtbdd_refs_internal_t)malloc(sizeof(struct mtbdd_refs_internal));
     s->pcur = s->pbegin = (const MTBDD**)malloc(sizeof(MTBDD*) * 1024);
     s->pend = s->pbegin + 1024;
@@ -274,11 +272,6 @@ mtbdd_refs_init_key(void)
     s->scur = s->sbegin = (mtbdd_refs_task_t)malloc(sizeof(struct mtbdd_refs_task) * 1024);
     s->send = s->sbegin + 1024;
     SET_THREAD_LOCAL(mtbdd_refs_key, s);
-}
-
-VOID_TASK_0(mtbdd_refs_init_task)
-{
-    mtbdd_refs_init_key();
 }
 
 VOID_TASK_0(mtbdd_refs_init)
@@ -321,13 +314,8 @@ void __attribute__((unused))
 mtbdd_refs_pushptr(const MTBDD *ptr)
 {
     LOCALIZE_THREAD_LOCAL(mtbdd_refs_key, mtbdd_refs_internal_t);
-    if (mtbdd_refs_key == 0) {
-        mtbdd_refs_init_key();
-        mtbdd_refs_pushptr(ptr);
-    } else {
-        *mtbdd_refs_key->pcur++ = ptr;
-        if (mtbdd_refs_key->pcur == mtbdd_refs_key->pend) mtbdd_refs_ptrs_up(mtbdd_refs_key);
-    }
+    *mtbdd_refs_key->pcur++ = ptr;
+    if (mtbdd_refs_key->pcur == mtbdd_refs_key->pend) mtbdd_refs_ptrs_up(mtbdd_refs_key);
 }
 
 void __attribute__((unused))
@@ -341,14 +329,9 @@ MTBDD __attribute__((unused))
 mtbdd_refs_push(MTBDD mtbdd)
 {
     LOCALIZE_THREAD_LOCAL(mtbdd_refs_key, mtbdd_refs_internal_t);
-    if (mtbdd_refs_key == 0) {
-        mtbdd_refs_init_key();
-        return mtbdd_refs_push(mtbdd);
-    } else {
-        *(mtbdd_refs_key->rcur++) = mtbdd;
-        if (mtbdd_refs_key->rcur == mtbdd_refs_key->rend) return mtbdd_refs_refs_up(mtbdd_refs_key, mtbdd);
-        else return mtbdd;
-    }
+    *(mtbdd_refs_key->rcur++) = mtbdd;
+    if (mtbdd_refs_key->rcur == mtbdd_refs_key->rend) return mtbdd_refs_refs_up(mtbdd_refs_key, mtbdd);
+    else return mtbdd;
 }
 
 void __attribute__((unused))
@@ -412,7 +395,8 @@ sylvan_init_mtbdd()
         mtbdd_protected_created = 1;
     }
 
-    RUN(mtbdd_refs_init);
+    LACE_ME;
+    CALL(mtbdd_refs_init);
 }
 
 /**
@@ -429,7 +413,9 @@ mtbdd_makeleaf(uint32_t type, uint64_t value)
     int created;
     uint64_t index = custom ? llmsset_lookupc(nodes, n.a, n.b, &created) : llmsset_lookup(nodes, n.a, n.b, &created);
     if (index == 0) {
-        RUN(sylvan_gc);
+        LACE_ME;
+
+        sylvan_gc();
 
         index = custom ? llmsset_lookupc(nodes, n.a, n.b, &created) : llmsset_lookup(nodes, n.a, n.b, &created);
         if (index == 0) {
@@ -444,50 +430,47 @@ mtbdd_makeleaf(uint32_t type, uint64_t value)
     return (MTBDD)index;
 }
 
-void
-__attribute__ ((noinline))
-_mtbdd_makenode_gc(MTBDD low, MTBDD high)
-{
-    mtbdd_refs_push(low);
-    mtbdd_refs_push(high);
-    RUN(sylvan_gc);
-    mtbdd_refs_pop(2);
-}
-
-void
-__attribute__ ((noinline))
-_mtbdd_makenode_exit(void)
-{
-    fprintf(stderr, "BDD Unique table full, %zu of %zu buckets filled!\n", llmsset_count_marked(nodes), llmsset_get_size(nodes));
-    exit(1);
-}
-
 MTBDD
 _mtbdd_makenode(uint32_t var, MTBDD low, MTBDD high)
 {
     // Normalization to keep canonicity
     // low will have no mark
 
-    MTBDD result = low & mtbdd_complement;
-    low ^= result;
-    high ^= result;
-
     struct mtbddnode n;
+    int mark, created;
+
+    if (MTBDD_HASMARK(low)) {
+        mark = 1;
+        low = MTBDD_TOGGLEMARK(low);
+        high = MTBDD_TOGGLEMARK(high);
+    } else {
+        mark = 0;
+    }
+
     mtbddnode_makenode(&n, var, low, high);
 
-    int created;
+    MTBDD result;
     uint64_t index = llmsset_lookup(nodes, n.a, n.b, &created);
     if (index == 0) {
-        _mtbdd_makenode_gc(low, high);
+        LACE_ME;
+
+        mtbdd_refs_push(low);
+        mtbdd_refs_push(high);
+        sylvan_gc();
+        mtbdd_refs_pop(2);
+
         index = llmsset_lookup(nodes, n.a, n.b, &created);
-        if (index == 0) _mtbdd_makenode_exit();
+        if (index == 0) {
+            fprintf(stderr, "BDD Unique table full, %zu of %zu buckets filled!\n", llmsset_count_marked(nodes), llmsset_get_size(nodes));
+            exit(1);
+        }
     }
 
     if (created) sylvan_stats_count(BDD_NODES_CREATED);
     else sylvan_stats_count(BDD_NODES_REUSED);
 
-    result |= index;
-    return result;
+    result = index;
+    return mark ? result | mtbdd_complement : result;
 }
 
 MTBDD
@@ -503,9 +486,11 @@ mtbdd_makemapnode(uint32_t var, MTBDD low, MTBDD high)
     mtbddnode_makemapnode(&n, var, low, high);
     index = llmsset_lookup(nodes, n.a, n.b, &created);
     if (index == 0) {
+        LACE_ME;
+
         mtbdd_refs_push(low);
         mtbdd_refs_push(high);
-        RUN(sylvan_gc);
+        sylvan_gc();
         mtbdd_refs_pop(2);
 
         index = llmsset_lookup(nodes, n.a, n.b, &created);
@@ -2310,7 +2295,7 @@ TASK_IMPL_1(MTBDD, mtbdd_support, MTBDD, dd)
 
 /**
  * Function composition, for each node with variable <key> which has a <key,value> pair in <map>,
- * replace the node by the result of mtbdd_ite(<value>, <high>, <low>).
+ * replace the node by the result of mtbdd_ite(<value>, <low>, <high>).
  * Each <value> in <map> must be a Boolean MTBDD.
  */
 TASK_IMPL_2(MTBDD, mtbdd_compose, MTBDD, a, MTBDDMAP, map)
@@ -2537,10 +2522,6 @@ mtbdd_enum_first(MTBDD dd, MTBDD variables, uint8_t *arr, mtbdd_enum_filter_cb f
             variables = mtbdd_gethigh(variables);
         }
         return dd;
-    } else if (variables == mtbdd_true) {
-        // in the case of partial evaluation... treat like a leaf
-        if (filter_cb != NULL && filter_cb(dd) == 0) return mtbdd_false;
-        return dd;
     } else {
         // if variables == true, then dd must be a leaf. But then this line is unreachable.
         // if this assertion fails, then <variables> is not the support of <dd>.
@@ -2581,9 +2562,6 @@ mtbdd_enum_next(MTBDD dd, MTBDD variables, uint8_t *arr, mtbdd_enum_filter_cb fi
 {
     if (mtbdd_isleaf(dd)) {
         // we find the leaf in 'enum_next', then we've seen it before...
-        return mtbdd_false;
-    } else if (variables == mtbdd_true) {
-        // in the case of partial evaluation... treat like a leaf
         return mtbdd_false;
     } else {
         // if variables == true, then dd must be a leaf. But then this line is unreachable.
@@ -2627,10 +2605,8 @@ mtbdd_enum_all_first(MTBDD dd, MTBDD variables, uint8_t *arr, mtbdd_enum_filter_
         return mtbdd_false;
     } else if (variables == mtbdd_true) {
         // if this assertion fails, then <variables> is not the support of <dd>.
-        // actually, remove this check to allow for "partial" enumeration
-        // assert(mtbdd_isleaf(dd));
+        assert(mtbdd_isleaf(dd));
         // for _first, just return the leaf; there is nothing to set, though.
-        if (filter_cb != NULL && filter_cb(dd) == 0) return mtbdd_false;
         return dd;
     } else if (mtbdd_isleaf(dd)) {
         // a leaf for which the filter returns 0 is skipped
@@ -2683,8 +2659,7 @@ mtbdd_enum_all_next(MTBDD dd, MTBDD variables, uint8_t *arr, mtbdd_enum_filter_c
         return mtbdd_false;
     } else if (variables == mtbdd_true) {
         // if this assertion fails, then <variables> is not the support of <dd>.
-        // actually, remove this check to allow for "partial" enumeration
-        // assert(mtbdd_isleaf(dd));
+        assert(mtbdd_isleaf(dd));
         // no next if there are no variables
         return mtbdd_false;
     } else {
