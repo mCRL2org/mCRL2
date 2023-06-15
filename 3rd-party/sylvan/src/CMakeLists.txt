@@ -61,6 +61,3 @@ option(SYLVAN_STATS "Let Sylvan collect statistics at runtime" OFF)
 if(SYLVAN_STATS)
     set_target_properties(sylvan PROPERTIES COMPILE_DEFINITIONS "SYLVAN_STATS")
 endif()
-
-mark_as_advanced(SYLVAN_USE_MMAP
-    SYLVAN_STATS)
