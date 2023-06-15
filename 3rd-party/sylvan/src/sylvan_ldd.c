@@ -144,7 +144,7 @@ VOID_TASK_2(lddmc_refs_mark_p_par, const MDD**, begin, size_t, count)
 {
     if (count < 32) {
         while (count) {
-            CALL(lddmc_gc_mark_rec, **(begin++));
+            lddmc_gc_mark_rec(**(begin++));
             count--;
         }
     } else {
@@ -158,7 +158,7 @@ VOID_TASK_2(lddmc_refs_mark_r_par, MDD*, begin, size_t, count)
 {
     if (count < 32) {
         while (count) {
-            CALL(lddmc_gc_mark_rec, *begin++);
+            lddmc_gc_mark_rec(*begin++);
             count--;
         }
     } else {
@@ -175,7 +175,7 @@ VOID_TASK_2(lddmc_refs_mark_s_par, lddmc_refs_task_t, begin, size_t, count)
             Task *t = begin->t;
             if (!TASK_IS_STOLEN(t)) return;
             if (t->f == begin->f && TASK_IS_COMPLETED(t)) {
-                CALL(lddmc_gc_mark_rec, *(BDD*)TASK_RESULT(t));
+                lddmc_gc_mark_rec(*(BDD*)TASK_RESULT(t));
             }
             begin += 1;
             count -= 1;
@@ -203,10 +203,8 @@ VOID_TASK_0(lddmc_refs_mark)
     TOGETHER(lddmc_refs_mark_task);
 }
 
-void
-lddmc_refs_init_key(void)
+VOID_TASK_0(lddmc_refs_init_task)
 {
-    assert(lace_is_worker()); // only use inside Lace workers
     lddmc_refs_internal_t s = (lddmc_refs_internal_t)malloc(sizeof(struct lddmc_refs_internal));
     s->pcur = s->pbegin = (const MDD**)malloc(sizeof(MDD*) * 1024);
     s->pend = s->pbegin + 1024;
@@ -215,11 +213,6 @@ lddmc_refs_init_key(void)
     s->scur = s->sbegin = (lddmc_refs_task_t)malloc(sizeof(struct lddmc_refs_task) * 1024);
     s->send = s->sbegin + 1024;
     SET_THREAD_LOCAL(lddmc_refs_key, s);
-}
-
-VOID_TASK_0(lddmc_refs_init_task)
-{
-    lddmc_refs_init_key();
 }
 
 VOID_TASK_0(lddmc_refs_init)
@@ -261,13 +254,8 @@ void __attribute__((unused))
 lddmc_refs_pushptr(const MDD *ptr)
 {
     LOCALIZE_THREAD_LOCAL(lddmc_refs_key, lddmc_refs_internal_t);
-    if (lddmc_refs_key == 0) {
-        lddmc_refs_init_key();
-        lddmc_refs_pushptr(ptr);
-    } else {
-        *lddmc_refs_key->pcur++ = ptr;
-        if (lddmc_refs_key->pcur == lddmc_refs_key->pend) lddmc_refs_ptrs_up(lddmc_refs_key);
-    }
+    *lddmc_refs_key->pcur++ = ptr;
+    if (lddmc_refs_key->pcur == lddmc_refs_key->pend) lddmc_refs_ptrs_up(lddmc_refs_key);
 }
 
 void __attribute__((unused))
@@ -281,14 +269,9 @@ MDD __attribute__((unused))
 lddmc_refs_push(MDD lddmc)
 {
     LOCALIZE_THREAD_LOCAL(lddmc_refs_key, lddmc_refs_internal_t);
-    if (lddmc_refs_key == 0) {
-        lddmc_refs_init_key();
-        return lddmc_refs_push(lddmc);
-    } else {
-        *(lddmc_refs_key->rcur++) = lddmc;
-        if (lddmc_refs_key->rcur == lddmc_refs_key->rend) return lddmc_refs_refs_up(lddmc_refs_key, lddmc);
-        else return lddmc;
-    }
+    *(lddmc_refs_key->rcur++) = lddmc;
+    if (lddmc_refs_key->rcur == lddmc_refs_key->rend) return lddmc_refs_refs_up(lddmc_refs_key, lddmc);
+    else return lddmc;
 }
 
 void __attribute__((unused))
@@ -342,7 +325,8 @@ sylvan_init_ldd()
         lddmc_protected_created = 1;
     }
 
-    RUN(lddmc_refs_init);
+    LACE_ME;
+    CALL(lddmc_refs_init);
 }
 
 /**
@@ -366,8 +350,9 @@ lddmc_makenode(uint32_t value, MDD ifeq, MDD ifneq)
     if (index == 0) {
         lddmc_refs_push(ifeq);
         lddmc_refs_push(ifneq);
-        RUN(sylvan_gc);
-        lddmc_refs_pop(1);
+        LACE_ME;
+        sylvan_gc();
+        lddmc_refs_pop(2);
 
         index = llmsset_lookup(nodes, n.a, n.b, &created);
         if (index == 0) {
@@ -393,8 +378,9 @@ lddmc_make_copynode(MDD ifeq, MDD ifneq)
     if (index == 0) {
         lddmc_refs_push(ifeq);
         lddmc_refs_push(ifneq);
-        RUN(sylvan_gc);
-        lddmc_refs_pop(1);
+        LACE_ME;
+        sylvan_gc();
+        lddmc_refs_pop(2);
 
         index = llmsset_lookup(nodes, n.a, n.b, &created);
         if (index == 0) {
@@ -1848,7 +1834,7 @@ lddmc_member_cube(MDD a, uint32_t* values, size_t count)
     while (1) {
         if (a == lddmc_false) return 0;
         if (a == lddmc_true) return 1;
-        if (count <= 0) assert(count > 0); // size mismatch
+        assert(count > 0); // size mismatch
 
         a = lddmc_follow(a, *values);
         values++;
@@ -1862,7 +1848,7 @@ lddmc_member_cube_copy(MDD a, uint32_t* values, int* copy, size_t count)
     while (1) {
         if (a == lddmc_false) return 0;
         if (a == lddmc_true) return 1;
-        if (count <= 0) assert(count > 0); // size mismatch
+        assert(count > 0); // size mismatch
 
         if (*copy) a = lddmc_followcopy(a);
         else a = lddmc_follow(a, *values);
@@ -2449,7 +2435,7 @@ static avl_node_t *lddmc_ser_set = NULL;
 static avl_node_t *lddmc_ser_reversed_set = NULL;
 
 // Start counting (assigning numbers to MDDs) at 2
-static size_t lddmc_ser_counter = 2;
+static volatile size_t lddmc_ser_counter = 2;
 static size_t lddmc_ser_done = 0;
 
 // Given a MDD, assign unique numbers to all nodes
@@ -2624,6 +2610,8 @@ VOID_TASK_IMPL_0(lddmc_gc_mark_serialize)
     while ((s=lddmc_ser_iter_next(it))) {
         CALL(lddmc_gc_mark_rec, s->mdd);
     }
+
+    lddmc_ser_iter_free(it);
 }
 
 static void

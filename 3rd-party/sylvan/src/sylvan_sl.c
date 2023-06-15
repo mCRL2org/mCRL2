@@ -15,8 +15,9 @@
  */
 
 #include <sylvan.h>
-#include <sylvan_align.h>
 #include <sylvan_sl.h>
+
+#include <sys/mman.h> // for mmap, munmap, etc
 
 /* A SL_DEPTH of 6 means 32 bytes per bucket, of 14 means 64 bytes per bucket.
    However, there is a very large performance drop with only 6 levels. */
@@ -25,15 +26,19 @@
 typedef struct
 {
     BDD dd;
-    _Atomic(uint32_t) next[SL_DEPTH];
+    uint32_t next[SL_DEPTH];
 } sl_bucket;
 
 struct sylvan_skiplist
 {
     sl_bucket *buckets;
     size_t size;
-    _Atomic(size_t) next;
+    size_t next;
 };
+
+#ifndef cas
+#define cas(ptr, old, new) (__sync_bool_compare_and_swap((ptr),(old),(new)))
+#endif
 
 sylvan_skiplist_t
 sylvan_skiplist_alloc(size_t size)
@@ -43,8 +48,8 @@ sylvan_skiplist_alloc(size_t size)
         exit(1);
     }
     sylvan_skiplist_t l = malloc(sizeof(struct sylvan_skiplist));
-    l->buckets = alloc_aligned(sizeof(sl_bucket) * size);
-    if (l->buckets == 0) {
+    l->buckets = (sl_bucket*)mmap(0, sizeof(sl_bucket)*size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, 0, 0);
+    if (l->buckets == (sl_bucket*)-1) {
         fprintf(stderr, "sylvan: Unable to allocate virtual memory (%'zu bytes) for the skiplist!\n", size*sizeof(sl_bucket));
         exit(1);
     }
@@ -56,7 +61,7 @@ sylvan_skiplist_alloc(size_t size)
 void
 sylvan_skiplist_free(sylvan_skiplist_t l)
 {
-    free_aligned(l->buckets, sizeof(sl_bucket)*l->size);
+    munmap(l->buckets, sizeof(sl_bucket)*l->size);
     free(l);
 }
 
@@ -74,7 +79,7 @@ sylvan_skiplist_get(sylvan_skiplist_t l, MTBDD dd)
         /* invariant: [loc].dd < dd */
         /* note: this is always true for loc==0 */
         sl_bucket *e = l->buckets + loc;
-        uint32_t loc_next = atomic_load_explicit(e->next+k, memory_order_acquire) & 0x7fffffff;
+        uint32_t loc_next = (*(volatile uint32_t*)&e->next[k]) & 0x7fffffff;
         if (loc_next != 0 && l->buckets[loc_next].dd == dd) {
             /* found */
             return loc_next;
@@ -100,7 +105,7 @@ VOID_TASK_IMPL_2(sylvan_skiplist_assign_next, sylvan_skiplist_t, l, MTBDD, dd)
         /* invariant: [loc].dd < dd */
         /* note: this is always true for loc==0 */
         sl_bucket *e = l->buckets + loc;
-        loc_next = atomic_load_explicit(e->next+k, memory_order_acquire) & 0x7fffffff;
+        loc_next = (*(volatile uint32_t*)&e->next[k]) & 0x7fffffff;
         if (loc_next != 0 && l->buckets[loc_next].dd == dd) {
             /* found */
             return;
@@ -111,15 +116,14 @@ VOID_TASK_IMPL_2(sylvan_skiplist_assign_next, sylvan_skiplist_t, l, MTBDD, dd)
             /* go down */
             trace[k] = loc;
             k--;
-        } else if (!(e->next[0] & 0x80000000) &&
-                   atomic_compare_exchange_strong(&e->next[0], &loc_next, loc_next|0x80000000)) {
+        } else if (!(e->next[0] & 0x80000000) && cas(&e->next[0], loc_next, loc_next|0x80000000)) {
             /* locked */
             break;
         }
     }
 
     /* claim next item */
-    const uint64_t next = atomic_fetch_add(&l->next, 1);
+    const uint64_t next = __sync_fetch_and_add(&l->next, 1);
     if (next >= l->size) {
         fprintf(stderr, "Out of cheese exception, no more blocks available\n");
         exit(1);
@@ -129,7 +133,8 @@ VOID_TASK_IMPL_2(sylvan_skiplist_assign_next, sylvan_skiplist_t, l, MTBDD, dd)
     sl_bucket *a = l->buckets + next;
     a->dd = dd;
     a->next[0] = loc_next;
-    atomic_store_explicit(l->buckets[loc].next, next, memory_order_release);
+    compiler_barrier();
+    l->buckets[loc].next[0] = next;
 
     /* determine height */
     uint64_t h = 1 + __builtin_clz(LACE_TRNG) / 2;
@@ -141,12 +146,12 @@ VOID_TASK_IMPL_2(sylvan_skiplist_assign_next, sylvan_skiplist_t, l, MTBDD, dd)
         for (;;) {
             sl_bucket *e = l->buckets + loc;
             /* note, at k>0, no locks on edges */
-            uint32_t loc_next = atomic_load_explicit(&e->next[k], memory_order_acquire);
+            uint32_t loc_next = *(volatile uint32_t*)&e->next[k];
             if (loc_next != 0 && l->buckets[loc_next].dd < dd) {
                 loc = loc_next;
             } else {
                 a->next[k] = loc_next;
-                if (atomic_compare_exchange_strong(&e->next[k], &loc_next, next)) break;
+                if (cas(&e->next[k], loc_next, next)) break;
             }
         }
     }

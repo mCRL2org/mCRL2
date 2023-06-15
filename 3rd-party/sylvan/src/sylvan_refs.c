@@ -16,15 +16,19 @@
  */
 
 #include <sylvan.h>
-#include <sylvan_align.h>
 #include <sylvan_refs.h>
 #include <sylvan_hash.h>
 
 #include <errno.h>  // for errno
 #include <string.h> // for strerror
+#include <sys/mman.h> // for mmap
 
 #ifndef compiler_barrier
-#define compiler_barrier() atomic_signal_fence(memory_order_seq_cst)
+#define compiler_barrier() { asm volatile("" ::: "memory"); }
+#endif
+
+#ifndef cas
+#define cas(ptr, old, new) (__sync_bool_compare_and_swap((ptr),(old),(new)))
 #endif
 
 /**
@@ -41,11 +45,10 @@ size_t
 refs_count(refs_table_t *tbl)
 {
     size_t count = 0;
-    _Atomic(uint64_t) *bucket = tbl->refs_table;
-    _Atomic(uint64_t) * const end = bucket + tbl->refs_size;
+    uint64_t *bucket = tbl->refs_table;
+    uint64_t * const end = bucket + tbl->refs_size;
     while (bucket != end) {
-        uint64_t d = atomic_load_explicit(bucket, memory_order_relaxed);
-        if (d != 0 && d != refs_ts) count++;
+        if (*bucket != 0 && *bucket != refs_ts) count++;
         bucket++;
     }
     return count;
@@ -57,16 +60,13 @@ refs_rehash(refs_table_t *tbl, uint64_t v)
     if (v == 0) return; // do not rehash empty value
     if (v == refs_ts) return; // do not rehash tombstone
 
-    _Atomic(uint64_t) *bucket = tbl->refs_table + (fnvhash8(v & 0x000000ffffffffff) % tbl->refs_size);
-    _Atomic(uint64_t) * const end = tbl->refs_table + tbl->refs_size;
+    volatile uint64_t *bucket = tbl->refs_table + (fnvhash8(v & 0x000000ffffffffff) % tbl->refs_size);
+    uint64_t * const end = tbl->refs_table + tbl->refs_size;
 
     int i = 128; // try 128 times linear probing
     while (i--) {
-        uint64_t d = atomic_load_explicit(bucket, memory_order_relaxed);
-        if (d == 0) {
-            if (atomic_compare_exchange_strong(bucket, &d, v)) return; 
-        }
-        if (++bucket == end) bucket = (_Atomic(uint64_t) *)tbl->refs_table;
+        if (*bucket == 0) { if (cas(bucket, 0, v)) return; }
+        if (++bucket == end) bucket = tbl->refs_table;
     }
 
     // assert(0); // impossible!
@@ -79,23 +79,19 @@ refs_rehash(refs_table_t *tbl, uint64_t v)
 static int
 refs_resize_help(refs_table_t *tbl)
 {
-    // TODO optimize??
     if (0 == (tbl->refs_control & 0xf0000000)) return 0; // no resize in progress (anymore)
     if (tbl->refs_control & 0x80000000) return 1; // still waiting for preparation
 
     if (tbl->refs_resize_part >= tbl->refs_resize_size / 128) return 1; // all parts claimed
-    size_t part = atomic_fetch_add(&tbl->refs_resize_part, 1);
+    size_t part = __sync_fetch_and_add(&tbl->refs_resize_part, 1);
     if (part >= tbl->refs_resize_size/128) return 1; // all parts claimed
 
     // rehash all
     int i;
-    _Atomic(uint64_t) *bucket = tbl->refs_resize_table + part * 128;
-    for (i=0; i<128; i++) {
-        refs_rehash(tbl, atomic_load_explicit(bucket, memory_order_relaxed));
-        bucket++;
-    }
+    volatile uint64_t *bucket = tbl->refs_resize_table + part * 128;
+    for (i=0; i<128; i++) refs_rehash(tbl, *bucket++);
 
-    atomic_fetch_add(&tbl->refs_resize_done, 1);
+    __sync_fetch_and_add(&tbl->refs_resize_done, 1);
     return 1;
 }
 
@@ -110,7 +106,7 @@ refs_resize(refs_table_t *tbl)
             while (refs_resize_help(tbl)) continue;
             return;
         }
-        if (atomic_compare_exchange_weak(&tbl->refs_control, &v, 0x80000000 | v)) {
+        if (cas(&tbl->refs_control, v, 0x80000000 | v)) {
             // wait until all users gone
             while (tbl->refs_control != 0x80000000) continue;
             break;
@@ -128,8 +124,8 @@ refs_resize(refs_table_t *tbl)
     if (count*4 > tbl->refs_size) new_size *= 2;
 
     // allocate new table
-    _Atomic(uint64_t)* new_table = (_Atomic(uint64_t)*)alloc_aligned(new_size * sizeof(uint64_t));
-    if (new_table == 0) {
+    uint64_t *new_table = (uint64_t*)mmap(0, new_size * sizeof(uint64_t), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
+    if (new_table == (uint64_t*)-1) {
         fprintf(stderr, "refs: Unable to allocate memory: %s!\n", strerror(errno));
         exit(1);
     }
@@ -148,7 +144,7 @@ refs_resize(refs_table_t *tbl)
     tbl->refs_control = 0;
 
     // unmap old table
-    free_aligned(tbl->refs_resize_table, tbl->refs_resize_size * sizeof(uint64_t));
+    munmap(tbl->refs_resize_table, tbl->refs_resize_size * sizeof(uint64_t));
 }
 
 /* Enter refs_modify */
@@ -160,7 +156,7 @@ refs_enter(refs_table_t *tbl)
         if (v & 0xf0000000) {
             while (refs_resize_help(tbl)) continue;
         } else {
-            if (atomic_compare_exchange_weak(&tbl->refs_control, &v, v+1)) return;
+            if (cas(&tbl->refs_control, v, v+1)) return;
         }
     }
 }
@@ -171,15 +167,15 @@ refs_leave(refs_table_t *tbl)
 {
     for (;;) {
         uint32_t v = tbl->refs_control;
-        if (atomic_compare_exchange_weak(&tbl->refs_control, &v, v-1)) return;
+        if (cas(&tbl->refs_control, v, v-1)) return;
     }
 }
 
 static inline int
 refs_modify(refs_table_t *tbl, const uint64_t a, const int dir)
 {
-    _Atomic(uint64_t)* bucket;
-    _Atomic(uint64_t)* ts_bucket;
+    volatile uint64_t *bucket;
+    volatile uint64_t *ts_bucket;
     uint64_t v, new_v;
     int res, i;
 
@@ -229,7 +225,7 @@ ref_restart:
         ts_bucket = NULL;
         v = refs_ts;
         new_v = a | (1ULL << 40);
-        if (!atomic_compare_exchange_weak(bucket, &v, new_v)) goto ref_retry;
+        if (!cas(bucket, v, new_v)) goto ref_retry;
         res = 1;
         goto ref_exit;
     } else {
@@ -240,7 +236,7 @@ ref_restart:
     }
 
 ref_mod:
-    if (!atomic_compare_exchange_weak(bucket, &v, new_v)) goto ref_restart;
+    if (!cas(bucket, v, new_v)) goto ref_restart;
 
 ref_exit:
     refs_leave(tbl);
@@ -270,10 +266,9 @@ refs_iter(refs_table_t *tbl, size_t first, size_t end)
     // assert(first < tbl->refs_size);
     // assert(end <= tbl->refs_size);
 
-    _Atomic(uint64_t)* bucket = tbl->refs_table + first;
+    uint64_t *bucket = tbl->refs_table + first;
     while (bucket != tbl->refs_table + end) {
-        uint64_t d = atomic_load_explicit(bucket, memory_order_relaxed);
-        if (d != 0 && d != refs_ts) return (uint64_t*)bucket;
+        if (*bucket != 0 && *bucket != refs_ts) return bucket;
         bucket++;
     }
     return NULL;
@@ -282,15 +277,14 @@ refs_iter(refs_table_t *tbl, size_t first, size_t end)
 uint64_t
 refs_next(refs_table_t *tbl, uint64_t **_bucket, size_t end)
 {
-    _Atomic(uint64_t)* bucket = (_Atomic(uint64_t)*)*_bucket;
+    uint64_t *bucket = *_bucket;
     // assert(bucket != NULL);
     // assert(end <= tbl->refs_size);
-    uint64_t result = atomic_load_explicit(bucket, memory_order_relaxed) & 0x000000ffffffffff;
+    uint64_t result = *bucket & 0x000000ffffffffff;
     bucket++;
     while (bucket != tbl->refs_table + end) {
-        uint64_t d = atomic_load_explicit(bucket, memory_order_relaxed);
-        if (d != 0 && d != refs_ts) {
-            *_bucket = (uint64_t*)bucket;
+        if (*bucket != 0 && *bucket != refs_ts) {
+            *_bucket = bucket;
             return result;
         }
         bucket++;
@@ -308,8 +302,8 @@ refs_create(refs_table_t *tbl, size_t _refs_size)
     }
 
     tbl->refs_size = _refs_size;
-    tbl->refs_table = (_Atomic(uint64_t)*)alloc_aligned(tbl->refs_size * sizeof(uint64_t));
-    if (tbl->refs_table == 0) {
+    tbl->refs_table = (uint64_t*)mmap(0, tbl->refs_size * sizeof(uint64_t), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
+    if (tbl->refs_table == (uint64_t*)-1) {
         fprintf(stderr, "refs: Unable to allocate memory: %s!\n", strerror(errno));
         exit(1);
     }
@@ -318,7 +312,7 @@ refs_create(refs_table_t *tbl, size_t _refs_size)
 void
 refs_free(refs_table_t *tbl)
 {
-    free_aligned(tbl->refs_table, tbl->refs_size * sizeof(uint64_t));
+    munmap(tbl->refs_table, tbl->refs_size * sizeof(uint64_t));
 }
 
 /**
@@ -331,11 +325,10 @@ size_t
 protect_count(refs_table_t *tbl)
 {
     size_t count = 0;
-    _Atomic(uint64_t)* bucket = tbl->refs_table;
-    _Atomic(uint64_t)* const end = bucket + tbl->refs_size;
+    uint64_t *bucket = tbl->refs_table;
+    uint64_t * const end = bucket + tbl->refs_size;
     while (bucket != end) {
-        uint64_t d = atomic_load_explicit(bucket, memory_order_relaxed);
-        if (d != 0 && d != refs_ts) count++;
+        if (*bucket != 0 && *bucket != refs_ts) count++;
         bucket++;
     }
     return count;
@@ -347,13 +340,12 @@ protect_rehash(refs_table_t *tbl, uint64_t v)
     if (v == 0) return; // do not rehash empty value
     if (v == refs_ts) return; // do not rehash tombstone
 
-    _Atomic(uint64_t)* bucket = tbl->refs_table + (fnvhash8(v) % tbl->refs_size);
-    _Atomic(uint64_t)* const end = tbl->refs_table + tbl->refs_size;
+    volatile uint64_t *bucket = tbl->refs_table + (fnvhash8(v) % tbl->refs_size);
+    uint64_t * const end = tbl->refs_table + tbl->refs_size;
 
     int i = 128; // try 128 times linear probing
     while (i--) {
-        uint64_t d = atomic_load(bucket);
-        if (d == 0 && atomic_compare_exchange_strong(bucket, &d, v)) return;
+        if (*bucket == 0 && cas(bucket, 0, v)) return;
         if (++bucket == end) bucket = tbl->refs_table;
     }
 
@@ -370,15 +362,15 @@ protect_resize_help(refs_table_t *tbl)
     if (0 == (tbl->refs_control & 0xf0000000)) return 0; // no resize in progress (anymore)
     if (tbl->refs_control & 0x80000000) return 1; // still waiting for preparation
     if (tbl->refs_resize_part >= tbl->refs_resize_size / 128) return 1; // all parts claimed
-    size_t part = atomic_fetch_add(&tbl->refs_resize_part, 1);
+    size_t part = __sync_fetch_and_add(&tbl->refs_resize_part, 1);
     if (part >= tbl->refs_resize_size/128) return 1; // all parts claimed
 
     // rehash all
     int i;
-    _Atomic(uint64_t)* bucket = tbl->refs_resize_table + part * 128;
+    volatile uint64_t *bucket = tbl->refs_resize_table + part * 128;
     for (i=0; i<128; i++) protect_rehash(tbl, *bucket++);
 
-    atomic_fetch_add(&tbl->refs_resize_done, 1);
+    __sync_fetch_and_add(&tbl->refs_resize_done, 1);
     return 1;
 }
 
@@ -393,7 +385,7 @@ protect_resize(refs_table_t *tbl)
             while (protect_resize_help(tbl)) continue;
             return;
         }
-        if (atomic_compare_exchange_weak(&tbl->refs_control, &v, 0x80000000 | v)) {
+        if (cas(&tbl->refs_control, v, 0x80000000 | v)) {
             // wait until all users gone
             while (tbl->refs_control != 0x80000000) continue;
             break;
@@ -411,8 +403,8 @@ protect_resize(refs_table_t *tbl)
     if (count*4 > tbl->refs_size) new_size *= 2;
 
     // allocate new table
-    _Atomic(uint64_t)* new_table = (_Atomic(uint64_t)*)alloc_aligned(new_size * sizeof(uint64_t));
-    if (new_table == 0) {
+    uint64_t *new_table = (uint64_t*)mmap(0, new_size * sizeof(uint64_t), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
+    if (new_table == (uint64_t*)-1) {
         fprintf(stderr, "refs: Unable to allocate memory: %s!\n", strerror(errno));
         exit(1);
     }
@@ -431,7 +423,7 @@ protect_resize(refs_table_t *tbl)
     tbl->refs_control = 0;
 
     // unmap old table
-    free_aligned(tbl->refs_resize_table, tbl->refs_resize_size * sizeof(uint64_t));
+    munmap(tbl->refs_resize_table, tbl->refs_resize_size * sizeof(uint64_t));
 }
 
 static inline void
@@ -442,7 +434,7 @@ protect_enter(refs_table_t *tbl)
         if (v & 0xf0000000) {
             while (protect_resize_help(tbl)) continue;
         } else {
-            if (atomic_compare_exchange_weak(&tbl->refs_control, &v, v+1)) return;
+            if (cas(&tbl->refs_control, v, v+1)) return;
         }
     }
 }
@@ -452,15 +444,15 @@ protect_leave(refs_table_t *tbl)
 {
     for (;;) {
         uint32_t v = tbl->refs_control;
-        if (atomic_compare_exchange_weak(&tbl->refs_control, &v, v-1)) return;
+        if (cas(&tbl->refs_control, v, v-1)) return;
     }
 }
 
 void
 protect_up(refs_table_t *tbl, uint64_t a)
 {
-    _Atomic(uint64_t)* bucket;
-    _Atomic(uint64_t)* ts_bucket;
+    volatile uint64_t *bucket;
+    volatile uint64_t *ts_bucket;
     uint64_t v;
     int i;
 
@@ -479,15 +471,14 @@ ref_restart:
         } else if (v == 0) {
             // go go go
             if (ts_bucket != NULL) {
-                v = refs_ts;
-                if (atomic_compare_exchange_weak(ts_bucket, &v, a)) {
+                if (cas(ts_bucket, refs_ts, a)) {
                     protect_leave(tbl);
                     return;
                 } else {
                     goto ref_retry;
                 }
             } else {
-                if (atomic_compare_exchange_weak(bucket, &v, a)) {
+                if (cas(bucket, 0, a)) {
                     protect_leave(tbl);
                     return;
                 } else {
@@ -501,8 +492,7 @@ ref_restart:
 
     // not found after linear probing
     if (ts_bucket != NULL) {
-        v = refs_ts;
-        if (atomic_compare_exchange_weak(ts_bucket, &v, a)) {
+        if (cas(ts_bucket, refs_ts, a)) {
             protect_leave(tbl);
             return;
         } else {
@@ -520,16 +510,15 @@ ref_restart:
 void
 protect_down(refs_table_t *tbl, uint64_t a)
 {
-    _Atomic(uint64_t)* bucket;
+    volatile uint64_t *bucket;
     protect_enter(tbl);
 
     bucket = tbl->refs_table + (fnvhash8(a) & (tbl->refs_size - 1));
     int i = 128; // try 128 times linear probing
 
     while (i--) {
-        uint64_t d = atomic_load_explicit(bucket, memory_order_relaxed);
-        if (d == a) {
-            atomic_store_explicit(bucket, refs_ts, memory_order_relaxed);
+        if (*bucket == a) {
+            *bucket = refs_ts;
             protect_leave(tbl);
             return;
         }
@@ -546,10 +535,9 @@ protect_iter(refs_table_t *tbl, size_t first, size_t end)
     // assert(first < tbl->refs_size);
     // assert(end <= tbl->refs_size);
 
-    _Atomic(uint64_t)* bucket = tbl->refs_table + first;
+    uint64_t *bucket = tbl->refs_table + first;
     while (bucket != tbl->refs_table + end) {
-        uint64_t d = atomic_load_explicit(bucket, memory_order_relaxed);
-        if (d != 0 && d != refs_ts) return (uint64_t*)bucket;
+        if (*bucket != 0 && *bucket != refs_ts) return bucket;
         bucket++;
     }
     return NULL;
@@ -558,15 +546,14 @@ protect_iter(refs_table_t *tbl, size_t first, size_t end)
 uint64_t
 protect_next(refs_table_t *tbl, uint64_t **_bucket, size_t end)
 {
-    _Atomic(uint64_t)* bucket = (_Atomic(uint64_t)*) *_bucket;
+    uint64_t *bucket = *_bucket;
     // assert(bucket != NULL);
     // assert(end <= tbl->refs_size);
     uint64_t result = *bucket;
     bucket++;
     while (bucket != tbl->refs_table + end) {
-        uint64_t d = atomic_load_explicit(bucket, memory_order_relaxed);
-        if (d != 0 && d != refs_ts) {
-            *_bucket = (uint64_t*)bucket;
+        if (*bucket != 0 && *bucket != refs_ts) {
+            *_bucket = bucket;
             return result;
         }
         bucket++;
@@ -584,8 +571,8 @@ protect_create(refs_table_t *tbl, size_t _refs_size)
     }
 
     tbl->refs_size = _refs_size;
-    tbl->refs_table = (_Atomic(uint64_t)*)alloc_aligned(tbl->refs_size * sizeof(uint64_t));
-    if (tbl->refs_table == 0) {
+    tbl->refs_table = (uint64_t*)mmap(0, tbl->refs_size * sizeof(uint64_t), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
+    if (tbl->refs_table == (uint64_t*)-1) {
         fprintf(stderr, "refs: Unable to allocate memory: %s!\n", strerror(errno));
         exit(1);
     }
@@ -594,6 +581,6 @@ protect_create(refs_table_t *tbl, size_t _refs_size)
 void
 protect_free(refs_table_t *tbl)
 {
-    free_aligned(tbl->refs_table, tbl->refs_size * sizeof(uint64_t));
+    munmap(tbl->refs_table, tbl->refs_size * sizeof(uint64_t));
     tbl->refs_table = 0;
 }

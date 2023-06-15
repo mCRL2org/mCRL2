@@ -33,7 +33,6 @@
 
 #include <string.h>	/* memcpy()/memset() or bcopy()/bzero() */
 #include <assert.h>	/* assert() */
-#include <sys/param.h> /* for BYTE_ORDER */
 #include "sha2.h"
 
 /*
