@@ -282,18 +282,21 @@ inline ldd follow(const ldd& A, std::uint32_t value)
 // union(A,B) = A ∪ B
 inline ldd union_(const ldd& A, const ldd& B)
 {
+  LACE_ME;
   return ldd(lddmc_union(A.get(), B.get()));
 }
 
 // minus(A,B) = A \ B
 inline ldd minus(const ldd& A, const ldd& B)
 {
+  LACE_ME;
   return ldd(lddmc_minus(A.get(), B.get()));
 }
 
 // zip(A,B) = (X,Y) such that X = A U B, Y = B \ A
 inline std::pair<ldd, ldd> zip(const ldd& A, const ldd& B)
 {
+  LACE_ME;
   MDD result[2];
   lddmc_zip(A.get(), B.get(), result);
   return {ldd(result[0]), ldd(result[1]) };
@@ -302,36 +305,42 @@ inline std::pair<ldd, ldd> zip(const ldd& A, const ldd& B)
 // project(A,p) = the projection of the set A according to the projection vector p
 inline ldd project(const ldd& A, const ldd& p)
 {
+  LACE_ME;
   return ldd(lddmc_project(A.get(), p.get()));
 }
 
 // project_minus(A,p,B) = minus(project(A,p),B)
 inline ldd project_minus(const ldd& A, const ldd& p, const ldd& B)
 {
+  LACE_ME;
   return ldd(lddmc_project_minus(A.get(), p.get(), B.get()));
 }
 
 // intersect(A,B) = A ∩ B
 inline ldd intersect(const ldd& A, const ldd& B)
 {
+  LACE_ME;
   return ldd(lddmc_intersect(A.get(), B.get()));
 }
 
 // match(A,B,meta) = A ∩ B, with B defined on subset of the variables of A according to meta
 inline ldd match(const ldd& A, const ldd& B, const ldd& meta)
 {
+  LACE_ME;
   return ldd(lddmc_match(A.get(), B.get(), meta.get()));
 }
 
 // join(A,B,pA,pB) = A ∩ B, but A and B are projections of the state vector, described by pA and pB
 inline ldd join(const ldd& A, const ldd& B, const ldd& px, const ldd& py)
 {
+  LACE_ME;
   return ldd(lddmc_join(A.get(), B.get(), px.get(), py.get()));
 }
 
 // cube(v) = the singleton set containing the tuple with values in v
 inline ldd cube(const std::uint32_t* v, std::size_t n)
 {
+  LACE_ME;
   return ldd(lddmc_cube(const_cast<std::uint32_t*>(v), n));
 }
 
@@ -344,12 +353,14 @@ inline ldd cube(const std::vector<std::uint32_t>& v)
 // member_cube(A,v) = check if cube(v) is in the set A
 inline ldd member_cube(const ldd& A, const std::vector<std::uint32_t>& v)
 {
+  LACE_ME;
   return ldd(lddmc_member_cube(A.get(), const_cast<std::uint32_t*>(v.data()), v.size()));
 }
 
 // union_cube(A,v) = union_(A,cube(v))
 inline ldd union_cube(const ldd& A, const std::uint32_t* v, std::size_t n)
 {
+  LACE_ME;
   return ldd(lddmc_union_cube(A.get(), const_cast<std::uint32_t*>(v), n));
 }
 
@@ -362,24 +373,28 @@ inline ldd union_cube(const ldd& A, const std::vector<std::uint32_t>& v)
 // <undocumented>
 inline ldd cube_copy(const std::vector<std::uint32_t>& v, const std::vector<int>& copy)
 {
+  LACE_ME;
   return ldd(lddmc_cube_copy(const_cast<std::uint32_t*>(v.data()), const_cast<int*>(copy.data()), v.size()));
 }
 
 // <undocumented>
 inline int member_cube_copy(const ldd& A, const std::vector<std::uint32_t>& v, const std::vector<int>& copy)
 {
+  LACE_ME;
   return lddmc_member_cube_copy(A.get(), const_cast<std::uint32_t*>(v.data()), const_cast<int*>(copy.data()), v.size());
 }
 
 // union_cube(A,v) = union_(A,cube(v))
 inline ldd union_cube_copy(const ldd& A, const std::uint32_t* v, const int* copy, std::size_t n)
 {
+  LACE_ME;
   return ldd(lddmc_union_cube_copy(A.get(), const_cast<std::uint32_t*>(v), const_cast<int*>(copy), n));
 }
 
 // <undocumented>
 inline ldd union_cube_copy(const ldd& A, const std::vector<std::uint32_t>& v, const std::vector<int>& copy)
 {
+  LACE_ME;
   return union_cube_copy(A, v.data(), copy.data(), v.size());
 }
 
@@ -387,6 +402,7 @@ inline ldd union_cube_copy(const ldd& A, const std::vector<std::uint32_t>& v, co
 // meta: -1 (end; rest not in rel), 0 (not in rel), 1 (read), 2 (write), 3 (only-read), 4 (only-write), 5 (action label)
 inline ldd relprod(const ldd& A, const ldd& B, const ldd& meta)
 {
+  LACE_ME;
   return ldd(lddmc_relprod(A.get(), B.get(), meta.get()));
 }
 
@@ -394,18 +410,21 @@ inline ldd relprod(const ldd& A, const ldd& B, const ldd& meta)
 // TODO: the parameter U is undocumented
 inline ldd relprod_union(const ldd& A, const ldd& B, const ldd& meta, const ldd& U)
 {
+  LACE_ME;
   return ldd(lddmc_relprod_union(A.get(), B.get(), meta.get(), U.get()));
 }
 
 // relprev(A,B,meta,U) = the predecessors of the states in A according to the transition relation B which is described by meta, restricted to states in U
 inline ldd relprev(const ldd& A, const ldd& B, const ldd& meta, const ldd& U)
 {
+  LACE_ME;
   return ldd(lddmc_relprev(A.get(), B.get(), meta.get(), U.get()));
 }
 
 // satcount(A) = the size of the set A
 inline double satcount(const ldd& A)
 {
+  LACE_ME;
   return lddmc_satcount(A.get());
 }
 
@@ -421,6 +440,7 @@ std::size_t nodecount(const ldd& A)
 template <typename OutputIterator>
 inline int sat_one(const ldd& A, OutputIterator to)
 {
+  LACE_ME;
   MDD mdd = A.get();
   while (mdd != lddmc_false && mdd != lddmc_true)
   {
@@ -443,6 +463,7 @@ std::vector<std::uint32_t> sat_one_vector(const ldd& A)
 inline
 void sat_all(const ldd& A, lddmc_enum_cb cb, void* context = nullptr)
 {
+  LACE_ME;
   lddmc_sat_all_par(A.get(), cb, context);
 }
 
@@ -450,6 +471,7 @@ void sat_all(const ldd& A, lddmc_enum_cb cb, void* context = nullptr)
 inline
 void sat_all_nopar(const ldd& A, lddmc_enum_cb cb, void* context = nullptr)
 {
+  LACE_ME;
   lddmc_sat_all_nopar(A.get(), cb, context);
 }
 
@@ -457,6 +479,7 @@ void sat_all_nopar(const ldd& A, lddmc_enum_cb cb, void* context = nullptr)
 // TODO: this is probably wrong, because there are two more undocumented parameters
 inline ldd collect(const ldd& A, lddmc_collect_cb cb, void* context = nullptr)
 {
+  LACE_ME;
   return ldd(lddmc_collect(A.get(), cb, context));
 }
 
@@ -464,6 +487,7 @@ inline ldd collect(const ldd& A, lddmc_collect_cb cb, void* context = nullptr)
 inline
 void match_sat(const ldd& A, const ldd& B, const ldd& meta, lddmc_enum_cb cb, void* context = nullptr)
 {
+  LACE_ME;
   lddmc_match_sat_par(A.get(), B.get(), meta.get(), cb, context);
 }
 

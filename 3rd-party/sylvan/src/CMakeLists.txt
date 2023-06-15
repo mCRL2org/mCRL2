@@ -42,7 +42,6 @@ target_sources(sylvan
 
 target_include_directories(sylvan PUBLIC .)
 target_compile_options(sylvan PRIVATE -Wno-pedantic)
-target_link_libraries(sylvan PUBLIC m pthread lace)
 
 option(SYLVAN_USE_MMAP "Let Sylvan use mmap to allocate (virtual) memory" ON)
 if(SYLVAN_USE_MMAP)

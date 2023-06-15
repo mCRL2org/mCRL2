@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.16)
+
 project(sylvan
     VERSION 1.8.0
     DESCRIPTION "Sylvan, a parallel decision diagram library"
