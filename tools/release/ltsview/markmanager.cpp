@@ -140,7 +140,8 @@ void MarkManager::setLts(LTS *lts)
   setClusterMatchStyle(MATCH_ANY);
   setStateMatchStyle(MATCH_ANY);
 
-  cleanLts();
+  // It seems that this function is not necessary, and causes crashes when opening a new file when a file is already opened.
+  // cleanLts();
   m_lts = lts;
 
   m_markedActions.clear();
