@@ -343,7 +343,7 @@ void LtsCanvas::mouseReleaseEvent(QMouseEvent* event)
   determineActiveTool(event, false);
   m_dragging = m_activeTool != SelectTool;
   event->accept();
-  repaint();
+  update();
 }
 
 void LtsCanvas::mouseDoubleClickEvent(QMouseEvent* event)
@@ -374,7 +374,7 @@ void LtsCanvas::mouseMoveEvent(QMouseEvent* event)
        0.0f
     );
     event->accept();
-    repaint();
+    update();
   }
   else if (m_activeTool == ZoomTool)
   {
@@ -384,13 +384,13 @@ void LtsCanvas::mouseMoveEvent(QMouseEvent* event)
       0.01f * (m_baseDepth - m_position.z()) * (oldPosition.y() - event->y())
     );
     event->accept();
-    repaint();
+    update();
   }
   else if (m_activeTool == RotateTool)
   {
     m_rotation = mcrl2::gui::arcballRotation(oldPosition, m_lastMousePosition) * m_rotation;
     event->accept();
-    repaint();
+    update();
   }
 }
 
@@ -398,7 +398,7 @@ void LtsCanvas::wheelEvent(QWheelEvent* event)
 {
   m_position += QVector3D(0.0f, 0.0f, 0.001f * (m_baseDepth - m_position.z()) * event->angleDelta().y());
   event->accept();
-  repaint();
+  update();
 }
 
 LtsCanvas::Selection LtsCanvas::selectObject(QPoint position)
