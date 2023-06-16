@@ -103,7 +103,8 @@ QPointF Visualizer::worldCoordinate(QPointF deviceCoordinate)
 {
   QSizeF size = worldSize();
   double pixel = pixelSize();
-  return QPointF(-0.5 * size.width() + deviceCoordinate.x() * pixel, 0.5 * size.height() - deviceCoordinate.y() * pixel);
+  return QPointF(-0.5 * size.width() + deviceCoordinate.x() * pixel * devicePixelRatio(), 
+                  0.5 * size.height() - deviceCoordinate.y() * pixel * devicePixelRatio());
 }
 
 
