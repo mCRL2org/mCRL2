@@ -1,0 +1,1 @@
+The generate.sh script uses `pdflatex` and `inkscape` to convert the tex files into vector .svg files with transparent background. We do this statically and commit the .svg files to avoid more build dependencies.

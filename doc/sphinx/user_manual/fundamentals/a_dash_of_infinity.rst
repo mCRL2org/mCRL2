@@ -17,20 +17,8 @@ operate the machine forever.
 .. _coffee-inf1:
 .. list-table:: An ever-lasting coffee machine.
 
-   * - .. graphviz:: 
+   * - .. image:: /_static/tikz/coffee_machine.svg
 
-          digraph infinite_coffee {
-          graph [rankdir=LR];
-          node [shape=circle, label="", width=0.1];
-          edge [arrowhead=vee,arrowsize=0.4];
-          ns[style=invisible];
-          ns -> n0;
-          n0 -> n1 [label=coin,labelangle=90];
-          n1 -> n0 [label=bad,labelangle=-90];
-          n1 -> n3 [label=coin,labelangle=90];
-          n3 -> n0 [label=good,labelangle=-90];
-          }
-   
      - ::
 
           act coin, good, bad;
@@ -49,23 +37,7 @@ repetition once and obtain a bisimilar system, as shown in
 .. _coffee-inf2:
 .. list-table:: The ever-lasting coffee machine, unfolded once.
 
-   * - .. graphviz:: 
-
-          digraph unfolded_coffee {
-          graph [rankdir=LR];
-          node [shape=circle, label="", width=0.1];
-          edge [arrowhead=vee,arrowsize=0.4];
-          ns[style=invisible];
-          ns -> n4;
-          n4 -> n5 [label=coin,labelangle=90];
-          n5 -> n6 [label=coin,labelangle=90];
-          n5 -> n0 [label=bad,labelangle=90];
-          n6 -> n0 [label=good,labelangle=90];
-          n0 -> n1 [label=coin,labelangle=90];
-          n1 -> n0 [label=bad,labelangle=-90];
-          n1 -> n3 [label=coin,labelangle=90];
-          n3 -> n0 [label=good,labelangle=-90];
-          }
+   * - .. image:: /_static/tikz/coffee_machine_unfolded.svg
    
      - ::
 
@@ -298,17 +270,8 @@ coins, with on the right the required mCRL2 notation.
 
 .. list-table:: A state accepting coins of all flavour.
 
-   * - .. tikz::
-          :libs: automata
+   * - .. image:: /_static/tikz/lts_coins.svg
 
-          [auto,->]
-          \renewcommand{\a}[1]{\textit{#1}}
-          \node[state,initial] (n)  {};
-          \node[state] (e) [below of=n, node distance=2cm] {};
-          \path
-             (n) edge[bend left=60] node[above,rotate=-90]{\scriptsize{\a{coin(c2)}}} (e)
-                 edge node[above,rotate=-90]{\scriptsize{\a{coin(c5)}}} (e)
-                 edge[bend right=60] node[below,rotate=-90]{\scriptsize{\a{coin(c10)}}} (e);
      - ::
 
           sort Val = struct c2 | c5 | c10;
@@ -334,21 +297,7 @@ equivalent expression using only the plus operator.
 .. _nats:
 .. list-table:: Transition system with an infinite number of transitions. 
 
-   * - .. tikz::
-          :libs: automata
-
-          [auto,->]
-          \renewcommand{\a}[1]{\textit{#1}}
-          \node[state,initial] (n)  {};
-          \node[state] (e) [below of=n, node distance=4cm] {};
-          \foreach \n/\l in {0/0,1/2,2/4,3/6,4/8}
-          \foreach \x in {-1.75cm+\n*0.5cm}
-          \path[draw,->] (n) .. controls (\x,-2cm)..  (e) 
-             node[sloped,below,pos=0.5]{\scriptsize\a{num(\l)}};
-          \foreach \n in {5,...,11}
-          \foreach \x in {-1.75cm+\n*0.5cm}
-          \path[draw,->,dotted] (n) .. controls (\x,-2cm)..  (e) 
-             node[sloped,below,pos=0.5]{\scriptsize$\cdots$};
+   * - .. image:: /_static/tikz/lts_infinite.svg
      - ::
 
           act num: Nat;
@@ -389,23 +338,8 @@ are as follows:
 .. _picky:
 .. list-table:: A picky coffee machine.
 
-   * - .. tikz::
-          :libs: automata
-
-          [auto,->]
-          \renewcommand{\a}[1]{\textit{#1}}
-          \node[state,initial] (n0) at (0,0) {};
-          \node[state] (n2) at (-2,0) {};
-          \node[state] (n10) at (0,-2) {};
-          \node[state] (n5) at (2,0) {};
-
-          \path[->]
-          (n0) edge[bend right] node[above] {\scriptsize{\a{coin(c2)}}} (n2)
-          (n2) edge[bend right] node[below] {\scriptsize{\a{rej(c2)}}} (n0)
-          (n0) edge[bend left] node[above] {\scriptsize{\a{coin(c5)}}} (n5)
-          (n5) edge[bend left] node[below] {\scriptsize{\a{rej(c5)}}} (n0)
-          (n0) edge[bend left] node[right] {\scriptsize{\a{coin(c10)}}} (n10)
-          (n10) edge[bend left] node[left] {\scriptsize{\a{coffee}}} (n0);
+   * - .. image:: /_static/tikz/coffee_machine_picky.svg
+          
      - ::
 
           sort Val = struct c2 | c5 | c10;

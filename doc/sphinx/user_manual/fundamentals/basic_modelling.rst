@@ -306,7 +306,7 @@ LTSs are strongly bisimilar iff their initial states are bisimilar.
    In the following diagram, the dotted lines indicate the pairs of nodes that
    are related by a relation `R`.
 
-   .. image:: /_static/tikz/coffee_bisim.svg
+   .. image:: /_static/tikz/coffee_bisim1.svg
 
 
    `R` is a bisimulation relation that relates the initial states of the two
