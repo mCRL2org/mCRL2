@@ -15,6 +15,14 @@
      initial text=]
      [auto,->]
      \renewcommand{\a}[1]{\textit{#1}}
+     \begin{scope}
+     \node[state,initial] (l1) {};
+     \node[state,below of=l1] (l2) {};
+     \node[state,below of=l2] (l3) {};
+     \path[->] (l1) edge node[left]{\a{coin}} (l2)
+               (l2) edge node[left]{\a{coffee}} (l3);
+     \end{scope}
+     \begin{scope}[xshift=3cm]
      \node[state,initial] (r1) {};
      \node[state,below of=r1,left of=r1] (r2) {};
      \node[state,below of=r2,right of=r1] (r3) {};
@@ -28,11 +36,10 @@
                     edge node[above,rotate=-60]{\a{coffee}} (r5)
                (r3) edge node[above,rotate=60]{\a{coffee}} (r6) 
                     edge node[above,rotate=-60]{\a{coffee}} (r7);
-
+     \end{scope}
      \path[dotted,bend right]
-     (r2) edge (r3)
-     (r4) edge (r5) edge (r6) edge (r7) 
-     (r5) edge (r6) edge (r7)
-     (r6) edge (r7); 
-\end{tikzpicture}    
+          (l1) edge (r1)
+          (l2) edge (r2) edge (r3)
+          (l3) edge (r4) edge (r5) edge (r6) edge (r7);
+\end{tikzpicture}
 \end{document}
