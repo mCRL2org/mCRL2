@@ -41,12 +41,12 @@ RUN mkdir ~/mcrl2-build && cd ~/mcrl2-build && cmake \
  -DMCRL2_ENABLE_DEPRECATED=OFF \
  -DMCRL2_ENABLE_EXPERIMENTAL=OFF \
  -DMCRL2_ENABLE_GUI_TOOLS=ON \
- -DMCRL2_PACKAGE_RELEASE=ON \
  -DCMAKE_INSTALL_PREFIX=`pwd`/install \
  ~/mcrl2
 
 # Build the toolset
-RUN cd ~/mcrl2-build && make -j0 
+ARG THREADS=8
+RUN cd ~/mcrl2-build && make -j${THREADS} 
 
 # Package the build
 RUN cd ~/mcrl2-build && cpack -G RPM
@@ -55,8 +55,8 @@ RUN cd ~/mcrl2-build && cpack -G RPM
 RUN cd ~/mcrl2-build \
     && cmake -DMCRL2_ENABLE_EXPERIMENTAL=ON \
              -DMCRL2_ENABLE_TESTS=ON . \
-    && make -j0 \
-    && ctest . -j0
+    && make -j${THREADS} \
+    && ctest . -j${THREADS}
 
 # Build the documentation
 RUN cd ~/mcrl2-build && make doc
