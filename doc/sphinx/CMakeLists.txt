@@ -61,7 +61,7 @@ function(add_build_doc_target NAME DESC)
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     # copy the Sphinx source to the build directory, because some of the
     # extensions modify the source and we don't want to pollute the source dir
-    COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different ${SPHINX_SOURCE_DIR} ${SPHINX_BUILD_SRC_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${SPHINX_SOURCE_DIR} ${SPHINX_BUILD_SRC_DIR}
     # run the Sphinx build command
     COMMAND ${CMAKE_COMMAND} -E env CMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR} SPHINX_BUILD_OUT_DIR=${SPHINX_BUILD_OUT_DIR} SPHINX_BUILD_TEMP_DIR=${SPHINX_BUILD_TEMP_DIR} MCRL2_TOOL_PATH=${MCRL2_TOOL_PATH} MCRL2_TOOLS=${MCRL2_TOOLS}
       ${SPHINX_BUILD_CMD}
