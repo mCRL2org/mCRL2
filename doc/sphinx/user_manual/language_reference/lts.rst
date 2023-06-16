@@ -1,50 +1,61 @@
 .. _language-lts:
 
-Labelled Transition Systems
-===========================
+Formats for Labelled Transition Systems
+=======================================
 
 .. _language-mcrl2-lts:
+
+These pages explain the storage formats for labelled transition systems. 
+For a general explanation of labelled transition systems see 
+:ref: `labelled-transition-systems`.
 
 mCRL2 LTS format
 ----------------
 
-An mCRL2 LTS file consist of two sections (although the second section is
-optional). The first section, starting at offset 0, is an
-`SVC file <http://db.cwi.nl/rapporten/abstract.php?abstractnr=1060>`_ with type
-``mCRL2`` or ``mCRL2+info``. The appendix ``+info`` indicates
-whether states are stored as just numbers or as actual mCRL2 states. The actions
-of transitions are always stored as a pair of an mCRL2 multiaction and an mCRL2
-expression of sort Time. The latter may also be ``Nil`` in absence of
-timing. The precise form of states and transitions is as follows.
+An mCRL2 LTS file is stored in internal *ATerm* format, and consists of 
+a labelled transition system together with a declaration of data types
+and action declarations. The labels on transitions consist of multi-actions, 
+which is a sequence of action labels each optionally having 
+data arguments. States can also have labels that generally consist
+out of a vector of data values corresponding to the values of process 
+parameters in a linear process specification. These labels can also be sets
+of such vectors. This typically occurs when a labelled transition system
+is reduced using (branching/weak) bisimulation in which case all labels
+of equivalent states are accumulated in a set and this set is used as the
+new label. 
 
-.. productionlist::
-   State            : STATE(`DataExprList`)
-   TransitionAction : pair(`MultAct`,`DataExprOrNil`)
-   DataExprOrNil    : `DataExpr` | Nil
+An labelled transition system can have probabilistic states. These are 
+non-labelled states with outgoing transitions that are labelled with probabilities.
+The sum of the probabilities of all outgoing transistion equals 1. Only a few tools
+support probabilistic transition systems, such as ``ltsgraph`` and ``ltspbisim``. 
 
-Optionally, this SVC file is followed by a second section containing information
-such as a data specification or state parameter names. This section consist of
-an ATerm in Binary format followed by a 64-bit offset (little endian)
-and a marker :literal:`\    1STL2LRCm` (note the three initial
-spaces). The offset indicates where this section starts in the file. The
-ATerm is of the following form.
+An LTS in LTS format requires relatively little diskspace as it is stored as a compressed, shared ATerm.
+This ATerm storage format supports streaming, and therefore
+labelled transition systems in LTS format can be streamed. 
 
-.. productionlist::
-   mCRL2LTS1      : mCRL2LTS1(`DataSpecOrNil`,`ParamSpecOrNil`,`ActSpecOrNil`)
-   DataSpecOrNil  : `DataSpec` | Nil
-   ParamSpecOrNil : ParamSpec(`DataVarIdList`) | Nil
-   ActSpecOrNil   ::= `ActSpec` | Nil
+Files in the LTS format typically have the extension ``.lts``. 
+As all data and action declarations are stored in the file format, 
+this format is very suitable to transform an LTS into a linear process
+using the tool ``lts2lps``. 
 
-.. _language-fsm-lts:
+A disadvantage of the ``.lts`` format is that it is not human readable.
+For this, the LTS should be translated into ``.aut`` or ``.fsm`` format, 
+which can be done using the tool ``ltsconvert``.
 
 FSM file format
 ---------------
 
-Files in the FSM file format are accepted as input by several LTS visualisation
-tools in the mCRL2 toolset.
+An FSM file is a human-readable, plain-text file that specifies an LTS and
+supports labels of both transitions and states. It also supports probabilities.
+The states are numbered from 1 to *n* where *n* is the highest state number
+occurring in the transition system. It typically has the extension ``.fsm``.
 
-An FSM file is a human-readable, plain-text file that specifies an LTS.
-Its contents are of the following form:
+The states are numbered from 1 to *n* where *n* is the maximum of the highest number of
+a state occurring in any transition, or the number of state labels. 
+In general these are of course the same, but there are situations where they 
+can diverge. 
+
+The content of a FSM file has the following form:
 
 .. productionlist::
    FSM : `PARAMETERS` '\n' '---' '\n' `STATES` '\n' '---' '\n' `TRANSITIONS`
@@ -52,7 +63,7 @@ Its contents are of the following form:
 containing three sections:
 
 * The first section specifies the *state parameters* and their domains;
-* The second section specifies the *states* of the LTS;
+* The second section specifies the *labels of the states* of the LTS;
 * The third section specifies the *transitions* of the LTS.
 
 These sections are separated by lines that contain three dashes: ``---``.
@@ -66,7 +77,7 @@ The parameters section defines the state parameters (or state variables) and
 their domains of possible values. In every state of the LTS, each of the
 parameters has one specific value from its domain.
 
-At least one parameter should be specified. Every parameter is specified on a
+Zero or more parameter should be specified. Every parameter is specified on a
 separate line of the following form:
 
 .. productionlist::
@@ -80,19 +91,14 @@ containing the following items:
 * A list of *domain values*: a space-separated list of quoted values, where
   every value is a string of characters that does not contain quotes (``"``).
 
-The number of domain values should be equal to the domain cardinality. If the
-domain cardinality is 0, then the parameter will be ignored. It will not be
-visible in the tool and the corresponding state values in the states section are
-ignored.
+The number of domain values should be equal to the domain cardinality. 
 
 States section
 ^^^^^^^^^^^^^^
 
-The states section defines the number of states and the value of every parameter
-in every state.
-
-At least one state should be specified. The first state specified is taken to be
-the *initial state* of the LTS. Every state is specified on a separate line
+The states section defines labels for states. If the states have no label,
+this section can be left empty. 
+The parameter list for every state is specified on a separate line
 of the following form:
 
 .. productionlist::
@@ -102,7 +108,7 @@ being a list of *parameter values*: a space-separated list of natural numbers.
 
 The number of parameter values should be equal to the number of parameters
 defined in the parameters section, including parameters with a domain
-cardinality of 0.
+cardinality of 0. 
 
 The *i*\ th value in the list specifies the value of the *i*\ th parameter of the
 parameters section in the following way: a value of *n* specifies that in this
@@ -113,6 +119,21 @@ parameter.
 Every value should be at least 0 and smaller than the domain cardinality of the
 corresponding parameter. If that domain cardinality is 0, then the latter
 restriction does not apply and the value will be ignored.
+
+A typical example of a ``.fsm`` file is:
+list:: 
+
+  s1(2) Pos  "2" "1"
+  b(2) Bool  "false" "true"
+  ---
+  0 0
+  1 1
+  1 0
+  ---
+  1 2 "tau"
+  2 3 "a"
+  3 2 "a"
+
 
 Transitions section
 ^^^^^^^^^^^^^^^^^^^
