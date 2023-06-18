@@ -350,7 +350,7 @@ public:
     // own instances of X_false. Each nu group gets its own instances
     // of X_true.
     fixpoint_symbol previous_symbol(q.equations()[0].symbol());
-    int rank = previous_symbol == fixpoint_symbol::nu() ? 0 : 1;
+    // int rank = previous_symbol == fixpoint_symbol::nu() ? 0 : 1; Not used. 
 
     const std::string x_true_name = id_gen("X_true");
     const std::string x_false_name = id_gen("X_false");
@@ -386,7 +386,7 @@ public:
         m_equations.emplace_back(previous_symbol == fixpoint_symbol::mu() ? x_false_disj_name : x_true_disj_name, previous_symbol, false);
 
         // Update for the new block
-        rank++;
+        // rank++; This is not used. Should be removed. 
         previous_symbol = eq.symbol();
         if(previous_symbol == fixpoint_symbol::mu())
         {
