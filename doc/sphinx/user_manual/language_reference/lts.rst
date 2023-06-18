@@ -5,7 +5,7 @@ Formats for Labelled Transition Systems
 
 .. _language-mcrl2-lts:
 
-These pages explain the storage formats for labelled transition systems. 
+These pages explain the storage formats for labelled transition systems (LTSs). 
 For a general explanation of labelled transition systems see 
 :ref:`labelled-transition-systems`.
 
@@ -48,16 +48,16 @@ The aut format
 --------------
 
 The aut file format is a simple format for storing labelled transition
-systems (LTS's) explicitly. It is widely used by other tools, for instance
-the `Caesar-Aldebaran toolset <https://cadp.inria.fr>`. 
+systems. It is widely used by other tools, for instance
+the `Caesar-Aldebaran or CADP toolset <https://cadp.inria.fr>`_. 
 
 The syntax
 ^^^^^^^^^^
 
 The syntax of an Aldebaran file consists of a number of lines, where the first
-line is :token:`aut_header` and the remaining lines are :token:`aut_edge`.
+line is a :token:`aut_header` and the remaining lines are of type :token:`aut_edge`.
 
-:token:`aut_header` is defined as follows:
+An :token:`aut_header` is defined as follows:
 
 .. productionlist::
    aut_header : 'des (' `first_state` ',' `nr_of_transitions` ',' `nr_of_states` ')'
@@ -67,7 +67,7 @@ line is :token:`aut_header` and the remaining lines are :token:`aut_edge`.
 
 Here:
 
-* :token:`first_state` is a number representing the first stater;.
+* :token:`first_state` is a number representing the first state;
 * :token:`nr_of_transitions` is a number representing the number of transitions;
 * :token:`nr_of_states` is a number representing the number of states.
 
@@ -117,7 +117,7 @@ The probabilistic aut format
 
 There is a straightforward probabilistic extension of the aut format. 
 The first state and each end state of an edge can be written as a discrete 
-distribution in the form :math: `s_0~p_0~s_1\cdots p_{n-1}~s_n`. This means
+distribution in the form :math:`s_0~p_0~s_1\cdots p_{n-1}~s_n`. This means
 that state :math:`s_i` is reached with probability :math:`p_i` for :math:`i<n`
 and state :math:`p_n` is reached with probability :math:`1-\sum_{i=0}^{n-1}p_i`.
 Each probability is denoted as a fraction ``n/m`` where ``n`` and ``m`` are 
@@ -131,9 +131,9 @@ A probabilistic example
 
 A small but typical example of a probabilistic aut file is given below.
 The initial distribution chooses state ``0`` or state ``1`` with respective
-probabilities ``1/3`` and ``2/3``. In state ``0i`` an action is possible after which
+probabilities ``1/3`` and ``2/3``. In state ``0`` an action is possible after which
 either state ``0`` or ``1`` are chosen with equal probability. In state 1 only an action 
-``b`` can be done, and after that state 1 is always reacheda.::
+``b`` can be done, and after that state 1 is always reached::
 
   des(0 1/3 1, 2, 2)
   (0,"a",0 1/2 1)
@@ -153,9 +153,9 @@ The FSM file format
 
 An FSM file is a human-readable, plain-text file that specifies an LTS and
 it supports not only labelling of transitions but also of states. 
-Besides that it also allows to express probabilities.
+Besides that it can also express probabilities.
 The states are numbered from 1 to *n* where *n* is the highest state number
-occurring in the transition system. It typically has the extension ``.fsm``.
+occurring in the transition system. A file typically has the extension ``.fsm``.
 
 The states are numbered from 1 to *n* where *n* is the maximum of the highest number of
 a state occurring in any transition, or the number of state labels. 
@@ -165,13 +165,14 @@ can differ, for instance when there are no state labels.
 The content of a FSM file has the following form:
 
 .. productionlist::
-   FSM : `PARAMETERS` '\n' '---' '\n' `STATES` '\n' '---' '\n' `TRANSITIONS`
+   FSM : `PARAMETERS` '\n' '---' '\n' `STATES` '\n' '---' '\n' `TRANSITIONS` '---' '\n' 'INITIAL_STATE'
 
-containing three sections:
+containing four sections of which the last one is optional:
 
 * The first section specifies the *state parameters* and their domains;
 * The second section specifies the *labels of the states* of the LTS;
-* The third section specifies the *transitions* of the LTS.
+* The third section specifies the *transitions* of the LTS;
+* The fourth section contains the *initial state* or *initial distribution*. 
 
 These sections are separated by lines that contain three dashes: ``---``.
 
@@ -241,13 +242,25 @@ Every transition is specified on a separate line of the following form:
 containing the following items:
 
 * The *source state*: a positive natural number;
-* The *target state*: a positive natural number;
+* The *target state*: a positive natural number or distribution;
 * The *label*: a quoted string of characters that does not contain quotes
   (``"``).
 
 A value of *n* for either of the states indicates the *n*-th state of the states
 section. Each of these values should be at least 1 and at most the number of
 states specified in the states section.
+
+A distribution is a sequence of pairs of state number followed by a fraction
+indicating the probability for this state to happen. This sequence is surrounded
+by square brackets. All probabilities in a distribution must add up to 1. 
+A typical example is [ 1 1/2 3 1/4 7 1/4].
+
+The initial state section
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The initial state section is generally omitted and the initial state is by 
+default assumed to be state 1. This section can be used to indicate an alternative
+state number, or to use a stochastic distribution over states as the initial state. 
 
 An example without probabilities
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -259,7 +272,7 @@ The following FSM file specifies the LTS depicted in the figure above. The state
 parameter values are indicated next to every state. The state identifiers used
 in the transitions section of the FSM file are shown inside every state::
 
-   b(2) Bool "false" "true"
+   b(2) Bool "F" "T"
    n(2) Nat "1" "2"
    ---
    0 0
@@ -276,7 +289,38 @@ in the transitions section of the FSM file are shown inside every state::
    4 2 "off"
    4 3 "decrease"
 
-Using probabilistic states
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+An example without probabilities
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The FSM format supports probabilities. 
+An probablistic example, based on a probabilistic fan controller, is given below::
+
+  s1_P(6) Pos  "2" "3" "4" "6" "1" "5"
+  b2_P(2) Bool  "true" "false"
+  b1_P(2) Bool  "true" "false"
+  k_P(3) Nat  "0" "1" "2"
+  ---
+  0 0 0 0
+  1 0 0 0
+  1 0 1 0
+  0 0 0 1
+  2 0 0 0
+  2 1 0 0
+  3 0 0 1
+  0 0 0 2
+  4 0 0 0
+  3 0 0 2
+  5 0 0 0
+  ---
+  1 [2 99/100 3 1/100] "on"
+  2 4 "fan_on(1, true)"
+  3 [5 99/100 6 1/100] "fan_on(1, false)"
+  4 7 "off"
+  5 8 "fan_on(2, true)"
+  6 9 "fan_on(2, false)"
+  7 1 "fan_off(1)"
+  8 10 "off"
+  9 11 "fail"
+  10 1 "fan_off(2)"
+  ---
+  [1 1/2 2 1/4 3 1/4]
+
