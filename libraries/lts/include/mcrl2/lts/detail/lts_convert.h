@@ -31,52 +31,6 @@ namespace lts
 namespace detail
 {
 
-template <class CONVERTOR, class LTS_IN_TYPE, class LTS_OUT_TYPE>
-inline void convert_core_lts(CONVERTOR& c,
-                             const LTS_IN_TYPE& lts_in,
-                             LTS_OUT_TYPE& lts_out);
-
-/** \brief Convert LTSs to each other. The input lts is not usable afterwards.
-    \details Converts the input lts into the output lts maintaining the nature
-            of the lts as good as possible. If no translation can be provided
-            because more information is required (such as data types), then
-            a mcrl2::runtime error is thrown. This also happens if the particular
-            translation is not implemented.
-
-template < class LTS_IN_TYPE, class LTS_OUT_TYPE >
-inline void lts_convert(const LTS_IN_TYPE&, LTS_OUT_TYPE&)
-{
-  throw mcrl2::runtime_error("Conversion between lts types is not defined (without extra information).");
-} */
-
-/** \brief Convert LTSs to each other. The input lts is not usable afterwards.
-    \details See lts_convert for an explanation. The extra information that is
-             provided, is used for the translation, provided that extra_data_is_defined
-             is set to true. This extra boolean makes it possible to dynamically conclude
-             whether the required data is available, and if not, this boolean can be set to
-             false, and the extra data will not be used. If the extra information is not needed in
-             the translation, it is not used and a message is printed to stderr.
-*/
-/* Enabling this leads to selecting this class as the default, always causing the error messages.
- * template < class LTS_IN_TYPE, class LTS_OUT_TYPE >
-inline void lts_convert(
-  const LTS_IN_TYPE& lts_in,
-  LTS_OUT_TYPE& lts_out,
-  const data::data_specification&,
-  const process::action_label_list&,
-  const data::variable_list&,
-  const bool extra_data_is_defined=true)
-{
-  if (!extra_data_is_defined)
-  {
-    lts_convert(lts_in,lts_out);
-  }
-  else
-  {
-    throw mcrl2::runtime_error("Conversion between lts types is not defined (with extra information).");
-  }
-} */
-
 /** \brief Translate a fraction given as a data_expression to a representation
  *         with an arbitrary size fraction */
 
@@ -993,13 +947,12 @@ template < class STATE_LABEL1, class ACTION_LABEL1, class PROBABILISTIC_STATE1, 
 inline void translate_probability_labels(const probabilistic_lts<STATE_LABEL1, ACTION_LABEL1, PROBABILISTIC_STATE1, LTS_BASE1>& lts_in, 
                                          probabilistic_lts<STATE_LABEL2, ACTION_LABEL2, PROBABILISTIC_STATE2, LTS_BASE2>& lts_out)
 {
-  lts_out.set_initial_probabilistic_state(lts_convert_probabilistic_state<PROBABILISTIC_STATE1,PROBABILISTIC_STATE2>(lts_in.initial_probabilistic_state()));
-
   lts_out.clear_probabilistic_states();
   for(std::size_t i=0; i< lts_in.num_probabilistic_states(); ++i)
   {
     lts_out.add_probabilistic_state(lts_convert_probabilistic_state<PROBABILISTIC_STATE1,PROBABILISTIC_STATE2>(lts_in.probabilistic_state(i)));
   }
+  lts_out.set_initial_probabilistic_state(lts_convert_probabilistic_state<PROBABILISTIC_STATE1,PROBABILISTIC_STATE2>(lts_in.initial_probabilistic_state()));
 }
 
 
@@ -1022,9 +975,9 @@ inline void lts_convert(const probabilistic_lts<STATE_LABEL1, ACTION_LABEL1, PRO
                         const data::variable_list& process_parameters,
                         const bool extra_data_is_defined=true)
 {
- lts_convert(static_cast<const lts<STATE_LABEL1, ACTION_LABEL1, LTS_BASE1>& >(lts_in),
-             static_cast<lts<STATE_LABEL2, ACTION_LABEL2, LTS_BASE2>& >(lts_out),
-             data, action_label_list, process_parameters, extra_data_is_defined);
+  lts_convert(static_cast<const lts<STATE_LABEL1, ACTION_LABEL1, LTS_BASE1>& >(lts_in),
+              static_cast<lts<STATE_LABEL2, ACTION_LABEL2, LTS_BASE2>& >(lts_out),
+              data, action_label_list, process_parameters, extra_data_is_defined);
   translate_probability_labels(lts_in,lts_out);
 }
 

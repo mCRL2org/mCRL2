@@ -538,9 +538,34 @@ bool reachability_check(probabilistic_lts < SL, AL, PROBABILISTIC_STATE, BASE>& 
     }
 
     PROBABILISTIC_STATE new_initial_state;
-    for(const typename PROBABILISTIC_STATE::state_probability_pair& s: l.initial_probabilistic_state())
+    for (std::size_t i=0; i<l.num_probabilistic_states(); ++i)
     {
-      new_initial_state.add(state_map[s.state()], s.probability());
+      new_initial_state.clear();
+      if (l.probabilistic_state(i).size()==0)
+      {
+        new_initial_state.set(state_map[l.probabilistic_state(i).get()]);
+      }
+      else 
+      {
+        for(const typename PROBABILISTIC_STATE::state_probability_pair& s: l.probabilistic_state(i))
+        {
+          new_initial_state.add(state_map[s.state()], s.probability());
+        }
+      }
+      new_lts.add_probabilistic_state(new_initial_state);
+    }
+    
+    new_initial_state.clear();
+    if (l.initial_probabilistic_state().size()==0)
+    {
+      new_initial_state.set(state_map[l.initial_probabilistic_state().get()]);
+    }
+    else 
+    {
+      for(const typename PROBABILISTIC_STATE::state_probability_pair& s: l.initial_probabilistic_state())
+      {
+        new_initial_state.add(state_map[s.state()], s.probability());
+      }
     }
     new_lts.set_initial_probabilistic_state(new_initial_state);
     l.swap(new_lts);

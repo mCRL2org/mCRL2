@@ -227,22 +227,30 @@ struct fsm_builder
     fsm.clear();
   }
 
+  std::size_t find_maximal_state_index(const lts_fsm_base::probabilistic_state& distribution)
+  {
+    std::size_t max = 0;
+    if (distribution.size()>1)
+    { 
+      for (const detail::lts_fsm_base::state_probability_pair& p: distribution)
+      { 
+        max = std::max(max, p.state());
+      }
+    } 
+    else
+    {
+      max=distribution.get();
+    }
+    return max;
+  }
+
   void add_transition(const std::string& source, const std::string& target, const std::string& label)
   {
     fsm_transition t(source, target, label);
-    std::size_t max = t.source();
-    if (t.target().size()>1)
-    {
-      for (const detail::lts_fsm_base::state_probability_pair& p: t.target())
-      {
-        max = std::max(max, p.state());
-      }
-    }
-    else 
-    {
-      max=std::max(max, t.target().get());
-    }
-    max += 1; // Apply a correction for the mismatch between numbering in lts_fsm and the fsm file format
+    
+    // Apply a correction with +1 for the mismatch between numbering in lts_fsm and the fsm file format
+    std::size_t max = std::max(t.source(),find_maximal_state_index(t.target()))+1;
+
     if (fsm.num_states() <= max)
     {
       fsm.set_num_states(max, fsm.has_state_info());
@@ -276,7 +284,16 @@ struct fsm_builder
 
   void add_initial_distribution(const std::string& distribution)
   {
-    fsm.set_initial_probabilistic_state(parse_distribution(distribution));
+    const lts_fsm_base::probabilistic_state d=parse_distribution(distribution);
+    std::size_t max=find_maximal_state_index(d)+1;  // Add one as state numbers are subtracted by one when parsing. 
+
+    if (fsm.num_states() <= max)
+    {
+      fsm.set_num_states(max, fsm.has_state_info());
+    }
+    fsm.add_probabilistic_state(detail::lts_fsm_base::probabilistic_state(d));
+
+    fsm.set_initial_probabilistic_state(d);
     m_initial_state_is_set = true;
   }
 
