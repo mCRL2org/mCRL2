@@ -292,7 +292,7 @@ in the transitions section of the FSM file are shown inside every state::
 An example without probabilities
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-An probablistic example, based on a probabilistic fan controller, is given below::
+A probabilistic example, based on a probabilistic fan controller, is given below::
 
   s1_P(6) Pos  "2" "3" "4" "6" "1" "5"
   b2_P(2) Bool  "true" "false"
