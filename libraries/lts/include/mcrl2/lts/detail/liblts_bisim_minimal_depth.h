@@ -31,13 +31,15 @@ namespace lts
 namespace detail
 {
 template < class LTS_TYPE>
-class bisim_partitioner_counter_example {
+class bisim_partitioner_minimal_depth {
 public:
     /** \brief Creates a bisimulation partitioner for an LTS.
-    *  \details TODO.
-    *  \warning Might be less efficient than other implementations, focussed on generating minimal depth counter-examples.
-    *  \param[in] l Reference to the LTS. */
-    bisim_partitioner_counter_example(LTS_TYPE& l, const std::size_t init_l2)
+    *  \details This partitioner is specifically for creating minimal depth counter-examples for strong bisimulation.
+    *           It guarantees stability w.r.t. the old partition before consideren new splitter blocks. This might cause this 
+    *           implementation to be less efficient than other partitioners. 
+    *  \param l Reference to the LTS.
+    *  \param init_l2 reference to the initial state of lts2. */
+    bisim_partitioner_minimal_depth(LTS_TYPE& l, const std::size_t init_l2)
         : aut(l),
         initial_l2(init_l2),
         max_state_index(0)
@@ -68,7 +70,7 @@ public:
     }
 
     /** \brief Destroys this partitioner. */
-    ~bisim_partitioner_counter_example() = default;
+    ~bisim_partitioner_minimal_depth() = default;
 
     /** \brief Creates a state formula that distinguishes state s from state t.
      *  \details The states s and t are non bisimilar states. A distinguishign state formula phi is
@@ -81,7 +83,7 @@ public:
     mcrl2::state_formulas::state_formula dist_formula_mindepth(const std::size_t s, const std::size_t t) {
         formula f = distinguish(block_index_of_a_state[s], block_index_of_a_state[t]);
         mCRL2log(mcrl2::log::info) << "done with formula \n";
-        return convertFormula(f);
+        return convert_formula(f);
     };
 
     bool in_same_class(const std::size_t s, const std::size_t t) 
@@ -117,6 +119,11 @@ private:
 
         void swap(block& b)
         {
+            std::swap(b.state_index, state_index);
+            std::swap(b.block_index, block_index);
+            std::swap(b.parent_block_index, parent_block_index);
+            std::swap(b.level, level);
+            /*
             state_type state_index1 = b.state_index;
             b.state_index = state_index;
             state_index = state_index1;
@@ -132,7 +139,7 @@ private:
             level_type level1 = b.level;
             b.level = level;
             level = level1;
-
+            */
             states.swap(b.states);
             transitions.swap(b.transitions);
         }
@@ -148,10 +155,9 @@ private:
 
         int depth() {
             int max_depth = 0;
-            for (formula f : conjunctions) {
-                if (f.depth() > max_depth) {
-                    max_depth = f.depth() + 1;
-                }
+            for (formula f : conjunctions) 
+            {
+                max_depth = std::max(max_depth, f.depth() + 1);
             }
             return max_depth; 
         }
@@ -171,8 +177,10 @@ private:
 
 
     /* Post processes the partition structure to save outgoing transitions per block */
-    void save_transitions() {
-        for (transition t : aut.get_transitions()) {
+    void save_transitions() 
+    {
+        for (transition t : aut.get_transitions()) 
+        {
             
             block_index_type sourceBlock = block_index_of_a_state[t.from()];
             block_index_type targetBlock = block_index_of_a_state[t.to()];
@@ -181,7 +189,8 @@ private:
         }
     }
 
-    void set_truths(formula& f) {
+    void set_truths(formula& f) 
+    {
         std::set <block_index_type> image_truths;
         std::set <block_index_type> pre_image_truths;
         std::set<block_index_type> intersection;
@@ -189,7 +198,8 @@ private:
         
         image_truths = std::set(partition);
 
-        for (formula df : f.conjunctions) {
+        for (formula df : f.conjunctions)
+        {
             std::set_intersection(image_truths.begin(), image_truths.end(), df.truths.begin(), df.truths.end(),
                 std::inserter(intersection, intersection.begin())
             );
@@ -198,7 +208,8 @@ private:
         }
 
         //Now compute preimage according to label
-        for (block_index_type B : image_truths) {
+        for (block_index_type B : image_truths) 
+        {
             for (transition t : blocks[B].transitions) {
                 if (t.label() == f.label && (pre_image_truths.find(block_index_of_a_state[t.from()]) == pre_image_truths.end()) ) {
                     pre_image_truths.insert(block_index_of_a_state[t.from()]);
@@ -206,7 +217,8 @@ private:
             }
         }
 
-        if (f.negated) {
+        if (f.negated) 
+        {
             image_truths.swap(pre_image_truths);
             pre_image_truths.clear();
             std::set_difference(partition.begin(), partition.end(), image_truths.begin(), image_truths.end(),
@@ -215,7 +227,8 @@ private:
         f.truths.swap(pre_image_truths);
     }
 
-    void create_initial_partition() {
+    void create_initial_partition() 
+    {
         to_be_processed.clear();
         block initial_block;
         
@@ -277,7 +290,6 @@ private:
                     BL.clear();
                 }
             }
-            //blocks[splitter_index].transitions.clear();
         }
         return true;
     }
@@ -515,31 +527,31 @@ private:
 
     /*
     * \brief Converts the private formula data type to the proper mCRL2 state_formula objects
-    * \param[in] a formula f
-    * \retval a state_formula equivalent to f
+    * \param a formula f
+    * \return a state_formula equivalent to f
     */ 
-    mcrl2::state_formulas::state_formula convertFormula(formula& f) {
-        mcrl2::state_formulas::state_formula returnPhi = mcrl2::state_formulas::may(
-            create_regular_formula(aut.action_label(f.label)), 
-            conjunction(f.conjunctions)
-        );
+	mcrl2::state_formulas::state_formula convert_formula(formula& f) {
+		mcrl2::state_formulas::state_formula returnPhi = mcrl2::state_formulas::may(
+			create_regular_formula(aut.action_label(f.label)),
+			conjunction(f.conjunctions)
+		);
 
-        if (f.negated) {
-            return mcrl2::state_formulas::not_(returnPhi);
-        }
-        return returnPhi;
-    }
+		if (f.negated) {
+			return mcrl2::state_formulas::not_(returnPhi);
+		}
+		return returnPhi;
+	}
 
     /**
      * \brief conjunction Creates a conjunction of state formulas
-     * \param[in] terms The terms of the conjunction
+     * \param terms The terms of the conjunction
      * \return The conjunctive state formula
      */
     mcrl2::state_formulas::state_formula conjunction(std::vector<formula>& conjunctions)
     {
         std::vector<mcrl2::state_formulas::state_formula> terms;
         for (formula& f : conjunctions) {
-            terms.push_back(convertFormula(f));
+            terms.push_back(convert_formula(f));
         }
         return utilities::detail::join<mcrl2::state_formulas::state_formula>(
             terms.begin(), terms.end(),
@@ -552,7 +564,7 @@ private:
     /**
     * \brief create_regular_formula Creates a regular formula that represents action a
     * \details In case the action comes from an LTS in the aut or fsm format.
-    * \param[in] a The action for which to create a regular formula
+    * \param a The action for which to create a regular formula
     * \return The created regular formula
     */
     regular_formulas::regular_formula create_regular_formula(const mcrl2::lts::action_label_string& a) const
@@ -564,7 +576,7 @@ private:
     /**
     * \brief create_regular_formula Creates a regular formula that represents action a
     * \details In case the action comes from an LTS in the lts format.
-    * \param[in] a The action for which to create a regular formula
+    * \param a The action for which to create a regular formula
     * \return The created regular formula
     */
     regular_formulas::regular_formula create_regular_formula(const mcrl2::lps::multi_action& a) const
