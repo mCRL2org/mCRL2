@@ -18,7 +18,7 @@
 #include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_dot.h"
-#include "mcrl2/lts/detail/liblts_bisim_m.h"
+#include "mcrl2/lts/detail/liblts_bisim_minimal_depth.h"
 
 namespace mcrl2
 {
@@ -1164,8 +1164,8 @@ bool destructive_bisimulation_compare_minimal_depth(
     std::size_t init_l2 = l2.initial_state() + l1.num_states();
     mcrl2::lts::detail::merge(l1, l2);
     l2.clear(); // No use for l2 anymore.
-    detail::bisim_partitioner_counter_example<LTS_TYPE> bisim_partitioner_counter_example(l1, init_l2);
-    if (bisim_partitioner_counter_example.in_same_class(l1.initial_state(), init_l2))
+    detail::bisim_partitioner_minimal_depth<LTS_TYPE> bisim_partitioner_minimal_depth(l1, init_l2);
+    if (bisim_partitioner_minimal_depth.in_same_class(l1.initial_state(), init_l2))
     {
         return true; 
     }
@@ -1175,7 +1175,7 @@ bool destructive_bisimulation_compare_minimal_depth(
         filename = counter_example_file;
     }
 
-    mcrl2::state_formulas::state_formula counter_example_formula = bisim_partitioner_counter_example.dist_formula_mindepth(l1.initial_state(), init_l2);
+    mcrl2::state_formulas::state_formula counter_example_formula = bisim_partitioner_minimal_depth.dist_formula_mindepth(l1.initial_state(), init_l2);
     
     std::ofstream counter_file(filename);
     counter_file << mcrl2::state_formulas::pp(counter_example_formula);
