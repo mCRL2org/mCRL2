@@ -79,7 +79,7 @@ bool destructive_compare(LTS_TYPE& l1,
     {
       if (generate_counter_examples)
       {
-        mCRL2log(mcrl2::log::warning) << "Warning, experimental area from here.\n";
+        mCRL2log(mcrl2::log::warning) << "A slower partition refinement algorithm is used to generate minimal-depth counter examples.\n";
         return detail::destructive_bisimulation_compare_minimal_depth(l1,l2, false,false,true,counter_example_file,structured_output);
       }
       return detail::destructive_bisimulation_compare_dnj(l1,l2, false,false,generate_counter_examples,counter_example_file,structured_output);
@@ -183,6 +183,9 @@ bool destructive_compare(LTS_TYPE& l1,
       determinise(l2);
 
       // Trace equivalence now corresponds to bisimilarity
+      if (generate_counter_examples) {
+          return detail::destructive_bisimulation_compare_minimal_depth(l1, l2, false, false, generate_counter_examples, counter_example_file, structured_output);
+      }
       return detail::destructive_bisimulation_compare(l1,l2,false,false,generate_counter_examples,counter_example_file,structured_output);
     }
     case lts_eq_weak_trace:
