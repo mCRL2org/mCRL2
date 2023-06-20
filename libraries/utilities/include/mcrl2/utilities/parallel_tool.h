@@ -38,7 +38,7 @@ class parallel_tool: public Tool
     {
       Tool::add_options(desc);
 #ifdef MCRL2_THREAD_SAFE
-      desc.add_option("threads", utilities::make_mandatory_argument("NUM"), "run with NUM threads (default=1). ");
+      desc.add_option("threads", utilities::make_mandatory_argument("NUM"), "run with NUM threads (default=1). With multiple threads the stack size on a Mac is limited which can lead to bus errors. ");
 #else
       desc.add_option("threads", utilities::make_mandatory_argument("NUM"), "run with NUM threads (default=1). This option is not available as this tool is compiled as a sequential tool.");
 #endif
