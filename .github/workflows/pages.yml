@@ -45,6 +45,7 @@ jobs:
         with:
           packages: build-essential libboost-dev libgl1-mesa-dev qtbase5-dev texlive texlive-latex-extra texlive-science texlive-pstricks doxygen
           version: 1.0
+          execute_install_scripts: true
 
       - uses: mozilla-actions/sccache-action@v0.0.3
     
