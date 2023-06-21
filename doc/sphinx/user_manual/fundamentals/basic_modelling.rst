@@ -112,17 +112,8 @@ the left the semantics of the specification.
 
 .. list-table:: A simple coffee machine.
 
-   * - .. graphviz:: 
+   * - .. image:: /_static/tikz/coffee_machine_simple1.svg
 
-          digraph coffee1 {
-          graph [rankdir=LR];
-          node [shape=circle, label="", width=0.1];
-          edge [arrowhead=vee,arrowsize=0.4];
-          ns[style=invisible];
-          ns -> n0;
-          n0 -> n1 [label=coin,labelangle=90];
-          n1 -> n2 [label=coffee,labelangle=90];
-          }
      - ::
 
           act coin, coffee;
@@ -140,19 +131,8 @@ be expressed as follows:
 .. _coffee2:
 .. list-table:: Another coffee machine.
 
-   * - .. graphviz:: 
+   * - .. image:: /_static/tikz/coffee_machine_simple2.svg
 
-          digraph coffee1 {
-          graph [rankdir=LR];
-          node [shape=circle, label="", width=0.1];
-          edge [arrowhead=vee,arrowsize=0.4];
-          ns[style=invisible];
-          ns -> n0;
-          n0 -> n1 [label=coin,labelangle=90];
-          n1 -> n2 [label=bad,labelangle=90];
-          n1 -> n3 [label=coin,labelangle=-45];
-          n3 -> n2 [label=good,labelangle=45];
-          }
      - ::
 
           act coin, good, bad;
