@@ -68,7 +68,7 @@ function(add_build_doc_target NAME DESC)
       -b html 
       -d "${SPHINX_BUILD_TEMP_DIR}/doctrees"
       -T
-      -W --keep-going
+#     -W --keep-going
       ${SPHINX_TAGS}
       ${SPHINX_PARALLEL}
       ${SPHINX_BUILD_SRC_DIR} 
