@@ -1247,12 +1247,12 @@ class explorer: public abortable
         state_type s0_ = make_state(s0);
         const auto& S = s0_.states;
         todo = make_todo_set(S.begin(), S.end());
-        discovered.clear();
+        discovered.clear(initialisation_thread_index);
         std::list<std::size_t> s0_index;
         for (const state& s: S)
         {
           // TODO: join duplicate targets
-          std::size_t s_index = discovered.index(s);
+          std::size_t s_index = discovered.index(s, initialisation_thread_index);
           if (s_index >= discovered.size())
           {
             s_index = discovered.insert(s, initialisation_thread_index).first;
