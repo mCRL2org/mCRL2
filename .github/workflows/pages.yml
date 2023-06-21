@@ -43,7 +43,7 @@ jobs:
 
       # Install the packages required for building and testing.
       - name: Install dependencies for Ubuntu
-        run: sudo apt install -y build-essential libboost-dev libgl1-mesa-dev qtbase5-dev texlive texlive-latex-extra texlive-science doxygen
+        run: sudo apt install -y build-essential libboost-dev libgl1-mesa-dev qtbase5-dev texlive texlive-latex-extra texlive-science texlive-pstricks doxygen
 
       - uses: mozilla-actions/sccache-action@v0.0.3
     
