@@ -41,11 +41,8 @@ jobs:
         id: cpu-cores
 
       # Install the packages required for building and testing.      
-      - uses: awalsh128/cache-apt-pkgs-action@latest
-        with:
-          packages: build-essential libboost-dev libgl1-mesa-dev qtbase5-dev texlive texlive-latex-extra texlive-science texlive-pstricks doxygen
-          version: 1.0
-          execute_install_scripts: true
+      - name: Install dependencies for Ubuntu
+        run: sudo apt update && sudo apt install -y build-essential libboost-dev libgl1-mesa-dev qtbase5-dev texlive texlive-latex-extra texlive-science texlive-pstricks doxygen
 
       - uses: mozilla-actions/sccache-action@v0.0.3
     
