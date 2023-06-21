@@ -117,7 +117,7 @@ The probabilistic aut format
 
 There is a straightforward probabilistic extension of the aut format. 
 The first state and each end state of an edge can be written as a discrete 
-distribution in the form :math:`s_0~p_0~s_1\cdots p_{n-1}~s_n`. This means
+probability distribution in the form :math:`s_0~p_0~s_1\cdots p_{n-1}~s_n`. This means
 that state :math:`s_i` is reached with probability :math:`p_i` for :math:`i<n`
 and state :math:`p_n` is reached with probability :math:`1-\sum_{i=0}^{n-1}p_i`.
 Each probability is denoted as a fraction ``n/m`` where ``n`` and ``m`` are 
@@ -130,7 +130,7 @@ A probabilistic example
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 A small but typical example of a probabilistic aut file is given below.
-The initial distribution chooses state ``0`` or state ``1`` with respective
+The initial probability distribution chooses state ``0`` or state ``1`` with respective
 probabilities ``1/3`` and ``2/3``. In state ``0`` an action is possible after which
 either state ``0`` or ``1`` are chosen with equal probability. In state 1 only an action 
 ``b`` can be done, and after that state 1 is always reached::
@@ -155,12 +155,10 @@ An FSM file is a human-readable, plain-text file that specifies an LTS and
 it supports not only labelling of transitions but also of states. 
 Besides that it can also express probabilities.
 The states are numbered from 1 to *n* where *n* is the highest state number
-occurring in the transition system. A file typically has the extension ``.fsm``.
-
-The states are numbered from 1 to *n* where *n* is the maximum of the highest number of
-a state occurring in any transition, or the number of state labels. 
+occurring in the transition system, or *n* is the number of state labels. 
 In general these are the same, but there are situations where they 
 can differ, for instance when there are no state labels. 
+An FSM file typically has the extension ``.fsm``.
 
 The content of a FSM file has the following form:
 
@@ -172,7 +170,7 @@ containing four sections of which the last one is optional:
 * The first section specifies the *state parameters* and their domains;
 * The second section specifies the *labels of the states* of the LTS;
 * The third section specifies the *transitions* of the LTS;
-* The fourth section contains the *initial state* or *initial distribution*. 
+* The fourth section is optional and contains the *initial state* or *initial probability distribution*. 
 
 These sections are separated by lines that contain three dashes: ``---``.
 
@@ -242,7 +240,7 @@ Every transition is specified on a separate line of the following form:
 containing the following items:
 
 * The *source state*: a positive natural number;
-* The *target state*: a positive natural number or distribution;
+* The *target state*: a positive natural number or a probability distribution;
 * The *label*: a quoted string of characters that does not contain quotes
   (``"``).
 
@@ -250,7 +248,7 @@ A value of *n* for either of the states indicates the *n*-th state of the states
 section. Each of these values should be at least 1 and at most the number of
 states specified in the states section.
 
-A distribution is a sequence of pairs of state number followed by a fraction
+A probability distribution is a sequence of pairs of state number followed by a fraction
 indicating the probability for this state to happen. This sequence is surrounded
 by square brackets. All probabilities in a distribution must add up to 1. 
 A typical example is [ 1 1/2 3 1/4 7 1/4].
@@ -260,7 +258,8 @@ The initial state section
 
 The initial state section is generally omitted and the initial state is by 
 default assumed to be state 1. This section can be used to indicate an alternative
-state number, or to use a stochastic distribution over states as the initial state. 
+initial state number, or it can be used to indicate that this transition system has 
+a probability distribution over states as the initial state. 
 
 An example without probabilities
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -289,7 +288,7 @@ in the transitions section of the FSM file are shown inside every state::
    4 2 "off"
    4 3 "decrease"
 
-An example without probabilities
+An example with probabilities
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A probabilistic example, based on a probabilistic fan controller, is given below::
