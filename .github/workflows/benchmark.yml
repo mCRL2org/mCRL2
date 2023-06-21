@@ -25,12 +25,8 @@ jobs:
       id: cpu-cores
       
     # Install the packages required for building and testing.
-    #- uses: awalsh128/cache-apt-pkgs-action@latest
-    #  with:
-    #    packages: build-essential libboost-dev libgl1-mesa-dev qtbase5-dev python3-psutil python3-yaml ccache
-    #    version: 1.0
     - name: Install dependencies for Ubuntu
-      run: sudo apt install -y build-essential libboost-dev ccache
+      run: sudo apt update && sudo apt install -y build-essential libboost-dev ccache
       
     - uses: mozilla-actions/sccache-action@v0.0.3 
       
