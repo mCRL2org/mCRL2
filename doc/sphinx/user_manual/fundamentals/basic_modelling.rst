@@ -78,17 +78,7 @@ is marked by an incoming arrow that has no source state. For `s,s'\in S` and
    \{(s_0, \a{coin}, s_1), (s_1, \a{coffee}, s_2)\}`, `i=s_0` and `f=s_2`. Its
    graphical representation is as follows:
 
-   .. graphviz:: 
-
-      digraph coffee1 {
-        graph [rankdir=LR];
-        node [shape=circle, label="", width=0.1];
-        edge [arrowhead=vee,arrowsize=0.4];
-        ns[style=invisible];
-        ns -> n0;
-        n0 -> n1 [label=coin,labelangle=90];
-        n1 -> n2 [label=coffee,labelangle=90];
-      }
+   .. image:: /_static/tikz/coffee_machine_simple.svg
 
 Sequences and choices
 ---------------------
