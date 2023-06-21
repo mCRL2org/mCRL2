@@ -1,6 +1,6 @@
-FROM fedora:36
+FROM fedora:38
 
-# 1. Install packages needed for compiling and testing the tools
+# Install packages needed for compiling and testing the tools
 RUN dnf install -y \
  boost-devel \
  cmake \
@@ -14,9 +14,6 @@ RUN dnf install -y \
  which \
 # Packages needed for packaging
  rpm-build \
-# Packages needed for testing
- python3-psutil \
- python3-pyyaml \
 # Packages needed for documentation
  doxygen \
  python3-devel \
@@ -26,13 +23,16 @@ RUN dnf install -y \
  texlive-scheme-medium \
  texlive-collection-mathextra
 
-# This package is not available in the fedora repository
-RUN pip install --user dparser
+# Copy the current source files into the root home directory
+COPY requirements.txt /root/requirements.txt
 
-# 2. Clone the git repository in the home directory
-RUN cd ~/ && git clone -b release-202206 https://github.com/mcrl2org/mcrl2.git mcrl2
+# Install the required Python packages.
+RUN pip install --user --requirement /root/requirements.txt
 
-# 3. Configure out of source build
+# Copy the current source files into the root home directory
+COPY ./ /root/mcrl2/
+
+# Configure out of source build
 RUN mkdir ~/mcrl2-build && cd ~/mcrl2-build && cmake \
  -DCMAKE_BUILD_TYPE=RELEASE \
  -DBUILD_SHARED_LIBS=ON \
@@ -41,22 +41,22 @@ RUN mkdir ~/mcrl2-build && cd ~/mcrl2-build && cmake \
  -DMCRL2_ENABLE_DEPRECATED=OFF \
  -DMCRL2_ENABLE_EXPERIMENTAL=OFF \
  -DMCRL2_ENABLE_GUI_TOOLS=ON \
- -DMCRL2_PACKAGE_RELEASE=ON \
  -DCMAKE_INSTALL_PREFIX=`pwd`/install \
  ~/mcrl2
 
-# 4. Build the toolset
-RUN cd ~/mcrl2-build && make -j8 
+# Build the toolset
+ARG THREADS=8
+RUN cd ~/mcrl2-build && make -j${THREADS} 
 
-# 5. Package the build
+# Package the build
 RUN cd ~/mcrl2-build && cpack -G RPM
 
-# 6. Test the toolset; tests require the experimental tools.
+# Test the toolset; tests require the experimental tools.
 RUN cd ~/mcrl2-build \
     && cmake -DMCRL2_ENABLE_EXPERIMENTAL=ON \
              -DMCRL2_ENABLE_TESTS=ON . \
-    && make -j8 \
-    && ctest . -j8
+    && make -j${THREADS} \
+    && ctest . -j${THREADS}
 
-# 7. Build the documentation (this does not work with sphinx v4.4.0)
-#RUN cd ~/mcrl2-build && make doc
+# Build the documentation
+RUN cd ~/mcrl2-build && make doc

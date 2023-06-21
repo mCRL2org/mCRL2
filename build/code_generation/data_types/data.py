@@ -566,7 +566,7 @@ class function_declaration_list():
 ${cases}
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for ${functionname} with domain sorts \" + ${sortmsg});
+          throw mcrl2::runtime_error("Cannot compute target sort for ${functionname} with domain sorts \" + ${sortmsg} + \". \");
         }
 ''')
 

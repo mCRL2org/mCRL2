@@ -444,7 +444,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for union_ with domain sorts " + pp(s0) + ", " + pp(s1));
+          throw mcrl2::runtime_error("Cannot compute target sort for union_ with domain sorts " + pp(s0) + ", " + pp(s1) + ". ");
         }
 
         function_symbol union_(union_name(), make_function_sort_(s0, s1, target_sort));
@@ -529,7 +529,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for intersection with domain sorts " + pp(s0) + ", " + pp(s1));
+          throw mcrl2::runtime_error("Cannot compute target sort for intersection with domain sorts " + pp(s0) + ", " + pp(s1) + ". ");
         }
 
         function_symbol intersection(intersection_name(), make_function_sort_(s0, s1, target_sort));
@@ -614,7 +614,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for difference with domain sorts " + pp(s0) + ", " + pp(s1));
+          throw mcrl2::runtime_error("Cannot compute target sort for difference with domain sorts " + pp(s0) + ", " + pp(s1) + ". ");
         }
 
         function_symbol difference(difference_name(), make_function_sort_(s0, s1, target_sort));

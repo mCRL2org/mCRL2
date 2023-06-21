@@ -1,6 +1,6 @@
-FROM fedora:34
+FROM fedora:38
 
-#  Install packages needed for compiling and testing the tools.
+# Install packages needed for compiling and testing the tools.
 RUN dnf install -y \
  boost-devel \
  cmake \
@@ -24,8 +24,8 @@ RUN dnf install -y \
  popt-devel \
  zlib-devel
 
-# Clone mcrl2 in the home directory.
-RUN cd ~/ && git clone --depth=1 -b release-202106 git://github.com/mcrl2org/mcrl2.git mcrl2
+# Copy the current source files into the root home directory
+COPY ./ /root/mcrl2/
 
 # Configure out of source build.
 RUN mkdir ~/mcrl2-build && cd ~/mcrl2-build && cmake \
@@ -39,13 +39,14 @@ RUN mkdir ~/mcrl2-build && cd ~/mcrl2-build && cmake \
  ~/mcrl2
 
 # Build the toolset.
-RUN cd ~/mcrl2-build && make -j8 install
+ARG THREADS=8
+RUN cd ~/mcrl2-build && make -j${THREADS} install
 
 # Clone and build the sylvan.
 RUN cd ~/ && git clone --depth=1 --branch=v1.4.1 https://github.com/trolando/sylvan.git sylvan
 
 # Disabled a specific warning as error since sylvan cannot be compiled otherwise.
-RUN cd ~/sylvan && cmake -DCMAKE_C_FLAGS="-Wno-error=array-parameter" -DBUILD_SHARED_LIBS=OFF . && make -j8 install
+RUN cd ~/sylvan && cmake -DCMAKE_C_FLAGS="-Wno-error=array-parameter" -DBUILD_SHARED_LIBS=OFF . && make -j${THREADS} install
 
 # Clone ltsmin git repository.
 RUN cd ~/ && git clone -b v3.0.2 https://github.com/utwente-fmt/ltsmin.git ltsmin
@@ -58,10 +59,13 @@ RUN cd ~/ltsmin && git submodule update --init
 RUN cd ~/ltsmin/ltl2ba && git checkout ea33bb2091a34f6af8dba8e26978fecb969aa93b
 
 # Fix a compilation error in ltsmin.
-COPY ltsmin.patch /root/ltsmin/
-RUN cd ~/ltsmin && git apply ltsmin.patch
+RUN cd ~/ltsmin && git apply --ignore-whitespace ~/mcrl2/build/docker/ltsmin/ltsmin.patch
 
 # Build the ltsmin toolset.
-RUN cd ~/ltsmin && ./ltsminreconf && ./configure --disable-dependency-tracking --prefix=/root/ltsmin-build/ && cd ~/ltsmin && make -j8 install
+RUN cd ~/ltsmin \
+    && ./ltsminreconf \
+    && ./configure --disable-dependency-tracking --prefix=/root/ltsmin-build/ \
+    && cd ~/ltsmin \
+    && make -j${THREADS} install
 
 # We can now copy the /root/ltsmin-build directory from the resulting image and install the mcrl2 release locally for the shared libraries and jittyc headers.

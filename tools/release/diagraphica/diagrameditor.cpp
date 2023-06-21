@@ -217,6 +217,14 @@ void DiagramEditor::setDiagram(Diagram* dgrm)
 void DiagramEditor::setEditMode(int mode)
 {
   m_editMode = mode;
+  if (mode == EDIT_MODE_SELECT || mode == EDIT_MODE_DOF)
+  {
+    setCursor(Qt::ArrowCursor);
+  }
+  else
+  {
+    setCursor(Qt::CrossCursor);
+  }
   deselectAll();
   update();
 }
@@ -357,58 +365,41 @@ void DiagramEditor::copyShapes()
 
 void DiagramEditor::pasteShapes()
 {
-  if (m_clipBoardList.size() > 0)
+  if (m_clipBoardList.size() < 1)
+    return;
+
+  deselectAll();
+
+  // Calculate the outer bounds of the shapes in the clipboard
+  // note: does not take rotation into account
+  double x1 = qInf(), x2 = -qInf(), y1 = qInf(), y2 = -qInf();
+  for (Shape* shape : m_clipBoardList)
   {
-    deselectAll();
-
-    double xOriginal = m_clipBoardList[0]->xCenter();
-    double yOriginal = m_clipBoardList[0]->yCenter();
-
-    QPointF pos = worldCoordinate(m_lastMouseEvent.localPos());
-    double xPaste = pos.x();
-    double yPaste = pos.y();
-
-    for (int i = 0; i < m_clipBoardList.size(); ++i)
-    {
-      // update index of clipboard shape
-      m_clipBoardList[i]->setIndex(m_diagram->shapeCount());
-
-      // update clipboard shape
-      if (i == 0) // Paste the first selected shape to the clicked position
-      {
-        m_clipBoardList[i]->setCenter(xPaste, yPaste);
-      }
-      else // Paste other shapes relative to their position with respect to first shape
-      {
-        double distanceX, distanceY, x1, x2, y1, y2;
-        m_clipBoardList[0]->center(x1, y1);
-        m_clipBoardList[i]->center(x2, y2);
-
-        // calculate the distance between the first selected shape and the current shape
-        distanceX = xOriginal - x2;
-        distanceY = yOriginal - y2;
-        if (x2 > xOriginal)
-        {
-          distanceX = x2 - xOriginal;
-        }
-        if (y2 > yOriginal)
-        {
-          distanceY = y2 - yOriginal;
-        }
-
-        double xC = xPaste + distanceX; // Calculate new center of the selected shape according to the distance between the first shape
-        double yC = yPaste + distanceY;
-
-        m_clipBoardList[i]->setCenter(xC, yC);
-      }
-      m_clipBoardList[i]->setModeEdit();
-
-      // add clipboard shape to diagram
-      m_diagram->addShape(m_clipBoardList[i]);
-      // make another copy of clipboard shape
-      m_clipBoardList[i] = new Shape(*m_clipBoardList[i]);
-    }
+    double cx, cy, dx, dy;
+    shape->center(cx, cy);
+    dx = abs(shape->xDistance());
+    dy = abs(shape->yDistance());
+    x1 = qMin(x1, cx - dx);
+    x2 = qMax(x2, cx + dx);
+    y1 = qMin(y1, cy - dy);
+    y2 = qMax(y2, cy + dy);
   }
+
+  // Calculate the offset of the shapes, so that the combined center of the shapes matches the mouse position
+  QPointF mouse = worldCoordinate(m_lastMouseEvent.localPos());
+  double x = snapIfNeeded(mouse.x() - x1 - (x2 - x1) / 2.0);
+  double y = snapIfNeeded(mouse.y() - y1 - (y2 - y1) / 2.0);
+
+  // Copy the shapes in the clipboard to the diagram
+  for (Shape* cb_shape : m_clipBoardList)
+  {
+    Shape* shape = new Shape(*cb_shape);
+    shape->setCenter(shape->xCenter() + x, shape->yCenter() + y);
+    shape->setModeEdit();
+    shape->setIndex(m_diagram->shapeCount());
+    m_diagram->addShape(shape);
+  }
+
   update();
 }
 

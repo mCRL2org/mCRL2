@@ -87,7 +87,7 @@ class Shape : public QObject
     void center(double& x, double& y)   { x = m_xCenter; y = m_yCenter; }
     double xCenter()                    { return m_xCenter; }
     double yCenter()                    { return m_yCenter; }
-    void distance(double& x, double& y) { x = m_xDistance; y = m_yCenter; }
+    void distance(double& x, double& y) { x = m_xDistance; y = m_yDistance; }
     double xDistance()                  { return m_xDistance; }
     double yDistance()                  { return m_yDistance; }
     double angle()                      { return m_angle; }

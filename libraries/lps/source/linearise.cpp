@@ -980,12 +980,12 @@ class specification_basic_type
         {
           throw mcrl2::runtime_error("Stochastic operator occurs within a multi-action in " + process::pp(body) +".");
         }
-        const processstatustype s1=determine_process_statusterm(sto.operand(),mCRL);
-        /*if (s1==mCRL)
+        const processstatustype s1=determine_process_statusterm(sto.operand(),pCRL);
+        if (s1==mCRL)
         {
           throw mcrl2::runtime_error("An operator ||, allow, hide, rename, or comm occurs in the scope of the stochastic operator in " + process::pp(body) + ". "
                                      + "The lineariser cannot handle such processes. ");
-        }*/
+        }
         return s1;
       }
 
@@ -10566,7 +10566,8 @@ class specification_basic_type
 
 
     /* This function replaces all process instances by a process instance assignment,
-       furthermore, if a process consists of only a process instantionation, i.e., X=Y, */
+       furthermore, if a process consists of only a process instantionation, i.e., X=Y, it is removed. 
+       Nested stochastic operators are merged into one. */
     void transform_process_arguments(
             const process_identifier& procId,
             std::set<process_identifier>& visited_processes)
@@ -10583,14 +10584,16 @@ class specification_basic_type
       }
     }
 
-    /* This function replaces all process instances by a process instance assignment */
+    /* This function replaces all process instances by a process instance assignment and 
+       merges nested stochastic operators into one.  */
     void transform_process_arguments(const process_identifier& procId)
     {
       std::set<process_identifier> visited_processes;
       transform_process_arguments(procId,visited_processes);
     }
 
-    /* This function replaces all process instances by a process instance assignment */
+    /* This function replaces all process instances by a process instance assignment 
+       and merges nested stochastic operators into one. */
     process_expression transform_process_arguments_body(
       const process_expression& t, 
       const std::set<variable>& bound_variables,
@@ -10706,10 +10709,21 @@ class specification_basic_type
       if (is_stochastic_operator(t))
       {
         const stochastic_operator& tso=down_cast<const stochastic_operator>(t);
+        // Join nested stochastic operators into one.
+        variable_list vars = tso.variables();
+        data_expression dist = tso.distribution();
+        process_expression body = tso.operand();
+        while (is_stochastic_operator(body))
+        {
+          const stochastic_operator& tso1 = down_cast<const stochastic_operator>(body);
+          vars = vars + tso1.variables();
+          dist = sort_real::times(dist, tso1.distribution());
+          body = tso1.operand();
+        }
         return stochastic_operator(
-                 tso.variables(),
-                 tso.distribution(),
-                 transform_process_arguments_body(tso.operand(),bound_variables,visited_processes));
+                 vars,
+                 dist,
+                 transform_process_arguments_body(body,bound_variables,visited_processes));
       }
       throw mcrl2::runtime_error("unexpected process format in transform_process_arguments_body " + process::pp(t) +".");
     }
@@ -11163,7 +11177,7 @@ class specification_basic_type
     {
       /* Then select the BPA processes, and check that the others
          are proper parallel processes */
-      transform_process_arguments(init);
+      transform_process_arguments(init);   // Also merges nested stochastic operators. 
       guarantee_that_parameters_have_unique_type(init);
       determine_process_status(init,mCRL);
       determinewhetherprocessescanterminate(init);
