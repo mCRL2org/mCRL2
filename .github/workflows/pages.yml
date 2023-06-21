@@ -2,7 +2,6 @@
 name: Deploy Developer Webpage
 
 on:
-  # Runs on pushes targeting the default branch
   push:
     branches: ["documentation"]
 
@@ -41,9 +40,11 @@ jobs:
         uses: SimenB/github-actions-cpu-cores@v1
         id: cpu-cores
 
-      # Install the packages required for building and testing.
-      - name: Install dependencies for Ubuntu
-        run: sudo apt install -y build-essential libboost-dev libgl1-mesa-dev qtbase5-dev texlive texlive-latex-extra texlive-science texlive-pstricks doxygen
+      # Install the packages required for building and testing.      
+      - uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: build-essential libboost-dev libgl1-mesa-dev qtbase5-dev texlive texlive-latex-extra texlive-science texlive-pstricks doxygen
+          version: 1.0
 
       - uses: mozilla-actions/sccache-action@v0.0.3
     
