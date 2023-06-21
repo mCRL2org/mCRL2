@@ -14,12 +14,12 @@ class DParserParser(tpg.Parser):
 
     token operator: '[+?*]' ;
     token literal: '\'[\S]*\'' ; 
-    token literal2: '"[\S\s]*"' ; 
+    token regex: '"[^\"]*"' ; 
     token identifier: '[a-zA-Z\d]*' ;
 
     START/rules ->      $ rules = {}
       (
-        RULE/r          $ (i, c) = r; rules[i] = '\n | '.join(c)
+        RULE/r          $ (i, c) = r; rules[i] = i + ' : ' + (' |\n' + ' '*len(i) + ' : ').join(c)
       )*
       ;
 
@@ -51,9 +51,9 @@ class DParserParser(tpg.Parser):
     ;
 
       ATOM/a ->
-          identifier/a
+          identifier/a                     $ a = f'`{a}`'
         | literal/a
-        | literal2/a
+        | regex/a
       ;
 
    """
