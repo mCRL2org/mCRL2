@@ -18,6 +18,6 @@
     \renewcommand{\a}[1]{\textit{#1}}
     \node[state,initial] (a0) {}; 
     \node[state,final,right of=a0] (a1) {};
-    \path (a0) edge node {\a{coffee}} (a1);
+    \path (a0) edge node[above] {\a{coffee}} (a1);
 \end{tikzpicture}
 \end{document}
