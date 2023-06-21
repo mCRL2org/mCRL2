@@ -34,15 +34,7 @@ The **deadlock process** (``delta``)
 
   .. list-table:: The deadlock process.
 
-     * - .. graphviz:: 
-
-            digraph deadlock {
-            graph [rankdir=LR];
-            node [shape=circle, label="", width=0.1];
-            edge [arrowhead=vee,arrowsize=0.4];
-            ns[style=invisible];
-            ns;
-            }
+     * - .. image:: /_static/tikz/lts_delta.svg
        - ::
 
             init delta;
