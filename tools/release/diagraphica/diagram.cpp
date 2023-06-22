@@ -53,7 +53,7 @@ Diagram &Diagram::operator=(const Diagram &other)
 // -- set functions -------------------------------------------------
 
 
-void Diagram::moveShapeToFront(int index)
+void Diagram::moveShapeToBack(int index)
 {
   if (index < m_shapes.size())
   {
@@ -69,7 +69,7 @@ void Diagram::moveShapeToFront(int index)
 }
 
 
-void Diagram::moveShapeToBack(int index)
+void Diagram::moveShapeToFront(int index)
 {
   if (index < m_shapes.size())
   {
@@ -85,7 +85,7 @@ void Diagram::moveShapeToBack(int index)
 }
 
 
-void Diagram::moveShapeForward(int index)
+void Diagram::moveShapeBackward(int index)
 {
   if (0 < index && index < m_shapes.size())
   {
@@ -96,11 +96,11 @@ void Diagram::moveShapeForward(int index)
 }
 
 
-void Diagram::moveShapeBackward(int index)
+void Diagram::moveShapeForward(int index)
 {
   if (index < m_shapes.size()-1)
   {
-    swapItemsAt(m_shapes, index, index-1);
+    swapItemsAt(m_shapes, index, index+1);
     m_shapes[index]->setIndex(index);
     m_shapes[index+1]->setIndex(index+1);
   }
