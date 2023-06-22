@@ -14,7 +14,6 @@
 #define MCRL2_UTILITIES_DETAIL_INDEXED_SET_H
 #pragma once
 
-#include <atomic>
 #include "mcrl2/utilities/unused.h"
 #include "mcrl2/utilities/indexed_set.h"    // necessary for header test. 
 
@@ -279,14 +278,6 @@ inline typename INDEXED_SET::size_type INDEXED_SET::index(const key_type& key, c
       position = (position + detail::STEP) % m_hashtable.size();
       assert(position!=start); // The hashtable is full. This should never happen.
     }
-    std::atomic_thread_fence(std::memory_order_seq_cst);  // This fence may convince the compiler to 
-                                                          // always read index from m_hashtable[position],
-                                                          // even if position did not change. Without this
-                                                          // statement the compiler may optimize reading 
-                                                          // index, which causes this do--while loop to not
-                                                          // terminate. This thread then has shared_access
-                                                          // preventing other processes from getting exclusive
-                                                          // access. 
   }
   while (true);
 
