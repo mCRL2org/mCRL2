@@ -62,6 +62,10 @@ struct atomic_size_t_wrapper: public std::atomic<std::size_t>
    : std::atomic<std::size_t>(0)
   {}
 
+  atomic_size_t_wrapper(const std::size_t t)
+   : std::atomic<std::size_t>(t)
+  {}
+
   atomic_size_t_wrapper(const atomic_size_t_wrapper& other)
     : std::atomic<std::size_t>(other.load())
   {}
@@ -85,7 +89,7 @@ template<typename Key,
 class indexed_set
 {
 private:
-  std::vector<std::size_t> m_hashtable;
+  std::vector<detail::atomic_size_t_wrapper> m_hashtable;
   KeyTable m_keys;
 
   /// \brief Mutex for the m_hashtable and m_keys data structures.
