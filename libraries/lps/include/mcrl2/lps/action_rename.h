@@ -879,7 +879,6 @@ namespace std
 {
 /// \brief Output an action_rename_rule to ostream. 
 /// \param out An output stream
-/// \param x An action_rename_rule. 
 /// \return The output stream
 // Currently, the variables are not printed. The shape is also not parseable. This may be mended. 
 inline
@@ -890,7 +889,6 @@ std::ostream& operator<<(std::ostream& out, const mcrl2::lps::action_rename_rule
 
 /// \brief Output a action_rename_rule to ostream. 
 /// \param out An output stream
-/// \param x An action_rename_rule. 
 /// \return The output stream
 // Currently, the data declaration and the action declaration are not printed. 
 inline
