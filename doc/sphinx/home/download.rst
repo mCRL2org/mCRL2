@@ -62,7 +62,7 @@ They are available here.
    +------------------------+-------------------------+
 
 If you are using a Linux distribution that is not listed, you may wish to try
-:ref:`compiling mCRL2 yourself <build>`.
+:ref:`compiling mCRL2 yourself <build-instructions>`.
 
 
 Previous releases
