@@ -8,15 +8,9 @@ import datetime
 import os
 import re
 import sys
-import textwrap
 
 # used to parse mCRL2 version information from CMake file
 from pathlib import Path
-
-import sphinx.errors
-
-# The ReadTheDocs theme.
-import sphinx_rtd_theme
 
 _CMAKE_SOURCE_DIR = os.environ['CMAKE_SOURCE_DIR']
 _MCRL2_TOOL_PATH = os.environ['MCRL2_TOOL_PATH']
@@ -69,6 +63,7 @@ master_doc = 'index'
 extensions = [
     'mcrl2_dparser',
     'mcrl2_pygment',
+    'sphinxcontrib.doxylink',
     'sphinx.ext.ifconfig',
     'sphinx.ext.mathjax',
     'sphinx.ext.todo',
@@ -107,9 +102,7 @@ html_css_files = [
     'css/mcrl2.css'
 ]
 
-html_js_files = [
-    'js/mcrl2.js'
-]
+html_js_files = []
 
 # Tweaking how the "last updated" is displayed
 today_fmt = '%d-%m-%Y'
@@ -120,9 +113,6 @@ suppress_warnings = ['ref.citation']
 doxylink = {
     'mcrl2' : (str(Path(__file__).parent / '_doxygen/mcrl2.tag'), 'doxygen/')
 }
-
-if tags.has('build_doxygen'):
-    extensions.append('sphinxcontrib.doxylink')
     
 # -- App setup - executed before the build process starts --------------------
 def setup(app):
