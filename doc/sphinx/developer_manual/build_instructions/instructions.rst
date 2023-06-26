@@ -12,111 +12,29 @@ obtained using:
   git clone https://github.com/mCRL2org/mCRL2.git
 
 In the remainder of this manual, we assume that you have the source code on your
-system in a folder called ``mcrl2/src``. We will set up an out-of-source build
-in ``mcrl2/build``. To acquire the various dependencies we will list the
-official websites. However, they can also be acquired from the system package manager
-or alternatives like `brew <https://brew.sh/>` for MacOS or `Conda
-<https://docs.conda.io>` for Windows provided that they have sufficient versions.
+system in a folder called ``mCRL2``. We will set up an out-of-source build
+in ``mCRL2-build``.
 
-To compile the mCRL2 toolset we require any of the following compilers:
+.. note::
 
-    GCC: 7.0
-    Clang: 5.0
-    AppleClang: 11.0
-    MSVC: 2019 v16.0
+  The mCRL2 toolset requires Qt and OpenGL for compilation of the graphical tools
+  (:ref:`tool-diagraphica`, :ref:`tool-ltsgraph`, :ref:`tool-ltsview`,
+  :ref:`tool-lpsxsim`, :ref:`tool-mcrl2-gui`, :ref:`tool-mcrl2xi`). If this is
+  undesirable then building the graphical tools can be disabled using the
+  `MCRL2_ENABLE_GUI_TOOLS` cmake flag.
 
+See the platform specific instructions for :doc:`Windows <windows>`, :doc:`MacOS <macos>` and :doc:`Linux <linux>`
 
-Qt
---
-
-The mCRL2 toolset requires Qt for compilation of the graphical tools
-(:ref:`tool-diagraphica`, :ref:`tool-ltsgraph`, :ref:`tool-ltsview`,
-:ref:`tool-lpsxsim`, :ref:`tool-mcrl2-gui`, :ref:`tool-mcrl2xi`).
-Qt version 5.12.0 does not work properly and results in non functioning graphical
-tools. Qt version 5.12.1 appears to work fine. Qt 5.13.0 appears to support dark mode on MacOs Mojave
-properly, whereas earlier versions of Qt do not properly adapt the color schemes
-leading to unreadable (white on white) text in some tools.
-
-Windows
+Testing
 --------
 
-For Windows the minimum Qt version supported is 5.12.
-Download and install Qt from https://www.qt.io/download-qt-installer.
+For testing see the documentation :ref:`here <_build-testing>`.
 
-MacOS
-------
+.. _configuration:
 
-For MacOS the minimum Qt version supported is 5.12.
-However, due to MacOS updates changing the APIs used by applications,
-a newer version of MacOS may require a newer version of Qt for some
-features to work properly.
-Qt can be installed using MacPorts by doing the following:
-
-- First go to http://www.macports.org/.
-- In the left menu bar select "Available Downloads" and download the
-  appropriate version.
-- Install the downloaded image.
-- After installing open a terminal and execute the following to test and
-  update MacPort::
-
-    sudo port selfupdate
-
-  Note that ``port`` is usually installed in ``/opt/local/bin``.
-- To install Qt, execute::
-
-    sudo port install qt5-mac
-
-Linux
------
-
-For Linux the minimum Qt version supported is 5.12.
-Binary development versions are available in the package manager in most
-distributions (for instance the ``qtbase5-dev`` package in Ubuntu).
-
-On Linux it is also required to install OpenGL related development packages.
-The exact package to be installed depends on your distribution. For Ubuntu
-these are e.g. ``libgl1-mesa-dev`` and ``libglu1-mesa-dev``.
-
-
-Configuration
-=============
-
-First of all, we need to install `CMake 3.14.0`
-<http://www.cmake.org/cmake/resources/software.html>`. To configure CMake to
-build in ``<mcrl2>/build``, make sure ``<mcrl2>/build`` exists before continuing
-with the following steps. There are three ways to configure CMake:
-
-*Graphically*
-  A graphical user interface ``cmake-gui`` is available on all platforms 
-  (in Linux you may have to install it separately, it is, e.g., currently
-  in the ``cmake-qt-gui`` package in the PPA for Ubuntu installations).
-  Use of this user interface is mostly self-explanatory.
-
-*CCMake*
-  A user-friendly command-line interface is provided by the ``ccmake``
-  executable. Example usage is as follows (from the directory
-  ``<mcrl2>/build``)::
-
-    ccmake <mcrl2>/src
-
-  From the interface you are presented with, you can choose the options
-  explained below.
-
-*Command-line*
-  CMake can also be run directly from the command line. This is recommended only
-  for experienced users who need to configure the build from a script. To set
-  a configuration variable, use the ``-D<FLAG=option>`` command-line option.
-
-  Example usage is as follows (from the directory
-  ``<mcrl2>/build``)::
-
-    cmake <mcrl2>/src -DFLAG=option
-
-  To install mCRL2 to <installdir>, with all default settings, you can
-  issue the command::
-
-    cmake <mcrl2>/src -DCMAKE_INSTALL_PREFIX=<installdir>
-	
+CMake configuration flags
+--------------------------
+  
 All three methods allow you to change the value of CMake configuration
 variables. Below, we describe the meaning of these variables. Note that in the
 graphical user interfaces, some advanced settings are initially hidden.
@@ -272,20 +190,3 @@ graphical user interfaces, some advanced settings are initially hidden.
 
 ``Qt5_DIR``
   This variable specifies the location where Qt can be found.
-
-  .. admonition:: Windows
-     :class: platform-specific win
-
-     It should be set to ``<path_to_Qt_dir>\<Qt_version>\msvc2017_64\lib\cmake\Qt5``.
-
-  .. admonition:: Mac OS X
-     :class: platform-specific mac
-
-     On Mac, this variable should have the value
-     ``<Qt_dir>/qtbase/lib/cmake/Qt5``, ``<Qt_dir>`` is the path to the directory
-     where Qt was installed.
-
-  .. admonition:: Linux
-     :class: platform-specific linux
-
-     On Linux, the right path is generally automatically detected.
