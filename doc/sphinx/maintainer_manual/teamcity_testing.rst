@@ -3,7 +3,7 @@ Regression testing with TeamCity
 ================================
 
 This documentation concerns the setup of the continuous integration service. For
-information about the tests themselves see :doc:`build-testing`. The quality of the
+information about the tests themselves see :ref:`build-testing`. The quality of the
 mCRL2 toolset is continuously monitored through regression tests, which are run
 automatically in a TeamCity setup. The results of the regression tests can be
 found at `<http://mcrl2build1.win.tue.nl:8111>`_. (You will need an account to
