@@ -78,7 +78,7 @@ is marked by an incoming arrow that has no source state. For `s,s'\in S` and
    \{(s_0, \a{coin}, s_1), (s_1, \a{coffee}, s_2)\}`, `i=s_0` and `f=s_2`. Its
    graphical representation is as follows:
 
-   .. image:: /_static/tikz/coffee_machine_simple.svg
+   .. image:: /_static/tikz/coffee_machine_simple1.svg
 
 Sequences and choices
 ---------------------
@@ -102,7 +102,7 @@ the left the semantics of the specification.
 
 .. list-table:: A simple coffee machine.
 
-   * - .. image:: /_static/tikz/coffee_machine_simple1.svg
+   * - .. image:: /_static/tikz/coffee_machine_simple2.svg
 
      - ::
 
