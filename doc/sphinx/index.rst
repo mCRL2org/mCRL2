@@ -145,6 +145,9 @@ the `University of Twente <http://fmt.cs.utwente.nl>`_.
 
    /developer_manual/contributing
    /developer_manual/build_instructions/instructions
+   /developer_manual/build_instructions/windows
+   /developer_manual/build_instructions/macos
+   /developer_manual/build_instructions/linux
    /developer_manual/guidelines
    /developer_manual/library_documentation
 
@@ -156,6 +159,6 @@ the `University of Twente <http://fmt.cs.utwente.nl>`_.
    :maxdepth: 2
    :hidden:
 
-   /developer_manual/git_workflow
-   /developer_manual/teamcity_testing
-   /developer_manual/packaging
+   /maintainer_manual/git_workflow
+   /maintainer_manual/teamcity_testing
+   /maintainer_manual/packaging
