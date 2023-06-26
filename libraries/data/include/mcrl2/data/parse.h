@@ -35,7 +35,6 @@ inline static data_specification const& default_specification()
 }
 
 } // namespace detail
-/// \endcond
 
 std::pair<basic_sort_vector, alias_vector> parse_sort_specification(const std::string& text);
 

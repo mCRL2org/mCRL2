@@ -21,7 +21,6 @@ namespace mcrl2
 namespace data
 {
 
-/// \cond INTERNAL
 namespace detail
 {
 

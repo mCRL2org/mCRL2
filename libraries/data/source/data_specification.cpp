@@ -765,7 +765,6 @@ bool data_specification::is_well_typed() const
 
   return true;
 }
-/// \endcond
 
 /// There are two types of representations of ATerms:
 ///  - the bare specification that does not contain constructor, mappings
