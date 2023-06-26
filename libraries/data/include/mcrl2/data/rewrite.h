@@ -80,7 +80,6 @@ make_rewrite_data_expressions_with_substitution_builder(Rewriter R, Substitution
 {
   return rewrite_data_expressions_with_substitution_builder<Builder, Rewriter, Substitution>(R, sigma);
 }
-/// \endcond
 
 } // namespace detail
 

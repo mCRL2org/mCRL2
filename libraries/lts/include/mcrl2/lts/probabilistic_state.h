@@ -334,9 +334,9 @@ namespace std
 {
 
 /// \brief Specialization of the standard std::hash function.
-/// \detail It is essential that this hash function yields the same has for a singular
-///         state in a distribution, stored as a number with implicit probability 1, or
-///         as a vector of length 1. 
+/// \details It is essential that this hash function yields the same has for a singular
+///          state in a distribution, stored as a number with implicit probability 1, or
+///          as a vector of length 1. 
 template < class STATE, class PROBABILITY >
 struct hash< mcrl2::lts::probabilistic_state<STATE, PROBABILITY> >
 {
