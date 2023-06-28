@@ -30,22 +30,22 @@ Atermpp types
 -------------
 
 In the atermpp library there is a class for function symbols and 4 predefined core types for terms, as shown in the following table.
-The class :cpp:class:`aterm <atermpp::aterm>` is a base class for all others.
+The class :mcrl2:`aterm <atermpp::aterm>` is a base class for all others.
 
 .. table:: atermpp function symbols and terms
 
    =======================================================  ==========================================
    type                                                     description
    =======================================================  ==========================================
-   :cpp:class:`function_symbol <atermpp::function_symbol>`  a function symbol
-   :cpp:class:`aterm <atermpp::aterm>`                      a generic aterm
-   :cpp:class:`term_appl\<T\> <atermpp::term_appl>`         a function application
-   :cpp:class:`term_list\<T\> <atermpp::term_list>`         a list of terms
-   :cpp:class:`aterm_int <atermpp::aterm_int>`              a term containing a 64 bit positive number
+   :mcrl2:`function_symbol <atermpp::function_symbol>`      a function symbol
+   :mcrl2:`aterm <atermpp::aterm>`                          a generic aterm
+   :mcrl2:`term_appl\<T\> <atermpp::term_appl>`             a function application
+   :mcrl2:`term_list\<T\> <atermpp::term_list>`             a list of terms
+   :mcrl2:`aterm_int <atermpp::aterm_int>`                  a term containing a 64 bit positive number
    =======================================================  ==========================================
 
 
-The types :cpp:class:`term_list <atermpp::term_list>` and :cpp:class:`term_appl
+The types :mcrl2:`term_appl
 <atermpp::term_appl>` are template classes. Typedefs exist for two commonly used variants:
 
 .. code-block:: c++
@@ -53,17 +53,17 @@ The types :cpp:class:`term_list <atermpp::term_list>` and :cpp:class:`term_appl
   typedef term_list<aterm> aterm_list;
   typedef term_appl<aterm> aterm_appl;
 
-A :cpp:class:`term_list\<T\> <atermpp::term_list>` models a read-only singly
-linked list with elements of type :cpp:type:`T`. The element type should be
-:cpp:class:`aterm <atermpp::aterm>` or one of its derivatives, or a user defined
+A :mcrl2:`term_list\<T\> <atermpp::term_list>` models a read-only singly
+linked list with elements of type :mcrl2:`T`. The element type should be
+:mcrl2:`aterm <atermpp::aterm>` or one of its derivatives, or a user defined
 aterm (see :ref:`atermpp_programming_user_defined`). A
-:cpp:class:`term_appl\<T\> <atermpp::term_appl>` is a function application to arguments
-of type :cpp:type:`T`.
+:mcrl2:`term_appl\<T\> <atermpp::term_appl>` is a function application to arguments
+of type :mcrl2:`T`.
 
 Besides this the library contains a few more data types in which elements derived from aterms can
-be stored. Indexed sets (:cpp:class:`indexed_set\<T\> <atermpp::indexed_set>` are essentially unordered sets providing a unique index for each inserted
+be stored. Indexed sets (:mcrl2:`indexed_set\<T\> <atermpp::indexed_set>` are essentially unordered sets providing a unique index for each inserted
 element. They are more memory efficient than unordered_maps mapping terms to a number. Balanced trees
-(:cpp:class:`term_balanced_tree\<T\> <atermpp::term_balanced_tree>`) are used to store trees of terms.
+(:mcrl2:`term_balanced_tree\<T\> <atermpp::term_balanced_tree>`) are used to store trees of terms.
 They provide an alternative
 way to store lists. As the atermpp library uses maximal sharing, balanced trees provided a memory
 efficient way to store such lists, in case there are many subtrees are the same. This is for instance
@@ -75,8 +75,8 @@ tree is itself an aterm, and can therefore be used in other terms and lists.
    ==================================================================  ===================================================================================
    type                                                                description
    ==================================================================  ===================================================================================
-   :cpp:class:`indexed_set\<T\> <atermpp::indexed_set>`                an unordered set to store aterms providing a unique number (index) for each element
-   :cpp:class:`term_balanced_tree\<T\> <atermpp::term_balanced_tree>`  a sort containing balanced trees of terms
+   :mcrl2:`indexed_set\<T\> <atermpp::indexed_set>`                    an unordered set to store aterms providing a unique number (index) for each element
+   :mcrl2:`term_balanced_tree\<T\> <atermpp::term_balanced_tree>`      a sort containing balanced trees of terms
    ==================================================================  ===================================================================================
 
 Aterm properties
@@ -126,11 +126,11 @@ Type conversions
 ^^^^^^^^^^^^^^^^
 
 Data types that employ the atermpp library typically derive from
-:cpp:class:`term_appl\<T\> <atermpp::term_appl>`, and sometimes
-from :cpp:class:`term_list\<T\> <atermpp::term_list>` and
-:cpp:class:`term_int <atermpp::term_int>`. These are subclasses
-from :cpp:class:`aterm <atermpp::aterm>`. This means that there is
-an automatic conversion from such classes towards :cpp:class:`aterm <atermpp::aterm>`'s.
+:mcrl2:`term_appl\<T\> <atermpp::term_appl>`, and sometimes
+from :mcrl2:`term_list\<T\> <atermpp::term_list>` and
+:mcrl2:`aterm_int <atermpp::aterm_int>`. These are subclasses
+from :mcrl2:`aterm <atermpp::aterm>`. This means that there is
+an automatic conversion from such classes towards :mcrl2:`aterm <atermpp::aterm>`'s.
 
 To convert aterm based types to derived classes explicit
 constructors can be used. There is a disadvantage because constructors
@@ -159,7 +159,7 @@ String representations
 ^^^^^^^^^^^^^^^^^^^^^^
 
 Aterms and derived terms can be transformed to strings using the pretty print function
-:cpp:func:`pp <atermpp::pp>` function. Aterms can also be used in output streams.
+:mcrl2:`pp <atermpp::pp>` function. Aterms can also be used in output streams.
 
 .. code-block:: c++
 
@@ -168,7 +168,7 @@ Aterms and derived terms can be transformed to strings using the pretty print fu
     std::out << "This is how a default aterm looks like: " << x << "\n";
 
 In most cases this string can be converted back to an aterm using the
-:cpp:func:`read_term_from_string <atermpp::read_term_from_string>` function. However, when using some
+:mcrl2:`read_term_from_string <atermpp::read_term_from_string>` function. However, when using some
 control characters the resul will not be the same.
 
 Comparing aterms
@@ -181,10 +181,10 @@ yield consistent outcomes when the reference count of the terms never reaches 0.
 
 Recognizing basic aterms
 ^^^^^^^^^^^^^^^^^^^^^^^^
-Using the aterm member function :cpp:member:`type_is_list <atermpp::aterm::is_list>`,
-:cpp:member:`type_is_appl <atermpp::aterm::is_appl>` and :cpp:member:`type_is_int <atermpp::aterm::is_int>`
+Using the aterm member function :mcrl2:`type_is_list <atermpp::unprotected_aterm::type_is_list>`,
+:mcrl2:`type_is_int <atermpp::unprotected_aterm::type_is_int>`
 to figure out whether an aterm is a list, a function application or an aterm_int.
-The aterm member function :cpp:member:`defined <atermpp::aterm::defined>` can be used to
+The aterm member function :mcrl2:`defined <atermpp::unprotected_aterm::defined>` can be used to
 find out whether an aterm is equal to the default constructed aterm.
 
 
@@ -271,8 +271,8 @@ defined for aterms. Swapping aterms is more efficient than assigning aterms as i
 All comparision operators are defined as already mentioned above.
 
 
-For a function_symbol the function :cpp:func:`name() <atermpp::aterm_int::name>` provides the name of the function
-as a string and the function :cpp:func:`arity() <atermpp::function_symbol::arity>` gives its arity.
+For a function_symbol the function :mcrl2:`name() <atermpp::function_symbol::name>` provides the name of the function
+as a string and the function :mcrl2:`arity() <atermpp::function_symbol::arity>` gives its arity.
 
 .. code-block:: c++
 
@@ -282,7 +282,7 @@ as a string and the function :cpp:func:`arity() <atermpp::function_symbol::arity
      std::string s=f.name();              // s becomes the string "FUNCTION".
      size_t n=f.arity();                  // n becomes 5.
 
-The value in an aterm_int can be obtained using the function :cpp:func:`value() <atermpp::aterm_int::value>`.
+The value in an aterm_int can be obtained using the function :mcrl2:`value() <atermpp::aterm_int::value>`.
 
 .. code-block:: c++
 
@@ -291,12 +291,12 @@ The value in an aterm_int can be obtained using the function :cpp:func:`value() 
      aterm_int n(12);
      size_t x=n.value();    // x gets the value 12.
 
-The function symbol of a :cpp:class:`term_appl\<T\> <atermpp::aterm_appl>` can be obtained using :cpp:func:`function() <atermpp::term_appl::function>'.
-The number of arguments of a term is obtained using :cpp:func:`size() <atermpp::term_appl::size>`. A convenience function
-:cpp:func:`empty() <atermpp::term_appl::empty>` can be used to check whether the term application is a constant, i.e.,
-has no arguments. An argument can be obtained using the subscript operator :cpp:func:`operator[] <atermpp::term_appl::operator[]>`.
+The function symbol of a :mcrl2:`function() <atermpp::term_appl::function>'.
+The number of arguments of a term is obtained using :mcrl2:`size() <atermpp::term_appl::size>`. A convenience function
+:mcrl2:`empty() <atermpp::term_appl::empty>` can be used to check whether the term application is a constant, i.e.,
+has no arguments. An argument can be obtained using the subscript operator :mcrl2:`operator[] <atermpp::term_appl::operator[]>`.
 The first argument has number 0. Using const iterators it is possible to iteratate over the arguments of a term.
-For this purpose the functions :cpp:func:`begin() <atermpp::term_appl::begin>` and :cpp:func:`end() <atermpp::term_appl::end>` are defined.
+For this purpose the functions :mcrl2:`end() <atermpp::term_appl::end>` are defined.
 
 .. code-block:: c++
 
@@ -316,13 +316,13 @@ For this purpose the functions :cpp:func:`begin() <atermpp::term_appl::begin>` a
 
 There are a number of functions to manipulate with term_lists.
 The function :mcrl2:`front() <atermpp::term_list::front>` provides the first element of a list and
-the function :cpp:func:`tail() <atermpp::term_list::tail>` give the tail of the list.
-The function :cpp:func:`pop_front() <atermpp::term_list::pop_front>` removes the first element from
-a list and :cpp:func:`push_front() <atermpp::term_list::push_front>` is used to add an element to the front
-of the list. The length of a list is obtained by :cpp:func:`size() <atermpp::term_list::size>` and the
-convenience function :cpp:func:`empty() <atermpp::term_list::empty>` can be used to check whether
+the function :mcrl2:`tail() <atermpp::term_list::tail>` give the tail of the list.
+The function :mcrl2:`pop_front() <atermpp::term_list::pop_front>` removes the first element from
+a list and :mcrl2:`push_front() <atermpp::term_list::push_front>` is used to add an element to the front
+of the list. The length of a list is obtained by :mcrl2:`size() <atermpp::term_list::size>` and the
+convenience function :mcrl2:`empty() <atermpp::term_list::empty>` can be used to check whether
 a list is empty. It is possible to iterate over the elements of a list using
-:cpp:func:`begin() <atermpp::term_list::begin>` and :cpp:func:`end() <atermpp::term_list::end>`.
+:mcrl2:`end() <atermpp::term_list::end>`.
 
 .. code-block:: c++
 
@@ -362,10 +362,10 @@ For example:
 
 Iterator interfaces
 ^^^^^^^^^^^^^^^^^^^
-The classes :cpp:class:`term_list\<T\> <atermpp::term_list>` and
-:cpp:class:`term_appl\<T\> <atermpp::term_appl>` have C++ standard conforming iterator interfaces.
-The iterator of a :cpp:class:`term_list` iterates over the elements in the list. The iterator
-of a :cpp:class:`term_appl` iterates over the arguments of the term.
+The classes :mcrl2:`term_list\<T\> <atermpp::term_list>` and
+:mcrl2:`term_appl\<T\> <atermpp::term_appl>` have C++ standard conforming iterator interfaces.
+The iterator of a :mcrl2:`term_list` iterates over the elements in the list. The iterator
+of a :mcrl2:`term_appl` iterates over the arguments of the term.
 They operate well with the C++ Standard Library, as illustrated by the following example:
 
 .. code-block:: c++
@@ -412,7 +412,7 @@ User defined terms
 The aterm library provides an excellent basis on top of which user defined terms
 can be constructed. Suppose one wants to create terms with zero, one and addition
 where only addition is defined explicitly below.
-This can be done by creating a class :cpp:class:`Expression` inheriting from an aterm_appl.
+This can be done by creating a class :mcrl2:`Expression` inheriting from an aterm_appl.
 
 .. code-block:: c++
 
@@ -483,7 +483,7 @@ This can be done by creating a class :cpp:class:`Expression` inheriting from an 
 
    }
 
-Now that we have defined :cpp:class:`Expression`, we can use it in standard containers.
+Now that we have defined :mcrl2:`Expression`, we can use it in standard containers.
 
 .. code-block:: c++
 
@@ -503,14 +503,14 @@ Aterm algorithms
 
 For the `atermpp` library a couple of algorithms are defined. Most
 of these algorithms have template parameters for the terms that they
-operate on. These algorithms work on every class for which an :cpp:class:`aterm_traits`
+operate on. These algorithms work on every class for which an :mcrl2:`aterm_traits`
 specialization exists.
 
 Find algorithms
 ^^^^^^^^^^^^^^^
-There are a couple of find algorithms, including :cpp:func:`find_if <atermpp::find_if>`
+There are a couple of find algorithms, including :mcrl2:`find_if <atermpp::find_if>`
 for searching a subterm that matches a given predicate, and
-:cpp:func:`find_all_if <atermpp::find_all_if>` for finding all subterms that match a
+:mcrl2:`find_all_if <atermpp::find_all_if>` for finding all subterms that match a
 predicate. The program fragment below illustrates this:
 
 .. code-block:: c++
@@ -535,8 +535,8 @@ predicate. The program fragment below illustrates this:
   assert(v.front() == read_term_from_string("f(y)"));
   assert(v.back() == read_term_from_string("f(z)"));
 
-The find algorithms also work on user defined types. So if `t` is of type :cpp:class:`Expression`,
-then it is possible to call :cpp:func:`find_if(t, is_f())`
+The find algorithms also work on user defined types. So if `t` is of type :mcrl2:`Expression`,
+then it is possible to call :mcrl2:`find_if(t, is_f())`
 as well.
 
 Replace algorithms
@@ -545,7 +545,7 @@ There are several algorithms for replacing subterms. The ``replace`` algorithm r
 a subterm with another term, `bottom_up_replace` does the same but with a different traversal
 order. The latter function also contains a version that maintains a cache of replaced terms,
 which may improve the performance if the same subterms occur often.
-The algorithm :cpp:func:`~atermpp::partial_replace` has the option to abort further replacements
+The algorithm :mcrl2:`~atermpp::partial_replace` has the option to abort further replacements
 based on a predicate.
 
 .. code-block:: c++
@@ -571,8 +571,8 @@ based on a predicate.
 Miscellaneous algorithms
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-The algorithm :cpp:func:`~atermpp::apply` applies an operation to the elements
-of a list, and returns the result. The :cpp:func:`~atermpp::for_each` algorithm applies
+The algorithm :mcrl2:`~atermpp::apply` applies an operation to the elements
+of a list, and returns the result. The :mcrl2:`~atermpp::for_each` algorithm applies
 an operation to each subterm of a term.
 
 .. code-block:: c++
