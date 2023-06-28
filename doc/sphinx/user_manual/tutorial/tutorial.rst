@@ -11,7 +11,7 @@ introduction of the main concepts, and to [GM14a]_ for an in-depth
 discussion.
 
 Before starting this tutorial you should first :ref:`download <download>` a copy
-of mCRL2. See also the :ref:`build instructions <build>`.
+of mCRL2. See also the :ref:`build instructions <build-instructions>`.
 
 .. note::
 
