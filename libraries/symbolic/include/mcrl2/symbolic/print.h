@@ -214,9 +214,12 @@ std::string print_relation(const std::vector<data_expression_index>& data_index,
 }
 
 /// \brief Prints the number of elements represented by the ldd L and optionally also include the number of nodes of L.
+inline
 std::string print_size(const sylvan::ldds::ldd& L, bool print_exact, bool print_nodecount)
 {
   std::ostringstream out;
+  double result = satcount(L);
+
   if (print_exact)
   {
     // Use this ugly construct to figure out if the conversion succeeded, should have been an exception or sum type.
@@ -224,11 +227,11 @@ std::string print_size(const sylvan::ldds::ldd& L, bool print_exact, bool print_
     std::feholdexcept(&save_env);
 
     std::feclearexcept(FE_ALL_EXCEPT);
-    long long exact = std::llround(satcount(L));
+    long long exact = std::llround(result);
     if (std::fetestexcept(FE_INVALID))
     {
-      //  the result of the rounding is outside the range of the return type.
-      out << satcount(L);
+      // the result of the rounding is outside the range of the return type.
+      out << result;
     }
     else
     {
@@ -239,7 +242,7 @@ std::string print_size(const sylvan::ldds::ldd& L, bool print_exact, bool print_
   }
   else
   {
-    out << satcount(L);
+    out << result;
   }
 
   if (print_nodecount)
@@ -413,10 +416,36 @@ std::string print_relation(const std::vector<data_expression_index>& data_index,
 
 /// \brief Prints the number of elements represented by the BDD L and optionally also include the number of nodes of L.
 inline 
-std::string print_size(const sylvan::bdds::bdd& L, const sylvan::bdds::bdd& variables, bool print_nodecount)
+std::string print_size(const sylvan::bdds::bdd& L, const sylvan::bdds::bdd& variables, bool print_exact, bool print_nodecount)
 {
   std::ostringstream out;
-  out << sylvan::bdds::satcount(L, variables);
+  double result = sylvan::bdds::satcount(L, variables);
+
+  if (print_exact)
+  {
+    // Use this ugly construct to figure out if the conversion succeeded, should have been an exception or sum type.
+    std::fenv_t save_env;
+    std::feholdexcept(&save_env);
+
+    std::feclearexcept(FE_ALL_EXCEPT);
+    long long exact = std::llround(result);
+    if (std::fetestexcept(FE_INVALID))
+    {
+      // the result of the rounding is outside the range of the return type.
+      out << result;
+    }
+    else
+    {
+      out << exact;
+    }
+    
+    std::feupdateenv(&save_env);
+  }
+  else
+  {
+    out << result;
+  }
+
   if (print_nodecount)
   {
     out << "[" << L.node_count() << "]";

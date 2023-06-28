@@ -181,7 +181,7 @@ mcrl2::lps::symbolic_lts_bdd sigref_algorithm::run(const mcrl2::lps::symbolic_lt
   merged_transition_relation[0] = big_union(new_transition_relations);
   new_transition_relations = merged_transition_relation;
 
-  mCRL2log(log_level_t::debug) << "transition relation size " << print_size(new_transition_relations[0], bdd_and(bdd_and(lts.state_variables(), prime_variables), lts.action_label_variables()), true) << std::endl;
+  mCRL2log(log_level_t::debug) << "transition relation size " << print_size(new_transition_relations[0], bdd_and(bdd_and(lts.state_variables(), prime_variables), lts.action_label_variables()), true, true) << std::endl;
 
   // mCRL2log(log_level_t::debug) << "transition relation = " << std::endl;     
   //mCRL2log(log_level_t::debug) << print_vectors(new_transition_relations[0], bdd_and(bdd_and(lts.state_variables, prime_variables), lts.action_label_variables)) << std::endl;

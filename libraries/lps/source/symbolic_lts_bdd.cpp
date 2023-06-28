@@ -147,7 +147,7 @@ symbolic_lts_bdd::symbolic_lts_bdd(const symbolic_lts& lts)
   m_states = bdd_from_ldd(lts.states(), m_bits, 0); 
   
   mCRL2log(log_level_t::debug) << symbolic::print_states(lts.data_index(), m_states, m_state_variables, m_bits) << std::endl;
-  mCRL2log(log_level_t::debug) << "state space LDD size " << symbolic::print_size(lts.states(), true) << " to BDD size " << symbolic::print_size(m_states, m_state_variables, true) << std::endl;
+  mCRL2log(log_level_t::debug) << "state space LDD size " << symbolic::print_size(lts.states(), true, true) << " to BDD size " << symbolic::print_size(m_states, m_state_variables, true, true) << std::endl;
   
   std::vector<uint32_t> action_variables;
   for (std::size_t i = 0; i < m_bits_action_label; ++i)
@@ -173,8 +173,8 @@ symbolic_lts_bdd::symbolic_lts_bdd(const symbolic_lts& lts)
     //mCRL2log(log_level_t::debug) << symbolic::print_relation(lts.data_index, lts.action_index, relation, sylvan::bdds::bdd_and(variables, action_label_variables), bits, bits_action_label, group.read, group.write) << std::endl;    
     
     m_transitions.emplace_back(relation, variables);
-    mCRL2log(log_level_t::debug) << "transition relation LLD size " << symbolic::print_size(group.L, true) 
-      << " to BDD size " << symbolic::print_size(relation, sylvan::bdds::bdd_and(variables, m_action_label_variables), true) << std::endl;
+    mCRL2log(log_level_t::debug) << "transition relation LLD size " << symbolic::print_size(group.L, true, true) 
+      << " to BDD size " << symbolic::print_size(relation, sylvan::bdds::bdd_and(variables, m_action_label_variables), true, true) << std::endl;
   }
 
   m_state_variables_length = variables.size();
