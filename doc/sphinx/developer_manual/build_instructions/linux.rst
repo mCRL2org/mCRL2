@@ -21,7 +21,7 @@ executable. Example usage is as follows (from the directory
   ccmake ../mCRL2
 
 From the interface you are presented with, you can choose the options
-explained on the :ref:`instructions <instructions>`. Then prcessing `c`
+explained on the :ref:`instructions <build-instructions>`. Then prcessing `c`
 will configuration the project, and pressing `g` will generate the Makefile.
 For compilation using multiple cores, use the ``-j`` flag; *e.g.*, to compile
 using 4 cores, use::
