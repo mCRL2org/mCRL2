@@ -167,7 +167,7 @@ First, clone the correct release branch of the mCRL2 source using a Git client
 to some folder (called ``source`` from now on). Then open CMake, enter
 ``source`` as the folder with the source code and enter some folder for the
 binaries (called ``build`` from now on). On top of :doc:`configuring the CMake
-options normally <configuration>`, also set
+options normally <build-instructions>`, also set
 MCRL2_PACKAGE_RELEASE to true. Then click on configure and set the generator to
 Visual Studio (the version used for development) and the platform to x64.
 Afterwards click on generate and then on open project to open the project in
