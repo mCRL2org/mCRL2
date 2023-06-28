@@ -1,3 +1,5 @@
+.. _teamcity-testing:
+
 ================================
 Regression testing with TeamCity
 ================================

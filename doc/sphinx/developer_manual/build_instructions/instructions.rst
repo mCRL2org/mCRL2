@@ -28,7 +28,7 @@ See the platform specific instructions for :doc:`Windows <windows>`, :doc:`MacOS
 Testing
 --------
 
-For testing see the documentation :ref:`here <_build-testing>`.
+For testing see the documentation :ref:`here <build-testing>`.
 
 .. _configuration:
 
@@ -44,9 +44,7 @@ graphical user interfaces, some advanced settings are initially hidden.
    For a typical installation of mCRL2, the default settings are
    acceptable for all the options listed below. The only common change
    is in the path to which mCRL2 must be installed, which can be set
-   using ``CMAKE_INSTALL_PREFIX``. If you are not interested in the
-   meaning of detailed configuration settings, you can safely skip to
-   :ref:`build-compilation`.
+   using ``CMAKE_INSTALL_PREFIX``.
 
 .. note::
 

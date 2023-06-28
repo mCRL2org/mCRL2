@@ -40,7 +40,7 @@ Regression tests
 
 The toolset contains several types of regression tests. These tests are
 automatically executed on a continuous integration service to maintain the
-quality of the toolset, for information see :doc:`teamcity_testing`. First of
+quality of the toolset, for information see :ref:`teamcity_testing`. First of
 all, each library contains a `test` directory consisting of several :file:`.cpp`
 files in which unit and integration tests are defined using the unit testing
 framework of the Boost library. Existing tests give an idea on how the tests are
