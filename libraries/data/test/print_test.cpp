@@ -19,7 +19,7 @@ using namespace mcrl2::data::sort_bool;
 using namespace mcrl2::data::sort_nat;
 
 template <typename T>
-void test_term(const std::string& s, const T& x)
+void test_term(const std::string& , const T& x)
 {
   std::cout << data::pp(x) << std::endl;
 }

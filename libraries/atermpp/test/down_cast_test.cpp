@@ -18,7 +18,7 @@
 class t1 : public atermpp::aterm
 {
 public:
-  t1(const int x) 
+  t1(const int ) 
   {}
 
   explicit t1(const aterm& x) 
@@ -51,7 +51,7 @@ public:
 };
 
 inline
-void f(const t3& t)
+void f(const t3& )
 {
 }
 

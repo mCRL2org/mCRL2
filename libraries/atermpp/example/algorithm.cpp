@@ -53,7 +53,7 @@ void test_replace()
   assert(b == read_term_from_string("f(x)"));
 }
 
-int main(int argc, char* argv[])
+int main(int /*argc*/, char** /*argv*/)
 {
   test_find();
   test_replace();
