@@ -3,6 +3,12 @@
 Build instructions
 ==================
 
+.. toctree::
+
+   windows
+   macos
+   linux
+   
 The mCRL2 source code can be obtained in two ways. The source code for releases
 of the toolset are available as a source tarball, see :ref:`download`. The source
 code for the development version of the toolset is available in our `Git <https://git-scm.com/>`_

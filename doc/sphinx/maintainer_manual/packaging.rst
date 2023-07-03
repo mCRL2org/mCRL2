@@ -166,7 +166,7 @@ We assume here that cpack.exe (provided by CMake) is in PATH.
 First, clone the correct release branch of the mCRL2 source using a Git client
 to some folder (called ``source`` from now on). Then open CMake, enter
 ``source`` as the folder with the source code and enter some folder for the
-binaries (called ``build`` from now on). On top of :doc:`configuring the CMake
+binaries (called ``build`` from now on). On top of :ref:`configuring the CMake
 options normally <build-instructions>`, also set
 MCRL2_PACKAGE_RELEASE to true. Then click on configure and set the generator to
 Visual Studio (the version used for development) and the platform to x64.
