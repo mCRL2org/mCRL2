@@ -1,3 +1,5 @@
+.. _labelled-transition-systems:
+
 Labelled transition systems
 ===========================
 

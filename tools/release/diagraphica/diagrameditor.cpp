@@ -316,19 +316,24 @@ void DiagramEditor::editTextSize()
   }
 }
 
-void DiagramEditor::editNote()
+bool DiagramEditor::editNote(Shape* shape)
 {
-  Shape* s = selectedShape();
-  if (s != 0)
+  if (shape == nullptr)
+  {
+    shape = selectedShape();
+  }
+  if (shape != nullptr)
   {
     bool ok;
-    QString note = QInputDialog::getText(this, "Set Note", "Text:", QLineEdit::Normal, s->note(), &ok);
+    QString note = QInputDialog::getText(this, "Set Note", "Text:", QLineEdit::Normal, shape->note(), &ok);
     if (ok)
     {
-      s->setNote(note);
+      shape->setNote(note);
       update();
+      return true;
     }
   }
+  return false;
 }
 
 
@@ -595,16 +600,23 @@ void DiagramEditor::createShape()
   }
   else if (m_editMode == EDIT_MODE_NOTE)
   {
+    // Bug: For some reason opening a dialog triggers the createShape function twice
+    //      We temporarily set the mode to selection. Perhaps there is a better solution.
+    m_editMode = EDIT_MODE_SELECT;
+    bool ok = editNote(s);
+    m_editMode = EDIT_MODE_NOTE;
+
+    if (!ok) // Remove shape if dialog was cancelled
+    {
+      delete s;
+      return;
+    }
+
     s->setTypeNote();
   }
 
   m_diagram->addShape(s);
   update();
-
-  if (m_editMode == EDIT_MODE_NOTE)
-  {
-    editNote();
-  }
 }
 
 void DiagramEditor::initContextMenu()

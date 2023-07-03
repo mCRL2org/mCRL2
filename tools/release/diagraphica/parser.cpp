@@ -1,4 +1,4 @@
-// Author(s): A.J. (Hannes) pretorius
+// Author(s): A.J. (Hannes) Pretorius
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //

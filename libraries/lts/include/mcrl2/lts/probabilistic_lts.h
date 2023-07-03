@@ -135,7 +135,7 @@ class probabilistic_lts: public lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE>
     void set_initial_probabilistic_state(const PROBABILISTIC_STATE_T& state)
     {
       // Prevent that the initial state of the lts, which is not used in a probabilistic state
-      // has a random value.
+      // has an arbitrary value.
       set_initial_state(0);
       m_init_probabilistic_state = state;
     }

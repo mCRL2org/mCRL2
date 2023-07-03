@@ -3,12 +3,13 @@
 µ-Calculus
 ==========
 
-The µ-calculus used in mCRL2 is a first-order modal
-µ-calculus extended with data-depended processes and regular formulas.
+The µ-calculus used in mCRL2 is the modal
+µ-calculus extended with data. It also supports regular formulas as these
+allow to express many common properties more concisely. .
 This page describes the concrete syntax of these µ-calculus formulas,
 and how it is used in the toolset.
 
-The syntax of the µ-calculus consists of multiactions, action
+The syntax of the µ-calculus consists of multi-actions, action
 formulas, regular formulas and state formulas. Next to these, the use of
 µ-calculus formulas in files is described.
 
@@ -19,8 +20,8 @@ Multi-actions are defined by the following syntax.
 
 .. dparser:: ActionList MultAct
 
-The constant ``tau`` represents for the empty multiaction,
-``a0 | ... | an`` represents the multiaction consisting of parameterised actions
+The constant ``tau`` represents for the empty multi-action,
+``a0 | ... | an`` represents the multi-action consisting of parameterised actions
 ``ai``, for ``0 ≤ i ≤ n``.
 
 Action formulas

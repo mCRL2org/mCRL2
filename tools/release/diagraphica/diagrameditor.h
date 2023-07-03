@@ -75,8 +75,8 @@ class DiagramEditor : public Visualizer
 
     // -- context menu functions ------------------------------------
 
-    void editDof(Shape *shape = 0);
-    void editNote();
+    void editDof(Shape* shape = nullptr);
+    bool editNote(Shape* shape = nullptr);
     void editTextSize();
 
     void cutShapes();

@@ -1160,7 +1160,7 @@ void GLScene::renderNode(std::size_t i, bool transparent)
     m_drawNodeBorder.push_back(node.pos(), color);
 
     color = QVector4D(applyFog(fill, fog), alpha);
-    if (node.is_probabilistic())
+    if (node.is_probabilistic() && !mark)   // Marked and initial states are not drawn as black spheres. 
     {
       // Draw only the top section of the half sphere
       // This gives the appearance of a thicker border

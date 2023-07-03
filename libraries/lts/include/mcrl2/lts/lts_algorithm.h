@@ -79,8 +79,8 @@ bool destructive_compare(LTS_TYPE& l1,
     {
       if (generate_counter_examples)
       {
-        mCRL2log(mcrl2::log::warning) << "The default bisimulation comparison algorithm cannot generate counter examples. Therefore the slower gv algorithm is used instead.\n";
-        return detail::destructive_bisimulation_compare(l1,l2, false,false,generate_counter_examples,counter_example_file,structured_output);
+        mCRL2log(mcrl2::log::warning) << "A slower partition refinement algorithm is used to generate minimal-depth counter examples.\n";
+        return detail::destructive_bisimulation_compare_minimal_depth(l1,l2, false,false,true,counter_example_file,structured_output);
       }
       return detail::destructive_bisimulation_compare_dnj(l1,l2, false,false,generate_counter_examples,counter_example_file,structured_output);
     }
@@ -183,6 +183,9 @@ bool destructive_compare(LTS_TYPE& l1,
       determinise(l2);
 
       // Trace equivalence now corresponds to bisimilarity
+      if (generate_counter_examples) {
+          return detail::destructive_bisimulation_compare_minimal_depth(l1, l2, false, false, generate_counter_examples, counter_example_file, structured_output);
+      }
       return detail::destructive_bisimulation_compare(l1,l2,false,false,generate_counter_examples,counter_example_file,structured_output);
     }
     case lts_eq_weak_trace:
@@ -538,9 +541,34 @@ bool reachability_check(probabilistic_lts < SL, AL, PROBABILISTIC_STATE, BASE>& 
     }
 
     PROBABILISTIC_STATE new_initial_state;
-    for(const typename PROBABILISTIC_STATE::state_probability_pair& s: l.initial_probabilistic_state())
+    for (std::size_t i=0; i<l.num_probabilistic_states(); ++i)
     {
-      new_initial_state.add(state_map[s.state()], s.probability());
+      new_initial_state.clear();
+      if (l.probabilistic_state(i).size()==0)
+      {
+        new_initial_state.set(state_map[l.probabilistic_state(i).get()]);
+      }
+      else 
+      {
+        for(const typename PROBABILISTIC_STATE::state_probability_pair& s: l.probabilistic_state(i))
+        {
+          new_initial_state.add(state_map[s.state()], s.probability());
+        }
+      }
+      new_lts.add_probabilistic_state(new_initial_state);
+    }
+    
+    new_initial_state.clear();
+    if (l.initial_probabilistic_state().size()==0)
+    {
+      new_initial_state.set(state_map[l.initial_probabilistic_state().get()]);
+    }
+    else 
+    {
+      for(const typename PROBABILISTIC_STATE::state_probability_pair& s: l.initial_probabilistic_state())
+      {
+        new_initial_state.add(state_map[s.state()], s.probability());
+      }
     }
     new_lts.set_initial_probabilistic_state(new_initial_state);
     l.swap(new_lts);

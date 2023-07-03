@@ -254,7 +254,6 @@ inline typename INDEXED_SET::size_type INDEXED_SET::index(const key_type& key, c
   assert(m_hashtable.size()>0);
   std::size_t start = ((m_hasher(key) * detail::PRIME_NUMBER) >> 2) % m_hashtable.size();
   std::size_t position = start;
-
   do
   {
     std::size_t index = m_hashtable[position];
