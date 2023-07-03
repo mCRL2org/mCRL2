@@ -442,19 +442,11 @@ Incorporating hints
 For both the reporting level and the stream, the routines to change them have
 an optional hint argument that can be used to override the defaults for a
 specific hint. To set a reporting level for a specific hint "hint" one can
-use :mcrl2:`mcrl2_logger::set_reporting_level(level, "hint")`, likewise, for a stream
-one can use :mcrl2:`mcrl2_logger::output_policy_t::set_stream(file_pointer, "hint")`.
+use :mcrl2:`mcrl2_logger::set_reporting_level`, likewise, for a stream
+one can use :mcrl2:`mcrl2_logger::output_policy_t::set_stream`.
 In order to remove specific treatment of a hint, the routines
-:mcrl2:`mcrl2_logger::clear_reporting_level("hint")` an
-:mcrl2:`mcrl2_logger::output_policy_t::clear_stream("hint")` can be used.
-
-Formatting the output
-^^^^^^^^^^^^^^^^^^^^^
-By default each line in the output is prefixed with a fixed string,
-including a timestamp, the log level and, if provided, a hint. Furthermore,
-the user of the library can control indentation (at a global level) using
-the routines :mcrl2:`mcrl2_logger::indent()` and
-:mcrl2:`mcrl2_logger::unindent()`.
+:mcrl2:`mcrl2_logger::clear_reporting_level` an
+:mcrl2:`mcrl2_logger::output_policy_t::clear_stream` can be used.
 
 Tutorial
 --------
@@ -500,7 +492,7 @@ Let's do some logging.
     mCRL2log(log::info) << "This shows the way info messages are printed, using the default messages" << std::endl;
     mCRL2log(log::debug) << "This line is not printed, and the function " << my_function() << " is not evaluated" << std::endl;
 
-Now we call an algorithm :mcrl2:`my_algorithm`, which we will define later.
+Now we call an algorithm `my_algorithm`, which we will define later.
 The algorithm uses "my_algorithm" as hint for logging, and we want to write
 its output to a file. First we create a file logger_test_file.txt to which
 we log, and assign it to the hint "my_algorithm".
@@ -568,7 +560,7 @@ statements of all levels up to and including debug3 are actually compiled
 into the code. We still have to enable the logging statements at run-time,
 because so far we have only allowed logging of messages up to verbose level.
 Therefore we should add the following anywhere before the execution of
-the second debug print in :mcrl2:`my_algorithm`
+the second debug print in `my_algorithm`
 
 .. code-block:: c++
 
@@ -632,7 +624,7 @@ The complete code now looks as follows:
     fclose(plogfile);
   }
 
-Note that in this code, the logging of :mcrl2:`my_algorithm` is done to the file
+Note that in this code, the logging of `my_algorithm` is done to the file
 logger_test_file.txt, whereas the other log messages are printed to stderr.
 
 After execution, stderr looks as follows::
