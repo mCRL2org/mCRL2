@@ -54,7 +54,7 @@ The types :mcrl2:`term_appl
   typedef term_appl<aterm> aterm_appl;
 
 A :mcrl2:`term_list\<T\> <atermpp::term_list>` models a read-only singly
-linked list with elements of type :mcrl2:`T`. The element type should be
+linked list with elements of type `T`. The element type should be
 :mcrl2:`aterm <atermpp::aterm>` or one of its derivatives, or a user defined
 aterm (see :ref:`atermpp_programming_user_defined`). A
 :mcrl2:`term_appl\<T\> <atermpp::term_appl>` is a function application to arguments
@@ -291,7 +291,7 @@ The value in an aterm_int can be obtained using the function :mcrl2:`value() <at
      aterm_int n(12);
      size_t x=n.value();    // x gets the value 12.
 
-The function symbol of a :mcrl2:`function() <atermpp::term_appl::function>'.
+The function symbol of a :mcrl2:`function() <atermpp::term_appl::function>`.
 The number of arguments of a term is obtained using :mcrl2:`size() <atermpp::term_appl::size>`. A convenience function
 :mcrl2:`empty() <atermpp::term_appl::empty>` can be used to check whether the term application is a constant, i.e.,
 has no arguments. An argument can be obtained using the subscript operator :mcrl2:`operator[] <atermpp::term_appl::operator[]>`.

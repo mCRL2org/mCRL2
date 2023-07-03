@@ -11,8 +11,8 @@ provided websites to acquire them individually.
 
   * *XCode* must be installed. It can be obtained from Apple's developer website. Afterwards we have to execute `xcode-select --install` to install the required command line tools.
   * Boost library sources, which can be downloaded from `<https://www.boost.org/>`_ and extracted in any desired location.
-  * Qt version 5.15.0. Download and install Qt from `<https://www.qt.io/download-qt-installer>`, which requires a Qt account.
-  * `CMake 3.14.0` or higher from <http://www.cmake.org/cmake/resources/software.html>`. 
+  * Qt version 5.15.0. Download and install Qt from `<https://www.qt.io/download-qt-installer>`_, which requires a Qt account.
+  * `CMake 3.14.0` or higher from `<http://www.cmake.org/cmake/resources/software.html>`_. 
 
 .. note::
 
