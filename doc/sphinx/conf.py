@@ -63,7 +63,6 @@ master_doc = 'index'
 extensions = [
     'mcrl2_dparser',
     'mcrl2_pygment',
-    'sphinxcontrib.doxylink',
     'sphinx.ext.ifconfig',
     'sphinx.ext.mathjax',
     'sphinx.ext.todo',
@@ -109,6 +108,9 @@ today_fmt = '%d-%m-%Y'
 
 # Suppress warnings about unreferenced citations (there are many on the publications page).
 suppress_warnings = ['ref.citation']
+
+if tags.has('build_doxygen'):
+    extensions.append('sphinxcontrib.doxylink')
 
 doxylink = {
     'mcrl2' : (str(Path(__file__).parent / '_doxygen/mcrl2.tag'), 'doxygen/')
