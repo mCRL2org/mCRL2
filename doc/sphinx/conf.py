@@ -81,10 +81,11 @@ exclude_patterns = ['.git']
 # a list of builtin themes.
 #
 html_theme = 'sphinx_rtd_theme'
+html_style = 'css/mcrl2.css'
 html_theme_options = {
     'collapse_navigation': False,
     'logo_only': True,
-    'style_external_links': True
+    'style_external_links': False
 }
 html_logo = '_static/mcrl2.png'
 html_sidebars = {
@@ -96,11 +97,6 @@ html_sidebars = {
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 html_extra_path = ['_doxygen/output/']
-
-html_css_files = [
-    'css/mcrl2.css'
-]
-
 html_js_files = []
 
 # Tweaking how the "last updated" is displayed
