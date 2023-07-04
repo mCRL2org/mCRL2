@@ -39,7 +39,7 @@
  .citation .brackets:before { content: "["; }
  .citation .brackets:after { content: "]"; }
  
- div.tool-docs li { float: left; display: inline; width: 20%; }
+ div.tool-docs li { display: inline-block; width: 20%; }
  div.tool-docs { clear: both; }
  
  div.dparser .admonition-title {
