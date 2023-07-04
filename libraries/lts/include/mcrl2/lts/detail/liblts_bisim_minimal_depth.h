@@ -214,7 +214,11 @@ private:
 			blocks[sourceBlock].outgoing_observations.insert(std::make_pair(t.label(), targetBlock));
 		}
 	}
-
+	
+	/** \brief Compute and set the truth values of a formula f.
+	 *  \details Given the formula f we compute the subset of blocks in which f is true.
+	 *			 the truthvalues are computed based on the truth values of the different conjuncts and
+	 *			 the modality which consists of the label and being negated or not. */
 	void set_truths(formula& f)
 	{
 		std::set <block_index_type> image_truths;
@@ -252,35 +256,6 @@ private:
 		}
 		f.truths.swap(pre_image_truths);
 	}
-
-	void create_initial_partition()
-	{
-		to_be_processed.clear();
-		block initial_block;
-
-		initial_block = block();
-		for (state_type i = 0; i < aut.num_states(); i++) {
-			initial_block.states.push_back(i);
-		}
-		sort_transitions(aut.get_transitions(), mcrl2::lts::lbl_tgt_src);
-		const std::vector<transition>& trans = aut.get_transitions();
-		for (std::vector<transition>::const_iterator r = trans.begin(); r != trans.end(); ++r)
-		{
-			initial_block.transitions.push_back(*r);
-		}
-		initial_block.block_index = 0;
-		initial_block.state_index = 0;
-		max_state_index = 1;
-		initial_block.parent_block_index = 0;
-		initial_block.level = 0;
-		blocks.push_back(block());
-		blocks.back().swap(initial_block);
-		block_index_of_a_state = std::vector < block_index_type >(aut.num_states(), 0);
-		block_flags.push_back(false);
-		state_flags = std::vector < bool >(aut.num_states(), false);
-		to_be_processed.push_back(0);
-		BL.clear();
-	} // end create_initial_partition
 
 	 // Refine the partition to a certain lvl.
 	bool refine_partition(level_type lvl)
@@ -320,7 +295,8 @@ private:
 		}
 		return true;
 	}
-
+	
+	/** \brief Performs the splits based on the blocks in Bsplit and the flags set in state_flags. */
 	void split_BL(
 		const label_type splitter_label,
 		const block_index_type splitter_block,
@@ -453,6 +429,9 @@ private:
 		return obs.second;
 	}
 
+	/** \brief Creates a formula that distinguishes a block b1 from the block b2.
+	 *  \details creates a minimal depth formula that distinguishes b1 and b2.
+	 *  \return A minimal observation depth distinguishing state formula, that is often also minimum negation-depth and irreducible. */
 	formula distinguish(const block_index_type b1, const block_index_type b2)
 	{
 		derivatives_t b2_delta;
@@ -493,7 +472,8 @@ private:
 		while (!dT.empty()) {
 			level_type max_intersect = 0;
 			block_index_type splitBlock = *dT.begin();
-			for (block_index_type bid : dT) {
+			for (block_index_type bid : dT) 
+			{
 				if (gca_level(target(dist_obs), bid) > max_intersect) {
 					splitBlock = bid;
 					max_intersect = gca_level(target(dist_obs), bid);
@@ -517,6 +497,8 @@ private:
 		return returnf;
 	}
 
+	/** \brief Auxiliarry function that computes the level of the greatest common ancestor. 
+	*		   In other words a lvl i such that B1 and B2 are i-bisimilar. */
 	level_type gca_level(const block_index_type B1, const block_index_type B2)
 	{
 		block_index_type b1 = B1, b2 = B2;
