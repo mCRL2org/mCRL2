@@ -1190,7 +1190,7 @@ class explorer: public abortable
         number_of_active_processes--;
         number_of_idle_processes++;
         if (atermpp::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_state_access.lock();
-        assert(thread_todo->empty());
+        assert(thread_todo->empty() || m_must_abort);
         if (todo->empty())
         {
           if (atermpp::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_state_access.unlock();
