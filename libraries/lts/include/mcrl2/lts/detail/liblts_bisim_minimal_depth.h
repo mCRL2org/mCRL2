@@ -288,7 +288,7 @@ private:
 				if ((i != transitions_to_process.end() && next(i) == transitions_to_process.end()) ||
 					t.label() != (*next(i)).label())
 				{
-					split_BL(t.label(), splitter_index, lvl);
+					split_BL(lvl);
 					BL.clear();
 				}
 			}
@@ -298,8 +298,6 @@ private:
 	
 	/** \brief Performs the splits based on the blocks in Bsplit and the flags set in state_flags. */
 	void split_BL(
-		const label_type splitter_label,
-		const block_index_type splitter_block,
 		level_type lvl
 	)
 	{
