@@ -317,7 +317,7 @@ To create a new tool, the following needs to be done:
 
      The actual execution of the tool happens in the virtual member function :mcrl2:`run`.
      The developer has to override this function to add the behavior of the tool
-     The :mcrl2:`execute` member function, after the
+     The :mcrl2:`run` function is called from the :mcrl2:`execute` member function, after the
      command line parameters have been parsed.
 
   #. Set some parameters in the constructor
@@ -341,7 +341,7 @@ To create a new tool, the following needs to be done:
 
   #. Optionally add additional command line arguments]
      Additional command line arguments can be specified by overriding the virtual
-     methods :mcrl2:`add_options`:
+     methods :mcrl2:`parse_options` and :mcrl2:`add_options`:
 
      .. code-block:: c++
 
