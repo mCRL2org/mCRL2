@@ -29,12 +29,45 @@ in ``mCRL2-build``.
   undesirable then building the graphical tools can be disabled using the
   `MCRL2_ENABLE_GUI_TOOLS` cmake flag.
 
-See the platform specific instructions for :doc:`Windows <windows>`, :doc:`MacOS <macos>` and :doc:`Linux <linux>`
+See the platform specific instructions for :doc:`Windows <windows>`, :doc:`MacOS <macos>` and :doc:`Linux <linux>`. For testing see the documentation :ref:`here <build-testing>`.
 
-Testing
---------
+Documentation
+---------------
 
-For testing see the documentation :ref:`here <build-testing>`.
+To build the documentation we need various dependencies depending on what exact
+configuration is being used. First of all the cmake flag
+``MCRL2_ENABLE_DOCUMENTATION`` must be enabled to build the documentation.
+If you don't want to install Python libraries system wide, you can set up a
+Python virtual environment (needs to be done only once).
+
+    $ python3 -m venv sphinx-venv
+
+Activate it.
+
+    $ source sphinx-venv/bin/activate
+
+Install Sphinx (currently version 2.2.0) and other dependencies.
+
+    $ pip install -r <mCRL2>/requirements.txt
+
+When using a virtual environment ensure that CMake uses the right Python binary.
+
+    $ cmake [other options] \
+          -DPYTHON_EXECUTABLE=absolute/path/to/sphinx-venv/bin/python \
+          path/to/mCRL2/src
+
+Then the `doc` target can be build for a full documentation build, or `fastdoc`
+to avoid cleaning up the intermediate results. The documentation build can be
+fine tuned using the following cmake configuration flags.
+
+  - ``MCRL2_ENABLE_DOC_DOXYGEN`` enables building the source code documentation
+    using doxygen, this requires `Doxygen <https://www.doxygen.nl/>`_ to be
+    installed with at least version 1.9.7.
+  - ``MCRL2_ENABLE_DOC_PDFLATEX`` enables building the pdfs that are found in
+    the library documentation, this required pdflatex to be installed with
+    various packages.
+  - ``MCRL2_ENABLE_DOC_MANUAL`` enables building the tool documentation pages,
+    which requires the tools to be compiled.
 
 .. _configuration:
 
