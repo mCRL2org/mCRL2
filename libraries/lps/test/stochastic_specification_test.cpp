@@ -217,6 +217,7 @@ BOOST_AUTO_TEST_CASE(distributed_sum_over_dist2)
   stochastic_specification spec=linearise(text);
   BOOST_CHECK(lps::detail::is_well_typed(spec));
 }
+
 /* The following example shows an initial distribution with variables
  * that are not used in the body. */
 BOOST_AUTO_TEST_CASE(non_bound_initial_stochastic_variables)
@@ -230,4 +231,26 @@ BOOST_AUTO_TEST_CASE(non_bound_initial_stochastic_variables)
   stochastic_specification spec=linearise(text);
   BOOST_CHECK(lps::detail::is_well_typed(spec));
 }
+
+/* The following example was not linearised correctly, as
+   an expression sum x:D.a.P was returned
+   unchanged when P had an initial distribution. 
+ */
+BOOST_AUTO_TEST_CASE(distribution_insided_sum_bug)
+{
+  std::string text =
+    "act a,b;\n"
+    "\n"
+    "proc Environment = \n"
+    "        sum realReading: Nat . (realReading<2) ->\n"
+    "            a . EnvironmentSensorProcess;\n"
+    "\n"
+    "proc EnvironmentSensorProcess =\n"
+    "        dist f:Bool[if(f, 1/4, 3/4)].f->b.delta;\n"
+    "\n"
+    "init Environment;\n";
+  stochastic_specification spec=linearise(text);
+  BOOST_CHECK(lps::detail::is_well_typed(spec));
+}
+
 

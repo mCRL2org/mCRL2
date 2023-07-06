@@ -10038,8 +10038,8 @@ class specification_basic_type
           return stochastic_operator(r.variables(),
                                      r.distribution(),
                                      sum(s.variables(),r.operand()));
-         }
-        return t;
+        }
+        return sum(s.variables(),r_);
       }
 
       if (is_stochastic_operator(t))
