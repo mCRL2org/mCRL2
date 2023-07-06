@@ -123,7 +123,7 @@ Algorithms on PBESs
    :mcrl2:`remove_unreachable_variables <mcrl2::pbes_system::remove_unreachable_variables>`        Removes equations that are not (syntactically) reachable from the initial state of a PBES
    :mcrl2:`is_bes                       <mcrl2::pbes_system::is_bes>`                              Returns true if a PBES data type is in BES form
    :mcrl2:`complement                   <mcrl2::pbes_system::complement>`                          Pushes negations as far as possible inwards towards data expressions
-   :mcrl2:`\implies`
+   :mcrl2:`normalize                    <mcrl2::pbes_system::normalize>`                           Brings a PBES expression into positive normal form, i.e. without occurrences of :math:`\neg` and :math:`\implies
    ===========================================================================================   =================================================================================================================
 
 Search and Replace functions
