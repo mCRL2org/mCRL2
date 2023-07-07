@@ -3,11 +3,11 @@
 Formats for Labelled Transition Systems
 =======================================
 
-.. _language-mcrl2-lts:
-
 These pages explain the storage formats for labelled transition systems (LTSs). 
 For a general explanation of labelled transition systems see 
 :ref:`labelled-transition-systems`.
+
+.. _language-mcrl2-lts:
 
 mCRL2 LTS format
 ----------------
@@ -147,6 +147,8 @@ The Aldebaran format originally stems from the `CADP toolset
 `original syntax definition
 <http://www.inrialpes.fr/vasy/cadp/man/aldebaran.html#sect6>`_, the labels of
 the edges should consist of at most 5000 characters.
+
+.. _language-fsm-lts:
 
 The FSM file format
 -------------------

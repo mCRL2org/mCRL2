@@ -1,3 +1,23 @@
+.. default-role:: math
+.. highlight:: mcrl2
+.. math::
+ 
+    \newcommand{\seq}{\cdot}
+    \newcommand{\alt}{+}
+    \newcommand{\nat}{\mathbb{N}}
+    \newcommand{\bool}{\mathbb{B}}
+    \newcommand{\true}{\mathbf{true}}
+    \newcommand{\false}{\mathbf{false}}
+    \renewcommand{\a}[1]{\textit{#1}}
+    \renewcommand{\implies}{\mathop{\Rightarrow}}
+    \newcommand{\act}{\mathit{Act}}
+    \newcommand{\mccan}[1]{\langle #1 \rangle}
+    \newcommand{\mcall}[1]{[ #1 ]}
+    \newcommand{\sem}[1]{[\![ #1 ]\!]}
+    \newcommand{\R}{\mathrel{R}}
+    \newcommand{\bisim}{\stackrel{\leftrightarrow}{-}}
+    \newcommand{\oftype}{\smash{\,:\,}}
+    %
 
 Compositionality
 ================

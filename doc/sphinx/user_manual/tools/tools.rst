@@ -46,10 +46,10 @@ This page lists all file formats supported by the mCRL2 toolset.
   ===========  =========   =======  ===========
   File format  Extension   Type     Description
   ===========  =========   =======  ===========
-  mCRL2	       .mcrl2      textual  :ref:`language-mcrl2`
+  mCRL2        .mcrl2      textual  :ref:`language-mcrl2`
   MCF          .mcf        textual  :ref:`language-mu-calculus`
   LPS          .lps        binary   :ref:`language-lps`
-  PBES	       .pbes       binary   :ref:`language-pbes`
+  PBES         .pbes       binary   :ref:`language-pbes`
   BES          .bes        binary   :ref:`language-bes`
   GM           .gm         textual  parity game in the PGSolver format
   LTS          .lts        binary   labelled transition system in the :ref:`language-mcrl2-lts`
@@ -59,6 +59,11 @@ This page lists all file formats supported by the mCRL2 toolset.
   DOT          .dot        textual  `DOT file format <http://www.graphviz.org/doc/info/lang.html>`_ (subgraphs as nodes are not supported)
   μCRL         .mcrl       textual  `μCRL specification <http://homepages.cwi.nl/~mcrl/>`_
   ===========  =========   =======  ===========
+
+.. toctree::
+   :maxdepth: 1
+
+   lts
 
 .. _external_tools:
 
