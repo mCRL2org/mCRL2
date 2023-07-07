@@ -68,7 +68,7 @@ struct add_capture_avoiding_replacement: public process::detail::add_capture_avo
     do_action_summand(x, v1);
 
     lps::stochastic_distribution dist;
-    apply(dist, x.distribution());
+    apply(dist, x.distribution(), x.assignments());
     x.distribution() = dist;
     sigma.remove_fresh_variable_assignments(sumvars);
   }
@@ -142,10 +142,20 @@ struct add_capture_avoiding_replacement: public process::detail::add_capture_avo
   template<class T>
   void apply(T& result, const stochastic_distribution& x)
   {
+    assert(false); // This function should never be called.
+  }
+
+  /// In the code below, it is essential that the assignments are also updated. They are passed by reference and changed in place. 
+  template<class T>
+  void apply(T& result, const stochastic_distribution& x, data::assignment_list& assignments)
+  {
     data::variable_list v1 = sigma.add_fresh_variable_assignments(x.variables());
 
     data::data_expression dist;
     apply(dist, x.distribution());
+    data::assignment_list aux_assignments;
+    apply(aux_assignments, assignments);
+    assignments = aux_assignments;
     result = stochastic_distribution(v1, dist);
     sigma.remove_fresh_variable_assignments(x.variables());
   }
