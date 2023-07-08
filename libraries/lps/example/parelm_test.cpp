@@ -173,7 +173,7 @@ void test_stochastic_specification()
   std::cout << "<after>\n"  << lps::pp(spec2.process()) << std::endl;
 }
 
-int main(int argc, char* argv[])
+int main(int /* argc*/, char** /* argv*/ )
 {
   test_parelm(SPEC1);
   test_parelm(SPEC2);
