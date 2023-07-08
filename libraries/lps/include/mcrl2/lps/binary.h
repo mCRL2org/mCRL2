@@ -380,9 +380,12 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
 
     stochastic_process_initializer update_initial_process(const data::variable_list& parameters, const stochastic_process_initializer& init)
     {
-      return stochastic_process_initializer(replace_enumerated_parameters_in_initial_expressions(parameters, init.expressions()),
+      /* return stochastic_process_initializer(replace_enumerated_parameters_in_initial_expressions(parameters, init.expressions()),
                                             lps::replace_variables_capture_avoiding(init.distribution(), m_if_trees, m_if_trees_generator)
-                                           );
+                                           ); */
+      data::data_expression_list d = replace_enumerated_parameters_in_initial_expressions(parameters, init.expressions());
+      const stochastic_distribution dist = lps::replace_variables_capture_avoiding(init.distribution(), d, m_if_trees, m_if_trees_generator);
+      return stochastic_process_initializer(d, dist);
     }
 
   public:
