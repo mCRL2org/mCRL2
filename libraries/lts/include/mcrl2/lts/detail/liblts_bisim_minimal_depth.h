@@ -40,8 +40,8 @@ public:
    * this implementation to be less efficient than other partitioners. \param l Reference to the LTS. \param init_l2
    * reference to the initial state of lts2. */
   bisim_partitioner_minimal_depth(LTS_TYPE &l, const std::size_t init_l2)
-      : aut(l),
-        initial_l2(init_l2),
+      : initial_l2(init_l2),
+		aut(l),
         max_state_index(0)
   {
     to_be_processed.clear();
