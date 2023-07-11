@@ -480,7 +480,8 @@ substituted.
 
 .. list-table:: Predefined operations on numeric sorts
    :header-rows: 1
-   :widths: 15 20 50
+   :widths: auto
+   :width: 100%
 
    * - Name
      - Sort(s)

@@ -77,11 +77,19 @@ table.teamcity-blurb td { border: 0; vertical-align: middle; white-space: normal
 
 img.frontpage-logo { margin-top: 1.5em; }
 
+.wy-nav-content {
+  max-width: 60%
+}
+
 .rst-content .note {
   background: var(--mcrl2-light);
 }
 .rst-content .note .admonition-title {
   background: var(--mcrl2-title);
+}
+
+.rst-content code.literal {
+  white-space: nowrap;
 }
 
 .wy-menu-vertical p.caption {
