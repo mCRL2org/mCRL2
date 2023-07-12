@@ -57,6 +57,10 @@ private:
 class shared_guard : private mcrl2::utilities::noncopyable
 {
 public:
+  
+  /// Locks the guard again explicitly.
+  void lock_shared();
+
   /// Unlocks the acquired shared guard explicitly. Otherwise, performed in destructor.
   void unlock_shared();
 
@@ -296,7 +300,8 @@ void shared_guard::unlock_shared()
   is_locked = false;
 }
 
-inline void shared_guard::lock_shared()
+inline 
+void shared_guard::lock_shared()
 {
   // Uses the internal implementation since we don't need a shared_guard.
   m_mutex.lock_shared_impl();
