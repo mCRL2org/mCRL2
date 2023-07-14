@@ -1,7 +1,7 @@
 find_package(PythonModules COMPONENTS sphinx REQUIRED)
 
 if (MCRL2_ENABLE_DOC_DOXYGEN)
-    find_package(Doxygen REQUIRED)
+    find_package(Doxygen 1.9.7 REQUIRED)
 endif()
 
 if (MCRL2_ENABLE_DOC_PDFLATEX)
