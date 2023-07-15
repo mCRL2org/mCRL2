@@ -15,6 +15,7 @@
 
 #include <cmath>
 #include <mutex>
+#include <vector>
 
 namespace mcrl2::utilities
 {
