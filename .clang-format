@@ -30,7 +30,6 @@ BinPackParameters: false
 BitFieldColonSpacing: After
 BreakBeforeBraces: Custom
 BreakBeforeConceptDeclarations: Always
-BreakBeforeInlineASMColon: OnlyMultiline
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializers: BeforeColon
 BreakInheritanceList: BeforeColon
@@ -57,7 +56,6 @@ BraceWrapping:
   AfterUnion: true
   AfterExternBlock: true
   BeforeCatch: true
-BreakAfterAttributes: Always
 Cpp11BracedListStyle: true
 EmptyLineAfterAccessModifier: Leave
 EmptyLineBeforeAccessModifier: Leave
@@ -66,9 +64,6 @@ FixNamespaceComments: true
 IndentAccessModifiers: false
 IndentCaseBlocks: false
 InsertBraces: true
-InsertNewlineAtEOF: true
-IntegerLiteralSeparator:
-  Decimal: 3
 KeepEmptyLinesAtTheStartOfBlocks: false
 Language: Cpp
 LambdaBodyIndentation: Signature
