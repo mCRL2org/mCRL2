@@ -41,45 +41,6 @@ void benchmark_threads(std::size_t number_of_threads, F f)
 }
 
 /// \brief Create a nested function application f_depth. Where f_0 = c and f_i = f(f_i-1,...,f_i-1).
-template<bool with_converter = false>
-aterm_appl create_nested_function(const std::string& function_name,  const std::string& leaf_name, std::size_t number_of_arguments, std::size_t depth)
-{
-  // Create a suitable function application.
-  function_symbol f(function_name, number_of_arguments);
-  function_symbol c(leaf_name, 0);
-
-  aterm_appl c_term(c);
-
-  // Initialize a wide function application.
-  std::vector<aterm> arguments(f.arity());
-  for (std::size_t i = 0; i < arguments.size(); ++i)
-  {
-    arguments[i] = c_term;
-  }
-  aterm_appl f_term(f, arguments.begin(), arguments.end());
-
-  for (std::size_t j = 0; j < depth; ++j)
-  {
-    // Create a very wide nested function application
-    for (std::size_t k = 0; k < arguments.size(); ++k)
-    {
-      arguments[k] = f_term;
-    }
-
-    if (with_converter)
-    {      
-      make_term_appl(f_term, f, arguments.begin(), arguments.end(), detail::do_not_convert_term<aterm>());
-    }
-    else
-    {
-      make_term_appl(f_term, f, arguments.begin(), arguments.end());
-    }
-  }
-
-  return f_term;
-}
-
-/// \brief Create a nested function application f_depth. Where f_0 = c and f_i = f(f_i-1,...,f_i-1).
 ///        However, this function uses the fixed arity constructor of length N which should be faster.
 template<std::size_t N>
 aterm_appl create_nested_function(const std::string& function_name, const std::string& leaf_name, std::size_t depth)
