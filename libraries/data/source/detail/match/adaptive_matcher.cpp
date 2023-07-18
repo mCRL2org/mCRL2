@@ -10,8 +10,8 @@
 #include "mcrl2/data/detail/match/adaptive_matcher.h"
 
 #include "mcrl2/atermpp/aterm_io.h"
+#include "mcrl2/atermpp/detail/index_traits.h"
 #include "mcrl2/utilities/stopwatch.h"
-#include "mcrl2/core/index_traits.h"
 #include "mcrl2/data/detail/enumerator_identifier_generator.h"
 #include "mcrl2/data/detail/match/linearise.h"
 #include "mcrl2/data/substitutions/sequence_substitution.h"
@@ -210,7 +210,7 @@ inline const data_expression& get_head(const data_expression& t)
 /// \returns A unique index for the head symbol that the given term starts with.
 inline std::size_t get_head_index(const data_expression& term)
 {
-  return mcrl2::core::index_traits<mcrl2::data::function_symbol, function_symbol_key_type, 2>::index(static_cast<const function_symbol&>(get_head(term)));
+  return atermpp::detail::index_traits<mcrl2::data::function_symbol, function_symbol_key_type, 2>::index(static_cast<const function_symbol&>(get_head(term)));
 }
 
 // Public functions
@@ -241,9 +241,9 @@ AdaptiveMatcher<Substitution>::AdaptiveMatcher(const data_equation_vector& equat
   }
 
   // Determine the index of dontcare.
-  m_dontcare_index = mcrl2::core::index_traits<mcrl2::data::function_symbol, function_symbol_key_type, 2>::index(static_cast<const function_symbol&>(dontcare()));
-  m_not_equal_index = mcrl2::core::index_traits<mcrl2::data::function_symbol, function_symbol_key_type, 2>::index(static_cast<const function_symbol&>(not_equal()));
-  m_equal_index = mcrl2::core::index_traits<mcrl2::data::function_symbol, function_symbol_key_type, 2>::index(static_cast<const function_symbol&>(equal()));
+  m_dontcare_index = atermpp::detail::index_traits<mcrl2::data::function_symbol, function_symbol_key_type, 2>::index(static_cast<const function_symbol&>(dontcare()));
+  m_not_equal_index = atermpp::detail::index_traits<mcrl2::data::function_symbol, function_symbol_key_type, 2>::index(static_cast<const function_symbol&>(not_equal()));
+  m_equal_index = atermpp::detail::index_traits<mcrl2::data::function_symbol, function_symbol_key_type, 2>::index(static_cast<const function_symbol&>(equal()));
 
   // Construct the automaton.
   try
@@ -615,7 +615,7 @@ typename AdaptiveMatcher<Substitution>::Automaton AdaptiveMatcher<Substitution>:
         std::size_t s_prime = M_prime.add_state();
 
         // M := M[delta := (delta := delta(s, f) -> s')
-        M_prime.add_transition(M_prime.root(), mcrl2::core::index_traits<mcrl2::data::function_symbol, function_symbol_key_type, 2>::index(symbol), s_prime);
+        M_prime.add_transition(M_prime.root(), atermpp::detail::index_traits<mcrl2::data::function_symbol, function_symbol_key_type, 2>::index(symbol), s_prime);
 
         //if (PrintConstructionSteps) { mCRL2log(info) << "added transition from "
         //  << "0 with label " << static_cast<atermpp::aterm>(symbol) << " to state " << s_prime << ".\n"; }

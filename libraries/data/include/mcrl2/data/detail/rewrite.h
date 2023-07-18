@@ -39,7 +39,7 @@ namespace detail
  *   delete r;
  * \endcode
  **/
-class Rewriter : public mcrl2::utilities::noncopyable
+class Rewriter
 {
   protected:
     enumerator_identifier_generator m_generator;  //name for variables.
@@ -90,6 +90,13 @@ class Rewriter : public mcrl2::utilities::noncopyable
      * \return The normal form of Term.
      **/
     virtual data_expression rewrite(const data_expression& term, substitution_type& sigma) = 0;
+
+    /**
+     * \brief Rewrite an mCRL2 data term.
+     * \param Term The term to be rewritten. This term should be a data_term
+     * \return The normal form of Term.
+     **/
+    virtual void rewrite(data_expression& result, const data_expression& term, substitution_type& sigma) = 0;
 
     /**
      * \brief Provide the rewriter with a () operator, such that it can also

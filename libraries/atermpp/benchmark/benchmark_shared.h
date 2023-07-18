@@ -17,7 +17,7 @@ using namespace atermpp;
 template<typename F>
 void benchmark_threads(std::size_t number_of_threads, F f)
 {
-  stopwatch timer;
+  mcrl2::utilities::stopwatch timer;
 
   // Initialize a number of threads.
   std::vector<std::thread> threads(number_of_threads - 1);

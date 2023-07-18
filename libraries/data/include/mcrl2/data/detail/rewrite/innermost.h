@@ -39,7 +39,14 @@ public:
   // Begin of the Rewriter interface.
   data_expression rewrite(const data_expression &term, substitution_type &sigma) override;
 
+  void rewrite(data_expression& result, const data_expression& term, substitution_type& sigma) override;
+
   rewrite_strategy getStrategy() override { return innermost; }
+
+  std::shared_ptr<detail::Rewriter> clone()
+  {
+    return std::shared_ptr<Rewriter>(new InnermostRewriter(*this));
+  }
   // End of the Rewriter interface.
 
 private:

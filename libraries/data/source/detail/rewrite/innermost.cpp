@@ -24,7 +24,7 @@ constexpr bool PrintRewriteSteps = false;
 // Enable term rewrite engine features.
 
 /// \brief Enable higher-order rewriting (also the head symbols).
-constexpr bool EnableHigherOrder = false;
+constexpr bool EnableHigherOrder = true;
 
 /// \brief Enable conditional rewriting, otherwise conditions cause exceptions.
 constexpr bool EnableConditions = true;
@@ -119,6 +119,13 @@ data_expression InnermostRewriter::rewrite(const data_expression& term, substitu
   print_rewrite_metrics();
   return rewrite_impl(term, sigma);
 }
+
+void InnermostRewriter::rewrite(data_expression& result, const data_expression& term, substitution_type& sigma)
+{
+  print_rewrite_metrics();
+  result = rewrite_impl(term, sigma);
+}
+
 
 // Private functions
 

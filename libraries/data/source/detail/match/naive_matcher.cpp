@@ -83,7 +83,7 @@ inline bool match_lhs(const data_expression& term,  const data_expression& lhs, 
 /// \returns A unique index for the head symbol that the given term starts with.
 inline std::size_t get_head_index(const data_expression& term)
 {
-  return core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(static_cast<const function_symbol&>(get_nested_head(term)));
+  return atermpp::detail::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(static_cast<const function_symbol&>(get_nested_head(term)));
 }
 
 template<typename Substitution>
