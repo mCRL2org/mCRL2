@@ -1,0 +1,53 @@
+sort Xbool = struct
+  Xtrue
+| Xfalse ;
+
+sort Xnat = struct
+  d0
+| s (Xnat) ;
+
+sort NatList = struct
+  nil
+| Xcons (Xnat, NatList) ;
+
+sort ListPair = struct
+  pair (NatList, NatList) ;
+
+map
+  d10 : Xnat ;
+  lte : Xnat # Xnat -> Xbool ;
+  plus : Xnat # Xnat -> Xnat ;
+  times : Xnat # Xnat -> Xnat ;
+  rev : Xnat -> NatList ;
+  split : NatList -> ListPair ;
+  merge : NatList # NatList -> NatList ;
+  mergesort : NatList -> NatList ;
+  p1 : ListPair -> NatList ;
+  p2 : ListPair -> NatList ;
+var
+  X, Y, N, M : Xnat ;
+  L1, L2, L : NatList ;
+eqn
+  d10 = s (s (s (s (s (s (s (s (s (s (d0)))))))))) ;
+  lte (d0, s (N)) = Xtrue ;
+  lte (s (N), d0) = Xfalse ;
+  lte (d0, d0) = Xtrue ;
+  lte (s (N), s (M)) = lte (N, M) ;
+  plus (d0, N) = N ;
+  plus (s (N), M) = s (plus (N, M)) ;
+  times (d0, N) = d0 ;
+  times (s (N), M) = plus (M, times (N, M)) ;
+  rev (s (N)) = Xcons (s (N), rev (N)) ;
+  rev (d0) = Xcons (d0, nil) ;
+  merge (nil, L) = L ;
+  merge (L, nil) = L ;
+  lte (X, Y) == Xtrue -> merge (Xcons (X, L1), Xcons (Y, L2)) = Xcons (X, merge (L1, Xcons (Y, L2))) ;
+  lte (X, Y) == Xfalse -> merge (Xcons (X, L1), Xcons (Y, L2)) = Xcons (Y, merge (Xcons (X, L1), L2)) ;
+  split (Xcons (X, Xcons (Y, L))) = pair (Xcons (X, p1 (split (L))), Xcons (Y, p2 (split (L)))) ;
+  split (nil) = pair (nil, nil) ;
+  split (Xcons (X, nil)) = pair (Xcons (X, nil), nil) ;
+  mergesort (nil) = nil ;
+  mergesort (Xcons (X, nil)) = Xcons (X, nil) ;
+  mergesort (Xcons (X, Xcons (Y, L))) = merge (mergesort (Xcons (X, p1 (split (L)))), mergesort (Xcons (Y, p2 (split (L))))) ;
+  p1 (pair (L1, L2)) = L1 ;
+  p2 (pair (L1, L2)) = L2 ;

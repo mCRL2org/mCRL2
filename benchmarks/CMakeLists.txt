@@ -168,3 +168,18 @@ if (MCRL2_ENABLE_DEVELOPER)
     endif()
   endforeach()
 endif()
+
+if (MCRL2_ENABLE_DEVELOPER)
+  # Find all the benchmark files
+  file(GLOB BENCHMARK_FILES ${CMAKE_CURRENT_SOURCE_DIR}/REC/*.dataspec)
+
+  foreach(benchmark ${BENCHMARK_FILES})
+    get_filename_component(benchmark ${benchmark} NAME)
+    string(REPLACE ".dataspec" "" NAME ${benchmark})
+
+     add_tool_benchmark("${NAME}_jitty" mcrl2rewrite 
+      "${CMAKE_CURRENT_SOURCE_DIR}/REC/${NAME}.dataspec" 
+      "${CMAKE_CURRENT_SOURCE_DIR}/REC/${NAME}.expressions" 
+      "-rjitty")
+  endforeach()
+endif()

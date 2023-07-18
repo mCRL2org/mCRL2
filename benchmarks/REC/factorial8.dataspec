@@ -1,0 +1,17 @@
+sort Xnat = struct
+  d0
+| s (Xnat) ;
+
+map
+  plus : Xnat # Xnat -> Xnat ;
+  times : Xnat # Xnat -> Xnat ;
+  fact : Xnat -> Xnat ;
+var
+  N, M : Xnat ;
+eqn
+  plus (d0, N) = N ;
+  plus (s (N), M) = s (plus (N, M)) ;
+  times (d0, N) = d0 ;
+  times (s (N), M) = plus (M, times (N, M)) ;
+  fact (d0) = s (d0) ;
+  fact (s (N)) = times (s (N), fact (N)) ;

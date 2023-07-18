@@ -1,0 +1,89 @@
+sort Xbool = struct
+  Xtrue
+| Xfalse ;
+
+sort Xpos = struct
+  d1
+| cDub (Xbool, Xpos) ;
+
+sort ENat = struct
+  Exz
+| Exs (ENat)
+| Explus (ENat, ENat)
+| Exmult (ENat, ENat)
+| Exexp (ENat, ENat) ;
+
+sort SNat = struct
+  Z
+| S (SNat) ;
+
+map
+  eqBool : Xbool # Xbool -> Xbool ;
+  and : Xbool # Xbool -> Xbool ;
+  eqPos : Xpos # Xpos -> Xbool ;
+  lambda0 : ENat -> Xbool ;
+  eq : SNat # SNat -> Xbool ;
+  succ17 : SNat -> SNat ;
+  plus17 : SNat # SNat -> SNat ;
+  mult17 : SNat # SNat -> SNat ;
+  exp17 : SNat # SNat -> SNat ;
+  eval17 : ENat -> SNat ;
+  evalsym17 : ENat -> SNat ;
+  dec : ENat -> ENat ;
+  two : ENat ;
+  seventeen : ENat ;
+  f : ENat -> Xbool ;
+var
+  b, c : Xbool ;
+  p, q : Xpos ;
+  l, m, n, o : ENat ;
+  r, t : SNat ;
+eqn
+  eqBool (Xtrue,b) = b ;
+  eqBool (Xfalse,Xtrue) = Xfalse ;
+  eqBool (Xfalse,Xfalse) = Xtrue ;
+  and (b,Xtrue) = b ;
+  and (b,Xfalse) = Xfalse ;
+  eqPos (d1,d1) = Xtrue ;
+  eqPos (d1,cDub (b,p)) = Xfalse ;
+  eqPos (cDub (b,p),d1) = Xfalse ;
+  eqPos (cDub (b,p),cDub (c,q)) = and (eqBool (b,c), eqPos (p,q)) ;
+  lambda0 (m) = eq (eval17 (m),evalsym17 (m)) ;
+  eq (Z,Z) = Xtrue ;
+  eq (Z,S (r)) = Xfalse ;
+  eq (S (r),Z) = Xfalse ;
+  eq (S (r),S (t)) = eq (r,t) ;
+  eq (r,S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (Z))))))))))))))))) == Xtrue -> succ17 (r) = Z ;
+  eq (r,S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (Z))))))))))))))))) == Xfalse -> succ17 (r) = S (r) ;
+  plus17 (r,Z) = r ;
+  plus17 (r,S (t)) = succ17 (plus17 (r,t)) ;
+  mult17 (r,Z) = Z ;
+  mult17 (r,S (t)) = plus17 (r,mult17 (r,t)) ;
+  exp17 (r,Z) = succ17 (Z) ;
+  exp17 (r,S (t)) = mult17 (r,exp17 (r,t)) ;
+  eval17 (Exz) = Z ;
+  eval17 (Exs (n)) = succ17 (eval17 (n)) ;
+  eval17 (Explus (n,m)) = plus17 (eval17 (n),eval17 (m)) ;
+  eval17 (Exmult (n,m)) = mult17 (eval17 (n),eval17 (m)) ;
+  eval17 (Exexp (n,m)) = exp17 (eval17 (n),eval17 (m)) ;
+  evalsym17 (Exz) = Z ;
+  evalsym17 (Exs (n)) = succ17 (evalsym17 (n)) ;
+  evalsym17 (Explus (n,m)) = plus17 (evalsym17 (n),evalsym17 (m)) ;
+  evalsym17 (Exmult (n,Exz)) = Z ;
+  evalsym17 (Exmult (n,Exs (m))) = evalsym17 (Explus (Exmult (n,m),n)) ;
+  evalsym17 (Exmult (n,Explus (m,o))) = evalsym17 (Explus (Exmult (n,m),Exmult (n,o))) ;
+  evalsym17 (Exmult (n,Exmult (m,o))) = evalsym17 (Exmult (Exmult (n,m),o)) ;
+  evalsym17 (Exmult (n,Exexp (m,o))) = evalsym17 (Exmult (n,dec (Exexp (m,o)))) ;
+  evalsym17 (Exexp (n,Exz)) = succ17 (Z) ;
+  evalsym17 (Exexp (n,Exs (m))) = evalsym17 (Exmult (Exexp (n,m),n)) ;
+  evalsym17 (Exexp (n,Explus (m,o))) = evalsym17 (Exmult (Exexp (n,m),Exexp (n,o))) ;
+  evalsym17 (Exexp (n,Exmult (m,o))) = evalsym17 (Exexp (Exexp (n,m),o)) ;
+  evalsym17 (Exexp (n,Exexp (m,o))) = evalsym17 (Exexp (n,dec (Exexp (m,o)))) ;
+  dec (Exexp (n,Exz)) = Exs (Exz) ;
+  dec (Exexp (n,Exs (m))) = Exmult (Exexp (n,m),n) ;
+  dec (Exexp (n,Explus (m,o))) = Exmult (Exexp (n,m),Exexp (n,o)) ;
+  dec (Exexp (n,Exmult (m,o))) = dec (Exexp (Exexp (n,m),o)) ;
+  dec (Exexp (n,Exexp (m,o))) = dec (Exexp (n,dec (Exexp (m,o)))) ;
+  two = Exs (Exs (Exz)) ;
+  seventeen = Exs (Exs (Exs (Exs (Exs (Exs (Exs (Exs (Exs (Exs (Exs (Exs (Exs (Exs (Exs (Exs (Exs (Exs (Exs (Exs (Exs (Exs (Exs (Exs (Exz)))))))))))))))))))))))) ;
+  f (m) = lambda0 (Exexp (two,m)) ;
