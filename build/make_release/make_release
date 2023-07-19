@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright: Wieger Wesselink <j.w.wesselink@tue.nl> 2014-2021
+# Copyright: Wieger Wesselink <j.w.wesselink@tue.nl> 2014-2023
 #
 # This script is used for building debian packages.
 #
@@ -30,8 +30,8 @@
 # do_ppa_upload. If these steps fail, it makes no sense to do an upload. After
 # every failed upload attempt the version number needs to be updated.
 
-MCRL2_RELEASE_BRANCH="release-202206"
-MCRL2_VERSION="202206.1"
+MCRL2_RELEASE_BRANCH="release-202307"
+MCRL2_VERSION="202307.0"
 UBUNTU_VERSION="1ubuntu1ppa1"
 DEBEMAIL="m.laveaux@tue.nl"
 DEBFULLNAME="Maurice Laveaux"
