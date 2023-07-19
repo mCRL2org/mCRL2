@@ -91,7 +91,11 @@ class ressolve_by_numerical_iteration
       {
         error = std::max(error,std::abs(m_new_solution[m_equations[i].variable().name()]-m_previous_solution[m_equations[i].variable().name()]));
       }
-// std::cerr << " ERROR " << error << "\n";     
+std::cerr << " ERROR " << error << "\n";     
+std::cerr << "Current solution " << detail::evaluate(m_input_pres.initial_state(),m_new_solution) << "\n";
+std::cerr << "Next solution0 " << m_new_solution[m_equations[0].variable().name()] << "\n";
+std::cerr << "Next solution1 " << m_new_solution[m_equations[1].variable().name()] << "\n";
+std::cerr << "Next solution2 " << m_new_solution[m_equations[2].variable().name()] << "\n";
       return error<0.0000001;
     }
 

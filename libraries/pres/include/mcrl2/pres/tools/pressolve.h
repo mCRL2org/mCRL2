@@ -122,7 +122,8 @@ class pressolve_tool
     pres resulting_res = pres2res.run();
     timer().finish("instantiation");
 
-std::cerr << "RESULTING RES\n" << resulting_res << "\n";
+    mCRL2log(log::verbose) << "RESULTING RES\n" << resulting_res << "\n";
+
     timer().start("solving");
     if (options.algorithm==gauss_elimination)
     {

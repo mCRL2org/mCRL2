@@ -133,6 +133,7 @@ class pres2res_algorithm
                                                         pbes_system::propositional_variable(new_pres_variables[m_stored_variables.index(X_e)].name(),
                                                                                             data::variable_list()), 
                                                         psi_e));
+        if (generated_equations[k].size() % 1000 == 0) mCRL2log(log::verbose) << "Generated " << (generated_equations[k].size()/1000) << "k RES variables with rank " << k << ".\n";
       }
       
       variable_replace_builder variable_replacer(m_stored_variables, new_pres_variables);
