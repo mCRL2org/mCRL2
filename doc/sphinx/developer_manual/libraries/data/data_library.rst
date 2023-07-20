@@ -655,18 +655,18 @@ Lists
 """""
 All standard operations for lists are available in `list.h`, and can
 be found in the namespace data::sort_list. The lists have two
-constructors, the empty list ([]), and inserting an element into a list (|>).
+constructors, the empty list ([]), and inserting an element into a list (\|>).
 
 Let x be an element of sort S, and l of sort List(S).
 
 .. table:: Constructors for sort List(S)
 
-   ===========  ======  ==============================
-   Expression   Syntax  Meaning
-   ===========  ======  ==============================
-   nil(S)       []      The empty list of sort S
-   cons(S,x,l)  x |> l  The list l prefixed with x
-   ===========  ======  ==============================
+   ===========  =======  ==============================
+   Expression   Syntax   Meaning
+   ===========  =======  ==============================
+   nil(S)       []       The empty list of sort S
+   cons(S,x,l)  x \|> l  The list l prefixed with x
+   ===========  =======  ==============================
 
 Also, the following functions operating on lists are available. Again,
 let x be an element of sort S, l of sort List(S), and n of sort Nat.
