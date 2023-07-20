@@ -306,8 +306,3 @@ would have had 3 times more states, and 15 times more transitions.
    It should also be noted that for instance `n`-way communication is also
    possible, which can be useful to model, *e.g.*, barrier synchronisation or
    clock ticks.
-
-.. rubric:: Footnotes
-
-.. [#f1] If a formula is not in positive normal form, then its least
-   and greatest fixpoint are not guaranteed to exist, hence the requirement. 
