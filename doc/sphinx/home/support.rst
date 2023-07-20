@@ -3,19 +3,14 @@
 Support
 =======
 
-There are several ways to get support:
+If the documentation pages are unsufficient to find an answer for your question then there are several ways to get support:
 
-- Please first browse our documentation pages to see if can find the answer to
-  your question there.
-- If not, you can `subscribe to our mailing list
-  <http://listserver.tue.nl/mailman/listinfo/mcrl2-users>`_ and post your
-  question to the mCRL2 developers and other users.
+- General questions can either be asked on our `Github Discussions <https://github.com/mCRL2org/mCRL2/discussions>`_.
+- Alternatively, an email can be send to the main contact point Jan Friso Groote
+  (j.f.groote (at) tue.nl) or the main developer Maurice Laveaux (m.laveaux (at)
+  tue.nl).
 - If you think you have found a bug in our tools, you are welcome to
   `submit a bug at our issue tracker <https://github.com/mCRL2org/mCRL2/issues>`_.
-
-If you appreciate the mCRL2 language or want to get in touch with mCRL2 users
-and developers, you can join the special mCRL2 community at
-`LinkedIn <http://www.linkedin.com/e/gis/1026507>`_.
 
 .. important::
 
