@@ -11,6 +11,7 @@
 #define MCRL2_UTILITIES_DETAIL_SHARED_MUTEX_H
 
 #include "mcrl2/utilities/noncopyable.h"
+#include "mcrl2/utilities/configuration.h"
 
 #include <atomic>
 #include <mutex>
