@@ -13,6 +13,7 @@
 The mCRL2 toolset
 #################
 
+.. rst-class:: image-no-text-wrap
 .. image:: /_static/book.*
           :align: left
           :alt: Modeling and analysis of communicating systems (book)
@@ -21,7 +22,7 @@ The mCRL2 toolset
 mCRL2 is a formal specification language with an associated toolset. The
 toolset can be used for modelling, validation and verification of
 concurrent systems and protocols. It can be run on Windows, Linux, Apple
-Mac OS X and FreeBSD.
+MacOS and FreeBSD.
        
 The toolset supports a collection of tools for linearisation, simulation,
 state-space exploration and generation and tools to optimise and analyse
@@ -32,6 +33,13 @@ The mCRL2 toolset is developed at the department of Mathematics and
 Computer Science of the `Technische Universiteit Eindhoven
 <http://www.tue.nl>`_, in collaboration with
 the `University of Twente <http://fmt.cs.utwente.nl>`_.
+
+.. note::
+
+   The latest release, mCRL2 202307.0, is now available from the download page.
+   This release mainly features parallel state space exploration algorithms for lps2lts and pbes2bool.
+   See the `changelog <https://github.com/mCRL2org/mCRL2/blob/master/CHANGES>`_ for a detailed list
+   of changes.
 
 .. note::
 
@@ -50,24 +58,6 @@ the `University of Twente <http://fmt.cs.utwente.nl>`_.
 
    FORTE 2022 Best Artefact Award: Process Algebra Can Save Lives: Static Analysis of XACML Access 
    Control Policies using mCRL2. By Arshad, Horne, Johansen, Owe and Willemse. 
-
-.. note::
-
-   The 32bit nightly builds have been declared deprecated. They are not being built anymore. 
-
-.. note::
-
-   The latest release, mCRL2 202206.0, is now available from the download page.
-   This release mainly contains two new symbolic tools called lpsreach and
-   pbessolvesymbolic and contains several bug fixes. Unfortunately, these tools
-   are not yet available on Windows. See the `changelog <https://github.com/mCRL2org/mCRL2/blob/master/CHANGES>`_ for a detailed list
-   of changes.
-
-.. note::
-
-   Starting from the 2th of July the nightly builds contain the new thread-safe
-   implementation of the ATerm library. This enables the use of multiple threads
-   by the tools `lps2lts` and `pbessolve`.
 
 .. note::
   .. image:: /_static/tacas-ae.*
