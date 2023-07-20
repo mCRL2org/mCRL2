@@ -18,6 +18,11 @@ table.docutils td { padding: 0.3em 0; }
 table.docutils caption { font-family: sans-serif; padding-bottom: 0.5em; border-bottom: 1px solid black; }
 table.docutils.field-list { margin: 0; }
 
+image.image-no-text-wrap {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
 .citation {
   display: flex;
   flex-wrap: wrap;
