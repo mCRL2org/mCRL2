@@ -590,3 +590,8 @@ In a similar vein, the µ-calculus can be extended with first-order constructs,
 allowing for *parameterised recursion*. This allows one to pass on
 data values and use these to record events that have been observed in
 the past.
+
+.. rubric:: Footnotes
+
+.. [#f1] If a formula is not in positive normal form, then its least
+   and greatest fixpoint are not guaranteed to exist, hence the requirement. 
