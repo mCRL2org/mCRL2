@@ -59,7 +59,7 @@ RUN cd ~/ltsmin && git submodule update --init
 RUN cd ~/ltsmin/ltl2ba && git checkout ea33bb2091a34f6af8dba8e26978fecb969aa93b
 
 # Fix a compilation error in ltsmin.
-RUN cd ~/ltsmin && git apply --ignore-whitespace ~/mcrl2/build/docker/ltsmin/ltsmin.patch
+RUN cd ~/ltsmin && git apply --ignore-whitespace ~/mcrl2/build/workarounds/ltsmin.patch
 
 # Build the ltsmin toolset.
 RUN cd ~/ltsmin \
