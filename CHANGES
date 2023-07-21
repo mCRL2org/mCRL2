@@ -15,9 +15,7 @@ List of other changes:
     have been significantly reduced in size.
   - A new graph layout algorithm has been implemented LTSGraph that is
     significantly faster and allows the visualization of state spaces with
-    thousands of states. In some cases the new layout algorithm is less visibly
-    stable for small state spaces, so ltsgraph_old remains available for the
-    time being with the original behaviour.
+    thousands of states.
   - New algorithms have been implemented in the lpsparunfold tool, which can
     unfold structured parameters into its components. The new algorithms obtain
     better results by default, but can also deal better with complexer situations.
