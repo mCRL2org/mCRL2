@@ -68,7 +68,7 @@ struct add_capture_avoiding_replacement: public process::detail::add_capture_avo
     do_action_summand(x, v1);
 
     lps::stochastic_distribution dist;
-    apply(dist, x.distribution());
+    apply(dist, x.distribution(), x.assignments());
     x.distribution() = dist;
     sigma.remove_fresh_variable_assignments(sumvars);
   }
@@ -140,12 +140,38 @@ struct add_capture_avoiding_replacement: public process::detail::add_capture_avo
   }
 
   template<class T>
-  void apply(T& result, const stochastic_distribution& x)
+  void apply(T& /* result */, const stochastic_distribution& /* x */)
+  {
+    assert(false); // This function should never be called. If a stochastic distribution is 
+                   // changed, the associated parameter list should be changed too. 
+  }
+
+  /// In the code below, it is essential that the assignments are also updated. They are passed by reference and changed in place. 
+  template<class T>
+  void apply(T& result, const stochastic_distribution& x, data::assignment_list& assignments)
   {
     data::variable_list v1 = sigma.add_fresh_variable_assignments(x.variables());
 
     data::data_expression dist;
     apply(dist, x.distribution());
+    data::assignment_list aux_assignments;
+    apply(aux_assignments, assignments);
+    assignments = aux_assignments;
+    result = stochastic_distribution(v1, dist);
+    sigma.remove_fresh_variable_assignments(x.variables());
+  }
+
+  /// In the code below, it is essential that the assignments are also updated. They are passed by reference and changed in place. 
+  template<class T>
+  void apply(T& result, const stochastic_distribution& x, data::data_expression_list& pars)
+  {
+    data::variable_list v1 = sigma.add_fresh_variable_assignments(x.variables());
+
+    data::data_expression dist;
+    apply(dist, x.distribution());
+    data::data_expression_list aux_pars;
+    apply(aux_pars, pars);
+    pars = aux_pars;
     result = stochastic_distribution(v1, dist);
     sigma.remove_fresh_variable_assignments(x.variables());
   }
@@ -222,6 +248,47 @@ T replace_variables_capture_avoiding(const T& x,
   return lps::replace_variables_capture_avoiding(x, sigma, id_generator);
 }
 //--- end generated lps replace_capture_avoiding code ---//
+
+/// \\brief Applies sigma as a capture avoiding substitution to x with x a distribution..
+/// \\details The capture avoiding substitution must also be applied to the expression to which the distribution is applied.
+/// \\param x The object to which the substiution is applied.
+/// \\param pars The parameter list to which the distribution is applied. 
+/// \\param sigma A substitution.
+/// \\param id_generator An identifier generator that generates names that do not appear in x and sigma
+template <typename Substitution>
+stochastic_distribution replace_variables_capture_avoiding(
+                                     const stochastic_distribution& x,
+                                     data::data_expression_list& pars,
+                                     Substitution& sigma,
+                                     data::set_identifier_generator& id_generator
+)
+{
+  data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
+  stochastic_distribution result;
+  data::detail::apply_replace_capture_avoiding_variables_builder<lps::data_expression_builder, lps::detail::add_capture_avoiding_replacement>(sigma1).apply(result, x, pars);
+  return result;
+}
+
+/// \\brief Applies sigma as a capture avoiding substitution to a stochastic_distribution and a list of parameters.
+/// \\param x The object to which the substiution is applied.
+/// \\param pars The parameters of which the variables are bound. This list is changed if necessary.
+/// \\param sigma A substitution.
+template <typename Substitution>
+stochastic_distribution replace_variables_capture_avoiding(
+                                     const stochastic_distribution& x,
+                                     data::data_expression_list& pars,
+                                     Substitution& sigma
+) 
+{ 
+  data::set_identifier_generator id_generator;
+  id_generator.add_identifiers(lps::find_identifiers(x));
+  for (const data::variable& v: substitution_variables(sigma))
+  { 
+    id_generator.add_identifier(v.name());
+  } 
+  return lps::replace_variables_capture_avoiding(x, pars, sigma, id_generator);
+} 
+
 
 } // namespace lps
 
