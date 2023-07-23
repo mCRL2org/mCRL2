@@ -15,11 +15,11 @@
 
 #include "mcrl2/res/pres_input_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
-#include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/lps/detail/lps_io.h"
 #include "mcrl2/pres/detail/pres_io.h"
 #include "mcrl2/pres/pressolve_options.h"
 #include "mcrl2/pres/normalize.h"
+#include "mcrl2/pres/detail/instantiate_global_variables.h"
 #include "mcrl2/pres/pres2res.h"
 #include "mcrl2/pres/ressolve_gauss_elimination.h"
 #include "mcrl2/pres/ressolve_numerical.h"
@@ -114,7 +114,14 @@ class pressolve_tool
   bool run() override
   {
     pres_system::pres presspec = pres_system::detail::load_pres(input_filename());
+    
+    mCRL2log(log::debug) << "INPUT PRES\n" << presspec << "\n";
+    data::mutable_map_substitution<> sigma;
+    sigma = pres_system::detail::instantiate_global_variables(presspec);
+    pres_system::detail::replace_global_variables(presspec, sigma);
+
     pres_system::normalize(presspec);
+    mCRL2log(log::debug) << "RESULTING PRES\n" << presspec << "\n";
     
     mCRL2log(log::verbose) << "Generating RES..." << std::endl;
     timer().start("instantiation");
@@ -122,7 +129,7 @@ class pressolve_tool
     pres resulting_res = pres2res.run();
     timer().finish("instantiation");
 
-    mCRL2log(log::verbose) << "RESULTING RES\n" << resulting_res << "\n";
+    mCRL2log(log::debug) << "RESULTING RES\n" << resulting_res << "\n";
 
     timer().start("solving");
     if (options.algorithm==gauss_elimination)
