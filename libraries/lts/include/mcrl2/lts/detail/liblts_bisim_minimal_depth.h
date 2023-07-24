@@ -41,8 +41,8 @@ public:
    * reference to the initial state of lts2. */
   bisim_partitioner_minimal_depth(LTS_TYPE &l, const std::size_t init_l2)
       : initial_l2(init_l2),
-		aut(l),
-        max_state_index(0)
+        max_state_index(0),
+	aut(l)
   {
     to_be_processed.clear();
     block initial_block = block();
