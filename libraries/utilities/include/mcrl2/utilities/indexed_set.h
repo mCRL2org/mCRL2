@@ -155,11 +155,11 @@ public:
   indexed_set();
 
   /// \brief Constructor of an empty indexed set. 
-  /// \detail With a single thread it delivers contiguous values for states.
-  ///         With multiple threads some indices may be skipped. Each thread
-  ///         reserves numbers, which it hands out. If a thread does not have
-  ///         the opportunity to hand out all numbers, holes in the contiguous
-  ///         numbering can occur. The holes are always of limited size. 
+  /// \details With a single thread it delivers contiguous values for states.
+  ///          With multiple threads some indices may be skipped. Each thread
+  ///          reserves numbers, which it hands out. If a thread does not have
+  ///          the opportunity to hand out all numbers, holes in the contiguous
+  ///          numbering can occur. The holes are always of limited size. 
   /// \param number_of_threads The number of threads that use this index set. If the number is 1, it is treated
   ///        as a sequential set. If this number is larger than 1, the threads must be numbered
   ///        from 1 up and including number_of_threads. The number 0 cannot be used in that case. 
