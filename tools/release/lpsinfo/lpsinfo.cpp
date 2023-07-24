@@ -8,9 +8,6 @@
 //
 /// \file ./lpsinfo.cpp
 
-#define TOOLNAME "lpsinfo"
-#define AUTHOR "Wieger Wesselink and Frank Stappers"
-
 #include "mcrl2/lps/tools.h"
 #include "mcrl2/utilities/input_tool.h"
 
@@ -28,8 +25,8 @@ class lpsinfo_tool: public input_tool
   public:
     lpsinfo_tool()
       : super(
-        TOOLNAME,
-        AUTHOR,
+        "lpsinfo",
+        "Wieger Wesselink and Frank Stappers",
         "display basic information about an LPS",
         "Print basic information on the linear process specification (LPS) in INFILE.")
     {}

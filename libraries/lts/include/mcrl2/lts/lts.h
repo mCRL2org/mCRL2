@@ -40,6 +40,30 @@ namespace mcrl2
 namespace lts
 {
 
+class lts_default_base
+{
+  public:
+    /** \brief Provides the type of this lts, in casu lts_none.  */
+    lts_type type()
+    {
+      return lts_none;
+    }
+
+    /** \brief Standard swap function. */
+    void swap(lts_default_base& )
+    {
+      // Does intentionally not provide any action.
+    }
+
+    /** \brief Standard equality function.
+     *  \param[in] other Value to compare with. */
+    bool operator==(const lts_default_base&) const
+    {
+      return true;
+    }
+};
+
+
 /** \brief A class that contains a labelled transition system.
     \details The state labels and action labels can be any type.
         Essentially, a labelled transition system consists of a
@@ -54,7 +78,7 @@ namespace lts
         a separate variable.
 */
 
-template < class STATE_LABEL_T, class ACTION_LABEL_T, class LTS_BASE>
+template < class STATE_LABEL_T, class ACTION_LABEL_T, class LTS_BASE = lts_default_base>
 class lts: public LTS_BASE
 {
   public:
