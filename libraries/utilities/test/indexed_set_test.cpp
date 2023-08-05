@@ -26,6 +26,7 @@ BOOST_AUTO_TEST_CASE(basic_test_indexed_set)
 
   {
     const indexed_set<std::string>& t1 = t;
+    BOOST_CHECK(t1.size() == t.size());
   }
   indexed_set<std::string> t2 = t;
 

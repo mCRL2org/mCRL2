@@ -37,7 +37,7 @@ void rewrite2()
   assert(r(d1, sigma) == r(d2));
 }
 
-int main(int argc, char* argv[])
+int main(int /* argc */, char** /* argv */)
 {
   rewrite1();
   rewrite2();
