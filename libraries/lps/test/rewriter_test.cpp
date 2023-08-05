@@ -102,6 +102,7 @@ void test1()
 
   // test destructor
   const rewriter& r1 = r;
+  BOOST_CHECK(r1(n1) == r(n1));
 }
 
 const std::string SPECIFICATION2=

@@ -35,7 +35,6 @@ void run_monotonicity_test_case(const std::string& formula, const specification&
     f = state_formulas::resolve_state_variable_name_clashes(f);
     std::cerr << "resolved to " << state_formulas::pp(f) << std::endl;
   }
-
   BOOST_TEST(is_monotonous(f) == expect_success);
 }
 

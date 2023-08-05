@@ -143,15 +143,7 @@ struct add_capture_avoiding_replacement: public process::detail::add_capture_avo
   void apply(T& /* result */, const stochastic_distribution& /* x */)
   {
     assert(false); // This function should never be called. If a stochastic distribution is 
-                   // changed, the associated parameter list should be changed too. 
-  }
-
-  /// In the code below, it is essential that the assignments are also updated. They are passed by reference and changed in place. 
-  template<class T>
-  void apply(T& result, const stochastic_distribution& x, data::assignment_list& assignments)
-  {
-    assert(false); // This function should never be called. If a stochastic distribution is 
-                   // changed, the associated parameter list should be changed too. 
+                   // changed, the associated assignment list should be changed too. 
   }
 
   /// In the code below, it is essential that the assignments are also updated. They are passed by reference and changed in place. 

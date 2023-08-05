@@ -39,7 +39,7 @@ struct make_timed_lps_summand
     {
       data::variable t(m_generator("T"), data::sort_real::real_());
       s.deadlock().time() = t;
-      push_back(s.summation_variables(), t);
+      s.summation_variables() = push_back(s.summation_variables(), t);
       /* data::variable_vector v = data::variable_vector(s.summation_variables().begin(),s.summation_variables().end());
       v.push_back(t);
       s.summation_variables() = data::variable_list(v.begin(),v.end()); */
@@ -54,7 +54,7 @@ struct make_timed_lps_summand
     {
       data::variable t(m_generator("T"), data::sort_real::real_());
       s.multi_action() = multi_action(s.multi_action().actions(), t);
-      push_back(s.summation_variables(), t);
+      s.summation_variables()=push_back(s.summation_variables(), t);
       /* data::variable_vector v = data::variable_vector(s.summation_variables().begin(),s.summation_variables().end());
       v.push_back(t);
       s.summation_variables() = data::variable_list(v.begin(),v.end());

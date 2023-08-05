@@ -68,6 +68,10 @@ public:
   explicit term_appl(const aterm& t) 
    : aterm(t)
   {
+if (!type_is_appl())
+{
+std::cerr << "CULPRIT " << t << "\n";
+}
     assert(type_is_appl());
     static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
     static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
