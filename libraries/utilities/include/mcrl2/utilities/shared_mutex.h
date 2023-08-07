@@ -10,13 +10,15 @@
 #ifndef MCRL2_UTILITIES_DETAIL_SHARED_MUTEX_H
 #define MCRL2_UTILITIES_DETAIL_SHARED_MUTEX_H
 
-#include "mcrl2/utilities/noncopyable.h"
-#include "mcrl2/utilities/configuration.h"
-
 #include <assert.h>
+#include <algorithm>
 #include <atomic>
 #include <mutex>
 #include <vector>
+
+#include "mcrl2/utilities/noncopyable.h"
+#include "mcrl2/utilities/configuration.h"
+
 
 namespace mcrl2::utilities
 {
