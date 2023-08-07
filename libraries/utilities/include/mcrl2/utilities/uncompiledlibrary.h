@@ -10,8 +10,8 @@
 /// \brief Extends the dynamic_library from dynamiclibrary.h to be able to compile a
 ///        source file and load the resulting library.
 
-#ifndef __UNCOMPILED_LIBRARY_H
-#define __UNCOMPILED_LIBRARY_H
+#ifndef MCRL2_UTILITY_UNCOMPILED_LIBRARY_H
+#define MCRL2_UTILITY_UNCOMPILED_LIBRARY_H
 
 /*
  * Extends the dynamic_library from dynamiclibrary.h to be able to compile a
@@ -33,6 +33,10 @@
  * temporary files.
  *
  */
+
+#include "mcrl2/utilities/platform.h"
+
+#ifndef MCRL2_PLATFORM_WINDOWS
 
 #include <cerrno>
 #include <list>
@@ -154,4 +158,6 @@ class uncompiled_library : public dynamic_library
 
 };
 
-#endif // __UNCOMPILED_LIBRARY_H
+#endif // MCRL2_PLATFORM_WINDOWS
+
+#endif // MCRL2_UTILITY_UNCOMPILED_LIBRARY_H

@@ -9,6 +9,7 @@
 
 #ifndef MCRL2_ATERMPP_INDEX_TRAITS_H
 #define MCRL2_ATERMPP_INDEX_TRAITS_H
+#pragma once
 
 #include "mcrl2/atermpp/detail/aterm_configuration.h"
 #include "mcrl2/atermpp/standard_containers/unordered_map.h"

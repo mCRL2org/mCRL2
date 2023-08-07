@@ -9,10 +9,11 @@
 #ifndef MCRL2_ATERMPP_INDEXED_SET_H
 #define MCRL2_ATERMPP_INDEXED_SET_H
 
+#include "mcrl2/atermpp/detail/thread_aterm_pool.h"
+#include "mcrl2/atermpp/standard_containers/deque.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/utilities/indexed_set.h"
 #include "mcrl2/utilities/shared_mutex.h"
-#include <mcrl2/atermpp/standard_containers/deque.h>
 
 
 namespace atermpp

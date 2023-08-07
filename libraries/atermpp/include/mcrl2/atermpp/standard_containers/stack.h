@@ -19,6 +19,7 @@
 #define MCRL2_ATERMPP_STANDARD_CONTAINER_STACK_H
 
 #include "mcrl2/atermpp/detail/aterm_container.h"
+#include "mcrl2/atermpp/detail/thread_aterm_pool.h"
 #include "mcrl2/atermpp/standard_containers/deque.h"
 #include "mcrl2/utilities/shared_mutex.h"
 

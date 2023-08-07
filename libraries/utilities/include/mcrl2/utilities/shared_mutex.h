@@ -13,8 +13,10 @@
 #include "mcrl2/utilities/noncopyable.h"
 #include "mcrl2/utilities/configuration.h"
 
+#include <assert.h>
 #include <atomic>
 #include <mutex>
+#include <vector>
 
 namespace mcrl2::utilities
 {
