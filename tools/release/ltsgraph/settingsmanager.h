@@ -4,6 +4,7 @@
 #include <QHash>
 #include <string>
 #include <functional>
+#include <memory>
 
 #include <QJsonDocument>
 #include <QJsonParseError>
@@ -26,7 +27,6 @@ template <typename T> struct GetterSetter
   GetterSetter(Obj* obj, const T default_value, const bool reset_to_default)
       : default_value(default_value), reset_to_default(reset_to_default)
   {
-    name = obj->objectName().toStdString();
     if constexpr (std::is_same_v<Obj, QSpinBox> || std::is_same_v<Obj, QSlider>)
     {
       getter = [obj]() { return obj->value(); };
@@ -59,7 +59,7 @@ template <typename T> struct GetterSetter
           << typeid(Obj).name() << "\". Skipping this element." << std::endl;
     }
   }
-  std::string name;
+
   std::function<T()> getter;
   std::function<void(T)> setter;
   const T default_value;
@@ -67,7 +67,7 @@ template <typename T> struct GetterSetter
 };
 
 template <typename T>
-using varmap = QHash<QString, GetterSetter<T>*>;
+using varmap = QHash<QString, std::shared_ptr<GetterSetter<T>>>;
 
 class Settings
 {
@@ -84,7 +84,7 @@ class Settings
       if (m_bools.find(name) == m_bools.end())
       {
         m_bools[name] =
-            new GetterSetter<bool>(obj, default_value, reset_to_default);
+            std::make_shared<GetterSetter<bool>>(obj, default_value, reset_to_default);
       }
     }
     else if constexpr (std::is_same_v<int, T>)
@@ -92,7 +92,7 @@ class Settings
       if (m_ints.find(name) == m_ints.end())
       {
         m_ints[name] =
-            new GetterSetter<int>(obj, default_value, reset_to_default);
+            std::make_shared<GetterSetter<int>>(obj, default_value, reset_to_default);
       }
     }
     else if constexpr (std::is_same_v<float, T>)
@@ -100,7 +100,7 @@ class Settings
       if (m_floats.find(name) == m_floats.end())
       {
         m_floats[name] =
-            new GetterSetter<float>(obj, default_value, reset_to_default);
+            std::make_shared<GetterSetter<float>>(obj, default_value, reset_to_default);
       }
     }
     else if constexpr (std::is_same_v<QString, T>)
@@ -108,7 +108,7 @@ class Settings
       if (m_strings.find(name) == m_strings.end())
       {
       m_strings[name] =
-          new GetterSetter<QString>(obj, default_value, reset_to_default);
+          std::make_shared<GetterSetter<QString>>(obj, default_value, reset_to_default);
       }
     }
     else
