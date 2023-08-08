@@ -1160,24 +1160,16 @@ void GLScene::renderNode(std::size_t i, bool transparent)
   if (transparent || alpha > 0.99f) // Check if these elements are visible and
                                     // opaque if transparency is disallowed.
   {
-    // Node stroke color: red when selected, black otherwise. Apply fogging
+    // Node border color: red when selected, blue when probabilistic, and black otherwise. Apply fogging
     // afterwards.
-    QVector3D line(0.6f * node.selected(), 0.0f, 0.0f);
+    QVector3D line(0.6f * node.selected(), 0.0f, 1.0f*node.is_probabilistic());
+
     QVector4D color = QVector4D(applyFog(line, fog), alpha);
     m_drawNodeBorder.push_back(node.pos(), color);
 
     color = QVector4D(applyFog(fill, fog), alpha);
-    if (node.is_probabilistic() && !mark)   // Marked and initial states are not drawn as black spheres. 
-    {
-      // Draw only the top section of the half sphere
-      // This gives the appearance of a thicker border
-      m_drawHalfSphere.push_back(node.pos(), color);
-    }
-    else
-    {
-      // Draw the sphere
-      m_drawSphere.push_back(node.pos(), color);
-    }
+    // Draw the sphere to fill the internal area of a node. 
+    m_drawSphere.push_back(node.pos(), color);
 
     if (m_graph.hasExploration() && !m_graph.isBridge(i) &&
         m_graph.initialState() != i)
