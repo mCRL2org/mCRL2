@@ -827,11 +827,11 @@ void GLScene::renderText(QPainter& painter)
       furthest = std::max(dist, furthest);
     }
 
-    const double furthest_scale = 0.8;
-    const double closest_scale = 1.0;
     auto getScale = [&](std::size_t i) -> double
     {
-      if (furthest == closest)
+      const double furthest_scale = 0.8;
+      const double closest_scale = 1.0;
+      if (!m_is_threedimensional || furthest == closest)
       {
         return closest_scale;
       }
@@ -924,11 +924,11 @@ void GLScene::renderText(QPainter& painter)
       furthest = std::max(dist, furthest);
     }
 
-    const double furthest_scale = 0.8;
-    const double closest_scale = 1.0;
     auto getScale = [&](std::size_t i) -> double
     {
-      if (furthest == closest)
+      const double furthest_scale = 0.8;
+      const double closest_scale = 1.0;
+      if (!m_is_threedimensional || furthest == closest)
       {
         return closest_scale;
       }
@@ -984,7 +984,8 @@ QVector3D GLScene::applyFog(const QVector3D& color, float fogAmount)
   return mix(clamp(fogAmount, 0.0f, 1.0f), color, m_clearColor);
 }
 
-void GLScene::drawCenteredText3D(QPainter& painter, const QString& text,
+void GLScene::drawCenteredText3D(QPainter& painter, 
+                                 const QString& text,
                                  const QVector3D& position,
                                  const QVector3D& color)
 {
