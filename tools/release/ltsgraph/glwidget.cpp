@@ -427,7 +427,7 @@ void GLWidget::mousePressEvent(QMouseEvent* e)
     }
     else if (e->modifiers() == Qt::ShiftModifier)
     {
-      if (e->button() == Qt::LeftButton && m_is_threedimensional)
+      if (e->button() == Qt::LeftButton && m_scene.m_is_threedimensional)
       {
         m_dragmode = dm_rotate;
       }
@@ -443,7 +443,7 @@ void GLWidget::mousePressEvent(QMouseEvent* e)
     {
       if (m_hover.selectionType == GLScene::SelectableObject::none)
       {
-        if (e->button() == Qt::RightButton && m_is_threedimensional)
+        if (e->button() == Qt::RightButton && m_scene.m_is_threedimensional)
         {
           m_dragmode = dm_rotate;
         }
@@ -606,12 +606,12 @@ void GLWidget::rebuild()
 
 void GLWidget::set3D(bool enabled)
 {
-  if (!enabled && m_is_threedimensional)
+  if (!enabled && m_scene.m_is_threedimensional)
   {
     m_scene.project2D();
   }
   m_ui->m_ui.cbThreeDimensional->setChecked(enabled);
-  m_is_threedimensional = enabled;
+  m_scene.m_is_threedimensional = enabled;
   update();
   m_graph.hasNewFrame(true);
   m_graph.setStable(false);
@@ -619,7 +619,7 @@ void GLWidget::set3D(bool enabled)
 
 bool GLWidget::get3D()
 {
-  return m_is_threedimensional;
+  return m_scene.m_is_threedimensional;
 }
 
 void GLWidget::resetViewpoint(std::size_t)
