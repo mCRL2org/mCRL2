@@ -829,8 +829,12 @@ void GLScene::renderText(QPainter& painter)
 
     const double furthest_scale = 0.8;
     const double closest_scale = 1.0;
-    auto getScale = [&](std::size_t i)
+    auto getScale = [&](std::size_t i) -> double
     {
+      if (furthest == closest)
+      {
+        return closest_scale;
+      }
       return (closest_scale - (closest_scale - furthest_scale) *
                                   (std::sqrt(distances[i]) - closest) /
                                   (furthest - closest));
@@ -922,8 +926,12 @@ void GLScene::renderText(QPainter& painter)
 
     const double furthest_scale = 0.8;
     const double closest_scale = 1.0;
-    auto getScale = [&](std::size_t i)
+    auto getScale = [&](std::size_t i) -> double
     {
+      if (furthest == closest)
+      {
+        return closest_scale;
+      }
       return (closest_scale - (closest_scale - furthest_scale) *
                                   (std::sqrt(distances[i]) - closest) /
                                   (furthest - closest));
