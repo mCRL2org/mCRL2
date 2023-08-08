@@ -408,9 +408,9 @@ class GLScene : private QOpenGLFunctions_3_3_Core
   /// for text that rarely changes its layout.
   std::vector<QStaticText> m_state_labels;
   std::vector<QStaticText> m_transition_labels;
-  std::size_t m_textLimitTransLabels = 200;
-  std::size_t m_textLimitStateLabels = 200;
-  std::size_t m_textLimitStateNumbers = 200;
+  int m_textLimitTransLabels = 200;
+  int m_textLimitStateLabels = 200;
+  int m_textLimitStateNumbers = 200;
   friend class GLWidget;
 };
 
