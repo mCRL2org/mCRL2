@@ -26,36 +26,36 @@
 
 /// \brief Number of orthogonal slices from which a circle representing a node
 /// is constructed.
-constexpr std::size_t RES_NODE_SLICE = 128;
+constexpr int RES_NODE_SLICE = 128;
 
 /// \brief Number of vertical planes from which a circle representing a node is
 /// constructed.
-constexpr std::size_t RES_NODE_STACK = 2;
+constexpr int RES_NODE_STACK = 2;
 
 /// \brief Amount of segments in arrowhead cone
-constexpr std::size_t RES_ARROWHEAD = 16;
+constexpr int RES_ARROWHEAD = 16;
 
 /// \brief Amount of segments for edge arc
-constexpr std::size_t RES_ARC = 16;
+constexpr int RES_ARC = 16;
 
 /// This should match the layout of m_vertexbuffer.
-constexpr std::size_t VERTICES_NODE_BORDER = RES_NODE_SLICE + 1;
-constexpr std::size_t VERTICES_NODE_SPHERE = RES_NODE_SLICE * RES_NODE_STACK * 2;
-constexpr std::size_t VERTICES_HINT = 12;
-constexpr std::size_t VERTICES_HANDLE_BODY = 4;
-constexpr std::size_t VERTICES_HANDLE_OUTLINE = 4;
-constexpr std::size_t VERTICES_ARROWHEAD = RES_ARROWHEAD + 1;
-constexpr std::size_t VERTICES_ARROWHEAD_BASE = RES_ARROWHEAD + 1;
-constexpr std::size_t VERTICES_ARC = RES_ARC;
+constexpr int VERTICES_NODE_BORDER = RES_NODE_SLICE + 1;
+constexpr int VERTICES_NODE_SPHERE = RES_NODE_SLICE * RES_NODE_STACK * 2;
+constexpr int VERTICES_HINT = 12;
+constexpr int VERTICES_HANDLE_BODY = 4;
+constexpr int VERTICES_HANDLE_OUTLINE = 4;
+constexpr int VERTICES_ARROWHEAD = RES_ARROWHEAD + 1;
+constexpr int VERTICES_ARROWHEAD_BASE = RES_ARROWHEAD + 1;
+constexpr int VERTICES_ARC = RES_ARC;
 
-constexpr std::size_t OFFSET_NODE_BORDER = 0;
-constexpr std::size_t OFFSET_NODE_SPHERE = OFFSET_NODE_BORDER + VERTICES_NODE_BORDER;
-constexpr std::size_t OFFSET_HINT = OFFSET_NODE_SPHERE + VERTICES_NODE_SPHERE;
-constexpr std::size_t OFFSET_HANDLE_BODY = OFFSET_HINT + VERTICES_HINT;
-constexpr std::size_t OFFSET_HANDLE_OUTLINE = OFFSET_HANDLE_BODY + VERTICES_HANDLE_BODY;
-constexpr std::size_t OFFSET_ARROWHEAD = OFFSET_HANDLE_OUTLINE + VERTICES_HANDLE_OUTLINE;
-constexpr std::size_t OFFSET_ARROWHEAD_BASE = OFFSET_ARROWHEAD + VERTICES_ARROWHEAD;
-constexpr std::size_t OFFSET_ARC = OFFSET_ARROWHEAD_BASE + VERTICES_ARROWHEAD_BASE;
+constexpr int OFFSET_NODE_BORDER = 0;
+constexpr int OFFSET_NODE_SPHERE = OFFSET_NODE_BORDER + VERTICES_NODE_BORDER;
+constexpr int OFFSET_HINT = OFFSET_NODE_SPHERE + VERTICES_NODE_SPHERE;
+constexpr int OFFSET_HANDLE_BODY = OFFSET_HINT + VERTICES_HINT;
+constexpr int OFFSET_HANDLE_OUTLINE = OFFSET_HANDLE_BODY + VERTICES_HANDLE_BODY;
+constexpr int OFFSET_ARROWHEAD = OFFSET_HANDLE_OUTLINE + VERTICES_HANDLE_OUTLINE;
+constexpr int OFFSET_ARROWHEAD_BASE = OFFSET_ARROWHEAD + VERTICES_ARROWHEAD;
+constexpr int OFFSET_ARC = OFFSET_ARROWHEAD_BASE + VERTICES_ARROWHEAD_BASE;
 
 GLScene::GLScene(QOpenGLWidget& glwidget, Graph::Graph& g)
     : m_glwidget(glwidget), m_graph(g)
@@ -101,10 +101,10 @@ void GLScene::initialize()
   {
     // The center of the circle, followed by the vertices on the edge.
     nodeborder[0] = QVector3D(0.0f, 0.0f, 0.0f);
-    for (std::size_t i = 0; i < RES_NODE_SLICE; ++i)
+    for (int i = 0; i < RES_NODE_SLICE; ++i)
     {
       float t = -i * 2.0f * PI / (RES_NODE_SLICE - 1);
-      nodeborder[i + 1] =
+      nodeborder[static_cast<std::size_t>(i) + 1] =
           QVector3D(std::sin(t), std::cos(t), 0.0f);
     }
   }
@@ -116,9 +116,9 @@ void GLScene::initialize()
     float stackd = PI_2 / RES_NODE_STACK;
 
     std::size_t n = 0;
-    for (std::size_t j = 0; j < RES_NODE_STACK; ++j, stack += stackd)
+    for (int j = 0; j < RES_NODE_STACK; ++j, stack += stackd)
     {
-      for (std::size_t i = 0; i < RES_NODE_SLICE - 1; ++i)
+      for (int i = 0; i < RES_NODE_SLICE - 1; ++i)
       {
         float slice = i * 2.0f * PI / (RES_NODE_SLICE - 2);
         node[n++] = QVector3D(std::sin(stack + stackd) * std::sin(slice),
@@ -175,7 +175,7 @@ void GLScene::initialize()
   {
     arrowhead[0] = QVector3D(0.0f, 0.0f, 0.0f);
 
-    for (std::size_t i = 0; i < RES_ARROWHEAD; ++i)
+    for (int i = 0; i < RES_ARROWHEAD; ++i)
     {
       float t = -i * 2.0f * PI / (RES_ARROWHEAD - 1);
       arrowhead[static_cast<std::size_t>(i) + 1] =
@@ -187,7 +187,7 @@ void GLScene::initialize()
   {
     arrowhead_base[0] = QVector3D(-1.0f, 0.0f, 0.0f);
 
-    for (std::size_t i = 0; i < RES_ARROWHEAD; ++i)
+    for (int i = 0; i < RES_ARROWHEAD; ++i)
     {
       float t = i * 2.0f * PI / (RES_ARROWHEAD - 1);
       arrowhead_base[static_cast<std::size_t>(i) + 1] =
@@ -199,7 +199,7 @@ void GLScene::initialize()
   // by the vertex shader using the x coordinate as t.
   std::vector<QVector3D> arc(VERTICES_ARC);
   {
-    for (std::size_t i = 0; i < VERTICES_ARC; ++i)
+    for (int i = 0; i < VERTICES_ARC; ++i)
     {
       arc[static_cast<std::size_t>(i)] =
           QVector3D(static_cast<float>(i) / (VERTICES_ARC - 1), 0.0f, 0.0f);
@@ -232,9 +232,9 @@ void GLScene::initialize()
 
   m_node_shader.bind();
 
-  std::size_t vertex_attrib_location = m_node_shader.attributeLocation("vertex");
-  std::size_t offset_attrib_location = m_node_shader.attributeLocation("offset");
-  std::size_t color_attrib_location = m_node_shader.attributeLocation("color");
+  int vertex_attrib_location = m_node_shader.attributeLocation("vertex");
+  int offset_attrib_location = m_node_shader.attributeLocation("offset");
+  int color_attrib_location = m_node_shader.attributeLocation("color");
 
   int recommended_max_buffer_size;
   glGetIntegerv(GL_MAX_ELEMENTS_VERTICES, &recommended_max_buffer_size);
@@ -814,8 +814,8 @@ void GLScene::renderText(QPainter& painter)
     for (std::size_t i = 0;
          i <
          std::min(nodeCount,
-                  std::max(m_textLimitStateLabels,
-                           m_textLimitStateNumbers));
+                  std::max(static_cast<std::size_t>(m_textLimitStateLabels),
+                           static_cast<std::size_t>(m_textLimitStateNumbers)));
          ++i)
     {
       std::size_t n =
@@ -829,12 +829,8 @@ void GLScene::renderText(QPainter& painter)
 
     const double furthest_scale = 0.8;
     const double closest_scale = 1.0;
-    auto getScale = [&](std::size_t i)->int
+    auto getScale = [&](std::size_t i)
     {
-      if (furthest-closest == 0)
-      {
-        return 1;
-      }
       return (closest_scale - (closest_scale - furthest_scale) *
                                   (std::sqrt(distances[i]) - closest) /
                                   (furthest - closest));
@@ -842,20 +838,20 @@ void GLScene::renderText(QPainter& painter)
     for (std::size_t i = 0;
          i <
          std::min(nodeCount,
-                  std::max(m_textLimitStateLabels,
-                           m_textLimitStateNumbers));
+                  std::max(static_cast<std::size_t>(m_textLimitStateLabels),
+                           static_cast<std::size_t>(m_textLimitStateNumbers)));
          ++i)
     {
       font.setPixelSize(getScale(indices[i]) * m_fontsize);
       painter.setFont(font);
-      if (m_drawstatenumbers && i < m_textLimitStateNumbers)
+      if (m_drawstatenumbers && i < static_cast<std::size_t>(m_textLimitStateNumbers))
       {
         renderStateNumber(painter, exploration_active
                                        ? m_graph.explorationNode(indices[i])
                                        : indices[i]);
       }
 
-      if (m_drawstatelabels && i < m_textLimitStateLabels)
+      if (m_drawstatelabels && i < static_cast<std::size_t>(m_textLimitStateLabels))
       {
         renderStateLabel(painter, exploration_active
                                       ? m_graph.explorationNode(indices[i])
@@ -911,7 +907,7 @@ void GLScene::renderText(QPainter& painter)
     double furthest = 0;
     for (std::size_t i = 0;
          i <
-         std::min(edgeCount, m_textLimitTransLabels);
+         std::min(edgeCount, static_cast<std::size_t>(m_textLimitTransLabels));
          ++i)
     {
       std::size_t n =
@@ -926,12 +922,8 @@ void GLScene::renderText(QPainter& painter)
 
     const double furthest_scale = 0.8;
     const double closest_scale = 1.0;
-    auto getScale = [&](std::size_t i)->int
+    auto getScale = [&](std::size_t i)
     {
-      if (furthest-closest == 0)
-      {
-        return 1;
-      }
       return (closest_scale - (closest_scale - furthest_scale) *
                                   (std::sqrt(distances[i]) - closest) /
                                   (furthest - closest));
@@ -940,7 +932,7 @@ void GLScene::renderText(QPainter& painter)
     {
       for (std::size_t i = 0;
            i < std::min(edgeCount,
-                        m_textLimitTransLabels);
+                        static_cast<std::size_t>(m_textLimitTransLabels));
            ++i)
       {
         font.setPixelSize(getScale(indices[i]) * m_fontsize);
