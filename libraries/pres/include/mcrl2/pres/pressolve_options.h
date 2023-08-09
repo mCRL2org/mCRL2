@@ -14,6 +14,7 @@
 
 #include <iomanip>
 #include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/pres/resalgorithm_type.h"
 
 namespace mcrl2 {

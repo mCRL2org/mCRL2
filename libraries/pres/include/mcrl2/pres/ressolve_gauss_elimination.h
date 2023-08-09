@@ -12,7 +12,10 @@
 #ifndef MCRL2_PRES_RESSOLVE_GAUSS_ELIMINATION_H
 #define MCRL2_PRES_RESSOLVE_GAUSS_ELIMINATION_H
 
+#include "mcrl2/atermpp/standard_containers/indexed_set.h"
 #include "mcrl2/data/real_utilities.h"
+#include "mcrl2/pres/pressolve_options.h"
+#include "mcrl2/pres/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pres/builder.h" 
 
 namespace mcrl2 {
@@ -626,17 +629,17 @@ void collect_m_and_split_lines(const std::vector< linear_fixed_point_equation >&
                                const bool minimal_fixed_point)
 {
   bool m_defined=false;
-  m = minimal_fixed_point?data::false_():data::true_();
+  m = minimal_fixed_point?false_():true_();
   for(const linear_fixed_point_equation& eq: lines)
   {
     if (eq.c_j_term_present)
     {
       data::data_expression is_shallow=rewriter(data::less(eq.c_j,data::sort_real::real_one()));
-      if (data::is_true(is_shallow))
+      if (is_true(is_shallow))
       {
         shallow_lines.push_back(eq);
       }
-      else if (data::is_false(is_shallow))
+      else if (is_false(is_shallow))
       {
         steep_lines.push_back(eq);
       }

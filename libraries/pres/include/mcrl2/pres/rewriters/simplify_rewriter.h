@@ -283,7 +283,7 @@ struct add_simplify: public Builder<Derived>
     }
     data::data_expression inequality;
     apply(inequality, data::less(data::sort_real::real_zero(), atermpp::down_cast<data::data_expression>(result_lhs)));
-    if (data::is_true(inequality)) // if the factor in const_multiply is larger than zero, we can simplify further. 
+    if (is_true(inequality)) // if the factor in const_multiply is larger than zero, we can simplify further. 
     {
       if (is_true(result) || is_false(result) || is_eqinf(result) || is_eqninf(result))
       {

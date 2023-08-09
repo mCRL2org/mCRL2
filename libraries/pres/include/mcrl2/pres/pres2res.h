@@ -13,9 +13,11 @@
 #define MCRL2_PRES_PRES2RES_H
 
 #include "mcrl2/atermpp/standard_containers/vector.h"
+#include "mcrl2/atermpp/standard_containers/indexed_set.h"
 #include "mcrl2/atermpp/function_symbol_generator.h"
 #include "mcrl2/data/substitution_utility.h"
 #include "mcrl2/pbes/pbes_equation_index.h"
+#include "mcrl2/pres/pressolve_options.h"
 #include "mcrl2/pres/rewriters/enumerate_quantifiers_rewriter.h"
 
 namespace mcrl2 {

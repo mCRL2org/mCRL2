@@ -15,6 +15,8 @@
 #include "limits"
 #include "mcrl2/data/real_utilities.h"
 #include "mcrl2/pres/builder.h" 
+#include "mcrl2/pres/pressolve_options.h"
+#include "mcrl2/pres/rewriters/enumerate_quantifiers_rewriter.h"
 
 namespace mcrl2 {
 
