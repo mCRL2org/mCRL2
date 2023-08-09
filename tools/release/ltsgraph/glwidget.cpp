@@ -457,6 +457,14 @@ void GLWidget::mousePressEvent(QMouseEvent* e)
       else
       {
         m_dragmode = dm_dragnode;
+
+        if (m_dragnode != nullptr) {
+          // A drag action was already in process so release it, and delete the node first.          
+          m_dragnode->release(false);
+          delete m_dragnode;
+          m_dragnode = nullptr;
+        }
+
         switch (m_hover.selectionType)
         {
         case GLScene::SelectableObject::node:
