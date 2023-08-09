@@ -266,7 +266,7 @@ class GLWidget : public QOpenGLWidget
   public:              /// TODO: Expose nicely
   DragMode m_dragmode; ///< The current drag mode.
   private:
-  MoveRecord* m_dragnode; ///< The current node (if any) which is being dragged.
+  MoveRecord* m_dragnode = nullptr; ///< The current node (if any) which is being dragged.
   QPoint m_dragstart;     ///< The coordinate at which the dragging started.
   QVector2D m_draglength; ///< The accumulated distance reached while dragging.
   QVector3D m_paintcolor; ///< The color of the paint operation.
