@@ -755,7 +755,9 @@ void SpringLayout::apply()
     QVector3D clipmin = m_graph.getClipMin();
     QVector3D clipmax = m_graph.getClipMax();
     bool new_anchored = false;
-    float use_speed = m_speed * std::log2f(nodeCount+1) * 0.25f;
+
+    // Offset the nodeCount to avoid multiplying by zero
+    float use_speed = m_speed * std::log2f(nodeCount+2) * 0.25f;
 
     for (std::size_t i = 0; i < nodeCount; ++i)
     {
