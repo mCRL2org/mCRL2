@@ -10,7 +10,6 @@
 /// \brief Tests for the is_monotonous function for state formulas.
 
 #define BOOST_TEST_MODULE modal_formula_monotonicity_test
-
 #include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/lps/detail/test_input.h"

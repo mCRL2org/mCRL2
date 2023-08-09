@@ -25,7 +25,7 @@ unordered_set<T> construct(std::initializer_list<T> list)
 {
   unordered_set<T> set;
 
-  for (auto& element : list)
+  for (const T& element : list)
   {
     set.emplace(element);
   }
@@ -140,6 +140,7 @@ BOOST_AUTO_TEST_CASE(test_const_iterator)
 
   const unordered_set<int>::iterator it2 = set.begin();
   int value = *it2;
+  BOOST_CHECK(value == *const_it);
 }
 
 class Object
@@ -166,7 +167,7 @@ struct hash<Object>
 {
   std::size_t operator()(const Object& object) const
   {
-    return 0;
+    return reinterpret_cast<std::size_t>(&object);
   }
 };
 

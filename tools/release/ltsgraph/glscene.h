@@ -411,6 +411,9 @@ class GLScene : private QOpenGLFunctions_3_3_Core
   int m_textLimitTransLabels = 200;
   int m_textLimitStateLabels = 200;
   int m_textLimitStateNumbers = 200;
+  bool m_is_threedimensional = false; ///< Indicates that the scene should be
+                                      ///< viewed in 3D, as opposed to 2D.
+
   friend class GLWidget;
 };
 

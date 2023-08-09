@@ -53,8 +53,7 @@ constexpr int OFFSET_NODE_SPHERE = OFFSET_NODE_BORDER + VERTICES_NODE_BORDER;
 constexpr int OFFSET_HINT = OFFSET_NODE_SPHERE + VERTICES_NODE_SPHERE;
 constexpr int OFFSET_HANDLE_BODY = OFFSET_HINT + VERTICES_HINT;
 constexpr int OFFSET_HANDLE_OUTLINE = OFFSET_HANDLE_BODY + VERTICES_HANDLE_BODY;
-constexpr int OFFSET_ARROWHEAD =
-    OFFSET_HANDLE_OUTLINE + VERTICES_HANDLE_OUTLINE;
+constexpr int OFFSET_ARROWHEAD = OFFSET_HANDLE_OUTLINE + VERTICES_HANDLE_OUTLINE;
 constexpr int OFFSET_ARROWHEAD_BASE = OFFSET_ARROWHEAD + VERTICES_ARROWHEAD;
 constexpr int OFFSET_ARC = OFFSET_ARROWHEAD_BASE + VERTICES_ARROWHEAD_BASE;
 
@@ -828,10 +827,14 @@ void GLScene::renderText(QPainter& painter)
       furthest = std::max(dist, furthest);
     }
 
-    const double furthest_scale = 0.8;
-    const double closest_scale = 1.0;
-    auto getScale = [&](std::size_t i)
+    auto getScale = [&](std::size_t i) -> double
     {
+      const double furthest_scale = 0.8;
+      const double closest_scale = 1.0;
+      if (!m_is_threedimensional || furthest == closest)
+      {
+        return closest_scale;
+      }
       return (closest_scale - (closest_scale - furthest_scale) *
                                   (std::sqrt(distances[i]) - closest) /
                                   (furthest - closest));
@@ -845,14 +848,14 @@ void GLScene::renderText(QPainter& painter)
     {
       font.setPixelSize(getScale(indices[i]) * m_fontsize);
       painter.setFont(font);
-      if (m_drawstatenumbers && i < m_textLimitStateNumbers)
+      if (m_drawstatenumbers && i < static_cast<std::size_t>(m_textLimitStateNumbers))
       {
         renderStateNumber(painter, exploration_active
                                        ? m_graph.explorationNode(indices[i])
                                        : indices[i]);
       }
 
-      if (m_drawstatelabels && i < m_textLimitStateLabels)
+      if (m_drawstatelabels && i < static_cast<std::size_t>(m_textLimitStateLabels))
       {
         renderStateLabel(painter, exploration_active
                                       ? m_graph.explorationNode(indices[i])
@@ -921,10 +924,14 @@ void GLScene::renderText(QPainter& painter)
       furthest = std::max(dist, furthest);
     }
 
-    const double furthest_scale = 0.8;
-    const double closest_scale = 1.0;
-    auto getScale = [&](std::size_t i)
+    auto getScale = [&](std::size_t i) -> double
     {
+      const double furthest_scale = 0.8;
+      const double closest_scale = 1.0;
+      if (!m_is_threedimensional || furthest == closest)
+      {
+        return closest_scale;
+      }
       return (closest_scale - (closest_scale - furthest_scale) *
                                   (std::sqrt(distances[i]) - closest) /
                                   (furthest - closest));
@@ -977,7 +984,8 @@ QVector3D GLScene::applyFog(const QVector3D& color, float fogAmount)
   return mix(clamp(fogAmount, 0.0f, 1.0f), color, m_clearColor);
 }
 
-void GLScene::drawCenteredText3D(QPainter& painter, const QString& text,
+void GLScene::drawCenteredText3D(QPainter& painter, 
+                                 const QString& text,
                                  const QVector3D& position,
                                  const QVector3D& color)
 {
@@ -1153,24 +1161,16 @@ void GLScene::renderNode(std::size_t i, bool transparent)
   if (transparent || alpha > 0.99f) // Check if these elements are visible and
                                     // opaque if transparency is disallowed.
   {
-    // Node stroke color: red when selected, black otherwise. Apply fogging
+    // Node border color: red when selected, blue when probabilistic, and black otherwise. Apply fogging
     // afterwards.
-    QVector3D line(0.6f * node.selected(), 0.0f, 0.0f);
+    QVector3D line(0.6f * node.selected(), 0.0f, 1.0f*node.is_probabilistic());
+
     QVector4D color = QVector4D(applyFog(line, fog), alpha);
     m_drawNodeBorder.push_back(node.pos(), color);
 
     color = QVector4D(applyFog(fill, fog), alpha);
-    if (node.is_probabilistic() && !mark)   // Marked and initial states are not drawn as black spheres. 
-    {
-      // Draw only the top section of the half sphere
-      // This gives the appearance of a thicker border
-      m_drawHalfSphere.push_back(node.pos(), color);
-    }
-    else
-    {
-      // Draw the sphere
-      m_drawSphere.push_back(node.pos(), color);
-    }
+    // Draw the sphere to fill the internal area of a node. 
+    m_drawSphere.push_back(node.pos(), color);
 
     if (m_graph.hasExploration() && !m_graph.isBridge(i) &&
         m_graph.initialState() != i)

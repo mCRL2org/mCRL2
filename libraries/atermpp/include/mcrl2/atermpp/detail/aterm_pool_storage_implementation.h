@@ -194,10 +194,6 @@ ATERM_POOL_STORAGE_TEMPLATES
 template<class ...Terms>
 bool ATERM_POOL_STORAGE::create_appl(aterm& term, const function_symbol& symbol, const Terms&... arguments)
 {
-  if (!(symbol.arity() == sizeof...(arguments)))
-  {
-std::cerr << "KRAK " << symbol.name() << "    " << symbol.arity() << "     " << sizeof...(arguments) << "\n";
-  }
   assert(symbol.arity() == sizeof...(arguments));
   if constexpr (detail::are_terms<Terms...>::value)
   {

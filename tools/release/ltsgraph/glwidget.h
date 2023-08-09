@@ -183,19 +183,19 @@ class GLWidget : public QOpenGLWidget
   /// Slots for various UI interactions.
   void setLimitTransLabels(int a)
   {
-    m_textLimitTransLabels = a;
+    // m_textLimitTransLabelsYYY = a;
     m_scene.m_textLimitTransLabels = a;
   }
 
   void setLimitStateLabels(int a)
   {
-    m_textLimitStateLabels = a;
+    // m_textLimitStateLabels = a;
     m_scene.m_textLimitStateLabels = a;
   }
 
   void setLimitStateNumbers(int a)
   {
-    m_textLimitStateNumbers = a;
+    // m_textLimitStateNumbers = a;
     m_scene.m_textLimitStateNumbers = a;
   }
 
@@ -273,15 +273,15 @@ class GLWidget : public QOpenGLWidget
 
   bool m_painting =
       false; ///< Indicates wheter painting node by the used is enabled.
-  bool m_is_threedimensional = false; ///< Indicates that the scene should be
-                                      ///< viewed in 3D, as opposed to 2D.
+  /* bool m_is_threedimensional = false; ///< Indicates that the scene should be
+                                      ///< viewed in 3D, as opposed to 2D. */
   bool m_has_new_frame = false;
   bool m_drawDebugGraphs = false; ///< Drawing debug graphs can be turned on/off
                                   ///< in advanced layout dialog
 
-  int m_textLimitTransLabels = 200;
+  /* int m_textLimitTransLabels = 200;
   int m_textLimitStateLabels = 200;
-  int m_textLimitStateNumbers = 200;
+  int m_textLimitStateNumbers = 200; */
   std::list<GLScene::Selection>
       m_selections; ///< A list of the objects under the cursor.
 
