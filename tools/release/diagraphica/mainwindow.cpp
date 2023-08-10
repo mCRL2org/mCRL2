@@ -22,7 +22,6 @@ MainWindow::MainWindow():
   m_examiner(0),
   m_arcDiagram(0),
   m_simulator(0),
-  m_timeSeries(0),
   m_diagramEditor(0),
   m_routingCluster(0),
   m_fileDialog("", this)
@@ -31,7 +30,6 @@ MainWindow::MainWindow():
 
   QActionGroup* groupMode = new QActionGroup(m_ui.menuMode);
   groupMode->addAction(m_ui.actionSimulationMode);
-  groupMode->addAction(m_ui.actionTraceMode);
   groupMode->addAction(m_ui.actionEditMode);
 
   m_ui.attributes->resizeColumnsToContents();
@@ -62,7 +60,6 @@ MainWindow::MainWindow():
   updateAttributeOperations();
 
   connect(m_ui.actionClusterNodes, SIGNAL(triggered()), this, SLOT(clusterNodes()));
-  connect(m_ui.actionViewTrace, SIGNAL(triggered()), this, SLOT(viewTrace()));
   connect(m_ui.actionDistributionPlot, SIGNAL(triggered()), this, SLOT(distributionPlot()));
   connect(m_ui.actionCorrelationPlot, SIGNAL(triggered()), this, SLOT(correlationPlot()));
   connect(m_ui.actionCombinationPlot, SIGNAL(triggered()), this, SLOT(combinationPlot()));
@@ -123,8 +120,7 @@ void MainWindow::open(QString filename)
       << m_diagramEditor
       << m_examiner
       << m_arcDiagram
-      << m_simulator
-      << m_timeSeries;
+      << m_simulator;
 
   for (int i = 0; i < oldWidgets.size(); ++i)
   {
@@ -177,16 +173,6 @@ void MainWindow::open(QString filename)
   connect(m_simulator, SIGNAL(hoverCluster(Cluster *, QList<Attribute *>)), this, SLOT(hoverCluster(Cluster *, QList<Attribute *>)));
   connect(m_simulator, SIGNAL(hoverCluster(Cluster *, QList<Attribute *>)), this, SLOT(updateArcDiagramMarks()));
 
-  m_timeSeries = new TimeSeries(m_ui.traceWidget, &m_settings, m_graph);
-  m_timeSeries->setDiagram(m_diagramEditor->diagram());
-  stretch(m_timeSeries);
-  connect(m_timeSeries, SIGNAL(routingCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)), this, SLOT(routeCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)));
-  connect(m_timeSeries, SIGNAL(hoverCluster(Cluster *, QList<Attribute *>)), this, SLOT(hoverCluster(Cluster *, QList<Attribute *>)));
-  connect(m_timeSeries, SIGNAL(hoverCluster(Cluster *, QList<Attribute *>)), this, SLOT(updateArcDiagramMarks()));
-  connect(m_timeSeries, SIGNAL(marksChanged()), this, SLOT(updateArcDiagramMarks()));
-  connect(m_timeSeries, SIGNAL(animationChanged()), this, SLOT(updateArcDiagramMarks()));
-
-  connect(m_arcDiagram, SIGNAL(clickedCluster(Cluster *)), m_timeSeries, SLOT(markItems(Cluster *)));
   connect(m_graph, SIGNAL(clusteringChanged()), this, SLOT(updateArcDiagramMarks()));
 
   m_ui.actionSave->setEnabled(true);
@@ -247,7 +233,6 @@ void MainWindow::updateAttributeOperations()
   int items = attributes.size();
 
   m_ui.actionClusterNodes->setEnabled(items > 0);
-  m_ui.actionViewTrace->setEnabled(items > 0 && traceMode());
   m_ui.actionDistributionPlot->setEnabled(items == 1);
   m_ui.actionCorrelationPlot->setEnabled(items == 2);
   m_ui.actionCombinationPlot->setEnabled(items > 0);
@@ -459,12 +444,6 @@ void MainWindow::modeSelected(QAction *action)
     m_ui.analysisStack->setCurrentWidget(m_ui.simulatorWidget);
     m_ui.examinerWidget->show();
   }
-  if (action == m_ui.actionTraceMode)
-  {
-    m_ui.mainViewStack->setCurrentWidget(m_ui.analysisPage);
-    m_ui.analysisStack->setCurrentWidget(m_ui.traceWidget);
-    m_ui.examinerWidget->show();
-  }
   if (action == m_ui.actionEditMode)
   {
     m_ui.mainViewStack->setCurrentWidget(m_ui.editPage);
@@ -492,17 +471,6 @@ void MainWindow::clusterNodes()
     attributeVector.push_back(attributes[i]);
   }
   m_graph->clustNodesOnAttr(attributeVector);
-}
-
-void MainWindow::viewTrace()
-{
-  QList<int> attributes = selectedAttributes();
-  std::vector<std::size_t> attributeVector;
-  for (int i = 0; i < attributes.size(); ++i)
-  {
-    attributeVector.push_back(attributes[i]);
-  }
-  m_timeSeries->initAttributes(attributeVector);
 }
 
 void MainWindow::distributionPlot()
@@ -657,16 +625,6 @@ void MainWindow::routeCluster(Cluster *cluster, QList<Cluster *> clusterSet, QLi
   connect(toSimulator, SIGNAL(triggered()), this, SLOT(toSimulator()));
   toSimulator->setEnabled(cluster != 0 && sender != m_simulator);
 
-  /*menu->addSeparator();
-
-  QAction *toTrace = menu->addAction("Mark this in trace");
-  connect(toTrace, SIGNAL(triggered()), this, SLOT(toTrace()));
-  toTrace->setEnabled(cluster != 0 && sender != m_timeSeries);
-
-  QAction *allToTrace = menu->addAction("Mark all in trace");
-  connect(allToTrace, SIGNAL(triggered()), this, SLOT(allToTrace()));
-  allToTrace->setEnabled(!clusterSet.isEmpty() && sender != m_timeSeries);*/
-
   menu->addSeparator();
 
   QAction *toExaminer = menu->addAction("Send this to examiner");
@@ -700,48 +658,6 @@ void MainWindow::updateArcDiagramMarks()
   if (simulationMode())
   {
     m_arcDiagram->markLeaf(m_simulator->SelectedClusterIndex(), m_simulator->SelectColor());
-  }
-  else if (traceMode())
-  {
-    QColor color;
-    std::set<std::size_t> indices;
-    std::size_t index;
-
-    m_timeSeries->getIdcsClstMarked(indices, color);
-    for (std::set<std::size_t>::iterator i = indices.begin(); i != indices.end(); ++i)
-    {
-      m_arcDiagram->markLeaf(*i, color);
-    }
-
-    m_timeSeries->getIdxMseOver(index, indices, color);
-    if (index != NON_EXISTING)
-    {
-      m_arcDiagram->markLeaf(index, color);
-      for (std::set<std::size_t>::iterator i = indices.begin(); i != indices.end(); ++i)
-      {
-        m_arcDiagram->markBundle(*i);
-      }
-    }
-
-    m_timeSeries->getCurrIdxDgrm(index, indices, color);
-    if (index != NON_EXISTING)
-    {
-      m_arcDiagram->markLeaf(index, color);
-      for (std::set<std::size_t>::iterator i = indices.begin(); i != indices.end(); ++i)
-      {
-        m_arcDiagram->markBundle(*i);
-      }
-    }
-
-    m_timeSeries->getAnimIdxDgrm(index, indices, color);
-    if (index != NON_EXISTING)
-    {
-      m_arcDiagram->markLeaf(index, color);
-      for (std::set<std::size_t>::iterator i = indices.begin(); i != indices.end(); ++i)
-      {
-        m_arcDiagram->markBundle(*i);
-      }
-    }
   }
 
   m_arcDiagram->markLeaf(m_examiner->selectedClusterIndex(), m_examiner->selectionColor());

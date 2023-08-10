@@ -318,19 +318,6 @@
               </property>
              </layout>
             </widget>
-            <widget class="QWidget" name="traceWidget">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <layout class="QVBoxLayout" name="verticalLayout_7">
-              <property name="margin">
-               <number>0</number>
-              </property>
-             </layout>
-            </widget>
            </widget>
           </widget>
          </item>
@@ -791,7 +778,6 @@
      <string>&amp;Mode</string>
     </property>
     <addaction name="actionSimulationMode"/>
-    <addaction name="actionTraceMode"/>
     <addaction name="actionEditMode"/>
    </widget>
    <widget class="QMenu" name="menuAttributes">
@@ -799,7 +785,6 @@
      <string>&amp;Attributes</string>
     </property>
     <addaction name="actionClusterNodes"/>
-    <addaction name="actionViewTrace"/>
     <addaction name="separator"/>
     <addaction name="actionDistributionPlot"/>
     <addaction name="actionCorrelationPlot"/>
@@ -913,29 +898,10 @@
     <string>&amp;Edit Mode</string>
    </property>
   </action>
-  <action name="actionTraceMode">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="visible">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>&amp;Trace Mode</string>
-   </property>
-  </action>
   <action name="actionClusterNodes">
    <property name="text">
     <string>Cluster Nodes</string>
    </property>
-  </action>
-  <action name="actionViewTrace">
-   <property name="text">
-    <string>View Trace</string>
-   </property>
-  <property name="visible">
-   <bool>false</bool>
-  </property>
   </action>
   <action name="actionDistributionPlot">
    <property name="text">

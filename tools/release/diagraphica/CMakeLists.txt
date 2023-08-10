@@ -30,7 +30,6 @@ add_mcrl2_tool(diagraphica
     settingsdialog.cpp
     shape.cpp
     simulator.cpp
-    timeseries.cpp
     utils.cpp
     visualizer.cpp
     visutils.cpp
