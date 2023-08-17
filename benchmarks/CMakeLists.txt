@@ -72,12 +72,19 @@ foreach(benchmark ${STATESPACE_BENCHMARKS} ${GAME_BENCHMARKS})
 
   # Benchmark statespace generation.
   add_tool_benchmark("${NAME}" lps2lts "${LPS_FILENAME}" "")
-  add_tool_benchmark("${NAME}_jittyc" lps2lts "${LPS_FILENAME}" "" "-rjittyc")
   add_tool_benchmark("${NAME}_parallel" lps2lts "${LPS_FILENAME}" "" "--threads=4")
-  add_tool_benchmark("${NAME}_jittyc_parallel" lps2lts "${LPS_FILENAME}" "" "-rjittyc" "--threads=4")
+
+  if(NOT WIN32)
+    add_tool_benchmark("${NAME}_jittyc" lps2lts "${LPS_FILENAME}" "" "-rjittyc")
+    add_tool_benchmark("${NAME}_jittyc_parallel" lps2lts "${LPS_FILENAME}" "" "-rjittyc" "--threads=4")
+  endif()
 
   # Benchmark statespace reduction techniques, the first target generates the statespaces.
-  add_tool_benchmark("${NAME}_exploration" lps2lts "${LPS_FILENAME}" "${LTS_FILENAME}" "-rjittyc")
+  if(NOT WIN32)
+    add_tool_benchmark("${NAME}_exploration" lps2lts "${LPS_FILENAME}" "${LTS_FILENAME}" "-rjittyc")
+  else()
+    add_tool_benchmark("${NAME}_exploration" lps2lts "${LPS_FILENAME}" "${LTS_FILENAME}")
+  endif()
 
   add_tool_benchmark("${NAME}_bisim" ltsconvert "${LTS_FILENAME}" "" "-ebisim")
   add_tool_benchmark("${NAME}_bisim-gjkw" ltsconvert "${LTS_FILENAME}" "" "-ebisim-gjkw")
