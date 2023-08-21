@@ -1,4 +1,11 @@
 ===============================================================================
+Changes between toolset releases 202307.1 and 202207.0:
+===============================================================================
+
+This is a minor release resolving some issues with ltsgraph and removing 
+ltsgraph_deprecated since it is not functional.
+
+===============================================================================
 Changes between toolset releases 202307.0 and 202206.1:
 ===============================================================================
 
@@ -15,7 +22,9 @@ List of other changes:
     have been significantly reduced in size.
   - A new graph layout algorithm has been implemented LTSGraph that is
     significantly faster and allows the visualization of state spaces with
-    thousands of states.
+    thousands of states. In some cases the new layout algorithm is less visibly
+    stable for small state spaces, so ltsgraph_deprecated remains available for 
+    the time being with the original behaviour.
   - New algorithms have been implemented in the lpsparunfold tool, which can
     unfold structured parameters into its components. The new algorithms obtain
     better results by default, but can also deal better with complexer situations.
