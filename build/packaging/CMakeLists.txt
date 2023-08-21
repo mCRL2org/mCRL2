@@ -51,10 +51,7 @@ if(APPLE)
           DESTINATION ${MCRL2_BUNDLE_PATH}/Contents/bin)
 
   if(MCRL2_ENABLE_GUI_TOOLS)
-    find_program(MACDEPLOYQT NAMES macdeployqt PATHS ${QT5_DIR}/../../../bin DOC "Path to macdeployqt executable (in the Qt binary directory)")
-    if (NOT MACDEPLOYQT)
-      message(FATAL_ERROR "Could not find macdeployqt; please add it to your PATH or specify the MACDEPLOYQT variable in CMake.")
-    endif()
+    find_program(MACDEPLOYQT NAMES macdeployqt PATHS ${Qt5_DIR}/../../../bin DOC "Path to macdeployqt executable (in the Qt binary directory)" REQUIRED)
     set(EXECUTABLES "")
     foreach(EXECUTABLE ${MCRL2_QT_APPS})
       set(EXECUTABLES "${EXECUTABLES} -executable=${MCRL2_RUNTIME_PATH}/${EXECUTABLE}")
@@ -65,7 +62,11 @@ if(APPLE)
         COMMAND ${MACDEPLOYQT} mCRL2.app ${EXECUTABLES}
         WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}
         OUTPUT_FILE /tmp/macdeployqt.log
-      )
+        RESULT_VARIABLE retval
+      )      
+      if(retval AND NOT retval EQUAL 0)
+        message(FATAL_ERROR \"Failed: ${retval}\")
+      endif()
     "
     COMPONENT Stable)
   endif()
@@ -198,13 +199,18 @@ endif()
 # -------
 
 if (WIN32)
+  find_program(WINDEPLOYQT NAMES "windeployqt" PATHS "${Qt5_DIR}/../../../bin/" DOC "Path to windeployqt executable (in the Qt binary directory)" REQUIRED)
   foreach(EXECUTABLE ${MCRL2_QT_APPS})
     install(CODE "
-      message(STATUS \"Executing windeployqt ${EXECUTABLE} in directory \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${MCRL2_RUNTIME_PATH}\")
+      message(STATUS \"Executing ${WINDEPLOYQT} ${EXECUTABLE} in directory \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${MCRL2_RUNTIME_PATH}\")
       execute_process(
-        COMMAND windeployqt --no-translations --no-system-d3d-compiler --no-quick-import ${EXECUTABLE}.exe
+        COMMAND ${WINDEPLOYQT} --no-translations --no-system-d3d-compiler --no-quick-import ${EXECUTABLE}.exe
         WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${MCRL2_RUNTIME_PATH}
+        RESULT_VARIABLE retval
       )
+      if(retval AND NOT retval EQUAL 0)
+        message(FATAL_ERROR \"Failed: ${retval}\")
+      endif()
     "
     COMPONENT Stable)
   endforeach()
