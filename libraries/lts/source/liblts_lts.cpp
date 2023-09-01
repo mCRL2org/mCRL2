@@ -263,7 +263,7 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
         throw mcrl2::runtime_error("Attempting to read a probabilistic LTS as a regular LTS.");
       }
     }
-    else if (term.function() == atermpp::detail::g_term_pool().as_list())
+    else if (term.type_is_list())
     {
       // Lists always represent state labels, only need to add the indices.
       lts.add_state(reinterpret_cast<const state_label_lts&>(term));
