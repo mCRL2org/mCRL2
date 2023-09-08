@@ -187,7 +187,7 @@ void function_symbol_pool::sweep()
     }
   }
 
-  std::size_t erased_blocks = m_symbol_set.get_allocator().consolidate();
+  std::size_t erased_blocks = 0; //m_symbol_set.get_allocator().consolidate();
 
   if (EnableGarbageCollectionMetrics)
   {
