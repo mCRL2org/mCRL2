@@ -14,6 +14,7 @@
 
 #include "mcrl2/utilities/unordered_map.h"
 #include "mcrl2/utilities/unused.h"
+#include "mcrl2/utilities/detail/atomic_wrapper.h"
 
 namespace mcrl2
 {
@@ -55,28 +56,6 @@ struct alignas (64) thread_control
 
 };
 
-// The purpose of this wrapper is to allow copying of atomic size_t's. 
-struct atomic_size_t_wrapper: public std::atomic<std::size_t>
-{
-  atomic_size_t_wrapper()
-   : std::atomic<std::size_t>(0)
-  {}
-
-  atomic_size_t_wrapper(const std::size_t t)
-   : std::atomic<std::size_t>(t)
-  {}
-
-  atomic_size_t_wrapper(const atomic_size_t_wrapper& other)
-    : std::atomic<std::size_t>(other.load())
-  {}
-
-  atomic_size_t_wrapper& operator=(const atomic_size_t_wrapper& other)
-  {
-    store(other.load());
-    return *this;
-  }
-};
-
 } // namespace detail
 
 /// \brief A set that assigns each element an unique index.
@@ -89,7 +68,7 @@ template<typename Key,
 class indexed_set
 {
 private:
-  std::vector<detail::atomic_size_t_wrapper> m_hashtable;
+  std::vector<detail::atomic_wrapper<std::size_t>> m_hashtable;
   KeyTable m_keys;
 
   /// \brief Mutex for the m_hashtable and m_keys data structures.
@@ -98,7 +77,7 @@ private:
   /// m_next_index indicates the next index that 
   //  has not yet been used. This allows to increase m_keys in 
   //  large steps, avoiding exclusive access too often.  
-  detail::atomic_size_t_wrapper m_next_index;
+  detail::atomic_wrapper<size_t> m_next_index;
 
   Hash m_hasher;
   Equals m_equals;

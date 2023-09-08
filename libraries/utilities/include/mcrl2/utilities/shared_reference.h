@@ -230,11 +230,9 @@ public:
   }
 
   /// \brief Swaps *this with the other shared reference.
-  /// \details Prevents the change of any reference count adaptations
   void swap(shared_reference<T>& other)
   {
-    using std::swap;
-    swap(m_reference, other.m_reference);
+    m_reference.swap(other.m_reference);
   }
 
   bool tagged() const noexcept

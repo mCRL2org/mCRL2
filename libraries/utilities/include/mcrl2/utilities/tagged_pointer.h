@@ -13,6 +13,9 @@
 #include <functional>
 #include <type_traits>
 
+#include "mcrl2/utilities/configuration.h"
+#include "mcrl2/utilities/detail/atomic_wrapper.h"
+
 namespace mcrl2::utilities
 {
 
@@ -24,6 +27,12 @@ T* tag(const T* p)
   return reinterpret_cast<T*>(reinterpret_cast<std::size_t>(p) | 1);
 }
 
+template<typename T>
+T* tag(const detail::atomic_wrapper<T*>& p)
+{
+  return reinterpret_cast<T*>(reinterpret_cast<std::size_t>(p.load(std::memory_order_relaxed)) | 1);
+}
+
 /// \returns The original pointer that can be deferenced.
 template<typename T>
 T* pointer(const T* p)
@@ -31,11 +40,23 @@ T* pointer(const T* p)
   return reinterpret_cast<T*>(reinterpret_cast<std::size_t>(p) & ~static_cast<std::size_t>(1));
 }
 
+template<typename T>
+T* pointer(const detail::atomic_wrapper<T*>& p)
+{
+  return reinterpret_cast<T*>(reinterpret_cast<std::size_t>(p.load(std::memory_order_relaxed)) & ~static_cast<std::size_t>(1));
+}
+
 /// \returns True iff this pointer has been tagged.
 template<typename T>
 bool tagged(const T* p)
 {
   return reinterpret_cast<std::size_t>(p) & 1;
+}
+
+template<typename T>
+bool tagged(const detail::atomic_wrapper<T*>& p)
+{
+  return reinterpret_cast<std::size_t>(p.load(std::memory_order_relaxed)) & 1;
 }
 
 /// \brief A pointer storage object that uses a least significant bit as a mark.
@@ -147,8 +168,16 @@ public:
     return pointer(m_pointer);
   }
 
+  void swap(tagged_pointer<T>& other)
+  {
+    // This is not atomic, so swaps are only allowed when no tags are being applied concurrently.
+    auto tmp = other.m_pointer;
+    other.m_pointer = m_pointer;
+    m_pointer = tmp;
+  }
+
 private:
-  mutable T* m_pointer = nullptr;
+  mutable std::conditional_t<detail::GlobalThreadSafe, detail::atomic_wrapper<T*>, T*> m_pointer = nullptr;
 };
 
 } // namespace mcrl2::utilities
