@@ -62,7 +62,7 @@ public:
   {
     if constexpr (ThreadSafe)
     {
-      m_reference_count.fetch_sub(1, std::memory_order_relaxed);
+      m_reference_count.fetch_sub(1, std::memory_order_release);
     }
     else
     {
