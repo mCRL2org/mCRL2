@@ -61,15 +61,16 @@ public:
     }
 
     /// \returns The next bucket in the linked list.
-    node_base* next() const noexcept { return m_next.load(std::memory_order_relaxed); }
+    node_base* next() const noexcept { return m_next.load(std::memory_order_acquire); }
 
     /// \returns True if and only there is a next bucket in the linked list.
     bool has_next() const noexcept { return m_next.load(std::memory_order_relaxed) != nullptr; }
 
     /// \brief Set the next pointer to the given next pointer.
     void set_next(node_base* next) noexcept { m_next.store(next, std::memory_order_relaxed); }
+
     /// \returns True iff next has been replaced by value iff next is equal to expected.
-    bool exchange(node_base*& expected, node_base* value) { return m_next.compare_exchange_weak(expected, value, std::memory_order_release, std::memory_order_relaxed); }
+    bool exchange(node_base*& expected, node_base* value) { return m_next.compare_exchange_weak(expected, value, std::memory_order_release, std::memory_order_acquire); }
   protected:
 
     /// \brief Pointer to the next node.
