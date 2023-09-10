@@ -55,6 +55,14 @@ if(MCRL2_ENABLE_ADDRESSSANITIZER)
   unset(CMAKE_REQUIRED_LIBRARIES)
 endif()
 
+if(MCRL2_ENABLE_THREADSANITIZER)
+  # We need to add the proper flag to the linker before we try:
+  set(CMAKE_REQUIRED_LIBRARIES "-fsanitize=thread")
+  try_add_c_flag(-fsanitize=thread)
+  try_add_c_flag(-fno-omit-frame-pointer)
+  unset(CMAKE_REQUIRED_LIBRARIES)
+endif()
+
 if(BUILD_SHARED_LIBS)
   try_add_c_flag(-fPIC)
 endif()
@@ -99,11 +107,11 @@ if(MCRL2_ENABLE_ADDRESSSANITIZER)
 endif()
 
 if(MCRL2_ENABLE_THREADSANITIZER)
-# We need to add the proper flag to the linker before we try:
-set(CMAKE_REQUIRED_LIBRARIES "-fsanitize=thread")
-try_add_cxx_flag(-fsanitize=thread)
-try_add_cxx_flag(-fno-omit-frame-pointer)
-unset(CMAKE_REQUIRED_LIBRARIES)
+  # We need to add the proper flag to the linker before we try:
+  set(CMAKE_REQUIRED_LIBRARIES "-fsanitize=thread")
+  try_add_cxx_flag(-fsanitize=thread)
+  try_add_cxx_flag(-fno-omit-frame-pointer)
+  unset(CMAKE_REQUIRED_LIBRARIES)
 endif()
 
 if(BUILD_SHARED_LIBS)
@@ -147,6 +155,6 @@ endif()
 
 
 if(MCRL2_ENABLE_THREADSANITIZER)
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fsanitize=thread")
-set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} -fsanitize=thread")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fsanitize=thread")
+  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} -fsanitize=thread")
 endif()
