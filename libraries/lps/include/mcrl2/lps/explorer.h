@@ -1074,7 +1074,7 @@ class explorer: public abortable
       if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_state_access.lock();
       while (number_of_active_processes>0 || !todo->empty())
       {
-        assert(thread_todo->empty());
+        assert(m_must_abort || thread_todo->empty());
           
         if (!todo->empty())
         {
@@ -1192,11 +1192,12 @@ class explorer: public abortable
         // not empty, to take up more work. 
         number_of_active_processes--;
         number_of_idle_processes++;
-        if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_state_access.lock();
+        if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1) m_exclusive_state_access.lock();
+        
         assert(thread_todo->empty() || m_must_abort);
         if (todo->empty())
         {
-          if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_state_access.unlock();
+          if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1) m_exclusive_state_access.unlock();
           std::this_thread::sleep_for(std::chrono::milliseconds(100));
           if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_state_access.lock();
         }
@@ -1491,6 +1492,7 @@ class explorer: public abortable
       {
         throw mcrl2::runtime_error("Dfs exploration is not thread safe.");
       }
+
       for (const transition& tr: out_edges(s0, regular_summands, confluent_summands, m_global_sigma, m_global_rewr, m_global_enumerator, m_global_id_generator))
       {
         if (m_must_abort)
@@ -1529,6 +1531,7 @@ class explorer: public abortable
         }
       }
       gray.erase(s0);
+      
       finish_state(0, s0); // TODO MAKE THREAD SAFE
     }
 

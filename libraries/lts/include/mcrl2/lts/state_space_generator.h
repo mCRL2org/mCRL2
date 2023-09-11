@@ -570,7 +570,8 @@ class progress_monitor
       static std::mutex exclusive_print_mutex;
       if (search_strategy == lps::es_breadth)
       {
-        if (number_of_threads == 1 && ++count == level_up) 
+        ++count;
+        if (number_of_threads == 1 && count == level_up) 
         {
           exclusive_print_mutex.lock();
           mCRL2log(log::debug) << "Number of states at level " << level << " is " << state_count - last_state_count << "\n";
@@ -584,6 +585,7 @@ class progress_monitor
         if (time(&new_log_time) > last_log_time.load(std::memory_order_relaxed))
         {
           exclusive_print_mutex.lock();
+
           last_log_time = new_log_time;
           std::size_t lvl_states = state_count - last_state_count;
           std::size_t lvl_transitions = transition_count - last_transition_count;
