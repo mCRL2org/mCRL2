@@ -90,7 +90,25 @@ struct shared_mutex_data
   std::vector<shared_mutex*> other;
 
   /// \brief Mutex for adding/removing shared_guards.
-  std::mutex mutex;
+  std::mutex mutex;  
+  
+  /// Adds a shared mutex to the data.
+  inline
+  void register_mutex(shared_mutex* shared_mutex)
+  {
+    std::lock_guard guard(mutex);
+    other.emplace_back(shared_mutex);
+  }
+  
+  // Removes a shared mutex from the data
+  inline void unregister_mutex(shared_mutex* shared_mutex) 
+  {
+    std::lock_guard guard(mutex);
+    auto it = std::find(other.begin(), other.end(), shared_mutex);
+    assert(it != other.end());
+
+    other.erase(it);
+  }
 };
 
 /// An implementation of a shared mutex (also called readers-write lock in the literature) based on
@@ -100,36 +118,52 @@ class shared_mutex
 public:
   shared_mutex()
     : m_shared(std::make_shared<shared_mutex_data>())
-  {}
+  {
+    m_shared->register_mutex(this);
+  }
 
   ~shared_mutex() 
   { 
-    unregister_mutex(this);
+    m_shared->unregister_mutex(this);
   }
 
-  shared_mutex(shared_mutex& other)
+  /// The copy/move constructor/assignment should not be called while any lock_guard or shared_guard is alive.
+  shared_mutex(const shared_mutex& other)
     : m_shared(other.m_shared)
   {
-    register_mutex(this);
+    m_shared->register_mutex(this);
   }
 
   shared_mutex(shared_mutex&& other)  
     : m_shared(other.m_shared)
   {
-    register_mutex(this);
-    unregister_mutex(&other);
+    m_shared->register_mutex(this);
+    m_shared->unregister_mutex(&other);
   }
 
   shared_mutex& operator=(const shared_mutex& other)
   {
-    register_mutex(this);
+    if (this != &other)
+    {
+      // Remove ourselves, and register into the other shared.
+      m_shared->unregister_mutex(this);
+
+      m_shared = other.m_shared;
+      m_shared->register_mutex(this);
+    }
     return *this;
   }
 
   shared_mutex& operator=(shared_mutex&& other)
   {
-    register_mutex(this);
-    unregister_mutex(&other);
+    if (this != &other)
+    {
+      m_shared->unregister_mutex(this);
+
+      m_shared = other.m_shared;
+      m_shared->register_mutex(this);
+      m_shared->unregister_mutex(&other);
+    }
     return *this;
   }
   
@@ -142,7 +176,7 @@ public:
       // Only one thread can halt everything.
       m_shared->mutex.lock();
 
-      assert(std::find(m_shared_mutexes.begin(), m_shared_mutexes.end(), shared_mutex) != m_shared_mutexes.end());
+      assert(std::find(m_shared->other.begin(), m_shared->other.end(), this) != m_shared->other.end());
 
       // Indicate that threads must wait.
       for (auto& mutex : m_shared->other)
@@ -261,24 +295,6 @@ private:
   void set_forbidden(bool value)
   {
     m_forbidden_flag.store(value);
-  }
-  
-  /// Adds a shared mutex to the pool.
-  inline
-  void register_mutex(shared_mutex* mutex)
-  {
-    std::lock_guard guard(m_shared->mutex);
-    m_shared->other.emplace_back(mutex);
-  }
-  
-  // Removes a shared mutex from the pool
-  inline void unregister_mutex(shared_mutex* mutex) 
-  {
-    std::lock_guard guard(m_shared->mutex);
-    auto it = std::find(m_shared->other.begin(), m_shared->other.end(), mutex);
-    assert(it != m_shared->other.end());
-
-    m_shared->other.erase(it);
   }
 
   /// \brief A boolean flag indicating whether this thread is working inside the global aterm pool.
