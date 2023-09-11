@@ -570,7 +570,7 @@ class progress_monitor
       static std::mutex exclusive_print_mutex;
       if (search_strategy == lps::es_breadth)
       {
-        if (++count == level_up) 
+        if (number_of_threads == 1 && ++count == level_up) 
         {
           exclusive_print_mutex.lock();
           mCRL2log(log::debug) << "Number of states at level " << level << " is " << state_count - last_state_count << "\n";
