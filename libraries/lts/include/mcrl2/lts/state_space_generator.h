@@ -765,7 +765,10 @@ struct state_space_generator
         // start_state
         [&](const std::size_t thread_index, const lps::state& s, std::size_t /* s_index */)
         {
-          source = &s;
+          if (options.number_of_threads == 1) {
+            source = &s;
+          }
+
           assert(thread_index<has_outgoing_transitions.size());
           has_outgoing_transitions[thread_index].m_bool = false;
           if (options.detect_nondeterminism)

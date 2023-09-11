@@ -486,7 +486,7 @@ class explorer: public abortable
     std::vector<explorer_summand> m_regular_summands;
     std::vector<explorer_summand> m_confluent_summands;
 
-    volatile bool m_must_abort = false;
+    volatile std::atomic<bool> m_must_abort = false;
 
     // N.B. The keys are stored in term_appl instead of data_expression_list for performance reasons.
     summand_cache_map global_cache;
@@ -1082,7 +1082,7 @@ class explorer: public abortable
           thread_todo->insert(current_state);
           if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_state_access.unlock();
 
-          while (!thread_todo->empty() && !m_must_abort)
+          while (!thread_todo->empty() && !m_must_abort.load(std::memory_order_relaxed))
           { 
             thread_todo->choose_element(current_state);
             std::size_t s_index = discovered.index(current_state,thread_index);
@@ -1282,7 +1282,7 @@ class explorer: public abortable
         for(std::size_t i=1; i<=number_of_threads; ++i)  // Threads are numbered from 1 to number_of_threads. Thread number 0 is reserved as 
                                                          // indicator for a sequential implementation. 
         {
-          std::thread tr ([&, i](){ 
+          threads.emplace_back([&, i](){ 
                                     generate_state_space_thread< StateType, SummandSequence,
                                                          DiscoverState, ExamineTransition,
                                                          StartState, FinishState,
@@ -1292,8 +1292,7 @@ class explorer: public abortable
                                         regular_summands,confluent_summands,discovered, discover_state,
                                         examine_transition, start_state, finish_state, 
                                         m_global_rewr.clone(), m_global_sigma); } );  // It is essential that the rewriter is cloned as
-                                                                                      // one rewriter cannot be used in parallel. 
-          threads.push_back(std::move(tr));
+                                                                                      // one rewriter cannot be used in parallel.
         }
 
         for(std::size_t i=1; i<=number_of_threads; ++i)
