@@ -36,11 +36,7 @@ set(STATESPACE_BENCHMARKS
 # These specifications use lists of lists to represent the board of a game. The
 # symbolic tools cannot deal with this single parameter and require additional
 # preprocessing of the LPS (using lpsparunfold).
-set(GAME_BENCHMARKS
-  "examples/games/clobber/clobber.mcrl2"
-  "examples/games/domineering/domineering.mcrl2"
-  "examples/games/othello/othello.mcrl2"
-  )
+set(GAME_BENCHMARKS "")
 
 # This target is used to generate all intermediate files required for benchmarks. 
 add_custom_target(benchmarks)
