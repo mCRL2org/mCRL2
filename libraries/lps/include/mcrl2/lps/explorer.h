@@ -1161,20 +1161,22 @@ class explorer: public abortable
                 }
               );
             }
+
             if (number_of_idle_processes>0 && thread_todo->size()>1)
             {
-              if (todo->size()<m_options.number_of_threads)  // Not thread_safe, but number is not so important.
-              // if (todo->size()<=number_of_idle_processes)  // Not thread_safe, but number is not so important.
+              if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_state_access.lock();
+
+              if (todo->size() < m_options.number_of_threads) 
               {
-                if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_state_access.lock();
                 // move 25% of the states of this thread to the global todo buffer.
                 for(std::size_t i=0; i<std::min(thread_todo->size()-1,1+(thread_todo->size()/4)); ++i)  
                 {
                   thread_todo->choose_element(current_state);
                   todo->insert(current_state);
                 }
-                if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_state_access.unlock();
               }
+
+              if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_state_access.unlock();
             }
 
             finish_state(thread_index, m_options.number_of_threads, current_state, s_index, thread_todo->size());
