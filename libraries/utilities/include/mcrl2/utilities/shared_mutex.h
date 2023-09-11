@@ -256,6 +256,7 @@ private:
         // Wait for the global lock.
         m_shared->mutex.lock();
         m_shared->mutex.unlock();
+        
         m_busy_flag = true;
       }
     }
@@ -288,7 +289,7 @@ private:
   inline
   void wait_for_busy() const
   {
-    while (m_busy_flag.load());
+    while (m_busy_flag.load()) { /* wait */ };
   }
 
   inline
