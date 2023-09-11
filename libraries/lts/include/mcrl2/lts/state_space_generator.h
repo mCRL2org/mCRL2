@@ -788,7 +788,7 @@ struct state_space_generator
           }
           if (!options.suppress_progress_messages)
           {
-            m_progress_monitor.finish_state(explorer.state_map().size(), todo_list_size, number_of_threads);
+            m_progress_monitor.finish_state(explorer.state_map().size(thread_index), todo_list_size, number_of_threads);
           }
         },
 
