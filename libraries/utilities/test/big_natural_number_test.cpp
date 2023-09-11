@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(cumulative_tests)
 }
 
 
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
+boost::unit_test::test_suite* init_unit_test_suite(int, char*)
 {
   return nullptr;
 }
