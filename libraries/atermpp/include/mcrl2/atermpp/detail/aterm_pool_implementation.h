@@ -100,7 +100,7 @@ void aterm_pool::collect(mcrl2::utilities::shared_mutex& mutex)
 void aterm_pool::register_thread_aterm_pool(thread_aterm_pool_interface& pool)
 {
 #ifdef MCRL2_THREAD_SAFE
-  std::lock_guard guard(m_mutex);
+  mcrl2::utilities::lock_guard guard = m_shared_mutex.lock();
   mCRL2log(mcrl2::log::debug) << "Registered thread_local aterm pool\n";
 #endif
 
@@ -110,7 +110,7 @@ void aterm_pool::register_thread_aterm_pool(thread_aterm_pool_interface& pool)
 void aterm_pool::remove_thread_aterm_pool(thread_aterm_pool_interface& pool)
 {
 #ifdef MCRL2_THREAD_SAFE
-  std::lock_guard guard(m_mutex);
+  mcrl2::utilities::lock_guard guard = m_shared_mutex.lock();
   mCRL2log(mcrl2::log::debug) << "Removed thread_local aterm pool\n";
 #endif
 
