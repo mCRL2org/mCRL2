@@ -78,7 +78,7 @@ void DocumentManager::closeDocument(int index)
 void DocumentManager::updateTitle()
 {
   DocumentWidget* document = currentDocument();
-  if(document->getFileName() != NULL)
+  if(!document->getFileName().isNull())
   {
     QFileInfo info(document->getFileName());
     setTabText(currentIndex(), (document->isModified() ? "*" : "") + info.completeBaseName());

@@ -9,6 +9,8 @@
 /// \file ./visualizer.cpp
 
 #include <iostream> // only temporary for std::clog
+#include <QOpenGLFramebufferObject>
+
 #include <QMessageBox>
 #include "visualizer.h"
 
@@ -16,7 +18,7 @@ Visualizer::Visualizer(
   QWidget *parent,
   Graph *graph_)
   : QOpenGLWidget(parent),
-    m_lastMouseEvent(QEvent::None, QPoint(0,0), Qt::NoButton, Qt::NoButton, Qt::NoModifier),
+    m_lastMouseEvent(std::make_unique<QMouseEvent>(QEvent::None, QPoint(0,0), Qt::NoButton, Qt::NoButton, Qt::NoModifier)),
     m_graph(graph_)
 {
   setMinimumSize(10,10);
@@ -147,14 +149,15 @@ void Visualizer::handleMouseEvent(QMouseEvent* e)
   if (!m_mouseDrag && e->buttons() != Qt::NoButton && e->type() == QEvent::MouseMove)
   {
     m_mouseDrag = true;
-    m_mouseDragStart = m_lastMouseEvent.pos();
+    m_mouseDragStart = m_lastMouseEvent->pos();
   }
   if (m_mouseDrag && e->buttons() == Qt::NoButton)
   {
     m_mouseDrag = false;
     m_mouseDragReleased = true;
   }
-  m_lastMouseEvent = QMouseEvent(e->type(), e->pos(), e->globalPos(), e->button(), e->buttons(), e->modifiers());
+
+  m_lastMouseEvent = std::make_unique<QMouseEvent>(e->type(), e->pos(), e->globalPos(), e->button(), e->buttons(), e->modifiers());
 }
 
 void Visualizer::handleKeyEvent(QKeyEvent* e)
@@ -181,7 +184,7 @@ void Visualizer::clear()
 
 void Visualizer::initMouse()
 {
-  m_lastMouseEvent = QMouseEvent(QEvent::None, QPoint(0,0), Qt::NoButton, Qt::NoButton, Qt::NoModifier);
+  m_lastMouseEvent = std::make_unique<QMouseEvent>(QEvent::None, QPoint(0,0), Qt::NoButton, Qt::NoButton, Qt::NoModifier);
   m_mouseDrag = false;
   m_mouseDragStart = QPoint(0,0);
 }
@@ -208,8 +211,8 @@ void Visualizer::startSelectMode(
   glPushMatrix();
   glLoadIdentity();
 
-  gluPickMatrix(m_lastMouseEvent.x()*devicePixelRatio(), // center x
-          viewport[3] - m_lastMouseEvent.y()*devicePixelRatio(), // center y
+  gluPickMatrix(m_lastMouseEvent->x()*devicePixelRatio(), // center x
+          viewport[3] - m_lastMouseEvent->y()*devicePixelRatio(), // center y
           pickWth,    // picking width
           pickHgt,    // picking height
           viewport);

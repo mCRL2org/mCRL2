@@ -54,15 +54,15 @@ class Visualizer : public QOpenGLWidget
     virtual void handleMouseLeaveEvent() { }
     virtual void handleKeyEvent(QKeyEvent* e);
 
-    virtual void enterEvent(QEvent *event) { handleMouseEnterEvent(); QOpenGLWidget::enterEvent(event); }
-    virtual void leaveEvent(QEvent *event) { handleMouseLeaveEvent(); QOpenGLWidget::leaveEvent(event); }
-    virtual void keyPressEvent(QKeyEvent *event) { handleKeyEvent(event); QOpenGLWidget::keyPressEvent(event); }
-    virtual void keyReleaseEvent(QKeyEvent *event) { handleKeyEvent(event); QOpenGLWidget::keyReleaseEvent(event); }
-    virtual void wheelEvent(QWheelEvent *event) { handleWheelEvent(event); QOpenGLWidget::wheelEvent(event); }
-    virtual void mouseMoveEvent(QMouseEvent *event) { handleMouseEvent(event); QOpenGLWidget::mouseMoveEvent(event); }
-    virtual void mousePressEvent(QMouseEvent *event) { handleMouseEvent(event); QOpenGLWidget::mousePressEvent(event); }
-    virtual void mouseReleaseEvent(QMouseEvent *event) { handleMouseEvent(event); QOpenGLWidget::mouseReleaseEvent(event); }
-    virtual void resizeEvent(QResizeEvent *event) { handleSizeEvent(); QOpenGLWidget::resizeEvent(event); }
+    virtual void enterEvent(QEnterEvent *event) override { handleMouseEnterEvent(); QOpenGLWidget::enterEvent(event); }
+    virtual void leaveEvent(QEvent *event) override { handleMouseLeaveEvent(); QOpenGLWidget::leaveEvent(event); }
+    virtual void keyPressEvent(QKeyEvent *event) override { handleKeyEvent(event); QOpenGLWidget::keyPressEvent(event); }
+    virtual void keyReleaseEvent(QKeyEvent *event) override { handleKeyEvent(event); QOpenGLWidget::keyReleaseEvent(event); }
+    virtual void wheelEvent(QWheelEvent *event) override { handleWheelEvent(event); QOpenGLWidget::wheelEvent(event); }
+    virtual void mouseMoveEvent(QMouseEvent *event) override { handleMouseEvent(event); QOpenGLWidget::mouseMoveEvent(event); }
+    virtual void mousePressEvent(QMouseEvent *event) override { handleMouseEvent(event); QOpenGLWidget::mousePressEvent(event); }
+    virtual void mouseReleaseEvent(QMouseEvent *event) override { handleMouseEvent(event); QOpenGLWidget::mouseReleaseEvent(event); }
+    virtual void resizeEvent(QResizeEvent *event) override { handleSizeEvent(); QOpenGLWidget::resizeEvent(event); }
 
     QSize sizeHint() const { return QSize(200,200); } // Reimplement to change preferred size
   public slots:
@@ -96,7 +96,7 @@ class Visualizer : public QOpenGLWidget
 
     bool m_inSelectMode;
 
-    QMouseEvent m_lastMouseEvent;   // The latest received event
+    std::unique_ptr<QMouseEvent> m_lastMouseEvent;   // The latest received event
     bool m_mouseDrag;               // The mouse is being dragged
     bool m_mouseDragReleased;       // The cursor was released after dragging
     QPoint m_mouseDragStart;        // The position where the drag started, only valid if (m_mouseDrag or m_mouseDragReleased)

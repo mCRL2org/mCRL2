@@ -9,6 +9,7 @@
 
 #include <QMessageBox>
 #include <QSettings>
+#include <QRegularExpression.h>
 
 #include "mainwindow.h"
 
@@ -479,11 +480,12 @@ void MainWindow::findErrorPosition(QString err)
   QStringList lines = err.split("\n");
   for (int i = 0; i < lines.size(); i++)
   {
-    QRegExp rxlen("Line (\\d+), column (\\d+): syntax error");
-    int pos = rxlen.indexIn(lines[i]);
-    if (pos > -1) {
-      m_lastErrorPosition.setX(rxlen.cap(1).toInt());
-      m_lastErrorPosition.setY(rxlen.cap(2).toInt());
+    QRegularExpression rxlen("Line (\\d+), column (\\d+): syntax error");
+    QRegularExpressionMatch match = rxlen.match(lines[i]);
+
+    if (match.isValid()) {
+      m_lastErrorPosition.setX(match.captured(1).toInt());
+      m_lastErrorPosition.setY(match.captured(2).toInt());
     }
   }
 }

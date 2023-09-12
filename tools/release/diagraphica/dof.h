@@ -35,7 +35,7 @@ class DOF
     void setAttribute(Attribute* attribute) { m_attribute = attribute; }
 
     // -- get functions ---------------------------------------------
-    int index()             { return m_index; }
+    int index()             { return static_cast<int>(m_index); }
     QString label()         { return m_label; }
 
     double min()            { return m_values.first(); }
