@@ -1026,8 +1026,7 @@ void GLScene::renderEdge(std::size_t i)
   {
     // Apply the fog color.
     // m_global_shader.setColor();
-    QVector4D color = applyFog(arcColor, fog);
-    color.setW(1);
+    QVector4D color = QVector4D(applyFog(arcColor, fog), 1.0f);
 
     m_drawArrowColors.push_back(color);
     m_drawArrowOffsets.push_back(tip);

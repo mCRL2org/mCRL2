@@ -5,7 +5,7 @@
 
 #include <QString>
 #include <QStringList>
-#include <QRegExp>
+#include <QRegularExpression>
 
 using namespace mcrl2::log;
 
@@ -16,8 +16,8 @@ namespace detail
 
 inline bool contains_keyword_init(const std::string& input)
 {
-  QRegExp rx("\\binit\\b", Qt::CaseInsensitive);
-  return rx.indexIn(QString::fromStdString(input)) != -1;
+  QRegularExpression rx("\\binit\\b", QRegularExpression::PatternOption::CaseInsensitiveOption);
+  return rx.match(QString::fromStdString(input)).isValid();
 }
 
 } // end namespace detail
