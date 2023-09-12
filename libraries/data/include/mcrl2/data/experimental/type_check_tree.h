@@ -203,19 +203,19 @@ constraint_ptr make_and_constraint(const std::vector<constraint_ptr>& alternativ
 constraint_ptr make_or_constraint(const std::vector<constraint_ptr>& alternatives);
 constraint_ptr make_is_equal_to_constraint(const sort_expression& s1, const sort_expression& s2, int cost = 0);
 
-struct true_constraint: public type_check_constraint
+struct true_constraint final: public type_check_constraint
 {
   true_constraint(int cost = 0)
     : type_check_constraint(cost)
   {}
 
-  std::string print() const
+  std::string print() const override
   {
     return "true";
   }
 };
 
-struct false_constraint: public type_check_constraint
+struct false_constraint final: public type_check_constraint
 {
   std::string message;
 
@@ -223,7 +223,7 @@ struct false_constraint: public type_check_constraint
     : message(message_)
   {}
 
-  std::string print() const
+  std::string print() const override
   {
     return "false(" + message + ")";
   }
@@ -242,7 +242,7 @@ constraint_ptr make_true_constraint(int cost = 0)
 }
 
 // The sort of the corresponding data expression should be equal to 'sort'.
-struct is_element_of_constraint: public type_check_constraint
+struct is_element_of_constraint final: public type_check_constraint
 {
   untyped_sort_variable s;
   std::vector<sort_expression> sorts;
@@ -251,7 +251,7 @@ struct is_element_of_constraint: public type_check_constraint
     : type_check_constraint(cost), s(s_), sorts(sorts_)
   {}
 
-  std::string print() const
+  std::string print() const override
   {
     if (sorts.size() == 1)
     {
@@ -316,7 +316,7 @@ constraint_ptr make_is_element_of_constraint(const sort_expression& s, const std
 }
 
 // The sort of the corresponding data expression should be equal to 'sort'.
-struct is_equal_to_constraint: public type_check_constraint
+struct is_equal_to_constraint final: public type_check_constraint
 {
   untyped_sort_variable s1;
   sort_expression s2;
@@ -325,7 +325,7 @@ struct is_equal_to_constraint: public type_check_constraint
     : type_check_constraint(cost), s1(s1_), s2(s2_)
   {}
 
-  std::string print() const
+  std::string print() const override
   {
     return "is_equal_to(" + data::pp(s1) + ", " + data::pp(s2) + ")";
   }
@@ -356,7 +356,7 @@ constraint_ptr make_is_equal_to_constraint(const sort_expression& s1,
 }
 
 // The sort variable s1 should be a subsort of s2.
-struct subsort_constraint: public type_check_constraint
+struct subsort_constraint final: public type_check_constraint
 {
   sort_expression s1;
   sort_expression s2;
@@ -365,7 +365,7 @@ struct subsort_constraint: public type_check_constraint
     : type_check_constraint(cost), s1(s1_), s2(s2_)
   {}
 
-  std::string print() const
+  std::string print() const override
   {
     return "subsort(" + data::pp(s1) + ", " + data::pp(s2) + ")";
   }
@@ -488,7 +488,7 @@ std::vector<constraint_ptr> join_or_is_element_of_constraints(const std::vector<
   return result;
 }
 
-struct or_constraint: public type_check_constraint
+struct or_constraint final: public type_check_constraint
 {
   std::vector<constraint_ptr> alternatives;
 
@@ -538,7 +538,7 @@ constraint_ptr make_or_constraint(const std::vector<constraint_ptr>& alternative
   return constraint_ptr(new or_constraint(v));
 }
 
-struct and_constraint: public type_check_constraint
+struct and_constraint final: public type_check_constraint
 {
   std::vector<constraint_ptr> alternatives;
 
@@ -546,7 +546,7 @@ struct and_constraint: public type_check_constraint
     : alternatives(alternatives_)
   {}
 
-  std::string print() const
+  std::string print() const override
   {
     return print_node_vector("and", alternatives);
   }
@@ -600,6 +600,8 @@ struct type_check_node
     sort = context.create_sort_variable();
   }
 
+  virtual ~type_check_node() {};
+
   // Adds a value to the 'sort' attribute
   // Sets the constraints that apply to this node to 'constraint'
   virtual void set_constraint(type_check_context& /* context */)
@@ -629,7 +631,7 @@ struct type_check_node
   virtual std::string print() const = 0;
 };
 
-struct id_node: public type_check_node
+struct id_node final: public type_check_node
 {
   std::string value;
 
@@ -637,7 +639,7 @@ struct id_node: public type_check_node
     : type_check_node(context, {}), value(value_)
   {}
 
-  void set_constraint(type_check_context& context)
+  void set_constraint(type_check_context& context) override
   {
     std::vector<constraint_ptr> alternatives;
 
@@ -672,13 +674,13 @@ struct id_node: public type_check_node
     }
   }
 
-  std::string print() const
+  std::string print() const override
   {
     return "id(" + value + ")";
   }
 };
 
-struct number_node: public type_check_node
+struct number_node final: public type_check_node
 {
   std::string value;
 
@@ -686,7 +688,7 @@ struct number_node: public type_check_node
     : type_check_node(context, {}), value(value_)
   {}
 
-  void set_constraint(type_check_context& /* context */)
+  void set_constraint(type_check_context& /* context */) override
   {
     if (detail::is_pos(value))
     {
@@ -702,7 +704,7 @@ struct number_node: public type_check_node
     }
   }
 
-  std::string print() const
+  std::string print() const override
   {
     return "number(" + value + ")";
   }
@@ -716,7 +718,9 @@ struct constant_node: public type_check_node
     : type_check_node(context, {}), name(name_)
   {}
 
-  void set_constraint(type_check_context& context)
+  virtual ~constant_node() {}
+
+  void set_constraint(type_check_context& context) override
   {
     std::pair<sort_expression_list, sort_expression_list> p = context.find_matching_constants(name);
     std::vector<constraint_ptr> alternatives;
@@ -728,72 +732,72 @@ struct constant_node: public type_check_node
     set_children_constraints(context);
   }
 
-  std::string print() const
+  std::string print() const override
   {
     return "constant(" + name + ")";
   }
 };
 
-struct true_node: public constant_node
+struct true_node final: public constant_node
 {
   true_node(type_check_context& context)
     : constant_node(context, "true")
   { }
 };
 
-struct false_node: public constant_node
+struct false_node final: public constant_node
 {
   false_node(type_check_context& context)
     : constant_node(context, "false")
   { }
 };
 
-struct empty_list_node: public constant_node
+struct empty_list_node final: public constant_node
 {
   empty_list_node(type_check_context& context)
     : constant_node(context, "[]")
   { }
 
-  void set_constraint(type_check_context& context)
+  void set_constraint(type_check_context& context) override
   {
     auto element_sort = context.create_sort_variable();
     constraint = make_is_equal_to_constraint(sort, sort_list::list(element_sort));
   }
 };
 
-struct empty_set_node: public constant_node
+struct empty_set_node final: public constant_node
 {
   empty_set_node(type_check_context& context)
     : constant_node(context, "{}")
   { }
 
-  void set_constraint(type_check_context& context)
+  void set_constraint(type_check_context& context) override
   {
     auto element_sort = context.create_sort_variable();
     constraint = make_is_equal_to_constraint(sort, sort_set::set_(element_sort));
   }
 };
 
-struct empty_bag_node: public constant_node
+struct empty_bag_node final: public constant_node
 {
   empty_bag_node(type_check_context& context)
     : constant_node(context, "{:}")
   { }
 
-  void set_constraint(type_check_context& context)
+  void set_constraint(type_check_context& context) override
   {
     auto element_sort = context.create_sort_variable();
     constraint = make_is_equal_to_constraint(sort, sort_bag::bag(element_sort));
   }
 };
 
-struct list_enumeration_node: public type_check_node
+struct list_enumeration_node final: public type_check_node
 {
   list_enumeration_node(type_check_context& context, const std::vector<type_check_node_ptr>& children)
     : type_check_node(context, children)
   {}
 
-  void set_constraint(type_check_context& context)
+  void set_constraint(type_check_context& context) override
   {
     auto element_sort = context.create_sort_variable();
     set_children_constraints(context);
@@ -807,19 +811,19 @@ struct list_enumeration_node: public type_check_node
     constraint = make_and_constraint(alternatives);
   }
 
-  std::string print() const
+  std::string print() const override
   {
     return print_node_vector("list_enumeration", children);
   }
 };
 
-struct bag_enumeration_node: public type_check_node
+struct bag_enumeration_node final: public type_check_node
 {
   bag_enumeration_node(type_check_context& context, const std::vector<type_check_node_ptr>& children)
     : type_check_node(context, children)
   {}
 
-  void set_constraint(type_check_context& context)
+  void set_constraint(type_check_context& context) override
   {
     auto element_sort = context.create_sort_variable();
     set_children_constraints(context);
@@ -840,19 +844,19 @@ struct bag_enumeration_node: public type_check_node
     constraint = make_and_constraint(alternatives);
   }
 
-  std::string print() const
+  std::string print() const override
   {
     return print_node_vector("bag_enumeration", children);
   }
 };
 
-struct set_enumeration_node: public type_check_node
+struct set_enumeration_node final: public type_check_node
 {
   set_enumeration_node(type_check_context& context, const std::vector<type_check_node_ptr>& children)
     : type_check_node(context, children)
   {}
 
-  void set_constraint(type_check_context& context)
+  void set_constraint(type_check_context& context) override
   {
     auto element_sort = context.create_sort_variable();
     set_children_constraints(context);
@@ -866,13 +870,13 @@ struct set_enumeration_node: public type_check_node
     constraint = make_and_constraint(alternatives);
   }
 
-  std::string print() const
+  std::string print() const override
   {
     return print_node_vector("set_enumeration", children);
   }
 };
 
-struct bag_or_set_enumeration_node: public type_check_node
+struct bag_or_set_enumeration_node final: public type_check_node
 {
   variable v;
 
@@ -882,7 +886,7 @@ struct bag_or_set_enumeration_node: public type_check_node
     children.push_back(x);
   }
 
-  void set_constraint(type_check_context& context)
+  void set_constraint(type_check_context& context) override
   {
     context.add_context_variable(v);
     set_children_constraints(context);
@@ -900,13 +904,13 @@ struct bag_or_set_enumeration_node: public type_check_node
     context.remove_context_variable(v);
   }
 
-  std::string print() const
+  std::string print() const override
   {
     return print_node_vector("bag_or_set_enumeration", children);
   }
 };
 
-struct function_update_node: public type_check_node
+struct function_update_node final: public type_check_node
 {
   function_update_node(type_check_context& context, type_check_node_ptr x1, type_check_node_ptr x2, type_check_node_ptr x3)
     : type_check_node(context, {})
@@ -916,13 +920,13 @@ struct function_update_node: public type_check_node
     children.push_back(x3);
   }
 
-  std::string print() const
+  std::string print() const override
   {
     return print_node_vector("function_update", children);
   }
 };
 
-struct application_node: public type_check_node
+struct application_node final: public type_check_node
 {
   std::size_t arity;
 
@@ -936,7 +940,7 @@ struct application_node: public type_check_node
     }
   }
 
-  void set_constraint(type_check_context& context)
+  void set_constraint(type_check_context& context) override
   {
     set_children_constraints(context);
 
@@ -960,7 +964,7 @@ struct application_node: public type_check_node
     constraint = make_and_constraint(alternatives);
   }
 
-  std::string print() const
+  std::string print() const override
   {
     return print_node_vector("application", children);
   }
@@ -974,7 +978,9 @@ struct unary_operator_node: public type_check_node
     : type_check_node(context, { arg }), name(name_)
   {}
 
-  void set_constraint(type_check_context& context)
+  virtual ~unary_operator_node() {}
+
+  void set_constraint(type_check_context& context) override
   {
     set_children_constraints(context);
 
@@ -991,7 +997,7 @@ struct unary_operator_node: public type_check_node
     constraint = make_or_constraint(alternatives);
   }
 
-  std::string print() const
+  std::string print() const override
   {
     std::ostringstream out;
     out << "unary_operator(" << name << ", " << children.front()->print() << ")";
@@ -999,7 +1005,7 @@ struct unary_operator_node: public type_check_node
   }
 };
 
-struct forall_node: public type_check_node
+struct forall_node final: public type_check_node
 {
   variable_list variables;
 
@@ -1007,7 +1013,7 @@ struct forall_node: public type_check_node
     : type_check_node(context, { arg }), variables(variables_)
   {}
 
-  void set_constraint(type_check_context& context)
+  void set_constraint(type_check_context& context) override
   {
     context.add_context_variables(variables);
     set_children_constraints(context);
@@ -1016,7 +1022,7 @@ struct forall_node: public type_check_node
     context.remove_context_variables(variables);
   }
 
-  std::string print() const
+  std::string print() const override
   {
     std::ostringstream out;
     out << "forall(" << data::pp(variables) << ". " << children.front()->print() << ")";
@@ -1024,7 +1030,7 @@ struct forall_node: public type_check_node
   }
 };
 
-struct exists_node: public type_check_node
+struct exists_node final: public type_check_node
 {
   variable_list variables;
 
@@ -1032,7 +1038,7 @@ struct exists_node: public type_check_node
     : type_check_node(context, { arg }), variables(variables_)
   {}
 
-  void set_constraint(type_check_context& context)
+  void set_constraint(type_check_context& context) override
   {
     context.add_context_variables(variables);
     set_children_constraints(context);
@@ -1041,7 +1047,7 @@ struct exists_node: public type_check_node
     context.remove_context_variables(variables);
   }
 
-  std::string print() const
+  std::string print() const override
   {
     std::ostringstream out;
     out << "exists(" << data::pp(variables) << ". " << children.front()->print() << ")";
@@ -1049,7 +1055,7 @@ struct exists_node: public type_check_node
   }
 };
 
-struct lambda_node: public unary_operator_node
+struct lambda_node final: public unary_operator_node
 {
   variable_list variables;
 
@@ -1057,7 +1063,7 @@ struct lambda_node: public unary_operator_node
     : unary_operator_node(context, "lambda", arg), variables(variables_)
   {}
 
-  void set_constraint(type_check_context& context)
+  void set_constraint(type_check_context& context) override
   {
     context.add_context_variables(variables);
     set_children_constraints(context);
@@ -1066,7 +1072,7 @@ struct lambda_node: public unary_operator_node
     context.remove_context_variables(variables);
   }
 
-  std::string print() const
+  std::string print() const override
   {
     std::ostringstream out;
     out << "lambda(" << data::pp(variables) << ". " << children.front()->print() << ")";
@@ -1074,7 +1080,7 @@ struct lambda_node: public unary_operator_node
   }
 };
 
-struct binary_operator_node: public type_check_node
+struct binary_operator_node final: public type_check_node
 {
   std::string name;
 
@@ -1082,7 +1088,7 @@ struct binary_operator_node: public type_check_node
     : type_check_node(context, { left, right }), name(name_)
   {}
 
-  void set_constraint(type_check_context& context)
+  void set_constraint(type_check_context& context) override
   {
     set_children_constraints(context);
 
@@ -1103,7 +1109,7 @@ struct binary_operator_node: public type_check_node
     constraint = make_or_constraint(alternatives);
   }
 
-  std::string print() const
+  std::string print() const override
   {
     std::ostringstream out;
     out << "binary_operator(" << name << ", " << children[0]->print() << ", " << children[1]->print() << ")";
@@ -1111,7 +1117,7 @@ struct binary_operator_node: public type_check_node
   }
 };
 
-struct where_clause_node: public type_check_node
+struct where_clause_node final: public type_check_node
 {
   std::vector<variable> variables;
 
@@ -1126,7 +1132,7 @@ struct where_clause_node: public type_check_node
     }
   }
 
-  void set_constraint(type_check_context& context)
+  void set_constraint(type_check_context& context) override
   {
     variable_list v(variables.begin(), variables.end());
     context.add_context_variables(v);
@@ -1144,7 +1150,7 @@ struct where_clause_node: public type_check_node
     constraint = make_and_constraint(constraints);
   }
 
-  std::string print() const
+  std::string print() const override
   {
     std::ostringstream out;
     return print_node_vector("where_clause", children);
@@ -1152,7 +1158,7 @@ struct where_clause_node: public type_check_node
   }
 };
 
-struct type_check_tree_generator: public detail::data_expression_actions
+struct type_check_tree_generator final: public detail::data_expression_actions
 {
   type_check_context& context;
 
