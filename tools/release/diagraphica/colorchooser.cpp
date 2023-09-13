@@ -82,7 +82,7 @@ void ColorChooser::handleMouseEvent(QMouseEvent* e)
       {
         if (m_dragIdx == NON_EXISTING)
         {
-          QPointF pos = worldCoordinate(e->localPos());
+          QPointF pos = worldCoordinate(e->position());
 
           double xCur = pos.x() / (0.5 * worldSize().width());
           double yCur = pos.y() / (0.5 * worldSize().height());
@@ -347,17 +347,17 @@ void ColorChooser::drawPoints(const bool& inSelectMode)
 
 void ColorChooser::handleHits(const std::vector< int > &ids)
 {
-  if (m_lastMouseEvent.type() == QEvent::MouseButtonPress)
+  if (m_lastMouseEvent->type() == QEvent::MouseButtonPress)
   {
     int id = ids[0];
-    if (m_lastMouseEvent.button() == Qt::LeftButton)
+    if (m_lastMouseEvent->button() == Qt::LeftButton)
     {
       if (0 <= id && id < m_yCoordinates->size())
       {
         m_dragIdx = id;
       }
     }
-    else if (m_lastMouseEvent.button() == Qt::RightButton)
+    else if (m_lastMouseEvent->button() == Qt::RightButton)
     {
       if (0 <= id && id < m_yCoordinates->size() && m_yCoordinates->size() > 2)
       {
@@ -374,7 +374,7 @@ void ColorChooser::handleDrag()
   if (m_dragIdx != NON_EXISTING && m_dragIdx < (std::size_t)m_yCoordinates->size())
   {
     QSizeF size = worldSize();
-    QPointF pos = worldCoordinate(m_lastMouseEvent.localPos());
+    QPointF pos = worldCoordinate(m_lastMouseEvent->position());
 
     double xCur = pos.x()/(0.5*size.width());
     double yCur = pos.y()/(0.5*size.height());
