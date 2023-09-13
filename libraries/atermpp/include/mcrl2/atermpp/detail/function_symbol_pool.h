@@ -71,7 +71,9 @@ private:
     _function_symbol,
     function_symbol_hasher,
     function_symbol_equals,
-    std::allocator<_function_symbol>,
+    typename std::conditional_t<EnableBlockAllocator, 
+      mcrl2::utilities::block_allocator<_function_symbol, 1024, mcrl2::utilities::detail::GlobalThreadSafe>, 
+      std::allocator<_function_symbol>>,
     mcrl2::utilities::detail::GlobalThreadSafe,
     false>;
 
