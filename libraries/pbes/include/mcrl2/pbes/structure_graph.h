@@ -109,7 +109,7 @@ class structure_graph
       }
     };
 
-    using vertex_vector = atermpp::vector<vertex, std::allocator<vertex>, mcrl2::utilities::detail::GlobalThreadSafe>;
+    using vertex_vector = atermpp::vector<vertex, std::allocator<atermpp::detail::reference_aterm<vertex>>, mcrl2::utilities::detail::GlobalThreadSafe>;
 
   protected:
     vertex_vector m_vertices;
