@@ -24,14 +24,15 @@ int MovableTableWidget::sizeHintForColumn(int column) const
 {
   ensurePolished();
 
-  QStyleOptionViewItem option = viewOptions();
+  QStyleOptionViewItem option;
+  initViewItemOption(&option);
 
   int hint = 0;
   QModelIndex index;
   for (int row = 0; row <= rowCount(); ++row) {
 
       index = indexFromItem(item(row, column));
-      hint = qMax(hint, itemDelegate(index)->sizeHint(option, index).width());
+      hint = qMax(hint, itemDelegateForIndex(index)->sizeHint(option, index).width());
   }
 
   return showGrid() ? hint + 1 : hint;
@@ -76,7 +77,7 @@ void MovableTableWidget::dragMoveEvent(QDragMoveEvent *event)
     QAbstractItemView::dragMoveEvent(event);
   }
 
-  m_lineRow = dropRow(event->pos());
+  m_lineRow = dropRow(event->position().toPoint());
   viewport()->repaint();
 
   event->accept();
@@ -90,7 +91,7 @@ void MovableTableWidget::dropEvent(QDropEvent *event)
     return;
   }
 
-  int targetRow = dropRow(event->pos());
+  int targetRow = dropRow(event->position().toPoint());
 
   QByteArray encoded = event->mimeData()->data("application/x-qabstractitemmodeldatalist");
   QDataStream stream(&encoded, QIODevice::ReadOnly);

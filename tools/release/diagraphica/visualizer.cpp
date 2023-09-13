@@ -157,7 +157,7 @@ void Visualizer::handleMouseEvent(QMouseEvent* e)
     m_mouseDragReleased = true;
   }
 
-  m_lastMouseEvent = std::make_unique<QMouseEvent>(e->type(), e->pos(), e->globalPos(), e->button(), e->buttons(), e->modifiers());
+  m_lastMouseEvent = std::make_unique<QMouseEvent>(e->type(), e->pos(), e->globalPosition(), e->button(), e->buttons(), e->modifiers());
 }
 
 void Visualizer::handleKeyEvent(QKeyEvent* e)
@@ -211,8 +211,8 @@ void Visualizer::startSelectMode(
   glPushMatrix();
   glLoadIdentity();
 
-  gluPickMatrix(m_lastMouseEvent->x()*devicePixelRatio(), // center x
-          viewport[3] - m_lastMouseEvent->y()*devicePixelRatio(), // center y
+  gluPickMatrix(m_lastMouseEvent->position().x()*devicePixelRatio(), // center x
+          viewport[3] - m_lastMouseEvent->position().y()*devicePixelRatio(), // center y
           pickWth,    // picking width
           pickHgt,    // picking height
           viewport);

@@ -417,7 +417,7 @@ void Examiner::handleHits(const std::vector< int >& ids)
 {
   if (ids.size() > 0)
   {
-    if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::LeftButton)
+    if (m_lastMouseEvent->type() == QEvent::MouseButtonPress && m_lastMouseEvent->button() == Qt::LeftButton)
     {
       if (ids[0] == ID_FRAME)
       {
@@ -475,7 +475,7 @@ void Examiner::handleHits(const std::vector< int >& ids)
       }
 
     }
-    else if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::RightButton)
+    else if (m_lastMouseEvent->type() == QEvent::MouseButtonPress && m_lastMouseEvent->button() == Qt::RightButton)
     {
       if (ids[0] == ID_FRAME)
       {

@@ -327,7 +327,7 @@ void DistrPlot::displTooltip(const std::size_t& posIdx)
     }
     else
     {
-      QPointF pos = worldCoordinate(m_lastMouseEvent.localPos());
+      QPointF pos = worldCoordinate(m_lastMouseEvent->position());
       posDgrm.x = pos.x() + (pos.x() < 0 ? 1.0 : -1.0) * scaleDgrm;
       posDgrm.y = pos.y() + (pos.x() < 0 ? 1.0 : -1.0) * scaleDgrm;
       showDgrm = true;

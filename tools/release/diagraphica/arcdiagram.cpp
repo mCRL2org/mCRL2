@@ -1563,7 +1563,7 @@ void ArcDiagram::handleHits(const std::vector< int >& ids)
         break;
 
       case ID_LEAF_NODE:
-        if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::LeftButton)
+        if (m_lastMouseEvent->type() == QEvent::MouseButtonPress && m_lastMouseEvent->button() == Qt::LeftButton)
         {
           handleShowDiagram(ids[2]);
           emit clickedCluster(m_graph->getLeaf(ids[2]));
@@ -1595,7 +1595,7 @@ void ArcDiagram::handleHits(const std::vector< int >& ids)
         break;
 
       case ID_DIAGRAM:
-        if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::LeftButton)
+        if (m_lastMouseEvent->type() == QEvent::MouseButtonPress && m_lastMouseEvent->button() == Qt::LeftButton)
         {
           dragIdxDgrm = ids[2];
           currIdxDgrm = ids[2];
@@ -1632,7 +1632,7 @@ void ArcDiagram::handleHits(const std::vector< int >& ids)
             dragIdxDgrm = NON_EXISTING;
           }
         }
-        else if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::RightButton)
+        else if (m_lastMouseEvent->type() == QEvent::MouseButtonPress && m_lastMouseEvent->button() == Qt::RightButton)
         {
           emit routingCluster(framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]], 
                               makeQList<Cluster*>(framesDgrm[currIdxDgrm].begin(), framesDgrm[currIdxDgrm].end()),
@@ -1763,7 +1763,7 @@ void ArcDiagram::handleDragDiagram()
 
 void ArcDiagram::handleDragDiagram(const int& dgrmIdx)
 {
-  QPointF delta = worldCoordinate(m_lastMouseEvent.localPos()) - worldCoordinate(m_lastMousePos);
+  QPointF delta = worldCoordinate(m_lastMouseEvent->position()) - worldCoordinate(m_lastMousePos);
 
   posDgrm[dgrmIdx].x += delta.x();
   posDgrm[dgrmIdx].y += delta.y();

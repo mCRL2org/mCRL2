@@ -51,7 +51,7 @@ if(APPLE)
           DESTINATION ${MCRL2_BUNDLE_PATH}/Contents/bin)
 
   if(MCRL2_ENABLE_GUI_TOOLS)
-    find_program(MACDEPLOYQT NAMES macdeployqt PATHS ${Qt5_DIR}/../../../bin DOC "Path to macdeployqt executable (in the Qt binary directory)" REQUIRED)
+    find_program(MACDEPLOYQT NAMES macdeployqt PATHS ${Qt6_DIR}/../../../bin DOC "Path to macdeployqt executable (in the Qt binary directory)" REQUIRED)
     set(EXECUTABLES "")
     foreach(EXECUTABLE ${MCRL2_QT_APPS})
       set(EXECUTABLES "${EXECUTABLES} -executable=${MCRL2_RUNTIME_PATH}/${EXECUTABLE}")
@@ -199,7 +199,7 @@ endif()
 # -------
 
 if (WIN32)
-  find_program(WINDEPLOYQT NAMES "windeployqt" PATHS "${Qt5_DIR}/../../../bin/" DOC "Path to windeployqt executable (in the Qt binary directory)" REQUIRED)
+  find_program(WINDEPLOYQT NAMES "windeployqt" PATHS "${Qt6_DIR}/../../../bin/" DOC "Path to windeployqt executable (in the Qt binary directory)" REQUIRED)
   foreach(EXECUTABLE ${MCRL2_QT_APPS})
     install(CODE "
       message(STATUS \"Executing ${WINDEPLOYQT} ${EXECUTABLE} in directory \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${MCRL2_RUNTIME_PATH}\")
