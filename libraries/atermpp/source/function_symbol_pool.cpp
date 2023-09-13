@@ -110,20 +110,21 @@ function_symbol function_symbol_pool::create(const std::string& name, const std:
 
 void function_symbol_pool::deregister(const std::string& prefix)
 {
-  if constexpr (GlobalThreadSafe) { m_mutex.lock(); }
+  m_mutex.lock();
   m_prefix_to_register_function_map.erase(prefix);
-  if constexpr (GlobalThreadSafe) { m_mutex.unlock(); }
+  m_mutex.unlock();
 }
 
 std::shared_ptr<std::size_t> function_symbol_pool::register_prefix(const std::string& prefix)
 {
-  if constexpr (GlobalThreadSafe) { m_mutex.lock(); }
+  m_mutex.lock();
 
   auto it = m_prefix_to_register_function_map.find(prefix);
   if (it != m_prefix_to_register_function_map.end())
   {
-    if constexpr (GlobalThreadSafe) { m_mutex.unlock(); }
-    return it->second;
+    auto result = it->second;
+    m_mutex.unlock();
+    return result;
   }
   else
   {
@@ -131,7 +132,7 @@ std::shared_ptr<std::size_t> function_symbol_pool::register_prefix(const std::st
     std::shared_ptr<std::size_t> shared_index = std::make_shared<std::size_t>(index);
     m_prefix_to_register_function_map[prefix] = shared_index;
 
-    if constexpr (GlobalThreadSafe) { m_mutex.unlock(); }
+    m_mutex.unlock();
     return shared_index;
   }
 }
