@@ -7,6 +7,9 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#ifndef MCRL2_UTILITIES_MUTEX_H_
+#define MCRL2_UTILITIES_MUTEX_H_
+
 #include <mutex>
 
 #include "mcrl2/utilities/configuration.h"
@@ -37,3 +40,5 @@ private:
 };
 
 } // namespace mcrl2::utilities
+
+#endif // MCRL2_UTILITIES_MUTEX_H_
