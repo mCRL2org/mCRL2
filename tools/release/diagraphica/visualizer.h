@@ -15,6 +15,7 @@
 #include "visutils.h"
 
 #include <QOpenGLWidget>
+#include <QOpenGLFramebufferObject>
 
 class Visualizer : public QOpenGLWidget
 {
@@ -27,8 +28,8 @@ class Visualizer : public QOpenGLWidget
       Graph *m_graph);
     virtual ~Visualizer() {}
 
-    virtual void initializeGL();
-    virtual void paintGL();
+    virtual void initializeGL() override;
+    virtual void paintGL() override;
 
     QSizeF worldSize();
     double pixelSize();
@@ -64,7 +65,7 @@ class Visualizer : public QOpenGLWidget
     virtual void mouseReleaseEvent(QMouseEvent *event) override { handleMouseEvent(event); QOpenGLWidget::mouseReleaseEvent(event); }
     virtual void resizeEvent(QResizeEvent *event) override { handleSizeEvent(); QOpenGLWidget::resizeEvent(event); }
 
-    QSize sizeHint() const { return QSize(200,200); } // Reimplement to change preferred size
+    QSize sizeHint() const override { return QSize(200,200); } // Reimplement to change preferred size
   public slots:
     void updateSelection();
 
