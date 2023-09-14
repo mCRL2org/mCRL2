@@ -172,7 +172,7 @@ void CodeHighlighter::highlightBlock(const QString& text)
 {
   for (const HighlightingRule& rule : highlightingRules)
   {
-    for (const auto& match : rule.pattern.globalMatchView(text))
+    for (const auto& match : rule.pattern.globalMatch(text))
     {      
       setFormat(match.capturedStart(), match.capturedEnd() - match.capturedStart(), rule.format);
     }

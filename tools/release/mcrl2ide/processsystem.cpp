@@ -818,8 +818,8 @@ void ProcessSystem::mcrl2ParsingResult(int previousExitCode)
         parsingOutput.indexOf(parsingError, parsingOutput.lastIndexOf("#####"), &match);
     if (parsingErrorIndex >= 0)
     {
-      fileSystem->setSpecificationEditorCursor(match.capturedTexts()[0].toInt(),
-        match.capturedTexts()[1].toInt());
+      fileSystem->setSpecificationEditorCursor(match.captured(1).toInt(),
+        match.captured(2).toInt());
     }
   }
 }
