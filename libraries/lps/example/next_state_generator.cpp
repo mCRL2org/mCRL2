@@ -17,7 +17,6 @@ void traverse_states(const lps::stochastic_specification& lps_spec, data::rewrit
   std::set<atermpp::aterm> visited;
   std::set<lps::state> seen;
   std::set<lps::multi_action> transition_labels;
-  std::size_t transitions = 0;
 
   std::queue<lps::state, std::deque<lps::state> > q;
   q.push(initial_state);
@@ -37,7 +36,6 @@ void traverse_states(const lps::stochastic_specification& lps_spec, data::rewrit
         {
           const lps::state s=j->target_state();
           transition_labels.insert(j->action());
-          ++transitions;
           if (seen.find(s) == seen.end())
           {
             q.push(s);
@@ -52,7 +50,6 @@ void traverse_states(const lps::stochastic_specification& lps_spec, data::rewrit
       {
         const lps::state s=j->target_state();
         transition_labels.insert(j->action());
-        ++transitions;
         if (seen.find(s) == seen.end())
         {
           q.push(s);

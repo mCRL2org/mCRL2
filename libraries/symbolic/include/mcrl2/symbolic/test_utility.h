@@ -67,7 +67,6 @@ sylvan::ldds::ldd random_subset(const sylvan::ldds::ldd& U, std::size_t amount)
 
     // Choose amount vectors.
     std::size_t added = 0;
-    std::size_t i = 0;
     for (const auto& vector : contained)
     {
       if (dist(gen()) <= amount)
@@ -80,8 +79,6 @@ sylvan::ldds::ldd random_subset(const sylvan::ldds::ldd& U, std::size_t amount)
       {
         break;
       }
-
-      ++i;
     }
 
     // Construct the ldd.
