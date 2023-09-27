@@ -4158,7 +4158,6 @@ class specification_basic_type
                    process_identifier& initial_process_id, // If parameters change, another initial_process_id will be substituted.
                    stochastic_distribution& initial_stochastic_distribution)
     {
-std::cerr << "REMOVE STOCH OPERATORS FROM FRONT " << initial_process_id << "\n";
       /* First obtain the stochastic distribution for each process variable. */
       std::map< process_identifier, process_pid_pair > processes_with_stochastic_distribution_first;
       std::set< process_identifier > result;
@@ -4166,10 +4165,8 @@ std::cerr << "REMOVE STOCH OPERATORS FROM FRONT " << initial_process_id << "\n";
       {
         objectdatatype& object = objectIndex(p);
         process_expression proc_=obtain_initial_distribution_term(object.processbody);
-std::cerr << "PROC1 " << p << "     " << proc_ << "\n";
         if (!is_stochastic_operator(proc_))
         {
-std::cerr << "NIKS\n";
           processes_with_stochastic_distribution_first.insert(std::pair< process_identifier, process_pid_pair >(p, process_pid_pair(proc_,p)));
           result.insert(p);
         }
@@ -4190,7 +4187,6 @@ std::cerr << "NIKS\n";
                                            pCRL,
                                            canterminatebody(proc.operand()),
                                            containstimebody(proc.operand()));
-std::cerr << "PROC2 " << newproc << "     " << objectIndex(newproc).processbody << "\n";
           // calculate the substitution to be applied on proc.distribution() which is moved outside the
           // body the process.
           processes_with_stochastic_distribution_first.insert(
@@ -4214,9 +4210,7 @@ std::cerr << "PROC2 " << newproc << "     " << objectIndex(newproc).processbody 
       }
 
       // Adapt the initial process
-std::cerr << "INITIAL PROC " << initial_process_id << "     " << objectIndex(initial_process_id).processbody << "\n";
       process_expression initial_distribution=processes_with_stochastic_distribution_first.at(initial_process_id).process_body();
-std::cerr << "INITIAL DIST " <<  initial_distribution << "\n";
       if (is_stochastic_operator(initial_distribution))
       {
         const stochastic_operator sto=atermpp::down_cast<stochastic_operator>(initial_distribution);
