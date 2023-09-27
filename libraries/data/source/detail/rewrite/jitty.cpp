@@ -792,8 +792,8 @@ void RewriterJitty::rewrite_aux_const_function_symbol(
     /* result.assign(cached_rhs,
                   this->m_busy_flag,
                   this->m_forbidden_flag,
-                  *this->m_creation_depth); */
-    result.unprotected_assign<false>(cached_rhs);
+                  *this->m_creation_depth); */                 
+    result.assign(cached_rhs, *m_thread_aterm_pool);
     return;
   }
 

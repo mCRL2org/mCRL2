@@ -17,7 +17,6 @@ using namespace mcrl2::utilities;
 void test_reachable_nodes()
 {
   typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS> graph;
-  typedef boost::graph_traits<graph>::vertex_descriptor vertex_descriptor;
 
   graph g(6);
   boost::add_edge(0, 1, g);

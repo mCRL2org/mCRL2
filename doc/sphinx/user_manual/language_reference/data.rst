@@ -719,10 +719,10 @@ enumeration is defined as a shorthand to denote lists::
      - ``List(S) -> List(S)``
      - :samp:`{a}` without its first element.
    * - :samp:`rhead({a})`
-     - ``List(S) -> Nat``
+     - ``List(S) -> S``
      - The last element of :samp:`{a}`.
    * - :samp:`rtail({a})`
-     - ``List(S) -> Nat``
+     - ``List(S) -> List(S)``
      - :samp:`{a}` without its last element.
   
 .. warning::

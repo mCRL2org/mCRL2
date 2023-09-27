@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://mcrl2.org/web/_images/mcrl2.png" >
+  <img src="https://mcrl2.org/web/_static/mcrl2.png" >
 </p>
 
 mCRL2 is a formal specification language with an associated toolset. The toolset

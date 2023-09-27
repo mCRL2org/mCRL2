@@ -9,8 +9,10 @@
 /// \file big_numbers_test.cpp
 /// \brief Test whether the class big_natural_numbers works properly.
 
-#include "mcrl2/utilities/big_numbers.h"
+#define BOOST_AUTO_TEST_MAIN
 #include <boost/test/included/unit_test.hpp>
+
+#include "mcrl2/utilities/big_numbers.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
@@ -125,10 +127,4 @@ BOOST_AUTO_TEST_CASE(cumulative_tests)
 
   std::string big_number("34985431223981954640133634673587613874569183765329875682716348576138476108576387546187658127653201876510287356021876530287165023817650187635081237650812376501876350871236501287365012873650182735610237560000000000000000000000000320129384710938471039561390847109398734601956601293846019285609853607349587453098713409835719348571930857");
   test(big_number,big_number);
-}
-
-
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
 }

@@ -29,7 +29,7 @@ class thread_aterm_pool final : public thread_aterm_pool_interface, mcrl2::utili
 public:
   thread_aterm_pool(aterm_pool& global_pool)
     : m_pool(global_pool),
-      m_shared_mutex(global_pool.shared_mutex_pool())
+      m_shared_mutex(global_pool.shared_mutex())
   {
     /// Identify the first constructor call as the main thread.
     static bool is_main_thread = true;
@@ -38,7 +38,7 @@ public:
       m_is_main_thread = true;
       is_main_thread = false;
     }
-
+    
     m_variables = new mcrl2::utilities::hashtable<aterm*>();
     m_containers = new mcrl2::utilities::hashtable<detail::_aterm_container*>();
     
@@ -58,27 +58,27 @@ public:
     }
   }
 
-  /// \threadsafe
+  /// \details threadsafe
   inline function_symbol create_function_symbol(const std::string& name, const std::size_t arity, const bool check_for_registered_functions = false);
 
-  /// \threadsafe
+  /// \details threadsafe
   inline function_symbol create_function_symbol(std::string&& name, const std::size_t arity, const bool check_for_registered_functions = false);
 
-  /// \threadsafe
+  /// \details threadsafe
   inline void create_int(aterm& term, std::size_t val);
 
-  /// \threadsafe
+  /// \details threadsafe
   inline void create_term(aterm& term, const function_symbol& sym);
 
-  /// \threadsafe
+  /// \details threadsafe
   template<class ...Terms>
   inline void create_appl(aterm& term, const function_symbol& sym, const Terms&... arguments);
 
-  /// \threadsafe
+  /// \details threadsafe
   template<class Term, class INDEX_TYPE, class ...Terms>
   inline void create_appl_index(aterm& term, const function_symbol& sym, const Terms&... arguments);
 
-  /// \threadsafe
+  /// \details threadsafe
   template<typename ForwardIterator>
   inline void create_appl_dynamic(aterm& term,
       const function_symbol& sym,

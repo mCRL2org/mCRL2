@@ -69,3 +69,4 @@ Language: Cpp
 LambdaBodyIndentation: Signature
 IndentExternBlock: NoIndent
 IndentGotoLabels: false
+PointerAlignment: Left

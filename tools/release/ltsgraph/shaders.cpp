@@ -104,7 +104,7 @@ namespace{
   "   float s = sin(theta);\n"
   "   vec3 r  = normalize(cross(cam, p2c));\n"
   "   localPos = mat3(V) * localPos;\n"
-  "   pos = ((1-c)*dot(localPos, r)*r + c*localPos + s*cross(r, localPos)) + offset;\n"
+  "   pos = length(cross(r, localPos)) > 0.01f ? ((1-c)*dot(localPos, r)*r + c*localPos + s*cross(r, localPos)) + offset : localPos + offset;\n"
   "   gl_Position = VP * vec4(pos, 1);\n"
   "   vColor = color;\n"
   "}";

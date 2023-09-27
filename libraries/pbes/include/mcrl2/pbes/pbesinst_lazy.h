@@ -11,7 +11,6 @@
 
 #include <thread>
 #include <mutex>
-#include <shared_mutex>
 
 #include "mcrl2/atermpp/standard_containers/deque.h"
 #include "mcrl2/atermpp/standard_containers/indexed_set.h"
@@ -139,14 +138,6 @@ class pbesinst_lazy_todo
       using utilities::detail::contains;
       std::size_t size_before = todo.size() + irrelevant.size();
       std::unordered_set<propositional_variable_instantiation> new_irrelevant;
-      /* for (const propositional_variable_instantiation& x: all_elements()) The range::join of boost does not seem to work with GCC. 
- *                                                                           Therefore it is split below. 
-      {
-        if (!contains(new_todo, x))
-        {
-          new_irrelevant.insert(x);
-        }
-      } */
       for (const propositional_variable_instantiation& x: todo)
       {
         if (!contains(new_todo, x))
@@ -212,8 +203,7 @@ class pbesinst_lazy_algorithm
     enumerate_quantifiers_rewriter m_global_R;
 
     // Mutexes
-    std::mutex m_todo_access;
-    std::shared_mutex m_graph_access;
+    utilities::mutex m_todo_access;
 
     volatile bool m_must_abort = false;
 
@@ -317,7 +307,6 @@ class pbesinst_lazy_algorithm
     /// \brief Reports BES equations that are produced by the algorithm.
     /// This function is called for every BES equation X = psi with rank k that is produced. By default it does nothing.
     virtual void on_report_equation(const std::size_t /* thread_index */,
-                                    std::shared_mutex& /* realloc_mutex */,
                                     const propositional_variable_instantiation& /* X */,
                                     const pbes_expression& /* psi */, std::size_t /* k */
                                    )
@@ -382,7 +371,7 @@ class pbesinst_lazy_algorithm
     {
       using utilities::detail::contains;
 
-      if (m_options.number_of_threads>1) mCRL2log(log::debug) << "Start thread " << thread_index << ".\n";
+      if (m_options.number_of_threads > 1) mCRL2log(log::debug) << "Start thread " << thread_index << ".\n";
       R.thread_initialise();
 
       propositional_variable_instantiation X_e;
@@ -409,9 +398,9 @@ class pbesinst_lazy_algorithm
           data::remove_assignments(sigma, eqn.variable().parameters());
 
           // optional step
-          m_graph_access.lock_shared();
+          m_todo_access.lock();
           rewrite_psi(thread_index, psi_e, eqn.symbol(), X_e, psi_e);
-          m_graph_access.unlock_shared();
+          m_todo_access.unlock();
 
           std::set<propositional_variable_instantiation> occ = find_propositional_variable_instantiations(psi_e);
 
@@ -420,7 +409,7 @@ class pbesinst_lazy_algorithm
           m_todo_access.lock();
           mCRL2log(log::debug) << "generated equation " << X_e << " = " << psi_e
                                << " with rank " << k << std::endl;
-          on_report_equation(thread_index, m_graph_access, X_e, psi_e, k);
+          on_report_equation(thread_index, X_e, psi_e, k);
           todo.insert(occ.begin(), occ.end(), discovered, thread_index);
           for (auto i = occ.begin(); i != occ.end(); ++i)
           {

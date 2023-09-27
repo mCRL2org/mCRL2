@@ -4158,6 +4158,7 @@ class specification_basic_type
                    process_identifier& initial_process_id, // If parameters change, another initial_process_id will be substituted.
                    stochastic_distribution& initial_stochastic_distribution)
     {
+std::cerr << "REMOVE STOCH OPERATORS FROM FRONT " << initial_process_id << "\n";
       /* First obtain the stochastic distribution for each process variable. */
       std::map< process_identifier, process_pid_pair > processes_with_stochastic_distribution_first;
       std::set< process_identifier > result;
@@ -4165,8 +4166,10 @@ class specification_basic_type
       {
         objectdatatype& object = objectIndex(p);
         process_expression proc_=obtain_initial_distribution_term(object.processbody);
+std::cerr << "PROC1 " << p << "     " << proc_ << "\n";
         if (!is_stochastic_operator(proc_))
         {
+std::cerr << "NIKS\n";
           processes_with_stochastic_distribution_first.insert(std::pair< process_identifier, process_pid_pair >(p, process_pid_pair(proc_,p)));
           result.insert(p);
         }
@@ -4187,6 +4190,7 @@ class specification_basic_type
                                            pCRL,
                                            canterminatebody(proc.operand()),
                                            containstimebody(proc.operand()));
+std::cerr << "PROC2 " << newproc << "     " << objectIndex(newproc).processbody << "\n";
           // calculate the substitution to be applied on proc.distribution() which is moved outside the
           // body the process.
           processes_with_stochastic_distribution_first.insert(
@@ -4210,7 +4214,9 @@ class specification_basic_type
       }
 
       // Adapt the initial process
+std::cerr << "INITIAL PROC " << initial_process_id << "     " << objectIndex(initial_process_id).processbody << "\n";
       process_expression initial_distribution=processes_with_stochastic_distribution_first.at(initial_process_id).process_body();
+std::cerr << "INITIAL DIST " <<  initial_distribution << "\n";
       if (is_stochastic_operator(initial_distribution))
       {
         const stochastic_operator sto=atermpp::down_cast<stochastic_operator>(initial_distribution);
@@ -9212,6 +9218,7 @@ class specification_basic_type
 
         objectdatatype& object=objectIndex(process_instance_assignment(t).identifier());
 
+        // Now apply the assignment in this process to the obtained initial process and the distribution. 
         maintain_variables_in_rhs<mutable_map_substitution<> > sigma;
         for (const assignment& a: process_instance_assignment(t).assignments())
         {
@@ -9219,6 +9226,10 @@ class specification_basic_type
         }
 
         init=replace_variables_capture_avoiding_alt(init,sigma);
+        initial_stochastic_distribution = 
+                   stochastic_distribution(
+                         initial_stochastic_distribution.variables(),
+                         replace_variables_capture_avoiding_alt(initial_stochastic_distribution.distribution(), sigma));
 
         // Make the bound variables and parameters in this process unique.
 
@@ -9437,7 +9448,9 @@ class specification_basic_type
     /* The result are a list of action summands, deadlock summand, the parameters of this
        linear process and its initial values. A initial stochastic distribution that must
        precede the initial linear process and the ultimate delay condition of this
-       linear process that can be used or be ignored. */
+       linear process that can be used or be ignored. 
+
+    */
 
     void generateLPEmCRL(
       stochastic_action_summand_vector& action_summands,

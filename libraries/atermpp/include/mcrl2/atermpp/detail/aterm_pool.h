@@ -72,11 +72,11 @@ public:
   inline function_symbol create_function_symbol(std::string&& name, const std::size_t arity, const bool check_for_registered_functions = false);
 
   /// \brief Register a thread specific aterm pool.
-  /// \threadsafe
+  /// \details threadsafe
   inline void register_thread_aterm_pool(thread_aterm_pool_interface& pool);
 
   /// \brief Remove thread specific aterm pool.
-  /// \threadsafe
+  /// \details threadsafe
   inline void remove_thread_aterm_pool(thread_aterm_pool_interface& pool);
 
   /// \brief The number of terms that can be stored without resizing.
@@ -111,17 +111,17 @@ public:
   // These functions of the aterm pool should be called through a thread_aterm_pool.
 private:
   /// \brief Force garbage collection on all storages.
-  /// \threadsafe
+  /// \details threadsafe
   inline void collect(mcrl2::utilities::shared_mutex& mutex);
 
   /// \brief Triggers garbage collection and resizing when conditions are met.
   /// \param allow_collect Actually perform the garbage collection instead of only updating the counters.
   /// \param mutex The shared mutex that should be used for locking if necessary.
-  /// \threadsafe
+  /// \details threadsafe
   inline void created_term(bool allow_collect, mcrl2::utilities::shared_mutex& mutex);
 
   /// \brief Collect garbage on all storages.
-  /// \threadsafe
+  /// \details threadsafe
   inline void collect_impl(mcrl2::utilities::shared_mutex& mutex);
 
   /// \brief Creates a integral term with the given value.
@@ -154,19 +154,16 @@ private:
       InputIterator end);
 
   /// \brief Resizes all storages if necessary.
-  /// \threadsafe.
+  /// \details threadsafe
   inline void resize_if_needed(mcrl2::utilities::shared_mutex& shared);
 
-  mcrl2::utilities::shared_mutex_pool& shared_mutex_pool() { return m_shared_pool; }
+  mcrl2::utilities::shared_mutex& shared_mutex() { return m_shared_mutex; }
 
   /// \returns The total number of term variables residing in the protection sets.
   inline std::size_t protection_set_size() const;
 
   /// \brief The set of local aterm pools.
   std::vector<thread_aterm_pool_interface* > m_thread_pools;
-
-  /// \brief Mutex for adding/removing local pools in m_thread_pools.
-  std::mutex m_mutex;
 
   /// \brief Storage for the function symbols.
   function_symbol_pool m_function_symbol_pool;
@@ -196,7 +193,7 @@ private:
   std::atomic<bool> m_enable_garbage_collection = EnableGarbageCollection; /// Garbage collection is enabled.
 
   /// All the shared mutexes.
-  mcrl2::utilities::shared_mutex_pool m_shared_pool;
+  mcrl2::utilities::shared_mutex m_shared_mutex;
 
   /// Represents an empty list.
   aterm m_empty_list;
