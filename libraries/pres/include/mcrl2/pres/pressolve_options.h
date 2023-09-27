@@ -27,6 +27,7 @@ struct pressolve_options
   bool replace_constants_by_variables = false;
   bool remove_unused_rewrite_rules = false;
   solution_algorithm algorithm = gauss_elimination;
+  std::size_t precision = 3; // Yield an answer with a precision of at most 10^-precision.
 };
 
 inline
@@ -36,6 +37,7 @@ std::ostream& operator<<(std::ostream& out, const pressolve_options& options)
   out << "replace-constants-by-variables = " << std::boolalpha << options.replace_constants_by_variables << std::endl;
   out << "remove-unused-rewrite-rules = " << std::boolalpha << options.remove_unused_rewrite_rules << std::endl;
   out << "solution-algorithm = " << (options.algorithm==gauss_elimination?"Gauss elimination":"numerical") << std::endl;
+  out << "the solution has a precision of = 10^-" << options.precision << std::endl;
   return out;
 }
 

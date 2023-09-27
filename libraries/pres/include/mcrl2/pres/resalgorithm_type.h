@@ -50,17 +50,17 @@ std::string description(const solution_algorithm a)
 inline
 solution_algorithm parse_algorithm(const std::string& s)
 {
-  if(s == "gauss")
+  if(s == "g" || s == "gauss")
   {
     return gauss_elimination;
   }
-  else if (s == "numerical")
+  else if (s == "n" || s == "numerical")
   {
     return numerical;
   }
   else
   {
-    throw mcrl2::runtime_error("unknown algorithm " + s);
+    throw mcrl2::runtime_error("Unknown algorithm " + s);
   }
 }
 

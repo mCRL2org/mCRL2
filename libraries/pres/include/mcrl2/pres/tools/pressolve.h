@@ -64,6 +64,8 @@ class pressolve_tool
                                  .add_value_short(pres_system::solution_algorithm::gauss_elimination, "g", true)
                                  .add_value_short(pres_system::solution_algorithm::numerical, "n"),
                     "select the algorithm NAME to solve the res after it is generated.",'a');
+    desc.add_option("precision", utilities::make_mandatory_argument("NUM"),
+                    "provide an answer within precision 10^-precision. [AS IT STANDS THIS IS THE NOW THE DIFFERENCE BETWEEN TWO ITERATIONS]", 'p');
   }
 
   void parse_options(const utilities::command_line_parser& parser) override
@@ -90,6 +92,15 @@ class pressolve_tool
     {
       options.algorithm = parse_algorithm(parser.option_argument("algorithm"));
     }
+
+    if (parser.has_option("precision"))
+    {
+      if (options.algorithm!=pres_system::solution_algorithm::numerical)
+      {
+        throw mcrl2::runtime_error("Option --precision (-p) can only be used in combination with --algorithm=numerical.");
+      }   
+      options.precision = std::stol(parser.option_argument("precision"));
+    }
   }
 
   std::set<utilities::file_format> available_input_formats() const override
@@ -115,13 +126,13 @@ class pressolve_tool
   {
     pres_system::pres presspec = pres_system::detail::load_pres(input_filename());
     
-    mCRL2log(log::debug) << "INPUT PRES\n" << presspec << "\n";
+    // mCRL2log(log::debug) << "INPUT PRES\n" << presspec << "\n";
     data::mutable_map_substitution<> sigma;
     sigma = pres_system::detail::instantiate_global_variables(presspec);
     pres_system::detail::replace_global_variables(presspec, sigma);
 
     pres_system::normalize(presspec);
-    mCRL2log(log::debug) << "RESULTING PRES\n" << presspec << "\n";
+    // mCRL2log(log::debug) << "RESULTING PRES\n" << presspec << "\n";
     
     mCRL2log(log::verbose) << "Generating RES..." << std::endl;
     timer().start("instantiation");
@@ -129,8 +140,9 @@ class pressolve_tool
     pres resulting_res = pres2res.run();
     timer().finish("instantiation");
 
-    mCRL2log(log::debug) << "RESULTING RES\n" << resulting_res << "\n";
+    // mCRL2log(log::debug) << "RESULTING RES\n" << resulting_res << "\n";
 
+    mCRL2log(log::verbose) << "Solving RES..." << std::endl;
     timer().start("solving");
     if (options.algorithm==gauss_elimination)
     {
@@ -145,9 +157,6 @@ class pressolve_tool
       std::cout << "Solution: " << result << std::endl;
     }  
     timer().finish("solving");
-    /* presinst_structure_graph_algorithm algorithm(options, presspec, G);
-    run_algorithm<presinst_structure_graph_algorithm>(algorithm, presspec, G,
-                                                        sigma); */
     return true;
   }
 };
