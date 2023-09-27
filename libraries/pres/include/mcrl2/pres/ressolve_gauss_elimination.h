@@ -1145,7 +1145,7 @@ public:
     pres_expression aux;
     apply(aux, x.operand());
     detail::push_plus_inside(result, false_(), aux, m_conjunctive_normal_form);
- std::cerr << "XXXX " << aux << "     " << result << "\n";
+// std::cerr << "XXXX " << aux << "     " << result << "\n";
   }
 
   template <class T>
