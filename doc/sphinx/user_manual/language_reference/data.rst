@@ -714,7 +714,7 @@ enumeration is defined as a shorthand to denote lists::
      - :samp:`{a}` concatenated with :samp:`{b}`.
    * - :samp:`head({a})`
      - ``List(S) -> S``
-     - The first element :samp:`{a}`.
+     - The first element of :samp:`{a}`.
    * - :samp:`tail({a})`
      - ``List(S) -> List(S)``
      - :samp:`{a}` without its first element.
