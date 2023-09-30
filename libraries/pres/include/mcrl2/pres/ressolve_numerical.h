@@ -51,22 +51,6 @@ double evaluate(const pres_expression& p, const std::unordered_map<core::identif
   {
     return -std::numeric_limits<double>::infinity();
   }
-  else if (data::is_data_expression(p))
-  {
-    const data::data_expression& pp = atermpp::down_cast<data::data_expression>(p);
-    const value_cache_type::const_iterator i=value_cache.find(pp);
-    if (i==value_cache.end())
-    {
-      if (data::sort_real::real_() == pp.sort())
-      {
-        double r=data::sort_real::value(pp);
-        value_cache[pp]=r;
-        return r;
-      }
-      throw mcrl2::runtime_error("Unexpected expression in evaluate: " + data::pp(pp) + ".");
-    }
-    return i->second;
-  }
   else if (is_and(p))
   {
     const and_& pp = atermpp::down_cast<and_>(p);
@@ -93,6 +77,22 @@ double evaluate(const pres_expression& p, const std::unordered_map<core::identif
       r=i->second;
     }
     return r * evaluate(pp.right(), solution);
+  }
+  else if (data::is_data_expression(p))
+  {
+    const data::data_expression& pp = atermpp::down_cast<data::data_expression>(p);
+    const value_cache_type::const_iterator i=value_cache.find(pp);
+    if (i==value_cache.end())
+    {
+      if (data::sort_real::real_() == pp.sort())
+      {
+        double r=data::sort_real::value(pp);
+        value_cache[pp]=r;
+        return r;
+      }
+      throw mcrl2::runtime_error("Unexpected expression in evaluate: " + data::pp(pp) + ".");
+    }
+    return i->second;
   }
   throw runtime_error("Unknown term format in evaluate " + pp(p) + ".");
 }
