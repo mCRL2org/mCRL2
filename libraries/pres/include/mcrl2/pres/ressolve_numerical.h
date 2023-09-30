@@ -14,6 +14,7 @@
 
 #include "limits"
 #include <cmath>
+#include <unordered_map>
 #include "mcrl2/data/real_utilities.h"
 #include "mcrl2/pres/builder.h" 
 #include "mcrl2/pres/pressolve_options.h"
@@ -28,6 +29,8 @@ namespace detail {
 
 double evaluate(const pres_expression& p, const std::unordered_map<core::identifier_string, double>& solution)
 {
+  typedef std::unordered_map<data::data_expression, double> value_cache_type;
+  static value_cache_type value_cache;
   if (is_propositional_variable_instantiation(p))
   {
     const propositional_variable_instantiation& pv = atermpp::down_cast<propositional_variable_instantiation>(p);
@@ -51,10 +54,18 @@ double evaluate(const pres_expression& p, const std::unordered_map<core::identif
   else if (data::is_data_expression(p))
   {
     const data::data_expression& pp = atermpp::down_cast<data::data_expression>(p);
-    if (data::sort_real::real_() == pp.sort())
+    const value_cache_type::const_iterator i=value_cache.find(pp);
+    if (i==value_cache.end())
     {
-      return data::sort_real::value(pp);
+      if (data::sort_real::real_() == pp.sort())
+      {
+        double r=data::sort_real::value(pp);
+        value_cache[pp]=r;
+        return r;
+      }
+      throw mcrl2::runtime_error("Unexpected expression in evaluate: " + data::pp(pp) + ".");
     }
+    return i->second;
   }
   else if (is_and(p))
   {
@@ -69,7 +80,19 @@ double evaluate(const pres_expression& p, const std::unordered_map<core::identif
   else if (is_const_multiply(p))
   {
     const const_multiply& pp = atermpp::down_cast<const_multiply>(p);
-    return data::sort_real::value(pp.left()) * evaluate(pp.right(), solution);
+    const data::data_expression& pleft = pp.left();
+    const value_cache_type::const_iterator i=value_cache.find(pleft);
+    double r;
+    if (i==value_cache.end())
+    {
+      r=data::sort_real::value(pleft);
+      value_cache[pleft]=r;
+    }
+    else 
+    {
+      r=i->second;
+    }
+    return r * evaluate(pp.right(), solution);
   }
   throw runtime_error("Unknown term format in evaluate " + pp(p) + ".");
 }
