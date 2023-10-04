@@ -959,7 +959,7 @@ class constln_t
     {                                                                           assert(begin() < end());
         block_t* const FirstB = (*begin())->block;
         block_t* const LastB = end()[-1]->block;                                assert(FirstB != LastB);
-        if (FirstB->end() == LastB->begin())  make_trivial();                   assert(FirstB->constln() == this);  assert(LastB->constln() == this);
+        if (FirstB->end() == LastB->begin()) { make_trivial(); }                assert(FirstB->constln() == this);  assert(LastB->constln() == this);
                                                                                 assert(postprocess_begin == postprocess_end);
         // 2.5: Choose a small splitter block SpB subset of SpC from P,
         //      i.e. |SpB| <= 1/2*|SpC|

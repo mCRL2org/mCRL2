@@ -2727,7 +2727,7 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
                                                                                 assert(part_tr.pred_end() > blue_pred_iter);
                                                                                 assert(blue_pred_iter->succ->B_to_C->pred == blue_pred_iter);
                     blue_s_prime = blue_pred_iter->source;
-                    if (blue_s_prime->block == NewB)  continue;                 assert(blue_s_prime->block == RfnB);
+                    if (blue_s_prime->block == NewB) { continue; }              assert(blue_s_prime->block == RfnB);
                     // 3.33l: s_prime --> s is no longer inert
                     part_tr.make_noninert(blue_pred_iter->succ);
                     // 3.34l: if |inert_out(s_prime)| == 0 then

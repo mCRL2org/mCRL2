@@ -1149,7 +1149,7 @@ class block_t
                                                                                 assert(begin <= marked_bottom_begin);
                                                                                 assert(marked_bottom_begin <= nonbottom_begin);
                                                                                 assert(nonbottom_begin <= marked_nonbottom_begin);
-        if (marked_nonbottom_begin <= s)  return false;                         assert(marked_nonbottom_begin <= end);
+        if (marked_nonbottom_begin <= s) { return false; }                      assert(marked_nonbottom_begin <= end);
         std::swap(*s, *--marked_nonbottom_begin);                               assert(nonbottom_begin <= marked_nonbottom_begin);
         return true;
     }
@@ -1165,7 +1165,7 @@ class block_t
         if (s < nonbottom_begin)                                                // assert(this == s->st->bl.ock); -- does not hold during initialisation
         {                                                                       assert(begin <= marked_bottom_begin);  assert(marked_nonbottom_begin <= end);
                                                                                 assert(nonbottom_begin <= marked_nonbottom_begin);
-            if (marked_bottom_begin <= s)  return false;                        assert(marked_bottom_begin <= nonbottom_begin);
+            if (marked_bottom_begin <= s) { return false; }                     assert(marked_bottom_begin <= nonbottom_begin);
             std::swap(*s, *--marked_bottom_begin);                              assert(begin <= marked_bottom_begin);
             return true;
         }
@@ -1568,7 +1568,7 @@ class pred_entry
                                                                                             partitioner.action_label.cbegin(), partitioner.action_label.cend(),
                                                                                                                       action_block, action_label_greater) -
                                                                                                                             partitioner.action_label.cbegin());
-                                                                                        assert(0 <= label && label < partitioner.action_label.size());
+                                                                                        assert(label < partitioner.action_label.size());
                                                                                         assert(partitioner.action_label[label].begin <= action_block);
                                                                                         assert(0==label||action_block<partitioner.action_label[label-1].begin);
                                                                                         // class lts_lts_t uses a function pp() to transform the action label
@@ -1761,7 +1761,7 @@ class bunch_t
                                                                                             partitioner.action_label.cbegin(), partitioner.action_label.cend(),
                                                                                                                                 begin, action_label_greater) -
                                                                                                                             partitioner.action_label.cbegin());
-                                                                                        assert(0 <= label && label < partitioner.action_label.size());
+                                                                                        assert(label < partitioner.action_label.size());
                                                                                         assert(partitioner.action_label[label].begin <= begin);
                                                                                         assert(0 == label || begin < partitioner.action_label[label-1].begin);
                                                                                         if (0 == label || end < partitioner.action_label[label - 1].begin)
@@ -2761,7 +2761,7 @@ class part_trans_t
         // this is the first transition in the new action_block-slice.
         // Check whether the bunch it belongs to has become nontrivial.
         bunch_t* const bunch(new_action_block_pos->succ->bunch());
-        if (!bunch->is_trivial())  return;                                      assert(old_begin_or_before_end + 1 == bunch->end);
+        if (!bunch->is_trivial()) { return; }                                    assert(old_begin_or_before_end + 1 == bunch->end);
         if (bunch->begin < new_action_block_pos)
         {
             make_nontrivial(bunch);
@@ -3370,7 +3370,7 @@ inline block_t* block_t::split_off_block(
             --pos2;                                                             assert(pos1 < pos2);
             *pos1 = std::move(*pos2);
             ++pos1;
-            if (0 >= --swapcount)  break;                                       assert(pos1 < pos2);
+            if (0 >= --swapcount) { break; }                                    assert(pos1 < pos2);
             *pos2 = std::move(*pos1);                                           // mCRL2complexity(new_block_is_U == new_block_mode ? pos1[-1] : *pos2, ...)
         }                                                                       // -- overapproximated by the call at the end
         *pos2 = std::move(temp);                                                // mCRL2complexity(new_block_is_U == new_block_mode ? pos1[-1] : *pos2, ...)
@@ -3698,7 +3698,7 @@ class bisim_partitioner_dnj
     /// same slice.)
     void create_initial_partition()
     {
-        mCRL2log(log::verbose, "bisim_gjkw") << "An O(m log n) "
+        mCRL2log(log::verbose) << "An O(m log n) "
              << (branching ? (preserve_divergence
                                            ? "divergence-preserving branching "
                                            : "branching ")
@@ -4413,13 +4413,13 @@ class bisim_partitioner_dnj
                     #undef PRINT_SG_PL
                 }
             }
-            if (nullptr == bunch_T)  break;                                     ONLY_IF_DEBUG( mCRL2log(log::debug, "bisim_jgkw") << "Refining "
+            if (nullptr == bunch_T)  { break; }                                 ONLY_IF_DEBUG( mCRL2log(log::debug) << "Refining "
             /* Line 2.7: Pi_t := Pi_t \ { bunch_T } union                    */                                          << bunch_T->debug_id(*this) << '\n'; )
             /*              { bunch_T_a_Bprime, bunch_T \ bunch_T_a_Bprime } */ assert(part_tr.nr_of_bunches < part_tr.nr_of_action_block_slices);
             bisim_dnj::bunch_t* const bunch_T_a_Bprime(
                          bunch_T->split_off_small_action_block_slice(part_tr));
                                                                                 #ifndef NDEBUG
-            /*------------ find predecessors of bunch_T_a_Bprime ------------*/     mCRL2log(log::debug, "bisim_jgkw") << "Splitting off "
+            /*------------ find predecessors of bunch_T_a_Bprime ------------*/     mCRL2log(log::debug) << "Splitting off "
                                                                                                                   << bunch_T_a_Bprime->debug_id(*this) << '\n';
             /* Line 2.8: for all B in splittableBlocks(bunch_T_a_Bprime) do  */     unsigned const max_splitter_counter(
                 /* we actually run through the transitions in T--a-->B'      */                                     bunch_T_a_Bprime->max_work_counter(*this));

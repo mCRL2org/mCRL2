@@ -177,6 +177,7 @@ pbes_expression norm(const pbes_expression& x)
   return pbes_system::detail::normalize_and_or(x);
 }
 
+inline
 void test_normalize_and_or_equality(const std::string& expr1, const std::string& expr2)
 {
   BOOST_CHECK(utilities::detail::test_operation(
