@@ -84,7 +84,7 @@ class parity_game_generator
     {
       std::size_t result;
 
-      mCRL2log(log::debug2, "parity_game_generator") << "Adding equation for " << t << std::endl;
+      mCRL2log(log::debug2) << "Adding equation for " << t << std::endl;
 
       // TODO: can this insertion be done more efficiently?
       auto i = m_pbes_expression_index.find(t);
@@ -133,10 +133,10 @@ class parity_game_generator
         const pbes_equation& pbes_eqn = *m_pbes_equation_index[psi1.name()];
         substitution_function sigma;
         make_substitution(pbes_eqn.variable().parameters(), psi1.parameters(), sigma);
-        mCRL2log(log::debug2, "parity_game_generator") << "Expanding right hand side " << pbes_eqn.formula() << " into " << std::flush;
+        mCRL2log(log::debug2) << "Expanding right hand side " << pbes_eqn.formula() << " into " << std::flush;
         pbes_expression result = R(pbes_eqn.formula(), sigma);
         R.clear_identifier_generator();
-        mCRL2log(log::debug2, "parity_game_generator") << result << std::endl;
+        mCRL2log(log::debug2) << result << std::endl;
         return result;
       }
       return psi;
@@ -390,7 +390,7 @@ class parity_game_generator
       pbes_expression& psi = eqn.first;
       const std::size_t priority = eqn.second;
 
-      mCRL2log(log::debug, "parity_game_generator") << std::endl << "Generating equation for expression " << psi << std::endl;
+      mCRL2log(log::debug) << std::endl << "Generating equation for expression " << psi << std::endl;
 
       // expand the right hand side if needed
       psi = expand_rhs(psi);
@@ -440,7 +440,7 @@ class parity_game_generator
         out << "Error in parity_game_generator: unexpected expression " << psi << "\n" << atermpp::aterm(psi);
         throw(std::runtime_error(out.str()));
       }
-      mCRL2log(log::debug, "parity_game_generator") << print_bes_equation(index, result);
+      mCRL2log(log::debug) << print_bes_equation(index, result);
       return result;
     }
 

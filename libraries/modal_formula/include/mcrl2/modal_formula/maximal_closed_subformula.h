@@ -65,7 +65,7 @@ struct bottom_up_traverser: public Traverser<Derived>
   void push(const Node& node)
   {
     node_stack.push_back(node);
-    mCRL2log(log::debug, "state_formulas") << "<push>" << node << std::endl;
+    mCRL2log(log::debug) << "<push>" << node << std::endl;
   }
 
   // Pop the top element of node_stack and return it

@@ -210,8 +210,8 @@ struct refinement_statistics
 template<typename T>
 void report_statistics(refinement_statistics<T>& stats)
 {
-  mCRL2log(log::debug, "Performance") << "working (current: " << stats.working.size() << ", max: " << stats.max_working << ").\n";
-  mCRL2log(log::debug, "Performance") << "antichain (hits: " << stats.antichain_inserts - stats.antichain_misses
+  mCRL2log(log::debug) << "working (current: " << stats.working.size() << ", max: " << stats.max_working << ").\n";
+  mCRL2log(log::debug) << "antichain (hits: " << stats.antichain_inserts - stats.antichain_misses
       << ", misses: " << stats.antichain_misses
       << ", size: " << stats.antichain.size()
       << ", max: " << stats.max_antichain << ")\n";

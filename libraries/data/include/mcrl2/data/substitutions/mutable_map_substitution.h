@@ -60,7 +60,7 @@ public:
     template <typename AssignableToExpression>
     assignment& operator=(AssignableToExpression const& e)
     {
-      mCRL2log(log::debug2, "substitutions") << "Setting " << m_variable << " := " << e << std::endl;
+      mCRL2log(log::debug2) << "Setting " << m_variable << " := " << e << std::endl;
       if (e != m_variable)
       {
         m_map[m_variable] = e;

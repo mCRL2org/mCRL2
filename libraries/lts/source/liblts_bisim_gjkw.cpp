@@ -225,23 +225,23 @@ block_t* block_t::split_off_red(permutation_iter_t const red_nonbottom_begin)
                                                                                     {
                                                                                         if (0 != end - begin)
                                                                                         {
-                                                                                            mCRL2log(log::debug, "bisim_gjkw") << "\t\t" << message
+                                                                                            mCRL2log(log::debug) << "\t\t" << message
                                                                                                                            << (1 < end-begin ? "s:\n" : ":\n");
                                                                                             do
                                                                                             {
-                                                                                                mCRL2log(log::debug, "bisim_gjkw") << "\t\t\t"
+                                                                                                mCRL2log(log::debug) << "\t\t\t"
                                                                                                                                        << (*begin)->debug_id();
                                                                                                 if (B != (*begin)->block)
                                                                                                 {
-                                                                                                    mCRL2log(log::debug,"bisim_gjkw") << ", inconsistent: "
+                                                                                                    mCRL2log(log::debug) << ", inconsistent: "
                                                                                                                    "points to " << (*begin)->block->debug_id();
                                                                                                 }
                                                                                                 if (begin != (*begin)->pos)
                                                                                                 {
-                                                                                                    mCRL2log(log::debug, "bisim_gjkw")
+                                                                                                    mCRL2log(log::debug)
                                                                                                                << ", inconsistent pointer to state_info_entry";
                                                                                                 }
-                                                                                                mCRL2log(log::debug, "bisim_gjkw") << '\n';
+                                                                                                mCRL2log(log::debug) << '\n';
                                                                                             }
                                                                                             while (++begin != end);
                                                                                         }
@@ -257,25 +257,25 @@ block_t* block_t::split_off_red(permutation_iter_t const red_nonbottom_begin)
                                                                                         assert(permutation.begin() < permutation.end());
                                                                                         for (const constln_t* C = permutation.front()->constln(); ; )
                                                                                         {
-                                                                                            mCRL2log(log::debug, "bisim_gjkw") << C->debug_id() << ":\n";
+                                                                                            mCRL2log(log::debug) << C->debug_id() << ":\n";
                                                                                             assert(C->begin() < C->end());
                                                                                             for (const block_t* B = (*C->begin())->block; ; )
                                                                                             {
-                                                                                                mCRL2log(log::debug, "bisim_gjkw") << "\t" << B->debug_id();
+                                                                                                mCRL2log(log::debug) << "\t" << B->debug_id();
                                                                                                 if (C != B->constln())
                                                                                                 {
-                                                                                                    mCRL2log(log::debug,"bisim_gjkw") << ", inconsistent: "
+                                                                                                    mCRL2log(log::debug) << ", inconsistent: "
                                                                                                                       "points to " << B->constln()->debug_id();
                                                                                                 }
-                                                                                                mCRL2log(log::debug, "bisim_gjkw") << ":\n";
+                                                                                                mCRL2log(log::debug) << ":\n";
                                                                                                 print_block("Non-bottom state", B, B->nonbottom_begin(),
                                                                                                                                            B->nonbottom_end());
                                                                                                 print_block("Bottom state", B, B->bottom_begin(),
                                                                                                                                               B->bottom_end());
-                                                                                                mCRL2log(log::debug, "bisim_gjkw") << "\t\tThis block has ";
+                                                                                                mCRL2log(log::debug) << "\t\tThis block has ";
                                                                                                 if (B->inert_end() == part_tr.B_to_C_begin())
                                                                                                 {
-                                                                                                    mCRL2log(log::debug, "bisim_gjkw")
+                                                                                                    mCRL2log(log::debug)
                                                                                                                << "no transitions to its own constellation.\n";
                                                                                                     assert(B->inert_begin() == B->inert_end());
                                                                                                 }
@@ -285,7 +285,7 @@ block_t* block_t::split_off_red(permutation_iter_t const red_nonbottom_begin)
                                                                                                                          B->inert_end()[-1].B_to_C_slice->end);
                                                                                                     assert(B->inert_end()[-1].B_to_C_slice->from_block() == B);
                                                                                                     assert(B->inert_end()[-1].B_to_C_slice->to_constln() == C);
-                                                                                                    mCRL2log(log::debug, "bisim_gjkw") << B->inert_end() -
+                                                                                                    mCRL2log(log::debug) << B->inert_end() -
                                                                                                                          B->inert_end()[-1].B_to_C_slice->begin
                                                                                                     <<" transition(s) to its own constellation,\n\t\tof which "
                                                                                                                      << B->inert_end() - B->inert_begin()
@@ -317,7 +317,7 @@ block_t* block_t::split_off_red(permutation_iter_t const red_nonbottom_begin)
                                                                                             succ_const_iter_t succ_constln_iter = state_iter->succ_begin();
                                                                                             if (state_iter->succ_end() != succ_constln_iter)
                                                                                             {
-                                                                                                mCRL2log(log::debug, "bisim_gjkw") << state_iter->debug_id()
+                                                                                                mCRL2log(log::debug) << state_iter->debug_id()
                                                                                                                                                       << ":\n";
                                                                                                 assert(state_iter->succ_begin() <=
                                                                                                                                state_iter->inert_succ_begin());
@@ -341,7 +341,7 @@ block_t* block_t::split_off_red(permutation_iter_t const red_nonbottom_begin)
                                                                                                 do
                                                                                                 {
                                                                                                     // print transitions to a constellation
-                                                                                                    mCRL2log(log::debug, "bisim_gjkw") << "\ttransitions to "
+                                                                                                    mCRL2log(log::debug) << "\ttransitions to "
                                                                                                             << succ_constln_iter->target->constln()->debug_id()
                                                                                                                                                       << ":\n";
                                                                                                     succ_const_iter_t s_iter = succ_constln_iter;
@@ -350,19 +350,19 @@ block_t* block_t::split_off_red(permutation_iter_t const red_nonbottom_begin)
                                                                                                     succ_constln_iter=succ_entry::slice_end(succ_constln_iter);
                                                                                                     for ( ;s_iter != succ_constln_iter ;++s_iter)
                                                                                                     {
-                                                                                                        mCRL2log(log::debug, "bisim_gjkw") << "\t\tto "
+                                                                                                        mCRL2log(log::debug) << "\t\tto "
                                                                                                                                  << s_iter->target->debug_id();
                                                                                                         if (state_iter->inert_succ_begin() <= s_iter &&
                                                                                                                          s_iter < state_iter->inert_succ_end())
                                                                                                         {
-                                                                                                            mCRL2log(log::debug, "bisim_gjkw") << " (inert)";
+                                                                                                            mCRL2log(log::debug) << " (inert)";
                                                                                                         }
                                                                                                         if (state_iter->current_constln() == s_iter)
                                                                                                         {
-                                                                                                            mCRL2log(log::debug, "bisim_gjkw")
+                                                                                                            mCRL2log(log::debug)
                                                                                                                                       << " <- current_constln";
                                                                                                         }
-                                                                                                        mCRL2log(log::debug, "bisim_gjkw") << '\n';
+                                                                                                        mCRL2log(log::debug) << '\n';
                                                                                                         assert(s_iter->B_to_C->pred->succ == s_iter);
                                                                                                         assert(s_iter->B_to_C->pred->source == &*state_iter);
                                                                                                     }
@@ -370,7 +370,7 @@ block_t* block_t::split_off_red(permutation_iter_t const red_nonbottom_begin)
 /* ************************************************************************* */                 while (state_iter->succ_end() != succ_constln_iter);
 /*                                                                           */                 if (state_iter->current_constln() == state_iter->succ_end())
 /*                           T R A N S I T I O N S                           */                 {
-/*                                                                           */                     mCRL2log(log::debug, "bisim_gjkw")
+/*                                                                           */                     mCRL2log(log::debug)
 /* ************************************************************************* */                                                  << "\t\t<- current_constln\n";
                                                                                                 }
                                                                                             }
@@ -1846,7 +1846,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
                                 refine_partition_until_it_becomes_stable_gjkw()
 {
                                                                                 #ifndef NDEBUG
-                                                                                    if (mCRL2logEnabled(log::debug, "bisim_gjkw"))
+                                                                                    if (mCRL2logEnabled(log::debug))
                                                                                     {
                                                                                         part_st.print_part(part_tr);
                                                                                         part_st.print_trans();
@@ -2100,7 +2100,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
         // 2.31: end for
         }
                                                                                 #ifndef NDEBUG
-                                                                                    if (mCRL2logEnabled(log::debug, "bisim_gjkw"))
+                                                                                    if (mCRL2logEnabled(log::debug))
                                                                                     {
                                                                                         part_st.print_part(part_tr);
                                                                                         part_st.print_trans();

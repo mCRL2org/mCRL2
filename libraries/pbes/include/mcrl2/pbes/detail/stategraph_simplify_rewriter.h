@@ -151,7 +151,7 @@ struct stategraph_simplify_builder: public simplify_quantifiers_data_rewriter_bu
         result = stategraph_not(arg);
       }
     }
-    mCRL2log(log::debug2, "stategraph") << "  simplify-postprocess " << x << " -> " << result << std::endl;
+    mCRL2log(log::debug2) << "  simplify-postprocess " << x << " -> " << result << std::endl;
     return result;
   }
 
