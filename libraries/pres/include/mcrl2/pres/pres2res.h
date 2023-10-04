@@ -127,8 +127,9 @@ class pres2res_algorithm
         // save the generated equation
         std::size_t k = m_equation_index.rank(X_e.name());
         
-        mCRL2log(log::debug) << "generated equation " << X_e << " = " << psi_e
-                               << " with rank " << k << "\n";
+        mCRL2log(log::debug) << "generated equation " << (k%2==0?pres_system::fixpoint_symbol::nu():pres_system::fixpoint_symbol::mu()) << " " 
+                             << new_pres_variables[m_stored_variables.index(X_e)].name() << " = " << psi_e
+                             << " with rank " << k << " for " << X_e << "\n";
 
         assert(generated_equations.size()>k);
         generated_equations[k].push_back(pres_equation((k%2==0?pres_system::fixpoint_symbol::nu():pres_system::fixpoint_symbol::mu()),

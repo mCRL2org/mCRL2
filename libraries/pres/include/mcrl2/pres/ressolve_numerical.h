@@ -29,6 +29,7 @@ namespace detail {
 
 double evaluate(const pres_expression& p, const std::unordered_map<core::identifier_string, double>& solution)
 {
+// std::cerr << "Evaluate: " << p << "\n";
   typedef std::unordered_map<data::data_expression, double> value_cache_type;
   static value_cache_type value_cache;
   if (is_propositional_variable_instantiation(p))
@@ -133,8 +134,7 @@ class ressolve_by_numerical_iteration
       }
       for(std::size_t j=base_equation_index ; j<to; ++j)
       { 
-        m_new_solution[m_equations[j].variable().name()] = detail::evaluate(m_equations[j].formula(), m_previous_solution);
-// std::cerr << "INTERMEDIATE SOLUTION " << m_equations[j].variable().name() << " := " << m_new_solution[m_equations[j].variable().name()] << "\n";
+        m_new_solution[m_equations[j].variable().name()] = detail::evaluate(m_equations[j].formula(), m_new_solution);
       }
     }
 
@@ -146,9 +146,13 @@ class ressolve_by_numerical_iteration
         std::size_t i=base_equation_index;
         for( ; i<m_equations.size() && m_equations[i].symbol()==m_equations[base_equation_index].symbol() ; ++i)
         {
-          m_new_solution[m_equations[i].variable().name()] = (m_equations[i].symbol().is_mu()?
-                                                                    -1*std::numeric_limits<double>::infinity():
-                                                                    std::numeric_limits<double>::infinity());
+// std::cerr << "SET " << m_equations[i].variable().name() << "\n";
+          const double sol = (m_equations[i].symbol().is_mu()?
+                                             -1*std::numeric_limits<double>::infinity():
+                                             std::numeric_limits<double>::infinity());
+          m_new_solution[m_equations[i].variable().name()] = sol;
+//          m_previous_solution[m_equations[i].variable().name()] = sol;
+                                                                  
 // std::cerr << "INITIAL SOLUTION " << m_equations[i].variable().name() << " := " << m_new_solution[m_equations[i].variable().name()] << "\n";
         }
 
