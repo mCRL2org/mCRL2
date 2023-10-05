@@ -34,17 +34,11 @@ function(_add_library_tests TARGET_NAME)
       endif()
 
       if("${category}" STREQUAL "librarytest")
-        add_test(NAME ${testname} COMMAND ${CMAKE_CTEST_COMMAND}
-           --build-and-test
-           "${CMAKE_SOURCE_DIR}"
-           "${CMAKE_BINARY_DIR}"
-           --build-noclean
-           --build-nocmake
-           --build-generator "${CMAKE_GENERATOR}"
-           --build-target "${testname}"
-           --build-makeprogram "${CMAKE_MAKE_PROGRAM}"
-           --test-command "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${category}/${testname}"
-        )
+        if(CMAKE_CONFIGURATION_TYPES)
+          add_test(NAME ${testname} COMMAND "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${category}/$<CONFIG>/${testname}")
+        else()
+          add_test(NAME ${testname} COMMAND "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${category}/${testname}")
+        endif()
       else()
         add_test(NAME ${testname} COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target ${testname})
       endif()
