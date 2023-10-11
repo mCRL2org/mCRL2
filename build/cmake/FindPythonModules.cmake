@@ -1,6 +1,6 @@
-find_package(PythonInterp 3.6.0)
+find_package(Python3 3.6.0)
 
-if(PYTHONINTERP_FOUND)
+if(Python3_FOUND)
   if(PythonModules_FIND_COMPONENTS)
     foreach(MODULE ${PythonModules_FIND_COMPONENTS})
       execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import  ${MODULE}"
