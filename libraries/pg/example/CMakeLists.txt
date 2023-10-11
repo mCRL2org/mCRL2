@@ -15,7 +15,7 @@ set(PREFIX "example_pg")
 set(PROJECT_NAME "${PREFIX}_solve_pg")
 project( ${PROJECT_NAME} )
 
-add_executable("${PROJECT_NAME}" EXCLUDE_FROM_ALL
+add_executable("${PROJECT_NAME}"
   pg_solving.cpp
 )
 
