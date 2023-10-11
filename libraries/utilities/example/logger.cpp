@@ -5,20 +5,20 @@ using namespace mcrl2::log;
 
 void do_something_special()
 {
-  mCRL2log(debug3, "my_algorithm") << "doing something special" << std::endl;
+  mCRL2log(debug3) << "doing something special" << std::endl;
 }
 
 std::string my_algorithm()
 {
-  mCRL2log(debug, "my_algorithm") << "Starting my_algorithm" << std::endl;
+  mCRL2log(debug) << "Starting my_algorithm" << std::endl;
   int iterations = 3;
-  mCRL2log(debug1, "my_algorithm") << "A loop with " << iterations << " iterations" << std::endl;
+  mCRL2log(debug1) << "A loop with " << iterations << " iterations" << std::endl;
   for(int i = 0; i < iterations; ++i)
   {
-    mCRL2log(debug2, "my_algorithm") << "Iteration " << i << std::endl;
+    mCRL2log(debug2) << "Iteration " << i << std::endl;
     if(i >= 2)
     {
-      mCRL2log(debug3, "my_algorithm") << "iteration number >= 2, treating specially" << std::endl;
+      mCRL2log(debug3) << "iteration number >= 2, treating specially" << std::endl;
       do_something_special();
     }
   }
@@ -38,8 +38,8 @@ int main(int /*argc*/, char** /*argv*/)
   {
     throw std::runtime_error("Cannot open logfile for writing");
   }
-  file_output::set_stream(plogfile, "my_algorithm");
-  mcrl2_logger::set_reporting_level(debug3, "my_algorithm");
+  file_output::set_stream(plogfile);
+  mcrl2_logger::set_reporting_level(debug3);
 
   // Execute algorithm
   my_algorithm();

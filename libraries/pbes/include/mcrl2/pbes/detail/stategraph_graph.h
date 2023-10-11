@@ -448,7 +448,7 @@ struct control_flow_graph
     auto j = std::find(vertices.begin(), vertices.end(), v_);
     if (j == vertices.end())
     {
-      mCRL2log(log::debug1, "stategraph") << " add vertex v = " << v_ << std::endl;
+      mCRL2log(log::debug1) << " add vertex v = " << v_ << std::endl;
       auto k = vertices.insert(v_);
       j = k.first;
     }
@@ -464,13 +464,13 @@ struct control_flow_graph
     auto q = u.outgoing_edges().find(&v);
     if (u.outgoing_edges().find(&v) == u.outgoing_edges().end() || q->second.find(i) == q->second.end())
     {
-      mCRL2log(log::debug1, "stategraph") << " add edge " << u << " -> " << v << std::endl;
+      mCRL2log(log::debug1) << " add edge " << u << " -> " << v << std::endl;
       u.insert_outgoing_edge(&v, i);
       v.insert_incoming_edge(&u, i);
     }
     else
     {
-      mCRL2log(log::debug1, "stategraph") << " edge already exists!" << std::endl;
+      mCRL2log(log::debug1) << " edge already exists!" << std::endl;
     }
   }
 
@@ -541,7 +541,7 @@ struct local_control_flow_graph: public control_flow_graph<local_control_flow_gr
                    std::size_t edge_label
                   )
   {
-    mCRL2log(log::debug1, "stategraph") << " insert_edge" << std::endl;
+    mCRL2log(log::debug1) << " insert_edge" << std::endl;
     const stategraph_equation& eq_Y = *find_equation(p, Y);
     const data::variable& d1 = (k1 == data::undefined_index() ? data::undefined_variable() : eq_Y.parameters()[k1]);
 
@@ -552,7 +552,7 @@ struct local_control_flow_graph: public control_flow_graph<local_control_flow_gr
       todo.insert(&v);
     }
 
-    mCRL2log(log::debug1, "stategraph") << " u.outgoing_edges() = " << u.print_outgoing_edges() << std::endl;
+    mCRL2log(log::debug1) << " u.outgoing_edges() = " << u.print_outgoing_edges() << std::endl;
     insert_edge(u, edge_label, v);
     // self_check();
   }

@@ -11,6 +11,7 @@
 #ifndef MCRL2_UTILITIES_LOGGER_H
 #define MCRL2_UTILITIES_LOGGER_H
 
+#include <atomic>
 #include <cstdio>
 #include <ctime>
 #include <map>
@@ -109,7 +110,6 @@ log_level_t log_level_from_string(const std::string& s)
   }
 }
 
-
 std::string format_time(const time_t* t);
 
 /// \brief Interface class for output policy.
@@ -128,13 +128,12 @@ class output_policy
 
     /// \brief Output message.
     /// \param[in] msg Message that is written to output.
-    /// \param[in] hint Hint for the stream to which the output is written.
     /// \param[in] timestamp Timestamp to use in the output.
     /// \param[in] level The log level to print the message to.
     /// \param[in] print_time_information An indication whether the time must be printed.
     ///  \details Any implementation must assure that output is written using an atomic action, to prevent
     /// mixing of different lines into one line in the output.
-    virtual void output(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg, const bool print_time_information) = 0;
+    virtual void output(const log_level_t level, const time_t timestamp, const std::string& msg, const bool print_time_information) = 0;
 };
 
 std::set<output_policy*> initialise_output_policies();
@@ -166,55 +165,31 @@ class logger
     /// \brief The loglevel of the current message
     log_level_t m_level;
 
+    /// \brief Timestamp of the current message
+    time_t m_timestamp;
+
+    static std::atomic<log_level_t>& log_level() 
+    {
+      static std::atomic<log_level_t> g_log_level(log_level_t::info);
+      return g_log_level;
+    }
+
     /// \brief An indication whether time information should be printed.
     static bool& m_print_time_information()
     {
-      static bool print_timing_info=false;
+      thread_local bool print_timing_info=false;
       return print_timing_info;
     }
-
-    /// \brief The message hint of the current message
-    std::string m_hint;
-
-    /// \brief Timestamp of the current message
-    time_t m_timestamp;
 
     /// \brief Output policies
     static
     std::set<output_policy*>& output_policies()
     {
-      static std::set<output_policy*> m_output_policies = initialise_output_policies();
+      thread_local std::set<output_policy*> m_output_policies = initialise_output_policies();
       return m_output_policies;
     }
 
-    /// \brief Mapping of message hint to loglevel. This allows a finegrained
-    /// control of log messages to log levels. It can e.g. be set that for some
-    /// message hint all messages up to debug level are printed, whereas for other
-    /// message hints no messages are printed at all.
-    static
-    std::map<std::string, log_level_t>& hint_to_level()
-    {
-      static std::map<std::string, log_level_t> m_hint_to_level;
-      return m_hint_to_level;
-    }
-
   public:
-    /// \brief The default log level that is used if no specific log level has
-    /// been set.
-    static
-    log_level_t default_reporting_level()
-    {
-      std::map<std::string, log_level_t>::const_iterator i = hint_to_level().find(default_hint());
-      if(i != hint_to_level().end())
-      {
-        return i->second;
-      }
-      else
-      {
-        return info;
-      }
-    }
-
     /// \brief Default constructor
     logger()
     {}
@@ -226,15 +201,8 @@ class logger
     {
       for(output_policy* policy: output_policies())
       {
-        policy->output(m_level, m_hint, m_timestamp, m_os.str(), m_print_time_information());
+        policy->output(m_level, m_timestamp, m_os.str(), m_print_time_information());
       }
-    }
-
-    /// \brief Default hint (empty)
-    static std::string default_hint()
-    {
-      static std::string default_hint;
-      return default_hint;
     }
 
     /// \brief Register output policy
@@ -264,47 +232,29 @@ class logger
 
     /// \brief Set reporting level
     /// \param[in] level Log level
-    /// \param[in] hint The hint for which to set log level
     static
-    void set_reporting_level(const log_level_t level, const std::string& hint = default_hint())
+    void set_reporting_level(const log_level_t level)
     {
-      hint_to_level()[hint] = level;
+      log_level() = level;
     }
 
     /// \brief Get reporting level
-    /// \param[in] hint The hint for which to get log level
     static
-    log_level_t get_reporting_level(const std::string& hint = default_hint())
+    log_level_t get_reporting_level()
     {
-      std::map<std::string, log_level_t>::const_iterator i = hint_to_level().find(hint);
-      if(i != hint_to_level().end())
-      {
-        return i->second;
-      }
-      else
-      {
-        return default_reporting_level();
-      }
-    }
-
-    /// \brief Clear reporting level
-    /// \param hint Reset the log level for hint
-    static
-    void clear_reporting_level(const std::string& hint)
-    {
-      hint_to_level().erase(hint);
+      return log_level();
     }
 
     /// \brief Indicate that timing information should be printed.
     static void set_report_time_info()
     {
-      m_print_time_information()=true;
+      m_print_time_information() = true;
     }
 
     /// \brief Indicate that timing information should not be printed.
     static void clear_report_time_info()
     {
-      m_print_time_information()=false;
+      m_print_time_information() = false;
     }
 
     /// \brief Get whether timing information is printed.
@@ -316,11 +266,9 @@ class logger
 
     /// Get access to the stream provided by the logger.
     /// \param[in] l Log level for the stream
-    /// \param[in] hint The hint for which the stream has to be provided.
-    std::ostringstream& get(const log_level_t l, const std::string& hint = default_hint())
+    std::ostringstream& get(const log_level_t l)
     {
       m_level = l;
-      m_hint = hint;
       std::time(&m_timestamp);
       return m_os;
     }
@@ -331,16 +279,15 @@ class formatter_interface
 public:
   /// \brief Format msg,
   /// \param[in] level The log level of the message
-  /// \param[in] hint The hint provided for the message
   /// \param[in] timestamp The timestamp of the log message
   /// \param[in] msg The message to be formatted
   /// \param[in] print_time_information A boolean that if true indicates that time usage information must be printed. If false this 
   ///                                   information is suppressed. 
   /// \return The formatted message (\a msg)
-  static std::string format(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg, const bool print_time_information)
+  static std::string format(const log_level_t level, const time_t timestamp, const std::string& msg, const bool print_time_information)
   {
     /// suppress non used variable warnings.
-    (void)level; (void)hint; (void)timestamp; (void)print_time_information;
+    (void)level; (void)timestamp; (void)print_time_information;
 
     return msg;
   }
@@ -357,35 +304,28 @@ protected:
   static
   bool& last_message_ended_with_newline()
   {
-    static bool m_last_message_ended_with_newline = true;
+    thread_local bool m_last_message_ended_with_newline = true;
     return m_last_message_ended_with_newline;
   }
 
   static
   bool& last_message_was_status()
   {
-    static bool m_last_message_was_status = false;
+    thread_local bool m_last_message_was_status = false;
     return m_last_message_was_status;
-  }
-
-  static
-  std::string& last_hint()
-  {
-    static std::string m_last_hint;
-    return m_last_hint;
   }
 
   static
   std::size_t& caret_pos()
   {
-    static std::size_t m_caret_pos = 0;
+    thread_local std::size_t m_caret_pos = 0;
     return m_caret_pos;
   }
 
   static
   std::size_t& last_caret_pos()
   {
-    static std::size_t m_last_caret_pos = 0;
+    thread_local std::size_t m_last_caret_pos = 0;
     return m_last_caret_pos;
   }
 
@@ -393,10 +333,9 @@ public:
   /// \brief Prefix each line in s with some extra information.
   /// The things that are added are:
   /// - current time
-  /// - hint
   /// - log level
   /// - indentation
-  static std::string format(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg, const bool print_time_information);
+  static std::string format(const log_level_t level, const time_t timestamp, const std::string& msg, const bool print_time_information);
 };
 
 /// \brief File output class.
@@ -405,33 +344,11 @@ public:
 class file_output: public output_policy
 {
   protected:
-    /// \brief Map hints to streams
-    /// This allows messages with different hints to be written to different output
-    /// streams.
-    static
-    std::map<std::string, FILE*>& hint_to_stream()
+    /// \brief Obtain the underlying stream used to print to a file.
+    static std::atomic<FILE*>& get_stream()
     {
-      static std::map<std::string, FILE*> m_hint_to_stream;
-      return m_hint_to_stream;
-    }
-
-    /// \brief Gets a stream handle for hint
-    /// \param[in] hint Hint for which to provide a stream handle.
-    FILE* get_stream(const std::string& hint)
-    {
-      std::map<std::string, FILE*>::iterator i = hint_to_stream().find(hint);
-      if(i == hint_to_stream().end())
-      {
-        i = hint_to_stream().find(logger::default_hint());
-      }
-      if (i == hint_to_stream().end())
-      {
-        return stderr;
-      }
-      else
-      {
-        return i->second;
-      }
+      static std::atomic<FILE*> g_stream(stderr);
+      return g_stream;
     }
 
   public:
@@ -440,36 +357,32 @@ class file_output: public output_policy
 
     virtual ~file_output()
     {}
-
-    /// \brief Set stream handle for a hint
+ 
     /// \param[in] stream A file handle
-    /// \param[in] hint The hint for which to set the handle to stream.
     static
-    void set_stream(FILE* stream, const std::string& hint = logger::default_hint())
+    void set_stream(FILE* stream)
     {
-      hint_to_stream()[hint] = stream;
+      get_stream() = stream;
     }
 
-    /// \overload
     /// Output message to stream.
     /// \param[in] level The log level on which to output the message
     /// \param[in] timestamp The timestamp to use for the message
     /// \param[in] msg The message to be printed
-    /// \param[in] hint The hint of the stream to which we print.
     /// \param[in] print_time_information A boolean that if true indicates that time usage information must be printed. If false this 
     ///                                   information is suppressed. 
     ///
     /// \note This uses fprintf (and not e.g. <<) because fprintf is guaranteed to be
     /// atomic.
-    virtual void output(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg, const bool print_time_information)
+    virtual void output(const log_level_t level, const time_t timestamp, const std::string& msg, const bool print_time_information) override
     {
-      FILE* p_stream = get_stream(hint);
+      FILE* p_stream = get_stream();
       if (!p_stream)
       {
         return;
       }
 
-      fprintf(p_stream, "%s", formatter::format(level, hint, timestamp, msg, print_time_information).c_str());
+      fprintf(p_stream, "%s", formatter::format(level, timestamp, msg, print_time_information).c_str());
       fflush(p_stream);
     }
 };
@@ -502,20 +415,13 @@ constexpr log_level_t MCRL2MaxLogLevel = mcrl2::log::debug;
 /// \returns True whenever the logging for the given level is enabled.
 constexpr bool mCRL2logEnabled(const log_level_t level)
 {
-  return level <= MCRL2MaxLogLevel && level <= mcrl2_logger::default_reporting_level();
-}
-
-/// \returns True whenever the logging for the given level and hint is enabled.
-constexpr bool mCRL2logEnabled(const log_level_t level, const std::string& hint)
-{
-  return level <= MCRL2MaxLogLevel && level <= mcrl2_logger::get_reporting_level(hint);
+  return level <= MCRL2MaxLogLevel && level <= info;
 }
 
   } // namespace log
 } // namespace mcrl2
 
-/// \brief mCRL2log(level) or mCRL2log(level, hint) provide the stream used to log.
-/// \details Uses variadic macros to allow mCRL2log(level) as well as mCRL2log(level, "hint").
-#define mCRL2log(...) if (mcrl2::log::mCRL2logEnabled(__VA_ARGS__)) mcrl2::log::mcrl2_logger().get(__VA_ARGS__)
+/// \brief mCRL2log(LEVEL) provides the stream used to log.
+#define mCRL2log(LEVEL) if (mcrl2::log::mCRL2logEnabled(LEVEL)) mcrl2::log::mcrl2_logger().get(LEVEL)
 
 #endif // MCRL2_UTILITIES_LOGGER_H

@@ -12,15 +12,13 @@
 using namespace mcrl2::gui;
 using namespace mcrl2::gui::qt;
 
-void LogRelay::output(const log_level_t level, 
-                      const std::string& hint, 
+void LogRelay::output(const log_level_t level,
                       const time_t timestamp, 
                       const std::string& msg, 
                       const bool /* print_time_information */)
 {
-  emit logMessage(QString::fromStdString(log_level_to_string(level)), 
-                  QString::fromStdString(hint), 
-                  QDateTime::fromSecsSinceEpoch(timestamp),
+  emit logMessage(QString::fromStdString(log_level_to_string(level)),
+                  QDateTime::fromSecsSinceEpoch(timestamp), 
                   QString::fromStdString(msg));
 }
 
@@ -29,7 +27,7 @@ LogWidget::LogWidget(QWidget *parent)
     m_ui(new Ui::LogWidget)
 {
   m_ui->setupUi(this);
-  connect(&m_relay, SIGNAL(logMessage(QString, QString, QDateTime, QString)), this, SLOT(writeMessage(QString, QString, QDateTime, QString)));
+  connect(&m_relay, SIGNAL(logMessage(QString,  QDateTime, QString)), this, SLOT(writeMessage(QString, QDateTime, QString)));
   mcrl2_logger::register_output_policy(m_relay);
 }
 

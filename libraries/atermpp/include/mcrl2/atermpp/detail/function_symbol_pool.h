@@ -13,6 +13,7 @@
 #include "mcrl2/atermpp/detail/function_symbol_hash.h"
 #include "mcrl2/utilities/cache_metric.h"
 #include "mcrl2/utilities/unordered_set.h"
+#include "mcrl2/utilities/mutex.h"
 
 namespace atermpp
 {
@@ -71,7 +72,9 @@ private:
     _function_symbol,
     function_symbol_hasher,
     function_symbol_equals,
-    std::allocator<_function_symbol>,
+    typename std::conditional_t<EnableBlockAllocator, 
+      mcrl2::utilities::block_allocator<_function_symbol, 1024, mcrl2::utilities::detail::GlobalThreadSafe>, 
+      std::allocator<_function_symbol>>,
     mcrl2::utilities::detail::GlobalThreadSafe,
     false>;
 
@@ -83,7 +86,7 @@ private:
   ///        prefix string is registered.
   std::map<std::string, std::shared_ptr<std::size_t>> m_prefix_to_register_function_map;
 
-  mutable std::mutex m_mutex; // Mutex for m_prefix_to_register_function_map.
+  mutable mcrl2::utilities::mutex m_mutex; // Mutex for m_prefix_to_register_function_map.
 
   // Default function symbols.
   function_symbol m_as_int;

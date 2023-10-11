@@ -308,18 +308,18 @@ void ATERM_POOL_STORAGE::print_performance_stats(const char* identifier) const
 {
   if (EnableHashtableMetrics)
   {
-    mCRL2log(mcrl2::log::info, "Performance") << "g_term_pool(" << identifier << ") hashtable:\n";
+    mCRL2log(mcrl2::log::info) << "g_term_pool(" << identifier << ") hashtable:\n";
     print_performance_statistics(m_term_set);
   }
 
   if (EnableGarbageCollectionMetrics && m_erasedBlocks > 0)
   {
-    mCRL2log(mcrl2::log::info, "Performance") << "g_term_pool(" << identifier << "): Consolidate removed " << m_erasedBlocks << " blocks.\n";
+    mCRL2log(mcrl2::log::info) << "g_term_pool(" << identifier << "): Consolidate removed " << m_erasedBlocks << " blocks.\n";
   }
 
   if (EnableCreationMetrics)
   {
-    mCRL2log(mcrl2::log::info, "Performance") << "g_term_pool(" << identifier << "): emplace() " << m_term_metric.message() << ".\n";
+    mCRL2log(mcrl2::log::info) << "g_term_pool(" << identifier << "): emplace() " << m_term_metric.message() << ".\n";
   }
 }
 

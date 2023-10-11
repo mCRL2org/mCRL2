@@ -21,7 +21,7 @@ namespace detail
 constexpr static bool EnableGarbageCollection = true;
 
 /// \brief Enable the block allocator for terms.
-constexpr static bool EnableBlockAllocator = false;
+constexpr static bool EnableBlockAllocator = true;
 
 /// \brief Enable to print garbage collection statistics.
 constexpr static bool EnableGarbageCollectionMetrics = false;

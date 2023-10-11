@@ -12,8 +12,6 @@
 #ifndef MCRL2_PBES_STRUCTURE_GRAPH_BUILDER_H
 #define MCRL2_PBES_STRUCTURE_GRAPH_BUILDER_H
 
-#include <shared_mutex>
-
 #include <mcrl2/atermpp/standard_containers/unordered_map.h>
 #include "mcrl2/pbes/pbessolve_vertex_set.h"
 
@@ -25,64 +23,32 @@ namespace detail {
 
 struct structure_graph_builder
 {
-  typedef structure_graph::index_type index_type;
+  using index_type = structure_graph::index_type;
 
   structure_graph& m_graph;
-  atermpp::unordered_map<pbes_expression, index_type> m_vertex_map;
+  atermpp::utilities::unordered_map<pbes_expression, 
+    index_type,
+    std::hash<atermpp::detail::reference_aterm<pbes_expression> >,
+    std::equal_to<atermpp::detail::reference_aterm<pbes_expression> >,
+    std::allocator< std::pair<const atermpp::detail::reference_aterm<pbes_expression>, atermpp::detail::reference_aterm<index_type> > >,
+    true> m_vertex_map;
   pbes_expression m_initial_state; // The initial state.
 
   explicit structure_graph_builder(structure_graph& G)
     : m_graph(G), m_initial_state(data::undefined_data_expression())
   {}
 
-  // Ensure that exclusive access is obtained before a reallocation happens.
-  void ensure_vertex_capacity(std::shared_mutex& realloc_mutex) {
-    std::size_t n = vertices().size() + 1;
-    std::size_t capacity = vertices().capacity();
-    if (n >= capacity) {
-      realloc_mutex.lock();
-      vertices().reserve(2 * capacity);
-      realloc_mutex.unlock();
-    }
-
-    capacity = m_vertex_map.max_load_factor() * m_vertex_map.bucket_count();
-    if (n >= capacity) {
-      realloc_mutex.lock();
-      m_vertex_map.reserve(2 * capacity);
-      realloc_mutex.unlock();
-    }
-  }
-
-  // Ensure that exclusive access is obtained before a reallocation happens.
-  void ensure_edge_capacity(std::shared_mutex& realloc_mutex, structure_graph::vertex& u, structure_graph::vertex& v) {
-    std::size_t n = u.successors.size() + 1;
-    std::size_t capacity = u.successors.capacity();
-    if (n >= capacity) {
-      realloc_mutex.lock();
-      u.successors.reserve(2 * capacity);
-      realloc_mutex.unlock();
-    }
-
-    n = v.predecessors.size() + 1;
-    capacity = v.predecessors.capacity();
-    if (n >= capacity) {
-      realloc_mutex.lock();
-      v.predecessors.reserve(2 * capacity);
-      realloc_mutex.unlock();
-    }
-  }
-
   std::size_t extent() const
   {
     return m_graph.extent();
   }
 
-  atermpp::vector<structure_graph::vertex>& vertices()
+  structure_graph::vertex_vector& vertices()
   {
     return m_graph.m_vertices;
   }
 
-  const atermpp::vector<structure_graph::vertex>& vertices() const
+  const structure_graph::vertex_vector& vertices() const
   {
     return m_graph.m_vertices;
   }
@@ -122,10 +88,10 @@ struct structure_graph_builder
     throw std::runtime_error("structure_graph_builder: encountered unsupported pbes_expression " + pp(x));
   }
 
-  index_type create_vertex(const pbes_expression& x, std::shared_mutex& realloc_mutex)
+  index_type create_vertex(const pbes_expression& x)
   {
     assert(m_vertex_map.find(x) == m_vertex_map.end());
-    ensure_vertex_capacity(realloc_mutex);
+
     vertices().emplace_back(x, decoration(x));
     index_type index = vertices().size() - 1;
     m_vertex_map.insert({ x, index });
@@ -133,10 +99,10 @@ struct structure_graph_builder
   }
 
   // insert the variable corresponding to the equation x = phi; overwrites existing value, but leaves pred/succ intact
-  index_type insert_variable(const pbes_expression& x, const pbes_expression& psi, std::size_t k, std::shared_mutex& realloc_mutex)
+  index_type insert_variable(const pbes_expression& x, const pbes_expression& psi, std::size_t k)
   {
     auto i = m_vertex_map.find(x);
-    index_type ui = i == m_vertex_map.end() ? create_vertex(x, realloc_mutex) : static_cast<unsigned int>(i->second);
+    index_type ui = i == m_vertex_map.end() ? create_vertex(x) : static_cast<unsigned int>(i->second);
     auto& u = vertex(ui);
     u.decoration = decoration(psi);
     u.rank = k;
@@ -144,7 +110,7 @@ struct structure_graph_builder
   }
 
   // insert the variable x; does not overwrite existing value
-  index_type insert_variable(const pbes_expression& x, std::shared_mutex& realloc_mutex)
+  index_type insert_variable(const pbes_expression& x)
   {
     auto i = m_vertex_map.find(x);
     if (i != m_vertex_map.end())
@@ -153,11 +119,11 @@ struct structure_graph_builder
     }
     else
     {
-      return create_vertex(x, realloc_mutex);
+      return create_vertex(x);
     }
   }
 
-  index_type insert_vertex(const pbes_expression& x, std::shared_mutex& realloc_mutex)
+  index_type insert_vertex(const pbes_expression& x)
   {
     // if the vertex already exists, return it
     auto i = m_vertex_map.find(x);
@@ -167,17 +133,16 @@ struct structure_graph_builder
     }
 
     // create a new vertex, and return it
-    return create_vertex(x, realloc_mutex);
+    return create_vertex(x);
   }
 
-  void insert_edge(index_type ui, index_type vi, std::shared_mutex& realloc_mutex)
+  void insert_edge(index_type ui, index_type vi)
   {
     using utilities::detail::contains;
     auto& u = vertex(ui);
     auto& v = vertex(vi);
     if (!contains(u.successors, vi))
     {
-      ensure_edge_capacity(realloc_mutex, u, v);
       u.successors.push_back(vi);
       v.predecessors.push_back(ui);
     }
@@ -274,7 +239,7 @@ struct manual_structure_graph_builder
   typedef structure_graph::index_type index_type;
 
   structure_graph& m_graph;
-  atermpp::vector<structure_graph::vertex> m_vertices;
+  structure_graph::vertex_vector m_vertices;
   index_type m_initial_state; // The initial state.
 
   explicit manual_structure_graph_builder(structure_graph& G)

@@ -105,7 +105,7 @@ class suminst_algorithm: public detail::lps_algorithm<Specification>
 
         try
         {
-          mCRL2log(log::debug, "suminst") << "enumerating variables " << vl << " in condition: " << data::pp(s.condition()) << std::endl;
+          mCRL2log(log::debug) << "enumerating variables " << vl << " in condition: " << data::pp(s.condition()) << std::endl;
           data::mutable_indexed_substitution<> local_sigma;
           m_enumerator.enumerate(enumerator_element(vl, s.condition()),
                                  local_sigma,
@@ -113,7 +113,7 @@ class suminst_algorithm: public detail::lps_algorithm<Specification>
                                  {
                                    mutable_indexed_substitution<> sigma;
                                    p.add_assignments(vl, sigma, m_rewriter);
-                                   mCRL2log(log::debug, "suminst") << "substitutions: " << sigma << std::endl;
+                                   mCRL2log(log::debug) << "substitutions: " << sigma << std::endl;
                                    SummandType t(s);
                                    t.summation_variables() = new_summation_variables;
                                    lps::rewrite(t, m_rewriter, sigma);
@@ -129,8 +129,8 @@ class suminst_algorithm: public detail::lps_algorithm<Specification>
           // If an error occurs in enumerating, remove all summands that
           // have been added to result thus far, and re-add the original.
           // This prevents problems e.g. in case of a sort without constructors.
-          mCRL2log(log::debug, "suminst") << "An error occurred in enumeration, removing already added summands, and keeping the original" << std::endl;
-          mCRL2log(log::debug, "suminst") << e.what() << std::endl;
+          mCRL2log(log::debug) << "An error occurred in enumeration, removing already added summands, and keeping the original" << std::endl;
+          mCRL2log(log::debug) << e.what() << std::endl;
 
           result.resize(result.size() - nr_summands);
           result.push_back(s);
@@ -193,7 +193,7 @@ class suminst_algorithm: public detail::lps_algorithm<Specification>
     {
       if(sorts.empty())
       {
-        mCRL2log(log::info, "suminst") << "an empty set of sorts to be unfolded was provided; defaulting to all finite sorts" << std::endl;
+        mCRL2log(log::info) << "an empty set of sorts to be unfolded was provided; defaulting to all finite sorts" << std::endl;
         m_sorts = finite_sorts(spec.data());
       }
     }

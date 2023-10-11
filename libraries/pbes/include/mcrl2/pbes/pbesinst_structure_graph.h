@@ -13,7 +13,6 @@
 #define MCRL2_PBES_PBESINST_STRUCTURE_GRAPH_H
 
 #include <iomanip>
-#include <shared_mutex>
 
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/join.h"
@@ -31,9 +30,9 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
   protected:
     detail::structure_graph_builder m_graph_builder;
 
-    void SG0(const propositional_variable_instantiation& X, const pbes_expression& psi, std::size_t k, std::shared_mutex& realloc_mutex)
+    void SG0(const propositional_variable_instantiation& X, const pbes_expression& psi, std::size_t k)
     {
-      auto vertex_phi = m_graph_builder.insert_variable(X, psi, k, realloc_mutex);
+      auto vertex_phi = m_graph_builder.insert_variable(X, psi, k);
       if (is_true(psi))
       {
         // skip
@@ -44,30 +43,30 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
       }
       else if (is_propositional_variable_instantiation(psi))
       {
-        auto vertex_psi = m_graph_builder.insert_variable(psi, realloc_mutex);
-        m_graph_builder.insert_edge(vertex_phi, vertex_psi, realloc_mutex);
+        auto vertex_psi = m_graph_builder.insert_variable(psi);
+        m_graph_builder.insert_edge(vertex_phi, vertex_psi);
       }
       else if (is_and(psi))
       {
         for (const pbes_expression& psi_i: split_and(psi))
         {
-          auto vertex_psi_i = SG1(psi_i, realloc_mutex);
-          m_graph_builder.insert_edge(vertex_phi, vertex_psi_i, realloc_mutex);
+          auto vertex_psi_i = SG1(psi_i);
+          m_graph_builder.insert_edge(vertex_phi, vertex_psi_i);
         }
       }
       else if (is_or(psi))
       {
         for (const pbes_expression& psi_i: split_or(psi))
         {
-          auto vertex_psi_i = SG1(psi_i, realloc_mutex);
-          m_graph_builder.insert_edge(vertex_phi, vertex_psi_i, realloc_mutex);
+          auto vertex_psi_i = SG1(psi_i);
+          m_graph_builder.insert_edge(vertex_phi, vertex_psi_i);
         }
       }
     }
 
-    structure_graph::index_type SG1(const pbes_expression& psi, std::shared_mutex& realloc_mutex)
+    structure_graph::index_type SG1(const pbes_expression& psi)
     {
-      auto vertex_psi = m_graph_builder.insert_vertex(psi, realloc_mutex);
+      auto vertex_psi = m_graph_builder.insert_vertex(psi);
       if (is_true(psi))
       {
         // skip
@@ -84,16 +83,16 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
       {
         for (const pbes_expression& psi_i: split_and(psi))
         {
-          auto vertex_psi_i = SG1(psi_i, realloc_mutex);
-          m_graph_builder.insert_edge(vertex_psi, vertex_psi_i, realloc_mutex);
+          auto vertex_psi_i = SG1(psi_i);
+          m_graph_builder.insert_edge(vertex_psi, vertex_psi_i);
         }
       }
       else if (is_or(psi))
       {
         for (const pbes_expression& psi_i: split_or(psi))
         {
-          auto vertex_psi_i = SG1(psi_i, realloc_mutex);
-          m_graph_builder.insert_edge(vertex_psi, vertex_psi_i, realloc_mutex);
+          auto vertex_psi_i = SG1(psi_i);
+          m_graph_builder.insert_edge(vertex_psi, vertex_psi_i);
         }
       }
       return vertex_psi;
@@ -122,7 +121,6 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
     {}
 
     void on_report_equation(const std::size_t /* thread_index */,
-                            std::shared_mutex& realloc_mutex,
                             const propositional_variable_instantiation& X,
                             const pbes_expression& psi,
                             std::size_t k
@@ -133,7 +131,7 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
       {
         m_graph_builder.set_initial_state(X);
       }
-      SG0(X, psi, k, realloc_mutex);
+      SG0(X, psi, k);
     }
 
     void run() override

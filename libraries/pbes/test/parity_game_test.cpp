@@ -26,6 +26,8 @@ using namespace mcrl2;
 
 void test_pbes(const std::string& pbes_spec, const bool expected_result)
 {
+  (void)expected_result;
+  
   pbes_system::pbes p = pbes_system::txt2pbes(pbes_spec);
   pbes_system::detail::parity_game_output pgg(p);
   pgg.run();

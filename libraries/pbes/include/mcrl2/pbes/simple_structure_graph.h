@@ -28,10 +28,10 @@ class simple_structure_graph
     typedef structure_graph::vertex vertex;
 
   protected:
-    const atermpp::vector<vertex>& m_vertices;
+    const structure_graph::vertex_vector& m_vertices;
 
   public:
-    explicit simple_structure_graph(const atermpp::vector<vertex>& vertices)
+    explicit simple_structure_graph(const structure_graph::vertex_vector& vertices)
       : m_vertices(vertices)
     {}
 
@@ -50,12 +50,12 @@ class simple_structure_graph
       return find_vertex(u).rank;
     }
 
-    const atermpp::vector<vertex>& vertices() const
+    const structure_graph::vertex_vector& vertices() const
     {
       return m_vertices;
     }
 
-    const atermpp::vector<vertex>& all_vertices() const
+    const structure_graph::vertex_vector& all_vertices() const
     {
       return m_vertices;
     }

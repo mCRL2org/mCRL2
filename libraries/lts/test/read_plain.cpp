@@ -19,7 +19,7 @@ using namespace mcrl2;
 using namespace mcrl2::lts;
 using namespace mcrl2::data;
 
-const std::string filename = "Testing/trace_plain.trc";
+const std::string filename = "trace_plain.trc";
 
 static bool read_trace(trace& t, const std::string& input_file)
 {

@@ -9212,6 +9212,7 @@ class specification_basic_type
 
         objectdatatype& object=objectIndex(process_instance_assignment(t).identifier());
 
+        // Now apply the assignment in this process to the obtained initial process and the distribution. 
         maintain_variables_in_rhs<mutable_map_substitution<> > sigma;
         for (const assignment& a: process_instance_assignment(t).assignments())
         {
@@ -9219,6 +9220,10 @@ class specification_basic_type
         }
 
         init=replace_variables_capture_avoiding_alt(init,sigma);
+        initial_stochastic_distribution = 
+                   stochastic_distribution(
+                         initial_stochastic_distribution.variables(),
+                         replace_variables_capture_avoiding_alt(initial_stochastic_distribution.distribution(), sigma));
 
         // Make the bound variables and parameters in this process unique.
 
@@ -9437,7 +9442,9 @@ class specification_basic_type
     /* The result are a list of action summands, deadlock summand, the parameters of this
        linear process and its initial values. A initial stochastic distribution that must
        precede the initial linear process and the ultimate delay condition of this
-       linear process that can be used or be ignored. */
+       linear process that can be used or be ignored. 
+
+    */
 
     void generateLPEmCRL(
       stochastic_action_summand_vector& action_summands,

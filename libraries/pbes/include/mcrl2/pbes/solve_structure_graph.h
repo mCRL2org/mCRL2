@@ -267,7 +267,7 @@ class solve_structure_graph_algorithm
       }
     }
 
-    static void insert_edge(atermpp::vector<structure_graph::vertex>& V, structure_graph::index_type ui, structure_graph::index_type vi)
+    static void insert_edge(structure_graph::vertex_vector& V, structure_graph::index_type ui, structure_graph::index_type vi)
     {
       using utilities::detail::contains;
       structure_graph::vertex& u = V[ui];
@@ -291,7 +291,7 @@ class solve_structure_graph_algorithm
       structure_graph::index_type init = G.initial_vertex();
 
       // V contains the vertices of G, but not the edges
-      atermpp::vector<vertex> V = G.all_vertices();
+      structure_graph::vertex_vector V = G.all_vertices();
       for (vertex& v: V)
       {
         v.successors.clear();
