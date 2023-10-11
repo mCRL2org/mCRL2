@@ -9,7 +9,7 @@
 /// \file linearization_test1.cpp
 /// \brief Add your file description here.
 
-#define BOOST_TEST_MODULE linearization_test1
+#define BOOST_TEST_MODULE linearization_test4
 #include <boost/test/included/unit_test.hpp>
 
 #ifndef MCRL2_SKIP_LONG_TESTS
@@ -22,166 +22,6 @@ using namespace mcrl2;
 using namespace mcrl2::lps;
 
 #include "utility.h"
-
-BOOST_AUTO_TEST_CASE(test_multiple_linearization_calls)
-{
-  // Parameter i should be removed
-  const std::string case_1(
-    "act a;\n\n"
-    "proc X(i: Nat) = a.X(i);\n\n"
-    "init X(2);\n");
-
-  // Parameter j should be removed
-  const std::string case_2(
-    "act a: Nat;\n\n"
-    "proc X(i,j: Nat) = a(i). X(i,j);\n\n"
-    "init X(0,1);\n");
-
-  // Parameter j should be removed
-  const std::string case_3(
-    "act a;\n\n"
-    "proc X(i,j: Nat)   = (i == 5) -> a. X(i,j);\n\n"
-    "init X(0,1);\n");
-
-  // Parameter j should be removed
-  const std::string case_4(
-    "act a;\n\n"
-    "proc X(i,j: Nat) = a@i.X(i,j);\n\n"
-    "init X(0,4);\n");
-
-  // Nothing should be removed
-  const std::string case_5(
-    "act a: Nat;\n"
-    "act b;\n\n"
-    "proc X(i,j,k: Nat) =  a(i).X(k,j,k) +\n"
-    "                         b.X(j,j,k);\n\n"
-    "init X(1,2,3);");
-
-  // Nothing should be removed
-  const std::string case_6(
-    "act act1, act2, act3: Nat;\n\n"
-    "proc X(i: Nat)   = (i <  5) -> act1(i).X(i+1) +\n"
-    "                   (i == 5) -> act3(i).Y(i, i);\n"
-    "     Y(i,j: Nat) = act2(j).Y(i,j+1);\n\n"
-    "init X(0);\n");
-
-  const std::string case_7(
-    "act act1, act2, act3: Nat;\n\n"
-    "proc X(i,z,j: Nat)   = (i <  5) -> act1(i)@z.X(i+1,z, j) +\n"
-    "                       (i == 5) -> act3(i).X(i, j, 4);\n\n"
-    "init X(0,5, 1);\n"
-  );
-
-  const std::string case_8(
-    "act a;\n"
-    "init sum t:Nat. a@t;\n"
-  );
-
-  // Check that rewriting of non explicitly declared lists
-  // works properly.
-  const std::string case_9
-  (
-    "act c;\n"
-    "init sum t:List(struct a | b) . c;\n"
-  );
-
-  stochastic_specification spec;
-  spec = linearise(case_1);
-  spec = linearise(case_2);
-  spec = linearise(case_3);
-  spec = linearise(case_4);
-  spec = linearise(case_5);
-  spec = linearise(case_6);
-  spec = linearise(case_7);
-  spec = linearise(case_8);
-  spec = linearise(case_9);
-}
-
-BOOST_AUTO_TEST_CASE(test_process_assignments)
-{
-  const std::string assignment_case_1
-  ("act a,b,c;"
-   "proc X(v:Nat)=a.X(v=3)+Y(1,2);"
-   "Y(v1:Nat, v2:Nat)=a.Y(v1=3)+b.X(5)+c.Y(v2=7);"
-   "init X(3);"
-  );
-
-  const std::string assignment_case_2
-  ("act a;"
-   "proc X(v:Nat)=a.Y(w=true);"
-   "Y(w:Bool)=a.X(v=0);"
-   "init X(v=3);"
-  );
-
-  const std::string assignment_case_3
-  ("act a;"
-   "    b:Nat;"
-   "proc X(v:Nat,w:List(Bool))=a.X(w=[])+"
-   "                         (v>0) ->b(v).X(v=max(v,0));"
-   "init X(v=3,w=[]);"
-
-  );
-
-  const std::string assignment_case_4
-  ("act a;"
-   "proc X(v:Pos,w:Nat)=sum w:Pos.a.X(v=w)+"
-   "                    sum u:Pos.a.X(v=u);"
-   "init X(3,4);"
-
-  );
-
-  const std::string assignment_case_5
-  ("act a;"
-   "proc X(v:Pos)=sum v:Pos.a@4.X();"
-   "init X(3);"
-  );
-
-  run_linearisation_test_case(assignment_case_1);
-  run_linearisation_test_case(assignment_case_2);
-  run_linearisation_test_case(assignment_case_3);
-  run_linearisation_test_case(assignment_case_4);
-  run_linearisation_test_case(assignment_case_5);
-}
-
-BOOST_AUTO_TEST_CASE(test_struct)
-{
-  std::string text =
-    "sort D = struct d1(Nat)?is_d1 | d2(arg2:Nat)?is_d2;\n"
-    "                                                   \n"
-    "init true->delta;                                  \n"
-    ;
-  run_linearisation_test_case(text);
-}
-
-BOOST_AUTO_TEST_CASE(test_lambda)
-{
-  run_linearisation_test_case(
-    "map select : (Nat -> Bool) # List(Nat) -> List(Nat);\n"
-    "var f : Nat -> Bool;\n"
-    "    x : Nat;\n"
-    "    xs : List(Nat);\n"
-    "eqn select(f,[]) = [];\n"
-    "    select(f,x|>xs) = if(f(x), x|>sxs, sxs) whr sxs = select(f, xs) end;\n"
-    "act a : Nat;\n"
-    "init sum n : Nat.\n"
-    "  (n in select(lambda x : Nat.x mod 2 == 0, [1, 2, 3])) -> a(n).delta;\n");
-}
-
-BOOST_AUTO_TEST_CASE(test_no_free_variables)
-{
-  const std::string no_free_variables_case_1(
-    "act a,b:Int;\n"
-    "proc P = sum y:Int . (y == 4) -> a(y)@y . b(y*2)@(y+1) . P;\n"
-    "init P;\n"
-  );
-
-  t_lin_options options;
-  options.noglobalvars = true;
-
-  stochastic_specification spec;
-  spec = linearise(no_free_variables_case_1, options);
-  BOOST_CHECK(spec.global_variables().empty());
-}
 
 // Here various testcases are checked, which have been used in
 // debugging the translation of the linearizer to the new data
@@ -438,38 +278,6 @@ BOOST_AUTO_TEST_CASE(various_case_26)
     "proc P=sum m:Nat.r(m).((m==1)->s1(m).P+(m==2)->P+P);\n"
     "init P;\n";
   run_linearisation_test_case(various_case_26);
-}
-
-// The following testcase exhibits a problem that occurred with sorts without explicit elements.
-// See bug report #1553. 
-BOOST_AUTO_TEST_CASE(bug_report_1553)
-{
-  const std::string report_1553=
-    "act  a: D;\n"
-    "sort D;\n"
-    "\n"
-    "proc X1 = sum d: D. a(d) . X1;\n"
-    "\n"
-    "init sum d1: D. a(d1) . X1;\n";
-  run_linearisation_test_case(report_1553);
-}
-
-// The following testcase showed a problem with typechecking where the ambiguous type 
-// of the function f was not detected. This problem cannot be linearised, due to a type problem. 
-BOOST_AUTO_TEST_CASE(bug_report_1576)
-{
-  const std::string report_1576=
-    "map\n"
-    "  f : Nat # Nat -> Nat;\n"
-    "  f : Nat -> Nat;\n"
-    "  g : Nat # Nat -> Nat;\n"
-    "  g : Nat -> Nat;\n"
-    "\n"
-    "eqn\n"
-    "  f = g;\n"
-    "\n"
-    "init delta;\n";
-  run_linearisation_test_case(report_1576, false);
 }
 
 #else // ndef MCRL2_SKIP_LONG_TESTS
