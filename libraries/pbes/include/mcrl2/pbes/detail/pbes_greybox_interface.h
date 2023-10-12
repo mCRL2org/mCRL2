@@ -88,7 +88,7 @@ namespace detail {
       initialize_generation();
 
       std::set<pbes_expression> result;
-      mCRL2log(log::debug, "pbes_greybox_interface") << "Generating equation for expression " << phi << std::endl;
+      mCRL2log(log::debug) << "Generating equation for expression " << phi << std::endl;
 
       // expand the right hand side if needed
       pbes_expression psi = expand_rhs(phi);
@@ -132,7 +132,7 @@ namespace detail {
       {
         throw(std::runtime_error("Error in pbes_greybox_interface: unexpected expression " + pbes_system::pp(psi) + "\n" + pp(psi)));
       }
-      mCRL2log(log::debug, "pbes_greybox_interface") << print_successors(result);
+      mCRL2log(log::debug) << print_successors(result);
       return result;
     }
 
@@ -150,7 +150,7 @@ namespace detail {
       {
         const pbes_equation& pbes_eqn = *m_pbes_equation_index[atermpp::down_cast<propositional_variable_instantiation>(psi).name()];
 
-        mCRL2log(log::debug2, "pbes_greybox_interface") << "Expanding right hand side of formula " << psi << std::endl << "  rhs: " << expr << " into ";
+        mCRL2log(log::debug2) << "Expanding right hand side of formula " << psi << std::endl << "  rhs: " << expr << " into ";
 
         pbes_expression result;
 
@@ -158,7 +158,7 @@ namespace detail {
         make_substitution(pbes_eqn.variable().parameters(), atermpp::down_cast<propositional_variable_instantiation>(psi).parameters(),sigma);
         result = pbes_rewriter(expr,sigma);
 
-        mCRL2log(log::debug2, "pbes_greybox_interface") << result << std::endl;
+        mCRL2log(log::debug2) << result << std::endl;
         return result;
       }
       return psi;
@@ -194,7 +194,7 @@ namespace detail {
       initialize_generation();
 
       std::set<pbes_expression> result;
-      mCRL2log(log::debug, "pbes_greybox_interface") << "Generating equation for expression "  << phi << " (var = " << var
+      mCRL2log(log::debug) << "Generating equation for expression "  << phi << " (var = " << var
                                                                                                << ", expr = " << expr << ")" <<std::endl;
 
       assert(is_propositional_variable_instantiation(phi));
@@ -245,7 +245,7 @@ namespace detail {
           throw(std::runtime_error("Error in pbes_greybox_interface: unexpected expression " + pbes_system::pp(psi)));
         }
       }
-      mCRL2log(log::debug, "pbes_greybox_interface") << print_successors(result);
+      mCRL2log(log::debug) << print_successors(result);
       return result;
     }
 

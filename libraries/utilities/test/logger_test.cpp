@@ -13,6 +13,8 @@
 
 #include "mcrl2/utilities/logger.h"
 
+#include <thread>
+
 using namespace mcrl2::log;
 
 void print_all_log_levels()
@@ -73,18 +75,6 @@ BOOST_AUTO_TEST_CASE(test_logging_multiline)
                  << "the last last line" << std::endl;
 }
 
-BOOST_AUTO_TEST_CASE(test_logging_hint)
-{
-  mcrl2_logger::set_reporting_level(info);
-  mCRL2log(debug, "test_hint") << "Testing hint, should not be printed" << std::endl;
-  mcrl2_logger::set_reporting_level(debug, "test_hint");
-  mCRL2log(debug, "test_hint") << "Testing hint, should be printed" << std::endl;
-  mCRL2log(debug) << "Testing hint, should not be printed" << std::endl;
-  mcrl2_logger::set_reporting_level(verbose, "test_hint");
-  mCRL2log(info) << "Testing hint, should still be printed" << std::endl;
-  mcrl2_logger::clear_reporting_level("test_hint");
-}
-
 BOOST_AUTO_TEST_CASE(test_file_logging)
 {
   FILE * pFile;
@@ -143,4 +133,19 @@ BOOST_AUTO_TEST_CASE(test_multiline_nonewline)
 BOOST_AUTO_TEST_CASE(test_enabled_constexpr)
 {
   static_assert(!mCRL2logEnabled(debug3), "This function should evaluate to false at compile time.");
+}
+
+BOOST_AUTO_TEST_CASE(test_parallel_logging)
+{
+  std::vector<std::thread> threads;
+
+  for (int i = 0; i < 10; ++i) {
+    threads.emplace_back([]() {
+      mCRL2log(info) << "A message";
+    });
+  }
+
+  for (auto& thread : threads) {
+    thread.join();
+  }
 }

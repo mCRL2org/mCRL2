@@ -80,7 +80,7 @@ class uncompiled_library : public dynamic_library
           std::string line(buf);
           assert(*line.rbegin() == '\n');
           line.erase(line.size() - 1);
-          mCRL2log(mcrl2::log::debug, "uncompiled_library") << "  Read line: " << line << std::endl;
+          mCRL2log(mcrl2::log::debug) << "  Read line: " << line << std::endl;
           
           // Check that reported file exists. If not, produce error message and
           // flush script output to the log.
@@ -102,7 +102,7 @@ class uncompiled_library : public dynamic_library
             // On OSX, interrupts sometimes arrive during the call to read(), which
             // is called by fgets. If an interrupt arrives, we just ignore it
             // an clear the error status of the stream, and try again.
-            mCRL2log(mcrl2::log::debug, "uncompiled_library") << "Reading was interrupted. Clearing error status and retrying" << std::endl;
+            mCRL2log(mcrl2::log::debug) << "Reading was interrupted. Clearing error status and retrying" << std::endl;
             perror("Error according to errno");
             clearerr(stream);
         }
@@ -136,7 +136,7 @@ class uncompiled_library : public dynamic_library
         }
         else
         {
-           mCRL2log(mcrl2::log::debug, "uncompiled_library") << "Temporary file '" << *f << "' deleted." << std::endl;
+           mCRL2log(mcrl2::log::debug) << "Temporary file '" << *f << "' deleted." << std::endl;
         }
       }
     }

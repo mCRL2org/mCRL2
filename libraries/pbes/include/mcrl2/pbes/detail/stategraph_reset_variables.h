@@ -36,7 +36,7 @@ struct reset_variable_builder: public pbes_expression_builder<reset_variable_bui
   template <class T>
   void apply(T& result, const propositional_variable_instantiation& x)
   {
-    mCRL2log(log::debug, "stategraph") << "<reset>" << pbes_system::pp(x) << " -> " << pbes_system::pp(*i) << std::endl;
+    mCRL2log(log::debug) << "<reset>" << pbes_system::pp(x) << " -> " << pbes_system::pp(*i) << std::endl;
     result = *i++;
   }
 };

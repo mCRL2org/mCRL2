@@ -30,13 +30,12 @@ namespace mcrl2 {
   }
 
   std::string formatter::format(const log_level_t level, 
-                                const std::string& hint, 
                                 const time_t timestamp, 
                                 const std::string& msg,
                                 const bool print_time_information)
   {
     // Construct the message header, with or without time and debug level info.
-    const log_level_t default_level=logger::get_reporting_level(hint);
+    const log_level_t default_level=logger::get_reporting_level();
     const bool print_log_level= level==error || level > verbose || default_level>=debug;
     std::stringstream start_of_line;
     if (print_time_information || print_log_level)
@@ -53,9 +52,7 @@ namespace mcrl2 {
     }
     if (print_log_level)
     {
-      start_of_line << hint
-                    << (hint == std::string()?"":"::")
-                    << log_level_to_string(level);
+      start_of_line << log_level_to_string(level);
     }
     if (print_time_information || print_log_level)
     {
@@ -80,7 +77,7 @@ namespace mcrl2 {
     bool overwrite = false;
     if (last_message_was_status())
     {
-      if (level == status && hint == last_hint())
+      if (level == status)
       {
         if (last_message_ended_with_newline())
         {
@@ -157,7 +154,6 @@ namespace mcrl2 {
     if (level == status)
     {
       last_message_was_status() = msg != "\n";
-      last_hint() = hint;
     }
     else
     {

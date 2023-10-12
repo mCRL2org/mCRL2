@@ -205,8 +205,8 @@ void thread_aterm_pool::print_local_performance_statistics() const
 {
   if constexpr (EnableVariableRegistrationMetrics)
   {
-    mCRL2log(mcrl2::log::info, "Performance") << "thread_aterm_pool: " << m_variables->size() << " variables in root set (" << m_variable_insertions << " total insertions)"
-                                              << " and " << m_containers->size() << " containers in root set (" << m_container_insertions << " total insertions).\n";
+    mCRL2log(mcrl2::log::info) << "thread_aterm_pool: " << m_variables->size() << " variables in root set (" << m_variable_insertions << " total insertions)"
+                               << " and " << m_containers->size() << " containers in root set (" << m_container_insertions << " total insertions).\n";
   }
 }
 

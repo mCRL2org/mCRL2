@@ -13,13 +13,12 @@ endmacro()
 
 function(_add_library_tests TARGET_NAME)
   file(GLOB librarytest "test/*.cpp")
-  file(GLOB libraryexample "example/*.cpp")
 
   if(MCRL2_SKIP_LONG_TESTS)
     add_definitions(-DMCRL2_SKIP_LONG_TESTS)
   endif(MCRL2_SKIP_LONG_TESTS)
 
-  foreach(category "librarytest" "libraryexample")
+  foreach(category "librarytest")
     foreach(test IN LISTS ${category})
 
       get_filename_component(base ${test} NAME_WE)
@@ -33,20 +32,10 @@ function(_add_library_tests TARGET_NAME)
         target_compile_definitions(${testname} PUBLIC -DMCRL2_TEST_JITTYC)
       endif()
 
-      if("${category}" STREQUAL "librarytest")
-        add_test(NAME ${testname} COMMAND ${CMAKE_CTEST_COMMAND}
-           --build-and-test
-           "${CMAKE_SOURCE_DIR}"
-           "${CMAKE_BINARY_DIR}"
-           --build-noclean
-           --build-nocmake
-           --build-generator "${CMAKE_GENERATOR}"
-           --build-target "${testname}"
-           --build-makeprogram "${CMAKE_MAKE_PROGRAM}"
-           --test-command "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${category}/${testname}"
-        )
+      if(CMAKE_CONFIGURATION_TYPES)
+        add_test(NAME ${testname} COMMAND "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${category}/$<CONFIG>/${testname}")
       else()
-        add_test(NAME ${testname} COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target ${testname})
+        add_test(NAME ${testname} COMMAND "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${category}/${testname}")
       endif()
 
       target_link_libraries(${testname} Threads::Threads)

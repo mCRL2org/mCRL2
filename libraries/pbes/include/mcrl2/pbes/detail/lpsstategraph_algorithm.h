@@ -106,7 +106,7 @@ class lpsstategraph_algorithm: public local_reset_variables_algorithm
     // Applies resetting of variables to the original PBES p.
     void reset_variables_to_original(lps::specification& lpsspec)
     {
-      mCRL2log(log::debug, "stategraph") << "=== resetting variables to the original LPS ---" << std::endl;
+      mCRL2log(log::debug) << "=== resetting variables to the original LPS ---" << std::endl;
 
       stategraph_equation& eqn = m_pbes.equations().front();
       lps_reset_variables(*this, eqn.formula(), eqn, lpsspec.process().process_parameters(), lpsspec.process().action_summands());

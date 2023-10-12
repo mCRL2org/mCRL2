@@ -53,7 +53,7 @@ class stategraph_global_algorithm: public stategraph_algorithm
     // Returns k such that cfp[k] == l. Throws an exception if no such k exists.
     std::size_t unproject(const predicate_variable& Yf, const std::vector<std::size_t>& cfp, std::size_t l) const
     {
-      mCRL2log(log::debug1, "stategraph") << "stategraph_global_algorithm::unproject: cfp = " << core::detail::print_list(cfp) << " l = " << l << std::endl;
+      mCRL2log(log::debug1) << "stategraph_global_algorithm::unproject: cfp = " << core::detail::print_list(cfp) << " l = " << l << std::endl;
       for (std::size_t k = 0; k < cfp.size(); k++)
       {
         if (Yf.copy(cfp[k]) == l)
@@ -72,25 +72,25 @@ class stategraph_global_algorithm: public stategraph_algorithm
       auto const& cfp_X = eq_X.control_flow_parameter_indices();
       auto const& cfp_Y = eq_Y.control_flow_parameter_indices();
 
-      mCRL2log(log::debug1, "stategraph") << "compute_vertex u = (X, e) = (" << X << ", " << core::detail::print_list(e) << "), Y(f) = " << Yf << std::endl;
-      mCRL2log(log::debug1, "stategraph") << "cfp_X = " << core::detail::print_list(cfp_X) << std::endl;
-      mCRL2log(log::debug1, "stategraph") << "cfp_Y = " << core::detail::print_list(cfp_Y) << std::endl;
+      mCRL2log(log::debug1) << "compute_vertex u = (X, e) = (" << X << ", " << core::detail::print_list(e) << "), Y(f) = " << Yf << std::endl;
+      mCRL2log(log::debug1) << "cfp_X = " << core::detail::print_list(cfp_X) << std::endl;
+      mCRL2log(log::debug1) << "cfp_Y = " << core::detail::print_list(cfp_Y) << std::endl;
 
       for (std::size_t l = 0; l < cfp_Y.size(); l++)
       {
         auto q = Yf.target(cfp_Y[l]);
         if (q != data::undefined_data_expression())
         {
-          mCRL2log(log::debug1, "stategraph") << "q = " << q << std::endl;
+          mCRL2log(log::debug1) << "q = " << q << std::endl;
           f.push_back(q);
         }
         else
         {
-          mCRL2log(log::debug1, "stategraph") << "q = undefined" << std::endl;
+          mCRL2log(log::debug1) << "q = undefined" << std::endl;
           // Compute k such that (X, k) and (Y, l) are related. This implies copy(X, i, cfp_X[k]) == cfp_Y[l].
           //                                                                 Yf.copy[cfp_X[k]] = cfp_Y[l]
           auto p = cfp_Y[l];
-          mCRL2log(log::debug2, "stategraph") << "Yf = " << Yf << "\n" << Yf.print() << " l = " << l << " Yf.copy(" << l << ") = " << p << std::endl;
+          mCRL2log(log::debug2) << "Yf = " << Yf << "\n" << Yf.print() << " l = " << l << " Yf.copy(" << l << ") = " << p << std::endl;
           assert(p != data::undefined_index());
           std::size_t k = unproject(Yf, cfp_X, p);
           assert(k < e.size());
@@ -120,7 +120,7 @@ class stategraph_global_algorithm: public stategraph_algorithm
       using utilities::detail::contains;
       using utilities::detail::pick_element;
 
-      mCRL2log(log::debug, "stategraph") << "=== compute control flow graph ===" << std::endl;
+      mCRL2log(log::debug) << "=== compute control flow graph ===" << std::endl;
       std::set<const global_control_flow_graph_vertex*> todo;
       std::set<const global_control_flow_graph_vertex*> done;
 
@@ -139,7 +139,7 @@ class stategraph_global_algorithm: public stategraph_algorithm
         auto const& eq_X = *find_equation(m_pbes, X);
         auto const& predvars = eq_X.predicate_variables();
 
-        mCRL2log(log::debug1, "stategraph") << "choose todo element " << u << std::endl;
+        mCRL2log(log::debug1) << "choose todo element " << u << std::endl;
 
         for (std::size_t i = 0; i < predvars.size(); i++)
         {
@@ -152,7 +152,7 @@ class stategraph_global_algorithm: public stategraph_algorithm
             m_control_flow_graph.insert_edge(u, i, v);
             if (!contains(done, &v))
             {
-              mCRL2log(log::debug1, "stategraph") << "insert todo element " << v << std::endl;
+              mCRL2log(log::debug1) << "insert todo element " << v << std::endl;
               todo.insert(&v);
               done.insert(&v);
             }

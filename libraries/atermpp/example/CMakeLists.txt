@@ -19,7 +19,7 @@ set(PREFIX "example_atermpp")
 set(PROJECT_NAME "${PREFIX}_algorithm")
 project( ${PROJECT_NAME} )
 
-add_executable("${PROJECT_NAME}" EXCLUDE_FROM_ALL
+add_executable("${PROJECT_NAME}"
   algorithm.cpp
 )
 
