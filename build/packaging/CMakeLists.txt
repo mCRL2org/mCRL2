@@ -199,10 +199,10 @@ endif()
 # -------
 
 if (WIN32)
-  find_program(WINDEPLOYQT NAMES "windeployqt" PATHS "${Qt6_DIR}/../../../bin/" DOC "Path to windeployqt executable (in the Qt binary directory)" REQUIRED)
+  find_program(WINDEPLOYQT_EXECUTABLE NAMES "windeployqt" PATHS "${Qt6_DIR}/../../../bin/" DOC "Path to windeployqt executable (in the Qt binary directory)" REQUIRED)
   foreach(EXECUTABLE ${MCRL2_QT_APPS})
     install(CODE "
-      message(STATUS \"Executing ${WINDEPLOYQT} ${EXECUTABLE} in directory \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${MCRL2_RUNTIME_PATH}\")
+      message(STATUS \"Executing ${WINDEPLOYQT_EXECUTABLE} ${EXECUTABLE} in directory \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${MCRL2_RUNTIME_PATH}\")
       execute_process(
         COMMAND ${WINDEPLOYQT} --no-translations --no-system-d3d-compiler --no-quick-import ${EXECUTABLE}.exe
         WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${MCRL2_RUNTIME_PATH}
