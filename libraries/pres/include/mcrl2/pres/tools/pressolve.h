@@ -100,6 +100,10 @@ class pressolve_tool
         throw mcrl2::runtime_error("Option --precision (-p) can only be used in combination with --algorithm=numerical.");
       }   
       options.precision = std::stol(parser.option_argument("precision"));
+      if (options.precision>std::numeric_limits<double>::digits10)
+      {
+        throw mcrl2::runtime_error("Precision " + std::to_string(options.precision) + " is too large. ");
+      }
     }
   }
 
@@ -154,7 +158,7 @@ class pressolve_tool
     {
       ressolve_by_numerical_iteration solver(options, resulting_res);
       double result = solver.run();
-      std::cout << "Solution: " << result << std::endl;
+      std::cout << "Solution: " << std::setprecision(options.precision) << result << std::endl;
     }  
     timer().finish("solving");
     return true;

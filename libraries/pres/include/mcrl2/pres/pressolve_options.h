@@ -27,7 +27,7 @@ struct pressolve_options
   bool replace_constants_by_variables = false;
   bool remove_unused_rewrite_rules = false;
   solution_algorithm algorithm = gauss_elimination;
-  std::size_t precision = 3; // Yield an answer with a precision of at most 10^-precision.
+  std::size_t precision = 10; // Yield an answer with a precision of at most 10^-precision.
 };
 
 inline

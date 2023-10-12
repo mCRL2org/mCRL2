@@ -123,7 +123,7 @@ class ressolve_by_numerical_iteration
 // std::cerr << "Next solution0 " << m_new_solution[m_equations[0].variable().name()] << "\n";
 // std::cerr << "Next solution1 " << m_new_solution[m_equations[1].variable().name()] << "\n";
 // std::cerr << "Next solution2 " << m_new_solution[m_equations[2].variable().name()] << "\n";
-      return error<pow(0.1,m_options.precision);
+      return error<=pow(0.1,m_options.precision);
     }
 
     void calculate_new_solution(std::size_t base_equation_index, std::size_t to)
