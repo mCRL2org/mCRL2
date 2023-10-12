@@ -264,6 +264,32 @@ std::string positive_constant_as_string(const data_expression& n_in)
 
   return detail::vector_number_to_string(result);
 }
+
+/// \brief Returns the NUMERIC_TYPE representation of a positive number
+/// \param n_in A data expression
+/// \pre is_positive_constant(n)
+/// \return Representation of n as sort NUMERIC_TYPE
+/// Transforms a positive constant n into number of sort NUMERIC_TYPE. Throws an exception when it does not fit. 
+/// the decimal representation of n.
+template <class NUMERIC_TYPE>
+inline
+NUMERIC_TYPE positive_constant_to_value(const data_expression& n)
+{
+  if (sort_pos::is_cdub_application(n))
+  {
+    NUMERIC_TYPE result = 2*positive_constant_to_value<NUMERIC_TYPE>(sort_pos::right(n));
+    if (sort_bool::is_true_function_symbol(sort_pos::left(n)))
+    {
+      result=result+1;
+    }
+    return result;
+  }
+
+  assert(sort_pos::is_c1_function_symbol(n));
+
+  return static_cast<NUMERIC_TYPE>(1);
+}
+
 } // namespace sort_pos
 
 namespace sort_nat
@@ -312,6 +338,24 @@ inline std::string natural_constant_as_string(const data_expression& n)
   else
   {
     return sort_pos::positive_constant_as_string(sort_nat::arg(n));
+  }
+}
+
+/// \brief Return the NUMERIC_VALUE representation of a natural number
+/// \param n A data expression
+/// \pre is_natural_constant(n)
+/// \return NUMERIC_VALUE representation of n
+template <class NUMERIC_VALUE>
+inline NUMERIC_VALUE natural_constant_to_value(const data_expression& n)
+{
+  assert(is_natural_constant(n));
+  if (sort_nat::is_c0_function_symbol(n))
+  {
+    return static_cast<NUMERIC_VALUE>(0);
+  }
+  else
+  {
+    return sort_pos::positive_constant_to_value<NUMERIC_VALUE>(sort_nat::arg(n));
   }
 }
 } // namespace sort_nat
@@ -378,6 +422,24 @@ inline std::string integer_constant_as_string(const data_expression& n)
     return "-" + sort_pos::positive_constant_as_string(sort_int::arg(n));
   }
 }
+
+/// \brief Return the NUMERIC_VALUE representation of an integer number
+/// \param n A data expression
+/// \pre is_integer_constant(n)
+/// \return NUMERIC_VALUE representation of n
+template <class NUMERIC_VALUE>
+inline NUMERIC_VALUE integer_constant_to_value(const data_expression& n)
+{
+  assert(is_integer_constant(n));
+  if (sort_int::is_cint_application(n))
+  {
+    return sort_nat::natural_constant_to_value<NUMERIC_VALUE>(sort_int::arg(n));
+  }
+  else
+  {
+    return -sort_pos::positive_constant_to_value<NUMERIC_VALUE>(sort_int::arg(n));
+  }
+}
 } // namespace sort_int
 
 namespace sort_real
@@ -408,6 +470,20 @@ inline data_expression real_(const std::string& n)
 {
   return sort_real::creal(sort_int::int_(n), sort_pos::c1());
 }
+
+/// \brief Yields the real value of a data expression.
+/// \param r A data expression of sort real in normal form.
+inline double value(const data_expression& r)
+{
+  if (is_creal_application(r))
+  {
+    const application& a = atermpp::down_cast<application>(r);
+    return sort_int::integer_constant_to_value<double>(a[0]) / 
+           sort_pos::positive_constant_to_value<double>(a[1]);
+  }
+  throw runtime_error("Expected a term of the shape @cReal(r1, r2) " + pp(r) + ".");
+}
+
 } // namespace sort_real
 
 /// \brief Construct numeric expression from a string representing a number in decimal notation
