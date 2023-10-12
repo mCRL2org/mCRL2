@@ -196,13 +196,13 @@ struct e_traverser: public state_formulas::state_formula_traverser<Derived>
   void apply(const state_formulas::nu& x)
   {
     apply_mu_nu(x, fixpoint_symbol::nu());
-    mCRL2log(log::debug1, "lps2pres") << "E(" << x << ") = " << core::detail::print_list(top()) << std::endl;
+    mCRL2log(log::debug1) << "E(" << x << ") = " << core::detail::print_list(top()) << std::endl;
   }
 
   void apply(const state_formulas::mu& x)
   {
     apply_mu_nu(x, fixpoint_symbol::mu());
-    mCRL2log(log::debug1, "lps2pres") << "E(" << x << ") = " << core::detail::print_list(top()) << std::endl;
+    mCRL2log(log::debug1) << "E(" << x << ") = " << core::detail::print_list(top()) << std::endl;
   }
 };
 
