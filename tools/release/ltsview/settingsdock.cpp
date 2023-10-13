@@ -45,10 +45,6 @@ SettingsDock::SettingsDock(QWidget *parent, Settings *settings):
   setupSpinbox(m_ui.branchRotation, m_settings->branchRotation);
   setupSpinbox(m_ui.branchTilt, m_settings->branchTilt);
 
-  connect(m_ui.accuracy, SIGNAL(valueChanged(int)), this, SLOT(accuracyChanged(int)));
-  connect(&m_settings->quality, SIGNAL(changed(int)), this, SLOT(setAccuracy(int)));
-  setAccuracy(m_settings->quality.value());
-
   new ComboboxHandler(m_ui.stateRanking, m_settings->stateRankStyleCyclic);
   new ComboboxHandler(m_ui.clusterPositioning, m_settings->fsmStyle);
   new ComboboxHandler(m_ui.statePositioning, m_settings->statePosStyleMultiPass);
@@ -73,16 +69,6 @@ void SettingsDock::clusterHeightChanged(int value)
 void SettingsDock::setClusterHeight(float value)
 {
   m_ui.clusterHeight->setValue((int)(value * 10.0f));
-}
-
-void SettingsDock::accuracyChanged(int value)
-{
-  m_settings->quality.setValue(value * 2);
-}
-
-void SettingsDock::setAccuracy(int value)
-{
-  m_ui.accuracy->setValue(value / 2);
 }
 
 void SettingsDock::setupSpinbox(QSpinBox *spinbox, Settings::SettingInt &setting)

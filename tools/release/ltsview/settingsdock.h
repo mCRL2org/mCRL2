@@ -42,8 +42,6 @@ class SettingsDock : public QWidget
     void setStateSize(float value);
     void clusterHeightChanged(int value);
     void setClusterHeight(float value);
-    void accuracyChanged(int value);
-    void setAccuracy(int value);
 
   private:
     void setupSpinbox(QSpinBox *spinbox, Settings::SettingInt &setting);

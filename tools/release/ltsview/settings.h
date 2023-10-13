@@ -59,7 +59,7 @@ struct Settings
     clusterHeight(0.0f),
     branchRotation(0),
     branchTilt(30),
-    quality(12),
+    quality(32),
     transparency(30),
     backgroundColor(QColor(150, 150, 150)),
     stateColor(QColor(255, 255, 255)),

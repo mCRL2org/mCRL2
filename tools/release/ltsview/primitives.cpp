@@ -17,6 +17,8 @@
 #include <cassert>
 #include "mathutils.h"
 
+#include "mcrl2/utilities/logger.h"
+
 using namespace MathUtils;
 
 /* -------- P_Sphere -------------------------------------------------------- */
@@ -40,8 +42,8 @@ void P_Sphere::reshape(int N,float* coss,float* sins)
 {
   assert(N>0);
   int i,j,k,l;
-  GLfloat* vertices = (GLfloat*)malloc(3*((N-1)*N+2)*sizeof(GLfloat));
-  GLfloat* texCoords = (GLfloat*)malloc(((N-1)*N+2)*sizeof(GLfloat));
+  std::vector<GLfloat> vertices(3*((N-1)*N+2));
+  std::vector<GLfloat> texCoords(((N-1)*N+2));
 
   vertices[0] = 0;
   vertices[1] = 0;
@@ -69,9 +71,7 @@ void P_Sphere::reshape(int N,float* coss,float* sins)
   texCoords[l] = 0;
 
   int M = N+2;
-
-  GLuint* is_bot = (GLuint*)malloc(M*sizeof(GLuint));
-
+  std::vector<GLuint> is_bot(M);
 
   is_bot[0] = 0;
   is_bot[1] = 1;
@@ -83,7 +83,8 @@ void P_Sphere::reshape(int N,float* coss,float* sins)
 
   }
 
-  GLuint* is_mid = (GLuint*)malloc((N-2)*(2*N+2)*sizeof(GLuint));
+  
+  std::vector<GLuint> is_mid((N-2)*(2*N+2));
   i = 0;
   for (j=N+1; j<=(N-2)*N+1; j+=N)
   {
@@ -98,7 +99,7 @@ void P_Sphere::reshape(int N,float* coss,float* sins)
     i += 2;
   }
 
-  GLuint* is_top = (GLuint*)malloc(M*sizeof(GLuint));
+  std::vector<GLuint> is_top(M);
   j = (N-2)*N;
   is_top[0] = j + N + 1;
   i = 1;
@@ -114,26 +115,25 @@ void P_Sphere::reshape(int N,float* coss,float* sins)
   {
     disp_list = glGenLists(1);
   }
+    
   glEnableClientState(GL_VERTEX_ARRAY);
   glEnableClientState(GL_NORMAL_ARRAY);
   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-  glVertexPointer(3,GL_FLOAT,0,vertices);
-  glNormalPointer(GL_FLOAT,0,vertices);
-  glTexCoordPointer(1, GL_FLOAT, 0, texCoords);
+
+  glVertexPointer(3,GL_FLOAT,0,vertices.data());
+  glNormalPointer(GL_FLOAT,0,vertices.data());
+  glTexCoordPointer(1, GL_FLOAT, 0, texCoords.data());
+
   glNewList(disp_list,GL_COMPILE);
-  glDrawElements(GL_TRIANGLE_FAN,M,GL_UNSIGNED_INT,is_bot);
-  glDrawElements(GL_TRIANGLE_FAN,M,GL_UNSIGNED_INT,is_top);
+  //glDrawElements(GL_TRIANGLE_FAN,M,GL_UNSIGNED_INT,is_bot.data());
+  //glDrawElements(GL_TRIANGLE_FAN,M,GL_UNSIGNED_INT,is_top.data());
+
   M += N;
   for (int i=0; i<N-2; ++i)
   {
-    glDrawElements(GL_QUAD_STRIP,M,GL_UNSIGNED_INT,is_mid + i*M);
+    //glDrawElements(GL_QUAD_STRIP,M,GL_UNSIGNED_INT,is_mid.data() + i*M);
   }
   glEndList();
-  free(vertices);
-  free(texCoords);
-  free(is_bot);
-  free(is_mid);
-  free(is_top);
 }
 
 /* -------- P_SimpleSphere -------------------------------------------------- */
@@ -231,8 +231,8 @@ void P_Hemisphere::reshape(int N,float* coss,float* sins)
   assert(N>0);
   int Ndiv2 = N / 2;
   int i,j,k,l;
-  GLfloat* vertices = (GLfloat*)malloc(3 * (N * Ndiv2 + 1) * sizeof(GLfloat));
-  GLfloat* texCoords = (GLfloat*)malloc((N*Ndiv2 + 2) * sizeof(GLfloat));
+  std::vector<GLfloat> vertices(3 * (N * Ndiv2 + 1));
+  std::vector<GLfloat> texCoords((N*Ndiv2 + 2));
 
   k = 0;
   l = 0;
@@ -253,7 +253,7 @@ void P_Hemisphere::reshape(int N,float* coss,float* sins)
   vertices[k+2] = 1;
   texCoords[l] = 0;
 
-  GLuint* is_mid = (GLuint*)malloc((N*N+N)*sizeof(GLuint));
+  std::vector<GLuint> is_mid(N*N+N);
   i = 0;
   for (j = N; j < N*Ndiv2; j += N)
   {
@@ -267,8 +267,8 @@ void P_Hemisphere::reshape(int N,float* coss,float* sins)
     is_mid[i+1] = is_mid[i] - N;
     i += 2;
   }
-
-  GLuint* is_top = (GLuint*)malloc((N+2)*sizeof(GLuint));
+  
+  std::vector<GLuint> is_top(N+2);
   is_top[0] = N*Ndiv2;
   i = 1;
   j = (Ndiv2-1)*N;
@@ -286,21 +286,17 @@ void P_Hemisphere::reshape(int N,float* coss,float* sins)
   glEnableClientState(GL_VERTEX_ARRAY);
   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   glEnableClientState(GL_NORMAL_ARRAY);
-  glVertexPointer(3,GL_FLOAT,0,vertices);
-  glNormalPointer(GL_FLOAT,0,vertices);
-  glTexCoordPointer(1, GL_FLOAT, 0, texCoords);
+  glVertexPointer(3,GL_FLOAT,0,vertices.data());
+  glNormalPointer(GL_FLOAT,0,vertices.data());
+  glTexCoordPointer(1, GL_FLOAT, 0, texCoords.data());
   int M = 2*N + 2;
   glNewList(disp_list,GL_COMPILE);
-  glDrawElements(GL_TRIANGLE_FAN,N+2,GL_UNSIGNED_INT,is_top);
+  glDrawElements(GL_TRIANGLE_FAN,N+2,GL_UNSIGNED_INT,is_top.data());
   for (i = 0; i < Ndiv2-1; ++i)
   {
-    glDrawElements(GL_QUAD_STRIP,M,GL_UNSIGNED_INT,is_mid + i*M);
+    glDrawElements(GL_QUAD_STRIP,M,GL_UNSIGNED_INT,is_mid.data() + i * M);
   }
   glEndList();
-  free(vertices);
-  free(is_mid);
-  free(is_top);
-  free(texCoords);
 }
 
 /* -------- P_Disc ------------------------------------------------------ */
@@ -381,8 +377,8 @@ void P_Ring::reshape(int N,float* coss,float* sins)
   assert(N>0);
   int N3 = 3*N;
   int i,j,k,l,m;
-  GLfloat* vertices = (GLfloat*)malloc(2*N3*sizeof(GLfloat));
-  GLfloat* texCoords = (GLfloat*)malloc((2*N+2)*sizeof(GLfloat));
+  std::vector<GLfloat> vertices(2*N3);
+  std::vector<GLfloat> texCoords(2*N+2);
 
   k = 0;
   l = 0;
@@ -444,16 +440,14 @@ void P_Ring::reshape(int N,float* coss,float* sins)
   glEnableClientState(GL_NORMAL_ARRAY);
   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-  glVertexPointer(3,GL_FLOAT,0,vertices);
+  glVertexPointer(3,GL_FLOAT,0,vertices.data());
   glNormalPointer(GL_FLOAT,0,normals);
-  glTexCoordPointer(1, GL_FLOAT, 0, texCoords);
+  glTexCoordPointer(1, GL_FLOAT, 0, texCoords.data());
   glNewList(disp_list,GL_COMPILE);
   glDrawElements(GL_QUAD_STRIP,2*N+2,GL_UNSIGNED_INT,is);
   glEndList();
-  free(vertices);
   free(normals);
   free(is);
-  free(texCoords);
 }
 
 float P_Ring::getTopRadius()
